@@ -13,7 +13,7 @@ class ApiVarselRepository(dataSource: DataSource) {
 
     private val varselDao = ApiVarselDao(dataSource)
 
-    internal fun finnVarslerSomIkkeErInaktiveFor(vedtaksperiodeId: UUID, utbetalingId: UUID): List<VarselDTO> {
+    internal fun finnVarslerSomIkkeErInaktiveFor(vedtaksperiodeId: UUID, utbetalingId: UUID): Set<VarselDTO> {
         return varselDao.finnVarslerSomIkkeErInaktiveFor(vedtaksperiodeId, utbetalingId).toDto()
     }
 

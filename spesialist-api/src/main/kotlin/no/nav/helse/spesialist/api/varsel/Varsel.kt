@@ -17,15 +17,15 @@ data class Varsel(
     private val vurdering: Varselvurdering?,
 ) {
     internal companion object {
-        internal fun List<Varsel>.toDto(): List<VarselDTO> {
-            return map { it.toDto() }
+        internal fun Set<Varsel>.toDto(): Set<VarselDTO> {
+            return map { it.toDto() }.toSet()
         }
 
-        internal fun List<Varsel>.antallIkkeVurderte(): Int {
+        internal fun Set<Varsel>.antallIkkeVurderte(): Int {
             return filter { !it.erVurdert() }.size
         }
 
-        internal fun List<Varsel>.antallIkkeVurderteEkskludertBesluttervarsler(): Int {
+        internal fun Set<Varsel>.antallIkkeVurderteEkskludertBesluttervarsler(): Int {
             return filter { !it.erVurdert() && !it.erBeslutterVarsel() }.size
         }
     }
@@ -67,12 +67,13 @@ data class Varsel(
             this === other || (other is Varselvurdering
                     && javaClass == other.javaClass
                     && ident == other.ident
+                    && tidsstempel.withNano(0) == other.tidsstempel.withNano(0)
                     && status == other.status)
 
         override fun hashCode(): Int {
             var result = ident.hashCode()
-            result = 31 * result + tidsstempel.hashCode()
             result = 31 * result + status.hashCode()
+            result = 31 * result + tidsstempel.withNano(0).hashCode()
             return result
         }
     }

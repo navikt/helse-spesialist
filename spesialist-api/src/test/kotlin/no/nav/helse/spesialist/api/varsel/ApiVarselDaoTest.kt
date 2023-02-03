@@ -75,7 +75,7 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         val forventetVarsel2 = Varsel(generasjonId2, definisjonId,"EN_KODE", "EN_TITTEL", null, null, null)
         val varsler = apiVarselDao.finnVarslerSomIkkeErInaktiveFor(oppgaveId)
 
-        assertEquals(listOf(forventetVarsel1, forventetVarsel2), varsler)
+        assertEquals(setOf(forventetVarsel1, forventetVarsel2), varsler)
     }
 
     @Test
@@ -101,7 +101,7 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         apiVarselDao.godkjennVarslerFor(oppgaveId)
         val varsler = apiVarselDao.finnVarslerSomIkkeErInaktiveFor(oppgaveId)
 
-        assertEquals(listOf(forventetVarsel1, forventetVarsel2), varsler)
+        assertEquals(setOf(forventetVarsel1, forventetVarsel2), varsler)
     }
 
     @Test
@@ -120,7 +120,7 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         val forventetVarsel = Varsel(generasjonId, definisjonId,"SB_BO_1234", "EN_TITTEL", null, null, Varselvurdering("EN_IDENT", LocalDateTime.now(), VURDERT))
         val varsler = apiVarselDao.finnVarslerSomIkkeErInaktiveFor(oppgaveId)
 
-        assertEquals(listOf(forventetVarsel), varsler)
+        assertEquals(setOf(forventetVarsel), varsler)
     }
 
     @Test
@@ -146,7 +146,7 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         val forventetVarsel2 = Varsel(generasjonId2, definisjonId2,"SB_BO_1234", "EN_TITTEL", null, null, Varselvurdering("EN_IDENT", LocalDateTime.now(), VURDERT))
         val varsler = apiVarselDao.finnVarslerSomIkkeErInaktiveFor(oppgaveId)
 
-        assertEquals(listOf(forventetVarsel1, forventetVarsel2), varsler)
+        assertEquals(setOf(forventetVarsel1, forventetVarsel2), varsler)
     }
 
     @Test

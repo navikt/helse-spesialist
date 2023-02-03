@@ -95,7 +95,7 @@ internal class Varsel(
     override fun hashCode(): Int {
         var result = id.hashCode()
         result = 31 * result + varselkode.hashCode()
-        result = 31 * result + opprettet.hashCode()
+        result = 31 * result + opprettet.withNano(0).hashCode()
         result = 31 * result + vedtaksperiodeId.hashCode()
         return result
     }

@@ -14,7 +14,7 @@ import no.nav.helse.spesialist.api.varsel.Varsel.Varselvurdering
 
 internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
 
-    internal fun finnVarslerSomIkkeErInaktiveFor(vedtaksperiodeId: UUID, utbetalingId: UUID): List<Varsel> = queryize(
+    internal fun finnVarslerSomIkkeErInaktiveFor(vedtaksperiodeId: UUID, utbetalingId: UUID): Set<Varsel> = queryize(
         """
             SELECT svg.unik_id as generasjon_id, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling FROM selve_varsel sv 
                 INNER JOIN selve_vedtaksperiode_generasjon svg ON sv.generasjon_ref = svg.id
@@ -27,10 +27,10 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
             "utbetaling_id" to utbetalingId,
             "status_inaktiv" to INAKTIV.name
         )
-    ) { mapVarsel(it) }
+    ) { mapVarsel(it) }.toSet()
 
-    internal fun finnVarslerSomIkkeErInaktiveFor(oppgaveId: Long): List<Varsel> {
-        return finnUtbetalingIdFor(oppgaveId)?.let(::finnVarslerSomIkkeErInaktiveFor) ?: emptyList()
+    internal fun finnVarslerSomIkkeErInaktiveFor(oppgaveId: Long): Set<Varsel> {
+        return finnUtbetalingIdFor(oppgaveId)?.let(::finnVarslerSomIkkeErInaktiveFor) ?: emptySet()
     }
 
     internal fun godkjennVarslerFor(oppgaveId: Long) {
@@ -182,14 +182,14 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
             Varselstatus.valueOf(it.string("status"))
         }
 
-    private fun finnVarslerSomIkkeErInaktiveFor(utbetalingId: UUID): List<Varsel> = queryize(
+    private fun finnVarslerSomIkkeErInaktiveFor(utbetalingId: UUID): Set<Varsel> = queryize(
         """
             SELECT svg.unik_id as generasjon_id, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling FROM selve_varsel sv 
                 INNER JOIN selve_vedtaksperiode_generasjon svg ON sv.generasjon_ref = svg.id
                 INNER JOIN api_varseldefinisjon av ON av.id = COALESCE(sv.definisjon_ref, (SELECT id FROM api_varseldefinisjon WHERE kode = sv.kode ORDER BY opprettet DESC LIMIT 1))
                 WHERE svg.utbetaling_id = :utbetaling_id AND sv.status != :status_inaktiv;
         """
-    ).list(mapOf("utbetaling_id" to utbetalingId, "status_inaktiv" to INAKTIV.name)) { mapVarsel(it) }
+    ).list(mapOf("utbetaling_id" to utbetalingId, "status_inaktiv" to INAKTIV.name)) { mapVarsel(it) }.toSet()
 
     private fun finnUtbetalingIdFor(oppgaveId: Long) = queryize(
         "SELECT utbetaling_id FROM oppgave WHERE oppgave.id = :oppgave_id;"

@@ -483,7 +483,7 @@ data class BeregnetPeriode(
     fun varslerForGenerasjon(): List<VarselDTO> = varselRepository.finnVarslerSomIkkeErInaktiveFor(
         UUID.fromString(vedtaksperiodeId()),
         UUID.fromString(periode.utbetaling.id)
-    )
+    ).toList()
 
     @Deprecated("Oppgavereferanse bør hentes fra periodens oppgave")
     fun oppgavereferanse(): String? =
