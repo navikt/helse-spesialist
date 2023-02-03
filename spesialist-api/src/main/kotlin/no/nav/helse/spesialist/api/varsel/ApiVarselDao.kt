@@ -5,7 +5,6 @@ import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.Row
 import no.nav.helse.HelseDao
-import no.nav.helse.spesialist.api.graphql.schema.VarselDTO
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.AKTIV
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.GODKJENT
@@ -139,18 +138,24 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
         generasjonId: UUID,
         varselkode: String,
         ident: String,
-    ): Int = queryize(
+    ): Varsel? = queryize(
         """
-            UPDATE selve_varsel 
-            SET 
-                status = :status_aktiv,
-                status_endret_tidspunkt = :endret_tidspunkt,
-                status_endret_ident = :endret_ident, 
-                definisjon_ref = null 
-            WHERE generasjon_ref = (SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = :generasjon_id)
-            AND kode = :kode AND status != :status_godkjent;
+            WITH updated AS (
+                UPDATE selve_varsel 
+                SET 
+                    status = :status_aktiv,
+                    status_endret_tidspunkt = :endret_tidspunkt,
+                    status_endret_ident = :endret_ident, 
+                    definisjon_ref = null 
+                WHERE generasjon_ref = (SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = :generasjon_id)
+                AND kode = :kode AND status != :status_godkjent
+                RETURNING *
+            )
+            SELECT u.kode, u.status, u.status_endret_ident, u.status_endret_tidspunkt, av.unik_id as definisjon_id, svg.unik_id as generasjon_id, av.tittel, av.forklaring, av.handling  FROM updated u 
+                INNER JOIN api_varseldefinisjon av on av.id = (SELECT id FROM api_varseldefinisjon WHERE kode = u.kode ORDER BY opprettet DESC LIMIT 1)
+                INNER JOIN selve_vedtaksperiode_generasjon svg on u.generasjon_ref = svg.id
         """
-    ).update(
+    ).single(
         mapOf(
             "status_aktiv" to AKTIV.name,
             "status_godkjent" to GODKJENT.name,
@@ -159,7 +164,9 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
             "generasjon_id" to generasjonId,
             "kode" to varselkode
         )
-    )
+    ) {
+        mapVarsel(it)
+    }
 
     internal fun finnStatusFor(varselkode: String, generasjonId: UUID): Varselstatus? =
         queryize(

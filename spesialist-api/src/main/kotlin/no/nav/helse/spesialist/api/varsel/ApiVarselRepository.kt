@@ -7,6 +7,7 @@ import no.nav.helse.spesialist.api.varsel.Varsel.Companion.antallIkkeVurderte
 import no.nav.helse.spesialist.api.varsel.Varsel.Companion.antallIkkeVurderteEkskludertBesluttervarsler
 import no.nav.helse.spesialist.api.varsel.Varsel.Companion.toDto
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.AKTIV
+import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.GODKJENT
 
 class ApiVarselRepository(dataSource: DataSource) {
 
@@ -30,10 +31,14 @@ class ApiVarselRepository(dataSource: DataSource) {
         varselDao.godkjennVarslerFor(oppgaveId)
     }
 
-    fun erAktiv(varselkode: String, generasjonId: UUID): Boolean {
-        val varselstatus = varselDao.finnStatusFor(varselkode, generasjonId)
-            ?: throw IllegalStateException("Forventet å finne status for varsel med varselkode=$varselkode, generasjonId=$generasjonId")
+    fun erAktiv(varselkode: String, generasjonId: UUID): Boolean? {
+        val varselstatus = varselDao.finnStatusFor(varselkode, generasjonId) ?: return null
         return varselstatus == AKTIV
+    }
+
+    fun erGodkjent(varselkode: String, generasjonId: UUID): Boolean? {
+        val varselstatus = varselDao.finnStatusFor(varselkode, generasjonId) ?: return null
+        return varselstatus == GODKJENT
     }
 
     fun settStatusVurdert(
@@ -57,8 +62,8 @@ class ApiVarselRepository(dataSource: DataSource) {
         generasjonId: UUID,
         varselkode: String,
         ident: String
-    ): Int {
-        return varselDao.settStatusAktiv(generasjonId, varselkode, ident)
+    ): VarselDTO? {
+        return varselDao.settStatusAktiv(generasjonId, varselkode, ident)?.toDto()
     }
 
 }

@@ -280,11 +280,29 @@ type Kommentar {
     tekst: String!
 }
 
+type VarselDTO {
+    generasjonId: String!,
+    definisjonId: String!,
+    kode: String!,
+    tittel: String!,
+    forklaring: String,
+    handling: String,
+    vurdering: VarselvurderingDTO,
+}
+
+type VarselvurderingDTO {
+    ident: String!,
+    tidsstempel: String!,
+    status: Varselstatus!,
+}
+
 type Mutation {
     feilregistrerKommentar(id: Int!): Boolean!
     feilregistrerNotat(id: Int!): Boolean!
     leggTilKommentar(notatId: Int!, saksbehandlerident: String!, tekst: String!): Kommentar
     leggTilNotat(saksbehandlerOid: String!, tekst: String!, type: NotatType!, vedtaksperiodeId: String!): Int!
+    settVarselstatusVurdert(generasjonIdString: String!, definisjonIdString: String!, varselkode: String!, ident: String!): VarselDTO
+    settVarselstatusAktiv(generasjonIdString: String!, varselkode: String!, ident: String!): VarselDTO
 }
 
 type Notat {
@@ -706,6 +724,13 @@ enum Kildetype {
     SOKNAD
     SYKMELDING
     UKJENT
+}
+
+enum Varselstatus {
+    AKTIV
+    VURDERT
+    GODKJENT
+    AVVIST
 }
 
 enum Kjonn {

@@ -263,6 +263,25 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `kan ikke sette varsel til AKTIV dersom det allerede er GODKJENT`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val definisjonId = UUID.randomUUID()
+        val generasjonId = UUID.randomUUID()
+        val utbetalingId = UUID.randomUUID()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        val definisjonRef = opprettVarseldefinisjon(definisjonId = definisjonId)
+        val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
+        nyttVarsel(vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, definisjonRef = definisjonRef, status = "GODKJENT")
+        val forsøktOppdatertVarsel = apiVarselDao.settStatusAktiv(generasjonId, "EN_KODE", "EN_IDENT")
+
+        assertEquals(
+            Varsel(generasjonId, definisjonId, "EN_KODE", "EN_TITTEL", null, null, Varselvurdering("EN_IDENT", LocalDateTime.now(), GODKJENT)),
+            apiVarselDao.finnVarslerSomIkkeErInaktiveFor(vedtaksperiodeId, utbetalingId).single()
+        )
+        assertNull(forsøktOppdatertVarsel)
+    }
+
+    @Test
     fun `setter status til VURDERT for beslutteroppgavevarsler`() {
         val utbetalingId = UUID.randomUUID()
         opprettVedtaksperiode(personId = opprettPerson(), arbeidsgiverId = opprettArbeidsgiver(), utbetlingId = utbetalingId)

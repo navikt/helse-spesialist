@@ -6,7 +6,7 @@ import kotliquery.sessionOf
 import no.nav.helse.spesialist.api.DatabaseIntegrationTest
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -37,7 +37,7 @@ internal class ApiVarselRepositoryTest: DatabaseIntegrationTest() {
         opprettVarseldefinisjon(kode = "EN_KODE")
         val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
         nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef)
-        assertTrue(apiVarselRepository.erAktiv("EN_KODE", generasjonId))
+        assertEquals(true, apiVarselRepository.erAktiv("EN_KODE", generasjonId))
     }
 
     @Test
@@ -51,7 +51,7 @@ internal class ApiVarselRepositoryTest: DatabaseIntegrationTest() {
         val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
         nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef)
         apiVarselRepository.settStatusVurdert(generasjonId, definisjonId, "EN_KODE", "EN_IDENT")
-        assertFalse(apiVarselRepository.erAktiv("EN_KODE", generasjonId))
+        assertEquals(false, apiVarselRepository.erAktiv("EN_KODE", generasjonId))
     }
 
     @Test
@@ -67,7 +67,46 @@ internal class ApiVarselRepositoryTest: DatabaseIntegrationTest() {
         val oppgaveId = finnOppgaveIdFor(PERIODE.id)
         apiVarselRepository.settStatusVurdert(generasjonId, definisjonId, "EN_KODE", "EN_IDENT")
         apiVarselRepository.godkjennVarslerFor(oppgaveId)
-        assertFalse(apiVarselRepository.erAktiv("EN_KODE", generasjonId))
+        assertEquals(false, apiVarselRepository.erAktiv("EN_KODE", generasjonId))
+    }
+
+    @Test
+    fun `varsel er godkjent`() {
+        val vedtaksperiodeId = PERIODE.id
+        val utbetalingId = UUID.randomUUID()
+        val generasjonId = UUID.randomUUID()
+        val definisjonId = UUID.randomUUID()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver(), utbetalingId)
+        opprettVarseldefinisjon(definisjonId = definisjonId, kode = "EN_KODE")
+        val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
+        nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef)
+        val oppgaveId = finnOppgaveIdFor(PERIODE.id)
+        apiVarselRepository.settStatusVurdert(generasjonId, definisjonId, "EN_KODE", "EN_IDENT")
+        apiVarselRepository.godkjennVarslerFor(oppgaveId)
+        assertEquals(true, apiVarselRepository.erGodkjent("EN_KODE", generasjonId))
+    }
+
+    @Test
+    fun `erGodkjent returnerer null hvis varsel ikke finnes`() {
+        val vedtaksperiodeId = PERIODE.id
+        val utbetalingId = UUID.randomUUID()
+        val generasjonId = UUID.randomUUID()
+        val definisjonId = UUID.randomUUID()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver(), utbetalingId)
+        opprettVarseldefinisjon(definisjonId = definisjonId, kode = "EN_KODE")
+        nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
+        assertNull(apiVarselRepository.erGodkjent("EN_KODE", generasjonId))
+    }
+    @Test
+    fun `erAktiv returnerer null hvis varsel ikke finnes`() {
+        val vedtaksperiodeId = PERIODE.id
+        val utbetalingId = UUID.randomUUID()
+        val generasjonId = UUID.randomUUID()
+        val definisjonId = UUID.randomUUID()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver(), utbetalingId)
+        opprettVarseldefinisjon(definisjonId = definisjonId, kode = "EN_KODE")
+        nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
+        assertNull(apiVarselRepository.erAktiv("EN_KODE", generasjonId))
     }
 
     private fun finnOppgaveIdFor(vedtaksperiodeId: UUID): Long = sessionOf(dataSource).use { session ->
