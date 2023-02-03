@@ -86,7 +86,7 @@ internal fun Route.overstyringApi(hendelseMediator: HendelseMediator) {
 
         val harOverstyringAvInntektOgRefusjonTilgang = listOf("G103083", "N115007", "C117102", "X999999").contains(saksbehandler.toDto().ident)
 
-        if (!Toggle.OverstyrInntektOgRefusjon.enabled || !harOverstyringAvInntektOgRefusjonTilgang) return@post
+        if (!harOverstyringAvInntektOgRefusjonTilgang) return@post
 
         val message = OverstyrInntektOgRefusjonKafkaDto(
             fødselsnummer = overstyring.fødselsnummer,
