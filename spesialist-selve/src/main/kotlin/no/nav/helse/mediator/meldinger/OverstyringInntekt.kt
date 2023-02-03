@@ -127,6 +127,7 @@ internal class OverstyringInntekt(
 
         override fun onPacket(packet: JsonMessage, context: MessageContext) {
             val hendelseId = UUID.fromString(packet["@id"].asText())
+            if (hendelseId.toString() == "fa402d11-c448-418d-8449-137f02016cd3") return
             logg.info(
                 "Mottok overstyring av inntekt med {}",
                 keyValue("eventId", hendelseId)
