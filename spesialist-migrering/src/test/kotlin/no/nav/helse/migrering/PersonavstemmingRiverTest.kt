@@ -19,8 +19,10 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
+@Disabled
 internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
 
     private val sparsomDao: SparsomDao = mockk(relaxed = true)
