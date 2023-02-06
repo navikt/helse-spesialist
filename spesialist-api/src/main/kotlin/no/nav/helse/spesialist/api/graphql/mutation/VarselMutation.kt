@@ -57,7 +57,7 @@ class VarselMutation(private val varselRepository: ApiVarselRepository) : Mutati
         definisjonIdString: String,
         varselkode: String,
         ident: String,
-    ): DataFetcherResult<VarselDTO> {
+    ): DataFetcherResult<VarselDTO?> {
         return withContext(Dispatchers.IO) {
             val generasjonId = UUID.fromString(generasjonIdString)
 
@@ -86,7 +86,7 @@ class VarselMutation(private val varselRepository: ApiVarselRepository) : Mutati
         generasjonIdString: String,
         varselkode: String,
         ident: String,
-    ): DataFetcherResult<VarselDTO> {
+    ): DataFetcherResult<VarselDTO?> {
         return withContext(Dispatchers.IO) {
             val generasjonId = UUID.fromString(generasjonIdString)
 
