@@ -126,7 +126,8 @@ internal class ActualVarselRepositoryTest : AbstractDatabaseTest() {
     @Test
     fun `oppdatering av varsel for én generasjon endrer ikke varsel for en annen generasjon på samme periode`() {
         generasjon.håndterVarsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), varselRepository)
-        generasjon.håndterGodkjentVarsel("EN_KODE", "EN_IDENT", varselRepository)
+        generasjon.håndterNyUtbetaling(UUID.randomUUID(), UUID.randomUUID(), varselRepository)
+        generasjon.håndterGodkjentAvSaksbehandler("EN_IDENT", varselRepository)
         generasjon.håndterVedtakFattet(UUID.randomUUID())
         generasjon = generasjonRepository.sisteFor(vedtaksperiodeId)
         val nesteGenerasjonId = UUID.randomUUID()

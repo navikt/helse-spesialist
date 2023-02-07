@@ -1,4 +1,4 @@
-package no.nav.helse
+package no.nav.helse.spesialist.api
 
 import com.auth0.jwk.JwkProvider
 import com.auth0.jwk.JwkProviderBuilder

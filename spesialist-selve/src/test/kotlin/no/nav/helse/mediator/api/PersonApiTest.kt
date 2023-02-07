@@ -24,13 +24,13 @@ import io.mockk.mockk
 import java.net.ServerSocket
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.AzureAdAppConfig
-import no.nav.helse.AzureConfig
 import no.nav.helse.Tilgangsgrupper
-import no.nav.helse.azureAdAppAuthentication
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.objectMapper
+import no.nav.helse.spesialist.api.AzureAdAppConfig
+import no.nav.helse.spesialist.api.AzureConfig
+import no.nav.helse.spesialist.api.azureAdAppAuthentication
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach

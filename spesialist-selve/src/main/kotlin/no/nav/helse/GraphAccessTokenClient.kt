@@ -15,6 +15,7 @@ import io.ktor.http.contentType
 import java.time.Instant
 import java.util.Date
 import java.util.UUID
+import no.nav.helse.spesialist.api.AzureConfig
 import org.slf4j.LoggerFactory
 
 internal class GraphAccessTokenClient(

@@ -10,18 +10,18 @@ import io.ktor.server.application.install
 import io.ktor.server.auth.authenticate
 import io.ktor.server.cio.*
 import io.ktor.server.engine.*
-import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationServer
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.routing
-import kotlinx.coroutines.runBlocking
-import no.nav.helse.AzureAdAppConfig
-import no.nav.helse.azureAdAppAuthentication
-import no.nav.helse.objectMapper
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.TestInstance
 import java.net.ServerSocket
 import java.util.*
-import no.nav.helse.AzureConfig
+import kotlinx.coroutines.runBlocking
+import no.nav.helse.objectMapper
+import no.nav.helse.spesialist.api.AzureAdAppConfig
+import no.nav.helse.spesialist.api.AzureConfig
+import no.nav.helse.spesialist.api.azureAdAppAuthentication
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.TestInstance
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationServer
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class AbstractApiTest {

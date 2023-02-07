@@ -167,9 +167,12 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                     val jwkProvider = jwtStub.getJwkProviderMock()
                     val azureConfig =
                         AzureAdAppConfig(
-                            clientId = clientId,
-                            issuer = issuer,
-                            jwkProvider = jwkProvider
+                            azureConfig = AzureConfig(
+                                clientId = clientId,
+                                issuer = issuer,
+                                jwkProvider = jwkProvider,
+                                tokenEndpoint = ""
+                            )
                         )
                     azureAdAppAuthentication(azureConfig)
                     routing {
