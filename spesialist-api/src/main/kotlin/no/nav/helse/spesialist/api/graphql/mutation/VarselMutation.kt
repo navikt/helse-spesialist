@@ -5,7 +5,6 @@ import graphql.GraphQLError
 import graphql.GraphqlErrorException.newErrorException
 import graphql.execution.DataFetcherResult
 import graphql.execution.DataFetcherResult.newResult
-import graphql.schema.DataFetchingEnvironment
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -17,38 +16,6 @@ class VarselMutation(private val varselRepository: ApiVarselRepository) : Mutati
 
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-    }
-
-    @Suppress("unused")
-    fun settStatusVurdert(
-        generasjonId: String,
-        definisjonId: String,
-        varselkode: String,
-        ident: String,
-        env: DataFetchingEnvironment,
-    ): Boolean {
-        val oppdatertVarsel = varselRepository.settStatusVurdert(
-            UUID.fromString(generasjonId),
-            UUID.fromString(definisjonId),
-            varselkode,
-            ident,
-        )
-        return oppdatertVarsel != null
-    }
-
-    @Suppress("unused")
-    fun settStatusAktiv(
-        generasjonId: String,
-        varselkode: String,
-        ident: String,
-        env: DataFetchingEnvironment,
-    ): Boolean {
-        val oppdatertVarsel = varselRepository.settStatusAktiv(
-            UUID.fromString(generasjonId),
-            varselkode,
-            ident,
-        )
-        return oppdatertVarsel != null
     }
 
     @Suppress("unused")
