@@ -183,8 +183,10 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
 
             @Language("PostgreSQL")
             val opprettOverstyringInntektQuery = """
-                INSERT INTO overstyring_inntekt(forklaring, manedlig_inntekt, fra_manedlig_inntekt, skjaeringstidspunkt, overstyring_ref, refusjonsopplysninger, fra_refusjonsopplysninger)
-                VALUES (:forklaring, :manedlig_inntekt, :fra_manedlig_inntekt, :skjaeringstidspunkt, :overstyring_ref, :refusjonsopplysninger::json, :fra_refusjonsopplysninger::json)
+                INSERT INTO overstyring_inntekt(forklaring, manedlig_inntekt, fra_manedlig_inntekt, skjaeringstidspunkt, overstyring_ref, refusjonsopplysninger, fra_refusjonsopplysninger, begrunnelse, arbeidsgiver_ref)
+                SELECT :forklaring, :manedlig_inntekt, :fra_manedlig_inntekt, :skjaeringstidspunkt, :overstyring_ref, :refusjonsopplysninger::json, :fra_refusjonsopplysninger::json, :begrunnelse, ag.id
+                FROM arbeidsgiver ag
+                WHERE ag.orgnummer = :orgnr
             """.trimIndent()
 
             val overstyringRef = session.run(
@@ -211,7 +213,9 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
                         "skjaeringstidspunkt" to skjæringstidspunkt,
                         "overstyring_ref" to overstyringRef,
                         "refusjonsopplysninger" to refusjonsopplysninger?.let { objectMapper.writeValueAsString(refusjonsopplysninger) },
-                        "fra_refusjonsopplysninger" to fraRefusjonsopplysninger?.let { objectMapper.writeValueAsString(fraRefusjonsopplysninger) }
+                        "fra_refusjonsopplysninger" to fraRefusjonsopplysninger?.let { objectMapper.writeValueAsString(fraRefusjonsopplysninger) },
+                        "begrunnelse" to begrunnelse,
+                        "orgnr" to organisasjonsnummer.toLong()
                     )
                 ).asUpdate
             )
@@ -239,9 +243,11 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
             """.trimIndent()
 
             @Language("PostgreSQL")
-            val opprettOverstyringInntektQuery = """
-                INSERT INTO overstyring_inntekt(forklaring, manedlig_inntekt, fra_manedlig_inntekt, skjaeringstidspunkt, overstyring_ref, refusjonsopplysninger, fra_refusjonsopplysninger)
-                VALUES (:forklaring, :manedlig_inntekt, :fra_manedlig_inntekt, :skjaeringstidspunkt, :overstyring_ref, :refusjonsopplysninger::json, :fra_refusjonsopplysninger::json)
+            val opprettOverstyringInntektOgRefusjonQuery = """
+                INSERT INTO overstyring_inntekt(forklaring, manedlig_inntekt, fra_manedlig_inntekt, skjaeringstidspunkt, overstyring_ref, refusjonsopplysninger, fra_refusjonsopplysninger, begrunnelse, arbeidsgiver_ref, subsumsjon)
+                SELECT :forklaring, :manedlig_inntekt, :fra_manedlig_inntekt, :skjaeringstidspunkt, :overstyring_ref, :refusjonsopplysninger::json, :fra_refusjonsopplysninger::json, :begrunnelse, ag.id, :subsumsjon::json
+                FROM arbeidsgiver ag
+                WHERE ag.orgnummer = :orgnr
             """.trimIndent()
 
             val overstyringRef = session.run(
@@ -258,20 +264,27 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
                 ).asUpdateAndReturnGeneratedKey
             )
 
-            session.run(
-                queryOf(
-                    opprettOverstyringInntektQuery,
-                    mapOf(
-                        "forklaring" to arbeidsgivere.first().forklaring,
-                        "manedlig_inntekt" to arbeidsgivere.first().månedligInntekt,
-                        "fra_manedlig_inntekt" to arbeidsgivere.first().fraMånedligInntekt,
-                        "skjaeringstidspunkt" to skjæringstidspunkt,
-                        "overstyring_ref" to overstyringRef,
-                        "refusjonsopplysninger" to arbeidsgivere.first().refusjonsopplysninger?.let { objectMapper.writeValueAsString(arbeidsgivere.first().refusjonsopplysninger) },
-                        "fra_refusjonsopplysninger" to arbeidsgivere.first().fraRefusjonsopplysninger?.let { objectMapper.writeValueAsString(arbeidsgivere.first().fraRefusjonsopplysninger) }
+            session.transaction { transactionalSession ->
+                arbeidsgivere.forEach { arbeidsgiver ->
+                    transactionalSession.run(
+                        queryOf(
+                            opprettOverstyringInntektOgRefusjonQuery,
+                            mapOf(
+                                "forklaring" to arbeidsgiver.forklaring,
+                                "manedlig_inntekt" to arbeidsgiver.månedligInntekt,
+                                "fra_manedlig_inntekt" to arbeidsgiver.fraMånedligInntekt,
+                                "skjaeringstidspunkt" to skjæringstidspunkt,
+                                "overstyring_ref" to overstyringRef,
+                                "refusjonsopplysninger" to arbeidsgiver.refusjonsopplysninger?.let { objectMapper.writeValueAsString(arbeidsgiver.refusjonsopplysninger) },
+                                "fra_refusjonsopplysninger" to arbeidsgiver.fraRefusjonsopplysninger?.let { objectMapper.writeValueAsString(arbeidsgiver.fraRefusjonsopplysninger) },
+                                "begrunnelse" to arbeidsgiver.begrunnelse,
+                                "orgnr" to arbeidsgiver.organisasjonsnummer.toLong(),
+                                "subsumsjon" to arbeidsgiver.subsumsjon?.let { objectMapper.writeValueAsString(arbeidsgiver.subsumsjon) }
+                            )
+                        ).asUpdate
                     )
-                ).asUpdate
-            )
+                }
+            }
         }
     }
 
@@ -300,8 +313,10 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
 
             @Language("PostgreSQL")
             val opprettOverstyringArbeidsforholdQuery = """
-                INSERT INTO overstyring_arbeidsforhold(forklaring, deaktivert, skjaeringstidspunkt, overstyring_ref)
-                VALUES (:forklaring, :deaktivert, :skjaeringstidspunkt, :overstyring_ref)
+                INSERT INTO overstyring_arbeidsforhold(forklaring, deaktivert, skjaeringstidspunkt, overstyring_ref, begrunnelse, arbeidsgiver_ref)
+                SELECT :forklaring, :deaktivert, :skjaeringstidspunkt, :overstyring_ref, :begrunnelse, ag.id
+                FROM arbeidsgiver ag
+                WHERE ag.orgnummer = :orgnr
             """.trimIndent()
 
             val overstyringRef = session.run(
@@ -326,7 +341,9 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
                         "forklaring" to forklaring,
                         "deaktivert" to deaktivert,
                         "skjaeringstidspunkt" to skjæringstidspunkt,
-                        "overstyring_ref" to overstyringRef
+                        "overstyring_ref" to overstyringRef,
+                        "begrunnelse" to begrunnelse,
+                        "orgnr" to organisasjonsnummer.toLong()
                     )
                 ).asUpdate
             )
