@@ -461,8 +461,8 @@ internal class PersonDao(private val dataSource: DataSource) {
 
     internal fun finnEnhetId(fødselsnummer: String) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
-        val statement = "SELECT id FROM enhet WHERE id = (SELECT enhet_ref FROM person where fodselsnummer = ?);"
-        requireNotNull(session.run(queryOf(statement, fødselsnummer.toLong()).map { it.string("id") }.asSingle))
+        val statement = "SELECT enhet_ref FROM person where fodselsnummer = ?;"
+        requireNotNull(session.run(queryOf(statement, fødselsnummer.toLong()).map { it.string("enhet_ref") }.asSingle))
     }
 }
 
