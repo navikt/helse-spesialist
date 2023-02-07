@@ -38,7 +38,6 @@ import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.OverstyringMediator
-import no.nav.helse.mediator.api.annulleringApi
 import no.nav.helse.mediator.api.erDev
 import no.nav.helse.mediator.api.leggPåVentApi
 import no.nav.helse.mediator.api.notaterApi
@@ -96,6 +95,7 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.utbetaling.UtbetalingApiDao
+import no.nav.helse.spesialist.api.utbetaling.annulleringApi
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
