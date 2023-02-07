@@ -37,10 +37,10 @@ internal class Inntektløsning(
                         it.demandKey("hendelseId")
                         it.requireKey("@id")
                         it.requireArray("@løsning.$behov") {
-                            this.require("årMåned", JsonNode::asYearMonth)
-                            this.requireArray("inntektsliste") {
-                                this.requireKey("beløp")
-                                this.requireKey("orgnummer")
+                            require("årMåned", JsonNode::asYearMonth)
+                            requireArray("inntektsliste") {
+                                requireKey("beløp")
+                                interestedIn("orgnummer")
                             }
                         }
                     }

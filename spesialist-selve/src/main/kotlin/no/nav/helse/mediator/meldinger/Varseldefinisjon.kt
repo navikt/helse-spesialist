@@ -101,9 +101,9 @@ internal class Varseldefinisjon(
                     it.demandValue("@event_name", "varseldefinisjoner_endret")
                     it.requireKey("@id")
                     it.requireArray("definisjoner") {
-                        this.requireKey("id", "kode", "tittel", "avviklet")
-                        this.interestedIn("forklaring", "handling")
-                        this.require("opprettet", JsonNode::asLocalDateTime)
+                        requireKey("id", "kode", "tittel", "avviklet")
+                        interestedIn("forklaring", "handling")
+                        require("opprettet", JsonNode::asLocalDateTime)
                     }
                 }
             }.register(this)
