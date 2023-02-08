@@ -8,6 +8,7 @@ import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.principal
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
+import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import java.time.LocalDate
@@ -86,7 +87,13 @@ internal fun Route.overstyringApi(hendelseMediator: HendelseMediator) {
 
         val harOverstyringAvInntektOgRefusjonTilgang = listOf("G103083", "N115007", "C117102", "X999999").contains(saksbehandler.toDto().ident)
 
-        if (!harOverstyringAvInntektOgRefusjonTilgang) return@post
+        if (!harOverstyringAvInntektOgRefusjonTilgang && !erDev()) {
+            call.respondText(
+                "Saksbehandler har ikke tilgang til refusjonsrakett steg 3",
+                status = HttpStatusCode.Unauthorized
+            )
+            return@post
+        }
 
         val message = OverstyrInntektOgRefusjonKafkaDto(
             fødselsnummer = overstyring.fødselsnummer,
