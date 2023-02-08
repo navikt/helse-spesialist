@@ -77,12 +77,14 @@ VALUES ('EN_KOMMENTAR', ${sequence_number}, null, '${saksbehandler_oid}');
 INSERT INTO overstyring(id, begrunnelse, tidspunkt, person_ref, arbeidsgiver_ref, hendelse_ref, saksbehandler_ref)
 VALUES (${sequence_number}, 'BEGRUNNELSE', now(), ${sequence_number}, ${sequence_number}, '${hendelse_id}',
         '${saksbehandler_oid}');
-INSERT INTO overstyring_dag(id, overstyring_ref, dato, dagtype, grad)
-VALUES (${sequence_number}, ${sequence_number}, '2018-01-01', 'TESTDAGTYPE', 100);
+INSERT INTO overstyring_dag(id, overstyring_ref, dato, dagtype, grad, overstyring_tidslinje_ref)
+VALUES (${sequence_number}, ${sequence_number}, '2018-01-01', 'TESTDAGTYPE', 100, ${sequence_number});
 INSERT INTO overstyring_inntekt(id, overstyring_ref, manedlig_inntekt, skjaeringstidspunkt, forklaring, begrunnelse, arbeidsgiver_ref)
 VALUES (${sequence_number}, ${sequence_number}, 1000, '2018-01-01', 'FORKLARING', 'BEGRUNNELSE', ${sequence_number});
 INSERT INTO overstyring_arbeidsforhold(id, overstyring_ref, forklaring, deaktivert, skjaeringstidspunkt, begrunnelse, arbeidsgiver_ref)
 VALUES (${sequence_number}, ${sequence_number}, 'FORKLARING', false, '2018-01-01', 'BEGRUNNELSE', ${sequence_number});
+INSERT INTO overstyring_tidslinje(id, overstyring_ref, arbeidsgiver_ref, begrunnelse)
+VALUES (${sequence_number}, ${sequence_number}, ${sequence_number},'BEGRUNNELSE');
 INSERT INTO overstyringer_for_vedtaksperioder(vedtaksperiode_id, overstyring_ref)
 VALUES ('${vedtaksperiode_id}', ${sequence_number});
 
