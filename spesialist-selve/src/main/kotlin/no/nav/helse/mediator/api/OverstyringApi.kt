@@ -82,9 +82,7 @@ internal fun Route.overstyringApi(hendelseMediator: HendelseMediator) {
 
     post("/api/overstyr/inntektogrefusjon") {
         val overstyring = call.receive<OverstyrInntektOgRefusjonDTO>()
-
         val saksbehandler = Saksbehandler.fraOnBehalfOfToken(requireNotNull(call.principal()))
-
         val harOverstyringAvInntektOgRefusjonTilgang = listOf("G103083", "N115007", "C117102", "X999999").contains(saksbehandler.toDto().ident)
 
         if (!harOverstyringAvInntektOgRefusjonTilgang && !erDev()) {
