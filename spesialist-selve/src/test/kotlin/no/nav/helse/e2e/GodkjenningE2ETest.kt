@@ -53,7 +53,7 @@ import org.junit.jupiter.api.Test
 
 internal class GodkjenningE2ETest : AbstractE2ETest() {
     private companion object {
-        private const val ENHET_UTLAND = "2101"
+        private const val ENHET_UTLAND = "0393"
         private const val SAKSBEHANDLERIDENT = "Z999999"
         private const val AUTOMATISK_BEHANDLET = "Automatisk behandlet"
         private const val SAKSBEHANDLEREPOST = "saksbehandler@nav.no"

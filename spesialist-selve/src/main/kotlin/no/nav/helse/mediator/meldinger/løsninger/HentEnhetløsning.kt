@@ -9,8 +9,8 @@ import java.util.*
 internal class HentEnhetløsning(private val enhetNr: String) {
 
     companion object {
-        private const val ENHET_UTLAND = "2101"
-        internal fun erEnhetUtland(enhet: String) = enhet == ENHET_UTLAND
+        private val UTLANDSENHETER = setOf("0393", "2101")
+        internal fun erEnhetUtland(enhet: String) = enhet in UTLANDSENHETER
     }
 
     internal fun lagrePerson(
