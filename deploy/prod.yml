@@ -67,7 +67,7 @@ spec:
         diskSize: 1024
         diskType: SSD
         name: spesialist
-        tier: db-custom-22-135185
+        tier: db-custom-22-135168
         retainedBackups: 14
         databases:
           - name: spesialist
