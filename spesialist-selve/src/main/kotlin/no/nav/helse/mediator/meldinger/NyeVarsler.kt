@@ -37,7 +37,7 @@ internal class NyeVarsler(
     override fun toJson(): String = json
     override fun execute(context: CommandContext): Boolean {
         if (!Toggle.VedtaksperiodeGenerasjoner.enabled) return true
-        varsler.lagre(varselRepository, generasjonRepository)
+        varsler.lagre(id, varselRepository, generasjonRepository)
         sikkerlogg.info("Lagrer ${varsler.size} varsler for {}", keyValue("fødselsnummer", fødselsnummer))
         return true
     }

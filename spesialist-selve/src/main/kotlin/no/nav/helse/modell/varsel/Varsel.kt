@@ -32,8 +32,8 @@ internal class Varsel(
 
     internal fun erAktiv(): Boolean = this.status == AKTIV
 
-    internal fun lagre(generasjon: Generasjon, varselRepository: VarselRepository) {
-        generasjon.håndterVarsel(id, varselkode, opprettet, varselRepository)
+    internal fun lagre(hendelseId: UUID, generasjon: Generasjon, varselRepository: VarselRepository) {
+        generasjon.håndterRegelverksvarsel(hendelseId, id, varselkode, opprettet, varselRepository)
     }
 
     internal fun godkjennFor(generasjonId: UUID, ident: String, varselRepository: VarselRepository) {
@@ -107,11 +107,15 @@ internal class Varsel(
             forEach { it.oppdaterGenerasjon(gammelGenerasjonId, nyGenerasjonId, varselRepository) }
         }
 
-        internal fun List<Varsel>.lagre(varselRepository: VarselRepository, generasjonRepository: GenerasjonRepository) {
+        internal fun List<Varsel>.lagre(
+            hendelseId: UUID,
+            varselRepository: VarselRepository,
+            generasjonRepository: GenerasjonRepository
+        ) {
             groupBy { it.vedtaksperiodeId }.forEach { (vedtaksperiodeId, varsler) ->
                 try {
                     val generasjon = generasjonRepository.sisteFor(vedtaksperiodeId)
-                    varsler.lagre(generasjon, varselRepository)
+                    varsler.lagre(hendelseId, generasjon, varselRepository)
                 } catch (e: IllegalStateException) {
                     sikkerlogg.info(
                         "Varsler for {} ble ikke lagret fordi det ikke finnes noen generasjon for perioden. Perioden er trolig forkastet",
@@ -121,8 +125,8 @@ internal class Varsel(
             }
         }
 
-        private fun List<Varsel>.lagre(generasjon: Generasjon, varselRepository: VarselRepository) {
-            forEach { it.lagre(generasjon, varselRepository) }
+        private fun List<Varsel>.lagre(hendelseId: UUID, generasjon: Generasjon, varselRepository: VarselRepository) {
+            forEach { it.lagre(hendelseId, generasjon, varselRepository) }
         }
 
         internal fun List<Varsel>.godkjennFor(generasjonId: UUID, varselkode: String, ident: String, varselRepository: VarselRepository) {

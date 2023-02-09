@@ -13,6 +13,7 @@ import no.nav.helse.modell.varsel.Varsel.Companion.godkjennAlleFor
 import no.nav.helse.modell.varsel.Varsel.Companion.godkjennFor
 import no.nav.helse.modell.varsel.Varsel.Companion.reaktiverFor
 import no.nav.helse.modell.varsel.VarselRepository
+import no.nav.helse.modell.varsel.Varselkode
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -112,12 +113,32 @@ internal class Generasjon private constructor(
         generasjonRepository.fjernUtbetalingFor(id)
     }
 
-    internal fun håndterVarsel(varselId: UUID, varselkode: String, opprettet: LocalDateTime, varselRepository: VarselRepository) {
-        if (låst) return sikkerlogg.info(
-            "Kan ikke lagre varsel {} på låst generasjon {}",
-            keyValue("varselId", varselId),
-            keyValue("generasjon", this)
-        )
+    internal fun håndterRegelverksvarsel(hendelseId: UUID, varselId: UUID, varselkode: String, opprettet: LocalDateTime, varselRepository: VarselRepository): Generasjon {
+        if (låst) {
+            val nyGenerasjon = håndterNyGenerasjon(hendelseId = hendelseId, varselRepository = varselRepository) ?: throw IllegalStateException("Forventer å kunne opprette ny generasjon da gjeldende generasjon = $this er låst.")
+            nyGenerasjon.håndterRegelverksvarsel(hendelseId, varselId, varselkode, opprettet, varselRepository)
+            sikkerlogg.info(
+                "Oppretter ny {} for {} som følge av nytt varsel {}, {}",
+                keyValue("generasjon", nyGenerasjon),
+                keyValue("vedtaksperiodeId", nyGenerasjon.vedtaksperiodeId),
+                keyValue("varselId", varselId),
+                keyValue("varselkode", varselkode)
+            )
+            return nyGenerasjon
+        }
+        håndterVarsel(varselId, varselkode, opprettet, varselRepository)
+
+        return this
+    }
+
+    internal fun håndterSaksbehandlingsvarsel(varselId: UUID, varselkode: Varselkode, opprettet: LocalDateTime, varselRepository: VarselRepository) {
+        if (låst) {
+            throw IllegalStateException("Forsøker å håndtere varselkode = $varselkode for generasjon = $this som er låst. Det skal ikke være mulig.")
+        }
+        håndterVarsel(varselId, varselkode.name, opprettet, varselRepository)
+    }
+
+    private fun håndterVarsel(varselId: UUID, varselkode: String, opprettet: LocalDateTime, varselRepository: VarselRepository) {
         varsler.reaktiverFor(this.id, varselkode, varselRepository) ?: run {
             varsler.add(Varsel(varselId, varselkode, opprettet, vedtaksperiodeId))
             varselRepository.lagreVarsel(varselId, this.id, varselkode, opprettet, vedtaksperiodeId)
