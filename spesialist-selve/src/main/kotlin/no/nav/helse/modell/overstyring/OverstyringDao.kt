@@ -116,26 +116,44 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
             """.trimIndent()
 
             @Language("PostgreSQL")
-            val opprettOverstyringDagQuery = """
-                INSERT INTO overstyring_dag(overstyring_ref, dato, dagtype, grad, fra_dagtype, fra_grad)
-                VALUES (:overstyring_ref, :dato, :dagtype, :grad, :fra_dagtype, :fra_grad)
+            val opprettOverstyringTidslinjeQuery = """
+                INSERT INTO overstyring_tidslinje(overstyring_ref, arbeidsgiver_ref, begrunnelse)
+                SELECT :overstyring_ref, ag.id, :begrunnelse
+                FROM arbeidsgiver ag
+                WHERE ag.orgnummer = :orgnr
             """.trimIndent()
 
-            val overstyringRef = session.run(
-                queryOf(
-                    opprettOverstyringQuery,
-                    mapOf(
-                        "hendelse_id" to hendelseId,
-                        "ekstern_hendelse_id" to eksternHendelseId,
-                        "fodselsnummer" to fødselsnummer.toLong(),
-                        "orgnr" to organisasjonsnummer.toLong(),
-                        "begrunnelse" to begrunnelse,
-                        "saksbehandler_ref" to saksbehandlerRef,
-                        "tidspunkt" to tidspunkt
-                    )
-                ).asUpdateAndReturnGeneratedKey
-            )
+            @Language("PostgreSQL")
+            val opprettOverstyringDagQuery = """
+                INSERT INTO overstyring_dag(overstyring_ref, dato, dagtype, grad, fra_dagtype, fra_grad, overstyring_tidslinje_ref)
+                VALUES (:overstyring_ref, :dato, :dagtype, :grad, :fra_dagtype, :fra_grad, :overstyring_tidslinje_ref)
+            """.trimIndent()
+
             session.transaction { transactionalSession ->
+                val overstyringRef = transactionalSession.run(
+                    queryOf(
+                        opprettOverstyringQuery,
+                        mapOf(
+                            "hendelse_id" to hendelseId,
+                            "ekstern_hendelse_id" to eksternHendelseId,
+                            "fodselsnummer" to fødselsnummer.toLong(),
+                            "orgnr" to organisasjonsnummer.toLong(),
+                            "begrunnelse" to begrunnelse,
+                            "saksbehandler_ref" to saksbehandlerRef,
+                            "tidspunkt" to tidspunkt
+                        )
+                    ).asUpdateAndReturnGeneratedKey
+                )
+                val overstyringTidslinjeRef = transactionalSession.run(
+                    queryOf(
+                        opprettOverstyringTidslinjeQuery,
+                        mapOf(
+                            "overstyring_ref" to overstyringRef,
+                            "orgnr" to organisasjonsnummer.toLong(),
+                            "begrunnelse" to begrunnelse,
+                        )
+                    ).asUpdateAndReturnGeneratedKey
+                )
                 overstyrteDager.forEach { dag ->
                     transactionalSession.run(
                         queryOf(
@@ -146,7 +164,8 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
                                 "dagtype" to dag.type.toString(),
                                 "grad" to dag.grad,
                                 "fra_dagtype" to dag.fraType.toString(),
-                                "fra_grad" to dag.fraGrad
+                                "fra_grad" to dag.fraGrad,
+                                "overstyring_tidslinje_ref" to overstyringTidslinjeRef
                             )
                         ).asUpdate
                     )
