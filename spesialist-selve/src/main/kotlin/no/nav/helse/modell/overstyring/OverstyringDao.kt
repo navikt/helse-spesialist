@@ -26,7 +26,8 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
             FROM overstyring o
             LEFT JOIN overstyring_arbeidsforhold oa on o.id = oa.overstyring_ref
             LEFT JOIN overstyring_inntekt oi on o.id = oi.overstyring_ref
-            LEFT JOIN overstyring_dag od on o.id = od.overstyring_ref
+            LEFT JOIN overstyring_tidslinje ot on o.id = ot.overstyring_ref
+            LEFT JOIN overstyring_dag od on ot.id = od.overstyring_tidslinje_ref
             WHERE o.id IN (
                 SELECT overstyring_ref FROM overstyringer_for_vedtaksperioder
                 WHERE vedtaksperiode_id = :vedtaksperiode_id

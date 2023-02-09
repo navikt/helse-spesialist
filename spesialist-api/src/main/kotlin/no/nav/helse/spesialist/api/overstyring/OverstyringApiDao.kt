@@ -11,18 +11,19 @@ class OverstyringApiDao(private val dataSource: DataSource) {
     fun finnOverstyringerAvTidslinjer(fødselsnummer: String, organisasjonsnummer: String) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val finnOverstyringQuery = """
-            SELECT o.*, p.fodselsnummer, a.orgnummer, s.navn, s.ident FROM overstyring o
+            SELECT o.*, ot.id AS overstyring_tidslinje_id, ot.arbeidsgiver_ref, ot.begrunnelse, p.fodselsnummer, a.orgnummer, s.navn, s.ident FROM overstyring o
                 INNER JOIN person p ON p.id = o.person_ref
                 INNER JOIN arbeidsgiver a ON a.id = o.arbeidsgiver_ref
                 INNER JOIN saksbehandler s ON s.oid = o.saksbehandler_ref
+                INNER JOIN overstyring_tidslinje ot ON ot.overstyring_ref = o.id
             WHERE p.fodselsnummer = ? 
             AND a.orgnummer = ?
-            AND o.id IN (SELECT overstyring_ref FROM overstyring_dag)
+            AND ot.id IN (SELECT overstyring_tidslinje_ref FROM overstyring_dag)
         """
         session.run(
             queryOf(finnOverstyringQuery, fødselsnummer.toLong(), organisasjonsnummer.toLong())
                 .map { overstyringRow ->
-                    val id = overstyringRow.long("id")
+                    val id = overstyringRow.long("overstyring_tidslinje_id")
                     OverstyringDto(
                         hendelseId = overstyringRow.uuid("hendelse_ref"),
                         fødselsnummer = overstyringRow.long("fodselsnummer").toFødselsnummer(),
@@ -33,7 +34,7 @@ class OverstyringApiDao(private val dataSource: DataSource) {
                         saksbehandlerIdent = overstyringRow.stringOrNull("ident"),
                         overstyrteDager = session.run(
                             queryOf(
-                                "SELECT * FROM overstyring_dag WHERE overstyring_ref = ?", id
+                                "SELECT * FROM overstyring_dag WHERE overstyring_tidslinje_ref = ?", id
                             ).map { overstyringDagRow ->
                                 OverstyringDagDto(
                                     dato = overstyringDagRow.localDate("dato"),
