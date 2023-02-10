@@ -3,11 +3,10 @@ package no.nav.helse.spesialist.api.overstyring
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.spesialist.api.graphql.schema.Arbeidsgiver
 
 enum class Dagtype { Sykedag, Feriedag, Egenmeldingsdag, Permisjonsdag }
 
-data class OverstyringDto(
+data class OverstyringTidslinjeDto(
     val hendelseId: UUID,
     val fødselsnummer: String,
     val organisasjonsnummer: String,
@@ -16,6 +15,7 @@ data class OverstyringDto(
     val saksbehandlerNavn: String,
     val saksbehandlerIdent: String?,
     val overstyrteDager: List<OverstyringDagDto>,
+    val ferdigstilt: Boolean,
 )
 
 data class OverstyringDagDto(
@@ -40,6 +40,7 @@ data class OverstyringInntektDto(
     val skjæringstidspunkt: LocalDate,
     val refusjonsopplysninger: List<Refusjonselement>?,
     val fraRefusjonsopplysninger: List<Refusjonselement>?,
+    val ferdigstilt: Boolean,
 ) {
     data class Refusjonselement(
         val fom: LocalDate,
@@ -55,7 +56,8 @@ data class OverstyringInntektOgRefusjonDto(
     val saksbehandlerNavn: String,
     val saksbehandlerIdent: String?,
     val skjæringstidspunkt: LocalDate,
-    val arbeidsgiver: List<Arbeidsgiverelement>
+    val arbeidsgiver: List<Arbeidsgiverelement>,
+    val ferdigstilt: Boolean,
 ) {
     data class Arbeidsgiverelement(
         val organisasjonsnummer: String,
@@ -84,4 +86,5 @@ data class OverstyringArbeidsforholdDto(
     val saksbehandlerIdent: String?,
     val deaktivert: Boolean,
     val skjæringstidspunkt: LocalDate,
+    val ferdigstilt: Boolean,
 )

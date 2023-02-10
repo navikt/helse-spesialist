@@ -26,7 +26,7 @@ class OverstyringApiDao(private val dataSource: DataSource) {
             queryOf(finnOverstyringQuery, fødselsnummer.toLong(), organisasjonsnummer.toLong())
                 .map { overstyringRow ->
                     val id = overstyringRow.long("overstyring_tidslinje_id")
-                    OverstyringDto(
+                    OverstyringTidslinjeDto(
                         hendelseId = overstyringRow.uuid("hendelse_ref"),
                         fødselsnummer = overstyringRow.long("fodselsnummer").toFødselsnummer(),
                         organisasjonsnummer = overstyringRow.int("orgnummer").toString(),
@@ -34,6 +34,7 @@ class OverstyringApiDao(private val dataSource: DataSource) {
                         timestamp = overstyringRow.localDateTime("tidspunkt"),
                         saksbehandlerNavn = overstyringRow.string("navn"),
                         saksbehandlerIdent = overstyringRow.stringOrNull("ident"),
+                        ferdigstilt = overstyringRow.boolean("ferdigstilt"),
                         overstyrteDager = session.run(
                             queryOf(
                                 "SELECT * FROM overstyring_dag WHERE overstyring_tidslinje_ref = ?", id
@@ -88,6 +89,7 @@ class OverstyringApiDao(private val dataSource: DataSource) {
                                 ?.let { objectMapper.readValue<List<OverstyringInntektDto.Refusjonselement>>(it) },
                             fraRefusjonsopplysninger = overstyringRow.stringOrNull("fra_refusjonsopplysninger")
                                 ?.let { objectMapper.readValue<List<OverstyringInntektDto.Refusjonselement>>(it) },
+                            ferdigstilt = overstyringRow.boolean("ferdigstilt"),
                         )
                     }.asList
             )
@@ -125,6 +127,7 @@ class OverstyringApiDao(private val dataSource: DataSource) {
                                 ?.let { objectMapper.readValue<List<OverstyringInntektDto.Refusjonselement>>(it) },
                             fraRefusjonsopplysninger = overstyringRow.stringOrNull("fra_refusjonsopplysninger")
                                 ?.let { objectMapper.readValue<List<OverstyringInntektDto.Refusjonselement>>(it) },
+                            ferdigstilt = overstyringRow.boolean("ferdigstilt"),
                         )
                     }.asList
             )
@@ -158,7 +161,8 @@ class OverstyringApiDao(private val dataSource: DataSource) {
                         saksbehandlerNavn = overstyringRow.string("navn"),
                         saksbehandlerIdent = overstyringRow.stringOrNull("ident"),
                         deaktivert = overstyringRow.boolean("deaktivert"),
-                        skjæringstidspunkt = overstyringRow.localDate("skjaeringstidspunkt")
+                        skjæringstidspunkt = overstyringRow.localDate("skjaeringstidspunkt"),
+                        ferdigstilt = overstyringRow.boolean("ferdigstilt"),
                     )
                 }.asList
         )

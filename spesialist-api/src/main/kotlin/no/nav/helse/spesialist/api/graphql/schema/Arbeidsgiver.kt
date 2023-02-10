@@ -10,8 +10,8 @@ import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.overstyring.OverstyringArbeidsforholdDto
-import no.nav.helse.spesialist.api.overstyring.OverstyringDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringInntektDto
+import no.nav.helse.spesialist.api.overstyring.OverstyringTidslinjeDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
@@ -34,6 +34,7 @@ interface Overstyring {
     val begrunnelse: String
     val timestamp: DateTimeString
     val saksbehandler: Saksbehandler
+    val ferdigstilt: Boolean
 }
 
 data class Dagoverstyring(
@@ -41,6 +42,7 @@ data class Dagoverstyring(
     override val begrunnelse: String,
     override val timestamp: DateTimeString,
     override val saksbehandler: Saksbehandler,
+    override val ferdigstilt: Boolean,
     val dager: List<OverstyrtDag>,
 ) : Overstyring {
     data class OverstyrtDag(
@@ -57,10 +59,12 @@ data class Inntektoverstyring(
     override val begrunnelse: String,
     override val timestamp: DateTimeString,
     override val saksbehandler: Saksbehandler,
+    override val ferdigstilt: Boolean,
     val inntekt: OverstyrtInntekt,
 ) : Overstyring {
     data class OverstyrtInntekt(
         val forklaring: String,
+        val begrunnelse: String,
         val manedligInntekt: Double,
         val fraManedligInntekt: Double?,
         val skjaeringstidspunkt: DateTimeString,
@@ -80,6 +84,7 @@ data class Arbeidsforholdoverstyring(
     override val begrunnelse: String,
     override val timestamp: DateTimeString,
     override val saksbehandler: Saksbehandler,
+    override val ferdigstilt: Boolean,
     val deaktivert: Boolean,
     val skjaeringstidspunkt: DateString,
     val forklaring: String,
@@ -153,7 +158,7 @@ data class Arbeidsgiver(
         }
 }
 
-private fun OverstyringDto.tilDagoverstyring() = Dagoverstyring(
+private fun OverstyringTidslinjeDto.tilDagoverstyring() = Dagoverstyring(
     hendelseId = hendelseId.toString(),
     begrunnelse = begrunnelse,
     timestamp = timestamp.format(DateTimeFormatter.ISO_DATE_TIME),
@@ -169,7 +174,8 @@ private fun OverstyringDto.tilDagoverstyring() = Dagoverstyring(
             grad = dag.grad,
             fraGrad = dag.fraGrad
         )
-    }
+    },
+    ferdigstilt = ferdigstilt,
 )
 
 private fun OverstyringInntektDto.tilInntektoverstyring() = Inntektoverstyring(
@@ -182,6 +188,7 @@ private fun OverstyringInntektDto.tilInntektoverstyring() = Inntektoverstyring(
     ),
     inntekt = Inntektoverstyring.OverstyrtInntekt(
         forklaring = forklaring,
+        begrunnelse = begrunnelse,
         manedligInntekt = månedligInntekt,
         fraManedligInntekt = fraMånedligInntekt,
         skjaeringstidspunkt = skjæringstidspunkt.format(DateTimeFormatter.ISO_DATE),
@@ -199,7 +206,8 @@ private fun OverstyringInntektDto.tilInntektoverstyring() = Inntektoverstyring(
                 belop = it.beløp
             )
         } ?: emptyList(),
-    )
+    ),
+    ferdigstilt = ferdigstilt,
 )
 
 private fun OverstyringArbeidsforholdDto.tilArbeidsforholdoverstyring() = Arbeidsforholdoverstyring(
@@ -212,5 +220,6 @@ private fun OverstyringArbeidsforholdDto.tilArbeidsforholdoverstyring() = Arbeid
     ),
     deaktivert = deaktivert,
     skjaeringstidspunkt = skjæringstidspunkt.format(DateTimeFormatter.ISO_DATE),
-    forklaring = forklaring
+    forklaring = forklaring,
+    ferdigstilt = ferdigstilt,
 )

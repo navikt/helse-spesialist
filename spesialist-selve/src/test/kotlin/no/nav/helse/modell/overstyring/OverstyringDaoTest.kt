@@ -141,9 +141,15 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         overstyringDao.persisterOverstyringTidslinje(ID, EKSTERN_HENDELSE_ID, FØDSELSNUMMER, ORGNUMMER, BEGRUNNELSE, OVERSTYRTE_DAGER, OID, OPPRETTET)
         overstyringDao.kobleOverstyringOgVedtaksperiode(listOf(VEDTAKSPERIODE), EKSTERN_HENDELSE_ID)
 
+        val hentetOverstyring = overstyringApiDao.finnOverstyringerAvTidslinjer(FØDSELSNUMMER, ORGNUMMER).first()
+        assertFalse(hentetOverstyring.ferdigstilt)
+
         assertTrue(overstyringDao.harVedtaksperiodePågåendeOverstyring(VEDTAKSPERIODE))
         overstyringDao.ferdigstillOverstyringerForVedtaksperiode(VEDTAKSPERIODE)
         assertFalse(overstyringDao.harVedtaksperiodePågåendeOverstyring(VEDTAKSPERIODE))
+
+        val hentetOverstyringEtterFerdigstilling = overstyringApiDao.finnOverstyringerAvTidslinjer(FØDSELSNUMMER, ORGNUMMER).first()
+        assertTrue(hentetOverstyringEtterFerdigstilling.ferdigstilt)
     }
 
     @Test
@@ -178,6 +184,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         assertEquals(SAKSBEHANDLER_NAVN, hentetOverstyring.saksbehandlerNavn)
         assertEquals(SAKSBEHANDLER_IDENT, hentetOverstyring.saksbehandlerIdent)
         assertEquals(OPPRETTET, hentetOverstyring.timestamp)
+        assertFalse(hentetOverstyring.ferdigstilt)
     }
 
 
@@ -212,6 +219,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         assertEquals(INNTEKT, hentetOverstyring.månedligInntekt)
         assertEquals(SKJÆRINGSTIDSPUNKT, hentetOverstyring.skjæringstidspunkt)
         assertEquals(OPPRETTET, hentetOverstyring.timestamp)
+        assertFalse(hentetOverstyring.ferdigstilt)
     }
 
     @Test
@@ -265,6 +273,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         assertEquals(SAKSBEHANDLER_NAVN, hentetOverstyring.saksbehandlerNavn)
         assertEquals(SAKSBEHANDLER_IDENT, hentetOverstyring.saksbehandlerIdent)
         assertEquals(OPPRETTET, hentetOverstyring.timestamp)
+        assertFalse(hentetOverstyring.ferdigstilt)
     }
 
     @Test
@@ -303,6 +312,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         assertEquals(INNTEKT, hentetOverstyring.månedligInntekt)
         assertEquals(SKJÆRINGSTIDSPUNKT, hentetOverstyring.skjæringstidspunkt)
         assertEquals(OPPRETTET, hentetOverstyring.timestamp)
+        assertFalse(hentetOverstyring.ferdigstilt)
     }
 
     private fun overstyrInntekt(hendelseId: UUID) = hendelseDao.opprett(

@@ -39,6 +39,7 @@ import no.nav.helse.spesialist.api.graphql.schema.Person
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -115,6 +116,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         assertEquals(1.januar, overstyringer.first().skjæringstidspunkt)
         assertEquals("begrunnelse", overstyringer.first().begrunnelse)
         assertEquals("vår egen forklaring", overstyringer.first().forklaring)
+        assertFalse(overstyringer.first().ferdigstilt)
 
         assertEquals(1, overstyringApiDao.finnOverstyringerAvInntekt(FØDSELSNUMMER, ORGNR).size)
 
@@ -167,6 +169,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         assertEquals(1.januar, overstyringer.first().skjæringstidspunkt)
         assertEquals("begrunnelse", overstyringer.first().begrunnelse)
         assertEquals("testbortforklaring", overstyringer.first().forklaring)
+        assertFalse(overstyringer.first().ferdigstilt)
 
         assertEquals(1, overstyringApiDao.finnOverstyringerAvInntekt(FØDSELSNUMMER, ORGNR).size)
 
@@ -211,6 +214,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             orgnummer = ORGNR_GHOST
         )
         assertEquals(1, overstyringer.size)
+        assertFalse(overstyringer.first().ferdigstilt)
         assertIngenOppgaver(testRapid.inspektør.oppgaveId(godkjenningsbehovId))
 
         val nyttGodkjenningsbehov = sendGodkjenningsbehov(
@@ -337,5 +341,8 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         assertEquals(1, (overstyringer.first() as Dagoverstyring).dager.size)
         assertEquals(15000.0, (overstyringer[1] as Inntektoverstyring).inntekt.manedligInntekt)
         assertEquals(true, (overstyringer[2] as Arbeidsforholdoverstyring).deaktivert)
+        assertFalse(overstyringer.first().ferdigstilt)
+        assertFalse(overstyringer[1].ferdigstilt)
+        assertFalse(overstyringer.last().ferdigstilt)
     }
 }
