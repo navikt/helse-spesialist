@@ -126,7 +126,7 @@ internal class PersonRepository(private val dataSource: DataSource) {
 
     private fun TransactionalSession.slettOverstyrtDag(personRef: Int) {
         @Language("PostgreSQL")
-        val query = "DELETE FROM overstyring_dag WHERE overstyring_ref IN (SELECT id FROM overstyring WHERE person_ref = ?)"
+        val query = "DELETE FROM overstyring_dag WHERE overstyring_tidslinje_ref IN (SELECT ot.id FROM overstyring_tidslinje ot JOIN overstyring o ON ot.overstyring_ref = o.id WHERE o.person_ref = ?)"
         run(queryOf(query, personRef).asExecute)
     }
 

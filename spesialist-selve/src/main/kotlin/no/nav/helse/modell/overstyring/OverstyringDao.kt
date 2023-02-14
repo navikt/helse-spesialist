@@ -107,12 +107,10 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             @Language("PostgreSQL")
             val opprettOverstyringQuery = """
-                INSERT INTO overstyring(hendelse_ref, ekstern_hendelse_id, person_ref, arbeidsgiver_ref, begrunnelse, saksbehandler_ref, tidspunkt)
-                SELECT :hendelse_id, :ekstern_hendelse_id, p.id, ag.id, :begrunnelse, :saksbehandler_ref, :tidspunkt
-                FROM arbeidsgiver ag,
-                     person p
+                INSERT INTO overstyring(hendelse_ref, ekstern_hendelse_id, person_ref, saksbehandler_ref, tidspunkt)
+                SELECT :hendelse_id, :ekstern_hendelse_id, p.id, :saksbehandler_ref, :tidspunkt
+                FROM person p
                 WHERE p.fodselsnummer = :fodselsnummer
-                  AND ag.orgnummer = :orgnr
             """.trimIndent()
 
             @Language("PostgreSQL")
@@ -125,8 +123,8 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
 
             @Language("PostgreSQL")
             val opprettOverstyringDagQuery = """
-                INSERT INTO overstyring_dag(overstyring_ref, dato, dagtype, grad, fra_dagtype, fra_grad, overstyring_tidslinje_ref)
-                VALUES (:overstyring_ref, :dato, :dagtype, :grad, :fra_dagtype, :fra_grad, :overstyring_tidslinje_ref)
+                INSERT INTO overstyring_dag(dato, dagtype, grad, fra_dagtype, fra_grad, overstyring_tidslinje_ref)
+                VALUES (:dato, :dagtype, :grad, :fra_dagtype, :fra_grad, :overstyring_tidslinje_ref)
             """.trimIndent()
 
             session.transaction { transactionalSession ->
@@ -137,8 +135,6 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
                             "hendelse_id" to hendelseId,
                             "ekstern_hendelse_id" to eksternHendelseId,
                             "fodselsnummer" to fødselsnummer.toLong(),
-                            "orgnr" to organisasjonsnummer.toLong(),
-                            "begrunnelse" to begrunnelse,
                             "saksbehandler_ref" to saksbehandlerRef,
                             "tidspunkt" to tidspunkt
                         )
@@ -159,7 +155,6 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
                         queryOf(
                             opprettOverstyringDagQuery,
                             mapOf(
-                                "overstyring_ref" to overstyringRef,
                                 "dato" to dag.dato,
                                 "dagtype" to dag.type.toString(),
                                 "grad" to dag.grad,
@@ -192,12 +187,10 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             @Language("PostgreSQL")
             val opprettOverstyringQuery = """
-                INSERT INTO overstyring(hendelse_ref, ekstern_hendelse_id, person_ref, arbeidsgiver_ref, begrunnelse, saksbehandler_ref, tidspunkt)
-                SELECT :hendelse_id, :ekstern_hendelse_id, p.id, ag.id, :begrunnelse, :saksbehandler_ref, :tidspunkt
-                FROM arbeidsgiver ag,
-                     person p
+                INSERT INTO overstyring(hendelse_ref, ekstern_hendelse_id, person_ref, saksbehandler_ref, tidspunkt)
+                SELECT :hendelse_id, :ekstern_hendelse_id, p.id, :saksbehandler_ref, :tidspunkt
+                FROM person p
                 WHERE p.fodselsnummer = :fodselsnummer
-                  AND ag.orgnummer = :orgnr
             """.trimIndent()
 
             @Language("PostgreSQL")
@@ -214,11 +207,10 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
                     mapOf(
                         "hendelse_id" to hendelseId,
                         "ekstern_hendelse_id" to eksternHendelseId,
-                        "begrunnelse" to begrunnelse,
                         "saksbehandler_ref" to saksbehandlerRef,
                         "tidspunkt" to tidspunkt,
-                        "fodselsnummer" to fødselsnummer.toLong(),
-                        "orgnr" to organisasjonsnummer.toLong())
+                        "fodselsnummer" to fødselsnummer.toLong()
+                    )
                 ).asUpdateAndReturnGeneratedKey
             )
 
@@ -253,12 +245,10 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             @Language("PostgreSQL")
             val opprettOverstyringQuery = """
-                INSERT INTO overstyring(hendelse_ref, ekstern_hendelse_id, person_ref, arbeidsgiver_ref, begrunnelse, saksbehandler_ref, tidspunkt)
-                SELECT :hendelse_id, :ekstern_hendelse_id, p.id, ag.id, :begrunnelse, :saksbehandler_ref, :tidspunkt
-                FROM arbeidsgiver ag,
-                     person p
+                INSERT INTO overstyring(hendelse_ref, ekstern_hendelse_id, person_ref, saksbehandler_ref, tidspunkt)
+                SELECT :hendelse_id, :ekstern_hendelse_id, p.id, :saksbehandler_ref, :tidspunkt
+                FROM person p
                 WHERE p.fodselsnummer = :fodselsnummer
-                  AND ag.orgnummer = :orgnr
             """.trimIndent()
 
             @Language("PostgreSQL")
@@ -269,21 +259,19 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
                 WHERE ag.orgnummer = :orgnr
             """.trimIndent()
 
-            val overstyringRef = session.run(
-                queryOf(
-                    opprettOverstyringQuery,
-                    mapOf(
-                        "hendelse_id" to hendelseId,
-                        "ekstern_hendelse_id" to eksternHendelseId,
-                        "begrunnelse" to arbeidsgivere.first().begrunnelse,
-                        "saksbehandler_ref" to saksbehandlerRef,
-                        "tidspunkt" to tidspunkt,
-                        "fodselsnummer" to fødselsnummer.toLong(),
-                        "orgnr" to arbeidsgivere.first().organisasjonsnummer.toLong())
-                ).asUpdateAndReturnGeneratedKey
-            )
-
             session.transaction { transactionalSession ->
+                val overstyringRef = transactionalSession.run(
+                    queryOf(
+                        opprettOverstyringQuery,
+                        mapOf(
+                            "hendelse_id" to hendelseId,
+                            "ekstern_hendelse_id" to eksternHendelseId,
+                            "saksbehandler_ref" to saksbehandlerRef,
+                            "tidspunkt" to tidspunkt,
+                            "fodselsnummer" to fødselsnummer.toLong()
+                        )
+                    ).asUpdateAndReturnGeneratedKey
+                )
                 arbeidsgivere.forEach { arbeidsgiver ->
                     transactionalSession.run(
                         queryOf(
@@ -322,12 +310,10 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             @Language("PostgreSQL")
             val opprettOverstyringQuery = """
-                INSERT INTO overstyring(hendelse_ref, ekstern_hendelse_id, person_ref, arbeidsgiver_ref, begrunnelse, saksbehandler_ref, tidspunkt)
-                SELECT :hendelse_id, :ekstern_hendelse_id, p.id, ag.id, :begrunnelse, :saksbehandler_ref, :tidspunkt
-                FROM arbeidsgiver ag,
-                     person p
+                INSERT INTO overstyring(hendelse_ref, ekstern_hendelse_id, person_ref, saksbehandler_ref, tidspunkt)
+                SELECT :hendelse_id, :ekstern_hendelse_id, p.id, :saksbehandler_ref, :tidspunkt
+                FROM person p
                 WHERE p.fodselsnummer = :fodselsnummer
-                  AND ag.orgnummer = :orgnr
             """.trimIndent()
 
             @Language("PostgreSQL")
@@ -344,11 +330,9 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
                     mapOf(
                         "hendelse_id" to hendelseId,
                         "ekstern_hendelse_id" to eksternHendelseId,
-                        "begrunnelse" to begrunnelse,
                         "saksbehandler_ref" to saksbehandlerRef,
                         "tidspunkt" to tidspunkt,
-                        "fodselsnummer" to fødselsnummer.toLong(),
-                        "orgnr" to organisasjonsnummer.toLong()
+                        "fodselsnummer" to fødselsnummer.toLong()
                     )
                 ).asUpdateAndReturnGeneratedKey
             )
