@@ -31,7 +31,6 @@ data class Generasjon(
 
 interface Overstyring {
     val hendelseId: UUIDString
-    val begrunnelse: String
     val timestamp: DateTimeString
     val saksbehandler: Saksbehandler
     val ferdigstilt: Boolean
@@ -39,10 +38,10 @@ interface Overstyring {
 
 data class Dagoverstyring(
     override val hendelseId: UUIDString,
-    override val begrunnelse: String,
     override val timestamp: DateTimeString,
     override val saksbehandler: Saksbehandler,
     override val ferdigstilt: Boolean,
+    val begrunnelse: String,
     val dager: List<OverstyrtDag>,
 ) : Overstyring {
     data class OverstyrtDag(
@@ -56,10 +55,10 @@ data class Dagoverstyring(
 
 data class Inntektoverstyring(
     override val hendelseId: UUIDString,
-    override val begrunnelse: String,
     override val timestamp: DateTimeString,
     override val saksbehandler: Saksbehandler,
     override val ferdigstilt: Boolean,
+    val begrunnelse: String?,
     val inntekt: OverstyrtInntekt,
 ) : Overstyring {
     data class OverstyrtInntekt(
@@ -81,10 +80,10 @@ data class Inntektoverstyring(
 
 data class Arbeidsforholdoverstyring(
     override val hendelseId: UUIDString,
-    override val begrunnelse: String,
     override val timestamp: DateTimeString,
     override val saksbehandler: Saksbehandler,
     override val ferdigstilt: Boolean,
+    val begrunnelse: String,
     val deaktivert: Boolean,
     val skjaeringstidspunkt: DateString,
     val forklaring: String,
