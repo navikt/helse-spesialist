@@ -121,7 +121,7 @@ data class Arbeidsgiver(
             id = generasjon.id,
             perioder = generasjon.perioder.map {
                 when (it) {
-                    is GraphQLUberegnetPeriode -> UberegnetPeriode(id = it.id, periode = it)
+                    is GraphQLUberegnetPeriode -> UberegnetPeriode(id = it.id, periode = it, varselRepository = varselRepository)
                     is GraphQLBeregnetPeriode -> BeregnetPeriode(
                         id = it.id,
                         orgnummer = organisasjonsnummer,

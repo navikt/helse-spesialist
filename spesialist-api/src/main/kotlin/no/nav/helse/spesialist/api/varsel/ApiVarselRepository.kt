@@ -17,6 +17,10 @@ class ApiVarselRepository(dataSource: DataSource) {
         return varselDao.finnVarslerSomIkkeErInaktiveFor(vedtaksperiodeId, utbetalingId).toDto()
     }
 
+    internal fun finnVarslerForUberegnetPeriode(vedtaksperiodeId: UUID): Set<VarselDTO> {
+        return varselDao.finnVarslerForUberegnetPeriode(vedtaksperiodeId).toDto()
+    }
+
     fun ikkeVurderteVarslerFor(oppgaveId: Long): Int {
         val alleVarsler = varselDao.finnVarslerSomIkkeErInaktiveFor(oppgaveId)
         return alleVarsler.antallIkkeVurderte()

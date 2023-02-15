@@ -29,6 +29,20 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
         )
     ) { mapVarsel(it) }.toSet()
 
+    internal fun finnVarslerForUberegnetPeriode(vedtaksperiodeId: UUID): Set<Varsel> = queryize(
+        """
+           SELECT svg.unik_id as generasjon_id, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling FROM selve_varsel sv
+                INNER JOIN selve_vedtaksperiode_generasjon svg ON sv.generasjon_ref = svg.id
+                INNER JOIN api_varseldefinisjon av ON av.id = COALESCE(sv.definisjon_ref, (SELECT id FROM api_varseldefinisjon WHERE kode = sv.kode ORDER BY opprettet DESC LIMIT 1))
+                WHERE sv.vedtaksperiode_id = :vedtaksperiode_id AND sv.status != :status_inaktiv; 
+        """
+    ).list(
+        mapOf(
+            "vedtaksperiode_id" to vedtaksperiodeId,
+            "status_inaktiv" to INAKTIV.name
+        )
+    ) { mapVarsel(it) }.toSet()
+
     internal fun finnVarslerSomIkkeErInaktiveFor(oppgaveId: Long): Set<Varsel> {
         return finnUtbetalingIdFor(oppgaveId)?.let(::finnVarslerSomIkkeErInaktiveFor) ?: emptySet()
     }

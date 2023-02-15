@@ -29,6 +29,23 @@ internal class ApiVarselRepositoryTest: DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `Finner varsler for uberegnet periode`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        opprettVarseldefinisjon(kode = "EN_KODE")
+        opprettVarseldefinisjon(kode = "EN_ANNEN_KODE")
+        opprettVarseldefinisjon(kode = "EN_TREDJE_KODE")
+        val generasjonRef = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)
+        nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef)
+        nyttVarsel(kode = "EN_ANNEN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef)
+        nyttVarsel(kode = "EN_TREDJE_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, status = "INAKTIV")
+        val varsler = apiVarselRepository.finnVarslerForUberegnetPeriode(vedtaksperiodeId)
+
+        assertTrue(varsler.isNotEmpty())
+        assertEquals(2, varsler.size)
+    }
+
+    @Test
     fun `varsel er aktivt`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val utbetalingId = UUID.randomUUID()

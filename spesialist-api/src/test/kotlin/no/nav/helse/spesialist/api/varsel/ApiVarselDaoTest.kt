@@ -42,6 +42,24 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `Finner varsler for uberegnet periode`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        opprettVarseldefinisjon(kode = "EN_KODE")
+        opprettVarseldefinisjon(kode = "EN_ANNEN_KODE")
+        val generasjonRef1 = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)
+        nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef1)
+        nyttVarsel(kode = "EN_ANNEN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef1)
+        val generasjonRef2 = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)
+        nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef2)
+        nyttVarsel(kode = "EN_ANNEN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef2)
+        val varsler = apiVarselDao.finnVarslerForUberegnetPeriode(vedtaksperiodeId)
+
+        assertTrue(varsler.isNotEmpty())
+        assertEquals(4, varsler.size)
+    }
+
+    @Test
     fun `Finner varsler med oppgaveId`() {
         val definisjonId = UUID.randomUUID()
         val generasjonId = UUID.randomUUID()
