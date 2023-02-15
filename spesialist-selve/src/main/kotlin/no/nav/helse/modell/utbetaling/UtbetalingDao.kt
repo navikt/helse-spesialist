@@ -10,6 +10,21 @@ import org.intellij.lang.annotations.Language
 
 class UtbetalingDao(private val dataSource: DataSource) {
 
+
+    fun erBehandletTidligere(aktørId: String): Boolean {
+        @Language("PostgreSQL")
+        val statement = """
+            SELECT 1 FROM utbetaling u 
+            JOIN utbetaling_id ui ON u.utbetaling_id_ref = ui.id
+            INNER JOIN person p ON ui.person_ref = p.id
+            WHERE u.status = 'UTBETALT' AND p.aktor_id = :aktor_id AND u.id = 
+                (SELECT max(id) FROM utbetaling u2 WHERE u2.utbetaling_id_ref = u.utbetaling_id_ref)
+        """
+        return sessionOf(dataSource).use {
+            it.run(queryOf(statement, mapOf("aktor_id" to aktørId.toLong())).map { it }.asList).isNotEmpty()
+        }
+    }
+
     fun erUtbetaltFør(utbetalingId: UUID): Boolean {
         @Language("PostgreSQL")
         val statement = """

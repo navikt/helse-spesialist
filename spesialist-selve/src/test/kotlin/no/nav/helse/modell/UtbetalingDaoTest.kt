@@ -21,6 +21,56 @@ import org.junit.jupiter.api.assertDoesNotThrow
 class UtbetalingDaoTest : DatabaseIntegrationTest() {
 
     @Test
+    fun `Ingen tidligere utbetalinger`() {
+        nyPerson()
+
+        assertFalse(utbetalingDao.erBehandletTidligere(AKTØR))
+    }
+
+    @Test
+    fun `Har tidligere utbetaling`() {
+        nyPerson()
+
+        val arbeidsgiveroppdragId = lagArbeidsgiveroppdrag(fagsystemId())
+        val personOppdragId = lagPersonoppdrag(fagsystemId())
+        val utbetaling_idId = lagUtbetalingId(arbeidsgiveroppdragId, personOppdragId, UUID.randomUUID())
+        utbetalingDao.nyUtbetalingStatus(utbetaling_idId, UTBETALT, LocalDateTime.now(), "{}")
+
+        assertTrue(utbetalingDao.erBehandletTidligere(AKTØR))
+    }
+
+    @Test
+    fun `Har forkastet utbetaling`() {
+        nyPerson()
+
+        val arbeidsgiveroppdragId = lagArbeidsgiveroppdrag(fagsystemId())
+        val personOppdragId = lagPersonoppdrag(fagsystemId())
+        val utbetaling_idId = lagUtbetalingId(arbeidsgiveroppdragId, personOppdragId, UUID.randomUUID())
+        utbetalingDao.nyUtbetalingStatus(utbetaling_idId, UTBETALT, LocalDateTime.now(), "{}")
+        utbetalingDao.nyUtbetalingStatus(utbetaling_idId, FORKASTET, LocalDateTime.now(), "{}")
+
+        assertFalse(utbetalingDao.erBehandletTidligere(AKTØR))
+    }
+
+    @Test
+    fun `Har forkastet og utbetalt utbetaling`() {
+        nyPerson()
+
+        val arbeidsgiveroppdragId = lagArbeidsgiveroppdrag(fagsystemId())
+        val personOppdragId = lagPersonoppdrag(fagsystemId())
+        val utbetaling_idId = lagUtbetalingId(arbeidsgiveroppdragId, personOppdragId, UUID.randomUUID())
+        utbetalingDao.nyUtbetalingStatus(utbetaling_idId, UTBETALT, LocalDateTime.now(), "{}")
+        utbetalingDao.nyUtbetalingStatus(utbetaling_idId, FORKASTET, LocalDateTime.now(), "{}")
+
+        val arbeidsgiveroppdragId2 = lagArbeidsgiveroppdrag(fagsystemId())
+        val personOppdragId2 = lagPersonoppdrag(fagsystemId())
+        val utbetaling_idId2 = lagUtbetalingId(arbeidsgiveroppdragId2, personOppdragId2, UUID.randomUUID())
+        utbetalingDao.nyUtbetalingStatus(utbetaling_idId2, UTBETALT, LocalDateTime.now(), "{}")
+
+        assertTrue(utbetalingDao.erBehandletTidligere(AKTØR))
+    }
+
+    @Test
     fun `Ukjent utbetaling har aldri endring`() {
         assertFalse(utbetalingDao.erUtbetaltFør(UUID.randomUUID()))
     }
