@@ -25,6 +25,7 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.overstyring.Dagtype.Feriedag
 import no.nav.helse.spesialist.api.overstyring.Dagtype.Sykedag
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
+import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 
@@ -245,6 +246,7 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
         fødselsnummer: String,
         organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
+        adressebeskyttelse: Adressebeskyttelse,
     ): UUID = newUUID.also { id ->
         val behov = testRapid.inspektør.siste("behov")
         testRapid.reset()
@@ -260,7 +262,8 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
                 vedtaksperiodeId = vedtaksperiodeId,
                 id = id,
                 hendelseId = hendelseId,
-                contextId = contextId
+                contextId = contextId,
+                adressebeskyttelse = adressebeskyttelse.name
             )
         )
     }
@@ -440,29 +443,6 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
         )
     }
 
-    fun sendDigitalKontaktinformasjonløsning(
-        aktørId: String,
-        fødselsnummer: String,
-        erDigital: Boolean = true,
-    ): UUID = newUUID.also { id ->
-        val behov = testRapid.inspektør.siste("behov")
-        testRapid.reset()
-        assertEquals("DigitalKontaktinformasjon", behov["@behov"].map { it.asText() }.single())
-        val contextId = UUID.fromString(behov["contextId"].asText())
-        val hendelseId = UUID.fromString(behov["hendelseId"].asText())
-
-        testRapid.sendTestMessage(
-            meldingsfabrikk.lagDigitalKontaktinformasjonløsning(
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                erDigital = erDigital,
-                id = id,
-                hendelseId = hendelseId,
-                contextId = contextId
-            )
-        )
-    }
-
     fun sendInntektløsning(
         aktørId: String,
         fødselsnummer: String,
@@ -574,6 +554,16 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
             )
         )
     }
+
+    fun sendAdressebeskyttelseEndret(
+        aktørId: String,
+        fødselsnummer: String
+    ): UUID =
+        newUUID.also { id ->
+            testRapid.sendTestMessage(
+                meldingsfabrikk.lagAdressebeskyttelseEndret(aktørId, fødselsnummer, id)
+            )
+        }
 
     fun sendOverstyrTidslinje(
         aktørId: String,

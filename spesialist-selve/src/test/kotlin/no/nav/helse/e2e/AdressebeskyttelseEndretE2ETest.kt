@@ -1,94 +1,70 @@
 package no.nav.helse.e2e
 
-import AbstractE2ETest
-import java.util.UUID
-import no.nav.helse.Meldingssender
-import no.nav.helse.Meldingssender.sendAdressebeskyttelseEndret
-import no.nav.helse.Meldingssender.sendHentPersoninfoLøsning
-import no.nav.helse.TestRapidHelpers.behov
-import no.nav.helse.TestRapidHelpers.hendelseId
-import no.nav.helse.TestRapidHelpers.hendelser
-import no.nav.helse.TestRapidHelpers.oppgaveId
-import no.nav.helse.Testdata
-import no.nav.helse.Testdata.FØDSELSNUMMER
-import no.nav.helse.Testdata.UTBETALING_ID
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus
-import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.spesialist.api.person.Adressebeskyttelse
-import org.junit.jupiter.api.Assertions.assertEquals
+import AbstractE2ETestV2
+import no.nav.helse.spesialist.api.person.Adressebeskyttelse.Fortrolig
+import no.nav.helse.spesialist.api.person.Adressebeskyttelse.StrengtFortrolig
 import org.junit.jupiter.api.Test
 
-internal class AdressebeskyttelseEndretE2ETest : AbstractE2ETest() {
+internal class AdressebeskyttelseEndretE2ETest : AbstractE2ETestV2() {
     @Test
     fun `oppdaterer adressebeskyttelse på en person vi kjenner til fra før`() {
-        vedtaksperiode(utbetalingId = UTBETALING_ID)
-        val originaleBehov = testRapid.inspektør.behov().size
-        val hendelseId = sendAdressebeskyttelseEndret()
 
-        assertEquals(originaleBehov + 1, testRapid.inspektør.behov().size)
-        assertEquals(Adressebeskyttelse.Ugradert, personDao.findAdressebeskyttelse(FØDSELSNUMMER))
-        sendHentPersoninfoLøsning(hendelseId, adressebeskyttelse = "Fortrolig")
-        assertEquals(Adressebeskyttelse.Fortrolig, personDao.findAdressebeskyttelse(FØDSELSNUMMER))
+        håndterSøknad()
+        håndterVedtaksperiodeOpprettet()
+        håndterAdressebeskyttelseEndret()
+        assertSisteEtterspurteBehov("HentPersoninfoV2")
+
+        assertAdressebeskyttelse(adressebeskyttelse = null)
+        håndterPersoninfoløsning(adressebeskyttelse = Fortrolig)
+        assertAdressebeskyttelse(adressebeskyttelse = Fortrolig)
     }
 
     @Test
     fun `oppdaterer ikke adressebeskyttelse dersom vi ikke kjenner til fødselsnummer`() {
-        sendAdressebeskyttelseEndret()
-        assertEquals(emptyList<String>(), testRapid.inspektør.behov())
+        håndterAdressebeskyttelseEndret()
+        assertIngenEtterspurteBehov()
     }
 
     @Test
     fun `Etterspør personinfo uten å sjekke ferskhet når adressebeskyttelse har blitt endret`() {
-        settOppBruker()
-        testRapid.reset()
+        håndterSøknad()
+        håndterVedtaksperiodeOpprettet()
 
         // Etterspør personinfo selv om det nettopp er gjort
-        sendAdressebeskyttelseEndret()
-        assertBehov("HentPersoninfoV2")
+        nullstillRapid()
+        håndterAdressebeskyttelseEndret()
+        assertSisteEtterspurteBehov("HentPersoninfoV2")
     }
 
     @Test
     fun `Etterspør personinfo men avviser ikke når det ikke er noen åpne oppgaver`() {
-        settOppBruker()
+        fremTilSaksbehandleroppgave()
+        håndterSaksbehandlerløsning()
+        håndterVedtakFattet()
 
-        sendSaksbehandlerløsningFraAPI(testRapid.inspektør.oppgaveId(), "ident", "epost", UUID.randomUUID(), false)
-        Meldingssender.sendUtbetalingEndret(
-            aktørId = Testdata.AKTØR,
-            fødselsnummer = FØDSELSNUMMER,
-            organisasjonsnummer = Testdata.ORGNR,
-            utbetalingId = UTBETALING_ID,
-            type = "UTBETALING",
-            status = Utbetalingsstatus.UTBETALT,
-        )
-        testRapid.reset()
-        assertOppgaver(0)
-
-        sendAdressebeskyttelseEndret()
-        assertBehov("HentPersoninfoV2")
-        val hendelseId = testRapid.inspektør.hendelseId()
-        sendHentPersoninfoLøsning(hendelseId, adressebeskyttelse = Adressebeskyttelse.StrengtFortrolig.name)
-        assertEquals(0, testRapid.inspektør.hendelser("vedtaksperiode_avvist").size)
+        håndterAdressebeskyttelseEndret()
+        assertSisteEtterspurteBehov("HentPersoninfoV2")
+        håndterPersoninfoløsning(adressebeskyttelse = StrengtFortrolig)
+        assertIkkeUtgåendeMelding("vedtaksperiode_avvist")
     }
 
     @Test
     fun `Behandler ny strengt fortrolig adressebeskyttelse og avviser`() {
-        settOppBruker()
-        sendAdressebeskyttelseEndret()
-        val hendelseId = testRapid.inspektør.hendelseId()
-        sendHentPersoninfoLøsning(hendelseId, adressebeskyttelse = Adressebeskyttelse.StrengtFortrolig.name)
+        fremTilSaksbehandleroppgave()
+        håndterAdressebeskyttelseEndret()
+        assertSisteEtterspurteBehov("HentPersoninfoV2")
 
-        assertVedtaksperiodeAvvist(
-            periodetype = Periodetype.FØRSTEGANGSBEHANDLING.name,
-            begrunnelser = listOf("Adressebeskyttelse strengt fortrolig"),
-            kommentar = null)
+        håndterPersoninfoløsning(adressebeskyttelse = StrengtFortrolig)
+        assertUtgåendeMelding("vedtaksperiode_avvist")
     }
 
     @Test
     fun `Behandler ny fortrolig adressebeskyttelse og avviser ikke`() {
-        settOppBruker()
-        sendAdressebeskyttelseEndret()
-        val hendelseId = testRapid.inspektør.hendelseId()
-        sendHentPersoninfoLøsning(hendelseId, adressebeskyttelse = Adressebeskyttelse.Fortrolig.name)
-        assertEquals(0, testRapid.inspektør.hendelser("vedtaksperiode_avvist").size)
+        fremTilSaksbehandleroppgave()
+        håndterAdressebeskyttelseEndret()
+        assertSisteEtterspurteBehov("HentPersoninfoV2")
+
+        håndterPersoninfoløsning(adressebeskyttelse = Fortrolig)
+        assertIkkeUtgåendeMelding("vedtaksperiode_avvist")
     }
 }

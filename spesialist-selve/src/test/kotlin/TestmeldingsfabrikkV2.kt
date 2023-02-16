@@ -127,6 +127,7 @@ internal object TestmeldingsfabrikkV2 {
         id: UUID,
         hendelseId: UUID,
         contextId: UUID,
+        adressebeskyttelse: String
     ) = nyHendelse(
         id, "behov", mapOf(
             "@final" to true,
@@ -145,7 +146,7 @@ internal object TestmeldingsfabrikkV2 {
                     "etternavn" to "Nordmann",
                     "fødselsdato" to "1970-01-01",
                     "kjønn" to "Kvinne",
-                    "adressebeskyttelse" to "Ugradert"
+                    "adressebeskyttelse" to adressebeskyttelse
                 )
             )
         )
@@ -306,30 +307,6 @@ internal object TestmeldingsfabrikkV2 {
             )
         )
     )
-
-    fun lagDigitalKontaktinformasjonløsning(
-        aktørId: String,
-        fødselsnummer: String,
-        erDigital: Boolean = true,
-        id: UUID,
-        hendelseId: UUID,
-        contextId: UUID,
-    ): String =
-        nyHendelse(
-            id, "behov", mutableMapOf(
-                "aktørId" to aktørId,
-                "fødselsnummer" to fødselsnummer,
-                "@final" to true,
-                "@behov" to listOf("DigitalKontaktinformasjon"),
-                "contextId" to contextId,
-                "hendelseId" to hendelseId,
-                "@løsning" to mapOf(
-                    "DigitalKontaktinformasjon" to mapOf(
-                        "erDigital" to erDigital
-                    )
-                )
-            )
-        )
 
     fun lagInntektløsning(
         aktørId: String,
@@ -751,6 +728,13 @@ internal object TestmeldingsfabrikkV2 {
         )
     )
 
+
+    fun lagAdressebeskyttelseEndret(aktørId: String, fødselsnummer: String, id: UUID) = nyHendelse(
+        id, "adressebeskyttelse_endret", mapOf(
+            "fødselsnummer" to fødselsnummer,
+            "aktørId" to aktørId
+        )
+    )
 
     private fun nyHendelse(id: UUID, navn: String, hendelse: Map<String, Any>) =
         JsonMessage.newMessage(

@@ -25,6 +25,7 @@ import no.nav.helse.januar
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
+import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.SENDT
@@ -33,6 +34,7 @@ import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
+import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.*
@@ -349,7 +351,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         )
     }
 
-    protected fun håndterUtbetalingUtbetalt(
+    private fun håndterUtbetalingUtbetalt(
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
@@ -430,8 +432,9 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert
     ) {
-        meldingssenderV2.sendPersoninfoløsning(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId)
+        meldingssenderV2.sendPersoninfoløsning(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId, adressebeskyttelse)
     }
 
     protected fun håndterEnhetløsning(
@@ -562,6 +565,10 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         meldingssenderV2.sendVedtakFattet(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId)
     }
 
+    protected fun håndterAdressebeskyttelseEndret(aktørId: String = AKTØR, fødselsnummer: String = FØDSELSNUMMER) {
+        meldingssenderV2.sendAdressebeskyttelseEndret(aktørId, fødselsnummer)
+    }
+
     protected fun håndterOverstyrTidslinje(
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
@@ -676,6 +683,10 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         assertEquals(skjermet, EgenAnsattDao(dataSource).erEgenAnsatt(fødselsnummer))
     }
 
+    protected fun assertAdressebeskyttelse(fødselsnummer: String = FØDSELSNUMMER, adressebeskyttelse: Adressebeskyttelse?) {
+        assertEquals(adressebeskyttelse, PersonDao(dataSource).findAdressebeskyttelse(fødselsnummer))
+    }
+
     protected fun assertNyttSnapshot(block: () -> Unit) {
         clearMocks(snapshotClient, answers = false, verificationMarks = false)
         block()
@@ -702,9 +713,14 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         assertEquals(1, arbeidsgiver(organisasjonsnummer)) { "Arbeidsgiver med organisasjonsnummer=$organisasjonsnummer finnes ikke i databasen" }
     }
 
-    private fun assertUtgåendeMelding(hendelse: String) {
+    protected fun assertUtgåendeMelding(hendelse: String) {
         val meldinger = testRapid.inspektør.hendelser(hendelse)
         assertEquals(1, meldinger.size)
+    }
+
+    protected fun assertIkkeUtgåendeMelding(hendelse: String) {
+        val meldinger = testRapid.inspektør.hendelser(hendelse)
+        assertEquals(0, meldinger.size)
     }
 
     private fun assertUtgåendeBehovløsning(behov: String) {
@@ -720,9 +736,22 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         }
     }
 
+    protected fun assertSisteEtterspurteBehov(behov: String) {
+        val sisteEtterspurteBehov = testRapid.inspektør.behov().last()
+        assertEquals(sisteEtterspurteBehov, behov)
+    }
+
+    protected fun assertIngenEtterspurteBehov() {
+        assertEquals(emptyList<String>(), testRapid.inspektør.behov())
+    }
+
     protected fun assertUtbetaling(arbeidsgiverbeløp: Int, personbeløp: Int) {
         assertEquals(arbeidsgiverbeløp, finnbeløp("arbeidsgiver"))
         assertEquals(personbeløp, finnbeløp("person"))
+    }
+
+    protected fun nullstillRapid() {
+        testRapid.reset()
     }
 
     private fun finnbeløp(type: String): Int? {
