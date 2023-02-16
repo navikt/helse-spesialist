@@ -1,90 +1,77 @@
 package no.nav.helse.e2e
 
-import AbstractE2ETest
+import AbstractE2ETestV2
 import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID.randomUUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
-import no.nav.helse.Meldingssender.sendGodkjenningsbehov
-import no.nav.helse.Meldingssender.sendUtbetalingEndret
-import no.nav.helse.TestRapidHelpers.hendelser
-import no.nav.helse.TestRapidHelpers.oppgaveId
-import no.nav.helse.Testdata
 import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.Testdata.ORGNR_GHOST
-import no.nav.helse.Testdata.UTBETALING_ID
-import no.nav.helse.februar
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
+import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.ArbeidsgiverinformasjonJson
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class OppdaterArbeidsgiverE2ETest : AbstractE2ETest() {
+internal class OppdaterArbeidsgiverE2ETest : AbstractE2ETestV2() {
 
     @Test
     fun `Etterspør oppdatert navn selv når svar på behovet er mottatt for et annet orgnr`() {
-        settOppBruker()
-
-        sendSaksbehandlerløsningFraAPI(testRapid.inspektør.oppgaveId(), "ident", "epost", randomUUID(), false)
-        sendUtbetalingEndret(
-            aktørId = Testdata.AKTØR,
-            fødselsnummer = Testdata.FØDSELSNUMMER,
-            organisasjonsnummer = ORGNR,
-            utbetalingId = UTBETALING_ID,
-            type = "UTBETALING",
-            status = UTBETALT,
-            arbeidsgiverFagsystemId = "EN_FAGSYSTEMID"
-        )
+        fremTilSaksbehandleroppgave()
+        håndterSaksbehandlerløsning()
+        håndterVedtakFattet()
 
         // Tiden går, arbeidsgivernavnet blir utdatert
         markerArbeidsgivernavnSomUkjent()
 
-        // godkjenningsbehov for forlengelse inneholder et nytt orgnr
         // Dette trigger at Opp_rett_ArbeidsgiverCommand sender ut behov med (kun) det ukjente orgnummeret
-        testRapid.reset()
+        nullstillRapid()
         val vedtaksperiode2Id = randomUUID()
-        val forlengelseBehovId = sendGodkjenningsbehov(
-            organisasjonsnummer = ORGNR,
+
+        // godkjenningsbehov for forlengelse inneholder et nytt orgnr
+        håndterGodkjenningsbehov(
             vedtaksperiodeId = vedtaksperiode2Id,
-            utbetalingId = randomUUID(),
-            periodeFom = 1.februar,
-            periodeTom = 21.februar,
-            orgnummereMedRelevanteArbeidsforhold = listOf(ORGNR_GHOST)
+            andreArbeidsforhold = listOf(ORGNR_GHOST),
+            harOppdatertMetainfo = true,
+            utbetalingId = randomUUID()
         )
 
-        sendArbeidsgiverinformasjonløsningOld(
-            hendelseId = forlengelseBehovId,
-            organisasjonsnummer = ORGNR_GHOST,
-            navn = "spøkelse fabrikk 👻",
-            vedtaksperiodeId = vedtaksperiode2Id,
-        )
-
-        assertEquals("En arbeidsgiver", arbeidsgivernavn())
-
-        val arbeidgiverinformasjonBehov = sendteBehov()
-        arbeidgiverinformasjonBehov[0].behovInneholderOrgnr(ORGNR_GHOST)
-
-        // Dette behovet kom ikke tidligere pga kommandoen aksepterte ukritisk 👆 som svar på utdatert navn for ORGNR
-        arbeidgiverinformasjonBehov[1].behovInneholderOrgnr(ORGNR)
-
-        val nyttAGNavn = "Oppdatert arbeidsgivernavn"
-        sendArbeidsgiverinformasjonløsningOld(
-            hendelseId = forlengelseBehovId,
-            organisasjonsnummer = ORGNR,
-            navn = nyttAGNavn,
-            vedtaksperiodeId = vedtaksperiode2Id,
-        )
-        assertEquals(nyttAGNavn, arbeidsgivernavn())
-    }
-
-    private fun sendteBehov() = testRapid.inspektør.hendelser("behov")
-        .filter {
-            it.path("@behov").map(JsonNode::asText).any { it == "Arbeidsgiverinformasjon" }
+        assertInnholdIBehov(behov = "Arbeidsgiverinformasjon") { jsonNode ->
+            jsonNode.behovInneholderOrganisasjonsnummer(ORGNR_GHOST)
         }
 
-    private fun JsonNode.behovInneholderOrgnr(orgNr: String) =
+        håndterArbeidsgiverinformasjonløsning(
+            organisasjonsnummer = ORGNR_GHOST,
+        )
+
+        assertEquals("Navn for $ORGNR", arbeidsgivernavn(ORGNR))
+        assertEquals("Navn for $ORGNR_GHOST", arbeidsgivernavn(ORGNR_GHOST))
+
+//        Dette Arbeidsgiverinformasjon-behovet ble tidligere ikke sendt ut fordi løsningen på
+//        Arbeidsgiverinformasjon-behovet som gikk ut ifbm. godkjenningsbehov på vedtaksperiode #2 ble akseptert som gyldig
+//        løsning selv om det ikke inneholdt løsning for samtlige relevante arbeidsgivere
+        assertInnholdIBehov(behov = "Arbeidsgiverinformasjon") { jsonNode ->
+            jsonNode.behovInneholderOrganisasjonsnummer(ORGNR)
+        }
+
+        val nyttAGNavn = "Oppdatert arbeidsgivernavn"
+
+        håndterArbeidsgiverinformasjonløsning(
+            organisasjonsnummer = ORGNR,
+            vedtaksperiodeId = vedtaksperiode2Id,
+            arbeidsgiverinformasjonJson = listOf(
+                ArbeidsgiverinformasjonJson(
+                    ORGNR,
+                    nyttAGNavn,
+                    listOf("En bransje")
+                )
+            )
+        )
+
+        assertEquals(nyttAGNavn, arbeidsgivernavn(ORGNR))
+    }
+
+    private fun JsonNode.behovInneholderOrganisasjonsnummer(orgNr: String) =
         path("Arbeidsgiverinformasjon")
             .path("organisasjonsnummer")
             .map(JsonNode::asText)
@@ -103,16 +90,16 @@ internal class OppdaterArbeidsgiverE2ETest : AbstractE2ETest() {
         }
     }
 
-    private fun arbeidsgivernavn(): String {
+    private fun arbeidsgivernavn(organisasjonsnummer: String = ORGNR): String {
         @Language("postgresql")
         val query = """
             select navn
             from arbeidsgiver_navn ag_navn
             join arbeidsgiver ag on ag_navn.id = ag.navn_ref
-            where ag.orgnummer = $ORGNR
+            where ag.orgnummer = ?
         """.trimIndent()
         return sessionOf(dataSource).use { session ->
-            session.run(queryOf(query)
+            session.run(queryOf(query, organisasjonsnummer.toInt())
                 .map { it.string(1) }
                 .asSingle
             )!!

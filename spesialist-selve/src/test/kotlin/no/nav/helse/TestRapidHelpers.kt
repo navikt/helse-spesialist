@@ -20,6 +20,11 @@ object TestRapidHelpers {
             .filterNot { it.hasNonNull("@løsning") }
             .flatMap { it.path("@behov").map(JsonNode::asText) }
 
+    fun TestRapid.RapidInspector.behov(behov: String) =
+        hendelser("behov")
+            .filterNot { it.hasNonNull("@løsning") }
+            .filter { it.path("@behov").map(JsonNode::asText).contains(behov) }
+
     fun TestRapid.RapidInspector.løsninger() =
         hendelser("behov")
             .filter { it.hasNonNull("@løsning") }

@@ -323,6 +323,7 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
         fødselsnummer: String,
         organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
+        arbeidsgiverinformasjonJson: List<ArbeidsgiverinformasjonJson>? = null
     ): UUID =
         newUUID.also { id ->
             val behov = testRapid.inspektør.siste("behov")
@@ -331,19 +332,11 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
             val contextId = UUID.fromString(behov["contextId"].asText())
             val hendelseId = UUID.fromString(behov["hendelseId"].asText())
 
-            val arbeidsgivere = behov["Arbeidsgiverinformasjon"]["organisasjonsnummer"].map {
-                val arbeidsgivernavn = listOf(
-                    "En arbeidsgiver",
-                    "En annen arbeidsgiver",
-                    "En tredje arbeidsgiver",
-                    "En fjerde arbeidsgiver"
-                )
-                val arbeidsgiverbransjer =
-                    listOf("En bransje", "En annen bransje", "En tredje bransje", "En fjerde bransje")
+            val arbeidsgivere = arbeidsgiverinformasjonJson ?: behov["Arbeidsgiverinformasjon"]["organisasjonsnummer"].map {
                 ArbeidsgiverinformasjonJson(
                     it.asText(),
-                    arbeidsgivernavn.random(),
-                    listOf(arbeidsgiverbransjer.random())
+                    "Navn for ${it.asText()}",
+                    listOf("Bransje for ${it.asText()}")
                 )
             }
 

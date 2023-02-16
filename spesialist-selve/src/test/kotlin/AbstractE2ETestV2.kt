@@ -1,3 +1,4 @@
+import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
@@ -23,6 +24,7 @@ import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.Testdata.snapshot
 import no.nav.helse.januar
 import no.nav.helse.mediator.meldinger.Risikofunn
+import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.person.PersonDao
@@ -410,6 +412,12 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
     ) {
         val erRevurdering = erRevurdering(vedtaksperiodeId)
 
+        val alleArbeidsforhold = sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val query = "SELECT a.orgnummer FROM arbeidsgiver a INNER JOIN vedtak v on a.id = v.arbeidsgiver_ref INNER JOIN person p on p.id = v.person_ref WHERE p.fodselsnummer = ?"
+            session.run(queryOf(query, fødselsnummer.toLong()).map { it.string("orgnummer") }.asList)
+        }
+
         håndterUtbetalingOpprettet(utbetalingtype = if (erRevurdering) "REVURDERING" else "UTBETALING")
         håndterVedtaksperiodeEndret()
         meldingssenderV2.sendGodkjenningsbehov(
@@ -423,8 +431,11 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
             skjæringstidspunkt = skjæringstidspunkt,
             orgnummereMedRelevanteArbeidsforhold = andreArbeidsforhold
         )
-        if (!harOppdatertMetainfo) assertEtterspurteBehov("HentPersoninfoV2")
-        else assertEtterspurteBehov("EgenAnsatt")
+        when {
+            !harOppdatertMetainfo -> assertEtterspurteBehov("HentPersoninfoV2")
+            !andreArbeidsforhold.all { it in alleArbeidsforhold } -> assertEtterspurteBehov("Arbeidsgiverinformasjon")
+            else -> assertEtterspurteBehov("EgenAnsatt")
+        }
     }
 
     protected fun håndterPersoninfoløsning(
@@ -460,12 +471,14 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        arbeidsgiverinformasjonJson: List<Testmeldingfabrikk.ArbeidsgiverinformasjonJson>? = null
     ) {
         meldingssenderV2.sendArbeidsgiverinformasjonløsning(
             aktørId,
             fødselsnummer,
             organisasjonsnummer,
-            vedtaksperiodeId
+            vedtaksperiodeId,
+            arbeidsgiverinformasjonJson
         )
     }
 
@@ -726,6 +739,11 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
     private fun assertUtgåendeBehovløsning(behov: String) {
         val løsning = testRapid.inspektør.løsningOrNull(behov)
         assertNotNull(løsning)
+    }
+
+    protected fun assertInnholdIBehov(behov: String, block: (JsonNode) -> Unit) {
+        val etterspurtBehov = testRapid.inspektør.behov(behov).last()
+        block(etterspurtBehov)
     }
 
     private fun assertEtterspurteBehov(vararg behov: String) {
