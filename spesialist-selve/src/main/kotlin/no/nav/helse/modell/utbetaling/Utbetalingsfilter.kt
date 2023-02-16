@@ -1,6 +1,5 @@
 package no.nav.helse.modell.utbetaling
 
-import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.utbetaling.Utbetalingtype.REVURDERING
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
@@ -25,7 +24,7 @@ internal class Utbetalingsfilter(
     private fun nyÅrsak(årsak: String) = årsaker.add("Brukerutbetalingsfilter: $årsak")
 
     private fun evaluer(): Boolean{
-        if (!harUtbetalingTilSykmeldt) return true // Full refusjon / ingen utbetaling kan alltid utbetales
+        if (!harUtbetalingTilSykmeldt || erUtbetaltFør) return true // Full refusjon / ingen utbetaling kan alltid utbetales
         if (delvisRefusjon) nyÅrsak("Utbetalingen består av delvis refusjon")
         if (!fødselsnummer.startsWith("31")) nyÅrsak("Velges ikke ut som 'to om dagen'") // Kvoteregulering
         if (periodetype !in tillatePeriodetyper) nyÅrsak("Perioden er ikke førstegangsbehandling eller forlengelse")
@@ -35,12 +34,6 @@ internal class Utbetalingsfilter(
             if (årsaker.isEmpty()) sikkerLogg.info("Utbetalingsfilter warnings som eneste årsak til at det ikke kan utbetales:\n${Warning.formater(warnings).joinToString(separator = "\n")}")
             else sikkerLogg.info("Utbetalingsfilter warnings som en av flere årsaker til at det ikke kan utbetales:\n${Warning.formater(warnings).joinToString(separator = "\n")}")
             nyÅrsak("Vedtaksperioden har warnings")
-        }
-        if (årsaker.isNotEmpty() && erUtbetaltFør) {
-            if (Toggle.BeholdForlengelseMedOvergangTilUTS.enabled) {
-                return true
-            }
-            sikkerLogg.info("Kandidat for å beholde hos oss. Avvisningsgrunner: ${årsaker.joinToString()}")
         }
         if (årsaker.isNotEmpty() && harVedtaksperiodePågåendeOverstyring) {
             sikkerLogg.info("Beholdes hos oss da det er en pågående overstyring. Årsaker registrert: ${årsaker.joinToString()}")

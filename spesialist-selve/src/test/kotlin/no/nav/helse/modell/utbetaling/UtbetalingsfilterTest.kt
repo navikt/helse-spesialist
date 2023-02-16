@@ -1,9 +1,6 @@
 package no.nav.helse.modell.utbetaling
 
-import ToggleHelpers.disable
-import ToggleHelpers.enable
 import java.time.LocalDateTime
-import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.utbetaling.Utbetalingtype.REVURDERING
 import no.nav.helse.modell.utbetaling.Utbetalingtype.UTBETALING
 import no.nav.helse.modell.vedtak.Warning
@@ -76,7 +73,7 @@ internal class UtbetalingsfilterTest {
     }
 
     @Test
-    fun `endring, endring fra full refusjon til delvis, kan utbetales gitt toggle`() {
+    fun `endring, endring fra full refusjon til delvis, kan utbetales`() {
         fun utbetalingsfilter() = Utbetalingsfilter(
             fødselsnummer = "21111111111",
             delvisRefusjon = true,
@@ -88,15 +85,7 @@ internal class UtbetalingsfilterTest {
             utbetalingtype = UTBETALING,
             harVedtaksperiodePågåendeOverstyring = false,
         )
-        assertKanIkkeUtbetales(
-            utbetalingsfilter(), listOf(
-                "Brukerutbetalingsfilter: Utbetalingen består av delvis refusjon",
-                "Brukerutbetalingsfilter: Velges ikke ut som 'to om dagen'"
-            )
-        )
-        Toggle.BeholdForlengelseMedOvergangTilUTS.enable()
         assertKanUtbetales(utbetalingsfilter(), true)
-        Toggle.BeholdForlengelseMedOvergangTilUTS.disable()
     }
 
     @Test

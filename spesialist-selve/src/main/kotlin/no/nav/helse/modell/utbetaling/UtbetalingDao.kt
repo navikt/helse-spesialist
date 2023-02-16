@@ -11,34 +11,19 @@ import org.intellij.lang.annotations.Language
 class UtbetalingDao(private val dataSource: DataSource) {
 
 
-    fun erBehandletTidligere(aktørId: String): Boolean {
+    fun erUtbetaltFør(aktørId: String): Boolean {
         @Language("PostgreSQL")
         val statement = """
             SELECT 1 FROM utbetaling u 
             JOIN utbetaling_id ui ON u.utbetaling_id_ref = ui.id
             INNER JOIN person p ON ui.person_ref = p.id
-            WHERE u.status = 'UTBETALT' AND p.aktor_id = :aktor_id AND u.id = 
-                (SELECT max(id) FROM utbetaling u2 WHERE u2.utbetaling_id_ref = u.utbetaling_id_ref)
+            WHERE u.status = 'UTBETALT' AND p.aktor_id = :aktor_id
         """
         return sessionOf(dataSource).use {
             it.run(queryOf(statement, mapOf("aktor_id" to aktørId.toLong())).map { it }.asList).isNotEmpty()
         }
     }
 
-    fun erUtbetaltFør(utbetalingId: UUID): Boolean {
-        @Language("PostgreSQL")
-        val statement = """
-            select 1 from utbetaling_id
-             join oppdrag oppdrag_1 on oppdrag_1.id = utbetaling_id.arbeidsgiver_fagsystem_id_ref or oppdrag_1.id = utbetaling_id.person_fagsystem_id_ref
-             join oppdrag oppdrag_2 on oppdrag_2.fagsystem_id = oppdrag_1.fagsystem_id
-             join utbetaling_id utbetaling_id_2 on utbetaling_id_2.arbeidsgiver_fagsystem_id_ref = oppdrag_2.id or utbetaling_id_2.person_fagsystem_id_ref = oppdrag_2.id  
-             join utbetaling on utbetaling_id_2.id = utbetaling.utbetaling_id_ref and status = 'UTBETALT' 
-             where utbetaling_id.utbetaling_id = :utbetalingId
-        """.trimIndent()
-        return sessionOf(dataSource).use {
-            it.run(queryOf(statement, mapOf("utbetalingId" to utbetalingId)).map { it }.asList).isNotEmpty()
-        }
-    }
     internal fun finnUtbetalingIdRef(utbetalingId: UUID): Long? {
         @Language("PostgreSQL")
         val statement = "SELECT id FROM utbetaling_id WHERE utbetaling_id = ? LIMIT 1;"

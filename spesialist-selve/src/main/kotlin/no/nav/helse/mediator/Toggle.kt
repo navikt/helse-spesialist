@@ -7,7 +7,6 @@ abstract class Toggle(private var _enabled: Boolean) {
 
     internal val enabled get() = _enabled
 
-    object BeholdForlengelseMedOvergangTilUTS : Toggle("BEHOLD_FORELENGELSER_TIL_UTS")
     object VedtaksperiodeGenerasjoner : Toggle("VEDTAKSPERIODE_GENERASJONER")
     object Inntekter : Toggle("INNTEKTER", true)
     object Refusjonsendringer : Toggle("REFUSJONSENDRINGER", erDev())

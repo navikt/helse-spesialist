@@ -109,7 +109,7 @@ internal class Godkjenningsbehov(
             fødselsnummer = fødselsnummer,
             harUtbetalingTilSykmeldt = utbetaling.utbetalingTilSykmeldt(),
             delvisRefusjon = utbetaling.delvisRefusjon(),
-            erUtbetaltFør = utbetalingDao.erUtbetaltFør(utbetalingId),
+            erUtbetaltFør = utbetalingDao.erUtbetaltFør(aktørId),
             warnings = warningDao.finnAktiveWarnings(vedtaksperiodeId),
             periodetype = periodetype,
             inntektskilde = inntektskilde,
