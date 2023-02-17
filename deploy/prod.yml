@@ -10,8 +10,6 @@ spec:
   port: 8080
   ingresses:
     - https://spesialist.intern.nav.no
-  strategy:
-    type: Recreate
   liveness:
     path: isalive
     initialDelay: 5
