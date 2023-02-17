@@ -114,8 +114,7 @@ internal class Varsel(
         ) {
             groupBy { it.vedtaksperiodeId }.forEach { (vedtaksperiodeId, varsler) ->
                 try {
-                    val generasjon = generasjonRepository.sisteFor(vedtaksperiodeId)
-                    varsler.lagre(hendelseId, generasjon, varselRepository)
+                    varsler.lagre(hendelseId, { generasjonRepository.sisteFor(vedtaksperiodeId) }, varselRepository)
                 } catch (e: IllegalStateException) {
                     sikkerlogg.info(
                         "Varsler for {} ble ikke lagret fordi det ikke finnes noen generasjon for perioden. Perioden er trolig forkastet",
@@ -125,8 +124,8 @@ internal class Varsel(
             }
         }
 
-        private fun List<Varsel>.lagre(hendelseId: UUID, generasjon: Generasjon, varselRepository: VarselRepository) {
-            forEach { it.lagre(hendelseId, generasjon, varselRepository) }
+        private fun List<Varsel>.lagre(hendelseId: UUID, sisteGenerasjon: () -> Generasjon, varselRepository: VarselRepository) {
+            forEach { it.lagre(hendelseId, sisteGenerasjon(), varselRepository) }
         }
 
         internal fun List<Varsel>.godkjennFor(generasjonId: UUID, varselkode: String, ident: String, varselRepository: VarselRepository) {

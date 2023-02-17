@@ -6,13 +6,12 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.modell.varsel.ActualVarselRepository
+import no.nav.helse.modell.varsel.Varsel
+import no.nav.helse.modell.varsel.Varsel.*
+import no.nav.helse.modell.varsel.Varsel.Companion.lagre
+import no.nav.helse.modell.varsel.Varsel.Status.*
 import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.varsel.Varselkode.*
-import no.nav.helse.spesialist.api.varsel.Varsel
-import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.AKTIV
-import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.AVVIST
-import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.GODKJENT
-import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.INAKTIV
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -176,6 +175,21 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         assertVarsler(generasjonId, 0, AKTIV, SB_EX_1)
         assertVarsler(utbetalingId, vedtaksperiodeId, 1, AKTIV, SB_EX_1)
     }
+
+    @Test
+    fun `Oppretter ikke ny generasjon når nye varsler som kommer inn samtidig på en låst generasjon`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjon = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)
+        generasjon.håndterVedtakFattet(UUID.randomUUID())
+        val varsler = listOf(
+            Varsel(UUID.randomUUID(), "RV_IM_1", LocalDateTime.now(), vedtaksperiodeId),
+            Varsel(UUID.randomUUID(), "RV_IM_2", LocalDateTime.now(), vedtaksperiodeId),
+        )
+        varsler.lagre(UUID.randomUUID(), varselRepository, generasjonRepository)
+
+        assertAntallGenerasjoner(2, vedtaksperiodeId)
+    }
+
     @Test
     fun `Skal ikke kunne opprette saksbehandlingsvarsel på låst generasjon`() {
         val vedtaksperiodeId = UUID.randomUUID()
@@ -355,7 +369,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         return requireNotNull(generasjonRepository.opprettFørste(vedtaksperiodeId, UUID.randomUUID(), generasjonId))
     }
 
-    private fun assertVarsler(generasjonId: UUID, forventetAntall: Int, status: Varsel.Varselstatus, varselkode: Varselkode) {
+    private fun assertVarsler(generasjonId: UUID, forventetAntall: Int, status: Status, varselkode: Varselkode) {
         @Language("PostgreSQL")
         val query =
             """SELECT COUNT(1) FROM selve_varsel sv INNER JOIN selve_vedtaksperiode_generasjon svg ON sv.generasjon_ref = svg.id
@@ -367,7 +381,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         assertEquals(forventetAntall, antall)
     }
 
-    private fun assertVarsler(utbetalingId: UUID, vedtaksperiodeId: UUID, forventetAntall: Int, status: Varsel.Varselstatus, varselkode: Varselkode) {
+    private fun assertVarsler(utbetalingId: UUID, vedtaksperiodeId: UUID, forventetAntall: Int, status: Status, varselkode: Varselkode) {
         @Language("PostgreSQL")
         val query =
             """SELECT COUNT(1) FROM selve_varsel sv INNER JOIN selve_vedtaksperiode_generasjon svg ON sv.generasjon_ref = svg.id

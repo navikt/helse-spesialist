@@ -123,6 +123,15 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETestV2() {
         assertGenerasjonerMedUtbetaling(VEDTAKSPERIODE_ID, UTBETALING_ID, 0)
     }
 
+    @Test
+    fun `Oppretter ikke ny generasjon pr nye varsel som kommer inn samtidig på en låst generasjon`() {
+        nyttVedtak(1.januar, 31.januar, utbetalingId = UTBETALING_ID)
+        håndterAktivitetsloggNyAktivitet(varselkoder = listOf("RV_IM_1", "RV_IM_2"))
+        assertGenerasjonerMedUtbetaling(VEDTAKSPERIODE_ID, UTBETALING_ID, 1)
+        assertLåsteGenerasjoner(VEDTAKSPERIODE_ID, 1)
+        assertGenerasjoner(VEDTAKSPERIODE_ID, 2)
+    }
+
     private fun assertGenerasjoner(vedtaksperiodeId: UUID, forventetAntall: Int) {
         val antall = sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
