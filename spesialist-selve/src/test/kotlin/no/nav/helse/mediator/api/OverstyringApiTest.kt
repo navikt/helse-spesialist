@@ -126,7 +126,6 @@ internal class OverstyringApiTest : AbstractE2ETest() {
 
     @Test
     fun `overstyr inntekt`() {
-        Toggle.Refusjonsendringer.enable()
         with(TestApplicationEngine()) {
             setUpApplication()
 
