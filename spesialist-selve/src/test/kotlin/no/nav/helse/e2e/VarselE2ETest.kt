@@ -81,9 +81,9 @@ internal class VarselE2ETest : AbstractE2ETestV2() {
     }
 
     @Test
-    fun `varsel om beslutteroppgave ved overstyring av inntekt`() {
+    fun `varsel om beslutteroppgave ved overstyring av inntekt og refusjon`() {
         fremTilSaksbehandleroppgave()
-        håndterOverstyrInntekt()
+        håndterOverstyrInntektOgRefusjon()
         håndterEgenansattløsning()
         håndterVergemålløsning()
         håndterÅpneOppgaverløsning()

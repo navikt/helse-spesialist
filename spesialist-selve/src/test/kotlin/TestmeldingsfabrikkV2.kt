@@ -3,7 +3,10 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.Testdata
+import no.nav.helse.mediator.api.Arbeidsgiver
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
+import no.nav.helse.mediator.api.SubsumsjonDto
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Risikofunn.Companion.tilJson
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
@@ -485,49 +488,37 @@ internal object TestmeldingsfabrikkV2 {
         )
     )
 
-    fun lagOverstyringInntekt(
+    fun lagOverstyringInntektOgRefusjon(
         aktørId: String,
         fødselsnummer: String,
-        organisasjonsnummer: String,
-        begrunnelse: String = "begrunnelse",
-        månedligInntekt: Double = 25000.0,
-        fraMånedligInntekt: Double = 25001.0,
+        arbeidsgivere: List<Arbeidsgiver> = listOf(
+            Arbeidsgiver(
+                organisasjonsnummer = Testdata.ORGNR,
+                månedligInntekt = 25000.0,
+                fraMånedligInntekt = 25001.0,
+                forklaring = "testbortforklaring",
+                subsumsjon = SubsumsjonDto("8-28", "LEDD_1", "BOKSTAV_A"),
+                refusjonsopplysninger = null,
+                fraRefusjonsopplysninger = null,
+                begrunnelse = "en begrunnelse")
+        ),
         skjæringstidspunkt: LocalDate,
-        forklaring: String = "forklaring",
-        subsumsjon: Testmeldingfabrikk.SubsumsjonJson?,
         saksbehandleroid: UUID = UUID.randomUUID(),
         saksbehandlernavn: String = "saksbehandler",
         saksbehandlerepost: String = "saksbehandler@nav.no",
         saksbehandlerident: String = "saksbehandlerIdent",
-        id: UUID,
+        id: UUID = UUID.randomUUID()
     ) = nyHendelse(
-        id, "saksbehandler_overstyrer_inntekt", mutableMapOf<String, Any>(
+        id, "saksbehandler_overstyrer_inntekt_og_refusjon", mutableMapOf(
             "aktørId" to aktørId,
             "fødselsnummer" to fødselsnummer,
-            "organisasjonsnummer" to organisasjonsnummer,
-            "begrunnelse" to begrunnelse,
-            "forklaring" to forklaring,
+            "arbeidsgivere" to arbeidsgivere,
             "saksbehandlerOid" to saksbehandleroid,
             "saksbehandlerIdent" to saksbehandlerident,
             "saksbehandlerNavn" to saksbehandlernavn,
             "saksbehandlerEpost" to saksbehandlerepost,
-            "månedligInntekt" to månedligInntekt,
-            "fraMånedligInntekt" to fraMånedligInntekt,
             "skjæringstidspunkt" to skjæringstidspunkt,
-        ).apply {
-            subsumsjon?.let {
-                this["subsumsjon"] = mutableMapOf(
-                    "paragraf" to subsumsjon.paragraf
-                ).apply {
-                    subsumsjon.ledd?.let { ledd ->
-                        this["ledd"] = ledd
-                    }
-                    subsumsjon.bokstav?.let { bokstav ->
-                        this["bokstav"] = bokstav
-                    }
-                }
-            }
-        }
+        )
     )
 
     fun lagOverstyringArbeidsforhold(

@@ -7,7 +7,7 @@ import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendOverstyrTidslinje
 import no.nav.helse.Meldingssender.sendOverstyringIgangsatt
 import no.nav.helse.Meldingssender.sendOverstyrtArbeidsforhold
-import no.nav.helse.Meldingssender.sendOverstyrtInntekt
+import no.nav.helse.Meldingssender.sendOverstyrtInntektOgRefusjon
 import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
@@ -16,7 +16,9 @@ import no.nav.helse.Testdata.ORGNR_GHOST
 import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.januar
+import no.nav.helse.mediator.api.Arbeidsgiver
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
+import no.nav.helse.mediator.api.SubsumsjonDto
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
@@ -27,19 +29,25 @@ import org.junit.jupiter.api.Test
 internal class TotrinnsvurderingE2ETest : AbstractE2ETest() {
 
     @Test
-    fun `sak blir trukket til totrinnsvurdering ved overstyring av inntekt`() {
+    fun `sak blir trukket til totrinnsvurdering ved overstyring av inntekt og refusjon`() {
         settOppBruker()
-        sendOverstyrtInntekt(
+        sendOverstyrtInntektOgRefusjon(
             aktørId = AKTØR,
             fødselsnummer = FØDSELSNUMMER,
-            organisasjonsnummer = ORGNR,
-            månedligInntekt = 25000.0,
-            fraMånedligInntekt = 25001.0,
-            skjæringstidspunkt = 1.januar,
-            forklaring = "vår egen forklaring",
-            subsumsjon = null
+            skjæringstidspunkt = LocalDate.now(),
+            arbeidsgivere = listOf(
+                Arbeidsgiver(
+                    organisasjonsnummer = ORGNR,
+                    månedligInntekt = 25000.0,
+                    fraMånedligInntekt = 25001.0,
+                    forklaring = "testbortforklaring",
+                    subsumsjon = SubsumsjonDto("8-28", "LEDD_1", "BOKSTAV_A"),
+                    refusjonsopplysninger = null,
+                    fraRefusjonsopplysninger = null,
+                    begrunnelse = "en begrunnelse")
+            )
         )
-        val ekstern_hendelse_id = testRapid.inspektør.hendelser("overstyr_inntekt").first().let {
+        val ekstern_hendelse_id = testRapid.inspektør.hendelser("overstyr_inntekt_og_refusjon").first().let {
             UUID.fromString(it.path("@id").asText())
         }
 

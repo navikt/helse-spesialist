@@ -12,10 +12,8 @@ import no.nav.helse.mediator.api.GodkjenningDTO
 import no.nav.helse.mediator.api.OppdaterPersonsnapshotDto
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdKafkaDto
-import no.nav.helse.mediator.api.OverstyrInntektKafkaDto
 import no.nav.helse.mediator.api.OverstyrInntektOgRefusjonKafkaDto
 import no.nav.helse.mediator.api.OverstyrTidslinjeKafkaDto
-import no.nav.helse.mediator.api.Refusjonselement
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.EndretSkjermetinfo
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov
@@ -25,7 +23,6 @@ import no.nav.helse.mediator.meldinger.NyeVarsler
 import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshot
 import no.nav.helse.mediator.meldinger.OverstyringArbeidsforhold
 import no.nav.helse.mediator.meldinger.OverstyringIgangsatt
-import no.nav.helse.mediator.meldinger.OverstyringInntekt
 import no.nav.helse.mediator.meldinger.OverstyringInntektOgRefusjon
 import no.nav.helse.mediator.meldinger.OverstyringTidslinje
 import no.nav.helse.mediator.meldinger.RevurderingAvvist
@@ -122,7 +119,6 @@ internal class HendelseMediator(
             VedtaksperiodeEndret.VedtaksperiodeEndretRiver(it, this)
             AdressebeskyttelseEndret.AdressebeskyttelseEndretRiver(it, this)
             OverstyringTidslinje.OverstyringTidslinjeRiver(it, this)
-            OverstyringInntekt.OverstyringInntektRiver(it, this)
             OverstyringInntektOgRefusjon.OverstyringInntektOgRefusjonRiver(it, this)
             OverstyringArbeidsforhold.OverstyringArbeidsforholdRiver(it, this)
             OverstyringIgangsatt.OverstyringIgangsattRiver(it, this)
@@ -475,47 +471,6 @@ internal class HendelseMediator(
         )
     }
 
-    fun overstyringInntekt(
-        id: UUID,
-        fødselsnummer: String,
-        oid: UUID,
-        navn: String,
-        ident: String,
-        epost: String,
-        orgnummer: String,
-        begrunnelse: String,
-        forklaring: String,
-        månedligInntekt: Double,
-        fraMånedligInntekt: Double,
-        skjæringstidspunkt: LocalDate,
-        opprettet: LocalDateTime,
-        refusjonsopplysninger: List<Refusjonselement>?,
-        fraRefusjonsopplysninger: List<Refusjonselement>?,
-        json: String,
-        context: MessageContext,
-    ) {
-        utfør(
-            fødselsnummer, hendelsefabrikk.overstyringInntekt(
-                id = id,
-                fødselsnummer = fødselsnummer,
-                oid = oid,
-                navn = navn,
-                ident = ident,
-                epost = epost,
-                orgnummer = orgnummer,
-                begrunnelse = begrunnelse,
-                forklaring = forklaring,
-                månedligInntekt = månedligInntekt,
-                fraMånedligInntekt = fraMånedligInntekt,
-                skjæringstidspunkt = skjæringstidspunkt,
-                refusjonsopplysninger = refusjonsopplysninger,
-                fraRefusjonsopplysninger = fraRefusjonsopplysninger,
-                opprettet = opprettet,
-                json = json
-            ), context
-        )
-    }
-
     fun overstyringInntektOgRefusjon(
         id: UUID,
         fødselsnummer: String,
@@ -676,16 +631,6 @@ internal class HendelseMediator(
         ).also {
             sikkerLogg.info("Publiserer overstyring fra api:\n${it.toJson()}")
         }
-        rapidsConnection.publish(overstyringMessage.fødselsnummer, overstyring.toJson())
-    }
-
-    fun håndter(overstyringMessage: OverstyrInntektKafkaDto) {
-        overstyringsteller.labels("opplysningstype", "inntekt").inc()
-
-        val overstyring = overstyringMessage.somKafkaMessage().also {
-            sikkerLogg.info("Publiserer overstyring fra api:\n${it.toJson()}")
-        }
-
         rapidsConnection.publish(overstyringMessage.fødselsnummer, overstyring.toJson())
     }
 

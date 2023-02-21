@@ -8,9 +8,7 @@ import java.util.UUID
 import javax.sql.DataSource
 import no.nav.helse.mediator.api.Arbeidsgiver
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
-import no.nav.helse.mediator.api.Refusjonselement
 import no.nav.helse.mediator.api.arbeidsgiverelementer
-import no.nav.helse.mediator.api.refusjonselementer
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.EndretSkjermetinfo
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov
@@ -19,7 +17,6 @@ import no.nav.helse.mediator.meldinger.NyeVarsler
 import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshot
 import no.nav.helse.mediator.meldinger.OverstyringArbeidsforhold
 import no.nav.helse.mediator.meldinger.OverstyringIgangsatt
-import no.nav.helse.mediator.meldinger.OverstyringInntekt
 import no.nav.helse.mediator.meldinger.OverstyringInntektOgRefusjon
 import no.nav.helse.mediator.meldinger.OverstyringTidslinje
 import no.nav.helse.mediator.meldinger.RevurderingAvvist
@@ -369,46 +366,6 @@ internal class Hendelsefabrikk(
         )
     }
 
-    fun overstyringInntekt(
-        id: UUID,
-        fødselsnummer: String,
-        oid: UUID,
-        navn: String,
-        ident: String,
-        epost: String,
-        orgnummer: String,
-        begrunnelse: String,
-        forklaring: String,
-        månedligInntekt: Double,
-        fraMånedligInntekt: Double,
-        skjæringstidspunkt: LocalDate,
-        refusjonsopplysninger: List<Refusjonselement>?,
-        fraRefusjonsopplysninger: List<Refusjonselement>?,
-        opprettet: LocalDateTime,
-        json: String,
-    ) = OverstyringInntekt(
-        id = id,
-        fødselsnummer = fødselsnummer,
-        oid = oid,
-        navn = navn,
-        epost = epost,
-        ident = ident,
-        orgnummer = orgnummer,
-        begrunnelse = begrunnelse,
-        forklaring = forklaring,
-        månedligInntekt = månedligInntekt,
-        fraMånedligInntekt = fraMånedligInntekt,
-        skjæringstidspunkt = skjæringstidspunkt,
-        refusjonsopplysninger = refusjonsopplysninger,
-        fraRefusjonsopplysninger = fraRefusjonsopplysninger,
-        opprettet = opprettet,
-        json = json,
-        reservasjonDao = reservasjonDao,
-        saksbehandlerDao = saksbehandlerDao,
-        oppgaveDao = oppgaveDao,
-        overstyringDao = overstyringDao,
-        overstyringMediator = overstyringMediator,
-    )
     fun overstyringInntektOgRefusjon(
         id: UUID,
         fødselsnummer: String,
@@ -484,28 +441,6 @@ internal class Hendelsefabrikk(
                 )
             },
             skjæringstidspunkt = jsonNode.path("skjæringstidspunkt").asLocalDate(),
-            opprettet = jsonNode.path("@opprettet").asLocalDateTime(),
-            json = json
-        )
-    }
-
-    fun overstyringInntekt(json: String): OverstyringInntekt {
-        val jsonNode = mapper.readTree(json)
-        return overstyringInntekt(
-            id = UUID.fromString(jsonNode.path("@id").asText()),
-            fødselsnummer = jsonNode.path("fødselsnummer").asText(),
-            oid = UUID.fromString(jsonNode.path("saksbehandlerOid").asText()),
-            navn = jsonNode.path("saksbehandlerNavn").asText(),
-            ident = jsonNode.path("saksbehandlerIdent").asText(),
-            epost = jsonNode.path("saksbehandlerEpost").asText(),
-            orgnummer = jsonNode.path("organisasjonsnummer").asText(),
-            begrunnelse = jsonNode.path("begrunnelse").asText(),
-            forklaring = jsonNode.path("forklaring").asText(),
-            månedligInntekt = jsonNode.path("månedligInntekt").asDouble(),
-            fraMånedligInntekt = jsonNode.path("fraMånedligInntekt").asDouble(),
-            skjæringstidspunkt = jsonNode.path("skjæringstidspunkt").asLocalDate(),
-            refusjonsopplysninger = jsonNode.path("refusjonsopplysninger").refusjonselementer(),
-            fraRefusjonsopplysninger = jsonNode.path("fraRefusjonsopplysninger").refusjonselementer(),
             opprettet = jsonNode.path("@opprettet").asLocalDateTime(),
             json = json
         )

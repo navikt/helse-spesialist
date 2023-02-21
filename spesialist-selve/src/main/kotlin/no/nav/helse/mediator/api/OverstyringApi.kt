@@ -53,29 +53,6 @@ internal fun Route.overstyringApi(hendelseMediator: HendelseMediator) {
         call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
     }
 
-    post("/api/overstyr/inntekt") {
-        val overstyring = call.receive<OverstyrInntektDTO>()
-
-        val saksbehandler = Saksbehandler.fraOnBehalfOfToken(requireNotNull(call.principal()))
-
-        val message = OverstyrInntektKafkaDto(
-            organisasjonsnummer = overstyring.organisasjonsnummer,
-            fødselsnummer = overstyring.fødselsnummer,
-            aktørId = overstyring.aktørId,
-            saksbehandler = saksbehandler.toDto(),
-            begrunnelse = overstyring.begrunnelse,
-            forklaring = overstyring.forklaring,
-            månedligInntekt = overstyring.månedligInntekt,
-            fraMånedligInntekt = overstyring.fraMånedligInntekt,
-            skjæringstidspunkt = overstyring.skjæringstidspunkt,
-            subsumsjon = overstyring.subsumsjon,
-            refusjonsopplysninger = overstyring.refusjonsopplysninger,
-            fraRefusjonsopplysninger = overstyring.fraRefusjonsopplysninger,
-        )
-        withContext(Dispatchers.IO) { hendelseMediator.håndter(message) }
-        call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
-    }
-
     post("/api/overstyr/inntektogrefusjon") {
         val overstyring = call.receive<OverstyrInntektOgRefusjonDTO>()
         val saksbehandler = Saksbehandler.fraOnBehalfOfToken(requireNotNull(call.principal()))
@@ -162,21 +139,6 @@ data class SubsumsjonDto(
     ).toMap()
 }
 
-@JsonIgnoreProperties
-data class OverstyrInntektDTO(
-    val organisasjonsnummer: String,
-    val fødselsnummer: String,
-    val aktørId: String,
-    val begrunnelse: String,
-    val forklaring: String,
-    val månedligInntekt: Double,
-    val fraMånedligInntekt: Double,
-    val skjæringstidspunkt: LocalDate,
-    val subsumsjon: SubsumsjonDto?,
-    val refusjonsopplysninger: List<Refusjonselement>?,
-    val fraRefusjonsopplysninger: List<Refusjonselement>?,
-)
-
 data class OverstyrInntektOgRefusjonDTO(
     val aktørId: String,
     val fødselsnummer: String,
@@ -204,42 +166,6 @@ data class Arbeidsgiver(
         "forklaring" to forklaring,
         "subsumsjon" to subsumsjon,
     ).toMap()
-}
-
-data class OverstyrInntektKafkaDto(
-    val saksbehandler: SaksbehandlerDto,
-    val fødselsnummer: String,
-    val organisasjonsnummer: String,
-    val aktørId: String,
-    val begrunnelse: String,
-    val forklaring: String,
-    val månedligInntekt: Double,
-    val fraMånedligInntekt: Double,
-    val skjæringstidspunkt: LocalDate,
-    val subsumsjon: SubsumsjonDto?,
-    val refusjonsopplysninger: List<Refusjonselement>?,
-    val fraRefusjonsopplysninger: List<Refusjonselement>?,
-) {
-    fun somKafkaMessage() = JsonMessage.newMessage(
-        "saksbehandler_overstyrer_inntekt",
-        listOfNotNull(
-            "fødselsnummer" to fødselsnummer,
-            "aktørId" to aktørId,
-            "organisasjonsnummer" to organisasjonsnummer,
-            "begrunnelse" to begrunnelse,
-            "forklaring" to forklaring,
-            "saksbehandlerOid" to saksbehandler.oid,
-            "saksbehandlerNavn" to saksbehandler.navn,
-            "saksbehandlerIdent" to saksbehandler.ident,
-            "saksbehandlerEpost" to saksbehandler.epost,
-            "månedligInntekt" to månedligInntekt,
-            "fraMånedligInntekt" to fraMånedligInntekt,
-            "skjæringstidspunkt" to skjæringstidspunkt,
-            subsumsjon?.let { "subsumsjon" to subsumsjon.toMap() },
-            refusjonsopplysninger?.let { "refusjonsopplysninger" to refusjonsopplysninger.toMap() },
-            fraRefusjonsopplysninger?.let { "fraRefusjonsopplysninger" to fraRefusjonsopplysninger.toMap() }
-        ).toMap()
-    )
 }
 
 data class OverstyrInntektOgRefusjonKafkaDto(

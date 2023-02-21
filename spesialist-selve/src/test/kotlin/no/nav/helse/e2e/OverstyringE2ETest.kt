@@ -10,7 +10,6 @@ import no.nav.helse.Meldingssender.sendEgenAnsattløsningOld
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendOverstyrTidslinje
 import no.nav.helse.Meldingssender.sendOverstyrtArbeidsforhold
-import no.nav.helse.Meldingssender.sendOverstyrtInntekt
 import no.nav.helse.Meldingssender.sendOverstyrtInntektOgRefusjon
 import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
 import no.nav.helse.Meldingssender.sendRisikovurderingløsningOld
@@ -89,53 +88,6 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         val oppgave =
             oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_UTEN_TILGANGER).find { it.fodselsnummer == FØDSELSNUMMER }
         assertEquals(SAKSBEHANDLER_EPOST, oppgave!!.tildeling?.epost)
-    }
-
-    @Test
-    fun `saksbehandler overstyrer inntekt`() {
-        val godkjenningsbehovId = settOppBruker()
-        val hendelseId = sendOverstyrtInntekt(
-            aktørId = AKTØR,
-            fødselsnummer = FØDSELSNUMMER,
-            organisasjonsnummer = ORGNR,
-            månedligInntekt = 25000.0,
-            fraMånedligInntekt = 25001.0,
-            skjæringstidspunkt = 1.januar,
-            forklaring = "vår egen forklaring",
-            subsumsjon = null
-        )
-
-        val overstyringer = overstyringApiDao.finnOverstyringerAvInntekt(FØDSELSNUMMER, ORGNR)
-        assertEquals(1, overstyringer.size)
-        assertEquals(FØDSELSNUMMER, overstyringer.first().fødselsnummer)
-        assertEquals(ORGNR, overstyringer.first().organisasjonsnummer)
-        assertEquals(hendelseId, overstyringer.first().hendelseId)
-        assertEquals("saksbehandlerIdent", overstyringer.first().saksbehandlerIdent)
-        assertEquals("saksbehandler", overstyringer.first().saksbehandlerNavn)
-        assertEquals(25000.0, overstyringer.first().månedligInntekt)
-        assertEquals(1.januar, overstyringer.first().skjæringstidspunkt)
-        assertEquals("begrunnelse", overstyringer.first().begrunnelse)
-        assertEquals("vår egen forklaring", overstyringer.first().forklaring)
-        assertFalse(overstyringer.first().ferdigstilt)
-
-        assertEquals(1, overstyringApiDao.finnOverstyringerAvInntekt(FØDSELSNUMMER, ORGNR).size)
-
-        assertIngenOppgaver(testRapid.inspektør.oppgaveId(godkjenningsbehovId))
-
-        val nyttGodkjenningsbehov = sendGodkjenningsbehov(
-            organisasjonsnummer = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            utbetalingId = UTBETALING_ID,
-            periodeFom = 1.januar,
-            periodeTom = 31.januar,
-            skjæringstidspunkt = 1.januar
-        )
-
-        klargjørForGodkjenning(nyttGodkjenningsbehov)
-
-        val oppgave = requireNotNull(oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_UTEN_TILGANGER)
-            .find { it.fodselsnummer == FØDSELSNUMMER })
-        assertEquals(SAKSBEHANDLER_EPOST, oppgave.tildeling?.epost)
     }
 
     @Test
@@ -281,15 +233,21 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
                 )
             )
         )
-        sendOverstyrtInntekt(
+        sendOverstyrtInntektOgRefusjon(
             aktørId = AKTØR,
             fødselsnummer = FØDSELSNUMMER,
-            organisasjonsnummer = ORGNR,
-            månedligInntekt = 15000.0,
-            fraMånedligInntekt = 15001.0,
             skjæringstidspunkt = LocalDate.now(),
-            forklaring = "forklaring",
-            subsumsjon = null
+            arbeidsgivere = listOf(
+                Arbeidsgiver(
+                    organisasjonsnummer = ORGNR,
+                    månedligInntekt = 15000.0,
+                    fraMånedligInntekt = 25001.0,
+                    forklaring = "testbortforklaring",
+                    subsumsjon = SubsumsjonDto("8-28", "LEDD_1", "BOKSTAV_A"),
+                    refusjonsopplysninger = null,
+                    fraRefusjonsopplysninger = null,
+                    begrunnelse = "en begrunnelse")
+            )
         )
         sendOverstyrtArbeidsforhold(
             aktørId = AKTØR,

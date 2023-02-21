@@ -632,51 +632,6 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         )
     )
 
-    fun lagOverstyringInntekt(
-        aktørId: String,
-        fødselsnummer: String,
-        organisasjonsnummer: String = "orgnr",
-        begrunnelse: String = "begrunnelse",
-        månedligInntekt: Double = 25000.0,
-        fraMånedligInntekt: Double = 25001.0,
-        skjæringstidspunkt: LocalDate,
-        forklaring: String = "forklaring",
-        subsumsjon: SubsumsjonJson?,
-        saksbehandleroid: UUID = UUID.randomUUID(),
-        saksbehandlernavn: String = "saksbehandler",
-        saksbehandlerepost: String = "saksbehandler@nav.no",
-        saksbehandlerident: String = "saksbehandlerIdent",
-        id: UUID = UUID.randomUUID()
-    ) = nyHendelse(
-        id, "saksbehandler_overstyrer_inntekt", mutableMapOf<String, Any>(
-            "aktørId" to aktørId,
-            "fødselsnummer" to fødselsnummer,
-            "organisasjonsnummer" to organisasjonsnummer,
-            "begrunnelse" to begrunnelse,
-            "forklaring" to forklaring,
-            "saksbehandlerOid" to saksbehandleroid,
-            "saksbehandlerIdent" to saksbehandlerident,
-            "saksbehandlerNavn" to saksbehandlernavn,
-            "saksbehandlerEpost" to saksbehandlerepost,
-            "månedligInntekt" to månedligInntekt,
-            "fraMånedligInntekt" to fraMånedligInntekt,
-            "skjæringstidspunkt" to skjæringstidspunkt,
-        ).apply {
-            subsumsjon?.let {
-                this["subsumsjon"] = mutableMapOf(
-                    "paragraf" to subsumsjon.paragraf
-                ).apply {
-                    subsumsjon.ledd?.let { ledd ->
-                        this["ledd"] = ledd
-                    }
-                    subsumsjon.bokstav?.let { bokstav ->
-                        this["bokstav"] = bokstav
-                    }
-                }
-            }
-        }
-    )
-
     fun lagOverstyringInntektOgRefusjon(
         aktørId: String,
         fødselsnummer: String,

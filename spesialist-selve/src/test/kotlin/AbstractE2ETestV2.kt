@@ -23,6 +23,8 @@ import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.Testdata.snapshot
 import no.nav.helse.januar
+import no.nav.helse.mediator.api.Arbeidsgiver
+import no.nav.helse.mediator.api.SubsumsjonDto
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
@@ -592,13 +594,26 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         }
     }
 
-    protected fun håndterOverstyrInntekt(
+    protected fun håndterOverstyrInntektOgRefusjon(
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
-        organisasjonsnummer: String = ORGNR,
+
+        skjæringstidspunkt: LocalDate = 1.januar(1970),
+        arbeidsgivere: List<Arbeidsgiver> = listOf(
+            Arbeidsgiver(
+                organisasjonsnummer = ORGNR,
+                månedligInntekt = 25000.0,
+                fraMånedligInntekt = 25001.0,
+                forklaring = "testbortforklaring",
+                subsumsjon = SubsumsjonDto("8-28", "LEDD_1", "BOKSTAV_A"),
+                refusjonsopplysninger = null,
+                fraRefusjonsopplysninger = null,
+                begrunnelse = "en begrunnelse")
+        )
+
     ) {
-        håndterOverstyring(aktørId, fødselsnummer, organisasjonsnummer, "overstyr_inntekt") {
-            meldingssenderV2.sendOverstyrtInntekt(aktørId, fødselsnummer, organisasjonsnummer)
+        håndterOverstyring(aktørId, fødselsnummer, ORGNR, "overstyr_inntekt_og_refusjon") {
+            meldingssenderV2.sendOverstyrtInntektOgRefusjon(aktørId, fødselsnummer, skjæringstidspunkt, arbeidsgivere)
         }
     }
 

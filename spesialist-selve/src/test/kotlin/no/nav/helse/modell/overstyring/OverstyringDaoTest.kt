@@ -8,7 +8,6 @@ import no.nav.helse.mediator.api.Arbeidsgiver
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.api.SubsumsjonDto
 import no.nav.helse.mediator.meldinger.OverstyringArbeidsforhold
-import no.nav.helse.mediator.meldinger.OverstyringInntekt
 import no.nav.helse.mediator.meldinger.OverstyringInntektOgRefusjon
 import no.nav.helse.mediator.meldinger.OverstyringTidslinje
 import no.nav.helse.spesialist.api.overstyring.Dagtype
@@ -187,41 +186,6 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         assertFalse(hentetOverstyring.ferdigstilt)
     }
 
-
-    @Test
-    fun `Finner opprettede inntektoverstyringer`() {
-        opprettPerson()
-        overstyrInntekt(ID)
-        overstyringDao.persisterOverstyringInntekt(
-            ID,
-            EKSTERN_HENDELSE_ID,
-            FØDSELSNUMMER,
-            ORGNUMMER,
-            BEGRUNNELSE,
-            FORKLARING,
-            OID,
-            INNTEKT,
-            INNTEKT + 1,
-            SKJÆRINGSTIDSPUNKT,
-            OPPRETTET,
-            null,
-            null
-        )
-        val hentetOverstyring = overstyringApiDao.finnOverstyringerAvInntekt(FØDSELSNUMMER, ORGNUMMER).first()
-
-        assertEquals(ID, hentetOverstyring.hendelseId)
-        assertEquals(FØDSELSNUMMER, hentetOverstyring.fødselsnummer)
-        assertEquals(ORGNUMMER, hentetOverstyring.organisasjonsnummer)
-        assertEquals(BEGRUNNELSE, hentetOverstyring.begrunnelse)
-        assertEquals(FORKLARING, hentetOverstyring.forklaring)
-        assertEquals(SAKSBEHANDLER_NAVN, hentetOverstyring.saksbehandlerNavn)
-        assertEquals(SAKSBEHANDLER_IDENT, hentetOverstyring.saksbehandlerIdent)
-        assertEquals(INNTEKT, hentetOverstyring.månedligInntekt)
-        assertEquals(SKJÆRINGSTIDSPUNKT, hentetOverstyring.skjæringstidspunkt)
-        assertEquals(OPPRETTET, hentetOverstyring.timestamp)
-        assertFalse(hentetOverstyring.ferdigstilt)
-    }
-
     @Test
     fun `Finner opprettede arbeidsforholdoverstyringer`() {
         opprettPerson()
@@ -314,32 +278,6 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         assertEquals(OPPRETTET, hentetOverstyring.timestamp)
         assertFalse(hentetOverstyring.ferdigstilt)
     }
-
-    private fun overstyrInntekt(hendelseId: UUID) = hendelseDao.opprett(
-        OverstyringInntekt(
-            id = hendelseId,
-            fødselsnummer = FØDSELSNUMMER,
-            oid = OID,
-            navn = SAKSBEHANDLER_NAVN,
-            epost = SAKSBEHANDLEREPOST,
-            ident = SAKSBEHANDLER_IDENT,
-            orgnummer = ORGNUMMER,
-            begrunnelse = BEGRUNNELSE,
-            forklaring = FORKLARING,
-            månedligInntekt = INNTEKT,
-            fraMånedligInntekt = INNTEKT + 1,
-            skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
-            refusjonsopplysninger = null,
-            fraRefusjonsopplysninger = null,
-            opprettet = OPPRETTET,
-            json = "{}",
-            reservasjonDao = reservasjonDao,
-            saksbehandlerDao = saksbehandlerDao,
-            oppgaveDao = oppgaveDao,
-            overstyringDao = overstyringDao,
-            overstyringMediator = mockk(),
-        )
-    )
 
     private fun overstyrInntektOgRefusjon(hendelseId: UUID) = hendelseDao.opprett(
         OverstyringInntektOgRefusjon(

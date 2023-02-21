@@ -173,33 +173,6 @@ internal object Meldingssender {
             )
         }
 
-    fun sendOverstyrtInntekt(
-        aktørId: String,
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-        månedligInntekt: Double = 25000.0,
-        fraMånedligInntekt: Double = 25001.0,
-        skjæringstidspunkt: LocalDate = 1.januar(1970),
-        forklaring: String = "testbortforklaring",
-        subsumsjon: SubsumsjonJson? = SubsumsjonJson("8-28", "LEDD_1", "BOKSTAV_A")
-    ): UUID =
-        uuid.also { id ->
-            testRapid.sendTestMessage(
-                meldingsfabrikk.lagOverstyringInntekt(
-                    aktørId = aktørId,
-                    fødselsnummer = fødselsnummer,
-                    organisasjonsnummer = organisasjonsnummer,
-                    månedligInntekt = månedligInntekt,
-                    fraMånedligInntekt = fraMånedligInntekt,
-                    skjæringstidspunkt = skjæringstidspunkt,
-                    forklaring = forklaring,
-                    subsumsjon = subsumsjon,
-                    saksbehandlerepost = SAKSBEHANDLER_EPOST,
-                    id = id
-                )
-            )
-        }
-
     fun sendOverstyrtInntektOgRefusjon(
         aktørId: String,
         fødselsnummer: String,

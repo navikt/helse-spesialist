@@ -5,11 +5,12 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.TestRapidHelpers.siste
+import no.nav.helse.mediator.api.Arbeidsgiver
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt
+import no.nav.helse.mediator.api.SubsumsjonDto
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.ArbeidsgiverinformasjonJson
-import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.SubsumsjonJson
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
@@ -604,29 +605,32 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
         )
     }
 
-    fun sendOverstyrtInntekt(
+    fun sendOverstyrtInntektOgRefusjon(
         aktørId: String,
         fødselsnummer: String,
-        organisasjonsnummer: String,
-        månedligInntekt: Double = 25000.0,
-        fraMånedligInntekt: Double = 25001.0,
         skjæringstidspunkt: LocalDate = 1.januar(1970),
-        forklaring: String = "testbortforklaring",
-        subsumsjon: SubsumsjonJson? = SubsumsjonJson("8-28", "LEDD_1", "BOKSTAV_A"),
-    ): UUID = newUUID.also { id ->
-        testRapid.sendTestMessage(
-            meldingsfabrikk.lagOverstyringInntekt(
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                organisasjonsnummer = organisasjonsnummer,
-                månedligInntekt = månedligInntekt,
-                fraMånedligInntekt = fraMånedligInntekt,
-                skjæringstidspunkt = skjæringstidspunkt,
-                forklaring = forklaring,
-                subsumsjon = subsumsjon,
-                saksbehandlerepost = Testdata.SAKSBEHANDLER_EPOST,
-                id = id
-            )
+        arbeidsgivere: List<Arbeidsgiver> = listOf(
+            Arbeidsgiver(
+                organisasjonsnummer = Testdata.ORGNR,
+                månedligInntekt = 15000.0,
+                fraMånedligInntekt = 25001.0,
+                forklaring = "testbortforklaring",
+                subsumsjon = SubsumsjonDto("8-28", "LEDD_1", "BOKSTAV_A"),
+                refusjonsopplysninger = null,
+                fraRefusjonsopplysninger = null,
+                begrunnelse = "en begrunnelse")
         )
-    }
+    ): UUID =
+        newUUID.also { id ->
+            testRapid.sendTestMessage(
+                meldingsfabrikk.lagOverstyringInntektOgRefusjon(
+                    aktørId = aktørId,
+                    fødselsnummer = fødselsnummer,
+                    arbeidsgivere = arbeidsgivere,
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    saksbehandlerepost = Testdata.SAKSBEHANDLER_EPOST,
+                    id = id
+                )
+            )
+        }
 }
