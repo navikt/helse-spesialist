@@ -1,4 +1,6 @@
+import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
@@ -35,8 +37,11 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.SENDT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 import no.nav.helse.modell.varsel.Varselkode
+import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import no.nav.helse.spesialist.api.graphql.HentSnapshot
+import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
@@ -74,11 +79,13 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
         utbetalingId: UUID = UTBETALING_ID,
         harOppdatertMetadata: Boolean = false,
+        snapshotversjon: Int = 1,
     ) {
         håndterSøknad()
         håndterVedtaksperiodeOpprettet(vedtaksperiodeId = vedtaksperiodeId)
         håndterVedtaksperiodeNyUtbetaling(vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshot(
+            versjon = snapshotversjon,
             fødselsnummer = FØDSELSNUMMER,
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId,
@@ -157,12 +164,13 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
         utbetalingId: UUID = UTBETALING_ID,
         harOppdatertMetadata: Boolean = false,
-        kanGodkjennesAutomatisk: Boolean = false
+        kanGodkjennesAutomatisk: Boolean = false,
+        snapshotversjon: Int = 1
     ) {
-        fremTilÅpneOppgaver(fom, tom, skjæringstidspunkt, andreArbeidsforhold, regelverksvarsler, fullmakter, vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId, harOppdatertMetadata = harOppdatertMetadata)
+        fremTilÅpneOppgaver(fom, tom, skjæringstidspunkt, andreArbeidsforhold, regelverksvarsler, fullmakter, vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId, harOppdatertMetadata = harOppdatertMetadata, snapshotversjon = snapshotversjon)
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning(kanGodkjennesAutomatisk = kanGodkjennesAutomatisk, risikofunn = risikofunn, vedtaksperiodeId = vedtaksperiodeId)
-        håndterInntektløsning()
+        if (!harOppdatertMetadata) håndterInntektløsning()
     }
 
     protected fun forlengelseFremTilSaksbehandleroppgave(
@@ -463,7 +471,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID
     ) {
         meldingssenderV2.sendInfotrygdutbetalingerløsning(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId)
     }
@@ -584,6 +592,16 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         meldingssenderV2.sendAdressebeskyttelseEndret(aktørId, fødselsnummer)
     }
 
+    protected fun håndterOppdaterPersonsnapshot(
+        aktørId: String = AKTØR,
+        fødselsnummer: String = FØDSELSNUMMER,
+        snapshotSomSkalHentes: GraphQLClientResponse<HentSnapshot.Result>
+    ) {
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshotSomSkalHentes
+        meldingssenderV2.sendOppdaterPersonsnapshot(aktørId, fødselsnummer)
+        assertEtterspurteBehov("HentInfotrygdutbetalinger")
+    }
+
     protected fun håndterOverstyrTidslinje(
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
@@ -687,6 +705,35 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         }
         assertEquals(1, oppgavestatuser.size)
         assertEquals(oppgavestatus, oppgavestatuser.single())
+    }
+
+    protected fun assertSnapshot(forventet: GraphQLClientResponse<HentSnapshot.Result>, vedtaksperiodeId: UUID) {
+        val forventetPersonsnapshot = forventet.data?.person
+        val personsnaphot = sessionOf(dataSource).use {
+            @Language("PostgreSQL")
+            val query =
+                "SELECT data FROM snapshot WHERE id = (SELECT snapshot_ref FROM vedtak WHERE vedtaksperiode_id=?)"
+            it.run(
+                queryOf(query, vedtaksperiodeId).map { row ->
+                    objectMapper.readValue<GraphQLPerson>(row.string("data"))
+                }.asSingle
+            )
+        }
+        assertEquals(forventetPersonsnapshot, personsnaphot)
+    }
+
+    protected fun assertSnapshotversjon(vedtaksperiodeId: UUID, forventetVersjon: Int) {
+        val versjon = sessionOf(dataSource).use {
+            @Language("PostgreSQL")
+            val query =
+                "SELECT versjon FROM snapshot WHERE id = (SELECT snapshot_ref FROM vedtak WHERE vedtaksperiode_id=?)"
+            it.run(
+                queryOf(query, vedtaksperiodeId).map { row ->
+                    row.int("versjon")
+                }.asSingle
+            )
+        }
+        assertEquals(forventetVersjon, versjon)
     }
 
     protected fun assertVarsler(vedtaksperiodeId: UUID, forventetAntall: Int) {

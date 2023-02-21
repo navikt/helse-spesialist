@@ -559,6 +559,16 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
             )
         }
 
+    fun sendOppdaterPersonsnapshot(
+        aktørId: String,
+        fødselsnummer: String
+    ): UUID =
+        newUUID.also { id ->
+            testRapid.sendTestMessage(
+                meldingsfabrikk.lagOppdaterPersonsnapshot(aktørId, fødselsnummer, id)
+            )
+        }
+
     fun sendOverstyrTidslinje(
         aktørId: String,
         fødselsnummer: String,

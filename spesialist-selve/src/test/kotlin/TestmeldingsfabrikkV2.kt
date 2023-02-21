@@ -727,6 +727,13 @@ internal object TestmeldingsfabrikkV2 {
         )
     )
 
+    fun lagOppdaterPersonsnapshot(aktørId: String, fødselsnummer: String, id: UUID) = nyHendelse(
+        id, "oppdater_personsnapshot", mapOf(
+            "fødselsnummer" to fødselsnummer,
+            "aktørId" to aktørId
+        )
+    )
+
     private fun nyHendelse(id: UUID, navn: String, hendelse: Map<String, Any>) =
         JsonMessage.newMessage(
             mutableMapOf<String, Any>(

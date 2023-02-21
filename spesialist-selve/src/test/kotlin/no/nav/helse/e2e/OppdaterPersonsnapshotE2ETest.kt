@@ -1,69 +1,53 @@
 package no.nav.helse.e2e
 
-import AbstractE2ETest
-import com.expediagroup.graphql.client.types.GraphQLClientResponse
-import io.mockk.every
+import AbstractE2ETestV2
 import java.time.LocalDate
-import java.util.*
 import java.util.UUID.randomUUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.Meldingssender.sendArbeidsforholdløsningOld
-import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
-import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsningOld
-import no.nav.helse.Meldingssender.sendEgenAnsattløsningOld
-import no.nav.helse.Meldingssender.sendGodkjenningsbehov
-import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
-import no.nav.helse.Meldingssender.sendRisikovurderingløsningOld
-import no.nav.helse.Meldingssender.sendVergemålløsningOld
-import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsningOld
-import no.nav.helse.TestRapidHelpers.contextId
-import no.nav.helse.TestRapidHelpers.hendelseId
-import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
-import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.Testdata.snapshot
-import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
-import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.spesialist.api.graphql.HentSnapshot
-import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class OppdaterPersonsnapshotE2ETest : AbstractE2ETest() {
+internal class OppdaterPersonsnapshotE2ETest : AbstractE2ETestV2() {
 
     @Test
     fun `Oppdater personsnapshot oppdaterer alle snapshots på personen`() {
-        val vedtaksperiodeId1 = randomUUID()
-        val utbetalingId1 = randomUUID()
-        val snapshot1 = snapshot(1, utbetalingId = utbetalingId1)
-        vedtaksperiode(vedtaksperiodeId1, snapshot1, utbetalingId1, Periodetype.FØRSTEGANGSBEHANDLING)
-        val vedtaksperiodeId2 = randomUUID()
-        val utbetalingId2 = randomUUID()
-        val snapshot2 = snapshot(2, utbetalingId = utbetalingId2)
-        vedtaksperiode(vedtaksperiodeId2, snapshot2, utbetalingId2, Periodetype.FORLENGELSE)
+        val v1 = randomUUID()
+        val v2 = randomUUID()
+        fremTilSaksbehandleroppgave(vedtaksperiodeId = v1, snapshotversjon = 1)
+        håndterSaksbehandlerløsning(vedtaksperiodeId = v1)
+        håndterVedtakFattet(vedtaksperiodeId = v1)
+
+        fremTilSaksbehandleroppgave(vedtaksperiodeId = v2, snapshotversjon = 1, utbetalingId = randomUUID(), harOppdatertMetadata = true)
+        håndterSaksbehandlerløsning(vedtaksperiodeId = v2)
+        håndterVedtakFattet(vedtaksperiodeId = v2)
 
         val snapshotFinal = snapshot(3)
-        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshotFinal
-        sendOppdaterPersonsnapshot()
+        håndterOppdaterPersonsnapshot(snapshotSomSkalHentes = snapshotFinal)
 
-        assertSnapshot(snapshotFinal, vedtaksperiodeId1)
-        assertSnapshot(snapshotFinal, vedtaksperiodeId2)
+        assertSnapshot(snapshotFinal, v1)
+        assertSnapshotversjon(v1, 3)
+        assertSnapshot(snapshotFinal, v2)
+        assertSnapshotversjon(v2, 3)
     }
 
     @Test
     fun `Oppdaterer også Infotrygd-utbetalinger`() {
-        val utbetalingId = randomUUID()
-        val snapshot = snapshot(1, utbetalingId = utbetalingId)
-        vedtaksperiode(randomUUID(), snapshot, utbetalingId, Periodetype.FØRSTEGANGSBEHANDLING)
-        sendOppdaterPersonsnapshot()
+        val v1 = randomUUID()
+        val snapshot = snapshot(2)
+        fremTilSaksbehandleroppgave(vedtaksperiodeId = v1, snapshotversjon = 1)
+        håndterSaksbehandlerløsning(vedtaksperiodeId = v1)
+        håndterVedtakFattet(vedtaksperiodeId = v1)
+
+        håndterOppdaterPersonsnapshot(snapshotSomSkalHentes = snapshot)
 
         assertInfotrygdutbetalingerOppdatert(FØDSELSNUMMER)
         settInfotrygdutbetalingerUtdatert(FØDSELSNUMMER)
         assertInfotrygdutbetalingerOppdatert(FØDSELSNUMMER, forventetDato = LocalDate.now().minusDays(7))
 
-        sendInfotrygdløsning()
-
+        håndterInfotrygdutbetalingerløsning()
         assertInfotrygdutbetalingerOppdatert(FØDSELSNUMMER)
     }
 
@@ -90,77 +74,5 @@ internal class OppdaterPersonsnapshotE2ETest : AbstractE2ETest() {
             )
         }
         assertEquals(forventetDato, dato)
-    }
-
-    private fun sendInfotrygdløsning() {
-        val testmeldingfabrikk = Testmeldingfabrikk(FØDSELSNUMMER, AKTØR)
-        testRapid.sendTestMessage(
-            testmeldingfabrikk.lagHentInfotrygdutbetalingerløsning(
-                hendelseId = testRapid.inspektør.hendelseId(),
-                contextId = testRapid.inspektør.contextId()
-            )
-        )
-    }
-
-    private fun sendOppdaterPersonsnapshot() {
-        @Language("JSON")
-        val json = """
-{
-    "@event_name": "oppdater_personsnapshot",
-    "@id": "${randomUUID()}",
-    "fødselsnummer": "$FØDSELSNUMMER"
-}"""
-
-        testRapid.sendTestMessage(json)
-    }
-
-    fun vedtaksperiode(
-        vedtaksperiodeId: UUID,
-        snapshot: GraphQLClientResponse<HentSnapshot.Result>,
-        utbetalingId: UUID,
-        periodetype: Periodetype
-    ) {
-        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshot
-        val godkjenningsmeldingId = sendGodkjenningsbehov(
-            organisasjonsnummer = ORGNR,
-            vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingId = utbetalingId,
-            periodetype = periodetype
-        )
-
-        if (periodetype == Periodetype.FØRSTEGANGSBEHANDLING) {
-            sendPersoninfoløsningComposite(
-                orgnr = ORGNR,
-                vedtaksperiodeId = vedtaksperiodeId,
-                hendelseId = godkjenningsmeldingId
-            )
-            sendArbeidsgiverinformasjonløsningOld(
-                hendelseId = godkjenningsmeldingId,
-                organisasjonsnummer = ORGNR,
-                vedtaksperiodeId = vedtaksperiodeId
-            )
-            sendArbeidsforholdløsningOld(
-                hendelseId = godkjenningsmeldingId,
-                orgnr = ORGNR,
-                vedtaksperiodeId = vedtaksperiodeId
-            )
-        }
-
-        sendEgenAnsattløsningOld(
-            godkjenningsmeldingId = godkjenningsmeldingId,
-            erEgenAnsatt = false
-        )
-        sendVergemålløsningOld(godkjenningsmeldingId = godkjenningsmeldingId)
-        sendDigitalKontaktinformasjonløsningOld(
-            godkjenningsmeldingId = godkjenningsmeldingId,
-            erDigital = true
-        )
-        sendÅpneGosysOppgaverløsningOld(
-            godkjenningsmeldingId = godkjenningsmeldingId
-        )
-        sendRisikovurderingløsningOld(
-            godkjenningsmeldingId = godkjenningsmeldingId,
-            vedtaksperiodeId = vedtaksperiodeId
-        )
     }
 }
