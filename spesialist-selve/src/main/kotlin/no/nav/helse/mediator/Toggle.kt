@@ -9,6 +9,5 @@ abstract class Toggle(private var _enabled: Boolean) {
 
     object VedtaksperiodeGenerasjoner : Toggle("VEDTAKSPERIODE_GENERASJONER")
     object Inntekter : Toggle("INNTEKTER", true)
-    object OverstyrInntektOgRefusjon : Toggle("OVERSTYR_INNTEKT_OG_REFUSJON", erDev())
     object AutomatiserRevuderinger : Toggle("AUTOMATISER_REVURDERINGER", erDev())
 }
