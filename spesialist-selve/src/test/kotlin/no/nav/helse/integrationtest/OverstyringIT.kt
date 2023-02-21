@@ -81,48 +81,6 @@ internal class OverstyringIT : AbstractE2ETest() {
     }
 
     @Test
-    fun `overstyr inntekt`() {
-        with(TestApplicationEngine()) {
-            setUpApplication()
-            settOppBruker()
-
-            val json = """
-                {
-                    "organisasjonsnummer": $ORGNR,
-                    "fødselsnummer": $FØDSELSNUMMER,
-                    "aktørId": $AKTØR,
-                    "begrunnelse": "en begrunnelse",
-                    "forklaring": "en forklaring",
-                    "månedligInntekt": 25000.0,
-                    "fraMånedligInntekt": 25001.0,
-                    "skjæringstidspunkt": "2018-01-01"
-                }
-            """.trimIndent()
-
-            val response = runBlocking {
-                client.post("/api/overstyr/inntekt") {
-                    header(HttpHeaders.ContentType, "application/json")
-                    authentication(
-                        oid = SAKSBEHANDLER_OID,
-                        epost = SAKSBEHANDLER_EPOST,
-                        navn = SAKSBEHANDLER_NAVN,
-                        ident = SAKSBEHANDLER_IDENT,
-                    )
-                    setBody(json)
-                }
-            }
-
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertEquals(1, testRapid.inspektør.hendelser("saksbehandler_overstyrer_inntekt").size)
-            testRapid.sendTestMessage(
-                testRapid.inspektør.hendelser("saksbehandler_overstyrer_inntekt").first().toString()
-            )
-            assertEquals("Invalidert", oppgaveStatus())
-            assertEquals(1, testRapid.inspektør.hendelser("overstyr_inntekt").size)
-        }
-    }
-
-    @Test
     fun `overstyr inntekt med refusjon`() {
         with(TestApplicationEngine()) {
             setUpApplication()
@@ -130,43 +88,85 @@ internal class OverstyringIT : AbstractE2ETest() {
 
             val json = """
                 {
-                    "organisasjonsnummer": $ORGNR,
                     "fødselsnummer": $FØDSELSNUMMER,
                     "aktørId": $AKTØR,
-                    "begrunnelse": "en begrunnelse",
-                    "forklaring": "en forklaring",
-                    "månedligInntekt": 25000.0,
-                    "fraMånedligInntekt": 25001.0,
                     "skjæringstidspunkt": "2018-01-01",
-                    "refusjonsopplysninger": [
-                        {
+                    "arbeidsgivere": [{
+                        "organisasjonsnummer": $ORGNR,
+                        "månedligInntekt": 25000.0,
+                        "fraMånedligInntekt": 25001.0,
+                        "refusjonsopplysninger": [
+                            {
                             "fom": "2018-01-01",
                             "tom": "2018-01-31",
                             "beløp": 25000.0
-                        },
-                        {
+                            },
+                            {
                             "fom": "2018-02-01",
                             "tom": null,
-                            "beløp": 25000.0
-                        }
-                    ],
-                    "fraRefusjonsopplysninger": [
-                        {
+                            "beløp": 24000.0
+                            }
+                        ],                        
+                        "fraRefusjonsopplysninger": [
+                            {
                             "fom": "2018-01-01",
                             "tom": "2018-01-31",
-                            "beløp": 25001.0
-                        },
-                        {
+                            "beløp": 24000.0
+                            },
+                            {
                             "fom": "2018-02-01",
                             "tom": null,
-                            "beløp": 25001.0
+                            "beløp": 23000.0
+                            }
+                        ],
+                        "begrunnelse": "en begrunnelse",
+                        "forklaring": "en forklaring",
+                        "subsumsjon": {
+                            "paragraf": "8-28",
+                            "ledd": "3",
+                            "bokstav": null
                         }
-                    ]
+                    },{
+                        "organisasjonsnummer": "666",
+                        "månedligInntekt": 21000.0,
+                        "fraMånedligInntekt": 25001.0,
+                        "refusjonsopplysninger": [
+                            {
+                            "fom": "2018-01-01",
+                            "tom": "2018-01-31",
+                            "beløp": 21000.0
+                            },
+                            {
+                            "fom": "2018-02-01",
+                            "tom": null,
+                            "beløp": 22000.0
+                            }
+                        ],                        
+                        "fraRefusjonsopplysninger": [
+                            {
+                            "fom": "2018-01-01",
+                            "tom": "2018-01-31",
+                            "beløp": 22000.0
+                            },
+                            {
+                            "fom": "2018-02-01",
+                            "tom": null,
+                            "beløp": 23000.0
+                            }
+                        ],
+                        "begrunnelse": "en begrunnelse 2",
+                        "forklaring": "en forklaring 2",
+                        "subsumsjon": {
+                            "paragraf": "8-28",
+                            "ledd": "3",
+                            "bokstav": null
+                        }
+                    }]
                 }
             """.trimIndent()
 
             val response = runBlocking {
-                client.post("/api/overstyr/inntekt") {
+                client.post("/api/overstyr/inntektogrefusjon") {
                     header(HttpHeaders.ContentType, "application/json")
                     authentication(
                         oid = SAKSBEHANDLER_OID,
@@ -179,9 +179,9 @@ internal class OverstyringIT : AbstractE2ETest() {
             }
 
             assertEquals(HttpStatusCode.OK, response.status)
-            assertEquals(1, testRapid.inspektør.hendelser("saksbehandler_overstyrer_inntekt").size)
+            assertEquals(1, testRapid.inspektør.hendelser("saksbehandler_overstyrer_inntekt_og_refusjon").size)
             testRapid.sendTestMessage(
-                testRapid.inspektør.hendelser("saksbehandler_overstyrer_inntekt").first().toString()
+                testRapid.inspektør.hendelser("saksbehandler_overstyrer_inntekt_og_refusjon").first().toString()
             )
 
             //TODO: Bruk OverstyringApiDao når denne er oppdatert til å inkludere nye kolonner
@@ -192,7 +192,7 @@ internal class OverstyringIT : AbstractE2ETest() {
             assertTrue(fraRefusjonsopplysninger?.isNotEmpty() == true)
 
             assertEquals("Invalidert", oppgaveStatus())
-            assertEquals(1, testRapid.inspektør.hendelser("overstyr_inntekt").size)
+            assertEquals(1, testRapid.inspektør.hendelser("overstyr_inntekt_og_refusjon").size)
         }
     }
 
