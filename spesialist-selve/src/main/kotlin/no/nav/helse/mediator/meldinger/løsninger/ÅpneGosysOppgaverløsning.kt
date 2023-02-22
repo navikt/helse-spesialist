@@ -59,13 +59,15 @@ internal class ÅpneGosysOppgaverløsning(
     }
 
     private fun warningsForÅpneGosysOppgaver(warningDao: WarningDao, varselRepository: VarselRepository, generasjonRepository: GenerasjonRepository, vedtaksperiodeId: UUID) {
+        if (antall == null) return
         val melding = "Det finnes åpne oppgaver på sykepenger i Gosys"
 
-        antall?.also {
-            if (it > 0) {
+        when {
+            antall > 0 -> {
                 leggTilWarning(warningDao, vedtaksperiodeId, melding)
                 leggTilVarsel(varselRepository, generasjonRepository, vedtaksperiodeId, SB_EX_1)
-            } else if (it == 0) {
+            }
+            antall == 0 -> {
                 setEksisterendeWarningInaktive(warningDao, vedtaksperiodeId, melding)
                 deaktiverVarsel(varselRepository, generasjonRepository, vedtaksperiodeId, SB_EX_1)
             }
