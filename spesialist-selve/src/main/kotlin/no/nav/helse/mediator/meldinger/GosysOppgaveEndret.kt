@@ -1,8 +1,10 @@
 package no.nav.helse.mediator.meldinger
 
+import java.io.File
 import java.util.UUID
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.api.erProd
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringForEksisterendeOppgaveCommand
@@ -38,7 +40,7 @@ internal class GosysOppgaveEndret(
     automatisering: Automatisering,
     godkjenningMediator: GodkjenningMediator,
     oppgaveMediator: OppgaveMediator,
-    oppgaveDao: OppgaveDao
+    oppgaveDao: OppgaveDao,
 ) : Hendelse, MacroCommand() {
 
     override fun fødselsnummer() = fødselsnummer
@@ -75,9 +77,13 @@ internal class GosysOppgaveEndret(
         rapidsConnection: RapidsConnection,
         private val mediator: HendelseMediator,
         private val oppgaveDao: OppgaveDao,
-        private val tildelingDao: TildelingDao
+        private val tildelingDao: TildelingDao,
     ) : no.nav.helse.rapids_rivers.River.PacketListener {
 
+        private val ignorerliste: Set<String> by lazy {
+            if (erProd()) File("/var/run/configmaps/ignorere-oppgave-endret.csv").readText().split(",").toSet()
+            else emptySet()
+        }
         private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
 
         init {
@@ -96,6 +102,10 @@ internal class GosysOppgaveEndret(
 
         override fun onPacket(packet: JsonMessage, context: MessageContext) {
             val fødselsnummer = packet["fødselsnummer"].asText()
+            if (ignorerliste.contains(fødselsnummer)) {
+                sikkerLog.warn("Ignorerer gosys_oppgave_endret for person $fødselsnummer")
+            return
+            }
             sikkerLog.info("gosys_oppgave_endret for fnr {}", fødselsnummer)
 
             oppgaveDao.finnOppgaveId(fødselsnummer)?.also { oppgaveId ->
@@ -116,6 +126,7 @@ internal class GosysOppgaveEndret(
                 mediator.gosysOppgaveEndret(packet, context)
             } ?: sikkerLog.info("Ingen åpne oppgaver for {}", fødselsnummer)
         }
+
     }
 
 }

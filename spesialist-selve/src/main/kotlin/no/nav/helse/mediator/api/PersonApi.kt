@@ -128,6 +128,7 @@ internal fun Route.personApi(
 }
 
 fun erDev() = "dev-gcp" == System.getenv("NAIS_CLUSTER_NAME")
+fun erProd() = "prod-gcp" == System.getenv("NAIS_CLUSTER_NAME")
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class OppdaterPersonsnapshotDto(

@@ -21,6 +21,7 @@ internal class VedtaksperiodeGodkjent(
             "periodetype" to periodetype.name,
             "saksbehandlerIdent" to løsning["Godkjenning"]["saksbehandlerIdent"].asText(),
             "saksbehandlerEpost" to løsning["Godkjenning"]["saksbehandlerEpost"].asText(),
-            "automatiskBehandling" to løsning["Godkjenning"]["automatiskBehandling"].asBoolean()
+            "automatiskBehandling" to løsning["Godkjenning"]["automatiskBehandling"].asBoolean(),
+            "kunRefusn" to "",
         )).toJson()
 }
