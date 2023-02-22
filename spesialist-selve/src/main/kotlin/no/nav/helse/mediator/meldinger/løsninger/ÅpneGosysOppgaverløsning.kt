@@ -62,12 +62,13 @@ internal class ÅpneGosysOppgaverløsning(
         if (antall == null) return
         val melding = "Det finnes åpne oppgaver på sykepenger i Gosys"
 
+        val harAlleredeVarsel = warningDao.finnAktiveWarningsMedMelding(vedtaksperiodeId, melding).isNotEmpty()
         when {
-            antall > 0 -> {
+            antall > 0 && !harAlleredeVarsel-> {
                 leggTilWarning(warningDao, vedtaksperiodeId, melding)
                 leggTilVarsel(varselRepository, generasjonRepository, vedtaksperiodeId, SB_EX_1)
             }
-            antall == 0 -> {
+            antall == 0 && harAlleredeVarsel -> {
                 setEksisterendeWarningInaktive(warningDao, vedtaksperiodeId, melding)
                 deaktiverVarsel(varselRepository, generasjonRepository, vedtaksperiodeId, SB_EX_1)
             }
@@ -75,19 +76,13 @@ internal class ÅpneGosysOppgaverløsning(
     }
 
     private fun leggTilWarning(warningDao: WarningDao, vedtaksperiodeId: UUID, melding: String) {
-        val eksisterendeWarnings = warningDao.finnAktiveWarningsMedMelding(vedtaksperiodeId, melding)
-        if (eksisterendeWarnings.isEmpty()) {
-            warningDao.leggTilWarning(vedtaksperiodeId, Warning(melding, WarningKilde.Spesialist, LocalDateTime.now()))
-            tellWarning(melding)
-        }
+        warningDao.leggTilWarning(vedtaksperiodeId, Warning(melding, WarningKilde.Spesialist, LocalDateTime.now()))
+        tellWarning(melding)
     }
 
     private fun setEksisterendeWarningInaktive(warningDao: WarningDao, vedtaksperiodeId: UUID, melding: String) {
-        val eksisterendeWarnings = warningDao.finnAktiveWarningsMedMelding(vedtaksperiodeId, melding)
-        if (eksisterendeWarnings.isNotEmpty()) {
-            warningDao.setWarningMedMeldingInaktiv(vedtaksperiodeId, melding, LocalDateTime.now())
-            tellWarningInaktiv(melding)
-        }
+        warningDao.setWarningMedMeldingInaktiv(vedtaksperiodeId, melding, LocalDateTime.now())
+        tellWarningInaktiv(melding)
     }
 
     private fun leggTilVarsel(varselRepository: VarselRepository, generasjonRepository: GenerasjonRepository, vedtaksperiodeId: UUID, varselkode: Varselkode) {

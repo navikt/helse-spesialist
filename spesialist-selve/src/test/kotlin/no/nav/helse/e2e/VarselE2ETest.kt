@@ -132,6 +132,18 @@ internal class VarselE2ETest : AbstractE2ETestV2() {
     }
 
     @Test
+    fun `lager ikke duplikatvarsel ved åpne gosys-oppgaver`() {
+        fremTilÅpneOppgaver()
+        håndterÅpneOppgaverløsning(antall = 1)
+        håndterRisikovurderingløsning()
+        håndterInntektløsning()
+        håndterGosysOppgaveEndret()
+        håndterÅpneOppgaverløsning(antall = 1)
+        assertVarsel(SB_EX_1, VEDTAKSPERIODE_ID, AKTIV)
+        assertWarning("Det finnes åpne oppgaver på sykepenger i Gosys", VEDTAKSPERIODE_ID)
+    }
+
+    @Test
     fun `fjern varsel om gosys-oppgave dersom det ikke finnes gosys-oppgave lenger`() {
         fremTilÅpneOppgaver()
         håndterÅpneOppgaverløsning(antall = 1)
@@ -276,7 +288,7 @@ internal class VarselE2ETest : AbstractE2ETestV2() {
                     )
                 ).map { row -> row.string("melding") }.asList
             )
-        }.contains(forventet))
+        }.singleOrNull() == forventet)
     }
 
     private fun assertInaktivWarning(forventet: String, vedtaksperiodeId: UUID) {
@@ -289,6 +301,6 @@ internal class VarselE2ETest : AbstractE2ETestV2() {
                     )
                 ).map { row -> row.string("melding") }.asList
             )
-        }.contains(forventet))
+        }.singleOrNull() == forventet)
     }
 }
