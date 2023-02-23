@@ -323,8 +323,8 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         meldingssenderV2.sendEndretSkjermetinfo(fødselsnummer, skjermet)
     }
 
-    protected fun håndterGosysOppgaveEndret(aktørId: String = AKTØR, fødselsnummer: String = FØDSELSNUMMER) {
-        meldingssenderV2.sendGosysOppgaveEndret(aktørId, fødselsnummer)
+    protected fun håndterGosysOppgaveEndret(fødselsnummer: String = FØDSELSNUMMER) {
+        meldingssenderV2.sendGosysOppgaveEndret(fødselsnummer)
         assertEtterspurteBehov("ÅpneOppgaver")
     }
 

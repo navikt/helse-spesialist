@@ -2,6 +2,7 @@ package no.nav.helse.mediator.meldinger
 
 import java.io.File
 import java.util.UUID
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.api.erProd
@@ -17,6 +18,7 @@ import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.oppgave.SjekkAtOppgaveFortsattErÅpenCommand
+import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -78,53 +80,59 @@ internal class GosysOppgaveEndret(
         private val mediator: HendelseMediator,
         private val oppgaveDao: OppgaveDao,
         private val tildelingDao: TildelingDao,
+        private val personDao: PersonDao
     ) : no.nav.helse.rapids_rivers.River.PacketListener {
 
         private val ignorerliste: Set<String> by lazy {
             if (erProd()) File("/var/run/configmaps/ignorere-oppgave-endret.csv").readText().split(",").toSet()
             else emptySet()
         }
-        private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
         init {
             River(rapidsConnection)
                 .apply {
                     validate {
                         it.demandValue("@event_name", "gosys_oppgave_endret")
-                        it.requireKey("@id", "@opprettet", "fødselsnummer", "aktørId")
+                        it.requireKey("@id", "@opprettet", "fødselsnummer")
                     }
                 }.register(this)
         }
 
         override fun onError(problems: MessageProblems, context: MessageContext) {
-            sikkerLog.error("Forstod ikke gosys_oppgave_endret:\n${problems.toExtendedReport()}")
+            sikkerlogg.error("Forstod ikke gosys_oppgave_endret:\n${problems.toExtendedReport()}")
         }
 
         override fun onPacket(packet: JsonMessage, context: MessageContext) {
+            val id = UUID.fromString(packet["@id"].asText())
             val fødselsnummer = packet["fødselsnummer"].asText()
+            val aktørId = personDao.finnAktørId(fødselsnummer) ?: kotlin.run {
+                sikkerlogg.info("Finner ikke aktørid for person. Kjenner ikke til person med {}", kv("fødselsnummer", fødselsnummer))
+                return
+            }
             if (ignorerliste.contains(fødselsnummer)) {
-                sikkerLog.warn("Ignorerer gosys_oppgave_endret for person $fødselsnummer")
+                sikkerlogg.warn("Ignorerer gosys_oppgave_endret for person $fødselsnummer")
             return
             }
-            sikkerLog.info("gosys_oppgave_endret for fnr {}", fødselsnummer)
+            sikkerlogg.info("gosys_oppgave_endret for fnr {}", fødselsnummer)
 
             oppgaveDao.finnOppgaveId(fødselsnummer)?.also { oppgaveId ->
-                sikkerLog.info("Fant en oppgave for {}: {}", fødselsnummer, oppgaveId)
+                sikkerlogg.info("Fant en oppgave for {}: {}", fødselsnummer, oppgaveId)
                 val commandData = oppgaveDao.gosysOppgaveEndretCommandData(oppgaveId)
                 if (commandData == null) {
-                    sikkerLog.info("Fant ikke commandData for {} og {}", fødselsnummer, oppgaveId)
+                    sikkerlogg.info("Fant ikke commandData for {} og {}", fødselsnummer, oppgaveId)
                     return
                 }
 
                 val tildeling = tildelingDao.tildelingForOppgave(oppgaveId)
                 if (tildeling != null) {
-                    sikkerLog.info("Fant tildeling for {}, {}: {}", fødselsnummer, oppgaveId, tildeling)
+                    sikkerlogg.info("Fant tildeling for {}, {}: {}", fødselsnummer, oppgaveId, tildeling)
                     return
                 }
 
-                sikkerLog.info("Har oppgave til_godkjenning, commandData og ingen tildeling for fnr $fødselsnummer og vedtaksperiodeId ${commandData.vedtaksperiodeId}")
-                mediator.gosysOppgaveEndret(packet, context)
-            } ?: sikkerLog.info("Ingen åpne oppgaver for {}", fødselsnummer)
+                sikkerlogg.info("Har oppgave til_godkjenning, commandData og ingen tildeling for fnr $fødselsnummer og vedtaksperiodeId ${commandData.vedtaksperiodeId}")
+                mediator.gosysOppgaveEndret(id, fødselsnummer, aktørId, packet.toJson(), context)
+            } ?: sikkerlogg.info("Ingen åpne oppgaver for {}", fødselsnummer)
         }
 
     }

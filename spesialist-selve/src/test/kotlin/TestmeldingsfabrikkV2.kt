@@ -452,13 +452,11 @@ internal object TestmeldingsfabrikkV2 {
 
 
     fun lagGosysOppgaveEndret(
-        aktørId: String,
         fødselsnummer: String,
         id: UUID,
     ): String =
         nyHendelse(
             id, "gosys_oppgave_endret", mapOf(
-                "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer,
             )
         )

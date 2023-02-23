@@ -722,11 +722,18 @@ internal class Hendelsefabrikk(
             json = json,
         )
     }
-
     fun gosysOppgaveEndret(json: String): GosysOppgaveEndret {
         val jsonNode = mapper.readTree(json)
         val fødselsnummer = jsonNode["fødselsnummer"].asText()
+        return gosysOppgaveEndret(
+            UUID.fromString(jsonNode["@id"].asText()),
+            fødselsnummer,
+            requireNotNull(personDao.finnAktørId(fødselsnummer)),
+            json
+        )
+    }
 
+    fun gosysOppgaveEndret(hendelseId: UUID, fødselsnummer: String, aktørId: String, json: String): GosysOppgaveEndret {
         // Vi kan ikke sende med oss dataene ned i løypa, så derfor må vi hente det ut på nytt her.
         val commandData = oppgaveDao.finnOppgaveIdUansettStatus(fødselsnummer).let { oppgaveId ->
             oppgaveDao.gosysOppgaveEndretCommandData(oppgaveId)!!
@@ -735,9 +742,9 @@ internal class Hendelsefabrikk(
         sikkerLog.info("Gjør ny sjekk om det finnes åpne gosysoppgaver for fnr $fødselsnummer og vedtaksperiodeId ${commandData.vedtaksperiodeId}")
 
         return GosysOppgaveEndret(
-            id = UUID.fromString(jsonNode["@id"].asText()),
+            id = hendelseId,
             fødselsnummer = fødselsnummer,
-            aktørId = jsonNode["aktørId"].asText(),
+            aktørId = aktørId,
             json = json,
             gosysOppgaveEndretCommandData = commandData,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,

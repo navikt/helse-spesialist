@@ -130,12 +130,10 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
         }
 
     fun sendGosysOppgaveEndret(
-        aktørId: String,
         fødselsnummer: String,
     ): UUID = newUUID.also { id ->
         testRapid.sendTestMessage(
             meldingsfabrikk.lagGosysOppgaveEndret(
-                aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
                 id = id,
             )

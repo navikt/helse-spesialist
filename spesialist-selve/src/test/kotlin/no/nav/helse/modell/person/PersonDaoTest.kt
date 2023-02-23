@@ -72,6 +72,17 @@ internal class PersonDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `finner aktørId`() {
+        opprettPerson()
+        assertEquals(AKTØR, personDao.finnAktørId(FNR))
+    }
+
+    @Test
+    fun `finner ikke aktørId om vi ikke har person`() {
+        assertEquals(null, personDao.finnAktørId(FNR))
+    }
+
+    @Test
     fun `finner enhet`() {
         opprettPerson()
         assertEquals(ENHET.toInt(), personDao.finnEnhetId(FNR).toInt())

@@ -25,6 +25,12 @@ internal class PersonDao(private val dataSource: DataSource) {
         )
     }
 
+    internal fun finnAktørId(fødselsnummer: String): String? = sessionOf(dataSource).use { session ->
+        @Language("PostgreSQL")
+        val query = "SELECT aktor_id FROM person WHERE fodselsnummer = ?"
+        session.run(queryOf(query, fødselsnummer.toLong()).map { it.string("aktor_id") }.asSingle)
+    }
+
     internal fun findPersoninfoSistOppdatert(fødselsnummer: String) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val query = "SELECT personinfo_oppdatert FROM person WHERE fodselsnummer=?;"
