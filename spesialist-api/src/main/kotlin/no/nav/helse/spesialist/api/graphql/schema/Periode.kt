@@ -311,7 +311,8 @@ interface Periode {
 data class UberegnetPeriode(
     val id: UUIDString,
     private val varselRepository: ApiVarselRepository,
-    private val periode: GraphQLTidslinjeperiode
+    private val periode: GraphQLTidslinjeperiode,
+    private val skalViseVarsler: Boolean,
 ) : Periode {
     override fun erForkastet(): Boolean = erForkastet(periode)
     override fun fom(): DateString = fom(periode)
@@ -323,7 +324,9 @@ data class UberegnetPeriode(
     override fun vedtaksperiodeId(): UUIDString = periode.vedtaksperiodeId
     override fun periodetilstand(): Periodetilstand = periodetilstand(periode.periodetilstand)
     override fun skjaeringstidspunkt(): DateString = periode.skjaeringstidspunkt
-    override fun varslerForGenerasjon(): List<VarselDTO> = emptyList()
+    override fun varslerForGenerasjon(): List<VarselDTO> = if (skalViseVarsler)
+        varselRepository.finnVarslerForUberegnetPeriode(UUID.fromString(vedtaksperiodeId())).toList() else
+        emptyList()
 }
 
 @Suppress("unused")

@@ -87,6 +87,7 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
+import no.nav.helse.spesialist.api.varsel.VarselService
 import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -111,6 +112,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     private val varselDao = VarselDao(dataSource)
     private val apiVarselRepository = ApiVarselRepository(dataSource)
+    private val varselService = VarselService()
     private val personApiDao = PersonApiDao(dataSource)
     protected val oppgaveDao = OppgaveDao(dataSource)
     protected val oppgaveApiDao = OppgaveApiDao(dataSource)
@@ -193,6 +195,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         risikovurderingApiDao = risikovurderingApiDao,
         varselDao = varselDao,
         varselRepository = apiVarselRepository,
+        varselService = varselService,
         oppgaveApiDao = oppgaveApiDao,
         periodehistorikkDao = periodehistorikkDao,
         notatDao = notatDao,

@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
 import java.time.format.DateTimeFormatter
+import java.util.UUID
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLBeregnetPeriode
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLGenerasjon
@@ -15,6 +16,7 @@ import no.nav.helse.spesialist.api.overstyring.OverstyringTidslinjeDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
+import no.nav.helse.spesialist.api.varsel.VarselService
 import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 
 data class Arbeidsforhold(
@@ -112,16 +114,25 @@ data class Arbeidsgiver(
     private val risikovurderingApiDao: RisikovurderingApiDao,
     private val varselDao: VarselDao,
     private val varselRepository: ApiVarselRepository,
+    private val varselService: VarselService,
     private val oppgaveApiDao: OppgaveApiDao,
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val notatDao: NotatDao,
 ) {
-    fun generasjoner(): List<Generasjon> = generasjoner.map { generasjon ->
+    fun generasjoner(): List<Generasjon> = generasjoner.mapIndexed { index, generasjon ->
         Generasjon(
             id = generasjon.id,
             perioder = generasjon.perioder.map {
                 when (it) {
-                    is GraphQLUberegnetPeriode -> UberegnetPeriode(id = it.id, periode = it, varselRepository = varselRepository)
+                    is GraphQLUberegnetPeriode -> UberegnetPeriode(
+                        id = it.id,
+                        varselRepository = varselRepository,
+                        periode = it,
+                        skalViseVarsler = index == 0 && varselService
+                            .uberegnedePerioderSomSkalViseVarsler(generasjon, oppgaveApiDao)
+                            .contains(UUID.fromString(it.vedtaksperiodeId)),
+                    )
+
                     is GraphQLBeregnetPeriode -> BeregnetPeriode(
                         id = it.id,
                         orgnummer = organisasjonsnummer,
@@ -133,6 +144,7 @@ data class Arbeidsgiver(
                         periodehistorikkDao = periodehistorikkDao,
                         notatDao = notatDao
                     )
+
                     else -> throw Exception("Ukjent tidslinjeperiode")
                 }
             }

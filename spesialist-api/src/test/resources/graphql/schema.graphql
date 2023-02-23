@@ -168,6 +168,7 @@ type BeregnetPeriode implements Periode {
     trengerTotrinnsvurdering: Boolean! @deprecated(reason: "trengerTotrinnsvurdering bør hentes fra periodens oppgave")
     utbetaling: Utbetaling!
     varsler: [String!]!
+    varslerForGenerasjon: [VarselDTO!]!
     vedtaksperiodeId: String!
     vilkarsgrunnlaghistorikkId: String!
 }
@@ -598,6 +599,7 @@ type UberegnetPeriode implements Periode {
     tidslinje: [Dag!]!
     tom: String!
     vedtaksperiodeId: String!
+    varslerForGenerasjon: [VarselDTO!]!
 }
 
 type Utbetaling {

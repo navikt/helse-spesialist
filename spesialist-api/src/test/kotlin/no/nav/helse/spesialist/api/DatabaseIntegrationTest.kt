@@ -12,12 +12,26 @@ import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.db.AbstractDatabaseTest
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.graphql.HentSnapshot
+import no.nav.helse.spesialist.api.graphql.enums.GraphQLInntektstype
+import no.nav.helse.spesialist.api.graphql.enums.GraphQLPeriodetilstand
+import no.nav.helse.spesialist.api.graphql.enums.GraphQLPeriodetype
+import no.nav.helse.spesialist.api.graphql.enums.GraphQLUtbetalingstatus
 import no.nav.helse.spesialist.api.graphql.enums.GraphQLVilkarsgrunnlagtype
+import no.nav.helse.spesialist.api.graphql.enums.Utbetalingtype
+import no.nav.helse.spesialist.api.graphql.hentsnapshot.Alder
+import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLArbeidsgiverrefusjon
+import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLBeregnetPeriode
+import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLGenerasjon
+import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLPeriodevilkar
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLRefusjonselement
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLSpleisVilkarsgrunnlag
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLSykepengegrunnlagsgrense
+import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLTidslinjeperiode
+import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLUberegnetPeriode
+import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLUtbetaling
+import no.nav.helse.spesialist.api.graphql.hentsnapshot.Sykepengedager
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
@@ -35,6 +49,7 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.utbetaling.UtbetalingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
+import no.nav.helse.spesialist.api.varsel.VarselService
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
@@ -56,6 +71,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     protected val varselDao = VarselDao(dataSource)
     protected val apiVarselRepository = ApiVarselRepository(dataSource)
+    protected val varselService = VarselService()
     protected val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
     protected val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
     protected val saksbehandlerDao = SaksbehandlerDao(dataSource)
@@ -474,14 +490,14 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             )
         }
 
-    protected fun mockSnapshot(fødselsnummer: String = FØDSELSNUMMER, avviksprosent: Double = 0.0) {
+    protected fun mockSnapshot(fødselsnummer: String = FØDSELSNUMMER, avviksprosent: Double = 0.0, arbeidsgivere: List<GraphQLArbeidsgiver> = emptyList()) {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns object :
             GraphQLClientResponse<HentSnapshot.Result> {
-            override val data = HentSnapshot.Result(snapshot(fødselsnummer, avviksprosent))
+            override val data = HentSnapshot.Result(snapshot(fødselsnummer, avviksprosent, arbeidsgivere))
         }
     }
 
-    private fun snapshot(fødselsnummer: String = FØDSELSNUMMER, avviksprosent: Double = 0.0): GraphQLPerson {
+    private fun snapshot(fødselsnummer: String = FØDSELSNUMMER, avviksprosent: Double = 0.0, arbeidsgivere: List<GraphQLArbeidsgiver> = emptyList()): GraphQLPerson {
         val vilkårsgrunnlag = GraphQLSpleisVilkarsgrunnlag(
             id = UUID.randomUUID().toString(),
             vilkarsgrunnlagtype = GraphQLVilkarsgrunnlagtype.SPLEIS,
@@ -519,13 +535,84 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
         return GraphQLPerson(
             aktorId = AKTØRID,
-            arbeidsgivere = emptyList(),
+            arbeidsgivere = arbeidsgivere,
             dodsdato = null,
             fodselsnummer = fødselsnummer,
             versjon = 1,
             vilkarsgrunnlag = listOf(vilkårsgrunnlag),
         )
     }
+
+    protected fun opprettSnapshotArbeidsgiver(generasjoner: List<GraphQLGenerasjon>) =
+        GraphQLArbeidsgiver(
+            organisasjonsnummer = ORGANISASJONSNUMMER,
+            ghostPerioder = emptyList(),
+            generasjoner = generasjoner
+        )
+
+    protected fun opprettSnapshotGenerasjon(perioder: List<GraphQLTidslinjeperiode>, id: UUID = UUID.randomUUID()) =
+        GraphQLGenerasjon(id = id.toString(), perioder = perioder)
+
+    protected fun opprettBeregnetPeriode(
+        fom: String = LocalDate.now().toString(),
+        tom: String = LocalDate.now().toString(),
+        vedtaksperiodeId: UUID = UUID.randomUUID(),
+        utbetalingId: UUID = UUID.randomUUID(),
+    ) = GraphQLBeregnetPeriode(
+        erForkastet = false,
+        fom = fom,
+        tom = tom,
+        inntektstype = GraphQLInntektstype.ENARBEIDSGIVER,
+        opprettet = LocalDateTime.now().toString(),
+        periodetype = GraphQLPeriodetype.FORSTEGANGSBEHANDLING,
+        periodetilstand = GraphQLPeriodetilstand.TILGODKJENNING,
+        skjaeringstidspunkt = LocalDate.now().toString(),
+        tidslinje = emptyList(),
+        vedtaksperiodeId = vedtaksperiodeId.toString(),
+        id = UUID.randomUUID().toString(),
+        aktivitetslogg = emptyList(),
+        beregningId = UUID.randomUUID().toString(),
+        forbrukteSykedager = null,
+        gjenstaendeSykedager = null,
+        hendelser = emptyList(),
+        maksdato = LocalDate.now().toString(),
+        vilkarsgrunnlagId = null,
+        periodevilkar = GraphQLPeriodevilkar(
+            alder = Alder(55, true),
+            sykepengedager = Sykepengedager(
+                maksdato = LocalDate.now().toString(),
+                oppfylt = true,
+                skjaeringstidspunkt = LocalDate.now().toString(),
+            )
+        ),
+        utbetaling = GraphQLUtbetaling(
+            id = utbetalingId.toString(),
+            arbeidsgiverFagsystemId = "EN_FAGSYSTEM_ID",
+            arbeidsgiverNettoBelop = 1,
+            personFagsystemId = "EN_FAGSYSTEM_ID",
+            personNettoBelop = 0,
+            statusEnum = GraphQLUtbetalingstatus.IKKEGODKJENT,
+            typeEnum = Utbetalingtype.UTBETALING,
+        ),
+    )
+
+    protected fun opprettUberegnetPeriode(
+        fom: String = LocalDate.now().toString(),
+        tom: String = LocalDate.now().toString(),
+        vedtaksperiodeId: UUID = UUID.randomUUID(),
+    ) = GraphQLUberegnetPeriode(
+        erForkastet = false,
+        fom = fom,
+        tom = tom,
+        inntektstype = GraphQLInntektstype.ENARBEIDSGIVER,
+        opprettet = LocalDateTime.now().toString(),
+        periodetype = GraphQLPeriodetype.FORSTEGANGSBEHANDLING,
+        periodetilstand = GraphQLPeriodetilstand.TILGODKJENNING,
+        skjaeringstidspunkt = LocalDate.now().toString(),
+        tidslinje = emptyList(),
+        vedtaksperiodeId = vedtaksperiodeId.toString(),
+        id = UUID.randomUUID().toString(),
+    )
 
     protected data class Navn(
         val fornavn: String,

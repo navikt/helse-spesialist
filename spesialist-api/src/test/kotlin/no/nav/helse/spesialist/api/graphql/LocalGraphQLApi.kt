@@ -53,6 +53,7 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.utbetaling.UtbetalingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
+import no.nav.helse.spesialist.api.varsel.VarselService
 import no.nav.helse.spesialist.api.vedtaksperiode.EnhetDto
 import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 
@@ -67,6 +68,7 @@ fun main() = runBlocking {
         val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
         val varselDao = VarselDao(dataSource)
         val apiVarselRepository = ApiVarselRepository(dataSource)
+        val varselService = VarselService()
         val utbetalingApiDao = mockk<UtbetalingApiDao>(relaxed = true)
         val oppgaveApiDao = mockk<OppgaveApiDao>(relaxed = true)
         val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
@@ -120,6 +122,7 @@ fun main() = runBlocking {
             risikovurderingApiDao = risikovurderingApiDao,
             varselDao = varselDao,
             varselRepository = apiVarselRepository,
+            varselService = varselService,
             utbetalingApiDao = utbetalingApiDao,
             oppgaveApiDao = oppgaveApiDao,
             periodehistorikkDao = periodehistorikkDao,
