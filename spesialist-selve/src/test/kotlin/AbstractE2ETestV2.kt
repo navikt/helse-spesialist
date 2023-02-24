@@ -25,6 +25,7 @@ import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.Testdata.snapshot
 import no.nav.helse.januar
 import no.nav.helse.mediator.api.Arbeidsgiver
+import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.api.SubsumsjonDto
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
@@ -42,6 +43,7 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.graphql.HentSnapshot
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
+import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import org.intellij.lang.annotations.Language
@@ -54,15 +56,24 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
     private val testRapid = TestRapid()
     private val meldingssenderV2 = MeldingssenderV2(testRapid)
     private lateinit var sisteMeldingId: UUID
-
-    init {
-        TestMediator(testRapid, snapshotClient, dataSource)
-    }
+    private val dataSource = AbstractDatabaseTest.dataSource
+    private val testMediator = TestMediator(testRapid, snapshotClient, dataSource)
 
     @BeforeEach
     internal fun resetTestSetup() {
         testRapid.reset()
         lagVarseldefinisjoner()
+    }
+
+    protected fun Int.oppgave(vedtaksperiodeId: UUID): Long {
+        require(this > 0) { "Forventet oppgaveId for vedtaksperiodeId=$vedtaksperiodeId må være større enn 0" }
+        @Language("PostgreSQL")
+        val query = "SELECT id FROM oppgave WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = ?)"
+        val oppgaveIder = sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, vedtaksperiodeId).map { it.long("id") }.asList)
+        }
+        assertTrue(oppgaveIder.size >= this) { "Forventer at det finnes minimum $this antall oppgaver for vedtaksperiodeId=$vedtaksperiodeId. Fant ${oppgaveIder.size} oppgaver." }
+        return oppgaveIder[this - 1]
     }
 
     private fun nyUtbetalingId(utbetalingId: UUID) {
@@ -163,13 +174,14 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         risikofunn: List<Risikofunn> = emptyList(),
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
         utbetalingId: UUID = UTBETALING_ID,
+        harRisikovurdering: Boolean = false,
         harOppdatertMetadata: Boolean = false,
         kanGodkjennesAutomatisk: Boolean = false,
         snapshotversjon: Int = 1
     ) {
         fremTilÅpneOppgaver(fom, tom, skjæringstidspunkt, andreArbeidsforhold, regelverksvarsler, fullmakter, vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId, harOppdatertMetadata = harOppdatertMetadata, snapshotversjon = snapshotversjon)
         håndterÅpneOppgaverløsning()
-        håndterRisikovurderingløsning(kanGodkjennesAutomatisk = kanGodkjennesAutomatisk, risikofunn = risikofunn, vedtaksperiodeId = vedtaksperiodeId)
+        if (!harRisikovurdering) håndterRisikovurderingløsning(kanGodkjennesAutomatisk = kanGodkjennesAutomatisk, risikofunn = risikofunn, vedtaksperiodeId = vedtaksperiodeId)
         if (!harOppdatertMetadata) håndterInntektløsning()
     }
 
@@ -645,7 +657,6 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
     protected fun håndterOverstyrInntektOgRefusjon(
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
-
         skjæringstidspunkt: LocalDate = 1.januar(1970),
         arbeidsgivere: List<Arbeidsgiver> = listOf(
             Arbeidsgiver(
@@ -669,9 +680,15 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
+        overstyrteArbeidsforhold: List<OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt>
     ) {
         håndterOverstyring(aktørId, fødselsnummer, organisasjonsnummer, "overstyr_arbeidsforhold") {
-            sisteMeldingId = meldingssenderV2.sendOverstyrtArbeidsforhold(aktørId, fødselsnummer, organisasjonsnummer)
+            sisteMeldingId = meldingssenderV2.sendOverstyrtArbeidsforhold(
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                organisasjonsnummer = organisasjonsnummer,
+                overstyrteArbeidsforhold = overstyrteArbeidsforhold
+            )
         }
     }
 
@@ -683,11 +700,13 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         overstyringBlock: () -> Unit,
     ) {
         overstyringBlock()
-        val hendelser = testRapid.inspektør.hendelser(overstyringHendelse)
-        assertEquals(1, hendelser.size)
-        val overstyring = hendelser.single()
-        val hendelseId = UUID.fromString(overstyring["@id"].asText())
+        val sisteOverstyring = testRapid.inspektør.hendelser(overstyringHendelse).last()
+        val hendelseId = UUID.fromString(sisteOverstyring["@id"].asText())
+        håndterOverstyringIgangsatt(aktørId, fødselsnummer, hendelseId)
         håndterUtbetalingForkastet(aktørId, fødselsnummer, organisasjonsnummer)
+    }
+
+    private fun håndterOverstyringIgangsatt(aktørId: String, fødselsnummer: String, kildeId: UUID) {
         sisteMeldingId = meldingssenderV2.sendOverstyringIgangsatt(
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
@@ -696,9 +715,8 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
                     "vedtaksperiodeId" to "$VEDTAKSPERIODE_ID"
                 )
             ),
-            kilde = hendelseId
+            kilde = kildeId
         )
-        håndterGodkjenningsbehov(harOppdatertMetainfo = true)
     }
 
     private fun erRevurdering(vedtaksperiodeId: UUID): Boolean {
@@ -874,6 +892,25 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
     protected fun assertUtbetaling(arbeidsgiverbeløp: Int, personbeløp: Int) {
         assertEquals(arbeidsgiverbeløp, finnbeløp("arbeidsgiver"))
         assertEquals(personbeløp, finnbeløp("person"))
+    }
+
+    protected fun assertOverstyringer(vedtaksperiodeId: UUID, vararg forventedeOverstyringstyper: OverstyringType) {
+        val typer = testMediator.overstyringstyperForVedtaksperiode(vedtaksperiodeId)
+        assertEquals(forventedeOverstyringstyper.toSet(), typer.toSet()) {
+            val ikkeEtterspurt = typer.toSet() - forventedeOverstyringstyper.toSet()
+            "Følgende typer finnes ikke: $ikkeEtterspurt\nForventede typer: $forventedeOverstyringstyper\n"
+        }
+    }
+
+    protected fun assertTotrinnsvurdering(oppgaveId: Long) {
+        @Language("PostgreSQL")
+        val query = "SELECT er_totrinnsoppgave FROM oppgave WHERE id = ?"
+        val erToTrinnsvurdering = sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, oppgaveId).map { it.boolean("er_totrinnsoppgave") }.asSingle)
+        } ?: throw IllegalStateException("Finner ikke oppgave med id $oppgaveId")
+        assertTrue(erToTrinnsvurdering) {
+            "Forventer at oppgaveId=$oppgaveId krever totrinnsvurdering"
+        }
     }
 
     private fun finnbeløp(type: String): Int? {

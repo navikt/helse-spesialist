@@ -572,8 +572,7 @@ internal object TestmeldingsfabrikkV2 {
         ),
         kilde: UUID = UUID.randomUUID(),
         id: UUID
-    ) =
-        nyHendelse(
+    ) = nyHendelse(
             id, "overstyring_igangsatt", mapOf(
                 "revurderingId" to "${UUID.randomUUID()}",
                 "kilde" to "$kilde",

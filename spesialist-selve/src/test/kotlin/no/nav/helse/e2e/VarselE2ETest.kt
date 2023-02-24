@@ -7,9 +7,10 @@ import java.time.LocalDate
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.Testdata
+import no.nav.helse.Testdata.ORGNR_GHOST
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.mediator.Toggle
+import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Område.Syk
@@ -73,6 +74,7 @@ internal class VarselE2ETest : AbstractE2ETestV2() {
     fun `varsel om beslutteroppgave ved overstyring av dager`() {
         fremTilSaksbehandleroppgave()
         håndterOverstyrTidslinje()
+        håndterGodkjenningsbehov(harOppdatertMetainfo = true)
         håndterEgenansattløsning()
         håndterVergemålløsning()
         håndterÅpneOppgaverløsning()
@@ -84,6 +86,7 @@ internal class VarselE2ETest : AbstractE2ETestV2() {
     fun `varsel om beslutteroppgave ved overstyring av inntekt og refusjon`() {
         fremTilSaksbehandleroppgave()
         håndterOverstyrInntektOgRefusjon()
+        håndterGodkjenningsbehov(harOppdatertMetainfo = true)
         håndterEgenansattløsning()
         håndterVergemålløsning()
         håndterÅpneOppgaverløsning()
@@ -93,8 +96,11 @@ internal class VarselE2ETest : AbstractE2ETestV2() {
 
     @Test
     fun `varsel om beslutteroppgave ved overstyring av arbeidsforhold`() {
-        fremTilSaksbehandleroppgave(andreArbeidsforhold = listOf(Testdata.ORGNR_GHOST))
-        håndterOverstyrArbeidsforhold(organisasjonsnummer = Testdata.ORGNR_GHOST)
+        fremTilSaksbehandleroppgave(andreArbeidsforhold = listOf(ORGNR_GHOST))
+        håndterOverstyrArbeidsforhold(overstyrteArbeidsforhold = listOf(
+            OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt(ORGNR_GHOST, true, "begrunnelse", "forklaring")
+        ))
+        håndterGodkjenningsbehov(harOppdatertMetainfo = true)
         håndterEgenansattløsning()
         håndterVergemålløsning()
         håndterÅpneOppgaverløsning()

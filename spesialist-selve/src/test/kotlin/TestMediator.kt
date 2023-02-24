@@ -1,3 +1,4 @@
+import java.util.UUID
 import javax.sql.DataSource
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
@@ -34,6 +35,7 @@ internal class TestMediator(
     private val warningDao = WarningDao(dataSource)
     private val vedtakDao = VedtakDao(dataSource)
     private val opptegnelseDao = OpptegnelseDao(dataSource)
+    private val overstyringDao = OverstyringDao(dataSource)
 
     private val godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao, opptegnelseDao, ActualVarselRepository(dataSource), ActualGenerasjonRepository(dataSource))
     private val oppgaveMediator = OppgaveMediator(OppgaveDao(dataSource), TildelingDao(dataSource), ReservasjonDao(dataSource),
@@ -73,4 +75,6 @@ internal class TestMediator(
             hendelsefabrikk = hendelsefabrikk
         )
     }
+
+    internal fun overstyringstyperForVedtaksperiode(vedtaksperiodeId: UUID) = overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(vedtaksperiodeId)
 }
