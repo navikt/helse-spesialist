@@ -461,6 +461,19 @@ internal object TestmeldingsfabrikkV2 {
             )
         )
 
+    fun lagEndretSkjermetinfo(
+        fødselsnummer: String,
+        skjermet: Boolean,
+        id: UUID
+    ): String =
+        nyHendelse(
+            id, "endret_skjermetinfo", mapOf(
+                "fødselsnummer" to fødselsnummer,
+                "skjermet" to skjermet,
+                "@opprettet" to LocalDateTime.now()
+            )
+        )
+
     fun lagOverstyringTidslinje(
         aktørId: String,
         fødselsnummer: String,
@@ -543,6 +556,37 @@ internal object TestmeldingsfabrikkV2 {
             "overstyrteArbeidsforhold" to overstyrteArbeidsforhold
         )
     )
+
+    fun lagOverstyringIgangsatt(
+        aktørId: String,
+        fødselsnummer: String,
+        berørtePerioder: List<Map<String, String>> = listOf(
+            mapOf(
+                "vedtaksperiodeId" to "${UUID.randomUUID()}",
+                "skjæringstidspunkt" to "2022-01-01",
+                "periodeFom" to "2022-01-01",
+                "periodeTom" to "2022-01-31",
+                "orgnummer" to "orgnr",
+                "typeEndring" to "REVURDERING"
+            )
+        ),
+        kilde: UUID = UUID.randomUUID(),
+        id: UUID
+    ) =
+        nyHendelse(
+            id, "overstyring_igangsatt", mapOf(
+                "revurderingId" to "${UUID.randomUUID()}",
+                "kilde" to "$kilde",
+                "skjæringstidspunkt" to "2022-01-01",
+                "periodeForEndringFom" to "2022-01-01",
+                "periodeForEndringTom" to "2022-01-01",
+                "årsak" to "KORRIGERT_INNTEKTSMELDING",
+                "typeEndring" to "REVURDERING",
+                "berørtePerioder" to berørtePerioder,
+                "aktørId" to aktørId,
+                "fødselsnummer" to fødselsnummer
+            )
+        )
 
     fun lagUtbetalingEndret(
         aktørId: String,

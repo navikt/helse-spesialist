@@ -2,6 +2,7 @@ package no.nav.helse
 
 import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID
+import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 
@@ -12,11 +13,30 @@ object TestRapidHelpers {
     fun TestRapid.RapidInspector.hendelser(type: String) =
         meldinger().filter { it.path("@event_name").asText() == type }
 
+    fun TestRapid.RapidInspector.hendelser() =
+        meldinger().map { it.path("@event_name").asText() }
+
+    fun TestRapid.RapidInspector.hendelser(forårsaketAv: UUID) =
+        meldinger()
+            .filterNot { it.path("@event_name").isMissingOrNull() }
+            .filter { it.path("@forårsaket_av").path("id").asText() == forårsaketAv.toString() }
+
+    fun TestRapid.RapidInspector.hendelser(type: String, forårsaketAv: UUID) =
+        meldinger()
+            .filter { it.path("@event_name").asText() == type }
+            .filter { it.path("@forårsaket_av").path("id").asText() == forårsaketAv.toString() }
+
     fun TestRapid.RapidInspector.siste(type: String) =
         hendelser(type).last()
 
     fun TestRapid.RapidInspector.behov() =
         hendelser("behov")
+            .filterNot { it.hasNonNull("@løsning") }
+            .flatMap { it.path("@behov").map(JsonNode::asText) }
+
+    fun TestRapid.RapidInspector.behov(forårsaketAv: UUID) =
+        hendelser("behov")
+            .filter { it.path("@forårsaket_av").path("id").asText() == forårsaketAv.toString() }
             .filterNot { it.hasNonNull("@løsning") }
             .flatMap { it.path("@behov").map(JsonNode::asText) }
 

@@ -25,7 +25,6 @@ internal class OppdaterArbeidsgiverE2ETest : AbstractE2ETestV2() {
         markerArbeidsgivernavnSomUkjent()
 
         // Dette trigger at Opp_rett_ArbeidsgiverCommand sender ut behov med (kun) det ukjente orgnummeret
-        nullstillRapid()
         val vedtaksperiode2Id = randomUUID()
 
         // godkjenningsbehov for forlengelse inneholder et nytt orgnr

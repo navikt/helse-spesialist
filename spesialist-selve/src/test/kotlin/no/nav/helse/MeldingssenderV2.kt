@@ -2,7 +2,6 @@ package no.nav.helse
 
 import TestmeldingsfabrikkV2
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.TestRapidHelpers.siste
 import no.nav.helse.mediator.api.Arbeidsgiver
@@ -27,7 +26,6 @@ import no.nav.helse.spesialist.api.overstyring.Dagtype.Feriedag
 import no.nav.helse.spesialist.api.overstyring.Dagtype.Sykedag
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 
 internal class MeldingssenderV2(private val testRapid: TestRapid) {
@@ -143,16 +141,14 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
     fun sendEndretSkjermetinfo(
         fødselsnummer: String,
         skjermet: Boolean,
-    ) {
-        @Language("JSON")
-        val json = """{
-          "@event_name": "endret_skjermetinfo",
-          "@id": "${UUID.randomUUID()}",
-          "fødselsnummer": "$fødselsnummer",
-          "skjermet": "$skjermet",
-          "@opprettet": "${LocalDateTime.now()}"
-        }"""
-        testRapid.sendTestMessage(json)
+    ): UUID = newUUID.also { id ->
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagEndretSkjermetinfo(
+                fødselsnummer = fødselsnummer,
+                skjermet = skjermet,
+                id = id
+            )
+        )
     }
 
     fun sendUtbetalingEndret(
@@ -248,7 +244,6 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
         adressebeskyttelse: Adressebeskyttelse,
     ): UUID = newUUID.also { id ->
         val behov = testRapid.inspektør.siste("behov")
-        testRapid.reset()
         assertEquals("HentPersoninfoV2", behov["@behov"].map { it.asText() }.single())
         val contextId = UUID.fromString(behov["contextId"].asText())
         val hendelseId = UUID.fromString(behov["hendelseId"].asText())
@@ -274,7 +269,6 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
         vedtaksperiodeId: UUID,
     ): UUID = newUUID.also { id ->
         val behov = testRapid.inspektør.siste("behov")
-        testRapid.reset()
         assertEquals("HentEnhet", behov["@behov"].map { it.asText() }.single())
         val contextId = UUID.fromString(behov["contextId"].asText())
         val hendelseId = UUID.fromString(behov["hendelseId"].asText())
@@ -299,7 +293,6 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
         vedtaksperiodeId: UUID,
     ): UUID = newUUID.also { id ->
         val behov = testRapid.inspektør.siste("behov")
-        testRapid.reset()
         assertEquals("HentInfotrygdutbetalinger", behov["@behov"].map { it.asText() }.single())
         val contextId = UUID.fromString(behov["contextId"].asText())
         val hendelseId = UUID.fromString(behov["hendelseId"].asText())
@@ -326,7 +319,6 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
     ): UUID =
         newUUID.also { id ->
             val behov = testRapid.inspektør.siste("behov")
-            testRapid.reset()
             assertEquals("Arbeidsgiverinformasjon", behov["@behov"].map { it.asText() }.single())
             val contextId = UUID.fromString(behov["contextId"].asText())
             val hendelseId = UUID.fromString(behov["hendelseId"].asText())
@@ -368,7 +360,6 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
         ),
     ): UUID = newUUID.also { id ->
         val behov = testRapid.inspektør.siste("behov")
-        testRapid.reset()
         assertEquals("Arbeidsforhold", behov["@behov"].map { it.asText() }.single())
         val contextId = UUID.fromString(behov["contextId"].asText())
         val hendelseId = UUID.fromString(behov["hendelseId"].asText())
@@ -393,7 +384,6 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
         erEgenAnsatt: Boolean,
     ): UUID = newUUID.also { id ->
         val behov = testRapid.inspektør.siste("behov")
-        testRapid.reset()
         assertEquals("EgenAnsatt", behov["@behov"].map { it.asText() }.single())
         val contextId = UUID.fromString(behov["contextId"].asText())
         val hendelseId = UUID.fromString(behov["hendelseId"].asText())
@@ -416,7 +406,6 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
         fullmakter: List<Fullmakt> = emptyList(),
     ): UUID = newUUID.also { id ->
         val behov = testRapid.inspektør.siste("behov")
-        testRapid.reset()
         assertEquals("Vergemål", behov["@behov"].map { it.asText() }.single())
         val contextId = UUID.fromString(behov["contextId"].asText())
         val hendelseId = UUID.fromString(behov["hendelseId"].asText())
@@ -440,7 +429,6 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
         fødselsnummer: String,
     ): UUID = newUUID.also { id ->
         val behov = testRapid.inspektør.siste("behov")
-        testRapid.reset()
         assertEquals("InntekterForSykepengegrunnlag", behov["@behov"].map { it.asText() }.single())
         val contextId = UUID.fromString(behov["contextId"].asText())
         val hendelseId = UUID.fromString(behov["hendelseId"].asText())
@@ -463,7 +451,6 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
         oppslagFeilet: Boolean,
     ): UUID = newUUID.also { id ->
         val behov = testRapid.inspektør.siste("behov")
-        testRapid.reset()
         assertEquals("ÅpneOppgaver", behov["@behov"].map { it.asText() }.single())
         val contextId = UUID.fromString(behov["contextId"].asText())
         val hendelseId = UUID.fromString(behov["hendelseId"].asText())
@@ -490,7 +477,6 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
         funn: List<Risikofunn> = emptyList(),
     ): UUID = newUUID.also { id ->
         val behov = testRapid.inspektør.siste("behov")
-        testRapid.reset()
         assertEquals("Risikovurdering", behov["@behov"].map { it.asText() }.single())
         val contextId = UUID.fromString(behov["contextId"].asText())
         val hendelseId = UUID.fromString(behov["hendelseId"].asText())
@@ -517,7 +503,6 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
         godkjent: Boolean,
     ): UUID {
         return newUUID.also { id ->
-            testRapid.reset()
             testRapid.sendTestMessage(
                 meldingsfabrikk.lagSaksbehandlerløsning(
                     fødselsnummer = fødselsnummer,
@@ -641,4 +626,29 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
                 )
             )
         }
+
+    fun sendOverstyringIgangsatt(
+        aktørId: String,
+        fødselsnummer: String,
+        berørtePerioder: List<Map<String, String>> = listOf(mapOf(
+            "vedtaksperiodeId" to "${Testdata.VEDTAKSPERIODE_ID}",
+            "skjæringstidspunkt" to "2022-01-01",
+            "periodeFom" to "2022-01-01",
+            "periodeTom" to "2022-01-31",
+            "orgnummer" to Testdata.ORGNR,
+            "typeEndring" to "REVURDERING"
+        )),
+        kilde: UUID = UUID.randomUUID(),
+    ): UUID = newUUID.also { id ->
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagOverstyringIgangsatt(
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                berørtePerioder = berørtePerioder,
+                kilde = kilde,
+                id = id,
+            )
+        )
+    }
+
 }

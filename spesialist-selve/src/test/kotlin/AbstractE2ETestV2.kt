@@ -11,7 +11,6 @@ import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
-import no.nav.helse.Meldingssender
 import no.nav.helse.MeldingssenderV2
 import no.nav.helse.TestRapidHelpers.behov
 import no.nav.helse.TestRapidHelpers.hendelser
@@ -54,6 +53,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
     private val snapshotClient = mockk<SnapshotClient>(relaxed = true)
     private val testRapid = TestRapid()
     private val meldingssenderV2 = MeldingssenderV2(testRapid)
+    private lateinit var sisteMeldingId: UUID
 
     init {
         TestMediator(testRapid, snapshotClient, dataSource)
@@ -240,7 +240,9 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
     ) {
-        meldingssenderV2.sendSøknadSendt(aktørId, fødselsnummer, organisasjonsnummer)
+        sisteMeldingId = meldingssenderV2.sendSøknadSendt(aktørId, fødselsnummer, organisasjonsnummer)
+        assertIngenEtterspurteBehov()
+        assertIngenUtgåendeMeldinger()
         assertPersonEksisterer(fødselsnummer, aktørId)
         assertArbeidsgiverEksisterer(organisasjonsnummer)
     }
@@ -251,13 +253,15 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
     ) {
-        meldingssenderV2.sendVedtaksperiodeEndret(
+        sisteMeldingId = meldingssenderV2.sendVedtaksperiodeEndret(
             aktørId,
             fødselsnummer,
             organisasjonsnummer,
             vedtaksperiodeId,
             forrigeTilstand = "START"
         )
+        assertIngenEtterspurteBehov()
+        assertIngenUtgåendeMeldinger()
         assertVedtaksperiodeEksisterer(vedtaksperiodeId)
     }
 
@@ -269,7 +273,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         forårsaketAvId: UUID = UUID.randomUUID(),
     ) {
         val erRevurdering = erRevurdering(vedtaksperiodeId)
-        meldingssenderV2.sendVedtaksperiodeEndret(
+        sisteMeldingId = meldingssenderV2.sendVedtaksperiodeEndret(
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
@@ -278,6 +282,8 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
             gjeldendeTilstand = if (erRevurdering) "AVVENTER_GODKJENNING_REVURDERING" else "AVVENTER_GODKJENNING",
             forårsaketAvId = forårsaketAvId
         )
+        assertIngenEtterspurteBehov()
+        assertIngenUtgåendeMeldinger()
     }
 
     protected fun håndterVedtaksperiodeNyUtbetaling(
@@ -288,13 +294,15 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         utbetalingId: UUID = UTBETALING_ID,
     ) {
         if (!this::utbetalingId.isInitialized || utbetalingId != this.utbetalingId) nyUtbetalingId(utbetalingId)
-        meldingssenderV2.sendVedtaksperiodeNyUtbetaling(
+        sisteMeldingId = meldingssenderV2.sendVedtaksperiodeNyUtbetaling(
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId
         )
+        assertIngenEtterspurteBehov()
+        assertIngenUtgåendeMeldinger()
     }
 
     protected fun håndterAktivitetsloggNyAktivitet(
@@ -307,24 +315,28 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         varselkoder.forEach {
             lagVarseldefinisjon(it)
         }
-        meldingssenderV2.sendAktivitetsloggNyAktivitet(
+        sisteMeldingId = meldingssenderV2.sendAktivitetsloggNyAktivitet(
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             varselkoder = varselkoder
         )
+        assertIngenEtterspurteBehov()
+        assertIngenUtgåendeMeldinger()
     }
 
     protected fun håndterEndretSkjermetinfo(
         fødselsnummer: String = FØDSELSNUMMER,
         skjermet: Boolean
     ) {
-        meldingssenderV2.sendEndretSkjermetinfo(fødselsnummer, skjermet)
+        sisteMeldingId = meldingssenderV2.sendEndretSkjermetinfo(fødselsnummer, skjermet)
+        assertIngenEtterspurteBehov()
+        assertIngenUtgåendeMeldinger()
     }
 
     protected fun håndterGosysOppgaveEndret(fødselsnummer: String = FØDSELSNUMMER) {
-        meldingssenderV2.sendGosysOppgaveEndret(fødselsnummer)
+        sisteMeldingId = meldingssenderV2.sendGosysOppgaveEndret(fødselsnummer)
         assertEtterspurteBehov("ÅpneOppgaver")
     }
 
@@ -336,7 +348,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
     ) {
-        meldingssenderV2.sendUtbetalingEndret(
+        sisteMeldingId = meldingssenderV2.sendUtbetalingEndret(
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
@@ -345,6 +357,8 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp
         )
+        assertIngenEtterspurteBehov()
+        assertIngenUtgåendeMeldinger()
     }
 
     protected fun håndterUtbetalingForkastet(
@@ -352,7 +366,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
     ) {
-        meldingssenderV2.sendUtbetalingEndret(
+        sisteMeldingId = meldingssenderV2.sendUtbetalingEndret(
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
@@ -361,6 +375,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
             forrigeStatus = NY,
             gjeldendeStatus = FORKASTET
         )
+        assertIngenEtterspurteBehov()
     }
 
     private fun håndterUtbetalingUtbetalt(
@@ -368,7 +383,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
     ) {
-        meldingssenderV2.sendUtbetalingEndret(
+        sisteMeldingId = meldingssenderV2.sendUtbetalingEndret(
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
@@ -377,6 +392,8 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
             forrigeStatus = SENDT,
             gjeldendeStatus = UTBETALT
         )
+        assertIngenEtterspurteBehov()
+        assertUtgåendeMelding("oppgave_oppdatert")
     }
 
     protected fun håndterUtbetalingAnnullert(
@@ -397,7 +414,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
             }
         }
 
-        meldingssenderV2.sendUtbetalingAnnullert(
+        sisteMeldingId = meldingssenderV2.sendUtbetalingAnnullert(
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
@@ -406,6 +423,8 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
             arbeidsgiverFagsystemId = fagsystemidFor(utbetalingId, tilArbeidsgiver = true),
             personFagsystemId = fagsystemidFor(utbetalingId, tilArbeidsgiver = false),
         )
+        assertIngenEtterspurteBehov()
+        assertIngenUtgåendeMeldinger()
     }
 
     protected fun håndterGodkjenningsbehov(
@@ -430,7 +449,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
 
         håndterUtbetalingOpprettet(utbetalingtype = if (erRevurdering) "REVURDERING" else "UTBETALING")
         håndterVedtaksperiodeEndret()
-        meldingssenderV2.sendGodkjenningsbehov(
+        sisteMeldingId = meldingssenderV2.sendGodkjenningsbehov(
             aktørId,
             fødselsnummer,
             organisasjonsnummer,
@@ -455,7 +474,8 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
         adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert
     ) {
-        meldingssenderV2.sendPersoninfoløsning(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId, adressebeskyttelse)
+        assertEtterspurteBehov("HentPersoninfoV2")
+        sisteMeldingId = meldingssenderV2.sendPersoninfoløsning(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId, adressebeskyttelse)
     }
 
     protected fun håndterEnhetløsning(
@@ -464,7 +484,8 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
     ) {
-        meldingssenderV2.sendEnhetløsning(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId)
+        assertEtterspurteBehov("HentEnhet")
+        sisteMeldingId = meldingssenderV2.sendEnhetløsning(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId)
     }
 
     protected fun håndterInfotrygdutbetalingerløsning(
@@ -473,7 +494,8 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID
     ) {
-        meldingssenderV2.sendInfotrygdutbetalingerløsning(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId)
+        assertEtterspurteBehov("HentInfotrygdutbetalinger")
+        sisteMeldingId = meldingssenderV2.sendInfotrygdutbetalingerløsning(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId)
     }
 
     protected fun håndterArbeidsgiverinformasjonløsning(
@@ -483,7 +505,8 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
         arbeidsgiverinformasjonJson: List<Testmeldingfabrikk.ArbeidsgiverinformasjonJson>? = null
     ) {
-        meldingssenderV2.sendArbeidsgiverinformasjonløsning(
+        assertEtterspurteBehov("Arbeidsgiverinformasjon")
+        sisteMeldingId = meldingssenderV2.sendArbeidsgiverinformasjonløsning(
             aktørId,
             fødselsnummer,
             organisasjonsnummer,
@@ -498,11 +521,13 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
     ) {
-        meldingssenderV2.sendArbeidsforholdløsning(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId)
+        assertEtterspurteBehov("Arbeidsforhold")
+        sisteMeldingId = meldingssenderV2.sendArbeidsforholdløsning(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId)
     }
 
     protected fun håndterEgenansattløsning(aktørId: String = AKTØR, fødselsnummer: String = FØDSELSNUMMER) {
-        meldingssenderV2.sendEgenAnsattløsning(aktørId, fødselsnummer, false)
+        assertEtterspurteBehov("EgenAnsatt")
+        sisteMeldingId = meldingssenderV2.sendEgenAnsattløsning(aktørId, fødselsnummer, false)
     }
 
     protected fun håndterVergemålløsning(
@@ -510,14 +535,16 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         fødselsnummer: String = FØDSELSNUMMER,
         fullmakter: List<Fullmakt> = emptyList(),
     ) {
-        meldingssenderV2.sendVergemålløsning(aktørId, fødselsnummer, fullmakter)
+        assertEtterspurteBehov("Vergemål")
+        sisteMeldingId = meldingssenderV2.sendVergemålløsning(aktørId, fødselsnummer, fullmakter)
     }
 
     protected fun håndterInntektløsning(
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
     ) {
-        meldingssenderV2.sendInntektløsning(aktørId, fødselsnummer)
+        assertEtterspurteBehov("InntekterForSykepengegrunnlag")
+        sisteMeldingId = meldingssenderV2.sendInntektløsning(aktørId, fødselsnummer)
     }
 
     protected fun håndterÅpneOppgaverløsning(
@@ -526,7 +553,8 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         antall: Int = 0,
         oppslagFeilet: Boolean = false,
     ) {
-        meldingssenderV2.sendÅpneGosysOppgaverløsning(aktørId, fødselsnummer, antall, oppslagFeilet)
+        assertEtterspurteBehov("ÅpneOppgaver")
+        sisteMeldingId = meldingssenderV2.sendÅpneGosysOppgaverløsning(aktørId, fødselsnummer, antall, oppslagFeilet)
     }
 
     protected fun håndterRisikovurderingløsning(
@@ -537,7 +565,8 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         kanGodkjennesAutomatisk: Boolean = true,
         risikofunn: List<Risikofunn> = emptyList(),
     ) {
-        meldingssenderV2.sendRisikovurderingløsning(
+        assertEtterspurteBehov("Risikovurdering")
+        sisteMeldingId = meldingssenderV2.sendRisikovurderingløsning(
             aktørId,
             fødselsnummer,
             organisasjonsnummer,
@@ -567,7 +596,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
 
         val oppgaveId = oppgaveIdFor(vedtaksperiodeId)
         val godkjenningsbehovId = godkjenningsbehovIdFor(vedtaksperiodeId)
-        meldingssenderV2.sendSaksbehandlerløsning(
+        sisteMeldingId = meldingssenderV2.sendSaksbehandlerløsning(
             fødselsnummer,
             oppgaveId = oppgaveId,
             godkjenningsbehovId = godkjenningsbehovId,
@@ -585,11 +614,12 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
     ) {
         håndterUtbetalingUtbetalt(aktørId, fødselsnummer, organisasjonsnummer)
-        meldingssenderV2.sendVedtakFattet(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId)
+        sisteMeldingId = meldingssenderV2.sendVedtakFattet(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId)
     }
 
-    protected fun håndterAdressebeskyttelseEndret(aktørId: String = AKTØR, fødselsnummer: String = FØDSELSNUMMER) {
-        meldingssenderV2.sendAdressebeskyttelseEndret(aktørId, fødselsnummer)
+    protected fun håndterAdressebeskyttelseEndret(aktørId: String = AKTØR, fødselsnummer: String = FØDSELSNUMMER, harOppdatertMetadata: Boolean = true) {
+        if (!harOppdatertMetadata) assertEtterspurteBehov("HentPersoninfoV2")
+        sisteMeldingId = meldingssenderV2.sendAdressebeskyttelseEndret(aktørId, fødselsnummer)
     }
 
     protected fun håndterOppdaterPersonsnapshot(
@@ -598,7 +628,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         snapshotSomSkalHentes: GraphQLClientResponse<HentSnapshot.Result>
     ) {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshotSomSkalHentes
-        meldingssenderV2.sendOppdaterPersonsnapshot(aktørId, fødselsnummer)
+        sisteMeldingId = meldingssenderV2.sendOppdaterPersonsnapshot(aktørId, fødselsnummer)
         assertEtterspurteBehov("HentInfotrygdutbetalinger")
     }
 
@@ -608,7 +638,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         organisasjonsnummer: String = ORGNR,
     ) {
         håndterOverstyring(aktørId, fødselsnummer, organisasjonsnummer, "overstyr_tidslinje") {
-            meldingssenderV2.sendOverstyrTidslinje(aktørId, fødselsnummer, organisasjonsnummer)
+            sisteMeldingId = meldingssenderV2.sendOverstyrTidslinje(aktørId, fødselsnummer, organisasjonsnummer)
         }
     }
 
@@ -631,7 +661,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
 
     ) {
         håndterOverstyring(aktørId, fødselsnummer, ORGNR, "overstyr_inntekt_og_refusjon") {
-            meldingssenderV2.sendOverstyrtInntektOgRefusjon(aktørId, fødselsnummer, skjæringstidspunkt, arbeidsgivere)
+            sisteMeldingId = meldingssenderV2.sendOverstyrtInntektOgRefusjon(aktørId, fødselsnummer, skjæringstidspunkt, arbeidsgivere)
         }
     }
 
@@ -641,7 +671,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         organisasjonsnummer: String = ORGNR,
     ) {
         håndterOverstyring(aktørId, fødselsnummer, organisasjonsnummer, "overstyr_arbeidsforhold") {
-            meldingssenderV2.sendOverstyrtArbeidsforhold(aktørId, fødselsnummer, organisasjonsnummer)
+            sisteMeldingId = meldingssenderV2.sendOverstyrtArbeidsforhold(aktørId, fødselsnummer, organisasjonsnummer)
         }
     }
 
@@ -652,14 +682,13 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         overstyringHendelse: String,
         overstyringBlock: () -> Unit,
     ) {
-        testRapid.reset()
         overstyringBlock()
         val hendelser = testRapid.inspektør.hendelser(overstyringHendelse)
         assertEquals(1, hendelser.size)
         val overstyring = hendelser.single()
         val hendelseId = UUID.fromString(overstyring["@id"].asText())
         håndterUtbetalingForkastet(aktørId, fødselsnummer, organisasjonsnummer)
-        Meldingssender.sendOverstyringIgangsatt(
+        sisteMeldingId = meldingssenderV2.sendOverstyringIgangsatt(
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             berørtePerioder = listOf(
@@ -686,7 +715,6 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         assertTrue(løsning.path("godkjent").isBoolean)
         assertTrue(løsning.path("godkjent").booleanValue())
         assertNotNull(løsning.path("godkjenttidspunkt").asLocalDateTime())
-        assertUtgåendeMelding("vedtaksperiode_godkjent")
     }
 
     protected fun assertIkkeAutomatiskGodkjent() {
@@ -768,7 +796,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         verify(exactly = 1) { snapshotClient.hentSnapshot(FØDSELSNUMMER) }
     }
 
-    protected fun assertVedtaksperiodeEksisterer(vedtaksperiodeId: UUID) {
+    private fun assertVedtaksperiodeEksisterer(vedtaksperiodeId: UUID) {
         assertEquals(1, vedtak(vedtaksperiodeId))
     }
 
@@ -776,7 +804,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         assertEquals(0, vedtak(vedtaksperiodeId))
     }
 
-    protected fun assertPersonEksisterer(fødselsnummer: String, aktørId: String) {
+    private fun assertPersonEksisterer(fødselsnummer: String, aktørId: String) {
         assertEquals(1, person(fødselsnummer, aktørId)) { "Person med fødselsnummer=$fødselsnummer og aktørId=$aktørId finnes ikke i databasen" }
     }
 
@@ -784,18 +812,36 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         assertEquals(0, person(fødselsnummer, aktørId))
     }
 
-    protected fun assertArbeidsgiverEksisterer(organisasjonsnummer: String) {
+    private fun assertArbeidsgiverEksisterer(organisasjonsnummer: String) {
         assertEquals(1, arbeidsgiver(organisasjonsnummer)) { "Arbeidsgiver med organisasjonsnummer=$organisasjonsnummer finnes ikke i databasen" }
     }
 
     protected fun assertUtgåendeMelding(hendelse: String) {
-        val meldinger = testRapid.inspektør.hendelser(hendelse)
-        assertEquals(1, meldinger.size)
+        val meldinger = testRapid.inspektør.hendelser(hendelse, sisteMeldingId)
+        assertEquals(1, meldinger.size) {
+            "Utgående meldinger: ${meldinger.joinToString { it.path("@event_name").asText() }}"
+        }
+    }
+
+    private fun assertSisteUtgåendeMelding(hendelse: String) {
+        val sisteMelding = testRapid.inspektør.hendelser().last()
+        assertEquals(sisteMelding, hendelse) {
+            "Siste utgående melding: $sisteMelding"
+        }
+    }
+
+    private fun assertIngenUtgåendeMeldinger() {
+        val meldinger = testRapid.inspektør.hendelser(sisteMeldingId)
+        assertEquals(0, meldinger.size) {
+            "Utgående meldinger: ${meldinger.joinToString { it.path("@event_name").asText() }}"
+        }
     }
 
     protected fun assertIkkeUtgåendeMelding(hendelse: String) {
         val meldinger = testRapid.inspektør.hendelser(hendelse)
-        assertEquals(0, meldinger.size)
+        assertEquals(0, meldinger.size) {
+            "Utgående meldinger: ${meldinger.joinToString { it.path("@event_name").asText() }}"
+        }
     }
 
     private fun assertUtgåendeBehovløsning(behov: String) {
@@ -809,11 +855,15 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
     }
 
     private fun assertEtterspurteBehov(vararg behov: String) {
-        val etterspurteBehov = testRapid.inspektør.behov()
+        val etterspurteBehov = testRapid.inspektør.behov(sisteMeldingId)
         assertEquals(behov.toList(), etterspurteBehov) {
             val ikkeEtterspurt = behov.toSet() - etterspurteBehov.toSet()
             "Følgende behov ble ikke etterspurt: $ikkeEtterspurt\nEtterspurte behov: $etterspurteBehov\n"
         }
+    }
+
+    protected fun assertIngenEtterspurteBehov() {
+        assertEquals(emptyList<String>(), testRapid.inspektør.behov(sisteMeldingId))
     }
 
     protected fun assertSisteEtterspurteBehov(behov: String) {
@@ -821,17 +871,9 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         assertEquals(sisteEtterspurteBehov, behov)
     }
 
-    protected fun assertIngenEtterspurteBehov() {
-        assertEquals(emptyList<String>(), testRapid.inspektør.behov())
-    }
-
     protected fun assertUtbetaling(arbeidsgiverbeløp: Int, personbeløp: Int) {
         assertEquals(arbeidsgiverbeløp, finnbeløp("arbeidsgiver"))
         assertEquals(personbeløp, finnbeløp("person"))
-    }
-
-    protected fun nullstillRapid() {
-        testRapid.reset()
     }
 
     private fun finnbeløp(type: String): Int? {

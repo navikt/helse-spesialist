@@ -31,7 +31,6 @@ internal class AdressebeskyttelseEndretE2ETest : AbstractE2ETestV2() {
         håndterVedtaksperiodeOpprettet()
 
         // Etterspør personinfo selv om det nettopp er gjort
-        nullstillRapid()
         håndterAdressebeskyttelseEndret()
         assertSisteEtterspurteBehov("HentPersoninfoV2")
     }
