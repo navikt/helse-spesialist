@@ -31,7 +31,7 @@ import org.junit.jupiter.api.TestInstance
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class TotrinnsvurderingApiTest : AbstractApiTest() {
 
-    private val apiVarselRepository: ApiVarselRepository = mockk(relaxed = true)
+    private val varselRepository = mockk<ApiVarselRepository>(relaxed = true)
     private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
     private val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
     private val notatMediator = mockk<NotatMediator>(relaxed = true)
@@ -52,7 +52,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     @BeforeAll
     fun setupTotrinnsvurdering() {
         setupServer {
-            totrinnsvurderingApi(apiVarselRepository, oppgaveMediator, periodehistorikkDao, notatMediator, tildelingService, hendelseMediator)
+            totrinnsvurderingApi(varselRepository, oppgaveMediator, periodehistorikkDao, notatMediator, tildelingService, hendelseMediator)
         }
     }
 
@@ -78,7 +78,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     fun `en vedtaksperiode kan godkjennes hvis alle varsler er vurdert`() {
         every { oppgaveMediator.erAktivOppgave(1L) } returns true
         every { oppgaveMediator.erRiskoppgave(1L) } returns false
-        every { apiVarselRepository.ikkeVurderteVarslerEkskludertBesluttervarslerFor(1L) } returns 0
+        every { varselRepository.ikkeVurderteVarslerEkskludertBesluttervarslerFor(1L) } returns 0
         val response = runBlocking {
             client.preparePost("/api/totrinnsvurdering") {
                 contentType(ContentType.Application.Json)
@@ -93,7 +93,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     fun `en vedtaksperiode kan ikke godkjennes hvis det fins aktive varsler`() {
         every { oppgaveMediator.erAktivOppgave(1L) } returns true
         every { oppgaveMediator.erRiskoppgave(1L) } returns false
-        every { apiVarselRepository.ikkeVurderteVarslerEkskludertBesluttervarslerFor(1L) } returns 1
+        every { varselRepository.ikkeVurderteVarslerEkskludertBesluttervarslerFor(1L) } returns 1
         val response = runBlocking {
             client.preparePost("/api/totrinnsvurdering") {
                 contentType(ContentType.Application.Json)

@@ -97,7 +97,6 @@ import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.utbetaling.UtbetalingApiDao
 import no.nav.helse.spesialist.api.utbetaling.annulleringApi
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
-import no.nav.helse.spesialist.api.varsel.VarselService
 import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import org.slf4j.LoggerFactory
@@ -215,7 +214,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val varselRepository = ActualVarselRepository(dataSource)
     private val apiVarselRepository = ApiVarselRepository(dataSource)
     private val generasjonRepository = ActualGenerasjonRepository(dataSource)
-    private val varselService = VarselService()
 
     private val behandlingsstatistikkMediator = BehandlingsstatistikkMediator(behandlingsstatistikkDao)
 
@@ -289,7 +287,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 risikovurderingApiDao = risikovurderingApiDao,
                 varselDao = varselDao,
                 varselRepository = apiVarselRepository,
-                varselService = varselService,
                 utbetalingApiDao = utbetalingApiDao,
                 oppgaveApiDao = oppgaveApiDao,
                 periodehistorikkDao = periodehistorikkDao,

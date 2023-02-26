@@ -16,7 +16,6 @@ import no.nav.helse.spesialist.api.overstyring.OverstyringTidslinjeDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
-import no.nav.helse.spesialist.api.varsel.VarselService
 import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 
 data class Arbeidsforhold(
@@ -114,12 +113,13 @@ data class Arbeidsgiver(
     private val risikovurderingApiDao: RisikovurderingApiDao,
     private val varselDao: VarselDao,
     private val varselRepository: ApiVarselRepository,
-    private val varselService: VarselService,
     private val oppgaveApiDao: OppgaveApiDao,
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val notatDao: NotatDao,
 ) {
     fun generasjoner(): List<Generasjon> = generasjoner.mapIndexed { index, generasjon ->
+        val oppgaveId = oppgaveApiDao.finnOppgaveId(fødselsnummer)
+        val perioderSomSkalViseAktiveVarsler = varselRepository.perioderSomSkalViseVarsler(oppgaveId)
         Generasjon(
             id = generasjon.id,
             perioder = generasjon.perioder.map {
@@ -128,9 +128,7 @@ data class Arbeidsgiver(
                         id = it.id,
                         varselRepository = varselRepository,
                         periode = it,
-                        skalViseVarsler = index == 0 && varselService
-                            .uberegnedePerioderSomSkalViseVarsler(generasjon, oppgaveApiDao)
-                            .contains(UUID.fromString(it.vedtaksperiodeId)),
+                        skalViseAktiveVarsler = index == 0 && perioderSomSkalViseAktiveVarsler.contains(UUID.fromString(it.vedtaksperiodeId)),
                     )
 
                     is GraphQLBeregnetPeriode -> BeregnetPeriode(

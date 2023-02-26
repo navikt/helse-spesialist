@@ -18,7 +18,6 @@ import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
-import no.nav.helse.spesialist.api.varsel.VarselService
 import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -32,7 +31,6 @@ class PersonQuery(
     private val risikovurderingApiDao: RisikovurderingApiDao,
     private val varselDao: VarselDao,
     private val varselRepository: ApiVarselRepository,
-    private val varselService: VarselService,
     private val oppgaveApiDao: OppgaveApiDao,
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val notatDao: NotatDao,
@@ -80,7 +78,6 @@ class PersonQuery(
                 risikovurderingApiDao = risikovurderingApiDao,
                 varselDao = varselDao,
                 varselRepository = varselRepository,
-                varselService = varselService,
                 oppgaveApiDao = oppgaveApiDao,
                 periodehistorikkDao = periodehistorikkDao,
                 notatDao = notatDao,

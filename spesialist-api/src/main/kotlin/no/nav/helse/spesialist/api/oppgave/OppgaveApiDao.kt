@@ -39,6 +39,15 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         """
     ).single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.long("id") }
 
+    fun finnOppgaveId(fødselsnummer: String) = queryize(
+        """
+            SELECT o.id as oppgaveId FROM oppgave o
+            JOIN vedtak v ON v.id = o.vedtak_ref
+            JOIN person p ON v.person_ref = p.id
+            WHERE p.fodselsnummer = :fodselsnummer AND status = 'AvventerSaksbehandler'::oppgavestatus;
+        """
+    ).single(mapOf("fodselsnummer" to fødselsnummer.toLong())) { it.long("oppgaveId") }
+
     fun erBeslutteroppgave(vedtaksperiodeId: UUID): Boolean = queryize(
         """
             SELECT er_beslutteroppgave FROM oppgave

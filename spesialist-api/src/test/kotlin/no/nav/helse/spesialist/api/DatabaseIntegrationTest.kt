@@ -49,7 +49,6 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.utbetaling.UtbetalingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
-import no.nav.helse.spesialist.api.varsel.VarselService
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
@@ -71,7 +70,6 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     protected val varselDao = VarselDao(dataSource)
     protected val apiVarselRepository = ApiVarselRepository(dataSource)
-    protected val varselService = VarselService()
     protected val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
     protected val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
     protected val saksbehandlerDao = SaksbehandlerDao(dataSource)
@@ -92,10 +90,10 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected fun opprettVedtaksperiode(
         personId: Long,
         arbeidsgiverId: Long,
-        utbetlingId: UUID? = null,
+        utbetalingId: UUID? = null,
         periode: Periode = PERIODE,
         oppgavetype: Oppgavetype = Oppgavetype.SØKNAD,
-    ) = opprettVedtak(personId, arbeidsgiverId, periode).also { klargjørVedtak(it, utbetlingId, periode, oppgavetype) }
+    ) = opprettVedtak(personId, arbeidsgiverId, periode).also { klargjørVedtak(it, utbetalingId, periode, oppgavetype) }
 
     protected fun opprettVedtak(
         personId: Long,
@@ -613,6 +611,12 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         vedtaksperiodeId = vedtaksperiodeId.toString(),
         id = UUID.randomUUID().toString(),
     )
+
+    protected fun finnOppgaveIdFor(vedtaksperiodeId: UUID): Long = sessionOf(dataSource).use { session ->
+        @Language("PostgreSQL")
+        val query = "SELECT o.id FROM oppgave o JOIN vedtak v ON v.id = o.vedtak_ref WHERE v.vedtaksperiode_id = :vedtaksperiode_id;"
+        return requireNotNull(session.run(queryOf(query, mapOf("vedtaksperiode_id" to vedtaksperiodeId)).map { it.long("id") }.asSingle))
+    }
 
     protected data class Navn(
         val fornavn: String,

@@ -44,7 +44,7 @@ import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ContentNe
 @TestInstance(PER_CLASS)
 internal class PersonApiTest {
 
-    private val apiVarselRepository: ApiVarselRepository = mockk(relaxed = true)
+    private val varselRepository: ApiVarselRepository = mockk(relaxed = true)
     private val hendelseMediator: HendelseMediator = mockk(relaxed = true)
     private val oppgaveMediator: OppgaveMediator = mockk(relaxed = true)
     private val saksbehandlerIdent = "1234"
@@ -83,7 +83,7 @@ internal class PersonApiTest {
     fun `en vedtaksperiode kan godkjennes hvis alle varsler er vurdert`() {
         every { oppgaveMediator.erAktivOppgave(1L) } returns true
         every { oppgaveMediator.erRiskoppgave(1L) } returns false
-        every { apiVarselRepository.ikkeVurderteVarslerFor(1L) } returns 0
+        every { varselRepository.ikkeVurderteVarslerFor(1L) } returns 0
         val response = runBlocking {
             client.preparePost("/api/vedtak") {
                 contentType(ContentType.Application.Json)
@@ -98,7 +98,7 @@ internal class PersonApiTest {
     fun `en vedtaksperiode kan ikke godkjennes hvis det fins aktive varsler`() {
         every { oppgaveMediator.erAktivOppgave(1L) } returns true
         every { oppgaveMediator.erRiskoppgave(1L) } returns false
-        every { apiVarselRepository.ikkeVurderteVarslerFor(1L) } returns 1
+        every { varselRepository.ikkeVurderteVarslerFor(1L) } returns 1
         val response = runBlocking {
             client.preparePost("/api/vedtak") {
                 contentType(ContentType.Application.Json)
@@ -113,7 +113,7 @@ internal class PersonApiTest {
     fun `en vedtaksperiode kan avvises selv om det finnes uvurderte varsler`() {
         every { oppgaveMediator.erAktivOppgave(1L) } returns true
         every { oppgaveMediator.erRiskoppgave(1L) } returns false
-        every { apiVarselRepository.ikkeVurderteVarslerFor(1L) } returns 1
+        every { varselRepository.ikkeVurderteVarslerFor(1L) } returns 1
         val response = runBlocking {
             client.preparePost("/api/vedtak") {
                 contentType(ContentType.Application.Json)
@@ -308,7 +308,7 @@ internal class PersonApiTest {
             routing {
                 authenticate("oidc") {
                     personApi(
-                        apiVarselRepository,
+                        varselRepository,
                         hendelseMediator,
                         oppgaveMediator,
                         Tilgangsgrupper(

@@ -70,7 +70,6 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
             risikovurderingApiDao = risikovurderingApiDao,
             varselDao = varselDao,
             varselRepository = apiVarselRepository,
-            varselService = varselService,
             utbetalingApiDao = utbetalingApiDao,
             oppgaveApiDao = oppgaveApiDao,
             periodehistorikkDao = periodehistorikkDao,
