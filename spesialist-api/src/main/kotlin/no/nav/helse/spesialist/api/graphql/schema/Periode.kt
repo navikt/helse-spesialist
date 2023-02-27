@@ -255,6 +255,7 @@ interface Periode {
     fun vedtaksperiodeId(): UUIDString
     fun periodetilstand(): Periodetilstand
     fun skjaeringstidspunkt(): DateString
+    fun varslerForGenerasjon(): List<VarselDTO>
 
     @GraphQLIgnore
     fun periodetilstand(tilstand: GraphQLPeriodetilstand) = when (tilstand) {
@@ -322,8 +323,7 @@ data class UberegnetPeriode(
     override fun vedtaksperiodeId(): UUIDString = periode.vedtaksperiodeId
     override fun periodetilstand(): Periodetilstand = periodetilstand(periode.periodetilstand)
     override fun skjaeringstidspunkt(): DateString = periode.skjaeringstidspunkt
-
-//    fun varslerForGenerasjon(): List<VarselDTO> = varselRepository.finnVarslerForUberegnetPeriode(UUID.fromString(vedtaksperiodeId())).toList()
+    override fun varslerForGenerasjon(): List<VarselDTO> = emptyList()
 }
 
 @Suppress("unused")
@@ -483,7 +483,7 @@ data class BeregnetPeriode(
 
     fun varsler(): List<String> = varselDao.finnAktiveVarsler(UUID.fromString(vedtaksperiodeId())).distinct()
 
-    fun varslerForGenerasjon(): List<VarselDTO> = varselRepository.finnVarslerSomIkkeErInaktiveFor(
+    override fun varslerForGenerasjon(): List<VarselDTO> = varselRepository.finnVarslerSomIkkeErInaktiveFor(
         UUID.fromString(vedtaksperiodeId()),
         UUID.fromString(periode.utbetaling.id)
     ).toList()
