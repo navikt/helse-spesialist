@@ -1,6 +1,7 @@
 package no.nav.helse.modell
 
 import DatabaseIntegrationTest
+import java.sql.SQLException
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
@@ -20,9 +21,12 @@ import no.nav.helse.spesialist.api.oppgave.BESLUTTEROPPGAVE_PREFIX
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class OppgaveApiDaoTest : DatabaseIntegrationTest() {
     private companion object {
@@ -43,6 +47,46 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
         val oppgave = oppgaver.first()
         assertTrue(oppgaver.isNotEmpty())
         assertEquals(oppgaveId.toString(), oppgave.id)
+    }
+
+    @Test
+    fun `Finner oppgaveId basert på vedtaksperiodeId`() {
+        nyPerson()
+        val oppgaveId = oppgaveApiDao.finnOppgaveId(VEDTAKSPERIODE)
+        assertNotNull(oppgaveId)
+        assertEquals(this.oppgaveId, oppgaveId)
+    }
+
+    @Test
+    fun `Finner ikke oppgaveId basert på vedtaksperiodeId dersom vedtaksperiode ikke finnes`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        val oppgaveId = oppgaveApiDao.finnOppgaveId(VEDTAKSPERIODE)
+        assertNull(oppgaveId)
+    }
+
+    @Test
+    fun `Får feil dersom det finnes flere oppgaver som avventer saksbehandler for en person`() {
+        nyPerson()
+        opprettOppgave()
+        assertThrows<SQLException> {
+            oppgaveApiDao.finnOppgaveId(VEDTAKSPERIODE)
+        }
+    }
+
+    @Test
+    fun `Finner oppgave basert på fødselsnummer`() {
+        nyPerson()
+        opprettOppgave()
+        assertThrows<SQLException> {
+            oppgaveApiDao.finnOppgaveId(FNR)
+        }
+    }
+
+    @Test
+    fun `Finner ikke oppgave basert på fødselsnummer dersom person ikke finnes`() {
+        val oppgaveId = oppgaveApiDao.finnOppgaveId(FNR)
+        assertNull(oppgaveId)
     }
 
     @Test
