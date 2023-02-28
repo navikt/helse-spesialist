@@ -23,7 +23,7 @@ data class OppgaveForOversiktsvisning(
     val id: UUIDString,
     val type: Oppgavetype,
     val opprettet: DateTimeString,
-    val opprinneligSøknadsdato: DateTimeString,
+    val opprinneligSoknadsdato: DateTimeString,
     val vedtaksperiodeId: UUIDString,
     val personinfo: Personinfo,
     val aktorId: String,

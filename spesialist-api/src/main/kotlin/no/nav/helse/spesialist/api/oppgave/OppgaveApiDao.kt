@@ -140,7 +140,7 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             WITH aktiv_oppgave AS (select o.* from oppgave o where o.status = 'AvventerSaksbehandler'),
                  aktiv_tildeling AS (select t.* from tildeling t where t.oppgave_id_ref in (select o.id from aktiv_oppgave o))
 
-            SELECT o.id as oppgave_id, o.type AS oppgavetype, o.opprettet, svg.opprettet_tidspunkt AS opprinneligSøknadsdato, o.er_beslutteroppgave, o.er_returoppgave, o.er_totrinnsoppgave, o.tidligere_saksbehandler_oid, o.sist_sendt,
+            SELECT o.id as oppgave_id, o.type AS oppgavetype, o.opprettet, svg.opprettet_tidspunkt AS opprinneligSoknadsdato, o.er_beslutteroppgave, o.er_returoppgave, o.er_totrinnsoppgave, o.tidligere_saksbehandler_oid, o.sist_sendt,
                 s.epost, s.navn as saksbehandler_navn, s.oid, v.vedtaksperiode_id, v.fom, v.tom, pi.fornavn, pi.mellomnavn, pi.etternavn, pi.fodselsdato,
                 pi.kjonn, pi.adressebeskyttelse, p.aktor_id, p.fodselsnummer, sot.type as saksbehandleroppgavetype, sot.inntektskilde, e.id AS enhet_id, e.navn AS enhet_navn, t.på_vent,
                 (SELECT COUNT(DISTINCT melding) from warning w where w.melding not like '$beslutterOppgaveHackyWorkaround%' and w.vedtak_ref = o.vedtak_ref and (w.inaktiv_fra is null or w.inaktiv_fra > now())) AS antall_varsler
@@ -256,7 +256,7 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             id = it.string("oppgave_id"),
             type = Oppgavetype.valueOf(it.string("oppgavetype")).tilOppgavetype(),
             opprettet = it.string("opprettet"),
-            opprinneligSøknadsdato = it.string("opprinneligSøknadsdato"),
+            opprinneligSoknadsdato = it.string("opprinneligSoknadsdato"),
             vedtaksperiodeId = it.string("vedtaksperiode_id"),
             personinfo = Personinfo(
                 fornavn = it.string("fornavn"),

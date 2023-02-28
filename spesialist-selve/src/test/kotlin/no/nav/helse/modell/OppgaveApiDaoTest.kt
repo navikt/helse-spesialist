@@ -344,7 +344,7 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
         val generasjonstidspunkt = finnOpprettetTidspunkterFor(VEDTAKSPERIODE).first()
         val oppgave = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN).first()
 
-        assertEquals(generasjonstidspunkt, oppgave.opprinneligSøknadsdato)
+        assertEquals(generasjonstidspunkt, oppgave.opprinneligSoknadsdato)
     }
 
     // Sortert stigende
