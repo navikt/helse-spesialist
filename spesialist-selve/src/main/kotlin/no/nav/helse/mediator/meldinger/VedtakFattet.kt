@@ -3,7 +3,6 @@ package no.nav.helse.mediator.meldinger
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -60,7 +59,6 @@ internal class VedtakFattet(
     }
 
     override fun execute(context: CommandContext): Boolean {
-        if (!Toggle.VedtaksperiodeGenerasjoner.enabled) return true
         try {
             val generasjon = generasjonRepository.sisteFor(vedtaksperiodeId)
             generasjon.håndterVedtakFattet(id)

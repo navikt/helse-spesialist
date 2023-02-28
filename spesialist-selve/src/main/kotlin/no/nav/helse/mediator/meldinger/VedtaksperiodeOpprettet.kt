@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.kommando.Command
@@ -40,15 +39,12 @@ internal class VedtaksperiodeOpprettet(
 
     override val commands: List<Command> = listOf(
         OpprettMinimaltVedtakCommand(fødselsnummer, organisasjonsnummer, vedtaksperiodeId, fom, tom, personDao, arbeidsgiverDao, vedtakDao),
-    ).let {
-        if (Toggle.VedtaksperiodeGenerasjoner.enabled) {
-            it + OpprettFørsteVedtaksperiodeGenerasjonCommand(
-                vedtaksperiodeId = vedtaksperiodeId,
-                hendelseId = id,
-                generasjonRepository = generasjonRepository,
-            )
-        } else it
-    }
+        OpprettFørsteVedtaksperiodeGenerasjonCommand(
+            vedtaksperiodeId = vedtaksperiodeId,
+            hendelseId = id,
+            generasjonRepository = generasjonRepository,
+        )
+    )
 
     internal class River(
         rapidsConnection: RapidsConnection,

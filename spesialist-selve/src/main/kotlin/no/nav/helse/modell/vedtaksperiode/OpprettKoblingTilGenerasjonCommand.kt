@@ -2,7 +2,6 @@ package no.nav.helse.modell.vedtaksperiode
 
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.varsel.VarselRepository
@@ -16,7 +15,6 @@ internal class OpprettKoblingTilGenerasjonCommand(
     private val varselRepository: VarselRepository,
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
-        if (!Toggle.VedtaksperiodeGenerasjoner.enabled) return true
         val generasjon = try {
             generasjonRepository.sisteFor(vedtaksperiodeId)
         } catch (e: IllegalStateException) {

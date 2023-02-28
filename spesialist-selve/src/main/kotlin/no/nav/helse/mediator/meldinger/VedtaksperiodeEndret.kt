@@ -3,7 +3,6 @@ package no.nav.helse.mediator.meldinger
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.Command
@@ -26,10 +25,10 @@ internal class VedtaksperiodeEndret(
     override val id: UUID,
     private val vedtaksperiodeId: UUID,
     private val fødselsnummer: String,
-    private val forårsaketAvId: UUID,
-    private val forrigeTilstand: String,
-    private val gjeldendeTilstand: String,
     private val json: String,
+    forårsaketAvId: UUID,
+    forrigeTilstand: String,
+    gjeldendeTilstand: String,
     warningDao: WarningDao,
     snapshotDao: SnapshotDao,
     snapshotClient: SnapshotClient,
@@ -46,19 +45,16 @@ internal class VedtaksperiodeEndret(
             warningDao = warningDao,
             personDao = personDao,
             json = json
+        ),
+        VedtaksperiodeGenerasjonCommand(
+            vedtaksperiodeId = vedtaksperiodeId,
+            vedtaksperiodeEndretHendelseId = forårsaketAvId,
+            generasjonRepository = generasjonRepository,
+            varselRepository = varselRepository,
+            forrigeTilstand = forrigeTilstand,
+            gjeldendeTilstand = gjeldendeTilstand
         )
-    ).let {
-        if (Toggle.VedtaksperiodeGenerasjoner.enabled) {
-            it + VedtaksperiodeGenerasjonCommand(
-                vedtaksperiodeId = vedtaksperiodeId,
-                vedtaksperiodeEndretHendelseId = forårsaketAvId,
-                generasjonRepository = generasjonRepository,
-                varselRepository = varselRepository,
-                forrigeTilstand = forrigeTilstand,
-                gjeldendeTilstand = gjeldendeTilstand
-            )
-        } else it
-    }
+    )
 
     override fun fødselsnummer() = fødselsnummer
     override fun vedtaksperiodeId() = vedtaksperiodeId

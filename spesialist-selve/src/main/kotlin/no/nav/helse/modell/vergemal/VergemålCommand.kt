@@ -2,7 +2,6 @@ package no.nav.helse.modell.vergemal
 
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.mediator.Toggle
 import no.nav.helse.mediator.meldinger.løsninger.Vergemålløsning
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.Command
@@ -44,7 +43,6 @@ internal class VergemålCommand(
         }
         if (løsning.harFullmakt()) {
             "Registert fullmakt på personen.".leggTilSomWarning()
-            if (!Toggle.VedtaksperiodeGenerasjoner.enabled) return true
             val generasjon = generasjonRepository.sisteFor(vedtaksperiodeId)
             SB_IK_1.nyttVarsel(generasjon, varselRepository)
         }

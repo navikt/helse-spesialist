@@ -3,7 +3,6 @@ package no.nav.helse.mediator.meldinger.løsninger
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDto
@@ -86,13 +85,11 @@ internal class ÅpneGosysOppgaverløsning(
     }
 
     private fun leggTilVarsel(varselRepository: VarselRepository, generasjonRepository: GenerasjonRepository, vedtaksperiodeId: UUID, varselkode: Varselkode) {
-        if (!Toggle.VedtaksperiodeGenerasjoner.enabled) return
         val generasjon = generasjonRepository.sisteFor(vedtaksperiodeId)
         varselkode.nyttVarsel(generasjon, varselRepository)
     }
 
     private fun deaktiverVarsel(varselRepository: VarselRepository, generasjonRepository: GenerasjonRepository, vedtaksperiodeId: UUID, varselkode: Varselkode) {
-        if (!Toggle.VedtaksperiodeGenerasjoner.enabled) return
         val generasjon = generasjonRepository.sisteFor(vedtaksperiodeId)
         varselkode.deaktiverFor(generasjon, varselRepository)
     }
