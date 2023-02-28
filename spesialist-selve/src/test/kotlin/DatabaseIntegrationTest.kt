@@ -217,6 +217,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     ) {
         opprettPerson()
         opprettArbeidsgiver()
+        opprettGenerasjon()
         opprettVedtaksperiode(periodetype = periodetype, inntektskilde = inntektskilde)
         opprettOppgave()
     }
@@ -279,6 +280,10 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     protected fun opprettSnapshot(person: GraphQLPerson = snapshot().data!!.person!!) {
         snapshotId = snapshotDao.lagre(FNR, person)
+    }
+
+    protected fun opprettGenerasjon(vedtaksperiodeId: UUID = VEDTAKSPERIODE) {
+        generasjonDao.opprettFor(UUID.randomUUID(), vedtaksperiodeId, UUID.randomUUID())
     }
 
     protected fun opprettVedtaksperiode(

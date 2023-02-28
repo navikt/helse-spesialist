@@ -5,6 +5,8 @@ import java.sql.SQLException
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
+import kotliquery.queryOf
+import kotliquery.sessionOf
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.TestHendelse
@@ -20,6 +22,7 @@ import no.nav.helse.spesialist.api.graphql.schema.Periodetype.OVERGANG_FRA_IT
 import no.nav.helse.spesialist.api.oppgave.BESLUTTEROPPGAVE_PREFIX
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -93,6 +96,7 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
     fun `inkluder risk qa oppgaver bare for supersaksbehandlere`() {
         opprettPerson()
         opprettArbeidsgiver()
+        opprettGenerasjon()
         opprettVedtaksperiode()
         opprettOppgave(vedtaksperiodeId = VEDTAKSPERIODE, oppgavetype = Oppgavetype.RISK_QA)
 
@@ -119,6 +123,7 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
     fun `inkluder kode-7 oppgaver bare for noen utvalgte saksbehandlere`() {
         opprettPerson(adressebeskyttelse = Adressebeskyttelse.Fortrolig)
         opprettArbeidsgiver()
+        opprettGenerasjon()
         opprettVedtaksperiode()
         opprettOppgave(vedtaksperiodeId = VEDTAKSPERIODE)
 
@@ -166,6 +171,7 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
 
         fun opprettVedtaksperiodeOgOppgave(periodetype: Periodetype, oppgavetype: Oppgavetype = OPPGAVETYPE) {
             val randomUUID = UUID.randomUUID()
+            opprettGenerasjon(randomUUID)
             opprettVedtaksperiode(vedtaksperiodeId = randomUUID, periodetype = periodetype)
             opprettOppgave(vedtaksperiodeId = randomUUID, oppgavetype = oppgavetype)
         }
@@ -249,6 +255,7 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
     fun `ikke tell varsler som er beslutteroppgaver`() {
         opprettPerson()
         opprettArbeidsgiver()
+        opprettGenerasjon()
         opprettVedtaksperiode()
         opprettOppgave(contextId = CONTEXT_ID)
         opprettWarning(melding = "$BESLUTTEROPPGAVE_PREFIX Dette er feil")
@@ -327,6 +334,27 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
 
         assertEquals(0, inntektFraAordningen.size)
         assertTrue(inntektFraAordningen.isEmpty())
+    }
+
+    @Test
+    fun `bruker tidspunkt fra tidligste generasjon`() {
+        nyPerson()
+        opprettGenerasjon()
+        opprettGenerasjon()
+        val generasjonstidspunkt = finnOpprettetTidspunkterFor(VEDTAKSPERIODE).first()
+        val oppgave = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN).first()
+
+        assertEquals(generasjonstidspunkt, oppgave.opprinneligSøknadsdato)
+    }
+
+    // Sortert stigende
+    private fun finnOpprettetTidspunkterFor(vedtaksperiodeId: UUID): List<String> {
+        @Language("PostgreSQL")
+        val query =
+            "SELECT opprettet_tidspunkt FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ? order by id;"
+        return sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, vedtaksperiodeId).map { it.string("opprettet_tidspunkt") }.asList)
+        }
     }
 
 }

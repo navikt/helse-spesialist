@@ -95,6 +95,26 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         oppgavetype: Oppgavetype = Oppgavetype.SØKNAD,
     ) = opprettVedtak(personId, arbeidsgiverId, periode).also { klargjørVedtak(it, utbetalingId, periode, oppgavetype) }
 
+    protected fun opprettGenerasjon(
+        periode: Periode,
+    ) = sessionOf(dataSource).use { session ->
+        @Language("PostgreSQL")
+        val statement =
+            "INSERT INTO selve_vedtaksperiode_generasjon (unik_id, vedtaksperiode_id, opprettet_av_hendelse) VALUES (:unik_id, :vedtaksperiode_id, :hendelse_id)"
+        requireNotNull(
+            session.run(
+                queryOf(
+                    statement,
+                    mapOf(
+                        "unik_id" to UUID.randomUUID(),
+                        "vedtaksperiode_id" to periode.id,
+                        "hendelse_id" to UUID.randomUUID(),
+                    )
+                ).asUpdate
+            )
+        )
+    }
+
     protected fun opprettVedtak(
         personId: Long,
         arbeidsgiverId: Long,
@@ -102,6 +122,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     ) =
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             val snapshotid = opprettSnapshot()
+            opprettGenerasjon(periode)
 
             @Language("PostgreSQL")
             val statement =

@@ -64,6 +64,7 @@ class OppgaverQuery(private val oppgaveApiDao: OppgaveApiDao, private val oppgav
         val tidBrukt = Duration.ofNanos(System.nanoTime() - start)
         sikkerLogg.trace("Hentet oppgaver, det tok ${tidBrukt.toMillis()} ms")
     }
+
     @Suppress("unused")
     fun oppgaver(
         antall: Int,
@@ -81,5 +82,4 @@ class OppgaverQuery(private val oppgaveApiDao: OppgaveApiDao, private val oppgav
 
         return DataFetcherResult.newResult<Oppgaver>().data(paginerteOppgaver).build()
     }
-
 }

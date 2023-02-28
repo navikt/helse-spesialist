@@ -51,13 +51,18 @@ class OppgavePagineringDao(private val dataSource: DataSource) : HelseDao(dataSo
         sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val query = """
-            SELECT o.id as oppgave_id, o.type AS oppgavetype, o.opprettet, o.er_beslutteroppgave, o.er_returoppgave, o.er_totrinnsoppgave, o.tidligere_saksbehandler_oid, o.sist_sendt, s.epost, s.navn as saksbehandler_navn, s.oid, v.vedtaksperiode_id, v.fom, v.tom, pi.fornavn, pi.mellomnavn, pi.etternavn, pi.fodselsdato,
+            SELECT o.id as oppgave_id, o.type AS oppgavetype, o.opprettet, svg.opprettet_tidspunkt AS opprinneligSøknadsdato, o.er_beslutteroppgave, o.er_returoppgave, o.er_totrinnsoppgave, o.tidligere_saksbehandler_oid, o.sist_sendt, s.epost, s.navn as saksbehandler_navn, s.oid, v.vedtaksperiode_id, v.fom, v.tom, pi.fornavn, pi.mellomnavn, pi.etternavn, pi.fodselsdato,
                    pi.kjonn, pi.adressebeskyttelse, p.aktor_id, p.fodselsnummer, sot.type as saksbehandleroppgavetype, sot.inntektskilde, e.id AS enhet_id, e.navn AS enhet_navn, t.på_vent,
                    (SELECT COUNT(DISTINCT melding) from warning w where w.vedtak_ref = o.vedtak_ref and (w.inaktiv_fra is null or w.inaktiv_fra > now())) AS antall_varsler
             FROM oppgave o
                 INNER JOIN vedtak v ON o.vedtak_ref = v.id
                 INNER JOIN person p ON v.person_ref = p.id
                 INNER JOIN person_info pi ON p.info_ref = pi.id
+                INNER JOIN (
+                    SELECT vedtaksperiode_id, min(opprettet_tidspunkt) AS opprettet_tidspunkt
+                    FROM selve_vedtaksperiode_generasjon
+                    GROUP BY vedtaksperiode_id
+                ) svg ON svg.vedtaksperiode_id = v.vedtaksperiode_id
                 LEFT JOIN enhet e ON p.enhet_ref = e.id
                 LEFT JOIN saksbehandleroppgavetype sot ON v.id = sot.vedtak_ref
                 LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
