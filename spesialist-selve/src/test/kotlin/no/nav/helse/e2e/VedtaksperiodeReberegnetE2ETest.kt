@@ -10,6 +10,7 @@ import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendInntektløsningOld
 import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
 import no.nav.helse.Meldingssender.sendRisikovurderingløsningOld
+import no.nav.helse.Meldingssender.sendSøknadSendt
 import no.nav.helse.Meldingssender.sendVedtaksperiodeEndret
 import no.nav.helse.Meldingssender.sendVergemålløsningOld
 import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsningOld
@@ -156,12 +157,11 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         )
         assertOppgaver(0)
 
-        godkjenningsmeldingId = vedtaksperiodeTilGodkjenning()
+        godkjenningsmeldingId = vedtaksperiodeTilGodkjenning(harOppdatertMetadata = true)
 
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
-            "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
@@ -253,18 +253,22 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         assertOppgavestatuser(0, Oppgavestatus.AvventerSaksbehandler)
     }
 
-    private fun vedtaksperiodeTilGodkjenning(): UUID {
+    private fun vedtaksperiodeTilGodkjenning(harOppdatertMetadata: Boolean = false): UUID {
+        sendSøknadSendt(AKTØR, FØDSELSNUMMER, ORGNR)
+        sendVedtaksperiodeEndret(AKTØR, FØDSELSNUMMER, ORGNR, vedtaksperiodeId = VEDTAKSPERIODE_ID, forrigeTilstand = "START")
         val godkjenningsmeldingId1 = sendGodkjenningsbehov(
             organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID
         )
         sendPersoninfoløsningComposite(godkjenningsmeldingId1, ORGNR, VEDTAKSPERIODE_ID)
-        sendArbeidsgiverinformasjonløsningOld(
-            hendelseId = godkjenningsmeldingId1,
-            organisasjonsnummer = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID
-        )
+        if (!harOppdatertMetadata) {
+            sendArbeidsgiverinformasjonløsningOld(
+                hendelseId = godkjenningsmeldingId1,
+                organisasjonsnummer = ORGNR,
+                vedtaksperiodeId = VEDTAKSPERIODE_ID
+            )
+        }
         sendArbeidsforholdløsningOld(
             hendelseId = godkjenningsmeldingId1,
             orgnr = ORGNR,

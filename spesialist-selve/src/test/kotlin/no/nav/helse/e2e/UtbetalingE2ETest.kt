@@ -123,7 +123,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
 
     @Test
     fun `utbetaling endret uten at vi kjenner arbeidsgiver`() {
-        val ET_ORGNR = "1"
+        val ET_ORGNR = "123456789"
         val ET_ANNET_ORGNR = "2"
         vedtaksperiode(FØDSELSNUMMER, ET_ORGNR, VEDTAKSPERIODE_ID, false, UTBETALING_ID, SNAPSHOT_UTEN_WARNINGS)
         assertDoesNotThrow {
@@ -254,7 +254,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
     fun `ved endringer i utbetalinger skal kun nyeste vises`() {
         val nyUtbetalingId = UUID.randomUUID()
         vedtaksperiode(utbetalingId = UTBETALING_ID)
-        vedtaksperiode(utbetalingId = nyUtbetalingId)
+        vedtaksperiode(utbetalingId = nyUtbetalingId, harOppdatertMetadata = true)
         sendUtbetalingEndret(
             aktørId = AKTØR,
             fødselsnummer = FØDSELSNUMMER,

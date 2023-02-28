@@ -1,19 +1,15 @@
 package no.nav.helse.modell.vedtaksperiode
 
-import ToggleHelpers.enable
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
-import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.varsel.ActualVarselRepository
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class OpprettKoblingTilGenerasjonCommandTest: AbstractDatabaseTest() {
@@ -61,15 +57,5 @@ class OpprettKoblingTilGenerasjonCommandTest: AbstractDatabaseTest() {
             session.run(queryOf(query, vedtaksperiodeId).map { it.int(1) }.asSingle)
         }
         assertEquals(forventetAntall, antall)
-    }
-
-    @BeforeEach
-    internal fun beforeEach() {
-        Toggle.VedtaksperiodeGenerasjoner.enable()
-    }
-
-    @AfterEach
-    internal fun afterEach() {
-        Toggle.VedtaksperiodeGenerasjoner.enable()
     }
 }

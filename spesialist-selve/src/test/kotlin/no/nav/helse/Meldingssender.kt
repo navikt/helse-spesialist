@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.TestRapidHelpers.contextId
+import no.nav.helse.TestRapidHelpers.siste
 import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
@@ -70,30 +71,6 @@ internal object Meldingssender {
         )
     }
 
-    fun sendOverstyringIgangsatt(
-        aktørId: String,
-        fødselsnummer: String,
-        berørtePerioder: List<Map<String, String>> = listOf(mapOf(
-            "vedtaksperiodeId" to "$VEDTAKSPERIODE_ID",
-            "skjæringstidspunkt" to "2022-01-01",
-            "periodeFom" to "2022-01-01",
-            "periodeTom" to "2022-01-31",
-            "orgnummer" to ORGNR,
-            "typeEndring" to "REVURDERING"
-        )),
-        kilde: UUID = UUID.randomUUID(),
-    ): UUID = uuid.also { id ->
-        testRapid.sendTestMessage(
-            meldingsfabrikk.lagOverstyringIgangsatt(
-                id = id,
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                berørtePerioder = berørtePerioder,
-                kilde = kilde,
-            )
-        )
-    }
-
     fun sendVedtaksperiodeForkastet(orgnr: String, vedtaksperiodeId: UUID): UUID =
         uuid.also { id ->
             testRapid.sendTestMessage(meldingsfabrikk.lagVedtaksperiodeForkastet(id, vedtaksperiodeId, orgnr))
@@ -144,11 +121,6 @@ internal object Meldingssender {
             )
         )
     }
-
-    fun sendAdressebeskyttelseEndret(): UUID =
-        uuid.also { id ->
-            testRapid.sendTestMessage(meldingsfabrikk.lagAdressebeskyttelseEndret(id))
-        }
 
 
     fun sendOverstyrtArbeidsforhold(
@@ -367,22 +339,6 @@ internal object Meldingssender {
             )
         }
 
-    fun sendHentPersoninfoLøsning(
-        hendelseId: UUID,
-        contextId: UUID = testRapid.inspektør.contextId(),
-        adressebeskyttelse: String = "Ugradert"
-    ): UUID =
-        uuid.also { id ->
-            testRapid.sendTestMessage(
-                meldingsfabrikk.lagHentPersoninfoløsning(
-                    id,
-                    hendelseId,
-                    contextId,
-                    adressebeskyttelse
-                )
-            )
-        }
-
     fun sendKomposittbehov(
         hendelseId: UUID,
         behov: List<String>,
@@ -409,20 +365,28 @@ internal object Meldingssender {
         organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
         contextId: UUID = testRapid.inspektør.contextId(),
-        navn: String = "En arbeidsgiver",
-        bransjer: List<String> = listOf("En bransje", "En annen bransje"),
         ekstraArbeidsgivere: List<ArbeidsgiverinformasjonJson> = emptyList()
     ): UUID =
         uuid.also { id ->
+            val behov = testRapid.inspektør.siste("behov")
+
+            val arbeidsgivere = ekstraArbeidsgivere.ifEmpty {
+                behov["Arbeidsgiverinformasjon"]["organisasjonsnummer"].map {
+                    ArbeidsgiverinformasjonJson(
+                        it.asText(),
+                        "Navn for ${it.asText()}",
+                        listOf("Bransje for ${it.asText()}")
+                    )
+                }
+            }
+
             testRapid.sendTestMessage(
                 meldingsfabrikk.lagArbeidsgiverinformasjonløsningOld(
                     aktørId = AKTØR,
                     fødselsnummer = FØDSELSNUMMER,
                     organisasjonsnummer = organisasjonsnummer,
                     vedtaksperiodeId = vedtaksperiodeId,
-                    ekstraArbeidsgivere = ekstraArbeidsgivere,
-                    navn = navn,
-                    bransjer = bransjer,
+                    ekstraArbeidsgivere = arbeidsgivere,
                     id = id,
                     hendelseId = hendelseId,
                     contextId = contextId
@@ -597,6 +561,18 @@ internal object Meldingssender {
                     godkjenningsmeldingId,
                     contextId
                 )
+            )
+        }
+    }
+
+    fun sendVedtaksperiodeNyUtbetaling(
+        vedtaksperiodeId: UUID,
+        utbetalingId: UUID = UUID.randomUUID(),
+        organisasjonsnummer: String
+    ): UUID {
+        return uuid.also {
+            testRapid.sendTestMessage(
+                meldingsfabrikk.lagVedtaksperiodeNyUtbetaling(vedtaksperiodeId, utbetalingId, organisasjonsnummer)
             )
         }
     }

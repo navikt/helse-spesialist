@@ -9,6 +9,7 @@ import graphql.schema.DataFetchingEnvironment
 import io.mockk.every
 import io.mockk.mockk
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -20,6 +21,9 @@ import no.nav.helse.Meldingssender.sendEgenAnsattløsningOld
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
 import no.nav.helse.Meldingssender.sendRisikovurderingløsningOld
+import no.nav.helse.Meldingssender.sendSøknadSendt
+import no.nav.helse.Meldingssender.sendVedtaksperiodeEndret
+import no.nav.helse.Meldingssender.sendVedtaksperiodeNyUtbetaling
 import no.nav.helse.Meldingssender.sendVergemålløsningOld
 import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsningOld
 import no.nav.helse.TestRapidHelpers.behov
@@ -44,7 +48,6 @@ import no.nav.helse.mediator.Toggle
 import no.nav.helse.mediator.api.GodkjenningDTO
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
-import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.ArbeidsgiverinformasjonJson
 import no.nav.helse.mediator.meldinger.TestmeldingfabrikkUtenFnr
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
@@ -60,6 +63,7 @@ import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.varsel.ActualVarselRepository
+import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålDao
@@ -203,11 +207,15 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     internal fun resetTestSetup() {
         testRapid.reset()
         Meldingssender.testRapid = testRapid
+        lagVarseldefinisjoner()
         Toggle.Inntekter.enable()
     }
 
     protected fun settOppBruker(orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList()): UUID {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_MED_WARNINGS
+        sendSøknadSendt(AKTØR, FØDSELSNUMMER, ORGNR)
+        sendVedtaksperiodeEndret(AKTØR, FØDSELSNUMMER, ORGNR, vedtaksperiodeId = VEDTAKSPERIODE_ID, forrigeTilstand = "START")
+        sendVedtaksperiodeNyUtbetaling(VEDTAKSPERIODE_ID, organisasjonsnummer = ORGNR)
         val godkjenningsbehovId = sendGodkjenningsbehov(
             organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
@@ -217,17 +225,15 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold
         )
         sendPersoninfoløsningComposite(godkjenningsbehovId, ORGNR, VEDTAKSPERIODE_ID)
-        sendArbeidsgiverinformasjonløsningOld(
+        if (orgnummereMedRelevanteArbeidsforhold.isNotEmpty()) sendArbeidsgiverinformasjonløsningOld(
             hendelseId = godkjenningsbehovId,
             organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            ekstraArbeidsgivere = orgnummereMedRelevanteArbeidsforhold.map {
-                ArbeidsgiverinformasjonJson(
-                    orgnummer = it,
-                    navn = "ghost",
-                    bransjer = listOf("bransje")
-                )
-            }
+        )
+        sendArbeidsgiverinformasjonløsningOld(
+            hendelseId = godkjenningsbehovId,
+            organisasjonsnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
         sendArbeidsforholdløsningOld(
             hendelseId = godkjenningsbehovId,
@@ -500,8 +506,12 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         periodeFom: LocalDate = 1.januar,
         periodeTom: LocalDate = 31.januar,
         risikofunn: List<Risikofunn> = emptyList(),
+        harOppdatertMetadata: Boolean = false,
     ): UUID {
         every { snapshotClient.hentSnapshot(fødselsnummer) } returns snapshot
+        sendSøknadSendt(AKTØR, FØDSELSNUMMER, ORGNR)
+        sendVedtaksperiodeEndret(AKTØR, FØDSELSNUMMER, ORGNR, vedtaksperiodeId, forrigeTilstand = "START")
+        sendVedtaksperiodeNyUtbetaling(vedtaksperiodeId, utbetalingId, ORGNR)
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
@@ -518,12 +528,14 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             hendelseId = godkjenningsmeldingId,
             contextId = contextId
         )
-        sendArbeidsgiverinformasjonløsningOld(
-            hendelseId = godkjenningsmeldingId,
-            organisasjonsnummer = organisasjonsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            contextId = contextId
-        )
+        if (!harOppdatertMetadata) {
+            sendArbeidsgiverinformasjonløsningOld(
+                hendelseId = godkjenningsmeldingId,
+                organisasjonsnummer = organisasjonsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
+                contextId = contextId
+            )
+        }
         sendArbeidsforholdløsningOld(
             hendelseId = godkjenningsmeldingId,
             orgnr = organisasjonsnummer,
@@ -552,4 +564,28 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         return godkjenningsmeldingId
     }
 
+    private fun lagVarseldefinisjoner() {
+        val varselkoder = Varselkode.values()
+        varselkoder.forEach { varselkode ->
+            lagVarseldefinisjon(varselkode.name)
+        }
+    }
+
+    private fun lagVarseldefinisjon(varselkode: String) {
+        @Language("PostgreSQL")
+        val query = "INSERT INTO api_varseldefinisjon(unik_id, kode, tittel, forklaring, handling, avviklet, opprettet) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (unik_id) DO NOTHING"
+        sessionOf(dataSource).use { session ->
+            session.run(
+                queryOf(
+                    query,
+                    UUID.nameUUIDFromBytes(varselkode.toByteArray()),
+                    varselkode,
+                    "En tittel for varselkode=${varselkode}",
+                    "En forklaring for varselkode=${varselkode}",
+                    "En handling for varselkode=${varselkode}",
+                    false,
+                    LocalDateTime.now()
+                ).asUpdate)
+        }
+    }
 }

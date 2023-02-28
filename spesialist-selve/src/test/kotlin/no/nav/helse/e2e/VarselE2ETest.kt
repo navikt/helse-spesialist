@@ -1,15 +1,12 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETestV2
-import ToggleHelpers.disable
-import ToggleHelpers.enable
 import java.time.LocalDate
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.Testdata.ORGNR_GHOST
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
-import no.nav.helse.mediator.Toggle
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
@@ -31,23 +28,11 @@ import no.nav.helse.modell.varsel.Varselkode.SB_RV_1
 import no.nav.helse.modell.varsel.Varselkode.SB_RV_2
 import no.nav.helse.modell.varsel.Varselkode.SB_RV_3
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class VarselE2ETest : AbstractE2ETestV2() {
-
-    @BeforeEach
-    fun før() {
-        Toggle.VedtaksperiodeGenerasjoner.enable()
-    }
-
-    @AfterEach
-    fun etter() {
-        Toggle.VedtaksperiodeGenerasjoner.disable()
-    }
 
     @Test
     fun `ingen varsel`() {

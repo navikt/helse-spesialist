@@ -1,26 +1,11 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETestV2
-import ToggleHelpers.disable
-import ToggleHelpers.enable
 import java.util.UUID
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
-import no.nav.helse.mediator.Toggle
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class NyeVarslerE2ETest : AbstractE2ETestV2() {
-
-    @BeforeEach
-    fun før() {
-        Toggle.VedtaksperiodeGenerasjoner.enable()
-    }
-
-    @AfterEach
-    fun etter() {
-        Toggle.VedtaksperiodeGenerasjoner.disable()
-    }
 
     @Test
     fun `lagrer varsler når vi mottar ny aktivitet i aktivitetsloggen`() {

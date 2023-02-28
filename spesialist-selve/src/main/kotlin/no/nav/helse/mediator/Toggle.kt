@@ -7,7 +7,7 @@ abstract class Toggle(private var _enabled: Boolean) {
 
     internal val enabled get() = _enabled
 
-    object VedtaksperiodeGenerasjoner : Toggle("VEDTAKSPERIODE_GENERASJONER")
+    object VedtaksperiodeGenerasjoner : Toggle("VEDTAKSPERIODE_GENERASJONER", true)
     object Inntekter : Toggle("INNTEKTER", true)
     object AutomatiserRevuderinger : Toggle("AUTOMATISER_REVURDERINGER", erDev())
 }

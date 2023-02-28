@@ -12,6 +12,9 @@ import no.nav.helse.Meldingssender.sendOverstyrtArbeidsforhold
 import no.nav.helse.Meldingssender.sendOverstyrtInntektOgRefusjon
 import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
 import no.nav.helse.Meldingssender.sendRisikovurderingløsningOld
+import no.nav.helse.Meldingssender.sendSøknadSendt
+import no.nav.helse.Meldingssender.sendVedtaksperiodeEndret
+import no.nav.helse.Meldingssender.sendVedtaksperiodeNyUtbetaling
 import no.nav.helse.Meldingssender.sendVergemålløsningOld
 import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsningOld
 import no.nav.helse.TestRapidHelpers.oppgaveId
@@ -186,6 +189,9 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
 
     @Test
     fun `legger ved overstyringer i speil snapshot`() {
+        sendSøknadSendt(AKTØR, FØDSELSNUMMER, ORGNR)
+        sendVedtaksperiodeEndret(AKTØR, FØDSELSNUMMER, ORGNR, vedtaksperiodeId = VEDTAKSPERIODE_ID, forrigeTilstand = "START")
+        sendVedtaksperiodeNyUtbetaling(VEDTAKSPERIODE_ID, organisasjonsnummer = ORGNR)
         val hendelseId = sendGodkjenningsbehov(
             organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
@@ -201,9 +207,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         sendArbeidsgiverinformasjonløsningOld(
             hendelseId = hendelseId,
             organisasjonsnummer = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            navn = "En Arbeidsgiver",
-            bransjer = listOf("Bransje1", "Bransje2")
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
         sendArbeidsforholdløsningOld(
             hendelseId = hendelseId,

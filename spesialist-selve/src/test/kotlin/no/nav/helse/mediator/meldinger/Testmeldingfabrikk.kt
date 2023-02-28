@@ -24,6 +24,21 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         const val OSLO = "0301"
     }
 
+    fun lagVedtaksperiodeNyUtbetaling(
+        vedtaksperiodeId: UUID,
+        utbetalingId: UUID,
+        organisasjonsnummer: String,
+        id: UUID = UUID.randomUUID()
+    ) = nyHendelse(
+        id, "vedtaksperiode_ny_utbetaling", mapOf(
+            "vedtaksperiodeId" to "$vedtaksperiodeId",
+            "utbetalingId" to "$utbetalingId",
+            "fødselsnummer" to fødselsnummer,
+            "aktørId" to aktørId,
+            "organisasjonsnummer" to organisasjonsnummer,
+        )
+    )
+
     fun lagAdressebeskyttelseEndret(
         id: UUID = UUID.randomUUID()
     ) = nyHendelse(
@@ -74,35 +89,6 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                 ),
                 "fom" to fom,
                 "tom" to tom
-            )
-        )
-
-    fun lagOverstyringIgangsatt(
-        id: UUID = UUID.randomUUID(),
-        aktørId: String,
-        fødselsnummer: String,
-        berørtePerioder: List<Map<String, String>> = listOf(mapOf(
-            "vedtaksperiodeId" to "${UUID.randomUUID()}",
-            "skjæringstidspunkt" to "2022-01-01",
-            "periodeFom" to "2022-01-01",
-            "periodeTom" to "2022-01-31",
-            "orgnummer" to "orgnr",
-            "typeEndring" to "REVURDERING"
-        )),
-        kilde: UUID = UUID.randomUUID()
-    ) =
-        nyHendelse(
-            id, "overstyring_igangsatt", mapOf(
-                "revurderingId" to "${UUID.randomUUID()}",
-                "kilde" to "$kilde",
-                "skjæringstidspunkt" to "2022-01-01",
-                "periodeForEndringFom" to "2022-01-01",
-                "periodeForEndringTom" to "2022-01-01",
-                "årsak" to "KORRIGERT_INNTEKTSMELDING",
-                "typeEndring" to "REVURDERING",
-                "berørtePerioder" to berørtePerioder,
-                "aktørId" to aktørId,
-                "fødselsnummer" to fødselsnummer
             )
         )
 
@@ -161,22 +147,12 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
     fun arbeidsgiverinformasjon(orgnummer: String, navn: String, bransjer: List<String>) =
         ArbeidsgiverinformasjonJson(orgnummer, navn, bransjer).toBody()
 
-    private fun arbeidsgiverinformasjon(
-        orgnummer: String,
-        navn: String,
-        bransjer: List<String>,
-        ekstraArbeidsgivere: List<ArbeidsgiverinformasjonJson>
-    ) = (
-            listOf(ArbeidsgiverinformasjonJson(orgnummer, navn, bransjer)) + ekstraArbeidsgivere
-            ).map(ArbeidsgiverinformasjonJson::toBody)
-
+    private fun arbeidsgiverinformasjon(ekstraArbeidsgivere: List<ArbeidsgiverinformasjonJson>) = (ekstraArbeidsgivere).map(ArbeidsgiverinformasjonJson::toBody)
     fun lagArbeidsgiverinformasjonløsningOld(
         aktørId: String,
         fødselsnummer: String,
         organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
-        navn: String,
-        bransjer: List<String>,
         ekstraArbeidsgivere: List<ArbeidsgiverinformasjonJson> = emptyList(),
         id: UUID = UUID.randomUUID(),
         hendelseId: UUID = UUID.randomUUID(),
@@ -192,7 +168,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
             "aktørId" to aktørId,
             "orgnummer" to organisasjonsnummer,
             "@løsning" to mapOf(
-                "Arbeidsgiverinformasjon" to arbeidsgiverinformasjon(organisasjonsnummer, navn, bransjer, ekstraArbeidsgivere)
+                "Arbeidsgiverinformasjon" to arbeidsgiverinformasjon(ekstraArbeidsgivere)
             )
         )
     )

@@ -11,11 +11,21 @@ import no.nav.helse.mediator.meldinger.Varseldefinisjon
 import no.nav.helse.modell.varsel.DefinisjonDao
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class VarseldefinisjonE2ETest : AbstractE2ETest() {
 
     private val definisjonDao = DefinisjonDao(dataSource)
+
+    @BeforeEach
+    fun beforeEach() {
+        @Language("PostgreSQL")
+        val query = "TRUNCATE TABLE selve_varsel;TRUNCATE TABLE api_varseldefinisjon CASCADE ;"
+        sessionOf(dataSource).use {
+            it.run(queryOf(query).asExecute)
+        }
+    }
 
     @Test
     fun `lagrer varseldefinisjoner når vi mottar varseldefinisjoner_endret`() {

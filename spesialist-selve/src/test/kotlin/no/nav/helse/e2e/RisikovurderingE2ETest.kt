@@ -12,9 +12,12 @@ import no.nav.helse.Meldingssender.sendEgenAnsattløsningOld
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
 import no.nav.helse.Meldingssender.sendRisikovurderingløsningOld
+import no.nav.helse.Meldingssender.sendSøknadSendt
+import no.nav.helse.Meldingssender.sendVedtaksperiodeEndret
 import no.nav.helse.Meldingssender.sendVergemålløsningOld
 import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsningOld
 import no.nav.helse.TestRapidHelpers.hendelser
+import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.Testdata.SNAPSHOT_UTEN_WARNINGS
@@ -75,6 +78,8 @@ private class RisikovurderingE2ETest : AbstractE2ETest() {
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
         ekstraArbeidsgivere: List<Testmeldingfabrikk.ArbeidsgiverinformasjonJson> = emptyList()
     ) {
+        sendSøknadSendt(AKTØR, FØDSELSNUMMER, ORGNR)
+        sendVedtaksperiodeEndret(AKTØR, FØDSELSNUMMER, ORGNR, vedtaksperiodeId = VEDTAKSPERIODE_ID, forrigeTilstand = "START")
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             organisasjonsnummer = ORGNR,
             vedtaksperiodeId = vedtaksperiodeId,

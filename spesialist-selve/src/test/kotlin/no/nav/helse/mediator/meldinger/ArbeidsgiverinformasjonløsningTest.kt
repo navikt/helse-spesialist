@@ -40,9 +40,7 @@ internal class ArbeidsgiverinformasjonløsningTest {
                 aktørId = AKTØRID,
                 fødselsnummer = FØDSELSNUMMER,
                 organisasjonsnummer = ORGNR,
-                vedtaksperiodeId = VEDTAKSPERIODE_ID,
-                navn = NAVN,
-                bransjer = BRANSJER
+                vedtaksperiodeId = VEDTAKSPERIODE_ID
             )
         )
         verify(exactly = 1) { mediator.løsning(any(), any(), any(), any<Arbeidsgiverinformasjonløsning>(), any()) }

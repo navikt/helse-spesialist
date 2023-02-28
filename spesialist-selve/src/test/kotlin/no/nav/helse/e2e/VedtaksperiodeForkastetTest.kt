@@ -11,7 +11,10 @@ import no.nav.helse.Meldingssender.sendEgenAnsattløsningOld
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
 import no.nav.helse.Meldingssender.sendRisikovurderingløsningOld
+import no.nav.helse.Meldingssender.sendSøknadSendt
 import no.nav.helse.Meldingssender.sendUtbetalingEndret
+import no.nav.helse.Meldingssender.sendVedtaksperiodeEndret
+import no.nav.helse.Meldingssender.sendVedtaksperiodeNyUtbetaling
 import no.nav.helse.Meldingssender.sendVergemålløsningOld
 import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsningOld
 import no.nav.helse.TestRapidHelpers.oppgaveId
@@ -71,6 +74,9 @@ internal class VedtaksperiodeForkastetTest : AbstractE2ETest() {
         }
 
     private fun vedtaksperiodeTilGodkjenning(): UUID {
+        sendSøknadSendt(AKTØR, FØDSELSNUMMER, ORGNR)
+        sendVedtaksperiodeEndret(AKTØR, FØDSELSNUMMER, ORGNR, vedtaksperiodeId = VEDTAKSPERIODE_ID, forrigeTilstand = "START")
+        sendVedtaksperiodeNyUtbetaling(VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID, organisasjonsnummer = ORGNR)
         val godkjenningsmeldingId1 = sendGodkjenningsbehov(
             AKTØR,
             FØDSELSNUMMER,

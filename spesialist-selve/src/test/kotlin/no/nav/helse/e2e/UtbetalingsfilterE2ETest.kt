@@ -100,10 +100,9 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETest() {
         _MODIFISERTBART_FØDSELSNUMMER = fødselsnummer
         vedtaksperiode(
             fødselsnummer = fødselsnummer,
-            utbetalingId = utbetalingId,
             vedtaksperiodeId = vedtaksperiodeId,
-            periodeFom = periodeFom,
-            periodeTom = periodeTom,
+            kanAutomatiseres = risikofunn.isEmpty(),
+            utbetalingId = utbetalingId,
             snapshot = snapshot(
                 fødselsnummer = fødselsnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
@@ -111,7 +110,8 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETest() {
                 arbeidsgiverbeløp = arbeidsgiverbeløp,
                 personbeløp = personbeløp,
             ),
-            kanAutomatiseres = risikofunn.isEmpty(),
+            periodeFom = periodeFom,
+            periodeTom = periodeTom,
             risikofunn = risikofunn
         )
     }

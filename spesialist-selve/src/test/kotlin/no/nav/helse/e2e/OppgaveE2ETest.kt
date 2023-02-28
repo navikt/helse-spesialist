@@ -108,7 +108,7 @@ internal class OppgaveE2ETest: AbstractE2ETest() {
             status = FORKASTET,
             arbeidsgiverFagsystemId = FAGSYSTEM_ID
         )
-        vedtaksperiode(FØDSELSNUMMER, ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, false, utbetalingId = UTBETALING_ID)
+        vedtaksperiode(FØDSELSNUMMER, ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, false, utbetalingId = UTBETALING_ID, harOppdatertMetadata = true)
         assertOppgavestatuser(0, AvventerSaksbehandler, Invalidert)
         assertOppgavestatuser(1, AvventerSaksbehandler)
     }
@@ -147,7 +147,7 @@ internal class OppgaveE2ETest: AbstractE2ETest() {
             status = FORKASTET,
             arbeidsgiverFagsystemId = FAGSYSTEM_ID
         )
-        vedtaksperiode(FØDSELSNUMMER, ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, false, utbetalingId = UTBETALING_ID)
+        vedtaksperiode(FØDSELSNUMMER, ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, false, utbetalingId = UTBETALING_ID, harOppdatertMetadata = true)
         assertOppgavestatuser(0, AvventerSaksbehandler, AvventerSystem, Invalidert)
         assertOppgavestatuser(1, AvventerSaksbehandler)
     }

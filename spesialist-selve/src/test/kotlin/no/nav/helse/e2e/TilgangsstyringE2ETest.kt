@@ -11,6 +11,8 @@ import no.nav.helse.Meldingssender.sendEgenAnsattløsningOld
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
 import no.nav.helse.Meldingssender.sendRisikovurderingløsningOld
+import no.nav.helse.Meldingssender.sendSøknadSendt
+import no.nav.helse.Meldingssender.sendVedtaksperiodeEndret
 import no.nav.helse.Meldingssender.sendVergemålløsningOld
 import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsningOld
 import no.nav.helse.MeldingssenderV2
@@ -86,14 +88,14 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
     }
 
     private fun sendMeldingerOppTilEgenAnsatt(): UUID {
+        sendSøknadSendt(AKTØR, FØDSELSNUMMER, ORGNR)
+        sendVedtaksperiodeEndret(AKTØR, FØDSELSNUMMER, ORGNR, vedtaksperiodeId = VEDTAKSPERIODE_ID, forrigeTilstand = "START")
         val godkjenningsmeldingId = sendGodkjenningsbehov(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsningComposite(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsningOld(
             hendelseId = godkjenningsmeldingId,
             organisasjonsnummer = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            navn = "En Arbeidsgiver",
-            bransjer = listOf("En eller flere bransjer")
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
         sendArbeidsforholdløsningOld(
             hendelseId = godkjenningsmeldingId,

@@ -10,13 +10,14 @@ internal class OpprettArbeidsgiverCommand(
     private val arbeidsgiverDao: ArbeidsgiverDao
 ) : Command {
     private companion object {
-        private val log = LoggerFactory.getLogger(OpprettArbeidsgiverCommand::class.java)
-        private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
+        private val logg = LoggerFactory.getLogger(OpprettArbeidsgiverCommand::class.java)
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
 
     override fun execute(context: CommandContext): Boolean {
-        if (arbeidsgivereSomIkkeFinnes().isEmpty()) return ignorer()
-        sikkerLog.info("Arbeidsgiver(e) med orgnr: $orgnummere finnes ikke fra før")
+        val arbeidsgivereSomIkkeFinnes = arbeidsgivereSomIkkeFinnes()
+        if (arbeidsgivereSomIkkeFinnes.isEmpty()) return ignorer()
+        sikkerlogg.info("Arbeidsgiver(e) med orgnr: $arbeidsgivereSomIkkeFinnes finnes ikke fra før")
         return behandle(context)
     }
 
@@ -25,7 +26,7 @@ internal class OpprettArbeidsgiverCommand(
     }
 
     private fun ignorer(): Boolean {
-        log.info("arbeidsgiver finnes fra før, lager ikke ny")
+        logg.info("arbeidsgiver finnes fra før, lager ikke ny")
         return true
     }
 
@@ -33,11 +34,11 @@ internal class OpprettArbeidsgiverCommand(
         val arbeidsgivereSomIkkeFinnes = arbeidsgivereSomIkkeFinnes()
         if (arbeidsgivereSomIkkeFinnes.isEmpty()) return ignorer()
         val arbeidsgiver = context.get<Arbeidsgiverinformasjonløsning>()?.also { arbeidsgiver ->
-            log.info("oppretter arbeidsgiver fra orgnumre")
+            logg.info("oppretter arbeidsgiver fra orgnumre")
             arbeidsgiver.opprett(arbeidsgiverDao)
         }
         val personinfo = context.get<HentPersoninfoløsninger>()?.also { personinfo ->
-            log.info("oppretter arbeidsgiver fra personer")
+            logg.info("oppretter arbeidsgiver fra personer")
             personinfo.opprett(arbeidsgiverDao)
         }
 

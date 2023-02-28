@@ -12,7 +12,10 @@ import no.nav.helse.Meldingssender.sendOverstyrTidslinje
 import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
 import no.nav.helse.Meldingssender.sendRevurderingAvvist
 import no.nav.helse.Meldingssender.sendRisikovurderingløsningOld
+import no.nav.helse.Meldingssender.sendSøknadSendt
 import no.nav.helse.Meldingssender.sendUtbetalingEndret
+import no.nav.helse.Meldingssender.sendVedtaksperiodeEndret
+import no.nav.helse.Meldingssender.sendVedtaksperiodeNyUtbetaling
 import no.nav.helse.Meldingssender.sendVergemålløsningOld
 import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsningOld
 import no.nav.helse.TestRapidHelpers.oppgaveId
@@ -57,6 +60,9 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
     fun `revurdering ved saksbehandlet oppgave`() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_MED_WARNINGS //Legger på warning for at saken ikke skal automatiseres
 
+        sendSøknadSendt(AKTØR, FØDSELSNUMMER, ORGNR)
+        sendVedtaksperiodeEndret(AKTØR, FØDSELSNUMMER, ORGNR, vedtaksperiodeId = VEDTAKSPERIODE_ID, forrigeTilstand = "START")
+        sendVedtaksperiodeNyUtbetaling(VEDTAKSPERIODE_ID, organisasjonsnummer = ORGNR)
         val godkjenningsmeldingId1 = sendGodkjenningsbehov(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         håndterGodkjenningsbehov(godkjenningsmeldingId1)
         sendSaksbehandlerløsningFraAPI(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
@@ -84,7 +90,7 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
             utbetalingId = UTBETALING_ID2,
             utbetalingtype = Utbetalingtype.REVURDERING
         )
-        håndterGodkjenningsbehov(godkjenningsmeldingId2)
+        håndterGodkjenningsbehov(godkjenningsmeldingId2, harOppdatertMetadata = true)
         sendSaksbehandlerløsningFraAPI(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
         sendUtbetalingEndret(
             aktørId = AKTØR,
@@ -107,6 +113,9 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
 
     @Test
     fun `revurdering av periode medfører oppgave selv om perioden ikke har warnings`() {
+        sendSøknadSendt(AKTØR, FØDSELSNUMMER, ORGNR)
+        sendVedtaksperiodeEndret(AKTØR, FØDSELSNUMMER, ORGNR, vedtaksperiodeId = VEDTAKSPERIODE_ID, forrigeTilstand = "START")
+        sendVedtaksperiodeNyUtbetaling(VEDTAKSPERIODE_ID, organisasjonsnummer = ORGNR)
         val godkjenningsmeldingId1 = sendGodkjenningsbehov(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         håndterGodkjenningsbehov(godkjenningsmeldingId1)
         sendUtbetalingEndret(
@@ -135,7 +144,7 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
             utbetalingId = UTBETALING_ID2,
             utbetalingtype = Utbetalingtype.REVURDERING
         )
-        håndterGodkjenningsbehov(godkjenningsmeldingId2)
+        håndterGodkjenningsbehov(godkjenningsmeldingId2, harOppdatertMetadata = true)
         sendSaksbehandlerløsningFraAPI(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
         sendUtbetalingEndret(
             aktørId = AKTØR,
@@ -158,6 +167,9 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
 
     @Test
     fun `fanger opp og informerer saksbehandler om avvist revurdering`() {
+        sendSøknadSendt(AKTØR, FØDSELSNUMMER, ORGNR)
+        sendVedtaksperiodeEndret(AKTØR, FØDSELSNUMMER, ORGNR, vedtaksperiodeId = VEDTAKSPERIODE_ID, forrigeTilstand = "START")
+        sendVedtaksperiodeNyUtbetaling(VEDTAKSPERIODE_ID, organisasjonsnummer = ORGNR)
         val godkjenningsmeldingId1 = sendGodkjenningsbehov(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
 
         håndterGodkjenningsbehov(godkjenningsmeldingId1)
@@ -180,13 +192,15 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
         assertTrue(opptegnelser.first().payload.contains("Revurderingen er åpenbart helt feil"))
     }
 
-    private fun håndterGodkjenningsbehov(godkjenningsmeldingId: UUID) {
+    private fun håndterGodkjenningsbehov(godkjenningsmeldingId: UUID, harOppdatertMetadata: Boolean = false) {
         sendPersoninfoløsningComposite(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
-        sendArbeidsgiverinformasjonløsningOld(
-            hendelseId = godkjenningsmeldingId,
-            organisasjonsnummer = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID
-        )
+        if (!harOppdatertMetadata) {
+            sendArbeidsgiverinformasjonløsningOld(
+                hendelseId = godkjenningsmeldingId,
+                organisasjonsnummer = ORGNR,
+                vedtaksperiodeId = VEDTAKSPERIODE_ID
+            )
+        }
         sendArbeidsforholdløsningOld(
             hendelseId = godkjenningsmeldingId,
             orgnr = ORGNR,

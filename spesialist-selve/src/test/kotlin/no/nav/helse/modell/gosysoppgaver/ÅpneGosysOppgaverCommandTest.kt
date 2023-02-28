@@ -1,14 +1,11 @@
 package no.nav.helse.modell.gosysoppgaver
 
-import ToggleHelpers.disable
-import ToggleHelpers.enable
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.mediator.Toggle
 import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.CommandContext
@@ -77,7 +74,6 @@ internal class ÅpneGosysOppgaverCommandTest {
 
     @Test
     fun `Lagrer warning ved åpne oppgaver`() {
-        Toggle.VedtaksperiodeGenerasjoner.enable()
         every { generasjonRepository.sisteFor(VEDTAKPERIODE_ID) } returns (Generasjon(UUID.randomUUID(), VEDTAKPERIODE_ID, generasjonRepository))
         val forventetWarning = Warning(
             melding = "Det finnes åpne oppgaver på sykepenger i Gosys",
@@ -89,12 +85,10 @@ internal class ÅpneGosysOppgaverCommandTest {
         verify(exactly = 1) { dao.persisterÅpneGosysOppgaver(any()) }
         verify(exactly = 1) { warningDao.leggTilWarning(VEDTAKPERIODE_ID, forventetWarning) }
         verify(exactly = 1) { varselRepository.lagreVarsel(any(), any(), SB_EX_1.name, any(), VEDTAKPERIODE_ID) }
-        Toggle.VedtaksperiodeGenerasjoner.disable()
     }
 
     @Test
     fun `Lagrer warning ved oppslag feilet`() {
-        Toggle.VedtaksperiodeGenerasjoner.enable()
         every { generasjonRepository.sisteFor(VEDTAKPERIODE_ID) } returns (Generasjon(UUID.randomUUID(), VEDTAKPERIODE_ID, generasjonRepository))
         val forventetWarning = Warning(
             melding = "Kunne ikke sjekke åpne oppgaver på sykepenger i Gosys",
@@ -106,6 +100,5 @@ internal class ÅpneGosysOppgaverCommandTest {
         verify(exactly = 1) { dao.persisterÅpneGosysOppgaver(any()) }
         verify(exactly = 1) { warningDao.leggTilWarning(VEDTAKPERIODE_ID, forventetWarning) }
         verify(exactly = 1) { varselRepository.lagreVarsel(any(), any(), SB_EX_3.name, any(), VEDTAKPERIODE_ID) }
-        Toggle.VedtaksperiodeGenerasjoner.disable()
     }
 }
