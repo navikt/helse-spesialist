@@ -25,7 +25,7 @@ internal class OverstyringTest {
         private const val EPOST = "saks.behandler@nav.no"
         private const val ORGNUMMER = "987654321"
         private const val BEGRUNNELSE = "Begrunnelse"
-        private val OVERSTYRTE_DAGER = listOf(
+        private var OVERSTYRTE_DAGER = listOf(
             OverstyringDagDto(
                 dato = LocalDate.of(2020, 1, 1),
                 type = Dagtype.Sykedag,
@@ -57,7 +57,7 @@ internal class OverstyringTest {
         snapshotMediator = mockk(relaxed = true),
     )
 
-    private val overstyringAvTidslinjeMessage = hendelsefabrikk.overstyringTidslinje(
+    private val overstyringAvTidslinjeMessage get() = hendelsefabrikk.overstyringTidslinje(
         id = ID,
         fødselsnummer = FØDSELSNUMMER,
         oid = OID,
@@ -80,6 +80,37 @@ internal class OverstyringTest {
 
     @Test
     fun `Persisterer overstyring av tidslinje`() {
+        overstyringAvTidslinjeMessage.execute(context)
+
+        verify(exactly = 1) { saksbehandlerDao.opprettSaksbehandler(OID, NAVN, EPOST, IDENT) }
+        verify(exactly = 1) { reservasjonDao.reserverPerson(OID, FØDSELSNUMMER) }
+        verify(exactly = 1) { oppgaveDao.invaliderOppgaveFor(FØDSELSNUMMER) }
+        verify(exactly = 1) { overstyringDao.finnEksternHendelseIdFraHendelseId(ID) }
+        verify(exactly = 1) {
+            overstyringDao.persisterOverstyringTidslinje(
+                hendelseId = ID,
+                eksternHendelseId = any(), // Vi kan ikke asserte denne fordi den blir generert inne i context
+                fødselsnummer = FØDSELSNUMMER,
+                organisasjonsnummer = ORGNUMMER,
+                begrunnelse = BEGRUNNELSE,
+                overstyrteDager = OVERSTYRTE_DAGER,
+                saksbehandlerRef = OID,
+                tidspunkt = OPPRETTET
+            )
+        }
+    }
+
+    @Test
+    fun `Leser inn overstyring av tidslinje med arbeidsdag`() {
+        OVERSTYRTE_DAGER = listOf(
+            OverstyringDagDto(
+                dato = LocalDate.of(2020, 1, 1),
+                type = Dagtype.Arbeidsdag,
+                grad = 100,
+                fraType = Dagtype.Sykedag,
+                fraGrad = null
+            )
+        )
         overstyringAvTidslinjeMessage.execute(context)
 
         verify(exactly = 1) { saksbehandlerDao.opprettSaksbehandler(OID, NAVN, EPOST, IDENT) }

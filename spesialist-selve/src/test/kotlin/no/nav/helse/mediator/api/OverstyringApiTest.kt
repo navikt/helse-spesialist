@@ -31,7 +31,6 @@ import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spesialist.api.azureAdAppAuthentication
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -48,6 +47,70 @@ internal class OverstyringApiTest : AbstractE2ETest() {
                 begrunnelse = "en begrunnelse",
                 dager = listOf(
                     OverstyrTidslinjeDTO.OverstyringdagDTO(dato = 10.januar, type = "Feriedag", fraType = "Sykedag", grad = null, fraGrad = 100)
+                )
+            )
+
+            val response = runBlocking {
+                client.post("/api/overstyr/dager") {
+                    header(HttpHeaders.ContentType, "application/json")
+                    authentication(
+                        oid = SAKSBEHANDLER_OID,
+                        epost = SAKSBEHANDLER_EPOST,
+                        navn = SAKSBEHANDLER_NAVN,
+                        ident = SAKSBEHANDLER_IDENT
+                    )
+                    setBody(objectMapper.writeValueAsString(overstyring))
+                }
+            }
+
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertEquals(1, testRapid.inspektør.hendelser("saksbehandler_overstyrer_tidslinje").size)
+        }
+    }
+
+    @Test
+    fun `overstyr tidslinje til arbeidsdag`() {
+        with(TestApplicationEngine()) {
+            setUpApplication()
+            val overstyring = OverstyrTidslinjeDTO(
+                organisasjonsnummer = ORGNR,
+                fødselsnummer = FØDSELSNUMMER,
+                aktørId = AKTØR,
+                begrunnelse = "en begrunnelse",
+                dager = listOf(
+                    OverstyrTidslinjeDTO.OverstyringdagDTO(dato = 10.januar, type = "Arbeidsdag", fraType = "Sykedag", grad = null, fraGrad = 100)
+                )
+            )
+
+            val response = runBlocking {
+                client.post("/api/overstyr/dager") {
+                    header(HttpHeaders.ContentType, "application/json")
+                    authentication(
+                        oid = SAKSBEHANDLER_OID,
+                        epost = SAKSBEHANDLER_EPOST,
+                        navn = SAKSBEHANDLER_NAVN,
+                        ident = SAKSBEHANDLER_IDENT
+                    )
+                    setBody(objectMapper.writeValueAsString(overstyring))
+                }
+            }
+
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertEquals(1, testRapid.inspektør.hendelser("saksbehandler_overstyrer_tidslinje").size)
+        }
+    }
+
+    @Test
+    fun `overstyr tidslinje fra arbeidsdag`() {
+        with(TestApplicationEngine()) {
+            setUpApplication()
+            val overstyring = OverstyrTidslinjeDTO(
+                organisasjonsnummer = ORGNR,
+                fødselsnummer = FØDSELSNUMMER,
+                aktørId = AKTØR,
+                begrunnelse = "en begrunnelse",
+                dager = listOf(
+                    OverstyrTidslinjeDTO.OverstyringdagDTO(dato = 10.januar, type = "Sykedag", fraType = "Arbeidsdag", grad = null, fraGrad = 100)
                 )
             )
 

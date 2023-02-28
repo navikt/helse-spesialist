@@ -122,7 +122,7 @@ data class OverstyrTidslinjeKafkaDto(
         val grad: Int?,
         val fraGrad: Int?
     ) {
-        enum class Type { Sykedag, Feriedag, Egenmeldingsdag, Permisjonsdag }
+        enum class Type { Sykedag, Feriedag, Egenmeldingsdag, Permisjonsdag, Arbeidsdag }
     }
 }
 
