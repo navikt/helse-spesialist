@@ -1,13 +1,13 @@
 package no.nav.helse.modell
 
+import java.time.LocalDate
+import java.util.*
+import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import org.intellij.lang.annotations.Language
-import java.time.LocalDate
-import java.util.*
-import javax.sql.DataSource
 
 internal class VedtakDao(private val dataSource: DataSource) {
     internal fun opprett(
@@ -131,4 +131,13 @@ internal class VedtakDao(private val dataSource: DataSource) {
         """
         session.run(queryOf(query, utbetalingId).map { it.boolean("automatisert") }.asSingle)
     } ?: false
+
+    fun markerForkastet(vedtaksperiodeId: UUID, hendelseId: UUID) = sessionOf(dataSource).use { session ->
+        @Language("PostgreSQL")
+        val query = "UPDATE vedtak SET forkastet = true, forkastet_av_hendelse = :hendelseId, forkastet_tidspunkt = now() WHERE vedtaksperiode_id = :vedtaksperiodeId"
+        session.run(queryOf(query, mapOf(
+            "hendelseId" to hendelseId,
+            "vedtaksperiodeId" to vedtaksperiodeId
+        )).asUpdate)
+    }
 }

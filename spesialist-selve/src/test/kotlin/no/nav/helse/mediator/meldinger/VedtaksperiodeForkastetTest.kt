@@ -55,7 +55,8 @@ internal class VedtaksperiodeForkastetTest {
         oppgaveMediator = oppgaveMediator,
         snapshotClient = graphQLClient,
         snapshotDao = snapshotDao,
-        personDao = personDao
+        personDao = personDao,
+        vedtakDao = vedtakDao
     )
 
     @BeforeEach
@@ -64,12 +65,13 @@ internal class VedtaksperiodeForkastetTest {
     }
 
     @Test
-    fun `avbryter kommandoer og oppdaterer snapshot`() {
+    fun `avbryter kommandoer, oppdaterer snapshot og markerer vedtaksperiode som forkastet`() {
         every { graphQLClient.hentSnapshot(FNR) } returns SNAPSHOT
         every { snapshotDao.lagre(FNR, SNAPSHOT.data!!.person!!) } returns 1
         every { personDao.findPersonByFødselsnummer(FNR) } returns 1
         assertTrue(vedtaksperiodeForkastetMessage.execute(context))
         verify(exactly = 1) { commandContextDao.avbryt(VEDTAKSPERIODE, CONTEXT) }
         verify(exactly = 1) { snapshotDao.lagre(FNR, SNAPSHOT.data!!.person!!) }
+        verify(exactly = 1) { vedtakDao.markerForkastet(VEDTAKSPERIODE, HENDELSE) }
     }
 }

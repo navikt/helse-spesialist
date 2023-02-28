@@ -6,6 +6,7 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.SnapshotDao
+import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.AvbrytCommand
 import no.nav.helse.modell.kommando.Command
@@ -13,6 +14,7 @@ import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.vedtaksperiode.ForkastVedtaksperiodeCommand
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -33,6 +35,7 @@ internal class VedtaksperiodeForkastet(
     snapshotClient: SnapshotClient,
     snapshotDao: SnapshotDao,
     personDao: PersonDao,
+    vedtakDao: VedtakDao
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         AvbrytCommand(vedtaksperiodeId, commandContextDao, oppgaveMediator),
@@ -44,7 +47,8 @@ internal class VedtaksperiodeForkastet(
             warningDao = warningDao,
             personDao = personDao,
             json = json
-        )
+        ),
+        ForkastVedtaksperiodeCommand(id, vedtaksperiodeId, vedtakDao)
     )
 
     override fun fødselsnummer() = fødselsnummer

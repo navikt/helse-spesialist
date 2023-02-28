@@ -533,7 +533,8 @@ internal class Hendelsefabrikk(
             oppgaveMediator = oppgaveMediator,
             snapshotClient = snapshotClient,
             snapshotDao = snapshotDao,
-            personDao = personDao
+            personDao = personDao,
+            vedtakDao = vedtakDao
         )
     }
 
