@@ -35,7 +35,6 @@ import no.nav.helse.mediator.api.AbstractApiTest.Companion.authentication
 import no.nav.helse.mediator.api.AbstractApiTest.Companion.azureAdAppConfig
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spesialist.api.azureAdAppAuthentication
-import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -85,29 +84,36 @@ internal class OverstyringApiTest : AbstractE2ETest() {
 
     @Test
     fun `overstyr tidslinje til arbeidsdag`() {
-        with(TestApplicationEngine()) {
-            setUpApplication()
-            val overstyring = OverstyrTidslinje(
-                organisasjonsnummer = ORGNR,
-                fødselsnummer = FØDSELSNUMMER,
-                aktørId = AKTØR,
-                begrunnelse = "en begrunnelse",
-                saksbehandlerOid = SAKSBEHANDLER_OID,
-                dager = listOf(
-                    OverstyrTidslinje.Overstyringdag(dato = 10.januar, type = "Arbeidsdag", fraType = "Sykedag", grad = null, fraGrad = 100)
-                )
-            )
+        testApplication {
 
-            val response = runBlocking {
-                client.post("/api/overstyr/dager") {
-                    header(HttpHeaders.ContentType, "application/json")
+            val response = execute {
+                post("/api/overstyr/dager") {
+                    contentType(ContentType.Application.Json)
+                    accept(ContentType.Application.Json)
                     authentication(
                         oid = SAKSBEHANDLER_OID,
                         epost = SAKSBEHANDLER_EPOST,
                         navn = SAKSBEHANDLER_NAVN,
                         ident = SAKSBEHANDLER_IDENT
                     )
-                    setBody(objectMapper.writeValueAsString(overstyring))
+                    setBody(
+                        mapOf(
+                            "aktørId" to AKTØR,
+                            "fødselsnummer" to FØDSELSNUMMER,
+                            "organisasjonsnummer" to ORGNR,
+                            "begrunnelse" to "en begrunnelse",
+                            "dager" to listOf(
+                                mapOf(
+                                    "dato" to 10.januar,
+                                    "type" to "Arbeidsdag",
+                                    "fraType" to "Sykedag",
+                                    "grad" to null,
+                                    "fraGrad" to 100
+                                )
+                            ),
+                            "saksbehandlerOid" to SAKSBEHANDLER_OID
+                        )
+                    )
                 }
             }
 
@@ -118,29 +124,35 @@ internal class OverstyringApiTest : AbstractE2ETest() {
 
     @Test
     fun `overstyr tidslinje fra arbeidsdag`() {
-        with(TestApplicationEngine()) {
-            setUpApplication()
-            val overstyring = OverstyrTidslinje(
-                organisasjonsnummer = ORGNR,
-                fødselsnummer = FØDSELSNUMMER,
-                aktørId = AKTØR,
-                begrunnelse = "en begrunnelse",
-                saksbehandlerOid = SAKSBEHANDLER_OID,
-                dager = listOf(
-                    OverstyrTidslinje.Overstyringdag(dato = 10.januar, type = "Sykedag", fraType = "Arbeidsdag", grad = null, fraGrad = 100)
-                )
-            )
-
-            val response = runBlocking {
-                client.post("/api/overstyr/dager") {
-                    header(HttpHeaders.ContentType, "application/json")
+        testApplication {
+            val response = execute {
+                post("/api/overstyr/dager") {
+                    contentType(ContentType.Application.Json)
+                    accept(ContentType.Application.Json)
                     authentication(
                         oid = SAKSBEHANDLER_OID,
                         epost = SAKSBEHANDLER_EPOST,
                         navn = SAKSBEHANDLER_NAVN,
                         ident = SAKSBEHANDLER_IDENT
                     )
-                    setBody(objectMapper.writeValueAsString(overstyring))
+                    setBody(
+                        mapOf(
+                            "aktørId" to AKTØR,
+                            "fødselsnummer" to FØDSELSNUMMER,
+                            "organisasjonsnummer" to ORGNR,
+                            "begrunnelse" to "en begrunnelse",
+                            "dager" to listOf(
+                                mapOf(
+                                    "dato" to 10.januar,
+                                    "type" to "Sykedag",
+                                    "fraType" to "Arbeidsdag",
+                                    "grad" to null,
+                                    "fraGrad" to 100
+                                )
+                            ),
+                            "saksbehandlerOid" to SAKSBEHANDLER_OID
+                        )
+                    )
                 }
             }
 

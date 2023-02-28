@@ -14,7 +14,7 @@ class SaksbehandlerTest {
     fun `kan registrere observere`() {
         saksbehandler.apply {
             register(observer)
-            annuller("aktørId", "fødselsnummer", "organisasjonsnummer", "fagsystemId", true, emptyList(), null)
+            annuller("aktørId", "fødselsnummer", "organisasjonsnummer", "fagsystemId", emptyList(), null)
         }
         assertEquals(1, annulleringer.size)
     }
@@ -74,7 +74,6 @@ class SaksbehandlerTest {
             saksbehandler: Map<String, Any>,
             fagsystemId: String,
             begrunnelser: List<String>,
-            gjelderSisteSkjæringstidspunkt: Boolean,
             kommentar: String?
         ) {
             annulleringer.add(fagsystemId)
