@@ -5,7 +5,6 @@ import io.mockk.every
 import java.time.LocalDate
 import no.nav.helse.Meldingssender.sendArbeidsforholdløsningOld
 import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
-import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendEgenAnsattløsningOld
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendOverstyrTidslinje
@@ -215,10 +214,6 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         sendVergemålløsningOld(
             godkjenningsmeldingId = hendelseId
         )
-        sendDigitalKontaktinformasjonløsningOld(
-            godkjenningsmeldingId = hendelseId,
-            erDigital = true
-        )
         sendOverstyrTidslinje(
             aktørId = AKTØR,
             fødselsnummer = FØDSELSNUMMER,
@@ -274,10 +269,6 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         sendEgenAnsattløsningOld(hendelseId2, false)
         sendVergemålløsningOld(
             godkjenningsmeldingId = hendelseId2
-        )
-        sendDigitalKontaktinformasjonløsningOld(
-            godkjenningsmeldingId = hendelseId2,
-            erDigital = true
         )
         sendÅpneGosysOppgaverløsningOld(
             godkjenningsmeldingId = hendelseId2

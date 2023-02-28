@@ -9,7 +9,6 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Meldingssender.sendArbeidsforholdløsningOld
 import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
-import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendEgenAnsattløsningOld
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendInntektløsningOld
@@ -104,10 +103,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         )
         sendEgenAnsattløsningOld(godkjenningsmeldingId, false)
         sendVergemålløsningOld(godkjenningsmeldingId)
-        sendDigitalKontaktinformasjonløsningOld(
-            godkjenningsmeldingId = godkjenningsmeldingId,
-            erDigital = true
-        )
         sendÅpneGosysOppgaverløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId
         )
@@ -119,7 +114,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
-            "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
@@ -152,10 +146,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             erEgenAnsatt = false
         )
         sendVergemålløsningOld(godkjenningsmeldingId)
-        sendDigitalKontaktinformasjonløsningOld(
-            godkjenningsmeldingId = godkjenningsmeldingId,
-            erDigital = true
-        )
         sendÅpneGosysOppgaverløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId
         )
@@ -181,7 +171,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
-            "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
@@ -222,10 +211,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             erEgenAnsatt = false
         )
         val vergemålløsningId = sendVergemålløsningOld(godkjenningsmeldingId)
-        val dkifløsningId = sendDigitalKontaktinformasjonløsningOld(
-            godkjenningsmeldingId = godkjenningsmeldingId,
-            erDigital = true
-        )
         val åpnegosysoppgaverløsningId = sendÅpneGosysOppgaverløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId
         )
@@ -246,16 +231,15 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             assertEquals(arbeidsforholdmeldingId.toString(), inspektør.field(3, "@forårsaket_av").path("id").asText())
             assertEquals(egenansattMeldingId.toString(), inspektør.field(4, "@forårsaket_av").path("id").asText())
             assertEquals(vergemålløsningId.toString(), inspektør.field(5, "@forårsaket_av").path("id").asText())
-            assertEquals(dkifløsningId.toString(), inspektør.field(6, "@forårsaket_av").path("id").asText())
             assertEquals(
                 åpnegosysoppgaverløsningId.toString(),
-                inspektør.field(7, "@forårsaket_av").path("id").asText()
+                inspektør.field(6, "@forårsaket_av").path("id").asText()
             )
-            assertEquals(inntektløsningId.toString(), inspektør.field(8, "@forårsaket_av").path("id").asText())
-            assertEquals(risikoløsningId.toString(), inspektør.field(9, "@forårsaket_av").path("id").asText())
-            assertEquals(godkjenningsmeldingId.toString(), inspektør.field(11, "@forårsaket_av").path("id").asText())
-            assertEquals(løsningId.toString(), inspektør.field(13, "@forårsaket_av").path("id").asText())
-            assertNotEquals(godkjenningsmeldingId.toString(), inspektør.field(13, "@id").asText())
+            assertEquals(inntektløsningId.toString(), inspektør.field(7, "@forårsaket_av").path("id").asText())
+            assertEquals(risikoløsningId.toString(), inspektør.field(8, "@forårsaket_av").path("id").asText())
+            assertEquals(godkjenningsmeldingId.toString(), inspektør.field(10, "@forårsaket_av").path("id").asText())
+            assertEquals(løsningId.toString(), inspektør.field(12, "@forårsaket_av").path("id").asText())
+            assertNotEquals(godkjenningsmeldingId.toString(), inspektør.field(12, "@id").asText())
 
             0.until(inspektør.size).forEach {
                 println(inspektør.message(it))
@@ -287,10 +271,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             erEgenAnsatt = false
         )
         sendVergemålløsningOld(godkjenningsmeldingId)
-        sendDigitalKontaktinformasjonløsningOld(
-            godkjenningsmeldingId = godkjenningsmeldingId,
-            erDigital = true
-        )
         sendÅpneGosysOppgaverløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             antall = 1,
@@ -337,10 +317,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             erEgenAnsatt = false
         )
         sendVergemålløsningOld(godkjenningsmeldingId)
-        sendDigitalKontaktinformasjonløsningOld(
-            godkjenningsmeldingId = godkjenningsmeldingId,
-            erDigital = true
-        )
         sendÅpneGosysOppgaverløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId
         )
@@ -376,7 +352,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
-            "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
@@ -425,10 +400,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             erEgenAnsatt = false
         )
         sendVergemålløsningOld(godkjenningsmeldingId)
-        sendDigitalKontaktinformasjonløsningOld(
-            godkjenningsmeldingId = godkjenningsmeldingId,
-            erDigital = true
-        )
         sendÅpneGosysOppgaverløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             antall = 1,
@@ -444,7 +415,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
-            "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
@@ -493,10 +463,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             erEgenAnsatt = false
         )
         sendVergemålløsningOld(godkjenningsmeldingId)
-        sendDigitalKontaktinformasjonløsningOld(
-            godkjenningsmeldingId = godkjenningsmeldingId,
-            erDigital = true
-        )
         sendÅpneGosysOppgaverløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             antall = 1,
@@ -521,7 +487,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
-            "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
@@ -570,10 +535,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             erEgenAnsatt = false
         )
         sendVergemålløsningOld(godkjenningsmeldingId)
-        sendDigitalKontaktinformasjonløsningOld(
-            godkjenningsmeldingId = godkjenningsmeldingId,
-            erDigital = true
-        )
         sendÅpneGosysOppgaverløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             antall = 1,
@@ -609,7 +570,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
-            "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
@@ -694,10 +654,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         )
         sendEgenAnsattløsningOld(godkjenningsmeldingId, true)
         sendVergemålløsningOld(godkjenningsmeldingId)
-        sendDigitalKontaktinformasjonløsningOld(
-            godkjenningsmeldingId = godkjenningsmeldingId,
-            erDigital = true
-        )
         sendÅpneGosysOppgaverløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId
         )
@@ -709,7 +665,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
-            "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
@@ -747,10 +702,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         )
         sendEgenAnsattløsningOld(godkjenningsmeldingId, false)
         sendVergemålløsningOld(godkjenningsmeldingId)
-        sendDigitalKontaktinformasjonløsningOld(
-            godkjenningsmeldingId = godkjenningsmeldingId,
-            erDigital = true
-        )
         sendÅpneGosysOppgaverløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId
         )
@@ -762,7 +713,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
-            "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
@@ -798,10 +748,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         )
         sendEgenAnsattløsningOld(godkjenningsmeldingId, false)
         sendVergemålløsningOld(godkjenningsmeldingId)
-        sendDigitalKontaktinformasjonløsningOld(
-            godkjenningsmeldingId = godkjenningsmeldingId,
-            erDigital = true
-        )
         sendÅpneGosysOppgaverløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId
         )
@@ -812,7 +758,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
-            "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
@@ -905,10 +850,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             erEgenAnsatt = false
         )
         sendVergemålløsningOld(godkjenningsmeldingId)
-        sendDigitalKontaktinformasjonløsningOld(
-            godkjenningsmeldingId = godkjenningsmeldingId,
-            erDigital = true
-        )
         sendÅpneGosysOppgaverløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
         )
@@ -950,10 +891,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             erEgenAnsatt = false
         )
         sendVergemålløsningOld(godkjenningsmeldingId2)
-        sendDigitalKontaktinformasjonløsningOld(
-            godkjenningsmeldingId = godkjenningsmeldingId2,
-            erDigital = true
-        )
         sendÅpneGosysOppgaverløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId2,
         )
@@ -1139,10 +1076,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
                 )
             )
         )
-        sendDigitalKontaktinformasjonløsningOld(
-            godkjenningsmeldingId = godkjenningsmeldingId,
-            erDigital = true
-        )
         sendÅpneGosysOppgaverløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId
         )
@@ -1153,7 +1086,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
-            "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
@@ -1204,10 +1136,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             vergemål = vergemål
         )
-        sendDigitalKontaktinformasjonløsningOld(
-            godkjenningsmeldingId = godkjenningsmeldingId,
-            erDigital = true
-        )
         sendÅpneGosysOppgaverløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId
         )
@@ -1219,7 +1147,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         if (!automatisertEllerAvvist) sendInntektløsningOld(godkjenningsmeldingId)
 
         val tilstander = mutableListOf("NY")
-        tilstander.addAll(listOf("SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT"))
+        tilstander.addAll(listOf("SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT"))
         if (!automatisertEllerAvvist) tilstander.add("SUSPENDERT")
         tilstander.add("FERDIG")
 

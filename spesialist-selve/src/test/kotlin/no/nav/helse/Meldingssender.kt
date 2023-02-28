@@ -19,7 +19,6 @@ import no.nav.helse.mediator.api.SubsumsjonDto
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.ArbeidsgiverinformasjonJson
-import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.SubsumsjonJson
 import no.nav.helse.mediator.meldinger.TestmeldingfabrikkUtenFnr
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
@@ -487,25 +486,6 @@ internal object Meldingssender {
                 )
             )
         }
-
-    fun sendDigitalKontaktinformasjonløsningOld(
-        godkjenningsmeldingId: UUID,
-        erDigital: Boolean = true,
-        contextId: UUID = testRapid.inspektør.contextId()
-    ): UUID {
-        return uuid.also { id ->
-            testRapid.sendTestMessage(
-                meldingsfabrikk.lagDigitalKontaktinformasjonløsning(
-                    aktørId = AKTØR,
-                    fødselsnummer = FØDSELSNUMMER,
-                    erDigital = erDigital,
-                    id = id,
-                    hendelseId = godkjenningsmeldingId,
-                    contextId = contextId
-                )
-            )
-        }
-    }
 
     fun sendInntektløsningOld(
         godkjenningsmeldingId: UUID,

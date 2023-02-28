@@ -16,7 +16,6 @@ import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.Meldingssender
 import no.nav.helse.Meldingssender.sendArbeidsforholdløsningOld
 import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
-import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendEgenAnsattløsningOld
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
@@ -243,10 +242,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         sendEgenAnsattløsningOld(oppgaveId, false)
         sendVergemålløsningOld(
             godkjenningsmeldingId = oppgaveId
-        )
-        sendDigitalKontaktinformasjonløsningOld(
-            godkjenningsmeldingId = oppgaveId,
-            erDigital = true
         )
         sendÅpneGosysOppgaverløsningOld(
             godkjenningsmeldingId = oppgaveId
@@ -542,11 +537,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         )
         sendVergemålløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId
-        )
-        sendDigitalKontaktinformasjonløsningOld(
-            godkjenningsmeldingId = godkjenningsmeldingId,
-            erDigital = true,
-            contextId = contextId
         )
         sendÅpneGosysOppgaverløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,

@@ -427,32 +427,6 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
             }
         )
 
-    fun lagDigitalKontaktinformasjonløsning(
-        aktørId: String,
-        fødselsnummer: String,
-        erDigital: Boolean = true,
-        id: UUID = UUID.randomUUID(),
-        hendelseId: UUID = UUID.randomUUID(),
-        contextId: UUID = UUID.randomUUID()
-    ): String =
-        nyHendelse(
-            id,
-            "behov", mutableMapOf(
-                "aktørId" to aktørId,
-                "fødselsnummer" to fødselsnummer,
-                "@final" to true,
-                "@behov" to listOf("DigitalKontaktinformasjon"),
-                "contextId" to contextId,
-                "hendelseId" to hendelseId,
-                "@løsning" to mapOf(
-                    "DigitalKontaktinformasjon" to mapOf(
-                        "erDigital" to erDigital
-                    )
-                )
-            )
-        )
-
-
     fun lagInntektløsning(
         aktørId: String,
         fødselsnummer: String,
@@ -839,13 +813,6 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         "@event_name" to navn,
         "@id" to id,
         "@opprettet" to LocalDateTime.now()
-    )
-
-
-    data class SubsumsjonJson(
-        val paragraf: String,
-        val ledd: String?,
-        val bokstav: String?
     )
 
     data class ArbeidsgiverinformasjonJson(

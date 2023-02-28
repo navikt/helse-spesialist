@@ -10,7 +10,6 @@ import java.util.UUID
 import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
-import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.overstyring.OverstyringDao
@@ -38,7 +37,6 @@ internal class AutomatiseringTest {
         every { hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(true)
     }
     private val snapshotMediator = mockk<SnapshotMediator>(relaxed = true)
-    private val digitalKontaktinformasjonDaoMock = mockk<DigitalKontaktinformasjonDao>(relaxed = true)
     private val åpneGosysOppgaverDaoMock = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
     private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
     private val personDaoMock = mockk<PersonDao>(relaxed = true)
@@ -74,7 +72,6 @@ internal class AutomatiseringTest {
         every { warningDaoMock.finnAktiveWarnings(vedtaksperiodeId) } returns emptyList()
         every { vedtakDaoMock.finnVedtaksperiodetype(vedtaksperiodeId) } returns Periodetype.FORLENGELSE
         every { vedtakDaoMock.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.EN_ARBEIDSGIVER
-        every { digitalKontaktinformasjonDaoMock.erDigital(any()) } returns true
         every { åpneGosysOppgaverDaoMock.harÅpneOppgaver(any()) } returns 0
         every { egenAnsattDao.erEgenAnsatt(any()) } returns false
         every { overstyringDaoMock.harVedtaksperiodePågåendeOverstyring(any()) } returns false

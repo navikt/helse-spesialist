@@ -37,7 +37,6 @@ import no.nav.helse.mediator.meldinger.VedtaksperiodeNyUtbetaling
 import no.nav.helse.mediator.meldinger.VedtaksperiodeOpprettet
 import no.nav.helse.mediator.meldinger.VedtaksperiodeReberegnet
 import no.nav.helse.mediator.meldinger.løsninger.Arbeidsgiverinformasjonløsning
-import no.nav.helse.mediator.meldinger.løsninger.DigitalKontaktinformasjonløsning
 import no.nav.helse.mediator.meldinger.løsninger.EgenAnsattløsning
 import no.nav.helse.mediator.meldinger.løsninger.HentEnhetløsning
 import no.nav.helse.mediator.meldinger.løsninger.HentInfotrygdutbetalingerløsning
@@ -122,7 +121,6 @@ internal class HendelseMediator(
             OverstyringInntektOgRefusjon.OverstyringInntektOgRefusjonRiver(it, this)
             OverstyringArbeidsforhold.OverstyringArbeidsforholdRiver(it, this)
             OverstyringIgangsatt.OverstyringIgangsattRiver(it, this)
-            DigitalKontaktinformasjonløsning.DigitalKontaktinformasjonRiver(it, this)
             EgenAnsattløsning.EgenAnsattRiver(it, this)
             Vergemålløsning.VergemålRiver(it, this)
             ÅpneGosysOppgaverløsning.ÅpneGosysOppgaverRiver(it, this)

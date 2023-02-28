@@ -7,7 +7,6 @@ import io.mockk.mockk
 import java.util.UUID
 import no.nav.helse.Meldingssender.sendArbeidsforholdløsningOld
 import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
-import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendEgenAnsattløsningOld
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
@@ -106,7 +105,6 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
 
     private fun sendFramTilOppgave(godkjenningsmeldingId: UUID) {
         sendVergemålløsningOld(godkjenningsmeldingId)
-        sendDigitalKontaktinformasjonløsningOld(godkjenningsmeldingId)
         sendÅpneGosysOppgaverløsningOld(godkjenningsmeldingId)
         sendRisikovurderingløsningOld(godkjenningsmeldingId, VEDTAKSPERIODE_ID)
     }
