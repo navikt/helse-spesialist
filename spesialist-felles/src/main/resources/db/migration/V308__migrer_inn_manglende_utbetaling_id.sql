@@ -1,0 +1,1 @@
+UPDATE selve_vedtaksperiode_generasjon SET utbetaling_id = 'ccd4e704-2e89-497b-b7f1-ae38e24cddb7' WHERE unik_id = '71d9140b-f6bf-4743-acfd-ade952eac7a1';

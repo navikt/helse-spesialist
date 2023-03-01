@@ -61,7 +61,7 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
             ?.loggKnyttetUtbetaling(utbetalingId)
             ?: sikkerlogg.info(
                 "Finner ikke ulåst generasjon for {}. Forsøkt knyttet til utbetaling {}",
-                keyValue("vedtaksperiodeId", generasjonId),
+                keyValue("generasjonId", generasjonId),
                 keyValue("utbetalingId", utbetalingId)
             )
     }

@@ -89,7 +89,7 @@ internal class Saksbehandlerløsning(
         override fun onPacket(packet: JsonMessage, context: MessageContext) {
             val hendelseId = UUID.fromString(packet["hendelseId"].asText())
             val id = UUID.fromString(packet["@id"].asText())
-            if (id == UUID.fromString("74b22005-db93-4f52-ac55-d0571a1bcf69")) return
+            if (id == UUID.fromString("bc1c69b4-a74a-4919-bb2c-d85dd796f8f8")) return
             mediator.saksbehandlerløsning(
                 packet,
                 id,

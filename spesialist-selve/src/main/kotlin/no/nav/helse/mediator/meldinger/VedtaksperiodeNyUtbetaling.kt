@@ -1,6 +1,7 @@
 package no.nav.helse.mediator.meldinger
 
 import java.util.UUID
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
@@ -66,12 +67,18 @@ internal class VedtaksperiodeNyUtbetaling(
         }
 
         override fun onPacket(packet: JsonMessage, context: MessageContext) {
-            sikkerLogg.info("Mottok melding om vedtaksperiode_ny_utbetaling")
-
             val fødselsnummer = packet["fødselsnummer"].asText()
             val vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
             val utbetalingId = UUID.fromString(packet["utbetalingId"].asText())
             val id = UUID.fromString(packet["@id"].asText())
+
+            sikkerLogg.info(
+                "Mottok melding om vedtaksperiode_ny_utbetaling for {}, {}, {} som følge av melding med {}",
+                kv("fødselsnummer", fødselsnummer),
+                kv("vedtaksperiodeId", vedtaksperiodeId),
+                kv("utbetalingId", utbetalingId),
+                kv("id", id)
+            )
 
             mediator.vedtaksperiodeNyUtbetaling(fødselsnummer, id, vedtaksperiodeId, utbetalingId, packet.toJson(), context)
         }
