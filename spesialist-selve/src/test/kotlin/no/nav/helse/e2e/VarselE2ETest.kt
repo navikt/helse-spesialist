@@ -49,14 +49,14 @@ internal class VarselE2ETest : AbstractE2ETestV2() {
     }
 
     @Test
-    fun `ikke varsel om beslutteroppgave ved varsel om lovvalg og medlemsskap`() {
+    fun `varsel om beslutteroppgave ved varsel om lovvalg og medlemsskap`() {
         fremTilSaksbehandleroppgave(regelverksvarsler = listOf("Vurder lovvalg og medlemskap"))
 
-        assertIngenVarsel(SB_BO_1, VEDTAKSPERIODE_ID)
+        assertVarsel(SB_BO_1, VEDTAKSPERIODE_ID, AKTIV)
     }
 
     @Test
-    fun `ikke varsel om beslutteroppgave ved overstyring av tidslinje`() {
+    fun `varsel om beslutteroppgave ved overstyring av dager`() {
         fremTilSaksbehandleroppgave()
         håndterOverstyrTidslinje()
         håndterGodkjenningsbehov(harOppdatertMetainfo = true)
@@ -64,11 +64,11 @@ internal class VarselE2ETest : AbstractE2ETestV2() {
         håndterVergemålløsning()
         håndterÅpneOppgaverløsning()
 
-        assertIngenVarsel(SB_BO_2, VEDTAKSPERIODE_ID)
+        assertVarsel(SB_BO_2, VEDTAKSPERIODE_ID, AKTIV)
     }
 
     @Test
-    fun `ikke varsel om beslutteroppgave ved overstyring av inntekt og refusjon`() {
+    fun `varsel om beslutteroppgave ved overstyring av inntekt og refusjon`() {
         fremTilSaksbehandleroppgave()
         håndterOverstyrInntektOgRefusjon()
         håndterGodkjenningsbehov(harOppdatertMetainfo = true)
@@ -76,11 +76,11 @@ internal class VarselE2ETest : AbstractE2ETestV2() {
         håndterVergemålløsning()
         håndterÅpneOppgaverløsning()
 
-        assertIngenVarsel(SB_BO_3, VEDTAKSPERIODE_ID)
+        assertVarsel(SB_BO_3, VEDTAKSPERIODE_ID, AKTIV)
     }
 
     @Test
-    fun `ikke varsel om beslutteroppgave ved overstyring av arbeidsforhold`() {
+    fun `varsel om beslutteroppgave ved overstyring av arbeidsforhold`() {
         fremTilSaksbehandleroppgave(andreArbeidsforhold = listOf(ORGNR_GHOST))
         håndterOverstyrArbeidsforhold(overstyrteArbeidsforhold = listOf(
             OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt(ORGNR_GHOST, true, "begrunnelse", "forklaring")
@@ -90,7 +90,7 @@ internal class VarselE2ETest : AbstractE2ETestV2() {
         håndterVergemålløsning()
         håndterÅpneOppgaverløsning()
 
-        assertIngenVarsel(SB_BO_4, VEDTAKSPERIODE_ID)
+        assertVarsel(SB_BO_4, VEDTAKSPERIODE_ID, AKTIV)
     }
 
     @Test

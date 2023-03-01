@@ -232,7 +232,9 @@ internal class Godkjenningsbehov(
             vedtaksperiodeId = vedtaksperiodeId,
             warningDao = warningDao,
             oppgaveMediator = oppgaveMediator,
-            overstyringDao = overstyringDao
+            overstyringDao = overstyringDao,
+            varselRepository = varselRepository,
+            generasjonRepository = generasjonRepository
         ),
         PersisterPeriodehistorikkCommand(
             vedtaksperiodeId = vedtaksperiodeId,
