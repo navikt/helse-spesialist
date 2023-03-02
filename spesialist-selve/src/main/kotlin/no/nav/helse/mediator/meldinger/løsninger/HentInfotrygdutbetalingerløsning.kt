@@ -2,6 +2,7 @@ package no.nav.helse.mediator.meldinger.løsninger
 
 import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -41,7 +42,18 @@ internal class HentInfotrygdutbetalingerløsning(private val utbetalinger: JsonN
         override fun onPacket(packet: JsonMessage, context: MessageContext) {
             val hendelseId = UUID.fromString(packet["hendelseId"].asText())
             val contextId = UUID.fromString(packet["contextId"].asText())
-            mediator.løsning(hendelseId, contextId, UUID.fromString(packet["@id"].asText()), HentInfotrygdutbetalingerløsning(packet["@løsning.HentInfotrygdutbetalinger"]), context)
+            sikkerLog.info(
+                "Mottok HentInfotrygdutbetalinger for {}, {}",
+                kv("hendelseId", hendelseId),
+                kv("contextId", contextId)
+            )
+            mediator.løsning(
+                hendelseId,
+                contextId,
+                UUID.fromString(packet["@id"].asText()),
+                HentInfotrygdutbetalingerløsning(packet["@løsning.HentInfotrygdutbetalinger"]),
+                context
+            )
         }
     }
 }
