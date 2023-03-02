@@ -87,6 +87,8 @@ INSERT INTO overstyring_arbeidsforhold(id, overstyring_ref, forklaring, deaktive
 VALUES (${sequence_number}, ${sequence_number}, 'FORKLARING', false, '2018-01-01', 'BEGRUNNELSE', ${sequence_number});
 INSERT INTO overstyringer_for_vedtaksperioder(vedtaksperiode_id, overstyring_ref)
 VALUES ('${vedtaksperiode_id}', ${sequence_number});
+INSERT INTO totrinnsvurdering(id, person_ref, arbeidsgiver_ref, skjaeringstidspunkt, er_retur, saksbehandler, beslutter)
+VALUES (${sequence_number}, ${sequence_number}, ${sequence_number}, '2018-01-01', false, '${saksbehandler_oid}', '${saksbehandler_oid}');
 
 INSERT INTO annullert_av_saksbehandler(id, annullert_tidspunkt, saksbehandler_ref)
 VALUES (${sequence_number}, now(), '${saksbehandler_oid}');
