@@ -156,7 +156,7 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         assertEquals(1, repository.tilhørendeFor(utbetalingId).size)
 
         generasjon?.invaliderUtbetaling(utbetalingId)
-        assertEquals(Generasjon(generasjonId, vedtaksperiodeId, null, false, emptySet(), dataSource), generasjon)
+        assertEquals(Generasjon(generasjonId, vedtaksperiodeId, null, false, null, null, emptySet(), dataSource), generasjon)
         assertEquals(0, repository.tilhørendeFor(utbetalingId).size)
     }
 

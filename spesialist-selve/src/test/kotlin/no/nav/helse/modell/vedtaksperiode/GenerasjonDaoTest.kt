@@ -87,6 +87,8 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
                 VEDTAKSPERIODE_ID,
                 null,
                 false,
+                null,
+                null,
                 setOf(
                     Varsel(varselId, "EN_KODE", varselOpprettet, VEDTAKSPERIODE_ID)
                 ),

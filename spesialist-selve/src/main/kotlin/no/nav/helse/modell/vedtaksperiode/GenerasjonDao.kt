@@ -1,5 +1,6 @@
 package no.nav.helse.modell.vedtaksperiode
 
+import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.Row
@@ -12,8 +13,11 @@ class GenerasjonDao(private val dataSource: DataSource) {
 
     internal fun finnSisteFor(vedtaksperiodeId: UUID): Generasjon? {
         @Language("PostgreSQL")
-        val query =
-            "SELECT id, unik_id, vedtaksperiode_id, utbetaling_id, låst FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ? ORDER BY id DESC;"
+        val query = """
+            SELECT id, unik_id, vedtaksperiode_id, utbetaling_id, låst, skjæringstidspunkt, fom, tom 
+            FROM selve_vedtaksperiode_generasjon 
+            WHERE vedtaksperiode_id = ? ORDER BY id DESC;
+            """
         return sessionOf(dataSource).use { session ->
             session.run(queryOf(query, vedtaksperiodeId).map(::toGenerasjon).asSingle)
         }
@@ -21,7 +25,11 @@ class GenerasjonDao(private val dataSource: DataSource) {
 
     internal fun alleFor(utbetalingId: UUID): List<Generasjon> {
         @Language("PostgreSQL")
-        val query = "SELECT id, unik_id, vedtaksperiode_id, utbetaling_id, låst FROM selve_vedtaksperiode_generasjon WHERE utbetaling_id = ?"
+        val query = """
+            SELECT id, unik_id, vedtaksperiode_id, utbetaling_id, låst, skjæringstidspunkt, fom, tom 
+            FROM selve_vedtaksperiode_generasjon 
+            WHERE utbetaling_id = ?
+            """
         return sessionOf(dataSource).use { session ->
             session.run(queryOf(query, utbetalingId).map(::toGenerasjon).asList)
         }
@@ -33,7 +41,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
             UPDATE selve_vedtaksperiode_generasjon 
             SET låst = true, låst_tidspunkt = now(), låst_av_hendelse = ? 
             WHERE unik_id = ?
-            RETURNING id, unik_id, vedtaksperiode_id, utbetaling_id, låst;
+            RETURNING id, unik_id, vedtaksperiode_id, utbetaling_id, låst, skjæringstidspunkt, fom, tom;
             """
 
         return sessionOf(dataSource).use { session ->
@@ -47,7 +55,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
             UPDATE selve_vedtaksperiode_generasjon 
             SET utbetaling_id = ? 
             WHERE unik_id = ?
-            RETURNING id, unik_id, vedtaksperiode_id, utbetaling_id, låst;
+            RETURNING id, unik_id, vedtaksperiode_id, utbetaling_id, låst, skjæringstidspunkt, fom, tom;
             """
 
         return sessionOf(dataSource).use { session ->
@@ -61,7 +69,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
             UPDATE selve_vedtaksperiode_generasjon 
             SET utbetaling_id = null 
             WHERE unik_id = ?
-            RETURNING id, unik_id, vedtaksperiode_id, utbetaling_id, låst;
+            RETURNING id, unik_id, vedtaksperiode_id, utbetaling_id, låst, skjæringstidspunkt, fom, tom;
             """
 
         return sessionOf(dataSource).use { session ->
@@ -74,7 +82,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
         val query = """
             INSERT INTO selve_vedtaksperiode_generasjon (unik_id, vedtaksperiode_id, opprettet_av_hendelse) 
             VALUES (?, ?, ?)
-            RETURNING id, unik_id, vedtaksperiode_id, utbetaling_id, låst
+            RETURNING id, unik_id, vedtaksperiode_id, utbetaling_id, låst, skjæringstidspunkt, fom, tom
             """
 
         return requireNotNull(sessionOf(dataSource).use { session ->
@@ -88,8 +96,15 @@ class GenerasjonDao(private val dataSource: DataSource) {
             row.uuid("vedtaksperiode_id"),
             row.uuidOrNull("utbetaling_id"),
             row.boolean("låst"),
+            row.localDateOrNull("skjæringstidspunkt"),
+            row.localDateOrNull("fom")?.let{
+                Periode(
+                    it,
+                    row.localDate("tom"),
+                )
+            },
             varslerFor(row.long("id")).toSet(),
-            dataSource
+            dataSource,
         )
     }
 

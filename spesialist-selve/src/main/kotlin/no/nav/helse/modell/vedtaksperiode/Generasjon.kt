@@ -1,5 +1,6 @@
 package no.nav.helse.modell.vedtaksperiode
 
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
@@ -22,6 +23,8 @@ internal class Generasjon private constructor(
     private val vedtaksperiodeId: UUID,
     private var utbetalingId: UUID?,
     private var låst: Boolean,
+    private var skjæringstidspunkt: LocalDate?,
+    private var periode: Periode?,
     varsler: Set<Varsel>,
     private val generasjonRepository: GenerasjonRepository
 ) {
@@ -29,16 +32,18 @@ internal class Generasjon private constructor(
         id: UUID,
         vedtaksperiodeId: UUID,
         generasjonRepository: GenerasjonRepository
-    ): this(id, vedtaksperiodeId, null, false, emptySet(), generasjonRepository)
+    ): this(id, vedtaksperiodeId, null, false, null, null, emptySet(), generasjonRepository)
 
     internal constructor(
         id: UUID,
         vedtaksperiodeId: UUID,
         utbetalingId: UUID?,
         låst: Boolean,
+        skjæringstidspunkt: LocalDate?,
+        periode: Periode?,
         varsler: Set<Varsel>,
         dataSource: DataSource
-    ): this(id, vedtaksperiodeId, utbetalingId, låst, varsler, ActualGenerasjonRepository(dataSource))
+    ): this(id, vedtaksperiodeId, utbetalingId, låst, skjæringstidspunkt, periode, varsler, ActualGenerasjonRepository(dataSource))
 
     private val varsler: MutableList<Varsel> = varsler.toMutableList()
 
