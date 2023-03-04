@@ -31,7 +31,7 @@ internal class ReservasjonDaoTest : DatabaseIntegrationTest() {
             reservasjonDao.hentReservertTil(FNR)
         } ?: fail("Forventet at det skulle finnes en reservasjon i basen")
         assertEquals(SAKSBEHANDLER_OID, saksbehandlerOid)
-        assertEquals(12, varighetPåReservasjon())
+        assertEquals(72, varighetPåReservasjon())
     }
 
     private fun opprettTabeller(fødselsnummer: String = FNR) {
