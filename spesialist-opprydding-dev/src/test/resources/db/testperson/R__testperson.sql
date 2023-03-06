@@ -87,8 +87,6 @@ INSERT INTO overstyring_arbeidsforhold(id, overstyring_ref, forklaring, deaktive
 VALUES (${sequence_number}, ${sequence_number}, 'FORKLARING', false, '2018-01-01', 'BEGRUNNELSE', ${sequence_number});
 INSERT INTO overstyringer_for_vedtaksperioder(vedtaksperiode_id, overstyring_ref)
 VALUES ('${vedtaksperiode_id}', ${sequence_number});
-INSERT INTO totrinnsvurdering(id, person_ref, arbeidsgiver_ref, skjaeringstidspunkt, er_retur, saksbehandler, beslutter)
-VALUES (${sequence_number}, ${sequence_number}, ${sequence_number}, '2018-01-01', false, '${saksbehandler_oid}', '${saksbehandler_oid}');
 
 INSERT INTO annullert_av_saksbehandler(id, annullert_tidspunkt, saksbehandler_ref)
 VALUES (${sequence_number}, now(), '${saksbehandler_oid}');
@@ -111,6 +109,9 @@ VALUES (${sequence_number}, '${utbetaling_id}', ${sequence_number}, ${sequence_n
 
 INSERT INTO utbetaling(id, status, opprettet, data, utbetaling_id_ref, annullert_av_saksbehandler_ref)
 VALUES (${sequence_number}, 'UTBETALT', now(), '{}'::json, ${sequence_number}, ${sequence_number});
+
+INSERT INTO totrinnsvurdering(id, vedtaksperiode_id, er_retur, saksbehandler, beslutter, utbetalt_utbetaling_ref, opprettet, oppdatert)
+VALUES (${sequence_number}, '${vedtaksperiode_id}', false, '${saksbehandler_oid}', '${saksbehandler_oid}', ${sequence_number}, now(), null);
 
 INSERT INTO periodehistorikk(id, type, timestamp, utbetaling_id, saksbehandler_oid, notat_id)
 VALUES (${sequence_number}, 'TOTRINNSVURDERING_RETUR', now(), '${utbetaling_id}', '${saksbehandler_oid}',
