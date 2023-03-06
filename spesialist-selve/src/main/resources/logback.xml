@@ -38,8 +38,9 @@
         <appender-ref ref="secureLog" />
     </logger>
     <logger name="io.ktor.auth.jwt" level="trace" />
+    <logger name="no.nav.helse" level="DEBUG" />
 
-    <root level="DEBUG">
+    <root level="INFO">
         <appender-ref ref="STDOUT_JSON"/>
     </root>
 </configuration>
