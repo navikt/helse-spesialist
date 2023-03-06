@@ -140,7 +140,8 @@ data class Arbeidsgiver(
                         varselRepository = varselRepository,
                         oppgaveApiDao = oppgaveApiDao,
                         periodehistorikkDao = periodehistorikkDao,
-                        notatDao = notatDao
+                        notatDao = notatDao,
+                        erSisteGenerasjon = index == 0,
                     )
 
                     else -> throw Exception("Ukjent tidslinjeperiode")

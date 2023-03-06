@@ -340,6 +340,7 @@ data class BeregnetPeriode(
     private val oppgaveApiDao: OppgaveApiDao,
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val notatDao: NotatDao,
+    private val erSisteGenerasjon: Boolean,
 ) : Periode {
     override fun erForkastet(): Boolean = erForkastet(periode)
     override fun fom(): DateString = fom(periode)
@@ -350,6 +351,15 @@ data class BeregnetPeriode(
     override fun tidslinje(): List<Dag> = tidslinje(periode)
     override fun vedtaksperiodeId(): UUIDString = periode.vedtaksperiodeId
     override fun periodetilstand(): Periodetilstand = periodetilstand(periode.periodetilstand)
+    override fun varslerForGenerasjon(): List<VarselDTO> =
+        if (erSisteGenerasjon) varselRepository.finnVarslerSomIkkeErInaktiveForSisteGenerasjon(
+            UUID.fromString(vedtaksperiodeId()),
+            UUID.fromString(periode.utbetaling.id)
+        ).toList()
+        else varselRepository.finnVarslerSomIkkeErInaktiveFor(
+            UUID.fromString(vedtaksperiodeId()),
+            UUID.fromString(periode.utbetaling.id)
+        ).toList()
 
     @Deprecated("erBeslutterOppgave bør hentes fra periodens oppgave")
     fun erBeslutterOppgave(): Boolean = oppgaveApiDao.erBeslutteroppgave(UUID.fromString(vedtaksperiodeId()))
@@ -485,11 +495,6 @@ data class BeregnetPeriode(
         }
 
     fun varsler(): List<String> = varselDao.finnAktiveVarsler(UUID.fromString(vedtaksperiodeId())).distinct()
-
-    override fun varslerForGenerasjon(): List<VarselDTO> = varselRepository.finnVarslerSomIkkeErInaktiveFor(
-        UUID.fromString(vedtaksperiodeId()),
-        UUID.fromString(periode.utbetaling.id)
-    ).toList()
 
     @Deprecated("Oppgavereferanse bør hentes fra periodens oppgave")
     fun oppgavereferanse(): String? =

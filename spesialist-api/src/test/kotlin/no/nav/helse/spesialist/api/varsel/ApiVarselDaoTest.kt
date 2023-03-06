@@ -43,6 +43,26 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `Finner varsler som skal med for siste snapshotgenerasjon`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val utbetalingId = UUID.randomUUID()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        opprettVarseldefinisjon(kode = "EN_KODE")
+        opprettVarseldefinisjon(kode = "EN_ANNEN_KODE")
+        val generasjonRef1 = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)
+        val generasjonRef2 = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
+        val generasjonRef3 = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)
+        nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef1)
+        nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef2)
+        nyttVarsel(kode = "EN_ANNEN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef2)
+        nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef3)
+        val varsler = apiVarselDao.finnVarslerSomIkkeErInaktiveForSisteGenerasjon(vedtaksperiodeId, utbetalingId)
+
+        assertTrue(varsler.isNotEmpty())
+        assertEquals(3, varsler.size)
+    }
+
+    @Test
     fun `Finner aktive varsler for uberegnet periode`() {
         val vedtaksperiodeId = UUID.randomUUID()
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())

@@ -19,6 +19,9 @@ class ApiVarselRepository(dataSource: DataSource) {
     internal fun finnVarslerSomIkkeErInaktiveFor(vedtaksperiodeId: UUID, utbetalingId: UUID): Set<VarselDTO> {
         return varselDao.finnVarslerSomIkkeErInaktiveFor(vedtaksperiodeId, utbetalingId).toDto()
     }
+    internal fun finnVarslerSomIkkeErInaktiveForSisteGenerasjon(vedtaksperiodeId: UUID, utbetalingId: UUID): Set<VarselDTO> {
+        return varselDao.finnVarslerSomIkkeErInaktiveForSisteGenerasjon(vedtaksperiodeId, utbetalingId).toDto()
+    }
 
     internal fun finnVarslerForUberegnetPeriode(vedtaksperiodeId: UUID): Set<VarselDTO> {
         return varselDao.finnVarslerForUberegnetPeriode(vedtaksperiodeId).toDto()
