@@ -89,7 +89,7 @@ spec:
     - name: SPLEIS_API_URL
       value: "http://spleis-api"
     - name: KONTAKT_OG_RESERVASJONSREGISTERET_API_URL
-      value: "http://digdir-krr-proxy.team-rocket"
+      value: "http://digdir-krr-proxy.team-rocket.svc.cluster.local"
     - name: KONTAKT_OG_RESERVASJONSREGISTERET_SCOPE
       value: api://dev-gcp.team-rocket.digdir-krr-proxy/.default
     - name: VEDTAKSPERIODE_GENERASJONER
