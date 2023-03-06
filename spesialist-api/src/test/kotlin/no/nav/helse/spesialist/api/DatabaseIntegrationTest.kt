@@ -115,6 +115,24 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         )
     }
 
+    protected fun opprettOpprinneligSøknadsdato(
+        periode: Periode,
+    ) = sessionOf(dataSource).use { session ->
+        @Language("PostgreSQL")
+        val statement =
+            "INSERT INTO opprinnelig_soknadsdato VALUES (:vedtaksperiode_id, now())"
+        requireNotNull(
+            session.run(
+                queryOf(
+                    statement,
+                    mapOf(
+                        "vedtaksperiode_id" to periode.id,
+                    )
+                ).asUpdate
+            )
+        )
+    }
+
     protected fun opprettVedtak(
         personId: Long,
         arbeidsgiverId: Long,
@@ -123,6 +141,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             val snapshotid = opprettSnapshot()
             opprettGenerasjon(periode)
+            opprettOpprinneligSøknadsdato(periode)
 
             @Language("PostgreSQL")
             val statement =

@@ -1,6 +1,6 @@
 package no.nav.helse.modell.vedtaksperiode
 
-import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.Row
@@ -83,11 +83,34 @@ class GenerasjonDao(private val dataSource: DataSource) {
             INSERT INTO selve_vedtaksperiode_generasjon (unik_id, vedtaksperiode_id, opprettet_av_hendelse) 
             VALUES (?, ?, ?)
             RETURNING id, unik_id, vedtaksperiode_id, utbetaling_id, låst, skjæringstidspunkt, fom, tom
-            """
+        """
+        @Language("PostgreSQL")
+        val søknadMottattQuery = """
+            INSERT INTO opprinnelig_soknadsdato 
+            SELECT :vedtaksperiodeId, opprettet_tidspunkt
+            FROM selve_vedtaksperiode_generasjon
+            WHERE vedtaksperiode_id = :vedtaksperiodeId
+            ON CONFLICT DO NOTHING;
+        """
 
-        return requireNotNull(sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, id, vedtaksperiodeId, hendelseId).map(::toGenerasjon).asSingle)
-        }) { "Kunne ikke opprette ny vedtaksperiode generasjon" }
+        return sessionOf(dataSource).use { session ->
+            session.transaction { transactionalSession ->
+                val generasjon = requireNotNull(
+                    transactionalSession.run(
+                        queryOf(query, id, vedtaksperiodeId, hendelseId).map(::toGenerasjon).asSingle
+                    )
+                ) { "Kunne ikke opprette ny generasjon" }
+                transactionalSession.run(
+                    queryOf(
+                        søknadMottattQuery, mapOf(
+                            "vedtaksperiodeId" to vedtaksperiodeId,
+                            "soknadMottatt" to LocalDateTime.now()
+                        )
+                    ).asUpdate
+                )
+                generasjon
+            }
+        }
     }
 
     private fun toGenerasjon(row: Row): Generasjon {

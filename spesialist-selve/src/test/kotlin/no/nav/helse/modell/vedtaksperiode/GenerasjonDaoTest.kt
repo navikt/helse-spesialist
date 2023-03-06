@@ -55,7 +55,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `sjekker at siste generasjon blir returnert`() {
+    fun `siste generasjon blir returnert`() {
         val første = generasjonDao.opprettFor(UUID.randomUUID(), VEDTAKSPERIODE_ID, UUID.randomUUID())
         generasjonDao.låsFor(VEDTAKSPERIODE_ID, UUID.randomUUID())
         val siste = generasjonDao.opprettFor(UUID.randomUUID(), VEDTAKSPERIODE_ID, UUID.randomUUID())
@@ -121,6 +121,23 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         assertUtbetaling(generasjonId, null)
     }
 
+    @Test
+    fun `Lager innslag i opprinnelig_soknadsdato`() {
+        generasjonDao.opprettFor(UUID.randomUUID(), VEDTAKSPERIODE_ID, UUID.randomUUID())
+
+        assertEquals(finnTidligsteGenerasjonOpprettetTidspunkt(VEDTAKSPERIODE_ID), finnSøknadMottatt(VEDTAKSPERIODE_ID))
+    }
+
+    @Test
+    fun `Lager ikke innslag i opprinnelig_soknadsdato for ettergølgende generasjoner`() {
+        generasjonDao.opprettFor(UUID.randomUUID(), VEDTAKSPERIODE_ID, UUID.randomUUID())
+        generasjonDao.låsFor(VEDTAKSPERIODE_ID, UUID.randomUUID())
+        val opprinneligSøknadsdato = finnSøknadMottatt(VEDTAKSPERIODE_ID)
+        generasjonDao.opprettFor(UUID.randomUUID(), VEDTAKSPERIODE_ID, UUID.randomUUID())
+
+        assertEquals(opprinneligSøknadsdato, finnSøknadMottatt(VEDTAKSPERIODE_ID))
+    }
+
     private fun generasjonIdFor(vedtaksperiodeId: UUID): UUID {
         @Language("PostgreSQL")
         val query =
@@ -142,7 +159,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
             }.asSingle)
         } ?: false
 
-        assertTrue(låst) {"Generasjonen er ikke låst"}
+        assertTrue(låst) { "Generasjonen er ikke låst" }
     }
 
     private fun assertIkkeLåst(vedtaksperiodeId: UUID, opprettetAvId: UUID, låstAvId: UUID) {
@@ -156,7 +173,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
             }.asSingle)
         } ?: false
 
-        assertFalse(låst) {"Generasjonen er låst"}
+        assertFalse(låst) { "Generasjonen er låst" }
     }
 
     private fun assertUtbetaling(generasjonId: UUID, forventetUtbetalingId: UUID?) {
@@ -172,4 +189,22 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
 
         assertEquals(forventetUtbetalingId, utbetalingId)
     }
+
+    private fun finnSøknadMottatt(vedtaksperiodeId: UUID) =
+        sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val query = "SELECT soknad_mottatt FROM opprinnelig_soknadsdato WHERE vedtaksperiode_id = ?"
+            session.run(queryOf(query, vedtaksperiodeId).map {
+                it.localDateTimeOrNull("soknad_mottatt")
+            }.asSingle)
+        }
+
+    private fun finnTidligsteGenerasjonOpprettetTidspunkt(vedtaksperiodeId: UUID) =
+        sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val query = "SELECT min(opprettet_tidspunkt) as opprettet_tidspunkt FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ? GROUP BY vedtaksperiode_id"
+            session.run(queryOf(query, vedtaksperiodeId).map {
+                it.localDateTimeOrNull("opprettet_tidspunkt")
+            }.asSingle)
+        }
 }

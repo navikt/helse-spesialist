@@ -33,6 +33,8 @@ VALUES (${sequence_number}, '${vedtaksperiode_id}', now(), now(), ${sequence_num
         ${sequence_number});
 INSERT INTO selve_vedtaksperiode_generasjon(id, vedtaksperiode_id, opprettet_av_hendelse)
 VALUES (${sequence_number}, '${vedtaksperiode_id}', '${hendelse_id}');
+INSERT INTO opprinnelig_soknadsdato (vedtaksperiode_id, soknad_mottatt)
+VALUES ('${vedtaksperiode_id}', now());
 INSERT INTO selve_varsel(unik_id, kode, vedtaksperiode_id, opprettet, generasjon_ref)
 VALUES (gen_random_uuid(), 'EN_KODE', '${vedtaksperiode_id}', now(), ${sequence_number});
 INSERT INTO warning(id, melding, vedtak_ref, kilde, opprettet)
