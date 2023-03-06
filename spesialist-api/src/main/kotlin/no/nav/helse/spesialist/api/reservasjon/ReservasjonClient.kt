@@ -19,6 +19,7 @@ class ReservasjonClient(
     private val scope: String,
     private val accessTokenClient: AccessTokenClient,
 ) {
+    private val logg: Logger = LoggerFactory.getLogger(this.javaClass)
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
     companion object {
@@ -41,7 +42,8 @@ class ReservasjonClient(
                 accept(ContentType.Application.Json)
             }.body()
         } catch (e: Exception) {
-            sikkerLogg.error("Feil under kall til Kontakt- og reservasjonsregisteret:", e)
+            logg.error("Feil under kall til Kontakt- og reservasjonsregisteret")
+            sikkerLogg.error("Feil under kall til Kontakt- og reservasjonsregisteret", e)
         } finally {
             timer.observeDuration()
         }

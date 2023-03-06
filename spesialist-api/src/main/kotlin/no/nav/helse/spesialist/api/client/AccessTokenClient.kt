@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.api.client
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import io.ktor.client.*
+import io.ktor.client.call.body
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
@@ -20,6 +21,7 @@ class AccessTokenClient(
 ) {
 
     private val log = LoggerFactory.getLogger(AccessTokenClient::class.java)
+    private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     private val mutex = Mutex()
 
     @Volatile
@@ -33,7 +35,7 @@ class AccessTokenClient(
                 ?: run {
                     log.info("Henter nytt token fra Azure AD")
                     val response: AadAccessToken = try {
-                        httpClient.preparePost(aadAccessTokenUrl) {
+                        val response = httpClient.post(aadAccessTokenUrl) {
                             accept(ContentType.Application.Json)
                             method = HttpMethod.Post
                             setBody(FormDataContent(Parameters.build {
@@ -42,8 +44,12 @@ class AccessTokenClient(
                                 append("grant_type", "client_credentials")
                                 append("client_secret", clientSecret)
                             }))
-                        }.body()
+                        }
+                        if (response.status != HttpStatusCode.OK)
+                            sikkerLogg.warn("Mottok ${response.status} fra Azure AD, respons:\n${response.body<String>()}")
+                        response.body()
                     } catch (e: Exception) {
+                        log.warn("Klarte ikke hente nytt token fra Azure AD")
                         throw RuntimeException("Klarte ikke hente nytt token fra Azure AD", e)
                     }
                     tokenMap[scope] = response
