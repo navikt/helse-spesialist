@@ -32,9 +32,9 @@ import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.AVVENTER_ARBEIDSGIVERKVITTERING
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.SENDT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.objectMapper
@@ -401,7 +401,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
             organisasjonsnummer = organisasjonsnummer,
             utbetalingId = utbetalingId,
             type = "UTBETALING",
-            forrigeStatus = SENDT,
+            forrigeStatus = AVVENTER_ARBEIDSGIVERKVITTERING,
             gjeldendeStatus = UTBETALT
         )
         assertIngenEtterspurteBehov()

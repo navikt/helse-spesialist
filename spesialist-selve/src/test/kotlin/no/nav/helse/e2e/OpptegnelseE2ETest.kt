@@ -12,15 +12,15 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
+import no.nav.helse.mediator.api.AbstractApiTest
+import no.nav.helse.mediator.api.AbstractApiTest.Companion.authentication
+import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDto
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseMediator
 import no.nav.helse.spesialist.api.abonnement.opptegnelseApi
-import no.nav.helse.mediator.api.AbstractApiTest
-import no.nav.helse.mediator.api.AbstractApiTest.Companion.authentication
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.person.Kjønn
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageProblems
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -50,7 +50,7 @@ private class OpptegnelseE2ETest : AbstractE2ETest() {
         testRapid.sendTestMessage(meldingsfabrikk.lagUtbetalingEndret(
             utbetalingId = utbetalingId,
             type = "ANNULLERING",
-            status = "UTBETALING_FEILET"
+            status = "ANNULLERT"
         ))
 
         val opptegnelser =

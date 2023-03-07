@@ -6,9 +6,10 @@ import java.util.UUID
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.ANNULLERT
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.AVVENTER_ARBEIDSGIVERKVITTERING
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.AVVENTER_KVITTERINGER
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.AVVENTER_PERSONKVITTERING
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.GODKJENT_UTEN_UTBETALING
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.OVERFØRT
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALING_FEILET
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
@@ -121,13 +122,10 @@ internal class LagreOppdragCommand(
 
     private fun lagOpptegnelse() {
         val opptegnelseType: OpptegnelseType = when {
-            type == Utbetalingtype.ANNULLERING && status == UTBETALING_FEILET -> {
-                OpptegnelseType.UTBETALING_ANNULLERING_FEILET
-            }
             type == Utbetalingtype.ANNULLERING && status == ANNULLERT -> {
                 OpptegnelseType.UTBETALING_ANNULLERING_OK
             }
-            type == Utbetalingtype.REVURDERING && status in listOf(UTBETALT, GODKJENT_UTEN_UTBETALING, OVERFØRT) -> {
+            type == Utbetalingtype.REVURDERING && status in setOf(AVVENTER_KVITTERINGER, AVVENTER_ARBEIDSGIVERKVITTERING, AVVENTER_PERSONKVITTERING, UTBETALT, GODKJENT_UTEN_UTBETALING) -> {
                 OpptegnelseType.REVURDERING_FERDIGBEHANDLET
             }
             else -> return

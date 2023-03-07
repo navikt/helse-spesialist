@@ -14,10 +14,10 @@ import no.nav.helse.Testdata.SNAPSHOT_UTEN_WARNINGS
 import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.ANNULLERT
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.AVVENTER_ARBEIDSGIVERKVITTERING
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.GODKJENT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_GODKJENT
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.OVERFØRT
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -40,7 +40,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
             organisasjonsnummer = ORGNR,
             utbetalingId = UTBETALING_ID,
             type = "UTBETALING",
-            status = GODKJENT,
+            status = AVVENTER_ARBEIDSGIVERKVITTERING,
             arbeidsgiverFagsystemId = arbeidsgiverFagsystemId
         )
         sendUtbetalingEndret(
@@ -49,7 +49,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
             organisasjonsnummer = ORGNR,
             utbetalingId = UTBETALING_ID,
             type = "ETTERUTBETALING",
-            status = OVERFØRT,
+            status = AVVENTER_ARBEIDSGIVERKVITTERING,
             arbeidsgiverFagsystemId = arbeidsgiverFagsystemId
         )
         sendUtbetalingEndret(
@@ -74,7 +74,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
             organisasjonsnummer = ORGNR,
             utbetalingId = UTBETALING_ID,
             type = "UTBETALING",
-            status = GODKJENT,
+            status = AVVENTER_ARBEIDSGIVERKVITTERING,
             arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
             opprettet = opprettet
         )
@@ -84,7 +84,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
             organisasjonsnummer = ORGNR,
             utbetalingId = UTBETALING_ID,
             type = "UTBETALING",
-            status = GODKJENT,
+            status = AVVENTER_ARBEIDSGIVERKVITTERING,
             arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
             opprettet = opprettet
         )
@@ -103,7 +103,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
             organisasjonsnummer = ORGNR,
             utbetalingId = UTBETALING_ID,
             type = "UTBETALING",
-            status = GODKJENT,
+            status = AVVENTER_ARBEIDSGIVERKVITTERING,
             arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
             opprettet = opprettet
         )
@@ -113,7 +113,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
             organisasjonsnummer = ORGNR,
             utbetalingId = UTBETALING_ID,
             type = "UTBETALING",
-            status = GODKJENT,
+            status = AVVENTER_ARBEIDSGIVERKVITTERING,
             arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
             opprettet = senereTidspunkt
         )
@@ -133,7 +133,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
                 organisasjonsnummer = ET_ANNET_ORGNR,
                 utbetalingId = UTBETALING_ID,
                 type = "UTBETALING",
-                status = GODKJENT,
+                status = AVVENTER_ARBEIDSGIVERKVITTERING,
                 arbeidsgiverFagsystemId = arbeidsgiverFagsystemId
             )
         }
@@ -151,7 +151,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
                 organisasjonsnummer = ORGNR,
                 utbetalingId = UTBETALING_ID,
                 type = "UTBETALING",
-                status = GODKJENT,
+                status = AVVENTER_ARBEIDSGIVERKVITTERING,
                 arbeidsgiverFagsystemId = arbeidsgiverFagsystemId
             )
         }
@@ -169,7 +169,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
                 organisasjonsnummer = ORGNR,
                 utbetalingId = UUID.randomUUID(),
                 type = "FERIEPENGER",
-                status = GODKJENT,
+                status = AVVENTER_ARBEIDSGIVERKVITTERING,
                 arbeidsgiverFagsystemId = arbeidsgiverFagsystemId
             )
             sendUtbetalingEndret(
@@ -178,7 +178,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
                 organisasjonsnummer = ORGNR,
                 utbetalingId = UUID.randomUUID(),
                 type = "ETTERUTBETALING",
-                status = GODKJENT,
+                status = AVVENTER_ARBEIDSGIVERKVITTERING,
                 arbeidsgiverFagsystemId = arbeidsgiverFagsystemId
             )
             sendUtbetalingEndret(
@@ -187,7 +187,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
                 organisasjonsnummer = ORGNR,
                 utbetalingId = UUID.randomUUID(),
                 type = "ANNULLERING",
-                status = GODKJENT,
+                status = AVVENTER_ARBEIDSGIVERKVITTERING,
                 arbeidsgiverFagsystemId = arbeidsgiverFagsystemId
             )
             sendUtbetalingEndret(
@@ -196,7 +196,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
                 organisasjonsnummer = ORGNR,
                 utbetalingId = UUID.randomUUID(),
                 type = "REVURDERING",
-                status = GODKJENT,
+                status = AVVENTER_ARBEIDSGIVERKVITTERING,
                 arbeidsgiverFagsystemId = arbeidsgiverFagsystemId
             )
         }
@@ -225,7 +225,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
             utbetalingId = UTBETALING_ID,
             type = "UTBETALING",
             status = FORKASTET,
-            forrigeStatus = GODKJENT,
+            forrigeStatus = IKKE_UTBETALT,
             arbeidsgiverFagsystemId = arbeidsgiverFagsystemId
         )
         assertEquals(2, utbetalinger().size)
@@ -240,7 +240,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
             organisasjonsnummer = ORGNR,
             utbetalingId = UTBETALING_ID,
             type = "FERIEPENGER",
-            status = OVERFØRT,
+            status = AVVENTER_ARBEIDSGIVERKVITTERING,
             arbeidsgiverFagsystemId = arbeidsgiverFagsystemId
         )
 
@@ -261,7 +261,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
             organisasjonsnummer = ORGNR,
             utbetalingId = UTBETALING_ID,
             type = "FERIEPENGER",
-            status = OVERFØRT,
+            status = AVVENTER_ARBEIDSGIVERKVITTERING,
             arbeidsgiverFagsystemId = arbeidsgiverFagsystemId
         )
         sendUtbetalingEndret(
@@ -270,7 +270,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
             organisasjonsnummer = ORGNR,
             utbetalingId = nyUtbetalingId,
             type = "FERIEPENGER",
-            status = OVERFØRT,
+            status = AVVENTER_ARBEIDSGIVERKVITTERING,
             arbeidsgiverFagsystemId = arbeidsgiverFagsystemId
         )
 
@@ -282,7 +282,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
     fun `forstår utbetaling til bruker`() {
         val nyUtbetalingId = UUID.randomUUID()
         vedtaksperiode(utbetalingId = nyUtbetalingId)
-        sendPersonUtbetalingEndret("UTBETALING", OVERFØRT, ORGNR, utbetalingId = nyUtbetalingId)
+        sendPersonUtbetalingEndret("UTBETALING", AVVENTER_ARBEIDSGIVERKVITTERING, ORGNR, utbetalingId = nyUtbetalingId)
 
         assertEquals(1, utbetalinger().size)
         assertTrue { utbetalinger().find { it.id == nyUtbetalingId } != null }

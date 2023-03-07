@@ -1,16 +1,16 @@
 package no.nav.helse.serde
 
 import DatabaseIntegrationTest
-import kotliquery.queryOf
-import kotliquery.sessionOf
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.GODKJENT
-import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalDateTime.now
+import kotliquery.queryOf
+import kotliquery.sessionOf
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.OVERFØRT
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 internal class FjernCarriageReturnsFraUtbetalingJsonTest : DatabaseIntegrationTest() {
     @BeforeEach
@@ -99,7 +99,7 @@ internal class FjernCarriageReturnsFraUtbetalingJsonTest : DatabaseIntegrationTe
         val personOppdragId = lagPersonoppdrag()
         lagLinje(arbeidsgiverOppdragId, LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 31))
         val utbetalingId = lagUtbetalingId(arbeidsgiverOppdragId, personOppdragId)
-        utbetalingDao.nyUtbetalingStatus(utbetalingId, GODKJENT, opprettet, data)
+        utbetalingDao.nyUtbetalingStatus(utbetalingId, OVERFØRT, opprettet, data)
         return utbetalingId
     }
 
