@@ -42,7 +42,7 @@ internal class AnnulleringApiTest : AbstractApiTest() {
     fun annulleringOk() {
         val clot = slot<AnnulleringDto>()
         val response = runBlocking {
-            client.preparePost("/api/annullering") {
+            client.post("/api/annullering") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 setBody(mapOf(
@@ -55,7 +55,7 @@ internal class AnnulleringApiTest : AbstractApiTest() {
                     "begrunnelser" to listOf("Ingen liker fisk", "En giraff!!")
                 ))
                 authentication(SAKSBEHANDLER_OID)
-            }.execute()
+            }
         }
         assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
         verify(exactly = 1) {

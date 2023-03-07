@@ -74,12 +74,12 @@ internal class LeggPåVentApiTest : AbstractApiTest() {
     fun `kan fjerne på vent`() {
         val oppgavereferanse = nextLong()
         val response = runBlocking {
-            client.prepareDelete("/api/leggpaavent/${oppgavereferanse}") {
+            client.delete("/api/leggpaavent/${oppgavereferanse}") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 setBody(objectMapper.createObjectNode())
                 authentication(SAKSBEHANDLER_OID)
-            }.execute()
+            }
         }
 
         assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")

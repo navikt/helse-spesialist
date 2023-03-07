@@ -5,9 +5,10 @@ import com.auth0.jwt.algorithms.Algorithm
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.nimbusds.jose.jwk.RSAKey
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
 import io.ktor.client.request.forms.FormDataContent
 import io.ktor.client.request.header
-import io.ktor.client.request.preparePost
+import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.Parameters
@@ -39,7 +40,7 @@ internal class GraphAccessTokenClient(
 
         val callId = UUID.randomUUID()
         logger.info("Henter Azure token for MS graph")
-        val token: AadAccessToken = httpClient.preparePost(azureConfig.tokenEndpoint) {
+        val token: AadAccessToken = httpClient.post(azureConfig.tokenEndpoint) {
             header("callId", callId)
             contentType(ContentType.Application.Json)
             setBody(FormDataContent(Parameters.build {

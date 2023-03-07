@@ -3,8 +3,8 @@ package no.nav.helse.e2e
 import AbstractE2ETest
 import io.ktor.client.call.body
 import io.ktor.client.request.accept
-import io.ktor.client.request.prepareGet
-import io.ktor.client.request.preparePost
+import io.ktor.client.request.get
+import io.ktor.client.request.post
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
@@ -38,11 +38,11 @@ private class OpptegnelseE2ETest : AbstractE2ETest() {
         val respons =
             AbstractApiTest.TestServer { opptegnelseApi(OpptegnelseMediator(opptegnelseApiDao, abonnementDao)) }
                 .withAuthenticatedServer {
-                    it.preparePost("/api/opptegnelse/abonner/$AKTØR") {
+                    it.post("/api/opptegnelse/abonner/$AKTØR") {
                         contentType(ContentType.Application.Json)
                         accept(ContentType.Application.Json)
                         authentication(SAKSBEHANDLER_ID)
-                    }.execute()
+                    }
                 }
 
         assertEquals(HttpStatusCode.OK, respons.status)
@@ -56,11 +56,11 @@ private class OpptegnelseE2ETest : AbstractE2ETest() {
         val opptegnelser =
             AbstractApiTest.TestServer { opptegnelseApi(OpptegnelseMediator(opptegnelseApiDao, abonnementDao)) }
                 .withAuthenticatedServer {
-                    it.prepareGet("/api/opptegnelse/hent") {
+                    it.get("/api/opptegnelse/hent") {
                         contentType(ContentType.Application.Json)
                         accept(ContentType.Application.Json)
                         authentication(SAKSBEHANDLER_ID)
-                    }.execute().call.body<List<OpptegnelseDto>>()
+                    }.body<List<OpptegnelseDto>>()
                 }
 
         assertEquals(1, opptegnelser.size)
@@ -68,11 +68,11 @@ private class OpptegnelseE2ETest : AbstractE2ETest() {
         val oppdateringer =
             AbstractApiTest.TestServer { opptegnelseApi(OpptegnelseMediator(opptegnelseApiDao, abonnementDao)) }
                 .withAuthenticatedServer {
-                    it.prepareGet("/api/opptegnelse/hent/${opptegnelser[0].sekvensnummer}") {
+                    it.get("/api/opptegnelse/hent/${opptegnelser[0].sekvensnummer}") {
                         contentType(ContentType.Application.Json)
                         accept(ContentType.Application.Json)
                         authentication(SAKSBEHANDLER_ID)
-                    }.execute().call.body<List<OpptegnelseDto>>()
+                    }.body<List<OpptegnelseDto>>()
                 }
 
         assertEquals(0, oppdateringer.size)

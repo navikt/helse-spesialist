@@ -3,8 +3,8 @@ package no.nav.helse.mediator.api
 import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.call.body
 import io.ktor.client.request.accept
-import io.ktor.client.request.prepareDelete
-import io.ktor.client.request.preparePost
+import io.ktor.client.request.delete
+import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
@@ -54,12 +54,12 @@ internal class TildelingApiTest : AbstractApiTest() {
     fun `kan tildele en oppgave til seg selv`() {
         val oppgavereferanse = nextLong()
         val response = runBlocking {
-            client.preparePost("/api/tildeling/${oppgavereferanse}") {
+            client.post("/api/tildeling/${oppgavereferanse}") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 setBody(objectMapper.createObjectNode())
                 authentication(SAKSBEHANDLER_OID)
-            }.execute()
+            }
         }
 
         assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
@@ -72,12 +72,12 @@ internal class TildelingApiTest : AbstractApiTest() {
     fun `kan slette en tildeling av en oppgave`() {
         val oppgavereferanse = nextLong()
         val response = runBlocking {
-            client.prepareDelete("/api/tildeling/${oppgavereferanse}") {
+            client.delete("/api/tildeling/${oppgavereferanse}") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 setBody(objectMapper.createObjectNode())
                 authentication(SAKSBEHANDLER_OID)
-            }.execute()
+            }
         }
 
         assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
@@ -92,12 +92,12 @@ internal class TildelingApiTest : AbstractApiTest() {
         every { tildelingService.tildelOppgaveTilSaksbehandler(any(), any(), any(), any(), any(), any()) } throws tildeltFeil
         val oppgavereferanse = nextLong()
         val response = runBlocking {
-            client.preparePost("/api/tildeling/${oppgavereferanse}") {
+            client.post("/api/tildeling/${oppgavereferanse}") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 setBody(objectMapper.createObjectNode())
                 authentication(SAKSBEHANDLER_OID)
-            }.execute()
+            }
         }
 
         assertEquals(HttpStatusCode.Conflict, response.status)
@@ -111,12 +111,12 @@ internal class TildelingApiTest : AbstractApiTest() {
     @Test
     fun `manglende oppgavereferanse POST gir Bad Request`() {
         val response = runBlocking {
-            client.preparePost("/api/tildeling/null") {
+            client.post("/api/tildeling/null") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 setBody(objectMapper.createObjectNode())
                 authentication(SAKSBEHANDLER_OID)
-            }.execute()
+            }
         }
 
         assertEquals(response.status, HttpStatusCode.BadRequest, "HTTP response burde returnere en Bad request, fikk ${response.status}")
@@ -125,12 +125,12 @@ internal class TildelingApiTest : AbstractApiTest() {
     @Test
     fun `manglende oppgavereferanse DELETE gir Bad Request`() {
         val response = runBlocking {
-            client.prepareDelete("/api/tildeling/null") {
+            client.delete("/api/tildeling/null") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 setBody(objectMapper.createObjectNode())
                 authentication(SAKSBEHANDLER_OID)
-            }.execute()
+            }
         }
         assertEquals(response.status, HttpStatusCode.BadRequest, "HTTP response burde returnere en Bad request, fikk ${response.status}")
     }

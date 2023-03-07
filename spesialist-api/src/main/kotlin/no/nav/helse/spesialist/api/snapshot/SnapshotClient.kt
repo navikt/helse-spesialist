@@ -5,9 +5,10 @@ import com.expediagroup.graphql.client.serializer.defaultGraphQLSerializer
 import com.expediagroup.graphql.client.types.GraphQLClientRequest
 import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
 import io.ktor.client.plugins.ServerResponseException
 import io.ktor.client.request.header
-import io.ktor.client.request.preparePost
+import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
@@ -80,7 +81,7 @@ class SnapshotClient(
         val accessToken = accessTokenClient.hentAccessToken(spleisClientId)
         val callId = UUID.randomUUID().toString()
 
-        val response = httpClient.preparePost(spleisUrl.resolve("/graphql").toURL()) {
+        val response = httpClient.post(spleisUrl.resolve("/graphql").toURL()) {
             header("Authorization", "Bearer $accessToken")
             header("callId", callId)
             contentType(ContentType.Application.Json)

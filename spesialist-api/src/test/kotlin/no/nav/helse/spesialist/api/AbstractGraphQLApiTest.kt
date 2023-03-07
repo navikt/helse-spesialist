@@ -11,7 +11,7 @@ import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.accept
 import io.ktor.client.request.header
-import io.ktor.client.request.preparePost
+import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
@@ -151,7 +151,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
 
     private class TestServerRuntime(
         build: Route.() -> Unit,
-        private val httpPort: Int
+        private val httpPort: Int,
     ) : AutoCloseable {
         private val server = createEmbeddedServer(build, httpPort)
 
@@ -209,13 +209,12 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
 
     protected fun runQuery(@Language("GraphQL") query: String, group: UUID? = null): JsonNode {
         val response = runBlocking {
-            val response = client.preparePost("/graphql") {
+            client.post("/graphql") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 authentication(UUID.randomUUID(), group = group?.toString())
                 setBody(mapOf("query" to query))
-            }.execute()
-            response.body<String>()
+            }.body<String>()
         }
 
         return objectMapper.readTree(response)

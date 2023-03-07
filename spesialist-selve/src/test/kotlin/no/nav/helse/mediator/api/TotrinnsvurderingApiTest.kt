@@ -2,7 +2,7 @@ package no.nav.helse.mediator.api
 
 import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.request.accept
-import io.ktor.client.request.preparePost
+import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
@@ -65,11 +65,11 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     fun `Kan ikke gjøres til beslutteroppgave hvis den allerede er beslutteroppgave`() {
         every { oppgaveMediator.erBeslutteroppgave(1L) } returns true
         val response = runBlocking {
-            client.preparePost("/api/totrinnsvurdering") {
+            client.post("/api/totrinnsvurdering") {
                 contentType(ContentType.Application.Json)
                 setBody<JsonNode>(objectMapper.valueToTree(totrinnsvurderingDto))
                 authentication(saksbehandler_oid)
-            }.execute()
+            }
         }
         assertEquals(HttpStatusCode.Conflict, response.status)
     }
@@ -80,11 +80,11 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
         every { oppgaveMediator.erRiskoppgave(1L) } returns false
         every { varselRepository.ikkeVurderteVarslerEkskludertBesluttervarslerFor(1L) } returns 0
         val response = runBlocking {
-            client.preparePost("/api/totrinnsvurdering") {
+            client.post("/api/totrinnsvurdering") {
                 contentType(ContentType.Application.Json)
                 setBody<JsonNode>(objectMapper.valueToTree(totrinnsvurderingDto))
                 authentication(saksbehandler_oid)
-            }.execute()
+            }
         }
         assertEquals(HttpStatusCode.OK, response.status)
     }
@@ -95,11 +95,11 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
         every { oppgaveMediator.erRiskoppgave(1L) } returns false
         every { varselRepository.ikkeVurderteVarslerEkskludertBesluttervarslerFor(1L) } returns 1
         val response = runBlocking {
-            client.preparePost("/api/totrinnsvurdering") {
+            client.post("/api/totrinnsvurdering") {
                 contentType(ContentType.Application.Json)
                 setBody<JsonNode>(objectMapper.valueToTree(totrinnsvurderingDto))
                 authentication(saksbehandler_oid)
-            }.execute()
+            }
         }
         assertEquals(HttpStatusCode.BadRequest, response.status)
     }
@@ -107,12 +107,12 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     @Test
     fun totrinnsvurderingOk() {
         val response = runBlocking {
-            client.preparePost(TOTRINNSVURDERING_URL) {
+            client.post(TOTRINNSVURDERING_URL) {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 setBody<TotrinnsvurderingDto>(objectMapper.valueToTree(totrinnsvurderingDto))
                 authentication(saksbehandler_oid)
-            }.execute()
+            }
         }
 
         verify(exactly = 1) {
@@ -143,12 +143,12 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     @Test
     fun returOk() {
         val response = runBlocking {
-            client.preparePost(RETUR_URL) {
+            client.post(RETUR_URL) {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 setBody<TotrinnsvurderingReturDto>(objectMapper.valueToTree(returDtoMedNotat))
                 authentication(saksbehandler_oid)
-            }.execute()
+            }
         }
 
         verify(exactly = 1) {
@@ -179,12 +179,12 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     @Test
     fun totrinnsvurderingManglerPeriodeId() {
         val response = runBlocking {
-            client.preparePost(TOTRINNSVURDERING_URL) {
+            client.post(TOTRINNSVURDERING_URL) {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 setBody(objectMapper.writeValueAsString("{oppgavereferanse: 1L}"))
                 authentication(saksbehandler_oid)
-            }.execute()
+            }
         }
 
         verify(exactly = 0) { oppgaveMediator.setBeslutteroppgave(any(), any()) }
@@ -194,12 +194,12 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     @Test
     fun returManglerPeriodeId() {
         val response = runBlocking {
-            client.preparePost(RETUR_URL) {
+            client.post(RETUR_URL) {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 setBody(objectMapper.writeValueAsString("{oppgavereferanse: 1L}"))
                 authentication(saksbehandler_oid)
-            }.execute()
+            }
         }
 
         verify(exactly = 0) { oppgaveMediator.setBeslutteroppgave(any(), any()) }
@@ -209,11 +209,11 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     @Test
     fun totrinnsvurderingManglerAccessToken() {
         val response = runBlocking {
-            client.preparePost(TOTRINNSVURDERING_URL) {
+            client.post(TOTRINNSVURDERING_URL) {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 setBody<TotrinnsvurderingDto>(objectMapper.valueToTree(totrinnsvurderingDto))
-            }.execute()
+            }
         }
 
         verify(exactly = 0) { oppgaveMediator.setBeslutteroppgave(any(), any()) }
@@ -223,11 +223,11 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     @Test
     fun returManglerAccessToken() {
         val response = runBlocking {
-            client.preparePost(RETUR_URL) {
+            client.post(RETUR_URL) {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 setBody<TotrinnsvurderingDto>(objectMapper.valueToTree(totrinnsvurderingDto))
-            }.execute()
+            }
         }
 
         verify(exactly = 0) { oppgaveMediator.setBeslutteroppgave(any(), any()) }
