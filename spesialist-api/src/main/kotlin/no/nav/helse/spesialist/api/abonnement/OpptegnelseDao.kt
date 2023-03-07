@@ -27,8 +27,9 @@ class OpptegnelseDao(dataSource: DataSource) : HelseDao(dataSource) {
             FROM opptegnelse o
             JOIN person p ON o.person_id = p.id
             JOIN abonnement_for_opptegnelse a ON a.person_id = o.person_id
+            JOIN saksbehandler_opptegnelse_sekvensnummer sos ON sos.saksbehandler_id = a.saksbehandler_id
             WHERE a.saksbehandler_id = :saksbehandlerIdent
-            AND (a.siste_sekvensnummer IS NULL OR o.SEKVENSNUMMER > a.siste_sekvensnummer)
+            AND o.SEKVENSNUMMER > sos.siste_sekvensnummer
         """, mapOf("saksbehandlerIdent" to saksbehandlerIdent)
     ).list { row ->
         Opptegnelse(

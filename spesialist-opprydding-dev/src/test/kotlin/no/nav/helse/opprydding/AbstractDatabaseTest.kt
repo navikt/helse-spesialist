@@ -116,6 +116,7 @@ internal abstract class AbstractDatabaseTest {
                 "arbeidsgiver_bransjer",
                 "arbeidsgiver_navn",
                 "api_varseldefinisjon",
+                "saksbehandler_opptegnelse_sekvensnummer",
                 "inntekt",
                 "temp_manglende_varsler",
                 "automatisering_korrigert_soknad",

@@ -66,8 +66,10 @@ VALUES ('${saksbehandler_oid}', ${sequence_number}, now());
 
 INSERT INTO opptegnelse(person_id, sekvensnummer, payload, type)
 VALUES (${sequence_number}, 1, '{}'::json, 'TESTTYPE');
-INSERT INTO abonnement_for_opptegnelse(saksbehandler_id, person_id, siste_sekvensnummer)
-VALUES ('${saksbehandler_oid}', ${sequence_number}, 1);
+INSERT INTO abonnement_for_opptegnelse(saksbehandler_id, person_id)
+VALUES ('${saksbehandler_oid}', ${sequence_number});
+INSERT INTO saksbehandler_opptegnelse_sekvensnummer (saksbehandler_id, siste_sekvensnummer)
+VALUES ('${saksbehandler_oid}', 1);
 
 INSERT INTO notat(id, tekst, opprettet, saksbehandler_oid, vedtaksperiode_id, feilregistrert, feilregistrert_tidspunkt)
 VALUES (${sequence_number}, 'TEST_TEXT', now(), '${saksbehandler_oid}', '${vedtaksperiode_id}', false, now());
