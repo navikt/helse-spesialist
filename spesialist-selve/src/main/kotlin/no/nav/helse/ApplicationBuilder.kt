@@ -30,6 +30,8 @@ import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.routing
 import io.ktor.util.pipeline.PipelineContext
+import java.lang.management.GarbageCollectorMXBean
+import java.lang.management.ManagementFactory
 import java.net.ProxySelector
 import java.net.URI
 import java.util.UUID
@@ -325,7 +327,10 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                     )
                 }
             }
-        }.build()
+        }.build().also {
+            val beans: List<GarbageCollectorMXBean> = ManagementFactory.getGarbageCollectorMXBeans()
+            logg.info("registrerte garbage collectors etter build(): ${beans.map { it.name }}")
+        }
 
     private val automatiseringDao = AutomatiseringDao(dataSource)
     val automatisering = Automatisering(
@@ -373,7 +378,10 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         )
     }
 
-    fun start() = rapidsConnection.start()
+    fun start() = rapidsConnection.start().also {
+        val beans: List<GarbageCollectorMXBean> = ManagementFactory.getGarbageCollectorMXBeans()
+        logg.info("Registrerte garbage collectors etter start(): ${beans.map { it.name }}")
+    }
 
     override fun onStartup(rapidsConnection: RapidsConnection) {
         dataSourceBuilder.migrate()
