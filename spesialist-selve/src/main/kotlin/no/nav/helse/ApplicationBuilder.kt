@@ -327,10 +327,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                     )
                 }
             }
-        }.build().also {
-            val beans: List<GarbageCollectorMXBean> = ManagementFactory.getGarbageCollectorMXBeans()
-            logg.info("registrerte garbage collectors etter build(): ${beans.map { it.name }}")
-        }
+        }.build()
 
     private val automatiseringDao = AutomatiseringDao(dataSource)
     val automatisering = Automatisering(
@@ -380,7 +377,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
 
     fun start() = rapidsConnection.start().also {
         val beans: List<GarbageCollectorMXBean> = ManagementFactory.getGarbageCollectorMXBeans()
-        logg.info("Registrerte garbage collectors etter start(): ${beans.map { it.name }}")
+        logg.info("Registrerte garbage collectors etter oppstart: ${beans.joinToString { it.name }}")
     }
 
     override fun onStartup(rapidsConnection: RapidsConnection) {
