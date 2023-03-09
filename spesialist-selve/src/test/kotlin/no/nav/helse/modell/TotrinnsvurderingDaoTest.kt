@@ -1,11 +1,10 @@
 package no.nav.helse.modell
 
 import DatabaseIntegrationTest
-import java.time.LocalDateTime
-import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.juli
+import no.nav.helse.modell.TotrinnsvurderingDao.Totrinnsvurdering
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -84,7 +83,7 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `Oppdaterer utbetalt_utbetaling_ref på totrinnsvurdering`() {
+    fun `Oppdaterer utbetaling_id_ref på totrinnsvurdering`() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode()
@@ -106,7 +105,60 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         assertNotNull(totrinnsvurdering.first().oppdatert)
     }
 
+    @Test
+    fun `Får ikke endret på totrinnsvurdering når utbetaling_id_ref er satt`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        val arbeidsgiverFagsystemId = fagsystemId()
+        val personFagsystemId = fagsystemId()
+        val arbeidsgiverOppdragId = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
+        val personOppdragId = lagPersonoppdrag(personFagsystemId)
+        lagLinje(arbeidsgiverOppdragId, 1.juli(), 10.juli(), 12000)
+        lagLinje(personOppdragId, 11.juli(), 31.juli(), 10000)
+        lagUtbetalingId(arbeidsgiverOppdragId, personOppdragId, UTBETALING_ID)
+        opprettUtbetalingKobling(VEDTAKSPERIODE, UTBETALING_ID)
 
+        totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
+        totrinnsvurderingDao.ferdigstill(VEDTAKSPERIODE)
+
+        val totrinnsvurdering = totrinnsvurdering()
+
+        assertEquals(VEDTAKSPERIODE, totrinnsvurdering.first().vedtaksperiodeId)
+        assertFalse(totrinnsvurdering.first().erRetur)
+        assertNull(totrinnsvurdering.first().saksbehandler)
+        assertNull(totrinnsvurdering.first().beslutter)
+        assertEquals(1, totrinnsvurdering.first().utbetalingIdRef)
+
+        totrinnsvurderingDao.settErRetur(VEDTAKSPERIODE)
+        totrinnsvurderingDao.settSaksbehandler(VEDTAKSPERIODE, SAKSBEHANDLER_OID)
+        totrinnsvurderingDao.settBeslutter(VEDTAKSPERIODE, SAKSBEHANDLER_OID)
+
+        val totrinnsvurderingFerdigstilt = totrinnsvurdering()
+
+        assertFalse(totrinnsvurderingFerdigstilt.first().erRetur)
+        assertNull(totrinnsvurderingFerdigstilt.first().saksbehandler)
+        assertNull(totrinnsvurderingFerdigstilt.first().beslutter)
+        assertEquals(1, totrinnsvurdering.first().utbetalingIdRef)
+    }
+
+    @Test
+    fun `Finner aktiv ikke-utbetalt totrinnsvurdering`() {
+        totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
+        totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
+        totrinnsvurderingDao.settErRetur(VEDTAKSPERIODE)
+        val aktivTotrinnsvurdering = totrinnsvurderingDao.hentAktiv(VEDTAKSPERIODE)
+
+        val totrinnsvurdering = totrinnsvurdering()
+
+        assertEquals(aktivTotrinnsvurdering?.vedtaksperiodeId, totrinnsvurdering.first().vedtaksperiodeId)
+        assertEquals(aktivTotrinnsvurdering?.erRetur, totrinnsvurdering.first().erRetur)
+        assertEquals(aktivTotrinnsvurdering?.saksbehandler, totrinnsvurdering.first().saksbehandler)
+        assertEquals(aktivTotrinnsvurdering?.beslutter, totrinnsvurdering.first().beslutter)
+        assertEquals(aktivTotrinnsvurdering?.utbetalingIdRef, totrinnsvurdering.first().utbetalingIdRef)
+        assertEquals(aktivTotrinnsvurdering?.oppdatert, totrinnsvurdering.first().oppdatert)
+        assertEquals(aktivTotrinnsvurdering?.opprettet, totrinnsvurdering.first().opprettet)
+    }
 
     private fun totrinnsvurdering() = sessionOf(dataSource).use {
         it.run(queryOf("SELECT * FROM totrinnsvurdering").map { row ->
@@ -121,14 +173,4 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
             )
         }.asList)
     }
-
-    private class Totrinnsvurdering(
-        val vedtaksperiodeId: UUID,
-        val erRetur: Boolean,
-        val saksbehandler: UUID?,
-        val beslutter: UUID?,
-        val utbetalingIdRef: Long?,
-        val opprettet: LocalDateTime,
-        val oppdatert: LocalDateTime?,
-    )
 }

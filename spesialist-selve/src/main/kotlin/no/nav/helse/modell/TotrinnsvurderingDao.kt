@@ -1,21 +1,50 @@
 package no.nav.helse.modell
 
+import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
+import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import org.intellij.lang.annotations.Language
 
 internal class TotrinnsvurderingDao(private val dataSource: DataSource) {
-    internal fun opprett(vedtaksperiodeId: UUID) {
-        sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query = """
-               INSERT INTO totrinnsvurdering (vedtaksperiode_id) 
-               VALUES (:vedtaksperiodeId)
-            """.trimIndent()
+    private fun TransactionalSession.opprett(vedtaksperiodeId: UUID): Boolean {
+        @Language("PostgreSQL")
+        val query = """
+           INSERT INTO totrinnsvurdering (vedtaksperiode_id) 
+           VALUES (:vedtaksperiodeId)
+        """.trimIndent()
 
-            session.run(queryOf(query, mapOf("vedtaksperiodeId" to vedtaksperiodeId)).asExecute)
+        return run(queryOf(query, mapOf("vedtaksperiodeId" to vedtaksperiodeId)).asExecute)
+    }
+
+    private fun TransactionalSession.hentAktiv(vedtaksperiodeId: UUID): Totrinnsvurdering? {
+        @Language("PostgreSQL")
+        val query = """
+           SELECT * FROM totrinnsvurdering
+           WHERE vedtaksperiode_id = :vedtaksperiodeId
+           AND utbetaling_id_ref IS NULL
+        """.trimIndent()
+
+        return run(queryOf(query, mapOf("vedtaksperiodeId" to vedtaksperiodeId)).map { row ->
+            Totrinnsvurdering(
+                vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
+                erRetur = row.boolean("er_retur"),
+                saksbehandler = row.uuidOrNull("saksbehandler"),
+                beslutter = row.uuidOrNull("beslutter"),
+                utbetalingIdRef = row.longOrNull("utbetaling_id_ref"),
+                opprettet = row.localDateTime("opprettet"),
+                oppdatert = row.localDateTimeOrNull("oppdatert")
+            )
+        }.asSingle)
+    }
+
+    internal fun opprett(vedtaksperiodeId: UUID) = sessionOf(dataSource).use { session ->
+        session.transaction { transaction ->
+            transaction.run {
+                hentAktiv(vedtaksperiodeId) ?: opprett(vedtaksperiodeId)
+            }
         }
     }
 
@@ -25,6 +54,7 @@ internal class TotrinnsvurderingDao(private val dataSource: DataSource) {
             val query = """
                UPDATE totrinnsvurdering SET saksbehandler = :saksbehandlerOid, oppdatert = now()
                WHERE vedtaksperiode_id = :vedtaksperiodeId
+               AND utbetaling_id_ref IS null
             """.trimIndent()
 
             session.run(
@@ -42,6 +72,7 @@ internal class TotrinnsvurderingDao(private val dataSource: DataSource) {
             val query = """
                UPDATE totrinnsvurdering SET beslutter = :saksbehandlerOid, oppdatert = now()
                WHERE vedtaksperiode_id = :vedtaksperiodeId
+               AND utbetaling_id_ref IS null
             """.trimIndent()
 
             session.run(
@@ -59,6 +90,7 @@ internal class TotrinnsvurderingDao(private val dataSource: DataSource) {
             val query = """
                UPDATE totrinnsvurdering SET er_retur = true, oppdatert = now()
                WHERE vedtaksperiode_id = :vedtaksperiodeId
+               AND utbetaling_id_ref IS null
             """.trimIndent()
 
             session.run(
@@ -76,6 +108,7 @@ internal class TotrinnsvurderingDao(private val dataSource: DataSource) {
             val query = """
                UPDATE totrinnsvurdering SET er_retur = false, oppdatert = now()
                WHERE vedtaksperiode_id = :vedtaksperiodeId
+               AND utbetaling_id_ref IS null
             """.trimIndent()
 
             session.run(
@@ -97,6 +130,7 @@ internal class TotrinnsvurderingDao(private val dataSource: DataSource) {
                    WHERE vui.vedtaksperiode_id = :vedtaksperiodeId
                ), oppdatert = now()
                WHERE vedtaksperiode_id = :vedtaksperiodeId
+               AND utbetaling_id_ref IS null
             """.trimIndent()
 
             session.run(
@@ -107,4 +141,20 @@ internal class TotrinnsvurderingDao(private val dataSource: DataSource) {
             )
         }
     }
+
+    fun hentAktiv(vedtaksperiodeId: UUID): Totrinnsvurdering? = sessionOf(dataSource).use { session ->
+        session.transaction {
+            it.hentAktiv(vedtaksperiodeId)
+        }
+    }
+
+    internal class Totrinnsvurdering(
+        val vedtaksperiodeId: UUID,
+        val erRetur: Boolean,
+        val saksbehandler: UUID?,
+        val beslutter: UUID?,
+        val utbetalingIdRef: Long?,
+        val opprettet: LocalDateTime,
+        val oppdatert: LocalDateTime?,
+    )
 }
