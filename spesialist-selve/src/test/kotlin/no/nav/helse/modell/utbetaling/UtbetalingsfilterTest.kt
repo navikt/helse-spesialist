@@ -34,7 +34,7 @@ internal class UtbetalingsfilterTest {
                 warnings = toWarnings,
                 utbetalingtype = UTBETALING,
                 harVedtaksperiodePågåendeOverstyring = false,
-            ), false
+            )
         )
     }
 
@@ -51,7 +51,7 @@ internal class UtbetalingsfilterTest {
                 warnings = toWarnings,
                 utbetalingtype = UTBETALING,
                 harVedtaksperiodePågåendeOverstyring = false,
-            ), false
+            )
         )
     }
 
@@ -68,7 +68,7 @@ internal class UtbetalingsfilterTest {
                 warnings = toWarnings,
                 utbetalingtype = UTBETALING,
                 harVedtaksperiodePågåendeOverstyring = false,
-            ), false
+            )
         )
     }
 
@@ -85,7 +85,7 @@ internal class UtbetalingsfilterTest {
             utbetalingtype = UTBETALING,
             harVedtaksperiodePågåendeOverstyring = false,
         )
-        assertKanUtbetales(utbetalingsfilter(), true)
+        assertKanUtbetales(utbetalingsfilter())
     }
 
     @Test
@@ -99,14 +99,13 @@ internal class UtbetalingsfilterTest {
     @Test
     fun `delvis refusjon kan utbetales dersom vedtaksperioden har pågående overstyring`() {
         assertKanUtbetales(
-            utbetalingsfilter(delvisRefusjon = true, harVedtaksperiodePågåendeOverstyring = true),
-            true
+            utbetalingsfilter(delvisRefusjon = true, harVedtaksperiodePågåendeOverstyring = true)
         )
     }
 
     @Test
     fun `ingen refusjon kan utbetales`() {
-        assertKanUtbetales(utbetalingsfilter(harUtbetalingTilSykmeldt = true), true)
+        assertKanUtbetales(utbetalingsfilter(harUtbetalingTilSykmeldt = true))
     }
 
     @Test
@@ -119,7 +118,7 @@ internal class UtbetalingsfilterTest {
 
     @Test
     fun `ingen refusjon & spleis forlengelse kan utbetales`() {
-        assertKanUtbetales(utbetalingsfilter(periodetype = FORLENGELSE), true)
+        assertKanUtbetales(utbetalingsfilter(periodetype = FORLENGELSE))
     }
 
     @Test
@@ -148,7 +147,7 @@ internal class UtbetalingsfilterTest {
 
     @Test
     fun `revurdering kan utbetales tross warnings`() {
-        assertKanUtbetales(utbetalingsfilter(utbetalingstype = REVURDERING, warnings = toWarnings), false)
+        assertKanUtbetales(utbetalingsfilter(utbetalingstype = REVURDERING, warnings = toWarnings))
     }
 
     @Test
@@ -201,18 +200,16 @@ internal class UtbetalingsfilterTest {
             harVedtaksperiodePågåendeOverstyring = harVedtaksperiodePågåendeOverstyring,
         )
 
-        private fun assertKanUtbetales(filter: Utbetalingsfilter, forventetPlukketUtForUtbetalingTilSykmeldt: Boolean) {
+        private fun assertKanUtbetales(filter: Utbetalingsfilter) {
             assertTrue(filter.kanUtbetales)
             assertFalse(filter.kanIkkeUtbetales)
             assertThrows<IllegalArgumentException> { filter.årsaker() }
-            assertEquals(forventetPlukketUtForUtbetalingTilSykmeldt, filter.plukketUtForUtbetalingTilSykmeldt)
         }
 
         private fun assertKanIkkeUtbetales(filter: Utbetalingsfilter, forventedeÅrsaker: List<String>) {
             assertFalse(filter.kanUtbetales)
             assertTrue(filter.kanIkkeUtbetales)
             assertEquals(forventedeÅrsaker, filter.årsaker())
-            assertFalse(filter.plukketUtForUtbetalingTilSykmeldt)
         }
     }
 }

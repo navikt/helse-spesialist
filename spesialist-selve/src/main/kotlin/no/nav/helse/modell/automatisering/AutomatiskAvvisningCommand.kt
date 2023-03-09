@@ -1,6 +1,5 @@
 package no.nav.helse.modell.automatisering
 
-import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.meldinger.løsninger.HentEnhetløsning
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
@@ -32,10 +31,7 @@ internal class AutomatiskAvvisningCommand(
         val underVergemål = vergemålDao.harVergemål(fødselsnummer) ?: false
         val utbetalingsfilter = utbetalingsfilter()
 
-        if (!erEgenAnsatt && !tilhørerEnhetUtland && !underVergemål && utbetalingsfilter.kanUtbetales) {
-            if (utbetalingsfilter.plukketUtForUtbetalingTilSykmeldt) sikkerLogg.info("Plukket ut for utbetaling til sykmeldt, {}", keyValue("fødselsnummer", fødselsnummer))
-            return true
-        }
+        if (!erEgenAnsatt && !tilhørerEnhetUtland && !underVergemål && utbetalingsfilter.kanUtbetales) return true
 
         val årsaker = mutableListOf<String>()
         if (erEgenAnsatt) årsaker.add("Egen ansatt")
@@ -51,6 +47,5 @@ internal class AutomatiskAvvisningCommand(
 
     private companion object {
         private val logg = LoggerFactory.getLogger(AutomatiskAvvisningCommand::class.java)
-        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     }
 }
