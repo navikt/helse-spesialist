@@ -151,6 +151,17 @@ internal class UtbetalingsfilterTest {
     }
 
     @Test
+    fun `revurdering beholdes uavhengig av fødselsdato`() {
+        assertKanUtbetales(
+            utbetalingsfilter(
+                utbetalingstype = REVURDERING,
+                warnings = toWarnings,
+                fødselsnummer = "10111111111"
+            )
+        )
+    }
+
+    @Test
     fun `passerer ingen av kriteriene i filteret`() {
         assertKanIkkeUtbetales(
             Utbetalingsfilter(
