@@ -40,6 +40,29 @@ internal class TotrinnsvurderingDao(private val dataSource: DataSource) {
         }.asSingle)
     }
 
+    private fun TransactionalSession.hentAktiv(oppgaveId: Long): Totrinnsvurdering? {
+        @Language("PostgreSQL")
+        val query = """
+           SELECT * FROM totrinnsvurdering
+           INNER JOIN vedtak v on totrinnsvurdering.vedtaksperiode_id = v.vedtaksperiode_id
+           INNER JOIN oppgave o on v.id = o.vedtak_ref
+           WHERE o.id = :oppgaveId
+           AND utbetaling_id_ref IS NULL
+        """.trimIndent()
+
+        return run(queryOf(query, mapOf("oppgaveId" to oppgaveId)).map { row ->
+            Totrinnsvurdering(
+                vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
+                erRetur = row.boolean("er_retur"),
+                saksbehandler = row.uuidOrNull("saksbehandler"),
+                beslutter = row.uuidOrNull("beslutter"),
+                utbetalingIdRef = row.longOrNull("utbetaling_id_ref"),
+                opprettet = row.localDateTime("opprettet"),
+                oppdatert = row.localDateTimeOrNull("oppdatert")
+            )
+        }.asSingle)
+    }
+
     internal fun opprett(vedtaksperiodeId: UUID) = sessionOf(dataSource).use { session ->
         session.transaction { transaction ->
             transaction.run {
@@ -145,6 +168,11 @@ internal class TotrinnsvurderingDao(private val dataSource: DataSource) {
     fun hentAktiv(vedtaksperiodeId: UUID): Totrinnsvurdering? = sessionOf(dataSource).use { session ->
         session.transaction {
             it.hentAktiv(vedtaksperiodeId)
+        }
+    }
+    fun hentAktiv(oppgaveId: Long): Totrinnsvurdering? = sessionOf(dataSource).use { session ->
+        session.transaction {
+            it.hentAktiv(oppgaveId)
         }
     }
 

@@ -160,6 +160,28 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         assertEquals(aktivTotrinnsvurdering?.opprettet, totrinnsvurdering.first().opprettet)
     }
 
+    @Test
+    fun `Finner aktiv ikke-utbetalt totrinnsvurdering med oppgaveId`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave()
+        totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
+        totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
+        totrinnsvurderingDao.settErRetur(VEDTAKSPERIODE)
+        val aktivTotrinnsvurdering = totrinnsvurderingDao.hentAktiv(1L)
+
+        val totrinnsvurdering = totrinnsvurdering()
+
+        assertEquals(aktivTotrinnsvurdering?.vedtaksperiodeId, totrinnsvurdering.first().vedtaksperiodeId)
+        assertEquals(aktivTotrinnsvurdering?.erRetur, totrinnsvurdering.first().erRetur)
+        assertEquals(aktivTotrinnsvurdering?.saksbehandler, totrinnsvurdering.first().saksbehandler)
+        assertEquals(aktivTotrinnsvurdering?.beslutter, totrinnsvurdering.first().beslutter)
+        assertEquals(aktivTotrinnsvurdering?.utbetalingIdRef, totrinnsvurdering.first().utbetalingIdRef)
+        assertEquals(aktivTotrinnsvurdering?.oppdatert, totrinnsvurdering.first().oppdatert)
+        assertEquals(aktivTotrinnsvurdering?.opprettet, totrinnsvurdering.first().opprettet)
+    }
+
     private fun totrinnsvurdering() = sessionOf(dataSource).use {
         it.run(queryOf("SELECT * FROM totrinnsvurdering").map { row ->
             Totrinnsvurdering(
