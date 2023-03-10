@@ -48,6 +48,7 @@ import no.nav.helse.mediator.meldinger.løsninger.Vergemålløsning
 import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.HendelseDao
+import no.nav.helse.modell.TotrinnsvurderingDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
@@ -94,6 +95,7 @@ internal class HendelseMediator(
     private val hendelsefabrikk: Hendelsefabrikk,
     private val egenAnsattDao: EgenAnsattDao = EgenAnsattDao(dataSource),
     private val overstyringDao: OverstyringDao = OverstyringDao(dataSource),
+    private val totrinnsvurderingDao: TotrinnsvurderingDao = TotrinnsvurderingDao(dataSource),
     private val varselRepository: VarselRepository = ActualVarselRepository(dataSource),
 ) {
     private companion object {
@@ -168,10 +170,14 @@ internal class HendelseMediator(
         val contextId = oppgaveDao.finnContextId(godkjenningDTO.oppgavereferanse)
         val hendelseId = oppgaveDao.finnHendelseId(godkjenningDTO.oppgavereferanse)
         val fødselsnummer = hendelseDao.finnFødselsnummer(hendelseId)
+        val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(godkjenningDTO.oppgavereferanse)
+        val totrinnsvurdering = totrinnsvurderingDao.hentAktiv(vedtaksperiodeId)
         val erBeslutteroppgave = oppgaveMediator.erBeslutteroppgave(godkjenningDTO.oppgavereferanse)
         val tidligereSaksbehandler = oppgaveMediator.finnTidligereSaksbehandler(godkjenningDTO.oppgavereferanse)
-        val reserverPersonOid =
-            if (erBeslutteroppgave && tidligereSaksbehandler != null) tidligereSaksbehandler else oid
+        val reserverPersonOid: UUID =
+            if (erBeslutteroppgave && tidligereSaksbehandler != null) tidligereSaksbehandler
+            else if (totrinnsvurdering?.beslutter != null && totrinnsvurdering.saksbehandler != null) totrinnsvurdering.saksbehandler
+            else oid
         val godkjenningMessage = JsonMessage.newMessage("saksbehandler_løsning", mutableMapOf(
             "@forårsaket_av" to mapOf(
                 "event_name" to "behov",
@@ -205,10 +211,10 @@ internal class HendelseMediator(
         internOppgaveMediator.avventerSystem(godkjenningDTO.oppgavereferanse, godkjenningDTO.saksbehandlerIdent, oid)
         internOppgaveMediator.lagreOppgaver(rapidsConnection, hendelseId, contextId)
 
-        val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(godkjenningDTO.oppgavereferanse)
         overstyringDao.ferdigstillOverstyringerForVedtaksperiode(vedtaksperiodeId)
+        totrinnsvurderingDao.ferdigstill(vedtaksperiodeId)
 
-        if (erBeslutteroppgave && godkjenningDTO.godkjent) {
+        if ((erBeslutteroppgave || totrinnsvurdering?.beslutter != null) && godkjenningDTO.godkjent) {
             internOppgaveMediator.lagrePeriodehistorikk(
                 godkjenningDTO.oppgavereferanse,
                 periodehistorikkDao,

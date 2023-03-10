@@ -17,6 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.modell.TotrinnsvurderingDao
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.tilganger
@@ -24,6 +25,7 @@ import org.slf4j.LoggerFactory
 
 internal fun Route.personApi(
     varselRepository: ApiVarselRepository,
+    totrinnsvurderingDao: TotrinnsvurderingDao,
     hendelseMediator: HendelseMediator,
     oppgaveMediator: OppgaveMediator,
     tilgangsgrupper: Tilgangsgrupper,
@@ -75,7 +77,9 @@ internal fun Route.personApi(
         }
 
         val erBeslutteroppgave = oppgaveMediator.erBeslutteroppgave(godkjenning.oppgavereferanse)
-        if (erBeslutteroppgave) {
+        val totrinnsvurdering = totrinnsvurderingDao.hentAktiv(godkjenning.oppgavereferanse)
+
+        if (erBeslutteroppgave || totrinnsvurdering?.saksbehandler != null) {
             // Midlertidig logging. Slik at vi vet når vi kan skru av totrinnsmerking i Speil
             if (!oppgaveMediator.trengerTotrinnsvurdering(godkjenning.oppgavereferanse)) {
                 log.info("Oppgave ${godkjenning.oppgavereferanse} er merket vha Speil.")
@@ -89,7 +93,7 @@ internal fun Route.personApi(
                 return@post
             }
 
-            if (oppgaveMediator.finnTidligereSaksbehandler(godkjenning.oppgavereferanse) == oid && !erDev()) {
+            if ((oppgaveMediator.finnTidligereSaksbehandler(godkjenning.oppgavereferanse) == oid || totrinnsvurdering?.saksbehandler == oid) && !erDev()) {
                 call.respondText(
                     "Kan ikke beslutte egne oppgaver.",
                     status = HttpStatusCode.Unauthorized
@@ -97,6 +101,7 @@ internal fun Route.personApi(
                 return@post
             }
 
+            if (totrinnsvurdering?.vedtaksperiodeId != null) totrinnsvurderingDao.settBeslutter(totrinnsvurdering.vedtaksperiodeId, oid)
             varselRepository.settStatusVurdertPåBeslutteroppgavevarsler(godkjenning.oppgavereferanse, godkjenning.saksbehandlerIdent)
         }
 

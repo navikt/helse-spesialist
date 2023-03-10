@@ -47,6 +47,7 @@ import no.nav.helse.mediator.api.overstyringApi
 import no.nav.helse.mediator.api.personApi
 import no.nav.helse.mediator.api.tildelingApi
 import no.nav.helse.mediator.api.totrinnsvurderingApi
+import no.nav.helse.modell.TotrinnsvurderingDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.automatisering.Automatisering
@@ -213,6 +214,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val vergemålDao = VergemålDao(dataSource)
     private val notatMediator = NotatMediator(notatDao)
     private val overstyringDao = OverstyringDao(dataSource)
+    private val totrinnsvurderingDao = TotrinnsvurderingDao(dataSource)
     private val varselRepository = ActualVarselRepository(dataSource)
     private val apiVarselRepository = ApiVarselRepository(dataSource)
     private val generasjonRepository = ActualGenerasjonRepository(dataSource)
@@ -306,6 +308,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 authenticate("oidc") {
                     personApi(
                         varselRepository = apiVarselRepository,
+                        totrinnsvurderingDao = totrinnsvurderingDao,
                         hendelseMediator = hendelseMediator,
                         oppgaveMediator = oppgaveMediator,
                         tilgangsgrupper = tilgangsgrupper,
