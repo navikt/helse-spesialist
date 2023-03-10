@@ -57,7 +57,7 @@ data class Dagoverstyring(
 
 data class Inntektoverstyring(
     override val hendelseId: UUIDString,
-    override val begrunnelse: String,
+    override val begrunnelse: String?,
     override val timestamp: DateTimeString,
     override val saksbehandler: Saksbehandler,
     override val ferdigstilt: Boolean,
