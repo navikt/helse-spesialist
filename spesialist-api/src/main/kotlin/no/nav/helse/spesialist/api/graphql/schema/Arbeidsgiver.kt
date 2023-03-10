@@ -32,7 +32,7 @@ data class Generasjon(
 
 interface Overstyring {
     val hendelseId: UUIDString
-    val begrunnelse: String
+    val begrunnelse: String?
     val timestamp: DateTimeString
     val saksbehandler: Saksbehandler
     val ferdigstilt: Boolean
