@@ -32,7 +32,6 @@ data class Generasjon(
 
 interface Overstyring {
     val hendelseId: UUIDString
-    val begrunnelse: String?
     val timestamp: DateTimeString
     val saksbehandler: Saksbehandler
     val ferdigstilt: Boolean
@@ -40,11 +39,11 @@ interface Overstyring {
 
 data class Dagoverstyring(
     override val hendelseId: UUIDString,
-    override val begrunnelse: String,
     override val timestamp: DateTimeString,
     override val saksbehandler: Saksbehandler,
     override val ferdigstilt: Boolean,
     val dager: List<OverstyrtDag>,
+    val begrunnelse: String,
 ) : Overstyring {
     data class OverstyrtDag(
         val dato: DateString,
@@ -57,7 +56,6 @@ data class Dagoverstyring(
 
 data class Inntektoverstyring(
     override val hendelseId: UUIDString,
-    override val begrunnelse: String?,
     override val timestamp: DateTimeString,
     override val saksbehandler: Saksbehandler,
     override val ferdigstilt: Boolean,
@@ -82,13 +80,13 @@ data class Inntektoverstyring(
 
 data class Arbeidsforholdoverstyring(
     override val hendelseId: UUIDString,
-    override val begrunnelse: String,
     override val timestamp: DateTimeString,
     override val saksbehandler: Saksbehandler,
     override val ferdigstilt: Boolean,
     val deaktivert: Boolean,
     val skjaeringstidspunkt: DateString,
     val forklaring: String,
+    val begrunnelse: String,
 ) : Overstyring
 
 data class GhostPeriode(
@@ -191,7 +189,6 @@ private fun OverstyringTidslinjeDto.tilDagoverstyring() = Dagoverstyring(
 
 private fun OverstyringInntektDto.tilInntektoverstyring() = Inntektoverstyring(
     hendelseId = hendelseId.toString(),
-    begrunnelse = begrunnelse,
     timestamp = timestamp.format(DateTimeFormatter.ISO_DATE_TIME),
     saksbehandler = Saksbehandler(
         navn = saksbehandlerNavn,
