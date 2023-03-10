@@ -8,6 +8,7 @@ import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.SnapshotDao
+import no.nav.helse.modell.TotrinnsvurderingDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
@@ -97,6 +98,7 @@ internal class Godkjenningsbehov(
     utbetalingDao: UtbetalingDao,
     periodehistorikkDao: PeriodehistorikkDao,
     overstyringDao: OverstyringDao,
+    totrinnsvurderingDao: TotrinnsvurderingDao,
     snapshotMediator: SnapshotMediator,
 ) : Hendelse, MacroCommand() {
 
@@ -233,6 +235,7 @@ internal class Godkjenningsbehov(
             warningDao = warningDao,
             oppgaveMediator = oppgaveMediator,
             overstyringDao = overstyringDao,
+            totrinnsvurderingDao = totrinnsvurderingDao,
             varselRepository = varselRepository,
             generasjonRepository = generasjonRepository
         ),

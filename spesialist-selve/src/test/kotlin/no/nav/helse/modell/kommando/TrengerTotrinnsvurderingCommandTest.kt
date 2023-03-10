@@ -1,10 +1,14 @@
 package no.nav.helse.modell.kommando
 
+import ToggleHelpers.disable
+import ToggleHelpers.enable
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.mediator.Toggle
+import no.nav.helse.modell.TotrinnsvurderingDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
@@ -26,6 +30,7 @@ internal class TrengerTotrinnsvurderingCommandTest {
     }
 
     private val warningDao = mockk<WarningDao>(relaxed = true)
+    private val totrinnsvurderingDao = mockk<TotrinnsvurderingDao>(relaxed = true)
     private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
     private val overstyringDao = mockk<OverstyringDao>(relaxed = true)
     private val varselRepository = mockk<VarselRepository>(relaxed = true)
@@ -37,6 +42,7 @@ internal class TrengerTotrinnsvurderingCommandTest {
         warningDao = warningDao,
         oppgaveMediator = oppgaveMediator,
         overstyringDao = overstyringDao,
+        totrinnsvurderingDao = totrinnsvurderingDao,
         varselRepository = varselRepository,
         generasjonRepository = generasjonRepository
     )
@@ -47,10 +53,45 @@ internal class TrengerTotrinnsvurderingCommandTest {
     }
 
     @Test
-    fun `Setter trengerTotrinnsvurdering dersom oppgaven har blitt overstyrt`() {
+    fun `Oppretter totrinnsvurdering dersom vedtaksperioden finnes i overstyringer_for_vedtaksperioder`() {
+        Toggle.Totrinnsvurdering.enable()
+        every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
+
+        assertTrue(command.execute(context))
+
+        verify(exactly = 1) { totrinnsvurderingDao.opprett(any()) }
+        Toggle.Totrinnsvurdering.disable()
+    }
+
+    @Test
+    fun `Oppretter totrinssvurdering dersom vedtaksperioden har varsel for lovvalg og medlemskap, og ikke har hatt oppgave som har vært ferdigstilt før`() {
+        Toggle.Totrinnsvurdering.enable()
+        val testWarningVurderMedlemskap = "Vurder lovvalg og medlemskap"
+        every {
+            warningDao.finnAktiveWarningsMedMelding(
+                VEDTAKSPERIODE_ID,
+                testWarningVurderMedlemskap
+            )
+        } returns listOf(Warning(testWarningVurderMedlemskap, WarningKilde.Spleis, LocalDateTime.now()))
+        every { oppgaveMediator.harFerdigstiltOppgave(VEDTAKSPERIODE_ID) } returns false
+
+        assertTrue(command.execute(context))
+        verify(exactly = 1) { totrinnsvurderingDao.opprett(any()) }
+        Toggle.Totrinnsvurdering.disable()
+    }
+
+    @Test
+    fun `Oppretter ikke totrinnsvurdering om det ikke er overstyring eller varsel for lovvalg og medlemskap`() {
+        assertTrue(command.execute(context))
+
+        verify(exactly = 0) { totrinnsvurderingDao.opprett (any()) }
+    }
+
+    @Test
+    fun `Setter trengerTotrinnsvurdering dersom oppgaven har varsel vurder lovvalg og medlemskap`() {
         every { warningDao.finnAktiveWarningsMedMelding(any(), any()) } returns listOf(
             Warning(
-                melding = "melding",
+                melding = "Vurder lovvalg og medlemskap",
                 kilde = WarningKilde.Spesialist,
                 opprettet = LocalDateTime.now(),
             )
@@ -62,7 +103,7 @@ internal class TrengerTotrinnsvurderingCommandTest {
     }
 
     @Test
-    fun `Setter trengerTotrinnsvurdering dersom oppgaven ikke har blitt overstyrt`() {
+    fun `Setter trengerTotrinnsvurdering dersom oppgaven har blitt overstyrt`() {
         every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
 
         assertTrue(command.execute(context))
