@@ -98,16 +98,18 @@ internal fun Route.totrinnsvurderingApi(
 
     post("/api/totrinnsvurdering/retur") {
         val retur = call.receive<TotrinnsvurderingReturDto>()
-
         val saksbehandlerOid = getSaksbehandlerOid()
+        val aktivTotrinnsvurdering = totrinnsvurderingDao.hentAktiv(oppgaveId = retur.oppgavereferanse)
         sikkerLog.info("OppgaveId ${retur.oppgavereferanse} sendes i retur av $saksbehandlerOid")
 
-        val tidligereSaksbehandlerOid = oppgaveMediator.finnTidligereSaksbehandler(retur.oppgavereferanse)
+        val tidligereSaksbehandlerOid = oppgaveMediator.finnTidligereSaksbehandler(retur.oppgavereferanse) ?: aktivTotrinnsvurdering?.saksbehandler
 
         oppgaveMediator.setReturoppgave(
             oppgaveId = retur.oppgavereferanse,
             beslutterSaksbehandlerOid = saksbehandlerOid
         )
+        totrinnsvurderingDao.settErRetur(oppgaveId = retur.oppgavereferanse)
+        totrinnsvurderingDao.settBeslutter(oppgaveId = retur.oppgavereferanse, saksbehandlerOid = saksbehandlerOid)
 
         tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(
             retur.oppgavereferanse,

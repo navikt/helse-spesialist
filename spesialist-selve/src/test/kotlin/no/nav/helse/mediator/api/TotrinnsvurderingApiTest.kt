@@ -379,4 +379,55 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             totrinnsvurderingDao.settHåndtertRetur(10L)
         }
     }
+
+    @Test
+    fun `Sende totrinnsvurdering i retur`() {
+        val tidligereSaksbehandlerOid = UUID.randomUUID()
+        every { totrinnsvurderingDao.hentAktiv(oppgaveId = 2L) } returns Totrinnsvurdering(
+            vedtaksperiodeId = UUID.randomUUID(),
+            erRetur = true,
+            saksbehandler = tidligereSaksbehandlerOid,
+            beslutter = null,
+            utbetalingIdRef = null,
+            oppdatert = now(),
+            opprettet = now()
+        )
+        every { oppgaveMediator.finnTidligereSaksbehandler(any()) } returns null
+
+        val response = runBlocking {
+            client.post(RETUR_URL) {
+                contentType(ContentType.Application.Json)
+                accept(ContentType.Application.Json)
+                setBody<TotrinnsvurderingReturDto>(objectMapper.valueToTree(TotrinnsvurderingReturDto(
+                    oppgavereferanse = 2L,
+                    notat = NotatApiDto("notat_tekst", NotatType.Retur)
+                )))
+                authentication(saksbehandler_oid)
+            }
+        }
+
+        verify(exactly = 1) {
+            totrinnsvurderingDao.settErRetur(oppgaveId = 2L)
+        }
+        verify(exactly = 1) {
+            totrinnsvurderingDao.settBeslutter(2L, saksbehandler_oid)
+        }
+        verify(exactly = 1) {
+            tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(
+                2L,
+                tidligereSaksbehandlerOid,
+                any()
+            )
+        }
+        verify(exactly = 1) {
+            notatMediator.lagreForOppgaveId(
+                2L,
+                returDtoMedNotat.notat.tekst,
+                saksbehandler_oid,
+                returDtoMedNotat.notat.type
+            )
+        }
+
+        assertEquals(HttpStatusCode.OK, response.status)
+    }
 }

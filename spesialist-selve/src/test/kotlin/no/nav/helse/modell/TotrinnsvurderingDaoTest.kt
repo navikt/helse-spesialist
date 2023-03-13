@@ -61,9 +61,40 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `Sett beslutter på totrinnsvurdering med oppgaveId`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave()
+        opprettSaksbehandler()
+        totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
+        totrinnsvurderingDao.settBeslutter(1L, SAKSBEHANDLER_OID)
+
+        val totrinnsvurdering = totrinnsvurdering()
+
+        assertEquals(SAKSBEHANDLER_OID, totrinnsvurdering.first().beslutter)
+        assertNotNull(totrinnsvurdering.first().oppdatert)
+    }
+
+    @Test
     fun `Sett er_retur true på totrinnsvurdering`() {
         totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
         totrinnsvurderingDao.settErRetur(VEDTAKSPERIODE)
+
+        val totrinnsvurdering = totrinnsvurdering()
+
+        assertTrue(totrinnsvurdering.first().erRetur)
+        assertNotNull(totrinnsvurdering.first().oppdatert)
+    }
+
+    @Test
+    fun `Sett er_retur true på totrinnsvurdering med oppgaveId`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave()
+        totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
+        totrinnsvurderingDao.settErRetur(1L)
 
         val totrinnsvurdering = totrinnsvurdering()
 
