@@ -1,4 +1,4 @@
-val graphQLKotlinVersion = "6.3.4"
+val graphQLKotlinVersion = "6.4.0"
 val testcontainersVersion = "1.17.3"
 
 plugins {
