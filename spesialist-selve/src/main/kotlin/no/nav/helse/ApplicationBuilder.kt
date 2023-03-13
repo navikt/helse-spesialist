@@ -326,7 +326,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                         periodehistorikkDao,
                         notatMediator,
                         tildelingService,
-                        hendelseMediator
+                        hendelseMediator,
+                        totrinnsvurderingDao
                     )
                 }
             }

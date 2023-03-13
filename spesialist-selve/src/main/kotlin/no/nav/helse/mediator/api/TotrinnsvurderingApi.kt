@@ -15,6 +15,7 @@ import io.ktor.util.pipeline.PipelineContext
 import java.util.UUID
 import no.nav.helse.gruppemedlemskap
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.modell.TotrinnsvurderingDao
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.tildeling.TildelingService
 import no.nav.helse.spesialist.api.notat.NotatMediator
@@ -33,19 +34,22 @@ internal fun Route.totrinnsvurderingApi(
     notatMediator: NotatMediator,
     tildelingService: TildelingService,
     hendelseMediator: HendelseMediator,
+    totrinnsvurderingDao: TotrinnsvurderingDao,
 ) {
     post("/api/totrinnsvurdering") {
         val totrinnsvurdering = call.receive<TotrinnsvurderingDto>()
         val saksbehandlerOid = getSaksbehandlerOid()
 
         if (oppgaveMediator.erBeslutteroppgave(totrinnsvurdering.oppgavereferanse)) {
-            call.respondText("Denne oppgaven har allerede blitt sendt til godkjenning.",
+            call.respondText(
+                "Denne oppgaven har allerede blitt sendt til godkjenning.",
                 status = HttpStatusCode.Conflict
             )
             return@post
         }
 
-        val antallIkkeVurderteVarsler = varselRepository.ikkeVurderteVarslerEkskludertBesluttervarslerFor(totrinnsvurdering.oppgavereferanse)
+        val antallIkkeVurderteVarsler =
+            varselRepository.ikkeVurderteVarslerEkskludertBesluttervarslerFor(totrinnsvurdering.oppgavereferanse)
         if (antallIkkeVurderteVarsler > 0) {
             call.respond(
                 status = HttpStatusCode.BadRequest,
@@ -60,14 +64,24 @@ internal fun Route.totrinnsvurderingApi(
         sikkerLog.info("OppgaveId ${totrinnsvurdering.oppgavereferanse} sendes til godkjenning av $saksbehandlerOid")
 
         val beslutterSaksbehandlerOid = oppgaveMediator.finnBeslutterSaksbehandler(totrinnsvurdering.oppgavereferanse)
-        tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(totrinnsvurdering.oppgavereferanse, beslutterSaksbehandlerOid, gruppemedlemskap())
+        tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(
+            totrinnsvurdering.oppgavereferanse,
+            beslutterSaksbehandlerOid,
+            gruppemedlemskap()
+        )
 
         oppgaveMediator.setBeslutteroppgave(
             oppgaveId = totrinnsvurdering.oppgavereferanse,
             tidligereSaksbehandlerOid = saksbehandlerOid
         )
 
-        oppgaveMediator.lagrePeriodehistorikk(totrinnsvurdering.oppgavereferanse,
+        totrinnsvurderingDao.settSaksbehandler(
+            oppgaveId = totrinnsvurdering.oppgavereferanse,
+            saksbehandlerOid = saksbehandlerOid
+        )
+
+        oppgaveMediator.lagrePeriodehistorikk(
+            totrinnsvurdering.oppgavereferanse,
             periodehistorikkDao,
             saksbehandlerOid,
             PeriodehistorikkType.TOTRINNSVURDERING_TIL_GODKJENNING
@@ -93,9 +107,18 @@ internal fun Route.totrinnsvurderingApi(
             beslutterSaksbehandlerOid = saksbehandlerOid
         )
 
-        tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(retur.oppgavereferanse, tidligereSaksbehandlerOid, gruppemedlemskap())
+        tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(
+            retur.oppgavereferanse,
+            tidligereSaksbehandlerOid,
+            gruppemedlemskap()
+        )
 
-        val notatId = notatMediator.lagreForOppgaveId(retur.oppgavereferanse, retur.notat.tekst, saksbehandlerOid, retur.notat.type)
+        val notatId = notatMediator.lagreForOppgaveId(
+            retur.oppgavereferanse,
+            retur.notat.tekst,
+            saksbehandlerOid,
+            retur.notat.type
+        )
 
         oppgaveMediator.lagrePeriodehistorikk(
             retur.oppgavereferanse, periodehistorikkDao,
@@ -125,5 +148,5 @@ class TotrinnsvurderingDto(
 @JsonIgnoreProperties
 class TotrinnsvurderingReturDto(
     val oppgavereferanse: Long,
-    val notat: NotatApiDto
+    val notat: NotatApiDto,
 )

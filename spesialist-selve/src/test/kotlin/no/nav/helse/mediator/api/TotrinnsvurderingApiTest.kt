@@ -14,6 +14,7 @@ import io.mockk.verify
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.modell.TotrinnsvurderingDao
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.tildeling.TildelingService
 import no.nav.helse.objectMapper
@@ -37,6 +38,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     private val notatMediator = mockk<NotatMediator>(relaxed = true)
     private val tildelingService = mockk<TildelingService>(relaxed = true)
     private val hendelseMediator = mockk<HendelseMediator>(relaxed = true)
+    private val totrinnsvurderingDao = mockk<TotrinnsvurderingDao>(relaxed = true)
 
     private val saksbehandler_oid = UUID.randomUUID()
 
@@ -52,7 +54,15 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     @BeforeAll
     fun setupTotrinnsvurdering() {
         setupServer {
-            totrinnsvurderingApi(varselRepository, oppgaveMediator, periodehistorikkDao, notatMediator, tildelingService, hendelseMediator)
+            totrinnsvurderingApi(
+                varselRepository,
+                oppgaveMediator,
+                periodehistorikkDao,
+                notatMediator,
+                tildelingService,
+                hendelseMediator,
+                totrinnsvurderingDao
+            )
         }
     }
 
@@ -232,5 +242,24 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
 
         verify(exactly = 0) { oppgaveMediator.setBeslutteroppgave(any(), any()) }
         assertEquals(HttpStatusCode.Unauthorized, response.status)
+    }
+
+    @Test
+    fun `Setter saksbehandler for totrinnsvurdering når oppgave blir sendt til godkjenning`() {
+        every { oppgaveMediator.erBeslutteroppgave(10L) } returns false
+        every { varselRepository.ikkeVurderteVarslerEkskludertBesluttervarslerFor(10L) } returns 0
+        every { oppgaveMediator.finnBeslutterSaksbehandler(10L) } returns null
+
+        val response = runBlocking {
+            client.post(TOTRINNSVURDERING_URL) {
+                contentType(ContentType.Application.Json)
+                accept(ContentType.Application.Json)
+                setBody<TotrinnsvurderingDto>(objectMapper.valueToTree(TotrinnsvurderingDto(10L)))
+                authentication(saksbehandler_oid)
+            }
+        }
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        verify(exactly = 1) { totrinnsvurderingDao.settSaksbehandler(10L, saksbehandler_oid) }
     }
 }

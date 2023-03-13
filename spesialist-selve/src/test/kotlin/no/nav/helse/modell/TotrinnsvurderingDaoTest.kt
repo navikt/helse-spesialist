@@ -15,7 +15,8 @@ import org.junit.jupiter.api.Test
 
 internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
 
-    @BeforeAll fun setup() {
+    @BeforeAll
+    fun setup() {
         opprettPerson()
     }
 
@@ -180,6 +181,31 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         assertEquals(aktivTotrinnsvurdering?.utbetalingIdRef, totrinnsvurdering.first().utbetalingIdRef)
         assertEquals(aktivTotrinnsvurdering?.oppdatert, totrinnsvurdering.first().oppdatert)
         assertEquals(aktivTotrinnsvurdering?.opprettet, totrinnsvurdering.first().opprettet)
+    }
+
+    @Test
+    fun `Kan sette saksbehandler med oppgave id`() {
+        opprettPerson()
+        opprettSaksbehandler()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave()
+        totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
+        totrinnsvurderingDao.settSaksbehandler(1L, SAKSBEHANDLER_OID)
+
+        assertEquals(SAKSBEHANDLER_OID, totrinnsvurderingDao.hentAktiv(VEDTAKSPERIODE)?.saksbehandler)
+    }
+
+    @Test
+    fun `Håndterer oppdatering av totrinnsvurdering som ikke finnes`() {
+        opprettPerson()
+        opprettSaksbehandler()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave()
+        totrinnsvurderingDao.settSaksbehandler(1L, SAKSBEHANDLER_OID)
+
+        assertNull(totrinnsvurderingDao.hentAktiv(1L))
     }
 
     private fun totrinnsvurdering() = sessionOf(dataSource).use {

@@ -89,6 +89,31 @@ internal class TotrinnsvurderingDao(private val dataSource: DataSource) {
         }
     }
 
+
+    fun settSaksbehandler(oppgaveId: Long, saksbehandlerOid: UUID) {
+        sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val query = """
+               UPDATE totrinnsvurdering SET saksbehandler = :saksbehandlerOid, oppdatert = now()
+               WHERE vedtaksperiode_id = (
+                   SELECT ttv.vedtaksperiode_id 
+                   FROM totrinnsvurdering ttv 
+                   INNER JOIN vedtak v on ttv.vedtaksperiode_id = v.vedtaksperiode_id
+                   INNER JOIN oppgave o on v.id = o.vedtak_ref
+                   WHERE o.id = :oppgaveId
+               )
+               AND utbetaling_id_ref IS null
+            """.trimIndent()
+
+            session.run(
+                queryOf(
+                    query,
+                    mapOf("oppgaveId" to oppgaveId, "saksbehandlerOid" to saksbehandlerOid)
+                ).asExecute
+            )
+        }
+    }
+
     fun settBeslutter(vedtaksperiodeId: UUID, saksbehandlerOid: UUID) {
         sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
@@ -170,6 +195,7 @@ internal class TotrinnsvurderingDao(private val dataSource: DataSource) {
             it.hentAktiv(vedtaksperiodeId)
         }
     }
+
     fun hentAktiv(oppgaveId: Long): Totrinnsvurdering? = sessionOf(dataSource).use { session ->
         session.transaction {
             it.hentAktiv(oppgaveId)
