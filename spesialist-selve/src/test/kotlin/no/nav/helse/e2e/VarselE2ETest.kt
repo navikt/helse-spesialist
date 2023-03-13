@@ -49,13 +49,6 @@ internal class VarselE2ETest : AbstractE2ETestV2() {
     }
 
     @Test
-    fun `varsel om beslutteroppgave ved varsel om lovvalg og medlemsskap`() {
-        fremTilSaksbehandleroppgave(regelverksvarsler = listOf("Vurder lovvalg og medlemskap"))
-
-        assertVarsel(SB_BO_1, VEDTAKSPERIODE_ID, AKTIV)
-    }
-
-    @Test
     fun `varsel om beslutteroppgave ved overstyring av dager`() {
         fremTilSaksbehandleroppgave()
         håndterOverstyrTidslinje()
@@ -82,9 +75,11 @@ internal class VarselE2ETest : AbstractE2ETestV2() {
     @Test
     fun `varsel om beslutteroppgave ved overstyring av arbeidsforhold`() {
         fremTilSaksbehandleroppgave(andreArbeidsforhold = listOf(ORGNR_GHOST))
-        håndterOverstyrArbeidsforhold(overstyrteArbeidsforhold = listOf(
-            OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt(ORGNR_GHOST, true, "begrunnelse", "forklaring")
-        ))
+        håndterOverstyrArbeidsforhold(
+            overstyrteArbeidsforhold = listOf(
+                OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt(ORGNR_GHOST, true, "begrunnelse", "forklaring")
+            )
+        )
         håndterGodkjenningsbehov(harOppdatertMetainfo = true)
         håndterEgenansattløsning()
         håndterVergemålløsning()

@@ -5,7 +5,6 @@ import ToggleHelpers.enable
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.TotrinnsvurderingDao
@@ -13,8 +12,6 @@ import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.varsel.VarselRepository
-import no.nav.helse.modell.vedtak.Warning
-import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -64,42 +61,10 @@ internal class TrengerTotrinnsvurderingCommandTest {
     }
 
     @Test
-    fun `Oppretter totrinssvurdering dersom vedtaksperioden har varsel for lovvalg og medlemskap, og ikke har hatt oppgave som har vært ferdigstilt før`() {
-        Toggle.Totrinnsvurdering.enable()
-        val testWarningVurderMedlemskap = "Vurder lovvalg og medlemskap"
-        every {
-            warningDao.finnAktiveWarningsMedMelding(
-                VEDTAKSPERIODE_ID,
-                testWarningVurderMedlemskap
-            )
-        } returns listOf(Warning(testWarningVurderMedlemskap, WarningKilde.Spleis, LocalDateTime.now()))
-        every { oppgaveMediator.harFerdigstiltOppgave(VEDTAKSPERIODE_ID) } returns false
-
-        assertTrue(command.execute(context))
-        verify(exactly = 1) { totrinnsvurderingDao.opprett(any()) }
-        Toggle.Totrinnsvurdering.disable()
-    }
-
-    @Test
-    fun `Oppretter ikke totrinnsvurdering om det ikke er overstyring eller varsel for lovvalg og medlemskap`() {
+    fun `Oppretter ikke totrinnsvurdering om det ikke er overstyring`() {
         assertTrue(command.execute(context))
 
-        verify(exactly = 0) { totrinnsvurderingDao.opprett (any()) }
-    }
-
-    @Test
-    fun `Setter trengerTotrinnsvurdering dersom oppgaven har varsel vurder lovvalg og medlemskap`() {
-        every { warningDao.finnAktiveWarningsMedMelding(any(), any()) } returns listOf(
-            Warning(
-                melding = "Vurder lovvalg og medlemskap",
-                kilde = WarningKilde.Spesialist,
-                opprettet = LocalDateTime.now(),
-            )
-        )
-
-        assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.alleUlagredeOppgaverTilTotrinnsvurdering() }
-        verify(exactly = 1) { warningDao.leggTilWarning(VEDTAKSPERIODE_ID, any()) }
+        verify(exactly = 0) { totrinnsvurderingDao.opprett(any()) }
     }
 
     @Test
@@ -112,75 +77,27 @@ internal class TrengerTotrinnsvurderingCommandTest {
     }
 
     @Test
-    fun `Setter trengerTotrinnsvurdering for lovvalg og medlemskap dersom vedtaksperioden har hatt oppgave som ikke har vært ferdigstilt før`() {
-        val testWarningVurderMedlemskap = "Vurder lovvalg og medlemskap"
-        every {
-            warningDao.finnAktiveWarningsMedMelding(
-                VEDTAKSPERIODE_ID,
-                testWarningVurderMedlemskap
-            )
-        } returns listOf(Warning(testWarningVurderMedlemskap, WarningKilde.Spleis, LocalDateTime.now()))
-        every { oppgaveMediator.harFerdigstiltOppgave(VEDTAKSPERIODE_ID) } returns false
-
-        assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.alleUlagredeOppgaverTilTotrinnsvurdering() }
-        verify(exactly = 1) { warningDao.leggTilWarning(VEDTAKSPERIODE_ID, any()) }
-    }
-
-    @Test
-    fun `Setter ikke trengerTotrinnsvurdering for lovvalg og medlemskap dersom vedtaksperioden har hatt oppgave som har vært ferdigstilt før`() {
-        val testWarningVurderMedlemskap = "Vurder lovvalg og medlemskap"
-        every {
-            warningDao.finnAktiveWarningsMedMelding(
-                VEDTAKSPERIODE_ID,
-                testWarningVurderMedlemskap
-            )
-        } returns listOf(Warning(testWarningVurderMedlemskap, WarningKilde.Spleis, LocalDateTime.now()))
-        every { oppgaveMediator.harFerdigstiltOppgave(VEDTAKSPERIODE_ID) } returns true
-
-        assertTrue(command.execute(context))
-        verify(exactly = 0) { oppgaveMediator.alleUlagredeOppgaverTilTotrinnsvurdering() }
-        verify(exactly = 0) { warningDao.leggTilWarning(VEDTAKSPERIODE_ID, any()) }
-    }
-
-    @Test
-    fun `Setter ikke trengerTotrinnsvurdering dersom oppgaven ikke har aktive warnings med spesifikk melding`() {
-        val testWarningVurderMedlemskap = "Vurder lovvalg og medlemskap"
-        every {
-            warningDao.finnAktiveWarningsMedMelding(
-                VEDTAKSPERIODE_ID,
-                testWarningVurderMedlemskap
-            )
-        } returns emptyList()
-
-        assertTrue(command.execute(context))
-        verify(exactly = 0) { oppgaveMediator.alleUlagredeOppgaverTilTotrinnsvurdering() }
-        verify(exactly = 0) { warningDao.leggTilWarning(VEDTAKSPERIODE_ID, any()) }
-    }
-
-    @Test
     fun `Warningtekst blir riktig for ulike årsaker`() {
-        assertEquals("Beslutteroppgave: Lovvalg og medlemskap", command.getWarningtekst(listOf(), true))
         assertEquals(
             "Beslutteroppgave: Overstyring av utbetalingsdager",
-            command.getWarningtekst(listOf(OverstyringType.Dager), false)
+            command.getWarningtekst(listOf(OverstyringType.Dager))
         )
         assertEquals(
             "Beslutteroppgave: Overstyring av inntekt",
-            command.getWarningtekst(listOf(OverstyringType.Inntekt), false)
+            command.getWarningtekst(listOf(OverstyringType.Inntekt))
         )
         assertEquals(
             "Beslutteroppgave: Overstyring av annet arbeidsforhold",
-            command.getWarningtekst(listOf(OverstyringType.Arbeidsforhold), false)
+            command.getWarningtekst(listOf(OverstyringType.Arbeidsforhold))
         )
         assertEquals(
-            "Beslutteroppgave: Lovvalg og medlemskap, Overstyring av utbetalingsdager, Overstyring av inntekt og Overstyring av annet arbeidsforhold",
+            "Beslutteroppgave: Overstyring av utbetalingsdager, Overstyring av inntekt og Overstyring av annet arbeidsforhold",
             command.getWarningtekst(
                 listOf(
                     OverstyringType.Dager,
                     OverstyringType.Inntekt,
                     OverstyringType.Arbeidsforhold
-                ), true
+                )
             )
         )
     }
