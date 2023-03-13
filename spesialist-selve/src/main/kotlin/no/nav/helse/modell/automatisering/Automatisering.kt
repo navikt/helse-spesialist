@@ -99,10 +99,10 @@ internal class Automatisering(
             risikovurderingDao.hentRisikovurdering(vedtaksperiodeId)
                 ?: validering("Mangler vilkårsvurdering for arbeidsuførhet, aktivitetsplikt eller medvirkning") { false }
         val warnings = warningDao.finnAktiveWarnings(vedtaksperiodeId)
-        val dedupliserteWarnngs = warnings.distinct()
+        val dedupliserteWarnings = warnings.distinct()
         val generasjoner = generasjonRepository.tilhørendeFor(utbetalingId)
         val varsler = generasjoner.gyldigeVarsler()
-        if (dedupliserteWarnngs.size != varsler.size) {
+        if (dedupliserteWarnings.size != varsler.size) {
             sikkerLogg.info(
                 "Nye varsler og Warnings er ikke enige om antall varsler (hhv. ${varsler.size} og ${warnings.size}) for periode/utbetaling med {}, {}.\n{}\n{}",
                 kv("vedtaksperiodeId", vedtaksperiodeId),
