@@ -39,8 +39,9 @@ internal fun Route.totrinnsvurderingApi(
     post("/api/totrinnsvurdering") {
         val totrinnsvurdering = call.receive<TotrinnsvurderingDto>()
         val saksbehandlerOid = getSaksbehandlerOid()
+        val aktivTotrinnsvurdering = totrinnsvurderingDao.hentAktiv(totrinnsvurdering.oppgavereferanse)
 
-        if (oppgaveMediator.erBeslutteroppgave(totrinnsvurdering.oppgavereferanse)) {
+        if (oppgaveMediator.erBeslutteroppgave(totrinnsvurdering.oppgavereferanse) || (aktivTotrinnsvurdering?.beslutter != null && !aktivTotrinnsvurdering.erRetur)) {
             call.respondText(
                 "Denne oppgaven har allerede blitt sendt til godkjenning.",
                 status = HttpStatusCode.Conflict
@@ -63,7 +64,7 @@ internal fun Route.totrinnsvurderingApi(
 
         sikkerLog.info("OppgaveId ${totrinnsvurdering.oppgavereferanse} sendes til godkjenning av $saksbehandlerOid")
 
-        val beslutterSaksbehandlerOid = oppgaveMediator.finnBeslutterSaksbehandler(totrinnsvurdering.oppgavereferanse)
+        val beslutterSaksbehandlerOid = oppgaveMediator.finnBeslutterSaksbehandler(totrinnsvurdering.oppgavereferanse) ?: aktivTotrinnsvurdering?.beslutter
         tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(
             totrinnsvurdering.oppgavereferanse,
             beslutterSaksbehandlerOid,
@@ -79,6 +80,7 @@ internal fun Route.totrinnsvurderingApi(
             oppgaveId = totrinnsvurdering.oppgavereferanse,
             saksbehandlerOid = saksbehandlerOid
         )
+        if (aktivTotrinnsvurdering?.erRetur == true) totrinnsvurderingDao.settHåndtertRetur(totrinnsvurdering.oppgavereferanse)
 
         oppgaveMediator.lagrePeriodehistorikk(
             totrinnsvurdering.oppgavereferanse,

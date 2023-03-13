@@ -84,6 +84,22 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `Sett er_retur false på totrinnsvurdering med oppgaveId`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave()
+        totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
+        totrinnsvurderingDao.settErRetur(VEDTAKSPERIODE)
+        totrinnsvurderingDao.settHåndtertRetur(1L)
+
+        val totrinnsvurdering = totrinnsvurdering()
+
+        assertFalse(totrinnsvurdering.first().erRetur)
+        assertNotNull(totrinnsvurdering.first().oppdatert)
+    }
+
+    @Test
     fun `Oppdaterer utbetaling_id_ref på totrinnsvurdering`() {
         opprettPerson()
         opprettArbeidsgiver()
