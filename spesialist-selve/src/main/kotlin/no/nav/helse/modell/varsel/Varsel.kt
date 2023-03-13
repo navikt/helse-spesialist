@@ -32,6 +32,8 @@ internal class Varsel(
 
     internal fun erAktiv(): Boolean = this.status == AKTIV
 
+    internal fun erGyldig(): Boolean = this.status != INAKTIV
+
     internal fun lagre(hendelseId: UUID, generasjon: Generasjon, varselRepository: VarselRepository) {
         generasjon.håndterRegelverksvarsel(hendelseId, id, varselkode, opprettet, varselRepository)
     }
@@ -82,6 +84,10 @@ internal class Varsel(
 
     private fun oppdaterGenerasjon(gammelGenerasjonId: UUID, nyGenerasjonId: UUID, varselRepository: VarselRepository) {
         varselRepository.oppdaterGenerasjonFor(this.id, gammelGenerasjonId, nyGenerasjonId)
+    }
+
+    override fun toString(): String {
+        return "varselkode=$varselkode, vedtaksperiodeId=$vedtaksperiodeId, status=${status.name}"
     }
 
     override fun equals(other: Any?): Boolean =

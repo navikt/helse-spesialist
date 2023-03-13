@@ -44,16 +44,17 @@ internal class TestMediator(
     private val overstyringMediator = OverstyringMediator(testRapid)
     private val snapshotMediator = SnapshotMediator(SnapshotApiDao(dataSource), snapshotClient)
     private val automatisering = Automatisering(
-        warningDao,
-        RisikovurderingDao(dataSource),
-        AutomatiseringDao(dataSource),
-        ÅpneGosysOppgaverDao(dataSource),
-        EgenAnsattDao(dataSource),
-        VergemålDao(dataSource),
-        PersonDao(dataSource),
-        vedtakDao,
-        OverstyringDao(dataSource),
-        snapshotMediator
+        warningDao = warningDao,
+        risikovurderingDao = RisikovurderingDao(dataSource),
+        automatiseringDao = AutomatiseringDao(dataSource),
+        åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource),
+        egenAnsattDao = EgenAnsattDao(dataSource),
+        vergemålDao = VergemålDao(dataSource),
+        personDao = PersonDao(dataSource),
+        vedtakDao = vedtakDao,
+        overstyringDao = OverstyringDao(dataSource),
+        generasjonRepository = ActualGenerasjonRepository(dataSource),
+        snapshotMediator = snapshotMediator,
     ) { false }
 
     private val hendelsefabrikk = Hendelsefabrikk(

@@ -2,6 +2,7 @@ package no.nav.helse.modell.automatisering
 
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.Toggle
 import no.nav.helse.mediator.meldinger.løsninger.HentEnhetløsning.Companion.erEnhetUtland
 import no.nav.helse.modell.VedtakDao
@@ -14,6 +15,10 @@ import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetalingTilSykmeldt
+import no.nav.helse.modell.varsel.Varsel
+import no.nav.helse.modell.vedtak.Warning
+import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.gyldigeVarsler
+import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLUtbetaling
@@ -30,6 +35,7 @@ internal class Automatisering(
     private val personDao: PersonDao,
     private val vedtakDao: VedtakDao,
     private val overstyringDao: OverstyringDao,
+    private val generasjonRepository: GenerasjonRepository,
     private val snapshotMediator: SnapshotMediator,
     private val plukkTilManuell: PlukkTilManuell,
 ) {
@@ -93,6 +99,17 @@ internal class Automatisering(
             risikovurderingDao.hentRisikovurdering(vedtaksperiodeId)
                 ?: validering("Mangler vilkårsvurdering for arbeidsuførhet, aktivitetsplikt eller medvirkning") { false }
         val warnings = warningDao.finnAktiveWarnings(vedtaksperiodeId)
+        val generasjoner = generasjonRepository.tilhørendeFor(utbetalingId)
+        val varsler = generasjoner.gyldigeVarsler()
+        if (warnings.size != varsler.size) {
+            sikkerLogg.info(
+                "Nye varsler og Warnings er uenige om antall varsler (hhv. ${varsler.size} og ${warnings.size}) for periode/utbetaling med {}, {}.\n{}\n{}",
+                kv("vedtaksperiodeId", vedtaksperiodeId),
+                kv("utbetalingId", utbetalingId),
+                kv("nyeVarsler", varsler.map(Varsel::toString)),
+                kv("warnings", warnings.map(Warning::toString)),
+            )
+        }
         val erEgenAnsatt = egenAnsattDao.erEgenAnsatt(fødselsnummer)
         val harVergemål = vergemålDao.harVergemål(fødselsnummer) ?: false
         val tilhørerUtlandsenhet = erEnhetUtland(personDao.finnEnhetId(fødselsnummer))

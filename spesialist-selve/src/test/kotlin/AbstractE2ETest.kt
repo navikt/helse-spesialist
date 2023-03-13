@@ -161,12 +161,13 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             automatiseringDao = automatiseringDao,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
             egenAnsattDao = egenAnsattDao,
+            vergemålDao = vergemålDao,
             personDao = personDao,
             vedtakDao = vedtakDao,
-            vergemålDao = vergemålDao,
-            snapshotMediator = snapshotMediator,
             overstyringDao = overstyringDao,
-        ) { false },
+            generasjonRepository = generasjonRepository,
+            snapshotMediator = snapshotMediator,
+            { false }),
         overstyringMediator = OverstyringMediator(testRapid),
         snapshotMediator = snapshotMediator
     )

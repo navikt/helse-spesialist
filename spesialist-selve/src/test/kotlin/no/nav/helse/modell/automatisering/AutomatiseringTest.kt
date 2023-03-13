@@ -18,6 +18,7 @@ import no.nav.helse.modell.risiko.Risikovurdering
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
+import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålDao
@@ -44,6 +45,7 @@ internal class AutomatiseringTest {
     private val plukkTilManuellMock = mockk<PlukkTilManuell>()
     private val vergemålDaoMock = mockk<VergemålDao>(relaxed = true)
     private val overstyringDaoMock = mockk<OverstyringDao>(relaxed = true)
+    private val generasjonRepository = mockk<GenerasjonRepository>(relaxed = true)
 
     private val automatisering =
         Automatisering(
@@ -52,12 +54,13 @@ internal class AutomatiseringTest {
             automatiseringDao = automatiseringDaoMock,
             åpneGosysOppgaverDao = åpneGosysOppgaverDaoMock,
             egenAnsattDao = egenAnsattDao,
+            vergemålDao = vergemålDaoMock,
             personDao = personDaoMock,
             vedtakDao = vedtakDaoMock,
-            plukkTilManuell = plukkTilManuellMock,
-            vergemålDao = vergemålDaoMock,
-            snapshotMediator = snapshotMediator,
             overstyringDao = overstyringDaoMock,
+            generasjonRepository = generasjonRepository,
+            snapshotMediator = snapshotMediator,
+            plukkTilManuell = plukkTilManuellMock
         )
 
     companion object {

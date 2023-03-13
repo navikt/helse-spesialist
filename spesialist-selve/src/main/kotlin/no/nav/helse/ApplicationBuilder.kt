@@ -340,12 +340,13 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         automatiseringDao = automatiseringDao,
         åpneGosysOppgaverDao = åpneGosysOppgaverDao,
         egenAnsattDao = egenAnsattDao,
+        vergemålDao = vergemålDao,
         personDao = personDao,
         vedtakDao = vedtakDao,
-        plukkTilManuell = plukkTilManuell,
-        vergemålDao = vergemålDao,
         overstyringDao = overstyringDao,
+        generasjonRepository = generasjonRepository,
         snapshotMediator = snapshotMediator,
+        plukkTilManuell = plukkTilManuell
     )
 
     private val hendelsefabrikk = Hendelsefabrikk(

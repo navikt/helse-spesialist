@@ -47,8 +47,11 @@ internal class Generasjon private constructor(
 
     private val varsler: MutableList<Varsel> = varsler.toMutableList()
 
-    private companion object {
+    internal companion object {
         private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
+        internal fun List<Generasjon>.gyldigeVarsler(): List<Varsel> {
+            return flatMap { generasjon -> generasjon.varsler.filter(Varsel::erGyldig) }
+        }
     }
 
     internal fun håndterNyGenerasjon(

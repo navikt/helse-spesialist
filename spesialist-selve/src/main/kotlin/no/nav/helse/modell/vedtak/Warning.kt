@@ -2,11 +2,11 @@ package no.nav.helse.modell.vedtak
 
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.UUID
 import no.nav.helse.modell.WarningDao
-import no.nav.helse.spesialist.api.person.SnapshotDto
-import java.util.*
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLBeregnetPeriode
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLPerson
+import no.nav.helse.spesialist.api.person.SnapshotDto
 
 internal class Warning(
     private val melding: String,
@@ -63,6 +63,10 @@ internal class Warning(
     internal fun lagre(warningDao: WarningDao, vedtakRef: Long) {
         if (melding.isBlank()) return
         warningDao.leggTilWarning(vedtakRef, melding, kilde, opprettet)
+    }
+
+    override fun toString(): String {
+        return "varseltekst=$melding, kilde=${kilde.name}"
     }
 
     override fun equals(other: Any?): Boolean {
