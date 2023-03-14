@@ -43,7 +43,7 @@ jobs:
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew :spesialist-opprydding-dev:test :spesialist-opprydding-dev:build
       - uses: nais/docker-build-push@v0
-        id: docker-push
+        id: docker-build-push
         with:
           team: 'tbd'
           dockerfile: Dockerfile-opprydding-dev
