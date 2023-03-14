@@ -37,6 +37,11 @@ jobs:
           distribution: 'temurin'
           java-version: '17.x'
           cache: 'gradle'
+      - name: test and build
+        env:
+          ORG_GRADLE_PROJECT_githubUser: x-access-token
+          ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew :spesialist-opprydding-dev:test :spesialist-opprydding-dev:build
       - uses: nais/docker-build-push@v0
         id: docker-push
         with:
@@ -45,11 +50,6 @@ jobs:
           tag: ${{ needs.set_version.outputs.image }}
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
-      - name: test and build
-        env:
-          ORG_GRADLE_PROJECT_githubUser: x-access-token
-          ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew :spesialist-opprydding-dev:test :spesialist-opprydding-dev:build
     outputs:
       image: ${{ steps.docker-build-push.outputs.image }}
 
