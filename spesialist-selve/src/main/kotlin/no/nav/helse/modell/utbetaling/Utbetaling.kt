@@ -7,7 +7,7 @@ import no.nav.helse.modell.utbetaling.Refusjonstype.INGEN_REFUSJON
 import no.nav.helse.modell.utbetaling.Refusjonstype.INGEN_UTBETALING
 import no.nav.helse.modell.utbetaling.Refusjonstype.NEGATIVT_BELØP
 
-class Utbetaling(
+internal class Utbetaling(
     private val utbetalingId: UUID,
     private val arbeidsgiverbeløp: Int,
     private val personbeløp: Int,
