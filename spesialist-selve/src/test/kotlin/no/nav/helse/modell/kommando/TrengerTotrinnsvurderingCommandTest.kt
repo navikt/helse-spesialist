@@ -8,8 +8,8 @@ import io.mockk.verify
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.mediator.Toggle
-import no.nav.helse.modell.TotrinnsvurderingDao
-import no.nav.helse.modell.TotrinnsvurderingDao.Totrinnsvurdering
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao.Totrinnsvurdering
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao

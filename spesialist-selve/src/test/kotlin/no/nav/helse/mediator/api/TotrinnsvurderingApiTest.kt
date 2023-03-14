@@ -15,8 +15,8 @@ import java.time.LocalDateTime.now
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.modell.TotrinnsvurderingDao
-import no.nav.helse.modell.TotrinnsvurderingDao.Totrinnsvurdering
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao.Totrinnsvurdering
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.tildeling.TildelingService
 import no.nav.helse.objectMapper

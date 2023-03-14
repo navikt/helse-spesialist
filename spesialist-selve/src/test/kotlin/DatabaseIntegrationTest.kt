@@ -14,7 +14,7 @@ import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.SnapshotDao
-import no.nav.helse.modell.TotrinnsvurderingDao
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao

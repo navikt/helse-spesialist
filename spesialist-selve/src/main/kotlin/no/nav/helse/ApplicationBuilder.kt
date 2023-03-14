@@ -47,7 +47,7 @@ import no.nav.helse.mediator.api.overstyringApi
 import no.nav.helse.mediator.api.personApi
 import no.nav.helse.mediator.api.tildelingApi
 import no.nav.helse.mediator.api.totrinnsvurderingApi
-import no.nav.helse.modell.TotrinnsvurderingDao
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.automatisering.Automatisering

@@ -15,7 +15,7 @@ import io.ktor.util.pipeline.PipelineContext
 import java.util.UUID
 import no.nav.helse.gruppemedlemskap
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.modell.TotrinnsvurderingDao
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.tildeling.TildelingService
 import no.nav.helse.spesialist.api.notat.NotatMediator

@@ -17,7 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.modell.TotrinnsvurderingDao
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.tilganger
