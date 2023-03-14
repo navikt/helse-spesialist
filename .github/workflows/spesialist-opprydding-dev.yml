@@ -21,7 +21,7 @@ jobs:
       - name: create docker tag
         run: echo "TAG=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
     outputs:
-      image: ghcr.io/${{ github.repository }}/spesialist-opprydding-dev:${{ env.TAG }}
+      image: spesialist-opprydding-dev:${{ env.TAG }}
 
   build:
     permissions:
@@ -64,4 +64,4 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: deploy/dev-opprydding.yml
-          IMAGE: ${{ needs.set_version.outputs.image }}
+          IMAGE: ${{ needs.build.outputs.image }}
