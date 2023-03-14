@@ -22,18 +22,15 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `opprett totrinnsvurdering`() {
-        totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
+        val totrinnsvurdering: Totrinnsvurdering = totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
 
-        val totrinnsvurdering = totrinnsvurdering()
-        assertEquals(1, totrinnsvurdering.size)
-
-        assertEquals(VEDTAKSPERIODE, totrinnsvurdering.first().vedtaksperiodeId)
-        assertFalse(totrinnsvurdering.first().erRetur)
-        assertNull(totrinnsvurdering.first().saksbehandler)
-        assertNull(totrinnsvurdering.first().beslutter)
-        assertNull(totrinnsvurdering.first().utbetalingIdRef)
-        assertNotNull(totrinnsvurdering.first().opprettet)
-        assertNull(totrinnsvurdering.first().oppdatert)
+        assertEquals(VEDTAKSPERIODE, totrinnsvurdering.vedtaksperiodeId)
+        assertFalse(totrinnsvurdering.erRetur)
+        assertNull(totrinnsvurdering.saksbehandler)
+        assertNull(totrinnsvurdering.beslutter)
+        assertNull(totrinnsvurdering.utbetalingIdRef)
+        assertNotNull(totrinnsvurdering.opprettet)
+        assertNull(totrinnsvurdering.oppdatert)
     }
 
     @Test

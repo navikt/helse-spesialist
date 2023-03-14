@@ -9,14 +9,25 @@ import kotliquery.sessionOf
 import org.intellij.lang.annotations.Language
 
 internal class TotrinnsvurderingDao(private val dataSource: DataSource) {
-    private fun TransactionalSession.opprett(vedtaksperiodeId: UUID): Boolean {
+    private fun TransactionalSession.opprett(vedtaksperiodeId: UUID): Totrinnsvurdering {
         @Language("PostgreSQL")
         val query = """
            INSERT INTO totrinnsvurdering (vedtaksperiode_id) 
            VALUES (:vedtaksperiodeId)
+           RETURNING *
         """.trimIndent()
 
-        return run(queryOf(query, mapOf("vedtaksperiodeId" to vedtaksperiodeId)).asExecute)
+        return requireNotNull(run(queryOf(query, mapOf("vedtaksperiodeId" to vedtaksperiodeId)).map { row ->
+            Totrinnsvurdering(
+                vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
+                erRetur = row.boolean("er_retur"),
+                saksbehandler = row.uuidOrNull("saksbehandler"),
+                beslutter = row.uuidOrNull("beslutter"),
+                utbetalingIdRef = row.longOrNull("utbetaling_id_ref"),
+                opprettet = row.localDateTime("opprettet"),
+                oppdatert = row.localDateTimeOrNull("oppdatert")
+            )
+        }.asSingle))
     }
 
     private fun TransactionalSession.hentAktiv(vedtaksperiodeId: UUID): Totrinnsvurdering? {
@@ -63,7 +74,7 @@ internal class TotrinnsvurderingDao(private val dataSource: DataSource) {
         }.asSingle)
     }
 
-    internal fun opprett(vedtaksperiodeId: UUID) = sessionOf(dataSource).use { session ->
+    internal fun opprett(vedtaksperiodeId: UUID): Totrinnsvurdering = sessionOf(dataSource).use { session ->
         session.transaction { transaction ->
             transaction.run {
                 hentAktiv(vedtaksperiodeId) ?: opprett(vedtaksperiodeId)

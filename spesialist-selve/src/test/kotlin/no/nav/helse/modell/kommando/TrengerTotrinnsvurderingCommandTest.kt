@@ -9,6 +9,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.TotrinnsvurderingDao
+import no.nav.helse.modell.TotrinnsvurderingDao.Totrinnsvurdering
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
@@ -27,6 +28,7 @@ internal class TrengerTotrinnsvurderingCommandTest {
 
     private companion object {
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
+        private val FØDSELSNUMMER = "fnr"
     }
 
     private val warningDao = mockk<WarningDao>(relaxed = true)
@@ -38,6 +40,7 @@ internal class TrengerTotrinnsvurderingCommandTest {
     private lateinit var context: CommandContext
 
     private val command = TrengerTotrinnsvurderingCommand(
+        fødselsnummer = FØDSELSNUMMER,
         vedtaksperiodeId = VEDTAKSPERIODE_ID,
         warningDao = warningDao,
         oppgaveMediator = oppgaveMediator,
@@ -81,10 +84,60 @@ internal class TrengerTotrinnsvurderingCommandTest {
     }
 
     @Test
+    fun `Hvis totrinnsvurdering har saksbehander skal oppgaven reserveres`() {
+        Toggle.Totrinnsvurdering.enable()
+
+        val saksbehander = UUID.randomUUID()
+
+        every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
+        every { totrinnsvurderingDao.opprett(any()) } returns Totrinnsvurdering(
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            erRetur = false,
+            saksbehandler = saksbehander,
+            beslutter = null,
+            utbetalingIdRef = null,
+            opprettet = LocalDateTime.now(),
+            oppdatert = null
+        )
+
+        assertTrue(command.execute(context))
+
+        verify(exactly = 1) { totrinnsvurderingDao.opprett(any()) }
+        verify(exactly = 1) { oppgaveMediator.reserverOppgave(saksbehander, FØDSELSNUMMER) }
+
+        Toggle.Totrinnsvurdering.disable()
+    }
+
+    @Test
+    fun `Hvis totrinnsvurdering har beslutter skal totrinnsvurderingen markeres som retur`() {
+        Toggle.Totrinnsvurdering.enable()
+        val saksbehander = UUID.randomUUID()
+        val beslutter = UUID.randomUUID()
+
+        every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
+        every { totrinnsvurderingDao.opprett(any()) } returns Totrinnsvurdering(
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            erRetur = false,
+            saksbehandler = saksbehander,
+            beslutter = beslutter,
+            utbetalingIdRef = null,
+            opprettet = LocalDateTime.now(),
+            oppdatert = null
+        )
+
+        assertTrue(command.execute(context))
+
+        verify(exactly = 1) { totrinnsvurderingDao.opprett(any()) }
+        verify(exactly = 1) { oppgaveMediator.reserverOppgave(saksbehander, FØDSELSNUMMER) }
+        verify(exactly = 1) { totrinnsvurderingDao.settErRetur(VEDTAKSPERIODE_ID) }
+        Toggle.Totrinnsvurdering.disable()
+    }
+
+    @Test
     fun `Oppretter ikke totrinnsvurdering om det ikke er overstyring eller varsel for lovvalg og medlemskap`() {
         assertTrue(command.execute(context))
 
-        verify(exactly = 0) { totrinnsvurderingDao.opprett (any()) }
+        verify(exactly = 0) { totrinnsvurderingDao.opprett(any()) }
     }
 
     @Test

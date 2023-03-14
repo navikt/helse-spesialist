@@ -21,13 +21,14 @@ import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import org.slf4j.LoggerFactory
 
 internal class TrengerTotrinnsvurderingCommand(
+    private val fødselsnummer: String,
     private val vedtaksperiodeId: UUID,
     private val warningDao: WarningDao,
     private val oppgaveMediator: OppgaveMediator,
     private val overstyringDao: OverstyringDao,
     private val totrinnsvurderingDao: TotrinnsvurderingDao,
     private val varselRepository: VarselRepository,
-    private val generasjonRepository: GenerasjonRepository
+    private val generasjonRepository: GenerasjonRepository,
 ) : Command {
 
     private companion object {
@@ -39,20 +40,20 @@ internal class TrengerTotrinnsvurderingCommand(
 
     internal fun getWarningtekst(overstyringer: List<OverstyringType>, medlemskap: Boolean): String {
         val årsaker = mutableListOf<String>()
-        if(medlemskap) årsaker.add("Lovvalg og medlemskap")
-        if(overstyringer.contains(OverstyringType.Dager)) årsaker.add("Overstyring av utbetalingsdager")
-        if(overstyringer.contains(OverstyringType.Inntekt)) årsaker.add("Overstyring av inntekt")
-        if(overstyringer.contains(OverstyringType.Arbeidsforhold)) årsaker.add("Overstyring av annet arbeidsforhold")
+        if (medlemskap) årsaker.add("Lovvalg og medlemskap")
+        if (overstyringer.contains(OverstyringType.Dager)) årsaker.add("Overstyring av utbetalingsdager")
+        if (overstyringer.contains(OverstyringType.Inntekt)) årsaker.add("Overstyring av inntekt")
+        if (overstyringer.contains(OverstyringType.Arbeidsforhold)) årsaker.add("Overstyring av annet arbeidsforhold")
 
         return "$BESLUTTEROPPGAVE_PREFIX ${formaterTekst(årsaker)}"
     }
 
     private fun varselkoder(overstyringer: List<OverstyringType>, medlemskap: Boolean): List<Varselkode> {
         val varselkoder = mutableListOf<Varselkode>()
-        if(medlemskap) varselkoder.add(SB_BO_1)
-        if(overstyringer.contains(OverstyringType.Dager)) varselkoder.add(SB_BO_2)
-        if(overstyringer.contains(OverstyringType.Inntekt)) varselkoder.add(SB_BO_3)
-        if(overstyringer.contains(OverstyringType.Arbeidsforhold)) varselkoder.add(SB_BO_4)
+        if (medlemskap) varselkoder.add(SB_BO_1)
+        if (overstyringer.contains(OverstyringType.Dager)) varselkoder.add(SB_BO_2)
+        if (overstyringer.contains(OverstyringType.Inntekt)) varselkoder.add(SB_BO_3)
+        if (overstyringer.contains(OverstyringType.Arbeidsforhold)) varselkoder.add(SB_BO_4)
         return varselkoder
     }
 
@@ -63,13 +64,27 @@ internal class TrengerTotrinnsvurderingCommand(
         if (harMedlemskapsvarsel || overstyringer.isNotEmpty()) {
             logg.info("Vedtaksperioden: $vedtaksperiodeId trenger totrinnsvurdering")
             oppgaveMediator.alleUlagredeOppgaverTilTotrinnsvurdering()
-            if (Toggle.Totrinnsvurdering.enabled) totrinnsvurderingDao.opprett(vedtaksperiodeId)
+            if (Toggle.Totrinnsvurdering.enabled) {
+                val totrinnsvurdering = totrinnsvurderingDao.opprett(vedtaksperiodeId)
 
-            warningDao.leggTilWarning(vedtaksperiodeId, Warning(
-                melding = getWarningtekst(overstyringer, harMedlemskapsvarsel),
-                kilde = WarningKilde.Spesialist,
-                opprettet = LocalDateTime.now()
-            ))
+                if (totrinnsvurdering.beslutter != null) {
+                    totrinnsvurderingDao.settErRetur(vedtaksperiodeId)
+                }
+                if (totrinnsvurdering.saksbehandler != null) {
+                    oppgaveMediator.reserverOppgave(
+                        saksbehandleroid = totrinnsvurdering.saksbehandler,
+                        fødselsnummer = fødselsnummer
+                    )
+                }
+            }
+
+            warningDao.leggTilWarning(
+                vedtaksperiodeId, Warning(
+                    melding = getWarningtekst(overstyringer, harMedlemskapsvarsel),
+                    kilde = WarningKilde.Spesialist,
+                    opprettet = LocalDateTime.now()
+                )
+            )
             val generasjon = generasjonRepository.sisteFor(vedtaksperiodeId)
             varselkoder(overstyringer, harMedlemskapsvarsel).forEach {
                 it.nyttVarsel(generasjon, varselRepository)
@@ -81,7 +96,8 @@ internal class TrengerTotrinnsvurderingCommand(
 
     private fun harMedlemskapsVarsel(): Boolean {
         val medlemSkapVarsel = "Vurder lovvalg og medlemskap"
-        val harMedlemskapsVarsel = warningDao.finnAktiveWarningsMedMelding(vedtaksperiodeId, medlemSkapVarsel).isNotEmpty()
+        val harMedlemskapsVarsel =
+            warningDao.finnAktiveWarningsMedMelding(vedtaksperiodeId, medlemSkapVarsel).isNotEmpty()
         val vedtaksperiodeHarFerdigstiltOppgave = oppgaveMediator.harFerdigstiltOppgave(vedtaksperiodeId)
 
         logg.info("Vedtaksperioden: $vedtaksperiodeId harMedlemskapsVarsel: $harMedlemskapsVarsel")

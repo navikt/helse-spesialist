@@ -231,6 +231,7 @@ internal class Godkjenningsbehov(
             snapshotMediator = snapshotMediator,
         ),
         TrengerTotrinnsvurderingCommand(
+            fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             warningDao = warningDao,
             oppgaveMediator = oppgaveMediator,
