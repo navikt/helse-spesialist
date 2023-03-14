@@ -6,6 +6,7 @@ import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.juli
+import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.ANNULLERT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
@@ -13,6 +14,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -36,6 +38,27 @@ class UtbetalingDaoTest : DatabaseIntegrationTest() {
         utbetalingDao.nyUtbetalingStatus(utbetaling_idId, UTBETALT, LocalDateTime.now(), "{}")
 
         assertTrue(utbetalingDao.erUtbetaltFør(AKTØR))
+    }
+
+    @Test
+    fun `finner utbetaling`() {
+        nyPerson()
+        val arbeidsgiverFagsystemId = fagsystemId()
+        val personFagsystemId = fagsystemId()
+
+        val arbeidsgiveroppdragId1 = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
+        val personOppdragId1 = lagPersonoppdrag(personFagsystemId)
+        val utbetalingId = UUID.randomUUID()
+        utbetalingDao.opprettUtbetalingId(utbetalingId, FNR, ORGNUMMER, Utbetalingtype.UTBETALING, LocalDateTime.now(), arbeidsgiveroppdragId1, personOppdragId1, 2000, 2000)
+
+        val utbetaling = utbetalingDao.utbetalingFor(utbetalingId)
+        assertEquals(Utbetaling(utbetalingId, 2000, 2000), utbetaling)
+    }
+
+    @Test
+    fun `finner ikke utbetaling dersom det ikke finnes noen`() {
+        val utbetaling = utbetalingDao.utbetalingFor(UUID.randomUUID())
+        assertNull(utbetaling)
     }
 
     @Test
@@ -75,7 +98,6 @@ class UtbetalingDaoTest : DatabaseIntegrationTest() {
         val arbeidsgiverFagsystemId = fagsystemId()
         val personFagsystemId = fagsystemId()
 
-        // Første utkast: til arbeidsgiver, ikke noe til person
         val arbeidsgiveroppdragId1 = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
         val personOppdragId1 = lagPersonoppdrag(personFagsystemId)
         val utbetalingId = UUID.randomUUID()
