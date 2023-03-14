@@ -19,6 +19,21 @@ class Utbetaling(
         if (arbeidsgiverbeløp > 0 && personbeløp == 0) return FULL_REFUSJON
         return NEGATIVT_BELØP
     }
+
+    override fun equals(other: Any?): Boolean = this === other || (
+        other is Utbetaling &&
+                this.javaClass == other.javaClass &&
+                this.utbetalingId == other.utbetalingId &&
+                this.arbeidsgiverbeløp == other.arbeidsgiverbeløp &&
+                this.personbeløp == other.personbeløp
+        )
+
+    override fun hashCode(): Int {
+        var result = utbetalingId.hashCode()
+        result = 31 * result + arbeidsgiverbeløp
+        result = 31 * result + personbeløp
+        return result
+    }
 }
 
 internal enum class Refusjonstype {
