@@ -1,5 +1,6 @@
 package no.nav.helse.modell.vedtaksperiode
 
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
@@ -110,6 +111,40 @@ class GenerasjonDao(private val dataSource: DataSource) {
                 )
                 generasjon
             }
+        }
+    }
+
+    internal fun åpenGenerasjonForVedtaksperiode(vedtaksperiodeId: UUID): Generasjon? {
+        @Language("PostgreSQL")
+        val query = """
+            SELECT id, unik_id, vedtaksperiode_id, utbetaling_id, låst, skjæringstidspunkt, fom, tom 
+            FROM selve_vedtaksperiode_generasjon 
+            WHERE vedtaksperiode_id = :vedtaksperiode_id AND låst = false
+            """
+        return sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, mapOf("vedtaksperiode_id" to vedtaksperiodeId)).map(::toGenerasjon).asSingle)
+        }
+    }
+
+    internal fun oppdaterSykefraværstilfelle(id: UUID, skjæringstidspunkt: LocalDate, periode: Periode) {
+        @Language("PostgreSQL")
+        val query = """
+            UPDATE selve_vedtaksperiode_generasjon 
+            SET skjæringstidspunkt = :skjaeringstidspunkt, fom = :fom, tom = :tom 
+            WHERE unik_id = :unik_id
+            """
+
+        return sessionOf(dataSource).use { session ->
+            session.run(
+                queryOf(
+                    query, mapOf(
+                        "unik_id" to id,
+                        "skjaeringstidspunkt" to skjæringstidspunkt,
+                        "fom" to periode.fom(),
+                        "tom" to periode.tom(),
+                    )
+                ).asUpdate
+            )
         }
     }
 

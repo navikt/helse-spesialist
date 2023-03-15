@@ -6,6 +6,7 @@ import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
+import no.nav.helse.januar
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.VarselDao
 import org.intellij.lang.annotations.Language
@@ -119,6 +120,82 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         assertUtbetaling(generasjonId, UTBETALING_ID)
         generasjonDao.fjernUtbetalingFor(generasjonId)
         assertUtbetaling(generasjonId, null)
+    }
+
+    @Test
+    fun `Finner åpen generasjon for vedtaksperiode-id`() {
+        val generasjonId1 = UUID.randomUUID()
+        val generasjonId2 = UUID.randomUUID()
+        generasjonDao.opprettFor(generasjonId1, VEDTAKSPERIODE_ID, UUID.randomUUID())
+        generasjonDao.låsFor(generasjonId1, UUID.randomUUID())
+        generasjonDao.opprettFor(generasjonId2, VEDTAKSPERIODE_ID, UUID.randomUUID())
+        val generasjon = generasjonDao.åpenGenerasjonForVedtaksperiode(VEDTAKSPERIODE_ID)
+        val forventetGenerasjon = Generasjon(generasjonId2, VEDTAKSPERIODE_ID, null, false, null, null, emptySet(), dataSource)
+
+        assertEquals(forventetGenerasjon, generasjon)
+    }
+
+    @Test
+    fun `Forsøk å oppdaterere sykefraværstilfelle på vedtaksperiode uten åpen generasjon`() {
+        val generasjonId = UUID.randomUUID()
+        generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE_ID, UUID.randomUUID())
+        generasjonDao.låsFor(generasjonId, UUID.randomUUID())
+        val generasjon = generasjonDao.åpenGenerasjonForVedtaksperiode(VEDTAKSPERIODE_ID)
+
+        assertNull(generasjon)
+    }
+
+    @Test
+    fun `Oppdaterer sykefraværstilfelle på generasjon`() {
+        val generasjonId = UUID.randomUUID()
+        val skjæringstidspunkt = 1.januar
+        val periode = Periode(1.januar, 5.januar)
+        generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE_ID, UUID.randomUUID())
+        generasjonDao.oppdaterSykefraværstilfelle(generasjonId, skjæringstidspunkt, periode)
+        val generasjon = generasjonDao.finnSisteFor(VEDTAKSPERIODE_ID)
+        val forventetGenerasjon = Generasjon(generasjonId, VEDTAKSPERIODE_ID, null, false, skjæringstidspunkt, periode, emptySet(), dataSource)
+
+        assertEquals(forventetGenerasjon, generasjon)
+    }
+
+    @Test
+    fun `Henter generasjon`() {
+        generasjonDao.opprettFor(UUID.randomUUID(), VEDTAKSPERIODE_ID, UUID.randomUUID())
+        val generasjonId = generasjonIdFor(VEDTAKSPERIODE_ID)
+        val generasjon = generasjonDao.finnSisteFor(VEDTAKSPERIODE_ID)
+        assertEquals(
+            Generasjon(
+                generasjonId,
+                VEDTAKSPERIODE_ID,
+                null,
+                false,
+                null,
+                null,
+                emptySet(),
+                dataSource
+            ),
+            generasjon
+        )
+    }
+
+    @Test
+    fun `Henter generasjon med fom, tom og skjæringstidspunkt`() {
+        generasjonDao.opprettFor(UUID.randomUUID(), VEDTAKSPERIODE_ID, UUID.randomUUID())
+        val generasjonId = generasjonIdFor(VEDTAKSPERIODE_ID)
+        val generasjon = generasjonDao.finnSisteFor(VEDTAKSPERIODE_ID)
+        assertEquals(
+            Generasjon(
+                generasjonId,
+                VEDTAKSPERIODE_ID,
+                null,
+                false,
+                null,
+                null,
+                emptySet(),
+                dataSource
+            ),
+            generasjon
+        )
     }
 
     @Test
