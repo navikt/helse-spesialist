@@ -6,7 +6,7 @@ val ktorVersion = "2.2.4"
 
 plugins {
     kotlin("plugin.serialization") version "1.6.21"
-    id("com.expediagroup.graphql") version "5.4.1"
+    id("com.expediagroup.graphql") version "6.4.0"
 }
 
 dependencies {
