@@ -65,8 +65,8 @@ internal class VedtaksperiodeEndret(
         private val mediator: HendelseMediator
     ) : River.PacketListener {
 
-        private val log = LoggerFactory.getLogger(this::class.java)
-        private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
+        private val logg = LoggerFactory.getLogger(this::class.java)
+        private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
         init {
             River(rapidsConnection).apply {
@@ -84,14 +84,14 @@ internal class VedtaksperiodeEndret(
         }
 
         override fun onError(problems: MessageProblems, context: MessageContext) {
-            sikkerLogg.error("Forstod ikke vedtaksperiode_endret:\n${problems.toExtendedReport()}")
+            sikkerlogg.error("Forstod ikke vedtaksperiode_endret:\n${problems.toExtendedReport()}")
         }
 
         override fun onPacket(packet: JsonMessage, context: MessageContext) {
             val vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
             val id = UUID.fromString(packet["@id"].asText())
             val forårsaketAvId = UUID.fromString(packet["@forårsaket_av.id"].asText())
-            log.info(
+            logg.info(
                 "Mottok vedtaksperiode endret {}, {}, {}",
                 keyValue("vedtaksperiodeId", vedtaksperiodeId),
                 keyValue("eventId", id),
