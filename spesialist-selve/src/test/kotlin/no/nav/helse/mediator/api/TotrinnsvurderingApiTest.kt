@@ -15,10 +15,10 @@ import java.time.LocalDateTime.now
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao.Totrinnsvurdering
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.tildeling.TildelingService
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.notat.NotatMediator
@@ -40,7 +40,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     private val notatMediator = mockk<NotatMediator>(relaxed = true)
     private val tildelingService = mockk<TildelingService>(relaxed = true)
     private val hendelseMediator = mockk<HendelseMediator>(relaxed = true)
-    private val totrinnsvurderingDao = mockk<TotrinnsvurderingDao>(relaxed = true)
+    private val totrinnsvurderingMediator = mockk<TotrinnsvurderingMediator>(relaxed = true)
 
     private val saksbehandler_oid = UUID.randomUUID()
 
@@ -63,7 +63,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
                 notatMediator,
                 tildelingService,
                 hendelseMediator,
-                totrinnsvurderingDao
+                totrinnsvurderingMediator
             )
         }
     }
@@ -118,7 +118,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
 
     @Test
     fun totrinnsvurderingOk() {
-        every { totrinnsvurderingDao.hentAktiv(oppgaveId = any()) } returns null
+        every { totrinnsvurderingMediator.hentAktiv(oppgaveId = any()) } returns null
         val response = runBlocking {
             client.post(TOTRINNSVURDERING_URL) {
                 contentType(ContentType.Application.Json)
@@ -249,7 +249,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
 
     @Test
     fun `Totrinnsvurdering kan ikke gjøres til beslutteroppgave hvis den allerede er beslutteroppgave`() {
-        every { totrinnsvurderingDao.hentAktiv(10L) } returns Totrinnsvurdering(
+        every { totrinnsvurderingMediator.hentAktiv(10L) } returns Totrinnsvurdering(
             vedtaksperiodeId = UUID.randomUUID(),
             erRetur = false,
             saksbehandler = UUID.randomUUID(),
@@ -272,7 +272,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     @Test
     fun `Totrinnsvurdering kan gjøres til beslutteroppgave hvis den er en returoppgave`() {
         every { oppgaveMediator.erBeslutteroppgave(10L) } returns false
-        every { totrinnsvurderingDao.hentAktiv(oppgaveId = any()) } returns Totrinnsvurdering(
+        every { totrinnsvurderingMediator.hentAktiv(oppgaveId = any()) } returns Totrinnsvurdering(
             vedtaksperiodeId = UUID.randomUUID(),
             erRetur = true,
             saksbehandler = UUID.randomUUID(),
@@ -294,7 +294,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
 
     @Test
     fun `Setter saksbehandler for totrinnsvurdering når oppgave blir sendt til godkjenning`() {
-        every { totrinnsvurderingDao.hentAktiv(10L) } returns Totrinnsvurdering(
+        every { totrinnsvurderingMediator.hentAktiv(10L) } returns Totrinnsvurdering(
             vedtaksperiodeId = UUID.randomUUID(),
             erRetur = false,
             saksbehandler = null,
@@ -316,13 +316,13 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
         }
 
         assertEquals(HttpStatusCode.OK, response.status)
-        verify(exactly = 1) { totrinnsvurderingDao.settSaksbehandler(10L, saksbehandler_oid) }
+        verify(exactly = 1) { totrinnsvurderingMediator.settSaksbehandler(10L, saksbehandler_oid) }
     }
 
     @Test
     fun `Tildeler oppgaven til beslutter dersom den finnes ved returnert retur`() {
         val beslutterSaksbehandlerOid = UUID.randomUUID()
-        every { totrinnsvurderingDao.hentAktiv(10L) } returns Totrinnsvurdering(
+        every { totrinnsvurderingMediator.hentAktiv(10L) } returns Totrinnsvurdering(
             vedtaksperiodeId = UUID.randomUUID(),
             erRetur = true,
             saksbehandler = UUID.randomUUID(),
@@ -354,7 +354,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
 
     @Test
     fun `Setter totrinnsvurdering til retur false ved returnert retur`() {
-        every { totrinnsvurderingDao.hentAktiv(10L) } returns Totrinnsvurdering(
+        every { totrinnsvurderingMediator.hentAktiv(10L) } returns Totrinnsvurdering(
             vedtaksperiodeId = UUID.randomUUID(),
             erRetur = true,
             saksbehandler = UUID.randomUUID(),
@@ -376,14 +376,14 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
 
         assertEquals(HttpStatusCode.OK, response.status)
         verify(exactly = 1) {
-            totrinnsvurderingDao.settHåndtertRetur(10L)
+            totrinnsvurderingMediator.settHåndtertRetur(10L)
         }
     }
 
     @Test
     fun `Sende totrinnsvurdering i retur`() {
         val tidligereSaksbehandlerOid = UUID.randomUUID()
-        every { totrinnsvurderingDao.hentAktiv(oppgaveId = 2L) } returns Totrinnsvurdering(
+        every { totrinnsvurderingMediator.hentAktiv(oppgaveId = 2L) } returns Totrinnsvurdering(
             vedtaksperiodeId = UUID.randomUUID(),
             erRetur = true,
             saksbehandler = tidligereSaksbehandlerOid,
@@ -407,10 +407,10 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
         }
 
         verify(exactly = 1) {
-            totrinnsvurderingDao.settErRetur(oppgaveId = 2L)
+            totrinnsvurderingMediator.settErRetur(oppgaveId = 2L)
         }
         verify(exactly = 1) {
-            totrinnsvurderingDao.settBeslutter(2L, saksbehandler_oid)
+            totrinnsvurderingMediator.settBeslutter(2L, saksbehandler_oid)
         }
         verify(exactly = 1) {
             tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(

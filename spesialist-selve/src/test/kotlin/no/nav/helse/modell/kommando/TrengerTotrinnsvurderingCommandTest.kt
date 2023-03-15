@@ -8,11 +8,11 @@ import io.mockk.verify
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.mediator.Toggle
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao.Totrinnsvurdering
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
@@ -32,7 +32,7 @@ internal class TrengerTotrinnsvurderingCommandTest {
     }
 
     private val warningDao = mockk<WarningDao>(relaxed = true)
-    private val totrinnsvurderingDao = mockk<TotrinnsvurderingDao>(relaxed = true)
+    private val totrinnsvurderingMediator = mockk<TotrinnsvurderingMediator>(relaxed = true)
     private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
     private val overstyringDao = mockk<OverstyringDao>(relaxed = true)
     private val varselRepository = mockk<VarselRepository>(relaxed = true)
@@ -45,7 +45,7 @@ internal class TrengerTotrinnsvurderingCommandTest {
         warningDao = warningDao,
         oppgaveMediator = oppgaveMediator,
         overstyringDao = overstyringDao,
-        totrinnsvurderingDao = totrinnsvurderingDao,
+        totrinnsvurderingMediator = totrinnsvurderingMediator,
         varselRepository = varselRepository,
         generasjonRepository = generasjonRepository
     )
@@ -62,7 +62,7 @@ internal class TrengerTotrinnsvurderingCommandTest {
 
         assertTrue(command.execute(context))
 
-        verify(exactly = 1) { totrinnsvurderingDao.opprett(any()) }
+        verify(exactly = 1) { totrinnsvurderingMediator.opprett(any()) }
         Toggle.Totrinnsvurdering.disable()
     }
 
@@ -79,7 +79,7 @@ internal class TrengerTotrinnsvurderingCommandTest {
         every { oppgaveMediator.harFerdigstiltOppgave(VEDTAKSPERIODE_ID) } returns false
 
         assertTrue(command.execute(context))
-        verify(exactly = 1) { totrinnsvurderingDao.opprett(any()) }
+        verify(exactly = 1) { totrinnsvurderingMediator.opprett(any()) }
         Toggle.Totrinnsvurdering.disable()
     }
 
@@ -90,7 +90,7 @@ internal class TrengerTotrinnsvurderingCommandTest {
         val saksbehander = UUID.randomUUID()
 
         every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
-        every { totrinnsvurderingDao.opprett(any()) } returns Totrinnsvurdering(
+        every { totrinnsvurderingMediator.opprett(any()) } returns Totrinnsvurdering(
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             erRetur = false,
             saksbehandler = saksbehander,
@@ -102,7 +102,7 @@ internal class TrengerTotrinnsvurderingCommandTest {
 
         assertTrue(command.execute(context))
 
-        verify(exactly = 1) { totrinnsvurderingDao.opprett(any()) }
+        verify(exactly = 1) { totrinnsvurderingMediator.opprett(any()) }
         verify(exactly = 1) { oppgaveMediator.reserverOppgave(saksbehander, FØDSELSNUMMER) }
 
         Toggle.Totrinnsvurdering.disable()
@@ -115,7 +115,7 @@ internal class TrengerTotrinnsvurderingCommandTest {
         val beslutter = UUID.randomUUID()
 
         every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
-        every { totrinnsvurderingDao.opprett(any()) } returns Totrinnsvurdering(
+        every { totrinnsvurderingMediator.opprett(any()) } returns Totrinnsvurdering(
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             erRetur = false,
             saksbehandler = saksbehander,
@@ -127,9 +127,9 @@ internal class TrengerTotrinnsvurderingCommandTest {
 
         assertTrue(command.execute(context))
 
-        verify(exactly = 1) { totrinnsvurderingDao.opprett(any()) }
+        verify(exactly = 1) { totrinnsvurderingMediator.opprett(any()) }
         verify(exactly = 1) { oppgaveMediator.reserverOppgave(saksbehander, FØDSELSNUMMER) }
-        verify(exactly = 1) { totrinnsvurderingDao.settErRetur(VEDTAKSPERIODE_ID) }
+        verify(exactly = 1) { totrinnsvurderingMediator.settErRetur(VEDTAKSPERIODE_ID) }
         Toggle.Totrinnsvurdering.disable()
     }
 
@@ -137,7 +137,7 @@ internal class TrengerTotrinnsvurderingCommandTest {
     fun `Oppretter ikke totrinnsvurdering om det ikke er overstyring eller varsel for lovvalg og medlemskap`() {
         assertTrue(command.execute(context))
 
-        verify(exactly = 0) { totrinnsvurderingDao.opprett(any()) }
+        verify(exactly = 0) { totrinnsvurderingMediator.opprett(any()) }
     }
 
     @Test

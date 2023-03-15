@@ -29,9 +29,9 @@ import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao.Totrinnsvurdering
 import no.nav.helse.modell.oppgave.OppgaveMediator
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.AzureAdAppConfig
 import no.nav.helse.spesialist.api.AzureConfig
@@ -52,7 +52,7 @@ internal class PersonApiTest {
     private val varselRepository: ApiVarselRepository = mockk(relaxed = true)
     private val hendelseMediator: HendelseMediator = mockk(relaxed = true)
     private val oppgaveMediator: OppgaveMediator = mockk(relaxed = true)
-    private val totrinnsvurderingDaoMock = mockk<TotrinnsvurderingDao>(relaxed = true)
+    private val totrinnsvurderingMediatorMock = mockk<TotrinnsvurderingMediator>(relaxed = true)
     private val saksbehandlerIdent = "1234"
     private val SAKSBEHANDLER_OID = UUID.randomUUID()
     private val godkjenning = GodkjenningDTO(1L, true, saksbehandlerIdent, null, null, null)
@@ -63,7 +63,7 @@ internal class PersonApiTest {
     @Test
     fun `godkjenning av vedtaksperiode OK`() {
         every { oppgaveMediator.erAktivOppgave(1L) } returns true
-        every { totrinnsvurderingDaoMock.hentAktiv(1L) } returns null
+        every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns null
         val response = runBlocking {
             client.post("/api/vedtak") {
                 contentType(ContentType.Application.Json)
@@ -91,7 +91,7 @@ internal class PersonApiTest {
     fun `en vedtaksperiode kan godkjennes hvis alle varsler er vurdert`() {
         every { oppgaveMediator.erAktivOppgave(1L) } returns true
         every { oppgaveMediator.erRiskoppgave(1L) } returns false
-        every { totrinnsvurderingDaoMock.hentAktiv(1L) } returns null
+        every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns null
         every { varselRepository.ikkeVurderteVarslerFor(1L) } returns 0
         val response = runBlocking {
             client.post("/api/vedtak") {
@@ -107,7 +107,7 @@ internal class PersonApiTest {
     fun `en vedtaksperiode kan ikke godkjennes hvis det fins aktive varsler`() {
         every { oppgaveMediator.erAktivOppgave(1L) } returns true
         every { oppgaveMediator.erRiskoppgave(1L) } returns false
-        every { totrinnsvurderingDaoMock.hentAktiv(1L) } returns null
+        every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns null
         every { varselRepository.ikkeVurderteVarslerFor(1L) } returns 1
         val response = runBlocking {
             client.post("/api/vedtak") {
@@ -123,7 +123,7 @@ internal class PersonApiTest {
     fun `en vedtaksperiode kan avvises selv om det finnes uvurderte varsler`() {
         every { oppgaveMediator.erAktivOppgave(1L) } returns true
         every { oppgaveMediator.erRiskoppgave(1L) } returns false
-        every { totrinnsvurderingDaoMock.hentAktiv(1L) } returns null
+        every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns null
         every { varselRepository.ikkeVurderteVarslerFor(1L) } returns 1
         val response = runBlocking {
             client.post("/api/vedtak") {
@@ -139,7 +139,7 @@ internal class PersonApiTest {
     fun `må ha tilgang for å kunne godkjenne vedtaksperiode med oppgavetype RISK_QA`() {
         every { oppgaveMediator.erAktivOppgave(1L) } returns true
         every { oppgaveMediator.erRiskoppgave(1L) } returns true
-        every { totrinnsvurderingDaoMock.hentAktiv(1L) } returns null
+        every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns null
         val responseForManglendeTilgang = runBlocking {
             client.post("/api/vedtak") {
                 contentType(ContentType.Application.Json)
@@ -168,7 +168,7 @@ internal class PersonApiTest {
         every { oppgaveMediator.erRiskoppgave(1L) } returns false
         every { varselRepository.ikkeVurderteVarslerFor(1L) } returns 0
         every { oppgaveMediator.erBeslutteroppgave(1L) } returns false
-        every { totrinnsvurderingDaoMock.hentAktiv(1L) } returns Totrinnsvurdering(
+        every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns Totrinnsvurdering(
             vedtaksperiodeId = vedtaksperiodeId,
             erRetur = false,
             saksbehandler = UUID.randomUUID(),
@@ -207,7 +207,7 @@ internal class PersonApiTest {
 
         every { oppgaveMediator.erAktivOppgave(1L) } returns true
         every { oppgaveMediator.erRiskoppgave(1L) } returns false
-        every { totrinnsvurderingDaoMock.hentAktiv(1L) } returns Totrinnsvurdering(
+        every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns Totrinnsvurdering(
             vedtaksperiodeId = vedtaksperiodeId,
             erRetur = false,
             saksbehandler = SAKSBEHANDLER_OID,
@@ -235,7 +235,7 @@ internal class PersonApiTest {
         val vedtaksperiodeId = UUID.randomUUID()
 
         every { oppgaveMediator.erAktivOppgave(1L) } returns true
-        every { totrinnsvurderingDaoMock.hentAktiv(1L) } returns Totrinnsvurdering(
+        every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns Totrinnsvurdering(
             vedtaksperiodeId = vedtaksperiodeId,
             erRetur = false,
             saksbehandler = UUID.randomUUID(),
@@ -253,7 +253,7 @@ internal class PersonApiTest {
             }
         }
 
-        verify (exactly = 1) { totrinnsvurderingDaoMock.settBeslutter(vedtaksperiodeId, SAKSBEHANDLER_OID) }
+        verify (exactly = 1) { totrinnsvurderingMediatorMock.settBeslutter(vedtaksperiodeId, SAKSBEHANDLER_OID) }
         assertEquals(HttpStatusCode.Created, responseUtbetaling.status)
     }
 
@@ -418,7 +418,7 @@ internal class PersonApiTest {
                 authenticate("oidc") {
                     personApi(
                         varselRepository,
-                        totrinnsvurderingDaoMock,
+                        totrinnsvurderingMediatorMock,
                         hendelseMediator,
                         oppgaveMediator,
                         Tilgangsgrupper(

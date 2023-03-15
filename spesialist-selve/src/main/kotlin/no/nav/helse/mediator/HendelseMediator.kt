@@ -59,6 +59,7 @@ import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.Varsel
@@ -95,7 +96,7 @@ internal class HendelseMediator(
     private val hendelsefabrikk: Hendelsefabrikk,
     private val egenAnsattDao: EgenAnsattDao = EgenAnsattDao(dataSource),
     private val overstyringDao: OverstyringDao = OverstyringDao(dataSource),
-    private val totrinnsvurderingDao: TotrinnsvurderingDao = TotrinnsvurderingDao(dataSource),
+    private val totrinnsvurderingMediator: TotrinnsvurderingMediator = TotrinnsvurderingMediator(TotrinnsvurderingDao(dataSource)),
     private val varselRepository: VarselRepository = ActualVarselRepository(dataSource),
 ) {
     private companion object {
@@ -171,7 +172,7 @@ internal class HendelseMediator(
         val hendelseId = oppgaveDao.finnHendelseId(godkjenningDTO.oppgavereferanse)
         val fødselsnummer = hendelseDao.finnFødselsnummer(hendelseId)
         val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(godkjenningDTO.oppgavereferanse)
-        val totrinnsvurdering = totrinnsvurderingDao.hentAktiv(vedtaksperiodeId)
+        val totrinnsvurdering = totrinnsvurderingMediator.hentAktiv(vedtaksperiodeId)
         val erBeslutteroppgave = oppgaveMediator.erBeslutteroppgave(godkjenningDTO.oppgavereferanse)
         val tidligereSaksbehandler = oppgaveMediator.finnTidligereSaksbehandler(godkjenningDTO.oppgavereferanse)
         val reserverPersonOid: UUID =
@@ -212,7 +213,7 @@ internal class HendelseMediator(
         internOppgaveMediator.lagreOppgaver(rapidsConnection, hendelseId, contextId)
 
         overstyringDao.ferdigstillOverstyringerForVedtaksperiode(vedtaksperiodeId)
-        totrinnsvurderingDao.ferdigstill(vedtaksperiodeId)
+        totrinnsvurderingMediator.ferdigstill(vedtaksperiodeId)
 
         if ((erBeslutteroppgave || totrinnsvurdering?.beslutter != null) && godkjenningDTO.godkjent) {
             internOppgaveMediator.lagrePeriodehistorikk(

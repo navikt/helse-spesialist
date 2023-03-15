@@ -14,6 +14,7 @@ import no.nav.helse.mediator.api.GodkjenningDTO
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao.Totrinnsvurdering
 import no.nav.helse.modell.oppgave.OppgaveMediator
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
@@ -36,7 +37,7 @@ internal class HendelseMediatorTest : AbstractE2ETest() {
         hendelsefabrikk = mockk(),
         reservasjonDao = reserverpersonDaoMock,
         periodehistorikkDao = periodehistorikkDaoMock,
-        totrinnsvurderingDao = totrinnsvurderingDaoMock
+        totrinnsvurderingMediator = TotrinnsvurderingMediator(totrinnsvurderingDaoMock)
     )
 
     @Test

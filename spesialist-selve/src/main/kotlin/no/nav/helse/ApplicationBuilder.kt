@@ -47,7 +47,6 @@ import no.nav.helse.mediator.api.overstyringApi
 import no.nav.helse.mediator.api.personApi
 import no.nav.helse.mediator.api.tildelingApi
 import no.nav.helse.mediator.api.totrinnsvurderingApi
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.automatisering.Automatisering
@@ -62,6 +61,8 @@ import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.tildeling.TildelingService
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
 import no.nav.helse.modell.vergemal.VergemålDao
@@ -214,7 +215,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val vergemålDao = VergemålDao(dataSource)
     private val notatMediator = NotatMediator(notatDao)
     private val overstyringDao = OverstyringDao(dataSource)
-    private val totrinnsvurderingDao = TotrinnsvurderingDao(dataSource)
+    private val totrinnsvurderingMediator = TotrinnsvurderingMediator(TotrinnsvurderingDao(dataSource))
     private val varselRepository = ActualVarselRepository(dataSource)
     private val apiVarselRepository = ApiVarselRepository(dataSource)
     private val generasjonRepository = ActualGenerasjonRepository(dataSource)
@@ -308,7 +309,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 authenticate("oidc") {
                     personApi(
                         varselRepository = apiVarselRepository,
-                        totrinnsvurderingDao = totrinnsvurderingDao,
+                        totrinnsvurderingMediator = totrinnsvurderingMediator,
                         hendelseMediator = hendelseMediator,
                         oppgaveMediator = oppgaveMediator,
                         tilgangsgrupper = tilgangsgrupper,
@@ -327,7 +328,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                         notatMediator,
                         tildelingService,
                         hendelseMediator,
-                        totrinnsvurderingDao
+                        totrinnsvurderingMediator
                     )
                 }
             }
@@ -353,7 +354,13 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         dataSource = dataSource,
         snapshotClient = snapshotClient,
         oppgaveMediator = oppgaveMediator,
-        godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao, opptegnelseDao, varselRepository, generasjonRepository),
+        godkjenningMediator = GodkjenningMediator(
+            warningDao,
+            vedtakDao,
+            opptegnelseDao,
+            varselRepository,
+            generasjonRepository
+        ),
         automatisering = automatisering,
         overstyringMediator = OverstyringMediator(rapidsConnection),
         snapshotMediator = snapshotMediator,

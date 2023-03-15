@@ -46,6 +46,7 @@ import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.modell.utbetaling.LagreOppdragCommand
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
@@ -86,7 +87,7 @@ internal class Hendelsefabrikk(
     private val tildelingDao: TildelingDao = TildelingDao(dataSource),
     private val saksbehandlerDao: SaksbehandlerDao = SaksbehandlerDao(dataSource),
     private val overstyringDao: OverstyringDao = OverstyringDao(dataSource),
-    private val totrinnsvurderingDao: TotrinnsvurderingDao = TotrinnsvurderingDao(dataSource),
+    private val totrinnsvurderingMediator: TotrinnsvurderingMediator = TotrinnsvurderingMediator(TotrinnsvurderingDao(dataSource)),
     private val risikovurderingDao: RisikovurderingDao = RisikovurderingDao(dataSource),
     private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource),
     private val snapshotDao: SnapshotDao = SnapshotDao(dataSource),
@@ -175,7 +176,7 @@ internal class Hendelsefabrikk(
             utbetalingDao = utbetalingDao,
             periodehistorikkDao = periodehistorikkDao,
             overstyringDao = overstyringDao,
-            totrinnsvurderingDao = totrinnsvurderingDao,
+            totrinnsvurderingMediator = totrinnsvurderingMediator,
             snapshotMediator = snapshotMediator,
         )
     }

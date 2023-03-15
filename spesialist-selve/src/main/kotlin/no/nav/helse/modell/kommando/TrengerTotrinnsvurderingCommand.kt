@@ -3,10 +3,10 @@ package no.nav.helse.modell.kommando
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.mediator.Toggle
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.varsel.Varselkode.SB_BO_1
@@ -26,7 +26,7 @@ internal class TrengerTotrinnsvurderingCommand(
     private val warningDao: WarningDao,
     private val oppgaveMediator: OppgaveMediator,
     private val overstyringDao: OverstyringDao,
-    private val totrinnsvurderingDao: TotrinnsvurderingDao,
+    private val totrinnsvurderingMediator: TotrinnsvurderingMediator,
     private val varselRepository: VarselRepository,
     private val generasjonRepository: GenerasjonRepository,
 ) : Command {
@@ -65,10 +65,10 @@ internal class TrengerTotrinnsvurderingCommand(
             logg.info("Vedtaksperioden: $vedtaksperiodeId trenger totrinnsvurdering")
             oppgaveMediator.alleUlagredeOppgaverTilTotrinnsvurdering()
             if (Toggle.Totrinnsvurdering.enabled) {
-                val totrinnsvurdering = totrinnsvurderingDao.opprett(vedtaksperiodeId)
+                val totrinnsvurdering = totrinnsvurderingMediator.opprett(vedtaksperiodeId)
 
                 if (totrinnsvurdering.beslutter != null) {
-                    totrinnsvurderingDao.settErRetur(vedtaksperiodeId)
+                    totrinnsvurderingMediator.settErRetur(vedtaksperiodeId)
                 }
                 if (totrinnsvurdering.saksbehandler != null) {
                     oppgaveMediator.reserverOppgave(

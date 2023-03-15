@@ -17,15 +17,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao
 import no.nav.helse.modell.oppgave.OppgaveMediator
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.tilganger
 import org.slf4j.LoggerFactory
 
 internal fun Route.personApi(
     varselRepository: ApiVarselRepository,
-    totrinnsvurderingDao: TotrinnsvurderingDao,
+    totrinnsvurderingMediator: TotrinnsvurderingMediator,
     hendelseMediator: HendelseMediator,
     oppgaveMediator: OppgaveMediator,
     tilgangsgrupper: Tilgangsgrupper,
@@ -77,7 +77,7 @@ internal fun Route.personApi(
         }
 
         val erBeslutteroppgave = oppgaveMediator.erBeslutteroppgave(godkjenning.oppgavereferanse)
-        val totrinnsvurdering = totrinnsvurderingDao.hentAktiv(godkjenning.oppgavereferanse)
+        val totrinnsvurdering = totrinnsvurderingMediator.hentAktiv(godkjenning.oppgavereferanse)
 
         if (erBeslutteroppgave || totrinnsvurdering?.saksbehandler != null) {
             // Midlertidig logging. Slik at vi vet når vi kan skru av totrinnsmerking i Speil
@@ -101,7 +101,7 @@ internal fun Route.personApi(
                 return@post
             }
 
-            if (totrinnsvurdering?.vedtaksperiodeId != null) totrinnsvurderingDao.settBeslutter(totrinnsvurdering.vedtaksperiodeId, oid)
+            if (totrinnsvurdering?.vedtaksperiodeId != null) totrinnsvurderingMediator.settBeslutter(totrinnsvurdering.vedtaksperiodeId, oid)
             varselRepository.settStatusVurdertPåBeslutteroppgavevarsler(godkjenning.oppgavereferanse, godkjenning.saksbehandlerIdent)
         }
 

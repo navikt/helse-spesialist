@@ -8,7 +8,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import org.intellij.lang.annotations.Language
 
-internal class TotrinnsvurderingDao(private val dataSource: DataSource) {
+class TotrinnsvurderingDao(private val dataSource: DataSource) {
     private fun TransactionalSession.opprett(vedtaksperiodeId: UUID): Totrinnsvurdering {
         @Language("PostgreSQL")
         val query = """
@@ -285,7 +285,7 @@ internal class TotrinnsvurderingDao(private val dataSource: DataSource) {
         }
     }
 
-    internal class Totrinnsvurdering(
+    class Totrinnsvurdering(
         val vedtaksperiodeId: UUID,
         val erRetur: Boolean,
         val saksbehandler: UUID?,

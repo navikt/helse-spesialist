@@ -15,9 +15,9 @@ import io.ktor.util.pipeline.PipelineContext
 import java.util.UUID
 import no.nav.helse.gruppemedlemskap
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.tildeling.TildelingService
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
@@ -34,12 +34,12 @@ internal fun Route.totrinnsvurderingApi(
     notatMediator: NotatMediator,
     tildelingService: TildelingService,
     hendelseMediator: HendelseMediator,
-    totrinnsvurderingDao: TotrinnsvurderingDao,
+    totrinnsvurderingMediator: TotrinnsvurderingMediator,
 ) {
     post("/api/totrinnsvurdering") {
         val totrinnsvurdering = call.receive<TotrinnsvurderingDto>()
         val saksbehandlerOid = getSaksbehandlerOid()
-        val aktivTotrinnsvurdering = totrinnsvurderingDao.hentAktiv(totrinnsvurdering.oppgavereferanse)
+        val aktivTotrinnsvurdering = totrinnsvurderingMediator.hentAktiv(totrinnsvurdering.oppgavereferanse)
 
         if (oppgaveMediator.erBeslutteroppgave(totrinnsvurdering.oppgavereferanse) || (aktivTotrinnsvurdering?.beslutter != null && !aktivTotrinnsvurdering.erRetur)) {
             call.respondText(
@@ -76,11 +76,11 @@ internal fun Route.totrinnsvurderingApi(
             tidligereSaksbehandlerOid = saksbehandlerOid
         )
 
-        totrinnsvurderingDao.settSaksbehandler(
+        totrinnsvurderingMediator.settSaksbehandler(
             oppgaveId = totrinnsvurdering.oppgavereferanse,
             saksbehandlerOid = saksbehandlerOid
         )
-        if (aktivTotrinnsvurdering?.erRetur == true) totrinnsvurderingDao.settHåndtertRetur(totrinnsvurdering.oppgavereferanse)
+        if (aktivTotrinnsvurdering?.erRetur == true) totrinnsvurderingMediator.settHåndtertRetur(totrinnsvurdering.oppgavereferanse)
 
         oppgaveMediator.lagrePeriodehistorikk(
             totrinnsvurdering.oppgavereferanse,
@@ -99,7 +99,7 @@ internal fun Route.totrinnsvurderingApi(
     post("/api/totrinnsvurdering/retur") {
         val retur = call.receive<TotrinnsvurderingReturDto>()
         val saksbehandlerOid = getSaksbehandlerOid()
-        val aktivTotrinnsvurdering = totrinnsvurderingDao.hentAktiv(oppgaveId = retur.oppgavereferanse)
+        val aktivTotrinnsvurdering = totrinnsvurderingMediator.hentAktiv(oppgaveId = retur.oppgavereferanse)
         sikkerLog.info("OppgaveId ${retur.oppgavereferanse} sendes i retur av $saksbehandlerOid")
 
         val tidligereSaksbehandlerOid = oppgaveMediator.finnTidligereSaksbehandler(retur.oppgavereferanse) ?: aktivTotrinnsvurdering?.saksbehandler
@@ -108,8 +108,8 @@ internal fun Route.totrinnsvurderingApi(
             oppgaveId = retur.oppgavereferanse,
             beslutterSaksbehandlerOid = saksbehandlerOid
         )
-        totrinnsvurderingDao.settErRetur(oppgaveId = retur.oppgavereferanse)
-        totrinnsvurderingDao.settBeslutter(oppgaveId = retur.oppgavereferanse, saksbehandlerOid = saksbehandlerOid)
+        totrinnsvurderingMediator.settErRetur(oppgaveId = retur.oppgavereferanse)
+        totrinnsvurderingMediator.settBeslutter(oppgaveId = retur.oppgavereferanse, saksbehandlerOid = saksbehandlerOid)
 
         tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(
             retur.oppgavereferanse,
