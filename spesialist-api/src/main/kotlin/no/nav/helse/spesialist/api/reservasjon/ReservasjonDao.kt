@@ -14,7 +14,8 @@ class ReservasjonDao(dataSource: DataSource) : HelseDao(dataSource) {
             FROM person
             WHERE person.fodselsnummer = :fodselsnummer
             ON CONFLICT (person_ref)
-                DO UPDATE SET gyldig_til = now(),
+                DO UPDATE SET gyldig_til = now() + INTERVAL '72 HOURS',
+                              saksbehandler_ref = :saksbehandler_ref,
                               sett_på_vent_flagg = :sett_paa_vent_flagg
             """
 

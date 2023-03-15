@@ -14,6 +14,7 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 
 internal class ReservasjonDaoTest : DatabaseIntegrationTest() {
 
@@ -28,6 +29,29 @@ internal class ReservasjonDaoTest : DatabaseIntegrationTest() {
         opprettTabeller()
         val saksbehandlerOid = sessionOf(dataSource).use {
             reservasjonDao.reserverPerson(SAKSBEHANDLER_OID, FNR)
+            reservasjonDao.hentReservertTil(FNR)
+        } ?: fail("Forventet at det skulle finnes en reservasjon i basen")
+        assertEquals(SAKSBEHANDLER_OID, saksbehandlerOid)
+        assertEquals(72, varighetPåReservasjon())
+    }
+
+    @Test
+    fun `ny reservasjon forlenger fristen`() {
+        opprettTabeller()
+        val enAnnenSaksbehandler = UUID.randomUUID()
+        saksbehandlerDao.opprettSaksbehandler(
+            enAnnenSaksbehandler,
+            "Siri Siksbehindler",
+            "siri.siksbehindler@nav.no",
+            "S666666"
+        )
+
+        val saksbehandlerOid = sessionOf(dataSource).use {
+            reservasjonDao.reserverPerson(enAnnenSaksbehandler, FNR)
+            val gyldigTil1 = finnGyldigTil()
+            reservasjonDao.reserverPerson(SAKSBEHANDLER_OID, FNR)
+            val gyldigTil2 = finnGyldigTil()
+            assertTrue(gyldigTil2.isAfter(gyldigTil1))
             reservasjonDao.hentReservertTil(FNR)
         } ?: fail("Forventet at det skulle finnes en reservasjon i basen")
         assertEquals(SAKSBEHANDLER_OID, saksbehandlerOid)
@@ -57,21 +81,23 @@ internal class ReservasjonDaoTest : DatabaseIntegrationTest() {
         )
     }
 
-    private fun varighetPåReservasjon(): Number {
+    private fun varighetPåReservasjon() =
+        Duration.between(LocalDateTime.now().minusSeconds(5), finnGyldigTil()).toHours().toInt()
+
+    private fun finnGyldigTil(): LocalDateTime {
         @Language("PostgreSQL")
         val query = """
-        SELECT r.gyldig_til
-        FROM reserver_person r
-        JOIN person p ON p.id = r.person_ref
-        WHERE p.fodselsnummer = :fnr AND r.gyldig_til > now();
-        """
-        val gyldigTil = sessionOf(dataSource).use { session ->
+            SELECT r.gyldig_til
+            FROM reserver_person r
+            JOIN person p ON p.id = r.person_ref
+            WHERE p.fodselsnummer = :fnr AND r.gyldig_til > now();
+            """
+        return sessionOf(dataSource).use { session ->
             session.run(
                 queryOf(query, mapOf("fnr" to FNR.toLong()))
                     .map { it.localDateTime("gyldig_til") }.asSingle
             )
-        }
-        return Duration.between(LocalDateTime.now().minusSeconds(5), gyldigTil).toHours().toInt()
+        }!!
     }
 
 }
