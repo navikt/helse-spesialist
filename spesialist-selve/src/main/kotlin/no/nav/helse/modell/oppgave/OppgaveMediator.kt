@@ -20,7 +20,8 @@ class OppgaveMediator(
     private val oppgaveDao: OppgaveDao,
     private val tildelingDao: TildelingDao,
     private val reservasjonDao: ReservasjonDao,
-    private val opptegnelseDao: OpptegnelseDao
+    private val opptegnelseDao: OpptegnelseDao,
+    private val periodehistorikkDao: PeriodehistorikkDao,
 ) {
     private val oppgaver = mutableSetOf<Oppgave>()
     private val oppgaverForPublisering = mutableMapOf<Long, String>()
@@ -184,7 +185,6 @@ class OppgaveMediator(
 
     fun lagrePeriodehistorikk(
         oppgaveId: Long,
-        periodehistorikkDao: PeriodehistorikkDao,
         saksbehandleroid: UUID,
         type: PeriodehistorikkType,
         notatId: Int? = null

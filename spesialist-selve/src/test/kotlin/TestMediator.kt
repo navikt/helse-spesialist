@@ -20,6 +20,7 @@ import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
@@ -30,16 +31,26 @@ import no.nav.helse.spesialist.api.tildeling.TildelingDao
 internal class TestMediator(
     testRapid: TestRapid,
     snapshotClient: SnapshotClient,
-    dataSource: DataSource
+    dataSource: DataSource,
 ) {
     private val warningDao = WarningDao(dataSource)
     private val vedtakDao = VedtakDao(dataSource)
     private val opptegnelseDao = OpptegnelseDao(dataSource)
     private val overstyringDao = OverstyringDao(dataSource)
 
-    private val godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao, opptegnelseDao, ActualVarselRepository(dataSource), ActualGenerasjonRepository(dataSource))
-    private val oppgaveMediator = OppgaveMediator(OppgaveDao(dataSource), TildelingDao(dataSource), ReservasjonDao(dataSource),
-        opptegnelseDao
+    private val godkjenningMediator = GodkjenningMediator(
+        warningDao,
+        vedtakDao,
+        opptegnelseDao,
+        ActualVarselRepository(dataSource),
+        ActualGenerasjonRepository(dataSource)
+    )
+    private val oppgaveMediator = OppgaveMediator(
+        oppgaveDao = OppgaveDao(dataSource),
+        tildelingDao = TildelingDao(dataSource),
+        reservasjonDao = ReservasjonDao(dataSource),
+        opptegnelseDao = opptegnelseDao,
+        periodehistorikkDao = PeriodehistorikkDao(dataSource)
     )
     private val overstyringMediator = OverstyringMediator(testRapid)
     private val snapshotMediator = SnapshotMediator(SnapshotApiDao(dataSource), snapshotClient)
@@ -77,5 +88,6 @@ internal class TestMediator(
         )
     }
 
-    internal fun overstyringstyperForVedtaksperiode(vedtaksperiodeId: UUID) = overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(vedtaksperiodeId)
+    internal fun overstyringstyperForVedtaksperiode(vedtaksperiodeId: UUID) =
+        overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(vedtaksperiodeId)
 }

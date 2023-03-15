@@ -207,7 +207,14 @@ internal class HendelseMediator(
         )
         rapidsConnection.publish(fødselsnummer, godkjenningMessage.toJson())
 
-        val internOppgaveMediator = OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao, opptegnelseDao)
+        val internOppgaveMediator =
+            OppgaveMediator(
+                oppgaveDao = oppgaveDao,
+                tildelingDao = tildelingDao,
+                reservasjonDao = reservasjonDao,
+                opptegnelseDao = opptegnelseDao,
+                periodehistorikkDao = periodehistorikkDao
+            )
         internOppgaveMediator.reserverOppgave(reserverPersonOid, fødselsnummer)
         internOppgaveMediator.avventerSystem(godkjenningDTO.oppgavereferanse, godkjenningDTO.saksbehandlerIdent, oid)
         internOppgaveMediator.lagreOppgaver(rapidsConnection, hendelseId, contextId)
@@ -217,10 +224,9 @@ internal class HendelseMediator(
 
         if ((erBeslutteroppgave || totrinnsvurdering?.beslutter != null) && godkjenningDTO.godkjent) {
             internOppgaveMediator.lagrePeriodehistorikk(
-                godkjenningDTO.oppgavereferanse,
-                periodehistorikkDao,
-                oid,
-                PeriodehistorikkType.TOTRINNSVURDERING_ATTESTERT
+                oppgaveId = godkjenningDTO.oppgavereferanse,
+                saksbehandleroid = oid,
+                type = PeriodehistorikkType.TOTRINNSVURDERING_ATTESTERT
             )
         }
     }

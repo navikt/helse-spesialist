@@ -149,7 +149,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val meldingsfabrikkUtenFnr get() = TestmeldingfabrikkUtenFnr()
 
     protected val oppgaveMediator =
-        OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao, opptegnelseDao)
+        OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao, opptegnelseDao, periodehistorikkDao)
+
     protected val hendelsefabrikk = Hendelsefabrikk(
         dataSource = dataSource,
         snapshotClient = snapshotClient,

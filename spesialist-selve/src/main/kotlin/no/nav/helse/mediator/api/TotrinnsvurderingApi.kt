@@ -19,7 +19,6 @@ import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.tildeling.TildelingService
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.spesialist.api.notat.NotatMediator
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import org.slf4j.LoggerFactory
@@ -30,7 +29,6 @@ private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
 internal fun Route.totrinnsvurderingApi(
     varselRepository: ApiVarselRepository,
     oppgaveMediator: OppgaveMediator,
-    periodehistorikkDao: PeriodehistorikkDao,
     notatMediator: NotatMediator,
     tildelingService: TildelingService,
     hendelseMediator: HendelseMediator,
@@ -83,10 +81,9 @@ internal fun Route.totrinnsvurderingApi(
         if (aktivTotrinnsvurdering?.erRetur == true) totrinnsvurderingMediator.settHåndtertRetur(totrinnsvurdering.oppgavereferanse)
 
         oppgaveMediator.lagrePeriodehistorikk(
-            totrinnsvurdering.oppgavereferanse,
-            periodehistorikkDao,
-            saksbehandlerOid,
-            PeriodehistorikkType.TOTRINNSVURDERING_TIL_GODKJENNING
+            oppgaveId = totrinnsvurdering.oppgavereferanse,
+            saksbehandleroid = saksbehandlerOid,
+            type = PeriodehistorikkType.TOTRINNSVURDERING_TIL_GODKJENNING
         )
 
         hendelseMediator.sendMeldingOppgaveOppdatert(totrinnsvurdering.oppgavereferanse)
@@ -125,10 +122,10 @@ internal fun Route.totrinnsvurderingApi(
         )
 
         oppgaveMediator.lagrePeriodehistorikk(
-            retur.oppgavereferanse, periodehistorikkDao,
-            saksbehandlerOid,
-            PeriodehistorikkType.TOTRINNSVURDERING_RETUR,
-            notatId?.toInt()
+            oppgaveId = retur.oppgavereferanse,
+            saksbehandleroid = saksbehandlerOid,
+            type = PeriodehistorikkType.TOTRINNSVURDERING_RETUR,
+            notatId = notatId?.toInt()
         )
 
         hendelseMediator.sendMeldingOppgaveOppdatert(retur.oppgavereferanse)

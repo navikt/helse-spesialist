@@ -59,7 +59,6 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             totrinnsvurderingApi(
                 varselRepository,
                 oppgaveMediator,
-                periodehistorikkDao,
                 notatMediator,
                 tildelingService,
                 hendelseMediator,
@@ -144,7 +143,6 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
         verify(exactly = 1) {
             oppgaveMediator.lagrePeriodehistorikk(
                 totrinnsvurderingDto.oppgavereferanse,
-                periodehistorikkDao,
                 saksbehandler_oid,
                 PeriodehistorikkType.TOTRINNSVURDERING_TIL_GODKJENNING
             )
