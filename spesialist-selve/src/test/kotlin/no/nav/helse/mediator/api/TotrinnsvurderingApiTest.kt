@@ -123,7 +123,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             client.post(TOTRINNSVURDERING_URL) {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
-                setBody<TotrinnsvurderingDto>(objectMapper.valueToTree(totrinnsvurderingDto))
+                setBody(totrinnsvurderingDto)
                 authentication(saksbehandler_oid)
             }
         }
@@ -159,7 +159,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             client.post(RETUR_URL) {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
-                setBody<TotrinnsvurderingReturDto>(objectMapper.valueToTree(returDtoMedNotat))
+                setBody(returDtoMedNotat)
                 authentication(saksbehandler_oid)
             }
         }
@@ -225,7 +225,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             client.post(TOTRINNSVURDERING_URL) {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
-                setBody<TotrinnsvurderingDto>(objectMapper.valueToTree(totrinnsvurderingDto))
+                setBody(totrinnsvurderingDto)
             }
         }
 
@@ -239,7 +239,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             client.post(RETUR_URL) {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
-                setBody<TotrinnsvurderingDto>(objectMapper.valueToTree(totrinnsvurderingDto))
+                setBody(totrinnsvurderingDto)
             }
         }
 
@@ -310,7 +310,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             client.post(TOTRINNSVURDERING_URL) {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
-                setBody<TotrinnsvurderingDto>(objectMapper.valueToTree(TotrinnsvurderingDto(10L)))
+                setBody(TotrinnsvurderingDto(10L))
                 authentication(saksbehandler_oid)
             }
         }
@@ -337,7 +337,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             client.post(TOTRINNSVURDERING_URL) {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
-                setBody<TotrinnsvurderingDto>(objectMapper.valueToTree(TotrinnsvurderingDto(10L)))
+                setBody(TotrinnsvurderingDto(10L))
                 authentication(saksbehandler_oid)
             }
         }
@@ -369,7 +369,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             client.post(TOTRINNSVURDERING_URL) {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
-                setBody<TotrinnsvurderingDto>(objectMapper.valueToTree(TotrinnsvurderingDto(10L)))
+                setBody(TotrinnsvurderingDto(10L))
                 authentication(saksbehandler_oid)
             }
         }
@@ -398,10 +398,10 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             client.post(RETUR_URL) {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
-                setBody<TotrinnsvurderingReturDto>(objectMapper.valueToTree(TotrinnsvurderingReturDto(
+                setBody(TotrinnsvurderingReturDto(
                     oppgavereferanse = 2L,
                     notat = NotatApiDto("notat_tekst", NotatType.Retur)
-                )))
+                ))
                 authentication(saksbehandler_oid)
             }
         }
