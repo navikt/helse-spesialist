@@ -1,5 +1,6 @@
 package no.nav.helse.modell.vedtaksperiode
 
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.modell.kommando.CommandContext
@@ -58,6 +59,11 @@ class InvaliderUtbetalingForGenerasjonerCommandTest {
         override fun fjernUtbetalingFor(generasjonId: UUID) {
             generasjonerMedUtbetaling.remove(generasjonId)
             generasjonerSomHarFåttFjernetUtbetaling.add(generasjonId)
+        }
+
+        override fun finnÅpenGenerasjonFor(vedtaksperiodeId: UUID): Generasjon = TODO("Not yet implemented")
+        override fun oppdaterSykefraværstilfelle(id: UUID, skjæringstidspunkt: LocalDate, periode: Periode) {
+            TODO("Not yet implemented")
         }
     }
 

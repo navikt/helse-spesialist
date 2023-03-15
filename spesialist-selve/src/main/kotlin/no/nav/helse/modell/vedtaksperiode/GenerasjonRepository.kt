@@ -1,5 +1,6 @@
 package no.nav.helse.modell.vedtaksperiode
 
+import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments.keyValue
@@ -14,6 +15,8 @@ internal interface GenerasjonRepository {
     fun sisteFor(vedtaksperiodeId: UUID): Generasjon
     fun tilhørendeFor(utbetalingId: UUID): List<Generasjon>
     fun fjernUtbetalingFor(generasjonId: UUID)
+    fun finnÅpenGenerasjonFor(vedtaksperiodeId: UUID): Generasjon?
+    fun oppdaterSykefraværstilfelle(id: UUID, skjæringstidspunkt: LocalDate, periode: Periode)
 }
 
 internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRepository {
@@ -73,6 +76,14 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
                 "Finner ikke generasjon med {}. Utbetaling forsøkt fjernet",
                 keyValue("generasjonId", generasjonId)
             )
+    }
+
+    override fun finnÅpenGenerasjonFor(vedtaksperiodeId: UUID): Generasjon? {
+        return dao.åpenGenerasjonForVedtaksperiode(vedtaksperiodeId)
+    }
+
+    override fun oppdaterSykefraværstilfelle(id: UUID, skjæringstidspunkt: LocalDate, periode: Periode) {
+        return dao.oppdaterSykefraværstilfelle(id, skjæringstidspunkt, periode)
     }
 
     private companion object {

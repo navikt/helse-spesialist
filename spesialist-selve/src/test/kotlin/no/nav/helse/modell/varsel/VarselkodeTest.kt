@@ -1,10 +1,12 @@
 package no.nav.helse.modell.varsel
 
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_3
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
+import no.nav.helse.modell.vedtaksperiode.Periode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -65,5 +67,9 @@ internal class VarselkodeTest {
         override fun sisteFor(vedtaksperiodeId: UUID): Generasjon = TODO("Not yet implemented")
         override fun tilhørendeFor(utbetalingId: UUID): List<Generasjon> = TODO("Not yet implemented")
         override fun fjernUtbetalingFor(generasjonId: UUID):Unit = TODO("Not yet implemented")
+        override fun finnÅpenGenerasjonFor(vedtaksperiodeId: UUID): Generasjon = TODO("Not yet implemented")
+        override fun oppdaterSykefraværstilfelle(id: UUID, skjæringstidspunkt: LocalDate, periode: Periode) {
+            TODO("Not yet implemented")
+        }
     }
 }
