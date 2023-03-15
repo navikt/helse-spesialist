@@ -102,8 +102,9 @@ internal fun Route.personApi(
             }
 
             if (totrinnsvurdering?.vedtaksperiodeId != null) totrinnsvurderingMediator.settBeslutter(totrinnsvurdering.vedtaksperiodeId, oid)
-            varselRepository.settStatusVurdertPåBeslutteroppgavevarsler(godkjenning.oppgavereferanse, godkjenning.saksbehandlerIdent)
         }
+
+        varselRepository.settStatusVurdertPåBeslutteroppgavevarsler(godkjenning.oppgavereferanse, godkjenning.saksbehandlerIdent)
 
         if (godkjenning.godkjent) {
             val antallIkkeVurderteVarsler = varselRepository.ikkeVurderteVarslerFor(godkjenning.oppgavereferanse)
