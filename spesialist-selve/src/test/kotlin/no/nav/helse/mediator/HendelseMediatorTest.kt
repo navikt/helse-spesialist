@@ -15,6 +15,7 @@ import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao.Totrinnsvurdering
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
+import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
@@ -29,6 +30,7 @@ internal class HendelseMediatorTest : AbstractE2ETest() {
     private val reserverpersonDaoMock = mockk<ReservasjonDao>(relaxed = true)
     private val totrinnsvurderingDaoMock = mockk<TotrinnsvurderingDao>(relaxed = true)
     private val periodehistorikkDaoMock = mockk<PeriodehistorikkDao>(relaxed = true)
+    private val notatMediatorMock = mockk<NotatMediator>(relaxed = true)
     private val mediatorWithMock = HendelseMediator(
         dataSource = dataSource,
         rapidsConnection = mockk(relaxed = true),
@@ -37,7 +39,7 @@ internal class HendelseMediatorTest : AbstractE2ETest() {
         hendelsefabrikk = mockk(),
         reservasjonDao = reserverpersonDaoMock,
         periodehistorikkDao = periodehistorikkDaoMock,
-        totrinnsvurderingMediator = TotrinnsvurderingMediator(totrinnsvurderingDaoMock)
+        totrinnsvurderingMediator = TotrinnsvurderingMediator(totrinnsvurderingDaoMock, oppgaveMediatorMock, notatMediatorMock)
     )
 
     @Test

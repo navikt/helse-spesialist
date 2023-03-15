@@ -3,6 +3,7 @@ package no.nav.helse.modell.totrinnsvurdering
 import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
+import kotliquery.Query
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -17,17 +18,7 @@ class TotrinnsvurderingDao(private val dataSource: DataSource) {
            RETURNING *
         """.trimIndent()
 
-        return requireNotNull(run(queryOf(query, mapOf("vedtaksperiodeId" to vedtaksperiodeId)).map { row ->
-            Totrinnsvurdering(
-                vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
-                erRetur = row.boolean("er_retur"),
-                saksbehandler = row.uuidOrNull("saksbehandler"),
-                beslutter = row.uuidOrNull("beslutter"),
-                utbetalingIdRef = row.longOrNull("utbetaling_id_ref"),
-                opprettet = row.localDateTime("opprettet"),
-                oppdatert = row.localDateTimeOrNull("oppdatert")
-            )
-        }.asSingle))
+        return requireNotNull(run(queryOf(query, mapOf("vedtaksperiodeId" to vedtaksperiodeId)).tilTotrinnsvurdering()))
     }
 
     private fun TransactionalSession.hentAktiv(vedtaksperiodeId: UUID): Totrinnsvurdering? {
@@ -38,17 +29,7 @@ class TotrinnsvurderingDao(private val dataSource: DataSource) {
            AND utbetaling_id_ref IS NULL
         """.trimIndent()
 
-        return run(queryOf(query, mapOf("vedtaksperiodeId" to vedtaksperiodeId)).map { row ->
-            Totrinnsvurdering(
-                vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
-                erRetur = row.boolean("er_retur"),
-                saksbehandler = row.uuidOrNull("saksbehandler"),
-                beslutter = row.uuidOrNull("beslutter"),
-                utbetalingIdRef = row.longOrNull("utbetaling_id_ref"),
-                opprettet = row.localDateTime("opprettet"),
-                oppdatert = row.localDateTimeOrNull("oppdatert")
-            )
-        }.asSingle)
+        return run(queryOf(query, mapOf("vedtaksperiodeId" to vedtaksperiodeId)).tilTotrinnsvurdering())
     }
 
     private fun TransactionalSession.hentAktiv(oppgaveId: Long): Totrinnsvurdering? {
@@ -61,17 +42,7 @@ class TotrinnsvurderingDao(private val dataSource: DataSource) {
            AND utbetaling_id_ref IS NULL
         """.trimIndent()
 
-        return run(queryOf(query, mapOf("oppgaveId" to oppgaveId)).map { row ->
-            Totrinnsvurdering(
-                vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
-                erRetur = row.boolean("er_retur"),
-                saksbehandler = row.uuidOrNull("saksbehandler"),
-                beslutter = row.uuidOrNull("beslutter"),
-                utbetalingIdRef = row.longOrNull("utbetaling_id_ref"),
-                opprettet = row.localDateTime("opprettet"),
-                oppdatert = row.localDateTimeOrNull("oppdatert")
-            )
-        }.asSingle)
+        return run(queryOf(query, mapOf("oppgaveId" to oppgaveId)).tilTotrinnsvurdering())
     }
 
     internal fun opprett(vedtaksperiodeId: UUID): Totrinnsvurdering = sessionOf(dataSource).use { session ->
@@ -284,6 +255,18 @@ class TotrinnsvurderingDao(private val dataSource: DataSource) {
             it.hentAktiv(oppgaveId)
         }
     }
+
+    private fun Query.tilTotrinnsvurdering() = map { row ->
+        Totrinnsvurdering(
+            vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
+            erRetur = row.boolean("er_retur"),
+            saksbehandler = row.uuidOrNull("saksbehandler"),
+            beslutter = row.uuidOrNull("beslutter"),
+            utbetalingIdRef = row.longOrNull("utbetaling_id_ref"),
+            opprettet = row.localDateTime("opprettet"),
+            oppdatert = row.localDateTimeOrNull("oppdatert")
+        )
+    }.asSingle
 
     class Totrinnsvurdering(
         val vedtaksperiodeId: UUID,

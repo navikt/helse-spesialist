@@ -215,7 +215,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val vergemålDao = VergemålDao(dataSource)
     private val notatMediator = NotatMediator(notatDao)
     private val overstyringDao = OverstyringDao(dataSource)
-    private val totrinnsvurderingMediator = TotrinnsvurderingMediator(TotrinnsvurderingDao(dataSource))
     private val varselRepository = ActualVarselRepository(dataSource)
     private val apiVarselRepository = ApiVarselRepository(dataSource)
     private val generasjonRepository = ActualGenerasjonRepository(dataSource)
@@ -229,6 +228,9 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         opptegnelseDao = opptegnelseDao,
         periodehistorikkDao = periodehistorikkDao
     )
+
+    private val totrinnsvurderingMediator =
+        TotrinnsvurderingMediator(TotrinnsvurderingDao(dataSource), oppgaveMediator, notatMediator)
 
     private val snapshotMediator = SnapshotMediator(
         snapshotDao = snapshotApiDao,

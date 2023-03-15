@@ -71,6 +71,8 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
+import no.nav.helse.spesialist.api.notat.NotatDao
+import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
@@ -96,7 +98,10 @@ internal class HendelseMediator(
     private val hendelsefabrikk: Hendelsefabrikk,
     private val egenAnsattDao: EgenAnsattDao = EgenAnsattDao(dataSource),
     private val overstyringDao: OverstyringDao = OverstyringDao(dataSource),
-    private val totrinnsvurderingMediator: TotrinnsvurderingMediator = TotrinnsvurderingMediator(TotrinnsvurderingDao(dataSource)),
+    private val totrinnsvurderingDao: TotrinnsvurderingDao = TotrinnsvurderingDao(dataSource),
+    private val notatDao: NotatDao = NotatDao(dataSource),
+    private val notatMediator: NotatMediator = NotatMediator(notatDao),
+    private val totrinnsvurderingMediator: TotrinnsvurderingMediator = TotrinnsvurderingMediator(totrinnsvurderingDao, oppgaveMediator, notatMediator),
     private val varselRepository: VarselRepository = ActualVarselRepository(dataSource),
 ) {
     private companion object {

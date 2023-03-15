@@ -33,7 +33,6 @@ import no.nav.helse.mediator.meldinger.løsninger.Saksbehandlerløsning
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.SnapshotDao
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
@@ -46,6 +45,7 @@ import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.modell.utbetaling.LagreOppdragCommand
 import no.nav.helse.modell.utbetaling.UtbetalingDao
@@ -64,6 +64,8 @@ import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
+import no.nav.helse.spesialist.api.notat.NotatDao
+import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
@@ -87,13 +89,20 @@ internal class Hendelsefabrikk(
     private val tildelingDao: TildelingDao = TildelingDao(dataSource),
     private val saksbehandlerDao: SaksbehandlerDao = SaksbehandlerDao(dataSource),
     private val overstyringDao: OverstyringDao = OverstyringDao(dataSource),
-    private val totrinnsvurderingMediator: TotrinnsvurderingMediator = TotrinnsvurderingMediator(TotrinnsvurderingDao(dataSource)),
     private val risikovurderingDao: RisikovurderingDao = RisikovurderingDao(dataSource),
     private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource),
     private val snapshotDao: SnapshotDao = SnapshotDao(dataSource),
     private val egenAnsattDao: EgenAnsattDao = EgenAnsattDao(dataSource),
     private val snapshotClient: SnapshotClient,
     private val oppgaveMediator: OppgaveMediator,
+    private val totrinnsvurderingDao: TotrinnsvurderingDao = TotrinnsvurderingDao(dataSource),
+    private val notatDao: NotatDao = NotatDao(dataSource),
+    private val notatMediator: NotatMediator = NotatMediator(notatDao),
+    private val totrinnsvurderingMediator: TotrinnsvurderingMediator = TotrinnsvurderingMediator(
+        totrinnsvurderingDao,
+        oppgaveMediator,
+        notatMediator
+    ),
     private val godkjenningMediator: GodkjenningMediator,
     private val automatisering: Automatisering,
     private val arbeidsforholdDao: ArbeidsforholdDao = ArbeidsforholdDao(dataSource),
@@ -213,6 +222,7 @@ internal class Hendelsefabrikk(
             arbeidsgiverDao = arbeidsgiverDao
         )
     }
+
     fun overstyringIgangsatt(
         json: String,
     ): OverstyringIgangsatt {
@@ -221,7 +231,8 @@ internal class Hendelsefabrikk(
             id = UUID.fromString(jsonNode.path("@id").asText()),
             fødselsnummer = jsonNode.path("fødselsnummer").asText(),
             kilde = UUID.fromString(jsonNode.path("kilde").asText()),
-            berørteVedtaksperiodeIder = jsonNode.path("berørtePerioder").map { UUID.fromString(it["vedtaksperiodeId"].asText()) },
+            berørteVedtaksperiodeIder = jsonNode.path("berørtePerioder")
+                .map { UUID.fromString(it["vedtaksperiodeId"].asText()) },
             json = json,
             overstyringDao = overstyringDao,
         )
@@ -398,6 +409,7 @@ internal class Hendelsefabrikk(
         overstyringDao = overstyringDao,
         overstyringMediator = overstyringMediator,
     )
+
     fun overstyringArbeidsforhold(
         id: UUID,
         fødselsnummer: String,
@@ -727,6 +739,7 @@ internal class Hendelsefabrikk(
             json = json,
         )
     }
+
     fun gosysOppgaveEndret(json: String): GosysOppgaveEndret {
         val jsonNode = mapper.readTree(json)
         val fødselsnummer = jsonNode["fødselsnummer"].asText()

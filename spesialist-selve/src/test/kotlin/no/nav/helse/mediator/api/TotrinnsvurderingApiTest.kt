@@ -1,5 +1,7 @@
 package no.nav.helse.mediator.api
 
+import ToggleHelpers.disable
+import ToggleHelpers.enable
 import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.request.accept
 import io.ktor.client.request.post
@@ -15,6 +17,7 @@ import java.time.LocalDateTime.now
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao.Totrinnsvurdering
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.tildeling.TildelingService
@@ -380,6 +383,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
 
     @Test
     fun `Sende totrinnsvurdering i retur`() {
+        Toggle.Totrinnsvurdering.enable()
         val tidligereSaksbehandlerOid = UUID.randomUUID()
         every { totrinnsvurderingMediator.hentAktiv(oppgaveId = 2L) } returns Totrinnsvurdering(
             vedtaksperiodeId = UUID.randomUUID(),
@@ -392,23 +396,21 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
         )
         every { oppgaveMediator.finnTidligereSaksbehandler(any()) } returns null
 
+        val notat = "notat_tekst"
         val response = runBlocking {
             client.post(RETUR_URL) {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 setBody(TotrinnsvurderingReturDto(
                     oppgavereferanse = 2L,
-                    notat = NotatApiDto("notat_tekst", NotatType.Retur)
+                    notat = NotatApiDto(notat, NotatType.Retur)
                 ))
                 authentication(saksbehandler_oid)
             }
         }
 
         verify(exactly = 1) {
-            totrinnsvurderingMediator.settErRetur(oppgaveId = 2L)
-        }
-        verify(exactly = 1) {
-            totrinnsvurderingMediator.settBeslutter(2L, saksbehandler_oid)
+            totrinnsvurderingMediator.settErRetur(oppgaveId = 2L, saksbehandler_oid, notat)
         }
         verify(exactly = 1) {
             tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(
@@ -427,5 +429,6 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
         }
 
         assertEquals(HttpStatusCode.OK, response.status)
+        Toggle.Totrinnsvurdering.disable()
     }
 }
