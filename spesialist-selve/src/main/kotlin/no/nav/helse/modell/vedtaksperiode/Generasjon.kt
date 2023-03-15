@@ -54,6 +54,14 @@ internal class Generasjon private constructor(
         }
     }
 
+    internal fun oppdaterSykefraværstilfelle(
+        skjæringstidspunkt: LocalDate,
+        periode: Periode,
+        generasjonRepository: GenerasjonRepository,
+    ) {
+        generasjonRepository.oppdaterSykefraværstilfelle(id, skjæringstidspunkt, periode)
+    }
+
     internal fun håndterNyGenerasjon(
         hendelseId: UUID,
         id: UUID = UUID.randomUUID(),
@@ -190,14 +198,18 @@ internal class Generasjon private constructor(
                 && javaClass == other.javaClass
                 && id == other.id
                 && vedtaksperiodeId == other.vedtaksperiodeId
+                && utbetalingId == other.utbetalingId
                 && låst == other.låst
-                && utbetalingId == other.utbetalingId)
+                && skjæringstidspunkt == other.skjæringstidspunkt
+                && periode == other.periode)
 
     override fun hashCode(): Int {
         var result = id.hashCode()
         result = 31 * result + vedtaksperiodeId.hashCode()
         result = 31 * result + utbetalingId.hashCode()
         result = 31 * result + låst.hashCode()
+        result = 31 * result + skjæringstidspunkt.hashCode()
+        result = 31 * result + periode.hashCode()
         return result
     }
 

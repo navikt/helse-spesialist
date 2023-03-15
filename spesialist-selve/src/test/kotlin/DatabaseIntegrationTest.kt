@@ -284,8 +284,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         snapshotId = snapshotDao.lagre(FNR, person)
     }
 
-    protected fun opprettGenerasjon(vedtaksperiodeId: UUID = VEDTAKSPERIODE) {
-        generasjonDao.opprettFor(UUID.randomUUID(), vedtaksperiodeId, UUID.randomUUID())
+    protected fun opprettGenerasjon(vedtaksperiodeId: UUID = VEDTAKSPERIODE, generasjonId: UUID = UUID.randomUUID()) {
+        generasjonDao.opprettFor(generasjonId, vedtaksperiodeId, UUID.randomUUID())
     }
 
     protected fun opprettVedtaksperiode(
