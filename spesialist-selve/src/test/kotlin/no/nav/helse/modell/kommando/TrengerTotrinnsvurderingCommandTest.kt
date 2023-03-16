@@ -8,10 +8,10 @@ import io.mockk.verify
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.mediator.Toggle
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao.Totrinnsvurdering
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.vedtak.Warning
@@ -129,7 +129,7 @@ internal class TrengerTotrinnsvurderingCommandTest {
 
         verify(exactly = 1) { totrinnsvurderingMediator.opprett(any()) }
         verify(exactly = 1) { oppgaveMediator.reserverOppgave(saksbehander, FØDSELSNUMMER) }
-        verify(exactly = 1) { totrinnsvurderingMediator.settErRetur(VEDTAKSPERIODE_ID) }
+        verify(exactly = 1) { totrinnsvurderingMediator.settAutomatiskRetur(VEDTAKSPERIODE_ID) }
         Toggle.Totrinnsvurdering.disable()
     }
 

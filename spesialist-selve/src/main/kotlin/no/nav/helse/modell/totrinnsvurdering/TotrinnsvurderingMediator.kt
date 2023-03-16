@@ -19,8 +19,19 @@ class TotrinnsvurderingMediator(
     fun settBeslutter(vedtaksperiodeId: UUID, saksbehandlerOid: UUID): Unit =
         dao.settBeslutter(vedtaksperiodeId, saksbehandlerOid)
 
-    fun settErRetur(vedtaksperiodeId: UUID): Unit = dao.settErRetur(vedtaksperiodeId)
-    fun settErRetur(oppgaveId: Long, beslutterOid: UUID, notat: String) {
+    fun settAutomatiskRetur(vedtaksperiodeId: UUID) {
+        oppgaveMediator.finnNyesteOppgaveId(vedtaksperiodeId)?.let {
+            dao.settErRetur(vedtaksperiodeId)
+
+            oppgaveMediator.lagrePeriodehistorikk(
+                oppgaveId = it,
+                saksbehandleroid = null,
+                type = PeriodehistorikkType.TOTRINNSVURDERING_RETUR
+            )
+        }
+    }
+
+    fun settRetur(oppgaveId: Long, beslutterOid: UUID, notat: String) {
         dao.settErRetur(oppgaveId)
 
         dao.settBeslutter(oppgaveId, beslutterOid)

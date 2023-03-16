@@ -19,14 +19,14 @@ class TotrinnsvurderingMediatorTest {
     private val totrinnsvurderingMediator = TotrinnsvurderingMediator(totrinnsvurderingDao, oppgaveMediator, notatMediator)
 
     @Test
-    fun `Sett er retur, oppdaterer status på totrinnsvurdering og oppdaterer periodehistorikk`() {
+    fun `Sett er retur, oppdaterer status på totrinnsvurdering og oppdaterer periodehistorikk med oppgaveId`() {
         val oppgaveId = 1L
         val beslutterOid = UUID.randomUUID()
         val notat = "notat"
 
         every { notatMediator.lagreForOppgaveId(oppgaveId, notat, beslutterOid, NotatType.Retur) } returns 1L
 
-        totrinnsvurderingMediator.settErRetur(oppgaveId, beslutterOid, notat)
+        totrinnsvurderingMediator.settRetur(oppgaveId, beslutterOid, notat)
 
         verify(exactly = 1) { totrinnsvurderingDao.settErRetur(oppgaveId) }
         verify(exactly = 1) {
@@ -35,6 +35,26 @@ class TotrinnsvurderingMediatorTest {
                 saksbehandleroid = beslutterOid,
                 type = PeriodehistorikkType.TOTRINNSVURDERING_RETUR,
                 notatId = 1
+            )
+        }
+    }
+
+    @Test
+    fun `Sett er retur, oppdaterer status på totrinnsvurdering og oppdaterer periodehistorikk med vedtaksperiodeId`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val oppgaveId = 42L
+
+        every { oppgaveMediator.finnNyesteOppgaveId(vedtaksperiodeId) } returns oppgaveId
+
+        totrinnsvurderingMediator.settAutomatiskRetur(vedtaksperiodeId)
+
+        verify(exactly = 1) { totrinnsvurderingDao.settErRetur(vedtaksperiodeId) }
+        verify(exactly = 1) { oppgaveMediator.finnNyesteOppgaveId(vedtaksperiodeId) }
+        verify(exactly = 1) {
+            oppgaveMediator.lagrePeriodehistorikk(
+                oppgaveId = oppgaveId,
+                saksbehandleroid = null,
+                type = PeriodehistorikkType.TOTRINNSVURDERING_RETUR,
             )
         }
     }

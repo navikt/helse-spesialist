@@ -68,7 +68,7 @@ internal class TrengerTotrinnsvurderingCommand(
                 val totrinnsvurdering = totrinnsvurderingMediator.opprett(vedtaksperiodeId)
 
                 if (totrinnsvurdering.beslutter != null) {
-                    totrinnsvurderingMediator.settErRetur(vedtaksperiodeId)
+                    totrinnsvurderingMediator.settAutomatiskRetur(vedtaksperiodeId)
                 }
                 if (totrinnsvurdering.saksbehandler != null) {
                     oppgaveMediator.reserverOppgave(

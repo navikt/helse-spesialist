@@ -18,9 +18,9 @@ import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Toggle
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao.Totrinnsvurdering
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.tildeling.TildelingService
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
@@ -410,7 +410,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
         }
 
         verify(exactly = 1) {
-            totrinnsvurderingMediator.settErRetur(oppgaveId = 2L, saksbehandler_oid, notat)
+            totrinnsvurderingMediator.settRetur(oppgaveId = 2L, saksbehandler_oid, notat)
         }
         verify(exactly = 1) {
             tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(

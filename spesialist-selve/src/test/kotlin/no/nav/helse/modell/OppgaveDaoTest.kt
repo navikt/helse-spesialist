@@ -99,6 +99,24 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `finner oppgaveId ved hjelp av vedtaksperiodeId`() {
+        nyPerson()
+        val actual = oppgaveDao.finnOppgaveId(VEDTAKSPERIODE)
+        assertEquals(1L, actual)
+    }
+
+    @Test
+    fun `finner nyeste oppgaveId uavhengig av status ved hjelp av vedtaksperiodeId`() {
+        nyPerson()
+        opprettOppgave()
+        oppgaveDao.invaliderOppgaveFor(fødselsnummer = FNR)
+
+        val actual = oppgaveDao.finnNyesteOppgaveId(VEDTAKSPERIODE)
+        assertEquals(2L, actual)
+    }
+
+
+    @Test
     fun `finner oppgave`() {
         nyPerson()
         val oppgave = oppgaveDao.finn(oppgaveId) ?: fail { "Fant ikke oppgave" }

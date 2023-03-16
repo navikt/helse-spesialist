@@ -179,13 +179,15 @@ class OppgaveMediator(
         beslutterSaksbehandlerOid
     )
 
+    fun finnNyesteOppgaveId(vedtaksperiodeId: UUID) = oppgaveDao.finnNyesteOppgaveId(vedtaksperiodeId)
+
     fun finnTidligereSaksbehandler(oppgaveId: Long) = oppgaveDao.finnTidligereSaksbehandler(oppgaveId)
 
     fun finnBeslutterSaksbehandler(oppgaveId: Long) = oppgaveDao.finnBeslutterSaksbehandler(oppgaveId)
 
     fun lagrePeriodehistorikk(
         oppgaveId: Long,
-        saksbehandleroid: UUID,
+        saksbehandleroid: UUID?,
         type: PeriodehistorikkType,
         notatId: Int? = null
     ) {

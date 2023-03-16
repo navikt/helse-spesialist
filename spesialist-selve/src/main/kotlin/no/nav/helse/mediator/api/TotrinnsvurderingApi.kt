@@ -110,7 +110,7 @@ internal fun Route.totrinnsvurderingApi(
         )
 
         if (Toggle.Totrinnsvurdering.enabled) {
-            totrinnsvurderingMediator.settErRetur(
+            totrinnsvurderingMediator.settRetur(
                 oppgaveId = retur.oppgavereferanse,
                 beslutterOid = beslutterOid,
                 notat = retur.notat.tekst

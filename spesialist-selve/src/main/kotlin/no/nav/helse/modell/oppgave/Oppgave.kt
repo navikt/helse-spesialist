@@ -157,7 +157,7 @@ class Oppgave private constructor(
 
     fun lagrePeriodehistorikk(
         periodehistorikkDao: PeriodehistorikkDao,
-        saksbehandleroid: UUID,
+        saksbehandleroid: UUID?,
         type: PeriodehistorikkType,
         notatId: Int?
     ) {

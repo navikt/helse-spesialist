@@ -20,6 +20,15 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             AND status = 'AvventerSaksbehandler'::oppgavestatus
         """.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.long("id") }
 
+    fun finnNyesteOppgaveId(vedtaksperiodeId: UUID) =
+        """
+            SELECT id FROM oppgave
+            WHERE vedtak_ref =
+                (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
+            ORDER BY opprettet DESC
+            LIMIT 1
+        """.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.long("id") }
+
     fun trengerTotrinnsvurdering(oppgaveId: Long): Boolean =
         """ SELECT er_totrinnsoppgave FROM oppgave
             WHERE id = :oppgaveId
