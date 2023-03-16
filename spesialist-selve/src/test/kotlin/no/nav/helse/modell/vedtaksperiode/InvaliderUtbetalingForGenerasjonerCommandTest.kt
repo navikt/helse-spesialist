@@ -38,7 +38,13 @@ class InvaliderUtbetalingForGenerasjonerCommandTest {
     }
 
     private val generasjonRepository get() = object : GenerasjonRepository {
-        override fun opprettNeste(id: UUID, vedtaksperiodeId: UUID, hendelseId: UUID): Generasjon = TODO("Not yet implemented")
+        override fun opprettNeste(
+            id: UUID,
+            vedtaksperiodeId: UUID,
+            hendelseId: UUID,
+            skjæringstidspunkt: LocalDate?,
+            periode: Periode?
+        ): Generasjon = TODO("Not yet implemented")
         override fun låsFor(generasjonId: UUID, hendelseId: UUID):Unit = TODO("Not yet implemented")
         override fun sisteFor(vedtaksperiodeId: UUID): Generasjon = TODO("Not yet implemented")
 

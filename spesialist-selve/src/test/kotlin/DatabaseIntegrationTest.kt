@@ -14,7 +14,6 @@ import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.SnapshotDao
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
@@ -27,6 +26,7 @@ import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtak.Warning
@@ -285,7 +285,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     }
 
     protected fun opprettGenerasjon(vedtaksperiodeId: UUID = VEDTAKSPERIODE, generasjonId: UUID = UUID.randomUUID()) {
-        generasjonDao.opprettFor(generasjonId, vedtaksperiodeId, UUID.randomUUID())
+        generasjonDao.opprettFor(generasjonId, vedtaksperiodeId, UUID.randomUUID(), null, null)
     }
 
     protected fun opprettVedtaksperiode(

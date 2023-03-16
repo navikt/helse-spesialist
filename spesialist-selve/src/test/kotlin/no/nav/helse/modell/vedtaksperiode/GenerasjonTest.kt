@@ -5,6 +5,7 @@ import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
+import no.nav.helse.januar
 import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.Varsel.*
@@ -27,6 +28,20 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     @BeforeEach
     internal fun beforeEach() {
         lagVarseldefinisjoner()
+    }
+
+    @Test
+    fun `Kopierer skjæringstidspunkt og periode til neste generasjon`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjon = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)
+        val periode = Periode(1.januar, 5.januar)
+        generasjon.oppdaterSykefraværstilfelle(skjæringstidspunkt = 1.januar, periode, generasjonRepository)
+        generasjon.håndterVedtakFattet(UUID.randomUUID())
+        val nyGenerasjonId = UUID.randomUUID()
+        val nyGenerasjon = generasjon.håndterNyGenerasjon(UUID.randomUUID(), nyGenerasjonId, varselRepository)
+        val forventetGenerasjon = Generasjon(nyGenerasjonId, vedtaksperiodeId, null, false, 1.januar, periode, emptySet(), dataSource)
+
+        assertEquals(forventetGenerasjon, nyGenerasjon)
     }
 
     @Test

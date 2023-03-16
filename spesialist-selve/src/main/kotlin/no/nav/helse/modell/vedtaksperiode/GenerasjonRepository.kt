@@ -9,7 +9,13 @@ import org.slf4j.LoggerFactory
 
 internal interface GenerasjonRepository {
     fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID = UUID.randomUUID()): Generasjon?
-    fun opprettNeste(id: UUID, vedtaksperiodeId: UUID, hendelseId: UUID): Generasjon
+    fun opprettNeste(
+        id: UUID,
+        vedtaksperiodeId: UUID,
+        hendelseId: UUID,
+        skjæringstidspunkt: LocalDate?,
+        periode: Periode?
+    ): Generasjon
     fun låsFor(generasjonId: UUID, hendelseId: UUID)
     fun utbetalingFor(generasjonId: UUID, utbetalingId: UUID)
     fun sisteFor(vedtaksperiodeId: UUID): Generasjon
@@ -31,13 +37,19 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
             )
             return null
         }
-        return dao.opprettFor(id, vedtaksperiodeId, hendelseId).also {
+        return dao.opprettFor(id, vedtaksperiodeId, hendelseId, null, null).also {
             it.loggFørsteOpprettet(vedtaksperiodeId)
         }
     }
 
-    override fun opprettNeste(id: UUID, vedtaksperiodeId: UUID, hendelseId: UUID): Generasjon {
-        return dao.opprettFor(id, vedtaksperiodeId, hendelseId).also {
+    override fun opprettNeste(
+        id: UUID,
+        vedtaksperiodeId: UUID,
+        hendelseId: UUID,
+        skjæringstidspunkt: LocalDate?,
+        periode: Periode?
+    ): Generasjon {
+        return dao.opprettFor(id, vedtaksperiodeId, hendelseId, skjæringstidspunkt, periode).also {
             it.loggNesteOpprettet(vedtaksperiodeId)
         }
     }

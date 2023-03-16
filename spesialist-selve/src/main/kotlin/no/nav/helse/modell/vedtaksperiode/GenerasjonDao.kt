@@ -78,13 +78,20 @@ class GenerasjonDao(private val dataSource: DataSource) {
         }
     }
 
-    internal fun opprettFor(id: UUID, vedtaksperiodeId: UUID, hendelseId: UUID): Generasjon {
+    internal fun opprettFor(
+        id: UUID,
+        vedtaksperiodeId: UUID,
+        hendelseId: UUID,
+        skjæringstidspunkt: LocalDate?,
+        periode: Periode?,
+    ): Generasjon {
         @Language("PostgreSQL")
         val query = """
-            INSERT INTO selve_vedtaksperiode_generasjon (unik_id, vedtaksperiode_id, opprettet_av_hendelse) 
-            VALUES (?, ?, ?)
+            INSERT INTO selve_vedtaksperiode_generasjon (unik_id, vedtaksperiode_id, opprettet_av_hendelse, skjæringstidspunkt, fom, tom) 
+            VALUES (?, ?, ?, ?, ?, ?)
             RETURNING id, unik_id, vedtaksperiode_id, utbetaling_id, låst, skjæringstidspunkt, fom, tom
         """
+
         @Language("PostgreSQL")
         val søknadMottattQuery = """
             INSERT INTO opprinnelig_soknadsdato 
@@ -98,7 +105,15 @@ class GenerasjonDao(private val dataSource: DataSource) {
             session.transaction { transactionalSession ->
                 val generasjon = requireNotNull(
                     transactionalSession.run(
-                        queryOf(query, id, vedtaksperiodeId, hendelseId).map(::toGenerasjon).asSingle
+                        queryOf(
+                            query,
+                            id,
+                            vedtaksperiodeId,
+                            hendelseId,
+                            skjæringstidspunkt,
+                            periode?.fom(),
+                            periode?.tom()
+                        ).map(::toGenerasjon).asSingle
                     )
                 ) { "Kunne ikke opprette ny generasjon" }
                 transactionalSession.run(
@@ -155,7 +170,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
             row.uuidOrNull("utbetaling_id"),
             row.boolean("låst"),
             row.localDateOrNull("skjæringstidspunkt"),
-            row.localDateOrNull("fom")?.let{
+            row.localDateOrNull("fom")?.let {
                 Periode(
                     it,
                     row.localDate("tom"),
@@ -168,7 +183,8 @@ class GenerasjonDao(private val dataSource: DataSource) {
 
     private fun varslerFor(generasjonRef: Long): List<Varsel> {
         @Language("PostgreSQL")
-        val query = "SELECT unik_id, vedtaksperiode_id, kode, opprettet, status FROM selve_varsel WHERE generasjon_ref = ?"
+        val query =
+            "SELECT unik_id, vedtaksperiode_id, kode, opprettet, status FROM selve_varsel WHERE generasjon_ref = ?"
         return sessionOf(dataSource).use { session ->
             session.run(queryOf(query, generasjonRef).map {
                 Varsel(

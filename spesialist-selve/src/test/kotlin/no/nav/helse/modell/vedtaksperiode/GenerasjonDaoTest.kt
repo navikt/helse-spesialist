@@ -22,10 +22,27 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `oppretter generasjon for vedtaksperiode`() {
-        val generasjon = generasjonDao.opprettFor(UUID.randomUUID(), VEDTAKSPERIODE_ID, UUID.randomUUID())
+        val generasjonId = UUID.randomUUID()
+        val generasjon = generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE_ID, UUID.randomUUID(), null, null)
         val siste = generasjonDao.finnSisteFor(VEDTAKSPERIODE_ID)
 
+        val forventetGenerasjon = Generasjon(generasjonId, VEDTAKSPERIODE_ID, null, false, null, null, emptySet(), dataSource)
+
         assertEquals(generasjon, siste)
+        assertEquals(forventetGenerasjon, generasjon)
+    }
+
+    @Test
+    fun `oppretter generasjon for vedtaksperiode med skjæringstidspunkt og periode`() {
+        val generasjonId = UUID.randomUUID()
+        val periode = Periode(1.januar, 5.januar)
+        val generasjon = generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE_ID, UUID.randomUUID(), 1.januar, periode)
+        val siste = generasjonDao.finnSisteFor(VEDTAKSPERIODE_ID)
+
+        val forventetGenerasjon = Generasjon(generasjonId, VEDTAKSPERIODE_ID, null, false, 1.januar, periode, emptySet(), dataSource)
+
+        assertEquals(generasjon, siste)
+        assertEquals(forventetGenerasjon, generasjon)
     }
 
     @Test
@@ -33,7 +50,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         val vedtaksperiodeEndretId = UUID.randomUUID()
         val vedtakFattetId = UUID.randomUUID()
         val generasjonId = UUID.randomUUID()
-        val generasjon = generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE_ID, vedtaksperiodeEndretId)
+        val generasjon = generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE_ID, vedtaksperiodeEndretId,null,null)
         val låstGenerasjon = generasjonDao.låsFor(generasjonId, vedtakFattetId)
 
         assertNotEquals(generasjon, låstGenerasjon)
@@ -57,9 +74,9 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `siste generasjon blir returnert`() {
-        val første = generasjonDao.opprettFor(UUID.randomUUID(), VEDTAKSPERIODE_ID, UUID.randomUUID())
+        val første = generasjonDao.opprettFor(UUID.randomUUID(), VEDTAKSPERIODE_ID, UUID.randomUUID(),null,null)
         generasjonDao.låsFor(VEDTAKSPERIODE_ID, UUID.randomUUID())
-        val siste = generasjonDao.opprettFor(UUID.randomUUID(), VEDTAKSPERIODE_ID, UUID.randomUUID())
+        val siste = generasjonDao.opprettFor(UUID.randomUUID(), VEDTAKSPERIODE_ID, UUID.randomUUID(),null,null)
         val funnet = generasjonDao.finnSisteFor(VEDTAKSPERIODE_ID)
 
         assertNotEquals(første, funnet)
@@ -69,14 +86,14 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `kan sette utbetaling_id for siste generasjon hvis den er åpen`() {
         val generasjonId = UUID.randomUUID()
-        generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE_ID, UUID.randomUUID())
+        generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE_ID, UUID.randomUUID(),null,null)
         generasjonDao.utbetalingFor(generasjonId, UTBETALING_ID)
         assertUtbetaling(generasjonId, UTBETALING_ID)
     }
 
     @Test
     fun `generasjon hentes opp sammen med varsler`() {
-        generasjonDao.opprettFor(UUID.randomUUID(), VEDTAKSPERIODE_ID, UUID.randomUUID())
+        generasjonDao.opprettFor(UUID.randomUUID(), VEDTAKSPERIODE_ID, UUID.randomUUID(),null,null)
         val varselId = UUID.randomUUID()
         val varselOpprettet = LocalDateTime.now()
         val generasjonId = generasjonIdFor(VEDTAKSPERIODE_ID)
@@ -104,8 +121,8 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         val generasjonId1 = UUID.randomUUID()
         val generasjonId2 = UUID.randomUUID()
         val utbetalingId = UUID.randomUUID()
-        generasjonDao.opprettFor(generasjonId1, UUID.randomUUID(), UUID.randomUUID())
-        generasjonDao.opprettFor(generasjonId2, UUID.randomUUID(), UUID.randomUUID())
+        generasjonDao.opprettFor(generasjonId1, UUID.randomUUID(), UUID.randomUUID(),null,null)
+        generasjonDao.opprettFor(generasjonId2, UUID.randomUUID(), UUID.randomUUID(),null,null)
         generasjonDao.utbetalingFor(generasjonId1, utbetalingId)
         generasjonDao.utbetalingFor(generasjonId2, utbetalingId)
 
@@ -115,7 +132,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `Kan fjerne utbetaling fra generasjon`() {
         val generasjonId = UUID.randomUUID()
-        generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE_ID, UUID.randomUUID())
+        generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE_ID, UUID.randomUUID(),null,null)
         generasjonDao.utbetalingFor(generasjonId, UTBETALING_ID)
         assertUtbetaling(generasjonId, UTBETALING_ID)
         generasjonDao.fjernUtbetalingFor(generasjonId)
@@ -126,9 +143,9 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
     fun `Finner åpen generasjon for vedtaksperiode-id`() {
         val generasjonId1 = UUID.randomUUID()
         val generasjonId2 = UUID.randomUUID()
-        generasjonDao.opprettFor(generasjonId1, VEDTAKSPERIODE_ID, UUID.randomUUID())
+        generasjonDao.opprettFor(generasjonId1, VEDTAKSPERIODE_ID, UUID.randomUUID(),null,null)
         generasjonDao.låsFor(generasjonId1, UUID.randomUUID())
-        generasjonDao.opprettFor(generasjonId2, VEDTAKSPERIODE_ID, UUID.randomUUID())
+        generasjonDao.opprettFor(generasjonId2, VEDTAKSPERIODE_ID, UUID.randomUUID(),null,null)
         val generasjon = generasjonDao.åpenGenerasjonForVedtaksperiode(VEDTAKSPERIODE_ID)
         val forventetGenerasjon = Generasjon(generasjonId2, VEDTAKSPERIODE_ID, null, false, null, null, emptySet(), dataSource)
 
@@ -138,7 +155,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `Forsøk å oppdaterere sykefraværstilfelle på vedtaksperiode uten åpen generasjon`() {
         val generasjonId = UUID.randomUUID()
-        generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE_ID, UUID.randomUUID())
+        generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE_ID, UUID.randomUUID(),null,null)
         generasjonDao.låsFor(generasjonId, UUID.randomUUID())
         val generasjon = generasjonDao.åpenGenerasjonForVedtaksperiode(VEDTAKSPERIODE_ID)
 
@@ -150,7 +167,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         val generasjonId = UUID.randomUUID()
         val skjæringstidspunkt = 1.januar
         val periode = Periode(1.januar, 5.januar)
-        generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE_ID, UUID.randomUUID())
+        generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE_ID, UUID.randomUUID(),null,null)
         generasjonDao.oppdaterSykefraværstilfelle(generasjonId, skjæringstidspunkt, periode)
         val generasjon = generasjonDao.finnSisteFor(VEDTAKSPERIODE_ID)
         val forventetGenerasjon = Generasjon(generasjonId, VEDTAKSPERIODE_ID, null, false, skjæringstidspunkt, periode, emptySet(), dataSource)
@@ -160,7 +177,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `Henter generasjon`() {
-        generasjonDao.opprettFor(UUID.randomUUID(), VEDTAKSPERIODE_ID, UUID.randomUUID())
+        generasjonDao.opprettFor(UUID.randomUUID(), VEDTAKSPERIODE_ID, UUID.randomUUID(),null,null)
         val generasjonId = generasjonIdFor(VEDTAKSPERIODE_ID)
         val generasjon = generasjonDao.finnSisteFor(VEDTAKSPERIODE_ID)
         assertEquals(
@@ -180,7 +197,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `Henter generasjon med fom, tom og skjæringstidspunkt`() {
-        generasjonDao.opprettFor(UUID.randomUUID(), VEDTAKSPERIODE_ID, UUID.randomUUID())
+        generasjonDao.opprettFor(UUID.randomUUID(), VEDTAKSPERIODE_ID, UUID.randomUUID(),null,null)
         val generasjonId = generasjonIdFor(VEDTAKSPERIODE_ID)
         val generasjon = generasjonDao.finnSisteFor(VEDTAKSPERIODE_ID)
         assertEquals(
@@ -200,17 +217,17 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `Lager innslag i opprinnelig_soknadsdato`() {
-        generasjonDao.opprettFor(UUID.randomUUID(), VEDTAKSPERIODE_ID, UUID.randomUUID())
+        generasjonDao.opprettFor(UUID.randomUUID(), VEDTAKSPERIODE_ID, UUID.randomUUID(),null,null)
 
         assertEquals(finnTidligsteGenerasjonOpprettetTidspunkt(VEDTAKSPERIODE_ID), finnSøknadMottatt(VEDTAKSPERIODE_ID))
     }
 
     @Test
     fun `Lager ikke innslag i opprinnelig_soknadsdato for ettergølgende generasjoner`() {
-        generasjonDao.opprettFor(UUID.randomUUID(), VEDTAKSPERIODE_ID, UUID.randomUUID())
+        generasjonDao.opprettFor(UUID.randomUUID(), VEDTAKSPERIODE_ID, UUID.randomUUID(),null,null)
         generasjonDao.låsFor(VEDTAKSPERIODE_ID, UUID.randomUUID())
         val opprinneligSøknadsdato = finnSøknadMottatt(VEDTAKSPERIODE_ID)
-        generasjonDao.opprettFor(UUID.randomUUID(), VEDTAKSPERIODE_ID, UUID.randomUUID())
+        generasjonDao.opprettFor(UUID.randomUUID(), VEDTAKSPERIODE_ID, UUID.randomUUID(),null,null)
 
         assertEquals(opprinneligSøknadsdato, finnSøknadMottatt(VEDTAKSPERIODE_ID))
     }

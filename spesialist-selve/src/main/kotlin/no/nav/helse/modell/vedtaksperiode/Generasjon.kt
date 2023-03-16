@@ -59,6 +59,8 @@ internal class Generasjon private constructor(
         periode: Periode,
         generasjonRepository: GenerasjonRepository,
     ) {
+        this.skjæringstidspunkt = skjæringstidspunkt
+        this.periode = periode
         generasjonRepository.oppdaterSykefraværstilfelle(id, skjæringstidspunkt, periode)
     }
 
@@ -76,7 +78,7 @@ internal class Generasjon private constructor(
             return null
         }
 
-        val nesteGenerasjon = generasjonRepository.opprettNeste(id, vedtaksperiodeId, hendelseId)
+        val nesteGenerasjon = generasjonRepository.opprettNeste(id, vedtaksperiodeId, hendelseId, skjæringstidspunkt, periode)
         flyttAktiveVarsler(nesteGenerasjon, varselRepository)
         return nesteGenerasjon
     }
@@ -191,7 +193,7 @@ internal class Generasjon private constructor(
         generasjonRepository.låsFor(id, hendelseId)
     }
 
-    override fun toString(): String = "generasjonId=$id, vedtaksperiodeId=$vedtaksperiodeId, utbetalingId=$utbetalingId, låst=$låst"
+    override fun toString(): String = "generasjonId=$id, vedtaksperiodeId=$vedtaksperiodeId, utbetalingId=$utbetalingId, låst=$låst, skjæringstidspunkt=$skjæringstidspunkt, periode=$periode"
 
     override fun equals(other: Any?): Boolean =
         this === other || (other is Generasjon
