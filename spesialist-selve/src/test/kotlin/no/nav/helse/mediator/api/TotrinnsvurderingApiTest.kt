@@ -385,7 +385,8 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     fun `Sende totrinnsvurdering i retur`() {
         Toggle.Totrinnsvurdering.enable()
         val tidligereSaksbehandlerOid = UUID.randomUUID()
-        every { totrinnsvurderingMediator.hentAktiv(oppgaveId = 2L) } returns Totrinnsvurdering(
+        val oppgaveId = 2L
+        every { totrinnsvurderingMediator.hentAktiv(oppgaveId = oppgaveId) } returns Totrinnsvurdering(
             vedtaksperiodeId = UUID.randomUUID(),
             erRetur = true,
             saksbehandler = tidligereSaksbehandlerOid,
@@ -402,29 +403,20 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 setBody(TotrinnsvurderingReturDto(
-                    oppgavereferanse = 2L,
+                    oppgavereferanse = oppgaveId,
                     notat = NotatApiDto(notat, NotatType.Retur)
                 ))
                 authentication(saksbehandler_oid)
             }
         }
 
-        verify(exactly = 1) {
-            totrinnsvurderingMediator.settRetur(oppgaveId = 2L, saksbehandler_oid, notat)
-        }
+        verify(exactly = 1) { totrinnsvurderingMediator.settRetur(oppgaveId, saksbehandler_oid, notat) }
+
         verify(exactly = 1) {
             tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(
-                2L,
+                oppgaveId,
                 tidligereSaksbehandlerOid,
                 any()
-            )
-        }
-        verify(exactly = 1) {
-            notatMediator.lagreForOppgaveId(
-                2L,
-                returDtoMedNotat.notat.tekst,
-                saksbehandler_oid,
-                returDtoMedNotat.notat.type
             )
         }
 

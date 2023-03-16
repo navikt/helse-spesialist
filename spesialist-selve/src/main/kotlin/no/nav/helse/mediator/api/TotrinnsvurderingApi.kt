@@ -110,11 +110,25 @@ internal fun Route.totrinnsvurderingApi(
             beslutterSaksbehandlerOid = beslutterOid
         )
 
-        if (Toggle.Totrinnsvurdering.enabled) {
+        if (Toggle.Totrinnsvurdering.enabled && aktivTotrinnsvurdering != null) {
             totrinnsvurderingMediator.settRetur(
                 oppgaveId = retur.oppgavereferanse,
                 beslutterOid = beslutterOid,
                 notat = retur.notat.tekst
+            )
+        } else {
+            val notatId = notatMediator.lagreForOppgaveId(
+                retur.oppgavereferanse,
+                retur.notat.tekst,
+                beslutterOid,
+                retur.notat.type
+            )
+
+            oppgaveMediator.lagrePeriodehistorikk(
+                oppgaveId = retur.oppgavereferanse,
+                saksbehandleroid = beslutterOid,
+                type = PeriodehistorikkType.TOTRINNSVURDERING_RETUR,
+                notatId = notatId?.toInt()
             )
         }
 
@@ -124,19 +138,6 @@ internal fun Route.totrinnsvurderingApi(
             gruppemedlemskap()
         )
 
-        val notatId = notatMediator.lagreForOppgaveId(
-            retur.oppgavereferanse,
-            retur.notat.tekst,
-            beslutterOid,
-            retur.notat.type
-        )
-
-        oppgaveMediator.lagrePeriodehistorikk(
-            oppgaveId = retur.oppgavereferanse,
-            saksbehandleroid = beslutterOid,
-            type = PeriodehistorikkType.TOTRINNSVURDERING_RETUR,
-            notatId = notatId?.toInt()
-        )
 
         hendelseMediator.sendMeldingOppgaveOppdatert(retur.oppgavereferanse)
 
