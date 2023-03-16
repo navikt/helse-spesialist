@@ -11,7 +11,7 @@ import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao.Totrinnsvurdering
+import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.vedtak.Warning

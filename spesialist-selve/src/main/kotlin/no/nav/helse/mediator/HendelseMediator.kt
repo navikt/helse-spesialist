@@ -48,7 +48,6 @@ import no.nav.helse.mediator.meldinger.løsninger.Vergemålløsning
 import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.HendelseDao
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
@@ -59,6 +58,7 @@ import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.ActualVarselRepository
@@ -182,7 +182,7 @@ internal class HendelseMediator(
         val tidligereSaksbehandler = oppgaveMediator.finnTidligereSaksbehandler(godkjenningDTO.oppgavereferanse)
         val reserverPersonOid: UUID =
             if (erBeslutteroppgave && tidligereSaksbehandler != null) tidligereSaksbehandler
-            else if (totrinnsvurdering?.beslutter != null && totrinnsvurdering.saksbehandler != null) totrinnsvurdering.saksbehandler
+            else if (totrinnsvurdering?.erBeslutteroppgave() == true) totrinnsvurdering.saksbehandler!!
             else oid
         val godkjenningMessage = JsonMessage.newMessage("saksbehandler_løsning", mutableMapOf(
             "@forårsaket_av" to mapOf(
@@ -227,7 +227,7 @@ internal class HendelseMediator(
         overstyringDao.ferdigstillOverstyringerForVedtaksperiode(vedtaksperiodeId)
         totrinnsvurderingMediator.ferdigstill(vedtaksperiodeId)
 
-        if ((erBeslutteroppgave || totrinnsvurdering?.beslutter != null) && godkjenningDTO.godkjent) {
+        if ((erBeslutteroppgave || totrinnsvurdering?.erBeslutteroppgave() == true) && godkjenningDTO.godkjent) {
             internOppgaveMediator.lagrePeriodehistorikk(
                 oppgaveId = godkjenningDTO.oppgavereferanse,
                 saksbehandleroid = oid,

@@ -11,9 +11,9 @@ import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.SAKSBEHANDLER_OID
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.mediator.api.GodkjenningDTO
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao.Totrinnsvurdering
 import no.nav.helse.modell.oppgave.OppgaveMediator
+import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao

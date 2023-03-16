@@ -4,7 +4,7 @@ import DatabaseIntegrationTest
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.juli
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao.Totrinnsvurdering
+import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull

@@ -40,7 +40,8 @@ internal fun Route.totrinnsvurderingApi(
         val saksbehandlerOid = getSaksbehandlerOid()
         val aktivTotrinnsvurdering = totrinnsvurderingMediator.hentAktiv(totrinnsvurdering.oppgavereferanse)
 
-        if (oppgaveMediator.erBeslutteroppgave(totrinnsvurdering.oppgavereferanse) || (aktivTotrinnsvurdering?.beslutter != null && !aktivTotrinnsvurdering.erRetur)) {
+        if (oppgaveMediator.erBeslutteroppgave(totrinnsvurdering.oppgavereferanse) ||
+            aktivTotrinnsvurdering?.erBeslutteroppgave() == true) {
             call.respondText(
                 "Denne oppgaven har allerede blitt sendt til godkjenning.",
                 status = HttpStatusCode.Conflict

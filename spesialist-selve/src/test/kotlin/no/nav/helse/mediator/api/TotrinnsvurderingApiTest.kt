@@ -20,7 +20,7 @@ import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.tildeling.TildelingService
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao.Totrinnsvurdering
+import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
@@ -250,7 +250,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
 
     @Test
     fun `Totrinnsvurdering kan ikke gjøres til beslutteroppgave hvis den allerede er beslutteroppgave`() {
-        every { totrinnsvurderingMediator.hentAktiv(10L) } returns Totrinnsvurdering(
+        every { totrinnsvurderingMediator.hentAktiv(1L) } returns Totrinnsvurdering(
             vedtaksperiodeId = UUID.randomUUID(),
             erRetur = false,
             saksbehandler = UUID.randomUUID(),
@@ -272,7 +272,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
 
     @Test
     fun `Totrinnsvurdering kan gjøres til beslutteroppgave hvis den er en returoppgave`() {
-        every { oppgaveMediator.erBeslutteroppgave(10L) } returns false
+        every { oppgaveMediator.erBeslutteroppgave(1L) } returns false
         every { totrinnsvurderingMediator.hentAktiv(oppgaveId = any()) } returns Totrinnsvurdering(
             vedtaksperiodeId = UUID.randomUUID(),
             erRetur = true,

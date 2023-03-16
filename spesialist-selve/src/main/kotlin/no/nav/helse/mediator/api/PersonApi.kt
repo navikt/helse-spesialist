@@ -79,7 +79,7 @@ internal fun Route.personApi(
         val erBeslutteroppgave = oppgaveMediator.erBeslutteroppgave(godkjenning.oppgavereferanse)
         val totrinnsvurdering = totrinnsvurderingMediator.hentAktiv(godkjenning.oppgavereferanse)
 
-        if (erBeslutteroppgave || totrinnsvurdering?.saksbehandler != null) {
+        if (erBeslutteroppgave || totrinnsvurdering?.erBeslutteroppgave() == true) {
             // Midlertidig logging. Slik at vi vet når vi kan skru av totrinnsmerking i Speil
             if (!oppgaveMediator.trengerTotrinnsvurdering(godkjenning.oppgavereferanse)) {
                 log.info("Oppgave ${godkjenning.oppgavereferanse} er merket vha Speil.")

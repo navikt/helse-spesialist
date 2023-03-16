@@ -29,8 +29,8 @@ import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao.Totrinnsvurdering
 import no.nav.helse.modell.oppgave.OppgaveMediator
+import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.AzureAdAppConfig
