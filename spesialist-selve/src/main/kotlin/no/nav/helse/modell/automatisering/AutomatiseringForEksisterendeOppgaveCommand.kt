@@ -6,6 +6,7 @@ import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.oppgave.OppgaveMediator
+import no.nav.helse.modell.utbetaling.Utbetaling
 import org.slf4j.LoggerFactory
 
 internal class AutomatiseringForEksisterendeOppgaveCommand(
@@ -17,6 +18,7 @@ internal class AutomatiseringForEksisterendeOppgaveCommand(
     private val godkjenningsbehovJson: String,
     private val godkjenningMediator: GodkjenningMediator,
     private val oppgaveMediator: OppgaveMediator,
+    private val utbetaling: Utbetaling,
 ) : Command {
 
     private companion object {
@@ -25,7 +27,7 @@ internal class AutomatiseringForEksisterendeOppgaveCommand(
 
     override fun execute(context: CommandContext): Boolean {
         automatisering.utfør(fødselsnummer, vedtaksperiodeId, hendelseId, utbetalingId) {
-            val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson)
+            val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson, utbetaling)
             godkjenningMediator.automatiskUtbetaling(context, behov, vedtaksperiodeId, fødselsnummer, hendelseId)
             logg.info("Oppgave avbrytes for vedtaksperiode $vedtaksperiodeId på grunn av automatisering")
             oppgaveMediator.avbrytOppgaver(vedtaksperiodeId)

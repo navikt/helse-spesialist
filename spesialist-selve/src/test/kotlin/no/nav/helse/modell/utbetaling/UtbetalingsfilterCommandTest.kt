@@ -4,12 +4,12 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import java.util.UUID
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.kommando.CommandContext
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.UUID
 
 internal class UtbetalingsfilterCommandTest {
     private lateinit var context: CommandContext
@@ -22,7 +22,8 @@ internal class UtbetalingsfilterCommandTest {
         hendelseId = UUID.randomUUID(),
         godkjenningsbehovJson = "{}",
         godkjenningMediator = godkjenningMediator,
-        utbetalingsfilter = { utbetalingsfilter }
+        utbetalingsfilter = { utbetalingsfilter },
+        utbetaling = Utbetaling(UUID.randomUUID(), 1000, 1000)
     )
 
     @BeforeEach

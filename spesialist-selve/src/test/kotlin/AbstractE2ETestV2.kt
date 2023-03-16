@@ -96,7 +96,6 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
     ) {
         håndterSøknad()
         håndterVedtaksperiodeOpprettet(vedtaksperiodeId = vedtaksperiodeId)
-        håndterVedtaksperiodeNyUtbetaling(vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshot(
             versjon = snapshotversjon,
             fødselsnummer = FØDSELSNUMMER,
@@ -460,7 +459,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
             val query = "SELECT a.orgnummer FROM arbeidsgiver a INNER JOIN vedtak v on a.id = v.arbeidsgiver_ref INNER JOIN person p on p.id = v.person_ref WHERE p.fodselsnummer = ?"
             session.run(queryOf(query, fødselsnummer.toLong()).map { it.string("orgnummer") }.asList)
         }
-
+        håndterVedtaksperiodeNyUtbetaling(vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
         håndterUtbetalingOpprettet(utbetalingtype = if (erRevurdering) "REVURDERING" else "UTBETALING")
         håndterVedtaksperiodeEndret()
         sisteMeldingId = meldingssenderV2.sendGodkjenningsbehov(

@@ -61,7 +61,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
             status = ANNULLERT,
             arbeidsgiverFagsystemId = arbeidsgiverFagsystemId
         )
-        assertEquals(3, utbetalinger().size)
+        assertEquals(4, utbetalinger().size)
     }
 
     @Test
@@ -89,7 +89,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
             opprettet = opprettet
         )
 
-        assertEquals(1, utbetalinger().size)
+        assertEquals(2, utbetalinger().size)
     }
 
     @Test
@@ -118,7 +118,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
             opprettet = senereTidspunkt
         )
 
-        assertEquals(2, utbetalinger().size)
+        assertEquals(3, utbetalinger().size)
     }
 
     @Test
@@ -137,7 +137,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
                 arbeidsgiverFagsystemId = arbeidsgiverFagsystemId
             )
         }
-        assertEquals(0, utbetalinger().size)
+        assertEquals(1, utbetalinger().size)
         assertEquals(1, feilendeMeldinger().size)
     }
 
@@ -155,7 +155,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
                 arbeidsgiverFagsystemId = arbeidsgiverFagsystemId
             )
         }
-        assertEquals(1, utbetalinger().size)
+        assertEquals(2, utbetalinger().size)
         assertEquals(0, feilendeMeldinger().size)
     }
 
@@ -200,7 +200,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
                 arbeidsgiverFagsystemId = arbeidsgiverFagsystemId
             )
         }
-        assertEquals(4, utbetalinger().size)
+        assertEquals(5, utbetalinger().size)
         assertEquals(0, feilendeMeldinger().size)
     }
 
@@ -217,7 +217,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
             forrigeStatus = IKKE_GODKJENT,
             arbeidsgiverFagsystemId = arbeidsgiverFagsystemId
         )
-        assertEquals(1, utbetalinger().size)
+        assertEquals(2, utbetalinger().size)
         sendUtbetalingEndret(
             aktørId = AKTØR,
             fødselsnummer = FØDSELSNUMMER,
@@ -228,7 +228,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
             forrigeStatus = GODKJENT,
             arbeidsgiverFagsystemId = arbeidsgiverFagsystemId
         )
-        assertEquals(2, utbetalinger().size)
+        assertEquals(3, utbetalinger().size)
     }
 
     @Test
@@ -238,13 +238,13 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
             aktørId = AKTØR,
             fødselsnummer = FØDSELSNUMMER,
             organisasjonsnummer = ORGNR,
-            utbetalingId = UTBETALING_ID,
+            utbetalingId = UUID.randomUUID(),
             type = "FERIEPENGER",
             status = OVERFØRT,
             arbeidsgiverFagsystemId = arbeidsgiverFagsystemId
         )
 
-        utbetalinger().first().let {
+        utbetalinger()[1].let {
             assertNotNull(it)
             assertEquals("FERIEPENGER", it.type)
         }
@@ -274,7 +274,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
             arbeidsgiverFagsystemId = arbeidsgiverFagsystemId
         )
 
-        assertEquals(2, utbetalinger().size)
+        assertEquals(4, utbetalinger().size)
         assertTrue { utbetalinger().find { it.id == nyUtbetalingId } != null }
     }
 
@@ -284,7 +284,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
         vedtaksperiode(utbetalingId = nyUtbetalingId)
         sendPersonUtbetalingEndret("UTBETALING", OVERFØRT, ORGNR, utbetalingId = nyUtbetalingId)
 
-        assertEquals(1, utbetalinger().size)
+        assertEquals(2, utbetalinger().size)
         assertTrue { utbetalinger().find { it.id == nyUtbetalingId } != null }
     }
 

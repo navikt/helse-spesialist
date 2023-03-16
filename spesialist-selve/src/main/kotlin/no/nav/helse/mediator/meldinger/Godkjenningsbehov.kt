@@ -104,6 +104,7 @@ internal class Godkjenningsbehov(
 
     // lambda fordi mange av testene ikke sørger for at utbetalingen fins i databasen før godkjenningsbehovet behandles
     private val utbetalingsfinner = { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) }
+    private val utbetaling = utbetalingDao.utbetalingFor(utbetalingId) ?: throw IllegalStateException("Forventer å finne utbetaling med id=$utbetalingId")
 
     private val utbetalingsfilter: () -> Utbetalingsfilter = {
         val utbetaling = utbetalingsfinner()
@@ -168,7 +169,8 @@ internal class Godkjenningsbehov(
             hendelseId = id,
             godkjenningsbehovJson = json,
             godkjenningMediator = godkjenningMediator,
-            utbetalingsfilter = utbetalingsfilter
+            utbetalingsfilter = utbetalingsfilter,
+            utbetaling = utbetaling
         ),
         EgenAnsattCommand(
             egenAnsattDao = egenAnsattDao,
@@ -207,7 +209,8 @@ internal class Godkjenningsbehov(
             godkjenningsbehovJson = json,
             godkjenningMediator = godkjenningMediator,
             hendelseId = id,
-            utbetalingsfilter = utbetalingsfilter
+            utbetalingsfilter = utbetalingsfilter,
+            utbetaling = utbetaling
         ),
         AutomatiseringCommand(
             fødselsnummer = fødselsnummer,
@@ -217,6 +220,7 @@ internal class Godkjenningsbehov(
             automatisering = automatisering,
             godkjenningsbehovJson = json,
             godkjenningMediator = godkjenningMediator,
+            utbetaling = utbetaling,
         ),
         OpprettSaksbehandleroppgaveCommand(
             fødselsnummer = fødselsnummer,

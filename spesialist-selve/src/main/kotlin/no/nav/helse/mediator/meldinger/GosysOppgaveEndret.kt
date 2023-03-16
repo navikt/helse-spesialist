@@ -19,6 +19,7 @@ import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.oppgave.SjekkAtOppgaveFortsattErÅpenCommand
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -43,10 +44,14 @@ internal class GosysOppgaveEndret(
     godkjenningMediator: GodkjenningMediator,
     oppgaveMediator: OppgaveMediator,
     oppgaveDao: OppgaveDao,
+    utbetalingDao: UtbetalingDao,
 ) : Hendelse, MacroCommand() {
 
     override fun fødselsnummer() = fødselsnummer
     override fun toJson(): String = json
+
+    private val utbetaling = utbetalingDao.utbetalingFor(gosysOppgaveEndretCommandData.utbetalingId)
+        ?: throw IllegalStateException("Forventer å finne utbetaling med id=${gosysOppgaveEndretCommandData.utbetalingId}")
 
     override val commands: List<Command> = listOf(
         ÅpneGosysOppgaverCommand(
@@ -71,7 +76,8 @@ internal class GosysOppgaveEndret(
             automatisering = automatisering,
             godkjenningsbehovJson = gosysOppgaveEndretCommandData.godkjenningsbehovJson,
             godkjenningMediator = godkjenningMediator,
-            oppgaveMediator = oppgaveMediator
+            oppgaveMediator = oppgaveMediator,
+            utbetaling = utbetaling
         )
     )
 

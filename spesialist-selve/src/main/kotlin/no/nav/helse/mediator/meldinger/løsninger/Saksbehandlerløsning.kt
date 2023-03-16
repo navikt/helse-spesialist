@@ -10,6 +10,7 @@ import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.UtbetalingsgodkjenningCommand
 import no.nav.helse.modell.oppgave.OppgaveDao
+import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -39,7 +40,9 @@ internal class Saksbehandlerløsning(
     hendelseDao: HendelseDao,
     private val oppgaveDao: OppgaveDao,
     godkjenningMediator: GodkjenningMediator,
+    utbetalingDao: UtbetalingDao,
 ) : Hendelse, MacroCommand() {
+    private val utbetaling = utbetalingDao.utbetalingFor(oppgaveId) ?: throw IllegalStateException("Forventer å finne utbetaling for oppgave med id=$oppgaveId")
 
     override val commands = listOf(
         UtbetalingsgodkjenningCommand(
@@ -55,7 +58,8 @@ internal class Saksbehandlerløsning(
             hendelseDao,
             godkjenningMediator,
             vedtaksperiodeId(),
-            fødselsnummer
+            fødselsnummer,
+            utbetaling
         ),
     )
 

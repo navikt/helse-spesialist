@@ -7,7 +7,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.HendelseDao
-import no.nav.helse.modell.UtbetalingsgodkjenningMessage
+import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.objectMapper
@@ -26,10 +26,11 @@ internal class UtbetalingsgodkjenningCommandTest {
         private val GODKJENNINGSBEHOV_ID = UUID.randomUUID()
         private val vedtaksperiodeId = UUID.randomUUID()
         private val fødselsnummer = "1234"
+        private val utbetaling = Utbetaling(UUID.randomUUID(), 1000, 1000)
     }
 
-    private val behov = UtbetalingsgodkjenningMessage("""{ "@event_name": "behov" }""")
-    private val dao = mockk<HendelseDao>()
+    private val godkjenningsbehovJson = """{ "@event_name": "behov" }"""
+    private val hendelseDao = mockk<HendelseDao>()
     private val varselRepository = mockk<VarselRepository>(relaxed = true)
     private val generasjonRepository = mockk<GenerasjonRepository>(relaxed = true)
     private lateinit var commandContext: CommandContext
@@ -37,7 +38,7 @@ internal class UtbetalingsgodkjenningCommandTest {
 
     @BeforeEach
     fun setup() {
-        clearMocks(dao)
+        clearMocks(hendelseDao)
         commandContext = CommandContext(UUID.randomUUID())
         command = UtbetalingsgodkjenningCommand(
             godkjent = GODKJENT,
@@ -49,16 +50,17 @@ internal class UtbetalingsgodkjenningCommandTest {
             begrunnelser = null,
             kommentar = null,
             godkjenningsbehovhendelseId = GODKJENNINGSBEHOV_ID,
-            hendelseDao = dao,
+            hendelseDao = hendelseDao,
             godkjenningMediator = GodkjenningMediator(mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true), varselRepository, generasjonRepository),
             vedtaksperiodeId = vedtaksperiodeId,
-            fødselsnummer = fødselsnummer
+            fødselsnummer = fødselsnummer,
+            utbetaling = utbetaling
         )
     }
 
     @Test
     fun `løser godkjenningsbehovet`() {
-        every { dao.finnUtbetalingsgodkjenningbehov(GODKJENNINGSBEHOV_ID) } returns behov
+        every { hendelseDao.finnUtbetalingsgodkjenningbehovJson(GODKJENNINGSBEHOV_ID) } returns godkjenningsbehovJson
         assertTrue(command.execute(commandContext))
         assertNotNull(commandContext.meldinger()
             .map(objectMapper::readTree)

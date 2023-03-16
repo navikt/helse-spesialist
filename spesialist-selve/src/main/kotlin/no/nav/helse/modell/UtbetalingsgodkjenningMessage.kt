@@ -5,11 +5,12 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.mediator.meldinger.utgående.VedtaksperiodeAvvist
 import no.nav.helse.mediator.meldinger.utgående.VedtaksperiodeGodkjent
+import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageProblems
 
-internal class UtbetalingsgodkjenningMessage(json: String) {
+internal class UtbetalingsgodkjenningMessage(json: String, private val utbetaling: Utbetaling) {
     private val behov = JsonMessage(json, MessageProblems(json))
     private lateinit var løsning: Map<String, Any>
 
@@ -93,7 +94,8 @@ internal class UtbetalingsgodkjenningMessage(json: String) {
                 "automatiskBehandling" to automatisk,
                 "årsak" to årsak,
                 "begrunnelser" to begrunnelser,
-                "kommentar" to kommentar
+                "kommentar" to kommentar,
+                "refusjonstype" to utbetaling.refusjonstype().name
             )
         )
         // <midlertidig forklaring="@behovId brukes for å gruppere behov/løsning. Ble innført 28. mars 2022. Må likevel fikse godkjenningsbehov som ble opprettet før 28. mars">

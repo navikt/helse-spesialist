@@ -11,6 +11,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.ANNULLERT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -52,6 +53,22 @@ class UtbetalingDaoTest : DatabaseIntegrationTest() {
         utbetalingDao.opprettUtbetalingId(utbetalingId, FNR, ORGNUMMER, Utbetalingtype.UTBETALING, LocalDateTime.now(), arbeidsgiveroppdragId1, personOppdragId1, 2000, 2000)
 
         val utbetaling = utbetalingDao.utbetalingFor(utbetalingId)
+        assertEquals(Utbetaling(utbetalingId, 2000, 2000), utbetaling)
+    }
+
+    @Test
+    fun `finner utbetaling basert på oppgaveId`() {
+        nyPerson()
+        val arbeidsgiverFagsystemId = fagsystemId()
+        val personFagsystemId = fagsystemId()
+
+        val arbeidsgiveroppdragId1 = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
+        val personOppdragId1 = lagPersonoppdrag(personFagsystemId)
+        val utbetalingId = UUID.randomUUID()
+        val oppgaveId = oppgaveDao.opprettOppgave(UUID.randomUUID(), Oppgavetype.SØKNAD, VEDTAKSPERIODE, utbetalingId)
+        utbetalingDao.opprettUtbetalingId(utbetalingId, FNR, ORGNUMMER, Utbetalingtype.UTBETALING, LocalDateTime.now(), arbeidsgiveroppdragId1, personOppdragId1, 2000, 2000)
+
+        val utbetaling = utbetalingDao.utbetalingFor(oppgaveId)
         assertEquals(Utbetaling(utbetalingId, 2000, 2000), utbetaling)
     }
 

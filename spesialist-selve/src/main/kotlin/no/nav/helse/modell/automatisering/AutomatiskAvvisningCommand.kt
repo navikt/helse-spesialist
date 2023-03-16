@@ -1,5 +1,6 @@
 package no.nav.helse.modell.automatisering
 
+import java.util.UUID
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.meldinger.løsninger.HentEnhetløsning
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
@@ -8,10 +9,10 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingsfilter
 import no.nav.helse.modell.vergemal.VergemålDao
 import org.slf4j.LoggerFactory
-import java.util.UUID
 
 internal class AutomatiskAvvisningCommand(
     private val fødselsnummer: String,
@@ -22,7 +23,8 @@ internal class AutomatiskAvvisningCommand(
     private val godkjenningsbehovJson: String,
     private val godkjenningMediator: GodkjenningMediator,
     private val hendelseId: UUID,
-    private val utbetalingsfilter: () -> Utbetalingsfilter
+    private val utbetalingsfilter: () -> Utbetalingsfilter,
+    private val utbetaling: Utbetaling
 ) : Command {
 
     override fun execute(context: CommandContext): Boolean {
@@ -39,7 +41,7 @@ internal class AutomatiskAvvisningCommand(
         if (underVergemål) årsaker.add("Vergemål")
         if (utbetalingsfilter.kanIkkeUtbetales) årsaker.addAll(utbetalingsfilter.årsaker())
 
-        val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson)
+        val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson, utbetaling)
         godkjenningMediator.automatiskAvvisning(context, behov, vedtaksperiodeId, fødselsnummer, årsaker.toList(), hendelseId)
         logg.info("Automatisk avvisning av vedtaksperiode $vedtaksperiodeId pga:$årsaker")
         return ferdigstill(context)

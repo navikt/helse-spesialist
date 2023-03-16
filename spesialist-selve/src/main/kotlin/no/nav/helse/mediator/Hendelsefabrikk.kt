@@ -311,6 +311,7 @@ internal class Hendelsefabrikk(
         godkjenningsbehovhendelseId = godkjenningsbehovhendelseId,
         hendelseDao = hendelseDao,
         oppgaveDao = oppgaveDao,
+        utbetalingDao = utbetalingDao,
         godkjenningMediator = godkjenningMediator
     )
 
@@ -479,7 +480,7 @@ internal class Hendelsefabrikk(
     }
 
     fun adressebeskyttelseEndret(id: UUID, fødselsnummer: String, json: String) =
-        AdressebeskyttelseEndret(id, fødselsnummer, json, personDao, oppgaveDao, hendelseDao, godkjenningMediator)
+        AdressebeskyttelseEndret(id, fødselsnummer, json, personDao, oppgaveDao, hendelseDao, godkjenningMediator, utbetalingDao)
 
     fun adressebeskyttelseEndret(json: String): AdressebeskyttelseEndret {
         val jsonNode = mapper.readTree(json)
@@ -491,6 +492,7 @@ internal class Hendelsefabrikk(
             oppgaveDao = oppgaveDao,
             hendelseDao = hendelseDao,
             godkjenningMediator = godkjenningMediator,
+            utbetalingDao = utbetalingDao
         )
     }
 
@@ -772,7 +774,8 @@ internal class Hendelsefabrikk(
             automatisering = automatisering,
             godkjenningMediator = godkjenningMediator,
             oppgaveMediator = oppgaveMediator,
-            oppgaveDao = oppgaveDao
+            oppgaveDao = oppgaveDao,
+            utbetalingDao = utbetalingDao
         )
     }
 

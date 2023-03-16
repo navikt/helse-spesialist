@@ -63,9 +63,9 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
     fun `finner utbetalingsgodkjenningsbehov`() {
         val json = """{"foo": "bar"}"""
         godkjenningsbehov(HENDELSE_ID, FNR, json)
-        val actual = hendelseDao.finnUtbetalingsgodkjenningbehov(HENDELSE_ID)
+        val actual = hendelseDao.finnUtbetalingsgodkjenningbehovJson(HENDELSE_ID)
         val expected = objectMapper.readTree(json)
-        assertEquals(expected.path("foo"), objectMapper.readTree(actual.toJson()).path("foo"))
+        assertEquals(expected.path("foo"), objectMapper.readTree(actual).path("foo"))
     }
 
     @Test

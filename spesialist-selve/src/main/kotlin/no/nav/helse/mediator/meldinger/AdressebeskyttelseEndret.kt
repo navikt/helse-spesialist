@@ -1,21 +1,22 @@
 package no.nav.helse.mediator.meldinger
 
+import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments
+import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.modell.HendelseDao
+import no.nav.helse.modell.kommando.AvvisVedStrengtFortroligAdressebeskyttelseCommand
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterPersoninfoCommand
+import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
-import java.util.*
-import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.modell.HendelseDao
-import no.nav.helse.modell.kommando.AvvisVedStrengtFortroligAdressebeskyttelseCommand
-import no.nav.helse.modell.oppgave.OppgaveDao
 
 internal class AdressebeskyttelseEndret(
     override val id: UUID,
@@ -24,16 +25,18 @@ internal class AdressebeskyttelseEndret(
     personDao: PersonDao,
     oppgaveDao: OppgaveDao,
     hendelseDao: HendelseDao,
-    godkjenningMediator: GodkjenningMediator
+    godkjenningMediator: GodkjenningMediator,
+    utbetalingDao: UtbetalingDao
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         OppdaterPersoninfoCommand(fødselsnummer, personDao, force = true),
         AvvisVedStrengtFortroligAdressebeskyttelseCommand(
-            fødselsnummer,
-            personDao,
-            oppgaveDao,
-            hendelseDao,
-            godkjenningMediator
+            fødselsnummer = fødselsnummer,
+            personDao = personDao,
+            oppgaveDao = oppgaveDao,
+            hendelseDao = hendelseDao,
+            utbetalingDao = utbetalingDao,
+            godkjenningMediator = godkjenningMediator
         )
     )
 

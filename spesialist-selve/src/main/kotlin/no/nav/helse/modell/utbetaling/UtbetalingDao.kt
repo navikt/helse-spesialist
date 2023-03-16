@@ -260,6 +260,20 @@ class UtbetalingDao(private val dataSource: DataSource) {
         }
     }
 
+    internal fun utbetalingFor(oppgaveId: Long): Utbetaling? {
+        @Language("PostgreSQL")
+        val query = "SELECT utbetaling_id, arbeidsgiverbeløp, personbeløp FROM utbetaling_id u WHERE u.utbetaling_id = (SELECT utbetaling_id FROM oppgave o WHERE o.id = :oppgave_id)"
+        return sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, mapOf("oppgave_id" to oppgaveId)).map {
+                Utbetaling(
+                    it.uuid("utbetaling_id"),
+                    it.int("arbeidsgiverbeløp"),
+                    it.int("personbeløp")
+                )
+            }.asSingle)
+        }
+    }
+
     internal fun utbetalingerForVedtaksperiode(vedtaksperiodeId: UUID): List<TidligereUtbetalingerForVedtaksperiodeDto> {
         @Language("PostgreSQL")
         val statement = """

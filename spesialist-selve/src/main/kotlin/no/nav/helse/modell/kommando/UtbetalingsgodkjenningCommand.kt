@@ -1,10 +1,12 @@
 package no.nav.helse.modell.kommando
 
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.HendelseDao
+import no.nav.helse.modell.UtbetalingsgodkjenningMessage
+import no.nav.helse.modell.utbetaling.Utbetaling
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
-import java.util.*
 
 internal class UtbetalingsgodkjenningCommand(
     private val godkjent: Boolean,
@@ -19,7 +21,8 @@ internal class UtbetalingsgodkjenningCommand(
     private val hendelseDao: HendelseDao,
     private val godkjenningMediator: GodkjenningMediator,
     private val vedtaksperiodeId: UUID,
-    private val fødselsnummer: String
+    private val fødselsnummer: String,
+    private val utbetaling: Utbetaling
 ) : Command {
 
     private companion object {
@@ -27,7 +30,8 @@ internal class UtbetalingsgodkjenningCommand(
     }
 
     override fun execute(context: CommandContext): Boolean {
-        val behov = hendelseDao.finnUtbetalingsgodkjenningbehov(godkjenningsbehovhendelseId)
+        val behovJson = hendelseDao.finnUtbetalingsgodkjenningbehovJson(godkjenningsbehovhendelseId)
+        val behov = UtbetalingsgodkjenningMessage(behovJson, utbetaling)
         if (godkjent) {
             godkjenningMediator.saksbehandlerUtbetaling(context, behov, vedtaksperiodeId, fødselsnummer, saksbehandlerIdent, epostadresse, godkjenttidspunkt)
         } else {

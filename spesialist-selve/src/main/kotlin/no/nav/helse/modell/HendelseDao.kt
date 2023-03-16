@@ -74,8 +74,8 @@ internal class HendelseDao(private val dataSource: DataSource) {
         }
     }
 
-    internal fun finnUtbetalingsgodkjenningbehov(hendelseId: UUID): UtbetalingsgodkjenningMessage {
-        return UtbetalingsgodkjenningMessage(finnJson(hendelseId, GODKJENNING))
+    internal fun finnUtbetalingsgodkjenningbehovJson(hendelseId: UUID): String {
+        return finnJson(hendelseId, GODKJENNING)
     }
 
     private fun finnJson(hendelseId: UUID, hendelsetype: Hendelsetype): String {

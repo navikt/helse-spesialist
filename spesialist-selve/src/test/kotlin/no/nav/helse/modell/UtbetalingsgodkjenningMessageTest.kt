@@ -4,12 +4,17 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import java.time.LocalDateTime
+import java.util.UUID
+import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.isMissingOrNull
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertDoesNotThrow
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
 
 internal class UtbetalingsgodkjenningMessageTest {
     private companion object {
@@ -22,10 +27,11 @@ internal class UtbetalingsgodkjenningMessageTest {
         private val GODKJENTTIDSPUNKT = LocalDateTime.now()
     }
     private lateinit var utbetalingMessage: UtbetalingsgodkjenningMessage
+    private val utbetaling = Utbetaling(UUID.randomUUID(), 1000, 1000)
 
     @BeforeEach
     fun setup() {
-        utbetalingMessage = UtbetalingsgodkjenningMessage("{}")
+        utbetalingMessage = UtbetalingsgodkjenningMessage("{}", utbetaling)
     }
 
     @Test

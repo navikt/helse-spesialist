@@ -6,6 +6,7 @@ import io.mockk.verify
 import java.util.UUID
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.objectMapper
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -37,6 +38,7 @@ internal class AutomatiseringCommandTest {
                 varselRepository = mockk(relaxed = true),
                 generasjonRepository = mockk(relaxed = true)
             ),
+            Utbetaling(utbetalingId, 1000, 1000),
         )
 
     private lateinit var context: CommandContext
