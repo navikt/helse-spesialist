@@ -74,6 +74,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
             oppgaveApiDao = oppgaveApiDao,
             periodehistorikkDao = periodehistorikkDao,
             notatDao = notatDao,
+            totrinnsvurderingApiDao = totrinnsvurderingApiDao,
             snapshotMediator = snapshotMediator,
             reservasjonClient = reservasjonClient,
             oppgaveService = oppgaveService,

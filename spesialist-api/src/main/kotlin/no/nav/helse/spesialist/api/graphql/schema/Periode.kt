@@ -20,6 +20,7 @@ import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
+import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 import no.nav.helse.spesialist.api.graphql.enums.Utbetalingtype as GraphQLUtbetalingtype
@@ -340,6 +341,7 @@ data class BeregnetPeriode(
     private val oppgaveApiDao: OppgaveApiDao,
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val notatDao: NotatDao,
+    private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
     private val erSisteGenerasjon: Boolean,
 ) : Periode {
     override fun erForkastet(): Boolean = erForkastet(periode)
@@ -508,6 +510,16 @@ data class BeregnetPeriode(
                 erRetur = it.erRetur,
                 trengerTotrinnsvurdering = it.trengerTotrinnsvurdering,
                 tidligereSaksbehandler = it.tidligereSaksbehandler,
+            )
+        }
+
+    fun totrinnsvurdering(): Totrinnsvurdering? =
+        totrinnsvurderingApiDao.hentAktiv(UUID.fromString(vedtaksperiodeId()))?.let {
+            Totrinnsvurdering(
+                erRetur = it.erRetur,
+                saksbehandler = it.saksbehandler.toString(),
+                beslutter = it.beslutter.toString(),
+                erBeslutteroppgave = !it.erRetur && it.saksbehandler != null
             )
         }
 }

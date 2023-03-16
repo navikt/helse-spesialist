@@ -30,6 +30,7 @@ import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
+import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.utbetaling.UtbetalingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
@@ -49,6 +50,7 @@ fun Application.graphQLApi(
     oppgaveApiDao: OppgaveApiDao,
     periodehistorikkDao: PeriodehistorikkDao,
     notatDao: NotatDao,
+    totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
     reservasjonClient: ReservasjonClient,
     skjermedePersonerGruppeId: UUID,
     kode7Saksbehandlergruppe: UUID,
@@ -71,6 +73,7 @@ fun Application.graphQLApi(
         oppgaveApiDao = oppgaveApiDao,
         periodehistorikkDao = periodehistorikkDao,
         notatDao = notatDao,
+        totrinnsvurderingApiDao = totrinnsvurderingApiDao,
         reservasjonClient = reservasjonClient,
         snapshotMediator = snapshotMediator,
         oppgaveService = oppgaveService,

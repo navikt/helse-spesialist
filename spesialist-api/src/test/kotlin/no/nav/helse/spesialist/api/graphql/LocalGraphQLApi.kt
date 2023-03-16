@@ -51,6 +51,7 @@ import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
+import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.utbetaling.UtbetalingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vedtaksperiode.EnhetDto
@@ -71,6 +72,7 @@ fun main() = runBlocking {
         val oppgaveApiDao = mockk<OppgaveApiDao>(relaxed = true)
         val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
         val notatDao = mockk<NotatDao>(relaxed = true)
+        val totrinnsvurderingApiDao = mockk<TotrinnsvurderingApiDao>(relaxed = true)
         val reservasjonClient = mockk<ReservasjonClient>(relaxed = true)
         val behandlingsstatistikkMediator = mockk<BehandlingsstatistikkMediator>(relaxed = true)
 
@@ -124,6 +126,7 @@ fun main() = runBlocking {
             oppgaveApiDao = oppgaveApiDao,
             periodehistorikkDao = periodehistorikkDao,
             notatDao = notatDao,
+            totrinnsvurderingApiDao = totrinnsvurderingApiDao,
             reservasjonClient = reservasjonClient,
             skjermedePersonerGruppeId = UUID.randomUUID(),
             kode7Saksbehandlergruppe = UUID.randomUUID(),

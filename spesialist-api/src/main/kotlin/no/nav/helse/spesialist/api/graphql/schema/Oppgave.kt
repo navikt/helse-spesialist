@@ -48,6 +48,13 @@ data class OppgaveForPeriodevisning(
     val tidligereSaksbehandler: String?,
 )
 
+data class Totrinnsvurdering(
+    val erRetur: Boolean,
+    val saksbehandler: UUIDString?,
+    val beslutter: UUIDString?,
+    val erBeslutteroppgave: Boolean
+)
+
 data class Personnavn(
     val fornavn: String,
     val etternavn: String,

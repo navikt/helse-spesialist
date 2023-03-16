@@ -90,6 +90,7 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
+import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 import org.intellij.lang.annotations.Language
@@ -135,6 +136,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val saksbehandlerDao = SaksbehandlerDao(dataSource)
     protected val reservasjonDao = ReservasjonDao(dataSource)
     private val notatDao = NotatDao(dataSource)
+    private val totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource)
     private val vergemålDao = VergemålDao(dataSource)
     protected val overstyringDao = OverstyringDao(dataSource)
     private val varselRepository = ActualVarselRepository(dataSource)
@@ -202,6 +204,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         oppgaveApiDao = oppgaveApiDao,
         periodehistorikkDao = periodehistorikkDao,
         notatDao = notatDao,
+        totrinnsvurderingApiDao = totrinnsvurderingApiDao,
         snapshotMediator = snapshotMediator,
         reservasjonClient = mockk(relaxed = true),
     )

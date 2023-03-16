@@ -15,6 +15,7 @@ import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
+import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 
@@ -63,6 +64,7 @@ data class Person(
     private val oppgaveApiDao: OppgaveApiDao,
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val notatDao: NotatDao,
+    private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
     private val reservasjonClient: ReservasjonClient,
 ) {
     fun versjon(): Int = snapshot.versjon
@@ -112,6 +114,7 @@ data class Person(
             oppgaveApiDao = oppgaveApiDao,
             periodehistorikkDao = periodehistorikkDao,
             notatDao = notatDao,
+            totrinnsvurderingApiDao = totrinnsvurderingApiDao,
         )
     }
 

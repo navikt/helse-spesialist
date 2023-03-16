@@ -17,6 +17,7 @@ import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
+import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 import org.slf4j.Logger
@@ -34,6 +35,7 @@ class PersonQuery(
     private val oppgaveApiDao: OppgaveApiDao,
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val notatDao: NotatDao,
+    private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
     private val snapshotMediator: SnapshotMediator,
     private val reservasjonClient: ReservasjonClient,
 ) : AbstractPersonQuery(personApiDao, egenAnsattApiDao) {
@@ -81,6 +83,7 @@ class PersonQuery(
                 oppgaveApiDao = oppgaveApiDao,
                 periodehistorikkDao = periodehistorikkDao,
                 notatDao = notatDao,
+                totrinnsvurderingApiDao = totrinnsvurderingApiDao,
                 reservasjonClient = reservasjonClient,
             )
         }

@@ -47,6 +47,7 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
+import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.utbetaling.UtbetalingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
@@ -74,6 +75,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
     protected val saksbehandlerDao = SaksbehandlerDao(dataSource)
     protected val notatDao = NotatDao(dataSource)
+    protected val totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource)
     protected val personApiDao = PersonApiDao(dataSource)
     protected val tildelingDao = TildelingDao(dataSource)
     protected val overstyringApiDao = OverstyringApiDao(dataSource)

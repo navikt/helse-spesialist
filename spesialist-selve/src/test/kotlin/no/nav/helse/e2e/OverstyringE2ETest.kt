@@ -37,6 +37,7 @@ import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
+import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 import org.intellij.lang.annotations.Language
@@ -230,6 +231,7 @@ internal class OverstyringE2ETest : AbstractE2ETestV2() {
         oppgaveApiDao = OppgaveApiDao(dataSource),
         periodehistorikkDao = PeriodehistorikkDao(dataSource),
         notatDao = NotatDao(dataSource),
+        totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource),
         snapshotMediator = SnapshotMediator(SnapshotApiDao(dataSource), mockk(relaxed = true)),
         reservasjonClient = mockk(relaxed = true),
     )

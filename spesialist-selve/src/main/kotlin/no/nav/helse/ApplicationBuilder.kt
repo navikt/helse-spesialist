@@ -98,6 +98,7 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
+import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.utbetaling.UtbetalingApiDao
 import no.nav.helse.spesialist.api.utbetaling.annulleringApi
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
@@ -211,6 +212,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val abonnementDao = no.nav.helse.spesialist.api.abonnement.AbonnementDao(dataSource)
     private val behandlingsstatistikkDao = BehandlingsstatistikkDao(dataSource)
     private val notatDao = NotatDao(dataSource)
+    private val totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource)
     private val snapshotApiDao = SnapshotApiDao(dataSource)
     private val vergemålDao = VergemålDao(dataSource)
     private val notatMediator = NotatMediator(notatDao)
@@ -299,6 +301,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 oppgaveApiDao = oppgaveApiDao,
                 periodehistorikkDao = periodehistorikkDao,
                 notatDao = notatDao,
+                totrinnsvurderingApiDao = totrinnsvurderingApiDao,
                 reservasjonClient = reservasjonClient,
                 skjermedePersonerGruppeId = tilgangsgrupper.skjermedePersonerGruppeId,
                 kode7Saksbehandlergruppe = tilgangsgrupper.kode7GruppeId,

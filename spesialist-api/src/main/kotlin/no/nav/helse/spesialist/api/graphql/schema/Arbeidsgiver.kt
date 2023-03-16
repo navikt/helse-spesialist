@@ -15,6 +15,7 @@ import no.nav.helse.spesialist.api.overstyring.OverstyringInntektDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringTidslinjeDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
+import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 
@@ -114,6 +115,7 @@ data class Arbeidsgiver(
     private val oppgaveApiDao: OppgaveApiDao,
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val notatDao: NotatDao,
+    private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
 ) {
     fun generasjoner(): List<Generasjon> = generasjoner.mapIndexed { index, generasjon ->
         val oppgaveId = oppgaveApiDao.finnOppgaveId(fødselsnummer)
@@ -139,6 +141,7 @@ data class Arbeidsgiver(
                         oppgaveApiDao = oppgaveApiDao,
                         periodehistorikkDao = periodehistorikkDao,
                         notatDao = notatDao,
+                        totrinnsvurderingApiDao = totrinnsvurderingApiDao,
                         erSisteGenerasjon = index == 0,
                     )
 
