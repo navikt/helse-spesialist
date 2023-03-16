@@ -11,6 +11,8 @@ import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.meldinger.løsninger.Saksbehandlerløsning
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.utbetaling.Refusjonstype
+import no.nav.helse.modell.utbetaling.Refusjonstype.DELVIS_REFUSJON
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -62,7 +64,7 @@ internal class SaksbehandlerløsningTest {
         every { utbetalingDao.utbetalingFor(OPPGAVE_ID) } returns Utbetaling(randomUUID(), 1000, 1000)
         val saksbehandlerløsning = saksbehandlerløsning(true)
         assertTrue(saksbehandlerløsning.execute(context))
-        assertLøsning(true)
+        assertLøsning(true, DELVIS_REFUSJON)
     }
 
     @Test
@@ -71,10 +73,10 @@ internal class SaksbehandlerløsningTest {
         every { utbetalingDao.utbetalingFor(OPPGAVE_ID) } returns Utbetaling(randomUUID(), 1000, 1000)
         val saksbehandlerløsning = saksbehandlerløsning(false)
         assertTrue(saksbehandlerløsning.execute(context))
-        assertLøsning(false)
+        assertLøsning(false, DELVIS_REFUSJON)
     }
 
-    private fun assertLøsning(godkjent: Boolean) {
+    private fun assertLøsning(godkjent: Boolean, refusjonstype: Refusjonstype) {
         val løsning = context.meldinger()
             .map(objectMapper::readTree)
             .filter { it["@event_name"].asText() == "behov" }
@@ -87,6 +89,7 @@ internal class SaksbehandlerløsningTest {
         assertEquals(godkjent, godkjenning.path("godkjent").booleanValue())
         assertEquals(IDENT, godkjenning.path("saksbehandlerIdent").textValue())
         assertEquals(GODKJENTTIDSPUNKT, LocalDateTime.parse(godkjenning.path("godkjenttidspunkt").textValue()))
+        assertEquals(refusjonstype, enumValueOf<Refusjonstype>(godkjenning.path("refusjonstype").asText()))
         assertTrue(godkjenning.path("årsak").isNull)
         assertTrue(godkjenning.path("kommentar").isNull)
         assertTrue(godkjenning.path("begrunnelser").isNull)
