@@ -1,258 +1,100 @@
 package no.nav.helse.e2e
 
-import AbstractE2ETest
+import AbstractE2ETestV2
+import graphql.schema.DataFetchingEnvironment
 import io.mockk.every
-import java.time.LocalDate
-import no.nav.helse.Meldingssender.sendArbeidsforholdløsningOld
-import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
-import no.nav.helse.Meldingssender.sendEgenAnsattløsningOld
-import no.nav.helse.Meldingssender.sendGodkjenningsbehov
-import no.nav.helse.Meldingssender.sendOverstyrTidslinje
-import no.nav.helse.Meldingssender.sendOverstyrtArbeidsforhold
-import no.nav.helse.Meldingssender.sendOverstyrtInntektOgRefusjon
-import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
-import no.nav.helse.Meldingssender.sendRisikovurderingløsningOld
-import no.nav.helse.Meldingssender.sendSøknadSendt
-import no.nav.helse.Meldingssender.sendVedtaksperiodeEndret
-import no.nav.helse.Meldingssender.sendVedtaksperiodeNyUtbetaling
-import no.nav.helse.Meldingssender.sendVergemålløsningOld
-import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsningOld
-import no.nav.helse.TestRapidHelpers.oppgaveId
-import no.nav.helse.Testdata.AKTØR
+import io.mockk.mockk
+import java.util.UUID
+import kotliquery.queryOf
+import kotliquery.sessionOf
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
-import no.nav.helse.Testdata.ORGNR_GHOST
 import no.nav.helse.Testdata.SAKSBEHANDLERTILGANGER_UTEN_TILGANGER
 import no.nav.helse.Testdata.SAKSBEHANDLER_EPOST
-import no.nav.helse.Testdata.SNAPSHOT_MED_WARNINGS
 import no.nav.helse.Testdata.UTBETALING_ID
-import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.januar
 import no.nav.helse.mediator.api.Arbeidsgiver
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.api.SubsumsjonDto
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
+import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
+import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
+import no.nav.helse.spesialist.api.graphql.query.PersonQuery
 import no.nav.helse.spesialist.api.graphql.schema.Arbeidsforholdoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.Dagoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.Inntektoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.OppgaveForOversiktsvisning
 import no.nav.helse.spesialist.api.graphql.schema.Person
-import no.nav.helse.spesialist.api.overstyring.Dagtype
+import no.nav.helse.spesialist.api.notat.NotatDao
+import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
+import no.nav.helse.spesialist.api.overstyring.Dagtype.Feriedag
+import no.nav.helse.spesialist.api.overstyring.Dagtype.Sykedag
+import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.spesialist.api.person.PersonApiDao
+import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
+import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
+import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
+import no.nav.helse.spesialist.api.tildeling.TildelingDao
+import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
+import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class OverstyringE2ETest : AbstractE2ETest() {
+internal class OverstyringE2ETest : AbstractE2ETestV2() {
 
     private fun List<OppgaveForOversiktsvisning>.ingenOppgaveMedId(id: String) = none { it.id == id }
-    private fun assertIngenOppgaver(id: String) {
-        oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_UTEN_TILGANGER).ingenOppgaveMedId(id)
-    }
 
     @Test
     fun `saksbehandler overstyrer sykdomstidslinje`() {
-        val originaltGodkjenningsbehov = settOppBruker()
+        fremTilSaksbehandleroppgave()
+        håndterOverstyrTidslinje(dager = listOf(OverstyringDagDto(20.januar, Feriedag, Sykedag, null, 100)))
+        assertOverstyrTidslinje(FØDSELSNUMMER, 1)
 
-        sendOverstyrTidslinje(
-            aktørId = AKTØR,
-            fødselsnummer = FØDSELSNUMMER,
-            organisasjonsnummer = ORGNR,
-            dager = listOf(
-                OverstyringDagDto(
-                    dato = LocalDate.of(2018, 1, 20),
-                    type = Dagtype.Feriedag,
-                    grad = null,
-                    fraType = Dagtype.Sykedag,
-                    fraGrad = 100
-                )
-            )
-        )
+        assertOppgaver(UTBETALING_ID, "AvventerSaksbehandler", 0)
 
-        assertTrue(overstyringApiDao.finnOverstyringerAvTidslinjer(FØDSELSNUMMER, ORGNR).isNotEmpty())
-        val originalOppgaveId = testRapid.inspektør.oppgaveId(originaltGodkjenningsbehov)
-        assertIngenOppgaver(originalOppgaveId)
-
-        val nyttGodkjenningsbehov = sendGodkjenningsbehov(
-            AKTØR,
-            FØDSELSNUMMER,
-            ORGNR,
-            VEDTAKSPERIODE_ID,
-            UTBETALING_ID,
-            LocalDate.of(2018, 1, 1),
-            LocalDate.of(2018, 1, 31)
-        )
-
-        klargjørForGodkjenning(nyttGodkjenningsbehov)
-
-        val oppgave =
-            oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_UTEN_TILGANGER).find { it.fodselsnummer == FØDSELSNUMMER }
-        assertEquals(SAKSBEHANDLER_EPOST, oppgave!!.tildeling?.epost)
+        val nyUtbetalingId = UUID.randomUUID()
+        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true, utbetalingId = nyUtbetalingId)
+        assertOppgaver(nyUtbetalingId, "AvventerSaksbehandler", 1)
+        assertTildeling(SAKSBEHANDLER_EPOST, nyUtbetalingId)
     }
 
     @Test
     fun `saksbehandler overstyrer inntekt og refusjon`() {
-        val godkjenningsbehovId = settOppBruker()
-        val hendelseId = sendOverstyrtInntektOgRefusjon(
-            aktørId = AKTØR,
-            fødselsnummer = FØDSELSNUMMER,
-            arbeidsgivere = listOf(
-                Arbeidsgiver(
-                organisasjonsnummer = ORGNR,
-                månedligInntekt = 25000.0,
-                fraMånedligInntekt = 25001.0,
-                forklaring = "testbortforklaring",
-                subsumsjon = SubsumsjonDto("8-28", "LEDD_1", "BOKSTAV_A"),
-                refusjonsopplysninger = null,
-                fraRefusjonsopplysninger = null,
-                begrunnelse = "begrunnelse")
-            ),
-            skjæringstidspunkt = 1.januar,
-        )
-
-        val overstyringer = overstyringApiDao.finnOverstyringerAvInntektOgRefusjon(FØDSELSNUMMER, ORGNR)
-        assertEquals(1, overstyringer.size)
-        assertEquals(FØDSELSNUMMER, overstyringer.first().fødselsnummer)
-        assertEquals(ORGNR, overstyringer.first().organisasjonsnummer)
-        assertEquals(hendelseId, overstyringer.first().hendelseId)
-        assertEquals("saksbehandlerIdent", overstyringer.first().saksbehandlerIdent)
-        assertEquals("saksbehandler", overstyringer.first().saksbehandlerNavn)
-        assertEquals(25000.0, overstyringer.first().månedligInntekt)
-        assertEquals(1.januar, overstyringer.first().skjæringstidspunkt)
-        assertEquals("begrunnelse", overstyringer.first().begrunnelse)
-        assertEquals("testbortforklaring", overstyringer.first().forklaring)
-        assertFalse(overstyringer.first().ferdigstilt)
-
-        assertEquals(1, overstyringApiDao.finnOverstyringerAvInntekt(FØDSELSNUMMER, ORGNR).size)
-
-        assertIngenOppgaver(testRapid.inspektør.oppgaveId(godkjenningsbehovId))
-
-        val nyttGodkjenningsbehov = sendGodkjenningsbehov(
-            organisasjonsnummer = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            utbetalingId = UTBETALING_ID,
-            periodeFom = 1.januar,
-            periodeTom = 31.januar,
-            skjæringstidspunkt = 1.januar
-        )
-
-        klargjørForGodkjenning(nyttGodkjenningsbehov)
-
-        val oppgave = requireNotNull(oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_UTEN_TILGANGER)
-            .find { it.fodselsnummer == FØDSELSNUMMER })
-        assertEquals(SAKSBEHANDLER_EPOST, oppgave.tildeling?.epost)
-    }
-
-    @Test
-    fun `saksbehandler overstyrer arbeidsforhold`() {
-        val godkjenningsbehovId = settOppBruker(orgnummereMedRelevanteArbeidsforhold = listOf(ORGNR_GHOST))
-        sendOverstyrtArbeidsforhold(
-            aktørId = AKTØR,
-            fødselsnummer = FØDSELSNUMMER,
-            organisasjonsnummer = ORGNR,
-            skjæringstidspunkt = 1.januar,
-            overstyrteArbeidsforhold = listOf(
-                OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt(
-                    orgnummer = ORGNR_GHOST,
-                    deaktivert = true,
-                    begrunnelse = "begrunnelse",
-                    forklaring = "forklaring"
-                )
-            )
-        )
-
-        val overstyringer = overstyringApiDao.finnOverstyringerAvArbeidsforhold(
-            fødselsnummer = FØDSELSNUMMER,
-            orgnummer = ORGNR_GHOST
-        )
-        assertEquals(1, overstyringer.size)
-        assertFalse(overstyringer.first().ferdigstilt)
-        assertIngenOppgaver(testRapid.inspektør.oppgaveId(godkjenningsbehovId))
-
-        val nyttGodkjenningsbehov = sendGodkjenningsbehov(
-            organisasjonsnummer = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            utbetalingId = UTBETALING_ID,
-            periodeFom = 1.januar,
-            periodeTom = 31.januar,
-            skjæringstidspunkt = 1.januar
-        )
-
-        klargjørForGodkjenning(nyttGodkjenningsbehov)
-
-        val oppgave = requireNotNull(oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_UTEN_TILGANGER)
-            .find { it.fodselsnummer == FØDSELSNUMMER })
-        assertEquals(SAKSBEHANDLER_EPOST, oppgave.tildeling?.epost)
-    }
-
-    @Test
-    fun `legger ved overstyringer i speil snapshot`() {
-        sendSøknadSendt(AKTØR, FØDSELSNUMMER, ORGNR)
-        sendVedtaksperiodeEndret(AKTØR, FØDSELSNUMMER, ORGNR, vedtaksperiodeId = VEDTAKSPERIODE_ID, forrigeTilstand = "START")
-        sendVedtaksperiodeNyUtbetaling(VEDTAKSPERIODE_ID, organisasjonsnummer = ORGNR)
-        val hendelseId = sendGodkjenningsbehov(
-            organisasjonsnummer = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            utbetalingId = UTBETALING_ID,
-            periodeFom = LocalDate.of(2018, 1, 1),
-            periodeTom = LocalDate.of(2018, 1, 31)
-        )
-        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_MED_WARNINGS
-        every { dataFetchingEnvironment.graphQlContext.get<String>("saksbehandlerNavn") } returns "saksbehandler"
-        every { dataFetchingEnvironment.graphQlContext.get<SaksbehandlerTilganger>("tilganger") } returns saksbehandlerTilganger
-
-        sendPersoninfoløsningComposite(hendelseId, ORGNR, VEDTAKSPERIODE_ID)
-        sendArbeidsgiverinformasjonløsningOld(
-            hendelseId = hendelseId,
-            organisasjonsnummer = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID
-        )
-        sendArbeidsforholdløsningOld(
-            hendelseId = hendelseId,
-            orgnr = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID
-        )
-        sendEgenAnsattløsningOld(hendelseId, false)
-        sendVergemålløsningOld(
-            godkjenningsmeldingId = hendelseId
-        )
-        sendOverstyrTidslinje(
-            aktørId = AKTØR,
-            fødselsnummer = FØDSELSNUMMER,
-            organisasjonsnummer = ORGNR,
-            dager = listOf(
-                OverstyringDagDto(
-                    dato = LocalDate.of(2018, 1, 20),
-                    type = Dagtype.Feriedag,
-                    grad = null,
-                    fraType = Dagtype.Sykedag,
-                    fraGrad = 100
-                )
-            )
-        )
-        sendOverstyrtInntektOgRefusjon(
-            aktørId = AKTØR,
-            fødselsnummer = FØDSELSNUMMER,
-            skjæringstidspunkt = LocalDate.now(),
+        fremTilSaksbehandleroppgave()
+        håndterOverstyrInntektOgRefusjon(
             arbeidsgivere = listOf(
                 Arbeidsgiver(
                     organisasjonsnummer = ORGNR,
-                    månedligInntekt = 15000.0,
+                    månedligInntekt = 25000.0,
                     fraMånedligInntekt = 25001.0,
                     forklaring = "testbortforklaring",
                     subsumsjon = SubsumsjonDto("8-28", "LEDD_1", "BOKSTAV_A"),
                     refusjonsopplysninger = null,
                     fraRefusjonsopplysninger = null,
-                    begrunnelse = "en begrunnelse")
-            )
+                    begrunnelse = "begrunnelse")
+            ),
+            skjæringstidspunkt = 1.januar,
         )
-        sendOverstyrtArbeidsforhold(
-            aktørId = AKTØR,
-            fødselsnummer = FØDSELSNUMMER,
-            organisasjonsnummer = ORGNR,
-            skjæringstidspunkt = LocalDate.of(2018, 1, 1),
+
+        assertOppgaver(UTBETALING_ID, "AvventerSaksbehandler", 0)
+        assertOverstyrInntektOgRefusjon(FØDSELSNUMMER, 1)
+
+        val nyUtbetalingId = UUID.randomUUID()
+        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true, utbetalingId = nyUtbetalingId)
+
+        assertOppgaver(nyUtbetalingId, "AvventerSaksbehandler", 1)
+        assertTildeling(SAKSBEHANDLER_EPOST, nyUtbetalingId)
+    }
+
+    @Test
+    fun `saksbehandler overstyrer arbeidsforhold`() {
+        fremTilSaksbehandleroppgave()
+        håndterOverstyrArbeidsforhold(
             overstyrteArbeidsforhold = listOf(
                 OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt(
                     orgnummer = ORGNR,
@@ -262,40 +104,133 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
                 )
             )
         )
+        assertOppgaver(UTBETALING_ID, "AvventerSaksbehandler", 0)
+        assertOverstyrArbeidsforhold(FØDSELSNUMMER, 1)
 
-        val hendelseId2 = sendGodkjenningsbehov(
-            organisasjonsnummer = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            utbetalingId = UTBETALING_ID,
-            periodeFom = LocalDate.of(2018, 1, 1),
-            periodeTom = LocalDate.of(2018, 1, 31)
-        )
-        sendEgenAnsattløsningOld(hendelseId2, false)
-        sendVergemålløsningOld(
-            godkjenningsmeldingId = hendelseId2
-        )
-        sendÅpneGosysOppgaverløsningOld(
-            godkjenningsmeldingId = hendelseId2
-        )
-        sendRisikovurderingløsningOld(
-            godkjenningsmeldingId = hendelseId2,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID
-        )
+        val nyUtbetalingId = UUID.randomUUID()
+        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true, utbetalingId = nyUtbetalingId)
 
-        // TODO: bør ikke koble seg på daoer i E2E
-        assertTrue(
-            oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_UTEN_TILGANGER).any { it.fodselsnummer == FØDSELSNUMMER })
+        assertOppgaver(nyUtbetalingId, "AvventerSaksbehandler", 1)
+        assertTildeling(SAKSBEHANDLER_EPOST, nyUtbetalingId)
+    }
+
+    @Test
+    fun `legger ved overstyringer i speil snapshot`() {
+        fremTilSaksbehandleroppgave()
+        håndterOverstyrTidslinje()
+        håndterOverstyrInntektOgRefusjon()
+        håndterOverstyrArbeidsforhold()
+
+        every { dataFetchingEnvironment.graphQlContext.get<String>("saksbehandlerNavn") } returns "saksbehandler"
+        every { dataFetchingEnvironment.graphQlContext.get<SaksbehandlerTilganger>("tilganger") } returns SAKSBEHANDLERTILGANGER_UTEN_TILGANGER
+
+        val nyUtbetalingId = UUID.randomUUID()
+        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true, utbetalingId = nyUtbetalingId)
+        assertOppgaver(nyUtbetalingId, "AvventerSaksbehandler", 1)
 
         val snapshot: Person = personQuery.person(FØDSELSNUMMER, null, dataFetchingEnvironment).data!!
 
         assertNotNull(snapshot)
         val overstyringer = snapshot.arbeidsgivere().first().overstyringer()
         assertEquals(3, overstyringer.size)
-        assertEquals(1, (overstyringer.first() as Dagoverstyring).dager.size)
-        assertEquals(15000.0, (overstyringer[1] as Inntektoverstyring).inntekt.manedligInntekt)
+        assertEquals(1, (overstyringer[0] as Dagoverstyring).dager.size)
+        assertEquals(25000.0, (overstyringer[1] as Inntektoverstyring).inntekt.manedligInntekt)
         assertEquals(true, (overstyringer[2] as Arbeidsforholdoverstyring).deaktivert)
         assertFalse(overstyringer.first().ferdigstilt)
         assertFalse(overstyringer[1].ferdigstilt)
         assertFalse(overstyringer.last().ferdigstilt)
     }
+
+    private fun assertOppgaver(utbetalingId: UUID, status: String, forventetAntall: Int) {
+        @Language("PostgreSQL")
+        val query = "SELECT COUNT(1) FROM oppgave o WHERE o.utbetaling_id = ? AND o.status = ?::oppgavestatus"
+        val antallOppgaver = sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, utbetalingId, status).map { it.int(1) }.asSingle) ?: 0
+        }
+        assertEquals(forventetAntall, antallOppgaver)
+    }
+
+    private fun assertOverstyrTidslinje(fødselsnummer: String, forventetAntall: Int) {
+        @Language("PostgreSQL")
+        val query =
+            """
+                SELECT COUNT(1) FROM overstyring o 
+                INNER JOIN overstyring_tidslinje ot on o.id = ot.overstyring_ref 
+                WHERE o.person_ref = (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer)
+            """
+        val antallOverstyrTidslinje = sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, mapOf(
+                "fodselsnummer" to fødselsnummer.toLong()
+            )).map { it.int(1) }.asSingle)
+        } ?: 0
+
+        assertEquals(forventetAntall, antallOverstyrTidslinje)
+    }
+
+    private fun assertOverstyrArbeidsforhold(fødselsnummer: String, forventetAntall: Int) {
+        @Language("PostgreSQL")
+        val query =
+            """
+                SELECT COUNT(1) FROM overstyring o
+                INNER JOIN overstyring_arbeidsforhold oa on o.id = oa.overstyring_ref
+                WHERE o.person_ref = (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer)
+            """
+        val antallOverstyrArbeidsforhold = sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, mapOf(
+                "fodselsnummer" to fødselsnummer.toLong()
+            )).map { it.int(1) }.asSingle)
+        } ?: 0
+
+        assertEquals(forventetAntall, antallOverstyrArbeidsforhold)
+    }
+
+    private fun assertOverstyrInntektOgRefusjon(fødselsnummer: String, forventetAntall: Int) {
+        @Language("PostgreSQL")
+        val query =
+            """
+                SELECT COUNT(1) FROM overstyring o
+                INNER JOIN overstyring_inntekt oi on o.id = oi.overstyring_ref
+                WHERE o.person_ref = (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer)
+            """
+        val antallOverstyrInntektOgRefusjon = sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, mapOf(
+                "fodselsnummer" to fødselsnummer.toLong()
+            )).map { it.int(1) }.asSingle)
+        } ?: 0
+
+        assertEquals(forventetAntall, antallOverstyrInntektOgRefusjon)
+    }
+
+    private fun assertTildeling(saksbehandlerEpost: String, utbetalingId: UUID) {
+        @Language("PostgreSQL")
+        val query =
+            """
+                SELECT epost FROM saksbehandler s 
+                INNER JOIN tildeling t on s.oid = t.saksbehandler_ref
+                INNER JOIN oppgave o on o.id = t.oppgave_id_ref
+                WHERE o.utbetaling_id = ?
+            """
+        val tildeltEpost = sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, utbetalingId).map { it.string("epost") }.asSingle)
+        }
+        assertEquals(saksbehandlerEpost, tildeltEpost)
+    }
+
+    private val dataFetchingEnvironment = mockk<DataFetchingEnvironment>(relaxed = true)
+
+    private val personQuery = PersonQuery(
+        personApiDao = PersonApiDao(dataSource),
+        egenAnsattApiDao = EgenAnsattApiDao(dataSource),
+        tildelingDao = TildelingDao(dataSource),
+        arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource),
+        overstyringApiDao = OverstyringApiDao(dataSource),
+        risikovurderingApiDao = RisikovurderingApiDao(dataSource),
+        varselDao = VarselDao(dataSource),
+        varselRepository = ApiVarselRepository(dataSource),
+        oppgaveApiDao = OppgaveApiDao(dataSource),
+        periodehistorikkDao = PeriodehistorikkDao(dataSource),
+        notatDao = NotatDao(dataSource),
+        snapshotMediator = SnapshotMediator(SnapshotApiDao(dataSource), mockk(relaxed = true)),
+        reservasjonClient = mockk(relaxed = true),
+    )
 }

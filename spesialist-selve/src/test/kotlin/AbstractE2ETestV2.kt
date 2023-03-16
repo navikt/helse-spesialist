@@ -43,6 +43,8 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.graphql.HentSnapshot
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
+import no.nav.helse.spesialist.api.overstyring.Dagtype
+import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
@@ -648,9 +650,12 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
+        dager: List<OverstyringDagDto> = listOf(
+            OverstyringDagDto(1.januar(1970), Dagtype.Feriedag, Dagtype.Sykedag, null, 100)
+        ),
     ) {
         håndterOverstyring(aktørId, fødselsnummer, organisasjonsnummer, "overstyr_tidslinje") {
-            sisteMeldingId = meldingssenderV2.sendOverstyrTidslinje(aktørId, fødselsnummer, organisasjonsnummer)
+            sisteMeldingId = meldingssenderV2.sendOverstyrTidslinje(aktørId, fødselsnummer, organisasjonsnummer, dager)
         }
     }
 
@@ -680,7 +685,14 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
-        overstyrteArbeidsforhold: List<OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt>
+        overstyrteArbeidsforhold: List<OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt> = listOf(
+            OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt(
+                orgnummer = ORGNR,
+                deaktivert = true,
+                begrunnelse = "begrunnelse",
+                forklaring = "forklaring"
+            )
+        )
     ) {
         håndterOverstyring(aktørId, fødselsnummer, organisasjonsnummer, "overstyr_arbeidsforhold") {
             sisteMeldingId = meldingssenderV2.sendOverstyrtArbeidsforhold(
