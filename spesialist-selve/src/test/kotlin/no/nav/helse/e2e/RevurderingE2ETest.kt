@@ -30,7 +30,7 @@ import no.nav.helse.Testdata.UTBETALING_ID2
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.Testdata.snapshotMedRevurderingUtbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
-import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.modell.utbetaling.Utbetalingtype.REVURDERING
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.overstyring.Dagtype
@@ -63,6 +63,7 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
         sendSøknadSendt(AKTØR, FØDSELSNUMMER, ORGNR)
         sendVedtaksperiodeEndret(AKTØR, FØDSELSNUMMER, ORGNR, vedtaksperiodeId = VEDTAKSPERIODE_ID, forrigeTilstand = "START")
         sendVedtaksperiodeNyUtbetaling(VEDTAKSPERIODE_ID, organisasjonsnummer = ORGNR)
+        sendUtbetalingEndret(AKTØR, FØDSELSNUMMER, ORGNR, UTBETALING_ID, "UTBETALING")
         val godkjenningsmeldingId1 = sendGodkjenningsbehov(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         håndterGodkjenningsbehov(godkjenningsmeldingId1)
         sendSaksbehandlerløsningFraAPI(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
@@ -84,11 +85,13 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
         assertOppgavetype(0, "SØKNAD")
         assertGodkjenningsbehovløsning(true, SAKSBEHANDLERIDENT)
 
+        sendVedtaksperiodeNyUtbetaling(VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID2, organisasjonsnummer = ORGNR)
+        sendUtbetalingEndret(AKTØR, FØDSELSNUMMER, ORGNR, UTBETALING_ID2, "UTBETALING")
         val godkjenningsmeldingId2 = sendGodkjenningsbehov(
             organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID2,
-            utbetalingtype = Utbetalingtype.REVURDERING
+            utbetalingtype = REVURDERING
         )
         håndterGodkjenningsbehov(godkjenningsmeldingId2, harOppdatertMetadata = true)
         sendSaksbehandlerløsningFraAPI(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
@@ -115,7 +118,8 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
     fun `revurdering av periode medfører oppgave selv om perioden ikke har warnings`() {
         sendSøknadSendt(AKTØR, FØDSELSNUMMER, ORGNR)
         sendVedtaksperiodeEndret(AKTØR, FØDSELSNUMMER, ORGNR, vedtaksperiodeId = VEDTAKSPERIODE_ID, forrigeTilstand = "START")
-        sendVedtaksperiodeNyUtbetaling(VEDTAKSPERIODE_ID, organisasjonsnummer = ORGNR)
+        sendVedtaksperiodeNyUtbetaling(VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID, organisasjonsnummer = ORGNR)
+        sendUtbetalingEndret(AKTØR, FØDSELSNUMMER, ORGNR, UTBETALING_ID, "UTBETALING")
         val godkjenningsmeldingId1 = sendGodkjenningsbehov(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         håndterGodkjenningsbehov(godkjenningsmeldingId1)
         sendUtbetalingEndret(
@@ -142,7 +146,7 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
             organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID2,
-            utbetalingtype = Utbetalingtype.REVURDERING
+            utbetalingtype = REVURDERING
         )
         håndterGodkjenningsbehov(godkjenningsmeldingId2, harOppdatertMetadata = true)
         sendSaksbehandlerløsningFraAPI(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
@@ -169,7 +173,8 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
     fun `fanger opp og informerer saksbehandler om avvist revurdering`() {
         sendSøknadSendt(AKTØR, FØDSELSNUMMER, ORGNR)
         sendVedtaksperiodeEndret(AKTØR, FØDSELSNUMMER, ORGNR, vedtaksperiodeId = VEDTAKSPERIODE_ID, forrigeTilstand = "START")
-        sendVedtaksperiodeNyUtbetaling(VEDTAKSPERIODE_ID, organisasjonsnummer = ORGNR)
+        sendVedtaksperiodeNyUtbetaling(VEDTAKSPERIODE_ID, organisasjonsnummer = ORGNR, utbetalingId = UTBETALING_ID)
+        sendUtbetalingEndret(AKTØR, FØDSELSNUMMER, ORGNR, UTBETALING_ID, "UTBETALING")
         val godkjenningsmeldingId1 = sendGodkjenningsbehov(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
 
         håndterGodkjenningsbehov(godkjenningsmeldingId1)

@@ -159,7 +159,7 @@ internal class OppgaveE2ETest: AbstractE2ETest() {
             aktørId = AKTØR,
             fødselsnummer = FØDSELSNUMMER,
             organisasjonsnummer = ORGANISASJONSNUMMER,
-            utbetalingId = UTBETALING_ID,
+            utbetalingId = UTBETALING_ID2,
             type = "UTBETALING",
             status = FORKASTET,
             arbeidsgiverFagsystemId = FAGSYSTEM_ID
