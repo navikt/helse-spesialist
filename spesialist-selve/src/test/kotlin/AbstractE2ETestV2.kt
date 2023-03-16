@@ -339,6 +339,20 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         assertIngenUtgåendeMeldinger()
     }
 
+    protected fun håndterSykefraværstilfeller(
+        aktørId: String = AKTØR,
+        fødselsnummer: String = FØDSELSNUMMER,
+        tilfeller: List<Map<String, Any>>,
+    ) {
+        sisteMeldingId = meldingssenderV2.sendSykefraværstilfeller(
+            aktørId,
+            fødselsnummer,
+            tilfeller
+        )
+        assertIngenEtterspurteBehov()
+        assertIngenUtgåendeMeldinger()
+    }
+
     protected fun håndterEndretSkjermetinfo(
         fødselsnummer: String = FØDSELSNUMMER,
         skjermet: Boolean

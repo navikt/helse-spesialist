@@ -18,6 +18,7 @@ import no.nav.helse.mediator.meldinger.OverstyringIgangsatt
 import no.nav.helse.mediator.meldinger.OverstyringInntektOgRefusjon
 import no.nav.helse.mediator.meldinger.OverstyringTidslinje
 import no.nav.helse.mediator.meldinger.RevurderingAvvist
+import no.nav.helse.mediator.meldinger.Sykefraværstilfeller
 import no.nav.helse.mediator.meldinger.SøknadSendt
 import no.nav.helse.mediator.meldinger.UtbetalingAnnullert
 import no.nav.helse.mediator.meldinger.UtbetalingEndret
@@ -40,6 +41,7 @@ import no.nav.helse.modell.HendelseDao.Hendelsetype.OVERSTYRING_IGANGSATT
 import no.nav.helse.modell.HendelseDao.Hendelsetype.OVERSTYRING_INNTEKT_OG_REFUSJON
 import no.nav.helse.modell.HendelseDao.Hendelsetype.REVURDERING_AVVIST
 import no.nav.helse.modell.HendelseDao.Hendelsetype.SAKSBEHANDLERLØSNING
+import no.nav.helse.modell.HendelseDao.Hendelsetype.SYKEFRAVÆRSTILFELLER
 import no.nav.helse.modell.HendelseDao.Hendelsetype.SØKNAD_SENDT
 import no.nav.helse.modell.HendelseDao.Hendelsetype.UTBETALING_ANNULLERT
 import no.nav.helse.modell.HendelseDao.Hendelsetype.UTBETALING_ENDRET
@@ -159,6 +161,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
             VEDTAKSPERIODE_OPPRETTET -> hendelsefabrikk.vedtaksperiodeOpprettet(json)
             SØKNAD_SENDT -> hendelsefabrikk.søknadSendt(json)
             VEDTAKSPERIODE_NY_UTBETALING -> hendelsefabrikk.vedtaksperiodeNyUtbetaling(json)
+            SYKEFRAVÆRSTILFELLER -> hendelsefabrikk.sykefraværstilfeller(json)
         }
 
     private fun tilHendelsetype(hendelse: Hendelse) = when (hendelse) {
@@ -183,6 +186,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
         is VedtaksperiodeOpprettet -> VEDTAKSPERIODE_OPPRETTET
         is SøknadSendt -> SØKNAD_SENDT
         is VedtaksperiodeNyUtbetaling -> VEDTAKSPERIODE_NY_UTBETALING
+        is Sykefraværstilfeller -> SYKEFRAVÆRSTILFELLER
         else -> throw IllegalArgumentException("ukjent hendelsetype: ${hendelse::class.simpleName}")
     }
 
@@ -191,6 +195,6 @@ internal class HendelseDao(private val dataSource: DataSource) {
         SAKSBEHANDLERLØSNING, UTBETALING_ANNULLERT, OPPDATER_PERSONSNAPSHOT, UTBETALING_ENDRET,
         VEDTAKSPERIODE_REBEREGNET, OVERSTYRING_INNTEKT_OG_REFUSJON, OVERSTYRING_ARBEIDSFORHOLD,
         REVURDERING_AVVIST, OVERSTYRING_IGANGSATT, GOSYS_OPPGAVE_ENDRET, ENDRET_SKJERMETINFO, VEDTAK_FATTET,
-        NYE_VARSLER, VEDTAKSPERIODE_OPPRETTET, SØKNAD_SENDT, VEDTAKSPERIODE_NY_UTBETALING
+        NYE_VARSLER, VEDTAKSPERIODE_OPPRETTET, SØKNAD_SENDT, VEDTAKSPERIODE_NY_UTBETALING, SYKEFRAVÆRSTILFELLER
     }
 }

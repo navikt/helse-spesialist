@@ -20,6 +20,7 @@ import no.nav.helse.mediator.meldinger.OverstyringIgangsatt
 import no.nav.helse.mediator.meldinger.OverstyringInntektOgRefusjon
 import no.nav.helse.mediator.meldinger.OverstyringTidslinje
 import no.nav.helse.mediator.meldinger.RevurderingAvvist
+import no.nav.helse.mediator.meldinger.Sykefraværstilfeller
 import no.nav.helse.mediator.meldinger.SøknadSendt
 import no.nav.helse.mediator.meldinger.UtbetalingAnnullert
 import no.nav.helse.mediator.meldinger.UtbetalingEndret
@@ -58,7 +59,9 @@ import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
+import no.nav.helse.modell.vedtaksperiode.Periode
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
@@ -493,6 +496,46 @@ internal class Hendelsefabrikk(
             hendelseDao = hendelseDao,
             godkjenningMediator = godkjenningMediator,
             utbetalingDao = utbetalingDao
+        )
+    }
+
+    fun sykefraværstilfeller(
+        id: UUID,
+        vedtaksperioder: List<Vedtaksperiode>,
+        fødselsnummer: String,
+        aktørId: String,
+        json: String,
+    ): Sykefraværstilfeller {
+        return Sykefraværstilfeller(
+            id = id,
+            fødselsnummer = fødselsnummer,
+            aktørId = aktørId,
+            vedtaksperioder = vedtaksperioder,
+            json,
+            generasjonRepository,
+        )
+    }
+
+    fun sykefraværstilfeller(json: String): Sykefraværstilfeller {
+        val jsonNode = mapper.readTree(json)
+        return sykefraværstilfeller(
+            id = UUID.fromString(jsonNode["@id"].asText()),
+            vedtaksperioder = jsonNode["tilfeller"].flatMap { tilfelleNode ->
+                val skjæringstidspunkt = tilfelleNode["dato"].asLocalDate()
+                tilfelleNode["perioder"].map {
+                    Vedtaksperiode(
+                        UUID.fromString(it["vedtaksperiodeId"].asText()),
+                        skjæringstidspunkt,
+                        Periode(
+                            LocalDate.parse(it["fom"].asText()),
+                            LocalDate.parse(it["tom"].asText()),
+                        ),
+                    )
+                }
+            },
+            fødselsnummer = jsonNode.path("fødselsnummer").asText(),
+            aktørId = jsonNode.path("aktørId").asText(),
+            json = json
         )
     }
 

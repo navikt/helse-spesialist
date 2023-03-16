@@ -26,6 +26,7 @@ import no.nav.helse.mediator.meldinger.OverstyringIgangsatt
 import no.nav.helse.mediator.meldinger.OverstyringInntektOgRefusjon
 import no.nav.helse.mediator.meldinger.OverstyringTidslinje
 import no.nav.helse.mediator.meldinger.RevurderingAvvist
+import no.nav.helse.mediator.meldinger.Sykefraværstilfeller
 import no.nav.helse.mediator.meldinger.SøknadSendt
 import no.nav.helse.mediator.meldinger.UtbetalingAnnullert
 import no.nav.helse.mediator.meldinger.UtbetalingEndret
@@ -66,6 +67,7 @@ import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.overstyringsteller
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -146,6 +148,7 @@ internal class HendelseMediator(
             NyeVarsler.River(it, this)
             Varseldefinisjon.River(it, varselRepository)
             VedtaksperiodeNyUtbetaling.River(it, this)
+            Sykefraværstilfeller.River(it, this)
         }
     }
 
@@ -268,6 +271,25 @@ internal class HendelseMediator(
         context: MessageContext,
     ) {
         utfør(fødselsnummer, hendelsefabrikk.adressebeskyttelseEndret(id, fødselsnummer, message.toJson()), context)
+    }
+
+    fun sykefraværstilfeller(
+        json: String,
+        id: UUID,
+        vedtaksperioder: List<Vedtaksperiode>,
+        fødselsnummer: String,
+        aktørId: String,
+        context: MessageContext,
+    ) {
+        val hendelse = hendelsefabrikk.sykefraværstilfeller(
+            id,
+            vedtaksperioder,
+            fødselsnummer,
+            aktørId,
+            json,
+        )
+
+        return utfør(hendelse, context)
     }
 
     fun vedtaksperiodeEndret(

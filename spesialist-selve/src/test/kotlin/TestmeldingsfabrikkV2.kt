@@ -130,7 +130,7 @@ internal object TestmeldingsfabrikkV2 {
         id: UUID,
         hendelseId: UUID,
         contextId: UUID,
-        adressebeskyttelse: String
+        adressebeskyttelse: String,
     ) = nyHendelse(
         id, "behov", mapOf(
             "@final" to true,
@@ -464,7 +464,7 @@ internal object TestmeldingsfabrikkV2 {
     fun lagEndretSkjermetinfo(
         fødselsnummer: String,
         skjermet: Boolean,
-        id: UUID
+        id: UUID,
     ): String =
         nyHendelse(
             id, "endret_skjermetinfo", mapOf(
@@ -511,14 +511,15 @@ internal object TestmeldingsfabrikkV2 {
                 subsumsjon = SubsumsjonDto("8-28", "LEDD_1", "BOKSTAV_A"),
                 refusjonsopplysninger = null,
                 fraRefusjonsopplysninger = null,
-                begrunnelse = "en begrunnelse")
+                begrunnelse = "en begrunnelse"
+            )
         ),
         skjæringstidspunkt: LocalDate,
         saksbehandleroid: UUID = UUID.randomUUID(),
         saksbehandlernavn: String = "saksbehandler",
         saksbehandlerepost: String = "saksbehandler@nav.no",
         saksbehandlerident: String = "saksbehandlerIdent",
-        id: UUID = UUID.randomUUID()
+        id: UUID = UUID.randomUUID(),
     ) = nyHendelse(
         id, "saksbehandler_overstyrer_inntekt_og_refusjon", mutableMapOf(
             "aktørId" to aktørId,
@@ -571,21 +572,21 @@ internal object TestmeldingsfabrikkV2 {
             )
         ),
         kilde: UUID = UUID.randomUUID(),
-        id: UUID
+        id: UUID,
     ) = nyHendelse(
-            id, "overstyring_igangsatt", mapOf(
-                "revurderingId" to "${UUID.randomUUID()}",
-                "kilde" to "$kilde",
-                "skjæringstidspunkt" to "2022-01-01",
-                "periodeForEndringFom" to "2022-01-01",
-                "periodeForEndringTom" to "2022-01-01",
-                "årsak" to "KORRIGERT_INNTEKTSMELDING",
-                "typeEndring" to "REVURDERING",
-                "berørtePerioder" to berørtePerioder,
-                "aktørId" to aktørId,
-                "fødselsnummer" to fødselsnummer
-            )
+        id, "overstyring_igangsatt", mapOf(
+            "revurderingId" to "${UUID.randomUUID()}",
+            "kilde" to "$kilde",
+            "skjæringstidspunkt" to "2022-01-01",
+            "periodeForEndringFom" to "2022-01-01",
+            "periodeForEndringTom" to "2022-01-01",
+            "årsak" to "KORRIGERT_INNTEKTSMELDING",
+            "typeEndring" to "REVURDERING",
+            "berørtePerioder" to berørtePerioder,
+            "aktørId" to aktørId,
+            "fødselsnummer" to fødselsnummer
         )
+    )
 
     fun lagUtbetalingEndret(
         aktørId: String,
@@ -659,6 +660,22 @@ internal object TestmeldingsfabrikkV2 {
             )
         )
     )
+
+    fun lagSykefraværstilfeller(
+        id: UUID = UUID.randomUUID(),
+        fødselsnummer: String,
+        aktørId: String,
+        tilfeller: List<Map<String, Any>>,
+    ) = nyHendelse(
+        id,
+        "sykefraværstilfeller",
+        mapOf(
+            "fødselsnummer" to fødselsnummer,
+            "aktørId" to aktørId,
+            "tilfeller" to tilfeller,
+        )
+    )
+
 
     fun lagVedtaksperiodeNyUtbetaling(
         id: UUID = UUID.randomUUID(),

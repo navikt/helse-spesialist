@@ -109,6 +109,22 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
             )
         }
 
+    fun sendSykefraværstilfeller(
+        aktørId: String,
+        fødselsnummer: String,
+        tilfeller: List<Map<String, Any>>,
+    ): UUID =
+        newUUID.also { id ->
+            testRapid.sendTestMessage(
+                meldingsfabrikk.lagSykefraværstilfeller(
+                    id,
+                    fødselsnummer,
+                    aktørId,
+                    tilfeller,
+                )
+            )
+        }
+
     fun sendVedtaksperiodeForkastet(
         aktørId: String,
         fødselsnummer: String,
