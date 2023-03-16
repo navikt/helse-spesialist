@@ -147,6 +147,7 @@ internal class HendelseMediator(
             VedtakFattet.River(it, this)
             NyeVarsler.River(it, this)
             Varseldefinisjon.River(it, varselRepository)
+            Varseldefinisjon.VarseldefinisjonRiver(it, varselRepository)
             VedtaksperiodeNyUtbetaling.River(it, this)
             Sykefraværstilfeller.River(it, this)
         }

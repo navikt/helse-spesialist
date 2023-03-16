@@ -3,6 +3,7 @@ package no.nav.helse.mediator.meldinger
 import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDateTime
 import java.util.UUID
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.modell.varsel.Varsel.Status
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -68,7 +69,7 @@ internal class Varseldefinisjon(
 
 
     internal companion object {
-        private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
+        private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
         internal fun List<Varseldefinisjon>.lagre(varselRepository: VarselRepository) {
             forEach { it.lagre(varselRepository) }
@@ -87,6 +88,51 @@ internal class Varseldefinisjon(
                         jsonNode["opprettet"].asLocalDateTime()
                     )
                 }
+        }
+    }
+
+    internal class VarseldefinisjonRiver(
+        rapidsConnection: RapidsConnection,
+        private val varselRepository: VarselRepository
+    ): PacketListener {
+        init {
+            River(rapidsConnection).apply {
+                validate {
+                    it.demandValue("@event_name", "varselkode_ny_definisjon")
+                    it.requireKey("@id")
+                    it.requireKey("varselkode")
+                    it.requireKey("gjeldende_definisjon")
+                    it.requireKey(
+                        "gjeldende_definisjon.id",
+                        "gjeldende_definisjon.kode",
+                        "gjeldende_definisjon.tittel",
+                        "gjeldende_definisjon.avviklet",
+                        "gjeldende_definisjon.opprettet"
+                    )
+                    it.interestedIn("gjeldende_definisjon.forklaring", "gjeldende_definisjon.handling")
+                }
+            }.register(this)
+        }
+
+        override fun onError(problems: MessageProblems, context: MessageContext) {
+            sikkerlogg.error("Forstod ikke varseldefinisjoner_endret:\n${problems.toExtendedReport()}")
+        }
+
+        override fun onPacket(packet: JsonMessage, context: MessageContext) {
+            val varselkode = packet["varselkode"].asText()
+            sikkerlogg.info("Mottok melding om ny definisjon for {}", kv("varselkode", varselkode))
+
+            val definisjonMessage = packet["gjeldende_definisjon"]
+            val definisjon = Varseldefinisjon(
+                id = UUID.fromString(definisjonMessage["id"].asText()),
+                varselkode = varselkode,
+                tittel = definisjonMessage["tittel"].asText(),
+                forklaring = definisjonMessage["forklaring"]?.textValue(),
+                handling = definisjonMessage["handling"]?.textValue(),
+                avviklet = definisjonMessage["avviklet"].asBoolean(),
+                opprettet = definisjonMessage["opprettet"].asLocalDateTime()
+            )
+            definisjon.lagre(varselRepository)
         }
     }
 
@@ -110,11 +156,11 @@ internal class Varseldefinisjon(
         }
 
         override fun onError(problems: MessageProblems, context: MessageContext) {
-            sikkerLogg.error("Forstod ikke varseldefinisjoner_endret:\n${problems.toExtendedReport()}")
+            sikkerlogg.error("Forstod ikke varseldefinisjoner_endret:\n${problems.toExtendedReport()}")
         }
 
         override fun onPacket(packet: JsonMessage, context: MessageContext) {
-            sikkerLogg.info("Mottok melding om varseldefinisjoner endret")
+            sikkerlogg.info("Mottok melding om varseldefinisjoner endret")
 
             val definisjoner = packet["definisjoner"].definisjoner()
 
