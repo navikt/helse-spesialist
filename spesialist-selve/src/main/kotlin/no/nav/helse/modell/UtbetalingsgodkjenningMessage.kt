@@ -95,7 +95,7 @@ internal class UtbetalingsgodkjenningMessage(json: String, private val utbetalin
                 "årsak" to årsak,
                 "begrunnelser" to begrunnelser,
                 "kommentar" to kommentar,
-                "refusjonstype" to utbetaling.refusjonstype().name
+                "refusjontype" to utbetaling.refusjonstype().name
             )
         )
         // <midlertidig forklaring="@behovId brukes for å gruppere behov/løsning. Ble innført 28. mars 2022. Må likevel fikse godkjenningsbehov som ble opprettet før 28. mars">

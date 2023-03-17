@@ -29,7 +29,7 @@ internal class SaksbehandlerløsningTest {
         private const val FNR = "12020052345"
         private const val IDENT = "Z999999"
         private const val HENDELSE_JSON = """{ "this_key_should_exist": "this_value_should_exist" }"""
-        private const val GODKJENNINGSBEHOV_JSON = """{ "@event_name": "behov" }"""
+        private const val GODKJENNINGSBEHOV_JSON = """{ "@event_name": "behov", "Godkjenning": {} }"""
         private val objectMapper = jacksonObjectMapper()
     }
 
@@ -89,7 +89,7 @@ internal class SaksbehandlerløsningTest {
         assertEquals(godkjent, godkjenning.path("godkjent").booleanValue())
         assertEquals(IDENT, godkjenning.path("saksbehandlerIdent").textValue())
         assertEquals(GODKJENTTIDSPUNKT, LocalDateTime.parse(godkjenning.path("godkjenttidspunkt").textValue()))
-        assertEquals(refusjonstype, enumValueOf<Refusjonstype>(godkjenning.path("refusjonstype").asText()))
+        assertEquals(refusjonstype, enumValueOf<Refusjonstype>(godkjenning.path("refusjontype").asText()))
         assertTrue(godkjenning.path("årsak").isNull)
         assertTrue(godkjenning.path("kommentar").isNull)
         assertTrue(godkjenning.path("begrunnelser").isNull)
