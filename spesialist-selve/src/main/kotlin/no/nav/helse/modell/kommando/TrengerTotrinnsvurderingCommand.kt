@@ -63,7 +63,6 @@ internal class TrengerTotrinnsvurderingCommand(
 
         if (harMedlemskapsvarsel || overstyringer.isNotEmpty()) {
             logg.info("Vedtaksperioden: $vedtaksperiodeId trenger totrinnsvurdering")
-            oppgaveMediator.alleUlagredeOppgaverTilTotrinnsvurdering()
             if (Toggle.Totrinnsvurdering.enabled) {
                 val totrinnsvurdering = totrinnsvurderingMediator.opprett(vedtaksperiodeId)
 
@@ -76,6 +75,8 @@ internal class TrengerTotrinnsvurderingCommand(
                         fødselsnummer = fødselsnummer
                     )
                 }
+            } else {
+                oppgaveMediator.alleUlagredeOppgaverTilTotrinnsvurdering()
             }
 
             warningDao.leggTilWarning(
