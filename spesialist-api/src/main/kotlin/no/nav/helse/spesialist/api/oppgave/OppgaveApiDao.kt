@@ -17,6 +17,7 @@ import no.nav.helse.spesialist.api.graphql.schema.Kjonn
 import no.nav.helse.spesialist.api.graphql.schema.OppgaveForOversiktsvisning
 import no.nav.helse.spesialist.api.graphql.schema.Personinfo
 import no.nav.helse.spesialist.api.graphql.schema.Tildeling
+import no.nav.helse.spesialist.api.graphql.schema.Totrinnsvurdering
 import no.nav.helse.spesialist.api.graphql.schema.UUIDString
 import no.nav.helse.spesialist.api.graphql.schema.tilAdressebeskyttelse
 import no.nav.helse.spesialist.api.graphql.schema.tilKjonn
@@ -143,7 +144,8 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             SELECT o.id as oppgave_id, o.type AS oppgavetype, o.opprettet, os.soknad_mottatt AS opprinneligSoknadsdato, o.er_beslutteroppgave, o.er_returoppgave, o.er_totrinnsoppgave, o.tidligere_saksbehandler_oid, o.sist_sendt,
                 s.epost, s.navn as saksbehandler_navn, s.oid, v.vedtaksperiode_id, v.fom, v.tom, pi.fornavn, pi.mellomnavn, pi.etternavn, pi.fodselsdato,
                 pi.kjonn, pi.adressebeskyttelse, p.aktor_id, p.fodselsnummer, sot.type as saksbehandleroppgavetype, sot.inntektskilde, e.id AS enhet_id, e.navn AS enhet_navn, t.på_vent,
-                (SELECT COUNT(DISTINCT melding) from warning w where w.melding not like '$beslutterOppgaveHackyWorkaround%' and w.vedtak_ref = o.vedtak_ref and (w.inaktiv_fra is null or w.inaktiv_fra > now())) AS antall_varsler
+                (SELECT COUNT(DISTINCT melding) from warning w where w.melding not like '$beslutterOppgaveHackyWorkaround%' and w.vedtak_ref = o.vedtak_ref and (w.inaktiv_fra is null or w.inaktiv_fra > now())) AS antall_varsler,
+                ttv.vedtaksperiode_id AS totrinnsvurdering_vedtaksperiode_id, ttv.saksbehandler, ttv.beslutter, ttv.er_retur
             FROM aktiv_oppgave o
                 INNER JOIN vedtak v ON o.vedtak_ref = v.id
                 INNER JOIN person p ON v.person_ref = p.id
@@ -152,7 +154,8 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 LEFT JOIN enhet e ON p.enhet_ref = e.id
                 LEFT JOIN saksbehandleroppgavetype sot ON v.id = sot.vedtak_ref
                 LEFT JOIN aktiv_tildeling t ON o.id = t.oppgave_id_ref
-                LEFT JOIN saksbehandler s on t.saksbehandler_ref = s.oid
+                LEFT JOIN saksbehandler s ON t.saksbehandler_ref = s.oid
+                LEFT JOIN totrinnsvurdering ttv ON (ttv.vedtaksperiode_id = v.vedtaksperiode_id AND ttv.utbetaling_id_ref IS NULL)
             WHERE status = 'AvventerSaksbehandler'::oppgavestatus
                 AND CASE WHEN :harTilgangTilRisk 
                     THEN true
@@ -282,6 +285,16 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             periodetype = it.stringOrNull("saksbehandleroppgavetype")?.let(Periodetype::valueOf)?.tilPeriodetype(),
             tidligereSaksbehandler = it.stringOrNull("tidligere_saksbehandler_oid"),
             sistSendt = it.stringOrNull("sist_sendt"),
+            totrinnsvurdering = it.stringOrNull("totrinnsvurdering_vedtaksperiode_id")?.let { _ ->
+                val erRetur = it.boolean("er_retur")
+                val saksbehandler = it.stringOrNull("saksbehandler")
+                Totrinnsvurdering(
+                    erRetur = erRetur,
+                    saksbehandler = saksbehandler,
+                    beslutter = it.stringOrNull("beslutter"),
+                    erBeslutteroppgave = !erRetur && saksbehandler != null
+                )
+            }
         )
     }
 }

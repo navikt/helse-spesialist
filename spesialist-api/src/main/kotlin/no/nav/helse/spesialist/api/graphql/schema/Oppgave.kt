@@ -38,6 +38,7 @@ data class OppgaveForOversiktsvisning(
     val periodetype: Periodetype?,
     val tidligereSaksbehandler: UUIDString?,
     val sistSendt: DateTimeString?,
+    val totrinnsvurdering: Totrinnsvurdering?,
 )
 
 data class OppgaveForPeriodevisning(
