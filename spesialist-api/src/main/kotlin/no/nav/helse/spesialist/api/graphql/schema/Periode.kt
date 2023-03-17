@@ -517,8 +517,8 @@ data class BeregnetPeriode(
         totrinnsvurderingApiDao.hentAktiv(UUID.fromString(vedtaksperiodeId()))?.let {
             Totrinnsvurdering(
                 erRetur = it.erRetur,
-                saksbehandler = it.saksbehandler.toString(),
-                beslutter = it.beslutter.toString(),
+                saksbehandler = it.saksbehandler?.toString(),
+                beslutter = it.beslutter?.toString(),
                 erBeslutteroppgave = !it.erRetur && it.saksbehandler != null
             )
         }
