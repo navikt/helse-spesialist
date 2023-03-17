@@ -15,7 +15,7 @@ internal class UtbetalingsfilterCommand(
     private val godkjenningsbehovJson: String,
     private val godkjenningMediator: GodkjenningMediator,
     private val utbetalingsfilter: () -> Utbetalingsfilter,
-    private val utbetaling: Utbetaling
+    private val utbetaling: Utbetaling?
 ) : Command {
 
     override fun resume(context: CommandContext) = execute(context)
@@ -24,6 +24,7 @@ internal class UtbetalingsfilterCommand(
         val utbetalingsfilter = utbetalingsfilter()
         if (utbetalingsfilter.kanUtbetales) return true
 
+        if (utbetaling == null) throw IllegalStateException("Forventer å finne utbetaling for vedtaksperiodeId=$vedtaksperiodeId")
         val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson, utbetaling)
         val årsaker = utbetalingsfilter.årsaker()
         godkjenningMediator.automatiskAvvisning(context, behov, vedtaksperiodeId, fødselsnummer, årsaker, hendelseId)

@@ -24,7 +24,7 @@ internal class AutomatiskAvvisningCommand(
     private val godkjenningMediator: GodkjenningMediator,
     private val hendelseId: UUID,
     private val utbetalingsfilter: () -> Utbetalingsfilter,
-    private val utbetaling: Utbetaling
+    private val utbetaling: Utbetaling?
 ) : Command {
 
     override fun execute(context: CommandContext): Boolean {
@@ -40,6 +40,8 @@ internal class AutomatiskAvvisningCommand(
         if (tilhørerEnhetUtland) årsaker.add("Utland")
         if (underVergemål) årsaker.add("Vergemål")
         if (utbetalingsfilter.kanIkkeUtbetales) årsaker.addAll(utbetalingsfilter.årsaker())
+
+        if (utbetaling == null) throw IllegalStateException("Forventer å finne utbetaling for vedtaksperiodeId=$vedtaksperiodeId")
 
         val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson, utbetaling)
         godkjenningMediator.automatiskAvvisning(context, behov, vedtaksperiodeId, fødselsnummer, årsaker.toList(), hendelseId)
