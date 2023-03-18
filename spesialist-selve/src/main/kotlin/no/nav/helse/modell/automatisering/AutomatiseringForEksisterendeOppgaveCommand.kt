@@ -18,7 +18,7 @@ internal class AutomatiseringForEksisterendeOppgaveCommand(
     private val godkjenningsbehovJson: String,
     private val godkjenningMediator: GodkjenningMediator,
     private val oppgaveMediator: OppgaveMediator,
-    private val utbetaling: Utbetaling,
+    private val utbetaling: Utbetaling?,
 ) : Command {
 
     private companion object {
@@ -27,6 +27,7 @@ internal class AutomatiseringForEksisterendeOppgaveCommand(
 
     override fun execute(context: CommandContext): Boolean {
         automatisering.utfør(fødselsnummer, vedtaksperiodeId, hendelseId, utbetalingId) {
+            if (utbetaling == null) throw IllegalStateException("Forventer å finne utbetaling med id=${utbetalingId}")
             val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson, utbetaling)
             godkjenningMediator.automatiskUtbetaling(context, behov, vedtaksperiodeId, fødselsnummer, hendelseId)
             logg.info("Oppgave avbrytes for vedtaksperiode $vedtaksperiodeId på grunn av automatisering")

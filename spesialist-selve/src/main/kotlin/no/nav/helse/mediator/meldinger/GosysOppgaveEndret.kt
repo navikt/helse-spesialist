@@ -51,7 +51,6 @@ internal class GosysOppgaveEndret(
     override fun toJson(): String = json
 
     private val utbetaling = utbetalingDao.utbetalingFor(gosysOppgaveEndretCommandData.utbetalingId)
-        ?: throw IllegalStateException("Forventer å finne utbetaling med id=${gosysOppgaveEndretCommandData.utbetalingId}")
 
     override val commands: List<Command> = listOf(
         ÅpneGosysOppgaverCommand(
