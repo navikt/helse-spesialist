@@ -733,7 +733,7 @@ internal class HendelseMediator(
 
     private fun errorHandler(err: Exception, message: String) {
         log.error("alvorlig feil: ${err.message} (se sikkerlogg for melding)", err)
-        sikkerLogg.error("alvorlig feil: ${err.message}\n\t$message", err)
+        sikkerLogg.error("alvorlig feil: ${err.message}\n\t$message", err, err.printStackTrace())
     }
 
     private fun nyContext(hendelse: Hendelse, contextId: UUID) = CommandContext(contextId).apply {
