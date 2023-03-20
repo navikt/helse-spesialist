@@ -6,10 +6,11 @@ import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.migrering.domene.Generasjon
+import no.nav.helse.migrering.domene.IPersonObserver
 import no.nav.helse.migrering.domene.Varsel
 import org.intellij.lang.annotations.Language
 
-internal class SpesialistDao(private val dataSource: DataSource) {
+internal class SpesialistDao(private val dataSource: DataSource): IPersonObserver {
 
     internal fun finnSisteGenerasjonFor(vedtaksperiodeId: UUID): Generasjon? {
         @Language("PostgreSQL")
@@ -114,6 +115,14 @@ internal class SpesialistDao(private val dataSource: DataSource) {
                     it.localDateTimeOrNull("inaktiv_fra"),
                 )
             }.asList)
+        }
+    }
+
+    override fun personOpprettet(aktørId: String, fødselsnummer: String) {
+        @Language("PostgreSQL")
+        val query = "INSERT INTO person(fodselsnummer, aktor_id) VALUES (?, ?) ON CONFLICT (fodselsnummer) DO NOTHING "
+        sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, fødselsnummer.toLong(), aktørId.toLong()).asUpdate)
         }
     }
 }

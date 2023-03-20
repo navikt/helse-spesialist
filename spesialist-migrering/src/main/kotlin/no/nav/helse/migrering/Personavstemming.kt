@@ -6,6 +6,7 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.migrering.db.SparsomDao
 import no.nav.helse.migrering.db.SpesialistDao
 import no.nav.helse.migrering.domene.Generasjon.Companion.lagre
+import no.nav.helse.migrering.domene.Person
 import no.nav.helse.migrering.domene.Utbetaling
 import no.nav.helse.migrering.domene.Utbetaling.Vurdering
 import no.nav.helse.migrering.domene.Vedtaksperiode
@@ -36,29 +37,14 @@ internal class Personavstemming {
                     it.requireKey("@id", "fødselsnummer", "aktørId")
                     it.require("@opprettet") { message -> message.asLocalDateTime() }
                     it.requireArray("arbeidsgivere") {
+                        requireKey("organisasjonsnummer")
                         requireArray("vedtaksperioder") {
-                            requireKey("tilstand")
+                            requireKey("forkastet", "fom", "tom", "skjæringstidspunkt")
                             require("opprettet", JsonNode::asLocalDateTime)
                             require("oppdatert", JsonNode::asLocalDateTime)
                             require("id") { jsonNode ->
                                 UUID.fromString(jsonNode.asText())
                             }
-                            requireArray("utbetalinger")
-                        }
-                        requireArray("utbetalinger") {
-                            require("opprettet", JsonNode::asLocalDateTime)
-                            require("oppdatert", JsonNode::asLocalDateTime)
-                            requireKey("type", "status")
-                            require("id") { jsonNode ->
-                                UUID.fromString(jsonNode.asText())
-                            }
-                            interestedIn("vurdering")
-                            interestedIn(
-                                "vurdering.ident",
-                                "vurdering.tidspunkt",
-                                "vurdering.automatiskBehandling",
-                                "vurdering.godkjent"
-                            )
                         }
                     }
                 }
@@ -69,6 +55,9 @@ internal class Personavstemming {
             val hendelseId = UUID.fromString(packet["@id"].asText())
             val fødselsnummer = packet["fødselsnummer"].asText()
             val aktørId = packet["aktørId"].asText()
+            val person = Person(aktørId, fødselsnummer)
+            person.register(spesialistDao)
+            person.opprett()
             sikkerlogg.info("Mottatt person_avstemt for {}, {}", keyValue("fødselsnummer", fødselsnummer), keyValue("aktørId", aktørId))
             val arbeidsgivereJson = packet["arbeidsgivere"]
             if (arbeidsgivereJson.isEmpty) {
