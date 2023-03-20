@@ -41,8 +41,6 @@ internal class AutomatiskAvvisningCommand(
         if (underVergemål) årsaker.add("Vergemål")
         if (utbetalingsfilter.kanIkkeUtbetales) årsaker.addAll(utbetalingsfilter.årsaker())
 
-        if (utbetaling == null) throw IllegalStateException("Forventer å finne utbetaling for vedtaksperiodeId=$vedtaksperiodeId")
-
         val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson, utbetaling)
         godkjenningMediator.automatiskAvvisning(context, behov, vedtaksperiodeId, fødselsnummer, årsaker.toList(), hendelseId)
         logg.info("Automatisk avvisning av vedtaksperiode $vedtaksperiodeId pga:$årsaker")

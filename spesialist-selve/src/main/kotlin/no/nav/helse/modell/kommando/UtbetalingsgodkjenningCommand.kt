@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory
 internal class UtbetalingsgodkjenningCommand(
     private val godkjent: Boolean,
     private val saksbehandlerIdent: String,
-    private val oid: UUID,
     private val epostadresse: String,
     private val godkjenttidspunkt: LocalDateTime,
     private val årsak: String?,
@@ -22,7 +21,7 @@ internal class UtbetalingsgodkjenningCommand(
     private val godkjenningMediator: GodkjenningMediator,
     private val vedtaksperiodeId: UUID,
     private val fødselsnummer: String,
-    private val utbetaling: Utbetaling
+    private val utbetaling: Utbetaling?
 ) : Command {
 
     private companion object {

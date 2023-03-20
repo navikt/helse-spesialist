@@ -29,7 +29,6 @@ internal class Saksbehandlerløsning(
     private val json: String,
     godkjent: Boolean,
     saksbehandlerIdent: String,
-    oid: UUID,
     epostadresse: String,
     godkjenttidspunkt: LocalDateTime,
     årsak: String?,
@@ -42,13 +41,12 @@ internal class Saksbehandlerløsning(
     godkjenningMediator: GodkjenningMediator,
     utbetalingDao: UtbetalingDao,
 ) : Hendelse, MacroCommand() {
-    private val utbetaling = utbetalingDao.utbetalingFor(oppgaveId) ?: throw IllegalStateException("Forventer å finne utbetaling for oppgave med id=$oppgaveId")
+    private val utbetaling = utbetalingDao.utbetalingFor(oppgaveId)
 
     override val commands = listOf(
         UtbetalingsgodkjenningCommand(
             godkjent,
             saksbehandlerIdent,
-            oid,
             epostadresse,
             godkjenttidspunkt,
             årsak,
@@ -101,7 +99,6 @@ internal class Saksbehandlerløsning(
                 packet["fødselsnummer"].asText(),
                 packet["godkjent"].asBoolean(),
                 packet["saksbehandlerident"].asText(),
-                UUID.fromString(packet["saksbehandleroid"].asText()),
                 packet["saksbehandlerepost"].asText(),
                 packet["godkjenttidspunkt"].asLocalDateTime(),
                 packet["årsak"].takeUnless(JsonNode::isMissingOrNull)?.asText(),

@@ -24,7 +24,6 @@ internal class UtbetalingsfilterCommand(
         val utbetalingsfilter = utbetalingsfilter()
         if (utbetalingsfilter.kanUtbetales) return true
 
-        if (utbetaling == null) throw IllegalStateException("Forventer å finne utbetaling for vedtaksperiodeId=$vedtaksperiodeId")
         val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson, utbetaling)
         val årsaker = utbetalingsfilter.årsaker()
         godkjenningMediator.automatiskAvvisning(context, behov, vedtaksperiodeId, fødselsnummer, årsaker, hendelseId)

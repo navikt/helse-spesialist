@@ -42,7 +42,6 @@ internal class SaksbehandlerløsningTest {
         json = HENDELSE_JSON,
         godkjent = godkjent,
         saksbehandlerIdent = IDENT,
-        oid = randomUUID(),
         epostadresse = "saksbehandler@nav.no",
         godkjenttidspunkt = GODKJENTTIDSPUNKT,
         årsak = null,
@@ -52,8 +51,8 @@ internal class SaksbehandlerløsningTest {
         godkjenningsbehovhendelseId = GODKJENNINGSBEHOV_ID,
         hendelseDao = hendelseDao,
         oppgaveDao = mockk(relaxed = true),
-        utbetalingDao = utbetalingDao,
         godkjenningMediator = GodkjenningMediator(mockk(relaxed = true), mockk(relaxed = true), mockk(), mockk(relaxed = true), mockk(relaxed = true)),
+        utbetalingDao = utbetalingDao,
     )
 
     private val context = CommandContext(randomUUID())

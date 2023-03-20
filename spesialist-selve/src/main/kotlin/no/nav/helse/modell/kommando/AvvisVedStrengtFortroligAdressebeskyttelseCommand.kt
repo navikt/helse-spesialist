@@ -22,7 +22,7 @@ internal class AvvisVedStrengtFortroligAdressebeskyttelseCommand(
             return true
         val oppgaveId = oppgaveDao.finnOppgaveId(fødselsnummer) ?: return true
 
-        val utbetaling = utbetalingDao.utbetalingFor(oppgaveId) ?: throw IllegalStateException("Forventer å finne utbetaling for oppgave med id=$oppgaveId")
+        val utbetaling = utbetalingDao.utbetalingFor(oppgaveId)
         val hendelseId = oppgaveDao.finnGodkjenningsbehov(fødselsnummer)
         val godkjenningsbehovJson = hendelseDao.finnUtbetalingsgodkjenningbehovJson(hendelseId)
         val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson, utbetaling)

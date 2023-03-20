@@ -290,7 +290,6 @@ internal class Hendelsefabrikk(
         fødselsnummer: String,
         godkjent: Boolean,
         saksbehandlerident: String,
-        oid: UUID,
         epostadresse: String,
         godkjenttidspunkt: LocalDateTime,
         årsak: String?,
@@ -304,7 +303,6 @@ internal class Hendelsefabrikk(
         json = json,
         godkjent = godkjent,
         saksbehandlerIdent = saksbehandlerident,
-        oid = oid,
         epostadresse = epostadresse,
         godkjenttidspunkt = godkjenttidspunkt,
         årsak = årsak,
@@ -314,8 +312,8 @@ internal class Hendelsefabrikk(
         godkjenningsbehovhendelseId = godkjenningsbehovhendelseId,
         hendelseDao = hendelseDao,
         oppgaveDao = oppgaveDao,
-        utbetalingDao = utbetalingDao,
-        godkjenningMediator = godkjenningMediator
+        godkjenningMediator = godkjenningMediator,
+        utbetalingDao = utbetalingDao
     )
 
     fun saksbehandlerløsning(json: String): Saksbehandlerløsning {
@@ -326,7 +324,6 @@ internal class Hendelsefabrikk(
             fødselsnummer = jsonNode["fødselsnummer"].asText(),
             godkjent = jsonNode["godkjent"].asBoolean(),
             saksbehandlerident = jsonNode["saksbehandlerident"].asText(),
-            oid = UUID.fromString(jsonNode["saksbehandleroid"].asText()),
             epostadresse = jsonNode["saksbehandlerepost"].asText(),
             godkjenttidspunkt = jsonNode["godkjenttidspunkt"].asLocalDateTime(),
             årsak = jsonNode["årsak"].takeUnless(JsonNode::isMissingOrNull)?.asText(),

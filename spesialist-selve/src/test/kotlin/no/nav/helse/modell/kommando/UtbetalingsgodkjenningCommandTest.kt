@@ -21,7 +21,6 @@ internal class UtbetalingsgodkjenningCommandTest {
         private const val GODKJENT = true
         private const val IDENT = "Z999999"
         private const val EPOST = "saksbehandler@nav.no"
-        private val OID = UUID.randomUUID()
         private val TIDSPUNKT = LocalDateTime.now()
         private val GODKJENNINGSBEHOV_ID = UUID.randomUUID()
         private val vedtaksperiodeId = UUID.randomUUID()
@@ -43,7 +42,6 @@ internal class UtbetalingsgodkjenningCommandTest {
         command = UtbetalingsgodkjenningCommand(
             godkjent = GODKJENT,
             saksbehandlerIdent = IDENT,
-            oid = OID,
             epostadresse = EPOST,
             godkjenttidspunkt = TIDSPUNKT,
             årsak = null,

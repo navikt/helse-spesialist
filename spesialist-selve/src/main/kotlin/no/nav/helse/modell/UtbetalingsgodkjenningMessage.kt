@@ -10,7 +10,7 @@ import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageProblems
 
-internal class UtbetalingsgodkjenningMessage(json: String, private val utbetaling: Utbetaling) {
+internal class UtbetalingsgodkjenningMessage(json: String, private val utbetaling: Utbetaling?) {
     private val behov = JsonMessage(json, MessageProblems(json))
     private lateinit var løsning: Map<String, Any>
 
@@ -86,7 +86,7 @@ internal class UtbetalingsgodkjenningMessage(json: String, private val utbetalin
         kommentar: String?
     ) {
         løsning = mapOf(
-            "Godkjenning" to mapOf(
+            "Godkjenning" to mutableMapOf(
                 "godkjent" to godkjent,
                 "saksbehandlerIdent" to saksbehandlerIdent,
                 "saksbehandlerEpost" to saksbehandlerEpost,
@@ -95,8 +95,9 @@ internal class UtbetalingsgodkjenningMessage(json: String, private val utbetalin
                 "årsak" to årsak,
                 "begrunnelser" to begrunnelser,
                 "kommentar" to kommentar,
-                "refusjontype" to utbetaling.refusjonstype().name
-            )
+            ).apply {
+                compute("refusjontype") { _, _ -> utbetaling?.refusjonstype()?.name }
+            }.toMap()
         )
         // <midlertidig forklaring="@behovId brukes for å gruppere behov/løsning. Ble innført 28. mars 2022. Må likevel fikse godkjenningsbehov som ble opprettet før 28. mars">
         behov.interestedIn("@behovId", "@id")
