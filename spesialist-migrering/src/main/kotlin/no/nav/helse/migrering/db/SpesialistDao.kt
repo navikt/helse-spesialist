@@ -125,4 +125,12 @@ internal class SpesialistDao(private val dataSource: DataSource): IPersonObserve
             session.run(queryOf(query, fødselsnummer.toLong(), aktørId.toLong()).asUpdate)
         }
     }
+
+    override fun arbeidsgiverOpprettet(organisasjonsnummer: String) {
+        @Language("PostgreSQL")
+        val query = "INSERT INTO arbeidsgiver(orgnummer) VALUES (?) ON CONFLICT (orgnummer) DO NOTHING "
+        sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, organisasjonsnummer.toLong()).asUpdate)
+        }
+    }
 }
