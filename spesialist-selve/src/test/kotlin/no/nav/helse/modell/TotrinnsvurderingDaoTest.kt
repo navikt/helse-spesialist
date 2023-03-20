@@ -1,6 +1,7 @@
 package no.nav.helse.modell
 
 import DatabaseIntegrationTest
+import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.juli
@@ -152,6 +153,36 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
 
         assertEquals(1, totrinnsvurdering?.utbetalingIdRef)
         assertNotNull(totrinnsvurdering?.oppdatert)
+    }
+
+    @Test
+    fun `Velger siste utbetaling_id når man ferdigstiller totrinnsvurdering`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        val arbeidsgiverFagsystemId = fagsystemId()
+        val personFagsystemId = fagsystemId()
+        val arbeidsgiverOppdragId = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
+        val personOppdragId = lagPersonoppdrag(personFagsystemId)
+        lagLinje(arbeidsgiverOppdragId, 1.juli(), 10.juli(), 12000)
+        lagLinje(personOppdragId, 11.juli(), 31.juli(), 10000)
+        lagUtbetalingId(arbeidsgiverOppdragId, personOppdragId, UTBETALING_ID)
+        opprettUtbetalingKobling(VEDTAKSPERIODE, UTBETALING_ID)
+
+        val utbetalingId2 = UUID.randomUUID()
+        lagLinje(arbeidsgiverOppdragId, 1.juli(), 10.juli(), 12000)
+        lagLinje(personOppdragId, 11.juli(), 31.juli(), 10000)
+        val utbetalingIdRef2 = lagUtbetalingId(arbeidsgiverOppdragId, personOppdragId, utbetalingId2)
+        opprettUtbetalingKobling(VEDTAKSPERIODE, utbetalingId2)
+
+        totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
+        totrinnsvurderingDao.ferdigstill(VEDTAKSPERIODE)
+
+        val totrinnsvurdering = totrinnsvurdering()
+
+        requireNotNull(totrinnsvurdering)
+        assertEquals(utbetalingIdRef2, totrinnsvurdering.utbetalingIdRef)
+        assertNotNull(totrinnsvurdering.oppdatert)
     }
 
     @Test

@@ -229,6 +229,8 @@ class TotrinnsvurderingDao(private val dataSource: DataSource) {
                    SELECT id FROM utbetaling_id ui
                    INNER JOIN vedtaksperiode_utbetaling_id vui ON vui.utbetaling_id = ui.utbetaling_id
                    WHERE vui.vedtaksperiode_id = :vedtaksperiodeId
+                   ORDER BY ui.id DESC
+                   LIMIT 1
                ), oppdatert = now()
                WHERE vedtaksperiode_id = :vedtaksperiodeId
                AND utbetaling_id_ref IS null
