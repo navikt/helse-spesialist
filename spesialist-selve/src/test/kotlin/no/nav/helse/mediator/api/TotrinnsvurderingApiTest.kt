@@ -156,6 +156,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
 
     @Test
     fun returOk() {
+        Toggle.Totrinnsvurdering.disable()
         val response = runBlocking {
             client.post(RETUR_URL) {
                 contentType(ContentType.Application.Json)
@@ -188,6 +189,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
         }
 
         assertEquals(HttpStatusCode.OK, response.status)
+        Toggle.Totrinnsvurdering.enable()
     }
 
     @Test
