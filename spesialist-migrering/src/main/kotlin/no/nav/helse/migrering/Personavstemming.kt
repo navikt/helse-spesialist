@@ -3,7 +3,6 @@ package no.nav.helse.migrering
 import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.migrering.db.SparsomDao
 import no.nav.helse.migrering.db.SpesialistDao
 import no.nav.helse.migrering.domene.Person
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -18,7 +17,6 @@ internal class Personavstemming {
 
     internal class River(
         rapidsConnection: RapidsConnection,
-        private val sparsomDao: SparsomDao,
         private val spesialistDao: SpesialistDao,
     ) : PacketListener {
 
@@ -48,7 +46,6 @@ internal class Personavstemming {
         }
 
         override fun onPacket(packet: JsonMessage, context: MessageContext) {
-            val hendelseId = UUID.fromString(packet["@id"].asText())
             val fødselsnummer = packet["fødselsnummer"].asText()
             val aktørId = packet["aktørId"].asText()
             val person = Person(aktørId, fødselsnummer)

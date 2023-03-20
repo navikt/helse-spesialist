@@ -8,7 +8,6 @@ import java.time.Duration
 internal class DataSourceBuilder(env: Map<String, String>, dbUser: DbUser) {
 
     internal enum class DbUser(private val user: String) {
-        SPARSOM("SPESIALIST_MIGRERING_SPARSOM"),
         SPESIALIST("SPESIALIST_MIGRERING");
 
         override fun toString(): String {

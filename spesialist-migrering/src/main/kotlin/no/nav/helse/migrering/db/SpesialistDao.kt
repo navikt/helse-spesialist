@@ -6,30 +6,10 @@ import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.migrering.domene.Generasjon
 import no.nav.helse.migrering.domene.IPersonObserver
-import no.nav.helse.migrering.domene.Varsel
 import org.intellij.lang.annotations.Language
 
 internal class SpesialistDao(private val dataSource: DataSource): IPersonObserver {
-
-    internal fun finnSisteGenerasjonFor(vedtaksperiodeId: UUID): Generasjon? {
-        @Language("PostgreSQL")
-        val query = "SELECT unik_id, vedtaksperiode_id, utbetaling_id, opprettet_tidspunkt, låst_tidspunkt FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ? ORDER BY id DESC"
-        return sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, vedtaksperiodeId).map {
-                Generasjon(
-                    it.uuid("unik_id"),
-                    it.uuid("vedtaksperiode_id"),
-                    it.uuidOrNull("utbetaling_id"),
-                    it.localDateTime("opprettet_tidspunkt"),
-                    it.localDateTimeOrNull("låst_tidspunkt"),
-                    null,
-                    emptyList()
-                )
-            }.asSingle)
-        }
-    }
 
     internal fun lagreGenerasjon(
         id: UUID,
@@ -94,28 +74,6 @@ internal class SpesialistDao(private val dataSource: DataSource): IPersonObserve
 
         sessionOf(dataSource).use { session ->
             session.run(queryOf(query, varselId, varselkode, vedtaksperiodeId, opprettet, generasjonId, definisjonRef, statusEndretIdent, statusEndretTidspunkt, status).asUpdate)
-        }
-    }
-
-    internal fun finnVarslerFor(fødselsnummer: String): List<Varsel> {
-        @Language("PostgreSQL")
-        val query = """
-            SELECT melding, opprettet, vedtaksperiode_id, inaktiv_fra
-            FROM warning 
-            INNER JOIN vedtak v on warning.vedtak_ref = v.id 
-                WHERE v.person_ref = (SELECT id FROM person WHERE fodselsnummer = ? LIMIT 1)
-        """
-
-        return sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, fødselsnummer.toLong()).map {
-                Varsel(
-                    it.uuid("vedtaksperiode_id"),
-                    it.string("melding"),
-                    it.localDateTime("opprettet"),
-                    UUID.randomUUID(),
-                    it.localDateTimeOrNull("inaktiv_fra"),
-                )
-            }.asList)
         }
     }
 
