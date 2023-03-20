@@ -39,9 +39,17 @@ internal fun Route.totrinnsvurderingApi(
         val totrinnsvurdering = call.receive<TotrinnsvurderingDto>()
         val saksbehandlerOid = getSaksbehandlerOid()
         val aktivTotrinnsvurdering = totrinnsvurderingMediator.hentAktiv(totrinnsvurdering.oppgavereferanse)
+            ?: totrinnsvurderingMediator.opprettFraLegacy(totrinnsvurdering.oppgavereferanse)
 
-        if (oppgaveMediator.erBeslutteroppgave(totrinnsvurdering.oppgavereferanse) ||
-            aktivTotrinnsvurdering?.erBeslutteroppgave() == true) {
+        if (aktivTotrinnsvurdering == null) {
+            call.respondText(
+                "Finner ikke aktiv totrinnsvurdering.",
+                status = HttpStatusCode.NotFound
+            )
+            return@post
+        }
+
+        if (oppgaveMediator.erBeslutteroppgave(totrinnsvurdering.oppgavereferanse) || aktivTotrinnsvurdering.erBeslutteroppgave()) {
             call.respondText(
                 "Denne oppgaven har allerede blitt sendt til godkjenning.",
                 status = HttpStatusCode.Conflict
@@ -65,7 +73,7 @@ internal fun Route.totrinnsvurderingApi(
         sikkerLog.info("OppgaveId ${totrinnsvurdering.oppgavereferanse} sendes til godkjenning av $saksbehandlerOid")
 
         val beslutterSaksbehandlerOid = oppgaveMediator.finnBeslutterSaksbehandler(totrinnsvurdering.oppgavereferanse)
-            ?: aktivTotrinnsvurdering?.beslutter
+            ?: aktivTotrinnsvurdering.beslutter
         tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(
             totrinnsvurdering.oppgavereferanse,
             beslutterSaksbehandlerOid,
@@ -81,7 +89,7 @@ internal fun Route.totrinnsvurderingApi(
             oppgaveId = totrinnsvurdering.oppgavereferanse,
             saksbehandlerOid = saksbehandlerOid
         )
-        if (aktivTotrinnsvurdering?.erRetur == true) totrinnsvurderingMediator.settHåndtertRetur(totrinnsvurdering.oppgavereferanse)
+        if (aktivTotrinnsvurdering.erRetur) totrinnsvurderingMediator.settHåndtertRetur(totrinnsvurdering.oppgavereferanse)
 
         oppgaveMediator.lagrePeriodehistorikk(
             oppgaveId = totrinnsvurdering.oppgavereferanse,
@@ -99,7 +107,8 @@ internal fun Route.totrinnsvurderingApi(
     post("/api/totrinnsvurdering/retur") {
         val retur = call.receive<TotrinnsvurderingReturDto>()
         val beslutterOid = getSaksbehandlerOid()
-        val aktivTotrinnsvurdering = totrinnsvurderingMediator.hentAktiv(oppgaveId = retur.oppgavereferanse)
+        val aktivTotrinnsvurdering = totrinnsvurderingMediator.hentAktiv(oppgaveId = retur.oppgavereferanse) ?:
+            totrinnsvurderingMediator.opprettFraLegacy(retur.oppgavereferanse)
         sikkerLog.info("OppgaveId ${retur.oppgavereferanse} sendes i retur av $beslutterOid")
 
         val tidligereSaksbehandlerOid =

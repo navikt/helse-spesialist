@@ -329,6 +329,50 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `Finner totrinnsvurderingsfelter på oppgave dersom er_totrinnsoppgave=true`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave(contextId = CONTEXT_ID)
+        opprettSaksbehandler()
+
+        oppgaveDao.setTrengerTotrinnsvurdering(VEDTAKSPERIODE)
+        val totrinnsfelter = oppgaveDao.finnTotrinnsvurderingFraLegacy(oppgaveId)
+        requireNotNull(totrinnsfelter)
+        assertFalse(totrinnsfelter.erRetur)
+        assertEquals(VEDTAKSPERIODE, totrinnsfelter.vedtaksperiodeId)
+        assertNull(totrinnsfelter.saksbehandler)
+        assertNull(totrinnsfelter.beslutter)
+    }
+
+    @Test
+    fun `Finner ikke totrinnsvurderingsfelter på oppgave dersom er_totrinnsoppgave=false`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave(contextId = CONTEXT_ID)
+        opprettSaksbehandler()
+
+        val totrinnsfelter = oppgaveDao.finnTotrinnsvurderingFraLegacy(oppgaveId)
+        assertNull(totrinnsfelter)
+    }
+
+    @Test
+    fun `Flipper er_totrinnsoppgave til false`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave(contextId = CONTEXT_ID)
+        opprettSaksbehandler()
+        oppgaveDao.setTrengerTotrinnsvurdering(VEDTAKSPERIODE)
+
+        assertTrue(trengerTotrinnsvurdering())
+
+        oppgaveDao.settTotrinnsoppgaveFalse(oppgaveId)
+        assertFalse(trengerTotrinnsvurdering())
+    }
+
+    @Test
     fun `sjekker risk-oppgaver`() {
         opprettPerson()
         opprettArbeidsgiver()

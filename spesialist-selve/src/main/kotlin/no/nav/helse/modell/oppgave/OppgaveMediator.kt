@@ -197,4 +197,7 @@ class OppgaveMediator(
     }
 
     fun harFerdigstiltOppgave(vedtaksperiodeId: UUID) = oppgaveDao.harFerdigstiltOppgave(vedtaksperiodeId)
+
+    fun finnTotrinnsvurderingFraLegacy(oppgaveId: Long) = oppgaveDao.finnTotrinnsvurderingFraLegacy(oppgaveId)
+    fun settTotrinnsoppgaveFalse(oppgaveId: Long) = oppgaveDao.settTotrinnsoppgaveFalse(oppgaveId)
 }

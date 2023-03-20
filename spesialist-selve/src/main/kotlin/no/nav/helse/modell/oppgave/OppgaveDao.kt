@@ -1,11 +1,13 @@
 package no.nav.helse.modell.oppgave
 
+import java.time.LocalDateTime.now
 import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.HelseDao
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommandData
+import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
@@ -125,6 +127,33 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 ferdigstiltAvOid = row.stringOrNull("ferdigstilt_av_oid")?.let(UUID::fromString)
             )
         }
+
+    fun finnTotrinnsvurderingFraLegacy(oppgaveId: Long) =
+        """ SELECT v.vedtaksperiode_id, o.er_beslutteroppgave, o.er_returoppgave, o.tidligere_saksbehandler_oid, o.er_totrinnsoppgave, o.beslutter_saksbehandler_oid
+            FROM oppgave o
+            INNER JOIN vedtak v on o.vedtak_ref = v.id
+            WHERE o.id = :oppgaveId
+            AND o.er_totrinnsoppgave = true
+        """.single(mapOf("oppgaveId" to oppgaveId)) { row ->
+            Totrinnsvurdering(
+                vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
+                erRetur = row.boolean("er_returoppgave"),
+                saksbehandler = row.uuidOrNull("tidligere_saksbehandler_oid"),
+                beslutter = row.uuidOrNull("beslutter_saksbehandler_oid"),
+                utbetalingIdRef = null,
+                opprettet = now(),
+                oppdatert = now()
+            )
+        }
+
+    fun settTotrinnsoppgaveFalse(oppgaveId: Long) =
+        """UPDATE oppgave SET er_totrinnsoppgave=false WHERE id=:oppgaveId"""
+            .update(
+                mapOf(
+                    "oppgaveId" to oppgaveId
+                )
+            )
+
 
     fun finnAktive(vedtaksperiodeId: UUID) =
         """ SELECT o.id, o.type, o.status, o.utbetaling_id

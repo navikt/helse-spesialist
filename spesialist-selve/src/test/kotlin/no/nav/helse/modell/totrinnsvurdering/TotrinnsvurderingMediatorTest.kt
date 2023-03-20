@@ -3,6 +3,7 @@ package no.nav.helse.modell.totrinnsvurdering
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import java.time.LocalDateTime.now
 import java.util.UUID
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
@@ -57,5 +58,30 @@ class TotrinnsvurderingMediatorTest {
                 type = PeriodehistorikkType.TOTRINNSVURDERING_RETUR,
             )
         }
+    }
+
+    @Test
+    fun `Oppretter ny totrinnsvurdering dersom den kun eksisterer i gammel løsning med kopi av data fra gammel løsning`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val oppgaveId = 42L
+
+        every { oppgaveMediator.finnTotrinnsvurderingFraLegacy(oppgaveId)} returns Totrinnsvurdering(
+            vedtaksperiodeId = vedtaksperiodeId,
+            erRetur = false,
+            saksbehandler = UUID.randomUUID(),
+            beslutter = UUID.randomUUID(),
+            utbetalingIdRef = null,
+            opprettet = now(),
+            oppdatert = now()
+        )
+
+        totrinnsvurderingMediator.opprettFraLegacy(oppgaveId)
+
+        verify(exactly = 1) { oppgaveMediator.finnTotrinnsvurderingFraLegacy(oppgaveId) }
+        verify(exactly = 1) { oppgaveMediator.settTotrinnsoppgaveFalse(oppgaveId) }
+
+        val totrinnLegacy = requireNotNull(oppgaveMediator.finnTotrinnsvurderingFraLegacy(oppgaveId))
+
+        verify(exactly = 1) { totrinnsvurderingDao.opprettFraLegacy(totrinnLegacy) }
     }
 }

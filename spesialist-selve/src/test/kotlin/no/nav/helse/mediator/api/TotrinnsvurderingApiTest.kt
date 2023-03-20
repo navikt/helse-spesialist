@@ -93,6 +93,15 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
         every { oppgaveMediator.erAktivOppgave(1L) } returns true
         every { oppgaveMediator.erRiskoppgave(1L) } returns false
         every { varselRepository.ikkeVurderteVarslerEkskludertBesluttervarslerFor(1L) } returns 0
+        every { totrinnsvurderingMediator.hentAktiv(oppgaveId = any()) } returns Totrinnsvurdering(
+            vedtaksperiodeId = UUID.randomUUID(),
+            erRetur = true,
+            saksbehandler = UUID.randomUUID(),
+            beslutter = UUID.randomUUID(),
+            utbetalingIdRef = null,
+            oppdatert = now(),
+            opprettet = now()
+        )
         val response = runBlocking {
             client.post("/api/totrinnsvurdering") {
                 contentType(ContentType.Application.Json)
@@ -251,6 +260,22 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     }
 
     @Test
+    fun `Finner ikke totrinnsvurdering i ny løsning eller i legacy`() {
+        every { totrinnsvurderingMediator.hentAktiv(1L) } returns null
+        every { totrinnsvurderingMediator.opprettFraLegacy(1L) } returns null
+
+        val response = runBlocking {
+            client.post("/api/totrinnsvurdering") {
+                contentType(ContentType.Application.Json)
+                setBody<JsonNode>(objectMapper.valueToTree(totrinnsvurderingDto))
+                authentication(saksbehandler_oid)
+            }
+        }
+
+        assertEquals(HttpStatusCode.NotFound, response.status)
+    }
+
+    @Test
     fun `Totrinnsvurdering kan ikke gjøres til beslutteroppgave hvis den allerede er beslutteroppgave`() {
         every { totrinnsvurderingMediator.hentAktiv(1L) } returns Totrinnsvurdering(
             vedtaksperiodeId = UUID.randomUUID(),
@@ -289,6 +314,56 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             client.post("/api/totrinnsvurdering") {
                 contentType(ContentType.Application.Json)
                 setBody<JsonNode>(objectMapper.valueToTree(totrinnsvurderingDto))
+                authentication(saksbehandler_oid)
+            }
+        }
+        assertEquals(HttpStatusCode.OK, response.status)
+    }
+
+    @Test
+    fun `Oppretter totrinnsvurdering dersom den kun finnes i legacyløsning`() {
+        every { totrinnsvurderingMediator.hentAktiv(1L) } returns null
+        every { totrinnsvurderingMediator.opprettFraLegacy(1L) } returns Totrinnsvurdering(
+            vedtaksperiodeId = UUID.randomUUID(),
+            erRetur = false,
+            saksbehandler = null,
+            beslutter = null,
+            utbetalingIdRef = null,
+            oppdatert = now(),
+            opprettet = now()
+        )
+
+        val response = runBlocking {
+            client.post("/api/totrinnsvurdering") {
+                contentType(ContentType.Application.Json)
+                setBody<JsonNode>(objectMapper.valueToTree(totrinnsvurderingDto))
+                authentication(saksbehandler_oid)
+            }
+        }
+        assertEquals(HttpStatusCode.OK, response.status)
+    }
+
+    @Test
+    fun `Oppretter totrinnsvurdering dersom den kun finnes i legacyløsning ved retur`() {
+        every { totrinnsvurderingMediator.hentAktiv(1L) } returns null
+        every { totrinnsvurderingMediator.opprettFraLegacy(1L) } returns Totrinnsvurdering(
+            vedtaksperiodeId = UUID.randomUUID(),
+            erRetur = false,
+            saksbehandler = saksbehandler_oid,
+            beslutter = null,
+            utbetalingIdRef = null,
+            oppdatert = now(),
+            opprettet = now()
+        )
+
+        val response = runBlocking {
+            client.post(RETUR_URL) {
+                contentType(ContentType.Application.Json)
+                accept(ContentType.Application.Json)
+                setBody(TotrinnsvurderingReturDto(
+                    oppgavereferanse = 1,
+                    notat = NotatApiDto("tekst", NotatType.Retur)
+                ))
                 authentication(saksbehandler_oid)
             }
         }

@@ -48,4 +48,11 @@ class TotrinnsvurderingMediator(
     fun ferdigstill(vedtaksperiodeId: UUID): Unit = dao.ferdigstill(vedtaksperiodeId)
     fun hentAktiv(vedtaksperiodeId: UUID): Totrinnsvurdering? = dao.hentAktiv(vedtaksperiodeId)
     fun hentAktiv(oppgaveId: Long): Totrinnsvurdering? = dao.hentAktiv(oppgaveId)
+
+    fun opprettFraLegacy(oppgaveId: Long): Totrinnsvurdering? =
+        oppgaveMediator.finnTotrinnsvurderingFraLegacy(oppgaveId)?.let {
+            dao.opprettFraLegacy(it).also {
+                oppgaveMediator.settTotrinnsoppgaveFalse(oppgaveId)
+            }
+        }
 }
