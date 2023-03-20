@@ -82,6 +82,7 @@ class TotrinnsvurderingDao(private val dataSource: DataSource) {
                    INNER JOIN vedtak v on ttv.vedtaksperiode_id = v.vedtaksperiode_id
                    INNER JOIN oppgave o on v.id = o.vedtak_ref
                    WHERE o.id = :oppgaveId
+                   LIMIT 1
                )
                AND utbetaling_id_ref IS null
             """.trimIndent()
@@ -124,6 +125,7 @@ class TotrinnsvurderingDao(private val dataSource: DataSource) {
                    INNER JOIN vedtak v on ttv.vedtaksperiode_id = v.vedtaksperiode_id
                    INNER JOIN oppgave o on v.id = o.vedtak_ref
                    WHERE o.id = :oppgaveId
+                   LIMIT 1
                )
                AND utbetaling_id_ref IS null
             """.trimIndent()
@@ -166,6 +168,7 @@ class TotrinnsvurderingDao(private val dataSource: DataSource) {
                    INNER JOIN vedtak v on ttv.vedtaksperiode_id = v.vedtaksperiode_id
                    INNER JOIN oppgave o on v.id = o.vedtak_ref
                    WHERE o.id = :oppgaveId
+                   LIMIT 1
                )
                AND utbetaling_id_ref IS null
             """.trimIndent()
@@ -208,6 +211,7 @@ class TotrinnsvurderingDao(private val dataSource: DataSource) {
                    INNER JOIN vedtak v on ttv.vedtaksperiode_id = v.vedtaksperiode_id
                    INNER JOIN oppgave o on v.id = o.vedtak_ref
                    WHERE o.id = :oppgaveId
+                   LIMIT 1
                )
                AND utbetaling_id_ref IS null
             """.trimIndent()
