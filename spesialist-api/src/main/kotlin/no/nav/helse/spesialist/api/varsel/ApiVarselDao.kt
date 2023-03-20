@@ -103,24 +103,6 @@ internal class ApiVarselDao(private val dataSource: DataSource) : HelseDao(dataS
         )
     ) { mapVarsel(it) }.toSet()
 
-    internal fun godkjennVarslerFor(oppgaveId: Long) {
-        val utbetalingId = finnUtbetalingIdFor(oppgaveId)
-        queryize(
-            """
-                UPDATE selve_varsel 
-                SET status = :status_godkjent 
-                WHERE status = :status_vurdert 
-                AND generasjon_ref IN (SELECT id FROM selve_vedtaksperiode_generasjon WHERE utbetaling_id = :utbetaling_id);
-            """
-        ).update(
-            mapOf(
-                "status_godkjent" to GODKJENT.name,
-                "status_vurdert" to VURDERT.name,
-                "utbetaling_id" to utbetalingId,
-            )
-        )
-    }
-
     internal fun godkjennVarslerFor(vedtaksperioder: List<UUID>) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val query = """
@@ -133,52 +115,30 @@ internal class ApiVarselDao(private val dataSource: DataSource) : HelseDao(dataS
         session.run(queryOf(query, GODKJENT.name, VURDERT.name, *vedtaksperioder.toTypedArray()).asUpdate)
     }
 
-    internal fun settStatusVurdertPåBeslutteroppgavevarsler(oppgaveId: Long, ident: String) {
-        val utbetalingId = finnUtbetalingIdFor(oppgaveId)
-        queryize(
-            """
-                UPDATE selve_varsel sv
-                SET 
-                    status = :status,
-                    status_endret_tidspunkt = :endret_tidspunkt,
-                    status_endret_ident = :endret_ident,
-                    definisjon_ref = (SELECT id from api_varseldefinisjon WHERE kode = sv.kode ORDER BY opprettet DESC LIMIT 1)
-                WHERE generasjon_ref in (SELECT id FROM selve_vedtaksperiode_generasjon WHERE utbetaling_id = :utbetaling_id)
-                AND kode like 'SB_BO_%';
-            """
-        ).update(
-            mapOf(
-                "status" to VURDERT.name,
-                "endret_tidspunkt" to LocalDateTime.now(),
-                "endret_ident" to ident,
-                "utbetaling_id" to utbetalingId,
+    internal fun settStatusVurdertPåBeslutteroppgavevarsler(vedtaksperioder: List<UUID>, ident: String) =
+        sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val query = """
+            UPDATE selve_varsel sv
+            SET
+                status = ?,
+                status_endret_tidspunkt = ?,
+                status_endret_ident = ?,
+                definisjon_ref = (SELECT id from api_varseldefinisjon WHERE kode = sv.kode ORDER BY opprettet DESC LIMIT 1)
+            WHERE generasjon_ref IN (SELECT id FROM selve_vedtaksperiode_generasjon svg 
+                WHERE svg.vedtaksperiode_id IN (${vedtaksperioder.joinToString { "?" }}))
+            AND kode LIKE 'SB_BO_%';
+        """
+            session.run(
+                queryOf(
+                    query,
+                    VURDERT.name,
+                    LocalDateTime.now(),
+                    ident,
+                    *vedtaksperioder.toTypedArray()
+                ).asUpdate
             )
-        )
-    }
-
-    internal fun settStatusVurdertFor(oppgaveId: Long, ident: String) {
-        val utbetalingId = finnUtbetalingIdFor(oppgaveId)
-        queryize(
-            """
-                UPDATE selve_varsel sv
-                SET 
-                    status = :status_vurdert,
-                    status_endret_tidspunkt = :endret_tidspunkt,
-                    status_endret_ident = :endret_ident,
-                    definisjon_ref = (SELECT id from api_varseldefinisjon WHERE kode = sv.kode ORDER BY opprettet DESC LIMIT 1)
-                WHERE generasjon_ref in (SELECT id FROM selve_vedtaksperiode_generasjon WHERE utbetaling_id = :utbetaling_id)
-                AND status != :status_inaktiv;
-            """
-        ).update(
-            mapOf(
-                "status_vurdert" to VURDERT.name,
-                "status_inaktiv" to INAKTIV.name,
-                "endret_tidspunkt" to LocalDateTime.now(),
-                "endret_ident" to ident,
-                "utbetaling_id" to utbetalingId,
-            )
-        )
-    }
+        }
 
     internal fun settStatusVurdert(
         generasjonId: UUID,

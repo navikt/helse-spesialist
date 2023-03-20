@@ -68,7 +68,8 @@ class ApiVarselRepository(dataSource: DataSource) {
     }
 
     fun settStatusVurdertPåBeslutteroppgavevarsler(oppgaveId: Long, ident: String) {
-        varselDao.settStatusVurdertPåBeslutteroppgavevarsler(oppgaveId, ident)
+        val vedtaksperioder = sammenhengendePerioder(oppgaveId)
+        varselDao.settStatusVurdertPåBeslutteroppgavevarsler(vedtaksperioder.map { it.vedtaksperiodeId() }, ident)
     }
 
     internal fun settStatusAktiv(
