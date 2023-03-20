@@ -11,18 +11,13 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 
 internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
 
-    @BeforeAll
-    fun setup() {
-        opprettPerson()
-    }
-
     @Test
     fun `opprett totrinnsvurdering`() {
+        opprettPerson()
         val totrinnsvurdering: Totrinnsvurdering = totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
 
         assertEquals(VEDTAKSPERIODE, totrinnsvurdering.vedtaksperiodeId)
@@ -36,6 +31,7 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `Sett saksbehandler på totrinnsvurdering`() {
+        opprettPerson()
         opprettSaksbehandler()
         totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
         totrinnsvurderingDao.settSaksbehandler(VEDTAKSPERIODE, SAKSBEHANDLER_OID)
@@ -48,6 +44,7 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `Sett beslutter på totrinnsvurdering`() {
+        opprettPerson()
         opprettSaksbehandler()
         totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
         totrinnsvurderingDao.settBeslutter(VEDTAKSPERIODE, SAKSBEHANDLER_OID)
@@ -76,6 +73,7 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `Sett er_retur true på totrinnsvurdering`() {
+        opprettPerson()
         totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
         totrinnsvurderingDao.settErRetur(VEDTAKSPERIODE)
 
@@ -104,6 +102,7 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `Sett er_retur false på totrinnsvurdering`() {
+        opprettPerson()
         totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
         totrinnsvurderingDao.settErRetur(VEDTAKSPERIODE)
         totrinnsvurderingDao.settHåndtertRetur(VEDTAKSPERIODE)
