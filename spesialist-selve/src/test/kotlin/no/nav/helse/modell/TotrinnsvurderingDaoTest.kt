@@ -41,8 +41,8 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
 
         val totrinnsvurdering = totrinnsvurdering()
 
-        assertEquals(SAKSBEHANDLER_OID, totrinnsvurdering.first().saksbehandler)
-        assertNotNull(totrinnsvurdering.first().oppdatert)
+        assertEquals(SAKSBEHANDLER_OID, totrinnsvurdering?.saksbehandler)
+        assertNotNull(totrinnsvurdering?.oppdatert)
     }
 
     @Test
@@ -53,8 +53,8 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
 
         val totrinnsvurdering = totrinnsvurdering()
 
-        assertEquals(SAKSBEHANDLER_OID, totrinnsvurdering.first().beslutter)
-        assertNotNull(totrinnsvurdering.first().oppdatert)
+        assertEquals(SAKSBEHANDLER_OID, totrinnsvurdering?.beslutter)
+        assertNotNull(totrinnsvurdering?.oppdatert)
     }
 
     @Test
@@ -69,8 +69,8 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
 
         val totrinnsvurdering = totrinnsvurdering()
 
-        assertEquals(SAKSBEHANDLER_OID, totrinnsvurdering.first().beslutter)
-        assertNotNull(totrinnsvurdering.first().oppdatert)
+        assertEquals(SAKSBEHANDLER_OID, totrinnsvurdering?.beslutter)
+        assertNotNull(totrinnsvurdering?.oppdatert)
     }
 
     @Test
@@ -80,8 +80,9 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
 
         val totrinnsvurdering = totrinnsvurdering()
 
-        assertTrue(totrinnsvurdering.first().erRetur)
-        assertNotNull(totrinnsvurdering.first().oppdatert)
+        requireNotNull(totrinnsvurdering)
+        assertTrue(totrinnsvurdering.erRetur)
+        assertNotNull(totrinnsvurdering.oppdatert)
     }
 
     @Test
@@ -95,8 +96,9 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
 
         val totrinnsvurdering = totrinnsvurdering()
 
-        assertTrue(totrinnsvurdering.first().erRetur)
-        assertNotNull(totrinnsvurdering.first().oppdatert)
+        requireNotNull(totrinnsvurdering)
+        assertTrue(totrinnsvurdering.erRetur)
+        assertNotNull(totrinnsvurdering.oppdatert)
     }
 
     @Test
@@ -107,8 +109,9 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
 
         val totrinnsvurdering = totrinnsvurdering()
 
-        assertFalse(totrinnsvurdering.first().erRetur)
-        assertNotNull(totrinnsvurdering.first().oppdatert)
+        requireNotNull(totrinnsvurdering)
+        assertFalse(totrinnsvurdering.erRetur)
+        assertNotNull(totrinnsvurdering.oppdatert)
     }
 
     @Test
@@ -123,8 +126,9 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
 
         val totrinnsvurdering = totrinnsvurdering()
 
-        assertFalse(totrinnsvurdering.first().erRetur)
-        assertNotNull(totrinnsvurdering.first().oppdatert)
+        requireNotNull(totrinnsvurdering)
+        assertFalse(totrinnsvurdering.erRetur)
+        assertNotNull(totrinnsvurdering.oppdatert)
     }
 
     @Test
@@ -146,8 +150,8 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
 
         val totrinnsvurdering = totrinnsvurdering()
 
-        assertEquals(1, totrinnsvurdering.first().utbetalingIdRef)
-        assertNotNull(totrinnsvurdering.first().oppdatert)
+        assertEquals(1, totrinnsvurdering?.utbetalingIdRef)
+        assertNotNull(totrinnsvurdering?.oppdatert)
     }
 
     @Test
@@ -169,11 +173,12 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
 
         val totrinnsvurdering = totrinnsvurdering()
 
-        assertEquals(VEDTAKSPERIODE, totrinnsvurdering.first().vedtaksperiodeId)
-        assertFalse(totrinnsvurdering.first().erRetur)
-        assertNull(totrinnsvurdering.first().saksbehandler)
-        assertNull(totrinnsvurdering.first().beslutter)
-        assertEquals(1, totrinnsvurdering.first().utbetalingIdRef)
+        requireNotNull(totrinnsvurdering)
+        assertEquals(VEDTAKSPERIODE, totrinnsvurdering.vedtaksperiodeId)
+        assertFalse(totrinnsvurdering.erRetur)
+        assertNull(totrinnsvurdering.saksbehandler)
+        assertNull(totrinnsvurdering.beslutter)
+        assertEquals(1, totrinnsvurdering.utbetalingIdRef)
 
         totrinnsvurderingDao.settErRetur(VEDTAKSPERIODE)
         totrinnsvurderingDao.settSaksbehandler(VEDTAKSPERIODE, SAKSBEHANDLER_OID)
@@ -181,10 +186,11 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
 
         val totrinnsvurderingFerdigstilt = totrinnsvurdering()
 
-        assertFalse(totrinnsvurderingFerdigstilt.first().erRetur)
-        assertNull(totrinnsvurderingFerdigstilt.first().saksbehandler)
-        assertNull(totrinnsvurderingFerdigstilt.first().beslutter)
-        assertEquals(1, totrinnsvurdering.first().utbetalingIdRef)
+        requireNotNull(totrinnsvurderingFerdigstilt)
+        assertFalse(totrinnsvurderingFerdigstilt.erRetur)
+        assertNull(totrinnsvurderingFerdigstilt.saksbehandler)
+        assertNull(totrinnsvurderingFerdigstilt.beslutter)
+        assertEquals(1, totrinnsvurdering.utbetalingIdRef)
     }
 
     @Test
@@ -196,13 +202,13 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
 
         val totrinnsvurdering = totrinnsvurdering()
 
-        assertEquals(aktivTotrinnsvurdering?.vedtaksperiodeId, totrinnsvurdering.first().vedtaksperiodeId)
-        assertEquals(aktivTotrinnsvurdering?.erRetur, totrinnsvurdering.first().erRetur)
-        assertEquals(aktivTotrinnsvurdering?.saksbehandler, totrinnsvurdering.first().saksbehandler)
-        assertEquals(aktivTotrinnsvurdering?.beslutter, totrinnsvurdering.first().beslutter)
-        assertEquals(aktivTotrinnsvurdering?.utbetalingIdRef, totrinnsvurdering.first().utbetalingIdRef)
-        assertEquals(aktivTotrinnsvurdering?.oppdatert, totrinnsvurdering.first().oppdatert)
-        assertEquals(aktivTotrinnsvurdering?.opprettet, totrinnsvurdering.first().opprettet)
+        assertEquals(aktivTotrinnsvurdering?.vedtaksperiodeId, totrinnsvurdering?.vedtaksperiodeId)
+        assertEquals(aktivTotrinnsvurdering?.erRetur, totrinnsvurdering?.erRetur)
+        assertEquals(aktivTotrinnsvurdering?.saksbehandler, totrinnsvurdering?.saksbehandler)
+        assertEquals(aktivTotrinnsvurdering?.beslutter, totrinnsvurdering?.beslutter)
+        assertEquals(aktivTotrinnsvurdering?.utbetalingIdRef, totrinnsvurdering?.utbetalingIdRef)
+        assertEquals(aktivTotrinnsvurdering?.oppdatert, totrinnsvurdering?.oppdatert)
+        assertEquals(aktivTotrinnsvurdering?.opprettet, totrinnsvurdering?.opprettet)
     }
 
     @Test
@@ -218,13 +224,13 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
 
         val totrinnsvurdering = totrinnsvurdering()
 
-        assertEquals(aktivTotrinnsvurdering?.vedtaksperiodeId, totrinnsvurdering.first().vedtaksperiodeId)
-        assertEquals(aktivTotrinnsvurdering?.erRetur, totrinnsvurdering.first().erRetur)
-        assertEquals(aktivTotrinnsvurdering?.saksbehandler, totrinnsvurdering.first().saksbehandler)
-        assertEquals(aktivTotrinnsvurdering?.beslutter, totrinnsvurdering.first().beslutter)
-        assertEquals(aktivTotrinnsvurdering?.utbetalingIdRef, totrinnsvurdering.first().utbetalingIdRef)
-        assertEquals(aktivTotrinnsvurdering?.oppdatert, totrinnsvurdering.first().oppdatert)
-        assertEquals(aktivTotrinnsvurdering?.opprettet, totrinnsvurdering.first().opprettet)
+        assertEquals(aktivTotrinnsvurdering?.vedtaksperiodeId, totrinnsvurdering?.vedtaksperiodeId)
+        assertEquals(aktivTotrinnsvurdering?.erRetur, totrinnsvurdering?.erRetur)
+        assertEquals(aktivTotrinnsvurdering?.saksbehandler, totrinnsvurdering?.saksbehandler)
+        assertEquals(aktivTotrinnsvurdering?.beslutter, totrinnsvurdering?.beslutter)
+        assertEquals(aktivTotrinnsvurdering?.utbetalingIdRef, totrinnsvurdering?.utbetalingIdRef)
+        assertEquals(aktivTotrinnsvurdering?.oppdatert, totrinnsvurdering?.oppdatert)
+        assertEquals(aktivTotrinnsvurdering?.opprettet, totrinnsvurdering?.opprettet)
     }
 
     @Test
@@ -263,6 +269,6 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
                 opprettet = row.localDateTime("opprettet"),
                 oppdatert = row.localDateTimeOrNull("oppdatert")
             )
-        }.asList)
+        }.asSingle)
     }
 }
