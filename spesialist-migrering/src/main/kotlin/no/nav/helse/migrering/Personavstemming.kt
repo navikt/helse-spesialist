@@ -5,11 +5,7 @@ import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.migrering.db.SparsomDao
 import no.nav.helse.migrering.db.SpesialistDao
-import no.nav.helse.migrering.domene.Generasjon.Companion.lagre
 import no.nav.helse.migrering.domene.Person
-import no.nav.helse.migrering.domene.Utbetaling
-import no.nav.helse.migrering.domene.Utbetaling.Vurdering
-import no.nav.helse.migrering.domene.Vedtaksperiode
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -67,6 +63,10 @@ internal class Personavstemming {
                 )
                 return
             }
+            arbeidsgivereJson.forEach {
+                val organisasjonsnummer = it["organisasjonsnummer"].asText()
+                person.håndterNyArbeidsgiver(organisasjonsnummer)
+            }
             val vedtaksperioderJson = arbeidsgivereJson.flatMap { it["vedtaksperioder"] }
             if (vedtaksperioderJson.isEmpty()) {
                 sikkerlogg.info(
@@ -77,43 +77,6 @@ internal class Personavstemming {
             }
 
             sikkerlogg.info("Starter migrering av generasjoner og varsler for person med {}", keyValue("fødselsnummer", fødselsnummer))
-
-            val varslerForPerson = sparsomDao.finnVarslerFor(fødselsnummer) + spesialistDao.finnVarslerFor(fødselsnummer)
-            val utbetalingerJson = arbeidsgivereJson.flatMap { it["utbetalinger"] }
-            val vedtaksperioder = vedtaksperioderJson.map { periodeNode ->
-                val vedtaksperiodeUtbetalinger = utbetalingerJson.filter { utbetalingNode ->
-                    utbetalingNode["id"].asText() in periodeNode["utbetalinger"].map { it.asText() }
-                }
-                Vedtaksperiode(
-                    id = UUID.fromString(periodeNode["id"].asText()),
-                    opprettet = periodeNode["opprettet"].asLocalDateTime(),
-                    oppdatert = periodeNode["oppdatert"].asLocalDateTime(),
-                    tilstand = periodeNode["tilstand"].asText(),
-                    personVarsler = varslerForPerson,
-                    spesialistDao = spesialistDao,
-                    utbetalinger = vedtaksperiodeUtbetalinger.map { utbetalingNode ->
-                        Utbetaling(
-                            UUID.fromString(utbetalingNode["id"].asText()),
-                            utbetalingNode["opprettet"].asLocalDateTime(),
-                            utbetalingNode["oppdatert"].asLocalDateTime(),
-                            utbetalingNode["status"].asText(),
-                            utbetalingNode["vurdering"]?.let { vurderingNode ->
-                                Vurdering(
-                                    vurderingNode["ident"].asText(),
-                                    vurderingNode["tidspunkt"].asLocalDateTime(),
-                                    vurderingNode["automatiskBehandling"].asBoolean(),
-                                    vurderingNode["godkjent"].asBoolean(),
-                                )
-                            },
-                        )
-                    }
-                )
-            }
-            vedtaksperioder
-                .map { periode -> periode.generasjoner(spesialistDao).sortedBy { it.opprettet } }
-                .forEach { it.lagre(spesialistDao, hendelseId) }
-
-            sikkerlogg.info("Fullført migrering av generasjoner og varsler for person med {}", keyValue("fødselsnummer", fødselsnummer))
         }
     }
 

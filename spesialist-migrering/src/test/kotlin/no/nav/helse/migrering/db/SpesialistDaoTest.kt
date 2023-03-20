@@ -1,8 +1,12 @@
 package no.nav.helse.migrering.db
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.migrering.AbstractDatabaseTest
+import no.nav.helse.migrering.januar
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -29,10 +33,39 @@ internal class SpesialistDaoTest: AbstractDatabaseTest() {
         assertArbeidsgiver("1234",  1)
     }
     @Test
-    fun `Opretter ikke arbeidsgiver flere ganger`() {
+    fun `Oppretter ikke arbeidsgiver flere ganger`() {
         dao.arbeidsgiverOpprettet("1234")
         dao.arbeidsgiverOpprettet("1234")
         assertArbeidsgiver("1234",  1)
+    }
+    @Test
+    fun `Kan opprette vedtaksperiode`() {
+        dao.personOpprettet("1234", "123")
+        dao.arbeidsgiverOpprettet("1234")
+        val vedtaksperiodeId = UUID.randomUUID()
+        dao.vedtaksperiodeOpprettet(vedtaksperiodeId, LocalDateTime.now(), 1.januar, 15.januar, 1.januar, "123", "1234")
+        assertVedtaksperiode(vedtaksperiodeId,  1)
+    }
+    @Test
+    fun `Oppretter ikke vedtaksperiode hvis den finnes fra før av`() {
+        dao.personOpprettet("1234", "123")
+        dao.arbeidsgiverOpprettet("1234")
+        val vedtaksperiodeId = UUID.randomUUID()
+        dao.vedtaksperiodeOpprettet(vedtaksperiodeId, LocalDateTime.now(), 1.januar, 15.januar, 1.januar,"123", "1234")
+        dao.vedtaksperiodeOpprettet(vedtaksperiodeId, LocalDateTime.now(), 1.januar, 15.januar, 1.januar,"123", "1234")
+        assertVedtaksperiode(vedtaksperiodeId,  1)
+    }
+    @Test
+    fun `Oppdaterer generasjoner for ekstisterende vedtaksperiode`() {
+        dao.personOpprettet("1234", "123")
+        dao.arbeidsgiverOpprettet("1234")
+        val vedtaksperiodeId = UUID.randomUUID()
+        opprettGenerasjonFor(vedtaksperiodeId)
+        //assertGenerasjon(vedtaksperiodeId, null, null, null, 1)
+
+        dao.vedtaksperiodeOpprettet(vedtaksperiodeId, LocalDateTime.now(), 1.januar, 15.januar, 1.januar,"123", "1234")
+        assertVedtaksperiode(vedtaksperiodeId,  1)
+        //assertGenerasjon(vedtaksperiodeId, 1.januar, 15.januar, 1.januar, 1)
     }
 
     private fun assertPerson(aktørId: String, fødselsnummer: String, forventetAntall: Int) {
@@ -49,6 +82,31 @@ internal class SpesialistDaoTest: AbstractDatabaseTest() {
         val query = "SELECT count(1) FROM arbeidsgiver WHERE orgnummer = ?"
         val antallFunnet = sessionOf(dataSource).use { session ->
             session.run(queryOf(query, organisasjonsnummer.toLong()).map { it.int(1) }.asSingle)
+        }
+        assertEquals(forventetAntall, antallFunnet)
+    }
+    private fun assertVedtaksperiode(vedtaksperiodeId: UUID, forventetAntall: Int) {
+        @Language("PostgreSQL")
+        val query = "SELECT count(1) FROM vedtak WHERE vedtaksperiode_id = ?"
+        val antallFunnet = sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, vedtaksperiodeId).map { it.int(1) }.asSingle)
+        }
+        assertEquals(forventetAntall, antallFunnet)
+    }
+
+    private fun opprettGenerasjonFor(vedtaksperiodeId: UUID) {
+        @Language("PostgreSQL")
+        val query = "INSERT INTO selve_vedtaksperiode_generasjon (vedtaksperiode_id, opprettet_av_hendelse) VALUES (?, gen_random_uuid())"
+        sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, vedtaksperiodeId).asExecute)
+        }
+    }
+
+    private fun assertGenerasjon(vedtaksperiodeId: UUID, fom: LocalDate?, tom: LocalDate?, skjæringstidspunkt: LocalDate?, forventetAntall: Int) {
+        @Language("PostgreSQL")
+        val query = "SELECT count(1) FROM selve_vedtaksperiode_generasjon svg WHERE vedtaksperiode_id = ? AND fom = ? AND tom = ? AND skjæringstidspunkt = ?"
+        val antallFunnet = sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, vedtaksperiodeId, fom, tom, skjæringstidspunkt).map { it.int(1) }.asSingle)
         }
         assertEquals(forventetAntall, antallFunnet)
     }

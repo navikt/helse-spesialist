@@ -1,5 +1,9 @@
 package no.nav.helse.migrering.domene
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
+
 internal class Person(
     private val aktørId: String,
     private val fødselsnummer: String
@@ -28,4 +32,13 @@ internal interface IPersonObserver{
     fun personOpprettet(aktørId: String, fødselsnummer: String) {}
 
     fun arbeidsgiverOpprettet(organisasjonsnummer: String) {}
+    fun vedtaksperiodeOpprettet(
+        id: UUID,
+        opprettet: LocalDateTime,
+        fom: LocalDate,
+        tom: LocalDate,
+        skjæringstidspunkt: LocalDate,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+    ) {}
 }

@@ -1,5 +1,6 @@
 package no.nav.helse.migrering.db
 
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
@@ -131,6 +132,22 @@ internal class SpesialistDao(private val dataSource: DataSource): IPersonObserve
         val query = "INSERT INTO arbeidsgiver(orgnummer) VALUES (?) ON CONFLICT (orgnummer) DO NOTHING "
         sessionOf(dataSource).use { session ->
             session.run(queryOf(query, organisasjonsnummer.toLong()).asUpdate)
+        }
+    }
+
+    override fun vedtaksperiodeOpprettet(
+        id: UUID,
+        opprettet: LocalDateTime,
+        fom: LocalDate,
+        tom: LocalDate,
+        skjæringstidspunkt: LocalDate,
+        fødselsnummer: String,
+        organisasjonsnummer: String
+    ) {
+        @Language("PostgreSQL")
+        val query = "INSERT INTO vedtak(vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref) VALUES (?, ?, ?, (SELECT id FROM arbeidsgiver WHERE orgnummer = ?), (SELECT id FROM person WHERE fodselsnummer = ?)) ON CONFLICT (vedtaksperiode_id) DO NOTHING "
+        sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, id, fom, tom, organisasjonsnummer.toLong(), fødselsnummer.toLong()).asExecute)
         }
     }
 }
