@@ -12,14 +12,14 @@ internal class VedtaksperiodeTest{
     fun `Kan opprette vedtaksperiode`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val vedtaksperiode = Vedtaksperiode(
-            vedtaksperiodeId,
-            LocalDateTime.now(),
-            LocalDate.now(),
-            LocalDate.now(),
-            LocalDate.now(),
-            "123",
-            "1234",
-            false
+            id = vedtaksperiodeId,
+            opprettet = LocalDateTime.now(),
+            fom = LocalDate.now(),
+            tom = LocalDate.now(),
+            skjæringstidspunkt = LocalDate.now(),
+            fødselsnummer = "123",
+            organisasjonsnummer = "1234",
+            forkastet = false
         )
         vedtaksperiode.register(observer)
         vedtaksperiode.opprett()
@@ -27,7 +27,7 @@ internal class VedtaksperiodeTest{
         assertEquals(listOf(vedtaksperiodeId), observer.opprettedeVedtaksperioder)
     }
 
-    private val observer = object : IPersonObserver{
+    private val observer = object : IPersonObserver {
         val opprettedeVedtaksperioder = mutableListOf<UUID>()
         override fun vedtaksperiodeOpprettet(
             id: UUID,

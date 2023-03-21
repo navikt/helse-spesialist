@@ -1,6 +1,6 @@
 package no.nav.helse.migrering.domene
 
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class PersonTest{
@@ -14,7 +14,7 @@ internal class PersonTest{
         assertEquals(listOf("123"), observer.opprettedePersoner)
     }
 
-    private val observer = object : IPersonObserver{
+    private val observer = object : IPersonObserver {
         val opprettedePersoner = mutableListOf<String>()
         override fun personOpprettet(aktørId: String, fødselsnummer: String) {
             opprettedePersoner.add(aktørId)

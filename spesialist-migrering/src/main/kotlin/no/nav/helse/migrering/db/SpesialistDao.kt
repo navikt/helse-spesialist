@@ -105,21 +105,30 @@ internal class SpesialistDao(private val dataSource: DataSource): IPersonObserve
         organisasjonsnummer: String,
         forkastet: Boolean,
     ) {
-
-        @Language("PostgreSQL")
-        val query =
-            "INSERT INTO vedtak(vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref) VALUES (?, ?, ?, (SELECT id FROM arbeidsgiver WHERE orgnummer = ?), (SELECT id FROM person WHERE fodselsnummer = ?)) ON CONFLICT (vedtaksperiode_id) DO NOTHING "
-        val insertOk = sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, id, fom, tom, organisasjonsnummer.toLong(), fødselsnummer.toLong()).asUpdate) > 0
-        }
-        if (insertOk) sikkerlogg.info(
-            "Opprettet vedtaksperiode for person {}, arbeidsgiver {}, med {}",
+        if (!forkastet) opprettVedtaksperiode(id, fom, tom, organisasjonsnummer, fødselsnummer)
+        else sikkerlogg.info(
+            "Oppretter ikke vedtaksperiode for person {}, arbeidsgiver {}, med {} da den er forkastet",
             kv("fødselsnummer", fødselsnummer),
             kv("organisasjonsnummer", organisasjonsnummer),
             kv("vedtaksperiodeId", id)
         )
         oppdaterGenerasjonerFor(id, fom, tom, skjæringstidspunkt)
         oppdaterForkastet(id, forkastet, if (forkastet) dummyForkastetAvHendelseId else null)
+    }
+
+    private fun opprettVedtaksperiode(vedtaksperiodeId: UUID, fom: LocalDate, tom: LocalDate, organisasjonsnummer: String, fødselsnummer: String) {
+        @Language("PostgreSQL")
+        val query =
+            "INSERT INTO vedtak(vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref) VALUES (?, ?, ?, (SELECT id FROM arbeidsgiver WHERE orgnummer = ?), (SELECT id FROM person WHERE fodselsnummer = ?)) ON CONFLICT (vedtaksperiode_id) DO NOTHING "
+        val insertOk = sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, vedtaksperiodeId, fom, tom, organisasjonsnummer.toLong(), fødselsnummer.toLong()).asUpdate) > 0
+        }
+        if (insertOk) sikkerlogg.info(
+            "Opprettet vedtaksperiode for person {}, arbeidsgiver {}, med {}",
+            kv("fødselsnummer", fødselsnummer),
+            kv("organisasjonsnummer", organisasjonsnummer),
+            kv("vedtaksperiodeId", vedtaksperiodeId)
+        )
     }
 
     private fun oppdaterGenerasjonerFor(

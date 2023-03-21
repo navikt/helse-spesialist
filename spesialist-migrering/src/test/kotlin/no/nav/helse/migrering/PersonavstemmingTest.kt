@@ -147,8 +147,8 @@ internal class PersonavstemmingTest : AbstractDatabaseTest() {
         assertVedtaksperiode(V1AG1, 1)
         assertVedtaksperiode(V1AG2, 1)
         assertVedtaksperiode(V2AG2, 1)
-        assertVedtaksperiode(V3AG2, 1, true)
-        assertVedtaksperiode(V4AG2, 1, true)
+        assertVedtaksperiode(V3AG2, 0, true)
+        assertVedtaksperiode(V4AG2, 0, true)
     }
 
     private fun assertPerson(fødselsnummer: String, forventetAntall: Int) {

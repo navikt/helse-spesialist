@@ -44,16 +44,7 @@ internal class SpesialistDaoTest: AbstractDatabaseTest() {
         dao.personOpprettet("1234", "123")
         dao.arbeidsgiverOpprettet("1234")
         val vedtaksperiodeId = UUID.randomUUID()
-        dao.vedtaksperiodeOpprettet(
-            vedtaksperiodeId,
-            LocalDateTime.now(),
-            1.januar,
-            15.januar,
-            1.januar,
-            "123",
-            "1234",
-            false
-        )
+        dao.vedtaksperiodeOpprettet(vedtaksperiodeId, LocalDateTime.now(), 1.januar, 15.januar, 1.januar, "123", "1234", false)
         assertVedtaksperiode(vedtaksperiodeId,  1)
     }
     @Test
@@ -61,26 +52,8 @@ internal class SpesialistDaoTest: AbstractDatabaseTest() {
         dao.personOpprettet("1234", "123")
         dao.arbeidsgiverOpprettet("1234")
         val vedtaksperiodeId = UUID.randomUUID()
-        dao.vedtaksperiodeOpprettet(
-            vedtaksperiodeId,
-            LocalDateTime.now(),
-            1.januar,
-            15.januar,
-            1.januar,
-            "123",
-            "1234",
-            false
-        )
-        dao.vedtaksperiodeOpprettet(
-            vedtaksperiodeId,
-            LocalDateTime.now(),
-            1.januar,
-            15.januar,
-            1.januar,
-            "123",
-            "1234",
-            false
-        )
+        dao.vedtaksperiodeOpprettet(vedtaksperiodeId, LocalDateTime.now(), 1.januar, 15.januar, 1.januar, "123", "1234", false)
+        dao.vedtaksperiodeOpprettet(vedtaksperiodeId, LocalDateTime.now(), 1.januar, 15.januar, 1.januar, "123", "1234", false)
         assertVedtaksperiode(vedtaksperiodeId,  1)
     }
     @Test
@@ -91,16 +64,7 @@ internal class SpesialistDaoTest: AbstractDatabaseTest() {
         opprettGenerasjonFor(vedtaksperiodeId)
         assertGenerasjonMed(vedtaksperiodeId, 1)
 
-        dao.vedtaksperiodeOpprettet(
-            vedtaksperiodeId,
-            LocalDateTime.now(),
-            1.januar,
-            15.januar,
-            1.januar,
-            "123",
-            "1234",
-            false
-        )
+        dao.vedtaksperiodeOpprettet(vedtaksperiodeId, LocalDateTime.now(), 1.januar, 15.januar, 1.januar, "123", "1234", false)
         assertVedtaksperiode(vedtaksperiodeId,  1)
         assertGenerasjonMed(vedtaksperiodeId, 1.januar, 15.januar, 1.januar, 1)
     }
@@ -110,34 +74,26 @@ internal class SpesialistDaoTest: AbstractDatabaseTest() {
         dao.arbeidsgiverOpprettet("1234")
         val vedtaksperiodeId = UUID.randomUUID()
         opprettGenerasjonFor(vedtaksperiodeId)
-        dao.vedtaksperiodeOpprettet(
-            vedtaksperiodeId,
-            LocalDateTime.now(),
-            1.januar,
-            31.januar,
-            1.januar,
-            "123",
-            "1234",
-            false
-        )
+        dao.vedtaksperiodeOpprettet(vedtaksperiodeId, LocalDateTime.now(), 1.januar, 31.januar, 1.januar, "123", "1234", false)
         opprettGenerasjonFor(vedtaksperiodeId)
         opprettGenerasjonFor(vedtaksperiodeId)
         assertGenerasjonMed(vedtaksperiodeId, 2)
         assertGenerasjonMed(vedtaksperiodeId, 1.januar, 31.januar, 1.januar, 1)
 
-        dao.vedtaksperiodeOpprettet(
-            vedtaksperiodeId,
-            LocalDateTime.now(),
-            15.januar,
-            15.februar,
-            15.januar,
-            "123",
-            "1234",
-            false
-        )
+        dao.vedtaksperiodeOpprettet(vedtaksperiodeId, LocalDateTime.now(), 15.januar, 15.februar, 15.januar, "123", "1234", false)
         assertVedtaksperiode(vedtaksperiodeId,  1)
         assertGenerasjonMed(vedtaksperiodeId, 1.januar, 31.januar, 1.januar, 1)
         assertGenerasjonMed(vedtaksperiodeId, 15.januar, 15.februar, 15.januar, 2)
+    }
+
+    @Test
+    fun `Oppretter ikke vedtaksperiode hvis den er forkastet`() {
+        dao.personOpprettet("1234", "123")
+        dao.arbeidsgiverOpprettet("1234")
+        val vedtaksperiodeId = UUID.randomUUID()
+        dao.vedtaksperiodeOpprettet(vedtaksperiodeId, LocalDateTime.now(), 1.januar, 15.januar, 1.januar, "123", "1234", true)
+        assertVedtaksperiode(vedtaksperiodeId, 0)
+        assertForkastetVedtaksperiode(vedtaksperiodeId, 0)
     }
 
     @Test
@@ -145,16 +101,9 @@ internal class SpesialistDaoTest: AbstractDatabaseTest() {
         dao.personOpprettet("1234", "123")
         dao.arbeidsgiverOpprettet("1234")
         val vedtaksperiodeId = UUID.randomUUID()
-        dao.vedtaksperiodeOpprettet(
-            vedtaksperiodeId,
-            LocalDateTime.now(),
-            1.januar,
-            15.januar,
-            1.januar,
-            "123",
-            "1234",
-            true
-        )
+        dao.vedtaksperiodeOpprettet(vedtaksperiodeId, LocalDateTime.now(), 1.januar, 15.januar, 1.januar, "123", "1234", false)
+        assertVedtaksperiode(vedtaksperiodeId, 1)
+        dao.vedtaksperiodeOpprettet(vedtaksperiodeId, LocalDateTime.now(), 1.januar, 15.januar, 1.januar, "123", "1234", true)
 
         assertForkastetVedtaksperiode(vedtaksperiodeId, 1)
     }
@@ -164,26 +113,8 @@ internal class SpesialistDaoTest: AbstractDatabaseTest() {
         dao.personOpprettet("1234", "123")
         dao.arbeidsgiverOpprettet("1234")
         val vedtaksperiodeId = UUID.randomUUID()
-        dao.vedtaksperiodeOpprettet(
-            vedtaksperiodeId,
-            LocalDateTime.now(),
-            1.januar,
-            15.januar,
-            1.januar,
-            "123",
-            "1234",
-            true
-        )
-        dao.vedtaksperiodeOpprettet(
-            vedtaksperiodeId,
-            LocalDateTime.now(),
-            1.januar,
-            15.januar,
-            1.januar,
-            "123",
-            "1234",
-            false
-        )
+        dao.vedtaksperiodeOpprettet(vedtaksperiodeId, LocalDateTime.now(), 1.januar, 15.januar, 1.januar, "123", "1234", true)
+        dao.vedtaksperiodeOpprettet(vedtaksperiodeId, LocalDateTime.now(), 1.januar, 15.januar, 1.januar, "123", "1234", false)
 
         assertVedtaksperiode(vedtaksperiodeId, 1)
     }
