@@ -33,9 +33,7 @@ internal class Person(
             )
         }
         observers.forEach { it.personOpprettet( aktørId, fødselsnummer) }
-        arbeidsgivere.forEach {
-            it.opprett()
-        }
+        arbeidsgivere.forEach { it.opprett() }
     }
 
     internal fun håndterNyArbeidsgiver(organisasjonsnummer: String): Arbeidsgiver {
@@ -63,6 +61,6 @@ internal interface IPersonObserver{
         skjæringstidspunkt: LocalDate,
         fødselsnummer: String,
         organisasjonsnummer: String,
-        forkastet: Boolean,
     ) {}
+    fun vedtaksperiodeOppdaterForkastet(id: UUID, forkastet: Boolean) {}
 }

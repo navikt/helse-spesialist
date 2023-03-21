@@ -14,13 +14,16 @@ internal class Arbeidsgiver(
     }
 
     internal fun opprett() {
-        if (vedtaksperioder.all { it.erForkastet() })
-            return sikkerlogg.info(
+        if (vedtaksperioder.all(Vedtaksperiode::erForkastet))
+            sikkerlogg.info(
                 "Oppretter ikke arbeidsgiver med {} da den ikke har noen ikke-forkastede vedtaksperioder",
                 kv("organisasjonsnummer", organisasjonsnummer)
             )
-        observers.forEach { it.arbeidsgiverOpprettet(organisasjonsnummer) }
-        vedtaksperioder.forEach { it.opprett() }
+        else {
+            observers.forEach { it.arbeidsgiverOpprettet(organisasjonsnummer) }
+            vedtaksperioder.forEach(Vedtaksperiode::opprett)
+        }
+        vedtaksperioder.forEach(Vedtaksperiode::oppdaterForkastet)
     }
 
     fun håndterNyVedtaksperiode(vedtaksperiode: Vedtaksperiode) {

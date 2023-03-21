@@ -46,16 +46,12 @@ internal class SpesialistDao(private val dataSource: DataSource): IPersonObserve
         skjæringstidspunkt: LocalDate,
         fødselsnummer: String,
         organisasjonsnummer: String,
-        forkastet: Boolean,
     ) {
-        if (!forkastet) opprettVedtaksperiode(id, fom, tom, organisasjonsnummer, fødselsnummer)
-        else sikkerlogg.info(
-            "Oppretter ikke vedtaksperiode for person {}, arbeidsgiver {}, med {} da den er forkastet",
-            kv("fødselsnummer", fødselsnummer),
-            kv("organisasjonsnummer", organisasjonsnummer),
-            kv("vedtaksperiodeId", id)
-        )
+        opprettVedtaksperiode(id, fom, tom, organisasjonsnummer, fødselsnummer)
         oppdaterGenerasjonerFor(id, fom, tom, skjæringstidspunkt)
+    }
+
+    override fun vedtaksperiodeOppdaterForkastet(id: UUID, forkastet: Boolean) {
         oppdaterForkastet(id, forkastet, if (forkastet) dummyForkastetAvHendelseId else null)
     }
 

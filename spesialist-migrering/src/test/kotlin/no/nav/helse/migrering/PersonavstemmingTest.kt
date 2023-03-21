@@ -33,7 +33,7 @@ internal class PersonavstemmingTest : AbstractDatabaseTest() {
         testRapid.sendTestMessage(testevent(vedtaksperiodeId))
         assertPerson("12345678910", 1)
         assertArbeidsgiver("987654321", 1)
-        assertVedtaksperiode(vedtaksperiodeId, 1)
+        assertIkkeForkastetVedtaksperiode(vedtaksperiodeId, 1)
     }
 
     @Test
@@ -46,7 +46,7 @@ internal class PersonavstemmingTest : AbstractDatabaseTest() {
         testRapid.sendTestMessage(testevent(vedtaksperiodeId))
         assertPerson("12345678910", 1)
         assertArbeidsgiver("987654321", 1)
-        assertVedtaksperiode(vedtaksperiodeId, 1)
+        assertIkkeForkastetVedtaksperiode(vedtaksperiodeId, 1)
     }
 
     @Test
@@ -60,7 +60,7 @@ internal class PersonavstemmingTest : AbstractDatabaseTest() {
         testRapid.sendTestMessage(testevent(vedtaksperiodeId))
         assertPerson("12345678910", 1)
         assertArbeidsgiver("987654321", 1)
-        assertVedtaksperiode(vedtaksperiodeId, 1)
+        assertIkkeForkastetVedtaksperiode(vedtaksperiodeId, 1)
     }
 
     @Test
@@ -73,7 +73,7 @@ internal class PersonavstemmingTest : AbstractDatabaseTest() {
         testRapid.sendTestMessage(testevent(vedtaksperiodeId))
         assertPerson("12345678910", 1)
         assertArbeidsgiver("987654321", 1)
-        assertVedtaksperiode(vedtaksperiodeId, 1)
+        assertIkkeForkastetVedtaksperiode(vedtaksperiodeId, 1)
     }
 
     @Test
@@ -82,7 +82,7 @@ internal class PersonavstemmingTest : AbstractDatabaseTest() {
         spesialistDao.arbeidsgiverOpprettet("987654321")
         val vedtaksperiodeId = UUID.randomUUID()
         spesialistDao.vedtaksperiodeOpprettet(
-            vedtaksperiodeId, LocalDateTime.now(), 1.januar, 31.januar, 1.januar, "12345678910", "987654321", false
+            vedtaksperiodeId, LocalDateTime.now(), 1.januar, 31.januar, 1.januar, "12345678910", "987654321"
         )
         assertPerson("12345678910", 1)
         assertArbeidsgiver("987654321", 1)
@@ -90,7 +90,7 @@ internal class PersonavstemmingTest : AbstractDatabaseTest() {
         testRapid.sendTestMessage(testevent(vedtaksperiodeId))
         assertPerson("12345678910", 1)
         assertArbeidsgiver("987654321", 1)
-        assertVedtaksperiode(vedtaksperiodeId, 1)
+        assertIkkeForkastetVedtaksperiode(vedtaksperiodeId, 1)
     }
 
     @Test
@@ -106,7 +106,7 @@ internal class PersonavstemmingTest : AbstractDatabaseTest() {
         testRapid.sendTestMessage(testevent(vedtaksperiodeId))
         assertPerson("12345678910", 1)
         assertArbeidsgiver("987654321", 1)
-        assertVedtaksperiode(vedtaksperiodeId, 1)
+        assertIkkeForkastetVedtaksperiode(vedtaksperiodeId, 1)
         assertGenerasjonMed(vedtaksperiodeId, 1.januar, 31.januar, 1.januar, 1)
     }
 
@@ -116,7 +116,7 @@ internal class PersonavstemmingTest : AbstractDatabaseTest() {
         spesialistDao.arbeidsgiverOpprettet("987654321")
         val vedtaksperiodeId = UUID.randomUUID()
         spesialistDao.vedtaksperiodeOpprettet(
-            vedtaksperiodeId, LocalDateTime.now(), 1.januar, 31.januar, 1.januar, "12345678910", "987654321", false
+            vedtaksperiodeId, LocalDateTime.now(), 1.januar, 31.januar, 1.januar, "12345678910", "987654321"
         )
         opprettGenerasjonFor(vedtaksperiodeId)
         assertPerson("12345678910", 1)
@@ -126,8 +126,24 @@ internal class PersonavstemmingTest : AbstractDatabaseTest() {
         testRapid.sendTestMessage(testevent(vedtaksperiodeId))
         assertPerson("12345678910", 1)
         assertArbeidsgiver("987654321", 1)
-        assertVedtaksperiode(vedtaksperiodeId, 1)
+        assertIkkeForkastetVedtaksperiode(vedtaksperiodeId, 1)
         assertGenerasjonMed(vedtaksperiodeId, 1.januar, 31.januar, 1.januar, 1)
+    }
+
+    @Test
+    fun `Oppdaterer forkastet-flagg når periode eksisterer`() {
+        spesialistDao.personOpprettet("42", "12345678910")
+        spesialistDao.arbeidsgiverOpprettet("987654321")
+        spesialistDao.vedtaksperiodeOpprettet(
+            V3AG2, LocalDateTime.now(), 1.januar, 31.januar, 1.januar, "12345678910", "987654321"
+        )
+        assertPerson("12345678910", 1)
+        assertArbeidsgiver("987654321", 1)
+        assertVedtaksperiode(V3AG2, 1)
+        testRapid.sendTestMessage(testeventMedMer())
+        assertPerson("12345678910", 1)
+        assertArbeidsgiver("987654321", 1)
+        assertForkastetVedtaksperiode(V3AG2, 1)
     }
 
     @Test
@@ -144,11 +160,11 @@ internal class PersonavstemmingTest : AbstractDatabaseTest() {
         assertPerson("12345678910", 1)
         assertArbeidsgiver(AG1, 1)
         assertArbeidsgiver(AG2, 1)
-        assertVedtaksperiode(V1AG1, 1)
-        assertVedtaksperiode(V1AG2, 1)
-        assertVedtaksperiode(V2AG2, 1)
-        assertVedtaksperiode(V3AG2, 0, true)
-        assertVedtaksperiode(V4AG2, 0, true)
+        assertIkkeForkastetVedtaksperiode(V1AG1, 1)
+        assertIkkeForkastetVedtaksperiode(V1AG2, 1)
+        assertIkkeForkastetVedtaksperiode(V2AG2, 1)
+        assertForkastetVedtaksperiode(V3AG2, 0)
+        assertForkastetVedtaksperiode(V4AG2, 0)
     }
 
     private fun assertPerson(fødselsnummer: String, forventetAntall: Int) {
@@ -167,10 +183,26 @@ internal class PersonavstemmingTest : AbstractDatabaseTest() {
         assertEquals(forventetAntall, antall)
     }
 
-    private fun assertVedtaksperiode(vedtaksperiodeId: UUID, forventetAntall: Int, forkastet: Boolean = false) {
-        @Language("PostgreSQL") val query = "SELECT count(1) FROM vedtak WHERE vedtaksperiode_id = ? AND forkastet = ?"
+    private fun assertVedtaksperiode(vedtaksperiodeId: UUID, forventetAntall: Int) {
+        @Language("PostgreSQL") val query = "SELECT count(1) FROM vedtak WHERE vedtaksperiode_id = ?"
         val antall = sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, vedtaksperiodeId, forkastet).map { it.int(1) }.asSingle)
+            session.run(queryOf(query, vedtaksperiodeId).map { it.int(1) }.asSingle)
+        }
+        assertEquals(forventetAntall, antall)
+    }
+
+    private fun assertForkastetVedtaksperiode(vedtaksperiodeId: UUID, forventetAntall: Int) {
+        @Language("PostgreSQL") val query = "SELECT count(1) FROM vedtak WHERE vedtaksperiode_id = ? AND forkastet = true"
+        val antall = sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, vedtaksperiodeId).map { it.int(1) }.asSingle)
+        }
+        assertEquals(forventetAntall, antall)
+    }
+
+    private fun assertIkkeForkastetVedtaksperiode(vedtaksperiodeId: UUID, forventetAntall: Int) {
+        @Language("PostgreSQL") val query = "SELECT count(1) FROM vedtak WHERE vedtaksperiode_id = ? AND forkastet = false"
+        val antall = sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, vedtaksperiodeId).map { it.int(1) }.asSingle)
         }
         assertEquals(forventetAntall, antall)
     }

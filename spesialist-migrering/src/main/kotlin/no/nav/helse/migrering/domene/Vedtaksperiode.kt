@@ -3,6 +3,8 @@ package no.nav.helse.migrering.domene
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import net.logstash.logback.argument.StructuredArguments.kv
+import org.slf4j.LoggerFactory
 
 internal class Vedtaksperiode(
     private val id: UUID,
@@ -23,7 +25,23 @@ internal class Vedtaksperiode(
         observers.addAll(observer)
     }
 
+    internal fun oppdaterForkastet() {
+        observers.forEach { it.vedtaksperiodeOppdaterForkastet(id, forkastet) }
+    }
+
     internal fun opprett() {
-        observers.forEach { it.vedtaksperiodeOpprettet(id, opprettet, fom, tom, skjæringstidspunkt, fødselsnummer, organisasjonsnummer, forkastet) }
+        if (forkastet) return sikkerlogg.info(
+            "Oppretter ikke vedtaksperiode for {}, {} med {} da den er forkastet",
+            kv("fødselsnummer", fødselsnummer),
+            kv("organisasjonsnummer", organisasjonsnummer),
+            kv("vedtaksperiodeId", id),
+        )
+        observers.forEach {
+            it.vedtaksperiodeOpprettet(id, opprettet, fom, tom, skjæringstidspunkt, fødselsnummer, organisasjonsnummer)
+        }
+    }
+
+    private companion object {
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
 }
