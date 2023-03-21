@@ -65,7 +65,7 @@ internal class Personavstemming {
             val arbeidsgivereJson = packet["arbeidsgivere"]
             if (arbeidsgivereJson.isEmpty) {
                 sikkerlogg.info(
-                    "Person med {} har ingen arbeidsgivere, forsøker ikke å opprette generasjon.",
+                    "Person med {} har ingen arbeidsgivere, avbryter migrering.\uD83D\uDD0A",
                     keyValue("fødselsnummer", fødselsnummer)
                 )
                 return
