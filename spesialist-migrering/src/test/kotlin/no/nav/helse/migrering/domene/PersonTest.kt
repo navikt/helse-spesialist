@@ -1,5 +1,8 @@
 package no.nav.helse.migrering.domene
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -9,10 +12,57 @@ internal class PersonTest{
     fun `Kan opprette person`() {
         val person = Person("123", "1234")
         person.register(observer)
+        val arbeidsgiver = person.håndterNyArbeidsgiver("123456789")
+        arbeidsgiver.håndterNyVedtaksperiode(vedtaksperiode())
         person.opprett()
 
         assertEquals(listOf("123"), observer.opprettedePersoner)
     }
+
+    @Test
+    fun `Oppretter ikke person hvis person ikke har arbeidsgivere`() {
+        val person = Person("123", "1234")
+        person.register(observer)
+        person.opprett()
+
+        assertEquals(emptyList<String>(), observer.opprettedePersoner)
+    }
+
+    @Test
+    fun `Oppretter ikke person hvis person har arbeidsgivere som kun har forkastede vedtaksperioder`() {
+        val person = Person("123", "1234")
+        person.register(observer)
+        val arbeidsgiver = person.håndterNyArbeidsgiver("123456789")
+        arbeidsgiver.håndterNyVedtaksperiode(vedtaksperiode(forkastet = true))
+        person.opprett()
+
+        assertEquals(emptyList<String>(), observer.opprettedePersoner)
+    }
+
+    @Test
+    fun `Oppretter person hvis person har arbeidsgivere som både har aktive og forkastede vedtaksperioder`() {
+        val person = Person("123", "1234")
+        person.register(observer)
+        val arbeidsgiver1 = person.håndterNyArbeidsgiver("123456789")
+        val arbeidsgiver2 = person.håndterNyArbeidsgiver("987654321")
+        arbeidsgiver1.håndterNyVedtaksperiode(vedtaksperiode(forkastet = true))
+        arbeidsgiver2.håndterNyVedtaksperiode(vedtaksperiode(forkastet = true))
+        arbeidsgiver2.håndterNyVedtaksperiode(vedtaksperiode(forkastet = false))
+        person.opprett()
+
+        assertEquals(listOf("123"), observer.opprettedePersoner)
+    }
+
+    private fun vedtaksperiode(forkastet: Boolean = false) = Vedtaksperiode(
+        UUID.randomUUID(),
+        LocalDateTime.now(),
+        LocalDate.now(),
+        LocalDate.now(),
+        LocalDate.now(),
+        "1234",
+        "123",
+        forkastet
+    )
 
     private val observer = object : IPersonObserver {
         val opprettedePersoner = mutableListOf<String>()

@@ -60,7 +60,6 @@ internal class Personavstemming {
             val aktørId = packet["aktørId"].asText()
             val person = Person(aktørId, fødselsnummer)
             person.register(spesialistDao)
-            person.opprett()
             sikkerlogg.info("Mottatt person_avstemt for {}, {}", keyValue("fødselsnummer", fødselsnummer), keyValue("aktørId", aktørId))
             val arbeidsgivereJson = packet["arbeidsgivere"]
             if (arbeidsgivereJson.isEmpty) {
@@ -101,6 +100,7 @@ internal class Personavstemming {
                     arbeidsgiver.håndterNyVedtaksperiode(it)
                 }
             }
+            person.opprett()
         }
     }
 
