@@ -279,6 +279,76 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         assertFalse(hentetOverstyring.ferdigstilt)
     }
 
+    @Test
+    fun `Finner hendelsesid'er for ikke ferdigstilte overstyringer for vedtaksperiode`() {
+        opprettPerson()
+        overstyrInntektOgRefusjon(ID)
+        overstyringDao.persisterOverstyringInntektOgRefusjon(
+            ID,
+            EKSTERN_HENDELSE_ID,
+            FØDSELSNUMMER,
+            listOf(
+                Arbeidsgiver(
+                    organisasjonsnummer = ORGNUMMER,
+                    begrunnelse = BEGRUNNELSE,
+                    forklaring = FORKLARING,
+                    månedligInntekt = INNTEKT,
+                    fraMånedligInntekt = INNTEKT + 1,
+                    refusjonsopplysninger = null,
+                    fraRefusjonsopplysninger = null,
+                    subsumsjon = SubsumsjonDto(paragraf = "87494")
+                )
+            ),
+            OID,
+            SKJÆRINGSTIDSPUNKT,
+            OPPRETTET
+        )
+        hendelseDao.opprett(OverstyringArbeidsforhold(
+            id = ID,
+            fødselsnummer = FØDSELSNUMMER,
+            oid = OID,
+            navn = SAKSBEHANDLER_NAVN,
+            epost = SAKSBEHANDLEREPOST,
+            ident = SAKSBEHANDLER_IDENT,
+            overstyrteArbeidsforhold = listOf(
+                OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt(
+                    orgnummer = GHOST_ORGNUMMER,
+                    deaktivert = DEAKTIVERT,
+                    begrunnelse = BEGRUNNELSE,
+                    forklaring = FORKLARING
+                )
+            ),
+            skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
+            opprettet = OPPRETTET,
+            json = "{}",
+            reservasjonDao = reservasjonDao,
+            saksbehandlerDao = saksbehandlerDao,
+            oppgaveDao = oppgaveDao,
+            overstyringDao = overstyringDao,
+            overstyringMediator = mockk(),
+        ))
+        overstyringDao.kobleOverstyringOgVedtaksperiode(listOf(VEDTAKSPERIODE), EKSTERN_HENDELSE_ID)
+        val eksternHendelsesIdArbeidsforhold = UUID.randomUUID()
+        overstyringDao.persisterOverstyringArbeidsforhold(
+            ID,
+            eksternHendelsesIdArbeidsforhold,
+            FØDSELSNUMMER,
+            ORGNUMMER,
+            BEGRUNNELSE,
+            FORKLARING,
+            DEAKTIVERT,
+            SKJÆRINGSTIDSPUNKT,
+            OID,
+            OPPRETTET
+        )
+        overstyringDao.kobleOverstyringOgVedtaksperiode(listOf(VEDTAKSPERIODE), eksternHendelsesIdArbeidsforhold)
+
+        val aktiveOverstyringer = overstyringDao.finnAktiveOverstyringer(VEDTAKSPERIODE)
+
+        assertEquals(EKSTERN_HENDELSE_ID, aktiveOverstyringer.first())
+        assertEquals(eksternHendelsesIdArbeidsforhold, aktiveOverstyringer.last())
+    }
+
     private fun overstyrInntektOgRefusjon(hendelseId: UUID) = hendelseDao.opprett(
         OverstyringInntektOgRefusjon(
             id = hendelseId,

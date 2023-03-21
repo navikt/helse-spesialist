@@ -8,7 +8,6 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.HelseDao
 import no.nav.helse.mediator.api.Arbeidsgiver
-import no.nav.helse.mediator.api.Refusjonselement
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
@@ -33,6 +32,16 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
             )
             AND o.ferdigstilt = false
         """.list(mapOf("vedtaksperiode_id" to vedtaksperiodeId)) { OverstyringType.valueOf(it.string("type")) }
+
+    fun finnAktiveOverstyringer(vedtaksperiodeId: UUID): List<EksternHendelseId> =
+        """
+            SELECT o.ekstern_hendelse_id FROM overstyring o
+            WHERE o.id IN (
+                SELECT overstyring_ref FROM overstyringer_for_vedtaksperioder
+                WHERE vedtaksperiode_id = :vedtaksperiode_id
+            )
+            AND o.ferdigstilt = false
+        """.list(mapOf("vedtaksperiode_id" to vedtaksperiodeId)) { it.uuid("ekstern_hendelse_id") }
 
     fun ferdigstillOverstyringerForVedtaksperiode(vedtaksperiodeId: UUID) =
         """ UPDATE overstyring
@@ -289,3 +298,5 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
         }
     }
 }
+
+private typealias EksternHendelseId = UUID
