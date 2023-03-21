@@ -16,17 +16,26 @@ internal class SpesialistDao(private val dataSource: DataSource): IPersonObserve
     override fun personOpprettet(aktørId: String, fødselsnummer: String) {
         @Language("PostgreSQL")
         val query = "INSERT INTO person(fodselsnummer, aktor_id) VALUES (?, ?) ON CONFLICT (fodselsnummer) DO NOTHING "
-        sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, fødselsnummer.toLong(), aktørId.toLong()).asUpdate)
+        val insertOk = sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, fødselsnummer.toLong(), aktørId.toLong()).asUpdate) > 0
         }
+        if (insertOk) sikkerlogg.info(
+            "Opprettet person med {}, {}",
+            kv("fødselsnummer", fødselsnummer),
+            kv("aktørId", aktørId)
+        )
     }
 
     override fun arbeidsgiverOpprettet(organisasjonsnummer: String) {
         @Language("PostgreSQL")
         val query = "INSERT INTO arbeidsgiver(orgnummer) VALUES (?) ON CONFLICT (orgnummer) DO NOTHING "
-        sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, organisasjonsnummer.toLong()).asUpdate)
+        val insertOk = sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, organisasjonsnummer.toLong()).asUpdate) > 0
         }
+        if (insertOk) sikkerlogg.info(
+            "Opprettet arbeidsgiver med {}",
+            kv("organisasjonsnummer", organisasjonsnummer)
+        )
     }
 
     override fun vedtaksperiodeOpprettet(
