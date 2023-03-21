@@ -2,7 +2,6 @@ package no.nav.helse.migrering
 
 import no.nav.helse.migrering.db.DataSourceBuilder
 import no.nav.helse.migrering.db.DataSourceBuilder.DbUser.SPESIALIST
-import no.nav.helse.migrering.db.SpesialistDao
 import no.nav.helse.rapids_rivers.RapidApplication
 
 internal class ApplicationBuilder(env: Map<String, String>) {
@@ -10,7 +9,7 @@ internal class ApplicationBuilder(env: Map<String, String>) {
     private val rapidsConnection = RapidApplication.create(env)
 
     init {
-        Personavstemming.River(rapidsConnection, SpesialistDao(spesialistDataSourceBuilder.getDataSource()))
+//        Personavstemming.River(rapidsConnection, SpesialistDao(spesialistDataSourceBuilder.getDataSource()))
     }
 
     internal fun start() = rapidsConnection.start()
