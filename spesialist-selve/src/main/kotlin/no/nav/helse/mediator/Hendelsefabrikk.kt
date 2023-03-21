@@ -295,6 +295,7 @@ internal class Hendelsefabrikk(
         årsak: String?,
         begrunnelser: List<String>?,
         kommentar: String?,
+        saksbehandleroverstyringer: List<UUID>,
         oppgaveId: Long,
         json: String,
     ) = Saksbehandlerløsning(
@@ -308,6 +309,7 @@ internal class Hendelsefabrikk(
         årsak = årsak,
         begrunnelser = begrunnelser,
         kommentar = kommentar,
+        saksbehandleroverstyringer = saksbehandleroverstyringer,
         oppgaveId = oppgaveId,
         godkjenningsbehovhendelseId = godkjenningsbehovhendelseId,
         hendelseDao = hendelseDao,
@@ -329,6 +331,10 @@ internal class Hendelsefabrikk(
             årsak = jsonNode["årsak"].takeUnless(JsonNode::isMissingOrNull)?.asText(),
             begrunnelser = jsonNode["begrunnelser"].takeUnless(JsonNode::isMissingOrNull)?.map(JsonNode::asText),
             kommentar = jsonNode["kommentar"].takeUnless(JsonNode::isMissingOrNull)?.asText(),
+            saksbehandleroverstyringer = jsonNode["saksbehandleroverstyringer"].takeUnless(JsonNode::isMissingOrNull)
+            ?.map {
+                UUID.fromString(it.asText())
+            } ?: emptyList(),
             oppgaveId = jsonNode["oppgaveId"].asLong(),
             json = json
         )
@@ -480,7 +486,16 @@ internal class Hendelsefabrikk(
     }
 
     fun adressebeskyttelseEndret(id: UUID, fødselsnummer: String, json: String) =
-        AdressebeskyttelseEndret(id, fødselsnummer, json, personDao, oppgaveDao, hendelseDao, godkjenningMediator, utbetalingDao)
+        AdressebeskyttelseEndret(
+            id,
+            fødselsnummer,
+            json,
+            personDao,
+            oppgaveDao,
+            hendelseDao,
+            godkjenningMediator,
+            utbetalingDao
+        )
 
     fun adressebeskyttelseEndret(json: String): AdressebeskyttelseEndret {
         val jsonNode = mapper.readTree(json)

@@ -411,6 +411,7 @@ internal object TestmeldingsfabrikkV2 {
         saksbehandlerident: String = "Z999999",
         saksbehandlerepost: String = "saksbehandler@nav.no",
         saksbehandlerOID: UUID = UUID.randomUUID(),
+        saksbehandleroverstyringer: List<UUID> = emptyList(),
         årsak: String? = null,
         begrunnelser: List<String>? = null,
         kommentar: String? = null,
@@ -427,7 +428,8 @@ internal object TestmeldingsfabrikkV2 {
                 "godkjenttidspunkt" to godkjenttidspunkt,
                 "saksbehandlerident" to saksbehandlerident,
                 "saksbehandlerepost" to saksbehandlerepost,
-                "saksbehandleroid" to saksbehandlerOID
+                "saksbehandleroid" to saksbehandlerOID,
+                "saksbehandleroverstyringer" to saksbehandleroverstyringer,
             ).apply {
                 årsak?.also { put("årsak", it) }
                 begrunnelser?.also { put("begrunnelser", it) }

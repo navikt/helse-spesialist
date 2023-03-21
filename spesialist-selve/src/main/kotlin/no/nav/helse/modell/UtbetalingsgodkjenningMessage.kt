@@ -31,7 +31,8 @@ internal class UtbetalingsgodkjenningMessage(json: String, private val utbetalin
             godkjenttidspunkt = LocalDateTime.now(),
             årsak = årsak,
             begrunnelser = begrunnelser,
-            kommentar = null
+            kommentar = null,
+            saksbehandleroverstyringer = emptyList()
         )
     }
 
@@ -39,8 +40,18 @@ internal class UtbetalingsgodkjenningMessage(json: String, private val utbetalin
         saksbehandlerIdent: String,
         saksbehandlerEpost: String,
         godkjenttidspunkt: LocalDateTime,
+        saksbehandleroverstyringer: List<UUID>
     ) {
-        løsManuelt(true, saksbehandlerIdent, saksbehandlerEpost, godkjenttidspunkt, null, null, null)
+        løsManuelt(
+            godkjent = true,
+            saksbehandlerIdent = saksbehandlerIdent,
+            saksbehandlerEpost = saksbehandlerEpost,
+            godkjenttidspunkt = godkjenttidspunkt,
+            årsak = null,
+            begrunnelser = null,
+            kommentar = null,
+            saksbehandleroverstyringer = saksbehandleroverstyringer,
+        )
     }
 
     internal fun avvisManuelt(
@@ -49,9 +60,19 @@ internal class UtbetalingsgodkjenningMessage(json: String, private val utbetalin
         godkjenttidspunkt: LocalDateTime,
         årsak: String?,
         begrunnelser: List<String>?,
-        kommentar: String?
+        kommentar: String?,
+        saksbehandleroverstyringer: List<UUID>
     ) {
-        løsManuelt(false, saksbehandlerIdent, saksbehandlerEpost, godkjenttidspunkt, årsak, begrunnelser, kommentar)
+        løsManuelt(
+            godkjent = false,
+            saksbehandlerIdent = saksbehandlerIdent,
+            saksbehandlerEpost = saksbehandlerEpost,
+            godkjenttidspunkt = godkjenttidspunkt,
+            årsak = årsak,
+            begrunnelser = begrunnelser,
+            kommentar = kommentar,
+            saksbehandleroverstyringer = saksbehandleroverstyringer
+        )
     }
 
     private fun løsManuelt(
@@ -61,17 +82,19 @@ internal class UtbetalingsgodkjenningMessage(json: String, private val utbetalin
         godkjenttidspunkt: LocalDateTime,
         årsak: String?,
         begrunnelser: List<String>?,
-        kommentar: String?
+        kommentar: String?,
+        saksbehandleroverstyringer: List<UUID>,
     ) {
         løs(
-            false,
-            godkjent,
-            saksbehandlerIdent,
-            saksbehandlerEpost,
-            godkjenttidspunkt,
-            årsak,
-            begrunnelser,
-            kommentar
+            automatisk = false,
+            godkjent = godkjent,
+            saksbehandlerIdent = saksbehandlerIdent,
+            saksbehandlerEpost = saksbehandlerEpost,
+            godkjenttidspunkt = godkjenttidspunkt,
+            årsak = årsak,
+            begrunnelser = begrunnelser,
+            kommentar = kommentar,
+            saksbehandleroverstyringer = saksbehandleroverstyringer,
         )
     }
 
@@ -83,7 +106,8 @@ internal class UtbetalingsgodkjenningMessage(json: String, private val utbetalin
         godkjenttidspunkt: LocalDateTime,
         årsak: String?,
         begrunnelser: List<String>?,
-        kommentar: String?
+        kommentar: String?,
+        saksbehandleroverstyringer: List<UUID>,
     ) {
         løsning = mapOf(
             "Godkjenning" to mutableMapOf(
@@ -95,6 +119,7 @@ internal class UtbetalingsgodkjenningMessage(json: String, private val utbetalin
                 "årsak" to årsak,
                 "begrunnelser" to begrunnelser,
                 "kommentar" to kommentar,
+                "saksbehandleroverstyringer" to saksbehandleroverstyringer
             ).apply {
                 compute("refusjontype") { _, _ -> utbetaling?.refusjonstype()?.name }
             }.toMap()

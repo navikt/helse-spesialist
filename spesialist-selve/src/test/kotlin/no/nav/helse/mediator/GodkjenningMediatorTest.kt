@@ -50,13 +50,13 @@ internal class GodkjenningMediatorTest {
 
     @Test
     fun `saksbehandler utbetaling skal ikke opprette opptegnelse`() {
-        mediator.saksbehandlerUtbetaling(context, UtbetalingsgodkjenningMessage("{}", utbetaling), UUID.randomUUID(), fnr, "1",  "2@nav.no", LocalDateTime.now())
+        mediator.saksbehandlerUtbetaling(context, UtbetalingsgodkjenningMessage("{}", utbetaling), UUID.randomUUID(), fnr, "1",  "2@nav.no", LocalDateTime.now(), emptyList())
         assertOpptegnelseIkkeOpprettet()
     }
 
     @Test
     fun `saksbehandler avvisning skal ikke opprette opptegnelse`() {
-        mediator.saksbehandlerAvvisning(context, UtbetalingsgodkjenningMessage("{}", utbetaling), UUID.randomUUID(), fnr, "1", "2@nav.no", LocalDateTime.now(), null, null, null)
+        mediator.saksbehandlerAvvisning(context, UtbetalingsgodkjenningMessage("{}", utbetaling), UUID.randomUUID(), fnr, "1", "2@nav.no", LocalDateTime.now(), null, null, null, emptyList())
         assertOpptegnelseIkkeOpprettet()
     }
 

@@ -188,6 +188,7 @@ internal class HendelseMediator(
             if (erBeslutteroppgave && tidligereSaksbehandler != null) tidligereSaksbehandler
             else if (totrinnsvurdering?.erBeslutteroppgave() == true) totrinnsvurdering.saksbehandler!!
             else oid
+        val saksbehandleroverstyringer = overstyringDao.finnAktiveOverstyringer(vedtaksperiodeId)
         val godkjenningMessage = JsonMessage.newMessage("saksbehandler_løsning", mutableMapOf(
             "@forårsaket_av" to mapOf(
                 "event_name" to "behov",
@@ -201,7 +202,8 @@ internal class HendelseMediator(
             "saksbehandlerident" to godkjenningDTO.saksbehandlerIdent,
             "saksbehandleroid" to oid,
             "saksbehandlerepost" to epost,
-            "godkjenttidspunkt" to now()
+            "godkjenttidspunkt" to now(),
+            "saksbehandleroverstyringer" to saksbehandleroverstyringer,
         ).apply {
             godkjenningDTO.årsak?.let { put("årsak", it) }
             godkjenningDTO.begrunnelser?.let { put("begrunnelser", it) }
@@ -456,6 +458,7 @@ internal class HendelseMediator(
         årsak: String?,
         begrunnelser: List<String>?,
         kommentar: String?,
+        saksbehandleroverstyringer: List<UUID>,
         oppgaveId: Long,
         context: MessageContext,
     ) {
@@ -471,6 +474,7 @@ internal class HendelseMediator(
                 årsak,
                 begrunnelser,
                 kommentar,
+                saksbehandleroverstyringer,
                 oppgaveId,
                 message.toJson()
             ), context

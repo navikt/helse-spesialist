@@ -34,6 +34,7 @@ internal class Saksbehandlerløsning(
     årsak: String?,
     begrunnelser: List<String>?,
     kommentar: String?,
+    saksbehandleroverstyringer: List<UUID>,
     private val oppgaveId: Long,
     godkjenningsbehovhendelseId: UUID,
     hendelseDao: HendelseDao,
@@ -45,19 +46,20 @@ internal class Saksbehandlerløsning(
 
     override val commands = listOf(
         UtbetalingsgodkjenningCommand(
-            godkjent,
-            saksbehandlerIdent,
-            epostadresse,
-            godkjenttidspunkt,
-            årsak,
-            begrunnelser,
-            kommentar,
-            godkjenningsbehovhendelseId,
-            hendelseDao,
-            godkjenningMediator,
-            vedtaksperiodeId(),
-            fødselsnummer,
-            utbetaling
+            godkjent = godkjent,
+            saksbehandlerIdent = saksbehandlerIdent,
+            epostadresse = epostadresse,
+            godkjenttidspunkt = godkjenttidspunkt,
+            årsak = årsak,
+            begrunnelser = begrunnelser,
+            kommentar = kommentar,
+            saksbehandleroverstyringer = saksbehandleroverstyringer,
+            godkjenningsbehovhendelseId = godkjenningsbehovhendelseId,
+            hendelseDao = hendelseDao,
+            godkjenningMediator = godkjenningMediator,
+            vedtaksperiodeId = vedtaksperiodeId(),
+            fødselsnummer = fødselsnummer,
+            utbetaling = utbetaling
         ),
     )
 
@@ -79,7 +81,7 @@ internal class Saksbehandlerløsning(
                         it.requireKey("@id", "fødselsnummer", "oppgaveId", "hendelseId")
                         it.requireKey("godkjent", "saksbehandlerident", "saksbehandleroid", "saksbehandlerepost")
                         it.require("godkjenttidspunkt", JsonNode::asLocalDateTime)
-                        it.interestedIn("årsak", "begrunnelser", "kommentar")
+                        it.interestedIn("årsak", "begrunnelser", "kommentar", "saksbehandleroverstyringer")
                     }
                 }.register(this)
         }
@@ -93,19 +95,22 @@ internal class Saksbehandlerløsning(
             val id = UUID.fromString(packet["@id"].asText())
             if (id == UUID.fromString("bc1c69b4-a74a-4919-bb2c-d85dd796f8f8")) return
             mediator.saksbehandlerløsning(
-                packet,
-                id,
-                hendelseId,
-                packet["fødselsnummer"].asText(),
-                packet["godkjent"].asBoolean(),
-                packet["saksbehandlerident"].asText(),
-                packet["saksbehandlerepost"].asText(),
-                packet["godkjenttidspunkt"].asLocalDateTime(),
-                packet["årsak"].takeUnless(JsonNode::isMissingOrNull)?.asText(),
-                packet["begrunnelser"].takeUnless(JsonNode::isMissingOrNull)?.map(JsonNode::asText),
-                packet["kommentar"].takeUnless(JsonNode::isMissingOrNull)?.asText(),
-                packet["oppgaveId"].asLong(),
-                context
+                message = packet,
+                id = id,
+                godkjenningsbehovhendelseId = hendelseId,
+                fødselsnummer = packet["fødselsnummer"].asText(),
+                godkjent = packet["godkjent"].asBoolean(),
+                saksbehandlerident = packet["saksbehandlerident"].asText(),
+                saksbehandlerepost = packet["saksbehandlerepost"].asText(),
+                godkjenttidspunkt = packet["godkjenttidspunkt"].asLocalDateTime(),
+                årsak = packet["årsak"].takeUnless(JsonNode::isMissingOrNull)?.asText(),
+                begrunnelser = packet["begrunnelser"].takeUnless(JsonNode::isMissingOrNull)?.map(JsonNode::asText),
+                kommentar = packet["kommentar"].takeUnless(JsonNode::isMissingOrNull)?.asText(),
+                saksbehandleroverstyringer = packet["saksbehandleroverstyringer"].takeUnless(JsonNode::isMissingOrNull)?.map {
+                    UUID.fromString(it.asText())
+                } ?: emptyList(),
+                oppgaveId = packet["oppgaveId"].asLong(),
+                context = context
             )
         }
     }

@@ -16,6 +16,7 @@ internal class UtbetalingsgodkjenningCommand(
     private val årsak: String?,
     private val begrunnelser: List<String>?,
     private val kommentar: String?,
+    private val saksbehandleroverstyringer: List<UUID>,
     private val godkjenningsbehovhendelseId: UUID,
     private val hendelseDao: HendelseDao,
     private val godkjenningMediator: GodkjenningMediator,
@@ -32,9 +33,30 @@ internal class UtbetalingsgodkjenningCommand(
         val behovJson = hendelseDao.finnUtbetalingsgodkjenningbehovJson(godkjenningsbehovhendelseId)
         val behov = UtbetalingsgodkjenningMessage(behovJson, utbetaling)
         if (godkjent) {
-            godkjenningMediator.saksbehandlerUtbetaling(context, behov, vedtaksperiodeId, fødselsnummer, saksbehandlerIdent, epostadresse, godkjenttidspunkt)
+            godkjenningMediator.saksbehandlerUtbetaling(
+                context = context,
+                behov = behov,
+                vedtaksperiodeId = vedtaksperiodeId,
+                fødselsnummer = fødselsnummer,
+                saksbehandlerIdent = saksbehandlerIdent,
+                saksbehandlerEpost = epostadresse,
+                godkjenttidspunkt = godkjenttidspunkt,
+                saksbehandleroverstyringer = saksbehandleroverstyringer,
+            )
         } else {
-            godkjenningMediator.saksbehandlerAvvisning(context, behov, vedtaksperiodeId, fødselsnummer, saksbehandlerIdent, epostadresse, godkjenttidspunkt, årsak, begrunnelser, kommentar)
+            godkjenningMediator.saksbehandlerAvvisning(
+                context = context,
+                behov = behov,
+                vedtaksperiodeId = vedtaksperiodeId,
+                fødselsnummer = fødselsnummer,
+                saksbehandlerIdent = saksbehandlerIdent,
+                saksbehandlerEpost = epostadresse,
+                godkjenttidspunkt = godkjenttidspunkt,
+                årsak = årsak,
+                begrunnelser = begrunnelser,
+                kommentar = kommentar,
+                saksbehandleroverstyringer = saksbehandleroverstyringer,
+            )
         }
         log.info("sender svar på godkjenningsbehov")
         return true

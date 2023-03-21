@@ -44,6 +44,7 @@ internal class SaksbehandlerløsningRiverTest {
             any(),
             any(),
             any(),
+            any(),
             any()
         ) }
     }

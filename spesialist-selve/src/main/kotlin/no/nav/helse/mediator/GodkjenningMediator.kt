@@ -30,9 +30,15 @@ internal class GodkjenningMediator(
         fødselsnummer: String,
         saksbehandlerIdent: String,
         saksbehandlerEpost: String,
-        godkjenttidspunkt: LocalDateTime
+        godkjenttidspunkt: LocalDateTime,
+        saksbehandleroverstyringer: List<UUID>
     ) {
-        behov.godkjennManuelt(saksbehandlerIdent, saksbehandlerEpost, godkjenttidspunkt)
+        behov.godkjennManuelt(
+            saksbehandlerIdent = saksbehandlerIdent,
+            saksbehandlerEpost = saksbehandlerEpost,
+            godkjenttidspunkt = godkjenttidspunkt,
+            saksbehandleroverstyringer = saksbehandleroverstyringer
+        )
         val sisteGenerasjon = generasjonRepository.sisteFor(vedtaksperiodeId)
         sisteGenerasjon.håndterGodkjentAvSaksbehandler(saksbehandlerIdent, varselRepository)
         context.publiser(behov.toJson())
@@ -49,9 +55,18 @@ internal class GodkjenningMediator(
         godkjenttidspunkt: LocalDateTime,
         årsak: String?,
         begrunnelser: List<String>?,
-        kommentar: String?
+        kommentar: String?,
+        saksbehandleroverstyringer: List<UUID>,
     ) {
-        behov.avvisManuelt(saksbehandlerIdent, saksbehandlerEpost, godkjenttidspunkt, årsak, begrunnelser, kommentar)
+        behov.avvisManuelt(
+            saksbehandlerIdent = saksbehandlerIdent,
+            saksbehandlerEpost = saksbehandlerEpost,
+            godkjenttidspunkt = godkjenttidspunkt,
+            årsak = årsak,
+            begrunnelser = begrunnelser,
+            kommentar = kommentar,
+            saksbehandleroverstyringer = saksbehandleroverstyringer
+        )
         val sisteGenerasjon = generasjonRepository.sisteFor(vedtaksperiodeId)
         sisteGenerasjon.håndterAvvistAvSaksbehandler(saksbehandlerIdent, varselRepository)
         context.publiser(behov.toJson())

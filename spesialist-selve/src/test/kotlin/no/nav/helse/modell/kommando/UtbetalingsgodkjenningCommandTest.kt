@@ -52,7 +52,8 @@ internal class UtbetalingsgodkjenningCommandTest {
             godkjenningMediator = GodkjenningMediator(mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true), varselRepository, generasjonRepository),
             vedtaksperiodeId = vedtaksperiodeId,
             fødselsnummer = fødselsnummer,
-            utbetaling = utbetaling
+            utbetaling = utbetaling,
+            saksbehandleroverstyringer = emptyList()
         )
     }
 

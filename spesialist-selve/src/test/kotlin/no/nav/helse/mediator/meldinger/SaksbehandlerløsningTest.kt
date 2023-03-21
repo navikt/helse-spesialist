@@ -6,6 +6,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.every
 import io.mockk.mockk
 import java.time.LocalDateTime
+import java.util.UUID
 import java.util.UUID.randomUUID
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.meldinger.løsninger.Saksbehandlerløsning
@@ -36,7 +37,7 @@ internal class SaksbehandlerløsningTest {
     private val hendelseDao = mockk<HendelseDao>(relaxed = true)
     private val utbetalingDao = mockk<UtbetalingDao>(relaxed = true)
 
-    private fun saksbehandlerløsning(godkjent: Boolean) = Saksbehandlerløsning(
+    private fun saksbehandlerløsning(godkjent: Boolean, saksbehandlerløsning: List<UUID> = emptyList()) = Saksbehandlerløsning(
         id = randomUUID(),
         fødselsnummer = FNR,
         json = HENDELSE_JSON,
@@ -53,6 +54,7 @@ internal class SaksbehandlerløsningTest {
         oppgaveDao = mockk(relaxed = true),
         godkjenningMediator = GodkjenningMediator(mockk(relaxed = true), mockk(relaxed = true), mockk(), mockk(relaxed = true), mockk(relaxed = true)),
         utbetalingDao = utbetalingDao,
+        saksbehandleroverstyringer = saksbehandlerløsning,
     )
 
     private val context = CommandContext(randomUUID())
@@ -64,6 +66,22 @@ internal class SaksbehandlerløsningTest {
         val saksbehandlerløsning = saksbehandlerløsning(true)
         assertTrue(saksbehandlerløsning.execute(context))
         assertLøsning(true, DELVIS_REFUSJON)
+    }
+
+    @Test
+    fun `løser godkjenningsbehov med saksbehandleroverstyringer`() {
+        every { hendelseDao.finnUtbetalingsgodkjenningbehovJson(GODKJENNINGSBEHOV_ID) } returns GODKJENNINGSBEHOV_JSON
+        every { utbetalingDao.utbetalingFor(OPPGAVE_ID) } returns Utbetaling(randomUUID(), 1000, 1000)
+        val  saksbehandleroverstyringer = listOf(randomUUID(), randomUUID())
+        val saksbehandlerløsning = saksbehandlerløsning(true, saksbehandleroverstyringer)
+        assertTrue(saksbehandlerløsning.execute(context))
+        val løsning = context.meldinger()
+            .map(objectMapper::readTree)
+            .filter { it["@event_name"].asText() == "behov" }
+            .firstOrNull { it["@løsning"].hasNonNull("Godkjenning") } ?: fail("Fant ikke løsning på godkjenningsbehov")
+
+        val godkjenning = løsning.path("@løsning").path("Godkjenning")
+        assertEquals(objectMapper.valueToTree(saksbehandleroverstyringer), godkjenning.path("saksbehandleroverstyringer"))
     }
 
     @Test
@@ -92,6 +110,7 @@ internal class SaksbehandlerløsningTest {
         assertTrue(godkjenning.path("årsak").isNull)
         assertTrue(godkjenning.path("kommentar").isNull)
         assertTrue(godkjenning.path("begrunnelser").isNull)
+        assertTrue(godkjenning.path("saksbehandleroverstyringer").isEmpty)
     }
 
     private fun assertJsonEquals(expected: String, actual: JsonNode) {
