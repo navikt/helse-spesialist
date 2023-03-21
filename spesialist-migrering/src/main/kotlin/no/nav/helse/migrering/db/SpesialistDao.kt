@@ -110,7 +110,7 @@ internal class SpesialistDao(private val dataSource: DataSource): IPersonObserve
         val query =
             "INSERT INTO vedtak(vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref) VALUES (?, ?, ?, (SELECT id FROM arbeidsgiver WHERE orgnummer = ?), (SELECT id FROM person WHERE fodselsnummer = ?)) ON CONFLICT (vedtaksperiode_id) DO NOTHING "
         val insertOk = sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, id, fom, tom, organisasjonsnummer.toLong(), fødselsnummer.toLong()).asExecute)
+            session.run(queryOf(query, id, fom, tom, organisasjonsnummer.toLong(), fødselsnummer.toLong()).asUpdate) > 0
         }
         if (insertOk) sikkerlogg.info(
             "Opprettet vedtaksperiode for person {}, arbeidsgiver {}, med {}",
