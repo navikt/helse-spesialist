@@ -19,11 +19,12 @@ internal class Person(
         observers.forEach { it.personOpprettet( aktørId, fødselsnummer) }
     }
 
-    internal fun håndterNyArbeidsgiver(organisasjonsnummer: String) {
+    internal fun håndterNyArbeidsgiver(organisasjonsnummer: String): Arbeidsgiver {
         val arbeidsgiver = Arbeidsgiver(organisasjonsnummer)
         arbeidsgivere.add(arbeidsgiver)
         arbeidsgiver.register(observer = observers.toTypedArray())
         arbeidsgiver.opprett()
+        return arbeidsgiver
     }
 }
 

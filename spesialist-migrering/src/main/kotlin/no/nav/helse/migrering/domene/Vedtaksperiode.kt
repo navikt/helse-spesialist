@@ -16,8 +16,8 @@ internal class Vedtaksperiode(
 
     private val observers = mutableListOf<IPersonObserver>()
 
-    internal fun register(observer: IPersonObserver) {
-        observers.add(observer)
+    internal fun register(vararg observer: IPersonObserver) {
+        observers.addAll(observer)
     }
 
     internal fun opprett() {
