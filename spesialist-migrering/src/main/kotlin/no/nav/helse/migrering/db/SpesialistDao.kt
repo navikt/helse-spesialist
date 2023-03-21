@@ -100,7 +100,8 @@ internal class SpesialistDao(private val dataSource: DataSource): IPersonObserve
         tom: LocalDate,
         skjæringstidspunkt: LocalDate,
         fødselsnummer: String,
-        organisasjonsnummer: String
+        organisasjonsnummer: String,
+        forkastet: Boolean
     ) {
         @Language("PostgreSQL")
         val query = "INSERT INTO vedtak(vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref) VALUES (?, ?, ?, (SELECT id FROM arbeidsgiver WHERE orgnummer = ?), (SELECT id FROM person WHERE fodselsnummer = ?)) ON CONFLICT (vedtaksperiode_id) DO NOTHING "
@@ -108,6 +109,8 @@ internal class SpesialistDao(private val dataSource: DataSource): IPersonObserve
             session.run(queryOf(query, id, fom, tom, organisasjonsnummer.toLong(), fødselsnummer.toLong()).asExecute)
         }
         oppdaterGenerasjonerFor(id, fom, tom, skjæringstidspunkt)
+        oppdaterForkastet(id, forkastet, if (forkastet) dummyForkastetAvHendelseId else null)
+
     }
 
     private fun oppdaterGenerasjonerFor(
@@ -121,5 +124,21 @@ internal class SpesialistDao(private val dataSource: DataSource): IPersonObserve
         sessionOf(dataSource).use { session ->
             session.run(queryOf(query, fom, tom, skjæringstidspunkt, vedtaksperiodeId).asUpdate)
         }
+    }
+
+    private fun oppdaterForkastet(
+        vedtaksperiodeId: UUID,
+        forkastet: Boolean,
+        forkastetAvHendelse: UUID?
+    ) {
+        @Language("PostgreSQL")
+        val query = "UPDATE vedtak SET forkastet = ?, forkastet_av_hendelse = ? WHERE vedtaksperiode_id = ? "
+        sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, forkastet, forkastetAvHendelse, vedtaksperiodeId).asUpdate)
+        }
+    }
+
+    private companion object {
+        private val dummyForkastetAvHendelseId = UUID.fromString("00000000-0000-0000-0000-000000000000")
     }
 }

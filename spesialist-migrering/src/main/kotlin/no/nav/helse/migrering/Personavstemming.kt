@@ -72,7 +72,8 @@ internal class Personavstemming {
                         tom = periodeNode["tom"].asLocalDate(),
                         skjæringstidspunkt = periodeNode["skjæringstidspunkt"].asLocalDate(),
                         fødselsnummer = fødselsnummer,
-                        organisasjonsnummer = organisasjonsnummer
+                        organisasjonsnummer = organisasjonsnummer,
+                        forkastet = periodeNode["forkastet"].asBoolean()
                     )
                 }
                 val arbeidsgiver = person.håndterNyArbeidsgiver(organisasjonsnummer)

@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-internal class PersonavstemmingTest: AbstractDatabaseTest() {
+internal class PersonavstemmingTest : AbstractDatabaseTest() {
 
     private val spesialistDao = SpesialistDao(dataSource)
     private val testRapid = TestRapid().apply {
@@ -81,7 +81,9 @@ internal class PersonavstemmingTest: AbstractDatabaseTest() {
         spesialistDao.personOpprettet("42", "12345678910")
         spesialistDao.arbeidsgiverOpprettet("987654321")
         val vedtaksperiodeId = UUID.randomUUID()
-        spesialistDao.vedtaksperiodeOpprettet(vedtaksperiodeId, LocalDateTime.now(), 1.januar, 31.januar, 1.januar, "12345678910", "987654321")
+        spesialistDao.vedtaksperiodeOpprettet(
+            vedtaksperiodeId, LocalDateTime.now(), 1.januar, 31.januar, 1.januar, "12345678910", "987654321", false
+        )
         assertPerson("12345678910", 1)
         assertArbeidsgiver("987654321", 1)
         assertVedtaksperiode(vedtaksperiodeId, 1)
@@ -113,7 +115,9 @@ internal class PersonavstemmingTest: AbstractDatabaseTest() {
         spesialistDao.personOpprettet("42", "12345678910")
         spesialistDao.arbeidsgiverOpprettet("987654321")
         val vedtaksperiodeId = UUID.randomUUID()
-        spesialistDao.vedtaksperiodeOpprettet(vedtaksperiodeId, LocalDateTime.now(), 1.januar, 31.januar, 1.januar, "12345678910", "987654321")
+        spesialistDao.vedtaksperiodeOpprettet(
+            vedtaksperiodeId, LocalDateTime.now(), 1.januar, 31.januar, 1.januar, "12345678910", "987654321", false
+        )
         opprettGenerasjonFor(vedtaksperiodeId)
         assertPerson("12345678910", 1)
         assertArbeidsgiver("987654321", 1)
@@ -126,9 +130,37 @@ internal class PersonavstemmingTest: AbstractDatabaseTest() {
         assertGenerasjonMed(vedtaksperiodeId, 1.januar, 31.januar, 1.januar, 1)
     }
 
+    @Test
+    fun `Oppdaterer forkastet på ny vedtaksperiode`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        assertPerson("12345678910", 0)
+        assertArbeidsgiver("987654321", 0)
+        assertVedtaksperiode(vedtaksperiodeId, 0)
+        testRapid.sendTestMessage(testevent(vedtaksperiodeId, true))
+        assertPerson("12345678910", 1)
+        assertArbeidsgiver("987654321", 1)
+        assertVedtaksperiode(vedtaksperiodeId, 1, true)
+    }
+
+    @Test
+    fun `Oppdaterer forkastet på eksisterende vedtaksperiode`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        assertPerson("12345678910", 0)
+        assertArbeidsgiver("987654321", 0)
+        spesialistDao.personOpprettet("42", "12345678910")
+        spesialistDao.arbeidsgiverOpprettet("987654321")
+        spesialistDao.vedtaksperiodeOpprettet(
+            vedtaksperiodeId, LocalDateTime.now(), 1.januar, 31.januar, 1.januar, "12345678910", "987654321", false
+        )
+        assertVedtaksperiode(vedtaksperiodeId, 1, false)
+        testRapid.sendTestMessage(testevent(vedtaksperiodeId, true))
+        assertPerson("12345678910", 1)
+        assertArbeidsgiver("987654321", 1)
+        assertVedtaksperiode(vedtaksperiodeId, 1, true)
+    }
+
     private fun assertPerson(fødselsnummer: String, forventetAntall: Int) {
-        @Language("PostgreSQL")
-        val query = "SELECT count(1) FROM person WHERE fodselsnummer = ? "
+        @Language("PostgreSQL") val query = "SELECT count(1) FROM person WHERE fodselsnummer = ? "
         val antall = sessionOf(dataSource).use { session ->
             session.run(queryOf(query, fødselsnummer.toLong()).map { it.int(1) }.asSingle)
         }
@@ -136,42 +168,47 @@ internal class PersonavstemmingTest: AbstractDatabaseTest() {
     }
 
     private fun assertArbeidsgiver(organisasjonsnummer: String, forventetAntall: Int) {
-        @Language("PostgreSQL")
-        val query = "SELECT count(1) FROM arbeidsgiver WHERE orgnummer = ? "
+        @Language("PostgreSQL") val query = "SELECT count(1) FROM arbeidsgiver WHERE orgnummer = ? "
         val antall = sessionOf(dataSource).use { session ->
             session.run(queryOf(query, organisasjonsnummer.toLong()).map { it.int(1) }.asSingle)
         }
         assertEquals(forventetAntall, antall)
     }
 
-    private fun assertVedtaksperiode(vedtaksperiodeId: UUID, forventetAntall: Int) {
-        @Language("PostgreSQL")
-        val query = "SELECT count(1) FROM vedtak WHERE vedtaksperiode_id = ? "
+    private fun assertVedtaksperiode(vedtaksperiodeId: UUID, forventetAntall: Int, forkastet: Boolean = false) {
+        @Language("PostgreSQL") val query = "SELECT count(1) FROM vedtak WHERE vedtaksperiode_id = ? AND forkastet = ?"
         val antall = sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, vedtaksperiodeId).map { it.int(1) }.asSingle)
+            session.run(queryOf(query, vedtaksperiodeId, forkastet).map { it.int(1) }.asSingle)
         }
         assertEquals(forventetAntall, antall)
     }
 
     private fun opprettGenerasjonFor(vedtaksperiodeId: UUID) {
-        @Language("PostgreSQL")
-        val query = "INSERT INTO selve_vedtaksperiode_generasjon (vedtaksperiode_id, opprettet_av_hendelse) VALUES (?, gen_random_uuid())"
+        @Language("PostgreSQL") val query =
+            "INSERT INTO selve_vedtaksperiode_generasjon (vedtaksperiode_id, opprettet_av_hendelse) VALUES (?, gen_random_uuid())"
         sessionOf(dataSource).use { session ->
             session.run(queryOf(query, vedtaksperiodeId).asExecute)
         }
     }
 
     private fun assertGenerasjonMed(vedtaksperiodeId: UUID, forventetAntall: Int) {
-        @Language("PostgreSQL")
-        val query = "SELECT count(1) FROM selve_vedtaksperiode_generasjon svg WHERE vedtaksperiode_id = ? AND fom IS NULL AND tom IS NULL AND skjæringstidspunkt is null "
+        @Language("PostgreSQL") val query =
+            "SELECT count(1) FROM selve_vedtaksperiode_generasjon svg WHERE vedtaksperiode_id = ? AND fom IS NULL AND tom IS NULL AND skjæringstidspunkt is null "
         val antallFunnet = sessionOf(dataSource).use { session ->
             session.run(queryOf(query, vedtaksperiodeId).map { it.int(1) }.asSingle)
         }
         assertEquals(forventetAntall, antallFunnet)
     }
-    private fun assertGenerasjonMed(vedtaksperiodeId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate, forventetAntall: Int) {
-        @Language("PostgreSQL")
-        val query = "SELECT count(1) FROM selve_vedtaksperiode_generasjon svg WHERE vedtaksperiode_id = ? AND fom = ? AND tom = ? AND skjæringstidspunkt = ? "
+
+    private fun assertGenerasjonMed(
+        vedtaksperiodeId: UUID,
+        fom: LocalDate,
+        tom: LocalDate,
+        skjæringstidspunkt: LocalDate,
+        forventetAntall: Int,
+    ) {
+        @Language("PostgreSQL") val query =
+            "SELECT count(1) FROM selve_vedtaksperiode_generasjon svg WHERE vedtaksperiode_id = ? AND fom = ? AND tom = ? AND skjæringstidspunkt = ? "
         val antallFunnet = sessionOf(dataSource).use { session ->
             session.run(queryOf(query, vedtaksperiodeId, fom, tom, skjæringstidspunkt).map { it.int(1) }.asSingle)
         }
@@ -179,7 +216,7 @@ internal class PersonavstemmingTest: AbstractDatabaseTest() {
     }
 
     @Language("JSON")
-    private fun testevent(vedtaksperiodeId: UUID): String {
+    private fun testevent(vedtaksperiodeId: UUID, forkastet: Boolean = false): String {
         return """
             {
                   "@event_name": "person_avstemt",
@@ -194,8 +231,7 @@ internal class PersonavstemmingTest: AbstractDatabaseTest() {
                           "skjæringstidspunkt": "2018-01-01",
                           "opprettet": "2022-11-23T12:52:42.017867",
                           "oppdatert": "2022-11-23T12:52:42.017867",
-                          "forkastet": false
-                          
+                          "forkastet": "$forkastet"
                       }
                       ]
                     }

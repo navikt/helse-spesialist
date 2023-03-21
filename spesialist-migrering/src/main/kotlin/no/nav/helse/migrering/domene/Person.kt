@@ -41,5 +41,6 @@ internal interface IPersonObserver{
         skjæringstidspunkt: LocalDate,
         fødselsnummer: String,
         organisasjonsnummer: String,
+        forkastet: Boolean,
     ) {}
 }

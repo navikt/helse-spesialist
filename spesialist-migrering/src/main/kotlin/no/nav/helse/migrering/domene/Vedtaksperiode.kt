@@ -11,7 +11,8 @@ internal class Vedtaksperiode(
     private val tom: LocalDate,
     private val skjæringstidspunkt: LocalDate,
     private val fødselsnummer: String,
-    private val organisasjonsnummer: String
+    private val organisasjonsnummer: String,
+    private val forkastet: Boolean
 ) {
 
     private val observers = mutableListOf<IPersonObserver>()
@@ -21,6 +22,6 @@ internal class Vedtaksperiode(
     }
 
     internal fun opprett() {
-        observers.forEach { it.vedtaksperiodeOpprettet(id, opprettet, fom, tom, skjæringstidspunkt, fødselsnummer, organisasjonsnummer) }
+        observers.forEach { it.vedtaksperiodeOpprettet(id, opprettet, fom, tom, skjæringstidspunkt, fødselsnummer, organisasjonsnummer, forkastet) }
     }
 }

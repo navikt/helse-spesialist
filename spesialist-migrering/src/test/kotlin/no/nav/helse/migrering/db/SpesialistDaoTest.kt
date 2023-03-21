@@ -44,7 +44,16 @@ internal class SpesialistDaoTest: AbstractDatabaseTest() {
         dao.personOpprettet("1234", "123")
         dao.arbeidsgiverOpprettet("1234")
         val vedtaksperiodeId = UUID.randomUUID()
-        dao.vedtaksperiodeOpprettet(vedtaksperiodeId, LocalDateTime.now(), 1.januar, 15.januar, 1.januar, "123", "1234")
+        dao.vedtaksperiodeOpprettet(
+            vedtaksperiodeId,
+            LocalDateTime.now(),
+            1.januar,
+            15.januar,
+            1.januar,
+            "123",
+            "1234",
+            false
+        )
         assertVedtaksperiode(vedtaksperiodeId,  1)
     }
     @Test
@@ -52,8 +61,26 @@ internal class SpesialistDaoTest: AbstractDatabaseTest() {
         dao.personOpprettet("1234", "123")
         dao.arbeidsgiverOpprettet("1234")
         val vedtaksperiodeId = UUID.randomUUID()
-        dao.vedtaksperiodeOpprettet(vedtaksperiodeId, LocalDateTime.now(), 1.januar, 15.januar, 1.januar,"123", "1234")
-        dao.vedtaksperiodeOpprettet(vedtaksperiodeId, LocalDateTime.now(), 1.januar, 15.januar, 1.januar,"123", "1234")
+        dao.vedtaksperiodeOpprettet(
+            vedtaksperiodeId,
+            LocalDateTime.now(),
+            1.januar,
+            15.januar,
+            1.januar,
+            "123",
+            "1234",
+            false
+        )
+        dao.vedtaksperiodeOpprettet(
+            vedtaksperiodeId,
+            LocalDateTime.now(),
+            1.januar,
+            15.januar,
+            1.januar,
+            "123",
+            "1234",
+            false
+        )
         assertVedtaksperiode(vedtaksperiodeId,  1)
     }
     @Test
@@ -64,7 +91,16 @@ internal class SpesialistDaoTest: AbstractDatabaseTest() {
         opprettGenerasjonFor(vedtaksperiodeId)
         assertGenerasjonMed(vedtaksperiodeId, 1)
 
-        dao.vedtaksperiodeOpprettet(vedtaksperiodeId, LocalDateTime.now(), 1.januar, 15.januar, 1.januar,"123", "1234")
+        dao.vedtaksperiodeOpprettet(
+            vedtaksperiodeId,
+            LocalDateTime.now(),
+            1.januar,
+            15.januar,
+            1.januar,
+            "123",
+            "1234",
+            false
+        )
         assertVedtaksperiode(vedtaksperiodeId,  1)
         assertGenerasjonMed(vedtaksperiodeId, 1.januar, 15.januar, 1.januar, 1)
     }
@@ -74,16 +110,82 @@ internal class SpesialistDaoTest: AbstractDatabaseTest() {
         dao.arbeidsgiverOpprettet("1234")
         val vedtaksperiodeId = UUID.randomUUID()
         opprettGenerasjonFor(vedtaksperiodeId)
-        dao.vedtaksperiodeOpprettet(vedtaksperiodeId, LocalDateTime.now(), 1.januar, 31.januar, 1.januar,"123", "1234")
+        dao.vedtaksperiodeOpprettet(
+            vedtaksperiodeId,
+            LocalDateTime.now(),
+            1.januar,
+            31.januar,
+            1.januar,
+            "123",
+            "1234",
+            false
+        )
         opprettGenerasjonFor(vedtaksperiodeId)
         opprettGenerasjonFor(vedtaksperiodeId)
         assertGenerasjonMed(vedtaksperiodeId, 2)
         assertGenerasjonMed(vedtaksperiodeId, 1.januar, 31.januar, 1.januar, 1)
 
-        dao.vedtaksperiodeOpprettet(vedtaksperiodeId, LocalDateTime.now(), 15.januar, 15.februar, 15.januar,"123", "1234")
+        dao.vedtaksperiodeOpprettet(
+            vedtaksperiodeId,
+            LocalDateTime.now(),
+            15.januar,
+            15.februar,
+            15.januar,
+            "123",
+            "1234",
+            false
+        )
         assertVedtaksperiode(vedtaksperiodeId,  1)
         assertGenerasjonMed(vedtaksperiodeId, 1.januar, 31.januar, 1.januar, 1)
         assertGenerasjonMed(vedtaksperiodeId, 15.januar, 15.februar, 15.januar, 2)
+    }
+
+    @Test
+    fun `Oppdaterer forkastet på ny vedtaksperiode`() {
+        dao.personOpprettet("1234", "123")
+        dao.arbeidsgiverOpprettet("1234")
+        val vedtaksperiodeId = UUID.randomUUID()
+        dao.vedtaksperiodeOpprettet(
+            vedtaksperiodeId,
+            LocalDateTime.now(),
+            1.januar,
+            15.januar,
+            1.januar,
+            "123",
+            "1234",
+            true
+        )
+
+        assertForkastetVedtaksperiode(vedtaksperiodeId, 1)
+    }
+
+    @Test
+    fun `Oppdaterer forkastet på eksisterende vedtaksperiode`() {
+        dao.personOpprettet("1234", "123")
+        dao.arbeidsgiverOpprettet("1234")
+        val vedtaksperiodeId = UUID.randomUUID()
+        dao.vedtaksperiodeOpprettet(
+            vedtaksperiodeId,
+            LocalDateTime.now(),
+            1.januar,
+            15.januar,
+            1.januar,
+            "123",
+            "1234",
+            true
+        )
+        dao.vedtaksperiodeOpprettet(
+            vedtaksperiodeId,
+            LocalDateTime.now(),
+            1.januar,
+            15.januar,
+            1.januar,
+            "123",
+            "1234",
+            false
+        )
+
+        assertVedtaksperiode(vedtaksperiodeId, 1)
     }
 
     private fun assertPerson(aktørId: String, fødselsnummer: String, forventetAntall: Int) {
@@ -105,9 +207,18 @@ internal class SpesialistDaoTest: AbstractDatabaseTest() {
     }
     private fun assertVedtaksperiode(vedtaksperiodeId: UUID, forventetAntall: Int) {
         @Language("PostgreSQL")
-        val query = "SELECT count(1) FROM vedtak WHERE vedtaksperiode_id = ?"
+        val query = "SELECT count(1) FROM vedtak WHERE vedtaksperiode_id = ? AND forkastet = false AND forkastet_av_hendelse IS NULL "
         val antallFunnet = sessionOf(dataSource).use { session ->
             session.run(queryOf(query, vedtaksperiodeId).map { it.int(1) }.asSingle)
+        }
+        assertEquals(forventetAntall, antallFunnet)
+    }
+
+    private fun assertForkastetVedtaksperiode(vedtaksperiodeId: UUID, forventetAntall: Int) {
+        @Language("PostgreSQL")
+        val query = "SELECT count(1) FROM vedtak WHERE vedtaksperiode_id = ? AND forkastet = true AND forkastet_av_hendelse = ?"
+        val antallFunnet = sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, vedtaksperiodeId, UUID.fromString("00000000-0000-0000-0000-000000000000")).map { it.int(1) }.asSingle)
         }
         assertEquals(forventetAntall, antallFunnet)
     }

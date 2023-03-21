@@ -3,7 +3,7 @@ package no.nav.helse.migrering.domene
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class VedtaksperiodeTest{
@@ -11,7 +11,16 @@ internal class VedtaksperiodeTest{
     @Test
     fun `Kan opprette vedtaksperiode`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val vedtaksperiode = Vedtaksperiode(vedtaksperiodeId, LocalDateTime.now(), LocalDate.now(), LocalDate.now(), LocalDate.now(), "123", "1234")
+        val vedtaksperiode = Vedtaksperiode(
+            vedtaksperiodeId,
+            LocalDateTime.now(),
+            LocalDate.now(),
+            LocalDate.now(),
+            LocalDate.now(),
+            "123",
+            "1234",
+            false
+        )
         vedtaksperiode.register(observer)
         vedtaksperiode.opprett()
 
@@ -27,7 +36,8 @@ internal class VedtaksperiodeTest{
             tom: LocalDate,
             skjæringstidspunkt: LocalDate,
             fødselsnummer: String,
-            organisasjonsnummer: String
+            organisasjonsnummer: String,
+            forkastet: Boolean
         ) {
             opprettedeVedtaksperioder.add(id)
         }
