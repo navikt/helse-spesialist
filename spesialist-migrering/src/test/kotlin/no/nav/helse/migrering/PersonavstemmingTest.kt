@@ -131,34 +131,6 @@ internal class PersonavstemmingTest : AbstractDatabaseTest() {
     }
 
     @Test
-    fun `Oppdaterer forkastet på ny vedtaksperiode`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        assertPerson("12345678910", 0)
-        assertArbeidsgiver("987654321", 0)
-        assertVedtaksperiode(vedtaksperiodeId, 0)
-        testRapid.sendTestMessage(testevent(vedtaksperiodeId, true))
-        assertPerson("12345678910", 1)
-        assertArbeidsgiver("987654321", 1)
-        assertVedtaksperiode(vedtaksperiodeId, 1, true)
-    }
-
-    @Test
-    fun `Oppdaterer forkastet på eksisterende vedtaksperiode`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        assertPerson("12345678910", 0)
-        assertArbeidsgiver("987654321", 0)
-        spesialistDao.personOpprettet("42", "12345678910")
-        spesialistDao.arbeidsgiverOpprettet("987654321")
-        spesialistDao.vedtaksperiodeOpprettet(
-            vedtaksperiodeId, LocalDateTime.now(), 1.januar, 31.januar, 1.januar, "12345678910", "987654321", false
-        )
-        assertVedtaksperiode(vedtaksperiodeId, 1, false)
-        testRapid.sendTestMessage(testevent(vedtaksperiodeId, true))
-        assertPerson("12345678910", 1)
-        assertArbeidsgiver("987654321", 1)
-        assertVedtaksperiode(vedtaksperiodeId, 1, true)
-    }
-    @Test
     fun potpourri() {
         assertPerson("12345678910", 0)
         assertArbeidsgiver(AG1, 0)
@@ -166,6 +138,8 @@ internal class PersonavstemmingTest : AbstractDatabaseTest() {
         assertVedtaksperiode(V1AG1, 0)
         assertVedtaksperiode(V1AG2, 0)
         assertVedtaksperiode(V2AG2, 0)
+        assertVedtaksperiode(V3AG2, 0)
+        assertVedtaksperiode(V4AG2, 0)
         testRapid.sendTestMessage(testeventMedMer())
         assertPerson("12345678910", 1)
         assertArbeidsgiver(AG1, 1)
@@ -173,6 +147,8 @@ internal class PersonavstemmingTest : AbstractDatabaseTest() {
         assertVedtaksperiode(V1AG1, 1)
         assertVedtaksperiode(V1AG2, 1)
         assertVedtaksperiode(V2AG2, 1)
+        assertVedtaksperiode(V3AG2, 1, true)
+        assertVedtaksperiode(V4AG2, 1, true)
     }
 
     private fun assertPerson(fødselsnummer: String, forventetAntall: Int) {
@@ -232,7 +208,7 @@ internal class PersonavstemmingTest : AbstractDatabaseTest() {
     }
 
     @Language("JSON")
-    private fun testevent(vedtaksperiodeId: UUID, forkastet: Boolean = false): String {
+    private fun testevent(vedtaksperiodeId: UUID): String {
         return """
             {
                   "@event_name": "person_avstemt",
@@ -246,10 +222,10 @@ internal class PersonavstemmingTest : AbstractDatabaseTest() {
                           "tom": "2018-01-31",
                           "skjæringstidspunkt": "2018-01-01",
                           "opprettet": "2022-11-23T12:52:42.017867",
-                          "oppdatert": "2022-11-23T12:52:42.017867",
-                          "forkastet": "$forkastet"
+                          "oppdatert": "2022-11-23T12:52:42.017867"
                       }
-                      ]
+                      ],
+                      "forkastedeVedtaksperioder": []
                     }
                   ],
                   "@id": "c405a203-264e-4496-99dc-785e76ede254",
@@ -258,7 +234,7 @@ internal class PersonavstemmingTest : AbstractDatabaseTest() {
                   "aktørId": "42"
             }
             
-        """.trimIndent()
+        """
     }
     @Language("JSON")
     private fun testeventMedMer(): String {
@@ -275,10 +251,10 @@ internal class PersonavstemmingTest : AbstractDatabaseTest() {
                       "tom": "2018-01-31",
                       "skjæringstidspunkt": "2018-01-01",
                       "opprettet": "2022-11-23T12:52:42.017867",
-                      "oppdatert": "2022-11-23T12:52:42.017867",
-                      "forkastet": false
+                      "oppdatert": "2022-11-23T12:52:42.017867"
                     }
-                  ]
+                  ],
+                  "forkastedeVedtaksperioder": []
                 },
                 {
                   "organisasjonsnummer": "$AG2",
@@ -289,8 +265,7 @@ internal class PersonavstemmingTest : AbstractDatabaseTest() {
                       "tom": "2018-01-31",
                       "skjæringstidspunkt": "2018-01-01",
                       "opprettet": "2022-11-23T12:52:42.017867",
-                      "oppdatert": "2022-11-23T12:52:42.017867",
-                      "forkastet": false
+                      "oppdatert": "2022-11-23T12:52:42.017867"
                     },
                     {
                       "id": "$V2AG2",
@@ -298,8 +273,25 @@ internal class PersonavstemmingTest : AbstractDatabaseTest() {
                       "tom": "2018-01-31",
                       "skjæringstidspunkt": "2018-01-01",
                       "opprettet": "2022-11-23T12:52:42.017867",
-                      "oppdatert": "2022-11-23T12:52:42.017867",
-                      "forkastet": false
+                      "oppdatert": "2022-11-23T12:52:42.017867"
+                    }
+                  ],
+                  "forkastedeVedtaksperioder": [
+                    {
+                      "id": "$V3AG2",
+                      "fom": "2018-01-01",
+                      "tom": "2018-01-31",
+                      "skjæringstidspunkt": "2018-01-01",
+                      "opprettet": "2022-11-23T12:52:42.017867",
+                      "oppdatert": "2022-11-23T12:52:42.017867"
+                    },
+                    {
+                      "id": "$V4AG2",
+                      "fom": "2018-01-01",
+                      "tom": "2018-01-31",
+                      "skjæringstidspunkt": "2018-01-01",
+                      "opprettet": "2022-11-23T12:52:42.017867",
+                      "oppdatert": "2022-11-23T12:52:42.017867"
                     }
                   ]
                 }
@@ -310,7 +302,7 @@ internal class PersonavstemmingTest : AbstractDatabaseTest() {
               "aktørId": "42"
             }
             
-        """.trimIndent()
+        """
     }
 
     private companion object{
@@ -319,6 +311,8 @@ internal class PersonavstemmingTest : AbstractDatabaseTest() {
         private val V1AG1 = UUID.randomUUID()
         private val V1AG2 = UUID.randomUUID()
         private val V2AG2 = UUID.randomUUID()
+        private val V3AG2 = UUID.randomUUID()
+        private val V4AG2 = UUID.randomUUID()
 
     }
 

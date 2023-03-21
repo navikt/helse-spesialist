@@ -35,7 +35,15 @@ internal class Personavstemming {
                     it.requireArray("arbeidsgivere") {
                         requireKey("organisasjonsnummer")
                         requireArray("vedtaksperioder") {
-                            requireKey("forkastet", "fom", "tom", "skjæringstidspunkt")
+                            requireKey("fom", "tom", "skjæringstidspunkt")
+                            require("opprettet", JsonNode::asLocalDateTime)
+                            require("oppdatert", JsonNode::asLocalDateTime)
+                            require("id") { jsonNode ->
+                                UUID.fromString(jsonNode.asText())
+                            }
+                        }
+                        requireArray("forkastedeVedtaksperioder") {
+                            requireKey("fom", "tom", "skjæringstidspunkt")
                             require("opprettet", JsonNode::asLocalDateTime)
                             require("oppdatert", JsonNode::asLocalDateTime)
                             require("id") { jsonNode ->
@@ -73,11 +81,23 @@ internal class Personavstemming {
                         skjæringstidspunkt = periodeNode["skjæringstidspunkt"].asLocalDate(),
                         fødselsnummer = fødselsnummer,
                         organisasjonsnummer = organisasjonsnummer,
-                        forkastet = periodeNode["forkastet"].asBoolean()
+                        forkastet = false
+                    )
+                }
+                val forkastedeVedtaksperioder = arbeidsgiverNode["forkastedeVedtaksperioder"].map { periodeNode ->
+                    Vedtaksperiode(
+                        id = UUID.fromString(periodeNode["id"].asText()),
+                        opprettet = periodeNode["opprettet"].asLocalDateTime(),
+                        fom = periodeNode["fom"].asLocalDate(),
+                        tom = periodeNode["tom"].asLocalDate(),
+                        skjæringstidspunkt = periodeNode["skjæringstidspunkt"].asLocalDate(),
+                        fødselsnummer = fødselsnummer,
+                        organisasjonsnummer = organisasjonsnummer,
+                        forkastet = true
                     )
                 }
                 val arbeidsgiver = person.håndterNyArbeidsgiver(organisasjonsnummer)
-                vedtaksperioder.forEach {
+                (vedtaksperioder + forkastedeVedtaksperioder).forEach {
                     arbeidsgiver.håndterNyVedtaksperiode(it)
                 }
             }
