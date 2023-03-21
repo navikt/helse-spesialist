@@ -6,8 +6,10 @@ import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.migrering.domene.IPersonObserver
 import org.intellij.lang.annotations.Language
+import org.slf4j.LoggerFactory
 
 internal class SpesialistDao(private val dataSource: DataSource): IPersonObserver {
 
@@ -101,16 +103,23 @@ internal class SpesialistDao(private val dataSource: DataSource): IPersonObserve
         skjæringstidspunkt: LocalDate,
         fødselsnummer: String,
         organisasjonsnummer: String,
-        forkastet: Boolean
+        forkastet: Boolean,
     ) {
+
         @Language("PostgreSQL")
-        val query = "INSERT INTO vedtak(vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref) VALUES (?, ?, ?, (SELECT id FROM arbeidsgiver WHERE orgnummer = ?), (SELECT id FROM person WHERE fodselsnummer = ?)) ON CONFLICT (vedtaksperiode_id) DO NOTHING "
-        sessionOf(dataSource).use { session ->
+        val query =
+            "INSERT INTO vedtak(vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref) VALUES (?, ?, ?, (SELECT id FROM arbeidsgiver WHERE orgnummer = ?), (SELECT id FROM person WHERE fodselsnummer = ?)) ON CONFLICT (vedtaksperiode_id) DO NOTHING "
+        val insertOk = sessionOf(dataSource).use { session ->
             session.run(queryOf(query, id, fom, tom, organisasjonsnummer.toLong(), fødselsnummer.toLong()).asExecute)
         }
+        if (insertOk) sikkerlogg.info(
+            "Opprettet vedtaksperiode for person {}, arbeidsgiver {}, med {}",
+            kv("fødselsnummer", fødselsnummer),
+            kv("organisasjonsnummer", organisasjonsnummer),
+            kv("vedtaksperiodeId", id)
+        )
         oppdaterGenerasjonerFor(id, fom, tom, skjæringstidspunkt)
         oppdaterForkastet(id, forkastet, if (forkastet) dummyForkastetAvHendelseId else null)
-
     }
 
     private fun oppdaterGenerasjonerFor(
@@ -121,9 +130,16 @@ internal class SpesialistDao(private val dataSource: DataSource): IPersonObserve
     ) {
         @Language("PostgreSQL")
         val query = "UPDATE selve_vedtaksperiode_generasjon SET fom = ?, tom = ?, skjæringstidspunkt = ? WHERE vedtaksperiode_id = ? AND (fom IS NULL OR tom IS NULL OR skjæringstidspunkt IS NULL) "
-        sessionOf(dataSource).use { session ->
+        val antallOppdatert = sessionOf(dataSource).use { session ->
             session.run(queryOf(query, fom, tom, skjæringstidspunkt, vedtaksperiodeId).asUpdate)
         }
+        if (antallOppdatert > 0) sikkerlogg.info(
+            "Oppdatert $antallOppdatert generasjoner for {}, med {}, {}, {}",
+            kv("vedtaksperiodeId", vedtaksperiodeId),
+            kv("fom", fom),
+            kv("tom", tom),
+            kv("skjæringstidspunkt", skjæringstidspunkt),
+        )
     }
 
     private fun oppdaterForkastet(
@@ -139,6 +155,7 @@ internal class SpesialistDao(private val dataSource: DataSource): IPersonObserve
     }
 
     private companion object {
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
         private val dummyForkastetAvHendelseId = UUID.fromString("00000000-0000-0000-0000-000000000000")
     }
 }
