@@ -107,5 +107,19 @@ internal class SpesialistDao(private val dataSource: DataSource): IPersonObserve
         sessionOf(dataSource).use { session ->
             session.run(queryOf(query, id, fom, tom, organisasjonsnummer.toLong(), fødselsnummer.toLong()).asExecute)
         }
+        oppdaterGenerasjonerFor(id, fom, tom, skjæringstidspunkt)
+    }
+
+    private fun oppdaterGenerasjonerFor(
+        vedtaksperiodeId: UUID,
+        fom: LocalDate,
+        tom: LocalDate,
+        skjæringstidspunkt: LocalDate,
+    ) {
+        @Language("PostgreSQL")
+        val query = "UPDATE selve_vedtaksperiode_generasjon SET fom = ?, tom = ?, skjæringstidspunkt = ? WHERE vedtaksperiode_id = ? AND (fom IS NULL OR tom IS NULL OR skjæringstidspunkt IS NULL) "
+        sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, fom, tom, skjæringstidspunkt, vedtaksperiodeId).asUpdate)
+        }
     }
 }
