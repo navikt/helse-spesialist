@@ -373,6 +373,16 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `Finner vedtaksperiodeId med oppgaveId`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave(contextId = CONTEXT_ID)
+
+        assertEquals(VEDTAKSPERIODE, oppgaveDao.finnVedtaksperiodeId(oppgaveId))
+    }
+
+    @Test
     fun `sjekker risk-oppgaver`() {
         opprettPerson()
         opprettArbeidsgiver()

@@ -54,5 +54,5 @@ class TotrinnsvurderingMediator(
             dao.opprettFraLegacy(it).also {
                 oppgaveMediator.settTotrinnsoppgaveFalse(oppgaveId)
             }
-        }
+        } ?: opprett(oppgaveMediator.finnVedtaksperiodeId(oppgaveId))
 }

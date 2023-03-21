@@ -200,4 +200,5 @@ class OppgaveMediator(
 
     fun finnTotrinnsvurderingFraLegacy(oppgaveId: Long) = oppgaveDao.finnTotrinnsvurderingFraLegacy(oppgaveId)
     fun settTotrinnsoppgaveFalse(oppgaveId: Long) = oppgaveDao.settTotrinnsoppgaveFalse(oppgaveId)
+    fun finnVedtaksperiodeId(oppgaveId: Long) = oppgaveDao.finnVedtaksperiodeId(oppgaveId)
 }

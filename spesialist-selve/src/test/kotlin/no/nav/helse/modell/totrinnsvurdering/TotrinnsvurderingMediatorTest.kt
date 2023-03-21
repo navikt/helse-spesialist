@@ -84,4 +84,19 @@ class TotrinnsvurderingMediatorTest {
 
         verify(exactly = 1) { totrinnsvurderingDao.opprettFraLegacy(totrinnLegacy) }
     }
+
+    @Test
+    fun `Oppretter ny totrinnsvurdering dersom finnTotrinnsvurderingFraLegacy er null`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val oppgaveId = 42L
+
+        every { oppgaveMediator.finnTotrinnsvurderingFraLegacy(oppgaveId)} returns null
+        every { oppgaveMediator.finnVedtaksperiodeId(oppgaveId) } returns vedtaksperiodeId
+
+        totrinnsvurderingMediator.opprettFraLegacy(oppgaveId)
+
+        verify(exactly = 1) { oppgaveMediator.finnTotrinnsvurderingFraLegacy(oppgaveId) }
+        verify(exactly = 1) { oppgaveMediator.finnVedtaksperiodeId(oppgaveId) }
+        verify(exactly = 1) { totrinnsvurderingDao.opprett(vedtaksperiodeId) }
+    }
 }
