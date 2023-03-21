@@ -158,6 +158,22 @@ internal class PersonavstemmingTest : AbstractDatabaseTest() {
         assertArbeidsgiver("987654321", 1)
         assertVedtaksperiode(vedtaksperiodeId, 1, true)
     }
+    @Test
+    fun potpourri() {
+        assertPerson("12345678910", 0)
+        assertArbeidsgiver(AG1, 0)
+        assertArbeidsgiver(AG2, 0)
+        assertVedtaksperiode(V1AG1, 0)
+        assertVedtaksperiode(V1AG2, 0)
+        assertVedtaksperiode(V2AG2, 0)
+        testRapid.sendTestMessage(testeventMedMer())
+        assertPerson("12345678910", 1)
+        assertArbeidsgiver(AG1, 1)
+        assertArbeidsgiver(AG2, 1)
+        assertVedtaksperiode(V1AG1, 1)
+        assertVedtaksperiode(V1AG2, 1)
+        assertVedtaksperiode(V2AG2, 1)
+    }
 
     private fun assertPerson(fødselsnummer: String, forventetAntall: Int) {
         @Language("PostgreSQL") val query = "SELECT count(1) FROM person WHERE fodselsnummer = ? "
@@ -243,6 +259,67 @@ internal class PersonavstemmingTest : AbstractDatabaseTest() {
             }
             
         """.trimIndent()
+    }
+    @Language("JSON")
+    private fun testeventMedMer(): String {
+        return """
+            {
+              "@event_name": "person_avstemt",
+              "arbeidsgivere": [
+                {
+                  "organisasjonsnummer": "$AG1",
+                  "vedtaksperioder": [
+                    {
+                      "id": "$V1AG1",
+                      "fom": "2018-01-01",
+                      "tom": "2018-01-31",
+                      "skjæringstidspunkt": "2018-01-01",
+                      "opprettet": "2022-11-23T12:52:42.017867",
+                      "oppdatert": "2022-11-23T12:52:42.017867",
+                      "forkastet": false
+                    }
+                  ]
+                },
+                {
+                  "organisasjonsnummer": "$AG2",
+                  "vedtaksperioder": [
+                    {
+                      "id": "$V1AG2",
+                      "fom": "2018-01-01",
+                      "tom": "2018-01-31",
+                      "skjæringstidspunkt": "2018-01-01",
+                      "opprettet": "2022-11-23T12:52:42.017867",
+                      "oppdatert": "2022-11-23T12:52:42.017867",
+                      "forkastet": false
+                    },
+                    {
+                      "id": "$V2AG2",
+                      "fom": "2018-01-01",
+                      "tom": "2018-01-31",
+                      "skjæringstidspunkt": "2018-01-01",
+                      "opprettet": "2022-11-23T12:52:42.017867",
+                      "oppdatert": "2022-11-23T12:52:42.017867",
+                      "forkastet": false
+                    }
+                  ]
+                }
+              ],
+              "@id": "c405a203-264e-4496-99dc-785e76ede254",
+              "@opprettet": "2022-11-23T12:52:42.017867",
+              "fødselsnummer": "12345678910",
+              "aktørId": "42"
+            }
+            
+        """.trimIndent()
+    }
+
+    private companion object{
+        private const val AG1 = "123456789"
+        private const val AG2 = "987654321"
+        private val V1AG1 = UUID.randomUUID()
+        private val V1AG2 = UUID.randomUUID()
+        private val V2AG2 = UUID.randomUUID()
+
     }
 
 
