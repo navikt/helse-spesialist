@@ -115,31 +115,6 @@ internal class ApiVarselDao(private val dataSource: DataSource) : HelseDao(dataS
         session.run(queryOf(query, GODKJENT.name, VURDERT.name, *vedtaksperioder.toTypedArray()).asUpdate)
     }
 
-    internal fun settStatusVurdertPåBeslutteroppgavevarsler(vedtaksperioder: List<UUID>, ident: String) =
-        sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query = """
-            UPDATE selve_varsel sv
-            SET
-                status = ?,
-                status_endret_tidspunkt = ?,
-                status_endret_ident = ?,
-                definisjon_ref = (SELECT id from api_varseldefinisjon WHERE kode = sv.kode ORDER BY opprettet DESC LIMIT 1)
-            WHERE generasjon_ref IN (SELECT id FROM selve_vedtaksperiode_generasjon svg 
-                WHERE svg.vedtaksperiode_id IN (${vedtaksperioder.joinToString { "?" }}))
-            AND kode LIKE 'SB_BO_%';
-        """
-            session.run(
-                queryOf(
-                    query,
-                    VURDERT.name,
-                    LocalDateTime.now(),
-                    ident,
-                    *vedtaksperioder.toTypedArray()
-                ).asUpdate
-            )
-        }
-
     internal fun settStatusVurdert(
         generasjonId: UUID,
         definisjonId: UUID,

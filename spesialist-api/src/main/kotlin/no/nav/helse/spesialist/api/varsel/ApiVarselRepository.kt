@@ -4,7 +4,6 @@ import java.util.UUID
 import javax.sql.DataSource
 import no.nav.helse.spesialist.api.graphql.schema.VarselDTO
 import no.nav.helse.spesialist.api.varsel.Varsel.Companion.antallIkkeVurderte
-import no.nav.helse.spesialist.api.varsel.Varsel.Companion.antallIkkeVurderteEkskludertBesluttervarsler
 import no.nav.helse.spesialist.api.varsel.Varsel.Companion.toDto
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.AKTIV
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.GODKJENT
@@ -37,12 +36,6 @@ class ApiVarselRepository(dataSource: DataSource) {
         return alleVarsler.antallIkkeVurderte()
     }
 
-    fun ikkeVurderteVarslerEkskludertBesluttervarslerFor(oppgaveId: Long): Int {
-        val vedtaksperioder = sammenhengendePerioder(oppgaveId)
-        val alleVarsler = varselDao.finnVarslerSomIkkeErInaktiveFor(vedtaksperioder.map { it.vedtaksperiodeId() })
-        return alleVarsler.antallIkkeVurderteEkskludertBesluttervarsler()
-    }
-
     fun godkjennVarslerFor(oppgaveId: Long) {
         val vedtaksperioder = sammenhengendePerioder(oppgaveId)
         varselDao.godkjennVarslerFor(vedtaksperioder.map { it.vedtaksperiodeId() })
@@ -65,11 +58,6 @@ class ApiVarselRepository(dataSource: DataSource) {
         ident: String,
     ): VarselDTO? {
         return varselDao.settStatusVurdert(generasjonId, definisjonId, varselkode, ident)?.toDto()
-    }
-
-    fun settStatusVurdertPåBeslutteroppgavevarsler(oppgaveId: Long, ident: String) {
-        val vedtaksperioder = sammenhengendePerioder(oppgaveId)
-        varselDao.settStatusVurdertPåBeslutteroppgavevarsler(vedtaksperioder.map { it.vedtaksperiodeId() }, ident)
     }
 
     internal fun settStatusAktiv(

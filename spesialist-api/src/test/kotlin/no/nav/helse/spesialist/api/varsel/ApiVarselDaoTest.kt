@@ -177,42 +177,22 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         val periode2 = Periode(UUID.randomUUID(), LocalDate.now(), LocalDate.now())
         opprettVedtaksperiode(personRef, arbeidsgiverRef, null, periode2)
         val definisjonId1 = UUID.randomUUID()
-        val definisjonId2 = UUID.randomUUID()
         val generasjonId1 = UUID.randomUUID()
         val generasjonId2 = UUID.randomUUID()
         val oppgaveId = finnOppgaveIdFor(PERIODE.id)
         opprettVarseldefinisjon(kode = "EN_KODE", definisjonId = definisjonId1)
-        opprettVarseldefinisjon(kode = "SB_BO_1234", definisjonId = definisjonId2)
         val generasjonRef1 = nyGenerasjon(vedtaksperiodeId = PERIODE.id, generasjonId = generasjonId1, utbetalingId = utbetalingId)
         val generasjonRef2 = nyGenerasjon(vedtaksperiodeId = periode2.id, generasjonId = generasjonId2, utbetalingId = utbetalingId)
         nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = PERIODE.id, generasjonRef = generasjonRef1)
-        nyttVarsel(kode = "SB_BO_1234", vedtaksperiodeId = periode2.id, generasjonRef = generasjonRef2)
+        nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = periode2.id, generasjonRef = generasjonRef2)
         apiVarselDao.settStatusVurdert(generasjonId1, definisjonId1, "EN_KODE", "EN_IDENT")
-        apiVarselDao.settStatusVurdertPåBeslutteroppgavevarsler(listOf(PERIODE.id, periode2.id), "EN_IDENT")
+        apiVarselDao.settStatusVurdert(generasjonId2, definisjonId1, "EN_KODE", "EN_IDENT")
         val forventetVarsel1 = Varsel(generasjonId1, definisjonId1,"EN_KODE", "EN_TITTEL", null, null, Varselvurdering("EN_IDENT", LocalDateTime.now(), GODKJENT))
-        val forventetVarsel2 = Varsel(generasjonId2, definisjonId2,"SB_BO_1234", "EN_TITTEL", null, null, Varselvurdering("EN_IDENT", LocalDateTime.now(), GODKJENT))
+        val forventetVarsel2 = Varsel(generasjonId2, definisjonId1,"EN_KODE", "EN_TITTEL", null, null, Varselvurdering("EN_IDENT", LocalDateTime.now(), GODKJENT))
         apiVarselDao.godkjennVarslerFor(listOf(PERIODE.id, periode2.id))
         val varsler = apiVarselDao.finnVarslerSomIkkeErInaktiveFor(oppgaveId)
 
         assertEquals(setOf(forventetVarsel1, forventetVarsel2), varsler)
-    }
-
-    @Test
-    fun `Lagrer vurdert besluttervarsel med siste definisjon for varselkoden`() {
-        val definisjonId = UUID.randomUUID()
-        val generasjonId = UUID.randomUUID()
-        val utbetalingId = UUID.randomUUID()
-        opprettVedtaksperiode(personId = opprettPerson(), arbeidsgiverId = opprettArbeidsgiver(), utbetalingId = utbetalingId)
-        val oppgaveId = finnOppgaveIdFor(PERIODE.id)
-        opprettVarseldefinisjon(kode = "SB_BO_1234", definisjonId = definisjonId)
-        val generasjonRef = nyGenerasjon(vedtaksperiodeId = PERIODE.id, generasjonId = generasjonId, utbetalingId = utbetalingId)
-        nyttVarsel(kode = "SB_BO_1234", vedtaksperiodeId = PERIODE.id, generasjonRef = generasjonRef)
-        apiVarselDao.settStatusVurdertPåBeslutteroppgavevarsler(listOf(PERIODE.id), "EN_IDENT")
-        opprettVarseldefinisjon(kode = "SB_BO_1234")
-        val forventetVarsel = Varsel(generasjonId, definisjonId,"SB_BO_1234", "EN_TITTEL", null, null, Varselvurdering("EN_IDENT", LocalDateTime.now(), VURDERT))
-        val varsler = apiVarselDao.finnVarslerSomIkkeErInaktiveFor(oppgaveId)
-
-        assertEquals(setOf(forventetVarsel), varsler)
     }
 
     @Test
@@ -342,19 +322,6 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
             apiVarselDao.finnVarslerSomIkkeErInaktiveFor(vedtaksperiodeId, utbetalingId).single()
         )
         assertNull(forsøktOppdatertVarsel)
-    }
-
-    @Test
-    fun `setter status til VURDERT for beslutteroppgavevarsler`() {
-        val utbetalingId = UUID.randomUUID()
-        opprettVedtaksperiode(personId = opprettPerson(), arbeidsgiverId = opprettArbeidsgiver(), utbetalingId = utbetalingId)
-        val generasjonRef = nyGenerasjon(vedtaksperiodeId = PERIODE.id, generasjonId = UUID.randomUUID(), utbetalingId = utbetalingId)
-        nyttVarsel(kode = "SB_BO_1234", vedtaksperiodeId = PERIODE.id, generasjonRef = generasjonRef)
-        nyttVarsel(kode = "NOE_ANNET", vedtaksperiodeId = PERIODE.id, generasjonRef = generasjonRef)
-        apiVarselDao.settStatusVurdertPåBeslutteroppgavevarsler(listOf(PERIODE.id), "EN_IDENT")
-        val antallVurderteVarsler = finnVarslerFor(VURDERT)
-
-        assertEquals(1, antallVurderteVarsler)
     }
 
     @Test

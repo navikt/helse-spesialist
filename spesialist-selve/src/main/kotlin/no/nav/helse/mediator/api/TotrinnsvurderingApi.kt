@@ -49,8 +49,7 @@ internal fun Route.totrinnsvurderingApi(
             return@post
         }
 
-        val antallIkkeVurderteVarsler =
-            varselRepository.ikkeVurderteVarslerEkskludertBesluttervarslerFor(totrinnsvurdering.oppgavereferanse)
+        val antallIkkeVurderteVarsler = varselRepository.ikkeVurderteVarslerFor(totrinnsvurdering.oppgavereferanse)
         if (antallIkkeVurderteVarsler > 0) {
             call.respond(
                 status = HttpStatusCode.BadRequest,

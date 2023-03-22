@@ -92,7 +92,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     fun `en vedtaksperiode kan godkjennes hvis alle varsler er vurdert`() {
         every { oppgaveMediator.erAktivOppgave(1L) } returns true
         every { oppgaveMediator.erRiskoppgave(1L) } returns false
-        every { varselRepository.ikkeVurderteVarslerEkskludertBesluttervarslerFor(1L) } returns 0
+        every { varselRepository.ikkeVurderteVarslerFor(1L) } returns 0
         every { totrinnsvurderingMediator.hentAktiv(oppgaveId = any()) } returns Totrinnsvurdering(
             vedtaksperiodeId = UUID.randomUUID(),
             erRetur = true,
@@ -116,7 +116,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     fun `en vedtaksperiode kan ikke godkjennes hvis det fins aktive varsler`() {
         every { oppgaveMediator.erAktivOppgave(1L) } returns true
         every { oppgaveMediator.erRiskoppgave(1L) } returns false
-        every { varselRepository.ikkeVurderteVarslerEkskludertBesluttervarslerFor(1L) } returns 1
+        every { varselRepository.ikkeVurderteVarslerFor(1L) } returns 1
         val response = runBlocking {
             client.post("/api/totrinnsvurdering") {
                 contentType(ContentType.Application.Json)
@@ -365,7 +365,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             oppdatert = now(),
             opprettet = now()
         )
-        every { varselRepository.ikkeVurderteVarslerEkskludertBesluttervarslerFor(10L) } returns 0
+        every { varselRepository.ikkeVurderteVarslerFor(10L) } returns 0
         every { oppgaveMediator.finnBeslutterSaksbehandler(10L) } returns null
 
         val response = runBlocking {

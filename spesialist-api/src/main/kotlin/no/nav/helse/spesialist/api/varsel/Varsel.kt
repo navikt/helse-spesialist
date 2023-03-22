@@ -24,10 +24,6 @@ data class Varsel(
         internal fun Set<Varsel>.antallIkkeVurderte(): Int {
             return filter { !it.erVurdert() }.size
         }
-
-        internal fun Set<Varsel>.antallIkkeVurderteEkskludertBesluttervarsler(): Int {
-            return filter { !it.erVurdert() && !it.erBeslutterVarsel() }.size
-        }
     }
 
     internal fun toDto() = VarselDTO(
@@ -39,10 +35,6 @@ data class Varsel(
         handling,
         vurdering?.toDto()
     )
-
-    private fun erBeslutterVarsel(): Boolean {
-        return kode.startsWith("SB_BO_")
-    }
 
     private fun erVurdert(): Boolean {
         return vurdering?.erIkkeVurdert() == false
