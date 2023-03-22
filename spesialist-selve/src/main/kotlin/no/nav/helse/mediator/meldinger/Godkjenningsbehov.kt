@@ -240,9 +240,7 @@ internal class Godkjenningsbehov(
             warningDao = warningDao,
             oppgaveMediator = oppgaveMediator,
             overstyringDao = overstyringDao,
-            totrinnsvurderingMediator = totrinnsvurderingMediator,
-            varselRepository = varselRepository,
-            generasjonRepository = generasjonRepository
+            totrinnsvurderingMediator = totrinnsvurderingMediator
         ),
         PersisterPeriodehistorikkCommand(
             vedtaksperiodeId = vedtaksperiodeId,

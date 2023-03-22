@@ -5,9 +5,7 @@ import java.time.LocalDate
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.Testdata.ORGNR_GHOST
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
-import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Område.Syk
@@ -17,10 +15,6 @@ import no.nav.helse.modell.varsel.Varsel.Status.AVVIST
 import no.nav.helse.modell.varsel.Varsel.Status.GODKJENT
 import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
 import no.nav.helse.modell.varsel.Varselkode
-import no.nav.helse.modell.varsel.Varselkode.SB_BO_1
-import no.nav.helse.modell.varsel.Varselkode.SB_BO_2
-import no.nav.helse.modell.varsel.Varselkode.SB_BO_3
-import no.nav.helse.modell.varsel.Varselkode.SB_BO_4
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_1
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_3
 import no.nav.helse.modell.varsel.Varselkode.SB_IK_1
@@ -37,60 +31,11 @@ internal class VarselE2ETest : AbstractE2ETestV2() {
     @Test
     fun `ingen varsel`() {
         fremTilSaksbehandleroppgave()
-        assertIngenVarsel(SB_BO_1, VEDTAKSPERIODE_ID)
-        assertIngenVarsel(SB_BO_2, VEDTAKSPERIODE_ID)
-        assertIngenVarsel(SB_BO_3, VEDTAKSPERIODE_ID)
-        assertIngenVarsel(SB_BO_4, VEDTAKSPERIODE_ID)
         assertIngenVarsel(SB_IK_1, VEDTAKSPERIODE_ID)
         assertIngenVarsel(SB_RV_1, VEDTAKSPERIODE_ID)
         assertIngenVarsel(SB_RV_3, VEDTAKSPERIODE_ID)
         assertIngenVarsel(SB_EX_1, VEDTAKSPERIODE_ID)
         assertIngenVarsel(SB_EX_3, VEDTAKSPERIODE_ID)
-    }
-
-    @Test
-    fun `varsel om beslutteroppgave ved varsel om lovvalg og medlemsskap`() {
-        fremTilSaksbehandleroppgave(regelverksvarsler = listOf("Vurder lovvalg og medlemskap"))
-
-        assertVarsel(SB_BO_1, VEDTAKSPERIODE_ID, AKTIV)
-    }
-
-    @Test
-    fun `varsel om beslutteroppgave ved overstyring av dager`() {
-        fremTilSaksbehandleroppgave()
-        håndterOverstyrTidslinje()
-        håndterGodkjenningsbehov(harOppdatertMetainfo = true)
-        håndterEgenansattløsning()
-        håndterVergemålløsning()
-        håndterÅpneOppgaverløsning()
-
-        assertVarsel(SB_BO_2, VEDTAKSPERIODE_ID, AKTIV)
-    }
-
-    @Test
-    fun `varsel om beslutteroppgave ved overstyring av inntekt og refusjon`() {
-        fremTilSaksbehandleroppgave()
-        håndterOverstyrInntektOgRefusjon()
-        håndterGodkjenningsbehov(harOppdatertMetainfo = true)
-        håndterEgenansattløsning()
-        håndterVergemålløsning()
-        håndterÅpneOppgaverløsning()
-
-        assertVarsel(SB_BO_3, VEDTAKSPERIODE_ID, AKTIV)
-    }
-
-    @Test
-    fun `varsel om beslutteroppgave ved overstyring av arbeidsforhold`() {
-        fremTilSaksbehandleroppgave(andreArbeidsforhold = listOf(ORGNR_GHOST))
-        håndterOverstyrArbeidsforhold(overstyrteArbeidsforhold = listOf(
-            OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt(ORGNR_GHOST, true, "begrunnelse", "forklaring")
-        ))
-        håndterGodkjenningsbehov(harOppdatertMetainfo = true)
-        håndterEgenansattløsning()
-        håndterVergemålløsning()
-        håndterÅpneOppgaverløsning()
-
-        assertVarsel(SB_BO_4, VEDTAKSPERIODE_ID, AKTIV)
     }
 
     @Test
