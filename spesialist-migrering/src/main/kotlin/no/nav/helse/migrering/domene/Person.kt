@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.helse.migrering.domene.Arbeidsgiver.Companion.harAktiveVedtaksperioder
+import no.nav.helse.migrering.domene.Arbeidsgiver.Companion.harKunForkastedeVedtaksperioder
 import org.slf4j.LoggerFactory
 
 internal class Person(
@@ -25,14 +25,15 @@ internal class Person(
                 kv("aktørId", aktørId),
                 kv("fødselsnummer", fødselsnummer)
             )
-        if (!arbeidsgivere.harAktiveVedtaksperioder()) {
-            return sikkerlogg.info(
+        if (arbeidsgivere.harKunForkastedeVedtaksperioder()) {
+            sikkerlogg.info(
                 "Oppretter ikke person med {}, {} da den ikke har noen aktive vedtaksperioder",
                 kv("aktørId", aktørId),
                 kv("fødselsnummer", fødselsnummer)
             )
+        } else {
+            observers.forEach { it.personOpprettet(aktørId, fødselsnummer) }
         }
-        observers.forEach { it.personOpprettet( aktørId, fødselsnummer) }
         arbeidsgivere.forEach { it.opprett() }
     }
 

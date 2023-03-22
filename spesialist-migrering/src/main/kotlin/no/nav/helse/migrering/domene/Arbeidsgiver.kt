@@ -33,11 +33,9 @@ internal class Arbeidsgiver(
 
     internal companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-        internal fun List<Arbeidsgiver>.harAktiveVedtaksperioder() =
-            any { arbeidsgiver ->
-                arbeidsgiver.vedtaksperioder
-                    .filterNot(Vedtaksperiode::erForkastet)
-                    .isNotEmpty()
+        internal fun List<Arbeidsgiver>.harKunForkastedeVedtaksperioder() =
+            all { arbeidsgiver ->
+                arbeidsgiver.vedtaksperioder.all(Vedtaksperiode::erForkastet)
             }
     }
 }

@@ -106,17 +106,6 @@ internal class SpesialistDaoTest: AbstractDatabaseTest() {
         assertForkastetVedtaksperiode(vedtaksperiodeId, 1)
     }
 
-    @Test
-    fun `Oppdaterer forkastet på eksisterende vedtaksperiode`() {
-        dao.personOpprettet("1234", "123")
-        dao.arbeidsgiverOpprettet("1234")
-        val vedtaksperiodeId = UUID.randomUUID()
-        dao.vedtaksperiodeOpprettet(vedtaksperiodeId, LocalDateTime.now(), 1.januar, 15.januar, 1.januar, "123", "1234")
-        dao.vedtaksperiodeOpprettet(vedtaksperiodeId, LocalDateTime.now(), 1.januar, 15.januar, 1.januar, "123", "1234")
-
-        assertVedtaksperiode(vedtaksperiodeId, 1)
-    }
-
     private fun assertPerson(aktørId: String, fødselsnummer: String, forventetAntall: Int) {
         @Language("PostgreSQL")
         val query = "SELECT count(1) FROM person WHERE aktor_id = ? AND fodselsnummer = ?"

@@ -53,6 +53,19 @@ internal class PersonTest{
         assertEquals(listOf("123"), observer.opprettedePersoner)
     }
 
+    @Test
+    fun `oppdaterer forkastet-flagg selv om person kun har arbeidsgivere med forkastede perioder`() {
+        val person = Person("123", "1234")
+        person.register(observer)
+        val arbeidsgiver1 = person.håndterNyArbeidsgiver("123456789")
+        val arbeidsgiver2 = person.håndterNyArbeidsgiver("987654321")
+        arbeidsgiver1.håndterNyVedtaksperiode(vedtaksperiode(forkastet = true))
+        arbeidsgiver2.håndterNyVedtaksperiode(vedtaksperiode(forkastet = true))
+        person.opprett()
+
+        assertEquals(2, observer.vedtaksperioderOppdatert.size)
+    }
+
     private fun vedtaksperiode(forkastet: Boolean = false) = Vedtaksperiode(
         UUID.randomUUID(),
         LocalDateTime.now(),
@@ -66,8 +79,13 @@ internal class PersonTest{
 
     private val observer = object : IPersonObserver {
         val opprettedePersoner = mutableListOf<String>()
+        val vedtaksperioderOppdatert = mutableListOf<UUID>()
         override fun personOpprettet(aktørId: String, fødselsnummer: String) {
             opprettedePersoner.add(aktørId)
+        }
+
+        override fun vedtaksperiodeOppdaterForkastet(id: UUID, forkastet: Boolean) {
+            vedtaksperioderOppdatert.add(id)
         }
     }
 }
