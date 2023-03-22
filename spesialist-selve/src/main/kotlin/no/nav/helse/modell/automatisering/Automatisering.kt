@@ -98,23 +98,26 @@ internal class Automatisering(
         val risikovurdering =
             risikovurderingDao.hentRisikovurdering(vedtaksperiodeId)
                 ?: validering("Mangler vilkårsvurdering for arbeidsuførhet, aktivitetsplikt eller medvirkning") { false }
+        val vedtaksperiodensUtbetaling = snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId)
         val warnings = warningDao.finnAktiveWarnings(vedtaksperiodeId)
         val dedupliserteWarnings = warnings.distinct()
         val generasjoner = generasjonRepository.tilhørendeFor(utbetalingId)
         val varsler = generasjoner.gyldigeVarsler()
         if (dedupliserteWarnings.size != varsler.size) {
             sikkerLogg.info(
-                "Nye varsler og Warnings er ikke enige om antall varsler (hhv. ${varsler.size} og ${dedupliserteWarnings.size}) for periode/utbetaling med {}, {}.\n{}\n{}",
+                "Nye varsler og Warnings er ikke enige om antall varsler (hhv. ${varsler.size} og ${dedupliserteWarnings.size}) for periode/utbetaling med {}, {}, {}.\n{}\n{}",
                 kv("vedtaksperiodeId", vedtaksperiodeId),
                 kv("utbetalingId", utbetalingId),
+                kv("utbetalingstype", vedtaksperiodensUtbetaling?.typeEnum?.name),
                 kv("nyeVarsler", varsler.map(Varsel::toString)),
                 kv("warnings", warnings.map(Warning::toString)),
             )
         } else {
             sikkerLogg.info(
-                "Nye varsler og Warnings er enige om antall varsler (hhv. ${varsler.size} og ${dedupliserteWarnings.size}) for periode/utbetaling med {}, {}.",
+                "Nye varsler og Warnings er enige om antall varsler (hhv. ${varsler.size} og ${dedupliserteWarnings.size}) for periode/utbetaling med {}, {}, {}.",
                 kv("vedtaksperiodeId", vedtaksperiodeId),
                 kv("utbetalingId", utbetalingId),
+                kv("utbetalingstype", vedtaksperiodensUtbetaling?.typeEnum?.name),
             )
         }
         val erEgenAnsatt = egenAnsattDao.erEgenAnsatt(fødselsnummer)
@@ -122,7 +125,6 @@ internal class Automatisering(
         val tilhørerUtlandsenhet = erEnhetUtland(personDao.finnEnhetId(fødselsnummer))
         val antallÅpneGosysoppgaver = åpneGosysOppgaverDao.harÅpneOppgaver(fødselsnummer)
         val inntektskilde = vedtakDao.finnInntektskilde(vedtaksperiodeId)
-        val vedtaksperiodensUtbetaling = snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId)
         val harPågåendeOverstyring = overstyringDao.harVedtaksperiodePågåendeOverstyring(vedtaksperiodeId)
 
         return valider(
