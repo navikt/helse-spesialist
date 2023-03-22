@@ -63,6 +63,9 @@ internal class PersonTest{
         arbeidsgiver2.håndterNyVedtaksperiode(vedtaksperiode(forkastet = true))
         person.opprett()
 
+        assertEquals(0, observer.opprettedePersoner.size)
+        assertEquals(0, observer.opprettedeArbeidsgivere.size)
+        assertEquals(0, observer.opprettedeVedtaksperioder.size)
         assertEquals(2, observer.vedtaksperioderOppdatert.size)
     }
 
@@ -79,6 +82,8 @@ internal class PersonTest{
 
     private val observer = object : IPersonObserver {
         val opprettedePersoner = mutableListOf<String>()
+        val opprettedeArbeidsgivere = mutableListOf<String>()
+        val opprettedeVedtaksperioder = mutableListOf<UUID>()
         val vedtaksperioderOppdatert = mutableListOf<UUID>()
         override fun personOpprettet(aktørId: String, fødselsnummer: String) {
             opprettedePersoner.add(aktørId)
@@ -86,6 +91,14 @@ internal class PersonTest{
 
         override fun vedtaksperiodeOppdaterForkastet(id: UUID, forkastet: Boolean) {
             vedtaksperioderOppdatert.add(id)
+        }
+
+        override fun arbeidsgiverOpprettet(organisasjonsnummer: String) {
+            opprettedeArbeidsgivere.add(organisasjonsnummer)
+        }
+
+        override fun vedtaksperiodeOpprettet(id: UUID, opprettet: LocalDateTime, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate, fødselsnummer: String, organisasjonsnummer: String) {
+            opprettedeVedtaksperioder.add(id)
         }
     }
 }
