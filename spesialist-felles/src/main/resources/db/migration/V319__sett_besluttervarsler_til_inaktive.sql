@@ -1,0 +1,1 @@
+UPDATE selve_varsel SET status = 'INAKTIV', status_endret_ident = 'Manuelt behandlet', status_endret_tidspunkt = now() WHERE kode ILIKE 'SB_BO%' AND status = 'AKTIV';
