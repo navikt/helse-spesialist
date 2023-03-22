@@ -9,7 +9,7 @@ val flywayCoreVersion = "9.16.1"
 val kotliqueryVersion = "1.9.0"
 val kotlinTestVersion = "1.6.21"
 val mockkVersion = "1.13.4"
-val postgresqlVersion = "42.5.4"
+val postgresqlVersion = "42.6.0"
 
 plugins {
     kotlin("jvm") version "1.8.10"
