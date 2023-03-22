@@ -260,22 +260,6 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     }
 
     @Test
-    fun `Finner ikke totrinnsvurdering i ny løsning eller i legacy`() {
-        every { totrinnsvurderingMediator.hentAktiv(1L) } returns null
-        every { totrinnsvurderingMediator.opprettFraLegacy(1L) } returns null
-
-        val response = runBlocking {
-            client.post("/api/totrinnsvurdering") {
-                contentType(ContentType.Application.Json)
-                setBody<JsonNode>(objectMapper.valueToTree(totrinnsvurderingDto))
-                authentication(saksbehandler_oid)
-            }
-        }
-
-        assertEquals(HttpStatusCode.NotFound, response.status)
-    }
-
-    @Test
     fun `Totrinnsvurdering kan ikke gjøres til beslutteroppgave hvis den allerede er beslutteroppgave`() {
         every { totrinnsvurderingMediator.hentAktiv(1L) } returns Totrinnsvurdering(
             vedtaksperiodeId = UUID.randomUUID(),

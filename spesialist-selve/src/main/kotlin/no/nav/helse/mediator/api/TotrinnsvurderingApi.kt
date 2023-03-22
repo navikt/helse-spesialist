@@ -41,14 +41,6 @@ internal fun Route.totrinnsvurderingApi(
         val aktivTotrinnsvurdering = totrinnsvurderingMediator.hentAktiv(totrinnsvurdering.oppgavereferanse)
             ?: totrinnsvurderingMediator.opprettFraLegacy(totrinnsvurdering.oppgavereferanse)
 
-        if (aktivTotrinnsvurdering == null) {
-            call.respondText(
-                "Finner ikke aktiv totrinnsvurdering.",
-                status = HttpStatusCode.NotFound
-            )
-            return@post
-        }
-
         if (oppgaveMediator.erBeslutteroppgave(totrinnsvurdering.oppgavereferanse) || aktivTotrinnsvurdering.erBeslutteroppgave()) {
             call.respondText(
                 "Denne oppgaven har allerede blitt sendt til godkjenning.",
@@ -112,14 +104,14 @@ internal fun Route.totrinnsvurderingApi(
         sikkerLog.info("OppgaveId ${retur.oppgavereferanse} sendes i retur av $beslutterOid")
 
         val tidligereSaksbehandlerOid =
-            oppgaveMediator.finnTidligereSaksbehandler(retur.oppgavereferanse) ?: aktivTotrinnsvurdering?.saksbehandler
+            oppgaveMediator.finnTidligereSaksbehandler(retur.oppgavereferanse) ?: aktivTotrinnsvurdering.saksbehandler
 
         oppgaveMediator.setReturoppgave(
             oppgaveId = retur.oppgavereferanse,
             beslutterSaksbehandlerOid = beslutterOid
         )
 
-        if (Toggle.Totrinnsvurdering.enabled && aktivTotrinnsvurdering != null) {
+        if (Toggle.Totrinnsvurdering.enabled) {
             totrinnsvurderingMediator.settRetur(
                 oppgaveId = retur.oppgavereferanse,
                 beslutterOid = beslutterOid,
