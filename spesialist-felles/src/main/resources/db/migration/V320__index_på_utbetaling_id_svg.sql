@@ -1,0 +1,1 @@
+CREATE INDEX ON selve_vedtaksperiode_generasjon(utbetaling_id);
