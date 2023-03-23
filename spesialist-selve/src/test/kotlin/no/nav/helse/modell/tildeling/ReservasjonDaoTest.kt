@@ -5,16 +5,17 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.ZonedDateTime
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.person.Kjønn
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.Assertions.fail
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.fail
+import org.junit.jupiter.api.Test
 
 internal class ReservasjonDaoTest : DatabaseIntegrationTest() {
 
@@ -32,7 +33,7 @@ internal class ReservasjonDaoTest : DatabaseIntegrationTest() {
             reservasjonDao.hentReservertTil(FNR)
         } ?: fail("Forventet at det skulle finnes en reservasjon i basen")
         assertEquals(SAKSBEHANDLER_OID, saksbehandlerOid)
-        assertEquals(72, varighetPåReservasjon())
+        assertRiktigVarighet(72)
     }
 
     @Test
@@ -55,7 +56,7 @@ internal class ReservasjonDaoTest : DatabaseIntegrationTest() {
             reservasjonDao.hentReservertTil(FNR)
         } ?: fail("Forventet at det skulle finnes en reservasjon i basen")
         assertEquals(SAKSBEHANDLER_OID, saksbehandlerOid)
-        assertEquals(72, varighetPåReservasjon())
+        assertRiktigVarighet(72)
     }
 
     private fun opprettTabeller(fødselsnummer: String = FNR) {
@@ -81,8 +82,13 @@ internal class ReservasjonDaoTest : DatabaseIntegrationTest() {
         )
     }
 
-    private fun varighetPåReservasjon() =
-        Duration.between(LocalDateTime.now().minusSeconds(5), finnGyldigTil()).toHours().toInt()
+    // Pga. at det kan forekomme tidssonebytte i databasen må vi benytte oss av tidsbiblioteket for å vite hvor i
+    // fremtiden vi er om 72 timer.
+    // Eksempel: gyldig_til er vintertid mens "nå" er sommertid
+    private fun assertRiktigVarighet(forventetVarighet: Long) {
+        val om72Timer = ZonedDateTime.now().plusHours(forventetVarighet).toLocalDateTime()
+        assertEquals(0.0, Duration.between(finnGyldigTil(), om72Timer).toSeconds().toDouble(), 5.0)
+    }
 
     private fun finnGyldigTil(): LocalDateTime {
         @Language("PostgreSQL")
