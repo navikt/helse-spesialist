@@ -1,0 +1,1 @@
+UPDATE selve_varsel SET status = 'AKTIV', status_endret_ident = NULL, status_endret_tidspunkt = NULL WHERE kode = 'RV_IT_1' AND id = 934105;
