@@ -35,8 +35,8 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         val generasjonId1 = UUID.randomUUID()
         val generasjonId2 = UUID.randomUUID()
 
-        repository.opprettFørste(vedtaksperiodeId1, generasjonId1)
-        repository.opprettFørste(vedtaksperiodeId2, generasjonId2)
+        repository.opprettFørste(vedtaksperiodeId1, UUID.randomUUID(), id = generasjonId1)
+        repository.opprettFørste(vedtaksperiodeId2, UUID.randomUUID(), id = generasjonId2)
 
         val perioder = repository.finnVedtaksperioder(listOf(vedtaksperiodeId1, vedtaksperiodeId2))
         assertEquals(2, perioder.size)
