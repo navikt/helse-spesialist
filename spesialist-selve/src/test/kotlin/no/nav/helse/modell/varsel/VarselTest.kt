@@ -7,6 +7,7 @@ import no.nav.helse.modell.varsel.Varsel.Status.VURDERT
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Periode
+import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.BeforeEach
@@ -230,6 +231,10 @@ internal class VarselTest {
         override fun fjernUtbetalingFor(generasjonId: UUID):Unit = TODO("Not yet implemented")
         override fun finnÅpenGenerasjonFor(vedtaksperiodeId: UUID): Generasjon = TODO(" Not yet implemented")
         override fun oppdaterSykefraværstilfelle(id: UUID, skjæringstidspunkt: LocalDate, periode: Periode) {
+            TODO("Not yet implemented")
+        }
+
+        override fun finnVedtaksperioder(vedtaksperiodeIder: List<UUID>): List<Vedtaksperiode> {
             TODO("Not yet implemented")
         }
     }

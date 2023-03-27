@@ -71,6 +71,10 @@ class InvaliderUtbetalingForGenerasjonerCommandTest {
         override fun oppdaterSykefraværstilfelle(id: UUID, skjæringstidspunkt: LocalDate, periode: Periode) {
             TODO("Not yet implemented")
         }
+
+        override fun finnVedtaksperioder(vedtaksperiodeIder: List<UUID>): List<Vedtaksperiode> {
+            TODO("Not yet implemented")
+        }
     }
 
     private val varselRepository get() = object : VarselRepository {

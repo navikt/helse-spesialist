@@ -29,6 +29,28 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
     }
 
     @Test
+    fun `hente ut liste av vedtaksperioder`() {
+        val vedtaksperiodeId1 = UUID.randomUUID()
+        val vedtaksperiodeId2 = UUID.randomUUID()
+        val generasjonId1 = UUID.randomUUID()
+        val generasjonId2 = UUID.randomUUID()
+
+        repository.opprettFørste(vedtaksperiodeId1, generasjonId1)
+        repository.opprettFørste(vedtaksperiodeId2, generasjonId2)
+
+        val perioder = repository.finnVedtaksperioder(listOf(vedtaksperiodeId1, vedtaksperiodeId2))
+        assertEquals(2, perioder.size)
+        assertEquals(
+            Vedtaksperiode(vedtaksperiodeId1, Generasjon(generasjonId1, vedtaksperiodeId1, repository)),
+            perioder[0]
+        )
+        assertEquals(
+            Vedtaksperiode(vedtaksperiodeId2, Generasjon(generasjonId2, vedtaksperiodeId2, repository)),
+            perioder[1]
+        )
+    }
+
+    @Test
     fun `kan ikke opprette FØRSTE generasjon når det eksisterer generasjoner fra før av`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val vedtaksperiodeOpprettet1 = UUID.randomUUID()

@@ -20,7 +20,8 @@ VedtaksperiodeTest : DatabaseIntegrationTest() {
 
     @Test
     fun `kan registrere observer`() {
-        val vedtaksperiode = Vedtaksperiode(UUID.randomUUID())
+        val vedtaksperiodeId = UUID.randomUUID()
+        val vedtaksperiode = Vedtaksperiode(vedtaksperiodeId, Generasjon(UUID.randomUUID(), vedtaksperiodeId, generasjonRepository))
         val observer = object : IVedtaksperiodeObserver{
             var tidslinjeOppdatert = false
             override fun tidslinjeOppdatert(

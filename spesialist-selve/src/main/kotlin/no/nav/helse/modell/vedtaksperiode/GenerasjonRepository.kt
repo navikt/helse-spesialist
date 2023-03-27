@@ -23,11 +23,21 @@ internal interface GenerasjonRepository {
     fun fjernUtbetalingFor(generasjonId: UUID)
     fun finnÅpenGenerasjonFor(vedtaksperiodeId: UUID): Generasjon?
     fun oppdaterSykefraværstilfelle(id: UUID, skjæringstidspunkt: LocalDate, periode: Periode)
+    fun finnVedtaksperioder(vedtaksperiodeIder: List<UUID>): List<Vedtaksperiode>
 }
 
 internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRepository {
 
     private val dao = GenerasjonDao(dataSource)
+
+    override fun finnVedtaksperioder(vedtaksperiodeIder: List<UUID>): List<Vedtaksperiode> {
+        return vedtaksperiodeIder.map { vedtaksperiodeId ->
+            Vedtaksperiode(
+                vedtaksperiodeId,
+                sisteFor(vedtaksperiodeId)
+            )
+        }
+    }
 
     override fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID): Generasjon? {
         if (dao.finnSisteFor(vedtaksperiodeId) != null) {

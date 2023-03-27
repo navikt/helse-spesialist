@@ -4,7 +4,8 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class Vedtaksperiode(
-    private val vedtaksperiodeId: UUID
+    private val vedtaksperiodeId: UUID,
+    private val gjeldendeGenerasjon: Generasjon
 ) {
 
     private val observers = mutableListOf<IVedtaksperiodeObserver>()
