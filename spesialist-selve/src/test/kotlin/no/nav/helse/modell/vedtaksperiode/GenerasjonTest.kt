@@ -1,5 +1,6 @@
 package no.nav.helse.modell.vedtaksperiode
 
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import kotliquery.queryOf
@@ -16,6 +17,7 @@ import no.nav.helse.modell.varsel.Varselkode.*
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -28,6 +30,64 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     @BeforeEach
     internal fun beforeEach() {
         lagVarseldefinisjoner()
+    }
+
+    @Test
+    fun `Kan registrere observer`() {
+        val generasjonId = UUID.randomUUID()
+        val generasjon = Generasjon(generasjonId, UUID.randomUUID(), generasjonRepository)
+        val observer = object : IVedtaksperiodeObserver {
+            lateinit var generasjonId: UUID
+            lateinit var fom: LocalDate
+            lateinit var tom: LocalDate
+            lateinit var skjæringstidspunkt: LocalDate
+            override fun tidslinjeOppdatert(
+                generasjonId: UUID,
+                fom: LocalDate,
+                tom: LocalDate,
+                skjæringstidspunkt: LocalDate
+            ) {
+                this.generasjonId = generasjonId
+                this.fom = fom
+                this.tom = tom
+                this.skjæringstidspunkt = skjæringstidspunkt
+            }
+        }
+        generasjon.registrer(observer)
+        generasjon.håndterTidslinjeendring(1.januar, 31.januar, 1.januar)
+        assertEquals(generasjonId, observer.generasjonId)
+        assertEquals(1.januar, observer.fom)
+        assertEquals(31.januar, observer.tom)
+        assertEquals(1.januar, observer.skjæringstidspunkt)
+    }
+
+    @Test
+    fun `Generasjon er ikke å anse som oppdatert dersom fom, tom og skjæringstidspunkt er lik oppdatering`() {
+        val generasjonId = UUID.randomUUID()
+        val generasjon = Generasjon(generasjonId, UUID.randomUUID(), null, false, 1.januar, Periode(1.januar, 31.januar), emptySet(), dataSource)
+        val observer = object : IVedtaksperiodeObserver {
+            var generasjonId: UUID? = null
+            var fom: LocalDate? = null
+            var tom: LocalDate? = null
+            var skjæringstidspunkt: LocalDate? = null
+            override fun tidslinjeOppdatert(
+                generasjonId: UUID,
+                fom: LocalDate,
+                tom: LocalDate,
+                skjæringstidspunkt: LocalDate
+            ) {
+                this.generasjonId = generasjonId
+                this.fom = fom
+                this.tom = tom
+                this.skjæringstidspunkt = skjæringstidspunkt
+            }
+        }
+        generasjon.registrer(observer)
+        generasjon.håndterTidslinjeendring(1.januar, 31.januar, 1.januar)
+        assertNull(observer.generasjonId)
+        assertNull(observer.fom)
+        assertNull(observer.tom)
+        assertNull(observer.skjæringstidspunkt)
     }
 
     @Test

@@ -46,11 +46,16 @@ internal class Generasjon private constructor(
     ): this(id, vedtaksperiodeId, utbetalingId, låst, skjæringstidspunkt, periode, varsler, ActualGenerasjonRepository(dataSource))
 
     private val varsler: MutableList<Varsel> = varsler.toMutableList()
+    private val observers = mutableListOf<IVedtaksperiodeObserver>()
 
-    internal companion object {
-        private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
-        internal fun List<Generasjon>.gyldigeVarsler(): List<Varsel> {
-            return flatMap { generasjon -> generasjon.varsler.filter(Varsel::erGyldig) }
+    internal fun registrer(observer: IVedtaksperiodeObserver) {
+        observers.add(observer)
+    }
+
+    internal fun håndterTidslinjeendring(fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate) {
+        if (fom == periode?.fom() && tom == periode?.tom() && skjæringstidspunkt == this.skjæringstidspunkt) return
+        observers.forEach {
+            it.tidslinjeOppdatert(id, fom, tom, skjæringstidspunkt)
         }
     }
 
@@ -215,4 +220,10 @@ internal class Generasjon private constructor(
         return result
     }
 
+    internal companion object {
+        private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
+        internal fun List<Generasjon>.gyldigeVarsler(): List<Varsel> {
+            return flatMap { generasjon -> generasjon.varsler.filter(Varsel::erGyldig) }
+        }
+    }
 }
