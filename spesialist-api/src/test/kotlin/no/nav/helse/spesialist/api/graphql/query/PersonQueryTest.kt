@@ -36,9 +36,6 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `får 400-feil når man ikke oppgir fødselsnummer eller aktørid i query`() {
-        mockSnapshot()
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
-
         val body = runQuery("""{ person(fnr: null) { aktorId } }""")
 
         assertEquals(400, body["errors"].first()["extensions"]["code"].asInt())
@@ -46,10 +43,21 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `får 404-feil når personen man søker etter ikke finnes`() {
-        mockSnapshot()
         val body = runQuery("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""")
 
         assertEquals(404, body["errors"].first()["extensions"]["code"].asInt())
+    }
+
+    @Test
+    fun `får personens fødselsnummer-identer når hen har flere`() {
+        val dNummer = "41017012345"
+        opprettPerson(fødselsnummer = dNummer, aktørId = AKTØRID)
+        opprettVedtaksperiode(opprettPerson(fødselsnummer = FØDSELSNUMMER, aktørId = AKTØRID), opprettArbeidsgiver())
+        val body = runQuery("""{ person(aktorId: "$AKTØRID") { fodselsnummer } }""")
+
+        val extensions = body["errors"].first()["extensions"]
+        assertEquals(500, extensions["code"].asInt())
+        assertEquals(setOf(dNummer, FØDSELSNUMMER), extensions["fodselsnumre"].map(JsonNode::asText).toSet())
     }
 
     @Test
@@ -64,7 +72,6 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `får 403-feil ved oppslag av kode7-personer uten riktige tilganger`() {
-        mockSnapshot()
         opprettVedtaksperiode(opprettPerson(adressebeskyttelse = Adressebeskyttelse.Fortrolig), opprettArbeidsgiver())
 
         val body = runQuery("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""")
@@ -85,7 +92,6 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `får 403-feil ved oppslag av skjermede personer`() {
-        mockSnapshot()
         every { egenAnsattApiDao.erEgenAnsatt(FØDSELSNUMMER) } returns true
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
 
@@ -96,7 +102,6 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `får 501-feil når oppdatering av snapshot feiler`() {
-        mockSnapshot()
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } throws GraphQLException("Oops")
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
 

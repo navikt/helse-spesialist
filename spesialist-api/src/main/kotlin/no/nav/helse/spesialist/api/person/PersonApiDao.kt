@@ -36,6 +36,12 @@ class PersonApiDao(dataSource: DataSource) : HelseDao(dataSource) {
             ).padStart(11, '0')
         }
 
+    fun finnFødselsnumre(aktørId: Long): List<String> =
+        """SELECT fodselsnummer FROM person WHERE aktor_id = :aktor_id;"""
+            .list(mapOf("aktor_id" to aktørId)) {
+                it.string("fodselsnummer").padStart(11, '0')
+            }
+
     // Alle peridoer som enten har ført til manuell oppgave eller blitt automatisk godkjent, vil ha et innslag i
     // automatisering-tabellen.
     fun spesialistHarPersonKlarForVisningISpeil(fødselsnummer: String) =

@@ -51,9 +51,16 @@ class PersonQuery(
         val ident = fnr ?: aktorId
         sikkerLogg.info("$saksbehandlerNavn is doing lookup with params: $ident")
 
-        val fødselsnummer = fnr.takeIf { it != null && personApiDao.finnesPersonMedFødselsnummer(it) }
-            ?: aktorId?.let { personApiDao.finnFødselsnummer(it.toLong()) }
-
+        val fødselsnummer =
+            if (fnr != null && personApiDao.finnesPersonMedFødselsnummer(fnr)) fnr
+            else aktorId?.let {
+                try {
+                    personApiDao.finnFødselsnummer(it.toLong())
+                } catch (e: Exception) {
+                    val fødselsnumre = personApiDao.finnFødselsnumre(aktorId.toLong()).toSet()
+                    return DataFetcherResult.newResult<Person?>().error(getFlereFødselsnumreError(fødselsnumre)).build()
+                }
+            }
         if (fødselsnummer == null || !personApiDao.spesialistHarPersonKlarForVisningISpeil(fødselsnummer)) {
             return DataFetcherResult.newResult<Person?>().error(getNotFoundError(fnr)).build()
         }
@@ -94,6 +101,15 @@ class PersonQuery(
             DataFetcherResult.newResult<Person?>().data(person).build()
         }
     }
+
+    private fun getFlereFødselsnumreError(fødselsnumre: Set<String>): GraphQLError = GraphqlErrorException.newErrorException()
+        .message("Mer enn ett fødselsnummer for personen")
+        .extensions(
+            mapOf(
+                "code" to 500,
+                "fodselsnumre" to fødselsnumre
+            )
+        ).build()
 
     private fun getSnapshotValidationError(): GraphQLError = GraphqlErrorException.newErrorException()
         .message("Lagret snapshot stemmer ikke overens med forventet format. Dette kommer som regel av at noen har gjort endringer på formatet men glemt å bumpe versjonsnummeret.")
