@@ -9,14 +9,14 @@ internal class Vedtaksperiode(
     private val periode: Periode,
 ) {
 
-    internal companion object {
-        internal fun List<Vedtaksperiode>.oppdaterSykefraværstilfeller(
-            generasjonRepository: GenerasjonRepository,
-        ) {
-            this.forEach {
-                it.oppdaterSykefraværstilfelle(generasjonRepository)
-            }
-        }
+    private val observers = mutableListOf<IVedtaksperiodeObserver>()
+
+    internal fun registrer(observer: IVedtaksperiodeObserver) {
+        observers.add(observer)
+    }
+
+    internal fun håndterTidslinjeEndring(fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate) {
+        observers.forEach{ it.tidslinjeOppdatert(vedtaksperiodeId, fom, tom, skjæringstidspunkt)}
     }
 
     private fun oppdaterSykefraværstilfelle(generasjonRepository: GenerasjonRepository) {
@@ -31,11 +31,20 @@ internal class Vedtaksperiode(
                 && sykefraværstilfelleStartDato == other.sykefraværstilfelleStartDato
                 && periode == other.periode)
 
-
     override fun hashCode(): Int {
         var result = vedtaksperiodeId.hashCode()
         result = 31 * result + sykefraværstilfelleStartDato.hashCode()
         result = 31 * result + periode.hashCode()
         return result
+    }
+
+    internal companion object {
+        internal fun List<Vedtaksperiode>.oppdaterSykefraværstilfeller(
+            generasjonRepository: GenerasjonRepository,
+        ) {
+            this.forEach {
+                it.oppdaterSykefraværstilfelle(generasjonRepository)
+            }
+        }
     }
 }

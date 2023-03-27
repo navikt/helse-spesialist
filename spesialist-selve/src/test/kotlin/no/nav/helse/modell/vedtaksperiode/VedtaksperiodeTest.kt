@@ -11,10 +11,31 @@ import no.nav.helse.januar
 import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode.Companion.oppdaterSykefraværstilfeller
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-class VedtaksperiodeTest : DatabaseIntegrationTest() {
+class
+VedtaksperiodeTest : DatabaseIntegrationTest() {
     private val generasjonRepository = ActualGenerasjonRepository(dataSource)
+
+    @Test
+    fun `kan registrere observer`() {
+        val vedtaksperiode = Vedtaksperiode(UUID.randomUUID(), 1.januar, Periode(1.januar, 5.januar))
+        val observer = object : IVedtaksperiodeObserver{
+            var tidslinjeOppdatert = false
+            override fun tidslinjeOppdatert(
+                vedtaksperiodeId: UUID,
+                fom: LocalDate,
+                tom: LocalDate,
+                skjæringstidspunkt: LocalDate
+            ) {
+                tidslinjeOppdatert = true
+            }
+        }
+        vedtaksperiode.registrer(observer)
+        vedtaksperiode.håndterTidslinjeEndring(15.januar, 30.januar, 15.januar)
+        assertTrue(observer.tidslinjeOppdatert)
+    }
 
     @Test
     fun `oppdatere sykefraværstilfelle`() {
