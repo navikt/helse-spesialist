@@ -8,7 +8,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.februar
 import no.nav.helse.januar
-import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode.Companion.oppdaterSykefraværstilfeller
+import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOppdatering.Companion.oppdaterSykefraværstilfeller
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -20,7 +20,7 @@ VedtaksperiodeTest : DatabaseIntegrationTest() {
 
     @Test
     fun `kan registrere observer`() {
-        val vedtaksperiode = Vedtaksperiode(UUID.randomUUID(), 1.januar, Periode(1.januar, 5.januar))
+        val vedtaksperiode = Vedtaksperiode(UUID.randomUUID())
         val observer = object : IVedtaksperiodeObserver{
             var tidslinjeOppdatert = false
             override fun tidslinjeOppdatert(
@@ -47,8 +47,8 @@ VedtaksperiodeTest : DatabaseIntegrationTest() {
         val skjæringstidspunkt2 = 1.februar
         val periode1 = Periode(1.januar, 5.januar)
         val periode2 = Periode(1.februar, 5.februar)
-        val vedtaksperiode1 = Vedtaksperiode(vedtaksperiodeId1, skjæringstidspunkt1, periode1)
-        val vedtaksperiode2 = Vedtaksperiode(vedtaksperiodeId2, skjæringstidspunkt2, periode2)
+        val vedtaksperiode1 = VedtaksperiodeOppdatering(vedtaksperiodeId = vedtaksperiodeId1, skjæringstidspunkt = skjæringstidspunkt1, fom = 1.januar, tom = 5.januar)
+        val vedtaksperiode2 = VedtaksperiodeOppdatering(vedtaksperiodeId = vedtaksperiodeId2, skjæringstidspunkt = skjæringstidspunkt2, fom = 1.februar, tom = 5.februar)
         opprettGenerasjon(vedtaksperiodeId1, generasjonId1)
         opprettGenerasjon(vedtaksperiodeId2, generasjonId2)
 
@@ -75,9 +75,9 @@ VedtaksperiodeTest : DatabaseIntegrationTest() {
         val skjæringstidspunkt2 = 1.februar
         val periode1 = Periode(1.januar, 5.januar)
         val periode2 = Periode(1.februar, 5.februar)
-        val vedtaksperiode1 = Vedtaksperiode(vedtaksperiodeId1, skjæringstidspunkt1, periode1)
-        val vedtaksperiode2 = Vedtaksperiode(vedtaksperiodeId2, skjæringstidspunkt2, periode2)
-        val vedtaksperiode3 = Vedtaksperiode(UUID.randomUUID(), LocalDate.now(), Periode(LocalDate.now(), LocalDate.now()))
+        val vedtaksperiode1 = VedtaksperiodeOppdatering(vedtaksperiodeId = vedtaksperiodeId1, skjæringstidspunkt = skjæringstidspunkt1, fom = 1.januar, tom = 5.januar)
+        val vedtaksperiode2 = VedtaksperiodeOppdatering(vedtaksperiodeId = vedtaksperiodeId2, skjæringstidspunkt = skjæringstidspunkt2, fom = 1.februar, tom = 5.februar)
+        val vedtaksperiode3 = VedtaksperiodeOppdatering(vedtaksperiodeId = UUID.randomUUID(), skjæringstidspunkt = LocalDate.now(), fom = LocalDate.now(), tom = LocalDate.now())
         opprettGenerasjon(vedtaksperiodeId1, generasjonId1)
         opprettGenerasjon(vedtaksperiodeId2, generasjonId2)
         opprettGenerasjon(vedtaksperiodeId3, generasjonId3)
@@ -105,7 +105,7 @@ VedtaksperiodeTest : DatabaseIntegrationTest() {
         val generasjonId3 = UUID.randomUUID()
         val skjæringstidspunkt = 1.januar
         val periode = Periode(1.januar, 5.januar)
-        val vedtaksperiode = Vedtaksperiode(vedtaksperiodeId1, skjæringstidspunkt, periode)
+        val vedtaksperiode = VedtaksperiodeOppdatering(vedtaksperiodeId = vedtaksperiodeId1, skjæringstidspunkt = skjæringstidspunkt, fom = 1.januar, tom = 5.januar)
         opprettGenerasjon(vedtaksperiodeId1, generasjonId1)
         generasjonDao.låsFor(generasjonId1, UUID.randomUUID())
         opprettGenerasjon(vedtaksperiodeId1, generasjonId2)
