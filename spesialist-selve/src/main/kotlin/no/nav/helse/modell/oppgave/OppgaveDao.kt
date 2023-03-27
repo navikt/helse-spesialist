@@ -8,6 +8,7 @@ import kotliquery.sessionOf
 import no.nav.helse.HelseDao
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommandData
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
+import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
@@ -317,10 +318,11 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         """.single(mapOf("oppgaveId" to oppgaveId)) { it.long("fodselsnummer").toFødselsnummer() })
 
     fun gosysOppgaveEndretCommandData(oppgaveId: Long): GosysOppgaveEndretCommandData? =
-        """ SELECT v.vedtaksperiode_id, v.fom, v.tom, o.utbetaling_id, h.id AS hendelseId, h.data AS godkjenningbehovJson
+        """ SELECT v.vedtaksperiode_id, v.fom, v.tom, o.utbetaling_id, h.id AS hendelseId, h.data AS godkjenningbehovJson, s.type as periodetype
             FROM vedtak v
             INNER JOIN oppgave o ON o.vedtak_ref = v.id
             INNER JOIN hendelse h ON h.id = (SELECT hendelse_id FROM command_context WHERE context_id = o.command_context_id LIMIT 1)
+            INNER JOIN saksbehandleroppgavetype s ON s.vedtak_ref = v.id
             WHERE o.id = :oppgaveId 
         """.single(mapOf("oppgaveId" to oppgaveId)) {
             GosysOppgaveEndretCommandData(
@@ -329,7 +331,8 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 periodeTom = it.localDate("tom"),
                 utbetalingId = it.uuid("utbetaling_id"),
                 hendelseId = it.uuid("hendelseId"),
-                godkjenningsbehovJson = it.string("godkjenningbehovJson")
+                godkjenningsbehovJson = it.string("godkjenningbehovJson"),
+                periodetype = enumValueOf(it.string("periodetype"))
             )
         }
 

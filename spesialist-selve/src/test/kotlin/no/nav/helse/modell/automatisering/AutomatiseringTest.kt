@@ -67,13 +67,14 @@ internal class AutomatiseringTest {
         private const val fødselsnummer = "12345678910"
         private val vedtaksperiodeId = UUID.randomUUID()
         private val utbetalingId = UUID.randomUUID()
+        private val periodetype = Periodetype.FORLENGELSE
     }
 
     @BeforeEach
     fun setupDefaultTilHappyCase() {
         every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(true)
         every { warningDaoMock.finnAktiveWarnings(vedtaksperiodeId) } returns emptyList()
-        every { vedtakDaoMock.finnVedtaksperiodetype(vedtaksperiodeId) } returns Periodetype.FORLENGELSE
+        every { vedtakDaoMock.finnVedtaksperiodetype(vedtaksperiodeId) } returns periodetype
         every { vedtakDaoMock.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.EN_ARBEIDSGIVER
         every { åpneGosysOppgaverDaoMock.harÅpneOppgaver(any()) } returns 0
         every { egenAnsattDao.erEgenAnsatt(any()) } returns false
@@ -84,7 +85,7 @@ internal class AutomatiseringTest {
     @Test
     fun `vedtaksperiode som oppfyller krav blir automatisk godkjent og lagret`() {
         val onSuccessCallback = mockk<() -> Unit>(relaxed = true)
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), onSuccessCallback)
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), periodetype, onSuccessCallback)
 
         verify { automatiseringDaoMock.automatisert(any(), any(), any()) }
         verify { onSuccessCallback() }
@@ -99,7 +100,7 @@ internal class AutomatiseringTest {
                 LocalDateTime.now()
             )
         )
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID()) { fail("Denne skal ikke kalles") }
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), periodetype) { fail("Denne skal ikke kalles") }
         verify { automatiseringDaoMock.manuellSaksbehandling(any(), any(), any(), any()) }
         verify(exactly = 0) {
             plukkTilManuellMock()
@@ -109,43 +110,43 @@ internal class AutomatiseringTest {
     @Test
     fun `vedtaksperiode uten ok risikovurdering er ikke automatiserbar`() {
         every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(false)
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID()) { fail("Denne skal ikke kalles") }
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), periodetype) { fail("Denne skal ikke kalles") }
     }
 
     @Test
     fun `vedtaksperiode med null risikovurdering er ikke automatiserbar`() {
         every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) } returns null
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID()) { fail("Denne skal ikke kalles") }
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), periodetype) { fail("Denne skal ikke kalles") }
     }
 
     @Test
     fun `vedtaksperiode med åpne oppgaver er ikke automatiserbar`() {
         every { åpneGosysOppgaverDaoMock.harÅpneOppgaver(any()) } returns 1
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID()) { fail("Denne skal ikke kalles") }
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), periodetype) { fail("Denne skal ikke kalles") }
     }
 
     @Test
     fun `vedtaksperiode med _null_ åpne oppgaver er ikke automatiserbar`() {
         every { åpneGosysOppgaverDaoMock.harÅpneOppgaver(any()) } returns null
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID()) { fail("Denne skal ikke kalles") }
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), periodetype) { fail("Denne skal ikke kalles") }
     }
 
     @Test
     fun `vedtaksperiode med egen ansatt er ikke automatiserbar`() {
         every { egenAnsattDao.erEgenAnsatt(any()) } returns true
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID()) { fail("Denne skal ikke kalles") }
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), periodetype) { fail("Denne skal ikke kalles") }
     }
 
     @Test
     fun `vedtaksperiode plukket ut til stikkprøve skal ikke automatisk godkjennes`() {
         every { plukkTilManuellMock() } returns true
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID()) { fail("Denne skal ikke kalles") }
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), periodetype) { fail("Denne skal ikke kalles") }
     }
 
     @Test
     fun `person med flere arbeidsgivere skal ikke automatisk godkjennes`() {
         every { vedtakDaoMock.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.FLERE_ARBEIDSGIVERE
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID()) { fail("Denne skal ikke kalles") }
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), periodetype) { fail("Denne skal ikke kalles") }
     }
 
     @Test
@@ -153,7 +154,7 @@ internal class AutomatiseringTest {
         val hendelseId = UUID.randomUUID()
         val utbetalingId = UUID.randomUUID()
         every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(type = Utbetalingtype.REVURDERING)
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, hendelseId, utbetalingId) { fail("Denne skal ikke kalles") }
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, hendelseId, utbetalingId, periodetype) { fail("Denne skal ikke kalles") }
         verify(exactly = 1) { automatiseringDaoMock.manuellSaksbehandling(any(), vedtaksperiodeId, hendelseId, utbetalingId) }
         verify(exactly = 0) { automatiseringDaoMock.automatisert(any(), any(), any()) }
     }
@@ -165,7 +166,7 @@ internal class AutomatiseringTest {
         val utbetalingId = UUID.randomUUID()
         val onSuccessCallback = mockk<() -> Unit>(relaxed = true)
         every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(type = Utbetalingtype.REVURDERING)
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, hendelseId, utbetalingId, onSuccessCallback)
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, hendelseId, utbetalingId, periodetype, onSuccessCallback)
         verify(exactly = 0) { automatiseringDaoMock.manuellSaksbehandling(any(), vedtaksperiodeId, hendelseId, utbetalingId) }
         verify(exactly = 1) { automatiseringDaoMock.automatisert(any(), any(), any()) }
         verify(exactly = 1) { onSuccessCallback() }
@@ -175,13 +176,38 @@ internal class AutomatiseringTest {
     @Test
     fun `periode med vergemål skal ikke automatisk godkjennes`() {
         every { vergemålDaoMock.harVergemål(fødselsnummer) } returns true
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID()) { fail("Denne skal ikke kalles") }
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), periodetype) { fail("Denne skal ikke kalles") }
     }
 
     @Test
     fun `periode med utbetaling til sykmeldt skal ikke automatisk godkjennes`() {
         every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(personbeløp = 500)
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), utbetalingId) { fail("Denne skal ikke kalles") }
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), utbetalingId, periodetype) { fail("Denne skal ikke kalles") }
+    }
+
+    @Test
+    fun `forlengelse med utbetaling til sykmeldt skal automatisk godkjennes`() {
+        Toggle.AutomatiserUtbetalingTilSykmeldt.enable()
+        val onSuccessCallback = mockk<() -> Unit>(relaxed = true)
+        every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(personbeløp = 500)
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), utbetalingId, periodetype, onSuccessCallback)
+        verify { automatiseringDaoMock.automatisert(any(), any(), any()) }
+        verify { onSuccessCallback() }
+        Toggle.AutomatiserUtbetalingTilSykmeldt.disable()
+    }
+
+    @Test
+    fun `førstegangsbehandling med utbetaling til sykmeldt skal ikke automatisk godkjennes`() {
+        Toggle.AutomatiserUtbetalingTilSykmeldt.enable()
+        every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(personbeløp = 500)
+        automatisering.utfør(
+            fødselsnummer,
+            vedtaksperiodeId,
+            UUID.randomUUID(),
+            utbetalingId,
+            Periodetype.FØRSTEGANGSBEHANDLING
+        ) { fail("Denne skal ikke kalles") }
+        Toggle.AutomatiserUtbetalingTilSykmeldt.disable()
     }
 
     @Test
@@ -190,13 +216,13 @@ internal class AutomatiseringTest {
             personbeløp = 500,
             arbeidsgiverbeløp = 500
         )
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), utbetalingId) { fail("Denne skal ikke kalles") }
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), utbetalingId, periodetype) { fail("Denne skal ikke kalles") }
     }
 
     @Test
     fun `periode med pågående overstyring skal ikke automatisk godkjennes`() {
         every { overstyringDaoMock.harVedtaksperiodePågåendeOverstyring(any()) } returns true
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), utbetalingId) { fail("Denne skal ikke kalles") }
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), utbetalingId, periodetype) { fail("Denne skal ikke kalles") }
     }
 
 

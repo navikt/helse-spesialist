@@ -3,7 +3,7 @@ package no.nav.helse.modell.automatisering
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.helse.mediator.Toggle
+import no.nav.helse.mediator.Toggle.*
 import no.nav.helse.mediator.meldinger.løsninger.HentEnhetløsning.Companion.erEnhetUtland
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
@@ -20,6 +20,7 @@ import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.gyldigeVarsler
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
+import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLUtbetaling
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
@@ -54,9 +55,10 @@ internal class Automatisering(
         vedtaksperiodeId: UUID,
         hendelseId: UUID,
         utbetalingId: UUID,
+        periodetype: Periodetype,
         onAutomatiserbar: () -> Unit
     ) {
-        val problemer = vurder(fødselsnummer, vedtaksperiodeId, utbetalingId)
+        val problemer = vurder(fødselsnummer, vedtaksperiodeId, utbetalingId, periodetype)
 
         val utfallslogger = { tekst: String ->
             sikkerLogg.info(
@@ -93,7 +95,8 @@ internal class Automatisering(
     private fun vurder(
         fødselsnummer: String,
         vedtaksperiodeId: UUID,
-        utbetalingId: UUID
+        utbetalingId: UUID,
+        periodetype: Periodetype,
     ): List<String> {
         val risikovurdering =
             risikovurderingDao.hentRisikovurdering(vedtaksperiodeId)
@@ -127,6 +130,12 @@ internal class Automatisering(
         val inntektskilde = vedtakDao.finnInntektskilde(vedtaksperiodeId)
         val harPågåendeOverstyring = overstyringDao.harVedtaksperiodePågåendeOverstyring(vedtaksperiodeId)
 
+        val skalStoppesPgaUTS =
+            if (AutomatiserUtbetalingTilSykmeldt.enabled) {
+                (vedtaksperiodensUtbetaling.utbetalingTilSykmeldt() &&
+                        periodetype != Periodetype.FORLENGELSE)
+            } else vedtaksperiodensUtbetaling.utbetalingTilSykmeldt()
+
         return valider(
             risikovurdering,
             validering("Har varsler") { warnings.isEmpty() },
@@ -138,7 +147,7 @@ internal class Automatisering(
             validering("Bruker tilhører utlandsenhet") { !tilhørerUtlandsenhet },
             validering("Har flere arbeidsgivere") { inntektskilde == Inntektskilde.EN_ARBEIDSGIVER },
             validering("Delvis refusjon") { !vedtaksperiodensUtbetaling.delvisRefusjon() },
-            validering("Utbetaling til sykmeldt") { !vedtaksperiodensUtbetaling.utbetalingTilSykmeldt() },
+            validering("Utbetaling til sykmeldt") { !skalStoppesPgaUTS },
             AutomatiserRevurderinger(vedtaksperiodensUtbetaling),
             validering("Vedtaksperioden har en pågående overstyring") { !harPågåendeOverstyring }
         )
@@ -156,10 +165,7 @@ internal class Automatisering(
         }
 
     private class AutomatiserRevurderinger(private val utbetaling: GraphQLUtbetaling?): AutomatiseringValidering {
-        override fun erAautomatiserbar(): Boolean {
-            if (!utbetaling.erRevurdering()) return true
-            return Toggle.AutomatiserRevuderinger.enabled
-        }
+        override fun erAautomatiserbar() = !utbetaling.erRevurdering() || AutomatiserRevuderinger.enabled
         override fun error() = "Utbetalingen er revurdering"
     }
 

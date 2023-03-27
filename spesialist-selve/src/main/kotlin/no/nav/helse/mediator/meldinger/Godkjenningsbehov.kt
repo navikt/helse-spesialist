@@ -221,6 +221,7 @@ internal class Godkjenningsbehov(
             godkjenningsbehovJson = json,
             godkjenningMediator = godkjenningMediator,
             utbetaling = utbetaling,
+            periodetype = periodetype,
         ),
         OpprettSaksbehandleroppgaveCommand(
             fødselsnummer = fødselsnummer,

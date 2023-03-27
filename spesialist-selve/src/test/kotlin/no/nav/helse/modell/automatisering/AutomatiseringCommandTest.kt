@@ -7,6 +7,7 @@ import java.util.UUID
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.utbetaling.Utbetaling
+import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.objectMapper
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -20,6 +21,7 @@ internal class AutomatiseringCommandTest {
         private val utbetalingId = UUID.randomUUID()
         private const val fødselsnummer = "12345678910"
         private val hendelseId = UUID.randomUUID()
+        private val periodeType = Periodetype.FORLENGELSE
     }
 
     private val automatisering = mockk<Automatisering>(relaxed = true)
@@ -39,6 +41,7 @@ internal class AutomatiseringCommandTest {
                 generasjonRepository = mockk(relaxed = true)
             ),
             Utbetaling(utbetalingId, 1000, 1000),
+            periodeType
         )
 
     private lateinit var context: CommandContext
@@ -52,16 +55,16 @@ internal class AutomatiseringCommandTest {
     fun `kaller automatiser utfør og returnerer true`() {
         assertTrue(command.execute(context))
         verify {
-            automatisering.utfør(any(), any(), any(), any(), any())
+            automatisering.utfør(any(), any(), any(), any(), any(), any())
         }
     }
 
     @Test
     fun `publiserer godkjenningsmelding ved automatisert godkjenning`() {
         every {
-            automatisering.utfør(any(), any(), any(), any(), captureLambda())
+            automatisering.utfør(any(), any(), any(), any(), any(), captureLambda())
         } answers {
-            arg<() -> Unit>(4).invoke()
+            arg<() -> Unit>(5).invoke()
         }
 
         assertTrue(command.execute(context))
