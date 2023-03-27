@@ -7,8 +7,7 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.OppdaterSykefraværstilfellerCommand
-import no.nav.helse.modell.vedtaksperiode.Periode
-import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
+import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOppdatering
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -22,7 +21,7 @@ internal class Sykefraværstilfeller(
     override val id: UUID,
     private val fødselsnummer: String,
     aktørId: String,
-    vedtaksperioder: List<Vedtaksperiode>,
+    vedtaksperioder: List<VedtaksperiodeOppdatering>,
     private val json: String,
     generasjonRepository: GenerasjonRepository,
 ) : Hendelse, MacroCommand() {
@@ -79,13 +78,11 @@ internal class Sykefraværstilfeller(
             val vedtaksperioder = packet["tilfeller"].flatMap { tilfelleNode ->
                 val skjæringstidspunkt = tilfelleNode["dato"].asLocalDate()
                 tilfelleNode["perioder"].map {
-                    Vedtaksperiode(
-                        UUID.fromString(it["vedtaksperiodeId"].asText()),
-                        skjæringstidspunkt,
-                        Periode(
-                            LocalDate.parse(it["fom"].asText()),
-                            LocalDate.parse(it["tom"].asText()),
-                        )
+                    VedtaksperiodeOppdatering(
+                        skjæringstidspunkt = skjæringstidspunkt,
+                        fom = LocalDate.parse(it["fom"].asText()),
+                        tom = LocalDate.parse(it["tom"].asText()),
+                        vedtaksperiodeId = UUID.fromString(it["vedtaksperiodeId"].asText()),
                     )
                 }
             }

@@ -9,8 +9,7 @@ import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.modell.vedtaksperiode.Periode
-import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
+import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOppdatering
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -66,10 +65,10 @@ internal class SykefraværstilfellerRiverTest {
         )
 
         val forventetListeVedtaksperioder = listOf(
-            Vedtaksperiode(vedtaksperiodeId1, 1.januar, Periode(1.januar, 5.januar)),
-            Vedtaksperiode(vedtaksperiodeId2, 1.januar, Periode(6.januar, 10.januar)),
-            Vedtaksperiode(vedtaksperiodeId3, 1.februar, Periode(1.februar, 5.februar)),
-            Vedtaksperiode(vedtaksperiodeId4, 1.februar, Periode(6.februar, 10.februar)),
+            VedtaksperiodeOppdatering(vedtaksperiodeId = vedtaksperiodeId1, skjæringstidspunkt = 1.januar, fom = 1.januar, tom = 5.januar),
+            VedtaksperiodeOppdatering(vedtaksperiodeId = vedtaksperiodeId2, skjæringstidspunkt = 1.januar, fom = 6.januar, tom = 10.januar),
+            VedtaksperiodeOppdatering(vedtaksperiodeId = vedtaksperiodeId3, skjæringstidspunkt = 1.februar, fom = 1.februar, tom = 5.februar),
+            VedtaksperiodeOppdatering(vedtaksperiodeId = vedtaksperiodeId4, skjæringstidspunkt = 1.februar, fom = 6.februar, tom = 10.februar),
         )
         verify(exactly = 1) { mediator.sykefraværstilfeller(any(), hendelseId, forventetListeVedtaksperioder, FØDSELSNUMMER, AKTØR, any()) }
     }

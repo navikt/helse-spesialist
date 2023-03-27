@@ -59,9 +59,8 @@ import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
-import no.nav.helse.modell.vedtaksperiode.Periode
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
+import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOppdatering
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
@@ -513,7 +512,7 @@ internal class Hendelsefabrikk(
 
     fun sykefraværstilfeller(
         id: UUID,
-        vedtaksperioder: List<Vedtaksperiode>,
+        vedtaksperioder: List<VedtaksperiodeOppdatering>,
         fødselsnummer: String,
         aktørId: String,
         json: String,
@@ -535,13 +534,11 @@ internal class Hendelsefabrikk(
             vedtaksperioder = jsonNode["tilfeller"].flatMap { tilfelleNode ->
                 val skjæringstidspunkt = tilfelleNode["dato"].asLocalDate()
                 tilfelleNode["perioder"].map {
-                    Vedtaksperiode(
-                        UUID.fromString(it["vedtaksperiodeId"].asText()),
-                        skjæringstidspunkt,
-                        Periode(
-                            LocalDate.parse(it["fom"].asText()),
-                            LocalDate.parse(it["tom"].asText()),
-                        ),
+                    VedtaksperiodeOppdatering(
+                        skjæringstidspunkt = skjæringstidspunkt,
+                        fom = LocalDate.parse(it["fom"].asText()),
+                        tom = LocalDate.parse(it["tom"].asText()),
+                        vedtaksperiodeId = UUID.fromString(it["vedtaksperiodeId"].asText()),
                     )
                 }
             },

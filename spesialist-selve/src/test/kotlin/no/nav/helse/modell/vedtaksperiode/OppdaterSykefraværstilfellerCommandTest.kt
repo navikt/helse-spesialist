@@ -19,7 +19,7 @@ class OppdaterSykefraværstilfellerCommandTest {
         val skjæringstidspunkt = 1.januar
         val periode = Periode(skjæringstidspunkt, 5.januar)
         every { repository.finnÅpenGenerasjonFor(any()) } returns Generasjon(generasjonsId, vedtaksperiodeId, repository)
-        val vedtaksperioder = listOf(Vedtaksperiode(vedtaksperiodeId, skjæringstidspunkt, periode))
+        val vedtaksperioder = listOf(VedtaksperiodeOppdatering(vedtaksperiodeId = vedtaksperiodeId, skjæringstidspunkt = skjæringstidspunkt, fom = skjæringstidspunkt, tom = 5.januar))
         val command = OppdaterSykefraværstilfellerCommand("fnr", "aktørId", vedtaksperioder, repository)
         command.execute(CommandContext(UUID.randomUUID()))
         verify(exactly = 1) { repository.finnÅpenGenerasjonFor(vedtaksperiodeId) }

@@ -67,7 +67,7 @@ import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
+import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOppdatering
 import no.nav.helse.overstyringsteller
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -279,7 +279,7 @@ internal class HendelseMediator(
     fun sykefraværstilfeller(
         json: String,
         id: UUID,
-        vedtaksperioder: List<Vedtaksperiode>,
+        vedtaksperioder: List<VedtaksperiodeOppdatering>,
         fødselsnummer: String,
         aktørId: String,
         context: MessageContext,

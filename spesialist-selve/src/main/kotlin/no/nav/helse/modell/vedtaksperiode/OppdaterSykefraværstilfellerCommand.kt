@@ -3,13 +3,13 @@ package no.nav.helse.modell.vedtaksperiode
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode.Companion.oppdaterSykefraværstilfeller
+import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOppdatering.Companion.oppdaterSykefraværstilfeller
 import org.slf4j.LoggerFactory
 
 internal class OppdaterSykefraværstilfellerCommand(
     private val fødselsnummer: String,
     private val aktørId: String,
-    private val vedtaksperioder: List<Vedtaksperiode>,
+    private val vedtaksperioder: List<VedtaksperiodeOppdatering>,
     private val generasjonRepository: GenerasjonRepository,
 ) : Command {
     private companion object {
