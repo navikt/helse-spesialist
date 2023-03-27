@@ -82,6 +82,24 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         this.utbetalingId = utbetalingId
     }
 
+    protected fun automatiskGodkjent(
+        fom: LocalDate = 1.januar,
+        tom: LocalDate = 31.januar,
+        skjæringstidspunkt: LocalDate = fom,
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        utbetalingId: UUID = UTBETALING_ID
+    ) {
+        fremTilÅpneOppgaver(
+            fom,
+            tom,
+            skjæringstidspunkt,
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = utbetalingId,
+        )
+        håndterÅpneOppgaverløsning()
+        håndterRisikovurderingløsning(vedtaksperiodeId = vedtaksperiodeId)
+    }
+
     protected fun fremTilÅpneOppgaver(
         fom: LocalDate = 1.januar,
         tom: LocalDate = 31.januar,
@@ -757,10 +775,11 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         val løsning = testRapid.inspektør.løsning("Godkjenning")
         assertTrue(løsning.path("godkjent").isBoolean)
         assertTrue(løsning.path("godkjent").booleanValue())
+        assertTrue(løsning.path("automatiskBehandling").booleanValue())
         assertNotNull(løsning.path("godkjenttidspunkt").asLocalDateTime())
     }
 
-    protected fun assertIkkeAutomatiskGodkjent() {
+    protected fun assertIkkeGodkjent() {
         val løsning = testRapid.inspektør.løsningOrNull("Godkjenning")
         assertNull(løsning)
     }

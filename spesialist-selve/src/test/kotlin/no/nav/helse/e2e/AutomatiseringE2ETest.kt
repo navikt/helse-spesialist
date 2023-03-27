@@ -1,7 +1,6 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETestV2
-import no.nav.helse.januar
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
 import org.junit.jupiter.api.Test
@@ -9,7 +8,7 @@ import org.junit.jupiter.api.Test
 internal class AutomatiseringE2ETest : AbstractE2ETestV2() {
     @Test
     fun `fatter automatisk vedtak`() {
-        nyttVedtak(1.januar, 31.januar)
+        automatiskGodkjent()
         assertAutomatiskGodkjent()
     }
 
@@ -17,7 +16,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETestV2() {
     fun `fatter ikke automatisk vedtak ved warnings`() {
         fremTilSaksbehandleroppgave(regelverksvarsler = listOf("Brukeren har flere inntekter de siste tre måneder"), kanGodkjennesAutomatisk = true)
 
-        assertIkkeAutomatiskGodkjent()
+        assertIkkeGodkjent()
         assertSaksbehandleroppgave(oppgavestatus = AvventerSaksbehandler)
     }
 
@@ -30,7 +29,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETestV2() {
             ),
             kanGodkjennesAutomatisk = false
         )
-        assertIkkeAutomatiskGodkjent()
+        assertIkkeGodkjent()
         assertSaksbehandleroppgave(oppgavestatus = AvventerSaksbehandler)
     }
 
@@ -40,7 +39,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETestV2() {
         håndterÅpneOppgaverløsning(antall = 1)
         håndterRisikovurderingløsning()
 
-        assertIkkeAutomatiskGodkjent()
+        assertIkkeGodkjent()
         assertSaksbehandleroppgave(oppgavestatus = AvventerSaksbehandler)
     }
 }
