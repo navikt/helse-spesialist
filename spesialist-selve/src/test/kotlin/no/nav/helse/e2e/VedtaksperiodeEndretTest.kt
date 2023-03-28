@@ -27,6 +27,7 @@ internal class VedtaksperiodeEndretTest : AbstractE2ETest() {
         vedtaksperiode(utbetalingId = utbetalingId)
 
         val tidspunkter = finnWarningsOpprettet(VEDTAKSPERIODE_ID)
+        sendVedtaksperiodeEndret(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, forrigeTilstand = "START")
         sendVedtaksperiodeEndret(aktørId = AKTØR, fødselsnummer = FØDSELSNUMMER, organisasjonsnummer = ORGNR, vedtaksperiodeId = VEDTAKSPERIODE_ID)
         val tidspunkterEtterTukling = finnWarningsOpprettet(VEDTAKSPERIODE_ID)
         assertEquals(tidspunkter.size, tidspunkterEtterTukling.size)

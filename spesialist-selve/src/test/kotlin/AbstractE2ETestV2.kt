@@ -493,7 +493,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         }
         håndterVedtaksperiodeNyUtbetaling(vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
         håndterUtbetalingOpprettet(utbetalingtype = if (erRevurdering) "REVURDERING" else "UTBETALING")
-        håndterVedtaksperiodeEndret()
+        håndterVedtaksperiodeEndret(vedtaksperiodeId = vedtaksperiodeId)
         sisteMeldingId = meldingssenderV2.sendGodkjenningsbehov(
             aktørId,
             fødselsnummer,

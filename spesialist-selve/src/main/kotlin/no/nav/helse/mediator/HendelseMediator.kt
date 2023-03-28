@@ -305,21 +305,20 @@ internal class HendelseMediator(
         gjeldendeTilstand: String,
         context: MessageContext,
     ) {
-        val hendelse =
-            hendelsefabrikk.vedtaksperiodeEndret(
-                id,
-                vedtaksperiodeId,
-                fødselsnummer,
-                forårsaketAvId,
-                forrigeTilstand,
-                gjeldendeTilstand,
-                message.toJson()
-            )
         if (personDao.findPersonByFødselsnummer(fødselsnummer) == null) {
-            log.info("ignorerer hendelseId=${hendelse.id} fordi vi kjenner ikke til personen")
-            sikkerLogg.info("ignorerer hendelseId=${hendelse.id} fordi vi kjenner ikke til personen med fnr=${fødselsnummer}")
+            log.info("ignorerer hendelseId=${id} fordi vi kjenner ikke til personen")
+            sikkerLogg.info("ignorerer hendelseId=${id} fordi vi kjenner ikke til personen med fnr=${fødselsnummer}")
             return
         }
+        val hendelse = hendelsefabrikk.vedtaksperiodeEndret(
+            id = id,
+            vedtaksperiodeId = vedtaksperiodeId,
+            fødselsnummer = fødselsnummer,
+            forårsaketAvId = forårsaketAvId,
+            forrigeTilstand = forrigeTilstand,
+            gjeldendeTilstand = gjeldendeTilstand,
+            json = message.toJson()
+        )
         return utfør(hendelse, context)
     }
 

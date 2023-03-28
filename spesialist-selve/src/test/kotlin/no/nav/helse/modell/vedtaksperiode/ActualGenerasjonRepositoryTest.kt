@@ -90,7 +90,7 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
 
         val generasjon = repository.opprettFørste(vedtaksperiodeId, vedtaksperiodeOpprettet, førsteGenerasjonId)
         generasjon?.håndterVedtakFattet(vedtakFattet)
-        generasjon?.håndterNyGenerasjon(vedtaksperiodeEndret, andreGenerasjonId, varselRepository)
+        generasjon?.håndterNyGenerasjon(varselRepository, vedtaksperiodeEndret, andreGenerasjonId)
 
         assertLåstGenerasjon(førsteGenerasjonId, vedtakFattet)
         assertUlåstGenerasjon(andreGenerasjonId)
@@ -102,7 +102,7 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         val vedtaksperiodeOpprettet = UUID.randomUUID()
         val vedtaksperiodeEndret = UUID.randomUUID()
         val førsteGenerasjon = repository.opprettFørste(vedtaksperiodeId, vedtaksperiodeOpprettet)
-        førsteGenerasjon?.håndterNyGenerasjon(hendelseId = vedtaksperiodeEndret, varselRepository = varselRepository)
+        førsteGenerasjon?.håndterNyGenerasjon(varselRepository = varselRepository, hendelseId = vedtaksperiodeEndret)
 
         assertGenerasjon(vedtaksperiodeId, vedtaksperiodeOpprettet)
         assertIngenGenerasjon(vedtaksperiodeId, vedtaksperiodeEndret)

@@ -70,9 +70,9 @@ internal class Generasjon private constructor(
         }
     }
     internal fun håndterNyGenerasjon(
+        varselRepository: VarselRepository,
         hendelseId: UUID,
         id: UUID = UUID.randomUUID(),
-        varselRepository: VarselRepository,
     ): Generasjon? {
         if (!låst) {
             sikkerlogg.info(
@@ -111,7 +111,7 @@ internal class Generasjon private constructor(
                 keyValue("generasjon", this),
                 keyValue("generasjonId", nyGenerasjonId)
             )
-            håndterNyGenerasjon(hendelseId, nyGenerasjonId, varselRepository)?.håndterNyUtbetaling(utbetalingId)
+            håndterNyGenerasjon(varselRepository, hendelseId, nyGenerasjonId)?.håndterNyUtbetaling(utbetalingId)
         }
         håndterNyUtbetaling(utbetalingId)
     }
@@ -138,7 +138,7 @@ internal class Generasjon private constructor(
 
     internal fun håndterRegelverksvarsel(hendelseId: UUID, varselId: UUID, varselkode: String, opprettet: LocalDateTime, varselRepository: VarselRepository): Generasjon {
         if (låst) {
-            val nyGenerasjon = håndterNyGenerasjon(hendelseId = hendelseId, varselRepository = varselRepository) ?: throw IllegalStateException("Forventer å kunne opprette ny generasjon da gjeldende generasjon = $this er låst.")
+            val nyGenerasjon = håndterNyGenerasjon(varselRepository = varselRepository, hendelseId = hendelseId) ?: throw IllegalStateException("Forventer å kunne opprette ny generasjon da gjeldende generasjon = $this er låst.")
             nyGenerasjon.håndterRegelverksvarsel(hendelseId, varselId, varselkode, opprettet, varselRepository)
             sikkerlogg.info(
                 "Oppretter ny {} for {} som følge av nytt varsel {}, {}",

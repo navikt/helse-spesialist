@@ -199,7 +199,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         generasjon.håndterTidslinjeendring(skjæringstidspunkt = 1.januar, fom = 1.januar, tom = 5.januar)
         generasjon.håndterVedtakFattet(UUID.randomUUID())
         val nyGenerasjonId = UUID.randomUUID()
-        val nyGenerasjon = generasjon.håndterNyGenerasjon(UUID.randomUUID(), nyGenerasjonId, varselRepository)
+        val nyGenerasjon = generasjon.håndterNyGenerasjon(varselRepository, UUID.randomUUID(), nyGenerasjonId)
         val forventetGenerasjon = Generasjon(nyGenerasjonId, vedtaksperiodeId, null, false, 1.januar, periode, emptySet(), dataSource)
 
         assertEquals(forventetGenerasjon, nyGenerasjon)
@@ -211,7 +211,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         generasjon.håndterRegelverksvarsel(UUID.randomUUID(), UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), varselRepository)
         generasjon.håndterVedtakFattet(UUID.randomUUID())
         val nyGenerasjonId = UUID.randomUUID()
-        generasjon.håndterNyGenerasjon(UUID.randomUUID(), nyGenerasjonId, varselRepository)
+        generasjon.håndterNyGenerasjon(varselRepository, UUID.randomUUID(), nyGenerasjonId)
         assertVarsler(generasjonId, 0, AKTIV, SB_EX_1)
         assertVarsler(nyGenerasjonId, 1, AKTIV, SB_EX_1)
     }
@@ -227,7 +227,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         generasjon.håndterAvvistAvSaksbehandler("EN_IDENT", varselRepository)
         generasjon.håndterVedtakFattet(UUID.randomUUID())
         val nyGenerasjonId = UUID.randomUUID()
-        generasjon.håndterNyGenerasjon(UUID.randomUUID(), nyGenerasjonId, varselRepository)
+        generasjon.håndterNyGenerasjon(varselRepository, UUID.randomUUID(), nyGenerasjonId)
         assertVarsler(generasjonId, 1, INAKTIV, SB_EX_1)
         assertVarsler(generasjonId, 1, GODKJENT, SB_EX_2)
         assertVarsler(generasjonId, 1, AVVIST, SB_EX_3)
