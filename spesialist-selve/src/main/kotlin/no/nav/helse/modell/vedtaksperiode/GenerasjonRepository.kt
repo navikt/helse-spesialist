@@ -30,12 +30,11 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
     private val dao = GenerasjonDao(dataSource)
 
     override fun finnVedtaksperioder(vedtaksperiodeIder: List<UUID>): List<Vedtaksperiode> {
-        return vedtaksperiodeIder.map { vedtaksperiodeId ->
-            Vedtaksperiode(
-                vedtaksperiodeId,
-                sisteFor(vedtaksperiodeId)
-            ).also {
-                it.registrer(this)
+        return vedtaksperiodeIder.mapNotNull { vedtaksperiodeId ->
+            dao.finnSisteFor(vedtaksperiodeId)?.let { generasjon ->
+                Vedtaksperiode(vedtaksperiodeId, generasjon).also {
+                    it.registrer(this)
+                }
             }
         }
     }
