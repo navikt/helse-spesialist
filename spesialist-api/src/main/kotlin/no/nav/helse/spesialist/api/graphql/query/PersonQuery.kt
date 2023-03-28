@@ -107,7 +107,8 @@ class PersonQuery(
         .extensions(
             mapOf(
                 "code" to 500,
-                "fodselsnumre" to fødselsnumre
+                "feilkode" to "HarFlereFodselsnumre",
+                "fodselsnumre" to fødselsnumre,
             )
         ).build()
 
