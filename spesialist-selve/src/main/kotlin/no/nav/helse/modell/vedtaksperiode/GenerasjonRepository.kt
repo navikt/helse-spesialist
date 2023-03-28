@@ -52,6 +52,7 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
         }
         return dao.opprettFor(id, vedtaksperiodeId, hendelseId, null, null).also {
             it.loggFørsteOpprettet(vedtaksperiodeId)
+            it.registrer(this)
         }
     }
 
@@ -64,15 +65,16 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
     ): Generasjon {
         return dao.opprettFor(id, vedtaksperiodeId, hendelseId, skjæringstidspunkt, periode).also {
             it.loggNesteOpprettet(vedtaksperiodeId)
+            it.registrer(this)
         }
     }
 
     override fun sisteFor(vedtaksperiodeId: UUID) =
-        dao.finnSisteFor(vedtaksperiodeId)
+        dao.finnSisteFor(vedtaksperiodeId)?.also { it.registrer(this) }
             ?: throw IllegalStateException("Forventer å finne en generasjon for perioden")
 
     override fun tilhørendeFor(utbetalingId: UUID): List<Generasjon> {
-        return dao.alleFor(utbetalingId)
+        return dao.alleFor(utbetalingId).onEach { it.registrer(this) }
     }
 
     override fun låsFor(generasjonId: UUID, hendelseId: UUID) {
