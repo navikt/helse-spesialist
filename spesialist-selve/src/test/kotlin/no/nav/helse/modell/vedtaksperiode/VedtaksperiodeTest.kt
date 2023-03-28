@@ -147,19 +147,11 @@ class VedtaksperiodeTest {
             TODO("Not yet implemented")
         }
 
-        override fun utbetalingFor(generasjonId: UUID, utbetalingId: UUID) {
-            TODO("Not yet implemented")
-        }
-
         override fun sisteFor(vedtaksperiodeId: UUID): Generasjon {
             TODO("Not yet implemented")
         }
 
         override fun tilhørendeFor(utbetalingId: UUID): List<Generasjon> {
-            TODO("Not yet implemented")
-        }
-
-        override fun fjernUtbetalingFor(generasjonId: UUID) {
             TODO("Not yet implemented")
         }
 
