@@ -6,13 +6,10 @@ import no.nav.helse.modell.kommando.CommandContext
 
 internal class InvaliderUtbetalingForGenerasjonerCommand(
     private val utbetalingId: UUID,
-    private val generasjonRepository: GenerasjonRepository
+    private val gjeldendeGenerasjoner: List<Generasjon>
 ): Command {
     override fun execute(context: CommandContext): Boolean {
-        val generasjoner = generasjonRepository.tilhørendeFor(utbetalingId)
-        generasjoner.forEach {
-            it.invaliderUtbetaling(utbetalingId)
-        }
+        gjeldendeGenerasjoner.forEach { it.invaliderUtbetaling(utbetalingId) }
         return true
     }
 }

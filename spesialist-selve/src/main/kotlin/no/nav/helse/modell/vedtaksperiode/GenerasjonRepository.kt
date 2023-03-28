@@ -46,6 +46,14 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
         opprettNeste(generasjonId, vedtaksperiodeId, hendelseId, skjæringstidspunkt, fom?.let { Periode(it, requireNotNull(tom)) })
     }
 
+    override fun nyUtbetaling(generasjonId: UUID, utbetalingId: UUID) {
+        utbetalingFor(generasjonId = generasjonId, utbetalingId = utbetalingId)
+    }
+
+    override fun utbetalingForkastet(generasjonId: UUID, utbetalingId: UUID) {
+        fjernUtbetalingFor(generasjonId)
+    }
+
     override fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID): Generasjon? {
         if (dao.finnSisteFor(vedtaksperiodeId) != null) {
             sikkerlogg.info(

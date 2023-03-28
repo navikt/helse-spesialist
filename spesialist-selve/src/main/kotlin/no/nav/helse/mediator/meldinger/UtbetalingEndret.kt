@@ -18,7 +18,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.Companion.gyldigeStatuse
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.Companion.values
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
+import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.InvaliderUtbetalingForGenerasjonerCommand
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -52,7 +52,7 @@ internal class UtbetalingEndret(
     reservasjonDao: ReservasjonDao,
     tildelingDao: TildelingDao,
     oppgaveMediator: OppgaveMediator,
-    generasjonRepository: GenerasjonRepository
+    gjeldendeGenerasjoner: List<Generasjon>
 ) : Hendelse, MacroCommand() {
 
     override fun fødselsnummer(): String = fødselsnummer
@@ -83,7 +83,7 @@ internal class UtbetalingEndret(
         OppdaterOppgavestatusCommand(utbetalingId, gjeldendeStatus, oppgaveDao, oppgaveMediator),
     ).apply {
         if (gjeldendeStatus == FORKASTET)
-            add(InvaliderUtbetalingForGenerasjonerCommand(utbetalingId, generasjonRepository))
+            add(InvaliderUtbetalingForGenerasjonerCommand(utbetalingId, gjeldendeGenerasjoner))
     }
 
     internal class River(

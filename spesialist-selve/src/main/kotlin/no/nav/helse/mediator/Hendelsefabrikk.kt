@@ -638,11 +638,12 @@ internal class Hendelsefabrikk(
 
     fun utbetalingEndret(json: String): UtbetalingEndret {
         val jsonNode = mapper.readTree(json)
+        val utbetalingId = UUID.fromString(jsonNode.path("utbetalingId").asText())
         return UtbetalingEndret(
             id = UUID.fromString(jsonNode.path("@id").asText()),
             fødselsnummer = jsonNode.path("fødselsnummer").asText(),
             orgnummer = jsonNode.path("organisasjonsnummer").asText(),
-            utbetalingId = UUID.fromString(jsonNode.path("utbetalingId").asText()),
+            utbetalingId = utbetalingId,
             type = jsonNode.path("type").asText(),
             gjeldendeStatus = Utbetalingsstatus.valueOf(jsonNode.path("gjeldendeStatus").asText()),
             opprettet = jsonNode.path("@opprettet").asLocalDateTime(),
@@ -657,7 +658,7 @@ internal class Hendelsefabrikk(
             reservasjonDao = reservasjonDao,
             tildelingDao = tildelingDao,
             oppgaveMediator = oppgaveMediator,
-            generasjonRepository = generasjonRepository
+            gjeldendeGenerasjoner = generasjonRepository.tilhørendeFor(utbetalingId)
         )
     }
 

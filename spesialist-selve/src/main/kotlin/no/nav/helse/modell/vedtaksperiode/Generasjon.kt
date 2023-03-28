@@ -102,22 +102,20 @@ internal class Generasjon private constructor(
     }
 
     internal fun håndterNyUtbetaling(hendelseId: UUID, utbetalingId: UUID, varselRepository: VarselRepository) {
-        if (låst) return run {
-            val nyGenerasjonId = UUID.randomUUID()
-            sikkerlogg.info(
-                "Kan ikke legge til ny utbetaling med {} for {}, da generasjonen er låst. Oppretter ny generasjon med {}",
-                keyValue("utbetalingId", utbetalingId),
-                keyValue("generasjon", this),
-                keyValue("generasjonId", nyGenerasjonId)
-            )
-            håndterNyGenerasjon(varselRepository, hendelseId, nyGenerasjonId)?.håndterNyUtbetaling(utbetalingId)
-        }
-        håndterNyUtbetaling(utbetalingId)
+        if (!låst) return håndterNyUtbetaling(utbetalingId)
+        val nyGenerasjonId = UUID.randomUUID()
+        sikkerlogg.info(
+            "Kan ikke legge til ny utbetaling med {} for {}, da generasjonen er låst. Oppretter ny generasjon med {}",
+            keyValue("utbetalingId", utbetalingId),
+            keyValue("generasjon", this),
+            keyValue("generasjonId", nyGenerasjonId)
+        )
+        håndterNyGenerasjon(varselRepository, hendelseId, nyGenerasjonId)?.håndterNyUtbetaling(utbetalingId)
     }
 
     private fun håndterNyUtbetaling(utbetalingId: UUID) {
         this.utbetalingId = utbetalingId
-        generasjonRepository.utbetalingFor(id, utbetalingId)
+        observers.forEach { it.nyUtbetaling(id, utbetalingId) }
     }
 
     internal fun invaliderUtbetaling(utbetalingId: UUID) {
@@ -132,7 +130,7 @@ internal class Generasjon private constructor(
             keyValue("utbetalingId", utbetalingId)
         )
         this.utbetalingId = null
-        generasjonRepository.fjernUtbetalingFor(id)
+        observers.forEach { it.utbetalingForkastet(id, utbetalingId) }
     }
 
     internal fun håndterRegelverksvarsel(hendelseId: UUID, varselId: UUID, varselkode: String, opprettet: LocalDateTime, varselRepository: VarselRepository): Generasjon {
