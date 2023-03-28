@@ -10,7 +10,7 @@ import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.varsel.VarselRepository
-import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
+import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload.Companion.lagre
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
@@ -20,8 +20,7 @@ internal class GodkjenningMediator(
     private val warningDao: WarningDao,
     private val vedtakDao: VedtakDao,
     private val opptegnelseDao: OpptegnelseDao,
-    private val varselRepository: VarselRepository,
-    private val generasjonRepository: GenerasjonRepository
+    private val varselRepository: VarselRepository
 ) {
     internal fun saksbehandlerUtbetaling(
         context: CommandContext,
@@ -31,7 +30,8 @@ internal class GodkjenningMediator(
         saksbehandlerIdent: String,
         saksbehandlerEpost: String,
         godkjenttidspunkt: LocalDateTime,
-        saksbehandleroverstyringer: List<UUID>
+        saksbehandleroverstyringer: List<UUID>,
+        gjeldendeGenerasjoner: List<Generasjon>
     ) {
         behov.godkjennManuelt(
             saksbehandlerIdent = saksbehandlerIdent,
@@ -39,8 +39,9 @@ internal class GodkjenningMediator(
             godkjenttidspunkt = godkjenttidspunkt,
             saksbehandleroverstyringer = saksbehandleroverstyringer
         )
-        val sisteGenerasjon = generasjonRepository.sisteFor(vedtaksperiodeId)
-        sisteGenerasjon.håndterGodkjentAvSaksbehandler(saksbehandlerIdent, varselRepository)
+        gjeldendeGenerasjoner.forEach {
+            it.håndterGodkjentAvSaksbehandler(saksbehandlerIdent, varselRepository)
+        }
         context.publiser(behov.toJson())
         context.publiser(behov.lagVedtaksperiodeGodkjent(vedtaksperiodeId, fødselsnummer, warningDao, vedtakDao).toJson())
     }
@@ -57,6 +58,7 @@ internal class GodkjenningMediator(
         begrunnelser: List<String>?,
         kommentar: String?,
         saksbehandleroverstyringer: List<UUID>,
+        gjeldendeGenerasjoner: List<Generasjon>,
     ) {
         behov.avvisManuelt(
             saksbehandlerIdent = saksbehandlerIdent,
@@ -67,8 +69,9 @@ internal class GodkjenningMediator(
             kommentar = kommentar,
             saksbehandleroverstyringer = saksbehandleroverstyringer
         )
-        val sisteGenerasjon = generasjonRepository.sisteFor(vedtaksperiodeId)
-        sisteGenerasjon.håndterAvvistAvSaksbehandler(saksbehandlerIdent, varselRepository)
+        gjeldendeGenerasjoner.forEach {
+            it.håndterAvvistAvSaksbehandler(saksbehandlerIdent, varselRepository)
+        }
         context.publiser(behov.toJson())
         context.publiser(behov.lagVedtaksperiodeAvvist(vedtaksperiodeId, fødselsnummer, warningDao, vedtakDao).toJson())
     }

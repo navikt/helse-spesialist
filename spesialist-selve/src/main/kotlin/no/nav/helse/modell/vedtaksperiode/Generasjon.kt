@@ -174,11 +174,7 @@ internal class Generasjon private constructor(
     }
 
     internal fun håndterGodkjentAvSaksbehandler(ident: String, varselRepository: VarselRepository) {
-        val utbetalingId = checkNotNull(utbetalingId) { "Mangler utbetalingId for generasjon. Det skal ikke være mulig." }
-        val allePerioderForUtbetaling = generasjonRepository.tilhørendeFor(utbetalingId)
-        allePerioderForUtbetaling.forEach {
-            it.varsler.godkjennAlleFor(it.id, ident, varselRepository)
-        }
+        varsler.godkjennAlleFor(id, ident, varselRepository)
     }
 
     internal fun håndterAvvistAvSaksbehandler(ident: String, varselRepository: VarselRepository) {

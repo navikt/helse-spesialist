@@ -37,8 +37,7 @@ internal class AutomatiseringCommandTest {
                 warningDao = mockk(relaxed = true),
                 vedtakDao = mockk(relaxed = true),
                 opptegnelseDao = mockk(relaxed = true),
-                varselRepository = mockk(relaxed = true),
-                generasjonRepository = mockk(relaxed = true)
+                varselRepository = mockk(relaxed = true)
             ),
             Utbetaling(utbetalingId, 1000, 1000),
             periodeType

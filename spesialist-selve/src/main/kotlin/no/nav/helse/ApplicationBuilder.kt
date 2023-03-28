@@ -363,8 +363,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             warningDao,
             vedtakDao,
             opptegnelseDao,
-            varselRepository,
-            generasjonRepository
+            varselRepository
         ),
         automatisering = automatisering,
         overstyringMediator = OverstyringMediator(rapidsConnection),

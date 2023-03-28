@@ -16,6 +16,9 @@ import no.nav.helse.modell.utbetaling.Refusjonstype
 import no.nav.helse.modell.utbetaling.Refusjonstype.DELVIS_REFUSJON
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.UtbetalingDao
+import no.nav.helse.modell.vedtaksperiode.Generasjon
+import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
+import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
@@ -48,13 +51,19 @@ internal class SaksbehandlerløsningTest {
         årsak = null,
         begrunnelser = null,
         kommentar = null,
+        saksbehandleroverstyringer = saksbehandlerløsning,
         oppgaveId = OPPGAVE_ID,
         godkjenningsbehovhendelseId = GODKJENNINGSBEHOV_ID,
         hendelseDao = hendelseDao,
         oppgaveDao = mockk(relaxed = true),
-        godkjenningMediator = GodkjenningMediator(mockk(relaxed = true), mockk(relaxed = true), mockk(), mockk(relaxed = true), mockk(relaxed = true)),
+        godkjenningMediator = GodkjenningMediator(
+            mockk(relaxed = true),
+            mockk(relaxed = true),
+            mockk(),
+            mockk(relaxed = true)
+        ),
         utbetalingDao = utbetalingDao,
-        saksbehandleroverstyringer = saksbehandlerløsning,
+        gjeldendeGenerasjoner = listOf(Generasjon(randomUUID(), randomUUID(), generasjonRepository)),
     )
 
     private val context = CommandContext(randomUUID())
@@ -137,5 +146,24 @@ internal class SaksbehandlerløsningTest {
             assertTrue(actual.has(field)) { "Expected field <$field> to exist" }
             assertJsonEquals(field, expected.path(field), actual.path(field))
         }
+    }
+
+    private val generasjonRepository = object : GenerasjonRepository {
+        override fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID): Generasjon? {
+            TODO("Not yet implemented")
+        }
+
+        override fun sisteFor(vedtaksperiodeId: UUID): Generasjon {
+            TODO("Not yet implemented")
+        }
+
+        override fun tilhørendeFor(utbetalingId: UUID): List<Generasjon> {
+            TODO("Not yet implemented")
+        }
+
+        override fun finnVedtaksperioder(vedtaksperiodeIder: List<UUID>): List<Vedtaksperiode> {
+            TODO("Not yet implemented")
+        }
+
     }
 }

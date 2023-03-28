@@ -42,8 +42,7 @@ internal class TestMediator(
         warningDao,
         vedtakDao,
         opptegnelseDao,
-        ActualVarselRepository(dataSource),
-        ActualGenerasjonRepository(dataSource)
+        ActualVarselRepository(dataSource)
     )
     private val oppgaveMediator = OppgaveMediator(
         oppgaveDao = OppgaveDao(dataSource),

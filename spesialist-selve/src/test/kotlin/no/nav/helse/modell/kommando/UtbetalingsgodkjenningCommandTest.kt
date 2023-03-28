@@ -9,6 +9,7 @@ import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.varsel.VarselRepository
+import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.objectMapper
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -47,13 +48,19 @@ internal class UtbetalingsgodkjenningCommandTest {
             årsak = null,
             begrunnelser = null,
             kommentar = null,
+            saksbehandleroverstyringer = emptyList(),
             godkjenningsbehovhendelseId = GODKJENNINGSBEHOV_ID,
             hendelseDao = hendelseDao,
-            godkjenningMediator = GodkjenningMediator(mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true), varselRepository, generasjonRepository),
+            godkjenningMediator = GodkjenningMediator(
+                mockk(relaxed = true),
+                mockk(relaxed = true),
+                mockk(relaxed = true),
+                varselRepository
+            ),
             vedtaksperiodeId = vedtaksperiodeId,
             fødselsnummer = fødselsnummer,
             utbetaling = utbetaling,
-            saksbehandleroverstyringer = emptyList()
+            gjeldendeGenerasjoner = listOf(Generasjon(UUID.randomUUID(), UUID.randomUUID(), generasjonRepository))
         )
     }
 

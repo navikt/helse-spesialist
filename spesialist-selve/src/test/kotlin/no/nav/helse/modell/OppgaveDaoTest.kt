@@ -84,6 +84,15 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `finner utbetalingId`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave(utbetalingId = UTBETALING_ID)
+        assertEquals(UTBETALING_ID, oppgaveDao.finnUtbetalingId(oppgaveId))
+    }
+
+    @Test
     fun `finner hendelseId`() {
         opprettPerson()
         opprettArbeidsgiver()

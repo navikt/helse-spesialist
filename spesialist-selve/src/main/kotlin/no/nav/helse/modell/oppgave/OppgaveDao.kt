@@ -8,7 +8,6 @@ import kotliquery.sessionOf
 import no.nav.helse.HelseDao
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommandData
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
-import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
@@ -22,6 +21,10 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
             AND status = 'AvventerSaksbehandler'::oppgavestatus
         """.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.long("id") }
+
+    fun finnUtbetalingId(oppgaveId: Long) =
+        queryize(""" SELECT utbetaling_id FROM oppgave WHERE id = :oppgaveId""")
+            .single(mapOf("oppgaveId" to oppgaveId)) { it.uuid("utbetaling_id") }
 
     fun finnNyesteOppgaveId(vedtaksperiodeId: UUID) =
         """

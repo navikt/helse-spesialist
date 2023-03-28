@@ -11,6 +11,7 @@ import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.UtbetalingsgodkjenningCommand
 import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
+import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -41,6 +42,7 @@ internal class Saksbehandlerløsning(
     private val oppgaveDao: OppgaveDao,
     godkjenningMediator: GodkjenningMediator,
     utbetalingDao: UtbetalingDao,
+    gjeldendeGenerasjoner: List<Generasjon>,
 ) : Hendelse, MacroCommand() {
     private val utbetaling = utbetalingDao.utbetalingFor(oppgaveId)
 
@@ -59,7 +61,8 @@ internal class Saksbehandlerløsning(
             godkjenningMediator = godkjenningMediator,
             vedtaksperiodeId = vedtaksperiodeId(),
             fødselsnummer = fødselsnummer,
-            utbetaling = utbetaling
+            utbetaling = utbetaling,
+            gjeldendeGenerasjoner = gjeldendeGenerasjoner
         ),
     )
 

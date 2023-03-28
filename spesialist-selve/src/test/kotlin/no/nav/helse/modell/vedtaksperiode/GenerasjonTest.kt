@@ -482,23 +482,16 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     }
 
     @Test
-    fun `godkjenner varsler for alle generasjoner som hører til samme utbetaling`() {
+    fun `godkjenner varsler for generasjon`() {
         val generasjonIdV1 = UUID.randomUUID()
-        val generasjonIdV2 = UUID.randomUUID()
         val generasjonV1 = nyGenerasjon(generasjonIdV1)
-        val generasjonV2 = nyGenerasjon(generasjonIdV2)
         val utbetalingId = UUID.randomUUID()
         generasjonV1.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId, varselRepository)
-        generasjonV2.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId, varselRepository)
         generasjonV1.håndterRegelverksvarsel(UUID.randomUUID(), UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), varselRepository)
-        generasjonV2.håndterRegelverksvarsel(UUID.randomUUID(), UUID.randomUUID(), "SB_EX_2", LocalDateTime.now(), varselRepository)
 
-        generasjonV2.håndterGodkjentAvSaksbehandler("EN_IDENT", varselRepository)
+        generasjonV1.håndterGodkjentAvSaksbehandler("EN_IDENT", varselRepository)
         assertUtbetaling(generasjonIdV1, utbetalingId)
-        assertUtbetaling(generasjonIdV2, utbetalingId)
-
         assertVarsler(generasjonIdV1, 1, GODKJENT, SB_EX_1)
-        assertVarsler(generasjonIdV2, 1, GODKJENT, SB_EX_2)
     }
 
     @Test

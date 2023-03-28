@@ -77,7 +77,7 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
         return dao.alleFor(utbetalingId).onEach { it.registrer(this) }
     }
 
-    fun låsFor(generasjonId: UUID, hendelseId: UUID) {
+    private fun låsFor(generasjonId: UUID, hendelseId: UUID) {
         dao.låsFor(generasjonId, hendelseId)
             ?.loggLåst()
             ?: sikkerlogg.error(

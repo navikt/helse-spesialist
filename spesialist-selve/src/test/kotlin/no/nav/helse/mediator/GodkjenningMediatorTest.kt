@@ -9,23 +9,35 @@ import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.varsel.VarselRepository
+import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
+import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class GodkjenningMediatorTest {
     private lateinit var context: CommandContext
     private val opptegnelseDao = mockk<OpptegnelseDao>(relaxed = true)
-    private val varselRepository = mockk<VarselRepository>(relaxed = true)
-    private val generasjonRepository = mockk<GenerasjonRepository>(relaxed = true)
+    private val varselRepository = object : VarselRepository {
+        val generasjonerMedGodkjenteVarsler = mutableSetOf<UUID>()
+        override fun deaktiverFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, definisjonId: UUID?) {}
+        override fun reaktiverFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String) {}
+        override fun godkjennFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String, definisjonId: UUID?) {
+            generasjonerMedGodkjenteVarsler.add(generasjonId)
+        }
+        override fun avvisFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String, definisjonId: UUID?) {}
+        override fun lagreVarsel(id: UUID, generasjonId: UUID, varselkode: String, opprettet: LocalDateTime, vedtaksperiodeId: UUID) {}
+        override fun lagreDefinisjon(id: UUID, varselkode: String, tittel: String, forklaring: String?, handling: String?, avviklet: Boolean, opprettet: LocalDateTime) {}
+        override fun oppdaterGenerasjonFor(id: UUID, gammelGenerasjonId: UUID, nyGenerasjonId: UUID) {}
+    }
     private val mediator = GodkjenningMediator(
         warningDao = mockk(relaxed = true),
         vedtakDao = mockk(relaxed = true),
         opptegnelseDao = opptegnelseDao,
         varselRepository = varselRepository,
-        generasjonRepository = generasjonRepository,
     )
 
     private val utbetaling = Utbetaling(UUID.randomUUID(), 1000, 1000)
@@ -50,15 +62,65 @@ internal class GodkjenningMediatorTest {
 
     @Test
     fun `saksbehandler utbetaling skal ikke opprette opptegnelse`() {
-        mediator.saksbehandlerUtbetaling(context, UtbetalingsgodkjenningMessage("{}", utbetaling), UUID.randomUUID(), fnr, "1",  "2@nav.no", LocalDateTime.now(), emptyList())
+        mediator.saksbehandlerUtbetaling(
+            context = context,
+            behov = UtbetalingsgodkjenningMessage("{}", utbetaling),
+            vedtaksperiodeId = UUID.randomUUID(),
+            fødselsnummer = fnr,
+            saksbehandlerIdent = "1",
+            saksbehandlerEpost = "2@nav.no",
+            godkjenttidspunkt = LocalDateTime.now(),
+            saksbehandleroverstyringer = emptyList(),
+            gjeldendeGenerasjoner = listOf(Generasjon(UUID.randomUUID(), UUID.randomUUID(), repository))
+        )
         assertOpptegnelseIkkeOpprettet()
     }
 
     @Test
     fun `saksbehandler avvisning skal ikke opprette opptegnelse`() {
-        mediator.saksbehandlerAvvisning(context, UtbetalingsgodkjenningMessage("{}", utbetaling), UUID.randomUUID(), fnr, "1", "2@nav.no", LocalDateTime.now(), null, null, null, emptyList())
+        mediator.saksbehandlerAvvisning(
+            context,
+            UtbetalingsgodkjenningMessage("{}", utbetaling),
+            UUID.randomUUID(),
+            fnr,
+            "1",
+            "2@nav.no",
+            LocalDateTime.now(),
+            null,
+            null,
+            null,
+            emptyList(),
+            listOf(Generasjon(UUID.randomUUID(), UUID.randomUUID(), repository))
+        )
         assertOpptegnelseIkkeOpprettet()
     }
+
+    @Test
+    fun `godkjenner varsler for alle gjeldende generasjoner`() {
+        val generasjonId1 = UUID.randomUUID()
+        val generasjonId2 = UUID.randomUUID()
+        val generasjon1 = Generasjon(generasjonId1, UUID.randomUUID(), repository)
+        val generasjon2 = Generasjon(generasjonId2, UUID.randomUUID(), repository)
+        generasjon1.håndterRegelverksvarsel(UUID.randomUUID(), UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), varselRepository)
+        generasjon2.håndterRegelverksvarsel(UUID.randomUUID(), UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), varselRepository)
+
+        godkjenning(listOf(generasjon1, generasjon2))
+        assertEquals(2, varselRepository.generasjonerMedGodkjenteVarsler.size)
+        assertEquals(generasjonId1, varselRepository.generasjonerMedGodkjenteVarsler.toList()[0])
+        assertEquals(generasjonId2, varselRepository.generasjonerMedGodkjenteVarsler.toList()[1])
+    }
+
+    private fun godkjenning(generasjoner: List<Generasjon>) = mediator.saksbehandlerUtbetaling(
+        context,
+        UtbetalingsgodkjenningMessage("{}", utbetaling),
+        UUID.randomUUID(),
+        fnr,
+        "Z000000",
+        "saksbehandler@nav.no",
+        LocalDateTime.now(),
+        emptyList(),
+        generasjoner
+    )
 
     private fun assertOpptegnelseOpprettet() = verify(exactly = 1) { opptegnelseDao.opprettOpptegnelse(eq(fnr), any(), eq(OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE)) }
 
@@ -66,5 +128,12 @@ internal class GodkjenningMediatorTest {
 
     private companion object {
         val fnr = "12341231221"
+    }
+
+    private val repository = object : GenerasjonRepository {
+        override fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID): Generasjon? = TODO("Not yet implemented")
+        override fun sisteFor(vedtaksperiodeId: UUID): Generasjon = TODO("Not yet implemented")
+        override fun tilhørendeFor(utbetalingId: UUID): List<Generasjon> = TODO("Not yet implemented")
+        override fun finnVedtaksperioder(vedtaksperiodeIder: List<UUID>): List<Vedtaksperiode> = TODO("Not yet implemented")
     }
 }

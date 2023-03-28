@@ -297,25 +297,31 @@ internal class Hendelsefabrikk(
         saksbehandleroverstyringer: List<UUID>,
         oppgaveId: Long,
         json: String,
-    ) = Saksbehandlerløsning(
-        id = id,
-        fødselsnummer = fødselsnummer,
-        json = json,
-        godkjent = godkjent,
-        saksbehandlerIdent = saksbehandlerident,
-        epostadresse = epostadresse,
-        godkjenttidspunkt = godkjenttidspunkt,
-        årsak = årsak,
-        begrunnelser = begrunnelser,
-        kommentar = kommentar,
-        saksbehandleroverstyringer = saksbehandleroverstyringer,
-        oppgaveId = oppgaveId,
-        godkjenningsbehovhendelseId = godkjenningsbehovhendelseId,
-        hendelseDao = hendelseDao,
-        oppgaveDao = oppgaveDao,
-        godkjenningMediator = godkjenningMediator,
-        utbetalingDao = utbetalingDao
-    )
+    ): Saksbehandlerløsning {
+        val utbetalingId = oppgaveDao.finnUtbetalingId(oppgaveId)
+            ?: throw IllegalStateException("Forventer å finne utbetalingId for oppgaveId=$oppgaveId")
+        val gjeldendeGenerasjoner = generasjonRepository.tilhørendeFor(utbetalingId)
+        return Saksbehandlerløsning(
+            id = id,
+            fødselsnummer = fødselsnummer,
+            json = json,
+            godkjent = godkjent,
+            saksbehandlerIdent = saksbehandlerident,
+            epostadresse = epostadresse,
+            godkjenttidspunkt = godkjenttidspunkt,
+            årsak = årsak,
+            begrunnelser = begrunnelser,
+            kommentar = kommentar,
+            saksbehandleroverstyringer = saksbehandleroverstyringer,
+            oppgaveId = oppgaveId,
+            godkjenningsbehovhendelseId = godkjenningsbehovhendelseId,
+            hendelseDao = hendelseDao,
+            oppgaveDao = oppgaveDao,
+            godkjenningMediator = godkjenningMediator,
+            utbetalingDao = utbetalingDao,
+            gjeldendeGenerasjoner = gjeldendeGenerasjoner
+        )
+    }
 
     fun saksbehandlerløsning(json: String): Saksbehandlerløsning {
         val jsonNode = mapper.readTree(json)
