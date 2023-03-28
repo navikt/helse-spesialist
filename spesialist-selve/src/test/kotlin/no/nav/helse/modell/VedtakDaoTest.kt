@@ -29,7 +29,7 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         opprettSnapshot()
         vedtakDao.opprett(VEDTAKSPERIODE, FOM, TOM, personId, arbeidsgiverId, snapshotId)
         assertEquals(1, vedtak().size)
-        vedtak().first().assertEquals(VEDTAKSPERIODE, FOM, TOM, personId, arbeidsgiverId, snapshotId)
+        vedtak().first().assertEquals(VEDTAKSPERIODE, FOM, TOM, personId, arbeidsgiverId, snapshotId, false)
     }
 
     @Test
@@ -76,7 +76,8 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
             forventetTom = nyTom,
             forventetPersonRef = personId,
             forventetArbeidsgiverRef = arbeidsgiverId,
-            forventetSnapshotRef = nySnapshotRef
+            forventetSnapshotRef = nySnapshotRef,
+            forventetForkastet = false
         )
     }
 
@@ -179,14 +180,15 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
     }
 
     private fun vedtak() = sessionOf(dataSource).use {
-        it.run(queryOf("SELECT vedtaksperiode_id, fom, tom, person_ref, arbeidsgiver_ref, snapshot_ref FROM vedtak").map { row ->
+        it.run(queryOf("SELECT vedtaksperiode_id, fom, tom, person_ref, arbeidsgiver_ref, snapshot_ref, forkastet FROM vedtak").map { row ->
             Vedtak(
                 vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
                 fom = row.localDate("fom"),
                 tom = row.localDate("tom"),
                 personRef = row.long("person_ref"),
                 arbeidsgiverRef = row.long("arbeidsgiver_ref"),
-                snapshotRef = row.int("snapshot_ref")
+                snapshotRef = row.int("snapshot_ref"),
+                forkastet = row.boolean("forkastet")
             )
         }.asList)
     }
@@ -197,7 +199,8 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         private val tom: LocalDate,
         private val personRef: Long,
         private val arbeidsgiverRef: Long,
-        val snapshotRef: Int
+        val snapshotRef: Int,
+        private val forkastet: Boolean
     ) {
         fun assertEquals(
             forventetVedtaksperiodeId: UUID,
@@ -205,7 +208,8 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
             forventetTom: LocalDate,
             forventetPersonRef: Long,
             forventetArbeidsgiverRef: Long,
-            forventetSnapshotRef: Int
+            forventetSnapshotRef: Int,
+            forventetForkastet: Boolean
         ) {
             assertEquals(forventetVedtaksperiodeId, vedtaksperiodeId)
             assertEquals(forventetFom, fom)
@@ -213,6 +217,7 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
             assertEquals(forventetPersonRef, personRef)
             assertEquals(forventetArbeidsgiverRef, arbeidsgiverRef)
             assertEquals(forventetSnapshotRef, snapshotRef)
+            assertEquals(forventetForkastet, forkastet)
         }
     }
 

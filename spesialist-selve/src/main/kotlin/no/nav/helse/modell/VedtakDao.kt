@@ -20,8 +20,8 @@ internal class VedtakDao(private val dataSource: DataSource) {
     ) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val query = """
-            INSERT INTO vedtak(vedtaksperiode_id, fom, tom, person_ref, arbeidsgiver_ref, snapshot_ref)
-            VALUES (:vedtaksperiode_id, :fom, :tom, :person_ref, :arbeidsgiver_ref, :snapshot_ref);
+            INSERT INTO vedtak(vedtaksperiode_id, fom, tom, person_ref, arbeidsgiver_ref, snapshot_ref, forkastet)
+            VALUES (:vedtaksperiode_id, :fom, :tom, :person_ref, :arbeidsgiver_ref, :snapshot_ref, false);
         """
         session.run(
             queryOf(
@@ -132,7 +132,7 @@ internal class VedtakDao(private val dataSource: DataSource) {
         session.run(queryOf(query, utbetalingId).map { it.boolean("automatisert") }.asSingle)
     } ?: false
 
-    fun markerForkastet(vedtaksperiodeId: UUID, hendelseId: UUID) = sessionOf(dataSource).use { session ->
+    internal fun markerForkastet(vedtaksperiodeId: UUID, hendelseId: UUID) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val query = "UPDATE vedtak SET forkastet = true, forkastet_av_hendelse = :hendelseId, forkastet_tidspunkt = now() WHERE vedtaksperiode_id = :vedtaksperiodeId"
         session.run(queryOf(query, mapOf(
