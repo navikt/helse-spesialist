@@ -75,9 +75,6 @@ internal class VarselkodeTest {
         override fun tilhørendeFor(utbetalingId: UUID): List<Generasjon> = TODO("Not yet implemented")
         override fun fjernUtbetalingFor(generasjonId: UUID):Unit = TODO("Not yet implemented")
         override fun finnÅpenGenerasjonFor(vedtaksperiodeId: UUID): Generasjon = TODO("Not yet implemented")
-        override fun oppdaterSykefraværstilfelle(id: UUID, skjæringstidspunkt: LocalDate, periode: Periode) {
-            TODO("Not yet implemented")
-        }
 
         override fun finnVedtaksperioder(vedtaksperiodeIder: List<UUID>): List<Vedtaksperiode> {
             TODO("Not yet implemented")

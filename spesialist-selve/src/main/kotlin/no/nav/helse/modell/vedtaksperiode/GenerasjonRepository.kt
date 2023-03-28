@@ -22,7 +22,6 @@ internal interface GenerasjonRepository {
     fun tilhørendeFor(utbetalingId: UUID): List<Generasjon>
     fun fjernUtbetalingFor(generasjonId: UUID)
     fun finnÅpenGenerasjonFor(vedtaksperiodeId: UUID): Generasjon?
-    fun oppdaterSykefraværstilfelle(id: UUID, skjæringstidspunkt: LocalDate, periode: Periode)
     fun finnVedtaksperioder(vedtaksperiodeIder: List<UUID>): List<Vedtaksperiode>
 }
 
@@ -42,7 +41,7 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
     }
 
     override fun tidslinjeOppdatert(generasjonId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate) {
-        oppdaterSykefraværstilfelle(generasjonId, skjæringstidspunkt, Periode(fom, tom))
+        dao.oppdaterSykefraværstilfelle(generasjonId, skjæringstidspunkt, Periode(fom, tom))
     }
 
     override fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID): Generasjon? {
@@ -71,7 +70,8 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
     }
 
     override fun sisteFor(vedtaksperiodeId: UUID) =
-        dao.finnSisteFor(vedtaksperiodeId) ?: throw IllegalStateException("Forventer å finne en generasjon for perioden")
+        dao.finnSisteFor(vedtaksperiodeId)
+            ?: throw IllegalStateException("Forventer å finne en generasjon for perioden")
 
     override fun tilhørendeFor(utbetalingId: UUID): List<Generasjon> {
         return dao.alleFor(utbetalingId)
@@ -110,10 +110,6 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
         return dao.åpenGenerasjonForVedtaksperiode(vedtaksperiodeId)
     }
 
-    override fun oppdaterSykefraværstilfelle(id: UUID, skjæringstidspunkt: LocalDate, periode: Periode) {
-        return dao.oppdaterSykefraværstilfelle(id, skjæringstidspunkt, periode)
-    }
-
     private companion object {
         private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
         private fun Generasjon.loggFørsteOpprettet(vedtaksperiodeId: UUID) {
@@ -123,6 +119,7 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
                 keyValue("vedtaksperiodeId", vedtaksperiodeId),
             )
         }
+
         private fun Generasjon.loggNesteOpprettet(vedtaksperiodeId: UUID) {
             sikkerlogg.info(
                 "Oppretter neste generasjon {} for {}",

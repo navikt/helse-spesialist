@@ -9,11 +9,16 @@ import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.januar
 import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.Varsel
-import no.nav.helse.modell.varsel.Varsel.*
 import no.nav.helse.modell.varsel.Varsel.Companion.lagre
-import no.nav.helse.modell.varsel.Varsel.Status.*
+import no.nav.helse.modell.varsel.Varsel.Status
+import no.nav.helse.modell.varsel.Varsel.Status.AKTIV
+import no.nav.helse.modell.varsel.Varsel.Status.AVVIST
+import no.nav.helse.modell.varsel.Varsel.Status.GODKJENT
+import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
 import no.nav.helse.modell.varsel.Varselkode
-import no.nav.helse.modell.varsel.Varselkode.*
+import no.nav.helse.modell.varsel.Varselkode.SB_EX_1
+import no.nav.helse.modell.varsel.Varselkode.SB_EX_2
+import no.nav.helse.modell.varsel.Varselkode.SB_EX_3
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -120,11 +125,34 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     }
 
     @Test
+    fun `håndterTidslinjeendring setter fom, tom og skjæringstidspunkt på generasjonen`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjonId = UUID.randomUUID()
+        val generasjon = nyGenerasjon(id = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
+        generasjon.håndterTidslinjeendring(1.januar, 31.januar, 1.januar)
+        assertEquals(
+            Generasjon(generasjonId, vedtaksperiodeId, null, false, 1.januar, Periode(1.januar, 31.januar), emptySet(), dataSource),
+            generasjon
+        )
+    }
+    @Test
+    fun `håndterTidslinjeendring setter ikke fom, tom og skjæringstidspunkt på generasjonen hvis den er låst`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjonId = UUID.randomUUID()
+        val generasjon = Generasjon(generasjonId, vedtaksperiodeId, null, true, null, null, emptySet(), dataSource)
+        generasjon.håndterTidslinjeendring(1.januar, 31.januar, 1.januar)
+        assertEquals(
+            Generasjon(generasjonId, vedtaksperiodeId, null, true, null, null, emptySet(), dataSource),
+            generasjon
+        )
+    }
+
+    @Test
     fun `Kopierer skjæringstidspunkt og periode til neste generasjon`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)
         val periode = Periode(1.januar, 5.januar)
-        generasjon.oppdaterSykefraværstilfelle(skjæringstidspunkt = 1.januar, periode, generasjonRepository)
+        generasjon.håndterTidslinjeendring(skjæringstidspunkt = 1.januar, fom = 1.januar, tom = 5.januar)
         generasjon.håndterVedtakFattet(UUID.randomUUID())
         val nyGenerasjonId = UUID.randomUUID()
         val nyGenerasjon = generasjon.håndterNyGenerasjon(UUID.randomUUID(), nyGenerasjonId, varselRepository)

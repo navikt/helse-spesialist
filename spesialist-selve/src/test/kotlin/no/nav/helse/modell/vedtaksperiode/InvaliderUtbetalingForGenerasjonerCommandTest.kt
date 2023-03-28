@@ -68,9 +68,6 @@ class InvaliderUtbetalingForGenerasjonerCommandTest {
         }
 
         override fun finnÅpenGenerasjonFor(vedtaksperiodeId: UUID): Generasjon = TODO("Not yet implemented")
-        override fun oppdaterSykefraværstilfelle(id: UUID, skjæringstidspunkt: LocalDate, periode: Periode) {
-            TODO("Not yet implemented")
-        }
 
         override fun finnVedtaksperioder(vedtaksperiodeIder: List<UUID>): List<Vedtaksperiode> {
             TODO("Not yet implemented")

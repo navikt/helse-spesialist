@@ -55,21 +55,12 @@ internal class Generasjon private constructor(
     internal fun håndterTidslinjeendring(fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate) {
         if (låst) return
         if (fom == periode?.fom() && tom == periode?.tom() && skjæringstidspunkt == this.skjæringstidspunkt) return
+        this.periode = Periode(fom, tom)
+        this.skjæringstidspunkt = skjæringstidspunkt
         observers.forEach {
             it.tidslinjeOppdatert(id, fom, tom, skjæringstidspunkt)
         }
     }
-
-    internal fun oppdaterSykefraværstilfelle(
-        skjæringstidspunkt: LocalDate,
-        periode: Periode,
-        generasjonRepository: GenerasjonRepository,
-    ) {
-        this.skjæringstidspunkt = skjæringstidspunkt
-        this.periode = periode
-        generasjonRepository.oppdaterSykefraværstilfelle(id, skjæringstidspunkt, periode)
-    }
-
     internal fun håndterNyGenerasjon(
         hendelseId: UUID,
         id: UUID = UUID.randomUUID(),
