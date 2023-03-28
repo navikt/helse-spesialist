@@ -26,6 +26,7 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -36,10 +37,12 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     private val varselRepository = ActualVarselRepository(dataSource)
     private val generasjonRepository = ActualGenerasjonRepository(dataSource)
     private lateinit var generasjonId: UUID
+    private lateinit var observer: Observer
 
     @BeforeEach
     internal fun beforeEach() {
         lagVarseldefinisjoner()
+        observer = Observer
     }
 
     @Test
@@ -160,6 +163,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         assertFalse(generasjon.liggerFør(1.januar))
         assertFalse(generasjon.liggerFør(31.desember(2017)))
     }
+
     @Test
     fun `generasjon ligger ikke før dato dersom perioden er null`() {
         val generasjon = Generasjon(UUID.randomUUID(), UUID.randomUUID(), null, true, null, null, emptySet(), dataSource)
@@ -176,12 +180,14 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         val generasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId, null, true, null, null, setOf(aktivtVarsel), dataSource)
         assertTrue(generasjon.harAktiveVarsler())
     }
+
     @Test
     fun `generasjon har ikke aktive varsler`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId, null, true, null, null, emptySet(), dataSource)
         assertFalse(generasjon.harAktiveVarsler())
     }
+
     @Test
     fun `generasjon har aktive varsler når generasjon har både aktive og vurderte varsler`() {
         val vedtaksperiodeId = UUID.randomUUID()
@@ -189,6 +195,34 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         val vurdertVarsel = Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId, VURDERT)
         val generasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId, null, true, null, null, setOf(aktivtVarsel, vurdertVarsel), dataSource)
         assertTrue(generasjon.harAktiveVarsler())
+    }
+
+    @Test
+    fun `opprett neste`() {
+        val nyGenerasjonId = UUID.randomUUID()
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId, null, false, 1.januar, Periode(1.januar, 31.januar), emptySet(), dataSource)
+        val hendelseId = UUID.randomUUID()
+        generasjon.registrer(observer)
+        generasjon.håndterVedtakFattet(UUID.randomUUID())
+        val nyGenerasjon = generasjon.håndterNyGenerasjon(varselRepository, hendelseId, nyGenerasjonId)
+        assertEquals(1, observer.opprettedeGenerasjoner.size)
+        assertNotEquals(generasjon, nyGenerasjon)
+        observer.assertOpprettelse(nyGenerasjonId, vedtaksperiodeId, hendelseId, 1.januar, 31.januar, 1.januar)
+        assertEquals(
+            Generasjon(nyGenerasjonId, vedtaksperiodeId, null, false, 1.januar, Periode(1.januar, 31.januar), emptySet(), dataSource),
+            nyGenerasjon
+        )
+    }
+
+    @Test
+    fun `ikke opprett neste dersom nåværende er ulåst`() {
+        val nyGenerasjonId = UUID.randomUUID()
+        val generasjon = Generasjon(UUID.randomUUID(), UUID.randomUUID(), generasjonRepository)
+        generasjon.registrer(observer)
+        val nyGenerasjon = generasjon.håndterNyGenerasjon(varselRepository, UUID.randomUUID(), nyGenerasjonId)
+        assertEquals(0, observer.opprettedeGenerasjoner.size)
+        assertNull(nyGenerasjon)
     }
 
     @Test
@@ -635,6 +669,49 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
                     false,
                     LocalDateTime.now()
                 ).asUpdate)
+        }
+    }
+
+    private object Observer: IVedtaksperiodeObserver {
+        private class Opprettelse(
+            val generasjonId: UUID,
+            val vedtaksperiodeId: UUID,
+            val hendelseId: UUID,
+            val fom: LocalDate?,
+            val tom: LocalDate?,
+            val skjæringstidspunkt: LocalDate?
+        )
+
+        val opprettedeGenerasjoner = mutableMapOf<UUID, Opprettelse>()
+        override fun generasjonOpprettet(
+            generasjonId: UUID,
+            vedtaksperiodeId: UUID,
+            hendelseId: UUID,
+            fom: LocalDate?,
+            tom: LocalDate?,
+            skjæringstidspunkt: LocalDate?
+        ) {
+            opprettedeGenerasjoner[generasjonId] =
+                Opprettelse(generasjonId, vedtaksperiodeId, hendelseId, fom, tom, skjæringstidspunkt)
+        }
+
+        fun assertOpprettelse(
+            forventetGenerasjonId: UUID,
+            forventetVedtaksperiodeId: UUID,
+            forventetHendelseId: UUID,
+            forventetFom: LocalDate?,
+            forventetTom: LocalDate?,
+            forventetSkjæringstidspunkt: LocalDate?
+        ) {
+            val opprettelse = opprettedeGenerasjoner[forventetGenerasjonId]
+            assertNotNull(opprettelse)
+            requireNotNull(opprettelse)
+            assertEquals(forventetGenerasjonId, opprettelse.generasjonId)
+            assertEquals(forventetVedtaksperiodeId, opprettelse.vedtaksperiodeId)
+            assertEquals(forventetHendelseId, opprettelse.hendelseId)
+            assertEquals(forventetFom, opprettelse.fom)
+            assertEquals(forventetTom, opprettelse.tom)
+            assertEquals(forventetSkjæringstidspunkt, opprettelse.skjæringstidspunkt)
         }
     }
 }

@@ -1,6 +1,5 @@
 package no.nav.helse.modell.vedtaksperiode
 
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.modell.kommando.CommandContext
@@ -38,13 +37,6 @@ class InvaliderUtbetalingForGenerasjonerCommandTest {
     }
 
     private val generasjonRepository get() = object : GenerasjonRepository {
-        override fun opprettNeste(
-            id: UUID,
-            vedtaksperiodeId: UUID,
-            hendelseId: UUID,
-            skjæringstidspunkt: LocalDate?,
-            periode: Periode?
-        ): Generasjon = TODO("Not yet implemented")
         override fun låsFor(generasjonId: UUID, hendelseId: UUID):Unit = TODO("Not yet implemented")
         override fun sisteFor(vedtaksperiodeId: UUID): Generasjon = TODO("Not yet implemented")
 

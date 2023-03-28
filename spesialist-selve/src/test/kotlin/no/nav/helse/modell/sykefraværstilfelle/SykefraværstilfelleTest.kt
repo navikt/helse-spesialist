@@ -1,6 +1,5 @@
 package no.nav.helse.modell.sykefraværstilfelle
 
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.februar
@@ -8,7 +7,6 @@ import no.nav.helse.januar
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
-import no.nav.helse.modell.vedtaksperiode.Periode
 import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode.Companion.harAktiveVarsler
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -44,8 +42,7 @@ internal class SykefraværstilfelleTest {
     }
 
     private val generasjonRepository = object : GenerasjonRepository {
-        override fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID): Generasjon? = TODO("Not yet implemented")
-        override fun opprettNeste(id: UUID, vedtaksperiodeId: UUID, hendelseId: UUID, skjæringstidspunkt: LocalDate?, periode: Periode?): Generasjon = TODO("Not yet implemented")
+        override fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID): Generasjon = TODO("Not yet implemented")
         override fun låsFor(generasjonId: UUID, hendelseId: UUID): Unit = TODO("Not yet implemented")
         override fun utbetalingFor(generasjonId: UUID, utbetalingId: UUID): Unit = TODO("Not yet implemented")
         override fun sisteFor(vedtaksperiodeId: UUID): Generasjon = TODO("Not yet implemented")

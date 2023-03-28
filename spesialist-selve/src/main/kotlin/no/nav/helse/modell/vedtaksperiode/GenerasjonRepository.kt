@@ -9,13 +9,6 @@ import org.slf4j.LoggerFactory
 
 internal interface GenerasjonRepository {
     fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID = UUID.randomUUID()): Generasjon?
-    fun opprettNeste(
-        id: UUID,
-        vedtaksperiodeId: UUID,
-        hendelseId: UUID,
-        skjæringstidspunkt: LocalDate?,
-        periode: Periode?
-    ): Generasjon
     fun låsFor(generasjonId: UUID, hendelseId: UUID)
     fun utbetalingFor(generasjonId: UUID, utbetalingId: UUID)
     fun sisteFor(vedtaksperiodeId: UUID): Generasjon
@@ -42,6 +35,17 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
         dao.oppdaterSykefraværstilfelle(generasjonId, skjæringstidspunkt, Periode(fom, tom))
     }
 
+    override fun generasjonOpprettet(
+        generasjonId: UUID,
+        vedtaksperiodeId: UUID,
+        hendelseId: UUID,
+        fom: LocalDate?,
+        tom: LocalDate?,
+        skjæringstidspunkt: LocalDate?
+    ) {
+        opprettNeste(generasjonId, vedtaksperiodeId, hendelseId, skjæringstidspunkt, fom?.let { Periode(it, requireNotNull(tom)) })
+    }
+
     override fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID): Generasjon? {
         if (dao.finnSisteFor(vedtaksperiodeId) != null) {
             sikkerlogg.info(
@@ -52,19 +56,6 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
         }
         return dao.opprettFor(id, vedtaksperiodeId, hendelseId, null, null).also {
             it.loggFørsteOpprettet(vedtaksperiodeId)
-            it.registrer(this)
-        }
-    }
-
-    override fun opprettNeste(
-        id: UUID,
-        vedtaksperiodeId: UUID,
-        hendelseId: UUID,
-        skjæringstidspunkt: LocalDate?,
-        periode: Periode?
-    ): Generasjon {
-        return dao.opprettFor(id, vedtaksperiodeId, hendelseId, skjæringstidspunkt, periode).also {
-            it.loggNesteOpprettet(vedtaksperiodeId)
             it.registrer(this)
         }
     }
@@ -104,6 +95,18 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
                 "Finner ikke generasjon med {}. Utbetaling forsøkt fjernet",
                 keyValue("generasjonId", generasjonId)
             )
+    }
+
+    private fun opprettNeste(
+        id: UUID,
+        vedtaksperiodeId: UUID,
+        hendelseId: UUID,
+        skjæringstidspunkt: LocalDate?,
+        periode: Periode?
+    ) {
+        dao.opprettFor(id, vedtaksperiodeId, hendelseId, skjæringstidspunkt, periode).also {
+            it.loggNesteOpprettet(vedtaksperiodeId)
+        }
     }
 
     private companion object {

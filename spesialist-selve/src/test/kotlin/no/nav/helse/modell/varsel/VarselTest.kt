@@ -1,12 +1,10 @@
 package no.nav.helse.modell.varsel
 
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.modell.varsel.Varsel.Status.VURDERT
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
-import no.nav.helse.modell.vedtaksperiode.Periode
 import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -217,13 +215,6 @@ internal class VarselTest {
 
     private val generasjonRepository get() = object : GenerasjonRepository {
         override fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID): Generasjon = TODO("Not yet implemented")
-        override fun opprettNeste(
-            id: UUID,
-            vedtaksperiodeId: UUID,
-            hendelseId: UUID,
-            skjæringstidspunkt: LocalDate?,
-            periode: Periode?
-        ): Generasjon = TODO("Not yet implemented")
         override fun låsFor(generasjonId: UUID, hendelseId: UUID): Unit = TODO("Not yet implemented")
         override fun utbetalingFor(generasjonId: UUID, utbetalingId: UUID): Unit = TODO("Not yet implemented")
         override fun sisteFor(vedtaksperiodeId: UUID): Generasjon = TODO("Not yet implemented")

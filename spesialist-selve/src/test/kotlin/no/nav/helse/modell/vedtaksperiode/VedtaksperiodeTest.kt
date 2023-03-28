@@ -143,16 +143,6 @@ class VedtaksperiodeTest {
             TODO("Not yet implemented")
         }
 
-        override fun opprettNeste(
-            id: UUID,
-            vedtaksperiodeId: UUID,
-            hendelseId: UUID,
-            skjæringstidspunkt: LocalDate?,
-            periode: Periode?,
-        ): Generasjon {
-            TODO("Not yet implemented")
-        }
-
         override fun låsFor(generasjonId: UUID, hendelseId: UUID) {
             TODO("Not yet implemented")
         }

@@ -48,8 +48,8 @@ internal class Generasjon private constructor(
     private val varsler: MutableList<Varsel> = varsler.toMutableList()
     private val observers = mutableSetOf<IVedtaksperiodeObserver>()
 
-    internal fun registrer(observer: IVedtaksperiodeObserver) {
-        observers.add(observer)
+    internal fun registrer(vararg observer: IVedtaksperiodeObserver) {
+        observers.addAll(observer)
     }
 
     internal fun liggerFør(dato: LocalDate): Boolean {
@@ -69,23 +69,22 @@ internal class Generasjon private constructor(
             it.tidslinjeOppdatert(id, fom, tom, skjæringstidspunkt)
         }
     }
+
     internal fun håndterNyGenerasjon(
         varselRepository: VarselRepository,
         hendelseId: UUID,
         id: UUID = UUID.randomUUID(),
     ): Generasjon? {
-        if (!låst) {
-            sikkerlogg.info(
-                "Oppretter ikke ny generasjon for {} da nåværende generasjon med {} er ulåst",
-                keyValue("vedtaksperiodeId", vedtaksperiodeId),
-                keyValue("generasjonId", this.id)
-            )
-            return null
-        }
-
-        val nesteGenerasjon = generasjonRepository.opprettNeste(id, vedtaksperiodeId, hendelseId, skjæringstidspunkt, periode)
+        if (!låst) return null
+        val nesteGenerasjon = opprettNeste(id, hendelseId)
         flyttAktiveVarsler(nesteGenerasjon, varselRepository)
         return nesteGenerasjon
+    }
+
+    private fun opprett(hendelseId: UUID) {
+        observers.forEach {
+            it.generasjonOpprettet(id, vedtaksperiodeId, hendelseId, periode?.fom(), periode?.tom(), skjæringstidspunkt)
+        }
     }
 
     private fun flyttAktiveVarsler(nyGenerasjon: Generasjon, varselRepository: VarselRepository) {
@@ -224,6 +223,14 @@ internal class Generasjon private constructor(
         private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
         internal fun List<Generasjon>.gyldigeVarsler(): List<Varsel> {
             return flatMap { generasjon -> generasjon.varsler.filter(Varsel::erGyldig) }
+        }
+
+        private fun Generasjon.opprettNeste(generasjonId: UUID, hendelseId: UUID): Generasjon {
+            val nyGenerasjon = Generasjon(generasjonId, this.vedtaksperiodeId, null, false, this.skjæringstidspunkt, this.periode, emptySet(), this.generasjonRepository)
+            nyGenerasjon.registrer(*this.observers.toTypedArray())
+            nyGenerasjon.opprett(hendelseId)
+
+            return nyGenerasjon
         }
     }
 }
