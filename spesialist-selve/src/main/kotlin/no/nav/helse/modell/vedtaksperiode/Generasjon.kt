@@ -46,7 +46,7 @@ internal class Generasjon private constructor(
     ): this(id, vedtaksperiodeId, utbetalingId, låst, skjæringstidspunkt, periode, varsler, ActualGenerasjonRepository(dataSource))
 
     private val varsler: MutableList<Varsel> = varsler.toMutableList()
-    private val observers = mutableListOf<IVedtaksperiodeObserver>()
+    private val observers = mutableSetOf<IVedtaksperiodeObserver>()
 
     internal fun registrer(observer: IVedtaksperiodeObserver) {
         observers.add(observer)
