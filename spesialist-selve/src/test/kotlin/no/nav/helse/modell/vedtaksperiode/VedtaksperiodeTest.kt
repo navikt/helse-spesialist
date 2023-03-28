@@ -11,6 +11,7 @@ import no.nav.helse.januar
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOppdatering.Companion.oppdaterSykefraværstilfeller
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -22,10 +23,10 @@ VedtaksperiodeTest : DatabaseIntegrationTest() {
     fun `kan registrere observer`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val vedtaksperiode = Vedtaksperiode(vedtaksperiodeId, Generasjon(UUID.randomUUID(), vedtaksperiodeId, generasjonRepository))
-        val observer = object : IVedtaksperiodeObserver{
+        val observer = object : IVedtaksperiodeObserver {
             var tidslinjeOppdatert = false
             override fun tidslinjeOppdatert(
-                vedtaksperiodeId: UUID,
+                generasjonId: UUID,
                 fom: LocalDate,
                 tom: LocalDate,
                 skjæringstidspunkt: LocalDate
@@ -34,7 +35,7 @@ VedtaksperiodeTest : DatabaseIntegrationTest() {
             }
         }
         vedtaksperiode.registrer(observer)
-        vedtaksperiode.håndterTidslinjeEndring(15.januar, 30.januar, 15.januar)
+        vedtaksperiode.håndterTidslinjeendring(15.januar, 30.januar, 15.januar)
         assertTrue(observer.tidslinjeOppdatert)
     }
 
@@ -125,6 +126,39 @@ VedtaksperiodeTest : DatabaseIntegrationTest() {
         assertEquals(generasjon1, forventetGenerasjon1)
         assertEquals(generasjon2, forventetGenerasjon2)
         assertEquals(generasjon3, forventetGenerasjon3)
+    }
+
+    @Test
+    fun `referential equals`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val vedtaksperiode = Vedtaksperiode(vedtaksperiodeId, Generasjon(UUID.randomUUID(), vedtaksperiodeId, generasjonRepository))
+        assertEquals(vedtaksperiode, vedtaksperiode)
+    }
+
+    @Test
+    fun `structural equals`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjonId = UUID.randomUUID()
+        val vedtaksperiode1 = Vedtaksperiode(vedtaksperiodeId, Generasjon(generasjonId, vedtaksperiodeId, generasjonRepository))
+        val vedtaksperiode2 = Vedtaksperiode(vedtaksperiodeId, Generasjon(generasjonId, vedtaksperiodeId, generasjonRepository))
+        assertEquals(vedtaksperiode1, vedtaksperiode2)
+    }
+
+    @Test
+    fun `not equals - vedtaksperiodeId`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjonId = UUID.randomUUID()
+        val vedtaksperiode1 = Vedtaksperiode(UUID.randomUUID(), Generasjon(generasjonId, vedtaksperiodeId, generasjonRepository))
+        val vedtaksperiode2 = Vedtaksperiode(vedtaksperiodeId, Generasjon(generasjonId, vedtaksperiodeId, generasjonRepository))
+        assertNotEquals(vedtaksperiode1, vedtaksperiode2)
+    }
+
+    @Test
+    fun `not equals - gjeldendeGenerasjon`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val vedtaksperiode1 = Vedtaksperiode(vedtaksperiodeId, Generasjon(UUID.randomUUID(), vedtaksperiodeId, generasjonRepository))
+        val vedtaksperiode2 = Vedtaksperiode(vedtaksperiodeId, Generasjon(UUID.randomUUID(), vedtaksperiodeId, generasjonRepository))
+        assertNotEquals(vedtaksperiode1, vedtaksperiode2)
     }
 
     private fun finnGenerasjonMed(generasjonId: UUID): Generasjon {

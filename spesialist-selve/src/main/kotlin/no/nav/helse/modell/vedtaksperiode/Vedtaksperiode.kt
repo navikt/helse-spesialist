@@ -21,10 +21,13 @@ internal class Vedtaksperiode(
     override fun equals(other: Any?): Boolean =
         this === other || (other is Vedtaksperiode
                 && javaClass == other.javaClass
-                && vedtaksperiodeId == other.vedtaksperiodeId)
+                && vedtaksperiodeId == other.vedtaksperiodeId
+                && gjeldendeGenerasjon == other.gjeldendeGenerasjon
+                )
 
     override fun hashCode(): Int {
         var result = vedtaksperiodeId.hashCode()
+        result = 31 * result + gjeldendeGenerasjon.hashCode()
         return result
     }
 
