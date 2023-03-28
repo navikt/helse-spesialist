@@ -6,6 +6,8 @@ import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
+import no.nav.helse.desember
+import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.Varsel
@@ -15,14 +17,17 @@ import no.nav.helse.modell.varsel.Varsel.Status.AKTIV
 import no.nav.helse.modell.varsel.Varsel.Status.AVVIST
 import no.nav.helse.modell.varsel.Varsel.Status.GODKJENT
 import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
+import no.nav.helse.modell.varsel.Varsel.Status.VURDERT
 import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_1
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_2
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_3
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -145,6 +150,45 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
             Generasjon(generasjonId, vedtaksperiodeId, null, true, null, null, emptySet(), dataSource),
             generasjon
         )
+    }
+
+    @Test
+    fun `generasjon ligger før dato`() {
+        val generasjon = Generasjon(UUID.randomUUID(), UUID.randomUUID(), null, true, 1.januar, Periode(1.januar, 31.januar), emptySet(), dataSource)
+        assertTrue(generasjon.liggerFør(31.januar))
+        assertTrue(generasjon.liggerFør(1.februar))
+        assertFalse(generasjon.liggerFør(1.januar))
+        assertFalse(generasjon.liggerFør(31.desember(2017)))
+    }
+    @Test
+    fun `generasjon ligger ikke før dato dersom perioden er null`() {
+        val generasjon = Generasjon(UUID.randomUUID(), UUID.randomUUID(), null, true, null, null, emptySet(), dataSource)
+        assertFalse(generasjon.liggerFør(31.januar))
+        assertFalse(generasjon.liggerFør(1.februar))
+        assertFalse(generasjon.liggerFør(1.januar))
+        assertFalse(generasjon.liggerFør(31.desember(2017)))
+    }
+
+    @Test
+    fun `generasjon har aktive varsler`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val aktivtVarsel = Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId, AKTIV)
+        val generasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId, null, true, null, null, setOf(aktivtVarsel), dataSource)
+        assertTrue(generasjon.harAktiveVarsler())
+    }
+    @Test
+    fun `generasjon har ikke aktive varsler`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId, null, true, null, null, emptySet(), dataSource)
+        assertFalse(generasjon.harAktiveVarsler())
+    }
+    @Test
+    fun `generasjon har aktive varsler når generasjon har både aktive og vurderte varsler`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val aktivtVarsel = Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId, AKTIV)
+        val vurdertVarsel = Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId, VURDERT)
+        val generasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId, null, true, null, null, setOf(aktivtVarsel, vurdertVarsel), dataSource)
+        assertTrue(generasjon.harAktiveVarsler())
     }
 
     @Test

@@ -19,6 +19,14 @@ internal class Vedtaksperiode(
         gjeldendeGenerasjon.håndterTidslinjeendring(fom, tom, skjæringstidspunkt)
     }
 
+    private fun liggerInnenfor(dato: LocalDate): Boolean {
+        return gjeldendeGenerasjon.liggerFør(dato)
+    }
+
+    private fun harAktiveVarsler(): Boolean {
+        return gjeldendeGenerasjon.harAktiveVarsler()
+    }
+
     override fun equals(other: Any?): Boolean =
         this === other || (other is Vedtaksperiode
                 && javaClass == other.javaClass
@@ -37,6 +45,14 @@ internal class Vedtaksperiode(
             forEach { vedtaksperiode ->
                 val oppdatering = vedtaksperiodeoppdateringer.find { it.vedtaksperiodeId == vedtaksperiode.vedtaksperiodeId } ?: return@forEach
                 vedtaksperiode.håndterTidslinjeendring(oppdatering.fom, oppdatering.tom, oppdatering.skjæringstidspunkt)
+            }
+        }
+
+        internal fun List<Vedtaksperiode>.harAktiveVarsler(tilOgMed: LocalDate): Boolean {
+            return this.filter {
+                it.liggerInnenfor(tilOgMed)
+            }.any {
+                it.harAktiveVarsler()
             }
         }
     }

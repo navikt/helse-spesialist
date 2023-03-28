@@ -52,6 +52,14 @@ internal class Generasjon private constructor(
         observers.add(observer)
     }
 
+    internal fun liggerFør(dato: LocalDate): Boolean {
+        return periode?.let { it.tom() <= dato } ?: false
+    }
+
+    internal fun harAktiveVarsler(): Boolean {
+        return varsler.any { it.erAktiv() }
+    }
+
     internal fun håndterTidslinjeendring(fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate) {
         if (låst) return
         if (fom == periode?.fom() && tom == periode?.tom() && skjæringstidspunkt == this.skjæringstidspunkt) return
