@@ -147,11 +147,11 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
             @Language("PostgreSQL")
             val statement =
-                "INSERT INTO vedtak(vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref, snapshot_ref) VALUES(?, ?, ?, ?, ?, ?)"
+                "INSERT INTO vedtak(vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref, snapshot_ref, forkastet) VALUES(?, ?, ?, ?, ?, ?, ?)"
             requireNotNull(
                 session.run(
                     queryOf(
-                        statement, periode.id, periode.fom, periode.tom, arbeidsgiverId, personId, snapshotid
+                        statement, periode.id, periode.fom, periode.tom, arbeidsgiverId, personId, snapshotid, false
                     ).asUpdateAndReturnGeneratedKey
                 )
             )

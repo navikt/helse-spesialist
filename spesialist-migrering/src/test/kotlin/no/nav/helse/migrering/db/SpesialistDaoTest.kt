@@ -125,7 +125,7 @@ internal class SpesialistDaoTest: AbstractDatabaseTest() {
     }
     private fun assertVedtaksperiode(vedtaksperiodeId: UUID, forventetAntall: Int) {
         @Language("PostgreSQL")
-        val query = "SELECT count(1) FROM vedtak WHERE vedtaksperiode_id = ? AND forkastet IS NULL AND forkastet_av_hendelse IS NULL "
+        val query = "SELECT count(1) FROM vedtak WHERE vedtaksperiode_id = ? AND forkastet = false AND forkastet_av_hendelse IS NULL "
         val antallFunnet = sessionOf(dataSource).use { session ->
             session.run(queryOf(query, vedtaksperiodeId).map { it.int(1) }.asSingle)
         }

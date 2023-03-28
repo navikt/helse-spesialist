@@ -58,7 +58,7 @@ internal class SpesialistDao(private val dataSource: DataSource): IPersonObserve
     private fun opprettVedtaksperiode(vedtaksperiodeId: UUID, fom: LocalDate, tom: LocalDate, organisasjonsnummer: String, fødselsnummer: String) {
         @Language("PostgreSQL")
         val query =
-            "INSERT INTO vedtak(vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref) VALUES (?, ?, ?, (SELECT id FROM arbeidsgiver WHERE orgnummer = ?), (SELECT id FROM person WHERE fodselsnummer = ?)) ON CONFLICT (vedtaksperiode_id) DO NOTHING "
+            "INSERT INTO vedtak(vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref, forkastet) VALUES (?, ?, ?, (SELECT id FROM arbeidsgiver WHERE orgnummer = ?), (SELECT id FROM person WHERE fodselsnummer = ?), false) ON CONFLICT (vedtaksperiode_id) DO NOTHING "
         val insertOk = sessionOf(dataSource).use { session ->
             session.run(queryOf(query, vedtaksperiodeId, fom, tom, organisasjonsnummer.toLong(), fødselsnummer.toLong()).asUpdate) > 0
         }
