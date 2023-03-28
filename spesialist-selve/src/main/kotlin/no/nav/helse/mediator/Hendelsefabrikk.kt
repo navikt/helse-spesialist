@@ -512,18 +512,20 @@ internal class Hendelsefabrikk(
 
     fun sykefraværstilfeller(
         id: UUID,
-        vedtaksperioder: List<VedtaksperiodeOppdatering>,
+        vedtaksperiodeOppdateringer: List<VedtaksperiodeOppdatering>,
         fødselsnummer: String,
         aktørId: String,
         json: String,
     ): Sykefraværstilfeller {
+        val vedtaksperiodeIder = vedtaksperiodeOppdateringer.map { it.vedtaksperiodeId }
+        val vedtaksperioder = generasjonRepository.finnVedtaksperioder(vedtaksperiodeIder)
         return Sykefraværstilfeller(
             id = id,
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
+            vedtaksperiodeOppdateringer = vedtaksperiodeOppdateringer,
             vedtaksperioder = vedtaksperioder,
-            json,
-            generasjonRepository,
+            json = json,
         )
     }
 
@@ -531,7 +533,7 @@ internal class Hendelsefabrikk(
         val jsonNode = mapper.readTree(json)
         return sykefraværstilfeller(
             id = UUID.fromString(jsonNode["@id"].asText()),
-            vedtaksperioder = jsonNode["tilfeller"].flatMap { tilfelleNode ->
+            vedtaksperiodeOppdateringer = jsonNode["tilfeller"].flatMap { tilfelleNode ->
                 val skjæringstidspunkt = tilfelleNode["dato"].asLocalDate()
                 tilfelleNode["perioder"].map {
                     VedtaksperiodeOppdatering(

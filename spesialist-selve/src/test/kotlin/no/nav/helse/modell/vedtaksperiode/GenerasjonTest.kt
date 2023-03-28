@@ -91,6 +91,35 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     }
 
     @Test
+    fun `Generasjon skal ikke oppdateres dersom den er låst`() {
+        val generasjonId = UUID.randomUUID()
+        val generasjon = Generasjon(generasjonId, UUID.randomUUID(), null, låst = true, null, null, emptySet(), dataSource)
+        val observer = object : IVedtaksperiodeObserver {
+            var generasjonId: UUID? = null
+            var fom: LocalDate? = null
+            var tom: LocalDate? = null
+            var skjæringstidspunkt: LocalDate? = null
+            override fun tidslinjeOppdatert(
+                generasjonId: UUID,
+                fom: LocalDate,
+                tom: LocalDate,
+                skjæringstidspunkt: LocalDate
+            ) {
+                this.generasjonId = generasjonId
+                this.fom = fom
+                this.tom = tom
+                this.skjæringstidspunkt = skjæringstidspunkt
+            }
+        }
+        generasjon.registrer(observer)
+        generasjon.håndterTidslinjeendring(1.januar, 31.januar, 1.januar)
+        assertNull(observer.generasjonId)
+        assertNull(observer.fom)
+        assertNull(observer.tom)
+        assertNull(observer.skjæringstidspunkt)
+    }
+
+    @Test
     fun `Kopierer skjæringstidspunkt og periode til neste generasjon`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)

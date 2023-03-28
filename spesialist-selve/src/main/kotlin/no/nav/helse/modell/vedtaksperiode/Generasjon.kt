@@ -53,6 +53,7 @@ internal class Generasjon private constructor(
     }
 
     internal fun håndterTidslinjeendring(fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate) {
+        if (låst) return
         if (fom == periode?.fom() && tom == periode?.tom() && skjæringstidspunkt == this.skjæringstidspunkt) return
         observers.forEach {
             it.tidslinjeOppdatert(id, fom, tom, skjæringstidspunkt)

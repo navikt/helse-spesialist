@@ -8,6 +8,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.februar
 import no.nav.helse.januar
+import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode.Companion.håndterOppdateringer
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOppdatering.Companion.oppdaterSykefraværstilfeller
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -126,6 +127,80 @@ VedtaksperiodeTest : DatabaseIntegrationTest() {
         assertEquals(generasjon1, forventetGenerasjon1)
         assertEquals(generasjon2, forventetGenerasjon2)
         assertEquals(generasjon3, forventetGenerasjon3)
+    }
+
+    @Test
+    fun `håndterer oppdateringer`() {
+        val vedtaksperiodeId1 = UUID.randomUUID()
+        val vedtaksperiodeId2 = UUID.randomUUID()
+        val generasjonId1 = UUID.randomUUID()
+        val generasjonId2 = UUID.randomUUID()
+        val vedtaksperiode1 = Vedtaksperiode(vedtaksperiodeId1, Generasjon(generasjonId1, vedtaksperiodeId1, generasjonRepository))
+        val vedtaksperiode2 = Vedtaksperiode(vedtaksperiodeId2, Generasjon(generasjonId2, vedtaksperiodeId2, generasjonRepository))
+
+        val observer = object : IVedtaksperiodeObserver {
+            val oppdaterteGenerasjoner = mutableListOf<UUID>()
+            override fun tidslinjeOppdatert(generasjonId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate) {
+                oppdaterteGenerasjoner.add(generasjonId)
+            }
+        }
+        vedtaksperiode1.registrer(observer)
+        vedtaksperiode2.registrer(observer)
+
+        listOf(vedtaksperiode1, vedtaksperiode2).håndterOppdateringer(
+            listOf(
+                VedtaksperiodeOppdatering(1.januar, 31.januar, 1.januar, vedtaksperiodeId1),
+                VedtaksperiodeOppdatering(1.januar, 31.januar, 1.januar, vedtaksperiodeId2),
+            )
+        )
+        assertEquals(2, observer.oppdaterteGenerasjoner.size)
+        assertEquals(generasjonId1, observer.oppdaterteGenerasjoner[0])
+        assertEquals(generasjonId2, observer.oppdaterteGenerasjoner[1])
+    }
+
+    @Test
+    fun `håndterer oppdateringer for kun noen av vedtaksperiodene`() {
+        val vedtaksperiodeId1 = UUID.randomUUID()
+        val vedtaksperiodeId2 = UUID.randomUUID()
+        val generasjonId1 = UUID.randomUUID()
+        val generasjonId2 = UUID.randomUUID()
+        val vedtaksperiode1 = Vedtaksperiode(vedtaksperiodeId1, Generasjon(generasjonId1, vedtaksperiodeId1, generasjonRepository))
+        val vedtaksperiode2 = Vedtaksperiode(vedtaksperiodeId2, Generasjon(generasjonId2, vedtaksperiodeId2, generasjonRepository))
+
+        val observer = object : IVedtaksperiodeObserver {
+            val oppdaterteGenerasjoner = mutableListOf<UUID>()
+            override fun tidslinjeOppdatert(generasjonId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate) {
+                oppdaterteGenerasjoner.add(generasjonId)
+            }
+        }
+        vedtaksperiode1.registrer(observer)
+        vedtaksperiode2.registrer(observer)
+
+        listOf(vedtaksperiode1, vedtaksperiode2).håndterOppdateringer(listOf(VedtaksperiodeOppdatering(1.januar, 31.januar, 1.januar, vedtaksperiodeId2)))
+        assertEquals(1, observer.oppdaterteGenerasjoner.size)
+        assertEquals(generasjonId2, observer.oppdaterteGenerasjoner[0])
+    }
+
+    @Test
+    fun `håndterer ikke oppdateringer for noen av vedtaksperiodene`() {
+        val vedtaksperiodeId1 = UUID.randomUUID()
+        val vedtaksperiodeId2 = UUID.randomUUID()
+        val generasjonId1 = UUID.randomUUID()
+        val generasjonId2 = UUID.randomUUID()
+        val vedtaksperiode1 = Vedtaksperiode(vedtaksperiodeId1, Generasjon(generasjonId1, vedtaksperiodeId1, generasjonRepository))
+        val vedtaksperiode2 = Vedtaksperiode(vedtaksperiodeId2, Generasjon(generasjonId2, vedtaksperiodeId2, generasjonRepository))
+
+        val observer = object : IVedtaksperiodeObserver {
+            val oppdaterteGenerasjoner = mutableListOf<UUID>()
+            override fun tidslinjeOppdatert(generasjonId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate) {
+                oppdaterteGenerasjoner.add(generasjonId)
+            }
+        }
+        vedtaksperiode1.registrer(observer)
+        vedtaksperiode2.registrer(observer)
+
+        listOf(vedtaksperiode1, vedtaksperiode2).håndterOppdateringer(listOf(VedtaksperiodeOppdatering(1.januar, 31.januar, 1.januar, UUID.randomUUID())))
+        assertEquals(0, observer.oppdaterteGenerasjoner.size)
     }
 
     @Test

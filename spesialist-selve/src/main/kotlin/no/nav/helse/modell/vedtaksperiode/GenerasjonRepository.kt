@@ -26,7 +26,7 @@ internal interface GenerasjonRepository {
     fun finnVedtaksperioder(vedtaksperiodeIder: List<UUID>): List<Vedtaksperiode>
 }
 
-internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRepository {
+internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRepository, IVedtaksperiodeObserver {
 
     private val dao = GenerasjonDao(dataSource)
 
@@ -35,8 +35,14 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
             Vedtaksperiode(
                 vedtaksperiodeId,
                 sisteFor(vedtaksperiodeId)
-            )
+            ).also {
+                it.registrer(this)
+            }
         }
+    }
+
+    override fun tidslinjeOppdatert(generasjonId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate) {
+        oppdaterSykefraværstilfelle(generasjonId, skjæringstidspunkt, Periode(fom, tom))
     }
 
     override fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID): Generasjon? {

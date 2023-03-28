@@ -5,5 +5,5 @@ import java.util.UUID
 
 interface IVedtaksperiodeObserver {
 
-    fun tidslinjeOppdatert(vedtaksperiodeId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate) {}
+    fun tidslinjeOppdatert(generasjonId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate) {}
 }

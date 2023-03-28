@@ -12,10 +12,11 @@ internal class Vedtaksperiode(
 
     internal fun registrer(observer: IVedtaksperiodeObserver) {
         observers.add(observer)
+        gjeldendeGenerasjon.registrer(observer)
     }
 
-    internal fun håndterTidslinjeEndring(fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate) {
-        observers.forEach{ it.tidslinjeOppdatert(vedtaksperiodeId, fom, tom, skjæringstidspunkt)}
+    internal fun håndterTidslinjeendring(fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate) {
+        gjeldendeGenerasjon.håndterTidslinjeendring(fom, tom, skjæringstidspunkt)
     }
 
     override fun equals(other: Any?): Boolean =
@@ -29,6 +30,15 @@ internal class Vedtaksperiode(
         var result = vedtaksperiodeId.hashCode()
         result = 31 * result + gjeldendeGenerasjon.hashCode()
         return result
+    }
+
+    internal companion object {
+        internal fun List<Vedtaksperiode>.håndterOppdateringer(vedtaksperiodeoppdateringer: List<VedtaksperiodeOppdatering>) {
+            forEach { vedtaksperiode ->
+                val oppdatering = vedtaksperiodeoppdateringer.find { it.vedtaksperiodeId == vedtaksperiode.vedtaksperiodeId } ?: return@forEach
+                vedtaksperiode.håndterTidslinjeendring(oppdatering.fom, oppdatering.tom, oppdatering.skjæringstidspunkt)
+            }
+        }
     }
 
 }
