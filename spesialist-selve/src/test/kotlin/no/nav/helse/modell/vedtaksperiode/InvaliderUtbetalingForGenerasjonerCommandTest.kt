@@ -67,8 +67,6 @@ class InvaliderUtbetalingForGenerasjonerCommandTest {
             generasjonerSomHarFåttFjernetUtbetaling.add(generasjonId)
         }
 
-        override fun finnÅpenGenerasjonFor(vedtaksperiodeId: UUID): Generasjon = TODO("Not yet implemented")
-
         override fun finnVedtaksperioder(vedtaksperiodeIder: List<UUID>): List<Vedtaksperiode> {
             TODO("Not yet implemented")
         }

@@ -21,7 +21,6 @@ internal interface GenerasjonRepository {
     fun sisteFor(vedtaksperiodeId: UUID): Generasjon
     fun tilhørendeFor(utbetalingId: UUID): List<Generasjon>
     fun fjernUtbetalingFor(generasjonId: UUID)
-    fun finnÅpenGenerasjonFor(vedtaksperiodeId: UUID): Generasjon?
     fun finnVedtaksperioder(vedtaksperiodeIder: List<UUID>): List<Vedtaksperiode>
 }
 
@@ -103,10 +102,6 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
                 "Finner ikke generasjon med {}. Utbetaling forsøkt fjernet",
                 keyValue("generasjonId", generasjonId)
             )
-    }
-
-    override fun finnÅpenGenerasjonFor(vedtaksperiodeId: UUID): Generasjon? {
-        return dao.åpenGenerasjonForVedtaksperiode(vedtaksperiodeId)
     }
 
     private companion object {
