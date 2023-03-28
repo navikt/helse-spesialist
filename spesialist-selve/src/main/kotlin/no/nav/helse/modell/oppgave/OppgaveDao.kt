@@ -77,15 +77,6 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             LIMIT 1;
         """.single(mapOf("fodselsnummer" to fødselsnummer.toLong())) { it.long("oppgaveId") }!!
 
-    fun harÅpenOppgave(fødselsnummer: String) =
-        """ SELECT 1 as exists
-            FROM oppgave o
-                     JOIN vedtak v ON v.id = o.vedtak_ref
-                     JOIN person p ON v.person_ref = p.id
-            WHERE p.fodselsnummer = :fodselsnummer
-            AND status = 'AvventerSaksbehandler'::oppgavestatus;
-        """.list(mapOf("fodselsnummer" to fødselsnummer.toLong())) { it.long("exists") }.isNotEmpty()
-
     fun finnGodkjenningsbehov(fødselsnummer: String) =
         """ SELECT c.hendelse_id as hendelse_id
             FROM oppgave o
