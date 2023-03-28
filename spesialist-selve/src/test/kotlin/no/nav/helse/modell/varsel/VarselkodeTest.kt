@@ -4,8 +4,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_3
 import no.nav.helse.modell.vedtaksperiode.Generasjon
-import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
-import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -23,7 +21,7 @@ internal class VarselkodeTest {
     @Test
     fun `opprett nytt varsel`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId, generasjonRepository)
+        val generasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId)
         SB_EX_3.nyttVarsel(generasjon, varselRepository)
 
         assertEquals(1, vedtaksperiodevarsler[vedtaksperiodeId]?.size)
@@ -32,7 +30,7 @@ internal class VarselkodeTest {
     @Test
     fun `deaktiverer varsel`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId, generasjonRepository)
+        val generasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId)
         SB_EX_3.nyttVarsel(generasjon, varselRepository)
         SB_EX_3.deaktiverFor(generasjon, varselRepository)
 
@@ -58,12 +56,4 @@ internal class VarselkodeTest {
         }
     }
 
-    private val generasjonRepository = object : GenerasjonRepository {
-        override fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID): Generasjon = TODO("Not yet implemented")
-        override fun sisteFor(vedtaksperiodeId: UUID): Generasjon = TODO("Not yet implemented")
-        override fun tilhørendeFor(utbetalingId: UUID): List<Generasjon> = TODO("Not yet implemented")
-        override fun finnVedtaksperioder(vedtaksperiodeIder: List<UUID>): List<Vedtaksperiode> {
-            TODO("Not yet implemented")
-        }
-    }
 }

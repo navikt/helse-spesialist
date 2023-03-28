@@ -26,7 +26,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         val generasjon = generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE_ID, UUID.randomUUID(), null, null)
         val siste = generasjonDao.finnSisteFor(VEDTAKSPERIODE_ID)
 
-        val forventetGenerasjon = Generasjon(generasjonId, VEDTAKSPERIODE_ID, null, false, null, null, emptySet(), dataSource)
+        val forventetGenerasjon = Generasjon(generasjonId, VEDTAKSPERIODE_ID, null, false, null, null, emptySet())
 
         assertEquals(generasjon, siste)
         assertEquals(forventetGenerasjon, generasjon)
@@ -39,7 +39,15 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         val generasjon = generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE_ID, UUID.randomUUID(), 1.januar, periode)
         val siste = generasjonDao.finnSisteFor(VEDTAKSPERIODE_ID)
 
-        val forventetGenerasjon = Generasjon(generasjonId, VEDTAKSPERIODE_ID, null, false, 1.januar, periode, emptySet(), dataSource)
+        val forventetGenerasjon = Generasjon(
+            generasjonId,
+            VEDTAKSPERIODE_ID,
+            null,
+            false,
+            1.januar,
+            periode,
+            emptySet()
+        )
 
         assertEquals(generasjon, siste)
         assertEquals(forventetGenerasjon, generasjon)
@@ -109,8 +117,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
                 null,
                 setOf(
                     Varsel(varselId, "EN_KODE", varselOpprettet, VEDTAKSPERIODE_ID)
-                ),
-                dataSource
+                )
             ),
             generasjon
         )
@@ -147,7 +154,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         generasjonDao.låsFor(generasjonId1, UUID.randomUUID())
         generasjonDao.opprettFor(generasjonId2, VEDTAKSPERIODE_ID, UUID.randomUUID(),null,null)
         val generasjon = generasjonDao.åpenGenerasjonForVedtaksperiode(VEDTAKSPERIODE_ID)
-        val forventetGenerasjon = Generasjon(generasjonId2, VEDTAKSPERIODE_ID, null, false, null, null, emptySet(), dataSource)
+        val forventetGenerasjon = Generasjon(generasjonId2, VEDTAKSPERIODE_ID, null, false, null, null, emptySet())
 
         assertEquals(forventetGenerasjon, generasjon)
     }
@@ -170,7 +177,15 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE_ID, UUID.randomUUID(),null,null)
         generasjonDao.oppdaterSykefraværstilfelle(generasjonId, skjæringstidspunkt, periode)
         val generasjon = generasjonDao.finnSisteFor(VEDTAKSPERIODE_ID)
-        val forventetGenerasjon = Generasjon(generasjonId, VEDTAKSPERIODE_ID, null, false, skjæringstidspunkt, periode, emptySet(), dataSource)
+        val forventetGenerasjon = Generasjon(
+            generasjonId,
+            VEDTAKSPERIODE_ID,
+            null,
+            false,
+            skjæringstidspunkt,
+            periode,
+            emptySet()
+        )
 
         assertEquals(forventetGenerasjon, generasjon)
     }
@@ -188,8 +203,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
                 false,
                 null,
                 null,
-                emptySet(),
-                dataSource
+                emptySet()
             ),
             generasjon
         )
@@ -208,8 +222,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
                 false,
                 null,
                 null,
-                emptySet(),
-                dataSource
+                emptySet()
             ),
             generasjon
         )

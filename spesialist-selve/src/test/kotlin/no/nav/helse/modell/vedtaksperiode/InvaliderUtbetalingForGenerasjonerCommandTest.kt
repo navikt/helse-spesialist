@@ -47,14 +47,7 @@ class InvaliderUtbetalingForGenerasjonerCommandTest {
         }
     }
 
-    private fun nyGenerasjon() = Generasjon(UUID.randomUUID(), UUID.randomUUID(), generasjonRepository)
-
-    private val generasjonRepository get() = object : GenerasjonRepository {
-        override fun sisteFor(vedtaksperiodeId: UUID): Generasjon = TODO("Not yet implemented")
-        override fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID): Generasjon = TODO("Not yet implemented")
-        override fun tilhørendeFor(utbetalingId: UUID): List<Generasjon> = TODO("Not yet implemented")
-        override fun finnVedtaksperioder(vedtaksperiodeIder: List<UUID>): List<Vedtaksperiode> = TODO("Not yet implemented")
-    }
+    private fun nyGenerasjon() = Generasjon(UUID.randomUUID(), UUID.randomUUID())
 
     private val varselRepository get() = object : VarselRepository {
         override fun deaktiverFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, definisjonId: UUID?):Unit = TODO("Not yet implemented")

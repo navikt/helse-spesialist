@@ -6,7 +6,6 @@ import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.vedtaksperiode.Generasjon
-import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode.Companion.harAktiveVarsler
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -19,8 +18,8 @@ internal class SykefraværstilfelleTest {
     fun `har ikke aktive varsler`() {
         val vedtaksperiodeId1 = UUID.randomUUID()
         val vedtaksperiodeId2 = UUID.randomUUID()
-        val gjeldendeGenerasjon1 = Generasjon(UUID.randomUUID(), vedtaksperiodeId1, generasjonRepository)
-        val gjeldendeGenerasjon2 = Generasjon(UUID.randomUUID(), vedtaksperiodeId2, generasjonRepository)
+        val gjeldendeGenerasjon1 = Generasjon(UUID.randomUUID(), vedtaksperiodeId1)
+        val gjeldendeGenerasjon2 = Generasjon(UUID.randomUUID(), vedtaksperiodeId2)
         gjeldendeGenerasjon1.håndterTidslinjeendring(1.januar, 31.januar, 1.januar)
         gjeldendeGenerasjon2.håndterTidslinjeendring(1.februar, 28.februar, 1.februar)
         val vedtaksperiode1 = Vedtaksperiode(vedtaksperiodeId1, gjeldendeGenerasjon1)
@@ -31,21 +30,14 @@ internal class SykefraværstilfelleTest {
     fun `har aktive varsler`() {
         val vedtaksperiodeId1 = UUID.randomUUID()
         val vedtaksperiodeId2 = UUID.randomUUID()
-        val gjeldendeGenerasjon1 = Generasjon(UUID.randomUUID(), vedtaksperiodeId1, generasjonRepository)
-        val gjeldendeGenerasjon2 = Generasjon(UUID.randomUUID(), vedtaksperiodeId2, generasjonRepository)
+        val gjeldendeGenerasjon1 = Generasjon(UUID.randomUUID(), vedtaksperiodeId1)
+        val gjeldendeGenerasjon2 = Generasjon(UUID.randomUUID(), vedtaksperiodeId2)
         gjeldendeGenerasjon1.håndterTidslinjeendring(1.januar, 31.januar, 1.januar)
         gjeldendeGenerasjon2.håndterTidslinjeendring(1.februar, 28.februar, 1.februar)
         val vedtaksperiode1 = Vedtaksperiode(vedtaksperiodeId1, gjeldendeGenerasjon1)
         val vedtaksperiode2 = Vedtaksperiode(vedtaksperiodeId2, gjeldendeGenerasjon2)
         gjeldendeGenerasjon2.håndterRegelverksvarsel(UUID.randomUUID(), UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), varselRepository)
         assertTrue(listOf(vedtaksperiode1, vedtaksperiode2).harAktiveVarsler(28.februar))
-    }
-
-    private val generasjonRepository = object : GenerasjonRepository {
-        override fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID): Generasjon = TODO("Not yet implemented")
-        override fun sisteFor(vedtaksperiodeId: UUID): Generasjon = TODO("Not yet implemented")
-        override fun tilhørendeFor(utbetalingId: UUID): List<Generasjon> = TODO("Not yet implemented")
-        override fun finnVedtaksperioder(vedtaksperiodeIder: List<UUID>): List<Vedtaksperiode> = TODO("Not yet implemented")
     }
 
     private val varselRepository = object : VarselRepository {

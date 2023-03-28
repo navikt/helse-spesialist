@@ -1,6 +1,5 @@
 package no.nav.helse.modell.vedtaksperiode
 
-import io.mockk.mockk
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.januar
@@ -10,14 +9,12 @@ import org.junit.jupiter.api.Test
 
 class OppdaterSykefraværstilfellerCommandTest {
 
-    private val repository = mockk<ActualGenerasjonRepository>(relaxed = true)
-
     @Test
     fun `oppdaterer sykefraværstilfelle`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjonsId = UUID.randomUUID()
         val skjæringstidspunkt = 1.januar
-        val generasjon = Generasjon(generasjonsId, vedtaksperiodeId, repository)
+        val generasjon = Generasjon(generasjonsId, vedtaksperiodeId)
         val vedtaksperiodeOppdateringer = listOf(
             VedtaksperiodeOppdatering(skjæringstidspunkt, 5.januar, skjæringstidspunkt, vedtaksperiodeId)
         )

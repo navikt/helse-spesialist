@@ -10,8 +10,6 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.vedtaksperiode.Generasjon
-import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
-import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -71,7 +69,7 @@ internal class GodkjenningMediatorTest {
             saksbehandlerEpost = "2@nav.no",
             godkjenttidspunkt = LocalDateTime.now(),
             saksbehandleroverstyringer = emptyList(),
-            gjeldendeGenerasjoner = listOf(Generasjon(UUID.randomUUID(), UUID.randomUUID(), repository))
+            gjeldendeGenerasjoner = listOf(Generasjon(UUID.randomUUID(), UUID.randomUUID()))
         )
         assertOpptegnelseIkkeOpprettet()
     }
@@ -90,7 +88,7 @@ internal class GodkjenningMediatorTest {
             null,
             null,
             emptyList(),
-            listOf(Generasjon(UUID.randomUUID(), UUID.randomUUID(), repository))
+            listOf(Generasjon(UUID.randomUUID(), UUID.randomUUID()))
         )
         assertOpptegnelseIkkeOpprettet()
     }
@@ -99,8 +97,8 @@ internal class GodkjenningMediatorTest {
     fun `godkjenner varsler for alle gjeldende generasjoner`() {
         val generasjonId1 = UUID.randomUUID()
         val generasjonId2 = UUID.randomUUID()
-        val generasjon1 = Generasjon(generasjonId1, UUID.randomUUID(), repository)
-        val generasjon2 = Generasjon(generasjonId2, UUID.randomUUID(), repository)
+        val generasjon1 = Generasjon(generasjonId1, UUID.randomUUID())
+        val generasjon2 = Generasjon(generasjonId2, UUID.randomUUID())
         generasjon1.håndterRegelverksvarsel(UUID.randomUUID(), UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), varselRepository)
         generasjon2.håndterRegelverksvarsel(UUID.randomUUID(), UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), varselRepository)
 
@@ -127,13 +125,6 @@ internal class GodkjenningMediatorTest {
     private fun assertOpptegnelseIkkeOpprettet() = verify(exactly = 0) { opptegnelseDao.opprettOpptegnelse(eq(fnr), any(), eq(OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE)) }
 
     private companion object {
-        val fnr = "12341231221"
-    }
-
-    private val repository = object : GenerasjonRepository {
-        override fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID): Generasjon? = TODO("Not yet implemented")
-        override fun sisteFor(vedtaksperiodeId: UUID): Generasjon = TODO("Not yet implemented")
-        override fun tilhørendeFor(utbetalingId: UUID): List<Generasjon> = TODO("Not yet implemented")
-        override fun finnVedtaksperioder(vedtaksperiodeIder: List<UUID>): List<Vedtaksperiode> = TODO("Not yet implemented")
+        const val fnr = "12341231221"
     }
 }

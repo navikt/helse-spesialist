@@ -41,11 +41,11 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         val perioder = repository.finnVedtaksperioder(listOf(vedtaksperiodeId1, vedtaksperiodeId2))
         assertEquals(2, perioder.size)
         assertEquals(
-            Vedtaksperiode(vedtaksperiodeId1, Generasjon(generasjonId1, vedtaksperiodeId1, repository)),
+            Vedtaksperiode(vedtaksperiodeId1, Generasjon(generasjonId1, vedtaksperiodeId1)),
             perioder[0]
         )
         assertEquals(
-            Vedtaksperiode(vedtaksperiodeId2, Generasjon(generasjonId2, vedtaksperiodeId2, repository)),
+            Vedtaksperiode(vedtaksperiodeId2, Generasjon(generasjonId2, vedtaksperiodeId2)),
             perioder[1]
         )
     }
@@ -61,7 +61,7 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         val perioder = repository.finnVedtaksperioder(listOf(vedtaksperiodeId1, vedtaksperiodeId2))
         assertEquals(1, perioder.size)
         assertEquals(
-            Vedtaksperiode(vedtaksperiodeId1, Generasjon(generasjonId1, vedtaksperiodeId1, repository)),
+            Vedtaksperiode(vedtaksperiodeId1, Generasjon(generasjonId1, vedtaksperiodeId1)),
             perioder[0]
         )
     }
@@ -194,7 +194,7 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         assertEquals(1, repository.tilhørendeFor(utbetalingId).size)
 
         generasjon?.invaliderUtbetaling(utbetalingId)
-        assertEquals(Generasjon(generasjonId, vedtaksperiodeId, null, false, null, null, emptySet(), dataSource), generasjon)
+        assertEquals(Generasjon(generasjonId, vedtaksperiodeId, null, false, null, null, emptySet()), generasjon)
         assertEquals(0, repository.tilhørendeFor(utbetalingId).size)
     }
 

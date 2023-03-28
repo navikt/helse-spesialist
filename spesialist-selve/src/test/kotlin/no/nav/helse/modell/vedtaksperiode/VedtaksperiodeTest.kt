@@ -14,7 +14,7 @@ class VedtaksperiodeTest {
     @Test
     fun `kan registrere observer`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val vedtaksperiode = Vedtaksperiode(vedtaksperiodeId, Generasjon(UUID.randomUUID(), vedtaksperiodeId, generasjonRepository))
+        val vedtaksperiode = Vedtaksperiode(vedtaksperiodeId, Generasjon(UUID.randomUUID(), vedtaksperiodeId))
         val observer = object : IVedtaksperiodeObserver {
             var tidslinjeOppdatert = false
             override fun tidslinjeOppdatert(
@@ -37,8 +37,8 @@ class VedtaksperiodeTest {
         val vedtaksperiodeId2 = UUID.randomUUID()
         val generasjonId1 = UUID.randomUUID()
         val generasjonId2 = UUID.randomUUID()
-        val vedtaksperiode1 = Vedtaksperiode(vedtaksperiodeId1, Generasjon(generasjonId1, vedtaksperiodeId1, generasjonRepository))
-        val vedtaksperiode2 = Vedtaksperiode(vedtaksperiodeId2, Generasjon(generasjonId2, vedtaksperiodeId2, generasjonRepository))
+        val vedtaksperiode1 = Vedtaksperiode(vedtaksperiodeId1, Generasjon(generasjonId1, vedtaksperiodeId1))
+        val vedtaksperiode2 = Vedtaksperiode(vedtaksperiodeId2, Generasjon(generasjonId2, vedtaksperiodeId2))
 
         val observer = object : IVedtaksperiodeObserver {
             val oppdaterteGenerasjoner = mutableListOf<UUID>()
@@ -66,8 +66,8 @@ class VedtaksperiodeTest {
         val vedtaksperiodeId2 = UUID.randomUUID()
         val generasjonId1 = UUID.randomUUID()
         val generasjonId2 = UUID.randomUUID()
-        val vedtaksperiode1 = Vedtaksperiode(vedtaksperiodeId1, Generasjon(generasjonId1, vedtaksperiodeId1, generasjonRepository))
-        val vedtaksperiode2 = Vedtaksperiode(vedtaksperiodeId2, Generasjon(generasjonId2, vedtaksperiodeId2, generasjonRepository))
+        val vedtaksperiode1 = Vedtaksperiode(vedtaksperiodeId1, Generasjon(generasjonId1, vedtaksperiodeId1))
+        val vedtaksperiode2 = Vedtaksperiode(vedtaksperiodeId2, Generasjon(generasjonId2, vedtaksperiodeId2))
 
         val observer = object : IVedtaksperiodeObserver {
             val oppdaterteGenerasjoner = mutableListOf<UUID>()
@@ -89,8 +89,8 @@ class VedtaksperiodeTest {
         val vedtaksperiodeId2 = UUID.randomUUID()
         val generasjonId1 = UUID.randomUUID()
         val generasjonId2 = UUID.randomUUID()
-        val vedtaksperiode1 = Vedtaksperiode(vedtaksperiodeId1, Generasjon(generasjonId1, vedtaksperiodeId1, generasjonRepository))
-        val vedtaksperiode2 = Vedtaksperiode(vedtaksperiodeId2, Generasjon(generasjonId2, vedtaksperiodeId2, generasjonRepository))
+        val vedtaksperiode1 = Vedtaksperiode(vedtaksperiodeId1, Generasjon(generasjonId1, vedtaksperiodeId1))
+        val vedtaksperiode2 = Vedtaksperiode(vedtaksperiodeId2, Generasjon(generasjonId2, vedtaksperiodeId2))
 
         val observer = object : IVedtaksperiodeObserver {
             val oppdaterteGenerasjoner = mutableListOf<UUID>()
@@ -108,7 +108,7 @@ class VedtaksperiodeTest {
     @Test
     fun `referential equals`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val vedtaksperiode = Vedtaksperiode(vedtaksperiodeId, Generasjon(UUID.randomUUID(), vedtaksperiodeId, generasjonRepository))
+        val vedtaksperiode = Vedtaksperiode(vedtaksperiodeId, Generasjon(UUID.randomUUID(), vedtaksperiodeId))
         assertEquals(vedtaksperiode, vedtaksperiode)
     }
 
@@ -116,8 +116,8 @@ class VedtaksperiodeTest {
     fun `structural equals`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjonId = UUID.randomUUID()
-        val vedtaksperiode1 = Vedtaksperiode(vedtaksperiodeId, Generasjon(generasjonId, vedtaksperiodeId, generasjonRepository))
-        val vedtaksperiode2 = Vedtaksperiode(vedtaksperiodeId, Generasjon(generasjonId, vedtaksperiodeId, generasjonRepository))
+        val vedtaksperiode1 = Vedtaksperiode(vedtaksperiodeId, Generasjon(generasjonId, vedtaksperiodeId))
+        val vedtaksperiode2 = Vedtaksperiode(vedtaksperiodeId, Generasjon(generasjonId, vedtaksperiodeId))
         assertEquals(vedtaksperiode1, vedtaksperiode2)
     }
 
@@ -125,35 +125,16 @@ class VedtaksperiodeTest {
     fun `not equals - vedtaksperiodeId`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjonId = UUID.randomUUID()
-        val vedtaksperiode1 = Vedtaksperiode(UUID.randomUUID(), Generasjon(generasjonId, vedtaksperiodeId, generasjonRepository))
-        val vedtaksperiode2 = Vedtaksperiode(vedtaksperiodeId, Generasjon(generasjonId, vedtaksperiodeId, generasjonRepository))
+        val vedtaksperiode1 = Vedtaksperiode(UUID.randomUUID(), Generasjon(generasjonId, vedtaksperiodeId))
+        val vedtaksperiode2 = Vedtaksperiode(vedtaksperiodeId, Generasjon(generasjonId, vedtaksperiodeId))
         assertNotEquals(vedtaksperiode1, vedtaksperiode2)
     }
 
     @Test
     fun `not equals - gjeldendeGenerasjon`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val vedtaksperiode1 = Vedtaksperiode(vedtaksperiodeId, Generasjon(UUID.randomUUID(), vedtaksperiodeId, generasjonRepository))
-        val vedtaksperiode2 = Vedtaksperiode(vedtaksperiodeId, Generasjon(UUID.randomUUID(), vedtaksperiodeId, generasjonRepository))
+        val vedtaksperiode1 = Vedtaksperiode(vedtaksperiodeId, Generasjon(UUID.randomUUID(), vedtaksperiodeId))
+        val vedtaksperiode2 = Vedtaksperiode(vedtaksperiodeId, Generasjon(UUID.randomUUID(), vedtaksperiodeId))
         assertNotEquals(vedtaksperiode1, vedtaksperiode2)
-    }
-
-    private val generasjonRepository = object : GenerasjonRepository {
-        override fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID): Generasjon? {
-            TODO("Not yet implemented")
-        }
-
-        override fun sisteFor(vedtaksperiodeId: UUID): Generasjon {
-            TODO("Not yet implemented")
-        }
-
-        override fun tilhørendeFor(utbetalingId: UUID): List<Generasjon> {
-            TODO("Not yet implemented")
-        }
-
-        override fun finnVedtaksperioder(vedtaksperiodeIder: List<UUID>): List<Vedtaksperiode> {
-            TODO("Not yet implemented")
-        }
-
     }
 }

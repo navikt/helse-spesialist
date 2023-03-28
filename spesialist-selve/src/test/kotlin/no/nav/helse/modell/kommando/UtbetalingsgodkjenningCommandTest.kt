@@ -10,7 +10,6 @@ import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.vedtaksperiode.Generasjon
-import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.objectMapper
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -32,7 +31,6 @@ internal class UtbetalingsgodkjenningCommandTest {
     private val godkjenningsbehovJson = """{ "@event_name": "behov" }"""
     private val hendelseDao = mockk<HendelseDao>()
     private val varselRepository = mockk<VarselRepository>(relaxed = true)
-    private val generasjonRepository = mockk<GenerasjonRepository>(relaxed = true)
     private lateinit var commandContext: CommandContext
     private lateinit var command: UtbetalingsgodkjenningCommand
 
@@ -60,7 +58,7 @@ internal class UtbetalingsgodkjenningCommandTest {
             vedtaksperiodeId = vedtaksperiodeId,
             fødselsnummer = fødselsnummer,
             utbetaling = utbetaling,
-            gjeldendeGenerasjoner = listOf(Generasjon(UUID.randomUUID(), UUID.randomUUID(), generasjonRepository))
+            gjeldendeGenerasjoner = listOf(Generasjon(UUID.randomUUID(), UUID.randomUUID()))
         )
     }
 

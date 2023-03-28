@@ -4,8 +4,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.modell.varsel.Varsel.Status.VURDERT
 import no.nav.helse.modell.vedtaksperiode.Generasjon
-import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
-import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.BeforeEach
@@ -18,7 +16,7 @@ internal class VarselTest {
     private val avvisteVarsler = mutableListOf<String>()
     private val deaktiverteVarsler = mutableListOf<String>()
     private val reaktiverteVarsler = mutableListOf<String>()
-    private val generasjon = Generasjon(UUID.randomUUID(), UUID.randomUUID(), generasjonRepository)
+    private val generasjon = Generasjon(UUID.randomUUID(), UUID.randomUUID())
 
     private val hendelseId get() = UUID.randomUUID()
     @BeforeEach
@@ -209,15 +207,6 @@ internal class VarselTest {
 
         override fun lagreDefinisjon(id: UUID, varselkode: String, tittel: String, forklaring: String?, handling: String?, avviklet: Boolean, opprettet: LocalDateTime): Unit = TODO("Not yet implemented")
         override fun oppdaterGenerasjonFor(id: UUID, gammelGenerasjonId: UUID, nyGenerasjonId: UUID) {
-            TODO("Not yet implemented")
-        }
-    }
-
-    private val generasjonRepository get() = object : GenerasjonRepository {
-        override fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID): Generasjon = TODO("Not yet implemented")
-        override fun sisteFor(vedtaksperiodeId: UUID): Generasjon = TODO("Not yet implemented")
-        override fun tilhørendeFor(utbetalingId: UUID): List<Generasjon> = TODO("Not yet implemented")
-        override fun finnVedtaksperioder(vedtaksperiodeIder: List<UUID>): List<Vedtaksperiode> {
             TODO("Not yet implemented")
         }
     }

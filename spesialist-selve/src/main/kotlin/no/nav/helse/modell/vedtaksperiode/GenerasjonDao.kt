@@ -177,7 +177,6 @@ class GenerasjonDao(private val dataSource: DataSource) {
                 )
             },
             varslerFor(row.long("id")).toSet(),
-            dataSource,
         )
     }
 

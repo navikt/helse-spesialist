@@ -3,7 +3,6 @@ package no.nav.helse.modell.vedtaksperiode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.modell.varsel.Varsel
@@ -18,32 +17,19 @@ import no.nav.helse.modell.varsel.Varselkode
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-internal class Generasjon private constructor(
+internal class Generasjon(
     private val id: UUID,
     private val vedtaksperiodeId: UUID,
     private var utbetalingId: UUID?,
     private var låst: Boolean,
     private var skjæringstidspunkt: LocalDate?,
     private var periode: Periode?,
-    varsler: Set<Varsel>,
-    private val generasjonRepository: GenerasjonRepository
+    varsler: Set<Varsel>
 ) {
     internal constructor(
         id: UUID,
-        vedtaksperiodeId: UUID,
-        generasjonRepository: GenerasjonRepository
-    ): this(id, vedtaksperiodeId, null, false, null, null, emptySet(), generasjonRepository)
-
-    internal constructor(
-        id: UUID,
-        vedtaksperiodeId: UUID,
-        utbetalingId: UUID?,
-        låst: Boolean,
-        skjæringstidspunkt: LocalDate?,
-        periode: Periode?,
-        varsler: Set<Varsel>,
-        dataSource: DataSource
-    ): this(id, vedtaksperiodeId, utbetalingId, låst, skjæringstidspunkt, periode, varsler, ActualGenerasjonRepository(dataSource))
+        vedtaksperiodeId: UUID
+    ): this(id, vedtaksperiodeId, null, false, null, null, emptySet())
 
     private val varsler: MutableList<Varsel> = varsler.toMutableList()
     private val observers = mutableSetOf<IVedtaksperiodeObserver>()
@@ -220,7 +206,7 @@ internal class Generasjon private constructor(
         }
 
         private fun Generasjon.opprettNeste(generasjonId: UUID, hendelseId: UUID): Generasjon {
-            val nyGenerasjon = Generasjon(generasjonId, this.vedtaksperiodeId, null, false, this.skjæringstidspunkt, this.periode, emptySet(), this.generasjonRepository)
+            val nyGenerasjon = Generasjon(generasjonId, this.vedtaksperiodeId, null, false, this.skjæringstidspunkt, this.periode, emptySet())
             nyGenerasjon.registrer(*this.observers.toTypedArray())
             nyGenerasjon.opprett(hendelseId)
 

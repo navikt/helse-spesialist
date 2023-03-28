@@ -17,8 +17,6 @@ import no.nav.helse.modell.utbetaling.Refusjonstype.DELVIS_REFUSJON
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtaksperiode.Generasjon
-import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
-import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
@@ -63,7 +61,7 @@ internal class SaksbehandlerløsningTest {
             mockk(relaxed = true)
         ),
         utbetalingDao = utbetalingDao,
-        gjeldendeGenerasjoner = listOf(Generasjon(randomUUID(), randomUUID(), generasjonRepository)),
+        gjeldendeGenerasjoner = listOf(Generasjon(randomUUID(), randomUUID())),
     )
 
     private val context = CommandContext(randomUUID())
@@ -148,22 +146,4 @@ internal class SaksbehandlerløsningTest {
         }
     }
 
-    private val generasjonRepository = object : GenerasjonRepository {
-        override fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID): Generasjon? {
-            TODO("Not yet implemented")
-        }
-
-        override fun sisteFor(vedtaksperiodeId: UUID): Generasjon {
-            TODO("Not yet implemented")
-        }
-
-        override fun tilhørendeFor(utbetalingId: UUID): List<Generasjon> {
-            TODO("Not yet implemented")
-        }
-
-        override fun finnVedtaksperioder(vedtaksperiodeIder: List<UUID>): List<Vedtaksperiode> {
-            TODO("Not yet implemented")
-        }
-
-    }
 }
