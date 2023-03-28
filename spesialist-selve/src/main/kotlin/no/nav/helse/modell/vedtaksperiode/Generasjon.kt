@@ -192,7 +192,7 @@ internal class Generasjon private constructor(
             keyValue("hendelseId", hendelseId)
         )
         låst = true
-        generasjonRepository.låsFor(id, hendelseId)
+        observers.forEach { it.vedtakFattet(id, hendelseId) }
     }
 
     override fun toString(): String = "generasjonId=$id, vedtaksperiodeId=$vedtaksperiodeId, utbetalingId=$utbetalingId, låst=$låst, skjæringstidspunkt=$skjæringstidspunkt, periode=$periode"

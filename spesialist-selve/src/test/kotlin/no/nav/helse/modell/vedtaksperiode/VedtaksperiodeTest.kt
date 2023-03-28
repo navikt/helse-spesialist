@@ -143,10 +143,6 @@ class VedtaksperiodeTest {
             TODO("Not yet implemented")
         }
 
-        override fun låsFor(generasjonId: UUID, hendelseId: UUID) {
-            TODO("Not yet implemented")
-        }
-
         override fun sisteFor(vedtaksperiodeId: UUID): Generasjon {
             TODO("Not yet implemented")
         }

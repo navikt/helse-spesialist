@@ -50,7 +50,6 @@ class InvaliderUtbetalingForGenerasjonerCommandTest {
     private fun nyGenerasjon() = Generasjon(UUID.randomUUID(), UUID.randomUUID(), generasjonRepository)
 
     private val generasjonRepository get() = object : GenerasjonRepository {
-        override fun låsFor(generasjonId: UUID, hendelseId: UUID):Unit = TODO("Not yet implemented")
         override fun sisteFor(vedtaksperiodeId: UUID): Generasjon = TODO("Not yet implemented")
         override fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID): Generasjon = TODO("Not yet implemented")
         override fun tilhørendeFor(utbetalingId: UUID): List<Generasjon> = TODO("Not yet implemented")

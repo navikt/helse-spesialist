@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory
 
 internal interface GenerasjonRepository {
     fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID = UUID.randomUUID()): Generasjon?
-    fun låsFor(generasjonId: UUID, hendelseId: UUID)
     fun sisteFor(vedtaksperiodeId: UUID): Generasjon
     fun tilhørendeFor(utbetalingId: UUID): List<Generasjon>
     fun finnVedtaksperioder(vedtaksperiodeIder: List<UUID>): List<Vedtaksperiode>
@@ -52,6 +51,10 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
         fjernUtbetalingFor(generasjonId)
     }
 
+    override fun vedtakFattet(generasjonId: UUID, hendelseId: UUID) {
+        låsFor(generasjonId, hendelseId)
+    }
+
     override fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID): Generasjon? {
         if (dao.finnSisteFor(vedtaksperiodeId) != null) {
             sikkerlogg.info(
@@ -74,7 +77,7 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
         return dao.alleFor(utbetalingId).onEach { it.registrer(this) }
     }
 
-    override fun låsFor(generasjonId: UUID, hendelseId: UUID) {
+    fun låsFor(generasjonId: UUID, hendelseId: UUID) {
         dao.låsFor(generasjonId, hendelseId)
             ?.loggLåst()
             ?: sikkerlogg.error(
