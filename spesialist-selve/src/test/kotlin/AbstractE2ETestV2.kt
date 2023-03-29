@@ -49,7 +49,10 @@ import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 
 internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
@@ -284,12 +287,11 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
     ) {
-        sisteMeldingId = meldingssenderV2.sendVedtaksperiodeEndret(
+        sisteMeldingId = meldingssenderV2.sendVedtaksperiodeOpprettet(
             aktørId,
             fødselsnummer,
             organisasjonsnummer,
             vedtaksperiodeId,
-            forrigeTilstand = "START"
         )
         assertIngenEtterspurteBehov()
         assertIngenUtgåendeMeldinger()
@@ -858,7 +860,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         verify(exactly = 1) { snapshotClient.hentSnapshot(FØDSELSNUMMER) }
     }
 
-    private fun assertVedtaksperiodeEksisterer(vedtaksperiodeId: UUID) {
+    protected fun assertVedtaksperiodeEksisterer(vedtaksperiodeId: UUID) {
         assertEquals(1, vedtak(vedtaksperiodeId))
     }
 
@@ -866,7 +868,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         assertEquals(0, vedtak(vedtaksperiodeId))
     }
 
-    private fun assertPersonEksisterer(fødselsnummer: String, aktørId: String) {
+    protected fun assertPersonEksisterer(fødselsnummer: String, aktørId: String) {
         assertEquals(1, person(fødselsnummer, aktørId)) { "Person med fødselsnummer=$fødselsnummer og aktørId=$aktørId finnes ikke i databasen" }
     }
 
@@ -874,7 +876,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         assertEquals(0, person(fødselsnummer, aktørId))
     }
 
-    private fun assertArbeidsgiverEksisterer(organisasjonsnummer: String) {
+    protected fun assertArbeidsgiverEksisterer(organisasjonsnummer: String) {
         assertEquals(1, arbeidsgiver(organisasjonsnummer)) { "Arbeidsgiver med organisasjonsnummer=$organisasjonsnummer finnes ikke i databasen" }
     }
 

@@ -69,6 +69,24 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
             )
         )
     }
+    fun sendVedtaksperiodeOpprettet(
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        vedtaksperiodeId: UUID,
+        forårsaketAvId: UUID = UUID.randomUUID(),
+    ): UUID = newUUID.also { id ->
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagVedtaksperiodeOpprettet(
+                id = id,
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                organisasjonsnummer = organisasjonsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
+                forårsaketAvId = forårsaketAvId,
+            )
+        )
+    }
 
     fun sendVedtaksperiodeNyUtbetaling(
         aktørId: String,

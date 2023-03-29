@@ -7,6 +7,7 @@ import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.Meldingssender.sendVedtaksperiodeEndret
+import no.nav.helse.Meldingssender.sendVedtaksperiodeOpprettet
 import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
@@ -27,7 +28,7 @@ internal class VedtaksperiodeEndretTest : AbstractE2ETest() {
         vedtaksperiode(utbetalingId = utbetalingId)
 
         val tidspunkter = finnWarningsOpprettet(VEDTAKSPERIODE_ID)
-        sendVedtaksperiodeEndret(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, forrigeTilstand = "START")
+        sendVedtaksperiodeOpprettet(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID)
         sendVedtaksperiodeEndret(aktørId = AKTØR, fødselsnummer = FØDSELSNUMMER, organisasjonsnummer = ORGNR, vedtaksperiodeId = VEDTAKSPERIODE_ID)
         val tidspunkterEtterTukling = finnWarningsOpprettet(VEDTAKSPERIODE_ID)
         assertEquals(tidspunkter.size, tidspunkterEtterTukling.size)

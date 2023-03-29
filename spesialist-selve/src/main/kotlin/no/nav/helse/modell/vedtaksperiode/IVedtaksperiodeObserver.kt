@@ -10,4 +10,5 @@ interface IVedtaksperiodeObserver {
     fun nyUtbetaling(generasjonId: UUID, utbetalingId: UUID) {}
     fun utbetalingForkastet(generasjonId: UUID, utbetalingId: UUID) {}
     fun vedtakFattet(generasjonId: UUID, hendelseId: UUID) {}
+    fun førsteGenerasjonOpprettet(generasjonId: UUID, vedtaksperiodeId: UUID, hendelseId: UUID, fom: LocalDate?, tom: LocalDate?, skjæringstidspunkt: LocalDate?) {}
 }

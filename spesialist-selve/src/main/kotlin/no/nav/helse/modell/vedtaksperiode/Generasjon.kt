@@ -173,6 +173,9 @@ internal class Generasjon(
         observers.forEach { it.vedtakFattet(id, hendelseId) }
     }
 
+    internal fun opprettFørste(hendelseId: UUID) {
+        observers.forEach { it.førsteGenerasjonOpprettet(id, vedtaksperiodeId, hendelseId, periode?.fom(), periode?.tom(), skjæringstidspunkt) }
+    }
     override fun toString(): String = "generasjonId=$id, vedtaksperiodeId=$vedtaksperiodeId, utbetalingId=$utbetalingId, låst=$låst, skjæringstidspunkt=$skjæringstidspunkt, periode=$periode"
 
     override fun equals(other: Any?): Boolean =
@@ -207,6 +210,18 @@ internal class Generasjon(
             nyGenerasjon.opprett(hendelseId)
 
             return nyGenerasjon
+        }
+
+        internal fun opprettFørste(vedtaksperiodeId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate): Generasjon {
+            return Generasjon(
+                UUID.randomUUID(),
+                vedtaksperiodeId,
+                null,
+                false,
+                skjæringstidspunkt,
+                Periode(fom, tom),
+                emptySet()
+            )
         }
     }
 }

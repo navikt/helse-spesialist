@@ -330,6 +330,7 @@ internal class HendelseMediator(
         vedtaksperiodeId: UUID,
         fom: LocalDate,
         tom: LocalDate,
+        skjæringstidspunkt: LocalDate,
         context: MessageContext,
     ) {
         val hendelse = hendelsefabrikk.vedtaksperiodeOpprettet(
@@ -339,6 +340,7 @@ internal class HendelseMediator(
             vedtaksperiodeId,
             fom,
             tom,
+            skjæringstidspunkt,
             message.toJson()
         )
         if (personDao.findPersonByFødselsnummer(fødselsnummer) == null) {

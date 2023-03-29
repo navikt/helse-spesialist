@@ -9,7 +9,6 @@ import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.januar
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
 internal class SykefraværstilfellerE2ETest : AbstractE2ETestV2() {
@@ -52,9 +51,9 @@ internal class SykefraværstilfellerE2ETest : AbstractE2ETestV2() {
         )
 
         finnFørsteGenerasjon(vedtaksperiodeId1).also { (skjæringstidspunkt, fom, tom) ->
-            assertNull(skjæringstidspunkt)
-            assertNull(fom)
-            assertNull(tom)
+            assertEquals(1.januar, skjæringstidspunkt)
+            assertEquals(1.januar ,fom)
+            assertEquals(31.januar ,tom)
         }
         finnSisteGenerasjon(vedtaksperiodeId1).also { (skjæringstidspunkt, fom, tom) ->
             assertEquals(15.januar, skjæringstidspunkt)
@@ -62,9 +61,9 @@ internal class SykefraværstilfellerE2ETest : AbstractE2ETestV2() {
             assertEquals(20.januar, tom)
         }
         finnFørsteGenerasjon(vedtaksperiodeId2).also { (skjæringstidspunkt, fom, tom) ->
-            assertNull(skjæringstidspunkt)
-            assertNull(fom)
-            assertNull(tom)
+            assertEquals(1.januar, skjæringstidspunkt)
+            assertEquals(1.januar ,fom)
+            assertEquals(31.januar ,tom)
         }
         finnSisteGenerasjon(vedtaksperiodeId2).also { (skjæringstidspunkt, fom, tom) ->
             assertEquals(15.januar, skjæringstidspunkt)
@@ -104,9 +103,9 @@ internal class SykefraværstilfellerE2ETest : AbstractE2ETestV2() {
         )
 
         finnFørsteGenerasjon(vedtaksperiodeId1).also { (skjæringstidspunkt, fom, tom) ->
-            assertNull(skjæringstidspunkt)
-            assertNull(fom)
-            assertNull(tom)
+            assertEquals(1.januar, skjæringstidspunkt)
+            assertEquals(1.januar ,fom)
+            assertEquals(31.januar ,tom)
         }
         finnSisteGenerasjon(vedtaksperiodeId1).also { (skjæringstidspunkt, fom, tom) ->
             assertEquals(1.januar, skjæringstidspunkt)
@@ -114,9 +113,9 @@ internal class SykefraværstilfellerE2ETest : AbstractE2ETestV2() {
             assertEquals(6.januar, tom)
         }
         finnFørsteGenerasjon(vedtaksperiodeId2).also { (skjæringstidspunkt, fom, tom) ->
-            assertNull(skjæringstidspunkt)
-            assertNull(fom)
-            assertNull(tom)
+            assertEquals(1.januar, skjæringstidspunkt)
+            assertEquals(1.januar ,fom)
+            assertEquals(31.januar ,tom)
         }
         finnSisteGenerasjon(vedtaksperiodeId2).also { (skjæringstidspunkt, fom, tom) ->
             assertEquals(11.januar, skjæringstidspunkt)

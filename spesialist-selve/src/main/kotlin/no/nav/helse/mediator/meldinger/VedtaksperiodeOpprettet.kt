@@ -11,7 +11,7 @@ import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OpprettFørsteVedtaksperiodeGenerasjonCommand
 import no.nav.helse.modell.kommando.OpprettMinimaltVedtakCommand
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
+import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -30,7 +30,7 @@ internal class VedtaksperiodeOpprettet(
     personDao: PersonDao,
     arbeidsgiverDao: ArbeidsgiverDao,
     vedtakDao: VedtakDao,
-    generasjonRepository: GenerasjonRepository,
+    generasjon: Generasjon,
     private val json: String,
 ) : Hendelse, MacroCommand() {
 
@@ -39,11 +39,7 @@ internal class VedtaksperiodeOpprettet(
 
     override val commands: List<Command> = listOf(
         OpprettMinimaltVedtakCommand(fødselsnummer, organisasjonsnummer, vedtaksperiodeId, fom, tom, personDao, arbeidsgiverDao, vedtakDao),
-        OpprettFørsteVedtaksperiodeGenerasjonCommand(
-            vedtaksperiodeId = vedtaksperiodeId,
-            hendelseId = id,
-            generasjonRepository = generasjonRepository,
-        )
+        OpprettFørsteVedtaksperiodeGenerasjonCommand(hendelseId = id, generasjon = generasjon)
     )
 
     internal class River(
@@ -55,11 +51,9 @@ internal class VedtaksperiodeOpprettet(
         init {
             River(rapidsConnection).apply {
                 validate {
-                    it.demandValue("@event_name", "vedtaksperiode_endret")
-                    it.demandValue("forrigeTilstand", "START")
-                    it.rejectValue("gjeldendeTilstand", "TIL_INFOTRYGD")
+                    it.demandValue("@event_name", "vedtaksperiode_opprettet")
                     it.requireKey(
-                        "@id", "fødselsnummer", "organisasjonsnummer", "vedtaksperiodeId", "fom", "tom"
+                        "@id", "fødselsnummer", "organisasjonsnummer", "vedtaksperiodeId", "fom", "tom", "skjæringstidspunkt"
                     )
                 }
             }.register(this)
@@ -72,6 +66,7 @@ internal class VedtaksperiodeOpprettet(
             val vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
             val fom = packet["fom"].asLocalDate()
             val tom = packet["tom"].asLocalDate()
+            val skjæringstidspunkt = packet["skjæringstidspunkt"].asLocalDate()
 
             log.info(
                 "Mottok vedtaksperiode opprettet {}, {}",
@@ -86,6 +81,7 @@ internal class VedtaksperiodeOpprettet(
                 vedtaksperiodeId,
                 fom,
                 tom,
+                skjæringstidspunkt,
                 context
             )
         }

@@ -7,6 +7,7 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Testdata
+import no.nav.helse.januar
 import no.nav.helse.mediator.api.Arbeidsgiver
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.api.SubsumsjonDto
@@ -89,6 +90,32 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                 ),
                 "fom" to fom,
                 "tom" to tom
+            )
+        )
+
+    fun lagVedtaksperiodeOpprettet(
+        id: UUID = UUID.randomUUID(),
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String = "orgnr",
+        vedtaksperiodeId: UUID = UUID.randomUUID(),
+        forårsaketAvId: UUID = UUID.randomUUID(),
+        fom: LocalDate = 1.januar,
+        tom: LocalDate = 31.januar,
+        skjæringstidspunkt: LocalDate = 1.januar
+    ) =
+        nyHendelse(
+            id, "vedtaksperiode_opprettet", mapOf(
+                "vedtaksperiodeId" to "$vedtaksperiodeId",
+                "fødselsnummer" to fødselsnummer,
+                "aktørId" to aktørId,
+                "organisasjonsnummer" to organisasjonsnummer,
+                "@forårsaket_av" to mapOf(
+                    "id" to forårsaketAvId
+                ),
+                "fom" to fom,
+                "tom" to tom,
+                "skjæringstidspunkt" to skjæringstidspunkt
             )
         )
 

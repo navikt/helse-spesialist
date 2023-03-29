@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory
 internal interface GenerasjonRepository {
     fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID = UUID.randomUUID()): Generasjon?
     fun sisteFor(vedtaksperiodeId: UUID): Generasjon
+    fun sisteForLenient(vedtaksperiodeId: UUID): Generasjon? = null
     fun tilhørendeFor(utbetalingId: UUID): List<Generasjon>
     fun finnVedtaksperioder(vedtaksperiodeIder: List<UUID>): List<Vedtaksperiode>
 }
@@ -26,6 +27,17 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
                 }
             }
         }
+    }
+
+    override fun førsteGenerasjonOpprettet(
+        generasjonId: UUID,
+        vedtaksperiodeId: UUID,
+        hendelseId: UUID,
+        fom: LocalDate?,
+        tom: LocalDate?,
+        skjæringstidspunkt: LocalDate?
+    ) {
+        opprettFørste(vedtaksperiodeId, hendelseId, generasjonId, fom, tom, skjæringstidspunkt)
     }
 
     override fun tidslinjeOppdatert(generasjonId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate) {
@@ -56,6 +68,9 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
     }
 
     override fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID): Generasjon? {
+        return opprettFørste(vedtaksperiodeId, hendelseId, id, null, null, null)
+    }
+    private fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID, fom: LocalDate?, tom: LocalDate?, skjæringstidspunkt: LocalDate?): Generasjon? {
         if (dao.finnSisteFor(vedtaksperiodeId) != null) {
             sikkerlogg.info(
                 "Kan ikke opprette første generasjon for {} når det eksisterer generasjoner fra før av",
@@ -63,15 +78,19 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
             )
             return null
         }
-        return dao.opprettFor(id, vedtaksperiodeId, hendelseId, null, null).also {
+        return dao.opprettFor(id, vedtaksperiodeId, hendelseId, skjæringstidspunkt, fom?.let { Periode(it, requireNotNull(tom)) }).also {
             it.loggFørsteOpprettet(vedtaksperiodeId)
             it.registrer(this)
         }
     }
 
     override fun sisteFor(vedtaksperiodeId: UUID) =
-        dao.finnSisteFor(vedtaksperiodeId)?.also { it.registrer(this) }
+        sisteForLenient(vedtaksperiodeId)
             ?: throw IllegalStateException("Forventer å finne en generasjon for perioden")
+
+    override fun sisteForLenient(vedtaksperiodeId: UUID): Generasjon? {
+        return dao.finnSisteFor(vedtaksperiodeId)?.also { it.registrer(this) }
+    }
 
     override fun tilhørendeFor(utbetalingId: UUID): List<Generasjon> {
         return dao.alleFor(utbetalingId).onEach { it.registrer(this) }

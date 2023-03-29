@@ -57,7 +57,7 @@ import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.Varsel.Companion.varsler
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
-import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
+import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOppdatering
@@ -110,7 +110,7 @@ internal class Hendelsefabrikk(
     private val arbeidsforholdDao: ArbeidsforholdDao = ArbeidsforholdDao(dataSource),
     private val utbetalingDao: UtbetalingDao = UtbetalingDao(dataSource),
     private val opptegnelseDao: OpptegnelseDao = OpptegnelseDao(dataSource),
-    private val generasjonRepository: GenerasjonRepository = ActualGenerasjonRepository(dataSource),
+    private val generasjonRepository: ActualGenerasjonRepository = ActualGenerasjonRepository(dataSource),
     private val vergemålDao: VergemålDao = VergemålDao(dataSource),
     private val periodehistorikkDao: PeriodehistorikkDao = PeriodehistorikkDao(dataSource),
     private val varselRepository: VarselRepository = ActualVarselRepository(dataSource),
@@ -769,8 +769,11 @@ internal class Hendelsefabrikk(
         vedtaksperiodeId: UUID,
         fom: LocalDate,
         tom: LocalDate,
+        skjæringstidspunkt: LocalDate,
         json: String,
     ): VedtaksperiodeOpprettet {
+        val førsteGenerasjon = generasjonRepository.sisteForLenient(vedtaksperiodeId)
+            ?: Generasjon.opprettFørste(vedtaksperiodeId, fom, tom, skjæringstidspunkt).also { it.registrer(generasjonRepository) }
         return VedtaksperiodeOpprettet(
             id = id,
             fødselsnummer = fødselsnummer,
@@ -781,24 +784,21 @@ internal class Hendelsefabrikk(
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
             vedtakDao = vedtakDao,
-            generasjonRepository = generasjonRepository,
+            generasjon = førsteGenerasjon,
             json = json,
         )
     }
 
     fun vedtaksperiodeOpprettet(json: String): VedtaksperiodeOpprettet {
         val jsonNode = mapper.readTree(json)
-        return VedtaksperiodeOpprettet(
+        return vedtaksperiodeOpprettet(
             id = UUID.fromString(jsonNode["@id"].asText()),
             fødselsnummer = jsonNode["fødselsnummer"].asText(),
             organisasjonsnummer = jsonNode.path("organisasjonsnummer").asText(),
             vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText()),
-            fom = LocalDate.parse(jsonNode.path("vedtaksperiodeId").asText()),
-            tom = LocalDate.parse(jsonNode.path("vedtaksperiodeId").asText()),
-            personDao = personDao,
-            arbeidsgiverDao = arbeidsgiverDao,
-            vedtakDao = vedtakDao,
-            generasjonRepository = generasjonRepository,
+            fom = LocalDate.parse(jsonNode.path("fom").asText()),
+            tom = LocalDate.parse(jsonNode.path("tom").asText()),
+            skjæringstidspunkt = LocalDate.parse(jsonNode.path("skjæringstidpunkt").asText()),
             json = json,
         )
     }

@@ -26,11 +26,12 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.modell.utbetaling.Utbetalingtype.*
+import no.nav.helse.modell.utbetaling.Utbetalingtype.UTBETALING
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
-import no.nav.helse.spesialist.api.overstyring.Dagtype.*
+import no.nav.helse.spesialist.api.overstyring.Dagtype.Feriedag
+import no.nav.helse.spesialist.api.overstyring.Dagtype.Sykedag
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import org.intellij.lang.annotations.Language
 
@@ -66,6 +67,24 @@ internal object Meldingssender {
                 vedtaksperiodeId,
                 forrigeTilstand,
                 gjeldendeTilstand,
+                forårsaketAvId,
+            )
+        )
+    }
+    fun sendVedtaksperiodeOpprettet(
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        vedtaksperiodeId: UUID,
+        forårsaketAvId: UUID = UUID.randomUUID(),
+    ): UUID = uuid.also { id ->
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagVedtaksperiodeOpprettet(
+                id,
+                aktørId,
+                fødselsnummer,
+                organisasjonsnummer,
+                vedtaksperiodeId,
                 forårsaketAvId,
             )
         )

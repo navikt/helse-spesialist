@@ -28,13 +28,17 @@ internal class VedtaksperiodeOpprettetRiverTest {
 
     @Test
     fun `tolker vedtaksperiode_endret for VedtaksperiodeOpprettet`() {
-        rapid.sendTestMessage(meldingsfabrikk.lagVedtaksperiodeEndret(aktørId = AKTØR, fødselsnummer = FØDSELSNUMMER, forrigeTilstand = "START"))
-        verify(exactly = 1) { mediator.vedtaksperiodeOpprettet(any(), any(), any(), any(), any(), any(), any(), any()) }
-    }
-
-    @Test
-    fun `leser ikke inn dersom perioden går fra START til TIL_INFOTRYGD`() {
-        rapid.sendTestMessage(meldingsfabrikk.lagVedtaksperiodeEndret(aktørId = AKTØR, fødselsnummer = FØDSELSNUMMER, forrigeTilstand = "START", gjeldendeTilstand = "TIL_INFOTRYGD"))
-        verify(exactly = 0) { mediator.vedtaksperiodeOpprettet(any(), any(), any(), any(), any(), any(), any(), any()) }
+        rapid.sendTestMessage(meldingsfabrikk.lagVedtaksperiodeOpprettet(aktørId = AKTØR, fødselsnummer = FØDSELSNUMMER))
+        verify(exactly = 1) { mediator.vedtaksperiodeOpprettet(
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any()
+        ) }
     }
 }
