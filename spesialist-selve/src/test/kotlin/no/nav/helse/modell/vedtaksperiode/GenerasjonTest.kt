@@ -190,6 +190,20 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     }
 
     @Test
+    fun `generasjon hører til utbetalingId`() {
+        val utbetalingId = UUID.randomUUID()
+        val generasjon = Generasjon(UUID.randomUUID(), UUID.randomUUID(), utbetalingId, true, null, null, emptySet())
+        assertTrue(generasjon.hørerTil(utbetalingId))
+    }
+
+    @Test
+    fun `generasjon hører ikke til utbetalingId`() {
+        val utbetalingId = UUID.randomUUID()
+        val generasjon = Generasjon(UUID.randomUUID(), UUID.randomUUID(), utbetalingId, true, null, null, emptySet())
+        assertFalse(generasjon.hørerTil(UUID.randomUUID()))
+    }
+
+    @Test
     fun `generasjon har aktive varsler`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val aktivtVarsel = Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId, AKTIV)

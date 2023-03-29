@@ -38,9 +38,8 @@ internal class Generasjon(
         observers.addAll(observer)
     }
 
-    internal fun liggerFør(dato: LocalDate): Boolean {
-        return periode?.let { it.tom() <= dato } ?: false
-    }
+    internal fun liggerFør(dato: LocalDate): Boolean = periode?.let { it.tom() <= dato } ?: false
+    internal fun hørerTil(utbetalingId: UUID): Boolean = this.utbetalingId == utbetalingId
 
     internal fun harAktiveVarsler(): Boolean {
         return varsler.any { it.erAktiv() }
