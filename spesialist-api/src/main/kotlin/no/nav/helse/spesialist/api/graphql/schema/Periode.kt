@@ -257,6 +257,7 @@ interface Periode {
     fun periodetilstand(): Periodetilstand
     fun skjaeringstidspunkt(): DateString
     fun varslerForGenerasjon(): List<VarselDTO>
+    fun hendelser(): List<Hendelse>
 
     @GraphQLIgnore
     fun periodetilstand(tilstand: GraphQLPeriodetilstand) = when (tilstand) {
@@ -325,6 +326,7 @@ data class UberegnetPeriode(
     override fun vedtaksperiodeId(): UUIDString = periode.vedtaksperiodeId
     override fun periodetilstand(): Periodetilstand = periodetilstand(periode.periodetilstand)
     override fun skjaeringstidspunkt(): DateString = periode.skjaeringstidspunkt
+    override fun hendelser(): List<Hendelse> =  periode.hendelser.map { it.tilHendelse() }
     override fun varslerForGenerasjon(): List<VarselDTO> = if (skalViseAktiveVarsler)
         varselRepository.finnVarslerForUberegnetPeriode(UUID.fromString(vedtaksperiodeId())).toList() else
         varselRepository.finnGodkjenteVarslerForUberegnetPeriode(UUID.fromString(vedtaksperiodeId())).toList()
@@ -362,6 +364,8 @@ data class BeregnetPeriode(
             UUID.fromString(vedtaksperiodeId()),
             UUID.fromString(periode.utbetaling.id)
         ).toList()
+
+    override fun hendelser(): List<Hendelse> = periode.hendelser.map { it.tilHendelse() }
 
     @Deprecated("erBeslutterOppgave bør hentes fra periodens oppgave")
     fun erBeslutterOppgave(): Boolean = oppgaveApiDao.erBeslutteroppgave(UUID.fromString(vedtaksperiodeId()))
@@ -432,8 +436,6 @@ data class BeregnetPeriode(
     fun forbrukteSykedager(): Int? = periode.forbrukteSykedager
 
     fun gjenstaendeSykedager(): Int? = periode.gjenstaendeSykedager
-
-    fun hendelser(): List<Hendelse> = periode.hendelser.map { it.tilHendelse() }
 
     fun maksdato(): DateString = periode.maksdato
 

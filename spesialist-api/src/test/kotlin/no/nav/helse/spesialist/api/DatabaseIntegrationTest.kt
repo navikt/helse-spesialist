@@ -652,6 +652,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         tidslinje = emptyList(),
         vedtaksperiodeId = vedtaksperiodeId.toString(),
         id = UUID.randomUUID().toString(),
+        hendelser = emptyList(),
     )
 
     protected fun finnOppgaveIdFor(vedtaksperiodeId: UUID): Long = sessionOf(dataSource).use { session ->

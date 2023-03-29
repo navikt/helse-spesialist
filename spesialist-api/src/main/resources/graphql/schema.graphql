@@ -34,6 +34,7 @@ interface GraphQLHendelse {
 interface GraphQLTidslinjeperiode {
   erForkastet: Boolean!
   fom: LocalDate!
+  hendelser: [GraphQLHendelse!]!
   id: UUID!
   inntektstype: GraphQLInntektstype!
   opprettet: LocalDateTime!
@@ -305,6 +306,7 @@ type GraphQLSykmelding implements GraphQLHendelse {
 type GraphQLUberegnetPeriode implements GraphQLTidslinjeperiode {
   erForkastet: Boolean!
   fom: LocalDate!
+  hendelser: [GraphQLHendelse!]!
   id: UUID!
   inntektstype: GraphQLInntektstype!
   opprettet: LocalDateTime!

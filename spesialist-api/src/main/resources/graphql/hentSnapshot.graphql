@@ -118,6 +118,41 @@ query HentSnapshot($fnr: String!) {
                             utbetaling
                         }
                     }
+                    hendelser {
+                        ... on GraphQLInntektsmelding {
+                            __typename
+                            beregnetInntekt
+                            id
+                            mottattDato
+                            type
+                        }
+                        ... on GraphQLSoknadArbeidsgiver {
+                            __typename
+                            fom
+                            id
+                            rapportertDato
+                            sendtArbeidsgiver
+                            tom
+                            type
+                        }
+                        ... on GraphQLSoknadNav {
+                            __typename
+                            fom
+                            id
+                            rapportertDato
+                            sendtNav
+                            tom
+                            type
+                        }
+                        ... on GraphQLSykmelding {
+                            __typename
+                            fom
+                            id
+                            rapportertDato
+                            tom
+                            type
+                        }
+                    }
                     vedtaksperiodeId
                     ... on GraphQLUberegnetPeriode {
                         __typename
@@ -135,41 +170,6 @@ query HentSnapshot($fnr: String!) {
                         beregningId
                         forbrukteSykedager
                         gjenstaendeSykedager
-                        hendelser {
-                            ... on GraphQLInntektsmelding {
-                                __typename
-                                beregnetInntekt
-                                id
-                                mottattDato
-                                type
-                            }
-                            ... on GraphQLSoknadArbeidsgiver {
-                                __typename
-                                fom
-                                id
-                                rapportertDato
-                                sendtArbeidsgiver
-                                tom
-                                type
-                            }
-                            ... on GraphQLSoknadNav {
-                                __typename
-                                fom
-                                id
-                                rapportertDato
-                                sendtNav
-                                tom
-                                type
-                            }
-                            ... on GraphQLSykmelding {
-                                __typename
-                                fom
-                                id
-                                rapportertDato
-                                tom
-                                type
-                            }
-                        }
                         maksdato
                         periodevilkar {
                             alder {
