@@ -42,10 +42,15 @@ internal class AutomatiseringTest {
     private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
     private val personDaoMock = mockk<PersonDao>(relaxed = true)
     private val automatiseringDaoMock = mockk<AutomatiseringDao>(relaxed = true)
-    private val plukkTilManuellMock = mockk<PlukkTilManuell>()
     private val vergemålDaoMock = mockk<VergemålDao>(relaxed = true)
     private val overstyringDaoMock = mockk<OverstyringDao>(relaxed = true)
     private val generasjonRepository = mockk<GenerasjonRepository>(relaxed = true)
+    private var stikkprøveFullRefusjon = false
+    private var stikkprøveUTS = false
+    private val stikkprøver = object : Stikkprøver {
+        override fun fullRefusjon() = stikkprøveFullRefusjon
+        override fun uts() = stikkprøveUTS
+    }
 
     private val automatisering =
         Automatisering(
@@ -60,7 +65,7 @@ internal class AutomatiseringTest {
             overstyringDao = overstyringDaoMock,
             generasjonRepository = generasjonRepository,
             snapshotMediator = snapshotMediator,
-            plukkTilManuell = plukkTilManuellMock
+            stikkprøver = stikkprøver
         )
 
     companion object {
@@ -79,7 +84,8 @@ internal class AutomatiseringTest {
         every { åpneGosysOppgaverDaoMock.harÅpneOppgaver(any()) } returns 0
         every { egenAnsattDao.erEgenAnsatt(any()) } returns false
         every { overstyringDaoMock.harVedtaksperiodePågåendeOverstyring(any()) } returns false
-        every { plukkTilManuellMock() } returns false
+        stikkprøveFullRefusjon = false
+        stikkprøveUTS = false
     }
 
     @Test
@@ -102,9 +108,6 @@ internal class AutomatiseringTest {
         )
         automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), periodetype) { fail("Denne skal ikke kalles") }
         verify { automatiseringDaoMock.manuellSaksbehandling(any(), any(), any(), any()) }
-        verify(exactly = 0) {
-            plukkTilManuellMock()
-        }
     }
 
     @Test
@@ -139,7 +142,7 @@ internal class AutomatiseringTest {
 
     @Test
     fun `vedtaksperiode plukket ut til stikkprøve skal ikke automatisk godkjennes`() {
-        every { plukkTilManuellMock() } returns true
+        stikkprøveFullRefusjon = true
         automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), periodetype) { fail("Denne skal ikke kalles") }
     }
 
@@ -193,6 +196,15 @@ internal class AutomatiseringTest {
         automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), utbetalingId, periodetype, onSuccessCallback)
         verify { automatiseringDaoMock.automatisert(any(), any(), any()) }
         verify { onSuccessCallback() }
+        Toggle.AutomatiserUtbetalingTilSykmeldt.disable()
+    }
+
+    @Test
+    fun `forlengelse med utbetaling til sykmeldt som plukkes ut som stikkprøve skal ikke automatisk godkjennes`() {
+        Toggle.AutomatiserUtbetalingTilSykmeldt.enable()
+        stikkprøveUTS = true
+        every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(personbeløp = 500)
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), utbetalingId, periodetype) { fail("Denne skal ikke kalles") }
         Toggle.AutomatiserUtbetalingTilSykmeldt.disable()
     }
 

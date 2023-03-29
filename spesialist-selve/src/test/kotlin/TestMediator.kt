@@ -8,6 +8,7 @@ import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringDao
+import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.oppgave.OppgaveDao
@@ -65,7 +66,11 @@ internal class TestMediator(
         overstyringDao = OverstyringDao(dataSource),
         generasjonRepository = ActualGenerasjonRepository(dataSource),
         snapshotMediator = snapshotMediator,
-    ) { false }
+        stikkprøver = object : Stikkprøver {
+            override fun fullRefusjon() = false
+            override fun uts() = false
+        }
+    )
 
     private val hendelsefabrikk = Hendelsefabrikk(
         dataSource = dataSource,

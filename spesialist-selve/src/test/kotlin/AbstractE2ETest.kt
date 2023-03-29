@@ -55,6 +55,7 @@ import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringDao
+import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.oppgave.OppgaveDao
@@ -171,7 +172,10 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             overstyringDao = overstyringDao,
             generasjonRepository = generasjonRepository,
             snapshotMediator = snapshotMediator,
-            { false }),
+            stikkprøver = object : Stikkprøver {
+                override fun fullRefusjon() = false
+                override fun uts() = false
+            }),
         overstyringMediator = OverstyringMediator(testRapid),
         snapshotMediator = snapshotMediator
     )

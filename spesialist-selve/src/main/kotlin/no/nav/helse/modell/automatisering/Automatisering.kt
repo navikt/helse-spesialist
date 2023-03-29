@@ -38,7 +38,7 @@ internal class Automatisering(
     private val overstyringDao: OverstyringDao,
     private val generasjonRepository: GenerasjonRepository,
     private val snapshotMediator: SnapshotMediator,
-    private val plukkTilManuell: PlukkTilManuell,
+    private val stikkprøver: Stikkprøver,
 ) {
     private companion object {
         private val logger = LoggerFactory.getLogger(Automatisering::class.java)
@@ -59,6 +59,8 @@ internal class Automatisering(
         onAutomatiserbar: () -> Unit
     ) {
         val problemer = vurder(fødselsnummer, vedtaksperiodeId, utbetalingId, periodetype)
+        val vedtaksperiodensUtbetaling = snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId)
+        val erUTS = vedtaksperiodensUtbetaling.utbetalingTilSykmeldt()
 
         val utfallslogger = { tekst: String ->
             sikkerLogg.info(
@@ -75,8 +77,9 @@ internal class Automatisering(
                 automatiseringDao.manuellSaksbehandling(problemer, vedtaksperiodeId, hendelseId, utbetalingId)
             }
 
-            plukkTilManuell() -> {
-                utfallslogger("Automatiserer ikke {} ({}), plukket ut til stikkprøve")
+            (!erUTS && stikkprøver.fullRefusjon()) || (erUTS && stikkprøver.uts()) -> {
+                val fullRefujonEllerUTS = if (erUTS) "UTS" else "full refusjon"
+                utfallslogger("Automatiserer ikke {} ({}), plukket ut til stikkprøve for $fullRefujonEllerUTS")
                 automatiseringDao.stikkprøve(vedtaksperiodeId, hendelseId, utbetalingId)
                 logger.info(
                     "Automatisk godkjenning av {} avbrutt, sendes til manuell behandling",
@@ -174,7 +177,12 @@ internal class Automatisering(
 
 }
 
-internal typealias PlukkTilManuell = () -> Boolean
+internal typealias PlukkTilManuell<String> = (String?) -> Boolean
+
+internal interface Stikkprøver {
+    fun fullRefusjon(): Boolean
+    fun uts(): Boolean
+}
 
 internal interface AutomatiseringValidering {
     fun erAautomatiserbar(): Boolean

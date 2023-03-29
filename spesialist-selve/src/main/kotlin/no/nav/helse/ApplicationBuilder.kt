@@ -52,6 +52,7 @@ import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.automatisering.PlukkTilManuell
+import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.leggpåvent.LeggPåVentService
@@ -239,13 +240,18 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         snapshotClient = snapshotClient,
     )
 
-    private val plukkTilManuell: PlukkTilManuell = ({
-        env["STIKKPROEVER_DIVISOR"]?.let {
+    private val plukkTilManuell: PlukkTilManuell<String> = ({
+        it?.let {
             val divisor = it.toInt()
             require(divisor > 0) { "Her er et vennlig tips: ikke prøv å dele på 0" }
             nextInt(divisor) == 0
         } ?: false
     })
+
+    private val stikkprøver = object : Stikkprøver {
+        override fun fullRefusjon() = plukkTilManuell(env["STIKKPROEVER_REFUSJON_DIVISOR"])
+        override fun uts() = plukkTilManuell(env["STIKKPROEVER_UTS_DIVISOR"])
+    }
 
     private val tilgangsgrupper = Tilgangsgrupper(System.getenv())
 
@@ -352,7 +358,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         overstyringDao = overstyringDao,
         generasjonRepository = generasjonRepository,
         snapshotMediator = snapshotMediator,
-        plukkTilManuell = plukkTilManuell
+        stikkprøver = stikkprøver
     )
 
     private val hendelsefabrikk = Hendelsefabrikk(
