@@ -119,22 +119,18 @@ internal class Generasjon(
         observers.forEach { it.utbetalingForkastet(id, utbetalingId) }
     }
 
-    internal fun håndterRegelverksvarsel(hendelseId: UUID, varselId: UUID, varselkode: String, opprettet: LocalDateTime, varselRepository: VarselRepository): Generasjon {
-        if (låst) {
-            val nyGenerasjon = håndterNyGenerasjon(varselRepository = varselRepository, hendelseId = hendelseId) ?: throw IllegalStateException("Forventer å kunne opprette ny generasjon da gjeldende generasjon = $this er låst.")
-            nyGenerasjon.håndterRegelverksvarsel(hendelseId, varselId, varselkode, opprettet, varselRepository)
-            sikkerlogg.info(
-                "Oppretter ny {} for {} som følge av nytt varsel {}, {}",
-                keyValue("generasjon", nyGenerasjon),
-                keyValue("vedtaksperiodeId", nyGenerasjon.vedtaksperiodeId),
-                keyValue("varselId", varselId),
-                keyValue("varselkode", varselkode)
-            )
-            return nyGenerasjon
-        }
-        håndterVarsel(varselId, varselkode, opprettet, varselRepository)
-
-        return this
+    internal fun håndterRegelverksvarsel(hendelseId: UUID, varselId: UUID, varselkode: String, opprettet: LocalDateTime, varselRepository: VarselRepository) {
+        if (!låst) return håndterVarsel(varselId, varselkode, opprettet, varselRepository)
+        val nyGenerasjon = håndterNyGenerasjon(varselRepository = varselRepository, hendelseId = hendelseId)
+            ?: throw IllegalStateException("Forventer å kunne opprette ny generasjon da gjeldende generasjon = $this er låst.")
+        nyGenerasjon.håndterRegelverksvarsel(hendelseId, varselId, varselkode, opprettet, varselRepository)
+        sikkerlogg.info(
+            "Oppretter ny {} for {} som følge av nytt varsel {}, {}",
+            keyValue("generasjon", nyGenerasjon),
+            keyValue("vedtaksperiodeId", nyGenerasjon.vedtaksperiodeId),
+            keyValue("varselId", varselId),
+            keyValue("varselkode", varselkode)
+        )
     }
 
     internal fun håndterSaksbehandlingsvarsel(varselId: UUID, varselkode: Varselkode, opprettet: LocalDateTime, varselRepository: VarselRepository) {

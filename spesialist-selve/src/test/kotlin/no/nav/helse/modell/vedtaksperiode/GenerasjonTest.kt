@@ -42,7 +42,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     @BeforeEach
     internal fun beforeEach() {
         lagVarseldefinisjoner()
-        observer = Observer
+        observer = Observer()
     }
 
     @Test
@@ -388,18 +388,19 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     @Test
     fun `Oppretter ny generasjon ved varsel på låst generasjon`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val utbetalingId = UUID.randomUUID()
+        val hendelseId = UUID.randomUUID()
         val generasjon = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)
+        generasjon.registrer(observer)
         generasjon.håndterVedtakFattet(UUID.randomUUID())
 
         assertAntallGenerasjoner(1, vedtaksperiodeId)
-        val nyGenerasjon = generasjon.håndterRegelverksvarsel(UUID.randomUUID(), UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), varselRepository)
-        nyGenerasjon.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId, varselRepository)
-
-        assertNotEquals(generasjon, nyGenerasjon)
+        generasjon.håndterRegelverksvarsel(hendelseId, UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), varselRepository)
+        assertEquals(1, observer.opprettedeGenerasjoner.size)
+        val nyGenerasjonId = observer.opprettedeGenerasjoner.keys.first()
+        observer.assertOpprettelse(nyGenerasjonId, vedtaksperiodeId, hendelseId, null, null, null)
         assertAntallGenerasjoner(2, vedtaksperiodeId)
         assertVarsler(generasjonId, 0, AKTIV, SB_EX_1)
-        assertVarsler(utbetalingId, vedtaksperiodeId, 1, AKTIV, SB_EX_1)
+        assertVarsler(nyGenerasjonId, 1, AKTIV, SB_EX_1)
     }
 
     @Test
@@ -600,18 +601,6 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         assertEquals(forventetAntall, antall)
     }
 
-    private fun assertVarsler(utbetalingId: UUID, vedtaksperiodeId: UUID, forventetAntall: Int, status: Status, varselkode: Varselkode) {
-        @Language("PostgreSQL")
-        val query =
-            """SELECT COUNT(1) FROM selve_varsel sv INNER JOIN selve_vedtaksperiode_generasjon svg ON sv.generasjon_ref = svg.id
-               WHERE svg.utbetaling_id = ? AND svg.vedtaksperiode_id = ? AND sv.status = ? AND sv.kode = ?
-            """
-        val antall = sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, utbetalingId, vedtaksperiodeId, status.name, varselkode.name).map { it.int(1) }.asSingle)
-        }
-        assertEquals(forventetAntall, antall)
-    }
-
     private fun assertUtbetaling(generasjonId: UUID, utbetalingId: UUID) {
         @Language("PostgreSQL")
         val query =
@@ -681,7 +670,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         }
     }
 
-    private object Observer: IVedtaksperiodeObserver {
+    private class Observer: IVedtaksperiodeObserver {
         private class Opprettelse(
             val generasjonId: UUID,
             val vedtaksperiodeId: UUID,
