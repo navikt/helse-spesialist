@@ -124,6 +124,24 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `finner liste av vedtaksperiodeIder`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        nyPerson()
+        val generasjonId1 = generasjonIdFor(VEDTAKSPERIODE)
+        val generasjonId2 = UUID.randomUUID()
+        val utbetalingId = UUID.randomUUID()
+
+        opprettVedtaksperiode(vedtaksperiodeId)
+        opprettGenerasjon(vedtaksperiodeId, generasjonId2)
+        generasjonDao.utbetalingFor(generasjonId1, utbetalingId)
+        generasjonDao.oppdaterSykefraværstilfelle(generasjonId2, 1.januar, Periode(1.januar, 31.januar))
+        val vedtaksperiodeIder = generasjonDao.finnVedtaksperiodeIderFor(1.januar, utbetalingId, FNR)
+        assertEquals(2, vedtaksperiodeIder.size)
+        assertEquals(VEDTAKSPERIODE, vedtaksperiodeIder[0])
+        assertEquals(vedtaksperiodeId, vedtaksperiodeIder[1])
+    }
+
+    @Test
     fun `finner alle generasjoner knyttet til en utbetalingId`() {
         val generasjonId1 = UUID.randomUUID()
         val generasjonId2 = UUID.randomUUID()

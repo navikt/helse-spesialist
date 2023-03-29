@@ -96,6 +96,10 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
         return dao.alleFor(utbetalingId).onEach { it.registrer(this) }
     }
 
+    internal fun finnVedtaksperioderFor(skjæringstidspunkt: LocalDate, utbetalingId: UUID, fødselsnummer: String): List<Vedtaksperiode> {
+        return finnVedtaksperioder(dao.finnVedtaksperiodeIderFor(skjæringstidspunkt, utbetalingId, fødselsnummer))
+    }
+
     private fun låsFor(generasjonId: UUID, hendelseId: UUID) {
         dao.låsFor(generasjonId, hendelseId)
             ?.loggLåst()
