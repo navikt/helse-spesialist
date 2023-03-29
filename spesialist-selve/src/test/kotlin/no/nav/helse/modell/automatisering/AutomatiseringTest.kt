@@ -184,33 +184,30 @@ internal class AutomatiseringTest {
 
     @Test
     fun `periode med utbetaling til sykmeldt skal ikke automatisk godkjennes`() {
+        Toggle.AutomatiserUtbetalingTilSykmeldt.disable()
         every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(personbeløp = 500)
         automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), utbetalingId, periodetype) { fail("Denne skal ikke kalles") }
+        Toggle.AutomatiserUtbetalingTilSykmeldt.enable()
     }
 
     @Test
     fun `forlengelse med utbetaling til sykmeldt skal automatisk godkjennes`() {
-        Toggle.AutomatiserUtbetalingTilSykmeldt.enable()
         val onSuccessCallback = mockk<() -> Unit>(relaxed = true)
         every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(personbeløp = 500)
         automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), utbetalingId, periodetype, onSuccessCallback)
         verify { automatiseringDaoMock.automatisert(any(), any(), any()) }
         verify { onSuccessCallback() }
-        Toggle.AutomatiserUtbetalingTilSykmeldt.disable()
     }
 
     @Test
     fun `forlengelse med utbetaling til sykmeldt som plukkes ut som stikkprøve skal ikke automatisk godkjennes`() {
-        Toggle.AutomatiserUtbetalingTilSykmeldt.enable()
         stikkprøveUTS = true
         every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(personbeløp = 500)
         automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), utbetalingId, periodetype) { fail("Denne skal ikke kalles") }
-        Toggle.AutomatiserUtbetalingTilSykmeldt.disable()
     }
 
     @Test
     fun `førstegangsbehandling med utbetaling til sykmeldt skal ikke automatisk godkjennes`() {
-        Toggle.AutomatiserUtbetalingTilSykmeldt.enable()
         every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(personbeløp = 500)
         automatisering.utfør(
             fødselsnummer,
@@ -219,12 +216,10 @@ internal class AutomatiseringTest {
             utbetalingId,
             Periodetype.FØRSTEGANGSBEHANDLING
         ) { fail("Denne skal ikke kalles") }
-        Toggle.AutomatiserUtbetalingTilSykmeldt.disable()
     }
 
     @Test
     fun `periode med delvis refusjon skal automatisk godkjennes`() {
-        Toggle.AutomatiserUtbetalingTilSykmeldt.enable()
         val onSuccessCallback = mockk<() -> Unit>(relaxed = true)
         every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(
             personbeløp = 500,
@@ -233,7 +228,6 @@ internal class AutomatiseringTest {
         automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), utbetalingId, periodetype, onSuccessCallback)
         verify { automatiseringDaoMock.automatisert(any(), any(), any()) }
         verify { onSuccessCallback() }
-        Toggle.AutomatiserUtbetalingTilSykmeldt.disable()
     }
 
     @Test
