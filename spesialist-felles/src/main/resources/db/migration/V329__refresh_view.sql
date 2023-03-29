@@ -1,0 +1,1 @@
+REFRESH MATERIALIZED VIEW generasjon_mangler_vedtak;
