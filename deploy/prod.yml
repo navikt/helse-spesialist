@@ -95,7 +95,7 @@ spec:
     - name: SPLEIS_CLIENT_ID
       value: api://prod-gcp.tbd.spleis-api/.default
     - name: STIKKPROEVER_REFUSJON_DIVISOR #Kan settes til 1 for å slå av automatisering
-      value: "300"
+      value: "500"
     - name: STIKKPROEVER_UTS_DIVISOR #Kan settes til 1 for å slå av automatisering
       value: "200"
     - name: SPLEIS_API_URL
