@@ -112,19 +112,22 @@ internal class Automatisering(
         val harWarnings = dedupliserteWarnings.isNotEmpty()
         when {
             !harAktiveVarsler && harWarnings -> sikkerLogg.info(
-                "Nye varsler mener at perioden kan automatiseres, mens warnings er uenig. Gjelder {}, {}, {}.",
+                "Nye varsler mener at perioden kan automatiseres, mens warnings er uenig. Gjelder {}, {}, {}, {}.",
+                kv("fødselsnummer", fødselsnummer),
                 kv("vedtaksperiodeId", vedtaksperiodeId),
                 kv("utbetalingId", utbetalingId),
                 kv("utbetalingstype", vedtaksperiodensUtbetaling?.typeEnum?.name)
             )
             harAktiveVarsler && !harWarnings -> sikkerLogg.info(
-                "Nye varsler mener at perioden ikke kan automatiseres, mens warnings er uenig. Gjelder {}, {}, {}.",
+                "Nye varsler mener at perioden ikke kan automatiseres, mens warnings er uenig. Gjelder {}, {}, {}, {}.",
+                kv("fødselsnummer", fødselsnummer),
                 kv("vedtaksperiodeId", vedtaksperiodeId),
                 kv("utbetalingId", utbetalingId),
                 kv("utbetalingstype", vedtaksperiodensUtbetaling?.typeEnum?.name)
             )
             else -> sikkerLogg.info(
-                "Nye varsler og warnings er enige om at perioden ${if(harAktiveVarsler) "ikke" else ""} kan automatiseres. Gjelder {}, {}, {}.",
+                "Nye varsler og warnings er enige om at perioden ${if(harAktiveVarsler) "ikke" else ""} kan automatiseres. Gjelder {}, {}, {}, {}.",
+                kv("fødselsnummer", fødselsnummer),
                 kv("vedtaksperiodeId", vedtaksperiodeId),
                 kv("utbetalingId", utbetalingId),
                 kv("utbetalingstype", vedtaksperiodensUtbetaling?.typeEnum?.name)
