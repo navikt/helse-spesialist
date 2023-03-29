@@ -24,7 +24,7 @@ internal class Utbetalingsfilter(
     private fun nyÅrsak(årsak: String) = årsaker.add("Brukerutbetalingsfilter: $årsak")
 
     private fun evaluer(): Boolean{
-        if (!harUtbetalingTilSykmeldt || erUtbetaltFør) return true
+        if (erUtbetaltFør) return true
         if (utbetalingtype == REVURDERING) {
             sikkerLogg.info("Beholdes da det er en revurdering, fnr=$fødselsnummer")
             return true
@@ -45,7 +45,7 @@ internal class Utbetalingsfilter(
         return årsaker.isEmpty()
     }
 
-    internal val kanUtbetales by lazy(::evaluer)
+    internal val kanUtbetales by lazy { if (harUtbetalingTilSykmeldt) evaluer() else true }
     internal val kanIkkeUtbetales get() = !kanUtbetales
 
     internal fun årsaker(): List<String> {
