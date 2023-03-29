@@ -1,0 +1,15 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: spesialist-db-policy-dev
+  namespace: tbd
+spec:
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 34.88.202.33/32
+  podSelector:
+    matchLabels:
+      db_policy_user: spesialistbruker
+  policyTypes:
+    - Egress
