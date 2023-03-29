@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory
 internal class SpesialistDao(private val dataSource: DataSource): IPersonObserver {
 
     internal fun finnVedtakSomMangler(vedtaksperiodeIder: List<UUID>): List<UUID> {
+        if (vedtaksperiodeIder.isEmpty()) return emptyList()
         @Language("PostgreSQL")
         val query = "SELECT vedtaksperiode_id FROM generasjon_mangler_vedtak WHERE vedtaksperiode_id IN (${vedtaksperiodeIder.joinToString { "?" }})"
         return sessionOf(dataSource).use {

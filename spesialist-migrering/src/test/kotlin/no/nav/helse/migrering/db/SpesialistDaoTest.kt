@@ -102,6 +102,36 @@ internal class SpesialistDaoTest : AbstractDatabaseTest() {
         assertForkastetVedtaksperiode(vedtaksperiodeId, 1)
     }
 
+    @Test
+    fun `Kan finne vedtaksperioder som mangler vedtak`() {
+        dao.personOpprettet("1234", "123")
+        dao.arbeidsgiverOpprettet("1234")
+        val vedtaksperiodeId = UUID.randomUUID()
+        opprettGenerasjonFor(vedtaksperiodeId)
+        refreshView()
+        val funnet = dao.finnVedtakSomMangler(listOf(vedtaksperiodeId, UUID.randomUUID()))
+        assertEquals(listOf(vedtaksperiodeId), funnet)
+    }
+
+    @Test
+    fun `finnVedtakSomMangler håndterer tom liste`() {
+        dao.personOpprettet("1234", "123")
+        dao.arbeidsgiverOpprettet("1234")
+        val vedtaksperiodeId = UUID.randomUUID()
+        opprettGenerasjonFor(vedtaksperiodeId)
+        refreshView()
+        val funnet = dao.finnVedtakSomMangler(emptyList())
+        assertEquals(emptyList<UUID>(), funnet)
+    }
+
+    private fun refreshView() {
+        @Language("PostgreSQL")
+        val query = "REFRESH MATERIALIZED VIEW generasjon_mangler_vedtak"
+        sessionOf(dataSource).use {
+            it.run(queryOf(query).asExecute)
+        }
+    }
+
     private fun assertPerson(aktørId: String, fødselsnummer: String, forventetAntall: Int) {
         @Language("PostgreSQL")
         val query = "SELECT count(1) FROM person WHERE aktor_id = ? AND fodselsnummer = ?"
