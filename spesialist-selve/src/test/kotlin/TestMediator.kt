@@ -17,7 +17,6 @@ import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.varsel.ActualVarselRepository
-import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
@@ -64,7 +63,6 @@ internal class TestMediator(
         personDao = PersonDao(dataSource),
         vedtakDao = vedtakDao,
         overstyringDao = OverstyringDao(dataSource),
-        generasjonRepository = ActualGenerasjonRepository(dataSource),
         snapshotMediator = snapshotMediator,
         stikkprøver = object : Stikkprøver {
             override fun fullRefusjon() = false

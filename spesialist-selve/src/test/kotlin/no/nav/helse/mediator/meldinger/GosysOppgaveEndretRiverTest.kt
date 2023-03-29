@@ -76,6 +76,7 @@ internal class GosysOppgaveEndretRiverTest {
             hendelseId = UUID.randomUUID(),
             godkjenningsbehovJson = "{}",
             periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+            skjæringstidspunkt = LocalDate.now()
         )
     ) {
         every { oppgaveDao.finnOppgaveId(any<String>()) }.returns(oppgaveId)

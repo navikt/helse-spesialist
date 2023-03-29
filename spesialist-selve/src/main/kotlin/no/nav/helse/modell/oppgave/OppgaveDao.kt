@@ -8,6 +8,8 @@ import kotliquery.sessionOf
 import no.nav.helse.HelseDao
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommandData
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
+import no.nav.helse.objectMapper
+import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
@@ -319,10 +321,13 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             INNER JOIN saksbehandleroppgavetype s ON s.vedtak_ref = v.id
             WHERE o.id = :oppgaveId 
         """.single(mapOf("oppgaveId" to oppgaveId)) {
+            val json = objectMapper.readTree(it.string("godkjenningbehovJson"))
+            val skjæringstidspunkt = json.path("Godkjenning").path("skjæringstidspunkt").asLocalDate()
             GosysOppgaveEndretCommandData(
                 vedtaksperiodeId = it.uuid("vedtaksperiode_id"),
                 periodeFom = it.localDate("fom"),
                 periodeTom = it.localDate("tom"),
+                skjæringstidspunkt = skjæringstidspunkt,
                 utbetalingId = it.uuid("utbetaling_id"),
                 hendelseId = it.uuid("hendelseId"),
                 godkjenningsbehovJson = it.string("godkjenningbehovJson"),

@@ -1,9 +1,11 @@
 package no.nav.helse.modell.automatisering
 
+import java.time.LocalDate
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.helse.mediator.Toggle.*
+import no.nav.helse.mediator.Toggle.AutomatiserRevuderinger
+import no.nav.helse.mediator.Toggle.AutomatiserUtbetalingTilSykmeldt
 import no.nav.helse.mediator.meldinger.løsninger.HentEnhetløsning.Companion.erEnhetUtland
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
@@ -13,11 +15,8 @@ import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
+import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetalingTilSykmeldt
-import no.nav.helse.modell.varsel.Varsel
-import no.nav.helse.modell.vedtak.Warning
-import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.gyldigeVarsler
-import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålDao
@@ -35,7 +34,6 @@ internal class Automatisering(
     private val personDao: PersonDao,
     private val vedtakDao: VedtakDao,
     private val overstyringDao: OverstyringDao,
-    private val generasjonRepository: GenerasjonRepository,
     private val snapshotMediator: SnapshotMediator,
     private val stikkprøver: Stikkprøver,
 ) {
@@ -55,9 +53,11 @@ internal class Automatisering(
         hendelseId: UUID,
         utbetalingId: UUID,
         periodetype: Periodetype,
+        sykefraværstilfelle: Sykefraværstilfelle,
+        periodeTom: LocalDate,
         onAutomatiserbar: () -> Unit
     ) {
-        val problemer = vurder(fødselsnummer, vedtaksperiodeId, utbetalingId, periodetype)
+        val problemer = vurder(fødselsnummer, vedtaksperiodeId, utbetalingId, periodetype, sykefraværstilfelle, periodeTom)
         val vedtaksperiodensUtbetaling = snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId)
         val erUTS = vedtaksperiodensUtbetaling.utbetalingTilSykmeldt()
 
@@ -99,6 +99,8 @@ internal class Automatisering(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
         periodetype: Periodetype,
+        sykefraværstilfelle: Sykefraværstilfelle,
+        periodeTom: LocalDate
     ): List<String> {
         val risikovurdering =
             risikovurderingDao.hentRisikovurdering(vedtaksperiodeId)
@@ -106,25 +108,29 @@ internal class Automatisering(
         val vedtaksperiodensUtbetaling = snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId)
         val warnings = warningDao.finnAktiveWarnings(vedtaksperiodeId)
         val dedupliserteWarnings = warnings.distinct()
-        val generasjoner = generasjonRepository.tilhørendeFor(utbetalingId)
-        val varsler = generasjoner.gyldigeVarsler()
-        if (dedupliserteWarnings.size != varsler.size) {
-            sikkerLogg.info(
-                "Nye varsler og Warnings er ikke enige om antall varsler (hhv. ${varsler.size} og ${dedupliserteWarnings.size}) for periode/utbetaling med {}, {}, {}.\n{}\n{}",
+        val harAktiveVarsler = sykefraværstilfelle.harAktiveVarsler(periodeTom, utbetalingId)
+        val harWarnings = dedupliserteWarnings.isNotEmpty()
+        when {
+            !harAktiveVarsler && harWarnings -> sikkerLogg.info(
+                "Nye varsler mener at perioden kan automatiseres, mens warnings er uenig. Gjelder {}, {}, {}.",
                 kv("vedtaksperiodeId", vedtaksperiodeId),
                 kv("utbetalingId", utbetalingId),
-                kv("utbetalingstype", vedtaksperiodensUtbetaling?.typeEnum?.name),
-                kv("nyeVarsler", varsler.map(Varsel::toString)),
-                kv("warnings", warnings.map(Warning::toString)),
+                kv("utbetalingstype", vedtaksperiodensUtbetaling?.typeEnum?.name)
             )
-        } else {
-            sikkerLogg.info(
-                "Nye varsler og Warnings er enige om antall varsler (hhv. ${varsler.size} og ${dedupliserteWarnings.size}) for periode/utbetaling med {}, {}, {}.",
+            harAktiveVarsler && !harWarnings -> sikkerLogg.info(
+                "Nye varsler mener at perioden ikke kan automatiseres, mens warnings er uenig. Gjelder {}, {}, {}.",
                 kv("vedtaksperiodeId", vedtaksperiodeId),
                 kv("utbetalingId", utbetalingId),
-                kv("utbetalingstype", vedtaksperiodensUtbetaling?.typeEnum?.name),
+                kv("utbetalingstype", vedtaksperiodensUtbetaling?.typeEnum?.name)
+            )
+            else -> sikkerLogg.info(
+                "Nye varsler og warnings er enige om at perioden ${if(harAktiveVarsler) "ikke" else ""} kan automatiseres. Gjelder {}, {}, {}.",
+                kv("vedtaksperiodeId", vedtaksperiodeId),
+                kv("utbetalingId", utbetalingId),
+                kv("utbetalingstype", vedtaksperiodensUtbetaling?.typeEnum?.name)
             )
         }
+
         val erEgenAnsatt = egenAnsattDao.erEgenAnsatt(fødselsnummer)
         val harVergemål = vergemålDao.harVergemål(fødselsnummer) ?: false
         val tilhørerUtlandsenhet = erEnhetUtland(personDao.finnEnhetId(fødselsnummer))

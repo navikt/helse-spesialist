@@ -66,12 +66,10 @@ import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.Varselkode
-import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
-import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.abonnement.AbonnementDao
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
@@ -112,14 +110,14 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     private val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource)
     private val automatiseringDao = AutomatiseringDao(dataSource)
-    protected val egenAnsattDao = EgenAnsattDao(dataSource)
+    private val egenAnsattDao = EgenAnsattDao(dataSource)
     private val egenAnsattApiDao = EgenAnsattApiDao(dataSource)
 
     private val varselDao = VarselDao(dataSource)
     private val apiVarselRepository = ApiVarselRepository(dataSource)
     private val personApiDao = PersonApiDao(dataSource)
     protected val oppgaveDao = OppgaveDao(dataSource)
-    protected val oppgaveApiDao = OppgaveApiDao(dataSource)
+    private val oppgaveApiDao = OppgaveApiDao(dataSource)
     private val periodehistorikkDao = PeriodehistorikkDao(dataSource)
     protected val personDao = PersonDao(dataSource)
     private val vedtakDao = VedtakDao(dataSource)
@@ -127,7 +125,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val tildelingDao = TildelingDao(dataSource)
     private val risikovurderingDao = RisikovurderingDao(dataSource)
     private val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
-    protected val overstyringApiDao = OverstyringApiDao(dataSource)
+    private val overstyringApiDao = OverstyringApiDao(dataSource)
     protected val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
     private val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
     protected val utbetalingDao = UtbetalingDao(dataSource)
@@ -139,9 +137,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private val notatDao = NotatDao(dataSource)
     private val totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource)
     private val vergemålDao = VergemålDao(dataSource)
-    protected val overstyringDao = OverstyringDao(dataSource)
+    private val overstyringDao = OverstyringDao(dataSource)
     private val varselRepository = ActualVarselRepository(dataSource)
-    private val generasjonRepository = ActualGenerasjonRepository(dataSource)
 
     protected val snapshotClient = mockk<SnapshotClient>(relaxed = true)
     private val snapshotApiDao = SnapshotApiDao(dataSource)
@@ -155,7 +152,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val oppgaveMediator =
         OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao, opptegnelseDao, periodehistorikkDao)
 
-    protected val hendelsefabrikk = Hendelsefabrikk(
+    private val hendelsefabrikk = Hendelsefabrikk(
         dataSource = dataSource,
         snapshotClient = snapshotClient,
         oppgaveMediator = oppgaveMediator,
@@ -170,7 +167,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             personDao = personDao,
             vedtakDao = vedtakDao,
             overstyringDao = overstyringDao,
-            generasjonRepository = generasjonRepository,
             snapshotMediator = snapshotMediator,
             stikkprøver = object : Stikkprøver {
                 override fun fullRefusjon() = false
@@ -189,12 +185,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     internal val dataFetchingEnvironment = mockk<DataFetchingEnvironment>(relaxed = true)
 
-    internal val saksbehandlerTilganger = mockk<SaksbehandlerTilganger> {
-        every { harTilgangTilSkjermedePersoner() } returns true
-        every { harTilgangTilBeslutterOppgaver() } returns true
-        every { harTilgangTilRiskOppgaver() } returns true
-        every { harTilgangTilKode7() } returns true
-    }
 
     internal val personQuery = PersonQuery(
         personApiDao = personApiDao,
@@ -255,7 +245,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         return godkjenningsbehovId
     }
 
-    protected fun klargjørForGodkjenning(oppgaveId: UUID) {
+    private fun klargjørForGodkjenning(oppgaveId: UUID) {
         sendEgenAnsattløsningOld(oppgaveId, false)
         sendVergemålløsningOld(
             godkjenningsmeldingId = oppgaveId
@@ -267,13 +257,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             godkjenningsmeldingId = oppgaveId,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
-    }
-
-    protected fun sendVedtakFattet(
-        fødselsnummer: String,
-        vedtaksperiodeId: UUID,
-    ) {
-        Meldingssender.sendVedtakFattet(fødselsnummer, vedtaksperiodeId)
     }
 
     /**
@@ -326,24 +309,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     protected fun assertVedtaksperiodeEksistererIkke(vedtaksperiodeId: UUID) {
         assertEquals(0, vedtak(vedtaksperiodeId))
-    }
-
-    protected fun assertPersonEksisterer(fødselsnummer: String, aktørId: String) {
-        assertEquals(
-            1,
-            person(fødselsnummer, aktørId)
-        ) { "Person med fødselsnummer=$fødselsnummer og aktørId=$aktørId finnes ikke i databasen" }
-    }
-
-    protected fun assertPersonEksistererIkke(fødselsnummer: String, aktørId: String) {
-        assertEquals(0, person(fødselsnummer, aktørId))
-    }
-
-    protected fun assertArbeidsgiverEksisterer(organisasjonsnummer: String) {
-        assertEquals(
-            1,
-            arbeidsgiver(organisasjonsnummer)
-        ) { "Arbeidsgiver med organisasjonsnummer=$organisasjonsnummer finnes ikke i databasen" }
     }
 
     protected fun person(fødselsnummer: String, aktørId: String): Int {
@@ -427,10 +392,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     protected fun assertGodkjenningsbehovIkkeLøst() {
         assertEquals(0, testRapid.inspektør.løsninger().size)
-    }
-
-    protected fun assertBehov(vararg behov: String) {
-        assertTrue(testRapid.inspektør.behov().containsAll(behov.toList()))
     }
 
     protected fun assertIkkeEtterspurtBehov(behov: String) {

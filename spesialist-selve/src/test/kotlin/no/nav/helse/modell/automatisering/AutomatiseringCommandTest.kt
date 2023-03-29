@@ -4,8 +4,10 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
+import no.nav.helse.januar
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.objectMapper
@@ -40,7 +42,9 @@ internal class AutomatiseringCommandTest {
                 varselRepository = mockk(relaxed = true)
             ),
             Utbetaling(utbetalingId, 1000, 1000),
-            periodeType
+            periodeType,
+            Sykefraværstilfelle(fødselsnummer, 1.januar, emptyList()),
+            1.januar
         )
 
     private lateinit var context: CommandContext
@@ -54,16 +58,16 @@ internal class AutomatiseringCommandTest {
     fun `kaller automatiser utfør og returnerer true`() {
         assertTrue(command.execute(context))
         verify {
-            automatisering.utfør(any(), any(), any(), any(), any(), any())
+            automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), any())
         }
     }
 
     @Test
     fun `publiserer godkjenningsmelding ved automatisert godkjenning`() {
         every {
-            automatisering.utfør(any(), any(), any(), any(), any(), captureLambda())
+            automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), captureLambda())
         } answers {
-            arg<() -> Unit>(5).invoke()
+            arg<() -> Unit>(7).invoke()
         }
 
         assertTrue(command.execute(context))

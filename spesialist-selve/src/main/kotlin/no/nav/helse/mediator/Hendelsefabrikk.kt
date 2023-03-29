@@ -46,6 +46,7 @@ import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
+import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.modell.utbetaling.LagreOppdragCommand
@@ -151,6 +152,8 @@ internal class Hendelsefabrikk(
         orgnummereMedRelevanteArbeidsforhold: List<String>,
         json: String,
     ): Godkjenningsbehov {
+        val vedtaksperioder = generasjonRepository.finnVedtaksperioderFor(skjæringstidspunkt, utbetalingId, fødselsnummer)
+        val sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, skjæringstidspunkt, vedtaksperioder)
         return Godkjenningsbehov(
             id = id,
             fødselsnummer = fødselsnummer,
@@ -166,6 +169,7 @@ internal class Hendelsefabrikk(
             inntektskilde = inntektskilde,
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
             skjæringstidspunkt = skjæringstidspunkt,
+            sykefraværstilfelle = sykefraværstilfelle,
             json = json,
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
@@ -822,10 +826,14 @@ internal class Hendelsefabrikk(
 
         sikkerLog.info("Gjør ny sjekk om det finnes åpne gosysoppgaver for fnr $fødselsnummer og vedtaksperiodeId ${commandData.vedtaksperiodeId}")
 
+        val vedtaksperioder = generasjonRepository.finnVedtaksperioderFor(commandData.skjæringstidspunkt, commandData.utbetalingId, fødselsnummer)
+        val sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, commandData.skjæringstidspunkt, vedtaksperioder)
+
         return GosysOppgaveEndret(
             id = hendelseId,
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
+            sykefraværstilfelle = sykefraværstilfelle,
             json = json,
             gosysOppgaveEndretCommandData = commandData,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,

@@ -19,6 +19,7 @@ import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.oppgave.SjekkAtOppgaveFortsattErÅpenCommand
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
@@ -34,6 +35,7 @@ internal class GosysOppgaveEndret(
     override val id: UUID,
     private val fødselsnummer: String,
     aktørId: String,
+    sykefraværstilfelle: Sykefraværstilfelle,
     private val json: String,
     gosysOppgaveEndretCommandData: GosysOppgaveEndretCommandData,
     åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
@@ -78,6 +80,8 @@ internal class GosysOppgaveEndret(
             oppgaveMediator = oppgaveMediator,
             utbetaling = utbetaling,
             periodetype = gosysOppgaveEndretCommandData.periodetype,
+            sykefraværstilfelle = sykefraværstilfelle,
+            periodeTom = gosysOppgaveEndretCommandData.periodeTom,
         )
     )
 

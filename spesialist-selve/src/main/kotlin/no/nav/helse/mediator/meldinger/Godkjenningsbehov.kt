@@ -37,6 +37,7 @@ import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikoCommand
 import no.nav.helse.modell.risiko.RisikovurderingDao
+import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingsfilter
@@ -77,6 +78,7 @@ internal class Godkjenningsbehov(
     inntektskilde: Inntektskilde,
     orgnummereMedRelevanteArbeidsforhold: List<String>,
     skjæringstidspunkt: LocalDate,
+    sykefraværstilfelle: Sykefraværstilfelle,
     private val json: String,
     personDao: PersonDao,
     arbeidsgiverDao: ArbeidsgiverDao,
@@ -222,6 +224,8 @@ internal class Godkjenningsbehov(
             godkjenningMediator = godkjenningMediator,
             utbetaling = utbetaling,
             periodetype = periodetype,
+            sykefraværstilfelle = sykefraværstilfelle,
+            periodeTom = periodeTom
         ),
         OpprettSaksbehandleroppgaveCommand(
             fødselsnummer = fødselsnummer,
