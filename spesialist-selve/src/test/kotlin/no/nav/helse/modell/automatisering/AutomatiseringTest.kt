@@ -223,12 +223,17 @@ internal class AutomatiseringTest {
     }
 
     @Test
-    fun `periode med delvis refusjon skal ikke automatisk godkjennes`() {
+    fun `periode med delvis refusjon skal automatisk godkjennes`() {
+        Toggle.AutomatiserUtbetalingTilSykmeldt.enable()
+        val onSuccessCallback = mockk<() -> Unit>(relaxed = true)
         every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(
             personbeløp = 500,
             arbeidsgiverbeløp = 500
         )
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), utbetalingId, periodetype) { fail("Denne skal ikke kalles") }
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), utbetalingId, periodetype, onSuccessCallback)
+        verify { automatiseringDaoMock.automatisert(any(), any(), any()) }
+        verify { onSuccessCallback() }
+        Toggle.AutomatiserUtbetalingTilSykmeldt.disable()
     }
 
     @Test

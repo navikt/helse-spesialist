@@ -7,7 +7,6 @@ import no.nav.helse.mediator.Toggle.*
 import no.nav.helse.mediator.meldinger.løsninger.HentEnhetløsning.Companion.erEnhetUtland
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
-import no.nav.helse.modell.delvisRefusjon
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.erRevurdering
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
@@ -149,7 +148,6 @@ internal class Automatisering(
             validering("Bruker er under verge") { !harVergemål },
             validering("Bruker tilhører utlandsenhet") { !tilhørerUtlandsenhet },
             validering("Har flere arbeidsgivere") { inntektskilde == Inntektskilde.EN_ARBEIDSGIVER },
-            validering("Delvis refusjon") { !vedtaksperiodensUtbetaling.delvisRefusjon() },
             validering("Utbetaling til sykmeldt") { !skalStoppesPgaUTS },
             AutomatiserRevurderinger(vedtaksperiodensUtbetaling),
             validering("Vedtaksperioden har en pågående overstyring") { !harPågåendeOverstyring }
