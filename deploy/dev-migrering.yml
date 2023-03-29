@@ -5,6 +5,7 @@ metadata:
   namespace: tbd
   labels:
     team: tbd
+    db_policy_user: spesialistbruker
 spec:
   image: {{image}}
   port: 8080
