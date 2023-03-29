@@ -126,7 +126,7 @@ internal class Automatisering(
                 kv("utbetalingstype", vedtaksperiodensUtbetaling?.typeEnum?.name)
             )
             else -> sikkerLogg.info(
-                "Nye varsler og warnings er enige om at perioden ${if(harAktiveVarsler) "ikke" else ""} kan automatiseres. Gjelder {}, {}, {}, {}.",
+                "Nye varsler og warnings er enige om at perioden ${if(harAktiveVarsler) "ikke " else ""}kan automatiseres. Gjelder {}, {}, {}, {}.",
                 kv("fødselsnummer", fødselsnummer),
                 kv("vedtaksperiodeId", vedtaksperiodeId),
                 kv("utbetalingId", utbetalingId),
