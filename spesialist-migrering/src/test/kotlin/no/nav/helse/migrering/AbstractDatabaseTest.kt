@@ -15,7 +15,7 @@ abstract class AbstractDatabaseTest {
 
     companion object {
         private val postgres = PostgreSQLContainer<Nothing>("postgres:14").apply {
-            withReuse(false)
+            withReuse(true)
             withLabel("app-navn", "spesialist-migrering")
             start()
             println("Database: jdbc:postgresql://localhost:$firstMappedPort/test startet opp, credentials: test og test")

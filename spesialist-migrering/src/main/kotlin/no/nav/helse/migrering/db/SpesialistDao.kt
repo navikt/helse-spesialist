@@ -48,6 +48,9 @@ internal class SpesialistDao(private val dataSource: DataSource): IPersonObserve
         organisasjonsnummer: String,
     ) {
         opprettVedtaksperiode(id, fom, tom, organisasjonsnummer, fødselsnummer)
+    }
+
+    override fun generasjonerOppdatert(id: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate) {
         oppdaterGenerasjonerFor(id, fom, tom, skjæringstidspunkt)
     }
 

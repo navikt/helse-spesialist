@@ -64,4 +64,5 @@ internal interface IPersonObserver{
         organisasjonsnummer: String,
     ) {}
     fun vedtaksperiodeOppdaterForkastet(id: UUID, forkastet: Boolean) {}
+    fun generasjonerOppdatert(id: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate) {}
 }

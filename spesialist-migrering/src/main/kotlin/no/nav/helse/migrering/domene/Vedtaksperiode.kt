@@ -30,14 +30,18 @@ internal class Vedtaksperiode(
     }
 
     internal fun opprett() {
-        if (forkastet) return sikkerlogg.info(
+        if (forkastet) sikkerlogg.info(
             "Oppretter ikke vedtaksperiode for {}, {} med {} da den er forkastet",
             kv("fødselsnummer", fødselsnummer),
             kv("organisasjonsnummer", organisasjonsnummer),
             kv("vedtaksperiodeId", id),
-        )
+        ) else {
+            observers.forEach {
+                it.vedtaksperiodeOpprettet(id, opprettet, fom, tom, skjæringstidspunkt, fødselsnummer, organisasjonsnummer)
+            }
+        }
         observers.forEach {
-            it.vedtaksperiodeOpprettet(id, opprettet, fom, tom, skjæringstidspunkt, fødselsnummer, organisasjonsnummer)
+            it.generasjonerOppdatert(id, fom, tom, skjæringstidspunkt)
         }
     }
 

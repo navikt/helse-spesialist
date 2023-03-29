@@ -131,6 +131,22 @@ internal class PersonavstemmingTest : AbstractDatabaseTest() {
     }
 
     @Test
+    fun `Oppdaterer eksisterende generasjoner selv om vedtaksperiode er forkastet`() {
+        spesialistDao.personOpprettet("42", "12345678910")
+        spesialistDao.arbeidsgiverOpprettet("987654321")
+        val vedtaksperiodeId = UUID.randomUUID()
+        opprettGenerasjonFor(vedtaksperiodeId)
+        assertPerson("12345678910", 1)
+        assertArbeidsgiver("987654321", 1)
+        assertGenerasjonMed(vedtaksperiodeId, 1)
+        testRapid.sendTestMessage(testevent(forkastetVedtaksperiodeId = vedtaksperiodeId))
+        assertPerson("12345678910", 1)
+        assertArbeidsgiver("987654321", 1)
+        assertVedtaksperiode(vedtaksperiodeId, 0) // Perioden er forkastet, skal ikke lagres
+        assertGenerasjonMed(vedtaksperiodeId, 1.januar, 31.januar, 1.januar, 1)
+    }
+
+    @Test
     fun `Oppdaterer forkastet-flagg når periode eksisterer`() {
         spesialistDao.personOpprettet("42", "12345678910")
         spesialistDao.arbeidsgiverOpprettet("987654321")
@@ -240,31 +256,39 @@ internal class PersonavstemmingTest : AbstractDatabaseTest() {
     }
 
     @Language("JSON")
-    private fun testevent(vedtaksperiodeId: UUID): String {
-        return """
-            {
-                  "@event_name": "person_avstemt",
-                  "arbeidsgivere": [
-                    {
-                      "organisasjonsnummer": "987654321",
-                      "vedtaksperioder": [
-                        {
-                          "id": "$vedtaksperiodeId",
-                          "fom": "2018-01-01",
-                          "tom": "2018-01-31",
-                          "skjæringstidspunkt": "2018-01-01",
-                          "opprettet": "2022-11-23T12:52:42.017867",
-                          "oppdatert": "2022-11-23T12:52:42.017867"
-                      }
-                      ],
-                      "forkastedeVedtaksperioder": []
-                    }
-                  ],
-                  "@id": "c405a203-264e-4496-99dc-785e76ede254",
-                  "@opprettet": "2022-11-23T12:52:42.017867",
-                  "fødselsnummer": "12345678910",
-                  "aktørId": "42"
-            }
+    private fun testevent(vedtaksperiodeId: UUID = UUID.randomUUID(), forkastetVedtaksperiodeId: UUID = UUID.randomUUID()): String {
+        return """{
+  "@event_name": "person_avstemt",
+  "arbeidsgivere": [
+    {
+      "organisasjonsnummer": "987654321",
+      "vedtaksperioder": [
+        {
+          "id": "$vedtaksperiodeId",
+          "fom": "2018-01-01",
+          "tom": "2018-01-31",
+          "skjæringstidspunkt": "2018-01-01",
+          "opprettet": "2022-11-23T12:52:42.017867",
+          "oppdatert": "2022-11-23T12:52:42.017867"
+        }
+      ],
+      "forkastedeVedtaksperioder": [
+        {
+          "id": "$forkastetVedtaksperiodeId",
+          "fom": "2018-01-01",
+          "tom": "2018-01-31",
+          "skjæringstidspunkt": "2018-01-01",
+          "opprettet": "2022-11-23T12:52:42.017867",
+          "oppdatert": "2022-11-23T12:52:42.017867"
+        }
+      ]
+    }
+  ],
+  "@id": "c405a203-264e-4496-99dc-785e76ede254",
+  "@opprettet": "2022-11-23T12:52:42.017867",
+  "fødselsnummer": "12345678910",
+  "aktørId": "42"
+}
             
         """
     }
