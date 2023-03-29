@@ -3,10 +3,6 @@ package no.nav.helse.e2e
 import AbstractE2ETest
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.TestRapidHelpers.oppgaveId
-import no.nav.helse.Testdata.SAKSBEHANDLER_EPOST
-import no.nav.helse.Testdata.SAKSBEHANDLER_IDENT
-import no.nav.helse.Testdata.SAKSBEHANDLER_OID
 import no.nav.helse.Testdata._MODIFISERTBART_FØDSELSNUMMER
 import no.nav.helse.Testdata.snapshot
 import no.nav.helse.januar
@@ -36,14 +32,7 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETest() {
             personbeløp = 1500,
         )
         assertVedtaksperiodeEksisterer(vedtaksperiodeId)
-        sendSaksbehandlerløsningFraAPI(
-            testRapid.inspektør.oppgaveId(),
-            SAKSBEHANDLER_IDENT,
-            SAKSBEHANDLER_EPOST,
-            SAKSBEHANDLER_OID,
-            true
-        )
-        assertGodkjenningsbehovløsning(true, SAKSBEHANDLER_IDENT)
+        assertGodkjenningsbehovløsning(true, "Automatisk behandlet")
     }
 
     @Test
