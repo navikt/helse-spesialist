@@ -18,14 +18,14 @@ internal class Person(
         observers.add(observer)
     }
 
-    internal fun opprett() {
+    internal fun opprett(vedtakSomMangler: List<UUID>) {
         if (arbeidsgivere.isEmpty())
             return sikkerlogg.info(
                 "Oppretter ikke person med {}, {} da den ikke har noen arbeidsgivere",
                 kv("aktørId", aktørId),
                 kv("fødselsnummer", fødselsnummer)
             )
-        if (arbeidsgivere.harKunForkastedeVedtaksperioder()) {
+        if (arbeidsgivere.harKunForkastedeVedtaksperioder() && vedtakSomMangler.isEmpty()) {
             sikkerlogg.info(
                 "Oppretter ikke person med {}, {} da den ikke har noen aktive vedtaksperioder",
                 kv("aktørId", aktørId),
@@ -34,7 +34,7 @@ internal class Person(
         } else {
             observers.forEach { it.personOpprettet(aktørId, fødselsnummer) }
         }
-        arbeidsgivere.forEach { it.opprett() }
+        arbeidsgivere.forEach { it.opprett(vedtakSomMangler) }
     }
 
     internal fun håndterNyArbeidsgiver(organisasjonsnummer: String): Arbeidsgiver {

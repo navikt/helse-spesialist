@@ -6,7 +6,7 @@ import java.util.UUID
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class PersonTest{
+internal class PersonTest {
 
     @Test
     fun `Kan opprette person`() {
@@ -14,7 +14,19 @@ internal class PersonTest{
         person.register(observer)
         val arbeidsgiver = person.håndterNyArbeidsgiver("123456789")
         arbeidsgiver.håndterNyVedtaksperiode(vedtaksperiode())
-        person.opprett()
+        person.opprett(emptyList())
+
+        assertEquals(listOf("123"), observer.opprettedePersoner)
+    }
+
+    @Test
+    fun `Oppretter person selv om den kun har arbeidsgivere med forkastede perioder dersom den har perioder i vedtakSomMangler`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val person = Person("123", "1234")
+        person.register(observer)
+        val arbeidsgiver = person.håndterNyArbeidsgiver("123456789")
+        arbeidsgiver.håndterNyVedtaksperiode(vedtaksperiode(vedtaksperiodeId, forkastet = true))
+        person.opprett(listOf(vedtaksperiodeId))
 
         assertEquals(listOf("123"), observer.opprettedePersoner)
     }
@@ -23,7 +35,7 @@ internal class PersonTest{
     fun `Oppretter ikke person hvis person ikke har arbeidsgivere`() {
         val person = Person("123", "1234")
         person.register(observer)
-        person.opprett()
+        person.opprett(emptyList())
 
         assertEquals(emptyList<String>(), observer.opprettedePersoner)
     }
@@ -34,7 +46,7 @@ internal class PersonTest{
         person.register(observer)
         val arbeidsgiver = person.håndterNyArbeidsgiver("123456789")
         arbeidsgiver.håndterNyVedtaksperiode(vedtaksperiode(forkastet = true))
-        person.opprett()
+        person.opprett(emptyList())
 
         assertEquals(emptyList<String>(), observer.opprettedePersoner)
     }
@@ -48,7 +60,7 @@ internal class PersonTest{
         arbeidsgiver1.håndterNyVedtaksperiode(vedtaksperiode(forkastet = true))
         arbeidsgiver2.håndterNyVedtaksperiode(vedtaksperiode(forkastet = true))
         arbeidsgiver2.håndterNyVedtaksperiode(vedtaksperiode(forkastet = false))
-        person.opprett()
+        person.opprett(emptyList())
 
         assertEquals(listOf("123"), observer.opprettedePersoner)
     }
@@ -61,7 +73,7 @@ internal class PersonTest{
         val arbeidsgiver2 = person.håndterNyArbeidsgiver("987654321")
         arbeidsgiver1.håndterNyVedtaksperiode(vedtaksperiode(forkastet = true))
         arbeidsgiver2.håndterNyVedtaksperiode(vedtaksperiode(forkastet = true))
-        person.opprett()
+        person.opprett(emptyList())
 
         assertEquals(0, observer.opprettedePersoner.size)
         assertEquals(0, observer.opprettedeArbeidsgivere.size)
@@ -69,8 +81,8 @@ internal class PersonTest{
         assertEquals(2, observer.vedtaksperioderOppdatert.size)
     }
 
-    private fun vedtaksperiode(forkastet: Boolean = false) = Vedtaksperiode(
-        UUID.randomUUID(),
+    private fun vedtaksperiode(vedtaksperiodeId: UUID = UUID.randomUUID(), forkastet: Boolean = false) = Vedtaksperiode(
+        vedtaksperiodeId,
         LocalDateTime.now(),
         LocalDate.now(),
         LocalDate.now(),

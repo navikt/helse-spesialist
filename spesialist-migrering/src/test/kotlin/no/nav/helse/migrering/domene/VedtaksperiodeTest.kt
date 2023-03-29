@@ -22,7 +22,26 @@ internal class VedtaksperiodeTest {
             forkastet = false
         )
         vedtaksperiode.register(observer)
-        vedtaksperiode.opprett()
+        vedtaksperiode.opprett(emptyList())
+
+        assertEquals(listOf(vedtaksperiodeId), observer.opprettedeVedtaksperioder)
+    }
+
+    @Test
+    fun `Oppretter vedtaksperiode selv om den er forkastet dersom den finnes i vedtakSomMangler`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val vedtaksperiode = Vedtaksperiode(
+            id = vedtaksperiodeId,
+            opprettet = LocalDateTime.now(),
+            fom = LocalDate.now(),
+            tom = LocalDate.now(),
+            skjæringstidspunkt = LocalDate.now(),
+            fødselsnummer = "123",
+            organisasjonsnummer = "1234",
+            forkastet = true
+        )
+        vedtaksperiode.register(observer)
+        vedtaksperiode.opprett(listOf(vedtaksperiodeId))
 
         assertEquals(listOf(vedtaksperiodeId), observer.opprettedeVedtaksperioder)
     }
@@ -41,7 +60,7 @@ internal class VedtaksperiodeTest {
             forkastet = true
         )
         vedtaksperiode.register(observer)
-        vedtaksperiode.opprett()
+        vedtaksperiode.opprett(emptyList())
 
         assertEquals(emptyList<UUID>(), observer.opprettedeVedtaksperioder)
     }

@@ -59,6 +59,12 @@ internal class Personavstemming {
             val fødselsnummer = packet["fødselsnummer"].asText()
             val aktørId = packet["aktørId"].asText()
             val person = Person(aktørId, fødselsnummer)
+            val vedtaksperiodeIder = packet["arbeidsgivere"].flatMap { arbeidsgiverNode ->
+                arbeidsgiverNode.path("vedtaksperioder").map { periodeNode ->
+                    UUID.fromString(periodeNode.path("id").asText())
+                }
+            }
+            val vedtakSomMangler = spesialistDao.finnVedtakSomMangler(vedtaksperiodeIder)
             person.register(spesialistDao)
             sikkerlogg.info("Mottatt person_avstemt for {}, {}", keyValue("fødselsnummer", fødselsnummer), keyValue("aktørId", aktørId))
             val arbeidsgivereJson = packet["arbeidsgivere"]
@@ -100,7 +106,7 @@ internal class Personavstemming {
                     arbeidsgiver.håndterNyVedtaksperiode(it)
                 }
             }
-            person.opprett()
+            person.opprett(vedtakSomMangler)
         }
     }
 

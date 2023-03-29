@@ -13,6 +13,14 @@ import org.slf4j.LoggerFactory
 
 internal class SpesialistDao(private val dataSource: DataSource): IPersonObserver {
 
+    internal fun finnVedtakSomMangler(vedtaksperiodeIder: List<UUID>): List<UUID> {
+        @Language("PostgreSQL")
+        val query = "SELECT vedtaksperiode_id FROM generasjon_mangler_vedtak WHERE vedtaksperiode_id IN (${vedtaksperiodeIder.joinToString { "?" }})"
+        return sessionOf(dataSource).use {
+            it.run(queryOf(query, *vedtaksperiodeIder.toTypedArray()).map { it.uuid("vedtaksperiode_id") }.asList)
+        }
+    }
+
     override fun personOpprettet(aktørId: String, fødselsnummer: String) {
         @Language("PostgreSQL")
         val query = "INSERT INTO person(fodselsnummer, aktor_id) VALUES (?, ?) ON CONFLICT (fodselsnummer) DO NOTHING "

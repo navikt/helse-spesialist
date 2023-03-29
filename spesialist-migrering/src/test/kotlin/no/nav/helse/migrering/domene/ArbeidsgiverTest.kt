@@ -13,7 +13,18 @@ internal class ArbeidsgiverTest {
         val arbeidsgiver = Arbeidsgiver("123")
         arbeidsgiver.register(observer)
         arbeidsgiver.håndterNyVedtaksperiode(vedtaksperiode())
-        arbeidsgiver.opprett()
+        arbeidsgiver.opprett(emptyList())
+
+        assertEquals(listOf("123"), observer.opprettedeArbeidsgivere)
+    }
+
+    @Test
+    fun `Oppretter arbeidsgiver selv om den kun har forkastede perioder dersom den har perioder i vedtakSomMangler`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val arbeidsgiver = Arbeidsgiver("123")
+        arbeidsgiver.register(observer)
+        arbeidsgiver.håndterNyVedtaksperiode(vedtaksperiode(vedtaksperiodeId, forkastet = true))
+        arbeidsgiver.opprett(listOf(vedtaksperiodeId))
 
         assertEquals(listOf("123"), observer.opprettedeArbeidsgivere)
     }
@@ -23,7 +34,7 @@ internal class ArbeidsgiverTest {
         val arbeidsgiver = Arbeidsgiver("123")
         arbeidsgiver.register(observer)
         arbeidsgiver.håndterNyVedtaksperiode(vedtaksperiode(forkastet = true))
-        arbeidsgiver.opprett()
+        arbeidsgiver.opprett(emptyList())
 
         assertEquals(emptyList<String>(), observer.opprettedeArbeidsgivere)
     }
@@ -34,13 +45,13 @@ internal class ArbeidsgiverTest {
         arbeidsgiver.register(observer)
         arbeidsgiver.håndterNyVedtaksperiode(vedtaksperiode(forkastet = true))
         arbeidsgiver.håndterNyVedtaksperiode(vedtaksperiode(forkastet = false))
-        arbeidsgiver.opprett()
+        arbeidsgiver.opprett(emptyList())
 
         assertEquals(listOf("123"), observer.opprettedeArbeidsgivere)
     }
 
-    private fun vedtaksperiode(forkastet: Boolean = false) = Vedtaksperiode(
-        UUID.randomUUID(),
+    private fun vedtaksperiode(vedtaksperiodeId: UUID = UUID.randomUUID(), forkastet: Boolean = false) = Vedtaksperiode(
+        vedtaksperiodeId,
         LocalDateTime.now(),
         LocalDate.now(),
         LocalDate.now(),

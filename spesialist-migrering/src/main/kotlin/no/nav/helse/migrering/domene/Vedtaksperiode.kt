@@ -29,8 +29,8 @@ internal class Vedtaksperiode(
         observers.forEach { it.vedtaksperiodeOppdaterForkastet(id, forkastet) }
     }
 
-    internal fun opprett() {
-        if (forkastet) sikkerlogg.info(
+    internal fun opprett(vedtakSomMangler: List<UUID>) {
+        if (forkastet && !finnesI(vedtakSomMangler)) sikkerlogg.info(
             "Oppretter ikke vedtaksperiode for {}, {} med {} da den er forkastet",
             kv("fødselsnummer", fødselsnummer),
             kv("organisasjonsnummer", organisasjonsnummer),
@@ -44,6 +44,8 @@ internal class Vedtaksperiode(
             it.generasjonerOppdatert(id, fom, tom, skjæringstidspunkt)
         }
     }
+
+    fun finnesI(vedtakSomMangler: List<UUID>) = id in vedtakSomMangler
 
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
