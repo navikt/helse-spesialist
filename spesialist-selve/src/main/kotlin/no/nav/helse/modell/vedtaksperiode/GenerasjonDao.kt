@@ -96,8 +96,8 @@ class GenerasjonDao(private val dataSource: DataSource) {
         id: UUID,
         vedtaksperiodeId: UUID,
         hendelseId: UUID,
-        skjæringstidspunkt: LocalDate?,
-        periode: Periode?,
+        skjæringstidspunkt: LocalDate,
+        periode: Periode,
     ): Generasjon {
         @Language("PostgreSQL")
         val query = """
@@ -125,8 +125,8 @@ class GenerasjonDao(private val dataSource: DataSource) {
                             vedtaksperiodeId,
                             hendelseId,
                             skjæringstidspunkt,
-                            periode?.fom(),
-                            periode?.tom()
+                            periode.fom(),
+                            periode.tom()
                         ).map(::toGenerasjon).asSingle
                     )
                 ) { "Kunne ikke opprette ny generasjon" }
@@ -183,13 +183,8 @@ class GenerasjonDao(private val dataSource: DataSource) {
             row.uuid("vedtaksperiode_id"),
             row.uuidOrNull("utbetaling_id"),
             row.boolean("låst"),
-            row.localDateOrNull("skjæringstidspunkt"),
-            row.localDateOrNull("fom")?.let {
-                Periode(
-                    it,
-                    row.localDate("tom"),
-                )
-            },
+            row.localDate("skjæringstidspunkt"),
+            Periode(row.localDate("fom"), row.localDate("tom")),
             varslerFor(row.long("id")).toSet(),
         )
     }

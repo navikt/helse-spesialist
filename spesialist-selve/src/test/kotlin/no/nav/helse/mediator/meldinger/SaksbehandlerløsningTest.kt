@@ -8,6 +8,7 @@ import io.mockk.mockk
 import java.time.LocalDateTime
 import java.util.UUID
 import java.util.UUID.randomUUID
+import no.nav.helse.januar
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.meldinger.løsninger.Saksbehandlerløsning
 import no.nav.helse.modell.HendelseDao
@@ -61,7 +62,7 @@ internal class SaksbehandlerløsningTest {
             mockk(relaxed = true)
         ),
         utbetalingDao = utbetalingDao,
-        gjeldendeGenerasjoner = listOf(Generasjon(randomUUID(), randomUUID())),
+        gjeldendeGenerasjoner = listOf(Generasjon(randomUUID(), randomUUID(), 1.januar, 31.januar, 1.januar)),
     )
 
     private val context = CommandContext(randomUUID())

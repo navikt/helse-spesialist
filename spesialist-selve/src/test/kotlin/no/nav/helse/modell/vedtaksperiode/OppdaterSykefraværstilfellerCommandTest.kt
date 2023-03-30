@@ -2,6 +2,7 @@ package no.nav.helse.modell.vedtaksperiode
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.modell.kommando.CommandContext
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -13,10 +14,9 @@ class OppdaterSykefraværstilfellerCommandTest {
     fun `oppdaterer sykefraværstilfelle`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjonsId = UUID.randomUUID()
-        val skjæringstidspunkt = 1.januar
-        val generasjon = Generasjon(generasjonsId, vedtaksperiodeId)
+        val generasjon = generasjon(generasjonsId, vedtaksperiodeId)
         val vedtaksperiodeOppdateringer = listOf(
-            VedtaksperiodeOppdatering(skjæringstidspunkt, 5.januar, skjæringstidspunkt, vedtaksperiodeId)
+            VedtaksperiodeOppdatering(1.februar, 5.februar, 1.februar, vedtaksperiodeId)
         )
         val vedtaksperiode = Vedtaksperiode(vedtaksperiodeId, generasjon)
         vedtaksperiode.registrer(observer)
@@ -28,6 +28,15 @@ class OppdaterSykefraværstilfellerCommandTest {
         assertEquals(1, observer.oppdaterteGenerasjoner.size)
         assertEquals(generasjonsId, observer.oppdaterteGenerasjoner[0])
     }
+
+    private fun generasjon(generasjonId: UUID = UUID.randomUUID(), vedtaksperiodeId: UUID = UUID.randomUUID()) = Generasjon(
+        id = generasjonId,
+        vedtaksperiodeId = vedtaksperiodeId,
+        fom = 1.januar,
+        tom = 31.januar,
+        skjæringstidspunkt = 1.januar
+    )
+
 
     private val observer = object : IVedtaksperiodeObserver {
         val oppdaterteGenerasjoner = mutableListOf<UUID>()

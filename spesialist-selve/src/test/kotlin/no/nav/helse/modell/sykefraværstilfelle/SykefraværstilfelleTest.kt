@@ -18,8 +18,8 @@ internal class SykefraværstilfelleTest {
     fun `har ikke aktive varsler`() {
         val vedtaksperiodeId1 = UUID.randomUUID()
         val vedtaksperiodeId2 = UUID.randomUUID()
-        val gjeldendeGenerasjon1 = Generasjon(UUID.randomUUID(), vedtaksperiodeId1)
-        val gjeldendeGenerasjon2 = Generasjon(UUID.randomUUID(), vedtaksperiodeId2)
+        val gjeldendeGenerasjon1 = generasjon(vedtaksperiodeId1)
+        val gjeldendeGenerasjon2 = generasjon(vedtaksperiodeId2)
         gjeldendeGenerasjon1.håndterTidslinjeendring(1.januar, 31.januar, 1.januar)
         gjeldendeGenerasjon2.håndterTidslinjeendring(1.februar, 28.februar, 1.februar)
         val vedtaksperiode1 = Vedtaksperiode(vedtaksperiodeId1, gjeldendeGenerasjon1)
@@ -30,8 +30,8 @@ internal class SykefraværstilfelleTest {
     fun `har ikke aktive varsler når generasjonene har utbetalingId men ikke fom`() {
         val vedtaksperiodeId1 = UUID.randomUUID()
         val vedtaksperiodeId2 = UUID.randomUUID()
-        val gjeldendeGenerasjon1 = Generasjon(UUID.randomUUID(), vedtaksperiodeId1)
-        val gjeldendeGenerasjon2 = Generasjon(UUID.randomUUID(), vedtaksperiodeId2)
+        val gjeldendeGenerasjon1 = generasjon(vedtaksperiodeId1)
+        val gjeldendeGenerasjon2 = generasjon(vedtaksperiodeId2)
         val utbetalingId = UUID.randomUUID()
         gjeldendeGenerasjon1.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId, varselRepository)
         gjeldendeGenerasjon2.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId, varselRepository)
@@ -43,8 +43,8 @@ internal class SykefraværstilfelleTest {
     fun `har aktive varsler`() {
         val vedtaksperiodeId1 = UUID.randomUUID()
         val vedtaksperiodeId2 = UUID.randomUUID()
-        val gjeldendeGenerasjon1 = Generasjon(UUID.randomUUID(), vedtaksperiodeId1)
-        val gjeldendeGenerasjon2 = Generasjon(UUID.randomUUID(), vedtaksperiodeId2)
+        val gjeldendeGenerasjon1 = generasjon(vedtaksperiodeId1)
+        val gjeldendeGenerasjon2 = generasjon(vedtaksperiodeId2)
         gjeldendeGenerasjon1.håndterTidslinjeendring(1.januar, 31.januar, 1.januar)
         gjeldendeGenerasjon2.håndterTidslinjeendring(1.februar, 28.februar, 1.februar)
         val vedtaksperiode1 = Vedtaksperiode(vedtaksperiodeId1, gjeldendeGenerasjon1)
@@ -52,6 +52,14 @@ internal class SykefraværstilfelleTest {
         gjeldendeGenerasjon2.håndterRegelverksvarsel(UUID.randomUUID(), UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), varselRepository)
         assertTrue(listOf(vedtaksperiode1, vedtaksperiode2).harAktiveVarsler(28.februar))
     }
+
+    private fun generasjon(vedtaksperiodeId: UUID = UUID.randomUUID()) = Generasjon(
+        id = UUID.randomUUID(),
+        vedtaksperiodeId = vedtaksperiodeId,
+        fom = 1.januar,
+        tom = 31.januar,
+        skjæringstidspunkt = 1.januar
+    )
 
     private val varselRepository = object : VarselRepository {
         override fun deaktiverFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, definisjonId: UUID?) {}
