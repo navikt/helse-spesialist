@@ -530,8 +530,7 @@ internal class Hendelsefabrikk(
         aktørId: String,
         json: String,
     ): Sykefraværstilfeller {
-        val vedtaksperiodeIder = vedtaksperiodeOppdateringer.map { it.vedtaksperiodeId }
-        val vedtaksperioder = generasjonRepository.finnVedtaksperioder(vedtaksperiodeIder)
+        val vedtaksperioder = generasjonRepository.finnVedtaksperioderFor(fødselsnummer)
         return Sykefraværstilfeller(
             id = id,
             fødselsnummer = fødselsnummer,
