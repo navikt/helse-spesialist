@@ -199,9 +199,6 @@ internal class Generasjon(
 
     internal companion object {
         private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
-        internal fun List<Generasjon>.gyldigeVarsler(): List<Varsel> {
-            return flatMap { generasjon -> generasjon.varsler.filter(Varsel::erGyldig) }
-        }
 
         private fun Generasjon.opprettNeste(generasjonId: UUID, hendelseId: UUID): Generasjon {
             val nyGenerasjon = Generasjon(generasjonId, this.vedtaksperiodeId, null, false, this.skjæringstidspunkt, this.periode, emptySet())
