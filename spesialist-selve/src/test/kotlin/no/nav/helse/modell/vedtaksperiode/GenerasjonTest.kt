@@ -9,7 +9,6 @@ import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.januar
-import no.nav.helse.mars
 import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.Varsel.Companion.lagre
@@ -18,6 +17,7 @@ import no.nav.helse.modell.varsel.Varsel.Status.AKTIV
 import no.nav.helse.modell.varsel.Varsel.Status.AVVIST
 import no.nav.helse.modell.varsel.Varsel.Status.GODKJENT
 import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
+import no.nav.helse.modell.varsel.Varsel.Status.VURDERT
 import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_1
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_2
@@ -48,7 +48,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     @Test
     fun `Kan registrere observer`() {
         val generasjonId = UUID.randomUUID()
-        val generasjon = generasjon(generasjonId, UUID.randomUUID())
+        val generasjon = Generasjon(generasjonId, UUID.randomUUID())
         val observer = object : IVedtaksperiodeObserver {
             lateinit var generasjonId: UUID
             lateinit var fom: LocalDate
@@ -67,11 +67,11 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
             }
         }
         generasjon.registrer(observer)
-        generasjon.håndterTidslinjeendring(1.mars, 31.mars, 1.mars)
+        generasjon.håndterTidslinjeendring(1.januar, 31.januar, 1.januar)
         assertEquals(generasjonId, observer.generasjonId)
-        assertEquals(1.mars, observer.fom)
-        assertEquals(31.mars, observer.tom)
-        assertEquals(1.mars, observer.skjæringstidspunkt)
+        assertEquals(1.januar, observer.fom)
+        assertEquals(31.januar, observer.tom)
+        assertEquals(1.januar, observer.skjæringstidspunkt)
     }
 
     @Test
@@ -114,8 +114,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     @Test
     fun `Generasjon skal ikke oppdateres dersom den er låst`() {
         val generasjonId = UUID.randomUUID()
-        val generasjon = generasjon(generasjonId, UUID.randomUUID())
-        generasjon.håndterVedtakFattet(UUID.randomUUID())
+        val generasjon = Generasjon(generasjonId, UUID.randomUUID(), null, låst = true, null, null, emptySet())
         val observer = object : IVedtaksperiodeObserver {
             var generasjonId: UUID? = null
             var fom: LocalDate? = null
@@ -156,11 +155,10 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     fun `håndterTidslinjeendring setter ikke fom, tom og skjæringstidspunkt på generasjonen hvis den er låst`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjonId = UUID.randomUUID()
-        val generasjon = generasjon(generasjonId, vedtaksperiodeId)
-        generasjon.håndterVedtakFattet(UUID.randomUUID())
-        generasjon.håndterTidslinjeendring(1.februar, 28.februar, 1.februar)
+        val generasjon = Generasjon(generasjonId, vedtaksperiodeId, null, true, null, null, emptySet())
+        generasjon.håndterTidslinjeendring(1.januar, 31.januar, 1.januar)
         assertEquals(
-            Generasjon(generasjonId, vedtaksperiodeId, null, true, 1.januar, Periode(1.januar, 31.januar), emptySet()),
+            Generasjon(generasjonId, vedtaksperiodeId, null, true, null, null, emptySet()),
             generasjon
         )
     }
@@ -183,31 +181,35 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     }
 
     @Test
+    fun `generasjon ligger ikke før dato dersom perioden er null`() {
+        val generasjon = Generasjon(UUID.randomUUID(), UUID.randomUUID(), null, true, null, null, emptySet())
+        assertFalse(generasjon.tilhører(31.januar))
+        assertFalse(generasjon.tilhører(1.februar))
+        assertFalse(generasjon.tilhører(1.januar))
+        assertFalse(generasjon.tilhører(31.desember(2017)))
+    }
+
+    @Test
     fun `generasjon har aktive varsler`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon = generasjon(vedtaksperiodeId = vedtaksperiodeId)
-        generasjon.registrer(generasjonRepository)
-        generasjon.opprettFørste(UUID.randomUUID())
-        generasjon.håndterRegelverksvarsel(UUID.randomUUID(), UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), varselRepository)
+        val aktivtVarsel = Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId, AKTIV)
+        val generasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId, null, true, null, null, setOf(aktivtVarsel))
         assertTrue(generasjon.harAktiveVarsler())
     }
 
     @Test
     fun `generasjon har ikke aktive varsler`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon = generasjon(vedtaksperiodeId = vedtaksperiodeId)
+        val generasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId, null, true, null, null, emptySet())
         assertFalse(generasjon.harAktiveVarsler())
     }
 
     @Test
     fun `generasjon har aktive varsler når generasjon har både aktive og vurderte varsler`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon = generasjon(vedtaksperiodeId = vedtaksperiodeId)
-        generasjon.registrer(generasjonRepository)
-        generasjon.opprettFørste(UUID.randomUUID())
-        generasjon.håndterRegelverksvarsel(UUID.randomUUID(), UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), varselRepository)
-        generasjon.håndterRegelverksvarsel(UUID.randomUUID(), UUID.randomUUID(), "SB_EX_2", LocalDateTime.now(), varselRepository)
-        generasjon.håndterGodkjentVarsel("SB_EX_2", "En ident", varselRepository)
+        val aktivtVarsel = Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId, AKTIV)
+        val vurdertVarsel = Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId, VURDERT)
+        val generasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId, null, true, null, null, setOf(aktivtVarsel, vurdertVarsel))
         assertTrue(generasjon.harAktiveVarsler())
     }
 
@@ -232,7 +234,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     @Test
     fun `ikke opprett neste dersom nåværende er ulåst`() {
         val nyGenerasjonId = UUID.randomUUID()
-        val generasjon = generasjon(UUID.randomUUID(), UUID.randomUUID())
+        val generasjon = Generasjon(UUID.randomUUID(), UUID.randomUUID())
         generasjon.registrer(observer)
         val nyGenerasjon = generasjon.håndterNyGenerasjon(varselRepository, UUID.randomUUID(), nyGenerasjonId)
         assertEquals(0, observer.opprettedeGenerasjoner.size)
@@ -511,7 +513,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
 
     @Test
     fun `referential equals`() {
-        val generasjon = generasjon(UUID.randomUUID(), UUID.randomUUID())
+        val generasjon = Generasjon(UUID.randomUUID(), UUID.randomUUID())
         assertEquals(generasjon, generasjon)
         assertEquals(generasjon.hashCode(), generasjon.hashCode())
     }
@@ -520,8 +522,8 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     fun `structural equals`() {
         val generasjonId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon1 = generasjon(generasjonId, vedtaksperiodeId)
-        val generasjon2 = generasjon(generasjonId, vedtaksperiodeId)
+        val generasjon1 = Generasjon(generasjonId, vedtaksperiodeId)
+        val generasjon2 = Generasjon(generasjonId, vedtaksperiodeId)
         assertEquals(generasjon1, generasjon2)
         assertEquals(generasjon1.hashCode(), generasjon2.hashCode())
     }
@@ -531,8 +533,8 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         val generasjonId1 = UUID.randomUUID()
         val generasjonId2 = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon1 = generasjon(generasjonId1, vedtaksperiodeId)
-        val generasjon2 = generasjon(generasjonId2, vedtaksperiodeId)
+        val generasjon1 = Generasjon(generasjonId1, vedtaksperiodeId)
+        val generasjon2 = Generasjon(generasjonId2, vedtaksperiodeId)
         assertNotEquals(generasjon1, generasjon2)
         assertNotEquals(generasjon1.hashCode(), generasjon2.hashCode())
     }
@@ -542,8 +544,8 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         val generasjonId = UUID.randomUUID()
         val vedtaksperiodeId1 = UUID.randomUUID()
         val vedtaksperiodeId2 = UUID.randomUUID()
-        val generasjon1 = generasjon(generasjonId, vedtaksperiodeId1)
-        val generasjon2 = generasjon(generasjonId, vedtaksperiodeId2)
+        val generasjon1 = Generasjon(generasjonId, vedtaksperiodeId1)
+        val generasjon2 = Generasjon(generasjonId, vedtaksperiodeId2)
         assertNotEquals(generasjon1, generasjon2)
         assertNotEquals(generasjon1.hashCode(), generasjon2.hashCode())
     }
@@ -552,9 +554,9 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     fun `forskjellig låst`() {
         val generasjonId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon1 = generasjon(generasjonId, vedtaksperiodeId)
+        val generasjon1 = Generasjon(generasjonId, vedtaksperiodeId)
         generasjon1.håndterVedtakFattet(UUID.randomUUID())
-        val generasjon2 = generasjon(generasjonId, vedtaksperiodeId)
+        val generasjon2 = Generasjon(generasjonId, vedtaksperiodeId)
         assertNotEquals(generasjon1, generasjon2)
         assertNotEquals(generasjon1.hashCode(), generasjon2.hashCode())
     }
@@ -563,9 +565,9 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     fun `forskjellig utbetalingId`() {
         val generasjonId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon1 = generasjon(generasjonId, vedtaksperiodeId)
+        val generasjon1 = Generasjon(generasjonId, vedtaksperiodeId)
         generasjon1.håndterNyUtbetaling(UUID.randomUUID(), UUID.randomUUID(), varselRepository)
-        val generasjon2 = generasjon(generasjonId, vedtaksperiodeId)
+        val generasjon2 = Generasjon(generasjonId, vedtaksperiodeId)
         generasjon2.håndterNyUtbetaling(UUID.randomUUID(), UUID.randomUUID(), varselRepository)
         assertNotEquals(generasjon1, generasjon2)
         assertNotEquals(generasjon1.hashCode(), generasjon2.hashCode())
@@ -575,29 +577,9 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     fun `forskjellig utbetalingId der én generasjon har null`() {
         val generasjonId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon1 = generasjon(generasjonId, vedtaksperiodeId)
+        val generasjon1 = Generasjon(generasjonId, vedtaksperiodeId)
         generasjon1.håndterNyUtbetaling(UUID.randomUUID(), UUID.randomUUID(), varselRepository)
-        val generasjon2 = generasjon(generasjonId, vedtaksperiodeId)
-        assertNotEquals(generasjon1, generasjon2)
-        assertNotEquals(generasjon1.hashCode(), generasjon2.hashCode())
-    }
-
-    @Test
-    fun `forskjellig periode`() {
-        val generasjonId = UUID.randomUUID()
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon1 = generasjon(generasjonId, vedtaksperiodeId, 1.januar, 31.januar)
-        val generasjon2 = generasjon(generasjonId, vedtaksperiodeId, 1.februar, 28.februar)
-        assertNotEquals(generasjon1, generasjon2)
-        assertNotEquals(generasjon1.hashCode(), generasjon2.hashCode())
-    }
-
-    @Test
-    fun `forskjellig skjæringstidspunkt`() {
-        val generasjonId = UUID.randomUUID()
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon1 = generasjon(generasjonId, vedtaksperiodeId, skjæringstidspunkt = 1.januar)
-        val generasjon2 = generasjon(generasjonId, vedtaksperiodeId, skjæringstidspunkt = 1.februar)
+        val generasjon2 = Generasjon(generasjonId, vedtaksperiodeId)
         assertNotEquals(generasjon1, generasjon2)
         assertNotEquals(generasjon1.hashCode(), generasjon2.hashCode())
     }
@@ -609,21 +591,6 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         generasjon.opprettFørste(UUID.randomUUID())
         return generasjon
     }
-
-
-    private fun generasjon(
-        generasjonId: UUID = UUID.randomUUID(),
-        vedtaksperiodeId: UUID = UUID.randomUUID(),
-        fom: LocalDate = 1.januar,
-        tom: LocalDate = 31.januar,
-        skjæringstidspunkt: LocalDate = 1.januar,
-    ) = Generasjon(
-        id = generasjonId,
-        vedtaksperiodeId = vedtaksperiodeId,
-        fom = fom,
-        tom = tom,
-        skjæringstidspunkt = skjæringstidspunkt
-    )
 
     private fun assertVarsler(generasjonId: UUID, forventetAntall: Int, status: Status, varselkode: Varselkode) {
         @Language("PostgreSQL")
@@ -721,9 +688,9 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
             generasjonId: UUID,
             vedtaksperiodeId: UUID,
             hendelseId: UUID,
-            fom: LocalDate,
-            tom: LocalDate,
-            skjæringstidspunkt: LocalDate
+            fom: LocalDate?,
+            tom: LocalDate?,
+            skjæringstidspunkt: LocalDate?
         ) {
             opprettedeGenerasjoner[generasjonId] =
                 Opprettelse(generasjonId, vedtaksperiodeId, hendelseId, fom, tom, skjæringstidspunkt)

@@ -2,7 +2,6 @@ package no.nav.helse.modell.vedtaksperiode
 
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.januar
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.varsel.VarselRepository
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -48,14 +47,7 @@ class InvaliderUtbetalingForGenerasjonerCommandTest {
         }
     }
 
-    private fun nyGenerasjon() = Generasjon(
-        id = UUID.randomUUID(),
-        vedtaksperiodeId = UUID.randomUUID(),
-        fom = 1.januar,
-        tom = 31.januar,
-        skjæringstidspunkt = 1.januar
-    )
-
+    private fun nyGenerasjon() = Generasjon(UUID.randomUUID(), UUID.randomUUID())
 
     private val varselRepository get() = object : VarselRepository {
         override fun deaktiverFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, definisjonId: UUID?):Unit = TODO("Not yet implemented")

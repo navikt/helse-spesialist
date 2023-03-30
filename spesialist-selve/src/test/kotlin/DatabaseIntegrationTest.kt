@@ -9,7 +9,6 @@ import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
-import no.nav.helse.januar
 import no.nav.helse.mediator.FeilendeMeldingerDao
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.modell.CommandContextDao
@@ -35,7 +34,6 @@ import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde.EN_ARBEIDSGIVER
-import no.nav.helse.modell.vedtaksperiode.Periode
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.modell.vergemal.VergemålDao
@@ -287,7 +285,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     }
 
     protected fun opprettGenerasjon(vedtaksperiodeId: UUID = VEDTAKSPERIODE, generasjonId: UUID = UUID.randomUUID()) {
-        generasjonDao.opprettFor(generasjonId, vedtaksperiodeId, UUID.randomUUID(), 1.januar, Periode(1.januar, 31.januar))
+        generasjonDao.opprettFor(generasjonId, vedtaksperiodeId, UUID.randomUUID(), null, null)
     }
 
     protected fun opprettVedtaksperiode(

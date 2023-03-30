@@ -5,7 +5,6 @@ import io.mockk.mockk
 import io.mockk.verify
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.januar
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.utbetaling.Utbetaling
@@ -70,7 +69,7 @@ internal class GodkjenningMediatorTest {
             saksbehandlerEpost = "2@nav.no",
             godkjenttidspunkt = LocalDateTime.now(),
             saksbehandleroverstyringer = emptyList(),
-            gjeldendeGenerasjoner = listOf(generasjon())
+            gjeldendeGenerasjoner = listOf(Generasjon(UUID.randomUUID(), UUID.randomUUID()))
         )
         assertOpptegnelseIkkeOpprettet()
     }
@@ -89,7 +88,7 @@ internal class GodkjenningMediatorTest {
             null,
             null,
             emptyList(),
-            listOf(generasjon())
+            listOf(Generasjon(UUID.randomUUID(), UUID.randomUUID()))
         )
         assertOpptegnelseIkkeOpprettet()
     }
@@ -98,8 +97,8 @@ internal class GodkjenningMediatorTest {
     fun `godkjenner varsler for alle gjeldende generasjoner`() {
         val generasjonId1 = UUID.randomUUID()
         val generasjonId2 = UUID.randomUUID()
-        val generasjon1 = generasjon(generasjonId1)
-        val generasjon2 = generasjon(generasjonId2)
+        val generasjon1 = Generasjon(generasjonId1, UUID.randomUUID())
+        val generasjon2 = Generasjon(generasjonId2, UUID.randomUUID())
         generasjon1.håndterRegelverksvarsel(UUID.randomUUID(), UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), varselRepository)
         generasjon2.håndterRegelverksvarsel(UUID.randomUUID(), UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), varselRepository)
 
@@ -108,14 +107,6 @@ internal class GodkjenningMediatorTest {
         assertEquals(generasjonId1, varselRepository.generasjonerMedGodkjenteVarsler.toList()[0])
         assertEquals(generasjonId2, varselRepository.generasjonerMedGodkjenteVarsler.toList()[1])
     }
-
-    private fun generasjon(id: UUID = UUID.randomUUID()) = Generasjon(
-        id = id,
-        vedtaksperiodeId = UUID.randomUUID(),
-        fom = 1.januar,
-        tom = 31.januar,
-        skjæringstidspunkt = 1.januar
-    )
 
     private fun godkjenning(generasjoner: List<Generasjon>) = mediator.saksbehandlerUtbetaling(
         context,

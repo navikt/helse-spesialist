@@ -6,7 +6,6 @@ import io.mockk.mockk
 import io.mockk.verify
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.januar
 import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.CommandContext
@@ -75,7 +74,10 @@ internal class ÅpneGosysOppgaverCommandTest {
 
     @Test
     fun `Lagrer warning ved åpne oppgaver`() {
-        every { generasjonRepository.sisteFor(VEDTAKPERIODE_ID) } returns (generasjon(VEDTAKPERIODE_ID))
+        every { generasjonRepository.sisteFor(VEDTAKPERIODE_ID) } returns (Generasjon(
+            UUID.randomUUID(),
+            VEDTAKPERIODE_ID
+        ))
         val forventetWarning = Warning(
             melding = "Det finnes åpne oppgaver på sykepenger i Gosys",
             kilde = WarningKilde.Spesialist,
@@ -90,7 +92,10 @@ internal class ÅpneGosysOppgaverCommandTest {
 
     @Test
     fun `Lagrer warning ved oppslag feilet`() {
-        every { generasjonRepository.sisteFor(VEDTAKPERIODE_ID) } returns (generasjon(VEDTAKPERIODE_ID))
+        every { generasjonRepository.sisteFor(VEDTAKPERIODE_ID) } returns (Generasjon(
+            UUID.randomUUID(),
+            VEDTAKPERIODE_ID
+        ))
         val forventetWarning = Warning(
             melding = "Kunne ikke sjekke åpne oppgaver på sykepenger i Gosys",
             kilde = WarningKilde.Spesialist,
@@ -102,12 +107,4 @@ internal class ÅpneGosysOppgaverCommandTest {
         verify(exactly = 1) { warningDao.leggTilWarning(VEDTAKPERIODE_ID, forventetWarning) }
         verify(exactly = 1) { varselRepository.lagreVarsel(any(), any(), SB_EX_3.name, any(), VEDTAKPERIODE_ID) }
     }
-
-    private fun generasjon(vedtaksperiodeId: UUID = UUID.randomUUID()) = Generasjon(
-        id = UUID.randomUUID(),
-        vedtaksperiodeId = vedtaksperiodeId,
-        fom = 1.januar,
-        tom = 31.januar,
-        skjæringstidspunkt = 1.januar
-    )
 }

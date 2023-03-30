@@ -5,7 +5,6 @@ import io.mockk.every
 import io.mockk.mockk
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.januar
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.utbetaling.Utbetaling
@@ -59,7 +58,7 @@ internal class UtbetalingsgodkjenningCommandTest {
             vedtaksperiodeId = vedtaksperiodeId,
             fødselsnummer = fødselsnummer,
             utbetaling = utbetaling,
-            gjeldendeGenerasjoner = listOf(Generasjon(UUID.randomUUID(), UUID.randomUUID(), 1.januar, 31.januar, 1.januar))
+            gjeldendeGenerasjoner = listOf(Generasjon(UUID.randomUUID(), UUID.randomUUID()))
         )
     }
 

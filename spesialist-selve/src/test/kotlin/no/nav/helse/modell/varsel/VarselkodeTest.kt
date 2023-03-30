@@ -2,7 +2,6 @@ package no.nav.helse.modell.varsel
 
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.januar
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_3
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -22,7 +21,7 @@ internal class VarselkodeTest {
     @Test
     fun `opprett nytt varsel`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon = generasjon(vedtaksperiodeId)
+        val generasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId)
         SB_EX_3.nyttVarsel(generasjon, varselRepository)
 
         assertEquals(1, vedtaksperiodevarsler[vedtaksperiodeId]?.size)
@@ -31,20 +30,12 @@ internal class VarselkodeTest {
     @Test
     fun `deaktiverer varsel`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon = generasjon(vedtaksperiodeId)
+        val generasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId)
         SB_EX_3.nyttVarsel(generasjon, varselRepository)
         SB_EX_3.deaktiverFor(generasjon, varselRepository)
 
         assertEquals(1, deaktiverteVarsler[vedtaksperiodeId]?.size)
     }
-
-    private fun generasjon(vedtaksperiodeId: UUID = UUID.randomUUID()) = Generasjon(
-        id = UUID.randomUUID(),
-        vedtaksperiodeId = vedtaksperiodeId,
-        fom = 1.januar,
-        tom = 31.januar,
-        skjæringstidspunkt = 1.januar
-    )
 
     private val varselRepository = object : VarselRepository {
 

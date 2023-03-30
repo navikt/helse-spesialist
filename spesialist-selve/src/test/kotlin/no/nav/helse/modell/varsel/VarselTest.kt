@@ -2,7 +2,6 @@ package no.nav.helse.modell.varsel
 
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.januar
 import no.nav.helse.modell.varsel.Varsel.Status.VURDERT
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -17,7 +16,7 @@ internal class VarselTest {
     private val avvisteVarsler = mutableListOf<String>()
     private val deaktiverteVarsler = mutableListOf<String>()
     private val reaktiverteVarsler = mutableListOf<String>()
-    private val generasjon = generasjon(UUID.randomUUID(), UUID.randomUUID())
+    private val generasjon = Generasjon(UUID.randomUUID(), UUID.randomUUID())
 
     private val hendelseId get() = UUID.randomUUID()
     @BeforeEach
@@ -185,14 +184,6 @@ internal class VarselTest {
         assertNotEquals(Varsel(UUID.randomUUID(), "EN_ANNEN_KODE", LocalDateTime.now(), UUID.randomUUID()), varsel)
         assertNotEquals(Varsel(UUID.randomUUID(), "EN_ANNEN_KODE", LocalDateTime.now(), UUID.randomUUID()).hashCode(), varsel.hashCode())
     }
-
-    private fun generasjon(generasjonId: UUID = UUID.randomUUID(), vedtaksperiodeId: UUID = UUID.randomUUID()) = Generasjon(
-        id = generasjonId,
-        vedtaksperiodeId = vedtaksperiodeId,
-        fom = 1.januar,
-        tom = 31.januar,
-        skjæringstidspunkt = 1.januar
-    )
 
     private val varselRepository = object : VarselRepository {
         override fun deaktiverFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, definisjonId: UUID?) {
