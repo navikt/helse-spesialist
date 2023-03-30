@@ -24,7 +24,7 @@ internal class SykefraværstilfelleTest {
         gjeldendeGenerasjon2.håndterTidslinjeendring(1.februar, 28.februar, 1.februar)
         val vedtaksperiode1 = Vedtaksperiode(vedtaksperiodeId1, gjeldendeGenerasjon1)
         val vedtaksperiode2 = Vedtaksperiode(vedtaksperiodeId2, gjeldendeGenerasjon2)
-        assertFalse(listOf(vedtaksperiode1, vedtaksperiode2).harAktiveVarsler(28.februar, UUID.randomUUID()))
+        assertFalse(listOf(vedtaksperiode1, vedtaksperiode2).harAktiveVarsler(28.februar))
     }
     @Test
     fun `har aktive varsler når generasjonene har utbetalingId men ikke fom`() {
@@ -38,7 +38,7 @@ internal class SykefraværstilfelleTest {
         val vedtaksperiode1 = Vedtaksperiode(vedtaksperiodeId1, gjeldendeGenerasjon1)
         val vedtaksperiode2 = Vedtaksperiode(vedtaksperiodeId2, gjeldendeGenerasjon2)
         gjeldendeGenerasjon2.håndterRegelverksvarsel(UUID.randomUUID(), UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), varselRepository)
-        assertTrue(listOf(vedtaksperiode1, vedtaksperiode2).harAktiveVarsler(28.februar, utbetalingId))
+        assertTrue(listOf(vedtaksperiode1, vedtaksperiode2).harAktiveVarsler(28.februar))
     }
     @Test
     fun `har ikke aktive varsler når generasjonene har utbetalingId men ikke fom`() {
@@ -51,7 +51,7 @@ internal class SykefraværstilfelleTest {
         gjeldendeGenerasjon2.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId, varselRepository)
         val vedtaksperiode1 = Vedtaksperiode(vedtaksperiodeId1, gjeldendeGenerasjon1)
         val vedtaksperiode2 = Vedtaksperiode(vedtaksperiodeId2, gjeldendeGenerasjon2)
-        assertFalse(listOf(vedtaksperiode1, vedtaksperiode2).harAktiveVarsler(28.februar, utbetalingId))
+        assertFalse(listOf(vedtaksperiode1, vedtaksperiode2).harAktiveVarsler(28.februar))
     }
     @Test
     fun `har aktive varsler`() {
@@ -64,7 +64,7 @@ internal class SykefraværstilfelleTest {
         val vedtaksperiode1 = Vedtaksperiode(vedtaksperiodeId1, gjeldendeGenerasjon1)
         val vedtaksperiode2 = Vedtaksperiode(vedtaksperiodeId2, gjeldendeGenerasjon2)
         gjeldendeGenerasjon2.håndterRegelverksvarsel(UUID.randomUUID(), UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), varselRepository)
-        assertTrue(listOf(vedtaksperiode1, vedtaksperiode2).harAktiveVarsler(28.februar, UUID.randomUUID()))
+        assertTrue(listOf(vedtaksperiode1, vedtaksperiode2).harAktiveVarsler(28.februar))
     }
 
     private val varselRepository = object : VarselRepository {

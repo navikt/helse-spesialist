@@ -174,33 +174,19 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
             Periode(1.januar, 31.januar),
             emptySet()
         )
-        assertTrue(generasjon.liggerFør(31.januar))
-        assertTrue(generasjon.liggerFør(1.februar))
-        assertFalse(generasjon.liggerFør(1.januar))
-        assertFalse(generasjon.liggerFør(31.desember(2017)))
+        assertTrue(generasjon.tilhører(31.januar))
+        assertTrue(generasjon.tilhører(1.februar))
+        assertFalse(generasjon.tilhører(1.januar))
+        assertFalse(generasjon.tilhører(31.desember(2017)))
     }
 
     @Test
     fun `generasjon ligger ikke før dato dersom perioden er null`() {
         val generasjon = Generasjon(UUID.randomUUID(), UUID.randomUUID(), null, true, null, null, emptySet())
-        assertFalse(generasjon.liggerFør(31.januar))
-        assertFalse(generasjon.liggerFør(1.februar))
-        assertFalse(generasjon.liggerFør(1.januar))
-        assertFalse(generasjon.liggerFør(31.desember(2017)))
-    }
-
-    @Test
-    fun `generasjon hører til utbetalingId`() {
-        val utbetalingId = UUID.randomUUID()
-        val generasjon = Generasjon(UUID.randomUUID(), UUID.randomUUID(), utbetalingId, true, null, null, emptySet())
-        assertTrue(generasjon.hørerTil(utbetalingId))
-    }
-
-    @Test
-    fun `generasjon hører ikke til utbetalingId`() {
-        val utbetalingId = UUID.randomUUID()
-        val generasjon = Generasjon(UUID.randomUUID(), UUID.randomUUID(), utbetalingId, true, null, null, emptySet())
-        assertFalse(generasjon.hørerTil(UUID.randomUUID()))
+        assertFalse(generasjon.tilhører(31.januar))
+        assertFalse(generasjon.tilhører(1.februar))
+        assertFalse(generasjon.tilhører(1.januar))
+        assertFalse(generasjon.tilhører(31.desember(2017)))
     }
 
     @Test

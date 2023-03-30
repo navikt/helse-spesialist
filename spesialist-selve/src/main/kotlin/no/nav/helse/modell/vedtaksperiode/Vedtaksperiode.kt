@@ -19,11 +19,8 @@ internal class Vedtaksperiode(
         gjeldendeGenerasjon.håndterTidslinjeendring(fom, tom, skjæringstidspunkt)
     }
 
-    private fun liggerInnenfor(dato: LocalDate): Boolean {
-        return gjeldendeGenerasjon.liggerFør(dato)
-    }
-    private fun hørerTil(utbetalingId: UUID): Boolean {
-        return gjeldendeGenerasjon.hørerTil(utbetalingId)
+    private fun tilhører(dato: LocalDate): Boolean {
+        return gjeldendeGenerasjon.tilhører(dato)
     }
 
     private fun harAktiveVarsler(): Boolean {
@@ -51,12 +48,8 @@ internal class Vedtaksperiode(
             }
         }
 
-        internal fun List<Vedtaksperiode>.harAktiveVarsler(tilOgMed: LocalDate, utbetalingId: UUID): Boolean {
-            return this.filter {
-                it.liggerInnenfor(tilOgMed) || it.hørerTil(utbetalingId)
-            }.any {
-                it.harAktiveVarsler()
-            }
+        internal fun List<Vedtaksperiode>.harAktiveVarsler(tilOgMed: LocalDate): Boolean {
+            return this.filter { it.tilhører(tilOgMed) }.any { it.harAktiveVarsler() }
         }
     }
 }

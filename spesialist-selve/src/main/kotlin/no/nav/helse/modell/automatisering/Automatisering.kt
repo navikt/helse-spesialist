@@ -108,7 +108,7 @@ internal class Automatisering(
         val vedtaksperiodensUtbetaling = snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId)
         val warnings = warningDao.finnAktiveWarnings(vedtaksperiodeId)
         val dedupliserteWarnings = warnings.distinct()
-        val harAktiveVarsler = sykefraværstilfelle.harAktiveVarsler(periodeTom, utbetalingId)
+        val harAktiveVarsler = sykefraværstilfelle.harAktiveVarsler(periodeTom)
         val harWarnings = dedupliserteWarnings.isNotEmpty()
         when {
             !harAktiveVarsler && harWarnings -> sikkerLogg.info(
