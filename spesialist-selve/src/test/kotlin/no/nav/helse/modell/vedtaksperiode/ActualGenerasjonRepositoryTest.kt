@@ -4,6 +4,7 @@ import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
+import no.nav.helse.januar
 import no.nav.helse.modell.varsel.ActualVarselRepository
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -23,7 +24,7 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         val vedtaksperiodeId = UUID.randomUUID()
         val hendelseId = UUID.randomUUID()
 
-        repository.opprettFørste(vedtaksperiodeId, hendelseId)
+        repository.førsteGenerasjonOpprettet(UUID.randomUUID(), vedtaksperiodeId, hendelseId, 1.januar, 31.januar, 1.januar)
         
         assertGenerasjon(vedtaksperiodeId, hendelseId)
     }
@@ -35,17 +36,17 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         val generasjonId1 = UUID.randomUUID()
         val generasjonId2 = UUID.randomUUID()
 
-        repository.opprettFørste(vedtaksperiodeId1, UUID.randomUUID(), id = generasjonId1)
-        repository.opprettFørste(vedtaksperiodeId2, UUID.randomUUID(), id = generasjonId2)
+        repository.førsteGenerasjonOpprettet(generasjonId1, vedtaksperiodeId1, UUID.randomUUID(), 1.januar, 31.januar, 1.januar)
+        repository.førsteGenerasjonOpprettet(generasjonId2, vedtaksperiodeId2, UUID.randomUUID(), 1.januar, 31.januar, 1.januar)
 
         val perioder = repository.finnVedtaksperioder(listOf(vedtaksperiodeId1, vedtaksperiodeId2))
         assertEquals(2, perioder.size)
         assertEquals(
-            Vedtaksperiode(vedtaksperiodeId1, Generasjon(generasjonId1, vedtaksperiodeId1)),
+            Vedtaksperiode(vedtaksperiodeId1, Generasjon(generasjonId1, vedtaksperiodeId1, null, false, 1.januar, Periode(1.januar, 31.januar), emptySet())),
             perioder[0]
         )
         assertEquals(
-            Vedtaksperiode(vedtaksperiodeId2, Generasjon(generasjonId2, vedtaksperiodeId2)),
+            Vedtaksperiode(vedtaksperiodeId2, Generasjon(generasjonId2, vedtaksperiodeId2, null, false, 1.januar, Periode(1.januar, 31.januar), emptySet())),
             perioder[1]
         )
     }
@@ -56,12 +57,12 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         val vedtaksperiodeId2 = UUID.randomUUID()
         val generasjonId1 = UUID.randomUUID()
 
-        repository.opprettFørste(vedtaksperiodeId1, UUID.randomUUID(), id = generasjonId1)
+        repository.førsteGenerasjonOpprettet(generasjonId1, vedtaksperiodeId1, UUID.randomUUID(), 1.januar, 31.januar, 1.januar)
 
         val perioder = repository.finnVedtaksperioder(listOf(vedtaksperiodeId1, vedtaksperiodeId2))
         assertEquals(1, perioder.size)
         assertEquals(
-            Vedtaksperiode(vedtaksperiodeId1, Generasjon(generasjonId1, vedtaksperiodeId1)),
+            Vedtaksperiode(vedtaksperiodeId1, Generasjon(generasjonId1, vedtaksperiodeId1, null, false, 1.januar, Periode(1.januar, 31.januar), emptySet())),
             perioder[0]
         )
     }
@@ -72,8 +73,8 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         val vedtaksperiodeOpprettet1 = UUID.randomUUID()
         val vedtaksperiodeOpprettet2 = UUID.randomUUID()
 
-        repository.opprettFørste(vedtaksperiodeId, vedtaksperiodeOpprettet1)
-        repository.opprettFørste(vedtaksperiodeId, vedtaksperiodeOpprettet2)
+        repository.førsteGenerasjonOpprettet(UUID.randomUUID(), vedtaksperiodeId, vedtaksperiodeOpprettet1, 1.januar, 31.januar, 1.januar)
+        repository.førsteGenerasjonOpprettet(UUID.randomUUID(), vedtaksperiodeId, vedtaksperiodeOpprettet2, 1.januar, 31.januar, 1.januar)
 
         assertGenerasjon(vedtaksperiodeId, vedtaksperiodeOpprettet1)
         assertIngenGenerasjon(vedtaksperiodeId, vedtaksperiodeOpprettet2)
@@ -88,9 +89,11 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         val førsteGenerasjonId = UUID.randomUUID()
         val andreGenerasjonId = UUID.randomUUID()
 
-        val generasjon = repository.opprettFørste(vedtaksperiodeId, vedtaksperiodeOpprettet, førsteGenerasjonId)
-        generasjon?.håndterVedtakFattet(vedtakFattet)
-        generasjon?.håndterNyGenerasjon(varselRepository, vedtaksperiodeEndret, andreGenerasjonId)
+        val generasjon = Generasjon(førsteGenerasjonId, vedtaksperiodeId, null, false, 1.januar, Periode(1.januar, 31.januar), emptySet())
+        generasjon.registrer(repository)
+        generasjon.opprettFørste(vedtaksperiodeOpprettet)
+        generasjon.håndterVedtakFattet(vedtakFattet)
+        generasjon.håndterNyGenerasjon(varselRepository, vedtaksperiodeEndret, andreGenerasjonId)
 
         assertLåstGenerasjon(førsteGenerasjonId, vedtakFattet)
         assertUlåstGenerasjon(andreGenerasjonId)
@@ -101,8 +104,10 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         val vedtaksperiodeId = UUID.randomUUID()
         val vedtaksperiodeOpprettet = UUID.randomUUID()
         val vedtaksperiodeEndret = UUID.randomUUID()
-        val førsteGenerasjon = repository.opprettFørste(vedtaksperiodeId, vedtaksperiodeOpprettet)
-        førsteGenerasjon?.håndterNyGenerasjon(varselRepository = varselRepository, hendelseId = vedtaksperiodeEndret)
+        val generasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId, null, false, 1.januar, Periode(1.januar, 31.januar), emptySet())
+        generasjon.registrer(repository)
+        generasjon.opprettFørste(vedtaksperiodeOpprettet)
+        generasjon.håndterNyGenerasjon(varselRepository, vedtaksperiodeEndret)
 
         assertGenerasjon(vedtaksperiodeId, vedtaksperiodeOpprettet)
         assertIngenGenerasjon(vedtaksperiodeId, vedtaksperiodeEndret)
@@ -114,8 +119,10 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         val vedtaksperiodeId = UUID.randomUUID()
         val utbetalingId = UUID.randomUUID()
 
-        val generasjon = repository.opprettFørste(vedtaksperiodeId, UUID.randomUUID(), generasjonId)
-        generasjon?.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId, varselRepository)
+        val generasjon = Generasjon(generasjonId, vedtaksperiodeId, null, false, 1.januar, Periode(1.januar, 31.januar), emptySet())
+        generasjon.registrer(repository)
+        generasjon.opprettFørste(UUID.randomUUID())
+        generasjon.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId, varselRepository)
 
         assertUtbetaling(generasjonId, utbetalingId)
     }
@@ -126,9 +133,11 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         val vedtaksperiodeId = UUID.randomUUID()
         val utbetalingId = UUID.randomUUID()
 
-        val generasjon = repository.opprettFørste(vedtaksperiodeId, UUID.randomUUID(), generasjonId)
-        generasjon?.håndterVedtakFattet(UUID.randomUUID())
-        generasjon?.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId, varselRepository)
+        val generasjon = Generasjon(generasjonId, vedtaksperiodeId, null, false, 1.januar, Periode(1.januar, 31.januar), emptySet())
+        generasjon.registrer(repository)
+        generasjon.opprettFørste(UUID.randomUUID())
+        generasjon.håndterVedtakFattet(UUID.randomUUID())
+        generasjon.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId, varselRepository)
 
         assertUtbetaling(generasjonId, null)
     }
@@ -140,10 +149,12 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         val gammel = UUID.randomUUID()
         val ny = UUID.randomUUID()
 
-        val generasjon = repository.opprettFørste(vedtaksperiodeId, UUID.randomUUID(), generasjonId)
-        generasjon?.håndterNyUtbetaling(UUID.randomUUID(), gammel, varselRepository)
-        generasjon?.håndterVedtakFattet(UUID.randomUUID())
-        generasjon?.håndterNyUtbetaling(UUID.randomUUID(), ny, varselRepository)
+        val generasjon = Generasjon(generasjonId, vedtaksperiodeId, null, false, 1.januar, Periode(1.januar, 31.januar), emptySet())
+        generasjon.registrer(repository)
+        generasjon.opprettFørste(UUID.randomUUID())
+        generasjon.håndterNyUtbetaling(UUID.randomUUID(), gammel, varselRepository)
+        generasjon.håndterVedtakFattet(UUID.randomUUID())
+        generasjon.håndterNyUtbetaling(UUID.randomUUID(), ny, varselRepository)
 
         assertUtbetaling(generasjonId, gammel)
     }
@@ -153,7 +164,7 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         val vedtaksperiodeId = UUID.randomUUID()
         val hendelseId = UUID.randomUUID()
 
-        repository.opprettFørste(vedtaksperiodeId, hendelseId)
+        repository.førsteGenerasjonOpprettet(UUID.randomUUID(), vedtaksperiodeId, hendelseId, 1.januar, 31.januar, 1.januar)
         assertGenerasjon(vedtaksperiodeId, hendelseId)
         assertDoesNotThrow {
             repository.sisteFor(vedtaksperiodeId)
@@ -175,10 +186,14 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         val generasjonIdV2 = UUID.randomUUID()
         val utbetalingId = UUID.randomUUID()
 
-        val generasjonV1 = repository.opprettFørste(UUID.randomUUID(), UUID.randomUUID(), generasjonIdV1)
-        val generasjonV2 = repository.opprettFørste(UUID.randomUUID(), UUID.randomUUID(), generasjonIdV2)
-        generasjonV1?.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId, varselRepository)
-        generasjonV2?.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId, varselRepository)
+        val generasjonV1 = Generasjon(generasjonIdV1, UUID.randomUUID(), utbetalingId, false, 1.januar, Periode(1.januar, 31.januar), emptySet())
+        val generasjonV2 = Generasjon(generasjonIdV2, UUID.randomUUID(), utbetalingId, false, 1.januar, Periode(1.januar, 31.januar), emptySet())
+        generasjonV1.registrer(repository)
+        generasjonV2.registrer(repository)
+        generasjonV1.opprettFørste(UUID.randomUUID())
+        generasjonV2.opprettFørste(UUID.randomUUID())
+        generasjonV1.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId, varselRepository)
+        generasjonV2.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId, varselRepository)
 
         assertEquals(2, repository.tilhørendeFor(utbetalingId).size)
     }
@@ -189,12 +204,14 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         val utbetalingId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
 
-        val generasjon = repository.opprettFørste(vedtaksperiodeId, UUID.randomUUID(), generasjonId)
-        generasjon?.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId, varselRepository)
+        val generasjon = Generasjon(generasjonId, vedtaksperiodeId, null, false, 1.januar, Periode(1.januar, 31.januar), emptySet())
+        generasjon.registrer(repository)
+        generasjon.opprettFørste(UUID.randomUUID())
+        generasjon.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId, varselRepository)
         assertEquals(1, repository.tilhørendeFor(utbetalingId).size)
 
-        generasjon?.invaliderUtbetaling(utbetalingId)
-        assertEquals(Generasjon(generasjonId, vedtaksperiodeId, null, false, null, null, emptySet()), generasjon)
+        generasjon.invaliderUtbetaling(utbetalingId)
+        assertEquals(Generasjon(generasjonId, vedtaksperiodeId, null, false, 1.januar, Periode(1.januar, 31.januar), emptySet()), generasjon)
         assertEquals(0, repository.tilhørendeFor(utbetalingId).size)
     }
 

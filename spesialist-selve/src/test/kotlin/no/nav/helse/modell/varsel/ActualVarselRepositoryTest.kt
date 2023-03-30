@@ -5,12 +5,14 @@ import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
+import no.nav.helse.januar
 import no.nav.helse.mediator.meldinger.Varseldefinisjon
 import no.nav.helse.modell.varsel.Varsel.Status.AVVIST
 import no.nav.helse.modell.varsel.Varsel.Status.GODKJENT
 import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
 import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Generasjon
+import no.nav.helse.modell.vedtaksperiode.Periode
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -35,7 +37,9 @@ internal class ActualVarselRepositoryTest : AbstractDatabaseTest() {
         varselRepository.lagreDefinisjon(definisjonId, "EN_KODE", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now())
         generasjonId = UUID.randomUUID()
 
-        generasjon = generasjonRepository.opprettFørste(vedtaksperiodeId, UUID.randomUUID(), generasjonId)!!
+        generasjon = Generasjon(generasjonId, vedtaksperiodeId, null, false, 1.januar, Periode(1.januar, 31.januar), emptySet())
+        generasjon.registrer(generasjonRepository)
+        generasjon.opprettFørste(UUID.randomUUID())
     }
 
     @Test

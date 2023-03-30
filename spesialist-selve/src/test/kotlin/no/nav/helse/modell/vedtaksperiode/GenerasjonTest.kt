@@ -397,7 +397,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         generasjon.håndterRegelverksvarsel(hendelseId, UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), varselRepository)
         assertEquals(1, observer.opprettedeGenerasjoner.size)
         val nyGenerasjonId = observer.opprettedeGenerasjoner.keys.first()
-        observer.assertOpprettelse(nyGenerasjonId, vedtaksperiodeId, hendelseId, null, null, null)
+        observer.assertOpprettelse(nyGenerasjonId, vedtaksperiodeId, hendelseId, 1.januar, 31.januar, 1.januar)
         assertAntallGenerasjoner(2, vedtaksperiodeId)
         assertVarsler(generasjonId, 0, AKTIV, SB_EX_1)
         assertVarsler(nyGenerasjonId, 1, AKTIV, SB_EX_1)
@@ -586,7 +586,10 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
 
     private fun nyGenerasjon(id: UUID = UUID.randomUUID(), vedtaksperiodeId: UUID = UUID.randomUUID()): Generasjon {
         generasjonId = id
-        return requireNotNull(generasjonRepository.opprettFørste(vedtaksperiodeId, UUID.randomUUID(), generasjonId))
+        val generasjon = Generasjon(id, vedtaksperiodeId, null, false, 1.januar, Periode(1.januar, 31.januar), emptySet())
+        generasjon.registrer(generasjonRepository)
+        generasjon.opprettFørste(UUID.randomUUID())
+        return generasjon
     }
 
     private fun assertVarsler(generasjonId: UUID, forventetAntall: Int, status: Status, varselkode: Varselkode) {
