@@ -293,7 +293,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         fom: LocalDate = FOM,
         tom: LocalDate = TOM,
         periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
-        inntektskilde: Inntektskilde = EN_ARBEIDSGIVER
+        inntektskilde: Inntektskilde = EN_ARBEIDSGIVER,
+        forkastet: Boolean = false
     ): Long {
         opprettSnapshot()
         return vedtakDao.opprett(vedtaksperiodeId, fom, tom, personId, arbeidsgiverId, snapshotId)
@@ -301,6 +302,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             ?.also {
                 vedtakId = it
                 opprettVedtakstype(vedtaksperiodeId, periodetype, inntektskilde)
+                if (forkastet) vedtakDao.markerForkastet(vedtaksperiodeId, UUID.randomUUID())
             }
             ?: fail { "Kunne ikke opprette vedtak" }
     }

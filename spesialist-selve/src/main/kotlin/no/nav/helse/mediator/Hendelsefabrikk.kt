@@ -135,6 +135,11 @@ internal class Hendelsefabrikk(
             }
     }
 
+    private fun sykefraværstilfelle(fødselsnummer: String, skjæringstidspunkt: LocalDate): Sykefraværstilfelle {
+        val vedtaksperioder = generasjonRepository.finnVedtaksperioderFor(skjæringstidspunkt, fødselsnummer)
+        return Sykefraværstilfelle(fødselsnummer, skjæringstidspunkt, vedtaksperioder)
+    }
+
     fun godkjenning(
         id: UUID,
         fødselsnummer: String,
@@ -152,8 +157,6 @@ internal class Hendelsefabrikk(
         orgnummereMedRelevanteArbeidsforhold: List<String>,
         json: String,
     ): Godkjenningsbehov {
-        val vedtaksperioder = generasjonRepository.finnVedtaksperioderFor(skjæringstidspunkt, utbetalingId, fødselsnummer)
-        val sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, skjæringstidspunkt, vedtaksperioder)
         return Godkjenningsbehov(
             id = id,
             fødselsnummer = fødselsnummer,
@@ -169,7 +172,7 @@ internal class Hendelsefabrikk(
             inntektskilde = inntektskilde,
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
             skjæringstidspunkt = skjæringstidspunkt,
-            sykefraværstilfelle = sykefraværstilfelle,
+            sykefraværstilfelle = sykefraværstilfelle(fødselsnummer, skjæringstidspunkt),
             json = json,
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
@@ -825,15 +828,11 @@ internal class Hendelsefabrikk(
         }
 
         sikkerLog.info("Gjør ny sjekk om det finnes åpne gosysoppgaver for fnr $fødselsnummer og vedtaksperiodeId ${commandData.vedtaksperiodeId}")
-
-        val vedtaksperioder = generasjonRepository.finnVedtaksperioderFor(commandData.skjæringstidspunkt, commandData.utbetalingId, fødselsnummer)
-        val sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, commandData.skjæringstidspunkt, vedtaksperioder)
-
         return GosysOppgaveEndret(
             id = hendelseId,
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
-            sykefraværstilfelle = sykefraværstilfelle,
+            sykefraværstilfelle = sykefraværstilfelle(fødselsnummer, commandData.skjæringstidspunkt),
             json = json,
             gosysOppgaveEndretCommandData = commandData,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,

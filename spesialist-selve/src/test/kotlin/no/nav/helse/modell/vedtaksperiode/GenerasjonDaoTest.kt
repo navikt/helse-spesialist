@@ -6,6 +6,7 @@ import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
+import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.VarselDao
@@ -129,16 +130,31 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         nyPerson()
         val generasjonId1 = generasjonIdFor(VEDTAKSPERIODE)
         val generasjonId2 = UUID.randomUUID()
-        val utbetalingId = UUID.randomUUID()
 
         opprettVedtaksperiode(vedtaksperiodeId)
         opprettGenerasjon(vedtaksperiodeId, generasjonId2)
-        generasjonDao.utbetalingFor(generasjonId1, utbetalingId)
+        generasjonDao.oppdaterSykefraværstilfelle(generasjonId1, 1.januar, Periode(1.februar, 28.februar))
         generasjonDao.oppdaterSykefraværstilfelle(generasjonId2, 1.januar, Periode(1.januar, 31.januar))
-        val vedtaksperiodeIder = generasjonDao.finnVedtaksperiodeIderFor(1.januar, utbetalingId, FNR)
+        val vedtaksperiodeIder = generasjonDao.finnVedtaksperiodeIderFor(1.januar, FNR)
         assertEquals(2, vedtaksperiodeIder.size)
         assertEquals(VEDTAKSPERIODE, vedtaksperiodeIder[0])
         assertEquals(vedtaksperiodeId, vedtaksperiodeIder[1])
+    }
+
+    @Test
+    fun `finner ikke vedtaksperiodeIder for forkastede perioder`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        nyPerson()
+        val generasjonId1 = generasjonIdFor(VEDTAKSPERIODE)
+        val generasjonId2 = UUID.randomUUID()
+
+        opprettVedtaksperiode(vedtaksperiodeId, forkastet = true)
+        opprettGenerasjon(vedtaksperiodeId, generasjonId2)
+        generasjonDao.oppdaterSykefraværstilfelle(generasjonId1, 1.januar, Periode(1.februar, 28.februar))
+        generasjonDao.oppdaterSykefraværstilfelle(generasjonId2, 1.januar, Periode(1.januar, 31.januar))
+        val vedtaksperiodeIder = generasjonDao.finnVedtaksperiodeIderFor(1.januar, FNR)
+        assertEquals(1, vedtaksperiodeIder.size)
+        assertEquals(VEDTAKSPERIODE, vedtaksperiodeIder[0])
     }
 
     @Test

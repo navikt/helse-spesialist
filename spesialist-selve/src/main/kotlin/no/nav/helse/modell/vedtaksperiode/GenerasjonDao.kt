@@ -78,17 +78,17 @@ class GenerasjonDao(private val dataSource: DataSource) {
         }
     }
 
-    internal fun finnVedtaksperiodeIderFor(skjæringstidspunkt: LocalDate, utbetalingId: UUID, fødselsnummer: String): List<UUID> {
+    internal fun finnVedtaksperiodeIderFor(skjæringstidspunkt: LocalDate, fødselsnummer: String): List<UUID> {
         @Language("PostgreSQL")
         val query = """
             SELECT svg.vedtaksperiode_id FROM selve_vedtaksperiode_generasjon svg 
             INNER JOIN vedtak v on svg.vedtaksperiode_id = v.vedtaksperiode_id
             INNER JOIN person p on p.id = v.person_ref
-            WHERE fodselsnummer = ? AND (svg.skjæringstidspunkt = ? OR svg.utbetaling_id = ?)
+            WHERE fodselsnummer = ? AND svg.skjæringstidspunkt = ? AND forkastet = false
             """
 
         return sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, fødselsnummer.toLong(), skjæringstidspunkt, utbetalingId).map { it.uuid("vedtaksperiode_id") }.asList)
+            session.run(queryOf(query, fødselsnummer.toLong(), skjæringstidspunkt).map { it.uuid("vedtaksperiode_id") }.asList)
         }
     }
 
