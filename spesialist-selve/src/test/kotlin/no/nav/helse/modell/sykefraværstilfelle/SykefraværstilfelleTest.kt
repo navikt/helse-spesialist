@@ -27,20 +27,6 @@ internal class SykefraværstilfelleTest {
         assertFalse(listOf(vedtaksperiode1, vedtaksperiode2).harAktiveVarsler(28.februar))
     }
     @Test
-    fun `har aktive varsler når generasjonene har utbetalingId men ikke fom`() {
-        val vedtaksperiodeId1 = UUID.randomUUID()
-        val vedtaksperiodeId2 = UUID.randomUUID()
-        val gjeldendeGenerasjon1 = Generasjon(UUID.randomUUID(), vedtaksperiodeId1)
-        val gjeldendeGenerasjon2 = Generasjon(UUID.randomUUID(), vedtaksperiodeId2)
-        val utbetalingId = UUID.randomUUID()
-        gjeldendeGenerasjon1.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId, varselRepository)
-        gjeldendeGenerasjon2.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId, varselRepository)
-        val vedtaksperiode1 = Vedtaksperiode(vedtaksperiodeId1, gjeldendeGenerasjon1)
-        val vedtaksperiode2 = Vedtaksperiode(vedtaksperiodeId2, gjeldendeGenerasjon2)
-        gjeldendeGenerasjon2.håndterRegelverksvarsel(UUID.randomUUID(), UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), varselRepository)
-        assertTrue(listOf(vedtaksperiode1, vedtaksperiode2).harAktiveVarsler(28.februar))
-    }
-    @Test
     fun `har ikke aktive varsler når generasjonene har utbetalingId men ikke fom`() {
         val vedtaksperiodeId1 = UUID.randomUUID()
         val vedtaksperiodeId2 = UUID.randomUUID()

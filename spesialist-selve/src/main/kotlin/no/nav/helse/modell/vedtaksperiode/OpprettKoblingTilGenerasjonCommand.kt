@@ -1,11 +1,9 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import java.util.UUID
-import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.varsel.VarselRepository
-import org.slf4j.LoggerFactory
 
 internal class OpprettKoblingTilGenerasjonCommand(
     private val hendelseId: UUID,
@@ -15,22 +13,8 @@ internal class OpprettKoblingTilGenerasjonCommand(
     private val varselRepository: VarselRepository,
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
-        val generasjon = try {
-            generasjonRepository.sisteFor(vedtaksperiodeId)
-        } catch (e: IllegalStateException) {
-            sikkerlogg.info(
-                "Oppretter generasjon for {} som følge av vedtaksperiode_ny_utbetaling med {}, da vi ikke finner noen eksisterende generasjoner for perioden",
-                keyValue("vedtaksperiodeId", vedtaksperiodeId),
-                keyValue("utbetalingId", utbetalingId),
-            )
-            generasjonRepository.opprettFørste(vedtaksperiodeId, hendelseId) ?: throw IllegalStateException("Klarte ikke å opprette generasjon for vedtaksperiodeId=$vedtaksperiodeId")
-        }
-
+        val generasjon = generasjonRepository.sisteFor(vedtaksperiodeId)
         generasjon.håndterNyUtbetaling(hendelseId, utbetalingId, varselRepository)
         return true
-    }
-
-    private companion object {
-        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
 }
