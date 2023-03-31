@@ -61,6 +61,7 @@ import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOppdatering
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.rapids_rivers.asLocalDate
@@ -136,11 +137,26 @@ internal class Hendelsefabrikk(
     }
 
     private fun sykefraværstilfelle(fødselsnummer: String, skjæringstidspunkt: LocalDate): Sykefraværstilfelle {
-        val vedtaksperioder =
-            generasjonRepository.finnVedtaksperiodeIderFor(fødselsnummer, skjæringstidspunkt).map {
-                VedtaksperiodeBuilder(vedtaksperiodeId = it).build(generasjonRepository, varselRepository)
-            }
+        val vedtaksperioder = vedtaksperioderFor(fødselsnummer, skjæringstidspunkt)
         return Sykefraværstilfelle(fødselsnummer, skjæringstidspunkt, vedtaksperioder)
+    }
+
+    private fun vedtaksperioderFor(fødselsnummer: String, skjæringstidspunkt: LocalDate): List<Vedtaksperiode> {
+        return vedtaksperioder {
+            generasjonRepository.finnVedtaksperiodeIderFor(fødselsnummer, skjæringstidspunkt)
+        }
+    }
+
+    private fun vedtaksperioderFor(fødselsnummer: String): List<Vedtaksperiode> {
+        return vedtaksperioder {
+            generasjonRepository.finnVedtaksperiodeIderFor(fødselsnummer)
+        }
+    }
+
+    private fun vedtaksperioder(iderGetter: () -> Set<UUID>): List<Vedtaksperiode> {
+        return iderGetter().map {
+            VedtaksperiodeBuilder(vedtaksperiodeId = it).build(generasjonRepository, varselRepository)
+        }
     }
 
     fun godkjenning(
@@ -533,7 +549,7 @@ internal class Hendelsefabrikk(
         aktørId: String,
         json: String,
     ): Sykefraværstilfeller {
-        val vedtaksperioder = generasjonRepository.finnVedtaksperioderFor(fødselsnummer)
+        val vedtaksperioder = vedtaksperioderFor(fødselsnummer)
         return Sykefraværstilfeller(
             id = id,
             fødselsnummer = fødselsnummer,

@@ -30,44 +30,6 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
     }
 
     @Test
-    fun `hente ut liste av vedtaksperioder`() {
-        val vedtaksperiodeId1 = UUID.randomUUID()
-        val vedtaksperiodeId2 = UUID.randomUUID()
-        val generasjonId1 = UUID.randomUUID()
-        val generasjonId2 = UUID.randomUUID()
-
-        repository.førsteGenerasjonOpprettet(generasjonId1, vedtaksperiodeId1, UUID.randomUUID(), 1.januar, 31.januar, 1.januar)
-        repository.førsteGenerasjonOpprettet(generasjonId2, vedtaksperiodeId2, UUID.randomUUID(), 1.januar, 31.januar, 1.januar)
-
-        val perioder = repository.finnVedtaksperioder(listOf(vedtaksperiodeId1, vedtaksperiodeId2))
-        assertEquals(2, perioder.size)
-        assertEquals(
-            Vedtaksperiode(vedtaksperiodeId1, generasjon(generasjonId1, vedtaksperiodeId1)),
-            perioder[0]
-        )
-        assertEquals(
-            Vedtaksperiode(vedtaksperiodeId2, generasjon(generasjonId2, vedtaksperiodeId2)),
-            perioder[1]
-        )
-    }
-
-    @Test
-    fun `hente kun ut vedtaksperioder der det finnes en generasjon for perioden`() {
-        val vedtaksperiodeId1 = UUID.randomUUID()
-        val vedtaksperiodeId2 = UUID.randomUUID()
-        val generasjonId1 = UUID.randomUUID()
-
-        repository.førsteGenerasjonOpprettet(generasjonId1, vedtaksperiodeId1, UUID.randomUUID(), 1.januar, 31.januar, 1.januar)
-
-        val perioder = repository.finnVedtaksperioder(listOf(vedtaksperiodeId1, vedtaksperiodeId2))
-        assertEquals(1, perioder.size)
-        assertEquals(
-            Vedtaksperiode(vedtaksperiodeId1, generasjon(generasjonId1, vedtaksperiodeId1)),
-            perioder[0]
-        )
-    }
-
-    @Test
     fun `kan ikke opprette FØRSTE generasjon når det eksisterer generasjoner fra før av`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val vedtaksperiodeOpprettet1 = UUID.randomUUID()
