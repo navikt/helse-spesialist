@@ -5,8 +5,10 @@ import java.time.LocalDateTime
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.januar
 import no.nav.helse.modell.varsel.Varsel.Status.AKTIV
 import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
+import no.nav.helse.modell.vedtaksperiode.Periode
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -22,7 +24,7 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
     fun `lagre varsel`() {
         definisjonDao.lagreDefinisjon(UUID.randomUUID(), "EN_KODE", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now())
         val generasjonId = UUID.randomUUID()
-        generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE, UUID.randomUUID(),null,null)
+        generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE, UUID.randomUUID(), 1.januar, Periode(1.januar, 31.januar))
         varselDao.lagreVarsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), VEDTAKSPERIODE, generasjonId)
         assertEquals(1, alleVarslerFor(VEDTAKSPERIODE).size)
     }
@@ -32,7 +34,7 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
         definisjonDao.lagreDefinisjon(UUID.randomUUID(), "EN_KODE", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now())
         definisjonDao.lagreDefinisjon(UUID.randomUUID(), "EN_ANNEN_KODE", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now())
         val generasjonId = UUID.randomUUID()
-        generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE, UUID.randomUUID(),null,null)
+        generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE, UUID.randomUUID(), 1.januar, Periode(1.januar, 31.januar))
         varselDao.lagreVarsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), VEDTAKSPERIODE, generasjonId)
         varselDao.lagreVarsel(UUID.randomUUID(), "EN_ANNEN_KODE", LocalDateTime.now(), VEDTAKSPERIODE, generasjonId)
         assertEquals(2, alleVarslerFor(VEDTAKSPERIODE).size)
@@ -42,7 +44,7 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
     fun `sjekk for aktivt varsel`() {
         definisjonDao.lagreDefinisjon(UUID.randomUUID(), "EN_KODE", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now())
         val generasjonId = UUID.randomUUID()
-        generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE, UUID.randomUUID(),null,null)
+        generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE, UUID.randomUUID(), 1.januar, Periode(1.januar, 31.januar))
         varselDao.lagreVarsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), VEDTAKSPERIODE, generasjonId)
         assertEquals(AKTIV, varselDao.finnVarselstatus(VEDTAKSPERIODE, "EN_KODE"))
     }
@@ -52,7 +54,7 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
         val definisjonId = UUID.randomUUID()
         definisjonDao.lagreDefinisjon(definisjonId, "EN_KODE", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now())
         val generasjonId = UUID.randomUUID()
-        generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE, UUID.randomUUID(),null,null)
+        generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE, UUID.randomUUID(), 1.januar, Periode(1.januar, 31.januar))
         varselDao.lagreVarsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), VEDTAKSPERIODE, generasjonId)
         varselDao.oppdaterStatus(VEDTAKSPERIODE, generasjonId, "EN_KODE", INAKTIV, "EN_IDENT", definisjonId)
         assertEquals(INAKTIV, varselDao.finnVarselstatus(VEDTAKSPERIODE, "EN_KODE"))
@@ -64,7 +66,7 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
         val varselId = UUID.randomUUID()
         val definisjonId = UUID.randomUUID()
         definisjonDao.lagreDefinisjon(definisjonId, "EN_KODE", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now())
-        generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE, UUID.randomUUID(),null,null)
+        generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE, UUID.randomUUID(), 1.januar, Periode(1.januar, 31.januar))
         varselDao.lagreVarsel(varselId, "EN_KODE", LocalDateTime.now(), VEDTAKSPERIODE, generasjonId)
         varselDao.oppdaterStatus(VEDTAKSPERIODE, generasjonId, "EN_KODE", INAKTIV, "ident", definisjonId)
 
@@ -84,8 +86,8 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
         val v2 = UUID.randomUUID()
         val generasjonIdv1 = UUID.randomUUID()
         val generasjonIdv2 = UUID.randomUUID()
-        generasjonDao.opprettFor(generasjonIdv1, v1, UUID.randomUUID(),null,null)
-        generasjonDao.opprettFor(generasjonIdv2, v2, UUID.randomUUID(),null,null)
+        generasjonDao.opprettFor(generasjonIdv1, v1, UUID.randomUUID(), 1.januar, Periode(1.januar, 31.januar))
+        generasjonDao.opprettFor(generasjonIdv2, v2, UUID.randomUUID(), 1.januar, Periode(1.januar, 31.januar))
         varselDao.lagreVarsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), v1, generasjonIdv1)
         varselDao.lagreVarsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), v2, generasjonIdv2)
         varselDao.oppdaterStatus(v1, generasjonIdv1, "EN_KODE", INAKTIV, "EN_IDENT", definisjonId)
@@ -105,7 +107,7 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
         val varselId = UUID.randomUUID()
         val opprettet = LocalDateTime.now()
         val generasjonId = UUID.randomUUID()
-        generasjonDao.opprettFor(generasjonId, v1, UUID.randomUUID(),null,null)
+        generasjonDao.opprettFor(generasjonId, v1, UUID.randomUUID(), 1.januar, Periode(1.januar, 31.januar))
         varselDao.lagreVarsel(varselId, "EN_KODE", LocalDateTime.now(), v1, generasjonId)
         assertEquals(listOf(Varsel(varselId, "EN_KODE", opprettet, v1)), alleVarslerFor(v1))
     }
@@ -115,8 +117,8 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjonIdv1 = UUID.randomUUID()
         val generasjonIdv2 = UUID.randomUUID()
-        generasjonDao.opprettFor(generasjonIdv1, vedtaksperiodeId, UUID.randomUUID(),null,null)
-        generasjonDao.opprettFor(generasjonIdv2, vedtaksperiodeId, UUID.randomUUID(),null,null)
+        generasjonDao.opprettFor(generasjonIdv1, vedtaksperiodeId, UUID.randomUUID(), 1.januar, Periode(1.januar, 31.januar))
+        generasjonDao.opprettFor(generasjonIdv2, vedtaksperiodeId, UUID.randomUUID(), 1.januar, Periode(1.januar, 31.januar))
         val varselId = UUID.randomUUID()
         varselDao.lagreVarsel(varselId, "EN_KODE", LocalDateTime.now(), vedtaksperiodeId, generasjonIdv1)
         varselDao.oppdaterGenerasjon(varselId, generasjonIdv1, generasjonIdv2)

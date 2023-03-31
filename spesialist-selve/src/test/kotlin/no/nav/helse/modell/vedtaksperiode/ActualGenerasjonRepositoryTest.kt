@@ -42,11 +42,11 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         val perioder = repository.finnVedtaksperioder(listOf(vedtaksperiodeId1, vedtaksperiodeId2))
         assertEquals(2, perioder.size)
         assertEquals(
-            Vedtaksperiode(vedtaksperiodeId1, Generasjon(generasjonId1, vedtaksperiodeId1, null, false, 1.januar, Periode(1.januar, 31.januar), emptySet())),
+            Vedtaksperiode(vedtaksperiodeId1, generasjon(generasjonId1, vedtaksperiodeId1)),
             perioder[0]
         )
         assertEquals(
-            Vedtaksperiode(vedtaksperiodeId2, Generasjon(generasjonId2, vedtaksperiodeId2, null, false, 1.januar, Periode(1.januar, 31.januar), emptySet())),
+            Vedtaksperiode(vedtaksperiodeId2, generasjon(generasjonId2, vedtaksperiodeId2)),
             perioder[1]
         )
     }
@@ -62,7 +62,7 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         val perioder = repository.finnVedtaksperioder(listOf(vedtaksperiodeId1, vedtaksperiodeId2))
         assertEquals(1, perioder.size)
         assertEquals(
-            Vedtaksperiode(vedtaksperiodeId1, Generasjon(generasjonId1, vedtaksperiodeId1, null, false, 1.januar, Periode(1.januar, 31.januar), emptySet())),
+            Vedtaksperiode(vedtaksperiodeId1, generasjon(generasjonId1, vedtaksperiodeId1)),
             perioder[0]
         )
     }
@@ -211,9 +211,18 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         assertEquals(1, repository.tilhørendeFor(utbetalingId).size)
 
         generasjon.invaliderUtbetaling(utbetalingId)
-        assertEquals(Generasjon(generasjonId, vedtaksperiodeId, null, false, 1.januar, Periode(1.januar, 31.januar), emptySet()), generasjon)
+        assertEquals(generasjon(generasjonId, vedtaksperiodeId), generasjon)
         assertEquals(0, repository.tilhørendeFor(utbetalingId).size)
     }
+
+
+    private fun generasjon(generasjonId: UUID = UUID.randomUUID(), vedtaksperiodeId: UUID = UUID.randomUUID()) = Generasjon(
+        id = generasjonId,
+        vedtaksperiodeId = vedtaksperiodeId,
+        fom = 1.januar,
+        tom = 31.januar,
+        skjæringstidspunkt = 1.januar
+    )
 
     private fun assertGenerasjon(vedtaksperiodeId: UUID, hendelseId: UUID) {
         val generasjon = sessionOf(dataSource).use { session ->

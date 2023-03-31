@@ -32,9 +32,9 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
         generasjonId: UUID,
         vedtaksperiodeId: UUID,
         hendelseId: UUID,
-        fom: LocalDate?,
-        tom: LocalDate?,
-        skjæringstidspunkt: LocalDate?
+        fom: LocalDate,
+        tom: LocalDate,
+        skjæringstidspunkt: LocalDate
     ) {
         opprettFørste(vedtaksperiodeId, hendelseId, generasjonId, fom, tom, skjæringstidspunkt)
     }
@@ -47,11 +47,11 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
         generasjonId: UUID,
         vedtaksperiodeId: UUID,
         hendelseId: UUID,
-        fom: LocalDate?,
-        tom: LocalDate?,
-        skjæringstidspunkt: LocalDate?
+        fom: LocalDate,
+        tom: LocalDate,
+        skjæringstidspunkt: LocalDate
     ) {
-        opprettNeste(generasjonId, vedtaksperiodeId, hendelseId, skjæringstidspunkt, fom?.let { Periode(it, requireNotNull(tom)) })
+        opprettNeste(generasjonId, vedtaksperiodeId, hendelseId, skjæringstidspunkt, Periode(fom, tom))
     }
 
     override fun nyUtbetaling(generasjonId: UUID, utbetalingId: UUID) {
@@ -66,7 +66,7 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
         låsFor(generasjonId, hendelseId)
     }
 
-    private fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID, fom: LocalDate?, tom: LocalDate?, skjæringstidspunkt: LocalDate?): Generasjon? {
+    private fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate): Generasjon? {
         if (dao.finnSisteFor(vedtaksperiodeId) != null) {
             sikkerlogg.info(
                 "Kan ikke opprette første generasjon for {} når det eksisterer generasjoner fra før av",
@@ -74,7 +74,7 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
             )
             return null
         }
-        return dao.opprettFor(id, vedtaksperiodeId, hendelseId, skjæringstidspunkt, fom?.let { Periode(it, requireNotNull(tom)) }).also {
+        return dao.opprettFor(id, vedtaksperiodeId, hendelseId, skjæringstidspunkt, Periode(fom, tom)).also {
             it.loggFørsteOpprettet(vedtaksperiodeId)
             it.registrer(this)
         }
@@ -133,8 +133,8 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
         id: UUID,
         vedtaksperiodeId: UUID,
         hendelseId: UUID,
-        skjæringstidspunkt: LocalDate?,
-        periode: Periode?
+        skjæringstidspunkt: LocalDate,
+        periode: Periode
     ) {
         dao.opprettFor(id, vedtaksperiodeId, hendelseId, skjæringstidspunkt, periode).also {
             it.loggNesteOpprettet(vedtaksperiodeId)

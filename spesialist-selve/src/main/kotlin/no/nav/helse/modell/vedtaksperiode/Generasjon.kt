@@ -22,14 +22,17 @@ internal class Generasjon(
     private val vedtaksperiodeId: UUID,
     private var utbetalingId: UUID?,
     private var låst: Boolean,
-    private var skjæringstidspunkt: LocalDate?,
-    private var periode: Periode?,
+    private var skjæringstidspunkt: LocalDate,
+    private var periode: Periode,
     varsler: Set<Varsel>
 ) {
     internal constructor(
         id: UUID,
-        vedtaksperiodeId: UUID
-    ): this(id, vedtaksperiodeId, null, false, null, null, emptySet())
+        vedtaksperiodeId: UUID,
+        fom: LocalDate,
+        tom: LocalDate,
+        skjæringstidspunkt: LocalDate
+    ): this(id, vedtaksperiodeId, null, false, skjæringstidspunkt, Periode(fom, tom), emptySet())
 
     private val varsler: MutableList<Varsel> = varsler.toMutableList()
     private val observers = mutableSetOf<IVedtaksperiodeObserver>()
@@ -38,7 +41,7 @@ internal class Generasjon(
         observers.addAll(observer)
     }
 
-    internal fun tilhører(dato: LocalDate): Boolean = periode?.let { it.tom() <= dato } ?: false
+    internal fun tilhører(dato: LocalDate): Boolean = periode.tom() <= dato
 
     internal fun harAktiveVarsler(): Boolean {
         return varsler.any { it.erAktiv() }
@@ -46,7 +49,7 @@ internal class Generasjon(
 
     internal fun håndterTidslinjeendring(fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate) {
         if (låst) return
-        if (fom == periode?.fom() && tom == periode?.tom() && skjæringstidspunkt == this.skjæringstidspunkt) return
+        if (fom == periode.fom() && tom == periode.tom() && skjæringstidspunkt == this.skjæringstidspunkt) return
         this.periode = Periode(fom, tom)
         this.skjæringstidspunkt = skjæringstidspunkt
         observers.forEach {
@@ -67,7 +70,7 @@ internal class Generasjon(
 
     private fun opprett(hendelseId: UUID) {
         observers.forEach {
-            it.generasjonOpprettet(id, vedtaksperiodeId, hendelseId, periode?.fom(), periode?.tom(), skjæringstidspunkt)
+            it.generasjonOpprettet(id, vedtaksperiodeId, hendelseId, periode.fom(), periode.tom(), skjæringstidspunkt)
         }
     }
 
@@ -172,7 +175,9 @@ internal class Generasjon(
     }
 
     internal fun opprettFørste(hendelseId: UUID) {
-        observers.forEach { it.førsteGenerasjonOpprettet(id, vedtaksperiodeId, hendelseId, periode?.fom(), periode?.tom(), skjæringstidspunkt) }
+        observers.forEach {
+            it.førsteGenerasjonOpprettet(id, vedtaksperiodeId, hendelseId, periode.fom(), periode.tom(), skjæringstidspunkt)
+        }
     }
     override fun toString(): String = "generasjonId=$id, vedtaksperiodeId=$vedtaksperiodeId, utbetalingId=$utbetalingId, låst=$låst, skjæringstidspunkt=$skjæringstidspunkt, periode=$periode"
 
