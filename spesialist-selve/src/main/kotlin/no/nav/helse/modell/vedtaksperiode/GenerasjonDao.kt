@@ -7,10 +7,29 @@ import javax.sql.DataSource
 import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.mediator.builders.GenerasjonBuilder
 import no.nav.helse.modell.varsel.Varsel
 import org.intellij.lang.annotations.Language
 
 class GenerasjonDao(private val dataSource: DataSource) {
+
+    internal fun byggSisteFor(vedtaksperiodeId: UUID, generasjonBuilder: GenerasjonBuilder) {
+        @Language("PostgreSQL")
+        val query = """
+            SELECT id, unik_id, vedtaksperiode_id, utbetaling_id, låst, skjæringstidspunkt, fom, tom 
+            FROM selve_vedtaksperiode_generasjon 
+            WHERE vedtaksperiode_id = ? ORDER BY id DESC;
+            """
+        sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, vedtaksperiodeId).map { row ->
+                generasjonBuilder.generasjonId(row.uuid("unik_id"))
+                row.uuidOrNull("utbetaling_id")?.let(generasjonBuilder::utbetalingId)
+                generasjonBuilder.skjæringstidspunkt(row.localDate("skjæringstidspunkt"))
+                generasjonBuilder.periode(row.localDate("fom"), row.localDate("tom"))
+                generasjonBuilder.låst(row.boolean("låst"))
+            }.asSingle)
+        }
+    }
 
     internal fun finnSisteFor(vedtaksperiodeId: UUID): Generasjon? {
         @Language("PostgreSQL")

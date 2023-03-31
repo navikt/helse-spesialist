@@ -34,6 +34,10 @@ internal class ActualVarselRepository(dataSource: DataSource) : VarselRepository
     private val varselDao = VarselDao(dataSource)
     private val definisjonDao = DefinisjonDao(dataSource)
 
+    internal fun finnVarslerFor(generasjonId: UUID): List<Varsel> {
+        return varselDao.varslerFor(generasjonId)
+    }
+
     override fun reaktiverFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String) {
         varselDao.oppdaterStatus(vedtaksperiodeId, generasjonId, varselkode, AKTIV, null, null)
         if (varselkode.matches(varselkodeformat.toRegex())) tellVarsel(varselkode)
@@ -75,5 +79,4 @@ internal class ActualVarselRepository(dataSource: DataSource) : VarselRepository
     override fun oppdaterGenerasjonFor(id: UUID, gammelGenerasjonId: UUID, nyGenerasjonId: UUID) {
         varselDao.oppdaterGenerasjon(id, gammelGenerasjonId, nyGenerasjonId)
     }
-
 }

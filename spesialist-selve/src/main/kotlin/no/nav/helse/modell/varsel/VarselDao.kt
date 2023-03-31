@@ -95,4 +95,21 @@ internal class VarselDao(private val dataSource: DataSource) {
             }.asSingle)
         }
     }
+
+    internal fun varslerFor(generasjonId: UUID): List<Varsel> {
+        @Language("PostgreSQL")
+        val query =
+            "SELECT unik_id, vedtaksperiode_id, kode, opprettet, status FROM selve_varsel WHERE generasjon_ref = (SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = ?)"
+        return sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, generasjonId).map {
+                Varsel(
+                    it.uuid("unik_id"),
+                    it.string("kode"),
+                    it.localDateTime("opprettet"),
+                    it.uuid("vedtaksperiode_id"),
+                    enumValueOf(it.string("status"))
+                )
+            }.asList)
+        }
+    }
 }

@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.mediator.builders.GenerasjonBuilder
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -17,6 +18,10 @@ internal interface GenerasjonRepository {
 internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRepository, IVedtaksperiodeObserver {
 
     private val dao = GenerasjonDao(dataSource)
+
+    internal fun byggGenerasjon(vedtaksperiodeId: UUID, generasjonBuilder: GenerasjonBuilder) {
+        dao.byggSisteFor(vedtaksperiodeId, generasjonBuilder)
+    }
 
     override fun finnVedtaksperioder(vedtaksperiodeIder: List<UUID>): List<Vedtaksperiode> {
         return vedtaksperiodeIder.mapNotNull { vedtaksperiodeId ->
