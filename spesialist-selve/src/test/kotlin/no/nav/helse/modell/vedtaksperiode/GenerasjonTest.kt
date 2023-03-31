@@ -77,15 +77,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     @Test
     fun `Generasjon er ikke å anse som oppdatert dersom fom, tom og skjæringstidspunkt er lik oppdatering`() {
         val generasjonId = UUID.randomUUID()
-        val generasjon = Generasjon(
-            generasjonId,
-            UUID.randomUUID(),
-            null,
-            false,
-            1.januar,
-            Periode(1.januar, 31.januar),
-            emptySet()
-        )
+        val generasjon = Generasjon(generasjonId, UUID.randomUUID(), 1.januar, 31.januar, 1.januar)
         val observer = object : IVedtaksperiodeObserver {
             var generasjonId: UUID? = null
             var fom: LocalDate? = null
@@ -148,10 +140,11 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         val generasjon = nyGenerasjon(id = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
         generasjon.håndterTidslinjeendring(1.januar, 31.januar, 1.januar)
         assertEquals(
-            Generasjon(generasjonId, vedtaksperiodeId, null, false, 1.januar, Periode(1.januar, 31.januar), emptySet()),
+            Generasjon(generasjonId, vedtaksperiodeId, 1.januar, 31.januar, 1.januar),
             generasjon
         )
     }
+
     @Test
     fun `håndterTidslinjeendring setter ikke fom, tom og skjæringstidspunkt på generasjonen hvis den er låst`() {
         val vedtaksperiodeId = UUID.randomUUID()
@@ -159,23 +152,17 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         val generasjon = generasjon(generasjonId, vedtaksperiodeId)
         generasjon.håndterVedtakFattet(UUID.randomUUID())
         generasjon.håndterTidslinjeendring(1.februar, 28.februar, 1.februar)
+        val forventetGenerasjon = Generasjon(generasjonId, vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
+        forventetGenerasjon.håndterVedtakFattet(UUID.randomUUID())
         assertEquals(
-            Generasjon(generasjonId, vedtaksperiodeId, null, true, 1.januar, Periode(1.januar, 31.januar), emptySet()),
+            forventetGenerasjon,
             generasjon
         )
     }
 
     @Test
     fun `generasjon ligger før dato`() {
-        val generasjon = Generasjon(
-            UUID.randomUUID(),
-            UUID.randomUUID(),
-            null,
-            true,
-            1.januar,
-            Periode(1.januar, 31.januar),
-            emptySet()
-        )
+        val generasjon = Generasjon(UUID.randomUUID(), UUID.randomUUID(), 1.januar, 31.januar, 1.januar)
         assertTrue(generasjon.tilhører(31.januar))
         assertTrue(generasjon.tilhører(1.februar))
         assertFalse(generasjon.tilhører(1.januar))
@@ -215,7 +202,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     fun `opprett neste`() {
         val nyGenerasjonId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId, null, false, 1.januar, Periode(1.januar, 31.januar), emptySet())
+        val generasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
         val hendelseId = UUID.randomUUID()
         generasjon.registrer(observer)
         generasjon.håndterVedtakFattet(UUID.randomUUID())
@@ -224,7 +211,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         assertNotEquals(generasjon, nyGenerasjon)
         observer.assertOpprettelse(nyGenerasjonId, vedtaksperiodeId, hendelseId, 1.januar, 31.januar, 1.januar)
         assertEquals(
-            Generasjon(nyGenerasjonId, vedtaksperiodeId, null, false, 1.januar, Periode(1.januar, 31.januar), emptySet()),
+            Generasjon(nyGenerasjonId, vedtaksperiodeId, 1.januar, 31.januar, 1.januar),
             nyGenerasjon
         )
     }
@@ -243,12 +230,11 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     fun `Kopierer skjæringstidspunkt og periode til neste generasjon`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)
-        val periode = Periode(1.januar, 5.januar)
         generasjon.håndterTidslinjeendring(skjæringstidspunkt = 1.januar, fom = 1.januar, tom = 5.januar)
         generasjon.håndterVedtakFattet(UUID.randomUUID())
         val nyGenerasjonId = UUID.randomUUID()
         val nyGenerasjon = generasjon.håndterNyGenerasjon(varselRepository, UUID.randomUUID(), nyGenerasjonId)
-        val forventetGenerasjon = Generasjon(nyGenerasjonId, vedtaksperiodeId, null, false, 1.januar, periode, emptySet())
+        val forventetGenerasjon = Generasjon(nyGenerasjonId, vedtaksperiodeId, 1.januar, 5.januar, 1.januar)
 
         assertEquals(forventetGenerasjon, nyGenerasjon)
     }
@@ -604,7 +590,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
 
     private fun nyGenerasjon(id: UUID = UUID.randomUUID(), vedtaksperiodeId: UUID = UUID.randomUUID()): Generasjon {
         generasjonId = id
-        val generasjon = Generasjon(id, vedtaksperiodeId, null, false, 1.januar, Periode(1.januar, 31.januar), emptySet())
+        val generasjon = Generasjon(id, vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
         generasjon.registrer(generasjonRepository)
         generasjon.opprettFørste(UUID.randomUUID())
         return generasjon

@@ -193,13 +193,14 @@ class GenerasjonDao(private val dataSource: DataSource) {
     }
 
     private fun toGenerasjon(row: Row): Generasjon {
-        return Generasjon(
+        return Generasjon.fraLagring(
             row.uuid("unik_id"),
             row.uuid("vedtaksperiode_id"),
             row.uuidOrNull("utbetaling_id"),
             row.boolean("låst"),
             row.localDate("skjæringstidspunkt"),
-            Periode(row.localDate("fom"), row.localDate("tom")),
+            row.localDate("fom"),
+            row.localDate("tom"),
             varslerFor(row.long("id")).toSet(),
         )
     }

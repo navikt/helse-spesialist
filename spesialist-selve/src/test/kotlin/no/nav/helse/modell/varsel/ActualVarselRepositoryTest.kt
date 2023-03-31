@@ -12,7 +12,6 @@ import no.nav.helse.modell.varsel.Varsel.Status.GODKJENT
 import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
 import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Generasjon
-import no.nav.helse.modell.vedtaksperiode.Periode
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -37,7 +36,7 @@ internal class ActualVarselRepositoryTest : AbstractDatabaseTest() {
         varselRepository.lagreDefinisjon(definisjonId, "EN_KODE", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now())
         generasjonId = UUID.randomUUID()
 
-        generasjon = Generasjon(generasjonId, vedtaksperiodeId, null, false, 1.januar, Periode(1.januar, 31.januar), emptySet())
+        generasjon = Generasjon(generasjonId, vedtaksperiodeId, 1.januar, 1.januar, 31.januar)
         generasjon.registrer(generasjonRepository)
         generasjon.opprettFørste(UUID.randomUUID())
     }

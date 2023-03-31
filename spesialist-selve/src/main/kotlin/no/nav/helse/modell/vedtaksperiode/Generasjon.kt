@@ -17,7 +17,7 @@ import no.nav.helse.modell.varsel.Varselkode
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-internal class Generasjon(
+internal class Generasjon private constructor(
     private val id: UUID,
     private val vedtaksperiodeId: UUID,
     private var utbetalingId: UUID?,
@@ -223,5 +223,16 @@ internal class Generasjon(
                 emptySet()
             )
         }
+
+        internal fun fraLagring(
+            id: UUID,
+            vedtaksperiodeId: UUID,
+            utbetalingId: UUID?,
+            låst: Boolean,
+            skjæringstidspunkt: LocalDate,
+            fom: LocalDate,
+            tom: LocalDate,
+            varsler: Set<Varsel>
+        ) = Generasjon(id, vedtaksperiodeId, utbetalingId, låst, skjæringstidspunkt, Periode(fom, tom), varsler)
     }
 }

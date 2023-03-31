@@ -89,7 +89,7 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         val førsteGenerasjonId = UUID.randomUUID()
         val andreGenerasjonId = UUID.randomUUID()
 
-        val generasjon = Generasjon(førsteGenerasjonId, vedtaksperiodeId, null, false, 1.januar, Periode(1.januar, 31.januar), emptySet())
+        val generasjon = Generasjon(førsteGenerasjonId, vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
         generasjon.registrer(repository)
         generasjon.opprettFørste(vedtaksperiodeOpprettet)
         generasjon.håndterVedtakFattet(vedtakFattet)
@@ -104,7 +104,7 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         val vedtaksperiodeId = UUID.randomUUID()
         val vedtaksperiodeOpprettet = UUID.randomUUID()
         val vedtaksperiodeEndret = UUID.randomUUID()
-        val generasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId, null, false, 1.januar, Periode(1.januar, 31.januar), emptySet())
+        val generasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
         generasjon.registrer(repository)
         generasjon.opprettFørste(vedtaksperiodeOpprettet)
         generasjon.håndterNyGenerasjon(varselRepository, vedtaksperiodeEndret)
@@ -119,7 +119,7 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         val vedtaksperiodeId = UUID.randomUUID()
         val utbetalingId = UUID.randomUUID()
 
-        val generasjon = Generasjon(generasjonId, vedtaksperiodeId, null, false, 1.januar, Periode(1.januar, 31.januar), emptySet())
+        val generasjon = Generasjon(generasjonId, vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
         generasjon.registrer(repository)
         generasjon.opprettFørste(UUID.randomUUID())
         generasjon.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId, varselRepository)
@@ -133,7 +133,7 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         val vedtaksperiodeId = UUID.randomUUID()
         val utbetalingId = UUID.randomUUID()
 
-        val generasjon = Generasjon(generasjonId, vedtaksperiodeId, null, false, 1.januar, Periode(1.januar, 31.januar), emptySet())
+        val generasjon = Generasjon(generasjonId, vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
         generasjon.registrer(repository)
         generasjon.opprettFørste(UUID.randomUUID())
         generasjon.håndterVedtakFattet(UUID.randomUUID())
@@ -149,7 +149,7 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         val gammel = UUID.randomUUID()
         val ny = UUID.randomUUID()
 
-        val generasjon = Generasjon(generasjonId, vedtaksperiodeId, null, false, 1.januar, Periode(1.januar, 31.januar), emptySet())
+        val generasjon = Generasjon(generasjonId, vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
         generasjon.registrer(repository)
         generasjon.opprettFørste(UUID.randomUUID())
         generasjon.håndterNyUtbetaling(UUID.randomUUID(), gammel, varselRepository)
@@ -186,8 +186,8 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         val generasjonIdV2 = UUID.randomUUID()
         val utbetalingId = UUID.randomUUID()
 
-        val generasjonV1 = Generasjon(generasjonIdV1, UUID.randomUUID(), utbetalingId, false, 1.januar, Periode(1.januar, 31.januar), emptySet())
-        val generasjonV2 = Generasjon(generasjonIdV2, UUID.randomUUID(), utbetalingId, false, 1.januar, Periode(1.januar, 31.januar), emptySet())
+        val generasjonV1 = Generasjon(generasjonIdV1, UUID.randomUUID(), 1.januar, 1.januar, 31.januar)
+        val generasjonV2 = Generasjon(generasjonIdV2, UUID.randomUUID(), 1.januar, 1.januar, 31.januar)
         generasjonV1.registrer(repository)
         generasjonV2.registrer(repository)
         generasjonV1.opprettFørste(UUID.randomUUID())
@@ -204,7 +204,7 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         val utbetalingId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
 
-        val generasjon = Generasjon(generasjonId, vedtaksperiodeId, null, false, 1.januar, Periode(1.januar, 31.januar), emptySet())
+        val generasjon = Generasjon(generasjonId, vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
         generasjon.registrer(repository)
         generasjon.opprettFørste(UUID.randomUUID())
         generasjon.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId, varselRepository)
