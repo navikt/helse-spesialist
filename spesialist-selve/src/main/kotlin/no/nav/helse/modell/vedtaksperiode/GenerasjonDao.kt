@@ -97,7 +97,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
         }
     }
 
-    internal fun finnVedtaksperiodeIderFor(fødselsnummer: String, skjæringstidspunkt: LocalDate): List<UUID> {
+    internal fun finnVedtaksperiodeIderFor(fødselsnummer: String, skjæringstidspunkt: LocalDate): Set<UUID> {
         @Language("PostgreSQL")
         val query = """
             SELECT svg.vedtaksperiode_id FROM selve_vedtaksperiode_generasjon svg 
@@ -107,12 +107,12 @@ class GenerasjonDao(private val dataSource: DataSource) {
             """
 
         return sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, fødselsnummer.toLong(), skjæringstidspunkt).map { it.uuid("vedtaksperiode_id") }.asList)
+            session.run(queryOf(query, fødselsnummer.toLong(), skjæringstidspunkt).map { it.uuid("vedtaksperiode_id") }.asList).toSet()
         }
     }
 
 
-    internal fun finnVedtaksperiodeIderFor(fødselsnummer: String): List<UUID> {
+    internal fun finnVedtaksperiodeIderFor(fødselsnummer: String): Set<UUID> {
         @Language("PostgreSQL")
         val query = """
             SELECT svg.vedtaksperiode_id FROM selve_vedtaksperiode_generasjon svg 
@@ -122,7 +122,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
             """
 
         return sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, fødselsnummer.toLong()).map { it.uuid("vedtaksperiode_id") }.asList)
+            session.run(queryOf(query, fødselsnummer.toLong()).map { it.uuid("vedtaksperiode_id") }.asList).toSet()
         }
     }
 

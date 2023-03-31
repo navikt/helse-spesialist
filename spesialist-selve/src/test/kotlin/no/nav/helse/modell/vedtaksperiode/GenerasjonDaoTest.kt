@@ -143,20 +143,24 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `finner liste av vedtaksperiodeIder`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        nyPerson()
-        val generasjonId1 = generasjonIdFor(VEDTAKSPERIODE)
+    fun `finner liste av unike vedtaksperiodeIder`() {
+        val vedtaksperiodeId1 = UUID.randomUUID()
+        val vedtaksperiodeId2 = UUID.randomUUID()
+        val generasjonId1 = UUID.randomUUID()
         val generasjonId2 = UUID.randomUUID()
+        val generasjonId3 = UUID.randomUUID()
 
-        opprettVedtaksperiode(vedtaksperiodeId)
-        opprettGenerasjon(vedtaksperiodeId, generasjonId2)
-        generasjonDao.oppdaterSykefraværstilfelle(generasjonId1, 1.januar, Periode(1.februar, 28.februar))
-        generasjonDao.oppdaterSykefraværstilfelle(generasjonId2, 1.januar, Periode(1.januar, 31.januar))
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode(vedtaksperiodeId1)
+        opprettGenerasjon(vedtaksperiodeId1, generasjonId1)
+        opprettVedtaksperiode(vedtaksperiodeId2)
+        opprettGenerasjon(vedtaksperiodeId2, generasjonId2)
+        opprettGenerasjon(vedtaksperiodeId2, generasjonId3)
+
         val vedtaksperiodeIder = generasjonDao.finnVedtaksperiodeIderFor(FNR, 1.januar)
         assertEquals(2, vedtaksperiodeIder.size)
-        assertEquals(VEDTAKSPERIODE, vedtaksperiodeIder[0])
-        assertEquals(vedtaksperiodeId, vedtaksperiodeIder[1])
+        assertTrue(vedtaksperiodeIder.containsAll(setOf(vedtaksperiodeId1, vedtaksperiodeId2)))
     }
 
     @Test
@@ -172,7 +176,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         generasjonDao.oppdaterSykefraværstilfelle(generasjonId2, 1.januar, Periode(1.januar, 31.januar))
         val vedtaksperiodeIder = generasjonDao.finnVedtaksperiodeIderFor(FNR, 1.januar)
         assertEquals(1, vedtaksperiodeIder.size)
-        assertEquals(VEDTAKSPERIODE, vedtaksperiodeIder[0])
+        assertTrue(vedtaksperiodeIder.contains(VEDTAKSPERIODE))
     }
 
     @Test
