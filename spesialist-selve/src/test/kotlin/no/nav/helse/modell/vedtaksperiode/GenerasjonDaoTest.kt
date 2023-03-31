@@ -37,6 +37,24 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
             generasjon
         )
     }
+
+    @Test
+    fun `bygg kun siste generasjon`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjonId1 = UUID.randomUUID()
+        val generasjonId2 = UUID.randomUUID()
+        generasjonDao.opprettFor(generasjonId1, vedtaksperiodeId, UUID.randomUUID(), 1.januar, Periode(1.januar, 31.januar))
+        generasjonDao.låsFor(generasjonId1, UUID.randomUUID())
+        generasjonDao.opprettFor(generasjonId2, vedtaksperiodeId, UUID.randomUUID(), 1.januar, Periode(1.januar, 31.januar))
+        val builder = GenerasjonBuilder(vedtaksperiodeId)
+        generasjonDao.byggSisteFor(vedtaksperiodeId, builder)
+        builder.varsler(emptyList())
+        val generasjon = builder.build()
+        val forventetGenerasjon = Generasjon(generasjonId2, vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
+
+        assertEquals(forventetGenerasjon, generasjon)
+    }
+
     @Test
     fun `oppretter generasjon for vedtaksperiode`() {
         val generasjonId = UUID.randomUUID()

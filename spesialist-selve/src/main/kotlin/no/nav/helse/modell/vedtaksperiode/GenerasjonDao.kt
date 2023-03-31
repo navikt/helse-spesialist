@@ -16,9 +16,9 @@ class GenerasjonDao(private val dataSource: DataSource) {
     internal fun byggSisteFor(vedtaksperiodeId: UUID, generasjonBuilder: GenerasjonBuilder) {
         @Language("PostgreSQL")
         val query = """
-            SELECT id, unik_id, vedtaksperiode_id, utbetaling_id, låst, skjæringstidspunkt, fom, tom 
+            SELECT DISTINCT ON (vedtaksperiode_id) id, vedtaksperiode_id, unik_id, utbetaling_id, låst, skjæringstidspunkt, fom, tom 
             FROM selve_vedtaksperiode_generasjon 
-            WHERE vedtaksperiode_id = ? ORDER BY id DESC;
+            WHERE vedtaksperiode_id = ? ORDER BY vedtaksperiode_id, id DESC;
             """
         sessionOf(dataSource).use { session ->
             session.run(queryOf(query, vedtaksperiodeId).map { row ->
