@@ -9,6 +9,7 @@ import javax.sql.DataSource
 import no.nav.helse.mediator.api.Arbeidsgiver
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.api.arbeidsgiverelementer
+import no.nav.helse.mediator.builders.VedtaksperiodeBuilder
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.EndretSkjermetinfo
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov
@@ -56,7 +57,6 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.Varsel.Companion.varsler
-import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
@@ -114,7 +114,7 @@ internal class Hendelsefabrikk(
     private val generasjonRepository: ActualGenerasjonRepository = ActualGenerasjonRepository(dataSource),
     private val vergemålDao: VergemålDao = VergemålDao(dataSource),
     private val periodehistorikkDao: PeriodehistorikkDao = PeriodehistorikkDao(dataSource),
-    private val varselRepository: VarselRepository = ActualVarselRepository(dataSource),
+    private val varselRepository: ActualVarselRepository = ActualVarselRepository(dataSource),
     private val overstyringMediator: OverstyringMediator,
     private val snapshotMediator: SnapshotMediator,
 ) {
@@ -136,7 +136,10 @@ internal class Hendelsefabrikk(
     }
 
     private fun sykefraværstilfelle(fødselsnummer: String, skjæringstidspunkt: LocalDate): Sykefraværstilfelle {
-        val vedtaksperioder = generasjonRepository.finnVedtaksperioderFor(skjæringstidspunkt, fødselsnummer)
+        val vedtaksperioder =
+            generasjonRepository.finnVedtaksperiodeIderFor(fødselsnummer, skjæringstidspunkt).map {
+                VedtaksperiodeBuilder(vedtaksperiodeId = it).build(generasjonRepository, varselRepository)
+            }
         return Sykefraværstilfelle(fødselsnummer, skjæringstidspunkt, vedtaksperioder)
     }
 

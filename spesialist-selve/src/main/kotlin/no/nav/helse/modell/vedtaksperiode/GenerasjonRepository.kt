@@ -23,6 +23,10 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
         dao.byggSisteFor(vedtaksperiodeId, generasjonBuilder)
     }
 
+    internal fun finnVedtaksperiodeIderFor(fødselsnummer: String, skjæringstidspunkt: LocalDate): List<UUID> {
+        return dao.finnVedtaksperiodeIderFor(fødselsnummer, skjæringstidspunkt)
+    }
+
     override fun finnVedtaksperioder(vedtaksperiodeIder: List<UUID>): List<Vedtaksperiode> {
         return vedtaksperiodeIder.mapNotNull { vedtaksperiodeId ->
             dao.finnSisteFor(vedtaksperiodeId)?.let { generasjon ->
@@ -95,10 +99,6 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
 
     override fun tilhørendeFor(utbetalingId: UUID): List<Generasjon> {
         return dao.alleFor(utbetalingId).onEach { it.registrer(this) }
-    }
-
-    internal fun finnVedtaksperioderFor(skjæringstidspunkt: LocalDate, fødselsnummer: String): List<Vedtaksperiode> {
-        return finnVedtaksperioder(dao.finnVedtaksperiodeIderFor(skjæringstidspunkt, fødselsnummer))
     }
 
     internal fun finnVedtaksperioderFor(fødselsnummer: String): List<Vedtaksperiode> {

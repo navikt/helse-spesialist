@@ -135,7 +135,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         opprettGenerasjon(vedtaksperiodeId, generasjonId2)
         generasjonDao.oppdaterSykefraværstilfelle(generasjonId1, 1.januar, Periode(1.februar, 28.februar))
         generasjonDao.oppdaterSykefraværstilfelle(generasjonId2, 1.januar, Periode(1.januar, 31.januar))
-        val vedtaksperiodeIder = generasjonDao.finnVedtaksperiodeIderFor(1.januar, FNR)
+        val vedtaksperiodeIder = generasjonDao.finnVedtaksperiodeIderFor(FNR, 1.januar)
         assertEquals(2, vedtaksperiodeIder.size)
         assertEquals(VEDTAKSPERIODE, vedtaksperiodeIder[0])
         assertEquals(vedtaksperiodeId, vedtaksperiodeIder[1])
@@ -152,7 +152,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         opprettGenerasjon(vedtaksperiodeId, generasjonId2)
         generasjonDao.oppdaterSykefraværstilfelle(generasjonId1, 1.januar, Periode(1.februar, 28.februar))
         generasjonDao.oppdaterSykefraværstilfelle(generasjonId2, 1.januar, Periode(1.januar, 31.januar))
-        val vedtaksperiodeIder = generasjonDao.finnVedtaksperiodeIderFor(1.januar, FNR)
+        val vedtaksperiodeIder = generasjonDao.finnVedtaksperiodeIderFor(FNR, 1.januar)
         assertEquals(1, vedtaksperiodeIder.size)
         assertEquals(VEDTAKSPERIODE, vedtaksperiodeIder[0])
     }

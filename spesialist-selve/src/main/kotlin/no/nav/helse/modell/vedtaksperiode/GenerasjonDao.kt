@@ -97,7 +97,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
         }
     }
 
-    internal fun finnVedtaksperiodeIderFor(skjæringstidspunkt: LocalDate, fødselsnummer: String): List<UUID> {
+    internal fun finnVedtaksperiodeIderFor(fødselsnummer: String, skjæringstidspunkt: LocalDate): List<UUID> {
         @Language("PostgreSQL")
         val query = """
             SELECT svg.vedtaksperiode_id FROM selve_vedtaksperiode_generasjon svg 
