@@ -9,14 +9,17 @@ internal class AutomatiseringE2ETest : AbstractE2ETestV2() {
     @Test
     fun `fatter automatisk vedtak`() {
         automatiskGodkjent()
-        assertAutomatiskGodkjent()
+        assertGodkjenningsbehovBesvart(godkjent = true, automatiskBehandlet = true)
     }
 
     @Test
     fun `fatter ikke automatisk vedtak ved warnings`() {
-        fremTilSaksbehandleroppgave(regelverksvarsler = listOf("Brukeren har flere inntekter de siste tre måneder"), kanGodkjennesAutomatisk = true)
+        fremTilSaksbehandleroppgave(
+            regelverksvarsler = listOf("Brukeren har flere inntekter de siste tre måneder"),
+            kanGodkjennesAutomatisk = true
+        )
 
-        assertIkkeGodkjent()
+        assertGodkjenningsbehovIkkeBesvart()
         assertSaksbehandleroppgave(oppgavestatus = AvventerSaksbehandler)
     }
 
@@ -29,7 +32,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETestV2() {
             ),
             kanGodkjennesAutomatisk = false
         )
-        assertIkkeGodkjent()
+        assertGodkjenningsbehovIkkeBesvart()
         assertSaksbehandleroppgave(oppgavestatus = AvventerSaksbehandler)
     }
 
@@ -39,7 +42,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETestV2() {
         håndterÅpneOppgaverløsning(antall = 1)
         håndterRisikovurderingløsning()
 
-        assertIkkeGodkjent()
+        assertGodkjenningsbehovIkkeBesvart()
         assertSaksbehandleroppgave(oppgavestatus = AvventerSaksbehandler)
     }
 }

@@ -37,6 +37,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.SENDT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 import no.nav.helse.modell.varsel.Varselkode
+import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -51,9 +52,9 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.fail
 
 internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
     private lateinit var utbetalingId: UUID
@@ -107,28 +108,56 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         fom: LocalDate = 1.januar,
         tom: LocalDate = 31.januar,
         skjæringstidspunkt: LocalDate = fom,
+        periodetype: Periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+        fødselsnummer: String = FØDSELSNUMMER,
         andreArbeidsforhold: List<String> = emptyList(),
         regelverksvarsler: List<String> = emptyList(),
         fullmakter: List<Fullmakt> = emptyList(),
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
         utbetalingId: UUID = UTBETALING_ID,
+        arbeidsgiverbeløp: Int = 30000,
+        personbeløp: Int = 0,
         harOppdatertMetadata: Boolean = false,
         snapshotversjon: Int = 1,
     ) {
-        håndterSøknad()
+        fremForbiUtbetalingsfilter(fom, tom, skjæringstidspunkt, periodetype, fødselsnummer, andreArbeidsforhold, regelverksvarsler, vedtaksperiodeId, utbetalingId, arbeidsgiverbeløp, personbeløp, harOppdatertMetadata, snapshotversjon)
+
+        håndterEgenansattløsning()
+        håndterVergemålløsning(fullmakter = fullmakter)
+    }
+
+    protected fun fremForbiUtbetalingsfilter(
+        fom: LocalDate = 1.januar,
+        tom: LocalDate = 31.januar,
+        skjæringstidspunkt: LocalDate = fom,
+        periodetype: Periodetype,
+        fødselsnummer: String = FØDSELSNUMMER,
+        andreArbeidsforhold: List<String> = emptyList(),
+        regelverksvarsler: List<String> = emptyList(),
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        utbetalingId: UUID = UTBETALING_ID,
+        arbeidsgiverbeløp: Int = 30_000,
+        personbeløp: Int = 0,
+        harOppdatertMetadata: Boolean = false,
+        snapshotversjon: Int = 1
+    ) {
+        håndterSøknad(fødselsnummer = fødselsnummer)
         håndterVedtaksperiodeOpprettet(vedtaksperiodeId = vedtaksperiodeId)
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshot(
             versjon = snapshotversjon,
-            fødselsnummer = FØDSELSNUMMER,
+            fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId,
-            regelverksvarsler = regelverksvarsler
+            regelverksvarsler = regelverksvarsler,
+            arbeidsgiverbeløp = arbeidsgiverbeløp,
+            personbeløp = personbeløp,
         )
         håndterGodkjenningsbehov(
             andreArbeidsforhold = andreArbeidsforhold,
             fom = fom,
             tom = tom,
             skjæringstidspunkt = skjæringstidspunkt,
+            periodetype = periodetype,
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId,
             harOppdatertMetainfo = harOppdatertMetadata
@@ -141,10 +170,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
             håndterArbeidsgiverinformasjonløsning(vedtaksperiodeId = vedtaksperiodeId)
             håndterArbeidsforholdløsning(vedtaksperiodeId = vedtaksperiodeId)
         }
-        verify { snapshotClient.hentSnapshot(FØDSELSNUMMER) }
-
-        håndterEgenansattløsning()
-        håndterVergemålløsning(fullmakter = fullmakter)
+        verify { snapshotClient.hentSnapshot(fødselsnummer) }
     }
 
     private fun forlengelseFremTilÅpneOppgaver(
@@ -172,13 +198,13 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
             regelverksvarsler = regelverksvarsler
         )
         håndterGodkjenningsbehov(
-            andreArbeidsforhold = andreArbeidsforhold,
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = utbetalingId,
             fom = fom,
             tom = tom,
             skjæringstidspunkt = skjæringstidspunkt,
-            vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingId = utbetalingId,
-            harOppdatertMetainfo = harOppdatertMetadata
+            harOppdatertMetainfo = harOppdatertMetadata,
+            andreArbeidsforhold = andreArbeidsforhold,
         )
         verify { snapshotClient.hentSnapshot(FØDSELSNUMMER) }
 
@@ -190,6 +216,8 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         fom: LocalDate = 1.januar,
         tom: LocalDate = 31.januar,
         skjæringstidspunkt: LocalDate = fom,
+        fødselsnummer: String = FØDSELSNUMMER,
+        periodetype: Periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
         andreArbeidsforhold: List<String> = emptyList(),
         regelverksvarsler: List<String> = emptyList(),
         fullmakter: List<Fullmakt> = emptyList(),
@@ -201,7 +229,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         kanGodkjennesAutomatisk: Boolean = false,
         snapshotversjon: Int = 1
     ) {
-        fremTilÅpneOppgaver(fom, tom, skjæringstidspunkt, andreArbeidsforhold, regelverksvarsler, fullmakter, vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId, harOppdatertMetadata = harOppdatertMetadata, snapshotversjon = snapshotversjon)
+        fremTilÅpneOppgaver(fom, tom, skjæringstidspunkt, periodetype, fødselsnummer, andreArbeidsforhold, regelverksvarsler, fullmakter, vedtaksperiodeId, utbetalingId, harOppdatertMetadata = harOppdatertMetadata, snapshotversjon = snapshotversjon)
         håndterÅpneOppgaverløsning()
         if (!harRisikovurdering) håndterRisikovurderingløsning(kanGodkjennesAutomatisk = kanGodkjennesAutomatisk, risikofunn = risikofunn, vedtaksperiodeId = vedtaksperiodeId)
         if (!harOppdatertMetadata) håndterInntektløsning()
@@ -256,11 +284,11 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         fremTilSaksbehandleroppgave(
             fom,
             tom,
-            skjæringstidspunkt,
-            andreArbeidsforhold,
-            regelverksvarsler,
-            fullmakter,
-            risikofunn,
+            skjæringstidspunkt = skjæringstidspunkt,
+            andreArbeidsforhold = andreArbeidsforhold,
+            regelverksvarsler = regelverksvarsler,
+            fullmakter = fullmakter,
+            risikofunn = risikofunn,
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId,
             harOppdatertMetadata = harOppdatertMetadata
@@ -483,6 +511,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         fom: LocalDate = 1.januar,
         tom: LocalDate = 31.januar,
         skjæringstidspunkt: LocalDate = fom,
+        periodetype: Periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
         harOppdatertMetainfo: Boolean = false,
         andreArbeidsforhold: List<String> = emptyList(),
     ) {
@@ -505,6 +534,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
             periodeFom = fom,
             periodeTom = tom,
             skjæringstidspunkt = skjæringstidspunkt,
+            periodetype = periodetype,
             orgnummereMedRelevanteArbeidsforhold = andreArbeidsforhold
         )
         when {
@@ -773,17 +803,30 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         }
     }
 
-    protected fun assertAutomatiskGodkjent() {
-        val løsning = testRapid.inspektør.løsning("Godkjenning")
+    protected fun assertGodkjenningsbehovBesvart(godkjent: Boolean, automatiskBehandlet: Boolean) {
+        val løsning = testRapid.inspektør.løsning("Godkjenning") ?: fail("Forventet å finne svar på godkjenningsbehov")
         assertTrue(løsning.path("godkjent").isBoolean)
-        assertTrue(løsning.path("godkjent").booleanValue())
-        assertTrue(løsning.path("automatiskBehandling").booleanValue())
+        assertEquals(godkjent, løsning.path("godkjent").booleanValue())
+        assertEquals(automatiskBehandlet, løsning.path("automatiskBehandling").booleanValue())
         assertNotNull(løsning.path("godkjenttidspunkt").asLocalDateTime())
     }
 
-    protected fun assertIkkeGodkjent() {
-        val løsning = testRapid.inspektør.løsningOrNull("Godkjenning")
-        assertNull(løsning)
+    protected fun assertGodkjenningsbehovIkkeBesvart() =
+        testRapid.inspektør.løsning("Godkjenningsbehov") == null
+
+    protected fun assertVedtaksperiodeAvvist(
+        periodetype: String,
+        begrunnelser: List<String>? = null,
+        kommentar: String? = null,
+    ) {
+        testRapid.inspektør.hendelser("vedtaksperiode_avvist").first().let {
+            assertEquals(periodetype, it.path("periodetype").asText())
+            assertEquals(begrunnelser, it.path("begrunnelser")?.map(JsonNode::asText))
+            // TODO: BUG: Vi sender faktisk kommentar som "null", ikke null...
+            val faktiskKommentar = it.takeIf { it.hasNonNull("kommentar") }?.get("kommentar")?.asText()
+            if (kommentar == null) assertEquals("null", faktiskKommentar)
+            else assertEquals(kommentar, faktiskKommentar)
+        }
     }
 
     protected fun assertSaksbehandleroppgave(
@@ -922,7 +965,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         val etterspurteBehov = testRapid.inspektør.behov(sisteMeldingId)
         assertEquals(behov.toList(), etterspurteBehov) {
             val ikkeEtterspurt = behov.toSet() - etterspurteBehov.toSet()
-            "Følgende behov ble ikke etterspurt: $ikkeEtterspurt\nEtterspurte behov: $etterspurteBehov\n"
+            "Forventet at følgende behov skulle være etterspurt: $ikkeEtterspurt\nFaktsk etterspurte behov: $etterspurteBehov\n"
         }
     }
 

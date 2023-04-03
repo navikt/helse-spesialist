@@ -49,10 +49,11 @@ object TestRapidHelpers {
         hendelser("behov")
             .filter { it.hasNonNull("@løsning") }
 
-    fun TestRapid.RapidInspector.løsning(behov: String): JsonNode =
+    fun TestRapid.RapidInspector.løsning(behov: String): JsonNode? =
         løsninger()
-            .last { it.path("@behov").map(JsonNode::asText).contains(behov) }
-            .path("@løsning").path(behov)
+            .findLast { it.path("@behov").map(JsonNode::asText).contains(behov) }
+            ?.path("@løsning")
+            ?.path(behov)
 
     fun TestRapid.RapidInspector.løsningOrNull(behov: String): JsonNode? =
         løsninger()

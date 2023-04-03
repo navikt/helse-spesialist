@@ -98,6 +98,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.fail
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao as OpptegnelseApiDao
 
 internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
@@ -360,6 +361,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         block: (JsonNode) -> Unit = {},
     ) {
         testRapid.inspektør.løsning("Godkjenning").apply {
+            if (this == null) fail("Forventet å finne svar på godkjenningsbehov")
             assertTrue(path("godkjent").isBoolean)
             assertEquals(godkjent, path("godkjent").booleanValue())
             assertEquals(saksbehandlerIdent, path("saksbehandlerIdent").textValue())
