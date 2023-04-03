@@ -75,28 +75,6 @@ data class FerdigstiltOppgave(
     val ferdigstiltAv: String?,
 )
 
-data class Paginering(
-    val side: Int,
-    val elementerPerSide: Int,
-    val antallSider: Int,
-)
-
-data class Oppgaver(
-    val oppgaver: List<OppgaveForOversiktsvisning>,
-    val paginering: Paginering,
-)
-
-enum class Retning {
-    asc,
-    desc,
-}
-
-data class Sortering(
-    val bosted: Retning? = null,
-    val status: Retning? = null,
-    val opprettet: Retning? = null,
-)
-
 internal fun no.nav.helse.spesialist.api.oppgave.Oppgavetype.tilOppgavetype(): Oppgavetype =
     when (this) {
         no.nav.helse.spesialist.api.oppgave.Oppgavetype.SØKNAD -> Oppgavetype.SOKNAD
