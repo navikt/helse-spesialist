@@ -33,8 +33,6 @@ import no.nav.helse.spesialist.api.graphql.ContextFactory
 import no.nav.helse.spesialist.api.graphql.RequestParser
 import no.nav.helse.spesialist.api.graphql.SchemaBuilder
 import no.nav.helse.spesialist.api.graphql.queryHandler
-import no.nav.helse.spesialist.api.oppgave.experimental.OppgavePagineringDao
-import no.nav.helse.spesialist.api.oppgave.experimental.OppgaveService
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.AfterAll
@@ -50,10 +48,8 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     protected val skjermedePersonerGruppeId: UUID = UUID.randomUUID()
     protected val beslutterGruppeId: UUID = UUID.randomUUID()
 
-    private val oppgavePagineringDao = OppgavePagineringDao(dataSource)
 
     private val reservasjonClient = mockk<ReservasjonClient>(relaxed = true)
-    private val oppgaveService = OppgaveService(oppgavePagineringDao = oppgavePagineringDao)
     private val behandlingsstatistikkMediator = mockk<BehandlingsstatistikkMediator>(relaxed = true)
 
     private lateinit var client: HttpClient
@@ -77,7 +73,6 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
             totrinnsvurderingApiDao = totrinnsvurderingApiDao,
             snapshotMediator = snapshotMediator,
             reservasjonClient = reservasjonClient,
-            oppgaveService = oppgaveService,
             behandlingsstatistikkMediator = behandlingsstatistikkMediator,
         ).build()
 

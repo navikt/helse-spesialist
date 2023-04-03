@@ -85,8 +85,6 @@ import no.nav.helse.spesialist.api.graphql.graphQLApi
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
-import no.nav.helse.spesialist.api.oppgave.experimental.OppgavePagineringDao
-import no.nav.helse.spesialist.api.oppgave.experimental.OppgaveService
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.person.PersonApiDao
@@ -192,7 +190,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val varselDao = VarselDao(dataSource)
     private val oppgaveDao = OppgaveDao(dataSource)
     private val oppgaveApiDao = OppgaveApiDao(dataSource)
-    private val oppgavePagineringDao = OppgavePagineringDao(dataSource)
     private val periodehistorikkDao = PeriodehistorikkDao(dataSource)
     private val vedtakDao = VedtakDao(dataSource)
     private val warningDao = WarningDao(dataSource)
@@ -312,7 +309,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 beslutterGruppeId = tilgangsgrupper.beslutterGruppeId,
                 riskGruppeId = tilgangsgrupper.riskQaGruppeId,
                 snapshotMediator = snapshotMediator,
-                oppgaveService = OppgaveService(oppgavePagineringDao),
                 behandlingsstatistikkMediator = behandlingsstatistikkMediator,
             )
             routing {

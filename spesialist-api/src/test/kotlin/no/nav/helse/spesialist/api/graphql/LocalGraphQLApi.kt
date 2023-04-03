@@ -133,7 +133,6 @@ fun main() = runBlocking {
             beslutterGruppeId = UUID.randomUUID(),
             riskGruppeId = UUID.randomUUID(),
             snapshotMediator = SnapshotMediator(snapshotApiDao, mockk(relaxed = true)),
-            oppgaveService = mockk(relaxed = true),
             behandlingsstatistikkMediator = behandlingsstatistikkMediator,
         )
     }

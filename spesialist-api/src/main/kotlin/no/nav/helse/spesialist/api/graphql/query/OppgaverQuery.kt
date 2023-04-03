@@ -11,15 +11,12 @@ import kotlinx.coroutines.withContext
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.graphql.schema.FerdigstiltOppgave
 import no.nav.helse.spesialist.api.graphql.schema.OppgaveForOversiktsvisning
-import no.nav.helse.spesialist.api.graphql.schema.Oppgaver
-import no.nav.helse.spesialist.api.graphql.schema.Sortering
 import no.nav.helse.spesialist.api.graphql.schema.tilFerdigstilteOppgaver
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
-import no.nav.helse.spesialist.api.oppgave.experimental.OppgaveService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class OppgaverQuery(private val oppgaveApiDao: OppgaveApiDao, private val oppgaveService: OppgaveService) : Query {
+class OppgaverQuery(private val oppgaveApiDao: OppgaveApiDao) : Query {
 
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
@@ -63,23 +60,5 @@ class OppgaverQuery(private val oppgaveApiDao: OppgaveApiDao, private val oppgav
     private fun avsluttSporing(start: Long) {
         val tidBrukt = Duration.ofNanos(System.nanoTime() - start)
         sikkerLogg.trace("Hentet oppgaver, det tok ${tidBrukt.toMillis()} ms")
-    }
-
-    @Suppress("unused")
-    fun oppgaver(
-        antall: Int,
-        side: Int,
-        sortering: Sortering? = null,
-        env: DataFetchingEnvironment
-    ): DataFetcherResult<Oppgaver> {
-        val tilganger = env.graphQlContext.get<SaksbehandlerTilganger>("tilganger")
-        val paginerteOppgaver = oppgaveService.hentOppgaver(
-            tilganger = tilganger,
-            antall = antall,
-            side = side,
-            sortering = sortering
-        )
-
-        return DataFetcherResult.newResult<Oppgaver>().data(paginerteOppgaver).build()
     }
 }
