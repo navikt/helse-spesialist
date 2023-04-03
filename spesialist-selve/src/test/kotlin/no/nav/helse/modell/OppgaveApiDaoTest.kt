@@ -12,6 +12,9 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.TestHendelse
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.spesialist.api.graphql.schema.Mottaker.ARBEIDSGIVER
+import no.nav.helse.spesialist.api.graphql.schema.Mottaker.BEGGE
+import no.nav.helse.spesialist.api.graphql.schema.Mottaker.SYKMELDT
 import no.nav.helse.spesialist.api.graphql.schema.Oppgavetype.RISK_QA
 import no.nav.helse.spesialist.api.graphql.schema.Oppgavetype.SOKNAD
 import no.nav.helse.spesialist.api.graphql.schema.Oppgavetype.STIKKPROVE
@@ -345,6 +348,93 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
         val oppgave = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN).first()
 
         assertEquals(generasjonstidspunkt, oppgave.opprinneligSoknadsdato)
+    }
+
+    @Test
+    fun `Mottaker er null når utbetaling_id-tabellen er tom`() {
+        nyPerson()
+        val oppgaver = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN)
+        val oppgave = oppgaver.first()
+        assertNull(oppgave.mottaker)
+    }
+
+    @Test
+    fun `Mottaker er NULL når begge beløpene er 0`() {
+        nyPerson()
+        val arbeidsgiverFagsystemId = fagsystemId()
+        val personFagsystemId = fagsystemId()
+        val arbeidsgiverOppdragId = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
+        val personOppdragId = lagPersonoppdrag(personFagsystemId)
+        lagUtbetalingId(arbeidsgiverOppdragId, personOppdragId, UTBETALING_ID, 0, 0)
+        val oppgaver = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN)
+        val oppgave = oppgaver.first()
+        assertNull(oppgave.mottaker)
+    }
+
+    @Test
+    fun `Mottaker er BEGGE når det er utbetaling til både sykmeldt og arbeidsgiver`() {
+        nyPerson()
+        val arbeidsgiverFagsystemId = fagsystemId()
+        val personFagsystemId = fagsystemId()
+        val arbeidsgiverOppdragId = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
+        val personOppdragId = lagPersonoppdrag(personFagsystemId)
+        lagUtbetalingId(arbeidsgiverOppdragId, personOppdragId, UTBETALING_ID, 2000, 2000)
+        val oppgaver = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN)
+        val oppgave = oppgaver.first()
+        assertEquals(BEGGE, oppgave.mottaker)
+    }
+
+
+    @Test
+    fun `Mottaker er SYKMELDT når det bare er utbetaling til sykmeldt`() {
+        nyPerson()
+        val arbeidsgiverFagsystemId = fagsystemId()
+        val personFagsystemId = fagsystemId()
+        val arbeidsgiverOppdragId = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
+        val personOppdragId = lagPersonoppdrag(personFagsystemId)
+        lagUtbetalingId(arbeidsgiverOppdragId, personOppdragId, UTBETALING_ID, 0, 2000)
+        val oppgaver = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN)
+        val oppgave = oppgaver.first()
+        assertEquals(SYKMELDT, oppgave.mottaker)
+    }
+
+    @Test
+    fun `Mottaker er SYKMELDT når det bare er utbetaling til sykmeldt, selvom beløp er negativt`() {
+        nyPerson()
+        val arbeidsgiverFagsystemId = fagsystemId()
+        val personFagsystemId = fagsystemId()
+        val arbeidsgiverOppdragId = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
+        val personOppdragId = lagPersonoppdrag(personFagsystemId)
+        lagUtbetalingId(arbeidsgiverOppdragId, personOppdragId, UTBETALING_ID, 0, -2000)
+        val oppgaver = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN)
+        val oppgave = oppgaver.first()
+        assertEquals(SYKMELDT, oppgave.mottaker)
+    }
+
+    @Test
+    fun `Mottaker er ARBEIDSGIVER når det bare er utbetaling til arbeidsgiver`() {
+        nyPerson()
+        val arbeidsgiverFagsystemId = fagsystemId()
+        val personFagsystemId = fagsystemId()
+        val arbeidsgiverOppdragId = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
+        val personOppdragId = lagPersonoppdrag(personFagsystemId)
+        lagUtbetalingId(arbeidsgiverOppdragId, personOppdragId, UTBETALING_ID, 2000, 0)
+        val oppgaver = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN)
+        val oppgave = oppgaver.first()
+        assertEquals(ARBEIDSGIVER, oppgave.mottaker)
+    }
+
+    @Test
+    fun `Mottaker er ARBEIDSGIVER når det bare er utbetaling til arbeidsgiver, selvom beløp er negativt`() {
+        nyPerson()
+        val arbeidsgiverFagsystemId = fagsystemId()
+        val personFagsystemId = fagsystemId()
+        val arbeidsgiverOppdragId = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
+        val personOppdragId = lagPersonoppdrag(personFagsystemId)
+        lagUtbetalingId(arbeidsgiverOppdragId, personOppdragId, UTBETALING_ID, -2000, 0)
+        val oppgaver = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN)
+        val oppgave = oppgaver.first()
+        assertEquals(ARBEIDSGIVER, oppgave.mottaker)
     }
 
     // Sortert stigende

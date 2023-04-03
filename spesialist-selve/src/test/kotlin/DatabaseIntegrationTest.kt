@@ -343,7 +343,13 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected fun lagPersonoppdrag(fagsystemId: String = fagsystemId(), endringskode: String = "NY") =
         utbetalingDao.nyttOppdrag(fagsystemId, FNR, "SPREF", endringskode, LocalDate.now().plusDays(169))!!
 
-    protected fun lagUtbetalingId(arbeidsgiverOppdragId: Long, personOppdragId: Long, utbetalingId: UUID = UUID.randomUUID()): Long =
+    protected fun lagUtbetalingId(
+        arbeidsgiverOppdragId: Long,
+        personOppdragId: Long,
+        utbetalingId: UUID = UUID.randomUUID(),
+        arbeidsgiverbeløp: Int = 2000,
+        personbeløp: Int = 2000,
+    ): Long =
         utbetalingDao.opprettUtbetalingId(
             utbetalingId = utbetalingId,
             fødselsnummer = FNR,
@@ -352,8 +358,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             opprettet = LocalDateTime.now(),
             arbeidsgiverFagsystemIdRef = arbeidsgiverOppdragId,
             personFagsystemIdRef = personOppdragId,
-            arbeidsgiverbeløp = 2000,
-            personbeløp = 2000
+            arbeidsgiverbeløp = arbeidsgiverbeløp,
+            personbeløp = personbeløp,
         )
 
     protected fun lagLinje(oppdrag: Long, fom: LocalDate, tom: LocalDate, totalbeløp: Int? = null) {

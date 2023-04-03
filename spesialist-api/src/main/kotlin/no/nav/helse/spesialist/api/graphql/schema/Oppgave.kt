@@ -39,6 +39,7 @@ data class OppgaveForOversiktsvisning(
     val tidligereSaksbehandler: UUIDString?,
     val sistSendt: DateTimeString?,
     val totrinnsvurdering: Totrinnsvurdering?,
+    val mottaker: Mottaker?,
 )
 
 data class OppgaveForPeriodevisning(
@@ -55,6 +56,12 @@ data class Totrinnsvurdering(
     val beslutter: UUIDString?,
     val erBeslutteroppgave: Boolean
 )
+
+enum class Mottaker {
+    SYKMELDT,
+    ARBEIDSGIVER,
+    BEGGE
+}
 
 data class Personnavn(
     val fornavn: String,

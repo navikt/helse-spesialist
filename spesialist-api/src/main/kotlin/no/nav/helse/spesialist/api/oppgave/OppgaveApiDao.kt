@@ -14,6 +14,10 @@ import no.nav.helse.spesialist.api.graphql.schema.Boenhet
 import no.nav.helse.spesialist.api.graphql.schema.DateString
 import no.nav.helse.spesialist.api.graphql.schema.InntektFraAOrdningen
 import no.nav.helse.spesialist.api.graphql.schema.Kjonn
+import no.nav.helse.spesialist.api.graphql.schema.Mottaker
+import no.nav.helse.spesialist.api.graphql.schema.Mottaker.ARBEIDSGIVER
+import no.nav.helse.spesialist.api.graphql.schema.Mottaker.BEGGE
+import no.nav.helse.spesialist.api.graphql.schema.Mottaker.SYKMELDT
 import no.nav.helse.spesialist.api.graphql.schema.OppgaveForOversiktsvisning
 import no.nav.helse.spesialist.api.graphql.schema.Personinfo
 import no.nav.helse.spesialist.api.graphql.schema.Tildeling
@@ -145,12 +149,14 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 s.epost, s.navn as saksbehandler_navn, s.oid, v.vedtaksperiode_id, v.fom, v.tom, pi.fornavn, pi.mellomnavn, pi.etternavn, pi.fodselsdato,
                 pi.kjonn, pi.adressebeskyttelse, p.aktor_id, p.fodselsnummer, sot.type as saksbehandleroppgavetype, sot.inntektskilde, e.id AS enhet_id, e.navn AS enhet_navn, t.på_vent,
                 (SELECT COUNT(DISTINCT melding) from warning w where w.melding not like '$beslutterOppgaveHackyWorkaround%' and w.vedtak_ref = o.vedtak_ref and (w.inaktiv_fra is null or w.inaktiv_fra > now())) AS antall_varsler,
-                ttv.vedtaksperiode_id AS totrinnsvurdering_vedtaksperiode_id, ttv.saksbehandler, ttv.beslutter, ttv.er_retur
+                ttv.vedtaksperiode_id AS totrinnsvurdering_vedtaksperiode_id, ttv.saksbehandler, ttv.beslutter, ttv.er_retur,
+                ui.arbeidsgiverbeløp, ui.personbeløp
             FROM aktiv_oppgave o
                 INNER JOIN vedtak v ON o.vedtak_ref = v.id
                 INNER JOIN person p ON v.person_ref = p.id
                 INNER JOIN person_info pi ON p.info_ref = pi.id
                 INNER JOIN opprinnelig_soknadsdato os ON os.vedtaksperiode_id = v.vedtaksperiode_id
+                LEFT JOIN utbetaling_id ui ON ui.utbetaling_id = o.utbetaling_id  
                 LEFT JOIN enhet e ON p.enhet_ref = e.id
                 LEFT JOIN saksbehandleroppgavetype sot ON v.id = sot.vedtak_ref
                 LEFT JOIN aktiv_tildeling t ON o.id = t.oppgave_id_ref
@@ -294,9 +300,22 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                     beslutter = it.stringOrNull("beslutter"),
                     erBeslutteroppgave = !erRetur && saksbehandler != null
                 )
-            }
+            },
+            mottaker = finnMottaker(it.intOrNull("arbeidsgiverbeløp"), it.intOrNull("personbeløp"))
         )
+
+        private fun finnMottaker(arbeidsgiverbeløp: Int?, personbeløp: Int?): Mottaker? {
+            val harArbeidsgiverbeløp = arbeidsgiverbeløp != null && arbeidsgiverbeløp != 0
+            val harPersonbeløp = personbeløp != null && personbeløp != 0
+            return when {
+                harArbeidsgiverbeløp && harPersonbeløp -> BEGGE
+                harPersonbeløp -> SYKMELDT
+                harArbeidsgiverbeløp -> ARBEIDSGIVER
+                else -> null
+            }
+        }
     }
+
 }
 
 private data class Inntekter(val årMåned: YearMonth, val inntektsliste: List<Inntekt>) {
