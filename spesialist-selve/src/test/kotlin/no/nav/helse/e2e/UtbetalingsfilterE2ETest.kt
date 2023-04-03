@@ -1,10 +1,10 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETestV2
+import AbstractE2ETestV2.Mottaker.*
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Testdata._MODIFISERTBART_FØDSELSNUMMER
-import no.nav.helse.e2e.UtbetalingsfilterE2ETest.Companion.Mottaker.*
 import no.nav.helse.januar
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -97,7 +97,6 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETestV2() {
         periodetype: Periodetype,
         mottaker: Mottaker,
     ) {
-        val (arbeidsgiverbeløp, personbeløp) = mottaker.lagMottakerbeløp()
         _MODIFISERTBART_FØDSELSNUMMER = fødselsnummer
         fremForbiUtbetalingsfilter(
             fom = periodeFom,
@@ -106,15 +105,8 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETestV2() {
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId,
-            arbeidsgiverbeløp = arbeidsgiverbeløp,
-            personbeløp = personbeløp,
+            mottaker = mottaker,
         )
-    }
-
-    private fun Mottaker.lagMottakerbeløp() = when (this) {
-        SYKMELDT -> 0 to 500
-        ARBEIDSGIVER -> 500 to 0
-        BEGGE -> 250 to 250
     }
 
     // Dette er litt skjørt, men jeg finner ikke noen bedre måte å asserte at UtbetalingfilterCommand kjørte OK på
@@ -125,10 +117,5 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETestV2() {
         private val utbetalingId = UUID.randomUUID()
         private const val FØDSELSNUMMER_SOM_IKKE_GÅR_GJENNOM_FILTER = "12020052345"
         private const val FØDSELSNUMMER_SOM_GÅR_GJENNOM_FILTER = "31020052345"
-        enum class Mottaker {
-            SYKMELDT,
-            ARBEIDSGIVER,
-            BEGGE
-        }
     }
 }

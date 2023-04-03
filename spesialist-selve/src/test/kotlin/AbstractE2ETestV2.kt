@@ -1,3 +1,4 @@
+import AbstractE2ETestV2.Mottaker.*
 import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -115,12 +116,10 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         fullmakter: List<Fullmakt> = emptyList(),
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
         utbetalingId: UUID = UTBETALING_ID,
-        arbeidsgiverbeløp: Int = 30000,
-        personbeløp: Int = 0,
         harOppdatertMetadata: Boolean = false,
         snapshotversjon: Int = 1,
     ) {
-        fremForbiUtbetalingsfilter(fom, tom, skjæringstidspunkt, periodetype, fødselsnummer, andreArbeidsforhold, regelverksvarsler, vedtaksperiodeId, utbetalingId, arbeidsgiverbeløp, personbeløp, harOppdatertMetadata, snapshotversjon)
+        fremForbiUtbetalingsfilter(fom, tom, skjæringstidspunkt, periodetype, fødselsnummer, andreArbeidsforhold, regelverksvarsler, vedtaksperiodeId, utbetalingId, harOppdatertMetadata = harOppdatertMetadata, snapshotversjon = snapshotversjon)
 
         håndterEgenansattløsning()
         håndterVergemålløsning(fullmakter = fullmakter)
@@ -136,11 +135,11 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         regelverksvarsler: List<String> = emptyList(),
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
         utbetalingId: UUID = UTBETALING_ID,
-        arbeidsgiverbeløp: Int = 30_000,
-        personbeløp: Int = 0,
+        mottaker: Mottaker = ARBEIDSGIVER,
         harOppdatertMetadata: Boolean = false,
         snapshotversjon: Int = 1
     ) {
+        val (arbeidsgiverbeløp, personbeløp) = mottaker.lagMottakerBeløp()
         håndterSøknad(fødselsnummer = fødselsnummer)
         håndterVedtaksperiodeOpprettet(vedtaksperiodeId = vedtaksperiodeId)
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshot(
@@ -1065,5 +1064,17 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
                 ).asUpdate)
         }
     }
+
+    enum class Mottaker {
+        SYKMELDT,
+        ARBEIDSGIVER,
+        BEGGE;
+        fun lagMottakerBeløp() = when (this) {
+            SYKMELDT -> 0 to 500
+            ARBEIDSGIVER -> 500 to 0
+            BEGGE -> 250 to 250
+        }
+    }
+
 }
 
