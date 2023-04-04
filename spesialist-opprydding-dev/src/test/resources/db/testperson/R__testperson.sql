@@ -105,9 +105,9 @@ INSERT INTO utbetalingslinje(id, oppdrag_id, delytelseid, refdelytelseid, reffag
 VALUES (${sequence_number} + 1000, ${sequence_number} + 1000, 1, null, null, 'NY', 'SPREFAG-IOP', null, null,
         '2018-01-01', '2018-01-31', 1000, 1000, 100, 1000);
 INSERT INTO utbetaling_id(id, utbetaling_id, person_ref, arbeidsgiver_ref, arbeidsgiver_fagsystem_id_ref,
-                          person_fagsystem_id_ref, type, opprettet)
+                          person_fagsystem_id_ref, type, opprettet, personbeløp, arbeidsgiverbeløp)
 VALUES (${sequence_number}, '${utbetaling_id}', ${sequence_number}, ${sequence_number}, ${sequence_number} + 1000,
-        ${sequence_number}, 'UTBETALING', now());
+        ${sequence_number}, 'UTBETALING', now(), 0, 0);
 
 INSERT INTO utbetaling(id, status, opprettet, data, utbetaling_id_ref, annullert_av_saksbehandler_ref)
 VALUES (${sequence_number}, 'UTBETALT', now(), '{}'::json, ${sequence_number}, ${sequence_number});
