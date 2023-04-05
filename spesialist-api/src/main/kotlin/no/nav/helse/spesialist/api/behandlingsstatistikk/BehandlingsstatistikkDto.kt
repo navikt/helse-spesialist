@@ -54,6 +54,6 @@ data class StatistikkPerInntektOgPeriodetype(
 data class InntektOgPeriodetyperad(
     val inntekttype: Inntektskilde,
     val periodetype: Periodetype,
-    val mottakertype: Mottakertype,
+    val mottakertype: Mottakertype?,
     val antall: Int,
 )

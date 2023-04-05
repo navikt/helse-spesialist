@@ -123,9 +123,7 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
             InntektOgPeriodetyperad(
                 inntekttype = Inntektskilde.valueOf(it.string("inntektskilde")),
                 periodetype = Periodetype.valueOf(it.string("type")),
-                mottakertype = if (inkluderMottakertype) {
-                    Mottakertype.valueOf(it.string("mottakertype"))
-                } else Mottakertype.BEGGE,
+                mottakertype = if (inkluderMottakertype) Mottakertype.valueOf(it.string("mottakertype")) else null,
                 antall = it.int("count")
             )
         }

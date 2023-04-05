@@ -10,6 +10,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.spesialist.api.vedtaksperiode.Mottakertype
+import org.junit.jupiter.api.Assertions.assertTrue
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkType as BehandlingsstatistikkTypeForApi
 
 internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
@@ -39,6 +40,16 @@ internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
         assertEquals(1, perPeriodetype[no.nav.helse.spesialist.api.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING])
         assertEquals(1, perMottakertype[mottakertype])
     }
+    @Test
+    fun `henter statikk for tilgjengelige oppgaver`() {
+        nyPerson()
+        val dto = behandlingsstatistikkDao.getTilgjengeligeOppgaverPerInntektOgPeriodetype()
+        assertEquals(1, dto.perInntekttype[no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde.EN_ARBEIDSGIVER])
+        assertEquals(0, dto.perInntekttype[no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde.FLERE_ARBEIDSGIVERE])
+        assertEquals(1, dto.perPeriodetype[no.nav.helse.spesialist.api.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING])
+        assertTrue(dto.perMottakertype.isEmpty())
+    }
+
 
     @Test
     fun `en periode til godkjenning`() {
@@ -69,6 +80,7 @@ internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
     fun antallManuelleGodkjenninger() {
         nyPerson()
         oppgaveDao.updateOppgave(oppgaveId, Oppgavestatus.Ferdigstilt)
+        assertTrue(behandlingsstatistikkDao.getManueltUtførteOppgaverPerInntektOgPeriodetype(NOW).perMottakertype.isEmpty())
         val dto = behandlingsstatistikkDao.oppgavestatistikk(NOW)
         assertEquals(1, dto.fullførteBehandlinger.totalt)
         assertEquals(1, dto.fullførteBehandlinger.manuelt.totalt)
