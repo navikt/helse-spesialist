@@ -6,6 +6,7 @@ import kotliquery.Row
 import no.nav.helse.HelseDao
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
+import no.nav.helse.spesialist.api.vedtaksperiode.Mottakertype
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
 import org.intellij.lang.annotations.Language
 
@@ -37,12 +38,21 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
     fun getAutomatiseringerPerInntektOgPeriodetype(fom: LocalDate): StatistikkPerInntektOgPeriodetype {
         @Language("PostgreSQL")
         val query = """
-            SELECT s.type, s.inntektskilde, count(distinct a.id)
+            SELECT s.type,
+                s.inntektskilde,
+                CASE WHEN ui.arbeidsgiverbeløp > 0 AND ui.personbeløp > 0 THEN '${Mottakertype.BEGGE}'
+                    WHEN ui.personbeløp > 0 THEN '${Mottakertype.SYKMELDT}'
+                    ELSE '${Mottakertype.ARBEIDSGIVER}'
+                END AS mottakertype,
+                count(distinct a.id)
             FROM automatisering a
                      INNER JOIN saksbehandleroppgavetype s on s.vedtak_ref = a.vedtaksperiode_ref
+                     INNER JOIN vedtak v ON v.id = a.vedtaksperiode_ref
+                     INNER JOIN vedtaksperiode_utbetaling_id vui on vui.vedtaksperiode_id = v.vedtaksperiode_id 
+                     INNER JOIN utbetaling_id ui on ui.utbetaling_id = vui.utbetaling_id
             WHERE a.opprettet >= :fom
               AND a.automatisert = true
-            GROUP BY s.type, s.inntektskilde;
+            GROUP BY s.type, s.inntektskilde, mottakertype;
         """.trimIndent()
 
         return getStatistikkPerInntektOgPeriodetype(query, mapOf("fom" to fom))
@@ -112,6 +122,7 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
             InntektOgPeriodetyperad(
                 inntekttype = Inntektskilde.valueOf(it.string("inntektskilde")),
                 periodetype = Periodetype.valueOf(it.string("type")),
+                mottakertype = Mottakertype.valueOf(it.string("mottakertype")),
                 antall = it.int("count")
             )
         }
@@ -124,9 +135,14 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
             mapOf(periodetype to rader.filter { it.periodetype == periodetype }.sumOf { it.antall })
         }.fold(emptyMap(), Map<Periodetype, Int>::plus)
 
+        val perMottakertype = Mottakertype.values().map { mottakertype ->
+            mapOf(mottakertype to rader.filter { it.mottakertype == mottakertype }.sumOf { it.antall })
+        }.fold(emptyMap(), Map<Mottakertype, Int>::plus)
+
         return StatistikkPerInntektOgPeriodetype(
             perInntekttype = perInntekttype,
             perPeriodetype = perPeriodetype,
+            perMottakertype = perMottakertype,
         )
     }
 

@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.api.behandlingsstatistikk
 
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
+import no.nav.helse.spesialist.api.vedtaksperiode.Mottakertype
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
 
 data class BehandlingsstatistikkDto(
@@ -46,11 +47,13 @@ data class BehandlingsstatistikkResponse(
 
 data class StatistikkPerInntektOgPeriodetype(
     val perInntekttype: Map<Inntektskilde, Int>,
-    val perPeriodetype: Map<Periodetype, Int>
+    val perPeriodetype: Map<Periodetype, Int>,
+    val perMottakertype: Map<Mottakertype, Int>,
 )
 
 data class InntektOgPeriodetyperad(
     val inntekttype: Inntektskilde,
     val periodetype: Periodetype,
+    val mottakertype: Mottakertype,
     val antall: Int,
 )

@@ -2,6 +2,11 @@ package no.nav.helse.spesialist.api.vedtaksperiode
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
+enum class Mottakertype {
+    ARBEIDSGIVER,
+    SYKMELDT,
+    BEGGE
+}
 
 enum class Periodetype {
     FØRSTEGANGSBEHANDLING,
