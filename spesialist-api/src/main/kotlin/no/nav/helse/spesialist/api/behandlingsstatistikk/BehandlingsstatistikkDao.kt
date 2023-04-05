@@ -55,7 +55,7 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
             GROUP BY s.type, s.inntektskilde, mottakertype;
         """.trimIndent()
 
-        return getStatistikkPerInntektOgPeriodetype(query, mapOf("fom" to fom))
+        return getStatistikkPerInntektOgPeriodetype(query, mapOf("fom" to fom), inkluderMottakertype = true)
     }
 
     fun getTilgjengeligeOppgaverPerInntektOgPeriodetype(): StatistikkPerInntektOgPeriodetype {
@@ -116,13 +116,16 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
 
     private fun getStatistikkPerInntektOgPeriodetype(
         query: String,
-        paramMap: Map<String, Any> = emptyMap()
+        paramMap: Map<String, Any> = emptyMap(),
+        inkluderMottakertype: Boolean = false
     ): StatistikkPerInntektOgPeriodetype {
         val rader = query.list(paramMap) {
             InntektOgPeriodetyperad(
                 inntekttype = Inntektskilde.valueOf(it.string("inntektskilde")),
                 periodetype = Periodetype.valueOf(it.string("type")),
-                mottakertype = Mottakertype.valueOf(it.string("mottakertype")),
+                mottakertype = if (inkluderMottakertype) {
+                    Mottakertype.valueOf(it.string("mottakertype"))
+                } else Mottakertype.BEGGE,
                 antall = it.int("count")
             )
         }
@@ -135,9 +138,11 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
             mapOf(periodetype to rader.filter { it.periodetype == periodetype }.sumOf { it.antall })
         }.fold(emptyMap(), Map<Periodetype, Int>::plus)
 
-        val perMottakertype = Mottakertype.values().map { mottakertype ->
-            mapOf(mottakertype to rader.filter { it.mottakertype == mottakertype }.sumOf { it.antall })
-        }.fold(emptyMap(), Map<Mottakertype, Int>::plus)
+        val perMottakertype = if (inkluderMottakertype) {
+            Mottakertype.values().map { mottakertype ->
+                mapOf(mottakertype to rader.filter { it.mottakertype == mottakertype }.sumOf { it.antall })
+            }.fold(emptyMap(), Map<Mottakertype, Int>::plus)
+        } else emptyMap()
 
         return StatistikkPerInntektOgPeriodetype(
             perInntekttype = perInntekttype,
