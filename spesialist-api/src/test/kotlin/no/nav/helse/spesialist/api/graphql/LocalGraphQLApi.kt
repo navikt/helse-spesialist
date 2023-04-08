@@ -113,6 +113,8 @@ fun main() = runBlocking {
             )
         }
 
+        infobannerOmMiljøvariabel()
+
         graphQLApi(
             personApiDao = personApiDao,
             egenAnsattApiDao = egenAnsattApiDao,
@@ -134,6 +136,21 @@ fun main() = runBlocking {
             riskGruppeId = UUID.randomUUID(),
             snapshotMediator = SnapshotMediator(snapshotApiDao, mockk(relaxed = true)),
             behandlingsstatistikkMediator = behandlingsstatistikkMediator,
+        )
+    }
+}
+
+private fun infobannerOmMiljøvariabel() {
+    if (System.getenv("DROPP_SIKKERHET_FOR_API") == null) {
+        val melding = "Hei! Du må sette miljøvariabelen DROPP_SIKKERHET_FOR_API=ja for å kunne bruke GraphQL Playground"
+        println(
+            """
+                
+                ${"x".repeat(melding.length + 4)}
+                x $melding x
+                ${"x".repeat(melding.length + 4)}
+                
+            """.trimIndent()
         )
     }
 }
