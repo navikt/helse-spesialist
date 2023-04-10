@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.api.graphql.schema
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.module.kotlin.readValue
-import kotlinx.coroutines.runBlocking
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLGhostPeriode
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLPerson
@@ -75,17 +74,7 @@ data class Person(
 
     fun dodsdato(): DateString? = snapshot.dodsdato
 
-    fun personinfo(): Personinfo = Personinfo(
-        fornavn = personinfo.fornavn,
-        mellomnavn = personinfo.mellomnavn,
-        etternavn = personinfo.etternavn,
-        fodselsdato = personinfo.fodselsdato,
-        kjonn = personinfo.kjonn,
-        adressebeskyttelse = personinfo.adressebeskyttelse,
-        reservasjon = runBlocking {
-            reservasjonClient.hentReservasjonsstatus(snapshot.fodselsnummer)
-        }
-    )
+    fun personinfo(): Personinfo = personinfo
 
     fun enhet(): Enhet = personApiDao.finnEnhet(snapshot.fodselsnummer).let { Enhet(it.id, it.navn) }
 

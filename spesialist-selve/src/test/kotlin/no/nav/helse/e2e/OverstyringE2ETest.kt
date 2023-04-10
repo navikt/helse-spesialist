@@ -5,6 +5,7 @@ import graphql.schema.DataFetchingEnvironment
 import io.mockk.every
 import io.mockk.mockk
 import java.util.UUID
+import kotlinx.coroutines.runBlocking
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.Testdata.FØDSELSNUMMER
@@ -129,7 +130,7 @@ internal class OverstyringE2ETest : AbstractE2ETestV2() {
         fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true, utbetalingId = nyUtbetalingId)
         assertOppgaver(nyUtbetalingId, "AvventerSaksbehandler", 1)
 
-        val snapshot: Person = personQuery.person(FØDSELSNUMMER, null, dataFetchingEnvironment).data!!
+        val snapshot: Person = runBlocking { personQuery.person(FØDSELSNUMMER, null, dataFetchingEnvironment).data!! }
 
         assertNotNull(snapshot)
         val overstyringer = snapshot.arbeidsgivere().first().overstyringer()

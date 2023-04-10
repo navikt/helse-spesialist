@@ -5,6 +5,7 @@ import graphql.GraphQLError
 import io.mockk.every
 import io.mockk.mockk
 import java.util.UUID
+import kotlinx.coroutines.runBlocking
 import no.nav.helse.Meldingssender.sendArbeidsforholdløsningOld
 import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendEgenAnsattløsningOld
@@ -115,7 +116,7 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
         sendRisikovurderingløsningOld(godkjenningsmeldingId, VEDTAKSPERIODE_ID)
     }
 
-    private fun fetchPerson() = personQuery.person(FØDSELSNUMMER, null, dataFetchingEnvironment)
+    private fun fetchPerson() = runBlocking { personQuery.person(FØDSELSNUMMER, null, dataFetchingEnvironment) }
 
     private fun assertKanIkkeHentePerson(feilmelding: String) {
         fetchPerson().let { response ->

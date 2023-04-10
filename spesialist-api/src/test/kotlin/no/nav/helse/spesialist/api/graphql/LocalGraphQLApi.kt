@@ -4,11 +4,15 @@ import io.ktor.http.ContentType
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.application.install
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.mockk.Call
+import io.mockk.MockKAnswerScope
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.spesialist.api.TestApplication
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
@@ -77,7 +81,7 @@ fun main() = runBlocking {
         val behandlingsstatistikkMediator = mockk<BehandlingsstatistikkMediator>(relaxed = true)
 
         every { snapshotApiDao.utdatert(any()) } returns false
-        every { snapshotApiDao.hentSnapshotMedMetadata(any()) } returns (enPersoninfo() to enPerson())
+        every { snapshotApiDao.hentSnapshotMedMetadata(any()) } answers withDelay(800) { (enPersoninfo() to enPerson()) }
         every { personApiDao.personHarAdressebeskyttelse(any(), any()) } returns false
         every {
             personApiDao.personHarAdressebeskyttelse(
@@ -88,6 +92,10 @@ fun main() = runBlocking {
         every { personApiDao.finnesPersonMedFødselsnummer(any()) } returns true
         every { personApiDao.finnEnhet(any()) } returns EnhetDto("1234", "Bømlo")
         every { personApiDao.finnFødselsnummer(isNull(inverse = true)) } returns enPerson().fodselsnummer
+        every { personApiDao.spesialistHarPersonKlarForVisningISpeil(any()) } returns true
+        coEvery { reservasjonClient.hentReservasjonsstatus(any()) } answers withDelay(800) {
+            Reservasjon(kanVarsles = true, reservert = false)
+        }
         every { utbetalingApiDao.findUtbetalinger(any()) } returns emptyList()
         every { behandlingsstatistikkMediator.getBehandlingsstatistikk() } returns BehandlingsstatistikkResponse(
             enArbeidsgiver = Statistikk(485, 104, 789),
@@ -162,10 +170,7 @@ private fun enPersoninfo() = Personinfo(
     fodselsdato = "2000-01-01",
     kjonn = Kjonn.Kvinne,
     adressebeskyttelse = Adressebeskyttelse.Ugradert,
-    reservasjon = Reservasjon(
-        kanVarsles = true,
-        reservert = false,
-    )
+    reservasjon = null, // Denne hentes runtime ved hjelp av et kall til KRR
 )
 
 private fun enPeriode() = GraphQLBeregnetPeriode(
@@ -287,3 +292,8 @@ private fun enPerson() = GraphQLPerson(
     versjon = 1,
     vilkarsgrunnlag = emptyList(),
 )
+
+fun <T, B> withDelay(millis: Long, block: () -> T): MockKAnswerScope<T, B>.(Call) -> T = {
+    runBlocking { delay(millis) }
+    block()
+}

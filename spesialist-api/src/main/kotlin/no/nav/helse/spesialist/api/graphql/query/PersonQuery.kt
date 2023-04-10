@@ -4,6 +4,9 @@ import graphql.GraphQLError
 import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
@@ -42,7 +45,7 @@ class PersonQuery(
 
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
-    fun person(fnr: String? = null, aktorId: String? = null, env: DataFetchingEnvironment): DataFetcherResult<Person?> {
+    suspend fun person(fnr: String? = null, aktorId: String? = null, env: DataFetchingEnvironment): DataFetcherResult<Person?> {
         if (fnr == null && aktorId == null) {
             return DataFetcherResult.newResult<Person?>().error(getBadRequestError()).build()
         }
@@ -65,6 +68,9 @@ class PersonQuery(
             return DataFetcherResult.newResult<Person?>().error(getNotFoundError(fnr)).build()
         }
 
+        val reservasjon =
+            CoroutineScope(Dispatchers.IO).async { reservasjonClient.hentReservasjonsstatus(fødselsnummer) }
+
         if (isForbidden(fødselsnummer, env)) {
             return DataFetcherResult.newResult<Person?>().error(getForbiddenError(fødselsnummer)).build()
         }
@@ -79,7 +85,7 @@ class PersonQuery(
         val person = snapshot?.let { (personinfo, personSnapshot) ->
             Person(
                 snapshot = personSnapshot,
-                personinfo = personinfo,
+                personinfo = personinfo.copy(reservasjon = reservasjon.await()),
                 personApiDao = personApiDao,
                 tildelingDao = tildelingDao,
                 arbeidsgiverApiDao = arbeidsgiverApiDao,
