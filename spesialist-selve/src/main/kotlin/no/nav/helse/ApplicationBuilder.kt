@@ -40,6 +40,8 @@ import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.OverstyringMediator
+import no.nav.helse.mediator.api.GodkjenningService
+import no.nav.helse.mediator.api.OppdaterPersonService
 import no.nav.helse.mediator.api.erDev
 import no.nav.helse.mediator.api.leggPåVentApi
 import no.nav.helse.mediator.api.notaterApi
@@ -311,12 +313,14 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 snapshotMediator = snapshotMediator,
                 behandlingsstatistikkMediator = behandlingsstatistikkMediator,
             )
+
             routing {
                 authenticate("oidc") {
                     personApi(
                         varselRepository = apiVarselRepository,
                         totrinnsvurderingMediator = totrinnsvurderingMediator,
-                        hendelseMediator = hendelseMediator,
+                        oppdaterPersonService = oppdaterPersonService,
+                        godkjenningService = godkjenningService,
                         oppgaveMediator = oppgaveMediator,
                         tilgangsgrupper = tilgangsgrupper,
                     )
@@ -338,6 +342,9 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 }
             }
         }.build()
+
+    private val oppdaterPersonService: OppdaterPersonService
+    private val godkjenningService: GodkjenningService
 
     private val automatiseringDao = AutomatiseringDao(dataSource)
     val automatisering = Automatisering(
@@ -374,7 +381,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         hendelseMediator = HendelseMediator(
             dataSource = dataSource,
             rapidsConnection = rapidsConnection,
-            opptegnelseDao = opptegnelseDao,
             oppgaveMediator = oppgaveMediator,
             hendelsefabrikk = hendelsefabrikk
         )
@@ -387,6 +393,12 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             kode7Saksbehandlergruppe = tilgangsgrupper.kode7GruppeId,
             beslutterSaksbehandlergruppe = tilgangsgrupper.beslutterGruppeId,
             skjermedePersonerSaksbehandlergruppe = tilgangsgrupper.skjermedePersonerGruppeId,
+        )
+        oppdaterPersonService = OppdaterPersonService(rapidsConnection)
+        godkjenningService = GodkjenningService(
+            dataSource = dataSource,
+            rapidsConnection = rapidsConnection,
+            oppgaveMediator = oppgaveMediator,
         )
     }
 

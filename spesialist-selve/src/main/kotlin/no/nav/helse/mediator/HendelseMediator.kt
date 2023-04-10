@@ -8,8 +8,6 @@ import java.util.UUID
 import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.api.Arbeidsgiver
-import no.nav.helse.mediator.api.GodkjenningDTO
-import no.nav.helse.mediator.api.OppdaterPersonsnapshotDto
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdKafkaDto
 import no.nav.helse.mediator.api.OverstyrInntektOgRefusjonKafkaDto
@@ -57,10 +55,7 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.oppgave.OppgaveMediator
-import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.Varsel
@@ -72,13 +67,7 @@ import no.nav.helse.overstyringsteller
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
-import no.nav.helse.spesialist.api.notat.NotatDao
-import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
-import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.slf4j.LoggerFactory
 
@@ -92,18 +81,10 @@ internal class HendelseMediator(
     private val arbeidsgiverDao: ArbeidsgiverDao = ArbeidsgiverDao(dataSource),
     private val hendelseDao: HendelseDao = HendelseDao(dataSource),
     private val tildelingDao: TildelingDao = TildelingDao(dataSource),
-    private val reservasjonDao: ReservasjonDao = ReservasjonDao(dataSource),
     private val feilendeMeldingerDao: FeilendeMeldingerDao = FeilendeMeldingerDao(dataSource),
-    private val periodehistorikkDao: PeriodehistorikkDao = PeriodehistorikkDao(dataSource),
-    private val opptegnelseDao: OpptegnelseDao,
     private val oppgaveMediator: OppgaveMediator,
     private val hendelsefabrikk: Hendelsefabrikk,
     private val egenAnsattDao: EgenAnsattDao = EgenAnsattDao(dataSource),
-    private val overstyringDao: OverstyringDao = OverstyringDao(dataSource),
-    private val totrinnsvurderingDao: TotrinnsvurderingDao = TotrinnsvurderingDao(dataSource),
-    private val notatDao: NotatDao = NotatDao(dataSource),
-    private val notatMediator: NotatMediator = NotatMediator(notatDao),
-    private val totrinnsvurderingMediator: TotrinnsvurderingMediator = TotrinnsvurderingMediator(totrinnsvurderingDao, oppgaveMediator, notatMediator),
     private val varselRepository: VarselRepository = ActualVarselRepository(dataSource),
 ) {
     private companion object {
@@ -173,72 +154,6 @@ internal class HendelseMediator(
                     "mottok løsning med behovId=$behovId som ikke kunne brukes fordi kommandoen ikke lengre er suspendert, " +
                             "eller fordi hendelsen $hendelseId er ukjent"
                 )
-        }
-    }
-
-    internal fun håndter(godkjenningDTO: GodkjenningDTO, epost: String, oid: UUID) {
-        val contextId = oppgaveDao.finnContextId(godkjenningDTO.oppgavereferanse)
-        val hendelseId = oppgaveDao.finnHendelseId(godkjenningDTO.oppgavereferanse)
-        val fødselsnummer = hendelseDao.finnFødselsnummer(hendelseId)
-        val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(godkjenningDTO.oppgavereferanse)
-        val totrinnsvurdering = totrinnsvurderingMediator.hentAktiv(vedtaksperiodeId)
-        val erBeslutteroppgave = oppgaveMediator.erBeslutteroppgave(godkjenningDTO.oppgavereferanse)
-        val tidligereSaksbehandler = oppgaveMediator.finnTidligereSaksbehandler(godkjenningDTO.oppgavereferanse)
-        val reserverPersonOid: UUID =
-            if (erBeslutteroppgave && tidligereSaksbehandler != null) tidligereSaksbehandler
-            else if (totrinnsvurdering?.erBeslutteroppgave() == true) totrinnsvurdering.saksbehandler!!
-            else oid
-        val saksbehandleroverstyringer = overstyringDao.finnAktiveOverstyringer(vedtaksperiodeId)
-        val godkjenningMessage = JsonMessage.newMessage("saksbehandler_løsning", mutableMapOf(
-            "@forårsaket_av" to mapOf(
-                "event_name" to "behov",
-                "behov" to "Godkjenning",
-                "id" to hendelseId
-            ),
-            "fødselsnummer" to fødselsnummer,
-            "oppgaveId" to godkjenningDTO.oppgavereferanse,
-            "hendelseId" to hendelseId,
-            "godkjent" to godkjenningDTO.godkjent,
-            "saksbehandlerident" to godkjenningDTO.saksbehandlerIdent,
-            "saksbehandleroid" to oid,
-            "saksbehandlerepost" to epost,
-            "godkjenttidspunkt" to now(),
-            "saksbehandleroverstyringer" to saksbehandleroverstyringer,
-        ).apply {
-            godkjenningDTO.årsak?.let { put("årsak", it) }
-            godkjenningDTO.begrunnelser?.let { put("begrunnelser", it) }
-            godkjenningDTO.kommentar?.let { put("kommentar", it) }
-        }).also {
-            sikkerLogg.info("Publiserer saksbehandler-løsning: ${it.toJson()}")
-        }
-        log.info(
-            "Publiserer saksbehandler-løsning for {}, {}",
-            keyValue("oppgaveId", godkjenningDTO.oppgavereferanse),
-            keyValue("hendelseId", hendelseId)
-        )
-        rapidsConnection.publish(fødselsnummer, godkjenningMessage.toJson())
-
-        val internOppgaveMediator =
-            OppgaveMediator(
-                oppgaveDao = oppgaveDao,
-                tildelingDao = tildelingDao,
-                reservasjonDao = reservasjonDao,
-                opptegnelseDao = opptegnelseDao,
-                periodehistorikkDao = periodehistorikkDao
-            )
-        internOppgaveMediator.reserverOppgave(reserverPersonOid, fødselsnummer)
-        internOppgaveMediator.avventerSystem(godkjenningDTO.oppgavereferanse, godkjenningDTO.saksbehandlerIdent, oid)
-        internOppgaveMediator.lagreOppgaver(rapidsConnection, hendelseId, contextId)
-
-        overstyringDao.ferdigstillOverstyringerForVedtaksperiode(vedtaksperiodeId)
-        totrinnsvurderingMediator.ferdigstill(vedtaksperiodeId)
-
-        if ((erBeslutteroppgave || totrinnsvurdering?.erBeslutteroppgave() == true) && godkjenningDTO.godkjent) {
-            internOppgaveMediator.lagrePeriodehistorikk(
-                oppgaveId = godkjenningDTO.oppgavereferanse,
-                saksbehandleroid = oid,
-                type = PeriodehistorikkType.TOTRINNSVURDERING_ATTESTERT
-            )
         }
     }
 
@@ -694,18 +609,6 @@ internal class HendelseMediator(
         }
 
         rapidsConnection.publish(overstyringMessage.fødselsnummer, overstyring.toJson())
-    }
-
-    fun håndter(oppdaterPersonsnapshotDto: OppdaterPersonsnapshotDto) {
-        rapidsConnection.publish(
-            oppdaterPersonsnapshotDto.fødselsnummer,
-            JsonMessage.newMessage(
-                "oppdater_personsnapshot", mapOf(
-                    "fødselsnummer" to oppdaterPersonsnapshotDto.fødselsnummer
-                )
-            ).toJson()
-        )
-        sikkerLogg.info("Publiserte event for å be om siste versjon av person: ${oppdaterPersonsnapshotDto.fødselsnummer}")
     }
 
     private fun forbered() {

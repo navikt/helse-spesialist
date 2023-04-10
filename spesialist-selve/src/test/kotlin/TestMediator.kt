@@ -84,7 +84,6 @@ internal class TestMediator(
         HendelseMediator(
             dataSource = dataSource,
             rapidsConnection = testRapid,
-            opptegnelseDao = opptegnelseDao,
             oppgaveMediator = oppgaveMediator,
             hendelsefabrikk = hendelsefabrikk
         )

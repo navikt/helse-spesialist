@@ -47,6 +47,7 @@ import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.OverstyringMediator
 import no.nav.helse.mediator.Toggle
 import no.nav.helse.mediator.api.GodkjenningDTO
+import no.nav.helse.mediator.api.GodkjenningService
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.TestmeldingfabrikkUtenFnr
@@ -179,9 +180,14 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     internal val hendelseMediator = HendelseMediator(
         dataSource = dataSource,
         rapidsConnection = testRapid,
-        opptegnelseDao = opptegnelseDao,
         oppgaveMediator = oppgaveMediator,
         hendelsefabrikk = hendelsefabrikk
+    )
+
+    private val godkjenningService = GodkjenningService(
+        dataSource,
+        rapidsConnection = testRapid,
+        oppgaveMediator = oppgaveMediator,
     )
 
     internal val dataFetchingEnvironment = mockk<DataFetchingEnvironment>(relaxed = true)
@@ -274,7 +280,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         begrunnelser: List<String>? = null,
         kommentar: String? = null,
     ): UUID {
-        hendelseMediator.håndter(
+        godkjenningService.håndter(
             godkjenningDTO = GodkjenningDTO(
                 oppgaveId,
                 godkjent,

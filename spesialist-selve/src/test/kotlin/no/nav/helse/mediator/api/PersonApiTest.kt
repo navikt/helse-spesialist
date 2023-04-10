@@ -19,7 +19,6 @@ import io.ktor.server.cio.CIO
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.routing.routing
-import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -28,7 +27,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.Tilgangsgrupper
-import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
@@ -38,7 +36,6 @@ import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.azureAdAppAuthentication
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -50,7 +47,6 @@ import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ContentNe
 internal class PersonApiTest {
 
     private val varselRepository: ApiVarselRepository = mockk(relaxed = true)
-    private val hendelseMediator: HendelseMediator = mockk(relaxed = true)
     private val oppgaveMediator: OppgaveMediator = mockk(relaxed = true)
     private val totrinnsvurderingMediatorMock = mockk<TotrinnsvurderingMediator>(relaxed = true)
     private val saksbehandlerIdent = "1234"
@@ -310,7 +306,8 @@ internal class PersonApiTest {
                     personApi(
                         varselRepository,
                         totrinnsvurderingMediatorMock,
-                        hendelseMediator,
+                        mockk(),
+                        mockk(relaxed = true),
                         oppgaveMediator,
                         Tilgangsgrupper(
                             mapOf(
@@ -329,11 +326,6 @@ internal class PersonApiTest {
     @AfterAll
     fun tearDown() {
         server.stop(0, 0)
-    }
-
-    @AfterEach
-    fun tearDownEach() {
-        clearMocks(hendelseMediator)
     }
 
 }

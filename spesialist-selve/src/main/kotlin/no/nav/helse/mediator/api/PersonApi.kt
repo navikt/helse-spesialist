@@ -1,7 +1,6 @@
 package no.nav.helse.mediator.api
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.auth.jwt.JWTPrincipal
@@ -16,7 +15,6 @@ import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.Tilgangsgrupper
-import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
@@ -26,7 +24,8 @@ import org.slf4j.LoggerFactory
 internal fun Route.personApi(
     varselRepository: ApiVarselRepository,
     totrinnsvurderingMediator: TotrinnsvurderingMediator,
-    hendelseMediator: HendelseMediator,
+    oppdaterPersonService: OppdaterPersonService,
+    godkjenningService: GodkjenningService,
     oppgaveMediator: OppgaveMediator,
     tilgangsgrupper: Tilgangsgrupper,
 ) {
@@ -120,13 +119,13 @@ internal fun Route.personApi(
             varselRepository.godkjennVarslerFor(godkjenning.oppgavereferanse)
         }
 
-        withContext(Dispatchers.IO) { hendelseMediator.håndter(godkjenning, epostadresse, oid) }
+        withContext(Dispatchers.IO) { godkjenningService.håndter(godkjenning, epostadresse, oid) }
         call.respond(HttpStatusCode.Created, mapOf("status" to "OK"))
     }
 
     post("/api/person/oppdater") {
         val personoppdateringDto = call.receive<OppdaterPersonsnapshotDto>()
-        hendelseMediator.håndter(personoppdateringDto)
+        oppdaterPersonService.håndter(personoppdateringDto)
         call.respond(HttpStatusCode.OK)
     }
 }

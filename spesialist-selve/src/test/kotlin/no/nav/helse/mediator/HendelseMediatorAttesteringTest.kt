@@ -16,7 +16,6 @@ internal class HendelseMediatorAttesteringTest {
     private val mediatorWithMock = HendelseMediator(
         dataSource = AbstractDatabaseTest.dataSource,
         rapidsConnection = mockk(relaxed = true),
-        opptegnelseDao = mockk(),
         oppgaveMediator = oppgaveMediatorMock,
         hendelsefabrikk = mockk()
     )
