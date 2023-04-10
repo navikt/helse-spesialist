@@ -35,14 +35,12 @@ import java.lang.management.ManagementFactory
 import java.net.ProxySelector
 import java.net.URI
 import java.util.UUID
-import kotlinx.coroutines.runBlocking
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.OverstyringMediator
 import no.nav.helse.mediator.api.GodkjenningService
 import no.nav.helse.mediator.api.OppdaterPersonService
-import no.nav.helse.mediator.api.erDev
 import no.nav.helse.mediator.api.leggPåVentApi
 import no.nav.helse.mediator.api.notaterApi
 import no.nav.helse.mediator.api.overstyringApi
@@ -177,11 +175,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         privateJwk = env.getValue("AZURE_APP_JWK")
     )
 
-    private val msGraphClient = MsGraphClient(httpClient = httpClient, tokenClient = graphAccessTokenClient).also {
-        if (erDev()) {
-            runBlocking { it.hentGrupper() }
-        }
-    }
+    private val msGraphClient = MsGraphClient(httpClient = httpClient, tokenClient = graphAccessTokenClient)
+
     private val httpTraceLog = LoggerFactory.getLogger("tjenestekall")
     private lateinit var hendelseMediator: HendelseMediator
     private lateinit var saksbehandlerMediator: SaksbehandlerMediator
@@ -225,7 +220,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         oppgaveDao = oppgaveDao,
         tildelingDao = tildelingDao,
         reservasjonDao = reservasjonDao,
-        opptegnelseDao = opptegnelseDao
+        opptegnelseDao = opptegnelseDao,
+        gruppehenter = { oid -> msGraphClient.hentGrupper(oid) },
     )
 
     private val totrinnsvurderingMediator =

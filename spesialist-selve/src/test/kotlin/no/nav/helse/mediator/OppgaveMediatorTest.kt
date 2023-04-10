@@ -11,6 +11,7 @@ import no.nav.helse.modell.kommando.TestHendelse
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.oppgave.OppgaveMediator
+import no.nav.helse.modell.oppgave.Saksbehandlergrupper
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
@@ -20,6 +21,7 @@ import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.reservasjon.Reservasjonsinfo
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -47,7 +49,14 @@ internal class OppgaveMediatorTest {
     private val tildelingDao = mockk<TildelingDao>(relaxed = true)
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
     private val opptegnelseDao = mockk<OpptegnelseDao>(relaxed = true)
-    private val mediator = OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao, opptegnelseDao)
+    private val gruppehenterTestoppsett = GruppehenterTestoppsett()
+    private val mediator = OppgaveMediator(
+        oppgaveDao,
+        tildelingDao,
+        reservasjonDao,
+        opptegnelseDao,
+        gruppehenter = gruppehenterTestoppsett.hentGrupper,
+    )
     private val søknadsoppgave: Oppgave = Oppgave.søknad(VEDTAKSPERIODE_ID, UTBETALING_ID)
     private val stikkprøveoppgave: Oppgave = Oppgave.stikkprøve(VEDTAKSPERIODE_ID_2, UTBETALING_ID_2)
 
@@ -88,6 +97,7 @@ internal class OppgaveMediatorTest {
         every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
         mediator.opprett(søknadsoppgave)
         mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
+        assertTrue(gruppehenterTestoppsett.erKalt)
         verify(exactly = 1) { tildelingDao.opprettTildeling(any(), oid, any()) }
         assertAntallOpptegnelser(1)
     }
@@ -101,6 +111,17 @@ internal class OppgaveMediatorTest {
         mediator.opprett(stikkprøveoppgave)
         mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
         verify(exactly = 0) { tildelingDao.opprettTildeling(any(), any(), any()) }
+        assertAntallOpptegnelser(1)
+    }
+
+    @Test
+    fun `kaller bare hentGrupper når personen er reservert`() {
+        every { reservasjonDao.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns null
+        every { oppgaveDao.finn(0L) } returns søknadsoppgave
+        every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
+        mediator.opprett(stikkprøveoppgave)
+        mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
+        assertFalse(gruppehenterTestoppsett.erKalt)
         assertAntallOpptegnelser(1)
     }
 
@@ -193,6 +214,14 @@ internal class OppgaveMediatorTest {
             assertEquals(status, enumValueOf<Oppgavestatus>(it.path("status").asText()))
             assertTrue(it.hasNonNull("oppgaveId"))
             assertBlock(it)
+        }
+    }
+
+    class GruppehenterTestoppsett {
+        var erKalt = false
+
+        val hentGrupper: Saksbehandlergrupper = { _: UUID ->
+            erKalt = true
         }
     }
 }

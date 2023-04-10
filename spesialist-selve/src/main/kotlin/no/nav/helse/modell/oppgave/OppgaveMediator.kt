@@ -2,6 +2,9 @@ package no.nav.helse.modell.oppgave
 
 import java.sql.SQLException
 import java.util.UUID
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import no.nav.helse.modell.oppgave.Oppgave.Companion.loggOppgaverAvbrutt
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
@@ -13,11 +16,14 @@ import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.slf4j.LoggerFactory
 
+internal typealias Saksbehandlergrupper = suspend (oid: UUID) -> Unit
+
 class OppgaveMediator(
     private val oppgaveDao: OppgaveDao,
     private val tildelingDao: TildelingDao,
     private val reservasjonDao: ReservasjonDao,
     private val opptegnelseDao: OpptegnelseDao,
+    private val gruppehenter: Saksbehandlergrupper = { },
 ) {
     private val oppgaver = mutableSetOf<Oppgave>()
     private val oppgaverForPublisering = mutableMapOf<Long, String>()
@@ -64,7 +70,7 @@ class OppgaveMediator(
         hendelseId: UUID,
         fødselsnummer: String,
         contextId: UUID,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ) {
         lagreOppgaver(hendelseId, contextId, messageContext) { tildelOppgaver(fødselsnummer) }
     }
@@ -109,7 +115,11 @@ class OppgaveMediator(
 
     private fun tildelOppgaver(fødselsnummer: String) {
         reservasjonDao.hentReservasjonFor(fødselsnummer)?.let { (oid, settPåVent) ->
-            oppgaver.forEach { it.tildelHvisIkkeStikkprøve(this, oid, settPåVent) }
+            // Hent i bakgrunnen nå i utprøvingsfasen
+            CoroutineScope(Dispatchers.IO).launch { gruppehenter(oid) }
+            oppgaver.forEach { oppgave ->
+                oppgave.tildelHvisIkkeStikkprøve(this, oid, settPåVent)
+            }
         }
     }
 
