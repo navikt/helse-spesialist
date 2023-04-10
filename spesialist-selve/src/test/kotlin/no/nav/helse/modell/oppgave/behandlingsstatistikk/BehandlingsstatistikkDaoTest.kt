@@ -152,22 +152,16 @@ internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
         }
     }
 
-    private fun utbetalingTilArbeidsgiver() {
-        val utbetaling_idId = utbetalingsopplegg(abeløp = 4000, pbeløp = 0)
-    }
+    private fun utbetalingTilArbeidsgiver() = utbetalingsopplegg(beløpTilArbeidsgiver = 4000, beløpTilSykmeldt = 0)
 
-    private fun utbetalingTilPerson() {
-        val utbetaling_idId = utbetalingsopplegg(abeløp = 0, pbeløp = 4000)
-    }
+    private fun utbetalingTilPerson() = utbetalingsopplegg(beløpTilArbeidsgiver = 0, beløpTilSykmeldt = 4000)
 
-    private fun utbetalingTilBegge() {
-        val utbetaling_idId = utbetalingsopplegg(abeløp = 2000, pbeløp = 2000)
-    }
+    private fun utbetalingTilBegge() = utbetalingsopplegg(beløpTilArbeidsgiver = 2000, beløpTilSykmeldt = 2000)
 
-    private fun utbetalingsopplegg(abeløp: Int, pbeløp: Int) {
+    private fun utbetalingsopplegg(beløpTilArbeidsgiver: Int, beløpTilSykmeldt: Int) {
         val arbeidsgiveroppdragId = lagArbeidsgiveroppdrag(fagsystemId())
         val personOppdragId = lagPersonoppdrag(fagsystemId())
-        val utbetaling_idId = lagUtbetalingId(arbeidsgiveroppdragId, personOppdragId, UTBETALING_ID, arbeidsgiverbeløp = abeløp, personbeløp = pbeløp)
+        val utbetaling_idId = lagUtbetalingId(arbeidsgiveroppdragId, personOppdragId, UTBETALING_ID, arbeidsgiverbeløp = beløpTilArbeidsgiver, personbeløp = beløpTilSykmeldt)
         utbetalingDao.nyUtbetalingStatus(utbetaling_idId, Utbetalingsstatus.UTBETALT, LocalDateTime.now(), "{}")
         opprettUtbetalingKobling(VEDTAKSPERIODE, UTBETALING_ID)
     }
