@@ -225,8 +225,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         oppgaveDao = oppgaveDao,
         tildelingDao = tildelingDao,
         reservasjonDao = reservasjonDao,
-        opptegnelseDao = opptegnelseDao,
-        periodehistorikkDao = periodehistorikkDao
+        opptegnelseDao = opptegnelseDao
     )
 
     private val totrinnsvurderingMediator =
@@ -321,7 +320,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                         totrinnsvurderingMediator = totrinnsvurderingMediator,
                         oppdaterPersonService = oppdaterPersonService,
                         godkjenningService = godkjenningService,
-                        oppgaveMediator = oppgaveMediator,
+                        oppgaveDao = oppgaveDao,
                         tilgangsgrupper = tilgangsgrupper,
                     )
                     overstyringApi(hendelseMediator)

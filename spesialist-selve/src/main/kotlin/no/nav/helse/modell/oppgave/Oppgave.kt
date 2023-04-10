@@ -30,6 +30,8 @@ class Oppgave private constructor(
         this.ferdigstiltAvOid = ferdigstiltAvOid
     }
 
+    private fun oppgaveId() = checkNotNull(id) { "Forventet at oppgave med id=$id skulle finnes?" }
+
     companion object {
         private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -124,10 +126,19 @@ class Oppgave private constructor(
         status = Oppgavestatus.Ferdigstilt
     }
 
-    fun avventerSystem(ident: String, oid: UUID) {
+    private fun avventerSystem(ident: String, oid: UUID) {
         status = Oppgavestatus.AvventerSystem
         ferdigstiltAvIdent = ident
         ferdigstiltAvOid = oid
+    }
+
+    fun lagMelding(eventName: String, oppgaveDao: OppgaveDao): JsonMessage {
+        return lagMelding(oppgaveId(), eventName, false, oppgaveDao).second
+    }
+
+    fun lagreAvventerSystem(oppgaveDao: OppgaveDao, ident: String, oid: UUID) {
+        avventerSystem(ident, oid)
+        oppgaveDao.updateOppgave(oppgaveId(), status, ferdigstiltAvIdent, ferdigstiltAvOid)
     }
 
     fun lagre(oppgaveMediator: OppgaveMediator, contextId: UUID, hendelseId: UUID) {

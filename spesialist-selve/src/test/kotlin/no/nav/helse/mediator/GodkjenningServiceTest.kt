@@ -38,9 +38,7 @@ internal class GodkjenningServiceTest : AbstractE2ETest() {
         hendelseDao = HendelseDao(dataSource),
         overstyringDao = mockk(relaxed = true),
         rapidsConnection = testRapid,
-        tildelingDao = tildelingDao,
         reservasjonDao = reserverpersonDaoMock,
-        opptegnelseDao = opptegnelseDao,
         periodehistorikkDao = periodehistorikkDaoMock,
         totrinnsvurderingMediator = TotrinnsvurderingMediator(
             totrinnsvurderingDaoMock,

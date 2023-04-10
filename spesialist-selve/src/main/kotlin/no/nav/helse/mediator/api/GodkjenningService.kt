@@ -1,5 +1,6 @@
 package no.nav.helse.mediator.api
 
+import java.sql.SQLException
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
@@ -7,19 +8,16 @@ import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.oppgave.OppgaveDao
-import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
-import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.slf4j.LoggerFactory
 
 private val log = LoggerFactory.getLogger(HendelseMediator::class.java)
@@ -31,9 +29,7 @@ internal class GodkjenningService(
     private val hendelseDao: HendelseDao = HendelseDao(dataSource),
     private val overstyringDao: OverstyringDao = OverstyringDao(dataSource),
     private val rapidsConnection: RapidsConnection,
-    private val tildelingDao: TildelingDao = TildelingDao(dataSource),
     private val reservasjonDao: ReservasjonDao = ReservasjonDao(dataSource),
-    private val opptegnelseDao: OpptegnelseDao = OpptegnelseDao(dataSource),
     private val periodehistorikkDao: PeriodehistorikkDao = PeriodehistorikkDao(dataSource),
     private val totrinnsvurderingMediator: TotrinnsvurderingMediator = TotrinnsvurderingMediator(
         TotrinnsvurderingDao(dataSource), oppgaveDao, periodehistorikkDao,
@@ -44,7 +40,6 @@ internal class GodkjenningService(
 ) {
 
     internal fun håndter(godkjenningDTO: GodkjenningDTO, epost: String, oid: UUID) {
-        val contextId = oppgaveDao.finnContextId(godkjenningDTO.oppgavereferanse)
         val hendelseId = oppgaveDao.finnHendelseId(godkjenningDTO.oppgavereferanse)
         val fødselsnummer = hendelseDao.finnFødselsnummer(hendelseId)
         val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(godkjenningDTO.oppgavereferanse)
@@ -85,28 +80,29 @@ internal class GodkjenningService(
         )
         rapidsConnection.publish(fødselsnummer, godkjenningMessage.toJson())
 
-        val internOppgaveMediator =
-            OppgaveMediator(
-                oppgaveDao = oppgaveDao,
-                tildelingDao = tildelingDao,
-                reservasjonDao = reservasjonDao,
-                opptegnelseDao = opptegnelseDao,
-                periodehistorikkDao = periodehistorikkDao
-            )
-        internOppgaveMediator.reserverOppgave(reserverPersonOid, fødselsnummer)
-        internOppgaveMediator.avventerSystem(godkjenningDTO.oppgavereferanse, godkjenningDTO.saksbehandlerIdent, oid)
-        internOppgaveMediator.lagreOppgaver(rapidsConnection, hendelseId, contextId)
+        val oppgave = finnOppgave(godkjenningDTO)
+        reserverPerson(reserverPersonOid, fødselsnummer)
+        oppgave.lagreAvventerSystem(oppgaveDao, godkjenningDTO.saksbehandlerIdent, oid)
+        rapidsConnection.publish(oppgave.lagMelding("oppgave_oppdatert", oppgaveDao = oppgaveDao).toJson())
 
         overstyringDao.ferdigstillOverstyringerForVedtaksperiode(vedtaksperiodeId)
         totrinnsvurderingMediator.ferdigstill(vedtaksperiodeId)
 
         if ((erBeslutteroppgave || totrinnsvurdering?.erBeslutteroppgave() == true) && godkjenningDTO.godkjent) {
-            internOppgaveMediator.lagrePeriodehistorikk(
-                oppgaveId = godkjenningDTO.oppgavereferanse,
-                saksbehandleroid = oid,
-                type = PeriodehistorikkType.TOTRINNSVURDERING_ATTESTERT
-            )
+            oppgave.lagrePeriodehistorikk(periodehistorikkDao, oid, PeriodehistorikkType.TOTRINNSVURDERING_ATTESTERT, null)
         }
+    }
+
+    private fun finnOppgave(godkjenningDTO: GodkjenningDTO) = oppgaveDao.finn(godkjenningDTO.oppgavereferanse)
+        ?: throw IllegalArgumentException("oppgaveId ${godkjenningDTO.oppgavereferanse} fins ikke")
+
+    private fun reserverPerson(oid: UUID, fødselsnummer: String) {
+        try {
+            reservasjonDao.reserverPerson(oid, fødselsnummer)
+        } catch (e: SQLException) {
+            log.warn("Kunne ikke reservere person")
+        }
+
     }
 
 }

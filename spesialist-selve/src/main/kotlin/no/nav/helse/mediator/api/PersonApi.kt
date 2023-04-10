@@ -15,7 +15,7 @@ import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.Tilgangsgrupper
-import no.nav.helse.modell.oppgave.OppgaveMediator
+import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.tilganger
@@ -26,7 +26,7 @@ internal fun Route.personApi(
     totrinnsvurderingMediator: TotrinnsvurderingMediator,
     oppdaterPersonService: OppdaterPersonService,
     godkjenningService: GodkjenningService,
-    oppgaveMediator: OppgaveMediator,
+    oppgaveDao: OppgaveDao,
     tilgangsgrupper: Tilgangsgrupper,
 ) {
     val log = LoggerFactory.getLogger("PersonApi")
@@ -53,7 +53,7 @@ internal fun Route.personApi(
         }
 
         val erAktivOppgave =
-            withContext(Dispatchers.IO) { oppgaveMediator.erAktivOppgave(godkjenning.oppgavereferanse) }
+            withContext(Dispatchers.IO) { oppgaveDao.venterPåSaksbehandler(godkjenning.oppgavereferanse) }
         if (!erAktivOppgave) {
             call.respondText(
                 "Dette vedtaket har ingen aktiv saksbehandleroppgave. Dette betyr vanligvis at oppgaven allerede er fullført.",
@@ -63,7 +63,7 @@ internal fun Route.personApi(
         }
 
         val tilgangskontroll = tilganger(tilgangsgrupper)
-        val erRiskOppgave = withContext(Dispatchers.IO) { oppgaveMediator.erRiskoppgave(godkjenning.oppgavereferanse) }
+        val erRiskOppgave = withContext(Dispatchers.IO) { oppgaveDao.erRiskoppgave(godkjenning.oppgavereferanse) }
         if (erRiskOppgave && !tilgangskontroll.harTilgangTilRisksaker) {
             call.respond(
                 status = HttpStatusCode.Forbidden,
@@ -75,12 +75,12 @@ internal fun Route.personApi(
             return@post
         }
 
-        val erBeslutteroppgave = oppgaveMediator.erBeslutteroppgave(godkjenning.oppgavereferanse)
+        val erBeslutteroppgave = oppgaveDao.erBeslutteroppgave(godkjenning.oppgavereferanse)
         val totrinnsvurdering = totrinnsvurderingMediator.hentAktiv(godkjenning.oppgavereferanse)
 
         if (erBeslutteroppgave || totrinnsvurdering?.erBeslutteroppgave() == true) {
             // Midlertidig logging. Slik at vi vet når vi kan skru av totrinnsmerking i Speil
-            if (!oppgaveMediator.trengerTotrinnsvurdering(godkjenning.oppgavereferanse)) {
+            if (!oppgaveDao.trengerTotrinnsvurdering(godkjenning.oppgavereferanse)) {
                 log.info("Oppgave ${godkjenning.oppgavereferanse} er merket vha Speil.")
             }
 
@@ -92,7 +92,7 @@ internal fun Route.personApi(
                 return@post
             }
 
-            if ((oppgaveMediator.finnTidligereSaksbehandler(godkjenning.oppgavereferanse) == oid || totrinnsvurdering?.saksbehandler == oid) && !erDev()) {
+            if ((oppgaveDao.finnTidligereSaksbehandler(godkjenning.oppgavereferanse) == oid || totrinnsvurdering?.saksbehandler == oid) && !erDev()) {
                 call.respondText(
                     "Kan ikke beslutte egne oppgaver.",
                     status = HttpStatusCode.Unauthorized

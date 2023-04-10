@@ -161,17 +161,17 @@ internal class HendelseMediator(
         oppgaveId: Long,
         saksbehandlerreferanse: UUID,
     ): Boolean {
-        val tidligereSaksbehandler = oppgaveMediator.finnTidligereSaksbehandler(oppgaveId)
+        val tidligereSaksbehandler = oppgaveDao.finnTidligereSaksbehandler(oppgaveId)
         return tidligereSaksbehandler == saksbehandlerreferanse
     }
 
-    internal fun erBeslutteroppgave(oppgaveId: Long) = oppgaveMediator.erBeslutteroppgave(oppgaveId)
+    internal fun erBeslutteroppgave(oppgaveId: Long) = oppgaveDao.erBeslutteroppgave(oppgaveId)
 
     internal fun tildelOppgaveTilSaksbehandler(
         oppgaveId: Long,
         saksbehandlerreferanse: UUID,
     ): Boolean {
-        val suksess = oppgaveMediator.tildel(oppgaveId, saksbehandlerreferanse)
+        val suksess = tildelingDao.opprettTildeling(oppgaveId, saksbehandlerreferanse)
         if (suksess) sendMeldingOppgaveOppdatert(oppgaveId)
         return suksess
     }

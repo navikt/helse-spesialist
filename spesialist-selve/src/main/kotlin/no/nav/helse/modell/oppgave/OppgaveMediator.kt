@@ -4,14 +4,11 @@ import java.sql.SQLException
 import java.util.UUID
 import no.nav.helse.modell.oppgave.Oppgave.Companion.loggOppgaverAvbrutt
 import no.nav.helse.rapids_rivers.MessageContext
-import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload.Companion.lagre
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.slf4j.LoggerFactory
@@ -21,7 +18,6 @@ class OppgaveMediator(
     private val tildelingDao: TildelingDao,
     private val reservasjonDao: ReservasjonDao,
     private val opptegnelseDao: OpptegnelseDao,
-    private val periodehistorikkDao: PeriodehistorikkDao,
 ) {
     private val oppgaver = mutableSetOf<Oppgave>()
     private val oppgaverForPublisering = mutableMapOf<Long, String>()
@@ -64,11 +60,6 @@ class OppgaveMediator(
         nyOppgave(oppgave)
     }
 
-    private fun avventerSystem(oppgave: Oppgave, saksbehandlerIdent: String, oid: UUID) {
-        oppgave.avventerSystem(saksbehandlerIdent, oid)
-        nyOppgave(oppgave)
-    }
-
     fun lagreOgTildelOppgaver(
         hendelseId: UUID,
         fødselsnummer: String,
@@ -78,19 +69,10 @@ class OppgaveMediator(
         lagreOppgaver(hendelseId, contextId, messageContext) { tildelOppgaver(fødselsnummer) }
     }
 
-    fun lagreOppgaver(rapidsConnection: RapidsConnection, hendelseId: UUID, contextId: UUID) {
-        lagreOppgaver(hendelseId, contextId, rapidsConnection)
-    }
-
     fun avbrytOppgaver(vedtaksperiodeId: UUID) {
         oppgaveDao.finnAktive(vedtaksperiodeId)
             .also { it.loggOppgaverAvbrutt(vedtaksperiodeId) }
             .map(::avbryt)
-    }
-
-    fun avventerSystem(oppgaveId: Long, saksbehandlerIdent: String, oid: UUID) {
-        val oppgave = oppgaveDao.finn(oppgaveId) ?: return
-        avventerSystem(oppgave, saksbehandlerIdent, oid)
     }
 
     fun opprett(
@@ -153,10 +135,6 @@ class OppgaveMediator(
         }.clear()
     }
 
-    fun erAktivOppgave(oppgaveId: Long) = oppgaveDao.venterPåSaksbehandler(oppgaveId)
-
-    fun erRiskoppgave(oppgaveId: Long) = oppgaveDao.erRiskoppgave(oppgaveId)
-
     fun erBeslutteroppgave(oppgaveId: Long) = oppgaveDao.erBeslutteroppgave(oppgaveId)
 
     fun trengerTotrinnsvurdering(oppgaveId: Long) = oppgaveDao.trengerTotrinnsvurdering(oppgaveId)
@@ -172,17 +150,6 @@ class OppgaveMediator(
     )
 
     fun finnTidligereSaksbehandler(oppgaveId: Long) = oppgaveDao.finnTidligereSaksbehandler(oppgaveId)
-
-    fun lagrePeriodehistorikk(
-        oppgaveId: Long,
-        saksbehandleroid: UUID?,
-        type: PeriodehistorikkType,
-        notatId: Int? = null
-    ) {
-        oppgaveDao.finn(oppgaveId)?.also {
-            it.lagrePeriodehistorikk(periodehistorikkDao, saksbehandleroid, type, notatId)
-        }
-    }
 
     fun harFerdigstiltOppgave(vedtaksperiodeId: UUID) = oppgaveDao.harFerdigstiltOppgave(vedtaksperiodeId)
 

@@ -20,7 +20,6 @@ import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
@@ -48,8 +47,7 @@ internal class TestMediator(
         oppgaveDao = OppgaveDao(dataSource),
         tildelingDao = TildelingDao(dataSource),
         reservasjonDao = ReservasjonDao(dataSource),
-        opptegnelseDao = opptegnelseDao,
-        periodehistorikkDao = PeriodehistorikkDao(dataSource)
+        opptegnelseDao = opptegnelseDao
     )
     private val overstyringMediator = OverstyringMediator(testRapid)
     private val snapshotMediator = SnapshotMediator(SnapshotApiDao(dataSource), snapshotClient)

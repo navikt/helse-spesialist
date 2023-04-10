@@ -27,7 +27,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.Tilgangsgrupper
-import no.nav.helse.modell.oppgave.OppgaveMediator
+import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.objectMapper
@@ -47,7 +47,7 @@ import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ContentNe
 internal class PersonApiTest {
 
     private val varselRepository: ApiVarselRepository = mockk(relaxed = true)
-    private val oppgaveMediator: OppgaveMediator = mockk(relaxed = true)
+    private val oppgaveDao: OppgaveDao = mockk(relaxed = true)
     private val totrinnsvurderingMediatorMock = mockk<TotrinnsvurderingMediator>(relaxed = true)
     private val saksbehandlerIdent = "1234"
     private val SAKSBEHANDLER_OID = UUID.randomUUID()
@@ -58,7 +58,7 @@ internal class PersonApiTest {
 
     @Test
     fun `godkjenning av vedtaksperiode OK`() {
-        every { oppgaveMediator.erAktivOppgave(1L) } returns true
+        every { oppgaveDao.venterPåSaksbehandler(1L) } returns true
         every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns null
         val response = runBlocking {
             client.post("/api/vedtak") {
@@ -72,7 +72,7 @@ internal class PersonApiTest {
 
     @Test
     fun `en vedtaksperiode kan kun godkjennes hvis den har en aktiv oppgave`() {
-        every { oppgaveMediator.erAktivOppgave(1L) } returns false
+        every { oppgaveDao.venterPåSaksbehandler(1L) } returns false
         val response = runBlocking {
             client.post("/api/vedtak") {
                 contentType(ContentType.Application.Json)
@@ -85,8 +85,8 @@ internal class PersonApiTest {
 
     @Test
     fun `en vedtaksperiode kan godkjennes hvis alle varsler er vurdert`() {
-        every { oppgaveMediator.erAktivOppgave(1L) } returns true
-        every { oppgaveMediator.erRiskoppgave(1L) } returns false
+        every { oppgaveDao.venterPåSaksbehandler(1L) } returns true
+        every { oppgaveDao.erRiskoppgave(1L) } returns false
         every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns null
         every { varselRepository.ikkeVurderteVarslerFor(1L) } returns 0
         val response = runBlocking {
@@ -101,8 +101,8 @@ internal class PersonApiTest {
 
     @Test
     fun `en vedtaksperiode kan ikke godkjennes hvis det fins aktive varsler`() {
-        every { oppgaveMediator.erAktivOppgave(1L) } returns true
-        every { oppgaveMediator.erRiskoppgave(1L) } returns false
+        every { oppgaveDao.venterPåSaksbehandler(1L) } returns true
+        every { oppgaveDao.erRiskoppgave(1L) } returns false
         every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns null
         every { varselRepository.ikkeVurderteVarslerFor(1L) } returns 1
         val response = runBlocking {
@@ -117,8 +117,8 @@ internal class PersonApiTest {
 
     @Test
     fun `en vedtaksperiode kan avvises selv om det finnes uvurderte varsler`() {
-        every { oppgaveMediator.erAktivOppgave(1L) } returns true
-        every { oppgaveMediator.erRiskoppgave(1L) } returns false
+        every { oppgaveDao.venterPåSaksbehandler(1L) } returns true
+        every { oppgaveDao.erRiskoppgave(1L) } returns false
         every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns null
         every { varselRepository.ikkeVurderteVarslerFor(1L) } returns 1
         val response = runBlocking {
@@ -133,8 +133,8 @@ internal class PersonApiTest {
 
     @Test
     fun `må ha tilgang for å kunne godkjenne vedtaksperiode med oppgavetype RISK_QA`() {
-        every { oppgaveMediator.erAktivOppgave(1L) } returns true
-        every { oppgaveMediator.erRiskoppgave(1L) } returns true
+        every { oppgaveDao.venterPåSaksbehandler(1L) } returns true
+        every { oppgaveDao.erRiskoppgave(1L) } returns true
         every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns null
         val responseForManglendeTilgang = runBlocking {
             client.post("/api/vedtak") {
@@ -160,10 +160,10 @@ internal class PersonApiTest {
     @Test
     fun `Må ha tilgang til beslutteroppgaver for å kunne godkjenne dem`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        every { oppgaveMediator.erAktivOppgave(1L) } returns true
-        every { oppgaveMediator.erRiskoppgave(1L) } returns false
+        every { oppgaveDao.venterPåSaksbehandler(1L) } returns true
+        every { oppgaveDao.erRiskoppgave(1L) } returns false
         every { varselRepository.ikkeVurderteVarslerFor(1L) } returns 0
-        every { oppgaveMediator.erBeslutteroppgave(1L) } returns false
+        every { oppgaveDao.erBeslutteroppgave(1L) } returns false
         every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns Totrinnsvurdering(
             vedtaksperiodeId = vedtaksperiodeId,
             erRetur = false,
@@ -201,8 +201,8 @@ internal class PersonApiTest {
     fun `Saksbehandler kan ikke attestere egen beslutteroppgave`() {
         val vedtaksperiodeId = UUID.randomUUID()
 
-        every { oppgaveMediator.erAktivOppgave(1L) } returns true
-        every { oppgaveMediator.erRiskoppgave(1L) } returns false
+        every { oppgaveDao.venterPåSaksbehandler(1L) } returns true
+        every { oppgaveDao.erRiskoppgave(1L) } returns false
         every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns Totrinnsvurdering(
             vedtaksperiodeId = vedtaksperiodeId,
             erRetur = false,
@@ -230,7 +230,7 @@ internal class PersonApiTest {
     fun `Setter utbetalende saksbehandlerOid i beslutter-feltet på totrinnsvurdering`() {
         val vedtaksperiodeId = UUID.randomUUID()
 
-        every { oppgaveMediator.erAktivOppgave(1L) } returns true
+        every { oppgaveDao.venterPåSaksbehandler(1L) } returns true
         every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns Totrinnsvurdering(
             vedtaksperiodeId = vedtaksperiodeId,
             erRetur = false,
@@ -308,7 +308,7 @@ internal class PersonApiTest {
                         totrinnsvurderingMediatorMock,
                         mockk(),
                         mockk(relaxed = true),
-                        oppgaveMediator,
+                        oppgaveDao,
                         Tilgangsgrupper(
                             mapOf(
                                 Tilgangsgrupper.riskQaKey to riskQaGruppe.toString(),

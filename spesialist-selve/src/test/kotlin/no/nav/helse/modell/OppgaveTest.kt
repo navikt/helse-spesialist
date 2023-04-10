@@ -6,11 +6,10 @@ import io.mockk.verify
 import java.util.UUID
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveDao
-import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.modell.oppgave.OppgaveMediator
+import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -36,9 +35,8 @@ internal class OppgaveTest {
     private val tildelingDao = mockk<TildelingDao>(relaxed = true)
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
     private val opptegnelseDao = mockk<OpptegnelseDao>(relaxed = true)
-    private val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
     private val oppgaveMediator =
-        OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao, opptegnelseDao, periodehistorikkDao)
+        OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao, opptegnelseDao)
 
     private val oppgave = Oppgave.søknad(VEDTAKSPERIODE_ID, UTBETALING_ID)
 
