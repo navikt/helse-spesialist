@@ -171,19 +171,7 @@ class OppgaveMediator(
         tidligereSaksbehandlerOid
     )
 
-    fun setReturoppgave(
-        oppgaveId: Long,
-        beslutterSaksbehandlerOid: UUID,
-    ) = oppgaveDao.setReturoppgave(
-        oppgaveId,
-        beslutterSaksbehandlerOid
-    )
-
-    fun finnNyesteOppgaveId(vedtaksperiodeId: UUID) = oppgaveDao.finnNyesteOppgaveId(vedtaksperiodeId)
-
     fun finnTidligereSaksbehandler(oppgaveId: Long) = oppgaveDao.finnTidligereSaksbehandler(oppgaveId)
-
-    fun finnBeslutterSaksbehandler(oppgaveId: Long) = oppgaveDao.finnBeslutterSaksbehandler(oppgaveId)
 
     fun lagrePeriodehistorikk(
         oppgaveId: Long,
@@ -198,7 +186,4 @@ class OppgaveMediator(
 
     fun harFerdigstiltOppgave(vedtaksperiodeId: UUID) = oppgaveDao.harFerdigstiltOppgave(vedtaksperiodeId)
 
-    fun finnTotrinnsvurderingFraLegacy(oppgaveId: Long) = oppgaveDao.finnTotrinnsvurderingFraLegacy(oppgaveId)
-    fun settTotrinnsoppgaveFalse(oppgaveId: Long) = oppgaveDao.settTotrinnsoppgaveFalse(oppgaveId)
-    fun finnVedtaksperiodeId(oppgaveId: Long) = oppgaveDao.finnVedtaksperiodeId(oppgaveId)
 }

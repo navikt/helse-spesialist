@@ -35,10 +35,12 @@ internal class GodkjenningService(
     private val reservasjonDao: ReservasjonDao = ReservasjonDao(dataSource),
     private val opptegnelseDao: OpptegnelseDao = OpptegnelseDao(dataSource),
     private val periodehistorikkDao: PeriodehistorikkDao = PeriodehistorikkDao(dataSource),
-    private val oppgaveMediator: OppgaveMediator,
-    private val totrinnsvurderingMediator: TotrinnsvurderingMediator = TotrinnsvurderingMediator(TotrinnsvurderingDao(dataSource), oppgaveMediator, NotatMediator(
-        NotatDao(dataSource)
-    )),
+    private val totrinnsvurderingMediator: TotrinnsvurderingMediator = TotrinnsvurderingMediator(
+        TotrinnsvurderingDao(dataSource), oppgaveDao, periodehistorikkDao,
+        NotatMediator(
+            NotatDao(dataSource)
+        ),
+    ),
 ) {
 
     internal fun håndter(godkjenningDTO: GodkjenningDTO, epost: String, oid: UUID) {
@@ -47,8 +49,8 @@ internal class GodkjenningService(
         val fødselsnummer = hendelseDao.finnFødselsnummer(hendelseId)
         val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(godkjenningDTO.oppgavereferanse)
         val totrinnsvurdering = totrinnsvurderingMediator.hentAktiv(vedtaksperiodeId)
-        val erBeslutteroppgave = oppgaveMediator.erBeslutteroppgave(godkjenningDTO.oppgavereferanse)
-        val tidligereSaksbehandler = oppgaveMediator.finnTidligereSaksbehandler(godkjenningDTO.oppgavereferanse)
+        val erBeslutteroppgave = oppgaveDao.erBeslutteroppgave(godkjenningDTO.oppgavereferanse)
+        val tidligereSaksbehandler = oppgaveDao.finnTidligereSaksbehandler(godkjenningDTO.oppgavereferanse)
         val reserverPersonOid: UUID =
             if (erBeslutteroppgave && tidligereSaksbehandler != null) tidligereSaksbehandler
             else if (totrinnsvurdering?.erBeslutteroppgave() == true) totrinnsvurdering.saksbehandler!!

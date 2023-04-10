@@ -18,7 +18,7 @@ import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Toggle
-import no.nav.helse.modell.oppgave.OppgaveMediator
+import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.tildeling.TildelingService
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
@@ -38,7 +38,7 @@ import org.junit.jupiter.api.TestInstance
 internal class TotrinnsvurderingApiTest : AbstractApiTest() {
 
     private val varselRepository = mockk<ApiVarselRepository>(relaxed = true)
-    private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
+    private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
     private val notatMediator = mockk<NotatMediator>(relaxed = true)
     private val tildelingService = mockk<TildelingService>(relaxed = true)
@@ -61,7 +61,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
         setupServer {
             totrinnsvurderingApi(
                 varselRepository,
-                oppgaveMediator,
+                oppgaveDao,
                 notatMediator,
                 tildelingService,
                 hendelseMediator,
@@ -72,12 +72,12 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
 
     @BeforeEach
     fun setup() {
-        clearMocks(oppgaveMediator, periodehistorikkDao, notatMediator, tildelingService, hendelseMediator)
+        clearMocks(oppgaveDao, periodehistorikkDao, notatMediator, tildelingService, hendelseMediator)
     }
 
     @Test
     fun `Kan ikke gjøres til beslutteroppgave hvis den allerede er beslutteroppgave`() {
-        every { oppgaveMediator.erBeslutteroppgave(1L) } returns true
+        every { oppgaveDao.erBeslutteroppgave(1L) } returns true
         val response = runBlocking {
             client.post("/api/totrinnsvurdering") {
                 contentType(ContentType.Application.Json)
@@ -90,8 +90,8 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
 
     @Test
     fun `en vedtaksperiode kan godkjennes hvis alle varsler er vurdert`() {
-        every { oppgaveMediator.erAktivOppgave(1L) } returns true
-        every { oppgaveMediator.erRiskoppgave(1L) } returns false
+        every { oppgaveDao.venterPåSaksbehandler(1L) } returns true
+        every { oppgaveDao.erRiskoppgave(1L) } returns false
         every { varselRepository.ikkeVurderteVarslerFor(1L) } returns 0
         every { totrinnsvurderingMediator.hentAktiv(oppgaveId = any()) } returns Totrinnsvurdering(
             vedtaksperiodeId = UUID.randomUUID(),
@@ -114,8 +114,8 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
 
     @Test
     fun `en vedtaksperiode kan ikke godkjennes hvis det fins aktive varsler`() {
-        every { oppgaveMediator.erAktivOppgave(1L) } returns true
-        every { oppgaveMediator.erRiskoppgave(1L) } returns false
+        every { oppgaveDao.venterPåSaksbehandler(1L) } returns true
+        every { oppgaveDao.erRiskoppgave(1L) } returns false
         every { varselRepository.ikkeVurderteVarslerFor(1L) } returns 1
         val response = runBlocking {
             client.post("/api/totrinnsvurdering") {
@@ -140,9 +140,9 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
         }
 
         verify(exactly = 1) {
-            oppgaveMediator.setBeslutteroppgave(
+            oppgaveDao.setBeslutteroppgave(
                 oppgaveId = totrinnsvurderingDto.oppgavereferanse,
-                tidligereSaksbehandlerOid = saksbehandler_oid
+                tidligereSaksbehandlerOID = saksbehandler_oid
             )
         }
         verify(exactly = 1) {
@@ -153,7 +153,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             )
         }
         verify(exactly = 1) {
-            oppgaveMediator.lagrePeriodehistorikk(
+            totrinnsvurderingMediator.lagrePeriodehistorikk(
                 totrinnsvurderingDto.oppgavereferanse,
                 saksbehandler_oid,
                 PeriodehistorikkType.TOTRINNSVURDERING_TIL_GODKJENNING
@@ -176,7 +176,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
         }
 
         verify(exactly = 1) {
-            oppgaveMediator.setReturoppgave(
+            oppgaveDao.setReturoppgave(
                 oppgaveId = returDtoMedNotat.oppgavereferanse,
                 beslutterSaksbehandlerOid = saksbehandler_oid
             )
@@ -212,7 +212,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             }
         }
 
-        verify(exactly = 0) { oppgaveMediator.setBeslutteroppgave(any(), any()) }
+        verify(exactly = 0) { oppgaveDao.setBeslutteroppgave(any(), any()) }
         assertEquals(HttpStatusCode.BadRequest, response.status)
     }
 
@@ -227,7 +227,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             }
         }
 
-        verify(exactly = 0) { oppgaveMediator.setBeslutteroppgave(any(), any()) }
+        verify(exactly = 0) { oppgaveDao.setBeslutteroppgave(any(), any()) }
         assertEquals(HttpStatusCode.BadRequest, response.status)
     }
 
@@ -241,7 +241,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             }
         }
 
-        verify(exactly = 0) { oppgaveMediator.setBeslutteroppgave(any(), any()) }
+        verify(exactly = 0) { oppgaveDao.setBeslutteroppgave(any(), any()) }
         assertEquals(HttpStatusCode.Unauthorized, response.status)
     }
 
@@ -255,7 +255,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             }
         }
 
-        verify(exactly = 0) { oppgaveMediator.setBeslutteroppgave(any(), any()) }
+        verify(exactly = 0) { oppgaveDao.setBeslutteroppgave(any(), any()) }
         assertEquals(HttpStatusCode.Unauthorized, response.status)
     }
 
@@ -283,7 +283,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
 
     @Test
     fun `Totrinnsvurdering kan gjøres til beslutteroppgave hvis den er en returoppgave`() {
-        every { oppgaveMediator.erBeslutteroppgave(1L) } returns false
+        every { oppgaveDao.erBeslutteroppgave(1L) } returns false
         every { totrinnsvurderingMediator.hentAktiv(oppgaveId = any()) } returns Totrinnsvurdering(
             vedtaksperiodeId = UUID.randomUUID(),
             erRetur = true,
@@ -366,7 +366,8 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             opprettet = now()
         )
         every { varselRepository.ikkeVurderteVarslerFor(10L) } returns 0
-        every { oppgaveMediator.finnBeslutterSaksbehandler(10L) } returns null
+        // TODO hvorfor kjører testen grønt uansett hva finnBeslutterSaksbehandler returnerer?
+        every { oppgaveDao.finnBeslutterSaksbehandler(10L) } returns null
 
         val response = runBlocking {
             client.post(TOTRINNSVURDERING_URL) {
@@ -393,7 +394,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             oppdatert = now(),
             opprettet = now()
         )
-        every { oppgaveMediator.finnBeslutterSaksbehandler(10L) } returns null
+        every { oppgaveDao.finnBeslutterSaksbehandler(10L) } returns null
 
         val response = runBlocking {
             client.post(TOTRINNSVURDERING_URL) {
@@ -425,7 +426,8 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             oppdatert = now(),
             opprettet = now()
         )
-        every { oppgaveMediator.finnBeslutterSaksbehandler(10L) } returns null
+        // TODO hvorfor kjører testen grønt uansett hva finnBeslutterSaksbehandler returnerer?
+        every { oppgaveDao.finnBeslutterSaksbehandler(10L) } returns null
 
         val response = runBlocking {
             client.post(TOTRINNSVURDERING_URL) {
@@ -456,7 +458,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             oppdatert = now(),
             opprettet = now()
         )
-        every { oppgaveMediator.finnTidligereSaksbehandler(any()) } returns null
+        every { oppgaveDao.finnTidligereSaksbehandler(any()) } returns null
 
         val notat = "notat_tekst"
         val response = runBlocking {

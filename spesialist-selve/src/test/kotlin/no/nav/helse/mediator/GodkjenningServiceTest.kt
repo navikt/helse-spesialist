@@ -12,6 +12,7 @@ import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.mediator.api.GodkjenningDTO
 import no.nav.helse.mediator.api.GodkjenningService
 import no.nav.helse.modell.HendelseDao
+import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao
@@ -41,8 +42,12 @@ internal class GodkjenningServiceTest : AbstractE2ETest() {
         reservasjonDao = reserverpersonDaoMock,
         opptegnelseDao = opptegnelseDao,
         periodehistorikkDao = periodehistorikkDaoMock,
-        oppgaveMediator = oppgaveMediatorMock,
-        totrinnsvurderingMediator = TotrinnsvurderingMediator(totrinnsvurderingDaoMock, oppgaveMediatorMock, notatMediatorMock),
+        totrinnsvurderingMediator = TotrinnsvurderingMediator(
+            totrinnsvurderingDaoMock,
+            mockk<OppgaveDao>(),
+            periodehistorikkDaoMock,
+            notatMediatorMock,
+        ),
     )
 
     @Test
@@ -58,13 +63,15 @@ internal class GodkjenningServiceTest : AbstractE2ETest() {
     }
 
     @Test
-    fun `For beslutteroppgave settes oppgavens tidligere_saksbehandler som reserverPersonOid`() {
+    fun `Ved godkjenning av beslutteroppgave reserveres personen til tidligereSaksbehandler`() {
         val oid = UUID.randomUUID()
         val tidligereSaksbehandlerOid = UUID.randomUUID()
         settOppBruker()
 
-        every { oppgaveMediatorMock.erBeslutteroppgave(1L) } returns true
-        every { oppgaveMediatorMock.finnTidligereSaksbehandler(1L) } returns tidligereSaksbehandlerOid
+        every { totrinnsvurderingDaoMock.hentAktiv(any<UUID>()) } returns mockk<Totrinnsvurdering>().also { totrinnsvurdering ->
+            every { totrinnsvurdering.erBeslutteroppgave() } returns true
+            every { totrinnsvurdering.saksbehandler } returns tidligereSaksbehandlerOid
+        }
 
         godkjenningServiceWithMocks.håndter(GodkjenningDTO(1L, true, "saksbehandler", null, null, null), "epost@nav.no", oid)
 
@@ -132,7 +139,7 @@ internal class GodkjenningServiceTest : AbstractE2ETest() {
     }
 
     @Test
-    fun `Lagrer periodehistorikk for beslutteroppgave ved utbetaling`() {
+    fun `Lagrer at beslutter har attestert i periodehistorikk`() {
         val oid = UUID.randomUUID()
         settOppBruker()
 

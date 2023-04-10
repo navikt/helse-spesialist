@@ -102,10 +102,12 @@ internal class Hendelsefabrikk(
     private val totrinnsvurderingDao: TotrinnsvurderingDao = TotrinnsvurderingDao(dataSource),
     private val notatDao: NotatDao = NotatDao(dataSource),
     private val notatMediator: NotatMediator = NotatMediator(notatDao),
+    private val periodehistorikkDao: PeriodehistorikkDao = PeriodehistorikkDao(dataSource),
     private val totrinnsvurderingMediator: TotrinnsvurderingMediator = TotrinnsvurderingMediator(
         totrinnsvurderingDao,
-        oppgaveMediator,
-        notatMediator
+        oppgaveDao,
+        periodehistorikkDao,
+        notatMediator,
     ),
     private val godkjenningMediator: GodkjenningMediator,
     private val automatisering: Automatisering,
@@ -114,7 +116,6 @@ internal class Hendelsefabrikk(
     private val opptegnelseDao: OpptegnelseDao = OpptegnelseDao(dataSource),
     private val generasjonRepository: ActualGenerasjonRepository = ActualGenerasjonRepository(dataSource),
     private val vergemålDao: VergemålDao = VergemålDao(dataSource),
-    private val periodehistorikkDao: PeriodehistorikkDao = PeriodehistorikkDao(dataSource),
     private val varselRepository: ActualVarselRepository = ActualVarselRepository(dataSource),
     private val overstyringMediator: OverstyringMediator,
     private val snapshotMediator: SnapshotMediator,

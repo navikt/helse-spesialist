@@ -188,7 +188,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private val godkjenningService = GodkjenningService(
         dataSource,
         rapidsConnection = testRapid,
-        oppgaveMediator = oppgaveMediator,
     )
 
     internal val dataFetchingEnvironment = mockk<DataFetchingEnvironment>(relaxed = true)

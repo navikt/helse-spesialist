@@ -230,7 +230,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     )
 
     private val totrinnsvurderingMediator =
-        TotrinnsvurderingMediator(TotrinnsvurderingDao(dataSource), oppgaveMediator, notatMediator)
+        TotrinnsvurderingMediator(TotrinnsvurderingDao(dataSource), oppgaveDao, periodehistorikkDao, notatMediator)
 
     private val snapshotMediator = SnapshotMediator(
         snapshotDao = snapshotApiDao,
@@ -333,7 +333,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                     notaterApi(notatMediator)
                     totrinnsvurderingApi(
                         apiVarselRepository,
-                        oppgaveMediator,
+                        oppgaveDao,
                         notatMediator,
                         tildelingService,
                         hendelseMediator,
@@ -398,7 +398,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         godkjenningService = GodkjenningService(
             dataSource = dataSource,
             rapidsConnection = rapidsConnection,
-            oppgaveMediator = oppgaveMediator,
         )
     }
 
