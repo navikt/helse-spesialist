@@ -19,6 +19,7 @@ import no.nav.helse.Meldingssender.sendArbeidsforholdløsningOld
 import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendEgenAnsattløsningOld
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
+import no.nav.helse.Meldingssender.sendInntektløsningOld
 import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
 import no.nav.helse.Meldingssender.sendRisikovurderingløsningOld
 import no.nav.helse.Meldingssender.sendSøknadSendt
@@ -264,6 +265,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             godkjenningsmeldingId = oppgaveId,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
+        sendInntektløsningOld(godkjenningsmeldingId = oppgaveId)
     }
 
     /**
