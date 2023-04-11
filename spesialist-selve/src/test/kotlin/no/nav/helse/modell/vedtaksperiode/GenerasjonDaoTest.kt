@@ -9,8 +9,8 @@ import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.mediator.builders.GenerasjonBuilder
+import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.VarselDao
-import no.nav.helse.modell.varsel.VarselRepository
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -135,7 +135,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         varselDao.lagreVarsel(varselId, "EN_KODE", varselOpprettet, VEDTAKSPERIODE_ID, generasjonId)
         val generasjon = generasjonDao.finnSisteFor(VEDTAKSPERIODE_ID)
         val forventetGenerasjon = Generasjon(generasjonId, VEDTAKSPERIODE_ID, 1.januar, 31.januar, 1.januar)
-        forventetGenerasjon.håndterRegelverksvarsel(UUID.randomUUID(), varselId, "EN_KODE", LocalDateTime.now(), varselRepository)
+        forventetGenerasjon.håndter(Varsel(varselId, "EN_KODE", varselOpprettet, VEDTAKSPERIODE_ID))
         assertEquals(
             forventetGenerasjon,
             generasjon
@@ -346,15 +346,4 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
                 it.localDateTimeOrNull("opprettet_tidspunkt")
             }.asSingle)
         }
-
-    private val varselRepository = object : VarselRepository {
-        override fun deaktiverFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, definisjonId: UUID?) {}
-        override fun reaktiverFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String) {}
-        override fun godkjennFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String, definisjonId: UUID?) {}
-        override fun avvisFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String, definisjonId: UUID?) {}
-        override fun lagreVarsel(id: UUID, generasjonId: UUID, varselkode: String, opprettet: LocalDateTime, vedtaksperiodeId: UUID) {}
-        override fun lagreDefinisjon(id: UUID, varselkode: String, tittel: String, forklaring: String?, handling: String?, avviklet: Boolean, opprettet: LocalDateTime) {}
-        override fun oppdaterGenerasjonFor(id: UUID, gammelGenerasjonId: UUID, nyGenerasjonId: UUID) {}
-    }
-
 }

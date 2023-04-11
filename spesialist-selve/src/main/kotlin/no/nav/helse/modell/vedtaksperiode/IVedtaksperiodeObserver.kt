@@ -1,6 +1,7 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 interface IVedtaksperiodeObserver {
@@ -11,4 +12,7 @@ interface IVedtaksperiodeObserver {
     fun utbetalingForkastet(generasjonId: UUID, utbetalingId: UUID) {}
     fun vedtakFattet(generasjonId: UUID, hendelseId: UUID) {}
     fun førsteGenerasjonOpprettet(generasjonId: UUID, vedtaksperiodeId: UUID, hendelseId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate) {}
+    fun varselOpprettet(vedtaksperiodeId: UUID, generasjonId: UUID, varselId: UUID, varselkode: String, opprettet: LocalDateTime) {}
+    fun varselReaktivert(varselId: UUID, varselkode: String, generasjonId: UUID, vedtaksperiodeId: UUID) {}
+
 }

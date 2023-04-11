@@ -897,18 +897,16 @@ internal class Hendelsefabrikk(
     }
 
     fun nyeVarsler(id: UUID, fødselsnummer: String, varsler: List<Varsel>, json: String): NyeVarsler {
-        return NyeVarsler(id, fødselsnummer, varsler, json, varselRepository, generasjonRepository)
+        return NyeVarsler(id, fødselsnummer, varsler, vedtaksperioderFor(fødselsnummer), json)
     }
 
     fun nyeVarsler(json: String): NyeVarsler {
         val jsonNode = mapper.readTree(json)
-        return NyeVarsler(
+        return nyeVarsler(
             id = UUID.fromString(jsonNode.path("@id").asText()),
             fødselsnummer = jsonNode.path("fødselsnummer").asText(),
             varsler = jsonNode.path("aktiviteter").varsler(),
             json,
-            varselRepository,
-            generasjonRepository
         )
     }
 }

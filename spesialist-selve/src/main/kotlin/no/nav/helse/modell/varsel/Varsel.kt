@@ -9,8 +9,7 @@ import no.nav.helse.modell.varsel.Varsel.Status.AVVIST
 import no.nav.helse.modell.varsel.Varsel.Status.GODKJENT
 import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
 import no.nav.helse.modell.varsel.Varsel.Status.VURDERT
-import no.nav.helse.modell.vedtaksperiode.Generasjon
-import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
+import no.nav.helse.modell.vedtaksperiode.IVedtaksperiodeObserver
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import org.slf4j.LoggerFactory
 
@@ -30,12 +29,16 @@ internal class Varsel(
         AVVIST
     }
 
+    private val observers = mutableSetOf<IVedtaksperiodeObserver>()
+
+    internal fun registrer(vararg observer: IVedtaksperiodeObserver) {
+        observers.addAll(observer)
+    }
+
     internal fun erAktiv(): Boolean = this.status == AKTIV
 
-    internal fun erGyldig(): Boolean = this.status != INAKTIV
-
-    internal fun lagre(hendelseId: UUID, generasjon: Generasjon, varselRepository: VarselRepository) {
-        generasjon.håndterRegelverksvarsel(hendelseId, id, varselkode, opprettet, varselRepository)
+    internal fun opprett(generasjonId: UUID) {
+        observers.forEach { it.varselOpprettet(vedtaksperiodeId, generasjonId, id, varselkode, opprettet) }
     }
 
     internal fun godkjennFor(generasjonId: UUID, ident: String, varselRepository: VarselRepository) {
@@ -82,6 +85,12 @@ internal class Varsel(
         varselRepository.reaktiverFor(vedtaksperiodeId, generasjonId, varselkode)
     }
 
+    internal fun reaktiver(generasjonId: UUID) {
+        if (status != INAKTIV) return
+        this.status = AKTIV
+        observers.forEach { it.varselReaktivert(id, varselkode, generasjonId, vedtaksperiodeId) }
+    }
+
     private fun oppdaterGenerasjon(gammelGenerasjonId: UUID, nyGenerasjonId: UUID, varselRepository: VarselRepository) {
         varselRepository.oppdaterGenerasjonFor(this.id, gammelGenerasjonId, nyGenerasjonId)
     }
@@ -106,32 +115,13 @@ internal class Varsel(
         return result
     }
 
+    internal fun erRelevantFor(vedtaksperiodeId: UUID): Boolean = this.vedtaksperiodeId == vedtaksperiodeId
+
     internal companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
         internal fun List<Varsel>.flyttVarslerFor(gammelGenerasjonId: UUID, nyGenerasjonId: UUID, varselRepository: VarselRepository) {
             forEach { it.oppdaterGenerasjon(gammelGenerasjonId, nyGenerasjonId, varselRepository) }
-        }
-
-        internal fun List<Varsel>.lagre(
-            hendelseId: UUID,
-            varselRepository: VarselRepository,
-            generasjonRepository: GenerasjonRepository
-        ) {
-            groupBy { it.vedtaksperiodeId }.forEach { (vedtaksperiodeId, varsler) ->
-                try {
-                    varsler.lagre(hendelseId, { generasjonRepository.sisteFor(vedtaksperiodeId) }, varselRepository)
-                } catch (e: IllegalStateException) {
-                    sikkerlogg.info(
-                        "Varsler for {} ble ikke lagret fordi det ikke finnes noen generasjon for perioden. Perioden er trolig forkastet",
-                        keyValue("vedtaksperiodeId", vedtaksperiodeId)
-                    )
-                }
-            }
-        }
-
-        private fun List<Varsel>.lagre(hendelseId: UUID, sisteGenerasjon: () -> Generasjon, varselRepository: VarselRepository) {
-            forEach { it.lagre(hendelseId, sisteGenerasjon(), varselRepository) }
         }
 
         internal fun List<Varsel>.godkjennFor(generasjonId: UUID, varselkode: String, ident: String, varselRepository: VarselRepository) {
@@ -152,6 +142,9 @@ internal class Varsel(
 
         internal fun List<Varsel>.avvisAlleFor(generasjonId: UUID, ident: String, varselRepository: VarselRepository) {
             forEach { it.avvisFor(generasjonId, ident, varselRepository) }
+        }
+        internal fun List<Varsel>.finnEksisterendeVarsel(varsel: Varsel): Varsel? {
+            return find { it.varselkode == varsel.varselkode }
         }
 
         internal fun JsonNode.varsler(): List<Varsel> {

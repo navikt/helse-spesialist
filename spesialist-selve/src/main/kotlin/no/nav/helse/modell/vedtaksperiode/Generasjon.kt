@@ -8,6 +8,7 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.Varsel.Companion.avvisAlleFor
 import no.nav.helse.modell.varsel.Varsel.Companion.deaktiverFor
+import no.nav.helse.modell.varsel.Varsel.Companion.finnEksisterendeVarsel
 import no.nav.helse.modell.varsel.Varsel.Companion.flyttVarslerFor
 import no.nav.helse.modell.varsel.Varsel.Companion.godkjennAlleFor
 import no.nav.helse.modell.varsel.Varsel.Companion.godkjennFor
@@ -39,6 +40,7 @@ internal class Generasjon private constructor(
 
     internal fun registrer(vararg observer: IVedtaksperiodeObserver) {
         observers.addAll(observer)
+        varsler.forEach { it.registrer(*observer) }
     }
 
     internal fun tilhører(dato: LocalDate): Boolean = periode.tom() <= dato
@@ -120,20 +122,6 @@ internal class Generasjon private constructor(
         observers.forEach { it.utbetalingForkastet(id, utbetalingId) }
     }
 
-    internal fun håndterRegelverksvarsel(hendelseId: UUID, varselId: UUID, varselkode: String, opprettet: LocalDateTime, varselRepository: VarselRepository) {
-        if (!låst) return håndterVarsel(varselId, varselkode, opprettet, varselRepository)
-        val nyGenerasjon = håndterNyGenerasjon(varselRepository = varselRepository, hendelseId = hendelseId)
-            ?: throw IllegalStateException("Forventer å kunne opprette ny generasjon da gjeldende generasjon = $this er låst.")
-        nyGenerasjon.håndterRegelverksvarsel(hendelseId, varselId, varselkode, opprettet, varselRepository)
-        sikkerlogg.info(
-            "Oppretter ny {} for {} som følge av nytt varsel {}, {}",
-            keyValue("generasjon", nyGenerasjon),
-            keyValue("vedtaksperiodeId", nyGenerasjon.vedtaksperiodeId),
-            keyValue("varselId", varselId),
-            keyValue("varselkode", varselkode)
-        )
-    }
-
     internal fun håndterSaksbehandlingsvarsel(varselId: UUID, varselkode: Varselkode, opprettet: LocalDateTime, varselRepository: VarselRepository) {
         if (låst) {
             throw IllegalStateException("Forsøker å håndtere varselkode = $varselkode for generasjon = $this som er låst. Det skal ikke være mulig.")
@@ -178,6 +166,18 @@ internal class Generasjon private constructor(
         observers.forEach {
             it.førsteGenerasjonOpprettet(id, vedtaksperiodeId, hendelseId, periode.fom(), periode.tom(), skjæringstidspunkt)
         }
+    }
+
+    internal fun håndter(varsel: Varsel) {
+        val eksisterendeVarsel = varsler.finnEksisterendeVarsel(varsel) ?: return nyttVarsel(varsel)
+        if (eksisterendeVarsel.erAktiv()) return
+        eksisterendeVarsel.reaktiver(id)
+    }
+
+    private fun nyttVarsel(varsel: Varsel) {
+        varsel.registrer(*this.observers.toTypedArray())
+        varsler.add(varsel)
+        varsel.opprett(id)
     }
     override fun toString(): String = "generasjonId=$id, vedtaksperiodeId=$vedtaksperiodeId, utbetalingId=$utbetalingId, låst=$låst, skjæringstidspunkt=$skjæringstidspunkt, periode=$periode"
 

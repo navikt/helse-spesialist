@@ -37,7 +37,7 @@ internal class ActualVarselRepositoryTest : AbstractDatabaseTest() {
         generasjonId = UUID.randomUUID()
 
         generasjon = Generasjon(generasjonId, vedtaksperiodeId, 1.januar, 1.januar, 31.januar)
-        generasjon.registrer(generasjonRepository)
+        generasjon.registrer(generasjonRepository, varselRepository)
         generasjon.opprettFørste(UUID.randomUUID())
     }
 
@@ -71,7 +71,7 @@ internal class ActualVarselRepositoryTest : AbstractDatabaseTest() {
 
     @Test
     fun `avvisning av varsel med definisjonId medfører at varselet lagres med referanse til denne definisjonen`() {
-        generasjon.håndterRegelverksvarsel(UUID.randomUUID(), UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), varselRepository)
+        generasjon.håndter(Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), vedtaksperiodeId))
         generasjon.håndterAvvistAvSaksbehandler("EN_KODE", varselRepository)
         assertEquals(AVVIST, statusFor(generasjonId, "EN_KODE"))
         assertDefinisjonFor(vedtaksperiodeId, "EN_KODE", definisjonId)
@@ -128,14 +128,13 @@ internal class ActualVarselRepositoryTest : AbstractDatabaseTest() {
 
     @Test
     fun `oppdatering av varsel for én generasjon endrer ikke varsel for en annen generasjon på samme periode`() {
-        generasjon.håndterRegelverksvarsel(UUID.randomUUID(), UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), varselRepository)
+        generasjon.håndter(Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), vedtaksperiodeId))
         generasjon.håndterNyUtbetaling(UUID.randomUUID(), UUID.randomUUID(), varselRepository)
         generasjon.håndterGodkjentAvSaksbehandler("EN_IDENT", varselRepository)
         generasjon.håndterVedtakFattet(UUID.randomUUID())
-        generasjon = generasjonRepository.sisteFor(vedtaksperiodeId)
         val nesteGenerasjonId = UUID.randomUUID()
         val nesteGenerasjon = generasjon.håndterNyGenerasjon(varselRepository, UUID.randomUUID(), nesteGenerasjonId)
-        nesteGenerasjon?.håndterRegelverksvarsel(UUID.randomUUID(), UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), varselRepository)
+        nesteGenerasjon?.håndter(Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), vedtaksperiodeId))
         nesteGenerasjon?.håndterDeaktivertVarsel("EN_KODE", varselRepository)
         assertGodkjent(generasjonId, "EN_KODE")
         assertInaktiv(nesteGenerasjonId, "EN_KODE")

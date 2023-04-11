@@ -32,7 +32,7 @@ class GenerasjonBuilderTest {
         val generasjon = builder.build()
         val forventetGenerasjon = Generasjon(generasjonId, vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
         forventetGenerasjon.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId, varselRepository)
-        forventetGenerasjon.håndterRegelverksvarsel(UUID.randomUUID(), varselId,"EN_KODE", varselOpprettet, varselRepository)
+        forventetGenerasjon.håndter(Varsel(varselId, "EN_KODE", varselOpprettet, vedtaksperiodeId))
 
         assertEquals(forventetGenerasjon, generasjon)
     }

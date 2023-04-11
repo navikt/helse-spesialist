@@ -19,7 +19,7 @@ class VedtaksperiodeBuilder(
         generasjonBuilder.varsler(varsler)
         return Vedtaksperiode(
             vedtaksperiodeId,
-            generasjonBuilder.build(generasjonRepository)
+            generasjonBuilder.build(generasjonRepository, varselRepository)
         )
     }
 }

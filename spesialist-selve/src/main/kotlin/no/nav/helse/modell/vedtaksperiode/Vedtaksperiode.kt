@@ -2,10 +2,11 @@ package no.nav.helse.modell.vedtaksperiode
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.modell.varsel.Varsel
 
 internal class Vedtaksperiode(
     private val vedtaksperiodeId: UUID,
-    private val gjeldendeGenerasjon: Generasjon
+    private val gjeldendeGenerasjon: Generasjon,
 ) {
 
     private val observers = mutableListOf<IVedtaksperiodeObserver>()
@@ -25,6 +26,12 @@ internal class Vedtaksperiode(
 
     private fun harAktiveVarsler(): Boolean {
         return gjeldendeGenerasjon.harAktiveVarsler()
+    }
+
+    private fun håndter(varsler: List<Varsel>) {
+        varsler
+            .filter { it.erRelevantFor(vedtaksperiodeId) }
+            .forEach { gjeldendeGenerasjon.håndter(it) }
     }
 
     override fun equals(other: Any?): Boolean =
@@ -50,6 +57,10 @@ internal class Vedtaksperiode(
 
         internal fun List<Vedtaksperiode>.harAktiveVarsler(tilOgMed: LocalDate): Boolean {
             return this.filter { it.tilhører(tilOgMed) }.any { it.harAktiveVarsler() }
+        }
+
+        internal fun List<Vedtaksperiode>.håndter(varsler: List<Varsel>) {
+            forEach { it.håndter(varsler) }
         }
     }
 }

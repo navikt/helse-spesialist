@@ -7,6 +7,7 @@ import no.nav.helse.modell.varsel.Varsel.Status.AKTIV
 import no.nav.helse.modell.varsel.Varsel.Status.AVVIST
 import no.nav.helse.modell.varsel.Varsel.Status.GODKJENT
 import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
+import no.nav.helse.modell.vedtaksperiode.IVedtaksperiodeObserver
 import no.nav.helse.tellInaktivtVarsel
 import no.nav.helse.tellVarsel
 
@@ -29,13 +30,29 @@ internal interface VarselRepository {
     fun oppdaterGenerasjonFor(id: UUID, gammelGenerasjonId: UUID, nyGenerasjonId: UUID)
 }
 
-internal class ActualVarselRepository(dataSource: DataSource) : VarselRepository {
+internal class ActualVarselRepository(dataSource: DataSource) : VarselRepository, IVedtaksperiodeObserver {
 
     private val varselDao = VarselDao(dataSource)
     private val definisjonDao = DefinisjonDao(dataSource)
 
     internal fun finnVarslerFor(generasjonId: UUID): List<Varsel> {
         return varselDao.varslerFor(generasjonId)
+    }
+
+    override fun varselOpprettet(
+        vedtaksperiodeId: UUID,
+        generasjonId: UUID,
+        varselId: UUID,
+        varselkode: String,
+        opprettet: LocalDateTime,
+        ) {
+        varselDao.lagreVarsel(varselId, varselkode, opprettet, vedtaksperiodeId, generasjonId)
+        if (varselkode.matches(varselkodeformat.toRegex())) tellVarsel(varselkode)
+    }
+
+    override fun varselReaktivert(varselId: UUID, varselkode: String, generasjonId: UUID, vedtaksperiodeId: UUID) {
+        varselDao.oppdaterStatus(vedtaksperiodeId, generasjonId, varselkode, AKTIV, null, null)
+        if (varselkode.matches(varselkodeformat.toRegex())) tellVarsel(varselkode)
     }
 
     override fun reaktiverFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String) {

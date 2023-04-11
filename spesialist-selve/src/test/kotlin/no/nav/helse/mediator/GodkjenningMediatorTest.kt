@@ -9,8 +9,9 @@ import no.nav.helse.januar
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.utbetaling.Utbetaling
-import no.nav.helse.modell.varsel.VarselRepository
+import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.vedtaksperiode.Generasjon
+import no.nav.helse.modell.vedtaksperiode.IVedtaksperiodeObserver
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -20,23 +21,23 @@ import org.junit.jupiter.api.Test
 internal class GodkjenningMediatorTest {
     private lateinit var context: CommandContext
     private val opptegnelseDao = mockk<OpptegnelseDao>(relaxed = true)
-    private val varselRepository = object : VarselRepository {
+    private val observer = object : IVedtaksperiodeObserver {
         val generasjonerMedGodkjenteVarsler = mutableSetOf<UUID>()
-        override fun deaktiverFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, definisjonId: UUID?) {}
-        override fun reaktiverFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String) {}
-        override fun godkjennFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String, definisjonId: UUID?) {
+        override fun varselOpprettet(
+            vedtaksperiodeId: UUID,
+            generasjonId: UUID,
+            varselId: UUID,
+            varselkode: String,
+            opprettet: LocalDateTime
+        ) {
             generasjonerMedGodkjenteVarsler.add(generasjonId)
         }
-        override fun avvisFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String, definisjonId: UUID?) {}
-        override fun lagreVarsel(id: UUID, generasjonId: UUID, varselkode: String, opprettet: LocalDateTime, vedtaksperiodeId: UUID) {}
-        override fun lagreDefinisjon(id: UUID, varselkode: String, tittel: String, forklaring: String?, handling: String?, avviklet: Boolean, opprettet: LocalDateTime) {}
-        override fun oppdaterGenerasjonFor(id: UUID, gammelGenerasjonId: UUID, nyGenerasjonId: UUID) {}
     }
     private val mediator = GodkjenningMediator(
         warningDao = mockk(relaxed = true),
         vedtakDao = mockk(relaxed = true),
         opptegnelseDao = opptegnelseDao,
-        varselRepository = varselRepository,
+        varselRepository = mockk(relaxed = true),
     )
 
     private val utbetaling = Utbetaling(UUID.randomUUID(), 1000, 1000)
@@ -100,13 +101,17 @@ internal class GodkjenningMediatorTest {
         val generasjonId2 = UUID.randomUUID()
         val generasjon1 = generasjon(generasjonId1)
         val generasjon2 = generasjon(generasjonId2)
-        generasjon1.håndterRegelverksvarsel(UUID.randomUUID(), UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), varselRepository)
-        generasjon2.håndterRegelverksvarsel(UUID.randomUUID(), UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), varselRepository)
+        generasjon1.registrer(observer)
+        generasjon2.registrer(observer)
+        val varsel1 = Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), UUID.randomUUID())
+        val varsel2 = Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), UUID.randomUUID())
+        generasjon1.håndter(varsel1)
+        generasjon2.håndter(varsel2)
 
         godkjenning(listOf(generasjon1, generasjon2))
-        assertEquals(2, varselRepository.generasjonerMedGodkjenteVarsler.size)
-        assertEquals(generasjonId1, varselRepository.generasjonerMedGodkjenteVarsler.toList()[0])
-        assertEquals(generasjonId2, varselRepository.generasjonerMedGodkjenteVarsler.toList()[1])
+        assertEquals(2, observer.generasjonerMedGodkjenteVarsler.size)
+        assertEquals(generasjonId1, observer.generasjonerMedGodkjenteVarsler.toList()[0])
+        assertEquals(generasjonId2, observer.generasjonerMedGodkjenteVarsler.toList()[1])
     }
 
     private fun generasjon(id: UUID = UUID.randomUUID()) = Generasjon(

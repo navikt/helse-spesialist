@@ -5,7 +5,7 @@ import java.util.UUID
 import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.januar
 import no.nav.helse.modell.varsel.ActualVarselRepository
-import no.nav.helse.modell.varsel.VarselRepository
+import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
@@ -29,22 +29,12 @@ class VedtaksperiodeBuilderTest : AbstractDatabaseTest() {
         val forventetVedtaksperiode = Vedtaksperiode(
             vedtaksperiodeId,
             Generasjon(generasjonId, vedtaksperiodeId, 1.januar, 31.januar, 1.januar).also {
-                it.håndterRegelverksvarsel(UUID.randomUUID(), varselId, "SB_EX_1", opprettet, dummyVarselRepository)
+                it.håndter(Varsel(varselId, "SB_EX_1", opprettet, vedtaksperiodeId))
             }
         )
         assertEquals(
             forventetVedtaksperiode,
             vedtaksperiode
         )
-    }
-
-    private val dummyVarselRepository = object : VarselRepository {
-        override fun deaktiverFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, definisjonId: UUID?) {}
-        override fun reaktiverFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String) {}
-        override fun godkjennFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String, definisjonId: UUID?) {}
-        override fun avvisFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String, definisjonId: UUID?) {}
-        override fun lagreVarsel(id: UUID, generasjonId: UUID, varselkode: String, opprettet: LocalDateTime, vedtaksperiodeId: UUID) {}
-        override fun lagreDefinisjon(id: UUID, varselkode: String, tittel: String, forklaring: String?, handling: String?, avviklet: Boolean, opprettet: LocalDateTime) {}
-        override fun oppdaterGenerasjonFor(id: UUID, gammelGenerasjonId: UUID, nyGenerasjonId: UUID) {}
     }
 }
