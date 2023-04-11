@@ -115,9 +115,9 @@ class OppgaveMediator(
 
     private fun tildelOppgaver(fødselsnummer: String) {
         reservasjonDao.hentReservasjonFor(fødselsnummer)?.let { (oid, settPåVent) ->
-            // Hent i bakgrunnen nå i utprøvingsfasen
-            CoroutineScope(Dispatchers.IO).launch { gruppehenter(oid) }
             oppgaver.forEach { oppgave ->
+                // Hent i bakgrunnen nå i utprøvingsfasen
+                CoroutineScope(Dispatchers.IO).launch { gruppehenter(oid) }
                 oppgave.tildelHvisIkkeStikkprøve(this, oid, settPåVent)
             }
         }

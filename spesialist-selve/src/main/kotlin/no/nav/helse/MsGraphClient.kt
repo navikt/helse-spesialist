@@ -30,7 +30,13 @@ class MsGraphClient(
             accept(ContentType.parse("application/json"))
             header("ConsistencyLevel", "eventual")
         }
-        sikkerlogger.info("respons fra MS Graph: ${response.bodyAsText()}")
+        val responseText = response.bodyAsText()
+        sikkerlogger.info("respons fra MS Graph: $responseText")
+        val responseNode = objectMapper.readTree(responseText)
+        responseNode["value"].firstOrNull()?.path("displayName")?.let {
+            sikkerlogger.info("$it er medlem av $groupId")
+        } ?: sikkerlogger.info("$oid er ikke medlem av $groupId")
+
     }
 
     companion object {
