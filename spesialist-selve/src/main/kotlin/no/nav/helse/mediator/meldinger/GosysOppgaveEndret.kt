@@ -61,7 +61,8 @@ internal class GosysOppgaveEndret(
             warningDao = warningDao,
             varselRepository = varselRepository,
             generasjonRepository = generasjonRepository,
-            vedtaksperiodeId = gosysOppgaveEndretCommandData.vedtaksperiodeId
+            vedtaksperiodeId = gosysOppgaveEndretCommandData.vedtaksperiodeId,
+            sykefraværstilfelle = sykefraværstilfelle
         ),
         SjekkAtOppgaveFortsattErÅpenCommand(fødselsnummer = fødselsnummer, oppgaveDao = oppgaveDao),
         SettTidligereAutomatiseringInaktivCommand(

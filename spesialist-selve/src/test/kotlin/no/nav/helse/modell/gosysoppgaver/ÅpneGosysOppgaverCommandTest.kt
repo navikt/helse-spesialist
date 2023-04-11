@@ -10,6 +10,7 @@ import no.nav.helse.januar
 import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_1
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_3
@@ -17,6 +18,8 @@ import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
+import no.nav.helse.modell.vedtaksperiode.IVedtaksperiodeObserver
+import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -31,12 +34,28 @@ internal class ÅpneGosysOppgaverCommandTest {
         private const val AKTØR_ID = "1234567891112"
         private val VEDTAKPERIODE_ID = UUID.randomUUID()
     }
+    private val observer = object : IVedtaksperiodeObserver {
 
+        val opprettedeVarsler = mutableListOf<String>()
+
+        override fun varselOpprettet(
+            vedtaksperiodeId: UUID,
+            generasjonId: UUID,
+            varselId: UUID,
+            varselkode: String,
+            opprettet: LocalDateTime
+        ) {
+            opprettedeVarsler.add(varselkode)
+        }
+    }
+
+    private val vedtaksperiode = Vedtaksperiode(VEDTAKPERIODE_ID, generasjon(VEDTAKPERIODE_ID)).also { it.registrer(observer) }
+    private val sykefraværstilfelle = Sykefraværstilfelle(FNR, 1.januar, listOf(vedtaksperiode))
     private val dao = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
     private val warningDao = mockk<WarningDao>(relaxed = true)
     private val varselRepository = mockk<VarselRepository>(relaxed = true)
     private val generasjonRepository = mockk<GenerasjonRepository>(relaxed = true)
-    private val command = ÅpneGosysOppgaverCommand(AKTØR_ID, dao, warningDao, varselRepository, generasjonRepository, VEDTAKPERIODE_ID)
+    private val command = ÅpneGosysOppgaverCommand(AKTØR_ID, dao, warningDao, varselRepository, generasjonRepository, VEDTAKPERIODE_ID, sykefraværstilfelle)
     private lateinit var context: CommandContext
 
     @BeforeEach
@@ -70,7 +89,7 @@ internal class ÅpneGosysOppgaverCommandTest {
         assertTrue(command.resume(context))
         verify(exactly = 1) { dao.persisterÅpneGosysOppgaver(any()) }
         verify(exactly = 0) { warningDao.leggTilWarning(VEDTAKPERIODE_ID, any()) }
-        verify(exactly = 0) { varselRepository.lagreVarsel(any(), any(), SB_EX_1.name, any(), VEDTAKPERIODE_ID) }
+        assertEquals(0, observer.opprettedeVarsler.size)
     }
 
     @Test
@@ -85,7 +104,8 @@ internal class ÅpneGosysOppgaverCommandTest {
         assertTrue(command.resume(context))
         verify(exactly = 1) { dao.persisterÅpneGosysOppgaver(any()) }
         verify(exactly = 1) { warningDao.leggTilWarning(VEDTAKPERIODE_ID, forventetWarning) }
-        verify(exactly = 1) { varselRepository.lagreVarsel(any(), any(), SB_EX_1.name, any(), VEDTAKPERIODE_ID) }
+        assertEquals(1, observer.opprettedeVarsler.size)
+        assertEquals(SB_EX_1.name, observer.opprettedeVarsler[0])
     }
 
     @Test
@@ -100,7 +120,8 @@ internal class ÅpneGosysOppgaverCommandTest {
         assertTrue(command.resume(context))
         verify(exactly = 1) { dao.persisterÅpneGosysOppgaver(any()) }
         verify(exactly = 1) { warningDao.leggTilWarning(VEDTAKPERIODE_ID, forventetWarning) }
-        verify(exactly = 1) { varselRepository.lagreVarsel(any(), any(), SB_EX_3.name, any(), VEDTAKPERIODE_ID) }
+        assertEquals(1, observer.opprettedeVarsler.size)
+        assertEquals(SB_EX_3.name, observer.opprettedeVarsler[0])
     }
 
     private fun generasjon(vedtaksperiodeId: UUID = UUID.randomUUID()) = Generasjon(

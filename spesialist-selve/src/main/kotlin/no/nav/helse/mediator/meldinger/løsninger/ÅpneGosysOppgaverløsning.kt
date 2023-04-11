@@ -6,6 +6,7 @@ import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDto
+import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_1
@@ -40,32 +41,32 @@ internal class ÅpneGosysOppgaverløsning(
         )
     }
 
-    internal fun evaluer(warningDao: WarningDao, varselRepository: VarselRepository, generasjonRepository: GenerasjonRepository, vedtaksperiodeId: UUID) {
-        warningsForOppslagFeilet(warningDao, varselRepository, generasjonRepository, vedtaksperiodeId)
-        warningsForÅpneGosysOppgaver(warningDao, varselRepository, generasjonRepository, vedtaksperiodeId)
+    internal fun evaluer(warningDao: WarningDao, varselRepository: VarselRepository, generasjonRepository: GenerasjonRepository, vedtaksperiodeId: UUID, sykefraværstilfelle: Sykefraværstilfelle) {
+        warningsForOppslagFeilet(warningDao, varselRepository, generasjonRepository, vedtaksperiodeId, sykefraværstilfelle)
+        warningsForÅpneGosysOppgaver(warningDao, varselRepository, generasjonRepository, vedtaksperiodeId, sykefraværstilfelle)
     }
 
-    private fun warningsForOppslagFeilet(warningDao: WarningDao, varselRepository: VarselRepository, generasjonRepository: GenerasjonRepository, vedtaksperiodeId: UUID) {
+    private fun warningsForOppslagFeilet(warningDao: WarningDao, varselRepository: VarselRepository, generasjonRepository: GenerasjonRepository, vedtaksperiodeId: UUID, sykefraværstilfelle: Sykefraværstilfelle) {
         val melding = "Kunne ikke sjekke åpne oppgaver på sykepenger i Gosys"
 
         if (oppslagFeilet) {
+            sykefraværstilfelle.håndter(SB_EX_3.nyttVarsel(vedtaksperiodeId))
             leggTilWarning(warningDao, vedtaksperiodeId, melding)
-            leggTilVarsel(varselRepository, generasjonRepository, vedtaksperiodeId, SB_EX_3)
         } else {
             setEksisterendeWarningInaktive(warningDao, vedtaksperiodeId, melding)
             deaktiverVarsel(varselRepository, generasjonRepository, vedtaksperiodeId, SB_EX_3)
         }
     }
 
-    private fun warningsForÅpneGosysOppgaver(warningDao: WarningDao, varselRepository: VarselRepository, generasjonRepository: GenerasjonRepository, vedtaksperiodeId: UUID) {
+    private fun warningsForÅpneGosysOppgaver(warningDao: WarningDao, varselRepository: VarselRepository, generasjonRepository: GenerasjonRepository, vedtaksperiodeId: UUID, sykefraværstilfelle: Sykefraværstilfelle) {
         if (antall == null) return
         val melding = "Det finnes åpne oppgaver på sykepenger i Gosys"
 
         val harAlleredeVarsel = warningDao.finnAktiveWarningsMedMelding(vedtaksperiodeId, melding).isNotEmpty()
         when {
             antall > 0 && !harAlleredeVarsel-> {
+                sykefraværstilfelle.håndter(SB_EX_1.nyttVarsel(vedtaksperiodeId))
                 leggTilWarning(warningDao, vedtaksperiodeId, melding)
-                leggTilVarsel(varselRepository, generasjonRepository, vedtaksperiodeId, SB_EX_1)
             }
             antall == 0 && harAlleredeVarsel -> {
                 setEksisterendeWarningInaktive(warningDao, vedtaksperiodeId, melding)
@@ -82,11 +83,6 @@ internal class ÅpneGosysOppgaverløsning(
     private fun setEksisterendeWarningInaktive(warningDao: WarningDao, vedtaksperiodeId: UUID, melding: String) {
         warningDao.setWarningMedMeldingInaktiv(vedtaksperiodeId, melding, LocalDateTime.now())
         tellWarningInaktiv(melding)
-    }
-
-    private fun leggTilVarsel(varselRepository: VarselRepository, generasjonRepository: GenerasjonRepository, vedtaksperiodeId: UUID, varselkode: Varselkode) {
-        val generasjon = generasjonRepository.sisteFor(vedtaksperiodeId)
-        varselkode.nyttVarsel(generasjon, varselRepository)
     }
 
     private fun deaktiverVarsel(varselRepository: VarselRepository, generasjonRepository: GenerasjonRepository, vedtaksperiodeId: UUID, varselkode: Varselkode) {

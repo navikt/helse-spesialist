@@ -39,6 +39,10 @@ enum class Varselkode(
         generasjon.håndterSaksbehandlingsvarsel(UUID.randomUUID(), this, LocalDateTime.now(), varselRepository)
     }
 
+    internal fun nyttVarsel(vedtaksperiodeId: UUID): Varsel {
+        return Varsel(UUID.randomUUID(), this.name, LocalDateTime.now(), vedtaksperiodeId)
+    }
+
     internal fun deaktiverFor(generasjon: Generasjon, varselRepository: VarselRepository) {
         generasjon.håndterDeaktivertVarsel(this.name, varselRepository)
     }

@@ -187,7 +187,8 @@ internal class Godkjenningsbehov(
             warningDao = warningDao,
             varselRepository = varselRepository,
             generasjonRepository = generasjonRepository,
-            vedtaksperiodeId = vedtaksperiodeId
+            vedtaksperiodeId = vedtaksperiodeId,
+            sykefraværstilfelle = sykefraværstilfelle
         ),
         RisikoCommand(
             vedtaksperiodeId = vedtaksperiodeId,
