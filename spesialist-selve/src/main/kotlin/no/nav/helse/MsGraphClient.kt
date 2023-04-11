@@ -22,7 +22,7 @@ class MsGraphClient(
         val groupId = "a7476a04-cec2-44dd-947f-efc745f199a7"
         val response = httpClient.get(graphUrl) {
             url {
-                path("/groups/$groupId/members")
+                path("v1.0/groups/$groupId/members")
                 parameters.append("\$filter", "id eq '$oid'")
                 parameters.append("\$count", "true")
             }
