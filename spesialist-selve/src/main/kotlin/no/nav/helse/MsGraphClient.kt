@@ -7,6 +7,7 @@ import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
+import io.ktor.http.path
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
@@ -19,12 +20,15 @@ class MsGraphClient(
     suspend fun hentGrupper(oid: UUID) {
         val token = runBlocking { tokenClient.fetchToken() }
         val groupId = "a7476a04-cec2-44dd-947f-efc745f199a7"
-        val response = httpClient.get(
-            "$graphUrl/groups/$groupId/members?\$filter=id eq '$oid'&\$count=true"
-        ) {
+        val response = httpClient.get(graphUrl) {
+            url {
+                path("/groups/$groupId/members")
+                parameters.append("\$filter", "id eq '$oid'")
+                parameters.append("\$count", "true")
+            }
             bearerAuth(token.access_token)
             accept(ContentType.parse("application/json"))
-            header("ConsistencyLevel" , "eventual")
+            header("ConsistencyLevel", "eventual")
         }
         sikkerlogger.info("respons fra MS Graph: ${response.bodyAsText()}")
     }
