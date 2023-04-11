@@ -26,6 +26,7 @@ import java.net.ServerSocket
 import java.time.LocalDateTime
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
+import no.nav.helse.Gruppe
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
@@ -311,8 +312,8 @@ internal class PersonApiTest {
                         oppgaveDao,
                         Tilgangsgrupper(
                             mapOf(
-                                Tilgangsgrupper.riskQaKey to riskQaGruppe.toString(),
-                                Tilgangsgrupper.beslutterKey to beslutterGruppe.toString()
+                                Gruppe.RISK_QA.gruppeKey to riskQaGruppe.toString(),
+                                Gruppe.BESLUTTER.gruppeKey to beslutterGruppe.toString(),
                             )
                         )
                     )

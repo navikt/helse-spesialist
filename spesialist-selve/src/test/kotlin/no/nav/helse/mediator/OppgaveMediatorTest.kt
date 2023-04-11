@@ -6,12 +6,13 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
+import no.nav.helse.Gruppe
+import no.nav.helse.Tilgangskontroll
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.kommando.TestHendelse
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.oppgave.OppgaveMediator
-import no.nav.helse.modell.oppgave.Saksbehandlergrupper
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
@@ -55,7 +56,7 @@ internal class OppgaveMediatorTest {
         tildelingDao,
         reservasjonDao,
         opptegnelseDao,
-        gruppehenter = gruppehenterTestoppsett.hentGrupper,
+        saksbehandlerErIGruppe = gruppehenterTestoppsett.hentGrupper,
     )
     private val søknadsoppgave: Oppgave = Oppgave.søknad(VEDTAKSPERIODE_ID, UTBETALING_ID)
     private val stikkprøveoppgave: Oppgave = Oppgave.stikkprøve(VEDTAKSPERIODE_ID_2, UTBETALING_ID_2)
@@ -220,7 +221,7 @@ internal class OppgaveMediatorTest {
     class GruppehenterTestoppsett {
         var erKalt = false
 
-        val hentGrupper: Saksbehandlergrupper = { _: UUID ->
+        val hentGrupper: Tilgangskontroll = { _: UUID, _: Gruppe->
             erKalt = true
         }
     }

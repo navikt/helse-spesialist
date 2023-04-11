@@ -5,6 +5,8 @@ import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import no.nav.helse.Gruppe
+import no.nav.helse.Tilgangskontroll
 import no.nav.helse.modell.oppgave.Oppgave.Companion.loggOppgaverAvbrutt
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
@@ -16,14 +18,12 @@ import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.slf4j.LoggerFactory
 
-internal typealias Saksbehandlergrupper = suspend (oid: UUID) -> Unit
-
 class OppgaveMediator(
     private val oppgaveDao: OppgaveDao,
     private val tildelingDao: TildelingDao,
     private val reservasjonDao: ReservasjonDao,
     private val opptegnelseDao: OpptegnelseDao,
-    private val gruppehenter: Saksbehandlergrupper = { },
+    private val saksbehandlerErIGruppe: Tilgangskontroll = { _, _ -> },
 ) {
     private val oppgaver = mutableSetOf<Oppgave>()
     private val oppgaverForPublisering = mutableMapOf<Long, String>()
@@ -117,7 +117,7 @@ class OppgaveMediator(
         reservasjonDao.hentReservasjonFor(fødselsnummer)?.let { (oid, settPåVent) ->
             oppgaver.forEach { oppgave ->
                 // Hent i bakgrunnen nå i utprøvingsfasen
-                CoroutineScope(Dispatchers.IO).launch { gruppehenter(oid) }
+                CoroutineScope(Dispatchers.IO).launch { saksbehandlerErIGruppe(oid, Gruppe.RISK_QA) }
                 oppgave.tildelHvisIkkeStikkprøve(this, oid, settPåVent)
             }
         }

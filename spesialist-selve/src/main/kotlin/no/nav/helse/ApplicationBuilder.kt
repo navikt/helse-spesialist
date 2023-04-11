@@ -221,7 +221,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         tildelingDao = tildelingDao,
         reservasjonDao = reservasjonDao,
         opptegnelseDao = opptegnelseDao,
-        gruppehenter = { oid -> msGraphClient.hentGrupper(oid) },
+        saksbehandlerErIGruppe = { oid, gruppe -> msGraphClient.erIGruppe(oid, tilgangsgrupper.gruppeId(gruppe)) }
     )
 
     private val totrinnsvurderingMediator =
@@ -433,26 +433,22 @@ internal fun PipelineContext<Unit, ApplicationCall>.gruppemedlemskap(): List<UUI
     return accessToken.payload.getClaim("groups").asList(String::class.java).map(UUID::fromString)
 }
 
-class Tilgangskontroll(private val tilgangsgrupper: Tilgangsgrupper, private val gruppemedlemskap: List<UUID>) {
-    val harTilgangTilRisksaker by lazy { gruppemedlemskap.contains(tilgangsgrupper.riskQaGruppeId) }
-    val harTilgangTilBeslutterOppgaver by lazy { gruppemedlemskap.contains(tilgangsgrupper.beslutterGruppeId) }
-}
-
 class Tilgangsgrupper(private val env: Map<String, String>) {
     private fun fromEnv(key: String) = UUID.fromString(env.getValue(key))
 
-    val kode7GruppeId: UUID by lazy { fromEnv(kode7Key) }
-    val riskQaGruppeId: UUID by lazy { fromEnv(riskQaKey) }
-    val beslutterGruppeId: UUID by lazy { fromEnv(beslutterKey) }
-    val skjermedePersonerGruppeId: UUID by lazy { fromEnv(skjermedeKey) }
+    val kode7GruppeId: UUID by lazy { fromEnv(Gruppe.KODE7.gruppeKey) }
+    val riskQaGruppeId: UUID by lazy { fromEnv(Gruppe.RISK_QA.gruppeKey) }
+    val beslutterGruppeId: UUID by lazy { fromEnv(Gruppe.BESLUTTER.gruppeKey) }
+    val skjermedePersonerGruppeId: UUID by lazy { fromEnv(Gruppe.SKJERMEDE.gruppeKey) }
 
-    companion object {
-        const val kode7Key = "KODE7_SAKSBEHANDLER_GROUP"
-        const val riskQaKey = "RISK_SUPERSAKSBEHANDLER_GROUP"
-        const val beslutterKey = "BESLUTTER_SAKSBEHANDLER_GROUP"
-        const val skjermedeKey = "SKJERMEDE_PERSONER_GROUP"
-    }
+    fun gruppeId(gruppe: Gruppe): UUID = fromEnv(gruppe.gruppeKey)
 }
 
-internal fun PipelineContext<Unit, ApplicationCall>.tilganger(tilgangsgrupper: Tilgangsgrupper) =
-    Tilgangskontroll(tilgangsgrupper, gruppemedlemskap())
+enum class Gruppe(val gruppeKey: String) {
+    RISK_QA("RISK_SUPERSAKSBEHANDLER_GROUP"),
+    KODE7("KODE7_SAKSBEHANDLER_GROUP"),
+    BESLUTTER("BESLUTTER_SAKSBEHANDLER_GROUP"),
+    SKJERMEDE("SKJERMEDE_PERSONER_GROUP"),
+}
+
+typealias Tilgangskontroll = suspend (UUID, Gruppe) -> Unit

@@ -17,9 +17,8 @@ class MsGraphClient(
     private val tokenClient: GraphAccessTokenClient,
     private val graphUrl: String = "https://graph.microsoft.com/v1.0",
 ) {
-    suspend fun hentGrupper(oid: UUID) {
+    suspend fun erIGruppe(oid: UUID, groupId: UUID) {
         val token = runBlocking { tokenClient.fetchToken() }
-        val groupId = "a7476a04-cec2-44dd-947f-efc745f199a7"
         val response = httpClient.get(graphUrl) {
             url {
                 path("v1.0/groups/$groupId/members")
