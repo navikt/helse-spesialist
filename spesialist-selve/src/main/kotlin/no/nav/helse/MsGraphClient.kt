@@ -20,7 +20,7 @@ class MsGraphClient(
         val token = runBlocking { tokenClient.fetchToken() }
         val groupId = "a7476a04-cec2-44dd-947f-efc745f199a7"
         val response = httpClient.get(
-            "$graphUrl/users/$oid/memberOf?\$filter=id eq '$groupId'&\$count=true"
+            "$graphUrl/groups/$groupId/members?\$filter=id eq '$oid'&\$count=true"
         ) {
             bearerAuth(token.access_token)
             accept(ContentType.parse("application/json"))
