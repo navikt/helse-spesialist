@@ -185,44 +185,6 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `finner liste av unike vedtaksperiodeIder med utbetalingId`() {
-        val vedtaksperiodeId1 = UUID.randomUUID()
-        val vedtaksperiodeId2 = UUID.randomUUID()
-        val vedtaksperiodeId3 = UUID.randomUUID()
-
-        val generasjonId1 = UUID.randomUUID()
-        val generasjonId2 = UUID.randomUUID()
-        val generasjonId3 = UUID.randomUUID()
-
-        val utbetalingId1 = UUID.randomUUID()
-        val utbetalingId2 = UUID.randomUUID()
-
-        opprettPerson()
-        opprettArbeidsgiver()
-
-        opprettVedtaksperiode(vedtaksperiodeId1)
-        opprettGenerasjon(vedtaksperiodeId1, generasjonId1)
-        opprettVedtaksperiode(vedtaksperiodeId2)
-        opprettGenerasjon(vedtaksperiodeId2, generasjonId2)
-        opprettVedtaksperiode(vedtaksperiodeId3)
-        opprettGenerasjon(vedtaksperiodeId3, generasjonId3)
-
-        generasjonDao.utbetalingFor(generasjonId1, utbetalingId1)
-        generasjonDao.utbetalingFor(generasjonId2, utbetalingId2)
-        generasjonDao.utbetalingFor(generasjonId3, utbetalingId2)
-
-        generasjonDao.finnVedtaksperiodeIderFor(utbetalingId1).also {
-            assertEquals(1, it.size)
-            assertTrue(it.containsAll(setOf(vedtaksperiodeId1)))
-        }
-
-        generasjonDao.finnVedtaksperiodeIderFor(utbetalingId2).also {
-            assertEquals(2, it.size)
-            assertTrue(it.containsAll(setOf(vedtaksperiodeId2, vedtaksperiodeId3)))
-        }
-    }
-
-    @Test
     fun `finner ikke vedtaksperiodeIder for forkastede perioder`() {
         val vedtaksperiodeId = UUID.randomUUID()
         nyPerson()

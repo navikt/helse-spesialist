@@ -126,21 +126,6 @@ class GenerasjonDao(private val dataSource: DataSource) {
         }
     }
 
-
-    internal fun finnVedtaksperiodeIderFor(utbetalingId: UUID): Set<UUID> {
-        @Language("PostgreSQL")
-        val query = """
-            SELECT svg.vedtaksperiode_id FROM selve_vedtaksperiode_generasjon svg 
-            INNER JOIN vedtak v on svg.vedtaksperiode_id = v.vedtaksperiode_id
-            INNER JOIN person p on p.id = v.person_ref
-            WHERE utbetaling_id = ? AND forkastet = false
-            """
-
-        return sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, utbetalingId).map { it.uuid("vedtaksperiode_id") }.asList).toSet()
-        }
-    }
-
     internal fun opprettFor(
         id: UUID,
         vedtaksperiodeId: UUID,
