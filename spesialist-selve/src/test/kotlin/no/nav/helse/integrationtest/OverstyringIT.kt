@@ -8,11 +8,10 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.jackson.JacksonConverter
-import io.ktor.server.application.install
 import io.ktor.server.auth.authenticate
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.server.routing.routing
-import io.ktor.server.testing.TestApplicationEngine
+import io.ktor.server.testing.TestApplicationBuilder
+import io.ktor.server.testing.testApplication
 import kotlinx.coroutines.runBlocking
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -43,7 +42,7 @@ internal class OverstyringIT : AbstractE2ETest() {
 
     @Test
     fun `overstyr tidslinje`() {
-        with(TestApplicationEngine()) {
+        testApplication {
             setUpApplication()
             settOppBruker()
             assertOppgaver(1)
@@ -82,7 +81,7 @@ internal class OverstyringIT : AbstractE2ETest() {
 
     @Test
     fun `overstyr inntekt med refusjon`() {
-        with(TestApplicationEngine()) {
+        testApplication {
             setUpApplication()
             settOppBruker()
 
@@ -198,7 +197,7 @@ internal class OverstyringIT : AbstractE2ETest() {
 
     @Test
     fun `overstyr arbeidsforhold`() {
-        with(TestApplicationEngine()) {
+        testApplication {
             setUpApplication()
             settOppBruker(orgnummereMedRelevanteArbeidsforhold = listOf(ORGNR_GHOST))
 
@@ -254,15 +253,15 @@ internal class OverstyringIT : AbstractE2ETest() {
             }.asSingle)
         }
 
-    private fun TestApplicationEngine.setUpApplication() {
-        application.install(ContentNegotiation) {
+    private fun TestApplicationBuilder.setUpApplication() {
+        install(ContentNegotiation) {
             register(
                 ContentType.Application.Json,
                 JacksonConverter(objectMapper),
             )
         }
-        application.azureAdAppAuthentication(azureAdAppConfig)
-        application.routing {
+        application { azureAdAppAuthentication(azureAdAppConfig) }
+        routing {
             authenticate("oidc") {
                 overstyringApi(hendelseMediator)
             }
