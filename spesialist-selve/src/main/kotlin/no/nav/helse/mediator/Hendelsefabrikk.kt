@@ -856,8 +856,6 @@ internal class Hendelsefabrikk(
             gosysOppgaveEndretCommandData = commandData,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
             warningDao = warningDao,
-            varselRepository = varselRepository,
-            generasjonRepository = generasjonRepository,
             automatisering = automatisering,
             godkjenningMediator = godkjenningMediator,
             oppgaveMediator = oppgaveMediator,

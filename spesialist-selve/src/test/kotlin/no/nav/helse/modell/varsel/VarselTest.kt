@@ -3,6 +3,7 @@ package no.nav.helse.modell.varsel
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.modell.varsel.Varsel.Companion.finnEksisterendeVarsel
+import no.nav.helse.modell.varsel.Varsel.Status.AKTIV
 import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
 import no.nav.helse.modell.varsel.Varsel.Status.VURDERT
 import no.nav.helse.modell.vedtaksperiode.IVedtaksperiodeObserver
@@ -166,6 +167,7 @@ internal class VarselTest {
         varsel.reaktiver(generasjonId)
         observer.assertReaktivering(vedtaksperiodeId, generasjonId, varselId, "EN_KODE")
     }
+
     @Test
     fun `reaktiverer ikke varsel som er aktivt`() {
         val varselId = UUID.randomUUID()
@@ -175,6 +177,28 @@ internal class VarselTest {
         varsel.registrer(observer)
         varsel.reaktiver(generasjonId)
         assertEquals(0, observer.reaktiverteVarsler.size)
+    }
+
+    @Test
+    fun `kan deaktivere varsel`() {
+        val varselId = UUID.randomUUID()
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjonId = UUID.randomUUID()
+        val varsel = Varsel(varselId, "EN_KODE", LocalDateTime.now(), vedtaksperiodeId, AKTIV)
+        varsel.registrer(observer)
+        varsel.deaktiver(generasjonId)
+        observer.assertDeaktivering(vedtaksperiodeId, generasjonId, varselId, "EN_KODE")
+    }
+
+    @Test
+    fun `deaktiverer ikke varsel som er inaktivt`() {
+        val varselId = UUID.randomUUID()
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjonId = UUID.randomUUID()
+        val varsel = Varsel(varselId, "EN_KODE", LocalDateTime.now(), vedtaksperiodeId, INAKTIV)
+        varsel.registrer(observer)
+        varsel.deaktiver(generasjonId)
+        assertEquals(0, observer.deaktiverteVarsler.size)
     }
 
     @Test
@@ -238,7 +262,7 @@ internal class VarselTest {
 
         val opprettedeVarsler = mutableMapOf<UUID, Opprettelse>()
         val reaktiverteVarsler = mutableMapOf<UUID, Reaktivering>()
-
+        val deaktiverteVarsler = mutableMapOf<UUID, Deaktivering>()
 
         private inner class Opprettelse(
             val vedtaksperiodeId: UUID,
@@ -253,9 +277,19 @@ internal class VarselTest {
             val varselId: UUID,
             val varselkode: String
         )
+        private inner class Deaktivering(
+            val vedtaksperiodeId: UUID,
+            val generasjonId: UUID,
+            val varselId: UUID,
+            val varselkode: String
+        )
 
         override fun varselReaktivert(varselId: UUID, varselkode: String, generasjonId: UUID, vedtaksperiodeId: UUID) {
             reaktiverteVarsler[varselId] = Reaktivering(vedtaksperiodeId, generasjonId, varselId, varselkode)
+        }
+
+        override fun varselDeaktivert(varselId: UUID, varselkode: String, generasjonId: UUID, vedtaksperiodeId: UUID) {
+            deaktiverteVarsler[varselId] = Deaktivering(vedtaksperiodeId, generasjonId, varselId, varselkode)
         }
 
         override fun varselOpprettet(
@@ -294,6 +328,19 @@ internal class VarselTest {
             assertEquals(forventetGenerasjonId, reaktivering?.generasjonId)
             assertEquals(forventetVarselkode, reaktivering?.varselkode)
             assertEquals(forventetVarselId, reaktivering?.varselId)
+        }
+
+        fun assertDeaktivering(
+            forventetVedtaksperiodeId: UUID,
+            forventetGenerasjonId: UUID,
+            forventetVarselId: UUID,
+            forventetVarselkode: String,
+        ) {
+            val deaktivering = deaktiverteVarsler[forventetVarselId]
+            assertEquals(forventetVedtaksperiodeId, deaktivering?.vedtaksperiodeId)
+            assertEquals(forventetGenerasjonId, deaktivering?.generasjonId)
+            assertEquals(forventetVarselkode, deaktivering?.varselkode)
+            assertEquals(forventetVarselId, deaktivering?.varselId)
         }
     }
 }

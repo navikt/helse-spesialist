@@ -1,7 +1,6 @@
 package no.nav.helse.modell.gosysoppgaver
 
 import io.mockk.clearMocks
-import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import java.time.LocalDateTime
@@ -11,13 +10,11 @@ import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
-import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_1
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_3
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.modell.vedtaksperiode.Generasjon
-import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.IVedtaksperiodeObserver
 import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -53,9 +50,7 @@ internal class ÅpneGosysOppgaverCommandTest {
     private val sykefraværstilfelle = Sykefraværstilfelle(FNR, 1.januar, listOf(vedtaksperiode))
     private val dao = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
     private val warningDao = mockk<WarningDao>(relaxed = true)
-    private val varselRepository = mockk<VarselRepository>(relaxed = true)
-    private val generasjonRepository = mockk<GenerasjonRepository>(relaxed = true)
-    private val command = ÅpneGosysOppgaverCommand(AKTØR_ID, dao, warningDao, varselRepository, generasjonRepository, VEDTAKPERIODE_ID, sykefraværstilfelle)
+    private val command = ÅpneGosysOppgaverCommand(AKTØR_ID, dao, warningDao, VEDTAKPERIODE_ID, sykefraværstilfelle)
     private lateinit var context: CommandContext
 
     @BeforeEach
@@ -94,7 +89,6 @@ internal class ÅpneGosysOppgaverCommandTest {
 
     @Test
     fun `Lagrer warning ved åpne oppgaver`() {
-        every { generasjonRepository.sisteFor(VEDTAKPERIODE_ID) } returns (generasjon(VEDTAKPERIODE_ID))
         val forventetWarning = Warning(
             melding = "Det finnes åpne oppgaver på sykepenger i Gosys",
             kilde = WarningKilde.Spesialist,
@@ -110,7 +104,6 @@ internal class ÅpneGosysOppgaverCommandTest {
 
     @Test
     fun `Lagrer warning ved oppslag feilet`() {
-        every { generasjonRepository.sisteFor(VEDTAKPERIODE_ID) } returns (generasjon(VEDTAKPERIODE_ID))
         val forventetWarning = Warning(
             melding = "Kunne ikke sjekke åpne oppgaver på sykepenger i Gosys",
             kilde = WarningKilde.Spesialist,

@@ -7,13 +7,10 @@ import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDto
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
-import no.nav.helse.modell.varsel.VarselRepository
-import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_1
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_3
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
-import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -41,12 +38,20 @@ internal class ÅpneGosysOppgaverløsning(
         )
     }
 
-    internal fun evaluer(warningDao: WarningDao, varselRepository: VarselRepository, generasjonRepository: GenerasjonRepository, vedtaksperiodeId: UUID, sykefraværstilfelle: Sykefraværstilfelle) {
-        warningsForOppslagFeilet(warningDao, varselRepository, generasjonRepository, vedtaksperiodeId, sykefraværstilfelle)
-        warningsForÅpneGosysOppgaver(warningDao, varselRepository, generasjonRepository, vedtaksperiodeId, sykefraværstilfelle)
+    internal fun evaluer(
+        warningDao: WarningDao,
+        vedtaksperiodeId: UUID,
+        sykefraværstilfelle: Sykefraværstilfelle
+    ) {
+        warningsForOppslagFeilet(warningDao, vedtaksperiodeId, sykefraværstilfelle)
+        warningsForÅpneGosysOppgaver(warningDao, vedtaksperiodeId, sykefraværstilfelle)
     }
 
-    private fun warningsForOppslagFeilet(warningDao: WarningDao, varselRepository: VarselRepository, generasjonRepository: GenerasjonRepository, vedtaksperiodeId: UUID, sykefraværstilfelle: Sykefraværstilfelle) {
+    private fun warningsForOppslagFeilet(
+        warningDao: WarningDao,
+        vedtaksperiodeId: UUID,
+        sykefraværstilfelle: Sykefraværstilfelle
+    ) {
         val melding = "Kunne ikke sjekke åpne oppgaver på sykepenger i Gosys"
 
         if (oppslagFeilet) {
@@ -54,11 +59,15 @@ internal class ÅpneGosysOppgaverløsning(
             leggTilWarning(warningDao, vedtaksperiodeId, melding)
         } else {
             setEksisterendeWarningInaktive(warningDao, vedtaksperiodeId, melding)
-            deaktiverVarsel(varselRepository, generasjonRepository, vedtaksperiodeId, SB_EX_3)
+            sykefraværstilfelle.deaktiver(SB_EX_3.nyttVarsel(vedtaksperiodeId))
         }
     }
 
-    private fun warningsForÅpneGosysOppgaver(warningDao: WarningDao, varselRepository: VarselRepository, generasjonRepository: GenerasjonRepository, vedtaksperiodeId: UUID, sykefraværstilfelle: Sykefraværstilfelle) {
+    private fun warningsForÅpneGosysOppgaver(
+        warningDao: WarningDao,
+        vedtaksperiodeId: UUID,
+        sykefraværstilfelle: Sykefraværstilfelle
+    ) {
         if (antall == null) return
         val melding = "Det finnes åpne oppgaver på sykepenger i Gosys"
 
@@ -70,7 +79,7 @@ internal class ÅpneGosysOppgaverløsning(
             }
             antall == 0 && harAlleredeVarsel -> {
                 setEksisterendeWarningInaktive(warningDao, vedtaksperiodeId, melding)
-                deaktiverVarsel(varselRepository, generasjonRepository, vedtaksperiodeId, SB_EX_1)
+                sykefraværstilfelle.deaktiver(SB_EX_1.nyttVarsel(vedtaksperiodeId))
             }
         }
     }
@@ -83,11 +92,6 @@ internal class ÅpneGosysOppgaverløsning(
     private fun setEksisterendeWarningInaktive(warningDao: WarningDao, vedtaksperiodeId: UUID, melding: String) {
         warningDao.setWarningMedMeldingInaktiv(vedtaksperiodeId, melding, LocalDateTime.now())
         tellWarningInaktiv(melding)
-    }
-
-    private fun deaktiverVarsel(varselRepository: VarselRepository, generasjonRepository: GenerasjonRepository, vedtaksperiodeId: UUID, varselkode: Varselkode) {
-        val generasjon = generasjonRepository.sisteFor(vedtaksperiodeId)
-        varselkode.deaktiverFor(generasjon, varselRepository)
     }
 
     internal class ÅpneGosysOppgaverRiver(

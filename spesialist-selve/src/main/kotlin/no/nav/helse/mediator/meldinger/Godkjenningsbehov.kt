@@ -185,8 +185,6 @@ internal class Godkjenningsbehov(
             aktørId = aktørId,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
             warningDao = warningDao,
-            varselRepository = varselRepository,
-            generasjonRepository = generasjonRepository,
             vedtaksperiodeId = vedtaksperiodeId,
             sykefraværstilfelle = sykefraværstilfelle
         ),

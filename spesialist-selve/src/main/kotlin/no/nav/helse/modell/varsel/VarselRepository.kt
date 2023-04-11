@@ -55,6 +55,17 @@ internal class ActualVarselRepository(dataSource: DataSource) : VarselRepository
         if (varselkode.matches(varselkodeformat.toRegex())) tellVarsel(varselkode)
     }
 
+    override fun varselDeaktivert(
+        varselId: UUID,
+        varselkode: String,
+        generasjonId: UUID,
+        vedtaksperiodeId: UUID
+    ) {
+        val definisjon = definisjonDao.sisteDefinisjonFor(varselkode)
+        definisjon.oppdaterVarsel(vedtaksperiodeId, generasjonId, INAKTIV, "Spesialist", varselDao::oppdaterStatus)
+        if (varselkode.matches(varselkodeformat.toRegex())) tellInaktivtVarsel(varselkode)
+    }
+
     override fun reaktiverFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String) {
         varselDao.oppdaterStatus(vedtaksperiodeId, generasjonId, varselkode, AKTIV, null, null)
         if (varselkode.matches(varselkodeformat.toRegex())) tellVarsel(varselkode)

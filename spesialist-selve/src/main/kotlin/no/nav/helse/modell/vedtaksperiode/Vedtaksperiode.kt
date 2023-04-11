@@ -34,6 +34,10 @@ internal class Vedtaksperiode(
             .forEach { gjeldendeGenerasjon.håndter(it) }
     }
 
+    private fun deaktiver(varsel: Varsel) {
+        gjeldendeGenerasjon.håndterDeaktivertVarsel(varsel)
+    }
+
     override fun equals(other: Any?): Boolean =
         this === other || (other is Vedtaksperiode
                 && javaClass == other.javaClass
@@ -61,6 +65,10 @@ internal class Vedtaksperiode(
 
         internal fun List<Vedtaksperiode>.håndter(varsler: List<Varsel>) {
             forEach { it.håndter(varsler) }
+        }
+
+        internal fun List<Vedtaksperiode>.deaktiver(varsel: Varsel) {
+            find { varsel.erRelevantFor(it.vedtaksperiodeId) }?.deaktiver(varsel)
         }
     }
 }

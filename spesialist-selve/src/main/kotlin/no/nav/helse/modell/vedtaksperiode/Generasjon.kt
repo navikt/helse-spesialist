@@ -144,6 +144,11 @@ internal class Generasjon private constructor(
         varsler.deaktiverFor(id, varselkode, varselRepository)
     }
 
+    internal fun håndterDeaktivertVarsel(varsel: Varsel) {
+        val funnetVarsel = varsler.finnEksisterendeVarsel(varsel) ?: return
+        funnetVarsel.deaktiver(id)
+    }
+
     internal fun håndterGodkjentAvSaksbehandler(ident: String, varselRepository: VarselRepository) {
         varsler.godkjennAlleFor(id, ident, varselRepository)
     }

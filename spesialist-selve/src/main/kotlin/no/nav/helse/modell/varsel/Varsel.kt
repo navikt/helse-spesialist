@@ -91,6 +91,12 @@ internal class Varsel(
         observers.forEach { it.varselReaktivert(id, varselkode, generasjonId, vedtaksperiodeId) }
     }
 
+    internal fun deaktiver(generasjonId: UUID) {
+        if(status != AKTIV) return
+        this.status = INAKTIV
+        observers.forEach { it.varselDeaktivert(id, varselkode, generasjonId, vedtaksperiodeId) }
+    }
+
     private fun oppdaterGenerasjon(gammelGenerasjonId: UUID, nyGenerasjonId: UUID, varselRepository: VarselRepository) {
         varselRepository.oppdaterGenerasjonFor(this.id, gammelGenerasjonId, nyGenerasjonId)
     }

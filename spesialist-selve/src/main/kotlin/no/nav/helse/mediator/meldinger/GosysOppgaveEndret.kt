@@ -21,8 +21,6 @@ import no.nav.helse.modell.oppgave.SjekkAtOppgaveFortsattErÅpenCommand
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.UtbetalingDao
-import no.nav.helse.modell.varsel.VarselRepository
-import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -40,8 +38,6 @@ internal class GosysOppgaveEndret(
     gosysOppgaveEndretCommandData: GosysOppgaveEndretCommandData,
     åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     warningDao: WarningDao,
-    varselRepository: VarselRepository,
-    generasjonRepository: GenerasjonRepository,
     automatisering: Automatisering,
     godkjenningMediator: GodkjenningMediator,
     oppgaveMediator: OppgaveMediator,
@@ -59,8 +55,6 @@ internal class GosysOppgaveEndret(
             aktørId = aktørId,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
             warningDao = warningDao,
-            varselRepository = varselRepository,
-            generasjonRepository = generasjonRepository,
             vedtaksperiodeId = gosysOppgaveEndretCommandData.vedtaksperiodeId,
             sykefraværstilfelle = sykefraværstilfelle
         ),

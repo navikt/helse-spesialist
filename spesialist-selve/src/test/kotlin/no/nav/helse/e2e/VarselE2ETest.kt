@@ -93,6 +93,24 @@ internal class VarselE2ETest : AbstractE2ETestV2() {
     }
 
     @Test
+    fun `varsel dersom kall til gosys feilet`() {
+        fremTilÅpneOppgaver()
+        håndterÅpneOppgaverløsning(antall = 0, oppslagFeilet = true)
+        assertVarsel(SB_EX_3, VEDTAKSPERIODE_ID, AKTIV)
+    }
+
+    @Test
+    fun `fjern varsel dersom kall til gosys ikke feiler lenger`() {
+        fremTilÅpneOppgaver()
+        håndterÅpneOppgaverløsning(antall = 0, oppslagFeilet = true)
+        håndterRisikovurderingløsning()
+        håndterInntektløsning()
+        håndterGosysOppgaveEndret()
+        håndterÅpneOppgaverløsning(antall = 0)
+        assertVarsel(SB_EX_3, VEDTAKSPERIODE_ID, INAKTIV)
+    }
+
+    @Test
     fun `legger til varsel om gosys-oppgave når vi får beskjed om at gosys har fått oppgaver`() {
         fremTilÅpneOppgaver()
         håndterÅpneOppgaverløsning(antall = 0)

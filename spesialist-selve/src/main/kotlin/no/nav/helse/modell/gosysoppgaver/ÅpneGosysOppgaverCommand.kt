@@ -6,16 +6,12 @@ import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
-import no.nav.helse.modell.varsel.VarselRepository
-import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import org.slf4j.LoggerFactory
 
 internal class ÅpneGosysOppgaverCommand(
     private val aktørId: String,
     private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     private val warningDao: WarningDao,
-    private val varselRepository: VarselRepository,
-    private val generasjonRepository: GenerasjonRepository,
     private val vedtaksperiodeId: UUID,
     private val sykefraværstilfelle: Sykefraværstilfelle
 ) : Command {
@@ -36,7 +32,7 @@ internal class ÅpneGosysOppgaverCommand(
             return false
         }
         løsning.lagre(åpneGosysOppgaverDao)
-        løsning.evaluer(warningDao, varselRepository, generasjonRepository, vedtaksperiodeId, sykefraværstilfelle)
+        løsning.evaluer(warningDao, vedtaksperiodeId, sykefraværstilfelle)
         return true
     }
 }

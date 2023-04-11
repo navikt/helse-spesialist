@@ -14,5 +14,6 @@ interface IVedtaksperiodeObserver {
     fun førsteGenerasjonOpprettet(generasjonId: UUID, vedtaksperiodeId: UUID, hendelseId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate) {}
     fun varselOpprettet(vedtaksperiodeId: UUID, generasjonId: UUID, varselId: UUID, varselkode: String, opprettet: LocalDateTime) {}
     fun varselReaktivert(varselId: UUID, varselkode: String, generasjonId: UUID, vedtaksperiodeId: UUID) {}
+    fun varselDeaktivert(varselId: UUID, varselkode: String, generasjonId: UUID, vedtaksperiodeId: UUID) {}
 
 }
