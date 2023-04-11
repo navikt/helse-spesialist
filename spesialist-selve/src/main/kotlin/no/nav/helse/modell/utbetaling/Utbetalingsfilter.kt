@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory
 
 internal class Utbetalingsfilter(
     private val fødselsnummer: String,
-    private val delvisRefusjon: Boolean,
     private val erUtbetaltFør: Boolean,
     private val harUtbetalingTilSykmeldt: Boolean,
     private val periodetype: Periodetype,
@@ -27,7 +26,6 @@ internal class Utbetalingsfilter(
             sikkerLogg.info("Beholdes da det er en revurdering, fnr=$fødselsnummer")
             return true
         }
-        if (delvisRefusjon) nyÅrsak("Utbetalingen består av delvis refusjon")
         if (!(fødselsnummer.startsWith("29") || fødselsnummer.startsWith("30") || fødselsnummer.startsWith("31"))) nyÅrsak(
             "Velges ikke ut som 'to om dagen'"
         ) // Kvoteregulering

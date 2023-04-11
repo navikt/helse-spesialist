@@ -2,7 +2,6 @@ package no.nav.helse.e2e
 
 import AbstractE2ETestV2
 import AbstractE2ETestV2.Mottaker.ARBEIDSGIVER
-import AbstractE2ETestV2.Mottaker.BEGGE
 import AbstractE2ETestV2.Mottaker.SYKMELDT
 import java.time.LocalDate
 import java.util.UUID
@@ -40,23 +39,6 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETestV2() {
         assertVedtaksperiodeEksisterer(vedtaksperiodeId)
         assertGodkjenningsbehovIkkeBesvart()
         assertIkkeAvvistIUtbetalingsfilter()
-    }
-
-    @Test
-    fun `overlappende utbetaling (aka delvis refusjon) går ikke gjennom`() {
-        behandleGodkjenningsbehov(
-            fødselsnummer = FØDSELSNUMMER_SOM_GÅR_GJENNOM_FILTER,
-            periodeFom = 1.januar,
-            periodeTom = 3.januar,
-            periodetype = Periodetype.FORLENGELSE,
-            mottaker = BEGGE,
-        )
-        assertVedtaksperiodeEksisterer(vedtaksperiodeId)
-        assertGodkjenningsbehovBesvart(godkjent = false, automatiskBehandlet = true)
-        assertVedtaksperiodeAvvist(
-            "FORLENGELSE",
-            listOf("Brukerutbetalingsfilter: Utbetalingen består av delvis refusjon")
-        )
     }
 
     @Test

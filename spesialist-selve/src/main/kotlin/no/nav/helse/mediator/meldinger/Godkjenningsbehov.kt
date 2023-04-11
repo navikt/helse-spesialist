@@ -16,7 +16,6 @@ import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringCommand
 import no.nav.helse.modell.automatisering.AutomatiskAvvisningCommand
-import no.nav.helse.modell.delvisRefusjon
 import no.nav.helse.modell.egenansatt.EgenAnsattCommand
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverCommand
@@ -112,9 +111,8 @@ internal class Godkjenningsbehov(
         val utbetaling = utbetalingsfinner()
         Utbetalingsfilter(
             fødselsnummer = fødselsnummer,
-            harUtbetalingTilSykmeldt = utbetaling.utbetalingTilSykmeldt(),
-            delvisRefusjon = utbetaling.delvisRefusjon(),
             erUtbetaltFør = utbetalingDao.erUtbetaltFør(aktørId),
+            harUtbetalingTilSykmeldt = utbetaling.utbetalingTilSykmeldt(),
             periodetype = periodetype,
             inntektskilde = inntektskilde,
             utbetalingtype = utbetalingtype,

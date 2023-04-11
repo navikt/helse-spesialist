@@ -23,7 +23,6 @@ internal class UtbetalingsfilterTest {
         assertKanUtbetales(
             Utbetalingsfilter(
                 fødselsnummer = "21111111111",
-                delvisRefusjon = false,
                 erUtbetaltFør = false,
                 harUtbetalingTilSykmeldt = false,
                 periodetype = OVERGANG_FRA_IT,
@@ -39,7 +38,6 @@ internal class UtbetalingsfilterTest {
         assertKanUtbetales(
             Utbetalingsfilter(
                 fødselsnummer = "21111111111",
-                delvisRefusjon = false,
                 erUtbetaltFør = false,
                 harUtbetalingTilSykmeldt = false,
                 periodetype = OVERGANG_FRA_IT,
@@ -55,7 +53,6 @@ internal class UtbetalingsfilterTest {
         assertKanUtbetales(
             Utbetalingsfilter(
                 fødselsnummer = "21111111111",
-                delvisRefusjon = false,
                 erUtbetaltFør = true,
                 harUtbetalingTilSykmeldt = false,
                 periodetype = OVERGANG_FRA_IT,
@@ -70,7 +67,6 @@ internal class UtbetalingsfilterTest {
     fun `endring, endring fra full refusjon til delvis, kan utbetales`() {
         fun utbetalingsfilter() = Utbetalingsfilter(
             fødselsnummer = "21111111111",
-            delvisRefusjon = true,
             erUtbetaltFør = true,
             harUtbetalingTilSykmeldt = true,
             periodetype = FORLENGELSE,
@@ -82,17 +78,9 @@ internal class UtbetalingsfilterTest {
     }
 
     @Test
-    fun `delvis refusjon kan ikke utbetales`() {
-        assertKanIkkeUtbetales(
-            utbetalingsfilter(delvisRefusjon = true),
-            listOf("Brukerutbetalingsfilter: Utbetalingen består av delvis refusjon")
-        )
-    }
-
-    @Test
     fun `delvis refusjon kan utbetales dersom vedtaksperioden har pågående overstyring`() {
         assertKanUtbetales(
-            utbetalingsfilter(delvisRefusjon = true, harVedtaksperiodePågåendeOverstyring = true)
+            utbetalingsfilter(harVedtaksperiodePågåendeOverstyring = true)
         )
     }
 
@@ -150,7 +138,6 @@ internal class UtbetalingsfilterTest {
         assertKanIkkeUtbetales(
             Utbetalingsfilter(
                 fødselsnummer = "21111111111",
-                delvisRefusjon = true,
                 erUtbetaltFør = false,
                 harUtbetalingTilSykmeldt = true,
                 periodetype = OVERGANG_FRA_IT,
@@ -158,7 +145,6 @@ internal class UtbetalingsfilterTest {
                 utbetalingtype = UTBETALING,
                 harVedtaksperiodePågåendeOverstyring = false,
             ), listOf(
-                "Brukerutbetalingsfilter: Utbetalingen består av delvis refusjon",
                 "Brukerutbetalingsfilter: Velges ikke ut som 'to om dagen'",
                 "Brukerutbetalingsfilter: Perioden er ikke førstegangsbehandling eller forlengelse",
                 "Brukerutbetalingsfilter: Inntektskilden er ikke for en arbeidsgiver",
@@ -169,7 +155,6 @@ internal class UtbetalingsfilterTest {
     private companion object {
         private fun utbetalingsfilter(
             fødselsnummer: String = "31111111111",
-            delvisRefusjon: Boolean = false,
             harUtbetalingTilSykmeldt: Boolean = true,
             periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
             inntektskilde: Inntektskilde = EN_ARBEIDSGIVER,
@@ -177,7 +162,6 @@ internal class UtbetalingsfilterTest {
             harVedtaksperiodePågåendeOverstyring: Boolean = false,
         ) = Utbetalingsfilter(
             fødselsnummer = fødselsnummer,
-            delvisRefusjon = delvisRefusjon,
             erUtbetaltFør = false,
             harUtbetalingTilSykmeldt = harUtbetalingTilSykmeldt,
             periodetype = periodetype,
