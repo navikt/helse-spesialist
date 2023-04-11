@@ -108,11 +108,7 @@ internal class Generasjon private constructor(
     }
 
     internal fun invaliderUtbetaling(utbetalingId: UUID) {
-        if (utbetalingId != this.utbetalingId) return sikkerlogg.error(
-                "{} sin utbetalingId samsvarer ikke med den forkastede utbetalingIden {}. Dette skal ikke kunne skje",
-                keyValue("Generasjon", this),
-                keyValue("utbetalingId", utbetalingId)
-            )
+        if (utbetalingId != this.utbetalingId) return
         if (låst) return sikkerlogg.error(
             "{} er låst. Utbetaling med {} forsøkt forkastet",
             keyValue("Generasjon", this),
