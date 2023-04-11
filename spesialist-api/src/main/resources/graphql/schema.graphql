@@ -143,8 +143,7 @@ type GraphQLGhostPeriode {
   organisasjonsnummer: String!
   skjaeringstidspunkt: LocalDate!
   tom: LocalDate!
-  vilkarsgrunnlagId: UUID
-  vilkarsgrunnlaghistorikkId: UUID
+  vilkarsgrunnlagId: UUID!
 }
 
 type GraphQLInfotrygdVilkarsgrunnlag implements GraphQLVilkarsgrunnlag {
