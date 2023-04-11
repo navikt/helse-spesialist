@@ -115,7 +115,6 @@ internal class Godkjenningsbehov(
             harUtbetalingTilSykmeldt = utbetaling.utbetalingTilSykmeldt(),
             delvisRefusjon = utbetaling.delvisRefusjon(),
             erUtbetaltFør = utbetalingDao.erUtbetaltFør(aktørId),
-            warnings = warningDao.finnAktiveWarnings(vedtaksperiodeId),
             periodetype = periodetype,
             inntektskilde = inntektskilde,
             utbetalingtype = utbetalingtype,
@@ -266,7 +265,7 @@ internal class Godkjenningsbehov(
 
     internal class GodkjenningsbehovRiver(
         rapidsConnection: RapidsConnection,
-        private val mediator: HendelseMediator
+        private val mediator: HendelseMediator,
     ) : River.PacketListener {
         private val logg = LoggerFactory.getLogger(this::class.java)
         private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")

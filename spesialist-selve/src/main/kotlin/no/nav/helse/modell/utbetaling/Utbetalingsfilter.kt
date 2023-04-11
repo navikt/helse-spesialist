@@ -1,7 +1,6 @@
 package no.nav.helse.modell.utbetaling
 
 import no.nav.helse.modell.utbetaling.Utbetalingtype.REVURDERING
-import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -16,7 +15,6 @@ internal class Utbetalingsfilter(
     private val harUtbetalingTilSykmeldt: Boolean,
     private val periodetype: Periodetype,
     private val inntektskilde: Inntektskilde,
-    private val warnings: List<Warning>,
     private val utbetalingtype: Utbetalingtype,
     private val harVedtaksperiodePågåendeOverstyring: Boolean,
 ) {
@@ -35,23 +33,6 @@ internal class Utbetalingsfilter(
         ) // Kvoteregulering
         if (periodetype !in tillatePeriodetyper) nyÅrsak("Perioden er ikke førstegangsbehandling eller forlengelse")
         if (inntektskilde != EN_ARBEIDSGIVER) nyÅrsak("Inntektskilden er ikke for en arbeidsgiver")
-        if (warnings.isNotEmpty()) {
-            if (årsaker.isEmpty()) sikkerLogg.info(
-                "Utbetalingsfilter warnings som eneste årsak til at det ikke kan utbetales:\n${
-                    Warning.formater(
-                        warnings
-                    ).joinToString(separator = "\n")
-                }"
-            )
-            else sikkerLogg.info(
-                "Utbetalingsfilter warnings som en av flere årsaker til at det ikke kan utbetales:\n${
-                    Warning.formater(
-                        warnings
-                    ).joinToString(separator = "\n")
-                }"
-            )
-            nyÅrsak("Vedtaksperioden har warnings")
-        }
         if (årsaker.isNotEmpty() && harVedtaksperiodePågåendeOverstyring) {
             sikkerLogg.info("Beholdes hos oss da det er en pågående overstyring. Årsaker registrert: ${årsaker.joinToString()}")
             return true
