@@ -177,9 +177,8 @@ internal class Godkjenningsbehov(
         VergemålCommand(
             vergemålDao = vergemålDao,
             warningDao = warningDao,
-            varselRepository = varselRepository,
-            generasjonRepository = generasjonRepository,
-            vedtaksperiodeId = vedtaksperiodeId
+            vedtaksperiodeId = vedtaksperiodeId,
+            sykefraværstilfelle = sykefraværstilfelle
         ),
         ÅpneGosysOppgaverCommand(
             aktørId = aktørId,

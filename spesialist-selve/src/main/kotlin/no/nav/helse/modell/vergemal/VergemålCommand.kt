@@ -6,20 +6,18 @@ import no.nav.helse.mediator.meldinger.løsninger.Vergemålløsning
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.varsel.VarselRepository
+import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.varsel.Varselkode.SB_IK_1
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
-import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.tellWarning
 import org.slf4j.LoggerFactory
 
 internal class VergemålCommand(
     private val vergemålDao: VergemålDao,
     private val warningDao: WarningDao,
-    private val varselRepository: VarselRepository,
-    private val generasjonRepository: GenerasjonRepository,
-    private val vedtaksperiodeId: UUID
+    private val vedtaksperiodeId: UUID,
+    private val sykefraværstilfelle: Sykefraværstilfelle
 ) : Command {
 
     override fun execute(context: CommandContext) = behandle(context)
@@ -43,8 +41,7 @@ internal class VergemålCommand(
         }
         if (løsning.harFullmakt()) {
             "Registert fullmakt på personen.".leggTilSomWarning()
-            val generasjon = generasjonRepository.sisteFor(vedtaksperiodeId)
-            SB_IK_1.nyttVarsel(generasjon, varselRepository)
+            sykefraværstilfelle.håndter(SB_IK_1.nyttVarsel(vedtaksperiodeId))
         }
 
         return true
