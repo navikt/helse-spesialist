@@ -212,6 +212,14 @@ internal class Generasjon private constructor(
             fom: LocalDate,
             tom: LocalDate,
             varsler: Set<Varsel>
-        ) = Generasjon(id, vedtaksperiodeId, utbetalingId, låst, skjæringstidspunkt, Periode(fom, tom), varsler)
+        ) = Generasjon(
+            id = id,
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = utbetalingId,
+            låst = låst,
+            skjæringstidspunkt = skjæringstidspunkt,
+            periode = Periode(fom, tom),
+            varsler = varsler
+        )
     }
 }

@@ -19,14 +19,14 @@ class GenerasjonBuilder(
 
     internal fun build(): Generasjon {
         return Generasjon.fraLagring(
-            generasjonId,
-            vedtaksperiodeId,
-            utbetalingId,
-            låst,
-            skjæringstidspunkt,
-            fom,
-            tom,
-            varsler.toSet()
+            id = generasjonId,
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = utbetalingId,
+            låst = låst,
+            skjæringstidspunkt = skjæringstidspunkt,
+            fom = fom,
+            tom = tom,
+            varsler = varsler.toSet()
         )
     }
 

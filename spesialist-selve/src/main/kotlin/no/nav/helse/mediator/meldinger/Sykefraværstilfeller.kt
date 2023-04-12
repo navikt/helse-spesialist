@@ -27,10 +27,10 @@ internal class Sykefraværstilfeller(
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         OppdaterSykefraværstilfellerCommand(
-            fødselsnummer,
-            aktørId,
-            vedtaksperiodeOppdateringer,
-            vedtaksperioder,
+            fødselsnummer = fødselsnummer,
+            aktørId = aktørId,
+            vedtaksperiodeoppdateringer = vedtaksperiodeOppdateringer,
+            vedtaksperioder = vedtaksperioder,
         )
     )
     override fun fødselsnummer() = fødselsnummer
