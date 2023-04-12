@@ -198,8 +198,6 @@ internal class Hendelsefabrikk(
             arbeidsgiverDao = arbeidsgiverDao,
             vedtakDao = vedtakDao,
             warningDao = warningDao,
-            varselRepository = varselRepository,
-            generasjonRepository = generasjonRepository,
             snapshotDao = snapshotDao,
             commandContextDao = commandContextDao,
             risikovurderingDao = risikovurderingDao,

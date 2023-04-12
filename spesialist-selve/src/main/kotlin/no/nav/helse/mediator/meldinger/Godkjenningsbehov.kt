@@ -44,8 +44,6 @@ import no.nav.helse.modell.utbetaling.UtbetalingsfilterCommand
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.utbetaling.Utbetalingtype.Companion.values
 import no.nav.helse.modell.utbetalingTilSykmeldt
-import no.nav.helse.modell.varsel.VarselRepository
-import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålCommand
@@ -83,8 +81,6 @@ internal class Godkjenningsbehov(
     arbeidsgiverDao: ArbeidsgiverDao,
     vedtakDao: VedtakDao,
     warningDao: WarningDao,
-    varselRepository: VarselRepository,
-    generasjonRepository: GenerasjonRepository,
     snapshotDao: SnapshotDao,
     commandContextDao: CommandContextDao,
     risikovurderingDao: RisikovurderingDao,
@@ -191,8 +187,6 @@ internal class Godkjenningsbehov(
             vedtaksperiodeId = vedtaksperiodeId,
             risikovurderingDao = risikovurderingDao,
             warningDao = warningDao,
-            varselRepository = varselRepository,
-            generasjonRepository = generasjonRepository,
             organisasjonsnummer = organisasjonsnummer,
             førstegangsbehandling = førstegangsbehandling,
             sykefraværstilfelle = sykefraværstilfelle,

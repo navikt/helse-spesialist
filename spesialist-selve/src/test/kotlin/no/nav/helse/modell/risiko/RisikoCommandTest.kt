@@ -15,9 +15,7 @@ import no.nav.helse.mediator.meldinger.løsninger.Risikovurderingløsning
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
-import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.vedtaksperiode.Generasjon
-import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLUtbetaling
@@ -31,8 +29,6 @@ internal class RisikoCommandTest {
 
     private val risikovurderingDao = mockk<RisikovurderingDao>()
     private val warningDao = mockk<WarningDao>()
-    private val varselRepository = mockk<VarselRepository>()
-    private val generasjonRepository = mockk<GenerasjonRepository>()
     private val utbetalingMock = mockk<GraphQLUtbetaling>(relaxed = true)
 
     private companion object {
@@ -150,15 +146,12 @@ internal class RisikoCommandTest {
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
         risikovurderingDao: RisikovurderingDao = this.risikovurderingDao,
         warningDao: WarningDao = this.warningDao,
-        varselRepository: VarselRepository = this.varselRepository,
         organisasjonsnummer: String = ORGNUMMER,
         førstegangsbehandling: Boolean = true
     ) = RisikoCommand(
         vedtaksperiodeId = vedtaksperiodeId,
         risikovurderingDao = risikovurderingDao,
         warningDao = warningDao,
-        varselRepository = varselRepository,
-        generasjonRepository = generasjonRepository,
         organisasjonsnummer = organisasjonsnummer,
         førstegangsbehandling = førstegangsbehandling,
         sykefraværstilfelle = sykefraværstilfelle,

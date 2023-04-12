@@ -8,11 +8,9 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetalingTilSykmeldt
-import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varselkode.SB_RV_1
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
-import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLUtbetaling
 import no.nav.helse.tellWarning
 import org.slf4j.LoggerFactory
@@ -21,8 +19,6 @@ internal class RisikoCommand(
     private val vedtaksperiodeId: UUID,
     private val risikovurderingDao: RisikovurderingDao,
     private val warningDao: WarningDao,
-    private val varselRepository: VarselRepository,
-    private val generasjonRepository: GenerasjonRepository,
     private val organisasjonsnummer: String,
     private val førstegangsbehandling: Boolean,
     private val sykefraværstilfelle: Sykefraværstilfelle,
@@ -69,8 +65,7 @@ internal class RisikoCommand(
                 )
             )
             tellWarning(melding)
-            val generasjon = generasjonRepository.sisteFor(vedtaksperiodeId)
-            varselkode().nyttVarsel(generasjon, varselRepository)
+            sykefraværstilfelle.håndter(varselkode().nyttVarsel(vedtaksperiodeId))
         }
         if (harFaresignalerFunn()) {
             val melding = "Faresignaler oppdaget. Kontroller om faresignalene påvirker retten til sykepenger."
