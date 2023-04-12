@@ -1,7 +1,6 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import net.logstash.logback.argument.StructuredArguments.kv
@@ -11,9 +10,7 @@ import no.nav.helse.modell.varsel.Varsel.Companion.finnEksisterendeVarsel
 import no.nav.helse.modell.varsel.Varsel.Companion.flyttVarslerFor
 import no.nav.helse.modell.varsel.Varsel.Companion.godkjennAlleFor
 import no.nav.helse.modell.varsel.Varsel.Companion.godkjennFor
-import no.nav.helse.modell.varsel.Varsel.Companion.reaktiverFor
 import no.nav.helse.modell.varsel.VarselRepository
-import no.nav.helse.modell.varsel.Varselkode
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -115,20 +112,6 @@ internal class Generasjon private constructor(
         )
         this.utbetalingId = null
         observers.forEach { it.utbetalingForkastet(id, utbetalingId) }
-    }
-
-    internal fun håndterSaksbehandlingsvarsel(varselId: UUID, varselkode: Varselkode, opprettet: LocalDateTime, varselRepository: VarselRepository) {
-        if (låst) {
-            throw IllegalStateException("Forsøker å håndtere varselkode = $varselkode for generasjon = $this som er låst. Det skal ikke være mulig.")
-        }
-        håndterVarsel(varselId, varselkode.name, opprettet, varselRepository)
-    }
-
-    private fun håndterVarsel(varselId: UUID, varselkode: String, opprettet: LocalDateTime, varselRepository: VarselRepository) {
-        varsler.reaktiverFor(this.id, varselkode, varselRepository) ?: run {
-            varsler.add(Varsel(varselId, varselkode, opprettet, vedtaksperiodeId))
-            varselRepository.lagreVarsel(varselId, this.id, varselkode, opprettet, vedtaksperiodeId)
-        }
     }
 
     internal fun håndterGodkjentVarsel(varselkode: String, ident: String, varselRepository: VarselRepository) {

@@ -2,7 +2,6 @@ package no.nav.helse.modell.varsel
 
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.modell.vedtaksperiode.Generasjon
 
 // Alle Varselkoder må følge formatet
 internal const val varselkodeformat = "SB_\\D{2}_\\d{1,3}"
@@ -33,10 +32,6 @@ enum class Varselkode(
 
     init {
         require(this.name.matches(regex)) { "Ugyldig varselkode-format: ${this.name}" }
-    }
-
-    internal fun nyttVarsel(generasjon: Generasjon, varselRepository: VarselRepository) {
-        generasjon.håndterSaksbehandlingsvarsel(UUID.randomUUID(), this, LocalDateTime.now(), varselRepository)
     }
 
     internal fun nyttVarsel(vedtaksperiodeId: UUID): Varsel {

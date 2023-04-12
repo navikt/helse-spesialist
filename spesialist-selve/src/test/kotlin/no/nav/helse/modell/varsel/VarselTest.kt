@@ -205,10 +205,6 @@ internal class VarselTest {
 
     private val varselRepository = object : VarselRepository {
 
-        override fun reaktiverFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String) {
-            reaktiverteVarsler.add(varselkode)
-        }
-
         override fun godkjennFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String, definisjonId: UUID?) {
             godkjenteVarsler.add(varselkode)
         }

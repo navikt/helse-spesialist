@@ -63,17 +63,6 @@ internal class Varsel(
         varselRepository.avvisFor(vedtaksperiodeId, generasjonId, varselkode, ident, null)
     }
 
-    internal fun reaktiverFor(generasjonId: UUID, varselRepository: VarselRepository) {
-        if (status != INAKTIV) return sikkerlogg.info(
-            "Reaktiverer ikke varsel med {}, {}, {} som ikke har status $INAKTIV. Varselet har status=$status",
-            keyValue("varselkode", varselkode),
-            keyValue("vedtaksperiodeId", vedtaksperiodeId),
-            keyValue("generasjonId", generasjonId)
-        )
-        this.status = AKTIV
-        varselRepository.reaktiverFor(vedtaksperiodeId, generasjonId, varselkode)
-    }
-
     internal fun reaktiver(generasjonId: UUID) {
         if (status != INAKTIV) return
         this.status = AKTIV
@@ -121,10 +110,6 @@ internal class Varsel(
 
         internal fun List<Varsel>.godkjennFor(generasjonId: UUID, varselkode: String, ident: String, varselRepository: VarselRepository) {
             find { it.varselkode == varselkode }?.godkjennFor(generasjonId, ident, varselRepository)
-        }
-
-        internal fun List<Varsel>.reaktiverFor(generasjonId: UUID, varselkode: String, varselRepository: VarselRepository): Varsel? {
-            return find { it.varselkode == varselkode }?.also { it.reaktiverFor(generasjonId, varselRepository) }
         }
 
         internal fun List<Varsel>.godkjennAlleFor(generasjonId: UUID, ident: String, varselRepository: VarselRepository) {

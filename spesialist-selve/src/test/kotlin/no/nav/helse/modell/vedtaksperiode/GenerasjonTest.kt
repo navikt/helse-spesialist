@@ -30,7 +30,6 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 internal class GenerasjonTest: AbstractDatabaseTest() {
     private val varselRepository = ActualVarselRepository(dataSource)
@@ -405,23 +404,11 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     }
 
     @Test
-    fun `Skal ikke kunne opprette saksbehandlingsvarsel på låst generasjon`() {
+    fun `Skal kunne opprette varsel på generasjon`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)
-        generasjon.håndterVedtakFattet(UUID.randomUUID())
-
-        assertThrows<IllegalStateException> {
-            generasjon.håndterSaksbehandlingsvarsel(UUID.randomUUID(), SB_EX_1, LocalDateTime.now(), varselRepository)
-        }
-        assertAntallGenerasjoner(1, vedtaksperiodeId)
-        assertVarsler(generasjonId, 0, AKTIV, SB_EX_1)
-    }
-    @Test
-    fun `Skal kunne opprette saksbehandlingsvarsel på ulåst generasjon`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)
-
-        generasjon.håndterSaksbehandlingsvarsel(UUID.randomUUID(), SB_EX_1, LocalDateTime.now(), varselRepository)
+        generasjon.registrer(generasjonRepository, varselRepository)
+        generasjon.håndter(Varsel(UUID.randomUUID(), SB_EX_1.name, LocalDateTime.now(), vedtaksperiodeId))
         assertAntallGenerasjoner(1, vedtaksperiodeId)
         assertVarsler(generasjonId, 1, AKTIV, SB_EX_1)
     }

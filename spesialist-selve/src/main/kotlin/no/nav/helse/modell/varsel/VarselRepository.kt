@@ -12,7 +12,6 @@ import no.nav.helse.tellInaktivtVarsel
 import no.nav.helse.tellVarsel
 
 internal interface VarselRepository {
-    fun reaktiverFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String)
     fun godkjennFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String, definisjonId: UUID?)
     fun avvisFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String, definisjonId: UUID?)
     fun lagreVarsel(id: UUID, generasjonId: UUID, varselkode: String, opprettet: LocalDateTime, vedtaksperiodeId: UUID)
@@ -58,11 +57,6 @@ internal class ActualVarselRepository(dataSource: DataSource) : VarselRepository
         val definisjon = definisjonDao.sisteDefinisjonFor(varselkode)
         definisjon.oppdaterVarsel(vedtaksperiodeId, generasjonId, INAKTIV, "Spesialist", varselDao::oppdaterStatus)
         if (varselkode.matches(varselkodeformat.toRegex())) tellInaktivtVarsel(varselkode)
-    }
-
-    override fun reaktiverFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String) {
-        varselDao.oppdaterStatus(vedtaksperiodeId, generasjonId, varselkode, AKTIV, null, null)
-        if (varselkode.matches(varselkodeformat.toRegex())) tellVarsel(varselkode)
     }
 
     override fun godkjennFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String, definisjonId: UUID?) {
