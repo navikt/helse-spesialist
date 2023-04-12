@@ -17,7 +17,7 @@ class MsGraphClient(
     private val tokenClient: GraphAccessTokenClient,
     private val graphUrl: String = "https://graph.microsoft.com/v1.0",
 ) {
-    suspend fun erIGruppe(oid: UUID, groupId: UUID) {
+    suspend fun erIGruppe(oid: UUID, groupId: UUID): Boolean {
         val token = runBlocking { tokenClient.fetchToken() }
         val response = httpClient.get(graphUrl) {
             url {
@@ -32,10 +32,14 @@ class MsGraphClient(
         val responseText = response.bodyAsText()
         sikkerlogger.info("respons fra MS Graph: $responseText")
         val responseNode = objectMapper.readTree(responseText)
-        responseNode["value"].firstOrNull()?.path("displayName")?.let {
-            sikkerlogger.info("$it er medlem av $groupId")
-        } ?: sikkerlogger.info("$oid er ikke medlem av $groupId")
-
+        return (responseNode["@odata.count"].asText() == "1").also { harTilgang ->
+            if (harTilgang) {
+                val hvem = responseNode["value"].first().path("displayName").asText()
+                sikkerlogger.info("$hvem er medlem av $groupId")
+            } else {
+                sikkerlogger.info("$oid er ikke medlem av $groupId")
+            }
+        }
     }
 
     companion object {

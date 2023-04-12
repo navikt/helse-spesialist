@@ -219,7 +219,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         tildelingDao = tildelingDao,
         reservasjonDao = reservasjonDao,
         opptegnelseDao = opptegnelseDao,
-        saksbehandlerErIGruppe = { oid, gruppe -> msGraphClient.erIGruppe(oid, tilgangsgrupper.gruppeId(gruppe)) }
+        harTilgangTil = { oid, gruppe -> msGraphClient.erIGruppe(oid, tilgangsgrupper.gruppeId(gruppe)) }
     )
 
     private val totrinnsvurderingMediator =
@@ -423,4 +423,4 @@ fun Application.installErrorHandling() {
     }
 }
 
-typealias Tilgangskontroll = suspend (UUID, Gruppe) -> Unit
+typealias Tilgangskontroll = suspend (UUID, Gruppe) -> Boolean

@@ -56,7 +56,7 @@ internal class OppgaveMediatorTest {
         tildelingDao,
         reservasjonDao,
         opptegnelseDao,
-        saksbehandlerErIGruppe = gruppehenterTestoppsett.hentGrupper,
+        harTilgangTil = gruppehenterTestoppsett.hentGrupper,
     )
     private val søknadsoppgave: Oppgave = Oppgave.søknad(VEDTAKSPERIODE_ID, UTBETALING_ID)
     private val stikkprøveoppgave: Oppgave = Oppgave.stikkprøve(VEDTAKSPERIODE_ID_2, UTBETALING_ID_2)
@@ -223,6 +223,7 @@ internal class OppgaveMediatorTest {
 
         val hentGrupper: Tilgangskontroll = { _: UUID, _: Gruppe->
             erKalt = true
+            true
         }
     }
 }

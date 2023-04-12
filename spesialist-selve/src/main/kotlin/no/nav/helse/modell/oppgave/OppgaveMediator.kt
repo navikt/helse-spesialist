@@ -23,7 +23,7 @@ class OppgaveMediator(
     private val tildelingDao: TildelingDao,
     private val reservasjonDao: ReservasjonDao,
     private val opptegnelseDao: OpptegnelseDao,
-    private val saksbehandlerErIGruppe: Tilgangskontroll = { _, _ -> },
+    private val harTilgangTil: Tilgangskontroll = { _, _ -> false },
 ) {
     private val oppgaver = mutableSetOf<Oppgave>()
     private val oppgaverForPublisering = mutableMapOf<Long, String>()
@@ -117,8 +117,8 @@ class OppgaveMediator(
         reservasjonDao.hentReservasjonFor(fødselsnummer)?.let { (oid, settPåVent) ->
             oppgaver.forEach { oppgave ->
                 // Hent i bakgrunnen nå i utprøvingsfasen
-                CoroutineScope(Dispatchers.IO).launch { saksbehandlerErIGruppe(oid, Gruppe.RISK_QA) }
-                oppgave.tildelHvisIkkeStikkprøve(this, oid, settPåVent)
+                CoroutineScope(Dispatchers.IO).launch { harTilgangTil(oid, Gruppe.RISK_QA) }
+                oppgave.tildelHvisIkkeStikkprøve(this, oid, settPåVent, harTilgangTil)
             }
         }
     }
