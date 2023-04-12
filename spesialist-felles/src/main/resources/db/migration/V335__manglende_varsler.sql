@@ -1,2 +1,0 @@
-INSERT INTO selve_varsel (unik_id, kode, vedtaksperiode_id, generasjon_ref) VALUES (gen_random_uuid(), 'SB_EX_1', '228951c4-3749-4813-837a-617fcd99ee43', 6515613);
-INSERT INTO selve_varsel (unik_id, kode, vedtaksperiode_id, generasjon_ref) VALUES (gen_random_uuid(), 'RV_OO_1', 'fbd93308-a5e4-407b-a331-b44e477e2571', 6423325);
