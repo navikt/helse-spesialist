@@ -43,27 +43,27 @@ internal class ActualVarselRepositoryTest : AbstractDatabaseTest() {
 
     @Test
     fun `kan lagre varsel dersom det finnes en generasjon for perioden`() {
-        varselRepository.lagreVarsel(UUID.randomUUID(), generasjonId, "EN_KODE", LocalDateTime.now(), vedtaksperiodeId)
+        varselRepository.varselOpprettet(vedtaksperiodeId, generasjonId, UUID.randomUUID(), "EN_KODE", LocalDateTime.now())
         assertAktiv(generasjonId, "EN_KODE")
     }
 
     @Test
     fun `kan ikke lagre varsel dersom det ikke finnes en generasjon for perioden`() {
         assertThrows<Exception> {
-            varselRepository.lagreVarsel(UUID.randomUUID(), UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), vedtaksperiodeId)
+            varselRepository.varselOpprettet(vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), "EN_KODE", LocalDateTime.now())
         }
     }
 
     @Test
     fun `kan godkjenne varsel`() {
-        varselRepository.lagreVarsel(UUID.randomUUID(), generasjonId, "EN_KODE", LocalDateTime.now(), vedtaksperiodeId)
+        varselRepository.varselOpprettet(vedtaksperiodeId, generasjonId, UUID.randomUUID(), "EN_KODE", LocalDateTime.now())
         varselRepository.godkjennFor(vedtaksperiodeId, generasjonId, "EN_KODE", "EN_IDENT", null)
         assertEquals(GODKJENT, statusFor(generasjonId, "EN_KODE"))
     }
 
     @Test
     fun `godkjenning av varsel med definisjonId medfører at varselet lagres med referanse til denne definisjonen`() {
-        varselRepository.lagreVarsel(UUID.randomUUID(), generasjonId, "EN_KODE", LocalDateTime.now(), vedtaksperiodeId)
+        varselRepository.varselOpprettet(vedtaksperiodeId, generasjonId, UUID.randomUUID(), "EN_KODE", LocalDateTime.now())
         varselRepository.godkjennFor(vedtaksperiodeId, generasjonId, "EN_KODE", "EN_IDENT", definisjonId)
         assertEquals(GODKJENT, statusFor(generasjonId, "EN_KODE"))
         assertDefinisjonFor(vedtaksperiodeId, "EN_KODE", definisjonId)
@@ -79,7 +79,7 @@ internal class ActualVarselRepositoryTest : AbstractDatabaseTest() {
 
     @Test
     fun `kan avvise varsel`() {
-        varselRepository.lagreVarsel(UUID.randomUUID(), generasjonId, "EN_KODE", LocalDateTime.now(), vedtaksperiodeId)
+        varselRepository.varselOpprettet(vedtaksperiodeId, generasjonId, UUID.randomUUID(), "EN_KODE", LocalDateTime.now())
         varselRepository.avvisFor(vedtaksperiodeId, generasjonId, "EN_KODE", "EN_IDENT", null)
         assertEquals(AVVIST, statusFor(generasjonId, "EN_KODE"))
     }
@@ -87,27 +87,27 @@ internal class ActualVarselRepositoryTest : AbstractDatabaseTest() {
     @Test
     fun `kan deaktivere varsel`() {
         val varselId = UUID.randomUUID()
-        varselRepository.lagreVarsel(varselId, generasjonId, "EN_KODE", LocalDateTime.now(), vedtaksperiodeId)
+        varselRepository.varselOpprettet(vedtaksperiodeId, generasjonId, varselId, "EN_KODE", LocalDateTime.now())
         varselRepository.varselDeaktivert(varselId, "EN_KODE", generasjonId, vedtaksperiodeId)
         assertEquals(INAKTIV, statusFor(generasjonId, "EN_KODE"))
     }
 
     @Test
     fun `nytt varsel er aktivt`() {
-        varselRepository.lagreVarsel(UUID.randomUUID(), generasjonId, "EN_KODE", LocalDateTime.now(), vedtaksperiodeId)
+        varselRepository.varselOpprettet(vedtaksperiodeId, generasjonId, UUID.randomUUID(), "EN_KODE", LocalDateTime.now())
         assertAktiv(generasjonId, "EN_KODE")
     }
 
     @Test
     fun `varsel har ikke lenger aktiv-status når det er godkjent`() {
-        varselRepository.lagreVarsel(UUID.randomUUID(), generasjonId, "EN_KODE", LocalDateTime.now(), vedtaksperiodeId)
+        varselRepository.varselOpprettet(vedtaksperiodeId, generasjonId, UUID.randomUUID(), "EN_KODE", LocalDateTime.now())
         varselRepository.godkjennFor(vedtaksperiodeId, generasjonId, "EN_KODE", "EN_IDENT", null)
         assertGodkjent(generasjonId, "EN_KODE")
     }
 
     @Test
     fun `varsel har ikke lenger aktiv-status når det er avvist`() {
-        varselRepository.lagreVarsel(UUID.randomUUID(), generasjonId, "EN_KODE", LocalDateTime.now(), vedtaksperiodeId)
+        varselRepository.varselOpprettet(vedtaksperiodeId, generasjonId, UUID.randomUUID(), "EN_KODE", LocalDateTime.now())
         varselRepository.avvisFor(vedtaksperiodeId, generasjonId, "EN_KODE", "EN_IDENT", null)
         assertAvvist(generasjonId, "EN_KODE")
     }
@@ -115,7 +115,7 @@ internal class ActualVarselRepositoryTest : AbstractDatabaseTest() {
     @Test
     fun `varsel har ikke lenger aktiv-status når det er deaktivert`() {
         val varselId = UUID.randomUUID()
-        varselRepository.lagreVarsel(varselId, generasjonId, "EN_KODE", LocalDateTime.now(), vedtaksperiodeId)
+        varselRepository.varselOpprettet(vedtaksperiodeId, generasjonId, varselId, "EN_KODE", LocalDateTime.now())
         varselRepository.varselDeaktivert(varselId, "EN_KODE", generasjonId, vedtaksperiodeId)
         assertInaktiv(generasjonId, "EN_KODE")
     }

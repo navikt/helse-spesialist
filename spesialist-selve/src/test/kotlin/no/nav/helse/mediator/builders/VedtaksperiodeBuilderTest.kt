@@ -23,7 +23,7 @@ class VedtaksperiodeBuilderTest : AbstractDatabaseTest() {
         val varselId = UUID.randomUUID()
         val opprettet = LocalDateTime.now()
         generasjonRepository.førsteGenerasjonOpprettet(generasjonId, vedtaksperiodeId, UUID.randomUUID(), 1.januar, 31.januar, 1.januar)
-        varselRepository.lagreVarsel(varselId, generasjonId, "SB_EX_1", opprettet, vedtaksperiodeId)
+        varselRepository.varselOpprettet( vedtaksperiodeId, generasjonId, varselId, "SB_EX_1", opprettet)
         val builder = VedtaksperiodeBuilder(vedtaksperiodeId)
         val vedtaksperiode = builder.build(generasjonRepository, varselRepository)
         val forventetVedtaksperiode = Vedtaksperiode(

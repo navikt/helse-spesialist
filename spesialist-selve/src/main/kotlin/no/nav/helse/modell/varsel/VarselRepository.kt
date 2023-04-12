@@ -14,7 +14,6 @@ import no.nav.helse.tellVarsel
 internal interface VarselRepository {
     fun godkjennFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String, definisjonId: UUID?)
     fun avvisFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String, definisjonId: UUID?)
-    fun lagreVarsel(id: UUID, generasjonId: UUID, varselkode: String, opprettet: LocalDateTime, vedtaksperiodeId: UUID)
     fun lagreDefinisjon(
         id: UUID,
         varselkode: String,
@@ -67,11 +66,6 @@ internal class ActualVarselRepository(dataSource: DataSource) : VarselRepository
     override fun avvisFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String, definisjonId: UUID?) {
         val definisjon = definisjonId?.let(definisjonDao::definisjonFor) ?: definisjonDao.sisteDefinisjonFor(varselkode)
         definisjon.oppdaterVarsel(vedtaksperiodeId, generasjonId, AVVIST, ident, varselDao::oppdaterStatus)
-    }
-
-    override fun lagreVarsel(id: UUID, generasjonId: UUID, varselkode: String, opprettet: LocalDateTime, vedtaksperiodeId: UUID) {
-        varselDao.lagreVarsel(id, varselkode, opprettet, vedtaksperiodeId, generasjonId)
-        if (varselkode.matches(varselkodeformat.toRegex())) tellVarsel(varselkode)
     }
 
     override fun lagreDefinisjon(

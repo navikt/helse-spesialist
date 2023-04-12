@@ -60,7 +60,6 @@ class InvaliderUtbetalingForGenerasjonerCommandTest {
     private val varselRepository get() = object : VarselRepository {
         override fun godkjennFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String, definisjonId: UUID?):Unit = TODO("Not yet implemented")
         override fun avvisFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String, definisjonId: UUID?):Unit = TODO("Not yet implemented")
-        override fun lagreVarsel(id: UUID, generasjonId: UUID, varselkode: String, opprettet: LocalDateTime, vedtaksperiodeId: UUID):Unit = TODO("Not yet implemented")
         override fun lagreDefinisjon(id: UUID, varselkode: String, tittel: String, forklaring: String?, handling: String?, avviklet: Boolean, opprettet: LocalDateTime):Unit = TODO("Not yet implemented")
         override fun oppdaterGenerasjonFor(id: UUID, gammelGenerasjonId: UUID, nyGenerasjonId: UUID):Unit = TODO("Not yet implemented")
     }
