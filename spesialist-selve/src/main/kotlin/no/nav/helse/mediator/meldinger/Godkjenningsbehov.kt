@@ -195,6 +195,7 @@ internal class Godkjenningsbehov(
             generasjonRepository = generasjonRepository,
             organisasjonsnummer = organisasjonsnummer,
             førstegangsbehandling = førstegangsbehandling,
+            sykefraværstilfelle = sykefraværstilfelle,
             utbetalingsfinner = utbetalingsfinner,
         ),
         AutomatiskAvvisningCommand(

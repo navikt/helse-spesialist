@@ -8,13 +8,17 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
+import no.nav.helse.januar
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.løsninger.Risikovurderingløsning
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.varsel.VarselRepository
+import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
+import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLUtbetaling
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -43,6 +47,10 @@ internal class RisikoCommandTest {
             funn = funn
         )).path("@løsning").path("Risikovurdering")
     }
+
+    private val vedtaksperiode = Vedtaksperiode(VEDTAKSPERIODE_ID, Generasjon(UUID.randomUUID(), VEDTAKSPERIODE_ID, 1.januar, 31.januar, 1.januar))
+    private val sykefraværstilfelle = Sykefraværstilfelle(FØDSELSNUMMER, 1.januar, listOf(vedtaksperiode))
+
 
     private lateinit var context: CommandContext
 
@@ -153,6 +161,7 @@ internal class RisikoCommandTest {
         generasjonRepository = generasjonRepository,
         organisasjonsnummer = organisasjonsnummer,
         førstegangsbehandling = førstegangsbehandling,
+        sykefraværstilfelle = sykefraværstilfelle,
         utbetalingsfinner = { utbetalingMock },
     )
 }

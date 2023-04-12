@@ -6,6 +6,7 @@ import no.nav.helse.mediator.meldinger.løsninger.Risikovurderingløsning
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetalingTilSykmeldt
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varselkode.SB_RV_1
@@ -24,6 +25,7 @@ internal class RisikoCommand(
     private val generasjonRepository: GenerasjonRepository,
     private val organisasjonsnummer: String,
     private val førstegangsbehandling: Boolean,
+    private val sykefraværstilfelle: Sykefraværstilfelle,
     private val utbetalingsfinner: () -> GraphQLUtbetaling?,
 ) : Command {
 
@@ -79,8 +81,7 @@ internal class RisikoCommand(
                     opprettet = LocalDateTime.now(),
                 )
             )
-            val generasjon = generasjonRepository.sisteFor(vedtaksperiodeId)
-            SB_RV_1.nyttVarsel(generasjon, varselRepository)
+            sykefraværstilfelle.håndter(SB_RV_1.nyttVarsel(vedtaksperiodeId))
             tellWarning(melding)
         }
     }
