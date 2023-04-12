@@ -23,8 +23,6 @@ internal interface VarselRepository {
         avviklet: Boolean,
         opprettet: LocalDateTime,
     )
-
-    fun oppdaterGenerasjonFor(id: UUID, gammelGenerasjonId: UUID, nyGenerasjonId: UUID)
 }
 
 internal class ActualVarselRepository(dataSource: DataSource) : VarselRepository, IVedtaksperiodeObserver {
@@ -58,6 +56,10 @@ internal class ActualVarselRepository(dataSource: DataSource) : VarselRepository
         if (varselkode.matches(varselkodeformat.toRegex())) tellInaktivtVarsel(varselkode)
     }
 
+    override fun varselFlyttet(varselId: UUID, gammelGenerasjonId: UUID, nyGenerasjonId: UUID) {
+        varselDao.oppdaterGenerasjon(varselId, gammelGenerasjonId, nyGenerasjonId)
+    }
+
     override fun godkjennFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String, definisjonId: UUID?) {
         val definisjon = definisjonId?.let(definisjonDao::definisjonFor) ?: definisjonDao.sisteDefinisjonFor(varselkode)
         definisjon.oppdaterVarsel(vedtaksperiodeId, generasjonId, GODKJENT, ident, varselDao::oppdaterStatus)
@@ -80,7 +82,4 @@ internal class ActualVarselRepository(dataSource: DataSource) : VarselRepository
         definisjonDao.lagreDefinisjon(id, varselkode, tittel, forklaring, handling, avviklet, opprettet)
     }
 
-    override fun oppdaterGenerasjonFor(id: UUID, gammelGenerasjonId: UUID, nyGenerasjonId: UUID) {
-        varselDao.oppdaterGenerasjon(id, gammelGenerasjonId, nyGenerasjonId)
-    }
 }

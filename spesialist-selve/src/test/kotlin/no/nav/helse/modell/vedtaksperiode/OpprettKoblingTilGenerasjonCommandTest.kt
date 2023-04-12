@@ -17,7 +17,12 @@ class OpprettKoblingTilGenerasjonCommandTest: AbstractDatabaseTest() {
     private val vedtaksperiodeId = UUID.randomUUID()
     private val utbetalingId = UUID.randomUUID()
     private val hendelseId = UUID.randomUUID()
-    private val command = OpprettKoblingTilGenerasjonCommand(hendelseId, vedtaksperiodeId, utbetalingId, generasjonRepository, varselRepository)
+    private val command = OpprettKoblingTilGenerasjonCommand(
+        hendelseId,
+        vedtaksperiodeId,
+        utbetalingId,
+        generasjonRepository
+    )
     @Test
     fun `Opprett kobling til utbetaling for generasjon`() {
         generasjonRepository.førsteGenerasjonOpprettet(UUID.randomUUID(), vedtaksperiodeId, UUID.randomUUID(), 1.januar, 31.januar, 1.januar)

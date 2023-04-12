@@ -44,7 +44,6 @@ internal class VedtaksperiodeNyUtbetaling(
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId,
             generasjonRepository = generasjonRepository,
-            varselRepository = varselRepository,
         )
     )
 

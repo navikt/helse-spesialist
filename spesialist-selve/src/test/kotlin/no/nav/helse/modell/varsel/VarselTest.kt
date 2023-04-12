@@ -214,9 +214,6 @@ internal class VarselTest {
         }
 
         override fun lagreDefinisjon(id: UUID, varselkode: String, tittel: String, forklaring: String?, handling: String?, avviklet: Boolean, opprettet: LocalDateTime): Unit = TODO("Not yet implemented")
-        override fun oppdaterGenerasjonFor(id: UUID, gammelGenerasjonId: UUID, nyGenerasjonId: UUID) {
-            TODO("Not yet implemented")
-        }
     }
 
     private val observer = object : IVedtaksperiodeObserver {

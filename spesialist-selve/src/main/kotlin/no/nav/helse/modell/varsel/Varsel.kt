@@ -75,8 +75,8 @@ internal class Varsel(
         observers.forEach { it.varselDeaktivert(id, varselkode, generasjonId, vedtaksperiodeId) }
     }
 
-    private fun oppdaterGenerasjon(gammelGenerasjonId: UUID, nyGenerasjonId: UUID, varselRepository: VarselRepository) {
-        varselRepository.oppdaterGenerasjonFor(this.id, gammelGenerasjonId, nyGenerasjonId)
+    private fun oppdaterGenerasjon(gammelGenerasjonId: UUID, nyGenerasjonId: UUID) {
+        observers.forEach { it.varselFlyttet(this.id, gammelGenerasjonId, nyGenerasjonId) }
     }
 
     override fun toString(): String {
@@ -104,8 +104,8 @@ internal class Varsel(
     internal companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
-        internal fun List<Varsel>.flyttVarslerFor(gammelGenerasjonId: UUID, nyGenerasjonId: UUID, varselRepository: VarselRepository) {
-            forEach { it.oppdaterGenerasjon(gammelGenerasjonId, nyGenerasjonId, varselRepository) }
+        internal fun List<Varsel>.flyttVarslerFor(gammelGenerasjonId: UUID, nyGenerasjonId: UUID) {
+            forEach { it.oppdaterGenerasjon(gammelGenerasjonId, nyGenerasjonId) }
         }
 
         internal fun List<Varsel>.godkjennFor(generasjonId: UUID, varselkode: String, ident: String, varselRepository: VarselRepository) {

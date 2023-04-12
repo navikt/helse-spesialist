@@ -48,7 +48,6 @@ internal class VedtaksperiodeEndret(
         ),
         VedtaksperiodeGenerasjonCommand(
             vedtaksperiodeEndretHendelseId = forårsaketAvId,
-            varselRepository = varselRepository,
             forrigeTilstand = forrigeTilstand,
             gjeldendeTilstand = gjeldendeTilstand,
             gjeldendeGenerasjon = gjeldendeGenerasjon

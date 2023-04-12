@@ -5,7 +5,6 @@ import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.modell.varsel.Varsel
-import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode.Companion.harAktiveVarsler
@@ -34,8 +33,8 @@ internal class SykefraværstilfelleTest {
         val gjeldendeGenerasjon1 = generasjon(vedtaksperiodeId1)
         val gjeldendeGenerasjon2 = generasjon(vedtaksperiodeId2)
         val utbetalingId = UUID.randomUUID()
-        gjeldendeGenerasjon1.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId, varselRepository)
-        gjeldendeGenerasjon2.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId, varselRepository)
+        gjeldendeGenerasjon1.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
+        gjeldendeGenerasjon2.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
         val vedtaksperiode1 = Vedtaksperiode(vedtaksperiodeId1, gjeldendeGenerasjon1)
         val vedtaksperiode2 = Vedtaksperiode(vedtaksperiodeId2, gjeldendeGenerasjon2)
         assertFalse(listOf(vedtaksperiode1, vedtaksperiode2).harAktiveVarsler(28.februar))
@@ -61,11 +60,4 @@ internal class SykefraværstilfelleTest {
         tom = 31.januar,
         skjæringstidspunkt = 1.januar
     )
-
-    private val varselRepository = object : VarselRepository {
-        override fun godkjennFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String, definisjonId: UUID?) {}
-        override fun avvisFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String, definisjonId: UUID?) {}
-        override fun lagreDefinisjon(id: UUID, varselkode: String, tittel: String, forklaring: String?, handling: String?, avviklet: Boolean, opprettet: LocalDateTime) {}
-        override fun oppdaterGenerasjonFor(id: UUID, gammelGenerasjonId: UUID, nyGenerasjonId: UUID) {}
-    }
 }

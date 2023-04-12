@@ -1,11 +1,9 @@
 package no.nav.helse.mediator.builders
 
-import java.time.LocalDateTime
 import java.time.LocalDateTime.now
 import java.util.UUID
 import no.nav.helse.januar
 import no.nav.helse.modell.varsel.Varsel
-import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -30,7 +28,7 @@ class GenerasjonBuilderTest {
         builder.varsler(listOf(Varsel(varselId, "EN_KODE", varselOpprettet, vedtaksperiodeId)))
         val generasjon = builder.build()
         val forventetGenerasjon = Generasjon(generasjonId, vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
-        forventetGenerasjon.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId, varselRepository)
+        forventetGenerasjon.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
         forventetGenerasjon.håndter(Varsel(varselId, "EN_KODE", varselOpprettet, vedtaksperiodeId))
 
         assertEquals(forventetGenerasjon, generasjon)
@@ -144,12 +142,5 @@ class GenerasjonBuilderTest {
         assertDoesNotThrow {
             builder.build()
         }
-    }
-
-    private val varselRepository = object : VarselRepository {
-        override fun godkjennFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String, definisjonId: UUID?) {}
-        override fun avvisFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String, definisjonId: UUID?) {}
-        override fun lagreDefinisjon(id: UUID, varselkode: String, tittel: String, forklaring: String?, handling: String?, avviklet: Boolean, opprettet: LocalDateTime) {}
-        override fun oppdaterGenerasjonFor(id: UUID, gammelGenerasjonId: UUID, nyGenerasjonId: UUID) {}
     }
 }

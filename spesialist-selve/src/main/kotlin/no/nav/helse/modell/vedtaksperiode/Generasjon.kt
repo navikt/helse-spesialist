@@ -55,14 +55,10 @@ internal class Generasjon private constructor(
         }
     }
 
-    internal fun håndterNyGenerasjon(
-        varselRepository: VarselRepository,
-        hendelseId: UUID,
-        id: UUID = UUID.randomUUID(),
-    ): Generasjon? {
+    internal fun håndterNyGenerasjon(hendelseId: UUID, id: UUID = UUID.randomUUID()): Generasjon? {
         if (!låst) return null
         val nesteGenerasjon = opprettNeste(id, hendelseId)
-        flyttAktiveVarsler(nesteGenerasjon, varselRepository)
+        flyttAktiveVarsler(nesteGenerasjon)
         return nesteGenerasjon
     }
 
@@ -72,9 +68,9 @@ internal class Generasjon private constructor(
         }
     }
 
-    private fun flyttAktiveVarsler(nyGenerasjon: Generasjon, varselRepository: VarselRepository) {
+    private fun flyttAktiveVarsler(nyGenerasjon: Generasjon) {
         val aktiveVarsler = varsler.filter(Varsel::erAktiv)
-        aktiveVarsler.flyttVarslerFor(this.id, nyGenerasjon.id, varselRepository)
+        aktiveVarsler.flyttVarslerFor(this.id, nyGenerasjon.id)
         this.varsler.removeAll(aktiveVarsler)
         nyGenerasjon.varsler.addAll(aktiveVarsler)
         if (aktiveVarsler.isNotEmpty())
@@ -86,7 +82,7 @@ internal class Generasjon private constructor(
             )
     }
 
-    internal fun håndterNyUtbetaling(hendelseId: UUID, utbetalingId: UUID, varselRepository: VarselRepository) {
+    internal fun håndterNyUtbetaling(hendelseId: UUID, utbetalingId: UUID) {
         if (!låst) return håndterNyUtbetaling(utbetalingId)
         val nyGenerasjonId = UUID.randomUUID()
         sikkerlogg.info(
@@ -95,7 +91,7 @@ internal class Generasjon private constructor(
             keyValue("generasjon", this),
             keyValue("generasjonId", nyGenerasjonId)
         )
-        håndterNyGenerasjon(varselRepository, hendelseId, nyGenerasjonId)?.håndterNyUtbetaling(utbetalingId)
+        håndterNyGenerasjon(hendelseId, nyGenerasjonId)?.håndterNyUtbetaling(utbetalingId)
     }
 
     private fun håndterNyUtbetaling(utbetalingId: UUID) {

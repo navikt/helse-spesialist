@@ -123,11 +123,11 @@ internal class ActualVarselRepositoryTest : AbstractDatabaseTest() {
     @Test
     fun `oppdatering av varsel for én generasjon endrer ikke varsel for en annen generasjon på samme periode`() {
         generasjon.håndter(Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), vedtaksperiodeId))
-        generasjon.håndterNyUtbetaling(UUID.randomUUID(), UUID.randomUUID(), varselRepository)
+        generasjon.håndterNyUtbetaling(UUID.randomUUID(), UUID.randomUUID())
         generasjon.håndterGodkjentAvSaksbehandler("EN_IDENT", varselRepository)
         generasjon.håndterVedtakFattet(UUID.randomUUID())
         val nesteGenerasjonId = UUID.randomUUID()
-        val nesteGenerasjon = generasjon.håndterNyGenerasjon(varselRepository, UUID.randomUUID(), nesteGenerasjonId)
+        val nesteGenerasjon = generasjon.håndterNyGenerasjon(UUID.randomUUID(), nesteGenerasjonId)
         val varsel = Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), vedtaksperiodeId)
         nesteGenerasjon?.håndter(varsel)
         nesteGenerasjon?.håndterDeaktivertVarsel(varsel)
