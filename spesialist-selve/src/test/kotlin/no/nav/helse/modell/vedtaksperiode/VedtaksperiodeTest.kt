@@ -28,7 +28,7 @@ class VedtaksperiodeTest {
             }
         }
         vedtaksperiode.registrer(observer)
-        vedtaksperiode.håndterTidslinjeendring(15.januar, 30.januar, 15.januar)
+        vedtaksperiode.håndterTidslinjeendring(15.januar, 30.januar, 15.januar, UUID.randomUUID())
         assertTrue(observer.tidslinjeOppdatert)
     }
 
@@ -54,7 +54,8 @@ class VedtaksperiodeTest {
             listOf(
                 VedtaksperiodeOppdatering(1.mars, 31.mars, 1.mars, vedtaksperiodeId1),
                 VedtaksperiodeOppdatering(1.mars, 31.mars, 1.mars, vedtaksperiodeId2),
-            )
+            ),
+            UUID.randomUUID()
         )
         assertEquals(2, observer.oppdaterteGenerasjoner.size)
         assertEquals(generasjonId1, observer.oppdaterteGenerasjoner[0])
@@ -79,7 +80,10 @@ class VedtaksperiodeTest {
         vedtaksperiode1.registrer(observer)
         vedtaksperiode2.registrer(observer)
 
-        listOf(vedtaksperiode1, vedtaksperiode2).håndterOppdateringer(listOf(VedtaksperiodeOppdatering(1.mars, 31.mars, 1.mars, vedtaksperiodeId2)))
+        listOf(vedtaksperiode1, vedtaksperiode2).håndterOppdateringer(
+            listOf(VedtaksperiodeOppdatering(1.mars, 31.mars, 1.mars, vedtaksperiodeId2)),
+            UUID.randomUUID()
+        )
         assertEquals(1, observer.oppdaterteGenerasjoner.size)
         assertEquals(generasjonId2, observer.oppdaterteGenerasjoner[0])
     }
@@ -102,7 +106,10 @@ class VedtaksperiodeTest {
         vedtaksperiode1.registrer(observer)
         vedtaksperiode2.registrer(observer)
 
-        listOf(vedtaksperiode1, vedtaksperiode2).håndterOppdateringer(listOf(VedtaksperiodeOppdatering(1.januar, 31.januar, 1.januar, UUID.randomUUID())))
+        listOf(vedtaksperiode1, vedtaksperiode2).håndterOppdateringer(
+            listOf(VedtaksperiodeOppdatering(1.januar, 31.januar, 1.januar, UUID.randomUUID())),
+            UUID.randomUUID()
+        )
         assertEquals(0, observer.oppdaterteGenerasjoner.size)
     }
 

@@ -1,5 +1,6 @@
 package no.nav.helse.modell.vedtaksperiode
 
+import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
@@ -11,6 +12,7 @@ internal class OppdaterSykefraværstilfellerCommand(
     private val aktørId: String,
     private val vedtaksperiodeoppdateringer: List<VedtaksperiodeOppdatering>,
     private val vedtaksperioder: List<Vedtaksperiode>,
+    private val hendelseId: UUID
 ) : Command {
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
@@ -22,7 +24,7 @@ internal class OppdaterSykefraværstilfellerCommand(
             keyValue("aktørId", aktørId),
             keyValue("fødselsnummer", fødselsnummer)
         )
-        vedtaksperioder.håndterOppdateringer(vedtaksperiodeoppdateringer)
+        vedtaksperioder.håndterOppdateringer(vedtaksperiodeoppdateringer, hendelseId)
         return true
     }
 }

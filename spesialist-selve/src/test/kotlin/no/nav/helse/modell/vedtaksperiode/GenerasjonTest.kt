@@ -65,7 +65,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
             }
         }
         generasjon.registrer(observer)
-        generasjon.håndterTidslinjeendring(1.mars, 31.mars, 1.mars)
+        generasjon.håndterTidslinjeendring(1.mars, 31.mars, 1.mars, UUID.randomUUID())
         assertEquals(generasjonId, observer.generasjonId)
         assertEquals(1.mars, observer.fom)
         assertEquals(31.mars, observer.tom)
@@ -94,7 +94,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
             }
         }
         generasjon.registrer(observer)
-        generasjon.håndterTidslinjeendring(1.januar, 31.januar, 1.januar)
+        generasjon.håndterTidslinjeendring(1.januar, 31.januar, 1.januar, UUID.randomUUID())
         assertNull(observer.generasjonId)
         assertNull(observer.fom)
         assertNull(observer.tom)
@@ -124,7 +124,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
             }
         }
         generasjon.registrer(observer)
-        generasjon.håndterTidslinjeendring(1.januar, 31.januar, 1.januar)
+        generasjon.håndterTidslinjeendring(1.januar, 31.januar, 1.januar, UUID.randomUUID())
         assertNull(observer.generasjonId)
         assertNull(observer.fom)
         assertNull(observer.tom)
@@ -136,7 +136,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjonId = UUID.randomUUID()
         val generasjon = nyGenerasjon(id = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
-        generasjon.håndterTidslinjeendring(1.januar, 31.januar, 1.januar)
+        generasjon.håndterTidslinjeendring(1.januar, 31.januar, 1.januar, UUID.randomUUID())
         assertEquals(
             Generasjon(generasjonId, vedtaksperiodeId, 1.januar, 31.januar, 1.januar),
             generasjon
@@ -149,7 +149,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         val generasjonId = UUID.randomUUID()
         val generasjon = generasjon(generasjonId, vedtaksperiodeId)
         generasjon.håndterVedtakFattet(UUID.randomUUID())
-        generasjon.håndterTidslinjeendring(1.februar, 28.februar, 1.februar)
+        generasjon.håndterTidslinjeendring(1.februar, 28.februar, 1.februar, UUID.randomUUID())
         val forventetGenerasjon = Generasjon(generasjonId, vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
         forventetGenerasjon.håndterVedtakFattet(UUID.randomUUID())
         assertEquals(
@@ -228,7 +228,12 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     fun `Kopierer skjæringstidspunkt og periode til neste generasjon`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)
-        generasjon.håndterTidslinjeendring(skjæringstidspunkt = 1.januar, fom = 1.januar, tom = 5.januar)
+        generasjon.håndterTidslinjeendring(
+            fom = 1.januar,
+            tom = 5.januar,
+            skjæringstidspunkt = 1.januar,
+            hendelseId = UUID.randomUUID()
+        )
         generasjon.håndterVedtakFattet(UUID.randomUUID())
         val nyGenerasjonId = UUID.randomUUID()
         val nyGenerasjon = generasjon.håndterNyGenerasjon(UUID.randomUUID(), nyGenerasjonId)
@@ -449,6 +454,37 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         assertIkkeUtbetaling(generasjonId, nyUtbetalingId)
         assertGenerasjonFor(gammelUtbetalingId, vedtaksperiodeId)
         assertGenerasjonFor(nyUtbetalingId, vedtaksperiodeId)
+    }
+
+    @Test
+    fun `oppdaterer tidslinje på ulåst generasjon der fom, tom og eller skjæringstidspunkt er ulike`() {
+        val generasjonId = UUID.randomUUID()
+        val generasjon = nyGenerasjon(generasjonId)
+        generasjon.registrer(observer)
+        generasjon.håndterTidslinjeendring(1.mars, 31.mars, 1.mars, UUID.randomUUID())
+        observer.assertTidslinjeendring(generasjonId, 1.mars, 31.mars, 1.mars)
+    }
+
+    @Test
+    fun `oppdaterer ikke tidslinje på ulåst generasjon der fom, tom og eller skjæringstidspunkt er like`() {
+        val generasjonId = UUID.randomUUID()
+        val generasjon = nyGenerasjon(generasjonId)
+        generasjon.registrer(observer)
+        generasjon.håndterTidslinjeendring(1.januar, 31.januar, 1.januar, UUID.randomUUID())
+        assertEquals(0, observer.oppdaterteGenerasjoner.size)
+    }
+
+    @Test
+    fun `oppretter ny generasjon dersom gjeldende generasjon er låst og tidslinje er ulik`() {
+        val generasjonId = UUID.randomUUID()
+        val vedtaksperiodeId = UUID.randomUUID()
+        val hendelseId = UUID.randomUUID()
+        val generasjon = nyGenerasjon(generasjonId, vedtaksperiodeId)
+        generasjon.registrer(observer)
+        generasjon.håndterVedtakFattet(UUID.randomUUID())
+        generasjon.håndterTidslinjeendring(2.januar, 31.januar, 2.januar, hendelseId)
+        assertEquals(1, observer.opprettedeGenerasjoner.size)
+        observer.assertOpprettelse(vedtaksperiodeId, hendelseId, 2.januar, 31.januar, 2.januar)
     }
 
     @Test
@@ -685,6 +721,12 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     }
 
     private class Observer: IVedtaksperiodeObserver {
+        private class Tidslinjeendring(
+            val fom: LocalDate,
+            val tom: LocalDate,
+            val skjæringstidspunkt: LocalDate
+        )
+
         private class Opprettelse(
             val generasjonId: UUID,
             val vedtaksperiodeId: UUID,
@@ -695,6 +737,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         )
 
         val opprettedeGenerasjoner = mutableMapOf<UUID, Opprettelse>()
+        val oppdaterteGenerasjoner = mutableMapOf<UUID, Tidslinjeendring>()
         val opprettedeVarsler = mutableMapOf<UUID, MutableList<String>>()
         override fun generasjonOpprettet(
             generasjonId: UUID,
@@ -708,6 +751,15 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
                 Opprettelse(generasjonId, vedtaksperiodeId, hendelseId, fom, tom, skjæringstidspunkt)
         }
 
+        override fun tidslinjeOppdatert(
+            generasjonId: UUID,
+            fom: LocalDate,
+            tom: LocalDate,
+            skjæringstidspunkt: LocalDate
+        ) {
+           oppdaterteGenerasjoner[generasjonId] = Tidslinjeendring(fom, tom, skjæringstidspunkt)
+        }
+
         override fun varselOpprettet(
             vedtaksperiodeId: UUID,
             generasjonId: UUID,
@@ -718,18 +770,47 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
             opprettedeVarsler.getOrPut(generasjonId) { mutableListOf() }.add(varselkode)
         }
 
+        fun assertTidslinjeendring(
+            generasjonId: UUID,
+            forventetFom: LocalDate,
+            forventetTom: LocalDate,
+            forventetSkjæringstidspunkt: LocalDate
+        ) {
+            val tidslinjeendring = oppdaterteGenerasjoner[generasjonId]
+            assertEquals(forventetFom, tidslinjeendring?.fom)
+            assertEquals(forventetTom, tidslinjeendring?.tom)
+            assertEquals(forventetSkjæringstidspunkt, tidslinjeendring?.skjæringstidspunkt)
+        }
+
         fun assertOpprettelse(
             forventetGenerasjonId: UUID,
             forventetVedtaksperiodeId: UUID,
             forventetHendelseId: UUID,
-            forventetFom: LocalDate?,
-            forventetTom: LocalDate?,
-            forventetSkjæringstidspunkt: LocalDate?
+            forventetFom: LocalDate,
+            forventetTom: LocalDate,
+            forventetSkjæringstidspunkt: LocalDate
         ) {
             val opprettelse = opprettedeGenerasjoner[forventetGenerasjonId]
             assertNotNull(opprettelse)
             requireNotNull(opprettelse)
             assertEquals(forventetGenerasjonId, opprettelse.generasjonId)
+            assertEquals(forventetVedtaksperiodeId, opprettelse.vedtaksperiodeId)
+            assertEquals(forventetHendelseId, opprettelse.hendelseId)
+            assertEquals(forventetFom, opprettelse.fom)
+            assertEquals(forventetTom, opprettelse.tom)
+            assertEquals(forventetSkjæringstidspunkt, opprettelse.skjæringstidspunkt)
+        }
+
+        fun assertOpprettelse(
+            forventetVedtaksperiodeId: UUID,
+            forventetHendelseId: UUID,
+            forventetFom: LocalDate,
+            forventetTom: LocalDate,
+            forventetSkjæringstidspunkt: LocalDate
+        ) {
+            val opprettelser = opprettedeGenerasjoner.values.filter { it.vedtaksperiodeId == forventetVedtaksperiodeId }
+            assertEquals(1, opprettelser.size)
+            val opprettelse = opprettelser[0]
             assertEquals(forventetVedtaksperiodeId, opprettelse.vedtaksperiodeId)
             assertEquals(forventetHendelseId, opprettelse.hendelseId)
             assertEquals(forventetFom, opprettelse.fom)

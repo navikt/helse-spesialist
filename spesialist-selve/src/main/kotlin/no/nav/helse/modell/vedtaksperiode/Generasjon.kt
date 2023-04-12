@@ -45,21 +45,31 @@ internal class Generasjon private constructor(
         return varsler.any { it.erAktiv() }
     }
 
-    internal fun håndterTidslinjeendring(fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate) {
-        if (låst) return
+    internal fun håndterTidslinjeendring(fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate, hendelseId: UUID) {
         if (fom == periode.fom() && tom == periode.tom() && skjæringstidspunkt == this.skjæringstidspunkt) return
+        if (!låst) return oppdaterTidslinje(fom, tom, skjæringstidspunkt)
+        håndterNyGenerasjon(hendelseId = hendelseId, fom = fom, tom = tom, skjæringstidspunkt = skjæringstidspunkt)
+    }
+
+    internal fun håndterNyGenerasjon(
+        hendelseId: UUID,
+        id: UUID = UUID.randomUUID(),
+        fom: LocalDate = this.periode.fom(),
+        tom: LocalDate = this.periode.tom(),
+        skjæringstidspunkt: LocalDate = this.skjæringstidspunkt
+    ): Generasjon? {
+        if (!låst) return null
+        val nesteGenerasjon = opprettNeste(id, hendelseId, fom, tom, skjæringstidspunkt)
+        flyttAktiveVarsler(nesteGenerasjon)
+        return nesteGenerasjon
+    }
+
+    private fun oppdaterTidslinje(fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate) {
         this.periode = Periode(fom, tom)
         this.skjæringstidspunkt = skjæringstidspunkt
         observers.forEach {
             it.tidslinjeOppdatert(id, fom, tom, skjæringstidspunkt)
         }
-    }
-
-    internal fun håndterNyGenerasjon(hendelseId: UUID, id: UUID = UUID.randomUUID()): Generasjon? {
-        if (!låst) return null
-        val nesteGenerasjon = opprettNeste(id, hendelseId)
-        flyttAktiveVarsler(nesteGenerasjon)
-        return nesteGenerasjon
     }
 
     private fun opprett(hendelseId: UUID) {
@@ -179,8 +189,8 @@ internal class Generasjon private constructor(
     internal companion object {
         private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
-        private fun Generasjon.opprettNeste(generasjonId: UUID, hendelseId: UUID): Generasjon {
-            val nyGenerasjon = Generasjon(generasjonId, this.vedtaksperiodeId, null, false, this.skjæringstidspunkt, this.periode, emptySet())
+        private fun Generasjon.opprettNeste(generasjonId: UUID, hendelseId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate): Generasjon {
+            val nyGenerasjon = Generasjon(generasjonId, this.vedtaksperiodeId, null, false, skjæringstidspunkt, Periode(fom, tom), emptySet())
             nyGenerasjon.registrer(*this.observers.toTypedArray())
             nyGenerasjon.opprett(hendelseId)
 

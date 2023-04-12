@@ -22,7 +22,7 @@ class OppdaterSykefraværstilfellerCommandTest {
         vedtaksperiode.registrer(observer)
         val vedtaksperioder = listOf(vedtaksperiode)
 
-        val command = OppdaterSykefraværstilfellerCommand("fnr", "aktørId", vedtaksperiodeOppdateringer, vedtaksperioder)
+        val command = OppdaterSykefraværstilfellerCommand("fnr", "aktørId", vedtaksperiodeOppdateringer, vedtaksperioder, UUID.randomUUID())
         command.execute(CommandContext(UUID.randomUUID()))
 
         assertEquals(1, observer.oppdaterteGenerasjoner.size)

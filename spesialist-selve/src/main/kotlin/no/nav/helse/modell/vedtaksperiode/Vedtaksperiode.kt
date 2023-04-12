@@ -16,8 +16,8 @@ internal class Vedtaksperiode(
         gjeldendeGenerasjon.registrer(*observer)
     }
 
-    internal fun håndterTidslinjeendring(fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate) {
-        gjeldendeGenerasjon.håndterTidslinjeendring(fom, tom, skjæringstidspunkt)
+    internal fun håndterTidslinjeendring(fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate, hendelseId: UUID) {
+        gjeldendeGenerasjon.håndterTidslinjeendring(fom, tom, skjæringstidspunkt, hendelseId)
     }
 
     private fun tilhører(dato: LocalDate): Boolean {
@@ -52,10 +52,13 @@ internal class Vedtaksperiode(
     }
 
     internal companion object {
-        internal fun List<Vedtaksperiode>.håndterOppdateringer(vedtaksperiodeoppdateringer: List<VedtaksperiodeOppdatering>) {
+        internal fun List<Vedtaksperiode>.håndterOppdateringer(
+            vedtaksperiodeoppdateringer: List<VedtaksperiodeOppdatering>,
+            hendelseId: UUID
+        ) {
             forEach { vedtaksperiode ->
                 val oppdatering = vedtaksperiodeoppdateringer.find { it.vedtaksperiodeId == vedtaksperiode.vedtaksperiodeId } ?: return@forEach
-                vedtaksperiode.håndterTidslinjeendring(oppdatering.fom, oppdatering.tom, oppdatering.skjæringstidspunkt)
+                vedtaksperiode.håndterTidslinjeendring(oppdatering.fom, oppdatering.tom, oppdatering.skjæringstidspunkt, hendelseId)
             }
         }
 

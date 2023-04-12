@@ -31,6 +31,7 @@ internal class Sykefraværstilfeller(
             aktørId = aktørId,
             vedtaksperiodeoppdateringer = vedtaksperiodeOppdateringer,
             vedtaksperioder = vedtaksperioder,
+            hendelseId = id
         )
     )
     override fun fødselsnummer() = fødselsnummer

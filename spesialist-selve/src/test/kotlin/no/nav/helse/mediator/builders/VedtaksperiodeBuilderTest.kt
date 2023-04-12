@@ -54,7 +54,7 @@ class VedtaksperiodeBuilderTest : AbstractDatabaseTest() {
         varselRepository.varselOpprettet(vedtaksperiodeId, generasjonId, varselId, "SB_EX_1", opprettet)
         val builder = VedtaksperiodeBuilder(vedtaksperiodeId)
         val vedtaksperiode = builder.build(generasjonRepository, varselRepository)
-        vedtaksperiode.håndterTidslinjeendring(1.mars, 31.mars, 1.mars)
+        vedtaksperiode.håndterTidslinjeendring(1.mars, 31.mars, 1.mars, UUID.randomUUID())
         assertDatoer(generasjonId, 1.mars, 1.mars, 31.mars)
     }
 
