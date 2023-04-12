@@ -3,7 +3,7 @@ package no.nav.helse.mediator
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalDateTime.now
-import java.time.temporal.ChronoUnit.SECONDS
+import java.time.temporal.ChronoUnit.MILLIS
 import java.util.UUID
 import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments.keyValue
@@ -67,6 +67,7 @@ import no.nav.helse.overstyringsteller
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.registrerTidsbrukForHendelse
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.slf4j.LoggerFactory
@@ -671,19 +672,22 @@ internal class HendelseMediator(
                 "vedtaksperiode_id" to "${hendelse.vedtaksperiodeId() ?: "N/A"}"
             )
         ) {
+            val hendelsenavn = hendelse::class.simpleName ?: "ukjent hendelse"
             try {
-                log.info("utfører ${hendelse::class.simpleName} med context_id=$contextId for hendelse_id=${hendelse.id}")
+                log.info("utfører $hendelsenavn med context_id=$contextId for hendelse_id=${hendelse.id}")
                 if (context.utfør(commandContextDao, hendelse)) {
+                    val kjøretid = MILLIS.between(commandContextDao.contextOpprettetTidspunkt(contextId), now())
+                    registrerTidsbrukForHendelse(hendelsenavn, kjøretid)
                     log.info(
-                        "Kommando(er) for ${hendelse::class.simpleName} er utført ferdig. Det tok ca {}s å kjøre hele kommandokjeden",
-                        SECONDS.between(commandContextDao.contextOpprettetTidspunkt(contextId), now())
+                        "Kommando(er) for $hendelsenavn er utført ferdig. Det tok ca {}s å kjøre hele kommandokjeden",
+                        kjøretid
                     )
-                } else log.info("${hendelse::class.simpleName} er suspendert")
+                } else log.info("$hendelsenavn er suspendert")
                 behovMediator.håndter(hendelse, context, contextId, messageContext)
                 oppgaveMediator.lagreOgTildelOppgaver(hendelse.id, hendelse.fødselsnummer(), contextId, messageContext)
             } catch (err: Exception) {
                 log.warn(
-                    "Feil ved kjøring av ${hendelse::class.simpleName}: contextId={}, message={}",
+                    "Feil ved kjøring av $hendelsenavn: contextId={}, message={}",
                     contextId,
                     err.message,
                     err
@@ -691,7 +695,7 @@ internal class HendelseMediator(
                 hendelse.undo(context)
                 throw err
             } finally {
-                log.info("utført ${hendelse::class.simpleName} med context_id=$contextId for hendelse_id=${hendelse.id}")
+                log.info("utført $hendelsenavn med context_id=$contextId for hendelse_id=${hendelse.id}")
             }
         }
     }

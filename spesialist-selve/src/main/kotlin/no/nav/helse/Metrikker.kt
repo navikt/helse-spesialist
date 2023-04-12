@@ -1,6 +1,7 @@
 package no.nav.helse
 
 import io.prometheus.client.Counter
+import io.prometheus.client.Summary
 
 internal val overstyringsteller = Counter.build("overstyringer", "Teller antall overstyringer")
     .labelNames("opplysningstype", "type")
@@ -22,6 +23,10 @@ private val inaktiveVarslerteller = Counter.build("inaktive_warning_totals", "Te
     .labelNames("alvorlighetsgrad", "melding")
     .register()
 
+private val registrerTidsbrukForHendelse = Summary.build("command_tidsbruk", "Måler hvor lang tid en command bruker på å kjøre i ms")
+    .labelNames("command")
+    .register()
+
 internal fun tellWarning(warning: String) = varselteller.labels("WARN", warning).inc()
 
 internal fun tellVarsel(varselkode: String) = varselteller.labels("WARN", varselkode).inc()
@@ -30,3 +35,4 @@ internal fun tellWarningInaktiv(warning: String) = inaktiveVarslerteller.labels(
 
 internal fun tellInaktivtVarsel(varselkode: String) = inaktiveVarslerteller.labels("WARN", varselkode).inc()
 
+internal fun registrerTidsbrukForHendelse(command: String, tid: Long) = registrerTidsbrukForHendelse.labels(command).observe(tid.toDouble())
