@@ -13,6 +13,8 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 
 internal class VarselTest {
 
@@ -54,7 +56,7 @@ internal class VarselTest {
 
     @Test
     fun `kan godkjenne aktivt varsel`() {
-        val varsel = Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), UUID.randomUUID())
+        val varsel = nyttVarsel()
         varsel.godkjennFor(UUID.randomUUID(), "EN_IDENT", varselRepository)
         assertEquals(1, godkjenteVarsler.size)
     }
@@ -68,21 +70,14 @@ internal class VarselTest {
 
     @Test
     fun `kan avvise aktivt varsel`() {
-        val varsel = Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), UUID.randomUUID())
+        val varsel = nyttVarsel()
         varsel.avvisFor(UUID.randomUUID(), "EN_IDENT", varselRepository)
         assertEquals(1, avvisteVarsler.size)
     }
 
     @Test
-    fun `kan deaktivere aktivt varsel`() {
-        val varsel = Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), UUID.randomUUID())
-        varsel.deaktiverFor(UUID.randomUUID(), varselRepository)
-        assertEquals(1, deaktiverteVarsler.size)
-    }
-
-    @Test
     fun `kan ikke avvise godkjent varsel`() {
-        val varsel = Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), UUID.randomUUID())
+        val varsel = nyttVarsel()
         val enGenerasjonId = UUID.randomUUID()
         varsel.godkjennFor(enGenerasjonId, "EN_IDENT", varselRepository)
         varsel.avvisFor(enGenerasjonId, "EN_IDENT", varselRepository)
@@ -91,18 +86,8 @@ internal class VarselTest {
     }
 
     @Test
-    fun `kan ikke deaktivere godkjent varsel`() {
-        val varsel = Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), UUID.randomUUID())
-        val enGenerasjonId = UUID.randomUUID()
-        varsel.godkjennFor(enGenerasjonId, "EN_IDENT", varselRepository)
-        varsel.deaktiverFor(enGenerasjonId, varselRepository)
-        assertEquals(1, godkjenteVarsler.size)
-        assertEquals(0, deaktiverteVarsler.size)
-    }
-
-    @Test
     fun `kan ikke godkjenne avvist varsel`() {
-        val varsel = Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), UUID.randomUUID())
+        val varsel = nyttVarsel()
         val enGenerasjonId = UUID.randomUUID()
         varsel.avvisFor(enGenerasjonId, "EN_IDENT", varselRepository)
         varsel.godkjennFor(enGenerasjonId, "EN_IDENT", varselRepository)
@@ -111,48 +96,30 @@ internal class VarselTest {
     }
 
     @Test
-    fun `kan ikke deaktivere avvist varsel`() {
-        val varsel = Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), UUID.randomUUID())
-        val enGenerasjonId = UUID.randomUUID()
-        varsel.avvisFor(enGenerasjonId, "EN_IDENT", varselRepository)
-        varsel.deaktiverFor(enGenerasjonId, varselRepository)
-        assertEquals(1, avvisteVarsler.size)
-        assertEquals(0, deaktiverteVarsler.size)
-    }
-
-    @Test
     fun `kan ikke godkjenne deaktivert varsel`() {
-        val varsel = Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), UUID.randomUUID())
+        val varsel = nyttVarsel()
+        varsel.registrer(observer)
         val enGenerasjonId = UUID.randomUUID()
-        varsel.deaktiverFor(enGenerasjonId, varselRepository)
+        varsel.deaktiver(enGenerasjonId)
         varsel.godkjennFor(enGenerasjonId, "EN_IDENT", varselRepository)
-        assertEquals(1, deaktiverteVarsler.size)
+        assertEquals(1, observer.deaktiverteVarsler.size)
         assertEquals(0, godkjenteVarsler.size)
     }
 
     @Test
     fun `kan ikke avvise deaktivert varsel`() {
-        val varsel = Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), UUID.randomUUID())
+        val varsel = nyttVarsel()
+        varsel.registrer(observer)
         val enGenerasjonId = UUID.randomUUID()
-        varsel.deaktiverFor(enGenerasjonId, varselRepository)
+        varsel.deaktiver(enGenerasjonId)
         varsel.avvisFor(enGenerasjonId, "EN_IDENT", varselRepository)
-        assertEquals(1, deaktiverteVarsler.size)
+        assertEquals(1, observer.deaktiverteVarsler.size)
         assertEquals(0, avvisteVarsler.size)
     }
 
     @Test
-    fun `kan reaktivere deaktivert varsel`() {
-        val varsel = Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), UUID.randomUUID())
-        val enGenerasjonId = UUID.randomUUID()
-        varsel.deaktiverFor(enGenerasjonId, varselRepository)
-        varsel.reaktiverFor(enGenerasjonId, varselRepository)
-        assertEquals(1, deaktiverteVarsler.size)
-        assertEquals(1, reaktiverteVarsler.size)
-    }
-
-    @Test
     fun `finner eksisterende varsel`() {
-        val varsel = Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), UUID.randomUUID())
+        val varsel = nyttVarsel()
         val funnetVarsel = listOf(varsel).finnEksisterendeVarsel(varsel)
         assertEquals(varsel, funnetVarsel)
     }
@@ -169,14 +136,14 @@ internal class VarselTest {
     }
 
     @Test
-    fun `reaktiverer ikke varsel som er aktivt`() {
-        val varselId = UUID.randomUUID()
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjonId = UUID.randomUUID()
-        val varsel = Varsel(varselId, "EN_KODE", LocalDateTime.now(), vedtaksperiodeId)
+    fun `kan reaktivere deaktivert varsel`() {
+        val varsel = nyttVarsel()
         varsel.registrer(observer)
-        varsel.reaktiver(generasjonId)
-        assertEquals(0, observer.reaktiverteVarsler.size)
+        val enGenerasjonId = UUID.randomUUID()
+        varsel.deaktiver(enGenerasjonId)
+        varsel.reaktiver(enGenerasjonId)
+        assertEquals(1, observer.deaktiverteVarsler.size)
+        assertEquals(1, observer.reaktiverteVarsler.size)
     }
 
     @Test
@@ -190,23 +157,21 @@ internal class VarselTest {
         observer.assertDeaktivering(vedtaksperiodeId, generasjonId, varselId, "EN_KODE")
     }
 
-    @Test
-    fun `deaktiverer ikke varsel som er inaktivt`() {
-        val varselId = UUID.randomUUID()
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjonId = UUID.randomUUID()
-        val varsel = Varsel(varselId, "EN_KODE", LocalDateTime.now(), vedtaksperiodeId, INAKTIV)
-        varsel.registrer(observer)
-        varsel.deaktiver(generasjonId)
-        assertEquals(0, observer.deaktiverteVarsler.size)
+    @ParameterizedTest
+    @EnumSource(value = Varsel.Status::class, names = ["INAKTIV"], mode = EnumSource.Mode.EXCLUDE)
+    fun `kan ikke reaktivere varsel som ikke er inaktivt`(status: Varsel.Status) {
+        val varsel = nyttVarsel(status = status)
+        val enGenerasjonId = UUID.randomUUID()
+        varsel.reaktiver(enGenerasjonId)
+        assertEquals(0, reaktiverteVarsler.size)
     }
 
-    @Test
-    fun `kan ikke reaktivere varsel som ikke er inaktivt`() {
-        val varsel = Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), UUID.randomUUID())
+    @ParameterizedTest
+    @EnumSource(value = Varsel.Status::class, names = ["AKTIV"], mode = EnumSource.Mode.EXCLUDE)
+    fun `kan ikke deaktivere varsel som ikke er aktivt`(status: Varsel.Status) {
+        val varsel = nyttVarsel(status = status)
         val enGenerasjonId = UUID.randomUUID()
-        varsel.reaktiverFor(enGenerasjonId, varselRepository)
-        assertEquals(0, deaktiverteVarsler.size)
+        varsel.deaktiver(enGenerasjonId)
         assertEquals(0, reaktiverteVarsler.size)
     }
 
@@ -224,18 +189,21 @@ internal class VarselTest {
 
     @Test
     fun `not equals`() {
-        val varsel = Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), UUID.randomUUID())
-        assertNotEquals(Varsel(UUID.randomUUID(), "EN_ANNEN_KODE", LocalDateTime.now(), UUID.randomUUID()), varsel)
+        val varsel = nyttVarsel()
+        assertNotEquals(nyttVarsel(kode = "EN_ANNEN_KODE"), varsel)
         assertNotEquals(
             Varsel(UUID.randomUUID(), "EN_ANNEN_KODE", LocalDateTime.now(), UUID.randomUUID()).hashCode(),
             varsel.hashCode()
         )
     }
 
-    private val varselRepository = object : VarselRepository {
-        override fun deaktiverFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, definisjonId: UUID?) {
-            deaktiverteVarsler.add(varselkode)
+    private fun nyttVarsel(kode: String = "EN_KODE", status: Varsel.Status = AKTIV): Varsel {
+        return Varsel(UUID.randomUUID(), kode, LocalDateTime.now(), UUID.randomUUID(), status).also {
+            it.registrer(observer)
         }
+    }
+
+    private val varselRepository = object : VarselRepository {
 
         override fun reaktiverFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String) {
             reaktiverteVarsler.add(varselkode)

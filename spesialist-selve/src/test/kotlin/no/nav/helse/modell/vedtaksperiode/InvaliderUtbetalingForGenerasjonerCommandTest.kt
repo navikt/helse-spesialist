@@ -58,7 +58,6 @@ class InvaliderUtbetalingForGenerasjonerCommandTest {
 
 
     private val varselRepository get() = object : VarselRepository {
-        override fun deaktiverFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, definisjonId: UUID?):Unit = TODO("Not yet implemented")
         override fun reaktiverFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String):Unit = TODO("Not yet implemented")
         override fun godkjennFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String, definisjonId: UUID?):Unit = TODO("Not yet implemented")
         override fun avvisFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String, definisjonId: UUID?):Unit = TODO("Not yet implemented")

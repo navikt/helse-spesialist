@@ -43,9 +43,5 @@ enum class Varselkode(
         return Varsel(UUID.randomUUID(), this.name, LocalDateTime.now(), vedtaksperiodeId)
     }
 
-    internal fun deaktiverFor(generasjon: Generasjon, varselRepository: VarselRepository) {
-        generasjon.håndterDeaktivertVarsel(this.name, varselRepository)
-    }
-
     override fun toString() = "${this.name}: $varseltekst"
 }

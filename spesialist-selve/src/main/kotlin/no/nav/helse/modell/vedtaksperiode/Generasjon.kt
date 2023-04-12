@@ -7,7 +7,6 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.Varsel.Companion.avvisAlleFor
-import no.nav.helse.modell.varsel.Varsel.Companion.deaktiverFor
 import no.nav.helse.modell.varsel.Varsel.Companion.finnEksisterendeVarsel
 import no.nav.helse.modell.varsel.Varsel.Companion.flyttVarslerFor
 import no.nav.helse.modell.varsel.Varsel.Companion.godkjennAlleFor
@@ -134,10 +133,6 @@ internal class Generasjon private constructor(
 
     internal fun håndterGodkjentVarsel(varselkode: String, ident: String, varselRepository: VarselRepository) {
         varsler.godkjennFor(id, varselkode, ident, varselRepository)
-    }
-
-    internal fun håndterDeaktivertVarsel(varselkode: String, varselRepository: VarselRepository) {
-        varsler.deaktiverFor(id, varselkode, varselRepository)
     }
 
     internal fun håndterDeaktivertVarsel(varsel: Varsel) {
