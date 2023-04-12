@@ -16,11 +16,13 @@ import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
+import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.modell.tildeling.TildelingService
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.feilhåndtering.FeilDto
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeTildelt
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
+import no.nav.helse.testEnv
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -41,7 +43,7 @@ internal class TildelingApiTest : AbstractApiTest() {
     fun setupTildeling() {
         tildelingService = mockk(relaxed = true)
         setupServer {
-            tildelingApi(tildelingService)
+            tildelingApi(tildelingService, Tilgangsgrupper(testEnv))
         }
     }
 

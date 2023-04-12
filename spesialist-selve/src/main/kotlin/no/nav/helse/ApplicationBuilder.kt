@@ -10,7 +10,6 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.application.Application
-import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.ApplicationCallPipeline
 import io.ktor.server.application.call
 import io.ktor.server.application.install
@@ -29,7 +28,6 @@ import io.ktor.server.request.uri
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.routing
-import io.ktor.util.pipeline.PipelineContext
 import java.lang.management.GarbageCollectorMXBean
 import java.lang.management.ManagementFactory
 import java.net.ProxySelector
@@ -320,7 +318,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                         tilgangsgrupper = tilgangsgrupper,
                     )
                     overstyringApi(hendelseMediator)
-                    tildelingApi(tildelingService)
+                    tildelingApi(tildelingService, tilgangsgrupper)
                     annulleringApi(saksbehandlerMediator)
                     opptegnelseApi(OpptegnelseMediator(opptegnelseApiDao, abonnementDao))
                     leggPåVentApi(LeggPåVentService(tildelingDao, hendelseMediator), notatMediator)
@@ -332,7 +330,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                         notatMediator,
                         tildelingService,
                         hendelseMediator,
-                        totrinnsvurderingMediator
+                        totrinnsvurderingMediator,
+                        tilgangsgrupper
                     )
                 }
             }
@@ -384,10 +383,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             saksbehandlerDao,
             tildelingDao,
             hendelseMediator,
-            riskSaksbehandlergruppe = tilgangsgrupper.riskQaGruppeId,
-            kode7Saksbehandlergruppe = tilgangsgrupper.kode7GruppeId,
-            beslutterSaksbehandlergruppe = tilgangsgrupper.beslutterGruppeId,
-            skjermedePersonerSaksbehandlergruppe = tilgangsgrupper.skjermedePersonerGruppeId,
         )
         oppdaterPersonService = OppdaterPersonService(rapidsConnection)
         godkjenningService = GodkjenningService(
@@ -426,29 +421,6 @@ fun Application.installErrorHandling() {
 
         }
     }
-}
-
-internal fun PipelineContext<Unit, ApplicationCall>.gruppemedlemskap(): List<UUID> {
-    val accessToken = requireNotNull(call.principal<JWTPrincipal>()) { "mangler access token" }
-    return accessToken.payload.getClaim("groups").asList(String::class.java).map(UUID::fromString)
-}
-
-class Tilgangsgrupper(private val env: Map<String, String>) {
-    private fun fromEnv(key: String) = UUID.fromString(env.getValue(key))
-
-    val kode7GruppeId: UUID by lazy { fromEnv(Gruppe.KODE7.gruppeKey) }
-    val riskQaGruppeId: UUID by lazy { fromEnv(Gruppe.RISK_QA.gruppeKey) }
-    val beslutterGruppeId: UUID by lazy { fromEnv(Gruppe.BESLUTTER.gruppeKey) }
-    val skjermedePersonerGruppeId: UUID by lazy { fromEnv(Gruppe.SKJERMEDE.gruppeKey) }
-
-    fun gruppeId(gruppe: Gruppe): UUID = fromEnv(gruppe.gruppeKey)
-}
-
-enum class Gruppe(val gruppeKey: String) {
-    RISK_QA("RISK_SUPERSAKSBEHANDLER_GROUP"),
-    KODE7("KODE7_SAKSBEHANDLER_GROUP"),
-    BESLUTTER("BESLUTTER_SAKSBEHANDLER_GROUP"),
-    SKJERMEDE("SKJERMEDE_PERSONER_GROUP"),
 }
 
 typealias Tilgangskontroll = suspend (UUID, Gruppe) -> Unit

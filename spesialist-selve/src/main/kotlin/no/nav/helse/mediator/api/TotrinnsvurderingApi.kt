@@ -13,7 +13,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.util.pipeline.PipelineContext
 import java.util.UUID
-import no.nav.helse.gruppemedlemskap
+import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.oppgave.OppgaveDao
@@ -34,6 +34,7 @@ internal fun Route.totrinnsvurderingApi(
     tildelingService: TildelingService,
     hendelseMediator: HendelseMediator,
     totrinnsvurderingMediator: TotrinnsvurderingMediator,
+    tilgangsgrupper: Tilgangsgrupper,
 ) {
     post("/api/totrinnsvurdering") {
         val totrinnsvurdering = call.receive<TotrinnsvurderingDto>()
@@ -68,7 +69,7 @@ internal fun Route.totrinnsvurderingApi(
         tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(
             totrinnsvurdering.oppgavereferanse,
             beslutterSaksbehandlerOid,
-            gruppemedlemskap()
+            tilganger(tilgangsgrupper),
         )
 
         oppgaveDao.setBeslutteroppgave(
@@ -135,7 +136,7 @@ internal fun Route.totrinnsvurderingApi(
         tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(
             retur.oppgavereferanse,
             tidligereSaksbehandlerOid,
-            gruppemedlemskap()
+            tilganger(tilgangsgrupper),
         )
 
 

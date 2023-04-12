@@ -28,6 +28,7 @@ import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.Gruppe
 import no.nav.helse.Tilgangsgrupper
+import no.nav.helse.idForGruppe
 import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
@@ -36,6 +37,7 @@ import no.nav.helse.spesialist.api.AzureAdAppConfig
 import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.azureAdAppAuthentication
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
+import no.nav.helse.testEnv
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
@@ -54,8 +56,8 @@ internal class PersonApiTest {
     private val SAKSBEHANDLER_OID = UUID.randomUUID()
     private val godkjenning = GodkjenningDTO(1L, true, saksbehandlerIdent, null, null, null)
     private val avvisning = GodkjenningDTO(1L, false, saksbehandlerIdent, "Avvist", null, null)
-    private val riskQaGruppe = UUID.randomUUID()
-    private val beslutterGruppe = UUID.randomUUID()
+    private val riskQaGruppe = idForGruppe(Gruppe.RISK_QA)
+    private val beslutterGruppe = idForGruppe(Gruppe.BESLUTTER)
 
     @Test
     fun `godkjenning av vedtaksperiode OK`() {
@@ -142,7 +144,6 @@ internal class PersonApiTest {
                 contentType(ContentType.Application.Json)
                 setBody<JsonNode>(objectMapper.valueToTree(godkjenning))
                 authentication(SAKSBEHANDLER_OID, emptyList())
-
             }
         }
         assertEquals(HttpStatusCode.Forbidden, responseForManglendeTilgang.status)
@@ -151,8 +152,7 @@ internal class PersonApiTest {
             client.post("/api/vedtak") {
                 contentType(ContentType.Application.Json)
                 setBody<JsonNode>(objectMapper.valueToTree(godkjenning))
-                authentication(SAKSBEHANDLER_OID, listOf(riskQaGruppe.toString()))
-
+                authentication(SAKSBEHANDLER_OID, listOf(riskQaGruppe))
             }
         }
         assertEquals(HttpStatusCode.Created, responseForTilgangOk.status)
@@ -191,7 +191,7 @@ internal class PersonApiTest {
             client.post("/api/vedtak") {
                 contentType(ContentType.Application.Json)
                 setBody<JsonNode>(objectMapper.valueToTree(godkjenning))
-                authentication(SAKSBEHANDLER_OID, listOf(beslutterGruppe.toString()))
+                authentication(SAKSBEHANDLER_OID, listOf(beslutterGruppe))
 
             }
         }
@@ -218,7 +218,7 @@ internal class PersonApiTest {
             client.post("/api/vedtak") {
                 contentType(ContentType.Application.Json)
                 setBody<JsonNode>(objectMapper.valueToTree(godkjenning))
-                authentication(SAKSBEHANDLER_OID, listOf(beslutterGruppe.toString()))
+                authentication(SAKSBEHANDLER_OID, listOf(beslutterGruppe))
             }
         }
 
@@ -246,7 +246,7 @@ internal class PersonApiTest {
             client.post("/api/vedtak") {
                 contentType(ContentType.Application.Json)
                 setBody<JsonNode>(objectMapper.valueToTree(godkjenning))
-                authentication(SAKSBEHANDLER_OID, listOf(beslutterGruppe.toString()))
+                authentication(SAKSBEHANDLER_OID, listOf(beslutterGruppe))
             }
         }
 
@@ -310,12 +310,7 @@ internal class PersonApiTest {
                         mockk(),
                         mockk(relaxed = true),
                         oppgaveDao,
-                        Tilgangsgrupper(
-                            mapOf(
-                                Gruppe.RISK_QA.gruppeKey to riskQaGruppe.toString(),
-                                Gruppe.BESLUTTER.gruppeKey to beslutterGruppe.toString(),
-                            )
-                        )
+                        Tilgangsgrupper(testEnv)
                     )
                 }
             }

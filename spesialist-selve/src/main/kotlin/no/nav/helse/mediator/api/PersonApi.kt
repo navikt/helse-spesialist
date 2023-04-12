@@ -14,8 +14,8 @@ import io.ktor.server.routing.post
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import no.nav.helse.Gruppe
 import no.nav.helse.Tilgangsgrupper
-import no.nav.helse.mediator.api.ApiTilgangskontroll.Companion.tilganger
 import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
@@ -64,7 +64,7 @@ internal fun Route.personApi(
 
         val tilgangskontroll = tilganger(tilgangsgrupper)
         val erRiskOppgave = withContext(Dispatchers.IO) { oppgaveDao.erRiskoppgave(godkjenning.oppgavereferanse) }
-        if (erRiskOppgave && !tilgangskontroll.harTilgangTilRisksaker) {
+        if (erRiskOppgave && !tilgangskontroll.harTilgangTil(Gruppe.RISK_QA)) {
             call.respond(
                 status = HttpStatusCode.Forbidden,
                 mapOf(
@@ -84,7 +84,7 @@ internal fun Route.personApi(
                 log.info("Oppgave ${godkjenning.oppgavereferanse} er merket vha Speil.")
             }
 
-            if (!tilgangskontroll.harTilgangTilBeslutterOppgaver && !erDev()) {
+            if (!tilgangskontroll.harTilgangTil(Gruppe.BESLUTTER) && !erDev()) {
                 call.respondText(
                     "Saksbehandler trenger beslutter-rolle for å kunne utbetale beslutteroppgaver",
                     status = HttpStatusCode.Unauthorized

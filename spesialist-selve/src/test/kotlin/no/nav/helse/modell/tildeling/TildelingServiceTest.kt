@@ -5,11 +5,14 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
+import no.nav.helse.Gruppe
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeTildelt
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
+import no.nav.helse.medTilgangTil
+import no.nav.helse.utenNoenTilganger
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -27,18 +30,10 @@ internal class TildelingServiceTest {
     private val saksbehandlerDao = mockk<SaksbehandlerDao>(relaxed = true)
     private val tildelingDao = mockk<TildelingDao>()
     private val hendelseMediator = mockk<HendelseMediator>(relaxed = true)
-    private val riskSaksbehandlergruppe = UUID.randomUUID()
-    private val kode7Saksbehandlergruppe = UUID.randomUUID()
-    private val beslutterSaksbehandlergruppe = UUID.randomUUID()
-    private val skjermedePersonerSaksbehandlergruppe = UUID.randomUUID()
     private val tildelingService = TildelingService(
         saksbehandlerDao,
         tildelingDao,
-        hendelseMediator,
-        riskSaksbehandlergruppe,
-        kode7Saksbehandlergruppe,
-        beslutterSaksbehandlergruppe,
-        skjermedePersonerSaksbehandlergruppe
+        hendelseMediator
     )
 
     @BeforeEach
@@ -58,7 +53,7 @@ internal class TildelingServiceTest {
                 epostadresse = eksisterendeTildeling.epost,
                 navn = "navn",
                 ident = "Z999999",
-                gruppetilganger = emptyList()
+                tilgangskontroll = utenNoenTilganger()
             )
         }
     }
@@ -76,7 +71,7 @@ internal class TildelingServiceTest {
                 epostadresse = "eksisterendeTildeling.epost",
                 navn = "navn",
                 ident = "Z999999",
-                gruppetilganger = emptyList()
+                tilgangskontroll = utenNoenTilganger()
             )
         }
     }
@@ -95,7 +90,7 @@ internal class TildelingServiceTest {
                 epostadresse = "eksisterendeTildeling.epost",
                 navn = "navn",
                 ident = "Z999999",
-                gruppetilganger = listOf(beslutterSaksbehandlergruppe)
+                tilgangskontroll = medTilgangTil(Gruppe.BESLUTTER)
             )
         }
     }
@@ -113,7 +108,7 @@ internal class TildelingServiceTest {
                 epostadresse = "eksisterendeTildeling.epost",
                 navn = "navn",
                 ident = "Z999999",
-                gruppetilganger = emptyList()
+                tilgangskontroll = utenNoenTilganger()
             )
         }
     }
@@ -124,7 +119,7 @@ internal class TildelingServiceTest {
         every { tildelingDao.tildelingForOppgave(any()) } returns null
         every { hendelseMediator.tildelOppgaveTilSaksbehandler(any(), any()) } returns true
 
-        tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(oppgaveref, SAKSBEHANDLER, emptyList())
+        tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(oppgaveref, SAKSBEHANDLER, utenNoenTilganger())
 
         verify(exactly = 1) { tildelingDao.slettTildeling(oppgaveref) }
         verify(exactly = 1) { hendelseMediator.tildelOppgaveTilSaksbehandler(oppgaveref, SAKSBEHANDLER) }
@@ -136,7 +131,7 @@ internal class TildelingServiceTest {
         every { tildelingDao.tildelingForOppgave(any()) } returns null
         every { hendelseMediator.tildelOppgaveTilSaksbehandler(any(), any()) } returns true
 
-        tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(oppgaveref, null, emptyList())
+        tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(oppgaveref, null, utenNoenTilganger())
 
         verify(exactly = 1) { tildelingDao.slettTildeling(oppgaveref) }
         verify(exactly = 0) { hendelseMediator.tildelOppgaveTilSaksbehandler(any(), any()) }

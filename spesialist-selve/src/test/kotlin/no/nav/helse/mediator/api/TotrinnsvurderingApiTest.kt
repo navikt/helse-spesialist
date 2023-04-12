@@ -16,6 +16,7 @@ import io.mockk.verify
 import java.time.LocalDateTime.now
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
+import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.oppgave.OppgaveDao
@@ -28,6 +29,7 @@ import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
+import no.nav.helse.testEnv
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -65,7 +67,8 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
                 notatMediator,
                 tildelingService,
                 hendelseMediator,
-                totrinnsvurderingMediator
+                totrinnsvurderingMediator,
+                Tilgangsgrupper(testEnv),
             )
         }
     }

@@ -11,14 +11,17 @@ import io.ktor.server.routing.post
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import no.nav.helse.gruppemedlemskap
+import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.modell.tildeling.TildelingService
 import no.nav.helse.spesialist.api.feilhåndtering.modellfeilForRest
 import org.slf4j.LoggerFactory
 
 private val log = LoggerFactory.getLogger("TildelingApi")
 
-internal fun Route.tildelingApi(tildelingService: TildelingService) {
+internal fun Route.tildelingApi(
+    tildelingService: TildelingService,
+    tilgangsgrupper: Tilgangsgrupper,
+) {
     post("/api/tildeling/{oppgavereferanse}") {
         modellfeilForRest {
             val oppgaveId = call.parameters["oppgavereferanse"]?.toLongOrNull()
@@ -41,7 +44,7 @@ internal fun Route.tildelingApi(tildelingService: TildelingService) {
                     epostadresse,
                     navn,
                     ident,
-                    gruppemedlemskap()
+                    tilganger(tilgangsgrupper),
                 )
             }
             log.info("Oppgave $oppgaveId er tildelt til $ident")
