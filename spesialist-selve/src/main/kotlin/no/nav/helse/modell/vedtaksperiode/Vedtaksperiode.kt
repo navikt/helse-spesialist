@@ -11,9 +11,9 @@ internal class Vedtaksperiode(
 
     private val observers = mutableListOf<IVedtaksperiodeObserver>()
 
-    internal fun registrer(observer: IVedtaksperiodeObserver) {
-        observers.add(observer)
-        gjeldendeGenerasjon.registrer(observer)
+    internal fun registrer(vararg observer: IVedtaksperiodeObserver) {
+        observers.addAll(observer)
+        gjeldendeGenerasjon.registrer(*observer)
     }
 
     internal fun håndterTidslinjeendring(fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate) {

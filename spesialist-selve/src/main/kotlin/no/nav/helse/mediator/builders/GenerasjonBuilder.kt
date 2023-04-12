@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.vedtaksperiode.Generasjon
-import no.nav.helse.modell.vedtaksperiode.IVedtaksperiodeObserver
 import kotlin.properties.Delegates
 
 class GenerasjonBuilder(
@@ -18,7 +17,7 @@ class GenerasjonBuilder(
     private var utbetalingId: UUID? = null
     private val varsler = mutableListOf<Varsel>()
 
-    internal fun build(vararg observers: IVedtaksperiodeObserver): Generasjon {
+    internal fun build(): Generasjon {
         return Generasjon.fraLagring(
             generasjonId,
             vedtaksperiodeId,
@@ -28,9 +27,7 @@ class GenerasjonBuilder(
             fom,
             tom,
             varsler.toSet()
-        ).also {
-            it.registrer(*observers)
-        }
+        )
     }
 
     internal fun generasjonId(): UUID = generasjonId

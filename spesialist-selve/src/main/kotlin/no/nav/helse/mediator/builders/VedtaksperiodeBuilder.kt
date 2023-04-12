@@ -17,9 +17,8 @@ class VedtaksperiodeBuilder(
         generasjonRepository.byggGenerasjon(vedtaksperiodeId, generasjonBuilder)
         val varsler: List<Varsel> = varselRepository.finnVarslerFor(generasjonBuilder.generasjonId())
         generasjonBuilder.varsler(varsler)
-        return Vedtaksperiode(
-            vedtaksperiodeId,
-            generasjonBuilder.build(generasjonRepository, varselRepository)
-        )
+        return Vedtaksperiode(vedtaksperiodeId, generasjonBuilder.build()).also {
+            it.registrer(generasjonRepository, varselRepository)
+        }
     }
 }

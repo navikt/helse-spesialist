@@ -7,7 +7,6 @@ import no.nav.helse.januar
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.vedtaksperiode.Generasjon
-import no.nav.helse.modell.vedtaksperiode.IVedtaksperiodeObserver
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -35,32 +34,6 @@ class GenerasjonBuilderTest {
         forventetGenerasjon.håndter(Varsel(varselId, "EN_KODE", varselOpprettet, vedtaksperiodeId))
 
         assertEquals(forventetGenerasjon, generasjon)
-    }
-
-    @Test
-    fun `observers blir registrert`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjonId = UUID.randomUUID()
-        val utbetalingId = UUID.randomUUID()
-        val varselId = UUID.randomUUID()
-        val varselOpprettet = now()
-        val builder = GenerasjonBuilder(vedtaksperiodeId)
-        builder.generasjonId(generasjonId)
-        builder.låst(false)
-        builder.periode(1.januar, 31.januar)
-        builder.skjæringstidspunkt(1.januar)
-        builder.utbetalingId(utbetalingId)
-        builder.varsler(listOf(Varsel(varselId, "EN_KODE", varselOpprettet, vedtaksperiodeId)))
-        val observer = object : IVedtaksperiodeObserver {
-            val nyeUtbetalinger = mutableListOf<UUID>()
-            override fun nyUtbetaling(generasjonId: UUID, utbetalingId: UUID) {
-                nyeUtbetalinger.add(generasjonId)
-            }
-        }
-        val generasjon = builder.build(observer)
-        generasjon.håndterNyUtbetaling(UUID.randomUUID(), UUID.randomUUID(), varselRepository)
-        assertEquals(1, observer.nyeUtbetalinger.size)
-        assertEquals(generasjonId, observer.nyeUtbetalinger[0])
     }
 
     @Test
