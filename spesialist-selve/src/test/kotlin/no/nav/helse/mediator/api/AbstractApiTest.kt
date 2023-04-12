@@ -1,5 +1,6 @@
 package no.nav.helse.mediator.api
 
+import io.ktor.server.application.Application
 import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
@@ -15,6 +16,7 @@ import io.ktor.server.routing.routing
 import java.net.ServerSocket
 import java.util.*
 import kotlinx.coroutines.runBlocking
+import no.nav.helse.mediator.api.AbstractApiTest.TestServerRuntime.Companion.routeToBeAuthenticated
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.AzureAdAppConfig
 import no.nav.helse.spesialist.api.AzureConfig
@@ -41,10 +43,10 @@ abstract class AbstractApiTest {
 
     companion object {
         private val requiredGroup: UUID = UUID.randomUUID()
-        private const val clientId = "client_id"
+        internal const val clientId = "client_id"
         private const val epostadresse = "sara.saksbehandler@nav.no"
-        private const val issuer = "https://jwt-provider-domain"
-        private val jwtStub = JwtStub()
+        internal const val issuer = "https://jwt-provider-domain"
+        internal val jwtStub = JwtStub()
         private val azureConfig = AzureConfig(
             clientId = clientId,
             issuer = issuer,
@@ -105,33 +107,18 @@ abstract class AbstractApiTest {
 
     class TestServerRuntime(
         build: Route.() -> Unit,
-        private val httpPort: Int
+        private val httpPort: Int,
     ) : AutoCloseable {
         private val server = createEmbeddedServer(build, httpPort)
 
         companion object {
-            private fun createEmbeddedServer(build: Route.() -> Unit, httpPort: Int) =
-                embeddedServer(CIO, port = httpPort) {
-                    install(ContentNegotiationServer) {
-                        register(
-                            ContentType.Application.Json,
-                            JacksonConverter(objectMapper)
-                        )
-                    }
-                    val azureAdAppConfig = AzureAdAppConfig(
-                        azureConfig = AzureConfig(
-                            clientId = clientId,
-                            issuer = issuer,
-                            jwkProvider = jwtStub.getJwkProviderMock(),
-                            tokenEndpoint = "",
-                        ),
-                    )
+            // Må ta vare på den her, fordi det ikke går an å sende parametere til module-funksjonen
+            internal var routeToBeAuthenticated: Route.() -> Unit = { }
 
-                    azureAdAppAuthentication(azureAdAppConfig)
-                    routing {
-                        authenticate("oidc", build = build)
-                    }
-                }
+            private fun createEmbeddedServer(build: Route.() -> Unit, httpPort: Int): CIOApplicationEngine {
+                routeToBeAuthenticated = build
+                return embeddedServer(CIO, port = httpPort, module = Application::module)
+            }
         }
 
         init {
@@ -159,4 +146,24 @@ abstract class AbstractApiTest {
             }
         }
     }
+}
+
+internal fun Application.module() {
+    install(ContentNegotiationServer) {
+        register(
+            ContentType.Application.Json,
+            JacksonConverter(objectMapper)
+        )
+    }
+    val azureAdAppConfig = AzureAdAppConfig(
+        azureConfig = AzureConfig(
+            clientId = AbstractApiTest.clientId,
+            issuer = AbstractApiTest.issuer,
+            jwkProvider = AbstractApiTest.jwtStub.getJwkProviderMock(),
+            tokenEndpoint = "",
+        ),
+    )
+
+    azureAdAppAuthentication(azureAdAppConfig)
+    routing { authenticate("oidc", build = routeToBeAuthenticated) }
 }

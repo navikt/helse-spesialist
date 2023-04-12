@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -13,16 +12,13 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.serialization.jackson.JacksonConverter
-import io.ktor.server.application.install
 import io.ktor.server.auth.authenticate
-import io.ktor.server.cio.CIO
-import io.ktor.server.engine.ApplicationEngine
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.routing.routing
+import io.ktor.server.testing.ApplicationTestBuilder
+import io.ktor.server.testing.TestApplicationBuilder
+import io.ktor.server.testing.testApplication
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import java.net.ServerSocket
 import java.time.LocalDateTime
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
@@ -38,9 +34,7 @@ import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.azureAdAppAuthentication
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.testEnv
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
@@ -60,7 +54,7 @@ internal class PersonApiTest {
     private val beslutterGruppe = idForGruppe(Gruppe.BESLUTTER)
 
     @Test
-    fun `godkjenning av vedtaksperiode OK`() {
+    fun `godkjenning av vedtaksperiode OK`() = iEnTestApplication { client ->
         every { oppgaveDao.venterPåSaksbehandler(1L) } returns true
         every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns null
         val response = runBlocking {
@@ -74,7 +68,7 @@ internal class PersonApiTest {
     }
 
     @Test
-    fun `en vedtaksperiode kan kun godkjennes hvis den har en aktiv oppgave`() {
+    fun `en vedtaksperiode kan kun godkjennes hvis den har en aktiv oppgave`() = iEnTestApplication { client ->
         every { oppgaveDao.venterPåSaksbehandler(1L) } returns false
         val response = runBlocking {
             client.post("/api/vedtak") {
@@ -87,7 +81,7 @@ internal class PersonApiTest {
     }
 
     @Test
-    fun `en vedtaksperiode kan godkjennes hvis alle varsler er vurdert`() {
+    fun `en vedtaksperiode kan godkjennes hvis alle varsler er vurdert`() = iEnTestApplication { client ->
         every { oppgaveDao.venterPåSaksbehandler(1L) } returns true
         every { oppgaveDao.erRiskoppgave(1L) } returns false
         every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns null
@@ -103,7 +97,7 @@ internal class PersonApiTest {
     }
 
     @Test
-    fun `en vedtaksperiode kan ikke godkjennes hvis det fins aktive varsler`() {
+    fun `en vedtaksperiode kan ikke godkjennes hvis det fins aktive varsler`() = iEnTestApplication { client ->
         every { oppgaveDao.venterPåSaksbehandler(1L) } returns true
         every { oppgaveDao.erRiskoppgave(1L) } returns false
         every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns null
@@ -119,7 +113,7 @@ internal class PersonApiTest {
     }
 
     @Test
-    fun `en vedtaksperiode kan avvises selv om det finnes uvurderte varsler`() {
+    fun `en vedtaksperiode kan avvises selv om det finnes uvurderte varsler`() = iEnTestApplication { client ->
         every { oppgaveDao.venterPåSaksbehandler(1L) } returns true
         every { oppgaveDao.erRiskoppgave(1L) } returns false
         every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns null
@@ -135,7 +129,7 @@ internal class PersonApiTest {
     }
 
     @Test
-    fun `må ha tilgang for å kunne godkjenne vedtaksperiode med oppgavetype RISK_QA`() {
+    fun `må ha tilgang for å kunne godkjenne vedtaksperiode med oppgavetype RISK_QA`() = iEnTestApplication { client ->
         every { oppgaveDao.venterPåSaksbehandler(1L) } returns true
         every { oppgaveDao.erRiskoppgave(1L) } returns true
         every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns null
@@ -159,7 +153,7 @@ internal class PersonApiTest {
     }
 
     @Test
-    fun `Må ha tilgang til beslutteroppgaver for å kunne godkjenne dem`() {
+    fun `Må ha tilgang til beslutteroppgaver for å kunne godkjenne dem`() = iEnTestApplication { client ->
         val vedtaksperiodeId = UUID.randomUUID()
         every { oppgaveDao.venterPåSaksbehandler(1L) } returns true
         every { oppgaveDao.erRiskoppgave(1L) } returns false
@@ -199,7 +193,7 @@ internal class PersonApiTest {
     }
 
     @Test
-    fun `Saksbehandler kan ikke attestere egen beslutteroppgave`() {
+    fun `Saksbehandler kan ikke attestere egen beslutteroppgave`() = iEnTestApplication { client ->
         val vedtaksperiodeId = UUID.randomUUID()
 
         every { oppgaveDao.venterPåSaksbehandler(1L) } returns true
@@ -228,7 +222,7 @@ internal class PersonApiTest {
     }
 
     @Test
-    fun `Setter utbetalende saksbehandlerOid i beslutter-feltet på totrinnsvurdering`() {
+    fun `Setter utbetalende saksbehandlerOid i beslutter-feltet på totrinnsvurdering`() = iEnTestApplication { client ->
         val vedtaksperiodeId = UUID.randomUUID()
 
         every { oppgaveDao.venterPåSaksbehandler(1L) } returns true
@@ -250,78 +244,55 @@ internal class PersonApiTest {
             }
         }
 
-        verify (exactly = 1) { totrinnsvurderingMediatorMock.settBeslutter(vedtaksperiodeId, SAKSBEHANDLER_OID) }
+        verify(exactly = 1) { totrinnsvurderingMediatorMock.settBeslutter(vedtaksperiodeId, SAKSBEHANDLER_OID) }
         assertEquals(HttpStatusCode.Created, responseUtbetaling.status)
     }
+
+    private val jwtStub = JwtStub()
+    private val clientId = "client_id"
+    private val issuer = "https://jwt-provider-domain"
 
     private fun HttpRequestBuilder.authentication(oid: UUID, groups: Collection<String> = emptyList()) {
         header(
             "Authorization",
-            "Bearer ${
-                jwtStub.getToken(
-                    groups,
-                    oid.toString(),
-                    "epostadresse",
-                    clientId,
-                    issuer
-                )
-            }"
+            "Bearer ${jwtStub.getToken(groups, oid.toString(), "epostadresse", clientId, issuer)}"
         )
     }
 
-    private lateinit var server: ApplicationEngine
+    private fun TestApplicationBuilder.setUpApplication() {
+        install(ContentNegotiationServer) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
+        val azureConfig = AzureConfig(
+            clientId = clientId,
+            issuer = issuer,
+            jwkProvider = jwtStub.getJwkProviderMock(),
+            tokenEndpoint = "",
+        )
 
-    private val httpPort = ServerSocket(0).use { it.localPort }
-    private val jwtStub = JwtStub()
-    private val clientId = "client_id"
-    private val issuer = "https://jwt-provider-domain"
-    private val client = HttpClient {
-        defaultRequest {
-            host = "localhost"
-            port = httpPort
-
+        application {
+            azureAdAppAuthentication(AzureAdAppConfig(azureConfig))
         }
-        expectSuccess = false
-        install(ContentNegotiation) {
-            register(ContentType.Application.Json, JacksonConverter(objectMapper))
-        }
-    }
-
-    @BeforeAll
-    fun setup() {
-        server = embeddedServer(CIO, port = httpPort) {
-            install(ContentNegotiationServer) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
-            val azureConfig = AzureConfig(
-                clientId = clientId,
-                issuer = issuer,
-                jwkProvider = jwtStub.getJwkProviderMock(),
-                tokenEndpoint = "",
-            )
-            val azureAdAppConfig = AzureAdAppConfig(
-                azureConfig = azureConfig,
-            )
-
-            azureAdAppAuthentication(azureAdAppConfig)
-            routing {
-                authenticate("oidc") {
-                    personApi(
-                        varselRepository,
-                        totrinnsvurderingMediatorMock,
-                        mockk(),
-                        mockk(relaxed = true),
-                        oppgaveDao,
+        routing {
+            authenticate("oidc") {
+                personApi(
+                    varselRepository,
+                    totrinnsvurderingMediatorMock,
+                    mockk(),
+                    mockk(relaxed = true),
+                    oppgaveDao,
                         Tilgangsgrupper(testEnv)
-                    )
-                }
+                )
             }
-        }.also {
-            it.start(wait = false)
         }
     }
 
-    @AfterAll
-    fun tearDown() {
-        server.stop(0, 0)
+    private fun iEnTestApplication(block: ApplicationTestBuilder.(HttpClient) -> Unit) = testApplication {
+        setUpApplication()
+        val client = createClient {
+            install(ContentNegotiation) {
+                register(ContentType.Application.Json, JacksonConverter(objectMapper))
+            }
+        }
+        block(client)
     }
 
 }
