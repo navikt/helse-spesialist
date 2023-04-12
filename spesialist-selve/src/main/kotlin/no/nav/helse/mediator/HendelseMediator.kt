@@ -679,7 +679,7 @@ internal class HendelseMediator(
                     val kjøretid = MILLIS.between(commandContextDao.contextOpprettetTidspunkt(contextId), now())
                     registrerTidsbrukForHendelse(hendelsenavn, kjøretid)
                     log.info(
-                        "Kommando(er) for $hendelsenavn er utført ferdig. Det tok ca {}s å kjøre hele kommandokjeden",
+                        "Kommando(er) for $hendelsenavn er utført ferdig. Det tok ca {}ms å kjøre hele kommandokjeden",
                         kjøretid
                     )
                 } else log.info("$hendelsenavn er suspendert")
