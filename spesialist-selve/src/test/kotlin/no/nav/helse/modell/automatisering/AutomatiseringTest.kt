@@ -2,7 +2,6 @@ package no.nav.helse.modell.automatisering
 
 import ToggleHelpers.disable
 import ToggleHelpers.enable
-import io.mockk.called
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
@@ -32,7 +31,6 @@ import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLUtbetaling
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.fail
 
 internal class AutomatiseringTest {
 
@@ -74,6 +72,7 @@ internal class AutomatiseringTest {
         private const val fødselsnummer = "12345678910"
         private val vedtaksperiodeId = UUID.randomUUID()
         private val utbetalingId = UUID.randomUUID()
+        private val hendelseId = UUID.randomUUID()
         private val periodetype = Periodetype.FORLENGELSE
     }
 
@@ -92,20 +91,7 @@ internal class AutomatiseringTest {
 
     @Test
     fun `vedtaksperiode som oppfyller krav blir automatisk godkjent og lagret`() {
-        val onSuccessCallback = mockk<() -> Unit>(relaxed = true)
-        automatisering.utfør(
-            fødselsnummer = fødselsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            hendelseId = UUID.randomUUID(),
-            utbetalingId = UUID.randomUUID(),
-            periodetype = periodetype,
-            sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1.januar, emptyList()),
-            periodeTom = 1.januar,
-            onAutomatiserbar = onSuccessCallback
-        )
-
-        verify { automatiseringDaoMock.automatisert(any(), any(), any()) }
-        verify { onSuccessCallback() }
+        gårAutomatisk()
     }
 
     @Test
@@ -113,160 +99,131 @@ internal class AutomatiseringTest {
         val gjeldendeGenerasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
         gjeldendeGenerasjon.håndter(Varsel(UUID.randomUUID(), "RV_IM_1", LocalDateTime.now(), vedtaksperiodeId))
         val vedtaksperiode = Vedtaksperiode(vedtaksperiodeId, gjeldendeGenerasjon)
-        val sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1.januar, listOf(vedtaksperiode))
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), periodetype, sykefraværstilfelle = sykefraværstilfelle, periodeTom = 31.januar) { fail("Denne skal ikke kalles") }
-        verify { automatiseringDaoMock.manuellSaksbehandling(any(), any(), any(), any()) }
+        support.run {
+            forsøkAutomatisering(vedtaksperioder = listOf(vedtaksperiode))
+            assertGikkTilManuell()
+        }
     }
 
     @Test
     fun `vedtaksperiode uten ok risikovurdering er ikke automatiserbar`() {
         every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(false)
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), periodetype, sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1.januar, emptyList()), periodeTom = 1.januar) { fail("Denne skal ikke kalles") }
+        gårTilManuell()
     }
 
     @Test
     fun `vedtaksperiode med null risikovurdering er ikke automatiserbar`() {
         every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) } returns null
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), periodetype, sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1.januar, emptyList()), periodeTom = 1.januar) { fail("Denne skal ikke kalles") }
+        gårTilManuell()
     }
 
     @Test
     fun `vedtaksperiode med åpne oppgaver er ikke automatiserbar`() {
         every { åpneGosysOppgaverDaoMock.harÅpneOppgaver(any()) } returns 1
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), periodetype, sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1.januar, emptyList()), periodeTom = 1.januar) { fail("Denne skal ikke kalles") }
+        gårTilManuell()
     }
 
     @Test
     fun `vedtaksperiode med _null_ åpne oppgaver er ikke automatiserbar`() {
         every { åpneGosysOppgaverDaoMock.harÅpneOppgaver(any()) } returns null
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), periodetype, sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1.januar, emptyList()), periodeTom = 1.januar) { fail("Denne skal ikke kalles") }
+        gårTilManuell()
     }
 
     @Test
     fun `vedtaksperiode med egen ansatt er ikke automatiserbar`() {
         every { egenAnsattDao.erEgenAnsatt(any()) } returns true
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), periodetype, sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1.januar, emptyList()), periodeTom = 1.januar) { fail("Denne skal ikke kalles") }
+        gårTilManuell()
     }
 
     @Test
     fun `vedtaksperiode plukket ut til stikkprøve skal ikke automatisk godkjennes`() {
         stikkprøveFullRefusjon = true
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), periodetype, sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1.januar, emptyList()), periodeTom = 1.januar) { fail("Denne skal ikke kalles") }
+        gårTilManuell()
     }
 
     @Test
     fun `person med flere arbeidsgivere skal ikke automatisk godkjennes`() {
         every { vedtakDaoMock.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.FLERE_ARBEIDSGIVERE
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), periodetype, sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1.januar, emptyList()), periodeTom = 1.januar) { fail("Denne skal ikke kalles") }
+        gårTilManuell()
     }
 
     @Test
     fun `periode til revurdering skal ikke automatisk godkjennes`() {
-        val hendelseId = UUID.randomUUID()
-        val utbetalingId = UUID.randomUUID()
         every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(type = Utbetalingtype.REVURDERING, personbeløp = 1)
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, hendelseId, utbetalingId, periodetype, sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1.januar, emptyList()), periodeTom = 1.januar) { fail("Denne skal ikke kalles") }
-        verify(exactly = 1) { automatiseringDaoMock.manuellSaksbehandling(any(), vedtaksperiodeId, hendelseId, utbetalingId) }
-        verify(exactly = 0) { automatiseringDaoMock.automatisert(any(), any(), any()) }
+        gårTilManuell()
     }
 
     @Test
     fun `revurdering uten endringer i beløp kan automatisk godkjennes`() {
-        val hendelseId = UUID.randomUUID()
-        val utbetalingId = UUID.randomUUID()
-        val onSuccessCallback = mockk<() -> Unit>(relaxed = true)
         every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(type = Utbetalingtype.REVURDERING)
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, hendelseId, utbetalingId, periodetype, sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1.januar, emptyList()), periodeTom = 1.januar, onSuccessCallback)
-        verify(exactly = 1) { onSuccessCallback() }
-        verify(exactly = 1) { automatiseringDaoMock.automatisert(vedtaksperiodeId, hendelseId, utbetalingId) }
-        verify(exactly = 0) { automatiseringDaoMock.manuellSaksbehandling(any(), any(), any(), any()) }
+        gårAutomatisk()
     }
 
     @Test
     fun `periode til revurdering skal automatisk godkjennes om toggle er på`() {
         Toggle.AutomatiserRevuderinger.enable()
-        val hendelseId = UUID.randomUUID()
-        val utbetalingId = UUID.randomUUID()
-        val onSuccessCallback = mockk<() -> Unit>(relaxed = true)
         every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(type = Utbetalingtype.REVURDERING)
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, hendelseId, utbetalingId, periodetype, sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1.januar, emptyList()), periodeTom = 1.januar, onSuccessCallback)
-        verify(exactly = 0) { automatiseringDaoMock.manuellSaksbehandling(any(), vedtaksperiodeId, hendelseId, utbetalingId) }
-        verify(exactly = 1) { automatiseringDaoMock.automatisert(any(), any(), any()) }
-        verify(exactly = 1) { onSuccessCallback() }
+        gårAutomatisk()
         Toggle.AutomatiserRevuderinger.disable()
     }
 
     @Test
     fun `periode med vergemål skal ikke automatisk godkjennes`() {
         every { vergemålDaoMock.harVergemål(fødselsnummer) } returns true
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), periodetype, sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1.januar, emptyList()), periodeTom = 1.januar) { fail("Denne skal ikke kalles") }
+        gårTilManuell()
     }
 
     @Test
     fun `periode med utbetaling til sykmeldt skal ikke automatisk godkjennes`() {
         Toggle.AutomatiserUtbetalingTilSykmeldt.disable()
         every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(personbeløp = 500)
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), utbetalingId, periodetype, sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1.januar, emptyList()), periodeTom = 1.januar) { fail("Denne skal ikke kalles") }
+        gårTilManuell()
         Toggle.AutomatiserUtbetalingTilSykmeldt.enable()
     }
 
     @Test
     fun `forlengelse med utbetaling til sykmeldt skal automatisk godkjennes`() {
-        val onSuccessCallback = mockk<() -> Unit>(relaxed = true)
         every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(personbeløp = 500)
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), utbetalingId, periodetype, sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1.januar, emptyList()), periodeTom = 1.januar, onSuccessCallback)
-        verify { automatiseringDaoMock.automatisert(any(), any(), any()) }
-        verify { onSuccessCallback() }
+        gårAutomatisk()
     }
 
     @Test
     fun `forlengelse med utbetaling til sykmeldt som plukkes ut som stikkprøve skal ikke automatisk godkjennes`() {
         stikkprøveUTS = true
         every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(personbeløp = 500)
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), utbetalingId, periodetype, sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1.januar, emptyList()), periodeTom = 1.januar) { fail("Denne skal ikke kalles") }
+        gårTilManuell()
     }
 
     @Test
     fun `førstegangsbehandling med utbetaling til sykmeldt skal ikke automatisk godkjennes`() {
         every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(personbeløp = 500)
-        automatisering.utfør(
-            fødselsnummer,
-            vedtaksperiodeId,
-            UUID.randomUUID(),
-            utbetalingId,
-            Periodetype.FØRSTEGANGSBEHANDLING,
-            sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1.januar, emptyList()),
-            periodeTom = 1.januar
-        ) { fail("Denne skal ikke kalles") }
+        support.run {
+            forsøkAutomatisering(periodetype = Periodetype.FØRSTEGANGSBEHANDLING)
+            assertGikkTilManuell()
+        }
     }
 
     @Test
     fun `periode med delvis refusjon skal automatisk godkjennes`() {
-        val onSuccessCallback = mockk<() -> Unit>(relaxed = true)
-        every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(
-            personbeløp = 500,
-            arbeidsgiverbeløp = 500
-        )
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), utbetalingId, periodetype, sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1.januar, emptyList()), periodeTom = 1.januar, onSuccessCallback)
-        verify { automatiseringDaoMock.automatisert(any(), any(), any()) }
-        verify { onSuccessCallback() }
+        every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns
+                enUtbetaling(personbeløp = 500, arbeidsgiverbeløp = 500)
+        gårAutomatisk()
     }
 
     @Test
     fun `periode med pågående overstyring skal ikke automatisk godkjennes`() {
         every { overstyringDaoMock.harVedtaksperiodePågåendeOverstyring(any()) } returns true
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), utbetalingId, periodetype, sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1.januar, emptyList()), periodeTom = 1.januar) { fail("Denne skal ikke kalles") }
+        gårTilManuell()
     }
 
     @Test
     fun `nullrevurdering grunnet saksbehandleroverstyring skal ikke automatisk godkjennes`() {
-        val support = support()
         every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns
                 enUtbetaling(type = Utbetalingtype.REVURDERING)
         support.forsøkAutomatisering()
         support.assertBleAutomatiskGodkjent()
 
-        clearMocks(support.onAutomatiserbar)
+        clearMocks(support.onAutomatiserbar, automatiseringDaoMock)
 
         every { overstyringDaoMock.harVedtaksperiodePågåendeOverstyring(any()) } returns true
         support.forsøkAutomatisering()
@@ -287,20 +244,47 @@ internal class AutomatiseringTest {
             arbeidsgiveroppdrag = null,
         )
 
-    private fun support() = object {
+    private val support = object {
         val onAutomatiserbar = mockk<() -> Unit>(relaxed = true)
-        fun forsøkAutomatisering() = automatisering.utfør(
+        fun forsøkAutomatisering(
+            periodetype: Periodetype = Companion.periodetype,
+            vedtaksperioder: List<Vedtaksperiode> = emptyList(),
+        ) = automatisering.utfør(
             fødselsnummer,
             vedtaksperiodeId,
-            UUID.randomUUID(),
+            hendelseId,
             utbetalingId,
             periodetype,
-            sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1.januar, emptyList()),
-            periodeTom = 1.januar,
-            onAutomatiserbar
+            sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1.januar, vedtaksperioder),
+            periodeTom = 31.januar,
+            onAutomatiserbar,
         )
-        fun assertBleAutomatiskGodkjent() = verify(exactly = 1) { onAutomatiserbar() }
-        fun assertGikkTilManuell() = verify { onAutomatiserbar wasNot called }
+
+        fun assertBleAutomatiskGodkjent() {
+            verify(exactly = 1) { onAutomatiserbar() }
+            verify(exactly = 1) { automatiseringDaoMock.automatisert(vedtaksperiodeId, hendelseId, utbetalingId) }
+            verify(exactly = 0) { automatiseringDaoMock.manuellSaksbehandling(any(), any(), any(), any()) }
+        }
+
+        fun assertGikkTilManuell() {
+            verify(exactly = 0) { onAutomatiserbar() }
+            verify(exactly = 0) { automatiseringDaoMock.automatisert(any(), any(), any()) }
+            verify(exactly = 1) {
+                if (stikkprøveUTS || stikkprøveFullRefusjon)
+                    automatiseringDaoMock.stikkprøve(any(), any(), any())
+                else automatiseringDaoMock.manuellSaksbehandling(any(), vedtaksperiodeId, hendelseId, utbetalingId)
+            }
+        }
+    }
+
+    private fun gårTilManuell() = support.run {
+        forsøkAutomatisering()
+        assertGikkTilManuell()
+    }
+
+    private fun gårAutomatisk() = support.run {
+        forsøkAutomatisering()
+        assertBleAutomatiskGodkjent()
     }
 }
 
