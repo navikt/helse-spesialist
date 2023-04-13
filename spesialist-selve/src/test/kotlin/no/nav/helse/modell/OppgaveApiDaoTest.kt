@@ -47,6 +47,13 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `finner oppgavetype`() {
+        nyPerson()
+        val type = oppgaveApiDao.finnOppgavetype(VEDTAKSPERIODE)
+        assertEquals(OPPGAVETYPE, type)
+    }
+
+    @Test
     fun `finner oppgaver`() {
         nyPerson()
         val oppgaver = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN)
@@ -383,7 +390,6 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
         val oppgave = oppgaver.first()
         assertEquals(BEGGE, oppgave.mottaker)
     }
-
 
     @Test
     fun `Mottaker er SYKMELDT når det bare er utbetaling til sykmeldt`() {

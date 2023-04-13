@@ -8,10 +8,15 @@ import io.mockk.every
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
+import no.nav.helse.spesialist.api.graphql.enums.GraphQLPeriodetilstand
+import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLBeregnetPeriode
+import no.nav.helse.spesialist.api.graphql.schema.Periodehandling
 import no.nav.helse.spesialist.api.objectMapper
+import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -182,7 +187,68 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         assertEquals(forventedeVarsler, sisteGenerasjonAvPeriode.varslerForGenerasjon)
     }
 
-    private fun runPersonQuery() = runQuery(
+    @Test
+    fun `inkluderer handlinger`() {
+        val personRef = opprettPerson()
+        val arbeidsgiverRef = opprettArbeidsgiver()
+        val periode1 = periode("2023-01-01", "2023-01-23")
+        val periode2 = periode("2023-01-24", "2023-01-31")
+        val vedtakId = opprettVedtaksperiode(personRef, arbeidsgiverRef, periode = periode1)
+        ferdigstillOppgave(vedtakId)
+        opprettVedtaksperiode(personRef, arbeidsgiverRef, periode = periode2)
+        val førstePeriode = periode1.tilBeregnetPeriode().copy(periodetilstand = GraphQLPeriodetilstand.UTBETALT)
+        val andrePeriode = periode2.tilBeregnetPeriode()
+        val snapshotGenerasjon = opprettSnapshotGenerasjon(listOf(førstePeriode, andrePeriode))
+        val arbeidsgiver = opprettSnapshotArbeidsgiver(listOf(snapshotGenerasjon))
+        mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
+
+        val body = runPersonQuery()
+
+        val perioder = body["data"]["person"]["arbeidsgivere"].first()["generasjoner"].first()["perioder"]
+        assertEquals(2, perioder.size())
+        val responseperiode1 = perioder.first { it["vedtaksperiodeId"].textValue() == periode1.id.toString() }
+        val responseperiode2 = perioder.first { it["vedtaksperiodeId"].textValue() == periode2.id.toString() }
+        assertFalse(responseperiode1["handlinger"].first { it["type"].textValue() == Periodehandling.UTBETALE.name }["tillatt"].booleanValue())
+        assertTrue(responseperiode2["handlinger"].first { it["type"].textValue() == Periodehandling.UTBETALE.name }["tillatt"].booleanValue())
+    }
+
+    @Test
+    fun `utbetaling av risk-oppgave ikke tillatt hvis ikke tilgang til risk`() {
+        val personRef = opprettPerson()
+        val arbeidsgiverRef = opprettArbeidsgiver()
+        opprettVedtaksperiode(personRef, arbeidsgiverRef, oppgavetype = Oppgavetype.RISK_QA)
+        val (id, fom, tom) = PERIODE
+        val graphQLperiodeMedOppgave = opprettBeregnetPeriode(fom.toString(), tom.toString(), id)
+        val snapshotGenerasjon = opprettSnapshotGenerasjon(listOf(graphQLperiodeMedOppgave))
+        val arbeidsgiver = opprettSnapshotArbeidsgiver(listOf(snapshotGenerasjon))
+        mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
+
+        val body = runPersonQuery(null)
+
+        val periode = body["data"]["person"]["arbeidsgivere"].first()["generasjoner"].first()["perioder"].first()
+        assertFalse(periode["handlinger"].isEmpty)
+        assertFalse(periode["handlinger"].first { it["type"].textValue() == Periodehandling.UTBETALE.name }["tillatt"].booleanValue())
+    }
+
+    @Test
+    fun `utbetaling av risk-oppgave tillatt hvis tilgang til risk`() {
+        val personRef = opprettPerson()
+        val arbeidsgiverRef = opprettArbeidsgiver()
+        opprettVedtaksperiode(personRef, arbeidsgiverRef, oppgavetype = Oppgavetype.RISK_QA)
+        val (id, fom, tom) = PERIODE
+        val graphQLperiodeMedOppgave = opprettBeregnetPeriode(fom.toString(), tom.toString(), id)
+        val snapshotGenerasjon = opprettSnapshotGenerasjon(listOf(graphQLperiodeMedOppgave))
+        val arbeidsgiver = opprettSnapshotArbeidsgiver(listOf(snapshotGenerasjon))
+        mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
+
+        val body = runPersonQuery(riskSaksbehandlergruppe)
+
+        val periode = body["data"]["person"]["arbeidsgivere"].first()["generasjoner"].first()["perioder"].first()
+        assertFalse(periode["handlinger"].isEmpty)
+        assertTrue(periode["handlinger"].first { it["type"].textValue() == Periodehandling.UTBETALE.name }["tillatt"].booleanValue())
+    }
+
+    private fun runPersonQuery(group: UUID? = null) = runQuery(
         """{ 
                 person(fnr: "$FØDSELSNUMMER") { 
                     aktorId
@@ -199,6 +265,7 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
                                 }
                                 ... on BeregnetPeriode {
                                     vedtaksperiodeId
+                                    handlinger { type, tillatt }
                                     varslerForGenerasjon {
                                         generasjonId
                                         kode
@@ -208,7 +275,8 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
                         }               
                     }
                 } 
-            }"""
+            }""",
+        group
     )
 
     private fun periode(fom: String, tom: String): Periode {
@@ -246,4 +314,6 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         val generasjonId: UUID,
         val kode: String,
     )
+    private fun Periode.tilBeregnetPeriode(): GraphQLBeregnetPeriode =
+        opprettBeregnetPeriode(fom.toString(), tom.toString(), id)
 }

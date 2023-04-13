@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.api.graphql.schema
 
 import java.time.format.DateTimeFormatter
 import java.util.UUID
+import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLBeregnetPeriode
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLGenerasjon
@@ -116,6 +117,7 @@ data class Arbeidsgiver(
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val notatDao: NotatDao,
     private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
+    private val tilganger: SaksbehandlerTilganger,
 ) {
     fun generasjoner(): List<Generasjon> = generasjoner.mapIndexed { index, generasjon ->
         val oppgaveId = oppgaveApiDao.finnOppgaveId(fødselsnummer)
@@ -142,6 +144,7 @@ data class Arbeidsgiver(
                         periodehistorikkDao = periodehistorikkDao,
                         notatDao = notatDao,
                         totrinnsvurderingApiDao = totrinnsvurderingApiDao,
+                        tilganger = tilganger,
                         erSisteGenerasjon = index == 0,
                     )
 

@@ -69,6 +69,18 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         }
     }
 
+    fun finnOppgavetype(vedtaksperiodeId: UUID): Oppgavetype? {
+        @Language("PostgreSQL")
+        val query = """
+            SELECT type
+            FROM oppgave
+            WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
+        """.trimIndent()
+        return query.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) {
+            Oppgavetype.valueOf(it.string("type"))
+        }
+    }
+
     fun finnPeriodensInntekterFraAordningen(vedtaksperiodeId: UUIDString, skjæringstidspunkt: DateString, orgnummer: String): List<InntektFraAOrdningen> =
         queryize(
             """

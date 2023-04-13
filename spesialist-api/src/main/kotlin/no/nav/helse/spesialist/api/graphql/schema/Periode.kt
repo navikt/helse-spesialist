@@ -4,6 +4,7 @@ import com.expediagroup.graphql.generator.annotations.GraphQLIgnore
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID
+import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.graphql.enums.GraphQLInntektstype
 import no.nav.helse.spesialist.api.graphql.enums.GraphQLPeriodetilstand
 import no.nav.helse.spesialist.api.graphql.enums.GraphQLPeriodetype
@@ -17,6 +18,7 @@ import no.nav.helse.spesialist.api.graphql.hentsnapshot.Sykepengedager
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
+import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
@@ -333,6 +335,12 @@ data class UberegnetPeriode(
         varselRepository.finnGodkjenteVarslerForUberegnetPeriode(UUID.fromString(vedtaksperiodeId())).toList()
 }
 
+enum class Periodehandling {
+    UTBETALE
+}
+
+data class Handling(val type: Periodehandling, val tillatt: Boolean, val begrunnelse: String? = null)
+
 @Suppress("unused")
 data class BeregnetPeriode(
     val id: UUIDString,
@@ -345,6 +353,7 @@ data class BeregnetPeriode(
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val notatDao: NotatDao,
     private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
+    private val tilganger: SaksbehandlerTilganger,
     private val erSisteGenerasjon: Boolean,
 ) : Periode {
     override fun erForkastet(): Boolean = erForkastet(periode)
@@ -356,6 +365,19 @@ data class BeregnetPeriode(
     override fun tidslinje(): List<Dag> = tidslinje(periode)
     override fun vedtaksperiodeId(): UUIDString = periode.vedtaksperiodeId
     override fun periodetilstand(): Periodetilstand = periodetilstand(periode.periodetilstand)
+    fun handlinger() = byggHandlinger()
+
+    private fun byggHandlinger(): List<Handling> {
+        return if (periodetilstand(periode.periodetilstand) != Periodetilstand.TilGodkjenning)
+            listOf(Handling(Periodehandling.UTBETALE, false, "perioden er ikke til godkjenning")
+        ) else {
+            val oppgavetype = oppgaveApiDao.finnOppgavetype(UUID.fromString(vedtaksperiodeId()))
+            if (oppgavetype == Oppgavetype.RISK_QA && !tilganger.harTilgangTilRiskOppgaver())
+                listOf(Handling(Periodehandling.UTBETALE, false, "IkkeTilgangTilRisk"))
+            else listOf(Handling(Periodehandling.UTBETALE, true))
+        }
+    }
+
     override fun varslerForGenerasjon(): List<VarselDTO> =
         if (erSisteGenerasjon) varselRepository.finnVarslerSomIkkeErInaktiveForSisteGenerasjon(
             UUID.fromString(vedtaksperiodeId()),

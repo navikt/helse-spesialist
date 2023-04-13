@@ -98,6 +98,7 @@ class PersonQuery(
                 notatDao = notatDao,
                 totrinnsvurderingApiDao = totrinnsvurderingApiDao,
                 reservasjonClient = reservasjonClient,
+                tilganger = env.graphQlContext.get("tilganger"),
             )
         }
 
