@@ -8,6 +8,7 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.asLocalDateTime
+import org.slf4j.LoggerFactory
 
 internal val overstyringsteller = Counter.build("overstyringer", "Teller antall overstyringer")
     .labelNames("opplysningstype", "type")
@@ -48,14 +49,13 @@ internal fun tellInaktivtVarsel(varselkode: String) = inaktiveVarslerteller.labe
 internal fun registrerTidsbrukForHendelse(command: String, tid: Long) = registrerTidsbrukForHendelse.labels(command).observe(tid.toDouble())
 
 internal class MetrikkRiver(rapidsConnection: RapidsConnection) : River.PacketListener {
+    val log = LoggerFactory.getLogger("MetrikkRiver")
+
     init {
         River(rapidsConnection).apply {
             validate {
                 it.demandValue("@event_name", "behov")
-                it.demandKey("@final")
-                it.demandKey("@behov")
-                it.demandKey("system_participating_services")
-                it.require("@besvart") { message -> message.asLocalDateTime() }
+                it.demandValue("@final", true)
             }
         }
     }
@@ -65,6 +65,7 @@ internal class MetrikkRiver(rapidsConnection: RapidsConnection) : River.PacketLi
         val delay = MILLIS.between(opprettet, besvart)
         val behov = packet["@behov"].asText()
 
+        log.info("Registrerer tidsbruk for $behov som $delay ms")
         registrerTidsbrukForBehov.labels(behov).observe(delay.toDouble())
     }
 
