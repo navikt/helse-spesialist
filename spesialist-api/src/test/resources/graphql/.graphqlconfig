@@ -4,7 +4,7 @@
   "extensions": {
     "endpoints": {
       "spesialist-dev": {
-        "url": "https://spesialist.dev.intern.nav.no/graphql",
+        "url": "https://spesialist.intern.dev.nav.no/graphql",
         "headers": {
           "user-agent": "JS GraphQL"
         },
