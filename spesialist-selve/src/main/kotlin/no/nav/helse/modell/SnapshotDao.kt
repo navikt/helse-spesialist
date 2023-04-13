@@ -72,4 +72,6 @@ internal fun GraphQLUtbetaling?.utbetalingTilArbeidsgiver() = this != null && ar
 
 internal fun GraphQLUtbetaling?.delvisRefusjon() = utbetalingTilSykmeldt() && utbetalingTilArbeidsgiver()
 
+internal fun GraphQLUtbetaling?.erNullendring() = this != null && personNettoBelop == 0 && arbeidsgiverNettoBelop == 0
+
 internal fun GraphQLUtbetaling?.erRevurdering() = this?.typeEnum == Utbetalingtype.REVURDERING

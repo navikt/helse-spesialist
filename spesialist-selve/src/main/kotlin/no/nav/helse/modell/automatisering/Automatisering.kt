@@ -10,6 +10,7 @@ import no.nav.helse.mediator.meldinger.løsninger.HentEnhetløsning.Companion.er
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
+import no.nav.helse.modell.erNullendring
 import no.nav.helse.modell.erRevurdering
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.overstyring.OverstyringDao
@@ -158,7 +159,7 @@ internal class Automatisering(
             validering("Bruker tilhører utlandsenhet") { !tilhørerUtlandsenhet },
             validering("Har flere arbeidsgivere") { inntektskilde == Inntektskilde.EN_ARBEIDSGIVER },
             validering("Utbetaling til sykmeldt") { !skalStoppesPgaUTS },
-            AutomatiserRevurderinger(vedtaksperiodensUtbetaling),
+            AutomatiserRevurderinger(vedtaksperiodensUtbetaling, fødselsnummer, vedtaksperiodeId),
             validering("Vedtaksperioden har en pågående overstyring") { !harPågåendeOverstyring }
         )
     }
@@ -174,8 +175,16 @@ internal class Automatisering(
             override fun error() = error
         }
 
-    private class AutomatiserRevurderinger(private val utbetaling: GraphQLUtbetaling?): AutomatiseringValidering {
-        override fun erAautomatiserbar() = !utbetaling.erRevurdering() || AutomatiserRevuderinger.enabled
+    private class AutomatiserRevurderinger(
+        private val utbetaling: GraphQLUtbetaling?,
+        private val fødselsnummer: String,
+        private val vedtaksperiodeId: UUID,
+    ) : AutomatiseringValidering {
+        override fun erAautomatiserbar() =
+            !utbetaling.erRevurdering() || AutomatiserRevuderinger.enabled || utbetaling.erNullendring().also {
+                sikkerLogg.info("Revurdering av $vedtaksperiodeId (person $fødselsnummer) har ingen endring, og er godkjent for automatisering")
+            }
+
         override fun error() = "Utbetalingen er revurdering"
     }
 

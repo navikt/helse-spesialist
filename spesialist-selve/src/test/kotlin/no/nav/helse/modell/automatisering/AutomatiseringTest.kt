@@ -162,10 +162,22 @@ internal class AutomatiseringTest {
     fun `periode til revurdering skal ikke automatisk godkjennes`() {
         val hendelseId = UUID.randomUUID()
         val utbetalingId = UUID.randomUUID()
-        every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(type = Utbetalingtype.REVURDERING)
+        every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(type = Utbetalingtype.REVURDERING, personbeløp = 1)
         automatisering.utfør(fødselsnummer, vedtaksperiodeId, hendelseId, utbetalingId, periodetype, sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1.januar, emptyList()), periodeTom = 1.januar) { fail("Denne skal ikke kalles") }
         verify(exactly = 1) { automatiseringDaoMock.manuellSaksbehandling(any(), vedtaksperiodeId, hendelseId, utbetalingId) }
         verify(exactly = 0) { automatiseringDaoMock.automatisert(any(), any(), any()) }
+    }
+
+    @Test
+    fun `revurdering uten endringer i beløp kan automatisk godkjennes`() {
+        val hendelseId = UUID.randomUUID()
+        val utbetalingId = UUID.randomUUID()
+        val onSuccessCallback = mockk<() -> Unit>(relaxed = true)
+        every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(type = Utbetalingtype.REVURDERING)
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, hendelseId, utbetalingId, periodetype, sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1.januar, emptyList()), periodeTom = 1.januar, onSuccessCallback)
+        verify(exactly = 1) { onSuccessCallback() }
+        verify(exactly = 1) { automatiseringDaoMock.automatisert(vedtaksperiodeId, hendelseId, utbetalingId) }
+        verify(exactly = 0) { automatiseringDaoMock.manuellSaksbehandling(any(), any(), any(), any()) }
     }
 
     @Test
