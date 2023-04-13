@@ -2,6 +2,8 @@ package no.nav.helse.modell.automatisering
 
 import ToggleHelpers.disable
 import ToggleHelpers.enable
+import io.mockk.called
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -256,6 +258,20 @@ internal class AutomatiseringTest {
         automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), utbetalingId, periodetype, sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1.januar, emptyList()), periodeTom = 1.januar) { fail("Denne skal ikke kalles") }
     }
 
+    @Test
+    fun `nullrevurdering grunnet saksbehandleroverstyring skal ikke automatisk godkjennes`() {
+        val support = support()
+        every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns
+                enUtbetaling(type = Utbetalingtype.REVURDERING)
+        support.forsøkAutomatisering()
+        support.assertBleAutomatiskGodkjent()
+
+        clearMocks(support.onAutomatiserbar)
+
+        every { overstyringDaoMock.harVedtaksperiodePågåendeOverstyring(any()) } returns true
+        support.forsøkAutomatisering()
+        support.assertGikkTilManuell()
+    }
 
     private fun enUtbetaling(personbeløp: Int = 0, arbeidsgiverbeløp: Int = 0, type: Utbetalingtype = Utbetalingtype.UTBETALING): GraphQLUtbetaling =
         GraphQLUtbetaling(
@@ -270,5 +286,21 @@ internal class AutomatiseringTest {
             personoppdrag = null,
             arbeidsgiveroppdrag = null,
         )
+
+    private fun support() = object {
+        val onAutomatiserbar = mockk<() -> Unit>(relaxed = true)
+        fun forsøkAutomatisering() = automatisering.utfør(
+            fødselsnummer,
+            vedtaksperiodeId,
+            UUID.randomUUID(),
+            utbetalingId,
+            periodetype,
+            sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1.januar, emptyList()),
+            periodeTom = 1.januar,
+            onAutomatiserbar
+        )
+        fun assertBleAutomatiskGodkjent() = verify(exactly = 1) { onAutomatiserbar() }
+        fun assertGikkTilManuell() = verify { onAutomatiserbar wasNot called }
+    }
 }
 
