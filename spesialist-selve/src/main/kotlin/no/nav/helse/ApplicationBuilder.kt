@@ -326,8 +326,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                     notaterApi(notatMediator)
                     totrinnsvurderingApi(
                         apiVarselRepository,
-                        oppgaveDao,
-                        notatMediator,
                         tildelingService,
                         hendelseMediator,
                         totrinnsvurderingMediator,

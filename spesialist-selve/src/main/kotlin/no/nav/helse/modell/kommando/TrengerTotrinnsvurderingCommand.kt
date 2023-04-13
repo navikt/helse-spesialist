@@ -1,7 +1,6 @@
 package no.nav.helse.modell.kommando
 
 import java.util.UUID
-import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
@@ -28,20 +27,16 @@ internal class TrengerTotrinnsvurderingCommand(
 
         if (harMedlemskapsvarsel || overstyringer.isNotEmpty()) {
             logg.info("Vedtaksperioden: $vedtaksperiodeId trenger totrinnsvurdering")
-            if (Toggle.Totrinnsvurdering.enabled) {
-                val totrinnsvurdering = totrinnsvurderingMediator.opprett(vedtaksperiodeId)
+            val totrinnsvurdering = totrinnsvurderingMediator.opprett(vedtaksperiodeId)
 
-                if (totrinnsvurdering.erBeslutteroppgave()) {
-                    totrinnsvurderingMediator.settAutomatiskRetur(vedtaksperiodeId)
-                }
-                if (totrinnsvurdering.saksbehandler != null) {
-                    oppgaveMediator.reserverOppgave(
-                        saksbehandleroid = totrinnsvurdering.saksbehandler,
-                        fødselsnummer = fødselsnummer
-                    )
-                }
-            } else {
-                oppgaveMediator.alleUlagredeOppgaverTilTotrinnsvurdering()
+            if (totrinnsvurdering.erBeslutteroppgave()) {
+                totrinnsvurderingMediator.settAutomatiskRetur(vedtaksperiodeId)
+            }
+            if (totrinnsvurdering.saksbehandler != null) {
+                oppgaveMediator.reserverOppgave(
+                    saksbehandleroid = totrinnsvurdering.saksbehandler,
+                    fødselsnummer = fødselsnummer
+                )
             }
         }
 

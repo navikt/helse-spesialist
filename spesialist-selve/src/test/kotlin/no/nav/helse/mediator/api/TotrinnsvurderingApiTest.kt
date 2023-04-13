@@ -1,7 +1,5 @@
 package no.nav.helse.mediator.api
 
-import ToggleHelpers.disable
-import ToggleHelpers.enable
 import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.request.accept
 import io.ktor.client.request.post
@@ -18,7 +16,6 @@ import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.tildeling.TildelingService
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
@@ -27,7 +24,6 @@ import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.testEnv
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -50,10 +46,6 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     private val saksbehandler_oid = UUID.randomUUID()
 
     private val totrinnsvurderingDto = TotrinnsvurderingDto(oppgavereferanse = 1L)
-    private val returDtoMedNotat = TotrinnsvurderingReturDto(
-        oppgavereferanse = 1L,
-        notat = NotatApiDto("notat_tekst", NotatType.Retur)
-    )
 
     private val TOTRINNSVURDERING_URL = "/api/totrinnsvurdering"
     private val RETUR_URL = "/api/totrinnsvurdering/retur"
@@ -63,8 +55,6 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
         setupServer {
             totrinnsvurderingApi(
                 varselRepository,
-                oppgaveDao,
-                notatMediator,
                 tildelingService,
                 hendelseMediator,
                 totrinnsvurderingMediator,
@@ -76,19 +66,6 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     @BeforeEach
     fun setup() {
         clearMocks(oppgaveDao, periodehistorikkDao, notatMediator, tildelingService, hendelseMediator)
-    }
-
-    @Test
-    fun `Kan ikke gjøres til beslutteroppgave hvis den allerede er beslutteroppgave`() {
-        every { oppgaveDao.erBeslutteroppgave(1L) } returns true
-        val response = runBlocking {
-            client.post("/api/totrinnsvurdering") {
-                contentType(ContentType.Application.Json)
-                setBody<JsonNode>(objectMapper.valueToTree(totrinnsvurderingDto))
-                authentication(saksbehandler_oid)
-            }
-        }
-        assertEquals(HttpStatusCode.Conflict, response.status)
     }
 
     @Test
@@ -128,80 +105,6 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             }
         }
         assertEquals(HttpStatusCode.BadRequest, response.status)
-    }
-
-    @Test
-    fun totrinnsvurderingOk() {
-        every { totrinnsvurderingMediator.hentAktiv(oppgaveId = any()) } returns null
-        val response = runBlocking {
-            client.post(TOTRINNSVURDERING_URL) {
-                contentType(ContentType.Application.Json)
-                accept(ContentType.Application.Json)
-                setBody(totrinnsvurderingDto)
-                authentication(saksbehandler_oid)
-            }
-        }
-
-        verify(exactly = 1) {
-            oppgaveDao.setBeslutteroppgave(
-                oppgaveId = totrinnsvurderingDto.oppgavereferanse,
-                tidligereSaksbehandlerOID = saksbehandler_oid
-            )
-        }
-        verify(exactly = 1) {
-            tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(
-                totrinnsvurderingDto.oppgavereferanse,
-                any(),
-                any()
-            )
-        }
-        verify(exactly = 1) {
-            totrinnsvurderingMediator.lagrePeriodehistorikk(
-                totrinnsvurderingDto.oppgavereferanse,
-                saksbehandler_oid,
-                PeriodehistorikkType.TOTRINNSVURDERING_TIL_GODKJENNING
-            )
-        }
-        assertEquals(HttpStatusCode.OK, response.status)
-    }
-
-
-    @Test
-    fun returOk() {
-        Toggle.Totrinnsvurdering.disable()
-        val response = runBlocking {
-            client.post(RETUR_URL) {
-                contentType(ContentType.Application.Json)
-                accept(ContentType.Application.Json)
-                setBody(returDtoMedNotat)
-                authentication(saksbehandler_oid)
-            }
-        }
-
-        verify(exactly = 1) {
-            oppgaveDao.setReturoppgave(
-                oppgaveId = returDtoMedNotat.oppgavereferanse,
-                beslutterSaksbehandlerOid = saksbehandler_oid
-            )
-        }
-        verify(exactly = 1) {
-            tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(
-                returDtoMedNotat.oppgavereferanse,
-                any(),
-                any()
-            )
-        }
-        verify(exactly = 1) {
-            notatMediator.lagreForOppgaveId(
-                returDtoMedNotat.oppgavereferanse,
-                returDtoMedNotat.notat.tekst,
-                saksbehandler_oid,
-                returDtoMedNotat.notat.type
-            )
-        }
-
-        assertEquals(HttpStatusCode.OK, response.status)
-        Toggle.Totrinnsvurdering.enable()
     }
 
     @Test
@@ -449,7 +352,6 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
 
     @Test
     fun `Sende totrinnsvurdering i retur`() {
-        Toggle.Totrinnsvurdering.enable()
         val tidligereSaksbehandlerOid = UUID.randomUUID()
         val oppgaveId = 2L
         every { totrinnsvurderingMediator.hentAktiv(oppgaveId = oppgaveId) } returns Totrinnsvurdering(
@@ -487,6 +389,5 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
         }
 
         assertEquals(HttpStatusCode.OK, response.status)
-        Toggle.Totrinnsvurdering.disable()
     }
 }

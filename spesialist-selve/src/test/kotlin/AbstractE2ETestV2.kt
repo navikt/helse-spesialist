@@ -993,9 +993,15 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
 
     protected fun assertTotrinnsvurdering(oppgaveId: Long) {
         @Language("PostgreSQL")
-        val query = "SELECT er_totrinnsoppgave FROM oppgave WHERE id = ?"
+        val query = """
+           SELECT 1 FROM totrinnsvurdering
+           INNER JOIN vedtak v on totrinnsvurdering.vedtaksperiode_id = v.vedtaksperiode_id
+           INNER JOIN oppgave o on v.id = o.vedtak_ref
+           WHERE o.id = ?
+           AND utbetaling_id_ref IS NULL
+        """.trimIndent()
         val erToTrinnsvurdering = sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, oppgaveId).map { it.boolean("er_totrinnsoppgave") }.asSingle)
+            session.run(queryOf(query, oppgaveId).map { it.boolean(1) }.asSingle)
         } ?: throw IllegalStateException("Finner ikke oppgave med id $oppgaveId")
         assertTrue(erToTrinnsvurdering) {
             "Forventer at oppgaveId=$oppgaveId krever totrinnsvurdering"

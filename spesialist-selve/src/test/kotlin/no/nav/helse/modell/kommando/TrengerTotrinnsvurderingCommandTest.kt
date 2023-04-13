@@ -1,13 +1,10 @@
 package no.nav.helse.modell.kommando
 
-import ToggleHelpers.disable
-import ToggleHelpers.enable
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
@@ -50,18 +47,15 @@ internal class TrengerTotrinnsvurderingCommandTest {
 
     @Test
     fun `Oppretter totrinnsvurdering dersom vedtaksperioden finnes i overstyringer_for_vedtaksperioder`() {
-        Toggle.Totrinnsvurdering.enable()
         every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
 
         assertTrue(command.execute(context))
 
         verify(exactly = 1) { totrinnsvurderingMediator.opprett(any()) }
-        Toggle.Totrinnsvurdering.disable()
     }
 
     @Test
     fun `Oppretter totrinssvurdering dersom vedtaksperioden har varsel for lovvalg og medlemskap, og ikke har hatt oppgave som har vært ferdigstilt før`() {
-        Toggle.Totrinnsvurdering.enable()
         val testWarningVurderMedlemskap = "Vurder lovvalg og medlemskap"
         every {
             warningDao.finnAktiveWarningsMedMelding(
@@ -73,13 +67,10 @@ internal class TrengerTotrinnsvurderingCommandTest {
 
         assertTrue(command.execute(context))
         verify(exactly = 1) { totrinnsvurderingMediator.opprett(any()) }
-        Toggle.Totrinnsvurdering.disable()
     }
 
     @Test
     fun `Hvis totrinnsvurdering har saksbehander skal oppgaven reserveres`() {
-        Toggle.Totrinnsvurdering.enable()
-
         val saksbehander = UUID.randomUUID()
 
         every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
@@ -98,13 +89,10 @@ internal class TrengerTotrinnsvurderingCommandTest {
         verify(exactly = 1) { totrinnsvurderingMediator.opprett(any()) }
         verify(exactly = 1) { oppgaveMediator.reserverOppgave(saksbehander, FØDSELSNUMMER) }
 
-        Toggle.Totrinnsvurdering.disable()
     }
 
     @Test
-    fun `Hvis totrinnsvurdering har beslutter skal totrinnsvurderingen markeres som retur`() {
-        Toggle.Totrinnsvurdering.enable()
-        val saksbehander = UUID.randomUUID()
+    fun `Hvis totrinnsvurdering har beslutter skal totrinnsvurderingen markeres som retur`() { val saksbehander = UUID.randomUUID()
         val beslutter = UUID.randomUUID()
 
         every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
@@ -123,7 +111,6 @@ internal class TrengerTotrinnsvurderingCommandTest {
         verify(exactly = 1) { totrinnsvurderingMediator.opprett(any()) }
         verify(exactly = 1) { oppgaveMediator.reserverOppgave(saksbehander, FØDSELSNUMMER) }
         verify(exactly = 1) { totrinnsvurderingMediator.settAutomatiskRetur(VEDTAKSPERIODE_ID) }
-        Toggle.Totrinnsvurdering.disable()
     }
 
     @Test
@@ -134,26 +121,11 @@ internal class TrengerTotrinnsvurderingCommandTest {
     }
 
     @Test
-    fun `Setter trengerTotrinnsvurdering dersom oppgaven har blitt overstyrt`() {
+    fun `Oppretter trengerTotrinnsvurdering dersom oppgaven har blitt overstyrt`() {
         every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
 
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.alleUlagredeOppgaverTilTotrinnsvurdering() }
-    }
-
-    @Test
-    fun `Setter trengerTotrinnsvurdering for lovvalg og medlemskap dersom vedtaksperioden har hatt oppgave som ikke har vært ferdigstilt før`() {
-        val testWarningVurderMedlemskap = "Vurder lovvalg og medlemskap"
-        every {
-            warningDao.finnAktiveWarningsMedMelding(
-                VEDTAKSPERIODE_ID,
-                testWarningVurderMedlemskap
-            )
-        } returns listOf(Warning(testWarningVurderMedlemskap, WarningKilde.Spleis, LocalDateTime.now()))
-        every { oppgaveMediator.harFerdigstiltOppgave(VEDTAKSPERIODE_ID) } returns false
-
-        assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.alleUlagredeOppgaverTilTotrinnsvurdering() }
+        verify(exactly = 1) { totrinnsvurderingMediator.opprett(any()) }
     }
 
     @Test

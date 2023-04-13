@@ -15,11 +15,8 @@ import io.ktor.util.pipeline.PipelineContext
 import java.util.UUID
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.mediator.Toggle
-import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.tildeling.TildelingService
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
-import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import org.slf4j.LoggerFactory
@@ -29,8 +26,6 @@ private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
 
 internal fun Route.totrinnsvurderingApi(
     varselRepository: ApiVarselRepository,
-    oppgaveDao: OppgaveDao,
-    notatMediator: NotatMediator,
     tildelingService: TildelingService,
     hendelseMediator: HendelseMediator,
     totrinnsvurderingMediator: TotrinnsvurderingMediator,
@@ -42,7 +37,7 @@ internal fun Route.totrinnsvurderingApi(
         val aktivTotrinnsvurdering = totrinnsvurderingMediator.hentAktiv(totrinnsvurdering.oppgavereferanse)
             ?: totrinnsvurderingMediator.opprettFraLegacy(totrinnsvurdering.oppgavereferanse)
 
-        if (oppgaveDao.erBeslutteroppgave(totrinnsvurdering.oppgavereferanse) || aktivTotrinnsvurdering.erBeslutteroppgave()) {
+        if (aktivTotrinnsvurdering.erBeslutteroppgave()) {
             call.respondText(
                 "Denne oppgaven har allerede blitt sendt til godkjenning.",
                 status = HttpStatusCode.Conflict
@@ -64,17 +59,11 @@ internal fun Route.totrinnsvurderingApi(
 
         sikkerLog.info("OppgaveId ${totrinnsvurdering.oppgavereferanse} sendes til godkjenning av $saksbehandlerOid")
 
-        val beslutterSaksbehandlerOid = oppgaveDao.finnBeslutterSaksbehandler(totrinnsvurdering.oppgavereferanse)
-            ?: aktivTotrinnsvurdering.beslutter
+        val beslutterSaksbehandlerOid = aktivTotrinnsvurdering.beslutter
         tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(
             totrinnsvurdering.oppgavereferanse,
             beslutterSaksbehandlerOid,
             tilganger(tilgangsgrupper),
-        )
-
-        oppgaveDao.setBeslutteroppgave(
-            oppgaveId = totrinnsvurdering.oppgavereferanse,
-            tidligereSaksbehandlerOID = saksbehandlerOid
         )
 
         totrinnsvurderingMediator.settSaksbehandler(
@@ -103,42 +92,19 @@ internal fun Route.totrinnsvurderingApi(
             totrinnsvurderingMediator.opprettFraLegacy(retur.oppgavereferanse)
         sikkerLog.info("OppgaveId ${retur.oppgavereferanse} sendes i retur av $beslutterOid")
 
-        val tidligereSaksbehandlerOid =
-            oppgaveDao.finnTidligereSaksbehandler(retur.oppgavereferanse) ?: aktivTotrinnsvurdering.saksbehandler
+        val tidligereSaksbehandlerOid = aktivTotrinnsvurdering.saksbehandler
 
-        oppgaveDao.setReturoppgave(
+        totrinnsvurderingMediator.settRetur(
             oppgaveId = retur.oppgavereferanse,
-            beslutterSaksbehandlerOid = beslutterOid
+            beslutterOid = beslutterOid,
+            notat = retur.notat.tekst
         )
-
-        if (Toggle.Totrinnsvurdering.enabled) {
-            totrinnsvurderingMediator.settRetur(
-                oppgaveId = retur.oppgavereferanse,
-                beslutterOid = beslutterOid,
-                notat = retur.notat.tekst
-            )
-        } else {
-            val notatId = notatMediator.lagreForOppgaveId(
-                retur.oppgavereferanse,
-                retur.notat.tekst,
-                beslutterOid,
-                retur.notat.type
-            )
-
-            totrinnsvurderingMediator.lagrePeriodehistorikk(
-                oppgaveId = retur.oppgavereferanse,
-                saksbehandleroid = beslutterOid,
-                type = PeriodehistorikkType.TOTRINNSVURDERING_RETUR,
-                notatId = notatId?.toInt()
-            )
-        }
 
         tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(
             retur.oppgavereferanse,
             tidligereSaksbehandlerOid,
             tilganger(tilgangsgrupper),
         )
-
 
         hendelseMediator.sendMeldingOppgaveOppdatert(retur.oppgavereferanse)
 
