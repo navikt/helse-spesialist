@@ -57,6 +57,7 @@ internal class MetrikkRiver(rapidsConnection: RapidsConnection) : River.PacketLi
             validate {
                 it.demandValue("@event_name", "behov")
                 it.demandValue("@final", true)
+                it.requireKey("@besvart", "@behov", "system_participating_services")
             }
         }.register(this)
     }
