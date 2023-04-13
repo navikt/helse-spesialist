@@ -1,5 +1,6 @@
 package no.nav.helse
 
+import com.fasterxml.jackson.databind.JsonNode
 import io.prometheus.client.Counter
 import io.prometheus.client.Summary
 import java.time.temporal.ChronoUnit.MILLIS
@@ -65,11 +66,9 @@ internal class MetrikkRiver(rapidsConnection: RapidsConnection) : River.PacketLi
         val besvart = packet["@besvart"].asLocalDateTime()
         val opprettet = packet["system_participating_services"][0].let { it["time"].asLocalDateTime() }
         val delay = MILLIS.between(opprettet, besvart)
-        val behov = packet["@behov"].asText()
+        val behov = packet["@behov"].map(JsonNode::asText)
 
         log.info("Registrerer tidsbruk for $behov som $delay ms")
-        registrerTidsbrukForBehov.labels(behov).observe(delay.toDouble())
+        registrerTidsbrukForBehov.labels(behov.first()).observe(delay.toDouble())
     }
-
 }
-
