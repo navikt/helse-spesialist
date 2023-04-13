@@ -8,6 +8,7 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.asLocalDateTime
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 internal val overstyringsteller = Counter.build("overstyringer", "Teller antall overstyringer")
@@ -49,7 +50,7 @@ internal fun tellInaktivtVarsel(varselkode: String) = inaktiveVarslerteller.labe
 internal fun registrerTidsbrukForHendelse(command: String, tid: Long) = registrerTidsbrukForHendelse.labels(command).observe(tid.toDouble())
 
 internal class MetrikkRiver(rapidsConnection: RapidsConnection) : River.PacketListener {
-    val log = LoggerFactory.getLogger("MetrikkRiver")
+    val log: Logger = LoggerFactory.getLogger("MetrikkRiver")
 
     init {
         River(rapidsConnection).apply {
@@ -57,7 +58,7 @@ internal class MetrikkRiver(rapidsConnection: RapidsConnection) : River.PacketLi
                 it.demandValue("@event_name", "behov")
                 it.demandValue("@final", true)
             }
-        }
+        }.register(this)
     }
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         val besvart = packet["@besvart"].asLocalDateTime()
