@@ -24,6 +24,7 @@ import no.nav.helse.Testdata.SNAPSHOT_MED_WARNINGS
 import no.nav.helse.Testdata.SNAPSHOT_UTEN_WARNINGS
 import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
+import no.nav.helse.januar
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -33,7 +34,15 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
     fun `avbryter saksbehandling før oppgave er opprettet til saksbehandling`() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_MED_WARNINGS
         sendSøknadSendt(AKTØR, FØDSELSNUMMER, ORGNR)
-        sendVedtaksperiodeOpprettet(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID)
+        sendVedtaksperiodeOpprettet(
+            AKTØR,
+            FØDSELSNUMMER,
+            ORGNR,
+            VEDTAKSPERIODE_ID,
+            skjæringstidspunkt = 1.januar,
+            fom = 1.januar,
+            tom = 31.januar
+        )
         sendVedtaksperiodeEndret(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID)
         sendVedtaksperiodeNyUtbetaling(VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID, organisasjonsnummer = ORGNR)
         sendUtbetalingEndret(AKTØR, FØDSELSNUMMER, ORGNR, UTBETALING_ID, "UTBETALING")
@@ -120,7 +129,15 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
     fun `avbryter kommandokjede ved reberegning og oppretter oppgave hos saksbehandler andre runde`() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
         sendSøknadSendt(AKTØR, FØDSELSNUMMER, ORGNR)
-        sendVedtaksperiodeOpprettet(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID)
+        sendVedtaksperiodeOpprettet(
+            AKTØR,
+            FØDSELSNUMMER,
+            ORGNR,
+            VEDTAKSPERIODE_ID,
+            skjæringstidspunkt = 1.januar,
+            fom = 1.januar,
+            tom = 31.januar
+        )
         sendVedtaksperiodeEndret(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID)
         sendVedtaksperiodeNyUtbetaling(VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID, organisasjonsnummer = ORGNR)
         sendUtbetalingEndret(AKTØR, FØDSELSNUMMER, ORGNR, UTBETALING_ID, "UTBETALING")
@@ -268,7 +285,15 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
 
     private fun vedtaksperiodeTilGodkjenning(harOppdatertMetadata: Boolean = false): UUID {
         sendSøknadSendt(AKTØR, FØDSELSNUMMER, ORGNR)
-        sendVedtaksperiodeOpprettet(AKTØR, FØDSELSNUMMER, ORGNR, vedtaksperiodeId = VEDTAKSPERIODE_ID)
+        sendVedtaksperiodeOpprettet(
+            AKTØR,
+            FØDSELSNUMMER,
+            ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            skjæringstidspunkt = 1.januar,
+            fom = 1.januar,
+            tom = 31.januar
+        )
         sendVedtaksperiodeNyUtbetaling(VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID, organisasjonsnummer = ORGNR)
         sendUtbetalingEndret(AKTØR, FØDSELSNUMMER, ORGNR, UTBETALING_ID, "UTBETALING")
         val godkjenningsmeldingId1 = sendGodkjenningsbehov(

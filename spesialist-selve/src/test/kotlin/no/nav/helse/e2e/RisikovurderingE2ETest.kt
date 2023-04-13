@@ -26,6 +26,7 @@ import no.nav.helse.Testdata.SNAPSHOT_UTEN_WARNINGS
 import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.Testdata.snapshot
+import no.nav.helse.januar
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -81,7 +82,15 @@ private class RisikovurderingE2ETest : AbstractE2ETest() {
         ekstraArbeidsgivere: List<Testmeldingfabrikk.ArbeidsgiverinformasjonJson> = emptyList()
     ) {
         sendSøknadSendt(AKTØR, FØDSELSNUMMER, ORGNR)
-        sendVedtaksperiodeOpprettet(AKTØR, FØDSELSNUMMER, ORGNR, vedtaksperiodeId = VEDTAKSPERIODE_ID)
+        sendVedtaksperiodeOpprettet(
+            AKTØR,
+            FØDSELSNUMMER,
+            ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            skjæringstidspunkt = 1.januar,
+            fom = 1.januar,
+            tom = 31.januar
+        )
         sendVedtaksperiodeNyUtbetaling(VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID, organisasjonsnummer = ORGNR)
         sendUtbetalingEndret(AKTØR, FØDSELSNUMMER, ORGNR, UTBETALING_ID, "UTBETALING")
         val godkjenningsmeldingId = sendGodkjenningsbehov(

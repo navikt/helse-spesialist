@@ -149,7 +149,7 @@ internal class Automatisering(
 
         return valider(
             risikovurdering,
-            validering("Har varsler") { warnings.isEmpty() },
+            validering("Har varsler") { !forhindrerAutomatisering },
             validering("Det finnes åpne oppgaver på sykepenger i Gosys") {
                 antallÅpneGosysoppgaver?.let { it == 0 } ?: false
             },

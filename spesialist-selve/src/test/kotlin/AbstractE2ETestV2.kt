@@ -1,4 +1,4 @@
-import AbstractE2ETestV2.Mottaker.*
+import AbstractE2ETestV2.Mottaker.ARBEIDSGIVER
 import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -151,6 +151,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp,
         )
+        if (regelverksvarsler.isNotEmpty()) håndterAktivitetsloggNyAktivitet(varselkoder = regelverksvarsler)
         håndterGodkjenningsbehov(
             andreArbeidsforhold = andreArbeidsforhold,
             fom = fom,

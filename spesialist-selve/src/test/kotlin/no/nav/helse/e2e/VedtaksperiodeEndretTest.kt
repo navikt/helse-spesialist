@@ -13,6 +13,7 @@ import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.Testdata.snapshot
+import no.nav.helse.januar
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -28,7 +29,15 @@ internal class VedtaksperiodeEndretTest : AbstractE2ETest() {
         vedtaksperiode(utbetalingId = utbetalingId)
 
         val tidspunkter = finnWarningsOpprettet(VEDTAKSPERIODE_ID)
-        sendVedtaksperiodeOpprettet(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID)
+        sendVedtaksperiodeOpprettet(
+            AKTØR,
+            FØDSELSNUMMER,
+            ORGNR,
+            VEDTAKSPERIODE_ID,
+            skjæringstidspunkt = 1.januar,
+            fom = 1.januar,
+            tom = 31.januar
+        )
         sendVedtaksperiodeEndret(aktørId = AKTØR, fødselsnummer = FØDSELSNUMMER, organisasjonsnummer = ORGNR, vedtaksperiodeId = VEDTAKSPERIODE_ID)
         val tidspunkterEtterTukling = finnWarningsOpprettet(VEDTAKSPERIODE_ID)
         assertEquals(tidspunkter.size, tidspunkterEtterTukling.size)

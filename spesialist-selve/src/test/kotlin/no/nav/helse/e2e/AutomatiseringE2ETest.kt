@@ -15,7 +15,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETestV2() {
     @Test
     fun `fatter ikke automatisk vedtak ved warnings`() {
         fremTilSaksbehandleroppgave(
-            regelverksvarsler = listOf("Brukeren har flere inntekter de siste tre måneder"),
+            regelverksvarsler = listOf("RV_IM_1"),
             kanGodkjennesAutomatisk = true
         )
 

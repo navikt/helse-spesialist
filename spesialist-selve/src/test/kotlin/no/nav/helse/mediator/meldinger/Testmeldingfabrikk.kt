@@ -40,6 +40,66 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         )
     )
 
+    fun lagAktivitetsloggNyAktivitet(
+        id: UUID,
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        vedtaksperiodeId: UUID,
+        varselkoder: List<String>,
+    ): String {
+        return nyHendelse(
+            id, "aktivitetslogg_ny_aktivitet",
+            mapOf(
+                "aktørId" to aktørId,
+                "fødselsnummer" to fødselsnummer,
+                "aktiviteter" to varselkoder.map {
+                    lagAktivitet(
+                        fødselsnummer = fødselsnummer,
+                        varselkode = it,
+                        vedtaksperiodeId = vedtaksperiodeId,
+                        organisasjonsnummer = organisasjonsnummer
+                    )
+                }
+            )
+        )
+    }
+
+    private fun lagAktivitet(
+        id: UUID = UUID.randomUUID(),
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        vedtaksperiodeId: UUID,
+        varselkode: String,
+    ): Map<String, Any> = mapOf(
+        "id" to id,
+        "melding" to "en melding",
+        "nivå" to "VARSEL",
+        "varselkode" to varselkode,
+        "tidsstempel" to LocalDateTime.now(),
+        "kontekster" to listOf(
+            mapOf(
+                "konteksttype" to "Person",
+                "kontekstmap" to mapOf(
+                    "fødselsnummer" to fødselsnummer,
+                    "aktørId" to "2093088099680"
+                )
+            ),
+            mapOf(
+                "konteksttype" to "Arbeidsgiver",
+                "kontekstmap" to mapOf(
+                    "organisasjonsnummer" to organisasjonsnummer
+                )
+            ),
+            mapOf(
+                "konteksttype" to "Vedtaksperiode",
+                "kontekstmap" to mapOf(
+                    "vedtaksperiodeId" to vedtaksperiodeId
+                )
+            )
+        )
+    )
+
     fun lagAdressebeskyttelseEndret(
         id: UUID = UUID.randomUUID()
     ) = nyHendelse(

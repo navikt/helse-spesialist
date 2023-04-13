@@ -6,6 +6,7 @@ import io.mockk.every
 import io.mockk.mockk
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
+import no.nav.helse.Meldingssender.sendAktivitetsloggNyAktivitet
 import no.nav.helse.Meldingssender.sendArbeidsforholdløsningOld
 import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendEgenAnsattløsningOld
@@ -25,6 +26,7 @@ import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.Testdata.SNAPSHOT_MED_WARNINGS
 import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
+import no.nav.helse.januar
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -92,10 +94,22 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
 
     private fun sendMeldingerOppTilEgenAnsatt(): UUID {
         sendSøknadSendt(AKTØR, FØDSELSNUMMER, ORGNR)
-        sendVedtaksperiodeOpprettet(AKTØR, FØDSELSNUMMER, ORGNR, vedtaksperiodeId = VEDTAKSPERIODE_ID)
+        val skjæringstidspunkt = 1.januar
+        val fom = 1.januar
+        val tom = 31.januar
+        sendVedtaksperiodeOpprettet(
+            AKTØR,
+            FØDSELSNUMMER,
+            ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            skjæringstidspunkt = skjæringstidspunkt,
+            fom = fom,
+            tom = tom
+        )
         sendVedtaksperiodeNyUtbetaling(VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID, organisasjonsnummer = ORGNR)
         sendUtbetalingEndret(AKTØR, FØDSELSNUMMER, ORGNR, UTBETALING_ID, "UTBETALING")
-        val godkjenningsmeldingId = sendGodkjenningsbehov(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
+        sendAktivitetsloggNyAktivitet(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, listOf("RV_IM_1"))
+        val godkjenningsmeldingId = sendGodkjenningsbehov(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID, periodeFom = fom, periodeTom = tom, skjæringstidspunkt = skjæringstidspunkt)
         sendPersoninfoløsningComposite(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsningOld(
             hendelseId = godkjenningsmeldingId,

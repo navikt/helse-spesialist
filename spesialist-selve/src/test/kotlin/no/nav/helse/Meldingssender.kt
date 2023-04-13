@@ -77,6 +77,9 @@ internal object Meldingssender {
         organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
         forårsaketAvId: UUID = UUID.randomUUID(),
+        skjæringstidspunkt: LocalDate,
+        fom: LocalDate,
+        tom: LocalDate,
     ): UUID = uuid.also { id ->
         testRapid.sendTestMessage(
             meldingsfabrikk.lagVedtaksperiodeOpprettet(
@@ -86,6 +89,9 @@ internal object Meldingssender {
                 organisasjonsnummer,
                 vedtaksperiodeId,
                 forårsaketAvId,
+                fom,
+                tom,
+                skjæringstidspunkt
             )
         )
     }
@@ -595,6 +601,26 @@ internal object Meldingssender {
             )
         }
     }
+
+    fun sendAktivitetsloggNyAktivitet(
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        vedtaksperiodeId: UUID,
+        varselkoder: List<String> = emptyList(),
+    ): UUID =
+        uuid.also { id ->
+            testRapid.sendTestMessage(
+                meldingsfabrikk.lagAktivitetsloggNyAktivitet(
+                    id,
+                    aktørId,
+                    fødselsnummer,
+                    organisasjonsnummer,
+                    vedtaksperiodeId,
+                    varselkoder
+                )
+            )
+        }
 
     private val meldingsfabrikk get() = Testmeldingfabrikk(FØDSELSNUMMER, AKTØR)
     private val meldingsfabrikkUtenFnr get() = TestmeldingfabrikkUtenFnr()

@@ -18,10 +18,11 @@ import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.Risikovurdering
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
-import no.nav.helse.modell.vedtak.Warning
-import no.nav.helse.modell.vedtak.WarningKilde
+import no.nav.helse.modell.varsel.Varsel
+import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.spesialist.api.graphql.enums.GraphQLUtbetalingstatus
 import no.nav.helse.spesialist.api.graphql.enums.Utbetalingtype
@@ -107,14 +108,11 @@ internal class AutomatiseringTest {
 
     @Test
     fun `vedtaksperiode med warnings er ikke automatiserbar`() {
-        every { warningDaoMock.finnAktiveWarnings(vedtaksperiodeId) } returns listOf(
-            Warning(
-                "8.4 - Uenig i diagnose",
-                WarningKilde.Spesialist,
-                LocalDateTime.now()
-            )
-        )
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), periodetype, sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1.januar, emptyList()), periodeTom = 1.januar) { fail("Denne skal ikke kalles") }
+        val gjeldendeGenerasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
+        gjeldendeGenerasjon.håndter(Varsel(UUID.randomUUID(), "RV_IM_1", LocalDateTime.now(), vedtaksperiodeId))
+        val vedtaksperiode = Vedtaksperiode(vedtaksperiodeId, gjeldendeGenerasjon)
+        val sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1.januar, listOf(vedtaksperiode))
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), periodetype, sykefraværstilfelle = sykefraværstilfelle, periodeTom = 31.januar) { fail("Denne skal ikke kalles") }
         verify { automatiseringDaoMock.manuellSaksbehandling(any(), any(), any(), any()) }
     }
 

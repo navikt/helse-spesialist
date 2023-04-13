@@ -15,6 +15,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.Meldingssender
+import no.nav.helse.Meldingssender.sendAktivitetsloggNyAktivitet
 import no.nav.helse.Meldingssender.sendArbeidsforholdløsningOld
 import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendEgenAnsattløsningOld
@@ -219,17 +220,22 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun settOppBruker(orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList()): UUID {
+        val fom = 1.januar
+        val tom = 31.januar
+        val skjæringstidspunkt = 1.januar
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_MED_WARNINGS
         sendSøknadSendt(AKTØR, FØDSELSNUMMER, ORGNR)
-        sendVedtaksperiodeOpprettet(AKTØR, FØDSELSNUMMER, ORGNR, vedtaksperiodeId = VEDTAKSPERIODE_ID)
+        sendVedtaksperiodeOpprettet(AKTØR, FØDSELSNUMMER, ORGNR, vedtaksperiodeId = VEDTAKSPERIODE_ID, fom = fom, tom = tom, skjæringstidspunkt = skjæringstidspunkt)
         sendVedtaksperiodeNyUtbetaling(VEDTAKSPERIODE_ID, organisasjonsnummer = ORGNR)
+        sendAktivitetsloggNyAktivitet(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, listOf("RV_IM_1"))
         sendUtbetalingEndret(AKTØR, FØDSELSNUMMER, ORGNR, UTBETALING_ID, "UTBETALING")
         val godkjenningsbehovId = sendGodkjenningsbehov(
             organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID,
-            periodeFom = 1.januar,
-            periodeTom = 31.januar,
+            periodeFom = fom,
+            periodeTom = tom,
+            skjæringstidspunkt = skjæringstidspunkt,
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold
         )
         sendPersoninfoløsningComposite(godkjenningsbehovId, ORGNR, VEDTAKSPERIODE_ID)
@@ -491,7 +497,15 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     ): UUID {
         every { snapshotClient.hentSnapshot(fødselsnummer) } returns snapshot
         sendSøknadSendt(AKTØR, FØDSELSNUMMER, ORGNR)
-        sendVedtaksperiodeOpprettet(AKTØR, FØDSELSNUMMER, ORGNR, vedtaksperiodeId)
+        sendVedtaksperiodeOpprettet(
+            AKTØR,
+            FØDSELSNUMMER,
+            ORGNR,
+            vedtaksperiodeId,
+            skjæringstidspunkt = 1.januar,
+            fom = 1.januar,
+            tom = 31.januar
+        )
         sendVedtaksperiodeNyUtbetaling(vedtaksperiodeId, utbetalingId, ORGNR)
         sendUtbetalingEndret(AKTØR, FØDSELSNUMMER, ORGNR, utbetalingId, "UTBETALING")
         val godkjenningsmeldingId = sendGodkjenningsbehov(
