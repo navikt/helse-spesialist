@@ -29,6 +29,7 @@ class MsGraphClient(
             accept(ContentType.parse("application/json"))
             header("ConsistencyLevel", "eventual")
         }
+
         val responseNode = objectMapper.readTree(response.bodyAsText())
         return (responseNode["@odata.count"].asText() == "1").also { harTilgang ->
             if (harTilgang) {
