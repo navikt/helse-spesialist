@@ -119,6 +119,25 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `finn skjæringstidspunkt`() {
+        generasjonDao.opprettFor(UUID.randomUUID(), VEDTAKSPERIODE_ID, UUID.randomUUID(), 1.januar, Periode(1.januar, 31.januar))
+        val skjæringstidspunkt = generasjonDao.finnSkjæringstidspunktFor(VEDTAKSPERIODE_ID)
+        assertEquals(1.januar, skjæringstidspunkt)
+    }
+
+    @Test
+    fun `finn skjæringstidspunkt for siste generasjon`() {
+        generasjonDao.opprettFor(UUID.randomUUID(), VEDTAKSPERIODE_ID, UUID.randomUUID(), 1.januar, Periode(1.januar, 31.januar))
+        generasjonDao.låsFor(VEDTAKSPERIODE_ID, UUID.randomUUID())
+        val generasjonId = UUID.randomUUID()
+        generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE_ID, UUID.randomUUID(), 1.januar, Periode(1.januar, 31.januar))
+        generasjonDao.oppdaterSykefraværstilfelle(generasjonId, 2.januar, Periode(2.januar, 31.januar))
+
+        val skjæringstidspunkt = generasjonDao.finnSkjæringstidspunktFor(VEDTAKSPERIODE_ID)
+        assertEquals(2.januar, skjæringstidspunkt)
+    }
+
+    @Test
     fun `kan sette utbetaling_id for siste generasjon hvis den er åpen`() {
         val generasjonId = UUID.randomUUID()
         generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE_ID, UUID.randomUUID(), 1.januar, Periode(1.januar, 31.januar))

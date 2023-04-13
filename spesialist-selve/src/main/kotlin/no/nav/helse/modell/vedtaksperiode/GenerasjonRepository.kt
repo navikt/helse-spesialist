@@ -30,6 +30,11 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
         return dao.finnVedtaksperiodeIderFor(fødselsnummer)
     }
 
+    internal fun skjæringstidspunktFor(vedtaksperiodeId: UUID): LocalDate {
+        return dao.finnSkjæringstidspunktFor(vedtaksperiodeId)
+            ?: throw IllegalStateException("Forventer å finne skjæringstidspunkt for vedtaksperiodeId=$vedtaksperiodeId")
+    }
+
     override fun førsteGenerasjonOpprettet(
         generasjonId: UUID,
         vedtaksperiodeId: UUID,

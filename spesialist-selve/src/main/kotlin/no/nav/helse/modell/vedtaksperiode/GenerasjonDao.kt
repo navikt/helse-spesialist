@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
+import kotliquery.Query
 import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -31,16 +32,26 @@ class GenerasjonDao(private val dataSource: DataSource) {
         }
     }
 
+    internal fun finnSkjæringstidspunktFor(vedtaksperiodeId: UUID): LocalDate? {
+        return sessionOf(dataSource).use { session ->
+            session.run(finnSiste(vedtaksperiodeId).map { it.localDate("skjæringstidspunkt") }.asSingle)
+        }
+    }
+
     internal fun finnSisteFor(vedtaksperiodeId: UUID): Generasjon? {
+        return sessionOf(dataSource).use { session ->
+            session.run(finnSiste(vedtaksperiodeId).map(::toGenerasjon).asSingle)
+        }
+    }
+
+    private fun finnSiste(vedtaksperiodeId: UUID): Query {
         @Language("PostgreSQL")
         val query = """
             SELECT id, unik_id, vedtaksperiode_id, utbetaling_id, låst, skjæringstidspunkt, fom, tom 
             FROM selve_vedtaksperiode_generasjon 
             WHERE vedtaksperiode_id = ? ORDER BY id DESC;
             """
-        return sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, vedtaksperiodeId).map(::toGenerasjon).asSingle)
-        }
+        return queryOf(query, vedtaksperiodeId)
     }
 
     internal fun alleFor(utbetalingId: UUID): List<Generasjon> {
