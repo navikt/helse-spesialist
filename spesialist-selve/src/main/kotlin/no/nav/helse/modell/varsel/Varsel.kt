@@ -123,6 +123,8 @@ internal class Varsel(
             return find { it.varselkode == varsel.varselkode }
         }
 
+        internal fun List<Varsel>.forhindrerAutomatisering() = any { it.status in listOf(VURDERT, AKTIV) }
+
         internal fun JsonNode.varsler(): List<Varsel> {
             return this
                 .filter { it["nivå"].asText() == "VARSEL" && it["varselkode"]?.asText() != null }

@@ -108,17 +108,17 @@ internal class Automatisering(
         val vedtaksperiodensUtbetaling = snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId)
         val warnings = warningDao.finnAktiveWarnings(vedtaksperiodeId)
         val dedupliserteWarnings = warnings.distinct()
-        val harAktiveVarsler = sykefraværstilfelle.harAktiveVarsler(periodeTom)
+        val forhindrerAutomatisering = sykefraværstilfelle.forhindrerAutomatisering(periodeTom)
         val harWarnings = dedupliserteWarnings.isNotEmpty()
         when {
-            !harAktiveVarsler && harWarnings -> sikkerLogg.info(
+            !forhindrerAutomatisering && harWarnings -> sikkerLogg.info(
                 "Nye varsler mener at perioden kan automatiseres, mens warnings er uenig. Gjelder {}, {}, {}, {}.",
                 kv("fødselsnummer", fødselsnummer),
                 kv("vedtaksperiodeId", vedtaksperiodeId),
                 kv("utbetalingId", utbetalingId),
                 kv("utbetalingstype", vedtaksperiodensUtbetaling?.typeEnum?.name)
             )
-            harAktiveVarsler && !harWarnings -> sikkerLogg.info(
+            forhindrerAutomatisering && !harWarnings -> sikkerLogg.info(
                 "Nye varsler mener at perioden ikke kan automatiseres, mens warnings er uenig. Gjelder {}, {}, {}, {}.",
                 kv("fødselsnummer", fødselsnummer),
                 kv("vedtaksperiodeId", vedtaksperiodeId),
@@ -126,7 +126,7 @@ internal class Automatisering(
                 kv("utbetalingstype", vedtaksperiodensUtbetaling?.typeEnum?.name)
             )
             else -> sikkerLogg.info(
-                "Nye varsler og warnings er enige om at perioden ${if(harAktiveVarsler) "ikke " else ""}kan automatiseres. Gjelder {}, {}, {}, {}.",
+                "Nye varsler og warnings er enige om at perioden ${if(forhindrerAutomatisering) "ikke " else ""}kan automatiseres. Gjelder {}, {}, {}, {}.",
                 kv("fødselsnummer", fødselsnummer),
                 kv("vedtaksperiodeId", vedtaksperiodeId),
                 kv("utbetalingId", utbetalingId),

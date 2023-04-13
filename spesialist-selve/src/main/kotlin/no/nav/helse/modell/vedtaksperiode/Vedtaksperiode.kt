@@ -24,8 +24,8 @@ internal class Vedtaksperiode(
         return gjeldendeGenerasjon.tilhører(dato)
     }
 
-    private fun harAktiveVarsler(): Boolean {
-        return gjeldendeGenerasjon.harAktiveVarsler()
+    private fun forhindrerAutomatisering(): Boolean {
+        return gjeldendeGenerasjon.forhindrerAutomatisering()
     }
 
     private fun håndter(varsler: List<Varsel>) {
@@ -62,8 +62,8 @@ internal class Vedtaksperiode(
             }
         }
 
-        internal fun List<Vedtaksperiode>.harAktiveVarsler(tilOgMed: LocalDate): Boolean {
-            return this.filter { it.tilhører(tilOgMed) }.any { it.harAktiveVarsler() }
+        internal fun List<Vedtaksperiode>.forhindrerAutomatisering(tilOgMed: LocalDate): Boolean {
+            return this.filter { it.tilhører(tilOgMed) }.any { it.forhindrerAutomatisering() }
         }
 
         internal fun List<Vedtaksperiode>.håndter(varsler: List<Varsel>) {

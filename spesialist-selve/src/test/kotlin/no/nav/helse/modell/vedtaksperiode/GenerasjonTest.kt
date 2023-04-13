@@ -174,14 +174,14 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         generasjon.registrer(generasjonRepository, varselRepository)
         generasjon.opprettFørste(UUID.randomUUID())
         generasjon.håndter(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
-        assertTrue(generasjon.harAktiveVarsler())
+        assertTrue(generasjon.forhindrerAutomatisering())
     }
 
     @Test
     fun `generasjon har ikke aktive varsler`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon = generasjon(vedtaksperiodeId = vedtaksperiodeId)
-        assertFalse(generasjon.harAktiveVarsler())
+        assertFalse(generasjon.forhindrerAutomatisering())
     }
 
     @Test
@@ -193,7 +193,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         generasjon.håndter(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
         generasjon.håndter(Varsel(UUID.randomUUID(), "SB_EX_2", LocalDateTime.now(), vedtaksperiodeId))
         generasjon.håndterGodkjentVarsel("SB_EX_2", "En ident", varselRepository)
-        assertTrue(generasjon.harAktiveVarsler())
+        assertTrue(generasjon.forhindrerAutomatisering())
     }
 
     @Test

@@ -8,6 +8,7 @@ import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.Varsel.Companion.avvisAlleFor
 import no.nav.helse.modell.varsel.Varsel.Companion.finnEksisterendeVarsel
 import no.nav.helse.modell.varsel.Varsel.Companion.flyttVarslerFor
+import no.nav.helse.modell.varsel.Varsel.Companion.forhindrerAutomatisering
 import no.nav.helse.modell.varsel.Varsel.Companion.godkjennAlleFor
 import no.nav.helse.modell.varsel.Varsel.Companion.godkjennFor
 import no.nav.helse.modell.varsel.VarselRepository
@@ -41,8 +42,8 @@ internal class Generasjon private constructor(
 
     internal fun tilhører(dato: LocalDate): Boolean = periode.tom() <= dato
 
-    internal fun harAktiveVarsler(): Boolean {
-        return varsler.any { it.erAktiv() }
+    internal fun forhindrerAutomatisering(): Boolean {
+        return varsler.forhindrerAutomatisering()
     }
 
     internal fun håndterTidslinjeendring(fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate, hendelseId: UUID) {

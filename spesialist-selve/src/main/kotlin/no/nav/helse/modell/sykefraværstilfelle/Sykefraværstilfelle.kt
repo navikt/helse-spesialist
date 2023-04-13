@@ -4,7 +4,7 @@ import java.time.LocalDate
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode.Companion.deaktiver
-import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode.Companion.harAktiveVarsler
+import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode.Companion.forhindrerAutomatisering
 import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode.Companion.håndter
 
 internal class Sykefraværstilfelle(
@@ -13,8 +13,8 @@ internal class Sykefraværstilfelle(
     private val vedtaksperioder: List<Vedtaksperiode>
 ) {
 
-    internal fun harAktiveVarsler(tilOgMed: LocalDate): Boolean {
-        return vedtaksperioder.harAktiveVarsler(tilOgMed)
+    internal fun forhindrerAutomatisering(tilOgMed: LocalDate): Boolean {
+        return vedtaksperioder.forhindrerAutomatisering(tilOgMed)
     }
 
     internal fun håndter(varsel: Varsel) {

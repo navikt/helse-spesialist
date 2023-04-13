@@ -7,7 +7,7 @@ import no.nav.helse.januar
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
-import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode.Companion.harAktiveVarsler
+import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode.Companion.forhindrerAutomatisering
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -24,7 +24,7 @@ internal class SykefraværstilfelleTest {
         gjeldendeGenerasjon2.håndterTidslinjeendring(1.februar, 28.februar, 1.februar, UUID.randomUUID())
         val vedtaksperiode1 = Vedtaksperiode(vedtaksperiodeId1, gjeldendeGenerasjon1)
         val vedtaksperiode2 = Vedtaksperiode(vedtaksperiodeId2, gjeldendeGenerasjon2)
-        assertFalse(listOf(vedtaksperiode1, vedtaksperiode2).harAktiveVarsler(28.februar))
+        assertFalse(listOf(vedtaksperiode1, vedtaksperiode2).forhindrerAutomatisering(28.februar))
     }
     @Test
     fun `har ikke aktive varsler når generasjonene har utbetalingId men ikke fom`() {
@@ -37,7 +37,7 @@ internal class SykefraværstilfelleTest {
         gjeldendeGenerasjon2.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
         val vedtaksperiode1 = Vedtaksperiode(vedtaksperiodeId1, gjeldendeGenerasjon1)
         val vedtaksperiode2 = Vedtaksperiode(vedtaksperiodeId2, gjeldendeGenerasjon2)
-        assertFalse(listOf(vedtaksperiode1, vedtaksperiode2).harAktiveVarsler(28.februar))
+        assertFalse(listOf(vedtaksperiode1, vedtaksperiode2).forhindrerAutomatisering(28.februar))
     }
     @Test
     fun `har aktive varsler`() {
@@ -50,7 +50,7 @@ internal class SykefraværstilfelleTest {
         val vedtaksperiode1 = Vedtaksperiode(vedtaksperiodeId1, gjeldendeGenerasjon1)
         val vedtaksperiode2 = Vedtaksperiode(vedtaksperiodeId2, gjeldendeGenerasjon2)
         gjeldendeGenerasjon2.håndter(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId2))
-        assertTrue(listOf(vedtaksperiode1, vedtaksperiode2).harAktiveVarsler(28.februar))
+        assertTrue(listOf(vedtaksperiode1, vedtaksperiode2).forhindrerAutomatisering(28.februar))
     }
 
     private fun generasjon(vedtaksperiodeId: UUID = UUID.randomUUID()) = Generasjon(

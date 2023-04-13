@@ -3,6 +3,7 @@ package no.nav.helse.modell.varsel
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.modell.varsel.Varsel.Companion.finnEksisterendeVarsel
+import no.nav.helse.modell.varsel.Varsel.Companion.forhindrerAutomatisering
 import no.nav.helse.modell.varsel.Varsel.Status.AKTIV
 import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
 import no.nav.helse.modell.varsel.Varsel.Status.VURDERT
@@ -173,6 +174,20 @@ internal class VarselTest {
         val enGenerasjonId = UUID.randomUUID()
         varsel.deaktiver(enGenerasjonId)
         assertEquals(0, reaktiverteVarsler.size)
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Varsel.Status::class, names = ["AKTIV", "VURDERT"], mode = EnumSource.Mode.EXCLUDE)
+    fun `forhindrer ikke automatisering`(status: Varsel.Status) {
+        val varsel = nyttVarsel(status = status)
+        assertFalse(listOf(varsel).forhindrerAutomatisering())
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Varsel.Status::class, names = ["AKTIV", "VURDERT"])
+    fun `forhindrer automatisering`(status: Varsel.Status) {
+        val varsel = nyttVarsel(status = status)
+        assertTrue(listOf(varsel).forhindrerAutomatisering())
     }
 
     @Test
