@@ -29,9 +29,7 @@ class MsGraphClient(
             accept(ContentType.parse("application/json"))
             header("ConsistencyLevel", "eventual")
         }
-        val responseText = response.bodyAsText()
-        sikkerlogger.info("respons fra MS Graph: $responseText")
-        val responseNode = objectMapper.readTree(responseText)
+        val responseNode = objectMapper.readTree(response.bodyAsText())
         return (responseNode["@odata.count"].asText() == "1").also { harTilgang ->
             if (harTilgang) {
                 val hvem = responseNode["value"].first().path("displayName").asText()
