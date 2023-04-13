@@ -2,6 +2,12 @@ package no.nav.helse
 
 import io.prometheus.client.Counter
 import io.prometheus.client.Summary
+import java.time.temporal.ChronoUnit.MILLIS
+import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
+import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.River
+import no.nav.helse.rapids_rivers.asLocalDateTime
 
 internal val overstyringsteller = Counter.build("overstyringer", "Teller antall overstyringer")
     .labelNames("opplysningstype", "type")
@@ -27,6 +33,10 @@ private val registrerTidsbrukForHendelse = Summary.build("command_tidsbruk", "M�
     .labelNames("command")
     .register()
 
+private val registrerTidsbrukForBehov = Summary.build("behov_tidsbruk", "Måler hvor lang tid et behov tok å løse i ms")
+    .labelNames("behov")
+    .register()
+
 internal fun tellWarning(warning: String) = varselteller.labels("WARN", warning).inc()
 
 internal fun tellVarsel(varselkode: String) = varselteller.labels("WARN", varselkode).inc()
@@ -36,3 +46,27 @@ internal fun tellWarningInaktiv(warning: String) = inaktiveVarslerteller.labels(
 internal fun tellInaktivtVarsel(varselkode: String) = inaktiveVarslerteller.labels("WARN", varselkode).inc()
 
 internal fun registrerTidsbrukForHendelse(command: String, tid: Long) = registrerTidsbrukForHendelse.labels(command).observe(tid.toDouble())
+
+internal class MetrikkRiver(rapidsConnection: RapidsConnection) : River.PacketListener {
+    init {
+        River(rapidsConnection).apply {
+            validate {
+                it.demandValue("@event_name", "behov")
+                it.demandKey("@final")
+                it.demandKey("@behov")
+                it.demandKey("system_participating_services")
+                it.require("@besvart") { message -> message.asLocalDateTime() }
+            }
+        }
+    }
+    override fun onPacket(packet: JsonMessage, context: MessageContext) {
+        val besvart = packet["@besvart"].asLocalDateTime()
+        val opprettet = packet["system_participating_services"][0].let { it["time"].asLocalDateTime() }
+        val delay = MILLIS.between(opprettet, besvart)
+        val behov = packet["@behov"].asText()
+
+        registrerTidsbrukForBehov.labels(behov).observe(delay.toDouble())
+    }
+
+}
+

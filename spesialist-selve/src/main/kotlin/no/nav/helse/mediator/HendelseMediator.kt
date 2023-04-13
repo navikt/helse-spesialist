@@ -7,6 +7,7 @@ import java.time.temporal.ChronoUnit.MILLIS
 import java.util.UUID
 import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.MetrikkRiver
 import no.nav.helse.mediator.api.Arbeidsgiver
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdKafkaDto
@@ -132,6 +133,7 @@ internal class HendelseMediator(
             Varseldefinisjon.VarseldefinisjonRiver(it, varselRepository)
             VedtaksperiodeNyUtbetaling.River(it, this)
             Sykefraværstilfeller.River(it, this)
+            MetrikkRiver(it)
         }
     }
 
