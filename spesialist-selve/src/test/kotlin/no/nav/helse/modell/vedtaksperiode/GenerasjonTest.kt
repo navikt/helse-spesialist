@@ -25,6 +25,7 @@ import no.nav.helse.modell.varsel.Varselkode.SB_EX_3
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterAvvist
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterGodkjent
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterOppdateringer
+import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverTotrinnsvurdering
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -662,6 +663,28 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     }
 
     @Test
+    fun `krever totrinnsvurdering hvis generasjonen har medlemskapsvarsel`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjon1 = generasjonMedVarsel(1.februar, 28.februar, vedtaksperiodeId, "RV_MV_1")
+        assertTrue(listOf(generasjon1).kreverTotrinnsvurdering(vedtaksperiodeId))
+    }
+
+    @Test
+    fun `krever totrinnsvurdering hvis en generasjon av flere har medlemskapsvarsel`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjon1 = generasjonMedVarsel(1.februar, 28.februar, vedtaksperiodeId, "RV_MV_1")
+        val generasjon2 = generasjon(fom = 1.januar, tom = 31.januar, skjæringstidspunkt = 1.januar)
+        assertTrue(listOf(generasjon1, generasjon2).kreverTotrinnsvurdering(vedtaksperiodeId))
+    }
+
+    @Test
+    fun `krever ikke totrinnsvurdering hvis generasjonen ikke har medlemskapsvarsel`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjon1 = generasjon(vedtaksperiodeId)
+        assertFalse(listOf(generasjon1).kreverTotrinnsvurdering(vedtaksperiodeId))
+    }
+
+    @Test
     fun `referential equals`() {
         val generasjon = generasjon(UUID.randomUUID(), UUID.randomUUID())
         assertEquals(generasjon, generasjon)
@@ -777,9 +800,9 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         skjæringstidspunkt = skjæringstidspunkt
     )
 
-    private fun generasjonMedVarsel(fom: LocalDate, tom: LocalDate, vedtaksperiodeId: UUID = UUID.randomUUID()): Generasjon {
+    private fun generasjonMedVarsel(fom: LocalDate, tom: LocalDate, vedtaksperiodeId: UUID = UUID.randomUUID(), varselkode: String = "SB_EX_1"): Generasjon {
         return generasjon(vedtaksperiodeId = vedtaksperiodeId, fom = fom, tom = tom).also {
-            it.håndter(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
+            it.håndter(Varsel(UUID.randomUUID(), varselkode, LocalDateTime.now(), vedtaksperiodeId))
             it.registrer(observer)
         }
     }

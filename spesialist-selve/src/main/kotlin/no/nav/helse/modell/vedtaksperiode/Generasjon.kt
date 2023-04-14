@@ -10,7 +10,7 @@ import no.nav.helse.modell.varsel.Varsel.Companion.finnEksisterendeVarsel
 import no.nav.helse.modell.varsel.Varsel.Companion.flyttVarslerFor
 import no.nav.helse.modell.varsel.Varsel.Companion.forhindrerAutomatisering
 import no.nav.helse.modell.varsel.Varsel.Companion.godkjennAlleFor
-import org.slf4j.Logger
+import no.nav.helse.modell.varsel.Varsel.Companion.inneholderMedlemskapsvarsel
 import org.slf4j.LoggerFactory
 
 internal class Generasjon private constructor(
@@ -182,8 +182,16 @@ internal class Generasjon private constructor(
         return result
     }
 
+    private fun kreverTotrinnsvurdering(): Boolean {
+        val inneholderMedlemskapsvarsel = varsler.inneholderMedlemskapsvarsel()
+        logg.info("$this harMedlemskapsvarsel: $inneholderMedlemskapsvarsel")
+        return inneholderMedlemskapsvarsel
+    }
+
     internal companion object {
-        private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
+
+        private val logg = LoggerFactory.getLogger(Generasjon::class.java)
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
         private fun Generasjon.opprettNeste(generasjonId: UUID, hendelseId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate): Generasjon {
             val nyGenerasjon = Generasjon(generasjonId, this.vedtaksperiodeId, null, false, skjæringstidspunkt, Periode(fom, tom), emptySet())
@@ -244,6 +252,10 @@ internal class Generasjon private constructor(
             return this.filter { it.tilhører(tilOgMed) }.any { it.forhindrerAutomatisering() }
         }
 
+        internal fun List<Generasjon>.kreverTotrinnsvurdering(vedtaksperiodeId: UUID): Boolean {
+            return overlapperMedEllerTidligereEnn(vedtaksperiodeId).any { it.kreverTotrinnsvurdering() }
+        }
+
         internal fun List<Generasjon>.deaktiver(varsel: Varsel) {
             find { varsel.erRelevantFor(it.vedtaksperiodeId) }?.håndterDeaktivertVarsel(varsel)
         }
@@ -259,7 +271,6 @@ internal class Generasjon private constructor(
                 it.håndterAvvistAvSaksbehandler(saksbehandlerIdent)
             }
         }
-
         private fun List<Generasjon>.overlapperMedEllerTidligereEnn(vedtaksperiodeId: UUID): List<Generasjon> {
             val gjeldende = find { it.vedtaksperiodeId == vedtaksperiodeId } ?: return emptyList()
             return sortedByDescending { it.periode.tom() }

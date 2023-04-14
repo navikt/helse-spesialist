@@ -1,9 +1,9 @@
 package no.nav.helse.modell.kommando
 
 import java.util.UUID
-import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
+import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import org.slf4j.LoggerFactory
@@ -11,10 +11,10 @@ import org.slf4j.LoggerFactory
 internal class TrengerTotrinnsvurderingCommand(
     private val fødselsnummer: String,
     private val vedtaksperiodeId: UUID,
-    private val warningDao: WarningDao,
     private val oppgaveMediator: OppgaveMediator,
     private val overstyringDao: OverstyringDao,
     private val totrinnsvurderingMediator: TotrinnsvurderingMediator,
+    private val sykefraværstilfelle: Sykefraværstilfelle
 ) : Command {
 
     private companion object {
@@ -22,10 +22,11 @@ internal class TrengerTotrinnsvurderingCommand(
     }
 
     override fun execute(context: CommandContext): Boolean {
-        val harMedlemskapsvarsel = harMedlemskapsVarsel()
+        val kreverTotrinnsvurdering = sykefraværstilfelle.kreverTotrinnsvurdering(vedtaksperiodeId)
+        val vedtaksperiodeHarFerdigstiltOppgave = oppgaveMediator.harFerdigstiltOppgave(vedtaksperiodeId)
         val overstyringer = finnOverstyringerMedType()
 
-        if (harMedlemskapsvarsel || overstyringer.isNotEmpty()) {
+        if ((kreverTotrinnsvurdering && !vedtaksperiodeHarFerdigstiltOppgave) || overstyringer.isNotEmpty()) {
             logg.info("Vedtaksperioden: $vedtaksperiodeId trenger totrinnsvurdering")
             val totrinnsvurdering = totrinnsvurderingMediator.opprett(vedtaksperiodeId)
 
@@ -41,17 +42,6 @@ internal class TrengerTotrinnsvurderingCommand(
         }
 
         return true
-    }
-
-    private fun harMedlemskapsVarsel(): Boolean {
-        val medlemSkapVarsel = "Vurder lovvalg og medlemskap"
-        val harMedlemskapsVarsel =
-            warningDao.finnAktiveWarningsMedMelding(vedtaksperiodeId, medlemSkapVarsel).isNotEmpty()
-        val vedtaksperiodeHarFerdigstiltOppgave = oppgaveMediator.harFerdigstiltOppgave(vedtaksperiodeId)
-
-        logg.info("Vedtaksperioden: $vedtaksperiodeId harMedlemskapsVarsel: $harMedlemskapsVarsel")
-
-        return harMedlemskapsVarsel && !vedtaksperiodeHarFerdigstiltOppgave
     }
 
     // Overstyringer og Revurderinger

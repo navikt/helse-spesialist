@@ -232,10 +232,10 @@ internal class Godkjenningsbehov(
         TrengerTotrinnsvurderingCommand(
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
-            warningDao = warningDao,
             oppgaveMediator = oppgaveMediator,
             overstyringDao = overstyringDao,
-            totrinnsvurderingMediator = totrinnsvurderingMediator
+            totrinnsvurderingMediator = totrinnsvurderingMediator,
+            sykefraværstilfelle = sykefraværstilfelle
         ),
         PersisterPeriodehistorikkCommand(
             vedtaksperiodeId = vedtaksperiodeId,

@@ -5,13 +5,14 @@ import io.mockk.mockk
 import io.mockk.verify
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.modell.WarningDao
+import no.nav.helse.januar
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
+import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
-import no.nav.helse.modell.vedtak.Warning
-import no.nav.helse.modell.vedtak.WarningKilde
+import no.nav.helse.modell.varsel.Varsel
+import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -25,19 +26,23 @@ internal class TrengerTotrinnsvurderingCommandTest {
         private val FØDSELSNUMMER = "fnr"
     }
 
-    private val warningDao = mockk<WarningDao>(relaxed = true)
     private val totrinnsvurderingMediator = mockk<TotrinnsvurderingMediator>(relaxed = true)
     private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
     private val overstyringDao = mockk<OverstyringDao>(relaxed = true)
     private lateinit var context: CommandContext
 
+    val sykefraværstilfelle = Sykefraværstilfelle(
+        FØDSELSNUMMER,
+        1.januar,
+        listOf(Generasjon(UUID.randomUUID(), VEDTAKSPERIODE_ID, 1.januar, 31.januar, 1.januar))
+    )
     private val command = TrengerTotrinnsvurderingCommand(
         fødselsnummer = FØDSELSNUMMER,
         vedtaksperiodeId = VEDTAKSPERIODE_ID,
-        warningDao = warningDao,
         oppgaveMediator = oppgaveMediator,
         overstyringDao = overstyringDao,
-        totrinnsvurderingMediator = totrinnsvurderingMediator
+        totrinnsvurderingMediator = totrinnsvurderingMediator,
+        sykefraværstilfelle = sykefraværstilfelle
     )
 
     @BeforeEach
@@ -56,13 +61,7 @@ internal class TrengerTotrinnsvurderingCommandTest {
 
     @Test
     fun `Oppretter totrinssvurdering dersom vedtaksperioden har varsel for lovvalg og medlemskap, og ikke har hatt oppgave som har vært ferdigstilt før`() {
-        val testWarningVurderMedlemskap = "Vurder lovvalg og medlemskap"
-        every {
-            warningDao.finnAktiveWarningsMedMelding(
-                VEDTAKSPERIODE_ID,
-                testWarningVurderMedlemskap
-            )
-        } returns listOf(Warning(testWarningVurderMedlemskap, WarningKilde.Spleis, LocalDateTime.now()))
+        sykefraværstilfelle.håndter(Varsel(UUID.randomUUID(), "RV_MV_1", LocalDateTime.now(), VEDTAKSPERIODE_ID))
         every { oppgaveMediator.harFerdigstiltOppgave(VEDTAKSPERIODE_ID) } returns false
 
         assertTrue(command.execute(context))

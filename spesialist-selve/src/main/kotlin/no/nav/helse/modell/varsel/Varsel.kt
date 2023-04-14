@@ -118,6 +118,9 @@ internal class Varsel(
         internal fun List<Varsel>.finnEksisterendeVarsel(varsel: Varsel): Varsel? {
             return find { it.varselkode == varsel.varselkode }
         }
+        internal fun List<Varsel>.inneholderMedlemskapsvarsel(): Boolean {
+            return any { it.varselkode == "RV_MV_1" }
+        }
 
         internal fun List<Varsel>.forhindrerAutomatisering() = any { it.status in listOf(VURDERT, AKTIV) }
 

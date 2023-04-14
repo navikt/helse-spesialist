@@ -9,6 +9,7 @@ import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.forhindrerAutomat
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndter
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterAvvist
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterGodkjent
+import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverTotrinnsvurdering
 
 internal class Sykefraværstilfelle(
     private val fødselsnummer: String,
@@ -34,5 +35,9 @@ internal class Sykefraværstilfelle(
 
     internal fun håndterAvvist(saksbehandlerIdent: String, vedtaksperiodeId: UUID) {
         gjeldendeGenerasjoner.håndterAvvist(saksbehandlerIdent, vedtaksperiodeId)
+    }
+
+    fun kreverTotrinnsvurdering(vedtaksperiodeId: UUID): Boolean {
+        return gjeldendeGenerasjoner.kreverTotrinnsvurdering(vedtaksperiodeId)
     }
 }
