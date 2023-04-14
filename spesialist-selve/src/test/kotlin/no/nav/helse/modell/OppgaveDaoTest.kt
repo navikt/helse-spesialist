@@ -19,7 +19,6 @@ import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
@@ -312,49 +311,6 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `setter ikke trenger Totrinnsvurdering`() {
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode()
-        opprettOppgave(contextId = CONTEXT_ID)
-        opprettSaksbehandler()
-
-        assertNotEquals(null, oppgaveDao.setTrengerTotrinnsvurdering(VEDTAKSPERIODE))
-    }
-
-    @Test
-    fun `setter trenger Totrinnsvurdering`() {
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode()
-        opprettOppgave(contextId = CONTEXT_ID)
-        opprettSaksbehandler()
-
-        assertFalse(trengerTotrinnsvurdering())
-
-        oppgaveDao.setTrengerTotrinnsvurdering(VEDTAKSPERIODE)
-
-        assertTrue(trengerTotrinnsvurdering())
-    }
-
-    @Test
-    fun `Finner totrinnsvurderingsfelter på oppgave dersom er_totrinnsoppgave=true`() {
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode()
-        opprettOppgave(contextId = CONTEXT_ID)
-        opprettSaksbehandler()
-
-        oppgaveDao.setTrengerTotrinnsvurdering(VEDTAKSPERIODE)
-        val totrinnsfelter = oppgaveDao.finnTotrinnsvurderingFraLegacy(oppgaveId)
-        requireNotNull(totrinnsfelter)
-        assertFalse(totrinnsfelter.erRetur)
-        assertEquals(VEDTAKSPERIODE, totrinnsfelter.vedtaksperiodeId)
-        assertNull(totrinnsfelter.saksbehandler)
-        assertNull(totrinnsfelter.beslutter)
-    }
-
-    @Test
     fun `Finner ikke totrinnsvurderingsfelter på oppgave dersom er_totrinnsoppgave=false`() {
         opprettPerson()
         opprettArbeidsgiver()
@@ -364,21 +320,6 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
 
         val totrinnsfelter = oppgaveDao.finnTotrinnsvurderingFraLegacy(oppgaveId)
         assertNull(totrinnsfelter)
-    }
-
-    @Test
-    fun `Flipper er_totrinnsoppgave til false`() {
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode()
-        opprettOppgave(contextId = CONTEXT_ID)
-        opprettSaksbehandler()
-        oppgaveDao.setTrengerTotrinnsvurdering(VEDTAKSPERIODE)
-
-        assertTrue(trengerTotrinnsvurdering())
-
-        oppgaveDao.settTotrinnsoppgaveFalse(oppgaveId)
-        assertFalse(trengerTotrinnsvurdering())
     }
 
     @Test
@@ -433,14 +374,6 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         }
         assertEquals(forventetStatus, status)
     }
-
-    private fun trengerTotrinnsvurdering(): Boolean = sessionOf(dataSource).use {
-        it.run(
-            queryOf(
-                "SELECT er_totrinnsoppgave FROM oppgave"
-            ).map { row -> row.boolean("er_totrinnsoppgave") }.asSingle
-        )
-    } ?: false
 
     private fun oppgave() =
         sessionOf(dataSource).use {

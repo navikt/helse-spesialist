@@ -75,15 +75,9 @@ internal fun Route.personApi(
             return@post
         }
 
-        val erBeslutteroppgave = oppgaveDao.erBeslutteroppgave(godkjenning.oppgavereferanse)
         val totrinnsvurdering = totrinnsvurderingMediator.hentAktiv(godkjenning.oppgavereferanse)
 
-        if (erBeslutteroppgave || totrinnsvurdering?.erBeslutteroppgave() == true) {
-            // Midlertidig logging. Slik at vi vet når vi kan skru av totrinnsmerking i Speil
-            if (!oppgaveDao.trengerTotrinnsvurdering(godkjenning.oppgavereferanse)) {
-                log.info("Oppgave ${godkjenning.oppgavereferanse} er merket vha Speil.")
-            }
-
+        if (totrinnsvurdering?.erBeslutteroppgave() == true) {
             if (!tilgangskontroll.harTilgangTil(Gruppe.BESLUTTER) && !erDev()) {
                 call.respondText(
                     "Saksbehandler trenger beslutter-rolle for å kunne utbetale beslutteroppgaver",
@@ -92,7 +86,7 @@ internal fun Route.personApi(
                 return@post
             }
 
-            if ((oppgaveDao.finnTidligereSaksbehandler(godkjenning.oppgavereferanse) == oid || totrinnsvurdering?.saksbehandler == oid) && !erDev()) {
+            if (totrinnsvurdering.saksbehandler == oid && !erDev()) {
                 call.respondText(
                     "Kan ikke beslutte egne oppgaver.",
                     status = HttpStatusCode.Unauthorized
@@ -100,7 +94,7 @@ internal fun Route.personApi(
                 return@post
             }
 
-            if (totrinnsvurdering?.vedtaksperiodeId != null) totrinnsvurderingMediator.settBeslutter(totrinnsvurdering.vedtaksperiodeId, oid)
+            totrinnsvurderingMediator.settBeslutter(totrinnsvurdering.vedtaksperiodeId, oid)
         }
 
         if (godkjenning.godkjent) {

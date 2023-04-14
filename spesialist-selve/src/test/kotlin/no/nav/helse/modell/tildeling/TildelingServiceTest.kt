@@ -4,14 +4,17 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Gruppe
+import no.nav.helse.medTilgangTil
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeTildelt
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
-import no.nav.helse.medTilgangTil
 import no.nav.helse.utenNoenTilganger
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -30,15 +33,17 @@ internal class TildelingServiceTest {
     private val saksbehandlerDao = mockk<SaksbehandlerDao>(relaxed = true)
     private val tildelingDao = mockk<TildelingDao>()
     private val hendelseMediator = mockk<HendelseMediator>(relaxed = true)
+    private val totrinnsvurderingMediator = mockk<TotrinnsvurderingMediator>(relaxed = true)
     private val tildelingService = TildelingService(
         saksbehandlerDao,
         tildelingDao,
-        hendelseMediator
+        hendelseMediator,
+        totrinnsvurderingMediator,
     )
 
     @BeforeEach
     fun setup() {
-        clearMocks(saksbehandlerDao, tildelingDao, hendelseMediator)
+        clearMocks(saksbehandlerDao, tildelingDao, hendelseMediator, totrinnsvurderingMediator)
     }
 
     @Test
@@ -61,8 +66,15 @@ internal class TildelingServiceTest {
     @Test
     fun `får ikke lov å ta sak etter å ha sendt den til beslutter, eller vice versa`() {
         val saksbehandler = UUID.randomUUID()
-        every { hendelseMediator.erBeslutteroppgave(oppgaveref) } returns true
-        every { hendelseMediator.erTidligereSaksbehandler(oppgaveref, saksbehandler) } returns true
+        every { totrinnsvurderingMediator.hentAktiv(oppgaveref) } returns Totrinnsvurdering(
+            vedtaksperiodeId = UUID.randomUUID(),
+            erRetur = false,
+            saksbehandler = saksbehandler,
+            beslutter = null,
+            utbetalingIdRef = null,
+            opprettet = LocalDateTime.now(),
+            oppdatert = null
+        )
 
         assertThrows<IllegalStateException> {
             tildelingService.tildelOppgaveTilSaksbehandler(
@@ -79,8 +91,15 @@ internal class TildelingServiceTest {
     @Test
     fun `får lov å tildele seg beslutteroppgave hvis man er i besluttergruppe`() {
         val saksbehandler = UUID.randomUUID()
-        every { hendelseMediator.erBeslutteroppgave(oppgaveref) } returns true
-        every { hendelseMediator.erTidligereSaksbehandler(oppgaveref, saksbehandler) } returns false
+        every { totrinnsvurderingMediator.hentAktiv(oppgaveref) } returns Totrinnsvurdering(
+            vedtaksperiodeId = UUID.randomUUID(),
+            erRetur = false,
+            saksbehandler = null,
+            beslutter = null,
+            utbetalingIdRef = null,
+            opprettet = LocalDateTime.now(),
+            oppdatert = null
+        )
         every { hendelseMediator.tildelOppgaveTilSaksbehandler(oppgaveref, saksbehandler) } returns true
 
         assertDoesNotThrow {
@@ -98,8 +117,15 @@ internal class TildelingServiceTest {
     @Test
     fun `får ikke lov å tildele seg beslutteroppgave hvis man ikke er i besluttergruppe`() {
         val saksbehandler = UUID.randomUUID()
-        every { hendelseMediator.erBeslutteroppgave(oppgaveref) } returns true
-        every { hendelseMediator.erTidligereSaksbehandler(oppgaveref, saksbehandler) } returns false
+        every { totrinnsvurderingMediator.hentAktiv(oppgaveref) } returns Totrinnsvurdering(
+            vedtaksperiodeId = UUID.randomUUID(),
+            erRetur = false,
+            saksbehandler = UUID.randomUUID(),
+            beslutter = null,
+            utbetalingIdRef = null,
+            opprettet = LocalDateTime.now(),
+            oppdatert = null
+        )
 
         assertThrows<IllegalStateException> {
             tildelingService.tildelOppgaveTilSaksbehandler(

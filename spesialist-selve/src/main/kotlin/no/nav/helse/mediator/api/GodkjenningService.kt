@@ -44,12 +44,7 @@ internal class GodkjenningService(
         val fødselsnummer = hendelseDao.finnFødselsnummer(hendelseId)
         val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(godkjenningDTO.oppgavereferanse)
         val totrinnsvurdering = totrinnsvurderingMediator.hentAktiv(vedtaksperiodeId)
-        val erBeslutteroppgave = oppgaveDao.erBeslutteroppgave(godkjenningDTO.oppgavereferanse)
-        val tidligereSaksbehandler = oppgaveDao.finnTidligereSaksbehandler(godkjenningDTO.oppgavereferanse)
-        val reserverPersonOid: UUID =
-            if (erBeslutteroppgave && tidligereSaksbehandler != null) tidligereSaksbehandler
-            else if (totrinnsvurdering?.erBeslutteroppgave() == true) totrinnsvurdering.saksbehandler!!
-            else oid
+        val reserverPersonOid: UUID = totrinnsvurdering?.saksbehandler ?: oid
         val saksbehandleroverstyringer = overstyringDao.finnAktiveOverstyringer(vedtaksperiodeId)
         val godkjenningMessage = JsonMessage.newMessage("saksbehandler_løsning", mutableMapOf(
             "@forårsaket_av" to mapOf(
@@ -88,7 +83,7 @@ internal class GodkjenningService(
         overstyringDao.ferdigstillOverstyringerForVedtaksperiode(vedtaksperiodeId)
         totrinnsvurderingMediator.ferdigstill(vedtaksperiodeId)
 
-        if ((erBeslutteroppgave || totrinnsvurdering?.erBeslutteroppgave() == true) && godkjenningDTO.godkjent) {
+        if (totrinnsvurdering?.erBeslutteroppgave() == true && godkjenningDTO.godkjent) {
             oppgave.lagrePeriodehistorikk(periodehistorikkDao, oid, PeriodehistorikkType.TOTRINNSVURDERING_ATTESTERT, null)
         }
     }

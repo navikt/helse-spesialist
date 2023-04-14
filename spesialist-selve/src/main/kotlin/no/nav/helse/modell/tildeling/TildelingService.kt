@@ -4,6 +4,7 @@ import java.util.UUID
 import no.nav.helse.Gruppe
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.api.ApiTilgangskontroll
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeTildelt
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
@@ -15,6 +16,7 @@ internal class TildelingService(
     private val saksbehandlerDao: SaksbehandlerDao,
     private val tildelingDao: TildelingDao,
     private val hendelseMediator: HendelseMediator,
+    private val totrinnsvurderingMediator: TotrinnsvurderingMediator,
 ) {
 
     internal fun tildelOppgaveTilSaksbehandler(
@@ -39,15 +41,17 @@ internal class TildelingService(
         }
     }
 
-    private fun kanTildele(oppgaveId: Long, saksbehandlerreferanse: UUID, tilgangskontroll: ApiTilgangskontroll)  {
-        if ("dev-gcp" != System.getenv("NAIS_CLUSTER_NAME") && hendelseMediator.erBeslutteroppgave(oppgaveId)) {
-            check(!hendelseMediator.erTidligereSaksbehandler(oppgaveId, saksbehandlerreferanse)) {
-                "Oppgave er beslutteroppgave, og kan ikke attesteres av samme saksbehandler som sendte til godkjenning"
+    private fun kanTildele(oppgaveId: Long, saksbehandlerreferanse: UUID, tilgangskontroll: ApiTilgangskontroll) {
+        totrinnsvurderingMediator.hentAktiv(oppgaveId)
+            ?.takeIf { "dev-gcp" != System.getenv("NAIS_CLUSTER_NAME") && it.erBeslutteroppgave() }
+            ?.let { totrinnsvurdering ->
+                check(totrinnsvurdering.saksbehandler == saksbehandlerreferanse) {
+                    "Oppgave er beslutteroppgave, og kan ikke attesteres av samme saksbehandler som sendte til godkjenning"
+                }
+                check(tilgangskontroll.harTilgangTil(Gruppe.BESLUTTER)) {
+                    "Saksbehandler har ikke beslutter-tilgang"
+                }
             }
-            check(tilgangskontroll.harTilgangTil(Gruppe.BESLUTTER)) {
-                "Saksbehandler har ikke beslutter-tilgang"
-            }
-        }
     }
 
     internal fun fjernTildelingOgTildelNySaksbehandlerHvisFinnes(oppgaveId: Long, saksbehandlerOid: UUID?, tilgangskontroll: ApiTilgangskontroll) {

@@ -13,7 +13,6 @@ import no.nav.helse.mediator.api.GodkjenningDTO
 import no.nav.helse.mediator.api.GodkjenningService
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.oppgave.OppgaveDao
-import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
@@ -27,7 +26,6 @@ import org.junit.jupiter.api.Test
 
 internal class GodkjenningServiceTest : AbstractE2ETest() {
 
-    private val oppgaveMediatorMock = mockk<OppgaveMediator>(relaxed = true)
     private val reserverpersonDaoMock = mockk<ReservasjonDao>(relaxed = true)
     private val totrinnsvurderingDaoMock = mockk<TotrinnsvurderingDao>(relaxed = true)
     private val periodehistorikkDaoMock = mockk<PeriodehistorikkDao>(relaxed = true)
@@ -83,8 +81,6 @@ internal class GodkjenningServiceTest : AbstractE2ETest() {
         settOppBruker()
         val oppgavereferanse = oppgaveDao.finnOppgaveId(FØDSELSNUMMER)!!
 
-        every { oppgaveMediatorMock.erBeslutteroppgave(oppgavereferanse) } returns false
-        every { oppgaveMediatorMock.finnTidligereSaksbehandler(oppgavereferanse) } returns null
         every { totrinnsvurderingDaoMock.hentAktiv(Testdata.VEDTAKSPERIODE_ID) } returns Totrinnsvurdering(
             vedtaksperiodeId = Testdata.VEDTAKSPERIODE_ID,
             erRetur = false,
@@ -105,8 +101,6 @@ internal class GodkjenningServiceTest : AbstractE2ETest() {
         val oid = UUID.randomUUID()
         settOppBruker()
 
-        every { oppgaveMediatorMock.erBeslutteroppgave(1L) } returns false
-        every { oppgaveMediatorMock.finnTidligereSaksbehandler(1L) } returns null
         every { totrinnsvurderingDaoMock.hentAktiv(Testdata.VEDTAKSPERIODE_ID) } returns null
 
         godkjenningServiceWithMocks.håndter(GodkjenningDTO(1L, true, "saksbehandler", null, null, null), "epost@nav.no", oid)
@@ -119,8 +113,6 @@ internal class GodkjenningServiceTest : AbstractE2ETest() {
         val oid = UUID.randomUUID()
         settOppBruker()
 
-        every { oppgaveMediatorMock.erBeslutteroppgave(1L) } returns false
-        every { oppgaveMediatorMock.finnTidligereSaksbehandler(1L) } returns null
         every { totrinnsvurderingDaoMock.hentAktiv(Testdata.VEDTAKSPERIODE_ID) } returns Totrinnsvurdering(
             vedtaksperiodeId = Testdata.VEDTAKSPERIODE_ID,
             erRetur = false,
@@ -141,8 +133,6 @@ internal class GodkjenningServiceTest : AbstractE2ETest() {
         val oid = UUID.randomUUID()
         settOppBruker()
 
-        every { oppgaveMediatorMock.erBeslutteroppgave(1L) } returns false
-        every { oppgaveMediatorMock.finnTidligereSaksbehandler(1L) } returns null
         every { totrinnsvurderingDaoMock.hentAktiv(Testdata.VEDTAKSPERIODE_ID) } returns Totrinnsvurdering(
             vedtaksperiodeId = Testdata.VEDTAKSPERIODE_ID,
             erRetur = false,

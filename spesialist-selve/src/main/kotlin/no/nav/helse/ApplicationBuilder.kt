@@ -381,6 +381,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             saksbehandlerDao,
             tildelingDao,
             hendelseMediator,
+            totrinnsvurderingMediator
         )
         oppdaterPersonService = OppdaterPersonService(rapidsConnection)
         godkjenningService = GodkjenningService(

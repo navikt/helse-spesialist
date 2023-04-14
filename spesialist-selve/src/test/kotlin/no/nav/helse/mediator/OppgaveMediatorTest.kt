@@ -192,17 +192,6 @@ internal class OppgaveMediatorTest {
         assertOpptegnelseIkkeOpprettet()
     }
 
-    @Test
-    fun `setter beslutter på totrinnsvurdering`() {
-
-        mediator.setBeslutteroppgave(
-            oppgaveId = 1L,
-            tidligereSaksbehandlerOid = UUID.randomUUID()
-        )
-
-        verify(exactly = 1) { oppgaveDao.setBeslutteroppgave(any(), any()) }
-    }
-
     private fun assertAntallOpptegnelser(antallOpptegnelser: Int) = verify(exactly = antallOpptegnelser) { opptegnelseDao.opprettOpptegnelse(eq(TESTHENDELSE.fødselsnummer()), any(), eq(OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE)) }
 
     private fun assertOpptegnelseIkkeOpprettet()= assertAntallOpptegnelser(0)

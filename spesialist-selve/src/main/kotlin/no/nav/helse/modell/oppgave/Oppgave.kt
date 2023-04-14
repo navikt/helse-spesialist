@@ -151,12 +151,6 @@ class Oppgave private constructor(
         } ?: oppgaveMediator.opprett(contextId, vedtaksperiodeId, utbetalingId!!, type, hendelseId).also { id = it } ?: return
     }
 
-    fun trengerTotrinnsvurdering(oppgaveMediator: OppgaveMediator) {
-        id?.also {
-            oppgaveMediator.setTrengerTotrinnsvurdering(it)
-        }
-    }
-
     fun avbryt() {
         status = Oppgavestatus.Invalidert
     }

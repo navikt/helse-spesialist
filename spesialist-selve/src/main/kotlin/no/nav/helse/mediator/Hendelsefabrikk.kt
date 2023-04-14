@@ -687,6 +687,7 @@ internal class Hendelsefabrikk(
             reservasjonDao = reservasjonDao,
             tildelingDao = tildelingDao,
             oppgaveMediator = oppgaveMediator,
+            totrinnsvurderingMediator = totrinnsvurderingMediator,
             gjeldendeGenerasjoner = generasjonRepository.tilhørendeFor(utbetalingId)
         )
     }

@@ -11,6 +11,7 @@ import no.nav.helse.modell.kommando.ReserverPersonHvisTildeltCommand
 import no.nav.helse.modell.oppgave.OppdaterOppgavestatusCommand
 import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.oppgave.OppgaveMediator
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.modell.utbetaling.LagreOppdragCommand
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
@@ -52,6 +53,7 @@ internal class UtbetalingEndret(
     reservasjonDao: ReservasjonDao,
     tildelingDao: TildelingDao,
     oppgaveMediator: OppgaveMediator,
+    totrinnsvurderingMediator: TotrinnsvurderingMediator,
     gjeldendeGenerasjoner: List<Generasjon>
 ) : Hendelse, MacroCommand() {
 
@@ -78,7 +80,8 @@ internal class UtbetalingEndret(
             fødselsnummer = fødselsnummer,
             reservasjonDao = reservasjonDao,
             tildelingDao = tildelingDao,
-            oppgaveDao = oppgaveDao
+            oppgaveDao = oppgaveDao,
+            totrinnsvurderingMediator = totrinnsvurderingMediator
         ),
         OppdaterOppgavestatusCommand(utbetalingId, gjeldendeStatus, oppgaveDao, oppgaveMediator),
     ).apply {

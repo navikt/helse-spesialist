@@ -127,35 +127,4 @@ internal class TrengerTotrinnsvurderingCommandTest {
         assertTrue(command.execute(context))
         verify(exactly = 1) { totrinnsvurderingMediator.opprett(any()) }
     }
-
-    @Test
-    fun `Setter ikke trengerTotrinnsvurdering for lovvalg og medlemskap dersom vedtaksperioden har hatt oppgave som har vært ferdigstilt før`() {
-        val testWarningVurderMedlemskap = "Vurder lovvalg og medlemskap"
-        every {
-            warningDao.finnAktiveWarningsMedMelding(
-                VEDTAKSPERIODE_ID,
-                testWarningVurderMedlemskap
-            )
-        } returns listOf(Warning(testWarningVurderMedlemskap, WarningKilde.Spleis, LocalDateTime.now()))
-        every { oppgaveMediator.harFerdigstiltOppgave(VEDTAKSPERIODE_ID) } returns true
-
-        assertTrue(command.execute(context))
-        verify(exactly = 0) { oppgaveMediator.alleUlagredeOppgaverTilTotrinnsvurdering() }
-        verify(exactly = 0) { warningDao.leggTilWarning(VEDTAKSPERIODE_ID, any()) }
-    }
-
-    @Test
-    fun `Setter ikke trengerTotrinnsvurdering dersom oppgaven ikke har aktive warnings med spesifikk melding`() {
-        val testWarningVurderMedlemskap = "Vurder lovvalg og medlemskap"
-        every {
-            warningDao.finnAktiveWarningsMedMelding(
-                VEDTAKSPERIODE_ID,
-                testWarningVurderMedlemskap
-            )
-        } returns emptyList()
-
-        assertTrue(command.execute(context))
-        verify(exactly = 0) { oppgaveMediator.alleUlagredeOppgaverTilTotrinnsvurdering() }
-        verify(exactly = 0) { warningDao.leggTilWarning(VEDTAKSPERIODE_ID, any()) }
-    }
 }

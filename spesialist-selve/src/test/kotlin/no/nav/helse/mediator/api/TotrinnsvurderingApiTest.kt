@@ -65,7 +65,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
 
     @BeforeEach
     fun setup() {
-        clearMocks(oppgaveDao, periodehistorikkDao, notatMediator, tildelingService, hendelseMediator)
+        clearMocks(oppgaveDao, periodehistorikkDao, notatMediator, tildelingService, hendelseMediator, totrinnsvurderingMediator)
     }
 
     @Test
@@ -118,7 +118,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             }
         }
 
-        verify(exactly = 0) { oppgaveDao.setBeslutteroppgave(any(), any()) }
+        verify(exactly = 0) { totrinnsvurderingMediator.settSaksbehandler(any(), any()) }
         assertEquals(HttpStatusCode.BadRequest, response.status)
     }
 
@@ -133,7 +133,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             }
         }
 
-        verify(exactly = 0) { oppgaveDao.setBeslutteroppgave(any(), any()) }
+        verify(exactly = 0) { totrinnsvurderingMediator.settRetur(any(), any(), any()) }
         assertEquals(HttpStatusCode.BadRequest, response.status)
     }
 
@@ -147,7 +147,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             }
         }
 
-        verify(exactly = 0) { oppgaveDao.setBeslutteroppgave(any(), any()) }
+        verify(exactly = 0) { totrinnsvurderingMediator.settSaksbehandler(any(), any()) }
         assertEquals(HttpStatusCode.Unauthorized, response.status)
     }
 
@@ -161,7 +161,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             }
         }
 
-        verify(exactly = 0) { oppgaveDao.setBeslutteroppgave(any(), any()) }
+        verify(exactly = 0) { totrinnsvurderingMediator.settRetur(any(), any(), any()) }
         assertEquals(HttpStatusCode.Unauthorized, response.status)
     }
 
@@ -272,8 +272,6 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             opprettet = now()
         )
         every { varselRepository.ikkeVurderteVarslerFor(10L) } returns 0
-        // TODO hvorfor kjører testen grønt uansett hva finnBeslutterSaksbehandler returnerer?
-        every { oppgaveDao.finnBeslutterSaksbehandler(10L) } returns null
 
         val response = runBlocking {
             client.post(TOTRINNSVURDERING_URL) {
@@ -300,7 +298,6 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             oppdatert = now(),
             opprettet = now()
         )
-        every { oppgaveDao.finnBeslutterSaksbehandler(10L) } returns null
 
         val response = runBlocking {
             client.post(TOTRINNSVURDERING_URL) {
@@ -332,8 +329,6 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             oppdatert = now(),
             opprettet = now()
         )
-        // TODO hvorfor kjører testen grønt uansett hva finnBeslutterSaksbehandler returnerer?
-        every { oppgaveDao.finnBeslutterSaksbehandler(10L) } returns null
 
         val response = runBlocking {
             client.post(TOTRINNSVURDERING_URL) {
@@ -363,7 +358,6 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             oppdatert = now(),
             opprettet = now()
         )
-        every { oppgaveDao.finnTidligereSaksbehandler(any()) } returns null
 
         val notat = "notat_tekst"
         val response = runBlocking {

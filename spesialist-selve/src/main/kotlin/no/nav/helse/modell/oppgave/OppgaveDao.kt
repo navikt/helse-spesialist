@@ -37,12 +37,6 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             LIMIT 1
         """.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.long("id") }
 
-    fun trengerTotrinnsvurdering(oppgaveId: Long): Boolean =
-        """ SELECT er_totrinnsoppgave FROM oppgave
-            WHERE id = :oppgaveId
-            AND status = 'AvventerSaksbehandler'::oppgavestatus   
-        """.single(mapOf("oppgaveId" to oppgaveId)) { it.boolean("er_totrinnsoppgave") } ?: false
-
     fun erBeslutteroppgave(fødselsnummer: String): Boolean =
         """ SELECT er_beslutteroppgave FROM oppgave o
                 JOIN vedtak v ON v.id = o.vedtak_ref
@@ -219,50 +213,6 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             .single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.long("id") })
     { "Kunne ikke finne vedtak for vedtaksperiodeId $vedtaksperiodeId" }
 
-    fun setBeslutteroppgave(
-        oppgaveId: Long,
-        tidligereSaksbehandlerOID: UUID,
-    ) =
-        """ UPDATE oppgave
-            SET er_beslutteroppgave=true, 
-                er_returoppgave=false, 
-                tidligere_saksbehandler_oid=:tidligere_saksbehandler_oid,
-                sist_sendt=now()
-            WHERE id=:oppgave_id
-        """.update(
-            mapOf(
-                "tidligere_saksbehandler_oid" to tidligereSaksbehandlerOID,
-                "oppgave_id" to oppgaveId
-            )
-        )
-
-    fun setReturoppgave(
-        oppgaveId: Long,
-        beslutterSaksbehandlerOid: UUID,
-    ) =
-        """ UPDATE oppgave
-            SET er_beslutteroppgave=false, 
-                er_returoppgave=true, 
-                beslutter_saksbehandler_oid=:beslutter_saksbehandler_oid,
-                sist_sendt=now()
-            WHERE id=:oppgave_id
-        """.update(
-            mapOf(
-                "beslutter_saksbehandler_oid" to beslutterSaksbehandlerOid,
-                "oppgave_id" to oppgaveId
-            )
-        )
-
-    fun finnTidligereSaksbehandler(oppgaveId: Long) = """
-        SELECT tidligere_saksbehandler_oid FROM oppgave
-        WHERE id=:oppgave_id
-    """.single(mapOf("oppgave_id" to oppgaveId)) { it.uuidOrNull("tidligere_saksbehandler_oid") }
-
-    fun finnBeslutterSaksbehandler(oppgaveId: Long) = """
-        SELECT beslutter_saksbehandler_oid FROM oppgave
-        WHERE id=:oppgave_id
-    """.single(mapOf("oppgave_id" to oppgaveId)) { it.uuidOrNull("beslutter_saksbehandler_oid") }
-
     fun updateOppgave(
         oppgaveId: Long,
         oppgavestatus: Oppgavestatus,
@@ -332,40 +282,6 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 hendelseId = it.uuid("hendelseId"),
                 godkjenningsbehovJson = it.string("godkjenningbehovJson"),
                 periodetype = enumValueOf(it.string("periodetype"))
-            )
-        }
-
-    fun setTrengerTotrinnsvurdering(vedtaksperiodeId: UUID): Long? =
-        sessionOf(dataSource, returnGeneratedKey = true).use {
-            @Language("PostgreSQL")
-            val query =
-                """ UPDATE oppgave
-                    SET er_totrinnsoppgave=true
-                    WHERE vedtak_ref = 
-                    (SELECT id FROM vedtak WHERE vedtaksperiode_id = ?)
-                    AND status = 'AvventerSaksbehandler'::oppgavestatus
-            """
-            it.run(
-                queryOf(
-                    query,
-                    vedtaksperiodeId,
-                ).asUpdateAndReturnGeneratedKey
-            )
-        }
-
-    fun setTrengerTotrinnsvurdering(oppgaveId: Long): Long? =
-        sessionOf(dataSource, returnGeneratedKey = true).use {
-            @Language("PostgreSQL")
-            val query =
-                """ UPDATE oppgave
-                    SET er_totrinnsoppgave=true
-                    WHERE id = ?
-            """
-            it.run(
-                queryOf(
-                    query,
-                    oppgaveId,
-                ).asUpdateAndReturnGeneratedKey
             )
         }
 

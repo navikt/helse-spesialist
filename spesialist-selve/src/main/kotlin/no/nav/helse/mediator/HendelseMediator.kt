@@ -160,16 +160,6 @@ internal class HendelseMediator(
         }
     }
 
-    internal fun erTidligereSaksbehandler(
-        oppgaveId: Long,
-        saksbehandlerreferanse: UUID,
-    ): Boolean {
-        val tidligereSaksbehandler = oppgaveDao.finnTidligereSaksbehandler(oppgaveId)
-        return tidligereSaksbehandler == saksbehandlerreferanse
-    }
-
-    internal fun erBeslutteroppgave(oppgaveId: Long) = oppgaveDao.erBeslutteroppgave(oppgaveId)
-
     internal fun tildelOppgaveTilSaksbehandler(
         oppgaveId: Long,
         saksbehandlerreferanse: UUID,

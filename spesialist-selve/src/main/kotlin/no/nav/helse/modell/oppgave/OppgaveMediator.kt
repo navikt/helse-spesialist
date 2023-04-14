@@ -27,15 +27,10 @@ class OppgaveMediator(
 ) {
     private val oppgaver = mutableSetOf<Oppgave>()
     private val oppgaverForPublisering = mutableMapOf<Long, String>()
-    private val oppgaverTilTotrinnsvurdering = mutableSetOf<Oppgave>()
     private val log = LoggerFactory.getLogger(this::class.java)
 
     fun opprett(oppgave: Oppgave) {
         nyOppgave(oppgave)
-    }
-
-    fun alleUlagredeOppgaverTilTotrinnsvurdering() {
-        oppgaverTilTotrinnsvurdering.addAll(oppgaver)
     }
 
     fun tildel(oppgaveId: Long, saksbehandleroid: UUID, påVent: Boolean = false): Boolean {
@@ -139,28 +134,10 @@ class OppgaveMediator(
         oppgaver.forEach { oppgave -> oppgave.lagre(this, contextId, hendelseId) }
         doAlso()
         oppgaver.clear()
-        oppgaverTilTotrinnsvurdering.onEach { oppgave -> oppgave.trengerTotrinnsvurdering(this) }.clear()
         oppgaverForPublisering.onEach { (oppgaveId, eventName) ->
             messageContext.publish(Oppgave.lagMelding(oppgaveId, eventName, oppgaveDao = oppgaveDao).second.toJson())
         }.clear()
     }
 
-    fun erBeslutteroppgave(oppgaveId: Long) = oppgaveDao.erBeslutteroppgave(oppgaveId)
-
-    fun trengerTotrinnsvurdering(oppgaveId: Long) = oppgaveDao.trengerTotrinnsvurdering(oppgaveId)
-
-    fun setTrengerTotrinnsvurdering(oppgaveId: Long) = oppgaveDao.setTrengerTotrinnsvurdering(oppgaveId)
-
-    fun setBeslutteroppgave(
-        oppgaveId: Long,
-        tidligereSaksbehandlerOid: UUID,
-    ) = oppgaveDao.setBeslutteroppgave(
-        oppgaveId,
-        tidligereSaksbehandlerOid
-    )
-
-    fun finnTidligereSaksbehandler(oppgaveId: Long) = oppgaveDao.finnTidligereSaksbehandler(oppgaveId)
-
     fun harFerdigstiltOppgave(vedtaksperiodeId: UUID) = oppgaveDao.harFerdigstiltOppgave(vedtaksperiodeId)
-
 }
