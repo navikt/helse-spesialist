@@ -37,7 +37,7 @@ internal class Sykefraværstilfelle(
         gjeldendeGenerasjoner.håndterAvvist(saksbehandlerIdent, vedtaksperiodeId)
     }
 
-    fun kreverTotrinnsvurdering(vedtaksperiodeId: UUID): Boolean {
+    internal fun kreverTotrinnsvurdering(vedtaksperiodeId: UUID): Boolean {
         return gjeldendeGenerasjoner.kreverTotrinnsvurdering(vedtaksperiodeId)
     }
 }
