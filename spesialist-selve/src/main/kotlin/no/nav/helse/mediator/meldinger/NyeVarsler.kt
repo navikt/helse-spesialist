@@ -7,8 +7,8 @@ import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.Varsel.Companion.varsler
-import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
-import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode.Companion.håndter
+import no.nav.helse.modell.vedtaksperiode.Generasjon
+import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndter
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -22,7 +22,7 @@ internal class NyeVarsler(
     override val id: UUID,
     private val fødselsnummer: String,
     private val varsler: List<Varsel>,
-    private val vedtaksperioder: List<Vedtaksperiode>,
+    private val generasjoner: List<Generasjon>,
     private val json: String,
 ) : Hendelse {
 
@@ -33,7 +33,7 @@ internal class NyeVarsler(
     override fun fødselsnummer(): String = fødselsnummer
     override fun toJson(): String = json
     override fun execute(context: CommandContext): Boolean {
-        vedtaksperioder.håndter(varsler)
+        generasjoner.håndter(varsler)
         sikkerlogg.info("Lagrer ${varsler.size} varsler for {}", keyValue("fødselsnummer", fødselsnummer))
         return true
     }

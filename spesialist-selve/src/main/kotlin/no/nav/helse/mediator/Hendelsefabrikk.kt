@@ -9,7 +9,7 @@ import javax.sql.DataSource
 import no.nav.helse.mediator.api.Arbeidsgiver
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.api.arbeidsgiverelementer
-import no.nav.helse.mediator.builders.VedtaksperiodeBuilder
+import no.nav.helse.mediator.builders.GenerasjonBuilder
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.EndretSkjermetinfo
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov
@@ -61,7 +61,6 @@ import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOppdatering
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.rapids_rivers.asLocalDate
@@ -138,25 +137,25 @@ internal class Hendelsefabrikk(
     }
 
     private fun sykefraværstilfelle(fødselsnummer: String, skjæringstidspunkt: LocalDate): Sykefraværstilfelle {
-        val vedtaksperioder = vedtaksperioderFor(fødselsnummer, skjæringstidspunkt)
-        return Sykefraværstilfelle(fødselsnummer, skjæringstidspunkt, vedtaksperioder)
+        val gjeldendeGenerasjoner = generasjonerFor(fødselsnummer, skjæringstidspunkt)
+        return Sykefraværstilfelle(fødselsnummer, skjæringstidspunkt, gjeldendeGenerasjoner)
     }
 
-    private fun vedtaksperioderFor(fødselsnummer: String, skjæringstidspunkt: LocalDate): List<Vedtaksperiode> {
-        return vedtaksperioder {
+    private fun generasjonerFor(fødselsnummer: String, skjæringstidspunkt: LocalDate): List<Generasjon> {
+        return gjeldendeGenerasjoner {
             generasjonRepository.finnVedtaksperiodeIderFor(fødselsnummer, skjæringstidspunkt)
         }
     }
 
-    private fun vedtaksperioderFor(fødselsnummer: String): List<Vedtaksperiode> {
-        return vedtaksperioder {
+    private fun generasjonerFor(fødselsnummer: String): List<Generasjon> {
+        return gjeldendeGenerasjoner {
             generasjonRepository.finnVedtaksperiodeIderFor(fødselsnummer)
         }
     }
 
-    private fun vedtaksperioder(iderGetter: () -> Set<UUID>): List<Vedtaksperiode> {
+    private fun gjeldendeGenerasjoner(iderGetter: () -> Set<UUID>): List<Generasjon> {
         return iderGetter().map {
-            VedtaksperiodeBuilder(vedtaksperiodeId = it).build(generasjonRepository, varselRepository)
+            GenerasjonBuilder(vedtaksperiodeId = it).build(generasjonRepository, varselRepository)
         }
     }
 
@@ -548,13 +547,13 @@ internal class Hendelsefabrikk(
         aktørId: String,
         json: String,
     ): Sykefraværstilfeller {
-        val vedtaksperioder = vedtaksperioderFor(fødselsnummer)
+        val generasjoner = generasjonerFor(fødselsnummer)
         return Sykefraværstilfeller(
             id = id,
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             vedtaksperiodeOppdateringer = vedtaksperiodeOppdateringer,
-            vedtaksperioder = vedtaksperioder,
+            gjeldendeGenerasjoner = generasjoner,
             json = json,
         )
     }
@@ -893,7 +892,7 @@ internal class Hendelsefabrikk(
     }
 
     fun nyeVarsler(id: UUID, fødselsnummer: String, varsler: List<Varsel>, json: String): NyeVarsler {
-        return NyeVarsler(id, fødselsnummer, varsler, vedtaksperioderFor(fødselsnummer), json)
+        return NyeVarsler(id, fødselsnummer, varsler, generasjonerFor(fødselsnummer), json)
     }
 
     fun nyeVarsler(json: String): NyeVarsler {

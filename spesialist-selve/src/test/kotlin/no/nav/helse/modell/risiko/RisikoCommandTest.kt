@@ -16,7 +16,6 @@ import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.vedtaksperiode.Generasjon
-import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLUtbetaling
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -44,8 +43,8 @@ internal class RisikoCommandTest {
         )).path("@løsning").path("Risikovurdering")
     }
 
-    private val vedtaksperiode = Vedtaksperiode(VEDTAKSPERIODE_ID, Generasjon(UUID.randomUUID(), VEDTAKSPERIODE_ID, 1.januar, 31.januar, 1.januar))
-    private val sykefraværstilfelle = Sykefraværstilfelle(FØDSELSNUMMER, 1.januar, listOf(vedtaksperiode))
+    private val generasjon = Generasjon(UUID.randomUUID(), VEDTAKSPERIODE_ID, 1.januar, 31.januar, 1.januar)
+    private val sykefraværstilfelle = Sykefraværstilfelle(FØDSELSNUMMER, 1.januar, listOf(generasjon))
 
 
     private lateinit var context: CommandContext

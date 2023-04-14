@@ -9,6 +9,7 @@ import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.mediator.builders.GenerasjonBuilder
+import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.VarselDao
 import org.intellij.lang.annotations.Language
@@ -21,6 +22,8 @@ import org.junit.jupiter.api.Test
 
 internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
     private val varselDao = VarselDao(dataSource)
+    private val varselRepository = ActualVarselRepository(dataSource)
+    private val generasjonRepository = ActualGenerasjonRepository(dataSource)
 
     @Test
     fun `bygg generasjon`() {
@@ -30,7 +33,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         val builder = GenerasjonBuilder(vedtaksperiodeId)
         generasjonDao.byggSisteFor(vedtaksperiodeId, builder)
         builder.varsler(emptyList())
-        val generasjon = builder.build()
+        val generasjon = builder.build(generasjonRepository, varselRepository)
         val forventetGenerasjon = Generasjon(generasjonId, vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
         assertEquals(
             forventetGenerasjon,
@@ -49,7 +52,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         val builder = GenerasjonBuilder(vedtaksperiodeId)
         generasjonDao.byggSisteFor(vedtaksperiodeId, builder)
         builder.varsler(emptyList())
-        val generasjon = builder.build()
+        val generasjon = builder.build(generasjonRepository, varselRepository)
         val forventetGenerasjon = Generasjon(generasjonId2, vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
 
         assertEquals(forventetGenerasjon, generasjon)

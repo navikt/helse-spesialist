@@ -99,12 +99,14 @@ internal class GodkjenningMediatorTest {
     fun `godkjenner varsler for alle gjeldende generasjoner`() {
         val generasjonId1 = UUID.randomUUID()
         val generasjonId2 = UUID.randomUUID()
-        val generasjon1 = generasjon(generasjonId1)
-        val generasjon2 = generasjon(generasjonId2)
+        val vedtaksperiodeId1 = UUID.randomUUID()
+        val vedtaksperiodeId2 = UUID.randomUUID()
+        val generasjon1 = generasjon(generasjonId1, vedtaksperiodeId1)
+        val generasjon2 = generasjon(generasjonId2, vedtaksperiodeId2)
         generasjon1.registrer(observer)
         generasjon2.registrer(observer)
-        val varsel1 = Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), UUID.randomUUID())
-        val varsel2 = Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), UUID.randomUUID())
+        val varsel1 = Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId1)
+        val varsel2 = Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId2)
         generasjon1.håndter(varsel1)
         generasjon2.håndter(varsel2)
 
@@ -114,9 +116,9 @@ internal class GodkjenningMediatorTest {
         assertEquals(generasjonId2, observer.generasjonerMedGodkjenteVarsler.toList()[1])
     }
 
-    private fun generasjon(id: UUID = UUID.randomUUID()) = Generasjon(
+    private fun generasjon(id: UUID = UUID.randomUUID(), vedtaksperiodeId: UUID = UUID.randomUUID()) = Generasjon(
         id = id,
-        vedtaksperiodeId = UUID.randomUUID(),
+        vedtaksperiodeId = vedtaksperiodeId,
         fom = 1.januar,
         tom = 31.januar,
         skjæringstidspunkt = 1.januar

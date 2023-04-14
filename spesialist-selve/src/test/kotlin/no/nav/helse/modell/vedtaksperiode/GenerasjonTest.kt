@@ -21,6 +21,7 @@ import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_1
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_2
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_3
+import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterOppdateringer
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -359,9 +360,10 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
 
     @Test
     fun `kan deaktivere reaktivert varsel`() {
-        val generasjon = nyGenerasjon()
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjon = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)
         generasjon.registrer(generasjonRepository, varselRepository)
-        val varsel = Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), UUID.randomUUID())
+        val varsel = Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId)
         generasjon.håndter(varsel)
         assertVarsler(generasjonId, 1, AKTIV, SB_EX_1)
         generasjon.håndterDeaktivertVarsel(varsel)
@@ -521,6 +523,84 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         generasjonV1.håndterGodkjentAvSaksbehandler("EN_IDENT", varselRepository)
         assertUtbetaling(generasjonIdV1, utbetalingId)
         assertVarsler(generasjonIdV1, 1, GODKJENT, SB_EX_1)
+    }
+
+    @Test
+    fun `håndterer oppdateringer`() {
+        val vedtaksperiodeId1 = UUID.randomUUID()
+        val vedtaksperiodeId2 = UUID.randomUUID()
+        val generasjonId1 = UUID.randomUUID()
+        val generasjonId2 = UUID.randomUUID()
+        val generasjonV1 = generasjon(generasjonId1, vedtaksperiodeId1)
+        val generasjonV2 = generasjon(generasjonId2, vedtaksperiodeId2)
+
+        val observer = object : IVedtaksperiodeObserver {
+            val oppdaterteGenerasjoner = mutableListOf<UUID>()
+            override fun tidslinjeOppdatert(generasjonId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate) {
+                oppdaterteGenerasjoner.add(generasjonId)
+            }
+        }
+        generasjonV1.registrer(observer)
+        generasjonV2.registrer(observer)
+
+        listOf(generasjonV1, generasjonV2).håndterOppdateringer(
+            listOf(
+                VedtaksperiodeOppdatering(1.mars, 31.mars, 1.mars, vedtaksperiodeId1),
+                VedtaksperiodeOppdatering(1.mars, 31.mars, 1.mars, vedtaksperiodeId2),
+            ),
+            UUID.randomUUID()
+        )
+        assertEquals(2, observer.oppdaterteGenerasjoner.size)
+        assertEquals(generasjonId1, observer.oppdaterteGenerasjoner[0])
+        assertEquals(generasjonId2, observer.oppdaterteGenerasjoner[1])
+    }
+
+    @Test
+    fun `håndterer oppdateringer for kun noen av vedtaksperiodene`() {
+        val vedtaksperiodeId2 = UUID.randomUUID()
+        val generasjonId1 = UUID.randomUUID()
+        val generasjonId2 = UUID.randomUUID()
+        val generasjonV1 = generasjon(generasjonId1, UUID.randomUUID())
+        val generasjonV2 = generasjon(generasjonId2, vedtaksperiodeId2)
+
+        val observer = object : IVedtaksperiodeObserver {
+            val oppdaterteGenerasjoner = mutableListOf<UUID>()
+            override fun tidslinjeOppdatert(generasjonId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate) {
+                oppdaterteGenerasjoner.add(generasjonId)
+            }
+        }
+        generasjonV1.registrer(observer)
+        generasjonV2.registrer(observer)
+
+        listOf(generasjonV1, generasjonV2).håndterOppdateringer(
+            listOf(VedtaksperiodeOppdatering(1.mars, 31.mars, 1.mars, vedtaksperiodeId2)),
+            UUID.randomUUID()
+        )
+        assertEquals(1, observer.oppdaterteGenerasjoner.size)
+        assertEquals(generasjonId2, observer.oppdaterteGenerasjoner[0])
+    }
+
+    @Test
+    fun `håndterer ikke oppdateringer for noen av vedtaksperiodene`() {
+        val generasjonId1 = UUID.randomUUID()
+        val generasjonId2 = UUID.randomUUID()
+        val generasjonV1 = generasjon(generasjonId1, UUID.randomUUID())
+        val generasjonV2 = generasjon(generasjonId2, UUID.randomUUID())
+
+        val observer = object : IVedtaksperiodeObserver {
+            val oppdaterteGenerasjoner = mutableListOf<UUID>()
+            override fun tidslinjeOppdatert(generasjonId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate) {
+                oppdaterteGenerasjoner.add(generasjonId)
+            }
+        }
+        generasjonV1.registrer(observer)
+        generasjonV2.registrer(observer)
+
+        listOf(generasjonV1, generasjonV2).håndterOppdateringer(
+            listOf(VedtaksperiodeOppdatering(1.januar, 31.januar, 1.januar, UUID.randomUUID())),
+            UUID.randomUUID()
+        )
+        assertEquals(0, observer.oppdaterteGenerasjoner.size)
     }
 
     @Test

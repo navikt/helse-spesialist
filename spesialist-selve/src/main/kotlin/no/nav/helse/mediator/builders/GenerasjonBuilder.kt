@@ -2,7 +2,9 @@ package no.nav.helse.mediator.builders
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.Varsel
+import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import kotlin.properties.Delegates
 
@@ -17,7 +19,12 @@ class GenerasjonBuilder(
     private var utbetalingId: UUID? = null
     private val varsler = mutableListOf<Varsel>()
 
-    internal fun build(): Generasjon {
+    internal fun build(
+        generasjonRepository: ActualGenerasjonRepository,
+        varselRepository: ActualVarselRepository,
+    ): Generasjon {
+        generasjonRepository.byggGenerasjon(vedtaksperiodeId, this)
+        varselRepository.byggGenerasjon(generasjonId, this)
         return Generasjon.fraLagring(
             id = generasjonId,
             vedtaksperiodeId = vedtaksperiodeId,
@@ -27,10 +34,10 @@ class GenerasjonBuilder(
             fom = fom,
             tom = tom,
             varsler = varsler.toSet()
-        )
+        ).also {
+            it.registrer(generasjonRepository, varselRepository)
+        }
     }
-
-    internal fun generasjonId(): UUID = generasjonId
 
     internal fun generasjonId(generasjonId: UUID) {
         this.generasjonId = generasjonId

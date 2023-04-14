@@ -155,6 +155,7 @@ internal class Generasjon private constructor(
     }
 
     internal fun håndter(varsel: Varsel) {
+        if (!varsel.erRelevantFor(vedtaksperiodeId)) return
         val eksisterendeVarsel = varsler.finnEksisterendeVarsel(varsel) ?: return nyttVarsel(varsel)
         if (eksisterendeVarsel.erAktiv()) return
         eksisterendeVarsel.reaktiver(id)
@@ -228,5 +229,29 @@ internal class Generasjon private constructor(
             periode = Periode(fom, tom),
             varsler = varsler
         )
+
+        internal fun List<Generasjon>.håndterOppdateringer(
+            vedtaksperiodeoppdateringer: List<VedtaksperiodeOppdatering>,
+            hendelseId: UUID
+        ) {
+            forEach { generasjon ->
+                val oppdatering = vedtaksperiodeoppdateringer.find { it.vedtaksperiodeId == generasjon.vedtaksperiodeId } ?: return@forEach
+                generasjon.håndterTidslinjeendring(oppdatering.fom, oppdatering.tom, oppdatering.skjæringstidspunkt, hendelseId)
+            }
+        }
+
+        internal fun List<Generasjon>.håndter(varsler: List<Varsel>) {
+            forEach { generasjon ->
+                varsler.forEach { generasjon.håndter(it) }
+            }
+        }
+
+        internal fun List<Generasjon>.forhindrerAutomatisering(tilOgMed: LocalDate): Boolean {
+            return this.filter { it.tilhører(tilOgMed) }.any { it.forhindrerAutomatisering() }
+        }
+
+        internal fun List<Generasjon>.deaktiver(varsel: Varsel) {
+            find { varsel.erRelevantFor(it.vedtaksperiodeId) }?.håndterDeaktivertVarsel(varsel)
+        }
     }
 }

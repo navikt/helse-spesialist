@@ -16,7 +16,6 @@ import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.IVedtaksperiodeObserver
-import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -46,8 +45,8 @@ internal class ÅpneGosysOppgaverCommandTest {
         }
     }
 
-    private val vedtaksperiode = Vedtaksperiode(VEDTAKPERIODE_ID, generasjon(VEDTAKPERIODE_ID)).also { it.registrer(observer) }
-    private val sykefraværstilfelle = Sykefraværstilfelle(FNR, 1.januar, listOf(vedtaksperiode))
+    private val generasjon = generasjon(VEDTAKPERIODE_ID).also { it.registrer(observer) }
+    private val sykefraværstilfelle = Sykefraværstilfelle(FNR, 1.januar, listOf(generasjon))
     private val dao = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
     private val warningDao = mockk<WarningDao>(relaxed = true)
     private val command = ÅpneGosysOppgaverCommand(AKTØR_ID, dao, warningDao, VEDTAKPERIODE_ID, sykefraværstilfelle)

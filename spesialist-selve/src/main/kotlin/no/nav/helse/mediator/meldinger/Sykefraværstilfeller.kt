@@ -5,8 +5,8 @@ import java.util.UUID
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
+import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.OppdaterSykefraværstilfellerCommand
-import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOppdatering
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -22,7 +22,7 @@ internal class Sykefraværstilfeller(
     private val fødselsnummer: String,
     aktørId: String,
     vedtaksperiodeOppdateringer: List<VedtaksperiodeOppdatering>,
-    vedtaksperioder: List<Vedtaksperiode>,
+    gjeldendeGenerasjoner: List<Generasjon>,
     private val json: String,
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
@@ -30,7 +30,7 @@ internal class Sykefraværstilfeller(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             vedtaksperiodeoppdateringer = vedtaksperiodeOppdateringer,
-            vedtaksperioder = vedtaksperioder,
+            generasjoner = gjeldendeGenerasjoner,
             hendelseId = id
         )
     )

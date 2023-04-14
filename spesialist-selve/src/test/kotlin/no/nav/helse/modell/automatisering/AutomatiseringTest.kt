@@ -23,7 +23,6 @@ import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.spesialist.api.graphql.enums.GraphQLUtbetalingstatus
 import no.nav.helse.spesialist.api.graphql.enums.Utbetalingtype
@@ -98,9 +97,8 @@ internal class AutomatiseringTest {
     fun `vedtaksperiode med warnings er ikke automatiserbar`() {
         val gjeldendeGenerasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
         gjeldendeGenerasjon.håndter(Varsel(UUID.randomUUID(), "RV_IM_1", LocalDateTime.now(), vedtaksperiodeId))
-        val vedtaksperiode = Vedtaksperiode(vedtaksperiodeId, gjeldendeGenerasjon)
         support.run {
-            forsøkAutomatisering(vedtaksperioder = listOf(vedtaksperiode))
+            forsøkAutomatisering(generasjoner = listOf(gjeldendeGenerasjon))
             assertGikkTilManuell()
         }
     }
@@ -248,14 +246,14 @@ internal class AutomatiseringTest {
         val onAutomatiserbar = mockk<() -> Unit>(relaxed = true)
         fun forsøkAutomatisering(
             periodetype: Periodetype = Companion.periodetype,
-            vedtaksperioder: List<Vedtaksperiode> = emptyList(),
+            generasjoner: List<Generasjon> = emptyList(),
         ) = automatisering.utfør(
             fødselsnummer,
             vedtaksperiodeId,
             hendelseId,
             utbetalingId,
             periodetype,
-            sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1.januar, vedtaksperioder),
+            sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1.januar, generasjoner),
             periodeTom = 31.januar,
             onAutomatiserbar,
         )

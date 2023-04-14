@@ -3,6 +3,7 @@ package no.nav.helse.modell.varsel
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
+import no.nav.helse.mediator.builders.GenerasjonBuilder
 import no.nav.helse.modell.varsel.Varsel.Status.AKTIV
 import no.nav.helse.modell.varsel.Varsel.Status.AVVIST
 import no.nav.helse.modell.varsel.Varsel.Status.GODKJENT
@@ -30,8 +31,8 @@ internal class ActualVarselRepository(dataSource: DataSource) : VarselRepository
     private val varselDao = VarselDao(dataSource)
     private val definisjonDao = DefinisjonDao(dataSource)
 
-    internal fun finnVarslerFor(generasjonId: UUID): List<Varsel> {
-        return varselDao.varslerFor(generasjonId)
+    internal fun byggGenerasjon(generasjonId: UUID, generasjonBuilder: GenerasjonBuilder) {
+        generasjonBuilder.varsler(varselDao.varslerFor(generasjonId))
     }
 
     override fun varselOpprettet(

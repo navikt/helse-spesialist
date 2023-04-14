@@ -15,7 +15,6 @@ import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.modell.vedtaksperiode.Generasjon
-import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -38,8 +37,8 @@ class VergemålCommandTest {
             LocalDateTime.now()
         )
     )
-    private val vedtaksperiode = Vedtaksperiode(VEDTAKSPERIODE_ID, Generasjon(UUID.randomUUID(), VEDTAKSPERIODE_ID, 1.januar, 31.januar, 1.januar))
-    private val sykefraværstilfelle = Sykefraværstilfelle(FNR, 1.januar, listOf(vedtaksperiode))
+    private val generasjon = Generasjon(UUID.randomUUID(), VEDTAKSPERIODE_ID, 1.januar, 31.januar, 1.januar)
+    private val sykefraværstilfelle = Sykefraværstilfelle(FNR, 1.januar, listOf(generasjon))
 
     private val command = VergemålCommand(
         vergemålDao = vergemålDao,
