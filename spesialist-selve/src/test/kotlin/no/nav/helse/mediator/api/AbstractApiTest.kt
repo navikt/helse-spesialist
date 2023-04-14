@@ -1,12 +1,12 @@
 package no.nav.helse.mediator.api
 
-import io.ktor.server.application.Application
 import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.jackson.JacksonConverter
+import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.auth.authenticate
 import io.ktor.server.cio.*
@@ -16,7 +16,6 @@ import io.ktor.server.routing.routing
 import java.net.ServerSocket
 import java.util.*
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.mediator.api.AbstractApiTest.TestServerRuntime.Companion.routeToBeAuthenticated
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.AzureAdAppConfig
 import no.nav.helse.spesialist.api.AzureConfig
@@ -112,13 +111,11 @@ abstract class AbstractApiTest {
         private val server = createEmbeddedServer(build, httpPort)
 
         companion object {
-            // Må ta vare på den her, fordi det ikke går an å sende parametere til module-funksjonen
-            internal var routeToBeAuthenticated: Route.() -> Unit = { }
-
-            private fun createEmbeddedServer(build: Route.() -> Unit, httpPort: Int): CIOApplicationEngine {
-                routeToBeAuthenticated = build
-                return embeddedServer(CIO, port = httpPort, module = Application::module)
-            }
+            private fun createEmbeddedServer(build: Route.() -> Unit, httpPort: Int) =
+                embeddedServer(CIO, applicationEngineEnvironment {
+                    connector { port = httpPort }
+                    module { module(build) }
+                })
         }
 
         init {
@@ -148,7 +145,7 @@ abstract class AbstractApiTest {
     }
 }
 
-internal fun Application.module() {
+internal fun Application.module(build: Route.() -> Unit) {
     install(ContentNegotiationServer) {
         register(
             ContentType.Application.Json,
@@ -165,5 +162,5 @@ internal fun Application.module() {
     )
 
     azureAdAppAuthentication(azureAdAppConfig)
-    routing { authenticate("oidc", build = routeToBeAuthenticated) }
+    routing { authenticate("oidc", build = build) }
 }
