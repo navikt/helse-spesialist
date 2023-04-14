@@ -13,6 +13,7 @@ import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.meldinger.løsninger.Saksbehandlerløsning
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Refusjonstype
 import no.nav.helse.modell.utbetaling.Refusjonstype.DELVIS_REFUSJON
 import no.nav.helse.modell.utbetaling.Utbetaling
@@ -58,11 +59,10 @@ internal class SaksbehandlerløsningTest {
         godkjenningMediator = GodkjenningMediator(
             mockk(relaxed = true),
             mockk(relaxed = true),
-            mockk(),
-            mockk(relaxed = true)
+            mockk()
         ),
         utbetalingDao = utbetalingDao,
-        gjeldendeGenerasjoner = listOf(Generasjon(randomUUID(), randomUUID(), 1.januar, 31.januar, 1.januar)),
+        sykefraværstilfelle = Sykefraværstilfelle(FNR, 1.januar, listOf(Generasjon(randomUUID(), randomUUID(), 1.januar, 31.januar, 1.januar))),
     )
 
     private val context = CommandContext(randomUUID())

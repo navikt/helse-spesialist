@@ -8,6 +8,7 @@ import java.util.UUID
 import no.nav.helse.januar
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.vedtaksperiode.Generasjon
@@ -24,9 +25,9 @@ internal class GodkjenningMediatorTest {
     private val observer = object : IVedtaksperiodeObserver {
         val generasjonerMedGodkjenteVarsler = mutableSetOf<UUID>()
         override fun varselOpprettet(
+            varselId: UUID,
             vedtaksperiodeId: UUID,
             generasjonId: UUID,
-            varselId: UUID,
             varselkode: String,
             opprettet: LocalDateTime
         ) {
@@ -37,7 +38,6 @@ internal class GodkjenningMediatorTest {
         warningDao = mockk(relaxed = true),
         vedtakDao = mockk(relaxed = true),
         opptegnelseDao = opptegnelseDao,
-        varselRepository = mockk(relaxed = true),
     )
 
     private val utbetaling = Utbetaling(UUID.randomUUID(), 1000, 1000)
@@ -71,7 +71,7 @@ internal class GodkjenningMediatorTest {
             saksbehandlerEpost = "2@nav.no",
             godkjenttidspunkt = LocalDateTime.now(),
             saksbehandleroverstyringer = emptyList(),
-            gjeldendeGenerasjoner = listOf(generasjon())
+            sykefraværstilfelle = Sykefraværstilfelle(fnr, 1.januar, listOf(generasjon()))
         )
         assertOpptegnelseIkkeOpprettet()
     }
@@ -90,7 +90,7 @@ internal class GodkjenningMediatorTest {
             null,
             null,
             emptyList(),
-            listOf(generasjon())
+            Sykefraværstilfelle(fnr, 1.januar, listOf(generasjon()))
         )
         assertOpptegnelseIkkeOpprettet()
     }
@@ -133,7 +133,7 @@ internal class GodkjenningMediatorTest {
         "saksbehandler@nav.no",
         LocalDateTime.now(),
         emptyList(),
-        generasjoner
+        Sykefraværstilfelle(fnr, 1.januar, generasjoner)
     )
 
     private fun assertOpptegnelseOpprettet() = verify(exactly = 1) { opptegnelseDao.opprettOpptegnelse(eq(fnr), any(), eq(OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE)) }

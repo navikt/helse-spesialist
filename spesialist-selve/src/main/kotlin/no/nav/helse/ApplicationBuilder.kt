@@ -62,7 +62,6 @@ import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.tildeling.TildelingService
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
-import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -209,7 +208,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val vergemålDao = VergemålDao(dataSource)
     private val notatMediator = NotatMediator(notatDao)
     private val overstyringDao = OverstyringDao(dataSource)
-    private val varselRepository = ActualVarselRepository(dataSource)
     private val apiVarselRepository = ApiVarselRepository(dataSource)
 
     private val behandlingsstatistikkMediator = BehandlingsstatistikkMediator(behandlingsstatistikkDao)
@@ -360,8 +358,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         godkjenningMediator = GodkjenningMediator(
             warningDao,
             vedtakDao,
-            opptegnelseDao,
-            varselRepository
+            opptegnelseDao
         ),
         automatisering = automatisering,
         overstyringMediator = OverstyringMediator(rapidsConnection),

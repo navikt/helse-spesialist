@@ -10,8 +10,8 @@ import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.UtbetalingsgodkjenningCommand
 import no.nav.helse.modell.oppgave.OppgaveDao
+import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.UtbetalingDao
-import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -42,7 +42,7 @@ internal class Saksbehandlerløsning(
     private val oppgaveDao: OppgaveDao,
     godkjenningMediator: GodkjenningMediator,
     utbetalingDao: UtbetalingDao,
-    gjeldendeGenerasjoner: List<Generasjon>,
+    sykefraværstilfelle: Sykefraværstilfelle,
 ) : Hendelse, MacroCommand() {
     private val utbetaling = utbetalingDao.utbetalingFor(oppgaveId)
 
@@ -62,7 +62,7 @@ internal class Saksbehandlerløsning(
             vedtaksperiodeId = vedtaksperiodeId(),
             fødselsnummer = fødselsnummer,
             utbetaling = utbetaling,
-            gjeldendeGenerasjoner = gjeldendeGenerasjoner
+            sykefraværstilfelle = sykefraværstilfelle
         ),
     )
 

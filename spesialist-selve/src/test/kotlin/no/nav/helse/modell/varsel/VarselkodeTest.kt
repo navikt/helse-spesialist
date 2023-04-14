@@ -28,9 +28,9 @@ internal class VarselkodeTest {
         )
 
         override fun varselOpprettet(
+            varselId: UUID,
             vedtaksperiodeId: UUID,
             generasjonId: UUID,
-            varselId: UUID,
             varselkode: String,
             opprettet: LocalDateTime
         ) {

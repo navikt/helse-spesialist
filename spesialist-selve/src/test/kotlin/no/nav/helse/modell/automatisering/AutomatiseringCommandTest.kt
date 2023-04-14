@@ -38,8 +38,7 @@ internal class AutomatiseringCommandTest {
             GodkjenningMediator(
                 warningDao = mockk(relaxed = true),
                 vedtakDao = mockk(relaxed = true),
-                opptegnelseDao = mockk(relaxed = true),
-                varselRepository = mockk(relaxed = true)
+                opptegnelseDao = mockk(relaxed = true)
             ),
             Utbetaling(utbetalingId, 1000, 1000),
             periodeType,

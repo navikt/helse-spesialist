@@ -16,7 +16,6 @@ import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
-import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
@@ -40,8 +39,7 @@ internal class TestMediator(
     private val godkjenningMediator = GodkjenningMediator(
         warningDao,
         vedtakDao,
-        opptegnelseDao,
-        ActualVarselRepository(dataSource)
+        opptegnelseDao
     )
     private val oppgaveMediator = OppgaveMediator(
         oppgaveDao = OppgaveDao(dataSource),

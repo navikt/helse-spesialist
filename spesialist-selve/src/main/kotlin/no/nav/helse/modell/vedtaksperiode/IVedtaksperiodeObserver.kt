@@ -12,8 +12,10 @@ interface IVedtaksperiodeObserver {
     fun utbetalingForkastet(generasjonId: UUID, utbetalingId: UUID) {}
     fun vedtakFattet(generasjonId: UUID, hendelseId: UUID) {}
     fun førsteGenerasjonOpprettet(generasjonId: UUID, vedtaksperiodeId: UUID, hendelseId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate) {}
-    fun varselOpprettet(vedtaksperiodeId: UUID, generasjonId: UUID, varselId: UUID, varselkode: String, opprettet: LocalDateTime) {}
+    fun varselOpprettet(varselId: UUID, vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, opprettet: LocalDateTime) {}
     fun varselReaktivert(varselId: UUID, varselkode: String, generasjonId: UUID, vedtaksperiodeId: UUID) {}
     fun varselDeaktivert(varselId: UUID, varselkode: String, generasjonId: UUID, vedtaksperiodeId: UUID) {}
     fun varselFlyttet(varselId: UUID, gammelGenerasjonId: UUID, nyGenerasjonId: UUID) {}
+    fun varselGodkjent(varselId: UUID, vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String) {}
+    fun varselAvvist(varselId: UUID, vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String) {}
 }

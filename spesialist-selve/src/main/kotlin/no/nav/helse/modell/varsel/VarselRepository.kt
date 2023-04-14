@@ -36,9 +36,9 @@ internal class ActualVarselRepository(dataSource: DataSource) : VarselRepository
     }
 
     override fun varselOpprettet(
+        varselId: UUID,
         vedtaksperiodeId: UUID,
         generasjonId: UUID,
-        varselId: UUID,
         varselkode: String,
         opprettet: LocalDateTime,
         ) {
@@ -59,6 +59,16 @@ internal class ActualVarselRepository(dataSource: DataSource) : VarselRepository
 
     override fun varselFlyttet(varselId: UUID, gammelGenerasjonId: UUID, nyGenerasjonId: UUID) {
         varselDao.oppdaterGenerasjon(varselId, gammelGenerasjonId, nyGenerasjonId)
+    }
+
+    override fun varselGodkjent(varselId: UUID, vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String) {
+        val definisjon = definisjonDao.sisteDefinisjonFor(varselkode)
+        definisjon.oppdaterVarsel(vedtaksperiodeId, generasjonId, GODKJENT, ident, varselDao::oppdaterStatus)
+    }
+
+    override fun varselAvvist(varselId: UUID, vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String) {
+        val definisjon = definisjonDao.sisteDefinisjonFor(varselkode)
+        definisjon.oppdaterVarsel(vedtaksperiodeId, generasjonId, AVVIST, ident, varselDao::oppdaterStatus)
     }
 
     override fun godkjennFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String, definisjonId: UUID?) {

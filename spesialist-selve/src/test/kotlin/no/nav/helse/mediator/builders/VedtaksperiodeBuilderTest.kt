@@ -28,7 +28,7 @@ class VedtaksperiodeBuilderTest : AbstractDatabaseTest() {
         val varselId = UUID.randomUUID()
         val opprettet = LocalDateTime.now()
         generasjonRepository.førsteGenerasjonOpprettet(generasjonId, vedtaksperiodeId, UUID.randomUUID(), 1.januar, 31.januar, 1.januar)
-        varselRepository.varselOpprettet(vedtaksperiodeId, generasjonId, varselId, "SB_EX_1", opprettet)
+        varselRepository.varselOpprettet(varselId, vedtaksperiodeId, generasjonId, "SB_EX_1", opprettet)
         val builder = GenerasjonBuilder(vedtaksperiodeId)
         val vedtaksperiode = builder.build(generasjonRepository, varselRepository)
         val forventetVedtaksperiode = Generasjon(generasjonId, vedtaksperiodeId, 1.januar, 31.januar, 1.januar).also {
@@ -47,7 +47,7 @@ class VedtaksperiodeBuilderTest : AbstractDatabaseTest() {
         val varselId = UUID.randomUUID()
         val opprettet = LocalDateTime.now()
         generasjonRepository.førsteGenerasjonOpprettet(generasjonId, vedtaksperiodeId, UUID.randomUUID(), 1.januar, 31.januar, 1.januar)
-        varselRepository.varselOpprettet(vedtaksperiodeId, generasjonId, varselId, "SB_EX_1", opprettet)
+        varselRepository.varselOpprettet(varselId, vedtaksperiodeId, generasjonId, "SB_EX_1", opprettet)
         val builder = GenerasjonBuilder(vedtaksperiodeId)
         val generasjon = builder.build(generasjonRepository, varselRepository)
         generasjon.håndterTidslinjeendring(1.mars, 31.mars, 1.mars, UUID.randomUUID())

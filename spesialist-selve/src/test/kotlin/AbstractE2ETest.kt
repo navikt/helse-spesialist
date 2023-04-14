@@ -67,7 +67,6 @@ import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
-import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålDao
@@ -142,7 +141,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private val totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource)
     private val vergemålDao = VergemålDao(dataSource)
     private val overstyringDao = OverstyringDao(dataSource)
-    private val varselRepository = ActualVarselRepository(dataSource)
 
     protected val snapshotClient = mockk<SnapshotClient>(relaxed = true)
     private val snapshotApiDao = SnapshotApiDao(dataSource)
@@ -160,7 +158,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         dataSource = dataSource,
         snapshotClient = snapshotClient,
         oppgaveMediator = oppgaveMediator,
-        godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao, opptegnelseDao, varselRepository),
+        godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao, opptegnelseDao),
         automatisering = Automatisering(
             warningDao = warningDao,
             risikovurderingDao = risikovurderingDao,

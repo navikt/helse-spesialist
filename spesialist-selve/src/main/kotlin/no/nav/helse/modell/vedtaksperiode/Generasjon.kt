@@ -10,8 +10,6 @@ import no.nav.helse.modell.varsel.Varsel.Companion.finnEksisterendeVarsel
 import no.nav.helse.modell.varsel.Varsel.Companion.flyttVarslerFor
 import no.nav.helse.modell.varsel.Varsel.Companion.forhindrerAutomatisering
 import no.nav.helse.modell.varsel.Varsel.Companion.godkjennAlleFor
-import no.nav.helse.modell.varsel.Varsel.Companion.godkjennFor
-import no.nav.helse.modell.varsel.VarselRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -121,21 +119,17 @@ internal class Generasjon private constructor(
         observers.forEach { it.utbetalingForkastet(id, utbetalingId) }
     }
 
-    internal fun håndterGodkjentVarsel(varselkode: String, ident: String, varselRepository: VarselRepository) {
-        varsler.godkjennFor(id, varselkode, ident, varselRepository)
-    }
-
     internal fun håndterDeaktivertVarsel(varsel: Varsel) {
         val funnetVarsel = varsler.finnEksisterendeVarsel(varsel) ?: return
         funnetVarsel.deaktiver(id)
     }
 
-    internal fun håndterGodkjentAvSaksbehandler(ident: String, varselRepository: VarselRepository) {
-        varsler.godkjennAlleFor(id, ident, varselRepository)
+    internal fun håndterGodkjentAvSaksbehandler(ident: String) {
+        varsler.godkjennAlleFor(id, ident)
     }
 
-    internal fun håndterAvvistAvSaksbehandler(ident: String, varselRepository: VarselRepository) {
-        varsler.avvisAlleFor(id, ident, varselRepository)
+    internal fun håndterAvvistAvSaksbehandler(ident: String) {
+        varsler.avvisAlleFor(id, ident)
     }
 
     internal fun håndterVedtakFattet(hendelseId: UUID) {
@@ -252,6 +246,24 @@ internal class Generasjon private constructor(
 
         internal fun List<Generasjon>.deaktiver(varsel: Varsel) {
             find { varsel.erRelevantFor(it.vedtaksperiodeId) }?.håndterDeaktivertVarsel(varsel)
+        }
+
+        internal fun List<Generasjon>.håndterGodkjent(saksbehandlerIdent: String, vedtaksperiodeId: UUID) {
+            overlapperMedEllerTidligereEnn(vedtaksperiodeId).forEach {
+                it.håndterGodkjentAvSaksbehandler(saksbehandlerIdent)
+            }
+        }
+
+        internal fun List<Generasjon>.håndterAvvist(saksbehandlerIdent: String, vedtaksperiodeId: UUID) {
+            overlapperMedEllerTidligereEnn(vedtaksperiodeId).forEach {
+                it.håndterAvvistAvSaksbehandler(saksbehandlerIdent)
+            }
+        }
+
+        private fun List<Generasjon>.overlapperMedEllerTidligereEnn(vedtaksperiodeId: UUID): List<Generasjon> {
+            val gjeldende = find { it.vedtaksperiodeId == vedtaksperiodeId } ?: return emptyList()
+            return sortedByDescending { it.periode.tom() }
+                .filter { it.periode.fom() <= gjeldende.periode.tom() }
         }
     }
 }

@@ -15,6 +15,7 @@ import no.nav.helse.Meldingssender.sendRevurderingAvvist
 import no.nav.helse.Meldingssender.sendRisikovurderingløsningOld
 import no.nav.helse.Meldingssender.sendSøknadSendt
 import no.nav.helse.Meldingssender.sendUtbetalingEndret
+import no.nav.helse.Meldingssender.sendVedtakFattet
 import no.nav.helse.Meldingssender.sendVedtaksperiodeNyUtbetaling
 import no.nav.helse.Meldingssender.sendVedtaksperiodeOpprettet
 import no.nav.helse.Meldingssender.sendVergemålløsningOld
@@ -99,6 +100,7 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
             status = Utbetalingsstatus.UTBETALT,
             arbeidsgiverFagsystemId = "EN_FAGSYSTEMID"
         )
+        sendVedtakFattet()
         assertOppgavestatuser(
             0,
             Oppgavestatus.AvventerSaksbehandler,
@@ -117,6 +119,7 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
             utbetalingtype = REVURDERING,
             periodeFom = fom, periodeTom = tom, skjæringstidspunkt = skjæringstidspunkt
         )
+        sendAktivitetsloggNyAktivitet(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, listOf("SB_EX_1"))
         håndterGodkjenningsbehov(godkjenningsmeldingId2, harOppdatertMetadata = true)
         sendSaksbehandlerløsningFraAPI(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
         sendUtbetalingEndret(

@@ -5,8 +5,8 @@ import java.util.UUID
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
+import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
-import no.nav.helse.modell.vedtaksperiode.Generasjon
 import org.slf4j.LoggerFactory
 
 internal class UtbetalingsgodkjenningCommand(
@@ -24,7 +24,7 @@ internal class UtbetalingsgodkjenningCommand(
     private val vedtaksperiodeId: UUID,
     private val fødselsnummer: String,
     private val utbetaling: Utbetaling?,
-    private val gjeldendeGenerasjoner: List<Generasjon>
+    private val sykefraværstilfelle: Sykefraværstilfelle
 ) : Command {
 
     private companion object {
@@ -44,7 +44,7 @@ internal class UtbetalingsgodkjenningCommand(
                 saksbehandlerEpost = epostadresse,
                 godkjenttidspunkt = godkjenttidspunkt,
                 saksbehandleroverstyringer = saksbehandleroverstyringer,
-                gjeldendeGenerasjoner = gjeldendeGenerasjoner
+                sykefraværstilfelle = sykefraværstilfelle
             )
         } else {
             godkjenningMediator.saksbehandlerAvvisning(
@@ -59,7 +59,7 @@ internal class UtbetalingsgodkjenningCommand(
                 begrunnelser = begrunnelser,
                 kommentar = kommentar,
                 saksbehandleroverstyringer = saksbehandleroverstyringer,
-                gjeldendeGenerasjoner = gjeldendeGenerasjoner
+                sykefraværstilfelle = sykefraværstilfelle
             )
         }
         log.info("sender svar på godkjenningsbehov")

@@ -322,9 +322,9 @@ internal class Hendelsefabrikk(
         oppgaveId: Long,
         json: String,
     ): Saksbehandlerløsning {
-        val utbetalingId = oppgaveDao.finnUtbetalingId(oppgaveId)
-            ?: throw IllegalStateException("Forventer å finne utbetalingId for oppgaveId=$oppgaveId")
-        val gjeldendeGenerasjoner = generasjonRepository.tilhørendeFor(utbetalingId)
+        val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(oppgaveId)
+        val skjæringstidspunkt = generasjonRepository.skjæringstidspunktFor(vedtaksperiodeId = vedtaksperiodeId)
+        val sykefraværstilfelle = sykefraværstilfelle(fødselsnummer, skjæringstidspunkt)
         return Saksbehandlerløsning(
             id = id,
             fødselsnummer = fødselsnummer,
@@ -343,7 +343,7 @@ internal class Hendelsefabrikk(
             oppgaveDao = oppgaveDao,
             godkjenningMediator = godkjenningMediator,
             utbetalingDao = utbetalingDao,
-            gjeldendeGenerasjoner = gjeldendeGenerasjoner
+            sykefraværstilfelle = sykefraværstilfelle
         )
     }
 

@@ -9,8 +9,7 @@ import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.varsel.VarselRepository
-import no.nav.helse.modell.vedtaksperiode.Generasjon
+import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload.Companion.lagre
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
@@ -19,8 +18,7 @@ import org.slf4j.LoggerFactory
 internal class GodkjenningMediator(
     private val warningDao: WarningDao,
     private val vedtakDao: VedtakDao,
-    private val opptegnelseDao: OpptegnelseDao,
-    private val varselRepository: VarselRepository
+    private val opptegnelseDao: OpptegnelseDao
 ) {
     internal fun saksbehandlerUtbetaling(
         context: CommandContext,
@@ -31,7 +29,7 @@ internal class GodkjenningMediator(
         saksbehandlerEpost: String,
         godkjenttidspunkt: LocalDateTime,
         saksbehandleroverstyringer: List<UUID>,
-        gjeldendeGenerasjoner: List<Generasjon>
+        sykefraværstilfelle: Sykefraværstilfelle
     ) {
         behov.godkjennManuelt(
             saksbehandlerIdent = saksbehandlerIdent,
@@ -39,9 +37,8 @@ internal class GodkjenningMediator(
             godkjenttidspunkt = godkjenttidspunkt,
             saksbehandleroverstyringer = saksbehandleroverstyringer
         )
-        gjeldendeGenerasjoner.forEach {
-            it.håndterGodkjentAvSaksbehandler(saksbehandlerIdent, varselRepository)
-        }
+        sykefraværstilfelle.håndterGodkjent(saksbehandlerIdent, vedtaksperiodeId)
+
         context.publiser(behov.toJson())
         context.publiser(behov.lagVedtaksperiodeGodkjent(vedtaksperiodeId, fødselsnummer, warningDao, vedtakDao).toJson())
     }
@@ -58,7 +55,7 @@ internal class GodkjenningMediator(
         begrunnelser: List<String>?,
         kommentar: String?,
         saksbehandleroverstyringer: List<UUID>,
-        gjeldendeGenerasjoner: List<Generasjon>,
+        sykefraværstilfelle: Sykefraværstilfelle,
     ) {
         behov.avvisManuelt(
             saksbehandlerIdent = saksbehandlerIdent,
@@ -69,9 +66,7 @@ internal class GodkjenningMediator(
             kommentar = kommentar,
             saksbehandleroverstyringer = saksbehandleroverstyringer
         )
-        gjeldendeGenerasjoner.forEach {
-            it.håndterAvvistAvSaksbehandler(saksbehandlerIdent, varselRepository)
-        }
+        sykefraværstilfelle.håndterAvvist(saksbehandlerIdent, vedtaksperiodeId)
         context.publiser(behov.toJson())
         context.publiser(behov.lagVedtaksperiodeAvvist(vedtaksperiodeId, fødselsnummer, warningDao, vedtakDao).toJson())
     }

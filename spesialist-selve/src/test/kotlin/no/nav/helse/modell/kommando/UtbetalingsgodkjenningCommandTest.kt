@@ -8,8 +8,8 @@ import java.util.UUID
 import no.nav.helse.januar
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.HendelseDao
+import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
-import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.objectMapper
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -31,7 +31,6 @@ internal class UtbetalingsgodkjenningCommandTest {
 
     private val godkjenningsbehovJson = """{ "@event_name": "behov" }"""
     private val hendelseDao = mockk<HendelseDao>()
-    private val varselRepository = mockk<VarselRepository>(relaxed = true)
     private lateinit var commandContext: CommandContext
     private lateinit var command: UtbetalingsgodkjenningCommand
 
@@ -53,13 +52,14 @@ internal class UtbetalingsgodkjenningCommandTest {
             godkjenningMediator = GodkjenningMediator(
                 mockk(relaxed = true),
                 mockk(relaxed = true),
-                mockk(relaxed = true),
-                varselRepository
+                mockk(relaxed = true)
             ),
             vedtaksperiodeId = vedtaksperiodeId,
             fødselsnummer = fødselsnummer,
             utbetaling = utbetaling,
-            gjeldendeGenerasjoner = listOf(Generasjon(UUID.randomUUID(), UUID.randomUUID(), 1.januar, 31.januar, 1.januar))
+            sykefraværstilfelle = Sykefraværstilfelle(
+                fødselsnummer, 1.januar, listOf(Generasjon(UUID.randomUUID(), UUID.randomUUID(), 1.januar, 31.januar, 1.januar))
+            )
         )
     }
 

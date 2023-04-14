@@ -38,10 +38,10 @@ internal class Varsel(
     internal fun erAktiv(): Boolean = this.status == AKTIV
 
     internal fun opprett(generasjonId: UUID) {
-        observers.forEach { it.varselOpprettet(vedtaksperiodeId, generasjonId, id, varselkode, opprettet) }
+        observers.forEach { it.varselOpprettet(id, vedtaksperiodeId, generasjonId, varselkode, opprettet) }
     }
 
-    internal fun godkjennFor(generasjonId: UUID, ident: String, varselRepository: VarselRepository) {
+    internal fun godkjennFor(generasjonId: UUID, ident: String) {
         if (status !in listOf(AKTIV, VURDERT)) return sikkerlogg.info(
             "Godkjenner ikke varsel med {}, {}, {} som ikke har status AKTIV eller VURDERT. Varselet har status=$status",
             keyValue("varselkode", varselkode),
@@ -49,10 +49,10 @@ internal class Varsel(
             keyValue("generasjonId", generasjonId)
         )
         status = GODKJENT
-        varselRepository.godkjennFor(vedtaksperiodeId, generasjonId, varselkode, ident, null)
+        observers.forEach { it.varselGodkjent(id, vedtaksperiodeId, generasjonId, varselkode, ident) }
     }
 
-    internal fun avvisFor(generasjonId: UUID, ident: String, varselRepository: VarselRepository) {
+    internal fun avvisFor(generasjonId: UUID, ident: String) {
         if (status != AKTIV) return sikkerlogg.info(
             "Avviser ikke varsel med {}, {}, {} som ikke har status $AKTIV. Varselet har status=$status",
             keyValue("varselkode", varselkode),
@@ -60,7 +60,7 @@ internal class Varsel(
             keyValue("generasjonId", generasjonId)
         )
         status = AVVIST
-        varselRepository.avvisFor(vedtaksperiodeId, generasjonId, varselkode, ident, null)
+        observers.forEach { it.varselAvvist(id, vedtaksperiodeId, generasjonId, varselkode, ident) }
     }
 
     internal fun reaktiver(generasjonId: UUID) {
@@ -108,16 +108,12 @@ internal class Varsel(
             forEach { it.oppdaterGenerasjon(gammelGenerasjonId, nyGenerasjonId) }
         }
 
-        internal fun List<Varsel>.godkjennFor(generasjonId: UUID, varselkode: String, ident: String, varselRepository: VarselRepository) {
-            find { it.varselkode == varselkode }?.godkjennFor(generasjonId, ident, varselRepository)
+        internal fun List<Varsel>.godkjennAlleFor(generasjonId: UUID, ident: String) {
+            forEach { it.godkjennFor(generasjonId, ident) }
         }
 
-        internal fun List<Varsel>.godkjennAlleFor(generasjonId: UUID, ident: String, varselRepository: VarselRepository) {
-            forEach { it.godkjennFor(generasjonId, ident, varselRepository) }
-        }
-
-        internal fun List<Varsel>.avvisAlleFor(generasjonId: UUID, ident: String, varselRepository: VarselRepository) {
-            forEach { it.avvisFor(generasjonId, ident, varselRepository) }
+        internal fun List<Varsel>.avvisAlleFor(generasjonId: UUID, ident: String) {
+            forEach { it.avvisFor(generasjonId, ident) }
         }
         internal fun List<Varsel>.finnEksisterendeVarsel(varsel: Varsel): Varsel? {
             return find { it.varselkode == varsel.varselkode }
