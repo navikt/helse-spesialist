@@ -106,7 +106,7 @@ subprojects {
         }
 
         withType<Wrapper> {
-            gradleVersion = "7.6.1"
+            gradleVersion = "8.1"
         }
 
         withType<Test> {
