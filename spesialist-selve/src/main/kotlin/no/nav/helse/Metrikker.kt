@@ -59,7 +59,8 @@ internal class MetrikkRiver(rapidsConnection: RapidsConnection) : River.PacketLi
                 it.demandValue("@event_name", "behov")
                 it.demandValue("@final", true)
                 it.requireKey("@besvart", "@behov", "system_participating_services")
-                it.interestedIn("@løsning")
+                it.interestedIn("@løsning.Godkjenning.godkjent")
+                it.interestedIn("@løsning.Godkjenning.automatiskBehandling")
             }
         }.register(this)
     }
@@ -69,7 +70,7 @@ internal class MetrikkRiver(rapidsConnection: RapidsConnection) : River.PacketLi
         val delay = MILLIS.between(opprettet, besvart)
         val behov = packet["@behov"].map(JsonNode::asText)
         val godkjent: Boolean? = packet["@løsning.Godkjenning.godkjent"].takeUnless{ it.isNull }?.asBoolean()
-        val automatisk: Boolean? = packet["@løsning.Godkjenning.automatisk"].takeUnless{ it.isNull }?.asBoolean()
+        val automatisk: Boolean? = packet["@løsning.Godkjenning.automatiskBehandling"].takeUnless{ it.isNull }?.asBoolean()
 
         val godkjenningslog = if (godkjent != null && automatisk != null) {
             " Løsning er ${if (automatisk) "automatisk" else "manuelt"} ${if (godkjent) "godkjennt" else "avvist"}."
