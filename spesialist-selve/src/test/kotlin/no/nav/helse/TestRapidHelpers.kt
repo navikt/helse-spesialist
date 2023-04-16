@@ -97,23 +97,23 @@ object TestRapidHelpers {
             .asText()
 
     fun TestRapid.RapidInspector.oppgaver(): Map<Int, OppgaveSnapshot> {
-        val oppgaveindekser = mutableListOf<Long>()
-        val oppgaver = mutableMapOf<Int, MutableList<JsonNode>>()
+        val oppgaveider = mutableListOf<Long>()
+        val oppgavemeldinger = mutableMapOf<Int, MutableList<JsonNode>>()
         hendelser("oppgave_opprettet")
             .forEach {
-                oppgaveindekser.add(it.path("oppgaveId").asLong())
-                oppgaver[oppgaveindekser.size - 1] = mutableListOf(it)
+                oppgaveider.add(it.path("oppgaveId").asLong())
+                oppgavemeldinger[oppgaveider.size - 1] = mutableListOf(it)
             }
         hendelser("oppgave_oppdatert")
             .forEach { oppgave ->
-                val indeks = oppgaveindekser.indexOf(oppgave.path("oppgaveId").asLong())
-                oppgaver[indeks]?.add(oppgave)
+                val indeks = oppgaveider.indexOf(oppgave.path("oppgaveId").asLong())
+                oppgavemeldinger[indeks]?.add(oppgave)
             }
-        return oppgaver
-            .mapValues { (_, oppgaver) ->
+        return oppgavemeldinger
+            .mapValues { (_, oppgavemelding) ->
                 OppgaveSnapshot(
-                    type = oppgaver.first().path("type").asText(),
-                    statuser = oppgaver.map { Oppgavestatus.valueOf(it.path("status").asText()) }
+                    type = oppgavemelding.first().path("type").asText(),
+                    statuser = oppgavemelding.map { Oppgavestatus.valueOf(it.path("status").asText()) }
                 )
             }
     }
