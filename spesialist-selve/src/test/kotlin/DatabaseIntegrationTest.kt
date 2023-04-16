@@ -375,7 +375,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         utbetalingDao.nyttOppdrag(fagsystemId, ORGNUMMER, "SPREF", endringskode, LocalDate.now().plusDays(169))!!
 
     protected fun lagPersonoppdrag(fagsystemId: String = fagsystemId(), endringskode: String = "NY") =
-        utbetalingDao.nyttOppdrag(fagsystemId, FNR, "SPREF", endringskode, LocalDate.now().plusDays(169))!!
+        utbetalingDao.nyttOppdrag(fagsystemId, FNR, "SP", endringskode, LocalDate.now().plusDays(169))!!
 
     protected fun lagUtbetalingId(
         arbeidsgiverOppdragId: Long,
