@@ -18,6 +18,7 @@ import no.nav.helse.modell.utbetaling.Refusjonstype
 import no.nav.helse.modell.utbetaling.Refusjonstype.DELVIS_REFUSJON
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.UtbetalingDao
+import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -70,7 +71,12 @@ internal class SaksbehandlerløsningTest {
     @Test
     fun `løser godkjenningsbehov`() {
         every { hendelseDao.finnUtbetalingsgodkjenningbehovJson(GODKJENNINGSBEHOV_ID) } returns GODKJENNINGSBEHOV_JSON
-        every { utbetalingDao.utbetalingFor(OPPGAVE_ID) } returns Utbetaling(randomUUID(), 1000, 1000)
+        every { utbetalingDao.utbetalingFor(OPPGAVE_ID) } returns Utbetaling(
+            randomUUID(),
+            1000,
+            1000,
+            Utbetalingtype.UTBETALING,
+        )
         val saksbehandlerløsning = saksbehandlerløsning(true)
         assertTrue(saksbehandlerløsning.execute(context))
         assertLøsning(true, DELVIS_REFUSJON)
@@ -79,7 +85,12 @@ internal class SaksbehandlerløsningTest {
     @Test
     fun `løser godkjenningsbehov med saksbehandleroverstyringer`() {
         every { hendelseDao.finnUtbetalingsgodkjenningbehovJson(GODKJENNINGSBEHOV_ID) } returns GODKJENNINGSBEHOV_JSON
-        every { utbetalingDao.utbetalingFor(OPPGAVE_ID) } returns Utbetaling(randomUUID(), 1000, 1000)
+        every { utbetalingDao.utbetalingFor(OPPGAVE_ID) } returns Utbetaling(
+            randomUUID(),
+            1000,
+            1000,
+            Utbetalingtype.UTBETALING,
+        )
         val  saksbehandleroverstyringer = listOf(randomUUID(), randomUUID())
         val saksbehandlerløsning = saksbehandlerløsning(true, saksbehandleroverstyringer)
         assertTrue(saksbehandlerløsning.execute(context))
@@ -95,7 +106,12 @@ internal class SaksbehandlerløsningTest {
     @Test
     fun `løser godkjenningsbehov ved avvist utbetaling`() {
         every { hendelseDao.finnUtbetalingsgodkjenningbehovJson(GODKJENNINGSBEHOV_ID) } returns GODKJENNINGSBEHOV_JSON
-        every { utbetalingDao.utbetalingFor(OPPGAVE_ID) } returns Utbetaling(randomUUID(), 1000, 1000)
+        every { utbetalingDao.utbetalingFor(OPPGAVE_ID) } returns Utbetaling(
+            randomUUID(),
+            1000,
+            1000,
+            Utbetalingtype.UTBETALING,
+        )
         val saksbehandlerløsning = saksbehandlerløsning(false)
         assertTrue(saksbehandlerløsning.execute(context))
         assertLøsning(false, DELVIS_REFUSJON)

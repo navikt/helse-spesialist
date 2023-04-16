@@ -9,6 +9,7 @@ import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
+import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.objectMapper
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -31,7 +32,6 @@ internal class AutomatiseringCommandTest {
         AutomatiseringCommand(
             fødselsnummer,
             vedtaksperiodeId,
-            utbetalingId,
             hendelseId,
             automatisering,
             """{ "@event_name": "behov" }""",
@@ -40,7 +40,7 @@ internal class AutomatiseringCommandTest {
                 vedtakDao = mockk(relaxed = true),
                 opptegnelseDao = mockk(relaxed = true)
             ),
-            Utbetaling(utbetalingId, 1000, 1000),
+            Utbetaling(utbetalingId, 1000, 1000, Utbetalingtype.UTBETALING),
             periodeType,
             Sykefraværstilfelle(fødselsnummer, 1.januar, emptyList()),
             1.januar

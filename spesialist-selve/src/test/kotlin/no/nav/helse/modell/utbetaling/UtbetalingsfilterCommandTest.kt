@@ -23,7 +23,7 @@ internal class UtbetalingsfilterCommandTest {
         godkjenningsbehovJson = "{}",
         godkjenningMediator = godkjenningMediator,
         utbetalingsfilter = { utbetalingsfilter },
-        utbetaling = Utbetaling(UUID.randomUUID(), 1000, 1000)
+        utbetaling = Utbetaling(UUID.randomUUID(), 1000, 1000, Utbetalingtype.UTBETALING)
     )
 
     @BeforeEach

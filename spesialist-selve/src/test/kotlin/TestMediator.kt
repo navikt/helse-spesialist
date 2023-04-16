@@ -59,7 +59,6 @@ internal class TestMediator(
         personDao = PersonDao(dataSource),
         vedtakDao = vedtakDao,
         overstyringDao = OverstyringDao(dataSource),
-        snapshotMediator = snapshotMediator,
         stikkprøver = object : Stikkprøver {
             override fun utsFlereArbeidsgivereFørstegangsbehandling() = false
             override fun utsFlereArbeidsgivereForlengelse() = false

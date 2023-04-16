@@ -7,6 +7,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.modell.utbetaling.Utbetaling
+import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
@@ -27,7 +28,7 @@ internal class UtbetalingsgodkjenningMessageTest {
         private val GODKJENTTIDSPUNKT = LocalDateTime.now()
     }
     private lateinit var utbetalingMessage: UtbetalingsgodkjenningMessage
-    private val utbetaling = Utbetaling(UUID.randomUUID(), 1000, 1000)
+    private val utbetaling = Utbetaling(UUID.randomUUID(), 1000, 1000, Utbetalingtype.UTBETALING)
 
     @BeforeEach
     fun setup() {

@@ -8,9 +8,10 @@ import no.nav.helse.modell.utbetaling.Refusjonstype.INGEN_UTBETALING
 import no.nav.helse.modell.utbetaling.Refusjonstype.NEGATIVT_BELØP
 
 internal class Utbetaling(
-    private val utbetalingId: UUID,
+    internal val utbetalingId: UUID,
     private val arbeidsgiverbeløp: Int,
     private val personbeløp: Int,
+    private val type: Utbetalingtype,
 ) {
     internal fun refusjonstype(): Refusjonstype {
         if (arbeidsgiverbeløp == 0 && personbeløp == 0) return INGEN_UTBETALING
@@ -19,6 +20,10 @@ internal class Utbetaling(
         if (arbeidsgiverbeløp > 0 && personbeløp == 0) return FULL_REFUSJON
         return NEGATIVT_BELØP
     }
+
+    internal fun harUtbetalingTilSykmeldt() = personbeløp > 0
+
+    internal fun erRevurdering() = type == Utbetalingtype.REVURDERING
 
     override fun equals(other: Any?): Boolean = this === other || (
         other is Utbetaling &&
@@ -33,6 +38,10 @@ internal class Utbetaling(
         result = 31 * result + arbeidsgiverbeløp
         result = 31 * result + personbeløp
         return result
+    }
+
+    override fun toString(): String {
+        return "Utbetaling(utbetalingId=$utbetalingId, arbeidsgiverbeløp=$arbeidsgiverbeløp, personbeløp=$personbeløp, type=$type)"
     }
 }
 

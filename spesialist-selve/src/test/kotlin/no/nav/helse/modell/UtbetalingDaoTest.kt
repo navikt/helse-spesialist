@@ -53,7 +53,7 @@ class UtbetalingDaoTest : DatabaseIntegrationTest() {
         utbetalingDao.opprettUtbetalingId(utbetalingId, FNR, ORGNUMMER, Utbetalingtype.UTBETALING, LocalDateTime.now(), arbeidsgiveroppdragId1, personOppdragId1, 2000, 2000)
 
         val utbetaling = utbetalingDao.utbetalingFor(utbetalingId)
-        assertEquals(Utbetaling(utbetalingId, 2000, 2000), utbetaling)
+        assertEquals(Utbetaling(utbetalingId, 2000, 2000, Utbetalingtype.UTBETALING), utbetaling)
     }
 
     @Test
@@ -69,7 +69,7 @@ class UtbetalingDaoTest : DatabaseIntegrationTest() {
         utbetalingDao.opprettUtbetalingId(utbetalingId, FNR, ORGNUMMER, Utbetalingtype.UTBETALING, LocalDateTime.now(), arbeidsgiveroppdragId1, personOppdragId1, 2000, 2000)
 
         val utbetaling = utbetalingDao.utbetalingFor(oppgaveId)
-        assertEquals(Utbetaling(utbetalingId, 2000, 2000), utbetaling)
+        assertEquals(Utbetaling(utbetalingId, 2000, 2000, Utbetalingtype.UTBETALING), utbetaling)
     }
 
     @Test

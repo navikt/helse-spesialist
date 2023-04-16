@@ -5,7 +5,6 @@ import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.objectMapper
-import no.nav.helse.spesialist.api.graphql.enums.Utbetalingtype
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLUtbetaling
 import org.intellij.lang.annotations.Language
@@ -71,7 +70,3 @@ internal fun GraphQLUtbetaling?.utbetalingTilSykmeldt() = this != null && person
 internal fun GraphQLUtbetaling?.utbetalingTilArbeidsgiver() = this != null && arbeidsgiverNettoBelop != 0
 
 internal fun GraphQLUtbetaling?.delvisRefusjon() = utbetalingTilSykmeldt() && utbetalingTilArbeidsgiver()
-
-internal fun GraphQLUtbetaling?.erNullendring() = this != null && personNettoBelop == 0 && arbeidsgiverNettoBelop == 0
-
-internal fun GraphQLUtbetaling?.erRevurdering() = this?.typeEnum == Utbetalingtype.REVURDERING

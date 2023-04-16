@@ -10,6 +10,7 @@ import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
+import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.objectMapper
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -26,7 +27,7 @@ internal class UtbetalingsgodkjenningCommandTest {
         private val GODKJENNINGSBEHOV_ID = UUID.randomUUID()
         private val vedtaksperiodeId = UUID.randomUUID()
         private val fødselsnummer = "1234"
-        private val utbetaling = Utbetaling(UUID.randomUUID(), 1000, 1000)
+        private val utbetaling = Utbetaling(UUID.randomUUID(), 1000, 1000, Utbetalingtype.UTBETALING)
     }
 
     private val godkjenningsbehovJson = """{ "@event_name": "behov" }"""

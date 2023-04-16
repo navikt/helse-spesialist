@@ -15,12 +15,11 @@ import org.slf4j.LoggerFactory
 internal class AutomatiseringCommand(
     private val fødselsnummer: String,
     private val vedtaksperiodeId: UUID,
-    private val utbetalingId: UUID,
     private val hendelseId: UUID,
     private val automatisering: Automatisering,
     private val godkjenningsbehovJson: String,
     private val godkjenningMediator: GodkjenningMediator,
-    private val utbetaling: Utbetaling?,
+    private val utbetaling: Utbetaling,
     private val periodetype: Periodetype,
     private val sykefraværstilfelle: Sykefraværstilfelle,
     private val periodeTom: LocalDate
@@ -31,7 +30,7 @@ internal class AutomatiseringCommand(
     }
 
     override fun execute(context: CommandContext): Boolean {
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, hendelseId, utbetalingId, periodetype, sykefraværstilfelle, periodeTom) {
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, hendelseId, utbetaling, periodetype, sykefraværstilfelle, periodeTom) {
             val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson, utbetaling)
             godkjenningMediator.automatiskUtbetaling(context, behov, vedtaksperiodeId, fødselsnummer, hendelseId)
             logg.info("Automatisk godkjenning for vedtaksperiode $vedtaksperiodeId")

@@ -48,7 +48,7 @@ internal class GosysOppgaveEndret(
     override fun fødselsnummer() = fødselsnummer
     override fun toJson(): String = json
 
-    private val utbetaling = utbetalingDao.utbetalingFor(gosysOppgaveEndretCommandData.utbetalingId)
+    private val utbetaling = utbetalingDao.hentUtbetaling(gosysOppgaveEndretCommandData.utbetalingId)
 
     override val commands: List<Command> = listOf(
         ÅpneGosysOppgaverCommand(
@@ -67,7 +67,6 @@ internal class GosysOppgaveEndret(
         AutomatiseringForEksisterendeOppgaveCommand(
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = gosysOppgaveEndretCommandData.vedtaksperiodeId,
-            utbetalingId = gosysOppgaveEndretCommandData.utbetalingId,
             hendelseId = gosysOppgaveEndretCommandData.hendelseId,
             automatisering = automatisering,
             godkjenningsbehovJson = gosysOppgaveEndretCommandData.godkjenningsbehovJson,

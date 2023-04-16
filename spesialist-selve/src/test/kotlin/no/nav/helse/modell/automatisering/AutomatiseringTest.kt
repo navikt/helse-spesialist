@@ -19,15 +19,13 @@ import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.Risikovurdering
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
+import no.nav.helse.modell.utbetaling.Utbetaling
+import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålDao
-import no.nav.helse.spesialist.api.graphql.enums.GraphQLUtbetalingstatus
-import no.nav.helse.spesialist.api.graphql.enums.Utbetalingtype
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLUtbetaling
-import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -38,7 +36,6 @@ internal class AutomatiseringTest {
     private val risikovurderingDaoMock = mockk<RisikovurderingDao> {
         every { hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(true)
     }
-    private val snapshotMediator = mockk<SnapshotMediator>(relaxed = true)
     private val åpneGosysOppgaverDaoMock = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
     private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
     private val personDaoMock = mockk<PersonDao>(relaxed = true)
@@ -69,7 +66,6 @@ internal class AutomatiseringTest {
             personDao = personDaoMock,
             vedtakDao = vedtakDaoMock,
             overstyringDao = overstyringDaoMock,
-            snapshotMediator = snapshotMediator,
             stikkprøver = stikkprøver
         )
 
@@ -153,21 +149,24 @@ internal class AutomatiseringTest {
 
     @Test
     fun `periode til revurdering skal ikke automatisk godkjennes`() {
-        every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(type = Utbetalingtype.REVURDERING, personbeløp = 1)
-        gårTilManuell()
+        gårTilManuell(enUtbetaling(personbeløp = 1, type = Utbetalingtype.REVURDERING))
     }
 
     @Test
     fun `revurdering uten endringer i beløp kan automatisk godkjennes`() {
-        every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(type = Utbetalingtype.REVURDERING)
-        gårAutomatisk()
+        gårAutomatisk(
+            enUtbetaling(
+                arbeidsgiverbeløp = 0,
+                personbeløp = 0,
+                type = Utbetalingtype.REVURDERING
+            )
+        )
     }
 
     @Test
     fun `periode til revurdering skal automatisk godkjennes om toggle er på`() {
         Toggle.AutomatiserRevuderinger.enable()
-        every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(type = Utbetalingtype.REVURDERING)
-        gårAutomatisk()
+        gårAutomatisk(enUtbetaling(type = Utbetalingtype.REVURDERING))
         Toggle.AutomatiserRevuderinger.disable()
     }
 
@@ -180,45 +179,41 @@ internal class AutomatiseringTest {
     @Test
     fun `periode med utbetaling til sykmeldt skal ikke automatisk godkjennes`() {
         Toggle.AutomatiserUtbetalingTilSykmeldt.disable()
-        every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(personbeløp = 500)
-        gårTilManuell()
+        gårTilManuell(enUtbetaling(personbeløp = 500))
         Toggle.AutomatiserUtbetalingTilSykmeldt.enable()
     }
 
     @Test
     fun `forlengelse med utbetaling til sykmeldt skal automatisk godkjennes`() {
-        every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(personbeløp = 500)
-        gårAutomatisk()
+        gårAutomatisk(enUtbetaling(personbeløp = 500))
     }
 
     @Test
     fun `forlengelse med utbetaling til sykmeldt som plukkes ut som stikkprøve skal ikke automatisk godkjennes`() {
         stikkprøveUtsEnArbeidsgiverForlengelse = true
-        every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(personbeløp = 500)
-        gårTilManuell()
+        gårTilManuell(enUtbetaling(personbeløp = 500))
     }
 
     @Test
     fun `førstegangsbehandling med utbetaling til sykmeldt skal automatisk godkjennes`() {
-        every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(personbeløp = 500)
-        gårAutomatisk()
+        gårAutomatisk(enUtbetaling(personbeløp = 500))
     }
 
     @Test
     fun `førstegangsbehandling med utbetaling til sykmeldt som plukkes ut som stikkprøve skal ikke automatisk godkjennes`() {
         stikkprøveUtsEnArbeidsgiverFørstegangsbehandling = true
-        every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(personbeløp = 500)
         support.run {
-            forsøkAutomatisering(periodetype = Periodetype.FØRSTEGANGSBEHANDLING)
+            forsøkAutomatisering(
+                periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+                utbetaling = enUtbetaling(personbeløp = 500)
+            )
             assertGikkTilManuell()
         }
     }
 
     @Test
     fun `periode med delvis refusjon skal automatisk godkjennes`() {
-        every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns
-                enUtbetaling(personbeløp = 500, arbeidsgiverbeløp = 500)
-        gårAutomatisk()
+        gårAutomatisk(enUtbetaling(personbeløp = 500, arbeidsgiverbeløp = 500))
     }
 
     @Test
@@ -229,9 +224,13 @@ internal class AutomatiseringTest {
 
     @Test
     fun `nullrevurdering grunnet saksbehandleroverstyring skal ikke automatisk godkjennes`() {
-        every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns
-                enUtbetaling(type = Utbetalingtype.REVURDERING)
-        support.forsøkAutomatisering()
+        support.forsøkAutomatisering(
+            utbetaling = enUtbetaling(
+                arbeidsgiverbeløp = 0,
+                personbeløp = 0,
+                type = Utbetalingtype.REVURDERING
+            )
+        )
         support.assertBleAutomatiskGodkjent()
 
         clearMocks(support.onAutomatiserbar, automatiseringDaoMock)
@@ -241,30 +240,17 @@ internal class AutomatiseringTest {
         support.assertGikkTilManuell()
     }
 
-    private fun enUtbetaling(personbeløp: Int = 0, arbeidsgiverbeløp: Int = 0, type: Utbetalingtype = Utbetalingtype.UTBETALING): GraphQLUtbetaling =
-        GraphQLUtbetaling(
-            id = utbetalingId.toString(),
-            arbeidsgiverFagsystemId = "EN_FAGSYSTEMID",
-            arbeidsgiverNettoBelop = arbeidsgiverbeløp,
-            personFagsystemId = "EN_FAGSYSTEMID",
-            personNettoBelop = personbeløp,
-            statusEnum = GraphQLUtbetalingstatus.GODKJENT,
-            typeEnum = type,
-            vurdering = null,
-            personoppdrag = null,
-            arbeidsgiveroppdrag = null,
-        )
-
     private val support = object {
         val onAutomatiserbar = mockk<() -> Unit>(relaxed = true)
         fun forsøkAutomatisering(
             periodetype: Periodetype = Companion.periodetype,
             generasjoner: List<Generasjon> = emptyList(),
+            utbetaling: Utbetaling = enUtbetaling(),
         ) = automatisering.utfør(
             fødselsnummer,
             vedtaksperiodeId,
             hendelseId,
-            utbetalingId,
+            utbetaling,
             periodetype,
             sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1.januar, generasjoner),
             periodeTom = 31.januar,
@@ -288,13 +274,19 @@ internal class AutomatiseringTest {
         }
     }
 
-    private fun gårTilManuell() = support.run {
-        forsøkAutomatisering()
+    private fun enUtbetaling(
+        arbeidsgiverbeløp: Int = 500,
+        personbeløp: Int = 0,
+        type: Utbetalingtype = Utbetalingtype.UTBETALING,
+    ) = Utbetaling(utbetalingId, arbeidsgiverbeløp, personbeløp, type)
+
+    private fun gårTilManuell(utbetaling: Utbetaling = enUtbetaling()) = support.run {
+        forsøkAutomatisering(utbetaling = utbetaling)
         assertGikkTilManuell()
     }
 
-    private fun gårAutomatisk() = support.run {
-        forsøkAutomatisering()
+    private fun gårAutomatisk(utbetaling: Utbetaling = enUtbetaling()) = support.run {
+        forsøkAutomatisering(utbetaling = utbetaling)
         assertBleAutomatiskGodkjent()
     }
 }

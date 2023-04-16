@@ -10,6 +10,7 @@ import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
+import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.IVedtaksperiodeObserver
@@ -40,7 +41,7 @@ internal class GodkjenningMediatorTest {
         opptegnelseDao = opptegnelseDao,
     )
 
-    private val utbetaling = Utbetaling(UUID.randomUUID(), 1000, 1000)
+    private val utbetaling = Utbetaling(UUID.randomUUID(), 1000, 1000, Utbetalingtype.UTBETALING)
 
     @BeforeEach
     fun setup() {

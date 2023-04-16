@@ -15,13 +15,12 @@ import org.slf4j.LoggerFactory
 internal class AutomatiseringForEksisterendeOppgaveCommand(
     private val fødselsnummer: String,
     private val vedtaksperiodeId: UUID,
-    private val utbetalingId: UUID,
     private val hendelseId: UUID,
     private val automatisering: Automatisering,
     private val godkjenningsbehovJson: String,
     private val godkjenningMediator: GodkjenningMediator,
     private val oppgaveMediator: OppgaveMediator,
-    private val utbetaling: Utbetaling?,
+    private val utbetaling: Utbetaling,
     private val periodetype: Periodetype,
     private val sykefraværstilfelle: Sykefraværstilfelle,
     private val periodeTom: LocalDate
@@ -32,7 +31,7 @@ internal class AutomatiseringForEksisterendeOppgaveCommand(
     }
 
     override fun execute(context: CommandContext): Boolean {
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, hendelseId, utbetalingId, periodetype, sykefraværstilfelle, periodeTom) {
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, hendelseId, utbetaling, periodetype, sykefraværstilfelle, periodeTom) {
             val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson, utbetaling)
             godkjenningMediator.automatiskUtbetaling(context, behov, vedtaksperiodeId, fødselsnummer, hendelseId)
             logg.info("Oppgave avbrytes for vedtaksperiode $vedtaksperiodeId på grunn av automatisering")

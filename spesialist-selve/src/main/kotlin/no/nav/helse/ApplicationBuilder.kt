@@ -348,7 +348,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         personDao = personDao,
         vedtakDao = vedtakDao,
         overstyringDao = overstyringDao,
-        snapshotMediator = snapshotMediator,
         stikkprøver = stikkprøver
     )
 
