@@ -10,22 +10,23 @@ import io.ktor.http.ContentType
 import io.ktor.http.path
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
+import no.nav.helse.spesialist.api.client.AccessTokenClient
 import org.slf4j.LoggerFactory
 
 class MsGraphClient(
     private val httpClient: HttpClient,
-    private val tokenClient: GraphAccessTokenClient,
+    private val tokenClient: AccessTokenClient,
     private val graphUrl: String = "https://graph.microsoft.com/v1.0",
 ) {
     suspend fun erIGruppe(oid: UUID, groupId: UUID): Boolean {
-        val token = runBlocking { tokenClient.fetchToken() }
+        val token = runBlocking { tokenClient.hentAccessToken("https://graph.microsoft.com/.default") }
         val response = httpClient.get(graphUrl) {
             url {
                 path("v1.0/groups/$groupId/members")
                 parameters.append("\$filter", "id eq '$oid'")
                 parameters.append("\$count", "true")
             }
-            bearerAuth(token.access_token)
+            bearerAuth(token)
             accept(ContentType.parse("application/json"))
             header("ConsistencyLevel", "eventual")
         }

@@ -139,11 +139,19 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             connectionRequestTimeout = 40_000
         }
     }
-    private val accessTokenClient = AccessTokenClient(
-        aadAccessTokenUrl = env.getValue("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
+    private val azureConfig = AzureConfig(
         clientId = env.getValue("AZURE_APP_CLIENT_ID"),
-        clientSecret = env.getValue("AZURE_APP_CLIENT_SECRET"),
-        httpClient = azureAdClient
+        issuer = env.getValue("AZURE_OPENID_CONFIG_ISSUER"),
+        jwkProviderUri = env.getValue("AZURE_OPENID_CONFIG_JWKS_URI"),
+        tokenEndpoint = env.getValue("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
+    )
+    private val azureAdAppConfig = AzureAdAppConfig(
+        azureConfig = azureConfig,
+    )
+    private val accessTokenClient = AccessTokenClient(
+        httpClient = azureAdClient,
+        azureConfig = azureConfig,
+        privateJwk = env.getValue("AZURE_APP_JWK")
     )
     private val snapshotClient = SnapshotClient(
         httpClient = httpClient,
@@ -157,22 +165,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         apiUrl = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_API_URL"),
         scope = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_SCOPE"),
     )
-    private val azureConfig = AzureConfig(
-        clientId = env.getValue("AZURE_APP_CLIENT_ID"),
-        issuer = env.getValue("AZURE_OPENID_CONFIG_ISSUER"),
-        jwkProviderUri = env.getValue("AZURE_OPENID_CONFIG_JWKS_URI"),
-        tokenEndpoint = env.getValue("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
-    )
-    private val azureAdAppConfig = AzureAdAppConfig(
-        azureConfig = azureConfig,
-    )
-    private val graphAccessTokenClient = GraphAccessTokenClient(
-        httpClient = httpClient,
-        azureConfig = azureConfig,
-        privateJwk = env.getValue("AZURE_APP_JWK")
-    )
 
-    private val msGraphClient = MsGraphClient(httpClient = httpClient, tokenClient = graphAccessTokenClient)
+    private val msGraphClient = MsGraphClient(httpClient = httpClient, tokenClient = accessTokenClient)
 
     private val httpTraceLog = LoggerFactory.getLogger("tjenestekall")
     private lateinit var hendelseMediator: HendelseMediator

@@ -10,6 +10,7 @@ plugins {
 }
 
 dependencies {
+    api("com.nimbusds:nimbus-jose-jwt:9.31")
     implementation(project(":spesialist-felles"))
     implementation("com.expediagroup:graphql-kotlin-server:$graphQLKotlinVersion")
     testImplementation("org.testcontainers:postgresql:$testcontainersVersion")
