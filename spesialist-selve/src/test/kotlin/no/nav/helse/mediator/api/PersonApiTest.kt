@@ -16,6 +16,7 @@ import io.ktor.server.auth.authenticate
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.TestApplicationBuilder
 import io.ktor.server.testing.testApplication
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -35,6 +36,7 @@ import no.nav.helse.spesialist.api.azureAdAppAuthentication
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.testEnv
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
@@ -52,6 +54,11 @@ internal class PersonApiTest {
     private val avvisning = GodkjenningDTO(1L, false, saksbehandlerIdent, "Avvist", null, null)
     private val riskQaGruppe = idForGruppe(Gruppe.RISK_QA)
     private val beslutterGruppe = idForGruppe(Gruppe.BESLUTTER)
+
+    @BeforeEach
+    fun beforeEach() {
+        clearAllMocks()
+    }
 
     @Test
     fun `godkjenning av vedtaksperiode OK`() = iEnTestApplication { client ->
