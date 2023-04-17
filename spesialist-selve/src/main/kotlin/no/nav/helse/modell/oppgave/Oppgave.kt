@@ -5,7 +5,6 @@ import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.Gruppe
 import no.nav.helse.Tilgangskontroll
-import no.nav.helse.mediator.Toggle
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
@@ -165,7 +164,7 @@ class Oppgave private constructor(
             log.info("OppgaveId $id er stikkprøve og tildeles ikke på tross av reservasjon.")
             return
         }
-        if (Toggle.HentDataFraMsGraph.enabled && type == Oppgavetype.RISK_QA) {
+        if (type == Oppgavetype.RISK_QA) {
             val harTilgangTilRisk = runBlocking { harTilgangTil(saksbehandleroid, Gruppe.RISK_QA) }
             if (!harTilgangTilRisk) log.info("OppgaveId $id er RISK_QA og saksbehandler har ikke tilgang, tildeles ikke på tross av reservasjon.")
             return

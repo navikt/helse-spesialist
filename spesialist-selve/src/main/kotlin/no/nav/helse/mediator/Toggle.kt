@@ -10,5 +10,4 @@ abstract class Toggle(private var _enabled: Boolean) {
     object Inntekter : Toggle("INNTEKTER", true)
     object AutomatiserRevuderinger : Toggle("AUTOMATISER_REVURDERINGER", erDev())
     object AutomatiserUtbetalingTilSykmeldt : Toggle("AUTOMATISER_UTS", true)
-    object HentDataFraMsGraph : Toggle("HENT_DATA_FRA_MS_GRAPH", erDev())
 }

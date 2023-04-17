@@ -60,6 +60,7 @@ internal class OppgaveMediatorTest {
     )
     private val søknadsoppgave: Oppgave = Oppgave.søknad(VEDTAKSPERIODE_ID, UTBETALING_ID)
     private val stikkprøveoppgave: Oppgave = Oppgave.stikkprøve(VEDTAKSPERIODE_ID_2, UTBETALING_ID_2)
+    private val riskoppgave: Oppgave = Oppgave.riskQA(VEDTAKSPERIODE_ID, UTBETALING_ID)
 
     private val testRapid = TestRapid()
 
@@ -98,8 +99,21 @@ internal class OppgaveMediatorTest {
         every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
         mediator.opprett(søknadsoppgave)
         mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
-        assertTrue(gruppehenterTestoppsett.erKalt)
+        assertFalse(gruppehenterTestoppsett.erKalt)
         verify(exactly = 1) { tildelingDao.opprettTildeling(any(), oid, any()) }
+        assertAntallOpptegnelser(1)
+    }
+
+    @Test
+    fun `tildeler ikke risk-oppgave til saksbehandler som har reservert personen hvis hen ikke har risk-tilgang`() {
+        val oid = UUID.randomUUID()
+        every { reservasjonDao.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns Reservasjonsinfo(oid, false)
+        every { oppgaveDao.finn(0L) } returns riskoppgave
+        every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
+        mediator.opprett(riskoppgave)
+        mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
+        assertTrue(gruppehenterTestoppsett.erKalt)
+        verify(exactly = 0) { tildelingDao.opprettTildeling(any(), oid, any()) }
         assertAntallOpptegnelser(1)
     }
 

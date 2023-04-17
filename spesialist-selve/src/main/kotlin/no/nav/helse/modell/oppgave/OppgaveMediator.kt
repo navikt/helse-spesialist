@@ -2,10 +2,6 @@ package no.nav.helse.modell.oppgave
 
 import java.sql.SQLException
 import java.util.UUID
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import no.nav.helse.Gruppe
 import no.nav.helse.Tilgangskontroll
 import no.nav.helse.modell.oppgave.Oppgave.Companion.loggOppgaverAvbrutt
 import no.nav.helse.rapids_rivers.MessageContext
@@ -111,8 +107,6 @@ class OppgaveMediator(
     private fun tildelOppgaver(fødselsnummer: String) {
         reservasjonDao.hentReservasjonFor(fødselsnummer)?.let { (oid, settPåVent) ->
             oppgaver.forEach { oppgave ->
-                // Hent i bakgrunnen nå i utprøvingsfasen
-                CoroutineScope(Dispatchers.IO).launch { harTilgangTil(oid, Gruppe.RISK_QA) }
                 oppgave.tildelHvisIkkeStikkprøve(this, oid, settPåVent, harTilgangTil)
             }
         }
