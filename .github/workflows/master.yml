@@ -97,7 +97,6 @@ jobs:
 
     deployProd:
         name: Deploy to prod
-        if: ${{false}}
         needs: [image_name, build, deployDev]
         runs-on: ubuntu-latest
         steps:
