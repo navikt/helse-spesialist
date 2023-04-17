@@ -4,6 +4,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.modell.varsel.Varsel.Companion.finnEksisterendeVarsel
 import no.nav.helse.modell.varsel.Varsel.Companion.forhindrerAutomatisering
+import no.nav.helse.modell.varsel.Varsel.Companion.inneholderMedlemskapsvarsel
 import no.nav.helse.modell.varsel.Varsel.Status.AKTIV
 import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
 import no.nav.helse.modell.varsel.Varsel.Status.VURDERT
@@ -173,6 +174,19 @@ internal class VarselTest {
     fun `forhindrer automatisering`(status: Varsel.Status) {
         val varsel = nyttVarsel(status = status)
         assertTrue(listOf(varsel).forhindrerAutomatisering())
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Varsel.Status::class, names = ["AKTIV"], mode = EnumSource.Mode.EXCLUDE)
+    fun `inneholder ikke medlemskapsvarsel`(status: Varsel.Status) {
+        val varsel = nyttVarsel(status = status, kode = "RV_MV_1")
+        assertFalse(listOf(varsel).inneholderMedlemskapsvarsel())
+    }
+
+    @Test
+    fun `inneholder medlemskapsvarsel`() {
+        val varsel = nyttVarsel(status = AKTIV, kode = "RV_MV_1")
+        assertTrue(listOf(varsel).inneholderMedlemskapsvarsel())
     }
 
     @Test
