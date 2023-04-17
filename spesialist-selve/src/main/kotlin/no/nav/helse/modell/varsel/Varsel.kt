@@ -119,7 +119,7 @@ internal class Varsel(
             return find { it.varselkode == varsel.varselkode }
         }
         internal fun List<Varsel>.inneholderMedlemskapsvarsel(): Boolean {
-            return any { it.varselkode == "RV_MV_1" }
+            return any { it.status == AKTIV && it.varselkode == "RV_MV_1" }
         }
 
         internal fun List<Varsel>.forhindrerAutomatisering() = any { it.status in listOf(VURDERT, AKTIV) }

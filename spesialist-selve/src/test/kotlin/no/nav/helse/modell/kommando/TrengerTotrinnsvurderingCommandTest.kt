@@ -5,6 +5,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
@@ -17,12 +18,15 @@ import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 
 
 internal class TrengerTotrinnsvurderingCommandTest {
 
     private companion object {
-        private val VEDTAKSPERIODE_ID = UUID.randomUUID()
+        private val VEDTAKSPERIODE_ID_2 = UUID.randomUUID()
+        private val VEDTAKSPERIODE_ID_1 = UUID.randomUUID()
         private val FØDSELSNUMMER = "fnr"
     }
 
@@ -34,11 +38,14 @@ internal class TrengerTotrinnsvurderingCommandTest {
     val sykefraværstilfelle = Sykefraværstilfelle(
         FØDSELSNUMMER,
         1.januar,
-        listOf(Generasjon(UUID.randomUUID(), VEDTAKSPERIODE_ID, 1.januar, 31.januar, 1.januar))
+        listOf(
+            Generasjon(UUID.randomUUID(), VEDTAKSPERIODE_ID_1, 1.januar, 31.januar, 1.januar),
+            Generasjon(UUID.randomUUID(), VEDTAKSPERIODE_ID_2, 1.februar, 28.februar, 1.januar)
+        )
     )
     private val command = TrengerTotrinnsvurderingCommand(
         fødselsnummer = FØDSELSNUMMER,
-        vedtaksperiodeId = VEDTAKSPERIODE_ID,
+        vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
         oppgaveMediator = oppgaveMediator,
         overstyringDao = overstyringDao,
         totrinnsvurderingMediator = totrinnsvurderingMediator,
@@ -61,11 +68,20 @@ internal class TrengerTotrinnsvurderingCommandTest {
 
     @Test
     fun `Oppretter totrinssvurdering dersom vedtaksperioden har varsel for lovvalg og medlemskap, og ikke har hatt oppgave som har vært ferdigstilt før`() {
-        sykefraværstilfelle.håndter(Varsel(UUID.randomUUID(), "RV_MV_1", LocalDateTime.now(), VEDTAKSPERIODE_ID))
-        every { oppgaveMediator.harFerdigstiltOppgave(VEDTAKSPERIODE_ID) } returns false
+        sykefraværstilfelle.håndter(Varsel(UUID.randomUUID(), "RV_MV_1", LocalDateTime.now(), VEDTAKSPERIODE_ID_2))
+        every { oppgaveMediator.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
 
         assertTrue(command.execute(context))
         verify(exactly = 1) { totrinnsvurderingMediator.opprett(any()) }
+    }
+    @ParameterizedTest
+    @EnumSource(value = Varsel.Status::class, names = ["AKTIV"], mode = EnumSource.Mode.EXCLUDE)
+    fun `Oppretter ikke totrinnssvurdering dersom tidligere vedtaksperiode har varsel for lovvalg og medlemskap og er utbetalt`(status: Varsel.Status) {
+        sykefraværstilfelle.håndter(Varsel(UUID.randomUUID(), "RV_MV_1", LocalDateTime.now(), VEDTAKSPERIODE_ID_1, status))
+        every { oppgaveMediator.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
+
+        assertTrue(command.execute(context))
+        verify(exactly = 0) { totrinnsvurderingMediator.opprett(any()) }
     }
 
     @Test
@@ -74,7 +90,7 @@ internal class TrengerTotrinnsvurderingCommandTest {
 
         every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
         every { totrinnsvurderingMediator.opprett(any()) } returns Totrinnsvurdering(
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
             erRetur = false,
             saksbehandler = saksbehander,
             beslutter = null,
@@ -96,7 +112,7 @@ internal class TrengerTotrinnsvurderingCommandTest {
 
         every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
         every { totrinnsvurderingMediator.opprett(any()) } returns Totrinnsvurdering(
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
             erRetur = false,
             saksbehandler = saksbehander,
             beslutter = beslutter,
@@ -109,7 +125,7 @@ internal class TrengerTotrinnsvurderingCommandTest {
 
         verify(exactly = 1) { totrinnsvurderingMediator.opprett(any()) }
         verify(exactly = 1) { oppgaveMediator.reserverOppgave(saksbehander, FØDSELSNUMMER) }
-        verify(exactly = 1) { totrinnsvurderingMediator.settAutomatiskRetur(VEDTAKSPERIODE_ID) }
+        verify(exactly = 1) { totrinnsvurderingMediator.settAutomatiskRetur(VEDTAKSPERIODE_ID_2) }
     }
 
     @Test
