@@ -45,7 +45,7 @@ internal class TildelingService(
         totrinnsvurderingMediator.hentAktiv(oppgaveId)
             ?.takeIf { "dev-gcp" != System.getenv("NAIS_CLUSTER_NAME") && it.erBeslutteroppgave() }
             ?.let { totrinnsvurdering ->
-                check(totrinnsvurdering.saksbehandler == saksbehandlerreferanse) {
+                check(totrinnsvurdering.saksbehandler != saksbehandlerreferanse) {
                     "Oppgave er beslutteroppgave, og kan ikke attesteres av samme saksbehandler som sendte til godkjenning"
                 }
                 check(tilgangskontroll.harTilgangTil(Gruppe.BESLUTTER)) {
