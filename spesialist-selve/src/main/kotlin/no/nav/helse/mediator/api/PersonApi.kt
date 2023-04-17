@@ -110,7 +110,7 @@ internal fun Route.personApi(
                 return@post
             }
 
-            if (!erDev()) varselRepository.godkjennVarslerFor(godkjenning.oppgavereferanse)
+            varselRepository.godkjennVarslerFor(godkjenning.oppgavereferanse)
         }
 
         withContext(Dispatchers.IO) { godkjenningService.håndter(godkjenning, epostadresse, oid) }

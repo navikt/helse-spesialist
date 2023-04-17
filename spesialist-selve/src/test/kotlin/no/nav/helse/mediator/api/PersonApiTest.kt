@@ -94,6 +94,7 @@ internal class PersonApiTest {
             }
         }
         assertEquals(HttpStatusCode.Created, response.status)
+        verify(exactly = 1) { varselRepository.godkjennVarslerFor(1L) }
     }
 
     @Test
