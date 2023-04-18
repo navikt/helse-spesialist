@@ -32,6 +32,32 @@ internal class Generasjon private constructor(
 
     private val varsler: MutableList<Varsel> = varsler.toMutableList()
     private val observers = mutableSetOf<IVedtaksperiodeObserver>()
+    private val tilstand: Tilstand get() = if (låst) Låst else Ulåst
+    internal interface Tilstand {
+        fun nyGenerasjon(generasjon: Generasjon, id: UUID, hendelseId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate): Generasjon? {
+            return null
+        }
+
+    }
+
+    internal object Låst: Tilstand {
+
+        override fun nyGenerasjon(
+            generasjon: Generasjon,
+            id: UUID,
+            hendelseId: UUID,
+            fom: LocalDate,
+            tom: LocalDate,
+            skjæringstidspunkt: LocalDate
+        ): Generasjon {
+            val nesteGenerasjon = generasjon.opprettNeste(id, hendelseId, fom, tom, skjæringstidspunkt)
+            generasjon.flyttAktiveVarsler(nesteGenerasjon)
+            return nesteGenerasjon
+        }
+    }
+    internal object Ulåst: Tilstand {
+
+    }
 
     internal fun registrer(vararg observer: IVedtaksperiodeObserver) {
         observers.addAll(observer)
@@ -57,10 +83,7 @@ internal class Generasjon private constructor(
         tom: LocalDate = this.periode.tom(),
         skjæringstidspunkt: LocalDate = this.skjæringstidspunkt
     ): Generasjon? {
-        if (!låst) return null
-        val nesteGenerasjon = opprettNeste(id, hendelseId, fom, tom, skjæringstidspunkt)
-        flyttAktiveVarsler(nesteGenerasjon)
-        return nesteGenerasjon
+        return tilstand.nyGenerasjon(this, id, hendelseId, fom, tom, skjæringstidspunkt)
     }
 
     private fun oppdaterTidslinje(fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate) {
