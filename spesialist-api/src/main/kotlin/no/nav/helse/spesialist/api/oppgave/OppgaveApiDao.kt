@@ -100,7 +100,7 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             SELECT o.id, t.vedtaksperiode_id, t.er_retur, t.beslutter, t.saksbehandler
             FROM oppgave o
             INNER JOIN vedtak v ON o.vedtak_ref = v.id
-            INNER JOIN totrinnsvurdering t on (v.vedtaksperiode_id = t.vedtaksperiode_id AND t.utbetaling_id_ref IS NULL)
+            LEFT JOIN totrinnsvurdering t on (v.vedtaksperiode_id = t.vedtaksperiode_id AND t.utbetaling_id_ref IS NULL)
             WHERE v.vedtaksperiode_id = :vedtaksperiodeId 
                 AND status = 'AvventerSaksbehandler'::oppgavestatus 
         """.trimIndent()
