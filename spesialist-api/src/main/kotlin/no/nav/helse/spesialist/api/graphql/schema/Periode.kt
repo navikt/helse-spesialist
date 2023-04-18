@@ -86,14 +86,14 @@ data class Vurdering(
     val automatisk: Boolean,
     val godkjent: Boolean,
     val ident: String,
-    val tidsstempel: DateTimeString
+    val tidsstempel: DateTimeString,
 )
 
 data class Simuleringslinje(
     val fom: DateString,
     val tom: DateString,
     val dagsats: Int,
-    val grad: Int
+    val grad: Int,
 )
 
 data class Simuleringsdetaljer(
@@ -109,7 +109,7 @@ data class Simuleringsdetaljer(
     val tilbakeforing: Boolean,
     val typeSats: String,
     val uforegrad: Int,
-    val utbetalingstype: String
+    val utbetalingstype: String,
 )
 
 data class Simuleringsutbetaling(
@@ -117,13 +117,13 @@ data class Simuleringsutbetaling(
     val mottakerNavn: String,
     val forfall: DateString,
     val feilkonto: Boolean,
-    val detaljer: List<Simuleringsdetaljer>
+    val detaljer: List<Simuleringsdetaljer>,
 )
 
 data class Simuleringsperiode(
     val fom: DateString,
     val tom: DateString,
-    val utbetalinger: List<Simuleringsutbetaling>
+    val utbetalinger: List<Simuleringsutbetaling>,
 )
 
 data class Simulering(
@@ -131,7 +131,7 @@ data class Simulering(
     val tidsstempel: DateTimeString,
     val utbetalingslinjer: List<Simuleringslinje>,
     val totalbelop: Int?,
-    val perioder: List<Simuleringsperiode>?
+    val perioder: List<Simuleringsperiode>?,
 )
 
 data class Utbetaling(
@@ -144,13 +144,13 @@ data class Utbetaling(
     val type: Utbetalingtype,
     val vurdering: Vurdering?,
     val arbeidsgiversimulering: Simulering?,
-    val personsimulering: Simulering?
+    val personsimulering: Simulering?,
 )
 
 data class Periodevilkar(
     val alder: Alder,
     val soknadsfrist: Soknadsfrist?,
-    val sykepengedager: Sykepengedager
+    val sykepengedager: Sykepengedager,
 )
 
 data class Kommentar(
@@ -191,41 +191,42 @@ data class PeriodeHistorikkElement(
     val type: PeriodehistorikkType,
     val timestamp: DateTimeString,
     val saksbehandler_ident: String?,
-    val notat_id: Int?
+    val notat_id: Int?,
 )
 
 data class Aktivitet(
     val alvorlighetsgrad: String,
     val melding: String,
     val tidsstempel: String,
-    val vedtaksperiodeId: UUIDString
+    val vedtaksperiodeId: UUIDString,
 )
 
 data class Faresignal(
     val beskrivelse: String,
-    val kategori: List<String>
+    val kategori: List<String>,
 )
 
 data class Risikovurdering(
     val funn: List<Faresignal>?,
-    val kontrollertOk: List<Faresignal>
+    val kontrollertOk: List<Faresignal>,
 )
 
+// TODO: Fjern denne
 data class Refusjon(
     val belop: Double?,
     val arbeidsgiverperioder: List<Refusjonsperiode>,
     val endringer: List<Endring>,
     val forsteFravaersdag: DateString?,
-    val sisteRefusjonsdag: DateString?
+    val sisteRefusjonsdag: DateString?,
 ) {
     data class Refusjonsperiode(
         val fom: DateString,
-        val tom: DateString
+        val tom: DateString,
     )
 
     data class Endring(
         val belop: Double,
-        val dato: DateString
+        val dato: DateString,
     )
 }
 
@@ -326,7 +327,7 @@ data class UberegnetPeriode(
     override fun vedtaksperiodeId(): UUIDString = periode.vedtaksperiodeId
     override fun periodetilstand(): Periodetilstand = periodetilstand(periode.periodetilstand)
     override fun skjaeringstidspunkt(): DateString = periode.skjaeringstidspunkt
-    override fun hendelser(): List<Hendelse> =  periode.hendelser.map { it.tilHendelse() }
+    override fun hendelser(): List<Hendelse> = periode.hendelser.map { it.tilHendelse() }
     override fun varslerForGenerasjon(): List<VarselDTO> = if (skalViseAktiveVarsler)
         varselRepository.finnVarslerForUberegnetPeriode(UUID.fromString(vedtaksperiodeId())).toList() else
         varselRepository.finnGodkjenteVarslerForUberegnetPeriode(UUID.fromString(vedtaksperiodeId())).toList()
@@ -368,24 +369,29 @@ data class BeregnetPeriode(
     override fun hendelser(): List<Hendelse> = periode.hendelser.map { it.tilHendelse() }
 
     @Deprecated("erBeslutterOppgave bør hentes fra periodens oppgave")
-    fun erBeslutterOppgave(): Boolean = oppgaveApiDao.erBeslutteroppgave(UUID.fromString(vedtaksperiodeId()))
+    fun erBeslutterOppgave(): Boolean? = oppgaveApiDao.erBeslutteroppgave(UUID.fromString(vedtaksperiodeId()))
 
     @Deprecated("erReturOppgave bør hentes fra periodens oppgave")
-    fun erReturOppgave(): Boolean = oppgaveApiDao.erReturOppgave(UUID.fromString(vedtaksperiodeId()))
+    fun erReturOppgave(): Boolean? = oppgaveApiDao.erReturOppgave(UUID.fromString(vedtaksperiodeId()))
 
     @Deprecated("trengerTotrinnsvurdering bør hentes fra periodens oppgave")
-    fun trengerTotrinnsvurdering(): Boolean =
+    fun trengerTotrinnsvurdering(): Boolean? =
         oppgaveApiDao.trengerTotrinnsvurdering(UUID.fromString(vedtaksperiodeId()))
 
     @Deprecated("tidligereSaksbehandlerOid bør hentes fra periodens oppgave")
     fun tidligereSaksbehandlerOid(): UUIDString? =
         oppgaveApiDao.hentTidligereSaksbehandlerOid(UUID.fromString(vedtaksperiodeId()))?.toString()
 
+    @Deprecated("beslutterSaksbehandlerOid skal hentes fra totrinnsvurdering")
     fun beslutterSaksbehandlerOid(): UUIDString? =
         oppgaveApiDao.hentBeslutterSaksbehandlerOid(UUID.fromString(vedtaksperiodeId()))?.toString()
 
     fun inntektFraAordningen(): List<InntektFraAOrdningen> =
-        oppgaveApiDao.finnPeriodensInntekterFraAordningen(periode.vedtaksperiodeId, periode.skjaeringstidspunkt, orgnummer)
+        oppgaveApiDao.finnPeriodensInntekterFraAordningen(
+            periode.vedtaksperiodeId,
+            periode.skjaeringstidspunkt,
+            orgnummer
+        )
 
     fun notater(): List<Notat> = notatDao.finnNotater(UUID.fromString(vedtaksperiodeId())).map {
         Notat(
@@ -505,13 +511,21 @@ data class BeregnetPeriode(
         oppgaveApiDao.finnOppgaveId(UUID.fromString(vedtaksperiodeId()))?.toString()
 
     fun oppgave(): OppgaveForPeriodevisning? =
-        oppgaveApiDao.finnPeriodeoppgave(UUID.fromString(vedtaksperiodeId()))?.let {
+        oppgaveApiDao.finnPeriodeoppgave(UUID.fromString(vedtaksperiodeId()))?.let { oppgaveForPeriodevisningDto ->
             OppgaveForPeriodevisning(
-                id = it.id,
-                erBeslutter = it.erBeslutter,
-                erRetur = it.erRetur,
-                trengerTotrinnsvurdering = it.trengerTotrinnsvurdering,
-                tidligereSaksbehandler = it.tidligereSaksbehandler,
+                id = oppgaveForPeriodevisningDto.id,
+                totrinnsvurdering = oppgaveForPeriodevisningDto.vedtaksperiodeId?.let {
+                    Totrinnsvurdering(
+                        erRetur = oppgaveForPeriodevisningDto.erRetur,
+                        saksbehandler = oppgaveForPeriodevisningDto.saksbehandler?.toString(),
+                        beslutter = oppgaveForPeriodevisningDto.beslutter?.toString(),
+                        erBeslutteroppgave = !oppgaveForPeriodevisningDto.erRetur && oppgaveForPeriodevisningDto.saksbehandler != null
+                    )
+                },
+                erBeslutter = null,
+                erRetur = null,
+                trengerTotrinnsvurdering = null,
+                tidligereSaksbehandler = null,
             )
         }
 

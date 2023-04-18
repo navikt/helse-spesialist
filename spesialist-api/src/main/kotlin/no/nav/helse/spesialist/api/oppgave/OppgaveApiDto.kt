@@ -8,6 +8,7 @@ import no.nav.helse.spesialist.api.vedtaksperiode.EnhetDto
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
 
+// TODO: Ta i bruk denne i DAO
 data class OppgaveForOversiktsvisningDto(
     val oppgavereferanse: String,
     val oppgavetype: String,
@@ -30,10 +31,10 @@ data class OppgaveForOversiktsvisningDto(
 
 data class OppgaveForPeriodevisningDto(
     val id: String,
-    val erBeslutter: Boolean,
+    val vedtaksperiodeId: UUID?,
     val erRetur: Boolean,
-    val trengerTotrinnsvurdering: Boolean,
-    val tidligereSaksbehandler: String?,
+    val beslutter: UUID?,
+    val saksbehandler: UUID?,
 )
 
 enum class Oppgavestatus {

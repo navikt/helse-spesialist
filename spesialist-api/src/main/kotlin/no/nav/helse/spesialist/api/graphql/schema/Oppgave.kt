@@ -31,22 +31,23 @@ data class OppgaveForOversiktsvisning(
     val antallVarsler: Int,
     val flereArbeidsgivere: Boolean,
     val boenhet: Boenhet,
-    val erBeslutter: Boolean,
-    val erRetur: Boolean,
-    val trengerTotrinnsvurdering: Boolean,
     val tildeling: Tildeling?,
     val periodetype: Periodetype?,
-    val tidligereSaksbehandler: UUIDString?,
     val sistSendt: DateTimeString?,
     val totrinnsvurdering: Totrinnsvurdering?,
     val mottaker: Mottaker?,
+    val erBeslutter: Boolean?,
+    val erRetur: Boolean?,
+    val trengerTotrinnsvurdering: Boolean?,
+    val tidligereSaksbehandler: UUIDString?,
 )
 
 data class OppgaveForPeriodevisning(
     val id: String,
-    val erBeslutter: Boolean,
-    val erRetur: Boolean,
-    val trengerTotrinnsvurdering: Boolean,
+    val totrinnsvurdering: Totrinnsvurdering?,
+    val erBeslutter: Boolean?,
+    val erRetur: Boolean?,
+    val trengerTotrinnsvurdering: Boolean?,
     val tidligereSaksbehandler: String?,
 )
 

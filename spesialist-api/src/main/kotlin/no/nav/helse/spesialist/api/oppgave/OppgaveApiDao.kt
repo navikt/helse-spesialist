@@ -97,18 +97,21 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
     fun finnPeriodeoppgave(vedtaksperiodeId: UUID): OppgaveForPeriodevisningDto? {
         @Language("PostgreSQL")
         val query = """
-            SELECT id, er_beslutteroppgave, er_returoppgave, er_totrinnsoppgave, tidligere_saksbehandler_oid
-            FROM oppgave
-            WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
-                AND status = 'AvventerSaksbehandler'::oppgavestatus
+            SELECT t.*
+            FROM totrinnsvurdering t
+            INNER JOIN vedtak v on t.vedtaksperiode_id = v.vedtaksperiode_id
+            INNER JOIN oppgave o on v.id = o.vedtak_ref 
+            WHERE t.vedtaksperiode_id = :vedtaksperiodeId 
+                AND status = 'AvventerSaksbehandler'::oppgavestatus 
+                AND t.utbetaling_id_ref IS NULL
         """.trimIndent()
         return query.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) {
             OppgaveForPeriodevisningDto(
                 id = it.string("id"),
-                erBeslutter = it.boolean("er_beslutteroppgave"),
-                erRetur = it.boolean("er_returoppgave"),
-                trengerTotrinnsvurdering = it.boolean("er_totrinnsoppgave"),
-                tidligereSaksbehandler = it.stringOrNull("tidligere_saksbehandler_oid"),
+                vedtaksperiodeId = it.uuidOrNull("vedtaksperiode_id"),
+                erRetur = it.boolean("er_retur"),
+                beslutter = it.uuidOrNull("beslutter"),
+                saksbehandler = it.uuidOrNull("saksbehandler"),
             )
         }
     }
