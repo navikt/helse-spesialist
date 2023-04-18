@@ -182,7 +182,7 @@ internal class Automatisering(
     ) : AutomatiseringValidering {
         override fun erAautomatiserbar() =
             !utbetaling.erRevurdering() || AutomatiserRevuderinger.enabled || utbetaling.erNullendring().also {
-                sikkerLogg.info("Revurdering av $vedtaksperiodeId (person $fødselsnummer) har ingen endring, og er godkjent for automatisering")
+                if (it) sikkerLogg.info("Revurdering av $vedtaksperiodeId (person $fødselsnummer) har ingen endring, og er godkjent for automatisering")
             }
 
         override fun error() = "Utbetalingen er revurdering"
