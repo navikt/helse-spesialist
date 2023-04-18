@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-interface IVedtaksperiodeObserver {
+internal interface IVedtaksperiodeObserver {
 
     fun tidslinjeOppdatert(generasjonId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate) {}
     fun generasjonOpprettet(generasjonId: UUID, vedtaksperiodeId: UUID, hendelseId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate) {}
@@ -18,4 +18,5 @@ interface IVedtaksperiodeObserver {
     fun varselFlyttet(varselId: UUID, gammelGenerasjonId: UUID, nyGenerasjonId: UUID) {}
     fun varselGodkjent(varselId: UUID, vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String) {}
     fun varselAvvist(varselId: UUID, vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String) {}
+    fun tilstandEndret(generasjonId: UUID, vedtaksperiodeId: UUID, gammel: Generasjon.Tilstand, ny: Generasjon.Tilstand) {}
 }

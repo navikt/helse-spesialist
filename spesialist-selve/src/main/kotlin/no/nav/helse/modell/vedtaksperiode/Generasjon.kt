@@ -33,7 +33,9 @@ internal class Generasjon private constructor(
     private val varsler: MutableList<Varsel> = varsler.toMutableList()
     private val observers = mutableSetOf<IVedtaksperiodeObserver>()
     private var tilstand: Tilstand = if (låst) Låst else Ulåst
+
     internal interface Tilstand {
+
         fun nyGenerasjon(generasjon: Generasjon, id: UUID, hendelseId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate): Generasjon? {
             return null
         }
@@ -41,11 +43,9 @@ internal class Generasjon private constructor(
         fun vedtakFattet(generasjon: Generasjon, hendelseId: UUID) {
             sikkerlogg.info("Forventet ikke vedtak_fattet i {}", kv("tilstand", this::class.simpleName))
         }
-
     }
 
     internal object Låst: Tilstand {
-
         override fun nyGenerasjon(
             generasjon: Generasjon,
             id: UUID,
@@ -59,8 +59,8 @@ internal class Generasjon private constructor(
             return nesteGenerasjon
         }
     }
-    internal object Ulåst: Tilstand {
 
+    internal object Ulåst: Tilstand {
         override fun vedtakFattet(generasjon: Generasjon, hendelseId: UUID) {
             generasjon.låst = true
             generasjon.observers.forEach { it.vedtakFattet(generasjon.id, hendelseId) }
@@ -69,6 +69,7 @@ internal class Generasjon private constructor(
     }
 
     private fun nyTilstand(gammel: Tilstand, ny: Tilstand) {
+        observers.forEach { it.tilstandEndret(id, vedtaksperiodeId, gammel, ny) }
         this.tilstand = ny
     }
 
@@ -190,6 +191,7 @@ internal class Generasjon private constructor(
         varsler.add(varsel)
         varsel.opprett(id)
     }
+
     override fun toString(): String = "generasjonId=$id, vedtaksperiodeId=$vedtaksperiodeId, utbetalingId=$utbetalingId, låst=$låst, skjæringstidspunkt=$skjæringstidspunkt, periode=$periode"
 
     override fun equals(other: Any?): Boolean =

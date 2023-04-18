@@ -229,6 +229,16 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     }
 
     @Test
+    fun `endrer tilstand etter vedtak fattet`() {
+        val generasjonId = UUID.randomUUID()
+        val generasjon = generasjon(generasjonId, UUID.randomUUID())
+        generasjon.registrer(observer)
+        generasjon.håndterVedtakFattet(UUID.randomUUID())
+        assertEquals(1, observer.låsteGenerasjoner.size)
+        observer.assertTilstandsendring(generasjonId, Generasjon.Ulåst, Generasjon.Låst, 0)
+    }
+
+    @Test
     fun `Kopierer skjæringstidspunkt og periode til neste generasjon`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)
@@ -904,11 +914,26 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
             val skjæringstidspunkt: LocalDate?
         )
 
+        val låsteGenerasjoner = mutableListOf<UUID>()
+        val tilstandsendringer = mutableMapOf<UUID, MutableList<Pair<Generasjon.Tilstand, Generasjon.Tilstand>>>()
         val opprettedeGenerasjoner = mutableMapOf<UUID, Opprettelse>()
         val oppdaterteGenerasjoner = mutableMapOf<UUID, Tidslinjeendring>()
         val opprettedeVarsler = mutableMapOf<UUID, MutableList<String>>()
         val godkjenteVarsler = mutableListOf<UUID>()
         val avvisteVarsler = mutableListOf<UUID>()
+
+        override fun vedtakFattet(generasjonId: UUID, hendelseId: UUID) {
+            låsteGenerasjoner.add(generasjonId)
+        }
+
+        override fun tilstandEndret(
+            generasjonId: UUID,
+            vedtaksperiodeId: UUID,
+            gammel: Generasjon.Tilstand,
+            ny: Generasjon.Tilstand
+        ) {
+            tilstandsendringer.getOrPut(generasjonId) { mutableListOf() }.add(gammel to ny)
+        }
         override fun generasjonOpprettet(
             generasjonId: UUID,
             vedtaksperiodeId: UUID,
@@ -958,6 +983,17 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
             ident: String
         ) {
             avvisteVarsler.add(varselId)
+        }
+
+        fun assertTilstandsendring(
+            generasjonId: UUID,
+            forventetGammel: Generasjon.Tilstand,
+            forventetNy: Generasjon.Tilstand,
+            index: Int
+        ) {
+            val (gammel, ny) = tilstandsendringer[generasjonId]!![index]
+            assertEquals(forventetGammel, gammel)
+            assertEquals(forventetNy, ny)
         }
 
         fun assertTidslinjeendring(
