@@ -522,9 +522,9 @@ data class BeregnetPeriode(
                         erBeslutteroppgave = !oppgaveForPeriodevisningDto.erRetur && oppgaveForPeriodevisningDto.saksbehandler != null
                     )
                 },
-                erBeslutter = null,
-                erRetur = null,
-                trengerTotrinnsvurdering = null,
+                erBeslutter = false,
+                erRetur = false,
+                trengerTotrinnsvurdering = false,
                 tidligereSaksbehandler = null,
             )
         }
