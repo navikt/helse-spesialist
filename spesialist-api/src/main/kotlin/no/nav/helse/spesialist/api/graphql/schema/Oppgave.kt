@@ -44,11 +44,6 @@ data class OppgaveForOversiktsvisning(
 
 data class OppgaveForPeriodevisning(
     val id: String,
-    val totrinnsvurdering: Totrinnsvurdering?,
-    val erBeslutter: Boolean?,
-    val erRetur: Boolean?,
-    val trengerTotrinnsvurdering: Boolean?,
-    val tidligereSaksbehandler: String?,
 )
 
 data class Totrinnsvurdering(

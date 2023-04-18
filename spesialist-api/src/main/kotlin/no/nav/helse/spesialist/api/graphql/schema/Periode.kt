@@ -513,19 +513,7 @@ data class BeregnetPeriode(
     fun oppgave(): OppgaveForPeriodevisning? =
         oppgaveApiDao.finnPeriodeoppgave(UUID.fromString(vedtaksperiodeId()))?.let { oppgaveForPeriodevisningDto ->
             OppgaveForPeriodevisning(
-                id = oppgaveForPeriodevisningDto.id,
-                totrinnsvurdering = oppgaveForPeriodevisningDto.vedtaksperiodeId?.let {
-                    Totrinnsvurdering(
-                        erRetur = oppgaveForPeriodevisningDto.erRetur,
-                        saksbehandler = oppgaveForPeriodevisningDto.saksbehandler?.toString(),
-                        beslutter = oppgaveForPeriodevisningDto.beslutter?.toString(),
-                        erBeslutteroppgave = !oppgaveForPeriodevisningDto.erRetur && oppgaveForPeriodevisningDto.saksbehandler != null
-                    )
-                },
-                erBeslutter = false,
-                erRetur = false,
-                trengerTotrinnsvurdering = false,
-                tidligereSaksbehandler = null,
+                id = oppgaveForPeriodevisningDto.id
             )
         }
 

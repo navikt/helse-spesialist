@@ -31,10 +31,6 @@ data class OppgaveForOversiktsvisningDto(
 
 data class OppgaveForPeriodevisningDto(
     val id: String,
-    val vedtaksperiodeId: UUID?,
-    val erRetur: Boolean,
-    val beslutter: UUID?,
-    val saksbehandler: UUID?,
 )
 
 enum class Oppgavestatus {
