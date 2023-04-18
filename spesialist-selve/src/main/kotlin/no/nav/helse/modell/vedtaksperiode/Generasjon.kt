@@ -32,10 +32,14 @@ internal class Generasjon private constructor(
 
     private val varsler: MutableList<Varsel> = varsler.toMutableList()
     private val observers = mutableSetOf<IVedtaksperiodeObserver>()
-    private val tilstand: Tilstand get() = if (låst) Låst else Ulåst
+    private var tilstand: Tilstand = if (låst) Låst else Ulåst
     internal interface Tilstand {
         fun nyGenerasjon(generasjon: Generasjon, id: UUID, hendelseId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate): Generasjon? {
             return null
+        }
+
+        fun vedtakFattet(generasjon: Generasjon, hendelseId: UUID) {
+            sikkerlogg.info("Forventet ikke vedtak_fattet i {}", kv("tilstand", this::class.simpleName))
         }
 
     }
@@ -57,6 +61,15 @@ internal class Generasjon private constructor(
     }
     internal object Ulåst: Tilstand {
 
+        override fun vedtakFattet(generasjon: Generasjon, hendelseId: UUID) {
+            generasjon.låst = true
+            generasjon.observers.forEach { it.vedtakFattet(generasjon.id, hendelseId) }
+            generasjon.nyTilstand(this, Låst)
+        }
+    }
+
+    private fun nyTilstand(gammel: Tilstand, ny: Tilstand) {
+        this.tilstand = ny
     }
 
     internal fun registrer(vararg observer: IVedtaksperiodeObserver) {
@@ -156,13 +169,7 @@ internal class Generasjon private constructor(
     }
 
     internal fun håndterVedtakFattet(hendelseId: UUID) {
-        if (låst) return sikkerlogg.warn(
-            "Siste {} er allerede låst. Forsøkt låst av {}",
-            keyValue("generasjon", this),
-            keyValue("hendelseId", hendelseId)
-        )
-        låst = true
-        observers.forEach { it.vedtakFattet(id, hendelseId) }
+        tilstand.vedtakFattet(this, hendelseId)
     }
 
     internal fun opprettFørste(hendelseId: UUID) {
