@@ -1,6 +1,7 @@
 package no.nav.helse.mediator.api
 
 import AbstractE2ETest
+import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -24,9 +25,9 @@ import no.nav.helse.Testdata.SAKSBEHANDLER_IDENT
 import no.nav.helse.Testdata.SAKSBEHANDLER_NAVN
 import no.nav.helse.Testdata.SAKSBEHANDLER_OID
 import no.nav.helse.januar
-import no.nav.helse.mediator.api.AbstractApiTest.Companion.authentication
-import no.nav.helse.mediator.api.AbstractApiTest.Companion.azureAdAppConfig
 import no.nav.helse.rapids_rivers.asLocalDate
+import no.nav.helse.spesialist.api.AzureAdAppConfig
+import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.azureAdAppAuthentication
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -324,6 +325,23 @@ internal class OverstyringApiTest : AbstractE2ETest() {
         }
     }
 
+    private val jwtStub = JwtStub()
+    private val clientId = "client_id"
+    private val issuer = "https://jwt-provider-domain"
+    private val azureConfig = AzureConfig(
+        clientId = clientId,
+        issuer = issuer,
+        jwkProvider = jwtStub.getJwkProviderMock(),
+        tokenEndpoint = "",
+    )
+
+    private fun HttpRequestBuilder.authentication(oid: UUID, groups: Collection<String> = emptyList(), epost: String, navn: String, ident: String) {
+        header(
+            "Authorization",
+            "Bearer ${jwtStub.getToken(groups, oid.toString(), epost, clientId, issuer, navn, ident)}"
+        )
+    }
+
     private fun TestApplicationBuilder.setUpApplication() {
         install(ContentNegotiation) {
             register(
@@ -331,7 +349,7 @@ internal class OverstyringApiTest : AbstractE2ETest() {
                 JacksonConverter(objectMapper)
             )
         }
-        application { azureAdAppAuthentication(azureAdAppConfig) }
+        application { azureAdAppAuthentication(AzureAdAppConfig(azureConfig)) }
         routing {
             authenticate("oidc") {
                 overstyringApi(hendelseMediator)
