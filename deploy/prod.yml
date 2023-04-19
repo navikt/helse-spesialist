@@ -62,6 +62,9 @@ spec:
         - application: spleis-api
           namespace: tbd
           cluster: prod-gcp
+        - application: digdir-krr-proxy
+          namespace: team-rocket
+          cluster: prod-gcp
   gcp:
     sqlInstances:
       - type: POSTGRES_14
