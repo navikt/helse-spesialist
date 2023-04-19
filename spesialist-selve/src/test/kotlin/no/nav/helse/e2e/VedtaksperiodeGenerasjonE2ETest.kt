@@ -25,7 +25,7 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETestV2() {
     @Test
     fun `Forventer at det eksisterer generasjon for perioden ved vedtaksperiode_endret`() {
         håndterSøknad()
-        assertThrows<IllegalStateException> { håndterVedtaksperiodeEndret() }
+        assertThrows<UninitializedPropertyAccessException> { håndterVedtaksperiodeEndret() }
         assertGenerasjoner(VEDTAKSPERIODE_ID, 0)
     }
 

@@ -15,13 +15,17 @@ class OpprettKoblingTilGenerasjonCommandTest: AbstractDatabaseTest() {
     private val vedtaksperiodeId = UUID.randomUUID()
     private val utbetalingId = UUID.randomUUID()
     private val hendelseId = UUID.randomUUID()
+    private val generasjon = Generasjon.opprettFørste(vedtaksperiodeId, 1.januar, 31.januar, 1.januar).also {
+        it.registrer(generasjonRepository)
+    }
     private val command = OpprettKoblingTilGenerasjonCommand(
-        hendelseId,
-        utbetalingId,
-        gjeldendeGenerasjon = Generasjon.opprettFørste(vedtaksperiodeId, 1.januar, 31.januar, 1.januar).also { it.registrer(generasjonRepository) }
+        hendelseId = hendelseId,
+        utbetalingId = utbetalingId,
+        gjeldendeGenerasjon = generasjon
     )
     @Test
     fun `Opprett kobling til utbetaling for generasjon`() {
+        generasjon.opprettFørste(UUID.randomUUID())
         command.execute(CommandContext(UUID.randomUUID()))
         assertEquals(1, generasjonRepository.tilhørendeFor(utbetalingId).size)
         assertGenerasjonerFor(vedtaksperiodeId, 1)

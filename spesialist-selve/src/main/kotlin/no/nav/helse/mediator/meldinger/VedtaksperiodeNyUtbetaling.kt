@@ -7,8 +7,7 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OpprettKoblingTilUtbetalingCommand
 import no.nav.helse.modell.utbetaling.UtbetalingDao
-import no.nav.helse.modell.varsel.VarselRepository
-import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
+import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.OpprettKoblingTilGenerasjonCommand
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -25,8 +24,7 @@ internal class VedtaksperiodeNyUtbetaling(
     utbetalingId: UUID,
     private val json: String,
     utbetalingDao: UtbetalingDao,
-    generasjonRepository: GenerasjonRepository,
-    varselRepository: VarselRepository,
+    gjeldendeGenerasjon: Generasjon
 ) : Hendelse, MacroCommand() {
 
     private companion object {
@@ -41,9 +39,8 @@ internal class VedtaksperiodeNyUtbetaling(
         ),
         OpprettKoblingTilGenerasjonCommand(
             hendelseId = id,
-            vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId,
-            generasjonRepository = generasjonRepository,
+            gjeldendeGenerasjon = gjeldendeGenerasjon
         )
     )
 
