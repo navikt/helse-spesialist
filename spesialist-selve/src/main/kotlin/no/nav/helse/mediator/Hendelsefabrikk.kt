@@ -799,8 +799,7 @@ internal class Hendelsefabrikk(
         skjæringstidspunkt: LocalDate,
         json: String,
     ): VedtaksperiodeOpprettet {
-        val førsteGenerasjon = generasjonRepository.sisteForLenient(vedtaksperiodeId)
-            ?: Generasjon.opprettFørste(vedtaksperiodeId, fom, tom, skjæringstidspunkt).also { it.registrer(generasjonRepository) }
+        val førsteGenerasjon = Generasjon.opprettFørste(vedtaksperiodeId, fom, tom, skjæringstidspunkt).also { it.registrer(generasjonRepository) }
         return VedtaksperiodeOpprettet(
             id = id,
             fødselsnummer = fødselsnummer,
