@@ -53,6 +53,14 @@ internal class Generasjon private constructor(
         ) {}
 
         fun nyUtbetaling(generasjon: Generasjon, hendelseId: UUID, utbetalingId: UUID) {}
+        fun invaliderUtbetaling(generasjon: Generasjon, utbetalingId: UUID) {
+            sikkerlogg.error(
+                "{} er i {}. Utbetaling med {} forsøkt forkastet",
+                keyValue("tilstand", this::class.simpleName),
+                keyValue("Generasjon", generasjon),
+                keyValue("utbetalingId", utbetalingId)
+            )
+        }
     }
 
     internal object Låst: Tilstand {
@@ -110,6 +118,11 @@ internal class Generasjon private constructor(
 
         override fun nyUtbetaling(generasjon: Generasjon, hendelseId: UUID, utbetalingId: UUID) {
             generasjon.håndterNyUtbetaling(utbetalingId)
+        }
+
+        override fun invaliderUtbetaling(generasjon: Generasjon, utbetalingId: UUID) {
+            generasjon.utbetalingId = null
+            generasjon.observers.forEach { it.utbetalingForkastet(generasjon.id, utbetalingId) }
         }
     }
 
@@ -183,13 +196,7 @@ internal class Generasjon private constructor(
 
     internal fun invaliderUtbetaling(utbetalingId: UUID) {
         if (utbetalingId != this.utbetalingId) return
-        if (låst) return sikkerlogg.error(
-            "{} er låst. Utbetaling med {} forsøkt forkastet",
-            keyValue("Generasjon", this),
-            keyValue("utbetalingId", utbetalingId)
-        )
-        this.utbetalingId = null
-        observers.forEach { it.utbetalingForkastet(id, utbetalingId) }
+        tilstand.invaliderUtbetaling(this, utbetalingId)
     }
 
     internal fun håndterDeaktivertVarsel(varsel: Varsel) {
