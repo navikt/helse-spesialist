@@ -26,7 +26,7 @@ internal class Utbetalingsfilter(
             sikkerLogg.info("Beholdes da det er en revurdering, fnr=$fødselsnummer")
             return true
         }
-        if (fødselsnummer.length != 11 || !(29 .. 31).contains(fødselsnummer.take(2).toInt())) nyÅrsak(
+        if (fødselsnummer.length != 11 || !(15 .. 31).contains(fødselsnummer.take(2).toInt())) nyÅrsak(
             "Velges ikke ut som 'to om dagen'"
         ) // Kvoteregulering
         if (periodetype !in tillatePeriodetyper) nyÅrsak("Perioden er ikke førstegangsbehandling eller forlengelse")

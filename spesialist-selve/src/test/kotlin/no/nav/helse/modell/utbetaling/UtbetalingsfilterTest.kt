@@ -103,7 +103,7 @@ internal class UtbetalingsfilterTest {
     }
     @Test
     fun `fødselsdato på dag 1 til 14 i måneden kan ikke utbetales`() {
-        (1 .. 28).forEach { dag ->
+        (1 .. 14).forEach { dag ->
             val fnr = ("0" + dag + "1".repeat(9)).takeLast(11)
             assertKanIkkeUtbetales(
                 utbetalingsfilter(fødselsnummer = fnr),
@@ -125,7 +125,7 @@ internal class UtbetalingsfilterTest {
 
     @Test
     fun `fødselsdato på dag 15 til 31 i måneden kan utbetales`() {
-        (29 .. 31).forEach { dag ->
+        (15 .. 31).forEach { dag ->
             val fnr = dag.toString() + "1".repeat(9)
             assertKanUtbetales(
                 utbetalingsfilter(fødselsnummer = fnr)
