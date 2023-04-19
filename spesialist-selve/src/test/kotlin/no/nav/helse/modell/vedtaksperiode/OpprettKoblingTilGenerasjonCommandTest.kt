@@ -6,14 +6,12 @@ import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.januar
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.varsel.ActualVarselRepository
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class OpprettKoblingTilGenerasjonCommandTest: AbstractDatabaseTest() {
     private val generasjonRepository = ActualGenerasjonRepository(dataSource)
-    private val varselRepository = ActualVarselRepository(dataSource)
     private val vedtaksperiodeId = UUID.randomUUID()
     private val utbetalingId = UUID.randomUUID()
     private val hendelseId = UUID.randomUUID()
@@ -25,7 +23,15 @@ class OpprettKoblingTilGenerasjonCommandTest: AbstractDatabaseTest() {
     )
     @Test
     fun `Opprett kobling til utbetaling for generasjon`() {
-        generasjonRepository.førsteGenerasjonOpprettet(UUID.randomUUID(), vedtaksperiodeId, UUID.randomUUID(), 1.januar, 31.januar, 1.januar)
+        generasjonRepository.førsteGenerasjonOpprettet(
+            UUID.randomUUID(),
+            vedtaksperiodeId,
+            UUID.randomUUID(),
+            1.januar,
+            31.januar,
+            1.januar,
+            Generasjon.Ulåst
+        )
         command.execute(CommandContext(UUID.randomUUID()))
         assertEquals(1, generasjonRepository.tilhørendeFor(utbetalingId).size)
         assertGenerasjonerFor(vedtaksperiodeId, 1)

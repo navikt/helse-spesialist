@@ -32,6 +32,7 @@ import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
+import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde.EN_ARBEIDSGIVER
@@ -287,7 +288,14 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     }
 
     protected fun opprettGenerasjon(vedtaksperiodeId: UUID = VEDTAKSPERIODE, generasjonId: UUID = UUID.randomUUID()) {
-        generasjonDao.opprettFor(generasjonId, vedtaksperiodeId, UUID.randomUUID(), 1.januar, Periode(1.januar, 31.januar))
+        generasjonDao.opprettFor(
+            generasjonId,
+            vedtaksperiodeId,
+            UUID.randomUUID(),
+            1.januar,
+            Periode(1.januar, 31.januar),
+            Generasjon.Ulåst
+        )
     }
 
     protected fun opprettVedtaksperiode(

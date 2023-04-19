@@ -27,7 +27,15 @@ class VedtaksperiodeBuilderTest : AbstractDatabaseTest() {
         val vedtaksperiodeId = UUID.randomUUID()
         val varselId = UUID.randomUUID()
         val opprettet = LocalDateTime.now()
-        generasjonRepository.førsteGenerasjonOpprettet(generasjonId, vedtaksperiodeId, UUID.randomUUID(), 1.januar, 31.januar, 1.januar)
+        generasjonRepository.førsteGenerasjonOpprettet(
+            generasjonId,
+            vedtaksperiodeId,
+            UUID.randomUUID(),
+            1.januar,
+            31.januar,
+            1.januar,
+            Generasjon.Ulåst
+        )
         varselRepository.varselOpprettet(varselId, vedtaksperiodeId, generasjonId, "SB_EX_1", opprettet)
         val builder = GenerasjonBuilder(vedtaksperiodeId)
         val vedtaksperiode = builder.build(generasjonRepository, varselRepository)
@@ -46,7 +54,15 @@ class VedtaksperiodeBuilderTest : AbstractDatabaseTest() {
         val vedtaksperiodeId = UUID.randomUUID()
         val varselId = UUID.randomUUID()
         val opprettet = LocalDateTime.now()
-        generasjonRepository.førsteGenerasjonOpprettet(generasjonId, vedtaksperiodeId, UUID.randomUUID(), 1.januar, 31.januar, 1.januar)
+        generasjonRepository.førsteGenerasjonOpprettet(
+            generasjonId,
+            vedtaksperiodeId,
+            UUID.randomUUID(),
+            1.januar,
+            31.januar,
+            1.januar,
+            Generasjon.Ulåst
+        )
         varselRepository.varselOpprettet(varselId, vedtaksperiodeId, generasjonId, "SB_EX_1", opprettet)
         val builder = GenerasjonBuilder(vedtaksperiodeId)
         val generasjon = builder.build(generasjonRepository, varselRepository)
@@ -59,7 +75,15 @@ class VedtaksperiodeBuilderTest : AbstractDatabaseTest() {
         val generasjonId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
         val varselId = UUID.randomUUID()
-        generasjonRepository.førsteGenerasjonOpprettet(generasjonId, vedtaksperiodeId, UUID.randomUUID(), 1.januar, 31.januar, 1.januar)
+        generasjonRepository.førsteGenerasjonOpprettet(
+            generasjonId,
+            vedtaksperiodeId,
+            UUID.randomUUID(),
+            1.januar,
+            31.januar,
+            1.januar,
+            Generasjon.Ulåst
+        )
         val builder = GenerasjonBuilder(vedtaksperiodeId)
         val generasjon = builder.build(generasjonRepository, varselRepository)
         listOf(generasjon).håndter(listOf(Varsel(varselId, "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId)))

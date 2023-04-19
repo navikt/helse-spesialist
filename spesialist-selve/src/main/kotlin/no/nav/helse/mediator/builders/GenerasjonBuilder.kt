@@ -15,6 +15,7 @@ class GenerasjonBuilder(
     private lateinit var fom: LocalDate
     private lateinit var tom: LocalDate
     private lateinit var skjæringstidspunkt: LocalDate
+    private lateinit var tilstand: Generasjon.Tilstand
     private var låst by Delegates.notNull<Boolean>()
     private var utbetalingId: UUID? = null
     private val varsler = mutableListOf<Varsel>()
@@ -31,6 +32,7 @@ class GenerasjonBuilder(
             utbetalingId = utbetalingId,
             låst = låst,
             skjæringstidspunkt = skjæringstidspunkt,
+            tilstand = tilstand,
             fom = fom,
             tom = tom,
             varsler = varsler.toSet()
@@ -54,6 +56,10 @@ class GenerasjonBuilder(
 
     internal fun skjæringstidspunkt(skjæringstidspunkt: LocalDate) {
         this.skjæringstidspunkt = skjæringstidspunkt
+    }
+
+    internal fun tilstand(tilstand: Generasjon.Tilstand) {
+        this.tilstand = tilstand
     }
 
     internal fun låst(låst: Boolean) {

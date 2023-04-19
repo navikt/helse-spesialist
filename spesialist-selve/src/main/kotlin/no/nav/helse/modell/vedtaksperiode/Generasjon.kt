@@ -20,6 +20,7 @@ internal class Generasjon private constructor(
     private var låst: Boolean,
     private var skjæringstidspunkt: LocalDate,
     private var periode: Periode,
+    private var tilstand: Tilstand,
     varsler: Set<Varsel>
 ) {
     internal constructor(
@@ -28,14 +29,14 @@ internal class Generasjon private constructor(
         fom: LocalDate,
         tom: LocalDate,
         skjæringstidspunkt: LocalDate
-    ): this(id, vedtaksperiodeId, null, false, skjæringstidspunkt, Periode(fom, tom), emptySet())
+    ): this(id, vedtaksperiodeId, null, false, skjæringstidspunkt, Periode(fom, tom), Ulåst, emptySet())
 
     private val varsler: MutableList<Varsel> = varsler.toMutableList()
     private val observers = mutableSetOf<IVedtaksperiodeObserver>()
-    private var tilstand: Tilstand = if (låst) Låst else Ulåst
 
-    internal interface Tilstand {
+    internal sealed interface Tilstand {
 
+        fun navn(): String
         fun nyGenerasjon(generasjon: Generasjon, id: UUID, hendelseId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate): Generasjon? {
             return null
         }
@@ -64,6 +65,8 @@ internal class Generasjon private constructor(
     }
 
     internal object Låst: Tilstand {
+        override fun navn(): String = "Låst"
+
         override fun nyGenerasjon(
             generasjon: Generasjon,
             id: UUID,
@@ -100,6 +103,8 @@ internal class Generasjon private constructor(
     }
 
     internal object Ulåst: Tilstand {
+        override fun navn(): String = "Ulåst"
+
         override fun vedtakFattet(generasjon: Generasjon, hendelseId: UUID) {
             generasjon.låst = true
             generasjon.observers.forEach { it.vedtakFattet(generasjon.id, hendelseId) }
@@ -167,7 +172,7 @@ internal class Generasjon private constructor(
 
     private fun opprett(hendelseId: UUID) {
         observers.forEach {
-            it.generasjonOpprettet(id, vedtaksperiodeId, hendelseId, periode.fom(), periode.tom(), skjæringstidspunkt)
+            it.generasjonOpprettet(id, vedtaksperiodeId, hendelseId, periode.fom(), periode.tom(), skjæringstidspunkt, tilstand)
         }
     }
 
@@ -218,7 +223,7 @@ internal class Generasjon private constructor(
 
     internal fun opprettFørste(hendelseId: UUID) {
         observers.forEach {
-            it.førsteGenerasjonOpprettet(id, vedtaksperiodeId, hendelseId, periode.fom(), periode.tom(), skjæringstidspunkt)
+            it.førsteGenerasjonOpprettet(id, vedtaksperiodeId, hendelseId, periode.fom(), periode.tom(), skjæringstidspunkt, tilstand)
         }
     }
 
@@ -271,7 +276,7 @@ internal class Generasjon private constructor(
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
         private fun Generasjon.opprettNeste(generasjonId: UUID, hendelseId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate): Generasjon {
-            val nyGenerasjon = Generasjon(generasjonId, this.vedtaksperiodeId, null, false, skjæringstidspunkt, Periode(fom, tom), emptySet())
+            val nyGenerasjon = opprett(generasjonId, this.vedtaksperiodeId, fom, tom, skjæringstidspunkt)
             nyGenerasjon.registrer(*this.observers.toTypedArray())
             nyGenerasjon.opprett(hendelseId)
 
@@ -279,14 +284,22 @@ internal class Generasjon private constructor(
         }
 
         internal fun opprettFørste(vedtaksperiodeId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate): Generasjon {
+            return opprett(
+                id = UUID.randomUUID(),
+                vedtaksperiodeId = vedtaksperiodeId,
+                fom = fom,
+                tom = tom,
+                skjæringstidspunkt = skjæringstidspunkt,
+            )
+        }
+
+        private fun opprett(id: UUID, vedtaksperiodeId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate): Generasjon {
             return Generasjon(
-                UUID.randomUUID(),
-                vedtaksperiodeId,
-                null,
-                false,
-                skjæringstidspunkt,
-                Periode(fom, tom),
-                emptySet()
+                id = id,
+                vedtaksperiodeId = vedtaksperiodeId,
+                fom = fom,
+                tom = tom,
+                skjæringstidspunkt = skjæringstidspunkt,
             )
         }
 
@@ -298,6 +311,7 @@ internal class Generasjon private constructor(
             skjæringstidspunkt: LocalDate,
             fom: LocalDate,
             tom: LocalDate,
+            tilstand: Tilstand,
             varsler: Set<Varsel>
         ) = Generasjon(
             id = id,
@@ -306,6 +320,7 @@ internal class Generasjon private constructor(
             låst = låst,
             skjæringstidspunkt = skjæringstidspunkt,
             periode = Periode(fom, tom),
+            tilstand = tilstand,
             varsler = varsler
         )
 

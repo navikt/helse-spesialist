@@ -225,7 +225,7 @@ internal class PersonavstemmingTest : AbstractDatabaseTest() {
 
     private fun opprettGenerasjonFor(vedtaksperiodeId: UUID) {
         @Language("PostgreSQL") val query =
-            "INSERT INTO selve_vedtaksperiode_generasjon (vedtaksperiode_id, opprettet_av_hendelse) VALUES (?, gen_random_uuid())"
+            "INSERT INTO selve_vedtaksperiode_generasjon (vedtaksperiode_id, opprettet_av_hendelse, tilstand) VALUES (?, gen_random_uuid(), 'Ulåst')"
         sessionOf(dataSource).use { session ->
             session.run(queryOf(query, vedtaksperiodeId).asExecute)
         }

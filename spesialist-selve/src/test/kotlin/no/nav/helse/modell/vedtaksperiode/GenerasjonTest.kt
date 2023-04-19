@@ -953,7 +953,8 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
             hendelseId: UUID,
             fom: LocalDate,
             tom: LocalDate,
-            skjæringstidspunkt: LocalDate
+            skjæringstidspunkt: LocalDate,
+            tilstand: Generasjon.Tilstand
         ) {
             opprettedeGenerasjoner[generasjonId] =
                 Opprettelse(generasjonId, vedtaksperiodeId, hendelseId, fom, tom, skjæringstidspunkt)

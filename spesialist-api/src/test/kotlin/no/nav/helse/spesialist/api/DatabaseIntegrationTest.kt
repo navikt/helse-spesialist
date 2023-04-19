@@ -102,7 +102,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     ) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val statement =
-            "INSERT INTO selve_vedtaksperiode_generasjon (unik_id, vedtaksperiode_id, opprettet_av_hendelse) VALUES (:unik_id, :vedtaksperiode_id, :hendelse_id)"
+            "INSERT INTO selve_vedtaksperiode_generasjon (unik_id, vedtaksperiode_id, opprettet_av_hendelse, tilstand) VALUES (:unik_id, :vedtaksperiode_id, :hendelse_id, 'Ulåst')"
         requireNotNull(
             session.run(
                 queryOf(
@@ -174,8 +174,8 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     ): Long = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
         @Language("PostgreSQL")
         val query = """
-            INSERT INTO selve_vedtaksperiode_generasjon(vedtaksperiode_id, unik_id, utbetaling_id, opprettet_av_hendelse, låst_tidspunkt, låst_av_hendelse) 
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO selve_vedtaksperiode_generasjon(vedtaksperiode_id, unik_id, utbetaling_id, opprettet_av_hendelse, låst_tidspunkt, låst_av_hendelse, tilstand) 
+            VALUES (?, ?, ?, ?, ?, ?, 'Ulåst')
         """
         return requireNotNull(session.run(queryOf(query, vedtaksperiodeId, generasjonId, utbetalingId, UUID.randomUUID(), låstTidspunkt, UUID.randomUUID()).asUpdateAndReturnGeneratedKey))
     }

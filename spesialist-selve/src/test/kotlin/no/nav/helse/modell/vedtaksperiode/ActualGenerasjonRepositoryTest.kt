@@ -22,7 +22,15 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         val vedtaksperiodeId = UUID.randomUUID()
         val hendelseId = UUID.randomUUID()
 
-        repository.førsteGenerasjonOpprettet(UUID.randomUUID(), vedtaksperiodeId, hendelseId, 1.januar, 31.januar, 1.januar)
+        repository.førsteGenerasjonOpprettet(
+            UUID.randomUUID(),
+            vedtaksperiodeId,
+            hendelseId,
+            1.januar,
+            31.januar,
+            1.januar,
+            Generasjon.Ulåst
+        )
         
         assertGenerasjon(vedtaksperiodeId, hendelseId)
     }
@@ -33,8 +41,24 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         val vedtaksperiodeOpprettet1 = UUID.randomUUID()
         val vedtaksperiodeOpprettet2 = UUID.randomUUID()
 
-        repository.førsteGenerasjonOpprettet(UUID.randomUUID(), vedtaksperiodeId, vedtaksperiodeOpprettet1, 1.januar, 31.januar, 1.januar)
-        repository.førsteGenerasjonOpprettet(UUID.randomUUID(), vedtaksperiodeId, vedtaksperiodeOpprettet2, 1.januar, 31.januar, 1.januar)
+        repository.førsteGenerasjonOpprettet(
+            UUID.randomUUID(),
+            vedtaksperiodeId,
+            vedtaksperiodeOpprettet1,
+            1.januar,
+            31.januar,
+            1.januar,
+            Generasjon.Ulåst
+        )
+        repository.førsteGenerasjonOpprettet(
+            UUID.randomUUID(),
+            vedtaksperiodeId,
+            vedtaksperiodeOpprettet2,
+            1.januar,
+            31.januar,
+            1.januar,
+            Generasjon.Ulåst
+        )
 
         assertGenerasjon(vedtaksperiodeId, vedtaksperiodeOpprettet1)
         assertIngenGenerasjon(vedtaksperiodeId, vedtaksperiodeOpprettet2)
@@ -124,7 +148,15 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         val vedtaksperiodeId = UUID.randomUUID()
         val hendelseId = UUID.randomUUID()
 
-        repository.førsteGenerasjonOpprettet(UUID.randomUUID(), vedtaksperiodeId, hendelseId, 1.januar, 31.januar, 1.januar)
+        repository.førsteGenerasjonOpprettet(
+            UUID.randomUUID(),
+            vedtaksperiodeId,
+            hendelseId,
+            1.januar,
+            31.januar,
+            1.januar,
+            Generasjon.Ulåst
+        )
         assertGenerasjon(vedtaksperiodeId, hendelseId)
         assertDoesNotThrow {
             repository.sisteFor(vedtaksperiodeId)

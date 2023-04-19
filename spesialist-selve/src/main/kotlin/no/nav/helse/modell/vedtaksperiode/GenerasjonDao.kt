@@ -17,7 +17,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
     internal fun byggSisteFor(vedtaksperiodeId: UUID, generasjonBuilder: GenerasjonBuilder) {
         @Language("PostgreSQL")
         val query = """
-            SELECT DISTINCT ON (vedtaksperiode_id) id, vedtaksperiode_id, unik_id, utbetaling_id, låst, skjæringstidspunkt, fom, tom 
+            SELECT DISTINCT ON (vedtaksperiode_id) id, vedtaksperiode_id, unik_id, utbetaling_id, låst, skjæringstidspunkt, fom, tom, tilstand
             FROM selve_vedtaksperiode_generasjon 
             WHERE vedtaksperiode_id = ? ORDER BY vedtaksperiode_id, id DESC;
             """
@@ -26,6 +26,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
                 generasjonBuilder.generasjonId(row.uuid("unik_id"))
                 row.uuidOrNull("utbetaling_id")?.let(generasjonBuilder::utbetalingId)
                 generasjonBuilder.skjæringstidspunkt(row.localDate("skjæringstidspunkt"))
+                generasjonBuilder.tilstand(mapToTilstand(row.string("tilstand")))
                 generasjonBuilder.periode(row.localDate("fom"), row.localDate("tom"))
                 generasjonBuilder.låst(row.boolean("låst"))
             }.asSingle)
@@ -47,7 +48,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
     private fun finnSiste(vedtaksperiodeId: UUID): Query {
         @Language("PostgreSQL")
         val query = """
-            SELECT id, unik_id, vedtaksperiode_id, utbetaling_id, låst, skjæringstidspunkt, fom, tom 
+            SELECT id, unik_id, vedtaksperiode_id, utbetaling_id, låst, skjæringstidspunkt, fom, tom, tilstand
             FROM selve_vedtaksperiode_generasjon 
             WHERE vedtaksperiode_id = ? ORDER BY id DESC;
             """
@@ -57,7 +58,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
     internal fun alleFor(utbetalingId: UUID): List<Generasjon> {
         @Language("PostgreSQL")
         val query = """
-            SELECT id, unik_id, vedtaksperiode_id, utbetaling_id, låst, skjæringstidspunkt, fom, tom 
+            SELECT id, unik_id, vedtaksperiode_id, utbetaling_id, låst, skjæringstidspunkt, fom, tom, tilstand
             FROM selve_vedtaksperiode_generasjon 
             WHERE utbetaling_id = ?
             """
@@ -72,7 +73,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
             UPDATE selve_vedtaksperiode_generasjon 
             SET låst = true, låst_tidspunkt = now(), låst_av_hendelse = ? 
             WHERE unik_id = ?
-            RETURNING id, unik_id, vedtaksperiode_id, utbetaling_id, låst, skjæringstidspunkt, fom, tom;
+            RETURNING id, unik_id, vedtaksperiode_id, utbetaling_id, låst, skjæringstidspunkt, fom, tom, tilstand;
             """
 
         return sessionOf(dataSource).use { session ->
@@ -86,7 +87,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
             UPDATE selve_vedtaksperiode_generasjon 
             SET utbetaling_id = ? 
             WHERE unik_id = ?
-            RETURNING id, unik_id, vedtaksperiode_id, utbetaling_id, låst, skjæringstidspunkt, fom, tom;
+            RETURNING id, unik_id, vedtaksperiode_id, utbetaling_id, låst, skjæringstidspunkt, fom, tom, tilstand;
             """
 
         return sessionOf(dataSource).use { session ->
@@ -100,7 +101,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
             UPDATE selve_vedtaksperiode_generasjon 
             SET utbetaling_id = null 
             WHERE unik_id = ?
-            RETURNING id, unik_id, vedtaksperiode_id, utbetaling_id, låst, skjæringstidspunkt, fom, tom;
+            RETURNING id, unik_id, vedtaksperiode_id, utbetaling_id, låst, skjæringstidspunkt, fom, tom, tilstand;
             """
 
         return sessionOf(dataSource).use { session ->
@@ -143,12 +144,13 @@ class GenerasjonDao(private val dataSource: DataSource) {
         hendelseId: UUID,
         skjæringstidspunkt: LocalDate,
         periode: Periode,
+        tilstand: Generasjon.Tilstand,
     ): Generasjon {
         @Language("PostgreSQL")
         val query = """
-            INSERT INTO selve_vedtaksperiode_generasjon (unik_id, vedtaksperiode_id, opprettet_av_hendelse, skjæringstidspunkt, fom, tom) 
-            VALUES (?, ?, ?, ?, ?, ?)
-            RETURNING id, unik_id, vedtaksperiode_id, utbetaling_id, låst, skjæringstidspunkt, fom, tom
+            INSERT INTO selve_vedtaksperiode_generasjon (unik_id, vedtaksperiode_id, opprettet_av_hendelse, skjæringstidspunkt, fom, tom, tilstand) 
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            RETURNING id, unik_id, vedtaksperiode_id, utbetaling_id, låst, skjæringstidspunkt, fom, tom, tilstand
         """
 
         @Language("PostgreSQL")
@@ -171,7 +173,8 @@ class GenerasjonDao(private val dataSource: DataSource) {
                             hendelseId,
                             skjæringstidspunkt,
                             periode.fom(),
-                            periode.tom()
+                            periode.tom(),
+                            tilstand.navn()
                         ).map(::toGenerasjon).asSingle
                     )
                 ) { "Kunne ikke opprette ny generasjon" }
@@ -185,18 +188,6 @@ class GenerasjonDao(private val dataSource: DataSource) {
                 )
                 generasjon
             }
-        }
-    }
-
-    internal fun åpenGenerasjonForVedtaksperiode(vedtaksperiodeId: UUID): Generasjon? {
-        @Language("PostgreSQL")
-        val query = """
-            SELECT id, unik_id, vedtaksperiode_id, utbetaling_id, låst, skjæringstidspunkt, fom, tom 
-            FROM selve_vedtaksperiode_generasjon 
-            WHERE vedtaksperiode_id = :vedtaksperiode_id AND låst = false
-            """
-        return sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, mapOf("vedtaksperiode_id" to vedtaksperiodeId)).map(::toGenerasjon).asSingle)
         }
     }
 
@@ -231,8 +222,15 @@ class GenerasjonDao(private val dataSource: DataSource) {
             row.localDate("skjæringstidspunkt"),
             row.localDate("fom"),
             row.localDate("tom"),
+            mapToTilstand(row.string("tilstand")),
             varslerFor(row.long("id")).toSet(),
         )
+    }
+
+    private fun mapToTilstand(tilstand: String): Generasjon.Tilstand {
+        val tilstandKlasser = Generasjon.Tilstand::class.sealedSubclasses
+        val tilstander = tilstandKlasser.mapNotNull { it.objectInstance }.associateBy { it.navn() }
+        return tilstander.getValue(tilstand)
     }
 
     private fun varslerFor(generasjonRef: Long): List<Varsel> {
@@ -249,6 +247,15 @@ class GenerasjonDao(private val dataSource: DataSource) {
                     enumValueOf(it.string("status"))
                 )
             }.asList)
+        }
+    }
+
+    internal fun oppdaterTilstandFor(generasjonId: UUID, ny: Generasjon.Tilstand) {
+        @Language("PostgreSQL")
+        val query =
+            "UPDATE selve_vedtaksperiode_generasjon SET tilstand = :tilstand WHERE unik_id = :generasjon_id"
+        sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, mapOf("tilstand" to ny.navn(), "generasjon_id" to generasjonId)).asUpdate)
         }
     }
 }
