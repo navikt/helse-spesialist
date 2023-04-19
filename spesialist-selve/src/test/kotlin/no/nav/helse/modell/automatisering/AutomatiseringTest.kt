@@ -45,11 +45,16 @@ internal class AutomatiseringTest {
     private val automatiseringDaoMock = mockk<AutomatiseringDao>(relaxed = true)
     private val vergemålDaoMock = mockk<VergemålDao>(relaxed = true)
     private val overstyringDaoMock = mockk<OverstyringDao>(relaxed = true)
-    private var stikkprøveFullRefusjon = false
-    private var stikkprøveUTS = false
+    private var stikkprøveFullRefusjonEnArbeidsgiver = false
+    private var stikkprøveUtsEnArbeidsgiverForlengelse = false
     private val stikkprøver = object : Stikkprøver {
-        override fun fullRefusjon() = stikkprøveFullRefusjon
-        override fun uts() = stikkprøveUTS
+        override fun utsFlereArbeidsgivereFørstegangsbehandling() = false
+        override fun utsFlereArbeidsgivereForlengelse() = false
+        override fun utsEnArbeidsgiverFørstegangsbehandling() = false
+        override fun utsEnArbeidsgiverForlengelse() = stikkprøveUtsEnArbeidsgiverForlengelse
+        override fun fullRefusjonFlereArbeidsgivereFørstegangsbehandling() = false
+        override fun fullRefusjonFlereArbeidsgivereForlengelse() = false
+        override fun fullRefusjonEnArbeidsgiver() = stikkprøveFullRefusjonEnArbeidsgiver
     }
 
     private val automatisering =
@@ -84,8 +89,8 @@ internal class AutomatiseringTest {
         every { åpneGosysOppgaverDaoMock.harÅpneOppgaver(any()) } returns 0
         every { egenAnsattDao.erEgenAnsatt(any()) } returns false
         every { overstyringDaoMock.harVedtaksperiodePågåendeOverstyring(any()) } returns false
-        stikkprøveFullRefusjon = false
-        stikkprøveUTS = false
+        stikkprøveFullRefusjonEnArbeidsgiver = false
+        stikkprøveUtsEnArbeidsgiverForlengelse = false
     }
 
     @Test
@@ -135,7 +140,7 @@ internal class AutomatiseringTest {
 
     @Test
     fun `vedtaksperiode plukket ut til stikkprøve skal ikke automatisk godkjennes`() {
-        stikkprøveFullRefusjon = true
+        stikkprøveFullRefusjonEnArbeidsgiver = true
         gårTilManuell()
     }
 
@@ -187,7 +192,7 @@ internal class AutomatiseringTest {
 
     @Test
     fun `forlengelse med utbetaling til sykmeldt som plukkes ut som stikkprøve skal ikke automatisk godkjennes`() {
-        stikkprøveUTS = true
+        stikkprøveUtsEnArbeidsgiverForlengelse = true
         every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(personbeløp = 500)
         gårTilManuell()
     }
@@ -268,7 +273,7 @@ internal class AutomatiseringTest {
             verify(exactly = 0) { onAutomatiserbar() }
             verify(exactly = 0) { automatiseringDaoMock.automatisert(any(), any(), any()) }
             verify(exactly = 1) {
-                if (stikkprøveUTS || stikkprøveFullRefusjon)
+                if (stikkprøveUtsEnArbeidsgiverForlengelse || stikkprøveFullRefusjonEnArbeidsgiver)
                     automatiseringDaoMock.stikkprøve(any(), any(), any())
                 else automatiseringDaoMock.manuellSaksbehandling(any(), vedtaksperiodeId, hendelseId, utbetalingId)
             }

@@ -61,6 +61,11 @@ internal class Automatisering(
         val problemer = vurder(fødselsnummer, vedtaksperiodeId, utbetalingId, periodetype, sykefraværstilfelle, periodeTom)
         val vedtaksperiodensUtbetaling = snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId)
         val erUTS = vedtaksperiodensUtbetaling.utbetalingTilSykmeldt()
+        val erFullRefusjon = !erUTS
+        val flereArbeidsgivere = vedtakDao.finnInntektskilde(vedtaksperiodeId) == Inntektskilde.FLERE_ARBEIDSGIVERE
+        val enArbeidsgiver = !flereArbeidsgivere
+        val erFørstegangsbehandling = periodetype == Periodetype.FØRSTEGANGSBEHANDLING
+        val erForlengelse = periodetype == Periodetype.FORLENGELSE
 
         val utfallslogger = { tekst: String ->
             sikkerLogg.info(
@@ -71,21 +76,33 @@ internal class Automatisering(
             )
         }
 
+        var årsakTilStikkprøve: String? = null
         when {
             problemer.isNotEmpty() -> {
                 utfallslogger("Automatiserer ikke {} ({}) fordi: {}")
                 automatiseringDao.manuellSaksbehandling(problemer, vedtaksperiodeId, hendelseId, utbetalingId)
             }
 
-            (!erUTS && stikkprøver.fullRefusjon()) || (erUTS && stikkprøver.uts()) -> {
-                val fullRefujonEllerUTS = if (erUTS) "UTS" else "full refusjon"
-                utfallslogger("Automatiserer ikke {} ({}), plukket ut til stikkprøve for $fullRefujonEllerUTS")
-                automatiseringDao.stikkprøve(vedtaksperiodeId, hendelseId, utbetalingId)
-                logger.info(
-                    "Automatisk godkjenning av {} avbrutt, sendes til manuell behandling",
-                    keyValue("vedtaksperiodeId", vedtaksperiodeId)
-                )
-            }
+            erUTS && flereArbeidsgivere && erFørstegangsbehandling && stikkprøver.utsFlereArbeidsgivereFørstegangsbehandling() ->
+                årsakTilStikkprøve = "UTS, flere arbeidsgivere, førstegangsbehandling"
+
+            erUTS && flereArbeidsgivere && erForlengelse && stikkprøver.utsFlereArbeidsgivereForlengelse() ->
+                årsakTilStikkprøve = "UTS, flere arbeidsgivere, forlengelse"
+
+            erUTS && enArbeidsgiver && erFørstegangsbehandling && stikkprøver.utsEnArbeidsgiverFørstegangsbehandling() ->
+                årsakTilStikkprøve = "UTS, en arbeidsgiver, førstegangsbehandling"
+
+            erUTS && enArbeidsgiver && erForlengelse && stikkprøver.utsEnArbeidsgiverForlengelse() ->
+                årsakTilStikkprøve = "UTS, en arbeidsgiver, forlengelse"
+
+            erFullRefusjon && flereArbeidsgivere && erFørstegangsbehandling && stikkprøver.fullRefusjonFlereArbeidsgivereFørstegangsbehandling() ->
+                årsakTilStikkprøve = "Refusjon, flere arbeidsgivere, førstegangsbehandling"
+
+            erFullRefusjon && flereArbeidsgivere && erForlengelse && stikkprøver.fullRefusjonFlereArbeidsgivereForlengelse() ->
+                årsakTilStikkprøve = "Refusjon, flere arbeidsgivere, forlengelse"
+
+            erFullRefusjon && enArbeidsgiver && stikkprøver.fullRefusjonEnArbeidsgiver() ->
+                årsakTilStikkprøve = "Refusjon, en arbeidsgiver"
 
             else -> {
                 utfallslogger("Automatiserer {} ({})")
@@ -93,6 +110,22 @@ internal class Automatisering(
                 automatiseringDao.automatisert(vedtaksperiodeId, hendelseId, utbetalingId)
             }
         }
+        årsakTilStikkprøve?.also { tilStikkprøve(it, utfallslogger, vedtaksperiodeId, hendelseId, utbetalingId) }
+    }
+
+    private fun tilStikkprøve(
+        årsak: String,
+        utfallslogger: (String) -> Unit,
+        vedtaksperiodeId: UUID,
+        hendelseId: UUID,
+        utbetalingId: UUID,
+    ) {
+        utfallslogger("Automatiserer ikke {} ({}), plukket ut til stikkprøve for $årsak")
+        automatiseringDao.stikkprøve(vedtaksperiodeId, hendelseId, utbetalingId)
+        logger.info(
+            "Automatisk godkjenning av {} avbrutt, sendes til manuell behandling",
+            keyValue("vedtaksperiodeId", vedtaksperiodeId)
+        )
     }
 
     private fun vurder(
@@ -196,8 +229,13 @@ internal class Automatisering(
 internal typealias PlukkTilManuell<String> = (String?) -> Boolean
 
 internal interface Stikkprøver {
-    fun fullRefusjon(): Boolean
-    fun uts(): Boolean
+    fun utsFlereArbeidsgivereFørstegangsbehandling(): Boolean
+    fun utsFlereArbeidsgivereForlengelse(): Boolean
+    fun utsEnArbeidsgiverFørstegangsbehandling(): Boolean
+    fun utsEnArbeidsgiverForlengelse(): Boolean
+    fun fullRefusjonFlereArbeidsgivereFørstegangsbehandling(): Boolean
+    fun fullRefusjonFlereArbeidsgivereForlengelse(): Boolean
+    fun fullRefusjonEnArbeidsgiver(): Boolean
 }
 
 internal interface AutomatiseringValidering {

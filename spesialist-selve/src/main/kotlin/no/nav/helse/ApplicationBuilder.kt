@@ -231,8 +231,13 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     })
 
     private val stikkprøver = object : Stikkprøver {
-        override fun fullRefusjon() = plukkTilManuell(env["STIKKPROEVER_REFUSJON_DIVISOR"])
-        override fun uts() = plukkTilManuell(env["STIKKPROEVER_UTS_DIVISOR"])
+        override fun utsFlereArbeidsgivereFørstegangsbehandling() = plukkTilManuell(env["STIKKPROEVER_UTS_FLERE_AG_FGB_DIVISOR"])
+        override fun utsFlereArbeidsgivereForlengelse() = plukkTilManuell(env["STIKKPROEVER_UTS_FLERE_AG_FORLENGELSE_DIVISOR"])
+        override fun utsEnArbeidsgiverFørstegangsbehandling() = plukkTilManuell(env["STIKKPROEVER_UTS_EN_AG_FGB_DIVISOR"])
+        override fun utsEnArbeidsgiverForlengelse() = plukkTilManuell(env["STIKKPROEVER_UTS_EN_AG_FORLENGELSE_DIVISOR"])
+        override fun fullRefusjonFlereArbeidsgivereFørstegangsbehandling() = plukkTilManuell(env["STIKKPROEVER_FULL_REFUSJON_FLERE_AG_FGB_DIVISOR"])
+        override fun fullRefusjonFlereArbeidsgivereForlengelse() = plukkTilManuell(env["STIKKPROEVER_FULL_REFUSJON_FLERE_AG_FORLENGELSE_DIVISOR"])
+        override fun fullRefusjonEnArbeidsgiver() = plukkTilManuell(env["STIKKPROEVER_FULL_REFUSJON_EN_AG_DIVISOR"])
     }
 
     private val tilgangsgrupper = Tilgangsgrupper(System.getenv())

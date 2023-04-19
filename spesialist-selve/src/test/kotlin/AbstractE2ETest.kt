@@ -171,8 +171,13 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             overstyringDao = overstyringDao,
             snapshotMediator = snapshotMediator,
             stikkprøver = object : Stikkprøver {
-                override fun fullRefusjon() = false
-                override fun uts() = false
+                override fun utsFlereArbeidsgivereFørstegangsbehandling() = false
+                override fun utsFlereArbeidsgivereForlengelse() = false
+                override fun utsEnArbeidsgiverFørstegangsbehandling() = false
+                override fun utsEnArbeidsgiverForlengelse() = false
+                override fun fullRefusjonFlereArbeidsgivereFørstegangsbehandling() = false
+                override fun fullRefusjonFlereArbeidsgivereForlengelse() = false
+                override fun fullRefusjonEnArbeidsgiver() = false
             }),
         overstyringMediator = OverstyringMediator(testRapid),
         snapshotMediator = snapshotMediator
