@@ -244,6 +244,7 @@ internal class Generasjon private constructor(
                 && vedtaksperiodeId == other.vedtaksperiodeId
                 && utbetalingId == other.utbetalingId
                 && låst == other.låst
+                && tilstand == other.tilstand
                 && skjæringstidspunkt == other.skjæringstidspunkt
                 && periode == other.periode)
 
@@ -252,6 +253,7 @@ internal class Generasjon private constructor(
         result = 31 * result + vedtaksperiodeId.hashCode()
         result = 31 * result + utbetalingId.hashCode()
         result = 31 * result + låst.hashCode()
+        result = 31 * result + tilstand.hashCode()
         result = 31 * result + skjæringstidspunkt.hashCode()
         result = 31 * result + periode.hashCode()
         return result

@@ -706,7 +706,9 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         val generasjonId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon1 = generasjon(generasjonId, vedtaksperiodeId)
+        generasjon1.håndterVedtakFattet(UUID.randomUUID())
         val generasjon2 = generasjon(generasjonId, vedtaksperiodeId)
+        generasjon2.håndterVedtakFattet(UUID.randomUUID())
         assertEquals(generasjon1, generasjon2)
         assertEquals(generasjon1.hashCode(), generasjon2.hashCode())
     }
@@ -783,6 +785,17 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon1 = generasjon(generasjonId, vedtaksperiodeId, skjæringstidspunkt = 1.januar)
         val generasjon2 = generasjon(generasjonId, vedtaksperiodeId, skjæringstidspunkt = 1.februar)
+        assertNotEquals(generasjon1, generasjon2)
+        assertNotEquals(generasjon1.hashCode(), generasjon2.hashCode())
+    }
+
+    @Test
+    fun `forskjellig tilstand`() {
+        val generasjonId = UUID.randomUUID()
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjon1 = generasjon(generasjonId, vedtaksperiodeId, skjæringstidspunkt = 1.januar)
+        generasjon1.håndterVedtakFattet(UUID.randomUUID())
+        val generasjon2 = generasjon(generasjonId, vedtaksperiodeId, skjæringstidspunkt = 1.januar)
         assertNotEquals(generasjon1, generasjon2)
         assertNotEquals(generasjon1.hashCode(), generasjon2.hashCode())
     }
