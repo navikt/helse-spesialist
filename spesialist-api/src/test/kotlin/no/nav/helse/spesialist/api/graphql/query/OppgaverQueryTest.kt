@@ -60,30 +60,6 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
     }
 
     @Test
-    fun `saksbehandlere som ikke er medlemmer av besluttergruppen får ikke beslutteroppgaver`() {
-        val vedtakRef = opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
-        opprettOppgave(Oppgavestatus.AvventerSaksbehandler, Oppgavetype.SØKNAD, vedtakRef, erBeslutter = true)
-
-        val body = runQuery("""{ alleOppgaver { erBeslutter } }""")
-        val oppgaver = body["data"]["alleOppgaver"]
-
-        assertEquals(1, oppgaver.size())
-        assertTrue(oppgaver.none { it["erBeslutter"].asBoolean() })
-    }
-
-    @Test
-    fun `saksbehandlere som er medlemmer av besluttergruppen får beslutteroppgaver`() {
-        val vedtakRef = opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
-        opprettOppgave(Oppgavestatus.AvventerSaksbehandler, Oppgavetype.SØKNAD, vedtakRef, erBeslutter = true)
-
-        val body = runQuery("""{ alleOppgaver { erBeslutter } }""", beslutterGruppeId)
-        val oppgaver = body["data"]["alleOppgaver"]
-
-        assertEquals(2, oppgaver.size())
-        assertTrue(oppgaver.any { it["erBeslutter"].asBoolean() })
-    }
-
-    @Test
     fun `henter behandlede oppgaver`() {
         opprettSaksbehandler()
         val vedtakRef = opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())

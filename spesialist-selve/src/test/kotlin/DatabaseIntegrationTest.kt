@@ -132,6 +132,13 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         beslutterSaksbehandlergruppe = BESLUTTER_GRUPPE_ID,
         skjermedePersonerSaksbehandlergruppe = SKJERMEDE_PERSONER_GRUPPE_ID,
     )
+    protected val SAKSBEHANDLERTILGANGER_MED_BESLUTTER = SaksbehandlerTilganger(
+        gruppetilganger = listOf(BESLUTTER_GRUPPE_ID),
+        kode7Saksbehandlergruppe = KODE7_GRUPPE_ID,
+        riskSaksbehandlergruppe = RISK_GRUPPE_ID,
+        beslutterSaksbehandlergruppe = BESLUTTER_GRUPPE_ID,
+        skjermedePersonerSaksbehandlergruppe = SKJERMEDE_PERSONER_GRUPPE_ID,
+    )
 
     internal var personId: Long = -1
         private set
@@ -336,6 +343,21 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             vedtaksperiodeId,
             utbetalingId
         )
+    }
+
+    protected fun opprettTotrinnsvurdering(
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE,
+        saksbehandler: UUID? = null,
+        erRetur: Boolean = false
+    ) {
+        totrinnsvurderingDao.opprett(vedtaksperiodeId)
+
+        if (saksbehandler != null) {
+            totrinnsvurderingDao.settSaksbehandler(vedtaksperiodeId, saksbehandler)
+        }
+        if (erRetur) {
+            totrinnsvurderingDao.settErRetur(vedtaksperiodeId)
+        }
     }
 
     protected fun opprettUtbetalingKobling(

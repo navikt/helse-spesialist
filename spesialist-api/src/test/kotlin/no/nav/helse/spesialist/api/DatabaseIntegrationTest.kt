@@ -452,14 +452,13 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         oppgavetype: Oppgavetype = Oppgavetype.SØKNAD,
         vedtakRef: Long,
         utbetlingId: UUID? = null,
-        erBeslutter: Boolean = false,
         opprettet: LocalDateTime = LocalDateTime.now(),
     ) =
         requireNotNull(
             sessionOf(dataSource, returnGeneratedKey = true).use { session ->
                 @Language("PostgreSQL")
                 val statement =
-                    "INSERT INTO oppgave(utbetaling_id, opprettet, oppdatert, status, vedtak_ref, type, er_beslutteroppgave) VALUES(?, ?, now(), CAST(? as oppgavestatus), ?, CAST(? as oppgavetype), ?)"
+                    "INSERT INTO oppgave(utbetaling_id, opprettet, oppdatert, status, vedtak_ref, type) VALUES(?, ?, now(), CAST(? as oppgavestatus), ?, CAST(? as oppgavetype))"
                 session.run(
                     queryOf(
                         statement,
@@ -468,7 +467,6 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                         status.name,
                         vedtakRef,
                         oppgavetype.name,
-                        erBeslutter,
                     ).asUpdateAndReturnGeneratedKey
                 )
             })

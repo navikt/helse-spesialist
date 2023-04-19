@@ -437,6 +437,44 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
         assertEquals(ARBEIDSGIVER, oppgave.mottaker)
     }
 
+    @Test
+    fun `Får totrinnsoppgaver selv om man ikke har besluttertilgang`() {
+        nyPerson()
+        opprettSaksbehandler()
+        opprettTotrinnsvurdering()
+        val oppgaver = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN)
+        assertTrue(oppgaver.isNotEmpty())
+    }
+
+    @Test
+    fun `Får beslutteroppgaver dersom man har besluttertilgang`() {
+        nyPerson()
+        opprettSaksbehandler()
+        opprettTotrinnsvurdering(saksbehandler = SAKSBEHANDLER_OID)
+        val oppgaver = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_BESLUTTER)
+        val oppgave = oppgaver.first()
+        assertEquals(SAKSBEHANDLER_OID, UUID.fromString(oppgave.totrinnsvurdering?.saksbehandler))
+    }
+
+    @Test
+    fun `Får ikke beslutteroppgaver dersom man ikke har besluttertilgang`() {
+        nyPerson()
+        opprettSaksbehandler()
+        opprettTotrinnsvurdering(saksbehandler = SAKSBEHANDLER_OID)
+        val oppgaver = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN)
+        assertTrue(oppgaver.isEmpty())
+    }
+
+    @Test
+    fun `Får returoppgaver selv om man ikke har besluttertilgang`() {
+        nyPerson()
+        opprettSaksbehandler()
+        opprettTotrinnsvurdering(saksbehandler = SAKSBEHANDLER_OID, erRetur = true)
+        val oppgaver = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN)
+        val oppgave = oppgaver.first()
+        assertEquals(SAKSBEHANDLER_OID, UUID.fromString(oppgave.totrinnsvurdering?.saksbehandler))
+    }
+
     // Sortert stigende
     private fun finnOpprettetTidspunkterFor(vedtaksperiodeId: UUID): List<String> {
         @Language("PostgreSQL")
@@ -446,5 +484,4 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
             session.run(queryOf(query, vedtaksperiodeId).map { it.string("opprettet_tidspunkt") }.asList)
         }
     }
-
 }
