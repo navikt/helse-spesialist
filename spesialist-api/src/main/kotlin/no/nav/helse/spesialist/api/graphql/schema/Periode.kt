@@ -368,24 +368,6 @@ data class BeregnetPeriode(
 
     override fun hendelser(): List<Hendelse> = periode.hendelser.map { it.tilHendelse() }
 
-    @Deprecated("erBeslutterOppgave bør hentes fra periodens oppgave")
-    fun erBeslutterOppgave(): Boolean? = oppgaveApiDao.erBeslutteroppgave(UUID.fromString(vedtaksperiodeId()))
-
-    @Deprecated("erReturOppgave bør hentes fra periodens oppgave")
-    fun erReturOppgave(): Boolean? = oppgaveApiDao.erReturOppgave(UUID.fromString(vedtaksperiodeId()))
-
-    @Deprecated("trengerTotrinnsvurdering bør hentes fra periodens oppgave")
-    fun trengerTotrinnsvurdering(): Boolean? =
-        oppgaveApiDao.trengerTotrinnsvurdering(UUID.fromString(vedtaksperiodeId()))
-
-    @Deprecated("tidligereSaksbehandlerOid bør hentes fra periodens oppgave")
-    fun tidligereSaksbehandlerOid(): UUIDString? =
-        oppgaveApiDao.hentTidligereSaksbehandlerOid(UUID.fromString(vedtaksperiodeId()))?.toString()
-
-    @Deprecated("beslutterSaksbehandlerOid skal hentes fra totrinnsvurdering")
-    fun beslutterSaksbehandlerOid(): UUIDString? =
-        oppgaveApiDao.hentBeslutterSaksbehandlerOid(UUID.fromString(vedtaksperiodeId()))?.toString()
-
     fun inntektFraAordningen(): List<InntektFraAOrdningen> =
         oppgaveApiDao.finnPeriodensInntekterFraAordningen(
             periode.vedtaksperiodeId,
