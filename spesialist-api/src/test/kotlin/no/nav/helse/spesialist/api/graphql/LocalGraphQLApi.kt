@@ -3,7 +3,9 @@ package no.nav.helse.spesialist.api.graphql
 import io.ktor.http.ContentType
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.application.install
+import io.ktor.server.plugins.callloging.CallLogging
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.plugins.doublereceive.DoubleReceive
 import io.mockk.Call
 import io.mockk.MockKAnswerScope
 import io.mockk.coEvery
@@ -122,6 +124,8 @@ fun main() = runBlocking {
         }
 
         infobannerOmMiljøvariabel()
+        install(CallLogging)
+        install(DoubleReceive)
 
         graphQLApi(
             personApiDao = personApiDao,

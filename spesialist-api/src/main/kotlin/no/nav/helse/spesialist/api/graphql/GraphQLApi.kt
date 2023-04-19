@@ -5,6 +5,7 @@ import graphql.GraphQL
 import io.ktor.http.ContentType
 import io.ktor.server.application.Application
 import io.ktor.server.application.call
+import io.ktor.server.application.install
 import io.ktor.server.auth.authenticate
 import io.ktor.server.request.ApplicationRequest
 import io.ktor.server.response.respond
@@ -16,6 +17,7 @@ import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import java.time.Duration
 import java.util.UUID
+import no.nav.helse.spesialist.api.GraphQLMetrikker
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMediator
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
@@ -91,6 +93,10 @@ fun Application.graphQLApi(
     )
 
     routing {
+        route("graphql") {
+            // Ligger utenfor queryHandler for å slippe å installe plugins for logging i testsammenheng
+            install(GraphQLMetrikker)
+        }
         route("graphql") {
             if (DROPP_SIKKERHET()) {
                 queryHandler(server)

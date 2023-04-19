@@ -20,6 +20,7 @@ import io.ktor.server.plugins.callid.CallId
 import io.ktor.server.plugins.callid.callIdMdc
 import io.ktor.server.plugins.callloging.CallLogging
 import io.ktor.server.plugins.cors.routing.CORS
+import io.ktor.server.plugins.doublereceive.*
 import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.request.header
 import io.ktor.server.request.httpMethod
@@ -262,6 +263,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 callIdMdc("callId")
                 filter { call -> call.request.path().startsWith("/api/") }
             }
+            install(DoubleReceive)
             intercept(ApplicationCallPipeline.Call) {
                 call.principal<JWTPrincipal>()?.let { principal ->
                     val uri = call.request.uri
