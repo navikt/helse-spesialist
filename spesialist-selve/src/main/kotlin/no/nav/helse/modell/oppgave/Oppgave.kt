@@ -66,8 +66,9 @@ class Oppgave private constructor(
             val contextId = oppgaveDao.finnContextId(oppgaveId)
             val oppgave = requireNotNull(oppgaveDao.finn(oppgaveId))
             val fødselsnummer = oppgaveDao.finnFødselsnummer(oppgaveId)
-            val erBeslutterOppgave = oppgaveDao.erBeslutteroppgave(oppgaveId)
-            val erReturOppgave = oppgaveDao.erReturoppgave(oppgaveId)
+            // @TODO bruke ny totrinnsvurderingtabell eller fjerne?
+            val erBeslutterOppgave = false
+            val erReturOppgave = false
 
             return fødselsnummer to lagMelding(
                 eventName = eventName,

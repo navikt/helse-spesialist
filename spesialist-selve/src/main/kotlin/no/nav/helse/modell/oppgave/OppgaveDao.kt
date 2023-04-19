@@ -37,31 +37,11 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             LIMIT 1
         """.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.long("id") }
 
-    fun erBeslutteroppgave(fødselsnummer: String): Boolean =
-        """ SELECT er_beslutteroppgave FROM oppgave o
-                JOIN vedtak v ON v.id = o.vedtak_ref
-                JOIN person p ON v.person_ref = p.id
-            WHERE p.fodselsnummer = :fodselsnummer
-            AND o.status = 'AvventerSaksbehandler'::oppgavestatus  
-        """.single(mapOf("fodselsnummer" to fødselsnummer.toLong())) { it.boolean("er_beslutteroppgave") } ?: false
-
-    fun erBeslutteroppgave(oppgaveId: Long): Boolean =
-        """ SELECT er_beslutteroppgave FROM oppgave
-            WHERE id=:oppgaveId
-            AND status = 'AvventerSaksbehandler'::oppgavestatus
-        """.single(mapOf("oppgaveId" to oppgaveId)) { it.boolean("er_beslutteroppgave") } ?: false
-
     fun erRiskoppgave(oppgaveId: Long): Boolean =
         """ SELECT 1 FROM oppgave
             WHERE id=:oppgaveId
             AND type = 'RISK_QA'
         """.single(mapOf("oppgaveId" to oppgaveId)) { true } ?: false
-
-    fun erReturoppgave(oppgaveId: Long): Boolean =
-        """ SELECT er_returoppgave FROM oppgave
-            WHERE id=:oppgaveId
-            AND status = 'AvventerSaksbehandler'::oppgavestatus
-        """.single(mapOf("oppgaveId" to oppgaveId)) { it.boolean("er_returoppgave") } ?: false
 
     fun finnOppgaveIdUansettStatus(fødselsnummer: String) =
         """ SELECT o.id as oppgaveId

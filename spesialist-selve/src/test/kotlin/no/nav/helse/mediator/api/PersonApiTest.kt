@@ -166,7 +166,6 @@ internal class PersonApiTest {
         every { oppgaveDao.venterPåSaksbehandler(1L) } returns true
         every { oppgaveDao.erRiskoppgave(1L) } returns false
         every { varselRepository.ikkeVurderteVarslerFor(1L) } returns 0
-        every { oppgaveDao.erBeslutteroppgave(1L) } returns false
         every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns Totrinnsvurdering(
             vedtaksperiodeId = vedtaksperiodeId,
             erRetur = false,

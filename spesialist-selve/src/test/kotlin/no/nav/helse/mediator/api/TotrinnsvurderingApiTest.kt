@@ -189,7 +189,6 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
 
     @Test
     fun `Totrinnsvurdering kan gjøres til beslutteroppgave hvis den er en returoppgave`() {
-        every { oppgaveDao.erBeslutteroppgave(1L) } returns false
         every { totrinnsvurderingMediator.hentAktiv(oppgaveId = any()) } returns Totrinnsvurdering(
             vedtaksperiodeId = UUID.randomUUID(),
             erRetur = true,
