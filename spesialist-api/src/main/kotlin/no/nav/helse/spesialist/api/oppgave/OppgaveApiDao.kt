@@ -53,47 +53,6 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         """
     ).single(mapOf("fodselsnummer" to fødselsnummer.toLong())) { it.long("oppgaveId") }
 
-    fun erBeslutteroppgave(vedtaksperiodeId: UUID): Boolean = queryize(
-        """
-            SELECT er_beslutteroppgave FROM oppgave
-                    WHERE vedtak_ref =
-                (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
-                    AND status = 'AvventerSaksbehandler'::oppgavestatus
-            """
-    ).single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.boolean("er_beslutteroppgave") } ?: false
-
-    fun erReturOppgave(vedtaksperiodeId: UUID): Boolean = queryize(
-        """ SELECT er_returoppgave FROM oppgave
-                WHERE vedtak_ref =
-                    (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
-                AND status = 'AvventerSaksbehandler'::oppgavestatus
-            """
-    ).single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.boolean("er_returoppgave") } ?: false
-
-    fun hentBeslutterSaksbehandlerOid(vedtaksperiodeId: UUID): UUID? = queryize(
-        """ SELECT beslutter_saksbehandler_oid FROM oppgave
-                WHERE vedtak_ref =
-                    (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
-                 AND status = 'AvventerSaksbehandler'::oppgavestatus   
-            """
-    ).single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.uuidOrNull("beslutter_saksbehandler_oid") }
-
-    fun hentTidligereSaksbehandlerOid(vedtaksperiodeId: UUID): UUID? = queryize(
-        """ SELECT tidligere_saksbehandler_oid FROM oppgave
-            WHERE vedtak_ref =
-                (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
-             AND status = 'AvventerSaksbehandler'::oppgavestatus   
-        """
-    ).single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.uuidOrNull("tidligere_saksbehandler_oid") }
-
-    fun trengerTotrinnsvurdering(vedtaksperiodeId: UUID): Boolean = queryize(
-        """ SELECT er_totrinnsoppgave FROM oppgave
-            WHERE vedtak_ref =
-                (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
-            AND status = 'AvventerSaksbehandler'::oppgavestatus   
-        """
-    ).single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.boolean("er_totrinnsoppgave") } ?: false
-
     fun finnPeriodeoppgave(vedtaksperiodeId: UUID): OppgaveForPeriodevisningDto? {
         @Language("PostgreSQL")
         val query = """
@@ -142,7 +101,7 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             WITH aktiv_oppgave AS (select o.* from oppgave o where o.status = 'AvventerSaksbehandler'),
                  aktiv_tildeling AS (select t.* from tildeling t where t.oppgave_id_ref in (select o.id from aktiv_oppgave o))
 
-            SELECT o.id as oppgave_id, o.type AS oppgavetype, o.opprettet, os.soknad_mottatt AS opprinneligSoknadsdato, o.er_beslutteroppgave, o.er_returoppgave, o.er_totrinnsoppgave, o.tidligere_saksbehandler_oid, o.sist_sendt,
+            SELECT o.id as oppgave_id, o.type AS oppgavetype, o.opprettet, os.soknad_mottatt AS opprinneligSoknadsdato, o.sist_sendt,
                 s.epost, s.navn as saksbehandler_navn, s.oid, v.vedtaksperiode_id, v.fom, v.tom, pi.fornavn, pi.mellomnavn, pi.etternavn, pi.fodselsdato,
                 pi.kjonn, pi.adressebeskyttelse, p.aktor_id, p.fodselsnummer, sot.type as saksbehandleroppgavetype, sot.inntektskilde, e.id AS enhet_id, e.navn AS enhet_navn, t.på_vent,
                 (SELECT COUNT(DISTINCT melding) from warning w where w.melding not like '$beslutterOppgaveHackyWorkaround%' and w.vedtak_ref = o.vedtak_ref and (w.inaktiv_fra is null or w.inaktiv_fra > now())) AS antall_varsler,
@@ -168,7 +127,7 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                     ELSE pi.adressebeskyttelse = 'Ugradert' END
                 AND CASE WHEN :harTilgangTilBeslutter
                     THEN true
-                    ELSE o.er_beslutteroppgave = false END
+                    ELSE (ttv.er_retur = true OR ttv.saksbehandler IS NULL) END
             ORDER BY
                 CASE WHEN t.saksbehandler_ref IS NOT NULL THEN 0 ELSE 1 END,
                 CASE WHEN o.type = 'STIKKPRØVE' THEN 0 ELSE 1 END,
@@ -196,15 +155,12 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
     ): List<FerdigstiltOppgaveDto> {
         val erFerdigstiltAvSaksbehandler =
             "((o.status = 'Ferdigstilt' OR o.status = 'AvventerSystem') AND s.ident = :ident)"
-        val erTidligereBehandletAvSaksbehandler =
-            "((o.er_beslutteroppgave = true OR o.er_returoppgave = true) AND o.tidligere_saksbehandler_oid = :oid)"
 
         return queryize(
             """
             SELECT o.id                                                     as oppgave_id,
                    o.type                                                   as oppgavetype,
                    o.status,
-                   o.er_beslutteroppgave,
                    s2.navn                                                  as ferdigstilt_av,
                    o.oppdatert                                              as ferdigstilt_tidspunkt,
                    pi.fornavn                                               as soker_fornavn,
@@ -227,7 +183,12 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                      LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
                      LEFT JOIN saksbehandler s on t.saksbehandler_ref = s.oid
                      LEFT JOIN saksbehandler s2 on o.ferdigstilt_av = s2.ident
-            WHERE ($erFerdigstiltAvSaksbehandler OR $erTidligereBehandletAvSaksbehandler)
+                     LEFT JOIN (SELECT DISTINCT ON (vedtaksperiode_id) vedtaksperiode_id, saksbehandler
+                         FROM totrinnsvurdering
+                         WHERE utbetaling_id_ref IS NOT NULL
+                         ORDER BY vedtaksperiode_id, id DESC
+                     ) ttv ON ttv.vedtaksperiode_id = v.vedtaksperiode_id
+            WHERE ($erFerdigstiltAvSaksbehandler OR ttv.saksbehandler = :oid)
               AND o.oppdatert >= :fom
             ORDER BY o.oppdatert;
         """.trimIndent()
@@ -274,9 +235,6 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             antallVarsler = it.int("antall_varsler"),
             flereArbeidsgivere = it.stringOrNull("inntektskilde") == Inntektskilde.FLERE_ARBEIDSGIVERE.name,
             boenhet = Boenhet(id = it.string("enhet_id"), navn = it.string("enhet_navn")),
-            erBeslutter = it.boolean("er_beslutteroppgave"),
-            erRetur = it.boolean("er_returoppgave"),
-            trengerTotrinnsvurdering = it.boolean("er_totrinnsoppgave"),
             tildeling = it.stringOrNull("epost")?.let { epost ->
                 Tildeling(
                     navn = it.string("saksbehandler_navn"),
@@ -286,7 +244,6 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 )
             },
             periodetype = it.stringOrNull("saksbehandleroppgavetype")?.let(Periodetype::valueOf)?.tilPeriodetype(),
-            tidligereSaksbehandler = it.stringOrNull("tidligere_saksbehandler_oid"),
             sistSendt = it.stringOrNull("sist_sendt"),
             totrinnsvurdering = it.stringOrNull("totrinnsvurdering_vedtaksperiode_id")?.let { _ ->
                 val erRetur = it.boolean("er_retur")

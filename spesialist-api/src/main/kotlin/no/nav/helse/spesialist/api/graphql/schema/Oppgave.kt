@@ -36,10 +36,6 @@ data class OppgaveForOversiktsvisning(
     val sistSendt: DateTimeString?,
     val totrinnsvurdering: Totrinnsvurdering?,
     val mottaker: Mottaker?,
-    val erBeslutter: Boolean?,
-    val erRetur: Boolean?,
-    val trengerTotrinnsvurdering: Boolean?,
-    val tidligereSaksbehandler: UUIDString?,
 )
 
 data class OppgaveForPeriodevisning(
