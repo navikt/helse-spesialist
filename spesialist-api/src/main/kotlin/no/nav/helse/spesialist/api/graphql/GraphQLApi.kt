@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.api.graphql
 import com.expediagroup.graphql.server.execution.GraphQLServer
 import graphql.GraphQL
 import io.ktor.http.ContentType
+import io.ktor.http.HttpMethod
 import io.ktor.server.application.Application
 import io.ktor.server.application.call
 import io.ktor.server.application.install
@@ -93,7 +94,7 @@ fun Application.graphQLApi(
     )
 
     routing {
-        route("graphql") {
+        route("graphql", HttpMethod.Post) {
             // Ligger utenfor queryHandler for å slippe å installe plugins for logging i testsammenheng
             install(GraphQLMetrikker)
         }
