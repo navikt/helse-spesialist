@@ -43,6 +43,14 @@ internal class Generasjon private constructor(
         fun vedtakFattet(generasjon: Generasjon, hendelseId: UUID) {
             sikkerlogg.info("Forventet ikke vedtak_fattet i {}", kv("tilstand", this::class.simpleName))
         }
+
+        fun tidslinjeendring(
+            generasjon: Generasjon,
+            fom: LocalDate,
+            tom: LocalDate,
+            skjæringstidspunkt: LocalDate,
+            hendelseId: UUID
+        ) {}
     }
 
     internal object Låst: Tilstand {
@@ -58,6 +66,16 @@ internal class Generasjon private constructor(
             generasjon.flyttAktiveVarsler(nesteGenerasjon)
             return nesteGenerasjon
         }
+
+        override fun tidslinjeendring(
+            generasjon: Generasjon,
+            fom: LocalDate,
+            tom: LocalDate,
+            skjæringstidspunkt: LocalDate,
+            hendelseId: UUID
+        ) {
+            generasjon.håndterNyGenerasjon(hendelseId = hendelseId, fom = fom, tom = tom, skjæringstidspunkt = skjæringstidspunkt)
+        }
     }
 
     internal object Ulåst: Tilstand {
@@ -65,6 +83,16 @@ internal class Generasjon private constructor(
             generasjon.låst = true
             generasjon.observers.forEach { it.vedtakFattet(generasjon.id, hendelseId) }
             generasjon.nyTilstand(this, Låst)
+        }
+
+        override fun tidslinjeendring(
+            generasjon: Generasjon,
+            fom: LocalDate,
+            tom: LocalDate,
+            skjæringstidspunkt: LocalDate,
+            hendelseId: UUID
+        ) {
+            generasjon.oppdaterTidslinje(fom, tom, skjæringstidspunkt)
         }
     }
 
@@ -86,8 +114,7 @@ internal class Generasjon private constructor(
 
     internal fun håndterTidslinjeendring(fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate, hendelseId: UUID) {
         if (fom == periode.fom() && tom == periode.tom() && skjæringstidspunkt == this.skjæringstidspunkt) return
-        if (!låst) return oppdaterTidslinje(fom, tom, skjæringstidspunkt)
-        håndterNyGenerasjon(hendelseId = hendelseId, fom = fom, tom = tom, skjæringstidspunkt = skjæringstidspunkt)
+        tilstand.tidslinjeendring(this, fom, tom, skjæringstidspunkt, hendelseId)
     }
 
     internal fun håndterNyGenerasjon(
