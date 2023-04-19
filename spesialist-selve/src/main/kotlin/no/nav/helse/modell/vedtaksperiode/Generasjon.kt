@@ -51,6 +51,8 @@ internal class Generasjon private constructor(
             skjæringstidspunkt: LocalDate,
             hendelseId: UUID
         ) {}
+
+        fun nyUtbetaling(generasjon: Generasjon, hendelseId: UUID, utbetalingId: UUID) {}
     }
 
     internal object Låst: Tilstand {
@@ -76,6 +78,17 @@ internal class Generasjon private constructor(
         ) {
             generasjon.håndterNyGenerasjon(hendelseId = hendelseId, fom = fom, tom = tom, skjæringstidspunkt = skjæringstidspunkt)
         }
+
+        override fun nyUtbetaling(generasjon: Generasjon, hendelseId: UUID, utbetalingId: UUID) {
+            val nyGenerasjonId = UUID.randomUUID()
+            sikkerlogg.info(
+                "Kan ikke legge til ny utbetaling med {} for {}, da generasjonen er låst. Oppretter ny generasjon med {}",
+                keyValue("utbetalingId", utbetalingId),
+                keyValue("generasjon", this),
+                keyValue("generasjonId", nyGenerasjonId)
+            )
+            generasjon.håndterNyGenerasjon(hendelseId, nyGenerasjonId)?.håndterNyUtbetaling(utbetalingId)
+        }
     }
 
     internal object Ulåst: Tilstand {
@@ -93,6 +106,10 @@ internal class Generasjon private constructor(
             hendelseId: UUID
         ) {
             generasjon.oppdaterTidslinje(fom, tom, skjæringstidspunkt)
+        }
+
+        override fun nyUtbetaling(generasjon: Generasjon, hendelseId: UUID, utbetalingId: UUID) {
+            generasjon.håndterNyUtbetaling(utbetalingId)
         }
     }
 
@@ -156,15 +173,7 @@ internal class Generasjon private constructor(
     }
 
     internal fun håndterNyUtbetaling(hendelseId: UUID, utbetalingId: UUID) {
-        if (!låst) return håndterNyUtbetaling(utbetalingId)
-        val nyGenerasjonId = UUID.randomUUID()
-        sikkerlogg.info(
-            "Kan ikke legge til ny utbetaling med {} for {}, da generasjonen er låst. Oppretter ny generasjon med {}",
-            keyValue("utbetalingId", utbetalingId),
-            keyValue("generasjon", this),
-            keyValue("generasjonId", nyGenerasjonId)
-        )
-        håndterNyGenerasjon(hendelseId, nyGenerasjonId)?.håndterNyUtbetaling(utbetalingId)
+        tilstand.nyUtbetaling(this, hendelseId, utbetalingId)
     }
 
     private fun håndterNyUtbetaling(utbetalingId: UUID) {
