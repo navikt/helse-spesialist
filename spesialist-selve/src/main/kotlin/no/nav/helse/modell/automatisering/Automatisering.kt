@@ -178,7 +178,7 @@ internal class Automatisering(
         val skalStoppesPgaUTS =
             if (AutomatiserUtbetalingTilSykmeldt.enabled) {
                 (vedtaksperiodensUtbetaling.utbetalingTilSykmeldt() &&
-                        periodetype != Periodetype.FORLENGELSE)
+                        !arrayOf(Periodetype.FORLENGELSE, Periodetype.FØRSTEGANGSBEHANDLING).contains(periodetype))
             } else vedtaksperiodensUtbetaling.utbetalingTilSykmeldt()
 
         return valider(

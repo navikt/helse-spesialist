@@ -46,11 +46,12 @@ internal class AutomatiseringTest {
     private val vergemålDaoMock = mockk<VergemålDao>(relaxed = true)
     private val overstyringDaoMock = mockk<OverstyringDao>(relaxed = true)
     private var stikkprøveFullRefusjonEnArbeidsgiver = false
+    private var stikkprøveUtsEnArbeidsgiverFørstegangsbehandling = false
     private var stikkprøveUtsEnArbeidsgiverForlengelse = false
     private val stikkprøver = object : Stikkprøver {
         override fun utsFlereArbeidsgivereFørstegangsbehandling() = false
         override fun utsFlereArbeidsgivereForlengelse() = false
-        override fun utsEnArbeidsgiverFørstegangsbehandling() = false
+        override fun utsEnArbeidsgiverFørstegangsbehandling() = stikkprøveUtsEnArbeidsgiverFørstegangsbehandling
         override fun utsEnArbeidsgiverForlengelse() = stikkprøveUtsEnArbeidsgiverForlengelse
         override fun fullRefusjonFlereArbeidsgivereFørstegangsbehandling() = false
         override fun fullRefusjonFlereArbeidsgivereForlengelse() = false
@@ -198,7 +199,14 @@ internal class AutomatiseringTest {
     }
 
     @Test
-    fun `førstegangsbehandling med utbetaling til sykmeldt skal ikke automatisk godkjennes`() {
+    fun `førstegangsbehandling med utbetaling til sykmeldt skal automatisk godkjennes`() {
+        every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(personbeløp = 500)
+        gårAutomatisk()
+    }
+
+    @Test
+    fun `førstegangsbehandling med utbetaling til sykmeldt som plukkes ut som stikkprøve skal ikke automatisk godkjennes`() {
+        stikkprøveUtsEnArbeidsgiverFørstegangsbehandling = true
         every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(personbeløp = 500)
         support.run {
             forsøkAutomatisering(periodetype = Periodetype.FØRSTEGANGSBEHANDLING)
@@ -273,7 +281,7 @@ internal class AutomatiseringTest {
             verify(exactly = 0) { onAutomatiserbar() }
             verify(exactly = 0) { automatiseringDaoMock.automatisert(any(), any(), any()) }
             verify(exactly = 1) {
-                if (stikkprøveUtsEnArbeidsgiverForlengelse || stikkprøveFullRefusjonEnArbeidsgiver)
+                if (stikkprøveUtsEnArbeidsgiverForlengelse || stikkprøveFullRefusjonEnArbeidsgiver || stikkprøveUtsEnArbeidsgiverFørstegangsbehandling)
                     automatiseringDaoMock.stikkprøve(any(), any(), any())
                 else automatiseringDaoMock.manuellSaksbehandling(any(), vedtaksperiodeId, hendelseId, utbetalingId)
             }
