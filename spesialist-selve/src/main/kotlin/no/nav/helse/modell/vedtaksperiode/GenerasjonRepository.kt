@@ -9,7 +9,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 internal interface GenerasjonRepository {
-    fun sisteFor(vedtaksperiodeId: UUID): Generasjon
     fun sisteForLenient(vedtaksperiodeId: UUID): Generasjon? = null
     fun tilhørendeFor(utbetalingId: UUID): List<Generasjon>
 }
@@ -96,10 +95,6 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
             it.registrer(this)
         }
     }
-
-    override fun sisteFor(vedtaksperiodeId: UUID) =
-        sisteForLenient(vedtaksperiodeId)
-            ?: throw IllegalStateException("Forventer å finne en generasjon for perioden")
 
     override fun sisteForLenient(vedtaksperiodeId: UUID): Generasjon? {
         return dao.finnSisteFor(vedtaksperiodeId)?.also { it.registrer(this) }

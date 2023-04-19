@@ -6,13 +6,11 @@ import no.nav.helse.modell.kommando.CommandContext
 
 internal class OpprettKoblingTilGenerasjonCommand(
     private val hendelseId: UUID,
-    private val vedtaksperiodeId: UUID,
     private val utbetalingId: UUID,
-    private val generasjonRepository: GenerasjonRepository,
+    private val gjeldendeGenerasjon: Generasjon,
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
-        val generasjon = generasjonRepository.sisteFor(vedtaksperiodeId)
-        generasjon.håndterNyUtbetaling(hendelseId, utbetalingId)
+        gjeldendeGenerasjon.håndterNyUtbetaling(hendelseId, utbetalingId)
         return true
     }
 }

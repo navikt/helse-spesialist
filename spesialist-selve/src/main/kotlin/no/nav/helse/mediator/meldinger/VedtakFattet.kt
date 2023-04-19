@@ -4,7 +4,7 @@ import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
+import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -19,7 +19,7 @@ internal class VedtakFattet(
     private val fødselsnummer: String,
     private val vedtaksperiodeId: UUID,
     private val json: String,
-    private val generasjonRepository: GenerasjonRepository
+    private val gjeldendeGenerasjon: Generasjon
 ) : Hendelse {
 
     private companion object {
@@ -60,8 +60,7 @@ internal class VedtakFattet(
 
     override fun execute(context: CommandContext): Boolean {
         try {
-            val generasjon = generasjonRepository.sisteFor(vedtaksperiodeId)
-            generasjon.håndterVedtakFattet(id)
+            gjeldendeGenerasjon.håndterVedtakFattet(id)
         } catch (e: IllegalStateException) {
             sikkerlogg.info(
                 "Finner ikke noen generasjon for {}, forsøkt låst av {}",

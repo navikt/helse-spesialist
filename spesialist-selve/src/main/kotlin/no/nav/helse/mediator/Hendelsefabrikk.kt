@@ -155,8 +155,12 @@ internal class Hendelsefabrikk(
 
     private fun gjeldendeGenerasjoner(iderGetter: () -> Set<UUID>): List<Generasjon> {
         return iderGetter().map {
-            GenerasjonBuilder(vedtaksperiodeId = it).build(generasjonRepository, varselRepository)
+            gjeldendeGenerasjon(it)
         }
+    }
+
+    private fun gjeldendeGenerasjon(vedtaksperiodeId: UUID): Generasjon {
+        return GenerasjonBuilder(vedtaksperiodeId = vedtaksperiodeId).build(generasjonRepository, varselRepository)
     }
 
     fun godkjenning(
@@ -601,7 +605,7 @@ internal class Hendelsefabrikk(
             snapshotClient = snapshotClient,
             personDao = personDao,
             varselRepository = varselRepository,
-            gjeldendeGenerasjon = generasjonRepository.sisteFor(vedtaksperiodeId)
+            gjeldendeGenerasjon = gjeldendeGenerasjon(vedtaksperiodeId)
         )
     }
 
@@ -878,17 +882,16 @@ internal class Hendelsefabrikk(
     }
 
     fun vedtakFattet(id: UUID, fødselsnummer: String, vedtaksperiodeId: UUID, json: String): VedtakFattet {
-        return VedtakFattet(id, fødselsnummer, vedtaksperiodeId, json, generasjonRepository)
+        return VedtakFattet(id, fødselsnummer, vedtaksperiodeId, json, gjeldendeGenerasjon(vedtaksperiodeId))
     }
 
     fun vedtakFattet(json: String): VedtakFattet {
         val jsonNode = mapper.readTree(json)
-        return VedtakFattet(
+        return vedtakFattet(
             id = UUID.fromString(jsonNode.path("@id").asText()),
             fødselsnummer = jsonNode.path("fødselsnummer").asText(),
             vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText()),
-            json,
-            generasjonRepository
+            json
         )
     }
 

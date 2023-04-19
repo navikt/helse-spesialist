@@ -10,8 +10,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
-import org.junit.jupiter.api.assertThrows
 
 internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
 
@@ -141,35 +139,6 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         generasjon.håndterNyUtbetaling(UUID.randomUUID(), ny)
 
         assertUtbetaling(generasjonId, gammel)
-    }
-
-    @Test
-    fun `finner siste generasjon for en periode`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val hendelseId = UUID.randomUUID()
-
-        repository.førsteGenerasjonOpprettet(
-            UUID.randomUUID(),
-            vedtaksperiodeId,
-            hendelseId,
-            1.januar,
-            31.januar,
-            1.januar,
-            Generasjon.Ulåst
-        )
-        assertGenerasjon(vedtaksperiodeId, hendelseId)
-        assertDoesNotThrow {
-            repository.sisteFor(vedtaksperiodeId)
-        }
-    }
-
-    @Test
-    fun `kaster exception dersom vi ikke finner generasjon`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-
-        assertThrows<IllegalStateException> {
-            repository.sisteFor(vedtaksperiodeId)
-        }
     }
 
     @Test
