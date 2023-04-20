@@ -1,0 +1,2 @@
+UPDATE selve_varsel SET status = 'GODKJENT' WHERE generasjon_ref = '6542559' AND status = 'VURDERT' AND kode in ('RV_IM_3', 'RV_IM_4');
+UPDATE selve_varsel SET status = 'GODKJENT' WHERE generasjon_ref = '6549465' AND status = 'VURDERT' AND kode = 'RV_IM_3';
