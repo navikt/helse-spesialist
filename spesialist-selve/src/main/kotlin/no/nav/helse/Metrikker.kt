@@ -9,6 +9,7 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.asLocalDateTime
+import no.nav.helse.rapids_rivers.isMissingOrNull
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -69,11 +70,11 @@ internal class MetrikkRiver(rapidsConnection: RapidsConnection) : River.PacketLi
         val opprettet = packet["system_participating_services"][0].let { it["time"].asLocalDateTime() }
         val delay = MILLIS.between(opprettet, besvart)
         val behov = packet["@behov"].map(JsonNode::asText)
-        val godkjent: Boolean? = packet["@løsning.Godkjenning.godkjent"].takeUnless{ it.isNull }?.asBoolean()
-        val automatisk: Boolean? = packet["@løsning.Godkjenning.automatiskBehandling"].takeUnless{ it.isNull }?.asBoolean()
+        val godkjent: Boolean? = packet["@løsning.Godkjenning.godkjent"].takeUnless{ it.isMissingOrNull() }?.asBoolean()
+        val automatisk: Boolean? = packet["@løsning.Godkjenning.automatiskBehandling"].takeUnless{ it.isMissingOrNull() }?.asBoolean()
 
         val godkjenningslog = if (godkjent != null && automatisk != null) {
-            " Løsning er ${if (automatisk) "automatisk" else "manuelt"} ${if (godkjent) "godkjennt" else "avvist"}."
+            " Løsning er ${if (automatisk) "automatisk" else "manuelt"} ${if (godkjent) "godkjent" else "avvist"}."
         } else {
             ""
         }
