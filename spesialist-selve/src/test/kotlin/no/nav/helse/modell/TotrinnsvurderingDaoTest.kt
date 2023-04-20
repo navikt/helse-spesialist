@@ -1,7 +1,6 @@
 package no.nav.helse.modell
 
 import DatabaseIntegrationTest
-import java.time.LocalDateTime
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -28,30 +27,6 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         assertNull(totrinnsvurdering.utbetalingIdRef)
         assertNotNull(totrinnsvurdering.opprettet)
         assertNull(totrinnsvurdering.oppdatert)
-    }
-
-    @Test
-    fun `Oppretter ny totrinnsvurdering basert på gammel legacy-løsning lagret rett på oppgave`() {
-        val beslutter = UUID.randomUUID()
-        opprettSaksbehandler()
-        opprettSaksbehandler(beslutter)
-        val gammelTotrinnsvurdering = Totrinnsvurdering(
-            vedtaksperiodeId = VEDTAKSPERIODE,
-            erRetur = false,
-            saksbehandler = SAKSBEHANDLER_OID,
-            beslutter = beslutter,
-            utbetalingIdRef = null,
-            opprettet = LocalDateTime.now(),
-            oppdatert = LocalDateTime.now()
-        )
-        totrinnsvurderingDao.opprettFraLegacy(gammelTotrinnsvurdering)
-        val totrinnsvurdering = totrinnsvurderingDao.hentAktiv(VEDTAKSPERIODE)
-
-        requireNotNull(totrinnsvurdering)
-        assertEquals(VEDTAKSPERIODE, totrinnsvurdering.vedtaksperiodeId)
-        assertFalse(totrinnsvurdering.erRetur)
-        assertEquals(SAKSBEHANDLER_OID, totrinnsvurdering.saksbehandler)
-        assertEquals(beslutter, totrinnsvurdering.beslutter)
     }
 
     @Test

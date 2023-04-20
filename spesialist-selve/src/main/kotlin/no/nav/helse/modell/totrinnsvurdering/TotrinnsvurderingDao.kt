@@ -261,31 +261,6 @@ class TotrinnsvurderingDao(private val dataSource: DataSource) {
         }
     }
 
-    fun opprettFraLegacy(totrinnsvurdering: Totrinnsvurdering): Totrinnsvurdering =
-        sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query = """
-           INSERT INTO totrinnsvurdering (vedtaksperiode_id, er_retur, saksbehandler, beslutter) 
-           VALUES (:vedtaksperiodeId, :erRetur, :saksbehandler, :beslutter)
-           RETURNING *
-        """.trimIndent()
-
-            return requireNotNull(
-                session.run(
-                    queryOf(
-                        query,
-                        mapOf(
-                            "vedtaksperiodeId" to totrinnsvurdering.vedtaksperiodeId,
-                            "erRetur" to totrinnsvurdering.erRetur,
-                            "saksbehandler" to totrinnsvurdering.saksbehandler,
-                            "beslutter" to totrinnsvurdering.beslutter
-                        )
-                    ).tilTotrinnsvurdering()
-                )
-            )
-        }
-
-
     private fun Query.tilTotrinnsvurdering() = map { row ->
         Totrinnsvurdering(
             vedtaksperiodeId = row.uuid("vedtaksperiode_id"),

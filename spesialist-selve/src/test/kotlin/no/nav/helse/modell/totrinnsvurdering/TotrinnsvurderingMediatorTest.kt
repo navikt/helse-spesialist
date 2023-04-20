@@ -3,7 +3,6 @@ package no.nav.helse.modell.totrinnsvurdering
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import java.time.LocalDateTime.now
 import java.util.UUID
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveDao
@@ -89,42 +88,14 @@ class TotrinnsvurderingMediatorTest {
     }
 
     @Test
-    fun `Oppretter ny totrinnsvurdering dersom den kun eksisterer i gammel løsning med kopi av data fra gammel løsning`() {
+    fun `Oppretter ny totrinnsvurdering dersom speil plukker opp at oppgaven trenger totrinns`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val oppgaveId = 42L
 
-        every { oppgaveDao.finnTotrinnsvurderingFraLegacy(oppgaveId)} returns Totrinnsvurdering(
-            vedtaksperiodeId = vedtaksperiodeId,
-            erRetur = false,
-            saksbehandler = UUID.randomUUID(),
-            beslutter = UUID.randomUUID(),
-            utbetalingIdRef = null,
-            opprettet = now(),
-            oppdatert = now()
-        )
+        every { oppgaveDao.finnVedtaksperiodeId(oppgaveId)} returns vedtaksperiodeId
 
         totrinnsvurderingMediator.opprettFraLegacy(oppgaveId)
 
-        verify(exactly = 1) { oppgaveDao.finnTotrinnsvurderingFraLegacy(oppgaveId) }
-        verify(exactly = 1) { oppgaveDao.settTotrinnsoppgaveFalse(oppgaveId) }
-
-        val totrinnLegacy = requireNotNull(oppgaveDao.finnTotrinnsvurderingFraLegacy(oppgaveId))
-
-        verify(exactly = 1) { totrinnsvurderingDao.opprettFraLegacy(totrinnLegacy) }
-    }
-
-    @Test
-    fun `Oppretter ny totrinnsvurdering dersom finnTotrinnsvurderingFraLegacy er null`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val oppgaveId = 42L
-
-        every { oppgaveDao.finnTotrinnsvurderingFraLegacy(oppgaveId)} returns null
-        every { oppgaveDao.finnVedtaksperiodeId(oppgaveId) } returns vedtaksperiodeId
-
-        totrinnsvurderingMediator.opprettFraLegacy(oppgaveId)
-
-        verify(exactly = 1) { oppgaveDao.finnTotrinnsvurderingFraLegacy(oppgaveId) }
-        verify(exactly = 1) { oppgaveDao.finnVedtaksperiodeId(oppgaveId) }
         verify(exactly = 1) { totrinnsvurderingDao.opprett(vedtaksperiodeId) }
     }
 }

@@ -6,6 +6,7 @@ import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
+import org.slf4j.LoggerFactory
 
 class TotrinnsvurderingMediator(
     private val dao: TotrinnsvurderingDao,
@@ -13,6 +14,8 @@ class TotrinnsvurderingMediator(
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val notatMediator: NotatMediator,
 ) {
+    private val log = LoggerFactory.getLogger("TotrinnsvurderingMediator")
+
     fun opprett(vedtaksperiodeId: UUID): Totrinnsvurdering = dao.opprett(vedtaksperiodeId)
     fun settSaksbehandler(oppgaveId: Long, saksbehandlerOid: UUID): Unit =
         dao.settSaksbehandler(oppgaveId, saksbehandlerOid)
@@ -63,9 +66,7 @@ class TotrinnsvurderingMediator(
     fun hentAktiv(oppgaveId: Long): Totrinnsvurdering? = dao.hentAktiv(oppgaveId)
 
     fun opprettFraLegacy(oppgaveId: Long): Totrinnsvurdering =
-        oppgaveDao.finnTotrinnsvurderingFraLegacy(oppgaveId)?.let {
-            dao.opprettFraLegacy(it).also {
-                oppgaveDao.settTotrinnsoppgaveFalse(oppgaveId)
-            }
-        } ?: opprett(oppgaveDao.finnVedtaksperiodeId(oppgaveId))
+        opprett(oppgaveDao.finnVedtaksperiodeId(oppgaveId)).also {
+            log.info("Opprettet totrinnsvurdering fra speil, {}", mapOf("oppgaveId" to oppgaveId, "vedtaksperiodeId" to it.vedtaksperiodeId))
+        }
 }

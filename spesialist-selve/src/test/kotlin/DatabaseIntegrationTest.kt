@@ -348,7 +348,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected fun opprettTotrinnsvurdering(
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         saksbehandler: UUID? = null,
-        erRetur: Boolean = false
+        erRetur: Boolean = false,
+        ferdigstill: Boolean = false
     ) {
         totrinnsvurderingDao.opprett(vedtaksperiodeId)
 
@@ -357,6 +358,9 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         }
         if (erRetur) {
             totrinnsvurderingDao.settErRetur(vedtaksperiodeId)
+        }
+        if (ferdigstill) {
+            totrinnsvurderingDao.ferdigstill(vedtaksperiodeId)
         }
     }
 

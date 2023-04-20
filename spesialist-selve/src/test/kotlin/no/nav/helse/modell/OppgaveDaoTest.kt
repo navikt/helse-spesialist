@@ -311,18 +311,6 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `Finner ikke totrinnsvurderingsfelter på oppgave dersom er_totrinnsoppgave=false`() {
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode()
-        opprettOppgave(contextId = CONTEXT_ID)
-        opprettSaksbehandler()
-
-        val totrinnsfelter = oppgaveDao.finnTotrinnsvurderingFraLegacy(oppgaveId)
-        assertNull(totrinnsfelter)
-    }
-
-    @Test
     fun `Finner vedtaksperiodeId med oppgaveId`() {
         opprettPerson()
         opprettArbeidsgiver()
