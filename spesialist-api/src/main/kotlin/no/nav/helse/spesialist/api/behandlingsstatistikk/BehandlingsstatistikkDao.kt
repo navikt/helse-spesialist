@@ -15,10 +15,11 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
     fun getAntallTilgjengeligeBeslutteroppgaver(): Int {
         @Language("PostgreSQL")
         val query = """
-            SELECT count(distinct o.id)
-            FROM oppgave o
-            WHERE o.status = 'AvventerSaksbehandler'
-            AND o.er_beslutteroppgave = true;
+            SELECT count(1)
+            FROM totrinnsvurdering
+            WHERE utbetaling_id_ref IS NULL
+            AND er_retur = false
+            AND saksbehandler IS NOT NULL
         """
         return query.single { it.int("count") } ?: 0
     }
@@ -26,11 +27,10 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
     fun getAntallFullførteBeslutteroppgaver(fom: LocalDate): Int {
         @Language("PostgreSQL")
         val query = """
-            SELECT count(distinct o.id)
-            FROM oppgave o
-            WHERE o.status = 'Ferdigstilt'
-            AND o.er_beslutteroppgave = true
-            AND o.oppdatert >= :fom;
+            SELECT count(1)
+            FROM totrinnsvurdering
+            WHERE utbetaling_id_ref IS NOT NULL
+            AND oppdatert >= :fom
         """
         return query.single(mapOf("fom" to fom)) { it.int("count") } ?: 0
     }

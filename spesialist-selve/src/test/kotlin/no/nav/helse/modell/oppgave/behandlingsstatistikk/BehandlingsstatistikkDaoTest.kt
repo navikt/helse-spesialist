@@ -1,16 +1,16 @@
 package no.nav.helse.modell.oppgave.behandlingsstatistikk
 
 import DatabaseIntegrationTest
-import no.nav.helse.modell.vedtaksperiode.Inntektskilde
-import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
+import no.nav.helse.modell.vedtaksperiode.Inntektskilde
+import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.vedtaksperiode.Mottakertype
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkType as BehandlingsstatistikkTypeForApi
 
 internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
@@ -131,6 +131,25 @@ internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
         assertEquals(0, dto.fullførteBehandlinger.automatisk)
         assertEquals(1, dto.oppgaverTilGodkjenning.totalt)
         assertEquals(1, dto.oppgaverTilGodkjenning.perPeriodetype.size)
+    }
+
+    @Test
+    fun`Får antall tilgjengelige beslutteroppgaver`() {
+        nyPerson()
+        opprettSaksbehandler()
+        assertEquals(0, behandlingsstatistikkDao.getAntallTilgjengeligeBeslutteroppgaver())
+        opprettTotrinnsvurdering(saksbehandler = SAKSBEHANDLER_OID)
+        assertEquals(1, behandlingsstatistikkDao.getAntallTilgjengeligeBeslutteroppgaver())
+    }
+
+    @Test
+    fun`Får antall fullførte beslutteroppgaver`() {
+        nyPerson()
+        opprettSaksbehandler()
+        utbetalingsopplegg(1000, 0)
+        assertEquals(0, behandlingsstatistikkDao.getAntallFullførteBeslutteroppgaver(LocalDate.now().minusDays(1)))
+        opprettTotrinnsvurdering(saksbehandler = SAKSBEHANDLER_OID, ferdigstill = true)
+        assertEquals(1, behandlingsstatistikkDao.getAntallFullførteBeslutteroppgaver(LocalDate.now().minusDays(1)))
     }
 
     private operator fun List<Pair<BehandlingsstatistikkTypeForApi, Int>>.get(type: BehandlingsstatistikkTypeForApi) = this.first { it.first == type }.second
