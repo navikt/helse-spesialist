@@ -16,7 +16,7 @@ abstract class AbstractDatabaseTest {
     companion object {
         private val postgres = PostgreSQLContainer<Nothing>("postgres:14").apply {
             withReuse(true)
-            withLabel("app-navn", "spesialist")
+            withLabel("app-navn", "spesialist-api")
             start()
             println("Database: jdbc:postgresql://localhost:$firstMappedPort/test startet opp, credentials: test og test")
         }
@@ -61,7 +61,7 @@ private fun createTruncateFunction(dataSource: DataSource) {
             DECLARE
             truncate_statement text;
             BEGIN
-                SELECT 'TRUNCATE ' || string_agg(format('%I.%I', schemaname, tablename), ',') || ' CASCADE'
+                SELECT 'TRUNCATE ' || string_agg(format('%I.%I', schemaname, tablename), ',') || ' RESTART IDENTITY CASCADE'
                     INTO truncate_statement
                 FROM pg_tables
                 WHERE schemaname='public'
