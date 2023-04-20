@@ -75,6 +75,7 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             SELECT type
             FROM oppgave
             WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
+            ORDER BY id LIMIT 1
         """.trimIndent()
         return query.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) {
             Oppgavetype.valueOf(it.string("type"))

@@ -23,6 +23,7 @@ import no.nav.helse.spesialist.api.graphql.schema.Periodetype.FORSTEGANGSBEHANDL
 import no.nav.helse.spesialist.api.graphql.schema.Periodetype.INFOTRYGDFORLENGELSE
 import no.nav.helse.spesialist.api.graphql.schema.Periodetype.OVERGANG_FRA_IT
 import no.nav.helse.spesialist.api.oppgave.BESLUTTEROPPGAVE_PREFIX
+import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import org.intellij.lang.annotations.Language
@@ -49,6 +50,16 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `finner oppgavetype`() {
         nyPerson()
+        val type = oppgaveApiDao.finnOppgavetype(VEDTAKSPERIODE)
+        assertEquals(OPPGAVETYPE, type)
+    }
+
+    @Test
+    fun `finner oppgavetype når det fins flere oppgaver for en vedtaksperiode`() {
+        nyPerson()
+        oppgaveDao.updateOppgave(oppgaveId, Oppgavestatus.Invalidert)
+        opprettOppgave(utbetalingId = UUID.randomUUID())
+
         val type = oppgaveApiDao.finnOppgavetype(VEDTAKSPERIODE)
         assertEquals(OPPGAVETYPE, type)
     }
