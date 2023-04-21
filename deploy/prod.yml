@@ -106,9 +106,9 @@ spec:
     - name: STIKKPROEVER_UTS_EN_AG_FORLENGELSE_DIVISOR
       value: "300"
     - name: STIKKPROEVER_FULL_REFUSJON_FLERE_AG_FGB_DIVISOR
-      value: "1"
+      value: "100"
     - name: STIKKPROEVER_FULL_REFUSJON_FLERE_AG_FORLENGELSE_DIVISOR
-      value: "1"
+      value: "400"
     - name: STIKKPROEVER_FULL_REFUSJON_EN_AG_DIVISOR
       value: "500"
     - name: SPLEIS_API_URL
