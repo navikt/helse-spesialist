@@ -3,7 +3,9 @@ package no.nav.helse
 import com.fasterxml.jackson.databind.JsonNode
 import io.prometheus.client.Counter
 import io.prometheus.client.Summary
+import java.time.Duration
 import java.time.temporal.ChronoUnit.MILLIS
+import no.nav.helse.mediator.GodkjenningsbehovUtfall
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -37,6 +39,15 @@ private val registrerTidsbrukForHendelse = Summary.build("command_tidsbruk", "M�
     .labelNames("command")
     .register()
 
+private val godkjenningsbehovUtfall = Summary.build("godkjenningsbehov_utfall", "Måler hvor raskt godkjenningsbehov behandles, fordelt på utfallet")
+    .labelNames("utfall")
+    .quantile(0.5, 0.05)
+    .quantile(0.9, 0.01)
+    .quantile(0.95, 0.005)
+    .maxAgeSeconds(Duration.ofHours(1).toSeconds())
+    .ageBuckets(30)
+    .register()
+
 private val registrerTidsbrukForBehov = Summary.build("behov_tidsbruk", "Måler hvor lang tid et behov tok å løse i ms")
     .labelNames("behov")
     .register()
@@ -50,6 +61,9 @@ internal fun tellWarningInaktiv(warning: String) = inaktiveVarslerteller.labels(
 internal fun tellInaktivtVarsel(varselkode: String) = inaktiveVarslerteller.labels("WARN", varselkode).inc()
 
 internal fun registrerTidsbrukForHendelse(command: String, tid: Long) = registrerTidsbrukForHendelse.labels(command).observe(tid.toDouble())
+
+internal fun registrerTidsbrukForGodkjenningsbehov(utfall: GodkjenningsbehovUtfall, tid: Long) =
+    godkjenningsbehovUtfall.labels(utfall.name).observe(tid.toDouble())
 
 internal class MetrikkRiver(rapidsConnection: RapidsConnection) : River.PacketListener {
     val log: Logger = LoggerFactory.getLogger("MetrikkRiver")

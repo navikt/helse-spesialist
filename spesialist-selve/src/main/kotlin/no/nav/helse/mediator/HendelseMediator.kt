@@ -68,6 +68,7 @@ import no.nav.helse.overstyringsteller
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.registrerTidsbrukForGodkjenningsbehov
 import no.nav.helse.registrerTidsbrukForHendelse
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
@@ -88,6 +89,7 @@ internal class HendelseMediator(
     private val hendelsefabrikk: Hendelsefabrikk,
     private val egenAnsattDao: EgenAnsattDao = EgenAnsattDao(dataSource),
     private val varselRepository: VarselRepository = ActualVarselRepository(dataSource),
+    private val metrikkDao: MetrikkDao = MetrikkDao(dataSource),
 ) {
     private companion object {
         private val log = LoggerFactory.getLogger(HendelseMediator::class.java)
@@ -669,7 +671,7 @@ internal class HendelseMediator(
                 log.info("utfører $hendelsenavn med context_id=$contextId for hendelse_id=${hendelse.id}")
                 if (context.utfør(commandContextDao, hendelse)) {
                     val kjøretid = MILLIS.between(commandContextDao.contextOpprettetTidspunkt(contextId), now())
-                    registrerTidsbrukForHendelse(hendelsenavn, kjøretid)
+                    metrikker(hendelsenavn, kjøretid, contextId)
                     log.info(
                         "Kommando(er) for $hendelsenavn er utført ferdig. Det tok ca {}ms å kjøre hele kommandokjeden",
                         kjøretid
@@ -690,6 +692,14 @@ internal class HendelseMediator(
                 log.info("utført $hendelsenavn med context_id=$contextId for hendelse_id=${hendelse.id}")
             }
         }
+    }
+
+    private fun metrikker(hendelsenavn: String, kjøretid: Long, contextId: UUID) {
+        if (hendelsenavn == Godkjenningsbehov::class.simpleName) {
+            val utfall: GodkjenningsbehovUtfall = metrikkDao.finnUtfallForGodkjenningsbehov(contextId)
+            registrerTidsbrukForGodkjenningsbehov(utfall, kjøretid)
+        }
+        registrerTidsbrukForHendelse(hendelsenavn, kjøretid)
     }
 
     private class Løsninger(

@@ -61,6 +61,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
     private lateinit var utbetalingId: UUID
     private val snapshotClient = mockk<SnapshotClient>(relaxed = true)
     private val testRapid = TestRapid()
+    internal val inspektør get() = testRapid.inspektør
     private val meldingssenderV2 = MeldingssenderV2(testRapid)
     private lateinit var sisteMeldingId: UUID
     private val dataSource = AbstractDatabaseTest.dataSource
