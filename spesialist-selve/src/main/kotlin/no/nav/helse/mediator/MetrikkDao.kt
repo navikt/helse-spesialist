@@ -20,9 +20,9 @@ class MetrikkDao(dataSource: DataSource) : HelseDao(dataSource) {
             """
             select distinct 1
             from oppgave
-            join command_context cc on oppgave.command_context_id = cc.context_id
+            where command_context_id = :contextId
             """, mapOf("contextId" to contextId)
-        ).single { row -> row.boolean(1) } ?: false
+        ).single { true } ?: false
 
         return if (gikkTilManuell) GodkjenningsbehovUtfall.ManuellOppgave
         else GodkjenningsbehovUtfall.AutomatiskAvvist
