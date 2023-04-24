@@ -3,7 +3,6 @@ package no.nav.helse.modell.vedtaksperiode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 
@@ -169,5 +168,10 @@ internal class GenerasjonTestObserver: IVedtaksperiodeObserver {
         assertEquals(forventetFom, opprettelse.fom)
         assertEquals(forventetTom, opprettelse.tom)
         assertEquals(forventetSkjæringstidspunkt, opprettelse.skjæringstidspunkt)
+    }
+
+    fun assertGjeldendeTilstand(generasjonId: UUID, forventetTilstand: Generasjon.Tilstand) {
+        val tilstand = tilstandsendringer[generasjonId]?.last()
+        assertEquals(forventetTilstand, tilstand?.second)
     }
 }

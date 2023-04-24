@@ -114,6 +114,7 @@ internal class Generasjon private constructor(
 
     internal fun håndterGodkjentAvSaksbehandler(ident: String) {
         varsler.godkjennAlleFor(id, ident)
+        tilstand.håndterGodkjenning(this, ident)
     }
 
     internal fun håndterAvvistAvSaksbehandler(ident: String) {
@@ -141,6 +142,7 @@ internal class Generasjon private constructor(
         varsel.registrer(*this.observers.toTypedArray())
         varsler.add(varsel)
         varsel.opprett(id)
+        tilstand.nyttVarsel(this, varsel)
     }
 
     override fun toString(): String = "generasjonId=$id, vedtaksperiodeId=$vedtaksperiodeId, utbetalingId=$utbetalingId, låst=$låst, skjæringstidspunkt=$skjæringstidspunkt, periode=$periode"
@@ -201,6 +203,9 @@ internal class Generasjon private constructor(
                 keyValue("utbetalingId", utbetalingId)
             )
         }
+
+        fun nyttVarsel(generasjon: Generasjon, varsel: Varsel) {}
+        fun håndterGodkjenning(generasjon: Generasjon, ident: String) {}
     }
 
     internal object Låst: Tilstand {
@@ -285,6 +290,53 @@ internal class Generasjon private constructor(
         ): Generasjon {
             val nesteGenerasjon = generasjon.opprettNeste(id, hendelseId, fom, tom, skjæringstidspunkt)
             generasjon.flyttAktiveVarsler(nesteGenerasjon)
+            return nesteGenerasjon
+        }
+
+        override fun tidslinjeendring(
+            generasjon: Generasjon,
+            fom: LocalDate,
+            tom: LocalDate,
+            skjæringstidspunkt: LocalDate,
+            hendelseId: UUID
+        ) {
+            generasjon.håndterNyGenerasjon(hendelseId = hendelseId, fom = fom, tom = tom, skjæringstidspunkt = skjæringstidspunkt)
+        }
+
+        override fun nyUtbetaling(generasjon: Generasjon, hendelseId: UUID, utbetalingId: UUID) {
+            val nyGenerasjonId = UUID.randomUUID()
+            sikkerlogg.info(
+                "Kan ikke legge til ny utbetaling med {} for {}, da generasjonen er låst. Oppretter ny generasjon med {}",
+                keyValue("utbetalingId", utbetalingId),
+                keyValue("generasjon", this),
+                keyValue("generasjonId", nyGenerasjonId)
+            )
+            generasjon.håndterNyGenerasjon(hendelseId, nyGenerasjonId)?.håndterNyUtbetaling(utbetalingId)
+        }
+
+        override fun nyttVarsel(generasjon: Generasjon, varsel: Varsel) {
+            generasjon.nyTilstand(this, UtenUtbetalingMåVurderes)
+        }
+    }
+
+    internal object UtenUtbetalingMåVurderes: Tilstand {
+        override fun navn(): String = "UtenUtbetalingMåVurderes"
+
+        override fun håndterGodkjenning(generasjon: Generasjon, ident: String) {
+            generasjon.nyTilstand(this, AvsluttetUtenUtbetaling)
+        }
+
+        override fun nyGenerasjon(
+            generasjon: Generasjon,
+            id: UUID,
+            hendelseId: UUID,
+            fom: LocalDate,
+            tom: LocalDate,
+            skjæringstidspunkt: LocalDate
+        ): Generasjon {
+            val nesteGenerasjon = generasjon.opprettNeste(id, hendelseId, fom, tom, skjæringstidspunkt)
+            generasjon.flyttAktiveVarsler(nesteGenerasjon)
+            generasjon.nyTilstand(this, AvsluttetUtenUtbetaling)
             return nesteGenerasjon
         }
 
