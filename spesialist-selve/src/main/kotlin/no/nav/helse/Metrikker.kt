@@ -2,8 +2,8 @@ package no.nav.helse
 
 import com.fasterxml.jackson.databind.JsonNode
 import io.prometheus.client.Counter
+import io.prometheus.client.Histogram
 import io.prometheus.client.Summary
-import java.time.Duration
 import java.time.temporal.ChronoUnit.MILLIS
 import no.nav.helse.mediator.GodkjenningsbehovUtfall
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -39,13 +39,9 @@ private val registrerTidsbrukForHendelse = Summary.build("command_tidsbruk", "M�
     .labelNames("command")
     .register()
 
-private val godkjenningsbehovUtfall = Summary.build("godkjenningsbehov_utfall", "Måler hvor raskt godkjenningsbehov behandles, fordelt på utfallet")
+private val godkjenningsbehovUtfall = Histogram.build("godkjenningsbehov_utfall", "Måler hvor raskt godkjenningsbehov behandles, fordelt på utfallet")
+    .buckets(500.0, 1000.0, 1500.0, 2000.0, 2500.0, 3000.0, 3500.0, 4000.0, 4500.0, 5000.0, 6000.0, 10_000.0, 30_000.0)
     .labelNames("utfall")
-    .quantile(0.5, 0.05)
-    .quantile(0.9, 0.01)
-    .quantile(0.95, 0.005)
-    .maxAgeSeconds(Duration.ofHours(1).toSeconds())
-    .ageBuckets(30)
     .register()
 
 private val registrerTidsbrukForBehov = Summary.build("behov_tidsbruk", "Måler hvor lang tid et behov tok å løse i ms")
