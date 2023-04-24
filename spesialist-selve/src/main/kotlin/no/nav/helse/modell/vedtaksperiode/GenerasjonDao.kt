@@ -39,9 +39,9 @@ class GenerasjonDao(private val dataSource: DataSource) {
         }
     }
 
-    internal fun finnSisteFor(vedtaksperiodeId: UUID): Generasjon? {
+    internal fun harGenerasjonFor(vedtaksperiodeId: UUID): Boolean {
         return sessionOf(dataSource).use { session ->
-            session.run(finnSiste(vedtaksperiodeId).map(::toGenerasjon).asSingle)
+            session.run(finnSiste(vedtaksperiodeId).map { it.uuid("unik_id") }.asSingle) != null
         }
     }
 

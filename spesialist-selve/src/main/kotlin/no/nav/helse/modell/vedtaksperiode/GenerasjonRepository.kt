@@ -42,7 +42,7 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
         skjæringstidspunkt: LocalDate,
         tilstand: Generasjon.Tilstand
     ) {
-        if (dao.finnSisteFor(vedtaksperiodeId) != null) {
+        if (dao.harGenerasjonFor(vedtaksperiodeId)) {
             return sikkerlogg.info(
                 "Kan ikke opprette første generasjon for {} når det eksisterer generasjoner fra før av",
                 kv("vedtaksperiodeId", vedtaksperiodeId)
