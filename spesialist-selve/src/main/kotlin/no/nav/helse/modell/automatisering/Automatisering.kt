@@ -56,11 +56,8 @@ internal class Automatisering(
     ) {
         val problemer = vurder(fødselsnummer, vedtaksperiodeId, utbetaling, periodetype, sykefraværstilfelle, periodeTom)
         val erUTS = utbetaling.harUtbetalingTilSykmeldt()
-        val erFullRefusjon = !erUTS
         val flereArbeidsgivere = vedtakDao.finnInntektskilde(vedtaksperiodeId) == Inntektskilde.FLERE_ARBEIDSGIVERE
-        val enArbeidsgiver = !flereArbeidsgivere
         val erFørstegangsbehandling = periodetype == Periodetype.FØRSTEGANGSBEHANDLING
-        val erForlengelse = periodetype == Periodetype.FORLENGELSE
 
         val utfallslogger = { tekst: String ->
             sikkerLogg.info(
@@ -71,41 +68,43 @@ internal class Automatisering(
             )
         }
 
-        var årsakTilStikkprøve: String? = null
-        when {
-            problemer.isNotEmpty() -> {
-                utfallslogger("Automatiserer ikke {} ({}) fordi: {}")
-                automatiseringDao.manuellSaksbehandling(problemer, vedtaksperiodeId, hendelseId, utbetaling.utbetalingId)
-            }
-
-            erUTS && flereArbeidsgivere && erFørstegangsbehandling && stikkprøver.utsFlereArbeidsgivereFørstegangsbehandling() ->
-                årsakTilStikkprøve = "UTS, flere arbeidsgivere, førstegangsbehandling"
-
-            erUTS && flereArbeidsgivere && erForlengelse && stikkprøver.utsFlereArbeidsgivereForlengelse() ->
-                årsakTilStikkprøve = "UTS, flere arbeidsgivere, forlengelse"
-
-            erUTS && enArbeidsgiver && erFørstegangsbehandling && stikkprøver.utsEnArbeidsgiverFørstegangsbehandling() ->
-                årsakTilStikkprøve = "UTS, en arbeidsgiver, førstegangsbehandling"
-
-            erUTS && enArbeidsgiver && erForlengelse && stikkprøver.utsEnArbeidsgiverForlengelse() ->
-                årsakTilStikkprøve = "UTS, en arbeidsgiver, forlengelse"
-
-            erFullRefusjon && flereArbeidsgivere && erFørstegangsbehandling && stikkprøver.fullRefusjonFlereArbeidsgivereFørstegangsbehandling() ->
-                årsakTilStikkprøve = "Refusjon, flere arbeidsgivere, førstegangsbehandling"
-
-            erFullRefusjon && flereArbeidsgivere && erForlengelse && stikkprøver.fullRefusjonFlereArbeidsgivereForlengelse() ->
-                årsakTilStikkprøve = "Refusjon, flere arbeidsgivere, forlengelse"
-
-            erFullRefusjon && enArbeidsgiver && stikkprøver.fullRefusjonEnArbeidsgiver() ->
-                årsakTilStikkprøve = "Refusjon, en arbeidsgiver"
-
-            else -> {
-                utfallslogger("Automatiserer {} ({})")
-                onAutomatiserbar()
-                automatiseringDao.automatisert(vedtaksperiodeId, hendelseId, utbetaling.utbetalingId)
-            }
+        if (problemer.isNotEmpty()) {
+            utfallslogger("Automatiserer ikke {} ({}) fordi: {}")
+            automatiseringDao.manuellSaksbehandling(problemer, vedtaksperiodeId, hendelseId, utbetaling.utbetalingId)
+            return
         }
-        årsakTilStikkprøve?.also { tilStikkprøve(it, utfallslogger, vedtaksperiodeId, hendelseId, utbetaling.utbetalingId) }
+        avgjørStikkprøve(erUTS, flereArbeidsgivere, erFørstegangsbehandling)?.let {
+            tilStikkprøve(it, utfallslogger, vedtaksperiodeId, hendelseId, utbetaling.utbetalingId)
+        } ?: run {
+            utfallslogger("Automatiserer {} ({})")
+            onAutomatiserbar()
+            automatiseringDao.automatisert(vedtaksperiodeId, hendelseId, utbetaling.utbetalingId)
+        }
+    }
+
+    private fun avgjørStikkprøve(
+        UTS: Boolean,
+        flereArbeidsgivere: Boolean,
+        førstegangsbehandling: Boolean,
+    ): String? {
+        when {
+            UTS -> when {
+                flereArbeidsgivere -> when {
+                        førstegangsbehandling && stikkprøver.utsFlereArbeidsgivereFørstegangsbehandling() -> return "UTS, flere arbeidsgivere, førstegangsbehandling"
+                        !førstegangsbehandling && stikkprøver.utsFlereArbeidsgivereForlengelse() -> return "UTS, flere arbeidsgivere, forlengelse"
+                    }
+                !flereArbeidsgivere -> when {
+                        førstegangsbehandling && stikkprøver.utsEnArbeidsgiverFørstegangsbehandling() -> return "UTS, en arbeidsgiver, førstegangsbehandling"
+                        !førstegangsbehandling&& stikkprøver.utsEnArbeidsgiverForlengelse() -> return "UTS, en arbeidsgiver, forlengelse"
+                    }
+            }
+            flereArbeidsgivere -> when {
+                førstegangsbehandling && stikkprøver.fullRefusjonFlereArbeidsgivereFørstegangsbehandling() -> return "Refusjon, flere arbeidsgivere, førstegangsbehandling"
+                !førstegangsbehandling&& stikkprøver.fullRefusjonFlereArbeidsgivereForlengelse() -> return "Refusjon, flere arbeidsgivere, forlengelse"
+            }
+            stikkprøver.fullRefusjonEnArbeidsgiver() -> return "Refusjon, en arbeidsgiver"
+        }
+        return null
     }
 
     private fun tilStikkprøve(
