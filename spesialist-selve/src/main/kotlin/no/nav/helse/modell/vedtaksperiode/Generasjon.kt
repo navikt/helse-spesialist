@@ -297,6 +297,17 @@ internal class Generasjon private constructor(
         ) {
             generasjon.håndterNyGenerasjon(hendelseId = hendelseId, fom = fom, tom = tom, skjæringstidspunkt = skjæringstidspunkt)
         }
+
+        override fun nyUtbetaling(generasjon: Generasjon, hendelseId: UUID, utbetalingId: UUID) {
+            val nyGenerasjonId = UUID.randomUUID()
+            sikkerlogg.info(
+                "Kan ikke legge til ny utbetaling med {} for {}, da generasjonen er låst. Oppretter ny generasjon med {}",
+                keyValue("utbetalingId", utbetalingId),
+                keyValue("generasjon", this),
+                keyValue("generasjonId", nyGenerasjonId)
+            )
+            generasjon.håndterNyGenerasjon(hendelseId, nyGenerasjonId)?.håndterNyUtbetaling(utbetalingId)
+        }
     }
 
     internal companion object {

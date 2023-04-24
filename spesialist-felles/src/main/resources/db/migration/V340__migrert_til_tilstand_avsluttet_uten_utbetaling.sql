@@ -1,0 +1,1 @@
+UPDATE selve_vedtaksperiode_generasjon SET tilstand = 'AvsluttetUtenUtbetaling' WHERE tilstand = 'Låst' AND utbetaling_id IS NULL;
