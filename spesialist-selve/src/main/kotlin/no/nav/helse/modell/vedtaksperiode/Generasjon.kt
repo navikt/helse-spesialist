@@ -239,7 +239,7 @@ internal class Generasjon private constructor(
             sikkerlogg.info(
                 "Kan ikke legge til ny utbetaling med {} for {}, da generasjonen er låst. Oppretter ny generasjon med {}",
                 keyValue("utbetalingId", utbetalingId),
-                keyValue("generasjon", this),
+                keyValue("generasjon", generasjon),
                 keyValue("generasjonId", nyGenerasjonId)
             )
             generasjon.håndterNyGenerasjon(hendelseId, nyGenerasjonId)?.håndterNyUtbetaling(utbetalingId)
@@ -308,7 +308,7 @@ internal class Generasjon private constructor(
             sikkerlogg.info(
                 "Kan ikke legge til ny utbetaling med {} for {}, da generasjonen er låst. Oppretter ny generasjon med {}",
                 keyValue("utbetalingId", utbetalingId),
-                keyValue("generasjon", this),
+                keyValue("generasjon", generasjon),
                 keyValue("generasjonId", nyGenerasjonId)
             )
             generasjon.håndterNyGenerasjon(hendelseId, nyGenerasjonId)?.håndterNyUtbetaling(utbetalingId)
@@ -355,7 +355,7 @@ internal class Generasjon private constructor(
             sikkerlogg.info(
                 "Kan ikke legge til ny utbetaling med {} for {}, da generasjonen er låst. Oppretter ny generasjon med {}",
                 keyValue("utbetalingId", utbetalingId),
-                keyValue("generasjon", this),
+                keyValue("generasjon", generasjon),
                 keyValue("generasjonId", nyGenerasjonId)
             )
             generasjon.håndterNyGenerasjon(hendelseId, nyGenerasjonId)?.håndterNyUtbetaling(utbetalingId)
