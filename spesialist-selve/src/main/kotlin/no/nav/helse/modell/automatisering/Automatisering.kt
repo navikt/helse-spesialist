@@ -163,7 +163,6 @@ internal class Automatisering(
         val harVergemål = vergemålDao.harVergemål(fødselsnummer) ?: false
         val tilhørerUtlandsenhet = erEnhetUtland(personDao.finnEnhetId(fødselsnummer))
         val antallÅpneGosysoppgaver = åpneGosysOppgaverDao.harÅpneOppgaver(fødselsnummer)
-        val inntektskilde = vedtakDao.finnInntektskilde(vedtaksperiodeId)
         val harPågåendeOverstyring = overstyringDao.harVedtaksperiodePågåendeOverstyring(vedtaksperiodeId)
         val harUtbetalingTilSykmeldt = utbetaling.harUtbetalingTilSykmeldt()
 
@@ -182,10 +181,6 @@ internal class Automatisering(
             validering("Bruker er ansatt i Nav") { erEgenAnsatt == false || erEgenAnsatt == null },
             validering("Bruker er under verge") { !harVergemål },
             validering("Bruker tilhører utlandsenhet") { !tilhørerUtlandsenhet },
-            validering("Førstegangsbehandling har flere arbeidsgivere") {
-                (inntektskilde == Inntektskilde.EN_ARBEIDSGIVER ||
-                        periodetype == Periodetype.FORLENGELSE)
-            },
             validering("Utbetaling til sykmeldt") { !skalStoppesPgaUTS },
             AutomatiserRevurderinger(utbetaling, fødselsnummer, vedtaksperiodeId),
             validering("Vedtaksperioden har en pågående overstyring") { !harPågåendeOverstyring }
