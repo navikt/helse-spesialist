@@ -30,7 +30,6 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -40,12 +39,12 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     private val varselRepository = ActualVarselRepository(dataSource)
     private val generasjonRepository = ActualGenerasjonRepository(dataSource)
     private lateinit var generasjonId: UUID
-    private lateinit var observer: Observer
+    private lateinit var observer: GenerasjonTestObserver
 
     @BeforeEach
     internal fun beforeEach() {
         lagVarseldefinisjoner()
-        observer = Observer()
+        observer = GenerasjonTestObserver()
     }
 
     @Test
@@ -226,16 +225,6 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         val nyGenerasjon = generasjon.håndterNyGenerasjon(UUID.randomUUID(), nyGenerasjonId)
         assertEquals(0, observer.opprettedeGenerasjoner.size)
         assertNull(nyGenerasjon)
-    }
-
-    @Test
-    fun `endrer tilstand etter vedtak fattet`() {
-        val generasjonId = UUID.randomUUID()
-        val generasjon = generasjon(generasjonId, UUID.randomUUID())
-        generasjon.registrer(observer)
-        generasjon.håndterVedtakFattet(UUID.randomUUID())
-        assertEquals(1, observer.låsteGenerasjoner.size)
-        observer.assertTilstandsendring(generasjonId, Generasjon.Ulåst, Generasjon.Låst, 0)
     }
 
     @Test
@@ -908,154 +897,6 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
                     false,
                     LocalDateTime.now()
                 ).asUpdate)
-        }
-    }
-
-    private class Observer: IVedtaksperiodeObserver {
-        private class Tidslinjeendring(
-            val fom: LocalDate,
-            val tom: LocalDate,
-            val skjæringstidspunkt: LocalDate
-        )
-
-        private class Opprettelse(
-            val generasjonId: UUID,
-            val vedtaksperiodeId: UUID,
-            val hendelseId: UUID,
-            val fom: LocalDate?,
-            val tom: LocalDate?,
-            val skjæringstidspunkt: LocalDate?
-        )
-
-        val låsteGenerasjoner = mutableListOf<UUID>()
-        val tilstandsendringer = mutableMapOf<UUID, MutableList<Pair<Generasjon.Tilstand, Generasjon.Tilstand>>>()
-        val opprettedeGenerasjoner = mutableMapOf<UUID, Opprettelse>()
-        val oppdaterteGenerasjoner = mutableMapOf<UUID, Tidslinjeendring>()
-        val opprettedeVarsler = mutableMapOf<UUID, MutableList<String>>()
-        val godkjenteVarsler = mutableListOf<UUID>()
-        val avvisteVarsler = mutableListOf<UUID>()
-
-        override fun vedtakFattet(generasjonId: UUID, hendelseId: UUID) {
-            låsteGenerasjoner.add(generasjonId)
-        }
-
-        override fun tilstandEndret(
-            generasjonId: UUID,
-            vedtaksperiodeId: UUID,
-            gammel: Generasjon.Tilstand,
-            ny: Generasjon.Tilstand
-        ) {
-            tilstandsendringer.getOrPut(generasjonId) { mutableListOf() }.add(gammel to ny)
-        }
-        override fun generasjonOpprettet(
-            generasjonId: UUID,
-            vedtaksperiodeId: UUID,
-            hendelseId: UUID,
-            fom: LocalDate,
-            tom: LocalDate,
-            skjæringstidspunkt: LocalDate,
-            tilstand: Generasjon.Tilstand
-        ) {
-            opprettedeGenerasjoner[generasjonId] =
-                Opprettelse(generasjonId, vedtaksperiodeId, hendelseId, fom, tom, skjæringstidspunkt)
-        }
-
-        override fun tidslinjeOppdatert(
-            generasjonId: UUID,
-            fom: LocalDate,
-            tom: LocalDate,
-            skjæringstidspunkt: LocalDate
-        ) {
-           oppdaterteGenerasjoner[generasjonId] = Tidslinjeendring(fom, tom, skjæringstidspunkt)
-        }
-
-        override fun varselOpprettet(
-            varselId: UUID,
-            vedtaksperiodeId: UUID,
-            generasjonId: UUID,
-            varselkode: String,
-            opprettet: LocalDateTime
-        ) {
-            opprettedeVarsler.getOrPut(generasjonId) { mutableListOf() }.add(varselkode)
-        }
-
-        override fun varselGodkjent(
-            varselId: UUID,
-            vedtaksperiodeId: UUID,
-            generasjonId: UUID,
-            varselkode: String,
-            ident: String
-        ) {
-            godkjenteVarsler.add(varselId)
-        }
-
-        override fun varselAvvist(
-            varselId: UUID,
-            vedtaksperiodeId: UUID,
-            generasjonId: UUID,
-            varselkode: String,
-            ident: String
-        ) {
-            avvisteVarsler.add(varselId)
-        }
-
-        fun assertTilstandsendring(
-            generasjonId: UUID,
-            forventetGammel: Generasjon.Tilstand,
-            forventetNy: Generasjon.Tilstand,
-            index: Int
-        ) {
-            val (gammel, ny) = tilstandsendringer[generasjonId]!![index]
-            assertEquals(forventetGammel, gammel)
-            assertEquals(forventetNy, ny)
-        }
-
-        fun assertTidslinjeendring(
-            generasjonId: UUID,
-            forventetFom: LocalDate,
-            forventetTom: LocalDate,
-            forventetSkjæringstidspunkt: LocalDate
-        ) {
-            val tidslinjeendring = oppdaterteGenerasjoner[generasjonId]
-            assertEquals(forventetFom, tidslinjeendring?.fom)
-            assertEquals(forventetTom, tidslinjeendring?.tom)
-            assertEquals(forventetSkjæringstidspunkt, tidslinjeendring?.skjæringstidspunkt)
-        }
-
-        fun assertOpprettelse(
-            forventetGenerasjonId: UUID,
-            forventetVedtaksperiodeId: UUID,
-            forventetHendelseId: UUID,
-            forventetFom: LocalDate,
-            forventetTom: LocalDate,
-            forventetSkjæringstidspunkt: LocalDate
-        ) {
-            val opprettelse = opprettedeGenerasjoner[forventetGenerasjonId]
-            assertNotNull(opprettelse)
-            requireNotNull(opprettelse)
-            assertEquals(forventetGenerasjonId, opprettelse.generasjonId)
-            assertEquals(forventetVedtaksperiodeId, opprettelse.vedtaksperiodeId)
-            assertEquals(forventetHendelseId, opprettelse.hendelseId)
-            assertEquals(forventetFom, opprettelse.fom)
-            assertEquals(forventetTom, opprettelse.tom)
-            assertEquals(forventetSkjæringstidspunkt, opprettelse.skjæringstidspunkt)
-        }
-
-        fun assertOpprettelse(
-            forventetVedtaksperiodeId: UUID,
-            forventetHendelseId: UUID,
-            forventetFom: LocalDate,
-            forventetTom: LocalDate,
-            forventetSkjæringstidspunkt: LocalDate
-        ) {
-            val opprettelser = opprettedeGenerasjoner.values.filter { it.vedtaksperiodeId == forventetVedtaksperiodeId }
-            assertEquals(1, opprettelser.size)
-            val opprettelse = opprettelser[0]
-            assertEquals(forventetVedtaksperiodeId, opprettelse.vedtaksperiodeId)
-            assertEquals(forventetHendelseId, opprettelse.hendelseId)
-            assertEquals(forventetFom, opprettelse.fom)
-            assertEquals(forventetTom, opprettelse.tom)
-            assertEquals(forventetSkjæringstidspunkt, opprettelse.skjæringstidspunkt)
         }
     }
 }

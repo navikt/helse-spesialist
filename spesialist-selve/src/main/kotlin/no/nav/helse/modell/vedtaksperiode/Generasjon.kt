@@ -34,103 +34,6 @@ internal class Generasjon private constructor(
     private val varsler: MutableList<Varsel> = varsler.toMutableList()
     private val observers = mutableSetOf<IVedtaksperiodeObserver>()
 
-    internal sealed interface Tilstand {
-
-        fun navn(): String
-        fun nyGenerasjon(generasjon: Generasjon, id: UUID, hendelseId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate): Generasjon? {
-            return null
-        }
-
-        fun vedtakFattet(generasjon: Generasjon, hendelseId: UUID) {
-            sikkerlogg.info("Forventet ikke vedtak_fattet i {}", kv("tilstand", this::class.simpleName))
-        }
-
-        fun tidslinjeendring(
-            generasjon: Generasjon,
-            fom: LocalDate,
-            tom: LocalDate,
-            skjæringstidspunkt: LocalDate,
-            hendelseId: UUID
-        ) {}
-
-        fun nyUtbetaling(generasjon: Generasjon, hendelseId: UUID, utbetalingId: UUID) {}
-        fun invaliderUtbetaling(generasjon: Generasjon, utbetalingId: UUID) {
-            sikkerlogg.error(
-                "{} er i {}. Utbetaling med {} forsøkt forkastet",
-                keyValue("tilstand", this::class.simpleName),
-                keyValue("Generasjon", generasjon),
-                keyValue("utbetalingId", utbetalingId)
-            )
-        }
-    }
-
-    internal object Låst: Tilstand {
-        override fun navn(): String = "Låst"
-
-        override fun nyGenerasjon(
-            generasjon: Generasjon,
-            id: UUID,
-            hendelseId: UUID,
-            fom: LocalDate,
-            tom: LocalDate,
-            skjæringstidspunkt: LocalDate
-        ): Generasjon {
-            val nesteGenerasjon = generasjon.opprettNeste(id, hendelseId, fom, tom, skjæringstidspunkt)
-            generasjon.flyttAktiveVarsler(nesteGenerasjon)
-            return nesteGenerasjon
-        }
-
-        override fun tidslinjeendring(
-            generasjon: Generasjon,
-            fom: LocalDate,
-            tom: LocalDate,
-            skjæringstidspunkt: LocalDate,
-            hendelseId: UUID
-        ) {
-            generasjon.håndterNyGenerasjon(hendelseId = hendelseId, fom = fom, tom = tom, skjæringstidspunkt = skjæringstidspunkt)
-        }
-
-        override fun nyUtbetaling(generasjon: Generasjon, hendelseId: UUID, utbetalingId: UUID) {
-            val nyGenerasjonId = UUID.randomUUID()
-            sikkerlogg.info(
-                "Kan ikke legge til ny utbetaling med {} for {}, da generasjonen er låst. Oppretter ny generasjon med {}",
-                keyValue("utbetalingId", utbetalingId),
-                keyValue("generasjon", this),
-                keyValue("generasjonId", nyGenerasjonId)
-            )
-            generasjon.håndterNyGenerasjon(hendelseId, nyGenerasjonId)?.håndterNyUtbetaling(utbetalingId)
-        }
-    }
-
-    internal object Ulåst: Tilstand {
-        override fun navn(): String = "Ulåst"
-
-        override fun vedtakFattet(generasjon: Generasjon, hendelseId: UUID) {
-            generasjon.låst = true
-            generasjon.observers.forEach { it.vedtakFattet(generasjon.id, hendelseId) }
-            generasjon.nyTilstand(this, Låst)
-        }
-
-        override fun tidslinjeendring(
-            generasjon: Generasjon,
-            fom: LocalDate,
-            tom: LocalDate,
-            skjæringstidspunkt: LocalDate,
-            hendelseId: UUID
-        ) {
-            generasjon.oppdaterTidslinje(fom, tom, skjæringstidspunkt)
-        }
-
-        override fun nyUtbetaling(generasjon: Generasjon, hendelseId: UUID, utbetalingId: UUID) {
-            generasjon.håndterNyUtbetaling(utbetalingId)
-        }
-
-        override fun invaliderUtbetaling(generasjon: Generasjon, utbetalingId: UUID) {
-            generasjon.utbetalingId = null
-            generasjon.observers.forEach { it.utbetalingForkastet(generasjon.id, utbetalingId) }
-        }
-    }
-
     private fun nyTilstand(gammel: Tilstand, ny: Tilstand) {
         observers.forEach { it.tilstandEndret(id, vedtaksperiodeId, gammel, ny) }
         this.tilstand = ny
@@ -268,6 +171,132 @@ internal class Generasjon private constructor(
         val inneholderMedlemskapsvarsel = varsler.inneholderMedlemskapsvarsel()
         logg.info("$this harMedlemskapsvarsel: $inneholderMedlemskapsvarsel")
         return inneholderMedlemskapsvarsel
+    }
+
+    internal sealed interface Tilstand {
+
+        fun navn(): String
+        fun nyGenerasjon(generasjon: Generasjon, id: UUID, hendelseId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate): Generasjon? {
+            return null
+        }
+
+        fun vedtakFattet(generasjon: Generasjon, hendelseId: UUID) {
+            sikkerlogg.info("Forventet ikke vedtak_fattet i {}", kv("tilstand", this::class.simpleName))
+        }
+
+        fun tidslinjeendring(
+            generasjon: Generasjon,
+            fom: LocalDate,
+            tom: LocalDate,
+            skjæringstidspunkt: LocalDate,
+            hendelseId: UUID
+        ) {}
+
+        fun nyUtbetaling(generasjon: Generasjon, hendelseId: UUID, utbetalingId: UUID) {}
+        fun invaliderUtbetaling(generasjon: Generasjon, utbetalingId: UUID) {
+            sikkerlogg.error(
+                "{} er i {}. Utbetaling med {} forsøkt forkastet",
+                keyValue("tilstand", this::class.simpleName),
+                keyValue("Generasjon", generasjon),
+                keyValue("utbetalingId", utbetalingId)
+            )
+        }
+    }
+
+    internal object Låst: Tilstand {
+        override fun navn(): String = "Låst"
+
+        override fun nyGenerasjon(
+            generasjon: Generasjon,
+            id: UUID,
+            hendelseId: UUID,
+            fom: LocalDate,
+            tom: LocalDate,
+            skjæringstidspunkt: LocalDate
+        ): Generasjon {
+            val nesteGenerasjon = generasjon.opprettNeste(id, hendelseId, fom, tom, skjæringstidspunkt)
+            generasjon.flyttAktiveVarsler(nesteGenerasjon)
+            return nesteGenerasjon
+        }
+
+        override fun tidslinjeendring(
+            generasjon: Generasjon,
+            fom: LocalDate,
+            tom: LocalDate,
+            skjæringstidspunkt: LocalDate,
+            hendelseId: UUID
+        ) {
+            generasjon.håndterNyGenerasjon(hendelseId = hendelseId, fom = fom, tom = tom, skjæringstidspunkt = skjæringstidspunkt)
+        }
+
+        override fun nyUtbetaling(generasjon: Generasjon, hendelseId: UUID, utbetalingId: UUID) {
+            val nyGenerasjonId = UUID.randomUUID()
+            sikkerlogg.info(
+                "Kan ikke legge til ny utbetaling med {} for {}, da generasjonen er låst. Oppretter ny generasjon med {}",
+                keyValue("utbetalingId", utbetalingId),
+                keyValue("generasjon", this),
+                keyValue("generasjonId", nyGenerasjonId)
+            )
+            generasjon.håndterNyGenerasjon(hendelseId, nyGenerasjonId)?.håndterNyUtbetaling(utbetalingId)
+        }
+    }
+
+    internal object Ulåst: Tilstand {
+        override fun navn(): String = "Ulåst"
+
+        override fun vedtakFattet(generasjon: Generasjon, hendelseId: UUID) {
+            generasjon.låst = true
+            generasjon.observers.forEach { it.vedtakFattet(generasjon.id, hendelseId) }
+            if (generasjon.utbetalingId == null)
+                return generasjon.nyTilstand(this, AvsluttetUtenUtbetaling)
+            generasjon.nyTilstand(this, Låst)
+        }
+
+        override fun tidslinjeendring(
+            generasjon: Generasjon,
+            fom: LocalDate,
+            tom: LocalDate,
+            skjæringstidspunkt: LocalDate,
+            hendelseId: UUID
+        ) {
+            generasjon.oppdaterTidslinje(fom, tom, skjæringstidspunkt)
+        }
+
+        override fun nyUtbetaling(generasjon: Generasjon, hendelseId: UUID, utbetalingId: UUID) {
+            generasjon.håndterNyUtbetaling(utbetalingId)
+        }
+
+        override fun invaliderUtbetaling(generasjon: Generasjon, utbetalingId: UUID) {
+            generasjon.utbetalingId = null
+            generasjon.observers.forEach { it.utbetalingForkastet(generasjon.id, utbetalingId) }
+        }
+    }
+
+    internal object AvsluttetUtenUtbetaling: Tilstand {
+        override fun navn(): String = "AvsluttetUtenUtbetaling"
+
+        override fun nyGenerasjon(
+            generasjon: Generasjon,
+            id: UUID,
+            hendelseId: UUID,
+            fom: LocalDate,
+            tom: LocalDate,
+            skjæringstidspunkt: LocalDate
+        ): Generasjon {
+            val nesteGenerasjon = generasjon.opprettNeste(id, hendelseId, fom, tom, skjæringstidspunkt)
+            generasjon.flyttAktiveVarsler(nesteGenerasjon)
+            return nesteGenerasjon
+        }
+
+        override fun tidslinjeendring(
+            generasjon: Generasjon,
+            fom: LocalDate,
+            tom: LocalDate,
+            skjæringstidspunkt: LocalDate,
+            hendelseId: UUID
+        ) {
+            generasjon.håndterNyGenerasjon(hendelseId = hendelseId, fom = fom, tom = tom, skjæringstidspunkt = skjæringstidspunkt)
+        }
     }
 
     internal companion object {
