@@ -142,9 +142,20 @@ internal class AutomatiseringTest {
     }
 
     @Test
-    fun `person med flere arbeidsgivere skal ikke automatisk godkjennes`() {
+    fun `person med flere arbeidsgivere og er forlengelse skal automatisk godkjennes`() {
         every { vedtakDaoMock.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.FLERE_ARBEIDSGIVERE
-        gårTilManuell()
+        gårAutomatisk()
+    }
+
+    @Test
+    fun `person med flere arbeidsgivere og er førstegangsbehandling skal ikke automatisk godkjennes`() {
+        every { vedtakDaoMock.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.FLERE_ARBEIDSGIVERE
+        support.run {
+            forsøkAutomatisering(
+                periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+            )
+            assertGikkTilManuell()
+        }
     }
 
     @Test

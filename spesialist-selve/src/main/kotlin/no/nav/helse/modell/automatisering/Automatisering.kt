@@ -182,7 +182,10 @@ internal class Automatisering(
             validering("Bruker er ansatt i Nav") { erEgenAnsatt == false || erEgenAnsatt == null },
             validering("Bruker er under verge") { !harVergemål },
             validering("Bruker tilhører utlandsenhet") { !tilhørerUtlandsenhet },
-            validering("Har flere arbeidsgivere") { inntektskilde == Inntektskilde.EN_ARBEIDSGIVER },
+            validering("Førstegangsbehandling har flere arbeidsgivere") {
+                (inntektskilde == Inntektskilde.EN_ARBEIDSGIVER ||
+                        periodetype == Periodetype.FORLENGELSE)
+            },
             validering("Utbetaling til sykmeldt") { !skalStoppesPgaUTS },
             AutomatiserRevurderinger(utbetaling, fødselsnummer, vedtaksperiodeId),
             validering("Vedtaksperioden har en pågående overstyring") { !harPågåendeOverstyring }
