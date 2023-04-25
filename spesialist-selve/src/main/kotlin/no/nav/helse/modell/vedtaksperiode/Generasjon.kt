@@ -261,7 +261,6 @@ internal class Generasjon private constructor(
 
         override fun vedtakFattet(generasjon: Generasjon, hendelseId: UUID) {
             generasjon.låst = true
-            generasjon.observers.forEach { it.vedtakFattet(generasjon.id, hendelseId) }
             if (generasjon.utbetalingId == null)
                 return generasjon.nyTilstand(this, AvsluttetUtenUtbetaling, hendelseId)
             generasjon.nyTilstand(this, Låst, hendelseId)

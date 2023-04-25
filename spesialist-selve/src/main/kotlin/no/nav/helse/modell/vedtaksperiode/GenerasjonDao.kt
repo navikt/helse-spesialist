@@ -67,20 +67,6 @@ class GenerasjonDao(private val dataSource: DataSource) {
         }
     }
 
-    internal fun låsFor(generasjonId: UUID, hendelseId: UUID): Generasjon? {
-        @Language("PostgreSQL")
-        val query = """
-            UPDATE selve_vedtaksperiode_generasjon 
-            SET låst = true, tilstand_endret_tidspunkt = ?, tilstand_endret_av_hendelse = ? 
-            WHERE unik_id = ?
-            RETURNING id, unik_id, vedtaksperiode_id, utbetaling_id, låst, skjæringstidspunkt, fom, tom, tilstand;
-            """
-
-        return sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, LocalDateTime.now(), hendelseId, generasjonId).map(::toGenerasjon).asSingle)
-        }
-    }
-
     internal fun utbetalingFor(generasjonId: UUID, utbetalingId: UUID): Generasjon? {
         @Language("PostgreSQL")
         val query = """

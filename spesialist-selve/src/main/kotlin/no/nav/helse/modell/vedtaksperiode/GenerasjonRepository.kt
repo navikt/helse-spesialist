@@ -87,16 +87,6 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
         fjernUtbetalingFor(generasjonId)
     }
 
-    override fun vedtakFattet(generasjonId: UUID, hendelseId: UUID) {
-        dao.låsFor(generasjonId, hendelseId)
-            ?.loggLåst()
-            ?: sikkerlogg.error(
-                "Finner ikke generasjon med {}. Forsøkt låst av {}",
-                kv("generasjonId", generasjonId),
-                kv("hendelseId", hendelseId)
-            )
-    }
-
     override fun tilhørendeFor(utbetalingId: UUID): List<Generasjon> {
         return dao.alleFor(utbetalingId).onEach { it.registrer(this) }
     }
@@ -136,10 +126,6 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
                 kv("generasjon", this),
                 kv("vedtaksperiodeId", vedtaksperiodeId),
             )
-        }
-
-        private fun Generasjon.loggLåst() {
-            sikkerlogg.info("Låser generasjon {}", kv("generasjon", this))
         }
 
         private fun Generasjon.loggKnyttetUtbetaling(utbetalingId: UUID) {

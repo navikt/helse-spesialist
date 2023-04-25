@@ -8,6 +8,7 @@ import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.februar
 import no.nav.helse.januar
+import no.nav.helse.modell.vedtaksperiode.Generasjon
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -42,7 +43,7 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETestV2() {
         fremTilSaksbehandleroppgave()
         håndterSaksbehandlerløsning()
         håndterVedtakFattet()
-        assertLåsteGenerasjoner(VEDTAKSPERIODE_ID, 1)
+        assertFerdigBehandledeGenerasjoner(VEDTAKSPERIODE_ID, 1)
     }
 
     @Test
@@ -54,7 +55,7 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETestV2() {
         val utbetalingId2 = UUID.randomUUID()
         håndterGodkjenningsbehov(utbetalingId = utbetalingId2, harOppdatertMetainfo = true) //revurdering
         assertGenerasjoner(VEDTAKSPERIODE_ID, 2)
-        assertLåsteGenerasjoner(VEDTAKSPERIODE_ID, 1)
+        assertFerdigBehandledeGenerasjoner(VEDTAKSPERIODE_ID, 1)
     }
 
     @Test
@@ -160,13 +161,13 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETestV2() {
         assertEquals(forventetAntall, antall) { "Forventet $forventetAntall generasjoner for $vedtaksperiodeId, fant $antall" }
     }
 
-    private fun assertLåsteGenerasjoner(vedtaksperiodeId: UUID, forventetAntall: Int) {
+    private fun assertFerdigBehandledeGenerasjoner(vedtaksperiodeId: UUID, forventetAntall: Int) {
         val antall = sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
-            val query = "SELECT COUNT(1) FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ? AND låst = true"
+            val query = "SELECT COUNT(1) FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ? AND tilstand = '${Generasjon.Låst.navn()}'"
             session.run(queryOf(query, vedtaksperiodeId).map { it.int(1) }.asSingle)
         }
-        assertEquals(forventetAntall, antall) { "Forventet $forventetAntall låste generasjoner for $vedtaksperiodeId, fant $antall" }
+        assertEquals(forventetAntall, antall) { "Forventet $forventetAntall ferdig behandlede generasjoner for $vedtaksperiodeId, fant $antall" }
     }
 
     private fun assertGenerasjonerMedUtbetaling(vedtaksperiodeId: UUID, utbetalingId: UUID, forventetAntall: Int) {

@@ -15,7 +15,6 @@ import no.nav.helse.modell.varsel.VarselDao
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -87,15 +86,6 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `gir null tilbake dersom det ikke finnes noen generasjon å låse`() {
-        val vedtaksperiodeEndretId = UUID.randomUUID()
-        val vedtakFattetId = UUID.randomUUID()
-        val låstGenerasjon = generasjonDao.låsFor(VEDTAKSPERIODE_ID, vedtakFattetId)
-        assertNull(låstGenerasjon)
-        assertIkkeLåst(VEDTAKSPERIODE_ID, vedtaksperiodeEndretId, vedtakFattetId)
-    }
-
-    @Test
     fun `gir false tilbake dersom vi ikke finner noen generasjon`() {
         val funnet = generasjonDao.harGenerasjonFor(VEDTAKSPERIODE_ID)
         assertFalse(funnet)
@@ -117,8 +107,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `finn skjæringstidspunkt for siste generasjon`() {
-        generasjonDao.opprettFor(UUID.randomUUID(), VEDTAKSPERIODE_ID, UUID.randomUUID(), 1.januar, Periode(1.januar, 31.januar), Generasjon.Ulåst)
-        generasjonDao.låsFor(VEDTAKSPERIODE_ID, UUID.randomUUID())
+        generasjonDao.opprettFor(UUID.randomUUID(), VEDTAKSPERIODE_ID, UUID.randomUUID(), 1.januar, Periode(1.januar, 31.januar), Generasjon.Låst)
         val generasjonId = UUID.randomUUID()
         generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE_ID, UUID.randomUUID(), 1.januar, Periode(1.januar, 31.januar), Generasjon.Ulåst)
         generasjonDao.oppdaterSykefraværstilfelle(generasjonId, 2.januar, Periode(2.januar, 31.januar))
@@ -285,9 +274,8 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
             UUID.randomUUID(),
             1.januar,
             Periode(1.januar, 31.januar),
-            Generasjon.Ulåst
+            Generasjon.Låst
         )
-        generasjonDao.låsFor(VEDTAKSPERIODE_ID, UUID.randomUUID())
         val opprinneligSøknadsdato = finnSøknadMottatt(VEDTAKSPERIODE_ID)
         generasjonDao.opprettFor(
             UUID.randomUUID(),
@@ -348,20 +336,6 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         }
 
         assertEquals(forventetTilstand.navn(), tilstand)
-    }
-
-    private fun assertIkkeLåst(vedtaksperiodeId: UUID, opprettetAv: UUID, tilstandEndretAv: UUID) {
-        val låst = sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query =
-                "SELECT låst FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ? AND opprettet_av_hendelse = ? AND tilstand_endret_av_hendelse = ?;"
-
-            session.run(queryOf(query, vedtaksperiodeId, opprettetAv, tilstandEndretAv).map {
-                it.boolean("låst")
-            }.asSingle)
-        } ?: false
-
-        assertFalse(låst) { "Generasjonen er låst" }
     }
 
     private fun assertUtbetaling(generasjonId: UUID, forventetUtbetalingId: UUID?) {

@@ -78,7 +78,7 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         generasjon.håndterVedtaksperiodeEndret(vedtaksperiodeEndret, andreGenerasjonId)
 
         assertLåstGenerasjon(førsteGenerasjonId, vedtakFattet)
-        assertUlåstGenerasjon(andreGenerasjonId)
+        assertUbehandletGenerasjon(andreGenerasjonId)
     }
 
     @Test
@@ -209,10 +209,10 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         assertNotNull(generasjon)
     }
 
-    private fun assertUlåstGenerasjon(generasjonId: UUID) {
+    private fun assertUbehandletGenerasjon(generasjonId: UUID) {
         val generasjon = sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
-            val query = "SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = ? AND låst = false;"
+            val query = "SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = ? AND tilstand = '${Generasjon.Ulåst.navn()}';"
 
             session.run(queryOf(query, generasjonId).map {
                 it.long(1)

@@ -38,6 +38,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.SENDT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 import no.nav.helse.modell.varsel.Varselkode
+import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.asLocalDateTime
@@ -823,7 +824,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         return sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val query =
-                "SELECT true FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ? AND låst = true ORDER BY id DESC"
+                "SELECT true FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ? AND tilstand = '${Generasjon.Låst.navn()}' ORDER BY id DESC"
             session.run(queryOf(query, vedtaksperiodeId).map { it.boolean(1) }.asSingle) ?: false
         }
     }
@@ -990,7 +991,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         val etterspurteBehov = testRapid.inspektør.behov(sisteMeldingId)
         assertEquals(behov.toList(), etterspurteBehov) {
             val ikkeEtterspurt = behov.toSet() - etterspurteBehov.toSet()
-            "Forventet at følgende behov skulle være etterspurt: $ikkeEtterspurt\nFaktsk etterspurte behov: $etterspurteBehov\n"
+            "Forventet at følgende behov skulle være etterspurt: $ikkeEtterspurt\nFaktisk etterspurte behov: $etterspurteBehov\n"
         }
     }
 
