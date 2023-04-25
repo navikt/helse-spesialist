@@ -11,7 +11,7 @@ internal class VedtaksperiodeGenerasjonCommand(
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
         if (forrigeTilstand == gjeldendeTilstand) return true
-        gjeldendeGenerasjon.håndterNyGenerasjon(vedtaksperiodeEndretHendelseId)
+        gjeldendeGenerasjon.håndterVedtaksperiodeEndret(vedtaksperiodeEndretHendelseId)
         return true
     }
 }

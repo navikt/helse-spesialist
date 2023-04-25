@@ -604,7 +604,6 @@ internal class Hendelsefabrikk(
             snapshotDao = snapshotDao,
             snapshotClient = snapshotClient,
             personDao = personDao,
-            varselRepository = varselRepository,
             gjeldendeGenerasjon = gjeldendeGenerasjon(vedtaksperiodeId)
         )
     }

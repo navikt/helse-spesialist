@@ -55,14 +55,26 @@ internal class Generasjon private constructor(
         tilstand.tidslinjeendring(this, fom, tom, skjæringstidspunkt, hendelseId)
     }
 
-    internal fun håndterNyGenerasjon(
+    internal fun håndterVedtaksperiodeEndret(
         hendelseId: UUID,
         id: UUID = UUID.randomUUID(),
         fom: LocalDate = this.periode.fom(),
         tom: LocalDate = this.periode.tom(),
         skjæringstidspunkt: LocalDate = this.skjæringstidspunkt
     ): Generasjon? {
-        return tilstand.nyGenerasjon(this, id, hendelseId, fom, tom, skjæringstidspunkt)
+        return tilstand.vedtaksperiodeEndret(this, id, hendelseId, fom, tom, skjæringstidspunkt)
+    }
+
+    private fun nyGenerasjon(
+        hendelseId: UUID,
+        id: UUID = UUID.randomUUID(),
+        fom: LocalDate = this.periode.fom(),
+        tom: LocalDate = this.periode.tom(),
+        skjæringstidspunkt: LocalDate = this.skjæringstidspunkt
+    ): Generasjon {
+        val nesteGenerasjon = opprettNeste(id, hendelseId, fom, tom, skjæringstidspunkt)
+        flyttAktiveVarsler(nesteGenerasjon)
+        return nesteGenerasjon
     }
 
     private fun oppdaterTidslinje(fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate) {
@@ -178,7 +190,7 @@ internal class Generasjon private constructor(
     internal sealed interface Tilstand {
 
         fun navn(): String
-        fun nyGenerasjon(generasjon: Generasjon, id: UUID, hendelseId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate): Generasjon? {
+        fun vedtaksperiodeEndret(generasjon: Generasjon, id: UUID, hendelseId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate): Generasjon? {
             return null
         }
 
@@ -211,7 +223,7 @@ internal class Generasjon private constructor(
     internal object Låst: Tilstand {
         override fun navn(): String = "Låst"
 
-        override fun nyGenerasjon(
+        override fun vedtaksperiodeEndret(
             generasjon: Generasjon,
             id: UUID,
             hendelseId: UUID,
@@ -219,9 +231,7 @@ internal class Generasjon private constructor(
             tom: LocalDate,
             skjæringstidspunkt: LocalDate
         ): Generasjon {
-            val nesteGenerasjon = generasjon.opprettNeste(id, hendelseId, fom, tom, skjæringstidspunkt)
-            generasjon.flyttAktiveVarsler(nesteGenerasjon)
-            return nesteGenerasjon
+            return generasjon.nyGenerasjon(hendelseId, id, fom, tom, skjæringstidspunkt)
         }
 
         override fun tidslinjeendring(
@@ -231,7 +241,7 @@ internal class Generasjon private constructor(
             skjæringstidspunkt: LocalDate,
             hendelseId: UUID
         ) {
-            generasjon.håndterNyGenerasjon(hendelseId = hendelseId, fom = fom, tom = tom, skjæringstidspunkt = skjæringstidspunkt)
+            generasjon.nyGenerasjon(hendelseId = hendelseId, fom = fom, tom = tom, skjæringstidspunkt = skjæringstidspunkt)
         }
 
         override fun nyUtbetaling(generasjon: Generasjon, hendelseId: UUID, utbetalingId: UUID) {
@@ -242,7 +252,7 @@ internal class Generasjon private constructor(
                 keyValue("generasjon", generasjon),
                 keyValue("generasjonId", nyGenerasjonId)
             )
-            generasjon.håndterNyGenerasjon(hendelseId, nyGenerasjonId)?.håndterNyUtbetaling(utbetalingId)
+            generasjon.nyGenerasjon(hendelseId, nyGenerasjonId).håndterNyUtbetaling(utbetalingId)
         }
     }
 
@@ -280,7 +290,7 @@ internal class Generasjon private constructor(
     internal object AvsluttetUtenUtbetaling: Tilstand {
         override fun navn(): String = "AvsluttetUtenUtbetaling"
 
-        override fun nyGenerasjon(
+        override fun vedtaksperiodeEndret(
             generasjon: Generasjon,
             id: UUID,
             hendelseId: UUID,
@@ -288,9 +298,7 @@ internal class Generasjon private constructor(
             tom: LocalDate,
             skjæringstidspunkt: LocalDate
         ): Generasjon {
-            val nesteGenerasjon = generasjon.opprettNeste(id, hendelseId, fom, tom, skjæringstidspunkt)
-            generasjon.flyttAktiveVarsler(nesteGenerasjon)
-            return nesteGenerasjon
+            return generasjon.nyGenerasjon(hendelseId, id, fom, tom, skjæringstidspunkt)
         }
 
         override fun tidslinjeendring(
@@ -300,7 +308,7 @@ internal class Generasjon private constructor(
             skjæringstidspunkt: LocalDate,
             hendelseId: UUID
         ) {
-            generasjon.håndterNyGenerasjon(hendelseId = hendelseId, fom = fom, tom = tom, skjæringstidspunkt = skjæringstidspunkt)
+            generasjon.nyGenerasjon(hendelseId = hendelseId, fom = fom, tom = tom, skjæringstidspunkt = skjæringstidspunkt)
         }
 
         override fun nyUtbetaling(generasjon: Generasjon, hendelseId: UUID, utbetalingId: UUID) {
@@ -311,7 +319,7 @@ internal class Generasjon private constructor(
                 keyValue("generasjon", generasjon),
                 keyValue("generasjonId", nyGenerasjonId)
             )
-            generasjon.håndterNyGenerasjon(hendelseId, nyGenerasjonId)?.håndterNyUtbetaling(utbetalingId)
+            generasjon.nyGenerasjon(hendelseId, nyGenerasjonId).håndterNyUtbetaling(utbetalingId)
         }
 
         override fun nyttVarsel(generasjon: Generasjon, varsel: Varsel) {
@@ -326,7 +334,7 @@ internal class Generasjon private constructor(
             generasjon.nyTilstand(this, AvsluttetUtenUtbetaling)
         }
 
-        override fun nyGenerasjon(
+        override fun vedtaksperiodeEndret(
             generasjon: Generasjon,
             id: UUID,
             hendelseId: UUID,
@@ -334,10 +342,8 @@ internal class Generasjon private constructor(
             tom: LocalDate,
             skjæringstidspunkt: LocalDate
         ): Generasjon {
-            val nesteGenerasjon = generasjon.opprettNeste(id, hendelseId, fom, tom, skjæringstidspunkt)
-            generasjon.flyttAktiveVarsler(nesteGenerasjon)
             generasjon.nyTilstand(this, AvsluttetUtenUtbetaling)
-            return nesteGenerasjon
+            return generasjon.nyGenerasjon(hendelseId, id, fom, tom, skjæringstidspunkt)
         }
 
         override fun tidslinjeendring(
@@ -347,7 +353,8 @@ internal class Generasjon private constructor(
             skjæringstidspunkt: LocalDate,
             hendelseId: UUID
         ) {
-            generasjon.håndterNyGenerasjon(hendelseId = hendelseId, fom = fom, tom = tom, skjæringstidspunkt = skjæringstidspunkt)
+            generasjon.nyTilstand(this, AvsluttetUtenUtbetaling)
+            generasjon.nyGenerasjon(hendelseId = hendelseId, fom = fom, tom = tom, skjæringstidspunkt = skjæringstidspunkt)
         }
 
         override fun nyUtbetaling(generasjon: Generasjon, hendelseId: UUID, utbetalingId: UUID) {
@@ -358,7 +365,8 @@ internal class Generasjon private constructor(
                 keyValue("generasjon", generasjon),
                 keyValue("generasjonId", nyGenerasjonId)
             )
-            generasjon.håndterNyGenerasjon(hendelseId, nyGenerasjonId)?.håndterNyUtbetaling(utbetalingId)
+            generasjon.nyTilstand(this, AvsluttetUtenUtbetaling)
+            generasjon.nyGenerasjon(hendelseId, nyGenerasjonId).håndterNyUtbetaling(utbetalingId)
         }
     }
 

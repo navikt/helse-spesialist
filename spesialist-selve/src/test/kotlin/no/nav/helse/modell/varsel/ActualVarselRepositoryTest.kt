@@ -127,7 +127,7 @@ internal class ActualVarselRepositoryTest : AbstractDatabaseTest() {
         generasjon.håndterGodkjentAvSaksbehandler("EN_IDENT")
         generasjon.håndterVedtakFattet(UUID.randomUUID())
         val nesteGenerasjonId = UUID.randomUUID()
-        val nesteGenerasjon = generasjon.håndterNyGenerasjon(UUID.randomUUID(), nesteGenerasjonId)
+        val nesteGenerasjon = generasjon.håndterVedtaksperiodeEndret(UUID.randomUUID(), nesteGenerasjonId)
         val varsel = Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), vedtaksperiodeId)
         nesteGenerasjon?.håndter(varsel)
         nesteGenerasjon?.håndterDeaktivertVarsel(varsel)
