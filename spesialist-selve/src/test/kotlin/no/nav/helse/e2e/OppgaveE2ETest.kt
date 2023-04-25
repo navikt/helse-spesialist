@@ -119,7 +119,7 @@ internal class OppgaveE2ETest: AbstractE2ETest() {
         val behov2 = sendGodkjenningsbehov(AKTØR, FØDSELSNUMMER, ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, UTBETALING_ID)
         assertOppgavestatuser(0, AvventerSaksbehandler)
         assertOppgaver(1)
-        assertIkkeHendelse(behov2)
+        assertGodkjenningsbehovIkkeLagret(behov2)
     }
 
     @Test

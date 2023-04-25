@@ -60,6 +60,25 @@ class SnapshotDao(private val dataSource: DataSource) {
         val statement = "UPDATE global_snapshot_versjon SET versjon = ?, sist_endret = now() WHERE id = 1"
         this.run(queryOf(statement, versjon).asExecute)
     }
+
+    internal fun utdatert(fødselsnummer: String) = sessionOf(dataSource).use { session ->
+        session.transaction { tx ->
+            val versjonForSnapshot = tx.finnSnapshotVersjon(fødselsnummer)
+            val sisteGjeldendeVersjon = tx.finnGlobalVersjon()
+            versjonForSnapshot?.let { it < sisteGjeldendeVersjon } ?: true
+        }
+    }
+
+    private fun TransactionalSession.finnSnapshotVersjon(fødselsnummer: String): Int? {
+        @Language("PostgreSQL")
+        val statement = """
+            SELECT versjon FROM snapshot s
+            INNER JOIN person p on p.id = s.person_ref
+            WHERE p.fodselsnummer = ?
+        """
+        return run(queryOf(statement, fødselsnummer.toLong()).map { it.int("versjon") }.asSingle)
+    }
+
 }
 
 // Disse støtter null fordi (gammelt) oppsett av testdata ikke sørger for at utbetalingen kan hentes opp fra

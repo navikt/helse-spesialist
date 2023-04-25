@@ -24,6 +24,7 @@ import no.nav.helse.mediator.meldinger.OverstyringArbeidsforhold
 import no.nav.helse.mediator.meldinger.OverstyringIgangsatt
 import no.nav.helse.mediator.meldinger.OverstyringInntektOgRefusjon
 import no.nav.helse.mediator.meldinger.OverstyringTidslinje
+import no.nav.helse.mediator.meldinger.PåminnetGodkjenningsbehov
 import no.nav.helse.mediator.meldinger.RevurderingAvvist
 import no.nav.helse.mediator.meldinger.Sykefraværstilfeller
 import no.nav.helse.mediator.meldinger.SøknadSendt
@@ -136,6 +137,7 @@ internal class HendelseMediator(
             VedtaksperiodeNyUtbetaling.River(it, this)
             Sykefraværstilfeller.River(it, this)
             MetrikkRiver(it)
+            PåminnetGodkjenningsbehov.River(it, this)
         }
     }
 
@@ -317,6 +319,20 @@ internal class HendelseMediator(
                 message.toJson()
             ), context
         )
+    }
+
+    fun påminnetGodkjenningsbehov(
+        message: JsonMessage,
+        id: UUID,
+        fødselsnummer: String,
+        vedtaksperiodeId: UUID,
+        utbetalingId: UUID,
+        context: MessageContext,
+    ) {
+        if (!oppgaveDao.harGyldigOppgave(utbetalingId)) return
+
+        log.info("Behandler påminnet godkjenningsbehov (id=$id) for vedtaksperiodeId=$vedtaksperiodeId, utbetalingId=$utbetalingId.")
+        utfør(hendelsefabrikk.påminnetGodkjenningsbehov(id, fødselsnummer, message.toJson()), context)
     }
 
     fun søknadSendt(

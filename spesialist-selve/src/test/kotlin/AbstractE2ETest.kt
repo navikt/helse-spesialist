@@ -319,6 +319,12 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         })
     }
 
+    protected fun assertGodkjenningsbehovIkkeLagret(hendelseId: UUID ) {
+        assertEquals(0, sessionOf(dataSource).use {
+            it.run(queryOf("SELECT COUNT(1) FROM hendelse WHERE id = ? AND type = 'GODKJENNINGSBEHOV'", hendelseId).map { row -> row.int(1) }.asSingle)
+        })
+    }
+
     protected fun assertVedtaksperiodeEksisterer(vedtaksperiodeId: UUID) {
         assertEquals(1, vedtak(vedtaksperiodeId))
     }

@@ -59,7 +59,7 @@ import org.junit.jupiter.api.fail
 
 internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
     private lateinit var utbetalingId: UUID
-    private val snapshotClient = mockk<SnapshotClient>(relaxed = true)
+    internal val snapshotClient = mockk<SnapshotClient>(relaxed = true)
     private val testRapid = TestRapid()
     internal val inspektør get() = testRapid.inspektør
     private val meldingssenderV2 = MeldingssenderV2(testRapid)
@@ -526,7 +526,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         håndterVedtaksperiodeNyUtbetaling(vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
         håndterUtbetalingOpprettet(utbetalingtype = if (erRevurdering) "REVURDERING" else "UTBETALING")
         håndterVedtaksperiodeEndret(vedtaksperiodeId = vedtaksperiodeId)
-        sisteMeldingId = meldingssenderV2.sendGodkjenningsbehov(
+        sisteMeldingId = sendGodkjenningsbehov(
             aktørId,
             fødselsnummer,
             organisasjonsnummer,
@@ -544,6 +544,30 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
             else -> assertEtterspurteBehov("EgenAnsatt")
         }
     }
+
+    internal fun sendGodkjenningsbehov(
+        aktørId: String = AKTØR,
+        fødselsnummer: String = FØDSELSNUMMER,
+        organisasjonsnummer: String = ORGNR,
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        utbetalingId: UUID = UTBETALING_ID,
+        periodeFom: LocalDate = 1.januar,
+        periodeTom: LocalDate = 31.januar,
+        skjæringstidspunkt: LocalDate = periodeFom,
+        periodetype: Periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+        orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList(),
+    ) = meldingssenderV2.sendGodkjenningsbehov(
+        aktørId = aktørId,
+        fødselsnummer = fødselsnummer,
+        organisasjonsnummer = organisasjonsnummer,
+        vedtaksperiodeId = vedtaksperiodeId,
+        utbetalingId = utbetalingId,
+        periodeFom = periodeFom,
+        periodeTom = periodeTom,
+        skjæringstidspunkt = skjæringstidspunkt,
+        periodetype = periodetype,
+        orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold
+    )
 
     protected fun håndterPersoninfoløsning(
         aktørId: String = AKTØR,

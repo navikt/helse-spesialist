@@ -13,6 +13,7 @@ import no.nav.helse.mediator.builders.GenerasjonBuilder
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.EndretSkjermetinfo
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov
+import no.nav.helse.mediator.meldinger.PåminnetGodkjenningsbehov
 import no.nav.helse.mediator.meldinger.GosysOppgaveEndret
 import no.nav.helse.mediator.meldinger.NyeVarsler
 import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshot
@@ -220,6 +221,15 @@ internal class Hendelsefabrikk(
         )
     }
 
+    fun påminnetGodkjenningsbehov(id: UUID, fødselsnummer: String, json: String) =
+        PåminnetGodkjenningsbehov(
+            id = id,
+            fødselsnummer = fødselsnummer,
+            json = json,
+            snapshotDao = snapshotDao,
+            snapshotClient = snapshotClient,
+        )
+
     fun søknadSendt(
         json: String,
     ): SøknadSendt {
@@ -307,6 +317,15 @@ internal class Hendelsefabrikk(
             orgnummereMedRelevanteArbeidsforhold = jsonNode.path("Godkjenning")
                 .path("orgnummereMedRelevanteArbeidsforhold")
                 .takeUnless(JsonNode::isMissingOrNull)?.map { it.asText() } ?: emptyList(),
+            json = json
+        )
+    }
+
+    fun påminnetGodkjenningsbehov(json: String): PåminnetGodkjenningsbehov {
+        val jsonNode = mapper.readTree(json)
+        return påminnetGodkjenningsbehov(
+            id = UUID.fromString(jsonNode.path("@id").asText()),
+            fødselsnummer = jsonNode.path("fødselsnummer").asText(),
             json = json
         )
     }

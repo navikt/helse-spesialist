@@ -17,6 +17,7 @@ import no.nav.helse.mediator.meldinger.OverstyringArbeidsforhold
 import no.nav.helse.mediator.meldinger.OverstyringIgangsatt
 import no.nav.helse.mediator.meldinger.OverstyringInntektOgRefusjon
 import no.nav.helse.mediator.meldinger.OverstyringTidslinje
+import no.nav.helse.mediator.meldinger.PåminnetGodkjenningsbehov
 import no.nav.helse.mediator.meldinger.RevurderingAvvist
 import no.nav.helse.mediator.meldinger.Sykefraværstilfeller
 import no.nav.helse.mediator.meldinger.SøknadSendt
@@ -39,6 +40,7 @@ import no.nav.helse.modell.HendelseDao.Hendelsetype.OVERSTYRING
 import no.nav.helse.modell.HendelseDao.Hendelsetype.OVERSTYRING_ARBEIDSFORHOLD
 import no.nav.helse.modell.HendelseDao.Hendelsetype.OVERSTYRING_IGANGSATT
 import no.nav.helse.modell.HendelseDao.Hendelsetype.OVERSTYRING_INNTEKT_OG_REFUSJON
+import no.nav.helse.modell.HendelseDao.Hendelsetype.PÅMINNET_GODKJENNINGSBEHOV
 import no.nav.helse.modell.HendelseDao.Hendelsetype.REVURDERING_AVVIST
 import no.nav.helse.modell.HendelseDao.Hendelsetype.SAKSBEHANDLERLØSNING
 import no.nav.helse.modell.HendelseDao.Hendelsetype.SYKEFRAVÆRSTILFELLER
@@ -137,13 +139,14 @@ internal class HendelseDao(private val dataSource: DataSource) {
     private fun fraHendelsetype(
         hendelsetype: Hendelsetype,
         json: String,
-        hendelsefabrikk: Hendelsefabrikk
+        hendelsefabrikk: Hendelsefabrikk,
     ): Hendelse =
         when (hendelsetype) {
             ADRESSEBESKYTTELSE_ENDRET -> hendelsefabrikk.adressebeskyttelseEndret(json)
             VEDTAKSPERIODE_ENDRET -> hendelsefabrikk.vedtaksperiodeEndret(json)
             VEDTAKSPERIODE_FORKASTET -> hendelsefabrikk.vedtaksperiodeForkastet(json)
             GODKJENNING -> hendelsefabrikk.godkjenning(json)
+            PÅMINNET_GODKJENNINGSBEHOV -> hendelsefabrikk.påminnetGodkjenningsbehov(json)
             OVERSTYRING -> hendelsefabrikk.overstyringTidslinje(json)
             OVERSTYRING_INNTEKT_OG_REFUSJON -> hendelsefabrikk.overstyringInntektOgRefusjon(json)
             OVERSTYRING_ARBEIDSFORHOLD -> hendelsefabrikk.overstyringArbeidsforhold(json)
@@ -169,6 +172,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
         is VedtaksperiodeEndret -> VEDTAKSPERIODE_ENDRET
         is VedtaksperiodeForkastet -> VEDTAKSPERIODE_FORKASTET
         is Godkjenningsbehov -> GODKJENNING
+        is PåminnetGodkjenningsbehov -> PÅMINNET_GODKJENNINGSBEHOV
         is OverstyringTidslinje -> OVERSTYRING
         is OverstyringInntektOgRefusjon -> OVERSTYRING_INNTEKT_OG_REFUSJON
         is OverstyringArbeidsforhold -> OVERSTYRING_ARBEIDSFORHOLD
@@ -195,6 +199,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
         SAKSBEHANDLERLØSNING, UTBETALING_ANNULLERT, OPPDATER_PERSONSNAPSHOT, UTBETALING_ENDRET,
         VEDTAKSPERIODE_REBEREGNET, OVERSTYRING_INNTEKT_OG_REFUSJON, OVERSTYRING_ARBEIDSFORHOLD,
         REVURDERING_AVVIST, OVERSTYRING_IGANGSATT, GOSYS_OPPGAVE_ENDRET, ENDRET_SKJERMETINFO, VEDTAK_FATTET,
-        NYE_VARSLER, VEDTAKSPERIODE_OPPRETTET, SØKNAD_SENDT, VEDTAKSPERIODE_NY_UTBETALING, SYKEFRAVÆRSTILFELLER
+        NYE_VARSLER, VEDTAKSPERIODE_OPPRETTET, SØKNAD_SENDT, VEDTAKSPERIODE_NY_UTBETALING, SYKEFRAVÆRSTILFELLER,
+        PÅMINNET_GODKJENNINGSBEHOV
     }
 }
