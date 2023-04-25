@@ -106,7 +106,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     }
 
     @Test
-    fun `Generasjon skal ikke oppdateres dersom den er låst`() {
+    fun `Generasjon skal ikke oppdateres dersom den er ferdig behandlet`() {
         val generasjonId = UUID.randomUUID()
         val generasjon = generasjon(generasjonId, UUID.randomUUID())
         generasjon.håndterVedtakFattet(UUID.randomUUID())
@@ -148,7 +148,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     }
 
     @Test
-    fun `håndterTidslinjeendring setter ikke fom, tom og skjæringstidspunkt på generasjonen hvis den er låst`() {
+    fun `håndterTidslinjeendring setter ikke fom, tom og skjæringstidspunkt på generasjonen hvis den er ferdig behandlet`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjonId = UUID.randomUUID()
         val generasjon = generasjon(generasjonId, vedtaksperiodeId)
@@ -224,7 +224,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     }
 
     @Test
-    fun `ikke opprett neste dersom nåværende er ulåst`() {
+    fun `ikke opprett neste dersom nåværende er ubehandlet`() {
         val nyGenerasjonId = UUID.randomUUID()
         val generasjon = generasjon(UUID.randomUUID(), UUID.randomUUID())
         generasjon.registrer(observer)
@@ -394,7 +394,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     }
 
     @Test
-    fun `Generasjon kan motta ny utbetalingId så lenge generasjonen ikke er låst`() {
+    fun `Generasjon kan motta ny utbetalingId så lenge generasjonen ikke er ferdig behandlet`() {
         val generasjon = nyGenerasjon()
         val gammelUtbetalingId = UUID.randomUUID()
         val nyUtbetalingId = UUID.randomUUID()
@@ -406,7 +406,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     }
 
     @Test
-    fun `Lagrer varsel på generasjon selvom den er låst`() {
+    fun `Lagrer varsel på generasjon selvom den er ferdig behandlet`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjonId = UUID.randomUUID()
         val generasjon = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId, id = generasjonId)
@@ -431,7 +431,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     }
 
     @Test
-    fun `kan ikke knytte utbetalingId til låst generasjon som har utbetalingId fra før`() {
+    fun `kan ikke knytte utbetalingId til ferdig behandlet generasjon som har utbetalingId fra før`() {
         val generasjon = nyGenerasjon()
         val gammelUtbetalingId = UUID.randomUUID()
         val nyUtbetalingId = UUID.randomUUID()
@@ -444,7 +444,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     }
 
     @Test
-    fun `kan ikke knytte utbetalingId til låst generasjon som ikke har utbetalingId fra før`() {
+    fun `kan ikke knytte utbetalingId til ferdig behandlet generasjon som ikke har utbetalingId fra før`() {
         val generasjon = nyGenerasjon()
         val nyUtbetalingId = UUID.randomUUID()
         generasjon.håndterVedtakFattet(UUID.randomUUID())
@@ -453,7 +453,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     }
 
     @Test
-    fun `oppretter ny generasjon for vedtaksperiodeId ved ny utbetaling dersom gjeldende generasjon er låst`() {
+    fun `oppretter ny generasjon for vedtaksperiodeId ved ny utbetaling dersom gjeldende generasjon er ferdig behandlet`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)
         val gammelUtbetalingId = UUID.randomUUID()
@@ -469,7 +469,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     }
 
     @Test
-    fun `oppdaterer tidslinje på ulåst generasjon der fom, tom og eller skjæringstidspunkt er ulike`() {
+    fun `oppdaterer tidslinje på ubehandlet generasjon der fom, tom og eller skjæringstidspunkt er ulike`() {
         val generasjonId = UUID.randomUUID()
         val generasjon = nyGenerasjon(generasjonId)
         generasjon.registrer(observer)
@@ -478,7 +478,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     }
 
     @Test
-    fun `oppdaterer ikke tidslinje på ulåst generasjon der fom, tom og eller skjæringstidspunkt er like`() {
+    fun `oppdaterer ikke tidslinje på ubehandlet generasjon der fom, tom og eller skjæringstidspunkt er like`() {
         val generasjonId = UUID.randomUUID()
         val generasjon = nyGenerasjon(generasjonId)
         generasjon.registrer(observer)
@@ -487,7 +487,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     }
 
     @Test
-    fun `oppretter ny generasjon dersom gjeldende generasjon er låst og tidslinje er ulik`() {
+    fun `oppretter ny generasjon dersom gjeldende generasjon er ferdig behandlet og tidslinje er ulik`() {
         val generasjonId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
         val hendelseId = UUID.randomUUID()
@@ -500,7 +500,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     }
 
     @Test
-    fun `kan fjerne utbetalingId fra ulåst generasjon`() {
+    fun `kan fjerne utbetalingId fra ubehandlet generasjon`() {
         val generasjon = nyGenerasjon()
         val utbetalingId = UUID.randomUUID()
         generasjon.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
@@ -510,7 +510,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     }
 
     @Test
-    fun `kan ikke fjerne utbetalingId fra låst generasjon`() {
+    fun `kan ikke fjerne utbetalingId fra ferdig behandlet generasjon`() {
         val generasjon = nyGenerasjon()
         val utbetalingId = UUID.randomUUID()
         generasjon.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
@@ -735,17 +735,6 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         val vedtaksperiodeId2 = UUID.randomUUID()
         val generasjon1 = generasjon(generasjonId, vedtaksperiodeId1)
         val generasjon2 = generasjon(generasjonId, vedtaksperiodeId2)
-        assertNotEquals(generasjon1, generasjon2)
-        assertNotEquals(generasjon1.hashCode(), generasjon2.hashCode())
-    }
-
-    @Test
-    fun `forskjellig låst`() {
-        val generasjonId = UUID.randomUUID()
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon1 = generasjon(generasjonId, vedtaksperiodeId)
-        generasjon1.håndterVedtakFattet(UUID.randomUUID())
-        val generasjon2 = generasjon(generasjonId, vedtaksperiodeId)
         assertNotEquals(generasjon1, generasjon2)
         assertNotEquals(generasjon1.hashCode(), generasjon2.hashCode())
     }

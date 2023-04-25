@@ -82,7 +82,7 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
     }
 
     @Test
-    fun `kan ikke opprette ny generasjon når tidligere er ulåst`() {
+    fun `kan ikke opprette ny generasjon når tidligere generasjon er ubehandlet`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val vedtaksperiodeOpprettet = UUID.randomUUID()
         val vedtaksperiodeEndret = UUID.randomUUID()
@@ -110,7 +110,7 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
     }
 
     @Test
-    fun `kan ikke knytte utbetalingId til låst generasjon som ikke har utbetalingId`() {
+    fun `kan ikke knytte utbetalingId til ferdig behandlet generasjon som ikke har utbetalingId`() {
         val generasjonId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
         val utbetalingId = UUID.randomUUID()
@@ -125,7 +125,7 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
     }
 
     @Test
-    fun `kan ikke knytte utbetalingId til låst generasjon som har utbetalingId fra før`() {
+    fun `kan ikke knytte utbetalingId til ferdig behandlet generasjon som har utbetalingId fra før`() {
         val generasjonId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
         val gammel = UUID.randomUUID()

@@ -31,7 +31,7 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETestV2() {
     }
 
     @Test
-    fun `Oppretter ikke ny generasjon ved vedtaksperiode_endret dersom det finnes en ulåst generasjon fra før av`() {
+    fun `Oppretter ikke ny generasjon ved vedtaksperiode_endret dersom det finnes en ubehandlet generasjon fra før av`() {
         håndterSøknad()
         håndterVedtaksperiodeOpprettet()
         håndterVedtaksperiodeEndret()
@@ -67,7 +67,7 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETestV2() {
     }
 
     @Test
-    fun `Gammel utbetaling erstattes av ny utbetaling dersom perioden ikke er låst`() {
+    fun `Gammel utbetaling erstattes av ny utbetaling dersom perioden ikke er ferdig behandlet`() {
         val gammel = UUID.randomUUID()
         val ny = UUID.randomUUID()
         håndterSøknad()
