@@ -17,7 +17,6 @@ internal class Generasjon private constructor(
     private val id: UUID,
     private val vedtaksperiodeId: UUID,
     private var utbetalingId: UUID?,
-    private var låst: Boolean,
     private var skjæringstidspunkt: LocalDate,
     private var periode: Periode,
     private var tilstand: Tilstand,
@@ -29,7 +28,7 @@ internal class Generasjon private constructor(
         fom: LocalDate,
         tom: LocalDate,
         skjæringstidspunkt: LocalDate
-    ): this(id, vedtaksperiodeId, null, false, skjæringstidspunkt, Periode(fom, tom), Ulåst, emptySet())
+    ): this(id, vedtaksperiodeId, null, skjæringstidspunkt, Periode(fom, tom), Ulåst, emptySet())
 
     private val varsler: MutableList<Varsel> = varsler.toMutableList()
     private val observers = mutableSetOf<IVedtaksperiodeObserver>()
@@ -157,7 +156,7 @@ internal class Generasjon private constructor(
         tilstand.nyttVarsel(this, varsel, hendelseId)
     }
 
-    override fun toString(): String = "generasjonId=$id, vedtaksperiodeId=$vedtaksperiodeId, utbetalingId=$utbetalingId, låst=$låst, skjæringstidspunkt=$skjæringstidspunkt, periode=$periode"
+    override fun toString(): String = "generasjonId=$id, vedtaksperiodeId=$vedtaksperiodeId, utbetalingId=$utbetalingId, skjæringstidspunkt=$skjæringstidspunkt, periode=$periode"
 
     override fun equals(other: Any?): Boolean =
         this === other || (other is Generasjon
@@ -165,7 +164,6 @@ internal class Generasjon private constructor(
                 && id == other.id
                 && vedtaksperiodeId == other.vedtaksperiodeId
                 && utbetalingId == other.utbetalingId
-                && låst == other.låst
                 && tilstand == other.tilstand
                 && skjæringstidspunkt == other.skjæringstidspunkt
                 && periode == other.periode)
@@ -174,7 +172,6 @@ internal class Generasjon private constructor(
         var result = id.hashCode()
         result = 31 * result + vedtaksperiodeId.hashCode()
         result = 31 * result + utbetalingId.hashCode()
-        result = 31 * result + låst.hashCode()
         result = 31 * result + tilstand.hashCode()
         result = 31 * result + skjæringstidspunkt.hashCode()
         result = 31 * result + periode.hashCode()
@@ -260,7 +257,6 @@ internal class Generasjon private constructor(
         override fun navn(): String = "Ulåst"
 
         override fun vedtakFattet(generasjon: Generasjon, hendelseId: UUID) {
-            generasjon.låst = true
             if (generasjon.utbetalingId == null)
                 return generasjon.nyTilstand(this, AvsluttetUtenUtbetaling, hendelseId)
             generasjon.nyTilstand(this, Låst, hendelseId)
@@ -406,7 +402,6 @@ internal class Generasjon private constructor(
             id: UUID,
             vedtaksperiodeId: UUID,
             utbetalingId: UUID?,
-            låst: Boolean,
             skjæringstidspunkt: LocalDate,
             fom: LocalDate,
             tom: LocalDate,
@@ -416,7 +411,6 @@ internal class Generasjon private constructor(
             id = id,
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId,
-            låst = låst,
             skjæringstidspunkt = skjæringstidspunkt,
             periode = Periode(fom, tom),
             tilstand = tilstand,

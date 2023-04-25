@@ -17,7 +17,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
     internal fun byggSisteFor(vedtaksperiodeId: UUID, generasjonBuilder: GenerasjonBuilder) {
         @Language("PostgreSQL")
         val query = """
-            SELECT DISTINCT ON (vedtaksperiode_id) id, vedtaksperiode_id, unik_id, utbetaling_id, låst, skjæringstidspunkt, fom, tom, tilstand
+            SELECT DISTINCT ON (vedtaksperiode_id) id, vedtaksperiode_id, unik_id, utbetaling_id, skjæringstidspunkt, fom, tom, tilstand
             FROM selve_vedtaksperiode_generasjon 
             WHERE vedtaksperiode_id = ? ORDER BY vedtaksperiode_id, id DESC;
             """
@@ -28,7 +28,6 @@ class GenerasjonDao(private val dataSource: DataSource) {
                 generasjonBuilder.skjæringstidspunkt(row.localDate("skjæringstidspunkt"))
                 generasjonBuilder.tilstand(mapToTilstand(row.string("tilstand")))
                 generasjonBuilder.periode(row.localDate("fom"), row.localDate("tom"))
-                generasjonBuilder.låst(row.boolean("låst"))
             }.asSingle)
         }
     }
@@ -48,7 +47,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
     private fun finnSiste(vedtaksperiodeId: UUID): Query {
         @Language("PostgreSQL")
         val query = """
-            SELECT id, unik_id, vedtaksperiode_id, utbetaling_id, låst, skjæringstidspunkt, fom, tom, tilstand
+            SELECT id, unik_id, vedtaksperiode_id, utbetaling_id, skjæringstidspunkt, fom, tom, tilstand
             FROM selve_vedtaksperiode_generasjon 
             WHERE vedtaksperiode_id = ? ORDER BY id DESC;
             """
@@ -58,7 +57,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
     internal fun alleFor(utbetalingId: UUID): List<Generasjon> {
         @Language("PostgreSQL")
         val query = """
-            SELECT id, unik_id, vedtaksperiode_id, utbetaling_id, låst, skjæringstidspunkt, fom, tom, tilstand
+            SELECT id, unik_id, vedtaksperiode_id, utbetaling_id, skjæringstidspunkt, fom, tom, tilstand
             FROM selve_vedtaksperiode_generasjon 
             WHERE utbetaling_id = ?
             """
@@ -73,7 +72,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
             UPDATE selve_vedtaksperiode_generasjon 
             SET utbetaling_id = ? 
             WHERE unik_id = ?
-            RETURNING id, unik_id, vedtaksperiode_id, utbetaling_id, låst, skjæringstidspunkt, fom, tom, tilstand;
+            RETURNING id, unik_id, vedtaksperiode_id, utbetaling_id, skjæringstidspunkt, fom, tom, tilstand;
             """
 
         return sessionOf(dataSource).use { session ->
@@ -87,7 +86,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
             UPDATE selve_vedtaksperiode_generasjon 
             SET utbetaling_id = null 
             WHERE unik_id = ?
-            RETURNING id, unik_id, vedtaksperiode_id, utbetaling_id, låst, skjæringstidspunkt, fom, tom, tilstand;
+            RETURNING id, unik_id, vedtaksperiode_id, utbetaling_id, skjæringstidspunkt, fom, tom, tilstand;
             """
 
         return sessionOf(dataSource).use { session ->
@@ -136,7 +135,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
         val query = """
             INSERT INTO selve_vedtaksperiode_generasjon (unik_id, vedtaksperiode_id, opprettet_av_hendelse, skjæringstidspunkt, fom, tom, tilstand) 
             VALUES (?, ?, ?, ?, ?, ?, ?)
-            RETURNING id, unik_id, vedtaksperiode_id, utbetaling_id, låst, skjæringstidspunkt, fom, tom, tilstand
+            RETURNING id, unik_id, vedtaksperiode_id, utbetaling_id, skjæringstidspunkt, fom, tom, tilstand
         """
 
         @Language("PostgreSQL")
@@ -204,7 +203,6 @@ class GenerasjonDao(private val dataSource: DataSource) {
             row.uuid("unik_id"),
             row.uuid("vedtaksperiode_id"),
             row.uuidOrNull("utbetaling_id"),
-            row.boolean("låst"),
             row.localDate("skjæringstidspunkt"),
             row.localDate("fom"),
             row.localDate("tom"),

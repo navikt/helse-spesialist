@@ -6,7 +6,6 @@ import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Generasjon
-import kotlin.properties.Delegates
 
 class GenerasjonBuilder(
     private val vedtaksperiodeId: UUID
@@ -16,7 +15,6 @@ class GenerasjonBuilder(
     private lateinit var tom: LocalDate
     private lateinit var skjæringstidspunkt: LocalDate
     private lateinit var tilstand: Generasjon.Tilstand
-    private var låst by Delegates.notNull<Boolean>()
     private var utbetalingId: UUID? = null
     private val varsler = mutableListOf<Varsel>()
 
@@ -30,11 +28,10 @@ class GenerasjonBuilder(
             id = generasjonId,
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId,
-            låst = låst,
             skjæringstidspunkt = skjæringstidspunkt,
-            tilstand = tilstand,
             fom = fom,
             tom = tom,
+            tilstand = tilstand,
             varsler = varsler.toSet()
         ).also {
             it.registrer(generasjonRepository, varselRepository)
@@ -60,10 +57,6 @@ class GenerasjonBuilder(
 
     internal fun tilstand(tilstand: Generasjon.Tilstand) {
         this.tilstand = tilstand
-    }
-
-    internal fun låst(låst: Boolean) {
-        this.låst = låst
     }
 
     internal fun varsler(varsler: List<Varsel>) {
