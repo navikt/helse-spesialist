@@ -170,14 +170,14 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         generasjonId: UUID = UUID.randomUUID(),
         utbetalingId: UUID = UUID.randomUUID(),
-        låstTidspunkt: LocalDateTime? = null
+        tilstandEndretTidspunkt: LocalDateTime? = null
     ): Long = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
         @Language("PostgreSQL")
         val query = """
-            INSERT INTO selve_vedtaksperiode_generasjon(vedtaksperiode_id, unik_id, utbetaling_id, opprettet_av_hendelse, låst_tidspunkt, låst_av_hendelse, tilstand) 
+            INSERT INTO selve_vedtaksperiode_generasjon(vedtaksperiode_id, unik_id, utbetaling_id, opprettet_av_hendelse, tilstand_endret_tidspunkt, tilstand_endret_av_hendelse, tilstand) 
             VALUES (?, ?, ?, ?, ?, ?, 'Ulåst')
         """
-        return requireNotNull(session.run(queryOf(query, vedtaksperiodeId, generasjonId, utbetalingId, UUID.randomUUID(), låstTidspunkt, UUID.randomUUID()).asUpdateAndReturnGeneratedKey))
+        return requireNotNull(session.run(queryOf(query, vedtaksperiodeId, generasjonId, utbetalingId, UUID.randomUUID(), tilstandEndretTidspunkt, UUID.randomUUID()).asUpdateAndReturnGeneratedKey))
     }
 
     protected fun nyttVarsel(

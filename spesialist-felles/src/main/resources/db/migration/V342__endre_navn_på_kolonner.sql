@@ -1,0 +1,2 @@
+ALTER TABLE selve_vedtaksperiode_generasjon RENAME COLUMN låst_tidspunkt TO tilstand_endret_tidspunkt;
+ALTER TABLE selve_vedtaksperiode_generasjon RENAME COLUMN låst_av_hendelse TO tilstand_endret_av_hendelse;

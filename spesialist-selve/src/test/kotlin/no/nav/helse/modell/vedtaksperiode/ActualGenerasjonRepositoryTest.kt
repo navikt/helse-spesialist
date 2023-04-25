@@ -200,7 +200,7 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
     private fun assertLåstGenerasjon(generasjonId: UUID, hendelseId: UUID) {
         val generasjon = sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
-            val query = "SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = ? AND låst_av_hendelse = ?;"
+            val query = "SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = ? AND tilstand_endret_av_hendelse = ?;"
 
             session.run(queryOf(query, generasjonId, hendelseId).map {
                 it.long(1)

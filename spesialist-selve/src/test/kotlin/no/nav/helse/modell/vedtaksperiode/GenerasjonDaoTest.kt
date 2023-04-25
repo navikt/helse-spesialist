@@ -350,13 +350,13 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         assertEquals(forventetTilstand.navn(), tilstand)
     }
 
-    private fun assertIkkeLåst(vedtaksperiodeId: UUID, opprettetAvId: UUID, låstAvId: UUID) {
+    private fun assertIkkeLåst(vedtaksperiodeId: UUID, opprettetAv: UUID, tilstandEndretAv: UUID) {
         val låst = sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val query =
-                "SELECT låst FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ? AND opprettet_av_hendelse = ? AND låst_av_hendelse = ?;"
+                "SELECT låst FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ? AND opprettet_av_hendelse = ? AND tilstand_endret_av_hendelse = ?;"
 
-            session.run(queryOf(query, vedtaksperiodeId, opprettetAvId, låstAvId).map {
+            session.run(queryOf(query, vedtaksperiodeId, opprettetAv, tilstandEndretAv).map {
                 it.boolean("låst")
             }.asSingle)
         } ?: false
