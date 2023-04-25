@@ -1,7 +1,6 @@
 package no.nav.helse.mediator.meldinger
 
 import java.util.UUID
-import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.vedtaksperiode.Generasjon
@@ -59,16 +58,7 @@ internal class VedtakFattet(
     }
 
     override fun execute(context: CommandContext): Boolean {
-        try {
-            gjeldendeGenerasjon.håndterVedtakFattet(id)
-        } catch (e: IllegalStateException) {
-            sikkerlogg.info(
-                "Finner ikke noen generasjon for {}, forsøkt låst av {}",
-                keyValue("vedtaksperiodeId", vedtaksperiodeId),
-                keyValue("hendelseId", id),
-            )
-        }
-
+        gjeldendeGenerasjon.håndterVedtakFattet(id)
         return true
     }
 }

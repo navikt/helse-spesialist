@@ -75,12 +75,6 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
 
     override fun nyUtbetaling(generasjonId: UUID, utbetalingId: UUID) {
         dao.utbetalingFor(generasjonId = generasjonId, utbetalingId = utbetalingId)
-            ?.loggKnyttetUtbetaling(utbetalingId = utbetalingId)
-            ?: sikkerlogg.info(
-                "Finner ikke ulåst generasjon for {}. Forsøkt knyttet til utbetaling {}",
-                kv("generasjonId", generasjonId),
-                kv("utbetalingId", utbetalingId)
-            )
     }
 
     override fun utbetalingForkastet(generasjonId: UUID, utbetalingId: UUID) {
@@ -125,14 +119,6 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
                 "Oppretter neste generasjon {} for {}",
                 kv("generasjon", this),
                 kv("vedtaksperiodeId", vedtaksperiodeId),
-            )
-        }
-
-        private fun Generasjon.loggKnyttetUtbetaling(utbetalingId: UUID) {
-            sikkerlogg.info(
-                "Knyttet {} til utbetaling {}",
-                kv("generasjon", this),
-                kv("utbetalingId", utbetalingId)
             )
         }
 

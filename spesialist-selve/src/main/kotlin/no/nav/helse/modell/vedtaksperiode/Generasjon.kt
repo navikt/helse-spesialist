@@ -243,12 +243,6 @@ internal class Generasjon private constructor(
 
         override fun nyUtbetaling(generasjon: Generasjon, hendelseId: UUID, utbetalingId: UUID) {
             val nyGenerasjonId = UUID.randomUUID()
-            sikkerlogg.info(
-                "Kan ikke legge til ny utbetaling med {} for {}, da generasjonen er låst. Oppretter ny generasjon med {}",
-                keyValue("utbetalingId", utbetalingId),
-                keyValue("generasjon", generasjon),
-                keyValue("generasjonId", nyGenerasjonId)
-            )
             generasjon.nyGenerasjon(hendelseId, nyGenerasjonId).håndterNyUtbetaling(utbetalingId)
         }
     }
@@ -308,12 +302,6 @@ internal class Generasjon private constructor(
 
         override fun nyUtbetaling(generasjon: Generasjon, hendelseId: UUID, utbetalingId: UUID) {
             val nyGenerasjonId = UUID.randomUUID()
-            sikkerlogg.info(
-                "Kan ikke legge til ny utbetaling med {} for {}, da generasjonen er låst. Oppretter ny generasjon med {}",
-                keyValue("utbetalingId", utbetalingId),
-                keyValue("generasjon", generasjon),
-                keyValue("generasjonId", nyGenerasjonId)
-            )
             generasjon.nyGenerasjon(hendelseId, nyGenerasjonId).håndterNyUtbetaling(utbetalingId)
         }
 
@@ -354,12 +342,6 @@ internal class Generasjon private constructor(
 
         override fun nyUtbetaling(generasjon: Generasjon, hendelseId: UUID, utbetalingId: UUID) {
             val nyGenerasjonId = UUID.randomUUID()
-            sikkerlogg.info(
-                "Kan ikke legge til ny utbetaling med {} for {}, da generasjonen er låst. Oppretter ny generasjon med {}",
-                keyValue("utbetalingId", utbetalingId),
-                keyValue("generasjon", generasjon),
-                keyValue("generasjonId", nyGenerasjonId)
-            )
             generasjon.nyTilstand(this, AvsluttetUtenUtbetaling, hendelseId)
             generasjon.nyGenerasjon(hendelseId, nyGenerasjonId).håndterNyUtbetaling(utbetalingId)
         }
