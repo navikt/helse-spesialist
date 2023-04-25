@@ -148,12 +148,12 @@ internal class RisikoCommandTest {
         organisasjonsnummer: String = ORGNUMMER,
         førstegangsbehandling: Boolean = true
     ) = RisikoCommand(
+        hendelseId = UUID.randomUUID(),
         vedtaksperiodeId = vedtaksperiodeId,
         risikovurderingDao = risikovurderingDao,
         warningDao = warningDao,
         organisasjonsnummer = organisasjonsnummer,
         førstegangsbehandling = førstegangsbehandling,
         sykefraværstilfelle = sykefraværstilfelle,
-        utbetalingsfinner = { utbetalingMock },
-    )
+    ) { utbetalingMock }
 }

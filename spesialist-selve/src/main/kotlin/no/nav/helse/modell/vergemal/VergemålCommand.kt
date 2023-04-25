@@ -14,10 +14,11 @@ import no.nav.helse.tellWarning
 import org.slf4j.LoggerFactory
 
 internal class VergemålCommand(
+    private val hendelseId: UUID,
     private val vergemålDao: VergemålDao,
     private val warningDao: WarningDao,
     private val vedtaksperiodeId: UUID,
-    private val sykefraværstilfelle: Sykefraværstilfelle
+    private val sykefraværstilfelle: Sykefraværstilfelle,
 ) : Command {
 
     override fun execute(context: CommandContext) = behandle(context)
@@ -41,7 +42,7 @@ internal class VergemålCommand(
         }
         if (løsning.harFullmakt()) {
             "Registert fullmakt på personen.".leggTilSomWarning()
-            sykefraværstilfelle.håndter(SB_IK_1.nyttVarsel(vedtaksperiodeId))
+            sykefraværstilfelle.håndter(SB_IK_1.nyttVarsel(vedtaksperiodeId), hendelseId)
         }
 
         return true

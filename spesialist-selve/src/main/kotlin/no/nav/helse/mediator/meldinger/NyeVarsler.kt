@@ -33,7 +33,7 @@ internal class NyeVarsler(
     override fun fødselsnummer(): String = fødselsnummer
     override fun toJson(): String = json
     override fun execute(context: CommandContext): Boolean {
-        generasjoner.håndter(varsler)
+        generasjoner.håndter(varsler, id)
         sikkerlogg.info("Lagrer ${varsler.size} varsler for {}", keyValue("fødselsnummer", fødselsnummer))
         return true
     }

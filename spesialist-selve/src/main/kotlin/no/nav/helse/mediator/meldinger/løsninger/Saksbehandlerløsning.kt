@@ -48,6 +48,7 @@ internal class Saksbehandlerløsning(
 
     override val commands = listOf(
         UtbetalingsgodkjenningCommand(
+            hendelseId = id,
             godkjent = godkjent,
             saksbehandlerIdent = saksbehandlerIdent,
             epostadresse = epostadresse,

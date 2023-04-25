@@ -49,7 +49,7 @@ internal class ÅpneGosysOppgaverCommandTest {
     private val sykefraværstilfelle = Sykefraværstilfelle(FNR, 1.januar, listOf(generasjon))
     private val dao = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
     private val warningDao = mockk<WarningDao>(relaxed = true)
-    private val command = ÅpneGosysOppgaverCommand(AKTØR_ID, dao, warningDao, VEDTAKPERIODE_ID, sykefraværstilfelle)
+    private val command = ÅpneGosysOppgaverCommand(UUID.randomUUID(), AKTØR_ID, dao, warningDao, VEDTAKPERIODE_ID, sykefraværstilfelle)
     private lateinit var context: CommandContext
 
     @BeforeEach

@@ -40,6 +40,7 @@ internal class UtbetalingsgodkjenningCommandTest {
         clearMocks(hendelseDao)
         commandContext = CommandContext(UUID.randomUUID())
         command = UtbetalingsgodkjenningCommand(
+            hendelseId = UUID.randomUUID(),
             godkjent = GODKJENT,
             saksbehandlerIdent = IDENT,
             epostadresse = EPOST,

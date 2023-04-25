@@ -41,21 +41,23 @@ internal class ÅpneGosysOppgaverløsning(
     internal fun evaluer(
         warningDao: WarningDao,
         vedtaksperiodeId: UUID,
-        sykefraværstilfelle: Sykefraværstilfelle
+        sykefraværstilfelle: Sykefraværstilfelle,
+        hendelseId: UUID
     ) {
-        warningsForOppslagFeilet(warningDao, vedtaksperiodeId, sykefraværstilfelle)
-        warningsForÅpneGosysOppgaver(warningDao, vedtaksperiodeId, sykefraværstilfelle)
+        warningsForOppslagFeilet(warningDao, vedtaksperiodeId, sykefraværstilfelle, hendelseId)
+        warningsForÅpneGosysOppgaver(warningDao, vedtaksperiodeId, sykefraværstilfelle, hendelseId)
     }
 
     private fun warningsForOppslagFeilet(
         warningDao: WarningDao,
         vedtaksperiodeId: UUID,
-        sykefraværstilfelle: Sykefraværstilfelle
+        sykefraværstilfelle: Sykefraværstilfelle,
+        hendelseId: UUID
     ) {
         val melding = "Kunne ikke sjekke åpne oppgaver på sykepenger i Gosys"
 
         if (oppslagFeilet) {
-            sykefraværstilfelle.håndter(SB_EX_3.nyttVarsel(vedtaksperiodeId))
+            sykefraværstilfelle.håndter(SB_EX_3.nyttVarsel(vedtaksperiodeId), hendelseId)
             leggTilWarning(warningDao, vedtaksperiodeId, melding)
         } else {
             setEksisterendeWarningInaktive(warningDao, vedtaksperiodeId, melding)
@@ -66,7 +68,8 @@ internal class ÅpneGosysOppgaverløsning(
     private fun warningsForÅpneGosysOppgaver(
         warningDao: WarningDao,
         vedtaksperiodeId: UUID,
-        sykefraværstilfelle: Sykefraværstilfelle
+        sykefraværstilfelle: Sykefraværstilfelle,
+        hendelseId: UUID
     ) {
         if (antall == null) return
         val melding = "Det finnes åpne oppgaver på sykepenger i Gosys"
@@ -74,7 +77,7 @@ internal class ÅpneGosysOppgaverløsning(
         val harAlleredeVarsel = warningDao.finnAktiveWarningsMedMelding(vedtaksperiodeId, melding).isNotEmpty()
         when {
             antall > 0 && !harAlleredeVarsel-> {
-                sykefraværstilfelle.håndter(SB_EX_1.nyttVarsel(vedtaksperiodeId))
+                sykefraværstilfelle.håndter(SB_EX_1.nyttVarsel(vedtaksperiodeId), hendelseId)
                 leggTilWarning(warningDao, vedtaksperiodeId, melding)
             }
             antall == 0 && harAlleredeVarsel -> {

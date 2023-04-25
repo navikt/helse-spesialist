@@ -146,12 +146,14 @@ internal class Godkjenningsbehov(
             egenAnsattDao = egenAnsattDao,
         ),
         VergemålCommand(
+            hendelseId = id,
             vergemålDao = vergemålDao,
             warningDao = warningDao,
             vedtaksperiodeId = vedtaksperiodeId,
             sykefraværstilfelle = sykefraværstilfelle
         ),
         ÅpneGosysOppgaverCommand(
+            hendelseId = id,
             aktørId = aktørId,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
             warningDao = warningDao,
@@ -159,6 +161,7 @@ internal class Godkjenningsbehov(
             sykefraværstilfelle = sykefraværstilfelle
         ),
         RisikoCommand(
+            hendelseId = id,
             vedtaksperiodeId = vedtaksperiodeId,
             risikovurderingDao = risikovurderingDao,
             warningDao = warningDao,

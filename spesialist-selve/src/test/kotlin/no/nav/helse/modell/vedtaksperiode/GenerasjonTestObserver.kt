@@ -69,7 +69,8 @@ internal class GenerasjonTestObserver: IVedtaksperiodeObserver {
         generasjonId: UUID,
         vedtaksperiodeId: UUID,
         gammel: Generasjon.Tilstand,
-        ny: Generasjon.Tilstand
+        ny: Generasjon.Tilstand,
+        hendelseId: UUID
     ) {
         tilstandsendringer.getOrPut(generasjonId) { mutableListOf() }.add(gammel to ny)
     }

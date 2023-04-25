@@ -52,6 +52,7 @@ internal class GosysOppgaveEndret(
 
     override val commands: List<Command> = listOf(
         ÅpneGosysOppgaverCommand(
+            hendelseId = id,
             aktørId = aktørId,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
             warningDao = warningDao,

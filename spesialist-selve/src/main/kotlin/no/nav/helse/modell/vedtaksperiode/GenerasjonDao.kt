@@ -250,12 +250,25 @@ class GenerasjonDao(private val dataSource: DataSource) {
         }
     }
 
-    internal fun oppdaterTilstandFor(generasjonId: UUID, ny: Generasjon.Tilstand) {
+    internal fun oppdaterTilstandFor(generasjonId: UUID, ny: Generasjon.Tilstand, endretAv: UUID) {
         @Language("PostgreSQL")
-        val query =
-            "UPDATE selve_vedtaksperiode_generasjon SET tilstand = :tilstand WHERE unik_id = :generasjon_id"
+        val query = """
+                UPDATE selve_vedtaksperiode_generasjon 
+                SET tilstand = :tilstand, tilstand_endret_tidspunkt = :endret_tidspunkt, tilstand_endret_av_hendelse = :endret_av_hendelse 
+                WHERE unik_id = :generasjon_id
+            """
         sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, mapOf("tilstand" to ny.navn(), "generasjon_id" to generasjonId)).asUpdate)
+            session.run(
+                queryOf(
+                    query,
+                    mapOf(
+                        "tilstand" to ny.navn(),
+                        "endret_tidspunkt" to LocalDateTime.now(),
+                        "endret_av_hendelse" to endretAv,
+                        "generasjon_id" to generasjonId
+                    )
+                ).asUpdate
+            )
         }
     }
 }

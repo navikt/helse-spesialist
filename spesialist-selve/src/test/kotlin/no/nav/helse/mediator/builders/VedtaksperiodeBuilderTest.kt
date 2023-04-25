@@ -40,7 +40,7 @@ class VedtaksperiodeBuilderTest : AbstractDatabaseTest() {
         val builder = GenerasjonBuilder(vedtaksperiodeId)
         val vedtaksperiode = builder.build(generasjonRepository, varselRepository)
         val forventetVedtaksperiode = Generasjon(generasjonId, vedtaksperiodeId, 1.januar, 31.januar, 1.januar).also {
-            it.håndter(Varsel(varselId, "SB_EX_1", opprettet, vedtaksperiodeId))
+            it.håndter(Varsel(varselId, "SB_EX_1", opprettet, vedtaksperiodeId), UUID.randomUUID())
         }
         assertEquals(
             forventetVedtaksperiode,
@@ -86,7 +86,10 @@ class VedtaksperiodeBuilderTest : AbstractDatabaseTest() {
         )
         val builder = GenerasjonBuilder(vedtaksperiodeId)
         val generasjon = builder.build(generasjonRepository, varselRepository)
-        listOf(generasjon).håndter(listOf(Varsel(varselId, "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId)))
+        listOf(generasjon).håndter(
+            listOf(Varsel(varselId, "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId)),
+            UUID.randomUUID()
+        )
         assertVarsel(generasjonId, "SB_EX_1", vedtaksperiodeId, varselId)
     }
 

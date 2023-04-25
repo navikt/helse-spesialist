@@ -34,8 +34,8 @@ internal class Generasjon private constructor(
     private val varsler: MutableList<Varsel> = varsler.toMutableList()
     private val observers = mutableSetOf<IVedtaksperiodeObserver>()
 
-    private fun nyTilstand(gammel: Tilstand, ny: Tilstand) {
-        observers.forEach { it.tilstandEndret(id, vedtaksperiodeId, gammel, ny) }
+    private fun nyTilstand(gammel: Tilstand, ny: Tilstand, hendelseId: UUID) {
+        observers.forEach { it.tilstandEndret(id, vedtaksperiodeId, gammel, ny, hendelseId) }
         this.tilstand = ny
     }
 
@@ -124,9 +124,9 @@ internal class Generasjon private constructor(
         funnetVarsel.deaktiver(id)
     }
 
-    internal fun håndterGodkjentAvSaksbehandler(ident: String) {
+    internal fun håndterGodkjentAvSaksbehandler(ident: String, hendelseId: UUID) {
         varsler.godkjennAlleFor(id, ident)
-        tilstand.håndterGodkjenning(this, ident)
+        tilstand.håndterGodkjenning(this, ident, hendelseId)
     }
 
     internal fun håndterAvvistAvSaksbehandler(ident: String) {
@@ -143,18 +143,18 @@ internal class Generasjon private constructor(
         }
     }
 
-    internal fun håndter(varsel: Varsel) {
+    internal fun håndter(varsel: Varsel, hendelseId: UUID) {
         if (!varsel.erRelevantFor(vedtaksperiodeId)) return
-        val eksisterendeVarsel = varsler.finnEksisterendeVarsel(varsel) ?: return nyttVarsel(varsel)
+        val eksisterendeVarsel = varsler.finnEksisterendeVarsel(varsel) ?: return nyttVarsel(varsel, hendelseId)
         if (eksisterendeVarsel.erAktiv()) return
         eksisterendeVarsel.reaktiver(id)
     }
 
-    private fun nyttVarsel(varsel: Varsel) {
+    private fun nyttVarsel(varsel: Varsel, hendelseId: UUID) {
         varsel.registrer(*this.observers.toTypedArray())
         varsler.add(varsel)
         varsel.opprett(id)
-        tilstand.nyttVarsel(this, varsel)
+        tilstand.nyttVarsel(this, varsel, hendelseId)
     }
 
     override fun toString(): String = "generasjonId=$id, vedtaksperiodeId=$vedtaksperiodeId, utbetalingId=$utbetalingId, låst=$låst, skjæringstidspunkt=$skjæringstidspunkt, periode=$periode"
@@ -216,8 +216,8 @@ internal class Generasjon private constructor(
             )
         }
 
-        fun nyttVarsel(generasjon: Generasjon, varsel: Varsel) {}
-        fun håndterGodkjenning(generasjon: Generasjon, ident: String) {}
+        fun nyttVarsel(generasjon: Generasjon, varsel: Varsel, hendelseId: UUID) {}
+        fun håndterGodkjenning(generasjon: Generasjon, ident: String, hendelseId: UUID) {}
     }
 
     internal object Låst: Tilstand {
@@ -263,8 +263,8 @@ internal class Generasjon private constructor(
             generasjon.låst = true
             generasjon.observers.forEach { it.vedtakFattet(generasjon.id, hendelseId) }
             if (generasjon.utbetalingId == null)
-                return generasjon.nyTilstand(this, AvsluttetUtenUtbetaling)
-            generasjon.nyTilstand(this, Låst)
+                return generasjon.nyTilstand(this, AvsluttetUtenUtbetaling, hendelseId)
+            generasjon.nyTilstand(this, Låst, hendelseId)
         }
 
         override fun tidslinjeendring(
@@ -322,16 +322,16 @@ internal class Generasjon private constructor(
             generasjon.nyGenerasjon(hendelseId, nyGenerasjonId).håndterNyUtbetaling(utbetalingId)
         }
 
-        override fun nyttVarsel(generasjon: Generasjon, varsel: Varsel) {
-            generasjon.nyTilstand(this, UtenUtbetalingMåVurderes)
+        override fun nyttVarsel(generasjon: Generasjon, varsel: Varsel, hendelseId: UUID) {
+            generasjon.nyTilstand(this, UtenUtbetalingMåVurderes, hendelseId)
         }
     }
 
     internal object UtenUtbetalingMåVurderes: Tilstand {
         override fun navn(): String = "UtenUtbetalingMåVurderes"
 
-        override fun håndterGodkjenning(generasjon: Generasjon, ident: String) {
-            generasjon.nyTilstand(this, AvsluttetUtenUtbetaling)
+        override fun håndterGodkjenning(generasjon: Generasjon, ident: String, hendelseId: UUID) {
+            generasjon.nyTilstand(this, AvsluttetUtenUtbetaling, hendelseId)
         }
 
         override fun vedtaksperiodeEndret(
@@ -342,7 +342,7 @@ internal class Generasjon private constructor(
             tom: LocalDate,
             skjæringstidspunkt: LocalDate
         ): Generasjon {
-            generasjon.nyTilstand(this, AvsluttetUtenUtbetaling)
+            generasjon.nyTilstand(this, AvsluttetUtenUtbetaling, hendelseId)
             return generasjon.nyGenerasjon(hendelseId, id, fom, tom, skjæringstidspunkt)
         }
 
@@ -353,7 +353,7 @@ internal class Generasjon private constructor(
             skjæringstidspunkt: LocalDate,
             hendelseId: UUID
         ) {
-            generasjon.nyTilstand(this, AvsluttetUtenUtbetaling)
+            generasjon.nyTilstand(this, AvsluttetUtenUtbetaling, hendelseId)
             generasjon.nyGenerasjon(hendelseId = hendelseId, fom = fom, tom = tom, skjæringstidspunkt = skjæringstidspunkt)
         }
 
@@ -365,7 +365,7 @@ internal class Generasjon private constructor(
                 keyValue("generasjon", generasjon),
                 keyValue("generasjonId", nyGenerasjonId)
             )
-            generasjon.nyTilstand(this, AvsluttetUtenUtbetaling)
+            generasjon.nyTilstand(this, AvsluttetUtenUtbetaling, hendelseId)
             generasjon.nyGenerasjon(hendelseId, nyGenerasjonId).håndterNyUtbetaling(utbetalingId)
         }
     }
@@ -434,9 +434,9 @@ internal class Generasjon private constructor(
             }
         }
 
-        internal fun List<Generasjon>.håndter(varsler: List<Varsel>) {
+        internal fun List<Generasjon>.håndter(varsler: List<Varsel>, hendelseId: UUID) {
             forEach { generasjon ->
-                varsler.forEach { generasjon.håndter(it) }
+                varsler.forEach { generasjon.håndter(it, hendelseId) }
             }
         }
 
@@ -452,9 +452,13 @@ internal class Generasjon private constructor(
             find { varsel.erRelevantFor(it.vedtaksperiodeId) }?.håndterDeaktivertVarsel(varsel)
         }
 
-        internal fun List<Generasjon>.håndterGodkjent(saksbehandlerIdent: String, vedtaksperiodeId: UUID) {
+        internal fun List<Generasjon>.håndterGodkjent(
+            saksbehandlerIdent: String,
+            vedtaksperiodeId: UUID,
+            hendelseId: UUID
+        ) {
             overlapperMedEllerTidligereEnn(vedtaksperiodeId).forEach {
-                it.håndterGodkjentAvSaksbehandler(saksbehandlerIdent)
+                it.håndterGodkjentAvSaksbehandler(saksbehandlerIdent, hendelseId)
             }
         }
 

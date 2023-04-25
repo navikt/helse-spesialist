@@ -105,9 +105,10 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
         generasjonId: UUID,
         vedtaksperiodeId: UUID,
         gammel: Generasjon.Tilstand,
-        ny: Generasjon.Tilstand
+        ny: Generasjon.Tilstand,
+        hendelseId: UUID
     ) {
-        dao.oppdaterTilstandFor(generasjonId, ny)
+        dao.oppdaterTilstandFor(generasjonId, ny, hendelseId)
     }
 
     private fun fjernUtbetalingFor(generasjonId: UUID) {

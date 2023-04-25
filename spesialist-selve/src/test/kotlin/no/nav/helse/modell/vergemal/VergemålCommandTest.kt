@@ -41,10 +41,11 @@ class VergemålCommandTest {
     private val sykefraværstilfelle = Sykefraværstilfelle(FNR, 1.januar, listOf(generasjon))
 
     private val command = VergemålCommand(
+        hendelseId = UUID.randomUUID(),
         vergemålDao = vergemålDao,
         warningDao = warningMock.warningDao,
         vedtaksperiodeId = VEDTAKSPERIODE_ID,
-        sykefraværstilfelle = sykefraværstilfelle
+        sykefraværstilfelle = sykefraværstilfelle,
     )
     private lateinit var context: CommandContext
 

@@ -21,16 +21,16 @@ internal class Sykefraværstilfelle(
         return gjeldendeGenerasjoner.forhindrerAutomatisering(tilOgMed)
     }
 
-    internal fun håndter(varsel: Varsel) {
-        gjeldendeGenerasjoner.håndter(listOf(varsel))
+    internal fun håndter(varsel: Varsel, hendelseId: UUID) {
+        gjeldendeGenerasjoner.håndter(listOf(varsel), hendelseId)
     }
 
     internal fun deaktiver(varsel: Varsel) {
         gjeldendeGenerasjoner.deaktiver(varsel)
     }
 
-    internal fun håndterGodkjent(saksbehandlerIdent: String, vedtaksperiodeId: UUID) {
-        gjeldendeGenerasjoner.håndterGodkjent(saksbehandlerIdent, vedtaksperiodeId)
+    internal fun håndterGodkjent(saksbehandlerIdent: String, vedtaksperiodeId: UUID, hendelseId: UUID) {
+        gjeldendeGenerasjoner.håndterGodkjent(saksbehandlerIdent, vedtaksperiodeId, hendelseId)
     }
 
     internal fun håndterAvvist(saksbehandlerIdent: String, vedtaksperiodeId: UUID) {

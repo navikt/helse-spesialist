@@ -9,6 +9,7 @@ import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import org.slf4j.LoggerFactory
 
 internal class ÅpneGosysOppgaverCommand(
+    val hendelseId: UUID,
     private val aktørId: String,
     private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     private val warningDao: WarningDao,
@@ -32,7 +33,7 @@ internal class ÅpneGosysOppgaverCommand(
             return false
         }
         løsning.lagre(åpneGosysOppgaverDao)
-        løsning.evaluer(warningDao, vedtaksperiodeId, sykefraværstilfelle)
+        løsning.evaluer(warningDao, vedtaksperiodeId, sykefraværstilfelle, hendelseId)
         return true
     }
 }

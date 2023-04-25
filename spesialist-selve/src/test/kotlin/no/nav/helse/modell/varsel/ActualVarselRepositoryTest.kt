@@ -71,7 +71,7 @@ internal class ActualVarselRepositoryTest : AbstractDatabaseTest() {
 
     @Test
     fun `avvisning av varsel med definisjonId medfører at varselet lagres med referanse til denne definisjonen`() {
-        generasjon.håndter(Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), vedtaksperiodeId))
+        generasjon.håndter(Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
         generasjon.håndterAvvistAvSaksbehandler("EN_KODE")
         assertEquals(AVVIST, statusFor(generasjonId, "EN_KODE"))
         assertDefinisjonFor(vedtaksperiodeId, "EN_KODE", definisjonId)
@@ -122,14 +122,14 @@ internal class ActualVarselRepositoryTest : AbstractDatabaseTest() {
 
     @Test
     fun `oppdatering av varsel for én generasjon endrer ikke varsel for en annen generasjon på samme periode`() {
-        generasjon.håndter(Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), vedtaksperiodeId))
+        generasjon.håndter(Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
         generasjon.håndterNyUtbetaling(UUID.randomUUID(), UUID.randomUUID())
-        generasjon.håndterGodkjentAvSaksbehandler("EN_IDENT")
+        generasjon.håndterGodkjentAvSaksbehandler("EN_IDENT", UUID.randomUUID())
         generasjon.håndterVedtakFattet(UUID.randomUUID())
         val nesteGenerasjonId = UUID.randomUUID()
         val nesteGenerasjon = generasjon.håndterVedtaksperiodeEndret(UUID.randomUUID(), nesteGenerasjonId)
         val varsel = Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), vedtaksperiodeId)
-        nesteGenerasjon?.håndter(varsel)
+        nesteGenerasjon?.håndter(varsel, UUID.randomUUID())
         nesteGenerasjon?.håndterDeaktivertVarsel(varsel)
         assertGodkjent(generasjonId, "EN_KODE")
         assertInaktiv(nesteGenerasjonId, "EN_KODE")

@@ -16,6 +16,7 @@ import no.nav.helse.tellWarning
 import org.slf4j.LoggerFactory
 
 internal class RisikoCommand(
+    private val hendelseId: UUID,
     private val vedtaksperiodeId: UUID,
     private val risikovurderingDao: RisikovurderingDao,
     private val warningDao: WarningDao,
@@ -65,7 +66,7 @@ internal class RisikoCommand(
                 )
             )
             tellWarning(melding)
-            sykefraværstilfelle.håndter(varselkode().nyttVarsel(vedtaksperiodeId))
+            sykefraværstilfelle.håndter(varselkode().nyttVarsel(vedtaksperiodeId), hendelseId)
         }
         if (harFaresignalerFunn()) {
             val melding = "Faresignaler oppdaget. Kontroller om faresignalene påvirker retten til sykepenger."
@@ -76,7 +77,7 @@ internal class RisikoCommand(
                     opprettet = LocalDateTime.now(),
                 )
             )
-            sykefraværstilfelle.håndter(SB_RV_1.nyttVarsel(vedtaksperiodeId))
+            sykefraværstilfelle.håndter(SB_RV_1.nyttVarsel(vedtaksperiodeId), hendelseId)
             tellWarning(melding)
         }
     }
