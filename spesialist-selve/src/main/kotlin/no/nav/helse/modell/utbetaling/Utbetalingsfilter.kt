@@ -2,7 +2,6 @@ package no.nav.helse.modell.utbetaling
 
 import no.nav.helse.modell.utbetaling.Utbetalingtype.REVURDERING
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
-import no.nav.helse.modell.vedtaksperiode.Inntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
@@ -26,11 +25,7 @@ internal class Utbetalingsfilter(
             sikkerLogg.info("Beholdes da det er en revurdering, fnr=$fødselsnummer")
             return true
         }
-        if (fødselsnummer.length != 11 || !(15 .. 31).contains(fødselsnummer.take(2).toInt())) nyÅrsak(
-            "Velges ikke ut som 'to om dagen'"
-        ) // Kvoteregulering
         if (periodetype !in tillatePeriodetyper) nyÅrsak("Perioden er ikke førstegangsbehandling eller forlengelse")
-        if (inntektskilde != EN_ARBEIDSGIVER) nyÅrsak("Inntektskilden er ikke for en arbeidsgiver")
         if (årsaker.isNotEmpty() && harVedtaksperiodePågåendeOverstyring) {
             sikkerLogg.info("Beholdes hos oss da det er en pågående overstyring. Årsaker registrert: ${årsaker.joinToString()}")
             return true

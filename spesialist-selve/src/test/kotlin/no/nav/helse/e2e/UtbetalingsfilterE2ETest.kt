@@ -13,23 +13,6 @@ import org.junit.jupiter.api.Test
 internal class UtbetalingsfilterE2ETest : AbstractE2ETestV2() {
 
     @Test
-    fun `fødselsnummer passer ikke`() {
-        behandleGodkjenningsbehov(
-            fødselsnummer = FØDSELSNUMMER_SOM_IKKE_GÅR_GJENNOM_FILTER,
-            periodeFom = 1.januar,
-            periodeTom = 3.januar,
-            periodetype = Periodetype.FORLENGELSE,
-            mottaker = SYKMELDT,
-        )
-        assertVedtaksperiodeEksisterer(vedtaksperiodeId)
-        assertGodkjenningsbehovBesvart(godkjent = false, automatiskBehandlet = true)
-        assertVedtaksperiodeAvvist(
-            Periodetype.FORLENGELSE.name,
-            listOf("Brukerutbetalingsfilter: Velges ikke ut som 'to om dagen'")
-        )
-    }
-
-    @Test
     fun `Går gjennom begge filtreringer`() {
         behandleGodkjenningsbehov(
             fødselsnummer = FØDSELSNUMMER_SOM_GÅR_GJENNOM_FILTER,

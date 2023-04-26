@@ -90,7 +90,7 @@ internal class UtbetalingsfilterTest {
     }
 
     @Test
-    fun `ingen refusjon & feil periodetype kan ikke utbetales`() {
+    fun `ingen refusjon & periodetype INFOTRYGDFORLENGELSE kan ikke utbetales`() {
         assertKanIkkeUtbetales(
             utbetalingsfilter(periodetype = INFOTRYGDFORLENGELSE),
             listOf("Brukerutbetalingsfilter: Perioden er ikke førstegangsbehandling eller forlengelse")
@@ -98,47 +98,16 @@ internal class UtbetalingsfilterTest {
     }
 
     @Test
+    fun `ingen refusjon & periodetype OVERGANG_FRA_IT kan ikke utbetales`() {
+        assertKanIkkeUtbetales(
+            utbetalingsfilter(periodetype = OVERGANG_FRA_IT),
+            listOf("Brukerutbetalingsfilter: Perioden er ikke førstegangsbehandling eller forlengelse")
+        )
+    }
+
+    @Test
     fun `ingen refusjon & spleis forlengelse kan utbetales`() {
         assertKanUtbetales(utbetalingsfilter(periodetype = FORLENGELSE))
-    }
-    @Test
-    fun `fødselsdato på dag 1 til 14 i måneden kan ikke utbetales`() {
-        (1 .. 14).forEach { dag ->
-            val fnr = ("0" + dag + "1".repeat(9)).takeLast(11)
-            assertKanIkkeUtbetales(
-                utbetalingsfilter(fødselsnummer = fnr),
-                listOf("Brukerutbetalingsfilter: Velges ikke ut som 'to om dagen'")
-            )
-        }
-    }
-
-    @Test
-    fun `d-nummer kan ikke utbetales`() {
-        (41 .. 71).forEach { dag ->
-            val fnr = dag.toString() + "1".repeat(9)
-            assertKanIkkeUtbetales(
-                utbetalingsfilter(fødselsnummer = fnr),
-                listOf("Brukerutbetalingsfilter: Velges ikke ut som 'to om dagen'")
-            )
-        }
-    }
-
-    @Test
-    fun `fødselsdato på dag 15 til 31 i måneden kan utbetales`() {
-        (15 .. 31).forEach { dag ->
-            val fnr = dag.toString() + "1".repeat(9)
-            assertKanUtbetales(
-                utbetalingsfilter(fødselsnummer = fnr)
-            )
-        }
-    }
-
-    @Test
-    fun `ingen refusjon & inntektskilde fra flere arbeidsgivere kan ikke utbetales`() {
-        assertKanIkkeUtbetales(
-            utbetalingsfilter(inntektskilde = FLERE_ARBEIDSGIVERE),
-            listOf("Brukerutbetalingsfilter: Inntektskilden er ikke for en arbeidsgiver")
-        )
     }
 
     @Test
@@ -152,25 +121,6 @@ internal class UtbetalingsfilterTest {
             utbetalingsfilter(
                 fødselsnummer = "10111111111",
                 utbetalingstype = REVURDERING
-            )
-        )
-    }
-
-    @Test
-    fun `passerer ingen av kriteriene i filteret`() {
-        assertKanIkkeUtbetales(
-            Utbetalingsfilter(
-                fødselsnummer = "14111111111",
-                erUtbetaltFør = false,
-                harUtbetalingTilSykmeldt = true,
-                periodetype = OVERGANG_FRA_IT,
-                inntektskilde = FLERE_ARBEIDSGIVERE,
-                utbetalingtype = UTBETALING,
-                harVedtaksperiodePågåendeOverstyring = false,
-            ), listOf(
-                "Brukerutbetalingsfilter: Velges ikke ut som 'to om dagen'",
-                "Brukerutbetalingsfilter: Perioden er ikke førstegangsbehandling eller forlengelse",
-                "Brukerutbetalingsfilter: Inntektskilden er ikke for en arbeidsgiver",
             )
         )
     }
