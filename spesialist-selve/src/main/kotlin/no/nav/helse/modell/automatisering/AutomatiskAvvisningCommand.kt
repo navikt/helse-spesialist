@@ -10,7 +10,6 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.utbetaling.Utbetaling
-import no.nav.helse.modell.utbetaling.Utbetalingsfilter
 import no.nav.helse.modell.vergemal.VergemålDao
 import org.slf4j.LoggerFactory
 
@@ -23,7 +22,6 @@ internal class AutomatiskAvvisningCommand(
     private val godkjenningsbehovJson: String,
     private val godkjenningMediator: GodkjenningMediator,
     private val hendelseId: UUID,
-    private val utbetalingsfilter: () -> Utbetalingsfilter,
     private val utbetaling: Utbetaling?
 ) : Command {
 
@@ -31,15 +29,13 @@ internal class AutomatiskAvvisningCommand(
         val erEgenAnsatt = egenAnsattDao.erEgenAnsatt(fødselsnummer) ?: false
         val tilhørerEnhetUtland = HentEnhetløsning.erEnhetUtland(personDao.finnEnhetId(fødselsnummer))
         val underVergemål = vergemålDao.harVergemål(fødselsnummer) ?: false
-        val utbetalingsfilter = utbetalingsfilter()
 
-        if (!erEgenAnsatt && !tilhørerEnhetUtland && !underVergemål && utbetalingsfilter.kanUtbetales) return true
+        if (!erEgenAnsatt && !tilhørerEnhetUtland && !underVergemål) return true
 
         val årsaker = mutableListOf<String>()
         if (erEgenAnsatt) årsaker.add("Egen ansatt")
         if (tilhørerEnhetUtland) årsaker.add("Utland")
         if (underVergemål) årsaker.add("Vergemål")
-        if (utbetalingsfilter.kanIkkeUtbetales) årsaker.addAll(utbetalingsfilter.årsaker())
 
         val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson, utbetaling)
         godkjenningMediator.automatiskAvvisning(context, behov, vedtaksperiodeId, fødselsnummer, årsaker.toList(), hendelseId)

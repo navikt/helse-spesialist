@@ -39,11 +39,8 @@ import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.modell.utbetaling.UtbetalingDao
-import no.nav.helse.modell.utbetaling.Utbetalingsfilter
-import no.nav.helse.modell.utbetaling.UtbetalingsfilterCommand
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.utbetaling.Utbetalingtype.Companion.values
-import no.nav.helse.modell.utbetalingTilSykmeldt
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålCommand
@@ -103,19 +100,6 @@ internal class Godkjenningsbehov(
     private val utbetalingsfinner = { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) }
     private val utbetaling = utbetalingDao.hentUtbetaling(utbetalingId)
 
-    private val utbetalingsfilter: () -> Utbetalingsfilter = {
-        val utbetaling = utbetalingsfinner()
-        Utbetalingsfilter(
-            fødselsnummer = fødselsnummer,
-            erUtbetaltFør = utbetalingDao.erUtbetaltFør(aktørId),
-            harUtbetalingTilSykmeldt = utbetaling.utbetalingTilSykmeldt(),
-            periodetype = periodetype,
-            inntektskilde = inntektskilde,
-            utbetalingtype = utbetalingtype,
-            harVedtaksperiodePågåendeOverstyring = overstyringDao.harVedtaksperiodePågåendeOverstyring(vedtaksperiodeId)
-        )
-    }
-
     override val commands: List<Command> = listOf(
         OpprettKoblingTilHendelseCommand(
             hendelseId = id,
@@ -158,15 +142,6 @@ internal class Godkjenningsbehov(
             utbetalingId = utbetalingId,
             utbetalingDao = utbetalingDao,
         ),
-        UtbetalingsfilterCommand(
-            vedtaksperiodeId = vedtaksperiodeId,
-            fødselsnummer = fødselsnummer,
-            hendelseId = id,
-            godkjenningsbehovJson = json,
-            godkjenningMediator = godkjenningMediator,
-            utbetalingsfilter = utbetalingsfilter,
-            utbetaling = utbetaling
-        ),
         EgenAnsattCommand(
             egenAnsattDao = egenAnsattDao,
         ),
@@ -201,7 +176,6 @@ internal class Godkjenningsbehov(
             godkjenningsbehovJson = json,
             godkjenningMediator = godkjenningMediator,
             hendelseId = id,
-            utbetalingsfilter = utbetalingsfilter,
             utbetaling = utbetaling
         ),
         AutomatiseringCommand(
