@@ -148,6 +148,7 @@ fun main() = runBlocking {
             riskGruppeId = UUID.randomUUID(),
             snapshotMediator = SnapshotMediator(snapshotApiDao, mockk(relaxed = true)),
             behandlingsstatistikkMediator = behandlingsstatistikkMediator,
+            saksbehandlereMedTilgangTilStikkprøve = listOf("EN_IDENT")
         )
     }
 }

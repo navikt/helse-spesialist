@@ -10,6 +10,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.HelseDao
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
+import no.nav.helse.spesialist.api.Toggle
 import no.nav.helse.spesialist.api.graphql.schema.Boenhet
 import no.nav.helse.spesialist.api.graphql.schema.DateString
 import no.nav.helse.spesialist.api.graphql.schema.InntektFraAOrdningen
@@ -82,7 +83,11 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         }
     }
 
-    fun finnPeriodensInntekterFraAordningen(vedtaksperiodeId: UUIDString, skjæringstidspunkt: DateString, orgnummer: String): List<InntektFraAOrdningen> =
+    fun finnPeriodensInntekterFraAordningen(
+        vedtaksperiodeId: UUIDString,
+        skjæringstidspunkt: DateString,
+        orgnummer: String,
+    ): List<InntektFraAOrdningen> =
         queryize(
             """
                 SELECT inntekter FROM inntekt
@@ -94,14 +99,19 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 "vedtaksperiodeId" to UUID.fromString(vedtaksperiodeId),
                 "skjaeringstidspunkt" to LocalDate.parse(skjæringstidspunkt)
             )
-        ){ row ->
+        ) { row ->
             objectMapper.readValue<List<Inntekter>>(row.string("inntekter"))
                 .mapNotNull { inntekter ->
                     inntekter.inntektsliste
                         .filter { it.orgnummer == orgnummer }
                         .takeUnless { it.isEmpty() }
                         ?.let { inntekter.copy(inntektsliste = it) }
-                }.map { inntekter -> InntektFraAOrdningen(maned = inntekter.årMåned.toString(), sum = inntekter.inntektsliste.sumOf { it.beløp }.toDouble()) }
+                }.map { inntekter ->
+                    InntektFraAOrdningen(
+                        maned = inntekter.årMåned.toString(),
+                        sum = inntekter.inntektsliste.sumOf { it.beløp }.toDouble()
+                    )
+                }
         } ?: emptyList()
 
     fun finnOppgaver(tilganger: SaksbehandlerTilganger): List<OppgaveForOversiktsvisning> =
@@ -141,6 +151,9 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 AND CASE WHEN :harTilgangTilBeslutter
                     THEN true
                     ELSE (ttv.er_retur = true OR ttv.saksbehandler IS NULL) END
+                AND CASE WHEN :harTilgangTilStikkprove
+                    THEN true
+                    ELSE o.type != 'STIKKPRØVE' END
             ORDER BY
                 CASE WHEN t.saksbehandler_ref IS NOT NULL THEN 0 ELSE 1 END,
                 CASE WHEN o.type = 'STIKKPRØVE' THEN 0 ELSE 1 END,
@@ -152,6 +165,7 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 "harTilgangTilRisk" to tilganger.harTilgangTilRiskOppgaver(),
                 "harTilgangTilKode7" to tilganger.harTilgangTilKode7(),
                 "harTilgangTilBeslutter" to tilganger.harTilgangTilBeslutterOppgaver(),
+                "harTilgangTilStikkprove" to tilganger.hartilgangTilStikkprøve()
             )
             session.run(
                 queryOf(query, parameters)
@@ -160,11 +174,10 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             )
         }
 
-
     fun hentBehandledeOppgaver(
         behandletAvIdent: String,
         behandletAvOid: UUID,
-        fom: LocalDate?
+        fom: LocalDate?,
     ): List<FerdigstiltOppgaveDto> {
         val erFerdigstiltAvSaksbehandler =
             "((o.status = 'Ferdigstilt' OR o.status = 'AvventerSystem') AND s.ident = :ident)"

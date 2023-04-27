@@ -20,7 +20,7 @@ import io.ktor.server.plugins.callid.CallId
 import io.ktor.server.plugins.callid.callIdMdc
 import io.ktor.server.plugins.callloging.CallLogging
 import io.ktor.server.plugins.cors.routing.CORS
-import io.ktor.server.plugins.doublereceive.*
+import io.ktor.server.plugins.doublereceive.DoubleReceive
 import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.request.header
 import io.ktor.server.request.httpMethod
@@ -243,6 +243,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
 
     private val tilgangsgrupper = Tilgangsgrupper(System.getenv())
 
+    private val saksbehandlereMedTilgangTilStikkprøver: List<String> = requireNotNull(env["SAKSBEHANDLERE_MED_TILGANG_TIL_STIKKPROVER"]).split(',')
+
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule {
             install(CORS) {
@@ -302,6 +304,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 kode7Saksbehandlergruppe = tilgangsgrupper.kode7GruppeId,
                 beslutterGruppeId = tilgangsgrupper.beslutterGruppeId,
                 riskGruppeId = tilgangsgrupper.riskQaGruppeId,
+                saksbehandlereMedTilgangTilStikkprøve = saksbehandlereMedTilgangTilStikkprøver,
                 snapshotMediator = snapshotMediator,
                 behandlingsstatistikkMediator = behandlingsstatistikkMediator,
             )

@@ -158,6 +158,28 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
         val oppgaver = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_KODE7)
         assertTrue(oppgaver.isNotEmpty())
     }
+    @Test
+    fun `ekskluder stikkprøve oppgaver for vanlige saksbehandlere`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave(oppgavetype = Oppgavetype.STIKKPRØVE)
+
+        val oppgaver = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN)
+        assertTrue(oppgaver.isEmpty())
+    }
+
+    @Test
+    fun `inkluder stikkprøve oppgaver bare for noen utvalgte saksbehandlere`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettGenerasjon()
+        opprettVedtaksperiode()
+        opprettOppgave(oppgavetype = Oppgavetype.STIKKPRØVE)
+
+        val oppgaver = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_STIKKPRØVE)
+        assertTrue(oppgaver.isNotEmpty())
+    }
 
     @Test
     fun `ekskluder oppgaver med strengt fortrolig som adressebeskyttelse for alle saksbehandlere`() {
@@ -225,8 +247,6 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
             }
         }
         listOf(
-            STIKKPROVE to FORLENGELSE,
-            STIKKPROVE to OVERGANG_FRA_IT,
             RISK_QA to FORLENGELSE,
             RISK_QA to FORSTEGANGSBEHANDLING,
             RISK_QA to OVERGANG_FRA_IT,

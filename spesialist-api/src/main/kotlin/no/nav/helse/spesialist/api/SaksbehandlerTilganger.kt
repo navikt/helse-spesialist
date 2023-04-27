@@ -4,10 +4,12 @@ import java.util.UUID
 
 class SaksbehandlerTilganger(
     private val gruppetilganger: List<UUID>,
+    private val saksbehandlerIdent: String,
     private val kode7Saksbehandlergruppe: UUID,
     private val riskSaksbehandlergruppe: UUID,
     private val beslutterSaksbehandlergruppe: UUID,
     private val skjermedePersonerSaksbehandlergruppe: UUID,
+    private val saksbehandlereMedTilgangTilStikkprøve: List<String>
 ) {
 
     fun harTilgangTilKode7() = kode7Saksbehandlergruppe in gruppetilganger
@@ -17,5 +19,6 @@ class SaksbehandlerTilganger(
     fun harTilgangTilBeslutterOppgaver() = beslutterSaksbehandlergruppe in gruppetilganger
 
     fun harTilgangTilSkjermedePersoner() = skjermedePersonerSaksbehandlergruppe in gruppetilganger
-
+    fun hartilgangTilStikkprøve() = saksbehandlerIdent in saksbehandlereMedTilgangTilStikkprøve || erDev()
+    private fun erDev() = "dev-gcp" == System.getenv("NAIS_CLUSTER_NAME")
 }

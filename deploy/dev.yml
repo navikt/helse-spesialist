@@ -88,6 +88,8 @@ spec:
       value: 59f26eef-0a4f-4038-bf46-3a5b2f252155
     - name: SKJERMEDE_PERSONER_GROUP
       value: 611669fa-de5c-4dc2-a0e8-6041a019992a
+    - name: SAKSBEHANDLERE_MED_TILGANG_TIL_STIKKPROVER
+      value: "EN_IDENT"
     - name: SPLEIS_CLIENT_ID
       value: api://dev-gcp.tbd.spleis-api/.default
     - name: SPLEIS_API_URL

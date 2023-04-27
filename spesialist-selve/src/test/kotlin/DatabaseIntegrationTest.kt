@@ -117,6 +117,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         riskSaksbehandlergruppe = RISK_GRUPPE_ID,
         beslutterSaksbehandlergruppe = BESLUTTER_GRUPPE_ID,
         skjermedePersonerSaksbehandlergruppe = SKJERMEDE_PERSONER_GRUPPE_ID,
+        saksbehandlerIdent = SAKSBEHANDLER_IDENT,
+        saksbehandlereMedTilgangTilStikkprøve = emptyList()
     )
     protected val SAKSBEHANDLERTILGANGER_MED_KODE7 = SaksbehandlerTilganger(
         gruppetilganger = listOf(KODE7_GRUPPE_ID),
@@ -124,6 +126,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         riskSaksbehandlergruppe = RISK_GRUPPE_ID,
         beslutterSaksbehandlergruppe = BESLUTTER_GRUPPE_ID,
         skjermedePersonerSaksbehandlergruppe = SKJERMEDE_PERSONER_GRUPPE_ID,
+        saksbehandlerIdent = SAKSBEHANDLER_IDENT,
+        saksbehandlereMedTilgangTilStikkprøve = emptyList()
     )
     protected val SAKSBEHANDLERTILGANGER_MED_RISK = SaksbehandlerTilganger(
         gruppetilganger = listOf(RISK_GRUPPE_ID),
@@ -131,6 +135,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         riskSaksbehandlergruppe = RISK_GRUPPE_ID,
         beslutterSaksbehandlergruppe = BESLUTTER_GRUPPE_ID,
         skjermedePersonerSaksbehandlergruppe = SKJERMEDE_PERSONER_GRUPPE_ID,
+        saksbehandlerIdent = SAKSBEHANDLER_IDENT,
+        saksbehandlereMedTilgangTilStikkprøve = emptyList()
     )
     protected val SAKSBEHANDLERTILGANGER_MED_BESLUTTER = SaksbehandlerTilganger(
         gruppetilganger = listOf(BESLUTTER_GRUPPE_ID),
@@ -138,6 +144,17 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         riskSaksbehandlergruppe = RISK_GRUPPE_ID,
         beslutterSaksbehandlergruppe = BESLUTTER_GRUPPE_ID,
         skjermedePersonerSaksbehandlergruppe = SKJERMEDE_PERSONER_GRUPPE_ID,
+        saksbehandlerIdent = SAKSBEHANDLER_IDENT,
+        saksbehandlereMedTilgangTilStikkprøve = emptyList()
+    )
+    protected val SAKSBEHANDLERTILGANGER_MED_STIKKPRØVE = SaksbehandlerTilganger(
+        gruppetilganger = emptyList(),
+        kode7Saksbehandlergruppe = KODE7_GRUPPE_ID,
+        riskSaksbehandlergruppe = RISK_GRUPPE_ID,
+        beslutterSaksbehandlergruppe = BESLUTTER_GRUPPE_ID,
+        skjermedePersonerSaksbehandlergruppe = SKJERMEDE_PERSONER_GRUPPE_ID,
+        saksbehandlerIdent = SAKSBEHANDLER_IDENT,
+        saksbehandlereMedTilgangTilStikkprøve = listOf(SAKSBEHANDLER_IDENT)
     )
 
     internal var personId: Long = -1

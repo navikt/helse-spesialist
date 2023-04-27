@@ -57,6 +57,7 @@ fun Application.graphQLApi(
     kode7Saksbehandlergruppe: UUID,
     beslutterGruppeId: UUID,
     riskGruppeId: UUID,
+    saksbehandlereMedTilgangTilStikkprøve: List<String>,
     snapshotMediator: SnapshotMediator,
     behandlingsstatistikkMediator: BehandlingsstatistikkMediator,
 ) {
@@ -86,6 +87,7 @@ fun Application.graphQLApi(
             skjermedePersonerSaksbehandlergruppe = skjermedePersonerGruppeId,
             beslutterSaksbehandlergruppe = beslutterGruppeId,
             riskSaksbehandlergruppe = riskGruppeId,
+            saksbehandlereMedTilgangTilStikkprøve = saksbehandlereMedTilgangTilStikkprøve
         ),
         requestHandler = LoggingGraphQLRequestHandler(
             GraphQL.newGraphQL(schema).build()

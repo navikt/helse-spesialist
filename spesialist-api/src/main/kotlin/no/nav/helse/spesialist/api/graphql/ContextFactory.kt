@@ -21,16 +21,19 @@ class ContextFactory(
     private val skjermedePersonerSaksbehandlergruppe: UUID,
     private val beslutterSaksbehandlergruppe: UUID,
     private val riskSaksbehandlergruppe: UUID,
+    private val saksbehandlereMedTilgangTilStikkprøve: List<String>
 ) : GraphQLContextFactory<AuthorizedContext, ApplicationRequest> {
 
     override suspend fun generateContextMap(request: ApplicationRequest): Map<String, Any> =
         mapOf(
             "tilganger" to SaksbehandlerTilganger(
                 gruppetilganger = request.getGrupper(),
+                saksbehandlerIdent = request.getSaksbehandlerIdent(),
                 kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
                 riskSaksbehandlergruppe = riskSaksbehandlergruppe,
                 beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe,
-                skjermedePersonerSaksbehandlergruppe = skjermedePersonerSaksbehandlergruppe
+                skjermedePersonerSaksbehandlergruppe = skjermedePersonerSaksbehandlergruppe,
+                saksbehandlereMedTilgangTilStikkprøve = saksbehandlereMedTilgangTilStikkprøve
             ),
             "saksbehandlerNavn" to request.getSaksbehandlerName()
         )
@@ -39,7 +42,6 @@ class ContextFactory(
     override suspend fun generateContext(request: ApplicationRequest): AuthorizedContext {
         return AuthorizedContext(request.getGrupper().contains(kode7Saksbehandlergruppe))
     }
-
 }
 
 private fun ApplicationRequest.getGrupper(): List<UUID> {
@@ -54,4 +56,9 @@ private fun ApplicationRequest.getGrupper(): List<UUID> {
 private fun ApplicationRequest.getSaksbehandlerName(): String {
     val accessToken = call.principal<JWTPrincipal>()
     return accessToken?.payload?.getClaim("name")?.asString() ?: ""
+}
+
+private fun ApplicationRequest.getSaksbehandlerIdent(): String {
+    val accessToken = call.principal<JWTPrincipal>()
+    return accessToken?.payload?.getClaim("NAVident")?.asString() ?: ""
 }
