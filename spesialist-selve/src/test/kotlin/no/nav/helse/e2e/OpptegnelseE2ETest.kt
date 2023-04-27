@@ -1,6 +1,6 @@
 package no.nav.helse.e2e
 
-import AbstractE2ETest
+import AbstractE2ETestV2
 import io.ktor.client.call.body
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
@@ -8,35 +8,35 @@ import io.ktor.client.request.post
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
-import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Testdata.AKTØR
-import no.nav.helse.Testdata.FØDSELSNUMMER
+import no.nav.helse.mediator.api.AbstractApiTest
+import no.nav.helse.mediator.api.AbstractApiTest.Companion.authentication
+import no.nav.helse.spesialist.api.abonnement.AbonnementDao
+import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDto
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseMediator
 import no.nav.helse.spesialist.api.abonnement.opptegnelseApi
-import no.nav.helse.mediator.api.AbstractApiTest
-import no.nav.helse.mediator.api.AbstractApiTest.Companion.authentication
-import no.nav.helse.spesialist.api.person.Adressebeskyttelse
-import no.nav.helse.spesialist.api.person.Kjønn
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageProblems
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-private class OpptegnelseE2ETest : AbstractE2ETest() {
+private class OpptegnelseE2ETest : AbstractE2ETestV2() {
     private val SAKSBEHANDLER_ID = UUID.randomUUID()
+
+    private val saksbehandlerDao = SaksbehandlerDao(dataSource)
 
     @Test
     fun `Ved abonnering får du et nytt abonnement`() {
-        val utbetalingId = UUID.randomUUID()
-        setupPerson()
-        setupArbeidsgiver()
         setupSaksbehandler()
-        setupUtbetalingIdKopling(utbetalingId)
+        håndterSøknad()
+        håndterVedtaksperiodeOpprettet()
+        håndterVedtaksperiodeNyUtbetaling()
+
+        val opptegnelseMediator = OpptegnelseMediator(OpptegnelseDao(dataSource), AbonnementDao(dataSource))
 
         val respons =
-            AbstractApiTest.TestServer { opptegnelseApi(OpptegnelseMediator(opptegnelseApiDao, abonnementDao)) }
+            AbstractApiTest.TestServer { opptegnelseApi(opptegnelseMediator) }
                 .withAuthenticatedServer {
                     it.post("/api/opptegnelse/abonner/$AKTØR") {
                         contentType(ContentType.Application.Json)
@@ -46,15 +46,10 @@ private class OpptegnelseE2ETest : AbstractE2ETest() {
                 }
 
         assertEquals(HttpStatusCode.OK, respons.status)
-
-        testRapid.sendTestMessage(meldingsfabrikk.lagUtbetalingEndret(
-            utbetalingId = utbetalingId,
-            type = "ANNULLERING",
-            status = "UTBETALING_FEILET"
-        ))
+        håndterUtbetalingFeilet()
 
         val opptegnelser =
-            AbstractApiTest.TestServer { opptegnelseApi(OpptegnelseMediator(opptegnelseApiDao, abonnementDao)) }
+            AbstractApiTest.TestServer { opptegnelseApi(opptegnelseMediator) }
                 .withAuthenticatedServer {
                     it.get("/api/opptegnelse/hent") {
                         contentType(ContentType.Application.Json)
@@ -66,7 +61,7 @@ private class OpptegnelseE2ETest : AbstractE2ETest() {
         assertEquals(1, opptegnelser.size)
 
         val oppdateringer =
-            AbstractApiTest.TestServer { opptegnelseApi(OpptegnelseMediator(opptegnelseApiDao, abonnementDao)) }
+            AbstractApiTest.TestServer { opptegnelseApi(opptegnelseMediator) }
                 .withAuthenticatedServer {
                     it.get("/api/opptegnelse/hent/${opptegnelser[0].sekvensnummer}") {
                         contentType(ContentType.Application.Json)
@@ -76,41 +71,6 @@ private class OpptegnelseE2ETest : AbstractE2ETest() {
                 }
 
         assertEquals(0, oppdateringer.size)
-    }
-
-    private fun setupUtbetalingIdKopling(utbetalingId : UUID) {
-        utbetalingDao.opprettKobling(UUID.randomUUID(), utbetalingId)
-    }
-
-    private fun setupPerson() {
-        val personinfoId = personDao.insertPersoninfo(
-            "Harald",
-            "Mellomnavn",
-            "Rex",
-            LocalDate.now().minusYears(20),
-            Kjønn.Ukjent,
-            Adressebeskyttelse.Ugradert
-        )
-        val string = """{ "node": "1234" }"""
-        val json = JsonMessage(string, MessageProblems(string))
-        json["key"] = "string"
-        val enhetId = 1219
-        val infoTrygdutbetalingerId = personDao.insertInfotrygdutbetalinger(json["key"])
-        personDao.insertPerson(
-            FØDSELSNUMMER,
-            AKTØR,
-            personinfoId,
-            enhetId,
-            infoTrygdutbetalingerId
-        )
-    }
-
-    private fun setupArbeidsgiver() {
-        arbeidsgiverDao.insertArbeidsgiver(
-            "123456789",
-            "Bedrift AS",
-            listOf("BEDRIFTSGREIER OG STÆSJ")
-        )
     }
 
     private fun setupSaksbehandler() {

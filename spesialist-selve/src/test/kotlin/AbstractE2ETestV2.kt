@@ -33,10 +33,12 @@ import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.SENDT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
+import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -65,7 +67,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
     internal val inspektør get() = testRapid.inspektør
     private val meldingssenderV2 = MeldingssenderV2(testRapid)
     private lateinit var sisteMeldingId: UUID
-    private val dataSource = AbstractDatabaseTest.dataSource
+    internal val dataSource = AbstractDatabaseTest.dataSource
     private val testMediator = TestMediator(testRapid, snapshotClient, dataSource)
 
     @BeforeEach
@@ -430,6 +432,28 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             utbetalingId = utbetalingId,
+            type = utbetalingtype,
+            arbeidsgiverbeløp = arbeidsgiverbeløp,
+            personbeløp = personbeløp
+        )
+        assertIngenEtterspurteBehov()
+        assertIngenUtgåendeMeldinger()
+    }
+
+    protected fun håndterUtbetalingFeilet(
+        aktørId: String = AKTØR,
+        fødselsnummer: String = FØDSELSNUMMER,
+        organisasjonsnummer: String = ORGNR,
+        utbetalingtype: String = Utbetalingtype.ANNULLERING.toString(),
+        arbeidsgiverbeløp: Int = 20000,
+        personbeløp: Int = 0,
+    ) {
+        sisteMeldingId = meldingssenderV2.sendUtbetalingEndret(
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+            utbetalingId = utbetalingId,
+            gjeldendeStatus = Utbetalingsstatus.UTBETALING_FEILET,
             type = utbetalingtype,
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp
