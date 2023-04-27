@@ -9,7 +9,7 @@ import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import org.slf4j.LoggerFactory
 
 internal class ÅpneGosysOppgaverCommand(
-    val hendelseId: UUID,
+    private val hendelseId: UUID,
     private val aktørId: String,
     private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     private val warningDao: WarningDao,

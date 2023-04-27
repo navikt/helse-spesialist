@@ -33,11 +33,5 @@ internal interface IVedtaksperiodeObserver {
     fun varselFlyttet(varselId: UUID, gammelGenerasjonId: UUID, nyGenerasjonId: UUID) {}
     fun varselGodkjent(varselId: UUID, vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String) {}
     fun varselAvvist(varselId: UUID, vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String) {}
-    fun tilstandEndret(
-        generasjonId: UUID,
-        vedtaksperiodeId: UUID,
-        gammel: Generasjon.Tilstand,
-        ny: Generasjon.Tilstand,
-        hendelseId: UUID
-    ) {}
+    fun tilstandEndret(generasjonId: UUID, vedtaksperiodeId: UUID, gammel: Generasjon.Tilstand, ny: Generasjon.Tilstand, hendelseId: UUID) {}
 }
