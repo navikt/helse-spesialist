@@ -6,9 +6,9 @@ import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.deaktiver
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.forhindrerAutomatisering
-import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndter
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterAvvist
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterGodkjent
+import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterNyttVarsel
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverTotrinnsvurdering
 
 internal class Sykefraværstilfelle(
@@ -22,7 +22,7 @@ internal class Sykefraværstilfelle(
     }
 
     internal fun håndter(varsel: Varsel, hendelseId: UUID) {
-        gjeldendeGenerasjoner.håndter(listOf(varsel), hendelseId)
+        gjeldendeGenerasjoner.håndterNyttVarsel(listOf(varsel), hendelseId)
     }
 
     internal fun deaktiver(varsel: Varsel) {

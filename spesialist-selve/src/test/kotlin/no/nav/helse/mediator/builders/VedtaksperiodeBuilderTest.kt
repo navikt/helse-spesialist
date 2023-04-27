@@ -12,7 +12,7 @@ import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Generasjon
-import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndter
+import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterNyttVarsel
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -40,7 +40,7 @@ class VedtaksperiodeBuilderTest : AbstractDatabaseTest() {
         val builder = GenerasjonBuilder(vedtaksperiodeId)
         val vedtaksperiode = builder.build(generasjonRepository, varselRepository)
         val forventetVedtaksperiode = Generasjon(generasjonId, vedtaksperiodeId, 1.januar, 31.januar, 1.januar).also {
-            it.håndter(Varsel(varselId, "SB_EX_1", opprettet, vedtaksperiodeId), UUID.randomUUID())
+            it.håndterNyttVarsel(Varsel(varselId, "SB_EX_1", opprettet, vedtaksperiodeId), UUID.randomUUID())
         }
         assertEquals(
             forventetVedtaksperiode,
@@ -86,7 +86,7 @@ class VedtaksperiodeBuilderTest : AbstractDatabaseTest() {
         )
         val builder = GenerasjonBuilder(vedtaksperiodeId)
         val generasjon = builder.build(generasjonRepository, varselRepository)
-        listOf(generasjon).håndter(
+        listOf(generasjon).håndterNyttVarsel(
             listOf(Varsel(varselId, "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId)),
             UUID.randomUUID()
         )

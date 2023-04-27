@@ -9,7 +9,7 @@ internal class InvaliderUtbetalingForGenerasjonerCommand(
     private val gjeldendeGenerasjoner: List<Generasjon>
 ): Command {
     override fun execute(context: CommandContext): Boolean {
-        gjeldendeGenerasjoner.forEach { it.invaliderUtbetaling(utbetalingId) }
+        gjeldendeGenerasjoner.forEach { it.håndterForkastetUtbetaling(utbetalingId) }
         return true
     }
 }

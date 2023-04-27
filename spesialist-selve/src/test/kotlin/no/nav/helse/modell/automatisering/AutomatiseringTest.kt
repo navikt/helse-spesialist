@@ -98,7 +98,7 @@ internal class AutomatiseringTest {
     @Test
     fun `vedtaksperiode med warnings er ikke automatiserbar`() {
         val gjeldendeGenerasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
-        gjeldendeGenerasjon.håndter(
+        gjeldendeGenerasjon.håndterNyttVarsel(
             Varsel(UUID.randomUUID(), "RV_IM_1", LocalDateTime.now(), vedtaksperiodeId),
             hendelseId
         )

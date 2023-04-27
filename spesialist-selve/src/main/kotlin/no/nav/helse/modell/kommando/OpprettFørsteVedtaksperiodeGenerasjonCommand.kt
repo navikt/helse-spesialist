@@ -9,7 +9,7 @@ internal class OpprettFørsteVedtaksperiodeGenerasjonCommand(
 ) : Command {
 
     override fun execute(context: CommandContext): Boolean {
-        generasjon.opprettFørste(hendelseId)
+        generasjon.håndterVedtaksperiodeOpprettet(hendelseId)
         return true
     }
 

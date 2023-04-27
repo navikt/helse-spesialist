@@ -109,8 +109,8 @@ internal class GodkjenningMediatorTest {
         generasjon2.registrer(observer)
         val varsel1 = Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId1)
         val varsel2 = Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId2)
-        generasjon1.håndter(varsel1, UUID.randomUUID())
-        generasjon2.håndter(varsel2, UUID.randomUUID())
+        generasjon1.håndterNyttVarsel(varsel1, UUID.randomUUID())
+        generasjon2.håndterNyttVarsel(varsel2, UUID.randomUUID())
 
         godkjenning(listOf(generasjon1, generasjon2))
         assertEquals(2, observer.generasjonerMedGodkjenteVarsler.size)

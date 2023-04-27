@@ -13,7 +13,6 @@ import no.nav.helse.mediator.builders.GenerasjonBuilder
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.EndretSkjermetinfo
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov
-import no.nav.helse.mediator.meldinger.PåminnetGodkjenningsbehov
 import no.nav.helse.mediator.meldinger.GosysOppgaveEndret
 import no.nav.helse.mediator.meldinger.NyeVarsler
 import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshot
@@ -21,6 +20,7 @@ import no.nav.helse.mediator.meldinger.OverstyringArbeidsforhold
 import no.nav.helse.mediator.meldinger.OverstyringIgangsatt
 import no.nav.helse.mediator.meldinger.OverstyringInntektOgRefusjon
 import no.nav.helse.mediator.meldinger.OverstyringTidslinje
+import no.nav.helse.mediator.meldinger.PåminnetGodkjenningsbehov
 import no.nav.helse.mediator.meldinger.RevurderingAvvist
 import no.nav.helse.mediator.meldinger.Sykefraværstilfeller
 import no.nav.helse.mediator.meldinger.SøknadSendt
@@ -817,7 +817,7 @@ internal class Hendelsefabrikk(
         skjæringstidspunkt: LocalDate,
         json: String,
     ): VedtaksperiodeOpprettet {
-        val førsteGenerasjon = Generasjon.opprettFørste(vedtaksperiodeId, fom, tom, skjæringstidspunkt).also { it.registrer(generasjonRepository) }
+        val førsteGenerasjon = Generasjon.håndterVedtaksperiodeOpprettet(vedtaksperiodeId, fom, tom, skjæringstidspunkt).also { it.registrer(generasjonRepository) }
         return VedtaksperiodeOpprettet(
             id = id,
             fødselsnummer = fødselsnummer,

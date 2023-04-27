@@ -37,7 +37,7 @@ internal class SykefraværstilfelleTest {
         val gjeldendeGenerasjon2 = generasjon(vedtaksperiodeId2)
         gjeldendeGenerasjon1.håndterTidslinjeendring(1.januar, 31.januar, 1.januar, UUID.randomUUID())
         gjeldendeGenerasjon2.håndterTidslinjeendring(1.februar, 28.februar, 1.februar, UUID.randomUUID())
-        gjeldendeGenerasjon2.håndter(
+        gjeldendeGenerasjon2.håndterNyttVarsel(
             Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId2),
             UUID.randomUUID()
         )
