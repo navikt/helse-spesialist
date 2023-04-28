@@ -36,10 +36,8 @@ jobs:
               id: docker-build-push
               with:
                   team: tbd
-                  dockerfile: Dockerfile-opprydding-dev
-                  tag: ${{ needs.set_version.outputs.image }}
-                  cache-from: type=gha
-                  cache-to: type=gha,mode=max
+                  cache_from: type=gha
+                  cache_to: type=gha,mode=max
                   project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
                   identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
         outputs:
