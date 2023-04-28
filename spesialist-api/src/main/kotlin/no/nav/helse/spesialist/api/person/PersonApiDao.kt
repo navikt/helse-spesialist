@@ -47,8 +47,10 @@ class PersonApiDao(dataSource: DataSource) : HelseDao(dataSource) {
     fun spesialistHarPersonKlarForVisningISpeil(fødselsnummer: String) =
         """SELECT 1 FROM person p
            INNER JOIN vedtak v ON v.person_ref = p.id
-           INNER JOIN automatisering a on a.vedtaksperiode_ref = v.id
+           LEFT JOIN automatisering a ON a.vedtaksperiode_ref = v.id
+           LEFT JOIN oppgave o ON o.vedtak_ref = v.id
            WHERE p.fodselsnummer = :fodselsnummer
+             AND a.id IS NOT NULL OR o.id IS NOT NULL
            LIMIT 1
        """.single(mapOf("fodselsnummer" to fødselsnummer.toLong())) { true } ?: false
 }
