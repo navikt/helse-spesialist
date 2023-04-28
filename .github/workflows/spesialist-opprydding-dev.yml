@@ -21,8 +21,6 @@ jobs:
     steps:
       - name: create docker tag
         run: echo "TAG=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
-    outputs:
-      image: spesialist-opprydding-dev:${{ env.TAG }}
 
   build:
     permissions:
@@ -48,7 +46,7 @@ jobs:
         with:
           team: 'tbd'
           dockerfile: Dockerfile-opprydding-dev
-          tag: ${{ needs.set_version.outputs.image }}
+          image_suffix: opprydding-dev
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
     outputs:
