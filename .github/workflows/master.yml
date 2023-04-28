@@ -7,6 +7,11 @@ on:
             - 'spesialist-opprydding-dev/**'
             - '.github/workflows/spesialist-opprydding-dev.yml'
             - 'deploy/dev-opprydding.yml'
+            - 'Dockerfile-migrering'
+            - 'spesialist-migrering/**'
+            - '.github/workflows/spesialist-migrering.yml'
+            - 'deploy/dev-migrering.yml'
+            - 'deploy/prod-migrering.yml'
         branches:
             - master
 
