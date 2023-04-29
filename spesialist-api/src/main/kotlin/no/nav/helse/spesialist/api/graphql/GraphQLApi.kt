@@ -96,15 +96,10 @@ fun Application.graphQLApi(
 
     routing {
         route("graphql") {
-            if (DROPP_SIKKERHET()) {
+            authenticate("oidc") {
+                install(GraphQLMetrikker)
                 queryHandler(server)
                 playground()
-            } else {
-                authenticate("oidc") {
-                    install(GraphQLMetrikker)
-                    queryHandler(server)
-                    playground()
-                }
             }
 
             if (erDev()) {
@@ -149,4 +144,3 @@ private fun buildPlaygroundHtml(graphQLEndpoint: String, subscriptionsEndpoint: 
         ?: throw IllegalStateException("graphql-playground.html cannot be found in the classpath")
 
 private fun erDev() = "dev-gcp" == System.getenv("NAIS_CLUSTER_NAME")
-private fun DROPP_SIKKERHET() = "ja" == System.getenv("DROPP_SIKKERHET_FOR_API")

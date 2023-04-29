@@ -1,11 +1,17 @@
 package no.nav.helse.spesialist.api.graphql
 
+import com.auth0.jwt.JWT
+import com.auth0.jwt.impl.JWTParser
+import com.auth0.jwt.interfaces.DecodedJWT
 import io.ktor.http.ContentType
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.application.install
+import io.ktor.server.auth.authentication
+import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.plugins.callloging.CallLogging
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.doublereceive.DoubleReceive
+import io.ktor.util.decodeBase64String
 import io.mockk.Call
 import io.mockk.MockKAnswerScope
 import io.mockk.coEvery
@@ -16,6 +22,7 @@ import java.time.format.DateTimeFormatter
 import java.util.UUID
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import no.nav.helse.spesialist.api.JwtStub
 import no.nav.helse.spesialist.api.TestApplication
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMediator
@@ -64,6 +71,17 @@ import no.nav.helse.spesialist.api.vedtaksperiode.EnhetDto
 import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 
 fun main() = runBlocking {
+    val jwtStub = JwtStub()
+    val clientId = "client_id"
+    val issuer = "https://jwt-provider-domain"
+    val epostadresse = "sara.saksbehandler@nav.no"
+    fun getJwt(
+        jwtStub: JwtStub,
+        epostadresse: String,
+        clientId: String,
+        issuer: String,
+    ) = jwtStub.getToken(emptyList(), UUID.randomUUID().toString(), epostadresse, clientId, issuer)
+
     TestApplication(4321).start { dataSource ->
         val snapshotApiDao = mockk<SnapshotApiDao>(relaxed = true)
         val personApiDao = mockk<PersonApiDao>(relaxed = true)
@@ -123,9 +141,18 @@ fun main() = runBlocking {
             )
         }
 
-        infobannerOmMiljøvariabel()
         install(CallLogging)
         install(DoubleReceive)
+
+        authentication {
+            provider("oidc") {
+                authenticate { authenticationContext ->
+                    val jwt = getJwt(jwtStub, epostadresse, clientId, issuer)
+                    val decodedJwt = JWT().decodeJwt(jwt)
+                    authenticationContext.principal(decodedJwt.toJwtPrincipal())
+                }
+            }
+        }
 
         graphQLApi(
             personApiDao = personApiDao,
@@ -153,20 +180,8 @@ fun main() = runBlocking {
     }
 }
 
-private fun infobannerOmMiljøvariabel() {
-    if (System.getenv("DROPP_SIKKERHET_FOR_API") == null) {
-        val melding = "Hei! Du må sette miljøvariabelen DROPP_SIKKERHET_FOR_API=ja for å kunne bruke GraphQL Playground"
-        println(
-            """
-                
-                ${"x".repeat(melding.length + 4)}
-                x $melding x
-                ${"x".repeat(melding.length + 4)}
-                
-            """.trimIndent()
-        )
-    }
-}
+private fun DecodedJWT.toJwtPrincipal() =
+    JWTPrincipal(JWTParser().parsePayload(payload.decodeBase64String()))
 
 private fun enPersoninfo() = Personinfo(
     fornavn = "Luke",
