@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import graphql.schema.DataFetchingEnvironment
 import io.mockk.every
 import io.mockk.mockk
@@ -29,10 +28,8 @@ import no.nav.helse.Meldingssender.sendVedtaksperiodeNyUtbetaling
 import no.nav.helse.Meldingssender.sendVedtaksperiodeOpprettet
 import no.nav.helse.Meldingssender.sendVergemålløsningOld
 import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsningOld
-import no.nav.helse.TestRapidHelpers.behov
 import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.TestRapidHelpers.løsning
-import no.nav.helse.TestRapidHelpers.løsninger
 import no.nav.helse.TestRapidHelpers.oppgaver
 import no.nav.helse.TestRapidHelpers.siste
 import no.nav.helse.Testdata.AKTØR
@@ -55,7 +52,6 @@ import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.TestmeldingfabrikkUtenFnr
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
-import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.automatisering.Stikkprøver
@@ -66,7 +62,6 @@ import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
-import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålDao
@@ -76,7 +71,6 @@ import no.nav.helse.spesialist.api.abonnement.AbonnementDao
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.graphql.HentSnapshot
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.spesialist.api.graphql.query.PersonQuery
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
@@ -96,7 +90,6 @@ import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -129,10 +122,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private val risikovurderingDao = RisikovurderingDao(dataSource)
     private val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
     private val overstyringApiDao = OverstyringApiDao(dataSource)
-    protected val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
     private val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
-    protected val utbetalingDao = UtbetalingDao(dataSource)
-    protected val opptegnelseDao = OpptegnelseApiDao(dataSource)
+    private val opptegnelseDao = OpptegnelseApiDao(dataSource)
     protected val opptegnelseApiDao = OpptegnelseApiDao(dataSource)
     protected val abonnementDao = AbonnementDao(dataSource)
     protected val saksbehandlerDao = SaksbehandlerDao(dataSource)
@@ -313,24 +304,10 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         })
     }
 
-    protected fun assertIkkeHendelse(hendelseId: UUID) {
-        assertEquals(0, sessionOf(dataSource).use {
-            it.run(queryOf("SELECT COUNT(1) FROM hendelse WHERE id = ?", hendelseId).map { row -> row.int(1) }.asSingle)
-        })
-    }
-
     protected fun assertGodkjenningsbehovIkkeLagret(hendelseId: UUID ) {
         assertEquals(0, sessionOf(dataSource).use {
             it.run(queryOf("SELECT COUNT(1) FROM hendelse WHERE id = ? AND type = 'GODKJENNINGSBEHOV'", hendelseId).map { row -> row.int(1) }.asSingle)
         })
-    }
-
-    protected fun assertVedtaksperiodeEksisterer(vedtaksperiodeId: UUID) {
-        assertEquals(1, vedtak(vedtaksperiodeId))
-    }
-
-    protected fun assertVedtaksperiodeEksistererIkke(vedtaksperiodeId: UUID) {
-        assertEquals(0, vedtak(vedtaksperiodeId))
     }
 
     protected fun person(fødselsnummer: String, aktørId: String): Int {
@@ -391,36 +368,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         }
     }
 
-    protected fun assertVedtaksperiodeAvvist(
-        periodetype: String,
-        begrunnelser: List<String>? = null,
-        kommentar: String? = null,
-    ) {
-        testRapid.inspektør.hendelser("vedtaksperiode_avvist").first().let {
-            assertEquals(periodetype, it.path("periodetype").asText())
-            assertEquals(begrunnelser, it.path("begrunnelser")?.map(JsonNode::asText))
-            // TODO: BUG: Vi sender faktisk kommentar som "null", ikke null...
-            val faktiskKommentar = it.takeIf { it.hasNonNull("kommentar") }?.get("kommentar")?.asText()
-            if (kommentar == null) assertEquals("null", faktiskKommentar)
-            else assertEquals(kommentar, faktiskKommentar)
-        }
-    }
-
-    protected fun assertAutomatisertLøsning(godkjent: Boolean = true, block: (JsonNode) -> Unit = {}) {
-        assertGodkjenningsbehovløsning(godkjent, "Automatisk behandlet") {
-            assertTrue(it.path("automatiskBehandling").booleanValue())
-            block(it)
-        }
-    }
-
-    protected fun assertGodkjenningsbehovIkkeLøst() {
-        assertEquals(0, testRapid.inspektør.løsninger().size)
-    }
-
-    protected fun assertIkkeEtterspurtBehov(behov: String) {
-        assertFalse(testRapid.inspektør.behov().any { it == behov })
-    }
-
     protected fun assertTilstand(hendelseId: UUID, vararg tilstand: String) {
         sessionOf(dataSource).use { session ->
             session.run(
@@ -432,18 +379,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         }.also {
             assertEquals(tilstand.toList(), it)
         }
-    }
-
-    protected fun assertAdressebeskyttelse(fnr: String, expected: String) {
-        val adressebeskyttelse = sessionOf(dataSource).use { session ->
-            session.run(
-                queryOf(
-                    "SELECT adressebeskyttelse FROM person_info pi JOIN person ON info_ref = pi.id WHERE fodselsnummer = ?",
-                    fnr.toLong()
-                ).map { it.string("adressebeskyttelse") }.asSingle
-            )
-        }
-        assertEquals(expected, adressebeskyttelse)
     }
 
     protected fun assertOppgaver(antall: Int) {
@@ -463,32 +398,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     protected fun assertIngenOppgave() {
         assertEquals(0, testRapid.inspektør.hendelser("oppgave_opprettet").size)
-    }
-
-    protected fun assertSnapshot(forventet: GraphQLClientResponse<HentSnapshot.Result>, vedtaksperiodeId: UUID) {
-        assertEquals(forventet.data?.person, sessionOf(dataSource).use {
-            it.run(
-                queryOf(
-                    "SELECT data FROM snapshot WHERE id = (SELECT snapshot_ref FROM vedtak WHERE vedtaksperiode_id=:vedtaksperiodeId)",
-                    mapOf(
-                        "vedtaksperiodeId" to vedtaksperiodeId
-                    )
-                ).map { row -> objectMapper.readValue<GraphQLPerson>(row.string("data")) }.asSingle
-            )
-        })
-    }
-
-    protected fun assertWarning(forventet: String, vedtaksperiodeId: UUID) {
-        assertTrue(sessionOf(dataSource).use {
-            it.run(
-                queryOf(
-                    "SELECT melding FROM warning WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id=:vedtaksperiodeId) and (inaktiv_fra is null)",
-                    mapOf(
-                        "vedtaksperiodeId" to vedtaksperiodeId
-                    )
-                ).map { row -> row.string("melding") }.asList
-            )
-        }.contains(forventet))
     }
 
     protected fun vedtaksperiode(

@@ -270,6 +270,33 @@ internal object TestmeldingsfabrikkV2 {
         )
     )
 
+    fun lagArbeidsgiverinformasjonKomposittLøsning(
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        vedtaksperiodeId: UUID,
+        organisasjoner: List<Testmeldingfabrikk.ArbeidsgiverinformasjonJson> = emptyList(),
+        personer: List<Map<String, Any>> = emptyList(),
+        id: UUID,
+        hendelseId: UUID,
+        contextId: UUID,
+    ) = nyHendelse(
+        id, "behov", mapOf(
+            "@final" to true,
+            "@behov" to listOf("Arbeidsgiverinformasjon", "HentPersoninfoV2"),
+            "hendelseId" to "$hendelseId",
+            "contextId" to "$contextId",
+            "vedtaksperiodeId" to "$vedtaksperiodeId",
+            "fødselsnummer" to fødselsnummer,
+            "aktørId" to aktørId,
+            "orgnummer" to organisasjonsnummer,
+            "@løsning" to mapOf(
+                "Arbeidsgiverinformasjon" to organisasjoner.map(Testmeldingfabrikk.ArbeidsgiverinformasjonJson::toBody),
+                "HentPersoninfoV2" to personer
+            )
+        )
+    )
+
     fun lagArbeidsforholdløsning(
         aktørId: String,
         fødselsnummer: String,

@@ -25,17 +25,22 @@ fun snapshotMedWarnings(
     fnr: String,
     aktørId: String,
     utbetalingId: UUID = UUID.randomUUID(),
+    varsler: List<String> = listOf("Brukeren har flere inntekter de siste tre måneder")
 ): GraphQLClientResponse<HentSnapshot.Result> =
     snapshot(
-        vedtaksperiodeId, orgnr, fnr, aktørId, utbetalingId, listOf(
+        vedtaksperiodeId,
+        orgnr,
+        fnr,
+        aktørId,
+        utbetalingId,
+        varsler.map {
             GraphQLAktivitet(
                 alvorlighetsgrad = "W",
-                melding = "Brukeren har flere inntekter de siste tre måneder",
+                melding = it,
                 tidsstempel = "2020-06-12 13:21:24.072",
                 vedtaksperiodeId = vedtaksperiodeId.toString()
             )
-        )
-    )
+        })
 
 fun snapshot(
     vedtaksperiodeId: UUID,

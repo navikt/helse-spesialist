@@ -27,6 +27,7 @@ object Testdata {
     const val AKTØR = "999999999"
     const val ORGNR = "222222222"
     const val ORGNR_GHOST = "666666666"
+    const val ENHET_OSLO = "0301"
 
     const val SAKSBEHANDLER_EPOST = "sara.saksbehandler@nav.no"
     val SAKSBEHANDLER_OID: UUID = UUID.randomUUID()

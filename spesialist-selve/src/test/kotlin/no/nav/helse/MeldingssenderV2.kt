@@ -11,6 +11,7 @@ import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.ArbeidsgiverinformasjonJson
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
+import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Vergemål
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
@@ -26,6 +27,7 @@ import no.nav.helse.spesialist.api.overstyring.Dagtype.Feriedag
 import no.nav.helse.spesialist.api.overstyring.Dagtype.Sykedag
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
+import no.nav.helse.spesialist.api.person.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
 
 internal class MeldingssenderV2(private val testRapid: TestRapid) {
@@ -301,6 +303,7 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
         fødselsnummer: String,
         organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
+        enhet: String
     ): UUID = newUUID.also { id ->
         val behov = testRapid.inspektør.siste("behov")
         assertEquals("HentEnhet", behov["@behov"].map { it.asText() }.single())
@@ -315,7 +318,8 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
                 vedtaksperiodeId = vedtaksperiodeId,
                 id = id,
                 hendelseId = hendelseId,
-                contextId = contextId
+                contextId = contextId,
+                enhet = enhet
             )
         )
     }
@@ -372,6 +376,52 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
                     organisasjonsnummer = organisasjonsnummer,
                     vedtaksperiodeId = vedtaksperiodeId,
                     ekstraArbeidsgivere = arbeidsgivere,
+                    id = id,
+                    hendelseId = hendelseId,
+                    contextId = contextId
+                )
+            )
+        }
+
+    fun sendArbeidsgiverinformasjonKompositt(
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        vedtaksperiodeId: UUID,
+    ): UUID =
+        newUUID.also { id ->
+            val behov = testRapid.inspektør.siste("behov")
+            assertEquals(setOf("Arbeidsgiverinformasjon", "HentPersoninfoV2"), behov["@behov"].map { it.asText() }.toSet())
+            val contextId = UUID.fromString(behov["contextId"].asText())
+            val hendelseId = UUID.fromString(behov["hendelseId"].asText())
+
+            val organisasjoner = behov["Arbeidsgiverinformasjon"]["organisasjonsnummer"].map {
+                ArbeidsgiverinformasjonJson(
+                    it.asText(),
+                    "Navn for ${it.asText()}",
+                    listOf("Bransje for ${it.asText()}")
+                )
+            }
+
+            val personer: List<Map<String, Any>> = behov["HentPersoninfoV2"]["ident"].map {
+                mapOf(
+                    "ident" to it.asText(),
+                    "fornavn" to it.asText(),
+                    "etternavn" to it.asText(),
+                    "fødselsdato" to LocalDate.now(),
+                    "kjønn" to Kjønn.Ukjent.name,
+                    "adressebeskyttelse" to Adressebeskyttelse.Ugradert.name,
+                )
+            }
+
+            testRapid.sendTestMessage(
+                meldingsfabrikk.lagArbeidsgiverinformasjonKomposittLøsning(
+                    aktørId = aktørId,
+                    fødselsnummer = fødselsnummer,
+                    organisasjonsnummer = organisasjonsnummer,
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    organisasjoner = organisasjoner,
+                    personer = personer,
                     id = id,
                     hendelseId = hendelseId,
                     contextId = contextId
@@ -437,6 +487,8 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
     fun sendVergemålløsning(
         aktørId: String,
         fødselsnummer: String,
+        vergemål: List<Vergemål> = emptyList(),
+        fremtidsfullmakter: List<Vergemål> = emptyList(),
         fullmakter: List<Fullmakt> = emptyList(),
     ): UUID = newUUID.also { id ->
         val behov = testRapid.inspektør.siste("behov")
@@ -444,13 +496,13 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
         val contextId = UUID.fromString(behov["contextId"].asText())
         val hendelseId = UUID.fromString(behov["hendelseId"].asText())
 
-        val vergemål = Testmeldingfabrikk.VergemålJson(emptyList(), emptyList(), fullmakter)
+        val payload = Testmeldingfabrikk.VergemålJson(vergemål, fremtidsfullmakter, fullmakter)
 
         testRapid.sendTestMessage(
             meldingsfabrikk.lagVergemålløsning(
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
-                vergemål = vergemål,
+                vergemål = payload,
                 id = id,
                 hendelseId = hendelseId,
                 contextId = contextId
@@ -535,6 +587,8 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
         oppgaveId: Long,
         godkjenningsbehovId: UUID,
         godkjent: Boolean,
+        kommentar: String? = null,
+        begrunnelser: List<String> = emptyList()
     ): UUID {
         return newUUID.also { id ->
             testRapid.sendTestMessage(
@@ -544,6 +598,8 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
                     id = id,
                     oppgaveId = oppgaveId,
                     hendelseId = godkjenningsbehovId,
+                    begrunnelser = begrunnelser,
+                    kommentar = kommentar
                 )
             )
         }

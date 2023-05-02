@@ -45,6 +45,11 @@ object TestRapidHelpers {
             .filterNot { it.hasNonNull("@løsning") }
             .filter { it.path("@behov").map(JsonNode::asText).contains(behov) }
 
+    fun TestRapid.RapidInspector.sisteBehov(vararg behov: String) =
+        hendelser("behov")
+            .last()
+            .takeIf { it.path("@behov").map(JsonNode::asText).containsAll(behov.toList()) && !it.hasNonNull("@løsning") }
+
     fun TestRapid.RapidInspector.løsninger() =
         hendelser("behov")
             .filter { it.hasNonNull("@løsning") }
