@@ -24,7 +24,6 @@ import no.nav.helse.spesialist.api.graphql.query.PersonQuery
 import no.nav.helse.spesialist.api.graphql.schema.Arbeidsforholdoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.Dagoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.Inntektoverstyring
-import no.nav.helse.spesialist.api.graphql.schema.OppgaveForOversiktsvisning
 import no.nav.helse.spesialist.api.graphql.schema.Person
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
@@ -48,8 +47,6 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 
 internal class OverstyringE2ETest : AbstractE2ETestV2() {
-
-    private fun List<OppgaveForOversiktsvisning>.ingenOppgaveMedId(id: String) = none { it.id == id }
 
     @Test
     fun `saksbehandler overstyrer sykdomstidslinje`() {
