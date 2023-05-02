@@ -18,7 +18,6 @@ import no.nav.helse.mediator.meldinger.OverstyringIgangsatt
 import no.nav.helse.mediator.meldinger.OverstyringInntektOgRefusjon
 import no.nav.helse.mediator.meldinger.OverstyringTidslinje
 import no.nav.helse.mediator.meldinger.PåminnetGodkjenningsbehov
-import no.nav.helse.mediator.meldinger.RevurderingAvvist
 import no.nav.helse.mediator.meldinger.Sykefraværstilfeller
 import no.nav.helse.mediator.meldinger.SøknadSendt
 import no.nav.helse.mediator.meldinger.UtbetalingAnnullert
@@ -41,7 +40,6 @@ import no.nav.helse.modell.HendelseDao.Hendelsetype.OVERSTYRING_ARBEIDSFORHOLD
 import no.nav.helse.modell.HendelseDao.Hendelsetype.OVERSTYRING_IGANGSATT
 import no.nav.helse.modell.HendelseDao.Hendelsetype.OVERSTYRING_INNTEKT_OG_REFUSJON
 import no.nav.helse.modell.HendelseDao.Hendelsetype.PÅMINNET_GODKJENNINGSBEHOV
-import no.nav.helse.modell.HendelseDao.Hendelsetype.REVURDERING_AVVIST
 import no.nav.helse.modell.HendelseDao.Hendelsetype.SAKSBEHANDLERLØSNING
 import no.nav.helse.modell.HendelseDao.Hendelsetype.SYKEFRAVÆRSTILFELLER
 import no.nav.helse.modell.HendelseDao.Hendelsetype.SØKNAD_SENDT
@@ -156,7 +154,6 @@ internal class HendelseDao(private val dataSource: DataSource) {
             UTBETALING_ENDRET -> hendelsefabrikk.utbetalingEndret(json)
             OPPDATER_PERSONSNAPSHOT -> hendelsefabrikk.oppdaterPersonsnapshot(json)
             VEDTAKSPERIODE_REBEREGNET -> hendelsefabrikk.vedtaksperiodeReberegnet(json)
-            REVURDERING_AVVIST -> hendelsefabrikk.revurderingAvvist(json)
             GOSYS_OPPGAVE_ENDRET -> hendelsefabrikk.gosysOppgaveEndret(json)
             ENDRET_SKJERMETINFO -> hendelsefabrikk.endretSkjermetinfo(json)
             VEDTAK_FATTET -> hendelsefabrikk.vedtakFattet(json)
@@ -182,7 +179,6 @@ internal class HendelseDao(private val dataSource: DataSource) {
         is OppdaterPersonsnapshot -> OPPDATER_PERSONSNAPSHOT
         is UtbetalingEndret -> UTBETALING_ENDRET
         is VedtaksperiodeReberegnet -> VEDTAKSPERIODE_REBEREGNET
-        is RevurderingAvvist -> REVURDERING_AVVIST
         is GosysOppgaveEndret -> GOSYS_OPPGAVE_ENDRET
         is EndretSkjermetinfo -> ENDRET_SKJERMETINFO
         is VedtakFattet -> VEDTAK_FATTET
@@ -198,7 +194,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
         ADRESSEBESKYTTELSE_ENDRET, VEDTAKSPERIODE_ENDRET, VEDTAKSPERIODE_FORKASTET, GODKJENNING, OVERSTYRING,
         SAKSBEHANDLERLØSNING, UTBETALING_ANNULLERT, OPPDATER_PERSONSNAPSHOT, UTBETALING_ENDRET,
         VEDTAKSPERIODE_REBEREGNET, OVERSTYRING_INNTEKT_OG_REFUSJON, OVERSTYRING_ARBEIDSFORHOLD,
-        REVURDERING_AVVIST, OVERSTYRING_IGANGSATT, GOSYS_OPPGAVE_ENDRET, ENDRET_SKJERMETINFO, VEDTAK_FATTET,
+        OVERSTYRING_IGANGSATT, GOSYS_OPPGAVE_ENDRET, ENDRET_SKJERMETINFO, VEDTAK_FATTET,
         NYE_VARSLER, VEDTAKSPERIODE_OPPRETTET, SØKNAD_SENDT, VEDTAKSPERIODE_NY_UTBETALING, SYKEFRAVÆRSTILFELLER,
         PÅMINNET_GODKJENNINGSBEHOV
     }

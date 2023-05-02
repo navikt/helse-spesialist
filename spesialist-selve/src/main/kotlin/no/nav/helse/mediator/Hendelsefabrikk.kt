@@ -21,7 +21,6 @@ import no.nav.helse.mediator.meldinger.OverstyringIgangsatt
 import no.nav.helse.mediator.meldinger.OverstyringInntektOgRefusjon
 import no.nav.helse.mediator.meldinger.OverstyringTidslinje
 import no.nav.helse.mediator.meldinger.PåminnetGodkjenningsbehov
-import no.nav.helse.mediator.meldinger.RevurderingAvvist
 import no.nav.helse.mediator.meldinger.Sykefraværstilfeller
 import no.nav.helse.mediator.meldinger.SøknadSendt
 import no.nav.helse.mediator.meldinger.UtbetalingAnnullert
@@ -880,21 +879,6 @@ internal class Hendelsefabrikk(
             oppgaveDao = oppgaveDao,
             utbetalingDao = utbetalingDao
         )
-    }
-
-    fun revurderingAvvist(json: String): RevurderingAvvist {
-        val jsonNode = mapper.readTree(json)
-        return RevurderingAvvist(
-            id = UUID.fromString(jsonNode["@id"].asText()),
-            fødselsnummer = jsonNode["fødselsnummer"].asText(),
-            errors = jsonNode["errors"].map { it.asText() },
-            json = json,
-            opptegnelseDao = opptegnelseDao
-        )
-    }
-
-    fun revurderingAvvist(fødselsnummer: String, errors: List<String>, json: String): RevurderingAvvist {
-        return RevurderingAvvist(UUID.randomUUID(), fødselsnummer, errors, json, opptegnelseDao)
     }
 
     fun vedtakFattet(id: UUID, fødselsnummer: String, vedtaksperiodeId: UUID, json: String): VedtakFattet {

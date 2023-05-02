@@ -25,7 +25,6 @@ import no.nav.helse.mediator.meldinger.OverstyringIgangsatt
 import no.nav.helse.mediator.meldinger.OverstyringInntektOgRefusjon
 import no.nav.helse.mediator.meldinger.OverstyringTidslinje
 import no.nav.helse.mediator.meldinger.PåminnetGodkjenningsbehov
-import no.nav.helse.mediator.meldinger.RevurderingAvvist
 import no.nav.helse.mediator.meldinger.Sykefraværstilfeller
 import no.nav.helse.mediator.meldinger.SøknadSendt
 import no.nav.helse.mediator.meldinger.UtbetalingAnnullert
@@ -127,7 +126,6 @@ internal class HendelseMediator(
             UtbetalingEndret.River(it, this)
             VedtaksperiodeReberegnet.River(it, this)
             VedtaksperiodeOpprettet.River(it, this)
-            RevurderingAvvist.River(it, this)
             GosysOppgaveEndret.River(it, this, oppgaveDao, tildelingDao, personDao)
             EndretSkjermetinfo.River(it, personDao, egenAnsattDao)
             VedtakFattet.River(it, this)
@@ -562,10 +560,6 @@ internal class HendelseMediator(
 
     fun gosysOppgaveEndret(hendelseId: UUID, fødselsnummer: String, aktørId: String, json: String, context: MessageContext) {
         utfør(hendelsefabrikk.gosysOppgaveEndret(hendelseId, fødselsnummer, aktørId, json), context)
-    }
-
-    fun revurderingAvvist(fødselsnummer: String, error: List<String>, json: String, context: MessageContext) {
-        utfør(hendelsefabrikk.revurderingAvvist(fødselsnummer, error, json), context)
     }
 
     fun vedtakFattet(id: UUID, fødselsnummer: String, vedtaksperiodeId: UUID, json: String, context: MessageContext) {
