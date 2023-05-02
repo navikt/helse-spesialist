@@ -6,18 +6,13 @@ import java.time.LocalDate.now
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
-import no.nav.helse.Testdata
 import no.nav.helse.januar
-import no.nav.helse.mediator.api.Arbeidsgiver
-import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
-import no.nav.helse.mediator.api.SubsumsjonDto
 import no.nav.helse.mediator.meldinger.Risikofunn.Companion.tilJson
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import kotlin.random.Random.Default.nextLong
 
 internal class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørId: String) {
@@ -230,9 +225,6 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                 )
             )
         )
-
-    fun arbeidsgiverinformasjon(orgnummer: String, navn: String, bransjer: List<String>) =
-        ArbeidsgiverinformasjonJson(orgnummer, navn, bransjer).toBody()
 
     private fun arbeidsgiverinformasjon(ekstraArbeidsgivere: List<ArbeidsgiverinformasjonJson>) = (ekstraArbeidsgivere).map(ArbeidsgiverinformasjonJson::toBody)
     fun lagArbeidsgiverinformasjonløsningOld(
@@ -474,7 +466,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         kommentar: String? = null
     ) =
         nyHendelse(
-            id, "saksbehandler_løsning", mutableMapOf<String, Any>(
+            id, "saksbehandler_løsning", mutableMapOf(
                 "fødselsnummer" to fødselsnummer,
                 "hendelseId" to hendelseId,
                 "contextId" to contextId,
@@ -528,17 +520,6 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                 )
             )
         )
-
-    fun lagVedtakFattet(
-        id: UUID = UUID.randomUUID(),
-        fødselsnummer: String = this.fødselsnummer,
-        vedtaksperiodeId: UUID
-    ): String = nyHendelse(
-        id, "vedtak_fattet", mapOf(
-            "fødselsnummer" to fødselsnummer,
-            "vedtaksperiodeId" to "$vedtaksperiodeId"
-        )
-    )
 
     fun lagEgenAnsattløsning(
         aktørId: String,
@@ -646,175 +627,6 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         )
 
 
-    fun lagOverstyringTidslinje(
-        aktørId: String,
-        fødselsnummer: String,
-        organisasjonsnummer: String = "orgnr",
-        dager: List<OverstyringDagDto> = emptyList(),
-        begrunnelse: String = "begrunnelse",
-        saksbehandleroid: UUID = UUID.randomUUID(),
-        saksbehandlernavn: String = "saksbehandler",
-        saksbehandlerepost: String = "saksbehandler@nav.no",
-        saksbehandlerident: String = "saksbehandlerIdent",
-        id: UUID = UUID.randomUUID()
-    ) = nyHendelse(
-        id, "saksbehandler_overstyrer_tidslinje", mapOf(
-            "aktørId" to aktørId,
-            "fødselsnummer" to fødselsnummer,
-            "organisasjonsnummer" to organisasjonsnummer,
-            "dager" to dager,
-            "begrunnelse" to begrunnelse,
-            "saksbehandlerOid" to saksbehandleroid,
-            "saksbehandlerIdent" to saksbehandlerident,
-            "saksbehandlerNavn" to saksbehandlernavn,
-            "saksbehandlerEpost" to saksbehandlerepost
-        )
-    )
-
-    fun lagOverstyringInntektOgRefusjon(
-        aktørId: String,
-        fødselsnummer: String,
-        arbeidsgivere: List<Arbeidsgiver> = listOf(
-            Arbeidsgiver(
-            organisasjonsnummer = Testdata.ORGNR,
-            månedligInntekt = 25000.0,
-            fraMånedligInntekt = 25001.0,
-            forklaring = "testbortforklaring",
-            subsumsjon = SubsumsjonDto("8-28", "LEDD_1", "BOKSTAV_A"),
-            refusjonsopplysninger = null,
-            fraRefusjonsopplysninger = null,
-            begrunnelse = "en begrunnelse")
-        ),
-        skjæringstidspunkt: LocalDate,
-        saksbehandleroid: UUID = UUID.randomUUID(),
-        saksbehandlernavn: String = "saksbehandler",
-        saksbehandlerepost: String = "saksbehandler@nav.no",
-        saksbehandlerident: String = "saksbehandlerIdent",
-        id: UUID = UUID.randomUUID()
-    ) = nyHendelse(
-        id, "saksbehandler_overstyrer_inntekt_og_refusjon", mutableMapOf(
-            "aktørId" to aktørId,
-            "fødselsnummer" to fødselsnummer,
-            "arbeidsgivere" to arbeidsgivere,
-            "saksbehandlerOid" to saksbehandleroid,
-            "saksbehandlerIdent" to saksbehandlerident,
-            "saksbehandlerNavn" to saksbehandlernavn,
-            "saksbehandlerEpost" to saksbehandlerepost,
-            "skjæringstidspunkt" to skjæringstidspunkt,
-        )
-    )
-
-    fun lagOverstyringArbeidsforhold(
-        aktørId: String,
-        fødselsnummer: String,
-        organisasjonsnummer: String = "orgnr",
-        skjæringstidspunkt: LocalDate,
-        overstyrteArbeidsforhold: List<OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt>,
-        saksbehandleroid: UUID = UUID.randomUUID(),
-        saksbehandlernavn: String = "saksbehandler",
-        saksbehandlerepost: String = "sara.saksbehandler@nav.no",
-        saksbehandlerident: String = "saksbehandlerIdent",
-        id: UUID = UUID.randomUUID()
-    ) = nyHendelse(
-        id, "saksbehandler_overstyrer_arbeidsforhold", mapOf(
-            "aktørId" to aktørId,
-            "fødselsnummer" to fødselsnummer,
-            "organisasjonsnummer" to organisasjonsnummer,
-            "saksbehandlerOid" to saksbehandleroid,
-            "saksbehandlerIdent" to saksbehandlerident,
-            "saksbehandlerNavn" to saksbehandlernavn,
-            "saksbehandlerEpost" to saksbehandlerepost,
-            "skjæringstidspunkt" to skjæringstidspunkt,
-            "overstyrteArbeidsforhold" to overstyrteArbeidsforhold
-        )
-    )
-
-    fun lagOppdragLinje(
-        endringskode: String = "NY", // [NY, UENDR, ENDR]
-        klassekode: String = "SPREFAG-IOP",
-        statuskode: String = "OPPH",
-        datoStatusFom: LocalDate = now(),
-        fom: LocalDate = now(),
-        tom: LocalDate = now(),
-        dagsats: Int = 111,
-        lønn: Int = 111,
-        grad: Double = 0.11,
-        delytelseId: Int = 11,
-        refDelytelseId: Int = 11,
-        refFagsystemId: String = "refFagsystemId",
-    ) =
-        mapOf<String, Any>(
-            "endringskode" to endringskode,
-            "klassekode" to klassekode,
-            "statuskode" to statuskode,
-            "datoStatusFom" to datoStatusFom,
-            "fom" to fom,
-            "tom" to tom,
-            "dagsats" to dagsats,
-            "lønn" to lønn,
-            "grad" to grad,
-            "delytelseId" to delytelseId,
-            "refDelytelseId" to refDelytelseId,
-            "refFagsystemId" to refFagsystemId,
-        )
-
-
-    fun lagOppdrag(
-        fagsystemId: String = "fagsystemId",
-        fagområde: String = "SPREF",
-        mottaker: String = "mottaker",
-        endringskode: String = "ENDR",
-        sisteArbeidsgiverdag: LocalDate = now(),
-        nettoBeløp: Int = 20,
-        linjer: List<Map<String, Any>> = listOf(lagOppdragLinje()),
-    ) =
-        mapOf(
-            "fagsystemId" to fagsystemId,
-            "fagområde" to fagområde,
-            "mottaker" to mottaker,
-            "endringskode" to endringskode,
-            "sisteArbeidsgiverdag" to sisteArbeidsgiverdag,
-            "nettoBeløp" to nettoBeløp,
-            "linjer" to linjer,
-        )
-
-
-    fun lagUtbetalingEndret(
-        id: UUID = UUID.randomUUID(),
-        fødselsnummer: String = "12020052345",
-        orgnummer: String = "123456789",
-        utbetalingId: UUID = UUID.randomUUID(),
-        type: String = "UTBETALING", // [UTBETALING, ANNULLERING, ETTERUTBETALING]
-        status: String = "UTBETALT", // [IKKE_UTBETALT, FORKASTET, IKKE_GODKJENT, GODKJENT_UTEN_UTBETALING, GODKJENT, SENDT, OVERFØRT, UTBETALING_FEILET, UTBETALT, ANNULLERT]
-        forrigeStatus: String = "IKKE_UTBETALT",
-        opprettet: LocalDateTime = LocalDateTime.now(),
-        arbeidsgiverOppdrag: Map<String, Any> = lagOppdrag(),
-        personOppdrag: Map<String, Any> = lagOppdrag(),
-    ) = nyHendelse(
-        id, "utbetaling_endret", mapOf(
-            "fødselsnummer" to fødselsnummer,
-            "organisasjonsnummer" to orgnummer,
-            "utbetalingId" to utbetalingId,
-            "type" to type,
-            "gjeldendeStatus" to status,
-            "forrigeStatus" to forrigeStatus,
-            "@opprettet" to opprettet,
-            "arbeidsgiverOppdrag" to arbeidsgiverOppdrag,
-            "personOppdrag" to personOppdrag,
-        )
-    )
-
-    fun lagRevurderingAvvist(
-        id: UUID = UUID.randomUUID(),
-        fødselsnummer: String,
-        errors: List<String>
-    ) = nyHendelse(
-        id, "revurdering_avvist", mapOf(
-            "fødselsnummer" to fødselsnummer,
-            "errors" to errors
-        )
-    )
-
     fun lagNyeVarsler(
         id: UUID,
         vedtaksperiodeId: UUID,
@@ -871,7 +683,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         )
     )
 
-    internal fun nyHendelse(id: UUID, navn: String, hendelse: Map<String, Any>) =
+    private fun nyHendelse(id: UUID, navn: String, hendelse: Map<String, Any>) =
         JsonMessage.newMessage(nyHendelse(id, navn) + hendelse).toJson()
 
     private fun nyHendelse(id: UUID, navn: String) = mutableMapOf(

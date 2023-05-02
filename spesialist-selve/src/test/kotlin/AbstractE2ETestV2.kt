@@ -535,7 +535,6 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
             gjeldendeStatus = UTBETALT
         )
         assertIngenEtterspurteBehov()
-        assertUtgåendeMelding("oppgave_oppdatert")
     }
 
     protected fun håndterUtbetalingAnnullert(
