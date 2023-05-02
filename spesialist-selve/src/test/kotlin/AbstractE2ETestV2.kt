@@ -506,6 +506,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
+        forrigeStatus: Utbetalingsstatus = NY
     ) {
         sisteMeldingId = meldingssenderV2.sendUtbetalingEndret(
             aktørId = aktørId,
@@ -513,13 +514,13 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
             organisasjonsnummer = organisasjonsnummer,
             utbetalingId = utbetalingId,
             type = "UTBETALING",
-            forrigeStatus = NY,
+            forrigeStatus = forrigeStatus,
             gjeldendeStatus = FORKASTET
         )
         assertIngenEtterspurteBehov()
     }
 
-    private fun håndterUtbetalingUtbetalt(
+    protected fun håndterUtbetalingUtbetalt(
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
@@ -646,7 +647,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         periodeFom: LocalDate = 1.januar,
         periodeTom: LocalDate = 31.januar,
         skjæringstidspunkt: LocalDate = periodeFom,
-        periodetype: Periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+        periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
         orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList(),
     ) = meldingssenderV2.sendGodkjenningsbehov(
         aktørId = aktørId,
@@ -948,7 +949,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
 
     protected fun assertKommandokjedetilstander(hendelseId: UUID, vararg forventedeTilstander: Kommandokjedetilstand) {
         @Language("PostgreSQL")
-        val query = "SELECT tilstand FROM command_context WHERE hendelse_id = ? ORDER BY id ASC"
+        val query = "SELECT tilstand FROM command_context WHERE hendelse_id = ? ORDER BY id"
         val tilstander = sessionOf(dataSource).use { session ->
             session.run(
                 queryOf(query, hendelseId).map { it.string("tilstand") }.asList
@@ -994,7 +995,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
     ) {
         testRapid.inspektør.hendelser("vedtaksperiode_godkjent").first().let {
             assertEquals(periodetype, it.path("periodetype").asText())
-            varsler.forEachIndexed { index, (kilde, varsel) ->
+            varsler.forEachIndexed { index, (kilde, _) ->
                 assertEquals(kilde.name, it["warnings"][index]["kilde"].asText())
             }
             assertFalse(it["automatiskBehandling"].asBoolean())
@@ -1006,12 +1007,11 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         oppgavestatus: Oppgavestatus,
     ) {
         @Language("PostgreSQL")
-        val query = "SELECT status FROM oppgave WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = ?)"
-        val oppgavestatuser = sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, vedtaksperiodeId).map { enumValueOf<Oppgavestatus>(it.string("status")) }.asList)
+        val query = "SELECT status FROM oppgave WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = ?) ORDER by id DESC"
+        val sisteOppgavestatus = sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, vedtaksperiodeId).map { enumValueOf<Oppgavestatus>(it.string("status")) }.asSingle)
         }
-        assertEquals(1, oppgavestatuser.size)
-        assertEquals(oppgavestatus, oppgavestatuser.single())
+        assertEquals(oppgavestatus, sisteOppgavestatus)
     }
 
     protected fun assertIkkeSaksbehandleroppgave(
@@ -1038,10 +1038,6 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
             )
         }
         assertEquals(forventetPersonsnapshot, personsnaphot)
-    }
-
-    protected fun assertSnapshotHentet(fødselsnummer: String = FØDSELSNUMMER, forventetAntall: Int) {
-        verify(exactly = forventetAntall) { snapshotClient.hentSnapshot(fødselsnummer) }
     }
 
     protected fun assertSnapshotversjon(vedtaksperiodeId: UUID, forventetVersjon: Int) {
@@ -1114,13 +1110,6 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         val meldinger = testRapid.inspektør.hendelser(hendelse, sisteMeldingId)
         assertEquals(1, meldinger.size) {
             "Utgående meldinger: ${meldinger.joinToString { it.path("@event_name").asText() }}"
-        }
-    }
-
-    private fun assertSisteUtgåendeMelding(hendelse: String) {
-        val sisteMelding = testRapid.inspektør.hendelser().last()
-        assertEquals(sisteMelding, hendelse) {
-            "Siste utgående melding: $sisteMelding"
         }
     }
 
