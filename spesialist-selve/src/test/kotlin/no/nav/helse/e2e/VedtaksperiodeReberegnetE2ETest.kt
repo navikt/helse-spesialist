@@ -1,334 +1,128 @@
 package no.nav.helse.e2e
 
-import AbstractE2ETest
-import io.mockk.every
-import java.util.UUID
-import no.nav.helse.Meldingssender.sendArbeidsforholdløsningOld
-import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
-import no.nav.helse.Meldingssender.sendEgenAnsattløsningOld
-import no.nav.helse.Meldingssender.sendGodkjenningsbehov
-import no.nav.helse.Meldingssender.sendInntektløsningOld
-import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
-import no.nav.helse.Meldingssender.sendRisikovurderingløsningOld
-import no.nav.helse.Meldingssender.sendSøknadSendt
-import no.nav.helse.Meldingssender.sendUtbetalingEndret
-import no.nav.helse.Meldingssender.sendVedtaksperiodeEndret
-import no.nav.helse.Meldingssender.sendVedtaksperiodeNyUtbetaling
-import no.nav.helse.Meldingssender.sendVedtaksperiodeOpprettet
-import no.nav.helse.Meldingssender.sendVergemålløsningOld
-import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsningOld
-import no.nav.helse.Testdata.AKTØR
-import no.nav.helse.Testdata.FØDSELSNUMMER
-import no.nav.helse.Testdata.ORGNR
-import no.nav.helse.Testdata.SNAPSHOT_MED_WARNINGS
-import no.nav.helse.Testdata.SNAPSHOT_UTEN_WARNINGS
-import no.nav.helse.Testdata.UTBETALING_ID
-import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
-import no.nav.helse.januar
+import AbstractE2ETestV2
+import AbstractE2ETestV2.Kommandokjedetilstand.AVBRUTT
+import AbstractE2ETestV2.Kommandokjedetilstand.FERDIG
+import AbstractE2ETestV2.Kommandokjedetilstand.NY
+import AbstractE2ETestV2.Kommandokjedetilstand.SUSPENDERT
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 
-internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
+internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETestV2() {
     @Test
     fun `avbryter saksbehandling før oppgave er opprettet til saksbehandling`() {
-        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_MED_WARNINGS
-        sendSøknadSendt(AKTØR, FØDSELSNUMMER, ORGNR)
-        sendVedtaksperiodeOpprettet(
-            AKTØR,
-            FØDSELSNUMMER,
-            ORGNR,
-            VEDTAKSPERIODE_ID,
-            skjæringstidspunkt = 1.januar,
-            fom = 1.januar,
-            tom = 31.januar
+        håndterSøknad()
+        håndterVedtaksperiodeOpprettet()
+        fremTilÅpneOppgaver()
+        håndterVedtaksperiodeReberegnet()
+        assertKommandokjedetilstander(
+            sisteGodkjenningsbehovId,
+            NY, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, AVBRUTT
         )
-        sendVedtaksperiodeEndret(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID)
-        sendVedtaksperiodeNyUtbetaling(VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID, organisasjonsnummer = ORGNR)
-        sendUtbetalingEndret(AKTØR, FØDSELSNUMMER, ORGNR, UTBETALING_ID, "UTBETALING")
-        val godkjenningsmeldingId = sendGodkjenningsbehov(
-            AKTØR,
-            FØDSELSNUMMER,
-            ORGNR,
-            VEDTAKSPERIODE_ID,
-            UTBETALING_ID
-        )
-        sendPersoninfoløsningComposite(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
-        sendArbeidsgiverinformasjonløsningOld(
-            hendelseId = godkjenningsmeldingId,
-            organisasjonsnummer = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID
-        )
-        sendArbeidsforholdløsningOld(
-            hendelseId = godkjenningsmeldingId,
-            orgnr = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID
-        )
-        sendEgenAnsattløsningOld(
-            godkjenningsmeldingId = godkjenningsmeldingId,
-            erEgenAnsatt = false
-        )
-        sendVergemålløsningOld(
-            godkjenningsmeldingId = godkjenningsmeldingId
-        )
-
-        sendVedtaksperiodeEndret(
-            aktørId = AKTØR,
-            fødselsnummer = FØDSELSNUMMER,
-            organisasjonsnummer = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            forrigeTilstand = "AVVENTER_GODKJENNING",
-            gjeldendeTilstand = "AVVENTER_HISTORIKK"
-        )
-
-        assertTilstand(
-            godkjenningsmeldingId,
-            "NY",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "AVBRUTT"
-        )
-        assertOppgaver(0)
+        assertIkkeSaksbehandleroppgave()
     }
 
     @Test
     fun `avbryter saksbehandling etter oppgave er opprettet til saksbehandling`() {
-        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
-        val godkjenningsmeldingId = vedtaksperiodeTilGodkjenning()
-
-        sendVedtaksperiodeEndret(
-            aktørId = AKTØR,
-            fødselsnummer = FØDSELSNUMMER,
-            organisasjonsnummer = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            forrigeTilstand = "AVVENTER_GODKJENNING",
-            gjeldendeTilstand = "AVVENTER_HISTORIKK"
+        håndterSøknad()
+        håndterVedtaksperiodeOpprettet()
+        fremTilSaksbehandleroppgave()
+        håndterVedtaksperiodeReberegnet()
+        assertKommandokjedetilstander(
+            sisteGodkjenningsbehovId,
+            NY, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, FERDIG
         )
-
-        assertTilstand(
-            godkjenningsmeldingId,
-            "NY",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "FERDIG"
-        )
-        assertOppgavestatuser(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.Invalidert)
+        assertSaksbehandleroppgave(oppgavestatus = Oppgavestatus.Invalidert)
     }
 
     @Test
     fun `avbryter kommandokjede ved reberegning og oppretter oppgave hos saksbehandler andre runde`() {
-        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
-        sendSøknadSendt(AKTØR, FØDSELSNUMMER, ORGNR)
-        sendVedtaksperiodeOpprettet(
-            AKTØR,
-            FØDSELSNUMMER,
-            ORGNR,
-            VEDTAKSPERIODE_ID,
-            skjæringstidspunkt = 1.januar,
-            fom = 1.januar,
-            tom = 31.januar
+        håndterSøknad()
+        håndterVedtaksperiodeOpprettet()
+        fremTilÅpneOppgaver()
+        håndterVedtaksperiodeReberegnet()
+        assertKommandokjedetilstander(
+            sisteGodkjenningsbehovId,
+            NY, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, AVBRUTT
         )
-        sendVedtaksperiodeEndret(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID)
-        sendVedtaksperiodeNyUtbetaling(VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID, organisasjonsnummer = ORGNR)
-        sendUtbetalingEndret(AKTØR, FØDSELSNUMMER, ORGNR, UTBETALING_ID, "UTBETALING")
-        var godkjenningsmeldingId = sendGodkjenningsbehov(
-            organisasjonsnummer = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            utbetalingId = UTBETALING_ID
-        )
-        sendPersoninfoløsningComposite(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
-        sendArbeidsgiverinformasjonløsningOld(
-            hendelseId = godkjenningsmeldingId,
-            organisasjonsnummer = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID
-        )
-        sendArbeidsforholdløsningOld(
-            hendelseId = godkjenningsmeldingId,
-            orgnr = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID
-        )
-        sendEgenAnsattløsningOld(
-            godkjenningsmeldingId = godkjenningsmeldingId,
-            erEgenAnsatt = false
-        )
-        sendVergemålløsningOld(
-            godkjenningsmeldingId = godkjenningsmeldingId
-        )
+        assertIkkeSaksbehandleroppgave()
 
-        sendVedtaksperiodeEndret(
-            aktørId = AKTØR,
-            fødselsnummer = FØDSELSNUMMER,
-            organisasjonsnummer = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            forrigeTilstand = "AVVENTER_GODKJENNING",
-            gjeldendeTilstand = "AVVENTER_HISTORIKK"
+        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = false)
+        assertKommandokjedetilstander(
+            sisteGodkjenningsbehovId,
+            NY, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, FERDIG
         )
-
-        assertTilstand(
-            godkjenningsmeldingId,
-            "NY",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "AVBRUTT"
-        )
-        assertOppgaver(0)
-
-        godkjenningsmeldingId = vedtaksperiodeTilGodkjenning(harOppdatertMetadata = true)
-
-        assertTilstand(
-            godkjenningsmeldingId,
-            "NY",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "FERDIG"
-        )
-
-        assertOppgavestatuser(0, Oppgavestatus.AvventerSaksbehandler)
+        assertSaksbehandleroppgave(oppgavestatus = Oppgavestatus.AvventerSaksbehandler)
     }
 
     @Test
     fun `avbryt ikke-eksisterende vedtaksperiode`() {
         assertDoesNotThrow {
-            sendVedtaksperiodeEndret(
-                aktørId = AKTØR,
-                fødselsnummer = FØDSELSNUMMER,
-                organisasjonsnummer = ORGNR,
-                vedtaksperiodeId = VEDTAKSPERIODE_ID,
-                forrigeTilstand = "AVVENTER_GODKJENNING",
-                gjeldendeTilstand = "AVVENTER_HISTORIKK"
-            )
+            håndterVedtaksperiodeReberegnet()
         }
     }
 
     @Test
     fun `avbryter ikke om forrige tilstand er noe annet enn AVVENTER_GODKJENNING eller AVVENTER_GODKJENNING_REVURDERING`() {
-        testIkkeAvbrutt("TIL_UTBETALING", "UBETALING_FEILET")
+        håndterSøknad()
+        håndterVedtaksperiodeOpprettet()
+        håndterGodkjenningsbehov()
+        håndterVedtaksperiodeEndret(forrigeTilstand = "TIL_UTBETALING", gjeldendeTilstand = "UBETALING_FEILET")
+        assertKommandokjedetilstander(sisteGodkjenningsbehovId, NY, SUSPENDERT)
     }
 
     @Test
     fun `avbryter ikke om forrige tilstand er AVVENTER_GODKJENNING_REVURDERING og gjeldende tilstand er TIL_INFOTRYGD`() {
-        testIkkeAvbrutt("AVVENTER_GODKJENNING_REVURDERING", "TIL_INFOTRYGD")
+        håndterSøknad()
+        håndterVedtaksperiodeOpprettet()
+        håndterGodkjenningsbehov()
+        håndterVedtaksperiodeEndret(forrigeTilstand = "AVVENTER_GODKJENNING_REVURDERING", gjeldendeTilstand = "TIL_INFOTRYGD")
+        assertKommandokjedetilstander(sisteGodkjenningsbehovId, NY, SUSPENDERT)
     }
 
     @Test
     fun `avbryter ikke om forrige tilstand er AVVENTER_GODKJENNING_REVURDERING og gjeldende tilstand er AVSLUTTET`() {
-        testIkkeAvbrutt("AVVENTER_GODKJENNING_REVURDERING", "AVSLUTTET")
+        håndterSøknad()
+        håndterVedtaksperiodeOpprettet()
+        håndterGodkjenningsbehov()
+        håndterVedtaksperiodeEndret(forrigeTilstand = "AVVENTER_GODKJENNING_REVURDERING", gjeldendeTilstand = "AVSLUTTET")
+        assertKommandokjedetilstander(sisteGodkjenningsbehovId, NY, SUSPENDERT)
     }
 
     @Test
     fun `avbryter ikke om forrige tilstand er AVVENTER_GODKJENNING_REVURDERING og gjeldende tilstand er TIL_UTBETALING`() {
-        testIkkeAvbrutt("AVVENTER_GODKJENNING_REVURDERING","TIL_UTBETALING")
+        håndterSøknad()
+        håndterVedtaksperiodeOpprettet()
+        håndterGodkjenningsbehov()
+        håndterVedtaksperiodeEndret(forrigeTilstand = "AVVENTER_GODKJENNING_REVURDERING", gjeldendeTilstand = "TIL_UTBETALING")
+        assertKommandokjedetilstander(sisteGodkjenningsbehovId, NY, SUSPENDERT)
     }
 
     @Test
     fun `avbryter ikke om gjeldende tilstand er TIL_INFOTRYGD`() {
-        testIkkeAvbrutt(gjeldendeTilstand = "TIL_INFOTRYGD")
+        håndterSøknad()
+        håndterVedtaksperiodeOpprettet()
+        håndterGodkjenningsbehov()
+        håndterVedtaksperiodeEndret(gjeldendeTilstand = "TIL_INFOTRYGD")
+        assertKommandokjedetilstander(sisteGodkjenningsbehovId, NY, SUSPENDERT)
     }
 
     @Test
     fun `avbryter ikke om gjeldende tilstand er AVSLUTTET`() {
-        testIkkeAvbrutt(gjeldendeTilstand = "AVSLUTTET")
+        håndterSøknad()
+        håndterVedtaksperiodeOpprettet()
+        håndterGodkjenningsbehov()
+        håndterVedtaksperiodeEndret(gjeldendeTilstand = "AVSLUTTET")
+        assertKommandokjedetilstander(sisteGodkjenningsbehovId, NY, SUSPENDERT)
     }
 
     @Test
     fun `avbryter ikke om gjeldende tilstand er TIL_UTBETALING`() {
-        testIkkeAvbrutt(gjeldendeTilstand = "TIL_UTBETALING")
-    }
-
-    private fun testIkkeAvbrutt(forrigeTilstand: String = "AVVENTER_GODKJENNING", gjeldendeTilstand: String) {
-        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
-        val godkjenningsmeldingId = vedtaksperiodeTilGodkjenning()
-
-        sendVedtaksperiodeEndret(
-            aktørId = AKTØR,
-            fødselsnummer = FØDSELSNUMMER,
-            organisasjonsnummer = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            forrigeTilstand = forrigeTilstand,
-            gjeldendeTilstand = gjeldendeTilstand
-        )
-
-        assertTilstand(
-            godkjenningsmeldingId,
-            "NY",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "FERDIG"
-        )
-        assertOppgavestatuser(0, Oppgavestatus.AvventerSaksbehandler)
-    }
-
-    private fun vedtaksperiodeTilGodkjenning(harOppdatertMetadata: Boolean = false): UUID {
-        sendSøknadSendt(AKTØR, FØDSELSNUMMER, ORGNR)
-        sendVedtaksperiodeOpprettet(
-            AKTØR,
-            FØDSELSNUMMER,
-            ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            skjæringstidspunkt = 1.januar,
-            fom = 1.januar,
-            tom = 31.januar
-        )
-        sendVedtaksperiodeNyUtbetaling(VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID, organisasjonsnummer = ORGNR)
-        sendUtbetalingEndret(AKTØR, FØDSELSNUMMER, ORGNR, UTBETALING_ID, "UTBETALING")
-        val godkjenningsmeldingId1 = sendGodkjenningsbehov(
-            organisasjonsnummer = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            utbetalingId = UTBETALING_ID
-        )
-        sendPersoninfoløsningComposite(godkjenningsmeldingId1, ORGNR, VEDTAKSPERIODE_ID)
-        if (!harOppdatertMetadata) {
-            sendArbeidsgiverinformasjonløsningOld(
-                hendelseId = godkjenningsmeldingId1,
-                organisasjonsnummer = ORGNR,
-                vedtaksperiodeId = VEDTAKSPERIODE_ID
-            )
-        }
-        sendArbeidsforholdløsningOld(
-            hendelseId = godkjenningsmeldingId1,
-            orgnr = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID
-        )
-        sendEgenAnsattløsningOld(
-            godkjenningsmeldingId = godkjenningsmeldingId1,
-            erEgenAnsatt = false
-        )
-        sendVergemålløsningOld(
-            godkjenningsmeldingId = godkjenningsmeldingId1
-        )
-        sendÅpneGosysOppgaverløsningOld(
-            godkjenningsmeldingId = godkjenningsmeldingId1, 1
-        )
-        sendRisikovurderingløsningOld(
-            godkjenningsmeldingId = godkjenningsmeldingId1,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID
-        )
-        sendInntektløsningOld(godkjenningsmeldingId = godkjenningsmeldingId1)
-        return godkjenningsmeldingId1
+        håndterSøknad()
+        håndterVedtaksperiodeOpprettet()
+        håndterGodkjenningsbehov()
+        håndterVedtaksperiodeEndret(gjeldendeTilstand = "TIL_UTBETALING")
+        assertKommandokjedetilstander(sisteGodkjenningsbehovId, NY, SUSPENDERT)
     }
 }

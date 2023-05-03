@@ -362,6 +362,8 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
         forårsaketAvId: UUID = UUID.randomUUID(),
+        forrigeTilstand: String? = null,
+        gjeldendeTilstand: String? = null
     ) {
         val erRevurdering = erRevurdering(vedtaksperiodeId)
         sisteMeldingId = meldingssenderV2.sendVedtaksperiodeEndret(
@@ -369,12 +371,32 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
-            forrigeTilstand = if (erRevurdering) "AVVENTER_SIMULERING_REVURDERING" else "AVVENTER_SIMULERING",
-            gjeldendeTilstand = if (erRevurdering) "AVVENTER_GODKJENNING_REVURDERING" else "AVVENTER_GODKJENNING",
+            forrigeTilstand = forrigeTilstand ?: if (erRevurdering) "AVVENTER_SIMULERING_REVURDERING" else "AVVENTER_SIMULERING",
+            gjeldendeTilstand = gjeldendeTilstand ?: if (erRevurdering) "AVVENTER_GODKJENNING_REVURDERING" else "AVVENTER_GODKJENNING",
             forårsaketAvId = forårsaketAvId
         )
         assertIngenEtterspurteBehov()
         assertIngenUtgåendeMeldinger()
+    }
+
+    protected fun håndterVedtaksperiodeReberegnet(
+        aktørId: String = AKTØR,
+        fødselsnummer: String = FØDSELSNUMMER,
+        organisasjonsnummer: String = ORGNR,
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        forårsaketAvId: UUID = UUID.randomUUID(),
+    ) {
+        val erRevurdering = erRevurdering(vedtaksperiodeId)
+        sisteMeldingId = meldingssenderV2.sendVedtaksperiodeEndret(
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            forrigeTilstand = if (erRevurdering) "AVVENTER_GODKJENNING_REVURDERING" else "AVVENTER_GODKJENNING",
+            gjeldendeTilstand = if (erRevurdering) "AVVENTER_HISTORIKK_REVURDERING" else "AVVENTER_HISTORIKK",
+            forårsaketAvId = forårsaketAvId
+        )
+        assertIngenEtterspurteBehov()
     }
 
     protected fun håndterVedtaksperiodeForkastet(
