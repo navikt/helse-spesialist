@@ -2,6 +2,7 @@ package no.nav.helse
 
 import TestmeldingsfabrikkV2
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.TestRapidHelpers.siste
 import no.nav.helse.mediator.api.Arbeidsgiver
@@ -196,7 +197,8 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
         forrigeStatus: Utbetalingsstatus = NY,
         gjeldendeStatus: Utbetalingsstatus = IKKE_UTBETALT,
         arbeidsgiverbeløp: Int = 20000,
-        personbeløp: Int = 0
+        personbeløp: Int = 0,
+        opprettet: LocalDateTime
     ): UUID = newUUID.also { id ->
         testRapid.sendTestMessage(
             meldingsfabrikk.lagUtbetalingEndret(
@@ -209,6 +211,7 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
                 type = type,
                 arbeidsgiverbeløp = arbeidsgiverbeløp,
                 personbeløp = personbeløp,
+                opprettet = opprettet,
                 id = id
             )
         )

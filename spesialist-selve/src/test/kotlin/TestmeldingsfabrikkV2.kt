@@ -655,6 +655,7 @@ internal object TestmeldingsfabrikkV2 {
         personFagsystemId: String = "ASJKLD90283JKLHAS3JKLF",
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
+        opprettet: LocalDateTime,
         id: UUID,
     ) = nyHendelse(
         id, "utbetaling_endret", mapOf(
@@ -665,6 +666,7 @@ internal object TestmeldingsfabrikkV2 {
             "type" to type,
             "forrigeStatus" to "$forrigeStatus",
             "gjeldendeStatus" to "$gjeldendeStatus",
+            "@opprettet" to opprettet,
             "arbeidsgiverOppdrag" to mapOf(
                 "mottaker" to organisasjonsnummer,
                 "fagområde" to "SPREF",
@@ -711,7 +713,39 @@ internal object TestmeldingsfabrikkV2 {
                 "endringskode" to "NY",
                 "fagsystemId" to personFagsystemId,
                 "nettoBeløp" to personbeløp,
-                "linjer" to emptyList<Map<String, Any>>()
+                "linjer" to listOf(
+                    mapOf(
+                        "fom" to "${LocalDate.now()}",
+                        "tom" to "${LocalDate.now()}",
+                        "dagsats" to 2000,
+                        "totalbeløp" to 2000,
+                        "lønn" to 2000,
+                        "grad" to 100.00,
+                        "refFagsystemId" to personFagsystemId,
+                        "delytelseId" to 2,
+                        "refDelytelseId" to 1,
+                        "datoStatusFom" to "${LocalDate.now()}",
+                        "endringskode" to "NY",
+                        "klassekode" to "SPATORD",
+                        "statuskode" to "OPPH"
+                    ),
+                    mapOf(
+                        "fom" to "${LocalDate.now()}",
+                        "tom" to "${LocalDate.now()}",
+                        "dagsats" to 2000,
+                        "totalbeløp" to 2000,
+                        "lønn" to 2000,
+                        "grad" to 100.00,
+                        "refFagsystemId" to null,
+                        "delytelseId" to 3,
+                        "refDelytelseId" to null,
+                        "datoStatusFom" to null,
+                        "endringskode" to "NY",
+                        "klassekode" to "SPATORD",
+                        "statuskode" to null
+                    )
+                )
+
             )
         )
     )
