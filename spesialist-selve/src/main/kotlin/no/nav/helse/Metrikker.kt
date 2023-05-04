@@ -15,10 +15,6 @@ import no.nav.helse.rapids_rivers.isMissingOrNull
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-internal val overstyringsteller = Counter.build("overstyringer", "Teller antall overstyringer")
-    .labelNames("opplysningstype", "type")
-    .register()
-
 internal val automatiseringsteller = Counter.build("automatiseringer", "Teller antall automatiseringer")
     .register()
 
