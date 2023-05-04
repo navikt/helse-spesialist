@@ -12,7 +12,6 @@ import no.nav.helse.mediator.api.Arbeidsgiver
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdKafkaDto
 import no.nav.helse.mediator.api.OverstyrInntektOgRefusjonKafkaDto
-import no.nav.helse.mediator.api.OverstyrTidslinjeKafkaDto
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.EndretSkjermetinfo
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov
@@ -69,6 +68,7 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.registrerTidsbrukForGodkjenningsbehov
 import no.nav.helse.registrerTidsbrukForHendelse
+import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeKafkaDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.overstyringsteller
 import no.nav.helse.spesialist.api.tildeling.TildelingDao

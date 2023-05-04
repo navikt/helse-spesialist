@@ -17,6 +17,8 @@ import kotlinx.coroutines.withContext
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
+import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDTO
+import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeKafkaDto
 import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDto
 
@@ -85,46 +87,6 @@ internal fun Route.overstyringApi(hendelseMediator: HendelseMediator) {
     }
 }
 
-
-@JsonIgnoreProperties
-class OverstyrTidslinjeDTO(
-    val organisasjonsnummer: String,
-    val fødselsnummer: String,
-    val aktørId: String,
-    val begrunnelse: String,
-    val dager: List<OverstyringdagDTO>
-) {
-    @JsonIgnoreProperties
-    class OverstyringdagDTO(
-        val dato: LocalDate,
-        val type: String,
-        val fraType: String,
-        val grad: Int?,
-        val fraGrad: Int?
-    )
-}
-
-data class OverstyrTidslinjeKafkaDto(
-    val saksbehandlerEpost: String,
-    val saksbehandlerOid: UUID,
-    val saksbehandlerNavn: String,
-    val saksbehandlerIdent: String,
-    val organisasjonsnummer: String,
-    val fødselsnummer: String,
-    val aktørId: String,
-    val begrunnelse: String,
-    val dager: List<Dag>
-) {
-    data class Dag(
-        val dato: LocalDate,
-        val type: Type,
-        val fraType: Type,
-        val grad: Int?,
-        val fraGrad: Int?
-    ) {
-        enum class Type { Sykedag, SykedagNav, Feriedag, Egenmeldingsdag, Permisjonsdag, Arbeidsdag, Avvistdag }
-    }
-}
 
 data class SubsumsjonDto(
     val paragraf: String,
