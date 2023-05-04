@@ -35,6 +35,15 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
     private val meldingsfabrikk = TestmeldingsfabrikkV2
     private val newUUID get() = UUID.randomUUID()
 
+    fun sendVarseldefinisjonerEndret(
+        definisjoner: List<Triple<UUID, String, String>> = listOf(Triple(UUID.randomUUID(), "SB_EX_1", "SB_EX_1 tittel"))
+    ): UUID = newUUID.also { id ->
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagVarseldefinisjonerEndret(id, definisjoner)
+        )
+    }
+
+
     fun sendSøknadSendt(
         aktørId: String,
         fødselsnummer: String,

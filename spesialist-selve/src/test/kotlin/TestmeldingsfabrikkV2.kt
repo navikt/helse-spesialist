@@ -25,6 +25,38 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 
 internal object TestmeldingsfabrikkV2 {
+    internal fun lagVarseldefinisjonerEndret(
+        id: UUID,
+        definisjoner: List<Triple<UUID, String, String>>
+    ): String {
+        return nyHendelse(
+            id,
+            "varseldefinisjoner_endret",
+            mapOf(
+                "definisjoner" to definisjoner.map { (id, kode, tittel) ->
+                    lagVarseldefinisjon(id = id, kode = kode, tittel = tittel)
+                }
+            )
+        )
+    }
+
+    private fun lagVarseldefinisjon(
+        id: UUID = UUID.randomUUID(),
+        kode: String = "EN_KODE",
+        tittel: String = "EN_TITTEL",
+        forklaring: String = "EN_FORKLARING",
+        handling: String = "EN_HANDLING",
+        opprettet: LocalDateTime = LocalDateTime.now(),
+    ): Map<String, Any> = mapOf(
+        "id" to id,
+        "kode" to kode,
+        "tittel" to tittel,
+        "forklaring" to forklaring,
+        "handling" to handling,
+        "avviklet" to false,
+        "opprettet" to opprettet,
+    )
+
     fun lagSøknadSendt(
         organisasjonsnummer: String,
         aktørId: String,

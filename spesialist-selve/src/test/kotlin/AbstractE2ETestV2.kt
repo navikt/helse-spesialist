@@ -327,6 +327,10 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         håndterVedtakFattet(vedtaksperiodeId = vedtaksperiodeId)
     }
 
+    protected fun håndterVarseldefinisjonerEndret(vararg varselkoder: Triple<UUID, String, String>) {
+        sisteMeldingId = meldingssenderV2.sendVarseldefinisjonerEndret(varselkoder.toList())
+    }
+
     protected fun håndterSøknad(
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
@@ -1003,6 +1007,15 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         }
     }
 
+    protected fun assertDefinisjonerFor(varselkode: String, vararg forventedeTitler: String) {
+        @Language("PostgreSQL")
+        val query = "SELECT tittel FROM api_varseldefinisjon WHERE kode = ? ORDER BY id"
+        val titler = sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, varselkode).map { it.string("tittel") }.asList)
+        }
+        assertEquals(forventedeTitler.toList(), titler)
+    }
+
     protected fun assertUtbetalinger(utbetalingId: UUID, forventetAntall: Int) {
         @Language("PostgreSQL")
         val query = "SELECT COUNT(1) FROM utbetaling_id ui INNER JOIN utbetaling u on ui.id = u.utbetaling_id_ref WHERE ui.utbetaling_id = ?"
@@ -1304,6 +1317,14 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
             requireNotNull(
                 session.run(queryOf(query, vedtaksperiodeId).map { row -> row.int(1) }.asSingle)
             )
+        }
+    }
+
+    protected fun nullstillVarseldefinisjoner() {
+        @Language("PostgreSQL")
+        val query = "TRUNCATE TABLE selve_varsel; TRUNCATE TABLE api_varseldefinisjon CASCADE;"
+        sessionOf(dataSource).use {
+            it.run(queryOf(query).asExecute)
         }
     }
 
