@@ -3,20 +3,20 @@ package no.nav.helse.e2e
 import AbstractE2ETestV2
 import AbstractE2ETestV2.Mottaker.ARBEIDSGIVER
 import AbstractE2ETestV2.Mottaker.SYKMELDT
-import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.Testdata._MODIFISERTBART_FØDSELSNUMMER
-import no.nav.helse.januar
-import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.Testdata.FØDSELSNUMMER
+import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
 import org.junit.jupiter.api.Test
 
 internal class UtbetalingsfilterE2ETest : AbstractE2ETestV2() {
 
     @Test
     fun `Går gjennom begge filtreringer`() {
-        behandleGodkjenningsbehov(
-            fødselsnummer = FØDSELSNUMMER_SOM_GÅR_GJENNOM_FILTER,
-            periodetype = Periodetype.FORLENGELSE,
+        fremForbiUtbetalingsfilter(
+            periodetype = FORLENGELSE,
+            fødselsnummer = FØDSELSNUMMER,
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = utbetalingId,
             mottaker = SYKMELDT,
         )
         assertVedtaksperiodeEksisterer(vedtaksperiodeId)
@@ -26,32 +26,15 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETestV2() {
 
     @Test
     fun `går gjennom uten personutbetaling`() {
-        behandleGodkjenningsbehov(
-            fødselsnummer = FØDSELSNUMMER_SOM_IKKE_GÅR_GJENNOM_FILTER,
-            periodetype = Periodetype.FORLENGELSE,
+        fremForbiUtbetalingsfilter(
+            periodetype = FORLENGELSE,
+            fødselsnummer = FØDSELSNUMMER,
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = utbetalingId,
             mottaker = ARBEIDSGIVER,
         )
         assertVedtaksperiodeEksisterer(vedtaksperiodeId)
         assertIkkeAvvistIUtbetalingsfilter()
-    }
-
-    private fun behandleGodkjenningsbehov(
-        fødselsnummer: String,
-        periodeFom: LocalDate = 1.januar,
-        periodeTom: LocalDate = 31.januar,
-        periodetype: Periodetype,
-        mottaker: Mottaker,
-    ) {
-        _MODIFISERTBART_FØDSELSNUMMER = fødselsnummer
-        fremForbiUtbetalingsfilter(
-            fom = periodeFom,
-            tom = periodeTom,
-            periodetype = periodetype,
-            fødselsnummer = fødselsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingId = utbetalingId,
-            mottaker = mottaker,
-        )
     }
 
     // Dette er litt skjørt, men jeg finner ikke noen bedre måte å asserte at UtbetalingfilterCommand kjørte OK på
@@ -60,7 +43,5 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETestV2() {
     private companion object {
         private val vedtaksperiodeId = UUID.randomUUID()
         private val utbetalingId = UUID.randomUUID()
-        private const val FØDSELSNUMMER_SOM_IKKE_GÅR_GJENNOM_FILTER = "12020052345"
-        private const val FØDSELSNUMMER_SOM_GÅR_GJENNOM_FILTER = "31020052345"
     }
 }

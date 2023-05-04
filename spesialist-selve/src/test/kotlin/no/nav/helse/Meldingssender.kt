@@ -8,13 +8,10 @@ import no.nav.helse.TestRapidHelpers.siste
 import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
-import no.nav.helse.Testdata.VARSEL_KODE_1
-import no.nav.helse.Testdata.VARSEL_KODE_2
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.ArbeidsgiverinformasjonJson
-import no.nav.helse.mediator.meldinger.TestmeldingfabrikkUtenFnr
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
@@ -40,28 +37,6 @@ internal object Meldingssender {
         )
     }
 
-    fun sendVedtaksperiodeEndret(
-        aktørId: String,
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-        vedtaksperiodeId: UUID,
-        forrigeTilstand: String = "FORRIGE_TILSTAND",
-        gjeldendeTilstand: String = "GJELDENDE_TILSTAND",
-        forårsaketAvId: UUID = UUID.randomUUID(),
-    ): UUID = uuid.also { id ->
-        testRapid.sendTestMessage(
-            meldingsfabrikk.lagVedtaksperiodeEndret(
-                id,
-                aktørId,
-                fødselsnummer,
-                organisasjonsnummer,
-                vedtaksperiodeId,
-                forrigeTilstand,
-                gjeldendeTilstand,
-                forårsaketAvId,
-            )
-        )
-    }
     fun sendVedtaksperiodeOpprettet(
         aktørId: String,
         fødselsnummer: String,
@@ -86,17 +61,6 @@ internal object Meldingssender {
             )
         )
     }
-
-    fun sendVarseldefinisjonerEndret(
-        definisjoner: List<Map<String, Any>> =
-            listOf(
-                meldingsfabrikkUtenFnr.lagVarseldefinisjon(kode = VARSEL_KODE_1),
-                meldingsfabrikkUtenFnr.lagVarseldefinisjon(kode = VARSEL_KODE_2)
-            )
-    ): UUID =
-        uuid.also { id ->
-            testRapid.sendTestMessage(meldingsfabrikkUtenFnr.lagVarseldefinisjonerEndret(id, definisjoner))
-        }
 
     fun sendGodkjenningsbehov(
         aktørId: String = AKTØR,
@@ -211,64 +175,6 @@ internal object Meldingssender {
 
             testRapid.sendTestMessage(json)
         }
-    }
-
-    fun sendPersonUtbetalingEndret(
-        type: String,
-        status: Utbetalingsstatus,
-        orgnr: String,
-        arbeidsgiverFagsystemId: String = "DFGKJDWOAWODOAWOW",
-        personFagsystemId: String = "ASJKLD90283JKLHAS3JKLF",
-        forrigeStatus: Utbetalingsstatus = status,
-        fødselsnummer: String = FØDSELSNUMMER,
-        utbetalingId: UUID
-    ) {
-        @Language("JSON")
-        val json = """
-{
-    "@event_name": "utbetaling_endret",
-    "@id": "${UUID.randomUUID()}",
-    "@opprettet": "${LocalDateTime.now()}",
-    "utbetalingId": "$utbetalingId",
-    "fødselsnummer": "$fødselsnummer",
-    "type": "$type",
-    "forrigeStatus": "$forrigeStatus",
-    "gjeldendeStatus": "$status",
-    "organisasjonsnummer": "$orgnr",
-    "arbeidsgiverOppdrag": {
-      "mottaker": "$orgnr",
-      "fagområde": "SP",
-      "endringskode": "NY",
-      "nettoBeløp": 20000,
-      "fagsystemId": "$arbeidsgiverFagsystemId",
-      "sisteArbeidsgiverdag": "${LocalDate.MIN}",
-      "linjer": []
-    },
-    "personOppdrag": {
-      "mottaker": "$FØDSELSNUMMER",
-      "fagområde": "SP",
-      "endringskode": "NY",
-      "nettoBeløp": 20000,
-      "fagsystemId": "$personFagsystemId",
-      "linjer": [{
-          "fom": "${LocalDate.now()}",
-          "tom": "${LocalDate.now()}",
-          "dagsats": 2000,
-          "totalbeløp": 2000,
-          "lønn": 2000,
-          "grad": 100.00,
-          "refFagsystemId": "asdfg",
-          "delytelseId": 2,
-          "refDelytelseId": 1,
-          "datoStatusFom": null,
-          "endringskode": "NY",
-          "klassekode": "SPATORD",
-          "statuskode": null
-        }]
-    }
-}"""
-
-        testRapid.sendTestMessage(json)
     }
 
     fun sendArbeidsforholdløsningOld(
@@ -491,7 +397,6 @@ internal object Meldingssender {
         }
 
     private val meldingsfabrikk get() = Testmeldingfabrikk(FØDSELSNUMMER, AKTØR)
-    private val meldingsfabrikkUtenFnr get() = TestmeldingfabrikkUtenFnr()
 
     private val uuid get() = UUID.randomUUID()
 

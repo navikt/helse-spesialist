@@ -20,9 +20,7 @@ import no.nav.helse.spesialist.api.graphql.hentsnapshot.Soknadsfrist
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.Sykepengedager
 
 object Testdata {
-    // Modifiserbare globale verdier fører ofte til spaghetti. Ved å bruke et stygt navn brer det forhåpentligvis ikke om seg
-    var _MODIFISERTBART_FØDSELSNUMMER = "12020052345"
-    val FØDSELSNUMMER get() = _MODIFISERTBART_FØDSELSNUMMER
+    const val FØDSELSNUMMER = "12020052345"
 
     const val AKTØR = "999999999"
     const val ORGNR = "222222222"
@@ -44,7 +42,6 @@ object Testdata {
             saksbehandlereMedTilgangTilStikkprøve = emptyList()
         )
     internal val UTBETALING_ID = UUID.randomUUID()
-    internal val UTBETALING_ID2 = UUID.randomUUID()
 
     const val VARSEL_KODE_1 = "VARSEL_KODE_1"
     const val VARSEL_KODE_2 = "VARSEL_KODE_2"
@@ -57,8 +54,6 @@ object Testdata {
         aktørId = AKTØR,
         utbetalingId = UTBETALING_ID,
     )
-
-    val SNAPSHOT_UTEN_WARNINGS = snapshot()
 
     fun snapshot(
         versjon: Int = 1,
@@ -154,26 +149,4 @@ object Testdata {
             )
         }
 
-    fun snapshotMedRevurderingUtbetaling(
-        versjon: Int = 1,
-        fødselsnummer: String = FØDSELSNUMMER,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
-        utbetalingId: UUID,
-        arbeidsgiverbeløp: Int = 30000,
-        personbeløp: Int = 0,
-    ): GraphQLClientResponse<HentSnapshot.Result> =
-        snapshot(
-            versjon, fødselsnummer, vedtaksperiodeId, utbetalingId,
-            arbeidsgiverbeløp = arbeidsgiverbeløp,
-            personbeløp = personbeløp,
-            utbetaling = GraphQLUtbetaling(
-                id = utbetalingId.toString(),
-                arbeidsgiverFagsystemId = "EN_FAGSYSTEMID",
-                arbeidsgiverNettoBelop = arbeidsgiverbeløp,
-                personFagsystemId = "EN_FAGSYSTEMID",
-                personNettoBelop = personbeløp,
-                statusEnum = GraphQLUtbetalingstatus.UBETALT,
-                typeEnum = Utbetalingtype.REVURDERING,
-            )
-        )
 }

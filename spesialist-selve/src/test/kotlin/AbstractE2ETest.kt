@@ -1,6 +1,5 @@
 import ToggleHelpers.enable
 import com.expediagroup.graphql.client.types.GraphQLClientResponse
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -29,9 +28,7 @@ import no.nav.helse.Meldingssender.sendVedtaksperiodeOpprettet
 import no.nav.helse.Meldingssender.sendVergemålløsningOld
 import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsningOld
 import no.nav.helse.TestRapidHelpers.hendelser
-import no.nav.helse.TestRapidHelpers.løsning
 import no.nav.helse.TestRapidHelpers.oppgaver
-import no.nav.helse.TestRapidHelpers.siste
 import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
@@ -45,11 +42,8 @@ import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.OverstyringMediator
 import no.nav.helse.mediator.Toggle
-import no.nav.helse.mediator.api.GodkjenningDTO
-import no.nav.helse.mediator.api.GodkjenningService
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
-import no.nav.helse.mediator.meldinger.TestmeldingfabrikkUtenFnr
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.automatisering.Automatisering
@@ -65,16 +59,13 @@ import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålDao
-import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
-import no.nav.helse.spesialist.api.abonnement.AbonnementDao
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.graphql.HentSnapshot
 import no.nav.helse.spesialist.api.graphql.query.PersonQuery
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
-import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.person.PersonApiDao
@@ -90,10 +81,7 @@ import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.fail
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao as OpptegnelseApiDao
 
 internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
@@ -124,8 +112,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private val overstyringApiDao = OverstyringApiDao(dataSource)
     private val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
     private val opptegnelseDao = OpptegnelseApiDao(dataSource)
-    protected val opptegnelseApiDao = OpptegnelseApiDao(dataSource)
-    protected val abonnementDao = AbonnementDao(dataSource)
     protected val saksbehandlerDao = SaksbehandlerDao(dataSource)
     protected val reservasjonDao = ReservasjonDao(dataSource)
     private val notatDao = NotatDao(dataSource)
@@ -140,7 +126,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val testRapid = TestRapid()
 
     protected val meldingsfabrikk get() = Testmeldingfabrikk(FØDSELSNUMMER, AKTØR)
-    protected val meldingsfabrikkUtenFnr get() = TestmeldingfabrikkUtenFnr()
 
     protected val oppgaveMediator =
         OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao, opptegnelseDao)
@@ -177,11 +162,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         rapidsConnection = testRapid,
         oppgaveMediator = oppgaveMediator,
         hendelsefabrikk = hendelsefabrikk
-    )
-
-    private val godkjenningService = GodkjenningService(
-        dataSource,
-        rapidsConnection = testRapid,
     )
 
     internal val dataFetchingEnvironment = mockk<DataFetchingEnvironment>(relaxed = true)
@@ -266,50 +246,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         sendInntektløsningOld(godkjenningsmeldingId = oppgaveId)
     }
 
-    /**
-     * Denne bidrar, på godt og vondt, til en slags integrasjonstesting mellom API og selve, siden den stort sett kalles
-     * fra tester som tester selve, men trigger noe oppførsel fra API-siden, som de forskjellige testene asserter på
-     * (at status er "AvventerSystem", blant annet).
-     */
-    protected fun sendSaksbehandlerløsningFraAPI(
-        oppgaveId: Long,
-        saksbehandlerIdent: String,
-        saksbehandlerEpost: String,
-        saksbehandlerOid: UUID,
-        godkjent: Boolean,
-        begrunnelser: List<String>? = null,
-        kommentar: String? = null,
-    ): UUID {
-        godkjenningService.håndter(
-            godkjenningDTO = GodkjenningDTO(
-                oppgaveId,
-                godkjent,
-                saksbehandlerIdent,
-                if (godkjent) null else "årsak",
-                begrunnelser,
-                kommentar
-            ),
-            epost = saksbehandlerEpost,
-            oid = saksbehandlerOid
-        )
-        assertEquals("AvventerSystem", testRapid.inspektør.siste("oppgave_oppdatert").path("status").asText())
-        val løsning = testRapid.inspektør.siste("saksbehandler_løsning")
-        testRapid.sendTestMessage(løsning.toString())
-        return UUID.fromString(løsning.path("@id").asText())
-    }
-
-    protected fun assertHendelse(hendelseId: UUID) {
-        assertEquals(1, sessionOf(dataSource).use {
-            it.run(queryOf("SELECT COUNT(1) FROM hendelse WHERE id = ?", hendelseId).map { row -> row.int(1) }.asSingle)
-        })
-    }
-
-    protected fun assertGodkjenningsbehovIkkeLagret(hendelseId: UUID ) {
-        assertEquals(0, sessionOf(dataSource).use {
-            it.run(queryOf("SELECT COUNT(1) FROM hendelse WHERE id = ? AND type = 'GODKJENNINGSBEHOV'", hendelseId).map { row -> row.int(1) }.asSingle)
-        })
-    }
-
     protected fun person(fødselsnummer: String, aktørId: String): Int {
         return sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
@@ -353,47 +289,9 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         }
     }
 
-    protected fun assertGodkjenningsbehovløsning(
-        godkjent: Boolean,
-        saksbehandlerIdent: String,
-        block: (JsonNode) -> Unit = {},
-    ) {
-        testRapid.inspektør.løsning("Godkjenning").apply {
-            if (this == null) fail("Forventet å finne svar på godkjenningsbehov")
-            assertTrue(path("godkjent").isBoolean)
-            assertEquals(godkjent, path("godkjent").booleanValue())
-            assertEquals(saksbehandlerIdent, path("saksbehandlerIdent").textValue())
-            assertNotNull(path("godkjenttidspunkt").asLocalDateTime())
-            block(this)
-        }
-    }
-
-    protected fun assertTilstand(hendelseId: UUID, vararg tilstand: String) {
-        sessionOf(dataSource).use { session ->
-            session.run(
-                queryOf(
-                    "SELECT tilstand FROM command_context WHERE hendelse_id = ? ORDER BY id ASC",
-                    hendelseId
-                ).map { it.string("tilstand") }.asList
-            )
-        }.also {
-            assertEquals(tilstand.toList(), it)
-        }
-    }
-
     protected fun assertOppgaver(antall: Int) {
         val oppgaver = testRapid.inspektør.oppgaver()
         assertEquals(antall, oppgaver.size)
-    }
-
-    protected fun assertOppgavestatuser(indeks: Int, vararg status: Oppgavestatus) {
-        val oppgaver = testRapid.inspektør.oppgaver()
-        assertEquals(status.toList(), oppgaver[indeks]?.statuser)
-    }
-
-    protected fun assertOppgavetype(indeks: Int, type: String) {
-        val oppgaver = testRapid.inspektør.oppgaver()
-        assertEquals(type, oppgaver[indeks]?.type)
     }
 
     protected fun assertIngenOppgave() {
