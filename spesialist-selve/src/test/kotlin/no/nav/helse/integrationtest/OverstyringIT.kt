@@ -30,7 +30,7 @@ import no.nav.helse.mediator.api.AbstractApiTest.Companion.azureAdAppConfig
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.api.overstyringApi
 import no.nav.helse.spesialist.api.azureAdAppAuthentication
-import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDTO
+import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -46,13 +46,13 @@ internal class OverstyringIT : AbstractE2ETest() {
             setUpApplication()
             settOppBruker()
             assertOppgaver(1)
-            val overstyring = OverstyrTidslinjeDTO(
+            val overstyring = OverstyrTidslinjeDto(
                 organisasjonsnummer = ORGNR,
                 fødselsnummer = FØDSELSNUMMER,
                 aktørId = AKTØR,
                 begrunnelse = "en begrunnelse",
                 dager = listOf(
-                    OverstyrTidslinjeDTO.OverstyringdagDTO(dato = 10.januar, type = "Feriedag", fraType = "Sykedag", grad = null, fraGrad = 100)
+                    OverstyrTidslinjeDto.OverstyrDagDto(dato = 10.januar, type = "Feriedag", fraType = "Sykedag", grad = null, fraGrad = 100)
                 ),
             )
 

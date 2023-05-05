@@ -29,7 +29,7 @@ import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spesialist.api.AzureAdAppConfig
 import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.azureAdAppAuthentication
-import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDTO
+import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -41,13 +41,13 @@ internal class OverstyringApiTest : AbstractE2ETest() {
     fun `overstyr tidslinje`() {
         testApplication {
             setUpApplication()
-            val overstyring = OverstyrTidslinjeDTO(
+            val overstyring = OverstyrTidslinjeDto(
                 organisasjonsnummer = ORGNR,
                 fødselsnummer = FØDSELSNUMMER,
                 aktørId = AKTØR,
                 begrunnelse = "en begrunnelse",
                 dager = listOf(
-                    OverstyrTidslinjeDTO.OverstyringdagDTO(dato = 10.januar, type = "Feriedag", fraType = "Sykedag", grad = null, fraGrad = 100)
+                    OverstyrTidslinjeDto.OverstyrDagDto(dato = 10.januar, type = "Feriedag", fraType = "Sykedag", grad = null, fraGrad = 100)
                 )
             )
 
@@ -73,13 +73,13 @@ internal class OverstyringApiTest : AbstractE2ETest() {
     fun `overstyr tidslinje til arbeidsdag`() {
         testApplication {
             setUpApplication()
-            val overstyring = OverstyrTidslinjeDTO(
+            val overstyring = OverstyrTidslinjeDto(
                 organisasjonsnummer = ORGNR,
                 fødselsnummer = FØDSELSNUMMER,
                 aktørId = AKTØR,
                 begrunnelse = "en begrunnelse",
                 dager = listOf(
-                    OverstyrTidslinjeDTO.OverstyringdagDTO(dato = 10.januar, type = "Arbeidsdag", fraType = "Sykedag", grad = null, fraGrad = 100)
+                    OverstyrTidslinjeDto.OverstyrDagDto(dato = 10.januar, type = "Arbeidsdag", fraType = "Sykedag", grad = null, fraGrad = 100)
                 )
             )
 
@@ -105,13 +105,13 @@ internal class OverstyringApiTest : AbstractE2ETest() {
     fun `overstyr tidslinje fra arbeidsdag`() {
         testApplication {
             setUpApplication()
-            val overstyring = OverstyrTidslinjeDTO(
+            val overstyring = OverstyrTidslinjeDto(
                 organisasjonsnummer = ORGNR,
                 fødselsnummer = FØDSELSNUMMER,
                 aktørId = AKTØR,
                 begrunnelse = "en begrunnelse",
                 dager = listOf(
-                    OverstyrTidslinjeDTO.OverstyringdagDTO(dato = 10.januar, type = "Sykedag", fraType = "Arbeidsdag", grad = null, fraGrad = 100)
+                    OverstyrTidslinjeDto.OverstyrDagDto(dato = 10.januar, type = "Sykedag", fraType = "Arbeidsdag", grad = null, fraGrad = 100)
                 )
             )
 

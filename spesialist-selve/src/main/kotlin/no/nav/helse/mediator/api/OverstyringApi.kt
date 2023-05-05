@@ -17,14 +17,14 @@ import kotlinx.coroutines.withContext
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
-import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDTO
+import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeKafkaDto
 import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDto
 
 internal fun Route.overstyringApi(hendelseMediator: HendelseMediator) {
     post("/api/overstyr/dager") {
-        val overstyring = call.receive<OverstyrTidslinjeDTO>()
+        val overstyring = call.receive<OverstyrTidslinjeDto>()
 
         val accessToken = requireNotNull(call.principal<JWTPrincipal>())
         val oid = UUID.fromString(accessToken.payload.getClaim("oid").asString())
@@ -42,7 +42,7 @@ internal fun Route.overstyringApi(hendelseMediator: HendelseMediator) {
             aktørId = overstyring.aktørId,
             begrunnelse = overstyring.begrunnelse,
             dager = overstyring.dager.map {
-                OverstyrTidslinjeKafkaDto.Dag(
+                OverstyrTidslinjeKafkaDto.OverstyrDagKafkaDto(
                     dato = it.dato,
                     type = enumValueOf(it.type),
                     fraType = enumValueOf(it.fraType),

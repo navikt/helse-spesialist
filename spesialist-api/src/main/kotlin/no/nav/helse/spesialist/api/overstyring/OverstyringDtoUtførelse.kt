@@ -5,15 +5,15 @@ import java.time.LocalDate
 import java.util.UUID
 
 @JsonIgnoreProperties
-class OverstyrTidslinjeDTO(
+class OverstyrTidslinjeDto(
     val organisasjonsnummer: String,
     val fødselsnummer: String,
     val aktørId: String,
     val begrunnelse: String,
-    val dager: List<OverstyringdagDTO>
+    val dager: List<OverstyrDagDto>
 ) {
     @JsonIgnoreProperties
-    class OverstyringdagDTO(
+    class OverstyrDagDto(
         val dato: LocalDate,
         val type: String,
         val fraType: String,
@@ -31,9 +31,9 @@ data class OverstyrTidslinjeKafkaDto(
     val fødselsnummer: String,
     val aktørId: String,
     val begrunnelse: String,
-    val dager: List<Dag>
+    val dager: List<OverstyrDagKafkaDto>
 ) {
-    data class Dag(
+    data class OverstyrDagKafkaDto(
         val dato: LocalDate,
         val type: Type,
         val fraType: Type,
