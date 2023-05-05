@@ -50,7 +50,7 @@ class PersonApiDao(dataSource: DataSource) : HelseDao(dataSource) {
            LEFT JOIN automatisering a ON a.vedtaksperiode_ref = v.id
            LEFT JOIN oppgave o ON o.vedtak_ref = v.id
            WHERE p.fodselsnummer = :fodselsnummer
-             AND a.id IS NOT NULL OR o.id IS NOT NULL
+             AND (a.id IS NOT NULL OR o.id IS NOT NULL)
            LIMIT 1
        """.single(mapOf("fodselsnummer" to fødselsnummer.toLong())) { true } ?: false
 }
