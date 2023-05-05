@@ -28,7 +28,6 @@ import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.Testdata.snapshot
 import no.nav.helse.januar
-import no.nav.helse.mediator.api.Arbeidsgiver
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
@@ -56,6 +55,7 @@ import no.nav.helse.spesialist.api.graphql.HentSnapshot
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.overstyring.Dagtype
+import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsgiverDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import no.nav.helse.spesialist.api.overstyring.SubsumsjonDto
@@ -930,8 +930,8 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         skjæringstidspunkt: LocalDate = 1.januar(1970),
-        arbeidsgivere: List<Arbeidsgiver> = listOf(
-            Arbeidsgiver(
+        arbeidsgivere: List<OverstyrArbeidsgiverDto> = listOf(
+            OverstyrArbeidsgiverDto(
                 organisasjonsnummer = ORGNR,
                 månedligInntekt = 25000.0,
                 fraMånedligInntekt = 25001.0,

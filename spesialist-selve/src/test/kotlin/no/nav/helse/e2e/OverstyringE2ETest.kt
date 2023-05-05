@@ -14,7 +14,6 @@ import no.nav.helse.Testdata.SAKSBEHANDLERTILGANGER_UTEN_TILGANGER
 import no.nav.helse.Testdata.SAKSBEHANDLER_EPOST
 import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.januar
-import no.nav.helse.mediator.api.Arbeidsgiver
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
@@ -28,6 +27,7 @@ import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.overstyring.Dagtype.Feriedag
 import no.nav.helse.spesialist.api.overstyring.Dagtype.Sykedag
+import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsgiverDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.overstyring.SubsumsjonDto
@@ -67,7 +67,7 @@ internal class OverstyringE2ETest : AbstractE2ETestV2() {
         fremTilSaksbehandleroppgave()
         håndterOverstyrInntektOgRefusjon(
             arbeidsgivere = listOf(
-                Arbeidsgiver(
+                OverstyrArbeidsgiverDto(
                     organisasjonsnummer = ORGNR,
                     månedligInntekt = 25000.0,
                     fraMånedligInntekt = 25001.0,

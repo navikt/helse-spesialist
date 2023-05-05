@@ -6,7 +6,6 @@ import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.OverstyringMediator
-import no.nav.helse.mediator.api.Arbeidsgiver
 import no.nav.helse.mediator.api.arbeidsgiverelementer
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.InvaliderSaksbehandlerOppgaveCommand
@@ -23,6 +22,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
+import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsgiverDto
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import org.slf4j.Logger
@@ -41,7 +41,7 @@ internal class OverstyringInntektOgRefusjon(
     navn: String,
     epost: String,
     ident: String,
-    arbeidsgivere: List<Arbeidsgiver>,
+    arbeidsgivere: List<OverstyrArbeidsgiverDto>,
     skjæringstidspunkt: LocalDate,
     opprettet: LocalDateTime,
     private val json: String,

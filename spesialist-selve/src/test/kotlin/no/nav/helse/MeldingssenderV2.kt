@@ -5,7 +5,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.TestRapidHelpers.siste
-import no.nav.helse.mediator.api.Arbeidsgiver
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
@@ -25,6 +24,7 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.overstyring.Dagtype.Feriedag
 import no.nav.helse.spesialist.api.overstyring.Dagtype.Sykedag
+import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsgiverDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.overstyring.SubsumsjonDto
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
@@ -704,8 +704,8 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
         aktørId: String,
         fødselsnummer: String,
         skjæringstidspunkt: LocalDate = 1.januar(1970),
-        arbeidsgivere: List<Arbeidsgiver> = listOf(
-            Arbeidsgiver(
+        arbeidsgivere: List<OverstyrArbeidsgiverDto> = listOf(
+            OverstyrArbeidsgiverDto(
                 organisasjonsnummer = Testdata.ORGNR,
                 månedligInntekt = 15000.0,
                 fraMånedligInntekt = 25001.0,

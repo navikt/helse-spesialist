@@ -17,6 +17,7 @@ import kotlinx.coroutines.withContext
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
+import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsgiverDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeKafkaDto
 import no.nav.helse.spesialist.api.overstyring.RefusjonselementDto
@@ -94,37 +95,15 @@ data class OverstyrInntektOgRefusjonDTO(
     val aktørId: String,
     val fødselsnummer: String,
     val skjæringstidspunkt: LocalDate,
-    val arbeidsgivere: List<Arbeidsgiver>,
+    val arbeidsgivere: List<OverstyrArbeidsgiverDto>,
 )
-
-data class Arbeidsgiver(
-    val organisasjonsnummer: String,
-    val månedligInntekt: Double,
-    val fraMånedligInntekt: Double,
-    val refusjonsopplysninger: List<RefusjonselementDto>?,
-    val fraRefusjonsopplysninger: List<RefusjonselementDto>?,
-    val begrunnelse: String,
-    val forklaring: String,
-    val subsumsjon: SubsumsjonDto?,
-) {
-    fun toMap(): Map<String, Any?> = listOfNotNull(
-        "organisasjonsnummer" to organisasjonsnummer,
-        "månedligInntekt" to månedligInntekt,
-        "fraMånedligInntekt" to fraMånedligInntekt,
-        "refusjonsopplysninger" to refusjonsopplysninger,
-        "fraRefusjonsopplysninger" to fraRefusjonsopplysninger,
-        "begrunnelse" to begrunnelse,
-        "forklaring" to forklaring,
-        "subsumsjon" to subsumsjon,
-    ).toMap()
-}
 
 data class OverstyrInntektOgRefusjonKafkaDto(
     val saksbehandler: SaksbehandlerDto,
     val fødselsnummer: String,
     val aktørId: String,
     val skjæringstidspunkt: LocalDate,
-    val arbeidsgivere: List<Arbeidsgiver>,
+    val arbeidsgivere: List<OverstyrArbeidsgiverDto>,
 ) {
     fun somKafkaMessage() = JsonMessage.newMessage(
         "saksbehandler_overstyrer_inntekt_og_refusjon",
@@ -161,9 +140,9 @@ internal fun JsonNode.subsumsjonelementer(): SubsumsjonDto? {
     )
 }
 
-internal fun JsonNode.arbeidsgiverelementer(): List<Arbeidsgiver> {
+internal fun JsonNode.arbeidsgiverelementer(): List<OverstyrArbeidsgiverDto> {
     return this.map { jsonNode ->
-        Arbeidsgiver(
+        OverstyrArbeidsgiverDto(
             organisasjonsnummer = jsonNode["organisasjonsnummer"].asText(),
             månedligInntekt = jsonNode["månedligInntekt"].asDouble(),
             fraMånedligInntekt = jsonNode["fraMånedligInntekt"].asDouble(),
@@ -178,7 +157,7 @@ internal fun JsonNode.arbeidsgiverelementer(): List<Arbeidsgiver> {
 @JvmName("Refusjonselement")
 fun List<RefusjonselementDto>.toMap(): List<Map<String, Any?>> = this.map { it.toMap() }
 @JvmName("Arbeidsgivere")
-fun List<Arbeidsgiver>.toMap(): List<Map<String, Any?>> = this.map { it.toMap() }
+fun List<OverstyrArbeidsgiverDto>.toMap(): List<Map<String, Any?>> = this.map { it.toMap() }
 
 @JsonIgnoreProperties
 data class OverstyrArbeidsforholdDto(

@@ -7,8 +7,8 @@ import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.HelseDao
-import no.nav.helse.mediator.api.Arbeidsgiver
 import no.nav.helse.objectMapper
+import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsgiverDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import org.intellij.lang.annotations.Language
@@ -182,7 +182,7 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
         hendelseId: UUID,
         eksternHendelseId: UUID,
         fødselsnummer: String,
-        arbeidsgivere: List<Arbeidsgiver>,
+        arbeidsgivere: List<OverstyrArbeidsgiverDto>,
         saksbehandlerRef: UUID,
         skjæringstidspunkt: LocalDate,
         tidspunkt: LocalDateTime,

@@ -68,3 +68,25 @@ data class SubsumsjonDto(
         bokstav?.let { "bokstav" to bokstav },
     ).toMap()
 }
+
+data class OverstyrArbeidsgiverDto(
+    val organisasjonsnummer: String,
+    val månedligInntekt: Double,
+    val fraMånedligInntekt: Double,
+    val refusjonsopplysninger: List<RefusjonselementDto>?,
+    val fraRefusjonsopplysninger: List<RefusjonselementDto>?,
+    val begrunnelse: String,
+    val forklaring: String,
+    val subsumsjon: SubsumsjonDto?,
+) {
+    fun toMap(): Map<String, Any?> = listOfNotNull(
+        "organisasjonsnummer" to organisasjonsnummer,
+        "månedligInntekt" to månedligInntekt,
+        "fraMånedligInntekt" to fraMånedligInntekt,
+        "refusjonsopplysninger" to refusjonsopplysninger,
+        "fraRefusjonsopplysninger" to fraRefusjonsopplysninger,
+        "begrunnelse" to begrunnelse,
+        "forklaring" to forklaring,
+        "subsumsjon" to subsumsjon,
+    ).toMap()
+}

@@ -8,7 +8,6 @@ import java.util.UUID
 import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.MetrikkRiver
-import no.nav.helse.mediator.api.Arbeidsgiver
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdKafkaDto
 import no.nav.helse.mediator.api.OverstyrInntektOgRefusjonKafkaDto
@@ -68,6 +67,7 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.registrerTidsbrukForGodkjenningsbehov
 import no.nav.helse.registrerTidsbrukForHendelse
+import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsgiverDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeKafkaDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.overstyringsteller
@@ -444,7 +444,7 @@ internal class HendelseMediator(
         navn: String,
         ident: String,
         epost: String,
-        arbeidsgivere: List<Arbeidsgiver>,
+        arbeidsgivere: List<OverstyrArbeidsgiverDto>,
         skjæringstidspunkt: LocalDate,
         opprettet: LocalDateTime,
         json: String,
