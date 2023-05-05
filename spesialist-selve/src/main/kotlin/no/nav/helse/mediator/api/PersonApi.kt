@@ -47,7 +47,8 @@ internal fun Route.personApi(
 
     post("/api/vedtak") {
         val godkjenning = call.receive<GodkjenningDTO>()
-        log.info("Behandler godkjenning av oppgaveId=${godkjenning.oppgavereferanse}")
+        log.info("Behandler godkjenning/avslag: ${godkjenning.åpenLoggString()} (se sikker logg for detaljer)")
+        sikkerLogg.info("Behandler godkjenning/avslag: $godkjenning")
         val (oid, epostadresse) = requireNotNull(call.principal<JWTPrincipal>()).payload.let {
             UUID.fromString(it.getClaim("oid").asString()) to it.getClaim("preferred_username").asString()
         }
@@ -129,7 +130,7 @@ fun erProd() = "prod-gcp" == System.getenv("NAIS_CLUSTER_NAME")
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class OppdaterPersonsnapshotDto(
-    val fødselsnummer: String
+    val fødselsnummer: String,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -139,9 +140,16 @@ data class GodkjenningDTO(
     val saksbehandlerIdent: String,
     val årsak: String?,
     val begrunnelser: List<String>?,
-    val kommentar: String?
+    val kommentar: String?,
 ) {
     init {
         if (!godkjent) requireNotNull(årsak)
+    }
+
+    fun åpenLoggString() = buildString {
+        append("Godkjenning(")
+        append("oppgavereferanse=$oppgavereferanse,")
+        append("godkjent=$godkjent")
+        append(")")
     }
 }
