@@ -7,7 +7,6 @@ import java.util.UUID
 import no.nav.helse.TestRapidHelpers.siste
 import no.nav.helse.mediator.api.Arbeidsgiver
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt
-import no.nav.helse.mediator.api.SubsumsjonDto
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.ArbeidsgiverinformasjonJson
@@ -27,6 +26,7 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.overstyring.Dagtype.Feriedag
 import no.nav.helse.spesialist.api.overstyring.Dagtype.Sykedag
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
+import no.nav.helse.spesialist.api.overstyring.SubsumsjonDto
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.person.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals

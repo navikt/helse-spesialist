@@ -16,7 +16,6 @@ import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.januar
 import no.nav.helse.mediator.api.Arbeidsgiver
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
-import no.nav.helse.mediator.api.SubsumsjonDto
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
@@ -31,6 +30,7 @@ import no.nav.helse.spesialist.api.overstyring.Dagtype.Feriedag
 import no.nav.helse.spesialist.api.overstyring.Dagtype.Sykedag
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
+import no.nav.helse.spesialist.api.overstyring.SubsumsjonDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao

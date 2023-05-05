@@ -19,6 +19,8 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeKafkaDto
+import no.nav.helse.spesialist.api.overstyring.RefusjonselementDto
+import no.nav.helse.spesialist.api.overstyring.SubsumsjonDto
 import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDto
 
@@ -88,19 +90,6 @@ internal fun Route.overstyringApi(hendelseMediator: HendelseMediator) {
 }
 
 
-data class SubsumsjonDto(
-    val paragraf: String,
-    val ledd: String? = null,
-    val bokstav: String? = null,
-) {
-
-    fun toMap(): Map<String, Any> = listOfNotNull(
-        "paragraf" to paragraf,
-        ledd?.let { "ledd" to ledd },
-        bokstav?.let { "bokstav" to bokstav },
-    ).toMap()
-}
-
 data class OverstyrInntektOgRefusjonDTO(
     val aktørId: String,
     val fødselsnummer: String,
@@ -112,8 +101,8 @@ data class Arbeidsgiver(
     val organisasjonsnummer: String,
     val månedligInntekt: Double,
     val fraMånedligInntekt: Double,
-    val refusjonsopplysninger: List<Refusjonselement>?,
-    val fraRefusjonsopplysninger: List<Refusjonselement>?,
+    val refusjonsopplysninger: List<RefusjonselementDto>?,
+    val fraRefusjonsopplysninger: List<RefusjonselementDto>?,
     val begrunnelse: String,
     val forklaring: String,
     val subsumsjon: SubsumsjonDto?,
@@ -152,22 +141,10 @@ data class OverstyrInntektOgRefusjonKafkaDto(
     )
 }
 
-data class Refusjonselement(
-    val fom: LocalDate,
-    val tom: LocalDate? = null,
-    val beløp: Double
-) {
-    fun toMap(): Map<String, Any?> = listOfNotNull(
-        "fom" to fom,
-        "tom" to tom,
-        "beløp" to beløp,
-    ).toMap()
-}
-
-internal fun JsonNode.refusjonselementer(): List<Refusjonselement>? {
+internal fun JsonNode.refusjonselementer(): List<RefusjonselementDto>? {
     if (this.isNull) return null
     return this.map { jsonNode ->
-        Refusjonselement(
+        RefusjonselementDto(
             fom = jsonNode["fom"].asLocalDate(),
             tom = if (jsonNode["tom"].isNull) null else jsonNode["tom"].asLocalDate(),
             beløp = jsonNode["beløp"].asDouble()
@@ -199,7 +176,7 @@ internal fun JsonNode.arbeidsgiverelementer(): List<Arbeidsgiver> {
     }
 }
 @JvmName("Refusjonselement")
-fun List<Refusjonselement>.toMap(): List<Map<String, Any?>> = this.map { it.toMap() }
+fun List<RefusjonselementDto>.toMap(): List<Map<String, Any?>> = this.map { it.toMap() }
 @JvmName("Arbeidsgivere")
 fun List<Arbeidsgiver>.toMap(): List<Map<String, Any?>> = this.map { it.toMap() }
 
