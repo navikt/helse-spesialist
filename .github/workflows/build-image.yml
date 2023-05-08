@@ -1,0 +1,38 @@
+name: Gjenbrukbar workflow for docker image
+
+on: workflow_call
+
+jobs:
+  build:
+    permissions:
+      contents: "read"
+      id-token: "write"
+    name: Build image
+    runs-on: ubuntu-latest-16-cores
+    outputs:
+      image: ${{ steps.docker-build-push.outputs.image }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17.x'
+
+      - uses: gradle/gradle-build-action@v2
+        name: Gradle build
+        with:
+          arguments: :spesialist-selve:build # felles- og api-modulene vil bli bygget fordi selve avhenger av dem
+        env:
+          ORG_GRADLE_PROJECT_githubUser: x-access-token
+          ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: nais/docker-build-push@v0
+        id: docker-build-push
+        with:
+          team: tbd
+          cache_from: type=gha
+          cache_to: type=gha,mode=max
+          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
+          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}

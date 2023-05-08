@@ -1,64 +1,28 @@
 name: Deploy spesifikk commit til dev
 
 on:
-    workflow_dispatch:
-        inputs:
-            commitHash:
-                description: 'SHA of the commit to deploy'
-                required: true
+  workflow_dispatch:
+    inputs:
+      commitHash:
+        description: 'SHA of the commit to deploy'
+        required: true
 
 jobs:
-    set_version:
-        name: set image name
-        runs-on: ubuntu-latest
-        steps:
-            - name: create docker tag
-              run: echo "TAG=$(echo ${{ github.event.inputs.commitHash }} | cut -c1-7)" >> $GITHUB_ENV
-        outputs:
-            image: ghcr.io/${{ github.repository }}/spesialist-selve:${{ env.TAG }}
-            tag: ${{ env.TAG }}
+  build:
+    uses: navikt/helse-spesialist/.github/workflows/build-image.yml@master
 
-    build:
-        name: build docker image
-        runs-on: ubuntu-latest
-        needs: set_version
-        steps:
-            - uses: actions/checkout@v3
-              with:
-                  ref: ${{ needs.set_version.outputs.tag }}
-            - uses: actions/setup-java@v3
-              with:
-                  distribution: 'temurin'
-                  java-version: '17.x'
-            - name: test and build
-              run: ./gradlew build
-              env:
-                  ORG_GRADLE_PROJECT_githubUser: x-access-token
-                  ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
-            - name: build docker image
-              run: docker build . --pull -t ${{ needs.set_version.outputs.image }}
-            -   name: Login to GitHub Pkg Registry
-                uses: docker/login-action@v2
-                with:
-                    registry: ghcr.io
-                    username: ${{ github.actor }}
-                    password: ${{ secrets.GITHUB_TOKEN }}
-            - name: push docker image
-              run: |
-                  docker push ${{ needs.set_version.outputs.image }}
-
-    deployDev:
-        name: deploy to dev
-        needs: [set_version, build]
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v3
-              with:
-                  ref: ${{ needs.set_version.outputs.tag }}
-            - uses: nais/deploy/actions/deploy@v1
-              env:
-                  APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-                  CLUSTER: dev-gcp
-                  RESOURCE: deploy/dev.yml
-                  IMAGE: ${{ needs.set_version.outputs.image }}
+  deployDev:
+    name: deploy to dev
+    needs: [ build ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ needs.set_version.outputs.tag }}
+      - uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: dev-gcp
+          RESOURCE: deploy/dev.yml
+          IMAGE: ${{ needs.build.outputs.image }}
 
