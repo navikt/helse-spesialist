@@ -90,3 +90,10 @@ data class OverstyrArbeidsgiverDto(
         "subsumsjon" to subsumsjon,
     ).toMap()
 }
+
+data class OverstyrInntektOgRefusjonDto(
+    val aktørId: String,
+    val fødselsnummer: String,
+    val skjæringstidspunkt: LocalDate,
+    val arbeidsgivere: List<OverstyrArbeidsgiverDto>,
+)

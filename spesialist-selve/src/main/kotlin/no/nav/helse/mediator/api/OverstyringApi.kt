@@ -18,6 +18,7 @@ import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsgiverDto
+import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeKafkaDto
 import no.nav.helse.spesialist.api.overstyring.RefusjonselementDto
@@ -59,7 +60,7 @@ internal fun Route.overstyringApi(hendelseMediator: HendelseMediator) {
     }
 
     post("/api/overstyr/inntektogrefusjon") {
-        val overstyring = call.receive<OverstyrInntektOgRefusjonDTO>()
+        val overstyring = call.receive<OverstyrInntektOgRefusjonDto>()
         val saksbehandler = Saksbehandler.fraOnBehalfOfToken(requireNotNull(call.principal()))
 
         val message = OverstyrInntektOgRefusjonKafkaDto(
@@ -90,13 +91,6 @@ internal fun Route.overstyringApi(hendelseMediator: HendelseMediator) {
     }
 }
 
-
-data class OverstyrInntektOgRefusjonDTO(
-    val aktørId: String,
-    val fødselsnummer: String,
-    val skjæringstidspunkt: LocalDate,
-    val arbeidsgivere: List<OverstyrArbeidsgiverDto>,
-)
 
 data class OverstyrInntektOgRefusjonKafkaDto(
     val saksbehandler: SaksbehandlerDto,
