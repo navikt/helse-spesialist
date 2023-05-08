@@ -95,10 +95,12 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         utbetalingId: UUID? = null,
         periode: Periode = PERIODE,
         oppgavetype: Oppgavetype = Oppgavetype.SØKNAD,
-    ) = opprettVedtak(personId, arbeidsgiverId, periode).also { klargjørVedtak(it, utbetalingId, periode, oppgavetype) }
+        skjæringstidspunkt: LocalDate = periode.fom
+    ) = opprettVedtak(personId, arbeidsgiverId, periode, skjæringstidspunkt).also { klargjørVedtak(it, utbetalingId, periode, oppgavetype) }
 
     private fun opprettGenerasjon(
         periode: Periode,
+        skjæringstidspunkt: LocalDate = periode.fom,
     ) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val statement =
@@ -113,7 +115,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                         "hendelse_id" to UUID.randomUUID(),
                         "fom" to periode.fom,
                         "tom" to periode.tom,
-                        "skjaeringstidspunkt" to periode.fom
+                        "skjaeringstidspunkt" to skjæringstidspunkt
                     )
                 ).asUpdate
             )
@@ -142,10 +144,11 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         personId: Long,
         arbeidsgiverId: Long,
         periode: Periode = PERIODE,
+        skjæringstidspunkt: LocalDate = periode.fom
     ) =
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             val snapshotid = opprettSnapshot()
-            opprettGenerasjon(periode)
+            opprettGenerasjon(periode, skjæringstidspunkt)
             opprettOpprinneligSøknadsdato(periode)
 
             @Language("PostgreSQL")
@@ -174,14 +177,15 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         generasjonId: UUID = UUID.randomUUID(),
         utbetalingId: UUID = UUID.randomUUID(),
         periode: Periode = PERIODE,
-        tilstandEndretTidspunkt: LocalDateTime? = null
+        tilstandEndretTidspunkt: LocalDateTime? = null,
+        skjæringstidspunkt: LocalDate = periode.fom
     ): Long = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
         @Language("PostgreSQL")
         val query = """
             INSERT INTO selve_vedtaksperiode_generasjon(vedtaksperiode_id, unik_id, utbetaling_id, opprettet_av_hendelse, tilstand_endret_tidspunkt, tilstand_endret_av_hendelse, tilstand, fom, tom, skjæringstidspunkt) 
             VALUES (?, ?, ?, ?, ?, ?, 'Ulåst', ?, ?, ?)
         """
-        return requireNotNull(session.run(queryOf(query, vedtaksperiodeId, generasjonId, utbetalingId, UUID.randomUUID(), tilstandEndretTidspunkt, UUID.randomUUID(), periode.fom, periode.tom, periode.fom).asUpdateAndReturnGeneratedKey))
+        return requireNotNull(session.run(queryOf(query, vedtaksperiodeId, generasjonId, utbetalingId, UUID.randomUUID(), tilstandEndretTidspunkt, UUID.randomUUID(), periode.fom, periode.tom, skjæringstidspunkt).asUpdateAndReturnGeneratedKey))
     }
 
     protected fun nyttVarsel(

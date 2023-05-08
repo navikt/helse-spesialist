@@ -76,20 +76,14 @@ class ApiVarselRepository(dataSource: DataSource) {
     private fun sammenhengendePerioder(oppgaveId: Long): Set<ApiVedtak> {
         val vedtakMedOppgave = vedtakDao.vedtakFor(oppgaveId)
         val alleVedtakForPersonen = vedtakDao.alleVedtakForPerson(oppgaveId)
-        val sammenhengendePerioder = alleVedtakForPersonen.finnPerioderRettFør(vedtakMedOppgave)
+        val sammenhengendePerioder = alleVedtakForPersonen.tidligereEnnOgSammenhengende(vedtakMedOppgave)
         return setOf(vedtakMedOppgave) + sammenhengendePerioder
     }
 
-    private fun Set<ApiVedtak>.finnPerioderRettFør(periode: ApiVedtak) =
-        this.finnPerioderRettFør(periode, emptySet())
-
-    private fun Set<ApiVedtak>.finnPerioderRettFør(periode: ApiVedtak, perioderFør: Set<ApiVedtak>): Set<ApiVedtak> {
-        this.firstOrNull { other ->
-            other.erPeriodeRettFør(periode)
-        }?.also {
-            return finnPerioderRettFør(it, perioderFør + setOf(it))
-        }
-        return perioderFør
+    private fun Set<ApiVedtak>.tidligereEnnOgSammenhengende(periode: ApiVedtak): Set<ApiVedtak> {
+        return this.filter { other ->
+            other.tidligereEnnOgSammenhengende(periode)
+        }.toSet()
     }
 
 }

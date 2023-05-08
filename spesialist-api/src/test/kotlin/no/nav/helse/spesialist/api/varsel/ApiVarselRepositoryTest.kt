@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.api.varsel
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.spesialist.api.DatabaseIntegrationTest
+import no.nav.helse.spesialist.api.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
@@ -147,8 +148,8 @@ internal class ApiVarselRepositoryTest: DatabaseIntegrationTest() {
         val arbeidsgiverRef = opprettArbeidsgiver()
         val uberegnetPeriode = periode("2023-01-02","2023-01-03")
         val periodeMedOppgave = periode("2023-01-04","2023-01-05")
-        opprettVedtaksperiode(personRef, arbeidsgiverRef, periode = periodeMedOppgave, utbetalingId = UUID.randomUUID())
-        opprettVedtak(personRef, arbeidsgiverRef, periode = uberegnetPeriode)
+        opprettVedtaksperiode(personRef, arbeidsgiverRef, periode = periodeMedOppgave, utbetalingId = UUID.randomUUID(), skjæringstidspunkt = 2.januar)
+        opprettVedtak(personRef, arbeidsgiverRef, periode = uberegnetPeriode, skjæringstidspunkt = 2.januar)
         val oppgaveId = finnOppgaveIdFor(periodeMedOppgave.id)
         val perioderSomSkalViseVarsler = apiVarselRepository.perioderSomSkalViseVarsler(oppgaveId)
 
@@ -175,8 +176,8 @@ internal class ApiVarselRepositoryTest: DatabaseIntegrationTest() {
         val arbeidsgiverRef = opprettArbeidsgiver()
         val uberegnetPeriode = periode("2023-01-02","2023-01-06")
         val periodeMedOppgave = periode("2023-01-09","2023-01-13")
-        opprettVedtaksperiode(personRef, arbeidsgiverRef, periode = periodeMedOppgave, utbetalingId = UUID.randomUUID())
-        opprettVedtak(personRef, arbeidsgiverRef, periode = uberegnetPeriode)
+        opprettVedtaksperiode(personRef, arbeidsgiverRef, periode = periodeMedOppgave, utbetalingId = UUID.randomUUID(), skjæringstidspunkt = 2.januar)
+        opprettVedtak(personRef, arbeidsgiverRef, periode = uberegnetPeriode, skjæringstidspunkt = 2.januar)
         val oppgaveId = finnOppgaveIdFor(periodeMedOppgave.id)
         val perioderSomSkalViseVarsler = apiVarselRepository.perioderSomSkalViseVarsler(oppgaveId)
 
@@ -190,9 +191,9 @@ internal class ApiVarselRepositoryTest: DatabaseIntegrationTest() {
         val uberegnetPeriode = periode("2023-01-01","2023-01-02")
         val beregnetPeriode = periode("2023-01-03","2023-01-04")
         val periodeMedOppgave = periode("2023-01-05","2023-01-06")
-        opprettVedtaksperiode(personRef, arbeidsgiverRef, periode = periodeMedOppgave, utbetalingId = UUID.randomUUID())
-        opprettVedtak(personRef, arbeidsgiverRef, periode = beregnetPeriode)
-        opprettVedtak(personRef, arbeidsgiverRef, periode = uberegnetPeriode)
+        opprettVedtaksperiode(personRef, arbeidsgiverRef, periode = periodeMedOppgave, utbetalingId = UUID.randomUUID(), skjæringstidspunkt = 1.januar)
+        opprettVedtak(personRef, arbeidsgiverRef, periode = beregnetPeriode, skjæringstidspunkt = 1.januar)
+        opprettVedtak(personRef, arbeidsgiverRef, periode = uberegnetPeriode, skjæringstidspunkt = 1.januar)
         val oppgaveId = finnOppgaveIdFor(periodeMedOppgave.id)
         val perioderSomSkalViseVarsler = apiVarselRepository.perioderSomSkalViseVarsler(oppgaveId)
 
@@ -206,9 +207,9 @@ internal class ApiVarselRepositoryTest: DatabaseIntegrationTest() {
         val uberegnetPeriode1 = periode("2023-01-01","2023-01-02")
         val uberegnetPeriode2 = periode("2023-01-03","2023-01-04")
         val periodeMedOppgave = periode("2023-01-05","2023-01-06")
-        opprettVedtaksperiode(personRef, arbeidsgiverRef, periode = periodeMedOppgave, utbetalingId = UUID.randomUUID())
-        opprettVedtak(personRef, arbeidsgiverRef, periode = uberegnetPeriode1)
-        opprettVedtak(personRef, arbeidsgiverRef, periode = uberegnetPeriode2)
+        opprettVedtaksperiode(personRef, arbeidsgiverRef, periode = periodeMedOppgave, utbetalingId = UUID.randomUUID(), skjæringstidspunkt = 1.januar)
+        opprettVedtak(personRef, arbeidsgiverRef, periode = uberegnetPeriode1, skjæringstidspunkt = 1.januar)
+        opprettVedtak(personRef, arbeidsgiverRef, periode = uberegnetPeriode2, skjæringstidspunkt = 1.januar)
         val oppgaveId = finnOppgaveIdFor(periodeMedOppgave.id)
         val perioderSomSkalViseVarsler = apiVarselRepository.perioderSomSkalViseVarsler(oppgaveId)
 
@@ -238,9 +239,9 @@ internal class ApiVarselRepositoryTest: DatabaseIntegrationTest() {
         val uberegnetPeriode1 = periode("2023-01-01","2023-01-02")
         val uberegnetPeriode2 = periode("2023-01-04","2023-01-05")
         val periodeMedOppgave = periode("2023-01-06","2023-01-07")
-        opprettVedtaksperiode(personRef, arbeidsgiverRef, periode = periodeMedOppgave, utbetalingId = UUID.randomUUID())
-        opprettVedtak(personRef, arbeidsgiverRef, periode = uberegnetPeriode1)
-        opprettVedtak(personRef, arbeidsgiverRef, periode = uberegnetPeriode2)
+        opprettVedtaksperiode(personRef, arbeidsgiverRef, periode = periodeMedOppgave, utbetalingId = UUID.randomUUID(), skjæringstidspunkt = 4.januar)
+        opprettVedtak(personRef, arbeidsgiverRef, periode = uberegnetPeriode1, skjæringstidspunkt = 1.januar)
+        opprettVedtak(personRef, arbeidsgiverRef, periode = uberegnetPeriode2, skjæringstidspunkt = 4.januar)
         val oppgaveId = finnOppgaveIdFor(periodeMedOppgave.id)
         val perioderSomSkalViseVarsler = apiVarselRepository.perioderSomSkalViseVarsler(oppgaveId)
 

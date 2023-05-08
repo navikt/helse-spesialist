@@ -11,6 +11,7 @@ import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import no.nav.helse.spesialist.api.graphql.enums.GraphQLPeriodetilstand
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLBeregnetPeriode
 import no.nav.helse.spesialist.api.graphql.schema.Periodehandling
+import no.nav.helse.spesialist.api.januar
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
@@ -121,10 +122,10 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         val arbeidsgiverRef = opprettArbeidsgiver()
         val uberegnetPeriode = periode("2023-01-02", "2023-01-03")
         val periodeMedOppgave = periode("2023-01-04", "2023-01-05")
-        opprettVedtaksperiode(personRef, arbeidsgiverRef, periode = periodeMedOppgave)
-        opprettVedtak(personRef, arbeidsgiverRef, periode = uberegnetPeriode)
+        opprettVedtaksperiode(personRef, arbeidsgiverRef, periode = periodeMedOppgave, skjæringstidspunkt = 2.januar)
+        opprettVedtak(personRef, arbeidsgiverRef, periode = uberegnetPeriode, skjæringstidspunkt = 2.januar)
         val generasjonId = UUID.randomUUID()
-        val generasjonRef = nyGenerasjon(vedtaksperiodeId = uberegnetPeriode.id, generasjonId = generasjonId, periode = uberegnetPeriode)
+        val generasjonRef = nyGenerasjon(vedtaksperiodeId = uberegnetPeriode.id, generasjonId = generasjonId, periode = uberegnetPeriode, skjæringstidspunkt = 2.januar)
         val graphQLUberegnetPeriode = opprettUberegnetPeriode("2023-01-02", "2023-01-03", uberegnetPeriode.id)
         val graphQLperiodeMedOppgave = opprettBeregnetPeriode("2023-01-04", "2023-01-05", periodeMedOppgave.id)
         val snapshotGenerasjon = opprettSnapshotGenerasjon(listOf(graphQLUberegnetPeriode, graphQLperiodeMedOppgave))
@@ -164,12 +165,12 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         val arbeidsgiverRef = opprettArbeidsgiver()
         val uberegnetPeriode = periode("2023-01-02", "2023-01-03")
         val periodeMedOppgave = periode("2023-01-04", "2023-01-05")
-        opprettVedtaksperiode(personRef, arbeidsgiverRef, periode = periodeMedOppgave)
-        opprettVedtak(personRef, arbeidsgiverRef, periode = uberegnetPeriode)
+        opprettVedtaksperiode(personRef, arbeidsgiverRef, periode = periodeMedOppgave, skjæringstidspunkt = 2.januar)
+        opprettVedtak(personRef, arbeidsgiverRef, periode = uberegnetPeriode, skjæringstidspunkt = 2.januar)
         val generasjonId1 = UUID.randomUUID()
         val generasjonId2 = UUID.randomUUID()
-        val generasjonRef1 = nyGenerasjon(vedtaksperiodeId = uberegnetPeriode.id, generasjonId = generasjonId1, periode = uberegnetPeriode)
-        val generasjonRef2 = nyGenerasjon(vedtaksperiodeId = uberegnetPeriode.id, generasjonId = generasjonId2, periode = uberegnetPeriode)
+        val generasjonRef1 = nyGenerasjon(vedtaksperiodeId = uberegnetPeriode.id, generasjonId = generasjonId1, periode = uberegnetPeriode, skjæringstidspunkt = 2.januar)
+        val generasjonRef2 = nyGenerasjon(vedtaksperiodeId = uberegnetPeriode.id, generasjonId = generasjonId2, periode = uberegnetPeriode, skjæringstidspunkt = 2.januar)
         val graphQLUberegnetPeriode = opprettUberegnetPeriode("2023-01-02", "2023-01-03", uberegnetPeriode.id)
         val graphQLperiodeMedOppgave = opprettBeregnetPeriode("2023-01-04", "2023-01-05", periodeMedOppgave.id)
         val snapshotGenerasjon1 = opprettSnapshotGenerasjon(listOf(graphQLUberegnetPeriode, graphQLperiodeMedOppgave), snapshotGenerasjonId1)
