@@ -169,6 +169,28 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `Finner aktive eller vurderte varsler for en gitt generasjon`() {
+        val personRef = opprettPerson()
+        val arbeidsgiverRef = opprettArbeidsgiver()
+        opprettVedtaksperiode(personRef, arbeidsgiverRef)
+        val definisjonId1 = UUID.randomUUID()
+        val definisjonId2 = UUID.randomUUID()
+        val generasjonId = UUID.randomUUID()
+        opprettVarseldefinisjon(kode = "EN_KODE", definisjonId = definisjonId1)
+        opprettVarseldefinisjon(kode = "EN_ANNEN_KODE", definisjonId = definisjonId2)
+        val generasjonRef = nyGenerasjon(vedtaksperiodeId = PERIODE.id, generasjonId)
+        nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = PERIODE.id, generasjonRef = generasjonRef)
+        nyttVarsel(kode = "EN_ANNEN_KODE", vedtaksperiodeId = PERIODE.id, generasjonRef = generasjonRef)
+
+        val forventetVarsel1 = Varsel(generasjonId, definisjonId1,"EN_KODE", "EN_TITTEL", null, null, null)
+        val forventetVarsel2 = Varsel(generasjonId, definisjonId2,"EN_ANNEN_KODE", "EN_TITTEL", null, null, null)
+
+        val varsler = apiVarselDao.finnVarslerSomErVurderteEllerAktive(generasjonId)
+
+        assertEquals(setOf(forventetVarsel1, forventetVarsel2), varsler)
+    }
+
+    @Test
     fun `Godkjenner vurderte varsler for en liste vedtaksperioder`() {
         val utbetalingId = UUID.randomUUID()
         val personRef = opprettPerson()

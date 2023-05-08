@@ -18,7 +18,7 @@ internal class ApiVedtakDaoTest: DatabaseIntegrationTest() {
     fun `Finner vedtak med oppgave`() {
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
         val vedtakMedOppgave = apiVedtakDao.vedtakFor(finnOppgaveIdFor(PERIODE.id))
-        val forventetVedtak = ApiVedtak(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom)
+        val forventetVedtak = ApiVedtak(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet())
 
         assertEquals(forventetVedtak, vedtakMedOppgave)
     }
@@ -30,8 +30,8 @@ internal class ApiVedtakDaoTest: DatabaseIntegrationTest() {
         val nyTom = PERIODE.tom.plusDays(1)
         nyGenerasjon(vedtaksperiodeId = PERIODE.id, periode = Periode(PERIODE.id, nyFom, nyTom))
         val vedtakMedOppgave = apiVedtakDao.vedtakFor(finnOppgaveIdFor(PERIODE.id))
-        val forventetVedtak = ApiVedtak(PERIODE.id, nyFom, nyTom, nyFom)
-        val ikkeForventetVedtak = ApiVedtak(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom)
+        val forventetVedtak = ApiVedtak(PERIODE.id, nyFom, nyTom, nyFom, emptySet())
+        val ikkeForventetVedtak = ApiVedtak(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet())
 
         assertEquals(forventetVedtak, vedtakMedOppgave)
         assertNotEquals(ikkeForventetVedtak, vedtakMedOppgave)
@@ -45,8 +45,8 @@ internal class ApiVedtakDaoTest: DatabaseIntegrationTest() {
         val periode2 = Periode(UUID.randomUUID(), LocalDate.now(), LocalDate.now())
         opprettVedtaksperiode(person, arbeidsgiver, null, periode2)
         val alleVedtakForPerson = apiVedtakDao.alleVedtakForPerson(finnOppgaveIdFor(PERIODE.id))
-        val forventetVedtak1 = ApiVedtak(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom)
-        val forventetVedtak2 = ApiVedtak(periode2.id, periode2.fom, periode2.tom, periode2.fom)
+        val forventetVedtak1 = ApiVedtak(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet())
+        val forventetVedtak2 = ApiVedtak(periode2.id, periode2.fom, periode2.tom, periode2.fom, emptySet())
 
         assertEquals(setOf(forventetVedtak1, forventetVedtak2), alleVedtakForPerson)
     }
@@ -74,9 +74,9 @@ internal class ApiVedtakDaoTest: DatabaseIntegrationTest() {
         val alleVedtakForPerson = apiVedtakDao.alleVedtakForPerson(finnOppgaveIdFor(periode1.id))
 
         assertEquals(3, alleVedtakForPerson.size)
-        val forventetVedtak1 = ApiVedtak(periode1.id, 1.februar, 28.februar, 1.februar)
-        val forventetVedtak2 = ApiVedtak(periode2.id, 1.mars, 31.mars, 1.mars)
-        val forventetVedtak3 = ApiVedtak(periode3.id, periode3.fom, periode3.tom, periode3.fom)
+        val forventetVedtak1 = ApiVedtak(periode1.id, 1.februar, 28.februar, 1.februar, emptySet())
+        val forventetVedtak2 = ApiVedtak(periode2.id, 1.mars, 31.mars, 1.mars, emptySet())
+        val forventetVedtak3 = ApiVedtak(periode3.id, periode3.fom, periode3.tom, periode3.fom, emptySet())
 
         assertEquals(setOf(forventetVedtak1, forventetVedtak2, forventetVedtak3), alleVedtakForPerson)
     }
