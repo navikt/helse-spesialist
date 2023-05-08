@@ -1,6 +1,11 @@
 name: Gjenbrukbar workflow for docker image
 
-on: workflow_call
+on:
+  workflow_call:
+    outputs:
+      image:
+        description: "Navn på imaget som ble bygget"
+        value: ${{ jobs.build.outputs.image }}
 
 jobs:
   build:
