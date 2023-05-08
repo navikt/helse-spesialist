@@ -8,7 +8,7 @@ internal class ApiVedtakDao(dataSource: DataSource) : HelseDao(dataSource) {
     internal fun vedtakFor(oppgaveId: Long): ApiVedtak = requireNotNull(
         queryize(
             """
-                SELECT svg.vedtaksperiode_id, svg.fom, svg.tom 
+                SELECT svg.vedtaksperiode_id, svg.fom, svg.tom, svg.skjæringstidspunkt
                 FROM vedtak v 
                 INNER JOIN selve_vedtaksperiode_generasjon svg on v.vedtaksperiode_id = svg.vedtaksperiode_id
                 JOIN oppgave o ON v.id = o.vedtak_ref
@@ -20,6 +20,7 @@ internal class ApiVedtakDao(dataSource: DataSource) : HelseDao(dataSource) {
                 it.uuid("vedtaksperiode_id"),
                 it.localDate("fom"),
                 it.localDate("tom"),
+                it.localDate("skjæringstidspunkt")
             )
         })
 
@@ -39,6 +40,7 @@ internal class ApiVedtakDao(dataSource: DataSource) : HelseDao(dataSource) {
             it.uuid("vedtaksperiode_id"),
             it.localDate("fom"),
             it.localDate("tom"),
+            it.localDate("skjæringstidspunkt")
         )
     }.toSet()
 }

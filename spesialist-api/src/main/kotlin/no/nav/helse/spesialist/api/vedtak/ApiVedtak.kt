@@ -8,6 +8,7 @@ data class ApiVedtak(
     private val vedtaksperiodeId: UUID,
     private val fom: LocalDate,
     private val tom: LocalDate,
+    private val skjæringstidspunkt: LocalDate
 ) {
     internal fun vedtaksperiodeId() = this.vedtaksperiodeId
 
