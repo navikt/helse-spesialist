@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.spesialist.api.DatabaseIntegrationTest
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 
 internal class ApiVedtakDaoTest: DatabaseIntegrationTest() {
@@ -17,6 +18,20 @@ internal class ApiVedtakDaoTest: DatabaseIntegrationTest() {
         val forventetVedtak = ApiVedtak(vedtakRef, PERIODE.id, PERIODE.fom, PERIODE.tom)
 
         assertEquals(forventetVedtak, vedtakMedOppgave)
+    }
+
+    @Test
+    fun `Finner vedtak med oppgave basert på siste generasjon`() {
+        val vedtakRef = opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        val nyFom = PERIODE.fom.plusDays(1)
+        val nyTom = PERIODE.tom.plusDays(1)
+        nyGenerasjon(vedtaksperiodeId = PERIODE.id, periode = Periode(PERIODE.id, nyFom, nyTom))
+        val vedtakMedOppgave = apiVedtakDao.vedtakFor(finnOppgaveIdFor(PERIODE.id))
+        val forventetVedtak = ApiVedtak(vedtakRef, PERIODE.id, nyFom, nyTom)
+        val ikkeForventetVedtak = ApiVedtak(vedtakRef, PERIODE.id, PERIODE.fom, PERIODE.tom)
+
+        assertEquals(forventetVedtak, vedtakMedOppgave)
+        assertNotEquals(ikkeForventetVedtak, vedtakMedOppgave)
     }
 
     @Test

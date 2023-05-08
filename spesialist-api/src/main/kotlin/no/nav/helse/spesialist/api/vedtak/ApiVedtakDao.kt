@@ -8,10 +8,12 @@ internal class ApiVedtakDao(dataSource: DataSource) : HelseDao(dataSource) {
     internal fun vedtakFor(oppgaveId: Long): ApiVedtak = requireNotNull(
         queryize(
             """
-                SELECT v.id, vedtaksperiode_id, fom, tom 
+                SELECT v.id, svg.vedtaksperiode_id, svg.fom, svg.tom 
                 FROM vedtak v 
+                INNER JOIN selve_vedtaksperiode_generasjon svg on v.vedtaksperiode_id = svg.vedtaksperiode_id
                 JOIN oppgave o ON v.id = o.vedtak_ref
-                WHERE o.id = :oppgave_id;
+                WHERE o.id = :oppgave_id
+                ORDER BY svg.id DESC LIMIT 1;
             """
         ).single(mapOf("oppgave_id" to oppgaveId)) {
             ApiVedtak(
