@@ -10,6 +10,7 @@ on:
 jobs:
   build:
     uses: navikt/helse-spesialist/.github/workflows/build-image.yml@master
+    secrets: inherit
 
   deployDev:
     name: deploy to dev
