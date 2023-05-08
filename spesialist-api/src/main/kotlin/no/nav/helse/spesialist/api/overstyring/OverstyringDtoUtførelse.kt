@@ -3,6 +3,9 @@ package no.nav.helse.spesialist.api.overstyring
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsgiverDto.Companion.toMap
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDto
 
 @JsonIgnoreProperties
 class OverstyrTidslinjeDto(
@@ -89,6 +92,10 @@ data class OverstyrArbeidsgiverDto(
         "forklaring" to forklaring,
         "subsumsjon" to subsumsjon,
     ).toMap()
+
+    companion object {
+        fun List<OverstyrArbeidsgiverDto>.toMap(): List<Map<String, Any?>> = this.map { it.toMap() }
+    }
 }
 
 data class OverstyrInntektOgRefusjonDto(
@@ -97,3 +104,25 @@ data class OverstyrInntektOgRefusjonDto(
     val skjæringstidspunkt: LocalDate,
     val arbeidsgivere: List<OverstyrArbeidsgiverDto>,
 )
+
+data class OverstyrInntektOgRefusjonKafkaDto(
+    val saksbehandler: SaksbehandlerDto,
+    val fødselsnummer: String,
+    val aktørId: String,
+    val skjæringstidspunkt: LocalDate,
+    val arbeidsgivere: List<OverstyrArbeidsgiverDto>,
+) {
+    fun somKafkaMessage() = JsonMessage.newMessage(
+        "saksbehandler_overstyrer_inntekt_og_refusjon",
+        listOfNotNull(
+            "aktørId" to aktørId,
+            "fødselsnummer" to fødselsnummer,
+            "skjæringstidspunkt" to skjæringstidspunkt,
+            "arbeidsgivere" to arbeidsgivere.toMap(),
+            "saksbehandlerOid" to saksbehandler.oid,
+            "saksbehandlerNavn" to saksbehandler.navn,
+            "saksbehandlerIdent" to saksbehandler.ident,
+            "saksbehandlerEpost" to saksbehandler.epost,
+        ).toMap()
+    )
+}

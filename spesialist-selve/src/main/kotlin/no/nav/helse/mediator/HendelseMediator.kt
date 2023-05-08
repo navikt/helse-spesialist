@@ -10,7 +10,6 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.MetrikkRiver
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdKafkaDto
-import no.nav.helse.mediator.api.OverstyrInntektOgRefusjonKafkaDto
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.EndretSkjermetinfo
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov
@@ -68,6 +67,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.registrerTidsbrukForGodkjenningsbehov
 import no.nav.helse.registrerTidsbrukForHendelse
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsgiverDto
+import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonKafkaDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeKafkaDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.overstyringsteller
