@@ -126,3 +126,19 @@ data class OverstyrInntektOgRefusjonKafkaDto(
         ).toMap()
     )
 }
+
+@JsonIgnoreProperties
+data class OverstyrArbeidsforholdDto(
+    val fødselsnummer: String,
+    val aktørId: String,
+    val skjæringstidspunkt: LocalDate,
+    val overstyrteArbeidsforhold: List<ArbeidsforholdOverstyrt>
+) {
+    @JsonIgnoreProperties
+    data class ArbeidsforholdOverstyrt(
+        val orgnummer: String,
+        val deaktivert: Boolean,
+        val begrunnelse: String,
+        val forklaring: String
+    )
+}

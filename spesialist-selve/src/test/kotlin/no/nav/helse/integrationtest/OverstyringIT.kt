@@ -27,9 +27,9 @@ import no.nav.helse.Testdata.SAKSBEHANDLER_OID
 import no.nav.helse.januar
 import no.nav.helse.mediator.api.AbstractApiTest.Companion.authentication
 import no.nav.helse.mediator.api.AbstractApiTest.Companion.azureAdAppConfig
-import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.api.overstyringApi
 import no.nav.helse.spesialist.api.azureAdAppAuthentication
+import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue

@@ -3,8 +3,8 @@ package no.nav.helse.modell.kommando
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.modell.overstyring.OverstyringDao
+import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
 
 internal class PersisterOverstyringArbeidsforholdCommand(
     private val oid: UUID,

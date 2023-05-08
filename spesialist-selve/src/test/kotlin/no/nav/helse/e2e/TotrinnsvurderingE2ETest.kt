@@ -3,7 +3,7 @@ package no.nav.helse.e2e
 import AbstractE2ETestV2
 import no.nav.helse.Testdata.ORGNR_GHOST
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
-import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
+import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import org.junit.jupiter.api.Test
 

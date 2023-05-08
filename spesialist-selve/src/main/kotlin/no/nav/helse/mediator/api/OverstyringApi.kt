@@ -1,6 +1,5 @@
 package no.nav.helse.mediator.api
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
@@ -17,6 +16,7 @@ import kotlinx.coroutines.withContext
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
+import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsgiverDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonKafkaDto
@@ -126,24 +126,6 @@ internal fun JsonNode.arbeidsgiverelementer(): List<OverstyrArbeidsgiverDto> {
             subsumsjon = jsonNode["subsumsjon"].subsumsjonelementer()
         )
     }
-}
-@JvmName("Refusjonselement")
-fun List<RefusjonselementDto>.toMap(): List<Map<String, Any?>> = this.map { it.toMap() }
-
-@JsonIgnoreProperties
-data class OverstyrArbeidsforholdDto(
-    val fødselsnummer: String,
-    val aktørId: String,
-    val skjæringstidspunkt: LocalDate,
-    val overstyrteArbeidsforhold: List<ArbeidsforholdOverstyrt>
-) {
-    @JsonIgnoreProperties
-    data class ArbeidsforholdOverstyrt(
-        val orgnummer: String,
-        val deaktivert: Boolean,
-        val begrunnelse: String,
-        val forklaring: String
-    )
 }
 
 data class OverstyrArbeidsforholdKafkaDto(
