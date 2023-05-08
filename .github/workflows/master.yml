@@ -32,7 +32,7 @@ jobs:
             - name: Gradle build
               uses: gradle/gradle-build-action@v2
               with:
-                arguments: build :spesialist-selve:build # felles- og api-modulene bygges fordi selve avhenger av dem
+                arguments: :spesialist-selve:build # felles- og api-modulene bygges fordi selve avhenger av dem
               env:
                   ORG_GRADLE_PROJECT_githubUser: x-access-token
                   ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
