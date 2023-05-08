@@ -9,14 +9,13 @@ import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
-import java.time.LocalDate
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
+import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdKafkaDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsgiverDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonKafkaDto
@@ -25,7 +24,6 @@ import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeKafkaDto
 import no.nav.helse.spesialist.api.overstyring.RefusjonselementDto
 import no.nav.helse.spesialist.api.overstyring.SubsumsjonDto
 import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
-import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDto
 
 internal fun Route.overstyringApi(hendelseMediator: HendelseMediator) {
     post("/api/overstyr/dager") {
@@ -128,23 +126,3 @@ internal fun JsonNode.arbeidsgiverelementer(): List<OverstyrArbeidsgiverDto> {
     }
 }
 
-data class OverstyrArbeidsforholdKafkaDto(
-    val saksbehandler: SaksbehandlerDto,
-    val fødselsnummer: String,
-    val aktørId: String,
-    val skjæringstidspunkt: LocalDate,
-    val overstyrteArbeidsforhold: List<OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt>
-) {
-    fun somKafkaMessage() = JsonMessage.newMessage(
-        "saksbehandler_overstyrer_arbeidsforhold", mapOf(
-            "fødselsnummer" to fødselsnummer,
-            "aktørId" to aktørId,
-            "saksbehandlerOid" to saksbehandler.oid,
-            "saksbehandlerNavn" to saksbehandler.navn,
-            "saksbehandlerIdent" to saksbehandler.ident,
-            "saksbehandlerEpost" to saksbehandler.epost,
-            "skjæringstidspunkt" to skjæringstidspunkt,
-            "overstyrteArbeidsforhold" to overstyrteArbeidsforhold,
-        )
-    )
-}
