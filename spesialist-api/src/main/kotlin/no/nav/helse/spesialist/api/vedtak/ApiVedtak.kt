@@ -5,7 +5,6 @@ import java.time.LocalDate
 import java.util.UUID
 
 data class ApiVedtak(
-    private val id: Long,
     private val vedtaksperiodeId: UUID,
     private val fom: LocalDate,
     private val tom: LocalDate,
