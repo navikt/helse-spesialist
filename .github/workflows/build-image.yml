@@ -46,6 +46,7 @@ jobs:
         id: docker-build-push
         with:
           team: tbd
+          tag: ${{ inputs.sha }}
           cache_from: type=gha
           cache_to: type=gha,mode=max
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
