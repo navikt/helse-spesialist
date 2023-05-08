@@ -2,6 +2,12 @@ name: Gjenbrukbar workflow for docker image
 
 on:
   workflow_call:
+    inputs:
+      sha:
+        description: 'SHA of the commit to build'
+        default: ${{ github.sha }}
+        required: false
+
     outputs:
       image:
         description: "Navn på imaget som ble bygget"

@@ -11,6 +11,8 @@ jobs:
   build:
     uses: navikt/helse-spesialist/.github/workflows/build-image.yml@master
     secrets: inherit
+    with:
+      sha: ${{ github.event.inputs.commitHash }}
 
   deployDev:
     name: deploy to dev
