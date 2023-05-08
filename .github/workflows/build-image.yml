@@ -5,6 +5,7 @@ on:
     inputs:
       sha:
         description: 'SHA of the commit to build'
+        type: string
         default: ${{ github.sha }}
         required: false
 
