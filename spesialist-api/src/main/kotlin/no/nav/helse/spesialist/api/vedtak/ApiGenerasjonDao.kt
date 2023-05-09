@@ -35,7 +35,7 @@ internal class ApiGenerasjonDao(dataSource: DataSource) : HelseDao(dataSource) {
                 WHERE person_ref = 
                     (SELECT person_ref FROM vedtak v2
                     JOIN oppgave o on v2.id = o.vedtak_ref
-                    WHERE o.id = :oppgave_id)
+                    WHERE o.id = :oppgave_id) AND v.forkastet = false
                 ORDER BY svg.vedtaksperiode_id, svg.id DESC;
             """
     ).list(mapOf("oppgave_id" to oppgaveId)) {

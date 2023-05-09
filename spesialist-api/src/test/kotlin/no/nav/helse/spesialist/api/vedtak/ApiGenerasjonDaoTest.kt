@@ -15,7 +15,7 @@ internal class ApiGenerasjonDaoTest: DatabaseIntegrationTest() {
     private val apiGenerasjonDao = ApiGenerasjonDao(dataSource)
 
     @Test
-    fun `Finner vedtak med oppgave`() {
+    fun `Finner generasjon med oppgave`() {
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
         val vedtakMedOppgave = apiGenerasjonDao.gjeldendeGenerasjonFor(finnOppgaveIdFor(PERIODE.id))
         val forventetVedtak = ApiGenerasjon(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet())
@@ -24,7 +24,7 @@ internal class ApiGenerasjonDaoTest: DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `Finner vedtak med oppgave basert på siste generasjon`() {
+    fun `Finner generasjon med oppgave basert på siste generasjon`() {
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
         val nyFom = PERIODE.fom.plusDays(1)
         val nyTom = PERIODE.tom.plusDays(1)
@@ -38,7 +38,7 @@ internal class ApiGenerasjonDaoTest: DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `Finner alle vedtak for person gitt en oppgaveId`() {
+    fun `Finner alle gjeldende generasjoner for person gitt en oppgaveId`() {
         val person = opprettPerson()
         val arbeidsgiver = opprettArbeidsgiver()
         opprettVedtaksperiode(person, arbeidsgiver)
@@ -52,7 +52,7 @@ internal class ApiGenerasjonDaoTest: DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `Hent ut alle vedtak for person gitt en oppgaveId basert på siste generasjon`() {
+    fun `Hent ut alle generasjon for person gitt en oppgaveId basert på siste generasjon`() {
         val person = opprettPerson()
         val arbeidsgiver = opprettArbeidsgiver()
 
@@ -79,5 +79,18 @@ internal class ApiGenerasjonDaoTest: DatabaseIntegrationTest() {
         val forventetVedtak3 = ApiGenerasjon(periode3.id, periode3.fom, periode3.tom, periode3.fom, emptySet())
 
         assertEquals(setOf(forventetVedtak1, forventetVedtak2, forventetVedtak3), alleVedtakForPerson)
+    }
+
+    @Test
+    fun `Finner ikke generasjoner for perioder som er forkastet`() {
+        val person = opprettPerson()
+        val arbeidsgiver = opprettArbeidsgiver()
+        opprettVedtaksperiode(person, arbeidsgiver)
+        val periode2 = Periode(UUID.randomUUID(), LocalDate.now(), LocalDate.now())
+        opprettVedtaksperiode(person, arbeidsgiver, null, periode2, forkastet = true)
+        val alleVedtakForPerson = apiGenerasjonDao.gjeldendeGenerasjonerForPerson(finnOppgaveIdFor(PERIODE.id))
+        val forventetVedtak = ApiGenerasjon(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet())
+
+        assertEquals(setOf(forventetVedtak), alleVedtakForPerson)
     }
 }

@@ -95,8 +95,9 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         utbetalingId: UUID? = null,
         periode: Periode = PERIODE,
         oppgavetype: Oppgavetype = Oppgavetype.SØKNAD,
-        skjæringstidspunkt: LocalDate = periode.fom
-    ) = opprettVedtak(personId, arbeidsgiverId, periode, skjæringstidspunkt).also { klargjørVedtak(it, utbetalingId, periode, oppgavetype) }
+        skjæringstidspunkt: LocalDate = periode.fom,
+        forkastet: Boolean = false
+    ) = opprettVedtak(personId, arbeidsgiverId, periode, skjæringstidspunkt, forkastet).also { klargjørVedtak(it, utbetalingId, periode, oppgavetype) }
 
     private fun opprettGenerasjon(
         periode: Periode,
@@ -144,7 +145,8 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         personId: Long,
         arbeidsgiverId: Long,
         periode: Periode = PERIODE,
-        skjæringstidspunkt: LocalDate = periode.fom
+        skjæringstidspunkt: LocalDate = periode.fom,
+        forkastet: Boolean = false
     ) =
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             val snapshotid = opprettSnapshot()
@@ -157,7 +159,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             requireNotNull(
                 session.run(
                     queryOf(
-                        statement, periode.id, periode.fom, periode.tom, arbeidsgiverId, personId, snapshotid, false
+                        statement, periode.id, periode.fom, periode.tom, arbeidsgiverId, personId, snapshotid, forkastet
                     ).asUpdateAndReturnGeneratedKey
                 )
             )
