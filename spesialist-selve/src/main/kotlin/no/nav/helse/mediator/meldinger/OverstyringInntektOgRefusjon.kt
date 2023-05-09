@@ -6,7 +6,6 @@ import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.OverstyringMediator
-import no.nav.helse.mediator.api.arbeidsgiverelementer
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.InvaliderSaksbehandlerOppgaveCommand
 import no.nav.helse.modell.kommando.MacroCommand
@@ -16,13 +15,14 @@ import no.nav.helse.modell.kommando.PubliserOverstyringCommand
 import no.nav.helse.modell.kommando.ReserverPersonCommand
 import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.overstyring.OverstyringDao
+import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver
+import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver.Companion.arbeidsgiverelementer
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
-import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsgiverDto
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import org.slf4j.Logger
@@ -41,7 +41,7 @@ internal class OverstyringInntektOgRefusjon(
     navn: String,
     epost: String,
     ident: String,
-    arbeidsgivere: List<OverstyrArbeidsgiverDto>,
+    arbeidsgivere: List<OverstyrtArbeidsgiver>,
     skjæringstidspunkt: LocalDate,
     opprettet: LocalDateTime,
     private val json: String,

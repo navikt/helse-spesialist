@@ -51,6 +51,7 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.oppgave.OppgaveMediator
+import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.ActualVarselRepository
@@ -66,7 +67,6 @@ import no.nav.helse.registrerTidsbrukForGodkjenningsbehov
 import no.nav.helse.registrerTidsbrukForHendelse
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdKafkaDto
-import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsgiverDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonKafkaDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeKafkaDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
@@ -444,7 +444,7 @@ internal class HendelseMediator(
         navn: String,
         ident: String,
         epost: String,
-        arbeidsgivere: List<OverstyrArbeidsgiverDto>,
+        arbeidsgivere: List<OverstyrtArbeidsgiver>,
         skjæringstidspunkt: LocalDate,
         opprettet: LocalDateTime,
         json: String,

@@ -16,7 +16,6 @@ import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdKafkaDto
-import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsgiverDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonKafkaDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDto
@@ -110,19 +109,3 @@ internal fun JsonNode.subsumsjonelementer(): SubsumsjonDto? {
         bokstav = if (this["bokstav"].isNull) null else this["bokstav"].asText(),
     )
 }
-
-internal fun JsonNode.arbeidsgiverelementer(): List<OverstyrArbeidsgiverDto> {
-    return this.map { jsonNode ->
-        OverstyrArbeidsgiverDto(
-            organisasjonsnummer = jsonNode["organisasjonsnummer"].asText(),
-            månedligInntekt = jsonNode["månedligInntekt"].asDouble(),
-            fraMånedligInntekt = jsonNode["fraMånedligInntekt"].asDouble(),
-            refusjonsopplysninger = jsonNode["refusjonsopplysninger"].refusjonselementer(),
-            fraRefusjonsopplysninger = jsonNode["fraRefusjonsopplysninger"].refusjonselementer(),
-            begrunnelse = jsonNode["begrunnelse"].asText(),
-            forklaring = jsonNode["forklaring"].asText(),
-            subsumsjon = jsonNode["subsumsjon"].subsumsjonelementer()
-        )
-    }
-}
-

@@ -9,7 +9,6 @@ import no.nav.helse.mediator.meldinger.OverstyringInntektOgRefusjon
 import no.nav.helse.mediator.meldinger.OverstyringTidslinje
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
-import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsgiverDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.overstyring.SubsumsjonDto
 import no.nav.helse.spesialist.api.person.Kjønn
@@ -249,7 +248,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             EKSTERN_HENDELSE_ID,
             FØDSELSNUMMER,
             listOf(
-                OverstyrArbeidsgiverDto(
+                OverstyrtArbeidsgiver(
                     organisasjonsnummer = ORGNUMMER,
                     begrunnelse = BEGRUNNELSE,
                     forklaring = FORKLARING,
@@ -288,7 +287,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             EKSTERN_HENDELSE_ID,
             FØDSELSNUMMER,
             listOf(
-                OverstyrArbeidsgiverDto(
+                OverstyrtArbeidsgiver(
                     organisasjonsnummer = ORGNUMMER,
                     begrunnelse = BEGRUNNELSE,
                     forklaring = FORKLARING,
@@ -358,7 +357,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             epost = SAKSBEHANDLEREPOST,
             ident = SAKSBEHANDLER_IDENT,
             arbeidsgivere = listOf(
-                OverstyrArbeidsgiverDto(
+                OverstyrtArbeidsgiver(
                     organisasjonsnummer = ORGNUMMER,
                     begrunnelse = BEGRUNNELSE,
                     forklaring = FORKLARING,

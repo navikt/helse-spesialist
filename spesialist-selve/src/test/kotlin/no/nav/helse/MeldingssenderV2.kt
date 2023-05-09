@@ -11,6 +11,7 @@ import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.Arbeidsgiverinformasjo
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Vergemål
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
+import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
@@ -24,7 +25,6 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.overstyring.Dagtype.Feriedag
 import no.nav.helse.spesialist.api.overstyring.Dagtype.Sykedag
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt
-import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsgiverDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.overstyring.SubsumsjonDto
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
@@ -704,8 +704,8 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
         aktørId: String,
         fødselsnummer: String,
         skjæringstidspunkt: LocalDate = 1.januar(1970),
-        arbeidsgivere: List<OverstyrArbeidsgiverDto> = listOf(
-            OverstyrArbeidsgiverDto(
+        arbeidsgivere: List<OverstyrtArbeidsgiver> = listOf(
+            OverstyrtArbeidsgiver(
                 organisasjonsnummer = Testdata.ORGNR,
                 månedligInntekt = 15000.0,
                 fraMånedligInntekt = 25001.0,
