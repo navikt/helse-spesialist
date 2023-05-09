@@ -5,9 +5,9 @@ import javax.sql.DataSource
 import no.nav.helse.HelseDao
 import no.nav.helse.spesialist.api.varsel.Varsel
 
-internal class ApiVedtakDao(dataSource: DataSource) : HelseDao(dataSource) {
+internal class ApiGenerasjonDao(dataSource: DataSource) : HelseDao(dataSource) {
 
-    internal fun vedtakFor(oppgaveId: Long): ApiVedtak = requireNotNull(
+    internal fun gjeldendeGenerasjonFor(oppgaveId: Long): ApiGenerasjon = requireNotNull(
         queryize(
             """
                 SELECT svg.vedtaksperiode_id, svg.fom, svg.tom, svg.skjæringstidspunkt
@@ -18,7 +18,7 @@ internal class ApiVedtakDao(dataSource: DataSource) : HelseDao(dataSource) {
                 ORDER BY svg.id DESC LIMIT 1;
             """
         ).single(mapOf("oppgave_id" to oppgaveId)) {
-            ApiVedtak(
+            ApiGenerasjon(
                 it.uuid("vedtaksperiode_id"),
                 it.localDate("fom"),
                 it.localDate("tom"),
@@ -27,7 +27,7 @@ internal class ApiVedtakDao(dataSource: DataSource) : HelseDao(dataSource) {
             )
         })
 
-    internal fun alleVedtakForPerson(oppgaveId: Long): Set<ApiVedtak> = queryize(
+    internal fun gjeldendeGenerasjonerForPerson(oppgaveId: Long): Set<ApiGenerasjon> = queryize(
         """
                 SELECT DISTINCT ON (svg.vedtaksperiode_id) svg.vedtaksperiode_id, svg.fom, svg.tom, svg.skjæringstidspunkt 
                 FROM vedtak v
@@ -39,7 +39,7 @@ internal class ApiVedtakDao(dataSource: DataSource) : HelseDao(dataSource) {
                 ORDER BY svg.vedtaksperiode_id, svg.id DESC;
             """
     ).list(mapOf("oppgave_id" to oppgaveId)) {
-        ApiVedtak(
+        ApiGenerasjon(
             it.uuid("vedtaksperiode_id"),
             it.localDate("fom"),
             it.localDate("tom"),
@@ -48,7 +48,7 @@ internal class ApiVedtakDao(dataSource: DataSource) : HelseDao(dataSource) {
         )
     }.toSet()
 
-    internal fun vedtakFor(oppgaveId: Long, varselGetter: (generasjonId: UUID) -> Set<Varsel>): ApiVedtak = requireNotNull(
+    internal fun gjeldendeGenerasjonFor(oppgaveId: Long, varselGetter: (generasjonId: UUID) -> Set<Varsel>): ApiGenerasjon = requireNotNull(
         queryize(
             """
                 SELECT svg.vedtaksperiode_id, svg.unik_id, svg.fom, svg.tom, svg.skjæringstidspunkt
@@ -59,7 +59,7 @@ internal class ApiVedtakDao(dataSource: DataSource) : HelseDao(dataSource) {
                 ORDER BY svg.id DESC LIMIT 1;
             """
         ).single(mapOf("oppgave_id" to oppgaveId)) {
-            ApiVedtak(
+            ApiGenerasjon(
                 it.uuid("vedtaksperiode_id"),
                 it.localDate("fom"),
                 it.localDate("tom"),
@@ -68,7 +68,7 @@ internal class ApiVedtakDao(dataSource: DataSource) : HelseDao(dataSource) {
             )
         })
 
-    internal fun alleVedtakForPerson(oppgaveId: Long, varselGetter: (generasjonId: UUID) -> Set<Varsel>): Set<ApiVedtak> = queryize(
+    internal fun gjeldendeGenerasjonerForPerson(oppgaveId: Long, varselGetter: (generasjonId: UUID) -> Set<Varsel>): Set<ApiGenerasjon> = queryize(
         """
                 SELECT DISTINCT ON (svg.vedtaksperiode_id) svg.vedtaksperiode_id, svg.unik_id, svg.fom, svg.tom, svg.skjæringstidspunkt 
                 FROM vedtak v
@@ -80,7 +80,7 @@ internal class ApiVedtakDao(dataSource: DataSource) : HelseDao(dataSource) {
                 ORDER BY svg.vedtaksperiode_id, svg.id DESC;
             """
     ).list(mapOf("oppgave_id" to oppgaveId)) {
-        ApiVedtak(
+        ApiGenerasjon(
             it.uuid("vedtaksperiode_id"),
             it.localDate("fom"),
             it.localDate("tom"),

@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.spesialist.api.varsel.Varsel
 
-data class ApiVedtak(
+data class ApiGenerasjon(
     private val vedtaksperiodeId: UUID,
     private val fom: LocalDate,
     private val tom: LocalDate,
@@ -13,5 +13,5 @@ data class ApiVedtak(
 ) {
     internal fun vedtaksperiodeId() = this.vedtaksperiodeId
 
-    internal fun tidligereEnnOgSammenhengende(other: ApiVedtak): Boolean = this.fom <= other.tom && this.skjæringstidspunkt == other.skjæringstidspunkt
+    internal fun tidligereEnnOgSammenhengende(other: ApiGenerasjon): Boolean = this.fom <= other.tom && this.skjæringstidspunkt == other.skjæringstidspunkt
 }

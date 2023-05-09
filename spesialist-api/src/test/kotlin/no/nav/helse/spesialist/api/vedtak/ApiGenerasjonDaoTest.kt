@@ -10,15 +10,15 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 
-internal class ApiVedtakDaoTest: DatabaseIntegrationTest() {
+internal class ApiGenerasjonDaoTest: DatabaseIntegrationTest() {
 
-    private val apiVedtakDao = ApiVedtakDao(dataSource)
+    private val apiGenerasjonDao = ApiGenerasjonDao(dataSource)
 
     @Test
     fun `Finner vedtak med oppgave`() {
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
-        val vedtakMedOppgave = apiVedtakDao.vedtakFor(finnOppgaveIdFor(PERIODE.id))
-        val forventetVedtak = ApiVedtak(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet())
+        val vedtakMedOppgave = apiGenerasjonDao.gjeldendeGenerasjonFor(finnOppgaveIdFor(PERIODE.id))
+        val forventetVedtak = ApiGenerasjon(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet())
 
         assertEquals(forventetVedtak, vedtakMedOppgave)
     }
@@ -29,9 +29,9 @@ internal class ApiVedtakDaoTest: DatabaseIntegrationTest() {
         val nyFom = PERIODE.fom.plusDays(1)
         val nyTom = PERIODE.tom.plusDays(1)
         nyGenerasjon(vedtaksperiodeId = PERIODE.id, periode = Periode(PERIODE.id, nyFom, nyTom))
-        val vedtakMedOppgave = apiVedtakDao.vedtakFor(finnOppgaveIdFor(PERIODE.id))
-        val forventetVedtak = ApiVedtak(PERIODE.id, nyFom, nyTom, nyFom, emptySet())
-        val ikkeForventetVedtak = ApiVedtak(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet())
+        val vedtakMedOppgave = apiGenerasjonDao.gjeldendeGenerasjonFor(finnOppgaveIdFor(PERIODE.id))
+        val forventetVedtak = ApiGenerasjon(PERIODE.id, nyFom, nyTom, nyFom, emptySet())
+        val ikkeForventetVedtak = ApiGenerasjon(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet())
 
         assertEquals(forventetVedtak, vedtakMedOppgave)
         assertNotEquals(ikkeForventetVedtak, vedtakMedOppgave)
@@ -44,9 +44,9 @@ internal class ApiVedtakDaoTest: DatabaseIntegrationTest() {
         opprettVedtaksperiode(person, arbeidsgiver)
         val periode2 = Periode(UUID.randomUUID(), LocalDate.now(), LocalDate.now())
         opprettVedtaksperiode(person, arbeidsgiver, null, periode2)
-        val alleVedtakForPerson = apiVedtakDao.alleVedtakForPerson(finnOppgaveIdFor(PERIODE.id))
-        val forventetVedtak1 = ApiVedtak(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet())
-        val forventetVedtak2 = ApiVedtak(periode2.id, periode2.fom, periode2.tom, periode2.fom, emptySet())
+        val alleVedtakForPerson = apiGenerasjonDao.gjeldendeGenerasjonerForPerson(finnOppgaveIdFor(PERIODE.id))
+        val forventetVedtak1 = ApiGenerasjon(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet())
+        val forventetVedtak2 = ApiGenerasjon(periode2.id, periode2.fom, periode2.tom, periode2.fom, emptySet())
 
         assertEquals(setOf(forventetVedtak1, forventetVedtak2), alleVedtakForPerson)
     }
@@ -71,12 +71,12 @@ internal class ApiVedtakDaoTest: DatabaseIntegrationTest() {
         val periode3 = Periode(v3, LocalDate.now(), LocalDate.now())
         opprettVedtaksperiode(person, arbeidsgiver, null, periode3)
 
-        val alleVedtakForPerson = apiVedtakDao.alleVedtakForPerson(finnOppgaveIdFor(periode1.id))
+        val alleVedtakForPerson = apiGenerasjonDao.gjeldendeGenerasjonerForPerson(finnOppgaveIdFor(periode1.id))
 
         assertEquals(3, alleVedtakForPerson.size)
-        val forventetVedtak1 = ApiVedtak(periode1.id, 1.februar, 28.februar, 1.februar, emptySet())
-        val forventetVedtak2 = ApiVedtak(periode2.id, 1.mars, 31.mars, 1.mars, emptySet())
-        val forventetVedtak3 = ApiVedtak(periode3.id, periode3.fom, periode3.tom, periode3.fom, emptySet())
+        val forventetVedtak1 = ApiGenerasjon(periode1.id, 1.februar, 28.februar, 1.februar, emptySet())
+        val forventetVedtak2 = ApiGenerasjon(periode2.id, 1.mars, 31.mars, 1.mars, emptySet())
+        val forventetVedtak3 = ApiGenerasjon(periode3.id, periode3.fom, periode3.tom, periode3.fom, emptySet())
 
         assertEquals(setOf(forventetVedtak1, forventetVedtak2, forventetVedtak3), alleVedtakForPerson)
     }

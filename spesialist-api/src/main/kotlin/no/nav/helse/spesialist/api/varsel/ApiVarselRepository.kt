@@ -7,13 +7,13 @@ import no.nav.helse.spesialist.api.varsel.Varsel.Companion.antallIkkeVurderte
 import no.nav.helse.spesialist.api.varsel.Varsel.Companion.toDto
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.AKTIV
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.GODKJENT
-import no.nav.helse.spesialist.api.vedtak.ApiVedtak
-import no.nav.helse.spesialist.api.vedtak.ApiVedtakDao
+import no.nav.helse.spesialist.api.vedtak.ApiGenerasjon
+import no.nav.helse.spesialist.api.vedtak.ApiGenerasjonDao
 
 class ApiVarselRepository(dataSource: DataSource) {
 
     private val varselDao = ApiVarselDao(dataSource)
-    private val vedtakDao = ApiVedtakDao(dataSource)
+    private val vedtakDao = ApiGenerasjonDao(dataSource)
 
     internal fun finnVarslerSomIkkeErInaktiveFor(vedtaksperiodeId: UUID, utbetalingId: UUID): Set<VarselDTO> {
         return varselDao.finnVarslerSomIkkeErInaktiveFor(vedtaksperiodeId, utbetalingId).toDto()
@@ -73,14 +73,14 @@ class ApiVarselRepository(dataSource: DataSource) {
         return sammenhengendePerioder(oppgaveId).map { it.vedtaksperiodeId() }.toSet()
     }
 
-    private fun sammenhengendePerioder(oppgaveId: Long): Set<ApiVedtak> {
-        val vedtakMedOppgave = vedtakDao.vedtakFor(oppgaveId)
-        val alleVedtakForPersonen = vedtakDao.alleVedtakForPerson(oppgaveId)
+    private fun sammenhengendePerioder(oppgaveId: Long): Set<ApiGenerasjon> {
+        val vedtakMedOppgave = vedtakDao.gjeldendeGenerasjonFor(oppgaveId)
+        val alleVedtakForPersonen = vedtakDao.gjeldendeGenerasjonerForPerson(oppgaveId)
         val sammenhengendePerioder = alleVedtakForPersonen.tidligereEnnOgSammenhengende(vedtakMedOppgave)
         return setOf(vedtakMedOppgave) + sammenhengendePerioder
     }
 
-    private fun Set<ApiVedtak>.tidligereEnnOgSammenhengende(periode: ApiVedtak): Set<ApiVedtak> {
+    private fun Set<ApiGenerasjon>.tidligereEnnOgSammenhengende(periode: ApiGenerasjon): Set<ApiGenerasjon> {
         return this.filter { other ->
             other.tidligereEnnOgSammenhengende(periode)
         }.toSet()
