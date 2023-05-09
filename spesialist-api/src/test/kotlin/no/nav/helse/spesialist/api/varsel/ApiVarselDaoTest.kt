@@ -169,7 +169,7 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `Finner aktive eller vurderte varsler for en gitt generasjon`() {
+    fun `Finner varsler for en gitt generasjon`() {
         val personRef = opprettPerson()
         val arbeidsgiverRef = opprettArbeidsgiver()
         opprettVedtaksperiode(personRef, arbeidsgiverRef)
@@ -185,7 +185,7 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         val forventetVarsel1 = Varsel(generasjonId, definisjonId1,"EN_KODE", "EN_TITTEL", null, null, null)
         val forventetVarsel2 = Varsel(generasjonId, definisjonId2,"EN_ANNEN_KODE", "EN_TITTEL", null, null, null)
 
-        val varsler = apiVarselDao.finnVarslerSomErVurderteEllerAktive(generasjonId)
+        val varsler = apiVarselDao.finnVarslerFor(generasjonId)
 
         assertEquals(setOf(forventetVarsel1, forventetVarsel2), varsler)
     }

@@ -11,8 +11,8 @@ class ApiGenerasjonRepository(dataSource: DataSource) {
     private val vedtakDao = ApiVedtakDao(dataSource)
 
     internal fun perioderTilBehandling(oppgaveId: Long): Set<ApiVedtak> {
-        val periodeTilGodkjenning = vedtakDao.vedtakFor(oppgaveId, varselDao::finnVarslerSomErVurderteEllerAktive)
-        val alleVedtakForPersonen = vedtakDao.alleVedtakForPerson(oppgaveId, varselDao::finnVarslerSomErVurderteEllerAktive)
+        val periodeTilGodkjenning = vedtakDao.vedtakFor(oppgaveId, varselDao::finnVarslerFor)
+        val alleVedtakForPersonen = vedtakDao.alleVedtakForPerson(oppgaveId, varselDao::finnVarslerFor)
         val sammenhengendePerioder = alleVedtakForPersonen.tidligereEnnOgSammenhengende(periodeTilGodkjenning)
         return sammenhengendePerioder + periodeTilGodkjenning
     }
