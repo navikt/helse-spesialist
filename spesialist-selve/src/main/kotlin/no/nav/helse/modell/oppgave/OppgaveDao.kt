@@ -97,12 +97,12 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             )
         }
 
-    fun finnAktive(vedtaksperiodeId: UUID) =
+    fun finnAktiv(vedtaksperiodeId: UUID) =
         """ SELECT o.id, o.type, o.status, o.utbetaling_id
             FROM oppgave o
             INNER JOIN vedtak v on o.vedtak_ref = v.id
             WHERE v.vedtaksperiode_id = :vedtaksperiodeId AND o.status IN('AvventerSystem'::oppgavestatus, 'AvventerSaksbehandler'::oppgavestatus)
-        """.list(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { row ->
+        """.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { row ->
             Oppgave(
                 id = row.long("id"),
                 type = enumValueOf(row.string("type")),

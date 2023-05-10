@@ -3,7 +3,6 @@ package no.nav.helse.modell.oppgave
 import java.sql.SQLException
 import java.util.UUID
 import no.nav.helse.Tilgangskontroll
-import no.nav.helse.modell.oppgave.Oppgave.Companion.loggOppgaverAvbrutt
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload.Companion.lagre
@@ -72,9 +71,10 @@ class OppgaveMediator(
     }
 
     fun avbrytOppgaver(vedtaksperiodeId: UUID) {
-        oppgaveDao.finnAktive(vedtaksperiodeId)
-            .also { it.loggOppgaverAvbrutt(vedtaksperiodeId) }
-            .map(::avbryt)
+        oppgaveDao.finnAktiv(vedtaksperiodeId)?.let { oppgave ->
+            oppgave.loggOppgaverAvbrutt(vedtaksperiodeId)
+            avbryt(oppgave)
+        }
     }
 
     fun opprett(
