@@ -227,13 +227,13 @@ internal class ApiVarselDao(private val dataSource: DataSource) : HelseDao(dataS
             generasjonId = it.uuid("generasjon_id"),
             definisjonId = it.uuid("definisjon_id"),
             kode = it.string("kode"),
+            status = Varselstatus.valueOf(it.string("status")),
             tittel = it.string("tittel"),
             forklaring = it.stringOrNull("forklaring"),
             handling = it.stringOrNull("handling"),
             vurdering = if (status in listOf(VURDERT, GODKJENT)) Varselvurdering(
                 it.string("status_endret_ident"),
                 it.localDateTime("status_endret_tidspunkt"),
-                Varselstatus.valueOf(it.string("status")),
             ) else null
         )
     }

@@ -5,12 +5,12 @@ import java.util.UUID
 import no.nav.helse.spesialist.api.graphql.schema.VarselDTO
 import no.nav.helse.spesialist.api.graphql.schema.VarselDTO.VarselvurderingDTO
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.AKTIV
-import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.INAKTIV
 
 data class Varsel(
     private val generasjonId: UUID,
     private val definisjonId: UUID,
     private val kode: String,
+    private val status: Varselstatus,
     private val tittel: String,
     private val forklaring: String?,
     private val handling: String?,
@@ -33,22 +33,19 @@ data class Varsel(
         tittel,
         forklaring,
         handling,
-        vurdering?.toDto()
+        vurdering?.toDto(status)
     )
 
     private fun erVurdert(): Boolean {
-        return vurdering?.erIkkeVurdert() == false
+        return status != AKTIV
     }
 
     data class Varselvurdering(
         private val ident: String,
         private val tidsstempel: LocalDateTime,
-        private val status: Varselstatus,
     ) {
-        internal fun erIkkeVurdert() = status == AKTIV
 
-        internal fun toDto(): VarselvurderingDTO {
-            if (status == INAKTIV) throw IllegalStateException("Sende INAKTIV til frontend støttes ikke")
+        internal fun toDto(status: Varselstatus): VarselvurderingDTO {
             return VarselvurderingDTO(
                 ident,
                 tidsstempel.toString(),
@@ -59,12 +56,10 @@ data class Varsel(
             this === other || (other is Varselvurdering
                     && javaClass == other.javaClass
                     && ident == other.ident
-                    && tidsstempel.withNano(0) == other.tidsstempel.withNano(0)
-                    && status == other.status)
+                    && tidsstempel.withNano(0) == other.tidsstempel.withNano(0))
 
         override fun hashCode(): Int {
             var result = ident.hashCode()
-            result = 31 * result + status.hashCode()
             result = 31 * result + tidsstempel.withNano(0).hashCode()
             return result
         }
