@@ -78,6 +78,7 @@ import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMe
 import no.nav.helse.spesialist.api.behandlingsstatistikk.behandlingsstatistikkApi
 import no.nav.helse.spesialist.api.client.AccessTokenClient
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
+import no.nav.helse.spesialist.api.endepunkter.annulleringApi
 import no.nav.helse.spesialist.api.endepunkter.overstyringApi
 import no.nav.helse.spesialist.api.graphql.graphQLApi
 import no.nav.helse.spesialist.api.notat.NotatDao
@@ -96,7 +97,6 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.utbetaling.UtbetalingApiDao
-import no.nav.helse.spesialist.api.utbetaling.annulleringApi
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner

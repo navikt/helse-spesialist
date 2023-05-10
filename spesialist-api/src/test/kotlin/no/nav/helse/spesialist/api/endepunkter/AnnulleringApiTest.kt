@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api
+package no.nav.helse.spesialist.api.endepunkter
 
 import io.ktor.client.request.*
 import io.ktor.http.*
@@ -8,8 +8,9 @@ import io.mockk.slot
 import io.mockk.verify
 import java.util.*
 import kotlinx.coroutines.runBlocking
+import no.nav.helse.spesialist.api.AbstractApiTest
+import no.nav.helse.spesialist.api.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.utbetaling.AnnulleringDto
-import no.nav.helse.spesialist.api.utbetaling.annulleringApi
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue

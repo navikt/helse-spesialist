@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api.utbetaling
+package no.nav.helse.spesialist.api.endepunkter
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
@@ -9,6 +9,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import no.nav.helse.spesialist.api.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
+import no.nav.helse.spesialist.api.utbetaling.AnnulleringDto
 
 fun Route.annulleringApi(saksbehandlerMediator: SaksbehandlerMediator) {
     post("/api/annullering") {
