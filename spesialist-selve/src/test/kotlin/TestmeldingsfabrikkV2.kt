@@ -10,6 +10,7 @@ import no.nav.helse.mediator.meldinger.Risikofunn.Companion.tilJson
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver
+import no.nav.helse.modell.overstyring.Subsumsjon
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
@@ -22,7 +23,6 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
-import no.nav.helse.spesialist.api.overstyring.SubsumsjonDto
 
 internal object TestmeldingsfabrikkV2 {
     internal fun lagVarseldefinisjonerEndret(
@@ -595,7 +595,7 @@ internal object TestmeldingsfabrikkV2 {
                 månedligInntekt = 25000.0,
                 fraMånedligInntekt = 25001.0,
                 forklaring = "testbortforklaring",
-                subsumsjon = SubsumsjonDto("8-28", "LEDD_1", "BOKSTAV_A"),
+                subsumsjon = Subsumsjon("8-28", "LEDD_1", "BOKSTAV_A"),
                 refusjonsopplysninger = null,
                 fraRefusjonsopplysninger = null,
                 begrunnelse = "en begrunnelse"

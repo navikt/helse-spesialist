@@ -1,6 +1,5 @@
 package no.nav.helse.mediator.api
 
-import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.auth.jwt.JWTPrincipal
@@ -19,7 +18,6 @@ import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonKafkaDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeKafkaDto
-import no.nav.helse.spesialist.api.overstyring.SubsumsjonDto
 import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
 
 internal fun Route.overstyringApi(hendelseMediator: HendelseMediator) {
@@ -85,13 +83,4 @@ internal fun Route.overstyringApi(hendelseMediator: HendelseMediator) {
         withContext(Dispatchers.IO) { hendelseMediator.håndter(message) }
         call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
     }
-}
-
-internal fun JsonNode.subsumsjonelementer(): SubsumsjonDto? {
-    if (this.isNull) return null
-    return SubsumsjonDto(
-        paragraf = this["paragraf"].asText(),
-        ledd = if (this["ledd"].isNull) null else this["ledd"].asText(),
-        bokstav = if (this["bokstav"].isNull) null else this["bokstav"].asText(),
-    )
 }

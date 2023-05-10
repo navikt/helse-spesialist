@@ -12,6 +12,7 @@ import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Vergemål
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver
+import no.nav.helse.modell.overstyring.Subsumsjon
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
@@ -26,7 +27,6 @@ import no.nav.helse.spesialist.api.overstyring.Dagtype.Feriedag
 import no.nav.helse.spesialist.api.overstyring.Dagtype.Sykedag
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
-import no.nav.helse.spesialist.api.overstyring.SubsumsjonDto
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.person.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -710,7 +710,7 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
                 månedligInntekt = 15000.0,
                 fraMånedligInntekt = 25001.0,
                 forklaring = "testbortforklaring",
-                subsumsjon = SubsumsjonDto("8-28", "LEDD_1", "BOKSTAV_A"),
+                subsumsjon = Subsumsjon("8-28", "LEDD_1", "BOKSTAV_A"),
                 refusjonsopplysninger = null,
                 fraRefusjonsopplysninger = null,
                 begrunnelse = "en begrunnelse")

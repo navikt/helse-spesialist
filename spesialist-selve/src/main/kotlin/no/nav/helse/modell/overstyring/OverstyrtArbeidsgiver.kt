@@ -2,10 +2,9 @@ package no.nav.helse.modell.overstyring
 
 import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDate
-import no.nav.helse.mediator.api.subsumsjonelementer
 import no.nav.helse.modell.overstyring.Refusjonselement.Companion.refusjonselementer
+import no.nav.helse.modell.overstyring.Subsumsjon.Companion.subsumsjonelementer
 import no.nav.helse.rapids_rivers.asLocalDate
-import no.nav.helse.spesialist.api.overstyring.SubsumsjonDto
 
 internal class OverstyrtArbeidsgiver(
     val organisasjonsnummer: String,
@@ -15,7 +14,7 @@ internal class OverstyrtArbeidsgiver(
     val fraRefusjonsopplysninger: List<Refusjonselement>?,
     val begrunnelse: String,
     val forklaring: String,
-    val subsumsjon: SubsumsjonDto?,
+    val subsumsjon: Subsumsjon?,
 ) {
     companion object {
         internal fun JsonNode.arbeidsgiverelementer(): List<OverstyrtArbeidsgiver> {
@@ -50,6 +49,23 @@ internal class Refusjonselement(
                     beløp = jsonNode["beløp"].asDouble()
                 )
             }
+        }
+    }
+}
+
+internal class Subsumsjon(
+    val paragraf: String,
+    val ledd: String? = null,
+    val bokstav: String? = null,
+) {
+    internal companion object {
+        internal fun JsonNode.subsumsjonelementer(): Subsumsjon? {
+            if (this.isNull) return null
+            return Subsumsjon(
+                paragraf = this["paragraf"].asText(),
+                ledd = if (this["ledd"].isNull) null else this["ledd"].asText(),
+                bokstav = if (this["bokstav"].isNull) null else this["bokstav"].asText(),
+            )
         }
     }
 }

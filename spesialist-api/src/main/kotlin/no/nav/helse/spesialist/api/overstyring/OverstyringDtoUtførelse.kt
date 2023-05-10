@@ -47,25 +47,6 @@ data class OverstyrTidslinjeKafkaDto(
     }
 }
 
-data class RefusjonselementDto(
-    val fom: LocalDate,
-    val tom: LocalDate? = null,
-    val beløp: Double
-)
-
-data class SubsumsjonDto(
-    val paragraf: String,
-    val ledd: String? = null,
-    val bokstav: String? = null,
-) {
-
-    fun toMap(): Map<String, Any> = listOfNotNull(
-        "paragraf" to paragraf,
-        ledd?.let { "ledd" to ledd },
-        bokstav?.let { "bokstav" to bokstav },
-    ).toMap()
-}
-
 data class OverstyrArbeidsgiverDto(
     val organisasjonsnummer: String,
     val månedligInntekt: Double,
@@ -86,6 +67,18 @@ data class OverstyrArbeidsgiverDto(
         "forklaring" to forklaring,
         "subsumsjon" to subsumsjon,
     ).toMap()
+
+    data class RefusjonselementDto(
+        val fom: LocalDate,
+        val tom: LocalDate? = null,
+        val beløp: Double
+    )
+
+    data class SubsumsjonDto(
+        val paragraf: String,
+        val ledd: String? = null,
+        val bokstav: String? = null,
+    )
 
     companion object {
         fun List<OverstyrArbeidsgiverDto>.toMap(): List<Map<String, Any?>> = this.map { it.toMap() }

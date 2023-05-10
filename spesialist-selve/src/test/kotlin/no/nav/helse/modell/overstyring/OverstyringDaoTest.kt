@@ -11,7 +11,6 @@ import no.nav.helse.mediator.meldinger.OverstyringTidslinje
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
-import no.nav.helse.spesialist.api.overstyring.SubsumsjonDto
 import no.nav.helse.spesialist.api.person.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -257,7 +256,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
                     fraMånedligInntekt = INNTEKT + 1,
                     refusjonsopplysninger = listOf(Refusjonselement(1.januar, 31.januar, 1000.0)),
                     fraRefusjonsopplysninger = null,
-                    subsumsjon = SubsumsjonDto(paragraf = "87494")
+                    subsumsjon = Subsumsjon(paragraf = "87494")
                 )
             ),
             OID,
@@ -301,7 +300,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
                     fraMånedligInntekt = INNTEKT + 1,
                     refusjonsopplysninger = null,
                     fraRefusjonsopplysninger = null,
-                    subsumsjon = SubsumsjonDto(paragraf = "87494")
+                    subsumsjon = Subsumsjon(paragraf = "87494")
                 )
             ),
             OID,
@@ -371,7 +370,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
                     fraMånedligInntekt = INNTEKT + 1,
                     refusjonsopplysninger = null,
                     fraRefusjonsopplysninger = null,
-                    subsumsjon = SubsumsjonDto(paragraf = "87494")
+                    subsumsjon = Subsumsjon(paragraf = "87494")
                 )
             ),
             opprettet = OPPRETTET,

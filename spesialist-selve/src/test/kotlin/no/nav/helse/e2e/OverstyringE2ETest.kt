@@ -15,6 +15,7 @@ import no.nav.helse.Testdata.SAKSBEHANDLER_EPOST
 import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.januar
 import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver
+import no.nav.helse.modell.overstyring.Subsumsjon
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
@@ -30,7 +31,6 @@ import no.nav.helse.spesialist.api.overstyring.Dagtype.Sykedag
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
-import no.nav.helse.spesialist.api.overstyring.SubsumsjonDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
@@ -72,7 +72,7 @@ internal class OverstyringE2ETest : AbstractE2ETestV2() {
                     månedligInntekt = 25000.0,
                     fraMånedligInntekt = 25001.0,
                     forklaring = "testbortforklaring",
-                    subsumsjon = SubsumsjonDto("8-28", "LEDD_1", "BOKSTAV_A"),
+                    subsumsjon = Subsumsjon("8-28", "LEDD_1", "BOKSTAV_A"),
                     refusjonsopplysninger = null,
                     fraRefusjonsopplysninger = null,
                     begrunnelse = "begrunnelse")

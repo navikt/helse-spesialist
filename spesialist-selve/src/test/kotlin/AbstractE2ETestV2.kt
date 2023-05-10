@@ -34,6 +34,7 @@ import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Vergemål
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver
+import no.nav.helse.modell.overstyring.Subsumsjon
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
@@ -58,7 +59,6 @@ import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
-import no.nav.helse.spesialist.api.overstyring.SubsumsjonDto
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import org.intellij.lang.annotations.Language
@@ -936,7 +936,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
                 månedligInntekt = 25000.0,
                 fraMånedligInntekt = 25001.0,
                 forklaring = "testbortforklaring",
-                subsumsjon = SubsumsjonDto("8-28", "LEDD_1", "BOKSTAV_A"),
+                subsumsjon = Subsumsjon("8-28", "LEDD_1", "BOKSTAV_A"),
                 refusjonsopplysninger = null,
                 fraRefusjonsopplysninger = null,
                 begrunnelse = "en begrunnelse")
