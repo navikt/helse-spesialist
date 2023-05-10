@@ -181,14 +181,16 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             )
 
     fun finnContextId(oppgaveId: Long) = requireNotNull(
-        """SELECT command_context_id FROM oppgave WHERE id = :oppgaveId""".single(mapOf("oppgaveId" to oppgaveId)) { row ->
+        """SELECT command_context_id FROM oppgave WHERE id = :oppgaveId""".trimMargin().single(mapOf("oppgaveId" to oppgaveId)) { row ->
             UUID.fromString(
                 row.string("command_context_id")
             )
         })
 
     fun finnHendelseId(oppgaveId: Long) = requireNotNull(
-        """SELECT DISTINCT hendelse_id FROM command_context WHERE context_id = (SELECT command_context_id FROM oppgave WHERE id = :oppgaveId)"""
+        """SELECT DISTINCT hendelse_id 
+            |FROM command_context 
+            |WHERE context_id = (SELECT command_context_id FROM oppgave WHERE id = :oppgaveId)""".trimMargin()
             .single(mapOf("oppgaveId" to oppgaveId)) { row -> row.uuid("hendelse_id") })
 
     fun harGyldigOppgave(utbetalingId: UUID) = requireNotNull(

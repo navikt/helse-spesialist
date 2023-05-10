@@ -162,9 +162,9 @@ internal class HendelseMediator(
         oppgaveId: Long,
         saksbehandlerreferanse: UUID,
     ): Boolean {
-        val suksess = tildelingDao.opprettTildeling(oppgaveId, saksbehandlerreferanse)
-        if (suksess) sendMeldingOppgaveOppdatert(oppgaveId)
-        return suksess
+        val tildelingApiDto = tildelingDao.opprettTildeling(oppgaveId, saksbehandlerreferanse)
+        if (tildelingApiDto != null) sendMeldingOppgaveOppdatert(oppgaveId)
+        return tildelingApiDto != null
     }
 
     internal fun sendMeldingOppgaveOppdatert(oppgaveId: Long, påVent: Boolean? = null) {

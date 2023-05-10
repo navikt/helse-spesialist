@@ -8,6 +8,7 @@ import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMediator
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.graphql.mutation.NotatMutation
+import no.nav.helse.spesialist.api.graphql.mutation.TildelingMutation
 import no.nav.helse.spesialist.api.graphql.mutation.VarselMutation
 import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQuery
 import no.nav.helse.spesialist.api.graphql.query.NotatQuery
@@ -23,6 +24,7 @@ import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
+import no.nav.helse.spesialist.api.tildeling.TildelingService
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.utbetaling.UtbetalingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
@@ -44,7 +46,8 @@ internal class SchemaBuilder(
     val notatDao: NotatDao,
     val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
     val reservasjonClient: ReservasjonClient,
-    val behandlingsstatistikkMediator: BehandlingsstatistikkMediator,
+    private val behandlingsstatistikkMediator: BehandlingsstatistikkMediator,
+    private val tildelingService: TildelingService
 ) {
     fun build(): GraphQLSchema {
         val schemaConfig = SchemaGeneratorConfig(
@@ -100,6 +103,9 @@ internal class SchemaBuilder(
                 ),
                 TopLevelObject(
                     VarselMutation(varselRepository = varselRepository)
+                ),
+                TopLevelObject(
+                    TildelingMutation(tildelingService = tildelingService)
                 )
             )
         )

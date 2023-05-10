@@ -9,32 +9,45 @@ import kotliquery.sessionOf
 import no.nav.helse.HelseDao
 import org.intellij.lang.annotations.Language
 
-class TildelingDao(private val dataSource: DataSource): HelseDao(dataSource) {
+class TildelingDao(private val dataSource: DataSource) : HelseDao(dataSource) {
 
-    fun opprettTildeling(oppgaveId: Long, saksbehandleroid: UUID, påVent: Boolean = false): Boolean {
-        return sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query = """
-                INSERT INTO tildeling (oppgave_id_ref, saksbehandler_ref, på_vent)
-                VALUES (:oppgave_id_ref, :saksbehandler_ref, :paa_vent);
-            """.trimIndent()
+    fun opprettTildeling(oppgaveId: Long, saksbehandleroid: UUID, påVent: Boolean = false): TildelingApiDto? =
+        sessionOf(dataSource).use { session ->
             session.transaction { tx ->
-                if (tx.tildelingForOppgave(oppgaveId) != null) false
+                if (tx.tildelingForOppgave(oppgaveId) != null) null
                 else {
-                    tx.run(
-                        queryOf(
-                            query, mapOf(
+                    val key = tx.run {
+                        queryize(
+                            """
+                                INSERT INTO tildeling (oppgave_id_ref, saksbehandler_ref, på_vent)
+                                VALUES (:oppgave_id_ref, :saksbehandler_ref, :paa_vent);
+                            """
+                        ).update(
+                            mapOf(
                                 "oppgave_id_ref" to oppgaveId,
                                 "saksbehandler_ref" to saksbehandleroid,
                                 "paa_vent" to påVent,
                             )
-                        ).asUpdate
-                    )
-                    true
+                        )
+                    }
+                    if (key > 0) {
+                        tx.run {
+                            queryize(
+                                """
+                                SELECT navn, epost, oid, på_vent
+                                FROM saksbehandler s
+                                INNER JOIN tildeling t on s.oid = t.saksbehandler_ref AND t.oppgave_id_ref = :oppgave_id
+                                WHERE s.oid = :saksbehandler_oid
+                            """
+                            ).single(
+                                mapOf("saksbehandler_oid" to saksbehandleroid, "oppgave_id" to oppgaveId),
+                                ::tildelingDto
+                            )
+                        }
+                    } else null
                 }
             }
         }
-    }
 
     fun slettTildeling(oppgaveId: Long) =
         """ DELETE
@@ -56,7 +69,7 @@ class TildelingDao(private val dataSource: DataSource): HelseDao(dataSource) {
                  RIGHT JOIN saksbehandler s on t.saksbehandler_ref = s.oid
             WHERE fodselsnummer = :fnr AND o.status = 'AvventerSaksbehandler'
             ORDER BY o.opprettet DESC;
-        """.single(mapOf("fnr" to fødselsnummer.toLong())) { row -> tildelingDto(row)}
+        """.single(mapOf("fnr" to fødselsnummer.toLong())) { row -> tildelingDto(row) }
 
     fun leggOppgavePåVent(oppgaveId: Long) =
         """ UPDATE tildeling

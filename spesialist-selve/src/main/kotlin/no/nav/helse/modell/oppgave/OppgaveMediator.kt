@@ -29,7 +29,7 @@ class OppgaveMediator(
     }
 
     fun tildel(oppgaveId: Long, saksbehandleroid: UUID, påVent: Boolean = false): Boolean {
-        return tildelingDao.opprettTildeling(oppgaveId, saksbehandleroid, påVent)
+        return tildelingDao.opprettTildeling(oppgaveId, saksbehandleroid, påVent) != null
     }
 
     /*

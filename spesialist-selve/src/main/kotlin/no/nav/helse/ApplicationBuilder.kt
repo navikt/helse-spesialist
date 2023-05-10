@@ -84,6 +84,7 @@ import no.nav.helse.spesialist.api.graphql.graphQLApi
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
+import no.nav.helse.spesialist.api.oppgave.Oppgavemelder
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.person.PersonApiDao
@@ -174,6 +175,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private lateinit var hendelseMediator: HendelseMediator
     private lateinit var saksbehandlerMediator: SaksbehandlerMediator
     private lateinit var tildelingService: TildelingService
+    private lateinit var oppgavemelder: Oppgavemelder
 
     private val personDao = PersonDao(dataSource)
     private val personApiDao = PersonApiDao(dataSource)
@@ -208,6 +210,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val apiGenerasjonRepository = ApiGenerasjonRepository(dataSource)
 
     private val behandlingsstatistikkMediator = BehandlingsstatistikkMediator(behandlingsstatistikkDao)
+    private val apiTildelingService = no.nav.helse.spesialist.api.tildeling.TildelingService(tildelingDao, saksbehandlerDao, totrinnsvurderingApiDao, oppgavemelder)
 
     private val oppgaveMediator = OppgaveMediator(
         oppgaveDao = oppgaveDao,
@@ -309,6 +312,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 saksbehandlereMedTilgangTilStikkprøve = saksbehandlereMedTilgangTilStikkprøver,
                 snapshotMediator = snapshotMediator,
                 behandlingsstatistikkMediator = behandlingsstatistikkMediator,
+                tildelingService = apiTildelingService
             )
 
             routing {
@@ -386,6 +390,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             hendelseMediator,
             totrinnsvurderingMediator
         )
+        oppgavemelder = Oppgavemelder(oppgaveApiDao, rapidsConnection)
         oppdaterPersonService = OppdaterPersonService(rapidsConnection)
         godkjenningService = GodkjenningService(
             dataSource = dataSource,

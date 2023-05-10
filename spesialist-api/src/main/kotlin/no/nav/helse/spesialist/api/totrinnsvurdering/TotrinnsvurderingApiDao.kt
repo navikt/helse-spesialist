@@ -15,6 +15,16 @@ class TotrinnsvurderingApiDao(private val dataSource: DataSource) : HelseDao(dat
         """
     ).single(mapOf("vedtaksperiodeId" to vedtaksperiodeId), ::tilTotrinnsvurdering)
 
+    fun hentAktiv(oppgaveId: Long): TotrinnsvurderingDto? = queryize(
+        """
+           SELECT * FROM totrinnsvurdering
+           INNER JOIN vedtak v on totrinnsvurdering.vedtaksperiode_id = v.vedtaksperiode_id
+           INNER JOIN oppgave o on v.id = o.vedtak_ref
+           WHERE o.id = :oppgaveId
+           AND utbetaling_id_ref IS NULL
+        """
+    ).single(mapOf("oppgaveId" to oppgaveId), ::tilTotrinnsvurdering)
+
     private fun tilTotrinnsvurdering(row: Row) =
         TotrinnsvurderingDto(
             vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
@@ -26,7 +36,7 @@ class TotrinnsvurderingApiDao(private val dataSource: DataSource) : HelseDao(dat
             oppdatert = row.localDateTimeOrNull("oppdatert")
         )
 
-    data class TotrinnsvurderingDto (
+    data class TotrinnsvurderingDto(
         val vedtaksperiodeId: UUID,
         val erRetur: Boolean,
         val saksbehandler: UUID?,

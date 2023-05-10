@@ -31,6 +31,7 @@ import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
+import no.nav.helse.spesialist.api.tildeling.TildelingService
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.utbetaling.UtbetalingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
@@ -60,6 +61,7 @@ fun Application.graphQLApi(
     saksbehandlereMedTilgangTilStikkprøve: List<String>,
     snapshotMediator: SnapshotMediator,
     behandlingsstatistikkMediator: BehandlingsstatistikkMediator,
+    tildelingService: TildelingService
 ) {
     val schema = SchemaBuilder(
         personApiDao = personApiDao,
@@ -78,6 +80,7 @@ fun Application.graphQLApi(
         reservasjonClient = reservasjonClient,
         snapshotMediator = snapshotMediator,
         behandlingsstatistikkMediator = behandlingsstatistikkMediator,
+        tildelingService = tildelingService
     ).build()
 
     val server = GraphQLServer(

@@ -10,7 +10,6 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.HelseDao
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
-import no.nav.helse.spesialist.api.Toggle
 import no.nav.helse.spesialist.api.graphql.schema.Boenhet
 import no.nav.helse.spesialist.api.graphql.schema.DateString
 import no.nav.helse.spesialist.api.graphql.schema.InntektFraAOrdningen
@@ -236,6 +235,38 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 bosted = it.string("bosted"),
             )
         }
+    }
+
+    fun finnFødselsnummer(oppgaveId: Long) = requireNotNull(
+        queryize(""" SELECT fodselsnummer from person
+            INNER JOIN vedtak v on person.id = v.person_ref
+            INNER JOIN oppgave o on v.id = o.vedtak_ref
+            WHERE o.id = :oppgaveId
+        """
+        ).single(mapOf("oppgaveId" to oppgaveId)) { it.long("fodselsnummer").toFødselsnummer() })
+
+    fun hentOppgavemelding(oppgaveId: Long): Oppgavemelder.Oppgavemelding? = queryize(
+        """
+            SELECT DISTINCT hendelse_id, context_id, o.id as oppgave_id, status, type, beslutter, er_retur, ferdigstilt_av, ferdigstilt_av_oid
+            FROM oppgave o
+            INNER JOIN command_context cc on cc.context_id = o.command_context_id
+            INNER JOIN vedtaksperiode_utbetaling_id vui on o.utbetaling_id = vui.utbetaling_id
+            INNER JOIN totrinnsvurdering t on vui.vedtaksperiode_id = t.vedtaksperiode_id
+            WHERE o.id = :oppgaveId
+            AND status = 'AvventerSaksbehandler'::oppgavestatus
+        """.trimIndent()
+    ).single(mapOf("oppgaveId" to oppgaveId)) {
+        Oppgavemelder.Oppgavemelding(
+            hendelseId = it.uuid("hendelse_id"),
+            contextId = it.uuid("command_context_id"),
+            oppgaveId = it.long("oppgave_id"),
+            status = Oppgavestatus.valueOf(it.string("status")),
+            type = Oppgavetype.valueOf(it.string("type")),
+            beslutter = it.uuidOrNull("beslutter"),
+            erRetur = it.boolean("er_retur"),
+            ferdigstiltAvIdent = it.stringOrNull("ferdigstillt_av"),
+            ferdigstiltAvOid = it.uuidOrNull("ferdigstilt_av_oid"),
+        )
     }
 
     companion object {

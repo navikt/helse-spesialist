@@ -75,6 +75,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
             snapshotMediator = snapshotMediator,
             reservasjonClient = reservasjonClient,
             behandlingsstatistikkMediator = behandlingsstatistikkMediator,
+            tildelingService = tildelingService
         ).build()
 
         graphQLServer = GraphQLServer(

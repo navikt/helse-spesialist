@@ -5,11 +5,11 @@ import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 
 internal class TildelingDaoTest : DatabaseIntegrationTest() {
 
@@ -31,7 +31,7 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
         saksbehandlerDao.opprettSaksbehandler(saksbehandlerOid2, "B", "b@nav.no", "A999999")
 
         tildelingDao.opprettTildeling(oppgaveId, saksbehandlerOid1)
-        val tildelingNrToSuksess = tildelingDao.opprettTildeling(oppgaveId, saksbehandlerOid2)
+        val tildelingNrToSuksess = tildelingDao.opprettTildeling(oppgaveId, saksbehandlerOid2) != null
 
         assertFalse(tildelingNrToSuksess)
         assertTildeling(oppgaveId, saksbehandlerOid1)
@@ -45,7 +45,7 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
 
         tildelingDao.opprettTildeling(oppgaveId, saksbehandlerOid)
 
-        val tildelingNrToSuksess = tildelingDao.opprettTildeling(oppgaveId, saksbehandlerOid)
+        val tildelingNrToSuksess = tildelingDao.opprettTildeling(oppgaveId, saksbehandlerOid) != null
 
         assertFalse(tildelingNrToSuksess)
     }

@@ -35,6 +35,7 @@ import no.nav.helse.spesialist.api.graphql.hentsnapshot.Sykepengedager
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
+import no.nav.helse.spesialist.api.oppgave.Oppgavemelder
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
@@ -47,6 +48,7 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
+import no.nav.helse.spesialist.api.tildeling.TildelingService
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.utbetaling.UtbetalingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
@@ -88,6 +90,8 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected val snapshotClient = mockk<SnapshotClient>(relaxed = true)
 
     protected val snapshotMediator = SnapshotMediator(snapshotApiDao, snapshotClient)
+    protected val tildelingService =
+        TildelingService(tildelingDao, saksbehandlerDao, totrinnsvurderingApiDao, mockk<Oppgavemelder>(relaxed = true))
 
     protected fun opprettVedtaksperiode(
         personId: Long,
@@ -96,8 +100,15 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         periode: Periode = PERIODE,
         oppgavetype: Oppgavetype = Oppgavetype.SØKNAD,
         skjæringstidspunkt: LocalDate = periode.fom,
-        forkastet: Boolean = false
-    ) = opprettVedtak(personId, arbeidsgiverId, periode, skjæringstidspunkt, forkastet).also { klargjørVedtak(it, utbetalingId, periode, oppgavetype) }
+        forkastet: Boolean = false,
+    ) = opprettVedtak(personId, arbeidsgiverId, periode, skjæringstidspunkt, forkastet).also {
+        klargjørVedtak(
+            it,
+            utbetalingId,
+            periode,
+            oppgavetype
+        )
+    }
 
     private fun opprettGenerasjon(
         periode: Periode,
@@ -146,7 +157,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         arbeidsgiverId: Long,
         periode: Periode = PERIODE,
         skjæringstidspunkt: LocalDate = periode.fom,
-        forkastet: Boolean = false
+        forkastet: Boolean = false,
     ) =
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             val snapshotid = opprettSnapshot()
@@ -165,13 +176,29 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             )
         }
 
-    protected fun opprettVarseldefinisjon(tittel: String = "EN_TITTEL", kode: String = "EN_KODE", definisjonId: UUID = UUID.randomUUID()): Long = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+    protected fun opprettVarseldefinisjon(
+        tittel: String = "EN_TITTEL",
+        kode: String = "EN_KODE",
+        definisjonId: UUID = UUID.randomUUID(),
+    ): Long = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
         @Language("PostgreSQL")
         val query = """
             INSERT INTO api_varseldefinisjon(unik_id, kode, tittel, forklaring, handling, opprettet) 
             VALUES (?, ?, ?, ?, ?, ?)    
         """
-        requireNotNull(session.run(queryOf(query, definisjonId, kode, tittel, null, null, LocalDateTime.now()).asUpdateAndReturnGeneratedKey))
+        requireNotNull(
+            session.run(
+                queryOf(
+                    query,
+                    definisjonId,
+                    kode,
+                    tittel,
+                    null,
+                    null,
+                    LocalDateTime.now()
+                ).asUpdateAndReturnGeneratedKey
+            )
+        )
     }
 
     protected fun nyGenerasjon(
@@ -180,14 +207,29 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         utbetalingId: UUID = UUID.randomUUID(),
         periode: Periode = PERIODE,
         tilstandEndretTidspunkt: LocalDateTime? = null,
-        skjæringstidspunkt: LocalDate = periode.fom
+        skjæringstidspunkt: LocalDate = periode.fom,
     ): Long = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
         @Language("PostgreSQL")
         val query = """
             INSERT INTO selve_vedtaksperiode_generasjon(vedtaksperiode_id, unik_id, utbetaling_id, opprettet_av_hendelse, tilstand_endret_tidspunkt, tilstand_endret_av_hendelse, tilstand, fom, tom, skjæringstidspunkt) 
             VALUES (?, ?, ?, ?, ?, ?, 'Ulåst', ?, ?, ?)
         """
-        return requireNotNull(session.run(queryOf(query, vedtaksperiodeId, generasjonId, utbetalingId, UUID.randomUUID(), tilstandEndretTidspunkt, UUID.randomUUID(), periode.fom, periode.tom, skjæringstidspunkt).asUpdateAndReturnGeneratedKey))
+        return requireNotNull(
+            session.run(
+                queryOf(
+                    query,
+                    vedtaksperiodeId,
+                    generasjonId,
+                    utbetalingId,
+                    UUID.randomUUID(),
+                    tilstandEndretTidspunkt,
+                    UUID.randomUUID(),
+                    periode.fom,
+                    periode.tom,
+                    skjæringstidspunkt
+                ).asUpdateAndReturnGeneratedKey
+            )
+        )
     }
 
     protected fun nyttVarsel(
@@ -538,14 +580,22 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             )
         }
 
-    protected fun mockSnapshot(fødselsnummer: String = FØDSELSNUMMER, avviksprosent: Double = 0.0, arbeidsgivere: List<GraphQLArbeidsgiver> = emptyList()) {
+    protected fun mockSnapshot(
+        fødselsnummer: String = FØDSELSNUMMER,
+        avviksprosent: Double = 0.0,
+        arbeidsgivere: List<GraphQLArbeidsgiver> = emptyList(),
+    ) {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns object :
             GraphQLClientResponse<HentSnapshot.Result> {
             override val data = HentSnapshot.Result(snapshot(fødselsnummer, avviksprosent, arbeidsgivere))
         }
     }
 
-    private fun snapshot(fødselsnummer: String = FØDSELSNUMMER, avviksprosent: Double = 0.0, arbeidsgivere: List<GraphQLArbeidsgiver> = emptyList()): GraphQLPerson {
+    private fun snapshot(
+        fødselsnummer: String = FØDSELSNUMMER,
+        avviksprosent: Double = 0.0,
+        arbeidsgivere: List<GraphQLArbeidsgiver> = emptyList(),
+    ): GraphQLPerson {
         val vilkårsgrunnlag = GraphQLSpleisVilkarsgrunnlag(
             id = UUID.randomUUID().toString(),
             vilkarsgrunnlagtype = GraphQLVilkarsgrunnlagtype.SPLEIS,
@@ -665,8 +715,16 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     protected fun finnOppgaveIdFor(vedtaksperiodeId: UUID): Long = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
-        val query = "SELECT o.id FROM oppgave o JOIN vedtak v ON v.id = o.vedtak_ref WHERE v.vedtaksperiode_id = :vedtaksperiode_id;"
-        return requireNotNull(session.run(queryOf(query, mapOf("vedtaksperiode_id" to vedtaksperiodeId)).map { it.long("id") }.asSingle))
+        val query =
+            "SELECT o.id FROM oppgave o JOIN vedtak v ON v.id = o.vedtak_ref WHERE v.vedtaksperiode_id = :vedtaksperiode_id;"
+        return requireNotNull(
+            session.run(
+                queryOf(
+                    query,
+                    mapOf("vedtaksperiode_id" to vedtaksperiodeId)
+                ).map { it.long("id") }.asSingle
+            )
+        )
     }
 
     protected data class Navn(
