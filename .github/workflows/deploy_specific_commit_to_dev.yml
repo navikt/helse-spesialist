@@ -8,20 +8,20 @@ on:
         required: true
 
 jobs:
-  lag_tag:
-    name: Lag en (midlertidig) tag
+  lag_branch:
+    name: Lag en (midlertidig) branch
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
           ref: ${{ github.event.inputs.commitHash }}
-      - name: Lag tag for senere workflows
+      - name: Lag branch for senere workflows
         run: |
-          git co -b denne_skal_deployes_til_dev
+          git branch denne_skal_deployes_til_dev
           git push origin denne_skal_deployes_til_dev
 
   build:
-    needs: [ lag_tag ]
+    needs: [ lag_branch ]
     uses: navikt/helse-spesialist/.github/workflows/build-image.yml@master
     secrets: inherit
     with:
@@ -42,8 +42,8 @@ jobs:
           RESOURCE: deploy/dev.yml
           IMAGE: ${{ needs.build.outputs.image }}
 
-  fjern_tag:
-    name: Fjern taggen
+  fjern_branch:
+    name: Fjern branchen
     if: always()
     needs: [ deployDev ]
     runs-on: ubuntu-latest
