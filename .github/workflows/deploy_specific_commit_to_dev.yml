@@ -48,5 +48,6 @@ jobs:
     needs: [ deployDev ]
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
       - run: |
           git push origin :denne_skal_deployes_til_dev
