@@ -2,13 +2,11 @@ package no.nav.helse.spesialist.api.endepunkter
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
-import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.principal
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
-import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.spesialist.api.SaksbehandlerMediator
@@ -23,18 +21,10 @@ import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
 fun Route.overstyringApi(saksbehandlerMediator: SaksbehandlerMediator) {
     post("/api/overstyr/dager") {
         val overstyring = call.receive<OverstyrTidslinjeDto>()
-
-        val accessToken = requireNotNull(call.principal<JWTPrincipal>())
-        val oid = UUID.fromString(accessToken.payload.getClaim("oid").asString())
-        val epostadresse = accessToken.payload.getClaim("preferred_username").asString()
-        val saksbehandlerNavn = accessToken.payload.getClaim("name").asString()
-        val saksbehandlerIdent = accessToken.payload.getClaim("NAVident").asString()
+        val saksbehandler = Saksbehandler.fraOnBehalfOfToken(requireNotNull(call.principal()))
 
         val message = OverstyrTidslinjeKafkaDto(
-            saksbehandlerEpost = epostadresse,
-            saksbehandlerOid = oid,
-            saksbehandlerNavn = saksbehandlerNavn,
-            saksbehandlerIdent = saksbehandlerIdent,
+            saksbehandler = saksbehandler.toDto(),
             organisasjonsnummer = overstyring.organisasjonsnummer,
             fødselsnummer = overstyring.fødselsnummer,
             aktørId = overstyring.aktørId,

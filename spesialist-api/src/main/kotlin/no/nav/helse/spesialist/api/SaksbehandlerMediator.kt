@@ -45,20 +45,8 @@ class SaksbehandlerMediator(
 
     internal fun håndter(overstyringMessage: OverstyrTidslinjeKafkaDto) {
         overstyringsteller.labels("opplysningstype", "tidslinje").inc()
-        val overstyring = JsonMessage.newMessage(
-            "saksbehandler_overstyrer_tidslinje", mutableMapOf(
-                "fødselsnummer" to overstyringMessage.fødselsnummer,
-                "aktørId" to overstyringMessage.aktørId,
-                "organisasjonsnummer" to overstyringMessage.organisasjonsnummer,
-                "dager" to overstyringMessage.dager,
-                "begrunnelse" to overstyringMessage.begrunnelse,
-                "saksbehandlerOid" to overstyringMessage.saksbehandlerOid,
-                "saksbehandlerNavn" to overstyringMessage.saksbehandlerNavn,
-                "saksbehandlerIdent" to overstyringMessage.saksbehandlerIdent,
-                "saksbehandlerEpost" to overstyringMessage.saksbehandlerEpost,
-            )
-        ).also {
-            sikkerlogg.info("Publiserer overstyring fra api:\n${it.toJson()}")
+        val overstyring = overstyringMessage.somKafkaMessage().also {
+            sikkerlogg.info("Publiserer overstyring av tidslinje fra api:\n${it.toJson()}")
         }
         rapidsConnection.publish(overstyringMessage.fødselsnummer, overstyring.toJson())
     }
@@ -66,7 +54,7 @@ class SaksbehandlerMediator(
     internal fun håndter(overstyringMessage: OverstyrInntektOgRefusjonKafkaDto) {
         overstyringsteller.labels("opplysningstype", "inntektogrefusjon").inc()
         val overstyring = overstyringMessage.somKafkaMessage().also {
-            sikkerlogg.info("Publiserer overstyring fra api:\n${it.toJson()}")
+            sikkerlogg.info("Publiserer overstyring av inntekt og refusjon fra api:\n${it.toJson()}")
         }
         rapidsConnection.publish(overstyringMessage.fødselsnummer, overstyring.toJson())
     }
@@ -75,7 +63,7 @@ class SaksbehandlerMediator(
         overstyringsteller.labels("opplysningstype", "arbeidsforhold").inc()
 
         val overstyring = overstyringMessage.somKafkaMessage().also {
-            sikkerlogg.info("Publiserer overstyring fra api:\n${it.toJson()}")
+            sikkerlogg.info("Publiserer overstyring av arbeidsforhold fra api:\n${it.toJson()}")
         }
 
         rapidsConnection.publish(overstyringMessage.fødselsnummer, overstyring.toJson())

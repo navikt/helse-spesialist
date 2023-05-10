@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.api.overstyring
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsgiverDto.Companion.toMap
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDto
@@ -25,28 +24,6 @@ class OverstyrTidslinjeDto(
     )
 }
 
-internal data class OverstyrTidslinjeKafkaDto(
-    val saksbehandlerEpost: String,
-    val saksbehandlerOid: UUID,
-    val saksbehandlerNavn: String,
-    val saksbehandlerIdent: String,
-    val organisasjonsnummer: String,
-    val fødselsnummer: String,
-    val aktørId: String,
-    val begrunnelse: String,
-    val dager: List<OverstyrDagKafkaDto>
-) {
-    internal data class OverstyrDagKafkaDto(
-        val dato: LocalDate,
-        val type: Type,
-        val fraType: Type,
-        val grad: Int?,
-        val fraGrad: Int?
-    ) {
-        enum class Type { Sykedag, SykedagNav, Feriedag, Egenmeldingsdag, Permisjonsdag, Arbeidsdag, Avvistdag }
-    }
-}
-
 internal data class OverstyrArbeidsgiverDto(
     val organisasjonsnummer: String,
     val månedligInntekt: Double,
@@ -67,7 +44,6 @@ internal data class OverstyrArbeidsgiverDto(
         "forklaring" to forklaring,
         "subsumsjon" to subsumsjon,
     ).toMap()
-
     data class RefusjonselementDto(
         val fom: LocalDate,
         val tom: LocalDate? = null,
@@ -80,7 +56,7 @@ internal data class OverstyrArbeidsgiverDto(
         val bokstav: String? = null,
     )
 
-    companion object {
+    internal companion object {
         fun List<OverstyrArbeidsgiverDto>.toMap(): List<Map<String, Any?>> = this.map { it.toMap() }
     }
 }
@@ -91,28 +67,6 @@ internal data class OverstyrInntektOgRefusjonDto(
     val skjæringstidspunkt: LocalDate,
     val arbeidsgivere: List<OverstyrArbeidsgiverDto>,
 )
-
-internal data class OverstyrInntektOgRefusjonKafkaDto(
-    val saksbehandler: SaksbehandlerDto,
-    val fødselsnummer: String,
-    val aktørId: String,
-    val skjæringstidspunkt: LocalDate,
-    val arbeidsgivere: List<OverstyrArbeidsgiverDto>,
-) {
-    fun somKafkaMessage() = JsonMessage.newMessage(
-        "saksbehandler_overstyrer_inntekt_og_refusjon",
-        listOfNotNull(
-            "aktørId" to aktørId,
-            "fødselsnummer" to fødselsnummer,
-            "skjæringstidspunkt" to skjæringstidspunkt,
-            "arbeidsgivere" to arbeidsgivere.toMap(),
-            "saksbehandlerOid" to saksbehandler.oid,
-            "saksbehandlerNavn" to saksbehandler.navn,
-            "saksbehandlerIdent" to saksbehandler.ident,
-            "saksbehandlerEpost" to saksbehandler.epost,
-        ).toMap()
-    )
-}
 
 @JsonIgnoreProperties
 data class OverstyrArbeidsforholdDto(
@@ -128,6 +82,40 @@ data class OverstyrArbeidsforholdDto(
         val begrunnelse: String,
         val forklaring: String
     )
+}
+
+internal data class OverstyrTidslinjeKafkaDto(
+    val saksbehandler: SaksbehandlerDto,
+    val organisasjonsnummer: String,
+    val fødselsnummer: String,
+    val aktørId: String,
+    val begrunnelse: String,
+    val dager: List<OverstyrDagKafkaDto>
+) {
+    internal fun somKafkaMessage(): JsonMessage {
+        return JsonMessage.newMessage(
+            "saksbehandler_overstyrer_tidslinje", mutableMapOf(
+                "fødselsnummer" to fødselsnummer,
+                "aktørId" to aktørId,
+                "organisasjonsnummer" to organisasjonsnummer,
+                "dager" to dager,
+                "begrunnelse" to begrunnelse,
+                "saksbehandlerOid" to saksbehandler.oid,
+                "saksbehandlerNavn" to saksbehandler.navn,
+                "saksbehandlerIdent" to saksbehandler.ident,
+                "saksbehandlerEpost" to saksbehandler.epost,
+            )
+        )
+    }
+    internal data class OverstyrDagKafkaDto(
+        val dato: LocalDate,
+        val type: Type,
+        val fraType: Type,
+        val grad: Int?,
+        val fraGrad: Int?
+    ) {
+        enum class Type { Sykedag, SykedagNav, Feriedag, Egenmeldingsdag, Permisjonsdag, Arbeidsdag, Avvistdag }
+    }
 }
 
 internal data class OverstyrArbeidsforholdKafkaDto(
@@ -148,5 +136,27 @@ internal data class OverstyrArbeidsforholdKafkaDto(
             "skjæringstidspunkt" to skjæringstidspunkt,
             "overstyrteArbeidsforhold" to overstyrteArbeidsforhold,
         )
+    )
+}
+
+internal data class OverstyrInntektOgRefusjonKafkaDto(
+    val saksbehandler: SaksbehandlerDto,
+    val fødselsnummer: String,
+    val aktørId: String,
+    val skjæringstidspunkt: LocalDate,
+    val arbeidsgivere: List<OverstyrArbeidsgiverDto>,
+) {
+    fun somKafkaMessage() = JsonMessage.newMessage(
+        "saksbehandler_overstyrer_inntekt_og_refusjon",
+        listOfNotNull(
+            "aktørId" to aktørId,
+            "fødselsnummer" to fødselsnummer,
+            "skjæringstidspunkt" to skjæringstidspunkt,
+            "arbeidsgivere" to arbeidsgivere.toMap(),
+            "saksbehandlerOid" to saksbehandler.oid,
+            "saksbehandlerNavn" to saksbehandler.navn,
+            "saksbehandlerIdent" to saksbehandler.ident,
+            "saksbehandlerEpost" to saksbehandler.epost,
+        ).toMap()
     )
 }
