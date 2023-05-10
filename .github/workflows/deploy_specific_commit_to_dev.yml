@@ -9,6 +9,8 @@ on:
 
 jobs:
   lag_tag:
+    name: Lag en (midlertidig) tag
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
@@ -19,6 +21,7 @@ jobs:
           git push origin denne_skal_deployes_til_dev
 
   build:
+    needs: [ lag_tag ]
     uses: navikt/helse-spesialist/.github/workflows/build-image.yml@master
     secrets: inherit
     with:
