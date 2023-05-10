@@ -45,10 +45,10 @@ internal abstract class AbstractE2ETest: AbstractDatabaseTest() {
     private val SAKSBEHANDLER_NAVN = "Sara Saksbehandler"
     private val SAKSBEHANDLER_IDENT = "X999999"
 
+    protected val AKTØR_ID = "1234567891011"
+    protected val FØDSELSNUMMER = "12345678910"
     protected val ORGANISASJONSNUMMER = "987654321"
     protected val ORGANISASJONSNUMMER_GHOST = "123456789"
-    protected val FØDSELSNUMMER = "12345678910"
-    protected val AKTØR_ID = "1234567891011"
 
     private val defaultSaksbehandler = Saksbehandler(
         oid = SAKSBEHANDLER_OID,
