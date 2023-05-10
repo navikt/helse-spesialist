@@ -25,7 +25,7 @@ class OverstyrTidslinjeDto(
     )
 }
 
-data class OverstyrTidslinjeKafkaDto(
+internal data class OverstyrTidslinjeKafkaDto(
     val saksbehandlerEpost: String,
     val saksbehandlerOid: UUID,
     val saksbehandlerNavn: String,
@@ -36,7 +36,7 @@ data class OverstyrTidslinjeKafkaDto(
     val begrunnelse: String,
     val dager: List<OverstyrDagKafkaDto>
 ) {
-    data class OverstyrDagKafkaDto(
+    internal data class OverstyrDagKafkaDto(
         val dato: LocalDate,
         val type: Type,
         val fraType: Type,
@@ -47,7 +47,7 @@ data class OverstyrTidslinjeKafkaDto(
     }
 }
 
-data class OverstyrArbeidsgiverDto(
+internal data class OverstyrArbeidsgiverDto(
     val organisasjonsnummer: String,
     val månedligInntekt: Double,
     val fraMånedligInntekt: Double,
@@ -85,14 +85,14 @@ data class OverstyrArbeidsgiverDto(
     }
 }
 
-data class OverstyrInntektOgRefusjonDto(
+internal data class OverstyrInntektOgRefusjonDto(
     val aktørId: String,
     val fødselsnummer: String,
     val skjæringstidspunkt: LocalDate,
     val arbeidsgivere: List<OverstyrArbeidsgiverDto>,
 )
 
-data class OverstyrInntektOgRefusjonKafkaDto(
+internal data class OverstyrInntektOgRefusjonKafkaDto(
     val saksbehandler: SaksbehandlerDto,
     val fødselsnummer: String,
     val aktørId: String,
@@ -130,7 +130,7 @@ data class OverstyrArbeidsforholdDto(
     )
 }
 
-data class OverstyrArbeidsforholdKafkaDto(
+internal data class OverstyrArbeidsforholdKafkaDto(
     val saksbehandler: SaksbehandlerDto,
     val fødselsnummer: String,
     val aktørId: String,

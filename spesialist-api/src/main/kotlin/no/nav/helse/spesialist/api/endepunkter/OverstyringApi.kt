@@ -70,7 +70,6 @@ fun Route.overstyringApi(saksbehandlerMediator: SaksbehandlerMediator) {
 
     post("/api/overstyr/arbeidsforhold") {
         val overstyring = call.receive<OverstyrArbeidsforholdDto>()
-
         val saksbehandler = Saksbehandler.fraOnBehalfOfToken(requireNotNull(call.principal()))
 
         val message = OverstyrArbeidsforholdKafkaDto(

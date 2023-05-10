@@ -18,7 +18,7 @@ class SaksbehandlerMediator(
 ) {
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
 
-    fun håndter(annulleringDto: AnnulleringDto, saksbehandler: Saksbehandler) {
+    internal fun håndter(annulleringDto: AnnulleringDto, saksbehandler: Saksbehandler) {
         tellAnnullering()
         saksbehandler.persister(saksbehandlerDao)
 
