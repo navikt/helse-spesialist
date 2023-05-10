@@ -263,7 +263,7 @@ internal class OverstyringIT : AbstractE2ETest() {
         application { azureAdAppAuthentication(azureAdAppConfig) }
         routing {
             authenticate("oidc") {
-                overstyringApi(hendelseMediator, saksbehandlerMediator)
+                overstyringApi(saksbehandlerMediator)
             }
         }
     }

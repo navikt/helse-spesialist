@@ -66,9 +66,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.registrerTidsbrukForGodkjenningsbehov
 import no.nav.helse.registrerTidsbrukForHendelse
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
-import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdKafkaDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
-import no.nav.helse.spesialist.api.overstyringsteller
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.slf4j.LoggerFactory
 
@@ -572,16 +570,6 @@ internal class HendelseMediator(
         context: MessageContext,
     ) {
         utfør(hendelsefabrikk.nyeVarsler(id, fødselsnummer, varsler, json), context)
-    }
-
-    fun håndter(overstyringMessage: OverstyrArbeidsforholdKafkaDto) {
-        overstyringsteller.labels("opplysningstype", "arbeidsforhold").inc()
-
-        val overstyring = overstyringMessage.somKafkaMessage().also {
-            sikkerLogg.info("Publiserer overstyring fra api:\n${it.toJson()}")
-        }
-
-        rapidsConnection.publish(overstyringMessage.fødselsnummer, overstyring.toJson())
     }
 
     private fun forbered() {
