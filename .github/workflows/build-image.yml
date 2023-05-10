@@ -34,7 +34,7 @@ jobs:
           distribution: 'temurin'
           java-version: '17.x'
 
-      - uses: gradle/gradle-build-action@v2
+      - uses: gradle/gradle-build-action@v2.4.2
         name: Gradle build
         with:
           arguments: :spesialist-selve:build # felles- og api-modulene vil bli bygget fordi selve avhenger av dem
@@ -42,9 +42,10 @@ jobs:
           ORG_GRADLE_PROJECT_githubUser: x-access-token
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: nais/docker-build-push@v0
+      - uses: nais/docker-build-push@v0.7.0
         id: docker-build-push
         with:
+          metadata_context: git
           team: tbd
           tag: ${{ inputs.sha }}
           cache_from: type=gha
