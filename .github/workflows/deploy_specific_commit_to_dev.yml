@@ -9,13 +9,14 @@ on:
 
 jobs:
   lag_tag:
-    - uses: actions/checkout@v3
-      with:
-        ref: ${{ github.event.inputs.commitHash }}
-    - name: Lag tag for senere workflows
-      run: |
-        git tag denne_skal_deployes_til_dev
-        git push origin denne_skal_deployes_til_dev
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.inputs.commitHash }}
+      - name: Lag tag for senere workflows
+        run: |
+          git tag denne_skal_deployes_til_dev
+          git push origin denne_skal_deployes_til_dev
 
   build:
     uses: navikt/helse-spesialist/.github/workflows/build-image.yml@master
