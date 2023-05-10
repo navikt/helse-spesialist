@@ -12,6 +12,7 @@ on:
             - '.github/workflows/spesialist-migrering.yml'
             - 'deploy/dev-migrering.yml'
             - 'deploy/prod-migrering.yml'
+            - '.github/workflows/deploy_specific_commit_to_dev.yml'
         branches:
             - master
 
