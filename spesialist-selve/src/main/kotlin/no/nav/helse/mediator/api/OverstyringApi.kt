@@ -12,6 +12,7 @@ import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.spesialist.api.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdKafkaDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonDto
@@ -20,7 +21,7 @@ import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeKafkaDto
 import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
 
-internal fun Route.overstyringApi(hendelseMediator: HendelseMediator) {
+internal fun Route.overstyringApi(hendelseMediator: HendelseMediator, saksbehandlerMediator: SaksbehandlerMediator) {
     post("/api/overstyr/dager") {
         val overstyring = call.receive<OverstyrTidslinjeDto>()
 
@@ -49,7 +50,7 @@ internal fun Route.overstyringApi(hendelseMediator: HendelseMediator) {
                 )
             }
         )
-        withContext(Dispatchers.IO) { hendelseMediator.håndter(message) }
+        withContext(Dispatchers.IO) { saksbehandlerMediator.håndter(message) }
         call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
     }
 

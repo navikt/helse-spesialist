@@ -4,6 +4,7 @@ import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeKafkaDto
 import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.utbetaling.AnnulleringDto
@@ -39,6 +40,27 @@ class SaksbehandlerMediator(
             )
         })
     }
+
+    fun håndter(overstyringMessage: OverstyrTidslinjeKafkaDto) {
+        overstyringsteller.labels("opplysningstype", "tidslinje").inc()
+        val overstyring = JsonMessage.newMessage(
+            "saksbehandler_overstyrer_tidslinje", mutableMapOf(
+                "fødselsnummer" to overstyringMessage.fødselsnummer,
+                "aktørId" to overstyringMessage.aktørId,
+                "organisasjonsnummer" to overstyringMessage.organisasjonsnummer,
+                "dager" to overstyringMessage.dager,
+                "begrunnelse" to overstyringMessage.begrunnelse,
+                "saksbehandlerOid" to overstyringMessage.saksbehandlerOid,
+                "saksbehandlerNavn" to overstyringMessage.saksbehandlerNavn,
+                "saksbehandlerIdent" to overstyringMessage.saksbehandlerIdent,
+                "saksbehandlerEpost" to overstyringMessage.saksbehandlerEpost,
+            )
+        ).also {
+            sikkerlogg.info("Publiserer overstyring fra api:\n${it.toJson()}")
+        }
+        rapidsConnection.publish(overstyringMessage.fødselsnummer, overstyring.toJson())
+    }
+
 
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")

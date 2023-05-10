@@ -68,7 +68,6 @@ import no.nav.helse.registrerTidsbrukForHendelse
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdKafkaDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonKafkaDto
-import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeKafkaDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.overstyringsteller
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
@@ -574,26 +573,6 @@ internal class HendelseMediator(
         context: MessageContext,
     ) {
         utfør(hendelsefabrikk.nyeVarsler(id, fødselsnummer, varsler, json), context)
-    }
-
-    fun håndter(overstyringMessage: OverstyrTidslinjeKafkaDto) {
-        overstyringsteller.labels("opplysningstype", "tidslinje").inc()
-        val overstyring = JsonMessage.newMessage(
-            "saksbehandler_overstyrer_tidslinje", mutableMapOf(
-                "fødselsnummer" to overstyringMessage.fødselsnummer,
-                "aktørId" to overstyringMessage.aktørId,
-                "organisasjonsnummer" to overstyringMessage.organisasjonsnummer,
-                "dager" to overstyringMessage.dager,
-                "begrunnelse" to overstyringMessage.begrunnelse,
-                "saksbehandlerOid" to overstyringMessage.saksbehandlerOid,
-                "saksbehandlerNavn" to overstyringMessage.saksbehandlerNavn,
-                "saksbehandlerIdent" to overstyringMessage.saksbehandlerIdent,
-                "saksbehandlerEpost" to overstyringMessage.saksbehandlerEpost,
-            )
-        ).also {
-            sikkerLogg.info("Publiserer overstyring fra api:\n${it.toJson()}")
-        }
-        rapidsConnection.publish(overstyringMessage.fødselsnummer, overstyring.toJson())
     }
 
     fun håndter(overstyringMessage: OverstyrInntektOgRefusjonKafkaDto) {
