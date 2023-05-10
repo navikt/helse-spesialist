@@ -1,4 +1,4 @@
-package no.nav.helse.mediator.api
+package no.nav.helse.spesialist.api.endepunkter
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
@@ -20,7 +20,7 @@ import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeKafkaDto
 import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
 
-internal fun Route.overstyringApi(saksbehandlerMediator: SaksbehandlerMediator) {
+fun Route.overstyringApi(saksbehandlerMediator: SaksbehandlerMediator) {
     post("/api/overstyr/dager") {
         val overstyring = call.receive<OverstyrTidslinjeDto>()
 

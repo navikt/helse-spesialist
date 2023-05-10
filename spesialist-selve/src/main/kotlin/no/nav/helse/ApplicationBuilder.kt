@@ -42,7 +42,6 @@ import no.nav.helse.mediator.api.GodkjenningService
 import no.nav.helse.mediator.api.OppdaterPersonService
 import no.nav.helse.mediator.api.leggPåVentApi
 import no.nav.helse.mediator.api.notaterApi
-import no.nav.helse.mediator.api.overstyringApi
 import no.nav.helse.mediator.api.personApi
 import no.nav.helse.mediator.api.tildelingApi
 import no.nav.helse.mediator.api.totrinnsvurderingApi
@@ -79,6 +78,7 @@ import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMe
 import no.nav.helse.spesialist.api.behandlingsstatistikk.behandlingsstatistikkApi
 import no.nav.helse.spesialist.api.client.AccessTokenClient
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
+import no.nav.helse.spesialist.api.endepunkter.overstyringApi
 import no.nav.helse.spesialist.api.graphql.graphQLApi
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.notat.NotatMediator

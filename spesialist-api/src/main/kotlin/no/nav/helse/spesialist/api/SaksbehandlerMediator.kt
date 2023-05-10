@@ -43,7 +43,7 @@ class SaksbehandlerMediator(
         })
     }
 
-    fun håndter(overstyringMessage: OverstyrTidslinjeKafkaDto) {
+    internal fun håndter(overstyringMessage: OverstyrTidslinjeKafkaDto) {
         overstyringsteller.labels("opplysningstype", "tidslinje").inc()
         val overstyring = JsonMessage.newMessage(
             "saksbehandler_overstyrer_tidslinje", mutableMapOf(
@@ -63,7 +63,7 @@ class SaksbehandlerMediator(
         rapidsConnection.publish(overstyringMessage.fødselsnummer, overstyring.toJson())
     }
 
-    fun håndter(overstyringMessage: OverstyrInntektOgRefusjonKafkaDto) {
+    internal fun håndter(overstyringMessage: OverstyrInntektOgRefusjonKafkaDto) {
         overstyringsteller.labels("opplysningstype", "inntektogrefusjon").inc()
         val overstyring = overstyringMessage.somKafkaMessage().also {
             sikkerlogg.info("Publiserer overstyring fra api:\n${it.toJson()}")
@@ -71,7 +71,7 @@ class SaksbehandlerMediator(
         rapidsConnection.publish(overstyringMessage.fødselsnummer, overstyring.toJson())
     }
 
-    fun håndter(overstyringMessage: OverstyrArbeidsforholdKafkaDto) {
+    internal fun håndter(overstyringMessage: OverstyrArbeidsforholdKafkaDto) {
         overstyringsteller.labels("opplysningstype", "arbeidsforhold").inc()
 
         val overstyring = overstyringMessage.somKafkaMessage().also {

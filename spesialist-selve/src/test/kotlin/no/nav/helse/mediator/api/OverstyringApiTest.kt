@@ -29,6 +29,7 @@ import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spesialist.api.AzureAdAppConfig
 import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.azureAdAppAuthentication
+import no.nav.helse.spesialist.api.endepunkter.overstyringApi
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDto
 import org.junit.jupiter.api.Assertions.assertEquals
