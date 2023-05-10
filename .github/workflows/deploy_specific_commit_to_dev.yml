@@ -40,6 +40,9 @@ jobs:
           IMAGE: ${{ needs.build.outputs.image }}
 
   fjern_tag:
-    - name: Fjern taggen
+    name: Fjern taggen
+    needs: [ deployDev ]
+    runs-on: ubuntu-latest
+    steps:
       run: |
         git push origin :denne_skal_deployes_til_dev
