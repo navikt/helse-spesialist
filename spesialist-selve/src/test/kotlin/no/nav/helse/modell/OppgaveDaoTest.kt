@@ -19,6 +19,7 @@ import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
@@ -274,20 +275,23 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
 
 
     @Test
-    fun `finner alle oppgaver knyttet til vedtaksperiodeId`() {
+    fun `finner oppgave knyttet til vedtaksperiodeId`() {
         nyPerson()
-        opprettOppgave(vedtaksperiodeId = VEDTAKSPERIODE)
-        val oppgaver = oppgaveDao.finnAktive(VEDTAKSPERIODE)
-        assertEquals(2, oppgaver.size)
+        assertNotNull(oppgaveDao.finnAktiv(VEDTAKSPERIODE))
     }
 
     @Test
-    fun `finner ikke oppgaver knyttet til andre vedtaksperiodeider`() {
-        val v2 = UUID.randomUUID()
+    fun `finner ikke oppgaver for andre vedtaksperiodeider`() {
         nyPerson()
-        opprettVedtaksperiode(v2)
-        opprettOppgave(vedtaksperiodeId = v2)
-        assertEquals(1, oppgaveDao.finnAktive(VEDTAKSPERIODE).size)
+        assertNotNull(oppgaveDao.finnAktiv(VEDTAKSPERIODE))
+        oppgaveDao.updateOppgave(oppgaveId, Ferdigstilt)
+        assertNull(oppgaveDao.finnAktiv(VEDTAKSPERIODE))
+
+        val vId2 = UUID.randomUUID()
+        opprettVedtaksperiode(vId2)
+        opprettOppgave(vedtaksperiodeId = vId2)
+        assertNull(oppgaveDao.finnAktiv(VEDTAKSPERIODE))
+        assertNotNull(oppgaveDao.finnAktiv(vId2))
     }
 
     @Test

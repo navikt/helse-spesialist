@@ -42,7 +42,6 @@ internal class OppgaveMediatorTest {
         private const val SAKSBEHANDLERIDENT = "Z999999"
         private val SAKSBEHANDLEROID = UUID.randomUUID()
         private val OPPGAVETYPE_SØKNAD = Oppgavetype.SØKNAD
-        private val OPPGAVETYPE_STIKKPRØVE = Oppgavetype.STIKKPRØVE
     }
 
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
@@ -74,21 +73,16 @@ internal class OppgaveMediatorTest {
     fun `lagrer oppgaver`() {
         every { reservasjonDao.hentReservertTil(TESTHENDELSE.fødselsnummer()) } returns null
         every { oppgaveDao.finn(0L) } returns søknadsoppgave
-        every { oppgaveDao.finn(1L) } returns stikkprøveoppgave
         every { oppgaveDao.opprettOppgave(any(), OPPGAVETYPE_SØKNAD, any(), any()) } returns 0L
-        every { oppgaveDao.opprettOppgave(any(), OPPGAVETYPE_STIKKPRØVE, any(), any()) } returns 1L
         every { oppgaveDao.finnHendelseId(any()) } returns HENDELSE_ID
         every { oppgaveDao.finnContextId(any()) } returns COMMAND_CONTEXT_ID
         every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
         mediator.opprett(søknadsoppgave)
-        mediator.opprett(stikkprøveoppgave)
         mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
         verify(exactly = 1) { oppgaveDao.opprettOppgave(COMMAND_CONTEXT_ID, OPPGAVETYPE_SØKNAD, VEDTAKSPERIODE_ID, UTBETALING_ID) }
-        verify(exactly = 1) { oppgaveDao.opprettOppgave(COMMAND_CONTEXT_ID, OPPGAVETYPE_STIKKPRØVE, VEDTAKSPERIODE_ID_2, UTBETALING_ID_2) }
-        assertEquals(2, testRapid.inspektør.size)
+        assertEquals(1, testRapid.inspektør.size)
         assertOppgaveevent(0, "oppgave_opprettet")
-        assertOppgaveevent(1, "oppgave_opprettet")
-        assertAntallOpptegnelser(2)
+        assertAntallOpptegnelser(1)
     }
 
     @Test
@@ -174,16 +168,13 @@ internal class OppgaveMediatorTest {
     fun `lagrer ikke dobbelt`() {
         every { reservasjonDao.hentReservertTil(TESTHENDELSE.fødselsnummer()) } returns null
         every { oppgaveDao.finn(0L) } returns søknadsoppgave
-        every { oppgaveDao.finn(1L) } returns stikkprøveoppgave
         every { oppgaveDao.opprettOppgave(any(), OPPGAVETYPE_SØKNAD, any(), any()) } returns 0L
-        every { oppgaveDao.opprettOppgave(any(), OPPGAVETYPE_STIKKPRØVE, any(), any()) } returns 1L
         every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
 
         mediator.opprett(søknadsoppgave)
-        mediator.opprett(stikkprøveoppgave)
         mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
-        assertEquals(2, testRapid.inspektør.size)
-        assertAntallOpptegnelser(2)
+        assertEquals(1, testRapid.inspektør.size)
+        assertAntallOpptegnelser(1)
         testRapid.reset()
         clearMocks(opptegnelseDao)
         mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
@@ -194,15 +185,13 @@ internal class OppgaveMediatorTest {
     @Test
     fun `avbryter oppgaver`() {
         val oppgave1 = Oppgave(1L, OPPGAVETYPE_SØKNAD, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID)
-        val oppgave2 = Oppgave(2L, OPPGAVETYPE_STIKKPRØVE, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID)
-        every { oppgaveDao.finnAktive(VEDTAKSPERIODE_ID) } returns listOf(oppgave1, oppgave2)
+        every { oppgaveDao.finnAktiv(VEDTAKSPERIODE_ID) } returns oppgave1
         every { reservasjonDao.hentReservertTil(TESTHENDELSE.fødselsnummer()) } returns null
         every { oppgaveDao.finn(1L) } returns oppgave1
-        every { oppgaveDao.finn(2L) } returns oppgave2
         mediator.avbrytOppgaver(VEDTAKSPERIODE_ID)
         mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
-        verify(exactly = 1) { oppgaveDao.finnAktive(VEDTAKSPERIODE_ID) }
-        verify(exactly = 2) { oppgaveDao.updateOppgave(any(), Oppgavestatus.Invalidert, null, null) }
+        verify(exactly = 1) { oppgaveDao.finnAktiv(VEDTAKSPERIODE_ID) }
+        verify(exactly = 1) { oppgaveDao.updateOppgave(any(), Oppgavestatus.Invalidert, null, null) }
         assertOpptegnelseIkkeOpprettet()
     }
 

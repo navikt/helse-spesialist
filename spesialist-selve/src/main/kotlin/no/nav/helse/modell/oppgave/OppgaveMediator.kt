@@ -21,40 +21,45 @@ class OppgaveMediator(
     private val opptegnelseDao: OpptegnelseDao,
     private val harTilgangTil: Tilgangskontroll = { _, _ -> false },
 ) {
-    private val oppgaver = mutableSetOf<Oppgave>()
+    private var oppgaveForLagring: Oppgave? = null
     private val oppgaverForPublisering = mutableMapOf<Long, String>()
     private val log = LoggerFactory.getLogger(this::class.java)
 
     fun opprett(oppgave: Oppgave) {
-        nyOppgave(oppgave)
+        leggPåVentForSenereLagring(oppgave)
     }
 
     fun tildel(oppgaveId: Long, saksbehandleroid: UUID, påVent: Boolean = false): Boolean {
         return tildelingDao.opprettTildeling(oppgaveId, saksbehandleroid, påVent)
     }
 
-    private fun nyOppgave(oppgave: Oppgave) {
-        oppgaver.add(oppgave)
+    /*
+        For nå må oppgaver mellomlagres i denne mediatoren, fordi ved lagring skal det sendes ut meldinger på Kafka,
+        og de skal inneholde standardfeltene for rapids-and-rivers, som i utgangspunktet kun er tilgjengelige via
+        MessageContext, som HendelseMediator har tilgang til.
+    */
+    private fun leggPåVentForSenereLagring(oppgave: Oppgave) {
+        oppgaveForLagring = oppgave
     }
 
     fun ferdigstill(oppgave: Oppgave, saksbehandlerIdent: String, oid: UUID) {
         oppgave.ferdigstill(saksbehandlerIdent, oid)
-        nyOppgave(oppgave)
+        leggPåVentForSenereLagring(oppgave)
     }
 
     fun ferdigstill(oppgave: Oppgave) {
         oppgave.ferdigstill()
-        nyOppgave(oppgave)
+        leggPåVentForSenereLagring(oppgave)
     }
 
     private fun avbryt(oppgave: Oppgave) {
         oppgave.avbryt()
-        nyOppgave(oppgave)
+        leggPåVentForSenereLagring(oppgave)
     }
 
     fun invalider(oppgave: Oppgave) {
         oppgave.avbryt()
-        nyOppgave(oppgave)
+        leggPåVentForSenereLagring(oppgave)
     }
 
     fun lagreOgTildelOppgaver(
@@ -106,9 +111,7 @@ class OppgaveMediator(
 
     private fun tildelOppgaver(fødselsnummer: String) {
         reservasjonDao.hentReservasjonFor(fødselsnummer)?.let { (oid, settPåVent) ->
-            oppgaver.forEach { oppgave ->
-                oppgave.tildelHvisIkkeStikkprøve(this, oid, settPåVent, harTilgangTil)
-            }
+            oppgaveForLagring?.tildelHvisIkkeStikkprøve(this, oid, settPåVent, harTilgangTil)
         }
     }
 
@@ -118,16 +121,9 @@ class OppgaveMediator(
         messageContext: MessageContext,
         doAlso: () -> Unit = {}
     ) {
-        if (oppgaver.size > 1) log.info(
-            """
-            Oppgaveliste har ${oppgaver.size} oppgaver (hendelsesId: $hendelseId og contextId: $contextId):
-            ${oppgaver.joinToString()}
-        """.trimIndent()
-        )
-
-        oppgaver.forEach { oppgave -> oppgave.lagre(this, contextId, hendelseId) }
+        oppgaveForLagring?.lagre(this, contextId, hendelseId)
         doAlso()
-        oppgaver.clear()
+        oppgaveForLagring = null
         oppgaverForPublisering.onEach { (oppgaveId, eventName) ->
             messageContext.publish(Oppgave.lagMelding(oppgaveId, eventName, oppgaveDao = oppgaveDao).second.toJson())
         }.clear()

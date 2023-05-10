@@ -49,13 +49,6 @@ class Oppgave private constructor(
         private fun oppgave(type: Oppgavetype, vedtaksperiodeId: UUID, utbetalingId: UUID) =
             Oppgave(type, Oppgavestatus.AvventerSaksbehandler, vedtaksperiodeId, utbetalingId)
 
-        fun List<Oppgave>.loggOppgaverAvbrutt(vedtaksperiodeId: UUID) {
-            if (isNotEmpty()) {
-                val oppgaveIds = map(Oppgave::id).joinToString()
-                log.info("Har avbrutt oppgave(r) $oppgaveIds for vedtaksperiode $vedtaksperiodeId")
-            }
-        }
-
         fun lagMelding(
             oppgaveId: Long,
             eventName: String,
@@ -138,6 +131,10 @@ class Oppgave private constructor(
 
     fun lagMelding(eventName: String, oppgaveDao: OppgaveDao): JsonMessage {
         return lagMelding(oppgaveId(), eventName, false, oppgaveDao).second
+    }
+
+    fun loggOppgaverAvbrutt(vedtaksperiodeId: UUID) {
+        log.info("Har avbrutt oppgave $id for vedtaksperiode $vedtaksperiodeId")
     }
 
     fun lagreAvventerSystem(oppgaveDao: OppgaveDao, ident: String, oid: UUID) {
