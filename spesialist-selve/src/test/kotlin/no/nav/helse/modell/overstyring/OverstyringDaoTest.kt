@@ -4,6 +4,7 @@ import DatabaseIntegrationTest
 import io.mockk.mockk
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.januar
 import no.nav.helse.mediator.meldinger.OverstyringArbeidsforhold
 import no.nav.helse.mediator.meldinger.OverstyringInntektOgRefusjon
 import no.nav.helse.mediator.meldinger.OverstyringTidslinje
@@ -254,7 +255,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
                     forklaring = FORKLARING,
                     månedligInntekt = INNTEKT,
                     fraMånedligInntekt = INNTEKT + 1,
-                    refusjonsopplysninger = null,
+                    refusjonsopplysninger = listOf(Refusjonselement(1.januar, 31.januar, 1000.0)),
                     fraRefusjonsopplysninger = null,
                     subsumsjon = SubsumsjonDto(paragraf = "87494")
                 )
@@ -276,6 +277,11 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         assertEquals(SKJÆRINGSTIDSPUNKT, hentetOverstyring.skjæringstidspunkt)
         assertEquals(OPPRETTET, hentetOverstyring.timestamp)
         assertFalse(hentetOverstyring.ferdigstilt)
+        assertEquals(1, hentetOverstyring.refusjonsopplysninger?.size)
+        val refusjonsopplysning = hentetOverstyring.refusjonsopplysninger?.first()
+        assertEquals(1.januar, refusjonsopplysning?.fom)
+        assertEquals(31.januar, refusjonsopplysning?.tom)
+        assertEquals(1000.0, refusjonsopplysning?.beløp)
     }
 
     @Test

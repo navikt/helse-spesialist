@@ -13,14 +13,12 @@ import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdKafkaDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonKafkaDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeKafkaDto
-import no.nav.helse.spesialist.api.overstyring.RefusjonselementDto
 import no.nav.helse.spesialist.api.overstyring.SubsumsjonDto
 import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
 
@@ -86,18 +84,6 @@ internal fun Route.overstyringApi(hendelseMediator: HendelseMediator) {
         )
         withContext(Dispatchers.IO) { hendelseMediator.håndter(message) }
         call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
-    }
-}
-
-
-internal fun JsonNode.refusjonselementer(): List<RefusjonselementDto>? {
-    if (this.isNull) return null
-    return this.map { jsonNode ->
-        RefusjonselementDto(
-            fom = jsonNode["fom"].asLocalDate(),
-            tom = if (jsonNode["tom"].isNull) null else jsonNode["tom"].asLocalDate(),
-            beløp = jsonNode["beløp"].asDouble()
-        )
     }
 }
 

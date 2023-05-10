@@ -1,17 +1,18 @@
 package no.nav.helse.modell.overstyring
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.mediator.api.refusjonselementer
+import java.time.LocalDate
 import no.nav.helse.mediator.api.subsumsjonelementer
-import no.nav.helse.spesialist.api.overstyring.RefusjonselementDto
+import no.nav.helse.modell.overstyring.Refusjonselement.Companion.refusjonselementer
+import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spesialist.api.overstyring.SubsumsjonDto
 
 internal class OverstyrtArbeidsgiver(
     val organisasjonsnummer: String,
     val månedligInntekt: Double,
     val fraMånedligInntekt: Double,
-    val refusjonsopplysninger: List<RefusjonselementDto>?,
-    val fraRefusjonsopplysninger: List<RefusjonselementDto>?,
+    val refusjonsopplysninger: List<Refusjonselement>?,
+    val fraRefusjonsopplysninger: List<Refusjonselement>?,
     val begrunnelse: String,
     val forklaring: String,
     val subsumsjon: SubsumsjonDto?,
@@ -31,6 +32,24 @@ internal class OverstyrtArbeidsgiver(
                 )
             }
         }
+    }
+}
 
+internal class Refusjonselement(
+    val fom: LocalDate,
+    val tom: LocalDate? = null,
+    val beløp: Double
+) {
+    internal companion object {
+        internal fun JsonNode.refusjonselementer(): List<Refusjonselement>? {
+            if (this.isNull) return null
+            return this.map { jsonNode ->
+                Refusjonselement(
+                    fom = jsonNode["fom"].asLocalDate(),
+                    tom = if (jsonNode["tom"].isNull) null else jsonNode["tom"].asLocalDate(),
+                    beløp = jsonNode["beløp"].asDouble()
+                )
+            }
+        }
     }
 }

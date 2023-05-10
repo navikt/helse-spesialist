@@ -51,13 +51,7 @@ data class RefusjonselementDto(
     val fom: LocalDate,
     val tom: LocalDate? = null,
     val beløp: Double
-) {
-    fun toMap(): Map<String, Any?> = listOfNotNull(
-        "fom" to fom,
-        "tom" to tom,
-        "beløp" to beløp,
-    ).toMap()
-}
+)
 
 data class SubsumsjonDto(
     val paragraf: String,
