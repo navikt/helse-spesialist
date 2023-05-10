@@ -8,11 +8,20 @@ on:
         required: true
 
 jobs:
+  lag_tag:
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{ github.event.inputs.commitHash }}
+    - name: Lag tag for senere workflows
+      run: |
+        git tag denne_skal_deployes_til_dev
+        git push origin denne_skal_deployes_til_dev
+
   build:
     uses: navikt/helse-spesialist/.github/workflows/build-image.yml@master
     secrets: inherit
     with:
-      sha: ${{ github.event.inputs.commitHash }}
+      ref: denne_skal_deployes_til_dev
 
   deployDev:
     name: deploy to dev
@@ -21,7 +30,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          ref: ${{ needs.set_version.outputs.tag }}
+          ref: denne_skal_deployes_til_dev
       - uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
@@ -29,3 +38,7 @@ jobs:
           RESOURCE: deploy/dev.yml
           IMAGE: ${{ needs.build.outputs.image }}
 
+  fjern_tag:
+    - name: Fjern taggen
+      run: |
+        git push origin :denne_skal_deployes_til_dev

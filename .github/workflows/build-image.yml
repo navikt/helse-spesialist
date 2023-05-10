@@ -3,8 +3,8 @@ name: Gjenbrukbar workflow for docker image
 on:
   workflow_call:
     inputs:
-      sha:
-        description: 'SHA of the commit to build'
+      ref:
+        description: 'symbolic ref pointing to the commit to build'
         type: string
         default: ${{ github.sha }}
         required: false
@@ -27,7 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          ref: ${{ inputs.sha }}
+          ref: ${{ inputs.ref }}
 
       - uses: actions/setup-java@v3
         with:
@@ -47,7 +47,7 @@ jobs:
         with:
           metadata_context: git
           team: tbd
-          tag: ${{ inputs.sha }}
+          tag: ${{ inputs.ref }}
           cache_from: type=gha
           cache_to: type=gha,mode=max
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
