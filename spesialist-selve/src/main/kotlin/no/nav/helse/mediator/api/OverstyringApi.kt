@@ -65,7 +65,7 @@ internal fun Route.overstyringApi(hendelseMediator: HendelseMediator, saksbehand
             saksbehandler = saksbehandler.toDto(),
             arbeidsgivere = overstyring.arbeidsgivere,
         )
-        withContext(Dispatchers.IO) { hendelseMediator.håndter(message) }
+        withContext(Dispatchers.IO) { saksbehandlerMediator.håndter(message) }
         call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
     }
 

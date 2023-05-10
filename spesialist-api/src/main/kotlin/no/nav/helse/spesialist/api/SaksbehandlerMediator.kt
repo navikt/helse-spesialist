@@ -4,6 +4,7 @@ import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonKafkaDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeKafkaDto
 import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
@@ -60,6 +61,15 @@ class SaksbehandlerMediator(
         }
         rapidsConnection.publish(overstyringMessage.fødselsnummer, overstyring.toJson())
     }
+
+    fun håndter(overstyringMessage: OverstyrInntektOgRefusjonKafkaDto) {
+        overstyringsteller.labels("opplysningstype", "inntektogrefusjon").inc()
+        val overstyring = overstyringMessage.somKafkaMessage().also {
+            sikkerlogg.info("Publiserer overstyring fra api:\n${it.toJson()}")
+        }
+        rapidsConnection.publish(overstyringMessage.fødselsnummer, overstyring.toJson())
+    }
+
 
 
     private companion object {
