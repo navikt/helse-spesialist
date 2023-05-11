@@ -9,9 +9,7 @@ import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdKafkaDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsgiverDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonKafkaDto
-import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeKafkaDto
-import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeKafkaDto.OverstyrDagKafkaDto.Type.Arbeidsdag
-import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeKafkaDto.OverstyrDagKafkaDto.Type.Sykedag
+import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDto
 import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
 import no.nav.helse.spesialist.api.utbetaling.AnnulleringDto
 import org.junit.jupiter.api.Assertions
@@ -82,24 +80,23 @@ class SaksbehandlerMediatorTest: AbstractDatabaseTest() {
 
     @Test
     fun `håndterer overstyring av tidslinje`() {
-        val overstyring = OverstyrTidslinjeKafkaDto(
+        val overstyring = OverstyrTidslinjeDto(
             organisasjonsnummer = ORGANISASJONSNUMMER,
             fødselsnummer = FØDSELSNUMMER,
             aktørId = AKTØR_ID,
             begrunnelse = "En begrunnelse",
-            saksbehandler = saksbehandler.toDto(),
             dager = listOf(
-                OverstyrTidslinjeKafkaDto.OverstyrDagKafkaDto(
+                OverstyrTidslinjeDto.OverstyrDagDto(
                     dato = 10.januar,
-                    type = Sykedag,
-                    fraType = Arbeidsdag,
+                    type = "Sykedag",
+                    fraType = "Arbeidsdag",
                     grad = null,
                     fraGrad = 100
                 )
             )
         )
 
-        mediator.håndter(overstyring)
+        mediator.håndter(overstyring, saksbehandler)
         val hendelse = testRapid.inspektør.hendelser("saksbehandler_overstyrer_tidslinje").first()
 
         assertNotNull(hendelse["@id"].asText())

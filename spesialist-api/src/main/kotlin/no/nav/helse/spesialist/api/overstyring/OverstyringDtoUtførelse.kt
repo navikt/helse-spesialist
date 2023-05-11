@@ -22,6 +22,23 @@ class OverstyrTidslinjeDto(
         val grad: Int?,
         val fraGrad: Int?
     )
+
+    internal fun somJsonMessage(saksbehandler: SaksbehandlerDto): JsonMessage {
+        return JsonMessage.newMessage(
+            "saksbehandler_overstyrer_tidslinje", mutableMapOf(
+                "fødselsnummer" to fødselsnummer,
+                "aktørId" to aktørId,
+                "organisasjonsnummer" to organisasjonsnummer,
+                "dager" to dager,
+                "begrunnelse" to begrunnelse,
+                "saksbehandlerOid" to saksbehandler.oid,
+                "saksbehandlerNavn" to saksbehandler.navn,
+                "saksbehandlerIdent" to saksbehandler.ident,
+                "saksbehandlerEpost" to saksbehandler.epost,
+            )
+        )
+    }
+
 }
 
 internal data class OverstyrArbeidsgiverDto(
@@ -82,41 +99,6 @@ data class OverstyrArbeidsforholdDto(
         val begrunnelse: String,
         val forklaring: String
     )
-}
-
-internal data class OverstyrTidslinjeKafkaDto(
-    val saksbehandler: SaksbehandlerDto,
-    val organisasjonsnummer: String,
-    val fødselsnummer: String,
-    val aktørId: String,
-    val begrunnelse: String,
-    val dager: List<OverstyrDagKafkaDto>
-) {
-    internal fun somKafkaMessage(): JsonMessage {
-        return JsonMessage.newMessage(
-            "saksbehandler_overstyrer_tidslinje", mutableMapOf(
-                "fødselsnummer" to fødselsnummer,
-                "aktørId" to aktørId,
-                "organisasjonsnummer" to organisasjonsnummer,
-                "dager" to dager,
-                "begrunnelse" to begrunnelse,
-                "saksbehandlerOid" to saksbehandler.oid,
-                "saksbehandlerNavn" to saksbehandler.navn,
-                "saksbehandlerIdent" to saksbehandler.ident,
-                "saksbehandlerEpost" to saksbehandler.epost,
-            )
-        )
-    }
-
-    internal data class OverstyrDagKafkaDto(
-        val dato: LocalDate,
-        val type: Type,
-        val fraType: Type,
-        val grad: Int?,
-        val fraGrad: Int?
-    ) {
-        enum class Type { Sykedag, SykedagNav, Feriedag, Egenmeldingsdag, Permisjonsdag, Arbeidsdag, Avvistdag }
-    }
 }
 
 internal data class OverstyrArbeidsforholdKafkaDto(

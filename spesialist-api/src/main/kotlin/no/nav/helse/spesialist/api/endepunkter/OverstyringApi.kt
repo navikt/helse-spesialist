@@ -15,7 +15,6 @@ import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdKafkaDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonKafkaDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDto
-import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeKafkaDto
 import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
 
 fun Route.overstyringApi(saksbehandlerMediator: SaksbehandlerMediator) {
@@ -23,23 +22,7 @@ fun Route.overstyringApi(saksbehandlerMediator: SaksbehandlerMediator) {
         val overstyring = call.receive<OverstyrTidslinjeDto>()
         val saksbehandler = Saksbehandler.fraOnBehalfOfToken(requireNotNull(call.principal()))
 
-        val message = OverstyrTidslinjeKafkaDto(
-            saksbehandler = saksbehandler.toDto(),
-            organisasjonsnummer = overstyring.organisasjonsnummer,
-            fødselsnummer = overstyring.fødselsnummer,
-            aktørId = overstyring.aktørId,
-            begrunnelse = overstyring.begrunnelse,
-            dager = overstyring.dager.map {
-                OverstyrTidslinjeKafkaDto.OverstyrDagKafkaDto(
-                    dato = it.dato,
-                    type = enumValueOf(it.type),
-                    fraType = enumValueOf(it.fraType),
-                    grad = it.grad,
-                    fraGrad = it.fraGrad
-                )
-            }
-        )
-        withContext(Dispatchers.IO) { saksbehandlerMediator.håndter(message) }
+        withContext(Dispatchers.IO) { saksbehandlerMediator.håndter(overstyring, saksbehandler) }
         call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
     }
 

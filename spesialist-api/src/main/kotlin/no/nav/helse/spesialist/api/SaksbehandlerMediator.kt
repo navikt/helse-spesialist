@@ -5,7 +5,7 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdKafkaDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonKafkaDto
-import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeKafkaDto
+import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDto
 import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.utbetaling.AnnulleringDto
@@ -32,17 +32,17 @@ class SaksbehandlerMediator(
         rapidsConnection.publish(annullering.fødselsnummer, message.toJson())
     }
 
-    internal fun håndter(message: OverstyrTidslinjeKafkaDto) {
+    internal fun håndter(overstyring: OverstyrTidslinjeDto, saksbehandler: Saksbehandler) {
         tellOverstyrTidslinje()
-        val overstyring = message.somKafkaMessage().also {
+        val message = overstyring.somJsonMessage(saksbehandler.toDto()).also {
             sikkerlogg.info(
                 "Publiserer overstyring av tidslinje fra api: {}, {}\n${it.toJson()}",
-                kv("fødselsnummer", message.fødselsnummer),
-                kv("aktørId", message.aktørId),
-                kv("organisasjonsnummer", message.organisasjonsnummer)
+                kv("fødselsnummer", overstyring.fødselsnummer),
+                kv("aktørId", overstyring.aktørId),
+                kv("organisasjonsnummer", overstyring.organisasjonsnummer)
             )
         }
-        rapidsConnection.publish(message.fødselsnummer, overstyring.toJson())
+        rapidsConnection.publish(overstyring.fødselsnummer, message.toJson())
     }
 
     internal fun håndter(message: OverstyrInntektOgRefusjonKafkaDto) {
