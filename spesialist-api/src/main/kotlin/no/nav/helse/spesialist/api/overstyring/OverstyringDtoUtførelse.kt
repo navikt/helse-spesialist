@@ -113,16 +113,8 @@ data class OverstyrArbeidsforholdDto(
         val begrunnelse: String,
         val forklaring: String
     )
-}
 
-internal data class OverstyrArbeidsforholdKafkaDto(
-    val saksbehandler: SaksbehandlerDto,
-    val fødselsnummer: String,
-    val aktørId: String,
-    val skjæringstidspunkt: LocalDate,
-    val overstyrteArbeidsforhold: List<OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt>
-) {
-    fun somKafkaMessage() = JsonMessage.newMessage(
+    fun somJsonMessage(saksbehandler: SaksbehandlerDto) = JsonMessage.newMessage(
         "saksbehandler_overstyrer_arbeidsforhold", mapOf(
             "fødselsnummer" to fødselsnummer,
             "aktørId" to aktørId,

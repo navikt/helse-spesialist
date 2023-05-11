@@ -6,7 +6,6 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.TestRapidHelpers.hendelser
 import no.nav.helse.spesialist.api.db.AbstractDatabaseTest
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
-import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdKafkaDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsgiverDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDto
@@ -120,7 +119,7 @@ class SaksbehandlerMediatorTest: AbstractDatabaseTest() {
 
     @Test
     fun `håndterer overstyring av arbeidsforhold`() {
-        val overstyring = OverstyrArbeidsforholdKafkaDto(
+        val overstyring = OverstyrArbeidsforholdDto(
             fødselsnummer = FØDSELSNUMMER,
             aktørId = AKTØR_ID,
             skjæringstidspunkt = 1.januar,
@@ -132,10 +131,9 @@ class SaksbehandlerMediatorTest: AbstractDatabaseTest() {
                     forklaring = "en forklaring"
                 )
             ),
-            saksbehandler = saksbehandler.toDto()
         )
 
-        mediator.håndter(overstyring)
+        mediator.håndter(overstyring, saksbehandler)
         val hendelse = testRapid.inspektør.hendelser("saksbehandler_overstyrer_arbeidsforhold").first()
 
         assertNotNull(hendelse["@id"].asText())
