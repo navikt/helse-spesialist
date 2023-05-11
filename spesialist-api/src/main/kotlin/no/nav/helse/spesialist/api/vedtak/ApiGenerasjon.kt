@@ -14,4 +14,14 @@ data class ApiGenerasjon(
     internal fun vedtaksperiodeId() = this.vedtaksperiodeId
 
     internal fun tidligereEnnOgSammenhengende(other: ApiGenerasjon): Boolean = this.fom <= other.tom && this.skjæringstidspunkt == other.skjæringstidspunkt
+
+    private fun harAktiveVarsler(): Boolean {
+        return varsler.any { it.erAktiv() }
+    }
+
+    companion object {
+        fun Set<ApiGenerasjon>.harAktiveVarsler(): Boolean {
+            return any { it.harAktiveVarsler() }
+        }
+    }
 }

@@ -19,10 +19,13 @@ import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
+import no.nav.helse.spesialist.api.vedtak.ApiGenerasjon.Companion.harAktiveVarsler
+import no.nav.helse.spesialist.api.vedtaksperiode.ApiGenerasjonRepository
 import org.slf4j.LoggerFactory
 
 internal fun Route.personApi(
     varselRepository: ApiVarselRepository,
+    generasjonRepository: ApiGenerasjonRepository,
     totrinnsvurderingMediator: TotrinnsvurderingMediator,
     oppdaterPersonService: OppdaterPersonService,
     godkjenningService: GodkjenningService,
@@ -47,6 +50,7 @@ internal fun Route.personApi(
 
     post("/api/vedtak") {
         val godkjenning = call.receive<GodkjenningDTO>()
+        val perioderTilBehandling = generasjonRepository.perioderTilBehandling(godkjenning.oppgavereferanse)
         log.info("Behandler godkjenning/avslag: ${godkjenning.åpenLoggString()} (se sikker logg for detaljer)")
         sikkerLogg.info("Behandler godkjenning/avslag: $godkjenning")
         val (oid, epostadresse) = requireNotNull(call.principal<JWTPrincipal>()).payload.let {
@@ -99,12 +103,11 @@ internal fun Route.personApi(
         }
 
         if (godkjenning.godkjent) {
-            val antallIkkeVurderteVarsler = varselRepository.ikkeVurderteVarslerFor(godkjenning.oppgavereferanse)
-            if (antallIkkeVurderteVarsler > 0) {
+            if (perioderTilBehandling.harAktiveVarsler()) {
                 call.respond(
                     status = HttpStatusCode.BadRequest,
                     mapOf(
-                        "melding" to "Alle varsler må vurderes før godkjenning - $antallIkkeVurderteVarsler varsler er ikke vurdert",
+                        "melding" to "Alle varsler må vurderes før godkjenning",
                         "feilkode" to "IkkeVurderteVarslerVedGodkjenning"
                     )
                 )

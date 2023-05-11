@@ -10,7 +10,7 @@ class ApiGenerasjonRepository(dataSource: DataSource) {
     private val varselDao = ApiVarselDao(dataSource)
     private val generasjonDao = ApiGenerasjonDao(dataSource)
 
-    internal fun perioderTilBehandling(oppgaveId: Long): Set<ApiGenerasjon> {
+    fun perioderTilBehandling(oppgaveId: Long): Set<ApiGenerasjon> {
         val periodeTilGodkjenning = generasjonDao.gjeldendeGenerasjonFor(oppgaveId, varselDao::finnVarslerFor)
         val gjeldendeGenerasjonerForPersonen = generasjonDao.gjeldendeGenerasjonerForPerson(oppgaveId, varselDao::finnVarslerFor)
         val sammenhengendePerioder = gjeldendeGenerasjonerForPersonen.tidligereEnnOgSammenhengende(periodeTilGodkjenning)

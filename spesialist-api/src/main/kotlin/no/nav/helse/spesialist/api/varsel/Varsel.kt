@@ -20,10 +20,6 @@ data class Varsel(
         internal fun Set<Varsel>.toDto(): Set<VarselDTO> {
             return map { it.toDto() }.toSet()
         }
-
-        internal fun Set<Varsel>.antallIkkeVurderte(): Int {
-            return filter { !it.erVurdert() }.size
-        }
     }
 
     internal fun toDto() = VarselDTO(
@@ -36,8 +32,8 @@ data class Varsel(
         vurdering?.toDto(status)
     )
 
-    private fun erVurdert(): Boolean {
-        return status != AKTIV
+    internal fun erAktiv(): Boolean {
+        return status == AKTIV
     }
 
     data class Varselvurdering(

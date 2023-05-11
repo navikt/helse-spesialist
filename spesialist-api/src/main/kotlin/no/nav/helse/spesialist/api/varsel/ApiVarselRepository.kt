@@ -3,7 +3,6 @@ package no.nav.helse.spesialist.api.varsel
 import java.util.UUID
 import javax.sql.DataSource
 import no.nav.helse.spesialist.api.graphql.schema.VarselDTO
-import no.nav.helse.spesialist.api.varsel.Varsel.Companion.antallIkkeVurderte
 import no.nav.helse.spesialist.api.varsel.Varsel.Companion.toDto
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.AKTIV
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.GODKJENT
@@ -28,12 +27,6 @@ class ApiVarselRepository(dataSource: DataSource) {
 
     internal fun finnGodkjenteVarslerForUberegnetPeriode(vedtaksperiodeId: UUID): Set<VarselDTO> {
         return varselDao.finnGodkjenteVarslerForUberegnetPeriode(vedtaksperiodeId).toDto()
-    }
-
-    fun ikkeVurderteVarslerFor(oppgaveId: Long): Int {
-        val vedtaksperioder = sammenhengendePerioder(oppgaveId)
-        val alleVarsler = varselDao.finnVarslerSomIkkeErInaktiveFor(vedtaksperioder.map { it.vedtaksperiodeId() })
-        return alleVarsler.antallIkkeVurderte()
     }
 
     fun godkjennVarslerFor(oppgaveId: Long) {

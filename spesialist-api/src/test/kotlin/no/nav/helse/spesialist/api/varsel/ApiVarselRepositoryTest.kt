@@ -119,23 +119,6 @@ internal class ApiVarselRepositoryTest: DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `tester ikkeVurderteVarslerFor`() {
-        val utbetalingId = UUID.randomUUID()
-        val generasjonId = UUID.randomUUID()
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver(), utbetalingId)
-        val oppgaveId = finnOppgaveIdFor(PERIODE.id)
-        opprettVarseldefinisjon(kode = "EN_KODE")
-        opprettVarseldefinisjon(kode = "EN_ANNEN_KODE")
-        opprettVarseldefinisjon(kode = "EN_TREDJE_KODE")
-        val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = PERIODE.id, utbetalingId = utbetalingId)
-        nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = PERIODE.id, generasjonRef = generasjonRef)
-        nyttVarsel(kode = "EN_ANNEN_KODE", vedtaksperiodeId = PERIODE.id, generasjonRef = generasjonRef)
-        nyttVarsel(kode = "EN_TREDJE_KODE", status = "VURDERT", vedtaksperiodeId = PERIODE.id, generasjonRef = generasjonRef)
-        val antallIkkeVurderteVarsler = apiVarselRepository.ikkeVurderteVarslerFor(oppgaveId)
-        assertEquals(2, antallIkkeVurderteVarsler)
-    }
-
-    @Test
     fun `Ingen periode med oppgave - uberegnet periode skal ikke vise varsler`() {
         val perioderSomSkalViseVarsler = apiVarselRepository.perioderSomSkalViseVarsler(null)
 

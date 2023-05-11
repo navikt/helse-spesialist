@@ -11,10 +11,12 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import java.time.LocalDate
 import java.time.LocalDateTime.now
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.Tilgangsgrupper
+import no.nav.helse.januar
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.tildeling.TildelingService
@@ -24,7 +26,9 @@ import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
-import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
+import no.nav.helse.spesialist.api.varsel.Varsel
+import no.nav.helse.spesialist.api.vedtak.ApiGenerasjon
+import no.nav.helse.spesialist.api.vedtaksperiode.ApiGenerasjonRepository
 import no.nav.helse.testEnv
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
@@ -35,7 +39,7 @@ import org.junit.jupiter.api.TestInstance
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class TotrinnsvurderingApiTest : AbstractApiTest() {
 
-    private val varselRepository = mockk<ApiVarselRepository>(relaxed = true)
+    private val generasjonRepository = mockk<ApiGenerasjonRepository>(relaxed = true)
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
     private val notatMediator = mockk<NotatMediator>(relaxed = true)
@@ -54,7 +58,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     fun setupTotrinnsvurdering() {
         setupServer {
             totrinnsvurderingApi(
-                varselRepository,
+                generasjonRepository,
                 tildelingService,
                 hendelseMediator,
                 totrinnsvurderingMediator,
@@ -65,14 +69,14 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
 
     @BeforeEach
     fun setup() {
-        clearMocks(oppgaveDao, periodehistorikkDao, notatMediator, tildelingService, hendelseMediator, totrinnsvurderingMediator)
+        clearMocks(oppgaveDao, periodehistorikkDao, notatMediator, tildelingService, hendelseMediator, totrinnsvurderingMediator, generasjonRepository)
     }
 
     @Test
     fun `en vedtaksperiode kan godkjennes hvis alle varsler er vurdert`() {
         every { oppgaveDao.venterPåSaksbehandler(1L) } returns true
         every { oppgaveDao.erRiskoppgave(1L) } returns false
-        every { varselRepository.ikkeVurderteVarslerFor(1L) } returns 0
+        every { generasjonRepository.perioderTilBehandling(1L) } returns setOf(opprettApiGenerasjon(1.januar, 31.januar, 1.januar, listOf(opprettVarsel(Varsel.Varselstatus.VURDERT))))
         every { totrinnsvurderingMediator.hentAktiv(oppgaveId = any()) } returns Totrinnsvurdering(
             vedtaksperiodeId = UUID.randomUUID(),
             erRetur = true,
@@ -96,7 +100,8 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     fun `en vedtaksperiode kan ikke godkjennes hvis det fins aktive varsler`() {
         every { oppgaveDao.venterPåSaksbehandler(1L) } returns true
         every { oppgaveDao.erRiskoppgave(1L) } returns false
-        every { varselRepository.ikkeVurderteVarslerFor(1L) } returns 1
+        every { generasjonRepository.perioderTilBehandling(1L) } returns setOf(opprettApiGenerasjon(1.januar, 31.januar, 1.januar, listOf(opprettVarsel(
+            Varsel.Varselstatus.AKTIV))))
         val response = runBlocking {
             client.post("/api/totrinnsvurdering") {
                 contentType(ContentType.Application.Json)
@@ -270,7 +275,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             oppdatert = now(),
             opprettet = now()
         )
-        every { varselRepository.ikkeVurderteVarslerFor(10L) } returns 0
+        every { generasjonRepository.perioderTilBehandling(10L) } returns setOf(opprettApiGenerasjon(1.januar, 31.januar, 1.januar, listOf(opprettVarsel(Varsel.Varselstatus.VURDERT))))
 
         val response = runBlocking {
             client.post(TOTRINNSVURDERING_URL) {
@@ -382,5 +387,13 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
         }
 
         assertEquals(HttpStatusCode.OK, response.status)
+    }
+
+    private fun opprettApiGenerasjon(fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate, varsler: List<Varsel> = emptyList()): ApiGenerasjon {
+        return ApiGenerasjon(UUID.randomUUID(), fom, tom, skjæringstidspunkt, varsler.toSet())
+    }
+
+    private fun opprettVarsel(status: Varsel.Varselstatus): Varsel {
+        return Varsel(UUID.randomUUID(), UUID.randomUUID(), "SB_EX_1", status, "EN_TITTEL", null, null, null)
     }
 }
