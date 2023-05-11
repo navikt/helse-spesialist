@@ -13,7 +13,7 @@ import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeKafkaDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeKafkaDto.OverstyrDagKafkaDto.Type.Arbeidsdag
 import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeKafkaDto.OverstyrDagKafkaDto.Type.Sykedag
 import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
-import no.nav.helse.spesialist.api.utbetaling.AnnulleringDto
+import no.nav.helse.spesialist.api.utbetaling.AnnulleringKafkaDto
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -51,9 +51,9 @@ class SaksbehandlerMediatorTest: AbstractDatabaseTest() {
         assertEquals("annullering", melding["@event_name"].asText())
 
         assertEquals(SAKSBEHANDLER_OID.toString(), melding["saksbehandler"]["oid"].asText())
-        assertEquals("epost@nav.no", melding["saksbehandler"]["epostaddresse"].asText())
+        assertEquals(SAKSBEHANDLER_EPOST, melding["saksbehandler"]["epostaddresse"].asText())
         assertEquals(SAKSBEHANDLER_NAVN, melding["saksbehandler"]["navn"].asText())
-        assertEquals("EN_IDENT", melding["saksbehandler"]["ident"].asText())
+        assertEquals(SAKSBEHANDLER_IDENT, melding["saksbehandler"]["ident"].asText())
 
         assertEquals("EN_FAGSYSTEMID", melding["fagsystemId"].asText())
         assertEquals("EN_KOMMENTAR", melding["kommentar"]?.asText())
@@ -71,9 +71,9 @@ class SaksbehandlerMediatorTest: AbstractDatabaseTest() {
         assertEquals("annullering", melding["@event_name"].asText())
 
         assertEquals(SAKSBEHANDLER_OID.toString(), melding["saksbehandler"]["oid"].asText())
-        assertEquals("epost@nav.no", melding["saksbehandler"]["epostaddresse"].asText())
+        assertEquals(SAKSBEHANDLER_EPOST, melding["saksbehandler"]["epostaddresse"].asText())
         assertEquals(SAKSBEHANDLER_NAVN, melding["saksbehandler"]["navn"].asText())
-        assertEquals("EN_IDENT", melding["saksbehandler"]["ident"].asText())
+        assertEquals(SAKSBEHANDLER_IDENT, melding["saksbehandler"]["ident"].asText())
 
         assertEquals("EN_FAGSYSTEMID", melding["fagsystemId"].asText())
         assertEquals(null, melding["kommentar"]?.asText())
@@ -245,13 +245,13 @@ class SaksbehandlerMediatorTest: AbstractDatabaseTest() {
     private fun annullering(
         begrunnelser: List<String> = listOf("EN_BEGRUNNELSE"),
         kommentar: String? = "EN_KOMMENTAR",
-    ) = AnnulleringDto(
-        aktørId = "EN_AKTØR",
-        fødselsnummer = "ET_FØDSELSNUMMER",
-        organisasjonsnummer = "ET_ORGANISASJONSNUMMER",
+    ) = AnnulleringKafkaDto(
+        aktørId = AKTØR_ID,
+        fødselsnummer = FØDSELSNUMMER,
+        organisasjonsnummer = ORGANISASJONSNUMMER,
         fagsystemId = "EN_FAGSYSTEMID",
-        saksbehandlerIdent = "EN_IDENT",
         begrunnelser = begrunnelser,
-        kommentar = kommentar
+        kommentar = kommentar,
+        saksbehandler = saksbehandler
     )
 }

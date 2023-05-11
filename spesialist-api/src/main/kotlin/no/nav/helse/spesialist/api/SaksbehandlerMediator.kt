@@ -1,15 +1,14 @@
 package no.nav.helse.spesialist.api
 
 import javax.sql.DataSource
-import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.rapids_rivers.JsonMessage
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdKafkaDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonKafkaDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeKafkaDto
 import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
-import no.nav.helse.spesialist.api.utbetaling.AnnulleringDto
+import no.nav.helse.spesialist.api.utbetaling.AnnulleringKafkaDto
 import org.slf4j.LoggerFactory
 
 class SaksbehandlerMediator(
@@ -18,55 +17,56 @@ class SaksbehandlerMediator(
 ) {
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
 
-    internal fun håndter(annulleringDto: AnnulleringDto, saksbehandler: Saksbehandler) {
+    internal fun håndter(message: AnnulleringKafkaDto, saksbehandler: Saksbehandler) {
         tellAnnullering()
         saksbehandler.persister(saksbehandlerDao)
-
-        val annulleringMessage = JsonMessage.newMessage("annullering", mutableMapOf(
-            "fødselsnummer" to annulleringDto.fødselsnummer,
-            "organisasjonsnummer" to annulleringDto.organisasjonsnummer,
-            "aktørId" to annulleringDto.aktørId,
-            "saksbehandler" to saksbehandler.json().toMutableMap()
-                .apply { put("ident", annulleringDto.saksbehandlerIdent) },
-            "fagsystemId" to annulleringDto.fagsystemId,
-            "begrunnelser" to annulleringDto.begrunnelser,
-        ).apply {
-            compute("kommentar") { _, _ -> annulleringDto.kommentar }
-        })
-
-        rapidsConnection.publish(annulleringDto.fødselsnummer, annulleringMessage.toJson().also {
+        val annullering = message.somKafkaMessage().also {
             sikkerlogg.info(
-                "sender annullering for {}, {}\n\t$it",
-                keyValue("fødselsnummer", annulleringDto.fødselsnummer),
-                keyValue("organisasjonsnummer", annulleringDto.organisasjonsnummer)
+                "Publiserer annullering fra api: {}, {}, {}\n${it.toJson()}",
+                kv("fødselsnummer", message.fødselsnummer),
+                kv("aktørId", message.aktørId),
+                kv("organisasjonsnummer", message.organisasjonsnummer)
             )
-        })
-    }
-
-    internal fun håndter(overstyringMessage: OverstyrTidslinjeKafkaDto) {
-        overstyringsteller.labels("opplysningstype", "tidslinje").inc()
-        val overstyring = overstyringMessage.somKafkaMessage().also {
-            sikkerlogg.info("Publiserer overstyring av tidslinje fra api:\n${it.toJson()}")
-        }
-        rapidsConnection.publish(overstyringMessage.fødselsnummer, overstyring.toJson())
-    }
-
-    internal fun håndter(overstyringMessage: OverstyrInntektOgRefusjonKafkaDto) {
-        overstyringsteller.labels("opplysningstype", "inntektogrefusjon").inc()
-        val overstyring = overstyringMessage.somKafkaMessage().also {
-            sikkerlogg.info("Publiserer overstyring av inntekt og refusjon fra api:\n${it.toJson()}")
-        }
-        rapidsConnection.publish(overstyringMessage.fødselsnummer, overstyring.toJson())
-    }
-
-    internal fun håndter(overstyringMessage: OverstyrArbeidsforholdKafkaDto) {
-        overstyringsteller.labels("opplysningstype", "arbeidsforhold").inc()
-
-        val overstyring = overstyringMessage.somKafkaMessage().also {
-            sikkerlogg.info("Publiserer overstyring av arbeidsforhold fra api:\n${it.toJson()}")
         }
 
-        rapidsConnection.publish(overstyringMessage.fødselsnummer, overstyring.toJson())
+        rapidsConnection.publish(message.fødselsnummer, annullering.toJson())
+    }
+
+    internal fun håndter(message: OverstyrTidslinjeKafkaDto) {
+        tellOverstyrTidslinje()
+        val overstyring = message.somKafkaMessage().also {
+            sikkerlogg.info(
+                "Publiserer overstyring av tidslinje fra api: {}, {}\n${it.toJson()}",
+                kv("fødselsnummer", message.fødselsnummer),
+                kv("aktørId", message.aktørId),
+                kv("organisasjonsnummer", message.organisasjonsnummer)
+            )
+        }
+        rapidsConnection.publish(message.fødselsnummer, overstyring.toJson())
+    }
+
+    internal fun håndter(message: OverstyrInntektOgRefusjonKafkaDto) {
+        tellOverstyrInntektOgRefusjon()
+        val overstyring = message.somKafkaMessage().also {
+            sikkerlogg.info(
+                "Publiserer overstyring av inntekt og refusjon fra api: {}, {}\n${it.toJson()}",
+                kv("fødselsnummer", message.fødselsnummer),
+                kv("aktørId", message.aktørId),
+            )
+        }
+        rapidsConnection.publish(message.fødselsnummer, overstyring.toJson())
+    }
+
+    internal fun håndter(message: OverstyrArbeidsforholdKafkaDto) {
+        tellOverstyrArbeidsforhold()
+        val overstyring = message.somKafkaMessage().also {
+            sikkerlogg.info(
+                "Publiserer overstyring av arbeidsforhold fra api: {}, {}\n${it.toJson()}",
+                kv("fødselsnummer", message.fødselsnummer),
+                kv("aktørId", message.aktørId),
+            )
+        }
+        rapidsConnection.publish(message.fødselsnummer, overstyring.toJson())
     }
 
     private companion object {

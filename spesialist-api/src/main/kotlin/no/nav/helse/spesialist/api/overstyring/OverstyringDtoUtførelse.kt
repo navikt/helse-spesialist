@@ -107,6 +107,7 @@ internal data class OverstyrTidslinjeKafkaDto(
             )
         )
     }
+
     internal data class OverstyrDagKafkaDto(
         val dato: LocalDate,
         val type: Type,
