@@ -13,7 +13,7 @@ import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeKafkaDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeKafkaDto.OverstyrDagKafkaDto.Type.Arbeidsdag
 import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeKafkaDto.OverstyrDagKafkaDto.Type.Sykedag
 import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
-import no.nav.helse.spesialist.api.utbetaling.AnnulleringKafkaDto
+import no.nav.helse.spesialist.api.utbetaling.AnnulleringDto
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -245,13 +245,12 @@ class SaksbehandlerMediatorTest: AbstractDatabaseTest() {
     private fun annullering(
         begrunnelser: List<String> = listOf("EN_BEGRUNNELSE"),
         kommentar: String? = "EN_KOMMENTAR",
-    ) = AnnulleringKafkaDto(
+    ) = AnnulleringDto(
         aktørId = AKTØR_ID,
         fødselsnummer = FØDSELSNUMMER,
         organisasjonsnummer = ORGANISASJONSNUMMER,
         fagsystemId = "EN_FAGSYSTEMID",
         begrunnelser = begrunnelser,
-        kommentar = kommentar,
-        saksbehandler = saksbehandler
+        kommentar = kommentar
     )
 }

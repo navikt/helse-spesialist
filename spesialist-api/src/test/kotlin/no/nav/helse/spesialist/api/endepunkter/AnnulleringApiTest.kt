@@ -10,7 +10,7 @@ import java.util.*
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.spesialist.api.AbstractApiTest
 import no.nav.helse.spesialist.api.SaksbehandlerMediator
-import no.nav.helse.spesialist.api.utbetaling.AnnulleringKafkaDto
+import no.nav.helse.spesialist.api.utbetaling.AnnulleringDto
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -41,7 +41,7 @@ internal class AnnulleringApiTest : AbstractApiTest() {
 
     @Test
     fun annulleringOk() {
-        val clot = slot<AnnulleringKafkaDto>()
+        val slot = slot<AnnulleringDto>()
         val response = runBlocking {
             client.post("/api/annullering") {
                 contentType(ContentType.Application.Json)
@@ -60,15 +60,15 @@ internal class AnnulleringApiTest : AbstractApiTest() {
         }
         assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
         verify(exactly = 1) {
-            saksbehandlerMediator.håndter(capture(clot), any())
+            saksbehandlerMediator.håndter(capture(slot), any())
         }
-        assertEquals("Russekort", clot.captured.kommentar)
-        assertEquals(listOf("Ingen liker fisk", "En giraff!!"), clot.captured.begrunnelser)
+        assertEquals("Russekort", slot.captured.kommentar)
+        assertEquals(listOf("Ingen liker fisk", "En giraff!!"), slot.captured.begrunnelser)
     }
 
     @Test
     fun annulleringTommeVerdier() {
-        val clot = slot<AnnulleringKafkaDto>()
+        val slot = slot<AnnulleringDto>()
         val response = runBlocking {
             client.preparePost("/api/annullering") {
                 contentType(ContentType.Application.Json)
@@ -85,9 +85,9 @@ internal class AnnulleringApiTest : AbstractApiTest() {
         }
         assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
         verify(exactly = 1) {
-            saksbehandlerMediator.håndter(capture(clot), any())
+            saksbehandlerMediator.håndter(capture(slot), any())
         }
-        assertEquals(null, clot.captured.kommentar)
-        assertEquals(emptyList<String>(), clot.captured.begrunnelser)
+        assertEquals(null, slot.captured.kommentar)
+        assertEquals(emptyList<String>(), slot.captured.begrunnelser)
     }
 }

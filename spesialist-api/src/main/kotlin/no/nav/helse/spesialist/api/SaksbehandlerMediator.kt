@@ -8,6 +8,7 @@ import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonKafkaDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeKafkaDto
 import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
+import no.nav.helse.spesialist.api.utbetaling.AnnulleringDto
 import no.nav.helse.spesialist.api.utbetaling.AnnulleringKafkaDto
 import org.slf4j.LoggerFactory
 
@@ -17,19 +18,28 @@ class SaksbehandlerMediator(
 ) {
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
 
-    internal fun håndter(message: AnnulleringKafkaDto, saksbehandler: Saksbehandler) {
+    internal fun håndter(annullering: AnnulleringDto, saksbehandler: Saksbehandler) {
         tellAnnullering()
         saksbehandler.persister(saksbehandlerDao)
-        val annullering = message.somKafkaMessage().also {
+        val kafkamelding = AnnulleringKafkaDto(
+            saksbehandler = saksbehandler,
+            organisasjonsnummer = annullering.organisasjonsnummer,
+            fødselsnummer = annullering.fødselsnummer,
+            aktørId = annullering.aktørId,
+            fagsystemId = annullering.fagsystemId,
+            begrunnelser = annullering.begrunnelser,
+            kommentar = annullering.kommentar
+        )
+        val message = kafkamelding.somKafkaMessage().also {
             sikkerlogg.info(
                 "Publiserer annullering fra api: {}, {}, {}\n${it.toJson()}",
-                kv("fødselsnummer", message.fødselsnummer),
-                kv("aktørId", message.aktørId),
-                kv("organisasjonsnummer", message.organisasjonsnummer)
+                kv("fødselsnummer", kafkamelding.fødselsnummer),
+                kv("aktørId", kafkamelding.aktørId),
+                kv("organisasjonsnummer", kafkamelding.organisasjonsnummer)
             )
         }
 
-        rapidsConnection.publish(message.fødselsnummer, annullering.toJson())
+        rapidsConnection.publish(kafkamelding.fødselsnummer, message.toJson())
     }
 
     internal fun håndter(message: OverstyrTidslinjeKafkaDto) {
