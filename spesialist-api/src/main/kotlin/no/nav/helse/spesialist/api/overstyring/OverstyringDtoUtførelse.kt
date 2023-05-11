@@ -83,7 +83,21 @@ internal data class OverstyrInntektOgRefusjonDto(
     val fødselsnummer: String,
     val skjæringstidspunkt: LocalDate,
     val arbeidsgivere: List<OverstyrArbeidsgiverDto>,
-)
+) {
+    fun somJsonMessage(saksbehandler: SaksbehandlerDto) = JsonMessage.newMessage(
+        "saksbehandler_overstyrer_inntekt_og_refusjon",
+        listOfNotNull(
+            "aktørId" to aktørId,
+            "fødselsnummer" to fødselsnummer,
+            "skjæringstidspunkt" to skjæringstidspunkt,
+            "arbeidsgivere" to arbeidsgivere.toMap(),
+            "saksbehandlerOid" to saksbehandler.oid,
+            "saksbehandlerNavn" to saksbehandler.navn,
+            "saksbehandlerIdent" to saksbehandler.ident,
+            "saksbehandlerEpost" to saksbehandler.epost,
+        ).toMap()
+    )
+}
 
 @JsonIgnoreProperties
 data class OverstyrArbeidsforholdDto(
@@ -119,27 +133,5 @@ internal data class OverstyrArbeidsforholdKafkaDto(
             "skjæringstidspunkt" to skjæringstidspunkt,
             "overstyrteArbeidsforhold" to overstyrteArbeidsforhold,
         )
-    )
-}
-
-internal data class OverstyrInntektOgRefusjonKafkaDto(
-    val saksbehandler: SaksbehandlerDto,
-    val fødselsnummer: String,
-    val aktørId: String,
-    val skjæringstidspunkt: LocalDate,
-    val arbeidsgivere: List<OverstyrArbeidsgiverDto>,
-) {
-    fun somKafkaMessage() = JsonMessage.newMessage(
-        "saksbehandler_overstyrer_inntekt_og_refusjon",
-        listOfNotNull(
-            "aktørId" to aktørId,
-            "fødselsnummer" to fødselsnummer,
-            "skjæringstidspunkt" to skjæringstidspunkt,
-            "arbeidsgivere" to arbeidsgivere.toMap(),
-            "saksbehandlerOid" to saksbehandler.oid,
-            "saksbehandlerNavn" to saksbehandler.navn,
-            "saksbehandlerIdent" to saksbehandler.ident,
-            "saksbehandlerEpost" to saksbehandler.epost,
-        ).toMap()
     )
 }

@@ -8,7 +8,7 @@ import no.nav.helse.spesialist.api.db.AbstractDatabaseTest
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdKafkaDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsgiverDto
-import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonKafkaDto
+import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDto
 import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
 import no.nav.helse.spesialist.api.utbetaling.AnnulleringDto
@@ -156,11 +156,10 @@ class SaksbehandlerMediatorTest: AbstractDatabaseTest() {
 
     @Test
     fun `håndterer overstyring av inntekt og refusjon`() {
-        val overstyring = OverstyrInntektOgRefusjonKafkaDto(
+        val overstyring = OverstyrInntektOgRefusjonDto(
             fødselsnummer = FØDSELSNUMMER,
             aktørId = AKTØR_ID,
             skjæringstidspunkt = 1.januar,
-            saksbehandler = saksbehandler.toDto(),
             arbeidsgivere = listOf(
                 OverstyrArbeidsgiverDto(
                     organisasjonsnummer = ORGANISASJONSNUMMER,
@@ -197,7 +196,7 @@ class SaksbehandlerMediatorTest: AbstractDatabaseTest() {
             )
         )
 
-        mediator.håndter(overstyring)
+        mediator.håndter(overstyring, saksbehandler)
 
         val hendelse = testRapid.inspektør.hendelser("saksbehandler_overstyrer_inntekt_og_refusjon").first()
 
