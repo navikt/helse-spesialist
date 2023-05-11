@@ -12,18 +12,8 @@ internal data class AnnulleringDto(
     val fagsystemId: String,
     val begrunnelser: List<String> = emptyList(),
     val kommentar: String?
-)
-
-internal data class AnnulleringKafkaDto(
-    val aktørId: String,
-    val fødselsnummer: String,
-    val organisasjonsnummer: String,
-    val fagsystemId: String,
-    val saksbehandler: Saksbehandler,
-    val begrunnelser: List<String> = emptyList(),
-    val kommentar: String?
 ) {
-    internal fun somKafkaMessage(): JsonMessage {
+    internal fun somJsonMessage(saksbehandler: Saksbehandler): JsonMessage {
         return JsonMessage.newMessage(
             "annullering", mutableMapOf(
                 "fødselsnummer" to fødselsnummer,
