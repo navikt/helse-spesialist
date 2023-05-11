@@ -1,6 +1,6 @@
 package no.nav.helse.mediator.api
 
-import io.ktor.http.*
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.principal
@@ -12,9 +12,10 @@ import io.ktor.server.routing.post
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import no.nav.helse.spesialist.api.feilhåndtering.modellfeilForRest
 import no.nav.helse.modell.leggpåvent.LeggPåVentService
+import no.nav.helse.spesialist.api.feilhåndtering.modellfeilForRest
 import no.nav.helse.spesialist.api.notat.NotatMediator
+import no.nav.helse.spesialist.api.notat.NyttNotatDto
 import org.slf4j.LoggerFactory
 
 private val log = LoggerFactory.getLogger("LeggPåVentApi")
@@ -30,7 +31,7 @@ internal fun Route.leggPåVentApi(leggPåVentService: LeggPåVentService, notatM
                 return@post
             }
 
-            val notat = call.receive<NotatApiDto>()
+            val notat = call.receive<NyttNotatDto>()
             val accessToken = requireNotNull(call.principal<JWTPrincipal>()) { "mangler access token" }
             val saksbehandlerOid = UUID.fromString(accessToken.payload.getClaim("oid").asString())
 

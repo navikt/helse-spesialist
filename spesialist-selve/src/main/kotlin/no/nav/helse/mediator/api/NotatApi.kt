@@ -1,6 +1,6 @@
 package no.nav.helse.mediator.api
 
-import io.ktor.http.*
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.principal
@@ -10,19 +10,19 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
+import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.spesialist.api.notat.NotatMediator
+import no.nav.helse.spesialist.api.notat.NyttNotatDto
 import org.slf4j.LoggerFactory
-import java.util.*
-import no.nav.helse.spesialist.api.graphql.schema.NotatType
 
 private val log = LoggerFactory.getLogger("NotatApi")
 
 internal fun Route.notaterApi(mediator: NotatMediator) {
 
     post("/api/notater/{vedtaksperiode_id}") {
-        val notat = call.receive<NotatApiDto>()
+        val notat = call.receive<NyttNotatDto>()
 
         val accessToken = requireNotNull(call.principal<JWTPrincipal>()) { "mangler access token" }
         val saksbehandlerOid = UUID.fromString(accessToken.payload.getClaim("oid").asString())
@@ -78,9 +78,3 @@ internal fun Route.notaterApi(mediator: NotatMediator) {
         else call.respond(HttpStatusCode.OK)
     }
 }
-
-data class NotatApiDto(
-    val tekst: String,
-    val type: NotatType
-)
-

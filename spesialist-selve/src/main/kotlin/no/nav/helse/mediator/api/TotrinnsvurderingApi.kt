@@ -17,6 +17,7 @@ import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.tildeling.TildelingService
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
+import no.nav.helse.spesialist.api.notat.NyttNotatDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.vedtak.ApiGenerasjon.Companion.harAktiveVarsler
 import no.nav.helse.spesialist.api.vedtaksperiode.ApiGenerasjonRepository
@@ -128,5 +129,5 @@ class TotrinnsvurderingDto(
 @JsonIgnoreProperties
 class TotrinnsvurderingReturDto(
     val oppgavereferanse: Long,
-    val notat: NotatApiDto,
+    val notat: NyttNotatDto,
 )

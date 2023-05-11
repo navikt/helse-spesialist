@@ -25,6 +25,7 @@ import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.notat.NotatMediator
+import no.nav.helse.spesialist.api.notat.NyttNotatDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.varsel.Varsel
 import no.nav.helse.spesialist.api.vedtak.ApiGenerasjon
@@ -256,7 +257,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
                 accept(ContentType.Application.Json)
                 setBody(TotrinnsvurderingReturDto(
                     oppgavereferanse = 1,
-                    notat = NotatApiDto("tekst", NotatType.Retur)
+                    notat = NyttNotatDto("tekst", NotatType.Retur)
                 ))
                 authentication(saksbehandler_oid)
             }
@@ -370,7 +371,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
                 accept(ContentType.Application.Json)
                 setBody(TotrinnsvurderingReturDto(
                     oppgavereferanse = oppgaveId,
-                    notat = NotatApiDto(notat, NotatType.Retur)
+                    notat = NyttNotatDto(notat, NotatType.Retur)
                 ))
                 authentication(saksbehandler_oid)
             }
