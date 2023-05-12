@@ -44,28 +44,28 @@ jobs:
     outputs:
       image: ${{ steps.docker-build-push.outputs.image }}
 
-  deployDev:
-    name: deploy to dev
-    needs: [build]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: nais/deploy/actions/deploy@v1
-        env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: dev-gcp
-          RESOURCE: deploy/dev-migrering.yml,deploy/dev-db-policy.yml
-          IMAGE: ${{ needs.build.outputs.image }}
-
-  deployProd:
-    name: deploy to prod
-    needs: [build, deployDev]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: nais/deploy/actions/deploy@v1
-        env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: prod-gcp
-          RESOURCE: deploy/prod-migrering.yml
-          IMAGE: ${{ needs.build.outputs.image }}
+#  deployDev:
+#    name: deploy to dev
+#    needs: [build]
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v3
+#      - uses: nais/deploy/actions/deploy@v1
+#        env:
+#          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+#          CLUSTER: dev-gcp
+#          RESOURCE: deploy/dev-migrering.yml,deploy/dev-db-policy.yml
+#          IMAGE: ${{ needs.build.outputs.image }}
+#
+#  deployProd:
+#    name: deploy to prod
+#    needs: [build, deployDev]
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v3
+#      - uses: nais/deploy/actions/deploy@v1
+#        env:
+#          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+#          CLUSTER: prod-gcp
+#          RESOURCE: deploy/prod-migrering.yml
+#          IMAGE: ${{ needs.build.outputs.image }}
