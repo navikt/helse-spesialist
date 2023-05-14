@@ -97,9 +97,8 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         TildelingService(
             tildelingDao,
             SaksbehandlerDao(dataSource),
-            totrinnsvurderingApiDao,
-            mockk<Oppgavemelder>(relaxed = true)
-        )
+            totrinnsvurderingApiDao
+        ) { mockk<Oppgavemelder>(relaxed = true) }
 
     protected fun opprettVedtaksperiode(
         personId: Long,

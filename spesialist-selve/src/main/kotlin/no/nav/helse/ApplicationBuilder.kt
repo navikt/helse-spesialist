@@ -208,7 +208,9 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val apiVarselRepository = ApiVarselRepository(dataSource)
 
     private val behandlingsstatistikkMediator = BehandlingsstatistikkMediator(behandlingsstatistikkDao)
-    private val apiTildelingService = no.nav.helse.spesialist.api.tildeling.TildelingService(tildelingDao, saksbehandlerDao, totrinnsvurderingApiDao, oppgavemelder)
+    private val apiTildelingService = no.nav.helse.spesialist.api.tildeling.TildelingService(tildelingDao, saksbehandlerDao, totrinnsvurderingApiDao) {
+        oppgavemelder
+    }
 
     private val oppgaveMediator = OppgaveMediator(
         oppgaveDao = oppgaveDao,

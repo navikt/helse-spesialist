@@ -11,8 +11,10 @@ class TildelingService(
     private val tildelingDao: TildelingDao,
     private val saksbehandlerDao: SaksbehandlerDao,
     private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
-    private val oppgavemelder: Oppgavemelder,
+    oppgavemelder: () -> Oppgavemelder,
 ) {
+    private val oppgavemelder: Oppgavemelder by lazy { oppgavemelder() }
+
     internal fun tildelOppgaveTilSaksbehandler(
         oppgaveId: Long,
         saksbehandlerreferanse: UUID,
