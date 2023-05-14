@@ -20,14 +20,12 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.Gruppe
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.idForGruppe
-import no.nav.helse.januar
 import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
@@ -37,10 +35,7 @@ import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.azureAdAppAuthentication
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
-import no.nav.helse.spesialist.api.varsel.Varsel
-import no.nav.helse.spesialist.api.vedtak.ApiGenerasjon
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
-import no.nav.helse.spesialist.api.vedtaksperiode.ApiGenerasjonRepository
 import no.nav.helse.testEnv
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -52,7 +47,6 @@ import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ContentNe
 @TestInstance(PER_CLASS)
 internal class PersonApiTest {
 
-    private val generasjonRepository: ApiGenerasjonRepository = mockk(relaxed = true)
     private val oppgaveDao: OppgaveDao = mockk(relaxed = true)
     private val totrinnsvurderingMediatorMock = mockk<TotrinnsvurderingMediator>(relaxed = true)
     private val saksbehandlerMediator = mockk<SaksbehandlerMediator>(relaxed = true)
@@ -172,7 +166,6 @@ internal class PersonApiTest {
         val vedtaksperiodeId = UUID.randomUUID()
         every { oppgaveDao.venterPåSaksbehandler(1L) } returns true
         every { oppgaveDao.erRiskoppgave(1L) } returns false
-        every { generasjonRepository.perioderTilBehandling(1L) } returns setOf(opprettApiGenerasjon(1.januar, 31.januar, 1.januar, listOf(opprettVarsel(Varsel.Varselstatus.VURDERT))))
         every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns Totrinnsvurdering(
             vedtaksperiodeId = vedtaksperiodeId,
             erRetur = false,
@@ -308,13 +301,4 @@ internal class PersonApiTest {
         }
         block(client)
     }
-
-    private fun opprettApiGenerasjon(fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate, varsler: List<Varsel> = emptyList()): ApiGenerasjon {
-        return ApiGenerasjon(UUID.randomUUID(), fom, tom, skjæringstidspunkt, varsler.toSet())
-    }
-
-    private fun opprettVarsel(status: Varsel.Varselstatus): Varsel {
-        return Varsel(UUID.randomUUID(), UUID.randomUUID(), "SB_EX_1", status, "EN_TITTEL", null, null, null)
-    }
-
 }

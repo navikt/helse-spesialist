@@ -99,7 +99,6 @@ import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.utbetaling.UtbetalingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
-import no.nav.helse.spesialist.api.vedtaksperiode.ApiGenerasjonRepository
 import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import org.slf4j.LoggerFactory
@@ -207,7 +206,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val notatMediator = NotatMediator(notatDao)
     private val overstyringDao = OverstyringDao(dataSource)
     private val apiVarselRepository = ApiVarselRepository(dataSource)
-    private val apiGenerasjonRepository = ApiGenerasjonRepository(dataSource)
 
     private val behandlingsstatistikkMediator = BehandlingsstatistikkMediator(behandlingsstatistikkDao)
     private val apiTildelingService = no.nav.helse.spesialist.api.tildeling.TildelingService(tildelingDao, saksbehandlerDao, totrinnsvurderingApiDao, oppgavemelder)
@@ -333,11 +331,11 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                     behandlingsstatistikkApi(BehandlingsstatistikkMediator(behandlingsstatistikkDao))
                     notaterApi(notatMediator)
                     totrinnsvurderingApi(
-                        apiGenerasjonRepository,
                         tildelingService,
                         hendelseMediator,
                         totrinnsvurderingMediator,
-                        tilgangsgrupper
+                        tilgangsgrupper,
+                        saksbehandlerMediator
                     )
                 }
             }

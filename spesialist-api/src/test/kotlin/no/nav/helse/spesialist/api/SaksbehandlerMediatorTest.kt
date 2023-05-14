@@ -83,6 +83,41 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `håndter totrinnsvurdering`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjonId = UUID.randomUUID()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver(), periode = Periode(vedtaksperiodeId, 1.januar, 31.januar))
+        val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
+        val definisjonRef = opprettVarseldefinisjon()
+        nyttVarsel(vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, status = "VURDERT", definisjonRef = definisjonRef)
+        assertDoesNotThrow {
+            mediator.håndterTotrinnsvurdering(1L)
+        }
+    }
+
+    @Test
+    fun `håndter totrinnsvurdering når periode har aktivt varsel`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjonId = UUID.randomUUID()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver(), periode = Periode(vedtaksperiodeId, 1.januar, 31.januar))
+        val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
+        val definisjonRef = opprettVarseldefinisjon()
+        nyttVarsel(vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, status = "AKTIV", definisjonRef = definisjonRef)
+        assertThrows<ManglerVurderingAvVarsler> {
+            mediator.håndterTotrinnsvurdering(1L)
+        }
+    }
+
+    @Test
+    fun `håndter totrinnsvurdering når periode ikke har noen varsler`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver(), periode = Periode(vedtaksperiodeId, 1.januar, 31.januar))
+        assertDoesNotThrow {
+            mediator.håndterTotrinnsvurdering(1L)
+        }
+    }
+
+    @Test
     fun `håndterer annullering`() {
         mediator.håndter(annullering(), saksbehandler)
 

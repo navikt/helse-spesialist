@@ -17,25 +17,25 @@ import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.tildeling.TildelingService
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
+import no.nav.helse.spesialist.api.SaksbehandlerMediator
+import no.nav.helse.spesialist.api.feilhåndtering.modellfeilForRest
 import no.nav.helse.spesialist.api.notat.NyttNotatDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
-import no.nav.helse.spesialist.api.vedtak.ApiGenerasjon.Companion.harAktiveVarsler
-import no.nav.helse.spesialist.api.vedtaksperiode.ApiGenerasjonRepository
+import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingDto
 import org.slf4j.LoggerFactory
 
 private val log = LoggerFactory.getLogger("TotrinnsvurderingApi")
-private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
+private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
 internal fun Route.totrinnsvurderingApi(
-    generasjonRepository: ApiGenerasjonRepository,
     tildelingService: TildelingService,
     hendelseMediator: HendelseMediator,
     totrinnsvurderingMediator: TotrinnsvurderingMediator,
     tilgangsgrupper: Tilgangsgrupper,
+    saksbehandlerMediator: SaksbehandlerMediator
 ) {
     post("/api/totrinnsvurdering") {
         val totrinnsvurdering = call.receive<TotrinnsvurderingDto>()
-        val perioderTilBehandling = generasjonRepository.perioderTilBehandling(totrinnsvurdering.oppgavereferanse)
         val saksbehandlerOid = getSaksbehandlerOid()
         val aktivTotrinnsvurdering = totrinnsvurderingMediator.hentAktiv(totrinnsvurdering.oppgavereferanse)
             ?: totrinnsvurderingMediator.opprettFraLegacy(totrinnsvurdering.oppgavereferanse)
@@ -48,43 +48,35 @@ internal fun Route.totrinnsvurderingApi(
             return@post
         }
 
-        if (perioderTilBehandling.harAktiveVarsler()) {
-            call.respond(
-                status = HttpStatusCode.BadRequest,
-                mapOf(
-                    "melding" to "Alle varsler må vurderes før godkjenning",
-                    "feilkode" to "IkkeVurderteVarslerVedGodkjenning"
-                )
+        modellfeilForRest {
+            saksbehandlerMediator.håndterTotrinnsvurdering(totrinnsvurdering.oppgavereferanse)
+            sikkerlogg.info("OppgaveId ${totrinnsvurdering.oppgavereferanse} sendes til godkjenning av $saksbehandlerOid")
+
+            val beslutterSaksbehandlerOid = aktivTotrinnsvurdering.beslutter
+            tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(
+                totrinnsvurdering.oppgavereferanse,
+                beslutterSaksbehandlerOid,
+                tilganger(tilgangsgrupper),
             )
-            return@post
+
+            totrinnsvurderingMediator.settSaksbehandler(
+                oppgaveId = totrinnsvurdering.oppgavereferanse,
+                saksbehandlerOid = saksbehandlerOid
+            )
+            if (aktivTotrinnsvurdering.erRetur) totrinnsvurderingMediator.settHåndtertRetur(totrinnsvurdering.oppgavereferanse)
+
+            totrinnsvurderingMediator.lagrePeriodehistorikk(
+                oppgaveId = totrinnsvurdering.oppgavereferanse,
+                saksbehandleroid = saksbehandlerOid,
+                type = PeriodehistorikkType.TOTRINNSVURDERING_TIL_GODKJENNING
+            )
+
+            hendelseMediator.sendMeldingOppgaveOppdatert(totrinnsvurdering.oppgavereferanse)
+
+            log.info("OppgaveId ${totrinnsvurdering.oppgavereferanse} sendt til godkjenning")
+
+            call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
         }
-
-        sikkerLog.info("OppgaveId ${totrinnsvurdering.oppgavereferanse} sendes til godkjenning av $saksbehandlerOid")
-
-        val beslutterSaksbehandlerOid = aktivTotrinnsvurdering.beslutter
-        tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(
-            totrinnsvurdering.oppgavereferanse,
-            beslutterSaksbehandlerOid,
-            tilganger(tilgangsgrupper),
-        )
-
-        totrinnsvurderingMediator.settSaksbehandler(
-            oppgaveId = totrinnsvurdering.oppgavereferanse,
-            saksbehandlerOid = saksbehandlerOid
-        )
-        if (aktivTotrinnsvurdering.erRetur) totrinnsvurderingMediator.settHåndtertRetur(totrinnsvurdering.oppgavereferanse)
-
-        totrinnsvurderingMediator.lagrePeriodehistorikk(
-            oppgaveId = totrinnsvurdering.oppgavereferanse,
-            saksbehandleroid = saksbehandlerOid,
-            type = PeriodehistorikkType.TOTRINNSVURDERING_TIL_GODKJENNING
-        )
-
-        hendelseMediator.sendMeldingOppgaveOppdatert(totrinnsvurdering.oppgavereferanse)
-
-        log.info("OppgaveId ${totrinnsvurdering.oppgavereferanse} sendt til godkjenning")
-
-        call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
     }
 
     post("/api/totrinnsvurdering/retur") {
@@ -92,7 +84,7 @@ internal fun Route.totrinnsvurderingApi(
         val beslutterOid = getSaksbehandlerOid()
         val aktivTotrinnsvurdering = totrinnsvurderingMediator.hentAktiv(oppgaveId = retur.oppgavereferanse) ?:
             totrinnsvurderingMediator.opprettFraLegacy(retur.oppgavereferanse)
-        sikkerLog.info("OppgaveId ${retur.oppgavereferanse} sendes i retur av $beslutterOid")
+        sikkerlogg.info("OppgaveId ${retur.oppgavereferanse} sendes i retur av $beslutterOid")
 
         val tidligereSaksbehandlerOid = aktivTotrinnsvurdering.saksbehandler
 
@@ -120,11 +112,6 @@ private fun PipelineContext<Unit, ApplicationCall>.getSaksbehandlerOid(): UUID {
     val accessToken = requireNotNull(call.principal<JWTPrincipal>()) { "mangler access token" }
     return UUID.fromString(accessToken.payload.getClaim("oid").asString())
 }
-
-@JsonIgnoreProperties
-class TotrinnsvurderingDto(
-    val oppgavereferanse: Long,
-)
 
 @JsonIgnoreProperties
 class TotrinnsvurderingReturDto(

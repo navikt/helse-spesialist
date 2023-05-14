@@ -85,6 +85,12 @@ class SaksbehandlerMediator(
         }
     }
 
+    fun håndterTotrinnsvurdering(oppgavereferanse: Long) {
+        val perioderTilBehandling = generasjonRepository.perioderTilBehandling(oppgavereferanse)
+        if (perioderTilBehandling.harAktiveVarsler())
+            throw ManglerVurderingAvVarsler(oppgavereferanse)
+    }
+
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
