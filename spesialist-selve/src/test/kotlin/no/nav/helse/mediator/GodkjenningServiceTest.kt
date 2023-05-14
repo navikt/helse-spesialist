@@ -9,7 +9,6 @@ import java.util.UUID
 import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.Testdata
 import no.nav.helse.Testdata.FØDSELSNUMMER
-import no.nav.helse.mediator.api.GodkjenningDTO
 import no.nav.helse.mediator.api.GodkjenningService
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.oppgave.OppgaveDao
@@ -20,6 +19,7 @@ import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
+import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -53,7 +53,7 @@ internal class GodkjenningServiceTest : AbstractE2ETest() {
         val saksbehandlerIdent = "saksbehandler"
         settOppBruker()
         val oppgavereferanse = oppgaveDao.finnOppgaveId(FØDSELSNUMMER)!!
-        godkjenningServiceWithMocks.håndter(GodkjenningDTO(oppgavereferanse, true, saksbehandlerIdent, null, null, null), epost, oid)
+        godkjenningServiceWithMocks.håndter(GodkjenningDto(oppgavereferanse, true, saksbehandlerIdent, null, null, null), epost, oid)
         assertTrue(testRapid.inspektør.hendelser("saksbehandler_løsning").isNotEmpty())
         assertEquals("AvventerSystem", testRapid.inspektør.hendelser("oppgave_oppdatert").last()["status"].asText())
     }
@@ -69,7 +69,7 @@ internal class GodkjenningServiceTest : AbstractE2ETest() {
             every { totrinnsvurdering.saksbehandler } returns tidligereSaksbehandlerOid
         }
 
-        godkjenningServiceWithMocks.håndter(GodkjenningDTO(1L, true, "saksbehandler", null, null, null), "epost@nav.no", oid)
+        godkjenningServiceWithMocks.håndter(GodkjenningDto(1L, true, "saksbehandler", null, null, null), "epost@nav.no", oid)
 
         verify (exactly = 1) { reserverpersonDaoMock.reserverPerson(tidligereSaksbehandlerOid, any(), any()) }
     }
@@ -91,7 +91,7 @@ internal class GodkjenningServiceTest : AbstractE2ETest() {
             oppdatert = null
         )
 
-        godkjenningServiceWithMocks.håndter(GodkjenningDTO(oppgavereferanse, true, "saksbehandler", null, null, null), "epost@nav.no", oid)
+        godkjenningServiceWithMocks.håndter(GodkjenningDto(oppgavereferanse, true, "saksbehandler", null, null, null), "epost@nav.no", oid)
 
         verify (exactly = 1) { reserverpersonDaoMock.reserverPerson(totrinnsvurderingSaksbehandlerOid, any(), any()) }
     }
@@ -103,7 +103,7 @@ internal class GodkjenningServiceTest : AbstractE2ETest() {
 
         every { totrinnsvurderingDaoMock.hentAktiv(Testdata.VEDTAKSPERIODE_ID) } returns null
 
-        godkjenningServiceWithMocks.håndter(GodkjenningDTO(1L, true, "saksbehandler", null, null, null), "epost@nav.no", oid)
+        godkjenningServiceWithMocks.håndter(GodkjenningDto(1L, true, "saksbehandler", null, null, null), "epost@nav.no", oid)
 
         verify (exactly = 1) { reserverpersonDaoMock.reserverPerson(oid, any(), any()) }
     }
@@ -123,7 +123,7 @@ internal class GodkjenningServiceTest : AbstractE2ETest() {
             oppdatert = null
         )
 
-        godkjenningServiceWithMocks.håndter(GodkjenningDTO(1L, true, "saksbehandler", null, null, null), "epost@nav.no", oid)
+        godkjenningServiceWithMocks.håndter(GodkjenningDto(1L, true, "saksbehandler", null, null, null), "epost@nav.no", oid)
 
         verify (exactly = 1) { totrinnsvurderingDaoMock.ferdigstill(Testdata.VEDTAKSPERIODE_ID) }
     }
@@ -143,7 +143,7 @@ internal class GodkjenningServiceTest : AbstractE2ETest() {
             oppdatert = null
         )
 
-        godkjenningServiceWithMocks.håndter(GodkjenningDTO(1L, true, "saksbehandler", null, null, null), "epost@nav.no", oid)
+        godkjenningServiceWithMocks.håndter(GodkjenningDto(1L, true, "saksbehandler", null, null, null), "epost@nav.no", oid)
 
         verify (exactly = 1) { periodehistorikkDaoMock.lagre(PeriodehistorikkType.TOTRINNSVURDERING_ATTESTERT, oid, any(), null) }
     }

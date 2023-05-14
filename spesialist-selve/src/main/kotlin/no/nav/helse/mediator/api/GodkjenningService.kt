@@ -18,6 +18,7 @@ import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
+import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import org.slf4j.LoggerFactory
 
 private val log = LoggerFactory.getLogger(HendelseMediator::class.java)
@@ -39,7 +40,7 @@ internal class GodkjenningService(
     ),
 ) {
 
-    internal fun håndter(godkjenningDTO: GodkjenningDTO, epost: String, oid: UUID) {
+    internal fun håndter(godkjenningDTO: GodkjenningDto, epost: String, oid: UUID) {
         val hendelseId = oppgaveDao.finnHendelseId(godkjenningDTO.oppgavereferanse)
         val fødselsnummer = hendelseDao.finnFødselsnummer(hendelseId)
         val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(godkjenningDTO.oppgavereferanse)
@@ -88,7 +89,7 @@ internal class GodkjenningService(
         }
     }
 
-    private fun finnOppgave(godkjenningDTO: GodkjenningDTO) = oppgaveDao.finn(godkjenningDTO.oppgavereferanse)
+    private fun finnOppgave(godkjenningDTO: GodkjenningDto) = oppgaveDao.finn(godkjenningDTO.oppgavereferanse)
         ?: throw IllegalArgumentException("oppgaveId ${godkjenningDTO.oppgavereferanse} fins ikke")
 
     private fun reserverPerson(oid: UUID, fødselsnummer: String) {

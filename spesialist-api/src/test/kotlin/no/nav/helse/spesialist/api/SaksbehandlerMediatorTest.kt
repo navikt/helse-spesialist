@@ -4,20 +4,23 @@ import java.util.UUID
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.TestRapidHelpers.hendelser
-import no.nav.helse.spesialist.api.db.AbstractDatabaseTest
+import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsgiverDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDto
 import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
 import no.nav.helse.spesialist.api.utbetaling.AnnulleringDto
+import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.api.assertThrows
 
-class SaksbehandlerMediatorTest: AbstractDatabaseTest() {
+internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
     private val testRapid = TestRapid()
     private val mediator = SaksbehandlerMediator(dataSource, testRapid)
 
@@ -37,6 +40,46 @@ class SaksbehandlerMediatorTest: AbstractDatabaseTest() {
     @BeforeEach
     internal fun beforeEach() {
         testRapid.reset()
+    }
+
+    @Test
+    fun `håndter godkjenning`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjonId = UUID.randomUUID()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver(), periode = Periode(vedtaksperiodeId, 1.januar, 31.januar))
+        val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
+        val definisjonRef = opprettVarseldefinisjon()
+        nyttVarsel(vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, status = "VURDERT", definisjonRef = definisjonRef)
+        assertDoesNotThrow {
+            mediator.håndter(godkjenning(sisteOppgaveId, true))
+        }
+        assertGodkjenteVarsler(generasjonRef, 1)
+    }
+
+    @Test
+    fun `håndter godkjenning når periode har aktivt varsel`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjonId = UUID.randomUUID()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver(), periode = Periode(vedtaksperiodeId, 1.januar, 31.januar))
+        val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
+        val definisjonRef = opprettVarseldefinisjon()
+        nyttVarsel(vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, status = "AKTIV", definisjonRef = definisjonRef)
+        assertThrows<ManglerVurderingAvVarsler> {
+            mediator.håndter(godkjenning(sisteOppgaveId, true))
+        }
+        assertGodkjenteVarsler(generasjonRef, 0)
+    }
+
+    @Test
+    fun `håndter godkjenning når periode ikke har noen varsler`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjonId = UUID.randomUUID()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver(), periode = Periode(vedtaksperiodeId, 1.januar, 31.januar))
+        val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
+        assertDoesNotThrow {
+            mediator.håndter(godkjenning(sisteOppgaveId, true))
+        }
+        assertGodkjenteVarsler(generasjonRef, 0)
     }
 
     @Test
@@ -235,6 +278,19 @@ class SaksbehandlerMediatorTest: AbstractDatabaseTest() {
             assertEquals(22000.0, it["fraRefusjonsopplysninger"].first()["beløp"].asDouble())
         }
     }
+
+    private fun godkjenning(
+        oppgavereferanse: Long,
+        godkjent: Boolean,
+        ident: String = SAKSBEHANDLER_IDENT,
+    ) = GodkjenningDto(
+        oppgavereferanse = oppgavereferanse,
+        saksbehandlerIdent = ident,
+        godkjent = godkjent,
+        begrunnelser = emptyList(),
+        kommentar = null,
+        årsak = null
+    )
 
     private fun annullering(
         begrunnelser: List<String> = listOf("EN_BEGRUNNELSE"),

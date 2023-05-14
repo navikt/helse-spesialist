@@ -1,10 +1,10 @@
 package no.nav.helse.spesialist.api.feilhåndtering
 
-import io.ktor.http.*
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.response.respond
-import io.ktor.util.pipeline.*
+import io.ktor.util.pipeline.PipelineContext
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import org.slf4j.LoggerFactory
@@ -50,6 +50,19 @@ class OppgaveIkkeTildelt(private val oppgaveId: Long): Modellfeil() {
     override val eksternKontekst: Map<String, Any> = mapOf("oppgaveId" to oppgaveId.toString())
     override val httpkode = HttpStatusCode.FailedDependency
     override val melding: String = "oppgave_er_ikke_tildelt"
+    override fun logger() {
+        logg.info(
+            "Returnerer {} for {} for oppgaveId=$oppgaveId",
+            keyValue("httpkode", "${httpkode.value}"),
+            keyValue("melding", melding)
+        )
+    }
+}
+
+class ManglerVurderingAvVarsler(private val oppgaveId: Long): Modellfeil() {
+    override val eksternKontekst: Map<String, Any> = mapOf("oppgaveId" to oppgaveId.toString())
+    override val httpkode = HttpStatusCode.BadRequest
+    override val melding: String = "mangler_vurdering_av_varsler"
     override fun logger() {
         logg.info(
             "Returnerer {} for {} for oppgaveId=$oppgaveId",

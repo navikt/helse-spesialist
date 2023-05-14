@@ -34,10 +34,12 @@ import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.AzureAdAppConfig
 import no.nav.helse.spesialist.api.AzureConfig
+import no.nav.helse.spesialist.api.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.azureAdAppAuthentication
-import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
+import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.varsel.Varsel
 import no.nav.helse.spesialist.api.vedtak.ApiGenerasjon
+import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import no.nav.helse.spesialist.api.vedtaksperiode.ApiGenerasjonRepository
 import no.nav.helse.testEnv
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -50,14 +52,14 @@ import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ContentNe
 @TestInstance(PER_CLASS)
 internal class PersonApiTest {
 
-    private val varselRepository: ApiVarselRepository = mockk(relaxed = true)
     private val generasjonRepository: ApiGenerasjonRepository = mockk(relaxed = true)
     private val oppgaveDao: OppgaveDao = mockk(relaxed = true)
     private val totrinnsvurderingMediatorMock = mockk<TotrinnsvurderingMediator>(relaxed = true)
+    private val saksbehandlerMediator = mockk<SaksbehandlerMediator>(relaxed = true)
     private val saksbehandlerIdent = "1234"
     private val SAKSBEHANDLER_OID = UUID.randomUUID()
-    private val godkjenning = GodkjenningDTO(1L, true, saksbehandlerIdent, null, null, null)
-    private val avvisning = GodkjenningDTO(1L, false, saksbehandlerIdent, "Avvist", null, null)
+    private val godkjenning = GodkjenningDto(1L, true, saksbehandlerIdent, null, null, null)
+    private val avvisning = GodkjenningDto(1L, false, saksbehandlerIdent, "Avvist", null, null)
     private val riskQaGruppe = idForGruppe(Gruppe.RISK_QA)
     private val beslutterGruppe = idForGruppe(Gruppe.BESLUTTER)
 
@@ -98,7 +100,7 @@ internal class PersonApiTest {
         every { oppgaveDao.venterPåSaksbehandler(1L) } returns true
         every { oppgaveDao.erRiskoppgave(1L) } returns false
         every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns null
-        every { generasjonRepository.perioderTilBehandling(1L) } returns setOf(opprettApiGenerasjon(1.januar, 31.januar, 1.januar, listOf(opprettVarsel(Varsel.Varselstatus.VURDERT))))
+        every { saksbehandlerMediator.håndter(godkjenning) } returns Unit
         val response = runBlocking {
             client.post("/api/vedtak") {
                 contentType(ContentType.Application.Json)
@@ -107,15 +109,14 @@ internal class PersonApiTest {
             }
         }
         assertEquals(HttpStatusCode.Created, response.status)
-        verify(exactly = 1) { varselRepository.godkjennVarslerFor(1L) }
     }
 
     @Test
-    fun `en vedtaksperiode kan ikke godkjennes hvis det fins aktive varsler`() = iEnTestApplication { client ->
+    fun `en vedtaksperiode kan ikke godkjennes hvis det finnes aktive varsler`() = iEnTestApplication { client ->
         every { oppgaveDao.venterPåSaksbehandler(1L) } returns true
         every { oppgaveDao.erRiskoppgave(1L) } returns false
         every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns null
-        every { generasjonRepository.perioderTilBehandling(1L) } returns setOf(opprettApiGenerasjon(1.januar, 31.januar, 1.januar, listOf(opprettVarsel(Varsel.Varselstatus.AKTIV))))
+        every { saksbehandlerMediator.håndter(godkjenning) } throws ManglerVurderingAvVarsler(1L)
         val response = runBlocking {
             client.post("/api/vedtak") {
                 contentType(ContentType.Application.Json)
@@ -131,7 +132,7 @@ internal class PersonApiTest {
         every { oppgaveDao.venterPåSaksbehandler(1L) } returns true
         every { oppgaveDao.erRiskoppgave(1L) } returns false
         every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns null
-        every { generasjonRepository.perioderTilBehandling(1L) } returns setOf(opprettApiGenerasjon(1.januar, 31.januar, 1.januar, listOf(opprettVarsel(Varsel.Varselstatus.AKTIV))))
+        every { saksbehandlerMediator.håndter(godkjenning) } returns Unit
         val response = runBlocking {
             client.post("/api/vedtak") {
                 contentType(ContentType.Application.Json)
@@ -287,13 +288,12 @@ internal class PersonApiTest {
         routing {
             authenticate("oidc") {
                 personApi(
-                    varselRepository,
-                    generasjonRepository,
                     totrinnsvurderingMediatorMock,
                     mockk(),
                     mockk(relaxed = true),
                     oppgaveDao,
-                    Tilgangsgrupper(testEnv)
+                    Tilgangsgrupper(testEnv),
+                    saksbehandlerMediator
                 )
             }
         }

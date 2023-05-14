@@ -56,6 +56,8 @@ import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 import org.intellij.lang.annotations.Language
+import org.junit.jupiter.api.Assertions.assertEquals
+import kotlin.properties.Delegates
 
 internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected companion object {
@@ -75,7 +77,6 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected val apiVarselRepository = ApiVarselRepository(dataSource)
     protected val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
     protected val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
-    protected val saksbehandlerDao = SaksbehandlerDao(dataSource)
     protected val notatDao = NotatDao(dataSource)
     protected val totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource)
     protected val personApiDao = PersonApiDao(dataSource)
@@ -89,9 +90,16 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected val egenAnsattApiDao = mockk<EgenAnsattApiDao>(relaxed = true)
     protected val snapshotClient = mockk<SnapshotClient>(relaxed = true)
 
+    protected var sisteOppgaveId by Delegates.notNull<Long>()
+
     protected val snapshotMediator = SnapshotMediator(snapshotApiDao, snapshotClient)
     protected val tildelingService =
-        TildelingService(tildelingDao, saksbehandlerDao, totrinnsvurderingApiDao, mockk<Oppgavemelder>(relaxed = true))
+        TildelingService(
+            tildelingDao,
+            SaksbehandlerDao(dataSource),
+            totrinnsvurderingApiDao,
+            mockk<Oppgavemelder>(relaxed = true)
+        )
 
     protected fun opprettVedtaksperiode(
         personId: Long,
@@ -521,7 +529,9 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                         oppgavetype.name,
                     ).asUpdateAndReturnGeneratedKey
                 )
-            })
+            }).also {
+                sisteOppgaveId = it
+        }
 
     private fun opprettHendelse(
         hendelseId: UUID,
@@ -712,6 +722,16 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         id = UUID.randomUUID().toString(),
         hendelser = emptyList(),
     )
+
+    protected fun assertGodkjenteVarsler(generasjonRef: Long, forventetAntall: Int) {
+        @Language("PostgreSQL")
+        val query =
+            "SELECT COUNT(1) FROM selve_varsel sv WHERE sv.generasjon_ref = ? AND status = 'GODKJENT'"
+        val antall = sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, generasjonRef).map { it.int(1) }.asSingle)
+        }
+        assertEquals(forventetAntall, antall)
+    }
 
     protected fun finnOppgaveIdFor(vedtaksperiodeId: UUID): Long = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
