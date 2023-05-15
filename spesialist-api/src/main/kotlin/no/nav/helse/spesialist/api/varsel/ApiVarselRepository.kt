@@ -6,13 +6,13 @@ import no.nav.helse.spesialist.api.graphql.schema.VarselDTO
 import no.nav.helse.spesialist.api.varsel.Varsel.Companion.toDto
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.AKTIV
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.GODKJENT
-import no.nav.helse.spesialist.api.vedtak.ApiGenerasjon
-import no.nav.helse.spesialist.api.vedtak.ApiGenerasjonDao
+import no.nav.helse.spesialist.api.vedtak.GenerasjonDao
+import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode
 
 class ApiVarselRepository(dataSource: DataSource) {
 
     private val varselDao = ApiVarselDao(dataSource)
-    private val vedtakDao = ApiGenerasjonDao(dataSource)
+    private val generasjonDao = GenerasjonDao(dataSource)
 
     internal fun finnVarslerSomIkkeErInaktiveFor(vedtaksperiodeId: UUID, utbetalingId: UUID): Set<VarselDTO> {
         return varselDao.finnVarslerSomIkkeErInaktiveFor(vedtaksperiodeId, utbetalingId).toDto()
@@ -66,14 +66,14 @@ class ApiVarselRepository(dataSource: DataSource) {
         return sammenhengendePerioder(oppgaveId).map { it.vedtaksperiodeId() }.toSet()
     }
 
-    private fun sammenhengendePerioder(oppgaveId: Long): Set<ApiGenerasjon> {
-        val vedtakMedOppgave = vedtakDao.gjeldendeGenerasjonFor(oppgaveId)
-        val alleVedtakForPersonen = vedtakDao.gjeldendeGenerasjonerForPerson(oppgaveId)
+    private fun sammenhengendePerioder(oppgaveId: Long): Set<Vedtaksperiode> {
+        val vedtakMedOppgave = generasjonDao.gjeldendeGenerasjonFor(oppgaveId)
+        val alleVedtakForPersonen = generasjonDao.gjeldendeGenerasjonerForPerson(oppgaveId)
         val sammenhengendePerioder = alleVedtakForPersonen.tidligereEnnOgSammenhengende(vedtakMedOppgave)
         return setOf(vedtakMedOppgave) + sammenhengendePerioder
     }
 
-    private fun Set<ApiGenerasjon>.tidligereEnnOgSammenhengende(periode: ApiGenerasjon): Set<ApiGenerasjon> {
+    private fun Set<Vedtaksperiode>.tidligereEnnOgSammenhengende(periode: Vedtaksperiode): Set<Vedtaksperiode> {
         return this.filter { other ->
             other.tidligereEnnOgSammenhengende(periode)
         }.toSet()

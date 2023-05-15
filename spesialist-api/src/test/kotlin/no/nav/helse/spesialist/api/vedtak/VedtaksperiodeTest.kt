@@ -8,12 +8,12 @@ import no.nav.helse.spesialist.api.januar
 import no.nav.helse.spesialist.api.mars
 import no.nav.helse.spesialist.api.varsel.Varsel
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus
-import no.nav.helse.spesialist.api.vedtak.ApiGenerasjon.Companion.harAktiveVarsler
+import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode.Companion.harAktiveVarsler
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class ApiGenerasjonTest {
+internal class VedtaksperiodeTest {
 
     @Test
     fun `sammenhengende - samme periode`() {
@@ -86,8 +86,8 @@ internal class ApiGenerasjonTest {
         assertFalse(setOf(generasjon1).harAktiveVarsler())
     }
 
-    private fun opprettApiGenerasjon(fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate, varsler: List<Varsel> = emptyList()): ApiGenerasjon {
-        return ApiGenerasjon(UUID.randomUUID(), fom, tom, skjæringstidspunkt, varsler.toSet())
+    private fun opprettApiGenerasjon(fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate, varsler: List<Varsel> = emptyList()): Vedtaksperiode {
+        return Vedtaksperiode(UUID.randomUUID(), fom, tom, skjæringstidspunkt, varsler.toSet())
     }
 
     private fun opprettVarsel(status: Varselstatus): Varsel {

@@ -10,17 +10,17 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 
-internal class ApiGenerasjonDaoTest: DatabaseIntegrationTest() {
+internal class GenerasjonDaoTest: DatabaseIntegrationTest() {
 
-    private val apiGenerasjonDao = ApiGenerasjonDao(dataSource)
+    private val generasjonDao = GenerasjonDao(dataSource)
 
     @Test
     fun `Finner generasjon med oppgave`() {
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
-        val vedtakMedOppgave = apiGenerasjonDao.gjeldendeGenerasjonFor(finnOppgaveIdFor(PERIODE.id))
-        val forventetVedtak = ApiGenerasjon(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet())
+        val vedtaksperiodeMedOppgave = generasjonDao.gjeldendeGenerasjonFor(finnOppgaveIdFor(PERIODE.id))
+        val forventetVedtaksperiode = Vedtaksperiode(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet())
 
-        assertEquals(forventetVedtak, vedtakMedOppgave)
+        assertEquals(forventetVedtaksperiode, vedtaksperiodeMedOppgave)
     }
 
     @Test
@@ -29,12 +29,12 @@ internal class ApiGenerasjonDaoTest: DatabaseIntegrationTest() {
         val nyFom = PERIODE.fom.plusDays(1)
         val nyTom = PERIODE.tom.plusDays(1)
         nyGenerasjon(vedtaksperiodeId = PERIODE.id, periode = Periode(PERIODE.id, nyFom, nyTom))
-        val vedtakMedOppgave = apiGenerasjonDao.gjeldendeGenerasjonFor(finnOppgaveIdFor(PERIODE.id))
-        val forventetVedtak = ApiGenerasjon(PERIODE.id, nyFom, nyTom, nyFom, emptySet())
-        val ikkeForventetVedtak = ApiGenerasjon(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet())
+        val vedtaksperiodeMedOppgave = generasjonDao.gjeldendeGenerasjonFor(finnOppgaveIdFor(PERIODE.id))
+        val forventetVedtaksperiode = Vedtaksperiode(PERIODE.id, nyFom, nyTom, nyFom, emptySet())
+        val ikkeForventetVedtaksperiode = Vedtaksperiode(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet())
 
-        assertEquals(forventetVedtak, vedtakMedOppgave)
-        assertNotEquals(ikkeForventetVedtak, vedtakMedOppgave)
+        assertEquals(forventetVedtaksperiode, vedtaksperiodeMedOppgave)
+        assertNotEquals(ikkeForventetVedtaksperiode, vedtaksperiodeMedOppgave)
     }
 
     @Test
@@ -44,11 +44,11 @@ internal class ApiGenerasjonDaoTest: DatabaseIntegrationTest() {
         opprettVedtaksperiode(person, arbeidsgiver)
         val periode2 = Periode(UUID.randomUUID(), LocalDate.now(), LocalDate.now())
         opprettVedtaksperiode(person, arbeidsgiver, null, periode2)
-        val alleVedtakForPerson = apiGenerasjonDao.gjeldendeGenerasjonerForPerson(finnOppgaveIdFor(PERIODE.id))
-        val forventetVedtak1 = ApiGenerasjon(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet())
-        val forventetVedtak2 = ApiGenerasjon(periode2.id, periode2.fom, periode2.tom, periode2.fom, emptySet())
+        val alleVedtaksperioderForPerson = generasjonDao.gjeldendeGenerasjonerForPerson(finnOppgaveIdFor(PERIODE.id))
+        val forventetVedtaksperiode1 = Vedtaksperiode(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet())
+        val forventetVedtaksperiode2 = Vedtaksperiode(periode2.id, periode2.fom, periode2.tom, periode2.fom, emptySet())
 
-        assertEquals(setOf(forventetVedtak1, forventetVedtak2), alleVedtakForPerson)
+        assertEquals(setOf(forventetVedtaksperiode1, forventetVedtaksperiode2), alleVedtaksperioderForPerson)
     }
 
     @Test
@@ -71,14 +71,14 @@ internal class ApiGenerasjonDaoTest: DatabaseIntegrationTest() {
         val periode3 = Periode(v3, LocalDate.now(), LocalDate.now())
         opprettVedtaksperiode(person, arbeidsgiver, null, periode3)
 
-        val alleVedtakForPerson = apiGenerasjonDao.gjeldendeGenerasjonerForPerson(finnOppgaveIdFor(periode1.id))
+        val alleVedtaksperioderForPerson = generasjonDao.gjeldendeGenerasjonerForPerson(finnOppgaveIdFor(periode1.id))
 
-        assertEquals(3, alleVedtakForPerson.size)
-        val forventetVedtak1 = ApiGenerasjon(periode1.id, 1.februar, 28.februar, 1.februar, emptySet())
-        val forventetVedtak2 = ApiGenerasjon(periode2.id, 1.mars, 31.mars, 1.mars, emptySet())
-        val forventetVedtak3 = ApiGenerasjon(periode3.id, periode3.fom, periode3.tom, periode3.fom, emptySet())
+        assertEquals(3, alleVedtaksperioderForPerson.size)
+        val forventetVedtaksperiode1 = Vedtaksperiode(periode1.id, 1.februar, 28.februar, 1.februar, emptySet())
+        val forventetVedtaksperiode2 = Vedtaksperiode(periode2.id, 1.mars, 31.mars, 1.mars, emptySet())
+        val forventetVedtaksperiode3 = Vedtaksperiode(periode3.id, periode3.fom, periode3.tom, periode3.fom, emptySet())
 
-        assertEquals(setOf(forventetVedtak1, forventetVedtak2, forventetVedtak3), alleVedtakForPerson)
+        assertEquals(setOf(forventetVedtaksperiode1, forventetVedtaksperiode2, forventetVedtaksperiode3), alleVedtaksperioderForPerson)
     }
 
     @Test
@@ -88,9 +88,9 @@ internal class ApiGenerasjonDaoTest: DatabaseIntegrationTest() {
         opprettVedtaksperiode(person, arbeidsgiver)
         val periode2 = Periode(UUID.randomUUID(), LocalDate.now(), LocalDate.now())
         opprettVedtaksperiode(person, arbeidsgiver, null, periode2, forkastet = true)
-        val alleVedtakForPerson = apiGenerasjonDao.gjeldendeGenerasjonerForPerson(finnOppgaveIdFor(PERIODE.id))
-        val forventetVedtak = ApiGenerasjon(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet())
+        val alleVedtaksperioderForPerson = generasjonDao.gjeldendeGenerasjonerForPerson(finnOppgaveIdFor(PERIODE.id))
+        val forventetVedtaksperiode = Vedtaksperiode(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet())
 
-        assertEquals(setOf(forventetVedtak), alleVedtakForPerson)
+        assertEquals(setOf(forventetVedtaksperiode), alleVedtaksperioderForPerson)
     }
 }
