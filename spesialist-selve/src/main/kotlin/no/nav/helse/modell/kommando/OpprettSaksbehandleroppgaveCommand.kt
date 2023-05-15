@@ -53,8 +53,8 @@ internal class OpprettSaksbehandleroppgaveCommand(
 
             else -> Oppgave.søknad(vedtaksperiodeId, utbetalingId)
         }
-        logg.info("Oppretter saksbehandleroppgave $oppgave")
-        sikkerLogg.info("Oppretter saksbehandleroppgave $oppgave")
+        logg.info("Saksbehandleroppgave opprettet, avventer lagring: $oppgave")
+        sikkerLogg.info("Saksbehandleroppgave opprettet, avventer lagring: $oppgave")
         oppgaveMediator.opprett(oppgave)
         return true
     }
