@@ -18,8 +18,10 @@ class TildelingMutation(
     private val tildelingService: TildelingService,
 ) : Mutation {
 
-    private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
-    private val logg: Logger = LoggerFactory.getLogger(this.javaClass.simpleName)
+    private companion object {
+        private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
+        private val logg: Logger = LoggerFactory.getLogger(this::class.java)
+    }
 
     @Suppress("unused")
     suspend fun opprettTildeling(
@@ -41,7 +43,7 @@ class TildelingMutation(
             ident = ident,
             saksbehandlerTilganger = tilganger
         )
-        sikkerLogg.info("tildeling fra tildelingservice: {}", kv("tildeling", tildeling))
+        sikkerlogg.info("tildeling fra tildelingservice: {}", kv("tildeling", tildeling))
         logg.info("tildeling fra tildelingservice: {}", kv("tildeling", tildeling))
         val returnTildeling = Tildeling(
             navn = tildeling.navn,
@@ -49,7 +51,7 @@ class TildelingMutation(
             epost = tildeling.epost,
             reservert = tildeling.påVent
         )
-        sikkerLogg.info("returtildeling ting: {}", kv("returnTildeling", returnTildeling))
+        sikkerlogg.info("returtildeling ting: {}", kv("returnTildeling", returnTildeling))
         newResult<Tildeling?>().data(returnTildeling).build()
     }
 

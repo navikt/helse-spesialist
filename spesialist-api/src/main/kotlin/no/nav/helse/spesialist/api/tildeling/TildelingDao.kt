@@ -6,10 +6,17 @@ import kotliquery.Row
 import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.HelseDao
 import org.intellij.lang.annotations.Language
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 class TildelingDao(private val dataSource: DataSource) : HelseDao(dataSource) {
+
+    private companion object {
+        private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
+    }
 
     fun opprettTildeling(oppgaveId: Long, saksbehandleroid: UUID, påVent: Boolean = false): TildelingApiDto? =
         sessionOf(dataSource).use { session ->
@@ -47,6 +54,8 @@ class TildelingDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                     } else null
                 }
             }
+        }.also {
+            sikkerlogg.info("fra tildelingdao: {}", kv("TildeingApiDto", it))
         }
 
     fun slettTildeling(oppgaveId: Long) =
