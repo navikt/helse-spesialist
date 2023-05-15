@@ -23,6 +23,7 @@ import no.nav.helse.spesialist.api.graphql.schema.Periodetype.FORSTEGANGSBEHANDL
 import no.nav.helse.spesialist.api.graphql.schema.Periodetype.INFOTRYGDFORLENGELSE
 import no.nav.helse.spesialist.api.graphql.schema.Periodetype.OVERGANG_FRA_IT
 import no.nav.helse.spesialist.api.oppgave.BESLUTTEROPPGAVE_PREFIX
+import no.nav.helse.spesialist.api.oppgave.Oppgavemelder
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
@@ -517,6 +518,32 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
         val oppgaver = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN)
         val oppgave = oppgaver.first()
         assertEquals(SAKSBEHANDLER_OID, UUID.fromString(oppgave.totrinnsvurdering?.saksbehandler))
+    }
+
+    @Test
+    fun `Henter oppgavemelding`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettGenerasjon()
+        opprettVedtaksperiode()
+        opprettOppgave(oppgavetype = Oppgavetype.SØKNAD, contextId = CONTEXT_ID)
+        opprettUtbetalingKobling(VEDTAKSPERIODE, UTBETALING_ID)
+
+        val oppgaveId = oppgaveApiDao.finnOppgaveId(VEDTAKSPERIODE)
+        val oppgavemelding = oppgaveApiDao.hentOppgavemelding(oppgaveId!!)
+        val forventetOppgavemleding = Oppgavemelder.Oppgavemelding(
+            HENDELSE_ID,
+            CONTEXT_ID,
+            oppgaveId,
+            Oppgavestatus.AvventerSaksbehandler,
+            Oppgavetype.SØKNAD,
+            null,
+            false,
+            null,
+            null
+        )
+
+        assertEquals(forventetOppgavemleding, oppgavemelding)
     }
 
     // Sortert stigende

@@ -258,13 +258,13 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
     ).single(mapOf("oppgaveId" to oppgaveId)) {
         Oppgavemelder.Oppgavemelding(
             hendelseId = it.uuid("hendelse_id"),
-            contextId = it.uuid("command_context_id"),
+            contextId = it.uuid("context_id"),
             oppgaveId = it.long("oppgave_id"),
             status = Oppgavestatus.valueOf(it.string("status")),
             type = Oppgavetype.valueOf(it.string("type")),
             beslutter = it.uuidOrNull("beslutter"),
             erRetur = it.boolean("er_retur"),
-            ferdigstiltAvIdent = it.stringOrNull("ferdigstillt_av"),
+            ferdigstiltAvIdent = it.stringOrNull("ferdigstilt_av"),
             ferdigstiltAvOid = it.uuidOrNull("ferdigstilt_av_oid"),
         )
     }
