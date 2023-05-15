@@ -91,6 +91,6 @@ internal class ApiGenerasjonTest {
     }
 
     private fun opprettVarsel(status: Varselstatus): Varsel {
-        return Varsel(UUID.randomUUID(), UUID.randomUUID(), "SB_EX_1", status, "EN_TITTEL", null, null, null)
+        return Varsel(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), "SB_EX_1", status, "EN_TITTEL", null, null, null)
     }
 }

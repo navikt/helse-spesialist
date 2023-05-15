@@ -24,6 +24,6 @@ internal class VarselTest {
 
 
     private fun opprettVarsel(status: Varsel.Varselstatus): Varsel {
-        return Varsel(UUID.randomUUID(), UUID.randomUUID(), "SB_EX_1", status, "EN_TITTEL", null, null, null)
+        return Varsel(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), "SB_EX_1", status, "EN_TITTEL", null, null, null)
     }
 }

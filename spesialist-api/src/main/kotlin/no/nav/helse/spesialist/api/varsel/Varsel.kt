@@ -7,6 +7,7 @@ import no.nav.helse.spesialist.api.graphql.schema.VarselDTO.VarselvurderingDTO
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.AKTIV
 
 data class Varsel(
+    private val varselId: UUID,
     private val generasjonId: UUID,
     private val definisjonId: UUID,
     private val kode: String,

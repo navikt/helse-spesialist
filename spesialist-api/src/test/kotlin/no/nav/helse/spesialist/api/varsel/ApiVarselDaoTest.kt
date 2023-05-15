@@ -106,8 +106,9 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         val oppgaveId = finnOppgaveIdFor(PERIODE.id)
         opprettVarseldefinisjon(kode = "EN_KODE", definisjonId = definisjonId)
         val generasjonRef = nyGenerasjon(vedtaksperiodeId = PERIODE.id, generasjonId = generasjonId, utbetalingId = utbetalingId)
-        nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = PERIODE.id, generasjonRef = generasjonRef)
-        val forventetVarsel = Varsel(generasjonId, definisjonId, "EN_KODE", AKTIV, "EN_TITTEL", null, null, null)
+        val varselId = UUID.randomUUID()
+        nyttVarsel(id = varselId, kode = "EN_KODE", vedtaksperiodeId = PERIODE.id, generasjonRef = generasjonRef)
+        val forventetVarsel = Varsel(varselId, generasjonId, definisjonId, "EN_KODE", AKTIV, "EN_TITTEL", null, null, null)
         val varsler = apiVarselDao.finnVarslerSomIkkeErInaktiveFor(oppgaveId)
 
         assertEquals(forventetVarsel, varsler.single())
@@ -125,10 +126,12 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         opprettVarseldefinisjon(kode = "EN_KODE", definisjonId = definisjonId)
         val generasjonRef1 = nyGenerasjon(vedtaksperiodeId = PERIODE.id, generasjonId = generasjonId1, utbetalingId = utbetalingId)
         val generasjonRef2 = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId, generasjonId = generasjonId2, utbetalingId = utbetalingId)
-        nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = PERIODE.id, generasjonRef = generasjonRef1)
-        nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef2)
-        val forventetVarsel1 = Varsel(generasjonId1, definisjonId, "EN_KODE", AKTIV, "EN_TITTEL", null, null, null)
-        val forventetVarsel2 = Varsel(generasjonId2, definisjonId, "EN_KODE", AKTIV, "EN_TITTEL", null, null, null)
+        val varselId1 = UUID.randomUUID()
+        val varselId2 = UUID.randomUUID()
+        nyttVarsel(id = varselId1, kode = "EN_KODE", vedtaksperiodeId = PERIODE.id, generasjonRef = generasjonRef1)
+        nyttVarsel(id = varselId2, kode = "EN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef2)
+        val forventetVarsel1 = Varsel(varselId1, generasjonId1, definisjonId, "EN_KODE", AKTIV, "EN_TITTEL", null, null, null)
+        val forventetVarsel2 = Varsel(varselId2, generasjonId2, definisjonId, "EN_KODE", AKTIV, "EN_TITTEL", null, null, null)
         val varsler = apiVarselDao.finnVarslerSomIkkeErInaktiveFor(oppgaveId)
 
         assertEquals(setOf(forventetVarsel1, forventetVarsel2), varsler)
@@ -153,16 +156,49 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         val sisteGenerasjonRef1 = nyGenerasjon(vedtaksperiodeId = PERIODE.id, generasjonId = generasjonId1)
         val førsteGenerasjonRef2 = nyGenerasjon(vedtaksperiodeId = periode2.id)
         val sisteGenerasjonRef2 = nyGenerasjon(vedtaksperiodeId = periode2.id, generasjonId = generasjonId2)
-        nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = PERIODE.id, generasjonRef = førsteGenerasjonRef1)
-        nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = periode2.id, generasjonRef = førsteGenerasjonRef2)
-        nyttVarsel(kode = "EN_ANNEN_KODE", vedtaksperiodeId = PERIODE.id, generasjonRef = sisteGenerasjonRef1)
-        nyttVarsel(kode = "EN_TREDJE_KODE", status = "INAKTIV", vedtaksperiodeId = PERIODE.id, generasjonRef = sisteGenerasjonRef1)
-        nyttVarsel(kode = "EN_ANNEN_KODE", vedtaksperiodeId = periode2.id, generasjonRef = sisteGenerasjonRef2)
-        nyttVarsel(kode = "EN_FJERDE_KODE", vedtaksperiodeId = periode2.id, generasjonRef = sisteGenerasjonRef2)
+        val varselId1 = UUID.randomUUID()
+        val varselId2 = UUID.randomUUID()
+        val varselId3 = UUID.randomUUID()
+        nyttVarsel(UUID.randomUUID(), kode = "EN_KODE", vedtaksperiodeId = PERIODE.id, generasjonRef = førsteGenerasjonRef1)
+        nyttVarsel(UUID.randomUUID(), kode = "EN_KODE", vedtaksperiodeId = periode2.id, generasjonRef = førsteGenerasjonRef2)
+        nyttVarsel(id = varselId1, kode = "EN_ANNEN_KODE", vedtaksperiodeId = PERIODE.id, generasjonRef = sisteGenerasjonRef1)
+        nyttVarsel(UUID.randomUUID(), kode = "EN_TREDJE_KODE", status = "INAKTIV", vedtaksperiodeId = PERIODE.id, generasjonRef = sisteGenerasjonRef1)
+        nyttVarsel(id = varselId2, kode = "EN_ANNEN_KODE", vedtaksperiodeId = periode2.id, generasjonRef = sisteGenerasjonRef2)
+        nyttVarsel(id = varselId3, kode = "EN_FJERDE_KODE", vedtaksperiodeId = periode2.id, generasjonRef = sisteGenerasjonRef2)
 
-        val forventetVarsel1 = Varsel(generasjonId1, definisjonId1, "EN_ANNEN_KODE", AKTIV, "EN_TITTEL", null, null, null)
-        val forventetVarsel2 = Varsel(generasjonId2, definisjonId1, "EN_ANNEN_KODE", AKTIV, "EN_TITTEL", null, null, null)
-        val forventetVarsel3 = Varsel(generasjonId2, definisjonId2, "EN_FJERDE_KODE", AKTIV, "EN_TITTEL", null, null, null)
+        val forventetVarsel1 = Varsel(
+            varselId1,
+            generasjonId1,
+            definisjonId1,
+            "EN_ANNEN_KODE",
+            AKTIV,
+            "EN_TITTEL",
+            null,
+            null,
+            null
+        )
+        val forventetVarsel2 = Varsel(
+            varselId2,
+            generasjonId2,
+            definisjonId1,
+            "EN_ANNEN_KODE",
+            AKTIV,
+            "EN_TITTEL",
+            null,
+            null,
+            null
+        )
+        val forventetVarsel3 = Varsel(
+            varselId3,
+            generasjonId2,
+            definisjonId2,
+            "EN_FJERDE_KODE",
+            AKTIV,
+            "EN_TITTEL",
+            null,
+            null,
+            null
+        )
 
         val varsler = apiVarselDao.finnVarslerSomIkkeErInaktiveFor(listOf(PERIODE.id, periode2.id))
 
@@ -180,11 +216,23 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         opprettVarseldefinisjon(kode = "EN_KODE", definisjonId = definisjonId1)
         opprettVarseldefinisjon(kode = "EN_ANNEN_KODE", definisjonId = definisjonId2)
         val generasjonRef = nyGenerasjon(vedtaksperiodeId = PERIODE.id, generasjonId)
-        nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = PERIODE.id, generasjonRef = generasjonRef)
-        nyttVarsel(kode = "EN_ANNEN_KODE", vedtaksperiodeId = PERIODE.id, generasjonRef = generasjonRef)
+        val varselId1 = UUID.randomUUID()
+        val varselId2 = UUID.randomUUID()
+        nyttVarsel(id = varselId1, kode = "EN_KODE", vedtaksperiodeId = PERIODE.id, generasjonRef = generasjonRef)
+        nyttVarsel(id = varselId2, kode = "EN_ANNEN_KODE", vedtaksperiodeId = PERIODE.id, generasjonRef = generasjonRef)
 
-        val forventetVarsel1 = Varsel(generasjonId, definisjonId1, "EN_KODE", AKTIV, "EN_TITTEL", null, null, null)
-        val forventetVarsel2 = Varsel(generasjonId, definisjonId2, "EN_ANNEN_KODE", AKTIV, "EN_TITTEL", null, null, null)
+        val forventetVarsel1 = Varsel(varselId1, generasjonId, definisjonId1, "EN_KODE", AKTIV, "EN_TITTEL", null, null, null)
+        val forventetVarsel2 = Varsel(
+            varselId2,
+            generasjonId,
+            definisjonId2,
+            "EN_ANNEN_KODE",
+            AKTIV,
+            "EN_TITTEL",
+            null,
+            null,
+            null
+        )
 
         val varsler = apiVarselDao.finnVarslerFor(generasjonId)
 
@@ -206,11 +254,14 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         opprettVarseldefinisjon(kode = "EN_KODE", definisjonId = definisjonId1)
         val generasjonRef1 = nyGenerasjon(vedtaksperiodeId = PERIODE.id, generasjonId = generasjonId1, utbetalingId = utbetalingId)
         val generasjonRef2 = nyGenerasjon(vedtaksperiodeId = periode2.id, generasjonId = generasjonId2, utbetalingId = utbetalingId)
-        nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = PERIODE.id, generasjonRef = generasjonRef1)
-        nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = periode2.id, generasjonRef = generasjonRef2)
+        val varselId1 = UUID.randomUUID()
+        val varselId2 = UUID.randomUUID()
+        nyttVarsel(id = varselId1, kode = "EN_KODE", vedtaksperiodeId = PERIODE.id, generasjonRef = generasjonRef1)
+        nyttVarsel(id = varselId2, kode = "EN_KODE", vedtaksperiodeId = periode2.id, generasjonRef = generasjonRef2)
         apiVarselDao.settStatusVurdert(generasjonId1, definisjonId1, "EN_KODE", "EN_IDENT")
         apiVarselDao.settStatusVurdert(generasjonId2, definisjonId1, "EN_KODE", "EN_IDENT")
         val forventetVarsel1 = Varsel(
+            varselId1,
             generasjonId1,
             definisjonId1,
             "EN_KODE",
@@ -221,6 +272,7 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
             Varselvurdering("EN_IDENT", LocalDateTime.now())
         )
         val forventetVarsel2 = Varsel(
+            varselId2,
             generasjonId2,
             definisjonId1,
             "EN_KODE",
@@ -265,8 +317,9 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         opprettVarseldefinisjon()
         opprettVarseldefinisjon(tittel = "EN_NY_TITTEL", definisjonId = definisjonId)
         val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
-        nyttVarsel(vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef)
-        val forventetVarsel = Varsel(generasjonId, definisjonId, "EN_KODE", AKTIV, "EN_NY_TITTEL", null, null, null)
+        val varselId = UUID.randomUUID()
+        nyttVarsel(id = varselId, vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef)
+        val forventetVarsel = Varsel(varselId, generasjonId, definisjonId, "EN_KODE", AKTIV, "EN_NY_TITTEL", null, null, null)
 
         assertEquals(forventetVarsel, apiVarselDao.finnVarslerSomIkkeErInaktiveFor(vedtaksperiodeId, utbetalingId).single())
     }
@@ -281,8 +334,9 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         val definisjonRef = opprettVarseldefinisjon(tittel = "EN_TITTEL", definisjonId = definisjonId)
         opprettVarseldefinisjon("EN_NY_TITTEL")
         val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
-        nyttVarsel(vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, definisjonRef = definisjonRef)
-        val forventetVarsel = Varsel(generasjonId, definisjonId, "EN_KODE", AKTIV, "EN_TITTEL", null, null, null)
+        val varselId = UUID.randomUUID()
+        nyttVarsel(id = varselId, vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, definisjonRef = definisjonRef)
+        val forventetVarsel = Varsel(varselId, generasjonId, definisjonId, "EN_KODE", AKTIV, "EN_TITTEL", null, null, null)
 
         assertEquals(forventetVarsel, apiVarselDao.finnVarslerSomIkkeErInaktiveFor(vedtaksperiodeId, utbetalingId).single())
     }
@@ -296,8 +350,10 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
         val definisjonRef = opprettVarseldefinisjon(definisjonId = definisjonId)
         val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
-        nyttVarsel(vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, definisjonRef = definisjonRef)
+        val varselId = UUID.randomUUID()
+        nyttVarsel(id = varselId, vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, definisjonRef = definisjonRef)
         val forventetVarsel = Varsel(
+            varselId,
             generasjonId,
             definisjonId,
             "EN_KODE",
@@ -321,13 +377,15 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
         val definisjonRef = opprettVarseldefinisjon(definisjonId = definisjonId)
         val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
-        nyttVarsel(vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, definisjonRef = definisjonRef)
+        val varselId = UUID.randomUUID()
+        nyttVarsel(id = varselId, vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, definisjonRef = definisjonRef)
         val oppdatertVarsel = apiVarselDao.settStatusVurdert(generasjonId, definisjonId, "EN_KODE", "EN_IDENT")
         val forsøktOppdatertVarsel = apiVarselDao.settStatusVurdert(generasjonId, definisjonId, "EN_KODE", "EN_IDENT")
 
         assertNotNull(oppdatertVarsel)
         assertEquals(
             Varsel(
+                varselId,
                 generasjonId,
                 definisjonId,
                 "EN_KODE",
@@ -351,7 +409,8 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
 
         val definisjonRef = opprettVarseldefinisjon(definisjonId = definisjonId)
         val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = PERIODE.id, utbetalingId = utbetalingId)
-        nyttVarsel(vedtaksperiodeId = PERIODE.id, generasjonRef = generasjonRef, definisjonRef = definisjonRef)
+        val varselId = UUID.randomUUID()
+        nyttVarsel(id = varselId, vedtaksperiodeId = PERIODE.id, generasjonRef = generasjonRef, definisjonRef = definisjonRef)
         val oppdatertVarsel = apiVarselDao.settStatusVurdert(generasjonId, definisjonId, "EN_KODE", "EN_IDENT")
         apiVarselDao.godkjennVarslerFor(listOf(PERIODE.id))
         val forsøktOppdatertVarsel = apiVarselDao.settStatusVurdert(generasjonId, definisjonId, "EN_KODE", "EN_IDENT")
@@ -359,6 +418,7 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         assertNotNull(oppdatertVarsel)
         assertEquals(
             Varsel(
+                varselId,
                 generasjonId,
                 definisjonId,
                 "EN_KODE",
@@ -382,11 +442,13 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
         val definisjonRef = opprettVarseldefinisjon(definisjonId = definisjonId)
         val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
-        nyttVarsel(vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, definisjonRef = definisjonRef, status = "GODKJENT")
+        val varselId = UUID.randomUUID()
+        nyttVarsel(id = varselId, vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, definisjonRef = definisjonRef, status = "GODKJENT")
         val forsøktOppdatertVarsel = apiVarselDao.settStatusAktiv(generasjonId, "EN_KODE", "EN_IDENT")
 
         assertEquals(
             Varsel(
+                varselId,
                 generasjonId,
                 definisjonId,
                 "EN_KODE",
@@ -410,8 +472,9 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
         val definisjonRef = opprettVarseldefinisjon(definisjonId = definisjonId)
         val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
-        nyttVarsel(vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, definisjonRef = definisjonRef)
-        val forventetVarsel = Varsel(generasjonId, definisjonId, "EN_KODE", AKTIV, "EN_TITTEL", null, null, null)
+        val varselId = UUID.randomUUID()
+        nyttVarsel(id = varselId, vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, definisjonRef = definisjonRef)
+        val forventetVarsel = Varsel(varselId, generasjonId, definisjonId, "EN_KODE", AKTIV, "EN_TITTEL", null, null, null)
         apiVarselDao.settStatusAktiv(generasjonId, "EN_KODE", "EN_IDENT")
 
         assertEquals(forventetVarsel, apiVarselDao.finnVarslerSomIkkeErInaktiveFor(vedtaksperiodeId, utbetalingId).single())
