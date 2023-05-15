@@ -52,29 +52,6 @@ internal class ApiVarselDao(private val dataSource: DataSource) : HelseDao(dataS
         )
     ) { mapVarsel(it) }.toSet()
 
-    internal fun finnVarslerSomIkkeErInaktiveFor(oppgaveId: Long): Set<Varsel> {
-        return finnUtbetalingIdFor(oppgaveId)?.let(::finnVarslerSomIkkeErInaktiveFor) ?: emptySet()
-    }
-
-    internal fun finnVarslerSomIkkeErInaktiveFor(vedtaksperioder: List<UUID>): Set<Varsel> =
-        sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query = """
-                WITH siste_generasjoner as (
-                    SELECT DISTINCT ON (svg.vedtaksperiode_id) svg.vedtaksperiode_id, id, unik_id
-                    FROM selve_vedtaksperiode_generasjon svg
-                    WHERE svg.vedtaksperiode_id in (${vedtaksperioder.joinToString { "?" }})
-                    ORDER BY svg.vedtaksperiode_id, id DESC
-                )
-                SELECT sg.unik_id as generasjon_id, sv.unik_id as varsel_id, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling
-                FROM selve_varsel sv
-                JOIN siste_generasjoner sg on sv.generasjon_ref = sg.id
-                JOIN api_varseldefinisjon av ON av.id = COALESCE(sv.definisjon_ref, (SELECT id FROM api_varseldefinisjon WHERE kode = sv.kode ORDER BY opprettet DESC LIMIT 1))
-                WHERE sv.status != ?;
-            """
-            session.run(queryOf(query, *vedtaksperioder.toTypedArray(), INAKTIV.name).map(::mapVarsel).asList).toSet()
-        }
-
     internal fun finnVarslerForUberegnetPeriode(vedtaksperiodeId: UUID): Set<Varsel> = queryize(
         """
            SELECT svg.unik_id as generasjon_id, sv.unik_id as varsel_id, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling FROM selve_varsel sv
@@ -199,15 +176,6 @@ internal class ApiVarselDao(private val dataSource: DataSource) : HelseDao(dataS
             Varselstatus.valueOf(it.string("status"))
         }
 
-    private fun finnVarslerSomIkkeErInaktiveFor(utbetalingId: UUID): Set<Varsel> = queryize(
-        """
-            SELECT sv.unik_id as varsel_id, svg.unik_id as generasjon_id, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling FROM selve_varsel sv 
-                INNER JOIN selve_vedtaksperiode_generasjon svg ON sv.generasjon_ref = svg.id
-                INNER JOIN api_varseldefinisjon av ON av.id = COALESCE(sv.definisjon_ref, (SELECT id FROM api_varseldefinisjon WHERE kode = sv.kode ORDER BY opprettet DESC LIMIT 1))
-                WHERE svg.utbetaling_id = :utbetaling_id AND sv.status != :status_inaktiv;
-        """
-    ).list(mapOf("utbetaling_id" to utbetalingId, "status_inaktiv" to INAKTIV.name)) { mapVarsel(it) }.toSet()
-
     internal fun finnVarslerFor(generasjonId: UUID): Set<Varsel> = queryize(
         """
             SELECT sv.unik_id as varsel_id, svg.unik_id as generasjon_id, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling FROM selve_varsel sv 
@@ -216,10 +184,6 @@ internal class ApiVarselDao(private val dataSource: DataSource) : HelseDao(dataS
                 WHERE svg.unik_id = :generasjon_id;
         """
     ).list(mapOf("generasjon_id" to generasjonId)) { mapVarsel(it) }.toSet()
-
-    private fun finnUtbetalingIdFor(oppgaveId: Long) = queryize(
-        "SELECT utbetaling_id FROM oppgave WHERE oppgave.id = :oppgave_id;"
-    ).single(mapOf("oppgave_id" to oppgaveId)) { it.uuid("utbetaling_id") }
 
     private fun mapVarsel(it: Row): Varsel {
         val status = Varselstatus.valueOf(it.string("status"))
