@@ -19,6 +19,7 @@ import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.spesialist.api.SaksbehandlerMediator
+import no.nav.helse.spesialist.api.feilhåndtering.IkkeTilgangTilRiskQa
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import org.slf4j.LoggerFactory
 
@@ -67,14 +68,7 @@ internal fun Route.personApi(
         val tilgangskontroll = tilganger(tilgangsgrupper)
         val erRiskOppgave = withContext(Dispatchers.IO) { oppgaveDao.erRiskoppgave(godkjenning.oppgavereferanse) }
         if (erRiskOppgave && !tilgangskontroll.harTilgangTil(Gruppe.RISK_QA)) {
-            call.respond(
-                status = HttpStatusCode.Forbidden,
-                mapOf(
-                    "melding" to "Saksbehandler har ikke tilgang til RISK_QA-saker",
-                    "feilkode" to "IkkeTilgangTilRiskQa"
-                )
-            )
-            return@post
+            throw IkkeTilgangTilRiskQa(godkjenning.saksbehandlerIdent, godkjenning.oppgavereferanse)
         }
 
         val totrinnsvurdering = totrinnsvurderingMediator.hentAktiv(godkjenning.oppgavereferanse)
