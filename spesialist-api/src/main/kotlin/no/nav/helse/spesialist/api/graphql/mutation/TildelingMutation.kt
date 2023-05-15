@@ -1,6 +1,8 @@
 package no.nav.helse.spesialist.api.graphql.mutation
 
 import com.expediagroup.graphql.server.operations.Mutation
+import graphql.GraphQLError
+import graphql.GraphqlErrorException.newErrorException
 import graphql.execution.DataFetcherResult
 import graphql.execution.DataFetcherResult.newResult
 import graphql.schema.DataFetchingEnvironment
@@ -35,14 +37,19 @@ class TildelingMutation(
         logg.debug("Hallo fra opprettTildeling mutation")
         val tilganger = env.graphQlContext.get<SaksbehandlerTilganger>("tilganger")
         val saksbehandlerOid = UUID.fromString(saksbehandlerreferanse)
-        val tildeling = tildelingService.tildelOppgaveTilSaksbehandler(
-            oppgaveId = oppgaveId.toLong(),
-            saksbehandlerreferanse = saksbehandlerOid,
-            epostadresse = epostadresse,
-            navn = navn,
-            ident = ident,
-            saksbehandlerTilganger = tilganger
-        )
+        val tildeling = try { tildelingService.tildelOppgaveTilSaksbehandler(
+                oppgaveId = oppgaveId.toLong(),
+                saksbehandlerreferanse = saksbehandlerOid,
+                epostadresse = epostadresse,
+                navn = navn,
+                ident = ident,
+                saksbehandlerTilganger = tilganger
+            )
+        } catch (e: RuntimeException) {
+            logg.error("Kunne ikke tildele: {}", kv("exception", e))
+            null
+        } ?: return@withContext newResult<Tildeling?>().error(getUpdateError(oppgaveId)).build()
+
         sikkerlogg.info("tildeling fra tildelingservice: {}", kv("tildeling", tildeling))
         logg.info("tildeling fra tildelingservice: {}", kv("tildeling", tildeling))
         val returnTildeling = Tildeling(
@@ -59,6 +66,15 @@ class TildelingMutation(
     suspend fun fjernTildeling(oppgaveId: String): DataFetcherResult<Boolean> = withContext(Dispatchers.IO) {
         val result = tildelingService.fjernTildeling(oppgaveId.toLong())
         newResult<Boolean>().data(result).build()
+    }
+
+    private fun getUpdateError(oppgaveId: String): GraphQLError {
+        val message = "Kunne ikke tildele oppgave med oppgaveId=$oppgaveId"
+        sikkerlogg.error(message)
+        return newErrorException()
+            .message(message)
+            .extensions(mapOf("code" to 500))
+            .build()
     }
 
 }
