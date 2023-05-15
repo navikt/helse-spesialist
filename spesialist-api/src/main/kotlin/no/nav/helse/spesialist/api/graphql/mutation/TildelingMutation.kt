@@ -9,7 +9,6 @@ import graphql.schema.DataFetchingEnvironment
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.graphql.schema.Tildeling
 import no.nav.helse.spesialist.api.tildeling.TildelingService
@@ -22,7 +21,6 @@ class TildelingMutation(
 
     private companion object {
         private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
-        private val logg: Logger = LoggerFactory.getLogger(this::class.java)
     }
 
     @Suppress("unused")
@@ -34,10 +32,10 @@ class TildelingMutation(
         ident: String,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Tildeling?> = withContext(Dispatchers.IO) {
-        logg.debug("Hallo fra opprettTildeling mutation")
         val tilganger = env.graphQlContext.get<SaksbehandlerTilganger>("tilganger")
         val saksbehandlerOid = UUID.fromString(saksbehandlerreferanse)
-        val tildeling = try { tildelingService.tildelOppgaveTilSaksbehandler(
+        val tildeling = try {
+            tildelingService.tildelOppgaveTilSaksbehandler(
                 oppgaveId = oppgaveId.toLong(),
                 saksbehandlerreferanse = saksbehandlerOid,
                 epostadresse = epostadresse,
@@ -46,20 +44,17 @@ class TildelingMutation(
                 saksbehandlerTilganger = tilganger
             )
         } catch (e: RuntimeException) {
-            logg.error("Kunne ikke tildele: {}", kv("exception", e))
-            null
-        } ?: return@withContext newResult<Tildeling?>().error(getUpdateError(oppgaveId)).build()
+            return@withContext newResult<Tildeling?>().error(getUpdateError(oppgaveId)).build()
+        }
 
-        sikkerlogg.info("tildeling fra tildelingservice: {}", kv("tildeling", tildeling))
-        logg.info("tildeling fra tildelingservice: {}", kv("tildeling", tildeling))
-        val returnTildeling = Tildeling(
-            navn = tildeling.navn,
-            oid = tildeling.oid.toString(),
-            epost = tildeling.epost,
-            reservert = tildeling.påVent
-        )
-        sikkerlogg.info("returtildeling ting: {}", kv("returnTildeling", returnTildeling))
-        newResult<Tildeling?>().data(returnTildeling).build()
+        newResult<Tildeling?>().data(
+            Tildeling(
+                navn = tildeling.navn,
+                oid = tildeling.oid.toString(),
+                epost = tildeling.epost,
+                reservert = tildeling.påVent
+            )
+        ).build()
     }
 
     @Suppress("unused")
