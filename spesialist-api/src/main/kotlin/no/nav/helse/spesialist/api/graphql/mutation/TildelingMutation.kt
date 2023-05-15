@@ -7,13 +7,18 @@ import graphql.schema.DataFetchingEnvironment
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.graphql.schema.Tildeling
 import no.nav.helse.spesialist.api.tildeling.TildelingService
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 class TildelingMutation(
     private val tildelingService: TildelingService,
 ) : Mutation {
+
+    private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
     @Suppress("unused")
     suspend fun opprettTildeling(
@@ -23,7 +28,7 @@ class TildelingMutation(
         navn: String,
         ident: String,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<Tildeling> = withContext(Dispatchers.IO) {
+    ): DataFetcherResult<Tildeling?> = withContext(Dispatchers.IO) {
         val tilganger = env.graphQlContext.get<SaksbehandlerTilganger>("tilganger")
         val saksbehandlerOid = UUID.fromString(saksbehandlerreferanse)
         val tildeling = tildelingService.tildelOppgaveTilSaksbehandler(
@@ -34,14 +39,15 @@ class TildelingMutation(
             ident = ident,
             saksbehandlerTilganger = tilganger
         )
-        newResult<Tildeling>().data(
-            Tildeling(
-                navn = navn,
-                oid = saksbehandlerreferanse,
-                epost = epostadresse,
-                reservert = tildeling.påVent
-            )
-        ).build()
+        sikkerLogg.info("tildeling fra tildelingservice: {}", kv("tildeling", tildeling))
+        val returnTildeling = Tildeling(
+            navn = navn,
+            oid = saksbehandlerreferanse,
+            epost = epostadresse,
+            reservert = tildeling.påVent
+        )
+        sikkerLogg.info("returtildeling ting: {}", kv("returnTildeling", returnTildeling))
+        newResult<Tildeling?>().data(returnTildeling).build()
     }
 
     @Suppress("unused")
