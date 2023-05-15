@@ -1,6 +1,6 @@
 package no.nav.helse.spesialist.api.feilhåndtering
 
-import io.ktor.http.*
+import io.ktor.http.HttpStatusCode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
@@ -11,7 +11,7 @@ internal class ModellfeilTest {
 
         val exception = assertThrows(
             Testfeil::class.java,
-            {  throw Testfeil() },
+            { throw Testfeil() },
             "Testfeil"
         )
         assertEquals("testmelding", exception.message)
@@ -19,10 +19,11 @@ internal class ModellfeilTest {
 
     }
 
-    private class Testfeil: Modellfeil() {
+    private class Testfeil : Modellfeil() {
         override val eksternKontekst: Map<String, Any>
             get() = mapOf("testdata" to "testdata")
         override val melding: String = "testmelding"
         override val httpkode: HttpStatusCode = HttpStatusCode.NotFound
+        override val message: String = melding
     }
 }

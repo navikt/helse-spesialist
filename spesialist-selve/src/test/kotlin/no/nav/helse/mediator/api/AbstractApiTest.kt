@@ -16,6 +16,7 @@ import io.ktor.server.routing.routing
 import java.net.ServerSocket
 import java.util.*
 import kotlinx.coroutines.runBlocking
+import no.nav.helse.installErrorHandling
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.AzureAdAppConfig
 import no.nav.helse.spesialist.api.AzureConfig
@@ -146,6 +147,7 @@ abstract class AbstractApiTest {
 }
 
 internal fun Application.module(build: Route.() -> Unit) {
+    installErrorHandling()
     install(ContentNegotiationServer) {
         register(
             ContentType.Application.Json,

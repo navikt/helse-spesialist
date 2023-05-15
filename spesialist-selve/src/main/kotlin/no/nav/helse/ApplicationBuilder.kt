@@ -10,6 +10,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.application.Application
+import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.ApplicationCallPipeline
 import io.ktor.server.application.call
 import io.ktor.server.application.install
@@ -80,6 +81,7 @@ import no.nav.helse.spesialist.api.client.AccessTokenClient
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.endepunkter.annulleringApi
 import no.nav.helse.spesialist.api.endepunkter.overstyringApi
+import no.nav.helse.spesialist.api.feilhåndtering.Modellfeil
 import no.nav.helse.spesialist.api.graphql.graphQLApi
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.notat.NotatMediator
@@ -414,6 +416,10 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
 fun Application.installErrorHandling() {
 
     install(StatusPages) {
+        exception<Modellfeil> { call: ApplicationCall, modellfeil: Modellfeil ->
+            modellfeil.logger()
+            call.respond(status = modellfeil.httpkode, message = modellfeil.tilFeilDto())
+        }
         exception<Throwable> { call, cause ->
             val uri = call.request.uri
             val verb = call.request.httpMethod.value

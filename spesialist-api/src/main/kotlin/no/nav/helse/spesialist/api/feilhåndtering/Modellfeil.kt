@@ -1,10 +1,6 @@
 package no.nav.helse.spesialist.api.feilhåndtering
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.ApplicationCall
-import io.ktor.server.application.call
-import io.ktor.server.response.respond
-import io.ktor.util.pipeline.PipelineContext
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import org.slf4j.LoggerFactory
@@ -20,8 +16,6 @@ abstract class Modellfeil protected constructor() : RuntimeException() {
     abstract val httpkode: HttpStatusCode
     open fun logger() = Unit
     open fun tilFeilDto(): FeilDto = FeilDto(melding, eksternKontekst)
-
-    override val message: String get() = melding
 }
 
 class OppgaveAlleredeTildelt(tildeling: TildelingApiDto) : Modellfeil() {
@@ -69,14 +63,5 @@ class ManglerVurderingAvVarsler(private val oppgaveId: Long): Modellfeil() {
             keyValue("httpkode", "${httpkode.value}"),
             keyValue("melding", melding)
         )
-    }
-}
-
-suspend inline fun PipelineContext<*, ApplicationCall>.modellfeilForRest(lambda: () -> Unit) {
-    try {
-        lambda()
-    } catch (feil: Modellfeil) {
-        feil.logger()
-        call.respond(status = feil.httpkode, message = feil.tilFeilDto())
     }
 }

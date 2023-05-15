@@ -19,7 +19,6 @@ import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.spesialist.api.SaksbehandlerMediator
-import no.nav.helse.spesialist.api.feilhåndtering.modellfeilForRest
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import org.slf4j.LoggerFactory
 
@@ -100,11 +99,9 @@ internal fun Route.personApi(
             totrinnsvurderingMediator.settBeslutter(totrinnsvurdering.vedtaksperiodeId, oid)
         }
 
-        modellfeilForRest {
-            saksbehandlerMediator.håndter(godkjenning)
-            withContext(Dispatchers.IO) { godkjenningService.håndter(godkjenning, epostadresse, oid) }
-            call.respond(HttpStatusCode.Created, mapOf("status" to "OK"))
-        }
+        saksbehandlerMediator.håndter(godkjenning)
+        withContext(Dispatchers.IO) { godkjenningService.håndter(godkjenning, epostadresse, oid) }
+        call.respond(HttpStatusCode.Created, mapOf("status" to "OK"))
     }
 
     post("/api/person/oppdater") {
