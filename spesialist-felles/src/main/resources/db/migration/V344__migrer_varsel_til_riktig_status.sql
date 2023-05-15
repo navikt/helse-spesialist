@@ -1,0 +1,1 @@
+UPDATE selve_varsel SET status = 'GODKJENT' WHERE unik_id = '8ead7d7b-1943-4e2c-a92b-c2246c9ce1c0';
