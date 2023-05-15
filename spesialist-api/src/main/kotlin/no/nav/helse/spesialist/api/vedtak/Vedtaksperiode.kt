@@ -23,5 +23,17 @@ internal data class Vedtaksperiode(
         fun Set<Vedtaksperiode>.harAktiveVarsler(): Boolean {
             return any { it.harAktiveVarsler() }
         }
+
+        fun Set<Vedtaksperiode>.godkjennVurderteVarsler(
+            godkjenningsbehovId: UUID,
+            vedtaksperiodeIdTilGodkjenning: UUID,
+            godkjenner: (godkjenningsbehovId: UUID, vedtaksperiodeIdTilGodkjenning: UUID, vedtaksperiodeId: UUID, varselId: UUID, varselTittel: String, varselkode: String) -> Unit
+        ) {
+            forEach { vedtaksperiode ->
+                vedtaksperiode.varsler.forEach {
+                    it.godkjenn(godkjenningsbehovId, vedtaksperiodeIdTilGodkjenning, vedtaksperiode.vedtaksperiodeId, godkjenner)
+                }
+            }
+        }
     }
 }

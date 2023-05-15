@@ -82,6 +82,24 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         }
     }
 
+    internal fun finnGodkjenningsbehovId(oppgaveId: Long) = requireNotNull(
+        queryize(
+        """
+                SELECT DISTINCT hendelse_id 
+                FROM command_context 
+                WHERE context_id = (SELECT command_context_id FROM oppgave WHERE id = :oppgaveId)
+            """)
+            .single(mapOf("oppgaveId" to oppgaveId)) { row -> row.uuid("hendelse_id") })
+
+    internal fun finnVedtaksperiodeId(oppgaveId: Long) = requireNotNull(
+        queryize(
+        """ 
+                SELECT v.vedtaksperiode_id
+                FROM vedtak v
+                INNER JOIN oppgave o on v.id = o.vedtak_ref
+                WHERE o.id = :oppgaveId
+            """).single(mapOf("oppgaveId" to oppgaveId)) { row -> row.uuid("vedtaksperiode_id") })
+
     fun finnPeriodensInntekterFraAordningen(
         vedtaksperiodeId: UUIDString,
         skjæringstidspunkt: DateString,

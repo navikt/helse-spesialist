@@ -34,6 +34,10 @@ class ApiVarselRepository(dataSource: DataSource) {
         varselDao.godkjennVarslerFor(vedtaksperioder.map { it.vedtaksperiodeId() })
     }
 
+    internal fun godkjennVarselFor(varselId: UUID) {
+        varselDao.godkjennVarselFor(varselId)
+    }
+
     internal fun erAktiv(varselkode: String, generasjonId: UUID): Boolean? {
         val varselstatus = varselDao.finnStatusFor(varselkode, generasjonId) ?: return null
         return varselstatus == AKTIV

@@ -91,6 +91,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected val snapshotClient = mockk<SnapshotClient>(relaxed = true)
 
     protected var sisteOppgaveId by Delegates.notNull<Long>()
+    protected var sisteCommandContextId by Delegates.notNull<UUID>()
 
     protected val snapshotMediator = SnapshotMediator(snapshotApiDao, snapshotClient)
     protected val tildelingService =
@@ -512,12 +513,13 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         vedtakRef: Long,
         utbetlingId: UUID? = null,
         opprettet: LocalDateTime = LocalDateTime.now(),
-    ) =
-        requireNotNull(
+    ): Long {
+        val commandContextId = UUID.randomUUID()
+        return requireNotNull(
             sessionOf(dataSource, returnGeneratedKey = true).use { session ->
                 @Language("PostgreSQL")
                 val statement =
-                    "INSERT INTO oppgave(utbetaling_id, opprettet, oppdatert, status, vedtak_ref, type) VALUES(?, ?, now(), CAST(? as oppgavestatus), ?, CAST(? as oppgavetype))"
+                    "INSERT INTO oppgave(utbetaling_id, opprettet, oppdatert, status, vedtak_ref, type, command_context_id) VALUES(?, ?, now(), CAST(? as oppgavestatus), ?, CAST(? as oppgavetype), ?)"
                 session.run(
                     queryOf(
                         statement,
@@ -526,11 +528,14 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                         status.name,
                         vedtakRef,
                         oppgavetype.name,
+                        commandContextId
                     ).asUpdateAndReturnGeneratedKey
                 )
             }).also {
-                sisteOppgaveId = it
+            sisteOppgaveId = it
+            sisteCommandContextId = commandContextId
         }
+    }
 
     private fun opprettHendelse(
         hendelseId: UUID,

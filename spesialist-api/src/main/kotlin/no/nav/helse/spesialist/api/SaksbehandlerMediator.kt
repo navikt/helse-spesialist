@@ -1,9 +1,11 @@
 package no.nav.helse.spesialist.api
 
+import java.util.UUID
 import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
+import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDto
@@ -12,6 +14,7 @@ import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.utbetaling.AnnulleringDto
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
+import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode.Companion.godkjennVurderteVarsler
 import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode.Companion.harAktiveVarsler
 import no.nav.helse.spesialist.api.vedtaksperiode.ApiGenerasjonRepository
 import org.slf4j.LoggerFactory
@@ -23,6 +26,7 @@ class SaksbehandlerMediator(
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
     private val generasjonRepository = ApiGenerasjonRepository(dataSource)
     private val varselRepository = ApiVarselRepository(dataSource)
+    private val oppgaveApiDao = OppgaveApiDao(dataSource)
 
     internal fun håndter(annullering: AnnulleringDto, saksbehandler: Saksbehandler) {
         tellAnnullering()
@@ -81,8 +85,14 @@ class SaksbehandlerMediator(
             if (perioderTilBehandling.harAktiveVarsler())
                 throw ManglerVurderingAvVarsler(godkjenning.oppgavereferanse)
 
-            varselRepository.godkjennVarslerFor(godkjenning.oppgavereferanse)
+            val godkjenningsbehovId = oppgaveApiDao.finnGodkjenningsbehovId(godkjenning.oppgavereferanse)
+            val vedtaksperiodeIdTilGodkjenning = oppgaveApiDao.finnVedtaksperiodeId(godkjenning.oppgavereferanse)
+            perioderTilBehandling.godkjennVurderteVarsler(godkjenningsbehovId, vedtaksperiodeIdTilGodkjenning, this::godkjennVarsel)
         }
+    }
+
+    private fun godkjennVarsel(godkjenningsbehovId: UUID, vedtaksperiodeIdTilGodkjenning: UUID, vedtaksperiodeId: UUID, varselId: UUID, varselTittel: String, varselkode: String) {
+        varselRepository.godkjennVarselFor(varselId)
     }
 
     fun håndterTotrinnsvurdering(oppgavereferanse: Long) {

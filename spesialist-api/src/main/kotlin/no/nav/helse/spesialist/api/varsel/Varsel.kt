@@ -5,13 +5,15 @@ import java.util.UUID
 import no.nav.helse.spesialist.api.graphql.schema.VarselDTO
 import no.nav.helse.spesialist.api.graphql.schema.VarselDTO.VarselvurderingDTO
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.AKTIV
+import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.GODKJENT
+import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.VURDERT
 
 data class Varsel(
     private val varselId: UUID,
     private val generasjonId: UUID,
     private val definisjonId: UUID,
     private val kode: String,
-    private val status: Varselstatus,
+    private var status: Varselstatus,
     private val tittel: String,
     private val forklaring: String?,
     private val handling: String?,
@@ -35,6 +37,17 @@ data class Varsel(
 
     internal fun erAktiv(): Boolean {
         return status == AKTIV
+    }
+
+    internal fun godkjenn(
+        godkjenningsbehovId: UUID,
+        vedtaksperiodeIdTilGodkjenning: UUID,
+        vedtaksperiodeId: UUID,
+        godkjenner: (godkjenningsbehovId: UUID, vedtaksperiodeIdTilGodkjenning: UUID, vedtaksperiodeId: UUID, varselId: UUID, varselTittel: String, varselkode: String) -> Unit,
+    ) {
+        if (status != VURDERT) return
+        status = GODKJENT
+        godkjenner(godkjenningsbehovId, vedtaksperiodeIdTilGodkjenning, vedtaksperiodeId, varselId, tittel, kode)
     }
 
     data class Varselvurdering(
