@@ -22,8 +22,7 @@ internal class ModellfeilTest {
     private class Testfeil : Modellfeil() {
         override val eksternKontekst: Map<String, Any>
             get() = mapOf("testdata" to "testdata")
-        override val melding: String = "testmelding"
+        override val feilkode: String = "testmelding"
         override val httpkode: HttpStatusCode = HttpStatusCode.NotFound
-        override val message: String = melding
     }
 }
