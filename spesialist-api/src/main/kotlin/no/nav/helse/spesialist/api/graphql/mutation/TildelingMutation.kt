@@ -19,6 +19,7 @@ class TildelingMutation(
 ) : Mutation {
 
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
+    private val logg: Logger = LoggerFactory.getLogger(this.javaClass.simpleName)
 
     @Suppress("unused")
     suspend fun opprettTildeling(
@@ -29,6 +30,7 @@ class TildelingMutation(
         ident: String,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Tildeling?> = withContext(Dispatchers.IO) {
+        logg.debug("Hallo fra opprettTildeling mutation")
         val tilganger = env.graphQlContext.get<SaksbehandlerTilganger>("tilganger")
         val saksbehandlerOid = UUID.fromString(saksbehandlerreferanse)
         val tildeling = tildelingService.tildelOppgaveTilSaksbehandler(
@@ -40,10 +42,11 @@ class TildelingMutation(
             saksbehandlerTilganger = tilganger
         )
         sikkerLogg.info("tildeling fra tildelingservice: {}", kv("tildeling", tildeling))
+        logg.info("tildeling fra tildelingservice: {}", kv("tildeling", tildeling))
         val returnTildeling = Tildeling(
-            navn = navn,
-            oid = saksbehandlerreferanse,
-            epost = epostadresse,
+            navn = tildeling.navn,
+            oid = tildeling.oid.toString(),
+            epost = tildeling.epost,
             reservert = tildeling.påVent
         )
         sikkerLogg.info("returtildeling ting: {}", kv("returnTildeling", returnTildeling))
