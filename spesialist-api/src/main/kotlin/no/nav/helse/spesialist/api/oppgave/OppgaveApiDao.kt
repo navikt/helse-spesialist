@@ -251,7 +251,7 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             FROM oppgave o
             INNER JOIN command_context cc on cc.context_id = o.command_context_id
             INNER JOIN vedtaksperiode_utbetaling_id vui on o.utbetaling_id = vui.utbetaling_id
-            INNER JOIN totrinnsvurdering t on vui.vedtaksperiode_id = t.vedtaksperiode_id
+            LEFT JOIN totrinnsvurdering t on vui.vedtaksperiode_id = t.vedtaksperiode_id
             WHERE o.id = :oppgaveId
             AND status = 'AvventerSaksbehandler'::oppgavestatus
         """.trimIndent()
