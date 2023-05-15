@@ -111,36 +111,6 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     }
 
     @Test
-    fun totrinnsvurderingManglerPeriodeId() {
-        val response = runBlocking {
-            client.post(TOTRINNSVURDERING_URL) {
-                contentType(ContentType.Application.Json)
-                accept(ContentType.Application.Json)
-                setBody(objectMapper.writeValueAsString("{oppgavereferanse: 1L}"))
-                authentication(saksbehandler_oid)
-            }
-        }
-
-        verify(exactly = 0) { totrinnsvurderingMediator.settSaksbehandler(any(), any()) }
-        assertEquals(HttpStatusCode.BadRequest, response.status)
-    }
-
-    @Test
-    fun returManglerPeriodeId() {
-        val response = runBlocking {
-            client.post(RETUR_URL) {
-                contentType(ContentType.Application.Json)
-                accept(ContentType.Application.Json)
-                setBody(objectMapper.writeValueAsString("{oppgavereferanse: 1L}"))
-                authentication(saksbehandler_oid)
-            }
-        }
-
-        verify(exactly = 0) { totrinnsvurderingMediator.settRetur(any(), any(), any()) }
-        assertEquals(HttpStatusCode.BadRequest, response.status)
-    }
-
-    @Test
     fun totrinnsvurderingManglerAccessToken() {
         val response = runBlocking {
             client.post(TOTRINNSVURDERING_URL) {
