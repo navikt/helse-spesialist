@@ -27,8 +27,8 @@ class TildelingService(
         return tildelOppgaveTilEksisterendeSaksbehandler(oppgaveId, saksbehandlerreferanse, saksbehandlerTilganger)
     }
 
-    internal fun fjernTildeling(oppgaveId: Long) {
-        tildelingDao.slettTildeling(oppgaveId)
+    internal fun fjernTildeling(oppgaveId: Long): Boolean {
+        return tildelingDao.slettTildeling(oppgaveId) > 0
     }
 
     private fun tildelOppgaveTilEksisterendeSaksbehandler(

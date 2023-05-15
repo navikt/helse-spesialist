@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.api.graphql.mutation
 
 import com.expediagroup.graphql.server.operations.Mutation
+import graphql.execution.DataFetcherResult
 import graphql.execution.DataFetcherResult.newResult
 import graphql.schema.DataFetchingEnvironment
 import java.util.UUID
@@ -22,7 +23,7 @@ class TildelingMutation(
         navn: String,
         ident: String,
         env: DataFetchingEnvironment,
-    ) = withContext(Dispatchers.IO) {
+    ): DataFetcherResult<Tildeling> = withContext(Dispatchers.IO) {
         val tilganger = env.graphQlContext.get<SaksbehandlerTilganger>("tilganger")
         val saksbehandlerOid = UUID.fromString(saksbehandlerreferanse)
         val tildeling = tildelingService.tildelOppgaveTilSaksbehandler(
@@ -44,9 +45,9 @@ class TildelingMutation(
     }
 
     @Suppress("unused")
-    suspend fun fjernTildeling(oppgaveId: String) = withContext(Dispatchers.IO) {
-        tildelingService.fjernTildeling(oppgaveId.toLong())
-        newResult<Boolean>().data(true).build()
+    suspend fun fjernTildeling(oppgaveId: String): DataFetcherResult<Boolean> = withContext(Dispatchers.IO) {
+        val result = tildelingService.fjernTildeling(oppgaveId.toLong())
+        newResult<Boolean>().data(result).build()
     }
 
 }
