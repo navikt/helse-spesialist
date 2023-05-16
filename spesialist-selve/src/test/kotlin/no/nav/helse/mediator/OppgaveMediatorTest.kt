@@ -79,7 +79,14 @@ internal class OppgaveMediatorTest {
         every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
         mediator.opprett(søknadsoppgave)
         mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
-        verify(exactly = 1) { oppgaveDao.opprettOppgave(COMMAND_CONTEXT_ID, OPPGAVETYPE_SØKNAD, VEDTAKSPERIODE_ID, UTBETALING_ID) }
+        verify(exactly = 1) {
+            oppgaveDao.opprettOppgave(
+                COMMAND_CONTEXT_ID,
+                OPPGAVETYPE_SØKNAD,
+                VEDTAKSPERIODE_ID,
+                UTBETALING_ID
+            )
+        }
         assertEquals(1, testRapid.inspektør.size)
         assertOppgaveevent(0, "oppgave_opprettet")
         assertAntallOpptegnelser(1)
@@ -137,7 +144,13 @@ internal class OppgaveMediatorTest {
     @Test
     fun `oppdaterer oppgave`() {
         every { reservasjonDao.hentReservertTil(TESTHENDELSE.fødselsnummer()) } returns null
-        val oppgave = Oppgave(OPPGAVE_ID, OPPGAVETYPE_SØKNAD, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID)
+        val oppgave = Oppgave(
+            OPPGAVE_ID,
+            OPPGAVETYPE_SØKNAD,
+            Oppgavestatus.AvventerSaksbehandler,
+            VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID
+        )
         every { oppgaveDao.finn(any<Long>()) } returns oppgave
         every { oppgaveDao.finnHendelseId(any()) } returns HENDELSE_ID
         every { oppgaveDao.finnContextId(any()) } returns COMMAND_CONTEXT_ID
@@ -154,7 +167,7 @@ internal class OppgaveMediatorTest {
 
     @Test
     fun `oppretter ikke flere oppgaver på samme vedtaksperiodeId`() {
-        every { oppgaveDao.harGyldigOppgave( UTBETALING_ID) } returnsMany listOf(false, true)
+        every { oppgaveDao.harGyldigOppgave(UTBETALING_ID) } returnsMany listOf(false, true)
         every { reservasjonDao.hentReservertTil(TESTHENDELSE.fødselsnummer()) } returns null
         every { oppgaveDao.finn(0L) } returns søknadsoppgave
         mediator.opprett(søknadsoppgave)
@@ -164,6 +177,7 @@ internal class OppgaveMediatorTest {
         assertOpptegnelseIkkeOpprettet()
 
     }
+
     @Test
     fun `lagrer ikke dobbelt`() {
         every { reservasjonDao.hentReservertTil(TESTHENDELSE.fødselsnummer()) } returns null
@@ -184,7 +198,13 @@ internal class OppgaveMediatorTest {
 
     @Test
     fun `avbryter oppgaver`() {
-        val oppgave1 = Oppgave(1L, OPPGAVETYPE_SØKNAD, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID)
+        val oppgave1 = Oppgave(
+            1L,
+            OPPGAVETYPE_SØKNAD,
+            Oppgavestatus.AvventerSaksbehandler,
+            VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID
+        )
         every { oppgaveDao.finnAktiv(VEDTAKSPERIODE_ID) } returns oppgave1
         every { reservasjonDao.hentReservertTil(TESTHENDELSE.fødselsnummer()) } returns null
         every { oppgaveDao.finn(1L) } returns oppgave1
@@ -195,11 +215,22 @@ internal class OppgaveMediatorTest {
         assertOpptegnelseIkkeOpprettet()
     }
 
-    private fun assertAntallOpptegnelser(antallOpptegnelser: Int) = verify(exactly = antallOpptegnelser) { opptegnelseDao.opprettOpptegnelse(eq(TESTHENDELSE.fødselsnummer()), any(), eq(OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE)) }
+    private fun assertAntallOpptegnelser(antallOpptegnelser: Int) = verify(exactly = antallOpptegnelser) {
+        opptegnelseDao.opprettOpptegnelse(
+            eq(TESTHENDELSE.fødselsnummer()),
+            any(),
+            eq(OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE)
+        )
+    }
 
-    private fun assertOpptegnelseIkkeOpprettet()= assertAntallOpptegnelser(0)
+    private fun assertOpptegnelseIkkeOpprettet() = assertAntallOpptegnelser(0)
 
-    private fun assertOppgaveevent(indeks: Int, navn: String, status: Oppgavestatus = Oppgavestatus.AvventerSaksbehandler, assertBlock: (JsonNode) -> Unit = {}) {
+    private fun assertOppgaveevent(
+        indeks: Int,
+        navn: String,
+        status: Oppgavestatus = Oppgavestatus.AvventerSaksbehandler,
+        assertBlock: (JsonNode) -> Unit = {},
+    ) {
         testRapid.inspektør.message(indeks).also {
             assertEquals(navn, it.path("@event_name").asText())
             assertEquals(HENDELSE_ID, UUID.fromString(it.path("hendelseId").asText()))
@@ -213,7 +244,7 @@ internal class OppgaveMediatorTest {
     class GruppehenterTestoppsett {
         var erKalt = false
 
-        val hentGrupper: Tilgangskontroll = { _: UUID, _: Gruppe->
+        val hentGrupper: Tilgangskontroll = { _: UUID, _: Gruppe ->
             erKalt = true
             true
         }

@@ -159,8 +159,9 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
         val oppgaver = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_KODE7)
         assertTrue(oppgaver.isNotEmpty())
     }
+
     @Test
-    fun `ekskluder stikkprøve oppgaver for vanlige saksbehandlere`() {
+    fun `ekskluder stikkprøve-oppgaver for vanlige saksbehandlere`() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode()
@@ -171,7 +172,7 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `inkluder stikkprøve oppgaver bare for noen utvalgte saksbehandlere`() {
+    fun `inkluder stikkprøve-oppgaver bare for noen utvalgte saksbehandlere`() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettGenerasjon()
