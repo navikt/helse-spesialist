@@ -1,9 +1,11 @@
 package no.nav.helse.spesialist.api.snapshot
 
+import com.expediagroup.graphql.client.jackson.GraphQLClientJacksonSerializer
 import com.expediagroup.graphql.client.serializer.GraphQLClientSerializer
-import com.expediagroup.graphql.client.serializer.defaultGraphQLSerializer
 import com.expediagroup.graphql.client.types.GraphQLClientRequest
 import com.expediagroup.graphql.client.types.GraphQLClientResponse
+import com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ServerResponseException
@@ -33,7 +35,7 @@ class SnapshotClient(
 ) {
     private companion object {
         val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
-        val serializer: GraphQLClientSerializer = defaultGraphQLSerializer()
+        val serializer: GraphQLClientSerializer = GraphQLClientJacksonSerializer(jacksonObjectMapper().disable(FAIL_ON_UNKNOWN_PROPERTIES))
     }
 
     fun hentSnapshot(fnr: String): GraphQLClientResponse<HentSnapshot.Result> {
