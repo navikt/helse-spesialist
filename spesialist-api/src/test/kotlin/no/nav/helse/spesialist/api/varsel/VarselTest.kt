@@ -1,6 +1,9 @@
 package no.nav.helse.spesialist.api.varsel
 
 import java.util.UUID
+import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.AVVIST
+import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.GODKJENT
+import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.VURDERT
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -24,26 +27,65 @@ internal class VarselTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = Varsel.Varselstatus::class, names = ["VURDERT"], mode = EnumSource.Mode.EXCLUDE)
-    fun `varsel blir ikke godkjent hvis det ikke er vurdert`(status: Varsel.Varselstatus) {
-        val varsel = opprettVarsel(status)
+    @EnumSource(value = Varsel.Varselstatus::class, names = ["VURDERT", "AKTIV"], mode = EnumSource.Mode.EXCLUDE)
+    fun `varsel blir ikke godkjent hvis det ikke er vurdert eller aktivt`(status: Varsel.Varselstatus) {
+        var nyStatus: Varsel.Varselstatus = status
+        val varsel = opprettVarsel(nyStatus)
         var godkjent = false
-        varsel.godkjenn("FNR", UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID()) { _: String, _: UUID, _: UUID, _: UUID, _: UUID, _: String, _: String, _: Varsel.Varselstatus, _: Varsel.Varselstatus ->
+        varsel.vurder(
+            godkjent = true,
+            "FNR",
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID()
+        ) { _: String, _: UUID, _: UUID, _: UUID, _: UUID, _: String, _: String, _: Varsel.Varselstatus, gjeldendeStatus: Varsel.Varselstatus ->
             godkjent = true
+            nyStatus = gjeldendeStatus
         }
 
         assertEquals(false, godkjent)
+        assertEquals(status, nyStatus)
     }
 
     @Test
     fun `godkjenn varsel som er vurdert`() {
-        val varsel = opprettVarsel(Varsel.Varselstatus.VURDERT)
-        var godkjent = false
-        varsel.godkjenn("FNR",UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID()) { _: String,  _: UUID, _: UUID, _: UUID, _: UUID, _: String, _: String, _: Varsel.Varselstatus, _: Varsel.Varselstatus  ->
-            godkjent = true
+        var status: Varsel.Varselstatus = VURDERT
+        val varsel = opprettVarsel(status)
+        var vurdert = false
+
+        varsel.vurder(
+            godkjent = true,
+            "FNR",
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID()
+        ) { _: String, _: UUID, _: UUID, _: UUID, _: UUID, _: String, _: String, _: Varsel.Varselstatus, gjeldendeStatus: Varsel.Varselstatus  ->
+            vurdert = true
+            status = gjeldendeStatus
         }
 
-        assertEquals(true, godkjent)
+        assertEquals(true, vurdert)
+        assertEquals(GODKJENT, status)
+    }
+
+    @Test
+    fun `avviser varsel som er aktivt eller vurdert dersom perioden ikke er godkjent`() {
+        var status: Varsel.Varselstatus = VURDERT
+        val varsel = opprettVarsel(status)
+        var vurdert = false
+        varsel.vurder(
+            godkjent = false,
+            "FNR",
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID()
+        ) { _: String, _: UUID, _: UUID, _: UUID, _: UUID, _: String, _: String, _: Varsel.Varselstatus, gjeldendeStatus: Varsel.Varselstatus  ->
+            vurdert = true
+            status = gjeldendeStatus
+        }
+
+        assertEquals(true, vurdert)
+        assertEquals(AVVIST, status)
     }
 
     private fun opprettVarsel(status: Varsel.Varselstatus): Varsel {

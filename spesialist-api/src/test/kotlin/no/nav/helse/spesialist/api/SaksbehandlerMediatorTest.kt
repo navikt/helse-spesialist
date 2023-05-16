@@ -89,6 +89,22 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
         assertGodkjenteVarsler(generasjonRef, 0)
     }
 
+
+
+    @Test
+    fun `håndter godkjenning når godkjenning er avvist`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjonId = UUID.randomUUID()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver(), periode = Periode(vedtaksperiodeId, 1.januar, 31.januar))
+        opprettCommandContext()
+        val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
+        val definisjonRef = opprettVarseldefinisjon()
+        nyttVarsel(vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, status = "AKTIV", definisjonRef = definisjonRef)
+        mediator.håndter(godkjenning(sisteOppgaveId, false))
+        assertGodkjenteVarsler(generasjonRef, 0)
+        assertAvvisteVarsler(generasjonRef, 1)
+    }
+
     @Test
     fun `håndter totrinnsvurdering`() {
         val vedtaksperiodeId = UUID.randomUUID()
@@ -357,8 +373,8 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
         saksbehandlerIdent = ident,
         godkjent = godkjent,
         begrunnelser = emptyList(),
-        kommentar = null,
-        årsak = null
+        kommentar = if (!godkjent) "Kommentar" else null,
+        årsak = if (!godkjent) "Årsak" else null
     )
 
     private fun annullering(

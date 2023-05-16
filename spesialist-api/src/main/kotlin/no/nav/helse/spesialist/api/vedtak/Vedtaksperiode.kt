@@ -24,7 +24,8 @@ internal data class Vedtaksperiode(
             return any { it.harAktiveVarsler() }
         }
 
-        fun Set<Vedtaksperiode>.godkjennVurderteVarsler(
+        fun Set<Vedtaksperiode>.vurderVarsler(
+            godkjent: Boolean,
             godkjenningsbehovId: UUID,
             vedtaksperiodeIdTilGodkjenning: UUID,
             fødselsnummer: String,
@@ -32,7 +33,7 @@ internal data class Vedtaksperiode(
         ) {
             forEach { vedtaksperiode ->
                 vedtaksperiode.varsler.forEach {
-                    it.godkjenn(fødselsnummer, godkjenningsbehovId, vedtaksperiodeIdTilGodkjenning, vedtaksperiode.vedtaksperiodeId, godkjenner)
+                    it.vurder(godkjent, fødselsnummer, godkjenningsbehovId, vedtaksperiodeIdTilGodkjenning, vedtaksperiode.vedtaksperiodeId, godkjenner)
                 }
             }
         }

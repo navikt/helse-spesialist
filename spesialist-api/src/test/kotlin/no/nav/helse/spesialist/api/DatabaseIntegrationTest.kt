@@ -742,6 +742,16 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         assertEquals(forventetAntall, antall)
     }
 
+    protected fun assertAvvisteVarsler(generasjonRef: Long, forventetAntall: Int) {
+        @Language("PostgreSQL")
+        val query =
+            "SELECT COUNT(1) FROM selve_varsel sv WHERE sv.generasjon_ref = ? AND status = 'AVVIST'"
+        val antall = sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, generasjonRef).map { it.int(1) }.asSingle)
+        }
+        assertEquals(forventetAntall, antall)
+    }
+
     protected fun finnOppgaveIdFor(vedtaksperiodeId: UUID): Long = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val query =

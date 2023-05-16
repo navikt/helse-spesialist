@@ -203,13 +203,13 @@ internal class ApiVarselDao(private val dataSource: DataSource) : HelseDao(dataS
         )
     }
 
-    internal fun godkjennVarselFor(varselId: UUID) = sessionOf(dataSource).use { session ->
+    internal fun vurderVarselFor(varselId: UUID, gjeldendeStatus: Varselstatus) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val query = """
             UPDATE selve_varsel 
             SET status = ? 
             WHERE unik_id = ? 
         """
-        session.run(queryOf(query, GODKJENT.name, varselId).asUpdate)
+        session.run(queryOf(query, gjeldendeStatus.name, varselId).asUpdate)
     }
 }

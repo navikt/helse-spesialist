@@ -5,6 +5,7 @@ import java.util.UUID
 import no.nav.helse.spesialist.api.graphql.schema.VarselDTO
 import no.nav.helse.spesialist.api.graphql.schema.VarselDTO.VarselvurderingDTO
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.AKTIV
+import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.AVVIST
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.GODKJENT
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.VURDERT
 
@@ -39,17 +40,19 @@ data class Varsel(
         return status == AKTIV
     }
 
-    internal fun godkjenn(
+    internal fun vurder(
+        godkjent: Boolean,
         fødselsnummer: String,
         godkjenningsbehovId: UUID,
         vedtaksperiodeIdTilGodkjenning: UUID,
         vedtaksperiodeId: UUID,
-        godkjenner: (fødselsnummer: String, godkjenningsbehovId: UUID, vedtaksperiodeIdTilGodkjenning: UUID, vedtaksperiodeId: UUID, varselId: UUID, varselTittel: String, varselkode: String, forrigeStatus: Varselstatus, gjeldendeStatus: Varselstatus) -> Unit,
+        vurderer: (fødselsnummer: String, godkjenningsbehovId: UUID, vedtaksperiodeIdTilGodkjenning: UUID, vedtaksperiodeId: UUID, varselId: UUID, varselTittel: String, varselkode: String, forrigeStatus: Varselstatus, gjeldendeStatus: Varselstatus) -> Unit,
     ) {
-        if (status != VURDERT) return
+        if (status !in (listOf(AKTIV, VURDERT))) return
+
         val forrigeStatus = status
-        status = GODKJENT
-        godkjenner(fødselsnummer, godkjenningsbehovId, vedtaksperiodeIdTilGodkjenning, vedtaksperiodeId, varselId, tittel, kode, forrigeStatus, status)
+        status = if (godkjent) GODKJENT else AVVIST
+        vurderer(fødselsnummer, godkjenningsbehovId, vedtaksperiodeIdTilGodkjenning, vedtaksperiodeId, varselId, tittel, kode, forrigeStatus, status)
     }
 
     data class Varselvurdering(

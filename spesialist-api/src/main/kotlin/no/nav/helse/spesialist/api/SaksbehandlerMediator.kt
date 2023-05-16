@@ -16,8 +16,8 @@ import no.nav.helse.spesialist.api.utbetaling.AnnulleringDto
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.varsel.Varsel
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
-import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode.Companion.godkjennVurderteVarsler
 import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode.Companion.harAktiveVarsler
+import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode.Companion.vurderVarsler
 import no.nav.helse.spesialist.api.vedtaksperiode.ApiGenerasjonRepository
 import org.slf4j.LoggerFactory
 
@@ -86,15 +86,17 @@ class SaksbehandlerMediator(
         if (godkjenning.godkjent) {
             if (perioderTilBehandling.harAktiveVarsler())
                 throw ManglerVurderingAvVarsler(godkjenning.oppgavereferanse)
-            val fødselsnummer = oppgaveApiDao.finnFødselsnummer(godkjenning.oppgavereferanse)
-            val godkjenningsbehovId = oppgaveApiDao.finnGodkjenningsbehovId(godkjenning.oppgavereferanse)
-            val vedtaksperiodeIdTilGodkjenning = oppgaveApiDao.finnVedtaksperiodeId(godkjenning.oppgavereferanse)
-            perioderTilBehandling.godkjennVurderteVarsler(godkjenningsbehovId, vedtaksperiodeIdTilGodkjenning, fødselsnummer, this::godkjennVarsel)
         }
+
+        val fødselsnummer = oppgaveApiDao.finnFødselsnummer(godkjenning.oppgavereferanse)
+        val godkjenningsbehovId = oppgaveApiDao.finnGodkjenningsbehovId(godkjenning.oppgavereferanse)
+        val vedtaksperiodeIdTilGodkjenning = oppgaveApiDao.finnVedtaksperiodeId(godkjenning.oppgavereferanse)
+
+        perioderTilBehandling.vurderVarsler(godkjenning.godkjent, godkjenningsbehovId, vedtaksperiodeIdTilGodkjenning, fødselsnummer, this::vurderVarsel)
     }
 
-    private fun godkjennVarsel(fødselsnummer: String, godkjenningsbehovId: UUID, vedtaksperiodeIdTilGodkjenning: UUID, vedtaksperiodeId: UUID, varselId: UUID, varseltittel: String, varselkode: String, forrigeStatus: Varsel.Varselstatus, gjeldendeStatus: Varsel.Varselstatus) {
-        varselRepository.godkjennVarselFor(varselId)
+    private fun vurderVarsel(fødselsnummer: String, godkjenningsbehovId: UUID, vedtaksperiodeIdTilGodkjenning: UUID, vedtaksperiodeId: UUID, varselId: UUID, varseltittel: String, varselkode: String, forrigeStatus: Varsel.Varselstatus, gjeldendeStatus: Varsel.Varselstatus) {
+        varselRepository.vurderVarselFor(varselId, gjeldendeStatus)
         val message = JsonMessage.newMessage(
             "varsel_endret", mapOf(
                 "fødselsnummer" to fødselsnummer,
