@@ -21,6 +21,7 @@ import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -53,9 +54,33 @@ internal class GodkjenningServiceTest : AbstractE2ETest() {
         val saksbehandlerIdent = "saksbehandler"
         settOppBruker()
         val oppgavereferanse = oppgaveDao.finnOppgaveId(FØDSELSNUMMER)!!
-        godkjenningServiceWithMocks.håndter(GodkjenningDto(oppgavereferanse, true, saksbehandlerIdent, null, null, null), epost, oid)
+        godkjenningServiceWithMocks.håndter(GodkjenningDto(oppgavereferanse, true, saksbehandlerIdent, null, null, null), epost, oid, UUID.randomUUID())
         assertTrue(testRapid.inspektør.hendelser("saksbehandler_løsning").isNotEmpty())
         assertEquals("AvventerSystem", testRapid.inspektør.hendelser("oppgave_oppdatert").last()["status"].asText())
+    }
+
+    @Test
+    fun `håndter godkjenning`() {
+        val oid = UUID.randomUUID()
+        val epost = "epost@nav.no"
+        val saksbehandlerIdent = "saksbehandler"
+        val behandlingId = UUID.randomUUID()
+        settOppBruker()
+        val oppgavereferanse = oppgaveDao.finnOppgaveId(FØDSELSNUMMER)!!
+        val hendelseId = oppgaveDao.finnHendelseId(oppgavereferanse)
+        godkjenningServiceWithMocks.håndter(GodkjenningDto(oppgavereferanse, true, saksbehandlerIdent, null, null, null), epost, oid, behandlingId)
+
+        val melding = testRapid.inspektør.hendelser("saksbehandler_løsning").last()
+
+        assertEquals(FØDSELSNUMMER, melding["fødselsnummer"].asText())
+        assertEquals(oppgavereferanse, melding["oppgaveId"].asLong())
+        assertEquals(hendelseId.toString(), melding["hendelseId"].asText())
+        assertEquals(behandlingId.toString(), melding["behandlingId"].asText())
+        assertEquals(true, melding["godkjent"].asBoolean())
+        assertEquals(saksbehandlerIdent, melding["saksbehandlerident"].asText())
+        assertEquals(oid.toString(), melding["saksbehandleroid"].asText())
+        assertEquals(epost, melding["saksbehandlerepost"].asText())
+        assertNotNull(melding["godkjenttidspunkt"]?.asText())
     }
 
     @Test
@@ -69,7 +94,7 @@ internal class GodkjenningServiceTest : AbstractE2ETest() {
             every { totrinnsvurdering.saksbehandler } returns tidligereSaksbehandlerOid
         }
 
-        godkjenningServiceWithMocks.håndter(GodkjenningDto(1L, true, "saksbehandler", null, null, null), "epost@nav.no", oid)
+        godkjenningServiceWithMocks.håndter(GodkjenningDto(1L, true, "saksbehandler", null, null, null), "epost@nav.no", oid, UUID.randomUUID())
 
         verify (exactly = 1) { reserverpersonDaoMock.reserverPerson(tidligereSaksbehandlerOid, any(), any()) }
     }
@@ -91,7 +116,7 @@ internal class GodkjenningServiceTest : AbstractE2ETest() {
             oppdatert = null
         )
 
-        godkjenningServiceWithMocks.håndter(GodkjenningDto(oppgavereferanse, true, "saksbehandler", null, null, null), "epost@nav.no", oid)
+        godkjenningServiceWithMocks.håndter(GodkjenningDto(oppgavereferanse, true, "saksbehandler", null, null, null), "epost@nav.no", oid, UUID.randomUUID())
 
         verify (exactly = 1) { reserverpersonDaoMock.reserverPerson(totrinnsvurderingSaksbehandlerOid, any(), any()) }
     }
@@ -103,7 +128,7 @@ internal class GodkjenningServiceTest : AbstractE2ETest() {
 
         every { totrinnsvurderingDaoMock.hentAktiv(Testdata.VEDTAKSPERIODE_ID) } returns null
 
-        godkjenningServiceWithMocks.håndter(GodkjenningDto(1L, true, "saksbehandler", null, null, null), "epost@nav.no", oid)
+        godkjenningServiceWithMocks.håndter(GodkjenningDto(1L, true, "saksbehandler", null, null, null), "epost@nav.no", oid, UUID.randomUUID())
 
         verify (exactly = 1) { reserverpersonDaoMock.reserverPerson(oid, any(), any()) }
     }
@@ -123,7 +148,7 @@ internal class GodkjenningServiceTest : AbstractE2ETest() {
             oppdatert = null
         )
 
-        godkjenningServiceWithMocks.håndter(GodkjenningDto(1L, true, "saksbehandler", null, null, null), "epost@nav.no", oid)
+        godkjenningServiceWithMocks.håndter(GodkjenningDto(1L, true, "saksbehandler", null, null, null), "epost@nav.no", oid, UUID.randomUUID())
 
         verify (exactly = 1) { totrinnsvurderingDaoMock.ferdigstill(Testdata.VEDTAKSPERIODE_ID) }
     }
@@ -143,7 +168,7 @@ internal class GodkjenningServiceTest : AbstractE2ETest() {
             oppdatert = null
         )
 
-        godkjenningServiceWithMocks.håndter(GodkjenningDto(1L, true, "saksbehandler", null, null, null), "epost@nav.no", oid)
+        godkjenningServiceWithMocks.håndter(GodkjenningDto(1L, true, "saksbehandler", null, null, null), "epost@nav.no", oid, UUID.randomUUID())
 
         verify (exactly = 1) { periodehistorikkDaoMock.lagre(PeriodehistorikkType.TOTRINNSVURDERING_ATTESTERT, oid, any(), null) }
     }

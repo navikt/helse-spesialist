@@ -93,7 +93,7 @@ internal fun Route.personApi(
         val behandlingId = UUID.randomUUID()
 
         saksbehandlerMediator.håndter(godkjenning, behandlingId)
-        withContext(Dispatchers.IO) { godkjenningService.håndter(godkjenning, epostadresse, oid) }
+        withContext(Dispatchers.IO) { godkjenningService.håndter(godkjenning, epostadresse, oid, behandlingId) }
         call.respond(HttpStatusCode.Created, mapOf("status" to "OK"))
     }
 

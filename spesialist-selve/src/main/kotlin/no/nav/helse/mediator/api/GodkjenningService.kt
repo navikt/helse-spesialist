@@ -40,7 +40,7 @@ internal class GodkjenningService(
     ),
 ) {
 
-    internal fun håndter(godkjenningDTO: GodkjenningDto, epost: String, oid: UUID) {
+    internal fun håndter(godkjenningDTO: GodkjenningDto, epost: String, oid: UUID, behandlingId: UUID) {
         val hendelseId = oppgaveDao.finnHendelseId(godkjenningDTO.oppgavereferanse)
         val fødselsnummer = hendelseDao.finnFødselsnummer(hendelseId)
         val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(godkjenningDTO.oppgavereferanse)
@@ -56,6 +56,7 @@ internal class GodkjenningService(
             "fødselsnummer" to fødselsnummer,
             "oppgaveId" to godkjenningDTO.oppgavereferanse,
             "hendelseId" to hendelseId,
+            "behandlingId" to behandlingId,
             "godkjent" to godkjenningDTO.godkjent,
             "saksbehandlerident" to godkjenningDTO.saksbehandlerIdent,
             "saksbehandleroid" to oid,
