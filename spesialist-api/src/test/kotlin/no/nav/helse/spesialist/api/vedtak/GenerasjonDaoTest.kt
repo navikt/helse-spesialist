@@ -93,4 +93,17 @@ internal class GenerasjonDaoTest: DatabaseIntegrationTest() {
 
         assertEquals(setOf(forventetVedtaksperiode), alleVedtaksperioderForPerson)
     }
+
+    @Test
+    fun `Finner ikke generasjoner for perioder som er forkastet - med varselGetter`() {
+        val person = opprettPerson()
+        val arbeidsgiver = opprettArbeidsgiver()
+        opprettVedtaksperiode(person, arbeidsgiver)
+        val periode2 = Periode(UUID.randomUUID(), LocalDate.now(), LocalDate.now())
+        opprettVedtaksperiode(person, arbeidsgiver, null, periode2, forkastet = true)
+        val alleVedtaksperioderForPerson = generasjonDao.gjeldendeGenerasjonerForPerson(finnOppgaveIdFor(PERIODE.id)) { emptySet() }
+        val forventetVedtaksperiode = Vedtaksperiode(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet())
+
+        assertEquals(setOf(forventetVedtaksperiode), alleVedtaksperioderForPerson)
+    }
 }
