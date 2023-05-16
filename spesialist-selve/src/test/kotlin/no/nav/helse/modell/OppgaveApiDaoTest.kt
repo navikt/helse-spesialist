@@ -547,6 +547,25 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
         assertEquals(forventetOppgavemleding, oppgavemelding)
     }
 
+    @Test
+    fun `lagre behandlingsreferanse`() {
+        val oppgaveId = 1L
+        val behandlingId = UUID.randomUUID()
+        oppgaveApiDao.lagreBehandlingsreferanse(oppgaveId, behandlingId)
+        assertOppgaveBehandlingKobling(oppgaveId, behandlingId)
+    }
+
+    private fun assertOppgaveBehandlingKobling(oppgaveId: Long, forventetBehandlingId: UUID) {
+        @Language("PostgreSQL")
+        val query =
+            "SELECT behandling_id FROM oppgave_behandling_kobling obk WHERE obk.oppgave_id = ?"
+        val behandlingId = sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, oppgaveId).map { it.uuid("behandling_id") }.asSingle)
+        }
+
+        assertEquals(forventetBehandlingId, behandlingId)
+    }
+
     // Sortert stigende
     private fun finnOpprettetTidspunkterFor(vedtaksperiodeId: UUID): List<String> {
         @Language("PostgreSQL")

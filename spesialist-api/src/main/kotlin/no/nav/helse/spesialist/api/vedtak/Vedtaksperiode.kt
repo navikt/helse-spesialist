@@ -26,14 +26,19 @@ internal data class Vedtaksperiode(
 
         fun Set<Vedtaksperiode>.vurderVarsler(
             godkjent: Boolean,
-            godkjenningsbehovId: UUID,
-            vedtaksperiodeIdTilGodkjenning: UUID,
             fødselsnummer: String,
-            godkjenner: (fødselsnummer: String, godkjenningsbehovId: UUID, vedtaksperiodeIdTilGodkjenning: UUID, vedtaksperiodeId: UUID, varselId: UUID, varselTittel: String, varselkode: String, forrigeStatus: Varsel.Varselstatus, gjeldendeStatus: Varsel.Varselstatus) -> Unit
+            behandlingId: UUID,
+            godkjenner: (fødselsnummer: String, behandlingId: UUID, vedtaksperiodeId: UUID, varselId: UUID, varselTittel: String, varselkode: String, forrigeStatus: Varsel.Varselstatus, gjeldendeStatus: Varsel.Varselstatus) -> Unit
         ) {
             forEach { vedtaksperiode ->
                 vedtaksperiode.varsler.forEach {
-                    it.vurder(godkjent, fødselsnummer, godkjenningsbehovId, vedtaksperiodeIdTilGodkjenning, vedtaksperiode.vedtaksperiodeId, godkjenner)
+                    it.vurder(
+                        godkjent = godkjent,
+                        fødselsnummer = fødselsnummer,
+                        behandlingId = behandlingId,
+                        vedtaksperiodeId = vedtaksperiode.vedtaksperiodeId,
+                        vurderer = godkjenner
+                    )
                 }
             }
         }

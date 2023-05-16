@@ -81,28 +81,36 @@ class SaksbehandlerMediator(
         rapidsConnection.publish(overstyring.fødselsnummer, message.toJson())
     }
 
-    fun håndter(godkjenning: GodkjenningDto) {
+    fun håndter(godkjenning: GodkjenningDto, behandlingId: UUID) {
         val perioderTilBehandling = generasjonRepository.perioderTilBehandling(godkjenning.oppgavereferanse)
         if (godkjenning.godkjent) {
             if (perioderTilBehandling.harAktiveVarsler())
                 throw ManglerVurderingAvVarsler(godkjenning.oppgavereferanse)
         }
 
-        val fødselsnummer = oppgaveApiDao.finnFødselsnummer(godkjenning.oppgavereferanse)
-        val godkjenningsbehovId = oppgaveApiDao.finnGodkjenningsbehovId(godkjenning.oppgavereferanse)
-        val vedtaksperiodeIdTilGodkjenning = oppgaveApiDao.finnVedtaksperiodeId(godkjenning.oppgavereferanse)
+        oppgaveApiDao.lagreBehandlingsreferanse(godkjenning.oppgavereferanse, behandlingId)
 
-        perioderTilBehandling.vurderVarsler(godkjenning.godkjent, godkjenningsbehovId, vedtaksperiodeIdTilGodkjenning, fødselsnummer, this::vurderVarsel)
+        val fødselsnummer = oppgaveApiDao.finnFødselsnummer(godkjenning.oppgavereferanse)
+
+        perioderTilBehandling.vurderVarsler(godkjenning.godkjent, fødselsnummer, behandlingId, this::vurderVarsel)
     }
 
-    private fun vurderVarsel(fødselsnummer: String, godkjenningsbehovId: UUID, vedtaksperiodeIdTilGodkjenning: UUID, vedtaksperiodeId: UUID, varselId: UUID, varseltittel: String, varselkode: String, forrigeStatus: Varsel.Varselstatus, gjeldendeStatus: Varsel.Varselstatus) {
+    private fun vurderVarsel(
+        fødselsnummer: String,
+        behandlingId: UUID,
+        vedtaksperiodeId: UUID,
+        varselId: UUID,
+        varseltittel: String,
+        varselkode: String,
+        forrigeStatus: Varsel.Varselstatus,
+        gjeldendeStatus: Varsel.Varselstatus
+    ) {
         varselRepository.vurderVarselFor(varselId, gjeldendeStatus)
         val message = JsonMessage.newMessage(
             "varsel_endret", mapOf(
                 "fødselsnummer" to fødselsnummer,
-                "godkjenningsbehov_id" to godkjenningsbehovId,
-                "vedtaksperiode_id_til_godkjenning" to vedtaksperiodeIdTilGodkjenning,
                 "vedtaksperiode_id" to vedtaksperiodeId,
+                "behandling_id" to behandlingId,
                 "varsel_id" to varselId,
                 "varseltittel" to varseltittel,
                 "varselkode" to varselkode,

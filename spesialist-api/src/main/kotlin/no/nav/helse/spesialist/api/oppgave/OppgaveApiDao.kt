@@ -36,6 +36,14 @@ import org.intellij.lang.annotations.Language
 
 class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
 
+    fun lagreBehandlingsreferanse(oppgaveId: Long, behandlingId: UUID) {
+        queryize(
+            """
+               INSERT INTO oppgave_behandling_kobling(oppgave_id, behandling_id) VALUES (:oppgaveId, :behandlingId)
+            """
+        ).update(mapOf("oppgaveId" to oppgaveId, "behandlingId" to behandlingId))
+    }
+
     fun finnOppgaveId(vedtaksperiodeId: UUID) = queryize(
         """ SELECT id FROM oppgave
             WHERE vedtak_ref =
@@ -81,15 +89,6 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             Oppgavetype.valueOf(it.string("type"))
         }
     }
-
-    internal fun finnGodkjenningsbehovId(oppgaveId: Long) = requireNotNull(
-        queryize(
-        """
-                SELECT DISTINCT hendelse_id 
-                FROM command_context 
-                WHERE context_id = (SELECT command_context_id FROM oppgave WHERE id = :oppgaveId)
-            """)
-            .single(mapOf("oppgaveId" to oppgaveId)) { row -> row.uuid("hendelse_id") })
 
     internal fun finnVedtaksperiodeId(oppgaveId: Long) = requireNotNull(
         queryize(

@@ -1,8 +1,6 @@
 package no.nav.helse.spesialist.api
 
 import java.util.UUID
-import kotliquery.queryOf
-import kotliquery.sessionOf
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.TestRapidHelpers.hendelser
@@ -14,7 +12,6 @@ import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDto
 import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
 import no.nav.helse.spesialist.api.utbetaling.AnnulleringDto
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -50,13 +47,12 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjonId = UUID.randomUUID()
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver(), periode = Periode(vedtaksperiodeId, 1.januar, 31.januar))
-        opprettCommandContext()
         val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
         val definisjonRef = opprettVarseldefinisjon()
         nyttVarsel(vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, status = "VURDERT", definisjonRef = definisjonRef)
         nyttVarsel(kode = "EN_ANNEN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, status = "VURDERT", definisjonRef = definisjonRef)
         assertDoesNotThrow {
-            mediator.håndter(godkjenning(sisteOppgaveId, true))
+            mediator.håndter(godkjenning(sisteOppgaveId, true), UUID.randomUUID())
         }
         assertGodkjenteVarsler(generasjonRef, 2)
     }
@@ -66,12 +62,11 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjonId = UUID.randomUUID()
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver(), periode = Periode(vedtaksperiodeId, 1.januar, 31.januar))
-        opprettCommandContext()
         val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
         val definisjonRef = opprettVarseldefinisjon()
         nyttVarsel(vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, status = "AKTIV", definisjonRef = definisjonRef)
         assertThrows<ManglerVurderingAvVarsler> {
-            mediator.håndter(godkjenning(sisteOppgaveId, true))
+            mediator.håndter(godkjenning(sisteOppgaveId, true), UUID.randomUUID())
         }
         assertGodkjenteVarsler(generasjonRef, 0)
     }
@@ -81,10 +76,9 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjonId = UUID.randomUUID()
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver(), periode = Periode(vedtaksperiodeId, 1.januar, 31.januar))
-        opprettCommandContext()
         val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
         assertDoesNotThrow {
-            mediator.håndter(godkjenning(sisteOppgaveId, true))
+            mediator.håndter(godkjenning(sisteOppgaveId, true), UUID.randomUUID())
         }
         assertGodkjenteVarsler(generasjonRef, 0)
     }
@@ -96,11 +90,10 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjonId = UUID.randomUUID()
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver(), periode = Periode(vedtaksperiodeId, 1.januar, 31.januar))
-        opprettCommandContext()
         val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
         val definisjonRef = opprettVarseldefinisjon()
         nyttVarsel(vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, status = "AKTIV", definisjonRef = definisjonRef)
-        mediator.håndter(godkjenning(sisteOppgaveId, false))
+        mediator.håndter(godkjenning(sisteOppgaveId, false), UUID.randomUUID())
         assertGodkjenteVarsler(generasjonRef, 0)
         assertAvvisteVarsler(generasjonRef, 1)
     }
@@ -144,21 +137,19 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
     fun `sender ut varsel_endret ved godkjenning av varsler`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjonId = UUID.randomUUID()
-        val hendelseId = UUID.randomUUID()
         val varselId = UUID.randomUUID()
+        val behandlingId = UUID.randomUUID()
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver(), periode = Periode(vedtaksperiodeId, 1.januar, 31.januar))
-        opprettCommandContext(hendelseId)
         val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
         val definisjonRef = opprettVarseldefinisjon(tittel = "EN_TITTEL")
         nyttVarsel(id = varselId, vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, kode = "EN_KODE", status = "VURDERT", definisjonRef = definisjonRef)
-        mediator.håndter(godkjenning(sisteOppgaveId, true))
+        mediator.håndter(godkjenning(sisteOppgaveId, true), behandlingId)
 
         assertEquals(1, testRapid.inspektør.size)
         val melding = testRapid.inspektør.message(0)
         assertEquals("varsel_endret", melding["@event_name"].asText())
         assertEquals(vedtaksperiodeId.toString(), melding["vedtaksperiode_id"].asText())
-        assertEquals(hendelseId.toString(), melding["godkjenningsbehov_id"].asText())
-        assertEquals(vedtaksperiodeId.toString(), melding["vedtaksperiode_id_til_godkjenning"].asText())
+        assertEquals(behandlingId.toString(), melding["behandling_id"].asText())
         assertEquals(varselId.toString(), melding["varsel_id"].asText())
         assertEquals("EN_TITTEL", melding["varseltittel"].asText())
         assertEquals("EN_KODE", melding["varselkode"].asText())
@@ -388,19 +379,4 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
         begrunnelser = begrunnelser,
         kommentar = kommentar
     )
-
-    @Deprecated("Skal vekk når vi har en bedre måte å linke et godkjenningsbehov til en oppgave enn via command context")
-    private fun opprettCommandContext(hendelseId: UUID = UUID.randomUUID()) {
-
-        @Language("PostgreSQL")
-        val hendelseQuery = "INSERT INTO hendelse(id, data, type, fodselsnummer) VALUES (?, '{}'::json, ?, ?)"
-        sessionOf(dataSource).use {
-            it.run(queryOf(hendelseQuery, hendelseId, "Godkjenningsbehov", FØDSELSNUMMER.toLong()).asUpdate)
-        }
-        @Language("PostgreSQL")
-        val commandContextQuery = "INSERT INTO command_context(context_id, hendelse_id, tilstand, data) VALUES (?, ?, ?, '{}'::json)"
-        sessionOf(dataSource).use {
-            it.run(queryOf(commandContextQuery, sisteCommandContextId, hendelseId, "suspendert").asUpdate)
-        }
-    }
 }

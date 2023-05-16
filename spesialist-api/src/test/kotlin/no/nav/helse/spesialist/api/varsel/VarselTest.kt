@@ -36,9 +36,8 @@ internal class VarselTest {
             godkjent = true,
             "FNR",
             UUID.randomUUID(),
-            UUID.randomUUID(),
             UUID.randomUUID()
-        ) { _: String, _: UUID, _: UUID, _: UUID, _: UUID, _: String, _: String, _: Varsel.Varselstatus, gjeldendeStatus: Varsel.Varselstatus ->
+        ) { _: String, _: UUID, _: UUID, _: UUID, _: String, _: String, _: Varsel.Varselstatus, gjeldendeStatus: Varsel.Varselstatus ->
             godkjent = true
             nyStatus = gjeldendeStatus
         }
@@ -57,9 +56,8 @@ internal class VarselTest {
             godkjent = true,
             "FNR",
             UUID.randomUUID(),
-            UUID.randomUUID(),
             UUID.randomUUID()
-        ) { _: String, _: UUID, _: UUID, _: UUID, _: UUID, _: String, _: String, _: Varsel.Varselstatus, gjeldendeStatus: Varsel.Varselstatus  ->
+        ) { _: String, _: UUID, _: UUID, _: UUID, _: String, _: String, _: Varsel.Varselstatus, gjeldendeStatus: Varsel.Varselstatus  ->
             vurdert = true
             status = gjeldendeStatus
         }
@@ -77,9 +75,8 @@ internal class VarselTest {
             godkjent = false,
             "FNR",
             UUID.randomUUID(),
-            UUID.randomUUID(),
             UUID.randomUUID()
-        ) { _: String, _: UUID, _: UUID, _: UUID, _: UUID, _: String, _: String, _: Varsel.Varselstatus, gjeldendeStatus: Varsel.Varselstatus  ->
+        ) { _: String, _: UUID, _: UUID, _: UUID, _: String, _: String, _: Varsel.Varselstatus, gjeldendeStatus: Varsel.Varselstatus  ->
             vurdert = true
             status = gjeldendeStatus
         }

@@ -97,7 +97,7 @@ internal class PersonApiTest {
         every { oppgaveDao.venterPåSaksbehandler(1L) } returns true
         every { oppgaveDao.erRiskoppgave(1L) } returns false
         every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns null
-        every { saksbehandlerMediator.håndter(godkjenning) } returns Unit
+        every { saksbehandlerMediator.håndter(godkjenning, UUID.randomUUID()) } returns Unit
         val response = runBlocking {
             client.post("/api/vedtak") {
                 contentType(ContentType.Application.Json)
@@ -113,7 +113,7 @@ internal class PersonApiTest {
         every { oppgaveDao.venterPåSaksbehandler(1L) } returns true
         every { oppgaveDao.erRiskoppgave(1L) } returns false
         every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns null
-        every { saksbehandlerMediator.håndter(godkjenning) } throws ManglerVurderingAvVarsler(1L)
+        every { saksbehandlerMediator.håndter(godkjenning, any()) } throws ManglerVurderingAvVarsler(1L)
         val response = runBlocking {
             client.post("/api/vedtak") {
                 contentType(ContentType.Application.Json)
@@ -129,7 +129,7 @@ internal class PersonApiTest {
         every { oppgaveDao.venterPåSaksbehandler(1L) } returns true
         every { oppgaveDao.erRiskoppgave(1L) } returns false
         every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns null
-        every { saksbehandlerMediator.håndter(godkjenning) } returns Unit
+        every { saksbehandlerMediator.håndter(godkjenning, any()) } returns Unit
         val response = runBlocking {
             client.post("/api/vedtak") {
                 contentType(ContentType.Application.Json)

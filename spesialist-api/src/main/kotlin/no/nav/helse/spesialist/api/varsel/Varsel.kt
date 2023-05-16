@@ -43,16 +43,15 @@ data class Varsel(
     internal fun vurder(
         godkjent: Boolean,
         fødselsnummer: String,
-        godkjenningsbehovId: UUID,
-        vedtaksperiodeIdTilGodkjenning: UUID,
+        behandlingId: UUID,
         vedtaksperiodeId: UUID,
-        vurderer: (fødselsnummer: String, godkjenningsbehovId: UUID, vedtaksperiodeIdTilGodkjenning: UUID, vedtaksperiodeId: UUID, varselId: UUID, varselTittel: String, varselkode: String, forrigeStatus: Varselstatus, gjeldendeStatus: Varselstatus) -> Unit,
+        vurderer: (fødselsnummer: String, behandlingId: UUID, vedtaksperiodeId: UUID, varselId: UUID, varselTittel: String, varselkode: String, forrigeStatus: Varselstatus, gjeldendeStatus: Varselstatus) -> Unit,
     ) {
         if (status !in (listOf(AKTIV, VURDERT))) return
 
         val forrigeStatus = status
         status = if (godkjent) GODKJENT else AVVIST
-        vurderer(fødselsnummer, godkjenningsbehovId, vedtaksperiodeIdTilGodkjenning, vedtaksperiodeId, varselId, tittel, kode, forrigeStatus, status)
+        vurderer(fødselsnummer, behandlingId, vedtaksperiodeId, varselId, tittel, kode, forrigeStatus, status)
     }
 
     data class Varselvurdering(

@@ -90,7 +90,9 @@ internal fun Route.personApi(
             totrinnsvurderingMediator.settBeslutter(totrinnsvurdering.vedtaksperiodeId, oid)
         }
 
-        saksbehandlerMediator.håndter(godkjenning)
+        val behandlingId = UUID.randomUUID()
+
+        saksbehandlerMediator.håndter(godkjenning, behandlingId)
         withContext(Dispatchers.IO) { godkjenningService.håndter(godkjenning, epostadresse, oid) }
         call.respond(HttpStatusCode.Created, mapOf("status" to "OK"))
     }
