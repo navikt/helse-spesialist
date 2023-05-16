@@ -88,6 +88,8 @@ internal class PersonApiTest {
             }
         }
         assertEquals(HttpStatusCode.Conflict, response.status)
+        val feilDto = runBlocking { response.body<JsonNode>() }
+        assertEquals("ikke_aapen_saksbehandleroppgave", feilDto["feilkode"].asText())
     }
 
     @Test

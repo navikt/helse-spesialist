@@ -83,3 +83,20 @@ class IkkeTilgangTilRiskQa(private val saksbehandlerIdent: String, private val o
         )
     }
 }
+
+class IkkeÅpenOppgave(private val saksbehandlerIdent: String, private val oppgaveId: Long): Modellfeil() {
+    override val eksternKontekst: Map<String, Any> = emptyMap()
+    override val httpkode = HttpStatusCode.Conflict
+    override val feilkode: String = "ikke_aapen_saksbehandleroppgave"
+    override fun logger() {
+        logg.info(
+            "Behandler ikke godkjenning/avslag for {}, den er enten behandlet eller invalidert",
+            keyValue("oppgaveId", oppgaveId),
+        )
+        sikkerLogg.info(
+            "Saksbehandler {} forsøkte å utbetale/avvise {} eller sende den til godkjenning, men den er behandlet eller invalidert",
+            keyValue("saksbehandlerIdent", saksbehandlerIdent),
+            keyValue("oppgaveId", oppgaveId),
+        )
+    }
+}
