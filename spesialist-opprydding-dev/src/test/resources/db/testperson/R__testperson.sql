@@ -128,3 +128,6 @@ VALUES (${sequence_number}, ${sequence_number}, 'TESTTEKST');
 
 INSERT INTO feilende_meldinger(id, event_name, opprettet, blob)
 VALUES (gen_random_uuid(), 'FEILENDE_TESTHENDELSE', now(), '{}'::json);
+
+INSERT INTO oppgave_behandling_kobling(oppgave_id, behandling_id)
+VALUES (${sequence_number}, gen_random_uuid());

@@ -246,8 +246,15 @@ internal class PersonRepository(private val dataSource: DataSource) {
         run(queryOf(query, personRef).asExecute)
     }
 
+    private fun TransactionalSession.slettOppgaveBehandlingKobling(personRef: Int) {
+        @Language("PostgreSQL")
+        val query = "DELETE FROM oppgave_behandling_kobling WHERE oppgave_id IN (SELECT o.id FROM oppgave o INNER JOIN vedtak v on v.id = o.vedtak_ref WHERE v.person_ref = ?)"
+        run(queryOf(query, personRef).asExecute)
+    }
+
     private fun TransactionalSession.slettOppgave(personRef: Int) {
         slettTildeling(personRef)
+        slettOppgaveBehandlingKobling(personRef)
         @Language("PostgreSQL")
         val query = "DELETE FROM oppgave WHERE vedtak_ref IN (SELECT id FROM vedtak WHERE person_ref = ?)"
         run(queryOf(query, personRef).asExecute)
