@@ -115,7 +115,8 @@ internal abstract class AbstractDatabaseTest {
                 "arbeidsgiver_navn",
                 "api_varseldefinisjon",
                 "inntekt",
-                "temp_manglende_varsler"
+                "temp_manglende_varsler",
+                "automatisering_korrigert_soknad"
             )
         )
         tabeller.forEach {
