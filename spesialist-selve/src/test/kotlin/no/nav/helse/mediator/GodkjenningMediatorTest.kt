@@ -64,6 +64,7 @@ internal class GodkjenningMediatorTest {
     @Test
     fun `saksbehandler utbetaling skal ikke opprette opptegnelse`() {
         mediator.saksbehandlerUtbetaling(
+            behandlingId = UUID.randomUUID(),
             hendelseId = UUID.randomUUID(),
             context = context,
             behov = UtbetalingsgodkjenningMessage("{}", utbetaling),
@@ -81,6 +82,7 @@ internal class GodkjenningMediatorTest {
     @Test
     fun `saksbehandler avvisning skal ikke opprette opptegnelse`() {
         mediator.saksbehandlerAvvisning(
+            behandlingId = UUID.randomUUID(),
             context,
             UtbetalingsgodkjenningMessage("{}", utbetaling),
             UUID.randomUUID(),
@@ -127,6 +129,7 @@ internal class GodkjenningMediatorTest {
     )
 
     private fun godkjenning(generasjoner: List<Generasjon>) = mediator.saksbehandlerUtbetaling(
+        behandlingId = UUID.randomUUID(),
         UUID.randomUUID(),
         context,
         UtbetalingsgodkjenningMessage("{}", utbetaling),

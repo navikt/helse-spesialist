@@ -21,6 +21,7 @@ internal class GodkjenningMediator(
     private val opptegnelseDao: OpptegnelseDao
 ) {
     internal fun saksbehandlerUtbetaling(
+        behandlingId: UUID,
         hendelseId: UUID,
         context: CommandContext,
         behov: UtbetalingsgodkjenningMessage,
@@ -33,6 +34,7 @@ internal class GodkjenningMediator(
         sykefraværstilfelle: Sykefraværstilfelle
     ) {
         behov.godkjennManuelt(
+            behandlingId = behandlingId,
             saksbehandlerIdent = saksbehandlerIdent,
             saksbehandlerEpost = saksbehandlerEpost,
             godkjenttidspunkt = godkjenttidspunkt,
@@ -45,6 +47,7 @@ internal class GodkjenningMediator(
     }
 
     internal fun saksbehandlerAvvisning(
+        behandlingId: UUID,
         context: CommandContext,
         behov: UtbetalingsgodkjenningMessage,
         vedtaksperiodeId: UUID,
@@ -59,6 +62,7 @@ internal class GodkjenningMediator(
         sykefraværstilfelle: Sykefraværstilfelle,
     ) {
         behov.avvisManuelt(
+            behandlingId = behandlingId,
             saksbehandlerIdent = saksbehandlerIdent,
             saksbehandlerEpost = saksbehandlerEpost,
             godkjenttidspunkt = godkjenttidspunkt,

@@ -43,6 +43,7 @@ internal class SaksbehandlerløsningTest {
 
     private fun saksbehandlerløsning(godkjent: Boolean, saksbehandlerløsning: List<UUID> = emptyList()) = Saksbehandlerløsning(
         id = randomUUID(),
+        behandlingId = randomUUID(),
         fødselsnummer = FNR,
         json = HENDELSE_JSON,
         godkjent = godkjent,

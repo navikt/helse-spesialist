@@ -370,6 +370,7 @@ internal class HendelseMediator(
     fun saksbehandlerløsning(
         message: JsonMessage,
         id: UUID,
+        behandlingId: UUID,
         godkjenningsbehovhendelseId: UUID,
         fødselsnummer: String,
         godkjent: Boolean,
@@ -386,6 +387,7 @@ internal class HendelseMediator(
         utfør(
             fødselsnummer, hendelsefabrikk.saksbehandlerløsning(
                 id,
+                behandlingId,
                 godkjenningsbehovhendelseId,
                 fødselsnummer,
                 godkjent,

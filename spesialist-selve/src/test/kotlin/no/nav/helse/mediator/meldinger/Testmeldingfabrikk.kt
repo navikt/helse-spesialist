@@ -470,6 +470,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                 "fødselsnummer" to fødselsnummer,
                 "hendelseId" to hendelseId,
                 "contextId" to contextId,
+                "behandlingId" to UUID.randomUUID(),
                 "oppgaveId" to oppgaveId,
                 "godkjent" to godkjent,
                 "godkjenttidspunkt" to godkjenttidspunkt,

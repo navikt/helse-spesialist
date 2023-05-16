@@ -508,6 +508,7 @@ internal object TestmeldingsfabrikkV2 {
             id, "saksbehandler_løsning", mutableMapOf<String, Any>(
                 "fødselsnummer" to fødselsnummer,
                 "hendelseId" to hendelseId,
+                "behandlingId" to UUID.randomUUID(),
                 "oppgaveId" to oppgaveId,
                 "godkjent" to godkjent,
                 "godkjenttidspunkt" to godkjenttidspunkt,

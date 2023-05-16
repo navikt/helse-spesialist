@@ -331,6 +331,7 @@ internal class Hendelsefabrikk(
 
     fun saksbehandlerløsning(
         id: UUID,
+        behandlingId: UUID,
         godkjenningsbehovhendelseId: UUID,
         fødselsnummer: String,
         godkjent: Boolean,
@@ -349,6 +350,7 @@ internal class Hendelsefabrikk(
         val sykefraværstilfelle = sykefraværstilfelle(fødselsnummer, skjæringstidspunkt)
         return Saksbehandlerløsning(
             id = id,
+            behandlingId = behandlingId,
             fødselsnummer = fødselsnummer,
             json = json,
             godkjent = godkjent,
@@ -373,6 +375,7 @@ internal class Hendelsefabrikk(
         val jsonNode = mapper.readTree(json)
         return saksbehandlerløsning(
             id = UUID.fromString(jsonNode["@id"].asText()),
+            behandlingId = UUID.fromString(jsonNode["behandlingId"].asText()),
             godkjenningsbehovhendelseId = UUID.fromString(jsonNode["hendelseId"].asText()),
             fødselsnummer = jsonNode["fødselsnummer"].asText(),
             godkjent = jsonNode["godkjent"].asBoolean(),

@@ -34,6 +34,7 @@ internal class SaksbehandlerløsningRiverTest {
         verify(exactly = 1) { mediator.saksbehandlerløsning(
             any(),
             ID,
+            any(),
             GODKJENNINGSBEHOV_ID,
             FNR,
             true,

@@ -43,20 +43,22 @@ internal class UtbetalingsgodkjenningMessageTest {
 
     @Test
     fun `manuelt godkjent`() {
-        utbetalingMessage.godkjennManuelt(IDENT, EPOST, GODKJENTTIDSPUNKT, emptyList())
-        assertGodkjent(false, IDENT, EPOST, GODKJENTTIDSPUNKT)
+        val behandlingId = UUID.randomUUID()
+        utbetalingMessage.godkjennManuelt(behandlingId = behandlingId, IDENT, EPOST, GODKJENTTIDSPUNKT, emptyList())
+        assertGodkjent(false, IDENT, EPOST, GODKJENTTIDSPUNKT, behandlingId)
     }
 
     @Test
     fun `manuelt avvist`() {
-        utbetalingMessage.avvisManuelt(IDENT, EPOST, GODKJENTTIDSPUNKT, null, null, null, emptyList())
-        assertIkkeGodkjent(false, IDENT, EPOST, GODKJENTTIDSPUNKT)
+        val behandlingId = UUID.randomUUID()
+        utbetalingMessage.avvisManuelt(behandlingId = behandlingId, IDENT, EPOST, GODKJENTTIDSPUNKT, null, null, null, emptyList())
+        assertIkkeGodkjent(false, IDENT, EPOST, GODKJENTTIDSPUNKT, behandlingId)
     }
 
-    private fun assertGodkjent(automatisk: Boolean, ident: String, epost: String, godkjenttidspunkt: LocalDateTime? = null) {
+    private fun assertGodkjent(automatisk: Boolean, ident: String, epost: String, godkjenttidspunkt: LocalDateTime? = null, behandlingId: UUID? = null) {
         assertMessage { løsning ->
             assertTrue(løsning.path("godkjent").booleanValue())
-            assertLøsning(automatisk, ident, epost, godkjenttidspunkt)
+            assertLøsning(automatisk, ident, epost, godkjenttidspunkt, behandlingId)
         }
     }
 
@@ -64,19 +66,21 @@ internal class UtbetalingsgodkjenningMessageTest {
         automatisk: Boolean,
         ident: String,
         epost: String,
-        godkjenttidspunkt: LocalDateTime? = null
+        godkjenttidspunkt: LocalDateTime? = null,
+        behandlingId: UUID? = null
     ) {
         assertMessage { løsning ->
             assertFalse(løsning.path("godkjent").booleanValue())
-            assertLøsning(automatisk, ident, epost, godkjenttidspunkt)
+            assertLøsning(automatisk, ident, epost, godkjenttidspunkt, behandlingId)
         }
     }
 
-    private fun assertLøsning(automatisk: Boolean, ident: String, epost: String, godkjenttidspunkt: LocalDateTime? = null) {
+    private fun assertLøsning(automatisk: Boolean, ident: String, epost: String, godkjenttidspunkt: LocalDateTime? = null, behandlingId: UUID? = null) {
         assertMessage { løsning ->
             assertEquals(automatisk, løsning.path("automatiskBehandling").booleanValue())
             assertEquals(ident, løsning.path("saksbehandlerIdent").asText())
             assertEquals(epost, løsning.path("saksbehandlerEpost").asText())
+            assertEquals(behandlingId?.toString(), løsning.path("behandlingId").textValue())
             assertDoesNotThrow { løsning.path("godkjenttidspunkt").asLocalDateTime() }
             godkjenttidspunkt?.also { assertEquals(godkjenttidspunkt, løsning.path("godkjenttidspunkt").asLocalDateTime()) }
             assertTrue(løsning.path("årsak").isMissingOrNull())

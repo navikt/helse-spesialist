@@ -24,6 +24,7 @@ internal class UtbetalingsgodkjenningMessage(json: String, private val utbetalin
 
     private fun løsAutomatisk(godkjent: Boolean, årsak: String? = null, begrunnelser: List<String>? = null) {
         løs(
+            behandlingId = null,
             automatisk = true,
             godkjent = godkjent,
             saksbehandlerIdent = "Automatisk behandlet",
@@ -37,12 +38,14 @@ internal class UtbetalingsgodkjenningMessage(json: String, private val utbetalin
     }
 
     internal fun godkjennManuelt(
+        behandlingId: UUID,
         saksbehandlerIdent: String,
         saksbehandlerEpost: String,
         godkjenttidspunkt: LocalDateTime,
         saksbehandleroverstyringer: List<UUID>
     ) {
         løsManuelt(
+            behandlingId = behandlingId,
             godkjent = true,
             saksbehandlerIdent = saksbehandlerIdent,
             saksbehandlerEpost = saksbehandlerEpost,
@@ -55,6 +58,7 @@ internal class UtbetalingsgodkjenningMessage(json: String, private val utbetalin
     }
 
     internal fun avvisManuelt(
+        behandlingId: UUID,
         saksbehandlerIdent: String,
         saksbehandlerEpost: String,
         godkjenttidspunkt: LocalDateTime,
@@ -64,6 +68,7 @@ internal class UtbetalingsgodkjenningMessage(json: String, private val utbetalin
         saksbehandleroverstyringer: List<UUID>
     ) {
         løsManuelt(
+            behandlingId = behandlingId,
             godkjent = false,
             saksbehandlerIdent = saksbehandlerIdent,
             saksbehandlerEpost = saksbehandlerEpost,
@@ -76,6 +81,7 @@ internal class UtbetalingsgodkjenningMessage(json: String, private val utbetalin
     }
 
     private fun løsManuelt(
+        behandlingId: UUID,
         godkjent: Boolean,
         saksbehandlerIdent: String,
         saksbehandlerEpost: String,
@@ -86,6 +92,7 @@ internal class UtbetalingsgodkjenningMessage(json: String, private val utbetalin
         saksbehandleroverstyringer: List<UUID>,
     ) {
         løs(
+            behandlingId = behandlingId,
             automatisk = false,
             godkjent = godkjent,
             saksbehandlerIdent = saksbehandlerIdent,
@@ -99,6 +106,7 @@ internal class UtbetalingsgodkjenningMessage(json: String, private val utbetalin
     }
 
     private fun løs(
+        behandlingId: UUID?,
         automatisk: Boolean,
         godkjent: Boolean,
         saksbehandlerIdent: String,
@@ -122,6 +130,7 @@ internal class UtbetalingsgodkjenningMessage(json: String, private val utbetalin
                 "saksbehandleroverstyringer" to saksbehandleroverstyringer
             ).apply {
                 compute("refusjontype") { _, _ -> utbetaling?.refusjonstype()?.name }
+                compute("behandlingId") { _, _ -> behandlingId }
             }.toMap()
         )
         // <midlertidig forklaring="@behovId brukes for å gruppere behov/løsning. Ble innført 28. mars 2022. Må likevel fikse godkjenningsbehov som ble opprettet før 28. mars">

@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory
  */
 internal class Saksbehandlerløsning(
     override val id: UUID,
+    behandlingId: UUID,
     private val fødselsnummer: String,
     private val json: String,
     godkjent: Boolean,
@@ -48,6 +49,7 @@ internal class Saksbehandlerløsning(
 
     override val commands = listOf(
         UtbetalingsgodkjenningCommand(
+            behandlingId = behandlingId,
             hendelseId = id,
             godkjent = godkjent,
             saksbehandlerIdent = saksbehandlerIdent,
@@ -82,7 +84,7 @@ internal class Saksbehandlerløsning(
                 .apply {
                     validate {
                         it.demandValue("@event_name", "saksbehandler_løsning")
-                        it.requireKey("@id", "fødselsnummer", "oppgaveId", "hendelseId")
+                        it.requireKey("@id", "fødselsnummer", "oppgaveId", "hendelseId", "behandlingId")
                         it.requireKey("godkjent", "saksbehandlerident", "saksbehandleroid", "saksbehandlerepost")
                         it.require("godkjenttidspunkt", JsonNode::asLocalDateTime)
                         it.interestedIn("årsak", "begrunnelser", "kommentar", "saksbehandleroverstyringer")
@@ -101,6 +103,7 @@ internal class Saksbehandlerløsning(
             mediator.saksbehandlerløsning(
                 message = packet,
                 id = id,
+                behandlingId = UUID.fromString(packet["behandlingId"].asText()),
                 godkjenningsbehovhendelseId = hendelseId,
                 fødselsnummer = packet["fødselsnummer"].asText(),
                 godkjent = packet["godkjent"].asBoolean(),

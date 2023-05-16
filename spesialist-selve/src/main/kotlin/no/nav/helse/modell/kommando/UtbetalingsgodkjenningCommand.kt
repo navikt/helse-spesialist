@@ -10,6 +10,7 @@ import no.nav.helse.modell.utbetaling.Utbetaling
 import org.slf4j.LoggerFactory
 
 internal class UtbetalingsgodkjenningCommand(
+    private val behandlingId: UUID,
     private val hendelseId: UUID,
     private val godkjent: Boolean,
     private val saksbehandlerIdent: String,
@@ -37,6 +38,7 @@ internal class UtbetalingsgodkjenningCommand(
         val behov = UtbetalingsgodkjenningMessage(behovJson, utbetaling)
         if (godkjent) {
             godkjenningMediator.saksbehandlerUtbetaling(
+                behandlingId = behandlingId,
                 hendelseId = hendelseId,
                 context = context,
                 behov = behov,
@@ -50,6 +52,7 @@ internal class UtbetalingsgodkjenningCommand(
             )
         } else {
             godkjenningMediator.saksbehandlerAvvisning(
+                behandlingId = behandlingId,
                 context = context,
                 behov = behov,
                 vedtaksperiodeId = vedtaksperiodeId,
