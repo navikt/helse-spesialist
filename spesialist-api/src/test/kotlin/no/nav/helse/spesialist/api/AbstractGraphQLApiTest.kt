@@ -119,18 +119,19 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
         private val requiredGroup: UUID = UUID.randomUUID()
         internal const val clientId = "client_id"
         internal const val issuer = "https://jwt-provider-domain"
-        private const val epostadresse = "sara.saksbehandler@nav.no"
 
-        fun HttpRequestBuilder.authentication(oid: UUID, group: String? = null) {
+        fun HttpRequestBuilder.authentication(navn: String, epost: String, ident: String, oid: String, group: String? = null) {
             header(
                 "Authorization",
                 "Bearer ${
                     jwtStub.getToken(
-                        listOfNotNull(requiredGroup.toString(), group),
-                        oid.toString(),
-                        epostadresse,
-                        clientId,
-                        issuer
+                        groups = listOfNotNull(requiredGroup.toString(), group),
+                        oid = oid,
+                        epostadresse = epost,
+                        clientId = clientId,
+                        issuer = issuer,
+                        navn = navn,
+                        navIdent = ident
                     )
                 }"
             )
@@ -211,7 +212,12 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
             client.post("/graphql") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
-                authentication(UUID.randomUUID(), group = group?.toString())
+                authentication(
+                    navn = SAKSBEHANDLER.navn,
+                    epost = SAKSBEHANDLER.epost,
+                    ident = SAKSBEHANDLER.ident,
+                    oid = SAKSBEHANDLER.oid.toString(),
+                    group = group?.toString())
                 setBody(mapOf("query" to query))
             }.body<String>()
         }

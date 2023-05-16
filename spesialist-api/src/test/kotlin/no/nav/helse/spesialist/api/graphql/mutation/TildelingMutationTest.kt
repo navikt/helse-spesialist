@@ -20,10 +20,6 @@ internal class TildelingMutationTest : AbstractGraphQLApiTest() {
                 mutation OpprettTildeling {
                     opprettTildeling(
                         oppgaveId: "$oppgaveId",
-                        saksbehandlerreferanse: "${SAKSBEHANDLER.oid}",
-                        epostadresse: "${SAKSBEHANDLER.epost}",
-                        navn: "${SAKSBEHANDLER.navn}",
-                        ident: "${SAKSBEHANDLER.ident}"
                     ) {
                         navn, oid, epost, reservert
                     }
@@ -46,10 +42,6 @@ internal class TildelingMutationTest : AbstractGraphQLApiTest() {
                 mutation OpprettTildeling {
                     opprettTildeling(
                         oppgaveId: "$oppgaveId",
-                        saksbehandlerreferanse: "${SAKSBEHANDLER.oid}",
-                        epostadresse: "${SAKSBEHANDLER.epost}",
-                        navn: "${SAKSBEHANDLER.navn}",
-                        ident: "${SAKSBEHANDLER.ident}"
                     ) {
                         navn, oid, epost, reservert
                     }

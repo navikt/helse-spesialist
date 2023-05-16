@@ -10,6 +10,11 @@ import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
+import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDER_EPOST
+import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER_IDENT
+import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER_NAVN
+import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER_OID
+import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGER
 import no.nav.helse.spesialist.api.graphql.schema.Tildeling
 import no.nav.helse.spesialist.api.tildeling.TildelingService
 import org.slf4j.Logger
@@ -26,14 +31,13 @@ class TildelingMutation(
     @Suppress("unused")
     suspend fun opprettTildeling(
         oppgaveId: String,
-        saksbehandlerreferanse: String,
-        epostadresse: String,
-        navn: String,
-        ident: String,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Tildeling?> = withContext(Dispatchers.IO) {
-        val tilganger = env.graphQlContext.get<SaksbehandlerTilganger>("tilganger")
-        val saksbehandlerOid = UUID.fromString(saksbehandlerreferanse)
+        val tilganger = env.graphQlContext.get<SaksbehandlerTilganger>(TILGANGER.key)
+        val saksbehandlerOid = UUID.fromString(env.graphQlContext.get(SAKSBEHANDLER_OID.key))
+        val epostadresse = env.graphQlContext.get<String>(SAKSBEHANDER_EPOST.key)
+        val navn = env.graphQlContext.get<String>(SAKSBEHANDLER_NAVN.key)
+        val ident = env.graphQlContext.get<String>(SAKSBEHANDLER_IDENT.key)
         val tildeling = try {
             tildelingService.tildelOppgaveTilSaksbehandler(
                 oppgaveId = oppgaveId.toLong(),

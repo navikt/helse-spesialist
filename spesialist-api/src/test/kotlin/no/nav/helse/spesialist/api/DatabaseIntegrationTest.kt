@@ -65,7 +65,12 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         val ENHET = Enhet(101, "Halden")
         val PERIODE = Periode(UUID.randomUUID(), LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 31))
         val ARBEIDSFORHOLD = Arbeidsforhold(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 2), "EN TITTEL", 100)
-        val SAKSBEHANDLER = Saksbehandler(UUID.randomUUID(), "Jan Banan", "jan.banan@nav.no", "B123456")
+        val SAKSBEHANDLER = Saksbehandler(
+            oid = UUID.randomUUID(),
+            navn = "Jan Banan",
+            ident = "B123456",
+            epost = "jan.banan@nav.no"
+        )
 
         const val FØDSELSNUMMER = "01017011111"
         const val AKTØRID = "01017011111111"
