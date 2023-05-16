@@ -28,7 +28,7 @@ internal class VarselTest {
     fun `varsel blir ikke godkjent hvis det ikke er vurdert`(status: Varsel.Varselstatus) {
         val varsel = opprettVarsel(status)
         var godkjent = false
-        varsel.godkjenn(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID()) { _: UUID, _: UUID, _: UUID, _: UUID, _: String, _: String ->
+        varsel.godkjenn("FNR", UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID()) { _: String, _: UUID, _: UUID, _: UUID, _: UUID, _: String, _: String, _: Varsel.Varselstatus, _: Varsel.Varselstatus ->
             godkjent = true
         }
 
@@ -39,7 +39,7 @@ internal class VarselTest {
     fun `godkjenn varsel som er vurdert`() {
         val varsel = opprettVarsel(Varsel.Varselstatus.VURDERT)
         var godkjent = false
-        varsel.godkjenn(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID()) { _: UUID, _: UUID, _: UUID, _: UUID, _: String, _: String ->
+        varsel.godkjenn("FNR",UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID()) { _: String,  _: UUID, _: UUID, _: UUID, _: UUID, _: String, _: String, _: Varsel.Varselstatus, _: Varsel.Varselstatus  ->
             godkjent = true
         }
 

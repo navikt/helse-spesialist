@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.api
 import java.util.UUID
 import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments.kv
+import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
@@ -13,6 +14,7 @@ import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.utbetaling.AnnulleringDto
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
+import no.nav.helse.spesialist.api.varsel.Varsel
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode.Companion.godkjennVurderteVarsler
 import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode.Companion.harAktiveVarsler
@@ -84,15 +86,35 @@ class SaksbehandlerMediator(
         if (godkjenning.godkjent) {
             if (perioderTilBehandling.harAktiveVarsler())
                 throw ManglerVurderingAvVarsler(godkjenning.oppgavereferanse)
-
+            val fødselsnummer = oppgaveApiDao.finnFødselsnummer(godkjenning.oppgavereferanse)
             val godkjenningsbehovId = oppgaveApiDao.finnGodkjenningsbehovId(godkjenning.oppgavereferanse)
             val vedtaksperiodeIdTilGodkjenning = oppgaveApiDao.finnVedtaksperiodeId(godkjenning.oppgavereferanse)
-            perioderTilBehandling.godkjennVurderteVarsler(godkjenningsbehovId, vedtaksperiodeIdTilGodkjenning, this::godkjennVarsel)
+            perioderTilBehandling.godkjennVurderteVarsler(godkjenningsbehovId, vedtaksperiodeIdTilGodkjenning, fødselsnummer, this::godkjennVarsel)
         }
     }
 
-    private fun godkjennVarsel(godkjenningsbehovId: UUID, vedtaksperiodeIdTilGodkjenning: UUID, vedtaksperiodeId: UUID, varselId: UUID, varselTittel: String, varselkode: String) {
+    private fun godkjennVarsel(fødselsnummer: String, godkjenningsbehovId: UUID, vedtaksperiodeIdTilGodkjenning: UUID, vedtaksperiodeId: UUID, varselId: UUID, varseltittel: String, varselkode: String, forrigeStatus: Varsel.Varselstatus, gjeldendeStatus: Varsel.Varselstatus) {
         varselRepository.godkjennVarselFor(varselId)
+        val message = JsonMessage.newMessage(
+            "varsel_endret", mapOf(
+                "fødselsnummer" to fødselsnummer,
+                "godkjenningsbehov_id" to godkjenningsbehovId,
+                "vedtaksperiode_id_til_godkjenning" to vedtaksperiodeIdTilGodkjenning,
+                "vedtaksperiode_id" to vedtaksperiodeId,
+                "varsel_id" to varselId,
+                "varseltittel" to varseltittel,
+                "varselkode" to varselkode,
+                "forrige_status" to forrigeStatus.name,
+                "gjeldende_status" to gjeldendeStatus.name
+            )
+        )
+        sikkerlogg.info(
+            "Publiserer varsel_endret for varsel med {}, {}, {}",
+            kv("varselId", varselId),
+            kv("varselkode", varselkode),
+            kv("status", gjeldendeStatus)
+        )
+        rapidsConnection.publish(fødselsnummer, message.toJson())
     }
 
     fun håndterTotrinnsvurdering(oppgavereferanse: Long) {

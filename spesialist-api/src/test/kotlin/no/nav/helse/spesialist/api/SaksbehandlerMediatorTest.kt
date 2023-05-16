@@ -125,6 +125,33 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `sender ut varsel_endret ved godkjenning av varsler`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjonId = UUID.randomUUID()
+        val hendelseId = UUID.randomUUID()
+        val varselId = UUID.randomUUID()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver(), periode = Periode(vedtaksperiodeId, 1.januar, 31.januar))
+        opprettCommandContext(hendelseId)
+        val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
+        val definisjonRef = opprettVarseldefinisjon(tittel = "EN_TITTEL")
+        nyttVarsel(id = varselId, vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, kode = "EN_KODE", status = "VURDERT", definisjonRef = definisjonRef)
+        mediator.håndter(godkjenning(sisteOppgaveId, true))
+
+        assertEquals(1, testRapid.inspektør.size)
+        val melding = testRapid.inspektør.message(0)
+        assertEquals("varsel_endret", melding["@event_name"].asText())
+        assertEquals(vedtaksperiodeId.toString(), melding["vedtaksperiode_id"].asText())
+        assertEquals(hendelseId.toString(), melding["godkjenningsbehov_id"].asText())
+        assertEquals(vedtaksperiodeId.toString(), melding["vedtaksperiode_id_til_godkjenning"].asText())
+        assertEquals(varselId.toString(), melding["varsel_id"].asText())
+        assertEquals("EN_TITTEL", melding["varseltittel"].asText())
+        assertEquals("EN_KODE", melding["varselkode"].asText())
+        assertEquals("GODKJENT", melding["gjeldende_status"].asText())
+        assertEquals("VURDERT", melding["forrige_status"].asText())
+
+    }
+
+    @Test
     fun `håndterer annullering`() {
         mediator.håndter(annullering(), saksbehandler)
 
@@ -347,8 +374,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
     )
 
     @Deprecated("Skal vekk når vi har en bedre måte å linke et godkjenningsbehov til en oppgave enn via command context")
-    private fun opprettCommandContext() {
-        val hendelseId = UUID.randomUUID()
+    private fun opprettCommandContext(hendelseId: UUID = UUID.randomUUID()) {
 
         @Language("PostgreSQL")
         val hendelseQuery = "INSERT INTO hendelse(id, data, type, fodselsnummer) VALUES (?, '{}'::json, ?, ?)"

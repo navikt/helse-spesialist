@@ -40,14 +40,16 @@ data class Varsel(
     }
 
     internal fun godkjenn(
+        fødselsnummer: String,
         godkjenningsbehovId: UUID,
         vedtaksperiodeIdTilGodkjenning: UUID,
         vedtaksperiodeId: UUID,
-        godkjenner: (godkjenningsbehovId: UUID, vedtaksperiodeIdTilGodkjenning: UUID, vedtaksperiodeId: UUID, varselId: UUID, varselTittel: String, varselkode: String) -> Unit,
+        godkjenner: (fødselsnummer: String, godkjenningsbehovId: UUID, vedtaksperiodeIdTilGodkjenning: UUID, vedtaksperiodeId: UUID, varselId: UUID, varselTittel: String, varselkode: String, forrigeStatus: Varselstatus, gjeldendeStatus: Varselstatus) -> Unit,
     ) {
         if (status != VURDERT) return
+        val forrigeStatus = status
         status = GODKJENT
-        godkjenner(godkjenningsbehovId, vedtaksperiodeIdTilGodkjenning, vedtaksperiodeId, varselId, tittel, kode)
+        godkjenner(fødselsnummer, godkjenningsbehovId, vedtaksperiodeIdTilGodkjenning, vedtaksperiodeId, varselId, tittel, kode, forrigeStatus, status)
     }
 
     data class Varselvurdering(

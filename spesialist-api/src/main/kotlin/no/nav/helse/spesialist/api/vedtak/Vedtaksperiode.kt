@@ -27,11 +27,12 @@ internal data class Vedtaksperiode(
         fun Set<Vedtaksperiode>.godkjennVurderteVarsler(
             godkjenningsbehovId: UUID,
             vedtaksperiodeIdTilGodkjenning: UUID,
-            godkjenner: (godkjenningsbehovId: UUID, vedtaksperiodeIdTilGodkjenning: UUID, vedtaksperiodeId: UUID, varselId: UUID, varselTittel: String, varselkode: String) -> Unit
+            fødselsnummer: String,
+            godkjenner: (fødselsnummer: String, godkjenningsbehovId: UUID, vedtaksperiodeIdTilGodkjenning: UUID, vedtaksperiodeId: UUID, varselId: UUID, varselTittel: String, varselkode: String, forrigeStatus: Varsel.Varselstatus, gjeldendeStatus: Varsel.Varselstatus) -> Unit
         ) {
             forEach { vedtaksperiode ->
                 vedtaksperiode.varsler.forEach {
-                    it.godkjenn(godkjenningsbehovId, vedtaksperiodeIdTilGodkjenning, vedtaksperiode.vedtaksperiodeId, godkjenner)
+                    it.godkjenn(fødselsnummer, godkjenningsbehovId, vedtaksperiodeIdTilGodkjenning, vedtaksperiode.vedtaksperiodeId, godkjenner)
                 }
             }
         }
