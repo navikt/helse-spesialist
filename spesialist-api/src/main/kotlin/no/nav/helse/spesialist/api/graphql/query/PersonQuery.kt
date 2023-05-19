@@ -8,6 +8,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.graphql.schema.Person
@@ -105,6 +106,8 @@ class PersonQuery(
         return if (person == null) {
             DataFetcherResult.newResult<Person?>().error(getNotFoundError(fødselsnummer)).build()
         } else {
+            // lagt til for å feilsøke i prod 19.05.23
+            sikkerLogg.info("Returnerer person til speil: {}", kv("person", person))
             DataFetcherResult.newResult<Person?>().data(person).build()
         }
     }
