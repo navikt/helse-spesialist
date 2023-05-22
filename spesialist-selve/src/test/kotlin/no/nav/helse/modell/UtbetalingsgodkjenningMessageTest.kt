@@ -13,6 +13,7 @@ import no.nav.helse.rapids_rivers.isMissingOrNull
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -56,9 +57,10 @@ internal class UtbetalingsgodkjenningMessageTest {
     }
 
     private fun assertGodkjent(automatisk: Boolean, ident: String, epost: String, godkjenttidspunkt: LocalDateTime? = null, behandlingId: UUID? = null) {
+        assertBehandlingId(behandlingId)
         assertMessage { løsning ->
             assertTrue(løsning.path("godkjent").booleanValue())
-            assertLøsning(automatisk, ident, epost, godkjenttidspunkt, behandlingId)
+            assertLøsning(automatisk, ident, epost, godkjenttidspunkt)
         }
     }
 
@@ -69,18 +71,25 @@ internal class UtbetalingsgodkjenningMessageTest {
         godkjenttidspunkt: LocalDateTime? = null,
         behandlingId: UUID? = null
     ) {
+        assertBehandlingId(behandlingId)
         assertMessage { løsning ->
             assertFalse(løsning.path("godkjent").booleanValue())
-            assertLøsning(automatisk, ident, epost, godkjenttidspunkt, behandlingId)
+            assertLøsning(automatisk, ident, epost, godkjenttidspunkt)
         }
     }
 
-    private fun assertLøsning(automatisk: Boolean, ident: String, epost: String, godkjenttidspunkt: LocalDateTime? = null, behandlingId: UUID? = null) {
+    private fun assertBehandlingId(behandlingId: UUID?) {
+        val message = objectMapper.readTree(utbetalingMessage.toJson())
+        val faktiskBehandlingId = message["behandlingId"].textValue()
+        if (behandlingId != null) assertEquals(behandlingId.toString(), faktiskBehandlingId)
+        else assertNotNull(faktiskBehandlingId)
+    }
+
+    private fun assertLøsning(automatisk: Boolean, ident: String, epost: String, godkjenttidspunkt: LocalDateTime? = null) {
         assertMessage { løsning ->
             assertEquals(automatisk, løsning.path("automatiskBehandling").booleanValue())
             assertEquals(ident, løsning.path("saksbehandlerIdent").asText())
             assertEquals(epost, løsning.path("saksbehandlerEpost").asText())
-            assertEquals(behandlingId?.toString(), løsning.path("behandlingId").textValue())
             assertDoesNotThrow { løsning.path("godkjenttidspunkt").asLocalDateTime() }
             godkjenttidspunkt?.also { assertEquals(godkjenttidspunkt, løsning.path("godkjenttidspunkt").asLocalDateTime()) }
             assertTrue(løsning.path("årsak").isMissingOrNull())

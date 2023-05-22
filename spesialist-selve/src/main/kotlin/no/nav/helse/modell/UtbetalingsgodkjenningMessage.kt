@@ -130,7 +130,6 @@ internal class UtbetalingsgodkjenningMessage(json: String, private val utbetalin
                 "saksbehandleroverstyringer" to saksbehandleroverstyringer
             ).apply {
                 compute("refusjontype") { _, _ -> utbetaling?.refusjonstype()?.name }
-                compute("behandlingId") { _, _ -> behandlingId }
             }.toMap()
         )
         // <midlertidig forklaring="@behovId brukes for å gruppere behov/løsning. Ble innført 28. mars 2022. Må likevel fikse godkjenningsbehov som ble opprettet før 28. mars">
@@ -140,6 +139,9 @@ internal class UtbetalingsgodkjenningMessage(json: String, private val utbetalin
         behov["@løsning"] = løsning
         behov["@id"] = UUID.randomUUID()
         behov["@opprettet"] = LocalDateTime.now()
+        // Foreløpig opprettes behandlingId kun ved godkjenning/avvisning av oppgave. For at den ikke skal være optional utad
+        // genererer vi en random uuid her. På sikt vil behandlingId sannsynligvis følge med fra vi mottar et godkjenningsbehov.
+        behov["behandlingId"] = behandlingId ?: UUID.randomUUID()
     }
 
     internal fun lagVedtaksperiodeGodkjent(
