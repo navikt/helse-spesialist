@@ -17,7 +17,6 @@ class Oppgavemelder(private val oppgaveApiDao: OppgaveApiDao, private val rapids
         return fødselsnummer to JsonMessage.newMessage("oppgave_oppdatert", mutableMapOf(
             "@forårsaket_av" to mapOf("id" to oppgavemelding.hendelseId),
             "hendelseId" to oppgavemelding.hendelseId,
-            "contextId" to oppgavemelding.contextId,
             "oppgaveId" to oppgavemelding.oppgaveId,
             "status" to oppgavemelding.status.name,
             "type" to oppgavemelding.type.name,
@@ -32,7 +31,6 @@ class Oppgavemelder(private val oppgaveApiDao: OppgaveApiDao, private val rapids
 
     data class Oppgavemelding(
         val hendelseId: UUID,
-        val contextId: UUID,
         val oppgaveId: Long,
         val status: Oppgavestatus,
         val type: Oppgavetype,

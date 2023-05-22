@@ -234,7 +234,6 @@ internal class OppgaveMediatorTest {
         testRapid.inspektør.message(indeks).also {
             assertEquals(navn, it.path("@event_name").asText())
             assertEquals(HENDELSE_ID, UUID.fromString(it.path("hendelseId").asText()))
-            assertEquals(COMMAND_CONTEXT_ID, UUID.fromString(it.path("contextId").asText()))
             assertEquals(status, enumValueOf<Oppgavestatus>(it.path("status").asText()))
             assertTrue(it.hasNonNull("oppgaveId"))
             assertBlock(it)

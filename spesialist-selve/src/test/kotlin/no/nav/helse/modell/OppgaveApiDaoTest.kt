@@ -534,7 +534,6 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
         val oppgavemelding = oppgaveApiDao.hentOppgavemelding(oppgaveId!!)
         val forventetOppgavemleding = Oppgavemelder.Oppgavemelding(
             HENDELSE_ID,
-            CONTEXT_ID,
             oppgaveId,
             Oppgavestatus.AvventerSaksbehandler,
             Oppgavetype.SØKNAD,

@@ -56,7 +56,6 @@ class Oppgave private constructor(
             oppgaveDao: OppgaveDao
         ): Pair<String, JsonMessage> {
             val hendelseId = oppgaveDao.finnHendelseId(oppgaveId)
-            val contextId = oppgaveDao.finnContextId(oppgaveId)
             val oppgave = requireNotNull(oppgaveDao.finn(oppgaveId))
             val fødselsnummer = oppgaveDao.finnFødselsnummer(oppgaveId)
             // @TODO bruke ny totrinnsvurderingtabell eller fjerne?
@@ -66,7 +65,6 @@ class Oppgave private constructor(
             return fødselsnummer to lagMelding(
                 eventName = eventName,
                 hendelseId = hendelseId,
-                contextId = contextId,
                 oppgaveId = oppgaveId,
                 status = oppgave.status,
                 type = oppgave.type,
@@ -82,7 +80,6 @@ class Oppgave private constructor(
         private fun lagMelding(
             eventName: String,
             hendelseId: UUID,
-            contextId: UUID,
             oppgaveId: Long,
             status: Oppgavestatus,
             type: Oppgavetype,
@@ -98,7 +95,6 @@ class Oppgave private constructor(
                     "id" to hendelseId
                 ),
                 "hendelseId" to hendelseId,
-                "contextId" to contextId,
                 "oppgaveId" to oppgaveId,
                 "status" to status.name,
                 "type" to type.name,

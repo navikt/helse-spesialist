@@ -275,7 +275,6 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
     ).single(mapOf("oppgaveId" to oppgaveId)) {
         Oppgavemelder.Oppgavemelding(
             hendelseId = it.uuid("hendelse_id"),
-            contextId = it.uuid("context_id"),
             oppgaveId = it.long("oppgave_id"),
             status = Oppgavestatus.valueOf(it.string("status")),
             type = Oppgavetype.valueOf(it.string("type")),
