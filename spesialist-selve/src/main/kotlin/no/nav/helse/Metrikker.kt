@@ -44,8 +44,6 @@ private val registrerTidsbrukForBehov = Summary.build("behov_tidsbruk", "Måler 
     .labelNames("behov")
     .register()
 
-internal fun tellWarning(warning: String) = varselteller.labels("WARN", warning).inc()
-
 internal fun tellVarsel(varselkode: String) = varselteller.labels("WARN", varselkode).inc()
 
 internal fun tellInaktivtVarsel(varselkode: String) = inaktiveVarslerteller.labels("WARN", varselkode).inc()
