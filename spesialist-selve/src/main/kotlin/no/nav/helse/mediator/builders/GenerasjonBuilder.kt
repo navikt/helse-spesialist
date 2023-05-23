@@ -6,6 +6,7 @@ import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Generasjon
+import no.nav.helse.modell.vedtaksperiode.IVedtaksperiodeObserver
 
 class GenerasjonBuilder(
     private val vedtaksperiodeId: UUID
@@ -17,6 +18,18 @@ class GenerasjonBuilder(
     private lateinit var tilstand: Generasjon.Tilstand
     private var utbetalingId: UUID? = null
     private val varsler = mutableListOf<Varsel>()
+
+    internal fun buildFirst(
+        generasjonId: UUID = UUID.randomUUID(),
+        fom: LocalDate,
+        tom: LocalDate,
+        skjæringstidspunkt: LocalDate,
+        vararg observers: IVedtaksperiodeObserver,
+    ): Generasjon {
+        return Generasjon.nyVedtaksperiode(generasjonId, vedtaksperiodeId, fom, tom, skjæringstidspunkt).also {
+            it.registrer(*observers)
+        }
+    }
 
     internal fun build(
         generasjonRepository: ActualGenerasjonRepository,

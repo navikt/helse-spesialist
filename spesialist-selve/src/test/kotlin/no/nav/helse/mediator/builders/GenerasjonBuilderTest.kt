@@ -17,7 +17,7 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-class VedtaksperiodeBuilderTest : AbstractDatabaseTest() {
+class GenerasjonBuilderTest : AbstractDatabaseTest() {
     private val varselRepository = ActualVarselRepository(dataSource)
     private val generasjonRepository = ActualGenerasjonRepository(dataSource)
 
@@ -46,6 +46,16 @@ class VedtaksperiodeBuilderTest : AbstractDatabaseTest() {
             forventetVedtaksperiode,
             vedtaksperiode
         )
+    }
+
+    @Test
+    fun `bygg første generasjon`() {
+        val generasjonId = UUID.randomUUID()
+        val vedtaksperiodeId = UUID.randomUUID()
+        val builder = GenerasjonBuilder(vedtaksperiodeId)
+        val vedtaksperiode = builder.buildFirst(generasjonId, 1.januar, 31.januar, 1.januar, generasjonRepository, varselRepository)
+        val forventetVedtaksperiode = Generasjon(generasjonId, vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
+        assertEquals(forventetVedtaksperiode, vedtaksperiode)
     }
 
     @Test

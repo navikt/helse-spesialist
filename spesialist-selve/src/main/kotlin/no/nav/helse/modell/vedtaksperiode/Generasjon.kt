@@ -347,22 +347,20 @@ internal class Generasjon private constructor(
         private val logg = LoggerFactory.getLogger(Generasjon::class.java)
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
-        internal fun håndterVedtaksperiodeOpprettet(vedtaksperiodeId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate): Generasjon {
+        internal fun nyVedtaksperiode(
+            generasjonId: UUID = UUID.randomUUID(),
+            vedtaksperiodeId: UUID,
+            fom: LocalDate,
+            tom: LocalDate,
+            skjæringstidspunkt: LocalDate,
+        ): Generasjon {
             return opprett(
-                id = UUID.randomUUID(),
+                id = generasjonId,
                 vedtaksperiodeId = vedtaksperiodeId,
                 fom = fom,
                 tom = tom,
                 skjæringstidspunkt = skjæringstidspunkt,
             )
-        }
-
-        private fun Generasjon.opprettNeste(generasjonId: UUID, hendelseId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate): Generasjon {
-            val nyGenerasjon = opprett(generasjonId, this.vedtaksperiodeId, fom, tom, skjæringstidspunkt)
-            nyGenerasjon.registrer(*this.observers.toTypedArray())
-            nyGenerasjon.opprett(hendelseId)
-
-            return nyGenerasjon
         }
 
         internal fun fraLagring(
@@ -392,6 +390,14 @@ internal class Generasjon private constructor(
                 tom = tom,
                 skjæringstidspunkt = skjæringstidspunkt,
             )
+        }
+
+        private fun Generasjon.opprettNeste(generasjonId: UUID, hendelseId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate): Generasjon {
+            val nyGenerasjon = opprett(generasjonId, this.vedtaksperiodeId, fom, tom, skjæringstidspunkt)
+            nyGenerasjon.registrer(*this.observers.toTypedArray())
+            nyGenerasjon.opprett(hendelseId)
+
+            return nyGenerasjon
         }
 
         internal fun List<Generasjon>.håndterOppdateringer(

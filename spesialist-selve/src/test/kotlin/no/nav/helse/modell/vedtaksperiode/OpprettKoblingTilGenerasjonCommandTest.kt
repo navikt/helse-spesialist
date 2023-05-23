@@ -12,10 +12,11 @@ import org.junit.jupiter.api.Test
 
 class OpprettKoblingTilGenerasjonCommandTest: AbstractDatabaseTest() {
     private val generasjonRepository = ActualGenerasjonRepository(dataSource)
+    private val generasjonId = UUID.randomUUID()
     private val vedtaksperiodeId = UUID.randomUUID()
     private val utbetalingId = UUID.randomUUID()
     private val hendelseId = UUID.randomUUID()
-    private val generasjon = Generasjon.håndterVedtaksperiodeOpprettet(vedtaksperiodeId, 1.januar, 31.januar, 1.januar).also {
+    private val generasjon = Generasjon.nyVedtaksperiode(generasjonId, vedtaksperiodeId, 1.januar, 31.januar, 1.januar).also {
         it.registrer(generasjonRepository)
     }
     private val command = OpprettKoblingTilGenerasjonCommand(

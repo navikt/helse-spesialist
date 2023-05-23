@@ -163,6 +163,15 @@ internal class Hendelsefabrikk(
         return GenerasjonBuilder(vedtaksperiodeId = vedtaksperiodeId).build(generasjonRepository, varselRepository)
     }
 
+    private fun førsteGenerasjon(vedtaksperiodeId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate): Generasjon {
+        return GenerasjonBuilder(vedtaksperiodeId).buildFirst(
+            fom = fom,
+            tom = tom,
+            skjæringstidspunkt = skjæringstidspunkt,
+            observers = arrayOf(generasjonRepository, varselRepository)
+        )
+    }
+
     fun godkjenning(
         id: UUID,
         fødselsnummer: String,
@@ -819,7 +828,6 @@ internal class Hendelsefabrikk(
         skjæringstidspunkt: LocalDate,
         json: String,
     ): VedtaksperiodeOpprettet {
-        val førsteGenerasjon = Generasjon.håndterVedtaksperiodeOpprettet(vedtaksperiodeId, fom, tom, skjæringstidspunkt).also { it.registrer(generasjonRepository) }
         return VedtaksperiodeOpprettet(
             id = id,
             fødselsnummer = fødselsnummer,
@@ -830,7 +838,7 @@ internal class Hendelsefabrikk(
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
             vedtakDao = vedtakDao,
-            generasjon = førsteGenerasjon,
+            generasjon = førsteGenerasjon(vedtaksperiodeId, fom, tom, skjæringstidspunkt),
             json = json,
         )
     }
