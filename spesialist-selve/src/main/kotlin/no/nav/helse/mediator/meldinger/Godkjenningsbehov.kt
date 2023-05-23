@@ -9,7 +9,6 @@ import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsforhold.command.KlargjørArbeidsforholdCommand
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
@@ -77,7 +76,6 @@ internal class Godkjenningsbehov(
     personDao: PersonDao,
     arbeidsgiverDao: ArbeidsgiverDao,
     vedtakDao: VedtakDao,
-    warningDao: WarningDao,
     snapshotDao: SnapshotDao,
     commandContextDao: CommandContextDao,
     risikovurderingDao: RisikovurderingDao,
@@ -138,7 +136,6 @@ internal class Godkjenningsbehov(
             arbeidsgiverDao = arbeidsgiverDao,
             snapshotDao = snapshotDao,
             vedtakDao = vedtakDao,
-            warningDao = warningDao,
             utbetalingId = utbetalingId,
             utbetalingDao = utbetalingDao,
         ),

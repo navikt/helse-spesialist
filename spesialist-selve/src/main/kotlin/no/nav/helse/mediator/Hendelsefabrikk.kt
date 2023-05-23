@@ -33,7 +33,6 @@ import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
@@ -85,7 +84,6 @@ internal class Hendelsefabrikk(
     private val personDao: PersonDao = PersonDao(dataSource),
     private val arbeidsgiverDao: ArbeidsgiverDao = ArbeidsgiverDao(dataSource),
     private val vedtakDao: VedtakDao = VedtakDao(dataSource),
-    private val warningDao: WarningDao = WarningDao(dataSource),
     private val oppgaveDao: OppgaveDao = OppgaveDao(dataSource),
     private val commandContextDao: CommandContextDao = CommandContextDao(dataSource),
     private val reservasjonDao: ReservasjonDao = ReservasjonDao(dataSource),
@@ -215,7 +213,6 @@ internal class Hendelsefabrikk(
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
             vedtakDao = vedtakDao,
-            warningDao = warningDao,
             snapshotDao = snapshotDao,
             commandContextDao = commandContextDao,
             risikovurderingDao = risikovurderingDao,
