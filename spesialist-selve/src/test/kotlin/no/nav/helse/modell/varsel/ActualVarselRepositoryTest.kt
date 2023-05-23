@@ -8,7 +8,6 @@ import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.januar
 import no.nav.helse.mediator.meldinger.Varseldefinisjon
 import no.nav.helse.modell.varsel.Varsel.Status.AVVIST
-import no.nav.helse.modell.varsel.Varsel.Status.GODKJENT
 import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
 import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Generasjon
@@ -55,33 +54,11 @@ internal class ActualVarselRepositoryTest : AbstractDatabaseTest() {
     }
 
     @Test
-    fun `kan godkjenne varsel`() {
-        varselRepository.varselOpprettet(UUID.randomUUID(), vedtaksperiodeId, generasjonId, "EN_KODE", LocalDateTime.now())
-        varselRepository.godkjennFor(vedtaksperiodeId, generasjonId, "EN_KODE", "EN_IDENT", null)
-        assertEquals(GODKJENT, statusFor(generasjonId, "EN_KODE"))
-    }
-
-    @Test
-    fun `godkjenning av varsel med definisjonId medfører at varselet lagres med referanse til denne definisjonen`() {
-        varselRepository.varselOpprettet(UUID.randomUUID(), vedtaksperiodeId, generasjonId, "EN_KODE", LocalDateTime.now())
-        varselRepository.godkjennFor(vedtaksperiodeId, generasjonId, "EN_KODE", "EN_IDENT", definisjonId)
-        assertEquals(GODKJENT, statusFor(generasjonId, "EN_KODE"))
-        assertDefinisjonFor(vedtaksperiodeId, "EN_KODE", definisjonId)
-    }
-
-    @Test
     fun `avvisning av varsel med definisjonId medfører at varselet lagres med referanse til denne definisjonen`() {
         generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
         generasjon.håndterAvvistAvSaksbehandler("EN_KODE")
         assertEquals(AVVIST, statusFor(generasjonId, "EN_KODE"))
         assertDefinisjonFor(vedtaksperiodeId, "EN_KODE", definisjonId)
-    }
-
-    @Test
-    fun `kan avvise varsel`() {
-        varselRepository.varselOpprettet(UUID.randomUUID(), vedtaksperiodeId, generasjonId, "EN_KODE", LocalDateTime.now())
-        varselRepository.avvisFor(vedtaksperiodeId, generasjonId, "EN_KODE", "EN_IDENT", null)
-        assertEquals(AVVIST, statusFor(generasjonId, "EN_KODE"))
     }
 
     @Test
@@ -96,20 +73,6 @@ internal class ActualVarselRepositoryTest : AbstractDatabaseTest() {
     fun `nytt varsel er aktivt`() {
         varselRepository.varselOpprettet(UUID.randomUUID(), vedtaksperiodeId, generasjonId, "EN_KODE", LocalDateTime.now())
         assertAktiv(generasjonId, "EN_KODE")
-    }
-
-    @Test
-    fun `varsel har ikke lenger aktiv-status når det er godkjent`() {
-        varselRepository.varselOpprettet(UUID.randomUUID(), vedtaksperiodeId, generasjonId, "EN_KODE", LocalDateTime.now())
-        varselRepository.godkjennFor(vedtaksperiodeId, generasjonId, "EN_KODE", "EN_IDENT", null)
-        assertGodkjent(generasjonId, "EN_KODE")
-    }
-
-    @Test
-    fun `varsel har ikke lenger aktiv-status når det er avvist`() {
-        varselRepository.varselOpprettet(UUID.randomUUID(), vedtaksperiodeId, generasjonId, "EN_KODE", LocalDateTime.now())
-        varselRepository.avvisFor(vedtaksperiodeId, generasjonId, "EN_KODE", "EN_IDENT", null)
-        assertAvvist(generasjonId, "EN_KODE")
     }
 
     @Test
@@ -217,20 +180,5 @@ internal class ActualVarselRepositoryTest : AbstractDatabaseTest() {
             )
         }
         assertEquals("GODKJENT", status)
-    }
-
-    private fun assertAvvist(generasjonId: UUID, varselkode: String) {
-        val status = sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query = "SELECT status FROM selve_varsel WHERE generasjon_ref = (SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = ?) AND kode = ?;"
-            session.run(
-                queryOf(
-                    query,
-                    generasjonId,
-                    varselkode
-                ).map { it.string(1) }.asSingle
-            )
-        }
-        assertEquals("AVVIST", status)
     }
 }
