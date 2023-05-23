@@ -1,13 +1,13 @@
 package no.nav.helse.modell
 
 import java.time.LocalDateTime
+import java.util.*
+import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import org.intellij.lang.annotations.Language
-import java.util.*
-import javax.sql.DataSource
 
 internal class WarningDao(private val dataSource: DataSource) {
     internal fun leggTilWarnings(vedtaksperiodeId: UUID, warnings: List<Warning>) {
@@ -89,25 +89,6 @@ internal class WarningDao(private val dataSource: DataSource) {
             )
         }.asList)
     }
-
-    internal fun setWarningMedMeldingInaktiv(vedtaksperiodeId: UUID, melding: String, inaktiv_fra: LocalDateTime) =
-        sessionOf(dataSource).use { session ->
-            val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return@use
-
-            @Language("PostgreSQL")
-            val statement = """
-                UPDATE warning 
-                SET inaktiv_fra = :inaktiv_fra 
-                WHERE vedtak_ref = :vedtak_ref
-                AND melding = :melding
-            """.trimIndent()
-            session.run(
-                queryOf(
-                    statement,
-                    mapOf("inaktiv_fra" to inaktiv_fra, "vedtak_ref" to vedtakRef, "melding" to melding)
-                ).asUpdate
-            )
-        }
 
     private fun finnVedtakId(vedtaksperiodeId: UUID) = sessionOf(dataSource).use  { session ->
         @Language("PostgreSQL")
