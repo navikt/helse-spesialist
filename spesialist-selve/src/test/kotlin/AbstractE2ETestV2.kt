@@ -45,7 +45,6 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALING_FEILET
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.Varselkode
-import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
@@ -1073,19 +1072,6 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
             val faktiskKommentar = it.takeIf { it.hasNonNull("kommentar") }?.get("kommentar")?.asText()
             if (kommentar == null) assertEquals("null", faktiskKommentar)
             else assertEquals(kommentar, faktiskKommentar)
-        }
-    }
-
-    protected fun assertVedtaksperiodeGodkjent(
-        periodetype: String,
-        varsler: List<Pair<WarningKilde, String>>,
-    ) {
-        testRapid.inspektør.hendelser("vedtaksperiode_godkjent").first().let {
-            assertEquals(periodetype, it.path("periodetype").asText())
-            varsler.forEachIndexed { index, (kilde, _) ->
-                assertEquals(kilde.name, it["warnings"][index]["kilde"].asText())
-            }
-            assertFalse(it["automatiskBehandling"].asBoolean())
         }
     }
 

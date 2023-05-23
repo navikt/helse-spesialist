@@ -16,7 +16,6 @@ import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.AutomatiseringDao
@@ -175,7 +174,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
     internal val snapshotDao = SnapshotDao(dataSource)
     internal val vedtakDao = VedtakDao(dataSource)
-    internal val warningDao = WarningDao(dataSource)
     internal val commandContextDao = CommandContextDao(dataSource)
     internal val tildelingDao = TildelingDao(dataSource)
     internal val saksbehandlerDao = SaksbehandlerDao(dataSource)
