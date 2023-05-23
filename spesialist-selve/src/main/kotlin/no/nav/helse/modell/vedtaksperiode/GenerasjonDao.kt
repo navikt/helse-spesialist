@@ -54,18 +54,6 @@ class GenerasjonDao(private val dataSource: DataSource) {
         return queryOf(query, vedtaksperiodeId)
     }
 
-    internal fun alleFor(utbetalingId: UUID): List<Generasjon> {
-        @Language("PostgreSQL")
-        val query = """
-            SELECT id, unik_id, vedtaksperiode_id, utbetaling_id, skjæringstidspunkt, fom, tom, tilstand
-            FROM selve_vedtaksperiode_generasjon 
-            WHERE utbetaling_id = ?
-            """
-        return sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, utbetalingId).map(::toGenerasjon).asList)
-        }
-    }
-
     internal fun utbetalingFor(generasjonId: UUID, utbetalingId: UUID): Generasjon? {
         @Language("PostgreSQL")
         val query = """
@@ -91,6 +79,14 @@ class GenerasjonDao(private val dataSource: DataSource) {
 
         return sessionOf(dataSource).use { session ->
             session.run(queryOf(query, generasjonId).map(::toGenerasjon).asSingle)
+        }
+    }
+
+    internal fun finnVedtaksperiodeIderFor(utbetalingId: UUID): Set<UUID> {
+        @Language("PostgreSQL")
+        val query = """SELECT vedtaksperiode_id FROM selve_vedtaksperiode_generasjon WHERE utbetaling_id = ?"""
+        return sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, utbetalingId).map { it.uuid("vedtaksperiode_id") }.asList).toSet()
         }
     }
 

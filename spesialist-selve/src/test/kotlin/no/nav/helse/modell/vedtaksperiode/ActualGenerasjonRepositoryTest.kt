@@ -142,24 +142,6 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
     }
 
     @Test
-    fun `finner alle generasjoner knyttet til en utbetalingId`() {
-        val generasjonIdV1 = UUID.randomUUID()
-        val generasjonIdV2 = UUID.randomUUID()
-        val utbetalingId = UUID.randomUUID()
-
-        val generasjonV1 = Generasjon(generasjonIdV1, UUID.randomUUID(), 1.januar, 1.januar, 31.januar)
-        val generasjonV2 = Generasjon(generasjonIdV2, UUID.randomUUID(), 1.januar, 1.januar, 31.januar)
-        generasjonV1.registrer(repository)
-        generasjonV2.registrer(repository)
-        generasjonV1.håndterVedtaksperiodeOpprettet(UUID.randomUUID())
-        generasjonV2.håndterVedtaksperiodeOpprettet(UUID.randomUUID())
-        generasjonV1.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
-        generasjonV2.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
-
-        assertEquals(2, repository.tilhørendeFor(utbetalingId).size)
-    }
-
-    @Test
     fun `Fjern utbetalingId når utbetaling blir forkastet`() {
         val generasjonId = UUID.randomUUID()
         val utbetalingId = UUID.randomUUID()
@@ -169,11 +151,11 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         generasjon.registrer(repository)
         generasjon.håndterVedtaksperiodeOpprettet(UUID.randomUUID())
         generasjon.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
-        assertEquals(1, repository.tilhørendeFor(utbetalingId).size)
+        assertEquals(1, repository.finnVedtaksperiodeIderFor(utbetalingId).size)
 
         generasjon.håndterForkastetUtbetaling(utbetalingId)
         assertEquals(generasjon(generasjonId, vedtaksperiodeId), generasjon)
-        assertEquals(0, repository.tilhørendeFor(utbetalingId).size)
+        assertEquals(0, repository.finnVedtaksperiodeIderFor(utbetalingId).size)
     }
 
 

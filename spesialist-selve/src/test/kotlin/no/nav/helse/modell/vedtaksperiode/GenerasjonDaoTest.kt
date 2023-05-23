@@ -216,7 +216,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         generasjonDao.utbetalingFor(generasjonId1, utbetalingId)
         generasjonDao.utbetalingFor(generasjonId2, utbetalingId)
 
-        assertEquals(2, generasjonDao.alleFor(utbetalingId).size)
+        assertEquals(2, generasjonDao.finnVedtaksperiodeIderFor(utbetalingId).size)
     }
 
     @Test

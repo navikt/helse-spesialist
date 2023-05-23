@@ -8,11 +8,7 @@ import no.nav.helse.mediator.builders.GenerasjonBuilder
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-internal interface GenerasjonRepository {
-    fun tilhørendeFor(utbetalingId: UUID): List<Generasjon>
-}
-
-internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRepository, IVedtaksperiodeObserver {
+internal class ActualGenerasjonRepository(dataSource: DataSource): IVedtaksperiodeObserver {
 
     private val dao = GenerasjonDao(dataSource)
 
@@ -26,6 +22,10 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
 
     internal fun finnVedtaksperiodeIderFor(fødselsnummer: String): Set<UUID> {
         return dao.finnVedtaksperiodeIderFor(fødselsnummer)
+    }
+
+    internal fun finnVedtaksperiodeIderFor(utbetalingId: UUID): Set<UUID> {
+        return dao.finnVedtaksperiodeIderFor(utbetalingId)
     }
 
     internal fun skjæringstidspunktFor(vedtaksperiodeId: UUID): LocalDate {
@@ -79,10 +79,6 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
 
     override fun utbetalingForkastet(generasjonId: UUID, utbetalingId: UUID) {
         fjernUtbetalingFor(generasjonId)
-    }
-
-    override fun tilhørendeFor(utbetalingId: UUID): List<Generasjon> {
-        return dao.alleFor(utbetalingId).onEach { it.registrer(this) }
     }
 
     override fun tilstandEndret(

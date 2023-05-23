@@ -153,6 +153,12 @@ internal class Hendelsefabrikk(
         }
     }
 
+    private fun generasjonerFor(utbetalingId: UUID): List<Generasjon> {
+        return gjeldendeGenerasjoner {
+            generasjonRepository.finnVedtaksperiodeIderFor(utbetalingId)
+        }
+    }
+
     private fun gjeldendeGenerasjoner(iderGetter: () -> Set<UUID>): List<Generasjon> {
         return iderGetter().map {
             gjeldendeGenerasjon(it)
@@ -721,7 +727,7 @@ internal class Hendelsefabrikk(
             tildelingDao = tildelingDao,
             oppgaveMediator = oppgaveMediator,
             totrinnsvurderingMediator = totrinnsvurderingMediator,
-            gjeldendeGenerasjoner = generasjonRepository.tilhørendeFor(utbetalingId)
+            gjeldendeGenerasjoner = generasjonerFor(utbetalingId)
         )
     }
 

@@ -28,7 +28,7 @@ class OpprettKoblingTilGenerasjonCommandTest: AbstractDatabaseTest() {
     fun `Opprett kobling til utbetaling for generasjon`() {
         generasjon.håndterVedtaksperiodeOpprettet(UUID.randomUUID())
         command.execute(CommandContext(UUID.randomUUID()))
-        assertEquals(1, generasjonRepository.tilhørendeFor(utbetalingId).size)
+        assertEquals(1, generasjonRepository.finnVedtaksperiodeIderFor(utbetalingId).size)
         assertGenerasjonerFor(vedtaksperiodeId, 1)
     }
 
