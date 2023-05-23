@@ -11,7 +11,6 @@ import java.util.UUID
 import no.nav.helse.januar
 import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.overstyring.OverstyringDao
@@ -32,7 +31,6 @@ import org.junit.jupiter.api.Test
 internal class AutomatiseringTest {
 
     private val vedtakDaoMock = mockk<VedtakDao>()
-    private val warningDaoMock = mockk<WarningDao>()
     private val risikovurderingDaoMock = mockk<RisikovurderingDao> {
         every { hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(true)
     }
@@ -79,7 +77,6 @@ internal class AutomatiseringTest {
     @BeforeEach
     fun setupDefaultTilHappyCase() {
         every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(true)
-        every { warningDaoMock.finnAktiveWarnings(vedtaksperiodeId) } returns emptyList()
         every { vedtakDaoMock.finnVedtaksperiodetype(vedtaksperiodeId) } returns periodetype
         every { vedtakDaoMock.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.EN_ARBEIDSGIVER
         every { åpneGosysOppgaverDaoMock.harÅpneOppgaver(any()) } returns 0
