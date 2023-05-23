@@ -163,7 +163,6 @@ internal class Godkjenningsbehov(
             hendelseId = id,
             vedtaksperiodeId = vedtaksperiodeId,
             risikovurderingDao = risikovurderingDao,
-            warningDao = warningDao,
             organisasjonsnummer = organisasjonsnummer,
             førstegangsbehandling = førstegangsbehandling,
             sykefraværstilfelle = sykefraværstilfelle,

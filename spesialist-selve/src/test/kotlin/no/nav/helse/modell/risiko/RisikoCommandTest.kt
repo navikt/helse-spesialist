@@ -12,7 +12,6 @@ import no.nav.helse.januar
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.løsninger.Risikovurderingløsning
-import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.vedtaksperiode.Generasjon
@@ -27,7 +26,6 @@ import org.junit.jupiter.api.Test
 internal class RisikoCommandTest {
 
     private val risikovurderingDao = mockk<RisikovurderingDao>()
-    private val warningDao = mockk<WarningDao>()
     private val utbetalingMock = mockk<GraphQLUtbetaling>(relaxed = true)
 
     private companion object {
@@ -144,14 +142,12 @@ internal class RisikoCommandTest {
     private fun risikoCommand(
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
         risikovurderingDao: RisikovurderingDao = this.risikovurderingDao,
-        warningDao: WarningDao = this.warningDao,
         organisasjonsnummer: String = ORGNUMMER,
         førstegangsbehandling: Boolean = true
     ) = RisikoCommand(
         hendelseId = UUID.randomUUID(),
         vedtaksperiodeId = vedtaksperiodeId,
         risikovurderingDao = risikovurderingDao,
-        warningDao = warningDao,
         organisasjonsnummer = organisasjonsnummer,
         førstegangsbehandling = førstegangsbehandling,
         sykefraværstilfelle = sykefraværstilfelle,

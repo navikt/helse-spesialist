@@ -48,8 +48,6 @@ internal fun tellWarning(warning: String) = varselteller.labels("WARN", warning)
 
 internal fun tellVarsel(varselkode: String) = varselteller.labels("WARN", varselkode).inc()
 
-internal fun tellWarningInaktiv(warning: String) = inaktiveVarslerteller.labels("WARN", warning).inc()
-
 internal fun tellInaktivtVarsel(varselkode: String) = inaktiveVarslerteller.labels("WARN", varselkode).inc()
 
 internal fun registrerTidsbrukForHendelse(command: String, tid: Long) = registrerTidsbrukForHendelse.labels(command).observe(tid.toDouble())

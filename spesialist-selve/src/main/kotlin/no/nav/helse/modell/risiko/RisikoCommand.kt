@@ -1,25 +1,19 @@
 package no.nav.helse.modell.risiko
 
-import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.mediator.meldinger.løsninger.Risikovurderingløsning
-import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetalingTilSykmeldt
 import no.nav.helse.modell.varsel.Varselkode.SB_RV_1
-import no.nav.helse.modell.vedtak.Warning
-import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLUtbetaling
-import no.nav.helse.tellWarning
 import org.slf4j.LoggerFactory
 
 internal class RisikoCommand(
     private val hendelseId: UUID,
     private val vedtaksperiodeId: UUID,
     private val risikovurderingDao: RisikovurderingDao,
-    private val warningDao: WarningDao,
     private val organisasjonsnummer: String,
     private val førstegangsbehandling: Boolean,
     private val sykefraværstilfelle: Sykefraværstilfelle,
@@ -49,36 +43,18 @@ internal class RisikoCommand(
         }
 
         løsning.lagre(risikovurderingDao)
-        løsning.leggTilWarnings()
+        løsning.leggTilVarsler()
         return true
     }
 
     private fun risikovurderingAlleredeGjort() = risikovurderingDao.hentRisikovurdering(vedtaksperiodeId) != null
 
-    private fun Risikovurderingløsning.leggTilWarnings() {
+    private fun Risikovurderingløsning.leggTilVarsler() {
         if (harArbeidsuførhetFunn()) {
-            val melding = arbeidsuførhetsmelding()
-            warningDao.leggTilWarning(
-                vedtaksperiodeId, Warning(
-                    melding = melding,
-                    kilde = WarningKilde.Spesialist,
-                    opprettet = LocalDateTime.now(),
-                )
-            )
-            tellWarning(melding)
             sykefraværstilfelle.håndter(varselkode().nyttVarsel(vedtaksperiodeId), hendelseId)
         }
         if (harFaresignalerFunn()) {
-            val melding = "Faresignaler oppdaget. Kontroller om faresignalene påvirker retten til sykepenger."
-            warningDao.leggTilWarning(
-                vedtaksperiodeId, Warning(
-                    melding = melding,
-                    kilde = WarningKilde.Spesialist,
-                    opprettet = LocalDateTime.now(),
-                )
-            )
             sykefraværstilfelle.håndter(SB_RV_1.nyttVarsel(vedtaksperiodeId), hendelseId)
-            tellWarning(melding)
         }
     }
 
