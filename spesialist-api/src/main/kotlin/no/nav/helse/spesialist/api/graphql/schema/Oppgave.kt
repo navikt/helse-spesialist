@@ -67,10 +67,10 @@ data class FerdigstiltOppgave(
     val ferdigstiltTidspunkt: DateTimeString,
     val personnavn: Personnavn,
     val aktorId: String,
-    val antallVarsler: Int,
+    val antallVarsler: Int?,
     val periodetype: Periodetype,
     val inntektstype: Inntektstype,
-    val bosted: String,
+    val bosted: String?,
     val ferdigstiltAv: String?,
 )
 
