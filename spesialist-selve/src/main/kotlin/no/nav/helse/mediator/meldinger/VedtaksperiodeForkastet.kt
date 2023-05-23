@@ -7,7 +7,6 @@ import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.AvbrytCommand
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
@@ -30,7 +29,6 @@ internal class VedtaksperiodeForkastet(
     private val fødselsnummer: String,
     private val json: String,
     commandContextDao: CommandContextDao,
-    warningDao: WarningDao,
     oppgaveMediator: OppgaveMediator,
     snapshotClient: SnapshotClient,
     snapshotDao: SnapshotDao,
@@ -44,7 +42,6 @@ internal class VedtaksperiodeForkastet(
             snapshotDao = snapshotDao,
             vedtaksperiodeId = vedtaksperiodeId,
             fødselsnummer = fødselsnummer,
-            warningDao = warningDao,
             personDao = personDao,
             json = json
         ),

@@ -2,9 +2,7 @@ package no.nav.helse.modell.kommando
 
 import java.util.UUID
 import no.nav.helse.modell.SnapshotDao
-import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import org.slf4j.LoggerFactory
@@ -14,7 +12,6 @@ internal class OppdaterSnapshotCommand(
     private val snapshotDao: SnapshotDao,
     private val vedtaksperiodeId: UUID,
     private val fødselsnummer: String,
-    private val warningDao: WarningDao,
     private val personDao: PersonDao,
     private val json: String
 ) : Command {
@@ -44,7 +41,6 @@ internal class OppdaterSnapshotCommand(
         return snapshotClient.hentSnapshot(fnr = fødselsnummer).data?.person?.let { person ->
             snapshotDao.lagre(fødselsnummer = fødselsnummer, snapshot = person)
             log.info("oppdaterer warnings fra graphql-snapshot for $vedtaksperiodeId")
-            warningDao.oppdaterSpleisWarnings(vedtaksperiodeId, Warning.graphQLWarnings(vedtaksperiodeId, person))
             true
         } ?: false
     }

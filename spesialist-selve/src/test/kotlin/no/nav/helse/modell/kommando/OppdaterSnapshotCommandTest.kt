@@ -42,7 +42,6 @@ internal class OppdaterSnapshotCommandTest {
         snapshotDao = snapshotDao,
         vedtaksperiodeId = VEDTAKSPERIODE,
         fødselsnummer = FNR,
-        warningDao = mockk(relaxed = true),
         personDao = personDao,
         json = "{}"
     )
@@ -79,7 +78,6 @@ internal class OppdaterSnapshotCommandTest {
             snapshotDao = snapshotDao,
             vedtaksperiodeId = VEDTAKSPERIODE,
             fødselsnummer = FNR,
-            warningDao = mockk(relaxed = true),
             personDao = personDao,
             json = """{"aktørId":"1000041572215"}"""
         )

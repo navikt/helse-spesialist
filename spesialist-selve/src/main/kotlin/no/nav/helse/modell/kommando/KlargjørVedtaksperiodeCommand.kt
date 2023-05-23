@@ -1,15 +1,14 @@
 package no.nav.helse.modell.kommando
 
+import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import java.time.LocalDate
-import java.util.*
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 
 internal class KlargjørVedtaksperiodeCommand(
@@ -25,7 +24,6 @@ internal class KlargjørVedtaksperiodeCommand(
     arbeidsgiverDao: ArbeidsgiverDao,
     snapshotDao: SnapshotDao,
     vedtakDao: VedtakDao,
-    warningDao: WarningDao,
     utbetalingId: UUID,
     utbetalingDao: UtbetalingDao
 ) : MacroCommand() {
@@ -41,7 +39,6 @@ internal class KlargjørVedtaksperiodeCommand(
             arbeidsgiverDao = arbeidsgiverDao,
             snapshotDao = snapshotDao,
             vedtakDao = vedtakDao,
-            warningDao = warningDao,
         ),
         PersisterVedtaksperiodetypeCommand(
             vedtaksperiodeId = vedtaksperiodeId,

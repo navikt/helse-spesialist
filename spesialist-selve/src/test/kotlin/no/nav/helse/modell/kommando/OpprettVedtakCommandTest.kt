@@ -5,10 +5,9 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.snapshot
@@ -32,7 +31,6 @@ internal class OpprettVedtakCommandTest {
     private val arbeidsgiverDao = mockk<ArbeidsgiverDao>(relaxed = true)
     private val snapshotDao = mockk<SnapshotDao>(relaxed = true)
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
-    private val warningDao = mockk<WarningDao>(relaxed = true)
     private val snapshotClient = mockk<SnapshotClient>(relaxed = true)
     private val command = OpprettVedtakCommand(
         snapshotClient = snapshotClient,
@@ -44,8 +42,7 @@ internal class OpprettVedtakCommandTest {
         personDao = personDao,
         arbeidsgiverDao = arbeidsgiverDao,
         snapshotDao = snapshotDao,
-        vedtakDao = vedtakDao,
-        warningDao = warningDao
+        vedtakDao = vedtakDao
     )
 
     @BeforeEach

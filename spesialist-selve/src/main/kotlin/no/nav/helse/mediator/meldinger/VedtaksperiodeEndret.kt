@@ -4,7 +4,6 @@ import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.SnapshotDao
-import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
@@ -28,7 +27,6 @@ internal class VedtaksperiodeEndret(
     forårsaketAvId: UUID,
     forrigeTilstand: String,
     gjeldendeTilstand: String,
-    warningDao: WarningDao,
     snapshotDao: SnapshotDao,
     snapshotClient: SnapshotClient,
     personDao: PersonDao,
@@ -40,7 +38,6 @@ internal class VedtaksperiodeEndret(
             snapshotDao = snapshotDao,
             vedtaksperiodeId = vedtaksperiodeId,
             fødselsnummer = fødselsnummer,
-            warningDao = warningDao,
             personDao = personDao,
             json = json
         ),

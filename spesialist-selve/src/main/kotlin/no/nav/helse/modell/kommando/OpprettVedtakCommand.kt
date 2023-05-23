@@ -4,11 +4,8 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.modell.vedtak.Warning
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import org.slf4j.LoggerFactory
 
@@ -22,8 +19,7 @@ internal class OpprettVedtakCommand(
     private val personDao: PersonDao,
     private val arbeidsgiverDao: ArbeidsgiverDao,
     private val snapshotDao: SnapshotDao,
-    private val vedtakDao: VedtakDao,
-    private val warningDao: WarningDao
+    private val vedtakDao: VedtakDao
 ) : Command {
     private companion object {
         private val log = LoggerFactory.getLogger(OpprettVedtakCommand::class.java)
@@ -38,7 +34,6 @@ internal class OpprettVedtakCommand(
         log.info("Henter oppdatert graphql-snapshot for vedtaksperiode: $vedtaksperiodeId")
         return snapshotClient.hentSnapshot(fødselsnummer).data?.person?.let {
             val id = snapshotDao.lagre(fødselsnummer, it)
-            oppdaterWarnings(it)
             log.info("Oppdaterer vedtak for vedtaksperiode: $vedtaksperiodeId")
             vedtakDao.oppdaterSnaphot(
                 vedtakRef = vedtakRef,
@@ -67,18 +62,6 @@ internal class OpprettVedtakCommand(
             arbeidsgiverRef = arbeidsgiverRef,
             snapshotRef = snapshotId
         )
-        snapshot.data?.person?.let {
-            oppdaterWarnings(it)
-        }
         return true
     }
-
-    private fun oppdaterWarnings(person: GraphQLPerson) {
-        warningDao.oppdaterSpleisWarnings(
-            vedtaksperiodeId, Warning.graphQLWarnings(
-                vedtaksperiodeId, person
-            )
-        )
-    }
-
 }

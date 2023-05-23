@@ -8,7 +8,6 @@ import java.util.UUID
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.person.PersonDao
@@ -36,7 +35,6 @@ internal class VedtaksperiodeForkastetTest {
     private val testmeldingfabrikk = Testmeldingfabrikk(FNR, "aktørid")
     private val commandContextDao = mockk<CommandContextDao>(relaxed = true)
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
-    private val warningDao = mockk<WarningDao>(relaxed = true)
     private val personDao = mockk<PersonDao>(relaxed = true)
     private val snapshotDao = mockk<SnapshotDao>(relaxed = true)
     private val graphQLClient = mockk<SnapshotClient>(relaxed = true)
@@ -51,7 +49,6 @@ internal class VedtaksperiodeForkastetTest {
             VEDTAKSPERIODE
         ),
         commandContextDao = commandContextDao,
-        warningDao = warningDao,
         oppgaveMediator = oppgaveMediator,
         snapshotClient = graphQLClient,
         snapshotDao = snapshotDao,

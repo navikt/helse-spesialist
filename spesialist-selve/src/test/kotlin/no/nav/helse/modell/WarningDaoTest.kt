@@ -32,11 +32,6 @@ internal class WarningDaoTest : DatabaseIntegrationTest() {
         val spesialistWarning = Warning("Warning B", WarningKilde.Spesialist, LocalDateTime.now())
         val testwarnings1 = listOf(Warning("Warning A", WarningKilde.Spleis, LocalDateTime.now()), spesialistWarning)
         warningDao.leggTilWarnings(VEDTAKSPERIODE, testwarnings1)
-        val testwarnings2 = listOf(
-            Warning("Warning C", WarningKilde.Spleis, LocalDateTime.now()),
-            Warning("Warning D", WarningKilde.Spleis, LocalDateTime.now())
-        )
-        warningDao.oppdaterSpleisWarnings(VEDTAKSPERIODE, testwarnings2)
     }
 
     @Test
