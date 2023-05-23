@@ -50,7 +50,6 @@ internal class TestMediator(
     private val overstyringMediator = OverstyringMediator(testRapid)
     private val snapshotMediator = SnapshotMediator(SnapshotApiDao(dataSource), snapshotClient)
     private val automatisering = Automatisering(
-        warningDao = warningDao,
         risikovurderingDao = RisikovurderingDao(dataSource),
         automatiseringDao = AutomatiseringDao(dataSource),
         åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource),

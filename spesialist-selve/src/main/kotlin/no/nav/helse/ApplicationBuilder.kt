@@ -350,7 +350,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
 
     private val automatiseringDao = AutomatiseringDao(dataSource)
     val automatisering = Automatisering(
-        warningDao = warningDao,
         risikovurderingDao = risikovurderingDao,
         automatiseringDao = automatiseringDao,
         åpneGosysOppgaverDao = åpneGosysOppgaverDao,

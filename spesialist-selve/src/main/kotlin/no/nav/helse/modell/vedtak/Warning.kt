@@ -14,8 +14,6 @@ internal class Warning(
     private val opprettet: LocalDateTime,
 ) {
     internal companion object {
-        fun formater(warnings: List<Warning>) =
-            warnings.map { "W  \t${it.kilde.name.padEnd(10, ' ')}  \t${it.melding}" }
 
         fun meldinger(warnings: List<Warning>) = warnings.map { it.melding }
 

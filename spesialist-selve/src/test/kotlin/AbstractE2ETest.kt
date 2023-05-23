@@ -137,7 +137,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         oppgaveMediator = oppgaveMediator,
         godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao, opptegnelseDao),
         automatisering = Automatisering(
-            warningDao = warningDao,
             risikovurderingDao = risikovurderingDao,
             automatiseringDao = automatiseringDao,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,

@@ -3,12 +3,10 @@ package no.nav.helse.modell.automatisering
 import java.time.LocalDate
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.Toggle.AutomatiserRevuderinger
 import no.nav.helse.mediator.Toggle.AutomatiserUtbetalingTilSykmeldt
 import no.nav.helse.mediator.meldinger.løsninger.HentEnhetløsning.Companion.erEnhetUtland
 import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.overstyring.OverstyringDao
@@ -23,7 +21,6 @@ import no.nav.helse.modell.vergemal.VergemålDao
 import org.slf4j.LoggerFactory
 
 internal class Automatisering(
-    private val warningDao: WarningDao,
     private val risikovurderingDao: RisikovurderingDao,
     private val automatiseringDao: AutomatiseringDao,
     private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
@@ -133,31 +130,7 @@ internal class Automatisering(
         val risikovurdering =
             risikovurderingDao.hentRisikovurdering(vedtaksperiodeId)
                 ?: validering("Mangler vilkårsvurdering for arbeidsuførhet, aktivitetsplikt eller medvirkning") { false }
-        val warnings = warningDao.finnAktiveWarnings(vedtaksperiodeId)
-        val dedupliserteWarnings = warnings.distinct()
         val forhindrerAutomatisering = sykefraværstilfelle.forhindrerAutomatisering(periodeTom)
-        val harWarnings = dedupliserteWarnings.isNotEmpty()
-        when {
-            !forhindrerAutomatisering && harWarnings -> sikkerLogg.info(
-                "Nye varsler mener at perioden kan automatiseres, mens warnings er uenig. Gjelder {}, {}, {}.",
-                kv("fødselsnummer", fødselsnummer),
-                kv("vedtaksperiodeId", vedtaksperiodeId),
-                kv("utbetaling", utbetaling),
-            )
-            forhindrerAutomatisering && !harWarnings -> sikkerLogg.info(
-                "Nye varsler mener at perioden ikke kan automatiseres, mens warnings er uenig. Gjelder {}, {}, {}.",
-                kv("fødselsnummer", fødselsnummer),
-                kv("vedtaksperiodeId", vedtaksperiodeId),
-                kv("utbetaling", utbetaling),
-            )
-            else -> sikkerLogg.info(
-                "Nye varsler og warnings er enige om at perioden ${if(forhindrerAutomatisering) "ikke " else ""}kan automatiseres. Gjelder {}, {}, {}.",
-                kv("fødselsnummer", fødselsnummer),
-                kv("vedtaksperiodeId", vedtaksperiodeId),
-                kv("utbetaling", utbetaling),
-            )
-        }
-
         val erEgenAnsatt = egenAnsattDao.erEgenAnsatt(fødselsnummer)
         val harVergemål = vergemålDao.harVergemål(fødselsnummer) ?: false
         val tilhørerUtlandsenhet = erEnhetUtland(personDao.finnEnhetId(fødselsnummer))
