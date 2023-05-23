@@ -60,7 +60,6 @@ internal class SaksbehandlerløsningTest {
         oppgaveDao = mockk(relaxed = true),
         godkjenningMediator = GodkjenningMediator(
             mockk(relaxed = true),
-            mockk(relaxed = true),
             mockk()
         ),
         utbetalingDao = utbetalingDao,

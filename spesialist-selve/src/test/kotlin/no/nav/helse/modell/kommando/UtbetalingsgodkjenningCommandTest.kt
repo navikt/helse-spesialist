@@ -54,7 +54,6 @@ internal class UtbetalingsgodkjenningCommandTest {
             hendelseDao = hendelseDao,
             godkjenningMediator = GodkjenningMediator(
                 mockk(relaxed = true),
-                mockk(relaxed = true),
                 mockk(relaxed = true)
             ),
             vedtaksperiodeId = vedtaksperiodeId,

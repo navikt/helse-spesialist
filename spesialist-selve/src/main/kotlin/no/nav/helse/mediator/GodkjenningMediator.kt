@@ -7,7 +7,6 @@ import no.nav.helse.automatiseringsteller
 import no.nav.helse.automatiskAvvistÅrsakerTeller
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
@@ -16,7 +15,6 @@ import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import org.slf4j.LoggerFactory
 
 internal class GodkjenningMediator(
-    private val warningDao: WarningDao,
     private val vedtakDao: VedtakDao,
     private val opptegnelseDao: OpptegnelseDao
 ) {
@@ -43,7 +41,7 @@ internal class GodkjenningMediator(
         sykefraværstilfelle.håndterGodkjent(saksbehandlerIdent, vedtaksperiodeId, hendelseId)
 
         context.publiser(behov.toJson())
-        context.publiser(behov.lagVedtaksperiodeGodkjent(vedtaksperiodeId, fødselsnummer, warningDao, vedtakDao).toJson())
+        context.publiser(behov.lagVedtaksperiodeGodkjent(vedtaksperiodeId, fødselsnummer, vedtakDao).toJson())
     }
 
     internal fun saksbehandlerAvvisning(
@@ -73,7 +71,7 @@ internal class GodkjenningMediator(
         )
         sykefraværstilfelle.håndterAvvist(saksbehandlerIdent, vedtaksperiodeId)
         context.publiser(behov.toJson())
-        context.publiser(behov.lagVedtaksperiodeAvvist(vedtaksperiodeId, fødselsnummer, warningDao, vedtakDao).toJson())
+        context.publiser(behov.lagVedtaksperiodeAvvist(vedtaksperiodeId, fødselsnummer, vedtakDao).toJson())
     }
 
     internal fun automatiskUtbetaling(
@@ -85,7 +83,7 @@ internal class GodkjenningMediator(
     ) {
         behov.godkjennAutomatisk()
         context.publiser(behov.toJson())
-        context.publiser(behov.lagVedtaksperiodeGodkjent(vedtaksperiodeId, fødselsnummer, warningDao, vedtakDao).toJson())
+        context.publiser(behov.lagVedtaksperiodeGodkjent(vedtaksperiodeId, fødselsnummer, vedtakDao).toJson())
         GodkjenningsbehovPayload(hendelseId).lagre(opptegnelseDao, fødselsnummer)
         automatiseringsteller.inc()
         sikkerLogg.info("Automatisk godkjenning av vedtaksperiode $vedtaksperiodeId", keyValue("fødselsnummer", fødselsnummer))
@@ -101,7 +99,7 @@ internal class GodkjenningMediator(
     ) {
         behov.avvisAutomatisk(begrunnelser)
         context.publiser(behov.toJson())
-        context.publiser(behov.lagVedtaksperiodeAvvist(vedtaksperiodeId, fødselsnummer, warningDao, vedtakDao).toJson())
+        context.publiser(behov.lagVedtaksperiodeAvvist(vedtaksperiodeId, fødselsnummer, vedtakDao).toJson())
         GodkjenningsbehovPayload(hendelseId).lagre(opptegnelseDao, fødselsnummer)
         begrunnelser.forEach { automatiskAvvistÅrsakerTeller.labels(it).inc() }
         automatiseringsteller.inc()

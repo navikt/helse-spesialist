@@ -7,11 +7,8 @@ import AbstractE2ETestV2.Kommandokjedetilstand.NY
 import AbstractE2ETestV2.Kommandokjedetilstand.SUSPENDERT
 import java.time.LocalDate
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
-import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.VergemålType.voksen
-import no.nav.helse.modell.vedtak.WarningKilde.Spesialist
-import no.nav.helse.modell.vedtak.WarningKilde.Spleis
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSystem
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
@@ -45,19 +42,6 @@ internal class GodkjenningE2ETest : AbstractE2ETestV2() {
 
         assertSaksbehandleroppgave(oppgavestatus = AvventerSystem)
         assertGodkjenningsbehovBesvart(godkjent = true, automatiskBehandlet = false)
-    }
-
-    @Test
-    fun `slår sammen warnings fra spleis og spesialist i utgående event`() {
-        håndterSøknad()
-        håndterVedtaksperiodeOpprettet()
-        fremTilSaksbehandleroppgave(
-            regelverksvarsler = listOf("RV_IM_1"),
-            risikofunn = listOf(Risikofunn(kategori = listOf("8-4"), beskrivelse = "8-4 ikke ok", kreverSupersaksbehandler = false))
-        )
-        håndterSaksbehandlerløsning()
-
-        assertVedtaksperiodeGodkjent("FØRSTEGANGSBEHANDLING", listOf(Spleis to "RV_IM_1", Spesialist to "SB_RV_2"))
     }
 
     @Test

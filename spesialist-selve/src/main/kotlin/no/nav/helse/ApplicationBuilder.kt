@@ -47,7 +47,6 @@ import no.nav.helse.mediator.api.personApi
 import no.nav.helse.mediator.api.tildelingApi
 import no.nav.helse.mediator.api.totrinnsvurderingApi
 import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.automatisering.PlukkTilManuell
@@ -185,7 +184,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val oppgaveApiDao = OppgaveApiDao(dataSource)
     private val periodehistorikkDao = PeriodehistorikkDao(dataSource)
     private val vedtakDao = VedtakDao(dataSource)
-    private val warningDao = WarningDao(dataSource)
     private val risikovurderingDao = RisikovurderingDao(dataSource)
     private val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
@@ -366,7 +364,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         snapshotClient = snapshotClient,
         oppgaveMediator = oppgaveMediator,
         godkjenningMediator = GodkjenningMediator(
-            warningDao,
             vedtakDao,
             opptegnelseDao
         ),

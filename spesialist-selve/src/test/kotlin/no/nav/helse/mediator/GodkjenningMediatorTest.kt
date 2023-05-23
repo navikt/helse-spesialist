@@ -36,7 +36,6 @@ internal class GodkjenningMediatorTest {
         }
     }
     private val mediator = GodkjenningMediator(
-        warningDao = mockk(relaxed = true),
         vedtakDao = mockk(relaxed = true),
         opptegnelseDao = opptegnelseDao,
     )

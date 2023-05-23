@@ -147,13 +147,11 @@ internal class UtbetalingsgodkjenningMessage(json: String, private val utbetalin
     internal fun lagVedtaksperiodeGodkjent(
         vedtaksperiodeId: UUID,
         fødselsnummer: String,
-        warningDao: WarningDao,
         vedtakDao: VedtakDao
     ) =
         VedtaksperiodeGodkjent(
             vedtaksperiodeId = vedtaksperiodeId,
             fødselsnummer = fødselsnummer,
-            warnings = warningDao.finnAktiveWarnings(vedtaksperiodeId).map { it.dto() },
             periodetype = vedtakDao.finnVedtaksperiodetype(vedtaksperiodeId),
             løsning = objectMapper.convertValue(løsning)
         )
@@ -161,12 +159,10 @@ internal class UtbetalingsgodkjenningMessage(json: String, private val utbetalin
     internal fun lagVedtaksperiodeAvvist(
         vedtaksperiodeId: UUID,
         fødselsnummer: String,
-        warningDao: WarningDao,
         vedtakDao: VedtakDao
     ) = VedtaksperiodeAvvist(
         vedtaksperiodeId = vedtaksperiodeId,
         fødselsnummer = fødselsnummer,
-        warnings = warningDao.finnAktiveWarnings(vedtaksperiodeId).map { it.dto() },
         periodetype = vedtakDao.finnVedtakId(vedtaksperiodeId)?.let { vedtakDao.finnVedtaksperiodetype(vedtaksperiodeId) },
         løsning = objectMapper.convertValue(løsning)
     )

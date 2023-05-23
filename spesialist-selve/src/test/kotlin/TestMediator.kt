@@ -5,7 +5,6 @@ import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.OverstyringMediator
 import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.automatisering.Stikkprøver
@@ -31,13 +30,11 @@ internal class TestMediator(
     snapshotClient: SnapshotClient,
     dataSource: DataSource,
 ) {
-    private val warningDao = WarningDao(dataSource)
     private val vedtakDao = VedtakDao(dataSource)
     private val opptegnelseDao = OpptegnelseDao(dataSource)
     private val overstyringDao = OverstyringDao(dataSource)
 
     private val godkjenningMediator = GodkjenningMediator(
-        warningDao,
         vedtakDao,
         opptegnelseDao
     )

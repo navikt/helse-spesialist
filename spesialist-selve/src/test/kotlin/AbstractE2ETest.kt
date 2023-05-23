@@ -45,7 +45,6 @@ import no.nav.helse.mediator.Toggle
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.automatisering.Stikkprøver
@@ -106,7 +105,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private val periodehistorikkDao = PeriodehistorikkDao(dataSource)
     protected val personDao = PersonDao(dataSource)
     private val vedtakDao = VedtakDao(dataSource)
-    private val warningDao = WarningDao(dataSource)
     protected val tildelingDao = TildelingDao(dataSource)
     private val risikovurderingDao = RisikovurderingDao(dataSource)
     private val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
@@ -135,7 +133,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         dataSource = dataSource,
         snapshotClient = snapshotClient,
         oppgaveMediator = oppgaveMediator,
-        godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao, opptegnelseDao),
+        godkjenningMediator = GodkjenningMediator(vedtakDao, opptegnelseDao),
         automatisering = Automatisering(
             risikovurderingDao = risikovurderingDao,
             automatiseringDao = automatiseringDao,
