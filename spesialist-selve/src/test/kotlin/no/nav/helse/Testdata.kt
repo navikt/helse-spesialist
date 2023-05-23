@@ -47,16 +47,18 @@ object Testdata {
     const val VARSEL_KODE_2 = "VARSEL_KODE_2"
 
     val VEDTAKSPERIODE_ID: UUID = UUID.randomUUID()
-    val SNAPSHOT_MED_WARNINGS = snapshotMedWarnings(
-        vedtaksperiodeId = VEDTAKSPERIODE_ID,
-        orgnr = ORGNR,
-        fnr = FØDSELSNUMMER,
+    val SNAPSHOT = snapshot(
         aktørId = AKTØR,
+        fødselsnummer = FØDSELSNUMMER,
+        organisasjonsnummer = ORGNR,
+        vedtaksperiodeId = VEDTAKSPERIODE_ID,
         utbetalingId = UTBETALING_ID,
     )
 
     fun snapshot(
         versjon: Int = 1,
+        aktørId: String = AKTØR,
+        organisasjonsnummer: String = ORGNR,
         fødselsnummer: String = FØDSELSNUMMER,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
         utbetalingId: UUID = UTBETALING_ID,
@@ -87,12 +89,12 @@ object Testdata {
             }
             override val data = HentSnapshot.Result(
                 GraphQLPerson(
-                    aktorId = AKTØR,
+                    aktorId = aktørId,
                     fodselsnummer = fødselsnummer,
                     versjon = versjon,
                     arbeidsgivere = listOf(
                         GraphQLArbeidsgiver(
-                            organisasjonsnummer = ORGNR,
+                            organisasjonsnummer = organisasjonsnummer,
                             ghostPerioder = emptyList(),
                             generasjoner = listOf(
                                 GraphQLGenerasjon(

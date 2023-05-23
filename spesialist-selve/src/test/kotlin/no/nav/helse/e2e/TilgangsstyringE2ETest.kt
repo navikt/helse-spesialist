@@ -23,7 +23,7 @@ import no.nav.helse.MeldingssenderV2
 import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
-import no.nav.helse.Testdata.SNAPSHOT_MED_WARNINGS
+import no.nav.helse.Testdata.SNAPSHOT
 import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.januar
@@ -147,7 +147,7 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
     }
 
     private fun settOppDefaultDataOgTilganger() {
-        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_MED_WARNINGS
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT
         every { dataFetchingEnvironment.graphQlContext.get<String>("saksbehandlerNavn") } returns "saksbehandler"
         saksbehandlertilgangTilSkjermede(harTilgang = false)
     }

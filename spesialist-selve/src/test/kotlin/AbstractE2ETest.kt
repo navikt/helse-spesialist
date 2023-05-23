@@ -32,7 +32,7 @@ import no.nav.helse.TestRapidHelpers.oppgaver
 import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
-import no.nav.helse.Testdata.SNAPSHOT_MED_WARNINGS
+import no.nav.helse.Testdata.SNAPSHOT
 import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.Testdata.snapshot
@@ -196,7 +196,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         val fom = 1.januar
         val tom = 31.januar
         val skjæringstidspunkt = 1.januar
-        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_MED_WARNINGS
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT
         sendSøknadSendt(AKTØR, FØDSELSNUMMER, ORGNR)
         sendVedtaksperiodeOpprettet(AKTØR, FØDSELSNUMMER, ORGNR, vedtaksperiodeId = VEDTAKSPERIODE_ID, fom = fom, tom = tom, skjæringstidspunkt = skjæringstidspunkt)
         sendVedtaksperiodeNyUtbetaling(VEDTAKSPERIODE_ID, organisasjonsnummer = ORGNR)

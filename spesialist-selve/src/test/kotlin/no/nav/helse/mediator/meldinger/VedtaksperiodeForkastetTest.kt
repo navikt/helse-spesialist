@@ -5,13 +5,13 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
+import no.nav.helse.Testdata.SNAPSHOT
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.snapshot
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -24,12 +24,6 @@ internal class VedtaksperiodeForkastetTest {
         private val VEDTAKSPERIODE = UUID.randomUUID()
         private val CONTEXT = UUID.randomUUID()
         private const val FNR = "fnr"
-        private val SNAPSHOT = snapshot(
-            vedtaksperiodeId = VEDTAKSPERIODE,
-            orgnr = "ORGNR",
-            fnr = FNR,
-            aktørId = "AKTØR",
-        )
     }
 
     private val testmeldingfabrikk = Testmeldingfabrikk(FNR, "aktørid")

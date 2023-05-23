@@ -6,11 +6,11 @@ import io.mockk.mockk
 import io.mockk.verify
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.Testdata.SNAPSHOT
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.snapshot
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -53,12 +53,7 @@ internal class OpprettVedtakCommandTest {
 
     @Test
     fun `opprette vedtak`() {
-        every { snapshotClient.hentSnapshot(FNR) } returns snapshot(
-            fnr = FNR,
-            aktørId = "Aktørid",
-            orgnr = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID
-        )
+        every { snapshotClient.hentSnapshot(FNR) } returns SNAPSHOT
         val (personRef, arbeidsgiverRef, snapshotRef) = personFinnes()
         every { vedtakDao.finnVedtakId(VEDTAKSPERIODE_ID) } returns null
         assertTrue(command.execute(context))
@@ -76,12 +71,7 @@ internal class OpprettVedtakCommandTest {
 
     @Test
     fun `oppdatere vedtak`() {
-        every { snapshotClient.hentSnapshot(FNR) } returns snapshot(
-            fnr = FNR,
-            aktørId = "Aktørid",
-            orgnr = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID
-        )
+        every { snapshotClient.hentSnapshot(FNR) } returns SNAPSHOT
         val (_, _, snapshotRef) = personFinnes()
         every { vedtakDao.finnVedtakId(VEDTAKSPERIODE_ID) } returns VEDTAK_REF
         assertTrue(command.execute(context))
