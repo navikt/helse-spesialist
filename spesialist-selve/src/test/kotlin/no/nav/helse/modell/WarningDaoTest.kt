@@ -10,21 +10,6 @@ import org.junit.jupiter.api.Test
 
 internal class WarningDaoTest : DatabaseIntegrationTest() {
     @Test
-    fun `lagrer og leser warnings`() {
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode()
-        val testwarnings = listOf(
-            Warning("Warning A", WarningKilde.Spleis, LocalDateTime.now()),
-            Warning("Warning B", WarningKilde.Spleis, LocalDateTime.now())
-        )
-        val testwarning = Warning("Warning C", WarningKilde.Spesialist, LocalDateTime.now())
-        warningDao.leggTilWarnings(VEDTAKSPERIODE, testwarnings)
-        warningDao.leggTilWarning(VEDTAKSPERIODE, testwarning)
-        assertWarnings(testwarnings + listOf(testwarning), warningDao.finnAktiveWarnings(VEDTAKSPERIODE))
-    }
-
-    @Test
     fun `sletter ikke gamle warnings`() {
         opprettPerson()
         opprettArbeidsgiver()

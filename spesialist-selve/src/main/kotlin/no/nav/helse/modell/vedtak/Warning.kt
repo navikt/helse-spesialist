@@ -6,7 +6,6 @@ import java.util.UUID
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLBeregnetPeriode
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLPerson
-import no.nav.helse.spesialist.api.person.SnapshotDto
 
 internal class Warning(
     private val melding: String,
@@ -14,8 +13,6 @@ internal class Warning(
     private val opprettet: LocalDateTime,
 ) {
     internal companion object {
-
-        fun meldinger(warnings: List<Warning>) = warnings.map { it.melding }
 
         fun lagre(warningDao: WarningDao, warnings: List<Warning>, vedtakRef: Long) {
             warnings.forEach { it.lagre(warningDao, vedtakRef) }
@@ -25,21 +22,6 @@ internal class Warning(
             tidsstempel,
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
         )
-
-        internal fun warnings(vedtaksperiodeId: UUID, snapshot: SnapshotDto) =
-            snapshot.arbeidsgivere
-                .flatMap { it.vedtaksperioder }
-                .filter { UUID.fromString(it["id"].asText()) == vedtaksperiodeId }
-                .flatMap { it.findValues("aktivitetslogg") }
-                .flatten()
-                .filter { it["alvorlighetsgrad"].asText() == "W" }
-                .map {
-                    Warning(
-                        melding = it["melding"].asText(),
-                        kilde = WarningKilde.Spleis,
-                        opprettet = parseTidsstempel(it["tidsstempel"].asText()),
-                    )
-                }
 
         internal fun graphQLWarnings(vedtaksperiodeId: UUID, person: GraphQLPerson) =
             person.arbeidsgivere

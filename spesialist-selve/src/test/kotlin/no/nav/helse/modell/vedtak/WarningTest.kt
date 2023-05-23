@@ -44,20 +44,6 @@ internal class WarningTest {
     }
 
     @Test
-    fun `henter ut meldinger`() {
-        val melding1 = "Warning A"
-        val melding2 = "Warning B"
-        assertEquals(
-            listOf(melding1, melding2), Warning.meldinger(
-                listOf(
-                    Warning(melding1, WarningKilde.Spleis, LocalDateTime.now()),
-                    Warning(melding2, WarningKilde.Spleis, LocalDateTime.now())
-                )
-            )
-        )
-    }
-
-    @Test
     fun likhet() {
         val warning1 = Warning("Warning A", WarningKilde.Spleis, LocalDateTime.now())
         val warning2 = Warning("Warning A", WarningKilde.Spleis, LocalDateTime.now())

@@ -15,15 +15,6 @@ internal class WarningDao(private val dataSource: DataSource) {
         Warning.lagre(this, warnings, vedtakRef)
     }
 
-    internal fun fjernWarnings(vedtaksperiodeId: UUID) {
-        val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return
-        sessionOf(dataSource).use  { session ->
-            @Language("PostgreSQL")
-            val statement = "DELETE FROM warning WHERE vedtak_ref=?"
-            session.run(queryOf(statement, vedtakRef).asExecute)
-        }
-    }
-
     private fun fjernWarnings(vedtakRef: Long, kilde: WarningKilde) {
         sessionOf(dataSource).use  { session ->
             @Language("PostgreSQL")
