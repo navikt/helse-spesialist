@@ -6,7 +6,6 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.api.erProd
-import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringForEksisterendeOppgaveCommand
 import no.nav.helse.modell.automatisering.SettTidligereAutomatiseringInaktivCommand
@@ -37,7 +36,6 @@ internal class GosysOppgaveEndret(
     private val json: String,
     gosysOppgaveEndretCommandData: GosysOppgaveEndretCommandData,
     åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
-    warningDao: WarningDao,
     automatisering: Automatisering,
     godkjenningMediator: GodkjenningMediator,
     oppgaveMediator: OppgaveMediator,
@@ -55,7 +53,6 @@ internal class GosysOppgaveEndret(
             hendelseId = id,
             aktørId = aktørId,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
-            warningDao = warningDao,
             vedtaksperiodeId = gosysOppgaveEndretCommandData.vedtaksperiodeId,
             sykefraværstilfelle = sykefraværstilfelle
         ),

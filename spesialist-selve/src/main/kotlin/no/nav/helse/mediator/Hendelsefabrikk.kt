@@ -889,7 +889,6 @@ internal class Hendelsefabrikk(
             json = json,
             gosysOppgaveEndretCommandData = commandData,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
-            warningDao = warningDao,
             automatisering = automatisering,
             godkjenningMediator = godkjenningMediator,
             oppgaveMediator = oppgaveMediator,

@@ -22,7 +22,6 @@ import no.nav.helse.modell.varsel.Varselkode.SB_RV_1
 import no.nav.helse.modell.varsel.Varselkode.SB_RV_2
 import no.nav.helse.modell.varsel.Varselkode.SB_RV_3
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -64,7 +63,6 @@ internal class VarselE2ETest : AbstractE2ETestV2() {
         håndterÅpneOppgaverløsning(antall = 1)
         assertVarsel(SB_EX_1, VEDTAKSPERIODE_ID, AKTIV)
         assertIngenVarsel(SB_EX_3, VEDTAKSPERIODE_ID)
-        assertWarning("Det finnes åpne oppgaver på sykepenger i Gosys", VEDTAKSPERIODE_ID)
     }
 
     @Test
@@ -76,7 +74,6 @@ internal class VarselE2ETest : AbstractE2ETestV2() {
         håndterGosysOppgaveEndret()
         håndterÅpneOppgaverløsning(antall = 1)
         assertVarsel(SB_EX_1, VEDTAKSPERIODE_ID, AKTIV)
-        assertWarning("Det finnes åpne oppgaver på sykepenger i Gosys", VEDTAKSPERIODE_ID)
     }
 
     @Test
@@ -89,7 +86,6 @@ internal class VarselE2ETest : AbstractE2ETestV2() {
         håndterÅpneOppgaverløsning(antall = 0)
         assertVarsel(SB_EX_1, VEDTAKSPERIODE_ID, INAKTIV)
         assertIngenVarsel(SB_EX_3, VEDTAKSPERIODE_ID)
-        assertInaktivWarning("Det finnes åpne oppgaver på sykepenger i Gosys", VEDTAKSPERIODE_ID)
     }
 
     @Test
@@ -120,7 +116,6 @@ internal class VarselE2ETest : AbstractE2ETestV2() {
         håndterÅpneOppgaverløsning(antall = 1)
         assertVarsel(SB_EX_1, VEDTAKSPERIODE_ID, AKTIV)
         assertIngenVarsel(SB_EX_3, VEDTAKSPERIODE_ID)
-        assertWarning("Det finnes åpne oppgaver på sykepenger i Gosys", VEDTAKSPERIODE_ID)
     }
 
     @Test
@@ -130,7 +125,6 @@ internal class VarselE2ETest : AbstractE2ETestV2() {
         håndterRisikovurderingløsning()
         assertVarsel(SB_EX_3, VEDTAKSPERIODE_ID, AKTIV)
         assertIngenVarsel(SB_EX_1, VEDTAKSPERIODE_ID)
-        assertWarning("Kunne ikke sjekke åpne oppgaver på sykepenger i Gosys", VEDTAKSPERIODE_ID)
     }
 
     @Test
@@ -143,7 +137,6 @@ internal class VarselE2ETest : AbstractE2ETestV2() {
         håndterÅpneOppgaverløsning(oppslagFeilet = true)
         assertVarsel(SB_EX_3, VEDTAKSPERIODE_ID, AKTIV)
         assertIngenVarsel(SB_EX_1, VEDTAKSPERIODE_ID)
-        assertWarning("Kunne ikke sjekke åpne oppgaver på sykepenger i Gosys", VEDTAKSPERIODE_ID)
     }
 
     @Test
@@ -230,31 +223,5 @@ internal class VarselE2ETest : AbstractE2ETestV2() {
             )
         }
         assertEquals(0, antallVarsler)
-    }
-
-    private fun assertWarning(forventet: String, vedtaksperiodeId: UUID) {
-        Assertions.assertTrue(sessionOf(dataSource).use {
-            it.run(
-                queryOf(
-                    "SELECT melding FROM warning WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id=:vedtaksperiodeId) and (inaktiv_fra is null)",
-                    mapOf(
-                        "vedtaksperiodeId" to vedtaksperiodeId
-                    )
-                ).map { row -> row.string("melding") }.asList
-            )
-        }.singleOrNull() == forventet)
-    }
-
-    private fun assertInaktivWarning(forventet: String, vedtaksperiodeId: UUID) {
-        Assertions.assertTrue(sessionOf(dataSource).use {
-            it.run(
-                queryOf(
-                    "SELECT melding FROM warning WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id=:vedtaksperiodeId) and (inaktiv_fra is not null)",
-                    mapOf(
-                        "vedtaksperiodeId" to vedtaksperiodeId
-                    )
-                ).map { row -> row.string("melding") }.asList
-            )
-        }.singleOrNull() == forventet)
     }
 }

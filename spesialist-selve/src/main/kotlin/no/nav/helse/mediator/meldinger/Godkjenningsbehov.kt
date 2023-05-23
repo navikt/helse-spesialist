@@ -156,7 +156,6 @@ internal class Godkjenningsbehov(
             hendelseId = id,
             aktørId = aktørId,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
-            warningDao = warningDao,
             vedtaksperiodeId = vedtaksperiodeId,
             sykefraværstilfelle = sykefraværstilfelle
         ),

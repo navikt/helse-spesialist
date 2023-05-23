@@ -3,22 +3,17 @@ package no.nav.helse.mediator.meldinger.løsninger
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDto
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_1
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_3
-import no.nav.helse.modell.vedtak.Warning
-import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.isMissingOrNull
-import no.nav.helse.tellWarning
-import no.nav.helse.tellWarningInaktiv
 import org.slf4j.LoggerFactory
 
 internal class ÅpneGosysOppgaverløsning(
@@ -39,62 +34,41 @@ internal class ÅpneGosysOppgaverløsning(
     }
 
     internal fun evaluer(
-        warningDao: WarningDao,
         vedtaksperiodeId: UUID,
         sykefraværstilfelle: Sykefraværstilfelle,
         hendelseId: UUID
     ) {
-        warningsForOppslagFeilet(warningDao, vedtaksperiodeId, sykefraværstilfelle, hendelseId)
-        warningsForÅpneGosysOppgaver(warningDao, vedtaksperiodeId, sykefraværstilfelle, hendelseId)
+        warningsForOppslagFeilet(vedtaksperiodeId, sykefraværstilfelle, hendelseId)
+        warningsForÅpneGosysOppgaver(vedtaksperiodeId, sykefraværstilfelle, hendelseId)
     }
 
     private fun warningsForOppslagFeilet(
-        warningDao: WarningDao,
         vedtaksperiodeId: UUID,
         sykefraværstilfelle: Sykefraværstilfelle,
         hendelseId: UUID
     ) {
-        val melding = "Kunne ikke sjekke åpne oppgaver på sykepenger i Gosys"
-
         if (oppslagFeilet) {
             sykefraværstilfelle.håndter(SB_EX_3.nyttVarsel(vedtaksperiodeId), hendelseId)
-            leggTilWarning(warningDao, vedtaksperiodeId, melding)
         } else {
-            setEksisterendeWarningInaktive(warningDao, vedtaksperiodeId, melding)
             sykefraværstilfelle.deaktiver(SB_EX_3.nyttVarsel(vedtaksperiodeId))
         }
     }
 
     private fun warningsForÅpneGosysOppgaver(
-        warningDao: WarningDao,
         vedtaksperiodeId: UUID,
         sykefraværstilfelle: Sykefraværstilfelle,
         hendelseId: UUID
     ) {
         if (antall == null) return
-        val melding = "Det finnes åpne oppgaver på sykepenger i Gosys"
 
-        val harAlleredeVarsel = warningDao.finnAktiveWarningsMedMelding(vedtaksperiodeId, melding).isNotEmpty()
         when {
-            antall > 0 && !harAlleredeVarsel-> {
+            antall > 0 -> {
                 sykefraværstilfelle.håndter(SB_EX_1.nyttVarsel(vedtaksperiodeId), hendelseId)
-                leggTilWarning(warningDao, vedtaksperiodeId, melding)
             }
-            antall == 0 && harAlleredeVarsel -> {
-                setEksisterendeWarningInaktive(warningDao, vedtaksperiodeId, melding)
+            antall == 0 -> {
                 sykefraværstilfelle.deaktiver(SB_EX_1.nyttVarsel(vedtaksperiodeId))
             }
         }
-    }
-
-    private fun leggTilWarning(warningDao: WarningDao, vedtaksperiodeId: UUID, melding: String) {
-        warningDao.leggTilWarning(vedtaksperiodeId, Warning(melding, WarningKilde.Spesialist, LocalDateTime.now()))
-        tellWarning(melding)
-    }
-
-    private fun setEksisterendeWarningInaktive(warningDao: WarningDao, vedtaksperiodeId: UUID, melding: String) {
-        warningDao.setWarningMedMeldingInaktiv(vedtaksperiodeId, melding, LocalDateTime.now())
-        tellWarningInaktiv(melding)
     }
 
     internal class ÅpneGosysOppgaverRiver(

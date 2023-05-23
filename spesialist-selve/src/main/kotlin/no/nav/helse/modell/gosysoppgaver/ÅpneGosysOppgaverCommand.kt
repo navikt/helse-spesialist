@@ -2,7 +2,6 @@ package no.nav.helse.modell.gosysoppgaver
 
 import java.util.UUID
 import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
-import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
@@ -12,7 +11,6 @@ internal class ÅpneGosysOppgaverCommand(
     private val hendelseId: UUID,
     private val aktørId: String,
     private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
-    private val warningDao: WarningDao,
     private val vedtaksperiodeId: UUID,
     private val sykefraværstilfelle: Sykefraværstilfelle
 ) : Command {
@@ -33,7 +31,7 @@ internal class ÅpneGosysOppgaverCommand(
             return false
         }
         løsning.lagre(åpneGosysOppgaverDao)
-        løsning.evaluer(warningDao, vedtaksperiodeId, sykefraværstilfelle, hendelseId)
+        løsning.evaluer(vedtaksperiodeId, sykefraværstilfelle, hendelseId)
         return true
     }
 }
