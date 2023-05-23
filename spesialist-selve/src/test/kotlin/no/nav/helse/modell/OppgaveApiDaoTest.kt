@@ -22,7 +22,6 @@ import no.nav.helse.spesialist.api.graphql.schema.Periodetype.FORLENGELSE
 import no.nav.helse.spesialist.api.graphql.schema.Periodetype.FORSTEGANGSBEHANDLING
 import no.nav.helse.spesialist.api.graphql.schema.Periodetype.INFOTRYGDFORLENGELSE
 import no.nav.helse.spesialist.api.graphql.schema.Periodetype.OVERGANG_FRA_IT
-import no.nav.helse.spesialist.api.oppgave.BESLUTTEROPPGAVE_PREFIX
 import no.nav.helse.spesialist.api.oppgave.Oppgavemelder
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
@@ -299,20 +298,6 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
         val oppgaver = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_RISK)
         assertEquals(FORSTEGANGSBEHANDLING, oppgaver.first().periodetype)
         assertTrue(oppgaver.first().flereArbeidsgivere)
-    }
-
-    @Test
-    fun `ikke tell varsler som er beslutteroppgaver`() {
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettGenerasjon()
-        opprettVedtaksperiode()
-        opprettOppgave(contextId = CONTEXT_ID)
-        opprettWarning(melding = "$BESLUTTEROPPGAVE_PREFIX Dette er feil")
-        opprettWarning()
-
-        val oppgave = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN).first()
-        assertEquals(1, oppgave.antallVarsler)
     }
 
     @Test

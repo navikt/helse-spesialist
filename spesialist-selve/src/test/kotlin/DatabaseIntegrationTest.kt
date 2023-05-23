@@ -30,8 +30,6 @@ import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.modell.vedtak.Warning
-import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
@@ -339,13 +337,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                 if (forkastet) vedtakDao.markerForkastet(vedtaksperiodeId, UUID.randomUUID())
             }
             ?: fail { "Kunne ikke opprette vedtak" }
-    }
-
-    protected fun opprettWarning(
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE,
-        melding: String = "Advarsel advarsel"
-    ) {
-        warningDao.leggTilWarning(vedtaksperiodeId, Warning(melding, WarningKilde.Spleis, LocalDateTime.now()))
     }
 
     protected fun opprettOppgave(
