@@ -1,22 +1,16 @@
 package no.nav.helse.modell.vergemal
 
-import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.mediator.meldinger.løsninger.Vergemålløsning
-import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.varsel.Varselkode.SB_IK_1
-import no.nav.helse.modell.vedtak.Warning
-import no.nav.helse.modell.vedtak.WarningKilde
-import no.nav.helse.tellWarning
 import org.slf4j.LoggerFactory
 
 internal class VergemålCommand(
     private val hendelseId: UUID,
     private val vergemålDao: VergemålDao,
-    private val warningDao: WarningDao,
     private val vedtaksperiodeId: UUID,
     private val sykefraværstilfelle: Sykefraværstilfelle,
 ) : Command {
@@ -41,23 +35,10 @@ internal class VergemålCommand(
             return true
         }
         if (løsning.harFullmakt()) {
-            "Registert fullmakt på personen.".leggTilSomWarning()
             sykefraværstilfelle.håndter(SB_IK_1.nyttVarsel(vedtaksperiodeId), hendelseId)
         }
 
         return true
-    }
-
-
-    private fun String.leggTilSomWarning() {
-        warningDao.leggTilWarning(
-            vedtaksperiodeId, Warning(
-                melding = this,
-                kilde = WarningKilde.Spesialist,
-                opprettet = LocalDateTime.now(),
-            )
-        )
-        tellWarning(this)
     }
 
     private fun Vergemålløsning.harVergemål() = vergemål.harVergemål

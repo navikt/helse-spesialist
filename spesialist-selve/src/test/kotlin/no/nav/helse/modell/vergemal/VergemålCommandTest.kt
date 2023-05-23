@@ -1,20 +1,16 @@
 package no.nav.helse.modell.vergemal
 
 import io.mockk.clearMocks
-import io.mockk.every
 import io.mockk.mockk
-import io.mockk.slot
 import io.mockk.verify
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.januar
 import no.nav.helse.mediator.meldinger.løsninger.Vergemålløsning
-import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
-import no.nav.helse.modell.vedtak.Warning
-import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.modell.vedtaksperiode.Generasjon
+import no.nav.helse.modell.vedtaksperiode.IVedtaksperiodeObserver
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -28,22 +24,22 @@ class VergemålCommandTest {
         private val VEDTAKSPERIODE_ID = UUID.fromString("1cd0d9cb-62e8-4f16-b634-f2b9dab550b6")
     }
 
+    private val observer = object : IVedtaksperiodeObserver {
+
+        val opprettedeVarsler = mutableListOf<String>()
+
+        override fun varselOpprettet(varselId: UUID, vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, opprettet: LocalDateTime) {
+            opprettedeVarsler.add(varselkode)
+        }
+    }
+
     private val vergemålDao = mockk<VergemålDao>(relaxed = true)
-    private val warningMock = WarningMock()
-    private val forventetFullmaktWarnings = listOf(
-        Warning(
-            "Registert fullmakt på personen.",
-            WarningKilde.Spesialist,
-            LocalDateTime.now()
-        )
-    )
-    private val generasjon = Generasjon(UUID.randomUUID(), VEDTAKSPERIODE_ID, 1.januar, 31.januar, 1.januar)
+    private val generasjon = Generasjon(UUID.randomUUID(), VEDTAKSPERIODE_ID, 1.januar, 31.januar, 1.januar).also { it.registrer(observer) }
     private val sykefraværstilfelle = Sykefraværstilfelle(FNR, 1.januar, listOf(generasjon))
 
     private val command = VergemålCommand(
         hendelseId = UUID.randomUUID(),
         vergemålDao = vergemålDao,
-        warningDao = warningMock.warningDao,
         vedtaksperiodeId = VEDTAKSPERIODE_ID,
         sykefraværstilfelle = sykefraværstilfelle,
     )
@@ -61,7 +57,6 @@ class VergemålCommandTest {
     fun setup() {
         context = CommandContext(UUID.randomUUID())
         clearMocks(vergemålDao)
-        warningMock.clear()
     }
 
     @Test
@@ -82,7 +77,7 @@ class VergemålCommandTest {
         assertTrue(command.resume(context))
         verify(exactly = 1) { vergemålDao.lagre(FNR, ingenVergemål) }
         assertEquals(0, context.meldinger().size)
-        assertEquals(emptyList<Warning>(), warningMock.warnings(VEDTAKSPERIODE_ID))
+        assertEquals(0, observer.opprettedeVarsler.size)
     }
 
     @Test
@@ -91,7 +86,7 @@ class VergemålCommandTest {
         assertTrue(command.resume(context))
         verify(exactly = 1) { vergemålDao.lagre(FNR, harVergemål) }
         assertEquals(0, context.meldinger().size)
-        assertEquals(emptyList<Warning>(), warningMock.warnings(VEDTAKSPERIODE_ID))
+        assertEquals(0, observer.opprettedeVarsler.size)
     }
 
     @Test
@@ -100,7 +95,7 @@ class VergemålCommandTest {
         assertTrue(command.resume(context))
         verify(exactly = 1) { vergemålDao.lagre(FNR, harFullmakt) }
         assertEquals(0, context.meldinger().size)
-        assertEquals(forventetFullmaktWarnings, warningMock.warnings(VEDTAKSPERIODE_ID))
+        assertEquals(1, observer.opprettedeVarsler.size)
     }
 
     @Test
@@ -109,7 +104,7 @@ class VergemålCommandTest {
         assertTrue(command.resume(context))
         verify(exactly = 1) { vergemålDao.lagre(FNR, harFremtidsfullmakt) }
         assertEquals(0, context.meldinger().size)
-        assertEquals(forventetFullmaktWarnings, warningMock.warnings(VEDTAKSPERIODE_ID))
+        assertEquals(1, observer.opprettedeVarsler.size)
     }
 
     @Test
@@ -118,7 +113,7 @@ class VergemålCommandTest {
         assertTrue(command.resume(context))
         verify(exactly = 1) { vergemålDao.lagre(FNR, harAlt) }
         assertEquals(0, context.meldinger().size)
-        assertEquals(emptyList<Warning>(), warningMock.warnings(VEDTAKSPERIODE_ID))
+        assertEquals(0, observer.opprettedeVarsler.size)
     }
 
     @Test
@@ -127,23 +122,6 @@ class VergemålCommandTest {
         assertTrue(command.resume(context))
         verify(exactly = 1) { vergemålDao.lagre(FNR, harBeggeFullmatkstyper) }
         assertEquals(0, context.meldinger().size)
-        assertEquals(forventetFullmaktWarnings, warningMock.warnings(VEDTAKSPERIODE_ID))
-    }
-
-    private class WarningMock {
-        private val warnings = mutableMapOf<UUID, MutableList<Warning>>()
-        private val vedtaksperiodeIdSlot = slot<UUID>()
-        private val warningSlot = slot<Warning>()
-        val warningDao = mockk<WarningDao>().also {
-            every { it.leggTilWarning(capture(vedtaksperiodeIdSlot), capture(warningSlot)) }.answers {
-                val vedtaksperiodeId = vedtaksperiodeIdSlot.captured
-                val warning = warningSlot.captured
-                val warningsForVedtaksperiode = warnings[vedtaksperiodeId] ?: mutableListOf()
-                warningsForVedtaksperiode.add(warning)
-                warnings[vedtaksperiodeId] = warningsForVedtaksperiode
-            }
-        }
-        fun warnings(vedtaksperiode: UUID) = warnings[vedtaksperiode]?.toList() ?: emptyList()
-        fun clear() = warnings.clear()
+        assertEquals(1, observer.opprettedeVarsler.size)
     }
 }

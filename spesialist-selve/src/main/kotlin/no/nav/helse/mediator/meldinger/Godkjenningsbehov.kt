@@ -148,7 +148,6 @@ internal class Godkjenningsbehov(
         VergemålCommand(
             hendelseId = id,
             vergemålDao = vergemålDao,
-            warningDao = warningDao,
             vedtaksperiodeId = vedtaksperiodeId,
             sykefraværstilfelle = sykefraværstilfelle
         ),
