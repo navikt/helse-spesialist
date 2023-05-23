@@ -328,7 +328,12 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                     erBeslutteroppgave = !erRetur && saksbehandler != null
                 )
             },
-            mottaker = finnMottaker(it.intOrNull("arbeidsgiverbeløp"), it.intOrNull("personbeløp"))
+            mottaker = finnMottaker(it.intOrNull("arbeidsgiverbeløp"), it.intOrNull("personbeløp")),
+            navn = no.nav.helse.spesialist.api.graphql.schema.Personnavn(
+                fornavn = it.string("fornavn"),
+                mellomnavn = it.stringOrNull("mellomnavn"),
+                etternavn = it.string("etternavn"),
+            )
         )
 
         private fun finnMottaker(arbeidsgiverbeløp: Int?, personbeløp: Int?): Mottaker? {

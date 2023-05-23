@@ -26,6 +26,7 @@ data class OppgaveForOversiktsvisning(
     val opprinneligSoknadsdato: DateTimeString,
     val vedtaksperiodeId: UUIDString,
     val personinfo: Personinfo,
+    val navn: Personnavn,
     val aktorId: String,
     val fodselsnummer: String,
     val antallVarsler: Int?,
