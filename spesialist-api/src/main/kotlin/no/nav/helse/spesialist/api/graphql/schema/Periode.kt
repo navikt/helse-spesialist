@@ -508,7 +508,7 @@ data class BeregnetPeriode(
             )
         }
 
-    fun varsler(): List<String> = varselDao.finnAktiveVarsler(UUID.fromString(vedtaksperiodeId())).distinct()
+    fun varsler(): List<String>? = varselDao.finnAktiveVarsler(UUID.fromString(vedtaksperiodeId())).distinct()
 
     @Deprecated("Oppgavereferanse bør hentes fra periodens oppgave")
     fun oppgavereferanse(): String? =
