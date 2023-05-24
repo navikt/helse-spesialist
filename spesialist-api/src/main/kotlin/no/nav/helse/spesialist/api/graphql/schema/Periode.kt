@@ -260,6 +260,7 @@ interface Periode {
     fun periodetilstand(): Periodetilstand
     fun skjaeringstidspunkt(): DateString
     fun varslerForGenerasjon(): List<VarselDTO>
+    fun varsler(): List<VarselDTO>
     fun hendelser(): List<Hendelse>
 
     @GraphQLIgnore
@@ -331,6 +332,9 @@ data class UberegnetPeriode(
     override fun skjaeringstidspunkt(): DateString = periode.skjaeringstidspunkt
     override fun hendelser(): List<Hendelse> = periode.hendelser.map { it.tilHendelse() }
     override fun varslerForGenerasjon(): List<VarselDTO> = if (skalViseAktiveVarsler)
+        varselRepository.finnVarslerForUberegnetPeriode(UUID.fromString(vedtaksperiodeId())).toList() else
+        varselRepository.finnGodkjenteVarslerForUberegnetPeriode(UUID.fromString(vedtaksperiodeId())).toList()
+    override fun varsler(): List<VarselDTO> = if (skalViseAktiveVarsler)
         varselRepository.finnVarslerForUberegnetPeriode(UUID.fromString(vedtaksperiodeId())).toList() else
         varselRepository.finnGodkjenteVarslerForUberegnetPeriode(UUID.fromString(vedtaksperiodeId())).toList()
 }
@@ -508,7 +512,15 @@ data class BeregnetPeriode(
             )
         }
 
-    fun varsler(): List<String>? = varselDao.finnAktiveVarsler(UUID.fromString(vedtaksperiodeId())).distinct()
+    override fun varsler(): List<VarselDTO> =
+        if (erSisteGenerasjon) varselRepository.finnVarslerSomIkkeErInaktiveForSisteGenerasjon(
+            UUID.fromString(vedtaksperiodeId()),
+            UUID.fromString(periode.utbetaling.id)
+        ).toList()
+        else varselRepository.finnVarslerSomIkkeErInaktiveFor(
+            UUID.fromString(vedtaksperiodeId()),
+            UUID.fromString(periode.utbetaling.id)
+        ).toList()
 
     @Deprecated("Oppgavereferanse bør hentes fra periodens oppgave")
     fun oppgavereferanse(): String? =
