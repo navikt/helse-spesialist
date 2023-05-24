@@ -143,7 +143,7 @@ internal class Automatisering(
             vedtaksperiodeId,
             overstyringIgangsattKorrigertSøknad
         )
-        return Pair(false, "Fant ikke vedtaksperiode som har periodeFom som matcher perideForEndringFom for korrigert søknad")
+        return Pair(true, null)
     }
 
     private fun avgjørStikkprøve(

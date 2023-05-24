@@ -139,20 +139,6 @@ internal class AutomatiseringTest {
     }
 
     @Test
-    fun `Finner ikke vedtaksperiode som har periodeFom som matcher perideForEndringFom for korrigert søknad`() {
-        every { hendelseDaoMock.sisteOverstyringIgangsattOmKorrigertSøknad(fødselsnummer, vedtaksperiodeId) } returns HendelseDao.OverstyringIgangsattKorrigertSøknad(
-            hendelseId = hendelseId.toString(),
-            periodeForEndringFom = periodeFom,
-            berørtePerioder = listOf(HendelseDao.BerørtPeriode(
-                vedtaksperiodeId = vedtaksperiodeId,
-                orgnummer = orgnummer,
-                periodeFom = periodeFom.plusDays(1)
-            )
-            ))
-        gårTilManuellMedError(problems = listOf("Fant ikke vedtaksperiode som har periodeFom som matcher perideForEndringFom for korrigert søknad"))
-    }
-
-    @Test
     fun `Automatisering av korrigert søknad er allerede håndtert for tidligere sykefraværstilfelle`() {
         every { hendelseDaoMock.erAutomatisertKorrigertSøknadHåndtert(hendelseId) } returns true
         gårAutomatisk()
