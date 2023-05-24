@@ -136,7 +136,7 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         val periode = runPersonQuery().plukkUtPeriodeMed(uberegnetPeriode.id)
         val forventetVarsel = setOf(PersonQueryTestVarsel(generasjonId, "EN_KODE"))
 
-        assertEquals(forventetVarsel, periode.varslerForGenerasjon)
+        assertEquals(forventetVarsel, periode.varsler)
     }
 
     @Test
@@ -154,7 +154,7 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
 
         val periode = runPersonQuery().plukkUtPeriodeMed(vedtaksperiodeId)
 
-        assertTrue(periode.varslerForGenerasjon.isEmpty())
+        assertTrue(periode.varsler.isEmpty())
     }
 
     @Test
@@ -184,8 +184,8 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         val sisteGenerasjonAvPeriode = runPersonQuery().plukkUtPeriodeMed(uberegnetPeriode.id, snapshotGenerasjonId1)
         val forventedeVarsler = setOf(PersonQueryTestVarsel(generasjonId1, "EN_KODE"), PersonQueryTestVarsel(generasjonId2, "EN_KODE"))
 
-        assertTrue(førsteGenerasjonAvPeriode.varslerForGenerasjon.isEmpty())
-        assertEquals(forventedeVarsler, sisteGenerasjonAvPeriode.varslerForGenerasjon)
+        assertTrue(førsteGenerasjonAvPeriode.varsler.isEmpty())
+        assertEquals(forventedeVarsler, sisteGenerasjonAvPeriode.varsler)
     }
 
     @Test
@@ -259,7 +259,7 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
                             perioder {
                                 ... on UberegnetPeriode {
                                     vedtaksperiodeId
-                                    varslerForGenerasjon {
+                                    varsler {
                                         generasjonId
                                         kode
                                     }                      
@@ -267,7 +267,7 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
                                 ... on BeregnetPeriode {
                                     vedtaksperiodeId
                                     handlinger { type, tillatt }
-                                    varslerForGenerasjon {
+                                    varsler {
                                         generasjonId
                                         kode
                                     }                      
@@ -308,7 +308,7 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
 
     private data class PersonQueryTestPeriode(
         val vedtaksperiodeId: UUID,
-        val varslerForGenerasjon: Set<PersonQueryTestVarsel>
+        val varsler: Set<PersonQueryTestVarsel>
     )
 
     private data class PersonQueryTestVarsel(

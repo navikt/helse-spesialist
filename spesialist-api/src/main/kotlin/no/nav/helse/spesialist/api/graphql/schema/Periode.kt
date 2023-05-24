@@ -259,7 +259,6 @@ interface Periode {
     fun vedtaksperiodeId(): UUIDString
     fun periodetilstand(): Periodetilstand
     fun skjaeringstidspunkt(): DateString
-    fun varslerForGenerasjon(): List<VarselDTO>?
     fun varsler(): List<VarselDTO>
     fun hendelser(): List<Hendelse>
 
@@ -331,9 +330,6 @@ data class UberegnetPeriode(
     override fun periodetilstand(): Periodetilstand = periodetilstand(periode.periodetilstand)
     override fun skjaeringstidspunkt(): DateString = periode.skjaeringstidspunkt
     override fun hendelser(): List<Hendelse> = periode.hendelser.map { it.tilHendelse() }
-    override fun varslerForGenerasjon(): List<VarselDTO>? = if (skalViseAktiveVarsler)
-        varselRepository.finnVarslerForUberegnetPeriode(UUID.fromString(vedtaksperiodeId())).toList() else
-        varselRepository.finnGodkjenteVarslerForUberegnetPeriode(UUID.fromString(vedtaksperiodeId())).toList()
     override fun varsler(): List<VarselDTO> = if (skalViseAktiveVarsler)
         varselRepository.finnVarslerForUberegnetPeriode(UUID.fromString(vedtaksperiodeId())).toList() else
         varselRepository.finnGodkjenteVarslerForUberegnetPeriode(UUID.fromString(vedtaksperiodeId())).toList()
@@ -381,16 +377,6 @@ data class BeregnetPeriode(
             else listOf(Handling(Periodehandling.UTBETALE, true))
         }
     }
-
-    override fun varslerForGenerasjon(): List<VarselDTO>? =
-        if (erSisteGenerasjon) varselRepository.finnVarslerSomIkkeErInaktiveForSisteGenerasjon(
-            UUID.fromString(vedtaksperiodeId()),
-            UUID.fromString(periode.utbetaling.id)
-        ).toList()
-        else varselRepository.finnVarslerSomIkkeErInaktiveFor(
-            UUID.fromString(vedtaksperiodeId()),
-            UUID.fromString(periode.utbetaling.id)
-        ).toList()
 
     override fun hendelser(): List<Hendelse> = periode.hendelser.map { it.tilHendelse() }
 
