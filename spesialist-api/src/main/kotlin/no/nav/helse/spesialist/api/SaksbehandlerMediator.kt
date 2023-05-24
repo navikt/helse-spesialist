@@ -81,7 +81,7 @@ class SaksbehandlerMediator(
         rapidsConnection.publish(overstyring.fødselsnummer, message.toJson())
     }
 
-    fun håndter(godkjenning: GodkjenningDto, behandlingId: UUID) {
+    fun håndter(godkjenning: GodkjenningDto, behandlingId: UUID, saksbehandler: Saksbehandler) {
         val perioderTilBehandling = generasjonRepository.perioderTilBehandling(godkjenning.oppgavereferanse)
         if (godkjenning.godkjent) {
             if (perioderTilBehandling.harAktiveVarsler())
@@ -92,7 +92,7 @@ class SaksbehandlerMediator(
 
         val fødselsnummer = oppgaveApiDao.finnFødselsnummer(godkjenning.oppgavereferanse)
 
-        perioderTilBehandling.vurderVarsler(godkjenning.godkjent, fødselsnummer, behandlingId, this::vurderVarsel)
+        perioderTilBehandling.vurderVarsler(godkjenning.godkjent, fødselsnummer, behandlingId, saksbehandler.ident(), this::vurderVarsel)
     }
 
     private fun vurderVarsel(
@@ -103,9 +103,10 @@ class SaksbehandlerMediator(
         varseltittel: String,
         varselkode: String,
         forrigeStatus: Varsel.Varselstatus,
-        gjeldendeStatus: Varsel.Varselstatus
+        gjeldendeStatus: Varsel.Varselstatus,
+        saksbehandlerIdent: String
     ) {
-        varselRepository.vurderVarselFor(varselId, gjeldendeStatus)
+        varselRepository.vurderVarselFor(varselId, gjeldendeStatus, saksbehandlerIdent)
         val message = JsonMessage.newMessage(
             "varsel_endret", mapOf(
                 "fødselsnummer" to fødselsnummer,

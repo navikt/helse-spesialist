@@ -45,13 +45,14 @@ data class Varsel(
         fødselsnummer: String,
         behandlingId: UUID,
         vedtaksperiodeId: UUID,
-        vurderer: (fødselsnummer: String, behandlingId: UUID, vedtaksperiodeId: UUID, varselId: UUID, varselTittel: String, varselkode: String, forrigeStatus: Varselstatus, gjeldendeStatus: Varselstatus) -> Unit,
+        ident: String,
+        vurderer: (fødselsnummer: String, behandlingId: UUID, vedtaksperiodeId: UUID, varselId: UUID, varselTittel: String, varselkode: String, forrigeStatus: Varselstatus, gjeldendeStatus: Varselstatus, saksbehandlerIdent: String) -> Unit,
     ) {
         if (status !in (listOf(AKTIV, VURDERT))) return
 
         val forrigeStatus = status
         status = if (godkjent) GODKJENT else AVVIST
-        vurderer(fødselsnummer, behandlingId, vedtaksperiodeId, varselId, tittel, kode, forrigeStatus, status)
+        vurderer(fødselsnummer, behandlingId, vedtaksperiodeId, varselId, tittel, kode, forrigeStatus, status, ident)
     }
 
     data class Varselvurdering(

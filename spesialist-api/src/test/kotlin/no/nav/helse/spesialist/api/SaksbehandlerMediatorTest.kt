@@ -52,7 +52,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
         nyttVarsel(vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, status = "VURDERT", definisjonRef = definisjonRef)
         nyttVarsel(kode = "EN_ANNEN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, status = "VURDERT", definisjonRef = definisjonRef)
         assertDoesNotThrow {
-            mediator.håndter(godkjenning(sisteOppgaveId, true), UUID.randomUUID())
+            mediator.håndter(godkjenning(sisteOppgaveId, true), UUID.randomUUID(), saksbehandler)
         }
         assertGodkjenteVarsler(generasjonRef, 2)
     }
@@ -66,7 +66,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
         val definisjonRef = opprettVarseldefinisjon()
         nyttVarsel(vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, status = "AKTIV", definisjonRef = definisjonRef)
         assertThrows<ManglerVurderingAvVarsler> {
-            mediator.håndter(godkjenning(sisteOppgaveId, true), UUID.randomUUID())
+            mediator.håndter(godkjenning(sisteOppgaveId, true), UUID.randomUUID(), saksbehandler)
         }
         assertGodkjenteVarsler(generasjonRef, 0)
     }
@@ -78,7 +78,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver(), periode = Periode(vedtaksperiodeId, 1.januar, 31.januar))
         val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
         assertDoesNotThrow {
-            mediator.håndter(godkjenning(sisteOppgaveId, true), UUID.randomUUID())
+            mediator.håndter(godkjenning(sisteOppgaveId, true), UUID.randomUUID(), saksbehandler)
         }
         assertGodkjenteVarsler(generasjonRef, 0)
     }
@@ -93,7 +93,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
         val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
         val definisjonRef = opprettVarseldefinisjon()
         nyttVarsel(vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, status = "AKTIV", definisjonRef = definisjonRef)
-        mediator.håndter(godkjenning(sisteOppgaveId, false), UUID.randomUUID())
+        mediator.håndter(godkjenning(sisteOppgaveId, false), UUID.randomUUID(), saksbehandler)
         assertGodkjenteVarsler(generasjonRef, 0)
         assertAvvisteVarsler(generasjonRef, 1)
     }
@@ -143,7 +143,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
         val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
         val definisjonRef = opprettVarseldefinisjon(tittel = "EN_TITTEL")
         nyttVarsel(id = varselId, vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, kode = "EN_KODE", status = "VURDERT", definisjonRef = definisjonRef)
-        mediator.håndter(godkjenning(sisteOppgaveId, true), behandlingId)
+        mediator.håndter(godkjenning(sisteOppgaveId, true), behandlingId, saksbehandler)
 
         assertEquals(1, testRapid.inspektør.size)
         val melding = testRapid.inspektør.message(0)

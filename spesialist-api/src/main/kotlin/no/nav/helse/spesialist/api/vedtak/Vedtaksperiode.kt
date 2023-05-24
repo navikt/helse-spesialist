@@ -28,7 +28,8 @@ internal data class Vedtaksperiode(
             godkjent: Boolean,
             fødselsnummer: String,
             behandlingId: UUID,
-            godkjenner: (fødselsnummer: String, behandlingId: UUID, vedtaksperiodeId: UUID, varselId: UUID, varselTittel: String, varselkode: String, forrigeStatus: Varsel.Varselstatus, gjeldendeStatus: Varsel.Varselstatus) -> Unit
+            ident: String,
+            godkjenner: (fødselsnummer: String, behandlingId: UUID, vedtaksperiodeId: UUID, varselId: UUID, varselTittel: String, varselkode: String, forrigeStatus: Varsel.Varselstatus, gjeldendeStatus: Varsel.Varselstatus, saksbehandlerIdent: String) -> Unit
         ) {
             forEach { vedtaksperiode ->
                 vedtaksperiode.varsler.forEach {
@@ -37,6 +38,7 @@ internal data class Vedtaksperiode(
                         fødselsnummer = fødselsnummer,
                         behandlingId = behandlingId,
                         vedtaksperiodeId = vedtaksperiode.vedtaksperiodeId,
+                        ident = ident,
                         vurderer = godkjenner
                     )
                 }

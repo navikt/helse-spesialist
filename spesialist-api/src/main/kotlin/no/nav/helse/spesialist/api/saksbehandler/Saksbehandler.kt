@@ -18,6 +18,8 @@ class Saksbehandler(
         )
     }
 
+    internal fun ident(): String = ident
+
     fun persister(saksbehandlerDao: SaksbehandlerDao) {
         saksbehandlerDao.opprettSaksbehandler(oid = oid, navn = navn, epost = epostadresse, ident = ident)
     }

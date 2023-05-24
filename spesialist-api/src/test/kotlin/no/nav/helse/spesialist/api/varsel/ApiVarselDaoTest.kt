@@ -349,9 +349,51 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         assertEquals(forventetVarsel, apiVarselDao.finnVarslerSomIkkeErInaktiveFor(vedtaksperiodeId, utbetalingId).single())
     }
 
+    @Test
+    fun `vurder varsel`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjonId = UUID.randomUUID()
+        val utbetalingId = UUID.randomUUID()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
+        val varselId = UUID.randomUUID()
+        nyttVarsel(id = varselId, vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef)
+        val vurdering1 = finnVurderingFor(varselId)
+        assertEquals(AKTIV, vurdering1?.status)
+        assertNull(vurdering1?.ident)
+        assertNull(vurdering1?.tidspunkt)
+
+        apiVarselDao.vurderVarselFor(varselId, VURDERT, "ident")
+        val vurdering2 = finnVurderingFor(varselId)
+        assertEquals(VURDERT, vurdering2?.status)
+        assertEquals("ident", vurdering2?.ident)
+        assertNotNull(vurdering2?.tidspunkt)
+    }
+
     private fun finnVarslerFor(status: Varselstatus): Int = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val query = "SELECT count(1) FROM selve_varsel WHERE status = :status;"
         return requireNotNull(session.run(queryOf(query, mapOf("status" to status.name)).map { it.int(1) }.asSingle))
     }
+
+    private fun finnVurderingFor(varselId: UUID): TestVurdering? {
+        @Language("PostgreSQL")
+        val query = "SELECT status, status_endret_ident, status_endret_tidspunkt FROM selve_varsel WHERE unik_id = ?;"
+
+        return sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, varselId).map {
+                TestVurdering(
+                    enumValueOf(it.string("status")),
+                    it.stringOrNull("status_endret_ident"),
+                    it.localDateTimeOrNull("status_endret_tidspunkt")
+                )
+            }.asSingle)
+        }
+    }
+
+    private data class TestVurdering(
+        val status: Varselstatus,
+        val ident: String?,
+        val tidspunkt: LocalDateTime?
+    )
 }

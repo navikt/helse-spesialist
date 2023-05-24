@@ -21,6 +21,7 @@ import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.spesialist.api.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.feilhåndtering.IkkeTilgangTilRiskQa
 import no.nav.helse.spesialist.api.feilhåndtering.IkkeÅpenOppgave
+import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import org.slf4j.LoggerFactory
 
@@ -50,6 +51,7 @@ internal fun Route.personApi(
 
     post("/api/vedtak") {
         val godkjenning = call.receive<GodkjenningDto>()
+        val saksbehandler = Saksbehandler.fraOnBehalfOfToken(requireNotNull(call.principal()))
         log.info("Behandler godkjenning/avslag: ${godkjenning.åpenLoggString()} (se sikker logg for detaljer)")
         sikkerLogg.info("Behandler godkjenning/avslag: $godkjenning")
         val (oid, epostadresse) = requireNotNull(call.principal<JWTPrincipal>()).payload.let {
@@ -92,7 +94,7 @@ internal fun Route.personApi(
 
         val behandlingId = UUID.randomUUID()
 
-        saksbehandlerMediator.håndter(godkjenning, behandlingId)
+        saksbehandlerMediator.håndter(godkjenning, behandlingId, saksbehandler)
         withContext(Dispatchers.IO) { godkjenningService.håndter(godkjenning, epostadresse, oid, behandlingId) }
         call.respond(HttpStatusCode.Created, mapOf("status" to "OK"))
     }
