@@ -15,6 +15,7 @@ import no.nav.helse.modell.varsel.VarselDao
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -287,6 +288,16 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         )
 
         assertEquals(opprinneligSøknadsdato, finnSøknadMottatt(VEDTAKSPERIODE_ID))
+    }
+
+    @Test
+    fun `Finner første generasjons låst tidspunkt`() {
+        val vedtaksperiodeEndretId = UUID.randomUUID()
+        val generasjonId = UUID.randomUUID()
+        generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE_ID, vedtaksperiodeEndretId, 1.januar, Periode(1.januar, 31.januar), Generasjon.Ulåst)
+        generasjonDao.oppdaterTilstandFor(generasjonId, Generasjon.Låst, UUID.randomUUID())
+
+        assertNotNull(generasjonDao.førsteGenerasjonLåstTidspunkt(VEDTAKSPERIODE_ID))
     }
 
     private fun assertVarsler(generasjonId: UUID, vararg forventedeVarselkoder: String) {

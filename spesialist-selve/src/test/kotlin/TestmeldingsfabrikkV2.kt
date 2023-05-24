@@ -109,7 +109,8 @@ internal object TestmeldingsfabrikkV2 {
         forårsaketAvId: UUID = UUID.randomUUID(),
         fom: LocalDate = 1.januar,
         tom: LocalDate = 31.januar,
-        skjæringstidspunkt: LocalDate = 1.januar
+        skjæringstidspunkt: LocalDate = 1.januar,
+        opprettet: LocalDateTime = LocalDateTime.now(),
     ) =
         nyHendelse(
             id, "vedtaksperiode_opprettet", mapOf(
@@ -118,7 +119,8 @@ internal object TestmeldingsfabrikkV2 {
                 "aktørId" to aktørId,
                 "organisasjonsnummer" to organisasjonsnummer,
                 "@forårsaket_av" to mapOf(
-                    "id" to forårsaketAvId
+                    "id" to forårsaketAvId,
+                    "opprettet" to opprettet,
                 ),
                 "fom" to fom,
                 "tom" to tom,

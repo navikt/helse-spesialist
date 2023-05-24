@@ -158,6 +158,12 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         assertForkastet(VEDTAKSPERIODE, HENDELSE_ID)
     }
 
+    @Test
+    fun `Finner orgnummer med vedtaksperiodeId`() {
+        nyPerson()
+        assertEquals(ORGNUMMER, vedtakDao.finnOrgnummer(VEDTAKSPERIODE))
+    }
+
     private fun assertForkastet(vedtaksperiodeId: UUID, forventetHendelseId: UUID) {
         @Language("PostgreSQL")
         val query = "SELECT forkastet, forkastet_av_hendelse, forkastet_tidspunkt FROM vedtak WHERE vedtaksperiode_id = ?"

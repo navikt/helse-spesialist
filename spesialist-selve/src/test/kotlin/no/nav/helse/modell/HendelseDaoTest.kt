@@ -10,6 +10,9 @@ import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.VedtaksperiodeForkastet
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -46,6 +49,66 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
                 VEDTAKSPERIODE
             )
         )
+    }
+
+    @Test
+    fun `finn siste igangsatte overstyring om den er korrigert søknad`() {
+        val overstyringIgangsatt = hendelsefabrikk.overstyringIgangsatt(
+            testmeldingfabrikk.lagOverstyringIgangsatt(
+                vedtaksperiodeId = VEDTAKSPERIODE
+            )
+        )
+        val overstyringIgangsattForAnnenVedtaksperiode = hendelsefabrikk.overstyringIgangsatt(
+            testmeldingfabrikk.lagOverstyringIgangsatt(
+                vedtaksperiodeId = VEDTAKSPERIODE,
+                årsak = "SYKDOMSTIDSLINJE"
+            )
+        )
+        hendelseDao.opprett(overstyringIgangsatt)
+        hendelseDao.opprett(overstyringIgangsattForAnnenVedtaksperiode)
+        assertNull(hendelseDao.sisteOverstyringIgangsattOmKorrigertSøknad(FNR, VEDTAKSPERIODE))
+
+        hendelseDao.opprett(hendelsefabrikk.overstyringIgangsatt(
+            testmeldingfabrikk.lagOverstyringIgangsatt(
+                vedtaksperiodeId = VEDTAKSPERIODE
+            )
+        ))
+        assertNotNull(hendelseDao.sisteOverstyringIgangsattOmKorrigertSøknad(FNR, VEDTAKSPERIODE))
+    }
+
+    @Test
+    fun `finn antall korrigerte søknader`() {
+        val overstyringIgangsatt = hendelsefabrikk.overstyringIgangsatt(
+            testmeldingfabrikk.lagOverstyringIgangsatt(
+                vedtaksperiodeId = VEDTAKSPERIODE
+            )
+        )
+        val overstyringIgangsattForAnnenVedtaksperiode = hendelsefabrikk.overstyringIgangsatt(
+            testmeldingfabrikk.lagOverstyringIgangsatt()
+        )
+        hendelseDao.opprett(overstyringIgangsatt)
+        hendelseDao.opprett(overstyringIgangsattForAnnenVedtaksperiode)
+        hendelseDao.opprettAutomatiseringKorrigertSøknad(VEDTAKSPERIODE, UUID.randomUUID())
+        val actual = hendelseDao.finnAntallAutomatisertKorrigertSøknad(VEDTAKSPERIODE)
+        assertEquals(1, actual)
+    }
+
+    @Test
+    fun `finn ut om automatisering av korrigert søknad allerede er håndtert`() {
+        val overstyringIgangsatt = hendelsefabrikk.overstyringIgangsatt(
+            testmeldingfabrikk.lagOverstyringIgangsatt(
+                id = HENDELSE_ID,
+                vedtaksperiodeId = VEDTAKSPERIODE
+            )
+        )
+        val overstyringIgangsattForAnnenVedtaksperiode = hendelsefabrikk.overstyringIgangsatt(
+            testmeldingfabrikk.lagOverstyringIgangsatt()
+        )
+        hendelseDao.opprett(overstyringIgangsatt)
+        hendelseDao.opprett(overstyringIgangsattForAnnenVedtaksperiode)
+        hendelseDao.opprettAutomatiseringKorrigertSøknad(VEDTAKSPERIODE, HENDELSE_ID)
+        val håndtert = hendelseDao.erAutomatisertKorrigertSøknadHåndtert(HENDELSE_ID)
+        assertTrue(håndtert)
     }
 
     @Test

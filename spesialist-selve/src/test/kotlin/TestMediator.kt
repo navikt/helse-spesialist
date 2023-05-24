@@ -4,6 +4,7 @@ import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.OverstyringMediator
+import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringDao
@@ -15,6 +16,7 @@ import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
+import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
@@ -33,6 +35,8 @@ internal class TestMediator(
     private val vedtakDao = VedtakDao(dataSource)
     private val opptegnelseDao = OpptegnelseDao(dataSource)
     private val overstyringDao = OverstyringDao(dataSource)
+    private val hendelseDao = HendelseDao(dataSource)
+    private val generasjonDao = GenerasjonDao(dataSource)
 
     private val godkjenningMediator = GodkjenningMediator(
         vedtakDao,
@@ -63,7 +67,9 @@ internal class TestMediator(
             override fun fullRefusjonFlereArbeidsgivereFørstegangsbehandling() = false
             override fun fullRefusjonFlereArbeidsgivereForlengelse() = false
             override fun fullRefusjonEnArbeidsgiver() = false
-        }
+        },
+        hendelseDao = hendelseDao,
+        generasjonDao = generasjonDao,
     )
 
     private val hendelsefabrikk = Hendelsefabrikk(

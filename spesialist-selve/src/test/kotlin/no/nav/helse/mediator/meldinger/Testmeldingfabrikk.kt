@@ -6,6 +6,7 @@ import java.time.LocalDate.now
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.mediator.meldinger.Risikofunn.Companion.tilJson
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
@@ -166,7 +167,8 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                 "aktørId" to aktørId,
                 "organisasjonsnummer" to organisasjonsnummer,
                 "@forårsaket_av" to mapOf(
-                    "id" to forårsaketAvId
+                    "id" to forårsaketAvId,
+                    "opprettet" to 1.februar.atStartOfDay()
                 ),
                 "fom" to fom,
                 "tom" to tom,
@@ -447,6 +449,26 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                 "@løsning" to mapOf(
                     "HentEnhet" to enhet
                 )
+            )
+        )
+
+    fun lagOverstyringIgangsatt(
+        id: UUID = UUID.randomUUID(),
+        vedtaksperiodeId: UUID = UUID.randomUUID(),
+        årsak: String = "KORRIGERT_SØKNAD",
+        fom: LocalDate = now(),
+        orgnummer: String = "123456789"
+    ) =
+        nyHendelse(
+            id, "overstyring_igangsatt", mutableMapOf(
+                "fødselsnummer" to fødselsnummer,
+                "årsak" to årsak,
+                "berørtePerioder" to listOf(
+                    mapOf("vedtaksperiodeId" to "${UUID.randomUUID()}", "periodeFom" to "$fom", "orgnummer" to orgnummer),
+                    mapOf("vedtaksperiodeId" to "$vedtaksperiodeId", "periodeFom" to "$fom", "orgnummer" to orgnummer),
+                ),
+                "kilde" to "${UUID.randomUUID()}",
+                "periodeForEndringFom" to "$fom",
             )
         )
 

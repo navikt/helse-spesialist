@@ -251,4 +251,27 @@ class GenerasjonDao(private val dataSource: DataSource) {
             )
         }
     }
+
+    internal fun førsteGenerasjonLåstTidspunkt(vedtaksperiodeId: UUID): LocalDateTime? {
+        @Language("PostgreSQL")
+        val query = """
+                SELECT tilstand_endret_tidspunkt 
+                FROM selve_vedtaksperiode_generasjon 
+                WHERE vedtaksperiode_id = :vedtaksperiodeId AND tilstand = 'Låst'
+                ORDER BY tilstand_endret_tidspunkt ASC 
+                LIMIT 1
+            """
+        return sessionOf(dataSource).use { session ->
+            session.run(
+                queryOf(
+                    query,
+                    mapOf(
+                        "vedtaksperiodeId" to vedtaksperiodeId
+                    )
+                ).map {
+                    it.localDateTimeOrNull("tilstand_endret_tidspunkt")
+                }.asSingle
+            )
+        }
+    }
 }

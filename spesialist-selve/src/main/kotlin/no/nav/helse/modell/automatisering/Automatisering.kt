@@ -1,11 +1,14 @@
 package no.nav.helse.modell.automatisering
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.Toggle.AutomatiserRevuderinger
 import no.nav.helse.mediator.Toggle.AutomatiserUtbetalingTilSykmeldt
 import no.nav.helse.mediator.meldinger.løsninger.HentEnhetløsning.Companion.erEnhetUtland
+import no.nav.helse.modell.HendelseDao
+import no.nav.helse.modell.HendelseDao.OverstyringIgangsattKorrigertSøknad
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
@@ -15,6 +18,7 @@ import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Refusjonstype
 import no.nav.helse.modell.utbetaling.Utbetaling
+import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålDao
@@ -30,6 +34,8 @@ internal class Automatisering(
     private val vedtakDao: VedtakDao,
     private val overstyringDao: OverstyringDao,
     private val stikkprøver: Stikkprøver,
+    private val hendelseDao: HendelseDao,
+    private val generasjonDao: GenerasjonDao,
 ) {
     private companion object {
         private val logger = LoggerFactory.getLogger(Automatisering::class.java)
@@ -51,7 +57,8 @@ internal class Automatisering(
         periodeTom: LocalDate,
         onAutomatiserbar: () -> Unit
     ) {
-        val problemer = vurder(fødselsnummer, vedtaksperiodeId, utbetaling, periodetype, sykefraværstilfelle, periodeTom)
+        val problemer =
+            vurder(fødselsnummer, vedtaksperiodeId, utbetaling, periodetype, sykefraværstilfelle, periodeTom)
         val erUTS = utbetaling.harUtbetalingTilSykmeldt()
         val flereArbeidsgivere = vedtakDao.finnInntektskilde(vedtaksperiodeId) == Inntektskilde.FLERE_ARBEIDSGIVERE
         val erFørstegangsbehandling = periodetype == Periodetype.FØRSTEGANGSBEHANDLING
@@ -70,6 +77,21 @@ internal class Automatisering(
             automatiseringDao.manuellSaksbehandling(problemer, vedtaksperiodeId, hendelseId, utbetaling.utbetalingId)
             return
         }
+
+        overstyringIgangsattKorrigertSøknad(fødselsnummer, vedtaksperiodeId)?.let {
+            val kanKorrigertSøknadAutomatiseres = kanKorrigertSøknadAutomatiseres(vedtaksperiodeId, it)
+            if (!kanKorrigertSøknadAutomatiseres.first) {
+                utfallslogger("Automatiserer ikke {} ({}) fordi: ${kanKorrigertSøknadAutomatiseres.second}")
+                automatiseringDao.manuellSaksbehandling(
+                    listOf("${kanKorrigertSøknadAutomatiseres.second}"),
+                    vedtaksperiodeId,
+                    hendelseId,
+                    utbetaling.utbetalingId
+                )
+                return
+            }
+        }
+
         avgjørStikkprøve(erUTS, flereArbeidsgivere, erFørstegangsbehandling)?.let {
             tilStikkprøve(it, utfallslogger, vedtaksperiodeId, hendelseId, utbetaling.utbetalingId)
         } ?: run {
@@ -77,6 +99,51 @@ internal class Automatisering(
             onAutomatiserbar()
             automatiseringDao.automatisert(vedtaksperiodeId, hendelseId, utbetaling.utbetalingId)
         }
+    }
+
+    private fun overstyringIgangsattKorrigertSøknad(
+        fødselsnummer: String,
+        vedtaksperiodeId: UUID
+    ): OverstyringIgangsattKorrigertSøknad? = generasjonDao.førsteGenerasjonLåstTidspunkt(vedtaksperiodeId)?.let {
+        hendelseDao.sisteOverstyringIgangsattOmKorrigertSøknad(fødselsnummer, vedtaksperiodeId)
+    }
+
+    private fun kanKorrigertSøknadAutomatiseres(
+        vedtaksperiodeId: UUID,
+        overstyringIgangsattKorrigertSøknad: OverstyringIgangsattKorrigertSøknad
+    ): Pair<Boolean, String?> {
+        val hendelseId = UUID.fromString(overstyringIgangsattKorrigertSøknad.hendelseId)
+        if (hendelseDao.erAutomatisertKorrigertSøknadHåndtert(hendelseId)) return Pair(true, null)
+
+        val orgnummer = vedtakDao.finnOrgnummer(vedtaksperiodeId)
+        val vedtaksperiodeIdKorrigertSøknad =
+            overstyringIgangsattKorrigertSøknad.let { overstyring ->
+                overstyring.berørtePerioder.find {
+                    it.orgnummer == orgnummer && overstyringIgangsattKorrigertSøknad.periodeForEndringFom.isEqual(
+                        it.periodeFom
+                    )
+                }?.vedtaksperiodeId
+            }
+
+        vedtaksperiodeIdKorrigertSøknad?.let {
+            val merEnn6MånederSidenVedtakPåFørsteMottattSøknad = generasjonDao.førsteGenerasjonLåstTidspunkt(it)?.let { tidspunktForVedtakFattet ->
+                tidspunktForVedtakFattet.isBefore(LocalDateTime.now().minusMonths(6)) ?: true
+            } ?: true
+            val antallKorrigeringer = hendelseDao.finnAntallAutomatisertKorrigertSøknad(it)
+            hendelseDao.opprettAutomatiseringKorrigertSøknad(it, hendelseId)
+
+            if (merEnn6MånederSidenVedtakPåFørsteMottattSøknad) return Pair(false, "Mer enn 6 måneder siden vedtak på første mottatt søknad")
+            if (antallKorrigeringer >= 2) return Pair(false, "Antall automatisk godkjente korrigerte søknader er større eller lik 2")
+
+            return Pair(true, null)
+        }
+
+        sikkerLogg.warn(
+            "Fant ikke første periodes vedtaksperiodeId for korrigert søknad med vedtaksperiodeId: {}, overstyringIgangsattKorrigertSøknad: {}",
+            vedtaksperiodeId,
+            overstyringIgangsattKorrigertSøknad
+        )
+        return Pair(false, "Fant ikke vedtaksperiode som har periodeFom som matcher perideForEndringFom for korrigert søknad")
     }
 
     private fun avgjørStikkprøve(
@@ -87,17 +154,17 @@ internal class Automatisering(
         when {
             UTS -> when {
                 flereArbeidsgivere -> when {
-                        førstegangsbehandling && stikkprøver.utsFlereArbeidsgivereFørstegangsbehandling() -> return "UTS, flere arbeidsgivere, førstegangsbehandling"
-                        !førstegangsbehandling && stikkprøver.utsFlereArbeidsgivereForlengelse() -> return "UTS, flere arbeidsgivere, forlengelse"
-                    }
+                    førstegangsbehandling && stikkprøver.utsFlereArbeidsgivereFørstegangsbehandling() -> return "UTS, flere arbeidsgivere, førstegangsbehandling"
+                    !førstegangsbehandling && stikkprøver.utsFlereArbeidsgivereForlengelse() -> return "UTS, flere arbeidsgivere, forlengelse"
+                }
                 !flereArbeidsgivere -> when {
-                        førstegangsbehandling && stikkprøver.utsEnArbeidsgiverFørstegangsbehandling() -> return "UTS, en arbeidsgiver, førstegangsbehandling"
-                        !førstegangsbehandling&& stikkprøver.utsEnArbeidsgiverForlengelse() -> return "UTS, en arbeidsgiver, forlengelse"
-                    }
+                    førstegangsbehandling && stikkprøver.utsEnArbeidsgiverFørstegangsbehandling() -> return "UTS, en arbeidsgiver, førstegangsbehandling"
+                    !førstegangsbehandling && stikkprøver.utsEnArbeidsgiverForlengelse() -> return "UTS, en arbeidsgiver, forlengelse"
+                }
             }
             flereArbeidsgivere -> when {
                 førstegangsbehandling && stikkprøver.fullRefusjonFlereArbeidsgivereFørstegangsbehandling() -> return "Refusjon, flere arbeidsgivere, førstegangsbehandling"
-                !førstegangsbehandling&& stikkprøver.fullRefusjonFlereArbeidsgivereForlengelse() -> return "Refusjon, flere arbeidsgivere, forlengelse"
+                !førstegangsbehandling && stikkprøver.fullRefusjonFlereArbeidsgivereForlengelse() -> return "Refusjon, flere arbeidsgivere, forlengelse"
             }
             stikkprøver.fullRefusjonEnArbeidsgiver() -> return "Refusjon, en arbeidsgiver"
         }

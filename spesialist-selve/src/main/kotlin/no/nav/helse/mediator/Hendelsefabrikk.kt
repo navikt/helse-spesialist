@@ -853,7 +853,7 @@ internal class Hendelsefabrikk(
             vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText()),
             fom = LocalDate.parse(jsonNode.path("fom").asText()),
             tom = LocalDate.parse(jsonNode.path("tom").asText()),
-            skjæringstidspunkt = LocalDate.parse(jsonNode.path("skjæringstidpunkt").asText()),
+            skjæringstidspunkt = LocalDate.parse(jsonNode.path("skjæringstidspunkt").asText()),
             json = json,
         )
     }

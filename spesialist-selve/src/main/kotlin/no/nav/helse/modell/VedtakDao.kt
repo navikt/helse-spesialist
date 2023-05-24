@@ -140,4 +140,14 @@ internal class VedtakDao(private val dataSource: DataSource) {
             "vedtaksperiodeId" to vedtaksperiodeId
         )).asUpdate)
     }
+
+    internal fun finnOrgnummer(vedtaksperiodeId: UUID) = sessionOf(dataSource).use { session ->
+        @Language("PostgreSQL")
+        val query = """
+            SELECT orgnummer FROM arbeidsgiver a
+            INNER JOIN vedtak v ON a.id = v.arbeidsgiver_ref
+            WHERE v.vedtaksperiode_id = :vedtaksperiodeId
+        """
+        session.run(queryOf(query, mapOf("vedtaksperiodeId" to vedtaksperiodeId)).map { it.long("orgnummer").toString() }.asSingle)
+    }
 }

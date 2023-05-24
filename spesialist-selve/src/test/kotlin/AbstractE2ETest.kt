@@ -44,6 +44,7 @@ import no.nav.helse.mediator.OverstyringMediator
 import no.nav.helse.mediator.Toggle
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
+import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringDao
@@ -56,6 +57,7 @@ import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.varsel.Varselkode
+import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -117,6 +119,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private val totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource)
     private val vergemålDao = VergemålDao(dataSource)
     private val overstyringDao = OverstyringDao(dataSource)
+    private val hendelseDao = HendelseDao(dataSource)
+    private val generasjonDao = GenerasjonDao(dataSource)
 
     protected val snapshotClient = mockk<SnapshotClient>(relaxed = true)
     private val snapshotApiDao = SnapshotApiDao(dataSource)
@@ -151,7 +155,10 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 override fun fullRefusjonFlereArbeidsgivereFørstegangsbehandling() = false
                 override fun fullRefusjonFlereArbeidsgivereForlengelse() = false
                 override fun fullRefusjonEnArbeidsgiver() = false
-            }),
+            },
+            hendelseDao = hendelseDao,
+            generasjonDao = generasjonDao,
+        ),
         overstyringMediator = OverstyringMediator(testRapid),
         snapshotMediator = snapshotMediator
     )

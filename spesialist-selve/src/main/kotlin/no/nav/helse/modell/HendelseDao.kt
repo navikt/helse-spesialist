@@ -1,5 +1,6 @@
 package no.nav.helse.modell
 
+import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.TransactionalSession
@@ -52,6 +53,8 @@ import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAKSPERIODE_OPPRETTET
 import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAKSPERIODE_REBEREGNET
 import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAK_FATTET
 import no.nav.helse.modell.person.toFødselsnummer
+import no.nav.helse.objectMapper
+import no.nav.helse.rapids_rivers.asLocalDate
 import org.intellij.lang.annotations.Language
 
 internal class HendelseDao(private val dataSource: DataSource) {
@@ -75,6 +78,90 @@ internal class HendelseDao(private val dataSource: DataSource) {
             }.asSingle))
         }
     }
+
+    internal fun finnAntallAutomatisertKorrigertSøknad(vedtaksperiodeId: UUID): Int {
+        return sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val statement = """
+                SELECT count(1) AS antall
+                FROM automatisering_korrigert_soknad aks
+                WHERE vedtaksperiode_id = :vedtaksperiodeId
+                """
+            requireNotNull(session.run(queryOf(statement, mapOf("vedtaksperiodeId" to vedtaksperiodeId)).map {
+                it.int("antall")
+            }.asSingle))
+        }
+    }
+
+    internal fun erAutomatisertKorrigertSøknadHåndtert(hendelseId: UUID): Boolean {
+        return sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val statement = """
+                SELECT count(1) AS antall
+                FROM automatisering_korrigert_soknad aks
+                WHERE hendelse_ref = :hendelseId
+                """
+            requireNotNull(session.run(queryOf(statement, mapOf("hendelseId" to hendelseId)).map {
+                it.int("antall") > 0
+            }.asSingle))
+        }
+    }
+
+    internal fun opprettAutomatiseringKorrigertSøknad(vedtaksperiodeId: UUID, hendelseId: UUID) {
+        sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val statement = """
+                INSERT INTO automatisering_korrigert_soknad (vedtaksperiode_id, hendelse_ref)
+                VALUES (:vedtaksperiodeId, :hendelseId)
+                """
+            session.run(queryOf(statement, mapOf("vedtaksperiodeId" to vedtaksperiodeId, "hendelseId" to hendelseId)).asExecute)
+        }
+    }
+
+    internal fun sisteOverstyringIgangsattOmKorrigertSøknad(fødselsnummer: String, vedtaksperiodeId: UUID): OverstyringIgangsattKorrigertSøknad? {
+        return sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val statement = """
+                SELECT h.data
+                FROM hendelse h, json_array_elements(h.data -> 'berørtePerioder') AS bp
+                WHERE fodselsnummer = :fodselsnummer
+                AND h.type='OVERSTYRING_IGANGSATT'
+                AND bp ->> 'vedtaksperiodeId' = :vedtaksperiodeId
+                ORDER BY h.data ->> '@opprettet' DESC
+                LIMIT 1
+                """
+            session.run(queryOf(statement, mapOf("fodselsnummer" to fødselsnummer.toLong(), "vedtaksperiodeId" to vedtaksperiodeId.toString())).map { row ->
+                row.stringOrNull("data")?.let {
+                    val data = objectMapper.readTree(it)
+                    if (data["årsak"].asText() != "KORRIGERT_SØKNAD") return@let null
+
+                    OverstyringIgangsattKorrigertSøknad(
+                        periodeForEndringFom = data["periodeForEndringFom"].asLocalDate(),
+                        hendelseId = data["@id"].asText(),
+                        berørtePerioder = data["berørtePerioder"].map { berørtPeriode ->
+                            BerørtPeriode(
+                                vedtaksperiodeId = UUID.fromString(berørtPeriode["vedtaksperiodeId"].asText()),
+                                periodeFom = berørtPeriode["periodeFom"].asLocalDate(),
+                                orgnummer = berørtPeriode["orgnummer"].asText()
+                            )
+                        }
+                    )
+                }
+            }.asSingle)
+        }
+    }
+
+    internal data class OverstyringIgangsattKorrigertSøknad(
+        val periodeForEndringFom: LocalDate,
+        val hendelseId: String,
+        val berørtePerioder: List<BerørtPeriode>,
+    )
+
+    internal data class BerørtPeriode(
+        val vedtaksperiodeId: UUID,
+        val periodeFom: LocalDate,
+        val orgnummer: String,
+    )
 
     internal fun finnUtbetalingsgodkjenningbehovJson(hendelseId: UUID): String {
         return finnJson(hendelseId, GODKJENNING)
