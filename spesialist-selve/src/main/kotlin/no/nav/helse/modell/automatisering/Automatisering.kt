@@ -138,11 +138,7 @@ internal class Automatisering(
             return Pair(true, null)
         }
 
-        sikkerLogg.warn(
-            "Fant ikke første periodes vedtaksperiodeId for korrigert søknad med vedtaksperiodeId: {}, overstyringIgangsattKorrigertSøknad: {}",
-            vedtaksperiodeId,
-            overstyringIgangsattKorrigertSøknad
-        )
+        // Hvis vi ikke finner vedtaksperiodeIdKorrigertSøknad, så er det fordi vi vedtaksperioden som er korrigert er AUU som vi ikke trenger å telle
         return Pair(true, null)
     }
 
