@@ -21,7 +21,7 @@ abstract class Modellfeil protected constructor() : RuntimeException() {
     override val message: String get() = feilkode
 }
 
-class OppgaveAlleredeTildelt(tildeling: TildelingApiDto) : Modellfeil() {
+class OppgaveAlleredeTildelt(val tildeling: TildelingApiDto) : Modellfeil() {
     override val eksternKontekst: Map<String, Any> = mapOf(
         "tildeling" to tildeling
     )

@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.graphql.mutation
 
-import com.fasterxml.jackson.module.kotlin.contains
 import java.util.UUID
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -49,7 +48,7 @@ internal class TildelingMutationTest : AbstractGraphQLApiTest() {
             """
         )
 
-        assertTrue(body.contains("errors"))
+        assertEquals(body["errors"].first()["extensions"]["tildeltNavn"].asText(), SAKSBEHANDLER.navn)
     }
 
     @Test
