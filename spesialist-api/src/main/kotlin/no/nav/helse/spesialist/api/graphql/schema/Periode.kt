@@ -26,6 +26,8 @@ import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.graphql.enums.Utbetalingtype as GraphQLUtbetalingtype
 
+private fun erDev() = "dev-gcp" == System.getenv("NAIS_CLUSTER_NAME")
+
 enum class Inntektstype { ENARBEIDSGIVER, FLEREARBEIDSGIVERE }
 
 enum class Periodetype {
@@ -195,13 +197,6 @@ data class PeriodeHistorikkElement(
     val notat_id: Int?,
 )
 
-data class Aktivitet(
-    val alvorlighetsgrad: String,
-    val melding: String,
-    val tidsstempel: String,
-    val vedtaksperiodeId: UUIDString,
-)
-
 data class Faresignal(
     val beskrivelse: String,
     val kategori: List<String>,
@@ -262,7 +257,7 @@ interface Periode {
     fun hendelser(): List<Hendelse>
 
     @GraphQLIgnore
-    fun periodetilstand(tilstand: GraphQLPeriodetilstand) = when (tilstand) {
+    fun periodetilstand(tilstand: GraphQLPeriodetilstand, erSisteGenerasjon: Boolean) = when (tilstand) {
         GraphQLPeriodetilstand.ANNULLERINGFEILET -> Periodetilstand.AnnulleringFeilet
         GraphQLPeriodetilstand.ANNULLERT -> Periodetilstand.Annullert
         GraphQLPeriodetilstand.INGENUTBETALING -> Periodetilstand.IngenUtbetaling
@@ -276,7 +271,10 @@ interface Periode {
         GraphQLPeriodetilstand.TILGODKJENNING -> Periodetilstand.TilGodkjenning
         GraphQLPeriodetilstand.UTBETALINGFEILET -> Periodetilstand.UtbetalingFeilet
         GraphQLPeriodetilstand.VENTERPAANNENPERIODE -> Periodetilstand.VenterPaEnAnnenPeriode
-        GraphQLPeriodetilstand.UTBETALTVENTERPAANNENPERIODE -> Periodetilstand.UtbetaltVenterPaEnAnnenPeriode
+        GraphQLPeriodetilstand.UTBETALTVENTERPAANNENPERIODE -> {
+            if (erDev() && erSisteGenerasjon) Periodetilstand.VenterPaEnAnnenPeriode
+            else Periodetilstand.UtbetaltVenterPaEnAnnenPeriode
+        }
         else -> Periodetilstand.Ukjent
     }
 
@@ -326,7 +324,7 @@ data class UberegnetPeriode(
     override fun periodetype(): Periodetype = periodetype(periode)
     override fun tidslinje(): List<Dag> = tidslinje(periode)
     override fun vedtaksperiodeId(): UUIDString = periode.vedtaksperiodeId
-    override fun periodetilstand(): Periodetilstand = periodetilstand(periode.periodetilstand)
+    override fun periodetilstand(): Periodetilstand = periodetilstand(periode.periodetilstand, true)
     override fun skjaeringstidspunkt(): DateString = periode.skjaeringstidspunkt
     override fun hendelser(): List<Hendelse> = periode.hendelser.map { it.tilHendelse() }
     override fun varsler(): List<VarselDTO> = if (skalViseAktiveVarsler)
@@ -354,6 +352,7 @@ data class BeregnetPeriode(
     private val tilganger: SaksbehandlerTilganger,
     private val erSisteGenerasjon: Boolean,
 ) : Periode {
+    private val periodetilstand = periodetilstand(periode.periodetilstand, erSisteGenerasjon)
     override fun erForkastet(): Boolean = erForkastet(periode)
     override fun fom(): DateString = fom(periode)
     override fun tom(): DateString = tom(periode)
@@ -362,11 +361,11 @@ data class BeregnetPeriode(
     override fun periodetype(): Periodetype = periodetype(periode)
     override fun tidslinje(): List<Dag> = tidslinje(periode)
     override fun vedtaksperiodeId(): UUIDString = periode.vedtaksperiodeId
-    override fun periodetilstand(): Periodetilstand = periodetilstand(periode.periodetilstand)
+    override fun periodetilstand(): Periodetilstand = periodetilstand
     fun handlinger() = byggHandlinger()
 
     private fun byggHandlinger(): List<Handling> {
-        return if (periodetilstand(periode.periodetilstand) != Periodetilstand.TilGodkjenning)
+        return if (periodetilstand != Periodetilstand.TilGodkjenning)
             listOf(Handling(Periodehandling.UTBETALE, false, "perioden er ikke til godkjenning")
         ) else {
             val oppgavetype = oppgaveApiDao.finnOppgavetype(UUID.fromString(vedtaksperiodeId()))
@@ -419,15 +418,6 @@ data class BeregnetPeriode(
                 notat_id = it.notat_id
             )
         }
-
-    fun aktivitetslogg(): List<Aktivitet>? = periode.aktivitetslogg.map {
-        Aktivitet(
-            alvorlighetsgrad = it.alvorlighetsgrad,
-            melding = it.melding,
-            tidsstempel = it.tidsstempel,
-            vedtaksperiodeId = it.vedtaksperiodeId
-        )
-    }
 
     fun beregningId(): UUIDString = periode.beregningId
 
