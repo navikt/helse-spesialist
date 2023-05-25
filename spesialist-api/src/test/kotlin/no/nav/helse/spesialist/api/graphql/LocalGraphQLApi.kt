@@ -69,7 +69,6 @@ import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.utbetaling.UtbetalingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vedtaksperiode.EnhetDto
-import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 
 fun main() = runBlocking {
     val jwtStub = JwtStub()
@@ -91,7 +90,6 @@ fun main() = runBlocking {
         val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
         val overstyringApiDao = OverstyringApiDao(dataSource)
         val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
-        val varselDao = VarselDao(dataSource)
         val apiVarselRepository = ApiVarselRepository(dataSource)
         val utbetalingApiDao = mockk<UtbetalingApiDao>(relaxed = true)
         val oppgaveApiDao = mockk<OppgaveApiDao>(relaxed = true)
@@ -163,7 +161,6 @@ fun main() = runBlocking {
             arbeidsgiverApiDao = arbeidsgiverApiDao,
             overstyringApiDao = overstyringApiDao,
             risikovurderingApiDao = risikovurderingApiDao,
-            varselDao = varselDao,
             varselRepository = apiVarselRepository,
             utbetalingApiDao = utbetalingApiDao,
             oppgaveApiDao = oppgaveApiDao,
@@ -175,9 +172,9 @@ fun main() = runBlocking {
             kode7Saksbehandlergruppe = UUID.randomUUID(),
             beslutterGruppeId = UUID.randomUUID(),
             riskGruppeId = UUID.randomUUID(),
+            saksbehandlereMedTilgangTilStikkprøve = listOf("EN_IDENT"),
             snapshotMediator = SnapshotMediator(snapshotApiDao, mockk(relaxed = true)),
             behandlingsstatistikkMediator = behandlingsstatistikkMediator,
-            saksbehandlereMedTilgangTilStikkprøve = listOf("EN_IDENT"),
             tildelingService = tildelingService
         )
     }

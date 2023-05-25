@@ -54,7 +54,6 @@ import no.nav.helse.spesialist.api.utbetaling.UtbetalingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
-import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import kotlin.properties.Delegates
@@ -78,7 +77,6 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         const val ORGANISASJONSNUMMER = "987654321"
     }
 
-    protected val varselDao = VarselDao(dataSource)
     protected val apiVarselRepository = ApiVarselRepository(dataSource)
     protected val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
     protected val risikovurderingApiDao = RisikovurderingApiDao(dataSource)

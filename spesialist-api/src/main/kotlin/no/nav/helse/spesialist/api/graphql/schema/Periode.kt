@@ -24,7 +24,6 @@ import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
-import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 import no.nav.helse.spesialist.api.graphql.enums.Utbetalingtype as GraphQLUtbetalingtype
 
 enum class Inntektstype { ENARBEIDSGIVER, FLEREARBEIDSGIVERE }
@@ -347,7 +346,6 @@ data class BeregnetPeriode(
     private val orgnummer: String,
     private val periode: GraphQLBeregnetPeriode,
     private val risikovurderingApiDao: RisikovurderingApiDao,
-    private val varselDao: VarselDao,
     private val varselRepository: ApiVarselRepository,
     private val oppgaveApiDao: OppgaveApiDao,
     private val periodehistorikkDao: PeriodehistorikkDao,

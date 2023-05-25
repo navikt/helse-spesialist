@@ -39,7 +39,6 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
-import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -224,7 +223,6 @@ internal class OverstyringE2ETest : AbstractE2ETestV2() {
         arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource),
         overstyringApiDao = OverstyringApiDao(dataSource),
         risikovurderingApiDao = RisikovurderingApiDao(dataSource),
-        varselDao = VarselDao(dataSource),
         varselRepository = ApiVarselRepository(dataSource),
         oppgaveApiDao = OppgaveApiDao(dataSource),
         periodehistorikkDao = PeriodehistorikkDao(dataSource),

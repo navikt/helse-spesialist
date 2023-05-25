@@ -17,7 +17,6 @@ import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
-import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 
 data class Infotrygdutbetaling(
     val fom: String,
@@ -59,7 +58,6 @@ data class Person(
     private val arbeidsgiverApiDao: ArbeidsgiverApiDao,
     private val overstyringApiDao: OverstyringApiDao,
     private val risikovurderingApiDao: RisikovurderingApiDao,
-    private val varselDao: VarselDao,
     private val varselRepository: ApiVarselRepository,
     private val oppgaveApiDao: OppgaveApiDao,
     private val periodehistorikkDao: PeriodehistorikkDao,
@@ -100,7 +98,6 @@ data class Person(
             generasjoner = it.generasjoner,
             arbeidsgiverApiDao = arbeidsgiverApiDao,
             risikovurderingApiDao = risikovurderingApiDao,
-            varselDao = varselDao,
             varselRepository = varselRepository,
             oppgaveApiDao = oppgaveApiDao,
             periodehistorikkDao = periodehistorikkDao,

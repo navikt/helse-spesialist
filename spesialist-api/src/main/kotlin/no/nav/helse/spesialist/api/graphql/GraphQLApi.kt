@@ -35,7 +35,6 @@ import no.nav.helse.spesialist.api.tildeling.TildelingService
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.utbetaling.UtbetalingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
-import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -46,7 +45,6 @@ fun Application.graphQLApi(
     arbeidsgiverApiDao: ArbeidsgiverApiDao,
     overstyringApiDao: OverstyringApiDao,
     risikovurderingApiDao: RisikovurderingApiDao,
-    varselDao: VarselDao,
     varselRepository: ApiVarselRepository,
     utbetalingApiDao: UtbetalingApiDao,
     oppgaveApiDao: OppgaveApiDao,
@@ -70,7 +68,6 @@ fun Application.graphQLApi(
         arbeidsgiverApiDao = arbeidsgiverApiDao,
         overstyringApiDao = overstyringApiDao,
         risikovurderingApiDao = risikovurderingApiDao,
-        varselDao = varselDao,
         varselRepository = varselRepository,
         utbetalingApiDao = utbetalingApiDao,
         oppgaveApiDao = oppgaveApiDao,
