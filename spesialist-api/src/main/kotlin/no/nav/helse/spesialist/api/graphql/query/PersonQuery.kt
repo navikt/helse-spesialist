@@ -48,10 +48,6 @@ class PersonQuery(
             return DataFetcherResult.newResult<Person?>().error(getBadRequestError()).build()
         }
 
-        val saksbehandlerNavn = env.graphQlContext.get<String>("saksbehandlerNavn")
-        val ident = fnr ?: aktorId
-        sikkerLogg.info("$saksbehandlerNavn is doing lookup with params: $ident")
-
         val fødselsnummer =
             if (fnr != null && personApiDao.finnesPersonMedFødselsnummer(fnr)) fnr
             else aktorId?.let {
