@@ -422,7 +422,7 @@ data class BeregnetPeriode(
             )
         }
 
-    fun aktivitetslogg(): List<Aktivitet> = periode.aktivitetslogg.map {
+    fun aktivitetslogg(): List<Aktivitet>? = periode.aktivitetslogg.map {
         Aktivitet(
             alvorlighetsgrad = it.alvorlighetsgrad,
             melding = it.melding,
