@@ -82,7 +82,7 @@ class TildelingMutation(
     private fun alleredeTildeltError(error: OppgaveAlleredeTildelt): GraphQLError {
         return newErrorException()
             .message("Oppgave allerede tildelt")
-            .extensions(mapOf("code" to error.httpkode, "tildeltNavn" to error.tildeling.navn))
+            .extensions(mapOf("code" to error.httpkode, "tildeling" to error.tildeling))
             .build()
     }
 }
