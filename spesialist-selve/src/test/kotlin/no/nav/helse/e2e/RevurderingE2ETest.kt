@@ -23,7 +23,7 @@ internal class RevurderingE2ETest : AbstractE2ETestV2() {
     }
 
     @Test
-    fun `revurdering av periode medfører oppgave selv om perioden ikke har varsler`() {
+    fun `revurdering av periode med negativt beløp medfører oppgave`() {
         håndterSøknad()
         håndterVedtaksperiodeOpprettet()
         fremTilSaksbehandleroppgave(kanGodkjennesAutomatisk = true)
@@ -35,8 +35,29 @@ internal class RevurderingE2ETest : AbstractE2ETestV2() {
             harOppdatertMetadata = true,
             harRisikovurdering = true,
             kanGodkjennesAutomatisk = true,
-            utbetalingId = utbetalingId2
+            utbetalingId = utbetalingId2,
+            arbeidsgiverbeløp = -200,
+            personbeløp = 0
         )
         assertSaksbehandleroppgave(oppgavestatus = Oppgavestatus.AvventerSaksbehandler)
+    }
+    @Test
+    fun `revurdering av periode med positivt beløp og ingen varsler medfører ikke oppgave`() {
+        håndterSøknad()
+        håndterVedtaksperiodeOpprettet()
+        fremTilSaksbehandleroppgave(kanGodkjennesAutomatisk = true)
+        håndterVedtakFattet()
+
+        val utbetalingId2 = UUID.randomUUID()
+
+        fremTilSaksbehandleroppgave(
+            harOppdatertMetadata = true,
+            harRisikovurdering = true,
+            kanGodkjennesAutomatisk = true,
+            utbetalingId = utbetalingId2,
+            arbeidsgiverbeløp = 200,
+            personbeløp = 0
+        )
+        assertIkkeSaksbehandleroppgave()
     }
 }

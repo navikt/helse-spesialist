@@ -1,8 +1,6 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETestV2
-import AbstractE2ETestV2.Mottaker.ARBEIDSGIVER
-import AbstractE2ETestV2.Mottaker.SYKMELDT
 import java.util.UUID
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
@@ -17,7 +15,6 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETestV2() {
             fødselsnummer = FØDSELSNUMMER,
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId,
-            mottaker = SYKMELDT,
         )
         assertVedtaksperiodeEksisterer(vedtaksperiodeId)
         assertGodkjenningsbehovIkkeBesvart()
@@ -31,7 +28,6 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETestV2() {
             fødselsnummer = FØDSELSNUMMER,
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId,
-            mottaker = ARBEIDSGIVER,
         )
         assertVedtaksperiodeEksisterer(vedtaksperiodeId)
         assertIkkeAvvistIUtbetalingsfilter()

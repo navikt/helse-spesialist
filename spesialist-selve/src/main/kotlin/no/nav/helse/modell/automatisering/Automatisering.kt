@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.mediator.Toggle.AutomatiserRevuderinger
 import no.nav.helse.mediator.Toggle.AutomatiserUtbetalingTilSykmeldt
 import no.nav.helse.mediator.meldinger.løsninger.HentEnhetløsning.Companion.erEnhetUtland
 import no.nav.helse.modell.HendelseDao
@@ -240,9 +239,8 @@ internal class Automatisering(
     ) : AutomatiseringValidering {
         override fun erAautomatiserbar() =
             !utbetaling.erRevurdering() ||
-                    AutomatiserRevuderinger.enabled ||
-                    (utbetaling.refusjonstype() == Refusjonstype.INGEN_UTBETALING).also {
-                        if (it) sikkerLogg.info("Revurdering av $vedtaksperiodeId (person $fødselsnummer) har ingen endring, og er godkjent for automatisering")
+                    (utbetaling.refusjonstype() != Refusjonstype.NEGATIVT_BELØP).also {
+                        if (it) sikkerLogg.info("Revurdering av $vedtaksperiodeId (person $fødselsnummer) har ikke et negativt beløp, og er godkjent for automatisering")
                     }
 
         override fun error() = "Utbetalingen er revurdering"

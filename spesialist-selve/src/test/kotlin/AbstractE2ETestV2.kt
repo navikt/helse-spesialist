@@ -1,4 +1,3 @@
-import AbstractE2ETestV2.Mottaker.ARBEIDSGIVER
 import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -61,7 +60,9 @@ import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.fail
 
@@ -128,8 +129,25 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         harOppdatertMetadata: Boolean = false,
         snapshotversjon: Int = 1,
         enhet: String = ENHET_OSLO,
+        arbeidsgiverbeløp: Int = 20000,
+        personbeløp: Int = 0
     ) {
-        fremForbiUtbetalingsfilter(fom, tom, skjæringstidspunkt, periodetype, fødselsnummer, andreArbeidsforhold, regelverksvarsler, vedtaksperiodeId, utbetalingId, harOppdatertMetadata = harOppdatertMetadata, snapshotversjon = snapshotversjon, enhet = enhet)
+        fremForbiUtbetalingsfilter(
+            fom,
+            tom,
+            skjæringstidspunkt,
+            periodetype,
+            fødselsnummer,
+            andreArbeidsforhold,
+            regelverksvarsler,
+            vedtaksperiodeId,
+            utbetalingId,
+            harOppdatertMetadata = harOppdatertMetadata,
+            snapshotversjon = snapshotversjon,
+            enhet = enhet,
+            arbeidsgiverbeløp = arbeidsgiverbeløp,
+            personbeløp = personbeløp
+        )
         håndterEgenansattløsning()
     }
 
@@ -147,8 +165,10 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         harOppdatertMetadata: Boolean = false,
         snapshotversjon: Int = 1,
         enhet: String = ENHET_OSLO,
+        arbeidsgiverbeløp: Int = 20000,
+        personbeløp: Int = 0
     ) {
-        fremTilVergemål(fom, tom, skjæringstidspunkt, periodetype, fødselsnummer, andreArbeidsforhold, regelverksvarsler, vedtaksperiodeId, utbetalingId, harOppdatertMetadata, snapshotversjon, enhet)
+        fremTilVergemål(fom, tom, skjæringstidspunkt, periodetype, fødselsnummer, andreArbeidsforhold, regelverksvarsler, vedtaksperiodeId, utbetalingId, harOppdatertMetadata, snapshotversjon, enhet, arbeidsgiverbeløp = arbeidsgiverbeløp, personbeløp = personbeløp)
         håndterVergemålløsning(fullmakter = fullmakter)
     }
 
@@ -162,12 +182,12 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         regelverksvarsler: List<String> = emptyList(),
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
         utbetalingId: UUID = UTBETALING_ID,
-        mottaker: Mottaker = ARBEIDSGIVER,
         harOppdatertMetadata: Boolean = false,
         snapshotversjon: Int = 1,
-        enhet: String = ENHET_OSLO
+        enhet: String = ENHET_OSLO,
+        arbeidsgiverbeløp: Int = 20000,
+        personbeløp: Int = 0
     ) {
-        val (arbeidsgiverbeløp, personbeløp) = mottaker.lagMottakerBeløp()
         håndterSøknad(fødselsnummer = fødselsnummer)
         håndterVedtaksperiodeOpprettet(vedtaksperiodeId = vedtaksperiodeId)
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshot(
@@ -188,7 +208,9 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
             periodetype = periodetype,
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId,
-            harOppdatertMetainfo = harOppdatertMetadata
+            harOppdatertMetainfo = harOppdatertMetadata,
+            arbeidsgiverbeløp = arbeidsgiverbeløp,
+            personbeløp = personbeløp
         )
         if (!harOppdatertMetadata) {
             håndterPersoninfoløsning(vedtaksperiodeId = vedtaksperiodeId)
@@ -256,9 +278,11 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         harRisikovurdering: Boolean = false,
         harOppdatertMetadata: Boolean = false,
         kanGodkjennesAutomatisk: Boolean = false,
-        snapshotversjon: Int = 1
+        snapshotversjon: Int = 1,
+        arbeidsgiverbeløp: Int = 20000,
+        personbeløp: Int = 0
     ) {
-        fremTilÅpneOppgaver(fom, tom, skjæringstidspunkt, periodetype, fødselsnummer, andreArbeidsforhold, regelverksvarsler, fullmakter, vedtaksperiodeId, utbetalingId, harOppdatertMetadata = harOppdatertMetadata, snapshotversjon = snapshotversjon, enhet = enhet)
+        fremTilÅpneOppgaver(fom, tom, skjæringstidspunkt, periodetype, fødselsnummer, andreArbeidsforhold, regelverksvarsler, fullmakter, vedtaksperiodeId, utbetalingId, harOppdatertMetadata = harOppdatertMetadata, snapshotversjon = snapshotversjon, enhet = enhet, arbeidsgiverbeløp = arbeidsgiverbeløp, personbeløp = personbeløp)
         håndterÅpneOppgaverløsning()
         if (!harRisikovurdering) håndterRisikovurderingløsning(kanGodkjennesAutomatisk = kanGodkjennesAutomatisk, risikofunn = risikofunn, vedtaksperiodeId = vedtaksperiodeId)
         if (!erFerdigstilt(sisteGodkjenningsbehovId)) håndterInntektløsning()
@@ -639,10 +663,12 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         skjæringstidspunkt: LocalDate = fom,
         periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
         andreArbeidsforhold: List<String> = emptyList(),
+        arbeidsgiverbeløp: Int = 20000,
+        personbeløp: Int = 0
     ) {
         val erRevurdering = erRevurdering(vedtaksperiodeId)
         håndterVedtaksperiodeNyUtbetaling(vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
-        håndterUtbetalingOpprettet(utbetalingtype = if (erRevurdering) "REVURDERING" else "UTBETALING", utbetalingId = utbetalingId)
+        håndterUtbetalingOpprettet(utbetalingtype = if (erRevurdering) "REVURDERING" else "UTBETALING", utbetalingId = utbetalingId, arbeidsgiverbeløp = arbeidsgiverbeløp, personbeløp = personbeløp)
         håndterVedtaksperiodeEndret(vedtaksperiodeId = vedtaksperiodeId)
         sisteMeldingId = sendGodkjenningsbehov(
             aktørId,
@@ -671,6 +697,8 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
         harOppdatertMetainfo: Boolean = false,
         andreArbeidsforhold: List<String> = emptyList(),
+        arbeidsgiverbeløp: Int = 20000,
+        personbeløp: Int = 0
     ) {
         val alleArbeidsforhold = sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
@@ -687,7 +715,9 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
             tom = tom,
             skjæringstidspunkt = skjæringstidspunkt,
             periodetype = periodetype,
-            andreArbeidsforhold = andreArbeidsforhold
+            andreArbeidsforhold = andreArbeidsforhold,
+            arbeidsgiverbeløp = arbeidsgiverbeløp,
+            personbeløp = personbeløp
         )
 
         when {
@@ -1336,17 +1366,6 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
                     false,
                     LocalDateTime.now()
                 ).asUpdate)
-        }
-    }
-
-    enum class Mottaker {
-        SYKMELDT,
-        ARBEIDSGIVER,
-        BEGGE;
-        fun lagMottakerBeløp() = when (this) {
-            SYKMELDT -> 0 to 500
-            ARBEIDSGIVER -> 500 to 0
-            BEGGE -> 250 to 250
         }
     }
 

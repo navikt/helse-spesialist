@@ -187,8 +187,13 @@ internal class AutomatiseringTest {
     }
 
     @Test
-    fun `periode til revurdering skal ikke automatisk godkjennes`() {
-        gårTilManuell(enUtbetaling(personbeløp = 1, type = Utbetalingtype.REVURDERING))
+    fun `periode med positiv revurdering skal automatisk godkjennes`() {
+        gårAutomatisk(enUtbetaling(personbeløp = 1, type = Utbetalingtype.REVURDERING))
+    }
+
+    @Test
+    fun `periode med negativ revurdering skal ikke automatisk godkjennes`() {
+        gårTilManuell(enUtbetaling(personbeløp = -1, type = Utbetalingtype.REVURDERING))
     }
 
     @Test
@@ -200,13 +205,6 @@ internal class AutomatiseringTest {
                 type = Utbetalingtype.REVURDERING
             )
         )
-    }
-
-    @Test
-    fun `periode til revurdering skal automatisk godkjennes om toggle er på`() {
-        Toggle.AutomatiserRevuderinger.enable()
-        gårAutomatisk(enUtbetaling(type = Utbetalingtype.REVURDERING))
-        Toggle.AutomatiserRevuderinger.disable()
     }
 
     @Test
