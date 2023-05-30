@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
+import no.nav.helse.spesialist.api.Toggle
 import no.nav.helse.spesialist.api.graphql.enums.GraphQLInntektstype
 import no.nav.helse.spesialist.api.graphql.enums.GraphQLPeriodetilstand
 import no.nav.helse.spesialist.api.graphql.enums.GraphQLPeriodetype
@@ -25,8 +26,6 @@ import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.graphql.enums.Utbetalingtype as GraphQLUtbetalingtype
-
-private fun erDev() = "dev-gcp" == System.getenv("NAIS_CLUSTER_NAME")
 
 enum class Inntektstype { ENARBEIDSGIVER, FLEREARBEIDSGIVERE }
 
@@ -272,7 +271,7 @@ interface Periode {
         GraphQLPeriodetilstand.UTBETALINGFEILET -> Periodetilstand.UtbetalingFeilet
         GraphQLPeriodetilstand.VENTERPAANNENPERIODE -> Periodetilstand.VenterPaEnAnnenPeriode
         GraphQLPeriodetilstand.UTBETALTVENTERPAANNENPERIODE -> {
-            if (erDev() && erSisteGenerasjon) Periodetilstand.VenterPaEnAnnenPeriode
+            if (Toggle.BehandleEnOgEnPeriode.enabled && erSisteGenerasjon) Periodetilstand.VenterPaEnAnnenPeriode
             else Periodetilstand.UtbetaltVenterPaEnAnnenPeriode
         }
         else -> Periodetilstand.Ukjent
