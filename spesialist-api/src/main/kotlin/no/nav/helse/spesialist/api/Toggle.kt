@@ -5,7 +5,7 @@ abstract class Toggle(private var _enabled: Boolean) {
 
     internal val enabled get() = _enabled
 
-    object BehandleEnOgEnPeriode : Toggle("BEHANDLE_EN_OG_EN_PERIODE", erDev())
+    object BehandleEnOgEnPeriode : Toggle("BEHANDLE_EN_OG_EN_PERIODE", false)
 }
 
 private fun erDev() = "dev-gcp" == System.getenv("NAIS_CLUSTER_NAME")
