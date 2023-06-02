@@ -685,7 +685,6 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         tidslinje = emptyList(),
         vedtaksperiodeId = vedtaksperiodeId.toString(),
         id = UUID.randomUUID().toString(),
-        aktivitetslogg = emptyList(),
         beregningId = UUID.randomUUID().toString(),
         forbrukteSykedager = null,
         gjenstaendeSykedager = null,

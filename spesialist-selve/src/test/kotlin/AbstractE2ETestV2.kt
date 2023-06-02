@@ -195,7 +195,6 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId,
-            regelverksvarsler = regelverksvarsler,
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp,
         )
@@ -228,7 +227,6 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         tom: LocalDate = 31.januar,
         skjæringstidspunkt: LocalDate = fom,
         andreArbeidsforhold: List<String> = emptyList(),
-        regelverksvarsler: List<String> = emptyList(),
         fullmakter: List<Fullmakt> = emptyList(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         utbetalingId: UUID = UUID.randomUUID(),
@@ -244,8 +242,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshot(
             fødselsnummer = FØDSELSNUMMER,
             vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingId = utbetalingId,
-            regelverksvarsler = regelverksvarsler
+            utbetalingId = utbetalingId
         )
         håndterGodkjenningsbehov(
             vedtaksperiodeId = vedtaksperiodeId,
@@ -300,7 +297,16 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         utbetalingId: UUID = UTBETALING_ID,
         harOppdatertMetadata: Boolean = true,
     ) {
-        forlengelseFremTilÅpneOppgaver(fom, tom, skjæringstidspunkt, andreArbeidsforhold, regelverksvarsler, fullmakter, vedtaksperiodeId, utbetalingId, harOppdatertMetadata)
+        forlengelseFremTilÅpneOppgaver(
+            fom,
+            tom,
+            skjæringstidspunkt,
+            andreArbeidsforhold,
+            fullmakter,
+            vedtaksperiodeId,
+            utbetalingId,
+            harOppdatertMetadata
+        )
         håndterÅpneOppgaverløsning()
         if (erRevurdering(vedtaksperiodeId)) return
         håndterRisikovurderingløsning(kanGodkjennesAutomatisk = false, risikofunn = risikofunn, vedtaksperiodeId = vedtaksperiodeId)

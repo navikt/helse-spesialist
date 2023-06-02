@@ -9,7 +9,6 @@ import no.nav.helse.spesialist.api.graphql.enums.GraphQLPeriodetype
 import no.nav.helse.spesialist.api.graphql.enums.GraphQLUtbetalingstatus
 import no.nav.helse.spesialist.api.graphql.enums.Utbetalingtype
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.Alder
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLAktivitet
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLBeregnetPeriode
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLGenerasjon
@@ -49,8 +48,8 @@ object Testdata {
     val VEDTAKSPERIODE_ID: UUID = UUID.randomUUID()
     val SNAPSHOT = snapshot(
         aktørId = AKTØR,
-        fødselsnummer = FØDSELSNUMMER,
         organisasjonsnummer = ORGNR,
+        fødselsnummer = FØDSELSNUMMER,
         vedtaksperiodeId = VEDTAKSPERIODE_ID,
         utbetalingId = UTBETALING_ID,
     )
@@ -76,17 +75,8 @@ object Testdata {
             personoppdrag = null,
             arbeidsgiveroppdrag = null
         ),
-        regelverksvarsler: List<String> = emptyList(),
     ): GraphQLClientResponse<HentSnapshot.Result> =
         object : GraphQLClientResponse<HentSnapshot.Result> {
-            val aktivitetslogg = regelverksvarsler.map {
-                GraphQLAktivitet(
-                    "W",
-                    it,
-                    "2020-06-12 13:21:24.072",
-                    vedtaksperiodeId.toString()
-                )
-            }
             override val data = HentSnapshot.Result(
                 GraphQLPerson(
                     aktorId = aktørId,
@@ -111,7 +101,6 @@ object Testdata {
                                             opprettet = "2020-01-31",
                                             periodetype = GraphQLPeriodetype.FORSTEGANGSBEHANDLING,
                                             tidslinje = emptyList(),
-                                            aktivitetslogg = this.aktivitetslogg,
                                             beregningId = UUID.randomUUID().toString(),
                                             forbrukteSykedager = null,
                                             gjenstaendeSykedager = null,

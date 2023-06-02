@@ -125,9 +125,9 @@ internal class Automatisering(
             }
 
         vedtaksperiodeIdKorrigertSøknad?.let {
-            val merEnn6MånederSidenVedtakPåFørsteMottattSøknad = generasjonDao.førsteGenerasjonLåstTidspunkt(it)?.let { tidspunktForVedtakFattet ->
-                tidspunktForVedtakFattet.isBefore(LocalDateTime.now().minusMonths(6)) ?: true
-            } ?: true
+            val merEnn6MånederSidenVedtakPåFørsteMottattSøknad = generasjonDao.førsteGenerasjonLåstTidspunkt(it)
+                ?.isBefore(LocalDateTime.now().minusMonths(6))
+                ?: true
             val antallKorrigeringer = hendelseDao.finnAntallAutomatisertKorrigertSøknad(it)
             hendelseDao.opprettAutomatiseringKorrigertSøknad(it, hendelseId)
 
