@@ -161,12 +161,6 @@ query HentSnapshot($fnr: String!) {
                     ... on GraphQLBeregnetPeriode {
                         __typename
                         id
-                        aktivitetslogg {
-                            alvorlighetsgrad
-                            melding
-                            tidsstempel
-                            vedtaksperiodeId
-                        }
                         beregningId
                         forbrukteSykedager
                         gjenstaendeSykedager
