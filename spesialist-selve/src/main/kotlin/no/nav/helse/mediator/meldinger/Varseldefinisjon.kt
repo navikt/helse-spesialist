@@ -42,9 +42,7 @@ internal class Varseldefinisjon(
         if (tittel != other.tittel) return false
         if (forklaring != other.forklaring) return false
         if (handling != other.handling) return false
-        if (avviklet != other.avviklet) return false
-
-        return true
+        return avviklet == other.avviklet
     }
 
     override fun hashCode(): Int {
