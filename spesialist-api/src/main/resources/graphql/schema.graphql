@@ -62,13 +62,6 @@ type Alder {
   oppfylt: Boolean!
 }
 
-type GraphQLAktivitet {
-  alvorlighetsgrad: String!
-  melding: String!
-  tidsstempel: String!
-  vedtaksperiodeId: UUID!
-}
-
 type GraphQLArbeidsgiver {
   generasjon(index: Int!): GraphQLGenerasjon
   generasjoner: [GraphQLGenerasjon!]!
@@ -92,7 +85,6 @@ type GraphQLArbeidsgiverrefusjon {
 }
 
 type GraphQLBeregnetPeriode implements GraphQLTidslinjeperiode {
-  aktivitetslogg: [GraphQLAktivitet!]!
   beregningId: UUID!
   erForkastet: Boolean!
   fom: LocalDate!
@@ -407,6 +399,7 @@ enum GraphQLInntektskilde {
   Infotrygd
   Inntektsmelding
   Saksbehandler
+  SkjonnsmessigFastsatt
 }
 
 enum GraphQLInntektstype {
