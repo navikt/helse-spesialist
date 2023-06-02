@@ -290,7 +290,6 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         tom: LocalDate = 31.januar,
         skjæringstidspunkt: LocalDate = fom,
         andreArbeidsforhold: List<String> = emptyList(),
-        regelverksvarsler: List<String> = emptyList(),
         fullmakter: List<Fullmakt> = emptyList(),
         risikofunn: List<Risikofunn> = emptyList(),
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
@@ -317,14 +316,23 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         tom: LocalDate,
         skjæringstidspunkt: LocalDate = fom,
         andreArbeidsforhold: List<String> = emptyList(),
-        regelverksvarsler: List<String> = emptyList(),
         fullmakter: List<Fullmakt> = emptyList(),
         risikofunn: List<Risikofunn> = emptyList(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         utbetalingId: UUID = UUID.randomUUID(),
         harOppdatertMetadata: Boolean = true
     ) {
-        forlengelseFremTilSaksbehandleroppgave(fom, tom, skjæringstidspunkt, andreArbeidsforhold, regelverksvarsler, fullmakter, risikofunn, vedtaksperiodeId, utbetalingId, harOppdatertMetadata)
+        forlengelseFremTilSaksbehandleroppgave(
+            fom,
+            tom,
+            skjæringstidspunkt,
+            andreArbeidsforhold,
+            fullmakter,
+            risikofunn,
+            vedtaksperiodeId,
+            utbetalingId,
+            harOppdatertMetadata
+        )
         håndterSaksbehandlerløsning(vedtaksperiodeId = vedtaksperiodeId)
         håndterVedtakFattet(vedtaksperiodeId = vedtaksperiodeId)
     }
