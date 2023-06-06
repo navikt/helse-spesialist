@@ -1,5 +1,7 @@
 package no.nav.helse.mediator
 
+import com.fasterxml.jackson.databind.node.ObjectNode
+import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 
@@ -21,7 +23,10 @@ internal class DelegatedRapid(
     override fun onMessage(message: String, context: MessageContext) {
         try {
             beforeRiverAction()
-            notifyMessage(message, context)
+            val packet = objectMapper.readTree(message) as ObjectNode
+            if (packet["fødselsnummer"]?.asText() != "28457626039") {
+                notifyMessage(message, context)
+            }
             afterRiverAction(message)
         } catch (err: Exception) {
             errorAction(err, message)

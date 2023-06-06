@@ -44,6 +44,12 @@ internal class DelegatedRapidTest : River.PacketListener {
         assertEquals(listOf("BEFORE", "ERROR"), order)
     }
 
+    @Test
+    fun `ignorerer en bestemt testperson`() {
+        testRapid.sendTestMessage("{\"fødselsnummer\": \"28457626039\"}")
+        assertEquals(listOf("BEFORE", "AFTER"), order)
+    }
+
     private fun beforeRiver() {
         order.add("BEFORE")
     }
