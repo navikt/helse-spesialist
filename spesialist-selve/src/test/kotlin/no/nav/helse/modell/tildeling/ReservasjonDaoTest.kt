@@ -27,9 +27,9 @@ internal class ReservasjonDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `reserverer person`() {
-        opprettTabeller()
+        opprettData()
         val saksbehandlerOid = sessionOf(dataSource).use {
-            reservasjonDao.reserverPerson(SAKSBEHANDLER_OID, FNR)
+            reservasjonDao.reserverPerson(SAKSBEHANDLER_OID, FNR, false)
             reservasjonDao.hentReservasjonFor(FNR)?.reservertTil
                 ?: fail("Forventet at det skulle finnes en reservasjon i basen")
         }
@@ -39,7 +39,7 @@ internal class ReservasjonDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `ny reservasjon forlenger fristen`() {
-        opprettTabeller()
+        opprettData()
         val enAnnenSaksbehandler = UUID.randomUUID()
         saksbehandlerDao.opprettSaksbehandler(
             enAnnenSaksbehandler,
@@ -49,9 +49,9 @@ internal class ReservasjonDaoTest : DatabaseIntegrationTest() {
         )
 
         val saksbehandlerOid = sessionOf(dataSource).use {
-            reservasjonDao.reserverPerson(enAnnenSaksbehandler, FNR)
+            reservasjonDao.reserverPerson(enAnnenSaksbehandler, FNR, false)
             val gyldigTil1 = finnGyldigTil()
-            reservasjonDao.reserverPerson(SAKSBEHANDLER_OID, FNR)
+            reservasjonDao.reserverPerson(SAKSBEHANDLER_OID, FNR, false)
             val gyldigTil2 = finnGyldigTil()
             assertTrue(gyldigTil2.isAfter(gyldigTil1))
             reservasjonDao.hentReservasjonFor(FNR)?.reservertTil
@@ -61,7 +61,7 @@ internal class ReservasjonDaoTest : DatabaseIntegrationTest() {
         assertRiktigVarighet(72)
     }
 
-    private fun opprettTabeller(fødselsnummer: String = FNR) {
+    private fun opprettData(fødselsnummer: String = FNR) {
         val personinfoRef = personDao.insertPersoninfo(
             "KARI",
             "Mellomnavn",

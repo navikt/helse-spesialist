@@ -78,6 +78,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             reservasjonDao = reservasjonDao,
             saksbehandlerDao = saksbehandlerDao,
             oppgaveDao = oppgaveDao,
+            tildelingDao = tildelingDao,
             overstyringDao = overstyringDao,
             overstyringMediator = mockk(),
         ))
@@ -106,6 +107,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             reservasjonDao = reservasjonDao,
             saksbehandlerDao = saksbehandlerDao,
             oppgaveDao = oppgaveDao,
+            tildelingDao = tildelingDao,
             overstyringDao = overstyringDao,
             overstyringMediator = mockk(),
         ))
@@ -133,6 +135,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             reservasjonDao = reservasjonDao,
             saksbehandlerDao = saksbehandlerDao,
             oppgaveDao = oppgaveDao,
+            tildelingDao = tildelingDao,
             overstyringDao = overstyringDao,
             overstyringMediator = mockk(),
         ))
@@ -168,6 +171,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             reservasjonDao = reservasjonDao,
             saksbehandlerDao = saksbehandlerDao,
             oppgaveDao = oppgaveDao,
+            tildelingDao = tildelingDao,
             overstyringDao = overstyringDao,
             overstyringMediator = mockk(),
         ))
@@ -209,6 +213,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             reservasjonDao = reservasjonDao,
             saksbehandlerDao = saksbehandlerDao,
             oppgaveDao = oppgaveDao,
+            tildelingDao = tildelingDao,
             overstyringDao = overstyringDao,
             overstyringMediator = mockk(),
         ))
@@ -328,6 +333,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             reservasjonDao = reservasjonDao,
             saksbehandlerDao = saksbehandlerDao,
             oppgaveDao = oppgaveDao,
+            tildelingDao = tildelingDao,
             overstyringDao = overstyringDao,
             overstyringMediator = mockk(),
         ))
@@ -373,12 +379,13 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
                     subsumsjon = Subsumsjon(paragraf = "87494")
                 )
             ),
-            opprettet = OPPRETTET,
             skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
+            opprettet = OPPRETTET,
             json = "{}",
             reservasjonDao = reservasjonDao,
             saksbehandlerDao = saksbehandlerDao,
             oppgaveDao = oppgaveDao,
+            tildelingDao = tildelingDao,
             overstyringDao = overstyringDao,
             overstyringMediator = mockk(),
         )

@@ -83,7 +83,7 @@ internal class OverstyringTest {
         overstyringAvTidslinjeMessage.execute(context)
 
         verify(exactly = 1) { saksbehandlerDao.opprettSaksbehandler(OID, NAVN, EPOST, IDENT) }
-        verify(exactly = 1) { reservasjonDao.reserverPerson(OID, FØDSELSNUMMER) }
+        verify(exactly = 1) { reservasjonDao.reserverPerson(OID, FØDSELSNUMMER, any()) }
         verify(exactly = 1) { oppgaveDao.invaliderOppgaveFor(FØDSELSNUMMER) }
         verify(exactly = 1) { overstyringDao.finnEksternHendelseIdFraHendelseId(ID) }
         verify(exactly = 1) {
@@ -114,7 +114,7 @@ internal class OverstyringTest {
         overstyringAvTidslinjeMessage.execute(context)
 
         verify(exactly = 1) { saksbehandlerDao.opprettSaksbehandler(OID, NAVN, EPOST, IDENT) }
-        verify(exactly = 1) { reservasjonDao.reserverPerson(OID, FØDSELSNUMMER) }
+        verify(exactly = 1) { reservasjonDao.reserverPerson(OID, FØDSELSNUMMER, false) }
         verify(exactly = 1) { oppgaveDao.invaliderOppgaveFor(FØDSELSNUMMER) }
         verify(exactly = 1) { overstyringDao.finnEksternHendelseIdFraHendelseId(ID) }
         verify(exactly = 1) {

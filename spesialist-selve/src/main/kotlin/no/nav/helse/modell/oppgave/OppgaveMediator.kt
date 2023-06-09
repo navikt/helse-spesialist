@@ -104,7 +104,7 @@ class OppgaveMediator(
 
     fun reserverOppgave(saksbehandleroid: UUID, fødselsnummer: String) {
         try {
-            reservasjonDao.reserverPerson(saksbehandleroid, fødselsnummer)
+            reservasjonDao.reserverPerson(saksbehandleroid, fødselsnummer, false)
         } catch (e: SQLException) {
             log.warn("Kunne ikke reservere person")
         }

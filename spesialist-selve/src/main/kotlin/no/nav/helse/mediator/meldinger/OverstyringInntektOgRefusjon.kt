@@ -25,6 +25,7 @@ import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
+import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -48,6 +49,7 @@ internal class OverstyringInntektOgRefusjon(
     reservasjonDao: ReservasjonDao,
     saksbehandlerDao: SaksbehandlerDao,
     oppgaveDao: OppgaveDao,
+    tildelingDao: TildelingDao,
     overstyringDao: OverstyringDao,
     overstyringMediator: OverstyringMediator,
 ) : Hendelse, MacroCommand() {
@@ -59,7 +61,7 @@ internal class OverstyringInntektOgRefusjon(
             ident = ident,
             saksbehandlerDao = saksbehandlerDao
         ),
-        ReserverPersonCommand(oid, fødselsnummer, reservasjonDao),
+        ReserverPersonCommand(oid, fødselsnummer, reservasjonDao, oppgaveDao, tildelingDao),
         PersisterOverstyringInntektOgRefusjonCommand(
             oid = oid,
             hendelseId = id,

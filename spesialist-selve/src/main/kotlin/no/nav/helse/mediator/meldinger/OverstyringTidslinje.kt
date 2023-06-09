@@ -23,6 +23,7 @@ import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
+import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -47,6 +48,7 @@ internal class OverstyringTidslinje(
     reservasjonDao: ReservasjonDao,
     saksbehandlerDao: SaksbehandlerDao,
     oppgaveDao: OppgaveDao,
+    tildelingDao: TildelingDao,
     overstyringDao: OverstyringDao,
     overstyringMediator: OverstyringMediator,
 ) : Hendelse, MacroCommand() {
@@ -58,7 +60,7 @@ internal class OverstyringTidslinje(
             ident = ident,
             saksbehandlerDao = saksbehandlerDao
         ),
-        ReserverPersonCommand(oid, fødselsnummer, reservasjonDao),
+        ReserverPersonCommand(oid, fødselsnummer, reservasjonDao, oppgaveDao, tildelingDao),
         PersisterOverstyringTidslinjeCommand(
             oid = oid,
             hendelseId = id,

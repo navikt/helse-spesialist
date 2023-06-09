@@ -95,7 +95,7 @@ internal class GodkjenningService(
 
     private fun reserverPerson(oid: UUID, fødselsnummer: String) {
         try {
-            reservasjonDao.reserverPerson(oid, fødselsnummer)
+            reservasjonDao.reserverPerson(oid, fødselsnummer, false)
         } catch (e: SQLException) {
             log.warn("Kunne ikke reservere person")
         }

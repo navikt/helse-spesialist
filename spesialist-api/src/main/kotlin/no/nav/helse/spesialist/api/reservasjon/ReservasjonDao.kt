@@ -6,7 +6,7 @@ import no.nav.helse.HelseDao
 import org.intellij.lang.annotations.Language
 
 class ReservasjonDao(dataSource: DataSource) : HelseDao(dataSource) {
-    fun reserverPerson(saksbehandlerOid: UUID, fødselsnummer: String, påVent: Boolean = false) {
+    fun reserverPerson(saksbehandlerOid: UUID, fødselsnummer: String, påVent: Boolean) {
         @Language("PostgreSQL")
         val query = """
             INSERT INTO reserver_person(saksbehandler_ref, person_ref, sett_på_vent_flagg)

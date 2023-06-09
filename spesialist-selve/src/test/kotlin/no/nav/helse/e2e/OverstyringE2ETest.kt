@@ -116,7 +116,9 @@ internal class OverstyringE2ETest : AbstractE2ETestV2() {
     fun `legger ved overstyringer i speil snapshot`() {
         fremTilSaksbehandleroppgave()
         håndterOverstyrTidslinje()
+        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true)
         håndterOverstyrInntektOgRefusjon()
+        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true)
         håndterOverstyrArbeidsforhold()
 
         every { dataFetchingEnvironment.graphQlContext.get<String>("saksbehandlerNavn") } returns "saksbehandler"

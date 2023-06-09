@@ -433,6 +433,7 @@ internal class Hendelsefabrikk(
         reservasjonDao = reservasjonDao,
         saksbehandlerDao = saksbehandlerDao,
         oppgaveDao = oppgaveDao,
+        tildelingDao = tildelingDao,
         overstyringDao = overstyringDao,
         overstyringMediator = overstyringMediator,
     )
@@ -470,8 +471,8 @@ internal class Hendelsefabrikk(
         fødselsnummer = fødselsnummer,
         oid = oid,
         navn = navn,
-        ident = ident,
         epost = epost,
+        ident = ident,
         arbeidsgivere = arbeidsgivere,
         skjæringstidspunkt = skjæringstidspunkt,
         opprettet = opprettet,
@@ -479,6 +480,7 @@ internal class Hendelsefabrikk(
         reservasjonDao = reservasjonDao,
         saksbehandlerDao = saksbehandlerDao,
         oppgaveDao = oppgaveDao,
+        tildelingDao = tildelingDao,
         overstyringDao = overstyringDao,
         overstyringMediator = overstyringMediator,
     )
@@ -508,6 +510,7 @@ internal class Hendelsefabrikk(
         reservasjonDao = reservasjonDao,
         saksbehandlerDao = saksbehandlerDao,
         oppgaveDao = oppgaveDao,
+        tildelingDao = tildelingDao,
         overstyringDao = overstyringDao,
         overstyringMediator = overstyringMediator,
     )
