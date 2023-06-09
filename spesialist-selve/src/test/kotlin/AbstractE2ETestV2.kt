@@ -555,7 +555,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
         forrigeStatus: Utbetalingsstatus = NY,
-        gjeldedeStatus: Utbetalingsstatus = IKKE_UTBETALT,
+        gjeldendeStatus: Utbetalingsstatus = IKKE_UTBETALT,
         opprettet: LocalDateTime = LocalDateTime.now(),
         utbetalingId: UUID = UTBETALING_ID
     ) {
@@ -569,7 +569,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp,
             forrigeStatus = forrigeStatus,
-            gjeldendeStatus = gjeldedeStatus,
+            gjeldendeStatus = gjeldendeStatus,
             opprettet = opprettet
         )
     }
@@ -591,7 +591,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
             utbetalingtype,
             arbeidsgiverbeløp,
             personbeløp,
-            gjeldedeStatus = UTBETALING_FEILET,
+            gjeldendeStatus = UTBETALING_FEILET,
             utbetalingId = this.utbetalingId
         )
         assertIngenEtterspurteBehov()
@@ -611,7 +611,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
             fødselsnummer,
             organisasjonsnummer,
             forrigeStatus = forrigeStatus,
-            gjeldedeStatus = FORKASTET,
+            gjeldendeStatus = FORKASTET,
             utbetalingId = this.utbetalingId
         )
         assertIngenEtterspurteBehov()
@@ -629,7 +629,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
             fødselsnummer,
             organisasjonsnummer,
             forrigeStatus = SENDT,
-            gjeldedeStatus = UTBETALT,
+            gjeldendeStatus = UTBETALT,
             utbetalingId = this.utbetalingId
         )
         assertIngenEtterspurteBehov()

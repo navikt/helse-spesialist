@@ -17,9 +17,9 @@ internal class UtbetalingE2ETest : AbstractE2ETestV2() {
     fun `utbetaling endret`() {
         håndterSøknad()
         håndterVedtaksperiodeOpprettet()
-        håndterUtbetalingEndret(utbetalingtype = "UTBETALING", gjeldedeStatus = GODKJENT)
-        håndterUtbetalingEndret(utbetalingtype = "ETTERUTBETALING", gjeldedeStatus = OVERFØRT)
-        håndterUtbetalingEndret(utbetalingtype = "ANNULLERING", gjeldedeStatus = ANNULLERT)
+        håndterUtbetalingEndret(utbetalingtype = "UTBETALING", gjeldendeStatus = GODKJENT)
+        håndterUtbetalingEndret(utbetalingtype = "ETTERUTBETALING", gjeldendeStatus = OVERFØRT)
+        håndterUtbetalingEndret(utbetalingtype = "ANNULLERING", gjeldendeStatus = ANNULLERT)
         assertUtbetalinger(UTBETALING_ID, 3)
     }
 
@@ -28,8 +28,8 @@ internal class UtbetalingE2ETest : AbstractE2ETestV2() {
         val opprettet = LocalDateTime.now()
         håndterSøknad()
         håndterVedtaksperiodeOpprettet()
-        håndterUtbetalingEndret(utbetalingtype = "UTBETALING", gjeldedeStatus = GODKJENT, opprettet = opprettet)
-        håndterUtbetalingEndret(utbetalingtype = "UTBETALING", gjeldedeStatus = GODKJENT, opprettet = opprettet)
+        håndterUtbetalingEndret(utbetalingtype = "UTBETALING", gjeldendeStatus = GODKJENT, opprettet = opprettet)
+        håndterUtbetalingEndret(utbetalingtype = "UTBETALING", gjeldendeStatus = GODKJENT, opprettet = opprettet)
         assertUtbetalinger(UTBETALING_ID, 1)
     }
 
@@ -39,8 +39,8 @@ internal class UtbetalingE2ETest : AbstractE2ETestV2() {
         val senereTidspunkt = opprettet.plusSeconds(10)
         håndterSøknad()
         håndterVedtaksperiodeOpprettet()
-        håndterUtbetalingEndret(utbetalingtype = "UTBETALING", gjeldedeStatus = GODKJENT, opprettet = opprettet)
-        håndterUtbetalingEndret(utbetalingtype = "UTBETALING", gjeldedeStatus = GODKJENT, opprettet = senereTidspunkt)
+        håndterUtbetalingEndret(utbetalingtype = "UTBETALING", gjeldendeStatus = GODKJENT, opprettet = opprettet)
+        håndterUtbetalingEndret(utbetalingtype = "UTBETALING", gjeldendeStatus = GODKJENT, opprettet = senereTidspunkt)
         assertUtbetalinger(UTBETALING_ID, 2)
     }
 
@@ -50,7 +50,7 @@ internal class UtbetalingE2ETest : AbstractE2ETestV2() {
 
         håndterSøknad()
         håndterVedtaksperiodeOpprettet()
-        håndterUtbetalingEndret(utbetalingtype = "UTBETALING", gjeldedeStatus = GODKJENT, organisasjonsnummer = ET_ANNET_ORGNR)
+        håndterUtbetalingEndret(utbetalingtype = "UTBETALING", gjeldendeStatus = GODKJENT, organisasjonsnummer = ET_ANNET_ORGNR)
         assertUtbetalinger(UTBETALING_ID, 0)
         assertFeilendeMeldinger(1)
     }
@@ -59,7 +59,7 @@ internal class UtbetalingE2ETest : AbstractE2ETestV2() {
     fun `lagrer utbetaling etter utbetaling_endret når utbetalingen har vært til godkjenning og vi kjenner arbeidsgiver`() {
         fremTilSaksbehandleroppgave()
         håndterSaksbehandlerløsning()
-        håndterUtbetalingEndret(forrigeStatus = IKKE_UTBETALT, gjeldedeStatus = GODKJENT)
+        håndterUtbetalingEndret(forrigeStatus = IKKE_UTBETALT, gjeldendeStatus = GODKJENT)
         assertUtbetalinger(UTBETALING_ID, 2)
         assertFeilendeMeldinger(0)
     }
@@ -68,9 +68,9 @@ internal class UtbetalingE2ETest : AbstractE2ETestV2() {
     fun `utbetaling forkastet`() {
         håndterSøknad()
         håndterVedtaksperiodeOpprettet()
-        håndterUtbetalingEndret(utbetalingtype = "UTBETALING", gjeldedeStatus = FORKASTET, forrigeStatus = IKKE_GODKJENT)
+        håndterUtbetalingEndret(utbetalingtype = "UTBETALING", gjeldendeStatus = FORKASTET, forrigeStatus = IKKE_GODKJENT)
         assertUtbetalinger(UTBETALING_ID, 1)
-        håndterUtbetalingEndret(utbetalingtype = "UTBETALING", gjeldedeStatus = FORKASTET, forrigeStatus = GODKJENT)
+        håndterUtbetalingEndret(utbetalingtype = "UTBETALING", gjeldendeStatus = FORKASTET, forrigeStatus = GODKJENT)
         assertUtbetalinger(UTBETALING_ID, 2)
     }
 
