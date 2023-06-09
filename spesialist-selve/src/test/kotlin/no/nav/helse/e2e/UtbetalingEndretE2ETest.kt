@@ -8,9 +8,11 @@ import kotliquery.sessionOf
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 
-internal class UtbetalingEndretE2ETest: AbstractE2ETestV2() {
+internal class UtbetalingEndretE2ETest : AbstractE2ETestV2() {
+
     @Test
     fun `Lagrer personbeløp og arbeidsgiverbeløp ved innlesing av utbetaling_endret`() {
         håndterSøknad()
@@ -29,9 +31,12 @@ internal class UtbetalingEndretE2ETest: AbstractE2ETestV2() {
         val oppgaveId = oppgaveIdFor(VEDTAKSPERIODE_ID)
         tildelOppgave(oppgaveId, saksbehandlerOid)
 
-        håndterUtbetalingOpprettet(arbeidsgiverbeløp = 20000, personbeløp = 20000)
+        håndterUtbetalingErstattet(arbeidsgiverbeløp = 20000, personbeløp = 20000)
+        håndterVedtaksperiodeReberegnet()
+        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true)
 
-        assertEquals(saksbehandlerOid, finnOidForTildeling(oppgaveId))
+        val oppgaveId2 = finnNyOppgaveId(forrigeOppgaveId = oppgaveId)
+        assertEquals(saksbehandlerOid, finnOidForTildeling(oppgaveId2))
     }
 
     @Test
@@ -43,17 +48,26 @@ internal class UtbetalingEndretE2ETest: AbstractE2ETestV2() {
         val oppgaveId = oppgaveIdFor(VEDTAKSPERIODE_ID)
         tildelOppgave(oppgaveId, saksbehandlerOid, påVent = true)
 
-        håndterUtbetalingOpprettet(arbeidsgiverbeløp = 20000, personbeløp = 20000)
+        håndterUtbetalingErstattet(arbeidsgiverbeløp = 20000, personbeløp = 20000)
+        håndterVedtaksperiodeReberegnet()
+        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true)
 
-        val (oid, påVent) = finnOidOgPåVentForTildeling(oppgaveId)!!
+        val oppgaveId2 = finnNyOppgaveId(forrigeOppgaveId = oppgaveId)
+        val (oid, påVent) = finnOidOgPåVentForTildeling(oppgaveId2)!!
         assertEquals(saksbehandlerOid, oid)
         assertEquals(true, påVent) { "Ny oppgave skal være lagt på vent etter reberegning" }
     }
 
+    private fun finnNyOppgaveId(forrigeOppgaveId: Long) = oppgaveIdFor(VEDTAKSPERIODE_ID).also { nyOppgaveId ->
+        assertNotEquals(forrigeOppgaveId, nyOppgaveId) {
+            "Det er meningen at det skal ha blitt opprettet en ny oppgave"
+        }
+    }
 
     private fun oppgaveIdFor(vedtaksperiodeId: UUID): Long = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
-        val query = "SELECT id FROM oppgave WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = ?);"
+        val query =
+            "SELECT id FROM oppgave WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = ?) ORDER BY id DESC;"
         requireNotNull(session.run(queryOf(query, vedtaksperiodeId).map { it.long(1) }.asSingle))
     }
 
@@ -93,7 +107,7 @@ internal class UtbetalingEndretE2ETest: AbstractE2ETestV2() {
     private fun opprettSaksbehandler(
         oid: UUID,
         navn: String,
-        epost: String
+        epost: String,
     ) {
         sessionOf(dataSource).use {
             val opprettSaksbehandlerQuery = "INSERT INTO saksbehandler(oid, navn, epost) VALUES (:oid, :navn, :epost)"

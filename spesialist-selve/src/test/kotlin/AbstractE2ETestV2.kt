@@ -547,6 +547,22 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         assertIngenUtgåendeMeldinger()
     }
 
+    protected fun håndterUtbetalingErstattet(
+        aktørId: String = AKTØR,
+        fødselsnummer: String = FØDSELSNUMMER,
+        organisasjonsnummer: String = ORGNR,
+        utbetalingtype: String = "UTBETALING",
+        arbeidsgiverbeløp: Int = 20000,
+        personbeløp: Int = 0,
+        utbetalingId: UUID = UTBETALING_ID,
+    ) {
+        håndterUtbetalingForkastet(aktørId, fødselsnummer, organisasjonsnummer, utbetalingId = this.utbetalingId)
+        nyUtbetalingId(utbetalingId)
+        håndterUtbetalingEndret(aktørId, fødselsnummer, organisasjonsnummer, utbetalingtype, arbeidsgiverbeløp, personbeløp, utbetalingId = this.utbetalingId)
+        assertIngenEtterspurteBehov()
+        assertIngenUtgåendeMeldinger()
+    }
+
     protected fun håndterUtbetalingEndret(
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,

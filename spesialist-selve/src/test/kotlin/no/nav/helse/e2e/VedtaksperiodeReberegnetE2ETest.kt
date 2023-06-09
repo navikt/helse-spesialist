@@ -68,7 +68,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETestV2() {
         håndterSøknad()
         håndterVedtaksperiodeOpprettet()
         håndterGodkjenningsbehov()
-        håndterVedtaksperiodeEndret(forrigeTilstand = "TIL_UTBETALING", gjeldendeTilstand = "UBETALING_FEILET")
+        håndterVedtaksperiodeEndret(forrigeTilstand = "TIL_UTBETALING", gjeldendeTilstand = "UTBETALING_FEILET")
         assertKommandokjedetilstander(sisteGodkjenningsbehovId, NY, SUSPENDERT)
     }
 
