@@ -28,15 +28,6 @@ class ReservasjonDao(dataSource: DataSource) : HelseDao(dataSource) {
         )
     }
 
-    fun hentReservertTil(fødselsnummer: String): UUID? =
-        """ SELECT r.* FROM reserver_person r
-                JOIN person p ON p.id = r.person_ref
-            WHERE p.fodselsnummer = :fnr AND r.gyldig_til > now(); """
-            .single(mapOf("fnr" to fødselsnummer.toLong())) {
-                it.uuid("saksbehandler_ref")
-
-            }
-
     fun hentReservasjonFor(fødselsnummer: String): Reservasjonsinfo? =
         """ SELECT r.* FROM reserver_person r
                 JOIN person p ON p.id = r.person_ref

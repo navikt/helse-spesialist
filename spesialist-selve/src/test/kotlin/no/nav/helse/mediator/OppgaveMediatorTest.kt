@@ -71,7 +71,6 @@ internal class OppgaveMediatorTest {
 
     @Test
     fun `lagrer oppgaver`() {
-        every { reservasjonDao.hentReservertTil(TESTHENDELSE.fødselsnummer()) } returns null
         every { oppgaveDao.finn(0L) } returns søknadsoppgave
         every { oppgaveDao.opprettOppgave(any(), OPPGAVETYPE_SØKNAD, any(), any()) } returns 0L
         every { oppgaveDao.finnHendelseId(any()) } returns HENDELSE_ID
@@ -143,7 +142,6 @@ internal class OppgaveMediatorTest {
 
     @Test
     fun `oppdaterer oppgave`() {
-        every { reservasjonDao.hentReservertTil(TESTHENDELSE.fødselsnummer()) } returns null
         val oppgave = Oppgave(
             OPPGAVE_ID,
             OPPGAVETYPE_SØKNAD,
@@ -168,7 +166,6 @@ internal class OppgaveMediatorTest {
     @Test
     fun `oppretter ikke flere oppgaver på samme vedtaksperiodeId`() {
         every { oppgaveDao.harGyldigOppgave(UTBETALING_ID) } returnsMany listOf(false, true)
-        every { reservasjonDao.hentReservertTil(TESTHENDELSE.fødselsnummer()) } returns null
         every { oppgaveDao.finn(0L) } returns søknadsoppgave
         mediator.opprett(søknadsoppgave)
         mediator.opprett(søknadsoppgave)
@@ -180,7 +177,6 @@ internal class OppgaveMediatorTest {
 
     @Test
     fun `lagrer ikke dobbelt`() {
-        every { reservasjonDao.hentReservertTil(TESTHENDELSE.fødselsnummer()) } returns null
         every { oppgaveDao.finn(0L) } returns søknadsoppgave
         every { oppgaveDao.opprettOppgave(any(), OPPGAVETYPE_SØKNAD, any(), any()) } returns 0L
         every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
@@ -206,7 +202,6 @@ internal class OppgaveMediatorTest {
             utbetalingId = UTBETALING_ID
         )
         every { oppgaveDao.finnAktiv(VEDTAKSPERIODE_ID) } returns oppgave1
-        every { reservasjonDao.hentReservertTil(TESTHENDELSE.fødselsnummer()) } returns null
         every { oppgaveDao.finn(1L) } returns oppgave1
         mediator.avbrytOppgaver(VEDTAKSPERIODE_ID)
         mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
