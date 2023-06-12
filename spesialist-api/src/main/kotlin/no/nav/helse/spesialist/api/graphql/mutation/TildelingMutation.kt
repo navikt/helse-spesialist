@@ -59,6 +59,7 @@ class TildelingMutation(
                 navn = tildeling.navn,
                 oid = tildeling.oid.toString(),
                 epost = tildeling.epost,
+                paaVent = tildeling.påVent,
                 reservert = tildeling.påVent
             )
         ).build()

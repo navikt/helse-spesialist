@@ -284,7 +284,7 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
         assertEquals(
             false,
             oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN)
-                .first().tildeling?.reservert
+                .first().tildeling?.paaVent
         )
         assertEquals(
             SAKSBEHANDLER_OID.toString(),

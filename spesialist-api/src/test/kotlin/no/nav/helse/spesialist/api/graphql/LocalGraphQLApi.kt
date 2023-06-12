@@ -50,9 +50,15 @@ import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLVurdering
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.Soknadsfrist
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.Sykepengedager
 import no.nav.helse.spesialist.api.graphql.schema.Adressebeskyttelse
+import no.nav.helse.spesialist.api.graphql.schema.Boenhet
 import no.nav.helse.spesialist.api.graphql.schema.Kjonn
+import no.nav.helse.spesialist.api.graphql.schema.Mottaker
+import no.nav.helse.spesialist.api.graphql.schema.OppgaveForOversiktsvisning
 import no.nav.helse.spesialist.api.graphql.schema.Personinfo
+import no.nav.helse.spesialist.api.graphql.schema.Personnavn
 import no.nav.helse.spesialist.api.graphql.schema.Reservasjon
+import no.nav.helse.spesialist.api.graphql.schema.Tildeling
+import no.nav.helse.spesialist.api.graphql.schema.Totrinnsvurdering
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
@@ -117,6 +123,7 @@ fun main() = runBlocking {
             Reservasjon(kanVarsles = true, reservert = false)
         }
         every { utbetalingApiDao.findUtbetalinger(any()) } returns emptyList()
+        every { oppgaveApiDao.finnOppgaver(any()) } returns listOf(enOppgave())
         every { behandlingsstatistikkMediator.getBehandlingsstatistikk() } returns BehandlingsstatistikkResponse(
             enArbeidsgiver = Statistikk(485, 104, 789),
             flereArbeidsgivere = Statistikk(254, 58, 301),
@@ -182,6 +189,50 @@ fun main() = runBlocking {
 
 private fun DecodedJWT.toJwtPrincipal() =
     JWTPrincipal(JWTParser().parsePayload(payload.decodeBase64String()))
+
+private fun enOppgave() = OppgaveForOversiktsvisning(
+    id = "oppgave_id",
+    type = no.nav.helse.spesialist.api.graphql.schema.Oppgavetype.SOKNAD,
+    opprettet = "20.47",
+    opprinneligSoknadsdato = "01.01.2018",
+    vedtaksperiodeId = "vedtaksperiode_id",
+    personinfo = Personinfo(
+        fornavn = "fornavn",
+        mellomnavn = "mellomnavn",
+        etternavn = "etternavn",
+        fodselsdato = "fodselsdato",
+        kjonn = Kjonn.Ukjent,
+        adressebeskyttelse = Adressebeskyttelse.Ugradert,
+    ),
+    aktorId = "aktor_id",
+    fodselsnummer = "fodselsnummer",
+    antallVarsler = 1,
+    flereArbeidsgivere = false,
+    boenhet = Boenhet(id = "enhet_id", navn = "enhet_navn"),
+    tildeling =
+    Tildeling(
+        navn = "saksbehandler_navn",
+        epost = "epost",
+        oid = "oid",
+        paaVent = true,
+        reservert = true,
+    ),
+    periodetype = no.nav.helse.spesialist.api.graphql.schema.Periodetype.FORSTEGANGSBEHANDLING,
+    sistSendt = "20.43",
+    totrinnsvurdering =
+    Totrinnsvurdering(
+        erRetur = false,
+        saksbehandler = "saksbehandler",
+        beslutter = "beslutter",
+        erBeslutteroppgave = true
+    ),
+    mottaker = Mottaker.ARBEIDSGIVER,
+    navn = Personnavn(
+        fornavn = "fornavn",
+        mellomnavn = "mellomnavn",
+        etternavn = "etternavn",
+    )
+)
 
 private fun enPersoninfo() = Personinfo(
     fornavn = "Luke",

@@ -313,6 +313,7 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                     navn = it.string("saksbehandler_navn"),
                     epost = epost,
                     oid = it.string("oid"),
+                    paaVent = it.boolean("på_vent"),
                     reservert = it.boolean("på_vent")
                 )
             },
