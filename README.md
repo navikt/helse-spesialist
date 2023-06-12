@@ -8,10 +8,14 @@ Backend for saksbehandling av sykepengesøknader
 Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på GitHub.
 
 ## Bygging lokalt
-Vi pr nå avhengig av naisdevice for å bygge lokalt, pga graphql schema endepunktet i denne filen:
+Vi er per nå avhengig av naisdevice for å bygge lokalt, pga graphql schema-endepunktet i denne filen:
 ```spesialist-selve/build.gradle.kts```
 
-## Protip for å kjøre tester raskere
+## Kjøre lokal GraphQL Playground
+- kjør main-funksjonen i LocalGraphQLApi.kt
+- gå til http://localhost:4321/graphql/playground i en nettleser
+
+## Kjøre tester raskere
 Finn filen .testcontainers.properties, ligger ofte på hjemmeområdet ditt eks: 
 
 ```~/.testcontainers.properties```
