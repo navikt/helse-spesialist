@@ -24,7 +24,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         private const val PERSON_ETTERNAVN = "Son"
         private val PERSON_FØDSELSDATO = LocalDate.of(1998, 4, 20)
         private val PERSON_KJØNN = Kjønn.Ukjent
-        private const val ARBEIDSGIVER_NAVN = "Skrue Mc Duck"
+        private const val ARBEIDSGIVER_NAVN = "Skrue McDuck"
         private val ID = UUID.randomUUID()
         private val EKSTERN_HENDELSE_ID = UUID.randomUUID()
         private const val FØDSELSNUMMER = "12020052345"
@@ -49,7 +49,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             )
         )
         private val OPPRETTET = LocalDate.of(2022, 6, 9).atStartOfDay()
-        private val INNTEKT = 31000.0
+        private const val INNTEKT = 31000.0
     }
 
     private fun opprettPerson() {
@@ -63,25 +63,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `Kan koble overstyringhendelse og vedtaksperiode`() {
         opprettPerson()
-        hendelseDao.opprett(OverstyringTidslinje(
-            id = ID,
-            fødselsnummer = FØDSELSNUMMER,
-            oid = OID,
-            navn = SAKSBEHANDLER_NAVN,
-            epost = SAKSBEHANDLEREPOST,
-            ident = SAKSBEHANDLER_IDENT,
-            orgnummer = ORGNUMMER,
-            begrunnelse = BEGRUNNELSE,
-            overstyrteDager = OVERSTYRTE_DAGER,
-            opprettet = OPPRETTET,
-            json = "{}",
-            reservasjonDao = reservasjonDao,
-            saksbehandlerDao = saksbehandlerDao,
-            oppgaveDao = oppgaveDao,
-            tildelingDao = tildelingDao,
-            overstyringDao = overstyringDao,
-            overstyringMediator = mockk(),
-        ))
+        hendelseDao.opprett(overstyringTidslinje())
         overstyringDao.persisterOverstyringTidslinje(ID, EKSTERN_HENDELSE_ID, FØDSELSNUMMER, ORGNUMMER, BEGRUNNELSE, OVERSTYRTE_DAGER, OID, OPPRETTET)
         overstyringDao.kobleOverstyringOgVedtaksperiode(listOf(VEDTAKSPERIODE), EKSTERN_HENDELSE_ID)
 
@@ -92,25 +74,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `Finnes ekstern_hendelse_id i overstyringtabell`() {
         opprettPerson()
-        hendelseDao.opprett(OverstyringTidslinje(
-            id = ID,
-            fødselsnummer = FØDSELSNUMMER,
-            oid = OID,
-            navn = SAKSBEHANDLER_NAVN,
-            epost = SAKSBEHANDLEREPOST,
-            ident = SAKSBEHANDLER_IDENT,
-            orgnummer = ORGNUMMER,
-            begrunnelse = BEGRUNNELSE,
-            overstyrteDager = OVERSTYRTE_DAGER,
-            opprettet = OPPRETTET,
-            json = "{}",
-            reservasjonDao = reservasjonDao,
-            saksbehandlerDao = saksbehandlerDao,
-            oppgaveDao = oppgaveDao,
-            tildelingDao = tildelingDao,
-            overstyringDao = overstyringDao,
-            overstyringMediator = mockk(),
-        ))
+        hendelseDao.opprett(overstyringTidslinje())
         overstyringDao.persisterOverstyringTidslinje(ID, EKSTERN_HENDELSE_ID, FØDSELSNUMMER, ORGNUMMER, BEGRUNNELSE, OVERSTYRTE_DAGER, OID, OPPRETTET)
 
         assertTrue(overstyringDao.finnesEksternHendelseId(EKSTERN_HENDELSE_ID))
@@ -120,25 +84,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `Vedtaksperiode har ikke pågående overstyring etter ferdigstilling`() {
         opprettPerson()
-        hendelseDao.opprett(OverstyringTidslinje(
-            id = ID,
-            fødselsnummer = FØDSELSNUMMER,
-            oid = OID,
-            navn = SAKSBEHANDLER_NAVN,
-            epost = SAKSBEHANDLEREPOST,
-            ident = SAKSBEHANDLER_IDENT,
-            orgnummer = ORGNUMMER,
-            begrunnelse = BEGRUNNELSE,
-            overstyrteDager = OVERSTYRTE_DAGER,
-            opprettet = OPPRETTET,
-            json = "{}",
-            reservasjonDao = reservasjonDao,
-            saksbehandlerDao = saksbehandlerDao,
-            oppgaveDao = oppgaveDao,
-            tildelingDao = tildelingDao,
-            overstyringDao = overstyringDao,
-            overstyringMediator = mockk(),
-        ))
+        hendelseDao.opprett(overstyringTidslinje())
         overstyringDao.persisterOverstyringTidslinje(ID, EKSTERN_HENDELSE_ID, FØDSELSNUMMER, ORGNUMMER, BEGRUNNELSE, OVERSTYRTE_DAGER, OID, OPPRETTET)
         overstyringDao.kobleOverstyringOgVedtaksperiode(listOf(VEDTAKSPERIODE), EKSTERN_HENDELSE_ID)
 
@@ -156,25 +102,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `Finner opprettede tidslinjeoverstyringer`() {
         opprettPerson()
-        hendelseDao.opprett(OverstyringTidslinje(
-            id = ID,
-            fødselsnummer = FØDSELSNUMMER,
-            oid = OID,
-            navn = SAKSBEHANDLER_NAVN,
-            epost = SAKSBEHANDLEREPOST,
-            ident = SAKSBEHANDLER_IDENT,
-            orgnummer = ORGNUMMER,
-            begrunnelse = BEGRUNNELSE,
-            overstyrteDager = OVERSTYRTE_DAGER,
-            opprettet = OPPRETTET,
-            json = "{}",
-            reservasjonDao = reservasjonDao,
-            saksbehandlerDao = saksbehandlerDao,
-            oppgaveDao = oppgaveDao,
-            tildelingDao = tildelingDao,
-            overstyringDao = overstyringDao,
-            overstyringMediator = mockk(),
-        ))
+        hendelseDao.opprett(overstyringTidslinje())
         overstyringDao.persisterOverstyringTidslinje(ID, EKSTERN_HENDELSE_ID, FØDSELSNUMMER, ORGNUMMER, BEGRUNNELSE, OVERSTYRTE_DAGER, OID, OPPRETTET)
         val hentetOverstyring = overstyringApiDao.finnOverstyringerAvTidslinjer(FØDSELSNUMMER, ORGNUMMER).first()
 
@@ -192,31 +120,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `Finner opprettede arbeidsforholdoverstyringer`() {
         opprettPerson()
-        hendelseDao.opprett(OverstyringArbeidsforhold(
-            id = ID,
-            fødselsnummer = FØDSELSNUMMER,
-            oid = OID,
-            navn = SAKSBEHANDLER_NAVN,
-            epost = SAKSBEHANDLEREPOST,
-            ident = SAKSBEHANDLER_IDENT,
-            overstyrteArbeidsforhold = listOf(
-                OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt(
-                    orgnummer = GHOST_ORGNUMMER,
-                    deaktivert = DEAKTIVERT,
-                    begrunnelse = BEGRUNNELSE,
-                    forklaring = FORKLARING
-                )
-            ),
-            skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
-            opprettet = OPPRETTET,
-            json = "{}",
-            reservasjonDao = reservasjonDao,
-            saksbehandlerDao = saksbehandlerDao,
-            oppgaveDao = oppgaveDao,
-            tildelingDao = tildelingDao,
-            overstyringDao = overstyringDao,
-            overstyringMediator = mockk(),
-        ))
+        hendelseDao.opprett(overstyringArbeidsforhold())
         overstyringDao.persisterOverstyringArbeidsforhold(
             ID,
             EKSTERN_HENDELSE_ID,
@@ -312,31 +216,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             SKJÆRINGSTIDSPUNKT,
             OPPRETTET
         )
-        hendelseDao.opprett(OverstyringArbeidsforhold(
-            id = ID,
-            fødselsnummer = FØDSELSNUMMER,
-            oid = OID,
-            navn = SAKSBEHANDLER_NAVN,
-            epost = SAKSBEHANDLEREPOST,
-            ident = SAKSBEHANDLER_IDENT,
-            overstyrteArbeidsforhold = listOf(
-                OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt(
-                    orgnummer = GHOST_ORGNUMMER,
-                    deaktivert = DEAKTIVERT,
-                    begrunnelse = BEGRUNNELSE,
-                    forklaring = FORKLARING
-                )
-            ),
-            skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
-            opprettet = OPPRETTET,
-            json = "{}",
-            reservasjonDao = reservasjonDao,
-            saksbehandlerDao = saksbehandlerDao,
-            oppgaveDao = oppgaveDao,
-            tildelingDao = tildelingDao,
-            overstyringDao = overstyringDao,
-            overstyringMediator = mockk(),
-        ))
+        hendelseDao.opprett(overstyringArbeidsforhold())
         overstyringDao.kobleOverstyringOgVedtaksperiode(listOf(VEDTAKSPERIODE), EKSTERN_HENDELSE_ID)
         val eksternHendelsesIdArbeidsforhold = UUID.randomUUID()
         overstyringDao.persisterOverstyringArbeidsforhold(
@@ -389,5 +269,51 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             overstyringDao = overstyringDao,
             overstyringMediator = mockk(),
         )
+    )
+
+    private fun overstyringTidslinje() = OverstyringTidslinje(
+        id = ID,
+        fødselsnummer = FØDSELSNUMMER,
+        oid = OID,
+        navn = SAKSBEHANDLER_NAVN,
+        epost = SAKSBEHANDLEREPOST,
+        ident = SAKSBEHANDLER_IDENT,
+        orgnummer = ORGNUMMER,
+        begrunnelse = BEGRUNNELSE,
+        overstyrteDager = OVERSTYRTE_DAGER,
+        opprettet = OPPRETTET,
+        json = "{}",
+        reservasjonDao = reservasjonDao,
+        saksbehandlerDao = saksbehandlerDao,
+        oppgaveDao = oppgaveDao,
+        tildelingDao = tildelingDao,
+        overstyringDao = overstyringDao,
+        overstyringMediator = mockk(),
+    )
+
+    private fun overstyringArbeidsforhold() = OverstyringArbeidsforhold(
+        id = ID,
+        fødselsnummer = FØDSELSNUMMER,
+        oid = OID,
+        navn = SAKSBEHANDLER_NAVN,
+        epost = SAKSBEHANDLEREPOST,
+        ident = SAKSBEHANDLER_IDENT,
+        overstyrteArbeidsforhold = listOf(
+            OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt(
+                orgnummer = GHOST_ORGNUMMER,
+                deaktivert = DEAKTIVERT,
+                begrunnelse = BEGRUNNELSE,
+                forklaring = FORKLARING
+            )
+        ),
+        skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
+        opprettet = OPPRETTET,
+        json = "{}",
+        reservasjonDao = reservasjonDao,
+        saksbehandlerDao = saksbehandlerDao,
+        oppgaveDao = oppgaveDao,
+        tildelingDao = tildelingDao,
+        overstyringDao = overstyringDao,
+        overstyringMediator = mockk(),
     )
 }
