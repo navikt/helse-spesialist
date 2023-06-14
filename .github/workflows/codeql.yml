@@ -34,8 +34,13 @@ jobs:
           java-version: '17.x'
           cache: 'gradle'
 
-      - name: Build
-        run: ./gradlew clean build -x test
+      - name: Gradle build
+        uses: gradle/gradle-build-action@v2.4.2
+        with:
+          arguments: :spesialist-selve:build # felles- og api-modulene bygges fordi selve avhenger av dem
+        env:
+          ORG_GRADLE_PROJECT_githubUser: x-access-token
+          ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
