@@ -17,6 +17,9 @@ jobs:
       - uses: actions/checkout@v3 # ratchet:actions/checkout@v3
       - name: Run snapshot action
         uses: mikepenz/gradle-dependency-submission@v0.8.6
+        env:
+          ORG_GRADLE_PROJECT_githubUser: x-access-token
+          ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
         with:
           fail-on-error: true
           gradle-dependency-path: "build.gradle.kts"
