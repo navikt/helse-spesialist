@@ -31,6 +31,16 @@ internal class TildelingService(
         tildelOppgaveTilEksisterendeSaksbehandler(oppgaveId, saksbehandlerreferanse, tilgangskontroll)
     }
 
+    internal fun fjernTildelingOgTildelNySaksbehandlerHvisFinnes(oppgaveId: Long, saksbehandlerOid: UUID?, tilgangskontroll: ApiTilgangskontroll) {
+        fjernTildeling(oppgaveId)
+        if (saksbehandlerOid != null) {
+            sikkerLog.info("Fjerner gammel tildeling og tildeler oppgave $oppgaveId til saksbehandler $saksbehandlerOid")
+            tildelOppgaveTilEksisterendeSaksbehandler(oppgaveId, saksbehandlerOid, tilgangskontroll)
+        }
+    }
+
+    internal fun fjernTildeling(oppgaveId: Long) = tildelingDao.slettTildeling(oppgaveId)
+
     private fun tildelOppgaveTilEksisterendeSaksbehandler(oppgaveId: Long, saksbehandlerreferanse: UUID, tilgangskontroll: ApiTilgangskontroll) {
         kanTildele(oppgaveId, saksbehandlerreferanse, tilgangskontroll)
         val suksess = hendelseMediator.tildelOppgaveTilSaksbehandler(oppgaveId, saksbehandlerreferanse)
@@ -53,14 +63,4 @@ internal class TildelingService(
                 }
             }
     }
-
-    internal fun fjernTildelingOgTildelNySaksbehandlerHvisFinnes(oppgaveId: Long, saksbehandlerOid: UUID?, tilgangskontroll: ApiTilgangskontroll) {
-        fjernTildeling(oppgaveId)
-        if (saksbehandlerOid != null) {
-            sikkerLog.info("Fjerner gammel tildeling og tildeler oppgave $oppgaveId til saksbehandler $saksbehandlerOid")
-            tildelOppgaveTilEksisterendeSaksbehandler(oppgaveId, saksbehandlerOid, tilgangskontroll)
-        }
-    }
-
-    internal fun fjernTildeling(oppgaveId: Long) = tildelingDao.slettTildeling(oppgaveId)
 }

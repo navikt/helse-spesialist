@@ -44,7 +44,6 @@ import no.nav.helse.mediator.api.OppdaterPersonService
 import no.nav.helse.mediator.api.leggPåVentApi
 import no.nav.helse.mediator.api.notaterApi
 import no.nav.helse.mediator.api.personApi
-import no.nav.helse.mediator.api.tildelingApi
 import no.nav.helse.mediator.api.totrinnsvurderingApi
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.VedtakDao
@@ -327,7 +326,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                         saksbehandlerMediator = saksbehandlerMediator
                     )
                     overstyringApi(saksbehandlerMediator)
-                    tildelingApi(tildelingService, tilgangsgrupper)
                     annulleringApi(saksbehandlerMediator)
                     opptegnelseApi(OpptegnelseMediator(opptegnelseApiDao, abonnementDao))
                     leggPåVentApi(LeggPåVentService(tildelingDao, hendelseMediator), notatMediator)
