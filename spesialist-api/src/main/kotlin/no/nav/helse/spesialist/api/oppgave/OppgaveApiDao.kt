@@ -30,6 +30,7 @@ import no.nav.helse.spesialist.api.graphql.schema.tilPeriodetype
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.person.Kjønn
+import no.nav.helse.spesialist.api.varsel.Varsel
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
 import org.intellij.lang.annotations.Language
@@ -138,14 +139,23 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             @Language("PostgreSQL")
             val query = """
             WITH aktiv_oppgave AS (select o.* from oppgave o where o.status = 'AvventerSaksbehandler'),
-                 aktiv_tildeling AS (select t.* from tildeling t where t.oppgave_id_ref in (select o.id from aktiv_oppgave o))
+                 aktiv_tildeling AS (select t.* from tildeling t where t.oppgave_id_ref in (select o.id from aktiv_oppgave o)),
+                 har_varsel_om_negativt_belop AS (SELECT sv.vedtaksperiode_id FROM selve_varsel sv
+                    INNER JOIN selve_vedtaksperiode_generasjon svg ON sv.generasjon_ref = svg.id
+                    INNER JOIN vedtak v ON v.vedtaksperiode_id = sv.vedtaksperiode_id
+                    INNER JOIN aktiv_oppgave o ON o.vedtak_ref = v.id
+                    WHERE sv.vedtaksperiode_id = v.vedtaksperiode_id
+                    AND sv.status != 'INAKTIV'
+                    AND sv.kode = 'RV_UT_23'
+                    AND svg.utbetaling_id = o.utbetaling_id
+                )
 
             SELECT o.id as oppgave_id, o.type AS oppgavetype, o.opprettet, os.soknad_mottatt AS opprinneligSoknadsdato, o.sist_sendt,
                 s.epost, s.navn as saksbehandler_navn, s.oid, v.vedtaksperiode_id, v.fom, v.tom, pi.fornavn, pi.mellomnavn, pi.etternavn, pi.fodselsdato,
                 pi.kjonn, pi.adressebeskyttelse, p.aktor_id, p.fodselsnummer, sot.type as saksbehandleroppgavetype, sot.inntektskilde, e.id AS enhet_id, e.navn AS enhet_navn, t.på_vent,
                 (SELECT COUNT(DISTINCT melding) from warning w where w.melding not like '$beslutterOppgaveHackyWorkaround%' and w.vedtak_ref = o.vedtak_ref and (w.inaktiv_fra is null or w.inaktiv_fra > now())) AS antall_varsler,
                 ttv.vedtaksperiode_id AS totrinnsvurdering_vedtaksperiode_id, ttv.saksbehandler, ttv.beslutter, ttv.er_retur,
-                ui.arbeidsgiverbeløp, ui.personbeløp
+                ui.arbeidsgiverbeløp, ui.personbeløp, h.vedtaksperiode_id IS NOT NULL AS har_varsel_om_negativt_belop
             FROM aktiv_oppgave o
                 INNER JOIN vedtak v ON o.vedtak_ref = v.id
                 INNER JOIN person p ON v.person_ref = p.id
@@ -157,6 +167,7 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 LEFT JOIN aktiv_tildeling t ON o.id = t.oppgave_id_ref
                 LEFT JOIN saksbehandler s ON t.saksbehandler_ref = s.oid
                 LEFT JOIN totrinnsvurdering ttv ON (ttv.vedtaksperiode_id = v.vedtaksperiode_id AND ttv.utbetaling_id_ref IS NULL)
+                LEFT JOIN har_varsel_om_negativt_belop h ON h.vedtaksperiode_id = v.vedtaksperiode_id
             WHERE status = 'AvventerSaksbehandler'::oppgavestatus
                 AND CASE WHEN :harTilgangTilRisk 
                     THEN true
@@ -172,6 +183,7 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                     ELSE o.type != 'STIKKPRØVE' END
             ORDER BY
                 CASE WHEN t.saksbehandler_ref IS NOT NULL THEN 0 ELSE 1 END,
+                har_varsel_om_negativt_belop DESC,
                 CASE WHEN o.type = 'STIKKPRØVE' THEN 0 ELSE 1 END,
                 CASE WHEN o.type = 'RISK_QA' THEN 0 ELSE 1 END,
                 opprettet
@@ -181,7 +193,8 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 "harTilgangTilRisk" to tilganger.harTilgangTilRiskOppgaver(),
                 "harTilgangTilKode7" to tilganger.harTilgangTilKode7(),
                 "harTilgangTilBeslutter" to tilganger.harTilgangTilBeslutterOppgaver(),
-                "harTilgangTilStikkprove" to tilganger.hartilgangTilStikkprøve()
+                "harTilgangTilStikkprove" to tilganger.hartilgangTilStikkprøve(),
+                "statusInaktiv" to Varsel.Varselstatus.INAKTIV.name
             )
             session.run(
                 queryOf(query, parameters)
@@ -336,7 +349,8 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 fornavn = it.string("fornavn"),
                 mellomnavn = it.stringOrNull("mellomnavn"),
                 etternavn = it.string("etternavn"),
-            )
+            ),
+            haster = it.boolean("har_varsel_om_negativt_belop"),
         )
 
         private fun finnMottaker(arbeidsgiverbeløp: Int?, personbeløp: Int?): Mottaker? {

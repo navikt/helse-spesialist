@@ -216,6 +216,14 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `En oppgave får haster true dersom det finnes et varsel om negativt beløp`() {
+        nyPerson(inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE)
+        val generasjonRef = nyGenerasjon(vedtaksperiodeId = VEDTAKSPERIODE, utbetalingId = UTBETALING_ID)
+        nyttVarsel(kode = "RV_UT_23", generasjonRef = generasjonRef, vedtaksperiodeId = VEDTAKSPERIODE)
+        val oppgaver = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_RISK)
+        assertTrue(oppgaver.first().haster ?: false)
+    }
+    @Test
     fun `sorterer STIKKPRØVE-oppgaver først, så RISK_QA, så resten, eldste først`() {
         opprettPerson()
         opprettArbeidsgiver()

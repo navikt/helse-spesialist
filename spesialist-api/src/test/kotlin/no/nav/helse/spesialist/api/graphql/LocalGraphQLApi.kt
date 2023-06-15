@@ -234,7 +234,8 @@ private fun enOppgave() = OppgaveForOversiktsvisning(
         fornavn = "fornavn",
         mellomnavn = "mellomnavn",
         etternavn = "etternavn",
-    )
+    ),
+    haster = false,
 )
 
 private fun enPersoninfo() = Personinfo(

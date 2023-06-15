@@ -37,6 +37,7 @@ data class OppgaveForOversiktsvisning(
     val sistSendt: DateTimeString?,
     val totrinnsvurdering: Totrinnsvurdering?,
     val mottaker: Mottaker?,
+    val haster: Boolean?,
 )
 
 data class OppgaveForPeriodevisning(
