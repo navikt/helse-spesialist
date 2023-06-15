@@ -10,6 +10,7 @@ data class Arbeidsgiverinntekt(
     val arbeidsgiver: String,
     val omregnetArsinntekt: OmregnetArsinntekt?,
     val sammenligningsgrunnlag: Sammenligningsgrunnlag?,
+    val skjonnsmessigFastsatt: OmregnetArsinntekt?,
     val deaktivert: Boolean? = null
 )
 
@@ -44,6 +45,7 @@ internal fun GraphQLArbeidsgiverinntekt.tilArbeidsgiverinntekt(): Arbeidsgiverin
         arbeidsgiver = arbeidsgiver,
         omregnetArsinntekt = omregnetArsinntekt?.tilOmregnetÅrsinntekt(),
         sammenligningsgrunnlag = sammenligningsgrunnlag?.tilSammenligningsgrunnlag(),
+        skjonnsmessigFastsatt = skjonnsmessigFastsatt?.tilOmregnetÅrsinntekt(),
         deaktivert = deaktivert
     )
 
