@@ -525,7 +525,8 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
             null,
             false,
             null,
-            null
+            null,
+            false
         )
 
         assertEquals(forventetOppgavemleding, oppgavemelding)

@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.api.tildeling
 import java.util.UUID
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeTildelt
+import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.oppgave.Oppgavemelder
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
@@ -29,6 +30,21 @@ class TildelingService(
 
     internal fun fjernTildeling(oppgaveId: Long): Boolean {
         return tildelingDao.slettTildeling(oppgaveId) > 0
+    }
+
+    internal fun leggOppgavePåVent(oppgaveId: Long): TildelingApiDto {
+        tildelingDao.tildelingForOppgave(oppgaveId) ?: throw OppgaveIkkeTildelt(oppgaveId)
+        val tildeling = tildelingDao.leggOppgavePåVent(oppgaveId)
+            ?: throw RuntimeException("Kunne ikke legge på vent")
+        oppgavemelder.sendOppgaveOppdatertMelding(oppgaveId)
+        return tildeling
+    }
+
+    internal fun fjernPåVent(oppgaveId: Long): TildelingApiDto {
+        val tildeling = tildelingDao.fjernPåVent(oppgaveId)
+            ?: throw RuntimeException("Kunne ikke fjerne fra på vent")
+        oppgavemelder.sendOppgaveOppdatertMelding(oppgaveId)
+        return tildeling
     }
 
     private fun tildelOppgaveTilEksisterendeSaksbehandler(

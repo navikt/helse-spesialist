@@ -34,6 +34,7 @@ import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLUtbetaling
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.Sykepengedager
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.notat.NotatDao
+import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.Oppgavemelder
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
@@ -97,6 +98,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected var sisteCommandContextId by Delegates.notNull<UUID>()
 
     protected val snapshotMediator = SnapshotMediator(snapshotApiDao, snapshotClient)
+    protected val notatMediator = mockk<NotatMediator>(relaxed = true)
     protected val tildelingService =
         TildelingService(
             tildelingDao,
@@ -596,6 +598,18 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                 ).asUpdate
             )
         }
+
+    protected fun leggPåVent(oppgaveId: Long) = sessionOf(dataSource).use { session ->
+        @Language("PostgreSQL")
+        val statement =
+            "UPDATE tildeling SET på_vent = true WHERE oppgave_id_ref = ?"
+        session.run(
+            queryOf(
+                statement,
+                oppgaveId
+            ).asUpdate
+        )
+    }
 
     protected fun mockSnapshot(
         fødselsnummer: String = FØDSELSNUMMER,

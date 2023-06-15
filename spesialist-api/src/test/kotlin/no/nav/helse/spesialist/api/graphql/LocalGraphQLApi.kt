@@ -60,6 +60,7 @@ import no.nav.helse.spesialist.api.graphql.schema.Reservasjon
 import no.nav.helse.spesialist.api.graphql.schema.Tildeling
 import no.nav.helse.spesialist.api.graphql.schema.Totrinnsvurdering
 import no.nav.helse.spesialist.api.notat.NotatDao
+import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
@@ -105,6 +106,7 @@ fun main() = runBlocking {
         val reservasjonClient = mockk<ReservasjonClient>(relaxed = true)
         val behandlingsstatistikkMediator = mockk<BehandlingsstatistikkMediator>(relaxed = true)
         val tildelingService = mockk<TildelingService>(relaxed = true)
+        val notatMediator = mockk<NotatMediator>(relaxed = true)
 
         every { snapshotApiDao.utdatert(any()) } returns false
         every { snapshotApiDao.hentSnapshotMedMetadata(any()) } answers withDelay(800) { (enPersoninfo() to enPerson()) }
@@ -182,7 +184,8 @@ fun main() = runBlocking {
             saksbehandlereMedTilgangTilStikkprøve = listOf("EN_IDENT"),
             snapshotMediator = SnapshotMediator(snapshotApiDao, mockk(relaxed = true)),
             behandlingsstatistikkMediator = behandlingsstatistikkMediator,
-            tildelingService = tildelingService
+            tildelingService = tildelingService,
+            notatMediator = notatMediator,
         )
     }
 }

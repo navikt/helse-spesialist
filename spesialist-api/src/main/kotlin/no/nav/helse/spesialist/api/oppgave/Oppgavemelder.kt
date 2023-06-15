@@ -23,6 +23,7 @@ class Oppgavemelder(private val oppgaveApiDao: OppgaveApiDao, private val rapids
             "fødselsnummer" to fødselsnummer,
             "erBeslutterOppgave" to (oppgavemelding.beslutter != null),
             "erReturOppgave" to oppgavemelding.erRetur,
+            "påVent" to oppgavemelding.påVent
         ).apply {
             oppgavemelding.ferdigstiltAvIdent?.also { put("ferdigstiltAvIdent", it) }
             oppgavemelding.ferdigstiltAvOid?.also { put("ferdigstiltAvOid", it) }
@@ -38,5 +39,6 @@ class Oppgavemelder(private val oppgaveApiDao: OppgaveApiDao, private val rapids
         val erRetur: Boolean,
         val ferdigstiltAvIdent: String? = null,
         val ferdigstiltAvOid: UUID? = null,
+        val påVent: Boolean,
     )
 }
