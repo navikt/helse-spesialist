@@ -633,6 +633,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             inntekter = emptyList(),
             omregnetArsinntekt = 1_000_000.0,
             sammenligningsgrunnlag = 1_000_000.0,
+            skjonnsmessigFastsattAarlig = 0.0,
             skjaeringstidspunkt = "2020-01-01",
             sykepengegrunnlag = 1_000_000.0,
             antallOpptjeningsdagerErMinst = 123,

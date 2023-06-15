@@ -10,6 +10,10 @@ Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på Git
 ## Bygging lokalt
 Vi er per nå avhengig av naisdevice for å bygge lokalt, pga graphql schema-endepunktet i filen `spesialist-selve/build.gradle.kts`
 
+## Oppdatere GraphQL Schema mot spleis
+- graphqlIntrospectSchema tasken skal kjøres når man bygger. Hvis schema.graphql ikke blir oppdatert, kan man prøve å slette filen og kjøre tasken på nytt.
+- For å få oppdatert de genererte .kt klasse-filene må man legge til de nye feltene i hentSnapshot.graphql. 
+
 ## Kjøre lokal GraphQL Playground
 - kjør main-funksjonen i LocalGraphQLApi.kt
 - gå til http://localhost:4321/graphql/playground i en nettleser

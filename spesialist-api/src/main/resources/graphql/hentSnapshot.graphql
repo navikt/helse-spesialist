@@ -50,6 +50,15 @@ fragment grunnlag on GraphQLVilkarsgrunnlag {
             kilde
             manedsbelop
         }
+        skjonnsmessigFastsatt {
+            belop
+            inntekterFraAOrdningen {
+                maned
+                sum
+            }
+            kilde
+            manedsbelop
+        }
         sammenligningsgrunnlag {
             belop
             inntekterFraAOrdningen {
@@ -223,6 +232,7 @@ query HentSnapshot($fnr: String!) {
                 __typename
                 antallOpptjeningsdagerErMinst
                 avviksprosent
+                skjonnsmessigFastsattAarlig
                 grunnbelop
                 sykepengegrunnlagsgrense {
                     grunnbelop
