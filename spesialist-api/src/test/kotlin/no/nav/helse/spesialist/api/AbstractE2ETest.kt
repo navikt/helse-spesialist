@@ -22,6 +22,7 @@ import no.nav.helse.spesialist.api.endepunkter.overstyringApi
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDto
+import no.nav.helse.spesialist.api.overstyring.SkjønnsmessigfastsattDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 
@@ -104,6 +105,22 @@ internal abstract class AbstractE2ETest: AbstractDatabaseTest() {
             setUpApplication()
             sisteRespons = runBlocking {
                 client.post("/api/overstyr/inntektogrefusjon") {
+                    header(HttpHeaders.ContentType, "application/json")
+                    authentication(saksbehandler)
+                    setBody(objectMapper.writeValueAsString(payload))
+                }
+            }
+        }
+    }
+
+    protected fun skjønnsmessigFastsettingInntekt(
+        payload: SkjønnsmessigfastsattDto,
+        saksbehandler: Saksbehandler = defaultSaksbehandler,
+    ) {
+        testApplication {
+            setUpApplication()
+            sisteRespons = runBlocking {
+                client.post("/api/overstyr/skjonnsmessigfastsattinntekt") {
                     header(HttpHeaders.ContentType, "application/json")
                     authentication(saksbehandler)
                     setBody(objectMapper.writeValueAsString(payload))

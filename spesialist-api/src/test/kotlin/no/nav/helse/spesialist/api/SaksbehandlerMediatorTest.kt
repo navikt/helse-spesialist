@@ -9,6 +9,7 @@ import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsgiverDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDto
+import no.nav.helse.spesialist.api.overstyring.SubsumsjonDto
 import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
 import no.nav.helse.spesialist.api.utbetaling.AnnulleringDto
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
@@ -290,7 +291,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
                         OverstyrArbeidsgiverDto.RefusjonselementDto(1.januar, 31.januar, 24000.0),
                         OverstyrArbeidsgiverDto.RefusjonselementDto(1.februar, null, 23000.0),
                     ),
-                    subsumsjon = OverstyrArbeidsgiverDto.SubsumsjonDto("8-28", "3", null),
+                    subsumsjon = SubsumsjonDto("8-28", "3", null),
                     begrunnelse = "En begrunnelse",
                     forklaring = "En forklaring"
                 ),
@@ -306,7 +307,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
                         OverstyrArbeidsgiverDto.RefusjonselementDto(1.januar, 31.januar, 22000.0),
                         OverstyrArbeidsgiverDto.RefusjonselementDto(1.februar, null, 23000.0),
                     ),
-                    subsumsjon = OverstyrArbeidsgiverDto.SubsumsjonDto("8-28", "3", null),
+                    subsumsjon = SubsumsjonDto("8-28", "3", null),
                     begrunnelse = "En begrunnelse 2",
                     forklaring = "En forklaring 2"
                 ),

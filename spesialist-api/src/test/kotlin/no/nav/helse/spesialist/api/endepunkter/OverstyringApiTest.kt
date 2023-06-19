@@ -8,10 +8,12 @@ import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsgiverDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsgiverDto.RefusjonselementDto
-import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsgiverDto.SubsumsjonDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDto.OverstyrDagDto
+import no.nav.helse.spesialist.api.overstyring.SkjønnsmessigFastsattArbeidsgiverDto
+import no.nav.helse.spesialist.api.overstyring.SkjønnsmessigfastsattDto
+import no.nav.helse.spesialist.api.overstyring.SubsumsjonDto
 import org.junit.jupiter.api.Test
 
 internal class OverstyringApiTest: AbstractE2ETest() {
@@ -122,5 +124,29 @@ internal class OverstyringApiTest: AbstractE2ETest() {
 
         assertSisteResponskode(HttpStatusCode.OK)
         assertSisteHendelse("saksbehandler_overstyrer_inntekt_og_refusjon")
+    }
+
+    @Test
+    fun `skjønnsmessig fastsetting av inntekt`() {
+        val skjonnsmessigFastsetting = SkjønnsmessigfastsattDto(
+            fødselsnummer = FØDSELSNUMMER,
+            aktørId = AKTØR_ID,
+            skjæringstidspunkt = 1.januar,
+            arbeidsgivere = listOf(
+                SkjønnsmessigFastsattArbeidsgiverDto(
+                    organisasjonsnummer = ORGANISASJONSNUMMER,
+                    skjønnsmessigFastsatt = 250000.0,
+                    fraSkjønnsmessigFastsatt = 260000.0,
+                    årsak = "En årsak",
+                    begrunnelse = "En begrunnelse",
+                    subsumsjon = SubsumsjonDto("8-28", "3", null)
+                ),
+            )
+        )
+
+        skjønnsmessigFastsettingInntekt(skjonnsmessigFastsetting)
+
+        assertSisteResponskode(HttpStatusCode.OK)
+        assertSisteHendelse("saksbehandler_skjonnsmessig_fastsetter_inntekt")
     }
 }
