@@ -218,7 +218,7 @@ private fun enOppgave() = OppgaveForOversiktsvisning(
         epost = "epost",
         oid = "oid",
         paaVent = true,
-        reservert = true,
+        reservert = null,
     ),
     periodetype = no.nav.helse.spesialist.api.graphql.schema.Periodetype.FORSTEGANGSBEHANDLING,
     sistSendt = "20.43",

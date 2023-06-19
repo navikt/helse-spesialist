@@ -65,7 +65,7 @@ class TildelingMutation(
                 oid = tildeling.oid.toString(),
                 epost = tildeling.epost,
                 paaVent = tildeling.påVent,
-                reservert = tildeling.påVent
+                reservert = null
             )
         ).build()
     }
@@ -100,7 +100,7 @@ class TildelingMutation(
                 oid = tildeling.oid.toString(),
                 epost = tildeling.epost,
                 paaVent = tildeling.påVent,
-                reservert = tildeling.påVent
+                reservert = null
             )
         ).build()
     }
@@ -114,7 +114,7 @@ class TildelingMutation(
                 oid = tildeling.oid.toString(),
                 epost = tildeling.epost,
                 paaVent = tildeling.påVent,
-                reservert = tildeling.påVent
+                reservert = null
             )
         ).build()
     }

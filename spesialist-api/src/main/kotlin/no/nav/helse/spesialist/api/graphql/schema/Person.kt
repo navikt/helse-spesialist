@@ -49,7 +49,7 @@ data class Tildeling(
     val oid: UUIDString,
     val paaVent: Boolean,
     @Deprecated("Skal fjernes til fordel for paaVent")
-    val reservert: Boolean
+    val reservert: Boolean?
 )
 
 data class Person(
@@ -86,7 +86,7 @@ data class Person(
             epost = it.epost,
             oid = it.oid.toString(),
             paaVent = it.påVent,
-            reservert = it.påVent
+            reservert = null
         )
     }
 
