@@ -156,10 +156,10 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 (SELECT COUNT(DISTINCT melding) from warning w where w.melding not like '$beslutterOppgaveHackyWorkaround%' and w.vedtak_ref = o.vedtak_ref and (w.inaktiv_fra is null or w.inaktiv_fra > now())) AS antall_varsler,
                 ttv.vedtaksperiode_id AS totrinnsvurdering_vedtaksperiode_id, ttv.saksbehandler, ttv.beslutter, ttv.er_retur,
                ((SELECT SUM(ABS(arbeidsgiverbeløp)) FROM utbetaling_id WHERE p.id=utbetaling_id.person_ref AND utbetaling_id.utbetaling_id IN (
-                   SELECT DISTINCT(utbetaling_id) FROM selve_vedtaksperiode_generasjon WHERE tilstand='Ulåst' AND skjæringstidspunkt=(
+                   SELECT utbetaling_id FROM selve_vedtaksperiode_generasjon WHERE tilstand='Ulåst' AND skjæringstidspunkt=(
                        SELECT skjæringstidspunkt FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id=v.vedtaksperiode_id AND tilstand='Ulåst'))) > 0) AS harArbeidsgiverbeløp,
                ((SELECT SUM(ABS(personbeløp)) FROM utbetaling_id WHERE p.id=utbetaling_id.person_ref AND utbetaling_id.utbetaling_id IN (
-                   SELECT DISTINCT(utbetaling_id) FROM selve_vedtaksperiode_generasjon WHERE tilstand='Ulåst' AND skjæringstidspunkt=(
+                   SELECT utbetaling_id FROM selve_vedtaksperiode_generasjon WHERE tilstand='Ulåst' AND skjæringstidspunkt=(
                        SELECT skjæringstidspunkt FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id=v.vedtaksperiode_id AND tilstand='Ulåst'))) > 0) AS harPersonbeløp,
                 h.vedtaksperiode_id IS NOT NULL AS har_varsel_om_negativt_belop
             FROM aktiv_oppgave o
