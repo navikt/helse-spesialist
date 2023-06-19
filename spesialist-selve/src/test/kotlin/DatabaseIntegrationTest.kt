@@ -310,6 +310,9 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     }
 
     protected fun opprettGenerasjon(vedtaksperiodeId: UUID = VEDTAKSPERIODE, generasjonId: UUID = UUID.randomUUID()) {
+        generasjonDao.finnSisteGenerasjonFor(vedtaksperiodeId)?.also {
+            generasjonDao.oppdaterTilstandFor(generasjonId = it, ny = Generasjon.Låst, endretAv = UUID.randomUUID())
+        }
         generasjonDao.opprettFor(
             generasjonId,
             vedtaksperiodeId,

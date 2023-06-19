@@ -157,10 +157,10 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 ttv.vedtaksperiode_id AS totrinnsvurdering_vedtaksperiode_id, ttv.saksbehandler, ttv.beslutter, ttv.er_retur,
                ((SELECT SUM(ABS(arbeidsgiverbeløp)) FROM utbetaling_id WHERE p.id=utbetaling_id.person_ref AND utbetaling_id.utbetaling_id IN (
                    SELECT DISTINCT(utbetaling_id) FROM selve_vedtaksperiode_generasjon WHERE tilstand='Ulåst' AND skjæringstidspunkt=(
-                       SELECT skjæringstidspunkt FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id=v.vedtaksperiode_id))) > 0) AS harArbeidsgiverbeløp,
+                       SELECT skjæringstidspunkt FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id=v.vedtaksperiode_id AND tilstand='Ulåst'))) > 0) AS harArbeidsgiverbeløp,
                ((SELECT SUM(ABS(personbeløp)) FROM utbetaling_id WHERE p.id=utbetaling_id.person_ref AND utbetaling_id.utbetaling_id IN (
                    SELECT DISTINCT(utbetaling_id) FROM selve_vedtaksperiode_generasjon WHERE tilstand='Ulåst' AND skjæringstidspunkt=(
-                       SELECT skjæringstidspunkt FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id=v.vedtaksperiode_id))) > 0) AS harPersonbeløp,
+                       SELECT skjæringstidspunkt FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id=v.vedtaksperiode_id AND tilstand='Ulåst'))) > 0) AS harPersonbeløp,
                 h.vedtaksperiode_id IS NOT NULL AS har_varsel_om_negativt_belop
             FROM aktiv_oppgave o
                 INNER JOIN vedtak v ON o.vedtak_ref = v.id
