@@ -10,6 +10,7 @@ import kotliquery.sessionOf
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.TestHendelse
+import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker.ARBEIDSGIVER
@@ -218,7 +219,10 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `En oppgave får haster true dersom det finnes et varsel om negativt beløp`() {
         nyPerson(inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE)
-        val generasjonRef = nyGenerasjon(vedtaksperiodeId = VEDTAKSPERIODE, utbetalingId = UTBETALING_ID)
+        generasjonDao.finnSisteGenerasjonFor(VEDTAKSPERIODE)?.also {
+            generasjonDao.oppdaterTilstandFor(generasjonId = it, ny = Generasjon.Låst, endretAv = UUID.randomUUID())
+        }
+         val generasjonRef = nyGenerasjon(vedtaksperiodeId = VEDTAKSPERIODE, utbetalingId = UTBETALING_ID)
         nyttVarsel(kode = "RV_UT_23", generasjonRef = generasjonRef, vedtaksperiodeId = VEDTAKSPERIODE)
         val oppgaver = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_RISK)
         assertTrue(oppgaver.first().haster ?: false)
