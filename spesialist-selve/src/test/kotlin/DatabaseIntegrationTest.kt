@@ -320,6 +320,13 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         )
     }
 
+    protected fun utbetalingForSisteGenerasjon(
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE,
+        utbetalingId: UUID
+    ) {
+        generasjonDao.utbetalingFor(generasjonId = generasjonDao.finnSisteGenerasjonFor(vedtaksperiodeId)!!, utbetalingId)
+    }
+
     protected fun opprettVedtaksperiode(
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         fom: LocalDate = FOM,
@@ -379,8 +386,12 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         utbetalingDao.opprettKobling(vedtaksperiodeId, utbetalingId)
     }
 
-    protected fun lagArbeidsgiveroppdrag(fagsystemId: String = fagsystemId(), endringskode: String = "NY") =
-        utbetalingDao.nyttOppdrag(fagsystemId, ORGNUMMER, "SPREF", endringskode, LocalDate.now().plusDays(169))!!
+    protected fun lagArbeidsgiveroppdrag(
+        fagsystemId: String = fagsystemId(),
+        mottaker: String = ORGNUMMER,
+        endringskode: String = "NY"
+    ) =
+        utbetalingDao.nyttOppdrag(fagsystemId, mottaker, "SPREF", endringskode, LocalDate.now().plusDays(169))!!
 
     protected fun lagPersonoppdrag(fagsystemId: String = fagsystemId(), endringskode: String = "NY") =
         utbetalingDao.nyttOppdrag(fagsystemId, FNR, "SP", endringskode, LocalDate.now().plusDays(169))!!

@@ -419,6 +419,7 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
         val arbeidsgiverOppdragId = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
         val personOppdragId = lagPersonoppdrag(personFagsystemId)
         lagUtbetalingId(arbeidsgiverOppdragId, personOppdragId, UTBETALING_ID, 2000, 2000)
+        utbetalingForSisteGenerasjon(utbetalingId = UTBETALING_ID)
         val oppgaver = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN)
         val oppgave = oppgaver.first()
         assertEquals(BEGGE, oppgave.mottaker)
@@ -432,6 +433,7 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
         val arbeidsgiverOppdragId = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
         val personOppdragId = lagPersonoppdrag(personFagsystemId)
         lagUtbetalingId(arbeidsgiverOppdragId, personOppdragId, UTBETALING_ID, 0, 2000)
+        utbetalingForSisteGenerasjon(utbetalingId = UTBETALING_ID)
         val oppgaver = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN)
         val oppgave = oppgaver.first()
         assertEquals(SYKMELDT, oppgave.mottaker)
@@ -445,9 +447,45 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
         val arbeidsgiverOppdragId = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
         val personOppdragId = lagPersonoppdrag(personFagsystemId)
         lagUtbetalingId(arbeidsgiverOppdragId, personOppdragId, UTBETALING_ID, 0, -2000)
+        utbetalingForSisteGenerasjon(utbetalingId = UTBETALING_ID)
         val oppgaver = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN)
         val oppgave = oppgaver.first()
         assertEquals(SYKMELDT, oppgave.mottaker)
+    }
+
+    @Test
+    fun `Mottaker er BEGGE, basert på utbetalinger for overlappende perioder med samme skjæringstidspunkt`() {
+        nyPerson()
+        val arbeidsgiverFagsystemId = fagsystemId()
+        val personFagsystemId = fagsystemId()
+
+        lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId).also { arbeidsgiverOppdragId ->
+            lagPersonoppdrag(personFagsystemId).also { personOppdragId ->
+                lagUtbetalingId(arbeidsgiverOppdragId, personOppdragId, UTBETALING_ID, 0, -2000)
+            }
+        }
+
+        utbetalingForSisteGenerasjon(utbetalingId = UTBETALING_ID)
+        var oppgaver = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN)
+        var oppgave = oppgaver.first()
+        assertEquals(SYKMELDT, oppgave.mottaker)
+
+        val utbetalingIdForAnnenArbeidsgiverperiode = UUID.randomUUID()
+        opprettArbeidsgiver(organisasjonsnummer = ORGNUMMER.reversed())
+        val vedtaksperiodeForAnnenArbeidsgiverperiode = UUID.randomUUID()
+        opprettGenerasjon(vedtaksperiodeId = vedtaksperiodeForAnnenArbeidsgiverperiode)
+        opprettVedtaksperiode(vedtaksperiodeId = vedtaksperiodeForAnnenArbeidsgiverperiode)
+
+        lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId, mottaker = ORGNUMMER.reversed()).also { arbeidsgiverOppdragId2 ->
+            lagPersonoppdrag(personFagsystemId).also { personOppdragId2 ->
+                lagUtbetalingId(arbeidsgiverOppdragId2, personOppdragId2, utbetalingIdForAnnenArbeidsgiverperiode, 1000, 0)
+            }
+        }
+
+        utbetalingForSisteGenerasjon(vedtaksperiodeId = vedtaksperiodeForAnnenArbeidsgiverperiode, utbetalingId = utbetalingIdForAnnenArbeidsgiverperiode)
+        oppgaver = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN)
+        oppgave = oppgaver.first()
+        assertEquals(BEGGE, oppgave.mottaker)
     }
 
     @Test
@@ -458,6 +496,7 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
         val arbeidsgiverOppdragId = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
         val personOppdragId = lagPersonoppdrag(personFagsystemId)
         lagUtbetalingId(arbeidsgiverOppdragId, personOppdragId, UTBETALING_ID, 2000, 0)
+        utbetalingForSisteGenerasjon(utbetalingId = UTBETALING_ID)
         val oppgaver = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN)
         val oppgave = oppgaver.first()
         assertEquals(ARBEIDSGIVER, oppgave.mottaker)
@@ -471,6 +510,7 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
         val arbeidsgiverOppdragId = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
         val personOppdragId = lagPersonoppdrag(personFagsystemId)
         lagUtbetalingId(arbeidsgiverOppdragId, personOppdragId, UTBETALING_ID, -2000, 0)
+        utbetalingForSisteGenerasjon(utbetalingId = UTBETALING_ID)
         val oppgaver = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN)
         val oppgave = oppgaver.first()
         assertEquals(ARBEIDSGIVER, oppgave.mottaker)

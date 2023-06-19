@@ -155,7 +155,13 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 pi.kjonn, pi.adressebeskyttelse, p.aktor_id, p.fodselsnummer, sot.type as saksbehandleroppgavetype, sot.inntektskilde, e.id AS enhet_id, e.navn AS enhet_navn, t.på_vent,
                 (SELECT COUNT(DISTINCT melding) from warning w where w.melding not like '$beslutterOppgaveHackyWorkaround%' and w.vedtak_ref = o.vedtak_ref and (w.inaktiv_fra is null or w.inaktiv_fra > now())) AS antall_varsler,
                 ttv.vedtaksperiode_id AS totrinnsvurdering_vedtaksperiode_id, ttv.saksbehandler, ttv.beslutter, ttv.er_retur,
-                ui.arbeidsgiverbeløp, ui.personbeløp, h.vedtaksperiode_id IS NOT NULL AS har_varsel_om_negativt_belop
+               ((SELECT SUM(ABS(arbeidsgiverbeløp)) FROM utbetaling_id WHERE p.id=utbetaling_id.person_ref AND utbetaling_id.utbetaling_id IN (
+                   SELECT DISTINCT(utbetaling_id) FROM selve_vedtaksperiode_generasjon WHERE tilstand='Ulåst' AND skjæringstidspunkt=(
+                       SELECT skjæringstidspunkt FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id=v.vedtaksperiode_id))) > 0) AS harArbeidsgiverbeløp,
+               ((SELECT SUM(ABS(personbeløp)) FROM utbetaling_id WHERE p.id=utbetaling_id.person_ref AND utbetaling_id.utbetaling_id IN (
+                   SELECT DISTINCT(utbetaling_id) FROM selve_vedtaksperiode_generasjon WHERE tilstand='Ulåst' AND skjæringstidspunkt=(
+                       SELECT skjæringstidspunkt FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id=v.vedtaksperiode_id))) > 0) AS harPersonbeløp,
+                h.vedtaksperiode_id IS NOT NULL AS har_varsel_om_negativt_belop
             FROM aktiv_oppgave o
                 INNER JOIN vedtak v ON o.vedtak_ref = v.id
                 INNER JOIN person p ON v.person_ref = p.id
@@ -344,7 +350,7 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                     erBeslutteroppgave = !erRetur && saksbehandler != null
                 )
             },
-            mottaker = finnMottaker(it.intOrNull("arbeidsgiverbeløp"), it.intOrNull("personbeløp")),
+            mottaker = finnMottaker(it.boolean("harArbeidsgiverbeløp"), it.boolean("harPersonbeløp")),
             navn = no.nav.helse.spesialist.api.graphql.schema.Personnavn(
                 fornavn = it.string("fornavn"),
                 mellomnavn = it.stringOrNull("mellomnavn"),
@@ -353,9 +359,7 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             haster = it.boolean("har_varsel_om_negativt_belop"),
         )
 
-        private fun finnMottaker(arbeidsgiverbeløp: Int?, personbeløp: Int?): Mottaker? {
-            val harArbeidsgiverbeløp = arbeidsgiverbeløp != null && arbeidsgiverbeløp != 0
-            val harPersonbeløp = personbeløp != null && personbeløp != 0
+        private fun finnMottaker(harArbeidsgiverbeløp: Boolean, harPersonbeløp: Boolean): Mottaker? {
             return when {
                 harArbeidsgiverbeløp && harPersonbeløp -> BEGGE
                 harPersonbeløp -> SYKMELDT

@@ -38,11 +38,13 @@ class GenerasjonDao(private val dataSource: DataSource) {
         }
     }
 
-    internal fun harGenerasjonFor(vedtaksperiodeId: UUID): Boolean {
+    internal fun finnSisteGenerasjonFor(vedtaksperiodeId: UUID): UUID? {
         return sessionOf(dataSource).use { session ->
-            session.run(finnSiste(vedtaksperiodeId).map { it.uuid("unik_id") }.asSingle) != null
+            session.run(finnSiste(vedtaksperiodeId).map { it.uuid("unik_id") }.asSingle)
         }
     }
+
+    internal fun harGenerasjonFor(vedtaksperiodeId: UUID): Boolean = finnSisteGenerasjonFor(vedtaksperiodeId) != null
 
     private fun finnSiste(vedtaksperiodeId: UUID): Query {
         @Language("PostgreSQL")
