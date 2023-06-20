@@ -37,8 +37,6 @@ INSERT INTO opprinnelig_soknadsdato (vedtaksperiode_id, soknad_mottatt)
 VALUES ('${vedtaksperiode_id}', now());
 INSERT INTO selve_varsel(unik_id, kode, vedtaksperiode_id, opprettet, generasjon_ref)
 VALUES (gen_random_uuid(), 'EN_KODE', '${vedtaksperiode_id}', now(), ${sequence_number});
-INSERT INTO warning(id, melding, vedtak_ref, kilde, opprettet)
-VALUES (${sequence_number}, 'WARNING', ${sequence_number}, 'Spesialist', now());
 INSERT INTO saksbehandleroppgavetype(id, type, vedtak_ref, inntektskilde)
 VALUES (${sequence_number}, 'SØKNAD', ${sequence_number}, 'EN_ARBEIDSGIVER');
 INSERT INTO vedtaksperiode_utbetaling_id(vedtaksperiode_id, utbetaling_id)
