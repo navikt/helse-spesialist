@@ -43,7 +43,6 @@ internal class OppdaterSnapshotCommandTest {
         vedtaksperiodeId = VEDTAKSPERIODE,
         fødselsnummer = FNR,
         personDao = personDao,
-        json = "{}"
     )
 
     @BeforeEach
@@ -69,22 +68,5 @@ internal class OppdaterSnapshotCommandTest {
         assertTrue(command.execute(context))
         verify(exactly = 1) { snapshotClient.hentSnapshot(FNR) }
         verify(exactly = 1) { snapshotDao.lagre(FNR, PERSON) }
-    }
-
-    @Test
-    fun `ignorerer enkeltperson`() {
-        val enkeltpersonCommand = OppdaterSnapshotCommand(
-            snapshotClient = snapshotClient,
-            snapshotDao = snapshotDao,
-            vedtaksperiodeId = VEDTAKSPERIODE,
-            fødselsnummer = FNR,
-            personDao = personDao,
-            json = """{"aktørId":"1000041572215"}"""
-        )
-        every { personDao.findPersonByFødselsnummer(any()) } returns 1L
-        every { personDao.findPersoninfoRef(any()) } returns 1L
-        assertTrue(enkeltpersonCommand.execute(context))
-        verify(exactly = 0) { snapshotClient.hentSnapshot(FNR) }
-        verify(exactly = 0) { snapshotDao.lagre(FNR, PERSON) }
     }
 }

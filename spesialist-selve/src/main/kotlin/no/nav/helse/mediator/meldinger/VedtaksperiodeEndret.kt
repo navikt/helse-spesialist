@@ -39,7 +39,6 @@ internal class VedtaksperiodeEndret(
             vedtaksperiodeId = vedtaksperiodeId,
             fødselsnummer = fødselsnummer,
             personDao = personDao,
-            json = json
         ),
         VedtaksperiodeGenerasjonCommand(
             vedtaksperiodeEndretHendelseId = forårsaketAvId,

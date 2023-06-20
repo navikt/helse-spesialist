@@ -698,7 +698,8 @@ internal class Hendelsefabrikk(
             utbetalingDao = utbetalingDao,
             saksbehandlerDao = saksbehandlerDao,
             snapshotClient = snapshotClient,
-            snapshotDao = snapshotDao
+            snapshotDao = snapshotDao,
+            personDao = personDao,
         )
     }
 

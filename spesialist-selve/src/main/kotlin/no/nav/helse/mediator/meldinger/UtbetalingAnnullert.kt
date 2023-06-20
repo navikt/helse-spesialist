@@ -5,7 +5,6 @@ import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.LagreAnnulleringCommand
 import no.nav.helse.modell.kommando.MacroCommand
-import no.nav.helse.modell.kommando.OppdaterSnapshotUtenÅLagreWarningsCommand
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.rapids_rivers.*
 import no.nav.helse.rapids_rivers.River.PacketListener
@@ -15,6 +14,8 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
 import no.nav.helse.modell.SnapshotDao
+import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
+import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 
 internal class UtbetalingAnnullert(
@@ -27,13 +28,15 @@ internal class UtbetalingAnnullert(
     utbetalingDao: UtbetalingDao,
     saksbehandlerDao: SaksbehandlerDao,
     snapshotClient: SnapshotClient,
-    snapshotDao: SnapshotDao
+    snapshotDao: SnapshotDao,
+    personDao: PersonDao,
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
-        OppdaterSnapshotUtenÅLagreWarningsCommand(
-            fødselsnummer = fødselsnummer,
+        OppdaterSnapshotCommand(
             snapshotClient = snapshotClient,
-            snapshotDao = snapshotDao
+            snapshotDao = snapshotDao,
+            fødselsnummer = fødselsnummer,
+            personDao = personDao,
         ),
         LagreAnnulleringCommand(
             utbetalingDao = utbetalingDao,

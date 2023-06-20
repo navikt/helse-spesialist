@@ -43,7 +43,6 @@ internal class VedtaksperiodeForkastet(
             vedtaksperiodeId = vedtaksperiodeId,
             fødselsnummer = fødselsnummer,
             personDao = personDao,
-            json = json
         ),
         ForkastVedtaksperiodeCommand(id, vedtaksperiodeId, vedtakDao)
     )
