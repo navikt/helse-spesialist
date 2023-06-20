@@ -133,9 +133,6 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
 
     fun finnOppgaver(tilganger: SaksbehandlerTilganger): List<OppgaveForOversiktsvisning> =
         sessionOf(dataSource).use { session ->
-            // bruk av const direkte i @Language-annotert sql fører til snodige fantom-compile-feil i IntelliJ
-            val beslutterOppgaveHackyWorkaround = BESLUTTEROPPGAVE_PREFIX
-
             @Language("PostgreSQL")
             val query = """
             WITH aktiv_oppgave AS (select o.* from oppgave o where o.status = 'AvventerSaksbehandler'),
@@ -153,7 +150,6 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             SELECT o.id as oppgave_id, o.type AS oppgavetype, o.opprettet, os.soknad_mottatt AS opprinneligSoknadsdato, o.sist_sendt,
                 s.epost, s.navn as saksbehandler_navn, s.oid, v.vedtaksperiode_id, v.fom, v.tom, pi.fornavn, pi.mellomnavn, pi.etternavn, pi.fodselsdato,
                 pi.kjonn, pi.adressebeskyttelse, p.aktor_id, p.fodselsnummer, sot.type as saksbehandleroppgavetype, sot.inntektskilde, e.id AS enhet_id, e.navn AS enhet_navn, t.på_vent,
-                (SELECT COUNT(DISTINCT melding) from warning w where w.melding not like '$beslutterOppgaveHackyWorkaround%' and w.vedtak_ref = o.vedtak_ref and (w.inaktiv_fra is null or w.inaktiv_fra > now())) AS antall_varsler,
                 ttv.vedtaksperiode_id AS totrinnsvurdering_vedtaksperiode_id, ttv.saksbehandler, ttv.beslutter, ttv.er_retur,
                ((SELECT SUM(ABS(arbeidsgiverbeløp)) FROM utbetaling_id WHERE p.id=utbetaling_id.person_ref AND utbetaling_id.utbetaling_id IN (
                    SELECT utbetaling_id FROM selve_vedtaksperiode_generasjon WHERE tilstand='Ulåst' AND skjæringstidspunkt=(
@@ -230,11 +226,7 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                    p.aktor_id                                               as soker_aktor_id,
                    sot.type                                                 as periodetype,
                    sot.inntektskilde                                        as inntektstype,
-                   e.navn                                                   as bosted,
-                   (SELECT count(distinct melding)
-                    FROM warning w
-                    WHERE w.vedtak_ref = o.vedtak_ref
-                      AND (w.inaktiv_fra is null OR w.inaktiv_fra > now())) as antall_varsler
+                   e.navn                                                   as bosted
             FROM oppgave o
                      INNER JOIN vedtak v ON o.vedtak_ref = v.id
                      INNER JOIN person p ON v.person_ref = p.id
@@ -265,7 +257,6 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                     etternavn = it.string("soker_etternavn"),
                 ),
                 aktørId = it.string("soker_aktor_id"),
-                antallVarsler = it.int("antall_varsler"),
                 periodetype = Periodetype.valueOf(it.string("periodetype")),
                 inntektskilde = Inntektskilde.valueOf(it.string("inntektstype")),
                 bosted = it.string("bosted"),
@@ -326,7 +317,6 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             ),
             aktorId = it.long("aktor_id").toString(),
             fodselsnummer = it.long("fodselsnummer").toFødselsnummer(),
-            antallVarsler = it.int("antall_varsler"),
             flereArbeidsgivere = it.stringOrNull("inntektskilde") == Inntektskilde.FLERE_ARBEIDSGIVERE.name,
             boenhet = Boenhet(id = it.string("enhet_id"), navn = it.string("enhet_navn")),
             tildeling = it.stringOrNull("epost")?.let { epost ->
@@ -374,5 +364,3 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
 private data class Inntekter(val årMåned: YearMonth, val inntektsliste: List<Inntekt>) {
     data class Inntekt(val beløp: Int, val orgnummer: String)
 }
-
-const val BESLUTTEROPPGAVE_PREFIX = "Beslutteroppgave:"

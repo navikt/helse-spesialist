@@ -209,7 +209,6 @@ private fun enOppgave() = OppgaveForOversiktsvisning(
     ),
     aktorId = "aktor_id",
     fodselsnummer = "fodselsnummer",
-    antallVarsler = 1,
     flereArbeidsgivere = false,
     boenhet = Boenhet(id = "enhet_id", navn = "enhet_navn"),
     tildeling =

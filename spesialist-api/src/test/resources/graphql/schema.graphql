@@ -213,7 +213,6 @@ type Faresignal {
 
 type FerdigstiltOppgave {
     aktorId: String!
-    antallVarsler: Int!
     bosted: String!
     ferdigstiltAv: String
     ferdigstiltTidspunkt: String!
@@ -344,7 +343,6 @@ type Oppdrag {
 
 type OppgaveForOversiktsvisning {
     aktorId: String!
-    antallVarsler: Int!
     boenhet: Boenhet!
     erBeslutter: Boolean!
     erRetur: Boolean!

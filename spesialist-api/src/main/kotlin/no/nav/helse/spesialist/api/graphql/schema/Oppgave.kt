@@ -29,7 +29,6 @@ data class OppgaveForOversiktsvisning(
     val navn: Personnavn,
     val aktorId: String,
     val fodselsnummer: String,
-    val antallVarsler: Int?,
     val flereArbeidsgivere: Boolean,
     val boenhet: Boenhet?,
     val tildeling: Tildeling?,
@@ -69,7 +68,6 @@ data class FerdigstiltOppgave(
     val ferdigstiltTidspunkt: DateTimeString,
     val personnavn: Personnavn,
     val aktorId: String,
-    val antallVarsler: Int?,
     val periodetype: Periodetype,
     val inntektstype: Inntektstype,
     val bosted: String?,
@@ -108,7 +106,6 @@ internal fun List<FerdigstiltOppgaveDto>.tilFerdigstilteOppgaver(): List<Ferdigs
                 mellomnavn = it.personinfo.mellomnavn,
             ),
             aktorId = it.aktørId,
-            antallVarsler = it.antallVarsler,
             periodetype = it.periodetype.tilPeriodetype(),
             inntektstype = when (it.inntektskilde) {
                 Inntektskilde.EN_ARBEIDSGIVER -> Inntektstype.ENARBEIDSGIVER
