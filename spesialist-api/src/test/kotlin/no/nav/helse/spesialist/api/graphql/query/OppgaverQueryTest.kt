@@ -72,7 +72,6 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
             {
                 behandledeOppgaver(
                     behandletAvOid: "${SAKSBEHANDLER.oid}", 
-                    behandletAvIdent: "${SAKSBEHANDLER.ident}", 
                     fom: "${LocalDateTime.now().minusDays(1)}"
                 ) {
                     ferdigstiltAv

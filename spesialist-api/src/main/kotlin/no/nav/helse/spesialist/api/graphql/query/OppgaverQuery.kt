@@ -22,7 +22,7 @@ class OppgaverQuery(private val oppgaveApiDao: OppgaveApiDao) : Query {
 
     @Suppress("unused")
     fun behandledeOppgaver(
-        behandletAvIdent: String?,
+        behandletAvIdent: String? = null,
         behandletAvOid: String,
         fom: String?,
     ): DataFetcherResult<List<FerdigstiltOppgave>> {
