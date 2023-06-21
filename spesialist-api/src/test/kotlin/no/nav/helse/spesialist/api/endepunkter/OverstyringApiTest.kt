@@ -11,8 +11,8 @@ import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsgiverDto.Refusjons
 import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDto.OverstyrDagDto
-import no.nav.helse.spesialist.api.overstyring.SkjønnsmessigFastsattArbeidsgiverDto
-import no.nav.helse.spesialist.api.overstyring.SkjønnsmessigfastsattDto
+import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsattArbeidsgiverDto
+import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsattSykepengegrunnlagDto
 import no.nav.helse.spesialist.api.overstyring.SubsumsjonDto
 import org.junit.jupiter.api.Test
 
@@ -127,16 +127,16 @@ internal class OverstyringApiTest: AbstractE2ETest() {
     }
 
     @Test
-    fun `skjønnsmessig fastsetting av inntekt`() {
-        val skjonnsmessigFastsetting = SkjønnsmessigfastsattDto(
+    fun `skjønnsfastsetting av sykepengegrunnlag`() {
+        val skjonnsfastsetting = SkjønnsfastsattSykepengegrunnlagDto(
             fødselsnummer = FØDSELSNUMMER,
             aktørId = AKTØR_ID,
             skjæringstidspunkt = 1.januar,
             arbeidsgivere = listOf(
-                SkjønnsmessigFastsattArbeidsgiverDto(
+                SkjønnsfastsattArbeidsgiverDto(
                     organisasjonsnummer = ORGANISASJONSNUMMER,
-                    skjønnsmessigFastsatt = 250000.0,
-                    fraSkjønnsmessigFastsatt = 260000.0,
+                    årlig = 250000.0,
+                    fraÅrlig = 260000.0,
                     årsak = "En årsak",
                     begrunnelse = "En begrunnelse",
                     subsumsjon = SubsumsjonDto("8-28", "3", null)
@@ -144,9 +144,9 @@ internal class OverstyringApiTest: AbstractE2ETest() {
             )
         )
 
-        skjønnsmessigFastsettingInntekt(skjonnsmessigFastsetting)
+        skjønnsfastsettingSykepengegrunnlag(skjonnsfastsetting)
 
         assertSisteResponskode(HttpStatusCode.OK)
-        assertSisteHendelse("saksbehandler_skjonnsmessig_fastsetter_inntekt")
+        assertSisteHendelse("saksbehandler_skjonnsfastsetter_sykepengegrunnlag")
     }
 }

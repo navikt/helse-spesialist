@@ -49,31 +49,20 @@ data class OverstyringInntektDto(
     )
 }
 
-data class OverstyringInntektOgRefusjonDto(
+data class SkjønnsfastsettingSykepengegrunnlagDto(
     val hendelseId: UUID,
     val fødselsnummer: String,
     val timestamp: LocalDateTime,
+    val organisasjonsnummer: String,
     val saksbehandlerNavn: String,
     val saksbehandlerIdent: String?,
     val skjæringstidspunkt: LocalDate,
-    val arbeidsgiver: List<Arbeidsgiverelement>,
     val ferdigstilt: Boolean,
-) {
-    data class Arbeidsgiverelement(
-        val organisasjonsnummer: String,
-        val begrunnelse: String,
-        val forklaring: String,
-        val månedligInntekt: Double,
-        val fraMånedligInntekt: Double?,
-        val refusjonsopplysninger: List<Refusjonselement>?,
-        val fraRefusjonsopplysninger: List<Refusjonselement>?,
-    )
-    data class Refusjonselement(
-        val fom: LocalDate,
-        val tom: LocalDate?,
-        val beløp: Double,
-    )
-}
+    val årlig: Double,
+    val fraÅrlig: Double?,
+    val årsak: String,
+    val begrunnelse: String,
+)
 
 data class OverstyringArbeidsforholdDto(
     val hendelseId: UUID,

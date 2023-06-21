@@ -18,6 +18,7 @@ import no.nav.helse.mediator.meldinger.OverstyringIgangsatt
 import no.nav.helse.mediator.meldinger.OverstyringInntektOgRefusjon
 import no.nav.helse.mediator.meldinger.OverstyringTidslinje
 import no.nav.helse.mediator.meldinger.PåminnetGodkjenningsbehov
+import no.nav.helse.mediator.meldinger.SkjønnsfastsettingSykepengegrunnlag
 import no.nav.helse.mediator.meldinger.Sykefraværstilfeller
 import no.nav.helse.mediator.meldinger.SøknadSendt
 import no.nav.helse.mediator.meldinger.UtbetalingAnnullert
@@ -43,6 +44,7 @@ import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver
 import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver.Companion.arbeidsgiverelementer
+import no.nav.helse.modell.overstyring.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
@@ -77,6 +79,7 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.slf4j.LoggerFactory
+import no.nav.helse.modell.overstyring.SkjønnsfastsattArbeidsgiver.Companion.arbeidsgiverelementer as skjønnsfastsattArbeidsgiverelementer
 
 internal class Hendelsefabrikk(
     dataSource: DataSource,
@@ -485,6 +488,36 @@ internal class Hendelsefabrikk(
         overstyringMediator = overstyringMediator,
     )
 
+    fun skjønnsfastsettingSykepengegrunnlag(
+        id: UUID,
+        fødselsnummer: String,
+        oid: UUID,
+        navn: String,
+        ident: String,
+        epost: String,
+        arbeidsgivere: List<SkjønnsfastsattArbeidsgiver>,
+        skjæringstidspunkt: LocalDate,
+        opprettet: LocalDateTime,
+        json: String,
+    ) = SkjønnsfastsettingSykepengegrunnlag(
+        id = id,
+        fødselsnummer = fødselsnummer,
+        oid = oid,
+        navn = navn,
+        epost = epost,
+        ident = ident,
+        arbeidsgivere = arbeidsgivere,
+        skjæringstidspunkt = skjæringstidspunkt,
+        opprettet = opprettet,
+        json = json,
+        reservasjonDao = reservasjonDao,
+        saksbehandlerDao = saksbehandlerDao,
+        oppgaveDao = oppgaveDao,
+        tildelingDao = tildelingDao,
+        overstyringDao = overstyringDao,
+        overstyringMediator = overstyringMediator,
+    )
+
     fun overstyringArbeidsforhold(
         id: UUID,
         fødselsnummer: String,
@@ -548,6 +581,22 @@ internal class Hendelsefabrikk(
             ident = jsonNode.path("saksbehandlerIdent").asText(),
             epost = jsonNode.path("saksbehandlerEpost").asText(),
             arbeidsgivere = jsonNode.path("arbeidsgivere").arbeidsgiverelementer(),
+            skjæringstidspunkt = jsonNode.path("skjæringstidspunkt").asLocalDate(),
+            opprettet = jsonNode.path("@opprettet").asLocalDateTime(),
+            json = json
+        )
+    }
+
+    fun skjønnsfastsettingSykepengegrunnlag(json: String): SkjønnsfastsettingSykepengegrunnlag {
+        val jsonNode = mapper.readTree(json)
+        return skjønnsfastsettingSykepengegrunnlag(
+            id = UUID.fromString(jsonNode.path("@id").asText()),
+            fødselsnummer = jsonNode.path("fødselsnummer").asText(),
+            oid = UUID.fromString(jsonNode.path("saksbehandlerOid").asText()),
+            navn = jsonNode.path("saksbehandlerNavn").asText(),
+            ident = jsonNode.path("saksbehandlerIdent").asText(),
+            epost = jsonNode.path("saksbehandlerEpost").asText(),
+            arbeidsgivere = jsonNode.path("arbeidsgivere").skjønnsfastsattArbeidsgiverelementer(),
             skjæringstidspunkt = jsonNode.path("skjæringstidspunkt").asLocalDate(),
             opprettet = jsonNode.path("@opprettet").asLocalDateTime(),
             json = json

@@ -13,7 +13,7 @@ import no.nav.helse.spesialist.api.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDto
-import no.nav.helse.spesialist.api.overstyring.SkjønnsmessigfastsattDto
+import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsattSykepengegrunnlagDto
 import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
 
 fun Route.overstyringApi(saksbehandlerMediator: SaksbehandlerMediator) {
@@ -41,8 +41,8 @@ fun Route.overstyringApi(saksbehandlerMediator: SaksbehandlerMediator) {
         call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
     }
 
-    post("/api/overstyr/skjonnsmessigfastsattinntekt") {
-        val overstyring = call.receive<SkjønnsmessigfastsattDto>()
+    post("/api/skjonnsfastsett/sykepengegrunnlag") {
+        val overstyring = call.receive<SkjønnsfastsattSykepengegrunnlagDto>()
         val saksbehandler = Saksbehandler.fraOnBehalfOfToken(requireNotNull(call.principal()))
 
         withContext(Dispatchers.IO) { saksbehandlerMediator.håndter(overstyring, saksbehandler) }

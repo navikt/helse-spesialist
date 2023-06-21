@@ -8,6 +8,7 @@ import no.nav.helse.januar
 import no.nav.helse.mediator.meldinger.OverstyringArbeidsforhold
 import no.nav.helse.mediator.meldinger.OverstyringInntektOgRefusjon
 import no.nav.helse.mediator.meldinger.OverstyringTidslinje
+import no.nav.helse.mediator.meldinger.SkjønnsfastsettingSykepengegrunnlag
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
@@ -39,6 +40,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         private const val GHOST_ORGNUMMER = "123412"
         private const val BEGRUNNELSE = "Begrunnelse"
         private const val FORKLARING = "Forklaring"
+        private const val ÅRSAK = "Årsak"
         private val OVERSTYRTE_DAGER = listOf(
             OverstyringDagDto(
                 dato = LocalDate.of(2020, 1, 1),
@@ -193,6 +195,44 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `Finner opprettede skjønnsfastsatte sykepengegrunnlag`() {
+        opprettPerson()
+        skjønnsfastsettingSykepengegrunnlag(ID)
+        overstyringDao.persisterSkjønnsfastsettingSykepengegrunnlag(
+            ID,
+            EKSTERN_HENDELSE_ID,
+            FØDSELSNUMMER,
+            listOf(
+                SkjønnsfastsattArbeidsgiver(
+                    organisasjonsnummer = ORGNUMMER,
+                    årlig = INNTEKT,
+                    fraÅrlig = INNTEKT + 1,
+                    årsak = ÅRSAK,
+                    begrunnelse = BEGRUNNELSE,
+                    subsumsjon = Subsumsjon(paragraf = "87494")
+                )
+            ),
+            OID,
+            SKJÆRINGSTIDSPUNKT,
+            OPPRETTET
+        )
+        val hentetSkjønnsfastsetting = overstyringApiDao.finnSkjønnsfastsettingSykepengegrunnlag(FØDSELSNUMMER, ORGNUMMER).first()
+
+        assertEquals(ID, hentetSkjønnsfastsetting.hendelseId)
+        assertEquals(FØDSELSNUMMER, hentetSkjønnsfastsetting.fødselsnummer)
+        assertEquals(ORGNUMMER, hentetSkjønnsfastsetting.organisasjonsnummer)
+        assertEquals(BEGRUNNELSE, hentetSkjønnsfastsetting.begrunnelse)
+        assertEquals(ÅRSAK, hentetSkjønnsfastsetting.årsak)
+        assertEquals(SAKSBEHANDLER_NAVN, hentetSkjønnsfastsetting.saksbehandlerNavn)
+        assertEquals(SAKSBEHANDLER_IDENT, hentetSkjønnsfastsetting.saksbehandlerIdent)
+        assertEquals(INNTEKT, hentetSkjønnsfastsetting.årlig)
+        assertEquals(INNTEKT + 1, hentetSkjønnsfastsetting.fraÅrlig)
+        assertEquals(SKJÆRINGSTIDSPUNKT, hentetSkjønnsfastsetting.skjæringstidspunkt)
+        assertEquals(OPPRETTET, hentetSkjønnsfastsetting.timestamp)
+        assertFalse(hentetSkjønnsfastsetting.ferdigstilt)
+    }
+
+    @Test
     fun `Finner hendelsesid'er for ikke ferdigstilte overstyringer for vedtaksperiode`() {
         opprettPerson()
         overstyrInntektOgRefusjon(ID)
@@ -256,6 +296,36 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
                     fraMånedligInntekt = INNTEKT + 1,
                     refusjonsopplysninger = null,
                     fraRefusjonsopplysninger = null,
+                    subsumsjon = Subsumsjon(paragraf = "87494")
+                )
+            ),
+            skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
+            opprettet = OPPRETTET,
+            json = "{}",
+            reservasjonDao = reservasjonDao,
+            saksbehandlerDao = saksbehandlerDao,
+            oppgaveDao = oppgaveDao,
+            tildelingDao = tildelingDao,
+            overstyringDao = overstyringDao,
+            overstyringMediator = mockk(),
+        )
+    )
+
+    private fun skjønnsfastsettingSykepengegrunnlag(hendelseId: UUID) = hendelseDao.opprett(
+        SkjønnsfastsettingSykepengegrunnlag(
+            id = hendelseId,
+            fødselsnummer = FØDSELSNUMMER,
+            oid = OID,
+            navn = SAKSBEHANDLER_NAVN,
+            epost = SAKSBEHANDLEREPOST,
+            ident = SAKSBEHANDLER_IDENT,
+            arbeidsgivere = listOf(
+                SkjønnsfastsattArbeidsgiver(
+                    organisasjonsnummer = ORGNUMMER,
+                    årlig = INNTEKT,
+                    fraÅrlig = INNTEKT + 1,
+                    årsak = ÅRSAK,
+                    begrunnelse = BEGRUNNELSE,
                     subsumsjon = Subsumsjon(paragraf = "87494")
                 )
             ),

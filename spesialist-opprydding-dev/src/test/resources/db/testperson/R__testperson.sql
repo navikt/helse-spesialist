@@ -85,6 +85,8 @@ INSERT INTO overstyring_inntekt(id, overstyring_ref, manedlig_inntekt, skjaering
 VALUES (${sequence_number}, ${sequence_number}, 1000, '2018-01-01', 'FORKLARING', 'BEGRUNNELSE', ${sequence_number});
 INSERT INTO overstyring_arbeidsforhold(id, overstyring_ref, forklaring, deaktivert, skjaeringstidspunkt, begrunnelse, arbeidsgiver_ref)
 VALUES (${sequence_number}, ${sequence_number}, 'FORKLARING', false, '2018-01-01', 'BEGRUNNELSE', ${sequence_number});
+INSERT INTO skjonnsfastsetting_sykepengegrunnlag(id, arlig, fra_arlig, skjaeringstidspunkt, arsak, begrunnelse, arbeidsgiver_ref, overstyring_ref)
+VALUES (${sequence_number}, 1000, 1200, '2018-01-01', 'ÅRSAK', 'BEGRUNNELSE', ${sequence_number}, ${sequence_number});
 INSERT INTO overstyringer_for_vedtaksperioder(vedtaksperiode_id, overstyring_ref)
 VALUES ('${vedtaksperiode_id}', ${sequence_number});
 

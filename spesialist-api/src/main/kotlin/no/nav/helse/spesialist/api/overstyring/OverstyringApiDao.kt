@@ -133,6 +133,40 @@ class OverstyringApiDao(private val dataSource: DataSource) {
             )
         }
 
+    fun finnSkjønnsfastsettingSykepengegrunnlag(fødselsnummer: String, organisasjonsnummer: String): List<SkjønnsfastsettingSykepengegrunnlagDto> =
+        sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val finnSkjønnsfastsettingQuery = """
+            SELECT o.id, o.tidspunkt, o.person_ref, o.hendelse_ref, o.saksbehandler_ref, o.ekstern_hendelse_id, 
+            o.ferdigstilt, ss.*, p.fodselsnummer, a.orgnummer, s.navn, s.ident FROM overstyring o
+                INNER JOIN skjonnsfastsetting_sykepengegrunnlag ss ON o.id = ss.overstyring_ref
+                INNER JOIN person p ON p.id = o.person_ref
+                INNER JOIN arbeidsgiver a ON a.id = ss.arbeidsgiver_ref
+                INNER JOIN saksbehandler s ON s.oid = o.saksbehandler_ref
+                INNER JOIN hendelse h ON h.id = o.hendelse_ref
+            WHERE p.fodselsnummer = ? AND a.orgnummer = ?
+        """
+            session.run(
+                queryOf(finnSkjønnsfastsettingQuery, fødselsnummer.toLong(), organisasjonsnummer.toLong())
+                    .map { overstyringRow ->
+                        SkjønnsfastsettingSykepengegrunnlagDto(
+                            hendelseId = overstyringRow.uuid("hendelse_ref"),
+                            fødselsnummer = overstyringRow.long("fodselsnummer").toFødselsnummer(),
+                            organisasjonsnummer = overstyringRow.int("orgnummer").toString(),
+                            begrunnelse = overstyringRow.string("begrunnelse"),
+                            årsak = overstyringRow.string("arsak"),
+                            timestamp = overstyringRow.localDateTime("tidspunkt"),
+                            saksbehandlerNavn = overstyringRow.string("navn"),
+                            saksbehandlerIdent = overstyringRow.stringOrNull("ident"),
+                            årlig = overstyringRow.double("arlig"),
+                            fraÅrlig = overstyringRow.doubleOrNull("fra_arlig"),
+                            skjæringstidspunkt = overstyringRow.localDate("skjaeringstidspunkt"),
+                            ferdigstilt = overstyringRow.boolean("ferdigstilt"),
+                        )
+                    }.asList
+            )
+        }
+
     fun finnOverstyringerAvArbeidsforhold(
         fødselsnummer: String,
         orgnummer: String

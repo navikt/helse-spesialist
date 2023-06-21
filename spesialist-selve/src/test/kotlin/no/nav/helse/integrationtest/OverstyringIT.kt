@@ -196,6 +196,67 @@ internal class OverstyringIT : AbstractE2ETest() {
     }
 
     @Test
+    fun `skjønnsfastsetter sykepengegrunnlag`() {
+        testApplication {
+            setUpApplication()
+            settOppBruker()
+
+            val json = """
+                {
+                    "fødselsnummer": $FØDSELSNUMMER,
+                    "aktørId": $AKTØR,
+                    "skjæringstidspunkt": "2018-01-01",
+                    "arbeidsgivere": [{
+                        "organisasjonsnummer": $ORGNR,
+                        "årlig": 250000.0,
+                        "fraÅrlig": 250001.0,
+                        "begrunnelse": "en begrunnelse",
+                        "årsak": "en årsak",
+                        "subsumsjon": {
+                            "paragraf": "8-28",
+                            "ledd": "3",
+                            "bokstav": null
+                        }
+                    },{
+                        "organisasjonsnummer": "666",
+                        "årlig": 210000.0,
+                        "fraÅrlig": 250001.0,
+                        "begrunnelse": "en begrunnelse 2",
+                        "årsak": "en årsak 2",
+                        "subsumsjon": {
+                            "paragraf": "8-28",
+                            "ledd": "3",
+                            "bokstav": null
+                        }
+                    }]
+                }
+            """.trimIndent()
+
+            val response = runBlocking {
+                client.post("/api/skjonnsfastsett/sykepengegrunnlag") {
+                    header(HttpHeaders.ContentType, "application/json")
+                    authentication(
+                        oid = SAKSBEHANDLER_OID,
+                        epost = SAKSBEHANDLER_EPOST,
+                        navn = SAKSBEHANDLER_NAVN,
+                        ident = SAKSBEHANDLER_IDENT,
+                    )
+                    setBody(json)
+                }
+            }
+
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertEquals(1, testRapid.inspektør.hendelser("saksbehandler_skjonnsfastsetter_sykepengegrunnlag").size)
+            testRapid.sendTestMessage(
+                testRapid.inspektør.hendelser("saksbehandler_skjonnsfastsetter_sykepengegrunnlag").first().toString()
+            )
+
+            assertEquals("Invalidert", oppgaveStatus())
+            assertEquals(1, testRapid.inspektør.hendelser("skjønnsmessig_fastsettelse").size)
+        }
+    }
+
+    @Test
     fun `overstyr arbeidsforhold`() {
         testApplication {
             setUpApplication()

@@ -10,7 +10,7 @@ import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDto
-import no.nav.helse.spesialist.api.overstyring.SkjønnsmessigfastsattDto
+import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsattSykepengegrunnlagDto
 import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.utbetaling.AnnulleringDto
@@ -69,16 +69,16 @@ class SaksbehandlerMediator(
         }
         rapidsConnection.publish(overstyring.fødselsnummer, message.toJson())
     }
-    internal fun håndter(skjønnsmessigFastsattInntekt: SkjønnsmessigfastsattDto, saksbehandler: Saksbehandler) {
-        tellSkjønnsmessigFastsettingInntekt()
-        val message = skjønnsmessigFastsattInntekt.somJsonMessage(saksbehandler.toDto()).also {
+    internal fun håndter(skjønnsfastsattSykepengegrunnlag: SkjønnsfastsattSykepengegrunnlagDto, saksbehandler: Saksbehandler) {
+        tellSkjønnsfastsettingSykepengegrunnlag()
+        val message = skjønnsfastsattSykepengegrunnlag.somJsonMessage(saksbehandler.toDto()).also {
             sikkerlogg.info(
-                "Publiserer skjønnsmessig fastsetting av inntekt fra api: {}, {}\n${it.toJson()}",
-                kv("fødselsnummer", skjønnsmessigFastsattInntekt.fødselsnummer),
-                kv("aktørId", skjønnsmessigFastsattInntekt.aktørId),
+                "Publiserer skjønnsfastsetting av inntekt fra api: {}, {}\n${it.toJson()}",
+                kv("fødselsnummer", skjønnsfastsattSykepengegrunnlag.fødselsnummer),
+                kv("aktørId", skjønnsfastsattSykepengegrunnlag.aktørId),
             )
         }
-        rapidsConnection.publish(skjønnsmessigFastsattInntekt.fødselsnummer, message.toJson())
+        rapidsConnection.publish(skjønnsfastsattSykepengegrunnlag.fødselsnummer, message.toJson())
     }
 
     internal fun håndter(overstyring: OverstyrArbeidsforholdDto, saksbehandler: Saksbehandler) {

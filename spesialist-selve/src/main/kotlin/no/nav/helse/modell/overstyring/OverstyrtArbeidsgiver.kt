@@ -34,6 +34,30 @@ internal class OverstyrtArbeidsgiver(
     }
 }
 
+internal class SkjønnsfastsattArbeidsgiver(
+    val organisasjonsnummer: String,
+    val årlig: Double,
+    val fraÅrlig: Double?,
+    val årsak: String,
+    val begrunnelse: String,
+    val subsumsjon: Subsumsjon?,
+) {
+    companion object {
+        internal fun JsonNode.arbeidsgiverelementer(): List<SkjønnsfastsattArbeidsgiver> {
+            return this.map { jsonNode ->
+                SkjønnsfastsattArbeidsgiver(
+                    organisasjonsnummer = jsonNode["organisasjonsnummer"].asText(),
+                    årlig = jsonNode["årlig"].asDouble(),
+                    fraÅrlig = jsonNode["fraÅrlig"].asDouble(),
+                    årsak = jsonNode["årsak"].asText(),
+                    begrunnelse = jsonNode["begrunnelse"].asText(),
+                    subsumsjon = jsonNode["subsumsjon"].subsumsjonelementer()
+                )
+            }
+        }
+    }
+}
+
 internal class Refusjonselement(
     val fom: LocalDate,
     val tom: LocalDate? = null,

@@ -148,4 +148,12 @@ internal class TrengerTotrinnsvurderingCommandTest {
         assertTrue(command.execute(context))
         verify(exactly = 1) { totrinnsvurderingMediator.opprett(any()) }
     }
+
+    @Test
+    fun `Oppretter trengerTotrinnsvurdering dersom oppgaven har fått avklart skjønnsfastsatt sykepengegrunnlag`() {
+        every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Sykepengegrunnlag)
+
+        assertTrue(command.execute(context))
+        verify(exactly = 1) { totrinnsvurderingMediator.opprett(any()) }
+    }
 }

@@ -19,6 +19,7 @@ import no.nav.helse.mediator.meldinger.OverstyringIgangsatt
 import no.nav.helse.mediator.meldinger.OverstyringInntektOgRefusjon
 import no.nav.helse.mediator.meldinger.OverstyringTidslinje
 import no.nav.helse.mediator.meldinger.PåminnetGodkjenningsbehov
+import no.nav.helse.mediator.meldinger.SkjønnsfastsettingSykepengegrunnlag
 import no.nav.helse.mediator.meldinger.Sykefraværstilfeller
 import no.nav.helse.mediator.meldinger.SøknadSendt
 import no.nav.helse.mediator.meldinger.UtbetalingAnnullert
@@ -42,6 +43,7 @@ import no.nav.helse.modell.HendelseDao.Hendelsetype.OVERSTYRING_IGANGSATT
 import no.nav.helse.modell.HendelseDao.Hendelsetype.OVERSTYRING_INNTEKT_OG_REFUSJON
 import no.nav.helse.modell.HendelseDao.Hendelsetype.PÅMINNET_GODKJENNINGSBEHOV
 import no.nav.helse.modell.HendelseDao.Hendelsetype.SAKSBEHANDLERLØSNING
+import no.nav.helse.modell.HendelseDao.Hendelsetype.SKJØNNSFASTSETTING_SYKEPENGEGRUNNLAG
 import no.nav.helse.modell.HendelseDao.Hendelsetype.SYKEFRAVÆRSTILFELLER
 import no.nav.helse.modell.HendelseDao.Hendelsetype.SØKNAD_SENDT
 import no.nav.helse.modell.HendelseDao.Hendelsetype.UTBETALING_ANNULLERT
@@ -235,6 +237,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
             OVERSTYRING -> hendelsefabrikk.overstyringTidslinje(json)
             OVERSTYRING_INNTEKT_OG_REFUSJON -> hendelsefabrikk.overstyringInntektOgRefusjon(json)
             OVERSTYRING_ARBEIDSFORHOLD -> hendelsefabrikk.overstyringArbeidsforhold(json)
+            SKJØNNSFASTSETTING_SYKEPENGEGRUNNLAG -> hendelsefabrikk.skjønnsfastsettingSykepengegrunnlag(json)
             OVERSTYRING_IGANGSATT -> hendelsefabrikk.overstyringIgangsatt(json)
             SAKSBEHANDLERLØSNING -> hendelsefabrikk.saksbehandlerløsning(json)
             UTBETALING_ANNULLERT -> hendelsefabrikk.utbetalingAnnullert(json)
@@ -260,6 +263,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
         is OverstyringTidslinje -> OVERSTYRING
         is OverstyringInntektOgRefusjon -> OVERSTYRING_INNTEKT_OG_REFUSJON
         is OverstyringArbeidsforhold -> OVERSTYRING_ARBEIDSFORHOLD
+        is SkjønnsfastsettingSykepengegrunnlag -> SKJØNNSFASTSETTING_SYKEPENGEGRUNNLAG
         is OverstyringIgangsatt -> OVERSTYRING_IGANGSATT
         is Saksbehandlerløsning -> SAKSBEHANDLERLØSNING
         is UtbetalingAnnullert -> UTBETALING_ANNULLERT
@@ -283,6 +287,6 @@ internal class HendelseDao(private val dataSource: DataSource) {
         VEDTAKSPERIODE_REBEREGNET, OVERSTYRING_INNTEKT_OG_REFUSJON, OVERSTYRING_ARBEIDSFORHOLD,
         OVERSTYRING_IGANGSATT, GOSYS_OPPGAVE_ENDRET, ENDRET_SKJERMETINFO, VEDTAK_FATTET,
         NYE_VARSLER, VEDTAKSPERIODE_OPPRETTET, SØKNAD_SENDT, VEDTAKSPERIODE_NY_UTBETALING, SYKEFRAVÆRSTILFELLER,
-        PÅMINNET_GODKJENNINGSBEHOV
+        PÅMINNET_GODKJENNINGSBEHOV, SKJØNNSFASTSETTING_SYKEPENGEGRUNNLAG
     }
 }

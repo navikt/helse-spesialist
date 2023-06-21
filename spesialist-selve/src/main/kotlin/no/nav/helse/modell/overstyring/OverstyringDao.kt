@@ -20,11 +20,13 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
                     WHEN oi.id IS NOT NULL THEN 'Inntekt'
                     WHEN oa.id IS NOT NULL THEN 'Arbeidsforhold'
                     WHEN ot.id IS NOT NULL THEN 'Dager'
+                    WHEN ss.id IS NOT NULL THEN 'Sykepengegrunnlag'
                 END type
             FROM overstyring o
             LEFT JOIN overstyring_arbeidsforhold oa on o.id = oa.overstyring_ref
             LEFT JOIN overstyring_inntekt oi on o.id = oi.overstyring_ref
             LEFT JOIN overstyring_tidslinje ot on o.id = ot.overstyring_ref
+            LEFT JOIN skjonnsfastsetting_sykepengegrunnlag ss on o.id = ss.overstyring_ref
             WHERE o.id IN (
                 SELECT overstyring_ref FROM overstyringer_for_vedtaksperioder
                 WHERE vedtaksperiode_id = :vedtaksperiode_id
@@ -231,6 +233,66 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
                                 "begrunnelse" to arbeidsgiver.begrunnelse,
                                 "orgnr" to arbeidsgiver.organisasjonsnummer.toLong(),
                                 "subsumsjon" to arbeidsgiver.subsumsjon?.let { objectMapper.writeValueAsString(arbeidsgiver.subsumsjon) }
+                            )
+                        ).asUpdate
+                    )
+                }
+            }
+        }
+    }
+
+    internal fun persisterSkjønnsfastsettingSykepengegrunnlag(
+        hendelseId: UUID,
+        eksternHendelseId: UUID,
+        fødselsnummer: String,
+        arbeidsgivere: List<SkjønnsfastsattArbeidsgiver>,
+        saksbehandlerRef: UUID,
+        skjæringstidspunkt: LocalDate,
+        tidspunkt: LocalDateTime,
+    ) {
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+            @Language("PostgreSQL")
+            val opprettOverstyringQuery = """
+                INSERT INTO overstyring(hendelse_ref, ekstern_hendelse_id, person_ref, saksbehandler_ref, tidspunkt)
+                SELECT :hendelse_id, :ekstern_hendelse_id, p.id, :saksbehandler_ref, :tidspunkt
+                FROM person p
+                WHERE p.fodselsnummer = :fodselsnummer
+            """.trimIndent()
+
+            @Language("PostgreSQL")
+            val opprettSkjønnsfastsettingSykepengegrunnlagQuery = """
+                INSERT INTO skjonnsfastsetting_sykepengegrunnlag(arlig, fra_arlig, skjaeringstidspunkt, arsak, begrunnelse, subsumsjon, arbeidsgiver_ref, overstyring_ref)
+                SELECT :arlig, :fra_arlig, :skjaeringstidspunkt, :arsak, :begrunnelse, :subsumsjon::json, ag.id, :overstyring_ref
+                FROM arbeidsgiver ag
+                WHERE ag.orgnummer = :orgnr
+            """.trimIndent()
+
+            session.transaction { transactionalSession ->
+                val overstyringRef = transactionalSession.run(
+                    queryOf(
+                        opprettOverstyringQuery,
+                        mapOf(
+                            "hendelse_id" to hendelseId,
+                            "ekstern_hendelse_id" to eksternHendelseId,
+                            "saksbehandler_ref" to saksbehandlerRef,
+                            "tidspunkt" to tidspunkt,
+                            "fodselsnummer" to fødselsnummer.toLong()
+                        )
+                    ).asUpdateAndReturnGeneratedKey
+                )
+                arbeidsgivere.forEach { arbeidsgiver ->
+                    transactionalSession.run(
+                        queryOf(
+                            opprettSkjønnsfastsettingSykepengegrunnlagQuery,
+                            mapOf(
+                                "arlig" to arbeidsgiver.årlig,
+                                "fra_arlig" to arbeidsgiver.fraÅrlig,
+                                "skjaeringstidspunkt" to skjæringstidspunkt,
+                                "arsak" to arbeidsgiver.årsak,
+                                "begrunnelse" to arbeidsgiver.begrunnelse,
+                                "subsumsjon" to arbeidsgiver.subsumsjon?.let { objectMapper.writeValueAsString(arbeidsgiver.subsumsjon) },
+                                "orgnr" to arbeidsgiver.organisasjonsnummer.toLong(),
+                                "overstyring_ref" to overstyringRef
                             )
                         ).asUpdate
                     )

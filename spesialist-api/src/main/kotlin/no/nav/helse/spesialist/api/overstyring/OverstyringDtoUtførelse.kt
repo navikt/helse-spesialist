@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import java.time.LocalDate
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsgiverDto.Companion.toMap
-import no.nav.helse.spesialist.api.overstyring.SkjønnsmessigFastsattArbeidsgiverDto.Companion.toMap
+import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsattArbeidsgiverDto.Companion.toMap
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDto
 
 @JsonIgnoreProperties
@@ -94,36 +94,36 @@ internal data class OverstyrInntektOgRefusjonDto(
     )
 }
 
-internal data class SkjønnsmessigFastsattArbeidsgiverDto(
+internal data class SkjønnsfastsattArbeidsgiverDto(
     val organisasjonsnummer: String,
-    val skjønnsmessigFastsatt: Double,
-    val fraSkjønnsmessigFastsatt: Double,
+    val årlig: Double,
+    val fraÅrlig: Double,
     val årsak: String,
     val begrunnelse: String,
     val subsumsjon: SubsumsjonDto?,
 ) {
     fun toMap(): Map<String, Any?> = listOfNotNull(
         "organisasjonsnummer" to organisasjonsnummer,
-        "skjønnsmessigFastsatt" to skjønnsmessigFastsatt,
-        "fraSkjønnsmessigFastsatt" to fraSkjønnsmessigFastsatt,
-        "arsak" to årsak,
+        "årlig" to årlig,
+        "fraÅrlig" to fraÅrlig,
+        "årsak" to årsak,
         "begrunnelse" to begrunnelse,
         "subsumsjon" to subsumsjon,
     ).toMap()
 
     internal companion object {
-        fun List<SkjønnsmessigFastsattArbeidsgiverDto>.toMap(): List<Map<String, Any?>> = this.map { it.toMap() }
+        fun List<SkjønnsfastsattArbeidsgiverDto>.toMap(): List<Map<String, Any?>> = this.map { it.toMap() }
     }
 }
 
-internal data class SkjønnsmessigfastsattDto(
+internal data class SkjønnsfastsattSykepengegrunnlagDto(
     val aktørId: String,
     val fødselsnummer: String,
     val skjæringstidspunkt: LocalDate,
-    val arbeidsgivere: List<SkjønnsmessigFastsattArbeidsgiverDto>,
+    val arbeidsgivere: List<SkjønnsfastsattArbeidsgiverDto>,
 ) {
     fun somJsonMessage(saksbehandler: SaksbehandlerDto) = JsonMessage.newMessage(
-        "saksbehandler_skjonnsmessig_fastsetter_inntekt",
+        "saksbehandler_skjonnsfastsetter_sykepengegrunnlag",
         listOfNotNull(
             "aktørId" to aktørId,
             "fødselsnummer" to fødselsnummer,

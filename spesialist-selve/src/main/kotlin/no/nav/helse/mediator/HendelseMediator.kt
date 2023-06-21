@@ -20,6 +20,7 @@ import no.nav.helse.mediator.meldinger.OverstyringIgangsatt
 import no.nav.helse.mediator.meldinger.OverstyringInntektOgRefusjon
 import no.nav.helse.mediator.meldinger.OverstyringTidslinje
 import no.nav.helse.mediator.meldinger.PåminnetGodkjenningsbehov
+import no.nav.helse.mediator.meldinger.SkjønnsfastsettingSykepengegrunnlag
 import no.nav.helse.mediator.meldinger.Sykefraværstilfeller
 import no.nav.helse.mediator.meldinger.SøknadSendt
 import no.nav.helse.mediator.meldinger.UtbetalingAnnullert
@@ -52,6 +53,7 @@ import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver
+import no.nav.helse.modell.overstyring.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.ActualVarselRepository
@@ -111,6 +113,7 @@ internal class HendelseMediator(
             OverstyringTidslinje.OverstyringTidslinjeRiver(it, this)
             OverstyringInntektOgRefusjon.OverstyringInntektOgRefusjonRiver(it, this)
             OverstyringArbeidsforhold.OverstyringArbeidsforholdRiver(it, this)
+            SkjønnsfastsettingSykepengegrunnlag.SkjønnsfastsettingSykepengegrunnlagRiver(it, this)
             OverstyringIgangsatt.OverstyringIgangsattRiver(it, this)
             EgenAnsattløsning.EgenAnsattRiver(it, this)
             Vergemålløsning.VergemålRiver(it, this)
@@ -450,6 +453,35 @@ internal class HendelseMediator(
     ) {
         utfør(
             fødselsnummer, hendelsefabrikk.overstyringInntektOgRefusjon(
+                id = id,
+                fødselsnummer = fødselsnummer,
+                oid = oid,
+                navn = navn,
+                ident = ident,
+                epost = epost,
+                arbeidsgivere = arbeidsgivere,
+                skjæringstidspunkt = skjæringstidspunkt,
+                opprettet = opprettet,
+                json = json
+            ), context
+        )
+    }
+
+    fun skjønnsfastsettingSykepengegrunnlag(
+        id: UUID,
+        fødselsnummer: String,
+        oid: UUID,
+        navn: String,
+        ident: String,
+        epost: String,
+        arbeidsgivere: List<SkjønnsfastsattArbeidsgiver>,
+        skjæringstidspunkt: LocalDate,
+        opprettet: LocalDateTime,
+        json: String,
+        context: MessageContext,
+    ) {
+        utfør(
+            fødselsnummer, hendelsefabrikk.skjønnsfastsettingSykepengegrunnlag(
                 id = id,
                 fødselsnummer = fødselsnummer,
                 oid = oid,

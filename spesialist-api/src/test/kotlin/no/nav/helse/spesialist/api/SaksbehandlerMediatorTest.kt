@@ -9,6 +9,8 @@ import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsgiverDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDto
+import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsattArbeidsgiverDto
+import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsattSykepengegrunnlagDto
 import no.nav.helse.spesialist.api.overstyring.SubsumsjonDto
 import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
 import no.nav.helse.spesialist.api.utbetaling.AnnulleringDto
@@ -353,6 +355,66 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
             assertEquals("2018-01-31", it["refusjonsopplysninger"].first()["tom"].asText())
             assertEquals(21000.0, it["refusjonsopplysninger"].first()["beløp"].asDouble())
             assertEquals(22000.0, it["fraRefusjonsopplysninger"].first()["beløp"].asDouble())
+        }
+    }
+
+    @Test
+    fun `håndterer skjønnsfastsetting av sykepengegrunnlag`() {
+        val skjønnsfastsetting = SkjønnsfastsattSykepengegrunnlagDto(
+            fødselsnummer = FØDSELSNUMMER,
+            aktørId = AKTØR_ID,
+            skjæringstidspunkt = 1.januar,
+            arbeidsgivere = listOf(
+                SkjønnsfastsattArbeidsgiverDto(
+                    organisasjonsnummer = ORGANISASJONSNUMMER,
+                    årlig = 25000.0,
+                    fraÅrlig = 25001.0,
+                    subsumsjon = SubsumsjonDto("8-28", "3", null),
+                    årsak = "En årsak",
+                    begrunnelse = "En begrunnelse"
+                ),
+                SkjønnsfastsattArbeidsgiverDto(
+                    organisasjonsnummer = ORGANISASJONSNUMMER_GHOST,
+                    årlig = 21000.0,
+                    fraÅrlig = 25001.0,
+                    subsumsjon = SubsumsjonDto("8-28", "3", null),
+                    årsak = "En årsak 2",
+                    begrunnelse = "En begrunnelse 2"
+                ),
+            )
+        )
+
+        mediator.håndter(skjønnsfastsetting, saksbehandler)
+
+        val hendelse = testRapid.inspektør.hendelser("saksbehandler_skjonnsfastsetter_sykepengegrunnlag").first()
+
+        assertNotNull(hendelse["@id"].asText())
+        assertEquals(FØDSELSNUMMER, hendelse["fødselsnummer"].asText())
+        assertEquals(AKTØR_ID, hendelse["aktørId"].asText())
+        assertEquals(SAKSBEHANDLER_OID, hendelse["saksbehandlerOid"].asText().let { UUID.fromString(it) })
+        assertEquals(SAKSBEHANDLER_NAVN, hendelse["saksbehandlerNavn"].asText())
+        assertEquals(SAKSBEHANDLER_IDENT, hendelse["saksbehandlerIdent"].asText())
+        assertEquals(SAKSBEHANDLER_EPOST, hendelse["saksbehandlerEpost"].asText())
+        assertEquals(1.januar, hendelse["skjæringstidspunkt"].asLocalDate())
+        hendelse["arbeidsgivere"].first().let {
+            assertEquals(ORGANISASJONSNUMMER, it["organisasjonsnummer"].asText())
+            assertEquals("En begrunnelse", it["begrunnelse"].asText())
+            assertEquals("En årsak", it["årsak"].asText())
+            assertEquals(25000.0, it["årlig"].asDouble())
+            assertEquals(25001.0, it["fraÅrlig"].asDouble())
+            assertEquals("8-28", it["subsumsjon"]["paragraf"].asText())
+            assertEquals("3", it["subsumsjon"]["ledd"].asText())
+            Assertions.assertTrue(it["subsumsjon"]["bokstav"].isNull)
+        }
+        hendelse["arbeidsgivere"].last().let {
+            assertEquals(ORGANISASJONSNUMMER_GHOST, it["organisasjonsnummer"].asText())
+            assertEquals("En begrunnelse 2", it["begrunnelse"].asText())
+            assertEquals("En årsak 2", it["årsak"].asText())
+            assertEquals(21000.0, it["årlig"].asDouble())
+            assertEquals(25001.0, it["fraÅrlig"].asDouble())
+            assertEquals("8-28", it["subsumsjon"]["paragraf"].asText())
+            assertEquals("3", it["subsumsjon"]["ledd"].asText())
+            Assertions.assertTrue(it["subsumsjon"]["bokstav"].isNull)
         }
     }
 
