@@ -345,7 +345,7 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 mellomnavn = it.stringOrNull("mellomnavn"),
                 etternavn = it.string("etternavn"),
             ),
-            haster = it.boolean("har_varsel_om_negativt_belop"),
+            haster = it.boolean("har_varsel_om_negativt_belop") && it.boolean("harPersonbeløp"),
         )
 
         private fun finnMottaker(harArbeidsgiverbeløp: Boolean, harPersonbeløp: Boolean): Mottaker? {

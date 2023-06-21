@@ -217,8 +217,14 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `En oppgave får haster true dersom det finnes et varsel om negativt beløp`() {
+    fun `En oppgave får haster true dersom det finnes et varsel om negativt beløp og det er delvis refusjon eller utbetaling til sykmeldt`() {
         nyPerson(inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE)
+        val arbeidsgiverFagsystemId = fagsystemId()
+        val personFagsystemId = fagsystemId()
+        val arbeidsgiverOppdragId = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
+        val personOppdragId = lagPersonoppdrag(personFagsystemId)
+        lagUtbetalingId(arbeidsgiverOppdragId, personOppdragId, UTBETALING_ID, 2000, 2000)
+
         generasjonDao.finnSisteGenerasjonFor(VEDTAKSPERIODE)?.also {
             generasjonDao.oppdaterTilstandFor(generasjonId = it, ny = Generasjon.Låst, endretAv = UUID.randomUUID())
         }
