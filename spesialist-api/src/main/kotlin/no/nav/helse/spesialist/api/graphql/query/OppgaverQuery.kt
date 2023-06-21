@@ -21,8 +21,7 @@ class OppgaverQuery(private val oppgaveApiDao: OppgaveApiDao) : Query {
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
     @Suppress("unused")
-    fun behandledeOppgaver(
-        behandletAvIdent: String,
+    fun behandleOppgaver(
         behandletAvOid: String,
         fom: String?
     ): DataFetcherResult<List<FerdigstiltOppgave>> {
@@ -33,11 +32,19 @@ class OppgaverQuery(private val oppgaveApiDao: OppgaveApiDao) : Query {
         }
 
         val oppgaver =
-            oppgaveApiDao.hentBehandledeOppgaver(behandletAvIdent, UUID.fromString(behandletAvOid), fraOgMed)
+            oppgaveApiDao.hentBehandledeOppgaver(UUID.fromString(behandletAvOid), fraOgMed)
                 .tilFerdigstilteOppgaver()
 
         return DataFetcherResult.newResult<List<FerdigstiltOppgave>>().data(oppgaver).build()
     }
+
+    @Deprecated("behandletAvOid brukes til fordel for behandletAvIdent", ReplaceWith("behandleOppgaver(behandletAvOid, fom)"))
+    @Suppress("unused")
+    fun behandledeOppgaver(
+        behandletAvIdent: String?,
+        behandletAvOid: String,
+        fom: String?
+    ): DataFetcherResult<List<FerdigstiltOppgave>> = behandleOppgaver(behandletAvOid, fom)
 
     @Suppress("unused")
     suspend fun alleOppgaver(env: DataFetchingEnvironment): DataFetcherResult<List<OppgaveForOversiktsvisning>> {

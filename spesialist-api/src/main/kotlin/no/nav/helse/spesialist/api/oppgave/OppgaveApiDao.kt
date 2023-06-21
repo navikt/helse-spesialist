@@ -206,12 +206,11 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         }
 
     fun hentBehandledeOppgaver(
-        behandletAvIdent: String,
         behandletAvOid: UUID,
         fom: LocalDate?,
     ): List<FerdigstiltOppgaveDto> {
         val erFerdigstiltAvSaksbehandler =
-            "((o.status = 'Ferdigstilt' OR o.status = 'AvventerSystem') AND s.ident = :ident)"
+            "((o.status = 'Ferdigstilt' OR o.status = 'AvventerSystem') AND s.oid = :oid)"
 
         return queryize(
             """
@@ -245,7 +244,7 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
               AND o.oppdatert >= :fom
             ORDER BY o.oppdatert;
         """.trimIndent()
-        ).list(mapOf("ident" to behandletAvIdent, "oid" to behandletAvOid, "fom" to (fom ?: LocalDate.now()))) {
+        ).list(mapOf("oid" to behandletAvOid, "fom" to (fom ?: LocalDate.now()))) {
             FerdigstiltOppgaveDto(
                 id = it.string("oppgave_id"),
                 type = Oppgavetype.valueOf(it.string("oppgavetype")),
