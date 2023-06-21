@@ -1,4 +1,4 @@
-FROM ghcr.io/navikt/baseimages/temurin:17
+FROM ghcr.io/navikt/baseimages/temurin:20
 
 COPY spesialist-selve/build/libs/*.jar ./
 
