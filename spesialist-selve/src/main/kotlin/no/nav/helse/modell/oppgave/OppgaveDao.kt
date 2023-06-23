@@ -12,48 +12,47 @@ import no.nav.helse.spesialist.api.graphql.schema.Mottaker
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
-import org.intellij.lang.annotations.Language
 
 class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
 
     fun finnOppgaveId(vedtaksperiodeId: UUID) =
-        """ SELECT id FROM oppgave
+        queryize(""" SELECT id FROM oppgave
             WHERE vedtak_ref =
                 (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
             AND status = 'AvventerSaksbehandler'::oppgavestatus
-        """.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.long("id") }
+        """).single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.long("id") }
 
     fun finnUtbetalingId(oppgaveId: Long) =
         queryize(""" SELECT utbetaling_id FROM oppgave WHERE id = :oppgaveId""")
             .single(mapOf("oppgaveId" to oppgaveId)) { it.uuid("utbetaling_id") }
 
     fun finnNyesteOppgaveId(vedtaksperiodeId: UUID) =
-        """
+        queryize("""
             SELECT id FROM oppgave
             WHERE vedtak_ref =
                 (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
             ORDER BY opprettet DESC
             LIMIT 1
-        """.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.long("id") }
+        """).single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.long("id") }
 
     fun erRiskoppgave(oppgaveId: Long): Boolean =
-        """ SELECT 1 FROM oppgave
+        queryize(""" SELECT 1 FROM oppgave
             WHERE id=:oppgaveId
             AND type = 'RISK_QA'
-        """.single(mapOf("oppgaveId" to oppgaveId)) { true } ?: false
+        """).single(mapOf("oppgaveId" to oppgaveId)) { true } ?: false
 
     fun finnOppgaveIdUansettStatus(fødselsnummer: String) =
-        """ SELECT o.id as oppgaveId
+        queryize(""" SELECT o.id as oppgaveId
             FROM oppgave o
                      JOIN vedtak v ON v.id = o.vedtak_ref
                      JOIN person p ON v.person_ref = p.id
             WHERE p.fodselsnummer = :fodselsnummer
             ORDER BY o.id DESC
             LIMIT 1;
-        """.single(mapOf("fodselsnummer" to fødselsnummer.toLong())) { it.long("oppgaveId") }!!
+        """).single(mapOf("fodselsnummer" to fødselsnummer.toLong())) { it.long("oppgaveId") }!!
 
     fun finnGodkjenningsbehov(fødselsnummer: String) =
-        """ SELECT c.hendelse_id as hendelse_id
+        queryize(""" SELECT c.hendelse_id as hendelse_id
             FROM oppgave o
                      JOIN vedtak v ON v.id = o.vedtak_ref
                      JOIN person p ON v.person_ref = p.id
@@ -61,32 +60,32 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             WHERE p.fodselsnummer = :fodselsnummer
             AND status = 'AvventerSaksbehandler'::oppgavestatus
             GROUP BY c.hendelse_id;
-        """.single(mapOf("fodselsnummer" to fødselsnummer.toLong())) { it.uuid("hendelse_id") }!!
+        """).single(mapOf("fodselsnummer" to fødselsnummer.toLong())) { it.uuid("hendelse_id") }!!
 
     fun finnVedtaksperiodeId(fødselsnummer: String) =
-        """ SELECT v.vedtaksperiode_id as vedtaksperiode_id
+        queryize(""" SELECT v.vedtaksperiode_id as vedtaksperiode_id
             FROM oppgave o
                      JOIN vedtak v ON v.id = o.vedtak_ref
                      JOIN person p ON v.person_ref = p.id
             WHERE p.fodselsnummer = :fodselsnummer
             AND status = 'AvventerSaksbehandler'::oppgavestatus;
-        """.single(mapOf("fodselsnummer" to fødselsnummer.toLong())) { it.uuid("vedtaksperiode_id") }!!
+        """).single(mapOf("fodselsnummer" to fødselsnummer.toLong())) { it.uuid("vedtaksperiode_id") }!!
 
     fun finnOppgaveId(fødselsnummer: String) =
-        """ SELECT o.id as oppgaveId
+        queryize(""" SELECT o.id as oppgaveId
             FROM oppgave o
                      JOIN vedtak v ON v.id = o.vedtak_ref
                      JOIN person p ON v.person_ref = p.id
             WHERE o.status = 'AvventerSaksbehandler'::oppgavestatus
               AND p.fodselsnummer = :fodselsnummer;
-        """.single(mapOf("fodselsnummer" to fødselsnummer.toLong())) { it.long("oppgaveId") }
+        """).single(mapOf("fodselsnummer" to fødselsnummer.toLong())) { it.long("oppgaveId") }
 
     fun finn(oppgaveId: Long) =
-        """ SELECT o.type, o.status, v.vedtaksperiode_id, o.ferdigstilt_av, o.ferdigstilt_av_oid, o.utbetaling_id
+        queryize(""" SELECT o.type, o.status, v.vedtaksperiode_id, o.ferdigstilt_av, o.ferdigstilt_av_oid, o.utbetaling_id
             FROM oppgave o
             INNER JOIN vedtak v on o.vedtak_ref = v.id
             WHERE o.id = :oppgaveId
-        """.single(mapOf("oppgaveId" to oppgaveId)) { row ->
+        """).single(mapOf("oppgaveId" to oppgaveId)) { row ->
             Oppgave(
                 id = oppgaveId,
                 type = enumValueOf(row.string("type")),
@@ -99,11 +98,11 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         }
 
     fun finnAktiv(vedtaksperiodeId: UUID) =
-        """ SELECT o.id, o.type, o.status, o.utbetaling_id
+        queryize(""" SELECT o.id, o.type, o.status, o.utbetaling_id
             FROM oppgave o
             INNER JOIN vedtak v on o.vedtak_ref = v.id
             WHERE v.vedtaksperiode_id = :vedtaksperiodeId AND o.status IN('AvventerSystem'::oppgavestatus, 'AvventerSaksbehandler'::oppgavestatus)
-        """.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { row ->
+        """).single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { row ->
             Oppgave(
                 id = row.long("id"),
                 type = enumValueOf(row.string("type")),
@@ -114,11 +113,11 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         }
 
     fun finn(utbetalingId: UUID) =
-        """ SELECT o.id, o.type, o.status, v.vedtaksperiode_id, o.utbetaling_id, o.ferdigstilt_av, o.ferdigstilt_av_oid
+        queryize(""" SELECT o.id, o.type, o.status, v.vedtaksperiode_id, o.utbetaling_id, o.ferdigstilt_av, o.ferdigstilt_av_oid
             FROM oppgave o
             INNER JOIN vedtak v on o.vedtak_ref = v.id
             WHERE utbetaling_id = :utbetalingId AND o.status NOT IN ('Invalidert'::oppgavestatus)
-        """.single(mapOf("utbetalingId" to utbetalingId)) { row ->
+        """).single(mapOf("utbetalingId" to utbetalingId)) { row ->
             Oppgave(
                 id = row.long("id"),
                 type = enumValueOf(row.string("type")),
@@ -131,14 +130,14 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         }
 
     fun finnVedtaksperiodeId(oppgaveId: Long) = requireNotNull(
-        """ SELECT v.vedtaksperiode_id
+        queryize(""" SELECT v.vedtaksperiode_id
             FROM vedtak v
             INNER JOIN oppgave o on v.id = o.vedtak_ref
             WHERE o.id = :oppgaveId
-        """.single(mapOf("oppgaveId" to oppgaveId)) { row -> row.uuid("vedtaksperiode_id") })
+        """).single(mapOf("oppgaveId" to oppgaveId)) { row -> row.uuid("vedtaksperiode_id") })
 
     private fun finnArbeidsgiverbeløpOgPersonbeløp(vedtaksperiodeId: UUID, utbetalingId: UUID) = requireNotNull(
-        """ SELECT SUM(ABS(arbeidsgiverbeløp)) as sumArbeidsgiverbeløp, SUM(ABS(personbeløp)) as sumPersonbeløp
+        queryize(""" SELECT SUM(ABS(arbeidsgiverbeløp)) as sumArbeidsgiverbeløp, SUM(ABS(personbeløp)) as sumPersonbeløp
             FROM utbetaling_id 
             WHERE person_ref=(SELECT person_ref FROM utbetaling_id WHERE utbetaling_id=:utbetalingId) AND 
                 utbetaling_id.utbetaling_id IN (
@@ -150,7 +149,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                             WHERE vedtaksperiode_id=:vedtaksperiodeId AND tilstand='Ulåst'
                         ) AND tilstand='Ulåst'
                     )
-        """.trimIndent().single(mapOf(
+        """).trimIndent().single(mapOf(
             "utbetalingId" to utbetalingId,
             "vedtaksperiodeId" to vedtaksperiodeId
         )) {row ->
@@ -173,28 +172,29 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             val (arbeidsgiverBeløp, personBeløp) = finnArbeidsgiverbeløpOgPersonbeløp(vedtaksperiodeId, utbetalingId)
             val mottaker = finnMottaker(arbeidsgiverBeløp > 0, personBeløp > 0)
 
-            @Language("PostgreSQL")
-            val query = """
+            val query = queryize("""
                 INSERT INTO oppgave(oppdatert, type, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, command_context_id, utbetaling_id, mottaker)
-                VALUES (now(), CAST(? as oppgavetype), CAST(? as oppgavestatus), ?, ?, ?, ?, ?, CAST(? as mottakertype));
-            """
+                VALUES (now(), CAST(:oppgavetype as oppgavetype), CAST(:oppgavestatus as oppgavestatus), :ferdigstiltAv, :ferdigstiltAvOid, :vedtakRef, :commandContextId, :utbetalingId, CAST(:mottaker as mottakertype));
+            """)
             it.run(
                 queryOf(
                     query,
-                    oppgavetype.name,
-                    AvventerSaksbehandler.name,
-                    null,
-                    null,
-                    vedtakRef,
-                    commandContextId,
-                    utbetalingId,
-                    mottaker?.name
+                    mapOf(
+                        "oppgavetype" to oppgavetype.name,
+                        "oppgavestatus" to AvventerSaksbehandler.name,
+                        "ferdigstiltAv" to null,
+                        "ferdigstiltAvOid" to null,
+                        "vedtakRef" to vedtakRef,
+                        "commandContextId" to commandContextId,
+                        "utbetalingId" to utbetalingId,
+                        "mottaker" to mottaker?.name
+                    )
                 ).asUpdateAndReturnGeneratedKey
             )
         }) { "Kunne ikke opprette oppgave" }
 
     private fun vedtakRef(vedtaksperiodeId: UUID) = requireNotNull(
-        """SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId"""
+        queryize("""SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId""")
             .single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.long("id") })
     { "Kunne ikke finne vedtak for vedtaksperiodeId $vedtaksperiodeId" }
 
@@ -204,7 +204,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         ferdigstiltAv: String? = null,
         oid: UUID? = null,
     ) =
-        """UPDATE oppgave SET ferdigstilt_av=:ferdigstiltAv, ferdigstilt_av_oid=:oid, status=:oppgavestatus::oppgavestatus WHERE id=:oppgaveId"""
+        queryize("""UPDATE oppgave SET ferdigstilt_av=:ferdigstiltAv, ferdigstilt_av_oid=:oid, status=:oppgavestatus::oppgavestatus WHERE id=:oppgaveId""")
             .update(
                 mapOf(
                     "ferdigstiltAv" to ferdigstiltAv,
@@ -215,49 +215,49 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             )
 
     fun finnContextId(oppgaveId: Long) = requireNotNull(
-        """SELECT command_context_id FROM oppgave WHERE id = :oppgaveId""".trimMargin().single(mapOf("oppgaveId" to oppgaveId)) { row ->
+        queryize("""SELECT command_context_id FROM oppgave WHERE id = :oppgaveId""").trimMargin().single(mapOf("oppgaveId" to oppgaveId)) { row ->
             UUID.fromString(
                 row.string("command_context_id")
             )
         })
 
     fun finnHendelseId(oppgaveId: Long) = requireNotNull(
-        """SELECT DISTINCT hendelse_id 
-            |FROM command_context 
-            |WHERE context_id = (SELECT command_context_id FROM oppgave WHERE id = :oppgaveId)""".trimMargin()
+        queryize("""SELECT DISTINCT hendelse_id 
+            FROM command_context 
+            WHERE context_id = (SELECT command_context_id FROM oppgave WHERE id = :oppgaveId)""").trimMargin()
             .single(mapOf("oppgaveId" to oppgaveId)) { row -> row.uuid("hendelse_id") })
 
     fun harGyldigOppgave(utbetalingId: UUID) = requireNotNull(
-        """ SELECT COUNT(1) AS oppgave_count FROM oppgave
+        queryize(""" SELECT COUNT(1) AS oppgave_count FROM oppgave
             WHERE utbetaling_id = :utbetalingId AND status IN('AvventerSystem'::oppgavestatus, 'AvventerSaksbehandler'::oppgavestatus, 'Ferdigstilt'::oppgavestatus)
-        """.single(mapOf("utbetalingId" to utbetalingId)) { it.int("oppgave_count") }) > 0
+        """).single(mapOf("utbetalingId" to utbetalingId)) { it.int("oppgave_count") }) > 0
 
     fun harFerdigstiltOppgave(vedtaksperiodeId: UUID) =
         requireNotNull(
-            """ SELECT COUNT(1) AS oppgave_count FROM oppgave o
+            queryize(""" SELECT COUNT(1) AS oppgave_count FROM oppgave o
                 INNER JOIN vedtak v on o.vedtak_ref = v.id
                 WHERE v.vedtaksperiode_id = :vedtaksperiodeId AND o.status = 'Ferdigstilt'::oppgavestatus
-            """.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.int("oppgave_count") }) > 0
+            """).single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.int("oppgave_count") }) > 0
 
     fun venterPåSaksbehandler(oppgaveId: Long) = requireNotNull(
-        """ SELECT EXISTS ( SELECT 1 FROM oppgave WHERE id=:oppgaveId AND status IN('AvventerSaksbehandler'::oppgavestatus) )"""
+        queryize(""" SELECT EXISTS ( SELECT 1 FROM oppgave WHERE id=:oppgaveId AND status IN('AvventerSaksbehandler'::oppgavestatus) )""")
             .single(mapOf("oppgaveId" to oppgaveId)) { it.boolean(1) })
 
     fun finnFødselsnummer(oppgaveId: Long) = requireNotNull(
-        """ SELECT fodselsnummer from person
+        queryize(""" SELECT fodselsnummer from person
             INNER JOIN vedtak v on person.id = v.person_ref
             INNER JOIN oppgave o on v.id = o.vedtak_ref
             WHERE o.id = :oppgaveId
-        """.single(mapOf("oppgaveId" to oppgaveId)) { it.long("fodselsnummer").toFødselsnummer() })
+        """).single(mapOf("oppgaveId" to oppgaveId)) { it.long("fodselsnummer").toFødselsnummer() })
 
     fun gosysOppgaveEndretCommandData(oppgaveId: Long): GosysOppgaveEndretCommandData? =
-        """ SELECT v.vedtaksperiode_id, v.fom, v.tom, o.utbetaling_id, h.id AS hendelseId, h.data AS godkjenningbehovJson, s.type as periodetype
+        queryize(""" SELECT v.vedtaksperiode_id, v.fom, v.tom, o.utbetaling_id, h.id AS hendelseId, h.data AS godkjenningbehovJson, s.type as periodetype
             FROM vedtak v
             INNER JOIN oppgave o ON o.vedtak_ref = v.id
             INNER JOIN hendelse h ON h.id = (SELECT hendelse_id FROM command_context WHERE context_id = o.command_context_id LIMIT 1)
             INNER JOIN saksbehandleroppgavetype s ON s.vedtak_ref = v.id
             WHERE o.id = :oppgaveId 
-        """.single(mapOf("oppgaveId" to oppgaveId)) {
+        """).single(mapOf("oppgaveId" to oppgaveId)) {
             val json = objectMapper.readTree(it.string("godkjenningbehovJson"))
             val skjæringstidspunkt = json.path("Godkjenning").path("skjæringstidspunkt").asLocalDate()
             GosysOppgaveEndretCommandData(
