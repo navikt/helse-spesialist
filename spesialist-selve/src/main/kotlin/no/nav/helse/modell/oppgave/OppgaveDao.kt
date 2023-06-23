@@ -8,6 +8,7 @@ import no.nav.helse.HelseDao
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommandData
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.asLocalDate
+import no.nav.helse.spesialist.api.graphql.schema.Mottaker
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
@@ -136,14 +137,46 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             WHERE o.id = :oppgaveId
         """.single(mapOf("oppgaveId" to oppgaveId)) { row -> row.uuid("vedtaksperiode_id") })
 
+    private fun finnArbeidsgiverbeløpOgPersonbeløp(vedtaksperiodeId: UUID, utbetalingId: UUID) = requireNotNull(
+        """ SELECT SUM(ABS(arbeidsgiverbeløp)) as sumArbeidsgiverbeløp, SUM(ABS(personbeløp)) as sumPersonbeløp
+            FROM utbetaling_id 
+            WHERE person_ref=(SELECT person_ref FROM utbetaling_id WHERE utbetaling_id=:utbetalingId) AND 
+                utbetaling_id.utbetaling_id IN (
+                    SELECT utbetaling_id 
+                    FROM selve_vedtaksperiode_generasjon 
+                    WHERE skjæringstidspunkt=(
+                        SELECT skjæringstidspunkt 
+                            FROM selve_vedtaksperiode_generasjon
+                            WHERE vedtaksperiode_id=:vedtaksperiodeId AND tilstand='Ulåst'
+                        ) AND tilstand='Ulåst'
+                    )
+        """.trimIndent().single(mapOf(
+            "utbetalingId" to utbetalingId,
+            "vedtaksperiodeId" to vedtaksperiodeId
+        )) {row ->
+            Pair(row.intOrNull("sumArbeidsgiverbeløp") ?: 0, row.intOrNull("sumPersonbeløp") ?: 0)
+        })
+
+    private fun finnMottaker(harArbeidsgiverbeløp: Boolean, harPersonbeløp: Boolean): Mottaker? {
+        return when {
+            harArbeidsgiverbeløp && harPersonbeløp -> Mottaker.BEGGE
+            harPersonbeløp -> Mottaker.SYKMELDT
+            harArbeidsgiverbeløp -> Mottaker.ARBEIDSGIVER
+            else -> null
+        }
+    }
+
     fun opprettOppgave(commandContextId: UUID, oppgavetype: Oppgavetype, vedtaksperiodeId: UUID, utbetalingId: UUID) =
         requireNotNull(sessionOf(dataSource, returnGeneratedKey = true).use {
             val vedtakRef = vedtakRef(vedtaksperiodeId)
 
+            val (arbeidsgiverBeløp, personBeløp) = finnArbeidsgiverbeløpOgPersonbeløp(vedtaksperiodeId, utbetalingId)
+            val mottaker = finnMottaker(arbeidsgiverBeløp > 0, personBeløp > 0)
+
             @Language("PostgreSQL")
             val query = """
-                INSERT INTO oppgave(oppdatert, type, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, command_context_id, utbetaling_id)
-                VALUES (now(), CAST(? as oppgavetype), CAST(? as oppgavestatus), ?, ?, ?, ?, ?);
+                INSERT INTO oppgave(oppdatert, type, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, command_context_id, utbetaling_id, mottaker)
+                VALUES (now(), CAST(? as oppgavetype), CAST(? as oppgavestatus), ?, ?, ?, ?, ?, CAST(? as mottakertype));
             """
             it.run(
                 queryOf(
@@ -154,7 +187,8 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                     null,
                     vedtakRef,
                     commandContextId,
-                    utbetalingId
+                    utbetalingId,
+                    mottaker?.name
                 ).asUpdateAndReturnGeneratedKey
             )
         }) { "Kunne ikke opprette oppgave" }

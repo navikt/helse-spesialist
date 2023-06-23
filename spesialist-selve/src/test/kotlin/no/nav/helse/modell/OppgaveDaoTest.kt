@@ -10,6 +10,7 @@ import no.nav.helse.modell.kommando.TestHendelse
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.spesialist.api.graphql.schema.Mottaker
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.Ferdigstilt
@@ -153,7 +154,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
             utbetalingId = utbetalingId,
             commandContextId = CONTEXT_ID,
             vedtakRef = vedtakId,
-            oppgavetype = OPPGAVETYPE
+            oppgavetype = OPPGAVETYPE,
+            mottaker = Mottaker.ARBEIDSGIVER
         )
         val oppgave = oppgaveDao.finn(utbetalingId) ?: fail { "Fant ikke oppgave" }
         assertEquals(
@@ -387,13 +389,14 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         oppgavetype: Oppgavetype,
         vedtakRef: Long? = null,
         utbetalingId: UUID?,
-        status: Oppgavestatus = AvventerSaksbehandler
+        status: Oppgavestatus = AvventerSaksbehandler,
+        mottaker: Mottaker? = null,
     ) = requireNotNull(sessionOf(dataSource, returnGeneratedKey = true).use {
         it.run(
             queryOf(
                 """
-                INSERT INTO oppgave(oppdatert, type, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, command_context_id, utbetaling_id)
-                VALUES (now(), CAST(? as oppgavetype), CAST(? as oppgavestatus), ?, ?, ?, ?, ?);
+                INSERT INTO oppgave(oppdatert, type, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, command_context_id, utbetaling_id, mottaker)
+                VALUES (now(), CAST(? as oppgavetype), CAST(? as oppgavestatus), ?, ?, ?, ?, ?, CAST(? as mottakertype));
             """,
                 oppgavetype.name,
                 status.name,
@@ -401,7 +404,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
                 null,
                 vedtakRef,
                 commandContextId,
-                utbetalingId
+                utbetalingId,
+                mottaker?.name
             ).asUpdateAndReturnGeneratedKey
         )
     }) { "Kunne ikke opprette oppgave" }

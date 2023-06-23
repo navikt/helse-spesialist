@@ -363,6 +363,11 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         )
     }
 
+    protected fun ferdigstillSistOpprettedeOppgaveOgOpprettNy() {
+        oppgaveDao.updateOppgave(oppgaveId = oppgaveId, oppgavestatus = Oppgavestatus.Ferdigstilt)
+        opprettOppgave()
+    }
+
     protected fun opprettTotrinnsvurdering(
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         saksbehandler: UUID? = null,

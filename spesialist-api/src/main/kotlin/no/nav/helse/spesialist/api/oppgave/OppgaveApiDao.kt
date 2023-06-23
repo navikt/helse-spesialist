@@ -34,6 +34,7 @@ import no.nav.helse.spesialist.api.varsel.Varsel
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
 import org.intellij.lang.annotations.Language
+import org.slf4j.LoggerFactory
 
 class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
 
@@ -147,7 +148,7 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                     AND svg.utbetaling_id = o.utbetaling_id
                 )
 
-            SELECT o.id as oppgave_id, o.type AS oppgavetype, o.opprettet, os.soknad_mottatt AS opprinneligSoknadsdato, o.sist_sendt,
+            SELECT o.id as oppgave_id, o.type AS oppgavetype, o.opprettet, o.mottaker, os.soknad_mottatt AS opprinneligSoknadsdato, o.sist_sendt,
                 s.epost, s.navn as saksbehandler_navn, s.oid, v.vedtaksperiode_id, v.fom, v.tom, pi.fornavn, pi.mellomnavn, pi.etternavn, pi.fodselsdato,
                 pi.kjonn, pi.adressebeskyttelse, p.aktor_id, p.fodselsnummer, sot.type as saksbehandleroppgavetype, sot.inntektskilde, e.id AS enhet_id, e.navn AS enhet_navn, t.på_vent,
                 ttv.vedtaksperiode_id AS totrinnsvurdering_vedtaksperiode_id, ttv.saksbehandler, ttv.beslutter, ttv.er_retur,
@@ -299,6 +300,8 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
     companion object {
         private fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else this.toString()
 
+        private val log = LoggerFactory.getLogger(OppgaveApiDao::class.java)
+
         internal fun tilOppgaveForOversiktsvisning(it: Row) = OppgaveForOversiktsvisning(
             id = it.string("oppgave_id"),
             type = Oppgavetype.valueOf(it.string("oppgavetype")).tilOppgavetype(),
@@ -339,7 +342,10 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                     erBeslutteroppgave = !erRetur && saksbehandler != null
                 )
             },
-            mottaker = finnMottaker(it.boolean("harArbeidsgiverbeløp"), it.boolean("harPersonbeløp")),
+            mottaker = finnMottaker(it.boolean("harArbeidsgiverbeløp"), it.boolean("harPersonbeløp")).also { mottaker ->
+                val mottakerSattVedOpprettelseAvOppgave = it.stringOrNull("mottaker")?.let(Mottaker::valueOf)
+                if (mottaker != mottakerSattVedOpprettelseAvOppgave) log.info("Mottaker satt ulikt for oppgave: ${it.string("oppgave_id")}")
+            },
             navn = no.nav.helse.spesialist.api.graphql.schema.Personnavn(
                 fornavn = it.string("fornavn"),
                 mellomnavn = it.stringOrNull("mellomnavn"),
