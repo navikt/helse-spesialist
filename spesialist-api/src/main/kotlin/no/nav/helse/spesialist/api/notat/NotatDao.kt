@@ -16,19 +16,25 @@ class NotatDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         tekst: String,
         saksbehandlerOid: UUID,
         type: NotatType = NotatType.Generelt
-    ): Int = queryize(
+    ): NotatDto? = queryize(
         """ 
-            INSERT INTO notat (vedtaksperiode_id, tekst, saksbehandler_oid, type)
-            VALUES (:vedtaksperiode_id, :tekst, :saksbehandler_oid, CAST(:type as notattype));
+            with inserted AS (
+                INSERT INTO notat (vedtaksperiode_id, tekst, saksbehandler_oid, type)
+                VALUES (:vedtaksperiode_id, :tekst, :saksbehandler_oid, CAST(:type as notattype))
+                RETURNING *
+            )
+            SELECT * FROM inserted i INNER JOIN saksbehandler s ON i.saksbehandler_oid = s.oid
         """
-    ).update(
+    ).single(
         mapOf(
             "vedtaksperiode_id" to vedtaksperiodeId,
             "tekst" to tekst,
             "saksbehandler_oid" to saksbehandlerOid,
             "type" to type.name
         )
-    )
+    ) {
+        mapNotatDto(it)
+    }
 
     fun leggTilKommentar(notatId: Int, tekst: String, saksbehandlerident: String): KommentarDto? = queryize(
         """

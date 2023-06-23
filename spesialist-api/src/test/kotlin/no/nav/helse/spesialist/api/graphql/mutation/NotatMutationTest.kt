@@ -47,7 +47,7 @@ internal class NotatMutationTest : AbstractGraphQLApiTest() {
         opprettSaksbehandler()
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
 
-        val antallNyeNotater = runQuery(
+        val body = runQuery(
             """
             mutation LeggTilNotat {
                 leggTilNotat(
@@ -55,12 +55,14 @@ internal class NotatMutationTest : AbstractGraphQLApiTest() {
                     type: Generelt,
                     vedtaksperiodeId: "${PERIODE.id}",
                     saksbehandlerOid: "${SAKSBEHANDLER.oid}"
-                )
+                ) {
+                    tekst
+                }
             }
         """
-        )["data"]["leggTilNotat"].asInt()
+        )
 
-        assertEquals(1, antallNyeNotater)
+        assertEquals("Dette er et notat", body["data"]["leggTilNotat"]["tekst"].asText())
     }
 
     @Test

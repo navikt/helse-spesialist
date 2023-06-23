@@ -2,7 +2,10 @@ package no.nav.helse.spesialist.api.notat
 
 import no.nav.helse.spesialist.api.DatabaseIntegrationTest
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class NotatDaoTest: DatabaseIntegrationTest() {
@@ -51,9 +54,15 @@ internal class NotatDaoTest: DatabaseIntegrationTest() {
         val oid = opprettSaksbehandler()
         val vedtaksperiodeId = PERIODE.id
 
-        val rowsAffected = notatDao.opprettNotat(vedtaksperiodeId, "tekst", oid)
-
-        assertEquals(1, rowsAffected)
+        val tekst = "tekst"
+        val notatDto = notatDao.opprettNotat(vedtaksperiodeId, tekst, oid)
+        assertEquals(tekst, notatDto?.tekst)
+        assertEquals(vedtaksperiodeId, notatDto?.vedtaksperiodeId)
+        assertEquals(oid, notatDto?.saksbehandlerOid)
+        assertEquals(SAKSBEHANDLER.epost, notatDto?.saksbehandlerEpost)
+        assertEquals(SAKSBEHANDLER.navn, notatDto?.saksbehandlerNavn)
+        assertEquals(SAKSBEHANDLER.ident, notatDto?.saksbehandlerIdent)
+        assertEquals(NotatType.Generelt, notatDto?.type)
     }
 
     @Test

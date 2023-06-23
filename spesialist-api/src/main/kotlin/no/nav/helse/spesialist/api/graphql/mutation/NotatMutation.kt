@@ -6,7 +6,9 @@ import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
 import java.time.format.DateTimeFormatter
 import java.util.UUID
+import no.nav.helse.spesialist.api.graphql.query.tilNotat
 import no.nav.helse.spesialist.api.graphql.schema.Kommentar
+import no.nav.helse.spesialist.api.graphql.schema.Notat
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.notat.NotatDao
 
@@ -25,8 +27,10 @@ class NotatMutation(private val notatDao: NotatDao) : Mutation {
     }
 
     @Suppress("unused")
-    fun leggTilNotat(tekst: String, type: NotatType, vedtaksperiodeId: String, saksbehandlerOid: String): Int {
-        return notatDao.opprettNotat(UUID.fromString(vedtaksperiodeId), tekst, UUID.fromString(saksbehandlerOid), type)
+    fun leggTilNotat(tekst: String, type: NotatType, vedtaksperiodeId: String, saksbehandlerOid: String): DataFetcherResult<Notat?> {
+        val notatDto = notatDao.opprettNotat(UUID.fromString(vedtaksperiodeId), tekst, UUID.fromString(saksbehandlerOid), type)
+                ?: return DataFetcherResult.newResult<Notat?>().data(null).build()
+        return DataFetcherResult.newResult<Notat?>().data(tilNotat(notatDto)).build()
     }
 
     @Suppress("unused")

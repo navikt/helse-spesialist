@@ -54,29 +54,29 @@ private fun Map<UUID, List<NotatDto>>.tilNotater(): List<Notater> =
     toList().map { (id, notater) ->
         Notater(
             id = id.toString(),
-            notater = notater.map { notat ->
-                Notat(
-                    id = notat.id,
-                    tekst = notat.tekst,
-                    opprettet = notat.opprettet.format(DateTimeFormatter.ISO_DATE_TIME),
-                    saksbehandlerOid = notat.saksbehandlerOid.toString(),
-                    saksbehandlerNavn = notat.saksbehandlerNavn,
-                    saksbehandlerEpost = notat.saksbehandlerEpost,
-                    saksbehandlerIdent = notat.saksbehandlerIdent,
-                    vedtaksperiodeId = notat.vedtaksperiodeId.toString(),
-                    feilregistrert = notat.feilregistrert,
-                    feilregistrert_tidspunkt = notat.feilregistrert_tidspunkt?.format(DateTimeFormatter.ISO_DATE_TIME),
-                    type = notat.type,
-                    kommentarer = notat.kommentarer.map { kommentar ->
-                        Kommentar(
-                            id = kommentar.id,
-                            tekst = kommentar.tekst,
-                            opprettet = kommentar.opprettet.toString(),
-                            saksbehandlerident = kommentar.saksbehandlerident,
-                            feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt?.toString(),
-                        )
-                    }
-                )
-            }
+            notater = notater.map(::tilNotat)
         )
     }
+
+internal fun tilNotat(notat: NotatDto) = Notat(
+    id = notat.id,
+    tekst = notat.tekst,
+    opprettet = notat.opprettet.format(DateTimeFormatter.ISO_DATE_TIME),
+    saksbehandlerOid = notat.saksbehandlerOid.toString(),
+    saksbehandlerNavn = notat.saksbehandlerNavn,
+    saksbehandlerEpost = notat.saksbehandlerEpost,
+    saksbehandlerIdent = notat.saksbehandlerIdent,
+    vedtaksperiodeId = notat.vedtaksperiodeId.toString(),
+    feilregistrert = notat.feilregistrert,
+    feilregistrert_tidspunkt = notat.feilregistrert_tidspunkt?.format(DateTimeFormatter.ISO_DATE_TIME),
+    type = notat.type,
+    kommentarer = notat.kommentarer.map { kommentar ->
+        Kommentar(
+            id = kommentar.id,
+            tekst = kommentar.tekst,
+            opprettet = kommentar.opprettet.toString(),
+            saksbehandlerident = kommentar.saksbehandlerident,
+            feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt?.toString(),
+        )
+    }
+)
