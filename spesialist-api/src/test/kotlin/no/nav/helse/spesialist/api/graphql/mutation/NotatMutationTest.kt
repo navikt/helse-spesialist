@@ -4,7 +4,6 @@ import no.nav.helse.rapids_rivers.asOptionalLocalDateTime
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class NotatMutationTest : AbstractGraphQLApiTest() {
@@ -29,23 +28,6 @@ internal class NotatMutationTest : AbstractGraphQLApiTest() {
     }
 
     @Test
-    fun `feilregistrerer kommentar old`() {
-        opprettSaksbehandler()
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
-        val notatId = opprettNotat()!!
-        val kommentarId = opprettKommentar(notatRef = notatId.toInt())
-
-        val body = runQuery(
-            """
-            mutation FeilregistrerKommentar {
-                feilregistrerKommentar(id: $kommentarId)
-            }
-        """
-        )
-
-        assertTrue(body["data"]["feilregistrerKommentar"].asBoolean())
-    }
-    @Test
     fun `feilregistrerer kommentar`() {
         opprettSaksbehandler()
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
@@ -55,14 +37,14 @@ internal class NotatMutationTest : AbstractGraphQLApiTest() {
         val body = runQuery(
             """
             mutation FeilregistrerKommentar {
-                feilregistrerKommentarV2(id: $kommentarId) {
+                feilregistrerKommentar(id: $kommentarId) {
                     feilregistrert_tidspunkt
                 }
             }
         """
         )
 
-        assertNotNull(body["data"]["feilregistrerKommentarV2"]["feilregistrert_tidspunkt"].asOptionalLocalDateTime())
+        assertNotNull(body["data"]["feilregistrerKommentar"]["feilregistrert_tidspunkt"].asOptionalLocalDateTime())
     }
 
     @Test

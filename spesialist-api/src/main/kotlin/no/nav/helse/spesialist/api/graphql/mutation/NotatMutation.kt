@@ -25,13 +25,7 @@ class NotatMutation(private val notatDao: NotatDao) : Mutation {
     }
 
     @Suppress("unused")
-    fun feilregistrerKommentar(id: Int): Boolean {
-        val antallOppdatert = notatDao.feilregistrerKommentar(id)
-        return antallOppdatert != null
-    }
-
-    @Suppress("unused")
-    fun feilregistrerKommentarV2(id: Int): DataFetcherResult<Kommentar?> {
+    fun feilregistrerKommentar(id: Int): DataFetcherResult<Kommentar?> {
         val kommentarDto = try {
             notatDao.feilregistrerKommentar(id)
         } catch (e: Exception) {
@@ -39,6 +33,9 @@ class NotatMutation(private val notatDao: NotatDao) : Mutation {
         }
         return DataFetcherResult.newResult<Kommentar?>().data(kommentarDto?.let(::tilKommentar)).build()
     }
+
+    @Suppress("unused")
+    fun feilregistrerKommentarV2(id: Int): DataFetcherResult<Kommentar?> = feilregistrerKommentar(id)
 
     @Suppress("unused")
     fun leggTilNotat(
