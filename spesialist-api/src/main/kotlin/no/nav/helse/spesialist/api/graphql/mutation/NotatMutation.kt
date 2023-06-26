@@ -4,8 +4,8 @@ import com.expediagroup.graphql.server.operations.Mutation
 import graphql.GraphQLError
 import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
-import java.time.format.DateTimeFormatter
 import java.util.UUID
+import no.nav.helse.spesialist.api.graphql.query.tilKommentar
 import no.nav.helse.spesialist.api.graphql.query.tilNotat
 import no.nav.helse.spesialist.api.graphql.schema.Kommentar
 import no.nav.helse.spesialist.api.graphql.schema.Notat
@@ -15,46 +15,72 @@ import no.nav.helse.spesialist.api.notat.NotatDao
 class NotatMutation(private val notatDao: NotatDao) : Mutation {
 
     @Suppress("unused")
-    fun feilregistrerNotat(id: Int): Boolean {
-        val antallOppdatert = notatDao.feilregistrerNotat(id)
-        return antallOppdatert > 0
+    fun feilregistrerNotat(id: Int): DataFetcherResult<Notat?> {
+        val notatDto = try {
+            notatDao.feilregistrerNotat(id)
+        } catch (e: RuntimeException) {
+            return DataFetcherResult.newResult<Notat?>().error(kunneIkkeFeilregistrereNotatError(id)).build()
+        }
+        return DataFetcherResult.newResult<Notat?>().data(notatDto?.let(::tilNotat)).build()
     }
 
     @Suppress("unused")
     fun feilregistrerKommentar(id: Int): Boolean {
         val antallOppdatert = notatDao.feilregistrerKommentar(id)
-        return antallOppdatert > 0
+        return antallOppdatert != null
     }
 
     @Suppress("unused")
-    fun leggTilNotat(tekst: String, type: NotatType, vedtaksperiodeId: String, saksbehandlerOid: String): DataFetcherResult<Notat?> {
-        val notatDto = notatDao.opprettNotat(UUID.fromString(vedtaksperiodeId), tekst, UUID.fromString(saksbehandlerOid), type)
-                ?: return DataFetcherResult.newResult<Notat?>().data(null).build()
-        return DataFetcherResult.newResult<Notat?>().data(tilNotat(notatDto)).build()
+    fun feilregistrerKommentarV2(id: Int): DataFetcherResult<Kommentar?> {
+        val kommentarDto = try {
+            notatDao.feilregistrerKommentar(id)
+        } catch (e: Exception) {
+            return DataFetcherResult.newResult<Kommentar?>().error(kunneIkkeFeilregistrereKommentarError(id)).build()
+        }
+        return DataFetcherResult.newResult<Kommentar?>().data(kommentarDto?.let(::tilKommentar)).build()
+    }
+
+    @Suppress("unused")
+    fun leggTilNotat(
+        tekst: String,
+        type: NotatType,
+        vedtaksperiodeId: String,
+        saksbehandlerOid: String,
+    ): DataFetcherResult<Notat?> {
+        val vedtaksperiodeIdUUID = UUID.fromString(vedtaksperiodeId)
+        val notatDto = try {
+            notatDao.opprettNotat(vedtaksperiodeIdUUID, tekst, UUID.fromString(saksbehandlerOid), type)
+        } catch (e: RuntimeException) {
+            return DataFetcherResult.newResult<Notat?>().error(kunneIkkeOppretteNotatError(vedtaksperiodeIdUUID))
+                .build()
+        }
+        return DataFetcherResult.newResult<Notat?>().data(notatDto?.let(::tilNotat)).build()
     }
 
     @Suppress("unused")
     fun leggTilKommentar(notatId: Int, tekst: String, saksbehandlerident: String): DataFetcherResult<Kommentar?> {
-        val kommentar = try {
+        val kommentarDto = try {
             notatDao.leggTilKommentar(notatId, tekst, saksbehandlerident)
-                ?: return DataFetcherResult.newResult<Kommentar?>().data(null).build()
         } catch (e: Exception) {
-            return DataFetcherResult.newResult<Kommentar?>().error(getNotFoundError(notatId)).build()
+            return DataFetcherResult.newResult<Kommentar?>().error(kunneIkkeFinneNotatError(notatId)).build()
         }
 
-        val result = Kommentar(
-            id = kommentar.id,
-            tekst = kommentar.tekst,
-            opprettet = kommentar.opprettet.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-            saksbehandlerident = kommentar.saksbehandlerident,
-            feilregistrert_tidspunkt = null,
-        )
-
-        return DataFetcherResult.newResult<Kommentar?>().data(result).build()
+        return DataFetcherResult.newResult<Kommentar?>().data(kommentarDto?.let(::tilKommentar)).build()
     }
 
-    private fun getNotFoundError(notatId: Int): GraphQLError = GraphqlErrorException.newErrorException()
-        .message("Finner ikke notat med id $notatId")
-        .extensions(mapOf("code" to 404))
-        .build()
+    private fun kunneIkkeFeilregistrereNotatError(id: Int): GraphQLError =
+        GraphqlErrorException.newErrorException().message("Kunne ikke feilregistrere notat med id $id")
+            .extensions(mapOf("code" to 500)).build()
+
+    private fun kunneIkkeFeilregistrereKommentarError(id: Int): GraphQLError =
+        GraphqlErrorException.newErrorException().message("Kunne ikke feilregistrere kommentar med id $id")
+            .extensions(mapOf("code" to 500)).build()
+
+    private fun kunneIkkeOppretteNotatError(id: UUID): GraphQLError =
+        GraphqlErrorException.newErrorException().message("Kunne ikke opprette notat for vedtaksperiode med id $id")
+            .extensions(mapOf("code" to 500)).build()
+
+    private fun kunneIkkeFinneNotatError(notatId: Int): GraphQLError =
+        GraphqlErrorException.newErrorException().message("Kunne ikke finne notat med id $notatId")
+            .extensions(mapOf("code" to 404)).build()
 }

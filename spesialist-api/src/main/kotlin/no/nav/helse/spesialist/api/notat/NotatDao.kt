@@ -106,21 +106,33 @@ class NotatDao(private val dataSource: DataSource) : HelseDao(dataSource) {
     }
 
 
-    fun feilregistrerNotat(notatId: Int): Int = queryize(
+    fun feilregistrerNotat(notatId: Int): NotatDto? = queryize(
         """ 
-            UPDATE notat
-            SET feilregistrert = true, feilregistrert_tidspunkt = now()
-            WHERE notat.id = :notatId
+            WITH inserted AS (
+                UPDATE notat
+                SET feilregistrert = true, feilregistrert_tidspunkt = now()
+                WHERE notat.id = :notatId
+                RETURNING *
+            )
+            SELECT *
+            FROM inserted i
+            INNER JOIN saksbehandler s on s.oid = i.saksbehandler_oid
         """
-    ).update(mapOf("notatId" to notatId))
+    ).single(mapOf("notatId" to notatId), ::mapNotatDto)
 
-    fun feilregistrerKommentar(kommentarId: Int): Int = queryize(
+    fun feilregistrerKommentar(kommentarId: Int): KommentarDto? = queryize(
         """
-            UPDATE kommentarer
-            SET feilregistrert_tidspunkt = now()
-            WHERE id = :kommentarId
+            WITH inserted AS (
+                UPDATE kommentarer
+                SET feilregistrert_tidspunkt = now()
+                WHERE id = :kommentarId
+                RETURNING *
+            )
+            SELECT *
+            FROM inserted AS i
+            INNER JOIN notat n on n.id = i.notat_ref
         """
-    ).update(mapOf("kommentarId" to kommentarId))
+    ).single(mapOf("kommentarId" to kommentarId), ::mapKommentarDto )
 
     private fun finnKommentarer(notatId: Int): List<KommentarDto> = queryize(
         """

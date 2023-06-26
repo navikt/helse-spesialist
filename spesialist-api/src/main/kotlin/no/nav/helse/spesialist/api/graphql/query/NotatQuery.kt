@@ -11,6 +11,7 @@ import kotlinx.coroutines.withContext
 import no.nav.helse.spesialist.api.graphql.schema.Kommentar
 import no.nav.helse.spesialist.api.graphql.schema.Notat
 import no.nav.helse.spesialist.api.graphql.schema.Notater
+import no.nav.helse.spesialist.api.notat.KommentarDto
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.notat.NotatDto
 
@@ -70,13 +71,13 @@ internal fun tilNotat(notat: NotatDto) = Notat(
     feilregistrert = notat.feilregistrert,
     feilregistrert_tidspunkt = notat.feilregistrert_tidspunkt?.format(DateTimeFormatter.ISO_DATE_TIME),
     type = notat.type,
-    kommentarer = notat.kommentarer.map { kommentar ->
-        Kommentar(
-            id = kommentar.id,
-            tekst = kommentar.tekst,
-            opprettet = kommentar.opprettet.toString(),
-            saksbehandlerident = kommentar.saksbehandlerident,
-            feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt?.toString(),
-        )
-    }
+    kommentarer = notat.kommentarer.map(::tilKommentar)
+)
+
+internal fun tilKommentar(kommentar: KommentarDto) = Kommentar(
+    id = kommentar.id,
+    tekst = kommentar.tekst,
+    opprettet = kommentar.opprettet.toString(),
+    saksbehandlerident = kommentar.saksbehandlerident,
+    feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt?.toString(),
 )
