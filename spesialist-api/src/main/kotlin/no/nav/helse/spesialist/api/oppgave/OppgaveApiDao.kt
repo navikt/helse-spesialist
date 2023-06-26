@@ -15,7 +15,6 @@ import no.nav.helse.spesialist.api.graphql.schema.DateString
 import no.nav.helse.spesialist.api.graphql.schema.InntektFraAOrdningen
 import no.nav.helse.spesialist.api.graphql.schema.Kjonn
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker
-import no.nav.helse.spesialist.api.graphql.schema.Mottaker.ARBEIDSGIVER
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker.BEGGE
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker.SYKMELDT
 import no.nav.helse.spesialist.api.graphql.schema.OppgaveForOversiktsvisning
@@ -34,7 +33,6 @@ import no.nav.helse.spesialist.api.varsel.Varsel
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
 import org.intellij.lang.annotations.Language
-import org.slf4j.LoggerFactory
 
 class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
 
@@ -152,12 +150,6 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 s.epost, s.navn as saksbehandler_navn, s.oid, v.vedtaksperiode_id, v.fom, v.tom, pi.fornavn, pi.mellomnavn, pi.etternavn, pi.fodselsdato,
                 pi.kjonn, pi.adressebeskyttelse, p.aktor_id, p.fodselsnummer, sot.type as saksbehandleroppgavetype, sot.inntektskilde, e.id AS enhet_id, e.navn AS enhet_navn, t.på_vent,
                 ttv.vedtaksperiode_id AS totrinnsvurdering_vedtaksperiode_id, ttv.saksbehandler, ttv.beslutter, ttv.er_retur,
-               ((SELECT SUM(ABS(arbeidsgiverbeløp)) FROM utbetaling_id WHERE p.id=utbetaling_id.person_ref AND utbetaling_id.utbetaling_id IN (
-                   SELECT utbetaling_id FROM selve_vedtaksperiode_generasjon WHERE tilstand='Ulåst' AND skjæringstidspunkt=(
-                       SELECT skjæringstidspunkt FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id=v.vedtaksperiode_id AND tilstand='Ulåst'))) > 0) AS harArbeidsgiverbeløp,
-               ((SELECT SUM(ABS(personbeløp)) FROM utbetaling_id WHERE p.id=utbetaling_id.person_ref AND utbetaling_id.utbetaling_id IN (
-                   SELECT utbetaling_id FROM selve_vedtaksperiode_generasjon WHERE tilstand='Ulåst' AND skjæringstidspunkt=(
-                       SELECT skjæringstidspunkt FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id=v.vedtaksperiode_id AND tilstand='Ulåst'))) > 0) AS harPersonbeløp,
                 h.vedtaksperiode_id IS NOT NULL AS har_varsel_om_negativt_belop
             FROM aktiv_oppgave o
                 INNER JOIN vedtak v ON o.vedtak_ref = v.id
@@ -300,8 +292,6 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
     companion object {
         private fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else this.toString()
 
-        private val log = LoggerFactory.getLogger(OppgaveApiDao::class.java)
-
         internal fun tilOppgaveForOversiktsvisning(it: Row) = OppgaveForOversiktsvisning(
             id = it.string("oppgave_id"),
             type = Oppgavetype.valueOf(it.string("oppgavetype")).tilOppgavetype(),
@@ -342,24 +332,20 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                     erBeslutteroppgave = !erRetur && saksbehandler != null
                 )
             },
-            mottaker = finnMottaker(it.boolean("harArbeidsgiverbeløp"), it.boolean("harPersonbeløp")).also { mottaker ->
-                val mottakerSattVedOpprettelseAvOppgave = it.stringOrNull("mottaker")?.let(Mottaker::valueOf)
-                if (mottaker != mottakerSattVedOpprettelseAvOppgave) log.info("Mottaker satt ulikt for oppgave: ${it.string("oppgave_id")}")
-            },
+            mottaker = it.stringOrNull("mottaker")?.let(Mottaker::valueOf),
             navn = no.nav.helse.spesialist.api.graphql.schema.Personnavn(
                 fornavn = it.string("fornavn"),
                 mellomnavn = it.stringOrNull("mellomnavn"),
                 etternavn = it.string("etternavn"),
             ),
-            haster = it.boolean("har_varsel_om_negativt_belop") && it.boolean("harPersonbeløp"),
+            haster = it.boolean("har_varsel_om_negativt_belop") && harUtbetalingTilSykmeldt(it.stringOrNull("mottaker")),
         )
 
-        private fun finnMottaker(harArbeidsgiverbeløp: Boolean, harPersonbeløp: Boolean): Mottaker? {
-            return when {
-                harArbeidsgiverbeløp && harPersonbeløp -> BEGGE
-                harPersonbeløp -> SYKMELDT
-                harArbeidsgiverbeløp -> ARBEIDSGIVER
-                else -> null
+        private fun harUtbetalingTilSykmeldt(mottaker: String?): Boolean {
+            if (mottaker == null) return false
+            return when (Mottaker.valueOf(mottaker)) {
+                BEGGE, SYKMELDT -> true
+                else -> false
             }
         }
     }

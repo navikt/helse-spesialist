@@ -230,6 +230,7 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
         }
          val generasjonRef = nyGenerasjon(vedtaksperiodeId = VEDTAKSPERIODE, utbetalingId = UTBETALING_ID)
         nyttVarsel(kode = "RV_UT_23", generasjonRef = generasjonRef, vedtaksperiodeId = VEDTAKSPERIODE)
+        ferdigstillSistOpprettedeOppgaveOgOpprettNy()
         val oppgaver = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_RISK)
         assertTrue(oppgaver.first().haster ?: false)
     }
