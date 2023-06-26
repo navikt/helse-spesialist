@@ -14,6 +14,7 @@ import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.overstyring.OverstyringArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringInntektDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringTidslinjeDto
+import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsettingSykepengegrunnlagDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
@@ -76,6 +77,22 @@ data class Inntektoverstyring(
         val fom: DateString,
         val tom: DateString?,
         val belop: Double,
+    )
+}
+
+data class Sykepengegrunnlagskjonnsfastsetting(
+    override val hendelseId: UUIDString,
+    override val timestamp: DateTimeString,
+    override val saksbehandler: Saksbehandler,
+    override val ferdigstilt: Boolean,
+    val skjonnsfastsatt: SkjonnsfastsattSykepengegrunnlag,
+) : Overstyring {
+    data class SkjonnsfastsattSykepengegrunnlag(
+        val arsak: String,
+        val begrunnelse: String,
+        val arlig: Double,
+        val fraArlig: Double?,
+        val skjaeringstidspunkt: DateTimeString,
     )
 }
 
@@ -157,7 +174,9 @@ data class Arbeidsgiver(
         overstyringApiDao.finnOverstyringerAvInntekt(fødselsnummer, organisasjonsnummer)
             .map { it.tilInntektoverstyring() } +
         overstyringApiDao.finnOverstyringerAvArbeidsforhold(fødselsnummer, organisasjonsnummer)
-            .map { it.tilArbeidsforholdoverstyring() }
+            .map { it.tilArbeidsforholdoverstyring() } +
+        overstyringApiDao.finnSkjønnsfastsettingSykepengegrunnlag(fødselsnummer, organisasjonsnummer)
+            .map { it.tilSykepengegrunnlagSkjønnsfastsetting() }
 
     fun arbeidsforhold(): List<Arbeidsforhold> =
         arbeidsgiverApiDao.finnArbeidsforhold(fødselsnummer, organisasjonsnummer).map {
@@ -234,3 +253,21 @@ private fun OverstyringArbeidsforholdDto.tilArbeidsforholdoverstyring() = Arbeid
     forklaring = forklaring,
     ferdigstilt = ferdigstilt,
 )
+
+private fun SkjønnsfastsettingSykepengegrunnlagDto.tilSykepengegrunnlagSkjønnsfastsetting() = Sykepengegrunnlagskjonnsfastsetting(
+    hendelseId = hendelseId.toString(),
+    timestamp = timestamp.format(DateTimeFormatter.ISO_DATE_TIME),
+    saksbehandler = Saksbehandler(
+        navn = saksbehandlerNavn,
+        ident = saksbehandlerIdent
+    ),
+    skjonnsfastsatt = Sykepengegrunnlagskjonnsfastsetting.SkjonnsfastsattSykepengegrunnlag(
+        arsak = årsak,
+        begrunnelse = begrunnelse,
+        arlig = årlig,
+        fraArlig = fraÅrlig,
+        skjaeringstidspunkt = skjæringstidspunkt.format(DateTimeFormatter.ISO_DATE),
+    ),
+    ferdigstilt = ferdigstilt,
+)
+
