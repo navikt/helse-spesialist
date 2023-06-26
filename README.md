@@ -23,11 +23,9 @@ Vi er per nå avhengig av naisdevice for å bygge lokalt, pga graphql schema-end
 - Legg til denne verdien: `testcontainers.reuse.enable=true`
 
 ## Oppgradering av gradle wrapper
-Finn nyeste versjon av gradle her: https://gradle.org/releases/
-
-Kjør `./gradlew wrapper --gradle-version $gradleVersjon`
-
-Husk å oppdatere gradle-versjon i build.gradle.kts-filen: `gradleVersion = "$gradleVersjon"`
+- Finn nyeste versjon av gradle her: https://gradle.org/releases/
+- Kjør `./gradlew wrapper --gradle-version $gradleVersjon` to ganger, ref. [dokumentasjonen til Gradle](https://docs.gradle.org/current/userguide/gradle_wrapper.html#sec:upgrading_wrapper).
+- Oppdater gradle-versjon i build.gradle.kts-filen: `gradleVersion = "$gradleVersjon"`
 
 ## Spesialist-opprydding-dev
 En selvstendig app for å slette testpersoner, kjører kun i dev.
