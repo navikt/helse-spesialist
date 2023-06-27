@@ -9,7 +9,6 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.path
 import java.util.UUID
-import kotlinx.coroutines.runBlocking
 import no.nav.helse.spesialist.api.client.AccessTokenClient
 import org.slf4j.LoggerFactory
 
@@ -19,7 +18,7 @@ class MsGraphClient(
     private val graphUrl: String = "https://graph.microsoft.com/v1.0",
 ) {
     suspend fun erIGruppe(oid: UUID, groupId: UUID): Boolean {
-        val token = runBlocking { tokenClient.hentAccessToken("https://graph.microsoft.com/.default") }
+        val token = tokenClient.hentAccessToken("https://graph.microsoft.com/.default")
         val response = httpClient.get(graphUrl) {
             url {
                 path("v1.0/groups/$groupId/members")
