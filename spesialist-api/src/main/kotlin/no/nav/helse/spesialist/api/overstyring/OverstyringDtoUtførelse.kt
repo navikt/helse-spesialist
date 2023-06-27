@@ -101,6 +101,7 @@ internal data class SkjønnsfastsattArbeidsgiverDto(
     val årsak: String,
     val begrunnelse: String,
     val subsumsjon: SubsumsjonDto?,
+    val initierendeVedtaksperiodeId: String?,
 ) {
     fun toMap(): Map<String, Any?> = listOfNotNull(
         "organisasjonsnummer" to organisasjonsnummer,
@@ -109,6 +110,7 @@ internal data class SkjønnsfastsattArbeidsgiverDto(
         "årsak" to årsak,
         "begrunnelse" to begrunnelse,
         "subsumsjon" to subsumsjon,
+        "initierendeVedtaksperiodeId" to initierendeVedtaksperiodeId,
     ).toMap()
 
     internal companion object {

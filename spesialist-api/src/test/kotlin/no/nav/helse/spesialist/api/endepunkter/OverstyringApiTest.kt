@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.api.endepunkter
 
 import io.ktor.http.HttpStatusCode
+import java.util.UUID
 import no.nav.helse.spesialist.api.AbstractE2ETest
 import no.nav.helse.spesialist.api.februar
 import no.nav.helse.spesialist.api.januar
@@ -139,7 +140,8 @@ internal class OverstyringApiTest: AbstractE2ETest() {
                     fraÅrlig = 260000.0,
                     årsak = "En årsak",
                     begrunnelse = "En begrunnelse",
-                    subsumsjon = SubsumsjonDto("8-28", "3", null)
+                    subsumsjon = SubsumsjonDto("8-28", "3", null),
+                    initierendeVedtaksperiodeId = UUID.randomUUID().toString(),
                 ),
             )
         )

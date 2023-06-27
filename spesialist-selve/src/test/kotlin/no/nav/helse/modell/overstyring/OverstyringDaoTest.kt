@@ -209,7 +209,8 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
                     fraÅrlig = INNTEKT + 1,
                     årsak = ÅRSAK,
                     begrunnelse = BEGRUNNELSE,
-                    subsumsjon = Subsumsjon(paragraf = "87494")
+                    subsumsjon = Subsumsjon(paragraf = "87494"),
+                    initierendeVedtaksperiodeId = VEDTAKSPERIODE
                 )
             ),
             OID,
@@ -326,7 +327,8 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
                     fraÅrlig = INNTEKT + 1,
                     årsak = ÅRSAK,
                     begrunnelse = BEGRUNNELSE,
-                    subsumsjon = Subsumsjon(paragraf = "87494")
+                    subsumsjon = Subsumsjon(paragraf = "87494"),
+                    initierendeVedtaksperiodeId = VEDTAKSPERIODE
                 )
             ),
             skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,

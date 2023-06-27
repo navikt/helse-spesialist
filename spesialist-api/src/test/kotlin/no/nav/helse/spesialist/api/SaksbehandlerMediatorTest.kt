@@ -371,7 +371,8 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
                     fraÅrlig = 25001.0,
                     subsumsjon = SubsumsjonDto("8-28", "3", null),
                     årsak = "En årsak",
-                    begrunnelse = "En begrunnelse"
+                    begrunnelse = "En begrunnelse",
+                    initierendeVedtaksperiodeId = PERIODE.id.toString()
                 ),
                 SkjønnsfastsattArbeidsgiverDto(
                     organisasjonsnummer = ORGANISASJONSNUMMER_GHOST,
@@ -379,7 +380,8 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
                     fraÅrlig = 25001.0,
                     subsumsjon = SubsumsjonDto("8-28", "3", null),
                     årsak = "En årsak 2",
-                    begrunnelse = "En begrunnelse 2"
+                    begrunnelse = "En begrunnelse 2",
+                    initierendeVedtaksperiodeId = UUID.randomUUID().toString()
                 ),
             )
         )

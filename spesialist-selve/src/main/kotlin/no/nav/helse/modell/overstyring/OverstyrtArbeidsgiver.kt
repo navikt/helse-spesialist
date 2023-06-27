@@ -2,6 +2,7 @@ package no.nav.helse.modell.overstyring
 
 import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.modell.overstyring.Refusjonselement.Companion.refusjonselementer
 import no.nav.helse.modell.overstyring.Subsumsjon.Companion.subsumsjonelementer
 import no.nav.helse.rapids_rivers.asLocalDate
@@ -41,6 +42,7 @@ internal class SkjønnsfastsattArbeidsgiver(
     val årsak: String,
     val begrunnelse: String,
     val subsumsjon: Subsumsjon?,
+    val initierendeVedtaksperiodeId: UUID?
 ) {
     companion object {
         internal fun JsonNode.arbeidsgiverelementer(): List<SkjønnsfastsattArbeidsgiver> {
@@ -51,7 +53,10 @@ internal class SkjønnsfastsattArbeidsgiver(
                     fraÅrlig = jsonNode["fraÅrlig"].asDouble(),
                     årsak = jsonNode["årsak"].asText(),
                     begrunnelse = jsonNode["begrunnelse"].asText(),
-                    subsumsjon = jsonNode["subsumsjon"].subsumsjonelementer()
+                    subsumsjon = jsonNode["subsumsjon"].subsumsjonelementer(),
+                    initierendeVedtaksperiodeId = if (jsonNode["initierendeVedtaksperiodeId"].isNull) null else UUID.fromString(
+                        jsonNode["initierendeVedtaksperiodeId"].asText()
+                    )
                 )
             }
         }
