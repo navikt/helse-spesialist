@@ -13,7 +13,7 @@ class OpptegnelseDao(dataSource: DataSource) : HelseDao(dataSource) {
             INSERT INTO opptegnelse (person_id, payload, type)
             SELECT id, :payload::jsonb, :type
             FROM person
-            WHERE fodselsnummer=:fodselsnummer
+            WHERE fodselsnummer = :fodselsnummer
         """
         return query.update(
             mapOf("fodselsnummer" to fødselsnummer.toLong(), "payload" to payload.toJson(), "type" to "$type")
@@ -27,8 +27,7 @@ class OpptegnelseDao(dataSource: DataSource) : HelseDao(dataSource) {
             FROM opptegnelse o
             JOIN person p ON o.person_id = p.id
             JOIN abonnement_for_opptegnelse a ON a.person_id = o.person_id
-
-            WHERE a.saksbehandler_id= :saksbehandlerIdent
+            WHERE a.saksbehandler_id = :saksbehandlerIdent
             AND (a.siste_sekvensnummer IS NULL OR o.SEKVENSNUMMER > a.siste_sekvensnummer)
         """
         return query.list(mapOf("saksbehandlerIdent" to saksbehandlerIdent)) { row ->
