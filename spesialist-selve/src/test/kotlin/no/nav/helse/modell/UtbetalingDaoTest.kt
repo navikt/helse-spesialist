@@ -3,8 +3,6 @@ package no.nav.helse.modell
 import DatabaseIntegrationTest
 import java.time.LocalDateTime
 import java.util.UUID
-import kotliquery.queryOf
-import kotliquery.sessionOf
 import no.nav.helse.juli
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
@@ -12,7 +10,6 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.ANNULLERT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
@@ -142,20 +139,18 @@ class UtbetalingDaoTest : DatabaseIntegrationTest() {
     }
 
     private fun assertArbeidsgiverbeløp(beløp: Int, utbetalingId: UUID) {
-        @Language("PostgreSQL")
-        val query = "SELECT arbeidsgiverbeløp FROM utbetaling_id WHERE utbetaling_id = ?"
-        val arbeidsgiverbeløp = sessionOf(dataSource).use {
-            it.run(queryOf(query, utbetalingId).map { it.intOrNull("arbeidsgiverbeløp") }.asSingle)
-        }
+        val arbeidsgiverbeløp = query(
+            "SELECT arbeidsgiverbeløp FROM utbetaling_id WHERE utbetaling_id = :utbetalingId",
+            "utbetalingId" to utbetalingId
+        ).single { it.intOrNull("arbeidsgiverbeløp") }
         assertEquals(beløp, arbeidsgiverbeløp)
     }
 
     private fun assertPersonbeløp(beløp: Int, utbetalingId: UUID) {
-        @Language("PostgreSQL")
-        val query = "SELECT personbeløp FROM utbetaling_id WHERE utbetaling_id = ?"
-        val personbeløp = sessionOf(dataSource).use {
-            it.run(queryOf(query, utbetalingId).map { it.intOrNull("personbeløp") }.asSingle)
-        }
+        val personbeløp = query(
+            "SELECT personbeløp FROM utbetaling_id WHERE utbetaling_id = :utbetalingId",
+            "utbetalingId" to utbetalingId
+        ).single { it.intOrNull("personbeløp") }
         assertEquals(beløp, personbeløp)
     }
 }

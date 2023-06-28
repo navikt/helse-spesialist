@@ -6,6 +6,9 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.Random
 import java.util.UUID
+import kotliquery.Query
+import kotliquery.Row
+import kotliquery.action.QueryAction
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
@@ -589,4 +592,13 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         val fom: LocalDate,
         val tom: LocalDate,
     )
+
+    protected fun query(@Language("postgresql") query: String, vararg params: Pair<String, Any>) =
+        queryOf(query, params.toMap())
+
+    protected fun Query.update() = asUpdate.runInSession()
+
+    protected fun <T> Query.single(mapper: (Row) -> T?) = map(mapper).asSingle.runInSession()
+
+    protected fun <T> QueryAction<T>.runInSession() = sessionOf(dataSource).use(::runWithSession)
 }
