@@ -6,6 +6,9 @@ import io.mockk.mockk
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import kotliquery.Query
+import kotliquery.Row
+import kotliquery.action.QueryAction
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
@@ -808,4 +811,13 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         val ident: String,
         val epost: String,
     )
+
+    protected fun query(@Language("postgresql") query: String, vararg params: Pair<String, Any>) =
+        queryOf(query, params.toMap())
+
+    protected fun Query.update() = asUpdate.runInSession()
+
+    protected fun <T> Query.single(mapper: (Row) -> T?) = map(mapper).asSingle.runInSession()
+
+    protected fun <T> QueryAction<T>.runInSession() = sessionOf(dataSource).use(::runWithSession)
 }

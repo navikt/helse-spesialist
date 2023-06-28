@@ -1,11 +1,13 @@
 package no.nav.helse.spesialist.api.abonnement
 
-import DatabaseIntegrationTest
 import java.util.UUID
+import no.nav.helse.spesialist.api.DatabaseIntegrationTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class AbonnementDaoTest : DatabaseIntegrationTest() {
+
+    private val abonnementDao = AbonnementDao(dataSource)
 
     @Test
     fun `sekvensnummer blir null når det ikke fins noen opptegnelser for personen`() {
@@ -24,7 +26,7 @@ internal class AbonnementDaoTest : DatabaseIntegrationTest() {
         val sekvensnummerForPersonen = 9696
         val aktørId = "42"
         val personId = opprettPerson(aktørId = aktørId)
-        lagOpptegnelse(personId.personId, sekvensnummerForPersonen)
+        lagOpptegnelse(personId, sekvensnummerForPersonen)
 
         abonnementDao.opprettAbonnement(saksbehandlerId, aktørId.toLong())
 
