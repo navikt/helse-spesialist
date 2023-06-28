@@ -296,8 +296,9 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         navn: String = "SAKSBEHANDLER SAKSBEHANDLERSEN",
         epost: String = "epost@nav.no",
         ident: String = "Z999999",
-    ) {
+    ): UUID {
         saksbehandlerDao.opprettSaksbehandler(saksbehandlerOID, navn, epost, ident)
+        return saksbehandlerOID
     }
 
     protected fun opprettArbeidsgiver(
