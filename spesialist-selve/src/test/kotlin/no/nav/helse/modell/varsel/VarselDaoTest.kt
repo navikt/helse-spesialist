@@ -8,6 +8,7 @@ import kotliquery.sessionOf
 import no.nav.helse.januar
 import no.nav.helse.modell.varsel.Varsel.Status.AKTIV
 import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
+import no.nav.helse.modell.varsel.Varsel.Status.VURDERT
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Periode
 import org.intellij.lang.annotations.Language
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class VarselDaoTest : DatabaseIntegrationTest() {
 
@@ -129,6 +131,20 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
         varselDao.oppdaterStatus(v1, generasjonIdv1, "EN_KODE", INAKTIV, "EN_IDENT", definisjonId)
         assertEquals(INAKTIV, varselDao.finnVarselstatus(v1, "EN_KODE"))
         assertEquals(AKTIV, varselDao.finnVarselstatus(v2, "EN_KODE"))
+    }
+
+    @Test
+    fun `kan ikke overskrive med samme status`() {
+        val definisjonId = UUID.randomUUID()
+        definisjonDao.lagreDefinisjon(definisjonId, "EN_KODE", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now())
+        val v1 = UUID.randomUUID()
+        val generasjonIdv1 = UUID.randomUUID()
+        generasjonDao.opprettFor(generasjonIdv1, v1, UUID.randomUUID(), 1.januar, Periode(1.januar, 31.januar), Generasjon.Ulåst)
+        varselDao.lagreVarsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), v1, generasjonIdv1)
+        varselDao.oppdaterStatus(v1, generasjonIdv1, "EN_KODE", VURDERT, "saksbehandler 1", definisjonId)
+        assertThrows<IllegalStateException> {
+            varselDao.oppdaterStatus(v1, generasjonIdv1, "EN_KODE", VURDERT, "saksbehandler 2", definisjonId)
+        }
     }
 
     @Test

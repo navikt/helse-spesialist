@@ -41,7 +41,8 @@ internal class VarselDao(private val dataSource: DataSource) {
                     end
                 WHERE vedtaksperiode_id = :vedtaksperiodeId
                 AND generasjon_ref = (SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = :generasjonId) 
-                AND kode = :varselkode;
+                AND kode = :varselkode
+                AND status != :status;
             """
 
         sessionOf(dataSource).use { session ->
@@ -58,7 +59,9 @@ internal class VarselDao(private val dataSource: DataSource) {
                         "varselkode" to varselkode
                     )
                 ).asUpdate
-            )
+            ).also {
+                check(it > 0) { "Varsel $varselkode for generasjonId $generasjonId, vedtaksperiodeId $vedtaksperiodeId har allerede status $status"}
+            }
         }
     }
 
