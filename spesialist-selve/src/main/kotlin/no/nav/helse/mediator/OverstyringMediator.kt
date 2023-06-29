@@ -16,7 +16,7 @@ internal class OverstyringMediator(
     }
 
     internal fun sendSubsumsjon(packet: JsonNode) {
-        val fnr = packet["fødselsnummer"].asText()
+        val fnr = packet["subsumsjon"]["fodselsnummer"].asText()
         val rawJson = objectMapper.writeValueAsString(packet)
         sikkerLogg.info("Publiserer subsumsjon for fnr=${fnr}:\n${rawJson}")
         rapidsConnection.publish(fnr, rawJson)

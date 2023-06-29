@@ -253,6 +253,7 @@ internal class OverstyringIT : AbstractE2ETest() {
 
             assertEquals("Invalidert", oppgaveStatus())
             assertEquals(1, testRapid.inspektør.hendelser("skjønnsmessig_fastsettelse").size)
+            assertEquals(1, testRapid.inspektør.hendelser("subsumsjon").size)
         }
     }
 
