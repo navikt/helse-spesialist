@@ -119,6 +119,7 @@ internal class Hendelsefabrikk(
     private val varselRepository: ActualVarselRepository = ActualVarselRepository(dataSource),
     private val overstyringMediator: OverstyringMediator,
     private val snapshotMediator: SnapshotMediator,
+    private val versjonAvKode: String?,
 ) {
     private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
 
@@ -135,6 +136,7 @@ internal class Hendelsefabrikk(
                     fraGrad = it.path("fraGrad").asInt()
                 )
             }
+
     }
 
     private fun sykefraværstilfelle(fødselsnummer: String, skjæringstidspunkt: LocalDate): Sykefraværstilfelle {
@@ -516,6 +518,7 @@ internal class Hendelsefabrikk(
         tildelingDao = tildelingDao,
         overstyringDao = overstyringDao,
         overstyringMediator = overstyringMediator,
+        versjonAvKode = versjonAvKode,
     )
 
     fun overstyringArbeidsforhold(

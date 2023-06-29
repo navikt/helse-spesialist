@@ -340,6 +340,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             tildelingDao = tildelingDao,
             overstyringDao = overstyringDao,
             overstyringMediator = mockk(),
+            versjonAvKode = "versjonAvKode",
         )
     )
 

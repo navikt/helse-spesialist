@@ -15,6 +15,13 @@ internal class OverstyringMediator(
         rapidsConnection.publish(fnr, rawJson)
     }
 
+    internal fun sendSubsumsjon(packet: JsonNode) {
+        val fnr = packet["fødselsnummer"].asText()
+        val rawJson = objectMapper.writeValueAsString(packet)
+        sikkerLogg.info("Publiserer subsumsjon for fnr=${fnr}:\n${rawJson}")
+        rapidsConnection.publish(fnr, rawJson)
+    }
+
     private companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     }

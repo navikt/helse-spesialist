@@ -79,7 +79,8 @@ internal class TestMediator(
         godkjenningMediator = godkjenningMediator,
         automatisering = automatisering,
         overstyringMediator = overstyringMediator,
-        snapshotMediator = snapshotMediator
+        snapshotMediator = snapshotMediator,
+        versjonAvKode = "versjonAvKode",
     )
 
     init {

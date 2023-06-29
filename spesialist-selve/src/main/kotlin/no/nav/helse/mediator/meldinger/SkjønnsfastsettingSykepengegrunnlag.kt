@@ -12,6 +12,7 @@ import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OpprettSaksbehandlerCommand
 import no.nav.helse.modell.kommando.PersisterSkjønnsfastsettingSykepengegrunnlagCommand
 import no.nav.helse.modell.kommando.PubliserOverstyringCommand
+import no.nav.helse.modell.kommando.PubliserSubsumsjonCommand
 import no.nav.helse.modell.kommando.ReserverPersonCommand
 import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.overstyring.OverstyringDao
@@ -52,6 +53,7 @@ internal class SkjønnsfastsettingSykepengegrunnlag(
     tildelingDao: TildelingDao,
     overstyringDao: OverstyringDao,
     overstyringMediator: OverstyringMediator,
+    versjonAvKode: String?,
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         OpprettSaksbehandlerCommand(
@@ -78,6 +80,12 @@ internal class SkjønnsfastsettingSykepengegrunnlag(
             json = json,
             overstyringMediator = overstyringMediator,
             overstyringDao = overstyringDao,
+        ),
+        PubliserSubsumsjonCommand(
+            fødselsnummer = fødselsnummer,
+            arbeidsgivere = arbeidsgivere,
+            overstyringMediator = overstyringMediator,
+            versjonAvKode = versjonAvKode
         )
     )
 

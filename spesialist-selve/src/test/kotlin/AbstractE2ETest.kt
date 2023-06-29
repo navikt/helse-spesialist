@@ -158,7 +158,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             generasjonDao = generasjonDao,
         ),
         overstyringMediator = OverstyringMediator(testRapid),
-        snapshotMediator = snapshotMediator
+        snapshotMediator = snapshotMediator,
+        versjonAvKode = "versjonAvKode",
     )
     internal val hendelseMediator = HendelseMediator(
         dataSource = dataSource,

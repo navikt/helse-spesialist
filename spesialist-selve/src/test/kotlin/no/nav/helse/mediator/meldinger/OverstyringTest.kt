@@ -55,6 +55,7 @@ internal class OverstyringTest {
         automatisering = mockk(),
         overstyringMediator = mockk(relaxed = true),
         snapshotMediator = mockk(relaxed = true),
+        versjonAvKode = "versjonAvKode",
     )
 
     private val overstyringAvTidslinjeMessage get() = hendelsefabrikk.overstyringTidslinje(

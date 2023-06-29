@@ -367,6 +367,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         automatisering = automatisering,
         overstyringMediator = OverstyringMediator(rapidsConnection),
         snapshotMediator = snapshotMediator,
+        versjonAvKode = versjonAvKode(env)
     )
 
     init {
@@ -403,6 +404,10 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
 
     override fun onShutdown(rapidsConnection: RapidsConnection) {
         dataSource.close()
+    }
+
+    private fun versjonAvKode(env: Map<String, String>): String {
+        return env["NAIS_APP_IMAGE"] ?: throw IllegalArgumentException("NAIS_APP_IMAGE env variable is missing")
     }
 }
 

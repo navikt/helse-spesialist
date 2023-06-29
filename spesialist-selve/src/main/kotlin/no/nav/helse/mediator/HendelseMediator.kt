@@ -491,7 +491,7 @@ internal class HendelseMediator(
                 arbeidsgivere = arbeidsgivere,
                 skjæringstidspunkt = skjæringstidspunkt,
                 opprettet = opprettet,
-                json = json
+                json = json,
             ), context
         )
     }
