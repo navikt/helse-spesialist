@@ -33,7 +33,7 @@ internal class PubliserSubsumsjonCommand(
             ),
             "tidsstempel" to "${LocalDateTime.now()}",
             "lovverk" to "folketrygdloven",
-            "lovverksversjon" to "2020-01-01",
+            "lovverksversjon" to "2023-03-15",
             "paragraf" to "${arbeidsgivere.first().subsumsjon?.paragraf}",
             "ledd" to "${arbeidsgivere.first().subsumsjon?.ledd}",
             "bokstav" to "${arbeidsgivere.first().subsumsjon?.bokstav}",
