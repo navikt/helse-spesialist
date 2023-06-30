@@ -12,17 +12,11 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.TestHendelse
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
-import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker.ARBEIDSGIVER
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker.BEGGE
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker.SYKMELDT
 import no.nav.helse.spesialist.api.graphql.schema.Oppgavetype.RISK_QA
-import no.nav.helse.spesialist.api.graphql.schema.Oppgavetype.SOKNAD
-import no.nav.helse.spesialist.api.graphql.schema.Oppgavetype.STIKKPROVE
-import no.nav.helse.spesialist.api.graphql.schema.Periodetype.FORLENGELSE
 import no.nav.helse.spesialist.api.graphql.schema.Periodetype.FORSTEGANGSBEHANDLING
-import no.nav.helse.spesialist.api.graphql.schema.Periodetype.INFOTRYGDFORLENGELSE
-import no.nav.helse.spesialist.api.graphql.schema.Periodetype.OVERGANG_FRA_IT
 import no.nav.helse.spesialist.api.oppgave.Oppgavemelder
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
@@ -233,50 +227,6 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
         ferdigstillSistOpprettedeOppgaveOgOpprettNy()
         val oppgaver = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_RISK)
         assertTrue(oppgaver.first().haster ?: false)
-    }
-    @Test
-    fun `sorterer STIKKPRØVE-oppgaver først, så RISK_QA, så resten, eldste først`() {
-        opprettPerson()
-        opprettArbeidsgiver()
-
-        fun opprettVedtaksperiodeOgOppgave(periodetype: Periodetype, oppgavetype: Oppgavetype = OPPGAVETYPE) {
-            val randomUUID = UUID.randomUUID()
-            opprettGenerasjon(randomUUID)
-            opprettVedtaksperiode(vedtaksperiodeId = randomUUID, periodetype = periodetype)
-            opprettOppgave(vedtaksperiodeId = randomUUID, oppgavetype = oppgavetype)
-        }
-
-        opprettVedtaksperiodeOgOppgave(Periodetype.FØRSTEGANGSBEHANDLING)
-        opprettVedtaksperiodeOgOppgave(Periodetype.FORLENGELSE, Oppgavetype.RISK_QA)
-        opprettVedtaksperiodeOgOppgave(Periodetype.FØRSTEGANGSBEHANDLING, Oppgavetype.RISK_QA)
-        opprettVedtaksperiodeOgOppgave(Periodetype.OVERGANG_FRA_IT, Oppgavetype.RISK_QA)
-        opprettVedtaksperiodeOgOppgave(Periodetype.INFOTRYGDFORLENGELSE)
-        opprettVedtaksperiodeOgOppgave(Periodetype.INFOTRYGDFORLENGELSE, Oppgavetype.RISK_QA)
-        opprettVedtaksperiodeOgOppgave(Periodetype.FORLENGELSE, Oppgavetype.STIKKPRØVE)
-        opprettVedtaksperiodeOgOppgave(Periodetype.OVERGANG_FRA_IT, Oppgavetype.STIKKPRØVE)
-
-        val oppgaver = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_RISK)
-        oppgaver.filter { it.type == RISK_QA }.let { riskoppgaver ->
-            assertTrue(riskoppgaver.map { it.opprettet }.zipWithNext { a, b -> a <= b }.all { it }) {
-                "Oops, skulle ha vært sortert stigende , men er det ikke: $riskoppgaver"
-            }
-        }
-        oppgaver.filter { it.type == STIKKPROVE }.let { stikkprøver ->
-            assertTrue(stikkprøver.map { it.opprettet }.zipWithNext { a, b -> a <= b }.all { it }) {
-                "Oops, skulle ha vært sortert stigende , men er det ikke: $stikkprøver"
-            }
-        }
-        listOf(
-            RISK_QA to FORLENGELSE,
-            RISK_QA to FORSTEGANGSBEHANDLING,
-            RISK_QA to OVERGANG_FRA_IT,
-            RISK_QA to INFOTRYGDFORLENGELSE,
-            SOKNAD to FORSTEGANGSBEHANDLING,
-            SOKNAD to INFOTRYGDFORLENGELSE,
-        ).let { ønsketRekkefølge ->
-            assertEquals(ønsketRekkefølge.map { it.first }, oppgaver.map { it.type })
-            assertEquals(ønsketRekkefølge.map { it.second }, oppgaver.map { it.periodetype })
-        }
     }
 
     @Test

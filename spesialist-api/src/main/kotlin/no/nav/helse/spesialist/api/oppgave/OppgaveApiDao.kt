@@ -176,12 +176,6 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 AND CASE WHEN :harTilgangTilStikkprove
                     THEN true
                     ELSE o.type != 'STIKKPRØVE' END
-            ORDER BY
-                CASE WHEN t.saksbehandler_ref IS NOT NULL THEN 0 ELSE 1 END,
-                har_varsel_om_negativt_belop DESC,
-                CASE WHEN o.type = 'STIKKPRØVE' THEN 0 ELSE 1 END,
-                CASE WHEN o.type = 'RISK_QA' THEN 0 ELSE 1 END,
-                opprettet
                 ;
             """
             val parameters = mapOf(
