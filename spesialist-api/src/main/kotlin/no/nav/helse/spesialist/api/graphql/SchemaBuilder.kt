@@ -16,6 +16,7 @@ import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQuery
 import no.nav.helse.spesialist.api.graphql.query.NotatQuery
 import no.nav.helse.spesialist.api.graphql.query.OppdragQuery
 import no.nav.helse.spesialist.api.graphql.query.OppgaverQuery
+import no.nav.helse.spesialist.api.graphql.query.OpptegnelseQuery
 import no.nav.helse.spesialist.api.graphql.query.PersonQuery
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.notat.NotatMediator
@@ -97,6 +98,11 @@ internal class SchemaBuilder(
                 ),
                 TopLevelObject(
                     NotatQuery(notatDao = notatDao)
+                ),
+                TopLevelObject(
+                    OpptegnelseQuery(
+                        saksbehandlerMediator = saksbehandlerMediator
+                    )
                 )
             ),
             mutations = listOf(

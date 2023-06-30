@@ -76,7 +76,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         )
 
         const val FØDSELSNUMMER = "01017011111"
-        const val AKTØRID = "01017011111111"
+        const val AKTØRID = "1017011111111"
         const val ARBEIDSGIVER_NAVN = "EN ARBEIDSGIVER"
         const val ORGANISASJONSNUMMER = "987654321"
     }

@@ -52,7 +52,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
 
     private val reservasjonClient = mockk<ReservasjonClient>(relaxed = true)
     private val behandlingsstatistikkMediator = mockk<BehandlingsstatistikkMediator>(relaxed = true)
-    private val saksbehandlerMediator = mockk<SaksbehandlerMediator>(relaxed = true)
+    protected open val saksbehandlerMediator = mockk<SaksbehandlerMediator>(relaxed = true)
 
     private lateinit var client: HttpClient
     private lateinit var graphQLServer: GraphQLServer<ApplicationRequest>

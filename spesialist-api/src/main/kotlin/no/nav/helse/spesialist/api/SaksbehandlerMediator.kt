@@ -7,8 +7,8 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.abonnement.AbonnementDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
-import no.nav.helse.spesialist.api.abonnement.OpptegnelseDto
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
+import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonDto
@@ -41,13 +41,14 @@ class SaksbehandlerMediator(
         abonnementDao.opprettAbonnement(saksbehandler.oid(), personidentifikator.toLong())
     }
 
-    internal fun hentAbonnerteOpptegnelser(saksbehandler: Saksbehandler, sisteSekvensId: Int): List<OpptegnelseDto> {
+    internal fun hentAbonnerteOpptegnelser(saksbehandler: Saksbehandler, sisteSekvensId: Int): List<Opptegnelse> {
         saksbehandler.persister(saksbehandlerDao)
         abonnementDao.registrerSistekvensnummer(saksbehandler.oid(), sisteSekvensId)
         return opptegnelseDao.finnOpptegnelser(saksbehandler.oid())
     }
 
-    internal fun hentAbonnerteOpptegnelser(saksbehandler: Saksbehandler): List<OpptegnelseDto> {
+    internal fun hentAbonnerteOpptegnelser(saksbehandler: Saksbehandler): List<Opptegnelse> {
+        saksbehandler.persister(saksbehandlerDao)
         return opptegnelseDao.finnOpptegnelser(saksbehandler.oid())
     }
 

@@ -343,6 +343,13 @@ type OppgaveForPeriodevisning {
     id: String!
 }
 
+type Opptegnelse {
+    aktorId: String!
+    payload: String!
+    sekvensnummer: Int!
+    type: Opptegnelsetype!
+}
+
 type OverstyrtDag {
     dato: String!
     fraGrad: Int
@@ -413,6 +420,7 @@ type Query {
     alleOppgaver: [OppgaveForOversiktsvisning!]!
     behandledeOppgaver(behandletAvIdent: String, behandletAvOid: String!, fom: String): [FerdigstiltOppgave!]!
     behandlingsstatistikk: Behandlingsstatistikk!
+    hentOpptegnelser(sekvensId: Int): [Opptegnelse!]!
     notater(forPerioder: [String!]!): [Notater!]!
     oppdrag(fnr: String!): [Oppdrag!]!
     person(aktorId: String, fnr: String): Person
@@ -774,6 +782,16 @@ enum Oppgavetype {
     SOKNAD
     STIKKPROVE
     UTBETALING_TIL_SYKMELDT
+}
+
+enum Opptegnelsetype {
+    FERDIGBEHANDLET_GODKJENNIGSBEHOV
+    NY_SAKSBEHANDLEROPPGAVE
+    PERSONDATA_OPPDATERT
+    REVURDERING_AVVIST
+    REVURDERING_FERDIGBEHANDLET
+    UTBETALING_ANNULLERING_FEILET
+    UTBETALING_ANNULLERING_OK
 }
 
 enum Periodehandling {

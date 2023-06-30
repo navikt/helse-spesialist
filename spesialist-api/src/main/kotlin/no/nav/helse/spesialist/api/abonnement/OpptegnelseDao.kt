@@ -1,9 +1,11 @@
 package no.nav.helse.spesialist.api.abonnement
 
-import no.nav.helse.HelseDao
-import org.intellij.lang.annotations.Language
 import java.util.*
 import javax.sql.DataSource
+import no.nav.helse.HelseDao
+import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
+import no.nav.helse.spesialist.api.graphql.schema.Opptegnelsetype
+import org.intellij.lang.annotations.Language
 
 class OpptegnelseDao(dataSource: DataSource) : HelseDao(dataSource) {
 
@@ -20,7 +22,7 @@ class OpptegnelseDao(dataSource: DataSource) : HelseDao(dataSource) {
         )
     }
 
-    fun finnOpptegnelser(saksbehandlerIdent: UUID): List<OpptegnelseDto> {
+    fun finnOpptegnelser(saksbehandlerIdent: UUID): List<Opptegnelse> {
         @Language("PostgreSQL")
         val query = """
             SELECT o.sekvensnummer, p.aktor_id, o.payload, o.type
@@ -31,11 +33,11 @@ class OpptegnelseDao(dataSource: DataSource) : HelseDao(dataSource) {
             AND (a.siste_sekvensnummer IS NULL OR o.SEKVENSNUMMER > a.siste_sekvensnummer)
         """
         return query.list(mapOf("saksbehandlerIdent" to saksbehandlerIdent)) { row ->
-            OpptegnelseDto(
+            Opptegnelse(
                 payload = row.string("payload"),
-                aktørId = row.long("aktor_id"),
+                aktorId = row.long("aktor_id").toString(),
                 sekvensnummer = row.int("sekvensnummer"),
-                type = OpptegnelseType.valueOf(row.string("type"))
+                type = Opptegnelsetype.valueOf(row.string("type"))
             )
         }
     }
