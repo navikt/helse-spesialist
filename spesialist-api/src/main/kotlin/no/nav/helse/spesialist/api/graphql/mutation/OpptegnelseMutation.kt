@@ -16,7 +16,7 @@ class OpptegnelseMutation(
         personidentifikator: String,
         environment: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> {
-        val saksbehandler = environment.graphQlContext.get<Saksbehandler>(SAKSBEHANDLER.key)
+        val saksbehandler = environment.graphQlContext.get<Lazy<Saksbehandler>>(SAKSBEHANDLER.key).value
         saksbehandlerMediator.opprettAbonnement(saksbehandler, personidentifikator)
         return DataFetcherResult.newResult<Boolean>().data(true).build()
     }

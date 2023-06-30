@@ -93,8 +93,10 @@ private fun ApplicationRequest.getSaksbehandlerIdent(): String {
     return accessToken?.payload?.getClaim("NAVident")?.asString() ?: ""
 }
 
-private fun ApplicationRequest.saksbehandler(): Saksbehandler {
+private fun ApplicationRequest.saksbehandler(): Lazy<Saksbehandler> {
     val accessToken = call.principal<JWTPrincipal>()
-    return accessToken?.let(Saksbehandler::fraOnBehalfOfToken)
-        ?: throw IllegalStateException("Forventer å finne saksbehandler i access token")
+    return lazy {
+        accessToken?.let(Saksbehandler::fraOnBehalfOfToken)
+            ?: throw IllegalStateException("Forventer å finne saksbehandler i access token")
+    }
 }
