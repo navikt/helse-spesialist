@@ -57,7 +57,6 @@ internal class GodkjenningMediator(
         begrunnelser: List<String>?,
         kommentar: String?,
         saksbehandleroverstyringer: List<UUID>,
-        sykefraværstilfelle: Sykefraværstilfelle,
     ) {
         behov.avvisManuelt(
             behandlingId = behandlingId,
@@ -69,7 +68,6 @@ internal class GodkjenningMediator(
             kommentar = kommentar,
             saksbehandleroverstyringer = saksbehandleroverstyringer
         )
-        sykefraværstilfelle.håndterAvvist(saksbehandlerIdent, vedtaksperiodeId)
         context.publiser(behov.toJson())
         context.publiser(behov.lagVedtaksperiodeAvvist(vedtaksperiodeId, fødselsnummer, vedtakDao).toJson())
     }

@@ -22,8 +22,6 @@ import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_1
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_2
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_3
-import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterAvvist
-import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterGodkjent
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterOppdateringer
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverTotrinnsvurdering
 import org.intellij.lang.annotations.Language
@@ -291,17 +289,6 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     }
 
     @Test
-    fun `godkjenner enkelt varsel`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)
-        generasjon.registrer(generasjonRepository, varselRepository)
-        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
-        generasjon.håndterGodkjentAvSaksbehandler("EN_IDENT", UUID.randomUUID())
-        assertVarsler(generasjonId, 0, AKTIV, SB_EX_1)
-        assertVarsler(generasjonId, 1, GODKJENT, SB_EX_1)
-    }
-
-    @Test
     fun `deaktiverer enkelt varsel`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)
@@ -311,34 +298,6 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         generasjon.håndterDeaktivertVarsel(varsel)
         assertVarsler(generasjonId, 0, AKTIV, SB_EX_1)
         assertVarsler(generasjonId, 1, INAKTIV, SB_EX_1)
-    }
-    @Test
-    fun `godkjenner alle varsler når generasjonen blir godkjent`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)
-        generasjon.registrer(generasjonRepository, varselRepository)
-        generasjon.håndterNyUtbetaling(UUID.randomUUID(), UUID.randomUUID())
-        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
-        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_2", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
-        generasjon.håndterGodkjentAvSaksbehandler("EN_IDENT", UUID.randomUUID())
-        assertVarsler(generasjonId, 1, GODKJENT, SB_EX_1)
-        assertVarsler(generasjonId, 0, AKTIV, SB_EX_1)
-        assertVarsler(generasjonId, 1, GODKJENT, SB_EX_2)
-        assertVarsler(generasjonId, 0, AKTIV, SB_EX_2)
-    }
-
-    @Test
-    fun `avviser alle varsler når generasjonen blir avvist`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)
-        generasjon.registrer(generasjonRepository, varselRepository)
-        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
-        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_2", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
-        generasjon.håndterAvvistAvSaksbehandler("EN_IDENT")
-        assertVarsler(generasjonId, 1, AVVIST, SB_EX_1)
-        assertVarsler(generasjonId, 0, AKTIV, SB_EX_1)
-        assertVarsler(generasjonId, 1, AVVIST, SB_EX_2)
-        assertVarsler(generasjonId, 0, AKTIV, SB_EX_2)
     }
 
     @Test
@@ -521,21 +480,6 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     }
 
     @Test
-    fun `godkjenner varsler for generasjon`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjonIdV1 = UUID.randomUUID()
-        val generasjonV1 = nyGenerasjon(generasjonIdV1, vedtaksperiodeId)
-        generasjonV1.registrer(generasjonRepository, varselRepository)
-        val utbetalingId = UUID.randomUUID()
-        generasjonV1.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
-        generasjonV1.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
-
-        generasjonV1.håndterGodkjentAvSaksbehandler("EN_IDENT", UUID.randomUUID())
-        assertUtbetaling(generasjonIdV1, utbetalingId)
-        assertVarsler(generasjonIdV1, 1, GODKJENT, SB_EX_1)
-    }
-
-    @Test
     fun `håndterer oppdateringer`() {
         val vedtaksperiodeId1 = UUID.randomUUID()
         val vedtaksperiodeId2 = UUID.randomUUID()
@@ -611,69 +555,6 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
             UUID.randomUUID()
         )
         assertEquals(0, observer.oppdaterteGenerasjoner.size)
-    }
-
-    @Test
-    fun `håndter godkjent periode`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon1 = generasjonMedVarsel(1.januar, 31.januar, vedtaksperiodeId)
-        val generasjon2 = generasjonMedVarsel(1.januar, 31.januar)
-        listOf(generasjon1, generasjon2).håndterGodkjent("Ident", vedtaksperiodeId, UUID.randomUUID())
-        assertEquals(2, observer.godkjenteVarsler.size)
-    }
-
-    @Test
-    fun `håndter avvist periode`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon1 = generasjonMedVarsel(1.januar, 31.januar, vedtaksperiodeId)
-        val generasjon2 = generasjonMedVarsel(1.januar, 31.januar)
-        listOf(generasjon1, generasjon2).håndterAvvist("Ident", vedtaksperiodeId)
-        assertEquals(2, observer.avvisteVarsler.size)
-    }
-
-    @Test
-    fun `ikke godkjenn varsler for perioder som ligger etter i tid`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon1 = generasjonMedVarsel(1.januar, 31.januar, vedtaksperiodeId)
-        val generasjon2 = generasjonMedVarsel(1.februar, 28.februar)
-        listOf(generasjon1, generasjon2).håndterGodkjent("Ident", vedtaksperiodeId, UUID.randomUUID())
-        assertEquals(1, observer.godkjenteVarsler.size)
-    }
-
-    @Test
-    fun `godkjenn varsler for perioder som overlapper med én dag`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon1 = generasjonMedVarsel(1.januar, 31.januar, vedtaksperiodeId)
-        val generasjon2 = generasjonMedVarsel(31.januar, 28.februar)
-        listOf(generasjon1, generasjon2).håndterGodkjent("Ident", vedtaksperiodeId, UUID.randomUUID())
-        assertEquals(2, observer.godkjenteVarsler.size)
-    }
-
-    @Test
-    fun `godkjenn varsler for perioder som ligger helt før`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon1 = generasjonMedVarsel(1.februar, 28.februar, vedtaksperiodeId)
-        val generasjon2 = generasjonMedVarsel(1.januar, 31.januar)
-        listOf(generasjon1, generasjon2).håndterGodkjent("Ident", vedtaksperiodeId, UUID.randomUUID())
-        assertEquals(2, observer.godkjenteVarsler.size)
-    }
-
-    @Test
-    fun `godkjenn varsler for perioder som overlapper delvis i starten`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon1 = generasjonMedVarsel(1.februar, 28.februar, vedtaksperiodeId)
-        val generasjon2 = generasjonMedVarsel(16.januar, 15.februar)
-        listOf(generasjon1, generasjon2).håndterGodkjent("Ident", vedtaksperiodeId, UUID.randomUUID())
-        assertEquals(2, observer.godkjenteVarsler.size)
-    }
-
-    @Test
-    fun `godkjenn varsler for perioder som overlapper delvis i slutten`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon1 = generasjonMedVarsel(1.februar, 28.februar, vedtaksperiodeId)
-        val generasjon2 = generasjonMedVarsel(16.februar, 15.mars)
-        listOf(generasjon1, generasjon2).håndterGodkjent("Ident", vedtaksperiodeId, UUID.randomUUID())
-        assertEquals(2, observer.godkjenteVarsler.size)
     }
 
     @Test
@@ -814,7 +695,9 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         fom = fom,
         tom = tom,
         skjæringstidspunkt = skjæringstidspunkt
-    )
+    ).also {
+        it.registrer(observer)
+    }
 
     private fun generasjonMedVarsel(fom: LocalDate, tom: LocalDate, vedtaksperiodeId: UUID = UUID.randomUUID(), varselkode: String = "SB_EX_1"): Generasjon {
         return generasjon(vedtaksperiodeId = vedtaksperiodeId, fom = fom, tom = tom).also {

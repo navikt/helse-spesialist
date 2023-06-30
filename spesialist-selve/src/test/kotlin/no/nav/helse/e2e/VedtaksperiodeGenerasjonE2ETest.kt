@@ -6,7 +6,6 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
-import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import org.intellij.lang.annotations.Language
@@ -76,30 +75,6 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETestV2() {
         håndterVedtaksperiodeNyUtbetaling(utbetalingId = ny)
         assertGenerasjonerMedUtbetaling(VEDTAKSPERIODE_ID, gammel, 0)
         assertGenerasjonerMedUtbetaling(VEDTAKSPERIODE_ID, ny, 1)
-    }
-
-    @Test
-    fun `To sammenhengende perioder i revurdering, alle varsler blir godkjent når periode med oppgave blir godkjent`() {
-        val v1 = UUID.randomUUID()
-        val v2 = UUID.randomUUID()
-        val revurdertUtbetalingId = UUID.randomUUID()
-        nyttVedtak(1.januar, 31.januar, vedtaksperiodeId = v1, utbetalingId = UUID.randomUUID())
-        forlengVedtak(1.februar, 28.februar, skjæringstidspunkt = 1.januar, vedtaksperiodeId = v2)
-
-        håndterVedtaksperiodeEndret(vedtaksperiodeId = v1)
-        håndterVedtaksperiodeNyUtbetaling(vedtaksperiodeId = v1, utbetalingId = revurdertUtbetalingId)
-        forlengelseFremTilSaksbehandleroppgave(
-            1.februar,
-            28.februar,
-            skjæringstidspunkt = 1.januar,
-            vedtaksperiodeId = v2,
-            utbetalingId = revurdertUtbetalingId
-        )
-        håndterAktivitetsloggNyAktivitet(vedtaksperiodeId = v1, varselkoder = listOf("RV_IM_1"))
-        håndterAktivitetsloggNyAktivitet(vedtaksperiodeId = v2, varselkoder = listOf("RV_IM_1"))
-        håndterSaksbehandlerløsning(vedtaksperiodeId = v2)
-        assertAvhukedeVarsler(v1, 1)
-        assertAvhukedeVarsler(v2, 1)
     }
 
     @Test

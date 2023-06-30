@@ -63,8 +63,7 @@ internal class UtbetalingsgodkjenningCommand(
                 årsak = årsak,
                 begrunnelser = begrunnelser,
                 kommentar = kommentar,
-                saksbehandleroverstyringer = saksbehandleroverstyringer,
-                sykefraværstilfelle = sykefraværstilfelle
+                saksbehandleroverstyringer = saksbehandleroverstyringer
             )
         }
         log.info("sender svar på godkjenningsbehov")

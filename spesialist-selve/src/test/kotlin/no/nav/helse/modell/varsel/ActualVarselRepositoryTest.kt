@@ -7,7 +7,6 @@ import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.januar
 import no.nav.helse.mediator.meldinger.Varseldefinisjon
-import no.nav.helse.modell.varsel.Varsel.Status.AVVIST
 import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
 import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Generasjon
@@ -54,14 +53,6 @@ internal class ActualVarselRepositoryTest : AbstractDatabaseTest() {
     }
 
     @Test
-    fun `avvisning av varsel med definisjonId medfører at varselet lagres med referanse til denne definisjonen`() {
-        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
-        generasjon.håndterAvvistAvSaksbehandler("EN_KODE")
-        assertEquals(AVVIST, statusFor(generasjonId, "EN_KODE"))
-        assertDefinisjonFor(vedtaksperiodeId, "EN_KODE", definisjonId)
-    }
-
-    @Test
     fun `kan deaktivere varsel`() {
         val varselId = UUID.randomUUID()
         varselRepository.varselOpprettet(varselId, vedtaksperiodeId, generasjonId, "EN_KODE", LocalDateTime.now())
@@ -81,21 +72,6 @@ internal class ActualVarselRepositoryTest : AbstractDatabaseTest() {
         varselRepository.varselOpprettet(varselId, vedtaksperiodeId, generasjonId, "EN_KODE", LocalDateTime.now())
         varselRepository.varselDeaktivert(varselId, "EN_KODE", generasjonId, vedtaksperiodeId)
         assertInaktiv(generasjonId, "EN_KODE")
-    }
-
-    @Test
-    fun `oppdatering av varsel for én generasjon endrer ikke varsel for en annen generasjon på samme periode`() {
-        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
-        generasjon.håndterNyUtbetaling(UUID.randomUUID(), UUID.randomUUID())
-        generasjon.håndterGodkjentAvSaksbehandler("EN_IDENT", UUID.randomUUID())
-        generasjon.håndterVedtakFattet(UUID.randomUUID())
-        val nesteGenerasjonId = UUID.randomUUID()
-        val nesteGenerasjon = generasjon.håndterVedtaksperiodeEndret(UUID.randomUUID(), nesteGenerasjonId)
-        val varsel = Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), vedtaksperiodeId)
-        nesteGenerasjon?.håndterNyttVarsel(varsel, UUID.randomUUID())
-        nesteGenerasjon?.håndterDeaktivertVarsel(varsel)
-        assertGodkjent(generasjonId, "EN_KODE")
-        assertInaktiv(nesteGenerasjonId, "EN_KODE")
     }
 
     @Test
@@ -127,16 +103,6 @@ internal class ActualVarselRepositoryTest : AbstractDatabaseTest() {
         }
     }
 
-    private fun assertDefinisjonFor(vedtaksperiodeId: UUID, varselkode: String, definisjonId: UUID) {
-        @Language("PostgreSQL")
-        val query =
-            "SELECT 1 FROM selve_varsel WHERE vedtaksperiode_id = ? AND kode = ? AND definisjon_ref = (SELECT id FROM api_varseldefinisjon WHERE unik_id = ?)"
-        val antall = sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, vedtaksperiodeId, varselkode, definisjonId).map { it.int(1) }.asSingle)
-        }
-        assertEquals(1, antall)
-    }
-
     private fun assertAktiv(generasjonId: UUID, varselkode: String) {
         val status = sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
@@ -165,20 +131,5 @@ internal class ActualVarselRepositoryTest : AbstractDatabaseTest() {
             )
         }
         assertEquals("INAKTIV", status)
-    }
-
-    private fun assertGodkjent(generasjonId: UUID, varselkode: String) {
-        val status = sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query = "SELECT status FROM selve_varsel WHERE generasjon_ref = (SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = ?) AND kode = ?;"
-            session.run(
-                queryOf(
-                    query,
-                    generasjonId,
-                    varselkode
-                ).map { it.string(1) }.asSingle
-            )
-        }
-        assertEquals("GODKJENT", status)
     }
 }

@@ -92,8 +92,7 @@ internal class GodkjenningMediatorTest {
             null,
             null,
             null,
-            emptyList(),
-            Sykefraværstilfelle(fnr, 1.januar, listOf(generasjon()))
+            emptyList()
         )
         assertOpptegnelseIkkeOpprettet()
     }

@@ -5,11 +5,9 @@ import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.modell.varsel.Varsel
-import no.nav.helse.modell.varsel.Varsel.Companion.avvisAlleFor
 import no.nav.helse.modell.varsel.Varsel.Companion.finnEksisterendeVarsel
 import no.nav.helse.modell.varsel.Varsel.Companion.flyttVarslerFor
 import no.nav.helse.modell.varsel.Varsel.Companion.forhindrerAutomatisering
-import no.nav.helse.modell.varsel.Varsel.Companion.godkjennAlleFor
 import no.nav.helse.modell.varsel.Varsel.Companion.inneholderMedlemskapsvarsel
 import org.slf4j.LoggerFactory
 
@@ -87,12 +85,7 @@ internal class Generasjon private constructor(
     }
 
     internal fun håndterGodkjentAvSaksbehandler(ident: String, hendelseId: UUID) {
-        varsler.godkjennAlleFor(id, ident)
         tilstand.håndterGodkjenning(this, ident, hendelseId)
-    }
-
-    internal fun håndterAvvistAvSaksbehandler(ident: String) {
-        varsler.avvisAlleFor(id, ident)
     }
 
     internal fun håndterVedtakFattet(hendelseId: UUID) {
@@ -438,11 +431,6 @@ internal class Generasjon private constructor(
             }
         }
 
-        internal fun List<Generasjon>.håndterAvvist(saksbehandlerIdent: String, vedtaksperiodeId: UUID) {
-            overlapperMedEllerTidligereEnn(vedtaksperiodeId).forEach {
-                it.håndterAvvistAvSaksbehandler(saksbehandlerIdent)
-            }
-        }
         private fun List<Generasjon>.overlapperMedEllerTidligereEnn(vedtaksperiodeId: UUID): List<Generasjon> {
             val gjeldende = find { it.vedtaksperiodeId == vedtaksperiodeId } ?: return emptyList()
             return sortedByDescending { it.periode.tom() }

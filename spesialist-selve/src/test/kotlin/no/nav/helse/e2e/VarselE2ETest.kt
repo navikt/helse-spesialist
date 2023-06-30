@@ -11,8 +11,6 @@ import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Område.Syk
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.Varsel.Status.AKTIV
-import no.nav.helse.modell.varsel.Varsel.Status.AVVIST
-import no.nav.helse.modell.varsel.Varsel.Status.GODKJENT
 import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
 import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_1
@@ -162,32 +160,6 @@ internal class VarselE2ETest : AbstractE2ETestV2() {
         )
         assertIngenVarsel(SB_RV_3, VEDTAKSPERIODE_ID)
         assertVarsel(SB_RV_2, VEDTAKSPERIODE_ID, AKTIV)
-    }
-
-    @Test
-    fun `godkjenner varsler når periode blir godkjent`() {
-        fremTilSaksbehandleroppgave(
-            fullmakter = listOf(Fullmakt(områder = listOf(Syk), LocalDate.MIN, LocalDate.MAX)),
-            risikofunn = listOf(
-                Risikofunn(listOf("8-4", "EN_ANNEN_KATEGORI"), "EN_BESKRIVELSE", false)
-            )
-        )
-        håndterSaksbehandlerløsning()
-        assertVarsel(SB_IK_1, VEDTAKSPERIODE_ID, GODKJENT)
-        assertVarsel(SB_RV_2, VEDTAKSPERIODE_ID, GODKJENT)
-    }
-
-    @Test
-    fun `avviser varsler når periode blir avvist`() {
-        fremTilSaksbehandleroppgave(
-            fullmakter = listOf(Fullmakt(områder = listOf(Syk), LocalDate.MIN, LocalDate.MAX)),
-            risikofunn = listOf(
-                Risikofunn(listOf("8-4", "EN_ANNEN_KATEGORI"), "EN_BESKRIVELSE", false)
-            )
-        )
-        håndterSaksbehandlerløsning(godkjent = false)
-        assertVarsel(SB_IK_1, VEDTAKSPERIODE_ID, AVVIST)
-        assertVarsel(SB_RV_2, VEDTAKSPERIODE_ID, AVVIST)
     }
 
     private fun assertVarsel(varselkode: Varselkode, vedtaksperiodeId: UUID, status: Varsel.Status) {

@@ -7,7 +7,6 @@ import no.nav.helse.modell.varsel.Varsel.Companion.forhindrerAutomatisering
 import no.nav.helse.modell.varsel.Varsel.Companion.inneholderMedlemskapsvarsel
 import no.nav.helse.modell.varsel.Varsel.Status.AKTIV
 import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
-import no.nav.helse.modell.varsel.Varsel.Status.VURDERT
 import no.nav.helse.modell.vedtaksperiode.IVedtaksperiodeObserver
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -39,69 +38,6 @@ internal class VarselTest {
         val varsel = Varsel(varselId, "EN_KODE", opprettet, vedtaksperiodeId)
         assertTrue(varsel.erRelevantFor(vedtaksperiodeId))
         assertFalse(varsel.erRelevantFor(UUID.randomUUID()))
-    }
-
-    @Test
-    fun `kan godkjenne aktivt varsel`() {
-        val varsel = nyttVarsel()
-        varsel.godkjennFor(UUID.randomUUID(), "EN_IDENT")
-        assertEquals(1, observer.godkjenteVarsler.size)
-    }
-
-    @Test
-    fun `kan godkjenne vurdert varsel`() {
-        val varsel = nyttVarsel("EN_KODE", VURDERT)
-        varsel.godkjennFor(UUID.randomUUID(), "EN_IDENT")
-        assertEquals(1, observer.godkjenteVarsler.size)
-    }
-
-    @Test
-    fun `kan avvise aktivt varsel`() {
-        val varsel = nyttVarsel()
-        varsel.avvisFor(UUID.randomUUID(), "EN_IDENT")
-        assertEquals(1, observer.avvisteVarsler.size)
-    }
-
-    @Test
-    fun `kan ikke avvise godkjent varsel`() {
-        val varsel = nyttVarsel()
-        val enGenerasjonId = UUID.randomUUID()
-        varsel.godkjennFor(enGenerasjonId, "EN_IDENT")
-        varsel.avvisFor(enGenerasjonId, "EN_IDENT")
-        assertEquals(1, observer.godkjenteVarsler.size)
-        assertEquals(0, observer.avvisteVarsler.size)
-    }
-
-    @Test
-    fun `kan ikke godkjenne avvist varsel`() {
-        val varsel = nyttVarsel()
-        val enGenerasjonId = UUID.randomUUID()
-        varsel.avvisFor(enGenerasjonId, "EN_IDENT")
-        varsel.godkjennFor(enGenerasjonId, "EN_IDENT")
-        assertEquals(1, observer.avvisteVarsler.size)
-        assertEquals(0, observer.godkjenteVarsler.size)
-    }
-
-    @Test
-    fun `kan ikke godkjenne deaktivert varsel`() {
-        val varsel = nyttVarsel()
-        varsel.registrer(observer)
-        val enGenerasjonId = UUID.randomUUID()
-        varsel.deaktiver(enGenerasjonId)
-        varsel.godkjennFor(enGenerasjonId, "EN_IDENT")
-        assertEquals(1, observer.deaktiverteVarsler.size)
-        assertEquals(0, observer.godkjenteVarsler.size)
-    }
-
-    @Test
-    fun `kan ikke avvise deaktivert varsel`() {
-        val varsel = nyttVarsel()
-        varsel.registrer(observer)
-        val enGenerasjonId = UUID.randomUUID()
-        varsel.deaktiver(enGenerasjonId)
-        varsel.avvisFor(enGenerasjonId, "EN_IDENT")
-        assertEquals(1, observer.deaktiverteVarsler.size)
-        assertEquals(0, observer.avvisteVarsler.size)
     }
 
     @Test
@@ -222,8 +158,6 @@ internal class VarselTest {
         val opprettedeVarsler = mutableMapOf<UUID, Opprettelse>()
         val reaktiverteVarsler = mutableMapOf<UUID, Reaktivering>()
         val deaktiverteVarsler = mutableMapOf<UUID, Deaktivering>()
-        val godkjenteVarsler = mutableListOf<String>()
-        val avvisteVarsler = mutableListOf<String>()
 
         private inner class Opprettelse(
             val vedtaksperiodeId: UUID,
@@ -251,14 +185,6 @@ internal class VarselTest {
 
         override fun varselDeaktivert(varselId: UUID, varselkode: String, generasjonId: UUID, vedtaksperiodeId: UUID) {
             deaktiverteVarsler[varselId] = Deaktivering(vedtaksperiodeId, generasjonId, varselId, varselkode)
-        }
-
-        override fun varselGodkjent(varselId: UUID, vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String) {
-            godkjenteVarsler.add(varselkode)
-        }
-
-        override fun varselAvvist(varselId: UUID, vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String) {
-            avvisteVarsler.add(varselkode)
         }
 
         override fun varselOpprettet(varselId: UUID, vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, opprettet: LocalDateTime) {

@@ -5,8 +5,6 @@ import java.util.UUID
 import javax.sql.DataSource
 import no.nav.helse.mediator.builders.GenerasjonBuilder
 import no.nav.helse.modell.varsel.Varsel.Status.AKTIV
-import no.nav.helse.modell.varsel.Varsel.Status.AVVIST
-import no.nav.helse.modell.varsel.Varsel.Status.GODKJENT
 import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
 import no.nav.helse.modell.vedtaksperiode.IVedtaksperiodeObserver
 import no.nav.helse.tellInaktivtVarsel
@@ -57,16 +55,6 @@ internal class ActualVarselRepository(dataSource: DataSource) : VarselRepository
 
     override fun varselFlyttet(varselId: UUID, gammelGenerasjonId: UUID, nyGenerasjonId: UUID) {
         varselDao.oppdaterGenerasjon(varselId, gammelGenerasjonId, nyGenerasjonId)
-    }
-
-    override fun varselGodkjent(varselId: UUID, vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String) {
-        val definisjon = definisjonDao.sisteDefinisjonFor(varselkode)
-        definisjon.oppdaterVarsel(vedtaksperiodeId, generasjonId, GODKJENT, ident, varselDao::oppdaterStatus)
-    }
-
-    override fun varselAvvist(varselId: UUID, vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String) {
-        val definisjon = definisjonDao.sisteDefinisjonFor(varselkode)
-        definisjon.oppdaterVarsel(vedtaksperiodeId, generasjonId, AVVIST, ident, varselDao::oppdaterStatus)
     }
 
     override fun lagreDefinisjon(

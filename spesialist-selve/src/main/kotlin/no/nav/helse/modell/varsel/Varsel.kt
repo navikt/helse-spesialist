@@ -3,15 +3,11 @@ package no.nav.helse.modell.varsel
 import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDateTime
 import java.util.UUID
-import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.modell.varsel.Varsel.Status.AKTIV
-import no.nav.helse.modell.varsel.Varsel.Status.AVVIST
-import no.nav.helse.modell.varsel.Varsel.Status.GODKJENT
 import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
 import no.nav.helse.modell.varsel.Varsel.Status.VURDERT
 import no.nav.helse.modell.vedtaksperiode.IVedtaksperiodeObserver
 import no.nav.helse.rapids_rivers.asLocalDateTime
-import org.slf4j.LoggerFactory
 
 internal class Varsel(
     private val id: UUID,
@@ -39,28 +35,6 @@ internal class Varsel(
 
     internal fun opprett(generasjonId: UUID) {
         observers.forEach { it.varselOpprettet(id, vedtaksperiodeId, generasjonId, varselkode, opprettet) }
-    }
-
-    internal fun godkjennFor(generasjonId: UUID, ident: String) {
-        if (status !in listOf(AKTIV, VURDERT)) return sikkerlogg.info(
-            "Godkjenner ikke varsel med {}, {}, {} som ikke har status AKTIV eller VURDERT. Varselet har status=$status",
-            keyValue("varselkode", varselkode),
-            keyValue("vedtaksperiodeId", vedtaksperiodeId),
-            keyValue("generasjonId", generasjonId)
-        )
-        status = GODKJENT
-        observers.forEach { it.varselGodkjent(id, vedtaksperiodeId, generasjonId, varselkode, ident) }
-    }
-
-    internal fun avvisFor(generasjonId: UUID, ident: String) {
-        if (status != AKTIV) return sikkerlogg.info(
-            "Avviser ikke varsel med {}, {}, {} som ikke har status $AKTIV. Varselet har status=$status",
-            keyValue("varselkode", varselkode),
-            keyValue("vedtaksperiodeId", vedtaksperiodeId),
-            keyValue("generasjonId", generasjonId)
-        )
-        status = AVVIST
-        observers.forEach { it.varselAvvist(id, vedtaksperiodeId, generasjonId, varselkode, ident) }
     }
 
     internal fun reaktiver(generasjonId: UUID) {
@@ -102,19 +76,10 @@ internal class Varsel(
     internal fun erRelevantFor(vedtaksperiodeId: UUID): Boolean = this.vedtaksperiodeId == vedtaksperiodeId
 
     internal companion object {
-        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-
         internal fun List<Varsel>.flyttVarslerFor(gammelGenerasjonId: UUID, nyGenerasjonId: UUID) {
             forEach { it.oppdaterGenerasjon(gammelGenerasjonId, nyGenerasjonId) }
         }
 
-        internal fun List<Varsel>.godkjennAlleFor(generasjonId: UUID, ident: String) {
-            forEach { it.godkjennFor(generasjonId, ident) }
-        }
-
-        internal fun List<Varsel>.avvisAlleFor(generasjonId: UUID, ident: String) {
-            forEach { it.avvisFor(generasjonId, ident) }
-        }
         internal fun List<Varsel>.finnEksisterendeVarsel(varsel: Varsel): Varsel? {
             return find { it.varselkode == varsel.varselkode }
         }

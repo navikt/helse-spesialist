@@ -27,8 +27,6 @@ internal class GenerasjonTestObserver: IVedtaksperiodeObserver {
     val opprettedeGenerasjoner = mutableMapOf<UUID, Opprettelse>()
     val oppdaterteGenerasjoner = mutableMapOf<UUID, Tidslinjeendring>()
     val opprettedeVarsler = mutableMapOf<UUID, MutableList<String>>()
-    val godkjenteVarsler = mutableListOf<UUID>()
-    val avvisteVarsler = mutableListOf<UUID>()
 
     override fun nyUtbetaling(generasjonId: UUID, utbetalingId: UUID) {
         utbetalingerPåGenerasjoner[generasjonId] = utbetalingId
@@ -78,26 +76,6 @@ internal class GenerasjonTestObserver: IVedtaksperiodeObserver {
         opprettet: LocalDateTime
     ) {
         opprettedeVarsler.getOrPut(generasjonId) { mutableListOf() }.add(varselkode)
-    }
-
-    override fun varselGodkjent(
-        varselId: UUID,
-        vedtaksperiodeId: UUID,
-        generasjonId: UUID,
-        varselkode: String,
-        ident: String
-    ) {
-        godkjenteVarsler.add(varselId)
-    }
-
-    override fun varselAvvist(
-        varselId: UUID,
-        vedtaksperiodeId: UUID,
-        generasjonId: UUID,
-        varselkode: String,
-        ident: String
-    ) {
-        avvisteVarsler.add(varselId)
     }
 
     fun assertUtbetaling(

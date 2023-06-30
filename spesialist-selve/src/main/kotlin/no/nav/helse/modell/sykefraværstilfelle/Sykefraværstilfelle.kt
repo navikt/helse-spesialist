@@ -6,7 +6,6 @@ import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.deaktiver
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.forhindrerAutomatisering
-import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterAvvist
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterGodkjent
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterNyttVarsel
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverTotrinnsvurdering
@@ -31,10 +30,6 @@ internal class Sykefraværstilfelle(
 
     internal fun håndterGodkjent(saksbehandlerIdent: String, vedtaksperiodeId: UUID, hendelseId: UUID) {
         gjeldendeGenerasjoner.håndterGodkjent(saksbehandlerIdent, vedtaksperiodeId, hendelseId)
-    }
-
-    internal fun håndterAvvist(saksbehandlerIdent: String, vedtaksperiodeId: UUID) {
-        gjeldendeGenerasjoner.håndterAvvist(saksbehandlerIdent, vedtaksperiodeId)
     }
 
     internal fun kreverTotrinnsvurdering(vedtaksperiodeId: UUID): Boolean {
