@@ -23,6 +23,7 @@ import java.util.UUID
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.spesialist.api.JwtStub
+import no.nav.helse.spesialist.api.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.TestApplication
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMediator
@@ -107,6 +108,7 @@ fun main() = runBlocking {
         val behandlingsstatistikkMediator = mockk<BehandlingsstatistikkMediator>(relaxed = true)
         val tildelingService = mockk<TildelingService>(relaxed = true)
         val notatMediator = mockk<NotatMediator>(relaxed = true)
+        val saksbehandlerMediator = mockk<SaksbehandlerMediator>(relaxed = true)
 
         every { snapshotApiDao.utdatert(any()) } returns false
         every { snapshotApiDao.hentSnapshotMedMetadata(any()) } answers withDelay(800) { (enPersoninfo() to enPerson()) }
@@ -186,6 +188,7 @@ fun main() = runBlocking {
             behandlingsstatistikkMediator = behandlingsstatistikkMediator,
             tildelingService = tildelingService,
             notatMediator = notatMediator,
+            saksbehandlerMediator = saksbehandlerMediator
         )
     }
 }

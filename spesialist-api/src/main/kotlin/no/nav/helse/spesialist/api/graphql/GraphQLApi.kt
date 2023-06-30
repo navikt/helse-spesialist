@@ -18,6 +18,7 @@ import io.ktor.server.routing.routing
 import java.time.Duration
 import java.util.UUID
 import no.nav.helse.spesialist.api.GraphQLMetrikker
+import no.nav.helse.spesialist.api.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMediator
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
@@ -62,6 +63,7 @@ fun Application.graphQLApi(
     behandlingsstatistikkMediator: BehandlingsstatistikkMediator,
     tildelingService: TildelingService,
     notatMediator: NotatMediator,
+    saksbehandlerMediator: SaksbehandlerMediator
 ) {
     val schema = SchemaBuilder(
         personApiDao = personApiDao,
@@ -80,7 +82,8 @@ fun Application.graphQLApi(
         snapshotMediator = snapshotMediator,
         behandlingsstatistikkMediator = behandlingsstatistikkMediator,
         tildelingService = tildelingService,
-        notatMediator = notatMediator
+        notatMediator = notatMediator,
+        saksbehandlerMediator = saksbehandlerMediator
     ).build()
 
     val server = GraphQLServer(

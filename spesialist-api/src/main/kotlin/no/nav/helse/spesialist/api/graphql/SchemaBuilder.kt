@@ -4,10 +4,12 @@ import com.expediagroup.graphql.generator.SchemaGeneratorConfig
 import com.expediagroup.graphql.generator.TopLevelObject
 import com.expediagroup.graphql.generator.toSchema
 import graphql.schema.GraphQLSchema
+import no.nav.helse.spesialist.api.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMediator
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.graphql.mutation.NotatMutation
+import no.nav.helse.spesialist.api.graphql.mutation.OpptegnelseMutation
 import no.nav.helse.spesialist.api.graphql.mutation.TildelingMutation
 import no.nav.helse.spesialist.api.graphql.mutation.VarselMutation
 import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQuery
@@ -47,7 +49,8 @@ internal class SchemaBuilder(
     val reservasjonClient: ReservasjonClient,
     private val behandlingsstatistikkMediator: BehandlingsstatistikkMediator,
     private val tildelingService: TildelingService,
-    private val notatMediator: NotatMediator
+    private val notatMediator: NotatMediator,
+    private val saksbehandlerMediator: SaksbehandlerMediator
 ) {
     fun build(): GraphQLSchema {
         val schemaConfig = SchemaGeneratorConfig(
@@ -105,6 +108,9 @@ internal class SchemaBuilder(
                 ),
                 TopLevelObject(
                     TildelingMutation(tildelingService = tildelingService, notatMediator = notatMediator)
+                ),
+                TopLevelObject(
+                    OpptegnelseMutation(saksbehandlerMediator = saksbehandlerMediator)
                 )
             )
         )

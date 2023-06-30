@@ -5,6 +5,9 @@ import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.spesialist.api.abonnement.AbonnementDao
+import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
+import no.nav.helse.spesialist.api.abonnement.OpptegnelseDto
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
@@ -30,6 +33,23 @@ class SaksbehandlerMediator(
     private val generasjonRepository = ApiGenerasjonRepository(dataSource)
     private val varselRepository = ApiVarselRepository(dataSource)
     private val oppgaveApiDao = OppgaveApiDao(dataSource)
+    private val opptegnelseDao = OpptegnelseDao(dataSource)
+    private val abonnementDao = AbonnementDao(dataSource)
+
+    internal fun opprettAbonnement(saksbehandler: Saksbehandler, personidentifikator: String) {
+        saksbehandler.persister(saksbehandlerDao)
+        abonnementDao.opprettAbonnement(saksbehandler.oid(), personidentifikator.toLong())
+    }
+
+    internal fun hentAbonnerteOpptegnelser(saksbehandler: Saksbehandler, sisteSekvensId: Int): List<OpptegnelseDto> {
+        saksbehandler.persister(saksbehandlerDao)
+        abonnementDao.registrerSistekvensnummer(saksbehandler.oid(), sisteSekvensId)
+        return opptegnelseDao.finnOpptegnelser(saksbehandler.oid())
+    }
+
+    internal fun hentAbonnerteOpptegnelser(saksbehandler: Saksbehandler): List<OpptegnelseDto> {
+        return opptegnelseDao.finnOpptegnelser(saksbehandler.oid())
+    }
 
     internal fun håndter(annullering: AnnulleringDto, saksbehandler: Saksbehandler) {
         tellAnnullering()

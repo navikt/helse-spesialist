@@ -10,10 +10,12 @@ import io.ktor.server.request.ApplicationRequest
 import java.util.UUID
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDER_EPOST
+import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER_IDENT
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER_NAVN
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER_OID
 import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGER
+import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -27,6 +29,7 @@ enum class ContextValues(val key: String) {
     SAKSBEHANDER_EPOST("saksbehanderEpost"),
     SAKSBEHANDLER_OID("saksbehandlerOid"),
     SAKSBEHANDLER_IDENT("saksbehandlerIdent"),
+    SAKSBEHANDLER("saksbehandler"),
 }
 
 class ContextFactory(
@@ -51,7 +54,8 @@ class ContextFactory(
             SAKSBEHANDLER_NAVN.key to request.getSaksbehandlerName(),
             SAKSBEHANDER_EPOST.key to request.getSaksbehanderEpost(),
             SAKSBEHANDLER_OID.key to request.getSaksbehandlerOid(),
-            SAKSBEHANDLER_IDENT.key to request.getSaksbehandlerIdent()
+            SAKSBEHANDLER_IDENT.key to request.getSaksbehandlerIdent(),
+            SAKSBEHANDLER.key to request.saksbehandler()
         )
 
     @Deprecated("The generic context object is deprecated in favor of the context map")
@@ -87,4 +91,10 @@ private fun ApplicationRequest.getSaksbehandlerOid(): String {
 private fun ApplicationRequest.getSaksbehandlerIdent(): String {
     val accessToken = call.principal<JWTPrincipal>()
     return accessToken?.payload?.getClaim("NAVident")?.asString() ?: ""
+}
+
+private fun ApplicationRequest.saksbehandler(): Saksbehandler {
+    val accessToken = call.principal<JWTPrincipal>()
+    return accessToken?.let(Saksbehandler::fraOnBehalfOfToken)
+        ?: throw IllegalStateException("Forventer å finne saksbehandler i access token")
 }
