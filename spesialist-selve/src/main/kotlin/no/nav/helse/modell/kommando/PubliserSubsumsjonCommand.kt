@@ -38,7 +38,7 @@ internal class PubliserSubsumsjonCommand(
             "ledd" to "${arbeidsgivere.first().subsumsjon?.ledd}",
             "bokstav" to "${arbeidsgivere.first().subsumsjon?.bokstav}",
             "input" to mapOf(
-                "beregnetMånedsinntektPerArbeidsgiver" to arbeidsgivere.map { ag -> { ag.organisasjonsnummer to ag.årlig} },
+                "sattÅrligInntektPerArbeidsgiver" to arbeidsgivere.map { ag -> { ag.organisasjonsnummer to ag.årlig} },
             ),
             "output" to mapOf(
                 "grunnlagForSykepengegrunnlag" to arbeidsgivere.sumOf { ag -> ag.årlig }
