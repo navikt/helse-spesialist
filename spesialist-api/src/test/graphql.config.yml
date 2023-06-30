@@ -1,0 +1,5 @@
+schema: 'schema.graphql'
+extensions:
+  endpoints:
+    spesialist-local:
+      url: http://0.0.0.0:4321/graphql
