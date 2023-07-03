@@ -33,4 +33,20 @@ class Saksbehandler(
     )
 
     fun toDto() = SaksbehandlerDto(oid = oid, navn = navn, epost = epostadresse, ident = ident)
+
+    override fun equals(other: Any?) = this === other || (
+        other is Saksbehandler &&
+        epostadresse == other.epostadresse &&
+        navn == other.navn &&
+        oid == other.oid &&
+        ident == other.ident
+    )
+
+    override fun hashCode(): Int {
+        var result = epostadresse.hashCode()
+        result = 31 * result + oid.hashCode()
+        result = 31 * result + navn.hashCode()
+        result = 31 * result + ident.hashCode()
+        return result
+    }
 }
