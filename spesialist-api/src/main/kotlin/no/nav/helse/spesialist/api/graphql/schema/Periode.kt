@@ -206,25 +206,6 @@ data class Risikovurdering(
     val kontrollertOk: List<Faresignal>,
 )
 
-// TODO: Fjern denne
-data class Refusjon(
-    val belop: Double?,
-    val arbeidsgiverperioder: List<Refusjonsperiode>,
-    val endringer: List<Endring>,
-    val forsteFravaersdag: DateString?,
-    val sisteRefusjonsdag: DateString?,
-) {
-    data class Refusjonsperiode(
-        val fom: DateString,
-        val tom: DateString,
-    )
-
-    data class Endring(
-        val belop: Double,
-        val dato: DateString,
-    )
-}
-
 data class VarselDTO(
     val generasjonId: UUIDString,
     val definisjonId: UUIDString,
@@ -306,14 +287,42 @@ interface Periode {
     }
 
     @GraphQLIgnore
+    fun notater(notatDao: NotatDao, vedtaksperiodeId: String): List<Notat> = notatDao.finnNotater(UUID.fromString(vedtaksperiodeId)).map {
+        Notat(
+            id = it.id,
+            tekst = it.tekst,
+            opprettet = it.opprettet.toString(),
+            saksbehandlerOid = it.saksbehandlerOid.toString(),
+            saksbehandlerNavn = it.saksbehandlerNavn,
+            saksbehandlerEpost = it.saksbehandlerEpost,
+            saksbehandlerIdent = it.saksbehandlerIdent,
+            vedtaksperiodeId = it.vedtaksperiodeId.toString(),
+            feilregistrert = it.feilregistrert,
+            feilregistrert_tidspunkt = it.feilregistrert_tidspunkt.toString(),
+            type = it.type,
+            kommentarer = it.kommentarer.map { kommentar ->
+                Kommentar(
+                    id = kommentar.id,
+                    tekst = kommentar.tekst,
+                    opprettet = kommentar.opprettet.toString(),
+                    saksbehandlerident = kommentar.saksbehandlerident,
+                    feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt?.toString(),
+                )
+            }
+        )
+    }
+
+    @GraphQLIgnore
     fun tidslinje(periode: GraphQLTidslinjeperiode): List<Dag> = periode.tidslinje.map { it.tilDag() }
 }
 
+@Suppress("unused")
 data class UberegnetPeriode(
     val id: UUIDString,
     private val varselRepository: ApiVarselRepository,
     private val periode: GraphQLTidslinjeperiode,
     private val skalViseAktiveVarsler: Boolean,
+    private val notatDao: NotatDao,
 ) : Periode {
     override fun erForkastet(): Boolean = erForkastet(periode)
     override fun fom(): DateString = fom(periode)
@@ -329,6 +338,7 @@ data class UberegnetPeriode(
     override fun varsler(): List<VarselDTO> = if (skalViseAktiveVarsler)
         varselRepository.finnVarslerForUberegnetPeriode(UUID.fromString(vedtaksperiodeId())).toList() else
         varselRepository.finnGodkjenteVarslerForUberegnetPeriode(UUID.fromString(vedtaksperiodeId())).toList()
+    fun notater(): List<Notat> = notater(notatDao, vedtaksperiodeId())
 }
 
 enum class Periodehandling {
@@ -383,30 +393,7 @@ data class BeregnetPeriode(
             orgnummer
         )
 
-    fun notater(): List<Notat> = notatDao.finnNotater(UUID.fromString(vedtaksperiodeId())).map {
-        Notat(
-            id = it.id,
-            tekst = it.tekst,
-            opprettet = it.opprettet.toString(),
-            saksbehandlerOid = it.saksbehandlerOid.toString(),
-            saksbehandlerNavn = it.saksbehandlerNavn,
-            saksbehandlerEpost = it.saksbehandlerEpost,
-            saksbehandlerIdent = it.saksbehandlerIdent,
-            vedtaksperiodeId = it.vedtaksperiodeId.toString(),
-            feilregistrert = it.feilregistrert,
-            feilregistrert_tidspunkt = it.feilregistrert_tidspunkt.toString(),
-            type = it.type,
-            kommentarer = it.kommentarer.map { kommentar ->
-                Kommentar(
-                    id = kommentar.id,
-                    tekst = kommentar.tekst,
-                    opprettet = kommentar.opprettet.toString(),
-                    saksbehandlerident = kommentar.saksbehandlerident,
-                    feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt?.toString(),
-                )
-            }
-        )
-    }
+    fun notater(): List<Notat> = notater(notatDao, vedtaksperiodeId())
 
     fun periodehistorikk(): List<PeriodeHistorikkElement> =
         periodehistorikkDao.finn(UUID.fromString(utbetaling().id)).map {

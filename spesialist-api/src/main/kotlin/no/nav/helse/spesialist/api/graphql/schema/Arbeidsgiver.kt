@@ -146,6 +146,7 @@ data class Arbeidsgiver(
                         varselRepository = varselRepository,
                         periode = it,
                         skalViseAktiveVarsler = index == 0 && perioderSomSkalViseAktiveVarsler.contains(UUID.fromString(it.vedtaksperiodeId)),
+                        notatDao = notatDao,
                     )
 
                     is GraphQLBeregnetPeriode -> BeregnetPeriode(
