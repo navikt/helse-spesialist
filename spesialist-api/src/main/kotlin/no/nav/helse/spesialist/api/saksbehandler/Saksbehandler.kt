@@ -16,13 +16,6 @@ class Saksbehandler(
             navn = jwtPrincipal.payload.getClaim("name").asString(),
             ident = jwtPrincipal.payload.getClaim("NAVident").asString(),
         )
-
-        val IngenSaksehandler = Saksbehandler(
-            "",
-            oid = UUID.fromString("00000000-0000-0000-0000-000000000000"),
-            navn = "",
-            ident = ""
-        )
     }
 
     internal fun ident(): String = ident

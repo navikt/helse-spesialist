@@ -36,33 +36,23 @@ class SaksbehandlerMediator(
     private val opptegnelseDao = OpptegnelseDao(dataSource)
     private val abonnementDao = AbonnementDao(dataSource)
 
-    private fun validerSaksbehandler(saksbehandler: Saksbehandler) {
-        assert(saksbehandler != Saksbehandler.IngenSaksehandler) {
-            "Forventer at forespørselen kommer fra en gyldig saksbehandler"
-        }
-    }
-
     internal fun opprettAbonnement(saksbehandler: Saksbehandler, personidentifikator: String) {
-        validerSaksbehandler(saksbehandler)
         saksbehandler.persister(saksbehandlerDao)
         abonnementDao.opprettAbonnement(saksbehandler.oid(), personidentifikator.toLong())
     }
 
     internal fun hentAbonnerteOpptegnelser(saksbehandler: Saksbehandler, sisteSekvensId: Int): List<Opptegnelse> {
-        validerSaksbehandler(saksbehandler)
         saksbehandler.persister(saksbehandlerDao)
         abonnementDao.registrerSistekvensnummer(saksbehandler.oid(), sisteSekvensId)
         return opptegnelseDao.finnOpptegnelser(saksbehandler.oid())
     }
 
     internal fun hentAbonnerteOpptegnelser(saksbehandler: Saksbehandler): List<Opptegnelse> {
-        validerSaksbehandler(saksbehandler)
         saksbehandler.persister(saksbehandlerDao)
         return opptegnelseDao.finnOpptegnelser(saksbehandler.oid())
     }
 
     internal fun håndter(annullering: AnnulleringDto, saksbehandler: Saksbehandler) {
-        validerSaksbehandler(saksbehandler)
         tellAnnullering()
         saksbehandler.persister(saksbehandlerDao)
         val message = annullering.somJsonMessage(saksbehandler).also {
@@ -77,7 +67,6 @@ class SaksbehandlerMediator(
     }
 
     internal fun håndter(overstyring: OverstyrTidslinjeDto, saksbehandler: Saksbehandler) {
-        validerSaksbehandler(saksbehandler)
         tellOverstyrTidslinje()
         val message = overstyring.somJsonMessage(saksbehandler.toDto()).also {
             sikkerlogg.info(
@@ -91,7 +80,6 @@ class SaksbehandlerMediator(
     }
 
     internal fun håndter(overstyring: OverstyrInntektOgRefusjonDto, saksbehandler: Saksbehandler) {
-        validerSaksbehandler(saksbehandler)
         tellOverstyrInntektOgRefusjon()
         val message = overstyring.somJsonMessage(saksbehandler.toDto()).also {
             sikkerlogg.info(
@@ -103,7 +91,6 @@ class SaksbehandlerMediator(
         rapidsConnection.publish(overstyring.fødselsnummer, message.toJson())
     }
     internal fun håndter(skjønnsfastsattSykepengegrunnlag: SkjønnsfastsattSykepengegrunnlagDto, saksbehandler: Saksbehandler) {
-        validerSaksbehandler(saksbehandler)
         tellSkjønnsfastsettingSykepengegrunnlag()
         val message = skjønnsfastsattSykepengegrunnlag.somJsonMessage(saksbehandler.toDto()).also {
             sikkerlogg.info(
@@ -116,7 +103,6 @@ class SaksbehandlerMediator(
     }
 
     internal fun håndter(overstyring: OverstyrArbeidsforholdDto, saksbehandler: Saksbehandler) {
-        validerSaksbehandler(saksbehandler)
         tellOverstyrArbeidsforhold()
         val message = overstyring.somJsonMessage(saksbehandler.toDto()).also {
             sikkerlogg.info(
@@ -129,7 +115,6 @@ class SaksbehandlerMediator(
     }
 
     fun håndter(godkjenning: GodkjenningDto, behandlingId: UUID, saksbehandler: Saksbehandler) {
-        validerSaksbehandler(saksbehandler)
         val perioderTilBehandling = generasjonRepository.perioderTilBehandling(godkjenning.oppgavereferanse)
         if (godkjenning.godkjent) {
             if (perioderTilBehandling.harAktiveVarsler())
