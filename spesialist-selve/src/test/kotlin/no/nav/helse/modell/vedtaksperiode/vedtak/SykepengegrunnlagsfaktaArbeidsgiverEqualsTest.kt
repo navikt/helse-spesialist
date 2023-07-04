@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 
-internal class SykepengegrunnlagsfaktaArbeidsgiverTest {
+internal class SykepengegrunnlagsfaktaArbeidsgiverEqualsTest {
     @Test
     fun `referential equals`() {
         val arbeidsgiverEtterSkjønn = Arbeidsgiver.EtterSkjønn("organisasjonsnummer", 500000.0, 600000.0)

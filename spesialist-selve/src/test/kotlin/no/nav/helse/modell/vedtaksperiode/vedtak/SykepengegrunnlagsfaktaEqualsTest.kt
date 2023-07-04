@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 
-class SykepengegrunnlagsfaktaTest {
+class SykepengegrunnlagsfaktaEqualsTest {
 
     @Test
     fun `referential equals - EtterSkjønn`() {

@@ -3,8 +3,6 @@ package no.nav.helse.modell.vedtaksperiode.vedtak
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 internal sealed class Sykepengevedtak(
     private val fødselsnummer: String,
@@ -22,10 +20,43 @@ internal sealed class Sykepengevedtak(
     private val inntekt: Double,
     private val vedtakFattetTidspunkt: LocalDateTime,
 ) {
-    private companion object {
-        private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
+    override fun equals(other: Any?) = this === other || (
+            other is Sykepengevedtak
+                    && fødselsnummer == other.fødselsnummer
+                    && aktørId == other.aktørId
+                    && vedtaksperiodeId == other.vedtaksperiodeId
+                    && organisasjonsnummer == other.organisasjonsnummer
+                    && fom == other.fom
+                    && tom == other.tom
+                    && skjæringstidspunkt == other.skjæringstidspunkt
+                    && hendelser == other.hendelser
+                    && sykepengegrunnlag == other.sykepengegrunnlag
+                    && grunnlagForSykepengegrunnlag == other.grunnlagForSykepengegrunnlag
+                    && grunnlagForSykepengegrunnlagPerArbeidsgiver == other.grunnlagForSykepengegrunnlagPerArbeidsgiver
+                    && begrensning == other.begrensning
+                    && inntekt == other.inntekt
+                    && vedtakFattetTidspunkt.withNano(0) == other.vedtakFattetTidspunkt.withNano(0)
+            )
+
+    override fun hashCode(): Int {
+        var result = fødselsnummer.hashCode()
+        result = 31 * result + aktørId.hashCode()
+        result = 31 * result + vedtaksperiodeId.hashCode()
+        result = 31 * result + organisasjonsnummer.hashCode()
+        result = 31 * result + fom.hashCode()
+        result = 31 * result + tom.hashCode()
+        result = 31 * result + skjæringstidspunkt.hashCode()
+        result = 31 * result + hendelser.hashCode()
+        result = 31 * result + sykepengegrunnlag.hashCode()
+        result = 31 * result + grunnlagForSykepengegrunnlag.hashCode()
+        result = 31 * result + grunnlagForSykepengegrunnlagPerArbeidsgiver.hashCode()
+        result = 31 * result + begrensning.hashCode()
+        result = 31 * result + inntekt.hashCode()
+        result = 31 * result + vedtakFattetTidspunkt.hashCode()
+        return result
     }
 
+    @Suppress("EqualsOrHashCode")
     internal class AuuVedtak(
         fødselsnummer: String,
         aktørId: String,
@@ -56,14 +87,16 @@ internal sealed class Sykepengevedtak(
         begrensning,
         inntekt,
         vedtakFattetTidspunkt
-    )
+    ) {
+        override fun equals(other: Any?) = this === other || (super.equals(other) && other is AuuVedtak)
+    }
 
     internal class Vedtak(
         fødselsnummer: String,
         aktørId: String,
         organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
-        utbetalingId: UUID,
+        private val utbetalingId: UUID,
         fom: LocalDate,
         tom: LocalDate,
         skjæringstidspunkt: LocalDate,
@@ -73,7 +106,7 @@ internal sealed class Sykepengevedtak(
         grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Double>,
         begrensning: String,
         inntekt: Double,
-        sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta,
+        private val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta,
         vedtakFattetTidspunkt: LocalDateTime
     ): Sykepengevedtak(
         fødselsnummer,
@@ -90,6 +123,20 @@ internal sealed class Sykepengevedtak(
         begrensning,
         inntekt,
         vedtakFattetTidspunkt,
-    )
+    ) {
+        override fun equals(other: Any?) = this === other || (
+            super.equals(other)
+                && other is Vedtak
+                && this.utbetalingId == other.utbetalingId
+                && this.sykepengegrunnlagsfakta == other.sykepengegrunnlagsfakta
+            )
+
+        override fun hashCode(): Int {
+            var result = super.hashCode()
+            result = 31 * result + utbetalingId.hashCode()
+            result = 31 * result + sykepengegrunnlagsfakta.hashCode()
+            return result
+        }
+    }
 }
 

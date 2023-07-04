@@ -13,13 +13,13 @@ internal sealed class Sykepengegrunnlagsfakta(
     internal class Infotrygd(omregnetÅrsinntekt: Double) : Sykepengegrunnlagsfakta(omregnetÅrsinntekt)
 
     internal sealed class Spleis(
-        omregnetArsinntekt: Double,
+        omregnetÅrsinntekt: Double,
         private val innrapportertÅrsinntekt: Double,
         private val avviksprosent: Double,
         private val seksG: Int,
         private val tags: List<String>,
         private val arbeidsgivere: List<Arbeidsgiver>,
-    ) : Sykepengegrunnlagsfakta(omregnetArsinntekt) {
+    ) : Sykepengegrunnlagsfakta(omregnetÅrsinntekt) {
         override fun equals(other: Any?): Boolean = this === other || (
             super.equals(other)
                 && other is Spleis
@@ -69,6 +69,7 @@ internal sealed class Sykepengegrunnlagsfakta(
             }
         }
 
+        @Suppress("EqualsOrHashCode")
         internal class EtterHovedregel(
             omregnetÅrsinntekt: Double,
             innrapportertÅrsinntekt: Double,
@@ -83,7 +84,10 @@ internal sealed class Sykepengegrunnlagsfakta(
             seksG,
             tags,
             arbeidsgivere
-        )
+        ) {
+            override fun equals(other: Any?): Boolean =
+                this === other || (super.equals(other) && other is EtterHovedregel)
+        }
 
         internal sealed class Arbeidsgiver(
             private val organisasjonsnummer: String,
@@ -119,10 +123,14 @@ internal sealed class Sykepengegrunnlagsfakta(
                 }
             }
 
+            @Suppress("EqualsOrHashCode")
             internal class EtterHovedregel(
                 organisasjonsnummer: String,
                 omregnetArsinntekt: Double,
-            ) : Arbeidsgiver(organisasjonsnummer, omregnetArsinntekt)
+            ) : Arbeidsgiver(organisasjonsnummer, omregnetArsinntekt) {
+                override fun equals(other: Any?) =
+                    this === other || (super.equals(other) && other is EtterHovedregel)
+            }
         }
     }
 }
