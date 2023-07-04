@@ -370,6 +370,24 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         assertNotNull(vurdering2?.tidspunkt)
     }
 
+    @Test
+    fun `godkjenning av varsel setter ikke ident eller endret_tidspunkt`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjonId = UUID.randomUUID()
+        val utbetalingId = UUID.randomUUID()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
+        val varselId = UUID.randomUUID()
+        nyttVarsel(id = varselId, vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef)
+
+        apiVarselDao.vurderVarselFor(varselId, VURDERT, "ident")
+        apiVarselDao.vurderVarselFor(varselId, GODKJENT, "annen ident")
+        val vurdering = finnVurderingFor(varselId)
+        assertEquals(GODKJENT, vurdering?.status)
+        assertEquals("ident", vurdering?.ident)
+        assertNotNull(vurdering?.tidspunkt)
+    }
+
     private fun finnVarslerFor(status: Varselstatus): Int = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val query = "SELECT count(1) FROM selve_varsel WHERE status = :status;"
