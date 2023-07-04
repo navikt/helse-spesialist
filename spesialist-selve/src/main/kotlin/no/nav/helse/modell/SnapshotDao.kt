@@ -5,8 +5,8 @@ import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.objectMapper
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLPerson
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLUtbetaling
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUtbetaling
 import org.intellij.lang.annotations.Language
 
 class SnapshotDao(private val dataSource: DataSource) {

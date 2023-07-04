@@ -1,10 +1,10 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
-import no.nav.helse.spesialist.api.graphql.enums.GraphQLVilkarsgrunnlagtype
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLInfotrygdVilkarsgrunnlag
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLSpleisVilkarsgrunnlag
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLSykepengegrunnlagsgrense
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLVilkarsgrunnlag
+import no.nav.helse.spleis.graphql.enums.GraphQLVilkarsgrunnlagtype
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLInfotrygdVilkarsgrunnlag
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSpleisVilkarsgrunnlag
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSykepengegrunnlagsgrense
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLVilkarsgrunnlag
 
 enum class Vilkarsgrunnlagtype { INFOTRYGD, SPLEIS, UKJENT }
 

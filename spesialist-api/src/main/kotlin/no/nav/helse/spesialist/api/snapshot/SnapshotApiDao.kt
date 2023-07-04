@@ -5,11 +5,11 @@ import javax.sql.DataSource
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.spesialist.api.graphql.schema.Adressebeskyttelse
 import no.nav.helse.spesialist.api.graphql.schema.Kjonn
 import no.nav.helse.spesialist.api.graphql.schema.Personinfo
 import no.nav.helse.spesialist.api.objectMapper
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import org.intellij.lang.annotations.Language
 
 class SnapshotApiDao(private val dataSource: DataSource) {

@@ -8,13 +8,13 @@ import io.mockk.every
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
-import no.nav.helse.spesialist.api.graphql.enums.GraphQLPeriodetilstand
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLBeregnetPeriode
 import no.nav.helse.spesialist.api.graphql.schema.Periodehandling
 import no.nav.helse.spesialist.api.januar
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
+import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetilstand
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLBeregnetPeriode
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse

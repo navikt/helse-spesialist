@@ -1,10 +1,10 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
-import no.nav.helse.spesialist.api.graphql.enums.GraphQLInntektskilde
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLArbeidsgiverinntekt
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLInntekterFraAOrdningen
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLOmregnetArsinntekt
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLSammenligningsgrunnlag
+import no.nav.helse.spleis.graphql.enums.GraphQLInntektskilde
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiverinntekt
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLInntekterFraAOrdningen
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLOmregnetArsinntekt
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSammenligningsgrunnlag
 
 data class Arbeidsgiverinntekt(
     val arbeidsgiver: String,

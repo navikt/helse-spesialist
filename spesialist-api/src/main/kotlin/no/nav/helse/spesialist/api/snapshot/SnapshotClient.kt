@@ -21,7 +21,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.spesialist.api.client.AccessTokenClient
-import no.nav.helse.spesialist.api.graphql.HentSnapshot
+import no.nav.helse.spleis.graphql.HentSnapshot
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 

@@ -11,14 +11,14 @@ import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.spesialist.api.graphql.enums.GraphQLUtbetalingstatus
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLUtbetaling
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
+import no.nav.helse.spleis.graphql.enums.GraphQLUtbetalingstatus
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUtbetaling
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import no.nav.helse.spesialist.api.graphql.enums.Utbetalingtype as GraphQLUtbetalingtype
+import no.nav.helse.spleis.graphql.enums.Utbetalingtype as GraphQLUtbetalingtype
 
 internal class OpprettSaksbehandleroppgaveCommandTest {
     private companion object {

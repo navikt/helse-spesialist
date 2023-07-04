@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLGhostPeriode
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
@@ -17,6 +15,8 @@ import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLGhostPeriode
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 
 data class Infotrygdutbetaling(
     val fom: String,

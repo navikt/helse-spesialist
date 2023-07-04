@@ -57,6 +57,7 @@ internal class SchemaBuilder(
         val schemaConfig = SchemaGeneratorConfig(
             supportedPackages = listOf(
                 "no.nav.helse.spesialist.api.graphql",
+                "no.nav.helse.spleis.graphql",
             )
         )
         return toSchema(

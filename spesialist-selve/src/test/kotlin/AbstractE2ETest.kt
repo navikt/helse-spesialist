@@ -64,7 +64,6 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
-import no.nav.helse.spesialist.api.graphql.HentSnapshot
 import no.nav.helse.spesialist.api.graphql.query.PersonQuery
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
@@ -80,6 +79,7 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
+import no.nav.helse.spleis.graphql.HentSnapshot
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach

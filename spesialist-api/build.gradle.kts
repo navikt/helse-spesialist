@@ -22,7 +22,7 @@ val graphqlGenerateClient by tasks.getting(GraphQLGenerateClientTask::class) {
     val baseDir = "${project.projectDir}/src/main/resources/graphql"
 
     serializer.set(com.expediagroup.graphql.plugin.gradle.config.GraphQLSerializer.JACKSON)
-    packageName.set("no.nav.helse.spesialist.api.graphql")
+    packageName.set("no.nav.helse.spleis.graphql")
     schemaFile.set(File("$baseDir/schema.graphql"))
     queryFiles.from(
         listOf(

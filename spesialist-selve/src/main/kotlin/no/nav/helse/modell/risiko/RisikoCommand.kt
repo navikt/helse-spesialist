@@ -7,7 +7,7 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetalingTilSykmeldt
 import no.nav.helse.modell.varsel.Varselkode.SB_RV_1
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLUtbetaling
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUtbetaling
 import org.slf4j.LoggerFactory
 
 internal class RisikoCommand(

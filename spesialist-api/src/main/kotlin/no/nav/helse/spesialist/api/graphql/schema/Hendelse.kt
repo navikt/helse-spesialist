@@ -1,10 +1,10 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLHendelse
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLInntektsmelding
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLSoknadArbeidsgiver
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLSoknadNav
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLSykmelding
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLHendelse
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLInntektsmelding
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSoknadArbeidsgiver
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSoknadNav
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSykmelding
 
 enum class Hendelsetype {
     INNTEKTSMELDING,

@@ -9,7 +9,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLPerson
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse

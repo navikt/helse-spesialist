@@ -8,9 +8,9 @@ import io.mockk.verify
 import java.util.UUID
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.spesialist.api.graphql.HentSnapshot
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
+import no.nav.helse.spleis.graphql.HentSnapshot
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

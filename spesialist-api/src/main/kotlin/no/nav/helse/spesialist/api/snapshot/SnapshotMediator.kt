@@ -1,10 +1,10 @@
 package no.nav.helse.spesialist.api.snapshot
 
 import java.util.UUID
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLBeregnetPeriode
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLPerson
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLUtbetaling
 import no.nav.helse.spesialist.api.graphql.schema.Personinfo
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLBeregnetPeriode
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUtbetaling
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 

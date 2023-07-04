@@ -1,12 +1,12 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
-import no.nav.helse.spesialist.api.graphql.enums.GraphQLBegrunnelse
-import no.nav.helse.spesialist.api.graphql.enums.GraphQLSykdomsdagkildetype
-import no.nav.helse.spesialist.api.graphql.enums.GraphQLSykdomsdagtype
-import no.nav.helse.spesialist.api.graphql.enums.GraphQLUtbetalingsdagType
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLDag
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLSykdomsdagkilde
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLUtbetalingsinfo
+import no.nav.helse.spleis.graphql.enums.GraphQLBegrunnelse
+import no.nav.helse.spleis.graphql.enums.GraphQLSykdomsdagkildetype
+import no.nav.helse.spleis.graphql.enums.GraphQLSykdomsdagtype
+import no.nav.helse.spleis.graphql.enums.GraphQLUtbetalingsdagType
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLDag
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSykdomsdagkilde
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUtbetalingsinfo
 
 enum class Kildetype {
     INNTEKTSMELDING,

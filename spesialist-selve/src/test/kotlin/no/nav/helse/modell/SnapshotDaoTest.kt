@@ -4,7 +4,7 @@ import DatabaseIntegrationTest
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLPerson
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

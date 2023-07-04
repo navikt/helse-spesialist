@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLArbeidsgiverrefusjon
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLRefusjonselement
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiverrefusjon
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLRefusjonselement
 
 data class Arbeidsgiverrefusjon(
     val arbeidsgiver: String,

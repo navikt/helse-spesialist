@@ -6,16 +6,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.Toggle
-import no.nav.helse.spesialist.api.graphql.enums.GraphQLInntektstype
-import no.nav.helse.spesialist.api.graphql.enums.GraphQLPeriodetilstand
-import no.nav.helse.spesialist.api.graphql.enums.GraphQLPeriodetype
-import no.nav.helse.spesialist.api.graphql.enums.GraphQLUtbetalingstatus
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.Alder
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLBeregnetPeriode
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLOppdrag
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLTidslinjeperiode
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.Soknadsfrist
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.Sykepengedager
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
@@ -25,7 +15,17 @@ import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
-import no.nav.helse.spesialist.api.graphql.enums.Utbetalingtype as GraphQLUtbetalingtype
+import no.nav.helse.spleis.graphql.enums.GraphQLInntektstype
+import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetilstand
+import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetype
+import no.nav.helse.spleis.graphql.enums.GraphQLUtbetalingstatus
+import no.nav.helse.spleis.graphql.hentsnapshot.Alder
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLBeregnetPeriode
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLOppdrag
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLTidslinjeperiode
+import no.nav.helse.spleis.graphql.hentsnapshot.Soknadsfrist
+import no.nav.helse.spleis.graphql.hentsnapshot.Sykepengedager
+import no.nav.helse.spleis.graphql.enums.Utbetalingtype as GraphQLUtbetalingtype
 
 enum class Inntektstype { ENARBEIDSGIVER, FLEREARBEIDSGIVERE }
 

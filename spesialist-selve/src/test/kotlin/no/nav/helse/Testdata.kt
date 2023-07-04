@@ -2,21 +2,21 @@ package no.nav.helse
 
 import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import java.util.UUID
-import no.nav.helse.spesialist.api.graphql.HentSnapshot
-import no.nav.helse.spesialist.api.graphql.enums.GraphQLInntektstype
-import no.nav.helse.spesialist.api.graphql.enums.GraphQLPeriodetilstand
-import no.nav.helse.spesialist.api.graphql.enums.GraphQLPeriodetype
-import no.nav.helse.spesialist.api.graphql.enums.GraphQLUtbetalingstatus
-import no.nav.helse.spesialist.api.graphql.enums.Utbetalingtype
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.Alder
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLArbeidsgiver
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLBeregnetPeriode
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLGenerasjon
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLPeriodevilkar
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLPerson
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLUtbetaling
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.Soknadsfrist
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.Sykepengedager
+import no.nav.helse.spleis.graphql.HentSnapshot
+import no.nav.helse.spleis.graphql.enums.GraphQLInntektstype
+import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetilstand
+import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetype
+import no.nav.helse.spleis.graphql.enums.GraphQLUtbetalingstatus
+import no.nav.helse.spleis.graphql.enums.Utbetalingtype
+import no.nav.helse.spleis.graphql.hentsnapshot.Alder
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiver
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLBeregnetPeriode
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLGenerasjon
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPeriodevilkar
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUtbetaling
+import no.nav.helse.spleis.graphql.hentsnapshot.Soknadsfrist
+import no.nav.helse.spleis.graphql.hentsnapshot.Sykepengedager
 
 object Testdata {
     const val FØDSELSNUMMER = "12020052345"

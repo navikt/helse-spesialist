@@ -30,26 +30,6 @@ import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMe
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkResponse
 import no.nav.helse.spesialist.api.behandlingsstatistikk.Statistikk
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
-import no.nav.helse.spesialist.api.graphql.enums.GraphQLInntektstype
-import no.nav.helse.spesialist.api.graphql.enums.GraphQLPeriodetilstand
-import no.nav.helse.spesialist.api.graphql.enums.GraphQLPeriodetype
-import no.nav.helse.spesialist.api.graphql.enums.GraphQLUtbetalingstatus
-import no.nav.helse.spesialist.api.graphql.enums.Utbetalingtype
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.Alder
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLArbeidsgiver
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLBeregnetPeriode
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLGenerasjon
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLOppdrag
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLPeriodevilkar
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLPerson
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLSimulering
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLSimuleringsdetaljer
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLSimuleringsperiode
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLSimuleringsutbetaling
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLUtbetaling
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLVurdering
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.Soknadsfrist
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.Sykepengedager
 import no.nav.helse.spesialist.api.graphql.schema.Adressebeskyttelse
 import no.nav.helse.spesialist.api.graphql.schema.Boenhet
 import no.nav.helse.spesialist.api.graphql.schema.Kjonn
@@ -77,6 +57,26 @@ import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.utbetaling.UtbetalingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vedtaksperiode.EnhetDto
+import no.nav.helse.spleis.graphql.enums.GraphQLInntektstype
+import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetilstand
+import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetype
+import no.nav.helse.spleis.graphql.enums.GraphQLUtbetalingstatus
+import no.nav.helse.spleis.graphql.enums.Utbetalingtype
+import no.nav.helse.spleis.graphql.hentsnapshot.Alder
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiver
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLBeregnetPeriode
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLGenerasjon
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLOppdrag
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPeriodevilkar
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSimulering
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSimuleringsdetaljer
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSimuleringsperiode
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSimuleringsutbetaling
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUtbetaling
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLVurdering
+import no.nav.helse.spleis.graphql.hentsnapshot.Soknadsfrist
+import no.nav.helse.spleis.graphql.hentsnapshot.Sykepengedager
 
 fun main() = runBlocking {
     val jwtStub = JwtStub()
