@@ -4,9 +4,12 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.januar
 import no.nav.helse.modell.vedtaksperiode.vedtak.Faktatype.ETTER_HOVEDREGEL
+import no.nav.helse.modell.vedtaksperiode.vedtak.Faktatype.ETTER_SKJØNN
+import no.nav.helse.modell.vedtaksperiode.vedtak.Faktatype.I_INFOTRYGD
 import no.nav.helse.modell.vedtaksperiode.vedtak.Sykepengegrunnlagsfakta.Infotrygd
 import no.nav.helse.modell.vedtaksperiode.vedtak.Sykepengegrunnlagsfakta.Spleis
 import no.nav.helse.modell.vedtaksperiode.vedtak.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -39,7 +42,7 @@ class SykepengevedtakBuilderTest {
     }
 
     @Test
-    fun `Bygg vanlig vedtak`() {
+    fun `Bygg vanlig vedtak - sykepengegrunnlag fastsatt etter hovedregel`() {
         val builder = SykepengevedtakBuilder()
         builder
             .fødselsnummer(fødselsnummer)
@@ -61,6 +64,116 @@ class SykepengevedtakBuilderTest {
 
         val utkast = builder.build()
         assertTrue(utkast is Sykepengevedtak.Vedtak)
+        assertEquals(
+            Sykepengevedtak.Vedtak(
+                fødselsnummer = fødselsnummer,
+                aktørId = aktørId,
+                vedtaksperiodeId = vedtaksperiodeId,
+                organisasjonsnummer = organisasjonsnummer,
+                fom = fom,
+                tom = tom,
+                skjæringstidspunkt = skjæringstidspunkt,
+                hendelser = hendelser,
+                sykepengegrunnlag = sykepengegrunnlag,
+                grunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag,
+                grunnlagForSykepengegrunnlagPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver,
+                begrensning = begrensning,
+                inntekt = inntekt,
+                vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+                sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(ETTER_HOVEDREGEL),
+                utbetalingId = utbetalingId
+            ), utkast
+        )
+    }
+
+    @Test
+    fun `Bygg vanlig vedtak - sykepengegrunnlag fastsatt skjønn`() {
+        val builder = SykepengevedtakBuilder()
+        builder
+            .fødselsnummer(fødselsnummer)
+            .aktørId(aktørId)
+            .organisasjonsnummer(organisasjonsnummer)
+            .vedtaksperiodeId(vedtaksperiodeId)
+            .utbetalingId(utbetalingId)
+            .fom(fom)
+            .tom(tom)
+            .skjæringstidspunkt(skjæringstidspunkt)
+            .hendelser(hendelser)
+            .sykepengegrunnlag(sykepengegrunnlag)
+            .grunnlagForSykepengegrunnlag(grunnlagForSykepengegrunnlag)
+            .grunnlagForSykepengegrunnlagPerArbeidsgiver(grunnlagForSykepengegrunnlagPerArbeidsgiver)
+            .begrensning(begrensning)
+            .inntekt(inntekt)
+            .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
+            .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_SKJØNN))
+
+        val utkast = builder.build()
+        assertTrue(utkast is Sykepengevedtak.Vedtak)
+        assertEquals(
+            Sykepengevedtak.Vedtak(
+                fødselsnummer = fødselsnummer,
+                aktørId = aktørId,
+                vedtaksperiodeId = vedtaksperiodeId,
+                organisasjonsnummer = organisasjonsnummer,
+                fom = fom,
+                tom = tom,
+                skjæringstidspunkt = skjæringstidspunkt,
+                hendelser = hendelser,
+                sykepengegrunnlag = sykepengegrunnlag,
+                grunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag,
+                grunnlagForSykepengegrunnlagPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver,
+                begrensning = begrensning,
+                inntekt = inntekt,
+                vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+                sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(ETTER_SKJØNN),
+                utbetalingId = utbetalingId
+            ), utkast
+        )
+    }
+
+    @Test
+    fun `Bygg vanlig vedtak - sykepengegrunnlag fastsatt i Infotrygd`() {
+        val builder = SykepengevedtakBuilder()
+        builder
+            .fødselsnummer(fødselsnummer)
+            .aktørId(aktørId)
+            .organisasjonsnummer(organisasjonsnummer)
+            .vedtaksperiodeId(vedtaksperiodeId)
+            .utbetalingId(utbetalingId)
+            .fom(fom)
+            .tom(tom)
+            .skjæringstidspunkt(skjæringstidspunkt)
+            .hendelser(hendelser)
+            .sykepengegrunnlag(sykepengegrunnlag)
+            .grunnlagForSykepengegrunnlag(grunnlagForSykepengegrunnlag)
+            .grunnlagForSykepengegrunnlagPerArbeidsgiver(grunnlagForSykepengegrunnlagPerArbeidsgiver)
+            .begrensning(begrensning)
+            .inntekt(inntekt)
+            .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
+            .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(I_INFOTRYGD))
+
+        val utkast = builder.build()
+        assertTrue(utkast is Sykepengevedtak.Vedtak)
+        assertEquals(
+            Sykepengevedtak.Vedtak(
+                fødselsnummer = fødselsnummer,
+                aktørId = aktørId,
+                vedtaksperiodeId = vedtaksperiodeId,
+                organisasjonsnummer = organisasjonsnummer,
+                fom = fom,
+                tom = tom,
+                skjæringstidspunkt = skjæringstidspunkt,
+                hendelser = hendelser,
+                sykepengegrunnlag = sykepengegrunnlag,
+                grunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag,
+                grunnlagForSykepengegrunnlagPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver,
+                begrensning = begrensning,
+                inntekt = inntekt,
+                vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+                sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(I_INFOTRYGD),
+                utbetalingId = utbetalingId
+            ), utkast
+        )
     }
 
     @Test
@@ -84,6 +197,24 @@ class SykepengevedtakBuilderTest {
 
         val utkast = builder.build()
         assertTrue(utkast is Sykepengevedtak.AuuVedtak)
+        assertEquals(
+            Sykepengevedtak.AuuVedtak(
+                fødselsnummer = fødselsnummer,
+                aktørId = aktørId,
+                vedtaksperiodeId = vedtaksperiodeId,
+                organisasjonsnummer = organisasjonsnummer,
+                fom = fom,
+                tom = tom,
+                skjæringstidspunkt = skjæringstidspunkt,
+                hendelser = hendelser,
+                sykepengegrunnlag = sykepengegrunnlag,
+                grunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag,
+                grunnlagForSykepengegrunnlagPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver,
+                begrensning = begrensning,
+                inntekt = inntekt,
+                vedtakFattetTidspunkt = vedtakFattetTidspunkt
+            ), utkast
+        )
     }
 
     @Test
@@ -138,7 +269,7 @@ class SykepengevedtakBuilderTest {
 
     private fun sykepengegrunnlagsfakta(faktatype: Faktatype): Sykepengegrunnlagsfakta {
         return when(faktatype) {
-            Faktatype.ETTER_SKJØNN -> Spleis.EtterSkjønn(
+            ETTER_SKJØNN -> Spleis.EtterSkjønn(
                 omregnetÅrsinntekt = omregnetÅrsinntekt,
                 innrapportertÅrsinntekt = innrapportertÅrsinntekt,
                 avviksprosent = avviksprosent,
@@ -161,7 +292,7 @@ class SykepengevedtakBuilderTest {
                     Arbeidsgiver.EtterHovedregel("987654321", 300000.0)
                 )
             )
-            Faktatype.I_INFOTRYGD -> Infotrygd(
+            I_INFOTRYGD -> Infotrygd(
                 omregnetÅrsinntekt = omregnetÅrsinntekt,
             )
         }
