@@ -18,32 +18,15 @@ dependencies {
     testImplementation("io.ktor:ktor-server-netty:$ktorVersion")
 }
 
-val graphqlIntrospectSchema by tasks.getting(com.expediagroup.graphql.plugin.gradle.tasks.GraphQLIntrospectSchemaTask::class) {
-    endpoint.set("https://spleis-api.intern.dev.nav.no/graphql/introspection")
-    outputFile.set(File("${project.projectDir}/src/main/resources/graphql/schema.graphql"))
-}
-
-// Disabler automatisk kjøring av introspection siden henting av schema feiler under bygg på Github.
-// Kan kjøres manuelt for å hente nytt schema.
-graphqlIntrospectSchema.enabled = System.getenv("CI") != "true"
-
 val graphqlGenerateClient by tasks.getting(GraphQLGenerateClientTask::class) {
     val baseDir = "${project.projectDir}/src/main/resources/graphql"
 
     serializer.set(com.expediagroup.graphql.plugin.gradle.config.GraphQLSerializer.JACKSON)
     packageName.set("no.nav.helse.spesialist.api.graphql")
-    schemaFile.set(graphqlIntrospectSchema.outputFile)
+    schemaFile.set(File("$baseDir/schema.graphql"))
     queryFiles.from(
         listOf(
             File("$baseDir/hentSnapshot.graphql")
         )
     )
-
-    if (graphqlIntrospectSchema.enabled) {
-        dependsOn("graphqlIntrospectSchema")
-    }
-}
-
-tasks.processResources {
-    dependsOn(tasks.graphqlIntrospectSchema)
 }

@@ -17,8 +17,9 @@ Hvis du nylig har gjort endringer i GraphQL-typer, -mutations, -queries eller -s
 - Commit endringene i `schema_til_bruk_fra_tester.graphql`.
 
 ## Oppdatere GraphQL Schema mot spleis
-- graphqlIntrospectSchema tasken skal kjøres når man bygger. Hvis schema.graphql ikke blir oppdatert, kan man prøve å slette filen og kjøre tasken på nytt.
-- For å få oppdatert de genererte .kt klasse-filene må man legge til de nye feltene i hentSnapshot.graphql. 
+- Kjør introspection manuelt med IntelliJ fra filen [graphql.config.yml](spesialist-api/src/main/resources/graphql/graphql.config.yml)
+- Gjør eventuelt endringer i hva som skal hentes fra spleis i `hentSnapshot.graphql`
+- Bruk gradle til å få generert klassene
 
 ## Kjøre lokal GraphQL Playground
 - kjør main-funksjonen i LocalGraphQLApi.kt
