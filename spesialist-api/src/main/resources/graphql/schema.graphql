@@ -311,6 +311,22 @@ type GraphQLUberegnetPeriode implements GraphQLTidslinjeperiode {
   vedtaksperiodeId: UUID!
 }
 
+type GraphQLUberegnetVilkarsprovdPeriode implements GraphQLTidslinjeperiode {
+  erForkastet: Boolean!
+  fom: LocalDate!
+  hendelser: [GraphQLHendelse!]!
+  id: UUID!
+  inntektstype: GraphQLInntektstype!
+  opprettet: LocalDateTime!
+  periodetilstand: GraphQLPeriodetilstand!
+  periodetype: GraphQLPeriodetype!
+  skjaeringstidspunkt: LocalDate!
+  tidslinje: [GraphQLDag!]!
+  tom: LocalDate!
+  vedtaksperiodeId: UUID!
+  vilkarsgrunnlagId: UUID!
+}
+
 type GraphQLUtbetaling {
   arbeidsgiverFagsystemId: String!
   arbeidsgiverNettoBelop: Int!
@@ -419,6 +435,7 @@ enum GraphQLPeriodetilstand {
   TilAnnullering
   TilGodkjenning
   TilInfotrygd
+  TilSkjonnsfastsettelse
   TilUtbetaling
   UtbetalingFeilet
   Utbetalt
