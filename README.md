@@ -12,9 +12,9 @@ Vi er per nå avhengig av naisdevice for å bygge lokalt, pga graphql schema-end
 
 ## Oppdatere GraphQL Schema for tester
 Hvis du nylig har gjort endringer i GraphQL-typer, -mutations, -queries eller -subscriptions og ønsker å teste disse endringene, er det lurt å først oppdatere lokalt testskjema, slik at du får syntax highlighting, code completion og et bedre liv. Da gjør du følgende:
-- Kjør opp [LocalGraphQLApi.kt](spesialist-api%2Fsrc%2Ftest%2Fkotlin%2Fno%2Fnav%2Fhelse%2Fspesialist%2Fapi%2Fgraphql%2FLocalGraphQLApi.kt) sin main-metode, det starter en lokal GraphQL-server.
-- Finn filen [graphql.config.yml](spesialist-api%2Fsrc%2Ftest%2Fgraphql.config.yml) og kjør `spesialist-local`, som vil oppdatere [schema_til_bruk_fra_tester.grapqhl](spesialist-api%2Fsrc%2Ftest%2Fschema_til_bruk_fra_tester.graphql). 
-- Commit endringene i [schema_til_bruk_fra_tester.graphql](spesialist-api%2Fsrc%2Ftest%2Fschema_til_bruk_fra_tester.graphql).
+- Kjør opp [LocalGraphQLApi.kt](spesialist-api/src/test/kotlin/no/nav/helse/spesialist/api/graphql/LocalGraphQLApi.kt) sin main-metode, det starter en lokal GraphQL-server.
+- Finn filen [graphql.config.yml](spesialist-api/src/test/graphql.config.yml) og kjør `spesialist-local`, som vil oppdatere [schema_til_bruk_fra_tester.grapqhl](spesialist-api/src/test/schema_til_bruk_fra_tester.graphql). 
+- Commit endringene i `schema_til_bruk_fra_tester.graphql`.
 
 ## Oppdatere GraphQL Schema mot spleis
 - graphqlIntrospectSchema tasken skal kjøres når man bygger. Hvis schema.graphql ikke blir oppdatert, kan man prøve å slette filen og kjøre tasken på nytt.
