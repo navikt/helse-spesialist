@@ -1,4 +1,4 @@
-schema: 'schema.graphql'
+schema: 'schema_til_bruk_fra_tester.graphql'
 extensions:
   endpoints:
     spesialist-local:
