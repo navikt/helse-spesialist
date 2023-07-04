@@ -4,6 +4,9 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.januar
 import no.nav.helse.modell.vedtaksperiode.vedtak.Faktatype.ETTER_HOVEDREGEL
+import no.nav.helse.modell.vedtaksperiode.vedtak.Sykepengegrunnlagsfakta.Infotrygd
+import no.nav.helse.modell.vedtaksperiode.vedtak.Sykepengegrunnlagsfakta.Spleis
+import no.nav.helse.modell.vedtaksperiode.vedtak.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -135,7 +138,7 @@ class SykepengevedtakBuilderTest {
 
     private fun sykepengegrunnlagsfakta(faktatype: Faktatype): Sykepengegrunnlagsfakta {
         return when(faktatype) {
-            Faktatype.ETTER_SKJØNN -> Sykepengegrunnlagsfakta.EtterSkjønn(
+            Faktatype.ETTER_SKJØNN -> Spleis.EtterSkjønn(
                 omregnetÅrsinntekt = omregnetÅrsinntekt,
                 innrapportertÅrsinntekt = innrapportertÅrsinntekt,
                 avviksprosent = avviksprosent,
@@ -147,18 +150,18 @@ class SykepengevedtakBuilderTest {
                     Arbeidsgiver.EtterSkjønn("987654321", 300000.0, 325000.0)
                 )
             )
-            ETTER_HOVEDREGEL -> Sykepengegrunnlagsfakta.EtterHovedregel(
+            ETTER_HOVEDREGEL -> Spleis.EtterHovedregel(
                 omregnetÅrsinntekt = omregnetÅrsinntekt,
                 innrapportertÅrsinntekt = innrapportertÅrsinntekt,
                 avviksprosent = avviksprosent,
                 seksG = seksG2023,
                 tags = emptyList(),
                 arbeidsgivere = listOf(
-                    Arbeidsgiver.EtterHoveregel(organisasjonsnummer, 300000.0),
-                    Arbeidsgiver.EtterHoveregel("987654321", 300000.0)
+                    Arbeidsgiver.EtterHovedregel(organisasjonsnummer, 300000.0),
+                    Arbeidsgiver.EtterHovedregel("987654321", 300000.0)
                 )
             )
-            Faktatype.I_INFOTRYGD -> Sykepengegrunnlagsfakta.Infotrygd(
+            Faktatype.I_INFOTRYGD -> Infotrygd(
                 omregnetÅrsinntekt = omregnetÅrsinntekt,
             )
         }
