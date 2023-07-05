@@ -2,6 +2,7 @@ package no.nav.helse.modell.saksbehandler
 
 import DatabaseIntegrationTest
 import java.util.UUID
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
@@ -60,7 +61,11 @@ internal class SaksbehandlerDaoTest : DatabaseIntegrationTest() {
         assertNotNull(saksbehandler)
     }
 
-    private fun saksbehandler(oid: UUID) = saksbehandlerDao.finnSaksbehandler(oid)
+    private fun saksbehandler(oid: UUID) = query(
+        " SELECT * FROM saksbehandler WHERE oid = :oid LIMIT 1; ", "oid" to oid
+    ).single { row ->
+        SaksbehandlerDto(oid = oid, navn = row.string("navn"), epost = row.string("epost"), ident = row.string("ident"))
+    }
 
     private fun assertSaksbehandler(oid: UUID, navn: String, epost: String, ident: String) {
         val saksbehandler = saksbehandler(oid)

@@ -76,15 +76,6 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `finner contextId`() {
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode()
-        opprettOppgave(contextId = CONTEXT_ID)
-        assertEquals(CONTEXT_ID, oppgaveDao.finnContextId(oppgaveId))
-    }
-
-    @Test
     fun `finner utbetalingId`() {
         opprettPerson()
         opprettArbeidsgiver()

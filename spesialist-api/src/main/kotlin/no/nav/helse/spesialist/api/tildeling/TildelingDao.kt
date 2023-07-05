@@ -17,7 +17,7 @@ class TildelingDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 if (tx.tildelingForOppgave(oppgaveId) != null) null
                 else {
                     tx.run {
-                        queryize(
+                        asSQL(
                             """
                                 WITH inserted AS (
                                     INSERT INTO tildeling (oppgave_id_ref, saksbehandler_ref, på_vent)
@@ -26,29 +26,26 @@ class TildelingDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                                 )
                                 SELECT s.navn, epost, oid, på_vent FROM inserted i
                                 INNER JOIN saksbehandler s on s.oid = i.saksbehandler_ref
-                            """
-                        ).single(
-                            mapOf(
+                            """, mapOf(
                                 "saksbehandler_oid" to saksbehandleroid,
                                 "oppgave_id" to oppgaveId,
                                 "paa_vent" to påVent,
-                            ),
-                            ::tildelingDto
-                        )
+                            )
+                        ).single(::tildelingDto)
                     }
                 }
             }
         }
 
-    fun slettTildeling(oppgaveId: Long) = queryize(
+    fun slettTildeling(oppgaveId: Long) = asSQL(
         """ 
             DELETE
             FROM tildeling
             WHERE oppgave_id_ref = :oppgave_id_ref;
-        """
-    ).update(mapOf("oppgave_id_ref" to oppgaveId))
+        """, mapOf("oppgave_id_ref" to oppgaveId)
+    ).update()
 
-    fun tildelingForPerson(fødselsnummer: String) = queryize(
+    fun tildelingForPerson(fødselsnummer: String) = asSQL(
         """ 
             SELECT s.epost, s.oid, s.navn, t.på_vent FROM person
                  RIGHT JOIN vedtak v on person.id = v.person_ref
@@ -57,8 +54,8 @@ class TildelingDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                  RIGHT JOIN saksbehandler s on t.saksbehandler_ref = s.oid
             WHERE fodselsnummer = :fnr AND o.status = 'AvventerSaksbehandler'
             ORDER BY o.opprettet DESC;
-        """
-    ).single(mapOf("fnr" to fødselsnummer.toLong()), ::tildelingDto)
+        """, mapOf("fnr" to fødselsnummer.toLong())
+    ).single(::tildelingDto)
 
     fun leggOppgavePåVent(oppgaveId: Long): TildelingApiDto? = updatePåVentReturningTildeling(oppgaveId, true)
 
@@ -85,7 +82,7 @@ class TildelingDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         return run(queryOf(query, mapOf("oppgaveId" to oppgaveId)).map(::tildelingDto).asSingle)
     }
 
-    private fun updatePåVentReturningTildeling(oppgaveId: Long, påVent: Boolean): TildelingApiDto? = queryize(
+    private fun updatePåVentReturningTildeling(oppgaveId: Long, påVent: Boolean): TildelingApiDto? = asSQL(
         """ 
             WITH updated AS (
                 UPDATE tildeling
@@ -95,6 +92,6 @@ class TildelingDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             )
             SELECT s.epost, u.på_vent, u.saksbehandler_ref as oid, s.navn FROM updated u
                 INNER JOIN saksbehandler s ON s.oid = u.saksbehandler_ref
-        """
-    ).single(mapOf("oppgave_id_ref" to oppgaveId, "paa_vent" to påVent), ::tildelingDto)
+        """, mapOf("oppgave_id_ref" to oppgaveId, "paa_vent" to påVent)
+    ).single(::tildelingDto)
 }

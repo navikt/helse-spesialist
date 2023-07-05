@@ -15,7 +15,7 @@ class NotatDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         vedtaksperiodeId: UUID,
         tekst: String,
         saksbehandlerOid: UUID,
-        type: NotatType = NotatType.Generelt
+        type: NotatType = NotatType.Generelt,
     ): NotatDto? = queryize(
         """ 
             with inserted AS (
@@ -50,8 +50,8 @@ class NotatDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         oppgaveId: Long,
         tekst: String,
         saksbehandlerOid: UUID,
-        type: NotatType = NotatType.Generelt
-    ): Long? = queryize(
+        type: NotatType = NotatType.Generelt,
+    ): Long? = asSQL(
         """ 
             INSERT INTO notat (vedtaksperiode_id, tekst, saksbehandler_oid, type)
             VALUES (
@@ -63,23 +63,13 @@ class NotatDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 :saksbehandler_oid,
                 CAST(:type as notattype)
             );
-        """
-    ).updateAndReturnGeneratedKey(
-        mapOf(
+        """, mapOf(
             "oppgave_id" to oppgaveId,
             "tekst" to tekst,
             "saksbehandler_oid" to saksbehandlerOid,
             "type" to type.name
         )
-    )
-
-    fun finnNotat(id: Int): NotatDto? = queryize(
-        """ 
-            SELECT * FROM notat n
-            JOIN saksbehandler s on s.oid = n.saksbehandler_oid
-            WHERE n.id = :id
-        """
-    ).single(mapOf("id" to id)) { mapNotatDto(it) }
+    ).updateAndReturnGeneratedKey()
 
     fun finnNotater(vedtaksperiodeId: UUID): List<NotatDto> = queryize(
         """ 

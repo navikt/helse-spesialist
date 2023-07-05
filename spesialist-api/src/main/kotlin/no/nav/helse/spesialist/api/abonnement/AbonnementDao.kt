@@ -1,8 +1,8 @@
 package no.nav.helse.spesialist.api.abonnement
 
-import no.nav.helse.HelseDao
-import java.util.*
+import java.util.UUID
 import javax.sql.DataSource
+import no.nav.helse.HelseDao
 
 class AbonnementDao(dataSource: DataSource) : HelseDao(dataSource) {
 
@@ -18,9 +18,10 @@ class AbonnementDao(dataSource: DataSource) : HelseDao(dataSource) {
       """, mapOf("saksbehandlerId" to saksbehandlerId, "aktorId" to aktørId)
         ).update()
 
-    fun registrerSistekvensnummer(saksbehandlerIdent: UUID, sisteSekvensId: Int) =
+    fun registrerSistekvensnummer(saksbehandlerIdent: UUID, sisteSekvensId: Int) = asSQL(
         """ UPDATE abonnement_for_opptegnelse
             SET siste_sekvensnummer=:sisteSekvensId
-            WHERE saksbehandler_id=:saksbehandlerId;"""
-            .update(mapOf("sisteSekvensId" to sisteSekvensId, "saksbehandlerId" to saksbehandlerIdent))
+            WHERE saksbehandler_id=:saksbehandlerId; """,
+        mapOf("sisteSekvensId" to sisteSekvensId, "saksbehandlerId" to saksbehandlerIdent)
+    ).update()
 }

@@ -74,7 +74,6 @@ internal class OppgaveMediatorTest {
         every { oppgaveDao.finn(0L) } returns søknadsoppgave
         every { oppgaveDao.opprettOppgave(any(), OPPGAVETYPE_SØKNAD, any(), any()) } returns 0L
         every { oppgaveDao.finnHendelseId(any()) } returns HENDELSE_ID
-        every { oppgaveDao.finnContextId(any()) } returns COMMAND_CONTEXT_ID
         every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
         mediator.opprett(søknadsoppgave)
         mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
@@ -151,7 +150,6 @@ internal class OppgaveMediatorTest {
         )
         every { oppgaveDao.finn(any<Long>()) } returns oppgave
         every { oppgaveDao.finnHendelseId(any()) } returns HENDELSE_ID
-        every { oppgaveDao.finnContextId(any()) } returns COMMAND_CONTEXT_ID
         mediator.ferdigstill(oppgave, SAKSBEHANDLERIDENT, SAKSBEHANDLEROID)
         mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
         assertEquals(1, testRapid.inspektør.size)

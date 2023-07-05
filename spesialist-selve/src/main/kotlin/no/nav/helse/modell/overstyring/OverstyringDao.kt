@@ -12,7 +12,7 @@ import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import org.intellij.lang.annotations.Language
 
-class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
+class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) {
 
     fun finnOverstyringerMedTypeForVedtaksperiode(vedtaksperiodeId: UUID): List<OverstyringType> =
         """ SELECT DISTINCT o.id,
@@ -44,18 +44,15 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
             AND o.ferdigstilt = false
         """.list(mapOf("vedtaksperiode_id" to vedtaksperiodeId)) { it.uuid("ekstern_hendelse_id") }
 
-    fun ferdigstillOverstyringerForVedtaksperiode(vedtaksperiodeId: UUID) =
+    fun ferdigstillOverstyringerForVedtaksperiode(vedtaksperiodeId: UUID) = asSQL(
         """ UPDATE overstyring
             SET ferdigstilt = true
             WHERE id IN (
                 SELECT overstyring_ref FROM overstyringer_for_vedtaksperioder
                 WHERE vedtaksperiode_id = :vedtaksperiode_id
             )
-        """.update(
-            mapOf(
-                "vedtaksperiode_id" to vedtaksperiodeId
-            )
-        )
+        """, mapOf("vedtaksperiode_id" to vedtaksperiodeId)
+    ).update()
 
     fun kobleOverstyringOgVedtaksperiode(vedtaksperiodeIder: List<UUID>, overstyringHendelseId: UUID) {
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
@@ -112,7 +109,7 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
         begrunnelse: String,
         overstyrteDager: List<OverstyringDagDto>,
         saksbehandlerRef: UUID,
-        tidspunkt: LocalDateTime
+        tidspunkt: LocalDateTime,
     ) {
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             @Language("PostgreSQL")
@@ -228,11 +225,23 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
                                 "fra_manedlig_inntekt" to arbeidsgiver.fraMånedligInntekt,
                                 "skjaeringstidspunkt" to skjæringstidspunkt,
                                 "overstyring_ref" to overstyringRef,
-                                "refusjonsopplysninger" to arbeidsgiver.refusjonsopplysninger?.let { objectMapper.writeValueAsString(arbeidsgiver.refusjonsopplysninger) },
-                                "fra_refusjonsopplysninger" to arbeidsgiver.fraRefusjonsopplysninger?.let { objectMapper.writeValueAsString(arbeidsgiver.fraRefusjonsopplysninger) },
+                                "refusjonsopplysninger" to arbeidsgiver.refusjonsopplysninger?.let {
+                                    objectMapper.writeValueAsString(
+                                        arbeidsgiver.refusjonsopplysninger
+                                    )
+                                },
+                                "fra_refusjonsopplysninger" to arbeidsgiver.fraRefusjonsopplysninger?.let {
+                                    objectMapper.writeValueAsString(
+                                        arbeidsgiver.fraRefusjonsopplysninger
+                                    )
+                                },
                                 "begrunnelse" to arbeidsgiver.begrunnelse,
                                 "orgnr" to arbeidsgiver.organisasjonsnummer.toLong(),
-                                "subsumsjon" to arbeidsgiver.subsumsjon?.let { objectMapper.writeValueAsString(arbeidsgiver.subsumsjon) }
+                                "subsumsjon" to arbeidsgiver.subsumsjon?.let {
+                                    objectMapper.writeValueAsString(
+                                        arbeidsgiver.subsumsjon
+                                    )
+                                }
                             )
                         ).asUpdate
                     )
@@ -290,7 +299,11 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
                                 "skjaeringstidspunkt" to skjæringstidspunkt,
                                 "arsak" to arbeidsgiver.årsak,
                                 "begrunnelse" to arbeidsgiver.begrunnelse,
-                                "subsumsjon" to arbeidsgiver.subsumsjon?.let { objectMapper.writeValueAsString(arbeidsgiver.subsumsjon) },
+                                "subsumsjon" to arbeidsgiver.subsumsjon?.let {
+                                    objectMapper.writeValueAsString(
+                                        arbeidsgiver.subsumsjon
+                                    )
+                                },
                                 "orgnr" to arbeidsgiver.organisasjonsnummer.toLong(),
                                 "overstyring_ref" to overstyringRef,
                                 "initierende_vedtaksperiode_id" to arbeidsgiver.initierendeVedtaksperiodeId
@@ -312,7 +325,7 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
         deaktivert: Boolean,
         skjæringstidspunkt: LocalDate,
         saksbehandlerRef: UUID,
-        tidspunkt: LocalDateTime
+        tidspunkt: LocalDateTime,
     ) {
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             @Language("PostgreSQL")

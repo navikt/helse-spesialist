@@ -203,23 +203,18 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         oppgavestatus: Oppgavestatus,
         ferdigstiltAv: String? = null,
         oid: UUID? = null,
-    ) =
-        queryize("""UPDATE oppgave SET ferdigstilt_av=:ferdigstiltAv, ferdigstilt_av_oid=:oid, status=:oppgavestatus::oppgavestatus WHERE id=:oppgaveId""")
-            .update(
-                mapOf(
-                    "ferdigstiltAv" to ferdigstiltAv,
-                    "oid" to oid,
-                    "oppgavestatus" to oppgavestatus.name,
-                    "oppgaveId" to oppgaveId
-                )
-            )
-
-    fun finnContextId(oppgaveId: Long) = requireNotNull(
-        queryize("""SELECT command_context_id FROM oppgave WHERE id = :oppgaveId""").trimMargin().single(mapOf("oppgaveId" to oppgaveId)) { row ->
-            UUID.fromString(
-                row.string("command_context_id")
-            )
-        })
+    ) = asSQL(
+        """
+            UPDATE oppgave
+            SET ferdigstilt_av = :ferdigstiltAv, ferdigstilt_av_oid = :oid, status = :oppgavestatus::oppgavestatus
+            WHERE id=:oppgaveId; 
+        """, mapOf(
+            "ferdigstiltAv" to ferdigstiltAv,
+            "oid" to oid,
+            "oppgavestatus" to oppgavestatus.name,
+            "oppgaveId" to oppgaveId
+        )
+    ).update()
 
     fun finnHendelseId(oppgaveId: Long) = requireNotNull(
         queryize("""SELECT DISTINCT hendelse_id 
@@ -272,7 +267,8 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             )
         }
 
-    fun invaliderOppgaveFor(fødselsnummer: String) = queryize("""
+    fun invaliderOppgaveFor(fødselsnummer: String) = asSQL(
+        """
         UPDATE oppgave o
         SET status = 'Invalidert'
         FROM oppgave o2
@@ -281,7 +277,8 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         WHERE p.fodselsnummer = :fodselsnummer
         and o.id = o2.id
         AND o.status = 'AvventerSaksbehandler'::oppgavestatus; 
-    """).update(mapOf("fodselsnummer" to fødselsnummer.toLong()))
+    """, mapOf("fodselsnummer" to fødselsnummer.toLong())
+    ).update()
 
 
     private fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else this.toString()
