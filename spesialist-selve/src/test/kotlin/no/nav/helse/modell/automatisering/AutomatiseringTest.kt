@@ -1,7 +1,5 @@
 package no.nav.helse.modell.automatisering
 
-import ToggleHelpers.disable
-import ToggleHelpers.enable
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
@@ -10,7 +8,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.januar
-import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
@@ -211,13 +208,6 @@ internal class AutomatiseringTest {
     fun `periode med vergemål skal ikke automatisk godkjennes`() {
         every { vergemålDaoMock.harVergemål(fødselsnummer) } returns true
         gårTilManuell()
-    }
-
-    @Test
-    fun `periode med utbetaling til sykmeldt skal ikke automatisk godkjennes`() {
-        Toggle.AutomatiserUtbetalingTilSykmeldt.disable()
-        gårTilManuell(enUtbetaling(personbeløp = 500))
-        Toggle.AutomatiserUtbetalingTilSykmeldt.enable()
     }
 
     @Test

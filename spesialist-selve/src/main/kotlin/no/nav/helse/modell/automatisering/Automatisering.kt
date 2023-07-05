@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.mediator.Toggle.AutomatiserUtbetalingTilSykmeldt
 import no.nav.helse.mediator.meldinger.løsninger.HentEnhetløsning.Companion.erEnhetUtland
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.HendelseDao.OverstyringIgangsattKorrigertSøknad
@@ -20,6 +19,8 @@ import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
+import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.modell.vergemal.VergemålDao
 import org.slf4j.LoggerFactory
 
@@ -60,7 +61,7 @@ internal class Automatisering(
             vurder(fødselsnummer, vedtaksperiodeId, utbetaling, periodetype, sykefraværstilfelle, periodeTom)
         val erUTS = utbetaling.harUtbetalingTilSykmeldt()
         val flereArbeidsgivere = vedtakDao.finnInntektskilde(vedtaksperiodeId) == Inntektskilde.FLERE_ARBEIDSGIVERE
-        val erFørstegangsbehandling = periodetype == Periodetype.FØRSTEGANGSBEHANDLING
+        val erFørstegangsbehandling = periodetype == FØRSTEGANGSBEHANDLING
 
         val utfallslogger = { tekst: String ->
             sikkerLogg.info(
@@ -200,11 +201,7 @@ internal class Automatisering(
         val harPågåendeOverstyring = overstyringDao.harVedtaksperiodePågåendeOverstyring(vedtaksperiodeId)
         val harUtbetalingTilSykmeldt = utbetaling.harUtbetalingTilSykmeldt()
 
-        val skalStoppesPgaUTS =
-            if (AutomatiserUtbetalingTilSykmeldt.enabled) {
-                (harUtbetalingTilSykmeldt &&
-                        !arrayOf(Periodetype.FORLENGELSE, Periodetype.FØRSTEGANGSBEHANDLING).contains(periodetype))
-            } else harUtbetalingTilSykmeldt
+        val skalStoppesPgaUTS = harUtbetalingTilSykmeldt && periodetype !in listOf(FORLENGELSE, FØRSTEGANGSBEHANDLING)
 
         return valider(
             risikovurdering,
