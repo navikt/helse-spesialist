@@ -24,11 +24,12 @@ class ArbeidsgiverApiDao(dataSource: DataSource) : HelseDao(dataSource) {
             WHERE a.orgnummer=:orgnummer;
         """.single(mapOf("orgnummer" to orgnummer.toLong())) { row -> row.string("navn") }
 
-    fun finnArbeidsforhold(fødselsnummer: String, organisasjonsnummer: String) =
+    fun finnArbeidsforhold(fødselsnummer: String, organisasjonsnummer: String) = asSQL(
         """ SELECT startdato, sluttdato, stillingstittel, stillingsprosent FROM arbeidsforhold
             WHERE arbeidsgiver_ref = (SELECT id FROM arbeidsgiver WHERE orgnummer = :orgnummer)
-            AND person_ref = (SELECT id FROM person WHERE fodselsnummer = :fnr)
-        """.list(mapOf("orgnummer" to organisasjonsnummer.toLong(), "fnr" to fødselsnummer.toLong())) { tilArbeidsforholdApiDto(organisasjonsnummer, it) }
+            AND person_ref = (SELECT id FROM person WHERE fodselsnummer = :fnr);
+        """, mapOf("orgnummer" to organisasjonsnummer.toLong(), "fnr" to fødselsnummer.toLong())
+    ).list { tilArbeidsforholdApiDto(organisasjonsnummer, it) }
 
     private fun tilArbeidsforholdApiDto(organisasjonsnummer: String, row: Row) = ArbeidsforholdApiDto(
         organisasjonsnummer = organisasjonsnummer,

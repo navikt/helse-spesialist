@@ -2,42 +2,37 @@ package no.nav.helse.spesialist.api.behandlingsstatistikk
 
 import java.time.LocalDate
 import javax.sql.DataSource
+import kotliquery.Query
 import kotliquery.Row
 import no.nav.helse.HelseDao
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
 import no.nav.helse.spesialist.api.vedtaksperiode.Mottakertype
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
-import org.intellij.lang.annotations.Language
 
 class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
 
-    fun getAntallTilgjengeligeBeslutteroppgaver(): Int {
-        @Language("PostgreSQL")
-        val query = """
+    fun getAntallTilgjengeligeBeslutteroppgaver() = asSQL(
+        """
             SELECT count(1)
             FROM totrinnsvurdering
             WHERE utbetaling_id_ref IS NULL
             AND er_retur = false
             AND saksbehandler IS NOT NULL
         """
-        return query.single { it.int("count") } ?: 0
-    }
+    ).single { it.int("count") } ?: 0
 
-    fun getAntallFullførteBeslutteroppgaver(fom: LocalDate): Int {
-        @Language("PostgreSQL")
-        val query = """
+    fun getAntallFullførteBeslutteroppgaver(fom: LocalDate) = asSQL(
+        """
             SELECT count(1)
             FROM totrinnsvurdering
             WHERE utbetaling_id_ref IS NOT NULL
             AND oppdatert >= :fom
-        """
-        return query.single(mapOf("fom" to fom)) { it.int("count") } ?: 0
-    }
+        """, mapOf("fom" to fom)
+    ).single { it.int("count") } ?: 0
 
     fun getAutomatiseringerPerInntektOgPeriodetype(fom: LocalDate): StatistikkPerInntektOgPeriodetype {
-        @Language("PostgreSQL")
-        val query = """
+        val query = asSQL("""
             SELECT s.type,
                 s.inntektskilde,
                 CASE WHEN ui.arbeidsgiverbeløp > 0 AND ui.personbeløp > 0 THEN '${Mottakertype.BEGGE}'
@@ -53,73 +48,62 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
             WHERE a.opprettet >= :fom
               AND a.automatisert = true
             GROUP BY s.type, s.inntektskilde, mottakertype;
-        """.trimIndent()
+        """, mapOf("fom" to fom))
 
-        return getStatistikkPerInntektOgPeriodetype(query, mapOf("fom" to fom), inkluderMottakertype = true)
+        return getStatistikkPerInntektOgPeriodetype(query, inkluderMottakertype = true)
     }
 
     fun getTilgjengeligeOppgaverPerInntektOgPeriodetype(): StatistikkPerInntektOgPeriodetype {
-        @Language("PostgreSQL")
-        val query = """
+        val query = asSQL("""
             SELECT s.type, s.inntektskilde, count(distinct o.id)
             FROM oppgave o
                      INNER JOIN saksbehandleroppgavetype s on o.vedtak_ref = s.vedtak_ref
             WHERE o.status = 'AvventerSaksbehandler'
             GROUP BY s.type, s.inntektskilde;
-        """.trimIndent()
+        """)
 
         return getStatistikkPerInntektOgPeriodetype(query)
     }
 
     fun getManueltUtførteOppgaverPerInntektOgPeriodetype(fom: LocalDate): StatistikkPerInntektOgPeriodetype {
-        @Language("PostgreSQL")
-        val query = """
+        val query = asSQL("""
             SELECT s.type, s.inntektskilde, count(distinct o.id)
             FROM oppgave o
                      INNER JOIN saksbehandleroppgavetype s on o.vedtak_ref = s.vedtak_ref
             WHERE o.status = 'Ferdigstilt'
               AND o.oppdatert >= :fom
             GROUP BY s.type, s.inntektskilde;
-        """.trimIndent()
+        """, mapOf("fom" to fom))
 
-        return getStatistikkPerInntektOgPeriodetype(query, mapOf("fom" to fom))
+        return getStatistikkPerInntektOgPeriodetype(query)
     }
 
-    fun getManueltUtførteOppgaverPerOppgavetype(fom: LocalDate): Map<Oppgavetype, Int> {
-        @Language("PostgreSQL")
-        val query = """
+    fun getManueltUtførteOppgaverPerOppgavetype(fom: LocalDate) = asSQL(
+        """
             SELECT o.type, count(distinct o.id)
             FROM oppgave o
             WHERE o.status = 'Ferdigstilt'
               AND o.oppdatert >= :fom
             GROUP BY o.type;
-        """.trimIndent()
+        """, mapOf("fom" to fom)
+    ).list { mapOf(Oppgavetype.valueOf(it.string("type")) to it.int("count")) }
+        .fold(emptyMap(), Map<Oppgavetype, Int>::plus)
 
-        return query
-            .list(mapOf("fom" to fom)) { mapOf(Oppgavetype.valueOf(it.string("type")) to it.int("count")) }
-            .fold(emptyMap(), Map<Oppgavetype, Int>::plus)
-    }
-
-    fun getTilgjengeligeOppgaverPerOppgavetype(): Map<Oppgavetype, Int> {
-        @Language("PostgreSQL")
-        val query = """
+    fun getTilgjengeligeOppgaverPerOppgavetype() = asSQL(
+        """
             SELECT o.type, count(distinct o.id)
             FROM oppgave o
             WHERE o.status = 'AvventerSaksbehandler'
             GROUP BY o.type;
-        """.trimIndent()
-
-        return query
-            .list { mapOf(Oppgavetype.valueOf(it.string("type")) to it.int("count")) }
-            .fold(emptyMap(), Map<Oppgavetype, Int>::plus)
-    }
+        """
+    ).list { mapOf(Oppgavetype.valueOf(it.string("type")) to it.int("count")) }
+        .fold(emptyMap(), Map<Oppgavetype, Int>::plus)
 
     private fun getStatistikkPerInntektOgPeriodetype(
-        query: String,
-        paramMap: Map<String, Any> = emptyMap(),
+        query: Query,
         inkluderMottakertype: Boolean = false
     ): StatistikkPerInntektOgPeriodetype {
-        val rader = query.list(paramMap) {
+        val rader = query.list {
             InntektOgPeriodetyperad(
                 inntekttype = Inntektskilde.valueOf(it.string("inntektskilde")),
                 periodetype = Periodetype.valueOf(it.string("type")),
@@ -149,17 +133,14 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
         )
     }
 
-    fun getAntallAnnulleringer(fom: LocalDate): Int {
-        @Language("PostgreSQL")
-        val query = """
+    fun getAntallAnnulleringer(fom: LocalDate) = asSQL(
+        """
             SELECT count(distinct u.id) as annulleringer
             FROM utbetaling u
             WHERE u.status = 'ANNULLERT'
               AND u.opprettet >= :fom;
-        """.trimIndent()
-
-        return query.single(mapOf("fom" to fom)) { it.int("annulleringer") } ?: 0
-    }
+        """, mapOf("fom" to fom)
+    ).single { it.int("annulleringer") } ?: 0
 
     fun oppgavestatistikk(fom: LocalDate = LocalDate.now()): BehandlingsstatistikkDto {
 
@@ -196,7 +177,7 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
         )
     }
 
-    private fun tilGodkjenningPerPeriodetype() =
+    private fun tilGodkjenningPerPeriodetype() = asSQL(
         """ SELECT sot.type AS periodetype, o.type, COUNT(distinct o.id)
             FILTER (WHERE o.type = 'SØKNAD') AS antall,
             COUNT(distinct o.id) as antallAvOppgaveType
@@ -204,9 +185,9 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
               INNER JOIN saksbehandleroppgavetype sot ON o.vedtak_ref = sot.vedtak_ref
             WHERE o.status = 'AvventerSaksbehandler'
             GROUP BY sot.type, o.type
-        """.list { perStatistikktype(it) }
+        """).list { perStatistikktype(it) }
 
-    private fun tildeltPerPeriodetype() =
+    private fun tildeltPerPeriodetype() = asSQL(
         """ SELECT s.type as periodetype, o.type,
             COUNT(distinct o.id) FILTER (WHERE o.type = 'SØKNAD') AS antall,
             COUNT(distinct o.id) as antallAvOppgaveType
@@ -216,9 +197,9 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
               INNER JOIN tildeling t on o.id = t.oppgave_id_ref
             WHERE o.status = 'AvventerSaksbehandler'
             GROUP BY s.type, o.type
-        """.list { perStatistikktype(it) }
+        """).list { perStatistikktype(it) }
 
-    private fun godkjentManueltPerPeriodetype(fom: LocalDate) =
+    private fun godkjentManueltPerPeriodetype(fom: LocalDate) = asSQL(
         """ SELECT sot.type AS periodetype, o.type,
             COUNT(distinct o.id) FILTER (WHERE o.type = 'SØKNAD') AS antall,
             COUNT(distinct o.id) as antallAvOppgaveType
@@ -226,9 +207,10 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
               INNER JOIN saksbehandleroppgavetype sot ON o.vedtak_ref = sot.vedtak_ref
             WHERE o.status = 'Ferdigstilt' AND o.oppdatert >= :fom
             GROUP BY sot.type, o.type
-        """.list(mapOf("fom" to fom)) { perStatistikktype(it) }
+        """, mapOf("fom" to fom)
+    ).list { perStatistikktype(it) }
 
-    private fun godkjentAutomatiskTotalt(fom: LocalDate) = requireNotNull(
+    private fun godkjentAutomatiskTotalt(fom: LocalDate) = requireNotNull(asSQL(
         """ SELECT COUNT(1) as antall
             FROM automatisering a
                 INNER JOIN vedtak v on a.vedtaksperiode_ref = v.id
@@ -236,13 +218,16 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
             AND a.stikkprøve = false 
             AND a.opprettet >= :fom
             AND (a.inaktiv_fra IS NULL OR a.inaktiv_fra > now()) 
-        """.single(mapOf("fom" to fom)) { it.int("antall") })
+        """, mapOf("fom" to fom)
+    ).single { it.int("antall") })
 
-    private fun antallAnnulleringer(fom: LocalDate) = requireNotNull("""
+    private fun antallAnnulleringer(fom: LocalDate) = requireNotNull(asSQL(
+        """
             SELECT COUNT(1) as antall
             FROM annullert_av_saksbehandler
             WHERE annullert_tidspunkt >= :fom
-        """.single(mapOf("fom" to fom)) { it.int("antall") })
+        """, mapOf("fom" to fom)
+    ).single { it.int("antall") })
 
     private fun perStatistikktype(row: Row): Pair<BehandlingsstatistikkType, Int> {
         val oppgavetype: Oppgavetype = Oppgavetype.valueOf(row.string("type"))

@@ -16,7 +16,7 @@ class NotatDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         tekst: String,
         saksbehandlerOid: UUID,
         type: NotatType = NotatType.Generelt,
-    ): NotatDto? = queryize(
+    ): NotatDto? = asSQL(
         """ 
             with inserted AS (
                 INSERT INTO notat (vedtaksperiode_id, tekst, saksbehandler_oid, type)
@@ -24,27 +24,21 @@ class NotatDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 RETURNING *
             )
             SELECT * FROM inserted i INNER JOIN saksbehandler s ON i.saksbehandler_oid = s.oid
-        """
-    ).single(
-        mapOf(
+        """, mapOf(
             "vedtaksperiode_id" to vedtaksperiodeId,
             "tekst" to tekst,
             "saksbehandler_oid" to saksbehandlerOid,
             "type" to type.name
         )
-    ) {
-        mapNotatDto(it)
-    }
+    ).single { mapNotatDto(it) }
 
-    fun leggTilKommentar(notatId: Int, tekst: String, saksbehandlerident: String): KommentarDto? = queryize(
+    fun leggTilKommentar(notatId: Int, tekst: String, saksbehandlerident: String): KommentarDto? = asSQL(
         """
             insert into kommentarer (tekst, notat_ref, saksbehandlerident)
             values (:tekst, :notatId, :saksbehandlerident)
             returning *
-        """
-    ).single(mapOf("tekst" to tekst, "notatId" to notatId, "saksbehandlerident" to saksbehandlerident)) {
-        mapKommentarDto(it)
-    }
+        """, mapOf("tekst" to tekst, "notatId" to notatId, "saksbehandlerident" to saksbehandlerident)
+    ).single { mapKommentarDto(it) }
 
     fun opprettNotatForOppgaveId(
         oppgaveId: Long,
@@ -71,13 +65,13 @@ class NotatDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         )
     ).updateAndReturnGeneratedKey()
 
-    fun finnNotater(vedtaksperiodeId: UUID): List<NotatDto> = queryize(
+    fun finnNotater(vedtaksperiodeId: UUID): List<NotatDto> = asSQL(
         """ 
             SELECT * FROM notat n
             JOIN saksbehandler s on s.oid = n.saksbehandler_oid
-            WHERE n.vedtaksperiode_id = :vedtaksperiode_id::uuid
-        """
-    ).list(mapOf("vedtaksperiode_id" to vedtaksperiodeId)) { mapNotatDto(it) }
+            WHERE n.vedtaksperiode_id = :vedtaksperiode_id::uuid;
+        """, mapOf("vedtaksperiode_id" to vedtaksperiodeId)
+    ).list { mapNotatDto(it) }
 
     fun finnNotater(vedtaksperiodeIds: List<UUID>): Map<UUID, List<NotatDto>> = sessionOf(dataSource).use { session ->
         val questionMarks = vedtaksperiodeIds.joinToString { "?" }
@@ -96,7 +90,7 @@ class NotatDao(private val dataSource: DataSource) : HelseDao(dataSource) {
     }
 
 
-    fun feilregistrerNotat(notatId: Int): NotatDto? = queryize(
+    fun feilregistrerNotat(notatId: Int): NotatDto? = asSQL(
         """ 
             WITH inserted AS (
                 UPDATE notat
@@ -107,10 +101,10 @@ class NotatDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             SELECT *
             FROM inserted i
             INNER JOIN saksbehandler s on s.oid = i.saksbehandler_oid
-        """
-    ).single(mapOf("notatId" to notatId), ::mapNotatDto)
+        """, mapOf("notatId" to notatId)
+    ).single(::mapNotatDto)
 
-    fun feilregistrerKommentar(kommentarId: Int): KommentarDto? = queryize(
+    fun feilregistrerKommentar(kommentarId: Int): KommentarDto? = asSQL(
         """
             WITH inserted AS (
                 UPDATE kommentarer
@@ -121,19 +115,17 @@ class NotatDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             SELECT *
             FROM inserted AS i
             INNER JOIN notat n on n.id = i.notat_ref
-        """
-    ).single(mapOf("kommentarId" to kommentarId), ::mapKommentarDto )
+        """, mapOf("kommentarId" to kommentarId)
+    ).single(::mapKommentarDto )
 
-    private fun finnKommentarer(notatId: Int): List<KommentarDto> = queryize(
+    private fun finnKommentarer(notatId: Int): List<KommentarDto> = asSQL(
         """
             select k.id, k.tekst, k.feilregistrert_tidspunkt, k.opprettet, k.saksbehandlerident
             from kommentarer k
             inner join notat n on n.id = k.notat_ref
             where n.id = :notatId
-        """
-    ).list(mapOf("notatId" to notatId)) {
-        mapKommentarDto(it)
-    }
+        """, mapOf("notatId" to notatId)
+    ).list { mapKommentarDto(it) }
 
     private fun mapNotatDto(it: Row): NotatDto = NotatDto(
         id = it.int("id"),
