@@ -16,15 +16,16 @@ class SaksbehandlerDao(dataSource: DataSource) : HelseDao(dataSource) {
             """, mapOf("oid" to oid, "navn" to navn, "epost" to epost, "ident" to ident)
         ).update()
 
-    fun finnSaksbehandler(epost: String) =
-        """ SELECT * FROM saksbehandler WHERE epost ILIKE :epost LIMIT 1"""
-            .single(mapOf("epost" to epost)) { row ->
-                SaksbehandlerDto(
-                    oid = row.uuid("oid"),
-                    navn = row.string("navn"),
-                    epost = row.string("epost"),
-                    ident = row.string("ident")
-                )
-            }
+    fun finnSaksbehandler(epost: String) = asSQL(
+        " SELECT * FROM saksbehandler WHERE epost ILIKE :epost LIMIT 1; ",
+        mapOf("epost" to epost)
+    ).single { row ->
+        SaksbehandlerDto(
+            oid = row.uuid("oid"),
+            navn = row.string("navn"),
+            epost = row.string("epost"),
+            ident = row.string("ident")
+        )
+    }
 
 }

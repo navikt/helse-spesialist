@@ -8,21 +8,23 @@ import no.nav.helse.spesialist.api.objectMapper
 
 class ArbeidsgiverApiDao(dataSource: DataSource) : HelseDao(dataSource) {
 
-    fun finnBransjer(orgnummer: String) =
+    fun finnBransjer(orgnummer: String) = asSQL(
         """ SELECT ab.bransjer FROM arbeidsgiver a
-                LEFT JOIN arbeidsgiver_bransjer ab on a.bransjer_ref = ab.id
+            LEFT JOIN arbeidsgiver_bransjer ab on a.bransjer_ref = ab.id
             WHERE a.orgnummer=:orgnummer;
-        """.single(mapOf("orgnummer" to orgnummer.toLong())) { row ->
-            row.stringOrNull("bransjer")
-                ?.let { objectMapper.readValue<List<String>>(it) }
-                ?.filter { it.isNotBlank() }
-        } ?: emptyList()
+        """, mapOf("orgnummer" to orgnummer.toLong())
+    ).single { row ->
+        row.stringOrNull("bransjer")
+            ?.let { objectMapper.readValue<List<String>>(it) }
+            ?.filter { it.isNotBlank() }
+    } ?: emptyList()
 
-    fun finnNavn(orgnummer: String) =
+    fun finnNavn(orgnummer: String) = asSQL(
         """ SELECT an.navn FROM arbeidsgiver a
-                JOIN arbeidsgiver_navn an ON a.navn_ref = an.id
+            JOIN arbeidsgiver_navn an ON a.navn_ref = an.id
             WHERE a.orgnummer=:orgnummer;
-        """.single(mapOf("orgnummer" to orgnummer.toLong())) { row -> row.string("navn") }
+        """, mapOf("orgnummer" to orgnummer.toLong())
+    ).single { row -> row.string("navn") }
 
     fun finnArbeidsforhold(fødselsnummer: String, organisasjonsnummer: String) = asSQL(
         """ SELECT startdato, sluttdato, stillingstittel, stillingsprosent FROM arbeidsforhold

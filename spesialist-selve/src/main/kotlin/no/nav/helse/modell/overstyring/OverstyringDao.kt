@@ -84,24 +84,27 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
         }
     }
 
-    fun harVedtaksperiodePågåendeOverstyring(vedtaksperiodeId: UUID): Boolean =
+    fun harVedtaksperiodePågåendeOverstyring(vedtaksperiodeId: UUID): Boolean = asSQL(
         """ SELECT 1 FROM overstyringer_for_vedtaksperioder ofv
             JOIN overstyring o ON o.id = ofv.overstyring_ref
             WHERE ofv.vedtaksperiode_id = :vedtaksperiode_id
             AND o.ferdigstilt = false
             LIMIT 1
-        """.single(mapOf("vedtaksperiode_id" to vedtaksperiodeId)) { row -> row.boolean(1) } ?: false
+        """, mapOf("vedtaksperiode_id" to vedtaksperiodeId)
+    ).single { row -> row.boolean(1) } ?: false
 
-    fun finnesEksternHendelseId(eksternHendelseId: UUID): Boolean =
+    fun finnesEksternHendelseId(eksternHendelseId: UUID): Boolean = asSQL(
         """ SELECT 1 from overstyring 
             WHERE ekstern_hendelse_id = :eksternHendelseId
-        """.single(mapOf("eksternHendelseId" to eksternHendelseId)) { row -> row.boolean(1) } ?: false
+        """, mapOf("eksternHendelseId" to eksternHendelseId)
+    ).single { row -> row.boolean(1) } ?: false
 
     // Skal ikke kunne være null for fremtidige overstyringer. Vær obs hvis den skal brukes på eldre data.
-    fun finnEksternHendelseIdFraHendelseId(hendelseId: UUID) = requireNotNull(
+    fun finnEksternHendelseIdFraHendelseId(hendelseId: UUID) = requireNotNull(asSQL(
         """ SELECT ekstern_hendelse_id FROM overstyring o
             WHERE o.hendelse_ref = :hendelseId
-        """.single(mapOf("hendelseId" to hendelseId)) { row -> row.uuid("ekstern_hendelse_id") })
+        """, mapOf("hendelseId" to hendelseId)
+    ).single { row -> row.uuid("ekstern_hendelse_id") })
 
     fun persisterOverstyringTidslinje(
         hendelseId: UUID,
