@@ -8,7 +8,7 @@ import no.nav.helse.spesialist.api.varsel.Varsel
 internal class GenerasjonDao(dataSource: DataSource) : HelseDao(dataSource) {
 
     internal fun gjeldendeGenerasjonFor(oppgaveId: Long): Vedtaksperiode = requireNotNull(
-        queryize(
+        asSQL(
             """
                 SELECT svg.vedtaksperiode_id, svg.fom, svg.tom, svg.skjæringstidspunkt
                 FROM vedtak v 
@@ -16,8 +16,8 @@ internal class GenerasjonDao(dataSource: DataSource) : HelseDao(dataSource) {
                 JOIN oppgave o ON v.id = o.vedtak_ref
                 WHERE o.id = :oppgave_id
                 ORDER BY svg.id DESC LIMIT 1;
-            """
-        ).single(mapOf("oppgave_id" to oppgaveId)) {
+            """, mapOf("oppgave_id" to oppgaveId)
+        ).single {
             Vedtaksperiode(
                 it.uuid("vedtaksperiode_id"),
                 it.localDate("fom"),
@@ -27,7 +27,7 @@ internal class GenerasjonDao(dataSource: DataSource) : HelseDao(dataSource) {
             )
         })
 
-    internal fun gjeldendeGenerasjonerForPerson(oppgaveId: Long): Set<Vedtaksperiode> = queryize(
+    internal fun gjeldendeGenerasjonerForPerson(oppgaveId: Long): Set<Vedtaksperiode> = asSQL(
         """
                 SELECT DISTINCT ON (svg.vedtaksperiode_id) svg.vedtaksperiode_id, svg.fom, svg.tom, svg.skjæringstidspunkt 
                 FROM vedtak v
@@ -37,8 +37,8 @@ internal class GenerasjonDao(dataSource: DataSource) : HelseDao(dataSource) {
                     JOIN oppgave o on v2.id = o.vedtak_ref
                     WHERE o.id = :oppgave_id) AND v.forkastet = false
                 ORDER BY svg.vedtaksperiode_id, svg.id DESC;
-            """
-    ).list(mapOf("oppgave_id" to oppgaveId)) {
+            """, mapOf("oppgave_id" to oppgaveId)
+    ).list {
         Vedtaksperiode(
             it.uuid("vedtaksperiode_id"),
             it.localDate("fom"),
@@ -48,8 +48,11 @@ internal class GenerasjonDao(dataSource: DataSource) : HelseDao(dataSource) {
         )
     }.toSet()
 
-    internal fun gjeldendeGenerasjonFor(oppgaveId: Long, varselGetter: (generasjonId: UUID) -> Set<Varsel>): Vedtaksperiode = requireNotNull(
-        queryize(
+    internal fun gjeldendeGenerasjonFor(
+        oppgaveId: Long,
+        varselGetter: (generasjonId: UUID) -> Set<Varsel>,
+    ): Vedtaksperiode = requireNotNull(
+        asSQL(
             """
                 SELECT svg.vedtaksperiode_id, svg.unik_id, svg.fom, svg.tom, svg.skjæringstidspunkt
                 FROM vedtak v 
@@ -57,8 +60,8 @@ internal class GenerasjonDao(dataSource: DataSource) : HelseDao(dataSource) {
                 JOIN oppgave o ON v.id = o.vedtak_ref
                 WHERE o.id = :oppgave_id
                 ORDER BY svg.id DESC LIMIT 1;
-            """
-        ).single(mapOf("oppgave_id" to oppgaveId)) {
+            """, mapOf("oppgave_id" to oppgaveId)
+        ).single {
             Vedtaksperiode(
                 it.uuid("vedtaksperiode_id"),
                 it.localDate("fom"),
@@ -68,7 +71,10 @@ internal class GenerasjonDao(dataSource: DataSource) : HelseDao(dataSource) {
             )
         })
 
-    internal fun gjeldendeGenerasjonerForPerson(oppgaveId: Long, varselGetter: (generasjonId: UUID) -> Set<Varsel>): Set<Vedtaksperiode> = queryize(
+    internal fun gjeldendeGenerasjonerForPerson(
+        oppgaveId: Long,
+        varselGetter: (generasjonId: UUID) -> Set<Varsel>,
+    ): Set<Vedtaksperiode> = asSQL(
         """
                 SELECT DISTINCT ON (svg.vedtaksperiode_id) svg.vedtaksperiode_id, svg.unik_id, svg.fom, svg.tom, svg.skjæringstidspunkt 
                 FROM vedtak v
@@ -78,8 +84,8 @@ internal class GenerasjonDao(dataSource: DataSource) : HelseDao(dataSource) {
                     JOIN oppgave o on v2.id = o.vedtak_ref
                     WHERE o.id = :oppgave_id) AND v.forkastet = false
                 ORDER BY svg.vedtaksperiode_id, svg.id DESC;
-            """
-    ).list(mapOf("oppgave_id" to oppgaveId)) {
+            """, mapOf("oppgave_id" to oppgaveId)
+    ).list {
         Vedtaksperiode(
             it.uuid("vedtaksperiode_id"),
             it.localDate("fom"),
