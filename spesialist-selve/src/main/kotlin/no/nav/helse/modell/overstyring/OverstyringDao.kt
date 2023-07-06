@@ -14,7 +14,7 @@ import org.intellij.lang.annotations.Language
 
 class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) {
 
-    fun finnOverstyringerMedTypeForVedtaksperiode(vedtaksperiodeId: UUID): List<OverstyringType> =
+    fun finnOverstyringerMedTypeForVedtaksperiode(vedtaksperiodeId: UUID): List<OverstyringType> = asSQL(
         """ SELECT DISTINCT o.id,
                 CASE
                     WHEN oi.id IS NOT NULL THEN 'Inntekt'
@@ -32,9 +32,10 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
                 WHERE vedtaksperiode_id = :vedtaksperiode_id
             )
             AND o.ferdigstilt = false
-        """.list(mapOf("vedtaksperiode_id" to vedtaksperiodeId)) { OverstyringType.valueOf(it.string("type")) }
+        """, mapOf("vedtaksperiode_id" to vedtaksperiodeId)
+    ).list { OverstyringType.valueOf(it.string("type")) }
 
-    fun finnAktiveOverstyringer(vedtaksperiodeId: UUID): List<EksternHendelseId> =
+    fun finnAktiveOverstyringer(vedtaksperiodeId: UUID): List<EksternHendelseId> = asSQL(
         """
             SELECT o.ekstern_hendelse_id FROM overstyring o
             WHERE o.id IN (
@@ -42,7 +43,8 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
                 WHERE vedtaksperiode_id = :vedtaksperiode_id
             )
             AND o.ferdigstilt = false
-        """.list(mapOf("vedtaksperiode_id" to vedtaksperiodeId)) { it.uuid("ekstern_hendelse_id") }
+        """, mapOf("vedtaksperiode_id" to vedtaksperiodeId)
+    ).list { it.uuid("ekstern_hendelse_id") }
 
     fun ferdigstillOverstyringerForVedtaksperiode(vedtaksperiodeId: UUID) = asSQL(
         """ UPDATE overstyring
