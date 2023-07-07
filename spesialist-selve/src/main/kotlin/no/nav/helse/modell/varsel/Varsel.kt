@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.modell.varsel.Varsel.Status.AKTIV
+import no.nav.helse.modell.varsel.Varsel.Status.AVVIST
 import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
 import no.nav.helse.modell.varsel.Varsel.Status.VURDERT
 import no.nav.helse.modell.vedtaksperiode.IVedtaksperiodeObserver
@@ -87,7 +88,7 @@ internal class Varsel(
             return any { it.status == AKTIV && it.varselkode == "RV_MV_1" }
         }
 
-        internal fun List<Varsel>.forhindrerAutomatisering() = any { it.status in listOf(VURDERT, AKTIV) }
+        internal fun List<Varsel>.forhindrerAutomatisering() = any { it.status in listOf(VURDERT, AKTIV, AVVIST) }
 
         internal fun JsonNode.varsler(): List<Varsel> {
             return this

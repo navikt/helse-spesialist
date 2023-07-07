@@ -44,9 +44,7 @@ internal class Generasjon private constructor(
         }
     }
 
-    internal fun forhindrerAutomatisering(): Boolean {
-        return varsler.forhindrerAutomatisering()
-    }
+    internal fun forhindrerAutomatisering(): Boolean = varsler.forhindrerAutomatisering()
 
     internal fun håndterTidslinjeendring(fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate, hendelseId: UUID) {
         if (fom == periode.fom() && tom == periode.tom() && skjæringstidspunkt == this.skjæringstidspunkt) return

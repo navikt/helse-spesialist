@@ -99,14 +99,14 @@ internal class VarselTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = Varsel.Status::class, names = ["AKTIV", "VURDERT"], mode = EnumSource.Mode.EXCLUDE)
+    @EnumSource(value = Varsel.Status::class, names = ["AKTIV", "VURDERT", "AVVIST"], mode = EnumSource.Mode.EXCLUDE)
     fun `forhindrer ikke automatisering`(status: Varsel.Status) {
         val varsel = nyttVarsel(status = status)
         assertFalse(listOf(varsel).forhindrerAutomatisering())
     }
 
     @ParameterizedTest
-    @EnumSource(value = Varsel.Status::class, names = ["AKTIV", "VURDERT"])
+    @EnumSource(value = Varsel.Status::class, names = ["AKTIV", "VURDERT", "AVVIST"])
     fun `forhindrer automatisering`(status: Varsel.Status) {
         val varsel = nyttVarsel(status = status)
         assertTrue(listOf(varsel).forhindrerAutomatisering())
