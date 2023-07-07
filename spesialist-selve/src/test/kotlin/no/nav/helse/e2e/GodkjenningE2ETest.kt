@@ -6,7 +6,9 @@ import AbstractE2ETestV2.Kommandokjedetilstand.FERDIG
 import AbstractE2ETestV2.Kommandokjedetilstand.NY
 import AbstractE2ETestV2.Kommandokjedetilstand.SUSPENDERT
 import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
+import no.nav.helse.januar
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.VergemålType.voksen
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
@@ -218,7 +220,7 @@ internal class GodkjenningE2ETest : AbstractE2ETestV2() {
     @Test
     fun `sendes til saksbehandler for godkjenning ved fremtidsfullmakt`() {
         fremTilVergemål()
-        håndterVergemålløsning(fremtidsfullmakter = listOf(VergemålJson.Vergemål(voksen))        )
+        håndterVergemålløsning(fremtidsfullmakter = listOf(VergemålJson.Vergemål(voksen)))
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning()
         assertSaksbehandleroppgave(VEDTAKSPERIODE_ID, AvventerSaksbehandler)
@@ -237,5 +239,32 @@ internal class GodkjenningE2ETest : AbstractE2ETestV2() {
         )
         assertGodkjenningsbehovBesvart(godkjent = false, automatiskBehandlet = true, "Vergemål", "Egen ansatt")
 
+    }
+
+    @Test
+    fun `avviser ikke godkjenningsbehov når kanAvvises-flagget er false`() {
+        automatiskGodkjent(11.januar, 31.januar)
+
+        val revurdertUtbetaling = UUID.randomUUID()
+        val kanAvvises = false
+
+        håndterGodkjenningsbehov(
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            utbetalingId = revurdertUtbetaling,
+            andreArbeidsforhold = emptyList(),
+            fom = 1.januar,
+            tom = 10.januar,
+            kanAvvises = kanAvvises,
+            harOppdatertMetainfo = true,
+        )
+
+        // egen ansatt er normalt avvisningsgrunn
+        håndterEgenansattløsning(erEgenAnsatt = true)
+
+        håndterVergemålløsning()
+        håndterÅpneOppgaverløsning()
+        håndterInntektløsning()
+
+        assertSaksbehandleroppgave(oppgavestatus = AvventerSaksbehandler)
     }
 }

@@ -68,6 +68,7 @@ internal class Godkjenningsbehov(
     periodetype: Periodetype,
     førstegangsbehandling: Boolean,
     utbetalingtype: Utbetalingtype,
+    kanAvvises: Boolean,
     inntektskilde: Inntektskilde,
     orgnummereMedRelevanteArbeidsforhold: List<String>,
     skjæringstidspunkt: LocalDate,
@@ -173,7 +174,8 @@ internal class Godkjenningsbehov(
             godkjenningsbehovJson = json,
             godkjenningMediator = godkjenningMediator,
             hendelseId = id,
-            utbetaling = utbetaling
+            utbetaling = utbetaling,
+            kanAvvises = kanAvvises,
         ),
         AutomatiseringCommand(
             fødselsnummer = fødselsnummer,
@@ -245,7 +247,8 @@ internal class Godkjenningsbehov(
                         "Godkjenning.skjæringstidspunkt",
                         "Godkjenning.periodetype",
                         "Godkjenning.førstegangsbehandling",
-                        "Godkjenning.inntektskilde"
+                        "Godkjenning.inntektskilde",
+                        "Godkjenning.kanAvvises",
                     )
                     it.requireAny("Godkjenning.utbetalingtype", Utbetalingtype.gyldigeTyper.values())
                     it.interestedIn("Godkjenning.orgnummereMedRelevanteArbeidsforhold")
@@ -286,6 +289,7 @@ internal class Godkjenningsbehov(
                 orgnummereMedRelevanteArbeidsforhold = packet["Godkjenning.orgnummereMedRelevanteArbeidsforhold"]
                     .takeUnless(JsonNode::isMissingOrNull)
                     ?.map { it.asText() } ?: emptyList(),
+                kanAvvises = packet["Godkjenning.kanAvvises"].asBoolean(),
                 context = context
             )
         }

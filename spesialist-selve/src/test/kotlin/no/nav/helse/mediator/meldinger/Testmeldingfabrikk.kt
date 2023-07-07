@@ -204,7 +204,8 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         fødselsnummer: String = this.fødselsnummer,
         aktørId: String = this.aktørId,
         inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
-        orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList()
+        orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList(),
+        kanAvvises: Boolean = true,
     ) =
         nyHendelse(
             id, "behov",
@@ -223,7 +224,8 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                     "førstegangsbehandling" to førstegangsbehandling,
                     "utbetalingtype" to utbetalingtype.name,
                     "inntektskilde" to inntektskilde.name,
-                    "orgnummereMedRelevanteArbeidsforhold" to orgnummereMedRelevanteArbeidsforhold
+                    "orgnummereMedRelevanteArbeidsforhold" to orgnummereMedRelevanteArbeidsforhold,
+                    "kanAvvises" to kanAvvises,
                 )
             )
         )

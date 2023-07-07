@@ -153,6 +153,7 @@ internal object TestmeldingsfabrikkV2 {
         periodeFom: LocalDate = LocalDate.now(),
         periodeTom: LocalDate = LocalDate.now(),
         periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
+        kanAvvises: Boolean,
         skjæringstidspunkt: LocalDate = LocalDate.now(),
         førstegangsbehandling: Boolean = true,
         utbetalingtype: Utbetalingtype = UTBETALING,
@@ -177,7 +178,8 @@ internal object TestmeldingsfabrikkV2 {
                     "førstegangsbehandling" to førstegangsbehandling,
                     "utbetalingtype" to utbetalingtype.name,
                     "inntektskilde" to inntektskilde.name,
-                    "orgnummereMedRelevanteArbeidsforhold" to orgnummereMedRelevanteArbeidsforhold
+                    "orgnummereMedRelevanteArbeidsforhold" to orgnummereMedRelevanteArbeidsforhold,
+                    "kanAvvises" to kanAvvises,
                 )
             )
         )

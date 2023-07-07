@@ -259,6 +259,7 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
         periodeTom: LocalDate = LocalDate.now(),
         skjæringstidspunkt: LocalDate = LocalDate.now(),
         periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
+        kanAvvises: Boolean = true,
         førstegangsbehandling: Boolean = true,
         inntektskilde: Inntektskilde = EN_ARBEIDSGIVER,
         orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList(),
@@ -266,20 +267,21 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
     ): UUID = newUUID.also { id ->
         testRapid.sendTestMessage(
             meldingsfabrikk.lagGodkjenningsbehov(
-                id = id,
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                organisasjonsnummer = organisasjonsnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
                 utbetalingId = utbetalingId,
-                organisasjonsnummer = organisasjonsnummer,
                 periodeFom = periodeFom,
                 periodeTom = periodeTom,
-                skjæringstidspunkt = skjæringstidspunkt,
                 periodetype = periodetype,
+                kanAvvises = kanAvvises,
+                skjæringstidspunkt = skjæringstidspunkt,
                 førstegangsbehandling = førstegangsbehandling,
-                fødselsnummer = fødselsnummer,
-                aktørId = aktørId,
+                utbetalingtype = utbetalingtype,
                 inntektskilde = inntektskilde,
                 orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
-                utbetalingtype = utbetalingtype
+                id = id,
             )
         )
     }

@@ -114,6 +114,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         )
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning(vedtaksperiodeId = vedtaksperiodeId)
+        håndterUtbetalingUtbetalt(utbetalingId = utbetalingId)
     }
 
     protected fun fremTilVergemål(
@@ -200,14 +201,14 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         )
         if (regelverksvarsler.isNotEmpty()) håndterAktivitetsloggNyAktivitet(varselkoder = regelverksvarsler)
         håndterGodkjenningsbehov(
-            andreArbeidsforhold = andreArbeidsforhold,
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = utbetalingId,
             fom = fom,
             tom = tom,
             skjæringstidspunkt = skjæringstidspunkt,
             periodetype = periodetype,
-            vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingId = utbetalingId,
             harOppdatertMetainfo = harOppdatertMetadata,
+            andreArbeidsforhold = andreArbeidsforhold,
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp
         )
@@ -692,6 +693,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         tom: LocalDate = 31.januar,
         skjæringstidspunkt: LocalDate = fom,
         periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
+        kanAvvises: Boolean = true,
         andreArbeidsforhold: List<String> = emptyList(),
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0
@@ -710,6 +712,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
             periodeTom = tom,
             skjæringstidspunkt = skjæringstidspunkt,
             periodetype = periodetype,
+            kanAvvises = kanAvvises,
             orgnummereMedRelevanteArbeidsforhold = andreArbeidsforhold
         )
         sisteGodkjenningsbehovId = sisteMeldingId
@@ -728,7 +731,8 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         harOppdatertMetainfo: Boolean = false,
         andreArbeidsforhold: List<String> = emptyList(),
         arbeidsgiverbeløp: Int = 20000,
-        personbeløp: Int = 0
+        personbeløp: Int = 0,
+        kanAvvises: Boolean = true,
     ) {
         val alleArbeidsforhold = sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
@@ -747,7 +751,8 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
             periodetype = periodetype,
             andreArbeidsforhold = andreArbeidsforhold,
             arbeidsgiverbeløp = arbeidsgiverbeløp,
-            personbeløp = personbeløp
+            personbeløp = personbeløp,
+            kanAvvises = kanAvvises,
         )
 
         when {
@@ -767,6 +772,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         periodeTom: LocalDate = 31.januar,
         skjæringstidspunkt: LocalDate = periodeFom,
         periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
+        kanAvvises: Boolean = true,
         orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList(),
     ) = meldingssenderV2.sendGodkjenningsbehov(
         aktørId = aktørId,
@@ -778,6 +784,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         periodeTom = periodeTom,
         skjæringstidspunkt = skjæringstidspunkt,
         periodetype = periodetype,
+        kanAvvises = kanAvvises,
         orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold
     )
 

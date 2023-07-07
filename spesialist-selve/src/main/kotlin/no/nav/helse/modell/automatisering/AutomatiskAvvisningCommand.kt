@@ -1,6 +1,7 @@
 package no.nav.helse.modell.automatisering
 
 import java.util.UUID
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.meldinger.løsninger.HentEnhetløsning
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
@@ -22,7 +23,8 @@ internal class AutomatiskAvvisningCommand(
     private val godkjenningsbehovJson: String,
     private val godkjenningMediator: GodkjenningMediator,
     private val hendelseId: UUID,
-    private val utbetaling: Utbetaling?
+    private val utbetaling: Utbetaling?,
+    private val kanAvvises: Boolean,
 ) : Command {
 
     override fun execute(context: CommandContext): Boolean {
@@ -36,6 +38,13 @@ internal class AutomatiskAvvisningCommand(
         if (erEgenAnsatt) årsaker.add("Egen ansatt")
         if (tilhørerEnhetUtland) årsaker.add("Utland")
         if (underVergemål) årsaker.add("Vergemål")
+        if (!kanAvvises) {
+            logg.info(
+                "Ville ha avvist {} pga. $årsaker, men behovet er markert som ikke avvisbar",
+                kv("vedtaksperiodeId", vedtaksperiodeId)
+            )
+            return true
+        }
 
         val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson, utbetaling)
         godkjenningMediator.automatiskAvvisning(context, behov, vedtaksperiodeId, fødselsnummer, årsaker.toList(), hendelseId)

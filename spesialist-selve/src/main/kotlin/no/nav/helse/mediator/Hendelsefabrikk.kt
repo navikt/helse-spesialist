@@ -196,6 +196,7 @@ internal class Hendelsefabrikk(
         utbetalingtype: Utbetalingtype,
         inntektskilde: Inntektskilde,
         orgnummereMedRelevanteArbeidsforhold: List<String>,
+        kanAvvises: Boolean,
         json: String,
     ): Godkjenningsbehov {
         return Godkjenningsbehov(
@@ -212,6 +213,7 @@ internal class Hendelsefabrikk(
             utbetalingtype = utbetalingtype,
             inntektskilde = inntektskilde,
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
+            kanAvvises = kanAvvises,
             skjæringstidspunkt = skjæringstidspunkt,
             sykefraværstilfelle = sykefraværstilfelle(fødselsnummer, skjæringstidspunkt),
             json = json,
@@ -333,7 +335,8 @@ internal class Hendelsefabrikk(
             orgnummereMedRelevanteArbeidsforhold = jsonNode.path("Godkjenning")
                 .path("orgnummereMedRelevanteArbeidsforhold")
                 .takeUnless(JsonNode::isMissingOrNull)?.map { it.asText() } ?: emptyList(),
-            json = json
+            kanAvvises = jsonNode.path("Godkjenning").path("kanAvvises").asBoolean(),
+            json = json,
         )
     }
 

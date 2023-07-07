@@ -291,6 +291,7 @@ internal class HendelseMediator(
         utbetalingtype: Utbetalingtype,
         inntektskilde: Inntektskilde,
         orgnummereMedRelevanteArbeidsforhold: List<String>,
+        kanAvvises: Boolean,
         context: MessageContext,
     ) {
         if (oppgaveDao.harGyldigOppgave(utbetalingId) || vedtakDao.erAutomatiskGodkjent(utbetalingId)) {
@@ -313,7 +314,8 @@ internal class HendelseMediator(
                 utbetalingtype,
                 inntektskilde,
                 orgnummereMedRelevanteArbeidsforhold,
-                message.toJson()
+                kanAvvises,
+                message.toJson(),
             ), context
         )
     }
