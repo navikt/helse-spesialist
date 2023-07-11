@@ -34,7 +34,7 @@ jobs:
           distribution: 'temurin'
           java-version: '17.x'
 
-      - uses: gradle/gradle-build-action@v2.4.2
+      - uses: gradle/gradle-build-action@v2.6.0
         name: Gradle build
         with:
           arguments: :spesialist-selve:build # felles- og api-modulene vil bli bygget fordi selve avhenger av dem
