@@ -17,7 +17,7 @@ internal class VedtaksperiodeEndretRiverTest {
     private val meldingsfabrikk = Testmeldingfabrikk("fnr", "aktørid")
 
     init {
-        VedtaksperiodeEndret.VedtaksperiodeEndretRiver(rapid, mediator)
+        VedtaksperiodeEndretRiver(rapid, mediator)
     }
 
     @BeforeEach
