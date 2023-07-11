@@ -6,8 +6,8 @@ import io.mockk.mockk
 import io.mockk.verify
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.mediator.meldinger.løsninger.Arbeidsgiverinformasjonløsning
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
+import no.nav.helse.modell.arbeidsgiver.Arbeidsgiverinformasjonløsning
 import no.nav.helse.modell.person.HentPersoninfoløsning
 import no.nav.helse.modell.person.HentPersoninfoløsninger
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse

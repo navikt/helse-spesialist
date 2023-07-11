@@ -1,7 +1,7 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.mediator.meldinger.løsninger.Arbeidsgiverinformasjonløsning
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
+import no.nav.helse.modell.arbeidsgiver.Arbeidsgiverinformasjonløsning
 import no.nav.helse.modell.person.HentPersoninfoløsninger
 import org.slf4j.LoggerFactory
 

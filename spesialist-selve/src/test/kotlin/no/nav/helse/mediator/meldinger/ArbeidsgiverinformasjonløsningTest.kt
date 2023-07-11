@@ -4,8 +4,9 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.mediator.meldinger.løsninger.Arbeidsgiverinformasjonløsning
+import no.nav.helse.mediator.meldinger.løsninger.ArbeidsgiverRiver
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
+import no.nav.helse.modell.arbeidsgiver.Arbeidsgiverinformasjonløsning
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -25,7 +26,7 @@ internal class ArbeidsgiverinformasjonløsningTest {
     private val meldingsfabrikk = Testmeldingfabrikk(FØDSELSNUMMER, AKTØRID)
 
     init {
-        Arbeidsgiverinformasjonløsning.ArbeidsgiverRiver(rapid, mediator)
+        ArbeidsgiverRiver(rapid, mediator)
     }
 
     @BeforeEach

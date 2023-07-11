@@ -32,7 +32,7 @@ import no.nav.helse.mediator.meldinger.VedtaksperiodeForkastetRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeNyUtbetaling
 import no.nav.helse.mediator.meldinger.VedtaksperiodeOpprettet
 import no.nav.helse.mediator.meldinger.VedtaksperiodeReberegnet
-import no.nav.helse.mediator.meldinger.løsninger.Arbeidsgiverinformasjonløsning
+import no.nav.helse.mediator.meldinger.løsninger.ArbeidsgiverRiver
 import no.nav.helse.mediator.meldinger.løsninger.EgenAnsattløsning
 import no.nav.helse.mediator.meldinger.løsninger.FlerePersoninfoRiver
 import no.nav.helse.mediator.meldinger.løsninger.HentEnhetRiver
@@ -107,7 +107,7 @@ internal class HendelseMediator(
             HentEnhetRiver(it, this)
             InfotrygdutbetalingerRiver(it, this)
             SaksbehandlerløsningRiver(it, this)
-            Arbeidsgiverinformasjonløsning.ArbeidsgiverRiver(it, this)
+            ArbeidsgiverRiver(it, this)
             Arbeidsforholdløsning.ArbeidsforholdRiver(it, this)
             VedtaksperiodeForkastetRiver(it, this)
             VedtaksperiodeEndret.VedtaksperiodeEndretRiver(it, this)
