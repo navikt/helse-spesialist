@@ -40,7 +40,7 @@ import no.nav.helse.mediator.meldinger.løsninger.InfotrygdutbetalingerRiver
 import no.nav.helse.mediator.meldinger.løsninger.Inntektløsning
 import no.nav.helse.mediator.meldinger.løsninger.PersoninfoRiver
 import no.nav.helse.mediator.meldinger.løsninger.Risikovurderingløsning
-import no.nav.helse.mediator.meldinger.løsninger.Saksbehandlerløsning
+import no.nav.helse.mediator.meldinger.løsninger.SaksbehandlerløsningRiver
 import no.nav.helse.mediator.meldinger.løsninger.Vergemålløsning
 import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
 import no.nav.helse.modell.CommandContextDao
@@ -106,7 +106,7 @@ internal class HendelseMediator(
             FlerePersoninfoRiver(it, this)
             HentEnhetRiver(it, this)
             InfotrygdutbetalingerRiver(it, this)
-            Saksbehandlerløsning.SaksbehandlerløsningRiver(it, this)
+            SaksbehandlerløsningRiver(it, this)
             Arbeidsgiverinformasjonløsning.ArbeidsgiverRiver(it, this)
             Arbeidsforholdløsning.ArbeidsforholdRiver(it, this)
             VedtaksperiodeForkastetRiver(it, this)

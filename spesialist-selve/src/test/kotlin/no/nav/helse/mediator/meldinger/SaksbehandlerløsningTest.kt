@@ -10,7 +10,6 @@ import java.util.UUID
 import java.util.UUID.randomUUID
 import no.nav.helse.januar
 import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.mediator.meldinger.løsninger.Saksbehandlerløsning
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
@@ -20,6 +19,7 @@ import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Generasjon
+import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail

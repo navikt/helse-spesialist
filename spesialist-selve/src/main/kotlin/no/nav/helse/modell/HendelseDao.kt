@@ -27,7 +27,6 @@ import no.nav.helse.mediator.meldinger.VedtaksperiodeEndret
 import no.nav.helse.mediator.meldinger.VedtaksperiodeNyUtbetaling
 import no.nav.helse.mediator.meldinger.VedtaksperiodeOpprettet
 import no.nav.helse.mediator.meldinger.VedtaksperiodeReberegnet
-import no.nav.helse.mediator.meldinger.løsninger.Saksbehandlerløsning
 import no.nav.helse.modell.HendelseDao.Hendelsetype.ADRESSEBESKYTTELSE_ENDRET
 import no.nav.helse.modell.HendelseDao.Hendelsetype.ENDRET_SKJERMETINFO
 import no.nav.helse.modell.HendelseDao.Hendelsetype.GODKJENNING
@@ -55,6 +54,7 @@ import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.person.toFødselsnummer
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
+import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.asLocalDate
 import org.intellij.lang.annotations.Language
