@@ -2,7 +2,7 @@ package no.nav.helse.mediator.meldinger
 
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.mediator.meldinger.løsninger.HentEnhetløsning
+import no.nav.helse.modell.person.HentEnhetløsning
 import no.nav.helse.modell.person.PersonDao
 import org.junit.jupiter.api.Test
 

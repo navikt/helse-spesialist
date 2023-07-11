@@ -3,12 +3,12 @@ package no.nav.helse.modell.automatisering
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.mediator.meldinger.løsninger.HentEnhetløsning
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
+import no.nav.helse.modell.person.HentEnhetløsning
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vergemal.VergemålDao
