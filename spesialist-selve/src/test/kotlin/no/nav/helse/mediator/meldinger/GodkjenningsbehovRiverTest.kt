@@ -26,7 +26,7 @@ internal class GodkjenningsbehovRiverTest {
     private val testmeldingfabrikk = Testmeldingfabrikk(FNR, AKTØR)
     private val mediator = mockk<HendelseMediator>(relaxed = true)
     private val testRapid = TestRapid().apply {
-        Godkjenningsbehov.GodkjenningsbehovRiver(this, mediator)
+        GodkjenningsbehovRiver(this, mediator)
     }
 
     @BeforeEach
