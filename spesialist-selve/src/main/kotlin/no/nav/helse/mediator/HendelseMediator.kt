@@ -34,10 +34,11 @@ import no.nav.helse.mediator.meldinger.VedtaksperiodeOpprettet
 import no.nav.helse.mediator.meldinger.VedtaksperiodeReberegnet
 import no.nav.helse.mediator.meldinger.løsninger.Arbeidsgiverinformasjonløsning
 import no.nav.helse.mediator.meldinger.løsninger.EgenAnsattløsning
+import no.nav.helse.mediator.meldinger.løsninger.FlerePersoninfoRiver
 import no.nav.helse.mediator.meldinger.løsninger.HentEnhetløsning
 import no.nav.helse.mediator.meldinger.løsninger.HentInfotrygdutbetalingerløsning
-import no.nav.helse.mediator.meldinger.løsninger.HentPersoninfoløsning
 import no.nav.helse.mediator.meldinger.løsninger.Inntektløsning
+import no.nav.helse.mediator.meldinger.løsninger.PersoninfoRiver
 import no.nav.helse.mediator.meldinger.løsninger.Risikovurderingløsning
 import no.nav.helse.mediator.meldinger.løsninger.Saksbehandlerløsning
 import no.nav.helse.mediator.meldinger.løsninger.Vergemålløsning
@@ -101,8 +102,8 @@ internal class HendelseMediator(
         DelegatedRapid(rapidsConnection, ::forbered, ::fortsett, ::errorHandler).also {
             GodkjenningsbehovRiver(it, this)
             SøknadSendtRiver(it, this)
-            HentPersoninfoløsning.PersoninfoRiver(it, this)
-            HentPersoninfoløsning.FlerePersoninfoRiver(it, this)
+            PersoninfoRiver(it, this)
+            FlerePersoninfoRiver(it, this)
             HentEnhetløsning.HentEnhetRiver(it, this)
             HentInfotrygdutbetalingerløsning.InfotrygdutbetalingerRiver(it, this)
             Saksbehandlerløsning.SaksbehandlerløsningRiver(it, this)

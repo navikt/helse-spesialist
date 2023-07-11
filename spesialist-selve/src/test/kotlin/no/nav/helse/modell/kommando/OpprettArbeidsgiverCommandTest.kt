@@ -7,9 +7,9 @@ import io.mockk.verify
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.mediator.meldinger.løsninger.Arbeidsgiverinformasjonløsning
-import no.nav.helse.mediator.meldinger.løsninger.HentPersoninfoløsning
-import no.nav.helse.mediator.meldinger.løsninger.HentPersoninfoløsninger
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
+import no.nav.helse.modell.person.HentPersoninfoløsning
+import no.nav.helse.modell.person.HentPersoninfoløsninger
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.person.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -69,9 +69,11 @@ internal class OpprettArbeidsgiverCommandTest {
     fun `opprett person-arbeidsgiver`() {
         val fnr = "12345678911"
         arbeidsgiverFinnesIkke(fnr)
-        context.add(HentPersoninfoløsninger(listOf(
+        context.add(
+            HentPersoninfoløsninger(listOf(
             HentPersoninfoløsning(fnr, "LITEN", null, "TRANFLASKE", LocalDate.of(1970, 1, 1), Kjønn.Kvinne, Adressebeskyttelse.Ugradert)
-        )))
+        ))
+        )
         val command = OpprettArbeidsgiverCommand(listOf(fnr), dao)
         assertTrue(command.execute(context))
         verify(exactly = 1) { dao.upsertNavn(fnr, "LITEN TRANFLASKE") }

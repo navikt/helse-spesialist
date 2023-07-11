@@ -3,7 +3,7 @@ package no.nav.helse.modell.kommando
 import java.time.LocalDate
 import no.nav.helse.mediator.meldinger.løsninger.HentEnhetløsning
 import no.nav.helse.mediator.meldinger.løsninger.HentInfotrygdutbetalingerløsning
-import no.nav.helse.mediator.meldinger.løsninger.HentPersoninfoløsning
+import no.nav.helse.modell.person.HentPersoninfoløsning
 import no.nav.helse.modell.person.PersonDao
 import org.slf4j.LoggerFactory
 

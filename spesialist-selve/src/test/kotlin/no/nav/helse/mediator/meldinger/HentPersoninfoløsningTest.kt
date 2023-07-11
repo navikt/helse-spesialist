@@ -3,7 +3,7 @@ package no.nav.helse.mediator.meldinger
 import io.mockk.mockk
 import io.mockk.verify
 import java.time.LocalDate
-import no.nav.helse.mediator.meldinger.løsninger.HentPersoninfoløsning
+import no.nav.helse.modell.person.HentPersoninfoløsning
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.person.Kjønn

@@ -2,13 +2,13 @@ package no.nav.helse.mediator.meldinger
 
 import io.mockk.mockk
 import io.mockk.verify
+import java.util.UUID
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.meldinger.løsninger.HentInfotrygdutbetalingerløsning
+import no.nav.helse.modell.person.HentPersoninfoløsning
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.*
-import no.nav.helse.mediator.meldinger.løsninger.HentInfotrygdutbetalingerløsning
-import no.nav.helse.mediator.meldinger.løsninger.HentPersoninfoløsning
 
 internal class InfotrygdutbetalingerRiverTest {
     private companion object {

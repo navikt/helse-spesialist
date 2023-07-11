@@ -9,7 +9,7 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.mediator.meldinger.løsninger.HentEnhetløsning
 import no.nav.helse.mediator.meldinger.løsninger.HentInfotrygdutbetalingerløsning
-import no.nav.helse.mediator.meldinger.løsninger.HentPersoninfoløsning
+import no.nav.helse.modell.person.HentPersoninfoløsning
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.person.Kjønn
