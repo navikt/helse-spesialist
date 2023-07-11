@@ -8,7 +8,6 @@ import java.util.UUID
 import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.MetrikkRiver
-import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.EndretSkjermetinfo
 import no.nav.helse.mediator.meldinger.GodkjenningsbehovRiver
 import no.nav.helse.mediator.meldinger.GosysOppgaveEndret
@@ -55,6 +54,7 @@ import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver
 import no.nav.helse.modell.overstyring.SkjønnsfastsattArbeidsgiver
+import no.nav.helse.modell.person.AdressebeskyttelseEndretRiver
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.ActualVarselRepository
@@ -111,7 +111,7 @@ internal class HendelseMediator(
             ArbeidsforholdRiver(it, this)
             VedtaksperiodeForkastetRiver(it, this)
             VedtaksperiodeEndretRiver(it, this)
-            AdressebeskyttelseEndret.AdressebeskyttelseEndretRiver(it, this)
+            AdressebeskyttelseEndretRiver(it, this)
             OverstyringTidslinje.OverstyringTidslinjeRiver(it, this)
             OverstyringInntektOgRefusjon.OverstyringInntektOgRefusjonRiver(it, this)
             OverstyringArbeidsforhold.OverstyringArbeidsforholdRiver(it, this)
