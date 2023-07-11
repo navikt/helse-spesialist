@@ -207,16 +207,6 @@ internal class HendelseDao(private val dataSource: DataSource) {
         )
     }
 
-    internal fun harKoblingTil(vedtaksperiodeId: UUID): Boolean {
-        return sessionOf(dataSource).use { session ->
-            session.run(
-                queryOf(
-                    "SELECT 1 FROM vedtaksperiode_hendelse WHERE vedtaksperiode_id=?", vedtaksperiodeId
-                ).map { it.boolean(1) }.asSingle
-            )
-        } ?: false
-    }
-
     internal fun finn(id: UUID, hendelsefabrikk: Hendelsefabrikk) = sessionOf(dataSource).use { session ->
         session.run(queryOf("SELECT type,data FROM hendelse WHERE id = ?", id).map { row ->
             fraHendelsetype(enumValueOf(row.string("type")), row.string("data"), hendelsefabrikk)
