@@ -81,7 +81,7 @@ internal class VedtaksperiodeForkastet(
             val vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
             val id = UUID.fromString(packet["@id"].asText())
             log.info(
-                "Mottok vedtaksperiode endret {}, {}",
+                "Mottok vedtaksperiode forkastet {}, {}",
                 keyValue("vedtaksperiodeId", vedtaksperiodeId),
                 keyValue("eventId", id)
             )
