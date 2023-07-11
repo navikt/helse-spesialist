@@ -16,7 +16,7 @@ internal class VedtaksperiodeForkastetRiverTest {
     private val mapper = jacksonObjectMapper()
 
     init {
-        VedtaksperiodeForkastet.VedtaksperiodeForkastetRiver(rapid, mediator)
+        VedtaksperiodeForkastetRiver(rapid, mediator)
     }
 
     @Test

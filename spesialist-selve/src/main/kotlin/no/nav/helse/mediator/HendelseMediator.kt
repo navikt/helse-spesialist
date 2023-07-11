@@ -28,7 +28,7 @@ import no.nav.helse.mediator.meldinger.UtbetalingEndret
 import no.nav.helse.mediator.meldinger.Varseldefinisjon
 import no.nav.helse.mediator.meldinger.VedtakFattet
 import no.nav.helse.mediator.meldinger.VedtaksperiodeEndret
-import no.nav.helse.mediator.meldinger.VedtaksperiodeForkastet
+import no.nav.helse.mediator.meldinger.VedtaksperiodeForkastetRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeNyUtbetaling
 import no.nav.helse.mediator.meldinger.VedtaksperiodeOpprettet
 import no.nav.helse.mediator.meldinger.VedtaksperiodeReberegnet
@@ -107,7 +107,7 @@ internal class HendelseMediator(
             Saksbehandlerløsning.SaksbehandlerløsningRiver(it, this)
             Arbeidsgiverinformasjonløsning.ArbeidsgiverRiver(it, this)
             Arbeidsforholdløsning.ArbeidsforholdRiver(it, this)
-            VedtaksperiodeForkastet.VedtaksperiodeForkastetRiver(it, this)
+            VedtaksperiodeForkastetRiver(it, this)
             VedtaksperiodeEndret.VedtaksperiodeEndretRiver(it, this)
             AdressebeskyttelseEndret.AdressebeskyttelseEndretRiver(it, this)
             OverstyringTidslinje.OverstyringTidslinjeRiver(it, this)
