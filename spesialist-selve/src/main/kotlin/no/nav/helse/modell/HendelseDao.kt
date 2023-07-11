@@ -20,7 +20,6 @@ import no.nav.helse.mediator.meldinger.OverstyringTidslinje
 import no.nav.helse.mediator.meldinger.PåminnetGodkjenningsbehov
 import no.nav.helse.mediator.meldinger.SkjønnsfastsettingSykepengegrunnlag
 import no.nav.helse.mediator.meldinger.Sykefraværstilfeller
-import no.nav.helse.mediator.meldinger.SøknadSendt
 import no.nav.helse.mediator.meldinger.UtbetalingAnnullert
 import no.nav.helse.mediator.meldinger.UtbetalingEndret
 import no.nav.helse.mediator.meldinger.VedtakFattet
@@ -52,6 +51,7 @@ import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAKSPERIODE_NY_UTBETALING
 import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAKSPERIODE_OPPRETTET
 import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAKSPERIODE_REBEREGNET
 import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAK_FATTET
+import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.person.toFødselsnummer
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet

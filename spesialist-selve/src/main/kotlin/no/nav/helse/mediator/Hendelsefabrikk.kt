@@ -19,7 +19,6 @@ import no.nav.helse.mediator.meldinger.OverstyringTidslinje
 import no.nav.helse.mediator.meldinger.PåminnetGodkjenningsbehov
 import no.nav.helse.mediator.meldinger.SkjønnsfastsettingSykepengegrunnlag
 import no.nav.helse.mediator.meldinger.Sykefraværstilfeller
-import no.nav.helse.mediator.meldinger.SøknadSendt
 import no.nav.helse.mediator.meldinger.UtbetalingAnnullert
 import no.nav.helse.mediator.meldinger.UtbetalingEndret
 import no.nav.helse.mediator.meldinger.VedtakFattet
@@ -44,6 +43,7 @@ import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver
 import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver.Companion.arbeidsgiverelementer
 import no.nav.helse.modell.overstyring.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao

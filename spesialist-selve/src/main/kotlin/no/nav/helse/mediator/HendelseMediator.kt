@@ -22,7 +22,7 @@ import no.nav.helse.mediator.meldinger.OverstyringTidslinje
 import no.nav.helse.mediator.meldinger.PåminnetGodkjenningsbehov
 import no.nav.helse.mediator.meldinger.SkjønnsfastsettingSykepengegrunnlag
 import no.nav.helse.mediator.meldinger.Sykefraværstilfeller
-import no.nav.helse.mediator.meldinger.SøknadSendt
+import no.nav.helse.mediator.meldinger.SøknadSendtRiver
 import no.nav.helse.mediator.meldinger.UtbetalingAnnullert
 import no.nav.helse.mediator.meldinger.UtbetalingEndret
 import no.nav.helse.mediator.meldinger.Varseldefinisjon
@@ -100,7 +100,7 @@ internal class HendelseMediator(
     init {
         DelegatedRapid(rapidsConnection, ::forbered, ::fortsett, ::errorHandler).also {
             GodkjenningsbehovRiver(it, this)
-            SøknadSendt.SøknadSendtRiver(it, this)
+            SøknadSendtRiver(it, this)
             HentPersoninfoløsning.PersoninfoRiver(it, this)
             HentPersoninfoløsning.FlerePersoninfoRiver(it, this)
             HentEnhetløsning.HentEnhetRiver(it, this)
