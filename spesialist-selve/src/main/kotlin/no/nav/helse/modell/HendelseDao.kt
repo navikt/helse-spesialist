@@ -13,7 +13,6 @@ import no.nav.helse.mediator.meldinger.GosysOppgaveEndret
 import no.nav.helse.mediator.meldinger.Hendelse
 import no.nav.helse.mediator.meldinger.NyeVarsler
 import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshot
-import no.nav.helse.mediator.meldinger.OverstyringIgangsatt
 import no.nav.helse.mediator.meldinger.PåminnetGodkjenningsbehov
 import no.nav.helse.mediator.meldinger.Sykefraværstilfeller
 import no.nav.helse.mediator.meldinger.UtbetalingAnnullert
@@ -45,6 +44,7 @@ import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAKSPERIODE_NY_UTBETALING
 import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAKSPERIODE_OPPRETTET
 import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAKSPERIODE_REBEREGNET
 import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAK_FATTET
+import no.nav.helse.modell.overstyring.OverstyringIgangsatt
 import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.person.toFødselsnummer
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyringArbeidsforhold
