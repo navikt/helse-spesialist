@@ -6,6 +6,7 @@ import java.time.LocalDate
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
+import no.nav.helse.mediator.meldinger.løsninger.ArbeidsforholdRiver
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -27,7 +28,7 @@ internal class ArbeidsforholdløsningTest {
     private val meldingsfabrikk = Testmeldingfabrikk(FØDSELSNUMMER, AKTØRID)
 
     init {
-        Arbeidsforholdløsning.ArbeidsforholdRiver(rapid, mediator)
+        ArbeidsforholdRiver(rapid, mediator)
     }
 
     @BeforeEach

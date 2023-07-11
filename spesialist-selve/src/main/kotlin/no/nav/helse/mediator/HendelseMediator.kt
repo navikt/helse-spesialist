@@ -32,6 +32,7 @@ import no.nav.helse.mediator.meldinger.VedtaksperiodeForkastetRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeNyUtbetaling
 import no.nav.helse.mediator.meldinger.VedtaksperiodeOpprettet
 import no.nav.helse.mediator.meldinger.VedtaksperiodeReberegnet
+import no.nav.helse.mediator.meldinger.løsninger.ArbeidsforholdRiver
 import no.nav.helse.mediator.meldinger.løsninger.ArbeidsgiverRiver
 import no.nav.helse.mediator.meldinger.løsninger.EgenAnsattløsning
 import no.nav.helse.mediator.meldinger.løsninger.FlerePersoninfoRiver
@@ -46,7 +47,6 @@ import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.kommando.CommandContext
@@ -108,7 +108,7 @@ internal class HendelseMediator(
             InfotrygdutbetalingerRiver(it, this)
             SaksbehandlerløsningRiver(it, this)
             ArbeidsgiverRiver(it, this)
-            Arbeidsforholdløsning.ArbeidsforholdRiver(it, this)
+            ArbeidsforholdRiver(it, this)
             VedtaksperiodeForkastetRiver(it, this)
             VedtaksperiodeEndret.VedtaksperiodeEndretRiver(it, this)
             AdressebeskyttelseEndret.AdressebeskyttelseEndretRiver(it, this)
