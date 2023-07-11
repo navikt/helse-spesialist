@@ -3,7 +3,7 @@ package no.nav.helse.mediator.meldinger
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.mediator.meldinger.løsninger.HentInfotrygdutbetalingerløsning
+import no.nav.helse.mediator.meldinger.løsninger.InfotrygdutbetalingerRiver
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -16,7 +16,7 @@ internal class UtbetalingAnnullertRiverTest {
     private val testmeldingfabrikk = Testmeldingfabrikk(FNR, AKTØR)
     private val mediator = mockk<HendelseMediator>(relaxed = true)
     private val testRapid = TestRapid().apply {
-        HentInfotrygdutbetalingerløsning.InfotrygdutbetalingerRiver(this, mediator)
+        InfotrygdutbetalingerRiver(this, mediator)
     }
 
     init {

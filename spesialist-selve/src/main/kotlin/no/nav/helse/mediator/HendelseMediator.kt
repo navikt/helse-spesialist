@@ -36,7 +36,7 @@ import no.nav.helse.mediator.meldinger.løsninger.Arbeidsgiverinformasjonløsnin
 import no.nav.helse.mediator.meldinger.løsninger.EgenAnsattløsning
 import no.nav.helse.mediator.meldinger.løsninger.FlerePersoninfoRiver
 import no.nav.helse.mediator.meldinger.løsninger.HentEnhetRiver
-import no.nav.helse.mediator.meldinger.løsninger.HentInfotrygdutbetalingerløsning
+import no.nav.helse.mediator.meldinger.løsninger.InfotrygdutbetalingerRiver
 import no.nav.helse.mediator.meldinger.løsninger.Inntektløsning
 import no.nav.helse.mediator.meldinger.løsninger.PersoninfoRiver
 import no.nav.helse.mediator.meldinger.løsninger.Risikovurderingløsning
@@ -105,7 +105,7 @@ internal class HendelseMediator(
             PersoninfoRiver(it, this)
             FlerePersoninfoRiver(it, this)
             HentEnhetRiver(it, this)
-            HentInfotrygdutbetalingerløsning.InfotrygdutbetalingerRiver(it, this)
+            InfotrygdutbetalingerRiver(it, this)
             Saksbehandlerløsning.SaksbehandlerløsningRiver(it, this)
             Arbeidsgiverinformasjonløsning.ArbeidsgiverRiver(it, this)
             Arbeidsforholdløsning.ArbeidsforholdRiver(it, this)

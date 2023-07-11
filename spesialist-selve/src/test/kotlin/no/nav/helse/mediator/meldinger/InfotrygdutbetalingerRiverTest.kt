@@ -4,7 +4,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.mediator.meldinger.løsninger.HentInfotrygdutbetalingerløsning
+import no.nav.helse.mediator.meldinger.løsninger.InfotrygdutbetalingerRiver
 import no.nav.helse.modell.person.HentPersoninfoløsning
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.BeforeEach
@@ -20,7 +20,7 @@ internal class InfotrygdutbetalingerRiverTest {
     private val testmeldingfabrikk = Testmeldingfabrikk(FNR, AKTØR)
     private val mediator = mockk<HendelseMediator>(relaxed = true)
     private val testRapid = TestRapid().apply {
-        HentInfotrygdutbetalingerløsning.InfotrygdutbetalingerRiver(this, mediator)
+        InfotrygdutbetalingerRiver(this, mediator)
     }
 
     @BeforeEach
