@@ -90,7 +90,7 @@ internal class HendelseMediator(
     private val metrikkDao: MetrikkDao = MetrikkDao(dataSource),
 ) {
     private companion object {
-        private val log = LoggerFactory.getLogger(HendelseMediator::class.java)
+        private val logg = LoggerFactory.getLogger(HendelseMediator::class.java)
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     }
 
@@ -154,7 +154,7 @@ internal class HendelseMediator(
             )
         ) {
             løsninger(context, hendelseId, contextId)?.also { it.add(hendelseId, contextId, løsning) }
-                ?: log.info(
+                ?: logg.info(
                     "mottok løsning med behovId=$behovId som ikke kunne brukes fordi kommandoen ikke lengre er suspendert, " +
                             "eller fordi hendelsen $hendelseId er ukjent"
                 )
@@ -215,7 +215,7 @@ internal class HendelseMediator(
         context: MessageContext,
     ) {
         if (personDao.findPersonByFødselsnummer(fødselsnummer) == null) {
-            log.info("ignorerer hendelseId=${id} fordi vi kjenner ikke til personen")
+            logg.info("ignorerer hendelseId=${id} fordi vi kjenner ikke til personen")
             sikkerLogg.info("ignorerer hendelseId=${id} fordi vi kjenner ikke til personen med fnr=${fødselsnummer}")
             return
         }
@@ -253,7 +253,7 @@ internal class HendelseMediator(
             message.toJson()
         )
         if (personDao.findPersonByFødselsnummer(fødselsnummer) == null) {
-            log.error("vedtaksperiodeOpprettet: ignorerer hendelseId=${hendelse.id} fordi vi kjenner ikke til personen")
+            logg.error("vedtaksperiodeOpprettet: ignorerer hendelseId=${hendelse.id} fordi vi kjenner ikke til personen")
             sikkerLogg.error("vedtaksperiodeOpprettet: ignorerer hendelseId=${hendelse.id} fordi vi kjenner ikke til personen med fnr=${fødselsnummer}")
             return
         }
@@ -268,8 +268,8 @@ internal class HendelseMediator(
         context: MessageContext,
     ) {
         val hendelse = hendelsefabrikk.vedtaksperiodeForkastet(id, vedtaksperiodeId, fødselsnummer, message.toJson())
-        if (!hendelseDao.harKoblingTil(vedtaksperiodeId)) {
-            log.info("ignorerer hendelseId=${hendelse.id} fordi vi ikke kjenner til $vedtaksperiodeId")
+        if (vedtakDao.finnVedtakId(vedtaksperiodeId) == null) {
+            logg.info("ignorerer hendelseId=${hendelse.id} fordi vi ikke kjenner til $vedtaksperiodeId")
             return
         }
         return utfør(hendelse, context)
@@ -330,7 +330,7 @@ internal class HendelseMediator(
     ) {
         if (!oppgaveDao.harGyldigOppgave(utbetalingId)) return
 
-        log.info("Behandler påminnet godkjenningsbehov (id=$id) for vedtaksperiodeId=$vedtaksperiodeId, utbetalingId=$utbetalingId.")
+        logg.info("Behandler påminnet godkjenningsbehov (id=$id) for vedtaksperiodeId=$vedtaksperiodeId, utbetalingId=$utbetalingId.")
         utfør(hendelsefabrikk.påminnetGodkjenningsbehov(id, fødselsnummer, message.toJson()), context)
     }
 
@@ -542,7 +542,7 @@ internal class HendelseMediator(
         context: MessageContext,
     ) {
         if (arbeidsgiverDao.findArbeidsgiverByOrgnummer(organisasjonsnummer) == null) {
-            log.warn(
+            logg.warn(
                 "Fant ikke arbeidsgiver med {}, se sikkerlogg for mer informasjon",
                 keyValue("hendelseId", message["@id"].asText())
             )
@@ -620,7 +620,7 @@ internal class HendelseMediator(
                 mutableListOf<String>().let {
                     if (hendelse == null) it += "Finner ikke hendelse med id=$hendelseId"
                     if (commandContext == null) it += "Command context $contextId er ikke suspendert"
-                    log.info("Ignorerer melding fordi: " + it.joinToString())
+                    logg.info("Ignorerer melding fordi: " + it.joinToString())
                 }
 
                 return null
@@ -635,7 +635,7 @@ internal class HendelseMediator(
     }
 
     private fun errorHandler(err: Exception, message: String) {
-        log.error("alvorlig feil: ${err.message} (se sikkerlogg for melding)", err)
+        logg.error("alvorlig feil: ${err.message} (se sikkerlogg for melding)", err)
         sikkerLogg.error("alvorlig feil: ${err.message}\n\t$message", err, err.printStackTrace())
     }
 
@@ -645,13 +645,13 @@ internal class HendelseMediator(
     }
 
     private fun utfør(fødselsnummer: String, hendelse: Hendelse, messageContext: MessageContext) {
-        if (personDao.findPersonByFødselsnummer(fødselsnummer) == null) return log.info("ignorerer hendelseId=${hendelse.id} fordi vi ikke kjenner til personen")
+        if (personDao.findPersonByFødselsnummer(fødselsnummer) == null) return logg.info("ignorerer hendelseId=${hendelse.id} fordi vi ikke kjenner til personen")
         return utfør(hendelse, messageContext)
     }
 
     private fun utfør(hendelse: Hendelse, messageContext: MessageContext) {
         val contextId = UUID.randomUUID()
-        log.info("oppretter ny kommandokontekst med context_id=$contextId for hendelse_id=${hendelse.id} og type=${hendelse::class.simpleName}")
+        logg.info("oppretter ny kommandokontekst med context_id=$contextId for hendelse_id=${hendelse.id} og type=${hendelse::class.simpleName}")
         utfør(hendelse, nyContext(hendelse, contextId), contextId, messageContext)
     }
 
@@ -670,19 +670,19 @@ internal class HendelseMediator(
         ) {
             val hendelsenavn = hendelse::class.simpleName ?: "ukjent hendelse"
             try {
-                log.info("utfører $hendelsenavn med context_id=$contextId for hendelse_id=${hendelse.id}")
+                logg.info("utfører $hendelsenavn med context_id=$contextId for hendelse_id=${hendelse.id}")
                 if (context.utfør(commandContextDao, hendelse)) {
                     val kjøretid = MILLIS.between(commandContextDao.contextOpprettetTidspunkt(contextId), now())
                     metrikker(hendelsenavn, kjøretid, contextId)
-                    log.info(
+                    logg.info(
                         "Kommando(er) for $hendelsenavn er utført ferdig. Det tok ca {}ms å kjøre hele kommandokjeden",
                         kjøretid
                     )
-                } else log.info("$hendelsenavn er suspendert")
+                } else logg.info("$hendelsenavn er suspendert")
                 behovMediator.håndter(hendelse, context, contextId, messageContext)
                 oppgaveMediator.lagreOgTildelOppgaver(hendelse.id, hendelse.fødselsnummer(), contextId, messageContext)
             } catch (err: Exception) {
-                log.warn(
+                logg.warn(
                     "Feil ved kjøring av $hendelsenavn: contextId={}, message={}",
                     contextId,
                     err.message,
@@ -691,7 +691,7 @@ internal class HendelseMediator(
                 hendelse.undo(context)
                 throw err
             } finally {
-                log.info("utført $hendelsenavn med context_id=$contextId for hendelse_id=${hendelse.id}")
+                logg.info("utført $hendelsenavn med context_id=$contextId for hendelse_id=${hendelse.id}")
             }
         }
     }
@@ -717,7 +717,7 @@ internal class HendelseMediator(
         }
 
         fun fortsett(mediator: HendelseMediator, message: String) {
-            log.info("fortsetter utførelse av kommandokontekst pga. behov_id=${hendelse.id} med context_id=$contextId for hendelse_id=${hendelse.id}")
+            logg.info("fortsetter utførelse av kommandokontekst pga. behov_id=${hendelse.id} med context_id=$contextId for hendelse_id=${hendelse.id}")
             sikkerLogg.info(
                 "fortsetter utførelse av kommandokontekst pga. behov_id=${hendelse.id} med context_id=$contextId for hendelse_id=${hendelse.id}.\n" +
                         "Innkommende melding:\n\t$message"
