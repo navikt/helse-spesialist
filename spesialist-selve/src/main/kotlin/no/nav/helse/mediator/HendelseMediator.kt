@@ -16,7 +16,7 @@ import no.nav.helse.mediator.meldinger.NyeVarsler
 import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshot
 import no.nav.helse.mediator.meldinger.OverstyringArbeidsforhold
 import no.nav.helse.mediator.meldinger.OverstyringIgangsatt
-import no.nav.helse.mediator.meldinger.OverstyringInntektOgRefusjon
+import no.nav.helse.mediator.meldinger.OverstyringInntektOgRefusjonRiver
 import no.nav.helse.mediator.meldinger.OverstyringTidslinjeRiver
 import no.nav.helse.mediator.meldinger.PåminnetGodkjenningsbehov
 import no.nav.helse.mediator.meldinger.SkjønnsfastsettingSykepengegrunnlag
@@ -113,7 +113,7 @@ internal class HendelseMediator(
             VedtaksperiodeEndretRiver(it, this)
             AdressebeskyttelseEndretRiver(it, this)
             OverstyringTidslinjeRiver(it, this)
-            OverstyringInntektOgRefusjon.OverstyringInntektOgRefusjonRiver(it, this)
+            OverstyringInntektOgRefusjonRiver(it, this)
             OverstyringArbeidsforhold.OverstyringArbeidsforholdRiver(it, this)
             SkjønnsfastsettingSykepengegrunnlag.SkjønnsfastsettingSykepengegrunnlagRiver(it, this)
             OverstyringIgangsatt.OverstyringIgangsattRiver(it, this)

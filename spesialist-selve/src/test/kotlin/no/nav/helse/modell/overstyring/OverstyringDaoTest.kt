@@ -6,8 +6,8 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.januar
 import no.nav.helse.mediator.meldinger.OverstyringArbeidsforhold
-import no.nav.helse.mediator.meldinger.OverstyringInntektOgRefusjon
 import no.nav.helse.mediator.meldinger.SkjønnsfastsettingSykepengegrunnlag
+import no.nav.helse.modell.saksbehandler.handlinger.OverstyringInntektOgRefusjon
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyringTidslinje
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
