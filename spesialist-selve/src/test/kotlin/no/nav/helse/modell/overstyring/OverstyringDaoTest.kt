@@ -5,8 +5,8 @@ import io.mockk.mockk
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.januar
-import no.nav.helse.mediator.meldinger.OverstyringArbeidsforhold
 import no.nav.helse.mediator.meldinger.SkjønnsfastsettingSykepengegrunnlag
+import no.nav.helse.modell.saksbehandler.handlinger.OverstyringArbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyringInntektOgRefusjon
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyringTidslinje
 import no.nav.helse.spesialist.api.overstyring.Dagtype
