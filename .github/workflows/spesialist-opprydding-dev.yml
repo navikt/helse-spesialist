@@ -54,5 +54,5 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
-          RESOURCE: deploy/dev-opprydding.yml,deploy/dev-db-policy.yml
+          RESOURCE: deploy/dev-opprydding.yml
           IMAGE: ${{ needs.build.outputs.image }}
