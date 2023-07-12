@@ -20,7 +20,7 @@ internal class UtbetalingAnnullertRiverTest {
     }
 
     init {
-        UtbetalingAnnullert.UtbetalingAnnullertRiver(testRapid, mediator)
+        UtbetalingAnnullertRiver(testRapid, mediator)
     }
 
     @BeforeEach

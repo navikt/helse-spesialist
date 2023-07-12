@@ -22,7 +22,7 @@ import no.nav.helse.mediator.meldinger.PåminnetGodkjenningsbehov
 import no.nav.helse.mediator.meldinger.SkjønnsfastsettingSykepengegrunnlagRiver
 import no.nav.helse.mediator.meldinger.Sykefraværstilfeller
 import no.nav.helse.mediator.meldinger.SøknadSendtRiver
-import no.nav.helse.mediator.meldinger.UtbetalingAnnullert
+import no.nav.helse.mediator.meldinger.UtbetalingAnnullertRiver
 import no.nav.helse.mediator.meldinger.UtbetalingEndret
 import no.nav.helse.mediator.meldinger.Varseldefinisjon
 import no.nav.helse.mediator.meldinger.VedtakFattet
@@ -122,7 +122,7 @@ internal class HendelseMediator(
             ÅpneGosysOppgaverløsning.ÅpneGosysOppgaverRiver(it, this)
             Risikovurderingløsning.V2River(it, this)
             if (Toggle.Inntekter.enabled) Inntektløsning.InntektRiver(it, this)
-            UtbetalingAnnullert.UtbetalingAnnullertRiver(it, this)
+            UtbetalingAnnullertRiver(it, this)
             OppdaterPersonsnapshot.River(it, this)
             UtbetalingEndret.River(it, this)
             VedtaksperiodeReberegnet.River(it, this)
