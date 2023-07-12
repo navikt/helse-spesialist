@@ -1,13 +1,9 @@
 package no.nav.helse.migrering.db
 
-import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.migrering.AbstractDatabaseTest
-import no.nav.helse.migrering.februar
-import no.nav.helse.migrering.januar
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -16,138 +12,14 @@ internal class SpesialistDaoTest : AbstractDatabaseTest() {
     private val dao = SpesialistDao(dataSource)
 
     @Test
-    fun `Kan opprette person`() {
-        dao.personOpprettet("1234", "134")
-        assertPerson("1234", "134", 1)
-    }
-
-    @Test
-    fun `Opretter ikke person flere ganger`() {
-        dao.personOpprettet("1234", "134")
-        dao.personOpprettet("1234", "134")
-
-        assertPerson("1234", "134", 1)
-    }
-
-    @Test
-    fun `Kan opprette arbeidsgiver`() {
-        dao.arbeidsgiverOpprettet("1234")
-        assertArbeidsgiver("1234", 1)
-    }
-
-    @Test
-    fun `Oppretter ikke arbeidsgiver flere ganger`() {
-        dao.arbeidsgiverOpprettet("1234")
-        dao.arbeidsgiverOpprettet("1234")
-        assertArbeidsgiver("1234", 1)
-    }
-
-    @Test
-    fun `Kan opprette vedtaksperiode`() {
-        dao.personOpprettet("1234", "123")
-        dao.arbeidsgiverOpprettet("1234")
-        val vedtaksperiodeId = UUID.randomUUID()
-        dao.vedtaksperiodeOpprettet(vedtaksperiodeId, LocalDateTime.now(), 1.januar, 15.januar, 1.januar, "123", "1234")
-        assertVedtaksperiode(vedtaksperiodeId, 1)
-    }
-
-    @Test
-    fun `Oppretter ikke vedtaksperiode hvis den finnes fra før av`() {
-        dao.personOpprettet("1234", "123")
-        dao.arbeidsgiverOpprettet("1234")
-        val vedtaksperiodeId = UUID.randomUUID()
-        dao.vedtaksperiodeOpprettet(vedtaksperiodeId, LocalDateTime.now(), 1.januar, 15.januar, 1.januar, "123", "1234")
-        dao.vedtaksperiodeOpprettet(vedtaksperiodeId, LocalDateTime.now(), 1.januar, 15.januar, 1.januar, "123", "1234")
-        assertVedtaksperiode(vedtaksperiodeId, 1)
-    }
-
-    @Test
-    fun `Oppdaterer generasjoner for eksisterende vedtaksperiode`() {
-        dao.personOpprettet("1234", "123")
-        dao.arbeidsgiverOpprettet("1234")
-        val vedtaksperiodeId = UUID.randomUUID()
-        opprettGenerasjonFor(vedtaksperiodeId)
-        assertGenerasjonMed(vedtaksperiodeId, 1)
-
-        dao.generasjonerOppdatert(vedtaksperiodeId, 1.januar, 15.januar, 1.januar)
-        assertGenerasjonMed(vedtaksperiodeId, 1.januar, 15.januar, 1.januar, 1)
-    }
-
-    @Test
-    fun `Oppdaterer generasjoner for ekstisterende vedtaksperiode kun for generasjoner som ikke har satt fom, tom eller skjæringstidspunkt`() {
-        dao.personOpprettet("1234", "123")
-        dao.arbeidsgiverOpprettet("1234")
-        val vedtaksperiodeId = UUID.randomUUID()
-        opprettGenerasjonFor(vedtaksperiodeId)
-        dao.generasjonerOppdatert(vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
-        opprettGenerasjonFor(vedtaksperiodeId)
-        opprettGenerasjonFor(vedtaksperiodeId)
-        assertGenerasjonMed(vedtaksperiodeId, 2)
-        assertGenerasjonMed(vedtaksperiodeId, 1.januar, 31.januar, 1.januar, 1)
-
-        dao.generasjonerOppdatert(vedtaksperiodeId, 15.januar, 15.februar, 15.januar)
-        assertGenerasjonMed(vedtaksperiodeId, 1.januar, 31.januar, 1.januar, 1)
-        assertGenerasjonMed(vedtaksperiodeId, 15.januar, 15.februar, 15.januar, 2)
-    }
-
-    @Test
     fun `Oppdaterer forkastet på ny vedtaksperiode`() {
-        dao.personOpprettet("1234", "123")
-        dao.arbeidsgiverOpprettet("1234")
         val vedtaksperiodeId = UUID.randomUUID()
-        dao.vedtaksperiodeOpprettet(vedtaksperiodeId, LocalDateTime.now(), 1.januar, 15.januar, 1.januar, "123", "1234")
+        opprettPersonFor("12345678910", "1234567891011")
+        opprettArbeidsgiverFor("987654321")
+        opprettVedtaksperiodeFor("12345678910", "987654321", vedtaksperiodeId)
         assertVedtaksperiode(vedtaksperiodeId, 1)
-        dao.vedtaksperiodeOppdaterForkastet(vedtaksperiodeId, true)
-
+        dao.forkast(vedtaksperiodeId)
         assertForkastetVedtaksperiode(vedtaksperiodeId, 1)
-    }
-
-    @Test
-    fun `Kan finne vedtaksperioder som mangler vedtak`() {
-        dao.personOpprettet("1234", "123")
-        dao.arbeidsgiverOpprettet("1234")
-        val vedtaksperiodeId = UUID.randomUUID()
-        opprettGenerasjonFor(vedtaksperiodeId)
-        refreshView()
-        val funnet = dao.finnVedtakSomMangler(listOf(vedtaksperiodeId, UUID.randomUUID()))
-        assertEquals(listOf(vedtaksperiodeId), funnet)
-    }
-
-    @Test
-    fun `finnVedtakSomMangler håndterer tom liste`() {
-        dao.personOpprettet("1234", "123")
-        dao.arbeidsgiverOpprettet("1234")
-        val vedtaksperiodeId = UUID.randomUUID()
-        opprettGenerasjonFor(vedtaksperiodeId)
-        refreshView()
-        val funnet = dao.finnVedtakSomMangler(emptyList())
-        assertEquals(emptyList<UUID>(), funnet)
-    }
-
-    private fun refreshView() {
-        @Language("PostgreSQL")
-        val query = "REFRESH MATERIALIZED VIEW generasjon_mangler_vedtak"
-        sessionOf(dataSource).use {
-            it.run(queryOf(query).asExecute)
-        }
-    }
-
-    private fun assertPerson(aktørId: String, fødselsnummer: String, forventetAntall: Int) {
-        @Language("PostgreSQL")
-        val query = "SELECT count(1) FROM person WHERE aktor_id = ? AND fodselsnummer = ?"
-        val antallFunnet = sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, aktørId.toLong(), fødselsnummer.toLong()).map { it.int(1) }.asSingle)
-        }
-        assertEquals(forventetAntall, antallFunnet)
-    }
-
-    private fun assertArbeidsgiver(organisasjonsnummer: String, forventetAntall: Int) {
-        @Language("PostgreSQL")
-        val query = "SELECT count(1) FROM arbeidsgiver WHERE orgnummer = ?"
-        val antallFunnet = sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, organisasjonsnummer.toLong()).map { it.int(1) }.asSingle)
-        }
-        assertEquals(forventetAntall, antallFunnet)
     }
 
     private fun assertVedtaksperiode(vedtaksperiodeId: UUID, forventetAntall: Int) {
@@ -176,38 +48,49 @@ internal class SpesialistDaoTest : AbstractDatabaseTest() {
         assertEquals(forventetAntall, antallFunnet)
     }
 
-    private fun opprettGenerasjonFor(vedtaksperiodeId: UUID) {
+    private fun opprettPersonFor(fødselsnummer: String, aktørId: String) {
         @Language("PostgreSQL")
         val query =
-            "INSERT INTO selve_vedtaksperiode_generasjon (vedtaksperiode_id, opprettet_av_hendelse, tilstand) VALUES (?, gen_random_uuid(), 'Ulåst')"
+            """
+                INSERT INTO person(fodselsnummer, aktor_id, info_ref, enhet_ref, enhet_ref_oppdatert, personinfo_oppdatert, infotrygdutbetalinger_ref, infotrygdutbetalinger_oppdatert) 
+                VALUES (?, ?, null, null, null, null, null, null)
+            """
         sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, vedtaksperiodeId).asExecute)
+            session.run(queryOf(query, fødselsnummer.toLong(), aktørId.toLong()).asExecute)
         }
     }
 
-    private fun assertGenerasjonMed(vedtaksperiodeId: UUID, forventetAntall: Int) {
+    private fun opprettArbeidsgiverFor(organisasjonsnummer: String) {
         @Language("PostgreSQL")
         val query =
-            "SELECT count(1) FROM selve_vedtaksperiode_generasjon svg WHERE vedtaksperiode_id = ? AND fom IS NULL AND tom IS NULL AND skjæringstidspunkt is null "
-        val antallFunnet = sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, vedtaksperiodeId).map { it.int(1) }.asSingle)
+            """
+                INSERT INTO arbeidsgiver(orgnummer, navn_ref, bransjer_ref) 
+                VALUES (?, null, null)
+            """
+        sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, organisasjonsnummer.toLong()).asExecute)
         }
-        assertEquals(forventetAntall, antallFunnet)
     }
 
-    private fun assertGenerasjonMed(
-        vedtaksperiodeId: UUID,
-        fom: LocalDate,
-        tom: LocalDate,
-        skjæringstidspunkt: LocalDate,
-        forventetAntall: Int,
-    ) {
+    private fun opprettVedtaksperiodeFor(fødselsnummer: String, organisasjonsnummer: String, vedtaksperiodeId: UUID) {
         @Language("PostgreSQL")
         val query =
-            "SELECT count(1) FROM selve_vedtaksperiode_generasjon svg WHERE vedtaksperiode_id = ? AND fom = ? AND tom = ? AND skjæringstidspunkt = ? "
-        val antallFunnet = sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, vedtaksperiodeId, fom, tom, skjæringstidspunkt).map { it.int(1) }.asSingle)
+            """
+                INSERT INTO vedtak (vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref, snapshot_ref, forkastet, forkastet_tidspunkt, forkastet_av_hendelse) 
+                VALUES (
+                    ?, 
+                    '2018-01-01', 
+                    '2018-01-31',
+                    (SELECT id FROM arbeidsgiver WHERE orgnummer = ?),
+                    (SELECT id FROM person WHERE fodselsnummer = ?),
+                    null,
+                    false,
+                    null,
+                    null
+                )
+            """
+        sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, vedtaksperiodeId, organisasjonsnummer.toLong(), fødselsnummer.toLong()).asExecute)
         }
-        assertEquals(forventetAntall, antallFunnet)
     }
 }
