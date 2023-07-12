@@ -46,6 +46,7 @@ internal class Personavstemming {
         override fun onPacket(packet: JsonMessage, context: MessageContext) {
             val fødselsnummer = packet["fødselsnummer"].asText()
             val aktørId = packet["aktørId"].asText()
+            sikkerlogg.info("Mottatt person_avstemt for {}, {}", keyValue("fødselsnummer", fødselsnummer), keyValue("aktørId", aktørId))
             val forkastedeVedtaksperioderIder = packet["arbeidsgivere"].flatMap { arbeidsgiverNode ->
                 arbeidsgiverNode.path("forkastedeVedtaksperioder").map { periodeNode ->
                     UUID.fromString(periodeNode.path("id").asText())
@@ -53,10 +54,11 @@ internal class Personavstemming {
             }
             if (forkastedeVedtaksperioderIder.isEmpty()) {
                 sikkerlogg.info("Ingen forkastede perioder for {}, {}", keyValue("fødselsnummer", fødselsnummer), keyValue("aktørId", aktørId))
-                return
+            } else {
+                sikkerlogg.info("${forkastedeVedtaksperioderIder.size} forkastede perioder for {}, {}", keyValue("fødselsnummer", fødselsnummer), keyValue("aktørId", aktørId))
+                forkastedeVedtaksperioderIder.forEach(spesialistDao::forkast)
             }
-            forkastedeVedtaksperioderIder.forEach(spesialistDao::forkast)
-            sikkerlogg.info("Mottatt person_avstemt for {}, {}", keyValue("fødselsnummer", fødselsnummer), keyValue("aktørId", aktørId))
+            sikkerlogg.info("Person {}, {} avstemt", keyValue("fødselsnummer", fødselsnummer), keyValue("aktørId", aktørId))
         }
     }
 
