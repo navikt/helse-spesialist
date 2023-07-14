@@ -1,11 +1,25 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import no.nav.helse.januar
+import no.nav.helse.modell.vedtaksperiode.Periode.Companion.til
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class PeriodeTest {
+
+    @Test
+    fun `fom etter tom`() {
+        assertThrows<IllegalArgumentException> {
+            Periode(2.januar, 1.januar)
+        }
+    }
+
+    @Test
+    fun til() {
+        assertEquals(Periode(1.januar, 2.januar), 1.januar til 2.januar)
+    }
 
     @Test
     fun `referential equals`() {
