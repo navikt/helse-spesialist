@@ -29,7 +29,7 @@ import no.nav.helse.mediator.meldinger.VedtakFattet
 import no.nav.helse.mediator.meldinger.VedtaksperiodeEndretRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeForkastetRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeNyUtbetaling
-import no.nav.helse.mediator.meldinger.VedtaksperiodeOpprettet
+import no.nav.helse.mediator.meldinger.VedtaksperiodeOpprettetRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeReberegnetRiver
 import no.nav.helse.mediator.meldinger.løsninger.ArbeidsforholdRiver
 import no.nav.helse.mediator.meldinger.løsninger.ArbeidsgiverRiver
@@ -126,7 +126,7 @@ internal class HendelseMediator(
             OppdaterPersonsnapshotRiver(it, this)
             UtbetalingEndretRiver(it, this)
             VedtaksperiodeReberegnetRiver(it, this)
-            VedtaksperiodeOpprettet.River(it, this)
+            VedtaksperiodeOpprettetRiver(it, this)
             GosysOppgaveEndret.River(it, this, oppgaveDao, tildelingDao, personDao)
             EndretSkjermetinfo.River(it, personDao, egenAnsattDao)
             VedtakFattet.River(it, this)
