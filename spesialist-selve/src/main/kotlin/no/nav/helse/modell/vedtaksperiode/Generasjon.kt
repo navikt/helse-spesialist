@@ -36,6 +36,10 @@ internal class Generasjon private constructor(
         varsler.forEach { it.registrer(*observer) }
     }
 
+    internal fun toDto(): GenerasjonDto {
+        return GenerasjonDto(id, vedtaksperiodeId, utbetalingId, skjæringstidspunkt, periode, tilstand.toDto(), varsler.map(Varsel::toDto))
+    }
+
     internal fun tilhører(dato: LocalDate): Boolean = periode.tom() <= dato
 
     internal fun håndterVedtaksperiodeOpprettet(hendelseId: UUID) {
@@ -156,6 +160,14 @@ internal class Generasjon private constructor(
     internal sealed interface Tilstand {
         fun navn(): String
 
+        fun toDto(): TilstandDto {
+            return when (this) {
+                AvsluttetUtenUtbetaling -> TilstandDto.AvsluttetUtenUtbetaling
+                Låst -> TilstandDto.Låst
+                Ulåst -> TilstandDto.Ulåst
+                UtenUtbetalingMåVurderes -> TilstandDto.UtenUtbetalingMåVurderes
+            }
+        }
         fun vedtaksperiodeEndret(generasjon: Generasjon, id: UUID, hendelseId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate): Generasjon? {
             return null
         }

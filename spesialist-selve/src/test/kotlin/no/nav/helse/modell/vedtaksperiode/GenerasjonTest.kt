@@ -24,6 +24,7 @@ import no.nav.helse.modell.varsel.Varselkode.SB_EX_2
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_3
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterOppdateringer
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverTotrinnsvurdering
+import no.nav.helse.modell.vedtaksperiode.Periode.Companion.til
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -697,6 +698,34 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         skjæringstidspunkt = skjæringstidspunkt
     ).also {
         it.registrer(observer)
+    }
+
+    @Test
+    fun `generasjon toDto`() {
+        val generasjonId = UUID.randomUUID()
+        val vedtaksperiodeId = UUID.randomUUID()
+        val fom = 1.januar
+        val tom = 31. januar
+        val skjæringstidspunkt = 1.januar
+        val utbetalingId = UUID.randomUUID()
+        val generasjon = Generasjon(generasjonId, vedtaksperiodeId, fom, tom, skjæringstidspunkt)
+        generasjon.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
+
+        val varselId = UUID.randomUUID()
+        val opprettet = LocalDateTime.now()
+        val varsel = Varsel(varselId, "SB_EX_1", opprettet, vedtaksperiodeId, AKTIV)
+        generasjon.håndterNyttVarsel(varsel, UUID.randomUUID())
+        val dto = generasjon.toDto()
+
+        assertEquals(GenerasjonDto(generasjonId, vedtaksperiodeId, utbetalingId, skjæringstidspunkt, fom til tom, TilstandDto.Ulåst, listOf(varsel.toDto())), dto)
+    }
+
+    @Test
+    fun `generasjonTilstand toDto`() {
+        assertEquals(TilstandDto.Låst, Generasjon.Låst.toDto())
+        assertEquals(TilstandDto.Ulåst, Generasjon.Ulåst.toDto())
+        assertEquals(TilstandDto.AvsluttetUtenUtbetaling, Generasjon.AvsluttetUtenUtbetaling.toDto())
+        assertEquals(TilstandDto.UtenUtbetalingMåVurderes, Generasjon.UtenUtbetalingMåVurderes.toDto())
     }
 
     private fun generasjonMedVarsel(fom: LocalDate, tom: LocalDate, vedtaksperiodeId: UUID = UUID.randomUUID(), varselkode: String = "SB_EX_1"): Generasjon {

@@ -23,13 +23,26 @@ internal class Varsel(
         INAKTIV,
         GODKJENT,
         VURDERT,
-        AVVIST
+        AVVIST;
+        internal fun toDto(): VarselStatusDto {
+            return when (this) {
+                AKTIV -> VarselStatusDto.AKTIV
+                INAKTIV -> VarselStatusDto.INAKTIV
+                GODKJENT -> VarselStatusDto.GODKJENT
+                VURDERT -> VarselStatusDto.VURDERT
+                AVVIST -> VarselStatusDto.AVVIST
+            }
+        }
     }
 
     private val observers = mutableSetOf<IVedtaksperiodeObserver>()
 
     internal fun registrer(vararg observer: IVedtaksperiodeObserver) {
         observers.addAll(observer)
+    }
+
+    internal fun toDto(): VarselDto {
+        return VarselDto(id, varselkode, opprettet, vedtaksperiodeId, status.toDto())
     }
 
     internal fun erAktiv(): Boolean = this.status == AKTIV

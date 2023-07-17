@@ -2,7 +2,7 @@ package no.nav.helse.modell.vedtaksperiode
 
 import java.time.LocalDate
 
-internal class Periode(
+class Periode(
     private val fom: LocalDate,
     private val tom: LocalDate,
 ) {
