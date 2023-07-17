@@ -13,7 +13,7 @@ import no.nav.helse.mediator.meldinger.GodkjenningsbehovRiver
 import no.nav.helse.mediator.meldinger.GosysOppgaveEndret
 import no.nav.helse.mediator.meldinger.Hendelse
 import no.nav.helse.mediator.meldinger.NyeVarsler
-import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshot
+import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshotRiver
 import no.nav.helse.mediator.meldinger.OverstyringArbeidsforholdRiver
 import no.nav.helse.mediator.meldinger.OverstyringIgangsattRiver
 import no.nav.helse.mediator.meldinger.OverstyringInntektOgRefusjonRiver
@@ -123,7 +123,7 @@ internal class HendelseMediator(
             Risikovurderingløsning.V2River(it, this)
             if (Toggle.Inntekter.enabled) Inntektløsning.InntektRiver(it, this)
             UtbetalingAnnullertRiver(it, this)
-            OppdaterPersonsnapshot.River(it, this)
+            OppdaterPersonsnapshotRiver(it, this)
             UtbetalingEndret.River(it, this)
             VedtaksperiodeReberegnet.River(it, this)
             VedtaksperiodeOpprettet.River(it, this)

@@ -11,7 +11,6 @@ import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.EndretSkjermetinfo
 import no.nav.helse.mediator.meldinger.GosysOppgaveEndret
 import no.nav.helse.mediator.meldinger.NyeVarsler
-import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshot
 import no.nav.helse.mediator.meldinger.PåminnetGodkjenningsbehov
 import no.nav.helse.mediator.meldinger.Sykefraværstilfeller
 import no.nav.helse.mediator.meldinger.UtbetalingEndret
@@ -35,6 +34,7 @@ import no.nav.helse.modell.overstyring.OverstyringIgangsatt
 import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver
 import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver.Companion.arbeidsgiverelementer
 import no.nav.helse.modell.overstyring.SkjønnsfastsattArbeidsgiver
+import no.nav.helse.modell.person.OppdaterPersonsnapshot
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.risiko.RisikovurderingDao
