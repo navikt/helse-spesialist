@@ -24,7 +24,7 @@ import no.nav.helse.mediator.meldinger.Sykefraværstilfeller
 import no.nav.helse.mediator.meldinger.SøknadSendtRiver
 import no.nav.helse.mediator.meldinger.UtbetalingAnnullertRiver
 import no.nav.helse.mediator.meldinger.UtbetalingEndretRiver
-import no.nav.helse.mediator.meldinger.Varseldefinisjon
+import no.nav.helse.mediator.meldinger.VarseldefinisjonRiver
 import no.nav.helse.mediator.meldinger.VedtakFattetRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeEndretRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeForkastetRiver
@@ -60,6 +60,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.VarselRepository
+import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -131,8 +132,7 @@ internal class HendelseMediator(
             EndretSkjermetinfoRiver(it, personDao, egenAnsattDao)
             VedtakFattetRiver(it, this)
             NyeVarslerRiver(it, this)
-            Varseldefinisjon.River(it, varselRepository)
-            Varseldefinisjon.VarseldefinisjonRiver(it, varselRepository)
+            VarseldefinisjonRiver(it, this)
             VedtaksperiodeNyUtbetaling.River(it, this)
             Sykefraværstilfeller.River(it, this)
             MetrikkRiver(it)
@@ -161,6 +161,10 @@ internal class HendelseMediator(
                             "eller fordi hendelsen $hendelseId er ukjent"
                 )
         }
+    }
+
+    internal fun håndter(varseldefinisjon: Varseldefinisjon) {
+        varseldefinisjon.lagre(varselRepository)
     }
 
     internal fun tildelOppgaveTilSaksbehandler(

@@ -2,7 +2,6 @@ package no.nav.helse.modell.varsel
 
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.mediator.meldinger.Varseldefinisjon
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test

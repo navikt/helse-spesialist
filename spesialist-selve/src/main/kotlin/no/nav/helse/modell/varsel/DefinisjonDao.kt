@@ -6,7 +6,6 @@ import javax.sql.DataSource
 import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.mediator.meldinger.Varseldefinisjon
 import org.intellij.lang.annotations.Language
 
 class DefinisjonDao(private val dataSource: DataSource) {
