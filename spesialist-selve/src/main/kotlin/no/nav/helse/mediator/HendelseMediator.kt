@@ -8,7 +8,7 @@ import java.util.UUID
 import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.MetrikkRiver
-import no.nav.helse.mediator.meldinger.EndretSkjermetinfo
+import no.nav.helse.mediator.meldinger.EndretSkjermetinfoRiver
 import no.nav.helse.mediator.meldinger.GodkjenningsbehovRiver
 import no.nav.helse.mediator.meldinger.GosysOppgaveEndretRiver
 import no.nav.helse.mediator.meldinger.Hendelse
@@ -128,7 +128,7 @@ internal class HendelseMediator(
             VedtaksperiodeReberegnetRiver(it, this)
             VedtaksperiodeOpprettetRiver(it, this)
             GosysOppgaveEndretRiver(it, this, oppgaveDao, tildelingDao, personDao)
-            EndretSkjermetinfo.River(it, personDao, egenAnsattDao)
+            EndretSkjermetinfoRiver(it, personDao, egenAnsattDao)
             VedtakFattet.River(it, this)
             NyeVarsler.River(it, this)
             Varseldefinisjon.River(it, varselRepository)
