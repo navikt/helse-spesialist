@@ -12,7 +12,7 @@ import no.nav.helse.mediator.meldinger.EndretSkjermetinfoRiver
 import no.nav.helse.mediator.meldinger.GodkjenningsbehovRiver
 import no.nav.helse.mediator.meldinger.GosysOppgaveEndretRiver
 import no.nav.helse.mediator.meldinger.Hendelse
-import no.nav.helse.mediator.meldinger.NyeVarsler
+import no.nav.helse.mediator.meldinger.NyeVarslerRiver
 import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshotRiver
 import no.nav.helse.mediator.meldinger.OverstyringArbeidsforholdRiver
 import no.nav.helse.mediator.meldinger.OverstyringIgangsattRiver
@@ -130,7 +130,7 @@ internal class HendelseMediator(
             GosysOppgaveEndretRiver(it, this, oppgaveDao, tildelingDao, personDao)
             EndretSkjermetinfoRiver(it, personDao, egenAnsattDao)
             VedtakFattetRiver(it, this)
-            NyeVarsler.River(it, this)
+            NyeVarslerRiver(it, this)
             Varseldefinisjon.River(it, varselRepository)
             Varseldefinisjon.VarseldefinisjonRiver(it, varselRepository)
             VedtaksperiodeNyUtbetaling.River(it, this)

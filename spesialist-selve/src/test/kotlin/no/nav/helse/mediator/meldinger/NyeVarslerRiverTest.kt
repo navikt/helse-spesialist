@@ -22,7 +22,7 @@ internal class NyeVarslerRiverTest {
     private val testmeldingfabrikk = Testmeldingfabrikk(FNR, AKTØR)
     private val mediator = mockk<HendelseMediator>(relaxed = true)
     private val testRapid = TestRapid().apply {
-        NyeVarsler.River(this, mediator)
+        NyeVarslerRiver(this, mediator)
     }
 
     @BeforeEach

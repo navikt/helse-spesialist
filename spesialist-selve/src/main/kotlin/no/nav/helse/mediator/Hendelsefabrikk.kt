@@ -8,7 +8,6 @@ import java.util.UUID
 import javax.sql.DataSource
 import no.nav.helse.mediator.builders.GenerasjonBuilder
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
-import no.nav.helse.mediator.meldinger.NyeVarsler
 import no.nav.helse.mediator.meldinger.PåminnetGodkjenningsbehov
 import no.nav.helse.mediator.meldinger.Sykefraværstilfeller
 import no.nav.helse.mediator.meldinger.VedtaksperiodeNyUtbetaling
@@ -54,6 +53,7 @@ import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
+import no.nav.helse.modell.vedtaksperiode.NyeVarsler
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeEndret
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
