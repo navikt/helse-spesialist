@@ -10,7 +10,7 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.MetrikkRiver
 import no.nav.helse.mediator.meldinger.EndretSkjermetinfo
 import no.nav.helse.mediator.meldinger.GodkjenningsbehovRiver
-import no.nav.helse.mediator.meldinger.GosysOppgaveEndret
+import no.nav.helse.mediator.meldinger.GosysOppgaveEndretRiver
 import no.nav.helse.mediator.meldinger.Hendelse
 import no.nav.helse.mediator.meldinger.NyeVarsler
 import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshotRiver
@@ -127,7 +127,7 @@ internal class HendelseMediator(
             UtbetalingEndretRiver(it, this)
             VedtaksperiodeReberegnetRiver(it, this)
             VedtaksperiodeOpprettetRiver(it, this)
-            GosysOppgaveEndret.River(it, this, oppgaveDao, tildelingDao, personDao)
+            GosysOppgaveEndretRiver(it, this, oppgaveDao, tildelingDao, personDao)
             EndretSkjermetinfo.River(it, personDao, egenAnsattDao)
             VedtakFattet.River(it, this)
             NyeVarsler.River(it, this)

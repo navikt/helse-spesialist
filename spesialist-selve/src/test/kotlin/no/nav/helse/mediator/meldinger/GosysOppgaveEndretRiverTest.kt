@@ -26,7 +26,7 @@ internal class GosysOppgaveEndretRiverTest {
     private val tildelingDao = mockk<TildelingDao>(relaxed = true)
 
     init {
-        GosysOppgaveEndret.River(testRapid, mediator, oppgaveDao, tildelingDao, personDao)
+        GosysOppgaveEndretRiver(testRapid, mediator, oppgaveDao, tildelingDao, personDao)
     }
 
     @Test
