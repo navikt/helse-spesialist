@@ -23,7 +23,7 @@ import no.nav.helse.mediator.meldinger.SkjønnsfastsettingSykepengegrunnlagRiver
 import no.nav.helse.mediator.meldinger.Sykefraværstilfeller
 import no.nav.helse.mediator.meldinger.SøknadSendtRiver
 import no.nav.helse.mediator.meldinger.UtbetalingAnnullertRiver
-import no.nav.helse.mediator.meldinger.UtbetalingEndret
+import no.nav.helse.mediator.meldinger.UtbetalingEndretRiver
 import no.nav.helse.mediator.meldinger.Varseldefinisjon
 import no.nav.helse.mediator.meldinger.VedtakFattet
 import no.nav.helse.mediator.meldinger.VedtaksperiodeEndretRiver
@@ -124,7 +124,7 @@ internal class HendelseMediator(
             if (Toggle.Inntekter.enabled) Inntektløsning.InntektRiver(it, this)
             UtbetalingAnnullertRiver(it, this)
             OppdaterPersonsnapshotRiver(it, this)
-            UtbetalingEndret.River(it, this)
+            UtbetalingEndretRiver(it, this)
             VedtaksperiodeReberegnet.River(it, this)
             VedtaksperiodeOpprettet.River(it, this)
             GosysOppgaveEndret.River(it, this, oppgaveDao, tildelingDao, personDao)
