@@ -1,6 +1,7 @@
-package no.nav.helse.mediator.meldinger
+package no.nav.helse.modell.person
 
 import java.util.UUID
+import no.nav.helse.mediator.meldinger.Hendelse
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 

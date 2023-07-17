@@ -15,7 +15,7 @@ internal class VedtakFattetRiverTest {
     private val testRapid = TestRapid()
 
     init {
-        VedtakFattet.River(testRapid, mediator)
+        VedtakFattetRiver(testRapid, mediator)
     }
 
     @Test
