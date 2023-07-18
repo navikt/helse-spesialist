@@ -190,9 +190,18 @@ internal class PersonRepository(private val dataSource: DataSource) {
     }
 
     private fun TransactionalSession.slettVedtaksperiodegenerasjoner(personRef: Int) {
+        slettGenerasjonBegrunnelseKoblinger(personRef)
         @Language("PostgreSQL")
         val query = """
              DELETE FROM selve_vedtaksperiode_generasjon svg USING vedtak v WHERE svg.vedtaksperiode_id = v.vedtaksperiode_id AND v.person_ref = ?
+        """
+        run(queryOf(query, personRef).asExecute)
+    }
+
+    private fun TransactionalSession.slettGenerasjonBegrunnelseKoblinger(personRef: Int) {
+        @Language("PostgreSQL")
+        val query = """
+             DELETE FROM generasjon_begrunnelse_kobling gbk USING vedtak v INNER JOIN selve_vedtaksperiode_generasjon svg on v.vedtaksperiode_id = svg.vedtaksperiode_id WHERE gbk.generasjon_id = svg.unik_id AND v.person_ref = ?
         """
         run(queryOf(query, personRef).asExecute)
     }

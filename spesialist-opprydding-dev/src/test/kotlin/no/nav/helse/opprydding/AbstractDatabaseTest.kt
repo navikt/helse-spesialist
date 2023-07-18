@@ -89,6 +89,7 @@ internal abstract class AbstractDatabaseTest {
                     "saksbehandler_oid" to UUID.randomUUID().toString(),
                     "hendelse_id" to UUID.randomUUID().toString(),
                     "fødselsnummer" to fødselsnummer,
+                    "generasjon_id" to UUID.randomUUID().toString(),
                     "vedtaksperiode_id" to UUID.randomUUID().toString(),
                     "command_context_id" to UUID.randomUUID().toString(),
                     "aktør_id" to fødselsnummer.reversed(),

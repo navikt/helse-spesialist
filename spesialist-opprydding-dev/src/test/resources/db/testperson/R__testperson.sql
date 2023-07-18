@@ -31,8 +31,8 @@ VALUES (${sequence_number}, '{}'::json, ${sequence_number}, 1);
 INSERT INTO vedtak(id, vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref, snapshot_ref, forkastet)
 VALUES (${sequence_number}, '${vedtaksperiode_id}', now(), now(), ${sequence_number}, ${sequence_number},
         ${sequence_number}, false);
-INSERT INTO selve_vedtaksperiode_generasjon(id, vedtaksperiode_id, opprettet_av_hendelse, tilstand)
-VALUES (${sequence_number}, '${vedtaksperiode_id}', '${hendelse_id}', 'Ulåst');
+INSERT INTO selve_vedtaksperiode_generasjon(id, unik_id, vedtaksperiode_id, opprettet_av_hendelse, tilstand)
+VALUES (${sequence_number}, '${generasjon_id}', '${vedtaksperiode_id}', '${hendelse_id}', 'Ulåst');
 INSERT INTO opprinnelig_soknadsdato (vedtaksperiode_id, soknad_mottatt)
 VALUES ('${vedtaksperiode_id}', now());
 INSERT INTO selve_varsel(unik_id, kode, vedtaksperiode_id, opprettet, generasjon_ref)
@@ -87,7 +87,7 @@ INSERT INTO overstyring_arbeidsforhold(id, overstyring_ref, forklaring, deaktive
 VALUES (${sequence_number}, ${sequence_number}, 'FORKLARING', false, '2018-01-01', 'BEGRUNNELSE', ${sequence_number});
 
 INSERT INTO begrunnelse(id, tekst, type, saksbehandler_ref) VALUES(${sequence_number}, 'En begrunnelse', 'SKJØNNSFASTSATT_SYKEPENGEGRUNNLAG', '${saksbehandler_oid}');
-
+INSERT INTO generasjon_begrunnelse_kobling(generasjon_id, begrunnelse_id) VALUES ('${generasjon_id}', ${sequence_number});
 INSERT INTO skjonnsfastsetting_sykepengegrunnlag(id, arlig, fra_arlig, skjaeringstidspunkt, arsak, arbeidsgiver_ref, overstyring_ref, begrunnelse_ref)
 VALUES (${sequence_number}, 1000, 1200, '2018-01-01', 'ÅRSAK', ${sequence_number}, ${sequence_number}, ${sequence_number});
 INSERT INTO overstyringer_for_vedtaksperioder(vedtaksperiode_id, overstyring_ref)
