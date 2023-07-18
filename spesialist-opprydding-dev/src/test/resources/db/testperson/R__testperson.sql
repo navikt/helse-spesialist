@@ -88,8 +88,8 @@ VALUES (${sequence_number}, ${sequence_number}, 'FORKLARING', false, '2018-01-01
 
 INSERT INTO begrunnelse(id, tekst, type, saksbehandler_ref) VALUES(${sequence_number}, 'En begrunnelse', 'SKJØNNSFASTSATT_SYKEPENGEGRUNNLAG', '${saksbehandler_oid}');
 
-INSERT INTO skjonnsfastsetting_sykepengegrunnlag(id, arlig, fra_arlig, skjaeringstidspunkt, arsak, begrunnelse, arbeidsgiver_ref, overstyring_ref, begrunnelse_ref)
-VALUES (${sequence_number}, 1000, 1200, '2018-01-01', 'ÅRSAK', 'BEGRUNNELSE', ${sequence_number}, ${sequence_number}, ${sequence_number});
+INSERT INTO skjonnsfastsetting_sykepengegrunnlag(id, arlig, fra_arlig, skjaeringstidspunkt, arsak, arbeidsgiver_ref, overstyring_ref, begrunnelse_ref)
+VALUES (${sequence_number}, 1000, 1200, '2018-01-01', 'ÅRSAK', ${sequence_number}, ${sequence_number}, ${sequence_number});
 INSERT INTO overstyringer_for_vedtaksperioder(vedtaksperiode_id, overstyring_ref)
 VALUES ('${vedtaksperiode_id}', ${sequence_number});
 

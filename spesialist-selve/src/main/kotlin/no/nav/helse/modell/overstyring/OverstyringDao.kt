@@ -274,9 +274,14 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
             """.trimIndent()
 
             @Language("PostgreSQL")
+            val opprettBegrunnelseQuery = """
+                INSERT INTO begrunnelse(tekst, type, saksbehandler_ref) VALUES (:tekst, :type, :saksbehandler_ref)
+            """
+
+            @Language("PostgreSQL")
             val opprettSkjønnsfastsettingSykepengegrunnlagQuery = """
-                INSERT INTO skjonnsfastsetting_sykepengegrunnlag(arlig, fra_arlig, skjaeringstidspunkt, arsak, begrunnelse, subsumsjon, arbeidsgiver_ref, overstyring_ref, initierende_vedtaksperiode_id)
-                SELECT :arlig, :fra_arlig, :skjaeringstidspunkt, :arsak, :begrunnelse, :subsumsjon::json, ag.id, :overstyring_ref, :initierende_vedtaksperiode_id
+                INSERT INTO skjonnsfastsetting_sykepengegrunnlag(arlig, fra_arlig, skjaeringstidspunkt, arsak, subsumsjon, arbeidsgiver_ref, overstyring_ref, initierende_vedtaksperiode_id, begrunnelse_ref)
+                SELECT :arlig, :fra_arlig, :skjaeringstidspunkt, :arsak, :subsumsjon::json, ag.id, :overstyring_ref, :initierende_vedtaksperiode_id, :begrunnelse_ref
                 FROM arbeidsgiver ag
                 WHERE ag.orgnummer = :orgnr
             """.trimIndent()
@@ -295,6 +300,16 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
                     ).asUpdateAndReturnGeneratedKey
                 )
                 arbeidsgivere.forEach { arbeidsgiver ->
+                    val begrunnelseId = requireNotNull(transactionalSession.run(
+                        queryOf(
+                            opprettBegrunnelseQuery,
+                            mapOf(
+                                "tekst" to arbeidsgiver.begrunnelse,
+                                "type" to "SKJØNNSFASTSATT_SYKEPENGEGRUNNLAG",
+                                "saksbehandler_ref" to saksbehandlerRef
+                            )
+                        ).asUpdateAndReturnGeneratedKey
+                    )) { "Forventer å kunne opprette begrunnelse" }
                     transactionalSession.run(
                         queryOf(
                             opprettSkjønnsfastsettingSykepengegrunnlagQuery,
@@ -303,7 +318,6 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
                                 "fra_arlig" to arbeidsgiver.fraÅrlig,
                                 "skjaeringstidspunkt" to skjæringstidspunkt,
                                 "arsak" to arbeidsgiver.årsak,
-                                "begrunnelse" to arbeidsgiver.begrunnelse,
                                 "subsumsjon" to arbeidsgiver.subsumsjon?.let {
                                     objectMapper.writeValueAsString(
                                         arbeidsgiver.subsumsjon
@@ -311,7 +325,8 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
                                 },
                                 "orgnr" to arbeidsgiver.organisasjonsnummer.toLong(),
                                 "overstyring_ref" to overstyringRef,
-                                "initierende_vedtaksperiode_id" to arbeidsgiver.initierendeVedtaksperiodeId
+                                "initierende_vedtaksperiode_id" to arbeidsgiver.initierendeVedtaksperiodeId,
+                                "begrunnelse_ref" to begrunnelseId
                             )
                         ).asUpdate
                     )
