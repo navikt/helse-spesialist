@@ -2,7 +2,6 @@ package no.nav.helse.modell.varsel
 
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.modell.varsel.Varsel.Status
 
 internal class Varseldefinisjon(
     private val id: UUID,
@@ -40,15 +39,5 @@ internal class Varseldefinisjon(
         result = 31 * result + (handling?.hashCode() ?: 0)
         result = 31 * result + avviklet.hashCode()
         return result
-    }
-
-    fun oppdaterVarsel(
-        vedtaksperiodeId: UUID,
-        generasjonId: UUID,
-        status: Status,
-        ident: String,
-        oppdaterBlock: (vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, status: Status, ident: String, definisjonId: UUID) -> Unit,
-    ) {
-        oppdaterBlock(vedtaksperiodeId, generasjonId, varselkode, status, ident, this.id)
     }
 }
