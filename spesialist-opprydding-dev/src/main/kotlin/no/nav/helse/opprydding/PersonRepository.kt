@@ -152,8 +152,18 @@ internal class PersonRepository(private val dataSource: DataSource) {
 
     private fun TransactionalSession.slettSkjønnsfastsettingSykepengegrunnlag(personRef: Int) {
         @Language("PostgreSQL")
-        val query = "DELETE FROM skjonnsfastsetting_sykepengegrunnlag WHERE overstyring_ref IN (SELECT id FROM overstyring WHERE person_ref = ?)"
-        run(queryOf(query, personRef).asExecute)
+        val query = "DELETE FROM skjonnsfastsetting_sykepengegrunnlag WHERE overstyring_ref IN (SELECT id FROM overstyring WHERE person_ref = ?) RETURNING begrunnelse_ref"
+        val begrunnelseRef = run(queryOf(query, personRef).map { it.long("begrunnelse_ref") }.asList)
+        begrunnelseRef.forEach {
+            slettBegrunnelse(it)
+        }
+    }
+
+    private fun TransactionalSession.slettBegrunnelse(begrunnelseRef: Long) {
+        @Language("PostgreSQL")
+        val query =
+            """DELETE FROM begrunnelse WHERE id = ?"""
+        run(queryOf(query, begrunnelseRef).asExecute)
     }
 
     private fun TransactionalSession.slettVedtak(personRef: Int) {
