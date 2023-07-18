@@ -20,7 +20,7 @@ import no.nav.helse.mediator.meldinger.OverstyringInntektOgRefusjonRiver
 import no.nav.helse.mediator.meldinger.OverstyringTidslinjeRiver
 import no.nav.helse.mediator.meldinger.PåminnetGodkjenningsbehov
 import no.nav.helse.mediator.meldinger.SkjønnsfastsettingSykepengegrunnlagRiver
-import no.nav.helse.mediator.meldinger.Sykefraværstilfeller
+import no.nav.helse.mediator.meldinger.SykefraværstilfellerRiver
 import no.nav.helse.mediator.meldinger.SøknadSendtRiver
 import no.nav.helse.mediator.meldinger.UtbetalingAnnullertRiver
 import no.nav.helse.mediator.meldinger.UtbetalingEndretRiver
@@ -133,7 +133,7 @@ internal class HendelseMediator(
             NyeVarslerRiver(it, this)
             VarseldefinisjonRiver(it, this)
             VedtaksperiodeNyUtbetalingRiver(it, this)
-            Sykefraværstilfeller.River(it, this)
+            SykefraværstilfellerRiver(it, this)
             MetrikkRiver(it)
             PåminnetGodkjenningsbehov.River(it, this)
         }

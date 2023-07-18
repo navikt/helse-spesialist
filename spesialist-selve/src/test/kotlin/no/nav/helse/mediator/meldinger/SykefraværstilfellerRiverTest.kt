@@ -21,7 +21,7 @@ internal class SykefraværstilfellerRiverTest {
     private val testmeldingfabrikk = TestmeldingsfabrikkV2
 
     init {
-        Sykefraværstilfeller.River(testRapid, mediator)
+        SykefraværstilfellerRiver(testRapid, mediator)
     }
 
     @BeforeEach
