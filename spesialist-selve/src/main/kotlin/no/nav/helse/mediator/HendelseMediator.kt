@@ -28,7 +28,7 @@ import no.nav.helse.mediator.meldinger.VarseldefinisjonRiver
 import no.nav.helse.mediator.meldinger.VedtakFattetRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeEndretRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeForkastetRiver
-import no.nav.helse.mediator.meldinger.VedtaksperiodeNyUtbetaling
+import no.nav.helse.mediator.meldinger.VedtaksperiodeNyUtbetalingRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeOpprettetRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeReberegnetRiver
 import no.nav.helse.mediator.meldinger.løsninger.ArbeidsforholdRiver
@@ -132,7 +132,7 @@ internal class HendelseMediator(
             VedtakFattetRiver(it, this)
             NyeVarslerRiver(it, this)
             VarseldefinisjonRiver(it, this)
-            VedtaksperiodeNyUtbetaling.River(it, this)
+            VedtaksperiodeNyUtbetalingRiver(it, this)
             Sykefraværstilfeller.River(it, this)
             MetrikkRiver(it)
             PåminnetGodkjenningsbehov.River(it, this)

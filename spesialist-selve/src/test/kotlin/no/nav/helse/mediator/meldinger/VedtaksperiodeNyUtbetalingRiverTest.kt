@@ -21,7 +21,7 @@ internal class VedtaksperiodeNyUtbetalingRiverTest {
     private val testmeldingfabrikk = TestmeldingsfabrikkV2
 
     init {
-        VedtaksperiodeNyUtbetaling.River(testRapid, mediator)
+        VedtaksperiodeNyUtbetalingRiver(testRapid, mediator)
     }
 
     @BeforeEach
