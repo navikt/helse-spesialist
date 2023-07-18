@@ -8,7 +8,6 @@ import java.util.UUID
 import javax.sql.DataSource
 import no.nav.helse.mediator.builders.GenerasjonBuilder
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
-import no.nav.helse.mediator.meldinger.PåminnetGodkjenningsbehov
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.SnapshotDao
@@ -54,6 +53,7 @@ import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.NyeVarsler
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vedtaksperiode.PåminnetGodkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeEndret
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling

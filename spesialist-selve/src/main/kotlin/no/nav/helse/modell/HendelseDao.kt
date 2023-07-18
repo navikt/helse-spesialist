@@ -9,7 +9,6 @@ import kotliquery.sessionOf
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.Hendelse
-import no.nav.helse.mediator.meldinger.PåminnetGodkjenningsbehov
 import no.nav.helse.modell.HendelseDao.Hendelsetype.ADRESSEBESKYTTELSE_ENDRET
 import no.nav.helse.modell.HendelseDao.Hendelsetype.ENDRET_SKJERMETINFO
 import no.nav.helse.modell.HendelseDao.Hendelsetype.GODKJENNING
@@ -48,6 +47,7 @@ import no.nav.helse.modell.utbetaling.UtbetalingAnnullert
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.NyeVarsler
+import no.nav.helse.modell.vedtaksperiode.PåminnetGodkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeEndret
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
