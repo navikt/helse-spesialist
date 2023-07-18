@@ -10,19 +10,7 @@ import no.nav.helse.modell.vedtaksperiode.IVedtaksperiodeObserver
 import no.nav.helse.tellInaktivtVarsel
 import no.nav.helse.tellVarsel
 
-internal interface VarselRepository {
-    fun lagreDefinisjon(
-        id: UUID,
-        varselkode: String,
-        tittel: String,
-        forklaring: String?,
-        handling: String?,
-        avviklet: Boolean,
-        opprettet: LocalDateTime,
-    )
-}
-
-internal class ActualVarselRepository(dataSource: DataSource) : VarselRepository, IVedtaksperiodeObserver {
+internal class ActualVarselRepository(dataSource: DataSource): IVedtaksperiodeObserver {
 
     private val varselDao = VarselDao(dataSource)
     private val definisjonDao = DefinisjonDao(dataSource)
@@ -56,16 +44,15 @@ internal class ActualVarselRepository(dataSource: DataSource) : VarselRepository
         varselDao.oppdaterGenerasjon(varselId, gammelGenerasjonId, nyGenerasjonId)
     }
 
-    override fun lagreDefinisjon(
-        id: UUID,
-        varselkode: String,
-        tittel: String,
-        forklaring: String?,
-        handling: String?,
-        avviklet: Boolean,
-        opprettet: LocalDateTime,
-    ) {
-        definisjonDao.lagreDefinisjon(id, varselkode, tittel, forklaring, handling, avviklet, opprettet)
+    internal fun lagreDefinisjon(definisjonDto: VarseldefinisjonDto) {
+        definisjonDao.lagreDefinisjon(
+            unikId = definisjonDto.id,
+            kode = definisjonDto.varselkode,
+            tittel = definisjonDto.tittel,
+            forklaring = definisjonDto.forklaring,
+            handling = definisjonDto.handling,
+            avviklet = definisjonDto.avviklet,
+            opprettet = definisjonDto.opprettet
+        )
     }
-
 }

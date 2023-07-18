@@ -13,23 +13,17 @@ internal class Varseldefinisjon(
     private val opprettet: LocalDateTime,
 ) {
 
-    internal fun lagre(varselRepository: VarselRepository) {
-        varselRepository.lagreDefinisjon(id, varselkode, tittel, forklaring, handling, avviklet, opprettet)
-    }
+    internal fun toDto() = VarseldefinisjonDto(id, varselkode, tittel, forklaring, handling, avviklet, opprettet)
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as Varseldefinisjon
-
-        if (id != other.id) return false
-        if (varselkode != other.varselkode) return false
-        if (tittel != other.tittel) return false
-        if (forklaring != other.forklaring) return false
-        if (handling != other.handling) return false
-        return avviklet == other.avviklet
-    }
+    override fun equals(other: Any?) = this === other || (
+        other is Varseldefinisjon &&
+            id == other.id &&
+            varselkode == other.varselkode &&
+            tittel == other.tittel &&
+            forklaring == other.forklaring &&
+            handling == other.handling &&
+            avviklet == other.avviklet
+        )
 
     override fun hashCode(): Int {
         var result = id.hashCode()

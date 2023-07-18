@@ -9,6 +9,14 @@ import org.junit.jupiter.api.Test
 internal class VarseldefinisjonTest {
 
     @Test
+    fun toDto() {
+        val id = UUID.randomUUID()
+        val opprettet = LocalDateTime.now()
+        val definisjon = Varseldefinisjon(id, "EN_KODE", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, opprettet)
+        assertEquals(VarseldefinisjonDto(id, "EN_KODE", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, opprettet), definisjon.toDto())
+    }
+
+    @Test
     fun `referential equals`() {
         val definisjon = Varseldefinisjon(UUID.randomUUID(), "EN_KODE", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now())
         assertEquals(definisjon, definisjon)

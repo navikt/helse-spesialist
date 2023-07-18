@@ -59,7 +59,6 @@ import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.Varsel
-import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
@@ -89,7 +88,7 @@ internal class HendelseMediator(
     private val oppgaveMediator: OppgaveMediator,
     private val hendelsefabrikk: Hendelsefabrikk,
     private val egenAnsattDao: EgenAnsattDao = EgenAnsattDao(dataSource),
-    private val varselRepository: VarselRepository = ActualVarselRepository(dataSource),
+    private val varselRepository: ActualVarselRepository = ActualVarselRepository(dataSource),
     private val metrikkDao: MetrikkDao = MetrikkDao(dataSource),
 ) {
     private companion object {
@@ -164,7 +163,7 @@ internal class HendelseMediator(
     }
 
     internal fun håndter(varseldefinisjon: Varseldefinisjon) {
-        varseldefinisjon.lagre(varselRepository)
+        varselRepository.lagreDefinisjon(varseldefinisjon.toDto())
     }
 
     internal fun tildelOppgaveTilSaksbehandler(

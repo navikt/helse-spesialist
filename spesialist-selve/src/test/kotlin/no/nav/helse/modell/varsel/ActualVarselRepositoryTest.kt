@@ -30,7 +30,8 @@ internal class ActualVarselRepositoryTest : AbstractDatabaseTest() {
     fun beforeEach() {
         definisjonId = UUID.randomUUID()
         vedtaksperiodeId = UUID.randomUUID()
-        varselRepository.lagreDefinisjon(definisjonId, "EN_KODE", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now())
+        val definisjonDto = VarseldefinisjonDto(definisjonId, "EN_KODE", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now())
+        varselRepository.lagreDefinisjon(definisjonDto)
         generasjonId = UUID.randomUUID()
 
         generasjon = Generasjon(generasjonId, vedtaksperiodeId, 1.januar, 1.januar, 31.januar)
@@ -76,7 +77,8 @@ internal class ActualVarselRepositoryTest : AbstractDatabaseTest() {
     @Test
     fun `lagre definisjon`() {
         val definisjonId = UUID.randomUUID()
-        varselRepository.lagreDefinisjon(definisjonId, "EN_KODE", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now())
+        val definisjonDto = VarseldefinisjonDto(definisjonId, "EN_KODE", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now())
+        varselRepository.lagreDefinisjon(definisjonDto)
         assertEquals(
             Varseldefinisjon(
                 id = definisjonId,
