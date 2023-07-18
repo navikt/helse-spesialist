@@ -1,7 +1,7 @@
 package no.nav.helse.mediator.meldinger
 
 import java.util.UUID
-import net.logstash.logback.argument.StructuredArguments
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -35,10 +35,10 @@ internal class VedtaksperiodeNyUtbetalingRiver(
 
         sikkerlogg.info(
             "Mottok melding om vedtaksperiode_ny_utbetaling for {}, {}, {} som følge av melding med {}",
-            StructuredArguments.kv("fødselsnummer", fødselsnummer),
-            StructuredArguments.kv("vedtaksperiodeId", vedtaksperiodeId),
-            StructuredArguments.kv("utbetalingId", utbetalingId),
-            StructuredArguments.kv("id", id)
+            kv("fødselsnummer", fødselsnummer),
+            kv("vedtaksperiodeId", vedtaksperiodeId),
+            kv("utbetalingId", utbetalingId),
+            kv("id", id)
         )
 
         mediator.vedtaksperiodeNyUtbetaling(fødselsnummer, id, vedtaksperiodeId, utbetalingId, packet.toJson(), context)
