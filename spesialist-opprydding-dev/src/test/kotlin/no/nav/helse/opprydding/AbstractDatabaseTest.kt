@@ -107,6 +107,7 @@ internal abstract class AbstractDatabaseTest {
         tabeller.removeAll(
             listOf(
                 "flyway_schema_history",
+                "flyway_schema_history_backup",
                 "enhet",
                 "global_snapshot_versjon",
                 "saksbehandler",

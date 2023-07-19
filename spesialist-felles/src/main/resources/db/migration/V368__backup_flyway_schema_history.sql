@@ -1,0 +1,1 @@
+CREATE TABLE flyway_schema_history_backup AS TABLE flyway_schema_history;
