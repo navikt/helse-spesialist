@@ -1,1 +1,0 @@
-ALTER TYPE oppdrag_klassekode ADD VALUE 'SPREFAGFER-IOP';

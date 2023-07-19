@@ -1,1 +1,0 @@
-TRUNCATE TABLE selve_vedtaksperiode_generasjon RESTART IDENTITY CASCADE;

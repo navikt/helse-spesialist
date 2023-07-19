@@ -1,1 +1,0 @@
-ALTER TYPE oppgavetype ADD VALUE 'RISK_QA';

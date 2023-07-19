@@ -1,1 +1,0 @@
-ALTER TABLE selve_vedtaksperiode_generasjon DROP COLUMN låst;

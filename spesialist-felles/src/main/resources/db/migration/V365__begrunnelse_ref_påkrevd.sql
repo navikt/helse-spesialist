@@ -1,2 +1,0 @@
-ALTER TABLE skjonnsfastsetting_sykepengegrunnlag ALTER COLUMN begrunnelse_ref SET NOT NULL;
-ALTER TABLE skjonnsfastsetting_sykepengegrunnlag DROP COLUMN begrunnelse;

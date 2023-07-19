@@ -1,1 +1,0 @@
-UPDATE selve_varsel SET status = 'AKTIV', status_endret_ident = NULL, status_endret_tidspunkt = NULL WHERE kode in ('RV_IT_1', 'RV_UT_1', 'SB_EX_1') AND id in (403939, 403940, 403942);

@@ -1,1 +1,0 @@
-UPDATE overstyring SET ferdigstilt=true

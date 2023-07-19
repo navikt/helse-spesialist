@@ -1,1 +1,0 @@
-UPDATE oppgave SET status = 'Invalidert' WHERE id in (2395608, 2396307, 2396621, 2392478, 2392918, 2393463);

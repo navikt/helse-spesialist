@@ -1,1 +1,0 @@
-CREATE INDEX ON utbetalingslinje(oppdrag_id);

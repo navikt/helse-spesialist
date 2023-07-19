@@ -1,2 +1,0 @@
-drop index selve_vedtaksperiode_generasjon_skjæringstidspunkt_idx;
-create index skjæringstidspunkt_med_utbetaling_id on selve_vedtaksperiode_generasjon (skjæringstidspunkt) include (utbetaling_id);

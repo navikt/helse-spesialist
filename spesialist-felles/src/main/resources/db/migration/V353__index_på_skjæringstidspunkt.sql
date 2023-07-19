@@ -1,1 +1,0 @@
-CREATE INDEX ON selve_vedtaksperiode_generasjon(skjæringstidspunkt);

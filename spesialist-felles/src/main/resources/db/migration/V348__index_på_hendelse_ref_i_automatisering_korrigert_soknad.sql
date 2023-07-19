@@ -1,1 +1,0 @@
-CREATE INDEX ON automatisering_korrigert_soknad(hendelse_ref);

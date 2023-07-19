@@ -1,1 +1,0 @@
-INSERT INTO saksbehandler(oid, navn, epost) VALUES ('f787f900-6697-440d-a086-d5bb56e26a9c', 'TBD', 'tbd@nav.no');

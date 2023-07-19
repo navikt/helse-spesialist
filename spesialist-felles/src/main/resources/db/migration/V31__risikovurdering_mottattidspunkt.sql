@@ -1,2 +1,0 @@
-ALTER TABLE risikovurdering
-    ADD COLUMN opprettet TIMESTAMP NOT NULL DEFAULT TIMESTAMP 'epoch'

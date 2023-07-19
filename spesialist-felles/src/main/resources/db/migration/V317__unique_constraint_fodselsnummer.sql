@@ -1,1 +1,0 @@
-ALTER TABLE person ADD CONSTRAINT fodselsnummer_unique UNIQUE (fodselsnummer);
