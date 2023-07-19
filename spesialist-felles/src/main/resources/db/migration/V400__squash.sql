@@ -1,32 +1,106 @@
-create sequence overstyrtdag_id_seq
-    as integer;
+create sequence IF NOT EXISTS overstyrtdag_id_seq as integer;
 
-create sequence person_navn_id_seq
-    as integer;
+create sequence IF NOT EXISTS person_navn_id_seq as integer;
 
-create type oppdrag_endringskode as enum ('NY', 'UEND', 'ENDR');
+DO
+$$
+    BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'oppdrag_endringskode') THEN
+            create type oppdrag_endringskode as enum ('NY', 'UEND', 'ENDR');
+        END IF;
+    END
+$$;
 
-create type oppdrag_fagområde as enum ('SPREF', 'SP');
+DO
+$$
+    BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'oppdrag_fagområde') THEN
+            create type oppdrag_fagområde as enum ('SPREF', 'SP');
+        END IF;
+    END
+$$;
 
-create type oppdrag_klassekode as enum ('SPREFAG-IOP', 'SPREFAGFER-IOP', 'SPATORD', 'SPATFER');
+DO
+$$
+    BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'oppdrag_klassekode') THEN
+            create type oppdrag_klassekode as enum ('SPREFAG-IOP', 'SPREFAGFER-IOP', 'SPATORD', 'SPATFER');
+        END IF;
+    END
+$$;
 
-create type oppdrag_statuskode as enum ('OPPH');
-
-create type oppgavestatus as enum ('AvventerSystem', 'AvventerSaksbehandler', 'Ferdigstilt', 'Invalidert', 'MakstidOppnådd');
-
-create type oppgavetype as enum ('SØKNAD', 'STIKKPRØVE', 'RISK_QA', 'REVURDERING', 'FORTROLIG_ADRESSE', 'UTBETALING_TIL_SYKMELDT', 'DELVIS_REFUSJON');
-
-create type person_kjonn as enum ('Mann', 'Kvinne', 'Ukjent');
-
-create type utbetaling_status as enum ('GODKJENT', 'SENDT', 'OVERFØRT', 'UTBETALING_FEILET', 'UTBETALT', 'ANNULLERT', 'FORKASTET', 'NY', 'IKKE_UTBETALT', 'IKKE_GODKJENT', 'GODKJENT_UTEN_UTBETALING');
-
-create type utbetaling_type as enum ('UTBETALING', 'ETTERUTBETALING', 'ANNULLERING', 'FERIEPENGER', 'REVURDERING');
-
-create type notattype as enum ('Retur', 'Generelt', 'PaaVent');
-
-create type overstyringtype as enum ('Inntekt', 'Dager', 'Arbeidsforhold');
-
-create type mottakertype as enum ('SYKMELDT', 'ARBEIDSGIVER', 'BEGGE');
+DO
+$$
+    BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'oppdrag_statuskode') THEN
+            create type oppdrag_statuskode as enum ('OPPH');
+        END IF;
+    END
+$$;
+DO
+$$
+    BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'oppgavestatus') THEN
+            create type oppgavestatus as enum ('AvventerSystem', 'AvventerSaksbehandler', 'Ferdigstilt', 'Invalidert', 'MakstidOppnådd');
+        END IF;
+    END
+$$;
+DO
+$$
+    BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'oppgavetype') THEN
+            create type oppgavetype as enum ('SØKNAD', 'STIKKPRØVE', 'RISK_QA', 'REVURDERING', 'FORTROLIG_ADRESSE', 'UTBETALING_TIL_SYKMELDT', 'DELVIS_REFUSJON');
+        END IF;
+    END
+$$;
+DO
+$$
+    BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'person_kjonn') THEN
+            create type person_kjonn as enum ('Mann', 'Kvinne', 'Ukjent');
+        END IF;
+    END
+$$;
+DO
+$$
+    BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'utbetaling_status') THEN
+            create type utbetaling_status as enum ('GODKJENT', 'SENDT', 'OVERFØRT', 'UTBETALING_FEILET', 'UTBETALT', 'ANNULLERT', 'FORKASTET', 'NY', 'IKKE_UTBETALT', 'IKKE_GODKJENT', 'GODKJENT_UTEN_UTBETALING');
+        END IF;
+    END
+$$;
+DO
+$$
+    BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'utbetaling_type') THEN
+            create type utbetaling_type as enum ('UTBETALING', 'ETTERUTBETALING', 'ANNULLERING', 'FERIEPENGER', 'REVURDERING');
+        END IF;
+    END
+$$;
+DO
+$$
+    BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'notattype') THEN
+            create type notattype as enum ('Retur', 'Generelt', 'PaaVent');
+        END IF;
+    END
+$$;
+DO
+$$
+    BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'overstyringtype') THEN
+            create type overstyringtype as enum ('Inntekt', 'Dager', 'Arbeidsforhold');
+        END IF;
+    END
+$$;
+DO
+$$
+    BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'mottakertype') THEN
+            create type mottakertype as enum ('SYKMELDT', 'ARBEIDSGIVER', 'BEGGE');
+        END IF;
+    END
+$$;
 
 create table if not exists arbeidsgiver_bransjer
 (
@@ -148,8 +222,6 @@ create table if not exists person_info
     kjonn              person_kjonn,
     adressebeskyttelse varchar(32)                                             not null
 );
-
-alter sequence person_navn_id_seq owned by person_info.id;
 
 create table if not exists person
 (
@@ -743,8 +815,6 @@ create table if not exists overstyring_dag
         references overstyring_tidslinje
 );
 
-alter sequence overstyrtdag_id_seq owned by overstyring_dag.id;
-
 create table if not exists totrinnsvurdering
 (
     id                serial
@@ -822,32 +892,66 @@ create table if not exists generasjon_begrunnelse_kobling
     primary key (generasjon_id, begrunnelse_id)
 );
 
-create function oppdater_oppdatert_kolonne() returns trigger
-    language plpgsql
-as
+DO
 $$
-BEGIN
-    NEW.oppdatert
-        = now();
-    RETURN NEW;
-END;
+    BEGIN
+        create function oppdater_oppdatert_kolonne() returns trigger
+            language plpgsql
+        as
+        '
+        BEGIN
+            NEW.oppdatert
+                = now();
+            RETURN NEW;
+        END;
+        ';
+    EXCEPTION
+        WHEN duplicate_function THEN
+            NULL;
+    END;
 $$;
 
-create trigger oppdater_arbeidsforhold_oppdatert
-    before update
-    on arbeidsforhold
-    for each row
-execute procedure oppdater_oppdatert_kolonne();
+DO
+$$
+    BEGIN
+        create trigger oppdater_arbeidsforhold_oppdatert
+            before update
+            on arbeidsforhold
+            for each row
+        execute procedure oppdater_oppdatert_kolonne();
+    EXCEPTION
+        WHEN duplicate_object THEN
+            NULL;
+    END;
+$$;
 
-create trigger oppdater_arbeidsgiver_bransjer_oppdatert
-    before update
-    on arbeidsgiver_bransjer
-    for each row
-execute procedure oppdater_oppdatert_kolonne();
+DO
+$$
+    BEGIN
+        create trigger oppdater_arbeidsgiver_bransjer_oppdatert
+            before update
+            on arbeidsgiver_bransjer
+            for each row
+        execute procedure oppdater_oppdatert_kolonne();
+    EXCEPTION
+        WHEN duplicate_object THEN
+            NULL;
+    END;
+$$;
 
-create trigger oppdater_oppgave_oppdatert
-    before update
-    on oppgave
-    for each row
-execute procedure oppdater_oppdatert_kolonne();
+DO
+$$
+    BEGIN
+        create trigger oppdater_oppgave_oppdatert
+            before update
+            on oppgave
+            for each row
+        execute procedure oppdater_oppdatert_kolonne();
+    EXCEPTION
+        WHEN duplicate_object THEN
+            NULL;
+    END;
+$$;
+
+
 
