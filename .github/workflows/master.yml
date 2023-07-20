@@ -61,16 +61,16 @@ jobs:
                   CLUSTER: dev-gcp
                   RESOURCE: deploy/dev.yml,deploy/dev-db-policy.yml
                   IMAGE: ${{ needs.build.outputs.image }}
-#
-#    deployProd:
-#        name: Deploy to prod
-#        needs: [build, deployDev]
-#        runs-on: ubuntu-latest
-#        steps:
-#            - uses: actions/checkout@v3
-#            - uses: nais/deploy/actions/deploy@v1
-#              env:
-#                  APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-#                  CLUSTER: prod-gcp
-#                  RESOURCE: deploy/prod.yml,deploy/prod-db-policy.yml
-#                  IMAGE: ${{ needs.build.outputs.image }}
+
+    deployProd:
+        name: Deploy to prod
+        needs: [build, deployDev]
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - uses: nais/deploy/actions/deploy@v1
+              env:
+                  APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+                  CLUSTER: prod-gcp
+                  RESOURCE: deploy/prod.yml,deploy/prod-db-policy.yml
+                  IMAGE: ${{ needs.build.outputs.image }}
