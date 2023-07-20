@@ -53,10 +53,7 @@ internal class DataSourceBuilder(env: Map<String, String>) {
             .dataSource(dataSource)
             .lockRetryCount(-1)
             .load()
-            .also {
-                it.repair()
-                it.migrate()
-            }
+            .migrate()
 
     internal fun getDataSource(): HikariDataSource {
         return HikariDataSource(hikariConfig)
