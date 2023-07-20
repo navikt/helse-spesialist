@@ -23,6 +23,8 @@ import no.nav.helse.Testdata.ENHET_OSLO
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.Testdata.SAKSBEHANDLER_EPOST
+import no.nav.helse.Testdata.SAKSBEHANDLER_NAVN
+import no.nav.helse.Testdata.SAKSBEHANDLER_OID
 import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.Testdata.snapshot
@@ -81,6 +83,15 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
     internal fun resetTestSetup() {
         testRapid.reset()
         lagVarseldefinisjoner()
+        opprettSaksbehandler()
+    }
+
+    private fun opprettSaksbehandler() {
+        sessionOf(dataSource).use {
+            @Language("PostgreSQL")
+            val query = """INSERT INTO saksbehandler(oid, navn, epost) VALUES (?, ?, ?) ON CONFLICT (oid) DO NOTHING """
+            it.run(queryOf(query, SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST).asExecute)
+        }
     }
 
     protected fun Int.oppgave(vedtaksperiodeId: UUID): Long {

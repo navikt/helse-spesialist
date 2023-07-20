@@ -58,7 +58,6 @@ internal class OverstyringE2ETest : AbstractE2ETestV2() {
         val nyUtbetalingId = UUID.randomUUID()
         fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true, utbetalingId = nyUtbetalingId)
         assertOppgaver(nyUtbetalingId, "AvventerSaksbehandler", 1)
-        assertTildeling(SAKSBEHANDLER_EPOST, nyUtbetalingId)
     }
 
     @Test

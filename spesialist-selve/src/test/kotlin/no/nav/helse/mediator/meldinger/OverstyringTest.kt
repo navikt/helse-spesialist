@@ -20,9 +20,6 @@ internal class OverstyringTest {
         private val ID = UUID.randomUUID()
         private const val FØDSELSNUMMER = "12020052345"
         private val OID = UUID.randomUUID()
-        private const val NAVN = "Saks Behandler"
-        private const val IDENT = "Z999999"
-        private const val EPOST = "saks.behandler@nav.no"
         private const val ORGNUMMER = "987654321"
         private const val BEGRUNNELSE = "Begrunnelse"
         private var OVERSTYRTE_DAGER = listOf(
@@ -62,9 +59,6 @@ internal class OverstyringTest {
         id = ID,
         fødselsnummer = FØDSELSNUMMER,
         oid = OID,
-        navn = NAVN,
-        ident = IDENT,
-        epost = EPOST,
         orgnummer = ORGNUMMER,
         begrunnelse = BEGRUNNELSE,
         overstyrteDager = OVERSTYRTE_DAGER,
@@ -83,9 +77,6 @@ internal class OverstyringTest {
     fun `Persisterer overstyring av tidslinje`() {
         overstyringAvTidslinjeMessage.execute(context)
 
-        verify(exactly = 1) { saksbehandlerDao.opprettSaksbehandler(OID, NAVN, EPOST, IDENT) }
-        verify(exactly = 1) { reservasjonDao.reserverPerson(OID, FØDSELSNUMMER, any()) }
-        verify(exactly = 1) { oppgaveDao.invaliderOppgaveFor(FØDSELSNUMMER) }
         verify(exactly = 1) { overstyringDao.finnEksternHendelseIdFraHendelseId(ID) }
         verify(exactly = 1) {
             overstyringDao.persisterOverstyringTidslinje(
@@ -114,9 +105,6 @@ internal class OverstyringTest {
         )
         overstyringAvTidslinjeMessage.execute(context)
 
-        verify(exactly = 1) { saksbehandlerDao.opprettSaksbehandler(OID, NAVN, EPOST, IDENT) }
-        verify(exactly = 1) { reservasjonDao.reserverPerson(OID, FØDSELSNUMMER, false) }
-        verify(exactly = 1) { oppgaveDao.invaliderOppgaveFor(FØDSELSNUMMER) }
         verify(exactly = 1) { overstyringDao.finnEksternHendelseIdFraHendelseId(ID) }
         verify(exactly = 1) {
             overstyringDao.persisterOverstyringTidslinje(
