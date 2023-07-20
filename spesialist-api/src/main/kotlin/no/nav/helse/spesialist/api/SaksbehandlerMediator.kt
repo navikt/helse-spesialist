@@ -14,6 +14,7 @@ import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDto
 import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsattSykepengegrunnlagDto
+import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.utbetaling.AnnulleringDto
@@ -35,6 +36,7 @@ class SaksbehandlerMediator(
     private val oppgaveApiDao = OppgaveApiDao(dataSource)
     private val opptegnelseDao = OpptegnelseDao(dataSource)
     private val abonnementDao = AbonnementDao(dataSource)
+    private val reservasjonDao = ReservasjonDao(dataSource)
 
     internal fun opprettAbonnement(saksbehandler: Saksbehandler, personidentifikator: String) {
         saksbehandler.persister(saksbehandlerDao)
@@ -94,8 +96,11 @@ class SaksbehandlerMediator(
         saksbehandler.persister(saksbehandlerDao)
         tellSkjønnsfastsettingSykepengegrunnlag()
         val fødselsnummer = skjønnsfastsattSykepengegrunnlag.fødselsnummer
+        reservasjonDao.reserverPerson(saksbehandler.oid(), fødselsnummer, false)
+
         val antall = oppgaveApiDao.invaliderOppgaveFor(fødselsnummer)
         sikkerlogg.info("Invaliderte $antall {} for $fødselsnummer", if (antall == 1) "oppgave" else "oppgaver")
+
         val message = skjønnsfastsattSykepengegrunnlag.somJsonMessage(saksbehandler.toDto()).also {
             sikkerlogg.info(
                 "Publiserer skjønnsfastsetting av inntekt fra api: {}, {}\n${it.toJson()}",

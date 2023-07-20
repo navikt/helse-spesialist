@@ -10,12 +10,8 @@ import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.PersisterSkjønnsfastsettingSykepengegrunnlagCommand
 import no.nav.helse.modell.kommando.PubliserOverstyringCommand
 import no.nav.helse.modell.kommando.PubliserSubsumsjonCommand
-import no.nav.helse.modell.kommando.ReserverPersonCommand
-import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.overstyring.SkjønnsfastsattArbeidsgiver
-import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
-import no.nav.helse.spesialist.api.tildeling.TildelingDao
 
 /**
  * Tar vare på overstyring av inntekt fra saksbehandler og sletter den opprinnelige oppgaven i påvente av nytt
@@ -31,15 +27,11 @@ internal class SkjønnsfastsettingSykepengegrunnlag(
     skjæringstidspunkt: LocalDate,
     opprettet: LocalDateTime,
     private val json: String,
-    reservasjonDao: ReservasjonDao,
-    oppgaveDao: OppgaveDao,
-    tildelingDao: TildelingDao,
     overstyringDao: OverstyringDao,
     overstyringMediator: OverstyringMediator,
     versjonAvKode: String?,
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
-        ReserverPersonCommand(oid, fødselsnummer, reservasjonDao, oppgaveDao, tildelingDao),
         PersisterSkjønnsfastsettingSykepengegrunnlagCommand(
             oid = oid,
             hendelseId = id,
