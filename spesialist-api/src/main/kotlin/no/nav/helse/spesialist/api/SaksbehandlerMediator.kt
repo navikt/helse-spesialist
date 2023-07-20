@@ -91,6 +91,7 @@ class SaksbehandlerMediator(
         rapidsConnection.publish(overstyring.fødselsnummer, message.toJson())
     }
     internal fun håndter(skjønnsfastsattSykepengegrunnlag: SkjønnsfastsattSykepengegrunnlagDto, saksbehandler: Saksbehandler) {
+        saksbehandler.persister(saksbehandlerDao)
         tellSkjønnsfastsettingSykepengegrunnlag()
         val message = skjønnsfastsattSykepengegrunnlag.somJsonMessage(saksbehandler.toDto()).also {
             sikkerlogg.info(

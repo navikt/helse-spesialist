@@ -8,7 +8,6 @@ import no.nav.helse.mediator.meldinger.Hendelse
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.InvaliderSaksbehandlerOppgaveCommand
 import no.nav.helse.modell.kommando.MacroCommand
-import no.nav.helse.modell.kommando.OpprettSaksbehandlerCommand
 import no.nav.helse.modell.kommando.PersisterSkjønnsfastsettingSykepengegrunnlagCommand
 import no.nav.helse.modell.kommando.PubliserOverstyringCommand
 import no.nav.helse.modell.kommando.PubliserSubsumsjonCommand
@@ -17,7 +16,6 @@ import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.overstyring.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
-import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 
 /**
@@ -30,15 +28,11 @@ internal class SkjønnsfastsettingSykepengegrunnlag(
     override val id: UUID,
     private val fødselsnummer: String,
     oid: UUID,
-    navn: String,
-    epost: String,
-    ident: String,
     arbeidsgivere: List<SkjønnsfastsattArbeidsgiver>,
     skjæringstidspunkt: LocalDate,
     opprettet: LocalDateTime,
     private val json: String,
     reservasjonDao: ReservasjonDao,
-    saksbehandlerDao: SaksbehandlerDao,
     oppgaveDao: OppgaveDao,
     tildelingDao: TildelingDao,
     overstyringDao: OverstyringDao,
@@ -46,13 +40,6 @@ internal class SkjønnsfastsettingSykepengegrunnlag(
     versjonAvKode: String?,
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
-        OpprettSaksbehandlerCommand(
-            oid = oid,
-            navn = navn,
-            epost = epost,
-            ident = ident,
-            saksbehandlerDao = saksbehandlerDao
-        ),
         ReserverPersonCommand(oid, fødselsnummer, reservasjonDao, oppgaveDao, tildelingDao),
         PersisterSkjønnsfastsettingSykepengegrunnlagCommand(
             oid = oid,

@@ -317,9 +317,6 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             id = hendelseId,
             fødselsnummer = FØDSELSNUMMER,
             oid = OID,
-            navn = SAKSBEHANDLER_NAVN,
-            epost = SAKSBEHANDLEREPOST,
-            ident = SAKSBEHANDLER_IDENT,
             arbeidsgivere = listOf(
                 SkjønnsfastsattArbeidsgiver(
                     organisasjonsnummer = ORGNUMMER,
@@ -335,7 +332,6 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             opprettet = OPPRETTET,
             json = "{}",
             reservasjonDao = reservasjonDao,
-            saksbehandlerDao = saksbehandlerDao,
             oppgaveDao = oppgaveDao,
             tildelingDao = tildelingDao,
             overstyringDao = overstyringDao,
