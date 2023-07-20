@@ -69,6 +69,19 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `invaliderer oppgave`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave()
+        val oppgaveId1 = oppgaveId
+
+        oppgaveApiDao.invaliderOppgaveFor(fødselsnummer = FNR)
+
+        assertOppgaveStatus(oppgaveId1, "Invalidert")
+    }
+
+    @Test
     fun `Finner oppgaveId basert på vedtaksperiodeId`() {
         nyPerson()
         val oppgaveId = oppgaveApiDao.finnOppgaveId(VEDTAKSPERIODE)
@@ -575,5 +588,15 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
         return sessionOf(dataSource).use { session ->
             session.run(queryOf(query, vedtaksperiodeId).map { it.string("opprettet_tidspunkt") }.asList)
         }
+    }
+
+    private fun assertOppgaveStatus(oppgaveId: Long, forventetStatus: String) {
+        val status = sessionOf(dataSource).use { session ->
+            session.run(
+                queryOf("SELECT * FROM oppgave where id = :id", mapOf("id" to oppgaveId))
+                    .map { it.string("status") }.asSingle
+            )
+        }
+        assertEquals(forventetStatus, status)
     }
 }

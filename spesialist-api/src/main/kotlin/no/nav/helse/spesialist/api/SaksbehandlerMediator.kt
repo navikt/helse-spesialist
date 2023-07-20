@@ -93,14 +93,17 @@ class SaksbehandlerMediator(
     internal fun håndter(skjønnsfastsattSykepengegrunnlag: SkjønnsfastsattSykepengegrunnlagDto, saksbehandler: Saksbehandler) {
         saksbehandler.persister(saksbehandlerDao)
         tellSkjønnsfastsettingSykepengegrunnlag()
+        val fødselsnummer = skjønnsfastsattSykepengegrunnlag.fødselsnummer
+        val antall = oppgaveApiDao.invaliderOppgaveFor(fødselsnummer)
+        sikkerlogg.info("Invaliderte $antall {} for $fødselsnummer", if (antall == 1) "oppgave" else "oppgaver")
         val message = skjønnsfastsattSykepengegrunnlag.somJsonMessage(saksbehandler.toDto()).also {
             sikkerlogg.info(
                 "Publiserer skjønnsfastsetting av inntekt fra api: {}, {}\n${it.toJson()}",
-                kv("fødselsnummer", skjønnsfastsattSykepengegrunnlag.fødselsnummer),
+                kv("fødselsnummer", fødselsnummer),
                 kv("aktørId", skjønnsfastsattSykepengegrunnlag.aktørId),
             )
         }
-        rapidsConnection.publish(skjønnsfastsattSykepengegrunnlag.fødselsnummer, message.toJson())
+        rapidsConnection.publish(fødselsnummer, message.toJson())
     }
 
     internal fun håndter(overstyring: OverstyrArbeidsforholdDto, saksbehandler: Saksbehandler) {
