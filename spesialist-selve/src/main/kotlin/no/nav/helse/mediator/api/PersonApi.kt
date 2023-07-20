@@ -21,7 +21,7 @@ import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.spesialist.api.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.feilhåndtering.IkkeTilgangTilRiskQa
 import no.nav.helse.spesialist.api.feilhåndtering.IkkeÅpenOppgave
-import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
+import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import org.slf4j.LoggerFactory
 

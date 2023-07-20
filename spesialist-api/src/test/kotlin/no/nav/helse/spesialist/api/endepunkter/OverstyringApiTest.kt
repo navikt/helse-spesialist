@@ -10,18 +10,18 @@ import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto.Arbeids
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsgiverDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsgiverDto.RefusjonselementDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonDto
-import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDto
-import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDto.OverstyrDagDto
 import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsattArbeidsgiverDto
 import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsattSykepengegrunnlagDto
 import no.nav.helse.spesialist.api.overstyring.SubsumsjonDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandling
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandling.OverstyrDagDto
 import org.junit.jupiter.api.Test
 
 internal class OverstyringApiTest: AbstractE2ETest() {
 
     @Test
     fun `overstyr tidslinje`() {
-        val overstyring = OverstyrTidslinjeDto(
+        val overstyring = OverstyrTidslinjeHandling(
             organisasjonsnummer = ORGANISASJONSNUMMER,
             fødselsnummer = FØDSELSNUMMER,
             aktørId = AKTØR_ID,
@@ -39,7 +39,7 @@ internal class OverstyringApiTest: AbstractE2ETest() {
 
     @Test
     fun `overstyr tidslinje til arbeidsdag`() {
-        val overstyring = OverstyrTidslinjeDto(
+        val overstyring = OverstyrTidslinjeHandling(
             organisasjonsnummer = ORGANISASJONSNUMMER,
             fødselsnummer = FØDSELSNUMMER,
             aktørId = AKTØR_ID,
@@ -57,7 +57,7 @@ internal class OverstyringApiTest: AbstractE2ETest() {
 
     @Test
     fun `overstyr tidslinje fra arbeidsdag`() {
-        val overstyring = OverstyrTidslinjeDto(
+        val overstyring = OverstyrTidslinjeHandling(
             organisasjonsnummer = ORGANISASJONSNUMMER,
             fødselsnummer = FØDSELSNUMMER,
             aktørId = AKTØR_ID,

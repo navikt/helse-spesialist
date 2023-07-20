@@ -6,17 +6,14 @@ import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.spesialist.api.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
-import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
+import no.nav.helse.spesialist.api.modell.Saksbehandler
 
 class OpptegnelseQuery(
     private val saksbehandlerMediator: SaksbehandlerMediator
 ): Query {
 
     @Suppress("unused")
-    fun hentOpptegnelser(
-        sekvensId: Int? = null,
-        environment: DataFetchingEnvironment,
-    ): DataFetcherResult<List<Opptegnelse>> {
+    fun hentOpptegnelser(sekvensId: Int? = null, environment: DataFetchingEnvironment): DataFetcherResult<List<Opptegnelse>> {
         val saksbehandler = environment.graphQlContext.get<Lazy<Saksbehandler>>(SAKSBEHANDLER.key).value
         val opptegnelser =
             if (sekvensId != null) saksbehandlerMediator.hentAbonnerteOpptegnelser(saksbehandler, sekvensId)

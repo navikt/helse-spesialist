@@ -9,14 +9,17 @@ import no.nav.helse.spesialist.api.abonnement.AbonnementDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
+import no.nav.helse.spesialist.api.modell.OverstyrtTidslinjeEvent
+import no.nav.helse.spesialist.api.modell.Saksbehandler
+import no.nav.helse.spesialist.api.modell.SaksbehandlerObserver
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonDto
-import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDto
 import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsattSykepengegrunnlagDto
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
-import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.PersonHandling
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.SaksbehandlerHandling
 import no.nav.helse.spesialist.api.utbetaling.AnnulleringDto
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.varsel.Varsel
@@ -29,7 +32,7 @@ import org.slf4j.LoggerFactory
 class SaksbehandlerMediator(
     dataSource: DataSource,
     private val rapidsConnection: RapidsConnection
-) {
+): SaksbehandlerObserver {
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
     private val generasjonRepository = ApiGenerasjonRepository(dataSource)
     private val varselRepository = ApiVarselRepository(dataSource)
@@ -37,6 +40,31 @@ class SaksbehandlerMediator(
     private val opptegnelseDao = OpptegnelseDao(dataSource)
     private val abonnementDao = AbonnementDao(dataSource)
     private val reservasjonDao = ReservasjonDao(dataSource)
+
+    internal fun <T: SaksbehandlerHandling> håndter(handling: T, saksbehandler: Saksbehandler) {
+        tell(handling)
+        saksbehandler.register(this)
+        saksbehandler.persister(saksbehandlerDao)
+        sikkerlogg.info("Handling ${handling.loggnavn()} utført av saksbehandler $saksbehandler")
+        when (handling) {
+            is PersonHandling -> håndter(handling, saksbehandler)
+            else -> handling.utførAv(saksbehandler)
+        }
+    }
+
+    private fun <T: PersonHandling> håndter(handling: T, saksbehandler: Saksbehandler) {
+        val fødselsnummer = handling.gjelderFødselsnummer()
+        val antall = oppgaveApiDao.invaliderOppgaveFor(fødselsnummer)
+        sikkerlogg.info("Invaliderer $antall {} for $fødselsnummer", if (antall == 1) "oppgave" else "oppgaver")
+        reservasjonDao.reserverPerson(saksbehandler.oid(), fødselsnummer, false)
+        sikkerlogg.info("Reserverer person $fødselsnummer til saksbehandler $saksbehandler")
+        handling.utførAv(saksbehandler)
+    }
+
+    override fun tidslinjeOverstyrt(fødselsnummer: String, event: OverstyrtTidslinjeEvent) {
+        val message = event.somJsonMessage()
+        rapidsConnection.publish(fødselsnummer, message.toJson())
+    }
 
     internal fun opprettAbonnement(saksbehandler: Saksbehandler, personidentifikator: String) {
         saksbehandler.persister(saksbehandlerDao)
@@ -66,19 +94,6 @@ class SaksbehandlerMediator(
             )
         }
         rapidsConnection.publish(annullering.fødselsnummer, message.toJson())
-    }
-
-    internal fun håndter(overstyring: OverstyrTidslinjeDto, saksbehandler: Saksbehandler) {
-        tellOverstyrTidslinje()
-        val message = overstyring.somJsonMessage(saksbehandler.toDto()).also {
-            sikkerlogg.info(
-                "Publiserer overstyring av tidslinje fra api: {}, {}\n${it.toJson()}",
-                kv("fødselsnummer", overstyring.fødselsnummer),
-                kv("aktørId", overstyring.aktørId),
-                kv("organisasjonsnummer", overstyring.organisasjonsnummer)
-            )
-        }
-        rapidsConnection.publish(overstyring.fødselsnummer, message.toJson())
     }
 
     internal fun håndter(overstyring: OverstyrInntektOgRefusjonDto, saksbehandler: Saksbehandler) {

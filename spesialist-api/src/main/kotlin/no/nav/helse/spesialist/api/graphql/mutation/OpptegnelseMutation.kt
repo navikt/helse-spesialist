@@ -5,7 +5,7 @@ import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.spesialist.api.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
-import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
+import no.nav.helse.spesialist.api.modell.Saksbehandler
 
 class OpptegnelseMutation(
     private val saksbehandlerMediator: SaksbehandlerMediator

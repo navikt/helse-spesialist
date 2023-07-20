@@ -5,14 +5,14 @@ import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.TestRapidHelpers.hendelser
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
+import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsgiverDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonDto
-import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDto
 import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsattArbeidsgiverDto
 import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsattSykepengegrunnlagDto
 import no.nav.helse.spesialist.api.overstyring.SubsumsjonDto
-import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandling
 import no.nav.helse.spesialist.api.utbetaling.AnnulleringDto
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import org.junit.jupiter.api.Assertions
@@ -201,13 +201,13 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
 
     @Test
     fun `håndterer overstyring av tidslinje`() {
-        val overstyring = OverstyrTidslinjeDto(
+        val overstyring = OverstyrTidslinjeHandling(
             organisasjonsnummer = ORGANISASJONSNUMMER,
             fødselsnummer = FØDSELSNUMMER,
             aktørId = AKTØR_ID,
             begrunnelse = "En begrunnelse",
             dager = listOf(
-                OverstyrTidslinjeDto.OverstyrDagDto(
+                OverstyrTidslinjeHandling.OverstyrDagDto(
                     dato = 10.januar,
                     type = "Sykedag",
                     fraType = "Arbeidsdag",

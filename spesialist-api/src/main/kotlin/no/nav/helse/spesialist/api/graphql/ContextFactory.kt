@@ -15,7 +15,7 @@ import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER_IDENT
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER_NAVN
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER_OID
 import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGER
-import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
+import no.nav.helse.spesialist.api.modell.Saksbehandler
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 

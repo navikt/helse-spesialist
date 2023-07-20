@@ -1,11 +1,30 @@
 package no.nav.helse.spesialist.api.saksbehandler
 
 import java.util.UUID
+import no.nav.helse.spesialist.api.modell.OverstyrtTidslinjeEvent
+import no.nav.helse.spesialist.api.modell.Saksbehandler
+import no.nav.helse.spesialist.api.modell.SaksbehandlerObserver
+import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.OverstyrtTidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 
-class SaksbehandlerTest {
+internal class SaksbehandlerTest {
+
+    @Test
+    fun `kan registrere observer`() {
+        var observert = false
+        val observer = object : SaksbehandlerObserver {
+            override fun tidslinjeOverstyrt(fødselsnummer: String, event: OverstyrtTidslinjeEvent) {
+                observert = true
+            }
+        }
+
+        val saksbehandler = Saksbehandler("epost@nav.no", UUID.randomUUID(), "navn", "Z999999")
+        saksbehandler.register(observer)
+        saksbehandler.håndter(OverstyrtTidslinje("123", "1234", "12345", emptyList(), "begrunnelse"))
+        assertEquals(true, observert)
+    }
 
     @Test
     fun `referential equals`() {

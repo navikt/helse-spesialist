@@ -8,7 +8,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import no.nav.helse.spesialist.api.SaksbehandlerMediator
-import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
+import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.utbetaling.AnnulleringDto
 
 fun Route.annulleringApi(saksbehandlerMediator: SaksbehandlerMediator) {

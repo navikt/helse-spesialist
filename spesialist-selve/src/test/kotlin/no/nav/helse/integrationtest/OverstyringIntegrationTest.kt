@@ -31,7 +31,7 @@ import no.nav.helse.mediator.api.AbstractApiTest.Companion.azureAdAppConfig
 import no.nav.helse.spesialist.api.azureAdAppAuthentication
 import no.nav.helse.spesialist.api.endepunkter.overstyringApi
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
-import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandling
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -39,7 +39,7 @@ import org.junit.jupiter.api.Test
 /**
  * Tester samspillet mellom API og selve, altså "integrasjonen" mellom dem 😀
  */
-internal class OverstyringIT : AbstractE2ETest() {
+internal class OverstyringIntegrationTest : AbstractE2ETest() {
 
     @Test
     fun `overstyr tidslinje`() {
@@ -47,13 +47,13 @@ internal class OverstyringIT : AbstractE2ETest() {
             setUpApplication()
             settOppBruker()
             assertOppgaver(1)
-            val overstyring = OverstyrTidslinjeDto(
+            val overstyring = OverstyrTidslinjeHandling(
                 organisasjonsnummer = ORGNR,
                 fødselsnummer = FØDSELSNUMMER,
                 aktørId = AKTØR,
                 begrunnelse = "en begrunnelse",
                 dager = listOf(
-                    OverstyrTidslinjeDto.OverstyrDagDto(dato = 10.januar, type = "Feriedag", fraType = "Sykedag", grad = null, fraGrad = 100)
+                    OverstyrTidslinjeHandling.OverstyrDagDto(dato = 10.januar, type = "Feriedag", fraType = "Sykedag", grad = null, fraGrad = 100)
                 ),
             )
 

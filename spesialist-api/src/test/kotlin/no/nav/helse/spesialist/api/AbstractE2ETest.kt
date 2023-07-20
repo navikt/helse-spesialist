@@ -21,8 +21,8 @@ import no.nav.helse.spesialist.api.db.AbstractDatabaseTest
 import no.nav.helse.spesialist.api.endepunkter.overstyringApi
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonDto
-import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDto
 import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsattSykepengegrunnlagDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandling
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 
@@ -66,7 +66,7 @@ internal abstract class AbstractE2ETest: AbstractDatabaseTest() {
     }
 
     protected fun overstyrTidslinje(
-        payload: OverstyrTidslinjeDto,
+        payload: OverstyrTidslinjeHandling,
         saksbehandler: Saksbehandler = defaultSaksbehandler,
     ) {
         testApplication {

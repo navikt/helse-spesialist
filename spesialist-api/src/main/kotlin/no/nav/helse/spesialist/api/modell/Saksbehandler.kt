@@ -1,7 +1,10 @@
-package no.nav.helse.spesialist.api.saksbehandler
+package no.nav.helse.spesialist.api.modell
 
 import io.ktor.server.auth.jwt.JWTPrincipal
 import java.util.UUID
+import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.OverstyrtTidslinje
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDto
 
 class Saksbehandler(
     private val epostadresse: String,
@@ -18,11 +21,22 @@ class Saksbehandler(
         )
     }
 
+    private val observers = mutableListOf<SaksbehandlerObserver>()
+
+    internal fun register(observer: SaksbehandlerObserver) {
+        observers.add(observer)
+    }
+
     internal fun ident(): String = ident
     internal fun oid(): UUID = oid
 
     fun persister(saksbehandlerDao: SaksbehandlerDao) {
         saksbehandlerDao.opprettSaksbehandler(oid = oid, navn = navn, epost = epostadresse, ident = ident)
+    }
+
+    internal fun håndter(hendelse: OverstyrtTidslinje) {
+        val event = hendelse.byggEvent(oid, navn, epostadresse, ident)
+        observers.forEach { it.tidslinjeOverstyrt(event.fødselsnummer, event) }
     }
 
     fun json() = mapOf(
@@ -33,6 +47,8 @@ class Saksbehandler(
     )
 
     fun toDto() = SaksbehandlerDto(oid = oid, navn = navn, epost = epostadresse, ident = ident)
+
+    override fun toString(): String = "epostadresse=$epostadresse, oid=$oid"
 
     override fun equals(other: Any?) = this === other || (
         other is Saksbehandler &&

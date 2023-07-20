@@ -10,15 +10,15 @@ import io.ktor.server.routing.post
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.spesialist.api.SaksbehandlerMediator
+import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonDto
-import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinjeDto
 import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsattSykepengegrunnlagDto
-import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandling
 
 fun Route.overstyringApi(saksbehandlerMediator: SaksbehandlerMediator) {
     post("/api/overstyr/dager") {
-        val overstyring = call.receive<OverstyrTidslinjeDto>()
+        val overstyring = call.receive<OverstyrTidslinjeHandling>()
         val saksbehandler = Saksbehandler.fraOnBehalfOfToken(requireNotNull(call.principal()))
 
         withContext(Dispatchers.IO) { saksbehandlerMediator.håndter(overstyring, saksbehandler) }

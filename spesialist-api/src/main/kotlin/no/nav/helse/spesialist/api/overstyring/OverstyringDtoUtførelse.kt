@@ -7,41 +7,6 @@ import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsgiverDto.Companion
 import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsattArbeidsgiverDto.Companion.toMap
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDto
 
-@JsonIgnoreProperties
-class OverstyrTidslinjeDto(
-    val organisasjonsnummer: String,
-    val fødselsnummer: String,
-    val aktørId: String,
-    val begrunnelse: String,
-    val dager: List<OverstyrDagDto>
-) {
-    @JsonIgnoreProperties
-    class OverstyrDagDto(
-        val dato: LocalDate,
-        val type: String,
-        val fraType: String,
-        val grad: Int?,
-        val fraGrad: Int?
-    )
-
-    internal fun somJsonMessage(saksbehandler: SaksbehandlerDto): JsonMessage {
-        return JsonMessage.newMessage(
-            "saksbehandler_overstyrer_tidslinje", mutableMapOf(
-                "fødselsnummer" to fødselsnummer,
-                "aktørId" to aktørId,
-                "organisasjonsnummer" to organisasjonsnummer,
-                "dager" to dager,
-                "begrunnelse" to begrunnelse,
-                "saksbehandlerOid" to saksbehandler.oid,
-                "saksbehandlerNavn" to saksbehandler.navn,
-                "saksbehandlerIdent" to saksbehandler.ident,
-                "saksbehandlerEpost" to saksbehandler.epost,
-            )
-        )
-    }
-
-}
-
 internal data class OverstyrArbeidsgiverDto(
     val organisasjonsnummer: String,
     val månedligInntekt: Double,

@@ -2,7 +2,7 @@ package no.nav.helse.spesialist.api.utbetaling
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
+import no.nav.helse.spesialist.api.modell.Saksbehandler
 
 @JsonIgnoreProperties
 internal data class AnnulleringDto(
