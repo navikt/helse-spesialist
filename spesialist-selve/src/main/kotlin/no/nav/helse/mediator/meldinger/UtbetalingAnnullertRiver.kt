@@ -43,6 +43,7 @@ internal class UtbetalingAnnullertRiver(
         val id = UUID.fromString(packet["@id"].asText())
         val arbeidsgiverFagsystemId = packet["arbeidsgiverFagsystemId"].takeUnless { it.isMissingOrNull() }?.asText()
         val personFagsystemId = packet["personFagsystemId"].takeUnless { it.isMissingOrNull() }?.asText()
+        if (id.toString() == "001d5949-9f43-40a2-aa08-12f2214a3b80") return
 
         val logInfo = mutableListOf(StructuredArguments.keyValue("eventId", id)).also {
             if (arbeidsgiverFagsystemId != null) it.add(
