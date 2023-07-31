@@ -104,7 +104,7 @@ internal class GraphQLApiTest : AbstractGraphQLApiTest() {
         val forventetError = objectMapper.readTree(
             """
             {
-                "message": "Can't serialize value (/person/vilkarsgrunnlag[0]/avviksprosent) : Expected type 'Float' but was 'Double'.",
+                "message": "Can't serialize value (/person/vilkarsgrunnlag[0]/avviksprosent) : Expected a value that can be converted to type 'Float' but it was a 'Double'",
                 "path": ["person", "vilkarsgrunnlag", 0, "avviksprosent"]
             }
         """
