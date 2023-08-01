@@ -440,6 +440,7 @@ enum GraphQLSykdomsdagtype {
     Arbeidsdag
     Arbeidsgiverdag
     Avslatt
+    FerieUtenSykmeldingDag
     Feriedag
     ForeldetSykedag
     FriskHelgedag
