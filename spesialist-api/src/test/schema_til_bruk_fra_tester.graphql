@@ -588,6 +588,7 @@ type UberegnetPeriode implements Periode {
     hendelser: [Hendelse!]!
     id: String!
     inntektstype: Inntektstype!
+    notater: [Notat!]!
     opprettet: String!
     periodetilstand: Periodetilstand!
     periodetype: Periodetype!
@@ -706,6 +707,7 @@ enum Dagtype {
     Arbeidsdag
     Avvistdag
     Egenmeldingsdag
+    FerieUtenSykmeldingDag
     Feriedag
     Permisjonsdag
     Sykedag
