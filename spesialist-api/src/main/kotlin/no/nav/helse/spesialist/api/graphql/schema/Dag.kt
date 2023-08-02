@@ -27,6 +27,7 @@ enum class Sykdomsdagtype {
     SYK_HELGEDAG,
     SYKEDAG,
     UBESTEMTDAG,
+    FERIEUTENSYKMELDINGDAG,
 }
 
 enum class Utbetalingsdagtype {
@@ -110,6 +111,7 @@ private fun GraphQLSykdomsdagtype.tilSykdomsdagtype(): Sykdomsdagtype =
         GraphQLSykdomsdagtype.ARBEIDSDAG -> Sykdomsdagtype.ARBEIDSDAG
         GraphQLSykdomsdagtype.ARBEIDSGIVERDAG -> Sykdomsdagtype.ARBEIDSGIVERDAG
         GraphQLSykdomsdagtype.AVSLATT -> Sykdomsdagtype.AVSLATT
+        GraphQLSykdomsdagtype.FERIEUTENSYKMELDINGDAG -> Sykdomsdagtype.FERIEUTENSYKMELDINGDAG
         GraphQLSykdomsdagtype.FERIEDAG -> Sykdomsdagtype.FERIEDAG
         GraphQLSykdomsdagtype.FORELDETSYKEDAG -> Sykdomsdagtype.FORELDET_SYKEDAG
         GraphQLSykdomsdagtype.FRISKHELGEDAG -> Sykdomsdagtype.FRISK_HELGEDAG
