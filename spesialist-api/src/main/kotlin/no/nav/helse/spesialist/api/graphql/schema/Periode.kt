@@ -51,6 +51,7 @@ enum class Periodetilstand {
     TilGodkjenning,
     VenterPaEnAnnenPeriode,
     UtbetaltVenterPaEnAnnenPeriode,
+    TilSkjonnsfastsettelse,
     Ukjent
 }
 
@@ -255,6 +256,7 @@ interface Periode {
             if (Toggle.BehandleEnOgEnPeriode.enabled && erSisteGenerasjon) Periodetilstand.VenterPaEnAnnenPeriode
             else Periodetilstand.UtbetaltVenterPaEnAnnenPeriode
         }
+        GraphQLPeriodetilstand.TILSKJONNSFASTSETTELSE -> Periodetilstand.TilSkjonnsfastsettelse
         else -> Periodetilstand.Ukjent
     }
 
