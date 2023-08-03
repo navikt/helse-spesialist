@@ -19,6 +19,7 @@ import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLBeregnetPeriode
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLGenerasjon
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUberegnetPeriode
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUberegnetVilkarsprovdPeriode
 
 data class Arbeidsforhold(
     val stillingstittel: String,
@@ -161,6 +162,15 @@ data class Arbeidsgiver(
                         totrinnsvurderingApiDao = totrinnsvurderingApiDao,
                         tilganger = tilganger,
                         erSisteGenerasjon = index == 0,
+                    )
+
+                    is GraphQLUberegnetVilkarsprovdPeriode -> UberegnetVilkarsprovdPeriode(
+                        id = it.id,
+                        vilkarsgrunnlagId = it.vilkarsgrunnlagId,
+                        varselRepository = varselRepository,
+                        periode = it,
+                        skalViseAktiveVarsler = index == 0 && perioderSomSkalViseAktiveVarsler.contains(UUID.fromString(it.vedtaksperiodeId)),
+                        notatDao = notatDao,
                     )
 
                     else -> throw Exception("Ukjent tidslinjeperiode")

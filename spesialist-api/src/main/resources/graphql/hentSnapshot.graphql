@@ -167,6 +167,11 @@ query HentSnapshot($fnr: String!) {
                         __typename
                         id
                     }
+                    ... on GraphQLUberegnetVilkarsprovdPeriode {
+                        __typename
+                        id
+                        vilkarsgrunnlagId
+                    }
                     ... on GraphQLBeregnetPeriode {
                         __typename
                         id

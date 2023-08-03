@@ -341,6 +341,34 @@ data class UberegnetPeriode(
     fun notater(): List<Notat> = notater(notatDao, vedtaksperiodeId())
 }
 
+@Suppress("unused")
+data class UberegnetVilkarsprovdPeriode(
+    val id: UUIDString,
+    val vilkarsgrunnlagId: UUIDString,
+    private val varselRepository: ApiVarselRepository,
+    private val periode: GraphQLTidslinjeperiode,
+    private val skalViseAktiveVarsler: Boolean,
+    private val notatDao: NotatDao,
+) : Periode {
+    override fun erForkastet(): Boolean = erForkastet(periode)
+    override fun fom(): DateString = fom(periode)
+    override fun tom(): DateString = tom(periode)
+    override fun inntektstype(): Inntektstype = inntektstype(periode)
+    override fun opprettet(): DateTimeString = opprettet(periode)
+    override fun periodetype(): Periodetype = periodetype(periode)
+    override fun tidslinje(): List<Dag> = tidslinje(periode)
+    override fun vedtaksperiodeId(): UUIDString = periode.vedtaksperiodeId
+    override fun periodetilstand(): Periodetilstand = periodetilstand(periode.periodetilstand, true)
+    override fun skjaeringstidspunkt(): DateString = periode.skjaeringstidspunkt
+    override fun hendelser(): List<Hendelse> = periode.hendelser.map { it.tilHendelse() }
+    override fun varsler(): List<VarselDTO> = if (skalViseAktiveVarsler)
+        varselRepository.finnVarslerForUberegnetPeriode(UUID.fromString(vedtaksperiodeId())).toList() else
+        varselRepository.finnGodkjenteVarslerForUberegnetPeriode(UUID.fromString(vedtaksperiodeId())).toList()
+    fun notater(): List<Notat> = notater(notatDao, vedtaksperiodeId())
+
+    fun vilkarsgrunnlagId(): UUIDString = vilkarsgrunnlagId
+}
+
 enum class Periodehandling {
     UTBETALE
 }
