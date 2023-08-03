@@ -7,5 +7,5 @@ abstract class Toggle(private var _enabled: Boolean) {
 
     object Inntekter : Toggle("INNTEKTER", true)
 
-    object BeholdRevurderingerMedVergemålEllerUtland : Toggle("BEHOLD_REVURDERINGER_MED_VERGEMÅL_ELLER_UTLAND", false)
+    object BeholdRevurderingerMedVergemålEllerUtland : Toggle("BEHOLD_REVURDERINGER_MED_VERGEMAAL_ELLER_UTLAND", false)
 }
