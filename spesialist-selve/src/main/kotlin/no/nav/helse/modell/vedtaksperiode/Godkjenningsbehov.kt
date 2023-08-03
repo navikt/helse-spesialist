@@ -37,6 +37,7 @@ import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.modell.varsel.LeggPåVarslerCommand
 import no.nav.helse.modell.vergemal.VergemålCommand
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
@@ -207,6 +208,15 @@ internal class Godkjenningsbehov(
             skjæringstidspunkt = skjæringstidspunkt,
             personDao = personDao
         ),
+        LeggPåVarslerCommand(
+            fødselsnummer = fødselsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            personDao = personDao,
+            vergemålDao = vergemålDao,
+            hendelseId = id,
+            utbetaling = utbetaling,
+            sykefraværstilfelle = sykefraværstilfelle
+        )
     )
 
     override fun fødselsnummer() = fødselsnummer

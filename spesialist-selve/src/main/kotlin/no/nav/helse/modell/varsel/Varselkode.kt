@@ -28,7 +28,9 @@ enum class Varselkode(
     SB_IK_1("Registrert fullmakt på personen"),
     SB_RV_1("Faresignaler oppdaget. Kontroller om faresignalene påvirker retten til sykepenger"),
     SB_RV_2("Veileder har stanset automatisk behandling. Se Gosys for mer informasjon"),
-    SB_RV_3("Kunne ikke sjekke om veileder har stanset automatisk behandling på grunn av teknisk feil");
+    SB_RV_3("Kunne ikke sjekke om veileder har stanset automatisk behandling på grunn av teknisk feil"),
+    SB_EX_4("Den sykmeldte er under vergemål"),
+    SB_EX_5("Det har kommet inn dokumentasjon som igangsetter en revurdering, og den sykmeldte er nå registrert på bokommune 0393 (NAV utland og fellestjenester)");
 
     init {
         require(this.name.matches(regex)) { "Ugyldig varselkode-format: ${this.name}" }
