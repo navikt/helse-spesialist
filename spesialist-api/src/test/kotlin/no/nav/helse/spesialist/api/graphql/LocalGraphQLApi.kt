@@ -238,6 +238,7 @@ private fun enOppgave() = OppgaveForOversiktsvisning(
         etternavn = "etternavn",
     ),
     haster = false,
+    harVergemal = false,
 )
 
 private fun enPersoninfo() = Personinfo(

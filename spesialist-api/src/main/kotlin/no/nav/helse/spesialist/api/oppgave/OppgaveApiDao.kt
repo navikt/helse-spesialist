@@ -129,13 +129,17 @@ class OppgaveApiDao(dataSource: DataSource) : HelseDao(dataSource) {
                     AND sv.status != 'INAKTIV'
                     AND sv.kode = 'RV_UT_23'
                     AND svg.utbetaling_id = o.utbetaling_id
+                ),
+                har_vergemal AS (SELECT har_vergemal, vm.person_ref FROM vergemal vm
+                    INNER JOIN vedtak v ON v.person_ref = vm.person_ref
+                    INNER JOIN aktiv_oppgave o ON o.vedtak_ref = v.id
                 )
 
             SELECT o.id as oppgave_id, o.type AS oppgavetype, o.opprettet, o.mottaker, os.soknad_mottatt AS opprinneligSoknadsdato, o.sist_sendt,
                 s.epost, s.navn as saksbehandler_navn, s.oid, v.vedtaksperiode_id, v.fom, v.tom, pi.fornavn, pi.mellomnavn, pi.etternavn, pi.fodselsdato,
                 pi.kjonn, pi.adressebeskyttelse, p.aktor_id, p.fodselsnummer, sot.type as saksbehandleroppgavetype, sot.inntektskilde, e.id AS enhet_id, e.navn AS enhet_navn, t.på_vent,
                 ttv.vedtaksperiode_id AS totrinnsvurdering_vedtaksperiode_id, ttv.saksbehandler, ttv.beslutter, ttv.er_retur,
-                h.vedtaksperiode_id IS NOT NULL AS har_varsel_om_negativt_belop
+                h.vedtaksperiode_id IS NOT NULL AS har_varsel_om_negativt_belop, hv.har_vergemal
             FROM aktiv_oppgave o
                 INNER JOIN vedtak v ON o.vedtak_ref = v.id
                 INNER JOIN person p ON v.person_ref = p.id
@@ -148,6 +152,7 @@ class OppgaveApiDao(dataSource: DataSource) : HelseDao(dataSource) {
                 LEFT JOIN saksbehandler s ON t.saksbehandler_ref = s.oid
                 LEFT JOIN totrinnsvurdering ttv ON (ttv.vedtaksperiode_id = v.vedtaksperiode_id AND ttv.utbetaling_id_ref IS NULL)
                 LEFT JOIN har_varsel_om_negativt_belop h ON h.vedtaksperiode_id = v.vedtaksperiode_id
+                LEFT JOIN har_vergemal hv ON hv.person_ref = p.id
             WHERE status = 'AvventerSaksbehandler'::oppgavestatus
                 AND CASE WHEN :harTilgangTilRisk 
                     THEN true
@@ -329,6 +334,7 @@ class OppgaveApiDao(dataSource: DataSource) : HelseDao(dataSource) {
                 etternavn = it.string("etternavn"),
             ),
             haster = it.boolean("har_varsel_om_negativt_belop") && harUtbetalingTilSykmeldt(it.stringOrNull("mottaker")),
+            harVergemal = it.boolean("har_vergemal"),
         )
 
         private fun harUtbetalingTilSykmeldt(mottaker: String?): Boolean {

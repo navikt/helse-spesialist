@@ -37,6 +37,7 @@ data class OppgaveForOversiktsvisning(
     val totrinnsvurdering: Totrinnsvurdering?,
     val mottaker: Mottaker?,
     val haster: Boolean?,
+    val harVergemal: Boolean?,
 )
 
 data class OppgaveForPeriodevisning(
