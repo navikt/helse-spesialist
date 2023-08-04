@@ -139,7 +139,7 @@ class OppgaveApiDao(dataSource: DataSource) : HelseDao(dataSource) {
                 s.epost, s.navn as saksbehandler_navn, s.oid, v.vedtaksperiode_id, v.fom, v.tom, pi.fornavn, pi.mellomnavn, pi.etternavn, pi.fodselsdato,
                 pi.kjonn, pi.adressebeskyttelse, p.aktor_id, p.fodselsnummer, sot.type as saksbehandleroppgavetype, sot.inntektskilde, e.id AS enhet_id, e.navn AS enhet_navn, t.på_vent,
                 ttv.vedtaksperiode_id AS totrinnsvurdering_vedtaksperiode_id, ttv.saksbehandler, ttv.beslutter, ttv.er_retur,
-                h.vedtaksperiode_id IS NOT NULL AS har_varsel_om_negativt_belop, hv.har_vergemal
+                h.vedtaksperiode_id IS NOT NULL AS har_varsel_om_negativt_belop, hv.har_vergemal, p.enhet_ref
             FROM aktiv_oppgave o
                 INNER JOIN vedtak v ON o.vedtak_ref = v.id
                 INNER JOIN person p ON v.person_ref = p.id
@@ -335,6 +335,7 @@ class OppgaveApiDao(dataSource: DataSource) : HelseDao(dataSource) {
             ),
             haster = it.boolean("har_varsel_om_negativt_belop") && harUtbetalingTilSykmeldt(it.stringOrNull("mottaker")),
             harVergemal = it.boolean("har_vergemal"),
+            tilhorerEnhetUtland = setOf("0393", "2101").contains(it.string("enhet_ref"))
         )
 
         private fun harUtbetalingTilSykmeldt(mottaker: String?): Boolean {

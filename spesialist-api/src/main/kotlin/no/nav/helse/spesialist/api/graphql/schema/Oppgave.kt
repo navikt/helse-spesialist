@@ -38,6 +38,7 @@ data class OppgaveForOversiktsvisning(
     val mottaker: Mottaker?,
     val haster: Boolean?,
     val harVergemal: Boolean?,
+    val tilhorerEnhetUtland: Boolean?,
 )
 
 data class OppgaveForPeriodevisning(
