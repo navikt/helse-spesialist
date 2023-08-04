@@ -335,7 +335,7 @@ class OppgaveApiDao(dataSource: DataSource) : HelseDao(dataSource) {
             ),
             haster = it.boolean("har_varsel_om_negativt_belop") && harUtbetalingTilSykmeldt(it.stringOrNull("mottaker")),
             harVergemal = it.boolean("har_vergemal"),
-            tilhorerEnhetUtland = setOf("0393", "2101").contains(it.string("enhet_ref"))
+            tilhorerEnhetUtland = setOf(393, 2101).contains(it.int("enhet_ref"))
         )
 
         private fun harUtbetalingTilSykmeldt(mottaker: String?): Boolean {
