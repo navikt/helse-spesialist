@@ -28,6 +28,13 @@ enum class Sykdomsdagtype {
     SYKEDAG,
     UBESTEMTDAG,
     FERIEUTENSYKMELDINGDAG,
+    ANDRE_YTELSER_AAP,
+    ANDRE_YTELSER_DAGPENGER,
+    ANDRE_YTELSER_FORELDREPENGER,
+    ANDRE_YTELSER_OMSORGSPENGER,
+    ANDRE_YTELSER_OPPLARINGSPENGER,
+    ANDRE_YTELSER_PLEIEPENGER,
+    ANDRE_YTELSER_SVANGERSKAPSPENGER,
 }
 
 enum class Utbetalingsdagtype {
@@ -53,6 +60,7 @@ enum class Begrunnelse {
     OVER_70,
     SYKEPENGEDAGER_OPPBRUKT,
     SYKEPENGEDAGER_OPPBRUKT_OVER_67,
+    ANDREYTELSER,
     UKJENT
 }
 
@@ -119,6 +127,13 @@ private fun GraphQLSykdomsdagtype.tilSykdomsdagtype(): Sykdomsdagtype =
         GraphQLSykdomsdagtype.SYKHELGEDAG -> Sykdomsdagtype.SYK_HELGEDAG
         GraphQLSykdomsdagtype.SYKEDAG -> Sykdomsdagtype.SYKEDAG
         GraphQLSykdomsdagtype.UBESTEMTDAG -> Sykdomsdagtype.UBESTEMTDAG
+        GraphQLSykdomsdagtype.ANDREYTELSERAAP -> Sykdomsdagtype.ANDRE_YTELSER_AAP
+        GraphQLSykdomsdagtype.ANDREYTELSERDAGPENGER -> Sykdomsdagtype.ANDRE_YTELSER_DAGPENGER
+        GraphQLSykdomsdagtype.ANDREYTELSERFORELDREPENGER -> Sykdomsdagtype.ANDRE_YTELSER_FORELDREPENGER
+        GraphQLSykdomsdagtype.ANDREYTELSEROMSORGSPENGER -> Sykdomsdagtype.ANDRE_YTELSER_OMSORGSPENGER
+        GraphQLSykdomsdagtype.ANDREYTELSEROPPLARINGSPENGER -> Sykdomsdagtype.ANDRE_YTELSER_OPPLARINGSPENGER
+        GraphQLSykdomsdagtype.ANDREYTELSERPLEIEPENGER -> Sykdomsdagtype.ANDRE_YTELSER_PLEIEPENGER
+        GraphQLSykdomsdagtype.ANDREYTELSERSVANGERSKAPSPENGER -> Sykdomsdagtype.ANDRE_YTELSER_SVANGERSKAPSPENGER
         else -> throw Exception("Ukjent sykdomsdagtype $name")
     }
 
@@ -157,5 +172,6 @@ private fun GraphQLBegrunnelse.tilBegrunnelse(): Begrunnelse =
         GraphQLBegrunnelse.OVER70 -> Begrunnelse.OVER_70
         GraphQLBegrunnelse.SYKEPENGEDAGEROPPBRUKT -> Begrunnelse.SYKEPENGEDAGER_OPPBRUKT
         GraphQLBegrunnelse.SYKEPENGEDAGEROPPBRUKTOVER67 -> Begrunnelse.SYKEPENGEDAGER_OPPBRUKT_OVER_67
+        GraphQLBegrunnelse.ANDREYTELSER -> Begrunnelse.ANDREYTELSER
         GraphQLBegrunnelse.__UNKNOWN_VALUE -> Begrunnelse.UKJENT
     }

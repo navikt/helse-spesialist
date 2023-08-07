@@ -324,6 +324,7 @@ type OppgaveForOversiktsvisning {
     boenhet: Boenhet
     flereArbeidsgivere: Boolean!
     fodselsnummer: String!
+    harVergemal: Boolean
     haster: Boolean
     id: String!
     mottaker: Mottaker
@@ -334,6 +335,7 @@ type OppgaveForOversiktsvisning {
     personinfo: Personinfo!
     sistSendt: String
     tildeling: Tildeling
+    tilhorerEnhetUtland: Boolean
     totrinnsvurdering: Totrinnsvurdering
     type: Oppgavetype!
     vedtaksperiodeId: String!
@@ -599,6 +601,24 @@ type UberegnetPeriode implements Periode {
     vedtaksperiodeId: String!
 }
 
+type UberegnetVilkarsprovdPeriode implements Periode {
+    erForkastet: Boolean!
+    fom: String!
+    hendelser: [Hendelse!]!
+    id: String!
+    inntektstype: Inntektstype!
+    notater: [Notat!]!
+    opprettet: String!
+    periodetilstand: Periodetilstand!
+    periodetype: Periodetype!
+    skjaeringstidspunkt: String!
+    tidslinje: [Dag!]!
+    tom: String!
+    varsler: [VarselDTO!]!
+    vedtaksperiodeId: String!
+    vilkarsgrunnlagId: String
+}
+
 type Utbetaling {
     arbeidsgiverFagsystemId: String!
     arbeidsgiverNettoBelop: Int!
@@ -690,6 +710,7 @@ enum Adressebeskyttelse {
 }
 
 enum Begrunnelse {
+    ANDREYTELSER
     EGENMELDING_UTENFOR_ARBEIDSGIVERPERIODE
     ETTER_DODSDATO
     MANGLER_MEDLEMSKAP
@@ -704,12 +725,19 @@ enum Begrunnelse {
 }
 
 enum Dagtype {
+    AAPdag
     Arbeidsdag
     Avvistdag
+    Dagpengerdag
     Egenmeldingsdag
     FerieUtenSykmeldingDag
     Feriedag
+    Foreldrepengerdag
+    Omsorgspengerdag
+    Opplaringspengerdag
     Permisjonsdag
+    Pleiepengerdag
+    Svangerskapspengerdag
     Sykedag
     SykedagNav
 }
@@ -817,6 +845,7 @@ enum Periodetilstand {
     TilAnnullering
     TilGodkjenning
     TilInfotrygd
+    TilSkjonnsfastsettelse
     TilUtbetaling
     Ukjent
     UtbetalingFeilet
@@ -833,10 +862,18 @@ enum Periodetype {
 }
 
 enum Sykdomsdagtype {
+    ANDRE_YTELSER_AAP
+    ANDRE_YTELSER_DAGPENGER
+    ANDRE_YTELSER_FORELDREPENGER
+    ANDRE_YTELSER_OMSORGSPENGER
+    ANDRE_YTELSER_OPPLARINGSPENGER
+    ANDRE_YTELSER_PLEIEPENGER
+    ANDRE_YTELSER_SVANGERSKAPSPENGER
     ARBEIDSDAG
     ARBEIDSGIVERDAG
     AVSLATT
     FERIEDAG
+    FERIEUTENSYKMELDINGDAG
     FORELDET_SYKEDAG
     FRISK_HELGEDAG
     PERMISJONSDAG

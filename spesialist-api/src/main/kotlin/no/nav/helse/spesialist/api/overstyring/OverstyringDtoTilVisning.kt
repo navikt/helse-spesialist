@@ -4,7 +4,23 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-enum class Dagtype { Sykedag, SykedagNav, Feriedag, Egenmeldingsdag, Permisjonsdag, Arbeidsdag, Avvistdag, FerieUtenSykmeldingDag }
+enum class Dagtype {
+    Sykedag,
+    SykedagNav,
+    Feriedag,
+    Egenmeldingsdag,
+    Permisjonsdag,
+    Arbeidsdag,
+    Avvistdag,
+    FerieUtenSykmeldingDag,
+    Foreldrepengerdag,
+    AAPdag,
+    Omsorgspengerdag,
+    Pleiepengerdag,
+    Svangerskapspengerdag,
+    Opplaringspengerdag,
+    Dagpengerdag
+}
 
 data class OverstyringTidslinjeDto(
     val hendelseId: UUID,
@@ -23,7 +39,7 @@ data class OverstyringDagDto(
     val type: Dagtype,
     val fraType: Dagtype?,
     val grad: Int?,
-    val fraGrad: Int?
+    val fraGrad: Int?,
 )
 
 data class OverstyringInntektDto(

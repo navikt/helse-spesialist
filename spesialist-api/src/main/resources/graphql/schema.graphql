@@ -369,6 +369,7 @@ type Sykepengedager {
 }
 
 enum GraphQLBegrunnelse {
+    AndreYtelser
     EgenmeldingUtenforArbeidsgiverperiode
     EtterDodsdato
     ManglerMedlemskap
@@ -437,6 +438,13 @@ enum GraphQLSykdomsdagkildetype {
 }
 
 enum GraphQLSykdomsdagtype {
+    AndreYtelserAap
+    AndreYtelserDagpenger
+    AndreYtelserForeldrepenger
+    AndreYtelserOmsorgspenger
+    AndreYtelserOpplaringspenger
+    AndreYtelserPleiepenger
+    AndreYtelserSvangerskapspenger
     Arbeidsdag
     Arbeidsgiverdag
     Avslatt
