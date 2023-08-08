@@ -169,7 +169,7 @@ data class Arbeidsgiver(
                         vilkarsgrunnlagId = it.vilkarsgrunnlagId,
                         varselRepository = varselRepository,
                         periode = it,
-                        skalViseAktiveVarsler = index == 0 && perioderSomSkalViseAktiveVarsler.contains(UUID.fromString(it.vedtaksperiodeId)),
+                        skalViseAktiveVarsler = true,
                         notatDao = notatDao,
                     )
 
