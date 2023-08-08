@@ -8,6 +8,7 @@ import java.util.UUID
 import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.MetrikkRiver
+import no.nav.helse.mediator.api.erDev
 import no.nav.helse.mediator.meldinger.EndretSkjermetinfoRiver
 import no.nav.helse.mediator.meldinger.GodkjenningsbehovRiver
 import no.nav.helse.mediator.meldinger.GosysOppgaveEndretRiver
@@ -31,6 +32,7 @@ import no.nav.helse.mediator.meldinger.VedtaksperiodeForkastetRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeNyUtbetalingRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeOpprettetRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeReberegnetRiver
+import no.nav.helse.mediator.meldinger.VedtaksperiodeSkjønnsmessigFastsettelseRiver
 import no.nav.helse.mediator.meldinger.løsninger.ArbeidsforholdRiver
 import no.nav.helse.mediator.meldinger.løsninger.ArbeidsgiverRiver
 import no.nav.helse.mediator.meldinger.løsninger.EgenAnsattløsning
@@ -127,6 +129,7 @@ internal class HendelseMediator(
             UtbetalingEndretRiver(it, this)
             VedtaksperiodeReberegnetRiver(it, this)
             VedtaksperiodeOpprettetRiver(it, this)
+            VedtaksperiodeSkjønnsmessigFastsettelseRiver(it, this)
             GosysOppgaveEndretRiver(it, this, oppgaveDao, tildelingDao, personDao)
             EndretSkjermetinfoRiver(it, personDao, egenAnsattDao)
             VedtakFattetRiver(it, this)
@@ -231,6 +234,29 @@ internal class HendelseMediator(
             forårsaketAvId = forårsaketAvId,
             forrigeTilstand = forrigeTilstand,
             gjeldendeTilstand = gjeldendeTilstand,
+            json = message.toJson()
+        )
+        return utfør(hendelse, context)
+    }
+
+    fun vedtaksperiodeSkjønnsmessigFastsettelse(
+        message: JsonMessage,
+        id: UUID,
+        vedtaksperiodeId: UUID,
+        fødselsnummer: String,
+        aktørId: String,
+        organisasjonsnummer: String,
+        context: MessageContext,
+    ) {
+        if (!erDev()) {
+            return
+        }
+        val hendelse = hendelsefabrikk.vedtaksperiodeSkjønnsmessigFastsettelse(
+            id = id,
+            vedtaksperiodeId = vedtaksperiodeId,
+            fødselsnummer = fødselsnummer,
+            aktørId = aktørId,
+            organisasjonsnummer = organisasjonsnummer,
             json = message.toJson()
         )
         return utfør(hendelse, context)

@@ -31,6 +31,7 @@ import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAKSPERIODE_FORKASTET
 import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAKSPERIODE_NY_UTBETALING
 import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAKSPERIODE_OPPRETTET
 import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAKSPERIODE_REBEREGNET
+import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAKSPERIODE_SKJØNNSMESSIG_FASTSETTELSE
 import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAK_FATTET
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
 import no.nav.helse.modell.overstyring.OverstyringIgangsatt
@@ -53,6 +54,7 @@ import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOpprettet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnet
+import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeSkjønnsmessigFastsettelse
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.modell.vedtaksperiode.vedtak.VedtakFattet
 import no.nav.helse.objectMapper
@@ -242,6 +244,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
             SØKNAD_SENDT -> hendelsefabrikk.søknadSendt(json)
             VEDTAKSPERIODE_NY_UTBETALING -> hendelsefabrikk.vedtaksperiodeNyUtbetaling(json)
             SYKEFRAVÆRSTILFELLER -> hendelsefabrikk.sykefraværstilfeller(json)
+            VEDTAKSPERIODE_SKJØNNSMESSIG_FASTSETTELSE -> hendelsefabrikk.vedtaksperiodeSkjønnsmessigFastsettelse(json)
         }
 
     private fun tilHendelsetype(hendelse: Hendelse) = when (hendelse) {
@@ -268,6 +271,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
         is SøknadSendt -> SØKNAD_SENDT
         is VedtaksperiodeNyUtbetaling -> VEDTAKSPERIODE_NY_UTBETALING
         is Sykefraværstilfeller -> SYKEFRAVÆRSTILFELLER
+        is VedtaksperiodeSkjønnsmessigFastsettelse -> VEDTAKSPERIODE_SKJØNNSMESSIG_FASTSETTELSE
         else -> throw IllegalArgumentException("ukjent hendelsetype: ${hendelse::class.simpleName}")
     }
 
@@ -277,6 +281,6 @@ internal class HendelseDao(private val dataSource: DataSource) {
         VEDTAKSPERIODE_REBEREGNET, OVERSTYRING_INNTEKT_OG_REFUSJON, OVERSTYRING_ARBEIDSFORHOLD,
         OVERSTYRING_IGANGSATT, GOSYS_OPPGAVE_ENDRET, ENDRET_SKJERMETINFO, VEDTAK_FATTET,
         NYE_VARSLER, VEDTAKSPERIODE_OPPRETTET, SØKNAD_SENDT, VEDTAKSPERIODE_NY_UTBETALING, SYKEFRAVÆRSTILFELLER,
-        PÅMINNET_GODKJENNINGSBEHOV, SKJØNNSFASTSETTING_SYKEPENGEGRUNNLAG
+        PÅMINNET_GODKJENNINGSBEHOV, SKJØNNSFASTSETTING_SYKEPENGEGRUNNLAG, VEDTAKSPERIODE_SKJØNNSMESSIG_FASTSETTELSE
     }
 }
