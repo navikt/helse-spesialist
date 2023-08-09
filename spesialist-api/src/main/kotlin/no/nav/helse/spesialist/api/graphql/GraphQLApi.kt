@@ -22,6 +22,7 @@ import no.nav.helse.spesialist.api.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMediator
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
+import no.nav.helse.spesialist.api.erDev
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.objectMapper
@@ -148,5 +149,3 @@ private fun buildPlaygroundHtml(graphQLEndpoint: String, subscriptionsEndpoint: 
     Application::class.java.classLoader.getResource("graphql-playground.html")?.readText()
         ?.replace("\${graphQLEndpoint}", graphQLEndpoint)?.replace("\${subscriptionsEndpoint}", subscriptionsEndpoint)
         ?: throw IllegalStateException("graphql-playground.html cannot be found in the classpath")
-
-private fun erDev() = "dev-gcp" == System.getenv("NAIS_CLUSTER_NAME")

@@ -20,5 +20,4 @@ class SaksbehandlerTilganger(
 
     fun harTilgangTilSkjermedePersoner() = skjermedePersonerSaksbehandlergruppe in gruppetilganger
     fun hartilgangTilStikkprøve() = saksbehandlerIdent in saksbehandlereMedTilgangTilStikkprøve || erDev()
-    private fun erDev() = "dev-gcp" == System.getenv("NAIS_CLUSTER_NAME")
 }
