@@ -719,6 +719,7 @@ internal class Hendelsefabrikk(
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
             arbeidsforholdDao = arbeidsforholdDao,
+            egenAnsattDao = egenAnsattDao,
         )
     }
 

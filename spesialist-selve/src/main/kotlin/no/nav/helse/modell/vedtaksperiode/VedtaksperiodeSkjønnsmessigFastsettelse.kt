@@ -6,6 +6,8 @@ import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsforhold.command.KlargjørArbeidsforholdCommand
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
+import no.nav.helse.modell.egenansatt.EgenAnsattCommand
+import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.KlargjørArbeidsgiverCommand
 import no.nav.helse.modell.kommando.KlargjørPersonCommand
@@ -27,6 +29,7 @@ internal class VedtaksperiodeSkjønnsmessigFastsettelse(
     personDao: PersonDao,
     arbeidsgiverDao: ArbeidsgiverDao,
     arbeidsforholdDao: ArbeidsforholdDao,
+    egenAnsattDao: EgenAnsattDao,
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         KlargjørPersonCommand(
@@ -43,6 +46,9 @@ internal class VedtaksperiodeSkjønnsmessigFastsettelse(
             organisasjonsnummer = organisasjonsnummer,
             arbeidsforholdDao = arbeidsforholdDao,
             førstegangsbehandling = true
+        ),
+        EgenAnsattCommand(
+            egenAnsattDao = egenAnsattDao
         ),
         OppdaterSnapshotCommand(
             snapshotClient = snapshotClient,
