@@ -472,6 +472,12 @@ internal class PersonDao(private val dataSource: DataSource) {
             it.int("enhet_ref").toEnhetnummer()
         }.asSingle))
     }
+
+    internal fun markerPersonSomKlarForVisning(fødselsnummer: String) = sessionOf(dataSource).use { session ->
+        @Language("PostgreSQL")
+        val statement = "INSERT INTO stottetabell_for_skjonnsmessig_fastsettelse(fodselsnummer) VALUES(:fodselsnummer);"
+        session.run(queryOf(statement, mapOf("fodselsnummer" to fødselsnummer.toLong())).asUpdate)
+    }
 }
 
 internal fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else this.toString()

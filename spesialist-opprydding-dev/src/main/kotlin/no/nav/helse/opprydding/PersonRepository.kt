@@ -51,8 +51,13 @@ internal class PersonRepository(private val dataSource: DataSource) {
         val personinfoRef = finnPersoninfoRef(personRef)
 
         @Language("PostgreSQL")
+        val query2 = "DELETE FROM stottetabell_for_skjonnsmessig_fastsettelse WHERE fodselsnummer = (SELECT fodselsnummer FROM person WHERE id = ?)"
+        run(queryOf(query2, personRef).asExecute)
+
+        @Language("PostgreSQL")
         val query = "DELETE FROM person WHERE id = ?"
         run(queryOf(query, personRef).asExecute)
+
         slettInfo(personinfoRef)
         slettInfotrygdutbetalinger(infotrygdutbetalingRef)
     }

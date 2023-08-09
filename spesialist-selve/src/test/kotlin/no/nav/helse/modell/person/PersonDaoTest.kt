@@ -59,6 +59,22 @@ internal class PersonDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `oppretter person klar for visning i støttetabell for skjønnsmessig fastsettelse`() {
+        opprettMinimalPerson()
+        personDao.markerPersonSomKlarForVisning(FNR)
+
+        val personKlarForVisning = sessionOf(dataSource).use { session ->
+            session.run(
+                queryOf(
+                    "SELECT fodselsnummer FROM stottetabell_for_skjonnsmessig_fastsettelse WHERE fodselsnummer = ?",
+                    FNR.toLong()
+                ).map { it.long("fodselsnummer").toFødselsnummer() }.asSingle
+            )
+        }
+        assertEquals(FNR, personKlarForVisning)
+    }
+
+    @Test
     fun `oppdaterer personinfo`() {
         opprettPerson()
         val nyttFornavn = "OLE"

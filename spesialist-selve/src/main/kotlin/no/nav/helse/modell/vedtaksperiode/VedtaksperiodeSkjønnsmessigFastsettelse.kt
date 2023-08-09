@@ -11,6 +11,7 @@ import no.nav.helse.modell.kommando.KlargjørArbeidsgiverCommand
 import no.nav.helse.modell.kommando.KlargjørPersonCommand
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
+import no.nav.helse.modell.kommando.ikkesuspenderendeCommand
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 
@@ -50,6 +51,9 @@ internal class VedtaksperiodeSkjønnsmessigFastsettelse(
             fødselsnummer = fødselsnummer,
             personDao = personDao,
         ),
+        ikkesuspenderendeCommand {
+            personDao.markerPersonSomKlarForVisning(fødselsnummer)
+        }
     )
 
     override fun fødselsnummer() = fødselsnummer

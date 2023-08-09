@@ -134,3 +134,6 @@ VALUES (gen_random_uuid(), 'FEILENDE_TESTHENDELSE', now(), '{}'::json);
 
 INSERT INTO oppgave_behandling_kobling(oppgave_id, behandling_id)
 VALUES (${sequence_number}, gen_random_uuid());
+
+INSERT INTO stottetabell_for_skjonnsmessig_fastsettelse(fodselsnummer)
+VALUES (${fødselsnummer})
