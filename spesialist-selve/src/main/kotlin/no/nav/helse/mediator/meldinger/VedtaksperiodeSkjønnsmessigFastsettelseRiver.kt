@@ -25,7 +25,7 @@ internal class VedtaksperiodeSkjønnsmessigFastsettelseRiver(
                 it.demandValue("@event_name", "vedtaksperiode_endret")
                 it.demandValue("gjeldendeTilstand", "AVVENTER_SKJØNNSMESSIG_FASTSETTELSE")
                 it.requireKey(
-                    "@id", "fødselsnummer", "aktørId", "organisasjonsnummer", "vedtaksperiodeId", "fom", "tom"
+                    "@id", "fødselsnummer", "aktørId", "organisasjonsnummer", "vedtaksperiodeId"
                 )
             }
         }.register(this)

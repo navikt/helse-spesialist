@@ -699,7 +699,6 @@ internal class Hendelsefabrikk(
         )
     }
 
-
     fun vedtaksperiodeSkjønnsmessigFastsettelse(
         id: UUID,
         vedtaksperiodeId: UUID,

@@ -8,7 +8,6 @@ import java.util.UUID
 import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.MetrikkRiver
-import no.nav.helse.mediator.api.erDev
 import no.nav.helse.mediator.meldinger.EndretSkjermetinfoRiver
 import no.nav.helse.mediator.meldinger.GodkjenningsbehovRiver
 import no.nav.helse.mediator.meldinger.GosysOppgaveEndretRiver
@@ -248,7 +247,7 @@ internal class HendelseMediator(
         organisasjonsnummer: String,
         context: MessageContext,
     ) {
-        if (!erDev()) {
+        if (!Toggle.Skjonnsfastsetting.enabled) {
             return
         }
         val hendelse = hendelsefabrikk.vedtaksperiodeSkjønnsmessigFastsettelse(

@@ -417,8 +417,6 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
             gjeldendeTilstand = gjeldendeTilstand ?: if (erRevurdering) "AVVENTER_GODKJENNING_REVURDERING" else "AVVENTER_GODKJENNING",
             forårsaketAvId = forårsaketAvId
         )
-        assertIngenEtterspurteBehov()
-        assertIngenUtgåendeMeldinger()
     }
 
     protected fun håndterVedtaksperiodeReberegnet(
@@ -1237,6 +1235,13 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
     protected fun assertPersonEksisterer(fødselsnummer: String, aktørId: String) {
         assertEquals(1, person(fødselsnummer, aktørId)) { "Person med fødselsnummer=$fødselsnummer og aktørId=$aktørId finnes ikke i databasen" }
     }
+
+    protected fun assertHarPersoninfo(fødselsnummer: String) =
+        sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val query = "SELECT info_ref FROM person WHERE fodselsnummer = ?"
+            session.run(queryOf(query, fødselsnummer.toLong()).map { it }.asSingle) ?: fail("Fant ikke personinfo for $fødselsnummer")
+        }
 
     protected fun assertPersonEksistererIkke(fødselsnummer: String, aktørId: String) {
         assertEquals(0, person(fødselsnummer, aktørId))

@@ -24,6 +24,7 @@ internal class VedtaksperiodeEndretRiver(
             validate {
                 it.demandValue("@event_name", "vedtaksperiode_endret")
                 it.rejectValue("forrigeTilstand", "START")
+                it.rejectValue("gjeldendeTilstand", "AVVENTER_SKJØNNSMESSIG_FASTSETTELSE")
                 it.requireKey("vedtaksperiodeId")
                 it.requireKey("fødselsnummer")
                 it.requireKey("@id")
