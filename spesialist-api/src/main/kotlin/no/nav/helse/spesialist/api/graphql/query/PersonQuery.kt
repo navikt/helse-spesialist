@@ -4,12 +4,14 @@ import graphql.GraphQLError
 import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
+import no.nav.helse.spesialist.api.erDev
 import no.nav.helse.spesialist.api.graphql.schema.Person
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
@@ -62,8 +64,7 @@ class PersonQuery(
             return DataFetcherResult.newResult<Person?>().error(getNotFoundError(fnr)).build()
         }
 
-        val reservasjon =
-            CoroutineScope(Dispatchers.IO).async { reservasjonClient.hentReservasjonsstatus(fødselsnummer) }
+        val reservasjon = finnReservasjonsstatus(fødselsnummer)
 
         if (isForbidden(fødselsnummer, env)) {
             return DataFetcherResult.newResult<Person?>().error(getForbiddenError(fødselsnummer)).build()
@@ -90,7 +91,6 @@ class PersonQuery(
                 periodehistorikkDao = periodehistorikkDao,
                 notatDao = notatDao,
                 totrinnsvurderingApiDao = totrinnsvurderingApiDao,
-                reservasjonClient = reservasjonClient,
                 tilganger = env.graphQlContext.get("tilganger"),
             )
         }
@@ -101,6 +101,11 @@ class PersonQuery(
             DataFetcherResult.newResult<Person?>().data(person).build()
         }
     }
+
+    private fun finnReservasjonsstatus(fødselsnummer: String) =
+        if (erDev()) CompletableDeferred(null) else CoroutineScope(Dispatchers.IO).async {
+            reservasjonClient.hentReservasjonsstatus(fødselsnummer)
+        }
 
     private fun getFlereFødselsnumreError(fødselsnumre: Set<String>): GraphQLError = GraphqlErrorException.newErrorException()
         .message("Mer enn ett fødselsnummer for personen")
