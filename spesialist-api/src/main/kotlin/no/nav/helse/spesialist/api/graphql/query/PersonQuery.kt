@@ -13,6 +13,7 @@ import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.erDev
 import no.nav.helse.spesialist.api.graphql.schema.Person
+import no.nav.helse.spesialist.api.graphql.schema.Reservasjon
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
@@ -103,7 +104,8 @@ class PersonQuery(
     }
 
     private fun finnReservasjonsstatus(fødselsnummer: String) =
-        if (erDev()) CompletableDeferred(null) else CoroutineScope(Dispatchers.IO).async {
+        if (erDev()) CompletableDeferred<Reservasjon?>().also { it.complete(null) }
+        else CoroutineScope(Dispatchers.IO).async {
             reservasjonClient.hentReservasjonsstatus(fødselsnummer)
         }
 
