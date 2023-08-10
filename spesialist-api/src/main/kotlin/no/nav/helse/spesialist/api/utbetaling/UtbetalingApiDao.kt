@@ -51,7 +51,7 @@ ORDER BY ui.id, u.opprettet DESC
     private fun findOppdrag(session: Session, fagsystemIdRef: Long): OppdragApiDto? =
         session.run(
             queryOf(
-                "SELECT * FROM oppdrag WHERE id = :fagsystemIdRef",
+                "SELECT id,mottaker,fagsystem_id FROM oppdrag WHERE id = :fagsystemIdRef",
                 mapOf("fagsystemIdRef" to fagsystemIdRef)
             ).map { row ->
                 OppdragApiDto(
@@ -62,9 +62,9 @@ ORDER BY ui.id, u.opprettet DESC
             }.asSingle
         )
 
-    private fun findUtbetalingslinjer(session: Session, oppdragId: Long): List<UtbetalingslinjeApiDto> {
+        private fun findUtbetalingslinjer(session: Session, oppdragId: Long): List<UtbetalingslinjeApiDto> {
         @Language("PostgreSQL")
-        val query = "SELECT * FROM utbetalingslinje WHERE oppdrag_id=:oppdrag_id;"
+        val query = "SELECT fom, tom, totalbeløp FROM utbetalingslinje WHERE oppdrag_id=:oppdrag_id;"
 
         return session.run(queryOf(query, mapOf("oppdrag_id" to oppdragId))
             .map { row ->

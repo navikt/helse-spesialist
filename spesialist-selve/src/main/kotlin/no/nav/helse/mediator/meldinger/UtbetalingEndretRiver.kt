@@ -1,6 +1,7 @@
 package no.nav.helse.mediator.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
+import java.time.LocalDate
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.mediator.HendelseMediator
@@ -11,6 +12,7 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
+import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -27,9 +29,23 @@ internal class UtbetalingEndretRiver(
                 it.demandValue("@event_name", "utbetaling_endret")
                 it.requireKey(
                     "@id", "fødselsnummer", "organisasjonsnummer",
-                    "utbetalingId", "arbeidsgiverOppdrag.fagsystemId", "personOppdrag.fagsystemId",
+                    "utbetalingId")
+                // disse brukes i Hendelsefabrikk for å lagre oppdrag i db
+                it.requireKey("arbeidsgiverOppdrag.fagsystemId", "personOppdrag.fagsystemId",
+                    "arbeidsgiverOppdrag.mottaker", "personOppdrag.mottaker",
                     "arbeidsgiverOppdrag.nettoBeløp", "personOppdrag.nettoBeløp"
                 )
+                /*
+                it.requireArray("arbeidsgiverOppdrag.linjer") {
+                    require("fom", JsonNode::asLocalDate)
+                    require("tom", JsonNode::asLocalDate)
+                    interestedIn("totalbeløp")
+                }
+                it.requireArray("personOppdrag.linjer") {
+                    require("fom", JsonNode::asLocalDate)
+                    require("tom", JsonNode::asLocalDate)
+                    interestedIn("totalbeløp")
+                }*/
                 it.requireAny("forrigeStatus", Utbetalingsstatus.gyldigeStatuser.values())
                 it.requireAny("gjeldendeStatus", Utbetalingsstatus.gyldigeStatuser.values())
                 it.require("@opprettet", JsonNode::asLocalDateTime)

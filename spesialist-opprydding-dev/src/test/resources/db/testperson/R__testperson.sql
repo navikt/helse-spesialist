@@ -95,18 +95,14 @@ VALUES ('${vedtaksperiode_id}', ${sequence_number});
 
 INSERT INTO annullert_av_saksbehandler(id, annullert_tidspunkt, saksbehandler_ref)
 VALUES (${sequence_number}, now(), '${saksbehandler_oid}');
-INSERT INTO oppdrag(id, fagsystem_id, mottaker, fagområde, endringskode, sistearbeidsgiverdag)
-VALUES (${sequence_number}, 'EN_PERSON_FAGSYSTEMID', 'MOTTAKER', 'SP', 'NY', '2018-01-01');
-INSERT INTO oppdrag(id, fagsystem_id, mottaker, fagområde, endringskode, sistearbeidsgiverdag)
-VALUES (${sequence_number} + 1000, 'EN_ARBEIDSGIVER_FAGSYSTEMID', 'MOTTAKER', 'SPREF', 'NY', '2018-01-01');
-INSERT INTO utbetalingslinje(id, oppdrag_id, delytelseid, refdelytelseid, reffagsystemid, endringskode, klassekode,
-                             statuskode, datostatusfom, fom, tom, dagsats, lønn, grad, totalbeløp)
-VALUES (${sequence_number}, ${sequence_number}, 1, null, null, 'NY', 'SPREFAG-IOP', null, null, '2018-01-01',
-        '2018-01-31', 1000, 1000, 100, 1000);
-INSERT INTO utbetalingslinje(id, oppdrag_id, delytelseid, refdelytelseid, reffagsystemid, endringskode, klassekode,
-                             statuskode, datostatusfom, fom, tom, dagsats, lønn, grad, totalbeløp)
-VALUES (${sequence_number} + 1000, ${sequence_number} + 1000, 1, null, null, 'NY', 'SPREFAG-IOP', null, null,
-        '2018-01-01', '2018-01-31', 1000, 1000, 100, 1000);
+INSERT INTO oppdrag(id, fagsystem_id, mottaker, fagområde)
+VALUES (${sequence_number}, 'EN_PERSON_FAGSYSTEMID', 'MOTTAKER', 'SP');
+INSERT INTO oppdrag(id, fagsystem_id, mottaker, fagområde)
+VALUES (${sequence_number} + 1000, 'EN_ARBEIDSGIVER_FAGSYSTEMID', 'MOTTAKER', 'SPREF');
+INSERT INTO utbetalingslinje(id, oppdrag_id, fom, tom, totalbeløp)
+VALUES (${sequence_number}, ${sequence_number}, '2018-01-01', '2018-01-31', 1000);
+INSERT INTO utbetalingslinje(id, oppdrag_id, fom, tom, totalbeløp)
+VALUES (${sequence_number} + 1000, ${sequence_number} + 1000, '2018-01-01', '2018-01-31', 1000);
 INSERT INTO utbetaling_id(id, utbetaling_id, person_ref, arbeidsgiver_ref, arbeidsgiver_fagsystem_id_ref,
                           person_fagsystem_id_ref, type, opprettet, personbeløp, arbeidsgiverbeløp)
 VALUES (${sequence_number}, '${utbetaling_id}', ${sequence_number}, ${sequence_number}, ${sequence_number} + 1000,

@@ -840,28 +840,13 @@ internal class Hendelsefabrikk(
 
     private fun tilOppdrag(jsonNode: JsonNode) = LagreOppdragCommand.Oppdrag(
         fagsystemId = jsonNode.path("fagsystemId").asText(),
-        fagområde = jsonNode.path("fagområde").asText(),
         mottaker = jsonNode.path("mottaker").asText(),
-        endringskode = jsonNode.path("endringskode").asText(),
-        sisteArbeidsgiverdag = jsonNode.path("sisteArbeidsgiverdag")
-            .takeIf(JsonNode::isTextual)
-            ?.asLocalDate()
-            ?.takeUnless { it == LocalDate.MIN },
+        fagområde = jsonNode.path("fagområde").asText(),
         linjer = jsonNode.path("linjer").map { linje ->
             LagreOppdragCommand.Oppdrag.Utbetalingslinje(
-                endringskode = linje.path("endringskode").asText(),
-                klassekode = linje.path("klassekode").asText(),
-                statuskode = linje.path("statuskode").takeIf(JsonNode::isTextual)?.asText(),
-                datoStatusFom = linje.path("datoStatusFom").takeIf(JsonNode::isTextual)?.asLocalDate(),
                 fom = linje.path("fom").asLocalDate(),
                 tom = linje.path("tom").asLocalDate(),
-                dagsats = linje.path("dagsats").asInt(),
-                totalbeløp = linje.path("totalbeløp").takeIf(JsonNode::isInt)?.asInt(),
-                lønn = linje.path("lønn").asInt(),
-                grad = linje.path("grad").asDouble(),
-                delytelseId = linje.path("delytelseId").asInt(),
-                refDelytelseId = linje.path("refDelytelseId").takeIf(JsonNode::isInt)?.asInt(),
-                refFagsystemId = linje.path("refFagsystemId").takeIf(JsonNode::isTextual)?.asText()
+                totalbeløp = linje.path("totalbeløp").takeIf(JsonNode::isInt)?.asInt()
             )
         }
     )
