@@ -795,8 +795,8 @@ internal class Hendelsefabrikk(
             opprettet = jsonNode.path("@opprettet").asLocalDateTime(),
             arbeidsgiverbeløp = jsonNode.path("arbeidsgiverOppdrag").path("nettoBeløp").asInt(),
             personbeløp = jsonNode.path("personOppdrag").path("nettoBeløp").asInt(),
-            arbeidsgiverOppdrag = tilOppdrag(jsonNode.path("arbeidsgiverOppdrag")),
-            personOppdrag = tilOppdrag(jsonNode.path("personOppdrag")),
+            arbeidsgiverOppdrag = tilOppdrag(jsonNode.path("arbeidsgiverOppdrag"), jsonNode.path("organisasjonsnummer").asText()),
+            personOppdrag = tilOppdrag(jsonNode.path("personOppdrag"), jsonNode.path("fødselsnummer").asText()),
             json = json,
             utbetalingDao = utbetalingDao,
             opptegnelseDao = opptegnelseDao,
@@ -838,9 +838,9 @@ internal class Hendelsefabrikk(
         )
     }
 
-    private fun tilOppdrag(jsonNode: JsonNode) = LagreOppdragCommand.Oppdrag(
+    private fun tilOppdrag(jsonNode: JsonNode, mottaker: String) = LagreOppdragCommand.Oppdrag(
         fagsystemId = jsonNode.path("fagsystemId").asText(),
-        mottaker = jsonNode.path("mottaker").asText(),
+        mottaker = jsonNode.path("mottaker").takeIf(JsonNode::isTextual)?.asText() ?: mottaker,
         fagområde = jsonNode.path("fagområde").asText(),
         linjer = jsonNode.path("linjer").map { linje ->
             LagreOppdragCommand.Oppdrag.Utbetalingslinje(

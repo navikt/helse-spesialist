@@ -31,10 +31,9 @@ internal class UtbetalingEndretRiver(
                     "@id", "fødselsnummer", "organisasjonsnummer",
                     "utbetalingId")
                 // disse brukes i Hendelsefabrikk for å lagre oppdrag i db
-                it.requireKey("arbeidsgiverOppdrag.fagsystemId", "personOppdrag.fagsystemId",
-                    "arbeidsgiverOppdrag.mottaker", "personOppdrag.mottaker",
-                    "arbeidsgiverOppdrag.nettoBeløp", "personOppdrag.nettoBeløp"
-                )
+                it.requireKey("arbeidsgiverOppdrag.fagsystemId", "personOppdrag.fagsystemId")
+                it.interestedIn("arbeidsgiverOppdrag.mottaker", "personOppdrag.mottaker",
+                    "arbeidsgiverOppdrag.nettoBeløp", "personOppdrag.nettoBeløp")
                 /*
                 it.requireArray("arbeidsgiverOppdrag.linjer") {
                     require("fom", JsonNode::asLocalDate)
