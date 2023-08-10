@@ -38,11 +38,10 @@ internal class LagreOppdragCommand(
     internal class Oppdrag(
         private val fagsystemId: String,
         private val mottaker: String,
-        private val fagområde: String,
         private val linjer: List<Utbetalingslinje>
     ) {
         internal fun lagre(utbetalingDao: UtbetalingDao) =
-            utbetalingDao.nyttOppdrag(fagsystemId, mottaker, fagområde)?.also {
+            utbetalingDao.nyttOppdrag(fagsystemId, mottaker)?.also {
                 lagreLinjer(utbetalingDao, it)
             }
 

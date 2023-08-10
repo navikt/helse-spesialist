@@ -110,13 +110,12 @@ class UtbetalingDao(private val dataSource: DataSource) {
 
     internal fun nyttOppdrag(
         fagsystemId: String,
-        mottaker: String,
-        fagområde: String
+        mottaker: String
     ): Long? {
         @Language("PostgreSQL")
         val statement = """
-            INSERT INTO oppdrag (fagsystem_id, mottaker, fagområde)
-            VALUES (:fagsystemId, :mottaker, CAST(:fagomrade as oppdrag_fagområde))
+            INSERT INTO oppdrag (fagsystem_id, mottaker)
+            VALUES (:fagsystemId, :mottaker)
             ON CONFLICT DO NOTHING
         """
         return sessionOf(dataSource, returnGeneratedKey = true).use {
@@ -124,8 +123,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
                 queryOf(
                     statement, mapOf(
                         "fagsystemId" to fagsystemId,
-                        "mottaker" to mottaker,
-                        "fagomrade" to fagområde
+                        "mottaker" to mottaker
                     )
                 ).asUpdateAndReturnGeneratedKey
             )

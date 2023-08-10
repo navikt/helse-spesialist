@@ -95,10 +95,10 @@ VALUES ('${vedtaksperiode_id}', ${sequence_number});
 
 INSERT INTO annullert_av_saksbehandler(id, annullert_tidspunkt, saksbehandler_ref)
 VALUES (${sequence_number}, now(), '${saksbehandler_oid}');
-INSERT INTO oppdrag(id, fagsystem_id, mottaker, fagområde)
-VALUES (${sequence_number}, 'EN_PERSON_FAGSYSTEMID', 'MOTTAKER', 'SP');
-INSERT INTO oppdrag(id, fagsystem_id, mottaker, fagområde)
-VALUES (${sequence_number} + 1000, 'EN_ARBEIDSGIVER_FAGSYSTEMID', 'MOTTAKER', 'SPREF');
+INSERT INTO oppdrag(id, fagsystem_id, mottaker)
+VALUES (${sequence_number}, 'EN_PERSON_FAGSYSTEMID', 'MOTTAKER');
+INSERT INTO oppdrag(id, fagsystem_id, mottaker)
+VALUES (${sequence_number} + 1000, 'EN_ARBEIDSGIVER_FAGSYSTEMID', 'MOTTAKER');
 INSERT INTO utbetalingslinje(id, oppdrag_id, fom, tom, totalbeløp)
 VALUES (${sequence_number}, ${sequence_number}, '2018-01-01', '2018-01-31', 1000);
 INSERT INTO utbetalingslinje(id, oppdrag_id, fom, tom, totalbeløp)

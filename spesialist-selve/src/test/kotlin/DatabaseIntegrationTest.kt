@@ -402,10 +402,10 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         fagsystemId: String = fagsystemId(),
         mottaker: String = ORGNUMMER
     ) =
-        utbetalingDao.nyttOppdrag(fagsystemId, mottaker, "SPREF")!!
+        utbetalingDao.nyttOppdrag(fagsystemId, mottaker)!!
 
     protected fun lagPersonoppdrag(fagsystemId: String = fagsystemId()) =
-        utbetalingDao.nyttOppdrag(fagsystemId, FNR, "SP")!!
+        utbetalingDao.nyttOppdrag(fagsystemId, FNR)!!
 
     protected fun lagUtbetalingId(
         arbeidsgiverOppdragId: Long,

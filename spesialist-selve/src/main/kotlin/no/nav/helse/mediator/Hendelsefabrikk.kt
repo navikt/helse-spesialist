@@ -841,7 +841,6 @@ internal class Hendelsefabrikk(
     private fun tilOppdrag(jsonNode: JsonNode, mottaker: String) = LagreOppdragCommand.Oppdrag(
         fagsystemId = jsonNode.path("fagsystemId").asText(),
         mottaker = jsonNode.path("mottaker").takeIf(JsonNode::isTextual)?.asText() ?: mottaker,
-        fagområde = jsonNode.path("fagområde").asText(),
         linjer = jsonNode.path("linjer").map { linje ->
             LagreOppdragCommand.Oppdrag.Utbetalingslinje(
                 fom = linje.path("fom").asLocalDate(),
