@@ -140,6 +140,8 @@ internal class OverstyringApiTest: AbstractE2ETest() {
                     fraÅrlig = 260000.0,
                     årsak = "En årsak",
                     begrunnelse = "En begrunnelse",
+                    begrunnelseMal = "En begrunnelsemal",
+                    begrunnelseFritekst = "begrunnelsefritekst",
                     subsumsjon = SubsumsjonDto("8-28", "3", null),
                     initierendeVedtaksperiodeId = UUID.randomUUID().toString(),
                 ),

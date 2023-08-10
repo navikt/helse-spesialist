@@ -372,6 +372,8 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
                     subsumsjon = SubsumsjonDto("8-28", "3", null),
                     årsak = "En årsak",
                     begrunnelse = "En begrunnelse",
+                    begrunnelseMal = "En begrunnelsemal",
+                    begrunnelseFritekst = "begrunnelsefritekst",
                     initierendeVedtaksperiodeId = PERIODE.id.toString()
                 ),
                 SkjønnsfastsattArbeidsgiverDto(
@@ -381,6 +383,8 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
                     subsumsjon = SubsumsjonDto("8-28", "3", null),
                     årsak = "En årsak 2",
                     begrunnelse = "En begrunnelse 2",
+                    begrunnelseMal = "En begrunnelsemal",
+                    begrunnelseFritekst = "begrunnelsefritekst",
                     initierendeVedtaksperiodeId = UUID.randomUUID().toString()
                 ),
             )
@@ -401,6 +405,8 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
         hendelse["arbeidsgivere"].first().let {
             assertEquals(ORGANISASJONSNUMMER, it["organisasjonsnummer"].asText())
             assertEquals("En begrunnelse", it["begrunnelse"].asText())
+            assertEquals("En begrunnelsemal", it["begrunnelseMal"].asText())
+            assertEquals("begrunnelsefritekst", it["begrunnelseFritekst"].asText())
             assertEquals("En årsak", it["årsak"].asText())
             assertEquals(25000.0, it["årlig"].asDouble())
             assertEquals(25001.0, it["fraÅrlig"].asDouble())
@@ -411,6 +417,8 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
         hendelse["arbeidsgivere"].last().let {
             assertEquals(ORGANISASJONSNUMMER_GHOST, it["organisasjonsnummer"].asText())
             assertEquals("En begrunnelse 2", it["begrunnelse"].asText())
+            assertEquals("En begrunnelsemal", it["begrunnelseMal"].asText())
+            assertEquals("begrunnelsefritekst", it["begrunnelseFritekst"].asText())
             assertEquals("En årsak 2", it["årsak"].asText())
             assertEquals(21000.0, it["årlig"].asDouble())
             assertEquals(25001.0, it["fraÅrlig"].asDouble())
