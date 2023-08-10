@@ -707,79 +707,36 @@ internal object TestmeldingsfabrikkV2 {
             "arbeidsgiverOppdrag" to mapOf(
                 "mottaker" to organisasjonsnummer,
                 "fagområde" to "SPREF",
-                "endringskode" to "NY",
                 "fagsystemId" to arbeidsgiverFagsystemId,
                 "nettoBeløp" to arbeidsgiverbeløp,
-                "sisteArbeidsgiverdag" to "${LocalDate.MIN}",
                 "linjer" to listOf(
                     mapOf(
                         "fom" to "${LocalDate.now()}",
                         "tom" to "${LocalDate.now()}",
-                        "dagsats" to 2000,
-                        "totalbeløp" to 2000,
-                        "lønn" to 2000,
-                        "grad" to 100.00,
-                        "refFagsystemId" to arbeidsgiverFagsystemId,
-                        "delytelseId" to 2,
-                        "refDelytelseId" to 1,
-                        "datoStatusFom" to "${LocalDate.now()}",
-                        "endringskode" to "NY",
-                        "klassekode" to "SPREFAG-IOP",
-                        "statuskode" to "OPPH"
+                        "totalbeløp" to 2000
                     ),
                     mapOf(
                         "fom" to "${LocalDate.now()}",
                         "tom" to "${LocalDate.now()}",
-                        "dagsats" to 2000,
-                        "totalbeløp" to 2000,
-                        "lønn" to 2000,
-                        "grad" to 100.00,
-                        "refFagsystemId" to null,
-                        "delytelseId" to 3,
-                        "refDelytelseId" to null,
-                        "datoStatusFom" to null,
-                        "endringskode" to "NY",
-                        "klassekode" to "SPREFAG-IOP",
-                        "statuskode" to null
+                        "totalbeløp" to 2000
                     )
                 )
             ),
             "personOppdrag" to mapOf(
                 "mottaker" to fødselsnummer,
                 "fagområde" to "SP",
-                "endringskode" to "NY",
                 "fagsystemId" to personFagsystemId,
                 "nettoBeløp" to personbeløp,
                 "linjer" to listOf(
                     mapOf(
                         "fom" to "${LocalDate.now()}",
                         "tom" to "${LocalDate.now()}",
-                        "dagsats" to 2000,
-                        "totalbeløp" to 2000,
-                        "lønn" to 2000,
-                        "grad" to 100.00,
-                        "refFagsystemId" to personFagsystemId,
-                        "delytelseId" to 2,
-                        "refDelytelseId" to 1,
-                        "datoStatusFom" to "${LocalDate.now()}",
-                        "endringskode" to "NY",
-                        "klassekode" to "SPATORD",
-                        "statuskode" to "OPPH"
+                        "totalbeløp" to 2000
                     ),
                     mapOf(
                         "fom" to "${LocalDate.now()}",
                         "tom" to "${LocalDate.now()}",
-                        "dagsats" to 2000,
-                        "totalbeløp" to 2000,
-                        "lønn" to 2000,
-                        "grad" to 100.00,
-                        "refFagsystemId" to null,
-                        "delytelseId" to 3,
-                        "refDelytelseId" to null,
-                        "datoStatusFom" to null,
-                        "endringskode" to "NY",
-                        "klassekode" to "SPATORD",
-                        "statuskode" to null
+                        "totalbeløp" to 2000
                     )
                 )
 

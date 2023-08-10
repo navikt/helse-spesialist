@@ -38,13 +38,10 @@ internal class LagreOppdragCommand(
     internal class Oppdrag(
         private val fagsystemId: String,
         private val mottaker: String,
-        private val fagområde: String,
-        private val endringskode: String,
-        private val sisteArbeidsgiverdag: LocalDate?,
         private val linjer: List<Utbetalingslinje>
     ) {
         internal fun lagre(utbetalingDao: UtbetalingDao) =
-            utbetalingDao.nyttOppdrag(fagsystemId, mottaker, fagområde, endringskode, sisteArbeidsgiverdag)?.also {
+            utbetalingDao.nyttOppdrag(fagsystemId, mottaker)?.also {
                 lagreLinjer(utbetalingDao, it)
             }
 
@@ -53,37 +50,12 @@ internal class LagreOppdragCommand(
         }
 
         internal class Utbetalingslinje(
-            private val endringskode: String,
-            private val klassekode: String,
-            private val statuskode: String?,
-            private val datoStatusFom: LocalDate?,
             private val fom: LocalDate,
             private val tom: LocalDate,
-            private val dagsats: Int,
-            private val totalbeløp: Int?,
-            private val lønn: Int,
-            private val grad: Double,
-            private val delytelseId: Int,
-            private val refDelytelseId: Int?,
-            private val refFagsystemId: String?
+            private val totalbeløp: Int?
         ) {
             internal fun lagre(utbetalingDao: UtbetalingDao, oppdragId: Long) {
-                utbetalingDao.nyLinje(
-                    oppdragId,
-                    endringskode,
-                    klassekode,
-                    statuskode,
-                    datoStatusFom,
-                    fom,
-                    tom,
-                    dagsats,
-                    totalbeløp,
-                    lønn,
-                    grad,
-                    delytelseId,
-                    refDelytelseId,
-                    refFagsystemId
-                )
+                utbetalingDao.nyLinje(oppdragId, fom, tom, totalbeløp)
             }
         }
     }

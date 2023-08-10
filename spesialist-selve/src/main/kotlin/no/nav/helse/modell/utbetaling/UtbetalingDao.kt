@@ -110,15 +110,12 @@ class UtbetalingDao(private val dataSource: DataSource) {
 
     internal fun nyttOppdrag(
         fagsystemId: String,
-        mottaker: String,
-        fagområde: String,
-        endringskode: String,
-        sisteArbeidsgiverdag: LocalDate?
+        mottaker: String
     ): Long? {
         @Language("PostgreSQL")
         val statement = """
-            INSERT INTO oppdrag (fagsystem_id, mottaker, fagområde, endringskode, sisteArbeidsgiverdag)
-            VALUES (:fagsystemId, :mottaker, CAST(:fagomrade as oppdrag_fagområde), CAST(:endringskode as oppdrag_endringskode), :sisteArbeidsgiverdag)
+            INSERT INTO oppdrag (fagsystem_id, mottaker)
+            VALUES (:fagsystemId, :mottaker)
             ON CONFLICT DO NOTHING
         """
         return sessionOf(dataSource, returnGeneratedKey = true).use {
@@ -126,10 +123,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
                 queryOf(
                     statement, mapOf(
                         "fagsystemId" to fagsystemId,
-                        "mottaker" to mottaker,
-                        "fagomrade" to fagområde,
-                        "endringskode" to endringskode,
-                        "sisteArbeidsgiverdag" to sisteArbeidsgiverdag
+                        "mottaker" to mottaker
                     )
                 ).asUpdateAndReturnGeneratedKey
             )
@@ -138,44 +132,23 @@ class UtbetalingDao(private val dataSource: DataSource) {
 
     internal fun nyLinje(
         oppdragId: Long,
-        endringskode: String,
-        klassekode: String,
-        statuskode: String?,
-        datoStatusFom: LocalDate?,
         fom: LocalDate,
         tom: LocalDate,
-        dagsats: Int,
-        totalbeløp: Int?,
-        lønn: Int,
-        grad: Double,
-        delytelseId: Int,
-        refDelytelseId: Int?,
-        refFagsystemId: String?
+        totalbeløp: Int?
     ) {
         @Language("PostgreSQL")
         val statement = """
-            INSERT INTO utbetalingslinje(oppdrag_id, delytelseId, refdelytelseid, reffagsystemid, endringskode, klassekode, statuskode, datostatusfom, fom, tom, dagsats, totalbeløp, lønn, grad)
-            VALUES (:oppdragIdRef, :delytelseId, :refDelytelseId, :refFagsystemId, CAST(:endringskode as oppdrag_endringskode), CAST(:klassekode as oppdrag_klassekode),
-            CAST(:statuskode as oppdrag_statuskode), :datoStatusFom, :fom, :tom, :dagsats, :totalbelop, :lonn, :grad)
+            INSERT INTO utbetalingslinje(oppdrag_id, fom, tom, totalbeløp)
+            VALUES (:oppdragIdRef, :fom, :tom, :totalbelop)
         """
         return sessionOf(dataSource).use {
             it.run(
                 queryOf(
                     statement, mapOf(
                         "oppdragIdRef" to oppdragId,
-                        "delytelseId" to delytelseId,
-                        "refDelytelseId" to refDelytelseId,
-                        "refFagsystemId" to refFagsystemId,
-                        "endringskode" to endringskode,
-                        "klassekode" to klassekode,
-                        "statuskode" to statuskode,
-                        "datoStatusFom" to datoStatusFom,
                         "fom" to fom,
                         "tom" to tom,
-                        "dagsats" to dagsats,
-                        "totalbelop" to totalbeløp,
-                        "lonn" to lønn,
-                        "grad" to grad
+                        "totalbelop" to totalbeløp
                     )
                 ).asExecute
             )

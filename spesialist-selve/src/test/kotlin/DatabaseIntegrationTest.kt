@@ -400,13 +400,12 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     protected fun lagArbeidsgiveroppdrag(
         fagsystemId: String = fagsystemId(),
-        mottaker: String = ORGNUMMER,
-        endringskode: String = "NY"
+        mottaker: String = ORGNUMMER
     ) =
-        utbetalingDao.nyttOppdrag(fagsystemId, mottaker, "SPREF", endringskode, LocalDate.now().plusDays(169))!!
+        utbetalingDao.nyttOppdrag(fagsystemId, mottaker)!!
 
-    protected fun lagPersonoppdrag(fagsystemId: String = fagsystemId(), endringskode: String = "NY") =
-        utbetalingDao.nyttOppdrag(fagsystemId, FNR, "SP", endringskode, LocalDate.now().plusDays(169))!!
+    protected fun lagPersonoppdrag(fagsystemId: String = fagsystemId()) =
+        utbetalingDao.nyttOppdrag(fagsystemId, FNR)!!
 
     protected fun lagUtbetalingId(
         arbeidsgiverOppdragId: Long,
@@ -430,19 +429,9 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected fun lagLinje(oppdrag: Long, fom: LocalDate, tom: LocalDate, totalbeløp: Int? = null) {
         utbetalingDao.nyLinje(
             oppdragId = oppdrag,
-            endringskode = "NY",
-            klassekode = "SPREFAG-IOP",
-            statuskode = null,
-            datoStatusFom = null,
             fom = fom,
             tom = tom,
-            dagsats = 1200,
-            totalbeløp = totalbeløp,
-            lønn = 3000,
-            grad = 100.0,
-            delytelseId = 1,
-            refDelytelseId = null,
-            refFagsystemId = null
+            totalbeløp = totalbeløp
         )
     }
 
