@@ -28,7 +28,7 @@ internal class PubliserSubsumsjonCommand(
             "versjonAvKode" to versjonAvKode,
             "fodselsnummer" to fødselsnummer,
             "sporing" to mapOf(
-                "vedtaksperiode" to arbeidsgivere.map { ag -> ag.initierendeVedtaksperiodeId.toString() }.toList(),
+                "vedtaksperiode" to arbeidsgivere.mapNotNull { ag -> ag.initierendeVedtaksperiodeId?.toString() }.toList(),
                 "organisasjonsnummer" to arbeidsgivere.map { ag -> ag.organisasjonsnummer }.toList()
             ),
             "tidsstempel" to "${LocalDateTime.now()}",
@@ -38,7 +38,7 @@ internal class PubliserSubsumsjonCommand(
             "ledd" to "${arbeidsgivere.first().subsumsjon?.ledd}",
             "bokstav" to "${arbeidsgivere.first().subsumsjon?.bokstav}",
             "input" to mapOf(
-                "sattÅrligInntektPerArbeidsgiver" to arbeidsgivere.map { ag -> { ag.organisasjonsnummer to ag.årlig} },
+                "sattÅrligInntektPerArbeidsgiver" to arbeidsgivere.map { ag -> mapOf(ag.organisasjonsnummer to ag.årlig) },
             ),
             "output" to mapOf(
                 "grunnlagForSykepengegrunnlag" to arbeidsgivere.sumOf { ag -> ag.årlig }

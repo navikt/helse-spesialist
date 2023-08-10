@@ -12,6 +12,7 @@ import io.ktor.server.auth.authenticate
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.testing.TestApplicationBuilder
 import io.ktor.server.testing.testApplication
+import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -227,7 +228,8 @@ internal class OverstyringIT : AbstractE2ETest() {
                             "paragraf": "8-28",
                             "ledd": "3",
                             "bokstav": null
-                        }
+                        },
+                        "initierendeVedtaksperiodeId": "${UUID.randomUUID()}"
                     }]
                 }
             """.trimIndent()
