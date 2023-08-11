@@ -1,14 +1,11 @@
 package no.nav.helse.modell.automatisering
 
-import ToggleHelpers.disable
-import ToggleHelpers.enable
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
 import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.PersonDao
@@ -31,7 +28,6 @@ internal class AutomatiskAvvisningCommandTest {
     fun setup() {
         context = CommandContext(UUID.randomUUID())
         clearMocks(vergemålDao, personDao, egenAnsattDao, godkjenningMediator)
-        Toggle.BeholdRevurderingerMedVergemålEllerUtland.enable()
     }
 
     @Test
@@ -53,13 +49,6 @@ internal class AutomatiskAvvisningCommandTest {
     }
 
     @Test
-    fun `skal avvise ved vergemål også for revurdering dersom toggle er disabled`() {
-        Toggle.BeholdRevurderingerMedVergemålEllerUtland.disable()
-        every { vergemålDao.harVergemål(fødselsnummer) } returns true
-        executeCommand(hentCommand(Utbetalingtype.REVURDERING), "Vergemål")
-    }
-
-    @Test
     fun `skal avvise ved utland dersom utbetaling ikke er revurdering`() {
         every { personDao.finnEnhetId(fødselsnummer) } returns "0393"
         executeCommand(hentCommand(Utbetalingtype.UTBETALING), "Utland")
@@ -69,13 +58,6 @@ internal class AutomatiskAvvisningCommandTest {
     fun `skal ikke avvise ved utland dersom utbetaling er revurdering`() {
         every { personDao.finnEnhetId(fødselsnummer) } returns "0393"
         executeCommand(hentCommand(Utbetalingtype.REVURDERING), null)
-    }
-
-    @Test
-    fun `skal avvise ved utland også for revurdering dersom toggle er disabled`() {
-        Toggle.BeholdRevurderingerMedVergemålEllerUtland.disable()
-        every { personDao.finnEnhetId(fødselsnummer) } returns "0393"
-        executeCommand(hentCommand(Utbetalingtype.REVURDERING), "Utland")
     }
 
     private fun executeCommand(command: AutomatiskAvvisningCommand, forventetÅrsakTilAvvisning: String?) {

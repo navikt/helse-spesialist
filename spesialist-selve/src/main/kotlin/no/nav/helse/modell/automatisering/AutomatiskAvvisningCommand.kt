@@ -3,7 +3,6 @@ package no.nav.helse.modell.automatisering
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.kommando.Command
@@ -32,9 +31,9 @@ internal class AutomatiskAvvisningCommand(
         val erEgenAnsatt = egenAnsattDao.erEgenAnsatt(fødselsnummer) ?: false
 
         val tilhørerEnhetUtland = HentEnhetløsning.erEnhetUtland(personDao.finnEnhetId(fødselsnummer))
-        val avvisGrunnetEnhetUtland = tilhørerEnhetUtland && !behold()
+        val avvisGrunnetEnhetUtland = tilhørerEnhetUtland && !utbetaling.erRevurdering()
         val underVergemål = vergemålDao.harVergemål(fødselsnummer) ?: false
-        val avvisGrunnetVergemål = underVergemål && !behold()
+        val avvisGrunnetVergemål = underVergemål && !utbetaling.erRevurdering()
 
         if (!erEgenAnsatt && !avvisGrunnetEnhetUtland && !avvisGrunnetVergemål) return true
 
@@ -55,8 +54,6 @@ internal class AutomatiskAvvisningCommand(
         logg.info("Automatisk avvisning av vedtaksperiode $vedtaksperiodeId pga:$årsaker")
         return ferdigstill(context)
     }
-
-    private fun behold() = Toggle.BeholdRevurderingerMedVergemålEllerUtland.enabled && utbetaling.erRevurdering()
 
     private companion object {
         private val logg = LoggerFactory.getLogger(AutomatiskAvvisningCommand::class.java)
