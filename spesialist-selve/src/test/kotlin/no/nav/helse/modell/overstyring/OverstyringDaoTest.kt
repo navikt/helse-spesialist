@@ -38,7 +38,9 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         private const val EPOST = "saks.behandler@nav.no"
         private const val ORGNUMMER = "987654321"
         private const val GHOST_ORGNUMMER = "123412"
-        private const val BEGRUNNELSE = "Begrunnelse"
+        private const val BEGRUNNELSE = "BegrunnelseMal\n\nBegrunnelseFritekst"
+        private const val BEGRUNNELSEMAL = "BegrunnelseMal"
+        private const val BEGRUNNELSEFRITEKST = "BegrunnelseFritekst"
         private const val FORKLARING = "Forklaring"
         private const val ÅRSAK = "Årsak"
         private val OVERSTYRTE_DAGER = listOf(
@@ -209,6 +211,8 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
                     fraÅrlig = INNTEKT + 1,
                     årsak = ÅRSAK,
                     begrunnelse = BEGRUNNELSE,
+                    begrunnelseMal = BEGRUNNELSEMAL,
+                    begrunnelseFritekst = BEGRUNNELSEFRITEKST,
                     subsumsjon = Subsumsjon(paragraf = "87494"),
                     initierendeVedtaksperiodeId = VEDTAKSPERIODE
                 )
@@ -223,6 +227,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         assertEquals(FØDSELSNUMMER, hentetSkjønnsfastsetting.fødselsnummer)
         assertEquals(ORGNUMMER, hentetSkjønnsfastsetting.organisasjonsnummer)
         assertEquals(BEGRUNNELSE, hentetSkjønnsfastsetting.begrunnelse)
+        assertEquals(BEGRUNNELSEMAL + "\n\n" + BEGRUNNELSEFRITEKST, hentetSkjønnsfastsetting.begrunnelse)
         assertEquals(ÅRSAK, hentetSkjønnsfastsetting.årsak)
         assertEquals(SAKSBEHANDLER_NAVN, hentetSkjønnsfastsetting.saksbehandlerNavn)
         assertEquals(SAKSBEHANDLER_IDENT, hentetSkjønnsfastsetting.saksbehandlerIdent)
@@ -324,6 +329,8 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
                     fraÅrlig = INNTEKT + 1,
                     årsak = ÅRSAK,
                     begrunnelse = BEGRUNNELSE,
+                    begrunnelseMal = BEGRUNNELSEMAL,
+                    begrunnelseFritekst = BEGRUNNELSEFRITEKST,
                     subsumsjon = Subsumsjon(paragraf = "87494"),
                     initierendeVedtaksperiodeId = VEDTAKSPERIODE
                 )

@@ -139,12 +139,13 @@ class OverstyringApiDao(private val dataSource: DataSource) {
             val finnSkjønnsfastsettingQuery = """
             SELECT o.id, o.tidspunkt, o.person_ref, o.hendelse_ref, o.saksbehandler_ref, o.ekstern_hendelse_id, 
             o.ferdigstilt, ss.arsak, ss.arlig, ss.fra_arlig, ss.skjaeringstidspunkt, 
-            b.tekst as begrunnelse, p.fodselsnummer, a.orgnummer, s.navn, s.ident FROM overstyring o
+            b1.tekst as fritekst, b2.tekst as mal, p.fodselsnummer, a.orgnummer, s.navn, s.ident FROM overstyring o
                 INNER JOIN skjonnsfastsetting_sykepengegrunnlag ss ON o.id = ss.overstyring_ref
                 INNER JOIN person p ON p.id = o.person_ref
                 INNER JOIN arbeidsgiver a ON a.id = ss.arbeidsgiver_ref
                 INNER JOIN saksbehandler s ON s.oid = o.saksbehandler_ref
-                INNER JOIN begrunnelse b ON ss.begrunnelse_ref = b.id 
+                INNER JOIN begrunnelse b1 ON ss.begrunnelse_fritekst_ref = b1.id 
+                INNER JOIN begrunnelse b2 ON ss.begrunnelse_mal_ref = b2.id 
                 INNER JOIN hendelse h ON h.id = o.hendelse_ref
             WHERE p.fodselsnummer = ? AND a.orgnummer = ?
         """
@@ -155,7 +156,7 @@ class OverstyringApiDao(private val dataSource: DataSource) {
                             hendelseId = overstyringRow.uuid("hendelse_ref"),
                             fødselsnummer = overstyringRow.long("fodselsnummer").toFødselsnummer(),
                             organisasjonsnummer = overstyringRow.int("orgnummer").toString(),
-                            begrunnelse = overstyringRow.string("begrunnelse"),
+                            begrunnelse = overstyringRow.string("mal") + "\n\n" + overstyringRow.string("fritekst"),
                             årsak = overstyringRow.string("arsak"),
                             timestamp = overstyringRow.localDateTime("tidspunkt"),
                             saksbehandlerNavn = overstyringRow.string("navn"),

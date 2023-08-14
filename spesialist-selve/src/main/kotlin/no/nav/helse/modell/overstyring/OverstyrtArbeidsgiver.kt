@@ -40,7 +40,9 @@ internal class SkjønnsfastsattArbeidsgiver(
     val årlig: Double,
     val fraÅrlig: Double?,
     val årsak: String,
-    val begrunnelse: String,
+    val begrunnelse: String?,
+    val begrunnelseMal: String?,
+    val begrunnelseFritekst: String?,
     val subsumsjon: Subsumsjon?,
     val initierendeVedtaksperiodeId: UUID?
 ) {
@@ -53,6 +55,8 @@ internal class SkjønnsfastsattArbeidsgiver(
                     fraÅrlig = jsonNode["fraÅrlig"].asDouble(),
                     årsak = jsonNode["årsak"].asText(),
                     begrunnelse = jsonNode["begrunnelse"].asText(),
+                    begrunnelseMal = jsonNode["begrunnelseMal"].asText(),
+                    begrunnelseFritekst = jsonNode["begrunnelseFritekst"].asText(),
                     subsumsjon = jsonNode["subsumsjon"].subsumsjonelementer(),
                     initierendeVedtaksperiodeId = if (jsonNode["initierendeVedtaksperiodeId"].isNull) null else UUID.fromString(
                         jsonNode["initierendeVedtaksperiodeId"].asText()

@@ -1,0 +1,4 @@
+TRUNCATE TABLE skjonnsfastsetting_sykepengegrunnlag;
+ALTER TABLE skjonnsfastsetting_sykepengegrunnlag RENAME COLUMN begrunnelse_ref TO begrunnelse_fritekst_ref;
+ALTER TABLE skjonnsfastsetting_sykepengegrunnlag ADD COLUMN begrunnelse_mal_ref BIGINT NOT NULL REFERENCES begrunnelse(id);
+ALTER TABLE skjonnsfastsetting_sykepengegrunnlag ALTER COLUMN skjaeringstidspunkt TYPE DATE;

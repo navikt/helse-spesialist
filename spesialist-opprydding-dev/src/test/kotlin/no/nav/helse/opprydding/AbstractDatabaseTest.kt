@@ -123,7 +123,7 @@ internal abstract class AbstractDatabaseTest {
         )
         tabeller.forEach {
             val tabellCount = finnTabellCount(it)
-            if (it in listOf("oppdrag", "utbetalingslinje")) {
+            if (it in listOf("oppdrag", "utbetalingslinje", "begrunnelse")) {
                 val (expression1, explanation1) = booleanExpressionBlock(tabellCount / 2)
                 assertTrue((expression1)) { "$it has $tabellCount rows, expected it to be $explanation1" }
             } else {

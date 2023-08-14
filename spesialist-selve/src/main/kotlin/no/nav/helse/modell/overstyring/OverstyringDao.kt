@@ -274,14 +274,19 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
             """.trimIndent()
 
             @Language("PostgreSQL")
-            val opprettBegrunnelseQuery = """
+            val opprettBegrunnelseFritekstQuery = """
+                INSERT INTO begrunnelse(tekst, type, saksbehandler_ref) VALUES (:tekst, :type, :saksbehandler_ref)
+            """
+
+            @Language("PostgreSQL")
+            val opprettBegrunnelseMalQuery = """
                 INSERT INTO begrunnelse(tekst, type, saksbehandler_ref) VALUES (:tekst, :type, :saksbehandler_ref)
             """
 
             @Language("PostgreSQL")
             val opprettSkjønnsfastsettingSykepengegrunnlagQuery = """
-                INSERT INTO skjonnsfastsetting_sykepengegrunnlag(arlig, fra_arlig, skjaeringstidspunkt, arsak, subsumsjon, arbeidsgiver_ref, overstyring_ref, initierende_vedtaksperiode_id, begrunnelse_ref)
-                SELECT :arlig, :fra_arlig, :skjaeringstidspunkt, :arsak, :subsumsjon::json, ag.id, :overstyring_ref, :initierende_vedtaksperiode_id, :begrunnelse_ref
+                INSERT INTO skjonnsfastsetting_sykepengegrunnlag(arlig, fra_arlig, skjaeringstidspunkt, arsak, subsumsjon, arbeidsgiver_ref, overstyring_ref, initierende_vedtaksperiode_id, begrunnelse_fritekst_ref, begrunnelse_mal_ref)
+                SELECT :arlig, :fra_arlig, :skjaeringstidspunkt, :arsak, :subsumsjon::json, ag.id, :overstyring_ref, :initierende_vedtaksperiode_id, :begrunnelse_fritekst_ref, :begrunnelse_mal_ref
                 FROM arbeidsgiver ag
                 WHERE ag.orgnummer = :orgnr
             """.trimIndent()
@@ -300,12 +305,22 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
                     ).asUpdateAndReturnGeneratedKey
                 )
                 arbeidsgivere.forEach { arbeidsgiver ->
-                    val begrunnelseId = requireNotNull(transactionalSession.run(
+                    val begrunnelseFritekstId = requireNotNull(transactionalSession.run(
                         queryOf(
-                            opprettBegrunnelseQuery,
+                            opprettBegrunnelseFritekstQuery,
                             mapOf(
-                                "tekst" to arbeidsgiver.begrunnelse,
-                                "type" to "SKJØNNSFASTSATT_SYKEPENGEGRUNNLAG",
+                                "tekst" to arbeidsgiver.begrunnelseFritekst,
+                                "type" to "SKJØNNSFASTSATT_SYKEPENGEGRUNNLAG_FRITEKST",
+                                "saksbehandler_ref" to saksbehandlerRef
+                            )
+                        ).asUpdateAndReturnGeneratedKey
+                    )) { "Forventer å kunne opprette begrunnelse" }
+                    val begrunnelseMalId = requireNotNull(transactionalSession.run(
+                        queryOf(
+                            opprettBegrunnelseMalQuery,
+                            mapOf(
+                                "tekst" to arbeidsgiver.begrunnelseMal,
+                                "type" to "SKJØNNSFASTSATT_SYKEPENGEGRUNNLAG_MAL",
                                 "saksbehandler_ref" to saksbehandlerRef
                             )
                         ).asUpdateAndReturnGeneratedKey
@@ -326,7 +341,8 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
                                 "orgnr" to arbeidsgiver.organisasjonsnummer.toLong(),
                                 "overstyring_ref" to overstyringRef,
                                 "initierende_vedtaksperiode_id" to arbeidsgiver.initierendeVedtaksperiodeId,
-                                "begrunnelse_ref" to begrunnelseId
+                                "begrunnelse_fritekst_ref" to begrunnelseFritekstId,
+                                "begrunnelse_mal_ref" to begrunnelseMalId,
                             )
                         ).asUpdate
                     )
