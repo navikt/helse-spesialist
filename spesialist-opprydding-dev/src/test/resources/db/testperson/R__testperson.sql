@@ -89,8 +89,10 @@ VALUES (${sequence_number}, ${sequence_number}, 'FORKLARING', false, '2018-01-01
 INSERT INTO begrunnelse(id, tekst, type, saksbehandler_ref) VALUES(${sequence_number}, 'Begrunnelsefritekst', 'SKJØNNSFASTSATT_SYKEPENGEGRUNNLAG_FRITEKST', '${saksbehandler_oid}');
 INSERT INTO begrunnelse(id, tekst, type, saksbehandler_ref) VALUES(${sequence_number} + 1000, 'En begrunnelsemal', 'SKJØNNSFASTSATT_SYKEPENGEGRUNNLAG_MAL', '${saksbehandler_oid}');
 INSERT INTO generasjon_begrunnelse_kobling(generasjon_id, begrunnelse_id) VALUES ('${generasjon_id}', ${sequence_number});
-INSERT INTO skjonnsfastsetting_sykepengegrunnlag(id, arlig, fra_arlig, skjaeringstidspunkt, arsak, arbeidsgiver_ref, overstyring_ref, begrunnelse_fritekst_ref, begrunnelse_mal_ref)
-VALUES (${sequence_number}, 1000, 1200, '2018-01-01', 'ÅRSAK', ${sequence_number}, ${sequence_number}, ${sequence_number}, ${sequence_number} + 1000);
+INSERT INTO skjonnsfastsetting_sykepengegrunnlag(id, skjaeringstidspunkt, arsak, overstyring_ref, begrunnelse_fritekst_ref, begrunnelse_mal_ref)
+VALUES (${sequence_number}, '2018-01-01', 'ÅRSAK', ${sequence_number}, ${sequence_number}, ${sequence_number} + 1000);
+INSERT INTO skjonnsfastsetting_sykepengegrunnlag_arbeidsgiver(id, arlig, fra_arlig, arbeidsgiver_ref, skjonnsfastsetting_sykepengegrunnlag_ref)
+VALUES (${sequence_number}, 1000, 1200, ${sequence_number}, ${sequence_number});
 INSERT INTO overstyringer_for_vedtaksperioder(vedtaksperiode_id, overstyring_ref)
 VALUES ('${vedtaksperiode_id}', ${sequence_number});
 
