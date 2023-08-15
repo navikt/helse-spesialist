@@ -19,6 +19,7 @@ internal class SykefraværstilfelleDaoTest: DatabaseIntegrationTest() {
         opprettSaksbehandler()
         val hendelseId = UUID.randomUUID()
         testhendelse(hendelseId)
+        val tidspunkt = LocalDateTime.now()
         overstyringDao.persisterSkjønnsfastsettingSykepengegrunnlag(
             hendelseId = hendelseId,
             eksternHendelseId = UUID.randomUUID(),
@@ -28,12 +29,12 @@ internal class SykefraværstilfelleDaoTest: DatabaseIntegrationTest() {
             ),
             saksbehandlerRef = SAKSBEHANDLER_OID,
             skjæringstidspunkt = 1.januar,
-            tidspunkt = LocalDateTime.now()
+            tidspunkt = tidspunkt
         )
 
         val funnet = sykefraværstilfelleDao.finnSkjønnsfastsatteSykepengegrunnlag(FNR, 1.januar)
         assertEquals(1, funnet.size)
-        assertEquals(SkjønnsfastattSykepengegrunnlag(1.januar, "En ", "begrunnelse"), funnet.single())
+        assertEquals(SkjønnsfastattSykepengegrunnlag(1.januar, "En ", "begrunnelse", tidspunkt), funnet.single())
     }
 
     @Test
@@ -47,6 +48,7 @@ internal class SykefraværstilfelleDaoTest: DatabaseIntegrationTest() {
         val hendelseId2 = UUID.randomUUID()
         testhendelse(hendelseId1)
         testhendelse(hendelseId2)
+        val tidspunkt = LocalDateTime.now()
         overstyringDao.persisterSkjønnsfastsettingSykepengegrunnlag(
             hendelseId = hendelseId1,
             eksternHendelseId = UUID.randomUUID(),
@@ -56,7 +58,7 @@ internal class SykefraværstilfelleDaoTest: DatabaseIntegrationTest() {
             ),
             saksbehandlerRef = SAKSBEHANDLER_OID,
             skjæringstidspunkt = 1.januar,
-            tidspunkt = LocalDateTime.now()
+            tidspunkt = tidspunkt
         )
         overstyringDao.persisterSkjønnsfastsettingSykepengegrunnlag(
             hendelseId = hendelseId2,
@@ -72,7 +74,7 @@ internal class SykefraværstilfelleDaoTest: DatabaseIntegrationTest() {
 
         val funnet = sykefraværstilfelleDao.finnSkjønnsfastsatteSykepengegrunnlag(FNR, 1.januar)
         assertEquals(1, funnet.size)
-        assertEquals(SkjønnsfastattSykepengegrunnlag(1.januar, "En ", "begrunnelse"), funnet.single())
+        assertEquals(SkjønnsfastattSykepengegrunnlag(1.januar, "En ", "begrunnelse", tidspunkt), funnet.single())
     }
 
     @Test
@@ -83,6 +85,7 @@ internal class SykefraværstilfelleDaoTest: DatabaseIntegrationTest() {
         val hendelseId2 = UUID.randomUUID()
         testhendelse(hendelseId1)
         testhendelse(hendelseId2)
+        val tidspunkt = LocalDateTime.now()
         overstyringDao.persisterSkjønnsfastsettingSykepengegrunnlag(
             hendelseId = hendelseId1,
             eksternHendelseId = UUID.randomUUID(),
@@ -92,7 +95,7 @@ internal class SykefraværstilfelleDaoTest: DatabaseIntegrationTest() {
             ),
             saksbehandlerRef = SAKSBEHANDLER_OID,
             skjæringstidspunkt = 1.januar,
-            tidspunkt = LocalDateTime.now()
+            tidspunkt = tidspunkt
         )
         overstyringDao.persisterSkjønnsfastsettingSykepengegrunnlag(
             hendelseId = hendelseId2,
@@ -108,7 +111,7 @@ internal class SykefraværstilfelleDaoTest: DatabaseIntegrationTest() {
 
         val funnet = sykefraværstilfelleDao.finnSkjønnsfastsatteSykepengegrunnlag(FNR, 1.januar)
         assertEquals(1, funnet.size)
-        assertEquals(SkjønnsfastattSykepengegrunnlag(1.januar, "En ", "begrunnelse"), funnet.single())
+        assertEquals(SkjønnsfastattSykepengegrunnlag(1.januar, "En ", "begrunnelse", tidspunkt), funnet.single())
     }
 
 }

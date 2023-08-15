@@ -1,11 +1,14 @@
 package no.nav.helse.modell.sykefraværstilfelle
 
 import java.time.LocalDate
+import java.time.LocalDateTime
+import no.nav.helse.modell.vedtaksperiode.vedtak.SykepengevedtakBuilder
 
 class SkjønnsfastattSykepengegrunnlag(
     private val skjæringstidspunkt: LocalDate,
     private val begrunnelseFraMal: String,
-    private val begrunnelseFraFritekst: String
+    private val begrunnelseFraFritekst: String,
+    private val opprettet: LocalDateTime
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
