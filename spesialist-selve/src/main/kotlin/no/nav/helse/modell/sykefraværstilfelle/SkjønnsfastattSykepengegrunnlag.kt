@@ -19,6 +19,7 @@ class SkjønnsfastattSykepengegrunnlag(
         if (skjæringstidspunkt != other.skjæringstidspunkt) return false
         if (begrunnelseFraMal != other.begrunnelseFraMal) return false
         if (begrunnelseFraFritekst != other.begrunnelseFraFritekst) return false
+        if (opprettet.withNano(0) != other.opprettet.withNano(0)) return false
 
         return true
     }
@@ -27,6 +28,7 @@ class SkjønnsfastattSykepengegrunnlag(
         var result = skjæringstidspunkt.hashCode()
         result = 31 * result + begrunnelseFraMal.hashCode()
         result = 31 * result + begrunnelseFraFritekst.hashCode()
+        result = 31 * result + opprettet.hashCode()
         return result
     }
 }
