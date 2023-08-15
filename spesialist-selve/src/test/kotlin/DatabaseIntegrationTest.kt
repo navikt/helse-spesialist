@@ -243,12 +243,15 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     protected fun nyPerson(
         periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
-        inntektskilde: Inntektskilde = EN_ARBEIDSGIVER
+        inntektskilde: Inntektskilde = EN_ARBEIDSGIVER,
+        fødselsnummer: String = FNR,
+        organisasjonsnummer: String = ORGNUMMER,
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE
     ) {
-        opprettPerson()
-        opprettArbeidsgiver()
+        opprettPerson(fødselsnummer = fødselsnummer)
+        opprettArbeidsgiver(organisasjonsnummer = organisasjonsnummer)
         opprettGenerasjon()
-        opprettVedtaksperiode(periodetype = periodetype, inntektskilde = inntektskilde)
+        opprettVedtaksperiode(periodetype = periodetype, inntektskilde = inntektskilde, vedtaksperiodeId = vedtaksperiodeId)
         opprettOppgave()
     }
 
