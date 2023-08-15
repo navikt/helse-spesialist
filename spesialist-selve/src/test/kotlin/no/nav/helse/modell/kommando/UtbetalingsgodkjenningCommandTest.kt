@@ -60,7 +60,7 @@ internal class UtbetalingsgodkjenningCommandTest {
             fødselsnummer = fødselsnummer,
             utbetaling = utbetaling,
             sykefraværstilfelle = Sykefraværstilfelle(
-                fødselsnummer, 1.januar, listOf(Generasjon(UUID.randomUUID(), UUID.randomUUID(), 1.januar, 31.januar, 1.januar))
+                fødselsnummer, 1.januar, listOf(Generasjon(UUID.randomUUID(), UUID.randomUUID(), 1.januar, 31.januar, 1.januar)), emptyList()
             )
         )
     }

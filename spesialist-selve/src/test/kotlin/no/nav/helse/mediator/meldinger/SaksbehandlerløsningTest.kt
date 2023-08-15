@@ -63,7 +63,7 @@ internal class SaksbehandlerløsningTest {
             mockk()
         ),
         utbetalingDao = utbetalingDao,
-        sykefraværstilfelle = Sykefraværstilfelle(FNR, 1.januar, listOf(Generasjon(randomUUID(), randomUUID(), 1.januar, 31.januar, 1.januar))),
+        sykefraværstilfelle = Sykefraværstilfelle(FNR, 1.januar, listOf(Generasjon(randomUUID(), randomUUID(), 1.januar, 31.januar, 1.januar)), emptyList()),
     )
 
     private val context = CommandContext(randomUUID())

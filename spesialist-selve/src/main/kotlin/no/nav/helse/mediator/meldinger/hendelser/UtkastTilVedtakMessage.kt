@@ -5,16 +5,23 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import java.util.UUID
 import no.nav.helse.mediator.asUUID
+import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.vedtaksperiode.vedtak.Faktatype
 import no.nav.helse.modell.vedtaksperiode.vedtak.Sykepengegrunnlagsfakta
+import no.nav.helse.modell.vedtaksperiode.vedtak.UtkastTilVedtak
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
+import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.isMissingOrNull
 
 internal class UtkastTilVedtakMessage(packet: JsonMessage) {
 
     private val id = UUID.fromString(packet["@id"].asText())
     private val fødselsnummer = packet["fødselsnummer"].asText()
+    private val aktørId = packet["aktørId"].asText()
+    private val fom = packet["fom"].asLocalDate()
+    private val tom = packet["tom"].asLocalDate()
+    private val vedtakFattetTidspunkt = packet["vedtakFattetTidspunkt"].asLocalDateTime()
     private val vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
     private val utbetalingId = packet["utbetalingId"].takeUnless(JsonNode::isMissingOrNull)?.asUUID()
@@ -26,6 +33,32 @@ internal class UtkastTilVedtakMessage(packet: JsonMessage) {
     private val begrensning = packet["begrensning"].asText()
     private val inntekt = packet["inntekt"].asDouble()
     private val sykepengegrunnlagsfakta = utbetalingId?.let { sykepengegrunnlagsfakta(packet, faktatype(packet)) }
+
+    internal fun skjæringstidspunkt() = skjæringstidspunkt
+    internal fun fødselsnummer() = fødselsnummer
+
+    private val utkastTilVedtak get() = UtkastTilVedtak(
+        fødselsnummer = fødselsnummer,
+        aktørId = aktørId,
+        organisasjonsnummer = organisasjonsnummer,
+        vedtaksperiodeId = vedtaksperiodeId,
+        utbetalingId = utbetalingId,
+        skjæringstidspunkt = skjæringstidspunkt,
+        hendelser = hendelser,
+        sykepengegrunnlag = sykepengegrunnlag,
+        grunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag,
+        grunnlagForSykepengegrunnlagPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver,
+        begrensning = begrensning,
+        inntekt = inntekt,
+        sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
+        fom = fom,
+        tom = tom,
+        vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+    )
+
+    internal fun sendInnTil(sykefraværstilfelle: Sykefraværstilfelle) {
+        sykefraværstilfelle.håndter(utkastTilVedtak)
+    }
 
     private fun faktatype(packet: JsonMessage): Faktatype {
         return when (val fastsattString = packet["sykepengegrunnlagsfakta.fastsatt"].asText()) {

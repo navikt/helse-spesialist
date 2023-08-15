@@ -6,6 +6,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
+import no.nav.helse.db.SykefraværstilfelleDao
 import no.nav.helse.mediator.builders.GenerasjonBuilder
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.modell.CommandContextDao
@@ -123,6 +124,7 @@ internal class Hendelsefabrikk(
     private val versjonAvKode: String?,
 ) {
     private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
+    private val sykefraværstilfelleDao = SykefraværstilfelleDao(dataSource)
 
     internal companion object {
         private val mapper = jacksonObjectMapper()
@@ -142,7 +144,8 @@ internal class Hendelsefabrikk(
 
     private fun sykefraværstilfelle(fødselsnummer: String, skjæringstidspunkt: LocalDate): Sykefraværstilfelle {
         val gjeldendeGenerasjoner = generasjonerFor(fødselsnummer, skjæringstidspunkt)
-        return Sykefraværstilfelle(fødselsnummer, skjæringstidspunkt, gjeldendeGenerasjoner)
+        val skjønnsfastsatteSykepengegrunnlag = sykefraværstilfelleDao.finnSkjønnsfastsatteSykepengegrunnlag(fødselsnummer, skjæringstidspunkt)
+        return Sykefraværstilfelle(fødselsnummer, skjæringstidspunkt, gjeldendeGenerasjoner, skjønnsfastsatteSykepengegrunnlag)
     }
 
     private fun generasjonerFor(fødselsnummer: String, skjæringstidspunkt: LocalDate): List<Generasjon> {

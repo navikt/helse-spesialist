@@ -73,7 +73,7 @@ internal class GodkjenningMediatorTest {
             saksbehandlerEpost = "2@nav.no",
             godkjenttidspunkt = LocalDateTime.now(),
             saksbehandleroverstyringer = emptyList(),
-            sykefraværstilfelle = Sykefraværstilfelle(fnr, 1.januar, listOf(generasjon()))
+            sykefraværstilfelle = Sykefraværstilfelle(fnr, 1.januar, listOf(generasjon()), emptyList())
         )
         assertOpptegnelseIkkeOpprettet()
     }
@@ -137,7 +137,7 @@ internal class GodkjenningMediatorTest {
         "saksbehandler@nav.no",
         LocalDateTime.now(),
         emptyList(),
-        Sykefraværstilfelle(fnr, 1.januar, generasjoner)
+        Sykefraværstilfelle(fnr, 1.januar, generasjoner, emptyList())
     )
 
     private fun assertOpptegnelseOpprettet() = verify(exactly = 1) { opptegnelseDao.opprettOpptegnelse(eq(fnr), any(), eq(OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE)) }

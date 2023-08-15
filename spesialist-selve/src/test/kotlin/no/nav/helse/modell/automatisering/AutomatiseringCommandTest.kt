@@ -41,7 +41,7 @@ internal class AutomatiseringCommandTest {
             ),
             Utbetaling(utbetalingId, 1000, 1000, Utbetalingtype.UTBETALING),
             periodeType,
-            Sykefraværstilfelle(fødselsnummer, 1.januar, emptyList()),
+            Sykefraværstilfelle(fødselsnummer, 1.januar, emptyList(), emptyList()),
             1.januar
         )
 

@@ -43,7 +43,7 @@ internal class ÅpneGosysOppgaverCommandTest {
     }
 
     private val generasjon = generasjon(VEDTAKPERIODE_ID).also { it.registrer(observer) }
-    private val sykefraværstilfelle = Sykefraværstilfelle(FNR, 1.januar, listOf(generasjon))
+    private val sykefraværstilfelle = Sykefraværstilfelle(FNR, 1.januar, listOf(generasjon), emptyList())
     private val dao = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
     private val command = ÅpneGosysOppgaverCommand(
         UUID.randomUUID(),

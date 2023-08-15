@@ -36,4 +36,8 @@ class SkjønnsfastattSykepengegrunnlag(
         result = 31 * result + opprettet.hashCode()
         return result
     }
+
+    internal companion object {
+        internal fun List<SkjønnsfastattSykepengegrunnlag>.sortert() = sortedBy { it.opprettet }
+    }
 }

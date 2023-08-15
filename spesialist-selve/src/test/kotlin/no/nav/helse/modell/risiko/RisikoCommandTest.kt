@@ -42,7 +42,7 @@ internal class RisikoCommandTest {
     }
 
     private val generasjon = Generasjon(UUID.randomUUID(), VEDTAKSPERIODE_ID, 1.januar, 31.januar, 1.januar)
-    private val sykefraværstilfelle = Sykefraværstilfelle(FØDSELSNUMMER, 1.januar, listOf(generasjon))
+    private val sykefraværstilfelle = Sykefraværstilfelle(FØDSELSNUMMER, 1.januar, listOf(generasjon), emptyList())
 
 
     private lateinit var context: CommandContext
