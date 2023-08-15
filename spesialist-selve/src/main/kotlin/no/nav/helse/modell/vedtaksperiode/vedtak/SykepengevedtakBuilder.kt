@@ -3,6 +3,7 @@ package no.nav.helse.modell.vedtaksperiode.vedtak
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.modell.sykefraværstilfelle.SkjønnsfastattSykepengegrunnlag
 import kotlin.properties.Delegates
 
 internal class SykepengevedtakBuilder {
