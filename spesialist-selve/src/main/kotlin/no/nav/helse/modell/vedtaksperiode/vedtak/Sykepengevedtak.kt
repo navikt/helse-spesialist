@@ -5,20 +5,20 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal sealed class Sykepengevedtak(
-    private val fødselsnummer: String,
-    private val aktørId: String,
-    private val vedtaksperiodeId: UUID,
-    private val organisasjonsnummer: String,
-    private val fom: LocalDate,
-    private val tom: LocalDate,
-    private val skjæringstidspunkt: LocalDate,
-    private val hendelser: List<UUID>,
-    private val sykepengegrunnlag: Double,
-    private val grunnlagForSykepengegrunnlag: Double,
-    private val grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Double>,
-    private val begrensning: String,
-    private val inntekt: Double,
-    private val vedtakFattetTidspunkt: LocalDateTime,
+    val fødselsnummer: String,
+    val aktørId: String,
+    val vedtaksperiodeId: UUID,
+    val organisasjonsnummer: String,
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val skjæringstidspunkt: LocalDate,
+    val hendelser: List<UUID>,
+    val sykepengegrunnlag: Double,
+    val grunnlagForSykepengegrunnlag: Double,
+    val grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Double>,
+    val begrensning: String,
+    val inntekt: Double,
+    val vedtakFattetTidspunkt: LocalDateTime,
 ) {
     override fun equals(other: Any?) = this === other || (
             other is Sykepengevedtak
@@ -96,7 +96,7 @@ internal sealed class Sykepengevedtak(
         aktørId: String,
         organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
-        private val utbetalingId: UUID,
+        val utbetalingId: UUID,
         fom: LocalDate,
         tom: LocalDate,
         skjæringstidspunkt: LocalDate,
@@ -106,7 +106,9 @@ internal sealed class Sykepengevedtak(
         grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Double>,
         begrensning: String,
         inntekt: Double,
-        private val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta,
+        val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta,
+        val begrunnelseFraMal: String?,
+        val begrunnelseFraFritekst: String?,
         vedtakFattetTidspunkt: LocalDateTime
     ): Sykepengevedtak(
         fødselsnummer,
@@ -129,12 +131,16 @@ internal sealed class Sykepengevedtak(
                 && other is Vedtak
                 && this.utbetalingId == other.utbetalingId
                 && this.sykepengegrunnlagsfakta == other.sykepengegrunnlagsfakta
+                && this.begrunnelseFraMal == other.begrunnelseFraMal
+                && this.begrunnelseFraFritekst == other.begrunnelseFraFritekst
             )
 
         override fun hashCode(): Int {
             var result = super.hashCode()
             result = 31 * result + utbetalingId.hashCode()
             result = 31 * result + sykepengegrunnlagsfakta.hashCode()
+            result = 31 * result + begrunnelseFraMal.hashCode()
+            result = 31 * result + begrunnelseFraFritekst.hashCode()
             return result
         }
     }

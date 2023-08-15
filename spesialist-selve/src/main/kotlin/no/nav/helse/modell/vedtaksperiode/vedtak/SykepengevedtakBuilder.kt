@@ -22,6 +22,9 @@ internal class SykepengevedtakBuilder {
     private lateinit var vedtakFattetTidspunkt: LocalDateTime
     private var utbetalingId: UUID? = null
     private var sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta? = null
+    private var skjønnsfastsattSykepengegrunnlag: SkjønnsfastattSykepengegrunnlag? = null
+    private var begrunnelseFraMal: String? = null
+    private var begrunnelseFraFritekst: String? = null
 
     internal fun fødselsnummer(fødselsnummer: String) = apply { this.fødselsnummer = fødselsnummer }
     internal fun aktørId(aktørId: String) = apply { this.aktørId = aktørId }
@@ -40,6 +43,12 @@ internal class SykepengevedtakBuilder {
     internal fun vedtakFattetTidspunkt(vedtakFattetTidspunkt: LocalDateTime) = apply { this.vedtakFattetTidspunkt = vedtakFattetTidspunkt }
     internal fun utbetalingId(utbetalingId: UUID) = apply { this.utbetalingId = utbetalingId }
     internal fun sykepengegrunnlagsfakta(sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta) = apply { this.sykepengegrunnlagsfakta = sykepengegrunnlagsfakta }
+    internal fun skjønnsfastsattSykepengegrunnlag(skjønnsfastsattSykepengegrunnlag: SkjønnsfastattSykepengegrunnlag) = apply {
+        this.skjønnsfastsattSykepengegrunnlag = skjønnsfastsattSykepengegrunnlag
+        skjønnsfastsattSykepengegrunnlag.byggVedtak(this)
+    }
+    internal fun begrunnelseFraMal(begrunnelseFraMal: String) = apply { this.begrunnelseFraMal = begrunnelseFraMal }
+    internal fun begrunnelseFraFritekst(begrunnelseFraFritekst: String) = apply { this.begrunnelseFraFritekst = begrunnelseFraFritekst }
 
     internal fun build(): Sykepengevedtak {
         if (utbetalingId != null) return buildVedtak()
@@ -67,6 +76,9 @@ internal class SykepengevedtakBuilder {
     }
 
     private fun buildVedtak(): Sykepengevedtak.Vedtak {
+        if (sykepengegrunnlagsfakta is Sykepengegrunnlagsfakta.Spleis.EtterSkjønn) {
+            requireNotNull(skjønnsfastsattSykepengegrunnlag) { "Forventer å finne skjønnsfastsatt sykepengegrunnlag ved bygging av vedtak når sykepengegrunnlaget er fastsatt etter skjønn" }
+        }
         return Sykepengevedtak.Vedtak(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
@@ -83,7 +95,9 @@ internal class SykepengevedtakBuilder {
             begrensning = begrensning,
             inntekt = inntekt,
             sykepengegrunnlagsfakta = requireNotNull(sykepengegrunnlagsfakta) { "sykepengegrunnlagsfakta kan ikke være null ved vanlig vedtak" },
-            vedtakFattetTidspunkt = vedtakFattetTidspunkt
+            vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+            begrunnelseFraFritekst = begrunnelseFraFritekst,
+            begrunnelseFraMal = begrunnelseFraMal
         )
     }
 }

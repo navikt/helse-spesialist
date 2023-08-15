@@ -10,6 +10,11 @@ class SkjønnsfastattSykepengegrunnlag(
     private val begrunnelseFraFritekst: String,
     private val opprettet: LocalDateTime
 ) {
+    internal fun byggVedtak(vedtakBuilder: SykepengevedtakBuilder) {
+        vedtakBuilder.begrunnelseFraMal(begrunnelseFraMal)
+        vedtakBuilder.begrunnelseFraFritekst(begrunnelseFraFritekst)
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

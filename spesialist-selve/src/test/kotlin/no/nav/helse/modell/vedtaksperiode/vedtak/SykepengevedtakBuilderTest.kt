@@ -3,6 +3,7 @@ package no.nav.helse.modell.vedtaksperiode.vedtak
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.januar
+import no.nav.helse.modell.sykefraværstilfelle.SkjønnsfastattSykepengegrunnlag
 import no.nav.helse.modell.vedtaksperiode.vedtak.Faktatype.ETTER_HOVEDREGEL
 import no.nav.helse.modell.vedtaksperiode.vedtak.Faktatype.ETTER_SKJØNN
 import no.nav.helse.modell.vedtaksperiode.vedtak.Faktatype.I_INFOTRYGD
@@ -81,7 +82,9 @@ class SykepengevedtakBuilderTest {
                 inntekt = inntekt,
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(ETTER_HOVEDREGEL),
-                utbetalingId = utbetalingId
+                utbetalingId = utbetalingId,
+                begrunnelseFraMal = null,
+                begrunnelseFraFritekst = null
             ), utkast
         )
     }
@@ -106,6 +109,7 @@ class SykepengevedtakBuilderTest {
             .inntekt(inntekt)
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
             .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_SKJØNN))
+            .skjønnsfastsattSykepengegrunnlag(SkjønnsfastattSykepengegrunnlag(skjæringstidspunkt, "Mal", "Fritekst", LocalDateTime.now()))
 
         val utkast = builder.build()
         assertTrue(utkast is Sykepengevedtak.Vedtak)
@@ -126,7 +130,9 @@ class SykepengevedtakBuilderTest {
                 inntekt = inntekt,
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(ETTER_SKJØNN),
-                utbetalingId = utbetalingId
+                utbetalingId = utbetalingId,
+                begrunnelseFraMal = "Mal",
+                begrunnelseFraFritekst = "Fritekst"
             ), utkast
         )
     }
@@ -171,7 +177,9 @@ class SykepengevedtakBuilderTest {
                 inntekt = inntekt,
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(I_INFOTRYGD),
-                utbetalingId = utbetalingId
+                utbetalingId = utbetalingId,
+                begrunnelseFraMal = null,
+                begrunnelseFraFritekst = null
             ), utkast
         )
     }
