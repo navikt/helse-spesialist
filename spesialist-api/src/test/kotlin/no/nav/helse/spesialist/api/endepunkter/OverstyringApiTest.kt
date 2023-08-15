@@ -139,7 +139,6 @@ internal class OverstyringApiTest: AbstractE2ETest() {
                     årlig = 250000.0,
                     fraÅrlig = 260000.0,
                     årsak = "En årsak",
-                    begrunnelse = "En begrunnelse",
                     begrunnelseMal = "En begrunnelsemal",
                     begrunnelseFritekst = "begrunnelsefritekst",
                     subsumsjon = SubsumsjonDto("8-28", "3", null),

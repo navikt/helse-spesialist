@@ -210,7 +210,6 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
                     årlig = INNTEKT,
                     fraÅrlig = INNTEKT + 1,
                     årsak = ÅRSAK,
-                    begrunnelse = BEGRUNNELSE,
                     begrunnelseMal = BEGRUNNELSEMAL,
                     begrunnelseFritekst = BEGRUNNELSEFRITEKST,
                     subsumsjon = Subsumsjon(paragraf = "87494"),
@@ -226,7 +225,6 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         assertEquals(ID, hentetSkjønnsfastsetting.hendelseId)
         assertEquals(FØDSELSNUMMER, hentetSkjønnsfastsetting.fødselsnummer)
         assertEquals(ORGNUMMER, hentetSkjønnsfastsetting.organisasjonsnummer)
-        assertEquals(BEGRUNNELSE, hentetSkjønnsfastsetting.begrunnelse)
         assertEquals(BEGRUNNELSEMAL + "\n\n" + BEGRUNNELSEFRITEKST, hentetSkjønnsfastsetting.begrunnelse)
         assertEquals(ÅRSAK, hentetSkjønnsfastsetting.årsak)
         assertEquals(SAKSBEHANDLER_NAVN, hentetSkjønnsfastsetting.saksbehandlerNavn)
@@ -328,7 +326,6 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
                     årlig = INNTEKT,
                     fraÅrlig = INNTEKT + 1,
                     årsak = ÅRSAK,
-                    begrunnelse = BEGRUNNELSE,
                     begrunnelseMal = BEGRUNNELSEMAL,
                     begrunnelseFritekst = BEGRUNNELSEFRITEKST,
                     subsumsjon = Subsumsjon(paragraf = "87494"),

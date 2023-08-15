@@ -371,7 +371,6 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
                     fraÅrlig = 25001.0,
                     subsumsjon = SubsumsjonDto("8-28", "3", null),
                     årsak = "En årsak",
-                    begrunnelse = "En begrunnelse",
                     begrunnelseMal = "En begrunnelsemal",
                     begrunnelseFritekst = "begrunnelsefritekst",
                     initierendeVedtaksperiodeId = PERIODE.id.toString()
@@ -382,7 +381,6 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
                     fraÅrlig = 25001.0,
                     subsumsjon = SubsumsjonDto("8-28", "3", null),
                     årsak = "En årsak 2",
-                    begrunnelse = "En begrunnelse 2",
                     begrunnelseMal = "En begrunnelsemal",
                     begrunnelseFritekst = "begrunnelsefritekst",
                     initierendeVedtaksperiodeId = UUID.randomUUID().toString()
@@ -404,7 +402,6 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
         assertEquals(1.januar, hendelse["skjæringstidspunkt"].asLocalDate())
         hendelse["arbeidsgivere"].first().let {
             assertEquals(ORGANISASJONSNUMMER, it["organisasjonsnummer"].asText())
-            assertEquals("En begrunnelse", it["begrunnelse"].asText())
             assertEquals("En begrunnelsemal", it["begrunnelseMal"].asText())
             assertEquals("begrunnelsefritekst", it["begrunnelseFritekst"].asText())
             assertEquals("En årsak", it["årsak"].asText())
@@ -416,7 +413,6 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
         }
         hendelse["arbeidsgivere"].last().let {
             assertEquals(ORGANISASJONSNUMMER_GHOST, it["organisasjonsnummer"].asText())
-            assertEquals("En begrunnelse 2", it["begrunnelse"].asText())
             assertEquals("En begrunnelsemal", it["begrunnelseMal"].asText())
             assertEquals("begrunnelsefritekst", it["begrunnelseFritekst"].asText())
             assertEquals("En årsak 2", it["årsak"].asText())

@@ -211,7 +211,8 @@ internal class OverstyringIntegrationTest : AbstractE2ETest() {
                         "organisasjonsnummer": $ORGNR,
                         "årlig": 250000.0,
                         "fraÅrlig": 250001.0,
-                        "begrunnelse": "en begrunnelse",
+                        "begrunnelseFritekst": "Begrunnelsefritekst",
+                        "begrunnelseMal": "en begrunnelsemal",
                         "årsak": "en årsak",
                         "subsumsjon": {
                             "paragraf": "8-28",
@@ -222,7 +223,8 @@ internal class OverstyringIntegrationTest : AbstractE2ETest() {
                         "organisasjonsnummer": "666",
                         "årlig": 210000.0,
                         "fraÅrlig": 250001.0,
-                        "begrunnelse": "en begrunnelse 2",
+                        "begrunnelseFritekst": "Begrunnelsefritekst",
+                        "begrunnelseMal": "en begrunnelsemal",
                         "årsak": "en årsak 2",
                         "subsumsjon": {
                             "paragraf": "8-28",
