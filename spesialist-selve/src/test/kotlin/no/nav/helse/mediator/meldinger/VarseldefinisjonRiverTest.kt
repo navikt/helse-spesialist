@@ -4,9 +4,9 @@ import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -27,14 +27,14 @@ internal class VarseldefinisjonRiverTest {
     fun `leser definisjon fra kafka`() {
         val id = UUID.fromString("ee7f8701-e70b-4752-a714-cfa76dba2f3a")
         testRapid.sendTestMessage(varseldefinisjon(id))
-        verify(exactly = 1) { mediator.håndter(any()) }
+        verify(exactly = 1) { mediator.håndter(any<Varseldefinisjon>()) }
     }
 
     @Test
     fun `leser definisjon fra kafka uten forklaring og handling`() {
         val id = UUID.fromString("ee7f8701-e70b-4752-a714-cfa76dba2f3a")
         testRapid.sendTestMessage(varseldefinisjonUtenForklaringOgHandling(id))
-        verify(exactly = 1) { mediator.håndter(any()) }
+        verify(exactly = 1) { mediator.håndter(any<Varseldefinisjon>()) }
     }
 
     @Language("JSON")

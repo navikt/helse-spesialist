@@ -1,6 +1,7 @@
 package no.nav.helse.mediator.meldinger
 
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.meldinger.hendelser.UtkastTilVedtakMessage
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -26,7 +27,8 @@ internal class UtkastTilVedtakRiver(
                 it.interestedIn("sykepengegrunnlagsfakta") { node ->
                     it.requireKey(
                         "sykepengegrunnlagsfakta.fastsatt",
-                        "sykepengegrunnlagsfakta.omregnetÅrsinntekt")
+                        "sykepengegrunnlagsfakta.omregnetÅrsinntekt"
+                    )
                     when (node["fastsatt"].asText()) {
                         "EtterSkjønn" -> {
                             it.requireKey(
@@ -60,6 +62,7 @@ internal class UtkastTilVedtakRiver(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         sikkerlogg.info("Mottok melding om utkast_til_vedtak")
+        mediator.håndter(UtkastTilVedtakMessage(packet))
     }
 
     private companion object {

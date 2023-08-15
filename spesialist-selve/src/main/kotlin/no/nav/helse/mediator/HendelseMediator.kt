@@ -32,6 +32,7 @@ import no.nav.helse.mediator.meldinger.VedtaksperiodeNyUtbetalingRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeOpprettetRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeReberegnetRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeSkjønnsmessigFastsettelseRiver
+import no.nav.helse.mediator.meldinger.hendelser.UtkastTilVedtakMessage
 import no.nav.helse.mediator.meldinger.løsninger.ArbeidsforholdRiver
 import no.nav.helse.mediator.meldinger.løsninger.ArbeidsgiverRiver
 import no.nav.helse.mediator.meldinger.løsninger.EgenAnsattløsning
@@ -166,6 +167,13 @@ internal class HendelseMediator(
 
     internal fun håndter(varseldefinisjon: Varseldefinisjon) {
         varselRepository.lagreDefinisjon(varseldefinisjon.toDto())
+    }
+
+    internal fun håndter(utkastTilVedtakMessage: UtkastTilVedtakMessage) {
+        val fødselsnummer = utkastTilVedtakMessage.fødselsnummer()
+        val skjæringstidspunkt = utkastTilVedtakMessage.skjæringstidspunkt()
+        val sykefraværstilfelle = hendelsefabrikk.sykefraværstilfelle(fødselsnummer, skjæringstidspunkt)
+        utkastTilVedtakMessage.sendInnTil(sykefraværstilfelle)
     }
 
     internal fun tildelOppgaveTilSaksbehandler(
