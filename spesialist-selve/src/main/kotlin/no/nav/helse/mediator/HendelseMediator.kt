@@ -173,6 +173,8 @@ internal class HendelseMediator(
         val fødselsnummer = utkastTilVedtakMessage.fødselsnummer()
         val skjæringstidspunkt = utkastTilVedtakMessage.skjæringstidspunkt()
         val sykefraværstilfelle = hendelsefabrikk.sykefraværstilfelle(fødselsnummer, skjæringstidspunkt)
+        val sykefraværstilfelleMediator = SykefraværstilfelleMediator(rapidsConnection)
+        sykefraværstilfelle.registrer(sykefraværstilfelleMediator)
         utkastTilVedtakMessage.sendInnTil(sykefraværstilfelle)
     }
 

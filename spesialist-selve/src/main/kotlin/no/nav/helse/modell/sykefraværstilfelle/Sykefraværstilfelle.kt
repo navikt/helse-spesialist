@@ -10,6 +10,7 @@ import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.forhindrerAutomat
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterGodkjent
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterNyttVarsel
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverTotrinnsvurdering
+import no.nav.helse.modell.vedtaksperiode.vedtak.Sykepengevedtak
 import no.nav.helse.modell.vedtaksperiode.vedtak.SykepengevedtakBuilder
 import no.nav.helse.modell.vedtaksperiode.vedtak.UtkastTilVedtak
 
@@ -20,6 +21,9 @@ internal class Sykefraværstilfelle(
     skjønnsfastatteSykepengegrunnlag: List<SkjønnsfastattSykepengegrunnlag>
 ) {
     private val skjønnsfastatteSykepengegrunnlag = skjønnsfastatteSykepengegrunnlag.sortert()
+    private val observers = mutableListOf<SykefraværstilfelleObserver>()
+
+    private fun fattVedtak(vedtak: Sykepengevedtak) = observers.forEach { it.vedtakFattet(vedtak) }
 
     internal fun forhindrerAutomatisering(tilOgMed: LocalDate): Boolean {
         return gjeldendeGenerasjoner.forhindrerAutomatisering(tilOgMed)
@@ -34,7 +38,7 @@ internal class Sykefraværstilfelle(
         val skjønnsfastsattSykepengegrunnlag = skjønnsfastatteSykepengegrunnlag.last()
         vedtakBuilder.skjønnsfastsattSykepengegrunnlag(skjønnsfastsattSykepengegrunnlag)
         utkastTilVedtak.byggVedtak(vedtakBuilder)
-        val vedtak = vedtakBuilder.build()
+        fattVedtak(vedtakBuilder.build())
     }
 
     internal fun deaktiver(varsel: Varsel) {
@@ -47,5 +51,9 @@ internal class Sykefraværstilfelle(
 
     internal fun kreverTotrinnsvurdering(vedtaksperiodeId: UUID): Boolean {
         return gjeldendeGenerasjoner.kreverTotrinnsvurdering(vedtaksperiodeId)
+    }
+
+    internal fun registrer(observer: SykefraværstilfelleObserver) {
+        observers.add(observer)
     }
 }

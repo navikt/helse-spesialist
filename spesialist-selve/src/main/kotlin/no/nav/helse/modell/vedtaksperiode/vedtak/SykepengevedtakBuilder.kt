@@ -77,15 +77,23 @@ internal class SykepengevedtakBuilder {
     }
 
     private fun buildVedtak(): Sykepengevedtak.Vedtak {
-        if (sykepengegrunnlagsfakta is Sykepengegrunnlagsfakta.Spleis.EtterSkjønn) {
-            requireNotNull(skjønnsfastsattSykepengegrunnlag) { "Forventer å finne skjønnsfastsatt sykepengegrunnlag ved bygging av vedtak når sykepengegrunnlaget er fastsatt etter skjønn" }
-        }
+        val sykepengegrunnlagsfakta = requireNotNull(sykepengegrunnlagsfakta) { "Forventer å finne sykepengegrunnlagsfakta ved bygging av vedtak" }
+        val utbetalingId = requireNotNull(utbetalingId) { "Forventer å finne utbetalingId ved bygging av vedtak" }
+        if (sykepengegrunnlagsfakta is Sykepengegrunnlagsfakta.Spleis.EtterSkjønn)
+            return buildVedtakEtterSkjønn(sykepengegrunnlagsfakta, utbetalingId)
+        return buildVedtak(sykepengegrunnlagsfakta, utbetalingId)
+    }
+
+    private fun buildVedtakEtterSkjønn(sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta, utbetalingId: UUID): Sykepengevedtak.Vedtak {
+        val begrunnelseFraMal = requireNotNull(begrunnelseFraMal) { "Forventer å finne begrunnelse fra mal ved bygging av vedtak når sykepengegrunnlaget er fastsatt etter skjønn" }
+        val begrunnelseFraFritekst = requireNotNull(begrunnelseFraFritekst) { "Forventer å finne begrunnelse fra fritekst ved bygging av vedtak når sykepengegrunnlaget er fastsatt etter skjønn" }
+
         return Sykepengevedtak.Vedtak(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingId = requireNotNull(utbetalingId) { "UtbetalingId kan ikke være null ved vanlig vedtak" },
+            utbetalingId = utbetalingId,
             fom = fom,
             tom = tom,
             skjæringstidspunkt = skjæringstidspunkt,
@@ -95,10 +103,33 @@ internal class SykepengevedtakBuilder {
             grunnlagForSykepengegrunnlagPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver,
             begrensning = begrensning,
             inntekt = inntekt,
-            sykepengegrunnlagsfakta = requireNotNull(sykepengegrunnlagsfakta) { "sykepengegrunnlagsfakta kan ikke være null ved vanlig vedtak" },
+            sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
             begrunnelseFraFritekst = begrunnelseFraFritekst,
             begrunnelseFraMal = begrunnelseFraMal
+        )
+    }
+
+    private fun buildVedtak(sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta, utbetalingId: UUID): Sykepengevedtak.Vedtak {
+        return Sykepengevedtak.Vedtak(
+            fødselsnummer = fødselsnummer,
+            aktørId = aktørId,
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = utbetalingId,
+            fom = fom,
+            tom = tom,
+            skjæringstidspunkt = skjæringstidspunkt,
+            hendelser = hendelser,
+            sykepengegrunnlag = sykepengegrunnlag,
+            grunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag,
+            grunnlagForSykepengegrunnlagPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver,
+            begrensning = begrensning,
+            inntekt = inntekt,
+            sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
+            vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+            begrunnelseFraFritekst = null,
+            begrunnelseFraMal = null
         )
     }
 }

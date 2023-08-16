@@ -275,6 +275,105 @@ class SykepengevedtakBuilderTest {
         }
     }
 
+    @Test
+    fun`Forventer at begrunnelseFraMal er satt ved bygging av vedtak etter skjønn`() {
+        val builder = SykepengevedtakBuilder()
+        builder
+            .fødselsnummer(fødselsnummer)
+            .aktørId(aktørId)
+            .organisasjonsnummer(organisasjonsnummer)
+            .vedtaksperiodeId(vedtaksperiodeId)
+            .utbetalingId(utbetalingId)
+            .fom(fom)
+            .tom(tom)
+            .skjæringstidspunkt(skjæringstidspunkt)
+            .hendelser(hendelser)
+            .sykepengegrunnlag(sykepengegrunnlag)
+            .grunnlagForSykepengegrunnlag(grunnlagForSykepengegrunnlag)
+            .grunnlagForSykepengegrunnlagPerArbeidsgiver(grunnlagForSykepengegrunnlagPerArbeidsgiver)
+            .begrensning(begrensning)
+            .inntekt(inntekt)
+            .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
+            .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_SKJØNN))
+            .begrunnelseFraFritekst("Fritekst")
+
+        assertThrows<IllegalArgumentException> { builder.build() }
+    }
+
+    @Test
+    fun`Forventer at begrunnelseFraFritekst er satt ved bygging av vedtak etter skjønn`() {
+        val builder = SykepengevedtakBuilder()
+        builder
+            .fødselsnummer(fødselsnummer)
+            .aktørId(aktørId)
+            .organisasjonsnummer(organisasjonsnummer)
+            .vedtaksperiodeId(vedtaksperiodeId)
+            .utbetalingId(utbetalingId)
+            .fom(fom)
+            .tom(tom)
+            .skjæringstidspunkt(skjæringstidspunkt)
+            .hendelser(hendelser)
+            .sykepengegrunnlag(sykepengegrunnlag)
+            .grunnlagForSykepengegrunnlag(grunnlagForSykepengegrunnlag)
+            .grunnlagForSykepengegrunnlagPerArbeidsgiver(grunnlagForSykepengegrunnlagPerArbeidsgiver)
+            .begrensning(begrensning)
+            .inntekt(inntekt)
+            .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
+            .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_SKJØNN))
+            .begrunnelseFraMal("Mal")
+
+        assertThrows<IllegalArgumentException> { builder.build() }
+    }
+
+    @Test
+    fun `Benytter ikke begrunnelser selv om det er satt ved bygging etter hovedregel`() {
+        val builder = SykepengevedtakBuilder()
+        builder
+            .fødselsnummer(fødselsnummer)
+            .aktørId(aktørId)
+            .organisasjonsnummer(organisasjonsnummer)
+            .vedtaksperiodeId(vedtaksperiodeId)
+            .utbetalingId(utbetalingId)
+            .fom(fom)
+            .tom(tom)
+            .skjæringstidspunkt(skjæringstidspunkt)
+            .hendelser(hendelser)
+            .sykepengegrunnlag(sykepengegrunnlag)
+            .grunnlagForSykepengegrunnlag(grunnlagForSykepengegrunnlag)
+            .grunnlagForSykepengegrunnlagPerArbeidsgiver(grunnlagForSykepengegrunnlagPerArbeidsgiver)
+            .begrensning(begrensning)
+            .inntekt(inntekt)
+            .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
+            .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_HOVEDREGEL))
+            .begrunnelseFraFritekst("Fritekst")
+            .begrunnelseFraMal("Mal")
+
+        val utkast = builder.build()
+        assertTrue(utkast is Sykepengevedtak.Vedtak)
+        assertEquals(
+            Sykepengevedtak.Vedtak(
+                fødselsnummer = fødselsnummer,
+                aktørId = aktørId,
+                vedtaksperiodeId = vedtaksperiodeId,
+                organisasjonsnummer = organisasjonsnummer,
+                fom = fom,
+                tom = tom,
+                skjæringstidspunkt = skjæringstidspunkt,
+                hendelser = hendelser,
+                sykepengegrunnlag = sykepengegrunnlag,
+                grunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag,
+                grunnlagForSykepengegrunnlagPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver,
+                begrensning = begrensning,
+                inntekt = inntekt,
+                vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+                sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(ETTER_HOVEDREGEL),
+                utbetalingId = utbetalingId,
+                begrunnelseFraMal = null,
+                begrunnelseFraFritekst = null
+            ), utkast
+        )
+    }
+
     private fun sykepengegrunnlagsfakta(faktatype: Faktatype): Sykepengegrunnlagsfakta {
         return when(faktatype) {
             ETTER_SKJØNN -> Spleis.EtterSkjønn(
