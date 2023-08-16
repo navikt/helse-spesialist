@@ -31,7 +31,7 @@ class SykepengevedtakEqualsTest {
         private const val omregnetÅrsinntekt = 300000.00
         private const val innrapportertÅrsinntekt = 300000.00
         private const val avviksprosent = 0.0
-        private const val seksG2023 = 6 * 118620
+        private const val seksG2023 = 6 * 118620.0
     }
 
     @Test

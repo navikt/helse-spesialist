@@ -15,7 +15,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
-            seksG = 6 * 118620,
+            seksG = 6 * 118620.0,
             skjønnsfastsatt = 600000.0,
             tags = listOf("TAG")
         )
@@ -31,7 +31,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
-            seksG = 6 * 118620,
+            seksG = 6 * 118620.0,
             tags = listOf("TAG")
         )
 
@@ -54,7 +54,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
-            seksG = 6 * 118620,
+            seksG = 6 * 118620.0,
             skjønnsfastsatt = 600000.0,
             tags = listOf("TAG")
         )
@@ -63,7 +63,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
-            seksG = 6 * 118620,
+            seksG = 6 * 118620.0,
             skjønnsfastsatt = 600000.0,
             tags = listOf("TAG")
         )
@@ -79,7 +79,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
-            seksG = 6 * 118620,
+            seksG = 6 * 118620.0,
             tags = listOf("TAG")
         )
         val sykepengegrunnlagsfakta2 = Spleis.EtterHovedregel(
@@ -87,7 +87,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
-            seksG = 6 * 118620,
+            seksG = 6 * 118620.0,
             tags = listOf("TAG")
         )
 
@@ -111,7 +111,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
-            seksG = 6 * 118620,
+            seksG = 6 * 118620.0,
             skjønnsfastsatt = 600000.0,
             tags = listOf("TAG")
         )
@@ -120,7 +120,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
-            seksG = 6 * 118620,
+            seksG = 6 * 118620.0,
             skjønnsfastsatt = 600000.0,
             tags = listOf("TAG")
         )
@@ -136,7 +136,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
-            seksG = 6 * 118620,
+            seksG = 6 * 118620.0,
             skjønnsfastsatt = 600000.0,
             tags = listOf("TAG")
         )
@@ -145,7 +145,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             omregnetÅrsinntekt = 400000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
-            seksG = 6 * 118620,
+            seksG = 6 * 118620.0,
             skjønnsfastsatt = 600000.0,
             tags = listOf("TAG")
         )
@@ -161,7 +161,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
-            seksG = 6 * 118620,
+            seksG = 6 * 118620.0,
             skjønnsfastsatt = 600000.0,
             tags = listOf("TAG")
         )
@@ -170,7 +170,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 400000.0,
             avviksprosent = 25.0,
-            seksG = 6 * 118620,
+            seksG = 6 * 118620.0,
             skjønnsfastsatt = 600000.0,
             tags = listOf("TAG")
         )
@@ -186,7 +186,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
-            seksG = 6 * 118620,
+            seksG = 6 * 118620.0,
             skjønnsfastsatt = 600000.0,
             tags = listOf("TAG")
         )
@@ -195,7 +195,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 26.0,
-            seksG = 6 * 118620,
+            seksG = 6 * 118620.0,
             skjønnsfastsatt = 600000.0,
             tags = listOf("TAG")
         )
@@ -211,7 +211,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
-            seksG = 6 * 118620,
+            seksG = 6 * 118620.0,
             skjønnsfastsatt = 600000.0,
             tags = listOf("TAG")
         )
@@ -220,7 +220,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
-            seksG = 6 * 100000,
+            seksG = 6 * 100000.0,
             skjønnsfastsatt = 600000.0,
             tags = listOf("TAG")
         )
@@ -236,7 +236,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
-            seksG = 6 * 118620,
+            seksG = 6 * 118620.0,
             skjønnsfastsatt = 600000.0,
             tags = listOf("TAG")
         )
@@ -245,7 +245,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
-            seksG = 6 * 118620,
+            seksG = 6 * 118620.0,
             skjønnsfastsatt = 500000.0,
             tags = listOf("TAG")
         )
@@ -261,7 +261,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
-            seksG = 6 * 118620,
+            seksG = 6 * 118620.0,
             skjønnsfastsatt = 600000.0,
             tags = listOf("TAG1")
         )
@@ -270,7 +270,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
-            seksG = 6 * 118620,
+            seksG = 6 * 118620.0,
             skjønnsfastsatt = 600000.0,
             tags = listOf("TAG2")
         )
@@ -286,7 +286,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
-            seksG = 6 * 118620,
+            seksG = 6 * 118620.0,
             tags = listOf("TAG")
         )
         val sykepengegrunnlagsfakta2 = Spleis.EtterHovedregel(
@@ -294,7 +294,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
-            seksG = 6 * 118620,
+            seksG = 6 * 118620.0,
             tags = listOf("TAG")
         )
 
@@ -309,7 +309,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
-            seksG = 6 * 118620,
+            seksG = 6 * 118620.0,
             tags = listOf("TAG")
         )
         val sykepengegrunnlagsfakta2 = Spleis.EtterHovedregel(
@@ -317,7 +317,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             omregnetÅrsinntekt = 400000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
-            seksG = 6 * 118620,
+            seksG = 6 * 118620.0,
             tags = listOf("TAG")
         )
 
@@ -332,7 +332,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
-            seksG = 6 * 118620,
+            seksG = 6 * 118620.0,
             tags = listOf("TAG")
         )
         val sykepengegrunnlagsfakta2 = Spleis.EtterHovedregel(
@@ -340,7 +340,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 400000.0,
             avviksprosent = 25.0,
-            seksG = 6 * 118620,
+            seksG = 6 * 118620.0,
             tags = listOf("TAG")
         )
 
@@ -355,7 +355,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
-            seksG = 6 * 118620,
+            seksG = 6 * 118620.0,
             tags = listOf("TAG")
         )
         val sykepengegrunnlagsfakta2 = Spleis.EtterHovedregel(
@@ -363,7 +363,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 26.0,
-            seksG = 6 * 118620,
+            seksG = 6 * 118620.0,
             tags = listOf("TAG")
         )
 
@@ -378,7 +378,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
-            seksG = 6 * 118620,
+            seksG = 6 * 118620.0,
             tags = listOf("TAG")
         )
         val sykepengegrunnlagsfakta2 = Spleis.EtterHovedregel(
@@ -386,7 +386,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
-            seksG = 6 * 100000,
+            seksG = 6 * 100000.0,
             tags = listOf("TAG")
         )
 
@@ -401,7 +401,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
-            seksG = 6 * 118620,
+            seksG = 6 * 118620.0,
             tags = listOf("TAG1")
         )
         val sykepengegrunnlagsfakta2 = Spleis.EtterHovedregel(
@@ -409,7 +409,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
-            seksG = 6 * 118620,
+            seksG = 6 * 118620.0,
             tags = listOf("TAG2")
         )
 

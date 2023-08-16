@@ -16,7 +16,6 @@ import no.nav.helse.rapids_rivers.isMissingOrNull
 
 internal class UtkastTilVedtakMessage(packet: JsonMessage) {
 
-    private val id = UUID.fromString(packet["@id"].asText())
     private val fødselsnummer = packet["fødselsnummer"].asText()
     private val aktørId = packet["aktørId"].asText()
     private val fom = packet["fom"].asLocalDate()
@@ -75,7 +74,7 @@ internal class UtkastTilVedtakMessage(packet: JsonMessage) {
                 omregnetÅrsinntekt = packet["sykepengegrunnlagsfakta.omregnetÅrsinntekt"].asDouble(),
                 innrapportertÅrsinntekt = packet["sykepengegrunnlagsfakta.innrapportertÅrsinntekt"].asDouble(),
                 avviksprosent = packet["sykepengegrunnlagsfakta.avviksprosent"].asDouble(),
-                seksG = packet["sykepengegrunnlagsfakta.6G"].asInt(),
+                seksG = packet["sykepengegrunnlagsfakta.6G"].asDouble(),
                 skjønnsfastsatt = packet["sykepengegrunnlagsfakta.skjønnsfastsatt"].asDouble(),
                 tags = packet["sykepengegrunnlagsfakta.tags"].map { it.asText() },
                 arbeidsgivere = packet["sykepengegrunnlagsfakta.arbeidsgivere"].map {
@@ -91,7 +90,7 @@ internal class UtkastTilVedtakMessage(packet: JsonMessage) {
                 omregnetÅrsinntekt = packet["sykepengegrunnlagsfakta.omregnetÅrsinntekt"].asDouble(),
                 innrapportertÅrsinntekt = packet["sykepengegrunnlagsfakta.innrapportertÅrsinntekt"].asDouble(),
                 avviksprosent = packet["sykepengegrunnlagsfakta.avviksprosent"].asDouble(),
-                seksG = packet["sykepengegrunnlagsfakta.6G"].asInt(),
+                seksG = packet["sykepengegrunnlagsfakta.6G"].asDouble(),
                 tags = packet["sykepengegrunnlagsfakta.tags"].map { it.asText() },
                 arbeidsgivere = packet["sykepengegrunnlagsfakta.arbeidsgivere"].map {
                     Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(

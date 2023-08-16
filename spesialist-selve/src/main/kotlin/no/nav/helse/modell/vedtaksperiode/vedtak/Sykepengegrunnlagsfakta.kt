@@ -1,7 +1,7 @@
 package no.nav.helse.modell.vedtaksperiode.vedtak
 
 internal sealed class Sykepengegrunnlagsfakta(
-    private val omregnetÅrsinntekt: Double,
+    val omregnetÅrsinntekt: Double,
 ) {
     override fun equals(other: Any?): Boolean = this === other || (
         other is Sykepengegrunnlagsfakta
@@ -14,11 +14,11 @@ internal sealed class Sykepengegrunnlagsfakta(
 
     internal sealed class Spleis(
         omregnetÅrsinntekt: Double,
-        private val innrapportertÅrsinntekt: Double,
-        private val avviksprosent: Double,
-        private val seksG: Int,
-        private val tags: List<String>,
-        private val arbeidsgivere: List<Arbeidsgiver>,
+        val innrapportertÅrsinntekt: Double,
+        val avviksprosent: Double,
+        val seksG: Double,
+        val tags: List<String>,
+        val arbeidsgivere: List<Arbeidsgiver>,
     ) : Sykepengegrunnlagsfakta(omregnetÅrsinntekt) {
         override fun equals(other: Any?): Boolean = this === other || (
             super.equals(other)
@@ -34,7 +34,7 @@ internal sealed class Sykepengegrunnlagsfakta(
             var result = super.hashCode()
             result = 31 * result + innrapportertÅrsinntekt.hashCode()
             result = 31 * result + avviksprosent.hashCode()
-            result = 31 * result + seksG
+            result = 31 * result + seksG.hashCode()
             result = 31 * result + tags.hashCode()
             result = 31 * result + arbeidsgivere.hashCode()
             return result
@@ -44,8 +44,8 @@ internal sealed class Sykepengegrunnlagsfakta(
             omregnetÅrsinntekt: Double,
             innrapportertÅrsinntekt: Double,
             avviksprosent: Double,
-            seksG: Int,
-            private val skjønnsfastsatt: Double,
+            seksG: Double,
+            val skjønnsfastsatt: Double,
             tags: List<String>,
             arbeidsgivere: List<Arbeidsgiver.EtterSkjønn>,
         ) : Spleis(
@@ -74,7 +74,7 @@ internal sealed class Sykepengegrunnlagsfakta(
             omregnetÅrsinntekt: Double,
             innrapportertÅrsinntekt: Double,
             avviksprosent: Double,
-            seksG: Int,
+            seksG: Double,
             tags: List<String>,
             arbeidsgivere: List<Arbeidsgiver.EtterHovedregel>,
         ) : Spleis(
@@ -90,8 +90,8 @@ internal sealed class Sykepengegrunnlagsfakta(
         }
 
         internal sealed class Arbeidsgiver(
-            private val organisasjonsnummer: String,
-            private val omregnetArsinntekt: Double,
+            val organisasjonsnummer: String,
+            val omregnetArsinntekt: Double,
         ) {
             override fun equals(other: Any?): Boolean = this === other || (
                     other is Arbeidsgiver
@@ -108,7 +108,7 @@ internal sealed class Sykepengegrunnlagsfakta(
             internal class EtterSkjønn(
                 organisasjonsnummer: String,
                 omregnetArsinntekt: Double,
-                private val skjønnsfastsatt: Double,
+                val skjønnsfastsatt: Double,
             ) : Arbeidsgiver(organisasjonsnummer, omregnetArsinntekt) {
                 override fun equals(other: Any?) = this === other || (
                         super.equals(other)
