@@ -373,6 +373,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
                     årsak = "En årsak",
                     begrunnelseMal = "En begrunnelsemal",
                     begrunnelseFritekst = "begrunnelsefritekst",
+                    begrunnelseKonklusjon = "begrunnelseKonklusjon",
                     initierendeVedtaksperiodeId = PERIODE.id.toString()
                 ),
                 SkjønnsfastsattArbeidsgiverDto(
@@ -383,6 +384,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
                     årsak = "En årsak 2",
                     begrunnelseMal = "En begrunnelsemal",
                     begrunnelseFritekst = "begrunnelsefritekst",
+                    begrunnelseKonklusjon = "begrunnelseKonklusjon",
                     initierendeVedtaksperiodeId = UUID.randomUUID().toString()
                 ),
             )
@@ -404,6 +406,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
             assertEquals(ORGANISASJONSNUMMER, it["organisasjonsnummer"].asText())
             assertEquals("En begrunnelsemal", it["begrunnelseMal"].asText())
             assertEquals("begrunnelsefritekst", it["begrunnelseFritekst"].asText())
+            assertEquals("begrunnelseKonklusjon", it["begrunnelseKonklusjon"].asText())
             assertEquals("En årsak", it["årsak"].asText())
             assertEquals(25000.0, it["årlig"].asDouble())
             assertEquals(25001.0, it["fraÅrlig"].asDouble())
@@ -415,6 +418,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
             assertEquals(ORGANISASJONSNUMMER_GHOST, it["organisasjonsnummer"].asText())
             assertEquals("En begrunnelsemal", it["begrunnelseMal"].asText())
             assertEquals("begrunnelsefritekst", it["begrunnelseFritekst"].asText())
+            assertEquals("begrunnelseKonklusjon", it["begrunnelseKonklusjon"].asText())
             assertEquals("En årsak 2", it["årsak"].asText())
             assertEquals(21000.0, it["årlig"].asDouble())
             assertEquals(25001.0, it["fraÅrlig"].asDouble())

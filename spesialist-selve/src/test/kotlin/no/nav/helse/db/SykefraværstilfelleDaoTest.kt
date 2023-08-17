@@ -25,7 +25,7 @@ internal class SykefraværstilfelleDaoTest: DatabaseIntegrationTest() {
             eksternHendelseId = UUID.randomUUID(),
             fødselsnummer = FNR,
             arbeidsgivere = listOf(
-                SkjønnsfastsattArbeidsgiver(ORGNUMMER, 1000.0, 900.0, "En årsak", "En ", "begrunnelse", null, null)
+                SkjønnsfastsattArbeidsgiver(ORGNUMMER, 1000.0, 900.0, "En årsak", "En ", "begrunnelse", "konklusjon", null, null)
             ),
             saksbehandlerRef = SAKSBEHANDLER_OID,
             skjæringstidspunkt = 1.januar,
@@ -34,7 +34,7 @@ internal class SykefraværstilfelleDaoTest: DatabaseIntegrationTest() {
 
         val funnet = sykefraværstilfelleDao.finnSkjønnsfastsatteSykepengegrunnlag(FNR, 1.januar)
         assertEquals(1, funnet.size)
-        assertEquals(SkjønnsfastattSykepengegrunnlag(1.januar, "En ", "begrunnelse", tidspunkt), funnet.single())
+        assertEquals(SkjønnsfastattSykepengegrunnlag(1.januar, "En ", "begrunnelse","konklusjon",  tidspunkt), funnet.single())
     }
 
     @Test
@@ -54,7 +54,7 @@ internal class SykefraværstilfelleDaoTest: DatabaseIntegrationTest() {
             eksternHendelseId = UUID.randomUUID(),
             fødselsnummer = FNR,
             arbeidsgivere = listOf(
-                SkjønnsfastsattArbeidsgiver(ORGNUMMER, 1000.0, 900.0, "En årsak", "En ", "begrunnelse", null, null)
+                SkjønnsfastsattArbeidsgiver(ORGNUMMER, 1000.0, 900.0, "En årsak", "En ", "begrunnelse", "konklusjon", null, null)
             ),
             saksbehandlerRef = SAKSBEHANDLER_OID,
             skjæringstidspunkt = 1.januar,
@@ -65,7 +65,7 @@ internal class SykefraværstilfelleDaoTest: DatabaseIntegrationTest() {
             eksternHendelseId = UUID.randomUUID(),
             fødselsnummer = person2,
             arbeidsgivere = listOf(
-                SkjønnsfastsattArbeidsgiver(arbeidsgiver2, 1000.0, 900.0, "En årsak", "En ", "begrunnelse", null, null)
+                SkjønnsfastsattArbeidsgiver(arbeidsgiver2, 1000.0, 900.0, "En årsak", "En ", "begrunnelse", "konklusjon", null, null)
             ),
             saksbehandlerRef = SAKSBEHANDLER_OID,
             skjæringstidspunkt = 1.januar,
@@ -74,7 +74,7 @@ internal class SykefraværstilfelleDaoTest: DatabaseIntegrationTest() {
 
         val funnet = sykefraværstilfelleDao.finnSkjønnsfastsatteSykepengegrunnlag(FNR, 1.januar)
         assertEquals(1, funnet.size)
-        assertEquals(SkjønnsfastattSykepengegrunnlag(1.januar, "En ", "begrunnelse", tidspunkt), funnet.single())
+        assertEquals(SkjønnsfastattSykepengegrunnlag(1.januar, "En ", "begrunnelse", "konklusjon", tidspunkt), funnet.single())
     }
 
     @Test
@@ -91,7 +91,7 @@ internal class SykefraværstilfelleDaoTest: DatabaseIntegrationTest() {
             eksternHendelseId = UUID.randomUUID(),
             fødselsnummer = FNR,
             arbeidsgivere = listOf(
-                SkjønnsfastsattArbeidsgiver(ORGNUMMER, 1000.0, 900.0, "En årsak", "En ", "begrunnelse", null, null)
+                SkjønnsfastsattArbeidsgiver(ORGNUMMER, 1000.0, 900.0, "En årsak", "En ", "begrunnelse", "konklusjon", null, null)
             ),
             saksbehandlerRef = SAKSBEHANDLER_OID,
             skjæringstidspunkt = 1.januar,
@@ -102,7 +102,7 @@ internal class SykefraværstilfelleDaoTest: DatabaseIntegrationTest() {
             eksternHendelseId = UUID.randomUUID(),
             fødselsnummer = FNR,
             arbeidsgivere = listOf(
-                SkjønnsfastsattArbeidsgiver(ORGNUMMER, 1000.0, 900.0, "En årsak", "En ", "begrunnelse", null, null)
+                SkjønnsfastsattArbeidsgiver(ORGNUMMER, 1000.0, 900.0, "En årsak", "En ", "begrunnelse", "konklusjon", null, null)
             ),
             saksbehandlerRef = SAKSBEHANDLER_OID,
             skjæringstidspunkt = 1.februar,
@@ -111,7 +111,7 @@ internal class SykefraværstilfelleDaoTest: DatabaseIntegrationTest() {
 
         val funnet = sykefraværstilfelleDao.finnSkjønnsfastsatteSykepengegrunnlag(FNR, 1.januar)
         assertEquals(1, funnet.size)
-        assertEquals(SkjønnsfastattSykepengegrunnlag(1.januar, "En ", "begrunnelse", tidspunkt), funnet.single())
+        assertEquals(SkjønnsfastattSykepengegrunnlag(1.januar, "En ", "begrunnelse", "konklusjon", tidspunkt), funnet.single())
     }
 
 }

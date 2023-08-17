@@ -41,6 +41,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         private const val BEGRUNNELSE = "BegrunnelseMal\n\nBegrunnelseFritekst"
         private const val BEGRUNNELSEMAL = "BegrunnelseMal"
         private const val BEGRUNNELSEFRITEKST = "BegrunnelseFritekst"
+        private const val BEGRUNNELSEKONKLUSJON = "BegrunnelseKonklusjon"
         private const val FORKLARING = "Forklaring"
         private const val ÅRSAK = "Årsak"
         private val OVERSTYRTE_DAGER = listOf(
@@ -212,6 +213,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
                     årsak = ÅRSAK,
                     begrunnelseMal = BEGRUNNELSEMAL,
                     begrunnelseFritekst = BEGRUNNELSEFRITEKST,
+                    begrunnelseKonklusjon = BEGRUNNELSEKONKLUSJON,
                     subsumsjon = Subsumsjon(paragraf = "87494"),
                     initierendeVedtaksperiodeId = VEDTAKSPERIODE
                 )
@@ -225,7 +227,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         assertEquals(ID, hentetSkjønnsfastsetting.hendelseId)
         assertEquals(FØDSELSNUMMER, hentetSkjønnsfastsetting.fødselsnummer)
         assertEquals(ORGNUMMER, hentetSkjønnsfastsetting.organisasjonsnummer)
-        assertEquals(BEGRUNNELSEMAL + "\n\n" + BEGRUNNELSEFRITEKST, hentetSkjønnsfastsetting.begrunnelse)
+        assertEquals(BEGRUNNELSEMAL + "\n\n" + BEGRUNNELSEFRITEKST + "\n\n" + BEGRUNNELSEKONKLUSJON, hentetSkjønnsfastsetting.begrunnelse)
         assertEquals(ÅRSAK, hentetSkjønnsfastsetting.årsak)
         assertEquals(SAKSBEHANDLER_NAVN, hentetSkjønnsfastsetting.saksbehandlerNavn)
         assertEquals(SAKSBEHANDLER_IDENT, hentetSkjønnsfastsetting.saksbehandlerIdent)
@@ -328,6 +330,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
                     årsak = ÅRSAK,
                     begrunnelseMal = BEGRUNNELSEMAL,
                     begrunnelseFritekst = BEGRUNNELSEFRITEKST,
+                    begrunnelseKonklusjon = BEGRUNNELSEKONKLUSJON,
                     subsumsjon = Subsumsjon(paragraf = "87494"),
                     initierendeVedtaksperiodeId = VEDTAKSPERIODE
                 )

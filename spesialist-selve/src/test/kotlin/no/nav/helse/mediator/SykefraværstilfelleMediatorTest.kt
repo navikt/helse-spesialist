@@ -100,7 +100,8 @@ internal class SykefraværstilfelleMediatorTest {
                 omregnetÅrsinntekt = 10000.0
             ),
             begrunnelseFraMal = null,
-            begrunnelseFraFritekst = null
+            begrunnelseFraFritekst = null,
+            begrunnelseFraKonklusjon = null
         )
         mediator.vedtakFattet(infotrygd)
         val eventer = testRapid.inspektør.meldinger()
@@ -165,7 +166,8 @@ internal class SykefraværstilfelleMediatorTest {
                 )
             ),
             begrunnelseFraMal = null,
-            begrunnelseFraFritekst = null
+            begrunnelseFraFritekst = null,
+            begrunnelseFraKonklusjon = null
         )
         mediator.vedtakFattet(infotrygd)
         val eventer = testRapid.inspektør.meldinger()
@@ -244,7 +246,8 @@ internal class SykefraværstilfelleMediatorTest {
                 skjønnsfastsatt = 13000.0
             ),
             begrunnelseFraMal = "Mal",
-            begrunnelseFraFritekst = "Fritekst"
+            begrunnelseFraFritekst = "Fritekst",
+            begrunnelseFraKonklusjon = "Konklusjon"
         )
         mediator.vedtakFattet(infotrygd)
         val eventer = testRapid.inspektør.meldinger()
@@ -289,7 +292,7 @@ internal class SykefraværstilfelleMediatorTest {
         )
         assertEquals(13000.0, event["sykepengegrunnlagsfakta"]["skjønnsfastsatt"].asDouble())
 
-        assertEquals(2, event["begrunnelser"].size())
+        assertEquals(3, event["begrunnelser"].size())
 
         assertEquals("SkjønnsfastsattSykepengegrunnlagMal", event["begrunnelser"][0]["type"].asText())
         assertEquals("Mal", event["begrunnelser"][0]["begrunnelse"].asText())
@@ -298,5 +301,9 @@ internal class SykefraværstilfelleMediatorTest {
         assertEquals("SkjønnsfastsattSykepengegrunnlagFritekst", event["begrunnelser"][1]["type"].asText())
         assertEquals("Fritekst", event["begrunnelser"][1]["begrunnelse"].asText())
         assertEquals(listOf(mapOf("fom" to fom, "tom" to tom)), objectMapper.convertValue<List<Map<String, LocalDate>>>(event["begrunnelser"][1]["perioder"]))
+
+        assertEquals("SkjønnsfastsattSykepengegrunnlagKonklusjon", event["begrunnelser"][2]["type"].asText())
+        assertEquals("Konklusjon", event["begrunnelser"][2]["begrunnelse"].asText())
+        assertEquals(listOf(mapOf("fom" to fom, "tom" to tom)), objectMapper.convertValue<List<Map<String, LocalDate>>>(event["begrunnelser"][2]["perioder"]))
     }
 }

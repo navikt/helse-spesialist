@@ -13,9 +13,10 @@ internal class SykefraværstilfelleDao(dataSource: DataSource) : HelseDao(dataSo
     ): List<SkjønnsfastattSykepengegrunnlag> {
         return asSQL(
             """
-                SELECT ss.skjaeringstidspunkt, fritekst.tekst as fritekst, mal.tekst as mal, o.tidspunkt FROM begrunnelse fritekst
+                SELECT ss.skjaeringstidspunkt, fritekst.tekst as fritekst, mal.tekst as mal, konklusjon.tekst as konklusjon, o.tidspunkt FROM begrunnelse fritekst
                 JOIN skjonnsfastsetting_sykepengegrunnlag ss ON fritekst.id = ss.begrunnelse_fritekst_ref
                 JOIN begrunnelse mal ON mal.id = ss.begrunnelse_mal_ref
+                JOIN begrunnelse konklusjon ON konklusjon.id = ss.begrunnelse_konklusjon_ref
                 JOIN overstyring o ON ss.overstyring_ref = o.id
                 JOIN person ON o.person_ref = person.id
                 WHERE ss.skjaeringstidspunkt::date = :skjaeringstidspunkt
@@ -27,6 +28,7 @@ internal class SykefraværstilfelleDao(dataSource: DataSource) : HelseDao(dataSo
                 skjæringstidspunkt = it.localDate("skjaeringstidspunkt"),
                 begrunnelseFraMal = it.string("mal"),
                 begrunnelseFraFritekst = it.string("fritekst"),
+                begrunnelseFraKonklusjon = it.string("konklusjon"),
                 opprettet = it.localDateTime("tidspunkt")
             )
         }

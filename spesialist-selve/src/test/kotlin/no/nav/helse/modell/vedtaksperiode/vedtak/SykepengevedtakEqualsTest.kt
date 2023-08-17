@@ -77,7 +77,8 @@ class SykepengevedtakEqualsTest {
             sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(Faktatype.ETTER_HOVEDREGEL),
             utbetalingId = utbetalingId,
             begrunnelseFraMal = "Mal",
-            begrunnelseFraFritekst = "Fritekst"
+            begrunnelseFraFritekst = "Fritekst",
+            begrunnelseFraKonklusjon = "Konklusjon"
         )
 
         assertEquals(vedtak, vedtak)
@@ -143,7 +144,8 @@ class SykepengevedtakEqualsTest {
             sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(Faktatype.ETTER_HOVEDREGEL),
             utbetalingId = utbetalingId,
             begrunnelseFraMal = "Mal",
-            begrunnelseFraFritekst = "Fritekst"
+            begrunnelseFraFritekst = "Fritekst",
+            begrunnelseFraKonklusjon = "Konklusjon"
         )
 
         val vedtak2 = Sykepengevedtak.Vedtak(
@@ -164,7 +166,8 @@ class SykepengevedtakEqualsTest {
             sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(Faktatype.ETTER_HOVEDREGEL),
             utbetalingId = utbetalingId,
             begrunnelseFraMal = "Mal",
-            begrunnelseFraFritekst = "Fritekst"
+            begrunnelseFraFritekst = "Fritekst",
+            begrunnelseFraKonklusjon = "Konklusjon"
         )
 
         assertEquals(vedtak1, vedtak2)
@@ -737,7 +740,8 @@ class SykepengevedtakEqualsTest {
             sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(Faktatype.ETTER_HOVEDREGEL),
             utbetalingId = utbetalingId,
             begrunnelseFraMal = "Mal",
-            begrunnelseFraFritekst = "Fritekst"
+            begrunnelseFraFritekst = "Fritekst",
+            begrunnelseFraKonklusjon = "Konklusjon"
         )
 
         val vedtak2 = Sykepengevedtak.Vedtak(
@@ -758,7 +762,8 @@ class SykepengevedtakEqualsTest {
             sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(Faktatype.ETTER_SKJØNN),
             utbetalingId = utbetalingId,
             begrunnelseFraMal = "Mal",
-            begrunnelseFraFritekst = "Fritekst"
+            begrunnelseFraFritekst = "Fritekst",
+            begrunnelseFraKonklusjon = "Konklusjon"
         )
 
         assertNotEquals(vedtak1, vedtak2)
@@ -785,7 +790,8 @@ class SykepengevedtakEqualsTest {
             sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(Faktatype.ETTER_HOVEDREGEL),
             utbetalingId = utbetalingId,
             begrunnelseFraMal = "Mal",
-            begrunnelseFraFritekst = "Fritekst"
+            begrunnelseFraFritekst = "Fritekst",
+            begrunnelseFraKonklusjon = "Konklusjon"
         )
 
         val vedtak2 = Sykepengevedtak.Vedtak(
@@ -806,7 +812,8 @@ class SykepengevedtakEqualsTest {
             sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(Faktatype.ETTER_HOVEDREGEL),
             utbetalingId = UUID.randomUUID(),
             begrunnelseFraMal = "Mal",
-            begrunnelseFraFritekst = "Fritekst"
+            begrunnelseFraFritekst = "Fritekst",
+            begrunnelseFraKonklusjon = "Konklusjon"
         )
 
         assertNotEquals(vedtak1, vedtak2)

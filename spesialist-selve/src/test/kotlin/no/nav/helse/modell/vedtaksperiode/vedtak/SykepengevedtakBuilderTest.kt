@@ -84,7 +84,8 @@ class SykepengevedtakBuilderTest {
                 sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(ETTER_HOVEDREGEL),
                 utbetalingId = utbetalingId,
                 begrunnelseFraMal = null,
-                begrunnelseFraFritekst = null
+                begrunnelseFraFritekst = null,
+                begrunnelseFraKonklusjon = null
             ), utkast
         )
     }
@@ -109,7 +110,7 @@ class SykepengevedtakBuilderTest {
             .inntekt(inntekt)
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
             .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_SKJØNN))
-            .skjønnsfastsattSykepengegrunnlag(SkjønnsfastattSykepengegrunnlag(skjæringstidspunkt, "Mal", "Fritekst", LocalDateTime.now()))
+            .skjønnsfastsattSykepengegrunnlag(SkjønnsfastattSykepengegrunnlag(skjæringstidspunkt, "Mal", "Fritekst", "Konklusjon", LocalDateTime.now()))
 
         val utkast = builder.build()
         assertTrue(utkast is Sykepengevedtak.Vedtak)
@@ -132,7 +133,8 @@ class SykepengevedtakBuilderTest {
                 sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(ETTER_SKJØNN),
                 utbetalingId = utbetalingId,
                 begrunnelseFraMal = "Mal",
-                begrunnelseFraFritekst = "Fritekst"
+                begrunnelseFraFritekst = "Fritekst",
+                begrunnelseFraKonklusjon = "Konklusjon"
             ), utkast
         )
     }
@@ -179,7 +181,8 @@ class SykepengevedtakBuilderTest {
                 sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(I_INFOTRYGD),
                 utbetalingId = utbetalingId,
                 begrunnelseFraMal = null,
-                begrunnelseFraFritekst = null
+                begrunnelseFraFritekst = null,
+                begrunnelseFraKonklusjon = null
             ), utkast
         )
     }
@@ -296,6 +299,7 @@ class SykepengevedtakBuilderTest {
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
             .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_SKJØNN))
             .begrunnelseFraFritekst("Fritekst")
+            .begrunnelseFraKonklusjon("konklusjon")
 
         assertThrows<IllegalArgumentException> { builder.build() }
     }
@@ -321,6 +325,33 @@ class SykepengevedtakBuilderTest {
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
             .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_SKJØNN))
             .begrunnelseFraMal("Mal")
+            .begrunnelseFraKonklusjon("Konklusjon")
+
+        assertThrows<IllegalArgumentException> { builder.build() }
+    }
+
+    @Test
+    fun`Forventer at begrunnelseFraKonklusjon er satt ved bygging av vedtak etter skjønn`() {
+        val builder = SykepengevedtakBuilder()
+        builder
+            .fødselsnummer(fødselsnummer)
+            .aktørId(aktørId)
+            .organisasjonsnummer(organisasjonsnummer)
+            .vedtaksperiodeId(vedtaksperiodeId)
+            .utbetalingId(utbetalingId)
+            .fom(fom)
+            .tom(tom)
+            .skjæringstidspunkt(skjæringstidspunkt)
+            .hendelser(hendelser)
+            .sykepengegrunnlag(sykepengegrunnlag)
+            .grunnlagForSykepengegrunnlag(grunnlagForSykepengegrunnlag)
+            .grunnlagForSykepengegrunnlagPerArbeidsgiver(grunnlagForSykepengegrunnlagPerArbeidsgiver)
+            .begrensning(begrensning)
+            .inntekt(inntekt)
+            .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
+            .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_SKJØNN))
+            .begrunnelseFraMal("Mal")
+            .begrunnelseFraFritekst("Fritekst")
 
         assertThrows<IllegalArgumentException> { builder.build() }
     }
@@ -347,6 +378,7 @@ class SykepengevedtakBuilderTest {
             .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_HOVEDREGEL))
             .begrunnelseFraFritekst("Fritekst")
             .begrunnelseFraMal("Mal")
+            .begrunnelseFraKonklusjon("Konklusjon")
 
         val utkast = builder.build()
         assertTrue(utkast is Sykepengevedtak.Vedtak)
@@ -369,7 +401,8 @@ class SykepengevedtakBuilderTest {
                 sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(ETTER_HOVEDREGEL),
                 utbetalingId = utbetalingId,
                 begrunnelseFraMal = null,
-                begrunnelseFraFritekst = null
+                begrunnelseFraFritekst = null,
+                begrunnelseFraKonklusjon = null
             ), utkast
         )
     }

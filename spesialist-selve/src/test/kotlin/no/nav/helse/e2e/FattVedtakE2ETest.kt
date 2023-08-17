@@ -41,9 +41,10 @@ internal class FattVedtakE2ETest: AbstractE2ETestV2() {
         håndterUtkastTilVedtak(fastsattType = "EtterSkjønn")
         val sisteHendelse = inspektør.meldinger().last()
         assertEquals("vedtak_fattet", sisteHendelse["@event_name"].asText())
-        assertEquals(2, sisteHendelse["begrunnelser"].size())
+        assertEquals(3, sisteHendelse["begrunnelser"].size())
         assertEquals("SkjønnsfastsattSykepengegrunnlagMal", sisteHendelse["begrunnelser"][0]["type"].asText())
         assertEquals("SkjønnsfastsattSykepengegrunnlagFritekst", sisteHendelse["begrunnelser"][1]["type"].asText())
+        assertEquals("SkjønnsfastsattSykepengegrunnlagKonklusjon", sisteHendelse["begrunnelser"][2]["type"].asText())
         assertEquals("EtterSkjønn", sisteHendelse["sykepengegrunnlagsfakta"]["fastsatt"].asText())
     }
 

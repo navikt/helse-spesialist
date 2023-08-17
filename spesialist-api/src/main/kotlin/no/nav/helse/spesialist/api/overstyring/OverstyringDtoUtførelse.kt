@@ -66,6 +66,7 @@ internal data class SkjønnsfastsattArbeidsgiverDto(
     val årsak: String,
     val begrunnelseMal: String?,
     val begrunnelseFritekst: String?,
+    val begrunnelseKonklusjon: String?,
     val subsumsjon: SubsumsjonDto?,
     val initierendeVedtaksperiodeId: String?,
 ) {
@@ -76,6 +77,7 @@ internal data class SkjønnsfastsattArbeidsgiverDto(
         "årsak" to årsak,
         "begrunnelseMal" to begrunnelseMal,
         "begrunnelseFritekst" to begrunnelseFritekst,
+        "begrunnelseKonklusjon" to begrunnelseKonklusjon,
         "subsumsjon" to subsumsjon,
         "initierendeVedtaksperiodeId" to initierendeVedtaksperiodeId,
     ).toMap()

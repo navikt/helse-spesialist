@@ -123,6 +123,7 @@ internal object TestmeldingsfabrikkV2 {
                         "årsak" to "Skjønnsfastsetting ved mer enn 25% avvik",
                         "begrunnelseMal" to "Mal",
                         "begrunnelseFritekst" to "Fritekst",
+                        "begrunnelseKonklusjon" to "Fritekst",
                         "subsumsjon" to mapOf(
                             "paragraf" to "8-30",
                             "ledd" to "2",

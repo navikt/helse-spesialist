@@ -109,6 +109,15 @@ internal class SykefraværstilfelleMediator(
                                 "fom" to "${sykepengevedtak.fom}", "tom" to "${sykepengevedtak.tom}"
                             )
                         )
+                    ),
+                    mapOf(
+                        "type" to "SkjønnsfastsattSykepengegrunnlagKonklusjon",
+                        "begrunnelse" to sykepengevedtak.begrunnelseFraKonklusjon,
+                        "perioder" to listOf(
+                            mapOf(
+                                "fom" to "${sykepengevedtak.fom}", "tom" to "${sykepengevedtak.tom}"
+                            )
+                        )
                     )
                 )
             )

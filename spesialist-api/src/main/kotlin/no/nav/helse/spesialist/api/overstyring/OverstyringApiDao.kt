@@ -139,7 +139,7 @@ class OverstyringApiDao(private val dataSource: DataSource) {
             val finnSkjønnsfastsettingQuery = """
             SELECT o.id, o.tidspunkt, o.person_ref, o.hendelse_ref, o.saksbehandler_ref, o.ekstern_hendelse_id, 
             o.ferdigstilt, ss.arsak, ssa.arlig, ssa.fra_arlig, ss.skjaeringstidspunkt, 
-            b1.tekst as fritekst, b2.tekst as mal, p.fodselsnummer, a.orgnummer, s.navn, s.ident FROM overstyring o
+            b1.tekst as fritekst, b2.tekst as mal, b3.tekst as konklusjon, p.fodselsnummer, a.orgnummer, s.navn, s.ident FROM overstyring o
                 INNER JOIN skjonnsfastsetting_sykepengegrunnlag ss ON o.id = ss.overstyring_ref
                 INNER JOIN skjonnsfastsetting_sykepengegrunnlag_arbeidsgiver ssa ON ssa.skjonnsfastsetting_sykepengegrunnlag_ref = ss.id
                 INNER JOIN person p ON p.id = o.person_ref
@@ -147,6 +147,7 @@ class OverstyringApiDao(private val dataSource: DataSource) {
                 INNER JOIN saksbehandler s ON s.oid = o.saksbehandler_ref
                 INNER JOIN begrunnelse b1 ON ss.begrunnelse_fritekst_ref = b1.id 
                 INNER JOIN begrunnelse b2 ON ss.begrunnelse_mal_ref = b2.id 
+                INNER JOIN begrunnelse b3 ON ss.begrunnelse_konklusjon_ref = b3.id 
                 INNER JOIN hendelse h ON h.id = o.hendelse_ref
             WHERE p.fodselsnummer = ? AND a.orgnummer = ?
         """
@@ -157,7 +158,7 @@ class OverstyringApiDao(private val dataSource: DataSource) {
                             hendelseId = overstyringRow.uuid("hendelse_ref"),
                             fødselsnummer = overstyringRow.long("fodselsnummer").toFødselsnummer(),
                             organisasjonsnummer = overstyringRow.int("orgnummer").toString(),
-                            begrunnelse = overstyringRow.string("mal") + "\n\n" + overstyringRow.string("fritekst"),
+                            begrunnelse = overstyringRow.string("mal") + "\n\n" + overstyringRow.string("fritekst") + "\n\n" + overstyringRow.string("konklusjon"),
                             årsak = overstyringRow.string("arsak"),
                             timestamp = overstyringRow.localDateTime("tidspunkt"),
                             saksbehandlerNavn = overstyringRow.string("navn"),

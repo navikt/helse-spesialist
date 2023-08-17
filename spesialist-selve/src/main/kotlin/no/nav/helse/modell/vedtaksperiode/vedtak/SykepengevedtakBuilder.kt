@@ -26,6 +26,7 @@ internal class SykepengevedtakBuilder {
     private var skjønnsfastsattSykepengegrunnlag: SkjønnsfastattSykepengegrunnlag? = null
     private var begrunnelseFraMal: String? = null
     private var begrunnelseFraFritekst: String? = null
+    private var begrunnelseFraKonklusjon: String? = null
 
     internal fun fødselsnummer(fødselsnummer: String) = apply { this.fødselsnummer = fødselsnummer }
     internal fun aktørId(aktørId: String) = apply { this.aktørId = aktørId }
@@ -50,6 +51,7 @@ internal class SykepengevedtakBuilder {
     }
     internal fun begrunnelseFraMal(begrunnelseFraMal: String) = apply { this.begrunnelseFraMal = begrunnelseFraMal }
     internal fun begrunnelseFraFritekst(begrunnelseFraFritekst: String) = apply { this.begrunnelseFraFritekst = begrunnelseFraFritekst }
+    internal fun begrunnelseFraKonklusjon(begrunnelseFraKonklusjon: String) = apply { this.begrunnelseFraKonklusjon = begrunnelseFraKonklusjon }
 
     internal fun build(): Sykepengevedtak {
         if (utbetalingId != null) return buildVedtak()
@@ -87,6 +89,7 @@ internal class SykepengevedtakBuilder {
     private fun buildVedtakEtterSkjønn(sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta, utbetalingId: UUID): Sykepengevedtak.Vedtak {
         val begrunnelseFraMal = requireNotNull(begrunnelseFraMal) { "Forventer å finne begrunnelse fra mal ved bygging av vedtak når sykepengegrunnlaget er fastsatt etter skjønn" }
         val begrunnelseFraFritekst = requireNotNull(begrunnelseFraFritekst) { "Forventer å finne begrunnelse fra fritekst ved bygging av vedtak når sykepengegrunnlaget er fastsatt etter skjønn" }
+        val begrunnelseFraKonklusjon = requireNotNull(begrunnelseFraKonklusjon) { "Forventer å finne begrunnelse fra konklusjon ved bygging av vedtak når sykepengegrunnlaget er fastsatt etter skjønn" }
 
         return Sykepengevedtak.Vedtak(
             fødselsnummer = fødselsnummer,
@@ -106,7 +109,8 @@ internal class SykepengevedtakBuilder {
             sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
             begrunnelseFraFritekst = begrunnelseFraFritekst,
-            begrunnelseFraMal = begrunnelseFraMal
+            begrunnelseFraMal = begrunnelseFraMal,
+            begrunnelseFraKonklusjon = begrunnelseFraKonklusjon,
         )
     }
 
@@ -129,7 +133,8 @@ internal class SykepengevedtakBuilder {
             sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
             begrunnelseFraFritekst = null,
-            begrunnelseFraMal = null
+            begrunnelseFraMal = null,
+            begrunnelseFraKonklusjon = null
         )
     }
 }

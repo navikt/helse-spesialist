@@ -42,6 +42,7 @@ internal class SkjønnsfastsattArbeidsgiver(
     val årsak: String,
     val begrunnelseMal: String?,
     val begrunnelseFritekst: String?,
+    val begrunnelseKonklusjon: String?,
     val subsumsjon: Subsumsjon?,
     val initierendeVedtaksperiodeId: UUID?
 ) {
@@ -55,6 +56,7 @@ internal class SkjønnsfastsattArbeidsgiver(
                     årsak = jsonNode["årsak"].asText(),
                     begrunnelseMal = jsonNode["begrunnelseMal"].asText(),
                     begrunnelseFritekst = jsonNode["begrunnelseFritekst"].asText(),
+                    begrunnelseKonklusjon = jsonNode["begrunnelseKonklusjon"].asText(),
                     subsumsjon = jsonNode["subsumsjon"].subsumsjonelementer(),
                     initierendeVedtaksperiodeId = if (jsonNode["initierendeVedtaksperiodeId"].isNull) null else UUID.fromString(
                         jsonNode["initierendeVedtaksperiodeId"].asText()

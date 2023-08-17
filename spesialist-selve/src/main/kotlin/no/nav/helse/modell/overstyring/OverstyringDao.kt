@@ -274,19 +274,14 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
             """
 
             @Language("PostgreSQL")
-            val opprettBegrunnelseFritekstQuery = """
-                INSERT INTO begrunnelse(tekst, type, saksbehandler_ref) VALUES (:tekst, :type, :saksbehandler_ref)
-            """
-
-            @Language("PostgreSQL")
-            val opprettBegrunnelseMalQuery = """
+            val opprettBegrunnelseQuery = """
                 INSERT INTO begrunnelse(tekst, type, saksbehandler_ref) VALUES (:tekst, :type, :saksbehandler_ref)
             """
 
             @Language("PostgreSQL")
             val opprettSkjønnsfastsettingSykepengegrunnlagQuery = """
-                INSERT INTO skjonnsfastsetting_sykepengegrunnlag(skjaeringstidspunkt, arsak, subsumsjon, overstyring_ref, initierende_vedtaksperiode_id, begrunnelse_fritekst_ref, begrunnelse_mal_ref)
-                VALUES (:skjaeringstidspunkt, :arsak, :subsumsjon::json, :overstyring_ref, :initierende_vedtaksperiode_id, :begrunnelse_fritekst_ref, :begrunnelse_mal_ref)
+                INSERT INTO skjonnsfastsetting_sykepengegrunnlag(skjaeringstidspunkt, arsak, subsumsjon, overstyring_ref, initierende_vedtaksperiode_id, begrunnelse_fritekst_ref, begrunnelse_mal_ref, begrunnelse_konklusjon_ref)
+                VALUES (:skjaeringstidspunkt, :arsak, :subsumsjon::json, :overstyring_ref, :initierende_vedtaksperiode_id, :begrunnelse_fritekst_ref, :begrunnelse_mal_ref, :begrunnelse_konklusjon_ref)
             """
 
             @Language("PostgreSQL")
@@ -312,24 +307,34 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
                 )
                 val begrunnelseFritekstId = requireNotNull(transactionalSession.run(
                     queryOf(
-                        opprettBegrunnelseFritekstQuery,
+                        opprettBegrunnelseQuery,
                         mapOf(
                             "tekst" to arbeidsgivere.first().begrunnelseFritekst,
                             "type" to "SKJØNNSFASTSATT_SYKEPENGEGRUNNLAG_FRITEKST",
                             "saksbehandler_ref" to saksbehandlerRef
                         )
                     ).asUpdateAndReturnGeneratedKey
-                )) { "Forventer å kunne opprette begrunnelse" }
+                )) { "Forventer å kunne opprette begrunnelseFritekst" }
                 val begrunnelseMalId = requireNotNull(transactionalSession.run(
                     queryOf(
-                        opprettBegrunnelseMalQuery,
+                        opprettBegrunnelseQuery,
                         mapOf(
                             "tekst" to arbeidsgivere.first().begrunnelseMal,
                             "type" to "SKJØNNSFASTSATT_SYKEPENGEGRUNNLAG_MAL",
                             "saksbehandler_ref" to saksbehandlerRef
                         )
                     ).asUpdateAndReturnGeneratedKey
-                )) { "Forventer å kunne opprette begrunnelse" }
+                )) { "Forventer å kunne opprette begrunnelseMal" }
+                val begrunnelseKonklusjonId = requireNotNull(transactionalSession.run(
+                    queryOf(
+                        opprettBegrunnelseQuery,
+                        mapOf(
+                            "tekst" to arbeidsgivere.first().begrunnelseKonklusjon,
+                            "type" to "SKJØNNSFASTSATT_SYKEPENGEGRUNNLAG_KONKLUSJON",
+                            "saksbehandler_ref" to saksbehandlerRef
+                        )
+                    ).asUpdateAndReturnGeneratedKey
+                )) { "Forventer å kunne opprette begrunnelseMal" }
                 val skjønnsfastsettingSykepengegrunnlagId = requireNotNull(transactionalSession.run(
                     queryOf(
                         opprettSkjønnsfastsettingSykepengegrunnlagQuery,
@@ -345,6 +350,7 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
                             "initierende_vedtaksperiode_id" to arbeidsgivere.first().initierendeVedtaksperiodeId,
                             "begrunnelse_fritekst_ref" to begrunnelseFritekstId,
                             "begrunnelse_mal_ref" to begrunnelseMalId,
+                            "begrunnelse_konklusjon_ref" to begrunnelseKonklusjonId,
                         )
                     ).asUpdateAndReturnGeneratedKey
                 ))

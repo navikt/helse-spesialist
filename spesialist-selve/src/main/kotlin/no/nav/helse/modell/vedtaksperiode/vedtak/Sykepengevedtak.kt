@@ -109,6 +109,7 @@ internal sealed class Sykepengevedtak(
         val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta,
         val begrunnelseFraMal: String?,
         val begrunnelseFraFritekst: String?,
+        val begrunnelseFraKonklusjon: String?,
         vedtakFattetTidspunkt: LocalDateTime
     ): Sykepengevedtak(
         fødselsnummer,
@@ -133,6 +134,7 @@ internal sealed class Sykepengevedtak(
                 && this.sykepengegrunnlagsfakta == other.sykepengegrunnlagsfakta
                 && this.begrunnelseFraMal == other.begrunnelseFraMal
                 && this.begrunnelseFraFritekst == other.begrunnelseFraFritekst
+                && this.begrunnelseFraKonklusjon == other.begrunnelseFraKonklusjon
             )
 
         override fun hashCode(): Int {
@@ -141,6 +143,7 @@ internal sealed class Sykepengevedtak(
             result = 31 * result + sykepengegrunnlagsfakta.hashCode()
             result = 31 * result + begrunnelseFraMal.hashCode()
             result = 31 * result + begrunnelseFraFritekst.hashCode()
+            result = 31 * result + begrunnelseFraKonklusjon.hashCode()
             return result
         }
     }

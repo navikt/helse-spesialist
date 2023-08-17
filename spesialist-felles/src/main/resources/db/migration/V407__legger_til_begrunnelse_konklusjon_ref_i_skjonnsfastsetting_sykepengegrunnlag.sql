@@ -1,0 +1,2 @@
+TRUNCATE TABLE skjonnsfastsetting_sykepengegrunnlag_arbeidsgiver, skjonnsfastsetting_sykepengegrunnlag;
+ALTER TABLE skjonnsfastsetting_sykepengegrunnlag ADD COLUMN begrunnelse_konklusjon_ref BIGINT NOT NULL REFERENCES begrunnelse(id);

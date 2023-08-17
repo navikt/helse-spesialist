@@ -8,11 +8,13 @@ class SkjønnsfastattSykepengegrunnlag(
     private val skjæringstidspunkt: LocalDate,
     private val begrunnelseFraMal: String,
     private val begrunnelseFraFritekst: String,
+    private val begrunnelseFraKonklusjon: String,
     private val opprettet: LocalDateTime
 ) {
     internal fun byggVedtak(vedtakBuilder: SykepengevedtakBuilder) {
         vedtakBuilder.begrunnelseFraMal(begrunnelseFraMal)
         vedtakBuilder.begrunnelseFraFritekst(begrunnelseFraFritekst)
+        vedtakBuilder.begrunnelseFraKonklusjon(begrunnelseFraKonklusjon)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -24,6 +26,7 @@ class SkjønnsfastattSykepengegrunnlag(
         if (skjæringstidspunkt != other.skjæringstidspunkt) return false
         if (begrunnelseFraMal != other.begrunnelseFraMal) return false
         if (begrunnelseFraFritekst != other.begrunnelseFraFritekst) return false
+        if (begrunnelseFraKonklusjon != other.begrunnelseFraKonklusjon) return false
         if (opprettet.withNano(0) != other.opprettet.withNano(0)) return false
 
         return true
@@ -33,6 +36,7 @@ class SkjønnsfastattSykepengegrunnlag(
         var result = skjæringstidspunkt.hashCode()
         result = 31 * result + begrunnelseFraMal.hashCode()
         result = 31 * result + begrunnelseFraFritekst.hashCode()
+        result = 31 * result + begrunnelseFraKonklusjon.hashCode()
         result = 31 * result + opprettet.hashCode()
         return result
     }
