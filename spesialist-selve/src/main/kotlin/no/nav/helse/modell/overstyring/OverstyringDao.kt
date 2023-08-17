@@ -346,7 +346,7 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
                             "begrunnelse_fritekst_ref" to begrunnelseFritekstId,
                             "begrunnelse_mal_ref" to begrunnelseMalId,
                         )
-                    ).asUpdate
+                    ).asUpdateAndReturnGeneratedKey
                 ))
                 arbeidsgivere.forEach { arbeidsgiver ->
                     transactionalSession.run(
