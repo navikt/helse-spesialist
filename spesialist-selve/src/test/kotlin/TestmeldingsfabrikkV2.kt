@@ -25,37 +25,6 @@ import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 
 internal object TestmeldingsfabrikkV2 {
-    internal fun lagVarseldefinisjonerEndret(
-        id: UUID,
-        definisjoner: List<Triple<UUID, String, String>>
-    ): String {
-        return nyHendelse(
-            id,
-            "varseldefinisjoner_endret",
-            mapOf(
-                "definisjoner" to definisjoner.map { (id, kode, tittel) ->
-                    lagVarseldefinisjon(id = id, kode = kode, tittel = tittel)
-                }
-            )
-        )
-    }
-
-    private fun lagVarseldefinisjon(
-        id: UUID = UUID.randomUUID(),
-        kode: String = "EN_KODE",
-        tittel: String = "EN_TITTEL",
-        forklaring: String = "EN_FORKLARING",
-        handling: String = "EN_HANDLING",
-        opprettet: LocalDateTime = LocalDateTime.now(),
-    ): Map<String, Any> = mapOf(
-        "id" to id,
-        "kode" to kode,
-        "tittel" to tittel,
-        "forklaring" to forklaring,
-        "handling" to handling,
-        "avviklet" to false,
-        "opprettet" to opprettet,
-    )
 
     fun lagSøknadSendt(
         organisasjonsnummer: String,
@@ -100,6 +69,7 @@ internal object TestmeldingsfabrikkV2 {
                 "tom" to tom
             )
         )
+
     fun lagVedtaksperiodeOpprettet(
         id: UUID = UUID.randomUUID(),
         aktørId: String,
@@ -125,6 +95,47 @@ internal object TestmeldingsfabrikkV2 {
                 "fom" to fom,
                 "tom" to tom,
                 "skjæringstidspunkt" to skjæringstidspunkt
+            )
+        )
+
+    fun lagSaksbehandlerSkjønnsfastsettingSykepengegrunnlag(
+        id: UUID = UUID.randomUUID(),
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        vedtaksperiodeId: UUID,
+        skjæringstidspunkt: LocalDate = 1.januar,
+        saksbehandlerOid: UUID,
+        saksbehandlerEpost: String,
+        saksbehandlerIdent: String,
+        saksbehandlerNavn: String,
+    ) =
+        nyHendelse(
+            id, "saksbehandler_skjonnsfastsetter_sykepengegrunnlag", mapOf(
+                "vedtaksperiodeId" to "$vedtaksperiodeId",
+                "fødselsnummer" to fødselsnummer,
+                "aktørId" to aktørId,
+                "arbeidsgivere" to listOf(
+                    mapOf(
+                        "organisasjonsnummer" to organisasjonsnummer,
+                        "årlig" to 600000.0,
+                        "fraÅrlig" to 500000.0,
+                        "årsak" to "Skjønnsfastsetting ved mer enn 25% avvik",
+                        "begrunnelseMal" to "Mal",
+                        "begrunnelseFritekst" to "Fritekst",
+                        "subsumsjon" to mapOf(
+                            "paragraf" to "8-30",
+                            "ledd" to "2",
+                            "bokstav" to null,
+                        ),
+                        "initierendeVedtaksperiodeId" to vedtaksperiodeId,
+                    )
+                ),
+                "skjæringstidspunkt" to skjæringstidspunkt,
+                "saksbehandlerIdent" to saksbehandlerIdent,
+                "saksbehandlerOid" to saksbehandlerOid,
+                "saksbehandlerNavn" to saksbehandlerNavn,
+                "saksbehandlerEpost" to saksbehandlerEpost,
             )
         )
 
@@ -541,6 +552,89 @@ internal object TestmeldingsfabrikkV2 {
             "vedtaksperiodeId" to vedtaksperiodeId
         )
     )
+
+    fun lagUtkastTilVedtak(
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        vedtaksperiodeId: UUID,
+        utbetalingId: UUID?,
+        fom: LocalDate,
+        tom: LocalDate, skjæringstidspunkt: LocalDate,
+        id: UUID,
+        fastsattType: String
+    ): String = nyHendelse(
+        id, "utkast_til_vedtak", mutableMapOf(
+            "aktørId" to aktørId,
+            "fødselsnummer" to fødselsnummer,
+            "organisasjonsnummer" to organisasjonsnummer,
+            "vedtaksperiodeId" to vedtaksperiodeId,
+            "fom" to fom,
+            "tom" to tom,
+            "skjæringstidspunkt" to skjæringstidspunkt,
+            "sykepengegrunnlag" to 600000.0,
+            "grunnlagForSykepengegrunnlag" to 600000.0,
+            "grunnlagForSykepengegrunnlagPerArbeidsgiver" to emptyMap<String, Double>(),
+            "begrensning" to "VET_IKKE",
+            "inntekt" to 600000.0,
+            "vedtakFattetTidspunkt" to LocalDateTime.now(),
+            "hendelser" to emptyList<String>()
+        ).apply {
+            compute("utbetalingId") { _, _ -> utbetalingId }
+            if (utbetalingId != null) {
+                val sykepengegrunnlagsfakta = when (fastsattType) {
+                    "EtterSkjønn" -> fastsattEtterSkjønn(organisasjonsnummer)
+                    "EtterHovedregel" -> fastsattEtterHovedregel(organisasjonsnummer)
+                    "IInfotrygd" -> fastsattIInfotrygd()
+                    else -> throw IllegalArgumentException("$fastsattType er ikke en gyldig fastsatt-type")
+                }
+                put("sykepengegrunnlagsfakta", sykepengegrunnlagsfakta)
+            }
+        }
+    )
+
+    private fun fastsattEtterSkjønn(organisasjonsnummer: String): Map<String, Any> {
+        return mapOf(
+            "fastsatt" to "EtterSkjønn",
+            "omregnetÅrsinntekt" to 500000.0,
+            "innrapportertÅrsinntekt" to 600000.0,
+            "skjønnsfastsatt" to 600000.0,
+            "avviksprosent" to 16.67,
+            "6G" to 6 * 118620.0,
+            "tags" to emptyList<String>(),
+            "arbeidsgivere" to listOf(
+                mapOf(
+                    "arbeidsgiver" to organisasjonsnummer,
+                    "omregnetÅrsinntekt" to 500000.00,
+                    "skjønnsfastsatt" to 600000.00
+                )
+            )
+        )
+    }
+
+    private fun fastsattEtterHovedregel(organisasjonsnummer: String): Map<String, Any> {
+        return mapOf(
+            "fastsatt" to "EtterHovedregel",
+            "omregnetÅrsinntekt" to 600000.0,
+            "innrapportertÅrsinntekt" to 600000.0,
+            "avviksprosent" to 0.0,
+            "6G" to 6 * 118620.0,
+            "tags" to emptyList<String>(),
+            "arbeidsgivere" to listOf(
+                mapOf(
+                    "arbeidsgiver" to organisasjonsnummer,
+                    "omregnetÅrsinntekt" to 600000.00,
+                )
+            )
+        )
+    }
+
+    private fun fastsattIInfotrygd(): Map<String, Any> {
+        return mapOf(
+            "fastsatt" to "IInfotrygd",
+            "omregnetÅrsinntekt" to 500000.0,
+        )
+    }
 
 
     fun lagGosysOppgaveEndret(

@@ -35,14 +35,6 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
     private val meldingsfabrikk = TestmeldingsfabrikkV2
     private val newUUID get() = UUID.randomUUID()
 
-    fun sendVarseldefinisjonerEndret(
-        definisjoner: List<Triple<UUID, String, String>> = listOf(Triple(UUID.randomUUID(), "SB_EX_1", "SB_EX_1 tittel"))
-    ): UUID = newUUID.also { id ->
-        testRapid.sendTestMessage(
-            meldingsfabrikk.lagVarseldefinisjonerEndret(id, definisjoner)
-        )
-    }
-
 
     fun sendSøknadSendt(
         aktørId: String,
@@ -96,6 +88,31 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
                 organisasjonsnummer = organisasjonsnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
                 forårsaketAvId = forårsaketAvId,
+            )
+        )
+    }
+
+    fun sendSaksbehandlerSkjønnsfastsettingSykepengegrunnlag(
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        vedtaksperiodeId: UUID,
+        saksbehandlerOid: UUID,
+        saksbehandlerEpost: String,
+        saksbehandlerIdent: String,
+        saksbehandlerNavn: String
+    ): UUID = newUUID.also { id ->
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagSaksbehandlerSkjønnsfastsettingSykepengegrunnlag(
+                id = id,
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                organisasjonsnummer = organisasjonsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
+                saksbehandlerOid = saksbehandlerOid,
+                saksbehandlerEpost = saksbehandlerEpost,
+                saksbehandlerIdent = saksbehandlerIdent,
+                saksbehandlerNavn = saksbehandlerNavn
             )
         )
     }
@@ -632,6 +649,33 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
                 organisasjonsnummer = organisasjonsnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
                 id = id
+            )
+        )
+    }
+
+    fun sendUtkastTilVedtak(
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        vedtaksperiodeId: UUID,
+        utbetalingId: UUID?,
+        fom: LocalDate,
+        tom: LocalDate,
+        skjæringstidspunkt: LocalDate,
+        fastsattType: String
+    ): UUID = newUUID.also { id ->
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagUtkastTilVedtak(
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                organisasjonsnummer = organisasjonsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
+                utbetalingId = utbetalingId,
+                fom = fom,
+                tom = tom,
+                skjæringstidspunkt = skjæringstidspunkt,
+                id = id,
+                fastsattType = fastsattType
             )
         )
     }

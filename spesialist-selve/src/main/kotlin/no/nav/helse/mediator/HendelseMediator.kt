@@ -24,6 +24,7 @@ import no.nav.helse.mediator.meldinger.SykefraværstilfellerRiver
 import no.nav.helse.mediator.meldinger.SøknadSendtRiver
 import no.nav.helse.mediator.meldinger.UtbetalingAnnullertRiver
 import no.nav.helse.mediator.meldinger.UtbetalingEndretRiver
+import no.nav.helse.mediator.meldinger.UtkastTilVedtakRiver
 import no.nav.helse.mediator.meldinger.VarseldefinisjonRiver
 import no.nav.helse.mediator.meldinger.VedtakFattetRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeEndretRiver
@@ -139,6 +140,7 @@ internal class HendelseMediator(
             SykefraværstilfellerRiver(it, this)
             MetrikkRiver(it)
             PåminnetGodkjenningsbehovRiver(it, this)
+            UtkastTilVedtakRiver(it, this)
         }
     }
 

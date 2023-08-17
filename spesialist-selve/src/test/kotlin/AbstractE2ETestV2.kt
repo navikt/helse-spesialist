@@ -23,6 +23,7 @@ import no.nav.helse.Testdata.ENHET_OSLO
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.Testdata.SAKSBEHANDLER_EPOST
+import no.nav.helse.Testdata.SAKSBEHANDLER_IDENT
 import no.nav.helse.Testdata.SAKSBEHANDLER_NAVN
 import no.nav.helse.Testdata.SAKSBEHANDLER_OID
 import no.nav.helse.Testdata.UTBETALING_ID
@@ -403,6 +404,28 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         assertIngenEtterspurteBehov()
         assertIngenUtgåendeMeldinger()
         assertVedtaksperiodeEksisterer(vedtaksperiodeId)
+    }
+
+    protected fun håndterSkjønnsfastsattSykepengegrunnlag(
+        aktørId: String = AKTØR,
+        fødselsnummer: String = FØDSELSNUMMER,
+        organisasjonsnummer: String = ORGNR,
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        saksbehandlerOid: UUID = SAKSBEHANDLER_OID,
+        saksbehandlerEpost: String = SAKSBEHANDLER_EPOST,
+        saksbehandlerNavn: String = SAKSBEHANDLER_NAVN,
+        saksbehandlerIdent: String = SAKSBEHANDLER_IDENT
+    ) {
+        sisteMeldingId = meldingssenderV2.sendSaksbehandlerSkjønnsfastsettingSykepengegrunnlag(
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            saksbehandlerOid = saksbehandlerOid,
+            saksbehandlerEpost = saksbehandlerEpost,
+            saksbehandlerIdent = saksbehandlerIdent,
+            saksbehandlerNavn = saksbehandlerNavn
+        )
     }
 
     protected fun håndterVedtaksperiodeEndret(
@@ -957,6 +980,27 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         if (godkjent) assertUtgåendeMelding("vedtaksperiode_godkjent")
         else assertUtgåendeMelding("vedtaksperiode_avvist")
         assertUtgåendeBehovløsning("Godkjenning")
+    }
+
+    protected fun håndterUtkastTilVedtak(
+        aktørId: String = AKTØR,
+        fødselsnummer: String = FØDSELSNUMMER,
+        organisasjonsnummer: String = ORGNR,
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        fastsattType: String = "EtterHovedregel"
+    ) {
+        val utbetalingId = if (this::utbetalingId.isInitialized) this.utbetalingId else null
+        sisteMeldingId = meldingssenderV2.sendUtkastTilVedtak(
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = utbetalingId,
+            fom = 1.januar,
+            tom = 31.januar,
+            skjæringstidspunkt = 1.januar,
+            fastsattType = fastsattType
+        )
     }
 
     protected fun håndterVedtakFattet(

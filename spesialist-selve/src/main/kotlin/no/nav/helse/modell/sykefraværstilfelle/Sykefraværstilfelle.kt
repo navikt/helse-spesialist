@@ -35,8 +35,10 @@ internal class Sykefraværstilfelle(
 
     internal fun håndter(utkastTilVedtak: UtkastTilVedtak) {
         val vedtakBuilder = SykepengevedtakBuilder()
-        val skjønnsfastsattSykepengegrunnlag = skjønnsfastatteSykepengegrunnlag.last()
-        vedtakBuilder.skjønnsfastsattSykepengegrunnlag(skjønnsfastsattSykepengegrunnlag)
+        val skjønnsfastsattSykepengegrunnlag = skjønnsfastatteSykepengegrunnlag.lastOrNull()
+        skjønnsfastsattSykepengegrunnlag?.also {
+            vedtakBuilder.skjønnsfastsattSykepengegrunnlag(it)
+        }
         utkastTilVedtak.byggVedtak(vedtakBuilder)
         fattVedtak(vedtakBuilder.build())
     }

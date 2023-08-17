@@ -24,33 +24,16 @@ internal class UtkastTilVedtakRiver(
                 it.requireArray("hendelser")
                 it.requireKey("sykepengegrunnlag", "grunnlagForSykepengegrunnlag", "grunnlagForSykepengegrunnlagPerArbeidsgiver")
                 it.requireKey("begrensning", "inntekt", "vedtakFattetTidspunkt")
-                it.interestedIn("sykepengegrunnlagsfakta") { node ->
-                    it.requireKey(
-                        "sykepengegrunnlagsfakta.fastsatt",
-                        "sykepengegrunnlagsfakta.omregnetÅrsinntekt"
-                    )
-                    when (node["fastsatt"].asText()) {
-                        "EtterSkjønn" -> {
-                            it.requireKey(
-                                "sykepengegrunnlagsfakta.innrapportertÅrsinntekt",
-                                "sykepengegrunnlagsfakta.avviksprosent",
-                                "sykepengegrunnlagsfakta.6G",
-                                "sykepengegrunnlagsfakta.skjønnsfastsatt"
-                            )
-                            it.requireArray("sykepengegrunnlagsfakta.tags")
-                            it.requireArray("sykepengegrunnlagsfakta.arbeidsgivere")
-                        }
-                        "EtterHovedregel" -> {
-                            it.requireKey(
-                                "sykepengegrunnlagsfakta.innrapportertÅrsinntekt",
-                                "sykepengegrunnlagsfakta.avviksprosent",
-                                "sykepengegrunnlagsfakta.6G"
-                            )
-                            it.requireArray("sykepengegrunnlagsfakta.tags")
-                            it.requireArray("sykepengegrunnlagsfakta.arbeidsgivere")
-                        }
-                    }
-                }
+                it.interestedIn(
+                    "sykepengegrunnlagsfakta.fastsatt",
+                    "sykepengegrunnlagsfakta.omregnetÅrsinntekt",
+                    "sykepengegrunnlagsfakta.innrapportertÅrsinntekt",
+                    "sykepengegrunnlagsfakta.avviksprosent",
+                    "sykepengegrunnlagsfakta.6G",
+                    "sykepengegrunnlagsfakta.skjønnsfastsatt",
+                    "sykepengegrunnlagsfakta.tags",
+                    "sykepengegrunnlagsfakta.arbeidsgivere",
+                )
                 it.interestedIn("utbetalingId")
             }
         }.register(this)
