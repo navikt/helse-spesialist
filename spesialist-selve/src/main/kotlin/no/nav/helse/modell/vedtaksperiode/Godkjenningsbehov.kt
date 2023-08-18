@@ -159,7 +159,6 @@ internal class Godkjenningsbehov(
             egenAnsattDao = egenAnsattDao,
             personDao = personDao,
             vergemålDao = vergemålDao,
-            godkjenningsbehovJson = json,
             godkjenningMediator = godkjenningMediator,
             hendelseId = id,
             utbetaling = utbetaling,

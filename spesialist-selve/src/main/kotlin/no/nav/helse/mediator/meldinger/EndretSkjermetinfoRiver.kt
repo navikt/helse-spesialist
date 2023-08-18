@@ -2,7 +2,9 @@ package no.nav.helse.mediator.meldinger
 
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments
+import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
+import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -17,6 +19,8 @@ internal class EndretSkjermetinfoRiver(
     rapidsConnection: RapidsConnection,
     private val personDao: PersonDao,
     private val egenAnsattDao: EgenAnsattDao,
+    val oppgaveDao: OppgaveDao,
+    val godkjenningMediator: GodkjenningMediator,
 ) : River.PacketListener {
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
@@ -42,23 +46,31 @@ internal class EndretSkjermetinfoRiver(
             sikkerLogg.warn("Mottok ugyldig fødselsnummer $fødselsnummer, skipper videre håndtering")
             return
         }
-        val erEgenAnsatt = packet["skjermet"].asBoolean()
-        val opprettet = packet["@opprettet"]::asLocalDateTime.invoke()
+
         val logger = { msg: String ->
             sikkerLogg.info(msg,
                 StructuredArguments.kv("fødselsnummer", fødselsnummer),
                 StructuredArguments.kv("eventId", id)
             )
         }
-        when {
-            personDao.findPersonByFødselsnummer(fødselsnummer) == null -> {
-                logger("Ignorerer $eventName for {} pga: person fins ikke i databasen, {}")
-            }
-            else -> {
-                logger("Mottok hendelse $eventName og oppdaterer database for {}, {}")
-                egenAnsattDao.lagre(fødselsnummer, erEgenAnsatt, opprettet)
-            }
+        if (personDao.findPersonByFødselsnummer(fødselsnummer) == null) {
+            logger("Ignorerer $eventName for {} pga: person fins ikke i databasen, {}")
+            return
         }
+
+        val erEgenAnsatt = packet["skjermet"].asBoolean()
+        val opprettet = packet["@opprettet"]::asLocalDateTime.invoke()
+
+        logger("Mottok hendelse $eventName og oppdaterer database for {}, {}")
+        egenAnsattDao.lagre(fødselsnummer, erEgenAnsatt, opprettet)
+        if (erEgenAnsatt) avvisOppgave(fødselsnummer, context)
+    }
+
+    private fun avvisOppgave(fødselsnummer: String, context: MessageContext) {
+        val oppgaveId = oppgaveDao.finnOppgaveId(fødselsnummer) ?: return
+        val årsaker = listOf("Egen ansatt")
+        godkjenningMediator.automatiskAvvisning(context::publish, årsaker, oppgaveId)
+        oppgaveDao.invaliderOppgaveFor(fødselsnummer)
     }
 
     private companion object {

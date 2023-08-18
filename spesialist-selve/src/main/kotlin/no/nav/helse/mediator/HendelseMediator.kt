@@ -89,6 +89,7 @@ internal class HendelseMediator(
     private val tildelingDao: TildelingDao = TildelingDao(dataSource),
     private val feilendeMeldingerDao: FeilendeMeldingerDao = FeilendeMeldingerDao(dataSource),
     private val oppgaveMediator: OppgaveMediator,
+    private val godkjenningMediator: GodkjenningMediator,
     private val hendelsefabrikk: Hendelsefabrikk,
     private val egenAnsattDao: EgenAnsattDao = EgenAnsattDao(dataSource),
     private val varselRepository: ActualVarselRepository = ActualVarselRepository(dataSource),
@@ -132,7 +133,7 @@ internal class HendelseMediator(
             VedtaksperiodeOpprettetRiver(it, this)
             VedtaksperiodeSkjønnsmessigFastsettelseRiver(it, this)
             GosysOppgaveEndretRiver(it, this, oppgaveDao, tildelingDao, personDao)
-            EndretSkjermetinfoRiver(it, personDao, egenAnsattDao)
+            EndretSkjermetinfoRiver(it, personDao, egenAnsattDao, oppgaveDao, godkjenningMediator)
             VedtakFattetRiver(it, this)
             NyeVarslerRiver(it, this)
             VarseldefinisjonRiver(it, this)

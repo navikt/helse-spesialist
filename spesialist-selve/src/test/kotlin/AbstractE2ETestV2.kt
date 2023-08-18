@@ -544,8 +544,10 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         skjermet: Boolean
     ) {
         sisteMeldingId = meldingssenderV2.sendEndretSkjermetinfo(fødselsnummer, skjermet)
-        assertIngenEtterspurteBehov()
-        assertIngenUtgåendeMeldinger()
+        if (!skjermet) {
+            assertIngenEtterspurteBehov()
+            assertIngenUtgåendeMeldinger()
+        }
     }
 
     protected fun håndterGosysOppgaveEndret(fødselsnummer: String = FØDSELSNUMMER) {

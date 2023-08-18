@@ -60,7 +60,10 @@ internal class SaksbehandlerløsningTest {
         oppgaveDao = mockk(relaxed = true),
         godkjenningMediator = GodkjenningMediator(
             mockk(relaxed = true),
-            mockk()
+            mockk(),
+            mockk(),
+            mockk(),
+            mockk(),
         ),
         utbetalingDao = utbetalingDao,
         sykefraværstilfelle = Sykefraværstilfelle(FNR, 1.januar, listOf(Generasjon(randomUUID(), randomUUID(), 1.januar, 31.januar, 1.januar)), emptyList()),

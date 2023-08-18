@@ -37,7 +37,10 @@ internal class AutomatiseringCommandTest {
             """{ "@event_name": "behov" }""",
             GodkjenningMediator(
                 vedtakDao = mockk(relaxed = true),
-                opptegnelseDao = mockk(relaxed = true)
+                opptegnelseDao = mockk(relaxed = true),
+                oppgaveDao = mockk(relaxed = true),
+                utbetalingDao = mockk(relaxed = true),
+                hendelseDao = mockk(relaxed = true),
             ),
             Utbetaling(utbetalingId, 1000, 1000, Utbetalingtype.UTBETALING),
             periodeType,

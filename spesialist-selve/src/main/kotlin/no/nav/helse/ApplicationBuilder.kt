@@ -59,6 +59,7 @@ import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.tildeling.TildelingService
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
+import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.rapids_rivers.RapidApplication
@@ -218,6 +219,14 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         harTilgangTil = { oid, gruppe -> msGraphClient.erIGruppe(oid, tilgangsgrupper.gruppeId(gruppe)) }
     )
 
+    private val godkjenningMediator = GodkjenningMediator(
+        vedtakDao,
+        opptegnelseDao,
+        oppgaveDao,
+        UtbetalingDao(dataSource),
+        hendelseDao,
+    )
+
     private val totrinnsvurderingMediator =
         TotrinnsvurderingMediator(TotrinnsvurderingDao(dataSource), oppgaveDao, periodehistorikkDao, notatMediator)
 
@@ -361,10 +370,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         dataSource = dataSource,
         snapshotClient = snapshotClient,
         oppgaveMediator = oppgaveMediator,
-        godkjenningMediator = GodkjenningMediator(
-            vedtakDao,
-            opptegnelseDao
-        ),
+        godkjenningMediator = godkjenningMediator,
         automatisering = automatisering,
         overstyringMediator = OverstyringMediator(rapidsConnection),
         snapshotMediator = snapshotMediator,
@@ -377,6 +383,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             dataSource = dataSource,
             rapidsConnection = rapidsConnection,
             oppgaveMediator = oppgaveMediator,
+            godkjenningMediator = godkjenningMediator,
             hendelsefabrikk = hendelsefabrikk
         )
         saksbehandlerMediator = SaksbehandlerMediator(dataSource, rapidsConnection)

@@ -1,6 +1,7 @@
 package no.nav.helse.mediator
 
 import io.mockk.clearMocks
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import java.time.LocalDateTime
@@ -38,6 +39,12 @@ internal class GodkjenningMediatorTest {
     private val mediator = GodkjenningMediator(
         vedtakDao = mockk(relaxed = true),
         opptegnelseDao = opptegnelseDao,
+        oppgaveDao = mockk(relaxed = true),
+        utbetalingDao = mockk(relaxed = true),
+        hendelseDao = mockk(relaxed = true) {
+            every { finnUtbetalingsgodkjenningbehovJson(any()) } returns "{}"
+            every { finnFødselsnummer(any()) } returns fnr
+        },
     )
 
     private val utbetaling = Utbetaling(UUID.randomUUID(), 1000, 1000, Utbetalingtype.UTBETALING)
@@ -50,7 +57,7 @@ internal class GodkjenningMediatorTest {
 
     @Test
     fun `automatisk avvisning skal opprette opptegnelse`() {
-        mediator.automatiskAvvisning(context, UtbetalingsgodkjenningMessage("{}", utbetaling), UUID.randomUUID(), fnr, listOf("foo"), UUID.randomUUID())
+        mediator.automatiskAvvisning(context::publiser, UUID.randomUUID(), listOf("foo"), utbetaling, UUID.randomUUID())
         assertOpptegnelseOpprettet()
     }
 

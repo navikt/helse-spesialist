@@ -594,9 +594,7 @@ internal class Hendelsefabrikk(
             json,
             personDao,
             oppgaveDao,
-            hendelseDao,
             godkjenningMediator,
-            utbetalingDao
         )
 
     fun adressebeskyttelseEndret(json: String): AdressebeskyttelseEndret {
@@ -607,9 +605,7 @@ internal class Hendelsefabrikk(
             json = json,
             personDao = personDao,
             oppgaveDao = oppgaveDao,
-            hendelseDao = hendelseDao,
             godkjenningMediator = godkjenningMediator,
-            utbetalingDao = utbetalingDao
         )
     }
 

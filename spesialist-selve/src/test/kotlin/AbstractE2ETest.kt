@@ -54,6 +54,7 @@ import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
+import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -116,6 +117,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private val vergemålDao = VergemålDao(dataSource)
     private val overstyringDao = OverstyringDao(dataSource)
     private val hendelseDao = HendelseDao(dataSource)
+    private val utbetalingDao = UtbetalingDao(dataSource)
     private val generasjonDao = GenerasjonDao(dataSource)
 
     protected val snapshotClient = mockk<SnapshotClient>(relaxed = true)
@@ -126,14 +128,15 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     protected val meldingsfabrikk get() = Testmeldingfabrikk(FØDSELSNUMMER, AKTØR)
 
-    protected val oppgaveMediator =
-        OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao, opptegnelseDao)
+    protected val oppgaveMediator = OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao, opptegnelseDao)
+    private val godkjenningMediator =
+        GodkjenningMediator(vedtakDao, opptegnelseDao, oppgaveDao, utbetalingDao, hendelseDao)
 
     private val hendelsefabrikk = Hendelsefabrikk(
         dataSource = dataSource,
         snapshotClient = snapshotClient,
         oppgaveMediator = oppgaveMediator,
-        godkjenningMediator = GodkjenningMediator(vedtakDao, opptegnelseDao),
+        godkjenningMediator = godkjenningMediator,
         automatisering = Automatisering(
             risikovurderingDao = risikovurderingDao,
             automatiseringDao = automatiseringDao,
@@ -163,6 +166,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         dataSource = dataSource,
         rapidsConnection = testRapid,
         oppgaveMediator = oppgaveMediator,
+        godkjenningMediator = godkjenningMediator,
         hendelsefabrikk = hendelsefabrikk
     )
 

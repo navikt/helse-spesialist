@@ -16,6 +16,7 @@ import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
+import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -34,13 +35,18 @@ internal class TestMediator(
 ) {
     private val vedtakDao = VedtakDao(dataSource)
     private val opptegnelseDao = OpptegnelseDao(dataSource)
+    private val oppgaveDao = OppgaveDao(dataSource)
+    private val utbetalingDao = UtbetalingDao(dataSource)
     private val overstyringDao = OverstyringDao(dataSource)
     private val hendelseDao = HendelseDao(dataSource)
     private val generasjonDao = GenerasjonDao(dataSource)
 
     private val godkjenningMediator = GodkjenningMediator(
         vedtakDao,
-        opptegnelseDao
+        opptegnelseDao,
+        oppgaveDao,
+        utbetalingDao,
+        hendelseDao,
     )
     private val oppgaveMediator = OppgaveMediator(
         oppgaveDao = OppgaveDao(dataSource),
@@ -88,6 +94,7 @@ internal class TestMediator(
             dataSource = dataSource,
             rapidsConnection = testRapid,
             oppgaveMediator = oppgaveMediator,
+            godkjenningMediator = godkjenningMediator,
             hendelsefabrikk = hendelsefabrikk
         )
     }

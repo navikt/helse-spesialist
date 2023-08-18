@@ -63,9 +63,9 @@ internal class AutomatiskAvvisningCommandTest {
     private fun executeCommand(command: AutomatiskAvvisningCommand, forventetÅrsakTilAvvisning: String?) {
         assertTrue(command.execute(context))
         if (forventetÅrsakTilAvvisning != null)
-            verify (exactly = 1) { godkjenningMediator.automatiskAvvisning(any(), any(), any(), any(), listOf(forventetÅrsakTilAvvisning), any()) }
+            verify (exactly = 1) { godkjenningMediator.automatiskAvvisning(any(), any(), listOf(forventetÅrsakTilAvvisning), any(), any()) }
         else
-            verify (exactly = 0) { godkjenningMediator.automatiskAvvisning(any(), any(), any(), any(), any(), any()) }
+            verify (exactly = 0) { godkjenningMediator.automatiskAvvisning(any(), any(), any()) }
     }
 
     private fun hentCommand(utbetalingstype: Utbetalingtype) =
@@ -75,7 +75,6 @@ internal class AutomatiskAvvisningCommandTest {
             egenAnsattDao = egenAnsattDao,
             personDao = personDao,
             vergemålDao = vergemålDao,
-            godkjenningsbehovJson = "{}",
             godkjenningMediator = godkjenningMediator,
             hendelseId = hendelseId,
             utbetaling = Utbetaling(utbetalingId, 1000, 1000, utbetalingstype),

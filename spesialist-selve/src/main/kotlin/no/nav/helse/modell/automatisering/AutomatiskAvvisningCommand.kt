@@ -3,7 +3,6 @@ package no.nav.helse.modell.automatisering
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
@@ -20,7 +19,6 @@ internal class AutomatiskAvvisningCommand(
     private val egenAnsattDao: EgenAnsattDao,
     private val personDao: PersonDao,
     private val vergemålDao: VergemålDao,
-    private val godkjenningsbehovJson: String,
     private val godkjenningMediator: GodkjenningMediator,
     private val hendelseId: UUID,
     private val utbetaling: Utbetaling,
@@ -49,8 +47,13 @@ internal class AutomatiskAvvisningCommand(
             return true
         }
 
-        val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson, utbetaling)
-        godkjenningMediator.automatiskAvvisning(context, behov, vedtaksperiodeId, fødselsnummer, årsaker.toList(), hendelseId)
+        godkjenningMediator.automatiskAvvisning(
+            context::publiser,
+            vedtaksperiodeId,
+            årsaker.toList(),
+            utbetaling,
+            hendelseId,
+        )
         logg.info("Automatisk avvisning av vedtaksperiode $vedtaksperiodeId pga:$årsaker")
         return ferdigstill(context)
     }
