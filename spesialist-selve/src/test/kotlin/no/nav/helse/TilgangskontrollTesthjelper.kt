@@ -8,7 +8,7 @@ fun idForGruppe(gruppe: Gruppe) = Tilgangsgrupper(testEnv).gruppeId(gruppe).toSt
 
 internal fun lagApiTilgangskontroll(tilgangsgrupper: Tilgangsgrupper, gruppemedlemskap: List<UUID>) =
     ApiTilgangskontroll { gruppe ->
-        Gruppe.values().associateWith { tilgangsgrupper.harTilgang(gruppemedlemskap, it) }[gruppe]!!
+        Gruppe.entries.associateWith { tilgangsgrupper.harTilgang(gruppemedlemskap, it) }[gruppe]!!
     }
 
 internal fun medTilgangTil(vararg innloggetBrukersGrupper: Gruppe = emptyArray()) =

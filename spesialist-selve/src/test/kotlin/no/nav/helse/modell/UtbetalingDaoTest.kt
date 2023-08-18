@@ -132,7 +132,7 @@ class UtbetalingDaoTest : DatabaseIntegrationTest() {
         val utbetaling = lagUtbetalingId(arbeidsgiverOppdragId, personOppdragId)
 
         assertDoesNotThrow {
-            Utbetalingsstatus.values().forEach {
+            Utbetalingsstatus.entries.forEach {
                 utbetalingDao.nyUtbetalingStatus(utbetaling, it, LocalDateTime.now(), "{}")
             }
         }

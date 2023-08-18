@@ -296,7 +296,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `oppretter oppgaver med riktig oppgavetype for alle oppgavetype-verdier`() {
-        Oppgavetype.values().forEach {
+        Oppgavetype.entries.forEach {
             assertDoesNotThrow({
                 insertOppgave(
                     commandContextId = UUID.randomUUID(),

@@ -18,7 +18,7 @@ internal fun PipelineContext<Unit, ApplicationCall>.gruppemedlemskap(): List<UUI
 
 private fun PipelineContext<Unit, ApplicationCall>.relevanteGrupper(tilgangsgrupper: Tilgangsgrupper): Map<Gruppe, Boolean> {
     val gruppemedlemskap = gruppemedlemskap()
-    return Gruppe.values().associateWith { tilgangsgrupper.harTilgang(gruppemedlemskap, it) }
+    return Gruppe.entries.associateWith { tilgangsgrupper.harTilgang(gruppemedlemskap, it) }
 }
 
 internal fun PipelineContext<Unit, ApplicationCall>.tilganger(tilgangsgrupper: Tilgangsgrupper) =

@@ -378,8 +378,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     private fun lagVarseldefinisjoner() {
-        val varselkoder = Varselkode.values()
-        varselkoder.forEach { varselkode ->
+        Varselkode.entries.forEach { varselkode ->
             lagVarseldefinisjon(varselkode.name)
         }
     }

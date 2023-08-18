@@ -13,7 +13,7 @@ enum class Gruppe(private val gruppenøkkel: String) {
     fun idFra(env: Map<String, String>): UUID = UUID.fromString(env.getValue(gruppenøkkel))
 
     companion object {
-        fun __indreInnhold_kunForTest() = values().associate { it.name to it.gruppenøkkel }
+        fun __indreInnhold_kunForTest() = entries.associate { it.name to it.gruppenøkkel }
     }
 }
 

@@ -112,16 +112,16 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
             )
         }
 
-        val perInntekttype = Inntektskilde.values().map { inntektskilde ->
+        val perInntekttype = Inntektskilde.entries.map { inntektskilde ->
             mapOf(inntektskilde to rader.filter { it.inntekttype == inntektskilde }.sumOf { it.antall })
         }.fold(emptyMap(), Map<Inntektskilde, Int>::plus)
 
-        val perPeriodetype = Periodetype.values().map { periodetype ->
+        val perPeriodetype = Periodetype.entries.map { periodetype ->
             mapOf(periodetype to rader.filter { it.periodetype == periodetype }.sumOf { it.antall })
         }.fold(emptyMap(), Map<Periodetype, Int>::plus)
 
         val perMottakertype = if (inkluderMottakertype) {
-            Mottakertype.values().map { mottakertype ->
+            Mottakertype.entries.map { mottakertype ->
                 mapOf(mottakertype to rader.filter { it.mottakertype == mottakertype }.sumOf { it.antall })
             }.fold(emptyMap(), Map<Mottakertype, Int>::plus)
         } else emptyMap()
