@@ -11,7 +11,7 @@ internal sealed interface SaksbehandlerHandling {
     fun utførAv(saksbehandler: Saksbehandler)
 }
 
-internal sealed interface PersonHandling: SaksbehandlerHandling {
+internal sealed interface OverstyringHandling: SaksbehandlerHandling {
     fun gjelderFødselsnummer(): String
 }
 
@@ -22,7 +22,7 @@ class OverstyrTidslinjeHandling(
     val aktørId: String,
     val begrunnelse: String,
     val dager: List<OverstyrDagDto>
-): PersonHandling {
+): OverstyringHandling {
 
     private val overstyrtTidslinje get() = OverstyrtTidslinje(
         aktørId = aktørId,

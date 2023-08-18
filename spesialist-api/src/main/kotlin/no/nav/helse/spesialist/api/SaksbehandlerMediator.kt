@@ -18,7 +18,7 @@ import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonDto
 import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsattSykepengegrunnlagDto
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.PersonHandling
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyringHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SaksbehandlerHandling
 import no.nav.helse.spesialist.api.utbetaling.AnnulleringDto
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
@@ -47,12 +47,12 @@ class SaksbehandlerMediator(
         saksbehandler.persister(saksbehandlerDao)
         sikkerlogg.info("Handling ${handling.loggnavn()} utført av saksbehandler $saksbehandler")
         when (handling) {
-            is PersonHandling -> håndter(handling, saksbehandler)
+            is OverstyringHandling -> håndter(handling, saksbehandler)
             else -> handling.utførAv(saksbehandler)
         }
     }
 
-    private fun <T: PersonHandling> håndter(handling: T, saksbehandler: Saksbehandler) {
+    private fun <T: OverstyringHandling> håndter(handling: T, saksbehandler: Saksbehandler) {
         val fødselsnummer = handling.gjelderFødselsnummer()
         val antall = oppgaveApiDao.invaliderOppgaveFor(fødselsnummer)
         sikkerlogg.info("Invaliderer $antall {} for $fødselsnummer", if (antall == 1) "oppgave" else "oppgaver")
