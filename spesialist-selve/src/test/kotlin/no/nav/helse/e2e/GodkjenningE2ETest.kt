@@ -70,7 +70,7 @@ internal class GodkjenningE2ETest : AbstractE2ETestV2() {
         håndterRisikovurderingløsning()
 
         assertVedtaksperiodeEksisterer(VEDTAKSPERIODE_ID)
-        assertIkkeSaksbehandleroppgave()
+        assertSaksbehandleroppgaveBleIkkeOpprettet()
         assertGodkjenningsbehovBesvart(false, automatiskBehandlet = true)
     }
 
@@ -81,7 +81,7 @@ internal class GodkjenningE2ETest : AbstractE2ETestV2() {
         fremTilSaksbehandleroppgave(enhet = ENHET_UTLAND)
 
         assertVedtaksperiodeEksisterer(VEDTAKSPERIODE_ID)
-        assertIkkeSaksbehandleroppgave()
+        assertSaksbehandleroppgaveBleIkkeOpprettet()
         assertGodkjenningsbehovBesvart(false, automatiskBehandlet = true)
         assertKommandokjedetilstander(
             sisteGodkjenningsbehovId,

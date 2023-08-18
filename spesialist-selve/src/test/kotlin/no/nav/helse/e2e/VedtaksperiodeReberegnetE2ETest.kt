@@ -20,7 +20,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETestV2() {
             sisteGodkjenningsbehovId,
             NY, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, AVBRUTT
         )
-        assertIkkeSaksbehandleroppgave()
+        assertSaksbehandleroppgaveBleIkkeOpprettet()
     }
 
     @Test
@@ -46,7 +46,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETestV2() {
             sisteGodkjenningsbehovId,
             NY, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, AVBRUTT
         )
-        assertIkkeSaksbehandleroppgave()
+        assertSaksbehandleroppgaveBleIkkeOpprettet()
 
         fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = false)
         assertKommandokjedetilstander(

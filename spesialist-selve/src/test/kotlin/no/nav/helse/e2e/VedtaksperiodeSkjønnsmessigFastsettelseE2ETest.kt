@@ -16,7 +16,7 @@ internal class VedtaksperiodeSkjønnsmessigFastsettelseE2ETest : AbstractE2ETest
         håndterVedtaksperiodeEndret(gjeldendeTilstand = "AVVENTER_SKJØNNSMESSIG_FASTSETTELSE")
         håndterPersoninfoløsning()
         assertHarPersoninfo(FØDSELSNUMMER)
-        assertIkkeSaksbehandleroppgave()
+        assertSaksbehandleroppgaveBleIkkeOpprettet()
         Toggle.Skjonnsfastsetting.disable()
     }
 }

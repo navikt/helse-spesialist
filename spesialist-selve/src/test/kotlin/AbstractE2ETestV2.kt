@@ -1194,7 +1194,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         assertEquals(oppgavestatus, sisteOppgavestatus)
     }
 
-    protected fun assertIkkeSaksbehandleroppgave(
+    protected fun assertSaksbehandleroppgaveBleIkkeOpprettet(
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
     ) {
         @Language("PostgreSQL")

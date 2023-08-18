@@ -58,6 +58,6 @@ internal class RevurderingE2ETest : AbstractE2ETestV2() {
             arbeidsgiverbeløp = 200,
             personbeløp = 0
         )
-        assertIkkeSaksbehandleroppgave()
+        assertSaksbehandleroppgaveBleIkkeOpprettet()
     }
 }
