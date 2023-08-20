@@ -5,9 +5,9 @@ import no.nav.helse.mediator.meldinger.Hendelse
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
-import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
-internal class BehovMediator(private val sikkerLogg: Logger) {
+internal class BehovMediator {
     internal fun håndter(hendelse: Hendelse, context: CommandContext, contextId: UUID, messageContext: MessageContext) {
         publiserMeldinger(hendelse, context, messageContext)
         publiserBehov(hendelse, context, contextId, messageContext)
@@ -35,4 +35,8 @@ internal class BehovMediator(private val sikkerLogg: Logger) {
         ).apply {
             putAll(context.behov())
         }).toJson()
+
+    private companion object {
+        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
+    }
 }

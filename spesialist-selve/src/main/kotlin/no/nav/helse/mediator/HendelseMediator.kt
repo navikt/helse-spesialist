@@ -100,7 +100,7 @@ internal class HendelseMediator(
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     }
 
-    private val behovMediator = BehovMediator(sikkerLogg)
+    private val behovMediator = BehovMediator()
 
     init {
         DelegatedRapid(rapidsConnection, ::forbered, ::fortsett, ::errorHandler).also {

@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
-import org.slf4j.LoggerFactory
 
 internal class BehovMediatorTest {
     private companion object {
@@ -24,8 +23,7 @@ internal class BehovMediatorTest {
     }
 
     private val testRapid: TestRapid = TestRapid()
-    private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-    private val behovMediator: BehovMediator = BehovMediator(sikkerLogg)
+    private val behovMediator: BehovMediator = BehovMediator()
     private lateinit var testHendelse: TestHendelse
     private lateinit var testContext: CommandContext
 
@@ -45,8 +43,8 @@ internal class BehovMediatorTest {
         testContext.behov("type 1", params)
         behovMediator.håndter(testHendelse, testContext, contextId, testRapid)
         assertEquals(listOf("type 1"), testRapid.inspektør.field(0, "@behov").map(JsonNode::asText))
-        assertEquals("$contextId", testRapid.inspektør.field(0, "contextId").asText())
-        assertEquals("$hendelseId", testRapid.inspektør.field(0, "hendelseId").asText())
+        assertEquals(contextId.toString(), testRapid.inspektør.field(0, "contextId").asText())
+        assertEquals(hendelseId.toString(), testRapid.inspektør.field(0, "hendelseId").asText())
         testRapid.inspektør.field(0, "type 1").also {
             assertEquals(1, it.path("param 1").asInt())
             assertEquals(2, it.path("param 2").asInt())
