@@ -22,6 +22,7 @@ internal class EndretSkjermetinfoRiver(
     val oppgaveDao: OppgaveDao,
     val godkjenningMediator: GodkjenningMediator,
 ) : River.PacketListener {
+    private val logg: Logger = LoggerFactory.getLogger(this::class.java)
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
     init {
@@ -68,6 +69,8 @@ internal class EndretSkjermetinfoRiver(
 
     private fun avvisOppgave(fødselsnummer: String, context: MessageContext) {
         val oppgaveId = oppgaveDao.finnOppgaveId(fødselsnummer) ?: return
+
+        logg.info("OppgaveId $oppgaveId avvises fordi vedkommende har blitt egen ansatt")
         val årsaker = listOf("Egen ansatt")
         godkjenningMediator.automatiskAvvisning(context::publish, årsaker, oppgaveId)
         oppgaveDao.invaliderOppgaveFor(fødselsnummer)

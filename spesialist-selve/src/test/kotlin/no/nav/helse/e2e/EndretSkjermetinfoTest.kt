@@ -39,5 +39,6 @@ internal class EndretSkjermetinfoTest : AbstractE2ETestV2() {
 
         assertSaksbehandleroppgave(oppgavestatus = Oppgavestatus.Invalidert)
         assertVedtaksperiodeAvvist("FØRSTEGANGSBEHANDLING", listOf("Egen ansatt"))
+        assertUtgåendeMelding("vedtaksperiode_avvist")
     }
 }
