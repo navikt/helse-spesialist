@@ -49,7 +49,9 @@ internal class SkjønnsfastsattArbeidsgiver(
     companion object {
         internal fun JsonNode.arbeidsgiverelementer(): List<SkjønnsfastsattArbeidsgiver> {
             return this.map { jsonNode ->
-                SkjønnsfastsattArbeidsgiver(
+                val initierendeVedtaksperiodeIdString = jsonNode["initierendeVedtaksperiodeId"]
+                val initierendeVedtaksperiodeId = initierendeVedtaksperiodeIdString.takeUnless { it.isNull || it.isEmpty }?.let { UUID.fromString(it.asText()) }
+                    SkjønnsfastsattArbeidsgiver(
                     organisasjonsnummer = jsonNode["organisasjonsnummer"].asText(),
                     årlig = jsonNode["årlig"].asDouble(),
                     fraÅrlig = jsonNode["fraÅrlig"].asDouble(),
@@ -58,9 +60,7 @@ internal class SkjønnsfastsattArbeidsgiver(
                     begrunnelseFritekst = jsonNode["begrunnelseFritekst"].asText(),
                     begrunnelseKonklusjon = jsonNode["begrunnelseKonklusjon"].asText(),
                     subsumsjon = jsonNode["subsumsjon"].subsumsjonelementer(),
-                    initierendeVedtaksperiodeId = if (jsonNode["initierendeVedtaksperiodeId"].isNull) null else UUID.fromString(
-                        jsonNode["initierendeVedtaksperiodeId"].asText()
-                    )
+                    initierendeVedtaksperiodeId = initierendeVedtaksperiodeId
                 )
             }
         }
