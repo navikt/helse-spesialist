@@ -43,7 +43,7 @@ internal class PubliserSubsumsjonCommand(
             "output" to mapOf(
                 "grunnlagForSykepengegrunnlag" to arbeidsgivere.sumOf { ag -> ag.årlig }
             ),
-            "utfall" to "VILKÅR_BEREGNET"
+            "utfall" to "VILKAR_BEREGNET"
         )))
         overstyringMediator.sendSubsumsjon(packet)
         return true
