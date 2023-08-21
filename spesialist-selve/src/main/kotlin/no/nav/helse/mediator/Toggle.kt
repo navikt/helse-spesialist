@@ -1,7 +1,5 @@
 package no.nav.helse.mediator
 
-import no.nav.helse.mediator.api.erDev
-
 abstract class Toggle(private var _enabled: Boolean) {
     private constructor(key: String, default: Boolean = false) : this(System.getenv()[key]?.toBoolean() ?: default)
 
@@ -9,5 +7,5 @@ abstract class Toggle(private var _enabled: Boolean) {
 
     object Inntekter : Toggle("INNTEKTER", true)
 
-    object Skjonnsfastsetting : Toggle("SKJONNSFASTSETTING", erDev())
+    object Skjonnsfastsetting : Toggle("SKJONNSFASTSETTING", true)
 }
