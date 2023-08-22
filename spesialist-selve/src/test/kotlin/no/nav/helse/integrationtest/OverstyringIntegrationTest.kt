@@ -214,6 +214,7 @@ internal class OverstyringIntegrationTest : AbstractE2ETest() {
                         "begrunnelseFritekst": "Begrunnelsefritekst",
                         "begrunnelseMal": "en begrunnelsemal",
                         "årsak": "en årsak",
+                        "type": "OMREGNET_ÅRSINNTEKT",
                         "subsumsjon": {
                             "paragraf": "8-28",
                             "ledd": "3",
@@ -226,6 +227,7 @@ internal class OverstyringIntegrationTest : AbstractE2ETest() {
                         "begrunnelseFritekst": "Begrunnelsefritekst",
                         "begrunnelseMal": "en begrunnelsemal",
                         "årsak": "en årsak 2",
+                        "type": "OMREGNET_ÅRSINNTEKT",
                         "subsumsjon": {
                             "paragraf": "8-28",
                             "ledd": "3",

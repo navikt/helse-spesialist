@@ -12,6 +12,7 @@ import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsgiverDto.Refusjons
 import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonDto
 import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsattArbeidsgiverDto
 import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsattSykepengegrunnlagDto
+import no.nav.helse.spesialist.api.overstyring.Skjønnsfastsettingstype
 import no.nav.helse.spesialist.api.overstyring.SubsumsjonDto
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandling.OverstyrDagDto
@@ -139,6 +140,7 @@ internal class OverstyringApiTest: AbstractE2ETest() {
                     årlig = 250000.0,
                     fraÅrlig = 260000.0,
                     årsak = "En årsak",
+                    type = Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
                     begrunnelseMal = "En begrunnelsemal",
                     begrunnelseFritekst = "begrunnelsefritekst",
                     begrunnelseKonklusjon = "En begrunnelsekonklusjon",

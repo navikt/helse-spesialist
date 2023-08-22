@@ -11,6 +11,7 @@ import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsgiverDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonDto
 import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsattArbeidsgiverDto
 import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsattSykepengegrunnlagDto
+import no.nav.helse.spesialist.api.overstyring.Skjønnsfastsettingstype
 import no.nav.helse.spesialist.api.overstyring.SubsumsjonDto
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandling
 import no.nav.helse.spesialist.api.utbetaling.AnnulleringDto
@@ -371,6 +372,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
                     fraÅrlig = 25001.0,
                     subsumsjon = SubsumsjonDto("8-28", "3", null),
                     årsak = "En årsak",
+                    type = Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
                     begrunnelseMal = "En begrunnelsemal",
                     begrunnelseFritekst = "begrunnelsefritekst",
                     begrunnelseKonklusjon = "begrunnelseKonklusjon",
@@ -382,6 +384,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
                     fraÅrlig = 25001.0,
                     subsumsjon = SubsumsjonDto("8-28", "3", null),
                     årsak = "En årsak 2",
+                    type = Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
                     begrunnelseMal = "En begrunnelsemal",
                     begrunnelseFritekst = "begrunnelsefritekst",
                     begrunnelseKonklusjon = "begrunnelseKonklusjon",

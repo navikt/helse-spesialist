@@ -35,11 +35,17 @@ internal class OverstyrtArbeidsgiver(
     }
 }
 
+internal enum class Skjønnsfastsettingstype {
+    OMREGNET_ÅRSINNTEKT,
+    RAPPORTERT_ÅRSINNTEKT,
+    ANNET,
+}
 internal class SkjønnsfastsattArbeidsgiver(
     val organisasjonsnummer: String,
     val årlig: Double,
     val fraÅrlig: Double?,
     val årsak: String,
+    val type: Skjønnsfastsettingstype,
     val begrunnelseMal: String?,
     val begrunnelseFritekst: String?,
     val begrunnelseKonklusjon: String?,
@@ -56,6 +62,7 @@ internal class SkjønnsfastsattArbeidsgiver(
                     årlig = jsonNode["årlig"].asDouble(),
                     fraÅrlig = jsonNode["fraÅrlig"].asDouble(),
                     årsak = jsonNode["årsak"].asText(),
+                    type = enumValueOf(jsonNode["type"].asText()),
                     begrunnelseMal = jsonNode["begrunnelseMal"].asText(),
                     begrunnelseFritekst = jsonNode["begrunnelseFritekst"].asText(),
                     begrunnelseKonklusjon = jsonNode["begrunnelseKonklusjon"].asText(),

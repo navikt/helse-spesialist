@@ -121,6 +121,7 @@ internal object TestmeldingsfabrikkV2 {
                         "årlig" to 600000.0,
                         "fraÅrlig" to 500000.0,
                         "årsak" to "Skjønnsfastsetting ved mer enn 25% avvik",
+                        "type" to "OMREGNET_ÅRSINNTEKT",
                         "begrunnelseMal" to "Mal",
                         "begrunnelseFritekst" to "Fritekst",
                         "begrunnelseKonklusjon" to "Fritekst",

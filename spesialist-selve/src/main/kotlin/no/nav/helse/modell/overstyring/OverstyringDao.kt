@@ -280,8 +280,8 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
 
             @Language("PostgreSQL")
             val opprettSkjønnsfastsettingSykepengegrunnlagQuery = """
-                INSERT INTO skjonnsfastsetting_sykepengegrunnlag(skjaeringstidspunkt, arsak, subsumsjon, overstyring_ref, initierende_vedtaksperiode_id, begrunnelse_fritekst_ref, begrunnelse_mal_ref, begrunnelse_konklusjon_ref)
-                VALUES (:skjaeringstidspunkt, :arsak, :subsumsjon::json, :overstyring_ref, :initierende_vedtaksperiode_id, :begrunnelse_fritekst_ref, :begrunnelse_mal_ref, :begrunnelse_konklusjon_ref)
+                INSERT INTO skjonnsfastsetting_sykepengegrunnlag(skjaeringstidspunkt, arsak, subsumsjon, overstyring_ref, initierende_vedtaksperiode_id, begrunnelse_fritekst_ref, begrunnelse_mal_ref, begrunnelse_konklusjon_ref, type)
+                VALUES (:skjaeringstidspunkt, :arsak, :subsumsjon::json, :overstyring_ref, :initierende_vedtaksperiode_id, :begrunnelse_fritekst_ref, :begrunnelse_mal_ref, :begrunnelse_konklusjon_ref, :type)
             """
 
             @Language("PostgreSQL")
@@ -341,6 +341,7 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
                         mapOf(
                             "skjaeringstidspunkt" to skjæringstidspunkt,
                             "arsak" to arbeidsgivere.first().årsak,
+                            "type" to arbeidsgivere.first().type.name,
                             "subsumsjon" to arbeidsgivere.first().subsumsjon?.let {
                                 objectMapper.writeValueAsString(
                                     arbeidsgivere.first().subsumsjon

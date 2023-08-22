@@ -6,6 +6,7 @@ import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.modell.overstyring.SkjønnsfastsattArbeidsgiver
+import no.nav.helse.modell.overstyring.Skjønnsfastsettingstype
 import no.nav.helse.modell.sykefraværstilfelle.SkjønnsfastattSykepengegrunnlag
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -25,7 +26,7 @@ internal class SykefraværstilfelleDaoTest: DatabaseIntegrationTest() {
             eksternHendelseId = UUID.randomUUID(),
             fødselsnummer = FNR,
             arbeidsgivere = listOf(
-                SkjønnsfastsattArbeidsgiver(ORGNUMMER, 1000.0, 900.0, "En årsak", "En ", "begrunnelse", "konklusjon", null, null)
+                SkjønnsfastsattArbeidsgiver(ORGNUMMER, 1000.0, 900.0, "En årsak", Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT, "En ", "begrunnelse", "konklusjon", null, null)
             ),
             saksbehandlerRef = SAKSBEHANDLER_OID,
             skjæringstidspunkt = 1.januar,
@@ -54,7 +55,7 @@ internal class SykefraværstilfelleDaoTest: DatabaseIntegrationTest() {
             eksternHendelseId = UUID.randomUUID(),
             fødselsnummer = FNR,
             arbeidsgivere = listOf(
-                SkjønnsfastsattArbeidsgiver(ORGNUMMER, 1000.0, 900.0, "En årsak", "En ", "begrunnelse", "konklusjon", null, null)
+                SkjønnsfastsattArbeidsgiver(ORGNUMMER, 1000.0, 900.0, "En årsak", Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,"En ", "begrunnelse", "konklusjon", null, null)
             ),
             saksbehandlerRef = SAKSBEHANDLER_OID,
             skjæringstidspunkt = 1.januar,
@@ -65,7 +66,7 @@ internal class SykefraværstilfelleDaoTest: DatabaseIntegrationTest() {
             eksternHendelseId = UUID.randomUUID(),
             fødselsnummer = person2,
             arbeidsgivere = listOf(
-                SkjønnsfastsattArbeidsgiver(arbeidsgiver2, 1000.0, 900.0, "En årsak", "En ", "begrunnelse", "konklusjon", null, null)
+                SkjønnsfastsattArbeidsgiver(arbeidsgiver2, 1000.0, 900.0, "En årsak", Skjønnsfastsettingstype.RAPPORTERT_ÅRSINNTEKT,"En ", "begrunnelse", "konklusjon", null, null)
             ),
             saksbehandlerRef = SAKSBEHANDLER_OID,
             skjæringstidspunkt = 1.januar,
@@ -91,7 +92,7 @@ internal class SykefraværstilfelleDaoTest: DatabaseIntegrationTest() {
             eksternHendelseId = UUID.randomUUID(),
             fødselsnummer = FNR,
             arbeidsgivere = listOf(
-                SkjønnsfastsattArbeidsgiver(ORGNUMMER, 1000.0, 900.0, "En årsak", "En ", "begrunnelse", "konklusjon", null, null)
+                SkjønnsfastsattArbeidsgiver(ORGNUMMER, 1000.0, 900.0, "En årsak", Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,"En ", "begrunnelse", "konklusjon", null, null)
             ),
             saksbehandlerRef = SAKSBEHANDLER_OID,
             skjæringstidspunkt = 1.januar,
@@ -102,7 +103,7 @@ internal class SykefraværstilfelleDaoTest: DatabaseIntegrationTest() {
             eksternHendelseId = UUID.randomUUID(),
             fødselsnummer = FNR,
             arbeidsgivere = listOf(
-                SkjønnsfastsattArbeidsgiver(ORGNUMMER, 1000.0, 900.0, "En årsak", "En ", "begrunnelse", "konklusjon", null, null)
+                SkjønnsfastsattArbeidsgiver(ORGNUMMER, 1000.0, 900.0, "En årsak", Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,"En ", "begrunnelse", "konklusjon", null, null)
             ),
             saksbehandlerRef = SAKSBEHANDLER_OID,
             skjæringstidspunkt = 1.februar,

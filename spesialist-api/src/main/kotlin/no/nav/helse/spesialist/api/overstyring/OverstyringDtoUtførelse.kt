@@ -59,11 +59,18 @@ internal data class OverstyrInntektOgRefusjonDto(
     )
 }
 
+internal enum class Skjønnsfastsettingstype {
+    OMREGNET_ÅRSINNTEKT,
+    RAPPORTERT_ÅRSINNTEKT,
+    ANNET,
+}
+
 internal data class SkjønnsfastsattArbeidsgiverDto(
     val organisasjonsnummer: String,
     val årlig: Double,
     val fraÅrlig: Double,
     val årsak: String,
+    val type: Skjønnsfastsettingstype,
     val begrunnelseMal: String?,
     val begrunnelseFritekst: String?,
     val begrunnelseKonklusjon: String?,
@@ -75,6 +82,7 @@ internal data class SkjønnsfastsattArbeidsgiverDto(
         "årlig" to årlig,
         "fraÅrlig" to fraÅrlig,
         "årsak" to årsak,
+        "type" to type,
         "begrunnelseMal" to begrunnelseMal,
         "begrunnelseFritekst" to begrunnelseFritekst,
         "begrunnelseKonklusjon" to begrunnelseKonklusjon,

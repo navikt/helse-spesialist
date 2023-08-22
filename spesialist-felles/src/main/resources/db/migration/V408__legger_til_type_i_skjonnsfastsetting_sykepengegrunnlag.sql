@@ -1,0 +1,1 @@
+ALTER TABLE skjonnsfastsetting_sykepengegrunnlag ADD COLUMN type VARCHAR NOT NULL DEFAULT 'OMREGNET_ÅRSINNTEKT';
