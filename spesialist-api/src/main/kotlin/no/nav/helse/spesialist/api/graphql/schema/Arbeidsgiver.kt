@@ -90,7 +90,10 @@ data class Sykepengegrunnlagskjonnsfastsetting(
 ) : Overstyring {
     data class SkjonnsfastsattSykepengegrunnlag(
         val arsak: String,
-        val begrunnelse: String,
+        val begrunnelse: String?,
+        val begrunnelseMal: String?,
+        val begrunnelseFritekst: String?,
+        val begrunnelseKonklusjon: String?,
         val arlig: Double,
         val fraArlig: Double?,
         val skjaeringstidspunkt: DateTimeString,
@@ -275,6 +278,9 @@ private fun SkjønnsfastsettingSykepengegrunnlagDto.tilSykepengegrunnlagSkjønns
     skjonnsfastsatt = Sykepengegrunnlagskjonnsfastsetting.SkjonnsfastsattSykepengegrunnlag(
         arsak = årsak,
         begrunnelse = begrunnelse,
+        begrunnelseMal = begrunnelseMal,
+        begrunnelseFritekst = begrunnelseFritekst,
+        begrunnelseKonklusjon = begrunnelseKonklusjon,
         arlig = årlig,
         fraArlig = fraÅrlig,
         skjaeringstidspunkt = skjæringstidspunkt.format(DateTimeFormatter.ISO_DATE),

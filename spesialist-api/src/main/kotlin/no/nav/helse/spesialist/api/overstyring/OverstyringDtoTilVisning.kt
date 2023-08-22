@@ -78,6 +78,9 @@ data class SkjønnsfastsettingSykepengegrunnlagDto(
     val fraÅrlig: Double?,
     val årsak: String,
     val begrunnelse: String,
+    val begrunnelseMal: String?,
+    val begrunnelseFritekst: String?,
+    val begrunnelseKonklusjon: String?,
 )
 
 data class OverstyringArbeidsforholdDto(
