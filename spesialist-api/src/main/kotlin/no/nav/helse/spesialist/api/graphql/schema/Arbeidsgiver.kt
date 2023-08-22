@@ -11,6 +11,7 @@ import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.overstyring.OverstyringArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringInntektDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringTidslinjeDto
+import no.nav.helse.spesialist.api.overstyring.Skjonnsfastsettingstype
 import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsettingSykepengegrunnlagDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
@@ -90,6 +91,7 @@ data class Sykepengegrunnlagskjonnsfastsetting(
 ) : Overstyring {
     data class SkjonnsfastsattSykepengegrunnlag(
         val arsak: String,
+        val type: Skjonnsfastsettingstype?,
         val begrunnelse: String?,
         val begrunnelseMal: String?,
         val begrunnelseFritekst: String?,
@@ -277,6 +279,7 @@ private fun SkjønnsfastsettingSykepengegrunnlagDto.tilSykepengegrunnlagSkjønns
     ),
     skjonnsfastsatt = Sykepengegrunnlagskjonnsfastsetting.SkjonnsfastsattSykepengegrunnlag(
         arsak = årsak,
+        type = type,
         begrunnelse = begrunnelse,
         begrunnelseMal = begrunnelseMal,
         begrunnelseFritekst = begrunnelseFritekst,

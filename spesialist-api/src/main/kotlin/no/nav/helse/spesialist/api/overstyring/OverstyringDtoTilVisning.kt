@@ -64,6 +64,12 @@ data class OverstyringInntektDto(
         val beløp: Double,
     )
 }
+enum class Skjonnsfastsettingstype {
+    OMREGNET_ARSINNTEKT,
+    RAPPORTERT_ARSINNTEKT,
+    ANNET,
+}
+
 
 data class SkjønnsfastsettingSykepengegrunnlagDto(
     val hendelseId: UUID,
@@ -77,6 +83,7 @@ data class SkjønnsfastsettingSykepengegrunnlagDto(
     val årlig: Double,
     val fraÅrlig: Double?,
     val årsak: String,
+    val type: Skjonnsfastsettingstype,
     val begrunnelse: String,
     val begrunnelseMal: String?,
     val begrunnelseFritekst: String?,

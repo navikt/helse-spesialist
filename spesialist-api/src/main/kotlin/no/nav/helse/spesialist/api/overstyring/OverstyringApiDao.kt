@@ -138,7 +138,7 @@ class OverstyringApiDao(private val dataSource: DataSource) {
             @Language("PostgreSQL")
             val finnSkjønnsfastsettingQuery = """
             SELECT o.id, o.tidspunkt, o.person_ref, o.hendelse_ref, o.saksbehandler_ref, o.ekstern_hendelse_id, 
-            o.ferdigstilt, ss.arsak, ssa.arlig, ssa.fra_arlig, ss.skjaeringstidspunkt, 
+            o.ferdigstilt, ss.arsak, ss.type, ssa.arlig, ssa.fra_arlig, ss.skjaeringstidspunkt, 
             b1.tekst as fritekst, b2.tekst as mal, b3.tekst as konklusjon, p.fodselsnummer, a.orgnummer, s.navn, s.ident FROM overstyring o
                 INNER JOIN skjonnsfastsetting_sykepengegrunnlag ss ON o.id = ss.overstyring_ref
                 INNER JOIN skjonnsfastsetting_sykepengegrunnlag_arbeidsgiver ssa ON ssa.skjonnsfastsetting_sykepengegrunnlag_ref = ss.id
@@ -163,6 +163,7 @@ class OverstyringApiDao(private val dataSource: DataSource) {
                             begrunnelseFritekst = overstyringRow.string("fritekst"),
                             begrunnelseKonklusjon = overstyringRow.string("konklusjon"),
                             årsak = overstyringRow.string("arsak"),
+                            type = enumValueOf(overstyringRow.string("type").replace("Å", "A")),
                             timestamp = overstyringRow.localDateTime("tidspunkt"),
                             saksbehandlerNavn = overstyringRow.string("navn"),
                             saksbehandlerIdent = overstyringRow.stringOrNull("ident"),
