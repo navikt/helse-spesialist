@@ -8,8 +8,6 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractE2ETestV2() {
 
     @Test
     fun `VedtaksperiodeForkastet oppdaterer ikke oppgave-tabellen dersom status er inaktiv`() {
-        håndterSøknad()
-        håndterVedtaksperiodeOpprettet()
         fremTilSaksbehandleroppgave()
         håndterSaksbehandlerløsning()
         håndterVedtakFattet()

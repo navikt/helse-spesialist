@@ -37,8 +37,6 @@ internal class GodkjenningE2ETest : AbstractE2ETestV2() {
 
     @Test
     fun `løser godkjenningsbehov når saksbehandler godkjenner`() {
-        håndterSøknad()
-        håndterVedtaksperiodeOpprettet()
         fremTilSaksbehandleroppgave(regelverksvarsler = listOf("Brukeren har flere inntekter de siste tre måneder"))
         håndterSaksbehandlerløsning()
 
@@ -48,8 +46,6 @@ internal class GodkjenningE2ETest : AbstractE2ETestV2() {
 
     @Test
     fun `løser godkjenningsbehov når saksbehandler avslår`() {
-        håndterSøknad()
-        håndterVedtaksperiodeOpprettet()
         fremTilSaksbehandleroppgave(regelverksvarsler = listOf("Brukeren har flere inntekter de siste tre måneder"))
         val begrunnelser = listOf("Mangler opptjening")
         val kommentar = "Vedkommende mangler opptjening"
@@ -61,8 +57,6 @@ internal class GodkjenningE2ETest : AbstractE2ETestV2() {
 
     @Test
     fun `oppretter ikke oppgave om bruker er egen ansatt`() {
-        håndterSøknad()
-        håndterVedtaksperiodeOpprettet()
         fremForbiUtbetalingsfilter()
         håndterEgenansattløsning(erEgenAnsatt = true)
         håndterVergemålløsning()
@@ -76,8 +70,6 @@ internal class GodkjenningE2ETest : AbstractE2ETestV2() {
 
     @Test
     fun `oppretter ikke oppgave om bruker tilhører utlandsenhet`() {
-        håndterSøknad()
-        håndterVedtaksperiodeOpprettet()
         fremTilSaksbehandleroppgave(enhet = ENHET_UTLAND)
 
         assertVedtaksperiodeEksisterer(VEDTAKSPERIODE_ID)
@@ -101,8 +93,6 @@ internal class GodkjenningE2ETest : AbstractE2ETestV2() {
 
     @Test
     fun `ignorerer påminnet godkjenningsbehov dersom det eksisterer en aktiv oppgave`() {
-        håndterSøknad()
-        håndterVedtaksperiodeOpprettet()
         fremTilSaksbehandleroppgave()
         håndterGodkjenningsbehovUtenValidering()
         assertIngenEtterspurteBehov()

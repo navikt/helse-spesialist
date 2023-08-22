@@ -25,8 +25,6 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETestV2() {
 
     @Test
     fun `avbryter saksbehandling etter oppgave er opprettet til saksbehandling`() {
-        håndterSøknad()
-        håndterVedtaksperiodeOpprettet()
         fremTilSaksbehandleroppgave()
         håndterVedtaksperiodeReberegnet()
         assertKommandokjedetilstander(

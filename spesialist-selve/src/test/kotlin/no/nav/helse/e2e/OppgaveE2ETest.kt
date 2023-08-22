@@ -11,8 +11,6 @@ internal class OppgaveE2ETest: AbstractE2ETestV2() {
 
     @Test
     fun `invaliderer oppgave når utbetalingen har blitt forkastet`() {
-        håndterSøknad()
-        håndterVedtaksperiodeOpprettet()
         fremTilSaksbehandleroppgave()
         håndterUtbetalingForkastet()
         assertSaksbehandleroppgave(oppgavestatus = Invalidert)
@@ -20,8 +18,6 @@ internal class OppgaveE2ETest: AbstractE2ETestV2() {
 
     @Test
     fun `invaliderer oppgave når utbetaling som har status IKKE_UTBETALT blir forkastet`() {
-        håndterSøknad()
-        håndterVedtaksperiodeOpprettet()
         fremTilSaksbehandleroppgave()
         håndterUtbetalingForkastet(forrigeStatus = IKKE_UTBETALT)
         assertSaksbehandleroppgave(oppgavestatus = Invalidert)
@@ -29,8 +25,6 @@ internal class OppgaveE2ETest: AbstractE2ETestV2() {
 
     @Test
     fun `ferdigstiller oppgaven først når utbetalingen er utbetalt`() {
-        håndterSøknad()
-        håndterVedtaksperiodeOpprettet()
         fremTilSaksbehandleroppgave()
         håndterSaksbehandlerløsning()
         håndterUtbetalingUtbetalt()
@@ -39,8 +33,6 @@ internal class OppgaveE2ETest: AbstractE2ETestV2() {
 
     @Test
     fun `oppretter ny oppgave når det finnes en invalidert oppgave for en vedtaksperiode`() {
-        håndterSøknad()
-        håndterVedtaksperiodeOpprettet()
         fremTilSaksbehandleroppgave()
         håndterUtbetalingForkastet()
         assertSaksbehandleroppgave(oppgavestatus = Invalidert)
@@ -50,8 +42,6 @@ internal class OppgaveE2ETest: AbstractE2ETestV2() {
 
     @Test
     fun `oppretter ikke ny oppgave når det finnes en aktiv oppgave`() {
-        håndterSøknad()
-        håndterVedtaksperiodeOpprettet()
         fremTilSaksbehandleroppgave()
         assertSaksbehandleroppgave(oppgavestatus = AvventerSaksbehandler)
         håndterGodkjenningsbehovUtenValidering()
@@ -60,8 +50,6 @@ internal class OppgaveE2ETest: AbstractE2ETestV2() {
 
     @Test
     fun `oppretter ny oppgave når saksbehandler har godkjent, men spleis har reberegnet i mellomtiden`() {
-        håndterSøknad()
-        håndterVedtaksperiodeOpprettet()
         fremTilSaksbehandleroppgave()
         håndterSaksbehandlerløsning()
         håndterUtbetalingForkastet()
@@ -72,8 +60,6 @@ internal class OppgaveE2ETest: AbstractE2ETestV2() {
 
     @Test
     fun `håndterer nytt godkjenningsbehov om vi har automatisk godkjent en periode men spleis har reberegnet i mellomtiden`() {
-        håndterSøknad()
-        håndterVedtaksperiodeOpprettet()
         fremTilSaksbehandleroppgave()
         håndterUtbetalingForkastet()
         assertSaksbehandleroppgave(oppgavestatus = Invalidert)
