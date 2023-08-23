@@ -38,6 +38,6 @@ internal class UtkastTilVedtak(
         vedtakBuilder.tom(tom)
         vedtakBuilder.aktørId(aktørId)
         vedtakBuilder.vedtakFattetTidspunkt(vedtakFattetTidspunkt)
-        sykepengegrunnlagsfakta?.also {vedtakBuilder.sykepengegrunnlagsfakta(it) }
+        sykepengegrunnlagsfakta?.also { vedtakBuilder.sykepengegrunnlagsfakta(it) }
     }
 }

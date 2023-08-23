@@ -31,8 +31,9 @@ internal class UtkastTilVedtakMessage(packet: JsonMessage) {
     private val grunnlagForSykepengegrunnlagPerArbeidsgiver = jacksonObjectMapper().treeToValue<Map<String, Double>>(packet["grunnlagForSykepengegrunnlagPerArbeidsgiver"])
     private val begrensning = packet["begrensning"].asText()
     private val inntekt = packet["inntekt"].asDouble()
-    private val sykepengegrunnlagsfakta = utbetalingId?.let { sykepengegrunnlagsfakta(packet, faktatype(packet)) }
-
+    private val sykepengegrunnlagsfakta = packet["sykepengegrunnlagsfakta"].takeUnless { it.isMissingOrNull() }?.let {
+        sykepengegrunnlagsfakta(packet, faktatype(packet))
+    }
     internal fun skjæringstidspunkt() = skjæringstidspunkt
     internal fun fødselsnummer() = fødselsnummer
 

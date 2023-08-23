@@ -229,7 +229,29 @@ class SykepengevedtakBuilderTest {
     }
 
     @Test
-    fun `Krever sykepengegrunnlagsfakta for å bygge vanlig vedtak`() {
+    fun `Mangel på både utbetalingId og sykepengegrunnlagsfakta medfører AUU-vedtak`() {
+        val builder = SykepengevedtakBuilder()
+        builder
+            .fødselsnummer(fødselsnummer)
+            .aktørId(aktørId)
+            .organisasjonsnummer(organisasjonsnummer)
+            .vedtaksperiodeId(vedtaksperiodeId)
+            .fom(fom)
+            .tom(tom)
+            .skjæringstidspunkt(skjæringstidspunkt)
+            .hendelser(hendelser)
+            .sykepengegrunnlag(sykepengegrunnlag)
+            .grunnlagForSykepengegrunnlag(grunnlagForSykepengegrunnlag)
+            .grunnlagForSykepengegrunnlagPerArbeidsgiver(grunnlagForSykepengegrunnlagPerArbeidsgiver)
+            .begrensning(begrensning)
+            .inntekt(inntekt)
+            .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
+
+        assertTrue(builder.build() is Sykepengevedtak.AuuVedtak)
+    }
+
+    @Test
+    fun `Mangel på sykepengegrunnlagsfakta medfører bygging av AUU-vedtak`() {
         val builder = SykepengevedtakBuilder()
         builder
             .fødselsnummer(fødselsnummer)
@@ -248,13 +270,11 @@ class SykepengevedtakBuilderTest {
             .inntekt(inntekt)
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
 
-        assertThrows<IllegalArgumentException> {
-            builder.build()
-        }
+        assertTrue(builder.build() is Sykepengevedtak.AuuVedtak)
     }
 
     @Test
-    fun `Sykepengegrunnlagsfakta kan ikke være satt ved bygging av AUU-vedtak`() {
+    fun `Mangel på utbetalingId medfører bygging av AUU-vedtak`() {
         val builder = SykepengevedtakBuilder()
         builder
             .fødselsnummer(fødselsnummer)
@@ -273,9 +293,7 @@ class SykepengevedtakBuilderTest {
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
             .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_HOVEDREGEL))
 
-        assertThrows<IllegalArgumentException> {
-            builder.build()
-        }
+        assertTrue(builder.build() is Sykepengevedtak.AuuVedtak)
     }
 
     @Test

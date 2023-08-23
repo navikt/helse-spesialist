@@ -49,13 +49,13 @@ internal class SykepengevedtakBuilder {
         this.skjønnsfastsattSykepengegrunnlag = skjønnsfastsattSykepengegrunnlag
         skjønnsfastsattSykepengegrunnlag.byggVedtak(this)
     }
+
     internal fun begrunnelseFraMal(begrunnelseFraMal: String) = apply { this.begrunnelseFraMal = begrunnelseFraMal }
     internal fun begrunnelseFraFritekst(begrunnelseFraFritekst: String) = apply { this.begrunnelseFraFritekst = begrunnelseFraFritekst }
     internal fun begrunnelseFraKonklusjon(begrunnelseFraKonklusjon: String) = apply { this.begrunnelseFraKonklusjon = begrunnelseFraKonklusjon }
 
     internal fun build(): Sykepengevedtak {
-        if (utbetalingId != null) return buildVedtak()
-        require(sykepengegrunnlagsfakta == null) { "Forventer at sykepengegrunnlagsfakta er null for Auu-vedtak" }
+        if (utbetalingId != null && sykepengegrunnlagsfakta != null) return buildVedtak()
         return buildAuuVedtak()
     }
 

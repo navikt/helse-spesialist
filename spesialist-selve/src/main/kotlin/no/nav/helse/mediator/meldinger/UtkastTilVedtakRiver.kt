@@ -24,7 +24,9 @@ internal class UtkastTilVedtakRiver(
                 it.requireArray("hendelser")
                 it.requireKey("sykepengegrunnlag", "grunnlagForSykepengegrunnlag", "grunnlagForSykepengegrunnlagPerArbeidsgiver")
                 it.requireKey("begrensning", "inntekt", "vedtakFattetTidspunkt")
+
                 it.interestedIn(
+                    "sykepengegrunnlagsfakta",
                     "sykepengegrunnlagsfakta.fastsatt",
                     "sykepengegrunnlagsfakta.omregnetÅrsinntekt",
                     "sykepengegrunnlagsfakta.innrapportertÅrsinntekt",
