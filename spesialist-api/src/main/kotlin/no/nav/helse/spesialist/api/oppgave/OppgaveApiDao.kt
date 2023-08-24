@@ -27,7 +27,6 @@ import no.nav.helse.spesialist.api.graphql.schema.tilPeriodetype
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.person.Kjønn
-import no.nav.helse.spesialist.api.varsel.Varsel
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
 
@@ -172,8 +171,7 @@ class OppgaveApiDao(dataSource: DataSource) : HelseDao(dataSource) {
             "harTilgangTilRisk" to tilganger.harTilgangTilRiskOppgaver(),
             "harTilgangTilKode7" to tilganger.harTilgangTilKode7(),
             "harTilgangTilBeslutter" to tilganger.harTilgangTilBeslutterOppgaver(),
-            "harTilgangTilStikkprove" to tilganger.hartilgangTilStikkprøve(),
-            "statusInaktiv" to Varsel.Varselstatus.INAKTIV.name
+            "harTilgangTilStikkprove" to tilganger.hartilgangTilStikkprøve()
         )
     ).list(::tilOppgaveForOversiktsvisning)
 
