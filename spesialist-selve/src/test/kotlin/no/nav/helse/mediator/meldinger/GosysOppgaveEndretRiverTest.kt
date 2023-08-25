@@ -12,8 +12,6 @@ import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
-import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
-import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 
@@ -23,10 +21,9 @@ internal class GosysOppgaveEndretRiverTest {
     private val testRapid = TestRapid()
     private val personDao = mockk<PersonDao>(relaxed = true)
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
-    private val tildelingDao = mockk<TildelingDao>(relaxed = true)
 
     init {
-        GosysOppgaveEndretRiver(testRapid, mediator, oppgaveDao, tildelingDao, personDao)
+        GosysOppgaveEndretRiver(testRapid, mediator, oppgaveDao, personDao)
     }
 
     @Test
@@ -34,13 +31,6 @@ internal class GosysOppgaveEndretRiverTest {
         mocks()
         testRapid.sendTestMessage(event())
         verify(exactly = 1) { mediator.gosysOppgaveEndret(any(), any(), any(), any(), any()) }
-    }
-
-    @Test
-    fun `Kaller ikke mediator hvis oppgave er tildelt`() {
-        mocks(tildeling = TildelingApiDto(navn="", epost="", oid=UUID.randomUUID(), påVent = false))
-        testRapid.sendTestMessage(event())
-        verify(exactly = 0) { mediator.gosysOppgaveEndret(any(), any(), any(), any(), any()) }
     }
 
     @Test
@@ -67,7 +57,6 @@ internal class GosysOppgaveEndretRiverTest {
 
     private fun mocks(
         oppgaveId: Long? = 1L,
-        tildeling: TildelingApiDto? = null,
         commandData: GosysOppgaveEndretCommandData? = GosysOppgaveEndretCommandData(
             vedtaksperiodeId = UUID.randomUUID(),
             periodeFom = LocalDate.now(),
@@ -80,7 +69,6 @@ internal class GosysOppgaveEndretRiverTest {
         )
     ) {
         every { oppgaveDao.finnOppgaveId(any<String>()) }.returns(oppgaveId)
-        every { tildelingDao.tildelingForOppgave(any()) }.returns(tildeling)
         every { oppgaveDao.gosysOppgaveEndretCommandData(any()) }.returns(commandData)
     }
 

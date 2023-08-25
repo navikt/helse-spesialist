@@ -25,6 +25,8 @@ internal class Sykefraværstilfelle(
 
     private fun fattVedtak(vedtak: Sykepengevedtak) = observers.forEach { it.vedtakFattet(vedtak) }
 
+    private fun deaktiverVarsel(varsel: Varsel) = observers.forEach { it.deaktiverVarsel(varsel) }
+
     internal fun forhindrerAutomatisering(tilOgMed: LocalDate): Boolean {
         return gjeldendeGenerasjoner.forhindrerAutomatisering(tilOgMed)
     }
@@ -45,6 +47,7 @@ internal class Sykefraværstilfelle(
 
     internal fun deaktiver(varsel: Varsel) {
         gjeldendeGenerasjoner.deaktiver(varsel)
+        deaktiverVarsel(varsel)
     }
 
     internal fun håndterGodkjent(saksbehandlerIdent: String, vedtaksperiodeId: UUID, hendelseId: UUID) {

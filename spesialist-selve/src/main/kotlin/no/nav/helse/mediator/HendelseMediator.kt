@@ -132,7 +132,7 @@ internal class HendelseMediator(
             VedtaksperiodeReberegnetRiver(it, this)
             VedtaksperiodeOpprettetRiver(it, this)
             VedtaksperiodeSkjønnsmessigFastsettelseRiver(it, this)
-            GosysOppgaveEndretRiver(it, this, oppgaveDao, tildelingDao, personDao)
+            GosysOppgaveEndretRiver(it, this, oppgaveDao, personDao)
             EndretSkjermetinfoRiver(it, personDao, egenAnsattDao, oppgaveDao, godkjenningMediator)
             VedtakFattetRiver(it, this)
             NyeVarslerRiver(it, this)

@@ -13,6 +13,7 @@ import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.oppgave.SjekkAtOppgaveFortsattErÅpenCommand
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.UtbetalingDao
+import no.nav.helse.spesialist.api.tildeling.TildelingDao
 
 internal class GosysOppgaveEndret(
     override val id: UUID,
@@ -27,6 +28,7 @@ internal class GosysOppgaveEndret(
     oppgaveMediator: OppgaveMediator,
     oppgaveDao: OppgaveDao,
     utbetalingDao: UtbetalingDao,
+    tildelingDao: TildelingDao,
 ) : Hendelse, MacroCommand() {
 
     override fun fødselsnummer() = fødselsnummer
@@ -34,13 +36,18 @@ internal class GosysOppgaveEndret(
 
     private val utbetaling = utbetalingDao.hentUtbetaling(gosysOppgaveEndretCommandData.utbetalingId)
 
+    private val harTildeltOppgave = oppgaveDao.finnOppgaveId(fødselsnummer)?.let { oppgaveId ->
+        tildelingDao.tildelingForOppgave(oppgaveId) != null
+    } ?: false
+
     override val commands: List<Command> = listOf(
         ÅpneGosysOppgaverCommand(
             hendelseId = id,
             aktørId = aktørId,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
             vedtaksperiodeId = gosysOppgaveEndretCommandData.vedtaksperiodeId,
-            sykefraværstilfelle = sykefraværstilfelle
+            sykefraværstilfelle = sykefraværstilfelle,
+            harTildeltOppgave = harTildeltOppgave,
         ),
         SjekkAtOppgaveFortsattErÅpenCommand(fødselsnummer = fødselsnummer, oppgaveDao = oppgaveDao),
         SettTidligereAutomatiseringInaktivCommand(

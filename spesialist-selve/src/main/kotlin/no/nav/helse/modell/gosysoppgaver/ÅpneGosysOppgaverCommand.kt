@@ -12,7 +12,8 @@ internal class ÅpneGosysOppgaverCommand(
     private val aktørId: String,
     private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     private val vedtaksperiodeId: UUID,
-    private val sykefraværstilfelle: Sykefraværstilfelle
+    private val sykefraværstilfelle: Sykefraværstilfelle,
+    private val harTildeltOppgave: Boolean,
 ) : Command {
 
     private companion object {
@@ -30,8 +31,9 @@ internal class ÅpneGosysOppgaverCommand(
             context.behov("ÅpneOppgaver", mapOf("aktørId" to aktørId))
             return false
         }
+
         løsning.lagre(åpneGosysOppgaverDao)
-        løsning.evaluer(vedtaksperiodeId, sykefraværstilfelle, hendelseId)
+        løsning.evaluer(vedtaksperiodeId, sykefraværstilfelle, hendelseId, harTildeltOppgave)
         return true
     }
 }

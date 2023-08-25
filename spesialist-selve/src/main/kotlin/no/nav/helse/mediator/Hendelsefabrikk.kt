@@ -941,7 +941,8 @@ internal class Hendelsefabrikk(
             godkjenningMediator = godkjenningMediator,
             oppgaveMediator = oppgaveMediator,
             oppgaveDao = oppgaveDao,
-            utbetalingDao = utbetalingDao
+            utbetalingDao = utbetalingDao,
+            tildelingDao = tildelingDao,
         )
     }
 

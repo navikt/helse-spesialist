@@ -9,6 +9,9 @@ import no.nav.helse.januar
 import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
+import no.nav.helse.modell.sykefraværstilfelle.SykefraværstilfelleObserver
+import no.nav.helse.modell.varsel.Varsel
+import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_1
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_3
 import no.nav.helse.modell.vedtaksperiode.Generasjon
@@ -27,8 +30,7 @@ internal class ÅpneGosysOppgaverCommandTest {
         private const val AKTØR_ID = "1234567891112"
         private val VEDTAKPERIODE_ID = UUID.randomUUID()
     }
-    private val observer = object : IVedtaksperiodeObserver {
-
+    private val vedtaksperiodeObserver = object : IVedtaksperiodeObserver {
         val opprettedeVarsler = mutableListOf<String>()
 
         override fun varselOpprettet(
@@ -42,15 +44,27 @@ internal class ÅpneGosysOppgaverCommandTest {
         }
     }
 
-    private val generasjon = generasjon(VEDTAKPERIODE_ID).also { it.registrer(observer) }
-    private val sykefraværstilfelle = Sykefraværstilfelle(FNR, 1.januar, listOf(generasjon), emptyList())
+    private val sykefraværstilfelleObserver = object : SykefraværstilfelleObserver {
+        val deaktiverteVarsler = mutableListOf<Varselkode>()
+
+        override fun deaktiverVarsel(varsel: Varsel) {
+            deaktiverteVarsler.add(Varselkode.valueOf(varsel.toDto().varselkode))
+        }
+    }
+
+    private val generasjon = generasjon(VEDTAKPERIODE_ID).also { it.registrer(vedtaksperiodeObserver) }
+    private val sykefraværstilfelle = Sykefraværstilfelle(FNR, 1.januar, listOf(generasjon), emptyList()).also {
+        it.registrer(sykefraværstilfelleObserver)
+    }
     private val dao = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
-    private val command = ÅpneGosysOppgaverCommand(
+
+    private fun command(harTildeltOppgave: Boolean = false) = ÅpneGosysOppgaverCommand(
         UUID.randomUUID(),
         AKTØR_ID,
         dao,
         VEDTAKPERIODE_ID,
-        sykefraværstilfelle
+        sykefraværstilfelle,
+        harTildeltOppgave = harTildeltOppgave,
     )
     private lateinit var context: CommandContext
 
@@ -62,47 +76,61 @@ internal class ÅpneGosysOppgaverCommandTest {
 
     @Test
     fun `Ber om åpne oppgaver i gosys`() {
-        assertFalse(command.execute(context))
+        assertFalse(command().execute(context))
         assertEquals(listOf("ÅpneOppgaver"), context.behov().keys.toList())
     }
 
     @Test
     fun `Mangler løsning ved resume`() {
-        assertFalse(command.resume(context))
+        assertFalse(command().resume(context))
         verify(exactly = 0) { dao.persisterÅpneGosysOppgaver(any()) }
     }
 
     @Test
     fun `Lagrer løsning ved resume`() {
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 0, false))
-        assertTrue(command.resume(context))
+        assertTrue(command().resume(context))
         verify(exactly = 1) { dao.persisterÅpneGosysOppgaver(any()) }
     }
 
     @Test
-    fun `Lagrer ikke warning ved ingen åpne oppgaver`() {
+    fun `Lagrer ikke varsel ved ingen åpne oppgaver og deaktiverer eventuelt eksisterende varsel`() {
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 0, false))
-        assertTrue(command.resume(context))
+        assertTrue(command().resume(context))
         verify(exactly = 1) { dao.persisterÅpneGosysOppgaver(any()) }
-        assertEquals(0, observer.opprettedeVarsler.size)
+        assertEquals(0, vedtaksperiodeObserver.opprettedeVarsler.size)
+        assertTrue(sykefraværstilfelleObserver.deaktiverteVarsler.contains(SB_EX_1))
     }
 
     @Test
-    fun `Lagrer warning ved åpne oppgaver`() {
-        context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 1, false))
-        assertTrue(command.resume(context))
-        verify(exactly = 1) { dao.persisterÅpneGosysOppgaver(any()) }
-        assertEquals(1, observer.opprettedeVarsler.size)
-        assertEquals(SB_EX_1.name, observer.opprettedeVarsler[0])
+    fun `Deaktiverer ikke varsel dersom oppgave er tildelt`() {
+        context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 0, false))
+        assertTrue(command(harTildeltOppgave = true).resume(context))
+        assertFalse(sykefraværstilfelleObserver.deaktiverteVarsler.contains(SB_EX_1))
     }
 
     @Test
-    fun `Lagrer warning ved oppslag feilet`() {
+    fun `Lagrer varsel ved åpne oppgaver, uavhengig om eventuell oppgave er tildelt eller ikke`() {
+        lagrerVarselVedÅpneOppgaver(false)
+        setup()
+        lagrerVarselVedÅpneOppgaver(true)
+    }
+
+    @Test
+    fun `Lagrer varsel ved oppslag feilet`() {
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, null, true))
-        assertTrue(command.resume(context))
+        assertTrue(command().resume(context))
         verify(exactly = 1) { dao.persisterÅpneGosysOppgaver(any()) }
-        assertEquals(1, observer.opprettedeVarsler.size)
-        assertEquals(SB_EX_3.name, observer.opprettedeVarsler[0])
+        assertEquals(1, vedtaksperiodeObserver.opprettedeVarsler.size)
+        assertEquals(SB_EX_3.name, vedtaksperiodeObserver.opprettedeVarsler[0])
+    }
+
+    private fun lagrerVarselVedÅpneOppgaver(harTildeltOppgave: Boolean) {
+        context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 1, false))
+        assertTrue(command(harTildeltOppgave).resume(context))
+        verify(exactly = 1) { dao.persisterÅpneGosysOppgaver(any()) }
+        assertEquals(1, vedtaksperiodeObserver.opprettedeVarsler.size)
+        assertEquals(SB_EX_1.name, vedtaksperiodeObserver.opprettedeVarsler[0])
     }
 
     private fun generasjon(vedtaksperiodeId: UUID = UUID.randomUUID()) = Generasjon(

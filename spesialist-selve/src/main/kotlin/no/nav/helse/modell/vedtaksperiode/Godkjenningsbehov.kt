@@ -142,7 +142,8 @@ internal class Godkjenningsbehov(
             aktørId = aktørId,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
             vedtaksperiodeId = vedtaksperiodeId,
-            sykefraværstilfelle = sykefraværstilfelle
+            sykefraværstilfelle = sykefraværstilfelle,
+            harTildeltOppgave = false
         ),
         RisikoCommand(
             hendelseId = id,

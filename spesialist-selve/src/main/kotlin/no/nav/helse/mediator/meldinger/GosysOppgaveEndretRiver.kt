@@ -12,14 +12,12 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
-import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.slf4j.LoggerFactory
 
 internal class GosysOppgaveEndretRiver(
     rapidsConnection: RapidsConnection,
     private val mediator: HendelseMediator,
     private val oppgaveDao: OppgaveDao,
-    private val tildelingDao: TildelingDao,
     private val personDao: PersonDao
 ) : River.PacketListener {
 
@@ -65,13 +63,7 @@ internal class GosysOppgaveEndretRiver(
                 return
             }
 
-            val tildeling = tildelingDao.tildelingForOppgave(oppgaveId)
-            if (tildeling != null) {
-                sikkerlogg.info("Fant tildeling for {}, {}: {}", fødselsnummer, oppgaveId, tildeling)
-                return
-            }
-
-            sikkerlogg.info("Har oppgave til_godkjenning, commandData og ingen tildeling for fnr $fødselsnummer og vedtaksperiodeId ${commandData.vedtaksperiodeId}")
+            sikkerlogg.info("Har oppgave til_godkjenning og commandData for fnr $fødselsnummer og vedtaksperiodeId ${commandData.vedtaksperiodeId}")
             mediator.gosysOppgaveEndret(id, fødselsnummer, aktørId, packet.toJson(), context)
         } ?: sikkerlogg.info("Ingen åpne oppgaver for {}", fødselsnummer)
     }
