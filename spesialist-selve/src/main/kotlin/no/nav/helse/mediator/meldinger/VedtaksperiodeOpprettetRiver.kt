@@ -3,7 +3,6 @@ package no.nav.helse.mediator.meldinger
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.mediator.api.erDev
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -42,14 +41,6 @@ internal class VedtaksperiodeOpprettetRiver(
             StructuredArguments.keyValue("vedtaksperiodeId", vedtaksperiodeId),
             StructuredArguments.keyValue("hendelseId", id),
         )
-        if (erDev()) {
-            try {
-                organisasjonsnummer.toLong()
-            } catch (exception: NumberFormatException) {
-                log.warn("Mottok '$organisasjonsnummer' som organisasjonsnummer og konvertering til Long feilet. Skipper melding...")
-                return
-            }
-        }
         mediator.vedtaksperiodeOpprettet(
             packet,
             id,
