@@ -310,7 +310,6 @@ class OppgaveApiDao(dataSource: DataSource) : HelseDao(dataSource) {
                     epost = epost,
                     oid = it.string("oid"),
                     paaVent = it.boolean("på_vent"),
-                    reservert = null
                 )
             },
             periodetype = it.stringOrNull("saksbehandleroppgavetype")?.let(Periodetype::valueOf)?.tilPeriodetype(),
