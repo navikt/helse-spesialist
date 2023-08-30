@@ -388,7 +388,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         )
         saksbehandlerMediator = SaksbehandlerMediator(dataSource, rapidsConnection)
         tildelingService = TildelingService(
-            saksbehandlerDao,
             tildelingDao,
             hendelseMediator,
             totrinnsvurderingMediator

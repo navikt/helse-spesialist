@@ -6,42 +6,34 @@ import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.api.ApiTilgangskontroll
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeTildelt
-import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.slf4j.LoggerFactory
 
 private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
 
 internal class TildelingService(
-    private val saksbehandlerDao: SaksbehandlerDao,
     private val tildelingDao: TildelingDao,
     private val hendelseMediator: HendelseMediator,
     private val totrinnsvurderingMediator: TotrinnsvurderingMediator,
 ) {
 
-    internal fun tildelOppgaveTilSaksbehandler(
+    internal fun fjernTildelingOgTildelNySaksbehandlerHvisFinnes(
         oppgaveId: Long,
-        saksbehandlerreferanse: UUID,
-        epostadresse: String,
-        navn: String,
-        ident: String,
-        tilgangskontroll: ApiTilgangskontroll,
+        saksbehandlerOid: UUID?,
+        tilgangskontroll: ApiTilgangskontroll
     ) {
-        saksbehandlerDao.opprettSaksbehandler(saksbehandlerreferanse, navn, epostadresse, ident)
-        tildelOppgaveTilEksisterendeSaksbehandler(oppgaveId, saksbehandlerreferanse, tilgangskontroll)
-    }
-
-    internal fun fjernTildelingOgTildelNySaksbehandlerHvisFinnes(oppgaveId: Long, saksbehandlerOid: UUID?, tilgangskontroll: ApiTilgangskontroll) {
-        fjernTildeling(oppgaveId)
+        tildelingDao.slettTildeling(oppgaveId)
         if (saksbehandlerOid != null) {
             sikkerLog.info("Fjerner gammel tildeling og tildeler oppgave $oppgaveId til saksbehandler $saksbehandlerOid")
             tildelOppgaveTilEksisterendeSaksbehandler(oppgaveId, saksbehandlerOid, tilgangskontroll)
         }
     }
 
-    internal fun fjernTildeling(oppgaveId: Long) = tildelingDao.slettTildeling(oppgaveId)
-
-    private fun tildelOppgaveTilEksisterendeSaksbehandler(oppgaveId: Long, saksbehandlerreferanse: UUID, tilgangskontroll: ApiTilgangskontroll) {
+    private fun tildelOppgaveTilEksisterendeSaksbehandler(
+        oppgaveId: Long,
+        saksbehandlerreferanse: UUID,
+        tilgangskontroll: ApiTilgangskontroll
+    ) {
         kanTildele(oppgaveId, saksbehandlerreferanse, tilgangskontroll)
         val suksess = hendelseMediator.tildelOppgaveTilSaksbehandler(oppgaveId, saksbehandlerreferanse)
         if (!suksess) {
