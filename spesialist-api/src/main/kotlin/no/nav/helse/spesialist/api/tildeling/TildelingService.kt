@@ -63,8 +63,9 @@ class TildelingService(
     }
 
     private fun kanTildele(oppgaveId: Long, saksbehandlerreferanse: UUID, saksbehandlerTilganger: SaksbehandlerTilganger) {
+        if ("dev-gcp" == System.getenv("NAIS_CLUSTER_NAME")) return
         totrinnsvurderingApiDao.hentAktiv(oppgaveId)
-            ?.takeIf { "dev-gcp" != System.getenv("NAIS_CLUSTER_NAME") && (!it.erRetur && it.saksbehandler != null) }
+            ?.takeIf { !it.erRetur && it.saksbehandler != null }
             ?.let { totrinnsvurdering ->
                 check(totrinnsvurdering.saksbehandler != saksbehandlerreferanse) {
                     "Oppgave er beslutteroppgave, og kan ikke attesteres av samme saksbehandler som sendte til godkjenning"
