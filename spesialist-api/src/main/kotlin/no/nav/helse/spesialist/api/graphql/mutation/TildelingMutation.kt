@@ -59,6 +59,8 @@ class TildelingMutation(
             return@withContext newResult<Tildeling?>().error(getUpdateError(oppgaveId)).build()
         }
 
+        sikkerlogg.info("Oppgave $oppgaveId er nå tildelt $saksbehandlerOid.")
+
         newResult<Tildeling?>().data(
             Tildeling(
                 navn = tildeling.navn,
