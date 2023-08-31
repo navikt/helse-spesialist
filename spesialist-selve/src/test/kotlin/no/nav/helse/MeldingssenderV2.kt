@@ -25,10 +25,10 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.overstyring.Dagtype.Feriedag
 import no.nav.helse.spesialist.api.overstyring.Dagtype.Sykedag
-import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.person.Kjønn
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandling.ArbeidsforholdDto
 import org.junit.jupiter.api.Assertions.assertEquals
 
 internal class MeldingssenderV2(private val testRapid: TestRapid) {
@@ -730,8 +730,8 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
         fødselsnummer: String,
         organisasjonsnummer: String,
         skjæringstidspunkt: LocalDate = 1.januar(1970),
-        overstyrteArbeidsforhold: List<ArbeidsforholdOverstyrt> = listOf(
-            ArbeidsforholdOverstyrt(organisasjonsnummer, true, "begrunnelse", "forklaring")
+        overstyrteArbeidsforhold: List<ArbeidsforholdDto> = listOf(
+            ArbeidsforholdDto(organisasjonsnummer, true, "begrunnelse", "forklaring")
         ),
     ): UUID = newUUID.also { id ->
         testRapid.sendTestMessage(

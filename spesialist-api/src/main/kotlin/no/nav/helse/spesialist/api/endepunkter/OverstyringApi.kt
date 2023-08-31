@@ -11,8 +11,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.spesialist.api.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.modell.Saksbehandler
-import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsattSykepengegrunnlagDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandling
 
@@ -34,7 +34,7 @@ fun Route.overstyringApi(saksbehandlerMediator: SaksbehandlerMediator) {
     }
 
     post("/api/overstyr/arbeidsforhold") {
-        val overstyring = call.receive<OverstyrArbeidsforholdDto>()
+        val overstyring = call.receive<OverstyrArbeidsforholdHandling>()
         val saksbehandler = Saksbehandler.fraOnBehalfOfToken(requireNotNull(call.principal()))
 
         withContext(Dispatchers.IO) { saksbehandlerMediator.håndter(overstyring, saksbehandler) }

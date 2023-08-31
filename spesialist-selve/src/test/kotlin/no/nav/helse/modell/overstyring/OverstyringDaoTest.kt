@@ -10,10 +10,10 @@ import no.nav.helse.modell.saksbehandler.handlinger.OverstyringInntektOgRefusjon
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyringTidslinje
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsettingSykepengegrunnlag
 import no.nav.helse.spesialist.api.overstyring.Dagtype
-import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.overstyring.Skjonnsfastsettingstype
 import no.nav.helse.spesialist.api.person.Kjønn
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandling
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -372,7 +372,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         epost = SAKSBEHANDLEREPOST,
         ident = SAKSBEHANDLER_IDENT,
         overstyrteArbeidsforhold = listOf(
-            OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt(
+            OverstyrArbeidsforholdHandling.ArbeidsforholdDto(
                 orgnummer = GHOST_ORGNUMMER,
                 deaktivert = DEAKTIVERT,
                 begrunnelse = BEGRUNNELSE,

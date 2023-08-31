@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.api.saksbehandler.handlinger
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import java.time.LocalDate
 import no.nav.helse.spesialist.api.modell.Saksbehandler
+import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.OverstyrtArbeidsforhold
 import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.OverstyrtArbeidsgiver
 import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.OverstyrtInntektOgRefusjon
 import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.OverstyrtTidslinje
@@ -110,4 +111,38 @@ internal data class OverstyrInntektOgRefusjonHandling(
             val beløp: Double
         )
     }
+}
+
+@JsonIgnoreProperties
+data class OverstyrArbeidsforholdHandling(
+    val fødselsnummer: String,
+    val aktørId: String,
+    val skjæringstidspunkt: LocalDate,
+    val overstyrteArbeidsforhold: List<ArbeidsforholdDto>
+): OverstyringHandling {
+
+    private val overstyrtArbeidsforhold get() = OverstyrtArbeidsforhold(
+        fødselsnummer,
+        aktørId,
+        skjæringstidspunkt,
+        overstyrteArbeidsforhold.map {
+            OverstyrtArbeidsforhold.Arbeidsforhold(it.orgnummer, it.deaktivert, it.begrunnelse, it.forklaring)
+        }
+    )
+
+    override fun loggnavn(): String = "overstyr_arbeidsforhold"
+
+    override fun gjelderFødselsnummer(): String = fødselsnummer
+
+    override fun utførAv(saksbehandler: Saksbehandler) {
+        saksbehandler.håndter(overstyrtArbeidsforhold)
+    }
+
+    @JsonIgnoreProperties
+    data class ArbeidsforholdDto(
+        val orgnummer: String,
+        val deaktivert: Boolean,
+        val begrunnelse: String,
+        val forklaring: String
+    )
 }

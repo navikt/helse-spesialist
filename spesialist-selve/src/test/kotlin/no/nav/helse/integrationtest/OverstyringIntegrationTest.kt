@@ -30,7 +30,7 @@ import no.nav.helse.mediator.api.AbstractApiTest.Companion.authentication
 import no.nav.helse.mediator.api.AbstractApiTest.Companion.azureAdAppConfig
 import no.nav.helse.spesialist.api.azureAdAppAuthentication
 import no.nav.helse.spesialist.api.endepunkter.overstyringApi
-import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandling
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -269,12 +269,12 @@ internal class OverstyringIntegrationTest : AbstractE2ETest() {
             setUpApplication()
             settOppBruker(orgnummereMedRelevanteArbeidsforhold = listOf(ORGNR_GHOST))
 
-            val overstyring = OverstyrArbeidsforholdDto(
+            val overstyring = OverstyrArbeidsforholdHandling(
                 fødselsnummer = FØDSELSNUMMER,
                 aktørId = AKTØR,
                 skjæringstidspunkt = 1.januar,
                 overstyrteArbeidsforhold = listOf(
-                    OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt(
+                    OverstyrArbeidsforholdHandling.ArbeidsforholdDto(
                         orgnummer = ORGNR_GHOST,
                         deaktivert = true,
                         begrunnelse = "en begrunnelse",

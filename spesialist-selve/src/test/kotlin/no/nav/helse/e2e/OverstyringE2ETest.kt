@@ -28,12 +28,12 @@ import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.overstyring.Dagtype.Feriedag
 import no.nav.helse.spesialist.api.overstyring.Dagtype.Sykedag
-import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandling
 import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
@@ -93,7 +93,7 @@ internal class OverstyringE2ETest : AbstractE2ETestV2() {
         fremTilSaksbehandleroppgave()
         håndterOverstyrArbeidsforhold(
             overstyrteArbeidsforhold = listOf(
-                OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt(
+                OverstyrArbeidsforholdHandling.ArbeidsforholdDto(
                     orgnummer = ORGNR,
                     deaktivert = true,
                     begrunnelse = "begrunnelse",

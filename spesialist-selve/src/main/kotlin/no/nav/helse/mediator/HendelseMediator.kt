@@ -72,8 +72,8 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.registrerTidsbrukForGodkjenningsbehov
 import no.nav.helse.registrerTidsbrukForHendelse
-import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandling
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.slf4j.LoggerFactory
 
@@ -536,7 +536,7 @@ internal class HendelseMediator(
         navn: String,
         ident: String,
         epost: String,
-        overstyrteArbeidsforhold: List<OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt>,
+        overstyrteArbeidsforhold: List<OverstyrArbeidsforholdHandling.ArbeidsforholdDto>,
         skjæringstidspunkt: LocalDate,
         opprettet: LocalDateTime,
         json: String,

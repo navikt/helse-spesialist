@@ -21,8 +21,8 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandling
 
 internal object TestmeldingsfabrikkV2 {
 
@@ -726,7 +726,7 @@ internal object TestmeldingsfabrikkV2 {
         fødselsnummer: String,
         organisasjonsnummer: String,
         skjæringstidspunkt: LocalDate,
-        overstyrteArbeidsforhold: List<OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt>,
+        overstyrteArbeidsforhold: List<OverstyrArbeidsforholdHandling.ArbeidsforholdDto>,
         saksbehandleroid: UUID = UUID.randomUUID(),
         saksbehandlernavn: String = "saksbehandler",
         saksbehandlerepost: String = "sara.saksbehandler@nav.no",

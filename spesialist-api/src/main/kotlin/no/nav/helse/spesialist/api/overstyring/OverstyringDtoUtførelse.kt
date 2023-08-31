@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.overstyring
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import java.time.LocalDate
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsattArbeidsgiverDto.Companion.toMap
@@ -60,35 +59,6 @@ internal data class SkjønnsfastsattSykepengegrunnlagDto(
             "saksbehandlerIdent" to saksbehandler.ident,
             "saksbehandlerEpost" to saksbehandler.epost,
         ).toMap()
-    )
-}
-
-@JsonIgnoreProperties
-data class OverstyrArbeidsforholdDto(
-    val fødselsnummer: String,
-    val aktørId: String,
-    val skjæringstidspunkt: LocalDate,
-    val overstyrteArbeidsforhold: List<ArbeidsforholdOverstyrt>
-) {
-    @JsonIgnoreProperties
-    data class ArbeidsforholdOverstyrt(
-        val orgnummer: String,
-        val deaktivert: Boolean,
-        val begrunnelse: String,
-        val forklaring: String
-    )
-
-    fun somJsonMessage(saksbehandler: SaksbehandlerDto) = JsonMessage.newMessage(
-        "saksbehandler_overstyrer_arbeidsforhold", mapOf(
-            "fødselsnummer" to fødselsnummer,
-            "aktørId" to aktørId,
-            "saksbehandlerOid" to saksbehandler.oid,
-            "saksbehandlerNavn" to saksbehandler.navn,
-            "saksbehandlerIdent" to saksbehandler.ident,
-            "saksbehandlerEpost" to saksbehandler.epost,
-            "skjæringstidspunkt" to skjæringstidspunkt,
-            "overstyrteArbeidsforhold" to overstyrteArbeidsforhold,
-        )
     )
 }
 

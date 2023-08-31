@@ -4,13 +4,13 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.modell.overstyring.OverstyringDao
-import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandling
 
 internal class PersisterOverstyringArbeidsforholdCommand(
     private val oid: UUID,
     private val hendelseId: UUID,
     private val fødselsnummer: String,
-    private val overstyrteArbeidsforhold: List<OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt>,
+    private val overstyrteArbeidsforhold: List<OverstyrArbeidsforholdHandling.ArbeidsforholdDto>,
     private val skjæringstidspunkt: LocalDate,
     private val opprettet: LocalDateTime,
     private val overstyringDao: OverstyringDao

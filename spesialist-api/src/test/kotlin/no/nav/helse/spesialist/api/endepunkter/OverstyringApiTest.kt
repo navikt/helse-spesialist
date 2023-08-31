@@ -5,12 +5,12 @@ import java.util.UUID
 import no.nav.helse.spesialist.api.AbstractE2ETest
 import no.nav.helse.spesialist.api.februar
 import no.nav.helse.spesialist.api.januar
-import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
-import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt
 import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsattArbeidsgiverDto
 import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsattSykepengegrunnlagDto
 import no.nav.helse.spesialist.api.overstyring.Skjønnsfastsettingstype
 import no.nav.helse.spesialist.api.overstyring.SubsumsjonDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandling
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandling.ArbeidsforholdDto
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandling.OverstyrArbeidsgiverDto.RefusjonselementDto
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandling
@@ -75,12 +75,12 @@ internal class OverstyringApiTest: AbstractE2ETest() {
 
     @Test
     fun `overstyr arbeidsforhold`() {
-        val overstyring = OverstyrArbeidsforholdDto(
+        val overstyring = OverstyrArbeidsforholdHandling(
             fødselsnummer = FØDSELSNUMMER,
             aktørId = AKTØR_ID,
             skjæringstidspunkt = 1.januar,
             overstyrteArbeidsforhold = listOf(
-                ArbeidsforholdOverstyrt(
+                ArbeidsforholdDto(
                     orgnummer = ORGANISASJONSNUMMER_GHOST,
                     deaktivert = true,
                     begrunnelse = "en begrunnelse",

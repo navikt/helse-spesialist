@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.spesialist.api.modell.OverstyrtInntektOgRefusjonEvent
 
-class OverstyrtInntektOgRefusjon(
+internal class OverstyrtInntektOgRefusjon(
     private val aktørId: String,
     private val fødselsnummer: String,
     private val skjæringstidspunkt: LocalDate,
@@ -23,7 +23,7 @@ class OverstyrtInntektOgRefusjon(
         )
 }
 
-class OverstyrtArbeidsgiver(
+internal class OverstyrtArbeidsgiver(
     private val organisasjonsnummer: String,
     private val månedligInntekt: Double,
     private val fraMånedligInntekt: Double,
@@ -45,7 +45,7 @@ class OverstyrtArbeidsgiver(
     )
 }
 
-class Refusjonselement(
+internal class Refusjonselement(
     private val fom: LocalDate,
     private val tom: LocalDate? = null,
     private val beløp: Double
@@ -54,7 +54,7 @@ class Refusjonselement(
         OverstyrtInntektOgRefusjonEvent.OverstyrtArbeidsgiver.OverstyrtRefusjonselement(fom, tom, beløp)
 }
 
-class Subsumsjon(
+internal class Subsumsjon(
     private val paragraf: String,
     private val ledd: String? = null,
     private val bokstav: String? = null,

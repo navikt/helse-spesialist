@@ -7,6 +7,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 internal interface SaksbehandlerObserver {
     fun tidslinjeOverstyrt(fødselsnummer: String, event: OverstyrtTidslinjeEvent) {}
     fun inntektOgRefusjonOverstyrt(fødselsnummer: String, event: OverstyrtInntektOgRefusjonEvent) {}
+    fun arbeidsforholdOverstyrt(fødselsnummer: String, event: OverstyrtArbeidsforholdEvent) {}
 }
 
 data class OverstyrtInntektOgRefusjonEvent(
@@ -91,5 +92,36 @@ data class OverstyrtTidslinjeEvent(
         val fraType: String,
         val grad: Int?,
         val fraGrad: Int?
+    )
+}
+
+data class OverstyrtArbeidsforholdEvent(
+    val fødselsnummer: String,
+    val aktørId: String,
+    val saksbehandlerOid: UUID,
+    val saksbehandlerNavn: String,
+    val saksbehandlerIdent: String,
+    val saksbehandlerEpost: String,
+    val skjæringstidspunkt: LocalDate,
+    val overstyrteArbeidsforhold: List<Arbeidsforhold>,
+) {
+    fun somJsonMessage() = JsonMessage.newMessage(
+        "saksbehandler_overstyrer_arbeidsforhold", mapOf(
+            "fødselsnummer" to fødselsnummer,
+            "aktørId" to aktørId,
+            "saksbehandlerOid" to saksbehandlerOid,
+            "saksbehandlerNavn" to saksbehandlerNavn,
+            "saksbehandlerIdent" to saksbehandlerIdent,
+            "saksbehandlerEpost" to saksbehandlerEpost,
+            "skjæringstidspunkt" to skjæringstidspunkt,
+            "overstyrteArbeidsforhold" to overstyrteArbeidsforhold,
+        )
+    )
+
+    data class Arbeidsforhold(
+        val orgnummer: String,
+        val deaktivert: Boolean,
+        val begrunnelse: String,
+        val forklaring: String,
     )
 }
