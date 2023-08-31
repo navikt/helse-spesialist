@@ -1,9 +1,12 @@
 package no.nav.helse.spesialist.api.saksbehandler
 
 import java.util.UUID
+import no.nav.helse.spesialist.api.januar
+import no.nav.helse.spesialist.api.modell.OverstyrtInntektOgRefusjonEvent
 import no.nav.helse.spesialist.api.modell.OverstyrtTidslinjeEvent
 import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.modell.SaksbehandlerObserver
+import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.OverstyrtInntektOgRefusjon
 import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.OverstyrtTidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -12,7 +15,7 @@ import org.junit.jupiter.api.Test
 internal class SaksbehandlerTest {
 
     @Test
-    fun `kan registrere observer`() {
+    fun `håndtering av OverstyrtTidslinje medfører utgående event`() {
         var observert = false
         val observer = object : SaksbehandlerObserver {
             override fun tidslinjeOverstyrt(fødselsnummer: String, event: OverstyrtTidslinjeEvent) {
@@ -23,6 +26,21 @@ internal class SaksbehandlerTest {
         val saksbehandler = Saksbehandler("epost@nav.no", UUID.randomUUID(), "navn", "Z999999")
         saksbehandler.register(observer)
         saksbehandler.håndter(OverstyrtTidslinje("123", "1234", "12345", emptyList(), "begrunnelse"))
+        assertEquals(true, observert)
+    }
+
+    @Test
+    fun `håndtering av OverstyrtInntektOgRefusjon medfører utgående event`() {
+        var observert = false
+        val observer = object : SaksbehandlerObserver {
+            override fun inntektOgRefusjonOverstyrt(fødselsnummer: String, event: OverstyrtInntektOgRefusjonEvent) {
+                observert = true
+            }
+        }
+
+        val saksbehandler = Saksbehandler("epost@nav.no", UUID.randomUUID(), "navn", "Z999999")
+        saksbehandler.register(observer)
+        saksbehandler.håndter(OverstyrtInntektOgRefusjon("123", "1234", 1.januar, emptyList()))
         assertEquals(true, observert)
     }
 

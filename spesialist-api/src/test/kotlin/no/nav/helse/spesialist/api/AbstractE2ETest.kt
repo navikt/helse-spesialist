@@ -20,8 +20,8 @@ import no.nav.helse.spesialist.api.TestRapidHelpers.hendelser
 import no.nav.helse.spesialist.api.db.AbstractDatabaseTest
 import no.nav.helse.spesialist.api.endepunkter.overstyringApi
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
-import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonDto
 import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsattSykepengegrunnlagDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandling
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -98,7 +98,7 @@ internal abstract class AbstractE2ETest: AbstractDatabaseTest() {
     }
 
     protected fun overstyrInntektOgRefusjon(
-        payload: OverstyrInntektOgRefusjonDto,
+        payload: OverstyrInntektOgRefusjonHandling,
         saksbehandler: Saksbehandler = defaultSaksbehandler,
     ) {
         testApplication {

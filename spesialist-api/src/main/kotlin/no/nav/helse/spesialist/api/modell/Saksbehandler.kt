@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.api.modell
 
 import io.ktor.server.auth.jwt.JWTPrincipal
 import java.util.UUID
+import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.OverstyrtInntektOgRefusjon
 import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.OverstyrtTidslinje
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDto
@@ -37,6 +38,11 @@ class Saksbehandler(
     internal fun håndter(hendelse: OverstyrtTidslinje) {
         val event = hendelse.byggEvent(oid, navn, epostadresse, ident)
         observers.forEach { it.tidslinjeOverstyrt(event.fødselsnummer, event) }
+    }
+
+    internal fun håndter(hendelse: OverstyrtInntektOgRefusjon) {
+        val event = hendelse.byggEvent(oid, navn, epostadresse, ident)
+        observers.forEach { it.inntektOgRefusjonOverstyrt(event.fødselsnummer, event) }
     }
 
     fun json() = mapOf(

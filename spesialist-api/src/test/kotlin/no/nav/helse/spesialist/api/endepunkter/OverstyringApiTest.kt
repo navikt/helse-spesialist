@@ -7,13 +7,12 @@ import no.nav.helse.spesialist.api.februar
 import no.nav.helse.spesialist.api.januar
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt
-import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsgiverDto
-import no.nav.helse.spesialist.api.overstyring.OverstyrArbeidsgiverDto.RefusjonselementDto
-import no.nav.helse.spesialist.api.overstyring.OverstyrInntektOgRefusjonDto
 import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsattArbeidsgiverDto
 import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsattSykepengegrunnlagDto
 import no.nav.helse.spesialist.api.overstyring.Skjønnsfastsettingstype
 import no.nav.helse.spesialist.api.overstyring.SubsumsjonDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandling
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandling.OverstyrArbeidsgiverDto.RefusjonselementDto
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandling.OverstyrDagDto
 import org.junit.jupiter.api.Test
@@ -98,12 +97,12 @@ internal class OverstyringApiTest: AbstractE2ETest() {
 
     @Test
     fun `overstyr inntekt og refusjon`() {
-        val overstyring = OverstyrInntektOgRefusjonDto(
+        val overstyring = OverstyrInntektOgRefusjonHandling(
             fødselsnummer = FØDSELSNUMMER,
             aktørId = AKTØR_ID,
             skjæringstidspunkt = 1.januar,
             arbeidsgivere = listOf(
-                OverstyrArbeidsgiverDto(
+                OverstyrInntektOgRefusjonHandling.OverstyrArbeidsgiverDto(
                     organisasjonsnummer = ORGANISASJONSNUMMER,
                     månedligInntekt = 25000.0,
                     fraMånedligInntekt = 25001.0,

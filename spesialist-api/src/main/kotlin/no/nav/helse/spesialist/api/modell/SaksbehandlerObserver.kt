@@ -6,6 +6,55 @@ import no.nav.helse.rapids_rivers.JsonMessage
 
 internal interface SaksbehandlerObserver {
     fun tidslinjeOverstyrt(fødselsnummer: String, event: OverstyrtTidslinjeEvent) {}
+    fun inntektOgRefusjonOverstyrt(fødselsnummer: String, event: OverstyrtInntektOgRefusjonEvent) {}
+}
+
+data class OverstyrtInntektOgRefusjonEvent(
+    val fødselsnummer: String,
+    val aktørId: String,
+    val skjæringstidspunkt: LocalDate,
+    val arbeidsgivere: List<OverstyrtArbeidsgiver>,
+    val saksbehandlerOid: UUID,
+    val saksbehandlerNavn: String,
+    val saksbehandlerIdent: String,
+    val saksbehandlerEpost: String
+) {
+    fun somJsonMessage() = JsonMessage.newMessage(
+        "saksbehandler_overstyrer_inntekt_og_refusjon",
+        listOfNotNull(
+            "aktørId" to aktørId,
+            "fødselsnummer" to fødselsnummer,
+            "skjæringstidspunkt" to skjæringstidspunkt,
+            "arbeidsgivere" to arbeidsgivere,
+            "saksbehandlerOid" to saksbehandlerOid,
+            "saksbehandlerNavn" to saksbehandlerNavn,
+            "saksbehandlerIdent" to saksbehandlerIdent,
+            "saksbehandlerEpost" to saksbehandlerEpost,
+        ).toMap()
+    )
+
+    data class OverstyrtArbeidsgiver(
+        val organisasjonsnummer: String,
+        val månedligInntekt: Double,
+        val fraMånedligInntekt: Double,
+        val refusjonsopplysninger: List<OverstyrtRefusjonselement>?,
+        val fraRefusjonsopplysninger: List<OverstyrtRefusjonselement>?,
+        val begrunnelse: String,
+        val forklaring: String,
+        val subsumsjon: Subsumsjon?,
+    ) {
+        data class OverstyrtRefusjonselement(
+            val fom: LocalDate,
+            val tom: LocalDate? = null,
+            val beløp: Double
+        )
+
+        data class Subsumsjon(
+            val paragraf: String,
+            val ledd: String? = null,
+            val bokstav: String? = null,
+        )
+    }
 }
 
 data class OverstyrtTidslinjeEvent(
