@@ -3,6 +3,7 @@ package no.nav.helse.modell.kommando
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import java.util.UUID
 import no.nav.helse.modell.automatisering.Automatisering
@@ -11,8 +12,11 @@ import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.modell.utbetaling.Utbetalingtype.REVURDERING
+import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype.DELVIS_REFUSJON
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype.FORTROLIG_ADRESSE
+import no.nav.helse.spesialist.api.oppgave.Oppgavetype.RISK_QA
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype.STIKKPRØVE
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype.SØKNAD
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype.UTBETALING_TIL_SYKMELDT
@@ -20,6 +24,7 @@ import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spleis.graphql.enums.GraphQLUtbetalingstatus
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUtbetaling
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -39,7 +44,8 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
     private val snapshotMediator = mockk<SnapshotMediator>(relaxed = true)
     private val risikovurderingDao = mockk<RisikovurderingDao>(relaxed = true)
     private lateinit var context: CommandContext
-    private val command = OpprettSaksbehandleroppgaveCommand(
+    private lateinit var utbetalingstype: Utbetalingtype
+    private val command get() = OpprettSaksbehandleroppgaveCommand(
         fødselsnummer = FNR,
         vedtaksperiodeId = VEDTAKSPERIODE_ID,
         oppgaveMediator = oppgaveMediator,
@@ -48,45 +54,97 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         personDao = personDao,
         risikovurderingDao = risikovurderingDao,
         utbetalingId = UTBETALING_ID,
-        utbetalingtype = Utbetalingtype.UTBETALING,
+        utbetalingtype = utbetalingstype,
         snapshotMediator = snapshotMediator,
     )
 
     @BeforeEach
     fun setup() {
         context = CommandContext(UUID.randomUUID())
+        utbetalingstype = Utbetalingtype.UTBETALING
         clearMocks(oppgaveMediator)
     }
 
     @Test
     fun `oppretter oppgave`() {
+        val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.opprett(Oppgave.oppgaveMedEgenskaper(VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(SØKNAD))) }
+        verify(exactly = 1) { oppgaveMediator.nyOppgave(capture(slot)) }
+        val oppgave = slot.captured.invoke(1L)
+        assertEquals(
+            Oppgave.oppgaveMedEgenskaper(1L, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(SØKNAD)),
+            oppgave
+        )
     }
 
     @Test
     fun `oppretter stikkprøve`() {
         every { automatisering.erStikkprøve(VEDTAKSPERIODE_ID, any()) } returns true
+        val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.opprett(Oppgave.oppgaveMedEgenskaper(VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(STIKKPRØVE))) }
+        verify(exactly = 1) { oppgaveMediator.nyOppgave(capture(slot)) }
+
+        val oppgave = slot.captured.invoke(1L)
+        assertEquals(
+            Oppgave.oppgaveMedEgenskaper(1L, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(STIKKPRØVE)),
+            oppgave
+        )
+    }
+
+    @Test
+    fun `oppretter risk QA`() {
+        every { risikovurderingDao.kreverSupersaksbehandler(VEDTAKSPERIODE_ID) } returns true
+        val slot = slot<((Long) -> Oppgave)>()
+        assertTrue(command.execute(context))
+        verify(exactly = 1) { oppgaveMediator.nyOppgave(capture(slot)) }
+
+        val oppgave = slot.captured.invoke(1L)
+        assertEquals(
+            Oppgave.oppgaveMedEgenskaper(1L, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(RISK_QA)),
+            oppgave
+        )
+    }
+
+    @Test
+    fun `oppretter revurdering`() {
+        utbetalingstype = REVURDERING
+        val slot = slot<((Long) -> Oppgave)>()
+        assertTrue(command.execute(context))
+        verify(exactly = 1) { oppgaveMediator.nyOppgave(capture(slot)) }
+
+        val oppgave = slot.captured.invoke(1L)
+        assertEquals(
+            Oppgave.oppgaveMedEgenskaper(1L, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(Oppgavetype.REVURDERING)),
+            oppgave
+        )
     }
 
     @Test
     fun `oppretter oppgave med egen oppgavetype for fortrlig adressebeskyttelse`() {
         every { personDao.findAdressebeskyttelse(FNR) } returns Adressebeskyttelse.Fortrolig
+        val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
-        verify(exactly = 1) {
-            oppgaveMediator.opprett(
-                Oppgave.oppgaveMedEgenskaper(VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(FORTROLIG_ADRESSE))
-            )
-        }
+        verify(exactly = 1) { oppgaveMediator.nyOppgave(capture(slot)) }
+
+        val oppgave = slot.captured.invoke(1L)
+        assertEquals(
+            Oppgave.oppgaveMedEgenskaper(1L, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(FORTROLIG_ADRESSE)),
+            oppgave
+        )
     }
 
     @Test
     fun `oppretter oppgave med egen oppgavetype for utbetaling til sykmeldt`() {
         every { snapshotMediator.finnUtbetaling(FNR, UTBETALING_ID) } returns enUtbetaling(personbeløp = 500)
+        val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.opprett(Oppgave.oppgaveMedEgenskaper(VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(UTBETALING_TIL_SYKMELDT))) }
+        verify(exactly = 1) { oppgaveMediator.nyOppgave(capture(slot)) }
+
+        val oppgave = slot.captured.invoke(1L)
+        assertEquals(
+            Oppgave.oppgaveMedEgenskaper(1L, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(UTBETALING_TIL_SYKMELDT)),
+            oppgave
+        )
     }
 
     @Test
@@ -95,8 +153,15 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
             personbeløp = 500,
             arbeidsgiverbeløp = 500
         )
+        val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.opprett(Oppgave.oppgaveMedEgenskaper(VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(DELVIS_REFUSJON))) }
+        verify(exactly = 1) { oppgaveMediator.nyOppgave(capture(slot)) }
+
+        val oppgave = slot.captured.invoke(1L)
+        assertEquals(
+            Oppgave.oppgaveMedEgenskaper(1L, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(DELVIS_REFUSJON)),
+            oppgave
+        )
     }
 
     private fun enUtbetaling(personbeløp: Int = 0, arbeidsgiverbeløp: Int = 0): GraphQLUtbetaling =

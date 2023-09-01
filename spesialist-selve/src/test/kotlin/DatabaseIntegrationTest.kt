@@ -66,6 +66,7 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUberegnetPeriode
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.fail
+import kotlin.random.Random.Default.nextLong
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
@@ -79,6 +80,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
         internal val UTBETALING_ID = UUID.randomUUID()
 
+        internal var OPPGAVE_ID = nextLong()
+            private set
         internal val OPPGAVETYPE = Oppgavetype.SØKNAD
         internal val OPPGAVESTATUS = Oppgavestatus.AvventerSaksbehandler
 
@@ -363,6 +366,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         utbetalingId: UUID = UTBETALING_ID
     ) {
         oppgaveId = oppgaveDao.opprettOppgave(
+            nextLong().also { OPPGAVE_ID = it },
             contextId,
             oppgavetype,
             vedtaksperiodeId,

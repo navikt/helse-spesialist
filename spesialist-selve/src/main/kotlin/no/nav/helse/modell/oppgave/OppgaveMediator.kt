@@ -3,7 +3,6 @@ package no.nav.helse.modell.oppgave
 import java.sql.SQLException
 import java.util.UUID
 import no.nav.helse.Tilgangskontroll
-import no.nav.helse.mediator.api.sikkerLogg
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload.Companion.lagre
@@ -22,10 +21,18 @@ class OppgaveMediator(
     private val harTilgangTil: Tilgangskontroll = { _, _ -> false },
 ) {
     private var oppgaveForLagring: Oppgave? = null
+    private var oppgaveForOppdatering: Oppgave? = null
     private val oppgaverForPublisering = mutableMapOf<Long, String>()
-    private val log = LoggerFactory.getLogger(this::class.java)
+    private val logg = LoggerFactory.getLogger(this::class.java)
+    private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
     fun opprett(oppgave: Oppgave) {
+        leggPåVentForSenereLagring(oppgave)
+    }
+
+    fun nyOppgave(opprettOppgaveBlock: (reservertId: Long) -> Oppgave) {
+        val nesteId = oppgaveDao.reserverNesteId()
+        val oppgave = opprettOppgaveBlock(nesteId)
         leggPåVentForSenereLagring(oppgave)
     }
 
@@ -41,25 +48,28 @@ class OppgaveMediator(
     private fun leggPåVentForSenereLagring(oppgave: Oppgave) {
         oppgaveForLagring = oppgave
     }
+    private fun leggPåVentForSenereOppdatering(oppgave: Oppgave) {
+        oppgaveForOppdatering = oppgave
+    }
 
     fun ferdigstill(oppgave: Oppgave, saksbehandlerIdent: String, oid: UUID) {
         oppgave.ferdigstill(saksbehandlerIdent, oid)
-        leggPåVentForSenereLagring(oppgave)
+        leggPåVentForSenereOppdatering(oppgave)
     }
 
     fun ferdigstill(oppgave: Oppgave) {
         oppgave.ferdigstill()
-        leggPåVentForSenereLagring(oppgave)
+        leggPåVentForSenereOppdatering(oppgave)
     }
 
     private fun avbryt(oppgave: Oppgave) {
         oppgave.avbryt()
-        leggPåVentForSenereLagring(oppgave)
+        leggPåVentForSenereOppdatering(oppgave)
     }
 
     fun invalider(oppgave: Oppgave) {
         oppgave.avbryt()
-        leggPåVentForSenereLagring(oppgave)
+        leggPåVentForSenereOppdatering(oppgave)
     }
 
     fun lagreOgTildelOppgaver(
@@ -79,17 +89,17 @@ class OppgaveMediator(
     }
 
     fun opprett(
+        id: Long,
         contextId: UUID,
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
         navn: Oppgavetype,
         hendelseId: UUID
-    ): Long? {
-        if (oppgaveDao.harGyldigOppgave(utbetalingId)) return null
-        return oppgaveDao.opprettOppgave(contextId, navn, vedtaksperiodeId, utbetalingId).also { oppgaveId ->
-            oppgaverForPublisering[oppgaveId] = "oppgave_opprettet"
-            GodkjenningsbehovPayload(hendelseId).lagre(opptegnelseDao, oppgaveDao.finnFødselsnummer(oppgaveId))
-        }
+    ) {
+        if (oppgaveDao.harGyldigOppgave(utbetalingId)) return
+        oppgaveDao.opprettOppgave(id, contextId, navn, vedtaksperiodeId, utbetalingId)
+        oppgaverForPublisering[id] = "oppgave_opprettet"
+        GodkjenningsbehovPayload(hendelseId).lagre(opptegnelseDao, oppgaveDao.finnFødselsnummer(id))
     }
 
     fun oppdater(
@@ -106,13 +116,13 @@ class OppgaveMediator(
         try {
             reservasjonDao.reserverPerson(saksbehandleroid, fødselsnummer, false)
         } catch (e: SQLException) {
-            log.warn("Kunne ikke reservere person")
+            logg.warn("Kunne ikke reservere person")
         }
     }
 
     private fun tildelOppgaver(fødselsnummer: String) {
         reservasjonDao.hentReservasjonFor(fødselsnummer)?.let { (oid, settPåVent) ->
-            oppgaveForLagring?.forsøkTildeling(this, oid, settPåVent, harTilgangTil)
+            (oppgaveForLagring ?: oppgaveForOppdatering)?.forsøkTildeling(this, oid, settPåVent, harTilgangTil)
         }
     }
 
@@ -124,11 +134,16 @@ class OppgaveMediator(
     ) {
         oppgaveForLagring?.let {
             it.lagre(this, contextId, hendelseId)
-            log.info("Oppgave lagret: $it")
-            sikkerLogg.info("Oppgave lagret: $it")
+            logg.info("Oppgave lagret: $it")
+            sikkerlogg.info("Oppgave lagret: $it")
+        } ?: oppgaveForOppdatering?.let {
+            it.oppdater(this)
+            logg.info("Oppgave oppdatert: $it")
+            sikkerlogg.info("Oppgave oppdatert: $it")
         }
         doAlso()
         oppgaveForLagring = null
+        oppgaveForOppdatering = null
         oppgaverForPublisering.onEach { (oppgaveId, eventName) ->
             messageContext.publish(Oppgave.lagMelding(oppgaveId, eventName, oppgaveDao = oppgaveDao).second.toJson())
         }.clear()

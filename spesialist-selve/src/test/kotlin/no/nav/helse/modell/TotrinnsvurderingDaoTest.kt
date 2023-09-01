@@ -63,7 +63,7 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         opprettOppgave()
         opprettSaksbehandler()
         totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
-        totrinnsvurderingDao.settBeslutter(1L, SAKSBEHANDLER_OID)
+        totrinnsvurderingDao.settBeslutter(OPPGAVE_ID, SAKSBEHANDLER_OID)
 
         val totrinnsvurdering = totrinnsvurdering()
 
@@ -91,7 +91,7 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         opprettVedtaksperiode()
         opprettOppgave()
         totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
-        totrinnsvurderingDao.settErRetur(1L)
+        totrinnsvurderingDao.settErRetur(OPPGAVE_ID)
 
         val totrinnsvurdering = totrinnsvurdering()
 
@@ -122,7 +122,7 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         opprettOppgave()
         totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
         totrinnsvurderingDao.settErRetur(VEDTAKSPERIODE)
-        totrinnsvurderingDao.settHåndtertRetur(1L)
+        totrinnsvurderingDao.settHåndtertRetur(OPPGAVE_ID)
 
         val totrinnsvurdering = totrinnsvurdering()
 
@@ -250,7 +250,7 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
         totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
         totrinnsvurderingDao.settErRetur(VEDTAKSPERIODE)
-        val aktivTotrinnsvurdering = totrinnsvurderingDao.hentAktiv(1L)
+        val aktivTotrinnsvurdering = totrinnsvurderingDao.hentAktiv(OPPGAVE_ID)
 
         val totrinnsvurdering = totrinnsvurdering()
 
@@ -271,7 +271,7 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         opprettVedtaksperiode()
         opprettOppgave()
         totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
-        totrinnsvurderingDao.settSaksbehandler(1L, SAKSBEHANDLER_OID)
+        totrinnsvurderingDao.settSaksbehandler(OPPGAVE_ID, SAKSBEHANDLER_OID)
 
         assertEquals(SAKSBEHANDLER_OID, totrinnsvurderingDao.hentAktiv(VEDTAKSPERIODE)?.saksbehandler)
     }

@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
+import kotlin.random.Random.Default.nextLong
 
 class UtbetalingDaoTest : DatabaseIntegrationTest() {
 
@@ -62,7 +63,7 @@ class UtbetalingDaoTest : DatabaseIntegrationTest() {
         val arbeidsgiveroppdragId1 = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
         val personOppdragId1 = lagPersonoppdrag(personFagsystemId)
         val utbetalingId = UUID.randomUUID()
-        val oppgaveId = oppgaveDao.opprettOppgave(UUID.randomUUID(), Oppgavetype.SØKNAD, VEDTAKSPERIODE, utbetalingId)
+        val oppgaveId = oppgaveDao.opprettOppgave(nextLong(), UUID.randomUUID(), Oppgavetype.SØKNAD, VEDTAKSPERIODE, utbetalingId)
         utbetalingDao.opprettUtbetalingId(utbetalingId, FNR, ORGNUMMER, Utbetalingtype.UTBETALING, LocalDateTime.now(), arbeidsgiveroppdragId1, personOppdragId1, 2000, 2000)
 
         val utbetaling = utbetalingDao.utbetalingFor(oppgaveId)

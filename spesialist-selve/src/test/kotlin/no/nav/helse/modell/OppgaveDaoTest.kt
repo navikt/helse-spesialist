@@ -103,7 +103,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     fun `finner oppgaveId ved hjelp av vedtaksperiodeId`() {
         nyPerson()
         val actual = oppgaveDao.finnOppgaveId(VEDTAKSPERIODE)
-        assertEquals(1L, actual)
+        assertEquals(OPPGAVE_ID, actual)
     }
 
     @Test
@@ -113,7 +113,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         oppgaveDao.invaliderOppgaveFor(fødselsnummer = FNR)
 
         val actual = oppgaveDao.finnNyesteOppgaveId(VEDTAKSPERIODE)
-        assertEquals(2L, actual)
+        assertEquals(OPPGAVE_ID, actual)
     }
 
 

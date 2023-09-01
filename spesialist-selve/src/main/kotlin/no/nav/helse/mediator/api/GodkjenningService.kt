@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments
-import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.overstyring.OverstyringDao
@@ -21,8 +20,6 @@ import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import org.slf4j.LoggerFactory
 
-private val log = LoggerFactory.getLogger(HendelseMediator::class.java)
-internal val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
 internal class GodkjenningService(
     private val dataSource: DataSource,
@@ -39,6 +36,10 @@ internal class GodkjenningService(
         ),
     ),
 ) {
+    private companion object {
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
+        private val logg = LoggerFactory.getLogger(GodkjenningService::class.java)
+    }
 
     internal fun håndter(godkjenningDTO: GodkjenningDto, epost: String, oid: UUID, behandlingId: UUID) {
         val hendelseId = oppgaveDao.finnHendelseId(godkjenningDTO.oppgavereferanse)
@@ -68,9 +69,9 @@ internal class GodkjenningService(
             godkjenningDTO.begrunnelser?.let { put("begrunnelser", it) }
             godkjenningDTO.kommentar?.let { put("kommentar", it) }
         }).also {
-            sikkerLogg.info("Publiserer saksbehandler-løsning: ${it.toJson()}")
+            sikkerlogg.info("Publiserer saksbehandler-løsning: ${it.toJson()}")
         }
-        log.info(
+        logg.info(
             "Publiserer saksbehandler-løsning for {}, {}",
             StructuredArguments.keyValue("oppgaveId", godkjenningDTO.oppgavereferanse),
             StructuredArguments.keyValue("hendelseId", hendelseId)
@@ -97,7 +98,7 @@ internal class GodkjenningService(
         try {
             reservasjonDao.reserverPerson(oid, fødselsnummer, false)
         } catch (e: SQLException) {
-            log.warn("Kunne ikke reservere person")
+            logg.warn("Kunne ikke reservere person")
         }
 
     }

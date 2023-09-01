@@ -13,6 +13,14 @@ import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 
 class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource) {
 
+    fun reserverNesteId(): Long {
+        return asSQL(
+            """
+               SELECT nextval(pg_get_serial_sequence('oppgave', 'id')) as neste_id; 
+            """
+        ).single { it.long("neste_id") } ?: throw IllegalStateException("Klarer ikke hente neste id i sekvens fra oppgave-tabellen")
+    }
+
     fun finnOppgaveId(vedtaksperiodeId: UUID) =
         asSQL(
             """ SELECT id FROM oppgave
@@ -188,7 +196,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource) {
         }
     }
 
-    fun opprettOppgave(commandContextId: UUID, oppgavetype: Oppgavetype, vedtaksperiodeId: UUID, utbetalingId: UUID) =
+    fun opprettOppgave(id: Long, commandContextId: UUID, oppgavetype: Oppgavetype, vedtaksperiodeId: UUID, utbetalingId: UUID) =
         requireNotNull(run {
             val vedtakRef = vedtakRef(vedtaksperiodeId)
 
@@ -197,9 +205,10 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource) {
 
             asSQL(
                 """
-                    INSERT INTO oppgave(oppdatert, type, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, command_context_id, utbetaling_id, mottaker)
-                    VALUES (now(), CAST(:oppgavetype as oppgavetype), CAST(:oppgavestatus as oppgavestatus), :ferdigstiltAv, :ferdigstiltAvOid, :vedtakRef, :commandContextId, :utbetalingId, CAST(:mottaker as mottakertype));
+                    INSERT INTO oppgave(id, oppdatert, type, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, command_context_id, utbetaling_id, mottaker)
+                    VALUES (:id, now(), CAST(:oppgavetype as oppgavetype), CAST(:oppgavestatus as oppgavestatus), :ferdigstiltAv, :ferdigstiltAvOid, :vedtakRef, :commandContextId, :utbetalingId, CAST(:mottaker as mottakertype));
                 """, mapOf(
+                    "id" to id,
                     "oppgavetype" to oppgavetype.name,
                     "oppgavestatus" to AvventerSaksbehandler.name,
                     "ferdigstiltAv" to null,

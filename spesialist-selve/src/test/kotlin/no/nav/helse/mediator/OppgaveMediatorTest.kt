@@ -59,9 +59,9 @@ internal class OppgaveMediatorTest {
         opptegnelseDao,
         harTilgangTil = gruppehenterTestoppsett.hentGrupper,
     )
-    private val søknadsoppgave: Oppgave = Oppgave.oppgaveMedEgenskaper(VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(SØKNAD))
-    private val stikkprøveoppgave: Oppgave = Oppgave.oppgaveMedEgenskaper(VEDTAKSPERIODE_ID_2, UTBETALING_ID_2, listOf(STIKKPRØVE))
-    private val riskoppgave: Oppgave = Oppgave.oppgaveMedEgenskaper(VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(RISK_QA))
+    private fun søknadsoppgave(id: Long): Oppgave = Oppgave.oppgaveMedEgenskaper(id, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(SØKNAD))
+    private fun stikkprøveoppgave(id: Long): Oppgave = Oppgave.oppgaveMedEgenskaper(id, VEDTAKSPERIODE_ID_2, UTBETALING_ID_2, listOf(STIKKPRØVE))
+    private fun riskoppgave(id: Long): Oppgave = Oppgave.oppgaveMedEgenskaper(id, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(RISK_QA))
 
     private val testRapid = TestRapid()
 
@@ -73,14 +73,17 @@ internal class OppgaveMediatorTest {
 
     @Test
     fun `lagrer oppgaver`() {
-        every { oppgaveDao.finn(0L) } returns søknadsoppgave
-        every { oppgaveDao.opprettOppgave(any(), OPPGAVETYPE_SØKNAD, any(), any()) } returns 0L
+        every { oppgaveDao.reserverNesteId() } returns 0L
+        every { oppgaveDao.finn(0L) } returns søknadsoppgave(0L)
         every { oppgaveDao.finnHendelseId(any()) } returns HENDELSE_ID
         every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
-        mediator.opprett(søknadsoppgave)
+        mediator.nyOppgave {
+            søknadsoppgave(it)
+        }
         mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
         verify(exactly = 1) {
             oppgaveDao.opprettOppgave(
+                0L,
                 COMMAND_CONTEXT_ID,
                 OPPGAVETYPE_SØKNAD,
                 VEDTAKSPERIODE_ID,
@@ -95,10 +98,13 @@ internal class OppgaveMediatorTest {
     @Test
     fun `lagrer oppgave og tildeler til saksbehandler som har reservert personen`() {
         val oid = UUID.randomUUID()
+        every { oppgaveDao.reserverNesteId() } returns 0L
         every { reservasjonDao.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns Reservasjonsinfo(oid, false)
-        every { oppgaveDao.finn(0L) } returns søknadsoppgave
+        every { oppgaveDao.finn(0L) } returns søknadsoppgave(0L)
         every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
-        mediator.opprett(søknadsoppgave)
+        mediator.nyOppgave {
+            søknadsoppgave(it)
+        }
         mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
         assertFalse(gruppehenterTestoppsett.erKalt)
         verify(exactly = 1) { tildelingDao.opprettTildeling(any(), oid, any()) }
@@ -108,10 +114,13 @@ internal class OppgaveMediatorTest {
     @Test
     fun `tildeler ikke risk-oppgave til saksbehandler som har reservert personen hvis hen ikke har risk-tilgang`() {
         val oid = UUID.randomUUID()
+        every { oppgaveDao.reserverNesteId() } returns 0L
         every { reservasjonDao.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns Reservasjonsinfo(oid, false)
-        every { oppgaveDao.finn(0L) } returns riskoppgave
+        every { oppgaveDao.finn(0L) } returns riskoppgave(0L)
         every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
-        mediator.opprett(riskoppgave)
+        mediator.nyOppgave {
+            riskoppgave(it)
+        }
         mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
         assertTrue(gruppehenterTestoppsett.erKalt)
         verify(exactly = 0) { tildelingDao.opprettTildeling(any(), oid, any()) }
@@ -121,10 +130,13 @@ internal class OppgaveMediatorTest {
     @Test
     fun `tildeler ikke reservert personen når oppgave er stikkprøve`() {
         val oid = UUID.randomUUID()
+        every { oppgaveDao.reserverNesteId() } returns 0L
         every { reservasjonDao.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns Reservasjonsinfo(oid, false)
-        every { oppgaveDao.finn(0L) } returns stikkprøveoppgave
+        every { oppgaveDao.finn(0L) } returns stikkprøveoppgave(0L)
         every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
-        mediator.opprett(stikkprøveoppgave)
+        mediator.nyOppgave {
+            stikkprøveoppgave(it)
+        }
         mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
         verify(exactly = 0) { tildelingDao.opprettTildeling(any(), any(), any()) }
         assertAntallOpptegnelser(1)
@@ -133,9 +145,13 @@ internal class OppgaveMediatorTest {
     @Test
     fun `kaller bare hentGrupper når personen er reservert`() {
         every { reservasjonDao.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns null
-        every { oppgaveDao.finn(0L) } returns søknadsoppgave
+        every { oppgaveDao.reserverNesteId() } returns 0L
+
+        every { oppgaveDao.finn(0L) } returns søknadsoppgave(0L)
         every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
-        mediator.opprett(stikkprøveoppgave)
+        mediator.nyOppgave {
+            stikkprøveoppgave(it)
+        }
         mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
         assertFalse(gruppehenterTestoppsett.erKalt)
         assertAntallOpptegnelser(1)
@@ -166,22 +182,30 @@ internal class OppgaveMediatorTest {
     @Test
     fun `oppretter ikke flere oppgaver på samme vedtaksperiodeId`() {
         every { oppgaveDao.harGyldigOppgave(UTBETALING_ID) } returnsMany listOf(false, true)
-        every { oppgaveDao.finn(0L) } returns søknadsoppgave
-        mediator.opprett(søknadsoppgave)
-        mediator.opprett(søknadsoppgave)
+        every { oppgaveDao.reserverNesteId() } returns 0L
+        every { oppgaveDao.finn(0L) } returns søknadsoppgave(0L)
+        mediator.nyOppgave {
+            søknadsoppgave(it)
+        }
+        mediator.nyOppgave {
+            søknadsoppgave(it)
+        }
         mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
-        verify(exactly = 1) { oppgaveDao.opprettOppgave(COMMAND_CONTEXT_ID, OPPGAVETYPE_SØKNAD, any(), UTBETALING_ID) }
+        verify(exactly = 1) { oppgaveDao.opprettOppgave(any(), COMMAND_CONTEXT_ID, OPPGAVETYPE_SØKNAD, any(), UTBETALING_ID) }
         assertOpptegnelseIkkeOpprettet()
 
     }
 
     @Test
     fun `lagrer ikke dobbelt`() {
-        every { oppgaveDao.finn(0L) } returns søknadsoppgave
-        every { oppgaveDao.opprettOppgave(any(), OPPGAVETYPE_SØKNAD, any(), any()) } returns 0L
+        every { oppgaveDao.reserverNesteId() } returns 0L
+        every { oppgaveDao.finn(0L) } returns søknadsoppgave(0L)
+        every { oppgaveDao.opprettOppgave(any(), any(), OPPGAVETYPE_SØKNAD, any(), any()) } returns 0L
         every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
 
-        mediator.opprett(søknadsoppgave)
+        mediator.nyOppgave {
+            søknadsoppgave(it)
+        }
         mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
         assertEquals(1, testRapid.inspektør.size)
         assertAntallOpptegnelser(1)

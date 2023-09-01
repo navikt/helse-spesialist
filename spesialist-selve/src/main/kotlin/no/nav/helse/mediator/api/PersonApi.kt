@@ -33,7 +33,8 @@ internal fun Route.personApi(
     tilgangsgrupper: Tilgangsgrupper,
     saksbehandlerMediator: SaksbehandlerMediator
 ) {
-    val log = LoggerFactory.getLogger("PersonApi")
+    val logg = LoggerFactory.getLogger("PersonApi")
+    val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
     get("/api/person/aktorId/{aktørId}/sist_oppdatert") {
         call.parameters["aktørId"]?.toLongOrNull() ?: run {
@@ -52,8 +53,8 @@ internal fun Route.personApi(
     post("/api/vedtak") {
         val godkjenning = call.receive<GodkjenningDto>()
         val saksbehandler = Saksbehandler.fraOnBehalfOfToken(requireNotNull(call.principal()))
-        log.info("Behandler godkjenning/avslag: ${godkjenning.åpenLoggString()} (se sikker logg for detaljer)")
-        sikkerLogg.info("Behandler godkjenning/avslag: $godkjenning")
+        logg.info("Behandler godkjenning/avslag: ${godkjenning.åpenLoggString()} (se sikker logg for detaljer)")
+        sikkerlogg.info("Behandler godkjenning/avslag: $godkjenning")
         val (oid, epostadresse) = requireNotNull(call.principal<JWTPrincipal>()).payload.let {
             UUID.fromString(it.getClaim("oid").asString()) to it.getClaim("preferred_username").asString()
         }

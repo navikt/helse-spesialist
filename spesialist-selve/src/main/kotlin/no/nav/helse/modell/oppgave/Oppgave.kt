@@ -13,12 +13,13 @@ import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import org.slf4j.LoggerFactory
 
 class Oppgave private constructor(
+    private val id: Long,
     private val type: Oppgavetype,
     private var status: Oppgavestatus,
     private val vedtaksperiodeId: UUID,
     private val utbetalingId: UUID
 ) {
-    private var id: Long? = null
+
     private var ferdigstiltAvIdent: String? = null
     private var ferdigstiltAvOid: UUID? = null
     private val egenskaper = mutableListOf<Oppgavetype>()
@@ -31,20 +32,17 @@ class Oppgave private constructor(
         utbetalingId: UUID,
         ferdigstiltAvIdent: String? = null,
         ferdigstiltAvOid: UUID? = null
-    ) : this(type, status, vedtaksperiodeId, utbetalingId) {
-        this.id = id
+    ) : this(id, type, status, vedtaksperiodeId, utbetalingId) {
         this.ferdigstiltAvIdent = ferdigstiltAvIdent
         this.ferdigstiltAvOid = ferdigstiltAvOid
     }
 
-    private fun oppgaveId() = checkNotNull(id) { "Forventet at oppgave med id=$id skulle finnes?" }
-
     companion object {
         private val logg = LoggerFactory.getLogger(this::class.java)
 
-        fun oppgaveMedEgenskaper(vedtaksperiodeId: UUID, utbetalingId: UUID, egenskaper: List<Oppgavetype>): Oppgave {
+        fun oppgaveMedEgenskaper(id: Long, vedtaksperiodeId: UUID, utbetalingId: UUID, egenskaper: List<Oppgavetype>): Oppgave {
             val hovedegenskap = egenskaper.firstOrNull() ?: Oppgavetype.SØKNAD
-            return Oppgave(hovedegenskap, Oppgavestatus.AvventerSaksbehandler, vedtaksperiodeId, utbetalingId).also {
+            return Oppgave(id, hovedegenskap, Oppgavestatus.AvventerSaksbehandler, vedtaksperiodeId, utbetalingId).also {
                 it.egenskaper.addAll(egenskaper)
             }
         }
@@ -126,7 +124,7 @@ class Oppgave private constructor(
     }
 
     fun lagMelding(eventName: String, oppgaveDao: OppgaveDao): JsonMessage {
-        return lagMelding(oppgaveId(), eventName, false, oppgaveDao).second
+        return lagMelding(id, eventName, false, oppgaveDao).second
     }
 
     fun loggOppgaverAvbrutt(vedtaksperiodeId: UUID) {
@@ -135,13 +133,15 @@ class Oppgave private constructor(
 
     fun lagreAvventerSystem(oppgaveDao: OppgaveDao, ident: String, oid: UUID) {
         avventerSystem(ident, oid)
-        oppgaveDao.updateOppgave(oppgaveId(), status, ferdigstiltAvIdent, ferdigstiltAvOid)
+        oppgaveDao.updateOppgave(id, status, ferdigstiltAvIdent, ferdigstiltAvOid)
     }
 
     fun lagre(oppgaveMediator: OppgaveMediator, contextId: UUID, hendelseId: UUID) {
-        id?.also {
-            oppgaveMediator.oppdater(it, status, ferdigstiltAvIdent, ferdigstiltAvOid)
-        } ?: oppgaveMediator.opprett(contextId, vedtaksperiodeId, utbetalingId, type, hendelseId).also { id = it } ?: return
+        oppgaveMediator.opprett(id, contextId, vedtaksperiodeId, utbetalingId, type, hendelseId)
+    }
+
+    fun oppdater(oppgaveMediator: OppgaveMediator) {
+        oppgaveMediator.oppdater(id, status, ferdigstiltAvIdent, ferdigstiltAvOid)
     }
 
     fun avbryt() {
@@ -163,7 +163,7 @@ class Oppgave private constructor(
             if (!harTilgangTilRisk) logg.info("OppgaveId $id er RISK_QA og saksbehandler har ikke tilgang, tildeles ikke på tross av reservasjon.")
             return
         }
-        oppgaveMediator.tildel(checkNotNull(id), saksbehandleroid, påVent)
+        oppgaveMediator.tildel(id, saksbehandleroid, påVent)
         logg.info("Oppgave $id tildeles $saksbehandleroid grunnet reservasjon.")
     }
 

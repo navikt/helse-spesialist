@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import kotlin.random.Random
+import kotlin.random.Random.Default.nextLong
 
 internal class OppgaveTest {
     private companion object {
@@ -28,7 +28,7 @@ internal class OppgaveTest {
         private val HENDELSE_ID = UUID.randomUUID()
         private const val SAKSBEHANDLERIDENT = "Z999999"
         private val SAKSBEHANDLEROID = UUID.randomUUID()
-        private val OPPGAVE_ID = Random.nextLong()
+        private val OPPGAVE_ID = nextLong()
     }
 
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
@@ -39,7 +39,7 @@ internal class OppgaveTest {
     private val oppgaveMediator =
         OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao, opptegnelseDao)
 
-    private val oppgave = Oppgave.oppgaveMedEgenskaper(VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(SØKNAD))
+    private val oppgave = Oppgave.oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(SØKNAD))
 
     @BeforeEach
     fun setup() {
@@ -49,7 +49,7 @@ internal class OppgaveTest {
     @Test
     fun `oppretter ny oppgave`() {
         oppgave.lagre(oppgaveMediator, COMMAND_CONTEXT_ID, HENDELSE_ID)
-        verify(exactly = 1) { oppgaveDao.opprettOppgave(COMMAND_CONTEXT_ID, OPPGAVETYPE, VEDTAKSPERIODE_ID, UTBETALING_ID) }
+        verify(exactly = 1) { oppgaveDao.opprettOppgave(OPPGAVE_ID, COMMAND_CONTEXT_ID, OPPGAVETYPE, VEDTAKSPERIODE_ID, UTBETALING_ID) }
     }
 
     @Test
@@ -62,7 +62,7 @@ internal class OppgaveTest {
             utbetalingId = UTBETALING_ID
         )
         oppgave.ferdigstill(SAKSBEHANDLERIDENT, SAKSBEHANDLEROID)
-        oppgave.lagre(oppgaveMediator, COMMAND_CONTEXT_ID, HENDELSE_ID)
+        oppgave.oppdater(oppgaveMediator)
         verify(exactly = 1) { oppgaveDao.updateOppgave(OPPGAVE_ID, Oppgavestatus.Ferdigstilt, SAKSBEHANDLERIDENT, SAKSBEHANDLEROID) }
     }
 
@@ -103,7 +103,7 @@ internal class OppgaveTest {
             utbetalingId = UTBETALING_ID
         )
         oppgave.avbryt()
-        oppgave.lagre(oppgaveMediator, COMMAND_CONTEXT_ID, HENDELSE_ID)
+        oppgave.oppdater(oppgaveMediator)
         verify(exactly = 1) { oppgaveDao.updateOppgave(OPPGAVE_ID, Oppgavestatus.Invalidert, null, null) }
     }
 
@@ -116,10 +116,10 @@ internal class OppgaveTest {
             VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID
         )
-        val oppgave1 = Oppgave.oppgaveMedEgenskaper(VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(SØKNAD))
-        val oppgave2 = Oppgave.oppgaveMedEgenskaper(VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(SØKNAD))
-        val oppgave3 = Oppgave.oppgaveMedEgenskaper(UUID.randomUUID(), UTBETALING_ID, listOf(SØKNAD))
-        val oppgave4 = Oppgave.oppgaveMedEgenskaper(VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(STIKKPRØVE))
+        val oppgave1 = Oppgave.oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(SØKNAD))
+        val oppgave2 = Oppgave.oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(SØKNAD))
+        val oppgave3 = Oppgave.oppgaveMedEgenskaper(OPPGAVE_ID, UUID.randomUUID(), UTBETALING_ID, listOf(SØKNAD))
+        val oppgave4 = Oppgave.oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(STIKKPRØVE))
         assertEquals(oppgave1, oppgave2)
         assertEquals(oppgave1.hashCode(), oppgave2.hashCode())
         assertNotEquals(oppgave1, oppgave3)
