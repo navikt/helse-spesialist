@@ -75,6 +75,32 @@ class Oppgave private constructor(
             )
         }
 
+        fun lagMelding(
+            fødselsnummer: String,
+            hendelseId: UUID,
+            eventName: String,
+            oppgave: Oppgave,
+            påVent: Boolean? = null
+        ): Pair<String, JsonMessage> {
+            // @TODO bruke ny totrinnsvurderingtabell eller fjerne?
+            val erBeslutterOppgave = false
+            val erReturOppgave = false
+
+            return fødselsnummer to lagMelding(
+                eventName = eventName,
+                hendelseId = hendelseId,
+                oppgaveId = oppgave.id,
+                status = oppgave.status,
+                type = oppgave.type,
+                fødselsnummer = fødselsnummer,
+                erBeslutterOppgave = erBeslutterOppgave,
+                erReturOppgave = erReturOppgave,
+                ferdigstiltAvIdent = oppgave.ferdigstiltAvIdent,
+                ferdigstiltAvOid = oppgave.ferdigstiltAvOid,
+                påVent = påVent,
+            )
+        }
+
         private fun lagMelding(
             eventName: String,
             hendelseId: UUID,
@@ -107,6 +133,10 @@ class Oppgave private constructor(
         }
     }
 
+    fun accept(visitor: OppgaveVisitor) {
+        visitor.visitOppgave(id, type, status, vedtaksperiodeId, utbetalingId, ferdigstiltAvOid, ferdigstiltAvIdent, egenskaper)
+    }
+
     fun ferdigstill(ident: String, oid: UUID) {
         status = Oppgavestatus.Ferdigstilt
         ferdigstiltAvIdent = ident
@@ -117,31 +147,18 @@ class Oppgave private constructor(
         status = Oppgavestatus.Ferdigstilt
     }
 
-    private fun avventerSystem(ident: String, oid: UUID) {
+    fun avventerSystem(ident: String, oid: UUID) {
         status = Oppgavestatus.AvventerSystem
         ferdigstiltAvIdent = ident
         ferdigstiltAvOid = oid
     }
 
-    fun lagMelding(eventName: String, oppgaveDao: OppgaveDao): JsonMessage {
-        return lagMelding(id, eventName, false, oppgaveDao).second
+    fun lagMelding(eventName: String, fødselsnummer: String, hendelseId: UUID): JsonMessage {
+        return lagMelding(fødselsnummer, hendelseId, eventName, this, false).second
     }
 
     fun loggOppgaverAvbrutt(vedtaksperiodeId: UUID) {
         logg.info("Har avbrutt oppgave $id for vedtaksperiode $vedtaksperiodeId")
-    }
-
-    fun lagreAvventerSystem(oppgaveDao: OppgaveDao, ident: String, oid: UUID) {
-        avventerSystem(ident, oid)
-        oppgaveDao.updateOppgave(id, status, ferdigstiltAvIdent, ferdigstiltAvOid)
-    }
-
-    fun lagre(oppgaveMediator: OppgaveMediator, contextId: UUID, hendelseId: UUID) {
-        oppgaveMediator.opprett(id, contextId, vedtaksperiodeId, utbetalingId, type, hendelseId)
-    }
-
-    fun oppdater(oppgaveMediator: OppgaveMediator) {
-        oppgaveMediator.oppdater(id, status, ferdigstiltAvIdent, ferdigstiltAvOid)
     }
 
     fun avbryt() {

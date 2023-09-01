@@ -2,16 +2,14 @@ package no.nav.helse.modell
 
 import io.mockk.clearMocks
 import io.mockk.mockk
-import io.mockk.verify
 import java.util.UUID
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveDao
-import no.nav.helse.modell.oppgave.OppgaveMediator
-import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
+import no.nav.helse.modell.oppgave.OppgaveVisitor
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
+import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype.STIKKPRØVE
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype.SØKNAD
-import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -24,8 +22,6 @@ internal class OppgaveTest {
         private val OPPGAVETYPE = SØKNAD
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
         private val UTBETALING_ID = UUID.randomUUID()
-        private val COMMAND_CONTEXT_ID = UUID.randomUUID()
-        private val HENDELSE_ID = UUID.randomUUID()
         private const val SAKSBEHANDLERIDENT = "Z999999"
         private val SAKSBEHANDLEROID = UUID.randomUUID()
         private val OPPGAVE_ID = nextLong()
@@ -34,36 +30,10 @@ internal class OppgaveTest {
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val vedtakDao = mockk<VedtakDao>()
     private val tildelingDao = mockk<TildelingDao>(relaxed = true)
-    private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
-    private val opptegnelseDao = mockk<OpptegnelseDao>(relaxed = true)
-    private val oppgaveMediator =
-        OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao, opptegnelseDao)
-
-    private val oppgave = Oppgave.oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(SØKNAD))
 
     @BeforeEach
     fun setup() {
         clearMocks(oppgaveDao, vedtakDao, tildelingDao)
-    }
-
-    @Test
-    fun `oppretter ny oppgave`() {
-        oppgave.lagre(oppgaveMediator, COMMAND_CONTEXT_ID, HENDELSE_ID)
-        verify(exactly = 1) { oppgaveDao.opprettOppgave(OPPGAVE_ID, COMMAND_CONTEXT_ID, OPPGAVETYPE, VEDTAKSPERIODE_ID, UTBETALING_ID) }
-    }
-
-    @Test
-    fun `oppdater oppgave`() {
-        val oppgave = Oppgave(
-            OPPGAVE_ID,
-            OPPGAVETYPE,
-            Oppgavestatus.AvventerSaksbehandler,
-            VEDTAKSPERIODE_ID,
-            utbetalingId = UTBETALING_ID
-        )
-        oppgave.ferdigstill(SAKSBEHANDLERIDENT, SAKSBEHANDLEROID)
-        oppgave.oppdater(oppgaveMediator)
-        verify(exactly = 1) { oppgaveDao.updateOppgave(OPPGAVE_ID, Oppgavestatus.Ferdigstilt, SAKSBEHANDLERIDENT, SAKSBEHANDLEROID) }
     }
 
     @Test
@@ -103,8 +73,23 @@ internal class OppgaveTest {
             utbetalingId = UTBETALING_ID
         )
         oppgave.avbryt()
-        oppgave.oppdater(oppgaveMediator)
-        verify(exactly = 1) { oppgaveDao.updateOppgave(OPPGAVE_ID, Oppgavestatus.Invalidert, null, null) }
+        val visitor = object : OppgaveVisitor {
+            lateinit var status: Oppgavestatus
+            override fun visitOppgave(
+                id: Long,
+                type: Oppgavetype,
+                status: Oppgavestatus,
+                vedtaksperiodeId: UUID,
+                utbetalingId: UUID,
+                ferdigstiltAvOid: UUID?,
+                ferdigstiltAvIdent: String?,
+                egenskaper: List<Oppgavetype>
+            ) {
+                this.status = status
+            }
+        }
+        oppgave.accept(visitor)
+        assertEquals(Oppgavestatus.Invalidert, visitor.status)
     }
 
     @Test

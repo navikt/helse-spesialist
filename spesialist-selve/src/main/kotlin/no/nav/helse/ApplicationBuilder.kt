@@ -397,6 +397,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         godkjenningService = GodkjenningService(
             dataSource = dataSource,
             rapidsConnection = rapidsConnection,
+            oppgaveMediator = oppgaveMediator
         )
     }
 

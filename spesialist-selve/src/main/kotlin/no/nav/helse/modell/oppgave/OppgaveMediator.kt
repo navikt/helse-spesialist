@@ -40,6 +40,15 @@ class OppgaveMediator(
         return tildelingDao.opprettTildeling(oppgaveId, saksbehandleroid, påVent) != null
     }
 
+    fun oppgave(id: Long, oppgaveBlock: Oppgave.() -> Unit) {
+        val oppgave = oppgaveDao.finn(id) ?: throw IllegalStateException("Forventer å finne oppgave")
+        oppgaveBlock(oppgave)
+        Oppgavelagrer().apply {
+            oppgave.accept(this)
+            lagre(this@OppgaveMediator)
+        }
+    }
+
     /*
         For nå må oppgaver mellomlagres i denne mediatoren, fordi ved lagring skal det sendes ut meldinger på Kafka,
         og de skal inneholde standardfeltene for rapids-and-rivers, som i utgangspunktet kun er tilgjengelige via
@@ -133,11 +142,17 @@ class OppgaveMediator(
         doAlso: () -> Unit = {}
     ) {
         oppgaveForLagring?.let {
-            it.lagre(this, contextId, hendelseId)
+            Oppgavelagrer().apply {
+                it.accept(this)
+                lagre(this@OppgaveMediator, hendelseId, contextId)
+            }
             logg.info("Oppgave lagret: $it")
             sikkerlogg.info("Oppgave lagret: $it")
         } ?: oppgaveForOppdatering?.let {
-            it.oppdater(this)
+            Oppgavelagrer().apply {
+                it.accept(this)
+                lagre(this@OppgaveMediator)
+            }
             logg.info("Oppgave oppdatert: $it")
             sikkerlogg.info("Oppgave oppdatert: $it")
         }

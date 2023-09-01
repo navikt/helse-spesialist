@@ -7,6 +7,7 @@ import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.oppgave.OppgaveDao
+import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
@@ -27,6 +28,7 @@ internal class GodkjenningService(
     private val hendelseDao: HendelseDao = HendelseDao(dataSource),
     private val overstyringDao: OverstyringDao = OverstyringDao(dataSource),
     private val rapidsConnection: RapidsConnection,
+    private val oppgaveMediator: OppgaveMediator,
     private val reservasjonDao: ReservasjonDao = ReservasjonDao(dataSource),
     private val periodehistorikkDao: PeriodehistorikkDao = PeriodehistorikkDao(dataSource),
     private val totrinnsvurderingMediator: TotrinnsvurderingMediator = TotrinnsvurderingMediator(
@@ -78,21 +80,18 @@ internal class GodkjenningService(
         )
         rapidsConnection.publish(fødselsnummer, godkjenningMessage.toJson())
 
-        val oppgave = finnOppgave(godkjenningDTO)
         reserverPerson(reserverPersonOid, fødselsnummer)
-        oppgave.lagreAvventerSystem(oppgaveDao, godkjenningDTO.saksbehandlerIdent, oid)
-        rapidsConnection.publish(oppgave.lagMelding("oppgave_oppdatert", oppgaveDao = oppgaveDao).toJson())
+        oppgaveMediator.oppgave(godkjenningDTO.oppgavereferanse) {
+            avventerSystem(godkjenningDTO.saksbehandlerIdent, oid)
+            rapidsConnection.publish(lagMelding("oppgave_oppdatert", fødselsnummer, hendelseId).toJson())
+            overstyringDao.ferdigstillOverstyringerForVedtaksperiode(vedtaksperiodeId)
+            totrinnsvurderingMediator.ferdigstill(vedtaksperiodeId)
 
-        overstyringDao.ferdigstillOverstyringerForVedtaksperiode(vedtaksperiodeId)
-        totrinnsvurderingMediator.ferdigstill(vedtaksperiodeId)
-
-        if (totrinnsvurdering?.erBeslutteroppgave() == true && godkjenningDTO.godkjent) {
-            oppgave.lagrePeriodehistorikk(periodehistorikkDao, oid, PeriodehistorikkType.TOTRINNSVURDERING_ATTESTERT, null)
+            if (totrinnsvurdering?.erBeslutteroppgave() == true && godkjenningDTO.godkjent) {
+                lagrePeriodehistorikk(periodehistorikkDao, oid, PeriodehistorikkType.TOTRINNSVURDERING_ATTESTERT, null)
+            }
         }
     }
-
-    private fun finnOppgave(godkjenningDTO: GodkjenningDto) = oppgaveDao.finn(godkjenningDTO.oppgavereferanse)
-        ?: throw IllegalArgumentException("oppgaveId ${godkjenningDTO.oppgavereferanse} fins ikke")
 
     private fun reserverPerson(oid: UUID, fødselsnummer: String) {
         try {
@@ -100,7 +99,5 @@ internal class GodkjenningService(
         } catch (e: SQLException) {
             logg.warn("Kunne ikke reservere person")
         }
-
     }
-
 }
