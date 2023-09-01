@@ -5,6 +5,7 @@ import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.withMDC
 import no.nav.helse.spesialist.api.abonnement.AbonnementDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
@@ -42,13 +43,21 @@ class SaksbehandlerMediator(
     private val reservasjonDao = ReservasjonDao(dataSource)
 
     internal fun <T: SaksbehandlerHandling> håndter(handling: T, saksbehandler: Saksbehandler) {
+        val handlingId = UUID.randomUUID()
         tell(handling)
         saksbehandler.register(this)
         saksbehandler.persister(saksbehandlerDao)
-        sikkerlogg.info("Handling ${handling.loggnavn()} utført av saksbehandler $saksbehandler")
-        when (handling) {
-            is OverstyringHandling -> håndter(handling, saksbehandler)
-            else -> handling.utførAv(saksbehandler)
+        withMDC(
+            mapOf(
+                "saksbehandlerOid" to saksbehandler.oid().toString(),
+                "handlingId" to handlingId.toString()
+            )
+        ) {
+            sikkerlogg.info("Utfører handling ${handling.loggnavn()} på vegne av saksbehandler $saksbehandler")
+            when (handling) {
+                is OverstyringHandling -> håndter(handling, saksbehandler)
+                else -> handling.utførAv(saksbehandler)
+            }
         }
     }
 
@@ -59,6 +68,7 @@ class SaksbehandlerMediator(
         reservasjonDao.reserverPerson(saksbehandler.oid(), fødselsnummer, false)
         sikkerlogg.info("Reserverer person $fødselsnummer til saksbehandler $saksbehandler")
         handling.utførAv(saksbehandler)
+        sikkerlogg.info("Handling ${handling.loggnavn()} utført")
     }
 
     override fun tidslinjeOverstyrt(fødselsnummer: String, event: OverstyrtTidslinjeEvent) {
