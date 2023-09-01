@@ -14,8 +14,8 @@ import no.nav.helse.spesialist.api.modell.OverstyrtInntektOgRefusjonEvent
 import no.nav.helse.spesialist.api.modell.OverstyrtTidslinjeEvent
 import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.modell.SaksbehandlerObserver
+import no.nav.helse.spesialist.api.modell.SkjønnsfastsattSykepengegrunnlagEvent
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
-import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsattSykepengegrunnlagDto
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyringHandling
@@ -76,6 +76,11 @@ class SaksbehandlerMediator(
         rapidsConnection.publish(fødselsnummer, message.toJson())
     }
 
+    override fun sykepengegrunnlagSkjønnsfastsatt(fødselsnummer: String, event: SkjønnsfastsattSykepengegrunnlagEvent) {
+        val message = event.somJsonMessage()
+        rapidsConnection.publish(fødselsnummer, message.toJson())
+    }
+
     internal fun opprettAbonnement(saksbehandler: Saksbehandler, personidentifikator: String) {
         saksbehandler.persister(saksbehandlerDao)
         abonnementDao.opprettAbonnement(saksbehandler.oid(), personidentifikator.toLong())
@@ -104,25 +109,6 @@ class SaksbehandlerMediator(
             )
         }
         rapidsConnection.publish(annullering.fødselsnummer, message.toJson())
-    }
-
-    internal fun håndter(skjønnsfastsattSykepengegrunnlag: SkjønnsfastsattSykepengegrunnlagDto, saksbehandler: Saksbehandler) {
-        saksbehandler.persister(saksbehandlerDao)
-        tellSkjønnsfastsettingSykepengegrunnlag()
-        val fødselsnummer = skjønnsfastsattSykepengegrunnlag.fødselsnummer
-        reservasjonDao.reserverPerson(saksbehandler.oid(), fødselsnummer, false)
-
-        val antall = oppgaveApiDao.invaliderOppgaveFor(fødselsnummer)
-        sikkerlogg.info("Invaliderte $antall {} for $fødselsnummer", if (antall == 1) "oppgave" else "oppgaver")
-
-        val message = skjønnsfastsattSykepengegrunnlag.somJsonMessage(saksbehandler.toDto()).also {
-            sikkerlogg.info(
-                "Publiserer skjønnsfastsetting av inntekt fra api: {}, {}\n${it.toJson()}",
-                kv("fødselsnummer", fødselsnummer),
-                kv("aktørId", skjønnsfastsattSykepengegrunnlag.aktørId),
-            )
-        }
-        rapidsConnection.publish(fødselsnummer, message.toJson())
     }
 
     fun håndter(godkjenning: GodkjenningDto, behandlingId: UUID, saksbehandler: Saksbehandler) {

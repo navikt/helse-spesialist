@@ -5,6 +5,7 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforho
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SaksbehandlerHandling
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandling
 
 private val overstyringsteller: Counter = Counter.build("overstyringer", "Teller antall overstyringer")
     .labelNames("opplysningstype", "type")
@@ -23,4 +24,5 @@ internal fun tell(handling: SaksbehandlerHandling) = when (handling) {
     is OverstyrTidslinjeHandling -> tellOverstyrTidslinje()
     is OverstyrInntektOgRefusjonHandling -> tellOverstyrInntektOgRefusjon()
     is OverstyrArbeidsforholdHandling -> tellOverstyrArbeidsforhold()
+    is SkjønnsfastsettSykepengegrunnlagHandling -> tellSkjønnsfastsettingSykepengegrunnlag()
 }

@@ -54,11 +54,3 @@ internal class Refusjonselement(
         OverstyrtInntektOgRefusjonEvent.OverstyrtArbeidsgiver.OverstyrtRefusjonselement(fom, tom, beløp)
 }
 
-internal class Subsumsjon(
-    private val paragraf: String,
-    private val ledd: String? = null,
-    private val bokstav: String? = null,
-) {
-    internal fun byggEvent() =
-        OverstyrtInntektOgRefusjonEvent.OverstyrtArbeidsgiver.Subsumsjon(paragraf, ledd, bokstav)
-}

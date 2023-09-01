@@ -5,6 +5,7 @@ import java.util.UUID
 import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.OverstyrtArbeidsforhold
 import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.OverstyrtInntektOgRefusjon
 import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.OverstyrtTidslinje
+import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDto
 
@@ -49,6 +50,11 @@ class Saksbehandler(
     internal fun håndter(hendelse: OverstyrtArbeidsforhold) {
         val event = hendelse.byggEvent(oid, navn, epostadresse, ident)
         observers.forEach { it.arbeidsforholdOverstyrt(event.fødselsnummer, event) }
+    }
+
+    internal fun håndter(hendelse: SkjønnsfastsattSykepengegrunnlag) {
+        val event = hendelse.byggEvent(oid, navn, epostadresse, ident)
+        observers.forEach { it.sykepengegrunnlagSkjønnsfastsatt(event.fødselsnummer, event) }
     }
 
     fun json() = mapOf(

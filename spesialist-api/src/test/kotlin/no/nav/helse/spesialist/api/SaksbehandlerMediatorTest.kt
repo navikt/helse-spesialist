@@ -6,14 +6,13 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.TestRapidHelpers.hendelser
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.modell.Saksbehandler
-import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsattArbeidsgiverDto
-import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsattSykepengegrunnlagDto
-import no.nav.helse.spesialist.api.overstyring.Skjønnsfastsettingstype
-import no.nav.helse.spesialist.api.overstyring.SubsumsjonDto
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandling.OverstyrArbeidsgiverDto
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandling
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandling
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandling.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.SubsumsjonDto
 import no.nav.helse.spesialist.api.utbetaling.AnnulleringDto
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import org.junit.jupiter.api.Assertions
@@ -361,30 +360,30 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
 
     @Test
     fun `håndterer skjønnsfastsetting av sykepengegrunnlag`() {
-        val skjønnsfastsetting = SkjønnsfastsattSykepengegrunnlagDto(
+        val skjønnsfastsetting = SkjønnsfastsettSykepengegrunnlagHandling(
             fødselsnummer = FØDSELSNUMMER,
             aktørId = AKTØR_ID,
             skjæringstidspunkt = 1.januar,
             arbeidsgivere = listOf(
-                SkjønnsfastsattArbeidsgiverDto(
+                SkjønnsfastsettSykepengegrunnlagHandling.SkjønnsfastsattArbeidsgiverDto(
                     organisasjonsnummer = ORGANISASJONSNUMMER,
                     årlig = 25000.0,
                     fraÅrlig = 25001.0,
                     subsumsjon = SubsumsjonDto("8-28", "3", null),
                     årsak = "En årsak",
-                    type = Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
+                    type = SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT,
                     begrunnelseMal = "En begrunnelsemal",
                     begrunnelseFritekst = "begrunnelsefritekst",
                     begrunnelseKonklusjon = "begrunnelseKonklusjon",
                     initierendeVedtaksperiodeId = PERIODE.id.toString()
                 ),
-                SkjønnsfastsattArbeidsgiverDto(
+                SkjønnsfastsettSykepengegrunnlagHandling.SkjønnsfastsattArbeidsgiverDto(
                     organisasjonsnummer = ORGANISASJONSNUMMER_GHOST,
                     årlig = 21000.0,
                     fraÅrlig = 25001.0,
                     subsumsjon = SubsumsjonDto("8-28", "3", null),
                     årsak = "En årsak 2",
-                    type = Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
+                    type = SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT,
                     begrunnelseMal = "En begrunnelsemal",
                     begrunnelseFritekst = "begrunnelsefritekst",
                     begrunnelseKonklusjon = "begrunnelseKonklusjon",

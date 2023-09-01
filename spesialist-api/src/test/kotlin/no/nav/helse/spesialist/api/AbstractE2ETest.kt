@@ -19,10 +19,10 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.TestRapidHelpers.hendelser
 import no.nav.helse.spesialist.api.db.AbstractDatabaseTest
 import no.nav.helse.spesialist.api.endepunkter.overstyringApi
-import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsattSykepengegrunnlagDto
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandling
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandling
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 
@@ -114,7 +114,7 @@ internal abstract class AbstractE2ETest: AbstractDatabaseTest() {
     }
 
     protected fun skjønnsfastsettingSykepengegrunnlag(
-        payload: SkjønnsfastsattSykepengegrunnlagDto,
+        payload: SkjønnsfastsettSykepengegrunnlagHandling,
         saksbehandler: Saksbehandler = defaultSaksbehandler,
     ) {
         testApplication {

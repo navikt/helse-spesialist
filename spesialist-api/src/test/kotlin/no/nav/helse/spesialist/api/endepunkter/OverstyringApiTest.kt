@@ -5,16 +5,15 @@ import java.util.UUID
 import no.nav.helse.spesialist.api.AbstractE2ETest
 import no.nav.helse.spesialist.api.februar
 import no.nav.helse.spesialist.api.januar
-import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsattArbeidsgiverDto
-import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsattSykepengegrunnlagDto
-import no.nav.helse.spesialist.api.overstyring.Skjønnsfastsettingstype
-import no.nav.helse.spesialist.api.overstyring.SubsumsjonDto
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandling.ArbeidsforholdDto
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandling.OverstyrArbeidsgiverDto.RefusjonselementDto
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandling.OverstyrDagDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandling
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandling.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.SubsumsjonDto
 import org.junit.jupiter.api.Test
 
 internal class OverstyringApiTest: AbstractE2ETest() {
@@ -129,17 +128,17 @@ internal class OverstyringApiTest: AbstractE2ETest() {
 
     @Test
     fun `skjønnsfastsetting av sykepengegrunnlag`() {
-        val skjonnsfastsetting = SkjønnsfastsattSykepengegrunnlagDto(
+        val skjonnsfastsetting = SkjønnsfastsettSykepengegrunnlagHandling(
             fødselsnummer = FØDSELSNUMMER,
             aktørId = AKTØR_ID,
             skjæringstidspunkt = 1.januar,
             arbeidsgivere = listOf(
-                SkjønnsfastsattArbeidsgiverDto(
+                SkjønnsfastsettSykepengegrunnlagHandling.SkjønnsfastsattArbeidsgiverDto(
                     organisasjonsnummer = ORGANISASJONSNUMMER,
                     årlig = 250000.0,
                     fraÅrlig = 260000.0,
                     årsak = "En årsak",
-                    type = Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
+                    type = SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT,
                     begrunnelseMal = "En begrunnelsemal",
                     begrunnelseFritekst = "begrunnelsefritekst",
                     begrunnelseKonklusjon = "En begrunnelsekonklusjon",

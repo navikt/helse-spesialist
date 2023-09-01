@@ -9,8 +9,10 @@ import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.OverstyrtInnt
 import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.OverstyrtTidslinje
 import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.OverstyrtTidslinjedag
 import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.Refusjonselement
+import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.SkjønnsfastsattSykepengegrunnlag
+import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.SkjønnsfastsattSykepengegrunnlag.SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype
 import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.Subsumsjon
-import no.nav.helse.spesialist.api.overstyring.SubsumsjonDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandling.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto
 
 internal sealed interface SaksbehandlerHandling {
     fun loggnavn(): String
@@ -146,3 +148,70 @@ data class OverstyrArbeidsforholdHandling(
         val forklaring: String
     )
 }
+
+internal data class SkjønnsfastsettSykepengegrunnlagHandling(
+    val aktørId: String,
+    val fødselsnummer: String,
+    val skjæringstidspunkt: LocalDate,
+    val arbeidsgivere: List<SkjønnsfastsattArbeidsgiverDto>,
+): OverstyringHandling {
+    private val skjønnsfastsattSykepengegrunnlag get() = SkjønnsfastsattSykepengegrunnlag(
+        aktørId,
+        fødselsnummer,
+        skjæringstidspunkt,
+        arbeidsgivere = arbeidsgivere.map { arbeidsgiverDto ->
+            SkjønnsfastsattSykepengegrunnlag.SkjønnsfastsattArbeidsgiver(
+                arbeidsgiverDto.organisasjonsnummer,
+                arbeidsgiverDto.årlig,
+                arbeidsgiverDto.fraÅrlig,
+                arbeidsgiverDto.årsak,
+                type = when (arbeidsgiverDto.type) {
+                    SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT -> Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT
+                    SkjønnsfastsettingstypeDto.RAPPORTERT_ÅRSINNTEKT -> Skjønnsfastsettingstype.RAPPORTERT_ÅRSINNTEKT
+                    SkjønnsfastsettingstypeDto.ANNET -> Skjønnsfastsettingstype.ANNET
+                },
+                begrunnelseMal = arbeidsgiverDto.begrunnelseMal,
+                begrunnelseFritekst = arbeidsgiverDto.begrunnelseFritekst,
+                begrunnelseKonklusjon = arbeidsgiverDto.begrunnelseKonklusjon,
+                subsumsjon = arbeidsgiverDto.subsumsjon?.let {
+                    Subsumsjon(it.paragraf, it.ledd, it.bokstav)
+                },
+                initierendeVedtaksperiodeId = arbeidsgiverDto.initierendeVedtaksperiodeId
+            )
+        }
+    )
+
+    override fun gjelderFødselsnummer(): String = fødselsnummer
+
+    override fun loggnavn(): String = "skjønnsfastsett_sykepengegrunnlag"
+
+    override fun utførAv(saksbehandler: Saksbehandler) {
+        saksbehandler.håndter(skjønnsfastsattSykepengegrunnlag)
+    }
+
+    internal data class SkjønnsfastsattArbeidsgiverDto(
+        val organisasjonsnummer: String,
+        val årlig: Double,
+        val fraÅrlig: Double,
+        val årsak: String,
+        val type: SkjønnsfastsettingstypeDto,
+        val begrunnelseMal: String?,
+        val begrunnelseFritekst: String?,
+        val begrunnelseKonklusjon: String?,
+        val subsumsjon: SubsumsjonDto?,
+        val initierendeVedtaksperiodeId: String?,
+    ) {
+
+        internal enum class SkjønnsfastsettingstypeDto {
+            OMREGNET_ÅRSINNTEKT,
+            RAPPORTERT_ÅRSINNTEKT,
+            ANNET,
+        }
+    }
+}
+
+data class SubsumsjonDto(
+    val paragraf: String,
+    val ledd: String? = null,
+    val bokstav: String? = null,
+)

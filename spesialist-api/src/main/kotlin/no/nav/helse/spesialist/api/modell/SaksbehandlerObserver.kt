@@ -8,6 +8,7 @@ internal interface SaksbehandlerObserver {
     fun tidslinjeOverstyrt(fødselsnummer: String, event: OverstyrtTidslinjeEvent) {}
     fun inntektOgRefusjonOverstyrt(fødselsnummer: String, event: OverstyrtInntektOgRefusjonEvent) {}
     fun arbeidsforholdOverstyrt(fødselsnummer: String, event: OverstyrtArbeidsforholdEvent) {}
+    fun sykepengegrunnlagSkjønnsfastsatt(fødselsnummer: String, event: SkjønnsfastsattSykepengegrunnlagEvent) {}
 }
 
 data class OverstyrtInntektOgRefusjonEvent(
@@ -42,21 +43,21 @@ data class OverstyrtInntektOgRefusjonEvent(
         val fraRefusjonsopplysninger: List<OverstyrtRefusjonselement>?,
         val begrunnelse: String,
         val forklaring: String,
-        val subsumsjon: Subsumsjon?,
+        val subsumsjon: SubsumsjonEvent?,
     ) {
         data class OverstyrtRefusjonselement(
             val fom: LocalDate,
             val tom: LocalDate? = null,
             val beløp: Double
         )
-
-        data class Subsumsjon(
-            val paragraf: String,
-            val ledd: String? = null,
-            val bokstav: String? = null,
-        )
     }
 }
+
+data class SubsumsjonEvent(
+    val paragraf: String,
+    val ledd: String? = null,
+    val bokstav: String? = null,
+)
 
 data class OverstyrtTidslinjeEvent(
     val fødselsnummer: String,
@@ -123,5 +124,43 @@ data class OverstyrtArbeidsforholdEvent(
         val deaktivert: Boolean,
         val begrunnelse: String,
         val forklaring: String,
+    )
+}
+
+data class SkjønnsfastsattSykepengegrunnlagEvent(
+    val fødselsnummer: String,
+    val aktørId: String,
+    val saksbehandlerOid: UUID,
+    val saksbehandlerNavn: String,
+    val saksbehandlerIdent: String,
+    val saksbehandlerEpost: String,
+    val skjæringstidspunkt: LocalDate,
+    val arbeidsgivere: List<SkjønnsfastsattArbeidsgiver>
+) {
+    fun somJsonMessage() = JsonMessage.newMessage(
+        "saksbehandler_skjonnsfastsetter_sykepengegrunnlag",
+        listOfNotNull(
+            "aktørId" to aktørId,
+            "fødselsnummer" to fødselsnummer,
+            "skjæringstidspunkt" to skjæringstidspunkt,
+            "arbeidsgivere" to arbeidsgivere,
+            "saksbehandlerOid" to saksbehandlerOid,
+            "saksbehandlerNavn" to saksbehandlerNavn,
+            "saksbehandlerIdent" to saksbehandlerIdent,
+            "saksbehandlerEpost" to saksbehandlerEpost,
+        ).toMap()
+    )
+
+    data class SkjønnsfastsattArbeidsgiver(
+        val organisasjonsnummer: String,
+        val årlig: Double,
+        val fraÅrlig: Double,
+        val årsak: String,
+        val type: String,
+        val begrunnelseMal: String?,
+        val begrunnelseFritekst: String?,
+        val begrunnelseKonklusjon: String?,
+        val subsumsjon: SubsumsjonEvent?,
+        val initierendeVedtaksperiodeId: String?,
     )
 }
