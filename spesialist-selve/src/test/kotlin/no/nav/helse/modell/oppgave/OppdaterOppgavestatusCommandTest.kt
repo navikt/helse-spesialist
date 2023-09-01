@@ -24,7 +24,15 @@ internal class OppdaterOppgavestatusCommandTest {
 
     @Test
     fun `ferdigstiller oppgave når utbetalingen har blitt utbetalt`() {
-        val oppgave = Oppgave(1L, Oppgavetype.SØKNAD, Oppgavestatus.AvventerSystem, UUID.randomUUID(), "IDENT", UUID.randomUUID(), UTBETALING_ID)
+        val oppgave = Oppgave(
+            1L,
+            Oppgavetype.SØKNAD,
+            Oppgavestatus.AvventerSystem,
+            UUID.randomUUID(),
+            UTBETALING_ID,
+            "IDENT",
+            UUID.randomUUID()
+        )
         every { oppgaveDao.finn(any<UUID>()) } returns oppgave
         val status = UTBETALT
         val command = OppdaterOppgavestatusCommand(UTBETALING_ID, status, oppgaveDao, oppgaveMediator)
@@ -35,7 +43,15 @@ internal class OppdaterOppgavestatusCommandTest {
 
     @Test
     fun `ferdigstiller oppgave når utbetalingen har blitt godkjent uten utbetaling`() {
-        val oppgave = Oppgave(1L, Oppgavetype.SØKNAD, Oppgavestatus.AvventerSystem, UUID.randomUUID(), "IDENT", UUID.randomUUID(), UTBETALING_ID)
+        val oppgave = Oppgave(
+            1L,
+            Oppgavetype.SØKNAD,
+            Oppgavestatus.AvventerSystem,
+            UUID.randomUUID(),
+            UTBETALING_ID,
+            "IDENT",
+            UUID.randomUUID()
+        )
         every { oppgaveDao.finn(any<UUID>()) } returns oppgave
         val status = GODKJENT_UTEN_UTBETALING
         val command = OppdaterOppgavestatusCommand(UTBETALING_ID, status, oppgaveDao, oppgaveMediator)
@@ -46,7 +62,15 @@ internal class OppdaterOppgavestatusCommandTest {
 
     @Test
     fun `ferdigstiller oppgave når utbetalingen har blitt avslått`() {
-        val oppgave = Oppgave(1L, Oppgavetype.SØKNAD, Oppgavestatus.AvventerSystem, UUID.randomUUID(), "IDENT", UUID.randomUUID(), UTBETALING_ID)
+        val oppgave = Oppgave(
+            1L,
+            Oppgavetype.SØKNAD,
+            Oppgavestatus.AvventerSystem,
+            UUID.randomUUID(),
+            UTBETALING_ID,
+            "IDENT",
+            UUID.randomUUID()
+        )
         every { oppgaveDao.finn(any<UUID>()) } returns oppgave
         val status = IKKE_GODKJENT
         val command = OppdaterOppgavestatusCommand(UTBETALING_ID, status, oppgaveDao, oppgaveMediator)
@@ -58,7 +82,15 @@ internal class OppdaterOppgavestatusCommandTest {
 
     @Test
     fun `invaliderer oppgave basert på utbetalingens status`() {
-        val oppgave = Oppgave(1L, Oppgavetype.SØKNAD, Oppgavestatus.AvventerSystem, UUID.randomUUID(), "IDENT", UUID.randomUUID(), UTBETALING_ID)
+        val oppgave = Oppgave(
+            1L,
+            Oppgavetype.SØKNAD,
+            Oppgavestatus.AvventerSystem,
+            UUID.randomUUID(),
+            UTBETALING_ID,
+            "IDENT",
+            UUID.randomUUID()
+        )
         every { oppgaveDao.finn(any<UUID>()) } returns oppgave
         val status = FORKASTET
         val command = OppdaterOppgavestatusCommand(UTBETALING_ID, status, oppgaveDao, oppgaveMediator)
@@ -70,7 +102,15 @@ internal class OppdaterOppgavestatusCommandTest {
 
     @Test
     fun `gjør ingenting om vi ikke forholder oss til utbetalingsstatusen`() {
-        val oppgave = Oppgave(1L, Oppgavetype.SØKNAD, Oppgavestatus.AvventerSystem, UUID.randomUUID(), "IDENT", UUID.randomUUID(), UTBETALING_ID)
+        val oppgave = Oppgave(
+            1L,
+            Oppgavetype.SØKNAD,
+            Oppgavestatus.AvventerSystem,
+            UUID.randomUUID(),
+            UTBETALING_ID,
+            "IDENT",
+            UUID.randomUUID()
+        )
         every { oppgaveDao.finn(any<UUID>()) } returns oppgave
         val status = ANNULLERT
         val command = OppdaterOppgavestatusCommand(UTBETALING_ID, status, oppgaveDao, oppgaveMediator)

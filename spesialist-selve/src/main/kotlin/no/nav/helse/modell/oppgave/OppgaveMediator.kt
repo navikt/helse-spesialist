@@ -112,7 +112,7 @@ class OppgaveMediator(
 
     private fun tildelOppgaver(fødselsnummer: String) {
         reservasjonDao.hentReservasjonFor(fødselsnummer)?.let { (oid, settPåVent) ->
-            oppgaveForLagring?.tildelHvisIkkeStikkprøve(this, oid, settPåVent, harTilgangTil)
+            oppgaveForLagring?.forsøkTildeling(this, oid, settPåVent, harTilgangTil)
         }
     }
 

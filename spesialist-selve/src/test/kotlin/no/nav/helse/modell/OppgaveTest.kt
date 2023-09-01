@@ -53,7 +53,13 @@ internal class OppgaveTest {
 
     @Test
     fun `oppdater oppgave`() {
-        val oppgave = Oppgave(OPPGAVE_ID, OPPGAVETYPE, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID)
+        val oppgave = Oppgave(
+            OPPGAVE_ID,
+            OPPGAVETYPE,
+            Oppgavestatus.AvventerSaksbehandler,
+            VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID
+        )
         oppgave.ferdigstill(SAKSBEHANDLERIDENT, SAKSBEHANDLEROID)
         oppgave.lagre(oppgaveMediator, COMMAND_CONTEXT_ID, HENDELSE_ID)
         verify(exactly = 1) { oppgaveDao.updateOppgave(OPPGAVE_ID, Oppgavestatus.Ferdigstilt, SAKSBEHANDLERIDENT, SAKSBEHANDLEROID) }
@@ -61,16 +67,40 @@ internal class OppgaveTest {
 
     @Test
     fun `gjenoppretter oppgave`() {
-        val oppgave1 = Oppgave(OPPGAVE_ID, OPPGAVETYPE, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID)
-        val oppgave2 = Oppgave(OPPGAVE_ID, OPPGAVETYPE, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID)
-        val oppgave3 = Oppgave(OPPGAVE_ID, OPPGAVETYPE, Oppgavestatus.AvventerSystem, VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID)
+        val oppgave1 = Oppgave(
+            OPPGAVE_ID,
+            OPPGAVETYPE,
+            Oppgavestatus.AvventerSaksbehandler,
+            VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID
+        )
+        val oppgave2 = Oppgave(
+            OPPGAVE_ID,
+            OPPGAVETYPE,
+            Oppgavestatus.AvventerSaksbehandler,
+            VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID
+        )
+        val oppgave3 = Oppgave(
+            OPPGAVE_ID,
+            OPPGAVETYPE,
+            Oppgavestatus.AvventerSystem,
+            VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID
+        )
         assertEquals(oppgave1, oppgave2)
         assertEquals(oppgave1, oppgave3)
     }
 
     @Test
     fun `Setter oppgavestatus til INVALIDERT når oppgaven avbrytes`() {
-        val oppgave = Oppgave(OPPGAVE_ID, OPPGAVETYPE, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID)
+        val oppgave = Oppgave(
+            OPPGAVE_ID,
+            OPPGAVETYPE,
+            Oppgavestatus.AvventerSaksbehandler,
+            VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID
+        )
         oppgave.avbryt()
         oppgave.lagre(oppgaveMediator, COMMAND_CONTEXT_ID, HENDELSE_ID)
         verify(exactly = 1) { oppgaveDao.updateOppgave(OPPGAVE_ID, Oppgavestatus.Invalidert, null, null) }
@@ -78,7 +108,13 @@ internal class OppgaveTest {
 
     @Test
     fun equals() {
-        val gjenopptattOppgave = Oppgave(1L, OPPGAVETYPE, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID)
+        val gjenopptattOppgave = Oppgave(
+            1L,
+            OPPGAVETYPE,
+            Oppgavestatus.AvventerSaksbehandler,
+            VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID
+        )
         val oppgave1 = Oppgave.søknad(VEDTAKSPERIODE_ID, UTBETALING_ID)
         val oppgave2 = Oppgave.søknad(VEDTAKSPERIODE_ID, UTBETALING_ID)
         val oppgave3 = Oppgave.søknad(UUID.randomUUID(), UTBETALING_ID)

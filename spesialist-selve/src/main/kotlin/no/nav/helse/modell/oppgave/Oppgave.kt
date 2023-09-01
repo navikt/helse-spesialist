@@ -16,18 +16,21 @@ class Oppgave private constructor(
     private val type: Oppgavetype,
     private var status: Oppgavestatus,
     private val vedtaksperiodeId: UUID,
-    private val utbetalingId: UUID?
+    private val utbetalingId: UUID
 ) {
     private var id: Long? = null
     private var ferdigstiltAvIdent: String? = null
     private var ferdigstiltAvOid: UUID? = null
 
-    constructor(id: Long, type: Oppgavetype, status: Oppgavestatus, vedtaksperiodeId: UUID, ferdigstiltAvIdent: String? = null, ferdigstiltAvOid: UUID? = null, utbetalingId: UUID?) : this(
-        type,
-        status,
-        vedtaksperiodeId,
-        utbetalingId
-    ) {
+    constructor(
+        id: Long,
+        type: Oppgavetype,
+        status: Oppgavestatus,
+        vedtaksperiodeId: UUID,
+        utbetalingId: UUID,
+        ferdigstiltAvIdent: String? = null,
+        ferdigstiltAvOid: UUID? = null
+    ) : this(type, status, vedtaksperiodeId, utbetalingId) {
         this.id = id
         this.ferdigstiltAvIdent = ferdigstiltAvIdent
         this.ferdigstiltAvOid = ferdigstiltAvOid
@@ -36,7 +39,7 @@ class Oppgave private constructor(
     private fun oppgaveId() = checkNotNull(id) { "Forventet at oppgave med id=$id skulle finnes?" }
 
     companion object {
-        private val log = LoggerFactory.getLogger(this::class.java)
+        private val logg = LoggerFactory.getLogger(this::class.java)
 
         fun søknad(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave(Oppgavetype.SØKNAD, vedtaksperiodeId, utbetalingId)
         fun stikkprøve(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave(Oppgavetype.STIKKPRØVE, vedtaksperiodeId, utbetalingId)
@@ -130,7 +133,7 @@ class Oppgave private constructor(
     }
 
     fun loggOppgaverAvbrutt(vedtaksperiodeId: UUID) {
-        log.info("Har avbrutt oppgave $id for vedtaksperiode $vedtaksperiodeId")
+        logg.info("Har avbrutt oppgave $id for vedtaksperiode $vedtaksperiodeId")
     }
 
     fun lagreAvventerSystem(oppgaveDao: OppgaveDao, ident: String, oid: UUID) {
@@ -141,30 +144,30 @@ class Oppgave private constructor(
     fun lagre(oppgaveMediator: OppgaveMediator, contextId: UUID, hendelseId: UUID) {
         id?.also {
             oppgaveMediator.oppdater(it, status, ferdigstiltAvIdent, ferdigstiltAvOid)
-        } ?: oppgaveMediator.opprett(contextId, vedtaksperiodeId, utbetalingId!!, type, hendelseId).also { id = it } ?: return
+        } ?: oppgaveMediator.opprett(contextId, vedtaksperiodeId, utbetalingId, type, hendelseId).also { id = it } ?: return
     }
 
     fun avbryt() {
         status = Oppgavestatus.Invalidert
     }
 
-    fun tildelHvisIkkeStikkprøve(
+    fun forsøkTildeling(
         oppgaveMediator: OppgaveMediator,
         saksbehandleroid: UUID,
         påVent: Boolean = false,
         harTilgangTil: Tilgangskontroll,
     ) {
         if (type == Oppgavetype.STIKKPRØVE) {
-            log.info("OppgaveId $id er stikkprøve og tildeles ikke på tross av reservasjon.")
+            logg.info("OppgaveId $id er stikkprøve og tildeles ikke på tross av reservasjon.")
             return
         }
         if (type == Oppgavetype.RISK_QA) {
             val harTilgangTilRisk = runBlocking { harTilgangTil(saksbehandleroid, Gruppe.RISK_QA) }
-            if (!harTilgangTilRisk) log.info("OppgaveId $id er RISK_QA og saksbehandler har ikke tilgang, tildeles ikke på tross av reservasjon.")
+            if (!harTilgangTilRisk) logg.info("OppgaveId $id er RISK_QA og saksbehandler har ikke tilgang, tildeles ikke på tross av reservasjon.")
             return
         }
         oppgaveMediator.tildel(checkNotNull(id), saksbehandleroid, påVent)
-        log.info("Oppgave $id tildeles $saksbehandleroid grunnet reservasjon.")
+        logg.info("Oppgave $id tildeles $saksbehandleroid grunnet reservasjon.")
     }
 
     fun lagrePeriodehistorikk(
@@ -173,9 +176,7 @@ class Oppgave private constructor(
         type: PeriodehistorikkType,
         notatId: Int?
     ) {
-        if (utbetalingId != null) {
-            periodehistorikkDao.lagre(type, saksbehandleroid, utbetalingId, notatId)
-        }
+        periodehistorikkDao.lagre(type, saksbehandleroid, utbetalingId, notatId)
     }
 
     override fun equals(other: Any?): Boolean {

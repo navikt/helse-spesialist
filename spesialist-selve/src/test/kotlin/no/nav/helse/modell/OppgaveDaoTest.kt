@@ -181,27 +181,6 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `kan hente oppgave selv om utbetalingId mangler`() {
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode(
-            periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
-            inntektskilde = Inntektskilde.EN_ARBEIDSGIVER
-        )
-        val oppgaveId = insertOppgave(
-            utbetalingId = null,
-            commandContextId = CONTEXT_ID,
-            vedtakRef = vedtakId,
-            oppgavetype = OPPGAVETYPE
-        )
-        val oppgave = oppgaveDao.finn(oppgaveId) ?: fail { "Fant ikke oppgave" }
-        assertEquals(
-            Oppgave(oppgaveId, OPPGAVETYPE, AvventerSaksbehandler, VEDTAKSPERIODE, utbetalingId = null),
-            oppgave
-        )
-    }
-
-    @Test
     fun `finner vedtaksperiodeId`() {
         nyPerson()
         val actual = oppgaveDao.finnVedtaksperiodeId(oppgaveId)

@@ -106,7 +106,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource) {
                 type = enumValueOf(row.string("type")),
                 status = enumValueOf(row.string("status")),
                 vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
-                utbetalingId = row.stringOrNull("utbetaling_id")?.let(UUID::fromString),
+                utbetalingId = row.uuid("utbetaling_id"),
                 ferdigstiltAvIdent = row.stringOrNull("ferdigstilt_av"),
                 ferdigstiltAvOid = row.stringOrNull("ferdigstilt_av_oid")?.let(UUID::fromString)
             )
@@ -125,7 +125,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource) {
                 type = enumValueOf(row.string("type")),
                 status = enumValueOf(row.string("status")),
                 vedtaksperiodeId = vedtaksperiodeId,
-                utbetalingId = row.stringOrNull("utbetaling_id")?.let(UUID::fromString),
+                utbetalingId = row.uuid("utbetaling_id"),
             )
         }
 
@@ -142,7 +142,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource) {
                 type = enumValueOf(row.string("type")),
                 status = enumValueOf(row.string("status")),
                 vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
-                utbetalingId = row.stringOrNull("utbetaling_id")?.let(UUID::fromString),
+                utbetalingId = row.uuid("utbetaling_id"),
                 ferdigstiltAvIdent = row.stringOrNull("ferdigstilt_av"),
                 ferdigstiltAvOid = row.stringOrNull("ferdigstilt_av_oid")?.let(UUID::fromString)
             )
