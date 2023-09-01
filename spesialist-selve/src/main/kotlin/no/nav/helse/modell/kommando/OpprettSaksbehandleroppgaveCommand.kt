@@ -46,8 +46,6 @@ internal class OpprettSaksbehandleroppgaveCommand(
 //        else if (vedtaksperiodensUtbetaling.utbetalingTilArbeidsgiver()) egenskaper.add(Oppgavetype.UTBETALING_TIL_ARBEIDSGIVER)
 //        else egenskaper.add(Oppgavetype.INGEN_UTBETALING)
 
-        if (egenskaper.isEmpty()) egenskaper.add(Oppgavetype.SØKNAD)
-
         val oppgave = Oppgave.oppgaveMedEgenskaper(vedtaksperiodeId, utbetalingId, egenskaper)
 
         logg.info("Saksbehandleroppgave opprettet, avventer lagring: $oppgave")

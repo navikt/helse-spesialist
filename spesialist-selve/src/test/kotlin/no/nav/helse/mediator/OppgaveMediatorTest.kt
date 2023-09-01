@@ -17,7 +17,9 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
-import no.nav.helse.spesialist.api.oppgave.Oppgavetype
+import no.nav.helse.spesialist.api.oppgave.Oppgavetype.RISK_QA
+import no.nav.helse.spesialist.api.oppgave.Oppgavetype.STIKKPRØVE
+import no.nav.helse.spesialist.api.oppgave.Oppgavetype.SØKNAD
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.reservasjon.Reservasjonsinfo
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
@@ -41,7 +43,7 @@ internal class OppgaveMediatorTest {
         private val OPPGAVE_ID = nextLong()
         private const val SAKSBEHANDLERIDENT = "Z999999"
         private val SAKSBEHANDLEROID = UUID.randomUUID()
-        private val OPPGAVETYPE_SØKNAD = Oppgavetype.SØKNAD
+        private val OPPGAVETYPE_SØKNAD = SØKNAD
     }
 
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
@@ -57,9 +59,9 @@ internal class OppgaveMediatorTest {
         opptegnelseDao,
         harTilgangTil = gruppehenterTestoppsett.hentGrupper,
     )
-    private val søknadsoppgave: Oppgave = Oppgave.søknad(VEDTAKSPERIODE_ID, UTBETALING_ID)
-    private val stikkprøveoppgave: Oppgave = Oppgave.stikkprøve(VEDTAKSPERIODE_ID_2, UTBETALING_ID_2)
-    private val riskoppgave: Oppgave = Oppgave.riskQA(VEDTAKSPERIODE_ID, UTBETALING_ID)
+    private val søknadsoppgave: Oppgave = Oppgave.oppgaveMedEgenskaper(VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(SØKNAD))
+    private val stikkprøveoppgave: Oppgave = Oppgave.oppgaveMedEgenskaper(VEDTAKSPERIODE_ID_2, UTBETALING_ID_2, listOf(STIKKPRØVE))
+    private val riskoppgave: Oppgave = Oppgave.oppgaveMedEgenskaper(VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(RISK_QA))
 
     private val testRapid = TestRapid()
 

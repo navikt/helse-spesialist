@@ -11,6 +11,11 @@ import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.spesialist.api.oppgave.Oppgavetype.DELVIS_REFUSJON
+import no.nav.helse.spesialist.api.oppgave.Oppgavetype.FORTROLIG_ADRESSE
+import no.nav.helse.spesialist.api.oppgave.Oppgavetype.STIKKPRØVE
+import no.nav.helse.spesialist.api.oppgave.Oppgavetype.SØKNAD
+import no.nav.helse.spesialist.api.oppgave.Oppgavetype.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spleis.graphql.enums.GraphQLUtbetalingstatus
@@ -56,14 +61,14 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
     @Test
     fun `oppretter oppgave`() {
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.opprett(Oppgave.søknad(VEDTAKSPERIODE_ID, UTBETALING_ID)) }
+        verify(exactly = 1) { oppgaveMediator.opprett(Oppgave.oppgaveMedEgenskaper(VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(SØKNAD))) }
     }
 
     @Test
     fun `oppretter stikkprøve`() {
         every { automatisering.erStikkprøve(VEDTAKSPERIODE_ID, any()) } returns true
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.opprett(Oppgave.stikkprøve(VEDTAKSPERIODE_ID, UTBETALING_ID)) }
+        verify(exactly = 1) { oppgaveMediator.opprett(Oppgave.oppgaveMedEgenskaper(VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(STIKKPRØVE))) }
     }
 
     @Test
@@ -72,10 +77,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         assertTrue(command.execute(context))
         verify(exactly = 1) {
             oppgaveMediator.opprett(
-                Oppgave.fortroligAdressebeskyttelse(
-                    VEDTAKSPERIODE_ID,
-                    UTBETALING_ID
-                )
+                Oppgave.oppgaveMedEgenskaper(VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(FORTROLIG_ADRESSE))
             )
         }
     }
@@ -84,7 +86,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
     fun `oppretter oppgave med egen oppgavetype for utbetaling til sykmeldt`() {
         every { snapshotMediator.finnUtbetaling(FNR, UTBETALING_ID) } returns enUtbetaling(personbeløp = 500)
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.opprett(Oppgave.utbetalingTilSykmeldt(VEDTAKSPERIODE_ID, UTBETALING_ID)) }
+        verify(exactly = 1) { oppgaveMediator.opprett(Oppgave.oppgaveMedEgenskaper(VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(UTBETALING_TIL_SYKMELDT))) }
     }
 
     @Test
@@ -94,7 +96,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
             arbeidsgiverbeløp = 500
         )
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.opprett(Oppgave.delvisRefusjon(VEDTAKSPERIODE_ID, UTBETALING_ID)) }
+        verify(exactly = 1) { oppgaveMediator.opprett(Oppgave.oppgaveMedEgenskaper(VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(DELVIS_REFUSJON))) }
     }
 
     private fun enUtbetaling(personbeløp: Int = 0, arbeidsgiverbeløp: Int = 0): GraphQLUtbetaling =

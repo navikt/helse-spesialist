@@ -9,7 +9,8 @@ import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
-import no.nav.helse.spesialist.api.oppgave.Oppgavetype
+import no.nav.helse.spesialist.api.oppgave.Oppgavetype.STIKKPRØVE
+import no.nav.helse.spesialist.api.oppgave.Oppgavetype.SØKNAD
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -20,7 +21,7 @@ import kotlin.random.Random
 
 internal class OppgaveTest {
     private companion object {
-        private val OPPGAVETYPE = Oppgavetype.SØKNAD
+        private val OPPGAVETYPE = SØKNAD
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
         private val UTBETALING_ID = UUID.randomUUID()
         private val COMMAND_CONTEXT_ID = UUID.randomUUID()
@@ -38,7 +39,7 @@ internal class OppgaveTest {
     private val oppgaveMediator =
         OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao, opptegnelseDao)
 
-    private val oppgave = Oppgave.søknad(VEDTAKSPERIODE_ID, UTBETALING_ID)
+    private val oppgave = Oppgave.oppgaveMedEgenskaper(VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(SØKNAD))
 
     @BeforeEach
     fun setup() {
@@ -115,10 +116,10 @@ internal class OppgaveTest {
             VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID
         )
-        val oppgave1 = Oppgave.søknad(VEDTAKSPERIODE_ID, UTBETALING_ID)
-        val oppgave2 = Oppgave.søknad(VEDTAKSPERIODE_ID, UTBETALING_ID)
-        val oppgave3 = Oppgave.søknad(UUID.randomUUID(), UTBETALING_ID)
-        val oppgave4 = Oppgave.stikkprøve(VEDTAKSPERIODE_ID, UTBETALING_ID)
+        val oppgave1 = Oppgave.oppgaveMedEgenskaper(VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(SØKNAD))
+        val oppgave2 = Oppgave.oppgaveMedEgenskaper(VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(SØKNAD))
+        val oppgave3 = Oppgave.oppgaveMedEgenskaper(UUID.randomUUID(), UTBETALING_ID, listOf(SØKNAD))
+        val oppgave4 = Oppgave.oppgaveMedEgenskaper(VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(STIKKPRØVE))
         assertEquals(oppgave1, oppgave2)
         assertEquals(oppgave1.hashCode(), oppgave2.hashCode())
         assertNotEquals(oppgave1, oppgave3)

@@ -42,23 +42,12 @@ class Oppgave private constructor(
     companion object {
         private val logg = LoggerFactory.getLogger(this::class.java)
 
-        fun søknad(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave(Oppgavetype.SØKNAD, vedtaksperiodeId, utbetalingId)
-        fun stikkprøve(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave(Oppgavetype.STIKKPRØVE, vedtaksperiodeId, utbetalingId)
-        fun revurdering(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave(Oppgavetype.REVURDERING, vedtaksperiodeId, utbetalingId)
-        fun riskQA(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave(Oppgavetype.RISK_QA, vedtaksperiodeId, utbetalingId)
-        fun fortroligAdressebeskyttelse(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave(Oppgavetype.FORTROLIG_ADRESSE, vedtaksperiodeId, utbetalingId)
-        fun utbetalingTilSykmeldt(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave(Oppgavetype.UTBETALING_TIL_SYKMELDT, vedtaksperiodeId, utbetalingId)
-        fun delvisRefusjon(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave(Oppgavetype.DELVIS_REFUSJON, vedtaksperiodeId, utbetalingId)
-
         fun oppgaveMedEgenskaper(vedtaksperiodeId: UUID, utbetalingId: UUID, egenskaper: List<Oppgavetype>): Oppgave {
-            val hovedegenskap = egenskaper.firstOrNull() ?: throw IllegalArgumentException("En oppgave må ha minst én egenskap")
+            val hovedegenskap = egenskaper.firstOrNull() ?: Oppgavetype.SØKNAD
             return Oppgave(hovedegenskap, Oppgavestatus.AvventerSaksbehandler, vedtaksperiodeId, utbetalingId).also {
                 it.egenskaper.addAll(egenskaper)
             }
         }
-
-        private fun oppgave(type: Oppgavetype, vedtaksperiodeId: UUID, utbetalingId: UUID) =
-            Oppgave(type, Oppgavestatus.AvventerSaksbehandler, vedtaksperiodeId, utbetalingId)
 
         fun lagMelding(
             oppgaveId: Long,
