@@ -12,6 +12,8 @@ enum class Oppgavetype {
     FORTROLIG_ADRESSE,
     UTBETALING_TIL_SYKMELDT,
     DELVIS_REFUSJON,
+    UTBETALING_TIL_ARBEIDSGIVER,
+    INGEN_UTBETALING
 }
 
 data class Boenhet(
@@ -85,6 +87,8 @@ internal fun no.nav.helse.spesialist.api.oppgave.Oppgavetype.tilOppgavetype(): O
         no.nav.helse.spesialist.api.oppgave.Oppgavetype.FORTROLIG_ADRESSE -> Oppgavetype.FORTROLIG_ADRESSE
         no.nav.helse.spesialist.api.oppgave.Oppgavetype.UTBETALING_TIL_SYKMELDT -> Oppgavetype.UTBETALING_TIL_SYKMELDT
         no.nav.helse.spesialist.api.oppgave.Oppgavetype.DELVIS_REFUSJON -> Oppgavetype.DELVIS_REFUSJON
+        no.nav.helse.spesialist.api.oppgave.Oppgavetype.UTBETALING_TIL_ARBEIDSGIVER -> Oppgavetype.UTBETALING_TIL_ARBEIDSGIVER
+        no.nav.helse.spesialist.api.oppgave.Oppgavetype.INGEN_UTBETALING -> Oppgavetype.INGEN_UTBETALING
     }
 
 internal fun no.nav.helse.spesialist.api.vedtaksperiode.Periodetype.tilPeriodetype(): Periodetype =
