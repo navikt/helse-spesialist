@@ -4,6 +4,7 @@ import io.mockk.clearMocks
 import io.mockk.mockk
 import java.util.UUID
 import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.modell.oppgave.Oppgave.Companion.oppgaveMedEgenskaper
 import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.oppgave.OppgaveVisitor
 import no.nav.helse.spesialist.api.modell.Saksbehandler
@@ -16,6 +17,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import kotlin.random.Random.Default.nextLong
 
 internal class OppgaveTest {
@@ -70,6 +73,25 @@ internal class OppgaveTest {
         )
         assertEquals(oppgave1, oppgave2)
         assertEquals(oppgave1, oppgave3)
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Oppgavetype::class, names = ["SØKNAD"], mode = EnumSource.Mode.EXCLUDE)
+    fun `Første egenskap anses som oppgavetype`(type: Oppgavetype) {
+        val oppgave = oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, egenskaper = listOf(type, SØKNAD))
+
+        inspektør(oppgave) {
+            assertEquals(type, this.type)
+        }
+    }
+
+    @Test
+    fun `Defaulter til SØKNAD dersom ingen egenskaper er oppgitt`() {
+        val oppgave = oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, egenskaper = emptyList())
+
+        inspektør(oppgave) {
+            assertEquals(SØKNAD, this.type)
+        }
     }
 
     @Test
@@ -159,10 +181,10 @@ internal class OppgaveTest {
             VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID
         )
-        val oppgave1 = Oppgave.oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(SØKNAD))
-        val oppgave2 = Oppgave.oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(SØKNAD))
-        val oppgave3 = Oppgave.oppgaveMedEgenskaper(OPPGAVE_ID, UUID.randomUUID(), UTBETALING_ID, listOf(SØKNAD))
-        val oppgave4 = Oppgave.oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(STIKKPRØVE))
+        val oppgave1 = oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(SØKNAD))
+        val oppgave2 = oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(SØKNAD))
+        val oppgave3 = oppgaveMedEgenskaper(OPPGAVE_ID, UUID.randomUUID(), UTBETALING_ID, listOf(SØKNAD))
+        val oppgave4 = oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(STIKKPRØVE))
         assertEquals(oppgave1, oppgave2)
         assertEquals(oppgave1.hashCode(), oppgave2.hashCode())
         assertNotEquals(oppgave1, oppgave3)
@@ -182,7 +204,7 @@ internal class OppgaveTest {
     }
 
     private fun nyOppgave(vararg egenskaper: Oppgavetype) =
-        Oppgave.oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, egenskaper.toList())
+        oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, egenskaper.toList())
 
     private fun inspektør(oppgave: Oppgave, block: OppgaveInspektør.() -> Unit) {
         val inspektør = OppgaveInspektør()
@@ -192,6 +214,7 @@ internal class OppgaveTest {
 
     private class OppgaveInspektør: OppgaveVisitor {
         lateinit var status: Oppgavestatus
+        lateinit var type: Oppgavetype
         var tildelt: Boolean = false
         var påVent: Boolean = false
         var tildeltTil: Saksbehandler? = null
@@ -211,6 +234,7 @@ internal class OppgaveTest {
             this.tildelt = tildelt != null
             this.tildeltTil = tildelt
             this.påVent = påVent
+            this.type = type
         }
     }
 }
