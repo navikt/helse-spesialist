@@ -1,6 +1,7 @@
 package no.nav.helse.modell.oppgave
 
 import java.util.UUID
+import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 
@@ -16,26 +17,36 @@ class Oppgavelagrer : OppgaveVisitor {
         var ferdigstiltAvIdent: String?,
         var ferdigstiltAvOid: UUID?,
         val egenskaper: List<Oppgavetype>,
+        val tildelt: Saksbehandler?,
+        val påVent: Boolean
     )
 
     internal fun lagre(oppgaveMediator: OppgaveMediator, hendelseId: UUID, contextId: UUID) {
+        val oppgave = oppgaveForLagring
         oppgaveMediator.opprett(
-            oppgaveForLagring.id,
-            contextId,
-            oppgaveForLagring.vedtaksperiodeId,
-            oppgaveForLagring.utbetalingId,
-            oppgaveForLagring.type,
-            hendelseId
+            id = oppgave.id,
+            contextId = contextId,
+            vedtaksperiodeId = oppgave.vedtaksperiodeId,
+            utbetalingId = oppgave.utbetalingId,
+            navn = oppgave.type,
+            hendelseId = hendelseId
         )
+        if (oppgave.tildelt != null) {
+            oppgaveMediator.tildel(oppgave.id, oppgave.tildelt.oid(), oppgave.påVent)
+        }
     }
 
     internal fun lagre(oppgaveMediator: OppgaveMediator) {
+        val oppgave = oppgaveForLagring
         oppgaveMediator.oppdater(
-            oppgaveId = oppgaveForLagring.id,
-            status = oppgaveForLagring.status,
-            ferdigstiltAvIdent = oppgaveForLagring.ferdigstiltAvIdent,
-            ferdigstiltAvOid = oppgaveForLagring.ferdigstiltAvOid
+            oppgaveId = oppgave.id,
+            status = oppgave.status,
+            ferdigstiltAvIdent = oppgave.ferdigstiltAvIdent,
+            ferdigstiltAvOid = oppgave.ferdigstiltAvOid
         )
+        if (oppgave.tildelt != null) {
+            oppgaveMediator.tildel(oppgave.id, oppgave.tildelt.oid(), oppgave.påVent)
+        }
     }
 
     override fun visitOppgave(
@@ -46,10 +57,12 @@ class Oppgavelagrer : OppgaveVisitor {
         utbetalingId: UUID,
         ferdigstiltAvOid: UUID?,
         ferdigstiltAvIdent: String?,
-        egenskaper: List<Oppgavetype>
+        egenskaper: List<Oppgavetype>,
+        tildelt: Saksbehandler?,
+        påVent: Boolean
     ) {
         oppgaveForLagring = OppgaveForLagring(
-            id, type, status, vedtaksperiodeId, utbetalingId, ferdigstiltAvIdent, ferdigstiltAvOid, egenskaper
+            id, type, status, vedtaksperiodeId, utbetalingId, ferdigstiltAvIdent, ferdigstiltAvOid, egenskaper, tildelt, påVent
         )
     }
 }

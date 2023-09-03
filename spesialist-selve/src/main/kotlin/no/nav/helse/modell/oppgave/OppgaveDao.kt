@@ -7,6 +7,7 @@ import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommandData
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker
+import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
@@ -103,9 +104,12 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource) {
 
     fun finn(oppgaveId: Long) =
         asSQL(
-            """ SELECT o.type, o.status, v.vedtaksperiode_id, o.ferdigstilt_av, o.ferdigstilt_av_oid, o.utbetaling_id
+            """ 
+            SELECT o.type, o.status, v.vedtaksperiode_id, o.ferdigstilt_av, o.ferdigstilt_av_oid, o.utbetaling_id, s.navn, s.epost, s.ident, s.oid, t.på_vent
             FROM oppgave o
             INNER JOIN vedtak v on o.vedtak_ref = v.id
+            LEFT JOIN tildeling t on o.id = t.oppgave_id_ref
+            LEFT JOIN saksbehandler s on s.oid = t.saksbehandler_ref
             WHERE o.id = :oppgaveId
         """, mapOf("oppgaveId" to oppgaveId)
         ).single { row ->
@@ -116,7 +120,16 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource) {
                 vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
                 utbetalingId = row.uuid("utbetaling_id"),
                 ferdigstiltAvIdent = row.stringOrNull("ferdigstilt_av"),
-                ferdigstiltAvOid = row.stringOrNull("ferdigstilt_av_oid")?.let(UUID::fromString)
+                ferdigstiltAvOid = row.stringOrNull("ferdigstilt_av_oid")?.let(UUID::fromString),
+                tildelt = row.uuidOrNull("oid")?.let {
+                    Saksbehandler(
+                        epostadresse = row.string("epost"),
+                        oid = it,
+                        navn = row.string("navn"),
+                        ident = row.string("ident")
+                    )
+                },
+                påVent = row.boolean("på_vent")
             )
         }
 

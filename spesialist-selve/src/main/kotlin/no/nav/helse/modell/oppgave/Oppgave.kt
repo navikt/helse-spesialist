@@ -6,6 +6,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.helse.Gruppe
 import no.nav.helse.Tilgangskontroll
 import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
@@ -23,6 +24,8 @@ class Oppgave private constructor(
     private var ferdigstiltAvIdent: String? = null
     private var ferdigstiltAvOid: UUID? = null
     private val egenskaper = mutableListOf<Oppgavetype>()
+    private var tildelt: Saksbehandler? = null
+    private var påVent: Boolean = false
 
     constructor(
         id: Long,
@@ -31,10 +34,14 @@ class Oppgave private constructor(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
         ferdigstiltAvIdent: String? = null,
-        ferdigstiltAvOid: UUID? = null
+        ferdigstiltAvOid: UUID? = null,
+        tildelt: Saksbehandler? = null,
+        påVent: Boolean = false
     ) : this(id, type, status, vedtaksperiodeId, utbetalingId) {
         this.ferdigstiltAvIdent = ferdigstiltAvIdent
         this.ferdigstiltAvOid = ferdigstiltAvOid
+        this.tildelt = tildelt
+        this.påVent = påVent
     }
 
     companion object {
@@ -134,7 +141,7 @@ class Oppgave private constructor(
     }
 
     fun accept(visitor: OppgaveVisitor) {
-        visitor.visitOppgave(id, type, status, vedtaksperiodeId, utbetalingId, ferdigstiltAvOid, ferdigstiltAvIdent, egenskaper)
+        visitor.visitOppgave(id, type, status, vedtaksperiodeId, utbetalingId, ferdigstiltAvOid, ferdigstiltAvIdent, egenskaper, tildelt, påVent)
     }
 
     fun ferdigstill(ident: String, oid: UUID) {
@@ -166,8 +173,7 @@ class Oppgave private constructor(
     }
 
     fun forsøkTildeling(
-        oppgaveMediator: OppgaveMediator,
-        saksbehandleroid: UUID,
+        saksbehandler: Saksbehandler,
         påVent: Boolean = false,
         harTilgangTil: Tilgangskontroll,
     ) {
@@ -176,12 +182,13 @@ class Oppgave private constructor(
             return
         }
         if (type == Oppgavetype.RISK_QA) {
-            val harTilgangTilRisk = runBlocking { harTilgangTil(saksbehandleroid, Gruppe.RISK_QA) }
+            val harTilgangTilRisk = runBlocking { harTilgangTil(saksbehandler.oid(), Gruppe.RISK_QA) }
             if (!harTilgangTilRisk) logg.info("OppgaveId $id er RISK_QA og saksbehandler har ikke tilgang, tildeles ikke på tross av reservasjon.")
             return
         }
-        oppgaveMediator.tildel(id, saksbehandleroid, påVent)
-        logg.info("Oppgave $id tildeles $saksbehandleroid grunnet reservasjon.")
+        tildelt = saksbehandler
+        this.påVent = påVent
+        logg.info("Oppgave $id tildeles $saksbehandler grunnet reservasjon.")
     }
 
     fun lagrePeriodehistorikk(

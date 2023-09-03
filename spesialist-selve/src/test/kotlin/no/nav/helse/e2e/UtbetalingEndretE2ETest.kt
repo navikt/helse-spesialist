@@ -28,7 +28,7 @@ internal class UtbetalingEndretE2ETest : AbstractE2ETestV2() {
     fun `tildeler andre rundes oppgave til saksbehandler`() {
         val saksbehandlerOid = UUID.randomUUID()
         fremTilSaksbehandleroppgave()
-        opprettSaksbehandler(saksbehandlerOid, "Behandler, Saks", "saks.behandler@nav.no")
+        opprettSaksbehandler(saksbehandlerOid, "Behandler, Saks", "saks.behandler@nav.no", "Z999999")
 
         val oppgaveId = oppgaveIdFor(VEDTAKSPERIODE_ID)
         tildelOppgave(oppgaveId, saksbehandlerOid)
@@ -45,7 +45,7 @@ internal class UtbetalingEndretE2ETest : AbstractE2ETestV2() {
     fun `beholder påVent-flagget ved gjentildeling`() {
         val saksbehandlerOid = UUID.randomUUID()
         fremTilSaksbehandleroppgave()
-        opprettSaksbehandler(saksbehandlerOid, "Behandler, Saks", "saks.behandler@nav.no")
+        opprettSaksbehandler(saksbehandlerOid, "Behandler, Saks", "saks.behandler@nav.no", "Z999999")
 
         val oppgaveId = oppgaveIdFor(VEDTAKSPERIODE_ID)
         tildelOppgave(oppgaveId, saksbehandlerOid, påVent = false)
@@ -130,14 +130,15 @@ internal class UtbetalingEndretE2ETest : AbstractE2ETestV2() {
         oid: UUID,
         navn: String,
         epost: String,
+        ident: String
     ) {
         sessionOf(dataSource).use {
-            val opprettSaksbehandlerQuery = "INSERT INTO saksbehandler(oid, navn, epost) VALUES (:oid, :navn, :epost)"
+            val opprettSaksbehandlerQuery = "INSERT INTO saksbehandler(oid, navn, epost, ident) VALUES (:oid, :navn, :epost, :ident)"
             it.run(
                 queryOf(
                     opprettSaksbehandlerQuery,
                     mapOf<String, Any>(
-                        "oid" to oid, "navn" to navn, "epost" to epost
+                        "oid" to oid, "navn" to navn, "epost" to epost, "ident" to ident
                     )
                 ).asUpdate
             )

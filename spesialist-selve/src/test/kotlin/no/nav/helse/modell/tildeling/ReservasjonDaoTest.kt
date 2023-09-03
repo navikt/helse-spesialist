@@ -26,12 +26,12 @@ internal class ReservasjonDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `reserverer person`() {
         opprettData()
-        val saksbehandlerOid = sessionOf(dataSource).use {
+        val saksbehandler = sessionOf(dataSource).use {
             reservasjonDao.reserverPerson(SAKSBEHANDLER_OID, FNR, false)
             reservasjonDao.hentReservasjonFor(FNR)?.reservertTil
                 ?: fail("Forventet at det skulle finnes en reservasjon i basen")
         }
-        assertEquals(SAKSBEHANDLER_OID, saksbehandlerOid)
+        assertEquals(SAKSBEHANDLER_OID, saksbehandler.oid())
         assertRiktigVarighet(finnGyldigTil())
     }
 
@@ -46,7 +46,7 @@ internal class ReservasjonDaoTest : DatabaseIntegrationTest() {
             "S666666"
         )
 
-        val saksbehandlerOid = sessionOf(dataSource).use {
+        val saksbehandler = sessionOf(dataSource).use {
             reservasjonDao.reserverPerson(enAnnenSaksbehandler, FNR, false)
             val gyldigTil1 = finnGyldigTil()
             reservasjonDao.reserverPerson(SAKSBEHANDLER_OID, FNR, false)
@@ -55,7 +55,7 @@ internal class ReservasjonDaoTest : DatabaseIntegrationTest() {
             reservasjonDao.hentReservasjonFor(FNR)?.reservertTil
                 ?: fail("Forventet at det skulle finnes en reservasjon i basen")
         }
-        assertEquals(SAKSBEHANDLER_OID, saksbehandlerOid)
+        assertEquals(SAKSBEHANDLER_OID, saksbehandler.oid())
         assertRiktigVarighet(finnGyldigTil())
     }
 

@@ -87,7 +87,8 @@ class OppgaveMediator(
         contextId: UUID,
         messageContext: MessageContext,
     ) {
-        lagreOppgaver(hendelseId, contextId, messageContext) { tildelOppgaver(fødselsnummer) }
+        tildelOppgaver(fødselsnummer)
+        lagreOppgaver(hendelseId, contextId, messageContext)
     }
 
     fun avbrytOppgaver(vedtaksperiodeId: UUID) {
@@ -130,16 +131,15 @@ class OppgaveMediator(
     }
 
     private fun tildelOppgaver(fødselsnummer: String) {
-        reservasjonDao.hentReservasjonFor(fødselsnummer)?.let { (oid, settPåVent) ->
-            (oppgaveForLagring ?: oppgaveForOppdatering)?.forsøkTildeling(this, oid, settPåVent, harTilgangTil)
+        reservasjonDao.hentReservasjonFor(fødselsnummer)?.let { (saksbehandler, settPåVent) ->
+            (oppgaveForLagring ?: oppgaveForOppdatering)?.forsøkTildeling(saksbehandler, settPåVent, harTilgangTil)
         }
     }
 
     private fun lagreOppgaver(
         hendelseId: UUID,
         contextId: UUID,
-        messageContext: MessageContext,
-        doAlso: () -> Unit = {}
+        messageContext: MessageContext
     ) {
         oppgaveForLagring?.let {
             Oppgavelagrer().apply {
@@ -156,7 +156,6 @@ class OppgaveMediator(
             logg.info("Oppgave oppdatert: $it")
             sikkerlogg.info("Oppgave oppdatert: $it")
         }
-        doAlso()
         oppgaveForLagring = null
         oppgaveForOppdatering = null
         oppgaverForPublisering.onEach { (oppgaveId, eventName) ->

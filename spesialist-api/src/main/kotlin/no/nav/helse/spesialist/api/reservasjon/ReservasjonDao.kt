@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.api.reservasjon
 import java.util.UUID
 import javax.sql.DataSource
 import no.nav.helse.HelseDao
+import no.nav.helse.spesialist.api.modell.Saksbehandler
 
 class ReservasjonDao(dataSource: DataSource) : HelseDao(dataSource) {
     fun reserverPerson(saksbehandlerOid: UUID, fødselsnummer: String, påVent: Boolean) {
@@ -26,14 +27,23 @@ class ReservasjonDao(dataSource: DataSource) : HelseDao(dataSource) {
     }
 
     fun hentReservasjonFor(fødselsnummer: String): Reservasjonsinfo? = asSQL(
-        """ SELECT r.* FROM reserver_person r
+        """ SELECT r.*, s.* FROM reserver_person r
             JOIN person p ON p.id = r.person_ref
+            JOIN saksbehandler s ON r.saksbehandler_ref = s.oid
             WHERE p.fodselsnummer = :fnr AND r.gyldig_til > now();
         """, mapOf("fnr" to fødselsnummer.toLong())
-    ).single { Reservasjonsinfo(it.uuid("saksbehandler_ref"), it.boolean("sett_på_vent_flagg")) }
+    ).single { Reservasjonsinfo(
+        Saksbehandler(
+            it.string("epost"),
+            it.uuid("oid"),
+            it.string("navn"),
+            it.string("ident")
+        ),
+        it.boolean("sett_på_vent_flagg")
+    ) }
 }
 
 data class Reservasjonsinfo(
-    val reservertTil: UUID,
+    val reservertTil: Saksbehandler,
     val settPåVentFlagg: Boolean,
 )

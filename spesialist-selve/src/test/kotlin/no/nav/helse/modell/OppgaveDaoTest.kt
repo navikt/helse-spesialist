@@ -116,7 +116,6 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         assertEquals(OPPGAVE_ID, actual)
     }
 
-
     @Test
     fun `finner oppgave`() {
         nyPerson()
