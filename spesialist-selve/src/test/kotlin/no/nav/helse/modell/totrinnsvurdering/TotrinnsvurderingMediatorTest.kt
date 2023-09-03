@@ -4,12 +4,9 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
-import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.notat.NotatMediator
-import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
-import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import org.junit.jupiter.api.Test
@@ -37,13 +34,7 @@ class TotrinnsvurderingMediatorTest {
 
         every { notatMediator.lagreForOppgaveId(oppgaveId, notat, beslutterOid, NotatType.Retur) } returns 1L
 
-        every { oppgaveDao.finn(any<Long>()) } returns Oppgave(
-            id = oppgaveId,
-            type = Oppgavetype.SØKNAD,
-            status = Oppgavestatus.AvventerSaksbehandler,
-            vedtaksperiodeId = UUID.randomUUID(),
-            utbetalingId = utbetalingId,
-        )
+        every { oppgaveDao.finnUtbetalingId(any<Long>()) } returns utbetalingId
 
         totrinnsvurderingMediator.settRetur(oppgaveId, beslutterOid, notat)
 
@@ -66,13 +57,7 @@ class TotrinnsvurderingMediatorTest {
 
         every { oppgaveDao.finnNyesteOppgaveId(vedtaksperiodeId) } returns oppgaveId
         every { oppgaveDao.finnNyesteOppgaveId(any()) } returns oppgaveId
-        every { oppgaveDao.finn(any<Long>()) } returns Oppgave(
-            id = oppgaveId,
-            type = Oppgavetype.SØKNAD,
-            status = Oppgavestatus.AvventerSaksbehandler,
-            vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingId = utbetalingId,
-        )
+        every { oppgaveDao.finnUtbetalingId(any<Long>()) } returns utbetalingId
 
         totrinnsvurderingMediator.settAutomatiskRetur(vedtaksperiodeId)
 

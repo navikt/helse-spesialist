@@ -41,8 +41,8 @@ class TotrinnsvurderingMediator(
         type: PeriodehistorikkType,
         notatId: Int? = null
     ) {
-        oppgaveDao.finn(oppgaveId)?.also {
-            it.lagrePeriodehistorikk(periodehistorikkDao, saksbehandleroid, type, notatId)
+        oppgaveDao.finnUtbetalingId(oppgaveId)?.also {
+            periodehistorikkDao.lagre(type, saksbehandleroid, it, notatId)
         }
     }
 

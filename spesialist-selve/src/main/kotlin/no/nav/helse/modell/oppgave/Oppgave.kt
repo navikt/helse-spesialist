@@ -9,8 +9,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import org.slf4j.LoggerFactory
 
 class Oppgave private constructor(
@@ -189,15 +187,6 @@ class Oppgave private constructor(
         tildelt = saksbehandler
         this.påVent = påVent
         logg.info("Oppgave $id tildeles $saksbehandler grunnet reservasjon.")
-    }
-
-    fun lagrePeriodehistorikk(
-        periodehistorikkDao: PeriodehistorikkDao,
-        saksbehandleroid: UUID?,
-        type: PeriodehistorikkType,
-        notatId: Int?
-    ) {
-        periodehistorikkDao.lagre(type, saksbehandleroid, utbetalingId, notatId)
     }
 
     override fun equals(other: Any?): Boolean {
