@@ -45,7 +45,7 @@ class OppgaveMediator(
         oppgaveBlock(oppgave)
         Oppgavelagrer().apply {
             oppgave.accept(this)
-            lagre(this@OppgaveMediator)
+            oppdater(this@OppgaveMediator)
         }
     }
 
@@ -151,7 +151,7 @@ class OppgaveMediator(
         } ?: oppgaveForOppdatering?.let {
             Oppgavelagrer().apply {
                 it.accept(this)
-                lagre(this@OppgaveMediator)
+                oppdater(this@OppgaveMediator)
             }
             logg.info("Oppgave oppdatert: $it")
             sikkerlogg.info("Oppgave oppdatert: $it")

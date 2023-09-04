@@ -22,7 +22,7 @@ class Oppgave private constructor(
     private var ferdigstiltAvIdent: String? = null
     private var ferdigstiltAvOid: UUID? = null
     private val egenskaper = mutableListOf<Oppgavetype>()
-    private var tildelt: Saksbehandler? = null
+    private var tildeltTil: Saksbehandler? = null
     private var påVent: Boolean = false
 
     constructor(
@@ -38,7 +38,7 @@ class Oppgave private constructor(
     ) : this(id, type, status, vedtaksperiodeId, utbetalingId) {
         this.ferdigstiltAvIdent = ferdigstiltAvIdent
         this.ferdigstiltAvOid = ferdigstiltAvOid
-        this.tildelt = tildelt
+        this.tildeltTil = tildelt
         this.påVent = påVent
     }
 
@@ -139,7 +139,7 @@ class Oppgave private constructor(
     }
 
     fun accept(visitor: OppgaveVisitor) {
-        visitor.visitOppgave(id, type, status, vedtaksperiodeId, utbetalingId, ferdigstiltAvOid, ferdigstiltAvIdent, egenskaper, tildelt, påVent)
+        visitor.visitOppgave(id, type, status, vedtaksperiodeId, utbetalingId, ferdigstiltAvOid, ferdigstiltAvIdent, egenskaper, tildeltTil, påVent)
     }
 
     fun ferdigstill(ident: String, oid: UUID) {
@@ -184,7 +184,7 @@ class Oppgave private constructor(
             if (!harTilgangTilRisk) logg.info("OppgaveId $id er RISK_QA og saksbehandler har ikke tilgang, tildeles ikke på tross av reservasjon.")
             return
         }
-        tildelt = saksbehandler
+        tildeltTil = saksbehandler
         this.påVent = påVent
         logg.info("Oppgave $id tildeles $saksbehandler grunnet reservasjon.")
     }

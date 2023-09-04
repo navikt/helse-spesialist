@@ -36,7 +36,7 @@ class Oppgavelagrer : OppgaveVisitor {
         }
     }
 
-    internal fun lagre(oppgaveMediator: OppgaveMediator) {
+    internal fun oppdater(oppgaveMediator: OppgaveMediator) {
         val oppgave = oppgaveForLagring
         oppgaveMediator.oppdater(
             oppgaveId = oppgave.id,
