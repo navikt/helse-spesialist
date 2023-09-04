@@ -2,10 +2,8 @@ package no.nav.helse.modell.tildeling
 
 import DatabaseIntegrationTest
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.ZonedDateTime
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -34,11 +32,11 @@ internal class ReservasjonDaoTest : DatabaseIntegrationTest() {
                 ?: fail("Forventet at det skulle finnes en reservasjon i basen")
         }
         assertEquals(SAKSBEHANDLER_OID, saksbehandlerOid)
-        assertRiktigVarighet(72)
+        assertRiktigVarighet(finnGyldigTil())
     }
 
     @Test
-    fun `ny reservasjon forlenger fristen`() {
+    fun `ny reservasjon forlenger ikke fristen`() {
         opprettData()
         val enAnnenSaksbehandler = UUID.randomUUID()
         saksbehandlerDao.opprettSaksbehandler(
@@ -53,12 +51,12 @@ internal class ReservasjonDaoTest : DatabaseIntegrationTest() {
             val gyldigTil1 = finnGyldigTil()
             reservasjonDao.reserverPerson(SAKSBEHANDLER_OID, FNR, false)
             val gyldigTil2 = finnGyldigTil()
-            assertTrue(gyldigTil2.isAfter(gyldigTil1))
+            assertTrue(gyldigTil2.isEqual(gyldigTil1))
             reservasjonDao.hentReservasjonFor(FNR)?.reservertTil
                 ?: fail("Forventet at det skulle finnes en reservasjon i basen")
         }
         assertEquals(SAKSBEHANDLER_OID, saksbehandlerOid)
-        assertRiktigVarighet(72)
+        assertRiktigVarighet(finnGyldigTil())
     }
 
     private fun opprettData(fødselsnummer: String = FNR) {
@@ -84,12 +82,8 @@ internal class ReservasjonDaoTest : DatabaseIntegrationTest() {
         )
     }
 
-    // Pga. at det kan forekomme tidssonebytte i databasen må vi benytte oss av tidsbiblioteket for å vite hvor i
-    // fremtiden vi er om 72 timer.
-    // Eksempel: gyldig_til er vintertid mens "nå" er sommertid
-    private fun assertRiktigVarighet(forventetVarighet: Long) {
-        val om72Timer = ZonedDateTime.now().plusHours(forventetVarighet).toLocalDateTime()
-        assertEquals(0.0, Duration.between(finnGyldigTil(), om72Timer).toSeconds().toDouble(), 5.0)
+    private fun assertRiktigVarighet(gyldigTil: LocalDateTime) {
+        assertEquals(LocalDate.now().atTime(23,59,59), gyldigTil)
     }
 
     private fun finnGyldigTil(): LocalDateTime {
