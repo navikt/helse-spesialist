@@ -35,7 +35,7 @@ jobs:
           cache: 'gradle'
 
       - name: Gradle build
-        uses: gradle/gradle-build-action@v2.7.1
+        uses: gradle/gradle-build-action@v2.8.0
         with:
           arguments: :spesialist-selve:build # felles- og api-modulene bygges fordi selve avhenger av dem
         env:
