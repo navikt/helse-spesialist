@@ -40,6 +40,14 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `Finn neste ledige id`() {
+        val id1 = oppgaveDao.reserverNesteId()
+        val id2 = oppgaveDao.reserverNesteId()
+        assertEquals(1L, id1)
+        assertEquals(2L, id2)
+    }
+
+    @Test
     fun `lagre oppgave`() {
         opprettPerson()
         opprettArbeidsgiver()
