@@ -56,7 +56,6 @@ import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
-import no.nav.helse.modell.tildeling.TildelingService
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.modell.utbetaling.UtbetalingDao
@@ -96,6 +95,7 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
+import no.nav.helse.spesialist.api.tildeling.TildelingService
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.utbetaling.UtbetalingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
@@ -173,7 +173,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private lateinit var hendelseMediator: HendelseMediator
     private lateinit var saksbehandlerMediator: SaksbehandlerMediator
     private lateinit var tildelingService: TildelingService
-    private lateinit var oppgavemelder: Oppgavemelder
+    private var oppgavemelder: Oppgavemelder
 
     private val personDao = PersonDao(dataSource)
     private val personApiDao = PersonApiDao(dataSource)
@@ -207,9 +207,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val generasjonDao = GenerasjonDao(dataSource)
 
     private val behandlingsstatistikkMediator = BehandlingsstatistikkMediator(behandlingsstatistikkDao)
-    private val apiTildelingService = no.nav.helse.spesialist.api.tildeling.TildelingService(tildelingDao, saksbehandlerDao, totrinnsvurderingApiDao) {
-        oppgavemelder
-    }
 
     private val oppgaveMediator = OppgaveMediator(
         oppgaveDao = oppgaveDao,
@@ -318,7 +315,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 saksbehandlereMedTilgangTilStikkprøve = saksbehandlereMedTilgangTilStikkprøver,
                 snapshotMediator = snapshotMediator,
                 behandlingsstatistikkMediator = behandlingsstatistikkMediator,
-                tildelingService = apiTildelingService,
+                tildelingService = tildelingService,
                 notatMediator = notatMediator,
                 saksbehandlerMediator = saksbehandlerMediator
             )
@@ -387,12 +384,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             hendelsefabrikk = hendelsefabrikk
         )
         saksbehandlerMediator = SaksbehandlerMediator(dataSource, rapidsConnection)
-        tildelingService = TildelingService(
-            tildelingDao,
-            hendelseMediator,
-            totrinnsvurderingMediator
-        )
         oppgavemelder = Oppgavemelder(oppgaveApiDao, rapidsConnection)
+        tildelingService = TildelingService(tildelingDao, saksbehandlerDao, totrinnsvurderingApiDao) { oppgavemelder }
         oppdaterPersonService = OppdaterPersonService(rapidsConnection)
         godkjenningService = GodkjenningService(
             dataSource = dataSource,

@@ -15,11 +15,12 @@ import io.ktor.util.pipeline.PipelineContext
 import java.util.UUID
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.modell.tildeling.TildelingService
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.spesialist.api.SaksbehandlerMediator
+import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.notat.NyttNotatDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
+import no.nav.helse.spesialist.api.tildeling.TildelingService
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingDto
 import org.slf4j.LoggerFactory
 
@@ -54,7 +55,15 @@ internal fun Route.totrinnsvurderingApi(
         tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(
             totrinnsvurdering.oppgavereferanse,
             beslutterSaksbehandlerOid,
-            tilganger(tilgangsgrupper),
+            SaksbehandlerTilganger(
+                gruppemedlemskap(),
+                getIdent(),
+                tilgangsgrupper.kode7GruppeId,
+                tilgangsgrupper.riskQaGruppeId,
+                tilgangsgrupper.beslutterGruppeId,
+                tilgangsgrupper.skjermedePersonerGruppeId,
+                emptyList() // tilgang til stikkprøve sjekkes ikke lenger inn
+            ),
         )
 
         totrinnsvurderingMediator.settSaksbehandler(
@@ -94,7 +103,15 @@ internal fun Route.totrinnsvurderingApi(
         tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(
             retur.oppgavereferanse,
             tidligereSaksbehandlerOid,
-            tilganger(tilgangsgrupper),
+            SaksbehandlerTilganger(
+                gruppemedlemskap(),
+                getIdent(),
+                tilgangsgrupper.kode7GruppeId,
+                tilgangsgrupper.riskQaGruppeId,
+                tilgangsgrupper.beslutterGruppeId,
+                tilgangsgrupper.skjermedePersonerGruppeId,
+                emptyList() // tilgang til stikkprøve sjekkes ikke lenger inn
+            ),
         )
 
         hendelseMediator.sendMeldingOppgaveOppdatert(retur.oppgavereferanse)
@@ -108,6 +125,11 @@ internal fun Route.totrinnsvurderingApi(
 private fun PipelineContext<Unit, ApplicationCall>.getSaksbehandlerOid(): UUID {
     val accessToken = requireNotNull(call.principal<JWTPrincipal>()) { "mangler access token" }
     return UUID.fromString(accessToken.payload.getClaim("oid").asString())
+}
+
+private fun PipelineContext<Unit, ApplicationCall>.getIdent(): String {
+    val accessToken = requireNotNull(call.principal<JWTPrincipal>()) { "mangler access token" }
+    return accessToken.payload.getClaim("NAVident").asString()
 }
 
 @JsonIgnoreProperties

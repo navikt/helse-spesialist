@@ -7,6 +7,7 @@ import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.oppgave.Oppgavemelder
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
+import org.slf4j.LoggerFactory
 
 class TildelingService(
     private val tildelingDao: TildelingDao,
@@ -15,6 +16,22 @@ class TildelingService(
     oppgavemelder: () -> Oppgavemelder,
 ) {
     private val oppgavemelder: Oppgavemelder by lazy { oppgavemelder() }
+
+    private companion object {
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
+    }
+
+    fun fjernTildelingOgTildelNySaksbehandlerHvisFinnes(
+        oppgaveId: Long,
+        saksbehandlerOid: UUID?,
+        saksbehandlerTilganger: SaksbehandlerTilganger
+    ) {
+        tildelingDao.slettTildeling(oppgaveId)
+        if (saksbehandlerOid != null) {
+            sikkerlogg.info("Fjerner gammel tildeling og tildeler oppgave $oppgaveId til saksbehandler $saksbehandlerOid")
+            tildelOppgaveTilEksisterendeSaksbehandler(oppgaveId, saksbehandlerOid, saksbehandlerTilganger)
+        }
+    }
 
     internal fun tildelOppgaveTilSaksbehandler(
         oppgaveId: Long,

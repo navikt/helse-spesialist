@@ -74,7 +74,6 @@ import no.nav.helse.registrerTidsbrukForGodkjenningsbehov
 import no.nav.helse.registrerTidsbrukForHendelse
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandling
-import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.slf4j.LoggerFactory
 
 internal class HendelseMediator(
@@ -86,7 +85,6 @@ internal class HendelseMediator(
     private val commandContextDao: CommandContextDao = CommandContextDao(dataSource),
     private val arbeidsgiverDao: ArbeidsgiverDao = ArbeidsgiverDao(dataSource),
     private val hendelseDao: HendelseDao = HendelseDao(dataSource),
-    private val tildelingDao: TildelingDao = TildelingDao(dataSource),
     private val feilendeMeldingerDao: FeilendeMeldingerDao = FeilendeMeldingerDao(dataSource),
     private val oppgaveMediator: OppgaveMediator,
     private val godkjenningMediator: GodkjenningMediator,
@@ -179,15 +177,6 @@ internal class HendelseMediator(
         val sykefraværstilfelleMediator = SykefraværstilfelleMediator(rapidsConnection)
         sykefraværstilfelle.registrer(sykefraværstilfelleMediator)
         utkastTilVedtakMessage.sendInnTil(sykefraværstilfelle)
-    }
-
-    internal fun tildelOppgaveTilSaksbehandler(
-        oppgaveId: Long,
-        saksbehandlerreferanse: UUID,
-    ): Boolean {
-        val tildelingApiDto = tildelingDao.opprettTildeling(oppgaveId, saksbehandlerreferanse)
-        if (tildelingApiDto != null) sendMeldingOppgaveOppdatert(oppgaveId)
-        return tildelingApiDto != null
     }
 
     internal fun sendMeldingOppgaveOppdatert(oppgaveId: Long, påVent: Boolean? = null) {
