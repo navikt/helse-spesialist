@@ -9,6 +9,8 @@ import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtBeslutter
+import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtIRetur
+import no.nav.helse.spesialist.api.feilhåndtering.OppgaveKreverTotrinnsvurdering
 import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
@@ -150,13 +152,38 @@ class Oppgave private constructor(
     }
 
     internal fun sendTilBeslutter(behandlendeSaksbehandler: Saksbehandler) {
-        val totrinnsvurdering = requireNotNull(totrinnsvurdering) { "Forventer at det eksisterer en aktiv totrinnsvurdering når oppgave sendes til beslutter" }
-        if (totrinnsvurdering.erBeslutteroppgave()) throw OppgaveAlleredeSendtBeslutter(id)
+        val totrinnsvurdering = requireNotNull(totrinnsvurdering) {
+            "Forventer at det eksisterer en aktiv totrinnsvurdering når oppgave sendes til beslutter"
+        }
+        if (totrinnsvurdering.erBeslutteroppgave())
+            throw OppgaveAlleredeSendtBeslutter(id)
 
         totrinnsvurdering.sendTilBeslutter(behandlendeSaksbehandler)
+
         if (totrinnsvurdering.tidligereBeslutter() == null) return
+        if (behandlendeSaksbehandler == totrinnsvurdering.tidligereBeslutter())
+            throw OppgaveKreverTotrinnsvurdering(id)
 
         tildeltTil = totrinnsvurdering.tidligereBeslutter()
+    }
+
+    internal fun sendIRetur(besluttendeSaksbehandler: Saksbehandler) {
+        val totrinnsvurdering = requireNotNull(totrinnsvurdering) {
+            "Forventer at det eksisterer en aktiv totrinnsvurdering når oppgave sendes til beslutter"
+        }
+        if (!totrinnsvurdering.erBeslutteroppgave())
+            throw OppgaveAlleredeSendtIRetur(id)
+
+        if (besluttendeSaksbehandler == totrinnsvurdering.opprinneligSaksbehandler())
+            throw OppgaveKreverTotrinnsvurdering(id)
+
+        totrinnsvurdering.sendIRetur(besluttendeSaksbehandler)
+
+        val opprinneligSaksbehandler = requireNotNull(totrinnsvurdering.opprinneligSaksbehandler()) {
+            "Opprinnelig saksbehandler kan ikke være null ved retur av beslutteroppgave"
+        }
+
+        tildeltTil = opprinneligSaksbehandler
     }
 
     fun accept(visitor: OppgaveVisitor) {

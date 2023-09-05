@@ -10,11 +10,9 @@ import io.ktor.http.contentType
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import java.time.LocalDateTime.now
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
@@ -23,6 +21,7 @@ import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtBeslutter
+import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtIRetur
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.notat.NotatMediator
@@ -30,7 +29,6 @@ import no.nav.helse.spesialist.api.notat.NyttNotatDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.tildeling.TildelingService
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingDto
-import no.nav.helse.testEnv
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -57,10 +55,25 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
 
     private val oppgavehåndterer = object : Oppgavehåndterer {
         var sendtTilBeslutter = false
-        var block: () -> Unit = {}
+        var sendtIRetur = false
+        var sendTilBeslutterBlock: () -> Unit = {}
+        var sendIReturBlock: () -> Unit = {}
+
+        fun reset() {
+            sendtTilBeslutter = false
+            sendtIRetur = false
+            sendTilBeslutterBlock = {}
+            sendIReturBlock = {}
+        }
+
         override fun sendTilBeslutter(oppgaveId: Long, behandlendeSaksbehandler: Saksbehandler) {
             sendtTilBeslutter = true
-            block()
+            sendTilBeslutterBlock()
+        }
+
+        override fun sendIRetur(oppgaveId: Long, besluttendeSaksbehandler: Saksbehandler) {
+            sendtIRetur = true
+            sendIReturBlock()
         }
     }
 
@@ -68,10 +81,8 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     fun setupTotrinnsvurdering() {
         setupServer {
             totrinnsvurderingApi(
-                tildelingService,
                 hendelseMediator,
                 totrinnsvurderingMediator,
-                Tilgangsgrupper(testEnv),
                 saksbehandlerMediator,
                 oppgavehåndterer
             )
@@ -81,7 +92,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     @BeforeEach
     fun setup() {
         clearMocks(oppgaveDao, periodehistorikkDao, notatMediator, tildelingService, hendelseMediator, totrinnsvurderingMediator)
-        oppgavehåndterer.sendtTilBeslutter = false
+        oppgavehåndterer.reset()
     }
 
     @Test
@@ -146,13 +157,12 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             }
         }
 
-        verify(exactly = 0) { totrinnsvurderingMediator.settRetur(any(), any(), any()) }
         assertEquals(HttpStatusCode.Unauthorized, response.status)
     }
 
     @Test
     fun `Api gir conflict dersom oppgave allerede er sendt til beslutter`() {
-        oppgavehåndterer.block = { throw OppgaveAlleredeSendtBeslutter(1L) }
+        oppgavehåndterer.sendTilBeslutterBlock = { throw OppgaveAlleredeSendtBeslutter(1L) }
 
         val response = runBlocking {
             client.post(TOTRINNSVURDERING_URL) {
@@ -189,41 +199,42 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
 
     @Test
     fun `Sende totrinnsvurdering i retur`() {
-        val tidligereSaksbehandlerOid = UUID.randomUUID()
         val oppgaveId = 2L
-        every { totrinnsvurderingMediator.hentAktiv(oppgaveId = oppgaveId) } returns TotrinnsvurderingOld(
-            vedtaksperiodeId = UUID.randomUUID(),
-            erRetur = true,
-            saksbehandler = tidligereSaksbehandlerOid,
-            beslutter = null,
-            utbetalingIdRef = null,
-            oppdatert = now(),
-            opprettet = now()
-        )
 
-        val notat = "notat_tekst"
         val response = runBlocking {
             client.post(RETUR_URL) {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 setBody(TotrinnsvurderingReturDto(
                     oppgavereferanse = oppgaveId,
-                    notat = NyttNotatDto(notat, NotatType.Retur)
+                    notat = NyttNotatDto("notat_tekst", NotatType.Retur)
                 ))
                 authentication(saksbehandler_oid)
             }
         }
 
-        verify(exactly = 1) { totrinnsvurderingMediator.settRetur(oppgaveId, saksbehandler_oid, notat) }
-
-        verify(exactly = 1) {
-            tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(
-                oppgaveId,
-                tidligereSaksbehandlerOid,
-                any()
-            )
-        }
+        assertEquals(true, oppgavehåndterer.sendtIRetur)
 
         assertEquals(HttpStatusCode.OK, response.status)
+    }
+
+    @Test
+    fun `Api gir conflict når oppgave allerede er sendt i retur`() {
+        val oppgaveId = 2L
+
+        oppgavehåndterer.sendIReturBlock = { throw OppgaveAlleredeSendtIRetur(oppgaveId) }
+        val response = runBlocking {
+            client.post(RETUR_URL) {
+                contentType(ContentType.Application.Json)
+                accept(ContentType.Application.Json)
+                setBody(TotrinnsvurderingReturDto(
+                    oppgavereferanse = oppgaveId,
+                    notat = NyttNotatDto("notat_tekst", NotatType.Retur)
+                ))
+                authentication(saksbehandler_oid)
+            }
+        }
+
+        assertEquals(HttpStatusCode.Conflict, response.status)
     }
 }

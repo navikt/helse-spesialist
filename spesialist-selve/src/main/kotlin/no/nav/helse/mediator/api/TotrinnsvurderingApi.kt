@@ -14,15 +14,13 @@ import io.ktor.server.routing.post
 import io.ktor.util.pipeline.PipelineContext
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.spesialist.api.SaksbehandlerMediator
-import no.nav.helse.spesialist.api.SaksbehandlerTilganger
+import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.notat.NyttNotatDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
-import no.nav.helse.spesialist.api.tildeling.TildelingService
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingDto
 import org.slf4j.LoggerFactory
 
@@ -31,13 +29,12 @@ private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
 interface Oppgavehåndterer {
     fun sendTilBeslutter(oppgaveId: Long, behandlendeSaksbehandler: Saksbehandler)
+    fun sendIRetur(oppgaveId: Long, besluttendeSaksbehandler: Saksbehandler)
 }
 
 internal fun Route.totrinnsvurderingApi(
-    tildelingService: TildelingService,
     hendelseMediator: HendelseMediator,
     totrinnsvurderingMediator: TotrinnsvurderingMediator,
-    tilgangsgrupper: Tilgangsgrupper,
     saksbehandlerMediator: SaksbehandlerMediator,
     oppgavehåndterer: Oppgavehåndterer
 ) {
@@ -70,39 +67,22 @@ internal fun Route.totrinnsvurderingApi(
 
     post("/api/totrinnsvurdering/retur") {
         val retur = call.receive<TotrinnsvurderingReturDto>()
+        val besluttendeSaksbehandler = Saksbehandler.fraOnBehalfOfToken(requireNotNull(call.principal()))
         val beslutterOid = getSaksbehandlerOid()
-        val aktivTotrinnsvurdering = totrinnsvurderingMediator.hentAktiv(oppgaveId = retur.oppgavereferanse)
 
-        if (aktivTotrinnsvurdering == null) {
-            call.respondText(
-                "Dette skulle kanskje ha vært en totrinnsoppgave.",
-                status = HttpStatusCode.ExpectationFailed
-            )
-            return@post
-        }
-
-        sikkerlogg.info("OppgaveId ${retur.oppgavereferanse} sendes i retur av $beslutterOid")
-
-        val tidligereSaksbehandlerOid = aktivTotrinnsvurdering.saksbehandler
-
-        totrinnsvurderingMediator.settRetur(
-            oppgaveId = retur.oppgavereferanse,
-            beslutterOid = beslutterOid,
-            notat = retur.notat.tekst
+        sikkerlogg.info(
+            "Oppgave med {} sendes i retur av beslutter med {}",
+            kv("oppgaveId", retur.oppgavereferanse),
+            kv("oid", beslutterOid),
         )
 
-        tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(
+        oppgavehåndterer.sendIRetur(retur.oppgavereferanse, besluttendeSaksbehandler)
+
+        totrinnsvurderingMediator.lagrePeriodehistorikk(
             retur.oppgavereferanse,
-            tidligereSaksbehandlerOid,
-            SaksbehandlerTilganger(
-                gruppemedlemskap(),
-                getIdent(),
-                tilgangsgrupper.kode7GruppeId,
-                tilgangsgrupper.riskQaGruppeId,
-                tilgangsgrupper.beslutterGruppeId,
-                tilgangsgrupper.skjermedePersonerGruppeId,
-                emptyList() // tilgang til stikkprøve sjekkes ikke lenger inn
-            ),
+            beslutterOid,
+            PeriodehistorikkType.TOTRINNSVURDERING_RETUR,
+            retur.notat.tekst to NotatType.Retur
         )
 
         hendelseMediator.sendMeldingOppgaveOppdatert(retur.oppgavereferanse)
@@ -116,11 +96,6 @@ internal fun Route.totrinnsvurderingApi(
 private fun PipelineContext<Unit, ApplicationCall>.getSaksbehandlerOid(): UUID {
     val accessToken = requireNotNull(call.principal<JWTPrincipal>()) { "mangler access token" }
     return UUID.fromString(accessToken.payload.getClaim("oid").asString())
-}
-
-private fun PipelineContext<Unit, ApplicationCall>.getIdent(): String {
-    val accessToken = requireNotNull(call.principal<JWTPrincipal>()) { "mangler access token" }
-    return accessToken.payload.getClaim("NAVident").asString()
 }
 
 @JsonIgnoreProperties

@@ -7,7 +7,6 @@ import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
-import org.slf4j.LoggerFactory
 
 class TotrinnsvurderingMediator(
     private val dao: TotrinnsvurderingDao,
@@ -15,8 +14,6 @@ class TotrinnsvurderingMediator(
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val notatMediator: NotatMediator,
 ) {
-    private val log = LoggerFactory.getLogger("TotrinnsvurderingMediator")
-
     fun opprett(vedtaksperiodeId: UUID): TotrinnsvurderingOld = dao.opprett(vedtaksperiodeId)
     fun settBeslutter(vedtaksperiodeId: UUID, saksbehandlerOid: UUID): Unit =
         dao.settBeslutter(vedtaksperiodeId, saksbehandlerOid)
@@ -37,25 +34,16 @@ class TotrinnsvurderingMediator(
         oppgaveId: Long,
         saksbehandleroid: UUID?,
         type: PeriodehistorikkType,
-        notatId: Int? = null
+        notat: Pair<String, NotatType>? = null
     ) {
+        var notatId: Int? = null
+        if (notat != null && saksbehandleroid != null) {
+            val (tekst, notattype) = notat
+            notatId = notatMediator.lagreForOppgaveId(oppgaveId, tekst, saksbehandleroid, notattype)?.toInt()
+        }
         oppgaveDao.finnUtbetalingId(oppgaveId)?.also {
             periodehistorikkDao.lagre(type, saksbehandleroid, it, notatId)
         }
-    }
-
-    fun settRetur(oppgaveId: Long, beslutterOid: UUID, notat: String) {
-        dao.settErRetur(oppgaveId)
-
-        dao.settBeslutter(oppgaveId, beslutterOid)
-        val notatId = notatMediator.lagreForOppgaveId(oppgaveId, notat, beslutterOid, NotatType.Retur)
-
-        lagrePeriodehistorikk(
-            oppgaveId = oppgaveId,
-            saksbehandleroid = beslutterOid,
-            type = PeriodehistorikkType.TOTRINNSVURDERING_RETUR,
-            notatId = notatId?.toInt()
-        )
     }
 
     fun ferdigstill(vedtaksperiodeId: UUID): Unit = dao.ferdigstill(vedtaksperiodeId)

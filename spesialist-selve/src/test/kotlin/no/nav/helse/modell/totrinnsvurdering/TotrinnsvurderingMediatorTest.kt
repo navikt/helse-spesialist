@@ -6,7 +6,6 @@ import io.mockk.verify
 import java.util.UUID
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.oppgave.OppgaveDao
-import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
@@ -25,30 +24,6 @@ class TotrinnsvurderingMediatorTest {
         periodehistorikkDao,
         notatMediator,
     )
-
-    @Test
-    fun `Sett er retur, oppdaterer status på totrinnsvurdering og oppdaterer periodehistorikk med oppgaveId`() {
-        val oppgaveId = 1L
-        val beslutterOid = UUID.randomUUID()
-        val utbetalingId = UUID.randomUUID()
-        val notat = "notat"
-
-        every { notatMediator.lagreForOppgaveId(oppgaveId, notat, beslutterOid, NotatType.Retur) } returns 1L
-
-        every { oppgaveDao.finnUtbetalingId(any<Long>()) } returns utbetalingId
-
-        totrinnsvurderingMediator.settRetur(oppgaveId, beslutterOid, notat)
-
-        verify(exactly = 1) { totrinnsvurderingDao.settErRetur(oppgaveId) }
-        verify(exactly = 1) {
-            periodehistorikkDao.lagre(
-                historikkType = PeriodehistorikkType.TOTRINNSVURDERING_RETUR,
-                saksbehandlerOid = beslutterOid,
-                utbetalingId = utbetalingId,
-                notatId = 1,
-            )
-        }
-    }
 
     @Test
     fun `Sett er retur, oppdaterer status på totrinnsvurdering og oppdaterer periodehistorikk med vedtaksperiodeId`() {

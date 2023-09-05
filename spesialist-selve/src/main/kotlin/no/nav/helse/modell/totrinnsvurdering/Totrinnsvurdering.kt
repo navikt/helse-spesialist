@@ -17,10 +17,18 @@ class Totrinnsvurdering(
 
     fun tidligereBeslutter() = beslutter
 
+    fun opprinneligSaksbehandler() = saksbehandler
+
     fun sendTilBeslutter(behandlendeSaksbehandler: Saksbehandler) {
         saksbehandler = behandlendeSaksbehandler
         oppdatert = LocalDateTime.now()
         if (erRetur) erRetur = false
+    }
+
+    fun sendIRetur(beslutter: Saksbehandler) {
+        this.beslutter = beslutter
+        oppdatert = LocalDateTime.now()
+        erRetur = true
     }
 
     fun accept(totrinnsvurderingVisitor: TotrinnsvurderingVisitor) {

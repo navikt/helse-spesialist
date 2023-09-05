@@ -94,6 +94,24 @@ class OppgaveAlleredeSendtBeslutter(private val oppgaveId: Long): Modellfeil() {
     }
 }
 
+class OppgaveAlleredeSendtIRetur(private val oppgaveId: Long): Modellfeil() {
+    override val eksternKontekst: Map<String, Any> = emptyMap()
+    override val feilkode: String = "oppgave_allerede_sendt_i_retur"
+    override val httpkode: HttpStatusCode = HttpStatusCode.Conflict
+    override fun logger() {
+        logg.info("Oppgave med {} er allerede sendt i retur av beslutter til opprinnelig saksbehandler", kv("oppgaveId", oppgaveId))
+    }
+}
+
+class OppgaveKreverTotrinnsvurdering(private val oppgaveId: Long): Modellfeil() {
+    override val eksternKontekst: Map<String, Any> = emptyMap()
+    override val feilkode: String = "oppgave_krever_totrinnsvurdering"
+    override val httpkode: HttpStatusCode = HttpStatusCode.Conflict
+    override fun logger() {
+        logg.info("Oppgave med {} må behandles og besluttes av to forskjellige saksbehandlere", kv("oppgaveId", oppgaveId))
+    }
+}
+
 class IkkeÅpenOppgave(private val saksbehandlerIdent: String, private val oppgaveId: Long): Modellfeil() {
     override val eksternKontekst: Map<String, Any> = emptyMap()
     override val httpkode = HttpStatusCode.Conflict

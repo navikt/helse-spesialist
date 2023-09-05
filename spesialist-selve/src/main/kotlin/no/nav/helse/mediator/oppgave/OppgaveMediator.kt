@@ -67,6 +67,12 @@ class OppgaveMediator(
         }
     }
 
+    override fun sendIRetur(oppgaveId: Long, besluttendeSaksbehandler: Saksbehandler) {
+        oppgave(oppgaveId) {
+            sendIRetur(besluttendeSaksbehandler)
+        }
+    }
+
     /*
         For nå må oppgaver mellomlagres i denne mediatoren, fordi ved lagring skal det sendes ut meldinger på Kafka,
         og de skal inneholde standardfeltene for rapids-and-rivers, som i utgangspunktet kun er tilgjengelige via

@@ -7,6 +7,8 @@ import no.nav.helse.modell.oppgave.Oppgave.Companion.oppgaveMedEgenskaper
 import no.nav.helse.modell.oppgave.OppgaveVisitor
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtBeslutter
+import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtIRetur
+import no.nav.helse.spesialist.api.feilhåndtering.OppgaveKreverTotrinnsvurdering
 import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
@@ -29,9 +31,16 @@ internal class OppgaveTest {
         private const val SAKSBEHANDLER_EPOST = "saksbehandler@nav.no"
         private const val SAKSBEHANDLER_NAVN = "Hen Saksbehandler"
         private val SAKSBEHANDLER_OID = UUID.randomUUID()
+        private val BESLUTTER_OID = UUID.randomUUID()
         private val OPPGAVE_ID = nextLong()
         private val saksbehandler = Saksbehandler(
             oid = SAKSBEHANDLER_OID,
+            epostadresse = SAKSBEHANDLER_EPOST,
+            navn = SAKSBEHANDLER_NAVN,
+            ident = SAKSBEHANDLER_IDENT
+        )
+        private val beslutter = Saksbehandler(
+            oid = BESLUTTER_OID,
             epostadresse = SAKSBEHANDLER_EPOST,
             navn = SAKSBEHANDLER_NAVN,
             ident = SAKSBEHANDLER_IDENT
@@ -176,6 +185,46 @@ internal class OppgaveTest {
         val oppgave = nyOppgave(SØKNAD, medTotrinnsvurdering = false)
         assertThrows<IllegalArgumentException> {
             oppgave.sendTilBeslutter(saksbehandler)
+        }
+    }
+
+    @Test
+    fun `oppgave sendt i retur tildeles opprinnelig saksbehandler`() {
+        val oppgave = nyOppgave(SØKNAD, medTotrinnsvurdering = true)
+        oppgave.sendTilBeslutter(saksbehandler)
+        oppgave.sendIRetur(beslutter)
+        inspektør(oppgave) {
+            assertEquals(saksbehandler, tildeltTil)
+        }
+    }
+
+    @Test
+    fun `oppgave sendt i retur og deretter tilbake til beslutter tildeles opprinnelig beslutter`() {
+        val oppgave = nyOppgave(SØKNAD, medTotrinnsvurdering = true)
+        oppgave.sendTilBeslutter(saksbehandler)
+        oppgave.sendIRetur(beslutter)
+        oppgave.sendTilBeslutter(saksbehandler)
+        inspektør(oppgave) {
+            assertEquals(beslutter, tildeltTil)
+        }
+    }
+
+    @Test
+    fun `Kaster exception dersom oppgave allerede er sendt i retur`() {
+        val oppgave = nyOppgave(SØKNAD, medTotrinnsvurdering = true)
+        oppgave.sendTilBeslutter(saksbehandler)
+        oppgave.sendIRetur(beslutter)
+        assertThrows<OppgaveAlleredeSendtIRetur> {
+            oppgave.sendIRetur(beslutter)
+        }
+    }
+
+    @Test
+    fun `Kaster exception dersom beslutter er samme som opprinnelig saksbehandler ved retur`() {
+        val oppgave = nyOppgave(SØKNAD, medTotrinnsvurdering = true)
+        oppgave.sendTilBeslutter(saksbehandler)
+        assertThrows<OppgaveKreverTotrinnsvurdering> {
+            oppgave.sendIRetur(saksbehandler)
         }
     }
 
