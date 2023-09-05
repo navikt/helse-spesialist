@@ -8,6 +8,7 @@ import io.mockk.verify
 import java.util.UUID
 import no.nav.helse.Gruppe
 import no.nav.helse.Tilgangskontroll
+import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
@@ -56,14 +57,16 @@ internal class OppgaveMediatorTest {
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
     private val opptegnelseDao = mockk<OpptegnelseDao>(relaxed = true)
     private val totrinnsvurderingDao = mockk<TotrinnsvurderingDao>(relaxed = true)
+    private val saksbehandlerDao = mockk<SaksbehandlerDao>()
     private val gruppehenterTestoppsett = GruppehenterTestoppsett()
     private val mediator = OppgaveMediator(
-        oppgaveDao,
-        tildelingDao,
-        reservasjonDao,
-        opptegnelseDao,
+        oppgaveDao = oppgaveDao,
+        tildelingDao = tildelingDao,
+        reservasjonDao = reservasjonDao,
+        opptegnelseDao = opptegnelseDao,
         harTilgangTil = gruppehenterTestoppsett.hentGrupper,
-        totrinnsvurderingDao = totrinnsvurderingDao
+        totrinnsvurderingRepository = totrinnsvurderingDao,
+        saksbehandlerRepository = saksbehandlerDao
     )
 
     private val saksbehandler = Saksbehandler(SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT)

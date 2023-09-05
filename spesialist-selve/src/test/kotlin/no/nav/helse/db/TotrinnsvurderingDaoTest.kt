@@ -5,7 +5,7 @@ import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.juli
-import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -18,15 +18,15 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `opprett totrinnsvurdering`() {
         opprettPerson()
-        val totrinnsvurdering: Totrinnsvurdering = totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
+        val totrinnsvurderingOld: TotrinnsvurderingOld = totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
 
-        assertEquals(VEDTAKSPERIODE, totrinnsvurdering.vedtaksperiodeId)
-        assertFalse(totrinnsvurdering.erRetur)
-        assertNull(totrinnsvurdering.saksbehandler)
-        assertNull(totrinnsvurdering.beslutter)
-        assertNull(totrinnsvurdering.utbetalingIdRef)
-        assertNotNull(totrinnsvurdering.opprettet)
-        assertNull(totrinnsvurdering.oppdatert)
+        assertEquals(VEDTAKSPERIODE, totrinnsvurderingOld.vedtaksperiodeId)
+        assertFalse(totrinnsvurderingOld.erRetur)
+        assertNull(totrinnsvurderingOld.saksbehandler)
+        assertNull(totrinnsvurderingOld.beslutter)
+        assertNull(totrinnsvurderingOld.utbetalingIdRef)
+        assertNotNull(totrinnsvurderingOld.opprettet)
+        assertNull(totrinnsvurderingOld.oppdatert)
     }
 
     @Test
@@ -310,7 +310,7 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
 
     private fun totrinnsvurdering() = sessionOf(dataSource).use {
         it.run(queryOf("SELECT * FROM totrinnsvurdering").map { row ->
-            Totrinnsvurdering(
+            TotrinnsvurderingOld(
                 vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
                 erRetur = row.boolean("er_retur"),
                 saksbehandler = row.uuidOrNull("saksbehandler"),

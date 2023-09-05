@@ -3,7 +3,8 @@ package no.nav.helse.mediator.oppgave
 import java.sql.SQLException
 import java.util.UUID
 import no.nav.helse.Tilgangskontroll
-import no.nav.helse.db.TotrinnsvurderingDao
+import no.nav.helse.db.SaksbehandlerRepository
+import no.nav.helse.db.TotrinnsvurderingRepository
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
@@ -20,7 +21,8 @@ class OppgaveMediator(
     private val tildelingDao: TildelingDao,
     private val reservasjonDao: ReservasjonDao,
     private val opptegnelseDao: OpptegnelseDao,
-    private val totrinnsvurderingDao: TotrinnsvurderingDao,
+    private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
+    private val saksbehandlerRepository: SaksbehandlerRepository,
     private val harTilgangTil: Tilgangskontroll = { _, _ -> false },
 ) {
     private var oppgaveForLagring: Oppgave? = null
@@ -44,7 +46,7 @@ class OppgaveMediator(
     }
 
     fun oppgave(id: Long, oppgaveBlock: Oppgave.() -> Unit) {
-        val oppgave = Oppgavehenter(oppgaveDao, totrinnsvurderingDao).oppgave(id)
+        val oppgave = Oppgavehenter(oppgaveDao, totrinnsvurderingRepository, saksbehandlerRepository).oppgave(id)
         oppgaveBlock(oppgave)
         Oppgavelagrer().apply {
             oppgave.accept(this)

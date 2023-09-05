@@ -28,8 +28,8 @@ import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.idForGruppe
 import no.nav.helse.installErrorHandling
 import no.nav.helse.mediator.oppgave.OppgaveDao
-import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.AzureAdAppConfig
 import no.nav.helse.spesialist.api.AzureConfig
@@ -169,7 +169,7 @@ internal class PersonApiTest {
         val vedtaksperiodeId = UUID.randomUUID()
         every { oppgaveDao.venterPåSaksbehandler(1L) } returns true
         every { oppgaveDao.erRiskoppgave(1L) } returns false
-        every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns Totrinnsvurdering(
+        every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns TotrinnsvurderingOld(
             vedtaksperiodeId = vedtaksperiodeId,
             erRetur = false,
             saksbehandler = UUID.randomUUID(),
@@ -208,7 +208,7 @@ internal class PersonApiTest {
 
         every { oppgaveDao.venterPåSaksbehandler(1L) } returns true
         every { oppgaveDao.erRiskoppgave(1L) } returns false
-        every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns Totrinnsvurdering(
+        every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns TotrinnsvurderingOld(
             vedtaksperiodeId = vedtaksperiodeId,
             erRetur = false,
             saksbehandler = SAKSBEHANDLER_OID,
@@ -236,7 +236,7 @@ internal class PersonApiTest {
         val vedtaksperiodeId = UUID.randomUUID()
 
         every { oppgaveDao.venterPåSaksbehandler(1L) } returns true
-        every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns Totrinnsvurdering(
+        every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns TotrinnsvurderingOld(
             vedtaksperiodeId = vedtaksperiodeId,
             erRetur = false,
             saksbehandler = UUID.randomUUID(),

@@ -183,7 +183,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val vedtakDao = VedtakDao(dataSource)
     private val risikovurderingDao = RisikovurderingDao(dataSource)
     private val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
-    private val saksbehandlerDao = SaksbehandlerDao(dataSource)
+    private val saksbehandlerApiDao = SaksbehandlerDao(dataSource)
+    private val saksbehandlerDao = no.nav.helse.db.SaksbehandlerDao(dataSource)
     private val tildelingDao = TildelingDao(dataSource)
     private val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource)
     private val overstyringApiDao = OverstyringApiDao(dataSource)
@@ -214,7 +215,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         tildelingDao = tildelingDao,
         reservasjonDao = reservasjonDao,
         opptegnelseDao = opptegnelseDao,
-        totrinnsvurderingDao = totrinnsvurderingDao,
+        totrinnsvurderingRepository = totrinnsvurderingDao,
+        saksbehandlerRepository = saksbehandlerDao,
         harTilgangTil = { oid, gruppe -> msGraphClient.erIGruppe(oid, tilgangsgrupper.gruppeId(gruppe)) }
     )
 
@@ -387,7 +389,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         )
         saksbehandlerMediator = SaksbehandlerMediator(dataSource, rapidsConnection)
         oppgavemelder = Oppgavemelder(oppgaveApiDao, rapidsConnection)
-        tildelingService = TildelingService(tildelingDao, saksbehandlerDao, totrinnsvurderingApiDao) { oppgavemelder }
+        tildelingService = TildelingService(tildelingDao, saksbehandlerApiDao, totrinnsvurderingApiDao) { oppgavemelder }
         oppdaterPersonService = OppdaterPersonService(rapidsConnection)
         godkjenningService = GodkjenningService(
             dataSource = dataSource,

@@ -10,8 +10,8 @@ import no.nav.helse.januar
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
-import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
@@ -96,7 +96,7 @@ internal class TrengerTotrinnsvurderingCommandTest {
         val saksbehander = UUID.randomUUID()
 
         every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
-        every { totrinnsvurderingMediator.opprett(any()) } returns Totrinnsvurdering(
+        every { totrinnsvurderingMediator.opprett(any()) } returns TotrinnsvurderingOld(
             vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
             erRetur = false,
             saksbehandler = saksbehander,
@@ -118,7 +118,7 @@ internal class TrengerTotrinnsvurderingCommandTest {
         val beslutter = UUID.randomUUID()
 
         every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
-        every { totrinnsvurderingMediator.opprett(any()) } returns Totrinnsvurdering(
+        every { totrinnsvurderingMediator.opprett(any()) } returns TotrinnsvurderingOld(
             vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
             erRetur = false,
             saksbehandler = saksbehander,

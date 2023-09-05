@@ -8,6 +8,7 @@ import no.nav.helse.Tilgangskontroll
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtBeslutter
 import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
@@ -49,9 +50,15 @@ class Oppgave private constructor(
     companion object {
         private val logg = LoggerFactory.getLogger(this::class.java)
 
-        fun oppgaveMedEgenskaper(id: Long, vedtaksperiodeId: UUID, utbetalingId: UUID, egenskaper: List<Oppgavetype>): Oppgave {
+        fun oppgaveMedEgenskaper(
+            id: Long,
+            vedtaksperiodeId: UUID,
+            utbetalingId: UUID,
+            egenskaper: List<Oppgavetype>,
+            totrinnsvurdering: Totrinnsvurdering? = null
+        ): Oppgave {
             val hovedegenskap = egenskaper.firstOrNull() ?: Oppgavetype.SØKNAD
-            return Oppgave(id, hovedegenskap, Oppgavestatus.AvventerSaksbehandler, vedtaksperiodeId, utbetalingId).also {
+            return Oppgave(id, hovedegenskap, Oppgavestatus.AvventerSaksbehandler, vedtaksperiodeId, utbetalingId, totrinnsvurdering).also {
                 it.egenskaper.addAll(egenskaper)
             }
         }
@@ -142,8 +149,19 @@ class Oppgave private constructor(
         }
     }
 
+    internal fun sendTilBeslutter(behandlendeSaksbehandler: Saksbehandler) {
+        val totrinnsvurdering = requireNotNull(totrinnsvurdering) { "Forventer at det eksisterer en aktiv totrinnsvurdering når oppgave sendes til beslutter" }
+        if (totrinnsvurdering.erBeslutteroppgave()) throw OppgaveAlleredeSendtBeslutter(id)
+
+        totrinnsvurdering.sendTilBeslutter(behandlendeSaksbehandler)
+        if (totrinnsvurdering.tidligereBeslutter() == null) return
+
+        tildeltTil = totrinnsvurdering.tidligereBeslutter()
+    }
+
     fun accept(visitor: OppgaveVisitor) {
         visitor.visitOppgave(id, type, status, vedtaksperiodeId, utbetalingId, ferdigstiltAvOid, ferdigstiltAvIdent, egenskaper, tildeltTil, påVent, totrinnsvurdering)
+        totrinnsvurdering?.accept(visitor)
     }
 
     fun ferdigstill(ident: String, oid: UUID) {

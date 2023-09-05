@@ -13,8 +13,8 @@ import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.api.GodkjenningService
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.HendelseDao
-import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
@@ -90,7 +90,7 @@ internal class GodkjenningServiceTest : AbstractE2ETest() {
         val tidligereSaksbehandlerOid = UUID.randomUUID()
         settOppBruker()
 
-        every { totrinnsvurderingDaoMock.hentAktiv(any<UUID>()) } returns mockk<Totrinnsvurdering>().also { totrinnsvurdering ->
+        every { totrinnsvurderingDaoMock.hentAktiv(any<UUID>()) } returns mockk<TotrinnsvurderingOld>().also { totrinnsvurdering ->
             every { totrinnsvurdering.erBeslutteroppgave() } returns true
             every { totrinnsvurdering.saksbehandler } returns tidligereSaksbehandlerOid
         }
@@ -107,7 +107,7 @@ internal class GodkjenningServiceTest : AbstractE2ETest() {
         settOppBruker()
         val oppgavereferanse = oppgaveDao.finnOppgaveId(FØDSELSNUMMER)!!
 
-        every { totrinnsvurderingDaoMock.hentAktiv(Testdata.VEDTAKSPERIODE_ID) } returns Totrinnsvurdering(
+        every { totrinnsvurderingDaoMock.hentAktiv(Testdata.VEDTAKSPERIODE_ID) } returns TotrinnsvurderingOld(
             vedtaksperiodeId = Testdata.VEDTAKSPERIODE_ID,
             erRetur = false,
             saksbehandler = totrinnsvurderingSaksbehandlerOid,
@@ -139,7 +139,7 @@ internal class GodkjenningServiceTest : AbstractE2ETest() {
         val oid = UUID.randomUUID()
         settOppBruker()
 
-        every { totrinnsvurderingDaoMock.hentAktiv(Testdata.VEDTAKSPERIODE_ID) } returns Totrinnsvurdering(
+        every { totrinnsvurderingDaoMock.hentAktiv(Testdata.VEDTAKSPERIODE_ID) } returns TotrinnsvurderingOld(
             vedtaksperiodeId = Testdata.VEDTAKSPERIODE_ID,
             erRetur = false,
             saksbehandler = Testdata.SAKSBEHANDLER_OID,
@@ -159,7 +159,7 @@ internal class GodkjenningServiceTest : AbstractE2ETest() {
         val oid = UUID.randomUUID()
         settOppBruker()
 
-        every { totrinnsvurderingDaoMock.hentAktiv(Testdata.VEDTAKSPERIODE_ID) } returns Totrinnsvurdering(
+        every { totrinnsvurderingDaoMock.hentAktiv(Testdata.VEDTAKSPERIODE_ID) } returns TotrinnsvurderingOld(
             vedtaksperiodeId = Testdata.VEDTAKSPERIODE_ID,
             erRetur = false,
             saksbehandler = Testdata.SAKSBEHANDLER_OID,

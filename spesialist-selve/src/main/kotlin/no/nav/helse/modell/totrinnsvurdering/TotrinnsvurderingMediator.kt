@@ -17,7 +17,7 @@ class TotrinnsvurderingMediator(
 ) {
     private val log = LoggerFactory.getLogger("TotrinnsvurderingMediator")
 
-    fun opprett(vedtaksperiodeId: UUID): Totrinnsvurdering = dao.opprett(vedtaksperiodeId)
+    fun opprett(vedtaksperiodeId: UUID): TotrinnsvurderingOld = dao.opprett(vedtaksperiodeId)
     fun settSaksbehandler(oppgaveId: Long, saksbehandlerOid: UUID): Unit =
         dao.settSaksbehandler(oppgaveId, saksbehandlerOid)
 
@@ -63,6 +63,6 @@ class TotrinnsvurderingMediator(
 
     fun settHåndtertRetur(oppgaveId: Long): Unit = dao.settHåndtertRetur(oppgaveId)
     fun ferdigstill(vedtaksperiodeId: UUID): Unit = dao.ferdigstill(vedtaksperiodeId)
-    fun hentAktiv(vedtaksperiodeId: UUID): Totrinnsvurdering? = dao.hentAktiv(vedtaksperiodeId)
-    fun hentAktiv(oppgaveId: Long): Totrinnsvurdering? = dao.hentAktiv(oppgaveId)
+    fun hentAktiv(vedtaksperiodeId: UUID): TotrinnsvurderingOld? = dao.hentAktiv(vedtaksperiodeId)
+    fun hentAktiv(oppgaveId: Long): TotrinnsvurderingOld? = dao.hentAktiv(oppgaveId)
 }

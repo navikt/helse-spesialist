@@ -1,23 +1,21 @@
 package no.nav.helse.modell
 
-import io.mockk.clearMocks
-import io.mockk.mockk
+import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.Oppgave.Companion.oppgaveMedEgenskaper
 import no.nav.helse.modell.oppgave.OppgaveVisitor
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
+import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtBeslutter
 import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype.STIKKPRØVE
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype.SØKNAD
-import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import kotlin.random.Random.Default.nextLong
@@ -38,15 +36,6 @@ internal class OppgaveTest {
             navn = SAKSBEHANDLER_NAVN,
             ident = SAKSBEHANDLER_IDENT
         )
-    }
-
-    private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
-    private val vedtakDao = mockk<VedtakDao>()
-    private val tildelingDao = mockk<TildelingDao>(relaxed = true)
-
-    @BeforeEach
-    fun setup() {
-        clearMocks(oppgaveDao, vedtakDao, tildelingDao)
     }
 
     @Test
@@ -79,7 +68,7 @@ internal class OppgaveTest {
     @ParameterizedTest
     @EnumSource(value = Oppgavetype::class, names = ["SØKNAD"], mode = EnumSource.Mode.EXCLUDE)
     fun `Første egenskap anses som oppgavetype`(type: Oppgavetype) {
-        val oppgave = oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, egenskaper = listOf(type, SØKNAD))
+        val oppgave = nyOppgave(type, SØKNAD)
 
         inspektør(oppgave) {
             assertEquals(type, this.type)
@@ -88,7 +77,7 @@ internal class OppgaveTest {
 
     @Test
     fun `Defaulter til SØKNAD dersom ingen egenskaper er oppgitt`() {
-        val oppgave = oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, egenskaper = emptyList())
+        val oppgave = nyOppgave()
 
         inspektør(oppgave) {
             assertEquals(SØKNAD, this.type)
@@ -174,6 +163,23 @@ internal class OppgaveTest {
     }
 
     @Test
+    fun `kaster exception dersom oppgave allerede er sendt til beslutter når man forsøker å sende til beslutter`() {
+        val oppgave = nyOppgave(SØKNAD, medTotrinnsvurdering = true)
+        oppgave.sendTilBeslutter(saksbehandler)
+        assertThrows<OppgaveAlleredeSendtBeslutter> {
+            oppgave.sendTilBeslutter(saksbehandler)
+        }
+    }
+
+    @Test
+    fun `kaster exception dersom oppgave sendes til beslutter uten at oppgaven krever totrinnsvurdering`() {
+        val oppgave = nyOppgave(SØKNAD, medTotrinnsvurdering = false)
+        assertThrows<IllegalArgumentException> {
+            oppgave.sendTilBeslutter(saksbehandler)
+        }
+    }
+
+    @Test
     fun equals() {
         val gjenopptattOppgave = Oppgave(
             1L,
@@ -182,10 +188,10 @@ internal class OppgaveTest {
             VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID
         )
-        val oppgave1 = oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(SØKNAD))
-        val oppgave2 = oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(SØKNAD))
-        val oppgave3 = oppgaveMedEgenskaper(OPPGAVE_ID, UUID.randomUUID(), UTBETALING_ID, listOf(SØKNAD))
-        val oppgave4 = oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(STIKKPRØVE))
+        val oppgave1 = oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(SØKNAD),)
+        val oppgave2 = oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(SØKNAD),)
+        val oppgave3 = oppgaveMedEgenskaper(OPPGAVE_ID, UUID.randomUUID(), UTBETALING_ID, listOf(SØKNAD),)
+        val oppgave4 = oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(STIKKPRØVE),)
         assertEquals(oppgave1, oppgave2)
         assertEquals(oppgave1.hashCode(), oppgave2.hashCode())
         assertNotEquals(oppgave1, oppgave3)
@@ -204,8 +210,20 @@ internal class OppgaveTest {
         assertEquals(oppgave1.hashCode(), oppgave2.hashCode())
     }
 
-    private fun nyOppgave(vararg egenskaper: Oppgavetype) =
-        oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, egenskaper.toList())
+    private fun nyOppgave(vararg egenskaper: Oppgavetype, medTotrinnsvurdering: Boolean = false): Oppgave {
+        val totrinnsvurdering = if (medTotrinnsvurdering) totrinnsvurdering() else null
+        return oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, egenskaper.toList(), totrinnsvurdering)
+    }
+
+    private fun totrinnsvurdering() = Totrinnsvurdering(
+        vedtaksperiodeId = VEDTAKSPERIODE_ID,
+        erRetur = false,
+        saksbehandler = null,
+        beslutter = null,
+        utbetalingIdRef = null,
+        opprettet = LocalDateTime.now(),
+        oppdatert = null
+    )
 
     private fun inspektør(oppgave: Oppgave, block: OppgaveInspektør.() -> Unit) {
         val inspektør = OppgaveInspektør()

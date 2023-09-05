@@ -6,7 +6,7 @@ import kotliquery.Query
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
 import org.intellij.lang.annotations.Language
 
 interface TotrinnsvurderingRepository {
@@ -14,7 +14,7 @@ interface TotrinnsvurderingRepository {
 }
 
 class TotrinnsvurderingDao(private val dataSource: DataSource): TotrinnsvurderingRepository {
-    private fun TransactionalSession.opprett(vedtaksperiodeId: UUID): Totrinnsvurdering {
+    private fun TransactionalSession.opprett(vedtaksperiodeId: UUID): TotrinnsvurderingOld {
         @Language("PostgreSQL")
         val query = """
            INSERT INTO totrinnsvurdering (vedtaksperiode_id) 
@@ -25,7 +25,7 @@ class TotrinnsvurderingDao(private val dataSource: DataSource): Totrinnsvurderin
         return requireNotNull(run(queryOf(query, mapOf("vedtaksperiodeId" to vedtaksperiodeId)).tilTotrinnsvurdering()))
     }
 
-    private fun TransactionalSession.hentAktiv(vedtaksperiodeId: UUID): Totrinnsvurdering? {
+    private fun TransactionalSession.hentAktiv(vedtaksperiodeId: UUID): TotrinnsvurderingOld? {
         @Language("PostgreSQL")
         val query = """
            SELECT * FROM totrinnsvurdering
@@ -63,7 +63,7 @@ class TotrinnsvurderingDao(private val dataSource: DataSource): Totrinnsvurderin
         }
     }
 
-    private fun TransactionalSession.hentAktiv(oppgaveId: Long): Totrinnsvurdering? {
+    private fun TransactionalSession.hentAktiv(oppgaveId: Long): TotrinnsvurderingOld? {
         @Language("PostgreSQL")
         val query = """
            SELECT * FROM totrinnsvurdering
@@ -76,7 +76,7 @@ class TotrinnsvurderingDao(private val dataSource: DataSource): Totrinnsvurderin
         return run(queryOf(query, mapOf("oppgaveId" to oppgaveId)).tilTotrinnsvurdering())
     }
 
-    internal fun opprett(vedtaksperiodeId: UUID): Totrinnsvurdering = sessionOf(dataSource).use { session ->
+    internal fun opprett(vedtaksperiodeId: UUID): TotrinnsvurderingOld = sessionOf(dataSource).use { session ->
         session.transaction { transaction ->
             transaction.run {
                 hentAktiv(vedtaksperiodeId) ?: opprett(vedtaksperiodeId)
@@ -281,20 +281,20 @@ class TotrinnsvurderingDao(private val dataSource: DataSource): Totrinnsvurderin
         }
     }
 
-    fun hentAktiv(vedtaksperiodeId: UUID): Totrinnsvurdering? = sessionOf(dataSource).use { session ->
+    fun hentAktiv(vedtaksperiodeId: UUID): TotrinnsvurderingOld? = sessionOf(dataSource).use { session ->
         session.transaction {
             it.hentAktiv(vedtaksperiodeId)
         }
     }
 
-    fun hentAktiv(oppgaveId: Long): Totrinnsvurdering? = sessionOf(dataSource).use { session ->
+    fun hentAktiv(oppgaveId: Long): TotrinnsvurderingOld? = sessionOf(dataSource).use { session ->
         session.transaction {
             it.hentAktiv(oppgaveId)
         }
     }
 
     private fun Query.tilTotrinnsvurdering() = map { row ->
-        Totrinnsvurdering(
+        TotrinnsvurderingOld(
             vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
             erRetur = row.boolean("er_retur"),
             saksbehandler = row.uuidOrNull("saksbehandler"),

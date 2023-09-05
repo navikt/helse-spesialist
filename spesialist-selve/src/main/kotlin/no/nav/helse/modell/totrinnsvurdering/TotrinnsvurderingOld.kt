@@ -2,34 +2,21 @@ package no.nav.helse.modell.totrinnsvurdering
 
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.spesialist.api.modell.Saksbehandler
 
-class Totrinnsvurdering(
-    private val vedtaksperiodeId: UUID,
-    private var erRetur: Boolean,
-    private var saksbehandler: Saksbehandler?,
-    private var beslutter: Saksbehandler?,
-    private val utbetalingIdRef: Long?,
-    private val opprettet: LocalDateTime,
-    private var oppdatert: LocalDateTime?
+class TotrinnsvurderingOld(
+    val vedtaksperiodeId: UUID,
+    val erRetur: Boolean,
+    val saksbehandler: UUID?,
+    val beslutter: UUID?,
+    val utbetalingIdRef: Long?,
+    val opprettet: LocalDateTime,
+    val oppdatert: LocalDateTime?,
 ) {
     fun erBeslutteroppgave(): Boolean = !erRetur && saksbehandler != null
 
-    fun tidligereBeslutter() = beslutter
-
-    fun sendTilBeslutter(behandlendeSaksbehandler: Saksbehandler) {
-        saksbehandler = behandlendeSaksbehandler
-        oppdatert = LocalDateTime.now()
-        if (erRetur) erRetur = false
-    }
-
-    fun accept(totrinnsvurderingVisitor: TotrinnsvurderingVisitor) {
-        totrinnsvurderingVisitor.visitTotrinnsvurdering(vedtaksperiodeId, erRetur, saksbehandler, beslutter, utbetalingIdRef, opprettet, oppdatert)
-    }
-
     override fun equals(other: Any?): Boolean {
         return this === other || (
-            other is Totrinnsvurdering &&
+            other is TotrinnsvurderingOld &&
             vedtaksperiodeId == other.vedtaksperiodeId &&
             erRetur == other.erRetur &&
             saksbehandler == other.saksbehandler &&

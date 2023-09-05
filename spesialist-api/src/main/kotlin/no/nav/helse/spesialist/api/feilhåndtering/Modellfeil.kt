@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.api.feilhåndtering
 
 import io.ktor.http.HttpStatusCode
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -81,6 +82,15 @@ class IkkeTilgangTilRiskQa(private val saksbehandlerIdent: String, private val o
             keyValue("saksbehandlerIdent", saksbehandlerIdent),
             keyValue("oppgaveId", oppgaveId),
         )
+    }
+}
+
+class OppgaveAlleredeSendtBeslutter(private val oppgaveId: Long): Modellfeil() {
+    override val eksternKontekst: Map<String, Any> = emptyMap()
+    override val feilkode: String = "oppgave_allerede_sendt_beslutter"
+    override val httpkode: HttpStatusCode = HttpStatusCode.Conflict
+    override fun logger() {
+        logg.info("Oppgave med {} er allerede sendt til beslutter for totrinnsvurdering", kv("oppgaveId", oppgaveId))
     }
 }
 

@@ -4,6 +4,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.db.OppgaveFraDatabase
 import no.nav.helse.db.SaksbehandlerFraDatabase
+import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.TotrinnsvurderingFraDatabase
 import no.nav.helse.db.TotrinnsvurderingRepository
 import no.nav.helse.modell.oppgave.OppgaveVisitor
@@ -23,12 +24,12 @@ class OppgavehenterTest {
         private const val STATUS = "AvventerSaksbehandler"
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
         private val UTBETALING_ID = UUID.randomUUID()
-        private const val FERDIGSTILT_AV_IDENT = "S199999"
+        private const val SAKSBEHANDLER_IDENT = "S199999"
         private const val SAKSBEHANDLER_EPOST = "saksbehandler@nav.no"
         private const val SAKSBEHANDLER_NAVN = "Saksbehandler"
         private val SAKSBEHANDLER_OID = UUID.randomUUID()
         private val BESLUTTER_OID = UUID.randomUUID()
-        private val TILDELT_TIL = SaksbehandlerFraDatabase(SAKSBEHANDLER_EPOST, SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, FERDIGSTILT_AV_IDENT)
+        private val TILDELT_TIL = SaksbehandlerFraDatabase(SAKSBEHANDLER_EPOST, SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_IDENT)
         private const val PÅ_VENT = false
         private const val ER_RETUR = false
         private val TOTRINNSVURDERING_OPPRETTET = LocalDateTime.now()
@@ -37,7 +38,7 @@ class OppgavehenterTest {
 
     @Test
     fun `konverter fra OppgaveFraDatabase til Oppgave`() {
-        val oppgavehenter = Oppgavehenter(oppgaveRepository, totrinnsvurderingRepository())
+        val oppgavehenter = Oppgavehenter(oppgaveRepository, totrinnsvurderingRepository(), saksbehandlerRepository)
         val oppgave = oppgavehenter.oppgave(OPPGAVE_ID)
         oppgave.accept(inspektør)
         inspektør.assertOppgave(
@@ -47,9 +48,9 @@ class OppgavehenterTest {
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID,
             ferdigstiltAvOid = SAKSBEHANDLER_OID,
-            ferdigstiltAvIdent = FERDIGSTILT_AV_IDENT,
+            ferdigstiltAvIdent = SAKSBEHANDLER_IDENT,
             egenskaper = emptyList(),
-            tildelt = Saksbehandler(SAKSBEHANDLER_EPOST, SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, FERDIGSTILT_AV_IDENT),
+            tildelt = Saksbehandler(SAKSBEHANDLER_EPOST, SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_IDENT),
             påVent = PÅ_VENT,
             null
         )
@@ -67,7 +68,7 @@ class OppgavehenterTest {
             oppdatert = LocalDateTime.now()
         )
 
-        val oppgavehenter = Oppgavehenter(oppgaveRepository, totrinnsvurderingRepository(totrinnsvurdering))
+        val oppgavehenter = Oppgavehenter(oppgaveRepository, totrinnsvurderingRepository(totrinnsvurdering), saksbehandlerRepository)
         val oppgave = oppgavehenter.oppgave(OPPGAVE_ID)
         oppgave.accept(inspektør)
         inspektør.assertOppgave(
@@ -77,15 +78,15 @@ class OppgavehenterTest {
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID,
             ferdigstiltAvOid = SAKSBEHANDLER_OID,
-            ferdigstiltAvIdent = FERDIGSTILT_AV_IDENT,
+            ferdigstiltAvIdent = SAKSBEHANDLER_IDENT,
             egenskaper = emptyList(),
-            tildelt = Saksbehandler(SAKSBEHANDLER_EPOST, SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, FERDIGSTILT_AV_IDENT),
+            tildelt = Saksbehandler(SAKSBEHANDLER_EPOST, SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_IDENT),
             påVent = PÅ_VENT,
             totrinnsvurdering = Totrinnsvurdering(
                 vedtaksperiodeId = VEDTAKSPERIODE_ID,
                 erRetur = ER_RETUR,
-                saksbehandler = SAKSBEHANDLER_OID,
-                beslutter = BESLUTTER_OID,
+                saksbehandler = Saksbehandler(SAKSBEHANDLER_EPOST, SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_IDENT),
+                beslutter = Saksbehandler(SAKSBEHANDLER_EPOST, BESLUTTER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_IDENT),
                 utbetalingIdRef = 1L,
                 opprettet = TOTRINNSVURDERING_OPPRETTET,
                 oppdatert = TOTRINNSVURDERING_OPPDATERT
@@ -167,7 +168,7 @@ class OppgavehenterTest {
                 status = STATUS,
                 vedtaksperiodeId = VEDTAKSPERIODE_ID,
                 utbetalingId = UTBETALING_ID,
-                ferdigstiltAvIdent = FERDIGSTILT_AV_IDENT,
+                ferdigstiltAvIdent = SAKSBEHANDLER_IDENT,
                 ferdigstiltAvOid = SAKSBEHANDLER_OID,
                 tildelt = TILDELT_TIL,
                 påVent = PÅ_VENT
@@ -179,5 +180,15 @@ class OppgavehenterTest {
         totrinnsvurdering: TotrinnsvurderingFraDatabase? = null
     ) = object : TotrinnsvurderingRepository {
         override fun hentAktivTotrinnsvurdering(oppgaveId: Long): TotrinnsvurderingFraDatabase? = totrinnsvurdering
+    }
+
+    private val saksbehandlerRepository = object : SaksbehandlerRepository {
+        val saksbehandlere = mapOf(
+            SAKSBEHANDLER_OID to SaksbehandlerFraDatabase(SAKSBEHANDLER_EPOST, SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_IDENT),
+            BESLUTTER_OID to SaksbehandlerFraDatabase(SAKSBEHANDLER_EPOST, BESLUTTER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_IDENT),
+        )
+        override fun finnSaksbehandler(oid: UUID): SaksbehandlerFraDatabase? {
+            return saksbehandlere[oid]
+        }
     }
 }

@@ -35,6 +35,7 @@ import no.nav.helse.Testdata.SNAPSHOT
 import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.Testdata.snapshot
+import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.januar
 import no.nav.helse.mediator.GodkjenningMediator
@@ -72,7 +73,6 @@ import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
-import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
@@ -130,7 +130,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     protected val meldingsfabrikk get() = Testmeldingfabrikk(FØDSELSNUMMER, AKTØR)
 
-    protected val oppgaveMediator = OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao, opptegnelseDao, totrinnsvurderingDao)
+    protected val oppgaveMediator = OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao, opptegnelseDao, totrinnsvurderingDao, saksbehandlerDao)
     private val godkjenningMediator =
         GodkjenningMediator(vedtakDao, opptegnelseDao, oppgaveDao, utbetalingDao, hendelseDao)
 
