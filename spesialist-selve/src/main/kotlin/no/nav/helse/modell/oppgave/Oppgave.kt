@@ -49,6 +49,101 @@ class Oppgave private constructor(
         this.påVent = påVent
     }
 
+    internal fun sendTilBeslutter(behandlendeSaksbehandler: Saksbehandler) {
+        val totrinnsvurdering = requireNotNull(totrinnsvurdering) {
+            "Forventer at det eksisterer en aktiv totrinnsvurdering når oppgave sendes til beslutter"
+        }
+        if (totrinnsvurdering.erBeslutteroppgave())
+            throw OppgaveAlleredeSendtBeslutter(id)
+
+        totrinnsvurdering.sendTilBeslutter(behandlendeSaksbehandler)
+
+        if (totrinnsvurdering.tidligereBeslutter() == null) return
+        if (behandlendeSaksbehandler == totrinnsvurdering.tidligereBeslutter())
+            throw OppgaveKreverTotrinnsvurdering(id)
+
+        tildeltTil = totrinnsvurdering.tidligereBeslutter()
+    }
+
+    internal fun sendIRetur(besluttendeSaksbehandler: Saksbehandler) {
+        val totrinnsvurdering = requireNotNull(totrinnsvurdering) {
+            "Forventer at det eksisterer en aktiv totrinnsvurdering når oppgave sendes til beslutter"
+        }
+        if (!totrinnsvurdering.erBeslutteroppgave())
+            throw OppgaveAlleredeSendtIRetur(id)
+
+        if (besluttendeSaksbehandler == totrinnsvurdering.opprinneligSaksbehandler())
+            throw OppgaveKreverTotrinnsvurdering(id)
+
+        totrinnsvurdering.sendIRetur(besluttendeSaksbehandler)
+
+        val opprinneligSaksbehandler = requireNotNull(totrinnsvurdering.opprinneligSaksbehandler()) {
+            "Opprinnelig saksbehandler kan ikke være null ved retur av beslutteroppgave"
+        }
+
+        tildeltTil = opprinneligSaksbehandler
+    }
+
+    fun accept(visitor: OppgaveVisitor) {
+        visitor.visitOppgave(id, type, status, vedtaksperiodeId, utbetalingId, ferdigstiltAvOid, ferdigstiltAvIdent, egenskaper, tildeltTil, påVent, totrinnsvurdering)
+        totrinnsvurdering?.accept(visitor)
+    }
+
+    fun ferdigstill() {
+        status = Oppgavestatus.Ferdigstilt
+    }
+
+    fun avventerSystem(ident: String, oid: UUID) {
+        status = Oppgavestatus.AvventerSystem
+        ferdigstiltAvIdent = ident
+        ferdigstiltAvOid = oid
+    }
+
+    fun lagMelding(eventName: String, fødselsnummer: String, hendelseId: UUID): JsonMessage {
+        return lagMelding(fødselsnummer, hendelseId, eventName, this, false).second
+    }
+
+    fun loggOppgaverAvbrutt(vedtaksperiodeId: UUID) {
+        logg.info("Har avbrutt oppgave $id for vedtaksperiode $vedtaksperiodeId")
+    }
+
+    fun avbryt() {
+        status = Oppgavestatus.Invalidert
+    }
+
+    fun forsøkTildeling(
+        saksbehandler: Saksbehandler,
+        påVent: Boolean = false,
+        harTilgangTil: Tilgangskontroll,
+    ) {
+        if (type == Oppgavetype.STIKKPRØVE) {
+            logg.info("OppgaveId $id er stikkprøve og tildeles ikke på tross av reservasjon.")
+            return
+        }
+        if (type == Oppgavetype.RISK_QA) {
+            val harTilgangTilRisk = runBlocking { harTilgangTil(saksbehandler.oid(), Gruppe.RISK_QA) }
+            if (!harTilgangTilRisk) logg.info("OppgaveId $id er RISK_QA og saksbehandler har ikke tilgang, tildeles ikke på tross av reservasjon.")
+            return
+        }
+        tildeltTil = saksbehandler
+        this.påVent = påVent
+        logg.info("Oppgave $id tildeles $saksbehandler grunnet reservasjon.")
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is Oppgave) return false
+        if (this.id != other.id) return false
+        return this.type == other.type && this.vedtaksperiodeId == other.vedtaksperiodeId
+    }
+
+    override fun hashCode(): Int {
+        return Objects.hash(id, type, vedtaksperiodeId)
+    }
+
+    override fun toString(): String {
+        return "Oppgave(type=$type, status=$status, vedtaksperiodeId=$vedtaksperiodeId, utbetalingId=$utbetalingId, id=$id)"
+    }
+
     companion object {
         private val logg = LoggerFactory.getLogger(this::class.java)
 
@@ -149,100 +244,5 @@ class Oppgave private constructor(
                 påVent?.also { put("påVent", it) }
             })
         }
-    }
-
-    internal fun sendTilBeslutter(behandlendeSaksbehandler: Saksbehandler) {
-        val totrinnsvurdering = requireNotNull(totrinnsvurdering) {
-            "Forventer at det eksisterer en aktiv totrinnsvurdering når oppgave sendes til beslutter"
-        }
-        if (totrinnsvurdering.erBeslutteroppgave())
-            throw OppgaveAlleredeSendtBeslutter(id)
-
-        totrinnsvurdering.sendTilBeslutter(behandlendeSaksbehandler)
-
-        if (totrinnsvurdering.tidligereBeslutter() == null) return
-        if (behandlendeSaksbehandler == totrinnsvurdering.tidligereBeslutter())
-            throw OppgaveKreverTotrinnsvurdering(id)
-
-        tildeltTil = totrinnsvurdering.tidligereBeslutter()
-    }
-
-    internal fun sendIRetur(besluttendeSaksbehandler: Saksbehandler) {
-        val totrinnsvurdering = requireNotNull(totrinnsvurdering) {
-            "Forventer at det eksisterer en aktiv totrinnsvurdering når oppgave sendes til beslutter"
-        }
-        if (!totrinnsvurdering.erBeslutteroppgave())
-            throw OppgaveAlleredeSendtIRetur(id)
-
-        if (besluttendeSaksbehandler == totrinnsvurdering.opprinneligSaksbehandler())
-            throw OppgaveKreverTotrinnsvurdering(id)
-
-        totrinnsvurdering.sendIRetur(besluttendeSaksbehandler)
-
-        val opprinneligSaksbehandler = requireNotNull(totrinnsvurdering.opprinneligSaksbehandler()) {
-            "Opprinnelig saksbehandler kan ikke være null ved retur av beslutteroppgave"
-        }
-
-        tildeltTil = opprinneligSaksbehandler
-    }
-
-    fun accept(visitor: OppgaveVisitor) {
-        visitor.visitOppgave(id, type, status, vedtaksperiodeId, utbetalingId, ferdigstiltAvOid, ferdigstiltAvIdent, egenskaper, tildeltTil, påVent, totrinnsvurdering)
-        totrinnsvurdering?.accept(visitor)
-    }
-
-    fun ferdigstill() {
-        status = Oppgavestatus.Ferdigstilt
-    }
-
-    fun avventerSystem(ident: String, oid: UUID) {
-        status = Oppgavestatus.AvventerSystem
-        ferdigstiltAvIdent = ident
-        ferdigstiltAvOid = oid
-    }
-
-    fun lagMelding(eventName: String, fødselsnummer: String, hendelseId: UUID): JsonMessage {
-        return lagMelding(fødselsnummer, hendelseId, eventName, this, false).second
-    }
-
-    fun loggOppgaverAvbrutt(vedtaksperiodeId: UUID) {
-        logg.info("Har avbrutt oppgave $id for vedtaksperiode $vedtaksperiodeId")
-    }
-
-    fun avbryt() {
-        status = Oppgavestatus.Invalidert
-    }
-
-    fun forsøkTildeling(
-        saksbehandler: Saksbehandler,
-        påVent: Boolean = false,
-        harTilgangTil: Tilgangskontroll,
-    ) {
-        if (type == Oppgavetype.STIKKPRØVE) {
-            logg.info("OppgaveId $id er stikkprøve og tildeles ikke på tross av reservasjon.")
-            return
-        }
-        if (type == Oppgavetype.RISK_QA) {
-            val harTilgangTilRisk = runBlocking { harTilgangTil(saksbehandler.oid(), Gruppe.RISK_QA) }
-            if (!harTilgangTilRisk) logg.info("OppgaveId $id er RISK_QA og saksbehandler har ikke tilgang, tildeles ikke på tross av reservasjon.")
-            return
-        }
-        tildeltTil = saksbehandler
-        this.påVent = påVent
-        logg.info("Oppgave $id tildeles $saksbehandler grunnet reservasjon.")
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (other !is Oppgave) return false
-        if (this.id != other.id) return false
-        return this.type == other.type && this.vedtaksperiodeId == other.vedtaksperiodeId
-    }
-
-    override fun hashCode(): Int {
-        return Objects.hash(id, type, vedtaksperiodeId)
-    }
-
-    override fun toString(): String {
-        return "Oppgave(type=$type, status=$status, vedtaksperiodeId=$vedtaksperiodeId, utbetalingId=$utbetalingId, id=$id)"
     }
 }
