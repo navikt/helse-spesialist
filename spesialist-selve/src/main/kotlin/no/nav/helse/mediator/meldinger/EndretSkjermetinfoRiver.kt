@@ -4,7 +4,7 @@ import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
-import no.nav.helse.modell.oppgave.OppgaveDao
+import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext

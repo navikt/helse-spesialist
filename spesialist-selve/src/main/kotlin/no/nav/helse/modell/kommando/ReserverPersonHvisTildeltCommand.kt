@@ -1,7 +1,7 @@
 package no.nav.helse.modell.kommando
 
 import java.util.UUID
-import no.nav.helse.modell.oppgave.OppgaveDao
+import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.tildeling.TildelingDao

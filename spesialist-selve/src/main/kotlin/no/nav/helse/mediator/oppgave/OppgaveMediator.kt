@@ -4,7 +4,6 @@ import java.sql.SQLException
 import java.util.UUID
 import no.nav.helse.Tilgangskontroll
 import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload.Companion.lagre

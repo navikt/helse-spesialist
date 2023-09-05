@@ -11,7 +11,7 @@ import no.nav.helse.Testdata
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.mediator.api.GodkjenningService
 import no.nav.helse.modell.HendelseDao
-import no.nav.helse.modell.oppgave.OppgaveDao
+import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator

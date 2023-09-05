@@ -12,7 +12,7 @@ import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.kommando.TestHendelse
 import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.modell.oppgave.OppgaveDao
+import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType

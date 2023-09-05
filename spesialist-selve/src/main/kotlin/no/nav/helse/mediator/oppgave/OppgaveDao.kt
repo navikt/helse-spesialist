@@ -1,9 +1,10 @@
-package no.nav.helse.modell.oppgave
+package no.nav.helse.mediator.oppgave
 
 import java.util.UUID
 import javax.sql.DataSource
 import no.nav.helse.HelseDao
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommandData
+import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker

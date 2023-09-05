@@ -9,7 +9,7 @@ import no.nav.helse.modell.automatisering.AutomatiseringForEksisterendeOppgaveCo
 import no.nav.helse.modell.automatisering.SettTidligereAutomatiseringInaktivCommand
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
-import no.nav.helse.modell.oppgave.OppgaveDao
+import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.oppgave.SjekkAtOppgaveFortsattErÅpenCommand
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.UtbetalingDao

@@ -6,7 +6,7 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.oppgave.OppgaveDao
+import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto

@@ -6,7 +6,7 @@ import no.nav.helse.modell.kommando.AvvisVedStrengtFortroligAdressebeskyttelseCo
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterPersoninfoCommand
-import no.nav.helse.modell.oppgave.OppgaveDao
+import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.person.PersonDao
 
 internal class AdressebeskyttelseEndret(

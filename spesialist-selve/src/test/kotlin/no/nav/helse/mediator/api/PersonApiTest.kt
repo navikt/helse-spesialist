@@ -27,7 +27,7 @@ import no.nav.helse.Gruppe
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.idForGruppe
 import no.nav.helse.installErrorHandling
-import no.nav.helse.modell.oppgave.OppgaveDao
+import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.objectMapper

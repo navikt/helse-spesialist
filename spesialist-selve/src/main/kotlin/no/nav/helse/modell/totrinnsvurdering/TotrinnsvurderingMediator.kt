@@ -1,7 +1,7 @@
 package no.nav.helse.modell.totrinnsvurdering
 
 import java.util.UUID
-import no.nav.helse.modell.oppgave.OppgaveDao
+import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao

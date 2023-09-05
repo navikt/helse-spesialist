@@ -1,7 +1,7 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.modell.oppgave.OppgaveDao
+import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 

@@ -8,7 +8,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommandData
-import no.nav.helse.modell.oppgave.OppgaveDao
+import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.rapids_rivers.testsupport.TestRapid

@@ -4,7 +4,7 @@ import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.*
-import no.nav.helse.modell.oppgave.OppgaveDao
+import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 
 internal class ReserverPersonCommand(

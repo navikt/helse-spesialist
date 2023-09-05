@@ -1,6 +1,6 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.modell.oppgave.OppgaveDao
+import no.nav.helse.mediator.oppgave.OppgaveDao
 import org.slf4j.LoggerFactory
 
 internal class InvaliderSaksbehandlerOppgaveCommand(

@@ -7,7 +7,7 @@ import no.nav.helse.mediator.meldinger.Hendelse
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.UtbetalingsgodkjenningCommand
-import no.nav.helse.modell.oppgave.OppgaveDao
+import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 

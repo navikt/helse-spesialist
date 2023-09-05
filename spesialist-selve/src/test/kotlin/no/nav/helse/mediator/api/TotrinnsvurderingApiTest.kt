@@ -16,7 +16,7 @@ import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.modell.oppgave.OppgaveDao
+import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.objectMapper

@@ -5,7 +5,7 @@ import io.mockk.mockk
 import java.util.UUID
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.Oppgave.Companion.oppgaveMedEgenskaper
-import no.nav.helse.modell.oppgave.OppgaveDao
+import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.oppgave.OppgaveVisitor
 import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus

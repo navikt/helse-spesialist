@@ -5,6 +5,7 @@ import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.Gruppe
 import no.nav.helse.Tilgangskontroll
+import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus

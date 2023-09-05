@@ -9,7 +9,7 @@ import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.oppgave.OppgaveDao
+import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.UtbetalingDao

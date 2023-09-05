@@ -1,6 +1,7 @@
 package no.nav.helse.modell.oppgave
 
 import java.util.UUID
+import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
