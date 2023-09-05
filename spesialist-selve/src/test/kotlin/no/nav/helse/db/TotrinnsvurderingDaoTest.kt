@@ -1,4 +1,4 @@
-package no.nav.helse.modell
+package no.nav.helse.db
 
 import DatabaseIntegrationTest
 import java.util.UUID
@@ -229,6 +229,26 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
         totrinnsvurderingDao.settErRetur(VEDTAKSPERIODE)
         val aktivTotrinnsvurdering = totrinnsvurderingDao.hentAktiv(VEDTAKSPERIODE)
+
+        val totrinnsvurdering = totrinnsvurdering()
+
+        assertEquals(aktivTotrinnsvurdering?.vedtaksperiodeId, totrinnsvurdering?.vedtaksperiodeId)
+        assertEquals(aktivTotrinnsvurdering?.erRetur, totrinnsvurdering?.erRetur)
+        assertEquals(aktivTotrinnsvurdering?.saksbehandler, totrinnsvurdering?.saksbehandler)
+        assertEquals(aktivTotrinnsvurdering?.beslutter, totrinnsvurdering?.beslutter)
+        assertEquals(aktivTotrinnsvurdering?.utbetalingIdRef, totrinnsvurdering?.utbetalingIdRef)
+        assertEquals(aktivTotrinnsvurdering?.oppdatert, totrinnsvurdering?.oppdatert)
+        assertEquals(aktivTotrinnsvurdering?.opprettet, totrinnsvurdering?.opprettet)
+    }
+
+    @Test
+    fun `Finner aktiv totrinnsvurdering`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave()
+        totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
+        val aktivTotrinnsvurdering = totrinnsvurderingDao.hentAktivTotrinnsvurdering(OPPGAVE_ID)
 
         val totrinnsvurdering = totrinnsvurdering()
 

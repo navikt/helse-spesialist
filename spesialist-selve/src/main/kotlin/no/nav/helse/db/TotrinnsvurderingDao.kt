@@ -1,14 +1,19 @@
-package no.nav.helse.modell.totrinnsvurdering
+package no.nav.helse.db
 
-import java.util.*
+import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.Query
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import org.intellij.lang.annotations.Language
 
-class TotrinnsvurderingDao(private val dataSource: DataSource) {
+interface TotrinnsvurderingRepository {
+    fun hentAktivTotrinnsvurdering(oppgaveId: Long): TotrinnsvurderingFraDatabase?
+}
+
+class TotrinnsvurderingDao(private val dataSource: DataSource): TotrinnsvurderingRepository {
     private fun TransactionalSession.opprett(vedtaksperiodeId: UUID): Totrinnsvurdering {
         @Language("PostgreSQL")
         val query = """
@@ -29,6 +34,33 @@ class TotrinnsvurderingDao(private val dataSource: DataSource) {
         """.trimIndent()
 
         return run(queryOf(query, mapOf("vedtaksperiodeId" to vedtaksperiodeId)).tilTotrinnsvurdering())
+    }
+
+    override fun hentAktivTotrinnsvurdering(oppgaveId: Long): TotrinnsvurderingFraDatabase? {
+        @Language("PostgreSQL")
+        val query = """
+           SELECT * FROM totrinnsvurdering tv
+           INNER JOIN vedtak v on tv.vedtaksperiode_id = v.vedtaksperiode_id
+           INNER JOIN oppgave o on v.id = o.vedtak_ref
+           WHERE o.id = :oppgaveId
+           AND utbetaling_id_ref IS NULL
+        """.trimIndent()
+
+        return sessionOf(dataSource).use {
+            it.run(
+                queryOf(query, mapOf("oppgaveId" to oppgaveId)).map { row ->
+                    TotrinnsvurderingFraDatabase(
+                        vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
+                        erRetur = row.boolean("er_retur"),
+                        saksbehandler = row.uuidOrNull("saksbehandler"),
+                        beslutter = row.uuidOrNull("beslutter"),
+                        utbetalingIdRef = row.longOrNull("utbetaling_id_ref"),
+                        opprettet = row.localDateTime("opprettet"),
+                        oppdatert = row.localDateTimeOrNull("oppdatert")
+                    )
+                }.asSingle
+            )
+        }
     }
 
     private fun TransactionalSession.hentAktiv(oppgaveId: Long): Totrinnsvurdering? {

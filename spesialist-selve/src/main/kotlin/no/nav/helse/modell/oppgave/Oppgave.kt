@@ -6,6 +6,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.helse.Gruppe
 import no.nav.helse.Tilgangskontroll
 import no.nav.helse.mediator.oppgave.OppgaveDao
+import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
@@ -17,7 +18,8 @@ class Oppgave private constructor(
     private val type: Oppgavetype,
     private var status: Oppgavestatus,
     private val vedtaksperiodeId: UUID,
-    private val utbetalingId: UUID
+    private val utbetalingId: UUID,
+    private val totrinnsvurdering: Totrinnsvurdering?
 ) {
 
     private var ferdigstiltAvIdent: String? = null
@@ -35,8 +37,9 @@ class Oppgave private constructor(
         ferdigstiltAvIdent: String? = null,
         ferdigstiltAvOid: UUID? = null,
         tildelt: Saksbehandler? = null,
-        påVent: Boolean = false
-    ) : this(id, type, status, vedtaksperiodeId, utbetalingId) {
+        påVent: Boolean = false,
+        totrinnsvurdering: Totrinnsvurdering? = null
+    ) : this(id, type, status, vedtaksperiodeId, utbetalingId, totrinnsvurdering) {
         this.ferdigstiltAvIdent = ferdigstiltAvIdent
         this.ferdigstiltAvOid = ferdigstiltAvOid
         this.tildeltTil = tildelt
@@ -140,7 +143,7 @@ class Oppgave private constructor(
     }
 
     fun accept(visitor: OppgaveVisitor) {
-        visitor.visitOppgave(id, type, status, vedtaksperiodeId, utbetalingId, ferdigstiltAvOid, ferdigstiltAvIdent, egenskaper, tildeltTil, påVent)
+        visitor.visitOppgave(id, type, status, vedtaksperiodeId, utbetalingId, ferdigstiltAvOid, ferdigstiltAvIdent, egenskaper, tildeltTil, påVent, totrinnsvurdering)
     }
 
     fun ferdigstill(ident: String, oid: UUID) {
