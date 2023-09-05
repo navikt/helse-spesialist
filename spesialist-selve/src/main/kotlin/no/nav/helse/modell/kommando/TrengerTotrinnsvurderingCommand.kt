@@ -1,7 +1,7 @@
 package no.nav.helse.modell.kommando
 
 import java.util.UUID
-import no.nav.helse.modell.oppgave.OppgaveMediator
+import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator

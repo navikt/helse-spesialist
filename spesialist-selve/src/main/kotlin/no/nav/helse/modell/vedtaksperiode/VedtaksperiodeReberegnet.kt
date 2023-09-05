@@ -2,12 +2,12 @@ package no.nav.helse.modell.vedtaksperiode
 
 import java.util.UUID
 import no.nav.helse.mediator.meldinger.Hendelse
+import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.kommando.AvbrytCommand
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.VedtaksperiodeReberegnetPeriodehistorikk
-import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 

@@ -7,7 +7,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.januar
-import no.nav.helse.modell.oppgave.OppgaveMediator
+import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering

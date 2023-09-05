@@ -1,6 +1,7 @@
-package no.nav.helse.modell.oppgave
+package no.nav.helse.mediator.oppgave
 
 import java.util.UUID
+import no.nav.helse.modell.oppgave.OppgaveVisitor
 import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
