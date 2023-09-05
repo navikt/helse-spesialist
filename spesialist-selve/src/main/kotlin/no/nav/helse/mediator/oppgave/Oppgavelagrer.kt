@@ -1,26 +1,15 @@
 package no.nav.helse.mediator.oppgave
 
 import java.util.UUID
+import no.nav.helse.db.OppgaveFraDatabase
+import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.modell.oppgave.OppgaveVisitor
 import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 
 class Oppgavelagrer : OppgaveVisitor {
-    private lateinit var oppgaveForLagring: OppgaveForLagring
-
-    private class OppgaveForLagring(
-        val id: Long,
-        val type: Oppgavetype,
-        var status: Oppgavestatus,
-        val vedtaksperiodeId: UUID,
-        val utbetalingId: UUID,
-        var ferdigstiltAvIdent: String?,
-        var ferdigstiltAvOid: UUID?,
-        val egenskaper: List<Oppgavetype>,
-        val tildelt: Saksbehandler?,
-        val påVent: Boolean
-    )
+    private lateinit var oppgaveForLagring: OppgaveFraDatabase
 
     internal fun lagre(oppgaveMediator: OppgaveMediator, hendelseId: UUID, contextId: UUID) {
         val oppgave = oppgaveForLagring
@@ -29,11 +18,11 @@ class Oppgavelagrer : OppgaveVisitor {
             contextId = contextId,
             vedtaksperiodeId = oppgave.vedtaksperiodeId,
             utbetalingId = oppgave.utbetalingId,
-            navn = oppgave.type,
+            navn = enumValueOf(oppgave.type),
             hendelseId = hendelseId
         )
         if (oppgave.tildelt != null) {
-            oppgaveMediator.tildel(oppgave.id, oppgave.tildelt.oid(), oppgave.påVent)
+            oppgaveMediator.tildel(oppgave.id, oppgave.tildelt.oid, oppgave.påVent)
         }
     }
 
@@ -41,12 +30,12 @@ class Oppgavelagrer : OppgaveVisitor {
         val oppgave = oppgaveForLagring
         oppgaveMediator.oppdater(
             oppgaveId = oppgave.id,
-            status = oppgave.status,
+            status = enumValueOf(oppgave.status),
             ferdigstiltAvIdent = oppgave.ferdigstiltAvIdent,
             ferdigstiltAvOid = oppgave.ferdigstiltAvOid
         )
         if (oppgave.tildelt != null) {
-            oppgaveMediator.tildel(oppgave.id, oppgave.tildelt.oid(), oppgave.påVent)
+            oppgaveMediator.tildel(oppgave.id, oppgave.tildelt.oid, oppgave.påVent)
         }
     }
 
@@ -62,8 +51,18 @@ class Oppgavelagrer : OppgaveVisitor {
         tildelt: Saksbehandler?,
         påVent: Boolean
     ) {
-        oppgaveForLagring = OppgaveForLagring(
-            id, type, status, vedtaksperiodeId, utbetalingId, ferdigstiltAvIdent, ferdigstiltAvOid, egenskaper, tildelt, påVent
+        oppgaveForLagring = OppgaveFraDatabase(
+            id = id,
+            type = type.toString(),
+            status = status.toString(),
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = utbetalingId,
+            ferdigstiltAvIdent = ferdigstiltAvIdent,
+            ferdigstiltAvOid = ferdigstiltAvOid,
+            tildelt = tildelt?.toDto()?.let {
+               SaksbehandlerFraDatabase(it.epost, it.oid, it.navn, it.ident)
+            },
+            påVent = påVent
         )
     }
 }

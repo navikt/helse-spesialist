@@ -1,10 +1,11 @@
-package no.nav.helse.modell
+package no.nav.helse.db
 
 import DatabaseIntegrationTest
 import java.time.LocalDate
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.TestHendelse
 import no.nav.helse.modell.oppgave.Oppgave
@@ -134,6 +135,21 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
                 OPPGAVETYPE,
                 AvventerSaksbehandler,
                 VEDTAKSPERIODE,
+                utbetalingId = UTBETALING_ID
+            ), oppgave
+        )
+    }
+
+    @Test
+    fun `finner OppgaveFraDatabase`() {
+        nyPerson()
+        val oppgave = oppgaveDao.finnOppgave(oppgaveId) ?: fail { "Fant ikke oppgave" }
+        assertEquals(
+            OppgaveFraDatabase(
+                id = oppgaveId,
+                type = OPPGAVETYPE.toString(),
+                status = AvventerSaksbehandler.toString(),
+                vedtaksperiodeId = VEDTAKSPERIODE,
                 utbetalingId = UTBETALING_ID
             ), oppgave
         )

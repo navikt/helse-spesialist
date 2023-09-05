@@ -3,6 +3,8 @@ package no.nav.helse.mediator.oppgave
 import java.util.UUID
 import javax.sql.DataSource
 import no.nav.helse.HelseDao
+import no.nav.helse.db.OppgaveFraDatabase
+import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommandData
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.objectMapper
@@ -13,7 +15,11 @@ import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 
-class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource) {
+interface OppgaveRepository {
+    fun finnOppgave(id: Long): OppgaveFraDatabase?
+}
+
+class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveRepository {
 
     fun reserverNesteId(): Long {
         return asSQL(
@@ -21,6 +27,38 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource) {
                SELECT nextval(pg_get_serial_sequence('oppgave', 'id')) as neste_id; 
             """
         ).single { it.long("neste_id") } ?: throw IllegalStateException("Klarer ikke hente neste id i sekvens fra oppgave-tabellen")
+    }
+
+    override fun finnOppgave(id: Long): OppgaveFraDatabase? {
+        return asSQL(
+            """ 
+            SELECT o.type, o.status, v.vedtaksperiode_id, o.ferdigstilt_av, o.ferdigstilt_av_oid, o.utbetaling_id, s.navn, s.epost, s.ident, s.oid, t.på_vent
+            FROM oppgave o
+            INNER JOIN vedtak v on o.vedtak_ref = v.id
+            LEFT JOIN tildeling t on o.id = t.oppgave_id_ref
+            LEFT JOIN saksbehandler s on s.oid = t.saksbehandler_ref
+            WHERE o.id = :oppgaveId
+        """, mapOf("oppgaveId" to id)
+        ).single { row ->
+            OppgaveFraDatabase(
+                id = id,
+                type = row.string("type"),
+                status = row.string("status"),
+                vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
+                utbetalingId = row.uuid("utbetaling_id"),
+                ferdigstiltAvIdent = row.stringOrNull("ferdigstilt_av"),
+                ferdigstiltAvOid = row.stringOrNull("ferdigstilt_av_oid")?.let(UUID::fromString),
+                tildelt = row.uuidOrNull("oid")?.let {
+                    SaksbehandlerFraDatabase(
+                        epostadresse = row.string("epost"),
+                        oid = it,
+                        navn = row.string("navn"),
+                        ident = row.string("ident")
+                    )
+                },
+                påVent = row.boolean("på_vent")
+            )
+        }
     }
 
     fun finnOppgaveId(vedtaksperiodeId: UUID) =

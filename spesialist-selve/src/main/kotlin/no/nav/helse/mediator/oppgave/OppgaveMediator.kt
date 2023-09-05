@@ -42,7 +42,7 @@ class OppgaveMediator(
     }
 
     fun oppgave(id: Long, oppgaveBlock: Oppgave.() -> Unit) {
-        val oppgave = oppgaveDao.finn(id) ?: throw IllegalStateException("Forventer å finne oppgave")
+        val oppgave = Oppgavehenter(oppgaveDao).oppgave(id)
         oppgaveBlock(oppgave)
         Oppgavelagrer().apply {
             oppgave.accept(this)
