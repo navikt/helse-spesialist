@@ -343,7 +343,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                         hendelseMediator,
                         totrinnsvurderingMediator,
                         tilgangsgrupper,
-                        saksbehandlerMediator
+                        saksbehandlerMediator,
+                        oppgaveMediator
                     )
                 }
             }

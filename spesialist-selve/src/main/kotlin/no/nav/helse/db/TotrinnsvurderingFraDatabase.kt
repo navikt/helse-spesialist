@@ -3,7 +3,7 @@ package no.nav.helse.db
 import java.time.LocalDateTime
 import java.util.UUID
 
-class TotrinnsvurderingFraDatabase(
+data class TotrinnsvurderingFraDatabase(
     val vedtaksperiodeId: UUID,
     val erRetur: Boolean,
     val saksbehandler: UUID?,

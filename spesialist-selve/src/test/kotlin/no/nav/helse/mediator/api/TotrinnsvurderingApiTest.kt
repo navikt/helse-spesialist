@@ -22,7 +22,9 @@ import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
+import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtBeslutter
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
+import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.notat.NyttNotatDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
@@ -53,6 +55,15 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     private val TOTRINNSVURDERING_URL = "/api/totrinnsvurdering"
     private val RETUR_URL = "/api/totrinnsvurdering/retur"
 
+    private val oppgavehåndterer = object : Oppgavehåndterer {
+        var sendtTilBeslutter = false
+        var block: () -> Unit = {}
+        override fun sendTilBeslutter(oppgaveId: Long, behandlendeSaksbehandler: Saksbehandler) {
+            sendtTilBeslutter = true
+            block()
+        }
+    }
+
     @BeforeAll
     fun setupTotrinnsvurdering() {
         setupServer {
@@ -61,7 +72,8 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
                 hendelseMediator,
                 totrinnsvurderingMediator,
                 Tilgangsgrupper(testEnv),
-                saksbehandlerMediator
+                saksbehandlerMediator,
+                oppgavehåndterer
             )
         }
     }
@@ -69,6 +81,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     @BeforeEach
     fun setup() {
         clearMocks(oppgaveDao, periodehistorikkDao, notatMediator, tildelingService, hendelseMediator, totrinnsvurderingMediator)
+        oppgavehåndterer.sendtTilBeslutter = false
     }
 
     @Test
@@ -120,7 +133,6 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             }
         }
 
-        verify(exactly = 0) { totrinnsvurderingMediator.settSaksbehandler(any(), any()) }
         assertEquals(HttpStatusCode.Unauthorized, response.status)
     }
 
@@ -139,16 +151,8 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     }
 
     @Test
-    fun `Totrinnsvurdering kan ikke gjøres til beslutteroppgave hvis den allerede er beslutteroppgave`() {
-        every { totrinnsvurderingMediator.hentAktiv(1L) } returns TotrinnsvurderingOld(
-            vedtaksperiodeId = UUID.randomUUID(),
-            erRetur = false,
-            saksbehandler = UUID.randomUUID(),
-            beslutter = UUID.randomUUID(),
-            utbetalingIdRef = null,
-            oppdatert = now(),
-            opprettet = now()
-        )
+    fun `Api gir conflict dersom oppgave allerede er sendt til beslutter`() {
+        oppgavehåndterer.block = { throw OppgaveAlleredeSendtBeslutter(1L) }
 
         val response = runBlocking {
             client.post(TOTRINNSVURDERING_URL) {
@@ -161,71 +165,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     }
 
     @Test
-    fun `Totrinnsvurdering kan gjøres til beslutteroppgave hvis den er en returoppgave`() {
-        every { totrinnsvurderingMediator.hentAktiv(oppgaveId = any()) } returns TotrinnsvurderingOld(
-            vedtaksperiodeId = UUID.randomUUID(),
-            erRetur = true,
-            saksbehandler = UUID.randomUUID(),
-            beslutter = UUID.randomUUID(),
-            utbetalingIdRef = null,
-            oppdatert = now(),
-            opprettet = now()
-        )
-
-        val response = runBlocking {
-            client.post("/api/totrinnsvurdering") {
-                contentType(ContentType.Application.Json)
-                setBody<JsonNode>(objectMapper.valueToTree(totrinnsvurderingDto))
-                authentication(saksbehandler_oid)
-            }
-        }
-        assertEquals(HttpStatusCode.OK, response.status)
-    }
-
-    @Test
-    fun `Returnerer feil dersom totrinnsvurdering ikke finnes`() {
-        every { totrinnsvurderingMediator.hentAktiv(1L) } returns null
-
-        val response = runBlocking {
-            client.post("/api/totrinnsvurdering") {
-                contentType(ContentType.Application.Json)
-                setBody<JsonNode>(objectMapper.valueToTree(totrinnsvurderingDto))
-                authentication(saksbehandler_oid)
-            }
-        }
-        assertEquals(HttpStatusCode.ExpectationFailed, response.status)
-    }
-
-    @Test
-    fun `Returnerer feil dersom totrinnsvurdering ikke finnes ved retur`() {
-        every { totrinnsvurderingMediator.hentAktiv(1L) } returns null
-
-        val response = runBlocking {
-            client.post(RETUR_URL) {
-                contentType(ContentType.Application.Json)
-                accept(ContentType.Application.Json)
-                setBody(TotrinnsvurderingReturDto(
-                    oppgavereferanse = 1,
-                    notat = NyttNotatDto("tekst", NotatType.Retur)
-                ))
-                authentication(saksbehandler_oid)
-            }
-        }
-        assertEquals(HttpStatusCode.ExpectationFailed, response.status)
-    }
-
-    @Test
-    fun `Setter saksbehandler for totrinnsvurdering når oppgave blir sendt til godkjenning`() {
-        every { totrinnsvurderingMediator.hentAktiv(10L) } returns TotrinnsvurderingOld(
-            vedtaksperiodeId = UUID.randomUUID(),
-            erRetur = false,
-            saksbehandler = null,
-            beslutter = null,
-            utbetalingIdRef = null,
-            oppdatert = now(),
-            opprettet = now()
-        )
-
+    fun `Oppgave sendes til beslutter når oppgave blir sendt til godkjenning`() {
         val response = runBlocking {
             client.post(TOTRINNSVURDERING_URL) {
                 contentType(ContentType.Application.Json)
@@ -236,66 +176,15 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
         }
 
         assertEquals(HttpStatusCode.OK, response.status)
-        verify(exactly = 1) { totrinnsvurderingMediator.settSaksbehandler(10L, saksbehandler_oid) }
+        assertEquals(true, oppgavehåndterer.sendtTilBeslutter)
     }
 
     @Test
     fun `Tildeler oppgaven til beslutter dersom den finnes ved returnert retur`() {
-        val beslutterSaksbehandlerOid = UUID.randomUUID()
-        every { totrinnsvurderingMediator.hentAktiv(10L) } returns TotrinnsvurderingOld(
-            vedtaksperiodeId = UUID.randomUUID(),
-            erRetur = true,
-            saksbehandler = UUID.randomUUID(),
-            beslutter = beslutterSaksbehandlerOid,
-            utbetalingIdRef = null,
-            oppdatert = now(),
-            opprettet = now()
-        )
-
-        val response = runBlocking {
-            client.post(TOTRINNSVURDERING_URL) {
-                contentType(ContentType.Application.Json)
-                accept(ContentType.Application.Json)
-                setBody(TotrinnsvurderingDto(10L))
-                authentication(saksbehandler_oid)
-            }
-        }
-
-        assertEquals(HttpStatusCode.OK, response.status)
-        verify(exactly = 1) {
-            tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(
-                10L,
-                beslutterSaksbehandlerOid,
-                any()
-            )
-        }
     }
 
     @Test
     fun `Setter totrinnsvurdering til retur false ved returnert retur`() {
-        every { totrinnsvurderingMediator.hentAktiv(10L) } returns TotrinnsvurderingOld(
-            vedtaksperiodeId = UUID.randomUUID(),
-            erRetur = true,
-            saksbehandler = UUID.randomUUID(),
-            beslutter = UUID.randomUUID(),
-            utbetalingIdRef = null,
-            oppdatert = now(),
-            opprettet = now()
-        )
-
-        val response = runBlocking {
-            client.post(TOTRINNSVURDERING_URL) {
-                contentType(ContentType.Application.Json)
-                accept(ContentType.Application.Json)
-                setBody(TotrinnsvurderingDto(10L))
-                authentication(saksbehandler_oid)
-            }
-        }
-
-        assertEquals(HttpStatusCode.OK, response.status)
-        verify(exactly = 1) {
-            totrinnsvurderingMediator.settHåndtertRetur(10L)
-        }
     }
 
     @Test

@@ -4,12 +4,15 @@ import java.sql.SQLException
 import java.util.UUID
 import no.nav.helse.Tilgangskontroll
 import no.nav.helse.db.SaksbehandlerRepository
+import no.nav.helse.db.TotrinnsvurderingFraDatabase
 import no.nav.helse.db.TotrinnsvurderingRepository
+import no.nav.helse.mediator.api.Oppgavehåndterer
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload.Companion.lagre
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
+import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
@@ -24,16 +27,12 @@ class OppgaveMediator(
     private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
     private val saksbehandlerRepository: SaksbehandlerRepository,
     private val harTilgangTil: Tilgangskontroll = { _, _ -> false },
-) {
+): Oppgavehåndterer {
     private var oppgaveForLagring: Oppgave? = null
     private var oppgaveForOppdatering: Oppgave? = null
     private val oppgaverForPublisering = mutableMapOf<Long, String>()
     private val logg = LoggerFactory.getLogger(this::class.java)
     private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-
-    fun opprett(oppgave: Oppgave) {
-        leggPåVentForSenereLagring(oppgave)
-    }
 
     fun nyOppgave(opprettOppgaveBlock: (reservertId: Long) -> Oppgave) {
         val nesteId = oppgaveDao.reserverNesteId()
@@ -45,12 +44,26 @@ class OppgaveMediator(
         return tildelingDao.opprettTildeling(oppgaveId, saksbehandleroid, påVent) != null
     }
 
+    fun avmeld(oppgaveId: Long) {
+        tildelingDao.slettTildeling(oppgaveId)
+    }
+
     fun oppgave(id: Long, oppgaveBlock: Oppgave.() -> Unit) {
         val oppgave = Oppgavehenter(oppgaveDao, totrinnsvurderingRepository, saksbehandlerRepository).oppgave(id)
         oppgaveBlock(oppgave)
         Oppgavelagrer().apply {
             oppgave.accept(this)
             oppdater(this@OppgaveMediator)
+        }
+    }
+
+    fun lagreTotrinnsvurdering(totrinnsvurderingFraDatabase: TotrinnsvurderingFraDatabase) {
+        totrinnsvurderingRepository.oppdater(totrinnsvurderingFraDatabase)
+    }
+
+    override fun sendTilBeslutter(oppgaveId: Long, behandlendeSaksbehandler: Saksbehandler) {
+        oppgave(oppgaveId) {
+            sendTilBeslutter(behandlendeSaksbehandler)
         }
     }
 

@@ -33,9 +33,10 @@ internal class TrengerTotrinnsvurderingCommand(
             if (totrinnsvurdering.erBeslutteroppgave()) {
                 totrinnsvurderingMediator.settAutomatiskRetur(vedtaksperiodeId)
             }
-            if (totrinnsvurdering.saksbehandler != null) {
+            val behandlendeSaksbehandlerOid = totrinnsvurdering.saksbehandler
+            if (behandlendeSaksbehandlerOid != null) {
                 oppgaveMediator.reserverOppgave(
-                    saksbehandleroid = totrinnsvurdering.saksbehandler,
+                    saksbehandleroid = behandlendeSaksbehandlerOid,
                     fødselsnummer = fødselsnummer
                 )
             }

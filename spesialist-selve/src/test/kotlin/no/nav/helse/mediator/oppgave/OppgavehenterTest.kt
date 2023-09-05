@@ -180,6 +180,7 @@ class OppgavehenterTest {
         totrinnsvurdering: TotrinnsvurderingFraDatabase? = null
     ) = object : TotrinnsvurderingRepository {
         override fun hentAktivTotrinnsvurdering(oppgaveId: Long): TotrinnsvurderingFraDatabase? = totrinnsvurdering
+        override fun oppdater(totrinnsvurderingFraDatabase: TotrinnsvurderingFraDatabase) {}
     }
 
     private val saksbehandlerRepository = object : SaksbehandlerRepository {

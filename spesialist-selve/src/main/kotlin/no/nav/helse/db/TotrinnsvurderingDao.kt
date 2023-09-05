@@ -11,6 +11,7 @@ import org.intellij.lang.annotations.Language
 
 interface TotrinnsvurderingRepository {
     fun hentAktivTotrinnsvurdering(oppgaveId: Long): TotrinnsvurderingFraDatabase?
+    fun oppdater(totrinnsvurderingFraDatabase: TotrinnsvurderingFraDatabase)
 }
 
 class TotrinnsvurderingDao(private val dataSource: DataSource): TotrinnsvurderingRepository {
@@ -36,6 +37,29 @@ class TotrinnsvurderingDao(private val dataSource: DataSource): Totrinnsvurderin
         return run(queryOf(query, mapOf("vedtaksperiodeId" to vedtaksperiodeId)).tilTotrinnsvurdering())
     }
 
+    override fun oppdater(totrinnsvurderingFraDatabase: TotrinnsvurderingFraDatabase) {
+        @Language("PostgreSQL")
+        val query = """
+           UPDATE totrinnsvurdering SET saksbehandler = :saksbehandler, beslutter = :beslutter, er_retur = :er_retur,
+           oppdatert = :oppdatert, utbetaling_id_ref = :utbetaling_id_ref
+           WHERE vedtaksperiode_id = :vedtaksperiode_id
+        """
+
+        sessionOf(dataSource).use {
+            it.run(
+                queryOf(
+                    query, mapOf(
+                        "saksbehandler" to totrinnsvurderingFraDatabase.saksbehandler,
+                        "beslutter" to totrinnsvurderingFraDatabase.beslutter,
+                        "er_retur" to totrinnsvurderingFraDatabase.erRetur,
+                        "oppdatert" to totrinnsvurderingFraDatabase.oppdatert,
+                        "utbetaling_id_ref" to totrinnsvurderingFraDatabase.utbetalingIdRef,
+                    )
+                ).asUpdate
+            )
+        }
+    }
+
     override fun hentAktivTotrinnsvurdering(oppgaveId: Long): TotrinnsvurderingFraDatabase? {
         @Language("PostgreSQL")
         val query = """
@@ -44,7 +68,7 @@ class TotrinnsvurderingDao(private val dataSource: DataSource): Totrinnsvurderin
            INNER JOIN oppgave o on v.id = o.vedtak_ref
            WHERE o.id = :oppgaveId
            AND utbetaling_id_ref IS NULL
-        """.trimIndent()
+        """
 
         return sessionOf(dataSource).use {
             it.run(
