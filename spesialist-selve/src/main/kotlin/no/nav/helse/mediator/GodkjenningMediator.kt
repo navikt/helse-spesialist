@@ -5,11 +5,11 @@ import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.automatiseringsteller
 import no.nav.helse.automatiskAvvistÅrsakerTeller
+import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.UtbetalingDao
@@ -91,7 +91,7 @@ internal class GodkjenningMediator(
         context.publiser(behov.lagVedtaksperiodeGodkjent(vedtaksperiodeId, fødselsnummer, vedtakDao).toJson())
         GodkjenningsbehovPayload(hendelseId).lagre(opptegnelseDao, fødselsnummer)
         automatiseringsteller.inc()
-        sikkerLogg.info("Automatisk godkjenning av vedtaksperiode $vedtaksperiodeId", keyValue("fødselsnummer", fødselsnummer))
+        sikkerLogg.info("Automatisk godkjenning av vedtaksperiode $vedtaksperiodeId for {}", keyValue("fødselsnummer", fødselsnummer))
     }
 
     internal fun automatiskAvvisning(publiserer: Publiserer, begrunnelser: List<String>, oppgaveId: Long) {
