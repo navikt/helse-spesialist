@@ -176,7 +176,8 @@ internal class OppgaveMediatorTest {
         )
         every { oppgaveDao.finn(any<Long>()) } returns oppgave
         every { oppgaveDao.finnHendelseId(any()) } returns HENDELSE_ID
-        mediator.ferdigstill(oppgave, SAKSBEHANDLERIDENT, SAKSBEHANDLEROID)
+        oppgave.avventerSystem(SAKSBEHANDLERIDENT, SAKSBEHANDLEROID)
+        mediator.ferdigstill(oppgave)
         mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
         assertEquals(1, testRapid.inspektør.size)
         assertOppgaveevent(0, "oppgave_oppdatert", Oppgavestatus.Ferdigstilt) {

@@ -191,12 +191,6 @@ class Oppgave private constructor(
         totrinnsvurdering?.accept(visitor)
     }
 
-    fun ferdigstill(ident: String, oid: UUID) {
-        status = Oppgavestatus.Ferdigstilt
-        ferdigstiltAvIdent = ident
-        ferdigstiltAvOid = oid
-    }
-
     fun ferdigstill() {
         status = Oppgavestatus.Ferdigstilt
     }

@@ -123,7 +123,8 @@ class OppgavelagrerTest {
     @Test
     fun `oppdatere oppgave uten tildeling eller totrinnsvurdering`() {
         val oppgave = nyOppgave(medTotrinnsvurdering = false)
-        oppgave.ferdigstill(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
+        oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
+        oppgave.ferdigstill()
         val oppgavelagrer = Oppgavelagrer()
         oppgave.accept(oppgavelagrer)
 
@@ -136,7 +137,8 @@ class OppgavelagrerTest {
     @Test
     fun `oppdatere oppgave uten tildeling`() {
         val oppgave = nyOppgave(medTotrinnsvurdering = true)
-        oppgave.ferdigstill(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
+        oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
+        oppgave.ferdigstill()
         val oppgavelagrer = Oppgavelagrer()
         oppgave.accept(oppgavelagrer)
 
@@ -150,7 +152,8 @@ class OppgavelagrerTest {
     fun `oppdatere oppgave uten totrinnsvurdering`() {
         val oppgave = nyOppgave(medTotrinnsvurdering = false)
         oppgave.forsøkTildeling(saksbehandler, harTilgangTil = { _, _ -> true })
-        oppgave.ferdigstill(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
+        oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
+        oppgave.ferdigstill()
         val oppgavelagrer = Oppgavelagrer()
         oppgave.accept(oppgavelagrer)
 
@@ -164,7 +167,8 @@ class OppgavelagrerTest {
     fun `oppdatere oppgave`() {
         val oppgave = nyOppgave(medTotrinnsvurdering = true)
         oppgave.forsøkTildeling(saksbehandler, harTilgangTil = { _, _ -> true })
-        oppgave.ferdigstill(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
+        oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
+        oppgave.ferdigstill()
         val oppgavelagrer = Oppgavelagrer()
         oppgave.accept(oppgavelagrer)
 

@@ -61,15 +61,6 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
         }
     }
 
-    fun finnOppgaveId(vedtaksperiodeId: UUID) =
-        asSQL(
-            """ SELECT id FROM oppgave
-            WHERE vedtak_ref =
-                (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
-            AND status = 'AvventerSaksbehandler'::oppgavestatus
-        """, mapOf("vedtaksperiodeId" to vedtaksperiodeId)
-        ).single { it.long("id") }
-
     fun finnUtbetalingId(oppgaveId: Long) = asSQL(
         " SELECT utbetaling_id FROM oppgave WHERE id = :oppgaveId; ",
         mapOf("oppgaveId" to oppgaveId)

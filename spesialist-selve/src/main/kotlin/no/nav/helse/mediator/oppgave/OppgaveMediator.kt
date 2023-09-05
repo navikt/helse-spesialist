@@ -85,11 +85,6 @@ class OppgaveMediator(
         oppgaveForOppdatering = oppgave
     }
 
-    fun ferdigstill(oppgave: Oppgave, saksbehandlerIdent: String, oid: UUID) {
-        oppgave.ferdigstill(saksbehandlerIdent, oid)
-        leggPåVentForSenereOppdatering(oppgave)
-    }
-
     fun ferdigstill(oppgave: Oppgave) {
         oppgave.ferdigstill()
         leggPåVentForSenereOppdatering(oppgave)

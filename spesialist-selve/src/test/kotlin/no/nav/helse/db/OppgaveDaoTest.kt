@@ -109,13 +109,6 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `finner oppgaveId ved hjelp av vedtaksperiodeId`() {
-        nyPerson()
-        val actual = oppgaveDao.finnOppgaveId(VEDTAKSPERIODE)
-        assertEquals(OPPGAVE_ID, actual)
-    }
-
-    @Test
     fun `finner nyeste oppgaveId uavhengig av status ved hjelp av vedtaksperiodeId`() {
         nyPerson()
         opprettOppgave()

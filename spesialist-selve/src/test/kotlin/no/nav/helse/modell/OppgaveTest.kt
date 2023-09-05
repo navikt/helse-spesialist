@@ -230,17 +230,11 @@ internal class OppgaveTest {
 
     @Test
     fun equals() {
-        val gjenopptattOppgave = Oppgave(
-            1L,
-            OPPGAVETYPE,
-            Oppgavestatus.AvventerSaksbehandler,
-            VEDTAKSPERIODE_ID,
-            utbetalingId = UTBETALING_ID
-        )
-        val oppgave1 = oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(SØKNAD),)
-        val oppgave2 = oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(SØKNAD),)
-        val oppgave3 = oppgaveMedEgenskaper(OPPGAVE_ID, UUID.randomUUID(), UTBETALING_ID, listOf(SØKNAD),)
-        val oppgave4 = oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(STIKKPRØVE),)
+        val gjenopptattOppgave = oppgaveMedEgenskaper(1L, VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID, listOf(OPPGAVETYPE))
+        val oppgave1 = oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(SØKNAD))
+        val oppgave2 = oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(SØKNAD))
+        val oppgave3 = oppgaveMedEgenskaper(OPPGAVE_ID, UUID.randomUUID(), UTBETALING_ID, listOf(SØKNAD))
+        val oppgave4 = oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(STIKKPRØVE))
         assertEquals(oppgave1, oppgave2)
         assertEquals(oppgave1.hashCode(), oppgave2.hashCode())
         assertNotEquals(oppgave1, oppgave3)
@@ -248,13 +242,13 @@ internal class OppgaveTest {
         assertNotEquals(oppgave1, oppgave4)
         assertNotEquals(oppgave1.hashCode(), oppgave4.hashCode())
 
-        gjenopptattOppgave.ferdigstill(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
+        gjenopptattOppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
         assertNotEquals(gjenopptattOppgave.hashCode(), oppgave2.hashCode())
         assertNotEquals(gjenopptattOppgave, oppgave2)
         assertNotEquals(gjenopptattOppgave, oppgave3)
         assertNotEquals(gjenopptattOppgave, oppgave4)
 
-        oppgave2.ferdigstill("ANNEN_SAKSBEHANDLER", UUID.randomUUID())
+        oppgave2.avventerSystem("ANNEN_SAKSBEHANDLER", UUID.randomUUID())
         assertEquals(oppgave1, oppgave2)
         assertEquals(oppgave1.hashCode(), oppgave2.hashCode())
     }
