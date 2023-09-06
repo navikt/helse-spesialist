@@ -183,17 +183,8 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     }
 
     @Test
-    fun `Oppretter totrinnsvurdering dersom den kun finnes i legacyløsning`() {
+    fun `Returnerer feil dersom totrinnsvurdering ikke finnes`() {
         every { totrinnsvurderingMediator.hentAktiv(1L) } returns null
-        every { totrinnsvurderingMediator.opprettFraLegacy(1L) } returns Totrinnsvurdering(
-            vedtaksperiodeId = UUID.randomUUID(),
-            erRetur = false,
-            saksbehandler = null,
-            beslutter = null,
-            utbetalingIdRef = null,
-            oppdatert = now(),
-            opprettet = now()
-        )
 
         val response = runBlocking {
             client.post("/api/totrinnsvurdering") {
@@ -202,21 +193,12 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
                 authentication(saksbehandler_oid)
             }
         }
-        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals(HttpStatusCode.ExpectationFailed, response.status)
     }
 
     @Test
-    fun `Oppretter totrinnsvurdering dersom den kun finnes i legacyløsning ved retur`() {
+    fun `Returnerer feil dersom totrinnsvurdering ikke finnes ved retur`() {
         every { totrinnsvurderingMediator.hentAktiv(1L) } returns null
-        every { totrinnsvurderingMediator.opprettFraLegacy(1L) } returns Totrinnsvurdering(
-            vedtaksperiodeId = UUID.randomUUID(),
-            erRetur = false,
-            saksbehandler = saksbehandler_oid,
-            beslutter = null,
-            utbetalingIdRef = null,
-            oppdatert = now(),
-            opprettet = now()
-        )
 
         val response = runBlocking {
             client.post(RETUR_URL) {
@@ -229,7 +211,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
                 authentication(saksbehandler_oid)
             }
         }
-        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals(HttpStatusCode.ExpectationFailed, response.status)
     }
 
     @Test

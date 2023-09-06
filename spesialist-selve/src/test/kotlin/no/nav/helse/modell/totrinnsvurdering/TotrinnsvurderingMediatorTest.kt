@@ -72,16 +72,4 @@ class TotrinnsvurderingMediatorTest {
             )
         }
     }
-
-    @Test
-    fun `Oppretter ny totrinnsvurdering dersom speil plukker opp at oppgaven trenger totrinns`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val oppgaveId = 42L
-
-        every { oppgaveDao.finnVedtaksperiodeId(oppgaveId)} returns vedtaksperiodeId
-
-        totrinnsvurderingMediator.opprettFraLegacy(oppgaveId)
-
-        verify(exactly = 1) { totrinnsvurderingDao.opprett(vedtaksperiodeId) }
-    }
 }

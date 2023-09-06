@@ -38,7 +38,14 @@ internal fun Route.totrinnsvurderingApi(
         val totrinnsvurdering = call.receive<TotrinnsvurderingDto>()
         val saksbehandlerOid = getSaksbehandlerOid()
         val aktivTotrinnsvurdering = totrinnsvurderingMediator.hentAktiv(totrinnsvurdering.oppgavereferanse)
-            ?: totrinnsvurderingMediator.opprettFraLegacy(totrinnsvurdering.oppgavereferanse)
+
+        if (aktivTotrinnsvurdering == null) {
+            call.respondText(
+                "Dette skulle kanskje ha vært en totrinnsoppgave.",
+                status = HttpStatusCode.ExpectationFailed
+            )
+            return@post
+        }
 
         if (aktivTotrinnsvurdering.erBeslutteroppgave()) {
             call.respondText(
@@ -88,8 +95,16 @@ internal fun Route.totrinnsvurderingApi(
     post("/api/totrinnsvurdering/retur") {
         val retur = call.receive<TotrinnsvurderingReturDto>()
         val beslutterOid = getSaksbehandlerOid()
-        val aktivTotrinnsvurdering = totrinnsvurderingMediator.hentAktiv(oppgaveId = retur.oppgavereferanse) ?:
-            totrinnsvurderingMediator.opprettFraLegacy(retur.oppgavereferanse)
+        val aktivTotrinnsvurdering = totrinnsvurderingMediator.hentAktiv(oppgaveId = retur.oppgavereferanse)
+
+        if (aktivTotrinnsvurdering == null) {
+            call.respondText(
+                "Dette skulle kanskje ha vært en totrinnsoppgave.",
+                status = HttpStatusCode.ExpectationFailed
+            )
+            return@post
+        }
+
         sikkerlogg.info("OppgaveId ${retur.oppgavereferanse} sendes i retur av $beslutterOid")
 
         val tidligereSaksbehandlerOid = aktivTotrinnsvurdering.saksbehandler
