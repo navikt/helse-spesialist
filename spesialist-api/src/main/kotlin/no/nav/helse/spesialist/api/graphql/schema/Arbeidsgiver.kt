@@ -174,7 +174,9 @@ data class Arbeidsgiver(
                         vilkarsgrunnlagId = it.vilkarsgrunnlagId,
                         varselRepository = varselRepository,
                         periode = it,
-                        skalViseAktiveVarsler = true,
+                        // Antakelse om at hvis det ikke finnes oppgave er det en periode som skal skjønnsfastsettes. Da vil vi vise varsler.
+                        // Dette kans fjernes når skjønnsfastsettingperioder også har oppgave.
+                        skalViseAktiveVarsler = if (oppgaveId == null) true else index == 0 && perioderSomSkalViseAktiveVarsler.contains(UUID.fromString(it.vedtaksperiodeId)),
                         notatDao = notatDao,
                     )
 
