@@ -4,14 +4,13 @@ import java.util.UUID
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingVisitor
 import no.nav.helse.spesialist.api.modell.Saksbehandler
-import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 
 interface OppgaveVisitor: TotrinnsvurderingVisitor {
     fun visitOppgave(
         id: Long,
         type: Oppgavetype,
-        status: Oppgavestatus,
+        tilstand: Oppgave.Tilstand,
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
         ferdigstiltAvOid: UUID?,

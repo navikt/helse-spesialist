@@ -3,6 +3,7 @@ package no.nav.helse.modell.oppgave
 import java.util.Objects
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.Gruppe
 import no.nav.helse.Tilgangskontroll
 import no.nav.helse.mediator.oppgave.OppgaveDao
@@ -12,14 +13,13 @@ import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtBeslutter
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtIRetur
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveKreverTotrinnsvurdering
 import no.nav.helse.spesialist.api.modell.Saksbehandler
-import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import org.slf4j.LoggerFactory
 
 class Oppgave private constructor(
     private val id: Long,
     private val type: Oppgavetype,
-    private var status: Oppgavestatus,
+    private var tilstand: Tilstand,
     private val vedtaksperiodeId: UUID,
     private val utbetalingId: UUID,
     private val totrinnsvurdering: Totrinnsvurdering?
@@ -31,10 +31,10 @@ class Oppgave private constructor(
     private var tildeltTil: Saksbehandler? = null
     private var påVent: Boolean = false
 
-    constructor(
+    internal constructor(
         id: Long,
         type: Oppgavetype,
-        status: Oppgavestatus,
+        tilstand: Tilstand,
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
         ferdigstiltAvIdent: String? = null,
@@ -42,11 +42,35 @@ class Oppgave private constructor(
         tildelt: Saksbehandler? = null,
         påVent: Boolean = false,
         totrinnsvurdering: Totrinnsvurdering? = null
-    ) : this(id, type, status, vedtaksperiodeId, utbetalingId, totrinnsvurdering) {
+    ) : this(id, type, tilstand, vedtaksperiodeId, utbetalingId, totrinnsvurdering) {
         this.ferdigstiltAvIdent = ferdigstiltAvIdent
         this.ferdigstiltAvOid = ferdigstiltAvOid
         this.tildeltTil = tildelt
         this.påVent = påVent
+    }
+
+    fun accept(visitor: OppgaveVisitor) {
+        visitor.visitOppgave(id, type, tilstand, vedtaksperiodeId, utbetalingId, ferdigstiltAvOid, ferdigstiltAvIdent, egenskaper, tildeltTil, påVent, totrinnsvurdering)
+        totrinnsvurdering?.accept(visitor)
+    }
+
+    internal fun forsøkTildeling(
+        saksbehandler: Saksbehandler,
+        påVent: Boolean = false,
+        harTilgangTil: Tilgangskontroll,
+    ) {
+        if (type == Oppgavetype.STIKKPRØVE) {
+            logg.info("OppgaveId $id er stikkprøve og tildeles ikke på tross av reservasjon.")
+            return
+        }
+        if (type == Oppgavetype.RISK_QA) {
+            val harTilgangTilRisk = runBlocking { harTilgangTil(saksbehandler.oid(), Gruppe.RISK_QA) }
+            if (!harTilgangTilRisk) logg.info("OppgaveId $id er RISK_QA og saksbehandler har ikke tilgang, tildeles ikke på tross av reservasjon.")
+            return
+        }
+        tildeltTil = saksbehandler
+        this.påVent = påVent
+        logg.info("Oppgave $id tildeles $saksbehandler grunnet reservasjon.")
     }
 
     internal fun sendTilBeslutter(behandlendeSaksbehandler: Saksbehandler) {
@@ -84,19 +108,12 @@ class Oppgave private constructor(
         tildeltTil = opprinneligSaksbehandler
     }
 
-    fun accept(visitor: OppgaveVisitor) {
-        visitor.visitOppgave(id, type, status, vedtaksperiodeId, utbetalingId, ferdigstiltAvOid, ferdigstiltAvIdent, egenskaper, tildeltTil, påVent, totrinnsvurdering)
-        totrinnsvurdering?.accept(visitor)
-    }
-
     fun ferdigstill() {
-        status = Oppgavestatus.Ferdigstilt
+        tilstand.ferdigstill(this)
     }
 
     fun avventerSystem(ident: String, oid: UUID) {
-        status = Oppgavestatus.AvventerSystem
-        ferdigstiltAvIdent = ident
-        ferdigstiltAvOid = oid
+        tilstand.avventerSystem(this, ident, oid)
     }
 
     fun lagMelding(eventName: String, fødselsnummer: String, hendelseId: UUID): JsonMessage {
@@ -108,27 +125,69 @@ class Oppgave private constructor(
     }
 
     fun avbryt() {
-        status = Oppgavestatus.Invalidert
+        tilstand.invalider(this)
     }
 
-    fun forsøkTildeling(
-        saksbehandler: Saksbehandler,
-        påVent: Boolean = false,
-        harTilgangTil: Tilgangskontroll,
-    ) {
-        if (type == Oppgavetype.STIKKPRØVE) {
-            logg.info("OppgaveId $id er stikkprøve og tildeles ikke på tross av reservasjon.")
-            return
-        }
-        if (type == Oppgavetype.RISK_QA) {
-            val harTilgangTilRisk = runBlocking { harTilgangTil(saksbehandler.oid(), Gruppe.RISK_QA) }
-            if (!harTilgangTilRisk) logg.info("OppgaveId $id er RISK_QA og saksbehandler har ikke tilgang, tildeles ikke på tross av reservasjon.")
-            return
-        }
-        tildeltTil = saksbehandler
-        this.påVent = påVent
-        logg.info("Oppgave $id tildeles $saksbehandler grunnet reservasjon.")
+    private fun nesteTilstand(neste: Tilstand) {
+        val forrige = tilstand
+        tilstand = neste
+        logg.info(
+            "Oppgave med {} bytter tilstand fra {} til {}",
+            kv("oppgaveId", id),
+            kv("forrigeTilstand", forrige),
+            kv("nesteTilstand", neste),
+        )
     }
+
+    sealed interface Tilstand {
+        fun invalider(oppgave: Oppgave) {
+            logg.error(
+                "Forventer ikke invalidering i {} for oppgave med {}",
+                kv("tilstand", this),
+                kv("oppgaveId", oppgave.id)
+            )
+        }
+        fun avventerSystem(oppgave: Oppgave, ident: String, oid: UUID) {
+            logg.error(
+                "Forventer ikke avventer system i {} for oppgave med {}",
+                kv("tilstand", this),
+                kv("oppgaveId", oppgave.id)
+            )
+        }
+        fun ferdigstill(oppgave: Oppgave) {
+            logg.error(
+                "Forventer ikke ferdigstillelse i {} for oppgave med {}",
+                kv("tilstand", this),
+                kv("oppgaveId", oppgave.id)
+            )
+        }
+    }
+
+    data object AvventerSaksbehandler: Tilstand {
+        override fun avventerSystem(oppgave: Oppgave, ident: String, oid: UUID) {
+            oppgave.ferdigstiltAvIdent = ident
+            oppgave.ferdigstiltAvOid = oid
+            oppgave.nesteTilstand(AvventerSystem)
+        }
+
+        override fun invalider(oppgave: Oppgave) {
+            oppgave.nesteTilstand(Invalidert)
+        }
+    }
+
+    data object AvventerSystem: Tilstand {
+        override fun ferdigstill(oppgave: Oppgave) {
+            oppgave.nesteTilstand(Ferdigstilt)
+        }
+
+        override fun invalider(oppgave: Oppgave) {
+            oppgave.nesteTilstand(Invalidert)
+        }
+    }
+
+    data object Ferdigstilt: Tilstand
+
+    data object Invalidert: Tilstand
 
     override fun equals(other: Any?): Boolean {
         if (other !is Oppgave) return false
@@ -141,7 +200,7 @@ class Oppgave private constructor(
     }
 
     override fun toString(): String {
-        return "Oppgave(type=$type, status=$status, vedtaksperiodeId=$vedtaksperiodeId, utbetalingId=$utbetalingId, id=$id)"
+        return "Oppgave(type=$type, tilstand=$tilstand, vedtaksperiodeId=$vedtaksperiodeId, utbetalingId=$utbetalingId, id=$id)"
     }
 
     companion object {
@@ -155,7 +214,7 @@ class Oppgave private constructor(
             totrinnsvurdering: Totrinnsvurdering? = null
         ): Oppgave {
             val hovedegenskap = egenskaper.firstOrNull() ?: Oppgavetype.SØKNAD
-            return Oppgave(id, hovedegenskap, Oppgavestatus.AvventerSaksbehandler, vedtaksperiodeId, utbetalingId, totrinnsvurdering).also {
+            return Oppgave(id, hovedegenskap, AvventerSaksbehandler, vedtaksperiodeId, utbetalingId, totrinnsvurdering).also {
                 it.egenskaper.addAll(egenskaper)
             }
         }
@@ -177,7 +236,7 @@ class Oppgave private constructor(
                 eventName = eventName,
                 hendelseId = hendelseId,
                 oppgaveId = oppgaveId,
-                status = oppgave.status,
+                tilstand = oppgave.tilstand.toString(),
                 type = oppgave.type,
                 fødselsnummer = fødselsnummer,
                 erBeslutterOppgave = erBeslutterOppgave,
@@ -203,7 +262,7 @@ class Oppgave private constructor(
                 eventName = eventName,
                 hendelseId = hendelseId,
                 oppgaveId = oppgave.id,
-                status = oppgave.status,
+                tilstand = oppgave.tilstand.toString(),
                 type = oppgave.type,
                 fødselsnummer = fødselsnummer,
                 erBeslutterOppgave = erBeslutterOppgave,
@@ -218,7 +277,7 @@ class Oppgave private constructor(
             eventName: String,
             hendelseId: UUID,
             oppgaveId: Long,
-            status: Oppgavestatus,
+            tilstand: String,
             type: Oppgavetype,
             fødselsnummer: String,
             erBeslutterOppgave: Boolean,
@@ -233,7 +292,7 @@ class Oppgave private constructor(
                 ),
                 "hendelseId" to hendelseId,
                 "oppgaveId" to oppgaveId,
-                "status" to status.name,
+                "status" to tilstand,
                 "type" to type.name,
                 "fødselsnummer" to fødselsnummer,
                 "erBeslutterOppgave" to erBeslutterOppgave,

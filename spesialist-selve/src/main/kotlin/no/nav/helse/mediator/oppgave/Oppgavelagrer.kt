@@ -5,6 +5,7 @@ import java.util.UUID
 import no.nav.helse.db.OppgaveFraDatabase
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.TotrinnsvurderingFraDatabase
+import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveVisitor
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.api.modell.Saksbehandler
@@ -50,7 +51,7 @@ class Oppgavelagrer : OppgaveVisitor {
     override fun visitOppgave(
         id: Long,
         type: Oppgavetype,
-        status: Oppgavestatus,
+        tilstand: Oppgave.Tilstand,
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
         ferdigstiltAvOid: UUID?,
@@ -60,6 +61,7 @@ class Oppgavelagrer : OppgaveVisitor {
         påVent: Boolean,
         totrinnsvurdering: Totrinnsvurdering?
     ) {
+        val status = status(tilstand)
         oppgaveForLagring = OppgaveFraDatabase(
             id = id,
             type = type.toString(),
@@ -93,5 +95,14 @@ class Oppgavelagrer : OppgaveVisitor {
             opprettet = opprettet,
             oppdatert = oppdatert
         )
+    }
+
+    private fun status(tilstand: Oppgave.Tilstand): Oppgavestatus {
+        return when (tilstand) {
+            Oppgave.AvventerSaksbehandler -> Oppgavestatus.AvventerSaksbehandler
+            Oppgave.AvventerSystem -> Oppgavestatus.AvventerSystem
+            Oppgave.Ferdigstilt -> Oppgavestatus.Ferdigstilt
+            Oppgave.Invalidert -> Oppgavestatus.Invalidert
+        }
     }
 }

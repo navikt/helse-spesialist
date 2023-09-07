@@ -10,7 +10,6 @@ import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtBeslutter
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtIRetur
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveKreverTotrinnsvurdering
 import no.nav.helse.spesialist.api.modell.Saksbehandler
-import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype.STIKKPRØVE
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype.SØKNAD
@@ -52,21 +51,21 @@ internal class OppgaveTest {
         val oppgave1 = Oppgave(
             OPPGAVE_ID,
             OPPGAVETYPE,
-            Oppgavestatus.AvventerSaksbehandler,
+            Oppgave.AvventerSaksbehandler,
             VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID
         )
         val oppgave2 = Oppgave(
             OPPGAVE_ID,
             OPPGAVETYPE,
-            Oppgavestatus.AvventerSaksbehandler,
+            Oppgave.AvventerSaksbehandler,
             VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID
         )
         val oppgave3 = Oppgave(
             OPPGAVE_ID,
             OPPGAVETYPE,
-            Oppgavestatus.AvventerSystem,
+            Oppgave.AvventerSystem,
             VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID
         )
@@ -147,7 +146,7 @@ internal class OppgaveTest {
         oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
 
         inspektør(oppgave) {
-            assertEquals(Oppgavestatus.AvventerSystem, status)
+            assertEquals(Oppgave.AvventerSystem, tilstand)
         }
     }
 
@@ -157,17 +156,18 @@ internal class OppgaveTest {
         oppgave.avbryt()
 
         inspektør(oppgave) {
-            assertEquals(Oppgavestatus.Invalidert, status)
+            assertEquals(Oppgave.Invalidert, tilstand)
         }
     }
 
     @Test
     fun `Setter oppgavestatus til Ferdigstilt når oppgaven ferdigstilles`() {
         val oppgave = nyOppgave(SØKNAD)
+        oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
         oppgave.ferdigstill()
 
         inspektør(oppgave) {
-            assertEquals(Oppgavestatus.Ferdigstilt, status)
+            assertEquals(Oppgave.Ferdigstilt, tilstand)
         }
     }
 
@@ -229,6 +229,75 @@ internal class OppgaveTest {
     }
 
     @Test
+    fun `kan ikke ferdigstille en oppgave som ikke har vært behandlet av saksbehandler`() {
+        val oppgave = nyOppgave(SØKNAD)
+        oppgave.ferdigstill()
+        inspektør(oppgave) {
+            assertEquals(Oppgave.AvventerSaksbehandler, this.tilstand)
+        }
+    }
+
+    @Test
+    fun `kan ikke invalidere en oppgave i ferdigstilt`() {
+        val oppgave = nyOppgave(SØKNAD)
+        oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
+        oppgave.ferdigstill()
+        oppgave.avbryt()
+        inspektør(oppgave) {
+            assertEquals(Oppgave.Ferdigstilt, this.tilstand)
+        }
+    }
+
+    @Test
+    fun `kan ikke gå i avventer system når en oppgave er i ferdigstilt`() {
+        val oppgave = nyOppgave(SØKNAD)
+        oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
+        oppgave.ferdigstill()
+        oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
+        inspektør(oppgave) {
+            assertEquals(Oppgave.Ferdigstilt, this.tilstand)
+        }
+    }
+
+    @Test
+    fun `kan ikke gå i avventer system når en oppgave er i invalidert`() {
+        val oppgave = nyOppgave(SØKNAD)
+        oppgave.avbryt()
+        oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
+        inspektør(oppgave) {
+            assertEquals(Oppgave.Invalidert, this.tilstand)
+        }
+    }
+
+    @Test
+    fun `kan invalidere en oppgave i avventer saksbehandler`() {
+        val oppgave = nyOppgave(SØKNAD)
+        oppgave.avbryt()
+        inspektør(oppgave) {
+            assertEquals(Oppgave.Invalidert, this.tilstand)
+        }
+    }
+
+    @Test
+    fun `kan ferdigstille en oppgave i avventer saksbehandler`() {
+        val oppgave = nyOppgave(SØKNAD)
+        oppgave.avbryt()
+        inspektør(oppgave) {
+            assertEquals(Oppgave.Invalidert, this.tilstand)
+        }
+    }
+
+    @Test
+    fun `kan ferdigstille en oppgave i avventer system`() {
+        val oppgave = nyOppgave(SØKNAD)
+        oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
+        oppgave.avbryt()
+        inspektør(oppgave) {
+            assertEquals(Oppgave.Invalidert, this.tilstand)
+        }
+    }
+
+    @Test
     fun equals() {
         val gjenopptattOppgave = oppgaveMedEgenskaper(1L, VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID, listOf(OPPGAVETYPE))
         val oppgave1 = oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(SØKNAD))
@@ -275,7 +344,7 @@ internal class OppgaveTest {
     }
 
     private class OppgaveInspektør: OppgaveVisitor {
-        lateinit var status: Oppgavestatus
+        lateinit var tilstand: Oppgave.Tilstand
         lateinit var type: Oppgavetype
         var tildelt: Boolean = false
         var påVent: Boolean = false
@@ -283,7 +352,7 @@ internal class OppgaveTest {
         override fun visitOppgave(
             id: Long,
             type: Oppgavetype,
-            status: Oppgavestatus,
+            tilstand: Oppgave.Tilstand,
             vedtaksperiodeId: UUID,
             utbetalingId: UUID,
             ferdigstiltAvOid: UUID?,
@@ -293,7 +362,7 @@ internal class OppgaveTest {
             påVent: Boolean,
             totrinnsvurdering: Totrinnsvurdering?
         ) {
-            this.status = status
+            this.tilstand = tilstand
             this.tildelt = tildelt != null
             this.tildeltTil = tildelt
             this.påVent = påVent

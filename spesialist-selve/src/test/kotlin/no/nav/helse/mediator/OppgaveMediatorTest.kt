@@ -170,7 +170,7 @@ internal class OppgaveMediatorTest {
         val oppgave = Oppgave(
             OPPGAVE_ID,
             OPPGAVETYPE_SØKNAD,
-            Oppgavestatus.AvventerSaksbehandler,
+            Oppgave.AvventerSaksbehandler,
             VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID
         )
@@ -230,7 +230,7 @@ internal class OppgaveMediatorTest {
         val oppgave1 = Oppgave(
             1L,
             OPPGAVETYPE_SØKNAD,
-            Oppgavestatus.AvventerSaksbehandler,
+            Oppgave.AvventerSaksbehandler,
             VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID
         )

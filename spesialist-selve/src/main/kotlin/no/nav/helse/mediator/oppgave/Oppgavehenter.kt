@@ -22,7 +22,7 @@ class Oppgavehenter(
         return Oppgave(
             id = oppgave.id,
             type = enumValueOf<Oppgavetype>(oppgave.type),
-            status = enumValueOf<Oppgavestatus>(oppgave.status),
+            tilstand = tilstand(enumValueOf<Oppgavestatus>(oppgave.status)),
             vedtaksperiodeId = oppgave.vedtaksperiodeId,
             utbetalingId = oppgave.utbetalingId,
             ferdigstiltAvIdent = oppgave.ferdigstiltAvIdent,
@@ -43,6 +43,15 @@ class Oppgavehenter(
                 )
             }
         )
+    }
+
+    private fun tilstand(oppgavestatus: Oppgavestatus): Oppgave.Tilstand {
+        return when (oppgavestatus) {
+            Oppgavestatus.AvventerSaksbehandler -> Oppgave.AvventerSaksbehandler
+            Oppgavestatus.AvventerSystem -> Oppgave.AvventerSystem
+            Oppgavestatus.Ferdigstilt -> Oppgave.Ferdigstilt
+            Oppgavestatus.Invalidert -> Oppgave.Invalidert
+        }
     }
 
     private fun SaksbehandlerFraDatabase.toSaksbehandler() = Saksbehandler(epostadresse, oid, navn, ident)

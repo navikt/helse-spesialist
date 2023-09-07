@@ -146,7 +146,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
             Oppgave(
                 id = oppgaveId,
                 type = enumValueOf(row.string("type")),
-                status = enumValueOf(row.string("status")),
+                tilstand = tilstand(enumValueOf(row.string("status"))),
                 vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
                 utbetalingId = row.uuid("utbetaling_id"),
                 ferdigstiltAvIdent = row.stringOrNull("ferdigstilt_av"),
@@ -163,6 +163,15 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
             )
         }
 
+    private fun tilstand(oppgavestatus: Oppgavestatus): Oppgave.Tilstand {
+        return when (oppgavestatus) {
+            Oppgavestatus.AvventerSaksbehandler -> Oppgave.AvventerSaksbehandler
+            Oppgavestatus.AvventerSystem -> Oppgave.AvventerSystem
+            Oppgavestatus.Ferdigstilt -> Oppgave.Ferdigstilt
+            Oppgavestatus.Invalidert -> Oppgave.Invalidert
+        }
+    }
+
     fun finnAktiv(vedtaksperiodeId: UUID) =
         asSQL(
             """ SELECT o.id, o.type, o.status, o.utbetaling_id
@@ -174,7 +183,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
             Oppgave(
                 id = row.long("id"),
                 type = enumValueOf(row.string("type")),
-                status = enumValueOf(row.string("status")),
+                tilstand = tilstand(enumValueOf(row.string("status"))),
                 vedtaksperiodeId = vedtaksperiodeId,
                 utbetalingId = row.uuid("utbetaling_id"),
             )
@@ -191,7 +200,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
             Oppgave(
                 id = row.long("id"),
                 type = enumValueOf(row.string("type")),
-                status = enumValueOf(row.string("status")),
+                tilstand = tilstand(enumValueOf(row.string("status"))),
                 vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
                 utbetalingId = row.uuid("utbetaling_id"),
                 ferdigstiltAvIdent = row.stringOrNull("ferdigstilt_av"),

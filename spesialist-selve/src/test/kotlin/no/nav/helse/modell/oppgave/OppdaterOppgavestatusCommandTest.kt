@@ -12,7 +12,6 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.GODKJENT_UTEN_UTBETALING
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_GODKJENT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
-import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -29,7 +28,7 @@ internal class OppdaterOppgavestatusCommandTest {
         val oppgave = Oppgave(
             1L,
             Oppgavetype.SØKNAD,
-            Oppgavestatus.AvventerSystem,
+            Oppgave.AvventerSystem,
             UUID.randomUUID(),
             UTBETALING_ID,
             "IDENT",
@@ -48,7 +47,7 @@ internal class OppdaterOppgavestatusCommandTest {
         val oppgave = Oppgave(
             1L,
             Oppgavetype.SØKNAD,
-            Oppgavestatus.AvventerSystem,
+            Oppgave.AvventerSystem,
             UUID.randomUUID(),
             UTBETALING_ID,
             "IDENT",
@@ -67,7 +66,7 @@ internal class OppdaterOppgavestatusCommandTest {
         val oppgave = Oppgave(
             1L,
             Oppgavetype.SØKNAD,
-            Oppgavestatus.AvventerSystem,
+            Oppgave.AvventerSystem,
             UUID.randomUUID(),
             UTBETALING_ID,
             "IDENT",
@@ -87,7 +86,7 @@ internal class OppdaterOppgavestatusCommandTest {
         val oppgave = Oppgave(
             1L,
             Oppgavetype.SØKNAD,
-            Oppgavestatus.AvventerSystem,
+            Oppgave.AvventerSystem,
             UUID.randomUUID(),
             UTBETALING_ID,
             "IDENT",
@@ -107,7 +106,7 @@ internal class OppdaterOppgavestatusCommandTest {
         val oppgave = Oppgave(
             1L,
             Oppgavetype.SØKNAD,
-            Oppgavestatus.AvventerSystem,
+            Oppgave.AvventerSystem,
             UUID.randomUUID(),
             UTBETALING_ID,
             "IDENT",

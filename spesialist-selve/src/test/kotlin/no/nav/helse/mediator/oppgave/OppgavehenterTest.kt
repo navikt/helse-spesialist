@@ -7,10 +7,10 @@ import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.TotrinnsvurderingFraDatabase
 import no.nav.helse.db.TotrinnsvurderingRepository
+import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveVisitor
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.api.modell.Saksbehandler
-import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -44,7 +44,7 @@ class OppgavehenterTest {
         inspektør.assertOppgave(
             id = OPPGAVE_ID,
             type = Oppgavetype.SØKNAD,
-            status = Oppgavestatus.AvventerSaksbehandler,
+            tilstand = Oppgave.AvventerSaksbehandler,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID,
             ferdigstiltAvOid = SAKSBEHANDLER_OID,
@@ -74,7 +74,7 @@ class OppgavehenterTest {
         inspektør.assertOppgave(
             id = OPPGAVE_ID,
             type = Oppgavetype.SØKNAD,
-            status = Oppgavestatus.AvventerSaksbehandler,
+            tilstand = Oppgave.AvventerSaksbehandler,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID,
             ferdigstiltAvOid = SAKSBEHANDLER_OID,
@@ -97,7 +97,7 @@ class OppgavehenterTest {
     private val inspektør = object : OppgaveVisitor {
         private var id by Delegates.notNull<Long>()
         private lateinit var type: Oppgavetype
-        private lateinit var status: Oppgavestatus
+        private lateinit var tilstand: Oppgave.Tilstand
         private lateinit var vedtaksperiodeId: UUID
         private lateinit var utbetalingId: UUID
         private var ferdigstiltAvOid: UUID? = null
@@ -110,7 +110,7 @@ class OppgavehenterTest {
         override fun visitOppgave(
             id: Long,
             type: Oppgavetype,
-            status: Oppgavestatus,
+            tilstand: Oppgave.Tilstand,
             vedtaksperiodeId: UUID,
             utbetalingId: UUID,
             ferdigstiltAvOid: UUID?,
@@ -122,7 +122,7 @@ class OppgavehenterTest {
         ) {
             this.id = id
             this.type = type
-            this.status = status
+            this.tilstand = tilstand
             this.vedtaksperiodeId = vedtaksperiodeId
             this.utbetalingId = utbetalingId
             this.ferdigstiltAvOid = ferdigstiltAvOid
@@ -136,7 +136,7 @@ class OppgavehenterTest {
         fun assertOppgave(
             id: Long,
             type: Oppgavetype,
-            status: Oppgavestatus,
+            tilstand: Oppgave.Tilstand,
             vedtaksperiodeId: UUID,
             utbetalingId: UUID,
             ferdigstiltAvOid: UUID?,
@@ -148,7 +148,7 @@ class OppgavehenterTest {
         ) {
             assertEquals(id, this.id)
             assertEquals(type, this.type)
-            assertEquals(status, this.status)
+            assertEquals(tilstand, this.tilstand)
             assertEquals(vedtaksperiodeId, this.vedtaksperiodeId)
             assertEquals(utbetalingId, this.utbetalingId)
             assertEquals(ferdigstiltAvOid, this.ferdigstiltAvOid)

@@ -126,7 +126,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
             Oppgave(
                 oppgaveId,
                 OPPGAVETYPE,
-                AvventerSaksbehandler,
+                Oppgave.AvventerSaksbehandler,
                 VEDTAKSPERIODE,
                 utbetalingId = UTBETALING_ID
             ), oppgave
@@ -169,7 +169,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
             Oppgave(
                 oppgaveId,
                 OPPGAVETYPE,
-                AvventerSaksbehandler,
+                Oppgave.AvventerSaksbehandler,
                 VEDTAKSPERIODE,
                 utbetalingId = utbetalingId
             ), oppgave
