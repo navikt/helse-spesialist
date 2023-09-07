@@ -46,33 +46,6 @@ internal class OppgaveTest {
         )
     }
 
-    @Test
-    fun `gjenoppretter oppgave`() {
-        val oppgave1 = Oppgave(
-            OPPGAVE_ID,
-            OPPGAVETYPE,
-            Oppgave.AvventerSaksbehandler,
-            VEDTAKSPERIODE_ID,
-            utbetalingId = UTBETALING_ID
-        )
-        val oppgave2 = Oppgave(
-            OPPGAVE_ID,
-            OPPGAVETYPE,
-            Oppgave.AvventerSaksbehandler,
-            VEDTAKSPERIODE_ID,
-            utbetalingId = UTBETALING_ID
-        )
-        val oppgave3 = Oppgave(
-            OPPGAVE_ID,
-            OPPGAVETYPE,
-            Oppgave.AvventerSystem,
-            VEDTAKSPERIODE_ID,
-            utbetalingId = UTBETALING_ID
-        )
-        assertEquals(oppgave1, oppgave2)
-        assertEquals(oppgave1, oppgave3)
-    }
-
     @ParameterizedTest
     @EnumSource(value = Oppgavetype::class, names = ["SØKNAD"], mode = EnumSource.Mode.EXCLUDE)
     fun `Første egenskap anses som oppgavetype`(type: Oppgavetype) {
@@ -299,11 +272,11 @@ internal class OppgaveTest {
 
     @Test
     fun equals() {
-        val gjenopptattOppgave = oppgaveMedEgenskaper(1L, VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID, listOf(OPPGAVETYPE))
-        val oppgave1 = oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(SØKNAD))
-        val oppgave2 = oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(SØKNAD))
-        val oppgave3 = oppgaveMedEgenskaper(OPPGAVE_ID, UUID.randomUUID(), UTBETALING_ID, listOf(SØKNAD))
-        val oppgave4 = oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(STIKKPRØVE))
+        val gjenopptattOppgave = oppgaveMedEgenskaper(1L, VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID, UUID.randomUUID(), listOf(OPPGAVETYPE))
+        val oppgave1 = oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), listOf(SØKNAD))
+        val oppgave2 = oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), listOf(SØKNAD))
+        val oppgave3 = oppgaveMedEgenskaper(OPPGAVE_ID, UUID.randomUUID(), UTBETALING_ID, UUID.randomUUID(), listOf(SØKNAD))
+        val oppgave4 = oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), listOf(STIKKPRØVE))
         assertEquals(oppgave1, oppgave2)
         assertEquals(oppgave1.hashCode(), oppgave2.hashCode())
         assertNotEquals(oppgave1, oppgave3)
@@ -324,7 +297,7 @@ internal class OppgaveTest {
 
     private fun nyOppgave(vararg egenskaper: Oppgavetype, medTotrinnsvurdering: Boolean = false): Oppgave {
         val totrinnsvurdering = if (medTotrinnsvurdering) totrinnsvurdering() else null
-        return oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, egenskaper.toList(), totrinnsvurdering)
+        return oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), egenskaper.toList(), totrinnsvurdering)
     }
 
     private fun totrinnsvurdering() = Totrinnsvurdering(

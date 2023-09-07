@@ -537,17 +537,19 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `Henter oppgavemelding`() {
+        val contextId = UUID.randomUUID()
+        val hendelseId = UUID.randomUUID()
         opprettPerson()
         opprettArbeidsgiver()
         opprettGenerasjon()
         opprettVedtaksperiode()
-        opprettOppgave(oppgavetype = Oppgavetype.SØKNAD, contextId = CONTEXT_ID)
+        opprettOppgave(oppgavetype = Oppgavetype.SØKNAD, hendelseId = hendelseId, contextId = contextId)
         opprettUtbetalingKobling(VEDTAKSPERIODE, UTBETALING_ID)
 
         val oppgaveId = oppgaveApiDao.finnOppgaveId(VEDTAKSPERIODE)
         val oppgavemelding = oppgaveApiDao.hentOppgavemelding(oppgaveId!!)
         val forventetOppgavemleding = Oppgavemelder.Oppgavemelding(
-            HENDELSE_ID,
+            hendelseId,
             oppgaveId,
             Oppgavestatus.AvventerSaksbehandler,
             Oppgavetype.SØKNAD,

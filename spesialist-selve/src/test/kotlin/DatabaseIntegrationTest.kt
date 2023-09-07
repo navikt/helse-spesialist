@@ -15,6 +15,7 @@ import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.januar
 import no.nav.helse.mediator.FeilendeMeldingerDao
+import no.nav.helse.mediator.meldinger.Hendelse
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.CommandContextDao
@@ -26,6 +27,7 @@ import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
+import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.TestHendelse
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
@@ -75,6 +77,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             .registerModule(JavaTimeModule())
         internal val HENDELSE_ID = UUID.randomUUID()
+        internal val CONTEXT_ID = UUID.randomUUID()
 
         internal val VEDTAKSPERIODE = UUID.randomUUID()
 
@@ -249,13 +252,18 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         inntektskilde: Inntektskilde = EN_ARBEIDSGIVER,
         fødselsnummer: String = FNR,
         organisasjonsnummer: String = ORGNUMMER,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE,
+        contextId: UUID = UUID.randomUUID()
     ) {
         opprettPerson(fødselsnummer = fødselsnummer)
         opprettArbeidsgiver(organisasjonsnummer = organisasjonsnummer)
         opprettGenerasjon()
         opprettVedtaksperiode(periodetype = periodetype, inntektskilde = inntektskilde, vedtaksperiodeId = vedtaksperiodeId)
-        opprettOppgave()
+        opprettOppgave(contextId = contextId)
+    }
+
+    private fun opprettCommandContext(hendelse: TestHendelse, contextId: UUID) {
+        commandContextDao.opprett(hendelse, contextId)
     }
 
     protected fun nyVedtaksperiode(periodetype: Periodetype = FØRSTEGANGSBEHANDLING) {
@@ -363,8 +371,11 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         contextId: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         oppgavetype: Oppgavetype = OPPGAVETYPE,
-        utbetalingId: UUID = UTBETALING_ID
+        utbetalingId: UUID = UTBETALING_ID,
+        hendelseId: UUID = UUID.randomUUID()
     ) {
+        val hendelse = testhendelse(hendelseId = hendelseId)
+        opprettCommandContext(hendelse, contextId)
         oppgaveId = oppgaveDao.opprettOppgave(
             nextLong().also { OPPGAVE_ID = it },
             contextId,
@@ -582,6 +593,13 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                 endretTidspunkt
             ).asExecute
         )
+    }
+
+    private class Testhendelse: Hendelse {
+        override val id: UUID = UUID.randomUUID()
+        override fun fødselsnummer(): String = FNR
+        override fun toJson(): String = "{}"
+        override fun execute(context: CommandContext): Boolean = true
     }
 
     protected data class Periode(

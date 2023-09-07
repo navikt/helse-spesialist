@@ -13,10 +13,14 @@ import no.nav.helse.spesialist.api.graphql.schema.Mottaker
 import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
+import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSystem
+import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.Ferdigstilt
+import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.Invalidert
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 
 interface OppgaveRepository {
     fun finnOppgave(id: Long): OppgaveFraDatabase?
+    fun finnHendelseId(id: Long): UUID
 }
 
 class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveRepository {
@@ -159,16 +163,17 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                         ident = row.string("ident")
                     )
                 },
-                påVent = row.boolean("på_vent")
+                påVent = row.boolean("på_vent"),
+                hendelseId = finnHendelseId(oppgaveId)
             )
         }
 
     private fun tilstand(oppgavestatus: Oppgavestatus): Oppgave.Tilstand {
         return when (oppgavestatus) {
-            Oppgavestatus.AvventerSaksbehandler -> Oppgave.AvventerSaksbehandler
-            Oppgavestatus.AvventerSystem -> Oppgave.AvventerSystem
-            Oppgavestatus.Ferdigstilt -> Oppgave.Ferdigstilt
-            Oppgavestatus.Invalidert -> Oppgave.Invalidert
+            AvventerSaksbehandler -> Oppgave.AvventerSaksbehandler
+            AvventerSystem -> Oppgave.AvventerSystem
+            Ferdigstilt -> Oppgave.Ferdigstilt
+            Invalidert -> Oppgave.Invalidert
         }
     }
 
@@ -180,12 +185,14 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
             WHERE v.vedtaksperiode_id = :vedtaksperiodeId AND o.status IN('AvventerSystem'::oppgavestatus, 'AvventerSaksbehandler'::oppgavestatus)
         """, mapOf("vedtaksperiodeId" to vedtaksperiodeId)
         ).single { row ->
+            val id = row.long("id")
             Oppgave(
-                id = row.long("id"),
+                id = id,
                 type = enumValueOf(row.string("type")),
                 tilstand = tilstand(enumValueOf(row.string("status"))),
                 vedtaksperiodeId = vedtaksperiodeId,
                 utbetalingId = row.uuid("utbetaling_id"),
+                hendelseId = finnHendelseId(id)
             )
         }
 
@@ -197,14 +204,16 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
             WHERE utbetaling_id = :utbetalingId AND o.status NOT IN ('Invalidert'::oppgavestatus)
         """, mapOf("utbetalingId" to utbetalingId)
         ).single { row ->
+            val id = row.long("id")
             Oppgave(
-                id = row.long("id"),
+                id = id,
                 type = enumValueOf(row.string("type")),
                 tilstand = tilstand(enumValueOf(row.string("status"))),
                 vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
                 utbetalingId = row.uuid("utbetaling_id"),
                 ferdigstiltAvIdent = row.stringOrNull("ferdigstilt_av"),
-                ferdigstiltAvOid = row.stringOrNull("ferdigstilt_av_oid")?.let(UUID::fromString)
+                ferdigstiltAvOid = row.stringOrNull("ferdigstilt_av_oid")?.let(UUID::fromString),
+                hendelseId = finnHendelseId(id)
             )
         }
 
@@ -296,14 +305,14 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
         )
     ).update()
 
-    fun finnHendelseId(oppgaveId: Long) = requireNotNull(
+    override fun finnHendelseId(id: Long) = requireNotNull(
         asSQL(
             """
                 SELECT DISTINCT hendelse_id 
                 FROM command_context 
                 WHERE context_id = (SELECT command_context_id FROM oppgave WHERE id = :oppgaveId);
             """,
-            mapOf("oppgaveId" to oppgaveId)
+            mapOf("oppgaveId" to id)
         )
             .single { row -> row.uuid("hendelse_id") })
 

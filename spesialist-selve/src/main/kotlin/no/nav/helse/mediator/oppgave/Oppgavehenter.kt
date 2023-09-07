@@ -41,7 +41,8 @@ class Oppgavehenter(
                     opprettet = it.opprettet,
                     oppdatert = it.oppdatert
                 )
-            }
+            },
+            hendelseId = oppgaveRepository.finnHendelseId(oppgave.id)
         )
     }
 

@@ -182,6 +182,7 @@ class OppgavelagrerTest {
         id = OPPGAVE_ID,
         vedtaksperiodeId = VEDTAKSPERIODE_ID,
         utbetalingId = UTBETALING_ID,
+        hendelseId = UUID.randomUUID(),
         egenskaper = listOf(OPPGAVETYPE),
         totrinnsvurdering = if (medTotrinnsvurdering) nyTotrinnsvurdering() else null
     )

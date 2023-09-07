@@ -71,10 +71,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         assertTrue(command.execute(context))
         verify(exactly = 1) { oppgaveMediator.nyOppgave(capture(slot)) }
         val oppgave = slot.captured.invoke(1L)
-        assertEquals(
-            Oppgave.oppgaveMedEgenskaper(1L, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(SØKNAD)),
-            oppgave
-        )
+        assertEquals(enOppgave(SØKNAD), oppgave)
     }
 
     @Test
@@ -85,10 +82,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         verify(exactly = 1) { oppgaveMediator.nyOppgave(capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
-        assertEquals(
-            Oppgave.oppgaveMedEgenskaper(1L, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(STIKKPRØVE)),
-            oppgave
-        )
+        assertEquals(enOppgave(STIKKPRØVE), oppgave)
     }
 
     @Test
@@ -99,10 +93,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         verify(exactly = 1) { oppgaveMediator.nyOppgave(capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
-        assertEquals(
-            Oppgave.oppgaveMedEgenskaper(1L, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(RISK_QA)),
-            oppgave
-        )
+        assertEquals(enOppgave(RISK_QA), oppgave)
     }
 
     @Test
@@ -113,10 +104,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         verify(exactly = 1) { oppgaveMediator.nyOppgave(capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
-        assertEquals(
-            Oppgave.oppgaveMedEgenskaper(1L, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(Oppgavetype.REVURDERING)),
-            oppgave
-        )
+        assertEquals(enOppgave(Oppgavetype.REVURDERING), oppgave)
     }
 
     @Test
@@ -127,10 +115,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         verify(exactly = 1) { oppgaveMediator.nyOppgave(capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
-        assertEquals(
-            Oppgave.oppgaveMedEgenskaper(1L, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(FORTROLIG_ADRESSE)),
-            oppgave
-        )
+        assertEquals(enOppgave(FORTROLIG_ADRESSE), oppgave)
     }
 
     @Test
@@ -141,10 +126,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         verify(exactly = 1) { oppgaveMediator.nyOppgave(capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
-        assertEquals(
-            Oppgave.oppgaveMedEgenskaper(1L, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(UTBETALING_TIL_SYKMELDT)),
-            oppgave
-        )
+        assertEquals(enOppgave(UTBETALING_TIL_SYKMELDT), oppgave)
     }
 
     @Test
@@ -158,11 +140,12 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         verify(exactly = 1) { oppgaveMediator.nyOppgave(capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
-        assertEquals(
-            Oppgave.oppgaveMedEgenskaper(1L, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(DELVIS_REFUSJON)),
-            oppgave
-        )
+        assertEquals(enOppgave(DELVIS_REFUSJON), oppgave)
     }
+
+    private fun enOppgave(vararg oppgavetype: Oppgavetype) =
+        Oppgave.oppgaveMedEgenskaper(1L, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), oppgavetype.toList())
+
 
     private fun enUtbetaling(personbeløp: Int = 0, arbeidsgiverbeløp: Int = 0): GraphQLUtbetaling =
         GraphQLUtbetaling(

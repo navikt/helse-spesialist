@@ -70,9 +70,9 @@ internal class OppgaveMediatorTest {
     )
 
     private val saksbehandler = Saksbehandler(SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT)
-    private fun søknadsoppgave(id: Long): Oppgave = Oppgave.oppgaveMedEgenskaper(id, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(SØKNAD))
-    private fun stikkprøveoppgave(id: Long): Oppgave = Oppgave.oppgaveMedEgenskaper(id, VEDTAKSPERIODE_ID_2, UTBETALING_ID_2, listOf(STIKKPRØVE))
-    private fun riskoppgave(id: Long): Oppgave = Oppgave.oppgaveMedEgenskaper(id, VEDTAKSPERIODE_ID, UTBETALING_ID, listOf(RISK_QA))
+    private fun søknadsoppgave(id: Long): Oppgave = Oppgave.oppgaveMedEgenskaper(id, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), listOf(SØKNAD))
+    private fun stikkprøveoppgave(id: Long): Oppgave = Oppgave.oppgaveMedEgenskaper(id, VEDTAKSPERIODE_ID_2, UTBETALING_ID_2, UUID.randomUUID(), listOf(STIKKPRØVE))
+    private fun riskoppgave(id: Long): Oppgave = Oppgave.oppgaveMedEgenskaper(id, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), listOf(RISK_QA))
 
     private val testRapid = TestRapid()
 
@@ -167,13 +167,7 @@ internal class OppgaveMediatorTest {
 
     @Test
     fun `oppdaterer oppgave`() {
-        val oppgave = Oppgave(
-            OPPGAVE_ID,
-            OPPGAVETYPE_SØKNAD,
-            Oppgave.AvventerSaksbehandler,
-            VEDTAKSPERIODE_ID,
-            utbetalingId = UTBETALING_ID
-        )
+        val oppgave = nyOppgave()
         every { oppgaveDao.finn(any<Long>()) } returns oppgave
         every { oppgaveDao.finnHendelseId(any()) } returns HENDELSE_ID
         oppgave.avventerSystem(SAKSBEHANDLERIDENT, SAKSBEHANDLEROID)
@@ -227,21 +221,23 @@ internal class OppgaveMediatorTest {
 
     @Test
     fun `avbryter oppgaver`() {
-        val oppgave1 = Oppgave(
-            1L,
-            OPPGAVETYPE_SØKNAD,
-            Oppgave.AvventerSaksbehandler,
-            VEDTAKSPERIODE_ID,
-            utbetalingId = UTBETALING_ID
-        )
+        val oppgave1 = nyOppgave()
         every { oppgaveDao.finnAktiv(VEDTAKSPERIODE_ID) } returns oppgave1
-        every { oppgaveDao.finn(1L) } returns oppgave1
+        every { oppgaveDao.finn(any<Long>()) } returns oppgave1
         mediator.avbrytOppgaver(VEDTAKSPERIODE_ID)
         mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
         verify(exactly = 1) { oppgaveDao.finnAktiv(VEDTAKSPERIODE_ID) }
         verify(exactly = 1) { oppgaveDao.updateOppgave(any(), Oppgavestatus.Invalidert, null, null) }
         assertOpptegnelseIkkeOpprettet()
     }
+
+    private fun nyOppgave() = Oppgave.oppgaveMedEgenskaper(
+        id = OPPGAVE_ID,
+        vedtaksperiodeId = VEDTAKSPERIODE_ID,
+        utbetalingId = UTBETALING_ID,
+        hendelseId = UUID.randomUUID(),
+        egenskaper = listOf(SØKNAD)
+    )
 
     private fun assertAntallOpptegnelser(antallOpptegnelser: Int) = verify(exactly = antallOpptegnelser) {
         opptegnelseDao.opprettOpptegnelse(

@@ -98,8 +98,10 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode()
-        opprettOppgave(contextId = CONTEXT_ID)
-        assertEquals(HENDELSE_ID, oppgaveDao.finnHendelseId(oppgaveId))
+        val contextId = UUID.randomUUID()
+        val hendelseId = UUID.randomUUID()
+        opprettOppgave(contextId = contextId, hendelseId = hendelseId)
+        assertEquals(hendelseId, oppgaveDao.finnHendelseId(oppgaveId))
     }
 
     @Test
@@ -128,7 +130,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
                 OPPGAVETYPE,
                 Oppgave.AvventerSaksbehandler,
                 VEDTAKSPERIODE,
-                utbetalingId = UTBETALING_ID
+                utbetalingId = UTBETALING_ID,
+                hendelseId = UUID.randomUUID()
             ), oppgave
         )
     }
@@ -171,7 +174,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
                 OPPGAVETYPE,
                 Oppgave.AvventerSaksbehandler,
                 VEDTAKSPERIODE,
-                utbetalingId = utbetalingId
+                utbetalingId = utbetalingId,
+                hendelseId = UUID.randomUUID()
             ), oppgave
         )
     }

@@ -22,6 +22,7 @@ class Oppgave private constructor(
     private var tilstand: Tilstand,
     private val vedtaksperiodeId: UUID,
     private val utbetalingId: UUID,
+    private val hendelseId: UUID,
     private val totrinnsvurdering: Totrinnsvurdering?
 ) {
 
@@ -37,12 +38,13 @@ class Oppgave private constructor(
         tilstand: Tilstand,
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
+        hendelseId: UUID,
         ferdigstiltAvIdent: String? = null,
         ferdigstiltAvOid: UUID? = null,
         tildelt: Saksbehandler? = null,
         påVent: Boolean = false,
         totrinnsvurdering: Totrinnsvurdering? = null
-    ) : this(id, type, tilstand, vedtaksperiodeId, utbetalingId, totrinnsvurdering) {
+    ) : this(id, type, tilstand, vedtaksperiodeId, utbetalingId, hendelseId, totrinnsvurdering) {
         this.ferdigstiltAvIdent = ferdigstiltAvIdent
         this.ferdigstiltAvOid = ferdigstiltAvOid
         this.tildeltTil = tildelt
@@ -210,11 +212,12 @@ class Oppgave private constructor(
             id: Long,
             vedtaksperiodeId: UUID,
             utbetalingId: UUID,
+            hendelseId: UUID,
             egenskaper: List<Oppgavetype>,
             totrinnsvurdering: Totrinnsvurdering? = null
         ): Oppgave {
             val hovedegenskap = egenskaper.firstOrNull() ?: Oppgavetype.SØKNAD
-            return Oppgave(id, hovedegenskap, AvventerSaksbehandler, vedtaksperiodeId, utbetalingId, totrinnsvurdering).also {
+            return Oppgave(id, hovedegenskap, AvventerSaksbehandler, vedtaksperiodeId, utbetalingId, hendelseId, totrinnsvurdering).also {
                 it.egenskaper.addAll(egenskaper)
             }
         }

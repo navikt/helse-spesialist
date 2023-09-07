@@ -174,6 +174,8 @@ class OppgavehenterTest {
                 påVent = PÅ_VENT
             )
         }
+
+        override fun finnHendelseId(id: Long): UUID = UUID.randomUUID()
     }
 
     private fun totrinnsvurderingRepository(

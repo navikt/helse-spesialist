@@ -47,7 +47,7 @@ internal class OpprettSaksbehandleroppgaveCommand(
 //        else egenskaper.add(Oppgavetype.INGEN_UTBETALING)
 
         oppgaveMediator.nyOppgave { reservertId ->
-            val oppgave = Oppgave.oppgaveMedEgenskaper(reservertId, vedtaksperiodeId, utbetalingId, egenskaper)
+            val oppgave = Oppgave.oppgaveMedEgenskaper(reservertId, vedtaksperiodeId, utbetalingId, hendelseId, egenskaper)
 
             logg.info("Saksbehandleroppgave opprettet, avventer lagring: $oppgave")
             sikkerLogg.info("Saksbehandleroppgave opprettet, avventer lagring: $oppgave")
