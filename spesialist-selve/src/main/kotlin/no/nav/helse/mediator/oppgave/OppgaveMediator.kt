@@ -34,17 +34,17 @@ class OppgaveMediator(
     private val logg = LoggerFactory.getLogger(this::class.java)
     private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
-    fun nyOppgave(opprettOppgaveBlock: (reservertId: Long) -> Oppgave) {
+    internal fun nyOppgave(opprettOppgaveBlock: (reservertId: Long) -> Oppgave) {
         val nesteId = oppgaveDao.reserverNesteId()
         val oppgave = opprettOppgaveBlock(nesteId)
         leggPåVentForSenereLagring(oppgave)
     }
 
-    fun tildel(oppgaveId: Long, saksbehandleroid: UUID, påVent: Boolean = false): Boolean {
+    internal fun tildel(oppgaveId: Long, saksbehandleroid: UUID, påVent: Boolean = false): Boolean {
         return tildelingDao.opprettTildeling(oppgaveId, saksbehandleroid, påVent) != null
     }
 
-    fun avmeld(oppgaveId: Long) {
+    internal fun avmeld(oppgaveId: Long) {
         tildelingDao.slettTildeling(oppgaveId)
     }
 
@@ -65,7 +65,7 @@ class OppgaveMediator(
         }
     }
 
-    fun lagreTotrinnsvurdering(totrinnsvurderingFraDatabase: TotrinnsvurderingFraDatabase) {
+    internal fun lagreTotrinnsvurdering(totrinnsvurderingFraDatabase: TotrinnsvurderingFraDatabase) {
         totrinnsvurderingRepository.oppdater(totrinnsvurderingFraDatabase)
     }
 
@@ -111,7 +111,7 @@ class OppgaveMediator(
         }
     }
 
-    fun opprett(
+    internal fun opprett(
         id: Long,
         contextId: UUID,
         vedtaksperiodeId: UUID,
