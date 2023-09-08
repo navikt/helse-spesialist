@@ -8,7 +8,9 @@ import io.mockk.verify
 import java.util.UUID
 import no.nav.helse.Gruppe
 import no.nav.helse.Tilgangskontroll
+import no.nav.helse.db.OppgaveFraDatabase
 import no.nav.helse.db.SaksbehandlerDao
+import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
@@ -69,6 +71,7 @@ internal class OppgaveMediatorTest {
         saksbehandlerRepository = saksbehandlerDao
     )
 
+    private val saksbehandlerFraDatabase = SaksbehandlerFraDatabase(SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT)
     private val saksbehandler = Saksbehandler(SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT)
     private fun søknadsoppgave(id: Long): Oppgave = Oppgave.oppgaveMedEgenskaper(id, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), listOf(SØKNAD))
     private fun stikkprøveoppgave(id: Long): Oppgave = Oppgave.oppgaveMedEgenskaper(id, VEDTAKSPERIODE_ID_2, UTBETALING_ID_2, UUID.randomUUID(), listOf(STIKKPRØVE))
@@ -167,11 +170,16 @@ internal class OppgaveMediatorTest {
 
     @Test
     fun `oppdaterer oppgave`() {
-        val oppgave = nyOppgave()
-        every { oppgaveDao.finn(any<Long>()) } returns oppgave
+        every { oppgaveDao.finnOppgave(OPPGAVE_ID) } returns oppgaveFraDatabase()
         every { oppgaveDao.finnHendelseId(any()) } returns HENDELSE_ID
-        oppgave.avventerSystem(SAKSBEHANDLERIDENT, SAKSBEHANDLEROID)
-        mediator.ferdigstill(oppgave)
+        every { saksbehandlerDao.finnSaksbehandler(any()) } returns saksbehandlerFraDatabase
+        var oppgave: Oppgave? = null
+        mediator.oppgave(OPPGAVE_ID) {
+            avventerSystem(SAKSBEHANDLERIDENT, SAKSBEHANDLEROID)
+            ferdigstill()
+            oppgave = this
+        }
+        every { oppgaveDao.finn(OPPGAVE_ID) } returns oppgave
         mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
         assertEquals(1, testRapid.inspektør.size)
         assertOppgaveevent(0, "oppgave_oppdatert", Oppgavestatus.Ferdigstilt) {
@@ -219,24 +227,12 @@ internal class OppgaveMediatorTest {
         assertOpptegnelseIkkeOpprettet()
     }
 
-    @Test
-    fun `avbryter oppgaver`() {
-        val oppgave1 = nyOppgave()
-        every { oppgaveDao.finnAktiv(VEDTAKSPERIODE_ID) } returns oppgave1
-        every { oppgaveDao.finn(any<Long>()) } returns oppgave1
-        mediator.avbrytOppgaver(VEDTAKSPERIODE_ID)
-        mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
-        verify(exactly = 1) { oppgaveDao.finnAktiv(VEDTAKSPERIODE_ID) }
-        verify(exactly = 1) { oppgaveDao.updateOppgave(any(), Oppgavestatus.Invalidert, null, null) }
-        assertOpptegnelseIkkeOpprettet()
-    }
-
-    private fun nyOppgave() = Oppgave.oppgaveMedEgenskaper(
+    private fun oppgaveFraDatabase() = OppgaveFraDatabase(
         id = OPPGAVE_ID,
         vedtaksperiodeId = VEDTAKSPERIODE_ID,
         utbetalingId = UTBETALING_ID,
-        hendelseId = UUID.randomUUID(),
-        egenskaper = listOf(SØKNAD)
+        type = "SØKNAD",
+        status = "AvventerSaksbehandler"
     )
 
     private fun assertAntallOpptegnelser(antallOpptegnelser: Int) = verify(exactly = antallOpptegnelser) {

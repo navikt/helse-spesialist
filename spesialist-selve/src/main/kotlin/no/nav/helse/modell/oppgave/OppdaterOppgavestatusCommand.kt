@@ -1,8 +1,7 @@
 package no.nav.helse.modell.oppgave
 
 import java.util.UUID
-import no.nav.helse.mediator.oppgave.OppgaveDao
-import no.nav.helse.mediator.oppgave.OppgaveMediator
+import no.nav.helse.mediator.api.Oppgavehåndterer
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
@@ -14,16 +13,15 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 internal class OppdaterOppgavestatusCommand(
     private val utbetalingId: UUID,
     private val status: Utbetalingsstatus,
-    private val oppgaveDao: OppgaveDao,
-    private val oppgaveMediator: OppgaveMediator
+    private val oppgavehåndterer: Oppgavehåndterer
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
-        oppgaveDao.finn(utbetalingId)?.also {
+        oppgavehåndterer.oppgave(utbetalingId) {
             when (status) {
                 GODKJENT_UTEN_UTBETALING,
                 UTBETALT,
-                IKKE_GODKJENT -> oppgaveMediator.ferdigstill(it)
-                FORKASTET -> oppgaveMediator.invalider(it)
+                IKKE_GODKJENT -> this?.ferdigstill()
+                FORKASTET -> this?.avbryt()
                 else -> {} // NOP
             }
         }

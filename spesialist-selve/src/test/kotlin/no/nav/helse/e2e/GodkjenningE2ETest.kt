@@ -93,15 +93,17 @@ internal class GodkjenningE2ETest : AbstractE2ETestV2() {
 
     @Test
     fun `ignorerer påminnet godkjenningsbehov dersom det eksisterer en aktiv oppgave`() {
-        fremTilSaksbehandleroppgave()
-        håndterGodkjenningsbehovUtenValidering()
+        val utbetalingId = UUID.randomUUID()
+        fremTilSaksbehandleroppgave(utbetalingId = utbetalingId)
+        håndterGodkjenningsbehovUtenValidering(utbetalingId = utbetalingId)
         assertIngenEtterspurteBehov()
     }
 
     @Test
     fun `ignorerer påminnet godkjenningsbehov dersom vedtaket er automatisk godkjent`() {
-        fremTilSaksbehandleroppgave(kanGodkjennesAutomatisk = true)
-        håndterGodkjenningsbehovUtenValidering()
+        val utbetalingId = UUID.randomUUID()
+        fremTilSaksbehandleroppgave(kanGodkjennesAutomatisk = true, utbetalingId = utbetalingId)
+        håndterGodkjenningsbehovUtenValidering(utbetalingId = utbetalingId)
         assertIngenEtterspurteBehov()
     }
 

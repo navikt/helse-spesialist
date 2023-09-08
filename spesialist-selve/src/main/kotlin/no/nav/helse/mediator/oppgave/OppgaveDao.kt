@@ -42,6 +42,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
             LEFT JOIN tildeling t on o.id = t.oppgave_id_ref
             LEFT JOIN saksbehandler s on s.oid = t.saksbehandler_ref
             WHERE o.id = :oppgaveId
+            ORDER BY o.id DESC LIMIT 1
         """, mapOf("oppgaveId" to id)
         ).single { row ->
             OppgaveFraDatabase(
@@ -136,6 +137,13 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
         """, mapOf("fodselsnummer" to fødselsnummer.toLong())
         ).single { it.long("oppgaveId") }
 
+    fun finnOppgaveId(utbetalingId: UUID) =
+        asSQL(
+            """ SELECT o.id as oppgaveId
+            FROM oppgave o WHERE o.utbetaling_id = :utbetaling_id
+        """, mapOf("utbetaling_id" to utbetalingId)
+        ).single { it.long("oppgaveId") }
+
     fun finn(oppgaveId: Long) =
         asSQL(
             """ 
@@ -192,27 +200,6 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                 tilstand = tilstand(enumValueOf(row.string("status"))),
                 vedtaksperiodeId = vedtaksperiodeId,
                 utbetalingId = row.uuid("utbetaling_id"),
-                hendelseId = finnHendelseId(id)
-            )
-        }
-
-    fun finn(utbetalingId: UUID) =
-        asSQL(
-            """ SELECT o.id, o.type, o.status, v.vedtaksperiode_id, o.utbetaling_id, o.ferdigstilt_av, o.ferdigstilt_av_oid
-            FROM oppgave o
-            INNER JOIN vedtak v on o.vedtak_ref = v.id
-            WHERE utbetaling_id = :utbetalingId AND o.status NOT IN ('Invalidert'::oppgavestatus)
-        """, mapOf("utbetalingId" to utbetalingId)
-        ).single { row ->
-            val id = row.long("id")
-            Oppgave(
-                id = id,
-                type = enumValueOf(row.string("type")),
-                tilstand = tilstand(enumValueOf(row.string("status"))),
-                vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
-                utbetalingId = row.uuid("utbetaling_id"),
-                ferdigstiltAvIdent = row.stringOrNull("ferdigstilt_av"),
-                ferdigstiltAvOid = row.stringOrNull("ferdigstilt_av_oid")?.let(UUID::fromString),
                 hendelseId = finnHendelseId(id)
             )
         }

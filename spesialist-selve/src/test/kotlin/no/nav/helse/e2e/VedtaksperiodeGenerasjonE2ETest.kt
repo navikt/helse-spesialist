@@ -79,7 +79,7 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETestV2() {
 
     @Test
     fun `fjerner knytning til utbetaling når utbetalingen blir forkastet`() {
-        fremTilSaksbehandleroppgave(1.januar, 31.januar)
+        fremTilSaksbehandleroppgave(1.januar, 31.januar, utbetalingId = UTBETALING_ID)
         assertGenerasjonerMedUtbetaling(VEDTAKSPERIODE_ID, UTBETALING_ID, 1)
         håndterUtbetalingForkastet()
         assertGenerasjonerMedUtbetaling(VEDTAKSPERIODE_ID, UTBETALING_ID, 0)

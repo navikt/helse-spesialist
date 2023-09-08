@@ -55,6 +55,14 @@ class OppgaveMediator(
             oppgave.accept(this)
             oppdater(this@OppgaveMediator)
         }
+        leggPåVentForSenereOppdatering(oppgave)
+    }
+
+    override fun oppgave(utbetalingId: UUID, oppgaveBlock: Oppgave?.() -> Unit) {
+        val oppgaveId = oppgaveDao.finnOppgaveId(utbetalingId)
+        oppgaveId?.let {
+            oppgave(it, oppgaveBlock)
+        }
     }
 
     fun lagreTotrinnsvurdering(totrinnsvurderingFraDatabase: TotrinnsvurderingFraDatabase) {
@@ -85,21 +93,6 @@ class OppgaveMediator(
         oppgaveForOppdatering = oppgave
     }
 
-    fun ferdigstill(oppgave: Oppgave) {
-        oppgave.ferdigstill()
-        leggPåVentForSenereOppdatering(oppgave)
-    }
-
-    private fun avbryt(oppgave: Oppgave) {
-        oppgave.avbryt()
-        leggPåVentForSenereOppdatering(oppgave)
-    }
-
-    fun invalider(oppgave: Oppgave) {
-        oppgave.avbryt()
-        leggPåVentForSenereOppdatering(oppgave)
-    }
-
     fun lagreOgTildelOppgaver(
         hendelseId: UUID,
         fødselsnummer: String,
@@ -111,9 +104,10 @@ class OppgaveMediator(
     }
 
     fun avbrytOppgaver(vedtaksperiodeId: UUID) {
-        oppgaveDao.finnAktiv(vedtaksperiodeId)?.let { oppgave ->
-            oppgave.loggOppgaverAvbrutt(vedtaksperiodeId)
-            avbryt(oppgave)
+        oppgaveDao.finnNyesteOppgaveId(vedtaksperiodeId)?.also { it ->
+            oppgave(it) {
+                this.avbryt()
+            }
         }
     }
 
@@ -167,13 +161,6 @@ class OppgaveMediator(
             }
             logg.info("Oppgave lagret: $it")
             sikkerlogg.info("Oppgave lagret: $it")
-        } ?: oppgaveForOppdatering?.let {
-            Oppgavelagrer().apply {
-                it.accept(this)
-                oppdater(this@OppgaveMediator)
-            }
-            logg.info("Oppgave oppdatert: $it")
-            sikkerlogg.info("Oppgave oppdatert: $it")
         }
         oppgaveForLagring = null
         oppgaveForOppdatering = null

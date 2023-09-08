@@ -9,13 +9,10 @@ import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.TestHendelse
 import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.modell.vedtaksperiode.Inntektskilde
-import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.Ferdigstilt
-import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.Invalidert
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
@@ -149,55 +146,6 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
                 utbetalingId = UTBETALING_ID
             ), oppgave
         )
-    }
-
-    @Test
-    fun `finner oppgave fra utbetalingId`() {
-        val utbetalingId = UUID.randomUUID()
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode(
-            periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
-            inntektskilde = Inntektskilde.EN_ARBEIDSGIVER
-        )
-        val oppgaveId = insertOppgave(
-            utbetalingId = utbetalingId,
-            commandContextId = CONTEXT_ID,
-            vedtakRef = vedtakId,
-            oppgavetype = OPPGAVETYPE,
-            mottaker = Mottaker.ARBEIDSGIVER
-        )
-        val oppgave = oppgaveDao.finn(utbetalingId) ?: fail { "Fant ikke oppgave" }
-        assertEquals(
-            Oppgave(
-                oppgaveId,
-                OPPGAVETYPE,
-                Oppgave.AvventerSaksbehandler,
-                VEDTAKSPERIODE,
-                utbetalingId = utbetalingId,
-                hendelseId = UUID.randomUUID()
-            ), oppgave
-        )
-    }
-
-    @Test
-    fun `finner ikke oppgave fra utbetalingId dersom oppgaven er invalidert`() {
-        val utbetalingId = UUID.randomUUID()
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode(
-            periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
-            inntektskilde = Inntektskilde.EN_ARBEIDSGIVER
-        )
-        insertOppgave(
-            utbetalingId = utbetalingId,
-            commandContextId = CONTEXT_ID,
-            vedtakRef = vedtakId,
-            oppgavetype = OPPGAVETYPE,
-            status = Invalidert
-        )
-        val oppgave = oppgaveDao.finn(utbetalingId)
-        assertNull(oppgave)
     }
 
     @Test

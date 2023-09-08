@@ -1,94 +1,103 @@
 package no.nav.helse.modell.oppgave
 
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
 import java.util.UUID
-import no.nav.helse.mediator.oppgave.OppgaveDao
-import no.nav.helse.mediator.oppgave.OppgaveMediator
+import no.nav.helse.mediator.api.Oppgavehåndterer
+import no.nav.helse.modell.OppgaveInspektør.Companion.inspektør
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.ANNULLERT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.GODKJENT_UTEN_UTBETALING
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_GODKJENT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
+import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class OppdaterOppgavestatusCommandTest {
 
     private val UTBETALING_ID = UUID.randomUUID()
     private val context = CommandContext(UUID.randomUUID())
-    private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
-    private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
+    private lateinit var oppgave: Oppgave
+
+    @BeforeEach
+    fun beforeEach() {
+        oppgave = Oppgave.oppgaveMedEgenskaper(
+            id = 1L,
+            vedtaksperiodeId = UUID.randomUUID(),
+            utbetalingId = UTBETALING_ID,
+            hendelseId = UUID.randomUUID(),
+            egenskaper = listOf(Oppgavetype.SØKNAD)
+        )
+    }
 
     @Test
     fun `ferdigstiller oppgave når utbetalingen har blitt utbetalt`() {
-        val oppgave = nyOppgave()
         oppgave.avventerSystem("IDENT", UUID.randomUUID())
-        every { oppgaveDao.finn(any<UUID>()) } returns oppgave
         val status = UTBETALT
-        val command = OppdaterOppgavestatusCommand(UTBETALING_ID, status, oppgaveDao, oppgaveMediator)
+        val command = OppdaterOppgavestatusCommand(UTBETALING_ID, status, oppgavehåndterer)
 
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.ferdigstill(oppgave) }
+        inspektør(oppgave) {
+            assertEquals(Oppgave.Ferdigstilt, this.tilstand)
+        }
     }
 
     @Test
     fun `ferdigstiller oppgave når utbetalingen har blitt godkjent uten utbetaling`() {
-        val oppgave = nyOppgave()
         oppgave.avventerSystem("IDENT", UUID.randomUUID())
-        every { oppgaveDao.finn(any<UUID>()) } returns oppgave
         val status = GODKJENT_UTEN_UTBETALING
-        val command = OppdaterOppgavestatusCommand(UTBETALING_ID, status, oppgaveDao, oppgaveMediator)
+        val command = OppdaterOppgavestatusCommand(UTBETALING_ID, status, oppgavehåndterer)
 
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.ferdigstill(oppgave) }
+        inspektør(oppgave) {
+            assertEquals(Oppgave.Ferdigstilt, this.tilstand)
+        }
+
     }
 
     @Test
     fun `ferdigstiller oppgave når utbetalingen har blitt avslått`() {
-        val oppgave = nyOppgave()
-        oppgave.avventerSystem("IDENT", UUID.randomUUID())
-        every { oppgaveDao.finn(any<UUID>()) } returns oppgave
         val status = IKKE_GODKJENT
-        val command = OppdaterOppgavestatusCommand(UTBETALING_ID, status, oppgaveDao, oppgaveMediator)
+        oppgave.avventerSystem("IDENT", UUID.randomUUID())
+        val command = OppdaterOppgavestatusCommand(UTBETALING_ID, status, oppgavehåndterer)
 
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.ferdigstill(oppgave) }
-        verify(exactly = 0) { oppgaveMediator.invalider(oppgave) }
+        inspektør(oppgave) {
+            assertEquals(Oppgave.Ferdigstilt, this.tilstand)
+        }
     }
 
     @Test
     fun `invaliderer oppgave basert på utbetalingens status`() {
-        val oppgave = nyOppgave()
-        every { oppgaveDao.finn(any<UUID>()) } returns oppgave
         val status = FORKASTET
-        val command = OppdaterOppgavestatusCommand(UTBETALING_ID, status, oppgaveDao, oppgaveMediator)
+        val command = OppdaterOppgavestatusCommand(UTBETALING_ID, status, oppgavehåndterer)
 
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.invalider(oppgave) }
-        verify(exactly = 0) { oppgaveMediator.ferdigstill(oppgave) }
+        inspektør(oppgave) {
+            assertEquals(Oppgave.Invalidert, this.tilstand)
+        }
     }
 
     @Test
     fun `gjør ingenting om vi ikke forholder oss til utbetalingsstatusen`() {
-        val oppgave = nyOppgave()
-        every { oppgaveDao.finn(any<UUID>()) } returns oppgave
+        oppgave.avventerSystem("IDENT", UUID.randomUUID())
         val status = ANNULLERT
-        val command = OppdaterOppgavestatusCommand(UTBETALING_ID, status, oppgaveDao, oppgaveMediator)
+        val command = OppdaterOppgavestatusCommand(UTBETALING_ID, status, oppgavehåndterer)
 
         assertTrue(command.execute(context))
-        verify(exactly = 0) { oppgaveMediator.invalider(oppgave) }
-        verify(exactly = 0) { oppgaveMediator.ferdigstill(oppgave) }
+        inspektør(oppgave) {
+            assertEquals(Oppgave.AvventerSystem, this.tilstand)
+        }
     }
 
-    private fun nyOppgave() = Oppgave.oppgaveMedEgenskaper(
-        id = 1L,
-        vedtaksperiodeId = UUID.randomUUID(),
-        utbetalingId = UTBETALING_ID,
-        hendelseId = UUID.randomUUID(),
-        egenskaper = listOf(Oppgavetype.SØKNAD)
-    )
+    private val oppgavehåndterer get() = object : Oppgavehåndterer {
+        override fun sendIRetur(oppgaveId: Long, besluttendeSaksbehandler: Saksbehandler) {}
+        override fun sendTilBeslutter(oppgaveId: Long, behandlendeSaksbehandler: Saksbehandler) {}
+        override fun oppgave(utbetalingId: UUID, oppgaveBlock: Oppgave?.() -> Unit) {
+            oppgaveBlock(oppgave)
+        }
+    }
 }

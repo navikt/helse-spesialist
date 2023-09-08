@@ -14,6 +14,7 @@ import io.ktor.util.pipeline.PipelineContext
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.spesialist.api.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
@@ -29,6 +30,7 @@ private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 interface Oppgavehåndterer {
     fun sendTilBeslutter(oppgaveId: Long, behandlendeSaksbehandler: Saksbehandler)
     fun sendIRetur(oppgaveId: Long, besluttendeSaksbehandler: Saksbehandler)
+    fun oppgave(utbetalingId: UUID, oppgaveBlock: Oppgave?.() -> Unit)
 }
 
 internal fun Route.totrinnsvurderingApi(

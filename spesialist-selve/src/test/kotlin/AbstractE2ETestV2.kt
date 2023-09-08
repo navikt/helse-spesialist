@@ -126,7 +126,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         )
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning(vedtaksperiodeId = vedtaksperiodeId)
-        håndterUtbetalingUtbetalt(utbetalingId = utbetalingId)
+        håndterUtbetalingUtbetalt()
     }
 
     protected fun fremTilVergemål(
@@ -284,7 +284,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         fullmakter: List<Fullmakt> = emptyList(),
         risikofunn: List<Risikofunn> = emptyList(),
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
-        utbetalingId: UUID = UTBETALING_ID,
+        utbetalingId: UUID = UUID.randomUUID(),
         harRisikovurdering: Boolean = false,
         harOppdatertMetadata: Boolean = false,
         kanGodkjennesAutomatisk: Boolean = false,
@@ -482,7 +482,6 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
             vedtaksperiodeId = vedtaksperiodeId,
         )
         assertIngenEtterspurteBehov()
-        assertIngenUtgåendeMeldinger()
     }
 
     protected fun håndterVedtaksperiodeNyUtbetaling(
@@ -575,7 +574,6 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
             utbetalingId = this.utbetalingId
         )
         assertIngenEtterspurteBehov()
-        assertIngenUtgåendeMeldinger()
     }
 
     protected fun håndterUtbetalingErstattet(
@@ -585,13 +583,10 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         utbetalingtype: String = "UTBETALING",
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
-        utbetalingId: UUID = UTBETALING_ID,
     ) {
-        håndterUtbetalingForkastet(aktørId, fødselsnummer, organisasjonsnummer, utbetalingId = this.utbetalingId)
-        nyUtbetalingId(utbetalingId)
-        håndterUtbetalingEndret(aktørId, fødselsnummer, organisasjonsnummer, utbetalingtype, arbeidsgiverbeløp, personbeløp, utbetalingId = this.utbetalingId)
+        håndterUtbetalingForkastet(aktørId, fødselsnummer, organisasjonsnummer)
+        håndterUtbetalingEndret(aktørId, fødselsnummer, organisasjonsnummer, utbetalingtype, arbeidsgiverbeløp, personbeløp, utbetalingId = UUID.randomUUID())
         assertIngenEtterspurteBehov()
-        assertIngenUtgåendeMeldinger()
     }
 
     protected fun håndterUtbetalingEndret(
@@ -604,7 +599,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         forrigeStatus: Utbetalingsstatus = NY,
         gjeldendeStatus: Utbetalingsstatus = IKKE_UTBETALT,
         opprettet: LocalDateTime = LocalDateTime.now(),
-        utbetalingId: UUID = UTBETALING_ID
+        utbetalingId: UUID = this.utbetalingId
     ) {
         nyUtbetalingId(utbetalingId)
         sisteMeldingId = meldingssenderV2.sendUtbetalingEndret(
@@ -650,9 +645,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         forrigeStatus: Utbetalingsstatus = NY,
-        utbetalingId: UUID = UTBETALING_ID
     ) {
-        nyUtbetalingId(utbetalingId)
         håndterUtbetalingEndret(
             aktørId,
             fødselsnummer,
@@ -668,9 +661,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
-        utbetalingId: UUID = UTBETALING_ID
     ) {
-        nyUtbetalingId(utbetalingId)
         håndterUtbetalingEndret(
             aktørId,
             fødselsnummer,
@@ -1011,7 +1002,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
     ) {
-        if (this::utbetalingId.isInitialized) håndterUtbetalingUtbetalt(aktørId, fødselsnummer, organisasjonsnummer, this.utbetalingId)
+        if (this::utbetalingId.isInitialized) håndterUtbetalingUtbetalt(aktørId, fødselsnummer, organisasjonsnummer)
         sisteMeldingId = meldingssenderV2.sendVedtakFattet(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId)
     }
 
@@ -1099,7 +1090,8 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         val sisteOverstyring = testRapid.inspektør.hendelser(overstyringHendelse).last()
         val hendelseId = UUID.fromString(sisteOverstyring["@id"].asText())
         håndterOverstyringIgangsatt(aktørId, fødselsnummer, hendelseId)
-        håndterUtbetalingForkastet(aktørId, fødselsnummer, organisasjonsnummer)
+        håndterUtbetalingErstattet(aktørId, fødselsnummer, organisasjonsnummer)
+        håndterVedtaksperiodeReberegnet(aktørId, fødselsnummer, organisasjonsnummer)
     }
 
     private fun håndterOverstyringIgangsatt(aktørId: String, fødselsnummer: String, kildeId: UUID) {

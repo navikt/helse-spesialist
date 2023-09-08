@@ -2,20 +2,22 @@ package no.nav.helse.mediator.meldinger
 
 import AbstractE2ETestV2
 import io.mockk.every
+import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.Testdata
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class PåminnetGodkjenningsbehovTest : AbstractE2ETestV2() {
 
     @Test
     fun `sørger for oppdatert snapshot om det fins oppgave`() {
-        fremTilSaksbehandleroppgave()
+        val utbetalingId = UUID.randomUUID()
+        fremTilSaksbehandleroppgave(utbetalingId = utbetalingId)
         assertEquals(1, finnSnapshotVersjon(Testdata.FØDSELSNUMMER))
-        sendPåminnetGodkjenningsbehov()
+        sendPåminnetGodkjenningsbehov(utbetalingId)
         assertEquals(1, finnSnapshotVersjon(Testdata.FØDSELSNUMMER))
 
         bumpGlobalVersjon()
@@ -23,7 +25,7 @@ internal class PåminnetGodkjenningsbehovTest : AbstractE2ETestV2() {
             versjon = 2
         )
 
-        sendPåminnetGodkjenningsbehov()
+        sendPåminnetGodkjenningsbehov(utbetalingId)
         assertEquals(2, finnSnapshotVersjon(Testdata.FØDSELSNUMMER))
     }
 
@@ -39,7 +41,7 @@ internal class PåminnetGodkjenningsbehovTest : AbstractE2ETestV2() {
         }
     }
 
-    private fun sendPåminnetGodkjenningsbehov() = sendGodkjenningsbehov()
+    private fun sendPåminnetGodkjenningsbehov(utbetalingId: UUID) = sendGodkjenningsbehov(utbetalingId = utbetalingId)
 
     private fun finnSnapshotVersjon(fnr: String): Int {
         @Language("postgresql")

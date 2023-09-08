@@ -15,6 +15,7 @@ import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.oppgave.OppgaveDao
+import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
 import no.nav.helse.objectMapper
@@ -74,6 +75,10 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
         override fun sendIRetur(oppgaveId: Long, besluttendeSaksbehandler: Saksbehandler) {
             sendtIRetur = true
             sendIReturBlock()
+        }
+
+        override fun oppgave(utbetalingId: UUID, oppgaveBlock: Oppgave?.() -> Unit) {
+
         }
     }
 
