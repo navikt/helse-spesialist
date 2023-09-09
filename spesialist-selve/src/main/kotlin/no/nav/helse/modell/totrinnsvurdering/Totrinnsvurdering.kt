@@ -2,6 +2,9 @@ package no.nav.helse.modell.totrinnsvurdering
 
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtBeslutter
+import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtIRetur
+import no.nav.helse.spesialist.api.feilhåndtering.OppgaveKreverVurderingAvToSaksbehandlere
 import no.nav.helse.spesialist.api.modell.Saksbehandler
 
 class Totrinnsvurdering(
@@ -9,26 +12,37 @@ class Totrinnsvurdering(
     private var erRetur: Boolean,
     private var saksbehandler: Saksbehandler?,
     private var beslutter: Saksbehandler?,
-    private val utbetalingId: UUID?,
+    private var utbetalingId: UUID?,
     private val opprettet: LocalDateTime,
     private var oppdatert: LocalDateTime?
 ) {
-    fun erBeslutteroppgave(): Boolean = !erRetur && saksbehandler != null
+    private val erBeslutteroppgave: Boolean = !erRetur && saksbehandler != null
 
     fun tidligereBeslutter() = beslutter
 
     fun opprinneligSaksbehandler() = saksbehandler
 
-    fun sendTilBeslutter(behandlendeSaksbehandler: Saksbehandler) {
+    internal fun sendTilBeslutter(oppgaveId: Long, behandlendeSaksbehandler: Saksbehandler) {
+        if (erBeslutteroppgave) throw OppgaveAlleredeSendtBeslutter(oppgaveId)
+        if (behandlendeSaksbehandler == beslutter) throw OppgaveKreverVurderingAvToSaksbehandlere(oppgaveId)
+        if (beslutter == null) return
+
         saksbehandler = behandlendeSaksbehandler
         oppdatert = LocalDateTime.now()
         if (erRetur) erRetur = false
     }
 
-    fun sendIRetur(beslutter: Saksbehandler) {
+    internal fun sendIRetur(oppgaveId: Long, beslutter: Saksbehandler) {
+        if (!erBeslutteroppgave) throw OppgaveAlleredeSendtIRetur(oppgaveId)
+        if (beslutter == saksbehandler) throw OppgaveKreverVurderingAvToSaksbehandlere(oppgaveId)
+
         this.beslutter = beslutter
         oppdatert = LocalDateTime.now()
         erRetur = true
+    }
+
+    internal fun ferdigstill(utbetalingId: UUID) {
+        this.utbetalingId = utbetalingId
     }
 
     fun accept(totrinnsvurderingVisitor: TotrinnsvurderingVisitor) {

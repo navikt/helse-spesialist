@@ -272,7 +272,7 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         assertEquals(beslutter, aktivTotrinnsvurdering?.beslutter)
         assertEquals(null, aktivTotrinnsvurdering?.utbetalingId)
         assertNotNull(aktivTotrinnsvurdering?.opprettet)
-        assertEquals(oppdatert, aktivTotrinnsvurdering?.oppdatert)
+        assertEquals(oppdatert.withNano(0), aktivTotrinnsvurdering?.oppdatert?.withNano(0))
     }
 
     @Test

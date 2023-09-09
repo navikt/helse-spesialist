@@ -103,7 +103,7 @@ class OppgaveAlleredeSendtIRetur(private val oppgaveId: Long): Modellfeil() {
     }
 }
 
-class OppgaveKreverTotrinnsvurdering(private val oppgaveId: Long): Modellfeil() {
+class OppgaveKreverVurderingAvToSaksbehandlere(private val oppgaveId: Long): Modellfeil() {
     override val eksternKontekst: Map<String, Any> = emptyMap()
     override val feilkode: String = "oppgave_krever_totrinnsvurdering"
     override val httpkode: HttpStatusCode = HttpStatusCode.Conflict

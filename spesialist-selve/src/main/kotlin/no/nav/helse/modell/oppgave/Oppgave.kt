@@ -9,9 +9,6 @@ import no.nav.helse.Tilgangskontroll
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtBeslutter
-import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtIRetur
-import no.nav.helse.spesialist.api.feilhåndtering.OppgaveKreverTotrinnsvurdering
 import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import org.slf4j.LoggerFactory
@@ -79,14 +76,8 @@ class Oppgave private constructor(
         val totrinnsvurdering = requireNotNull(totrinnsvurdering) {
             "Forventer at det eksisterer en aktiv totrinnsvurdering når oppgave sendes til beslutter"
         }
-        if (totrinnsvurdering.erBeslutteroppgave())
-            throw OppgaveAlleredeSendtBeslutter(id)
 
-        totrinnsvurdering.sendTilBeslutter(behandlendeSaksbehandler)
-
-        if (totrinnsvurdering.tidligereBeslutter() == null) return
-        if (behandlendeSaksbehandler == totrinnsvurdering.tidligereBeslutter())
-            throw OppgaveKreverTotrinnsvurdering(id)
+        totrinnsvurdering.sendTilBeslutter(id, behandlendeSaksbehandler)
 
         tildeltTil = totrinnsvurdering.tidligereBeslutter()
     }
@@ -95,13 +86,8 @@ class Oppgave private constructor(
         val totrinnsvurdering = requireNotNull(totrinnsvurdering) {
             "Forventer at det eksisterer en aktiv totrinnsvurdering når oppgave sendes til beslutter"
         }
-        if (!totrinnsvurdering.erBeslutteroppgave())
-            throw OppgaveAlleredeSendtIRetur(id)
 
-        if (besluttendeSaksbehandler == totrinnsvurdering.opprinneligSaksbehandler())
-            throw OppgaveKreverTotrinnsvurdering(id)
-
-        totrinnsvurdering.sendIRetur(besluttendeSaksbehandler)
+        totrinnsvurdering.sendIRetur(id, besluttendeSaksbehandler)
 
         val opprinneligSaksbehandler = requireNotNull(totrinnsvurdering.opprinneligSaksbehandler()) {
             "Opprinnelig saksbehandler kan ikke være null ved retur av beslutteroppgave"
@@ -120,10 +106,6 @@ class Oppgave private constructor(
 
     fun lagMelding(eventName: String, fødselsnummer: String, hendelseId: UUID): JsonMessage {
         return lagMelding(fødselsnummer, hendelseId, eventName, this, false).second
-    }
-
-    fun loggOppgaverAvbrutt(vedtaksperiodeId: UUID) {
-        logg.info("Har avbrutt oppgave $id for vedtaksperiode $vedtaksperiodeId")
     }
 
     fun avbryt() {
@@ -169,6 +151,7 @@ class Oppgave private constructor(
         override fun avventerSystem(oppgave: Oppgave, ident: String, oid: UUID) {
             oppgave.ferdigstiltAvIdent = ident
             oppgave.ferdigstiltAvOid = oid
+            oppgave.totrinnsvurdering?.ferdigstill(oppgave.utbetalingId)
             oppgave.nesteTilstand(AvventerSystem)
         }
 

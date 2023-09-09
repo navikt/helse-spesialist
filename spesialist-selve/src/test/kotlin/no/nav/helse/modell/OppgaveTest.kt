@@ -8,7 +8,7 @@ import no.nav.helse.modell.oppgave.Oppgave.Companion.oppgaveMedEgenskaper
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtBeslutter
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtIRetur
-import no.nav.helse.spesialist.api.feilhåndtering.OppgaveKreverTotrinnsvurdering
+import no.nav.helse.spesialist.api.feilhåndtering.OppgaveKreverVurderingAvToSaksbehandlere
 import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype.STIKKPRØVE
@@ -196,7 +196,7 @@ internal class OppgaveTest {
     fun `Kaster exception dersom beslutter er samme som opprinnelig saksbehandler ved retur`() {
         val oppgave = nyOppgave(SØKNAD, medTotrinnsvurdering = true)
         oppgave.sendTilBeslutter(saksbehandler)
-        assertThrows<OppgaveKreverTotrinnsvurdering> {
+        assertThrows<OppgaveKreverVurderingAvToSaksbehandlere> {
             oppgave.sendIRetur(saksbehandler)
         }
     }
