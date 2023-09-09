@@ -16,7 +16,7 @@ class Totrinnsvurdering(
     private val opprettet: LocalDateTime,
     private var oppdatert: LocalDateTime?
 ) {
-    private val erBeslutteroppgave: Boolean = !erRetur && saksbehandler != null
+    private val erBeslutteroppgave: Boolean get() = !erRetur && saksbehandler != null
 
     fun tidligereBeslutter() = beslutter
 
@@ -25,7 +25,6 @@ class Totrinnsvurdering(
     internal fun sendTilBeslutter(oppgaveId: Long, behandlendeSaksbehandler: Saksbehandler) {
         if (erBeslutteroppgave) throw OppgaveAlleredeSendtBeslutter(oppgaveId)
         if (behandlendeSaksbehandler == beslutter) throw OppgaveKreverVurderingAvToSaksbehandlere(oppgaveId)
-        if (beslutter == null) return
 
         saksbehandler = behandlendeSaksbehandler
         oppdatert = LocalDateTime.now()
