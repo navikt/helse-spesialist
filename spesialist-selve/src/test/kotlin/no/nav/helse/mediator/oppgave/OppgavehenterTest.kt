@@ -63,7 +63,7 @@ class OppgavehenterTest {
             erRetur = ER_RETUR,
             saksbehandler = SAKSBEHANDLER_OID,
             beslutter = BESLUTTER_OID,
-            utbetalingIdRef = 1L,
+            utbetalingId = UTBETALING_ID,
             opprettet = LocalDateTime.now(),
             oppdatert = LocalDateTime.now()
         )
@@ -87,7 +87,7 @@ class OppgavehenterTest {
                 erRetur = ER_RETUR,
                 saksbehandler = Saksbehandler(SAKSBEHANDLER_EPOST, SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_IDENT),
                 beslutter = Saksbehandler(SAKSBEHANDLER_EPOST, BESLUTTER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_IDENT),
-                utbetalingIdRef = 1L,
+                utbetalingId = UTBETALING_ID,
                 opprettet = TOTRINNSVURDERING_OPPRETTET,
                 oppdatert = TOTRINNSVURDERING_OPPDATERT
             )

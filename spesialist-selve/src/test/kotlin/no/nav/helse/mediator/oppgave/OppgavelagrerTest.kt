@@ -91,7 +91,7 @@ class OppgavelagrerTest {
         oppgavelagrer.lagre(oppgaveMediator, HENDELSE_ID, CONTEXT_ID)
         verify(exactly = 1) { oppgaveMediator.opprett(OPPGAVE_ID, CONTEXT_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, Oppgavetype.SØKNAD, HENDELSE_ID) }
         verify(exactly = 0) { oppgaveMediator.tildel(any(), any(), any()) }
-        verify(exactly = 1) { oppgaveMediator.lagreTotrinnsvurdering(TotrinnsvurderingFraDatabase(VEDTAKSPERIODE_ID, false, SAKSBEHANDLER_OID, BESLUTTER_OID, 1L, TOTRINNSVURDERING_OPPRETTET, TOTRINNSVURDERING_OPPDATERT)) }
+        verify(exactly = 1) { oppgaveMediator.lagreTotrinnsvurdering(TotrinnsvurderingFraDatabase(VEDTAKSPERIODE_ID, false, SAKSBEHANDLER_OID, BESLUTTER_OID, UTBETALING_ID, TOTRINNSVURDERING_OPPRETTET, TOTRINNSVURDERING_OPPDATERT)) }
     }
 
     @Test
@@ -117,7 +117,7 @@ class OppgavelagrerTest {
         oppgavelagrer.lagre(oppgaveMediator, HENDELSE_ID, CONTEXT_ID)
         verify(exactly = 1) { oppgaveMediator.opprett(OPPGAVE_ID, CONTEXT_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, Oppgavetype.SØKNAD, HENDELSE_ID) }
         verify(exactly = 1) { oppgaveMediator.tildel(OPPGAVE_ID, SAKSBEHANDLER_OID, false) }
-        verify(exactly = 1) { oppgaveMediator.lagreTotrinnsvurdering(TotrinnsvurderingFraDatabase(VEDTAKSPERIODE_ID, false, SAKSBEHANDLER_OID, BESLUTTER_OID, 1L, TOTRINNSVURDERING_OPPRETTET, TOTRINNSVURDERING_OPPDATERT)) }
+        verify(exactly = 1) { oppgaveMediator.lagreTotrinnsvurdering(TotrinnsvurderingFraDatabase(VEDTAKSPERIODE_ID, false, SAKSBEHANDLER_OID, BESLUTTER_OID, UTBETALING_ID, TOTRINNSVURDERING_OPPRETTET, TOTRINNSVURDERING_OPPDATERT)) }
     }
 
     @Test
@@ -145,7 +145,7 @@ class OppgavelagrerTest {
         oppgavelagrer.oppdater(oppgaveMediator)
         verify(exactly = 1) { oppgaveMediator.oppdater(OPPGAVE_ID, Oppgavestatus.Ferdigstilt, SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID) }
         verify(exactly = 0) { oppgaveMediator.tildel(any(), any(), any()) }
-        verify(exactly = 1) { oppgaveMediator.lagreTotrinnsvurdering(TotrinnsvurderingFraDatabase(VEDTAKSPERIODE_ID, false, SAKSBEHANDLER_OID, BESLUTTER_OID, 1L, TOTRINNSVURDERING_OPPRETTET, TOTRINNSVURDERING_OPPDATERT)) }
+        verify(exactly = 1) { oppgaveMediator.lagreTotrinnsvurdering(TotrinnsvurderingFraDatabase(VEDTAKSPERIODE_ID, false, SAKSBEHANDLER_OID, BESLUTTER_OID, UTBETALING_ID, TOTRINNSVURDERING_OPPRETTET, TOTRINNSVURDERING_OPPDATERT)) }
     }
 
     @Test
@@ -175,7 +175,7 @@ class OppgavelagrerTest {
         oppgavelagrer.oppdater(oppgaveMediator)
         verify(exactly = 1) { oppgaveMediator.oppdater(OPPGAVE_ID, Oppgavestatus.Ferdigstilt, SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID) }
         verify(exactly = 1) { oppgaveMediator.tildel(OPPGAVE_ID, SAKSBEHANDLER_OID, false) }
-        verify(exactly = 1) { oppgaveMediator.lagreTotrinnsvurdering(TotrinnsvurderingFraDatabase(VEDTAKSPERIODE_ID, false, SAKSBEHANDLER_OID, BESLUTTER_OID, 1L, TOTRINNSVURDERING_OPPRETTET, TOTRINNSVURDERING_OPPDATERT)) }
+        verify(exactly = 1) { oppgaveMediator.lagreTotrinnsvurdering(TotrinnsvurderingFraDatabase(VEDTAKSPERIODE_ID, false, SAKSBEHANDLER_OID, BESLUTTER_OID, UTBETALING_ID, TOTRINNSVURDERING_OPPRETTET, TOTRINNSVURDERING_OPPDATERT)) }
     }
 
     private fun nyOppgave(medTotrinnsvurdering: Boolean = false) = Oppgave.oppgaveMedEgenskaper(
@@ -192,7 +192,7 @@ class OppgavelagrerTest {
         erRetur = false,
         saksbehandler = saksbehandler,
         beslutter = beslutter,
-        utbetalingIdRef = 1L,
+        utbetalingId = UTBETALING_ID,
         opprettet = TOTRINNSVURDERING_OPPRETTET,
         oppdatert = TOTRINNSVURDERING_OPPDATERT
     )

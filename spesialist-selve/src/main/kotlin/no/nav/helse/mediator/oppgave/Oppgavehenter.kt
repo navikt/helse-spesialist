@@ -37,7 +37,7 @@ class Oppgavehenter(
                     erRetur = it.erRetur,
                     saksbehandler = it.saksbehandler?.let(saksbehandlerRepository::finnSaksbehandler)?.toSaksbehandler(),
                     beslutter = it.beslutter?.let(saksbehandlerRepository::finnSaksbehandler)?.toSaksbehandler(),
-                    utbetalingIdRef = it.utbetalingIdRef,
+                    utbetalingId = it.utbetalingId,
                     opprettet = it.opprettet,
                     oppdatert = it.oppdatert
                 )

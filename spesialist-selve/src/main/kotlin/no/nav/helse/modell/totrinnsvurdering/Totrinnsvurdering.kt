@@ -9,7 +9,7 @@ class Totrinnsvurdering(
     private var erRetur: Boolean,
     private var saksbehandler: Saksbehandler?,
     private var beslutter: Saksbehandler?,
-    private val utbetalingIdRef: Long?,
+    private val utbetalingId: UUID?,
     private val opprettet: LocalDateTime,
     private var oppdatert: LocalDateTime?
 ) {
@@ -32,7 +32,7 @@ class Totrinnsvurdering(
     }
 
     fun accept(totrinnsvurderingVisitor: TotrinnsvurderingVisitor) {
-        totrinnsvurderingVisitor.visitTotrinnsvurdering(vedtaksperiodeId, erRetur, saksbehandler, beslutter, utbetalingIdRef, opprettet, oppdatert)
+        totrinnsvurderingVisitor.visitTotrinnsvurdering(vedtaksperiodeId, erRetur, saksbehandler, beslutter, utbetalingId, opprettet, oppdatert)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -42,7 +42,7 @@ class Totrinnsvurdering(
             erRetur == other.erRetur &&
             saksbehandler == other.saksbehandler &&
             beslutter == other.beslutter &&
-            utbetalingIdRef == other.utbetalingIdRef &&
+            utbetalingId == other.utbetalingId &&
             opprettet.withNano(0) == other.opprettet.withNano(0) &&
             oppdatert?.withNano(0) == other.oppdatert?.withNano(0)
             )
@@ -53,7 +53,7 @@ class Totrinnsvurdering(
         result = 31 * result + erRetur.hashCode()
         result = 31 * result + (saksbehandler?.hashCode() ?: 0)
         result = 31 * result + (beslutter?.hashCode() ?: 0)
-        result = 31 * result + (utbetalingIdRef?.hashCode() ?: 0)
+        result = 31 * result + (utbetalingId?.hashCode() ?: 0)
         result = 31 * result + opprettet.hashCode()
         result = 31 * result + (oppdatert?.hashCode() ?: 0)
         return result

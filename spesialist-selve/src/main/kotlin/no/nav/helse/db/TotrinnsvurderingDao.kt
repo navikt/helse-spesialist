@@ -41,7 +41,7 @@ class TotrinnsvurderingDao(private val dataSource: DataSource): Totrinnsvurderin
         @Language("PostgreSQL")
         val query = """
            UPDATE totrinnsvurdering SET saksbehandler = :saksbehandler, beslutter = :beslutter, er_retur = :er_retur,
-           oppdatert = :oppdatert, utbetaling_id_ref = :utbetaling_id_ref
+           oppdatert = :oppdatert, utbetaling_id_ref = (SELECT id FROM utbetaling_id ui WHERE ui.utbetaling_id = :utbetaling_id)
            WHERE vedtaksperiode_id = :vedtaksperiode_id
         """
 
@@ -53,7 +53,8 @@ class TotrinnsvurderingDao(private val dataSource: DataSource): Totrinnsvurderin
                         "beslutter" to totrinnsvurderingFraDatabase.beslutter,
                         "er_retur" to totrinnsvurderingFraDatabase.erRetur,
                         "oppdatert" to totrinnsvurderingFraDatabase.oppdatert,
-                        "utbetaling_id_ref" to totrinnsvurderingFraDatabase.utbetalingIdRef,
+                        "utbetaling_id" to totrinnsvurderingFraDatabase.utbetalingId,
+                        "vedtaksperiode_id" to totrinnsvurderingFraDatabase.vedtaksperiodeId
                     )
                 ).asUpdate
             )
@@ -63,9 +64,10 @@ class TotrinnsvurderingDao(private val dataSource: DataSource): Totrinnsvurderin
     override fun hentAktivTotrinnsvurdering(oppgaveId: Long): TotrinnsvurderingFraDatabase? {
         @Language("PostgreSQL")
         val query = """
-           SELECT * FROM totrinnsvurdering tv
+           SELECT v.vedtaksperiode_id, er_retur, tv.saksbehandler, tv.beslutter, ui.id as utbetaling_id, tv.opprettet, tv.oppdatert FROM totrinnsvurdering tv
            INNER JOIN vedtak v on tv.vedtaksperiode_id = v.vedtaksperiode_id
            INNER JOIN oppgave o on v.id = o.vedtak_ref
+           LEFT JOIN utbetaling_id ui on ui.id = tv.utbetaling_id_ref
            WHERE o.id = :oppgaveId
            AND utbetaling_id_ref IS NULL
         """
@@ -78,7 +80,7 @@ class TotrinnsvurderingDao(private val dataSource: DataSource): Totrinnsvurderin
                         erRetur = row.boolean("er_retur"),
                         saksbehandler = row.uuidOrNull("saksbehandler"),
                         beslutter = row.uuidOrNull("beslutter"),
-                        utbetalingIdRef = row.longOrNull("utbetaling_id_ref"),
+                        utbetalingId = row.uuidOrNull("utbetaling_id"),
                         opprettet = row.localDateTime("opprettet"),
                         oppdatert = row.localDateTimeOrNull("oppdatert")
                     )

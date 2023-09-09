@@ -8,7 +8,7 @@ data class TotrinnsvurderingFraDatabase(
     val erRetur: Boolean,
     val saksbehandler: UUID?,
     val beslutter: UUID?,
-    val utbetalingIdRef: Long?,
+    val utbetalingId: UUID?,
     val opprettet: LocalDateTime,
     val oppdatert: LocalDateTime?,
 )

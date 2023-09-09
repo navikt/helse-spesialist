@@ -10,7 +10,7 @@ interface TotrinnsvurderingVisitor {
         erRetur: Boolean,
         saksbehandler: Saksbehandler?,
         beslutter: Saksbehandler?,
-        utbetalingIdRef: Long?,
+        utbetalingId: UUID?,
         opprettet: LocalDateTime,
         oppdatert: LocalDateTime?
     ) {}

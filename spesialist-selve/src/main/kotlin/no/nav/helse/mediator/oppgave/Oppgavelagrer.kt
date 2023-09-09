@@ -82,7 +82,7 @@ class Oppgavelagrer : OppgaveVisitor {
         erRetur: Boolean,
         saksbehandler: Saksbehandler?,
         beslutter: Saksbehandler?,
-        utbetalingIdRef: Long?,
+        utbetalingId: UUID?,
         opprettet: LocalDateTime,
         oppdatert: LocalDateTime?
     ) {
@@ -91,7 +91,7 @@ class Oppgavelagrer : OppgaveVisitor {
             erRetur = erRetur,
             saksbehandler = saksbehandler?.oid(),
             beslutter = beslutter?.oid(),
-            utbetalingIdRef = utbetalingIdRef,
+            utbetalingId = utbetalingId,
             opprettet = opprettet,
             oppdatert = oppdatert
         )

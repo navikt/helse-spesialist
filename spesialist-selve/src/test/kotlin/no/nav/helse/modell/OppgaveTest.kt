@@ -305,7 +305,7 @@ internal class OppgaveTest {
         erRetur = false,
         saksbehandler = null,
         beslutter = null,
-        utbetalingIdRef = null,
+        utbetalingId = null,
         opprettet = LocalDateTime.now(),
         oppdatert = null
     )

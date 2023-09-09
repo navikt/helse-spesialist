@@ -1,6 +1,7 @@
 package no.nav.helse.db
 
 import DatabaseIntegrationTest
+import java.time.LocalDateTime
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -243,22 +244,35 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `Finner aktiv totrinnsvurdering`() {
+        val beslutter = UUID.randomUUID()
+        val oppdatert = LocalDateTime.now()
+        opprettSaksbehandler(beslutter)
+        opprettSaksbehandler(SAKSBEHANDLER_OID)
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode()
         opprettOppgave()
         totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
+        totrinnsvurderingDao.oppdater(
+            TotrinnsvurderingFraDatabase(
+                vedtaksperiodeId = VEDTAKSPERIODE,
+                erRetur = false,
+                saksbehandler = SAKSBEHANDLER_OID,
+                beslutter = beslutter,
+                utbetalingId = UTBETALING_ID,
+                opprettet = LocalDateTime.now(),
+                oppdatert = oppdatert
+            )
+        )
         val aktivTotrinnsvurdering = totrinnsvurderingDao.hentAktivTotrinnsvurdering(OPPGAVE_ID)
 
-        val totrinnsvurdering = totrinnsvurdering()
-
-        assertEquals(aktivTotrinnsvurdering?.vedtaksperiodeId, totrinnsvurdering?.vedtaksperiodeId)
-        assertEquals(aktivTotrinnsvurdering?.erRetur, totrinnsvurdering?.erRetur)
-        assertEquals(aktivTotrinnsvurdering?.saksbehandler, totrinnsvurdering?.saksbehandler)
-        assertEquals(aktivTotrinnsvurdering?.beslutter, totrinnsvurdering?.beslutter)
-        assertEquals(aktivTotrinnsvurdering?.utbetalingIdRef, totrinnsvurdering?.utbetalingIdRef)
-        assertEquals(aktivTotrinnsvurdering?.oppdatert, totrinnsvurdering?.oppdatert)
-        assertEquals(aktivTotrinnsvurdering?.opprettet, totrinnsvurdering?.opprettet)
+        assertEquals(VEDTAKSPERIODE, aktivTotrinnsvurdering?.vedtaksperiodeId)
+        assertEquals(false, aktivTotrinnsvurdering?.erRetur)
+        assertEquals(SAKSBEHANDLER_OID, aktivTotrinnsvurdering?.saksbehandler)
+        assertEquals(beslutter, aktivTotrinnsvurdering?.beslutter)
+        assertEquals(null, aktivTotrinnsvurdering?.utbetalingId)
+        assertNotNull(aktivTotrinnsvurdering?.opprettet)
+        assertEquals(oppdatert, aktivTotrinnsvurdering?.oppdatert)
     }
 
     @Test
