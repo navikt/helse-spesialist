@@ -248,7 +248,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
                 insertOppgave(
                     commandContextId = UUID.randomUUID(),
                     oppgavetype = it,
-                    utbetalingId = null
+                    utbetalingId = UUID.randomUUID(),
                 )
             }, "Oppgavetype-enumen mangler verdien $it. Kjør migrering: ALTER TYPE oppgavetype ADD VALUE '$it';")
         }

@@ -43,7 +43,7 @@ internal class GenerasjonDaoTest: DatabaseIntegrationTest() {
         val arbeidsgiver = opprettArbeidsgiver()
         opprettVedtaksperiode(person, arbeidsgiver)
         val periode2 = Periode(UUID.randomUUID(), LocalDate.now(), LocalDate.now())
-        opprettVedtaksperiode(person, arbeidsgiver, null, periode2)
+        opprettVedtaksperiode(person, arbeidsgiver, periode = periode2)
         val alleVedtaksperioderForPerson = generasjonDao.gjeldendeGenerasjonerForPerson(finnOppgaveIdFor(PERIODE.id))
         val forventetVedtaksperiode1 = Vedtaksperiode(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet())
         val forventetVedtaksperiode2 = Vedtaksperiode(periode2.id, periode2.fom, periode2.tom, periode2.fom, emptySet())
@@ -58,18 +58,18 @@ internal class GenerasjonDaoTest: DatabaseIntegrationTest() {
 
         val v1 = UUID.randomUUID()
         val periode1 = Periode(v1, LocalDate.now(), LocalDate.now())
-        opprettVedtaksperiode(person, arbeidsgiver, null, periode1)
+        opprettVedtaksperiode(person, arbeidsgiver, periode = periode1)
         nyGenerasjon(v1, periode = Periode(v1, 1.januar, 31.januar))
         nyGenerasjon(v1, periode = Periode(v1, 1.februar, 28.februar))
 
         val v2 = UUID.randomUUID()
         val periode2 = Periode(v2, LocalDate.now(), LocalDate.now())
-        opprettVedtaksperiode(person, arbeidsgiver, null, periode2)
+        opprettVedtaksperiode(person, arbeidsgiver, periode = periode2)
         nyGenerasjon(v2, periode = Periode(v2, 1.mars, 31.mars))
 
         val v3 = UUID.randomUUID()
         val periode3 = Periode(v3, LocalDate.now(), LocalDate.now())
-        opprettVedtaksperiode(person, arbeidsgiver, null, periode3)
+        opprettVedtaksperiode(person, arbeidsgiver, periode = periode3)
 
         val alleVedtaksperioderForPerson = generasjonDao.gjeldendeGenerasjonerForPerson(finnOppgaveIdFor(periode1.id))
 
@@ -87,7 +87,7 @@ internal class GenerasjonDaoTest: DatabaseIntegrationTest() {
         val arbeidsgiver = opprettArbeidsgiver()
         opprettVedtaksperiode(person, arbeidsgiver)
         val periode2 = Periode(UUID.randomUUID(), LocalDate.now(), LocalDate.now())
-        opprettVedtaksperiode(person, arbeidsgiver, null, periode2, forkastet = true)
+        opprettVedtaksperiode(person, arbeidsgiver, periode = periode2, forkastet = true)
         val alleVedtaksperioderForPerson = generasjonDao.gjeldendeGenerasjonerForPerson(finnOppgaveIdFor(PERIODE.id))
         val forventetVedtaksperiode = Vedtaksperiode(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet())
 
@@ -100,7 +100,7 @@ internal class GenerasjonDaoTest: DatabaseIntegrationTest() {
         val arbeidsgiver = opprettArbeidsgiver()
         opprettVedtaksperiode(person, arbeidsgiver)
         val periode2 = Periode(UUID.randomUUID(), LocalDate.now(), LocalDate.now())
-        opprettVedtaksperiode(person, arbeidsgiver, null, periode2, forkastet = true)
+        opprettVedtaksperiode(person, arbeidsgiver, periode = periode2, forkastet = true)
         val alleVedtaksperioderForPerson = generasjonDao.gjeldendeGenerasjonerForPerson(finnOppgaveIdFor(PERIODE.id)) { emptySet() }
         val forventetVedtaksperiode = Vedtaksperiode(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet())
 

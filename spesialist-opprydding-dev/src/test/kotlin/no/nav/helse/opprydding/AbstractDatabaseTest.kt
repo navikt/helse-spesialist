@@ -118,7 +118,9 @@ internal abstract class AbstractDatabaseTest {
                 "api_varseldefinisjon",
                 "inntekt",
                 "temp_manglende_varsler",
-                "automatisering_korrigert_soknad"
+                "automatisering_korrigert_soknad",
+                "arkiv_tildeling_for_oppgaver_uten_utbetaling_id",
+                "arkiv_oppgave_uten_utbetaling_id",
             )
         )
         tabeller.forEach {

@@ -112,7 +112,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected fun opprettVedtaksperiode(
         personId: Long,
         arbeidsgiverId: Long,
-        utbetalingId: UUID? = null,
+        utbetalingId: UUID = UUID.randomUUID(),
         periode: Periode = PERIODE,
         oppgavetype: Oppgavetype = Oppgavetype.SØKNAD,
         skjæringstidspunkt: LocalDate = periode.fom,
@@ -288,7 +288,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     protected fun klargjørVedtak(
         vedtakId: Long,
-        utbetlingId: UUID? = null,
+        utbetalingId: UUID = UUID.randomUUID(),
         periode: Periode,
         oppgavetype: Oppgavetype,
     ) {
@@ -296,7 +296,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         val hendelseId = UUID.randomUUID()
         opprettHendelse(hendelseId)
         opprettAutomatisering(false, vedtaksperiodeId = periode.id, hendelseId = hendelseId)
-        opprettOppgave(Oppgavestatus.AvventerSaksbehandler, oppgavetype, vedtakId, utbetlingId)
+        opprettOppgave(Oppgavestatus.AvventerSaksbehandler, oppgavetype, vedtakId, utbetalingId)
     }
 
     private fun opprettSaksbehandleroppgavetype(type: Periodetype, inntektskilde: Inntektskilde, vedtakRef: Long) =
@@ -519,7 +519,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         status: Oppgavestatus = Oppgavestatus.AvventerSaksbehandler,
         oppgavetype: Oppgavetype = Oppgavetype.SØKNAD,
         vedtakRef: Long,
-        utbetlingId: UUID? = null,
+        utbetalingId: UUID = UUID.randomUUID(),
         opprettet: LocalDateTime = LocalDateTime.now(),
     ): Long {
         val commandContextId = UUID.randomUUID()
@@ -531,7 +531,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                 session.run(
                     queryOf(
                         statement,
-                        utbetlingId,
+                        utbetalingId,
                         opprettet,
                         status.name,
                         vedtakRef,
