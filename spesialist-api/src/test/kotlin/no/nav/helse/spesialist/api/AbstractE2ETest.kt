@@ -26,7 +26,7 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSyke
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 
-internal abstract class AbstractE2ETest: AbstractDatabaseTest() {
+internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     private val testRapid = TestRapid()
     private val saksbehandlerMediator = SaksbehandlerMediator(dataSource, testRapid)
@@ -51,7 +51,7 @@ internal abstract class AbstractE2ETest: AbstractDatabaseTest() {
     protected val ORGANISASJONSNUMMER = "987654321"
     protected val ORGANISASJONSNUMMER_GHOST = "123456789"
 
-    private val defaultSaksbehandler = Saksbehandler(
+    private val saksbehandler = Saksbehandler(
         oid = SAKSBEHANDLER_OID,
         epost = SAKSBEHANDLER_EPOST,
         navn = SAKSBEHANDLER_NAVN,
@@ -65,69 +65,21 @@ internal abstract class AbstractE2ETest: AbstractDatabaseTest() {
         testRapid.reset()
     }
 
-    protected fun overstyrTidslinje(
-        payload: OverstyrTidslinjeHandling,
-        saksbehandler: Saksbehandler = defaultSaksbehandler,
-    ) {
-        testApplication {
-            setUpApplication()
-            sisteRespons = runBlocking {
-                client.post("/api/overstyr/dager") {
-                    header(HttpHeaders.ContentType, "application/json")
-                    authentication(saksbehandler)
-                    setBody(objectMapper.writeValueAsString(payload))
-                }
-            }
-        }
-    }
+    protected fun overstyrTidslinje(payload: OverstyrTidslinjeHandling) =
+        sendOverstyring("/api/overstyr/dager", saksbehandler, objectMapper.writeValueAsString(payload))
 
-    protected fun overstyrArbeidsforhold(
-        payload: OverstyrArbeidsforholdHandling,
-        saksbehandler: Saksbehandler = defaultSaksbehandler,
-    ) {
-        testApplication {
-            setUpApplication()
-            sisteRespons = runBlocking {
-                client.post("/api/overstyr/arbeidsforhold") {
-                    header(HttpHeaders.ContentType, "application/json")
-                    authentication(saksbehandler)
-                    setBody(objectMapper.writeValueAsString(payload))
-                }
-            }
-        }
-    }
+    protected fun overstyrArbeidsforhold(payload: OverstyrArbeidsforholdHandling) =
+        sendOverstyring("/api/overstyr/arbeidsforhold", saksbehandler, objectMapper.writeValueAsString(payload))
 
-    protected fun overstyrInntektOgRefusjon(
-        payload: OverstyrInntektOgRefusjonHandling,
-        saksbehandler: Saksbehandler = defaultSaksbehandler,
-    ) {
-        testApplication {
-            setUpApplication()
-            sisteRespons = runBlocking {
-                client.post("/api/overstyr/inntektogrefusjon") {
-                    header(HttpHeaders.ContentType, "application/json")
-                    authentication(saksbehandler)
-                    setBody(objectMapper.writeValueAsString(payload))
-                }
-            }
-        }
-    }
+    protected fun overstyrInntektOgRefusjon(payload: OverstyrInntektOgRefusjonHandling) =
+        sendOverstyring("/api/overstyr/inntektogrefusjon", saksbehandler, objectMapper.writeValueAsString(payload))
 
-    protected fun skjønnsfastsettingSykepengegrunnlag(
-        payload: SkjønnsfastsettSykepengegrunnlagHandling,
-        saksbehandler: Saksbehandler = defaultSaksbehandler,
-    ) {
-        testApplication {
-            setUpApplication()
-            sisteRespons = runBlocking {
-                client.post("/api/skjonnsfastsett/sykepengegrunnlag") {
-                    header(HttpHeaders.ContentType, "application/json")
-                    authentication(saksbehandler)
-                    setBody(objectMapper.writeValueAsString(payload))
-                }
-            }
-        }
-    }
+    protected fun skjønnsfastsettingSykepengegrunnlag(payload: SkjønnsfastsettSykepengegrunnlagHandling) =
+        sendOverstyring(
+            "/api/skjonnsfastsett/sykepengegrunnlag",
+            saksbehandler,
+            objectMapper.writeValueAsString(payload)
+        )
 
     protected fun assertSisteHendelse(hendelsetype: String) {
         assertEquals(hendelsetype, testRapid.inspektør.hendelser().last())
@@ -135,6 +87,23 @@ internal abstract class AbstractE2ETest: AbstractDatabaseTest() {
 
     protected fun assertSisteResponskode(forventetKode: HttpStatusCode) {
         assertEquals(forventetKode, sisteRespons.status)
+    }
+
+    private fun sendOverstyring(
+        path: String,
+        saksbehandler: Saksbehandler,
+        body: String,
+    ) {
+        testApplication {
+            setUpApplication()
+            sisteRespons = runBlocking {
+                client.post(path) {
+                    header(HttpHeaders.ContentType, "application/json")
+                    authentication(saksbehandler)
+                    setBody(body)
+                }
+            }
+        }
     }
 
     private fun HttpRequestBuilder.authentication(saksbehandler: Saksbehandler) {
