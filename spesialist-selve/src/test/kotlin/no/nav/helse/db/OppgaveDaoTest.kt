@@ -326,7 +326,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         commandContextId: UUID,
         oppgavetype: Oppgavetype,
         vedtakRef: Long? = null,
-        utbetalingId: UUID?,
+        utbetalingId: UUID,
         status: Oppgavestatus = AvventerSaksbehandler,
         mottaker: Mottaker? = null,
     ) = requireNotNull(sessionOf(dataSource, returnGeneratedKey = true).use {
