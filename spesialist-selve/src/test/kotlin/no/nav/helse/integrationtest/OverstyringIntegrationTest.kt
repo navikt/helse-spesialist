@@ -4,16 +4,9 @@ import AbstractE2ETest
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
-import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
-import io.ktor.serialization.jackson.JacksonConverter
-import io.ktor.server.auth.authenticate
-import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.server.testing.TestApplicationBuilder
-import io.ktor.server.testing.testApplication
 import java.util.UUID
-import kotlinx.coroutines.runBlocking
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.TestRapidHelpers.hendelser
@@ -26,9 +19,8 @@ import no.nav.helse.Testdata.SAKSBEHANDLER_IDENT
 import no.nav.helse.Testdata.SAKSBEHANDLER_NAVN
 import no.nav.helse.Testdata.SAKSBEHANDLER_OID
 import no.nav.helse.januar
+import no.nav.helse.mediator.api.AbstractApiTest
 import no.nav.helse.mediator.api.AbstractApiTest.Companion.authentication
-import no.nav.helse.mediator.api.AbstractApiTest.Companion.azureAdAppConfig
-import no.nav.helse.spesialist.api.azureAdAppAuthentication
 import no.nav.helse.spesialist.api.endepunkter.overstyringApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandling
@@ -43,21 +35,19 @@ internal class OverstyringIntegrationTest : AbstractE2ETest() {
 
     @Test
     fun `overstyr tidslinje`() {
-        testApplication {
-            setUpApplication()
-            settOppBruker()
-            assertOppgaver(1)
-            val overstyring = OverstyrTidslinjeHandling(
-                organisasjonsnummer = ORGNR,
-                fødselsnummer = FØDSELSNUMMER,
-                aktørId = AKTØR,
-                begrunnelse = "en begrunnelse",
-                dager = listOf(
-                    OverstyrTidslinjeHandling.OverstyrDagDto(dato = 10.januar, type = "Feriedag", fraType = "Sykedag", grad = null, fraGrad = 100)
-                ),
-            )
-
-            val response = runBlocking {
+        settOppBruker()
+        assertOppgaver(1)
+        val overstyring = OverstyrTidslinjeHandling(
+            organisasjonsnummer = ORGNR,
+            fødselsnummer = FØDSELSNUMMER,
+            aktørId = AKTØR,
+            begrunnelse = "en begrunnelse",
+            dager = listOf(
+                OverstyrTidslinjeHandling.OverstyrDagDto(dato = 10.januar, type = "Feriedag", fraType = "Sykedag", grad = null, fraGrad = 100)
+            ),
+        )
+        val response = AbstractApiTest.TestServer { overstyringApi(saksbehandlerMediator) }
+            .withAuthenticatedServer { client ->
                 client.post("/api/overstyr/dager") {
                     header(HttpHeaders.ContentType, "application/json")
                     authentication(
@@ -69,24 +59,21 @@ internal class OverstyringIntegrationTest : AbstractE2ETest() {
                     setBody(objectMapper.writeValueAsString(overstyring))
                 }
             }
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals(1, testRapid.inspektør.hendelser("saksbehandler_overstyrer_tidslinje").size)
+        testRapid.sendTestMessage(
+            testRapid.inspektør.hendelser("saksbehandler_overstyrer_tidslinje").first().toString()
+        )
+        assertEquals("Invalidert", oppgaveStatus())
+        assertEquals(1, testRapid.inspektør.hendelser("overstyr_tidslinje").size)
 
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertEquals(1, testRapid.inspektør.hendelser("saksbehandler_overstyrer_tidslinje").size)
-            testRapid.sendTestMessage(
-                testRapid.inspektør.hendelser("saksbehandler_overstyrer_tidslinje").first().toString()
-            )
-            assertEquals("Invalidert", oppgaveStatus())
-            assertEquals(1, testRapid.inspektør.hendelser("overstyr_tidslinje").size)
-        }
     }
 
     @Test
     fun `overstyr inntekt med refusjon`() {
-        testApplication {
-            setUpApplication()
-            settOppBruker()
+        settOppBruker()
 
-            val json = """
+        val json = """
                 {
                     "fødselsnummer": $FØDSELSNUMMER,
                     "aktørId": $AKTØR,
@@ -165,7 +152,8 @@ internal class OverstyringIntegrationTest : AbstractE2ETest() {
                 }
             """.trimIndent()
 
-            val response = runBlocking {
+        val response = AbstractApiTest.TestServer { overstyringApi(saksbehandlerMediator) }
+            .withAuthenticatedServer { client ->
                 client.post("/api/overstyr/inntektogrefusjon") {
                     header(HttpHeaders.ContentType, "application/json")
                     authentication(
@@ -178,31 +166,28 @@ internal class OverstyringIntegrationTest : AbstractE2ETest() {
                 }
             }
 
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertEquals(1, testRapid.inspektør.hendelser("saksbehandler_overstyrer_inntekt_og_refusjon").size)
-            testRapid.sendTestMessage(
-                testRapid.inspektør.hendelser("saksbehandler_overstyrer_inntekt_og_refusjon").first().toString()
-            )
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals(1, testRapid.inspektør.hendelser("saksbehandler_overstyrer_inntekt_og_refusjon").size)
+        testRapid.sendTestMessage(
+            testRapid.inspektør.hendelser("saksbehandler_overstyrer_inntekt_og_refusjon").first().toString()
+        )
 
-            //TODO: Bruk OverstyringApiDao når denne er oppdatert til å inkludere nye kolonner
-            val refusjonsopplysninger = overstyringInntektRefusjonsopplysninger("refusjonsopplysninger")
-            val fraRefusjonsopplysninger = overstyringInntektRefusjonsopplysninger("fra_refusjonsopplysninger")
+        //TODO: Bruk OverstyringApiDao når denne er oppdatert til å inkludere nye kolonner
+        val refusjonsopplysninger = overstyringInntektRefusjonsopplysninger("refusjonsopplysninger")
+        val fraRefusjonsopplysninger = overstyringInntektRefusjonsopplysninger("fra_refusjonsopplysninger")
 
-            assertTrue(refusjonsopplysninger?.isNotEmpty() == true)
-            assertTrue(fraRefusjonsopplysninger?.isNotEmpty() == true)
+        assertTrue(refusjonsopplysninger?.isNotEmpty() == true)
+        assertTrue(fraRefusjonsopplysninger?.isNotEmpty() == true)
 
-            assertEquals("Invalidert", oppgaveStatus())
-            assertEquals(1, testRapid.inspektør.hendelser("overstyr_inntekt_og_refusjon").size)
-        }
+        assertEquals("Invalidert", oppgaveStatus())
+        assertEquals(1, testRapid.inspektør.hendelser("overstyr_inntekt_og_refusjon").size)
     }
 
     @Test
     fun `skjønnsfastsetter sykepengegrunnlag`() {
-        testApplication {
-            setUpApplication()
-            settOppBruker()
+        settOppBruker()
 
-            val json = """
+        val json = """
                 {
                     "fødselsnummer": $FØDSELSNUMMER,
                     "aktørId": $AKTØR,
@@ -238,7 +223,8 @@ internal class OverstyringIntegrationTest : AbstractE2ETest() {
                 }
             """.trimIndent()
 
-            val response = runBlocking {
+        val response = AbstractApiTest.TestServer { overstyringApi(saksbehandlerMediator) }
+            .withAuthenticatedServer { client ->
                 client.post("/api/skjonnsfastsett/sykepengegrunnlag") {
                     header(HttpHeaders.ContentType, "application/json")
                     authentication(
@@ -251,39 +237,37 @@ internal class OverstyringIntegrationTest : AbstractE2ETest() {
                 }
             }
 
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertEquals(1, testRapid.inspektør.hendelser("saksbehandler_skjonnsfastsetter_sykepengegrunnlag").size)
-            testRapid.sendTestMessage(
-                testRapid.inspektør.hendelser("saksbehandler_skjonnsfastsetter_sykepengegrunnlag").first().toString()
-            )
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals(1, testRapid.inspektør.hendelser("saksbehandler_skjonnsfastsetter_sykepengegrunnlag").size)
+        testRapid.sendTestMessage(
+            testRapid.inspektør.hendelser("saksbehandler_skjonnsfastsetter_sykepengegrunnlag").first().toString()
+        )
 
-            assertEquals("Invalidert", oppgaveStatus())
-            assertEquals(1, testRapid.inspektør.hendelser("skjønnsmessig_fastsettelse").size)
-            assertEquals(1, testRapid.inspektør.hendelser("subsumsjon").size)
-        }
+        assertEquals("Invalidert", oppgaveStatus())
+        assertEquals(1, testRapid.inspektør.hendelser("skjønnsmessig_fastsettelse").size)
+        assertEquals(1, testRapid.inspektør.hendelser("subsumsjon").size)
     }
 
     @Test
     fun `overstyr arbeidsforhold`() {
-        testApplication {
-            setUpApplication()
-            settOppBruker(orgnummereMedRelevanteArbeidsforhold = listOf(ORGNR_GHOST))
+        settOppBruker(orgnummereMedRelevanteArbeidsforhold = listOf(ORGNR_GHOST))
 
-            val overstyring = OverstyrArbeidsforholdHandling(
-                fødselsnummer = FØDSELSNUMMER,
-                aktørId = AKTØR,
-                skjæringstidspunkt = 1.januar,
-                overstyrteArbeidsforhold = listOf(
-                    OverstyrArbeidsforholdHandling.ArbeidsforholdDto(
-                        orgnummer = ORGNR_GHOST,
-                        deaktivert = true,
-                        begrunnelse = "en begrunnelse",
-                        forklaring = "en forklaring",
-                    )
+        val overstyring = OverstyrArbeidsforholdHandling(
+            fødselsnummer = FØDSELSNUMMER,
+            aktørId = AKTØR,
+            skjæringstidspunkt = 1.januar,
+            overstyrteArbeidsforhold = listOf(
+                OverstyrArbeidsforholdHandling.ArbeidsforholdDto(
+                    orgnummer = ORGNR_GHOST,
+                    deaktivert = true,
+                    begrunnelse = "en begrunnelse",
+                    forklaring = "en forklaring",
                 )
             )
+        )
 
-            val response = runBlocking {
+        val response = AbstractApiTest.TestServer { overstyringApi(saksbehandlerMediator) }
+            .withAuthenticatedServer { client ->
                 client.post("/api/overstyr/arbeidsforhold") {
                     header(HttpHeaders.ContentType, "application/json")
                     authentication(
@@ -297,14 +281,13 @@ internal class OverstyringIntegrationTest : AbstractE2ETest() {
             }
 
 
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertEquals(1, testRapid.inspektør.hendelser("saksbehandler_overstyrer_arbeidsforhold").size)
-            testRapid.sendTestMessage(
-                testRapid.inspektør.hendelser("saksbehandler_overstyrer_arbeidsforhold").first().toString()
-            )
-            assertEquals("Invalidert", oppgaveStatus())
-            assertEquals(1, testRapid.inspektør.hendelser("overstyr_arbeidsforhold").size)
-        }
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals(1, testRapid.inspektør.hendelser("saksbehandler_overstyrer_arbeidsforhold").size)
+        testRapid.sendTestMessage(
+            testRapid.inspektør.hendelser("saksbehandler_overstyrer_arbeidsforhold").first().toString()
+        )
+        assertEquals("Invalidert", oppgaveStatus())
+        assertEquals(1, testRapid.inspektør.hendelser("overstyr_arbeidsforhold").size)
     }
 
     private fun overstyringInntektRefusjonsopplysninger(column: String) =
@@ -320,19 +303,4 @@ internal class OverstyringIntegrationTest : AbstractE2ETest() {
                 it.string("status")
             }.asSingle)
         }
-
-    private fun TestApplicationBuilder.setUpApplication() {
-        install(ContentNegotiation) {
-            register(
-                ContentType.Application.Json,
-                JacksonConverter(objectMapper),
-            )
-        }
-        application { azureAdAppAuthentication(azureAdAppConfig) }
-        routing {
-            authenticate("oidc") {
-                overstyringApi(saksbehandlerMediator)
-            }
-        }
-    }
 }
