@@ -99,7 +99,7 @@ class OppgaveMediator(
         contextId: UUID,
         messageContext: MessageContext,
     ) {
-        tildelOppgaver(fødselsnummer)
+        tildelVedReservasjon(fødselsnummer)
         lagreOppgaver(hendelseId, contextId, messageContext)
     }
 
@@ -143,10 +143,9 @@ class OppgaveMediator(
         }
     }
 
-    private fun tildelOppgaver(fødselsnummer: String) {
-        reservasjonDao.hentReservasjonFor(fødselsnummer)?.let { (saksbehandler, settPåVent) ->
-            (oppgaveForLagring ?: oppgaveForOppdatering)?.forsøkTildeling(saksbehandler, settPåVent, harTilgangTil)
-        }
+    private fun tildelVedReservasjon(fødselsnummer: String) {
+        val (saksbehandler, settPåVent) = reservasjonDao.hentReservasjonFor(fødselsnummer) ?: return
+        oppgaveForLagring?.forsøkTildeling(saksbehandler, settPåVent, harTilgangTil)
     }
 
     private fun lagreOppgaver(
