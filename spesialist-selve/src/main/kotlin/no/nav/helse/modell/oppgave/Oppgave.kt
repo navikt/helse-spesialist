@@ -29,6 +29,8 @@ class Oppgave private constructor(
     private var tildeltTil: Saksbehandler? = null
     private var påVent: Boolean = false
 
+    private val observers = mutableListOf<OppgaveObserver>()
+
     internal constructor(
         id: Long,
         type: Oppgavetype,
@@ -51,6 +53,10 @@ class Oppgave private constructor(
     fun accept(visitor: OppgaveVisitor) {
         visitor.visitOppgave(id, type, tilstand, vedtaksperiodeId, utbetalingId, hendelseId, ferdigstiltAvOid, ferdigstiltAvIdent, egenskaper, tildeltTil, påVent, totrinnsvurdering)
         totrinnsvurdering?.accept(visitor)
+    }
+
+    fun register(observer: OppgaveObserver) {
+        observers.add(observer)
     }
 
     internal fun forsøkTildeling(
@@ -122,6 +128,7 @@ class Oppgave private constructor(
             kv("forrigeTilstand", forrige),
             kv("nesteTilstand", neste),
         )
+        observers.forEach { it.tilstandEndret(forrige, tilstand, this) }
     }
 
     sealed interface Tilstand {

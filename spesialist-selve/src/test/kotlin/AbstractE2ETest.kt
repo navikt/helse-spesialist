@@ -132,7 +132,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     protected val meldingsfabrikk get() = Testmeldingfabrikk(FØDSELSNUMMER, AKTØR)
 
-    protected val oppgaveMediator = OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao, opptegnelseDao, totrinnsvurderingDao, saksbehandlerDao)
+    protected val oppgaveMediator = OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao, opptegnelseDao, totrinnsvurderingDao, saksbehandlerDao, testRapid)
     private val godkjenningMediator =
         GodkjenningMediator(vedtakDao, opptegnelseDao, oppgaveDao, utbetalingDao, hendelseDao)
 

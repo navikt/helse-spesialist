@@ -76,17 +76,6 @@ class OppgaveApiDao(dataSource: DataSource) : HelseDao(dataSource) {
         mapOf("vedtaksperiodeId" to vedtaksperiodeId)
     ).single { Oppgavetype.valueOf(it.string("type")) }
 
-    internal fun finnVedtaksperiodeId(oppgaveId: Long) = requireNotNull(
-        asSQL(
-            """ 
-                SELECT v.vedtaksperiode_id
-                FROM vedtak v
-                INNER JOIN oppgave o on v.id = o.vedtak_ref
-                WHERE o.id = :oppgaveId
-            """,
-            mapOf("oppgaveId" to oppgaveId)
-        ).single { row -> row.uuid("vedtaksperiode_id") })
-
     fun finnPeriodensInntekterFraAordningen(
         vedtaksperiodeId: UUIDString,
         skjæringstidspunkt: DateString,
@@ -242,32 +231,6 @@ class OppgaveApiDao(dataSource: DataSource) : HelseDao(dataSource) {
         """,
         mapOf("oppgaveId" to oppgaveId)
     ).single { it.long("fodselsnummer").toFødselsnummer() })
-
-    fun hentOppgavemelding(oppgaveId: Long): Oppgavemelder.Oppgavemelding? = asSQL(
-        """
-            SELECT DISTINCT hendelse_id, context_id, o.id as oppgave_id, status, type, beslutter, er_retur, ferdigstilt_av, ferdigstilt_av_oid, t.på_vent
-            FROM oppgave o
-            INNER JOIN command_context cc on cc.context_id = o.command_context_id
-            INNER JOIN vedtaksperiode_utbetaling_id vui on o.utbetaling_id = vui.utbetaling_id
-            LEFT JOIN totrinnsvurdering ttv on vui.vedtaksperiode_id = ttv.vedtaksperiode_id
-            LEFT JOIN tildeling t on o.id = t.oppgave_id_ref
-            WHERE o.id = :oppgaveId
-            AND status = 'AvventerSaksbehandler'::oppgavestatus
-        """,
-        mapOf("oppgaveId" to oppgaveId)
-    ).single {
-        Oppgavemelder.Oppgavemelding(
-            hendelseId = it.uuid("hendelse_id"),
-            oppgaveId = it.long("oppgave_id"),
-            status = Oppgavestatus.valueOf(it.string("status")),
-            type = Oppgavetype.valueOf(it.string("type")),
-            beslutter = it.uuidOrNull("beslutter"),
-            erRetur = it.boolean("er_retur"),
-            ferdigstiltAvIdent = it.stringOrNull("ferdigstilt_av"),
-            ferdigstiltAvOid = it.uuidOrNull("ferdigstilt_av_oid"),
-            påVent = it.boolean("på_vent")
-        )
-    }
 
     fun invaliderOppgaveFor(fødselsnummer: String) = asSQL(
         """

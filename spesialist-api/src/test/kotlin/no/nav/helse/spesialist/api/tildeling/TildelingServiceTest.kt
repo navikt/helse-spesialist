@@ -7,7 +7,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeTildelt
-import no.nav.helse.spesialist.api.oppgave.Oppgavemelder
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao.TotrinnsvurderingDto
@@ -20,7 +19,7 @@ internal class TildelingServiceTest {
     private val saksbehandlerDao = mockk<SaksbehandlerDao>(relaxed = true)
     private val tildelingDao = mockk<TildelingDao>()
     private val totrinnsvurderingApiDao = mockk<TotrinnsvurderingApiDao>(relaxed = true)
-    private val oppgavemelder = { mockk<Oppgavemelder>(relaxed = true) }
+    private val oppgavemelder = { mockk<IOppgavemelder>(relaxed = true) }
     private val tildelingService = TildelingService(
         tildelingDao, saksbehandlerDao, totrinnsvurderingApiDao, oppgavemelder
     )

@@ -5,6 +5,7 @@ import java.time.LocalDate
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.mediator.oppgave.Oppgavemelder
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.TestHendelse
@@ -35,6 +36,34 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     fun setupDaoTest() {
         godkjenningsbehov(TESTHENDELSE.id)
         CommandContext(CONTEXT_ID).opprett(CommandContextDao(dataSource), TESTHENDELSE)
+    }
+
+    @Test
+    fun `Henter oppgavemelding`() {
+        val contextId = UUID.randomUUID()
+        val hendelseId = UUID.randomUUID()
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettGenerasjon()
+        opprettVedtaksperiode()
+        opprettOppgave(oppgavetype = Oppgavetype.SØKNAD, hendelseId = hendelseId, contextId = contextId)
+        opprettUtbetalingKobling(VEDTAKSPERIODE, UTBETALING_ID)
+
+        val oppgaveId = oppgaveDao.finnOppgaveId(UTBETALING_ID)
+        val oppgavemelding = oppgaveDao.hentOppgavemelding(oppgaveId!!)
+        val forventetOppgavemleding = Oppgavemelder.Oppgavemelding(
+            hendelseId = hendelseId,
+            oppgaveId = oppgaveId,
+            status = AvventerSaksbehandler.toString(),
+            type = Oppgavetype.SØKNAD.toString(),
+            beslutter = null,
+            erRetur = false,
+            ferdigstiltAvIdent = null,
+            ferdigstiltAvOid = null,
+            påVent = false
+        )
+
+        assertEquals(forventetOppgavemleding, oppgavemelding)
     }
 
     @Test

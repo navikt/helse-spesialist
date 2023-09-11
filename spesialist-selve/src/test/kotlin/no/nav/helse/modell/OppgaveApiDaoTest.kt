@@ -17,7 +17,6 @@ import no.nav.helse.spesialist.api.graphql.schema.Mottaker.BEGGE
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker.SYKMELDT
 import no.nav.helse.spesialist.api.graphql.schema.Oppgavetype.RISK_QA
 import no.nav.helse.spesialist.api.graphql.schema.Periodetype.FORSTEGANGSBEHANDLING
-import no.nav.helse.spesialist.api.oppgave.Oppgavemelder
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
@@ -533,34 +532,6 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
         val oppgaver = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN)
         val oppgave = oppgaver.first()
         assertEquals(SAKSBEHANDLER_OID, UUID.fromString(oppgave.totrinnsvurdering?.saksbehandler))
-    }
-
-    @Test
-    fun `Henter oppgavemelding`() {
-        val contextId = UUID.randomUUID()
-        val hendelseId = UUID.randomUUID()
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettGenerasjon()
-        opprettVedtaksperiode()
-        opprettOppgave(oppgavetype = Oppgavetype.SØKNAD, hendelseId = hendelseId, contextId = contextId)
-        opprettUtbetalingKobling(VEDTAKSPERIODE, UTBETALING_ID)
-
-        val oppgaveId = oppgaveApiDao.finnOppgaveId(VEDTAKSPERIODE)
-        val oppgavemelding = oppgaveApiDao.hentOppgavemelding(oppgaveId!!)
-        val forventetOppgavemleding = Oppgavemelder.Oppgavemelding(
-            hendelseId,
-            oppgaveId,
-            Oppgavestatus.AvventerSaksbehandler,
-            Oppgavetype.SØKNAD,
-            null,
-            false,
-            null,
-            null,
-            false
-        )
-
-        assertEquals(forventetOppgavemleding, oppgavemelding)
     }
 
     @Test

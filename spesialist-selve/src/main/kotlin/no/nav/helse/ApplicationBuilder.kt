@@ -47,6 +47,7 @@ import no.nav.helse.mediator.api.personApi
 import no.nav.helse.mediator.api.totrinnsvurderingApi
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
+import no.nav.helse.mediator.oppgave.Oppgavemelder
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.automatisering.Automatisering
@@ -84,7 +85,6 @@ import no.nav.helse.spesialist.api.graphql.graphQLApi
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
-import no.nav.helse.spesialist.api.oppgave.Oppgavemelder
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.person.PersonApiDao
@@ -212,15 +212,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
 
     private val behandlingsstatistikkMediator = BehandlingsstatistikkMediator(behandlingsstatistikkDao)
 
-    private val oppgaveMediator = OppgaveMediator(
-        oppgaveDao = oppgaveDao,
-        tildelingDao = tildelingDao,
-        reservasjonDao = reservasjonDao,
-        opptegnelseDao = opptegnelseDao,
-        totrinnsvurderingRepository = totrinnsvurderingDao,
-        saksbehandlerRepository = saksbehandlerDao,
-        harTilgangTil = { oid, gruppe -> msGraphClient.erIGruppe(oid, tilgangsgrupper.gruppeId(gruppe)) }
-    )
+    private lateinit var oppgaveMediator: OppgaveMediator
 
     private val godkjenningMediator = GodkjenningMediator(
         vedtakDao,
@@ -381,6 +373,15 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
 
     init {
         rapidsConnection.register(this)
+        oppgaveMediator = OppgaveMediator(
+            oppgaveDao = oppgaveDao,
+            tildelingDao = tildelingDao,
+            reservasjonDao = reservasjonDao,
+            opptegnelseDao = opptegnelseDao,
+            totrinnsvurderingRepository = totrinnsvurderingDao,
+            saksbehandlerRepository = saksbehandlerDao,
+            rapidsConnection = rapidsConnection
+        ) { oid, gruppe -> msGraphClient.erIGruppe(oid, tilgangsgrupper.gruppeId(gruppe)) }
         hendelseMediator = HendelseMediator(
             dataSource = dataSource,
             rapidsConnection = rapidsConnection,
@@ -389,7 +390,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             hendelsefabrikk = hendelsefabrikk
         )
         saksbehandlerMediator = SaksbehandlerMediator(dataSource, rapidsConnection)
-        oppgavemelder = Oppgavemelder(oppgaveApiDao, rapidsConnection)
+        oppgavemelder = Oppgavemelder(oppgaveDao, rapidsConnection)
         tildelingService = TildelingService(tildelingApiDao, saksbehandlerApiDao, totrinnsvurderingApiDao) { oppgavemelder }
         oppdaterPersonService = OppdaterPersonService(rapidsConnection)
         godkjenningService = GodkjenningService(

@@ -66,6 +66,32 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
         }
     }
 
+    fun hentOppgavemelding(oppgaveId: Long): Oppgavemelder.Oppgavemelding? = asSQL(
+        """
+            SELECT DISTINCT hendelse_id, context_id, o.id as oppgave_id, status, type, beslutter, er_retur, ferdigstilt_av, ferdigstilt_av_oid, t.på_vent
+            FROM oppgave o
+            INNER JOIN command_context cc on cc.context_id = o.command_context_id
+            INNER JOIN vedtaksperiode_utbetaling_id vui on o.utbetaling_id = vui.utbetaling_id
+            LEFT JOIN totrinnsvurdering ttv on vui.vedtaksperiode_id = ttv.vedtaksperiode_id
+            LEFT JOIN tildeling t on o.id = t.oppgave_id_ref
+            WHERE o.id = :oppgaveId
+            AND status = 'AvventerSaksbehandler'::oppgavestatus
+        """,
+        mapOf("oppgaveId" to oppgaveId)
+    ).single {
+        Oppgavemelder.Oppgavemelding(
+            hendelseId = it.uuid("hendelse_id"),
+            oppgaveId = it.long("oppgave_id"),
+            status = it.string("status"),
+            type = it.string("type"),
+            beslutter = it.uuidOrNull("beslutter"),
+            erRetur = it.boolean("er_retur"),
+            ferdigstiltAvIdent = it.stringOrNull("ferdigstilt_av"),
+            ferdigstiltAvOid = it.uuidOrNull("ferdigstilt_av_oid"),
+            påVent = it.boolean("på_vent")
+        )
+    }
+
     fun finnUtbetalingId(oppgaveId: Long) = asSQL(
         " SELECT utbetaling_id FROM oppgave WHERE id = :oppgaveId; ",
         mapOf("oppgaveId" to oppgaveId)

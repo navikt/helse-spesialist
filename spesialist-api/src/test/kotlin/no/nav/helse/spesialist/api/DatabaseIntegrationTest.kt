@@ -18,7 +18,6 @@ import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
-import no.nav.helse.spesialist.api.oppgave.Oppgavemelder
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
@@ -30,6 +29,7 @@ import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
+import no.nav.helse.spesialist.api.tildeling.IOppgavemelder
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.tildeling.TildelingService
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
@@ -107,7 +107,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             tildelingDao,
             SaksbehandlerDao(dataSource),
             totrinnsvurderingApiDao
-        ) { mockk<Oppgavemelder>(relaxed = true) }
+        ) { mockk<IOppgavemelder>(relaxed = true) }
 
     protected fun opprettVedtaksperiode(
         personId: Long,

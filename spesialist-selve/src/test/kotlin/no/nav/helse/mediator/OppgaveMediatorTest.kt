@@ -61,6 +61,8 @@ internal class OppgaveMediatorTest {
     private val totrinnsvurderingDao = mockk<TotrinnsvurderingDao>(relaxed = true)
     private val saksbehandlerDao = mockk<SaksbehandlerDao>()
     private val gruppehenterTestoppsett = GruppehenterTestoppsett()
+    private val testRapid = TestRapid()
+
     private val mediator = OppgaveMediator(
         oppgaveDao = oppgaveDao,
         tildelingDao = tildelingDao,
@@ -68,16 +70,15 @@ internal class OppgaveMediatorTest {
         opptegnelseDao = opptegnelseDao,
         harTilgangTil = gruppehenterTestoppsett.hentGrupper,
         totrinnsvurderingRepository = totrinnsvurderingDao,
-        saksbehandlerRepository = saksbehandlerDao
+        saksbehandlerRepository = saksbehandlerDao,
+        rapidsConnection = testRapid
     )
-
     private val saksbehandlerFraDatabase = SaksbehandlerFraDatabase(SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT)
     private val saksbehandler = Saksbehandler(SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT)
     private fun søknadsoppgave(id: Long): Oppgave = Oppgave.oppgaveMedEgenskaper(id, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), listOf(SØKNAD))
     private fun stikkprøveoppgave(id: Long): Oppgave = Oppgave.oppgaveMedEgenskaper(id, VEDTAKSPERIODE_ID_2, UTBETALING_ID_2, UUID.randomUUID(), listOf(STIKKPRØVE))
-    private fun riskoppgave(id: Long): Oppgave = Oppgave.oppgaveMedEgenskaper(id, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), listOf(RISK_QA))
 
-    private val testRapid = TestRapid()
+    private fun riskoppgave(id: Long): Oppgave = Oppgave.oppgaveMedEgenskaper(id, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), listOf(RISK_QA))
 
     @BeforeEach
     fun setup() {
@@ -181,8 +182,8 @@ internal class OppgaveMediatorTest {
         }
         every { oppgaveDao.finn(OPPGAVE_ID) } returns oppgave
         mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
-        assertEquals(1, testRapid.inspektør.size)
-        assertOppgaveevent(0, "oppgave_oppdatert", Oppgavestatus.Ferdigstilt) {
+        assertEquals(3, testRapid.inspektør.size)
+        assertOppgaveevent(2, "oppgave_oppdatert", Oppgavestatus.Ferdigstilt) {
             assertEquals(OPPGAVE_ID, it.path("oppgaveId").longValue())
             assertEquals(SAKSBEHANDLERIDENT, it.path("ferdigstiltAvIdent").asText())
             assertEquals(SAKSBEHANDLEROID, UUID.fromString(it.path("ferdigstiltAvOid").asText()))

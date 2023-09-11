@@ -4,18 +4,21 @@ import java.util.UUID
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeTildelt
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
-import no.nav.helse.spesialist.api.oppgave.Oppgavemelder
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import org.slf4j.LoggerFactory
+
+interface IOppgavemelder {
+    fun sendOppgaveOppdatertMelding(oppgaveId: Long)
+}
 
 class TildelingService(
     private val tildelingDao: TildelingDao,
     private val saksbehandlerDao: SaksbehandlerDao,
     private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
-    oppgavemelder: () -> Oppgavemelder,
+    oppgavemelder: () -> IOppgavemelder,
 ) {
-    private val oppgavemelder: Oppgavemelder by lazy { oppgavemelder() }
+    private val oppgavemelder: IOppgavemelder by lazy { oppgavemelder() }
 
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")

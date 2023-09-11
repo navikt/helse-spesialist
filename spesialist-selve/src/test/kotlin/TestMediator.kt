@@ -59,7 +59,8 @@ internal class TestMediator(
         reservasjonDao = ReservasjonDao(dataSource),
         opptegnelseDao = opptegnelseDao,
         totrinnsvurderingRepository = totrinnsvurderingDao,
-        saksbehandlerRepository = saksbehandlerDao
+        saksbehandlerRepository = saksbehandlerDao,
+        rapidsConnection = testRapid
     )
     private val overstyringMediator = OverstyringMediator(testRapid)
     private val snapshotMediator = SnapshotMediator(SnapshotApiDao(dataSource), snapshotClient)

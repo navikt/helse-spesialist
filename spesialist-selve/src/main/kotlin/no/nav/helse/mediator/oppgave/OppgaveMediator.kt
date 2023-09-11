@@ -9,6 +9,7 @@ import no.nav.helse.db.TotrinnsvurderingRepository
 import no.nav.helse.mediator.api.Oppgavehåndterer
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.rapids_rivers.MessageContext
+import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload.Companion.lagre
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
@@ -25,7 +26,8 @@ class OppgaveMediator(
     private val opptegnelseDao: OpptegnelseDao,
     private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
     private val saksbehandlerRepository: SaksbehandlerRepository,
-    private val harTilgangTil: Tilgangskontroll = { _, _ -> false },
+    private val rapidsConnection: RapidsConnection,
+    private val harTilgangTil: Tilgangskontroll = { _, _ -> false }
 ): Oppgavehåndterer {
     private var oppgaveForLagring: Oppgave? = null
     private var oppgaveForOppdatering: Oppgave? = null
@@ -36,11 +38,13 @@ class OppgaveMediator(
     internal fun nyOppgave(opprettOppgaveBlock: (reservertId: Long) -> Oppgave) {
         val nesteId = oppgaveDao.reserverNesteId()
         val oppgave = opprettOppgaveBlock(nesteId)
+        oppgave.register(Oppgavemelder(oppgaveDao, rapidsConnection))
         leggPåVentForSenereLagring(oppgave)
     }
 
     fun oppgave(id: Long, oppgaveBlock: Oppgave.() -> Unit) {
         val oppgave = Oppgavehenter(oppgaveDao, totrinnsvurderingRepository, saksbehandlerRepository).oppgave(id)
+        oppgave.register(Oppgavemelder(oppgaveDao, rapidsConnection))
         oppgaveBlock(oppgave)
         Oppgavelagrer(tildelingDao).apply {
             oppgave.accept(this)
