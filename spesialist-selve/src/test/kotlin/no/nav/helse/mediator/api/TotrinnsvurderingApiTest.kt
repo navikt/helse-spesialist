@@ -81,6 +81,10 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
         override fun leggPåVent(oppgaveId: Long): TildelingApiDto {
             TODO("Not yet implemented")
         }
+
+        override fun fjernPåVent(oppgaveId: Long): TildelingApiDto {
+            TODO("Not yet implemented")
+        }
     }
 
     @BeforeAll

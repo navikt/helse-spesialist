@@ -109,6 +109,14 @@ class Oppgave private constructor(
     internal fun leggPåVent(): Saksbehandler {
         val tildeltTil = this.tildeltTil ?: throw OppgaveIkkeTildelt(id)
         påVent = true
+        oppgaveEndret()
+        return tildeltTil
+    }
+
+    internal fun fjernPåVent(): Saksbehandler {
+        val tildeltTil = this.tildeltTil ?: throw OppgaveIkkeTildelt(id)
+        påVent = false
+        oppgaveEndret()
         return tildeltTil
     }
 

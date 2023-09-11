@@ -57,10 +57,6 @@ class TildelingDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         """, mapOf("fnr" to fødselsnummer.toLong())
     ).single(::tildelingDto)
 
-    fun leggOppgavePåVent(oppgaveId: Long): TildelingApiDto? = updatePåVentReturningTildeling(oppgaveId, true)
-
-    fun fjernPåVent(oppgaveId: Long): TildelingApiDto? = updatePåVentReturningTildeling(oppgaveId, false)
-
     private fun tildelingDto(it: Row) = TildelingApiDto(
         epost = it.string("epost"),
         påVent = it.boolean("på_vent"),
@@ -81,17 +77,4 @@ class TildelingDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             """
         return run(queryOf(query, mapOf("oppgaveId" to oppgaveId)).map(::tildelingDto).asSingle)
     }
-
-    private fun updatePåVentReturningTildeling(oppgaveId: Long, påVent: Boolean): TildelingApiDto? = asSQL(
-        """ 
-            WITH updated AS (
-                UPDATE tildeling
-                SET på_vent = :paa_vent
-                WHERE oppgave_id_ref = :oppgave_id_ref
-                RETURNING *
-            )
-            SELECT s.epost, u.på_vent, u.saksbehandler_ref as oid, s.navn FROM updated u
-                INNER JOIN saksbehandler s ON s.oid = u.saksbehandler_ref
-        """, mapOf("oppgave_id_ref" to oppgaveId, "paa_vent" to påVent)
-    ).single(::tildelingDto)
 }

@@ -336,6 +336,63 @@ internal class OppgaveTest {
     }
 
     @Test
+    fun `fjern påVent`() {
+        val oppgave = nyOppgave(SØKNAD)
+        oppgave.forsøkTildeling(saksbehandler, false) { _, _ -> true }
+        oppgave.leggPåVent()
+        oppgave.fjernPåVent()
+
+        inspektør(oppgave) {
+            assertEquals(false, påVent)
+        }
+    }
+
+    @Test
+    fun `kan ikke fjerne oppgave fra på vent uten at den er tildelt først`() {
+        val oppgave = nyOppgave(SØKNAD)
+
+        assertThrows<OppgaveIkkeTildelt> {
+            oppgave.fjernPåVent()
+        }
+
+        inspektør(oppgave) {
+            assertEquals(false, påVent)
+        }
+    }
+
+    @Test
+    fun `sender ut oppgaveEndret når oppgave sendes legges på vent`() {
+        val oppgave = nyOppgave(SØKNAD)
+        oppgave.register(observer)
+        oppgave.forsøkTildeling(saksbehandler, false) { _, _ -> true }
+        oppgave.leggPåVent()
+
+        assertEquals(1, observer.oppgaverEndret.size)
+        assertEquals(oppgave, observer.oppgaverEndret[0])
+
+        inspektør(oppgave) {
+            assertEquals(Oppgave.AvventerSaksbehandler, this.tilstand)
+        }
+    }
+
+    @Test
+    fun `sender ut oppgaveEndret når oppgave ikke er på vent lenger`() {
+        val oppgave = nyOppgave(SØKNAD)
+        oppgave.register(observer)
+        oppgave.forsøkTildeling(saksbehandler, false) { _, _ -> true }
+        oppgave.leggPåVent()
+        oppgave.fjernPåVent()
+
+        assertEquals(2, observer.oppgaverEndret.size)
+        assertEquals(oppgave, observer.oppgaverEndret[0])
+        assertEquals(oppgave, observer.oppgaverEndret[1])
+
+        inspektør(oppgave) {
+            assertEquals(Oppgave.AvventerSaksbehandler, this.tilstand)
+        }
+    }
+
+    @Test
     fun equals() {
         val gjenopptattOppgave = oppgaveMedEgenskaper(1L, VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID, UUID.randomUUID(), listOf(OPPGAVETYPE))
         val oppgave1 = oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), listOf(SØKNAD))

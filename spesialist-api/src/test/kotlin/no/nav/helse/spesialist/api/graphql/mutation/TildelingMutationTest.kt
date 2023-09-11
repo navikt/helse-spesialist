@@ -166,11 +166,8 @@ internal class TildelingMutationTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `fjern på vent`() {
-        opprettSaksbehandler()
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
-        val oppgaveId = finnOppgaveIdFor(PERIODE.id)
-        tildelOppgave(oppgaveId, SAKSBEHANDLER.oid)
-        leggPåVent(oppgaveId)
+        val oppgaveId = 1L
+        every { oppgavehåndterer.fjernPåVent(oppgaveId) } returns TildelingApiDto(SAKSBEHANDLER.navn, SAKSBEHANDLER.epost, SAKSBEHANDLER.oid, false)
 
         val body = runQuery(
             """

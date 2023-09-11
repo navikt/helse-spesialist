@@ -6,7 +6,6 @@ import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeTildelt
 import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
-import org.slf4j.LoggerFactory
 
 interface IOppgavemelder {
     fun sendOppgaveOppdatertMelding(oppgaveId: Long)
@@ -16,6 +15,7 @@ interface Oppgavehåndterer {
     fun sendTilBeslutter(oppgaveId: Long, behandlendeSaksbehandler: Saksbehandler)
     fun sendIRetur(oppgaveId: Long, besluttendeSaksbehandler: Saksbehandler)
     fun leggPåVent(oppgaveId: Long): TildelingApiDto
+    fun fjernPåVent(oppgaveId: Long): TildelingApiDto
 }
 
 class TildelingService(
@@ -26,22 +26,6 @@ class TildelingService(
     oppgavemelder: () -> IOppgavemelder
 ) {
     private val oppgavemelder: IOppgavemelder by lazy { oppgavemelder() }
-
-    private companion object {
-        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-    }
-
-    fun fjernTildelingOgTildelNySaksbehandlerHvisFinnes(
-        oppgaveId: Long,
-        saksbehandlerOid: UUID?,
-        saksbehandlerTilganger: SaksbehandlerTilganger
-    ) {
-        tildelingDao.slettTildeling(oppgaveId)
-        if (saksbehandlerOid != null) {
-            sikkerlogg.info("Fjerner gammel tildeling og tildeler oppgave $oppgaveId til saksbehandler $saksbehandlerOid")
-            tildelOppgaveTilEksisterendeSaksbehandler(oppgaveId, saksbehandlerOid, saksbehandlerTilganger)
-        }
-    }
 
     internal fun tildelOppgaveTilSaksbehandler(
         oppgaveId: Long,
@@ -64,10 +48,7 @@ class TildelingService(
     }
 
     internal fun fjernPåVent(oppgaveId: Long): TildelingApiDto {
-        val tildeling = tildelingDao.fjernPåVent(oppgaveId)
-            ?: throw RuntimeException("Kunne ikke fjerne fra på vent")
-        oppgavemelder.sendOppgaveOppdatertMelding(oppgaveId)
-        return tildeling
+        return oppgavehåndterer.fjernPåVent(oppgaveId)
     }
 
     private fun tildelOppgaveTilEksisterendeSaksbehandler(

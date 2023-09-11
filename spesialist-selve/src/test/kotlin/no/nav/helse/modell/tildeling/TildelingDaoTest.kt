@@ -114,15 +114,6 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `fjern på vent`() {
-        nyPerson()
-        tildelTilSaksbehandler()
-        tildelingDao.leggOppgavePåVent(oppgaveId)
-        tildelingDao.fjernPåVent(oppgaveId)
-        assertFalse(assertOppgavePåVent(oppgaveId))
-    }
-
-    @Test
     fun `finn tildeling for oppgave`() {
         nyPerson()
         tildelTilSaksbehandler()
@@ -156,14 +147,5 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
             )
         }
         assertEquals(saksbehandleroid, result)
-    }
-
-    private fun assertOppgavePåVent(oppgaveId: Long) : Boolean {
-        return requireNotNull(sessionOf(dataSource).use { session ->
-            session.run(
-                queryOf("SELECT på_vent FROM tildeling WHERE oppgave_id_ref = ?", oppgaveId)
-                    .map { it.boolean("på_vent") }.asSingle
-            )
-        })
     }
 }

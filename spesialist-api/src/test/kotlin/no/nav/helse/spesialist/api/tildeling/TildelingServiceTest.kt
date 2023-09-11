@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.api.tildeling
 
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
@@ -23,8 +22,6 @@ internal class TildelingServiceTest {
     private val tildelingService = TildelingService(
         tildelingDao, saksbehandlerDao, totrinnsvurderingApiDao, mockk(), oppgavemelder
     )
-
-    private val SAKSBEHANDLER_OID = UUID.randomUUID()
 
     @Test
     fun `stopper tildeling av allerede tildelt sak`() {
@@ -93,37 +90,6 @@ internal class TildelingServiceTest {
                 saksbehandlerTilganger = saksbehandlerTilganger(harBesluttertilgang = false)
             )
         }
-    }
-
-    @Test
-    fun `hvis det finnes en tidligere_saksbehandler blir tildeling fjernet og tidligere saksbehandler tildelt`() {
-        every { tildelingDao.slettTildeling(1L) } returns 1
-        every { tildelingDao.tildelingForOppgave(any()) } returns null
-        every { tildelingDao.opprettTildeling(any(), any(), any()) } returns TildelingApiDto("Saksbehandler", "saksbehandler@nav.no", SAKSBEHANDLER_OID, false)
-
-        tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(
-            oppgaveId = 1L,
-            saksbehandlerOid = SAKSBEHANDLER_OID,
-            saksbehandlerTilganger = saksbehandlerTilganger(harBesluttertilgang = true)
-        )
-
-        verify(exactly = 1) { tildelingDao.slettTildeling(1L) }
-        verify(exactly = 1) { tildelingDao.opprettTildeling(1L, SAKSBEHANDLER_OID, false) }
-    }
-
-    @Test
-    fun `hvis det ikke finnes en tidligere_saksbehandler blir tildeling fjernet`() {
-        every { tildelingDao.slettTildeling(1L) } returns 1
-        every { tildelingDao.tildelingForOppgave(any()) } returns null
-
-        tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(
-            1L,
-            null,
-            saksbehandlerTilganger(false)
-        )
-
-        verify(exactly = 1) { tildelingDao.slettTildeling(1L) }
-        verify(exactly = 0) { tildelingDao.opprettTildeling(any(), any(), any()) }
     }
 
     private fun totrinnsvurdering(saksbehandlerOid: UUID? = null) = TotrinnsvurderingDto(

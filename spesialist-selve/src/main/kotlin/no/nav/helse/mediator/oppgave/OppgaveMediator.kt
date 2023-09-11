@@ -84,7 +84,16 @@ class OppgaveMediator(
 
     override fun leggPåVent(oppgaveId: Long): TildelingApiDto {
         return oppgave(oppgaveId) {
-            val tildeltTil = leggPåVent()
+            val tildeltTil = this.leggPåVent()
+            tildeltTil.toDto().let {
+                TildelingApiDto(it.navn, it.epost, it.oid, true)
+            }
+        }
+    }
+
+    override fun fjernPåVent(oppgaveId: Long): TildelingApiDto {
+        return oppgave(oppgaveId) {
+            val tildeltTil = this.fjernPåVent()
             tildeltTil.toDto().let {
                 TildelingApiDto(it.navn, it.epost, it.oid, true)
             }
