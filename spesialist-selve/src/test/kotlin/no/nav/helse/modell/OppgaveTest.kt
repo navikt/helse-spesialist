@@ -162,6 +162,16 @@ internal class OppgaveTest {
     }
 
     @Test
+    fun `oppgave sendt til beslutter tildeles ingen dersom det ikke finnes noen tidligere beslutter`() {
+        val oppgave = nyOppgave(SØKNAD, medTotrinnsvurdering = true)
+        oppgave.forsøkTildeling(saksbehandler, false) { _, _ -> true }
+        oppgave.sendTilBeslutter(saksbehandler)
+        inspektør(oppgave) {
+            assertEquals(null, tildeltTil)
+        }
+    }
+
+    @Test
     fun `oppgave sendt i retur tildeles opprinnelig saksbehandler`() {
         val oppgave = nyOppgave(SØKNAD, medTotrinnsvurdering = true)
         oppgave.sendTilBeslutter(saksbehandler)
