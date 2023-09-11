@@ -4,6 +4,7 @@ import DatabaseIntegrationTest
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.db.TildelingDao
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -12,6 +13,39 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class TildelingDaoTest : DatabaseIntegrationTest() {
+
+    private val nyDao = TildelingDao(dataSource)
+
+    @Test
+    fun tildel() {
+        val oid = UUID.randomUUID()
+        nyPerson()
+        nySaksbehandler(oid)
+        nyDao.tildel(OPPGAVE_ID, oid, false)
+        assertTildeling(OPPGAVE_ID, oid)
+    }
+
+    @Test
+    fun `tildel selv om tildeling allerede eksisterer`() {
+        val oid = UUID.randomUUID()
+        val annenOid = UUID.randomUUID()
+        nyPerson()
+        nySaksbehandler(oid)
+        nySaksbehandler(annenOid)
+        nyDao.tildel(OPPGAVE_ID, oid, false)
+        nyDao.tildel(OPPGAVE_ID, annenOid, false)
+        assertTildeling(OPPGAVE_ID, annenOid)
+    }
+
+    @Test
+    fun avmeld() {
+        val oid = UUID.randomUUID()
+        nyPerson()
+        nySaksbehandler(oid)
+        nyDao.tildel(OPPGAVE_ID, oid, false)
+        nyDao.avmeld(OPPGAVE_ID)
+        assertTildeling(OPPGAVE_ID, null)
+    }
 
     @Test
     fun `oppretter tildeling`() {
@@ -106,6 +140,10 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
         assertEquals(SAKSBEHANDLEREPOST, tildeling.epost)
         assertEquals(SAKSBEHANDLER_NAVN, tildeling.navn)
         assertEquals(false, tildeling.påVent)
+    }
+
+    private fun nySaksbehandler(oid: UUID = UUID.randomUUID()) {
+        saksbehandlerDao.opprettSaksbehandler(oid, "Navn Navnesen", "navn@navnesen.no", "Z999999")
     }
 
     private fun tildelTilSaksbehandler(
