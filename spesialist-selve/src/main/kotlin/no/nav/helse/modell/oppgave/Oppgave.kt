@@ -126,21 +126,21 @@ class Oppgave private constructor(
 
     sealed interface Tilstand {
         fun invalider(oppgave: Oppgave) {
-            logg.error(
+            logg.warn(
                 "Forventer ikke invalidering i {} for oppgave med {}",
                 kv("tilstand", this),
                 kv("oppgaveId", oppgave.id)
             )
         }
         fun avventerSystem(oppgave: Oppgave, ident: String, oid: UUID) {
-            logg.error(
+            logg.warn(
                 "Forventer ikke avventer system i {} for oppgave med {}",
                 kv("tilstand", this),
                 kv("oppgaveId", oppgave.id)
             )
         }
         fun ferdigstill(oppgave: Oppgave) {
-            logg.error(
+            logg.warn(
                 "Forventer ikke ferdigstillelse i {} for oppgave med {}",
                 kv("tilstand", this),
                 kv("oppgaveId", oppgave.id)
