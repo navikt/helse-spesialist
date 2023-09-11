@@ -90,7 +90,7 @@ spec:
     - name: RISK_SUPERSAKSBEHANDLER_GROUP
       value: eb6e5e78-51a9-411c-b3b3-314debe35863
     - name: KODE7_SAKSBEHANDLER_GROUP
-      value: c21e58b6-d838-4cb0-919a-398cd40117e3
+      value: 9ec6487d-f37a-4aad-a027-cd221c1ac32b
     - name: BESLUTTER_SAKSBEHANDLER_GROUP
       value: 59f26eef-0a4f-4038-bf46-3a5b2f252155
     - name: SKJERMEDE_PERSONER_GROUP
