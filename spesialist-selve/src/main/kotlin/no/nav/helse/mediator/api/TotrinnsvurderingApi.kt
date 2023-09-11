@@ -13,7 +13,6 @@ import io.ktor.server.routing.post
 import io.ktor.util.pipeline.PipelineContext
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.spesialist.api.SaksbehandlerMediator
@@ -34,7 +33,6 @@ interface Oppgavehåndterer {
 }
 
 internal fun Route.totrinnsvurderingApi(
-    hendelseMediator: HendelseMediator,
     totrinnsvurderingMediator: TotrinnsvurderingMediator,
     saksbehandlerMediator: SaksbehandlerMediator,
     oppgavehåndterer: Oppgavehåndterer
@@ -58,8 +56,6 @@ internal fun Route.totrinnsvurderingApi(
             saksbehandleroid = saksbehandlerOid,
             type = PeriodehistorikkType.TOTRINNSVURDERING_TIL_GODKJENNING
         )
-
-        hendelseMediator.sendMeldingOppgaveOppdatert(totrinnsvurdering.oppgavereferanse)
 
         log.info("OppgaveId ${totrinnsvurdering.oppgavereferanse} sendt til godkjenning")
 
@@ -85,8 +81,6 @@ internal fun Route.totrinnsvurderingApi(
             PeriodehistorikkType.TOTRINNSVURDERING_RETUR,
             retur.notat.tekst to NotatType.Retur
         )
-
-        hendelseMediator.sendMeldingOppgaveOppdatert(retur.oppgavereferanse)
 
         log.info("OppgaveId ${retur.oppgavereferanse} sendt i retur")
 

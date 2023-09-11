@@ -87,6 +87,7 @@ class Oppgave private constructor(
         totrinnsvurdering.sendTilBeslutter(id, behandlendeSaksbehandler)
 
         tildeltTil = totrinnsvurdering.tidligereBeslutter()
+        oppgaveEndret()
     }
 
     internal fun sendIRetur(besluttendeSaksbehandler: Saksbehandler) {
@@ -101,6 +102,7 @@ class Oppgave private constructor(
         }
 
         tildeltTil = opprinneligSaksbehandler
+        oppgaveEndret()
     }
 
     fun ferdigstill() {
@@ -119,6 +121,10 @@ class Oppgave private constructor(
         tilstand.invalider(this)
     }
 
+    private fun oppgaveEndret() {
+        observers.forEach { it.oppgaveEndret(this) }
+    }
+
     private fun nesteTilstand(neste: Tilstand) {
         val forrige = tilstand
         tilstand = neste
@@ -128,7 +134,7 @@ class Oppgave private constructor(
             kv("forrigeTilstand", forrige),
             kv("nesteTilstand", neste),
         )
-        observers.forEach { it.oppgaveEndret(this) }
+        oppgaveEndret()
     }
 
     sealed interface Tilstand {

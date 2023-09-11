@@ -86,7 +86,6 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     fun setupTotrinnsvurdering() {
         setupServer {
             totrinnsvurderingApi(
-                hendelseMediator,
                 totrinnsvurderingMediator,
                 saksbehandlerMediator,
                 oppgavehåndterer

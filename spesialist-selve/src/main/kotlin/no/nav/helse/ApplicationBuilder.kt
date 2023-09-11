@@ -171,7 +171,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val msGraphClient = MsGraphClient(httpClient = httpClient, tokenClient = accessTokenClient)
 
     private val httpTraceLog = LoggerFactory.getLogger("tjenestekall")
-    private lateinit var hendelseMediator: HendelseMediator
+    private var hendelseMediator: HendelseMediator
     private lateinit var saksbehandlerMediator: SaksbehandlerMediator
     private lateinit var tildelingService: TildelingService
     private var oppgavemelder: Oppgavemelder
@@ -333,7 +333,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                     opptegnelseApi(OpptegnelseMediator(opptegnelseApiDao, abonnementDao))
                     behandlingsstatistikkApi(BehandlingsstatistikkMediator(behandlingsstatistikkDao))
                     totrinnsvurderingApi(
-                        hendelseMediator,
                         totrinnsvurderingMediator,
                         saksbehandlerMediator,
                         oppgaveMediator

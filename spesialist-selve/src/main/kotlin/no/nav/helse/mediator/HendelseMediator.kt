@@ -46,6 +46,7 @@ import no.nav.helse.mediator.meldinger.løsninger.Risikovurderingløsning
 import no.nav.helse.mediator.meldinger.løsninger.SaksbehandlerløsningRiver
 import no.nav.helse.mediator.meldinger.løsninger.Vergemålløsning
 import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
+import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.HendelseDao
@@ -53,8 +54,6 @@ import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver
 import no.nav.helse.modell.overstyring.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.person.AdressebeskyttelseEndretRiver
@@ -177,12 +176,6 @@ internal class HendelseMediator(
         val sykefraværstilfelleMediator = SykefraværstilfelleMediator(rapidsConnection)
         sykefraværstilfelle.registrer(sykefraværstilfelleMediator)
         utkastTilVedtakMessage.sendInnTil(sykefraværstilfelle)
-    }
-
-    internal fun sendMeldingOppgaveOppdatert(oppgaveId: Long, påVent: Boolean? = null) {
-        Oppgave.lagMelding(oppgaveId, "oppgave_oppdatert", påVent, oppgaveDao).also { (key, message) ->
-            rapidsConnection.publish(key, message.toJson())
-        }
     }
 
     fun adressebeskyttelseEndret(

@@ -5,6 +5,7 @@ import java.util.UUID
 import no.nav.helse.modell.OppgaveInspektør.Companion.inspektør
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.Oppgave.Companion.oppgaveMedEgenskaper
+import no.nav.helse.modell.oppgave.OppgaveObserver
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtBeslutter
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtIRetur
@@ -281,6 +282,36 @@ internal class OppgaveTest {
     }
 
     @Test
+    fun `sender ut oppgaveEndret når oppgave sendes til beslutter`() {
+        val oppgave = nyOppgave(SØKNAD, medTotrinnsvurdering = true)
+        oppgave.register(observer)
+        oppgave.sendTilBeslutter(saksbehandler)
+
+        assertEquals(1, observer.oppgaverEndret.size)
+        assertEquals(oppgave, observer.oppgaverEndret[0])
+
+        inspektør(oppgave) {
+            assertEquals(Oppgave.AvventerSaksbehandler, this.tilstand)
+        }
+    }
+
+    @Test
+    fun `sender ut oppgaveEndret når oppgave sendes i retur`() {
+        val oppgave = nyOppgave(SØKNAD, medTotrinnsvurdering = true)
+        oppgave.register(observer)
+        oppgave.sendTilBeslutter(saksbehandler)
+        oppgave.sendIRetur(beslutter)
+
+        assertEquals(2, observer.oppgaverEndret.size)
+        assertEquals(oppgave, observer.oppgaverEndret[0])
+        assertEquals(oppgave, observer.oppgaverEndret[1])
+
+        inspektør(oppgave) {
+            assertEquals(Oppgave.AvventerSaksbehandler, this.tilstand)
+        }
+    }
+
+    @Test
     fun equals() {
         val gjenopptattOppgave = oppgaveMedEgenskaper(1L, VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID, UUID.randomUUID(), listOf(OPPGAVETYPE))
         val oppgave1 = oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), listOf(SØKNAD))
@@ -319,4 +350,11 @@ internal class OppgaveTest {
         opprettet = LocalDateTime.now(),
         oppdatert = null
     )
+
+    private val observer = object : OppgaveObserver {
+        val oppgaverEndret = mutableListOf<Oppgave>()
+        override fun oppgaveEndret(oppgave: Oppgave) {
+            oppgaverEndret.add(oppgave)
+        }
+    }
 }
