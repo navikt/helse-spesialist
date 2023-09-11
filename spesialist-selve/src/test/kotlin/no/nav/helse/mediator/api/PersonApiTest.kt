@@ -22,7 +22,6 @@ import io.mockk.mockk
 import io.mockk.verify
 import java.time.LocalDateTime
 import java.util.UUID
-import kotlinx.coroutines.runBlocking
 import no.nav.helse.Gruppe
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.idForGruppe
@@ -67,12 +66,10 @@ internal class PersonApiTest {
     fun `godkjenning av vedtaksperiode OK`() = iEnTestApplication { client ->
         every { oppgaveDao.venterPåSaksbehandler(1L) } returns true
         every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns null
-        val response = runBlocking {
-            client.post("/api/vedtak") {
-                contentType(ContentType.Application.Json)
-                setBody<JsonNode>(objectMapper.valueToTree(godkjenning))
-                authentication(SAKSBEHANDLER_OID)
-            }
+        val response = client.post("/api/vedtak") {
+            contentType(ContentType.Application.Json)
+            setBody<JsonNode>(objectMapper.valueToTree(godkjenning))
+            authentication(SAKSBEHANDLER_OID)
         }
         assertEquals(HttpStatusCode.Created, response.status)
     }
@@ -80,15 +77,13 @@ internal class PersonApiTest {
     @Test
     fun `en vedtaksperiode kan kun godkjennes hvis den har en aktiv oppgave`() = iEnTestApplication { client ->
         every { oppgaveDao.venterPåSaksbehandler(1L) } returns false
-        val response = runBlocking {
-            client.post("/api/vedtak") {
-                contentType(ContentType.Application.Json)
-                setBody<JsonNode>(objectMapper.valueToTree(godkjenning))
-                authentication(SAKSBEHANDLER_OID)
-            }
+        val response = client.post("/api/vedtak") {
+            contentType(ContentType.Application.Json)
+            setBody<JsonNode>(objectMapper.valueToTree(godkjenning))
+            authentication(SAKSBEHANDLER_OID)
         }
         assertEquals(HttpStatusCode.Conflict, response.status)
-        val feilDto = runBlocking { response.body<JsonNode>() }
+        val feilDto = response.body<JsonNode>()
         assertEquals("ikke_aapen_saksbehandleroppgave", feilDto["feilkode"].asText())
     }
 
@@ -98,12 +93,10 @@ internal class PersonApiTest {
         every { oppgaveDao.erRiskoppgave(1L) } returns false
         every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns null
         every { saksbehandlerMediator.håndter(godkjenning, UUID.randomUUID(), any()) } returns Unit
-        val response = runBlocking {
-            client.post("/api/vedtak") {
-                contentType(ContentType.Application.Json)
-                setBody<JsonNode>(objectMapper.valueToTree(godkjenning))
-                authentication(SAKSBEHANDLER_OID)
-            }
+        val response = client.post("/api/vedtak") {
+            contentType(ContentType.Application.Json)
+            setBody<JsonNode>(objectMapper.valueToTree(godkjenning))
+            authentication(SAKSBEHANDLER_OID)
         }
         assertEquals(HttpStatusCode.Created, response.status)
     }
@@ -114,12 +107,10 @@ internal class PersonApiTest {
         every { oppgaveDao.erRiskoppgave(1L) } returns false
         every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns null
         every { saksbehandlerMediator.håndter(godkjenning, any(), any()) } throws ManglerVurderingAvVarsler(1L)
-        val response = runBlocking {
-            client.post("/api/vedtak") {
-                contentType(ContentType.Application.Json)
-                setBody<JsonNode>(objectMapper.valueToTree(godkjenning))
-                authentication(SAKSBEHANDLER_OID)
-            }
+        val response = client.post("/api/vedtak") {
+            contentType(ContentType.Application.Json)
+            setBody<JsonNode>(objectMapper.valueToTree(godkjenning))
+            authentication(SAKSBEHANDLER_OID)
         }
         assertEquals(HttpStatusCode.BadRequest, response.status)
     }
@@ -130,12 +121,10 @@ internal class PersonApiTest {
         every { oppgaveDao.erRiskoppgave(1L) } returns false
         every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns null
         every { saksbehandlerMediator.håndter(godkjenning, any(), any()) } returns Unit
-        val response = runBlocking {
-            client.post("/api/vedtak") {
-                contentType(ContentType.Application.Json)
-                setBody<JsonNode>(objectMapper.valueToTree(avvisning))
-                authentication(SAKSBEHANDLER_OID)
-            }
+        val response = client.post("/api/vedtak") {
+            contentType(ContentType.Application.Json)
+            setBody<JsonNode>(objectMapper.valueToTree(avvisning))
+            authentication(SAKSBEHANDLER_OID)
         }
         assertEquals(HttpStatusCode.Created, response.status)
     }
@@ -145,21 +134,17 @@ internal class PersonApiTest {
         every { oppgaveDao.venterPåSaksbehandler(1L) } returns true
         every { oppgaveDao.erRiskoppgave(1L) } returns true
         every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns null
-        val responseForManglendeTilgang = runBlocking {
-            client.post("/api/vedtak") {
-                contentType(ContentType.Application.Json)
-                setBody<JsonNode>(objectMapper.valueToTree(godkjenning))
-                authentication(SAKSBEHANDLER_OID, emptyList())
-            }
+        val responseForManglendeTilgang = client.post("/api/vedtak") {
+            contentType(ContentType.Application.Json)
+            setBody<JsonNode>(objectMapper.valueToTree(godkjenning))
+            authentication(SAKSBEHANDLER_OID, emptyList())
         }
         assertEquals(HttpStatusCode.Forbidden, responseForManglendeTilgang.status)
 
-        val responseForTilgangOk = runBlocking {
-            client.post("/api/vedtak") {
-                contentType(ContentType.Application.Json)
-                setBody<JsonNode>(objectMapper.valueToTree(godkjenning))
-                authentication(SAKSBEHANDLER_OID, listOf(riskQaGruppe))
-            }
+        val responseForTilgangOk = client.post("/api/vedtak") {
+            contentType(ContentType.Application.Json)
+            setBody<JsonNode>(objectMapper.valueToTree(godkjenning))
+            authentication(SAKSBEHANDLER_OID, listOf(riskQaGruppe))
         }
         assertEquals(HttpStatusCode.Created, responseForTilgangOk.status)
     }
@@ -179,25 +164,19 @@ internal class PersonApiTest {
             oppdatert = null
         )
 
-        val responseForManglendeTilgang = runBlocking {
-            client.post("/api/vedtak") {
-                contentType(ContentType.Application.Json)
-                setBody<JsonNode>(objectMapper.valueToTree(godkjenning))
-                authentication(SAKSBEHANDLER_OID, emptyList())
-
-            }
+        val responseForManglendeTilgang = client.post("/api/vedtak") {
+            contentType(ContentType.Application.Json)
+            setBody<JsonNode>(objectMapper.valueToTree(godkjenning))
+            authentication(SAKSBEHANDLER_OID, emptyList())
         }
         assertEquals(HttpStatusCode.Unauthorized, responseForManglendeTilgang.status)
-        val responseBody = runBlocking { responseForManglendeTilgang.body<String>() }
+        val responseBody = responseForManglendeTilgang.body<String>()
         assertEquals("Saksbehandler trenger beslutter-rolle for å kunne utbetale beslutteroppgaver", responseBody)
 
-        val responseForTilgangOk = runBlocking {
-            client.post("/api/vedtak") {
-                contentType(ContentType.Application.Json)
-                setBody<JsonNode>(objectMapper.valueToTree(godkjenning))
-                authentication(SAKSBEHANDLER_OID, listOf(beslutterGruppe))
-
-            }
+        val responseForTilgangOk = client.post("/api/vedtak") {
+            contentType(ContentType.Application.Json)
+            setBody<JsonNode>(objectMapper.valueToTree(godkjenning))
+            authentication(SAKSBEHANDLER_OID, listOf(beslutterGruppe))
         }
         assertEquals(HttpStatusCode.Created, responseForTilgangOk.status)
     }
@@ -218,16 +197,14 @@ internal class PersonApiTest {
             oppdatert = null
         )
 
-        val responseForManglendeTilgang = runBlocking {
-            client.post("/api/vedtak") {
-                contentType(ContentType.Application.Json)
-                setBody<JsonNode>(objectMapper.valueToTree(godkjenning))
-                authentication(SAKSBEHANDLER_OID, listOf(beslutterGruppe))
-            }
+        val responseForManglendeTilgang = client.post("/api/vedtak") {
+            contentType(ContentType.Application.Json)
+            setBody<JsonNode>(objectMapper.valueToTree(godkjenning))
+            authentication(SAKSBEHANDLER_OID, listOf(beslutterGruppe))
         }
 
         assertEquals(HttpStatusCode.Unauthorized, responseForManglendeTilgang.status)
-        val responseBody = runBlocking { responseForManglendeTilgang.body<String>() }
+        val responseBody = responseForManglendeTilgang.body<String>()
         assertEquals("Kan ikke beslutte egne oppgaver.", responseBody)
     }
 
@@ -246,12 +223,10 @@ internal class PersonApiTest {
             oppdatert = null
         )
 
-        val responseUtbetaling = runBlocking {
-            client.post("/api/vedtak") {
-                contentType(ContentType.Application.Json)
-                setBody<JsonNode>(objectMapper.valueToTree(godkjenning))
-                authentication(SAKSBEHANDLER_OID, listOf(beslutterGruppe))
-            }
+        val responseUtbetaling = client.post("/api/vedtak") {
+            contentType(ContentType.Application.Json)
+            setBody<JsonNode>(objectMapper.valueToTree(godkjenning))
+            authentication(SAKSBEHANDLER_OID, listOf(beslutterGruppe))
         }
 
         verify(exactly = 1) { totrinnsvurderingMediatorMock.settBeslutter(vedtaksperiodeId, SAKSBEHANDLER_OID) }
@@ -296,7 +271,7 @@ internal class PersonApiTest {
         }
     }
 
-    private fun iEnTestApplication(block: ApplicationTestBuilder.(HttpClient) -> Unit) = testApplication {
+    private fun iEnTestApplication(block: suspend ApplicationTestBuilder.(HttpClient) -> Unit) = testApplication {
         setUpApplication()
         val client = createClient {
             install(ContentNegotiation) {
