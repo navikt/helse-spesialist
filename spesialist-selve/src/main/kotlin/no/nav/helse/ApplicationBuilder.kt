@@ -35,6 +35,7 @@ import java.lang.management.ManagementFactory
 import java.net.ProxySelector
 import java.net.URI
 import java.util.UUID
+import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
@@ -94,7 +95,6 @@ import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
-import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.tildeling.TildelingService
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.utbetaling.UtbetalingApiDao
@@ -105,6 +105,7 @@ import org.slf4j.event.Level
 import kotlin.random.Random.Default.nextInt
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationServer
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao as OpptegnelseApiDao
+import no.nav.helse.spesialist.api.tildeling.TildelingDao as TildelingApiDao
 
 private val auditLog = LoggerFactory.getLogger("auditLogger")
 private val logg = LoggerFactory.getLogger("ApplicationBuilder")
@@ -185,6 +186,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
     private val saksbehandlerApiDao = SaksbehandlerDao(dataSource)
     private val saksbehandlerDao = no.nav.helse.db.SaksbehandlerDao(dataSource)
+    private val tildelingApiDao = TildelingApiDao(dataSource)
     private val tildelingDao = TildelingDao(dataSource)
     private val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource)
     private val overstyringApiDao = OverstyringApiDao(dataSource)
@@ -301,7 +303,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             graphQLApi(
                 personApiDao = personApiDao,
                 egenAnsattApiDao = egenAnsattApiDao,
-                tildelingDao = tildelingDao,
+                tildelingDao = tildelingApiDao,
                 arbeidsgiverApiDao = arbeidsgiverApiDao,
                 overstyringApiDao = overstyringApiDao,
                 risikovurderingApiDao = risikovurderingApiDao,
@@ -388,7 +390,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         )
         saksbehandlerMediator = SaksbehandlerMediator(dataSource, rapidsConnection)
         oppgavemelder = Oppgavemelder(oppgaveApiDao, rapidsConnection)
-        tildelingService = TildelingService(tildelingDao, saksbehandlerApiDao, totrinnsvurderingApiDao) { oppgavemelder }
+        tildelingService = TildelingService(tildelingApiDao, saksbehandlerApiDao, totrinnsvurderingApiDao) { oppgavemelder }
         oppdaterPersonService = OppdaterPersonService(rapidsConnection)
         godkjenningService = GodkjenningService(
             dataSource = dataSource,

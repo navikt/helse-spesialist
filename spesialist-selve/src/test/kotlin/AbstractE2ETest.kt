@@ -36,6 +36,7 @@ import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.Testdata.snapshot
 import no.nav.helse.db.SaksbehandlerDao
+import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.januar
 import no.nav.helse.mediator.GodkjenningMediator
@@ -76,7 +77,6 @@ import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
-import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spleis.graphql.HentSnapshot
@@ -84,6 +84,7 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao as OpptegnelseApiDao
+import no.nav.helse.spesialist.api.tildeling.TildelingDao as TildelingApiDao
 
 internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
@@ -105,7 +106,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private val periodehistorikkDao = PeriodehistorikkDao(dataSource)
     protected val personDao = PersonDao(dataSource)
     private val vedtakDao = VedtakDao(dataSource)
-    protected val tildelingDao = TildelingDao(dataSource)
+    protected val tildelingApiDao = TildelingApiDao(dataSource)
+    private val tildelingDao = TildelingDao(dataSource)
     private val risikovurderingDao = RisikovurderingDao(dataSource)
     private val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
     private val overstyringApiDao = OverstyringApiDao(dataSource)
@@ -180,7 +182,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     internal val personQuery = PersonQuery(
         personApiDao = personApiDao,
         egenAnsattApiDao = egenAnsattApiDao,
-        tildelingDao = tildelingDao,
+        tildelingDao = tildelingApiDao,
         arbeidsgiverApiDao = arbeidsgiverApiDao,
         overstyringApiDao = overstyringApiDao,
         risikovurderingApiDao = risikovurderingApiDao,

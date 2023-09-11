@@ -11,6 +11,7 @@ import no.nav.helse.Tilgangskontroll
 import no.nav.helse.db.OppgaveFraDatabase
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.SaksbehandlerFraDatabase
+import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
@@ -27,7 +28,6 @@ import no.nav.helse.spesialist.api.oppgave.Oppgavetype.STIKKPRØVE
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype.SØKNAD
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.reservasjon.Reservasjonsinfo
-import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -120,7 +120,7 @@ internal class OppgaveMediatorTest {
         }
         mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
         assertFalse(gruppehenterTestoppsett.erKalt)
-        verify(exactly = 1) { tildelingDao.opprettTildeling(any(), SAKSBEHANDLEROID, any()) }
+        verify(exactly = 1) { tildelingDao.tildel(any(), SAKSBEHANDLEROID, any()) }
         assertAntallOpptegnelser(1)
     }
 
@@ -135,7 +135,7 @@ internal class OppgaveMediatorTest {
         }
         mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
         assertTrue(gruppehenterTestoppsett.erKalt)
-        verify(exactly = 0) { tildelingDao.opprettTildeling(any(), SAKSBEHANDLEROID, any()) }
+        verify(exactly = 0) { tildelingDao.tildel(any(), SAKSBEHANDLEROID, any()) }
         assertAntallOpptegnelser(1)
     }
 
@@ -149,7 +149,7 @@ internal class OppgaveMediatorTest {
             stikkprøveoppgave(it)
         }
         mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
-        verify(exactly = 0) { tildelingDao.opprettTildeling(any(), any(), any()) }
+        verify(exactly = 0) { tildelingDao.tildel(any(), any(), any()) }
         assertAntallOpptegnelser(1)
     }
 

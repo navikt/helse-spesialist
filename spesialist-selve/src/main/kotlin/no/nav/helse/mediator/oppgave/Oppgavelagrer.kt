@@ -4,6 +4,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.db.OppgaveFraDatabase
 import no.nav.helse.db.SaksbehandlerFraDatabase
+import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingFraDatabase
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveVisitor
@@ -12,7 +13,7 @@ import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 
-class Oppgavelagrer : OppgaveVisitor {
+class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
     private lateinit var oppgaveForLagring: OppgaveFraDatabase
     private var totrinnsvurderingForLagring: TotrinnsvurderingFraDatabase? = null
 
@@ -26,8 +27,8 @@ class Oppgavelagrer : OppgaveVisitor {
             navn = enumValueOf(oppgave.type),
             hendelseId = hendelseId
         )
-        if (oppgave.tildelt != null) oppgaveMediator.tildel(oppgave.id, oppgave.tildelt.oid, oppgave.påVent)
-        else oppgaveMediator.avmeld(oppgave.id)
+        if (oppgave.tildelt != null) tildelingDao.tildel(oppgave.id, oppgave.tildelt.oid, oppgave.påVent)
+        else tildelingDao.avmeld(oppgave.id)
 
         val totrinnsvurdering = totrinnsvurderingForLagring
         if (totrinnsvurdering != null) oppgaveMediator.lagreTotrinnsvurdering(totrinnsvurdering)
@@ -41,8 +42,8 @@ class Oppgavelagrer : OppgaveVisitor {
             ferdigstiltAvIdent = oppgave.ferdigstiltAvIdent,
             ferdigstiltAvOid = oppgave.ferdigstiltAvOid
         )
-        if (oppgave.tildelt != null) oppgaveMediator.tildel(oppgave.id, oppgave.tildelt.oid, oppgave.påVent)
-        else oppgaveMediator.avmeld(oppgave.id)
+        if (oppgave.tildelt != null) tildelingDao.tildel(oppgave.id, oppgave.tildelt.oid, oppgave.påVent)
+        else tildelingDao.avmeld(oppgave.id)
 
         val totrinnsvurdering = totrinnsvurderingForLagring
         if (totrinnsvurdering != null) oppgaveMediator.lagreTotrinnsvurdering(totrinnsvurdering)

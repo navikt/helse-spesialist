@@ -16,12 +16,11 @@ import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
-import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.slf4j.LoggerFactory
 
 class OppgaveMediator(
     private val oppgaveDao: OppgaveDao,
-    private val tildelingDao: TildelingDao,
+    private val tildelingDao: no.nav.helse.db.TildelingDao,
     private val reservasjonDao: ReservasjonDao,
     private val opptegnelseDao: OpptegnelseDao,
     private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
@@ -40,18 +39,10 @@ class OppgaveMediator(
         leggPåVentForSenereLagring(oppgave)
     }
 
-    internal fun tildel(oppgaveId: Long, saksbehandleroid: UUID, påVent: Boolean = false): Boolean {
-        return tildelingDao.opprettTildeling(oppgaveId, saksbehandleroid, påVent) != null
-    }
-
-    internal fun avmeld(oppgaveId: Long) {
-        tildelingDao.slettTildeling(oppgaveId)
-    }
-
     fun oppgave(id: Long, oppgaveBlock: Oppgave.() -> Unit) {
         val oppgave = Oppgavehenter(oppgaveDao, totrinnsvurderingRepository, saksbehandlerRepository).oppgave(id)
         oppgaveBlock(oppgave)
-        Oppgavelagrer().apply {
+        Oppgavelagrer(tildelingDao).apply {
             oppgave.accept(this)
             oppdater(this@OppgaveMediator)
         }
@@ -154,7 +145,7 @@ class OppgaveMediator(
         messageContext: MessageContext
     ) {
         oppgaveForLagring?.let {
-            Oppgavelagrer().apply {
+            Oppgavelagrer(tildelingDao).apply {
                 it.accept(this)
                 lagre(this@OppgaveMediator, hendelseId, contextId)
             }

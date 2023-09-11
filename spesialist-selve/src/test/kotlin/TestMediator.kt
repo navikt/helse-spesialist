@@ -1,6 +1,7 @@
 import java.util.UUID
 import javax.sql.DataSource
 import no.nav.helse.db.SaksbehandlerDao
+import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
@@ -27,7 +28,6 @@ import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
-import no.nav.helse.spesialist.api.tildeling.TildelingDao
 
 
 internal class TestMediator(
@@ -44,6 +44,7 @@ internal class TestMediator(
     private val generasjonDao = GenerasjonDao(dataSource)
     private val totrinnsvurderingDao = TotrinnsvurderingDao(dataSource)
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
+    private val tildelingDao = TildelingDao(dataSource)
 
     private val godkjenningMediator = GodkjenningMediator(
         vedtakDao,
@@ -54,7 +55,7 @@ internal class TestMediator(
     )
     private val oppgaveMediator = OppgaveMediator(
         oppgaveDao = OppgaveDao(dataSource),
-        tildelingDao = TildelingDao(dataSource),
+        tildelingDao = tildelingDao,
         reservasjonDao = ReservasjonDao(dataSource),
         opptegnelseDao = opptegnelseDao,
         totrinnsvurderingRepository = totrinnsvurderingDao,

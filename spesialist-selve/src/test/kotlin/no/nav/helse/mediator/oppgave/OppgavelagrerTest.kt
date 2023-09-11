@@ -1,19 +1,23 @@
 package no.nav.helse.mediator.oppgave
 
+import DatabaseIntegrationTest
+import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingFraDatabase
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.random.Random
 
-class OppgavelagrerTest {
+class OppgavelagrerTest: DatabaseIntegrationTest() {
     private companion object {
         private val OPPGAVETYPE = Oppgavetype.SØKNAD
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
@@ -44,53 +48,59 @@ class OppgavelagrerTest {
         private val HENDELSE_ID = UUID.randomUUID()
     }
 
+    private val nyTildelingDao = mockk<TildelingDao>(relaxed = true)
     private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
+
+    @BeforeEach
+    fun beforeEach() {
+        clearMocks(nyTildelingDao, oppgaveMediator)
+    }
 
     @Test
     fun `lagre oppgave uten tildeling medfører forsøk på å slette eksisterende tildeling`() {
         val oppgave = nyOppgave()
-        val oppgavelagrer = Oppgavelagrer()
+        val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
         oppgave.accept(oppgavelagrer)
 
         oppgavelagrer.lagre(oppgaveMediator, HENDELSE_ID, CONTEXT_ID)
         verify(exactly = 1) { oppgaveMediator.opprett(OPPGAVE_ID, CONTEXT_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, Oppgavetype.SØKNAD, HENDELSE_ID) }
-        verify(exactly = 0) { oppgaveMediator.tildel(any(), any(), any()) }
-        verify(exactly = 1) { oppgaveMediator.avmeld(any()) }
+        verify(exactly = 0) { nyTildelingDao.tildel(any(), any(), any()) }
+        verify(exactly = 1) { nyTildelingDao.avmeld(OPPGAVE_ID) }
     }
 
     @Test
     fun `oppdatere oppgave uten tildeling medfører forsøk på å slette eksisterende tildeling`() {
         val oppgave = nyOppgave()
-        val oppgavelagrer = Oppgavelagrer()
+        val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
         oppgave.accept(oppgavelagrer)
 
         oppgavelagrer.oppdater(oppgaveMediator)
         verify(exactly = 1) { oppgaveMediator.oppdater(OPPGAVE_ID, Oppgavestatus.AvventerSaksbehandler, null, null) }
-        verify(exactly = 0) { oppgaveMediator.tildel(any(), any(), any()) }
-        verify(exactly = 1) { oppgaveMediator.avmeld(any()) }
+        verify(exactly = 0) { nyTildelingDao.tildel(any(), any(), any()) }
+        verify(exactly = 1) { nyTildelingDao.avmeld(OPPGAVE_ID) }
     }
 
     @Test
     fun `lagre oppgave uten tildeling eller totrinnsvurdering`() {
         val oppgave = nyOppgave(medTotrinnsvurdering = false)
-        val oppgavelagrer = Oppgavelagrer()
+        val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
         oppgave.accept(oppgavelagrer)
 
         oppgavelagrer.lagre(oppgaveMediator, HENDELSE_ID, CONTEXT_ID)
         verify(exactly = 1) { oppgaveMediator.opprett(OPPGAVE_ID, CONTEXT_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, Oppgavetype.SØKNAD, HENDELSE_ID) }
-        verify(exactly = 0) { oppgaveMediator.tildel(any(), any(), any()) }
+        verify(exactly = 0) { nyTildelingDao.tildel(any(), any(), any()) }
         verify(exactly = 0) { oppgaveMediator.lagreTotrinnsvurdering(any()) }
     }
 
     @Test
     fun `lagre oppgave uten tildeling`() {
         val oppgave = nyOppgave(medTotrinnsvurdering = true)
-        val oppgavelagrer = Oppgavelagrer()
+        val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
         oppgave.accept(oppgavelagrer)
 
         oppgavelagrer.lagre(oppgaveMediator, HENDELSE_ID, CONTEXT_ID)
         verify(exactly = 1) { oppgaveMediator.opprett(OPPGAVE_ID, CONTEXT_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, Oppgavetype.SØKNAD, HENDELSE_ID) }
-        verify(exactly = 0) { oppgaveMediator.tildel(any(), any(), any()) }
+        verify(exactly = 0) { nyTildelingDao.tildel(any(), any(), any()) }
         verify(exactly = 1) { oppgaveMediator.lagreTotrinnsvurdering(TotrinnsvurderingFraDatabase(VEDTAKSPERIODE_ID, false, SAKSBEHANDLER_OID, BESLUTTER_OID, UTBETALING_ID, TOTRINNSVURDERING_OPPRETTET, TOTRINNSVURDERING_OPPDATERT)) }
     }
 
@@ -98,12 +108,12 @@ class OppgavelagrerTest {
     fun `lagre oppgave uten totrinnsvurdering`() {
         val oppgave = nyOppgave(medTotrinnsvurdering = false)
         oppgave.forsøkTildeling(saksbehandler, harTilgangTil = { _, _ -> true })
-        val oppgavelagrer = Oppgavelagrer()
+        val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
         oppgave.accept(oppgavelagrer)
 
         oppgavelagrer.lagre(oppgaveMediator, HENDELSE_ID, CONTEXT_ID)
         verify(exactly = 1) { oppgaveMediator.opprett(OPPGAVE_ID, CONTEXT_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, Oppgavetype.SØKNAD, HENDELSE_ID) }
-        verify(exactly = 1) { oppgaveMediator.tildel(OPPGAVE_ID, SAKSBEHANDLER_OID, false) }
+        verify(exactly = 1) { nyTildelingDao.tildel(OPPGAVE_ID, SAKSBEHANDLER_OID, false) }
         verify(exactly = 0) { oppgaveMediator.lagreTotrinnsvurdering(any()) }
     }
 
@@ -111,12 +121,12 @@ class OppgavelagrerTest {
     fun `lagre oppgave`() {
         val oppgave = nyOppgave(medTotrinnsvurdering = true)
         oppgave.forsøkTildeling(saksbehandler, harTilgangTil = { _, _ -> true })
-        val oppgavelagrer = Oppgavelagrer()
+        val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
         oppgave.accept(oppgavelagrer)
 
         oppgavelagrer.lagre(oppgaveMediator, HENDELSE_ID, CONTEXT_ID)
         verify(exactly = 1) { oppgaveMediator.opprett(OPPGAVE_ID, CONTEXT_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, Oppgavetype.SØKNAD, HENDELSE_ID) }
-        verify(exactly = 1) { oppgaveMediator.tildel(OPPGAVE_ID, SAKSBEHANDLER_OID, false) }
+        verify(exactly = 1) { nyTildelingDao.tildel(OPPGAVE_ID, SAKSBEHANDLER_OID, false) }
         verify(exactly = 1) { oppgaveMediator.lagreTotrinnsvurdering(TotrinnsvurderingFraDatabase(VEDTAKSPERIODE_ID, false, SAKSBEHANDLER_OID, BESLUTTER_OID, UTBETALING_ID, TOTRINNSVURDERING_OPPRETTET, TOTRINNSVURDERING_OPPDATERT)) }
     }
 
@@ -125,12 +135,12 @@ class OppgavelagrerTest {
         val oppgave = nyOppgave(medTotrinnsvurdering = false)
         oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
         oppgave.ferdigstill()
-        val oppgavelagrer = Oppgavelagrer()
+        val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
         oppgave.accept(oppgavelagrer)
 
         oppgavelagrer.oppdater(oppgaveMediator)
         verify(exactly = 1) { oppgaveMediator.oppdater(OPPGAVE_ID, Oppgavestatus.Ferdigstilt, SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID) }
-        verify(exactly = 0) { oppgaveMediator.tildel(any(), any(), any()) }
+        verify(exactly = 0) { nyTildelingDao.tildel(any(), any(), any()) }
         verify(exactly = 0) { oppgaveMediator.lagreTotrinnsvurdering(any()) }
     }
 
@@ -139,12 +149,12 @@ class OppgavelagrerTest {
         val oppgave = nyOppgave(medTotrinnsvurdering = true)
         oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
         oppgave.ferdigstill()
-        val oppgavelagrer = Oppgavelagrer()
+        val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
         oppgave.accept(oppgavelagrer)
 
         oppgavelagrer.oppdater(oppgaveMediator)
         verify(exactly = 1) { oppgaveMediator.oppdater(OPPGAVE_ID, Oppgavestatus.Ferdigstilt, SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID) }
-        verify(exactly = 0) { oppgaveMediator.tildel(any(), any(), any()) }
+        verify(exactly = 0) { nyTildelingDao.tildel(any(), any(), any()) }
         verify(exactly = 1) { oppgaveMediator.lagreTotrinnsvurdering(TotrinnsvurderingFraDatabase(VEDTAKSPERIODE_ID, false, SAKSBEHANDLER_OID, BESLUTTER_OID, UTBETALING_ID, TOTRINNSVURDERING_OPPRETTET, TOTRINNSVURDERING_OPPDATERT)) }
     }
 
@@ -154,12 +164,12 @@ class OppgavelagrerTest {
         oppgave.forsøkTildeling(saksbehandler, harTilgangTil = { _, _ -> true })
         oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
         oppgave.ferdigstill()
-        val oppgavelagrer = Oppgavelagrer()
+        val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
         oppgave.accept(oppgavelagrer)
 
         oppgavelagrer.oppdater(oppgaveMediator)
         verify(exactly = 1) { oppgaveMediator.oppdater(OPPGAVE_ID, Oppgavestatus.Ferdigstilt, SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID) }
-        verify(exactly = 1) { oppgaveMediator.tildel(OPPGAVE_ID, SAKSBEHANDLER_OID, false) }
+        verify(exactly = 1) { nyTildelingDao.tildel(OPPGAVE_ID, SAKSBEHANDLER_OID, false) }
         verify(exactly = 0) { oppgaveMediator.lagreTotrinnsvurdering(any()) }
     }
 
@@ -169,12 +179,12 @@ class OppgavelagrerTest {
         oppgave.forsøkTildeling(saksbehandler, harTilgangTil = { _, _ -> true })
         oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
         oppgave.ferdigstill()
-        val oppgavelagrer = Oppgavelagrer()
+        val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
         oppgave.accept(oppgavelagrer)
 
         oppgavelagrer.oppdater(oppgaveMediator)
         verify(exactly = 1) { oppgaveMediator.oppdater(OPPGAVE_ID, Oppgavestatus.Ferdigstilt, SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID) }
-        verify(exactly = 1) { oppgaveMediator.tildel(OPPGAVE_ID, SAKSBEHANDLER_OID, false) }
+        verify(exactly = 1) { nyTildelingDao.tildel(OPPGAVE_ID, SAKSBEHANDLER_OID, false) }
         verify(exactly = 1) { oppgaveMediator.lagreTotrinnsvurdering(TotrinnsvurderingFraDatabase(VEDTAKSPERIODE_ID, false, SAKSBEHANDLER_OID, BESLUTTER_OID, UTBETALING_ID, TOTRINNSVURDERING_OPPRETTET, TOTRINNSVURDERING_OPPDATERT)) }
     }
 
