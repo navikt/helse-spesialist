@@ -36,7 +36,7 @@ class OverstyrTidslinjeHandling(
         aktørId = aktørId,
         fødselsnummer = fødselsnummer,
         organisasjonsnummer = organisasjonsnummer,
-        dager = dager.map { OverstyrtTidslinjedag(it.dato, it.type, it.fraType, it.grad, it.fraGrad) },
+        dager = dager.map { OverstyrtTidslinjedag(it.dato, it.type, it.fraType, it.grad, it.fraGrad, it.fraDagErForeldet) },
         begrunnelse = begrunnelse
     )
 
@@ -54,7 +54,8 @@ class OverstyrTidslinjeHandling(
         val type: String,
         val fraType: String,
         val grad: Int?,
-        val fraGrad: Int?
+        val fraGrad: Int?,
+        val fraDagErForeldet: Boolean,
     )
 }
 

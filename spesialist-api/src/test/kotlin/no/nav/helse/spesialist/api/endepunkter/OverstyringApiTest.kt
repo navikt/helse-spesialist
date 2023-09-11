@@ -26,7 +26,7 @@ internal class OverstyringApiTest: AbstractE2ETest() {
             aktørId = AKTØR_ID,
             begrunnelse = "en begrunnelse",
             dager = listOf(
-                OverstyrDagDto(dato = 10.januar, type = "Feriedag", fraType = "Sykedag", grad = null, fraGrad = 100)
+                OverstyrDagDto(dato = 10.januar, type = "Feriedag", fraType = "Sykedag", grad = null, fraGrad = 100, fraDagErForeldet = false)
             )
         )
 
@@ -44,7 +44,7 @@ internal class OverstyringApiTest: AbstractE2ETest() {
             aktørId = AKTØR_ID,
             begrunnelse = "en begrunnelse",
             dager = listOf(
-                OverstyrDagDto(dato = 10.januar, type = "Arbeidsdag", fraType = "Sykedag", grad = null, fraGrad = 100)
+                OverstyrDagDto(dato = 10.januar, type = "Arbeidsdag", fraType = "Sykedag", grad = null, fraGrad = 100, fraDagErForeldet = false)
             )
         )
 
@@ -62,7 +62,7 @@ internal class OverstyringApiTest: AbstractE2ETest() {
             aktørId = AKTØR_ID,
             begrunnelse = "en begrunnelse",
             dager = listOf(
-                OverstyrDagDto(dato = 10.januar, type = "Sykedag", fraType = "Arbeidsdag", grad = null, fraGrad = 100)
+                OverstyrDagDto(dato = 10.januar, type = "Sykedag", fraType = "Arbeidsdag", grad = null, fraGrad = 100, fraDagErForeldet = false)
             )
         )
 

@@ -212,7 +212,8 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
                     type = "Sykedag",
                     fraType = "Arbeidsdag",
                     grad = null,
-                    fraGrad = 100
+                    fraGrad = 100,
+                    fraDagErForeldet = false,
                 )
             )
         )

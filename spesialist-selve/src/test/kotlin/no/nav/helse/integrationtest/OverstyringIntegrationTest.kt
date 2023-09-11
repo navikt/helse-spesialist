@@ -45,7 +45,7 @@ internal class OverstyringIntegrationTest : AbstractE2ETest() {
             aktørId = AKTØR,
             begrunnelse = "en begrunnelse",
             dager = listOf(
-                OverstyrDagDto(dato = 10.januar, type = "Feriedag", fraType = "Sykedag", grad = null, fraGrad = 100)
+                OverstyrDagDto(dato = 10.januar, type = "Feriedag", fraType = "Sykedag", grad = null, fraGrad = 100, fraDagErForeldet = false)
             ),
         )
         val response = sendOverstyring("/api/overstyr/dager", objectMapper.writeValueAsString(overstyring))
