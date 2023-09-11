@@ -33,7 +33,7 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
         hendelsefabrikk = Hendelsefabrikk(
             dataSource = dataSource,
             snapshotClient = graphQLClient,
-            oppgaveMediator = mockk(),
+            oppgaveMediator = { mockk() },
             godkjenningMediator = mockk(relaxed = true),
             automatisering = mockk(relaxed = true),
             overstyringMediator = mockk(),

@@ -100,7 +100,7 @@ internal class Hendelsefabrikk(
     private val snapshotDao: SnapshotDao = SnapshotDao(dataSource),
     private val egenAnsattDao: EgenAnsattDao = EgenAnsattDao(dataSource),
     private val snapshotClient: SnapshotClient,
-    private val oppgaveMediator: OppgaveMediator,
+    oppgaveMediator: () -> OppgaveMediator,
     private val totrinnsvurderingDao: TotrinnsvurderingDao = TotrinnsvurderingDao(dataSource),
     private val notatDao: NotatDao = NotatDao(dataSource),
     private val notatMediator: NotatMediator = NotatMediator(notatDao),
@@ -125,6 +125,7 @@ internal class Hendelsefabrikk(
 ) {
     private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
     private val sykefraværstilfelleDao = SykefraværstilfelleDao(dataSource)
+    private val oppgaveMediator: OppgaveMediator by lazy { oppgaveMediator() }
 
     internal companion object {
         private val mapper = jacksonObjectMapper()

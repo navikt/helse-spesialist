@@ -139,7 +139,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private val hendelsefabrikk = Hendelsefabrikk(
         dataSource = dataSource,
         snapshotClient = snapshotClient,
-        oppgaveMediator = oppgaveMediator,
+        oppgaveMediator = { oppgaveMediator },
         godkjenningMediator = godkjenningMediator,
         automatisering = Automatisering(
             risikovurderingDao = risikovurderingDao,

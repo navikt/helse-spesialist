@@ -363,7 +363,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val hendelsefabrikk = Hendelsefabrikk(
         dataSource = dataSource,
         snapshotClient = snapshotClient,
-        oppgaveMediator = oppgaveMediator,
+        oppgaveMediator = { oppgaveMediator },
         godkjenningMediator = godkjenningMediator,
         automatisering = automatisering,
         overstyringMediator = OverstyringMediator(rapidsConnection),

@@ -89,7 +89,7 @@ internal class TestMediator(
     private val hendelsefabrikk = Hendelsefabrikk(
         dataSource = dataSource,
         snapshotClient = snapshotClient,
-        oppgaveMediator = oppgaveMediator,
+        oppgaveMediator = { oppgaveMediator },
         godkjenningMediator = godkjenningMediator,
         automatisering = automatisering,
         overstyringMediator = overstyringMediator,
