@@ -113,6 +113,7 @@ class OppgavehenterTest {
             tilstand: Oppgave.Tilstand,
             vedtaksperiodeId: UUID,
             utbetalingId: UUID,
+            hendelseId: UUID,
             ferdigstiltAvOid: UUID?,
             ferdigstiltAvIdent: String?,
             egenskaper: List<Oppgavetype>,

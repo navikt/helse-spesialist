@@ -49,7 +49,7 @@ class Oppgave private constructor(
     }
 
     fun accept(visitor: OppgaveVisitor) {
-        visitor.visitOppgave(id, type, tilstand, vedtaksperiodeId, utbetalingId, ferdigstiltAvOid, ferdigstiltAvIdent, egenskaper, tildeltTil, påVent, totrinnsvurdering)
+        visitor.visitOppgave(id, type, tilstand, vedtaksperiodeId, utbetalingId, hendelseId, ferdigstiltAvOid, ferdigstiltAvIdent, egenskaper, tildeltTil, påVent, totrinnsvurdering)
         totrinnsvurdering?.accept(visitor)
     }
 

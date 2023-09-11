@@ -55,6 +55,7 @@ class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
         tilstand: Oppgave.Tilstand,
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
+        hendelseId: UUID,
         ferdigstiltAvOid: UUID?,
         ferdigstiltAvIdent: String?,
         egenskaper: List<Oppgavetype>,
