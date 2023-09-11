@@ -9,6 +9,7 @@ import no.nav.helse.Tilgangskontroll
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import org.slf4j.LoggerFactory
@@ -103,6 +104,12 @@ class Oppgave private constructor(
 
         tildeltTil = opprinneligSaksbehandler
         oppgaveEndret()
+    }
+
+    internal fun leggPåVent(): Saksbehandler {
+        val tildeltTil = this.tildeltTil ?: throw OppgaveIkkeTildelt(id)
+        påVent = true
+        return tildeltTil
     }
 
     fun ferdigstill() {

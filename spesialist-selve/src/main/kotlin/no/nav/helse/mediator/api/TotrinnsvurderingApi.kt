@@ -13,24 +13,18 @@ import io.ktor.server.routing.post
 import io.ktor.util.pipeline.PipelineContext
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.spesialist.api.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.notat.NyttNotatDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
+import no.nav.helse.spesialist.api.tildeling.Oppgavehåndterer
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingDto
 import org.slf4j.LoggerFactory
 
 private val log = LoggerFactory.getLogger("TotrinnsvurderingApi")
 private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-
-interface Oppgavehåndterer {
-    fun sendTilBeslutter(oppgaveId: Long, behandlendeSaksbehandler: Saksbehandler)
-    fun sendIRetur(oppgaveId: Long, besluttendeSaksbehandler: Saksbehandler)
-    fun oppgave(utbetalingId: UUID, oppgaveBlock: Oppgave?.() -> Unit)
-}
 
 internal fun Route.totrinnsvurderingApi(
     totrinnsvurderingMediator: TotrinnsvurderingMediator,

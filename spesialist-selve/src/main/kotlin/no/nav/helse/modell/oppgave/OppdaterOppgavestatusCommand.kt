@@ -1,7 +1,7 @@
 package no.nav.helse.modell.oppgave
 
 import java.util.UUID
-import no.nav.helse.mediator.api.Oppgavehåndterer
+import no.nav.helse.mediator.oppgave.Oppgavefinner
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
@@ -13,10 +13,10 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 internal class OppdaterOppgavestatusCommand(
     private val utbetalingId: UUID,
     private val status: Utbetalingsstatus,
-    private val oppgavehåndterer: Oppgavehåndterer
+    private val oppgaveMediator: Oppgavefinner
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
-        oppgavehåndterer.oppgave(utbetalingId) {
+        oppgaveMediator.oppgave(utbetalingId) {
             when (status) {
                 GODKJENT_UTEN_UTBETALING,
                 UTBETALT,

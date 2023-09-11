@@ -390,7 +390,12 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         )
         saksbehandlerMediator = SaksbehandlerMediator(dataSource, rapidsConnection)
         oppgavemelder = Oppgavemelder(oppgaveDao, rapidsConnection)
-        tildelingService = TildelingService(tildelingApiDao, saksbehandlerApiDao, totrinnsvurderingApiDao) { oppgavemelder }
+        tildelingService = TildelingService(
+            tildelingApiDao,
+            saksbehandlerApiDao,
+            totrinnsvurderingApiDao,
+            oppgaveMediator
+        ) { oppgavemelder }
         oppdaterPersonService = OppdaterPersonService(rapidsConnection)
         godkjenningService = GodkjenningService(
             dataSource = dataSource,

@@ -1,7 +1,10 @@
 package no.nav.helse.spesialist.api.graphql.mutation
 
+import io.mockk.every
 import java.util.UUID
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
+import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
+import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -117,6 +120,8 @@ internal class TildelingMutationTest : AbstractGraphQLApiTest() {
         val oppgaveId = finnOppgaveIdFor(PERIODE.id)
         tildelOppgave(oppgaveId, SAKSBEHANDLER.oid)
 
+        every { oppgavehåndterer.leggPåVent(oppgaveId) } returns TildelingApiDto(SAKSBEHANDLER.navn, SAKSBEHANDLER.epost, SAKSBEHANDLER.oid, true)
+
         val body = runQuery(
             """
                 mutation LeggPaaVent {
@@ -139,6 +144,8 @@ internal class TildelingMutationTest : AbstractGraphQLApiTest() {
         opprettSaksbehandler()
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
         val oppgaveId = finnOppgaveIdFor(PERIODE.id)
+
+        every { oppgavehåndterer.leggPåVent(oppgaveId) } throws OppgaveIkkeTildelt(oppgaveId)
 
         val body = runQuery(
             """

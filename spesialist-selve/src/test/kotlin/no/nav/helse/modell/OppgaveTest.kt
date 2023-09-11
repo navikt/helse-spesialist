@@ -9,6 +9,7 @@ import no.nav.helse.modell.oppgave.OppgaveObserver
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtBeslutter
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtIRetur
+import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveKreverVurderingAvToSaksbehandlere
 import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
@@ -308,6 +309,29 @@ internal class OppgaveTest {
 
         inspektør(oppgave) {
             assertEquals(Oppgave.AvventerSaksbehandler, this.tilstand)
+        }
+    }
+
+    @Test
+    fun `legg oppgave på vent`() {
+        val oppgave = nyOppgave(SØKNAD)
+        oppgave.forsøkTildeling(saksbehandler, false) { _, _ -> true }
+        oppgave.leggPåVent()
+
+        inspektør(oppgave) {
+            assertEquals(true, påVent)
+        }
+    }
+
+    @Test
+    fun `kan ikke legge oppgave på vent uten at den er tildelt først`() {
+        val oppgave = nyOppgave(SØKNAD)
+        assertThrows<OppgaveIkkeTildelt> {
+            oppgave.leggPåVent()
+        }
+
+        inspektør(oppgave) {
+            assertEquals(false, påVent)
         }
     }
 

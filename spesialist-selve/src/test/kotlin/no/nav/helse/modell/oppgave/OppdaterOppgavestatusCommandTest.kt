@@ -1,7 +1,7 @@
 package no.nav.helse.modell.oppgave
 
 import java.util.UUID
-import no.nav.helse.mediator.api.Oppgavehåndterer
+import no.nav.helse.mediator.oppgave.Oppgavefinner
 import no.nav.helse.modell.OppgaveInspektør.Companion.inspektør
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.ANNULLERT
@@ -9,7 +9,6 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.GODKJENT_UTEN_UTBETALING
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_GODKJENT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
-import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -93,9 +92,7 @@ internal class OppdaterOppgavestatusCommandTest {
         }
     }
 
-    private val oppgavehåndterer get() = object : Oppgavehåndterer {
-        override fun sendIRetur(oppgaveId: Long, besluttendeSaksbehandler: Saksbehandler) {}
-        override fun sendTilBeslutter(oppgaveId: Long, behandlendeSaksbehandler: Saksbehandler) {}
+    private val oppgavehåndterer get() = object : Oppgavefinner {
         override fun oppgave(utbetalingId: UUID, oppgaveBlock: Oppgave?.() -> Unit) {
             oppgaveBlock(oppgave)
         }

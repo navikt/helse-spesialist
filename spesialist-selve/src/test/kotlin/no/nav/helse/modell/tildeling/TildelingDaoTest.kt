@@ -9,7 +9,6 @@ import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class TildelingDaoTest : DatabaseIntegrationTest() {
@@ -112,14 +111,6 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
         tildelTilSaksbehandler()
         val saksbehandlerepost = tildelingDao.tildelingForPerson(FNR)
         assertNull(saksbehandlerepost)
-    }
-
-    @Test
-    fun `legger opppgave på vent`() {
-        nyPerson()
-        tildelTilSaksbehandler()
-        tildelingDao.leggOppgavePåVent(oppgaveId)
-        assertTrue(assertOppgavePåVent(oppgaveId))
     }
 
     @Test

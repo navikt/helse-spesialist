@@ -3,7 +3,7 @@ package no.nav.helse.spesialist.api.tildeling
 import java.util.UUID
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeTildelt
-import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
+import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import org.slf4j.LoggerFactory
@@ -12,11 +12,18 @@ interface IOppgavemelder {
     fun sendOppgaveOppdatertMelding(oppgaveId: Long)
 }
 
+interface Oppgavehåndterer {
+    fun sendTilBeslutter(oppgaveId: Long, behandlendeSaksbehandler: Saksbehandler)
+    fun sendIRetur(oppgaveId: Long, besluttendeSaksbehandler: Saksbehandler)
+    fun leggPåVent(oppgaveId: Long): TildelingApiDto
+}
+
 class TildelingService(
     private val tildelingDao: TildelingDao,
     private val saksbehandlerDao: SaksbehandlerDao,
     private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
-    oppgavemelder: () -> IOppgavemelder,
+    private val oppgavehåndterer: Oppgavehåndterer,
+    oppgavemelder: () -> IOppgavemelder
 ) {
     private val oppgavemelder: IOppgavemelder by lazy { oppgavemelder() }
 
@@ -53,11 +60,7 @@ class TildelingService(
     }
 
     internal fun leggOppgavePåVent(oppgaveId: Long): TildelingApiDto {
-        tildelingDao.tildelingForOppgave(oppgaveId) ?: throw OppgaveIkkeTildelt(oppgaveId)
-        val tildeling = tildelingDao.leggOppgavePåVent(oppgaveId)
-            ?: throw RuntimeException("Kunne ikke legge på vent")
-        oppgavemelder.sendOppgaveOppdatertMelding(oppgaveId)
-        return tildeling
+        return oppgavehåndterer.leggPåVent(oppgaveId)
     }
 
     internal fun fjernPåVent(oppgaveId: Long): TildelingApiDto {
@@ -106,5 +109,4 @@ class TildelingService(
         }
         return tildeling
     }
-
 }

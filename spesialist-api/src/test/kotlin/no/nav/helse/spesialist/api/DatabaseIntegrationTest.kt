@@ -30,6 +30,7 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.IOppgavemelder
+import no.nav.helse.spesialist.api.tildeling.Oppgavehåndterer
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.tildeling.TildelingService
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
@@ -102,11 +103,13 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     protected val snapshotMediator = SnapshotMediator(snapshotApiDao, snapshotClient)
     protected val notatMediator = mockk<NotatMediator>(relaxed = true)
+    protected val oppgavehåndterer = mockk<Oppgavehåndterer>()
     protected val tildelingService =
         TildelingService(
             tildelingDao,
             SaksbehandlerDao(dataSource),
-            totrinnsvurderingApiDao
+            totrinnsvurderingApiDao,
+            oppgavehåndterer
         ) { mockk<IOppgavemelder>(relaxed = true) }
 
     protected fun opprettVedtaksperiode(

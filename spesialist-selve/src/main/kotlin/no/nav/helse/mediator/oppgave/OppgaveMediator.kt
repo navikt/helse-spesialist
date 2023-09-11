@@ -6,7 +6,6 @@ import no.nav.helse.Tilgangskontroll
 import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.TotrinnsvurderingFraDatabase
 import no.nav.helse.db.TotrinnsvurderingRepository
-import no.nav.helse.mediator.api.Oppgavehåndterer
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -17,7 +16,13 @@ import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
+import no.nav.helse.spesialist.api.tildeling.Oppgavehåndterer
+import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import org.slf4j.LoggerFactory
+
+interface Oppgavefinner {
+    fun oppgave(utbetalingId: UUID, oppgaveBlock: Oppgave?.() -> Unit)
+}
 
 class OppgaveMediator(
     private val oppgaveDao: OppgaveDao,
@@ -28,7 +33,7 @@ class OppgaveMediator(
     private val saksbehandlerRepository: SaksbehandlerRepository,
     private val rapidsConnection: RapidsConnection,
     private val harTilgangTil: Tilgangskontroll = { _, _ -> false }
-): Oppgavehåndterer {
+): Oppgavehåndterer, Oppgavefinner {
     private var oppgaveForLagring: Oppgave? = null
     private var oppgaveForOppdatering: Oppgave? = null
     private val oppgaverForPublisering = mutableMapOf<Long, String>()
@@ -42,15 +47,16 @@ class OppgaveMediator(
         leggPåVentForSenereLagring(oppgave)
     }
 
-    fun oppgave(id: Long, oppgaveBlock: Oppgave.() -> Unit) {
+    fun <T> oppgave(id: Long, oppgaveBlock: Oppgave.() -> T): T {
         val oppgave = Oppgavehenter(oppgaveDao, totrinnsvurderingRepository, saksbehandlerRepository).oppgave(id)
         oppgave.register(Oppgavemelder(oppgaveDao, rapidsConnection))
-        oppgaveBlock(oppgave)
+        val returverdi = oppgaveBlock(oppgave)
         Oppgavelagrer(tildelingDao).apply {
             oppgave.accept(this)
             oppdater(this@OppgaveMediator)
         }
         leggPåVentForSenereOppdatering(oppgave)
+        return returverdi
     }
 
     override fun oppgave(utbetalingId: UUID, oppgaveBlock: Oppgave?.() -> Unit) {
@@ -73,6 +79,15 @@ class OppgaveMediator(
     override fun sendIRetur(oppgaveId: Long, besluttendeSaksbehandler: Saksbehandler) {
         oppgave(oppgaveId) {
             sendIRetur(besluttendeSaksbehandler)
+        }
+    }
+
+    override fun leggPåVent(oppgaveId: Long): TildelingApiDto {
+        return oppgave(oppgaveId) {
+            val tildeltTil = leggPåVent()
+            tildeltTil.toDto().let {
+                TildelingApiDto(it.navn, it.epost, it.oid, true)
+            }
         }
     }
 

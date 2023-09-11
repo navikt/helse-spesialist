@@ -15,7 +15,6 @@ import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.oppgave.OppgaveDao
-import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
 import no.nav.helse.objectMapper
@@ -28,6 +27,8 @@ import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.notat.NyttNotatDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.spesialist.api.tildeling.Oppgavehåndterer
+import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import no.nav.helse.spesialist.api.tildeling.TildelingService
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingDto
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -77,8 +78,8 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             sendIReturBlock()
         }
 
-        override fun oppgave(utbetalingId: UUID, oppgaveBlock: Oppgave?.() -> Unit) {
-
+        override fun leggPåVent(oppgaveId: Long): TildelingApiDto {
+            TODO("Not yet implemented")
         }
     }
 

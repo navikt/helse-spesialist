@@ -21,7 +21,7 @@ internal class TildelingServiceTest {
     private val totrinnsvurderingApiDao = mockk<TotrinnsvurderingApiDao>(relaxed = true)
     private val oppgavemelder = { mockk<IOppgavemelder>(relaxed = true) }
     private val tildelingService = TildelingService(
-        tildelingDao, saksbehandlerDao, totrinnsvurderingApiDao, oppgavemelder
+        tildelingDao, saksbehandlerDao, totrinnsvurderingApiDao, mockk(), oppgavemelder
     )
 
     private val SAKSBEHANDLER_OID = UUID.randomUUID()
