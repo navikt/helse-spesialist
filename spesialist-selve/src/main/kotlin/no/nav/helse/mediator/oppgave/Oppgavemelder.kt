@@ -21,7 +21,7 @@ class Oppgavemelder(private val oppgaveDao: OppgaveDao, private val rapidsConnec
         }
     }
 
-    override fun tilstandEndret(gammelTilstand: Oppgave.Tilstand, nyTilstand: Oppgave.Tilstand, oppgave: Oppgave) {
+    override fun oppgaveEndret(oppgave: Oppgave) {
         val oppgavemelding = OppgaveForKafkaBygger().bygg(oppgave)
         val (fnr, melding) = melding(oppgavemelding)
         rapidsConnection.publish(fnr, melding.toJson())

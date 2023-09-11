@@ -128,7 +128,7 @@ class Oppgave private constructor(
             kv("forrigeTilstand", forrige),
             kv("nesteTilstand", neste),
         )
-        observers.forEach { it.tilstandEndret(forrige, tilstand, this) }
+        observers.forEach { it.oppgaveEndret(this) }
     }
 
     sealed interface Tilstand {
