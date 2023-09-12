@@ -86,7 +86,6 @@ internal class GodkjenningService(
             avventerSystem(godkjenningDTO.saksbehandlerIdent, oid)
             rapidsConnection.publish(lagMelding("oppgave_oppdatert", fødselsnummer, hendelseId).toJson())
             overstyringDao.ferdigstillOverstyringerForVedtaksperiode(vedtaksperiodeId)
-            totrinnsvurderingMediator.ferdigstill(vedtaksperiodeId)
 
             if (totrinnsvurdering?.erBeslutteroppgave() == true && godkjenningDTO.godkjent) {
                 periodehistorikkDao.lagre(TOTRINNSVURDERING_ATTESTERT, oid, utbetalingId, null)

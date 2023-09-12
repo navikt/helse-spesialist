@@ -135,26 +135,6 @@ internal class GodkjenningServiceTest : AbstractE2ETest() {
     }
 
     @Test
-    fun `Ferdigstiller totrinnsvurdering`() {
-        val oid = UUID.randomUUID()
-        settOppBruker()
-
-        every { totrinnsvurderingDaoMock.hentAktiv(Testdata.VEDTAKSPERIODE_ID) } returns TotrinnsvurderingOld(
-            vedtaksperiodeId = Testdata.VEDTAKSPERIODE_ID,
-            erRetur = false,
-            saksbehandler = Testdata.SAKSBEHANDLER_OID,
-            beslutter = UUID.randomUUID(),
-            utbetalingIdRef = 1,
-            opprettet = LocalDateTime.now(),
-            oppdatert = null
-        )
-
-        godkjenningServiceWithMocks.håndter(GodkjenningDto(1L, true, "saksbehandler", null, null, null), "epost@nav.no", oid, UUID.randomUUID())
-
-        verify (exactly = 1) { totrinnsvurderingDaoMock.ferdigstill(Testdata.VEDTAKSPERIODE_ID) }
-    }
-
-    @Test
     fun `Lagrer at beslutter har attestert i periodehistorikk`() {
         val oid = UUID.randomUUID()
         settOppBruker()
