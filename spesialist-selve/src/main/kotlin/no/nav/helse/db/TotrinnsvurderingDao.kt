@@ -42,7 +42,7 @@ class TotrinnsvurderingDao(private val dataSource: DataSource): Totrinnsvurderin
         val query = """
            UPDATE totrinnsvurdering SET saksbehandler = :saksbehandler, beslutter = :beslutter, er_retur = :er_retur,
            oppdatert = :oppdatert, utbetaling_id_ref = (SELECT id FROM utbetaling_id ui WHERE ui.utbetaling_id = :utbetaling_id)
-           WHERE vedtaksperiode_id = :vedtaksperiode_id
+           WHERE vedtaksperiode_id = :vedtaksperiode_id AND utbetaling_id_ref IS NULL
         """
 
         sessionOf(dataSource).use {
