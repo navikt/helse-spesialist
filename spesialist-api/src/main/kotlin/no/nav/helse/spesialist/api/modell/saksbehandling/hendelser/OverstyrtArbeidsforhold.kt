@@ -5,7 +5,7 @@ import java.util.UUID
 import no.nav.helse.spesialist.api.modell.OverstyrtArbeidsforholdEvent
 import no.nav.helse.spesialist.api.modell.Saksbehandler
 
-internal class OverstyrtArbeidsforhold(
+class OverstyrtArbeidsforhold(
     private val fødselsnummer: String,
     private val aktørId: String,
     private val skjæringstidspunkt: LocalDate,
@@ -16,7 +16,7 @@ internal class OverstyrtArbeidsforhold(
         saksbehandler.håndter(this)
     }
 
-    internal fun byggEvent(oid: UUID, navn: String, epost: String, ident: String): OverstyrtArbeidsforholdEvent {
+    fun byggEvent(oid: UUID, navn: String, epost: String, ident: String): OverstyrtArbeidsforholdEvent {
         return OverstyrtArbeidsforholdEvent(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
@@ -30,13 +30,13 @@ internal class OverstyrtArbeidsforhold(
     }
 
 
-    internal class Arbeidsforhold(
+    class Arbeidsforhold(
         private val organisasjonsnummer: String,
         private val deaktivert: Boolean,
         private val begrunnelse: String,
         private val forklaring: String
     ) {
-        internal fun byggEvent(): OverstyrtArbeidsforholdEvent.Arbeidsforhold {
+        fun byggEvent(): OverstyrtArbeidsforholdEvent.Arbeidsforhold {
             return OverstyrtArbeidsforholdEvent.Arbeidsforhold(
                 orgnummer = organisasjonsnummer,
                 deaktivert = deaktivert,

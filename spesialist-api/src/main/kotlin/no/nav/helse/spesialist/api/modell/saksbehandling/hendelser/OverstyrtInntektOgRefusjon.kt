@@ -5,7 +5,7 @@ import java.util.UUID
 import no.nav.helse.spesialist.api.modell.OverstyrtInntektOgRefusjonEvent
 import no.nav.helse.spesialist.api.modell.Saksbehandler
 
-internal class OverstyrtInntektOgRefusjon(
+class OverstyrtInntektOgRefusjon(
     private val aktørId: String,
     private val fødselsnummer: String,
     private val skjæringstidspunkt: LocalDate,
@@ -16,7 +16,7 @@ internal class OverstyrtInntektOgRefusjon(
         saksbehandler.håndter(this)
     }
 
-    internal fun byggEvent(oid: UUID, navn: String, epost: String, ident: String) =
+    fun byggEvent(oid: UUID, navn: String, epost: String, ident: String) =
         OverstyrtInntektOgRefusjonEvent(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
@@ -29,7 +29,7 @@ internal class OverstyrtInntektOgRefusjon(
         )
 }
 
-internal class OverstyrtArbeidsgiver(
+class OverstyrtArbeidsgiver(
     private val organisasjonsnummer: String,
     private val månedligInntekt: Double,
     private val fraMånedligInntekt: Double,
@@ -39,7 +39,7 @@ internal class OverstyrtArbeidsgiver(
     private val forklaring: String,
     private val subsumsjon: Subsumsjon?,
 ) {
-    internal fun byggEvent() = OverstyrtInntektOgRefusjonEvent.OverstyrtArbeidsgiver(
+    fun byggEvent() = OverstyrtInntektOgRefusjonEvent.OverstyrtArbeidsgiver(
         organisasjonsnummer,
         månedligInntekt,
         fraMånedligInntekt,
@@ -51,12 +51,12 @@ internal class OverstyrtArbeidsgiver(
     )
 }
 
-internal class Refusjonselement(
+class Refusjonselement(
     private val fom: LocalDate,
     private val tom: LocalDate? = null,
     private val beløp: Double
 ) {
-    internal fun byggEvent() =
+    fun byggEvent() =
         OverstyrtInntektOgRefusjonEvent.OverstyrtArbeidsgiver.OverstyrtRefusjonselement(fom, tom, beløp)
 }
 

@@ -5,7 +5,7 @@ import java.util.UUID
 import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.modell.SkjønnsfastsattSykepengegrunnlagEvent
 
-internal class SkjønnsfastsattSykepengegrunnlag(
+class SkjønnsfastsattSykepengegrunnlag(
     private val aktørId: String,
     private val fødselsnummer: String,
     private val skjæringstidspunkt: LocalDate,
@@ -15,7 +15,7 @@ internal class SkjønnsfastsattSykepengegrunnlag(
     override fun utførAv(saksbehandler: Saksbehandler) {
         saksbehandler.håndter(this)
     }
-    internal fun byggEvent(oid: UUID, navn: String, epost: String, ident: String): SkjønnsfastsattSykepengegrunnlagEvent {
+    fun byggEvent(oid: UUID, navn: String, epost: String, ident: String): SkjønnsfastsattSykepengegrunnlagEvent {
         return SkjønnsfastsattSykepengegrunnlagEvent(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
@@ -28,7 +28,7 @@ internal class SkjønnsfastsattSykepengegrunnlag(
         )
     }
 
-    internal class SkjønnsfastsattArbeidsgiver(
+    class SkjønnsfastsattArbeidsgiver(
         private val organisasjonsnummer: String,
         private val årlig: Double,
         private val fraÅrlig: Double,
@@ -40,7 +40,7 @@ internal class SkjønnsfastsattSykepengegrunnlag(
         private val subsumsjon: Subsumsjon?,
         private val initierendeVedtaksperiodeId: String?,
     ) {
-        internal fun byggEvent(): SkjønnsfastsattSykepengegrunnlagEvent.SkjønnsfastsattArbeidsgiver {
+        fun byggEvent(): SkjønnsfastsattSykepengegrunnlagEvent.SkjønnsfastsattArbeidsgiver {
             return SkjønnsfastsattSykepengegrunnlagEvent.SkjønnsfastsattArbeidsgiver(
                 organisasjonsnummer = organisasjonsnummer,
                 årlig = årlig,
@@ -59,7 +59,7 @@ internal class SkjønnsfastsattSykepengegrunnlag(
             )
         }
 
-        internal enum class Skjønnsfastsettingstype {
+        enum class Skjønnsfastsettingstype {
             OMREGNET_ÅRSINNTEKT,
             RAPPORTERT_ÅRSINNTEKT,
             ANNET,

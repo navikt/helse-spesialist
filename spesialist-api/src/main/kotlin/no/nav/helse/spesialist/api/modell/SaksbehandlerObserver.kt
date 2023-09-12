@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.rapids_rivers.JsonMessage
 
-internal interface SaksbehandlerObserver {
+interface SaksbehandlerObserver {
     fun tidslinjeOverstyrt(fødselsnummer: String, event: OverstyrtTidslinjeEvent) {}
     fun inntektOgRefusjonOverstyrt(fødselsnummer: String, event: OverstyrtInntektOgRefusjonEvent) {}
     fun arbeidsforholdOverstyrt(fødselsnummer: String, event: OverstyrtArbeidsforholdEvent) {}
@@ -72,7 +72,7 @@ data class OverstyrtTidslinjeEvent(
     val saksbehandlerEpost: String
 ) {
     //TODO: JsonMessage burde ikke være kjent for modell, bør mappes om fra Event til JsonMessage i mediator
-    internal fun somJsonMessage(): JsonMessage {
+    fun somJsonMessage(): JsonMessage {
         return JsonMessage.newMessage(
             "saksbehandler_overstyrer_tidslinje", mutableMapOf(
                 "fødselsnummer" to fødselsnummer,
@@ -179,7 +179,7 @@ data class AnnullertUtbetalingEvent(
     val begrunnelser: List<String>,
     val kommentar: String?
 ) {
-    internal fun somJsonMessage(): JsonMessage {
+    fun somJsonMessage(): JsonMessage {
         return JsonMessage.newMessage(
             "annullering", mutableMapOf(
                 "fødselsnummer" to fødselsnummer,

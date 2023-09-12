@@ -5,7 +5,7 @@ import java.util.UUID
 import no.nav.helse.spesialist.api.modell.OverstyrtTidslinjeEvent
 import no.nav.helse.spesialist.api.modell.Saksbehandler
 
-internal class OverstyrtTidslinje(
+class OverstyrtTidslinje(
     private val aktørId: String,
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
@@ -17,7 +17,7 @@ internal class OverstyrtTidslinje(
         saksbehandler.håndter(this)
     }
 
-    internal fun byggEvent(oid: UUID, navn: String, epost: String, ident: String) = OverstyrtTidslinjeEvent(
+    fun byggEvent(oid: UUID, navn: String, epost: String, ident: String) = OverstyrtTidslinjeEvent(
         fødselsnummer = fødselsnummer,
         aktørId = aktørId,
         organisasjonsnummer = organisasjonsnummer,
@@ -30,7 +30,7 @@ internal class OverstyrtTidslinje(
     )
 }
 
-internal class OverstyrtTidslinjedag(
+class OverstyrtTidslinjedag(
     private val dato: LocalDate,
     private val type: String,
     private val fraType: String,
@@ -38,7 +38,7 @@ internal class OverstyrtTidslinjedag(
     private val fraGrad: Int?,
     private val subsumsjon: Subsumsjon?,
 ) {
-    internal fun byggEvent() = OverstyrtTidslinjeEvent.OverstyrtTidslinjeEventDag(
+    fun byggEvent() = OverstyrtTidslinjeEvent.OverstyrtTidslinjeEventDag(
         dato = dato,
         type = type,
         fraType = fraType,
