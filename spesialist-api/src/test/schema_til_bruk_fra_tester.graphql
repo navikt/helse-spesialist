@@ -143,7 +143,6 @@ type BeregnetPeriode implements Periode {
     handlinger: [Handling!]!
     hendelser: [Hendelse!]!
     id: String!
-    inntektFraAordningen: [InntektFraAOrdningen!]!
     inntektstype: Inntektstype!
     maksdato: String!
     notater: [Notat!]!
@@ -992,10 +991,10 @@ input OverstyringArbeidsgiverInput {
 
 input OverstyringDagInput {
     dato: String!
-    fraDagErForeldet: Boolean!
     fraGrad: Int
     fraType: String!
     grad: Int
+    subsumsjon: SubsumsjonInput
     type: String!
 }
 

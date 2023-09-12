@@ -2,12 +2,9 @@ package no.nav.helse.modell
 
 import DatabaseIntegrationTest
 import java.sql.SQLException
-import java.time.LocalDate
-import java.time.YearMonth
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.TestHendelse
 import no.nav.helse.modell.vedtaksperiode.Generasjon
@@ -279,77 +276,6 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
         val oppgaver = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_RISK)
         assertEquals(FORSTEGANGSBEHANDLING, oppgaver.first().periodetype)
         assertTrue(oppgaver.first().flereArbeidsgivere)
-    }
-
-    @Test
-    fun `Finn inntekter fra aordningen for arbeidsgiveren i 3 foregående måneder før skjæringstidspunktet`() {
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode()
-        opprettOppgave(contextId = CONTEXT_ID)
-        opprettInntekt(
-            FNR,
-            LocalDate.parse("2020-01-01"),
-            listOf(
-                Inntekter(
-                    årMåned = YearMonth.of(2019, 12),
-                    inntektsliste = listOf(
-                        Inntekter.Inntekt(beløp = 20000, orgnummer = ORGNUMMER),
-                        Inntekter.Inntekt(beløp = 22000, orgnummer = "987654321"),
-                    )
-                ),
-                Inntekter(
-                    årMåned = YearMonth.of(2019, 11),
-                    inntektsliste = listOf(
-                        Inntekter.Inntekt(beløp = 22000, orgnummer = ORGNUMMER),
-                        Inntekter.Inntekt(beløp = 22000, orgnummer = "987654321"),
-                    )
-                ),
-                Inntekter(
-                    årMåned = YearMonth.of(2019, 10),
-                    inntektsliste = listOf(
-                        Inntekter.Inntekt(beløp = 22000, orgnummer = ORGNUMMER),
-                        Inntekter.Inntekt(beløp = 2000, orgnummer = ORGNUMMER),
-                        Inntekter.Inntekt(beløp = 22000, orgnummer = "987654321"),
-                    )
-                )
-            )
-        )
-
-        val inntektFraAordningen = oppgaveApiDao.finnPeriodensInntekterFraAordningen(
-            VEDTAKSPERIODE.toString(),
-            "2020-01-01",
-            ORGNUMMER
-        )
-
-        assertEquals(3, inntektFraAordningen.size)
-        assertEquals(20000.0, inntektFraAordningen.first().sum)
-        assertEquals(24000.0, inntektFraAordningen.last().sum)
-
-        val inntektFraAordningenFeilOrgnummer = oppgaveApiDao.finnPeriodensInntekterFraAordningen(
-            VEDTAKSPERIODE.toString(),
-            "2020-01-01",
-            "123123123"
-        )
-
-        assertEquals(0, inntektFraAordningenFeilOrgnummer.size)
-    }
-
-    @Test
-    fun `Returnerer tomt array om inntekter på beregnet periode for orgnr ikke er lagret`() {
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode()
-        opprettOppgave(contextId = CONTEXT_ID)
-
-        val inntektFraAordningen = oppgaveApiDao.finnPeriodensInntekterFraAordningen(
-            VEDTAKSPERIODE.toString(),
-            "2020-01-01",
-            ORGNUMMER
-        )
-
-        assertEquals(0, inntektFraAordningen.size)
-        assertTrue(inntektFraAordningen.isEmpty())
     }
 
     @Test

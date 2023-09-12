@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.oppgave
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
@@ -9,8 +8,6 @@ import kotliquery.Row
 import no.nav.helse.HelseDao
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.graphql.schema.Boenhet
-import no.nav.helse.spesialist.api.graphql.schema.DateString
-import no.nav.helse.spesialist.api.graphql.schema.InntektFraAOrdningen
 import no.nav.helse.spesialist.api.graphql.schema.Kjonn
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker.BEGGE
@@ -19,12 +16,10 @@ import no.nav.helse.spesialist.api.graphql.schema.OppgaveForOversiktsvisning
 import no.nav.helse.spesialist.api.graphql.schema.Personinfo
 import no.nav.helse.spesialist.api.graphql.schema.Tildeling
 import no.nav.helse.spesialist.api.graphql.schema.Totrinnsvurdering
-import no.nav.helse.spesialist.api.graphql.schema.UUIDString
 import no.nav.helse.spesialist.api.graphql.schema.tilAdressebeskyttelse
 import no.nav.helse.spesialist.api.graphql.schema.tilKjonn
 import no.nav.helse.spesialist.api.graphql.schema.tilOppgavetype
 import no.nav.helse.spesialist.api.graphql.schema.tilPeriodetype
-import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.person.Kjønn
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
@@ -75,35 +70,6 @@ class OppgaveApiDao(dataSource: DataSource) : HelseDao(dataSource) {
         """,
         mapOf("vedtaksperiodeId" to vedtaksperiodeId)
     ).single { Oppgavetype.valueOf(it.string("type")) }
-
-    fun finnPeriodensInntekterFraAordningen(
-        vedtaksperiodeId: UUIDString,
-        skjæringstidspunkt: DateString,
-        orgnummer: String,
-    ): List<InntektFraAOrdningen> =
-        asSQL(
-            """ SELECT inntekter FROM inntekt
-                WHERE person_ref=(SELECT person_ref FROM vedtak v WHERE v.vedtaksperiode_id = :vedtaksperiodeId)
-                AND skjaeringstidspunkt = :skjaeringstidspunkt
-            """,
-            mapOf(
-                "vedtaksperiodeId" to UUID.fromString(vedtaksperiodeId),
-                "skjaeringstidspunkt" to LocalDate.parse(skjæringstidspunkt)
-            )
-        ).single { row ->
-            objectMapper.readValue<List<Inntekter>>(row.string("inntekter"))
-                .mapNotNull { inntekter ->
-                    inntekter.inntektsliste
-                        .filter { it.orgnummer == orgnummer }
-                        .takeUnless { it.isEmpty() }
-                        ?.let { inntekter.copy(inntektsliste = it) }
-                }.map { inntekter ->
-                    InntektFraAOrdningen(
-                        maned = inntekter.årMåned.toString(),
-                        sum = inntekter.inntektsliste.sumOf { it.beløp }.toDouble()
-                    )
-                }
-        } ?: emptyList()
 
     fun finnOppgaver(tilganger: SaksbehandlerTilganger) = asSQL(
         """

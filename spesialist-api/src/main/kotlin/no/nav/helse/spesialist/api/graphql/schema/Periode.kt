@@ -416,13 +416,6 @@ data class BeregnetPeriode(
 
     override fun hendelser(): List<Hendelse> = periode.hendelser.map { it.tilHendelse() }
 
-    fun inntektFraAordningen(): List<InntektFraAOrdningen>? =
-        oppgaveApiDao.finnPeriodensInntekterFraAordningen(
-            periode.vedtaksperiodeId,
-            periode.skjaeringstidspunkt,
-            orgnummer
-        )
-
     fun notater(): List<Notat> = notater(notatDao, vedtaksperiodeId())
 
     fun periodehistorikk(): List<PeriodeHistorikkElement> =
