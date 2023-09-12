@@ -32,19 +32,19 @@ import no.nav.helse.spesialist.api.vedtaksperiode.ApiGenerasjonRepository
 import org.slf4j.LoggerFactory
 
 interface Saksbehandlerhåndterer {
-    fun <T: SaksbehandlerHandling> håndter(handling: T, saksbehandler: SaksbehandlerFraApi)
-    fun opprettAbonnement(saksbehandler: SaksbehandlerFraApi, personidentifikator: String)
-    fun hentAbonnerteOpptegnelser(saksbehandler: SaksbehandlerFraApi, sisteSekvensId: Int): List<Opptegnelse>
-    fun hentAbonnerteOpptegnelser(saksbehandler: SaksbehandlerFraApi): List<Opptegnelse>
-    fun håndter(annullering: AnnulleringDto, saksbehandler: SaksbehandlerFraApi)
-    fun håndter(godkjenning: GodkjenningDto, behandlingId: UUID, saksbehandler: SaksbehandlerFraApi)
+    fun <T: SaksbehandlerHandling> håndter(handling: T, saksbehandlerFraApi: SaksbehandlerFraApi)
+    fun opprettAbonnement(saksbehandlerFraApi: SaksbehandlerFraApi, personidentifikator: String)
+    fun hentAbonnerteOpptegnelser(saksbehandlerFraApi: SaksbehandlerFraApi, sisteSekvensId: Int): List<Opptegnelse>
+    fun hentAbonnerteOpptegnelser(saksbehandlerFraApi: SaksbehandlerFraApi): List<Opptegnelse>
+    fun håndter(annullering: AnnulleringDto, saksbehandlerFraApi: SaksbehandlerFraApi)
+    fun håndter(godkjenning: GodkjenningDto, behandlingId: UUID, saksbehandlerFraApi: SaksbehandlerFraApi)
     fun håndterTotrinnsvurdering(oppgavereferanse: Long)
 }
 
 class SaksbehandlerMediator(
     dataSource: DataSource,
     private val rapidsConnection: RapidsConnection
-): SaksbehandlerObserver {
+): SaksbehandlerObserver, Saksbehandlerhåndterer {
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
     private val generasjonRepository = ApiGenerasjonRepository(dataSource)
     private val varselRepository = ApiVarselRepository(dataSource)
@@ -53,7 +53,8 @@ class SaksbehandlerMediator(
     private val abonnementDao = AbonnementDao(dataSource)
     private val reservasjonDao = ReservasjonDao(dataSource)
 
-    internal fun <T: SaksbehandlerHandling> håndter(handling: T, saksbehandler: Saksbehandler) {
+    override fun <T: SaksbehandlerHandling> håndter(handling: T, saksbehandlerFraApi: SaksbehandlerFraApi) {
+        val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         val handlingId = UUID.randomUUID()
         tell(handling)
         saksbehandler.register(this)
@@ -102,23 +103,27 @@ class SaksbehandlerMediator(
         rapidsConnection.publish(fødselsnummer, message.toJson())
     }
 
-    internal fun opprettAbonnement(saksbehandler: Saksbehandler, personidentifikator: String) {
+    override fun opprettAbonnement(saksbehandlerFraApi: SaksbehandlerFraApi, personidentifikator: String) {
+        val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         saksbehandler.persister(saksbehandlerDao)
         abonnementDao.opprettAbonnement(saksbehandler.oid(), personidentifikator.toLong())
     }
 
-    internal fun hentAbonnerteOpptegnelser(saksbehandler: Saksbehandler, sisteSekvensId: Int): List<Opptegnelse> {
+    override fun hentAbonnerteOpptegnelser(saksbehandlerFraApi: SaksbehandlerFraApi, sisteSekvensId: Int): List<Opptegnelse> {
+        val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         saksbehandler.persister(saksbehandlerDao)
         abonnementDao.registrerSistekvensnummer(saksbehandler.oid(), sisteSekvensId)
         return opptegnelseDao.finnOpptegnelser(saksbehandler.oid())
     }
 
-    internal fun hentAbonnerteOpptegnelser(saksbehandler: Saksbehandler): List<Opptegnelse> {
+    override fun hentAbonnerteOpptegnelser(saksbehandlerFraApi: SaksbehandlerFraApi): List<Opptegnelse> {
+        val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         saksbehandler.persister(saksbehandlerDao)
         return opptegnelseDao.finnOpptegnelser(saksbehandler.oid())
     }
 
-    internal fun håndter(annullering: AnnulleringDto, saksbehandler: Saksbehandler) {
+    override fun håndter(annullering: AnnulleringDto, saksbehandlerFraApi: SaksbehandlerFraApi) {
+        val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         tellAnnullering()
         saksbehandler.persister(saksbehandlerDao)
         val message = annullering.somJsonMessage(saksbehandler).also {
@@ -132,7 +137,8 @@ class SaksbehandlerMediator(
         rapidsConnection.publish(annullering.fødselsnummer, message.toJson())
     }
 
-    fun håndter(godkjenning: GodkjenningDto, behandlingId: UUID, saksbehandler: Saksbehandler) {
+    override fun håndter(godkjenning: GodkjenningDto, behandlingId: UUID, saksbehandlerFraApi: SaksbehandlerFraApi) {
+        val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         val perioderTilBehandling = generasjonRepository.perioderTilBehandling(godkjenning.oppgavereferanse)
         if (godkjenning.godkjent) {
             if (perioderTilBehandling.harAktiveVarsler())
@@ -144,6 +150,12 @@ class SaksbehandlerMediator(
         val fødselsnummer = oppgaveApiDao.finnFødselsnummer(godkjenning.oppgavereferanse)
 
         perioderTilBehandling.vurderVarsler(godkjenning.godkjent, fødselsnummer, behandlingId, saksbehandler.ident(), this::vurderVarsel)
+    }
+
+    override fun håndterTotrinnsvurdering(oppgavereferanse: Long) {
+        val perioderTilBehandling = generasjonRepository.perioderTilBehandling(oppgavereferanse)
+        if (perioderTilBehandling.harAktiveVarsler())
+            throw ManglerVurderingAvVarsler(oppgavereferanse)
     }
 
     private fun vurderVarsel(
@@ -179,13 +191,9 @@ class SaksbehandlerMediator(
         rapidsConnection.publish(fødselsnummer, message.toJson())
     }
 
-    fun håndterTotrinnsvurdering(oppgavereferanse: Long) {
-        val perioderTilBehandling = generasjonRepository.perioderTilBehandling(oppgavereferanse)
-        if (perioderTilBehandling.harAktiveVarsler())
-            throw ManglerVurderingAvVarsler(oppgavereferanse)
-    }
-
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
+
+    private fun SaksbehandlerFraApi.tilSaksbehandler() = Saksbehandler(epost, oid, navn, ident)
 }

@@ -32,7 +32,7 @@ import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.AzureAdAppConfig
 import no.nav.helse.spesialist.api.AzureConfig
-import no.nav.helse.spesialist.api.SaksbehandlerMediator
+import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.azureAdAppAuthentication
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
@@ -49,7 +49,7 @@ internal class PersonApiTest {
 
     private val oppgaveDao: OppgaveDao = mockk(relaxed = true)
     private val totrinnsvurderingMediatorMock = mockk<TotrinnsvurderingMediator>(relaxed = true)
-    private val saksbehandlerMediator = mockk<SaksbehandlerMediator>(relaxed = true)
+    private val saksbehandlerhåndterer = mockk<Saksbehandlerhåndterer>(relaxed = true)
     private val saksbehandlerIdent = "1234"
     private val SAKSBEHANDLER_OID = UUID.randomUUID()
     private val godkjenning = GodkjenningDto(1L, true, saksbehandlerIdent, null, null, null)
@@ -92,7 +92,7 @@ internal class PersonApiTest {
         every { oppgaveDao.venterPåSaksbehandler(1L) } returns true
         every { oppgaveDao.erRiskoppgave(1L) } returns false
         every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns null
-        every { saksbehandlerMediator.håndter(godkjenning, UUID.randomUUID(), any()) } returns Unit
+        every { saksbehandlerhåndterer.håndter(godkjenning, UUID.randomUUID(), any()) } returns Unit
         val response = client.post("/api/vedtak") {
             contentType(ContentType.Application.Json)
             setBody<JsonNode>(objectMapper.valueToTree(godkjenning))
@@ -106,7 +106,7 @@ internal class PersonApiTest {
         every { oppgaveDao.venterPåSaksbehandler(1L) } returns true
         every { oppgaveDao.erRiskoppgave(1L) } returns false
         every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns null
-        every { saksbehandlerMediator.håndter(godkjenning, any(), any()) } throws ManglerVurderingAvVarsler(1L)
+        every { saksbehandlerhåndterer.håndter(godkjenning, any(), any()) } throws ManglerVurderingAvVarsler(1L)
         val response = client.post("/api/vedtak") {
             contentType(ContentType.Application.Json)
             setBody<JsonNode>(objectMapper.valueToTree(godkjenning))
@@ -120,7 +120,7 @@ internal class PersonApiTest {
         every { oppgaveDao.venterPåSaksbehandler(1L) } returns true
         every { oppgaveDao.erRiskoppgave(1L) } returns false
         every { totrinnsvurderingMediatorMock.hentAktiv(1L) } returns null
-        every { saksbehandlerMediator.håndter(godkjenning, any(), any()) } returns Unit
+        every { saksbehandlerhåndterer.håndter(godkjenning, any(), any()) } returns Unit
         val response = client.post("/api/vedtak") {
             contentType(ContentType.Application.Json)
             setBody<JsonNode>(objectMapper.valueToTree(avvisning))
@@ -265,7 +265,7 @@ internal class PersonApiTest {
                     mockk(relaxed = true),
                     oppgaveDao,
                     Tilgangsgrupper(testEnv),
-                    saksbehandlerMediator
+                    saksbehandlerhåndterer
                 )
             }
         }

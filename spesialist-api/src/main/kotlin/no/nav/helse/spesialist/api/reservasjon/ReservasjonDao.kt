@@ -3,7 +3,7 @@ package no.nav.helse.spesialist.api.reservasjon
 import java.util.UUID
 import javax.sql.DataSource
 import no.nav.helse.HelseDao
-import no.nav.helse.spesialist.api.modell.Saksbehandler
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 
 class ReservasjonDao(dataSource: DataSource) : HelseDao(dataSource) {
     fun reserverPerson(saksbehandlerOid: UUID, fødselsnummer: String, påVent: Boolean) {
@@ -33,17 +33,17 @@ class ReservasjonDao(dataSource: DataSource) : HelseDao(dataSource) {
             WHERE p.fodselsnummer = :fnr AND r.gyldig_til > now();
         """, mapOf("fnr" to fødselsnummer.toLong())
     ).single { Reservasjonsinfo(
-        Saksbehandler(
-            it.string("epost"),
-            it.uuid("oid"),
-            it.string("navn"),
-            it.string("ident")
+        SaksbehandlerFraApi(
+            oid = it.uuid("oid"),
+            navn = it.string("navn"),
+            epost = it.string("epost"),
+            ident = it.string("ident")
         ),
         it.boolean("sett_på_vent_flagg")
     ) }
 }
 
 data class Reservasjonsinfo(
-    val reservertTil: Saksbehandler,
+    val reservertTil: SaksbehandlerFraApi,
     val settPåVentFlagg: Boolean,
 )

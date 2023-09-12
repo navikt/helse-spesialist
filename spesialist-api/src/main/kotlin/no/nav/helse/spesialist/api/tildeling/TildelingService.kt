@@ -3,8 +3,8 @@ package no.nav.helse.spesialist.api.tildeling
 import java.util.UUID
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeTildelt
-import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 
 interface IOppgavemelder {
@@ -12,8 +12,8 @@ interface IOppgavemelder {
 }
 
 interface Oppgavehåndterer {
-    fun sendTilBeslutter(oppgaveId: Long, behandlendeSaksbehandler: Saksbehandler)
-    fun sendIRetur(oppgaveId: Long, besluttendeSaksbehandler: Saksbehandler)
+    fun sendTilBeslutter(oppgaveId: Long, behandlendeSaksbehandler: SaksbehandlerFraApi)
+    fun sendIRetur(oppgaveId: Long, besluttendeSaksbehandler: SaksbehandlerFraApi)
     fun leggPåVent(oppgaveId: Long): TildelingApiDto
     fun fjernPåVent(oppgaveId: Long): TildelingApiDto
 }

@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.modell
 
-import io.ktor.server.auth.jwt.JWTPrincipal
 import java.util.UUID
 import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.OverstyrtArbeidsforhold
 import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.OverstyrtInntektOgRefusjon
@@ -15,15 +14,6 @@ class Saksbehandler(
     private val navn: String,
     private val ident: String
 ) {
-    companion object {
-        fun fraOnBehalfOfToken(jwtPrincipal: JWTPrincipal) = Saksbehandler(
-            epostadresse = jwtPrincipal.payload.getClaim("preferred_username").asString(),
-            oid = jwtPrincipal.payload.getClaim("oid").asString().let { UUID.fromString(it) },
-            navn = jwtPrincipal.payload.getClaim("name").asString(),
-            ident = jwtPrincipal.payload.getClaim("NAVident").asString(),
-        )
-    }
-
     private val observers = mutableListOf<SaksbehandlerObserver>()
 
     internal fun register(observer: SaksbehandlerObserver) {

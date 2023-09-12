@@ -326,7 +326,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                         godkjenningService = godkjenningService,
                         oppgaveDao = oppgaveDao,
                         tilgangsgrupper = tilgangsgrupper,
-                        saksbehandlerMediator = saksbehandlerMediator
+                        saksbehandlerhåndterer = saksbehandlerMediator
                     )
                     overstyringApi(saksbehandlerMediator)
                     annulleringApi(saksbehandlerMediator)

@@ -18,15 +18,15 @@ import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
 import no.nav.helse.objectMapper
-import no.nav.helse.spesialist.api.SaksbehandlerMediator
+import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtBeslutter
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtIRetur
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
-import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.notat.NyttNotatDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.tildeling.Oppgavehåndterer
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import no.nav.helse.spesialist.api.tildeling.TildelingService
@@ -46,7 +46,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     private val tildelingService = mockk<TildelingService>(relaxed = true)
     private val hendelseMediator = mockk<HendelseMediator>(relaxed = true)
     private val totrinnsvurderingMediator = mockk<TotrinnsvurderingMediator>(relaxed = true)
-    private val saksbehandlerMediator = mockk<SaksbehandlerMediator>(relaxed = true)
+    private val saksbehandlerhåndterer = mockk<Saksbehandlerhåndterer>(relaxed = true)
 
     private val saksbehandler_oid = UUID.randomUUID()
 
@@ -68,12 +68,12 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             sendIReturBlock = {}
         }
 
-        override fun sendTilBeslutter(oppgaveId: Long, behandlendeSaksbehandler: Saksbehandler) {
+        override fun sendTilBeslutter(oppgaveId: Long, behandlendeSaksbehandler: SaksbehandlerFraApi) {
             sendtTilBeslutter = true
             sendTilBeslutterBlock()
         }
 
-        override fun sendIRetur(oppgaveId: Long, besluttendeSaksbehandler: Saksbehandler) {
+        override fun sendIRetur(oppgaveId: Long, besluttendeSaksbehandler: SaksbehandlerFraApi) {
             sendtIRetur = true
             sendIReturBlock()
         }
@@ -92,7 +92,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
         setupServer {
             totrinnsvurderingApi(
                 totrinnsvurderingMediator,
-                saksbehandlerMediator,
+                saksbehandlerhåndterer,
                 oppgavehåndterer
             )
         }
@@ -108,7 +108,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     fun `en vedtaksperiode kan godkjennes hvis alle varsler er vurdert`() {
         every { oppgaveDao.venterPåSaksbehandler(1L) } returns true
         every { oppgaveDao.erRiskoppgave(1L) } returns false
-        every { saksbehandlerMediator.håndterTotrinnsvurdering(1L) } returns Unit
+        every { saksbehandlerhåndterer.håndterTotrinnsvurdering(1L) } returns Unit
         every { totrinnsvurderingMediator.hentAktiv(oppgaveId = any()) } returns TotrinnsvurderingOld(
             vedtaksperiodeId = UUID.randomUUID(),
             erRetur = true,
@@ -132,7 +132,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     fun `en vedtaksperiode kan ikke godkjennes hvis det finnes aktive varsler`() {
         every { oppgaveDao.venterPåSaksbehandler(1L) } returns true
         every { oppgaveDao.erRiskoppgave(1L) } returns false
-        every { saksbehandlerMediator.håndterTotrinnsvurdering(1L) } throws ManglerVurderingAvVarsler(1L)
+        every { saksbehandlerhåndterer.håndterTotrinnsvurdering(1L) } throws ManglerVurderingAvVarsler(1L)
         val response = runBlocking {
             client.post(TOTRINNSVURDERING_URL) {
                 contentType(ContentType.Application.Json)

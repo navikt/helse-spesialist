@@ -1,15 +1,20 @@
 package no.nav.helse.spesialist.api.endepunkter
 
-import io.ktor.client.request.*
-import io.ktor.http.*
+import io.ktor.client.request.accept
+import io.ktor.client.request.post
+import io.ktor.client.request.preparePost
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
+import io.ktor.http.isSuccess
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import java.util.*
+import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.spesialist.api.AbstractApiTest
-import no.nav.helse.spesialist.api.SaksbehandlerMediator
+import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.utbetaling.AnnulleringDto
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -24,19 +29,19 @@ internal class AnnulleringApiTest : AbstractApiTest() {
 
     private val SAKSBEHANDLER_OID = UUID.randomUUID()
 
-    private lateinit var saksbehandlerMediator: SaksbehandlerMediator
+    private lateinit var saksbehandlerhåndterer: Saksbehandlerhåndterer
 
     @BeforeAll
     fun setupTildeling() {
-        saksbehandlerMediator = mockk(relaxed = true)
+        saksbehandlerhåndterer = mockk(relaxed = true)
         setupServer {
-            annulleringApi(saksbehandlerMediator)
+            annulleringApi(saksbehandlerhåndterer)
         }
     }
 
     @AfterEach
     fun tearDownEach() {
-        clearMocks(saksbehandlerMediator)
+        clearMocks(saksbehandlerhåndterer)
     }
 
     @Test
@@ -60,7 +65,7 @@ internal class AnnulleringApiTest : AbstractApiTest() {
         }
         assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
         verify(exactly = 1) {
-            saksbehandlerMediator.håndter(capture(slot), any())
+            saksbehandlerhåndterer.håndter(capture(slot), any())
         }
         assertEquals("Russekort", slot.captured.kommentar)
         assertEquals(listOf("Ingen liker fisk", "En giraff!!"), slot.captured.begrunnelser)
@@ -85,7 +90,7 @@ internal class AnnulleringApiTest : AbstractApiTest() {
         }
         assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
         verify(exactly = 1) {
-            saksbehandlerMediator.håndter(capture(slot), any())
+            saksbehandlerhåndterer.håndter(capture(slot), any())
         }
         assertEquals(null, slot.captured.kommentar)
         assertEquals(emptyList<String>(), slot.captured.begrunnelser)

@@ -31,7 +31,7 @@ internal class ReservasjonDaoTest : DatabaseIntegrationTest() {
             reservasjonDao.hentReservasjonFor(FNR)?.reservertTil
                 ?: fail("Forventet at det skulle finnes en reservasjon i basen")
         }
-        assertEquals(SAKSBEHANDLER_OID, saksbehandler.oid())
+        assertEquals(SAKSBEHANDLER_OID, saksbehandler.oid)
         assertRiktigVarighet(finnGyldigTil())
     }
 
@@ -55,7 +55,7 @@ internal class ReservasjonDaoTest : DatabaseIntegrationTest() {
             reservasjonDao.hentReservasjonFor(FNR)?.reservertTil
                 ?: fail("Forventet at det skulle finnes en reservasjon i basen")
         }
-        assertEquals(SAKSBEHANDLER_OID, saksbehandler.oid())
+        assertEquals(SAKSBEHANDLER_OID, saksbehandler.oid)
         assertRiktigVarighet(finnGyldigTil())
     }
 

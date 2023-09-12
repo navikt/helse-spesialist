@@ -104,7 +104,7 @@ internal class SchemaBuilder(
                 ),
                 TopLevelObject(
                     OpptegnelseQuery(
-                        saksbehandlerMediator = saksbehandlerMediator
+                        saksbehandlerhåndterer = saksbehandlerMediator
                     )
                 )
             ),
@@ -119,13 +119,13 @@ internal class SchemaBuilder(
                     TildelingMutation(tildelingService = tildelingService, notatMediator = notatMediator)
                 ),
                 TopLevelObject(
-                    OpptegnelseMutation(saksbehandlerMediator = saksbehandlerMediator)
+                    OpptegnelseMutation(saksbehandlerhåndterer = saksbehandlerMediator)
                 ),
                 TopLevelObject(
-                    OverstyringMutation(saksbehandlerMediator = saksbehandlerMediator)
+                    OverstyringMutation(saksbehandlerhåndterer = saksbehandlerMediator)
                 ),
                 TopLevelObject(
-                    SkjonnsfastsettelseMutation(saksbehandlerMediator = saksbehandlerMediator)
+                    SkjonnsfastsettelseMutation(saksbehandlerhåndterer = saksbehandlerMediator)
                 )
             )
         )

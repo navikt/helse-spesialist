@@ -8,26 +8,26 @@ import graphql.schema.DataFetchingEnvironment
 import java.time.LocalDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import no.nav.helse.spesialist.api.SaksbehandlerMediator
+import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.schema.ArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.InntektOgRefusjonOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.TidslinjeOverstyring
-import no.nav.helse.spesialist.api.modell.Saksbehandler
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SubsumsjonDto
 
 
-class OverstyringMutation(private val saksbehandlerMediator: SaksbehandlerMediator) : Mutation {
+class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhåndterer) : Mutation {
 
     @Suppress("unused")
     suspend fun overstyrDager(
         overstyring: TidslinjeOverstyring,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> {
-        val saksbehandler: Saksbehandler = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
+        val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
         try {
             val handling = OverstyrTidslinjeHandling(
                 organisasjonsnummer = overstyring.organisasjonsnummer,
@@ -44,7 +44,7 @@ class OverstyringMutation(private val saksbehandlerMediator: SaksbehandlerMediat
                         fraDagErForeldet = it.fraDagErForeldet,
                     )
                 })
-            withContext(Dispatchers.IO) { saksbehandlerMediator.håndter(handling, saksbehandler) }
+            withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(handling, saksbehandler) }
         } catch (e: Exception) {
             return DataFetcherResult.newResult<Boolean>().error(kunneIkkeOverstyreError("dager")).build()
         }
@@ -56,7 +56,7 @@ class OverstyringMutation(private val saksbehandlerMediator: SaksbehandlerMediat
         overstyring: InntektOgRefusjonOverstyring,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> {
-        val saksbehandler: Saksbehandler = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
+        val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
         try {
             val handling = OverstyrInntektOgRefusjonHandling(
                 overstyring.aktorId,
@@ -91,7 +91,7 @@ class OverstyringMutation(private val saksbehandlerMediator: SaksbehandlerMediat
                             )
                         })
                 })
-            withContext(Dispatchers.IO) { saksbehandlerMediator.håndter(handling, saksbehandler) }
+            withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(handling, saksbehandler) }
         } catch (e: Exception) {
             return DataFetcherResult.newResult<Boolean>().error(kunneIkkeOverstyreError("inntekt og refusjon")).build()
         }
@@ -103,7 +103,7 @@ class OverstyringMutation(private val saksbehandlerMediator: SaksbehandlerMediat
         overstyring: ArbeidsforholdOverstyringHandling,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> {
-        val saksbehandler: Saksbehandler = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
+        val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
         try {
             val handling = OverstyrArbeidsforholdHandling(
                 overstyring.fodselsnummer,
@@ -117,7 +117,7 @@ class OverstyringMutation(private val saksbehandlerMediator: SaksbehandlerMediat
                         forklaring = arbeidsforhold.forklaring
                     )
                 })
-            withContext(Dispatchers.IO) { saksbehandlerMediator.håndter(handling, saksbehandler) }
+            withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(handling, saksbehandler) }
         } catch (e: Exception) {
             return DataFetcherResult.newResult<Boolean>().error(kunneIkkeOverstyreError("arbeidsforhold")).build()
         }

@@ -18,10 +18,10 @@ import no.nav.helse.Gruppe
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
-import no.nav.helse.spesialist.api.SaksbehandlerMediator
+import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.feilhåndtering.IkkeTilgangTilRiskQa
 import no.nav.helse.spesialist.api.feilhåndtering.IkkeÅpenOppgave
-import no.nav.helse.spesialist.api.modell.Saksbehandler
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import org.slf4j.LoggerFactory
 
@@ -31,7 +31,7 @@ internal fun Route.personApi(
     godkjenningService: GodkjenningService,
     oppgaveDao: OppgaveDao,
     tilgangsgrupper: Tilgangsgrupper,
-    saksbehandlerMediator: SaksbehandlerMediator
+    saksbehandlerhåndterer: Saksbehandlerhåndterer
 ) {
     val logg = LoggerFactory.getLogger("PersonApi")
     val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
@@ -52,7 +52,7 @@ internal fun Route.personApi(
 
     post("/api/vedtak") {
         val godkjenning = call.receive<GodkjenningDto>()
-        val saksbehandler = Saksbehandler.fraOnBehalfOfToken(requireNotNull(call.principal()))
+        val saksbehandler = SaksbehandlerFraApi.fraOnBehalfOfToken(requireNotNull(call.principal()))
         logg.info("Behandler godkjenning/avslag: ${godkjenning.åpenLoggString()} (se sikker logg for detaljer)")
         sikkerlogg.info("Behandler godkjenning/avslag: $godkjenning")
         val (oid, epostadresse) = requireNotNull(call.principal<JWTPrincipal>()).payload.let {
@@ -95,7 +95,7 @@ internal fun Route.personApi(
 
         val behandlingId = UUID.randomUUID()
 
-        saksbehandlerMediator.håndter(godkjenning, behandlingId, saksbehandler)
+        saksbehandlerhåndterer.håndter(godkjenning, behandlingId, saksbehandler)
         withContext(Dispatchers.IO) { godkjenningService.håndter(godkjenning, epostadresse, oid, behandlingId) }
         call.respond(HttpStatusCode.Created, mapOf("status" to "OK"))
     }

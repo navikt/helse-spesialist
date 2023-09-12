@@ -7,16 +7,16 @@ import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
-import no.nav.helse.spesialist.api.SaksbehandlerMediator
-import no.nav.helse.spesialist.api.modell.Saksbehandler
+import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.utbetaling.AnnulleringDto
 
-fun Route.annulleringApi(saksbehandlerMediator: SaksbehandlerMediator) {
+fun Route.annulleringApi(saksbehandlerhåndterer: Saksbehandlerhåndterer) {
     post("/api/annullering") {
         val annullering = call.receive<AnnulleringDto>()
-        val saksbehandler = Saksbehandler.fraOnBehalfOfToken(requireNotNull(call.principal()))
+        val saksbehandler = SaksbehandlerFraApi.fraOnBehalfOfToken(requireNotNull(call.principal()))
 
-        saksbehandlerMediator.håndter(annullering, saksbehandler)
+        saksbehandlerhåndterer.håndter(annullering, saksbehandler)
         call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
     }
 }

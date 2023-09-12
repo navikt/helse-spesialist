@@ -21,13 +21,13 @@ import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
-import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype.RISK_QA
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype.STIKKPRØVE
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype.SØKNAD
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.reservasjon.Reservasjonsinfo
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -74,7 +74,7 @@ internal class OppgaveMediatorTest {
         rapidsConnection = testRapid
     )
     private val saksbehandlerFraDatabase = SaksbehandlerFraDatabase(SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT)
-    private val saksbehandler = Saksbehandler(SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT)
+    private val saksbehandler = SaksbehandlerFraApi(SAKSBEHANDLEROID, SAKSBEHANDLEREPOST, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT)
     private fun søknadsoppgave(id: Long): Oppgave = Oppgave.oppgaveMedEgenskaper(id, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), listOf(SØKNAD))
     private fun stikkprøveoppgave(id: Long): Oppgave = Oppgave.oppgaveMedEgenskaper(id, VEDTAKSPERIODE_ID_2, UTBETALING_ID_2, UUID.randomUUID(), listOf(STIKKPRØVE))
 

@@ -5,7 +5,7 @@ import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.TestRapidHelpers.hendelser
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
-import no.nav.helse.spesialist.api.modell.Saksbehandler
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandling.OverstyrArbeidsgiverDto
@@ -38,7 +38,12 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
 
     private val SAKSBEHANDLER_EPOST = "epost@nav.no"
 
-    private val saksbehandler = Saksbehandler(SAKSBEHANDLER_EPOST, SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_IDENT)
+    private val saksbehandler = SaksbehandlerFraApi(
+        oid = SAKSBEHANDLER_OID,
+        navn = SAKSBEHANDLER_NAVN,
+        epost = SAKSBEHANDLER_EPOST,
+        ident = SAKSBEHANDLER_IDENT
+    )
 
     @BeforeEach
     internal fun beforeEach() {

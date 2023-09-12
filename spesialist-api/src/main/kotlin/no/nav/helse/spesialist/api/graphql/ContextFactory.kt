@@ -15,7 +15,7 @@ import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER_IDENT
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER_NAVN
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER_OID
 import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGER
-import no.nav.helse.spesialist.api.modell.Saksbehandler
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -93,10 +93,10 @@ private fun ApplicationRequest.getSaksbehandlerIdent(): String {
     return accessToken?.payload?.getClaim("NAVident")?.asString() ?: ""
 }
 
-private fun ApplicationRequest.saksbehandler(): Lazy<Saksbehandler> {
+private fun ApplicationRequest.saksbehandler(): Lazy<SaksbehandlerFraApi> {
     val accessToken = call.principal<JWTPrincipal>()
     return lazy {
-        accessToken?.let(Saksbehandler::fraOnBehalfOfToken)
+        accessToken?.let(SaksbehandlerFraApi::fraOnBehalfOfToken)
             ?: throw IllegalStateException("Forventer å finne saksbehandler i access token")
     }
 }

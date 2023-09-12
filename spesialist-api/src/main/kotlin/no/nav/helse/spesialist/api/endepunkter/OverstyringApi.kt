@@ -9,43 +9,43 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import no.nav.helse.spesialist.api.SaksbehandlerMediator
-import no.nav.helse.spesialist.api.modell.Saksbehandler
+import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandling
 
-fun Route.overstyringApi(saksbehandlerMediator: SaksbehandlerMediator) {
+fun Route.overstyringApi(saksbehandlerhåndterer: Saksbehandlerhåndterer) {
     post("/api/overstyr/dager") {
         val overstyring = call.receive<OverstyrTidslinjeHandling>()
-        val saksbehandler = Saksbehandler.fraOnBehalfOfToken(requireNotNull(call.principal()))
+        val saksbehandler = SaksbehandlerFraApi.fraOnBehalfOfToken(requireNotNull(call.principal()))
 
-        withContext(Dispatchers.IO) { saksbehandlerMediator.håndter(overstyring, saksbehandler) }
+        withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(overstyring, saksbehandler) }
         call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
     }
 
     post("/api/overstyr/inntektogrefusjon") {
         val overstyring = call.receive<OverstyrInntektOgRefusjonHandling>()
-        val saksbehandler = Saksbehandler.fraOnBehalfOfToken(requireNotNull(call.principal()))
+        val saksbehandler = SaksbehandlerFraApi.fraOnBehalfOfToken(requireNotNull(call.principal()))
 
-        withContext(Dispatchers.IO) { saksbehandlerMediator.håndter(overstyring, saksbehandler) }
+        withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(overstyring, saksbehandler) }
         call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
     }
 
     post("/api/overstyr/arbeidsforhold") {
         val overstyring = call.receive<OverstyrArbeidsforholdHandling>()
-        val saksbehandler = Saksbehandler.fraOnBehalfOfToken(requireNotNull(call.principal()))
+        val saksbehandler = SaksbehandlerFraApi.fraOnBehalfOfToken(requireNotNull(call.principal()))
 
-        withContext(Dispatchers.IO) { saksbehandlerMediator.håndter(overstyring, saksbehandler) }
+        withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(overstyring, saksbehandler) }
         call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
     }
 
     post("/api/skjonnsfastsett/sykepengegrunnlag") {
         val overstyring = call.receive<SkjønnsfastsettSykepengegrunnlagHandling>()
-        val saksbehandler = Saksbehandler.fraOnBehalfOfToken(requireNotNull(call.principal()))
+        val saksbehandler = SaksbehandlerFraApi.fraOnBehalfOfToken(requireNotNull(call.principal()))
 
-        withContext(Dispatchers.IO) { saksbehandlerMediator.håndter(overstyring, saksbehandler) }
+        withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(overstyring, saksbehandler) }
         call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
     }
 }

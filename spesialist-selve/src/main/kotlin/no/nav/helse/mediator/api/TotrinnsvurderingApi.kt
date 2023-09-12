@@ -14,11 +14,11 @@ import io.ktor.util.pipeline.PipelineContext
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
-import no.nav.helse.spesialist.api.SaksbehandlerMediator
+import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
-import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.notat.NyttNotatDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.tildeling.Oppgavehåndterer
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingDto
 import org.slf4j.LoggerFactory
@@ -28,15 +28,15 @@ private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
 internal fun Route.totrinnsvurderingApi(
     totrinnsvurderingMediator: TotrinnsvurderingMediator,
-    saksbehandlerMediator: SaksbehandlerMediator,
+    saksbehandlerhåndterer: Saksbehandlerhåndterer,
     oppgavehåndterer: Oppgavehåndterer
 ) {
     post("/api/totrinnsvurdering") {
         val totrinnsvurdering = call.receive<TotrinnsvurderingDto>()
-        val behandlendeSaksbehandler = Saksbehandler.fraOnBehalfOfToken(requireNotNull(call.principal()))
+        val behandlendeSaksbehandler = SaksbehandlerFraApi.fraOnBehalfOfToken(requireNotNull(call.principal()))
         val saksbehandlerOid = getSaksbehandlerOid()
 
-        saksbehandlerMediator.håndterTotrinnsvurdering(totrinnsvurdering.oppgavereferanse)
+        saksbehandlerhåndterer.håndterTotrinnsvurdering(totrinnsvurdering.oppgavereferanse)
         oppgavehåndterer.sendTilBeslutter(totrinnsvurdering.oppgavereferanse, behandlendeSaksbehandler)
 
         sikkerlogg.info(
@@ -58,7 +58,7 @@ internal fun Route.totrinnsvurderingApi(
 
     post("/api/totrinnsvurdering/retur") {
         val retur = call.receive<TotrinnsvurderingReturDto>()
-        val besluttendeSaksbehandler = Saksbehandler.fraOnBehalfOfToken(requireNotNull(call.principal()))
+        val besluttendeSaksbehandler = SaksbehandlerFraApi.fraOnBehalfOfToken(requireNotNull(call.principal()))
         val beslutterOid = getSaksbehandlerOid()
 
         sikkerlogg.info(

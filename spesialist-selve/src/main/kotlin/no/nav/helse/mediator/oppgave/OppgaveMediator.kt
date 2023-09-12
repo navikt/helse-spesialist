@@ -16,6 +16,7 @@ import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.tildeling.Oppgavehåndterer
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import org.slf4j.LoggerFactory
@@ -70,15 +71,17 @@ class OppgaveMediator(
         totrinnsvurderingRepository.oppdater(totrinnsvurderingFraDatabase)
     }
 
-    override fun sendTilBeslutter(oppgaveId: Long, behandlendeSaksbehandler: Saksbehandler) {
+    override fun sendTilBeslutter(oppgaveId: Long, behandlendeSaksbehandler: SaksbehandlerFraApi) {
+        val saksbehandler = behandlendeSaksbehandler.tilSaksbehandler()
         oppgave(oppgaveId) {
-            sendTilBeslutter(behandlendeSaksbehandler)
+            sendTilBeslutter(saksbehandler)
         }
     }
 
-    override fun sendIRetur(oppgaveId: Long, besluttendeSaksbehandler: Saksbehandler) {
+    override fun sendIRetur(oppgaveId: Long, besluttendeSaksbehandler: SaksbehandlerFraApi) {
+        val saksbehandler = besluttendeSaksbehandler.tilSaksbehandler()
         oppgave(oppgaveId) {
-            sendIRetur(besluttendeSaksbehandler)
+            sendIRetur(saksbehandler)
         }
     }
 
@@ -163,7 +166,9 @@ class OppgaveMediator(
     }
 
     private fun tildelVedReservasjon(fødselsnummer: String) {
-        val (saksbehandler, settPåVent) = reservasjonDao.hentReservasjonFor(fødselsnummer) ?: return
+        // TODO: skal ikke være SaksbehandlerFraApi, men SaksbehandlerFraDatabase. Må fikses når ReservasjonDao kan flyttes til selve.db
+        val (saksbehandlerFraDatabase, settPåVent) = reservasjonDao.hentReservasjonFor(fødselsnummer) ?: return
+        val saksbehandler = Saksbehandler(saksbehandlerFraDatabase.epost, saksbehandlerFraDatabase.oid, saksbehandlerFraDatabase.navn, saksbehandlerFraDatabase.ident)
         oppgaveForLagring?.forsøkTildeling(saksbehandler, settPåVent, harTilgangTil)
     }
 
@@ -188,4 +193,11 @@ class OppgaveMediator(
     }
 
     fun harFerdigstiltOppgave(vedtaksperiodeId: UUID) = oppgaveDao.harFerdigstiltOppgave(vedtaksperiodeId)
+
+    private fun SaksbehandlerFraApi.tilSaksbehandler() = Saksbehandler(
+        epostadresse = epost,
+        oid = oid,
+        navn = navn,
+        ident = ident
+    )
 }

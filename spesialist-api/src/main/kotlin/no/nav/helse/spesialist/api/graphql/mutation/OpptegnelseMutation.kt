@@ -3,12 +3,12 @@ package no.nav.helse.spesialist.api.graphql.mutation
 import com.expediagroup.graphql.server.operations.Mutation
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
-import no.nav.helse.spesialist.api.SaksbehandlerMediator
+import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
-import no.nav.helse.spesialist.api.modell.Saksbehandler
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 
 class OpptegnelseMutation(
-    private val saksbehandlerMediator: SaksbehandlerMediator
+    private val saksbehandlerhåndterer: Saksbehandlerhåndterer
 ): Mutation {
 
     @Suppress("unused")
@@ -16,8 +16,8 @@ class OpptegnelseMutation(
         personidentifikator: String,
         environment: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> {
-        val saksbehandler = environment.graphQlContext.get<Lazy<Saksbehandler>>(SAKSBEHANDLER.key).value
-        saksbehandlerMediator.opprettAbonnement(saksbehandler, personidentifikator)
+        val saksbehandler = environment.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(SAKSBEHANDLER.key).value
+        saksbehandlerhåndterer.opprettAbonnement(saksbehandler, personidentifikator)
         return DataFetcherResult.newResult<Boolean>().data(true).build()
     }
 }
