@@ -4,7 +4,7 @@ import com.expediagroup.graphql.generator.SchemaGeneratorConfig
 import com.expediagroup.graphql.generator.TopLevelObject
 import com.expediagroup.graphql.generator.toSchema
 import graphql.schema.GraphQLSchema
-import no.nav.helse.spesialist.api.SaksbehandlerMediator
+import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMediator
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
@@ -53,7 +53,7 @@ internal class SchemaBuilder(
     private val behandlingsstatistikkMediator: BehandlingsstatistikkMediator,
     private val tildelingService: TildelingService,
     private val notatMediator: NotatMediator,
-    private val saksbehandlerMediator: SaksbehandlerMediator
+    private val saksbehandlerhåndterer: Saksbehandlerhåndterer
 ) {
     fun build(): GraphQLSchema {
         val schemaConfig = SchemaGeneratorConfig(
@@ -104,7 +104,7 @@ internal class SchemaBuilder(
                 ),
                 TopLevelObject(
                     OpptegnelseQuery(
-                        saksbehandlerhåndterer = saksbehandlerMediator
+                        saksbehandlerhåndterer = saksbehandlerhåndterer
                     )
                 )
             ),
@@ -119,13 +119,13 @@ internal class SchemaBuilder(
                     TildelingMutation(tildelingService = tildelingService, notatMediator = notatMediator)
                 ),
                 TopLevelObject(
-                    OpptegnelseMutation(saksbehandlerhåndterer = saksbehandlerMediator)
+                    OpptegnelseMutation(saksbehandlerhåndterer = saksbehandlerhåndterer)
                 ),
                 TopLevelObject(
-                    OverstyringMutation(saksbehandlerhåndterer = saksbehandlerMediator)
+                    OverstyringMutation(saksbehandlerhåndterer = saksbehandlerhåndterer)
                 ),
                 TopLevelObject(
-                    SkjonnsfastsettelseMutation(saksbehandlerhåndterer = saksbehandlerMediator)
+                    SkjonnsfastsettelseMutation(saksbehandlerhåndterer = saksbehandlerhåndterer)
                 )
             )
         )

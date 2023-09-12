@@ -2,23 +2,19 @@ package no.nav.helse.spesialist.api.graphql.query
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.treeToValue
-import kotliquery.queryOf
-import kotliquery.sessionOf
-import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import io.mockk.every
+import io.mockk.mockk
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
-import no.nav.helse.spesialist.api.SaksbehandlerMediator
+import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
-import no.nav.helse.spesialist.api.graphql.schema.Opptegnelsetype
 import no.nav.helse.spesialist.api.graphql.schema.Opptegnelsetype.REVURDERING_FERDIGBEHANDLET
 import no.nav.helse.spesialist.api.graphql.schema.Opptegnelsetype.UTBETALING_ANNULLERING_FEILET
 import no.nav.helse.spesialist.api.graphql.schema.Opptegnelsetype.UTBETALING_ANNULLERING_OK
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class OpptegnelseQueryTest: AbstractGraphQLApiTest() {
-    private val testRapid = TestRapid()
-    override val saksbehandlerMediator: SaksbehandlerMediator = SaksbehandlerMediator(dataSource, testRapid)
+    override val saksbehandlerhåndterer: Saksbehandlerhåndterer = mockk(relaxed = true)
 
     @Test
     fun `hent opptegnelser uten sekvensId`() {
@@ -29,9 +25,7 @@ internal class OpptegnelseQueryTest: AbstractGraphQLApiTest() {
             REVURDERING_FERDIGBEHANDLET
         )
         abonner(AKTØRID)
-        opprettOpptegnelse(FØDSELSNUMMER, typer[0])
-        opprettOpptegnelse(FØDSELSNUMMER, typer[1])
-        opprettOpptegnelse(FØDSELSNUMMER, typer[2])
+        every { saksbehandlerhåndterer.hentAbonnerteOpptegnelser(any()) } returns typer.mapIndexed { idx, type -> Opptegnelse(AKTØRID, idx + 1, type, "{}") }
 
         val body = runQuery(
             """query HentOpptegnelser {
@@ -61,10 +55,8 @@ internal class OpptegnelseQueryTest: AbstractGraphQLApiTest() {
             UTBETALING_ANNULLERING_OK,
             REVURDERING_FERDIGBEHANDLET
         )
-        opprettOpptegnelse(FØDSELSNUMMER, typer[0])
-        opprettOpptegnelse(FØDSELSNUMMER, typer[1])
-        opprettOpptegnelse(FØDSELSNUMMER, typer[2])
         abonner(AKTØRID)
+        every { saksbehandlerhåndterer.hentAbonnerteOpptegnelser(any(), any()) } returns listOf(Opptegnelse(AKTØRID, 3, typer[2], "{}"))
         val body = runQuery(
             """query HentOpptegnelser {
                 hentOpptegnelser(sekvensId: 2) {
@@ -83,16 +75,6 @@ internal class OpptegnelseQueryTest: AbstractGraphQLApiTest() {
         assertEquals(3, opptegnelse.sekvensnummer)
         assertEquals("""{}""", opptegnelse.payload)
         assertEquals(typer[2], opptegnelse.type)
-    }
-
-    private fun opprettOpptegnelse(fødselsnummer: String, type: Opptegnelsetype) {
-        @Language("PostgreSQL")
-        val query = """
-           INSERT INTO opptegnelse(person_id, payload, type) VALUES ((SELECT id FROM person WHERE fodselsnummer = ?), ?::json, ?)
-        """
-        sessionOf(dataSource).use {
-            it.run(queryOf(query, fødselsnummer.toLong(), "{}", type.toString()).asUpdate)
-        }
     }
 
     private fun abonner(personId: String) {

@@ -33,7 +33,6 @@ internal class OverstyringApiTest: AbstractE2ETest() {
         overstyrTidslinje(overstyring)
 
         assertSisteResponskode(HttpStatusCode.OK)
-        assertSisteHendelse("saksbehandler_overstyrer_tidslinje")
     }
 
     @Test
@@ -51,7 +50,6 @@ internal class OverstyringApiTest: AbstractE2ETest() {
         overstyrTidslinje(overstyring)
 
         assertSisteResponskode(HttpStatusCode.OK)
-        assertSisteHendelse("saksbehandler_overstyrer_tidslinje")
     }
 
     @Test
@@ -69,7 +67,6 @@ internal class OverstyringApiTest: AbstractE2ETest() {
         overstyrTidslinje(overstyring)
 
         assertSisteResponskode(HttpStatusCode.OK)
-        assertSisteHendelse("saksbehandler_overstyrer_tidslinje")
     }
 
     @Test
@@ -91,7 +88,6 @@ internal class OverstyringApiTest: AbstractE2ETest() {
         overstyrArbeidsforhold(overstyring)
 
         assertSisteResponskode(HttpStatusCode.OK)
-        assertSisteHendelse("saksbehandler_overstyrer_arbeidsforhold")
     }
 
     @Test
@@ -123,7 +119,6 @@ internal class OverstyringApiTest: AbstractE2ETest() {
         overstyrInntektOgRefusjon(overstyring)
 
         assertSisteResponskode(HttpStatusCode.OK)
-        assertSisteHendelse("saksbehandler_overstyrer_inntekt_og_refusjon")
     }
 
     @Test
@@ -151,6 +146,5 @@ internal class OverstyringApiTest: AbstractE2ETest() {
         skjønnsfastsettingSykepengegrunnlag(skjonnsfastsetting)
 
         assertSisteResponskode(HttpStatusCode.OK)
-        assertSisteHendelse("saksbehandler_skjonnsfastsetter_sykepengegrunnlag")
     }
 }

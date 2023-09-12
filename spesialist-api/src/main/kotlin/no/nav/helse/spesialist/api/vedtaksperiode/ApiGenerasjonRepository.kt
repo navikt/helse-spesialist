@@ -5,7 +5,7 @@ import no.nav.helse.spesialist.api.varsel.ApiVarselDao
 import no.nav.helse.spesialist.api.vedtak.GenerasjonDao
 import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode
 
-internal class ApiGenerasjonRepository(dataSource: DataSource) {
+class ApiGenerasjonRepository(dataSource: DataSource) {
 
     private val varselDao = ApiVarselDao(dataSource)
     private val generasjonDao = GenerasjonDao(dataSource)

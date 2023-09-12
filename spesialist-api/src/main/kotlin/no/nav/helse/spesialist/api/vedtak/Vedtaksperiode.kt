@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.spesialist.api.varsel.Varsel
 
-internal data class Vedtaksperiode(
+data class Vedtaksperiode(
     private val vedtaksperiodeId: UUID,
     private val fom: LocalDate,
     private val tom: LocalDate,

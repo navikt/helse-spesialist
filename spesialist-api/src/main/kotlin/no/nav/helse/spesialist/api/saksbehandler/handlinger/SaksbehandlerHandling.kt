@@ -3,7 +3,7 @@ package no.nav.helse.spesialist.api.saksbehandler.handlinger
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import java.time.LocalDate
 
-internal sealed interface SaksbehandlerHandling {
+sealed interface SaksbehandlerHandling {
     fun loggnavn(): String
 }
 

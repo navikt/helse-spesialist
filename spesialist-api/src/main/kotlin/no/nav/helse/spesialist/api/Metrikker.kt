@@ -21,7 +21,7 @@ internal fun tellOverstyrArbeidsforhold() = overstyringsteller.labels("opplysnin
 internal fun tellOverstyrInntektOgRefusjon() = overstyringsteller.labels("opplysningstype", "inntektogrefusjon").inc()
 internal fun tellSkjønnsfastsettingSykepengegrunnlag() = overstyringsteller.labels("opplysningstype", "skjønnsfastsettingsykepengegrunnlag").inc()
 
-internal fun tell(handling: SaksbehandlerHandling) = when (handling) {
+fun tell(handling: SaksbehandlerHandling) = when (handling) {
     is OverstyrTidslinjeHandling -> tellOverstyrTidslinje()
     is OverstyrInntektOgRefusjonHandling -> tellOverstyrInntektOgRefusjon()
     is OverstyrArbeidsforholdHandling -> tellOverstyrArbeidsforhold()

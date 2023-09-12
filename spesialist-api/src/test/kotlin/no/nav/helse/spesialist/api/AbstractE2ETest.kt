@@ -19,17 +19,34 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.TestRapidHelpers.hendelser
 import no.nav.helse.spesialist.api.db.AbstractDatabaseTest
 import no.nav.helse.spesialist.api.endepunkter.overstyringApi
+import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandling
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.SaksbehandlerHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandling
+import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 
 internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     private val testRapid = TestRapid()
-    private val saksbehandlerMediator = SaksbehandlerMediator(dataSource, testRapid)
+    private val saksbehandlerhåndterer = object : Saksbehandlerhåndterer {
+        override fun <T : SaksbehandlerHandling> håndter(handling: T, saksbehandlerFraApi: SaksbehandlerFraApi) {}
+        override fun håndter(godkjenning: GodkjenningDto, behandlingId: UUID, saksbehandlerFraApi: SaksbehandlerFraApi) {}
+        override fun opprettAbonnement(saksbehandlerFraApi: SaksbehandlerFraApi, personidentifikator: String) {}
+        override fun hentAbonnerteOpptegnelser(saksbehandlerFraApi: SaksbehandlerFraApi, sisteSekvensId: Int): List<Opptegnelse> {
+            return emptyList()
+        }
+
+        override fun hentAbonnerteOpptegnelser(saksbehandlerFraApi: SaksbehandlerFraApi): List<Opptegnelse> {
+            return emptyList()
+        }
+
+        override fun håndterTotrinnsvurdering(oppgavereferanse: Long) {}
+    }
 
     private val jwtStub = JwtStub()
     private val clientId = "client_id"
@@ -123,7 +140,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         application { azureAdAppAuthentication(AzureAdAppConfig(azureConfig)) }
         routing {
             authenticate("oidc") {
-                overstyringApi(saksbehandlerMediator)
+                overstyringApi(saksbehandlerhåndterer)
             }
         }
     }

@@ -315,7 +315,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 behandlingsstatistikkMediator = behandlingsstatistikkMediator,
                 tildelingService = tildelingService,
                 notatMediator = notatMediator,
-                saksbehandlerMediator = saksbehandlerMediator
+                saksbehandlerhåndterer = saksbehandlerMediator
             )
 
             routing {
