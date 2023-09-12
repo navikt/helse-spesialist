@@ -12,7 +12,7 @@ jobs:
     name: Lag en (midlertidig) branch
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.commitHash }}
       - name: Lag branch for senere workflows
@@ -32,7 +32,7 @@ jobs:
     needs: [ build ]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: denne_skal_deployes_til_dev
       - uses: nais/deploy/actions/deploy@v1
@@ -48,6 +48,6 @@ jobs:
     needs: [ deployDev ]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: |
           git push origin :denne_skal_deployes_til_dev
