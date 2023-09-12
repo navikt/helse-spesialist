@@ -22,8 +22,8 @@ internal class SnapshotDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `oppdaterer globalt og pr snapshot dersom utdatert`() {
-        val snapshot = snapshot(1).data!!.person!!
-        val nyttSnapshot = snapshot(2).data!!.person!!
+        val snapshot = snapshot(versjon = 1).data!!.person!!
+        val nyttSnapshot = snapshot(versjon = 2).data!!.person!!
         opprettPerson()
         snapshotDao.lagre(FNR, snapshot)
         snapshotDao.lagre(FNR, nyttSnapshot)

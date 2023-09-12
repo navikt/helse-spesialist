@@ -1,32 +1,38 @@
 package no.nav.helse.mediator
 
-import AbstractE2ETest
-import io.mockk.clearMocks
+import DatabaseIntegrationTest
+import io.mockk.confirmVerified
 import io.mockk.every
+import io.mockk.mockk
 import io.mockk.verify
-import java.util.UUID
-import no.nav.helse.Testdata.FØDSELSNUMMER
-import no.nav.helse.Testdata.snapshot
+import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
+import no.nav.helse.spesialist.api.snapshot.SnapshotClient
+import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import org.junit.jupiter.api.Test
 
-internal class VersjoneringAvSnapshotTest : AbstractE2ETest() {
+internal class VersjoneringAvSnapshotTest : DatabaseIntegrationTest() {
+
+    private val snapshotApiDao = SnapshotApiDao(dataSource)
+    private val snapshotClient = mockk<SnapshotClient>()
+    private val snapshotMediator = SnapshotMediator(
+        snapshotApiDao,
+        snapshotClient = snapshotClient
+    )
 
     @Test
     fun `utdatert snapshot`() {
-        val utbetalingId = UUID.randomUUID()
-        val gammelSnapshot = snapshot(-1, utbetalingId = utbetalingId)
-        val nyttSnapshot = snapshot(utbetalingId = utbetalingId)
-        vedtaksperiode(utbetalingId = utbetalingId, snapshot = gammelSnapshot)
+        every { snapshotClient.hentSnapshot(FNR) } returns snapshot()
 
-        clearMocks(snapshotClient)
-        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns nyttSnapshot
-        snapshotMediator.hentSnapshot(FØDSELSNUMMER)
-        verify(exactly = 1) { snapshotClient.hentSnapshot(FØDSELSNUMMER) }
+        nyPerson()
+        opprettSnapshot(person = snapshot(fødselsnummer = FNR, aktørId = AKTØR, versjon = 0).data?.person!!)
 
-        clearMocks(snapshotClient)
-        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns nyttSnapshot
-        snapshotMediator.hentSnapshot(FØDSELSNUMMER)
-        verify(exactly = 0) { snapshotClient.hentSnapshot(FØDSELSNUMMER) }
+        snapshotMediator.hentSnapshot(FNR)
+
+        verify(exactly = 1) { snapshotClient.hentSnapshot(FNR) }
+
+        snapshotMediator.hentSnapshot(FNR)
+
+        confirmVerified(snapshotClient)
     }
 
 }

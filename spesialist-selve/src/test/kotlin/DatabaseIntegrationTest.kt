@@ -483,16 +483,20 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         val personId: Long,
         val personinfoId: Long,
         val enhetId: Int,
-        val infotrygdutbetalingerId: Long
+        val infotrygdutbetalingerId: Long,
     )
 
-    protected fun snapshot(versjon: Int = 1): GraphQLClientResponse<HentSnapshot.Result> =
+    protected fun snapshot(
+        fødselsnummer: String = "12345612345",
+        aktørId: String = "123456789101112",
+        versjon: Int = 1,
+    ): GraphQLClientResponse<HentSnapshot.Result> =
         object : GraphQLClientResponse<HentSnapshot.Result> {
             override val data = HentSnapshot.Result(
                 GraphQLPerson(
                     versjon = versjon,
-                    aktorId = "123456789101112",
-                    fodselsnummer = "12345612345",
+                    aktorId = aktørId,
+                    fodselsnummer = fødselsnummer,
                     arbeidsgivere = listOf(
                         GraphQLArbeidsgiver(
                             organisasjonsnummer = "987654321",
