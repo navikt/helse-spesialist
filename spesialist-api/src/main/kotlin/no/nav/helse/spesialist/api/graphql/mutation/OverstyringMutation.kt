@@ -34,14 +34,14 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
                 fødselsnummer = overstyring.fodselsnummer,
                 aktørId = overstyring.aktorId,
                 begrunnelse = overstyring.begrunnelse,
-                dager = overstyring.dager.map {
+                dager = overstyring.dager.map { it ->
                     OverstyrTidslinjeHandling.OverstyrDagDto(
                         dato = LocalDate.parse(it.dato),
                         type = it.type,
                         fraType = it.fraType,
                         grad = it.grad,
                         fraGrad = it.fraGrad,
-                        fraDagErForeldet = it.fraDagErForeldet,
+                        subsumsjon = it.subsumsjon?.let { subsumsjon -> SubsumsjonDto(subsumsjon.paragraf, subsumsjon.paragraf, subsumsjon.bokstav) },
                     )
                 })
             withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(handling, saksbehandler) }

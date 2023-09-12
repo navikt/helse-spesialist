@@ -30,7 +30,7 @@ internal class OverstyrtTidslinjedag(
     private val fraType: String,
     private val grad: Int?,
     private val fraGrad: Int?,
-    private val fraDagErForeldet: Boolean,
+    private val subsumsjon: Subsumsjon?,
 ) {
     internal fun byggEvent() = OverstyrtTidslinjeEvent.OverstyrtTidslinjeEventDag(
         dato = dato,
@@ -38,6 +38,6 @@ internal class OverstyrtTidslinjedag(
         fraType = fraType,
         grad = grad,
         fraGrad = fraGrad,
-        fraDagErForeldet = fraDagErForeldet,
+        subsumsjon = subsumsjon?.byggEvent(),
     )
 }

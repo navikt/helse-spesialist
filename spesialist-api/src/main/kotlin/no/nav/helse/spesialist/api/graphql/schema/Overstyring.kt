@@ -53,5 +53,5 @@ data class OverstyringDag (
     val fraType: String,
     val grad: Int?,
     val fraGrad: Int?,
-    val fraDagErForeldet: Boolean
+    val subsumsjon: Subsumsjon?
 )

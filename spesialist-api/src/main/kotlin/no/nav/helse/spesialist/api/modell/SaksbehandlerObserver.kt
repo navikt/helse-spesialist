@@ -93,7 +93,7 @@ data class OverstyrtTidslinjeEvent(
         val fraType: String,
         val grad: Int?,
         val fraGrad: Int?,
-        val fraDagErForeldet: Boolean,
+        val subsumsjon: SubsumsjonEvent?,
     )
 }
 
