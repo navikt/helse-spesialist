@@ -9,6 +9,7 @@ internal interface SaksbehandlerObserver {
     fun inntektOgRefusjonOverstyrt(fødselsnummer: String, event: OverstyrtInntektOgRefusjonEvent) {}
     fun arbeidsforholdOverstyrt(fødselsnummer: String, event: OverstyrtArbeidsforholdEvent) {}
     fun sykepengegrunnlagSkjønnsfastsatt(fødselsnummer: String, event: SkjønnsfastsattSykepengegrunnlagEvent) {}
+    fun utbetalingAnnullert(fødselsnummer: String, event: AnnullertUtbetalingEvent) {}
 }
 
 data class OverstyrtInntektOgRefusjonEvent(
@@ -164,4 +165,37 @@ data class SkjønnsfastsattSykepengegrunnlagEvent(
         val subsumsjon: SubsumsjonEvent?,
         val initierendeVedtaksperiodeId: String?,
     )
+}
+
+data class AnnullertUtbetalingEvent(
+    val fødselsnummer: String,
+    val aktørId: String,
+    val organisasjonsnummer: String,
+    val saksbehandlerOid: UUID,
+    val saksbehandlerNavn: String,
+    val saksbehandlerIdent: String,
+    val saksbehandlerEpost: String,
+    val fagsystemId: String,
+    val begrunnelser: List<String>,
+    val kommentar: String?
+) {
+    internal fun somJsonMessage(): JsonMessage {
+        return JsonMessage.newMessage(
+            "annullering", mutableMapOf(
+                "fødselsnummer" to fødselsnummer,
+                "organisasjonsnummer" to organisasjonsnummer,
+                "aktørId" to aktørId,
+                "saksbehandler" to mapOf(
+                    "epostaddresse" to saksbehandlerEpost,
+                    "oid" to saksbehandlerOid,
+                    "navn" to saksbehandlerNavn,
+                    "ident" to saksbehandlerIdent,
+                ),
+                "fagsystemId" to fagsystemId,
+                "begrunnelser" to begrunnelser,
+            ).apply {
+                compute("kommentar") { _, _ -> kommentar }
+            }
+        )
+    }
 }

@@ -9,11 +9,11 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
-import no.nav.helse.spesialist.api.utbetaling.AnnulleringDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.AnnulleringHandling
 
 fun Route.annulleringApi(saksbehandlerhåndterer: Saksbehandlerhåndterer) {
     post("/api/annullering") {
-        val annullering = call.receive<AnnulleringDto>()
+        val annullering = call.receive<AnnulleringHandling>()
         val saksbehandler = SaksbehandlerFraApi.fraOnBehalfOfToken(requireNotNull(call.principal()))
 
         saksbehandlerhåndterer.håndter(annullering, saksbehandler)

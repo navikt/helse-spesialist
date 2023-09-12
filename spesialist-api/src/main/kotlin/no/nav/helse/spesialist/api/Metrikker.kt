@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.api
 
 import io.prometheus.client.Counter
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.AnnulleringHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandling
@@ -25,4 +26,5 @@ internal fun tell(handling: SaksbehandlerHandling) = when (handling) {
     is OverstyrInntektOgRefusjonHandling -> tellOverstyrInntektOgRefusjon()
     is OverstyrArbeidsforholdHandling -> tellOverstyrArbeidsforhold()
     is SkjønnsfastsettSykepengegrunnlagHandling -> tellSkjønnsfastsettingSykepengegrunnlag()
+    is AnnulleringHandling -> tellAnnullering()
 }

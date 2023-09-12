@@ -111,3 +111,15 @@ data class SubsumsjonDto(
     val ledd: String? = null,
     val bokstav: String? = null,
 )
+
+@JsonIgnoreProperties
+data class AnnulleringHandling(
+    val aktørId: String,
+    val fødselsnummer: String,
+    val organisasjonsnummer: String,
+    val fagsystemId: String,
+    val begrunnelser: List<String> = emptyList(),
+    val kommentar: String?
+): SaksbehandlerHandling {
+    override fun loggnavn(): String = "annuller_utbetaling"
+}

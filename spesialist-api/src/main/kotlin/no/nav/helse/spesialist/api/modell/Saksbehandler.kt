@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.api.modell
 
 import java.util.UUID
+import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.Annullering
 import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.OverstyrtArbeidsforhold
 import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.OverstyrtInntektOgRefusjon
 import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.OverstyrtTidslinje
@@ -45,6 +46,11 @@ class Saksbehandler(
     internal fun håndter(hendelse: SkjønnsfastsattSykepengegrunnlag) {
         val event = hendelse.byggEvent(oid, navn, epostadresse, ident)
         observers.forEach { it.sykepengegrunnlagSkjønnsfastsatt(event.fødselsnummer, event) }
+    }
+
+    internal fun håndter(hendelse: Annullering) {
+        val event = hendelse.byggEvent(oid, navn, epostadresse, ident)
+        observers.forEach { it.utbetalingAnnullert(event.fødselsnummer, event) }
     }
 
     fun json() = mapOf(

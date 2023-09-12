@@ -15,7 +15,7 @@ import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.spesialist.api.AbstractApiTest
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
-import no.nav.helse.spesialist.api.utbetaling.AnnulleringDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.AnnulleringHandling
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -46,7 +46,7 @@ internal class AnnulleringApiTest : AbstractApiTest() {
 
     @Test
     fun annulleringOk() {
-        val slot = slot<AnnulleringDto>()
+        val slot = slot<AnnulleringHandling>()
         val response = runBlocking {
             client.post("/api/annullering") {
                 contentType(ContentType.Application.Json)
@@ -73,7 +73,7 @@ internal class AnnulleringApiTest : AbstractApiTest() {
 
     @Test
     fun annulleringTommeVerdier() {
-        val slot = slot<AnnulleringDto>()
+        val slot = slot<AnnulleringHandling>()
         val response = runBlocking {
             client.preparePost("/api/annullering") {
                 contentType(ContentType.Application.Json)

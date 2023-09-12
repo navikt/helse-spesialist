@@ -10,12 +10,14 @@ import no.nav.helse.spesialist.api.abonnement.AbonnementDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
+import no.nav.helse.spesialist.api.modell.AnnullertUtbetalingEvent
 import no.nav.helse.spesialist.api.modell.OverstyrtArbeidsforholdEvent
 import no.nav.helse.spesialist.api.modell.OverstyrtInntektOgRefusjonEvent
 import no.nav.helse.spesialist.api.modell.OverstyrtTidslinjeEvent
 import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.modell.SaksbehandlerObserver
 import no.nav.helse.spesialist.api.modell.SkjønnsfastsattSykepengegrunnlagEvent
+import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.Annullering
 import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.Handling
 import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.Overstyring
 import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.OverstyrtArbeidsforhold
@@ -31,13 +33,13 @@ import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.AnnulleringHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SaksbehandlerHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandling.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto
-import no.nav.helse.spesialist.api.utbetaling.AnnulleringDto
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.varsel.Varsel
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
@@ -51,7 +53,6 @@ interface Saksbehandlerhåndterer {
     fun opprettAbonnement(saksbehandlerFraApi: SaksbehandlerFraApi, personidentifikator: String)
     fun hentAbonnerteOpptegnelser(saksbehandlerFraApi: SaksbehandlerFraApi, sisteSekvensId: Int): List<Opptegnelse>
     fun hentAbonnerteOpptegnelser(saksbehandlerFraApi: SaksbehandlerFraApi): List<Opptegnelse>
-    fun håndter(annullering: AnnulleringDto, saksbehandlerFraApi: SaksbehandlerFraApi)
     fun håndter(godkjenning: GodkjenningDto, behandlingId: UUID, saksbehandlerFraApi: SaksbehandlerFraApi)
     fun håndterTotrinnsvurdering(oppgavereferanse: Long)
 }
@@ -119,6 +120,11 @@ class SaksbehandlerMediator(
         rapidsConnection.publish(fødselsnummer, message.toJson())
     }
 
+    override fun utbetalingAnnullert(fødselsnummer: String, event: AnnullertUtbetalingEvent) {
+        val message = event.somJsonMessage()
+        rapidsConnection.publish(fødselsnummer, message.toJson())
+    }
+
     override fun opprettAbonnement(saksbehandlerFraApi: SaksbehandlerFraApi, personidentifikator: String) {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         saksbehandler.persister(saksbehandlerDao)
@@ -136,21 +142,6 @@ class SaksbehandlerMediator(
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         saksbehandler.persister(saksbehandlerDao)
         return opptegnelseDao.finnOpptegnelser(saksbehandler.oid())
-    }
-
-    override fun håndter(annullering: AnnulleringDto, saksbehandlerFraApi: SaksbehandlerFraApi) {
-        val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
-        tellAnnullering()
-        saksbehandler.persister(saksbehandlerDao)
-        val message = annullering.somJsonMessage(saksbehandler).also {
-            sikkerlogg.info(
-                "Publiserer annullering fra api: {}, {}, {}\n${it.toJson()}",
-                kv("fødselsnummer", annullering.fødselsnummer),
-                kv("aktørId", annullering.aktørId),
-                kv("organisasjonsnummer", annullering.organisasjonsnummer)
-            )
-        }
-        rapidsConnection.publish(annullering.fødselsnummer, message.toJson())
     }
 
     override fun håndter(godkjenning: GodkjenningDto, behandlingId: UUID, saksbehandlerFraApi: SaksbehandlerFraApi) {
@@ -219,6 +210,7 @@ class SaksbehandlerMediator(
             is OverstyrInntektOgRefusjonHandling -> this.toModellobjekt()
             is OverstyrTidslinjeHandling -> this.toModellobjekt()
             is SkjønnsfastsettSykepengegrunnlagHandling -> this.toModellobjekt()
+            is AnnulleringHandling -> this.toModellobjekt()
         }
     }
 
@@ -300,6 +292,16 @@ class SaksbehandlerMediator(
                 )
             }
         )
+    }
 
+    private fun AnnulleringHandling.toModellobjekt(): Annullering {
+        return Annullering(
+            aktørId = this.aktørId,
+            fødselsnummer = this.fødselsnummer,
+            organisasjonsnummer = this.organisasjonsnummer,
+            fagsystemId = this.fagsystemId,
+            begrunnelser = this.begrunnelser,
+            kommentar = this.kommentar
+        )
     }
 }

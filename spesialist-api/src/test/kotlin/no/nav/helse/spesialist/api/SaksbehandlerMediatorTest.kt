@@ -6,6 +6,7 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.TestRapidHelpers.hendelser
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.AnnulleringHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandling.OverstyrArbeidsgiverDto
@@ -13,7 +14,6 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHan
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandling.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SubsumsjonDto
-import no.nav.helse.spesialist.api.utbetaling.AnnulleringDto
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -452,7 +452,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
     private fun annullering(
         begrunnelser: List<String> = listOf("EN_BEGRUNNELSE"),
         kommentar: String? = "EN_KOMMENTAR",
-    ) = AnnulleringDto(
+    ) = AnnulleringHandling(
         aktørId = AKTØR_ID,
         fødselsnummer = FØDSELSNUMMER,
         organisasjonsnummer = ORGANISASJONSNUMMER,
