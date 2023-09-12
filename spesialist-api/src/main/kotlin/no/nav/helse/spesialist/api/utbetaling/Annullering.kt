@@ -5,7 +5,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.spesialist.api.modell.Saksbehandler
 
 @JsonIgnoreProperties
-internal data class AnnulleringDto(
+data class AnnulleringDto(
     val aktørId: String,
     val fødselsnummer: String,
     val organisasjonsnummer: String,

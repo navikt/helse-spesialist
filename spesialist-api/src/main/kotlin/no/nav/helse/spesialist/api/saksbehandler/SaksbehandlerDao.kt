@@ -20,7 +20,7 @@ class SaksbehandlerDao(dataSource: DataSource) : HelseDao(dataSource) {
         " SELECT * FROM saksbehandler WHERE epost ILIKE :epost LIMIT 1; ",
         mapOf("epost" to epost)
     ).single { row ->
-        SaksbehandlerDto(
+        SaksbehandlerFraApi(
             oid = row.uuid("oid"),
             navn = row.string("navn"),
             epost = row.string("epost"),

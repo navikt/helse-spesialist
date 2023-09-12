@@ -19,6 +19,7 @@ import no.nav.helse.spesialist.api.modell.SkjønnsfastsattSykepengegrunnlagEvent
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyringHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SaksbehandlerHandling
 import no.nav.helse.spesialist.api.utbetaling.AnnulleringDto
@@ -29,6 +30,16 @@ import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode.Companion.harAktiveVars
 import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode.Companion.vurderVarsler
 import no.nav.helse.spesialist.api.vedtaksperiode.ApiGenerasjonRepository
 import org.slf4j.LoggerFactory
+
+interface Saksbehandlerhåndterer {
+    fun <T: SaksbehandlerHandling> håndter(handling: T, saksbehandler: SaksbehandlerFraApi)
+    fun opprettAbonnement(saksbehandler: SaksbehandlerFraApi, personidentifikator: String)
+    fun hentAbonnerteOpptegnelser(saksbehandler: SaksbehandlerFraApi, sisteSekvensId: Int): List<Opptegnelse>
+    fun hentAbonnerteOpptegnelser(saksbehandler: SaksbehandlerFraApi): List<Opptegnelse>
+    fun håndter(annullering: AnnulleringDto, saksbehandler: SaksbehandlerFraApi)
+    fun håndter(godkjenning: GodkjenningDto, behandlingId: UUID, saksbehandler: SaksbehandlerFraApi)
+    fun håndterTotrinnsvurdering(oppgavereferanse: Long)
+}
 
 class SaksbehandlerMediator(
     dataSource: DataSource,

@@ -4,13 +4,13 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import java.util.UUID
 import no.nav.helse.januar
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
-import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDto
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.*
 
 internal class LagreAnnulleringCommandTest {
 
@@ -44,7 +44,7 @@ internal class LagreAnnulleringCommandTest {
     @Test
     fun `Legg til annullert av saksbehandler`() {
         every { saksbehandlerDao.finnSaksbehandler(SAKSBEHANDLER_EPOST) } returns
-            SaksbehandlerDto(UUID.randomUUID(), SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_IDENT)
+            SaksbehandlerFraApi(UUID.randomUUID(), SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_IDENT)
         every { utbetalingDao.nyAnnullering(ANNULLERT_TIDSPUNKT, any()) } returns ANNULLERING_ID
 
         command.execute(context)

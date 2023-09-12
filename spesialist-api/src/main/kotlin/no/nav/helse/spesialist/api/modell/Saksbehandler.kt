@@ -7,7 +7,7 @@ import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.OverstyrtInnt
 import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.OverstyrtTidslinje
 import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
-import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDto
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 
 class Saksbehandler(
     private val epostadresse: String,
@@ -64,7 +64,7 @@ class Saksbehandler(
         "ident" to ident,
     )
 
-    fun toDto() = SaksbehandlerDto(oid = oid, navn = navn, epost = epostadresse, ident = ident)
+    fun toDto() = SaksbehandlerFraApi(oid = oid, navn = navn, epost = epostadresse, ident = ident)
 
     override fun toString(): String = "epostadresse=$epostadresse, oid=$oid"
 
