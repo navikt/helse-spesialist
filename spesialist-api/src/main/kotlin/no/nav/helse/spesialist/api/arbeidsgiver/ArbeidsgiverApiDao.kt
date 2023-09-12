@@ -56,13 +56,13 @@ class ArbeidsgiverApiDao(dataSource: DataSource) : HelseDao(dataSource) {
                 }.map { inntekter ->
                     InntektFraAOrdningen(
                         maned = inntekter.årMåned.toString(),
-                        sum = inntekter.inntektsliste.sumOf { it.beløp }.toDouble()
+                        sum = inntekter.inntektsliste.sumOf { it.beløp }
                     )
                 }).takeIf { it.inntekter.isNotEmpty() }
     }
 
     internal data class Inntekter(val årMåned: YearMonth, val inntektsliste: List<Inntekt>) {
-        data class Inntekt(val beløp: Int, val orgnummer: String)
+        data class Inntekt(val beløp: Double, val orgnummer: String)
     }
 
     private fun tilArbeidsforholdApiDto(organisasjonsnummer: String, row: Row) = ArbeidsforholdApiDto(

@@ -56,23 +56,23 @@ internal class ArbeidsgiverApiDaoTest: DatabaseIntegrationTest() {
                 Inntekter(
                     årMåned = YearMonth.of(2019, 12),
                     inntektsliste = listOf(
-                        Inntekter.Inntekt(beløp = 19000, orgnummer = ORGANISASJONSNUMMER),
-                        Inntekter.Inntekt(beløp = 22000, orgnummer = "123456789"),
+                        Inntekter.Inntekt(beløp = 19000.0, orgnummer = ORGANISASJONSNUMMER),
+                        Inntekter.Inntekt(beløp = 22000.0, orgnummer = "123456789"),
                     )
                 ),
                 Inntekter(
                     årMåned = YearMonth.of(2019, 11),
                     inntektsliste = listOf(
-                        Inntekter.Inntekt(beløp = 21000, orgnummer = ORGANISASJONSNUMMER),
-                        Inntekter.Inntekt(beløp = 22000, orgnummer = "123456789"),
+                        Inntekter.Inntekt(beløp = 21000.0, orgnummer = ORGANISASJONSNUMMER),
+                        Inntekter.Inntekt(beløp = 22000.0, orgnummer = "123456789"),
                     )
                 ),
                 Inntekter(
                     årMåned = YearMonth.of(2019, 10),
                     inntektsliste = listOf(
-                        Inntekter.Inntekt(beløp = 21000, orgnummer = ORGANISASJONSNUMMER),
-                        Inntekter.Inntekt(beløp = 2000, orgnummer = ORGANISASJONSNUMMER),
-                        Inntekter.Inntekt(beløp = 22000, orgnummer = "123456789"),
+                        Inntekter.Inntekt(beløp = 21000.0, orgnummer = ORGANISASJONSNUMMER),
+                        Inntekter.Inntekt(beløp = 2000.0, orgnummer = ORGANISASJONSNUMMER),
+                        Inntekter.Inntekt(beløp = 22000.0, orgnummer = "123456789"),
                     )
                 )
             )
@@ -84,23 +84,23 @@ internal class ArbeidsgiverApiDaoTest: DatabaseIntegrationTest() {
                 Inntekter(
                     årMåned = YearMonth.of(2022, 10),
                     inntektsliste = listOf(
-                        Inntekter.Inntekt(beløp = 20000, orgnummer = ORGANISASJONSNUMMER),
-                        Inntekter.Inntekt(beløp = 22000, orgnummer = "123456789"),
+                        Inntekter.Inntekt(beløp = 20000.0, orgnummer = ORGANISASJONSNUMMER),
+                        Inntekter.Inntekt(beløp = 22000.0, orgnummer = "123456789"),
                     )
                 ),
                 Inntekter(
                     årMåned = YearMonth.of(2022, 9),
                     inntektsliste = listOf(
-                        Inntekter.Inntekt(beløp = 22000, orgnummer = ORGANISASJONSNUMMER),
-                        Inntekter.Inntekt(beløp = 22000, orgnummer = "123456789"),
+                        Inntekter.Inntekt(beløp = 22000.0, orgnummer = ORGANISASJONSNUMMER),
+                        Inntekter.Inntekt(beløp = 22000.0, orgnummer = "123456789"),
                     )
                 ),
                 Inntekter(
                     årMåned = YearMonth.of(2022, 8),
                     inntektsliste = listOf(
-                        Inntekter.Inntekt(beløp = 22000, orgnummer = ORGANISASJONSNUMMER),
-                        Inntekter.Inntekt(beløp = 2000, orgnummer = ORGANISASJONSNUMMER),
-                        Inntekter.Inntekt(beløp = 22000, orgnummer = "123456789"),
+                        Inntekter.Inntekt(beløp = 22000.0, orgnummer = ORGANISASJONSNUMMER),
+                        Inntekter.Inntekt(beløp = 2000.0, orgnummer = ORGANISASJONSNUMMER),
+                        Inntekter.Inntekt(beløp = 22000.0, orgnummer = "123456789"),
                     )
                 )
             )
