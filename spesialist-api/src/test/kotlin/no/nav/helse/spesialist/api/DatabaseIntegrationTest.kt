@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.api
 
 import com.expediagroup.graphql.client.types.GraphQLClientResponse
+import io.ktor.utils.io.core.use
 import io.mockk.every
 import io.mockk.mockk
 import java.time.LocalDate
@@ -12,6 +13,7 @@ import kotliquery.action.QueryAction
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
+import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao.Inntekter
 import no.nav.helse.spesialist.api.db.AbstractDatabaseTest
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
@@ -591,6 +593,27 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         )
     }
 
+    protected fun opprettInntekt(personId: Long, skjæringstidspunkt: LocalDate, inntekter: List<Inntekter>) =
+        sessionOf(dataSource).use { session ->
+            session.transaction { transaction ->
+                @Language("PostgreSQL")
+                val query = """
+                        INSERT INTO inntekt (person_ref, skjaeringstidspunkt, inntekter)
+                        VALUES (:person_ref, :skjaeringstidspunkt, :inntekter::json)
+                    """
+                transaction.run(
+                    queryOf(
+                        query,
+                        mapOf(
+                            "person_ref" to personId,
+                            "skjaeringstidspunkt" to skjæringstidspunkt,
+                            "inntekter" to objectMapper.writeValueAsString(inntekter)
+                        )
+                    ).asExecute
+                )
+            }
+        }
+
     protected fun tildelOppgave(oppgaveRef: Long, saksbehandlerOid: UUID) =
         sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
@@ -683,7 +706,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         GraphQLArbeidsgiver(
             organisasjonsnummer = ORGANISASJONSNUMMER,
             ghostPerioder = emptyList(),
-            generasjoner = generasjoner
+            generasjoner = generasjoner,
         )
 
     protected fun opprettSnapshotGenerasjon(perioder: List<GraphQLTidslinjeperiode>, id: UUID = UUID.randomUUID()) =

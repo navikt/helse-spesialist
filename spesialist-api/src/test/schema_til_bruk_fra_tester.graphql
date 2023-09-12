@@ -87,9 +87,15 @@ type Arbeidsgiver {
     bransjer: [String!]!
     generasjoner: [Generasjon!]!
     ghostPerioder: [GhostPeriode!]!
+    inntekterFraAordningen: [ArbeidsgiverInntekterFraAOrdningen!]!
     navn: String!
     organisasjonsnummer: String!
     overstyringer: [Overstyring!]!
+}
+
+type ArbeidsgiverInntekterFraAOrdningen {
+    inntekter: [InntektFraAOrdningen!]!
+    skjaeringstidspunkt: String!
 }
 
 type Arbeidsgiverinntekt {
@@ -279,8 +285,12 @@ type Mutation {
     leggTilKommentar(notatId: Int!, saksbehandlerident: String!, tekst: String!): Kommentar
     leggTilNotat(saksbehandlerOid: String!, tekst: String!, type: NotatType!, vedtaksperiodeId: String!): Notat
     opprettTildeling(oppgaveId: String!): Tildeling
+    overstyrArbeidsforhold(overstyring: ArbeidsforholdOverstyringHandlingInput!): Boolean!
+    overstyrDager(overstyring: TidslinjeOverstyringInput!): Boolean!
+    overstyrInntektOgRefusjon(overstyring: InntektOgRefusjonOverstyringInput!): Boolean!
     settVarselstatusAktiv(generasjonIdString: String!, ident: String!, varselkode: String!): VarselDTO
     settVarselstatusVurdert(definisjonIdString: String!, generasjonIdString: String!, ident: String!, varselkode: String!): VarselDTO
+    skjonnsfastsettSykepengegrunnlag(skjonnsfastsettelse: SkjonnsfastsettelseInput!): Boolean!
 }
 
 type Notat {
@@ -509,9 +519,13 @@ type Simuleringsutbetaling {
 type SkjonnsfastsattSykepengegrunnlag {
     arlig: Float!
     arsak: String!
-    begrunnelse: String!
+    begrunnelse: String
+    begrunnelseFritekst: String
+    begrunnelseKonklusjon: String
+    begrunnelseMal: String
     fraArlig: Float
     skjaeringstidspunkt: String!
+    type: Skjonnsfastsettingstype
 }
 
 type SoknadArbeidsgiver implements Hendelse {
@@ -807,10 +821,12 @@ enum Oppdragsstatus {
 enum Oppgavetype {
     DELVIS_REFUSJON
     FORTROLIG_ADRESSE
+    INGEN_UTBETALING
     REVURDERING
     RISK_QA
     SOKNAD
     STIKKPROVE
+    UTBETALING_TIL_ARBEIDSGIVER
     UTBETALING_TIL_SYKMELDT
 }
 
@@ -859,6 +875,18 @@ enum Periodetype {
     FORSTEGANGSBEHANDLING
     INFOTRYGDFORLENGELSE
     OVERGANG_FRA_IT
+}
+
+enum SkjonnsfastsettelseType {
+    ANNET
+    OMREGNET_ARSINNTEKT
+    RAPPORTERT_ARSINNTEKT
+}
+
+enum Skjonnsfastsettingstype {
+    ANNET
+    OMREGNET_ARSINNTEKT
+    RAPPORTERT_ARSINNTEKT
 }
 
 enum Sykdomsdagtype {
@@ -928,4 +956,85 @@ enum Vilkarsgrunnlagtype {
     INFOTRYGD
     SPLEIS
     UKJENT
+}
+
+input ArbeidsforholdOverstyringHandlingInput {
+    aktorId: String!
+    fodselsnummer: String!
+    overstyrteArbeidsforhold: [OverstyringArbeidsforholdInput!]!
+    skjaringstidspunkt: String!
+}
+
+input InntektOgRefusjonOverstyringInput {
+    aktorId: String!
+    arbeidsgivere: [OverstyringArbeidsgiverInput!]!
+    fodselsnummer: String!
+    skjaringstidspunkt: String!
+}
+
+input OverstyringArbeidsforholdInput {
+    begrunnelse: String!
+    deaktivert: Boolean!
+    forklaring: String!
+    orgnummer: String!
+}
+
+input OverstyringArbeidsgiverInput {
+    begrunnelse: String!
+    forklaring: String!
+    fraManedligInntekt: Float!
+    fraRefusjonsopplysninger: [OverstyringRefusjonselementInput!]
+    manedligInntekt: Float!
+    organisasjonsnummer: String!
+    refusjonsopplysninger: [OverstyringRefusjonselementInput!]
+    subsumsjon: SubsumsjonInput
+}
+
+input OverstyringDagInput {
+    dato: String!
+    fraDagErForeldet: Boolean!
+    fraGrad: Int
+    fraType: String!
+    grad: Int
+    type: String!
+}
+
+input OverstyringRefusjonselementInput {
+    belop: Float!
+    fom: String!
+    tom: String
+}
+
+input SkjonnsfastsettelseArbeidsgiverInput {
+    arlig: Float!
+    arsak: String!
+    begrunnelseFritekst: String
+    begrunnelseKonklusjon: String
+    begrunnelseMal: String
+    fraArlig: Float!
+    initierendeVedtaksperiodeId: String
+    organisasjonsnummer: String!
+    subsumsjon: SubsumsjonInput
+    type: SkjonnsfastsettelseType!
+}
+
+input SkjonnsfastsettelseInput {
+    aktorId: String!
+    arbeidsgivere: [SkjonnsfastsettelseArbeidsgiverInput!]!
+    fodselsnummer: String!
+    skjaringstidspunkt: String!
+}
+
+input SubsumsjonInput {
+    bokstav: String
+    ledd: String
+    paragraf: String!
+}
+
+input TidslinjeOverstyringInput {
+    aktorId: String!
+    begrunnelse: String!
+    dager: [OverstyringDagInput!]!
+    fodselsnummer: String!
+    organisasjonsnummer: String!
 }

@@ -1,9 +1,12 @@
 package no.nav.helse.spesialist.api.arbeidsgiver
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import java.time.YearMonth
 import javax.sql.DataSource
 import kotliquery.Row
 import no.nav.helse.HelseDao
+import no.nav.helse.spesialist.api.graphql.schema.ArbeidsgiverInntekterFraAOrdningen
+import no.nav.helse.spesialist.api.graphql.schema.InntektFraAOrdningen
 import no.nav.helse.spesialist.api.objectMapper
 
 class ArbeidsgiverApiDao(dataSource: DataSource) : HelseDao(dataSource) {
@@ -32,6 +35,35 @@ class ArbeidsgiverApiDao(dataSource: DataSource) : HelseDao(dataSource) {
             AND person_ref = (SELECT id FROM person WHERE fodselsnummer = :fnr);
         """, mapOf("orgnummer" to organisasjonsnummer.toLong(), "fnr" to fødselsnummer.toLong())
     ).list { tilArbeidsforholdApiDto(organisasjonsnummer, it) }
+
+    internal fun finnArbeidsgiverInntekterFraAordningen(
+        fødselsnummer: String,
+        orgnummer: String,
+    ): List<ArbeidsgiverInntekterFraAOrdningen> = asSQL(
+        """ SELECT inntekter, skjaeringstidspunkt FROM inntekt
+                WHERE person_ref=(SELECT id FROM person p WHERE p.fodselsnummer = :fodselsnummer)
+            """, mapOf(
+            "fodselsnummer" to fødselsnummer.toLong(),
+        )
+    ).list { row ->
+        ArbeidsgiverInntekterFraAOrdningen(
+            skjaeringstidspunkt = row.string("skjaeringstidspunkt"),
+            inntekter =
+            objectMapper.readValue<List<Inntekter>>(row.string("inntekter"))
+                .mapNotNull { inntekter ->
+                    inntekter.inntektsliste.filter { it.orgnummer == orgnummer }.takeUnless { it.isEmpty() }
+                        ?.let { inntekter.copy(inntektsliste = it) }
+                }.map { inntekter ->
+                    InntektFraAOrdningen(
+                        maned = inntekter.årMåned.toString(),
+                        sum = inntekter.inntektsliste.sumOf { it.beløp }.toDouble()
+                    )
+                }).takeIf { it.inntekter.isNotEmpty() }
+    }
+
+    internal data class Inntekter(val årMåned: YearMonth, val inntektsliste: List<Inntekt>) {
+        data class Inntekt(val beløp: Int, val orgnummer: String)
+    }
 
     private fun tilArbeidsforholdApiDto(organisasjonsnummer: String, row: Row) = ArbeidsforholdApiDto(
         organisasjonsnummer = organisasjonsnummer,

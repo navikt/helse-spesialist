@@ -34,6 +34,11 @@ data class Generasjon(
     val perioder: List<Periode>,
 )
 
+data class ArbeidsgiverInntekterFraAOrdningen(
+    val skjaeringstidspunkt: String,
+    val inntekter: List<InntektFraAOrdningen>,
+)
+
 interface Overstyring {
     val hendelseId: UUIDString
     val timestamp: DateTimeString
@@ -205,6 +210,8 @@ data class Arbeidsgiver(
                 sluttdato = it.sluttdato?.format(DateTimeFormatter.ISO_DATE)
             )
         }
+
+    fun inntekterFraAordningen(): List<ArbeidsgiverInntekterFraAOrdningen> = arbeidsgiverApiDao.finnArbeidsgiverInntekterFraAordningen(fødselsnummer, organisasjonsnummer)
 }
 
 private fun OverstyringTidslinjeDto.tilDagoverstyring() = Dagoverstyring(
