@@ -16,12 +16,27 @@ import no.nav.helse.spesialist.api.modell.OverstyrtTidslinjeEvent
 import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.modell.SaksbehandlerObserver
 import no.nav.helse.spesialist.api.modell.SkjønnsfastsattSykepengegrunnlagEvent
+import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.Handling
+import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.Overstyring
+import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.OverstyrtArbeidsforhold
+import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.OverstyrtArbeidsgiver
+import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.OverstyrtInntektOgRefusjon
+import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.OverstyrtTidslinje
+import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.OverstyrtTidslinjedag
+import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.Refusjonselement
+import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.SkjønnsfastsattSykepengegrunnlag
+import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.SkjønnsfastsattSykepengegrunnlag.SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype
+import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.Subsumsjon
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyringHandling
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandling
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandling
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SaksbehandlerHandling
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandling
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandling.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto
 import no.nav.helse.spesialist.api.utbetaling.AnnulleringDto
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.varsel.Varsel
@@ -59,6 +74,7 @@ class SaksbehandlerMediator(
         tell(handling)
         saksbehandler.register(this)
         saksbehandler.persister(saksbehandlerDao)
+        val modellhandling = handling.toModellobjekt()
         withMDC(
             mapOf(
                 "saksbehandlerOid" to saksbehandler.oid().toString(),
@@ -66,21 +82,21 @@ class SaksbehandlerMediator(
             )
         ) {
             sikkerlogg.info("Utfører handling ${handling.loggnavn()} på vegne av saksbehandler $saksbehandler")
-            when (handling) {
-                is OverstyringHandling -> håndter(handling, saksbehandler)
-                else -> handling.utførAv(saksbehandler)
+            when (modellhandling) {
+                is Overstyring -> håndter(modellhandling, saksbehandler)
+                else -> modellhandling.utførAv(saksbehandler)
             }
         }
+        sikkerlogg.info("Handling ${handling.loggnavn()} utført")
     }
 
-    private fun <T: OverstyringHandling> håndter(handling: T, saksbehandler: Saksbehandler) {
+    private fun <T: Overstyring> håndter(handling: T, saksbehandler: Saksbehandler) {
         val fødselsnummer = handling.gjelderFødselsnummer()
         val antall = oppgaveApiDao.invaliderOppgaveFor(fødselsnummer)
         sikkerlogg.info("Invaliderer $antall {} for $fødselsnummer", if (antall == 1) "oppgave" else "oppgaver")
         reservasjonDao.reserverPerson(saksbehandler.oid(), fødselsnummer, false)
         sikkerlogg.info("Reserverer person $fødselsnummer til saksbehandler $saksbehandler")
         handling.utførAv(saksbehandler)
-        sikkerlogg.info("Handling ${handling.loggnavn()} utført")
     }
 
     override fun tidslinjeOverstyrt(fødselsnummer: String, event: OverstyrtTidslinjeEvent) {
@@ -196,4 +212,94 @@ class SaksbehandlerMediator(
     }
 
     private fun SaksbehandlerFraApi.tilSaksbehandler() = Saksbehandler(epost, oid, navn, ident)
+
+    private fun SaksbehandlerHandling.toModellobjekt(): Handling {
+        return when (this) {
+            is OverstyrArbeidsforholdHandling -> this.toModellobjekt()
+            is OverstyrInntektOgRefusjonHandling -> this.toModellobjekt()
+            is OverstyrTidslinjeHandling -> this.toModellobjekt()
+            is SkjønnsfastsettSykepengegrunnlagHandling -> this.toModellobjekt()
+        }
+    }
+
+    private fun OverstyrArbeidsforholdHandling.toModellobjekt(): OverstyrtArbeidsforhold {
+        return OverstyrtArbeidsforhold(
+            fødselsnummer = fødselsnummer,
+            aktørId = aktørId,
+            skjæringstidspunkt = skjæringstidspunkt,
+            overstyrteArbeidsforhold = overstyrteArbeidsforhold.map {
+                OverstyrtArbeidsforhold.Arbeidsforhold(it.orgnummer, it.deaktivert, it.begrunnelse, it.forklaring)
+            }
+        )
+    }
+
+    private fun OverstyrInntektOgRefusjonHandling.toModellobjekt(): OverstyrtInntektOgRefusjon {
+        return OverstyrtInntektOgRefusjon(
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            skjæringstidspunkt = skjæringstidspunkt,
+            arbeidsgivere = arbeidsgivere.map { overstyrArbeidsgiver ->
+                OverstyrtArbeidsgiver(
+                    overstyrArbeidsgiver.organisasjonsnummer,
+                    overstyrArbeidsgiver.månedligInntekt,
+                    overstyrArbeidsgiver.fraMånedligInntekt,
+                    overstyrArbeidsgiver.refusjonsopplysninger?.map {
+                        Refusjonselement(it.fom, it.tom, it.beløp)
+                    },
+                    overstyrArbeidsgiver.fraRefusjonsopplysninger?.map {
+                        Refusjonselement(it.fom, it.tom, it.beløp)
+                    },
+                    begrunnelse = overstyrArbeidsgiver.begrunnelse,
+                    forklaring = overstyrArbeidsgiver.forklaring,
+                    subsumsjon = overstyrArbeidsgiver.subsumsjon?.let {
+                        Subsumsjon(it.paragraf, it.ledd, it.bokstav)
+                    }
+                )
+            },
+        )
+    }
+
+    private fun OverstyrTidslinjeHandling.toModellobjekt(): OverstyrtTidslinje {
+        return OverstyrtTidslinje(
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+            dager = dager.map { OverstyrtTidslinjedag(it.dato, it.type, it.fraType, it.grad, it.fraGrad, it.subsumsjon?.let { subsumsjon ->
+                Subsumsjon(
+                paragraf = subsumsjon.paragraf,
+                ledd = subsumsjon.ledd,
+                bokstav = subsumsjon.bokstav
+            ) }) },
+            begrunnelse = begrunnelse
+        )
+    }
+
+    private fun SkjønnsfastsettSykepengegrunnlagHandling.toModellobjekt(): SkjønnsfastsattSykepengegrunnlag {
+        return SkjønnsfastsattSykepengegrunnlag(
+            aktørId,
+            fødselsnummer,
+            skjæringstidspunkt,
+            arbeidsgivere = arbeidsgivere.map { arbeidsgiverDto ->
+                SkjønnsfastsattSykepengegrunnlag.SkjønnsfastsattArbeidsgiver(
+                    arbeidsgiverDto.organisasjonsnummer,
+                    arbeidsgiverDto.årlig,
+                    arbeidsgiverDto.fraÅrlig,
+                    arbeidsgiverDto.årsak,
+                    type = when (arbeidsgiverDto.type) {
+                        SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT -> Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT
+                        SkjønnsfastsettingstypeDto.RAPPORTERT_ÅRSINNTEKT -> Skjønnsfastsettingstype.RAPPORTERT_ÅRSINNTEKT
+                        SkjønnsfastsettingstypeDto.ANNET -> Skjønnsfastsettingstype.ANNET
+                    },
+                    begrunnelseMal = arbeidsgiverDto.begrunnelseMal,
+                    begrunnelseFritekst = arbeidsgiverDto.begrunnelseFritekst,
+                    begrunnelseKonklusjon = arbeidsgiverDto.begrunnelseKonklusjon,
+                    subsumsjon = arbeidsgiverDto.subsumsjon?.let {
+                        Subsumsjon(it.paragraf, it.ledd, it.bokstav)
+                    },
+                    initierendeVedtaksperiodeId = arbeidsgiverDto.initierendeVedtaksperiodeId
+                )
+            }
+        )
+
+    }
 }

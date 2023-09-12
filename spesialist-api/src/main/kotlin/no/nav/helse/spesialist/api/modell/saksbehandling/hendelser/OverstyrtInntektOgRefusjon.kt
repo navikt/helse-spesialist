@@ -3,13 +3,19 @@ package no.nav.helse.spesialist.api.modell.saksbehandling.hendelser
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.spesialist.api.modell.OverstyrtInntektOgRefusjonEvent
+import no.nav.helse.spesialist.api.modell.Saksbehandler
 
 internal class OverstyrtInntektOgRefusjon(
     private val aktørId: String,
     private val fødselsnummer: String,
     private val skjæringstidspunkt: LocalDate,
     private val arbeidsgivere: List<OverstyrtArbeidsgiver>,
-) {
+): Overstyring {
+    override fun gjelderFødselsnummer(): String = fødselsnummer
+    override fun utførAv(saksbehandler: Saksbehandler) {
+        saksbehandler.håndter(this)
+    }
+
     internal fun byggEvent(oid: UUID, navn: String, epost: String, ident: String) =
         OverstyrtInntektOgRefusjonEvent(
             fødselsnummer = fødselsnummer,

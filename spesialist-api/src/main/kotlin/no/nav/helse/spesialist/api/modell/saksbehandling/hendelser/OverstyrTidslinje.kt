@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.api.modell.saksbehandling.hendelser
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.spesialist.api.modell.OverstyrtTidslinjeEvent
+import no.nav.helse.spesialist.api.modell.Saksbehandler
 
 internal class OverstyrtTidslinje(
     private val aktørId: String,
@@ -10,7 +11,12 @@ internal class OverstyrtTidslinje(
     private val organisasjonsnummer: String,
     private val dager: List<OverstyrtTidslinjedag>,
     private val begrunnelse: String,
-) {
+): Overstyring {
+    override fun gjelderFødselsnummer(): String = fødselsnummer
+    override fun utførAv(saksbehandler: Saksbehandler) {
+        saksbehandler.håndter(this)
+    }
+
     internal fun byggEvent(oid: UUID, navn: String, epost: String, ident: String) = OverstyrtTidslinjeEvent(
         fødselsnummer = fødselsnummer,
         aktørId = aktørId,

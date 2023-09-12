@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.api.modell.saksbehandling.hendelser
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.modell.SkjønnsfastsattSykepengegrunnlagEvent
 
 internal class SkjønnsfastsattSykepengegrunnlag(
@@ -9,7 +10,11 @@ internal class SkjønnsfastsattSykepengegrunnlag(
     private val fødselsnummer: String,
     private val skjæringstidspunkt: LocalDate,
     private val arbeidsgivere: List<SkjønnsfastsattArbeidsgiver>,
-) {
+): Overstyring {
+    override fun gjelderFødselsnummer(): String = fødselsnummer
+    override fun utførAv(saksbehandler: Saksbehandler) {
+        saksbehandler.håndter(this)
+    }
     internal fun byggEvent(oid: UUID, navn: String, epost: String, ident: String): SkjønnsfastsattSykepengegrunnlagEvent {
         return SkjønnsfastsattSykepengegrunnlagEvent(
             fødselsnummer = fødselsnummer,
