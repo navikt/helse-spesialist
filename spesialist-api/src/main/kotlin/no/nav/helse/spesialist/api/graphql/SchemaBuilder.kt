@@ -10,6 +10,8 @@ import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMe
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.graphql.mutation.NotatMutation
 import no.nav.helse.spesialist.api.graphql.mutation.OpptegnelseMutation
+import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutation
+import no.nav.helse.spesialist.api.graphql.mutation.SkjonnsfastsettelseMutation
 import no.nav.helse.spesialist.api.graphql.mutation.TildelingMutation
 import no.nav.helse.spesialist.api.graphql.mutation.VarselMutation
 import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQuery
@@ -118,6 +120,12 @@ internal class SchemaBuilder(
                 ),
                 TopLevelObject(
                     OpptegnelseMutation(saksbehandlerMediator = saksbehandlerMediator)
+                ),
+                TopLevelObject(
+                    OverstyringMutation(saksbehandlerMediator = saksbehandlerMediator)
+                ),
+                TopLevelObject(
+                    SkjonnsfastsettelseMutation(saksbehandlerMediator = saksbehandlerMediator)
                 )
             )
         )

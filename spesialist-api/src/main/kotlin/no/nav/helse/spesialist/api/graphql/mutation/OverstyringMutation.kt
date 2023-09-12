@@ -1,0 +1,130 @@
+package no.nav.helse.spesialist.api.graphql.mutation
+
+import com.expediagroup.graphql.server.operations.Mutation
+import graphql.GraphQLError
+import graphql.GraphqlErrorException
+import graphql.execution.DataFetcherResult
+import graphql.schema.DataFetchingEnvironment
+import java.time.LocalDate
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import no.nav.helse.spesialist.api.SaksbehandlerMediator
+import no.nav.helse.spesialist.api.graphql.ContextValues
+import no.nav.helse.spesialist.api.graphql.schema.ArbeidsforholdOverstyringHandling
+import no.nav.helse.spesialist.api.graphql.schema.InntektOgRefusjonOverstyring
+import no.nav.helse.spesialist.api.graphql.schema.TidslinjeOverstyring
+import no.nav.helse.spesialist.api.modell.Saksbehandler
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandling
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandling
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandling
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.SubsumsjonDto
+
+
+class OverstyringMutation(private val saksbehandlerMediator: SaksbehandlerMediator) : Mutation {
+
+    @Suppress("unused")
+    suspend fun overstyrDager(
+        overstyring: TidslinjeOverstyring,
+        env: DataFetchingEnvironment,
+    ): DataFetcherResult<Boolean> {
+        val saksbehandler: Saksbehandler = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
+        try {
+            val handling = OverstyrTidslinjeHandling(
+                organisasjonsnummer = overstyring.organisasjonsnummer,
+                fødselsnummer = overstyring.fodselsnummer,
+                aktørId = overstyring.aktorId,
+                begrunnelse = overstyring.begrunnelse,
+                dager = overstyring.dager.map {
+                    OverstyrTidslinjeHandling.OverstyrDagDto(
+                        dato = LocalDate.parse(it.dato),
+                        type = it.type,
+                        fraType = it.fraType,
+                        grad = it.grad,
+                        fraGrad = it.fraGrad,
+                        fraDagErForeldet = it.fraDagErForeldet,
+                    )
+                })
+            withContext(Dispatchers.IO) { saksbehandlerMediator.håndter(handling, saksbehandler) }
+        } catch (e: Exception) {
+            return DataFetcherResult.newResult<Boolean>().error(kunneIkkeOverstyreError("dager")).build()
+        }
+        return DataFetcherResult.newResult<Boolean>().data(true).build()
+    }
+
+    @Suppress("unused")
+    suspend fun overstyrInntektOgRefusjon(
+        overstyring: InntektOgRefusjonOverstyring,
+        env: DataFetchingEnvironment,
+    ): DataFetcherResult<Boolean> {
+        val saksbehandler: Saksbehandler = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
+        try {
+            val handling = OverstyrInntektOgRefusjonHandling(
+                overstyring.aktorId,
+                overstyring.fodselsnummer,
+                LocalDate.parse(overstyring.skjaringstidspunkt),
+                overstyring.arbeidsgivere.map { arbeidsgiver ->
+                    OverstyrInntektOgRefusjonHandling.OverstyrArbeidsgiverDto(
+                        organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
+                        månedligInntekt = arbeidsgiver.manedligInntekt,
+                        fraMånedligInntekt = arbeidsgiver.fraManedligInntekt,
+                        refusjonsopplysninger = arbeidsgiver.refusjonsopplysninger?.map {
+                            OverstyrInntektOgRefusjonHandling.OverstyrArbeidsgiverDto.RefusjonselementDto(
+                                fom = LocalDate.parse(it.fom),
+                                tom = LocalDate.parse(it.tom),
+                                beløp = it.belop
+                            )
+                        },
+                        fraRefusjonsopplysninger = arbeidsgiver.fraRefusjonsopplysninger?.map {
+                            OverstyrInntektOgRefusjonHandling.OverstyrArbeidsgiverDto.RefusjonselementDto(
+                                fom = LocalDate.parse(it.fom),
+                                tom = LocalDate.parse(it.tom),
+                                beløp = it.belop
+                            )
+                        },
+                        begrunnelse = arbeidsgiver.begrunnelse,
+                        forklaring = arbeidsgiver.forklaring,
+                        subsumsjon = arbeidsgiver.subsumsjon?.let { subsumsjon ->
+                            SubsumsjonDto(
+                                subsumsjon.paragraf,
+                                subsumsjon.ledd,
+                                subsumsjon.bokstav
+                            )
+                        })
+                })
+            withContext(Dispatchers.IO) { saksbehandlerMediator.håndter(handling, saksbehandler) }
+        } catch (e: Exception) {
+            return DataFetcherResult.newResult<Boolean>().error(kunneIkkeOverstyreError("inntekt og refusjon")).build()
+        }
+        return DataFetcherResult.newResult<Boolean>().data(true).build()
+    }
+
+    @Suppress("unused")
+    suspend fun overstyrArbeidsforhold(
+        overstyring: ArbeidsforholdOverstyringHandling,
+        env: DataFetchingEnvironment,
+    ): DataFetcherResult<Boolean> {
+        val saksbehandler: Saksbehandler = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
+        try {
+            val handling = OverstyrArbeidsforholdHandling(
+                overstyring.fodselsnummer,
+                aktørId = overstyring.aktorId,
+                skjæringstidspunkt = LocalDate.parse(overstyring.skjaringstidspunkt),
+                overstyrteArbeidsforhold = overstyring.overstyrteArbeidsforhold.map { arbeidsforhold ->
+                    OverstyrArbeidsforholdHandling.ArbeidsforholdDto(
+                        orgnummer = arbeidsforhold.orgnummer,
+                        deaktivert = arbeidsforhold.deaktivert,
+                        begrunnelse = arbeidsforhold.begrunnelse,
+                        forklaring = arbeidsforhold.forklaring
+                    )
+                })
+            withContext(Dispatchers.IO) { saksbehandlerMediator.håndter(handling, saksbehandler) }
+        } catch (e: Exception) {
+            return DataFetcherResult.newResult<Boolean>().error(kunneIkkeOverstyreError("arbeidsforhold")).build()
+        }
+        return DataFetcherResult.newResult<Boolean>().data(true).build()
+    }
+
+    private fun kunneIkkeOverstyreError(overstyring: String): GraphQLError =
+        GraphqlErrorException.newErrorException().message("Kunne ikke overstyre $overstyring")
+            .extensions(mapOf("code" to 500)).build()
+}

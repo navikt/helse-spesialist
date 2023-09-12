@@ -59,7 +59,7 @@ class OverstyrTidslinjeHandling(
     )
 }
 
-internal data class OverstyrInntektOgRefusjonHandling(
+data class OverstyrInntektOgRefusjonHandling(
     val aktørId: String,
     val fødselsnummer: String,
     val skjæringstidspunkt: LocalDate,
@@ -97,7 +97,7 @@ internal data class OverstyrInntektOgRefusjonHandling(
         saksbehandler.håndter(overstyrtInntektOgRefusjon)
     }
 
-    internal data class OverstyrArbeidsgiverDto(
+    data class OverstyrArbeidsgiverDto(
         val organisasjonsnummer: String,
         val månedligInntekt: Double,
         val fraMånedligInntekt: Double,
@@ -150,7 +150,7 @@ data class OverstyrArbeidsforholdHandling(
     )
 }
 
-internal data class SkjønnsfastsettSykepengegrunnlagHandling(
+data class SkjønnsfastsettSykepengegrunnlagHandling(
     val aktørId: String,
     val fødselsnummer: String,
     val skjæringstidspunkt: LocalDate,
@@ -190,7 +190,7 @@ internal data class SkjønnsfastsettSykepengegrunnlagHandling(
         saksbehandler.håndter(skjønnsfastsattSykepengegrunnlag)
     }
 
-    internal data class SkjønnsfastsattArbeidsgiverDto(
+    data class SkjønnsfastsattArbeidsgiverDto(
         val organisasjonsnummer: String,
         val årlig: Double,
         val fraÅrlig: Double,
@@ -203,7 +203,7 @@ internal data class SkjønnsfastsettSykepengegrunnlagHandling(
         val initierendeVedtaksperiodeId: String?,
     ) {
 
-        internal enum class SkjønnsfastsettingstypeDto {
+        enum class SkjønnsfastsettingstypeDto {
             OMREGNET_ÅRSINNTEKT,
             RAPPORTERT_ÅRSINNTEKT,
             ANNET,
