@@ -53,13 +53,6 @@ class Saksbehandler(
         observers.forEach { it.utbetalingAnnullert(event.fødselsnummer, event) }
     }
 
-    fun json() = mapOf(
-        "epostaddresse" to epostadresse,
-        "oid" to oid,
-        "navn" to navn,
-        "ident" to ident,
-    )
-
     fun toDto() = SaksbehandlerFraApi(oid = oid, navn = navn, epost = epostadresse, ident = ident)
 
     override fun toString(): String = "epostadresse=$epostadresse, oid=$oid"

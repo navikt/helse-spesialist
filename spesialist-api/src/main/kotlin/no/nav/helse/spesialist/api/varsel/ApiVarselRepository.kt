@@ -34,7 +34,7 @@ class ApiVarselRepository(dataSource: DataSource) {
         varselDao.godkjennVarslerFor(vedtaksperioder.map { it.vedtaksperiodeId() })
     }
 
-    internal fun vurderVarselFor(varselId: UUID, gjeldendeStatus: Varsel.Varselstatus, saksbehandlerIdent: String) {
+    fun vurderVarselFor(varselId: UUID, gjeldendeStatus: Varsel.Varselstatus, saksbehandlerIdent: String) {
         varselDao.vurderVarselFor(varselId, gjeldendeStatus, saksbehandlerIdent)
     }
 
