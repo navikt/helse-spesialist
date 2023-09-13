@@ -164,7 +164,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `finner OppgaveFraDatabase`() {
-        nyPerson()
+        val hendelseId = UUID.randomUUID()
+        nyPerson(hendelseId = hendelseId)
         val oppgave = oppgaveDao.finnOppgave(oppgaveId) ?: fail { "Fant ikke oppgave" }
         assertEquals(
             OppgaveFraDatabase(
@@ -172,7 +173,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
                 type = OPPGAVETYPE.toString(),
                 status = AvventerSaksbehandler.toString(),
                 vedtaksperiodeId = VEDTAKSPERIODE,
-                utbetalingId = UTBETALING_ID
+                utbetalingId = UTBETALING_ID,
+                hendelseId = hendelseId
             ), oppgave
         )
     }

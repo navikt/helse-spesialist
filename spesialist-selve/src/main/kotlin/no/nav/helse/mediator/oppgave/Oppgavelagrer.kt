@@ -70,6 +70,7 @@ class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
             status = status.toString(),
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId,
+            hendelseId = hendelseId,
             ferdigstiltAvIdent = ferdigstiltAvIdent,
             ferdigstiltAvOid = ferdigstiltAvOid,
             tildelt = tildelt?.toDto()?.let {

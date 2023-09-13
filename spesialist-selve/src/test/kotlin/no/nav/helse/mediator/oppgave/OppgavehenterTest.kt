@@ -24,6 +24,7 @@ class OppgavehenterTest {
         private const val STATUS = "AvventerSaksbehandler"
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
         private val UTBETALING_ID = UUID.randomUUID()
+        private val HENDELSE_ID = UUID.randomUUID()
         private const val SAKSBEHANDLER_IDENT = "S199999"
         private const val SAKSBEHANDLER_EPOST = "saksbehandler@nav.no"
         private const val SAKSBEHANDLER_NAVN = "Saksbehandler"
@@ -169,6 +170,7 @@ class OppgavehenterTest {
                 status = STATUS,
                 vedtaksperiodeId = VEDTAKSPERIODE_ID,
                 utbetalingId = UTBETALING_ID,
+                hendelseId = HENDELSE_ID,
                 ferdigstiltAvIdent = SAKSBEHANDLER_IDENT,
                 ferdigstiltAvOid = SAKSBEHANDLER_OID,
                 tildelt = TILDELT_TIL,

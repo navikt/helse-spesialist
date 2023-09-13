@@ -8,6 +8,7 @@ data class OppgaveFraDatabase(
     val status: String,
     val vedtaksperiodeId: UUID,
     val utbetalingId: UUID,
+    val hendelseId: UUID,
     val ferdigstiltAvIdent: String? = null,
     val ferdigstiltAvOid: UUID? = null,
     val tildelt: SaksbehandlerFraDatabase? = null,

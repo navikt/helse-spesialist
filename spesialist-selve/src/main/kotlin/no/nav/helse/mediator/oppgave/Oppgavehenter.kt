@@ -25,6 +25,7 @@ class Oppgavehenter(
             tilstand = tilstand(enumValueOf<Oppgavestatus>(oppgave.status)),
             vedtaksperiodeId = oppgave.vedtaksperiodeId,
             utbetalingId = oppgave.utbetalingId,
+            hendelseId = oppgave.hendelseId,
             ferdigstiltAvIdent = oppgave.ferdigstiltAvIdent,
             ferdigstiltAvOid = oppgave.ferdigstiltAvOid,
             tildelt = oppgave.tildelt?.let {
@@ -42,7 +43,6 @@ class Oppgavehenter(
                     oppdatert = it.oppdatert
                 )
             },
-            hendelseId = oppgaveRepository.finnHendelseId(oppgave.id)
         )
     }
 

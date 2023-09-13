@@ -232,6 +232,7 @@ internal class OppgaveMediatorTest {
         id = OPPGAVE_ID,
         vedtaksperiodeId = VEDTAKSPERIODE_ID,
         utbetalingId = UTBETALING_ID,
+        hendelseId = HENDELSE_ID,
         type = "SØKNAD",
         status = "AvventerSaksbehandler"
     )

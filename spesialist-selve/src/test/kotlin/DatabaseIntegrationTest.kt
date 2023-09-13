@@ -252,13 +252,14 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         organisasjonsnummer: String = ORGNUMMER,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         generasjonId: UUID = UUID.randomUUID(),
-        contextId: UUID = UUID.randomUUID()
+        contextId: UUID = UUID.randomUUID(),
+        hendelseId: UUID = UUID.randomUUID()
     ) {
         opprettPerson(fødselsnummer = fødselsnummer)
         opprettArbeidsgiver(organisasjonsnummer = organisasjonsnummer)
         opprettGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
         opprettVedtaksperiode(periodetype = periodetype, inntektskilde = inntektskilde, vedtaksperiodeId = vedtaksperiodeId)
-        opprettOppgave(contextId = contextId, vedtaksperiodeId = vedtaksperiodeId)
+        opprettOppgave(contextId = contextId, vedtaksperiodeId = vedtaksperiodeId, hendelseId = hendelseId)
     }
 
     private fun opprettCommandContext(hendelse: TestHendelse, contextId: UUID) {
