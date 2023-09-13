@@ -1,6 +1,6 @@
-package no.nav.helse.spesialist.api.modell.saksbehandling.hendelser
+package no.nav.helse.modell.saksbehandler.handlinger
 
-import no.nav.helse.spesialist.api.modell.Saksbehandler
+import no.nav.helse.modell.saksbehandler.Saksbehandler
 
 interface Handling {
     fun utførAv(saksbehandler: Saksbehandler)

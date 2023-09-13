@@ -1,9 +1,9 @@
-package no.nav.helse.spesialist.api.modell.saksbehandling.hendelser
+package no.nav.helse.modell.saksbehandler.handlinger
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.spesialist.api.modell.OverstyrtInntektOgRefusjonEvent
-import no.nav.helse.spesialist.api.modell.Saksbehandler
 
 class OverstyrtInntektOgRefusjon(
     private val aktørId: String,

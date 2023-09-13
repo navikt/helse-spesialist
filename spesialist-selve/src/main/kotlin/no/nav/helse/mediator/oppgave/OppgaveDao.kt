@@ -7,10 +7,10 @@ import no.nav.helse.db.OppgaveFraDatabase
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommandData
 import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker
-import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSystem

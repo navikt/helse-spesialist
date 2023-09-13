@@ -2,10 +2,10 @@ package no.nav.helse.modell.totrinnsvurdering
 
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtBeslutter
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtIRetur
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveKreverVurderingAvToSaksbehandlere
-import no.nav.helse.spesialist.api.modell.Saksbehandler
 
 class Totrinnsvurdering(
     private val vedtaksperiodeId: UUID,

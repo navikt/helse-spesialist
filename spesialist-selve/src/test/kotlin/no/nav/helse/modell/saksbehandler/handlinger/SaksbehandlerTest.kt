@@ -1,13 +1,11 @@
-package no.nav.helse.spesialist.api.saksbehandler
+package no.nav.helse.modell.saksbehandler.handlinger
 
 import java.util.UUID
-import no.nav.helse.spesialist.api.januar
+import no.nav.helse.januar
+import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.spesialist.api.modell.OverstyrtInntektOgRefusjonEvent
 import no.nav.helse.spesialist.api.modell.OverstyrtTidslinjeEvent
-import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.modell.SaksbehandlerObserver
-import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.OverstyrtInntektOgRefusjon
-import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.OverstyrtTidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test

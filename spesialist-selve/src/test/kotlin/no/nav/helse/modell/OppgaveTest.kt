@@ -6,12 +6,12 @@ import no.nav.helse.modell.OppgaveInspektør.Companion.inspektør
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.Oppgave.Companion.oppgaveMedEgenskaper
 import no.nav.helse.modell.oppgave.OppgaveObserver
+import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtBeslutter
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtIRetur
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveKreverVurderingAvToSaksbehandlere
-import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype.STIKKPRØVE
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype.SØKNAD

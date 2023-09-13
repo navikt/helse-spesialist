@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api.modell.saksbehandling.hendelser
+package no.nav.helse.modell.saksbehandler.handlinger
 
 import no.nav.helse.spesialist.api.modell.SubsumsjonEvent
 

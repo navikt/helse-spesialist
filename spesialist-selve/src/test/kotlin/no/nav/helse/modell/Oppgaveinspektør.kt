@@ -3,8 +3,8 @@ package no.nav.helse.modell
 import java.util.UUID
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveVisitor
+import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
-import no.nav.helse.spesialist.api.modell.Saksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 
 class OppgaveInspektør private constructor(): OppgaveVisitor {

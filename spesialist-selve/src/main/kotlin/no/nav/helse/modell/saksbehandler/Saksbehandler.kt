@@ -1,11 +1,12 @@
-package no.nav.helse.spesialist.api.modell
+package no.nav.helse.modell.saksbehandler
 
 import java.util.UUID
-import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.Annullering
-import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.OverstyrtArbeidsforhold
-import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.OverstyrtInntektOgRefusjon
-import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.OverstyrtTidslinje
-import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.SkjønnsfastsattSykepengegrunnlag
+import no.nav.helse.modell.saksbehandler.handlinger.Annullering
+import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsforhold
+import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtInntektOgRefusjon
+import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinje
+import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
+import no.nav.helse.spesialist.api.modell.SaksbehandlerObserver
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 
