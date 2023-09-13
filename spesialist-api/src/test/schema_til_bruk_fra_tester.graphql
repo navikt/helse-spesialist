@@ -740,6 +740,7 @@ enum Begrunnelse {
 
 enum Dagtype {
     AAPdag
+    ArbeidIkkeGjenopptattDag
     Arbeidsdag
     Avvistdag
     Dagpengerdag
@@ -897,6 +898,7 @@ enum Sykdomsdagtype {
     ANDRE_YTELSER_OPPLARINGSPENGER
     ANDRE_YTELSER_PLEIEPENGER
     ANDRE_YTELSER_SVANGERSKAPSPENGER
+    ARBEIDIKKEGJENOPPTATTDAG
     ARBEIDSDAG
     ARBEIDSGIVERDAG
     AVSLATT
