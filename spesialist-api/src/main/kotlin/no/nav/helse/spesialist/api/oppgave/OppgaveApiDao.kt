@@ -93,7 +93,8 @@ class OppgaveApiDao(dataSource: DataSource) : HelseDao(dataSource) {
                 s.epost, s.navn as saksbehandler_navn, s.oid, v.vedtaksperiode_id, v.fom, v.tom, pi.fornavn, pi.mellomnavn, pi.etternavn, pi.fodselsdato,
                 pi.kjonn, pi.adressebeskyttelse, p.aktor_id, p.fodselsnummer, sot.type as saksbehandleroppgavetype, sot.inntektskilde, e.id AS enhet_id, e.navn AS enhet_navn, t.på_vent,
                 ttv.vedtaksperiode_id AS totrinnsvurdering_vedtaksperiode_id, ttv.saksbehandler, ttv.beslutter, ttv.er_retur,
-                h.vedtaksperiode_id IS NOT NULL AS har_varsel_om_negativt_belop, hv.har_vergemal, p.enhet_ref
+                h.vedtaksperiode_id IS NOT NULL AS har_varsel_om_negativt_belop, hv.har_vergemal, p.enhet_ref,
+                sps.vedtaksperiode_id is not null as er_spesialsak
             FROM aktiv_oppgave o
                 INNER JOIN vedtak v ON o.vedtak_ref = v.id
                 INNER JOIN person p ON v.person_ref = p.id
@@ -107,6 +108,7 @@ class OppgaveApiDao(dataSource: DataSource) : HelseDao(dataSource) {
                 LEFT JOIN totrinnsvurdering ttv ON (ttv.vedtaksperiode_id = v.vedtaksperiode_id AND ttv.utbetaling_id_ref IS NULL)
                 LEFT JOIN har_varsel_om_negativt_belop h ON h.vedtaksperiode_id = v.vedtaksperiode_id
                 LEFT JOIN har_vergemal hv ON hv.person_ref = p.id
+                LEFT JOIN spesialsak sps on sps.vedtaksperiode_id = v.vedtaksperiode_id
             WHERE status = 'AvventerSaksbehandler'::oppgavestatus
                 AND CASE WHEN :harTilgangTilRisk 
                     THEN true
@@ -261,7 +263,8 @@ class OppgaveApiDao(dataSource: DataSource) : HelseDao(dataSource) {
             ),
             haster = it.boolean("har_varsel_om_negativt_belop") && harUtbetalingTilSykmeldt(it.stringOrNull("mottaker")),
             harVergemal = it.boolean("har_vergemal"),
-            tilhorerEnhetUtland = setOf(393, 2101).contains(it.int("enhet_ref"))
+            tilhorerEnhetUtland = setOf(393, 2101).contains(it.int("enhet_ref")),
+            spesialsak = it.boolean("er_spesialsak"),
         )
 
         private fun harUtbetalingTilSykmeldt(mottaker: String?): Boolean {

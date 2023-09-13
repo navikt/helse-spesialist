@@ -41,6 +41,7 @@ data class OppgaveForOversiktsvisning(
     val haster: Boolean?,
     val harVergemal: Boolean?,
     val tilhorerEnhetUtland: Boolean?,
+    val spesialsak: Boolean,
 )
 
 data class OppgaveForPeriodevisning(

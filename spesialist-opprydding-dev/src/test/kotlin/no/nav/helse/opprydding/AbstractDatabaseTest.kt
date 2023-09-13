@@ -121,6 +121,7 @@ internal abstract class AbstractDatabaseTest {
                 "automatisering_korrigert_soknad",
                 "arkiv_tildeling_for_oppgaver_uten_utbetaling_id",
                 "arkiv_oppgave_uten_utbetaling_id",
+                "spesialsak",
             )
         )
         tabeller.forEach {

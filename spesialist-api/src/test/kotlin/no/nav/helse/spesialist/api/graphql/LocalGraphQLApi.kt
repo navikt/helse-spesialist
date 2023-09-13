@@ -239,6 +239,7 @@ private fun enOppgave() = OppgaveForOversiktsvisning(
     haster = false,
     harVergemal = false,
     tilhorerEnhetUtland = false,
+    spesialsak = false,
 )
 
 private fun enPersoninfo() = Personinfo(

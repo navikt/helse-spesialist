@@ -19,6 +19,7 @@ import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -468,6 +469,15 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
         assertOppgaveBehandlingKobling(oppgaveId, behandlingId)
     }
 
+    @Test
+    fun `støtter spesialsaker`() {
+        nyPerson()
+        assertFalse(oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN).first().spesialsak)
+
+        markerSpesialsak(VEDTAKSPERIODE)
+        assertTrue(oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN).first().spesialsak)
+    }
+
     private fun assertOppgaveBehandlingKobling(oppgaveId: Long, forventetBehandlingId: UUID) {
         @Language("PostgreSQL")
         val query =
@@ -497,5 +507,11 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
             )
         }
         assertEquals(forventetStatus, status)
+    }
+
+    private fun markerSpesialsak(vedtaksperiodeId: UUID) {
+        @Language("PostgreSQL")
+        val query = "insert into spesialsak values ('$vedtaksperiodeId')"
+        sessionOf(dataSource).use { session -> session.run(queryOf(query).asUpdate) }
     }
 }
