@@ -232,7 +232,7 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
             generasjonDao.oppdaterTilstandFor(generasjonId = it, ny = Generasjon.Låst, endretAv = UUID.randomUUID())
         }
          val generasjonRef = nyGenerasjon(vedtaksperiodeId = VEDTAKSPERIODE, utbetalingId = UTBETALING_ID)
-        nyttVarsel(kode = "RV_UT_23", generasjonRef = generasjonRef, vedtaksperiodeId = VEDTAKSPERIODE)
+        nyttVarsel(kode = "RV_UT_23", generasjonId = generasjonRef, vedtaksperiodeId = VEDTAKSPERIODE)
         ferdigstillSistOpprettedeOppgaveOgOpprettNy()
         val oppgaver = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_RISK)
         assertTrue(oppgaver.first().haster ?: false)

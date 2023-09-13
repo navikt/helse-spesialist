@@ -15,7 +15,6 @@ import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.januar
 import no.nav.helse.mediator.FeilendeMeldingerDao
-import no.nav.helse.mediator.meldinger.Hendelse
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.CommandContextDao
@@ -27,7 +26,6 @@ import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
-import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.TestHendelse
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
@@ -66,6 +64,7 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLGenerasjon
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUberegnetPeriode
 import org.intellij.lang.annotations.Language
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.fail
 import kotlin.random.Random.Default.nextLong
@@ -77,7 +76,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             .registerModule(JavaTimeModule())
         internal val HENDELSE_ID = UUID.randomUUID()
-        internal val CONTEXT_ID = UUID.randomUUID()
 
         internal val VEDTAKSPERIODE = UUID.randomUUID()
 
@@ -253,13 +251,14 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         fødselsnummer: String = FNR,
         organisasjonsnummer: String = ORGNUMMER,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
+        generasjonId: UUID = UUID.randomUUID(),
         contextId: UUID = UUID.randomUUID()
     ) {
         opprettPerson(fødselsnummer = fødselsnummer)
         opprettArbeidsgiver(organisasjonsnummer = organisasjonsnummer)
-        opprettGenerasjon()
+        opprettGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
         opprettVedtaksperiode(periodetype = periodetype, inntektskilde = inntektskilde, vedtaksperiodeId = vedtaksperiodeId)
-        opprettOppgave(contextId = contextId)
+        opprettOppgave(contextId = contextId, vedtaksperiodeId = vedtaksperiodeId)
     }
 
     private fun opprettCommandContext(hendelse: TestHendelse, contextId: UUID) {
@@ -537,43 +536,42 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         periode: Periode = PERIODE,
         tilstandEndretTidspunkt: LocalDateTime? = null,
         skjæringstidspunkt: LocalDate = periode.fom,
-    ): Long = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+    ): UUID = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
         @Language("PostgreSQL")
         val query = """
             INSERT INTO selve_vedtaksperiode_generasjon(vedtaksperiode_id, unik_id, utbetaling_id, opprettet_av_hendelse, tilstand_endret_tidspunkt, tilstand_endret_av_hendelse, tilstand, fom, tom, skjæringstidspunkt) 
             VALUES (?, ?, ?, ?, ?, ?, 'Ulåst', ?, ?, ?)
         """
-        return requireNotNull(
-            session.run(
-                queryOf(
-                    query,
-                    vedtaksperiodeId,
-                    generasjonId,
-                    utbetalingId,
-                    UUID.randomUUID(),
-                    tilstandEndretTidspunkt,
-                    UUID.randomUUID(),
-                    periode.fom,
-                    periode.tom,
-                    skjæringstidspunkt
-                ).asUpdateAndReturnGeneratedKey
-            )
+        session.run(
+            queryOf(
+                query,
+                vedtaksperiodeId,
+                generasjonId,
+                utbetalingId,
+                UUID.randomUUID(),
+                tilstandEndretTidspunkt,
+                UUID.randomUUID(),
+                periode.fom,
+                periode.tom,
+                skjæringstidspunkt
+            ).asUpdateAndReturnGeneratedKey
         )
+        return generasjonId
     }
 
     protected fun nyttVarsel(
         id: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         kode: String = "EN_KODE",
-        generasjonRef: Long,
+        generasjonId: UUID,
         definisjonRef: Long? = null,
-    ) = nyttVarsel(id, vedtaksperiodeId, kode, generasjonRef, definisjonRef, "AKTIV", null)
+    ) = nyttVarsel(id, vedtaksperiodeId, kode, generasjonId, definisjonRef, "AKTIV", null)
 
     protected fun nyttVarsel(
         id: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         kode: String = "EN_KODE",
-        generasjonRef: Long,
+        generasjonId: UUID,
         definisjonRef: Long? = null,
         status: String,
         endretTidspunkt: LocalDateTime? = LocalDateTime.now(),
@@ -581,7 +579,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         @Language("PostgreSQL")
         val query = """
             INSERT INTO selve_varsel(unik_id, kode, vedtaksperiode_id, generasjon_ref, definisjon_ref, opprettet, status, status_endret_ident, status_endret_tidspunkt) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, (SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = ?), ?, ?, ?, ?, ?)
         """
         session.run(
             queryOf(
@@ -589,7 +587,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                 id,
                 kode,
                 vedtaksperiodeId,
-                generasjonRef,
+                generasjonId,
                 definisjonRef,
                 LocalDateTime.now(),
                 status,
@@ -599,11 +597,49 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         )
     }
 
-    private class Testhendelse: Hendelse {
-        override val id: UUID = UUID.randomUUID()
-        override fun fødselsnummer(): String = FNR
-        override fun toJson(): String = "{}"
-        override fun execute(context: CommandContext): Boolean = true
+    protected fun opprettVarseldefinisjon(
+        tittel: String = "EN_TITTEL",
+        kode: String = "EN_KODE",
+        definisjonId: UUID = UUID.randomUUID(),
+    ): Long = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+        @Language("PostgreSQL")
+        val query = """
+            INSERT INTO api_varseldefinisjon(unik_id, kode, tittel, forklaring, handling, opprettet) 
+            VALUES (?, ?, ?, ?, ?, ?)    
+        """
+        requireNotNull(
+            session.run(
+                queryOf(
+                    query,
+                    definisjonId,
+                    kode,
+                    tittel,
+                    null,
+                    null,
+                    LocalDateTime.now()
+                ).asUpdateAndReturnGeneratedKey
+            )
+        )
+    }
+
+    protected fun assertGodkjenteVarsler(generasjonId: UUID, forventetAntall: Int) {
+        @Language("PostgreSQL")
+        val query =
+            "SELECT COUNT(1) FROM selve_varsel sv WHERE sv.generasjon_ref = (SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = ?) AND status = 'GODKJENT'"
+        val antall = sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, generasjonId).map { it.int(1) }.asSingle)
+        }
+        Assertions.assertEquals(forventetAntall, antall)
+    }
+
+    protected fun assertAvvisteVarsler(generasjonId: UUID, forventetAntall: Int) {
+        @Language("PostgreSQL")
+        val query =
+            "SELECT COUNT(1) FROM selve_varsel sv WHERE sv.generasjon_ref = (SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = ?) AND status = 'AVVIST'"
+        val antall = sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, generasjonId).map { it.int(1) }.asSingle)
+        }
+        Assertions.assertEquals(forventetAntall, antall)
     }
 
     protected data class Periode(

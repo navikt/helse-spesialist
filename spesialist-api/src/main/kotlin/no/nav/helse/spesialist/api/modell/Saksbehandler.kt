@@ -17,11 +17,11 @@ class Saksbehandler(
 ) {
     private val observers = mutableListOf<SaksbehandlerObserver>()
 
-    internal fun register(observer: SaksbehandlerObserver) {
+    fun register(observer: SaksbehandlerObserver) {
         observers.add(observer)
     }
 
-    internal fun ident(): String = ident
+    fun ident(): String = ident
     fun oid(): UUID = oid
 
     fun persister(saksbehandlerDao: SaksbehandlerDao) {

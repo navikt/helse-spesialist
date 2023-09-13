@@ -1,11 +1,11 @@
-package no.nav.helse.spesialist.api
+package no.nav.helse.mediator
 
 import java.util.UUID
 import javax.sql.DataSource
-import net.logstash.logback.argument.StructuredArguments.kv
+import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.withMDC
+import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.abonnement.AbonnementDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
@@ -27,7 +27,6 @@ import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.OverstyrtTids
 import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.OverstyrtTidslinjedag
 import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.Refusjonselement
 import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.SkjønnsfastsattSykepengegrunnlag
-import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.SkjønnsfastsattSykepengegrunnlag.SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype
 import no.nav.helse.spesialist.api.modell.saksbehandling.hendelser.Subsumsjon
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
@@ -39,7 +38,7 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRef
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SaksbehandlerHandling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandling
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandling.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto
+import no.nav.helse.spesialist.api.tell
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.varsel.Varsel
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
@@ -47,15 +46,6 @@ import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode.Companion.harAktiveVars
 import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode.Companion.vurderVarsler
 import no.nav.helse.spesialist.api.vedtaksperiode.ApiGenerasjonRepository
 import org.slf4j.LoggerFactory
-
-interface Saksbehandlerhåndterer {
-    fun <T: SaksbehandlerHandling> håndter(handling: T, saksbehandlerFraApi: SaksbehandlerFraApi)
-    fun opprettAbonnement(saksbehandlerFraApi: SaksbehandlerFraApi, personidentifikator: String)
-    fun hentAbonnerteOpptegnelser(saksbehandlerFraApi: SaksbehandlerFraApi, sisteSekvensId: Int): List<Opptegnelse>
-    fun hentAbonnerteOpptegnelser(saksbehandlerFraApi: SaksbehandlerFraApi): List<Opptegnelse>
-    fun håndter(godkjenning: GodkjenningDto, behandlingId: UUID, saksbehandlerFraApi: SaksbehandlerFraApi)
-    fun håndterTotrinnsvurdering(oppgavereferanse: Long)
-}
 
 class SaksbehandlerMediator(
     dataSource: DataSource,
@@ -76,7 +66,7 @@ class SaksbehandlerMediator(
         saksbehandler.register(this)
         saksbehandler.persister(saksbehandlerDao)
         val modellhandling = handling.toModellobjekt()
-        withMDC(
+        no.nav.helse.rapids_rivers.withMDC(
             mapOf(
                 "saksbehandlerOid" to saksbehandler.oid().toString(),
                 "handlingId" to handlingId.toString()
@@ -191,9 +181,9 @@ class SaksbehandlerMediator(
         )
         sikkerlogg.info(
             "Publiserer varsel_endret for varsel med {}, {}, {}",
-            kv("varselId", varselId),
-            kv("varselkode", varselkode),
-            kv("status", gjeldendeStatus)
+            StructuredArguments.kv("varselId", varselId),
+            StructuredArguments.kv("varselkode", varselkode),
+            StructuredArguments.kv("status", gjeldendeStatus)
         )
         rapidsConnection.publish(fødselsnummer, message.toJson())
     }
@@ -256,12 +246,21 @@ class SaksbehandlerMediator(
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
-            dager = dager.map { OverstyrtTidslinjedag(it.dato, it.type, it.fraType, it.grad, it.fraGrad, it.subsumsjon?.let { subsumsjon ->
-                Subsumsjon(
-                paragraf = subsumsjon.paragraf,
-                ledd = subsumsjon.ledd,
-                bokstav = subsumsjon.bokstav
-            ) }) },
+            dager = dager.map {
+                OverstyrtTidslinjedag(
+                    it.dato,
+                    it.type,
+                    it.fraType,
+                    it.grad,
+                    it.fraGrad,
+                    it.subsumsjon?.let { subsumsjon ->
+                        Subsumsjon(
+                            paragraf = subsumsjon.paragraf,
+                            ledd = subsumsjon.ledd,
+                            bokstav = subsumsjon.bokstav
+                        )
+                    })
+            },
             begrunnelse = begrunnelse
         )
     }
@@ -278,9 +277,9 @@ class SaksbehandlerMediator(
                     arbeidsgiverDto.fraÅrlig,
                     arbeidsgiverDto.årsak,
                     type = when (arbeidsgiverDto.type) {
-                        SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT -> Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT
-                        SkjønnsfastsettingstypeDto.RAPPORTERT_ÅRSINNTEKT -> Skjønnsfastsettingstype.RAPPORTERT_ÅRSINNTEKT
-                        SkjønnsfastsettingstypeDto.ANNET -> Skjønnsfastsettingstype.ANNET
+                        SkjønnsfastsettSykepengegrunnlagHandling.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT -> SkjønnsfastsattSykepengegrunnlag.SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT
+                        SkjønnsfastsettSykepengegrunnlagHandling.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto.RAPPORTERT_ÅRSINNTEKT -> SkjønnsfastsattSykepengegrunnlag.SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.RAPPORTERT_ÅRSINNTEKT
+                        SkjønnsfastsettSykepengegrunnlagHandling.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto.ANNET -> SkjønnsfastsattSykepengegrunnlag.SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.ANNET
                     },
                     begrunnelseMal = arbeidsgiverDto.begrunnelseMal,
                     begrunnelseFritekst = arbeidsgiverDto.begrunnelseFritekst,

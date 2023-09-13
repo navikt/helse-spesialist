@@ -41,6 +41,7 @@ import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.OverstyringMediator
+import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.api.GodkjenningService
 import no.nav.helse.mediator.api.OppdaterPersonService
 import no.nav.helse.mediator.api.personApi
@@ -67,7 +68,6 @@ import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.AzureAdAppConfig
 import no.nav.helse.spesialist.api.AzureConfig
-import no.nav.helse.spesialist.api.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseMediator
 import no.nav.helse.spesialist.api.abonnement.opptegnelseApi
