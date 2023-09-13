@@ -3,7 +3,6 @@ package no.nav.helse.mediator.meldinger
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.mediator.api.erDev
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -33,8 +32,6 @@ internal class VedtaksperiodeNyUtbetalingRiver(
         val vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
         val utbetalingId = UUID.fromString(packet["utbetalingId"].asText())
         val id = UUID.fromString(packet["@id"].asText())
-
-        if (erDev() && utbetalingId == UUID.fromString("cad28e24-090f-4fd3-a640-c9b2cdd6f544")) return
 
         sikkerlogg.info(
             "Mottok melding om vedtaksperiode_ny_utbetaling for {}, {}, {} som følge av melding med {}",
