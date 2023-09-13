@@ -5,7 +5,6 @@ import java.time.LocalDate
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.mediator.api.erDev
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.utbetaling.Utbetalingtype.Companion.values
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
@@ -64,9 +63,6 @@ internal class GodkjenningsbehovRiver(
             StructuredArguments.keyValue("hendelseId", hendelseId),
             StructuredArguments.keyValue("hendelse", packet.toJson()),
         )
-
-        if (erDev() && UUID.fromString(packet["utbetalingId"].asText()) == UUID.fromString("cad28e24-090f-4fd3-a640-c9b2cdd6f544")) return
-
         mediator.godkjenningsbehov(
             message = packet,
             id = hendelseId,
