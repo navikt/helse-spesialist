@@ -122,13 +122,17 @@ class OppgaveApiDao(dataSource: DataSource) : HelseDao(dataSource) {
                 AND CASE WHEN :harTilgangTilStikkprove
                     THEN true
                     ELSE o.type != 'STIKKPRØVE' END
+                AND CASE WHEN :harTilgangTilSpesialsaker
+                    THEN true
+                    ELSE sps.vedtaksperiode_id is null END
                     ;
         """,
         mapOf(
             "harTilgangTilRisk" to tilganger.harTilgangTilRiskOppgaver(),
             "harTilgangTilKode7" to tilganger.harTilgangTilKode7(),
             "harTilgangTilBeslutter" to tilganger.harTilgangTilBeslutterOppgaver(),
-            "harTilgangTilStikkprove" to tilganger.hartilgangTilStikkprøve()
+            "harTilgangTilStikkprove" to tilganger.hartilgangTilStikkprøve(),
+            "harTilgangTilSpesialsaker" to tilganger.hartilgangTilSpesialsaker(),
         )
     ).list(::tilOppgaveForOversiktsvisning)
 

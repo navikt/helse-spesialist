@@ -251,6 +251,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val tilgangsgrupper = Tilgangsgrupper(System.getenv())
 
     private val saksbehandlereMedTilgangTilStikkprøver: List<String> = requireNotNull(env["SAKSBEHANDLERE_MED_TILGANG_TIL_STIKKPROVER"]).split(',')
+    private val saksbehandlereMedTilgangTilSpesialsaker: List<String> = requireNotNull(env["SAKSBEHANDLERE_MED_TILGANG_TIL_SPESIALSAKER"]).split(',')
 
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule {
@@ -311,6 +312,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 beslutterGruppeId = tilgangsgrupper.beslutterGruppeId,
                 riskGruppeId = tilgangsgrupper.riskQaGruppeId,
                 saksbehandlereMedTilgangTilStikkprøve = saksbehandlereMedTilgangTilStikkprøver,
+                saksbehandlereMedTilgangTilSpesialsaker = saksbehandlereMedTilgangTilSpesialsaker,
                 snapshotMediator = snapshotMediator,
                 behandlingsstatistikkMediator = behandlingsstatistikkMediator,
                 tildelingService = tildelingService,

@@ -9,7 +9,8 @@ class SaksbehandlerTilganger(
     private val riskSaksbehandlergruppe: UUID,
     private val beslutterSaksbehandlergruppe: UUID,
     private val skjermedePersonerSaksbehandlergruppe: UUID,
-    private val saksbehandlereMedTilgangTilStikkprøve: List<String>
+    private val saksbehandlereMedTilgangTilStikkprøve: List<String>,
+    private val saksbehandlereMedTilgangTilSpesialsaker: List<String> = emptyList(),
 ) {
 
     fun harTilgangTilKode7() = kode7Saksbehandlergruppe in gruppetilganger
@@ -20,4 +21,5 @@ class SaksbehandlerTilganger(
 
     fun harTilgangTilSkjermedePersoner() = skjermedePersonerSaksbehandlergruppe in gruppetilganger
     fun hartilgangTilStikkprøve() = saksbehandlerIdent in saksbehandlereMedTilgangTilStikkprøve || erDev()
+    fun hartilgangTilSpesialsaker() = saksbehandlerIdent in saksbehandlereMedTilgangTilSpesialsaker || erDev()
 }

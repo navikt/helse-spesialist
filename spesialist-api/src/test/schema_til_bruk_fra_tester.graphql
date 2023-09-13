@@ -343,6 +343,7 @@ type OppgaveForOversiktsvisning {
     periodetype: Periodetype
     personinfo: Personinfo!
     sistSendt: String
+    spesialsak: Boolean!
     tildeling: Tildeling
     tilhorerEnhetUtland: Boolean
     totrinnsvurdering: Totrinnsvurdering

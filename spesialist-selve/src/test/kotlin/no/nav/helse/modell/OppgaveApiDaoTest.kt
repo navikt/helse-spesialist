@@ -9,6 +9,7 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.TestHendelse
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
+import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker.ARBEIDSGIVER
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker.BEGGE
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker.SYKMELDT
@@ -471,11 +472,22 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `støtter spesialsaker`() {
+        val spesialsaksbehandler = SaksbehandlerTilganger(
+            gruppetilganger = emptyList(),
+            kode7Saksbehandlergruppe = UUID.randomUUID(),
+            riskSaksbehandlergruppe = UUID.randomUUID(),
+            beslutterSaksbehandlergruppe = UUID.randomUUID(),
+            skjermedePersonerSaksbehandlergruppe = UUID.randomUUID(),
+            saksbehandlerIdent = SAKSBEHANDLER_IDENT,
+            saksbehandlereMedTilgangTilStikkprøve = emptyList(),
+            saksbehandlereMedTilgangTilSpesialsaker = listOf(SAKSBEHANDLER_IDENT),
+        )
+
         nyPerson()
-        assertFalse(oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN).first().spesialsak)
+        assertFalse(oppgaveApiDao.finnOppgaver(spesialsaksbehandler).first().spesialsak)
 
         markerSpesialsak(VEDTAKSPERIODE)
-        assertTrue(oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN).first().spesialsak)
+        assertTrue(oppgaveApiDao.finnOppgaver(spesialsaksbehandler).first().spesialsak)
     }
 
     private fun assertOppgaveBehandlingKobling(oppgaveId: Long, forventetBehandlingId: UUID) {

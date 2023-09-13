@@ -90,6 +90,8 @@ spec:
       value: 611669fa-de5c-4dc2-a0e8-6041a019992a
     - name: SAKSBEHANDLERE_MED_TILGANG_TIL_STIKKPROVER
       value: "EN_IDENT"
+    - name: SAKSBEHANDLERE_MED_TILGANG_TIL_SPESIALSAKER
+      value: "EN_IDENT"
     - name: SPLEIS_CLIENT_ID
       value: api://dev-gcp.tbd.spleis-api/.default
     - name: SPLEIS_API_URL

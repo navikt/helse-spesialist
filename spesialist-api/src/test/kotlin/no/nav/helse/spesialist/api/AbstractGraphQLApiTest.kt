@@ -48,6 +48,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     protected val skjermedePersonerGruppeId: UUID = UUID.randomUUID()
     private val beslutterGruppeId: UUID = UUID.randomUUID()
     private val saksbehandlereMedTilgangTilStikkprøver: List<String> = listOf("EN_IDENT")
+    private val saksbehandlereMedTilgangTilSpesialsaker: List<String> = listOf("EN_IDENT")
 
 
     private val reservasjonClient = mockk<ReservasjonClient>(relaxed = true)
@@ -87,7 +88,8 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                 skjermedePersonerGruppeId,
                 beslutterGruppeId,
                 riskSaksbehandlergruppe,
-                saksbehandlereMedTilgangTilStikkprøver
+                saksbehandlereMedTilgangTilStikkprøver,
+                saksbehandlereMedTilgangTilSpesialsaker,
             ),
             requestHandler = GraphQLRequestHandler(
                 GraphQL.newGraphQL(schema).build()

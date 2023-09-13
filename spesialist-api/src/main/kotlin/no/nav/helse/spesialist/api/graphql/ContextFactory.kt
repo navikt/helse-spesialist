@@ -37,7 +37,8 @@ class ContextFactory(
     private val skjermedePersonerSaksbehandlergruppe: UUID,
     private val beslutterSaksbehandlergruppe: UUID,
     private val riskSaksbehandlergruppe: UUID,
-    private val saksbehandlereMedTilgangTilStikkprøve: List<String>
+    private val saksbehandlereMedTilgangTilStikkprøve: List<String>,
+    private val saksbehandlereMedTilgangTilSpesialsaker: List<String>,
 ) : GraphQLContextFactory<AuthorizedContext, ApplicationRequest> {
 
     override suspend fun generateContextMap(request: ApplicationRequest): Map<String, Any> =
@@ -49,7 +50,8 @@ class ContextFactory(
                 riskSaksbehandlergruppe = riskSaksbehandlergruppe,
                 beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe,
                 skjermedePersonerSaksbehandlergruppe = skjermedePersonerSaksbehandlergruppe,
-                saksbehandlereMedTilgangTilStikkprøve = saksbehandlereMedTilgangTilStikkprøve
+                saksbehandlereMedTilgangTilStikkprøve = saksbehandlereMedTilgangTilStikkprøve,
+                saksbehandlereMedTilgangTilSpesialsaker = saksbehandlereMedTilgangTilSpesialsaker,
             ),
             SAKSBEHANDLER_NAVN.key to request.getSaksbehandlerName(),
             SAKSBEHANDER_EPOST.key to request.getSaksbehanderEpost(),
