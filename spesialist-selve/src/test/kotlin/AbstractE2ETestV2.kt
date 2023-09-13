@@ -807,7 +807,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         periodetype = periodetype,
         kanAvvises = kanAvvises,
         orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold
-    )
+    ).also { sisteMeldingId = it }
 
     protected fun håndterPersoninfoløsning(
         aktørId: String = AKTØR,

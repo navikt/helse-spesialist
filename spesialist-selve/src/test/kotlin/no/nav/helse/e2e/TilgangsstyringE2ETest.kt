@@ -1,25 +1,12 @@
 package no.nav.helse.e2e
 
-import AbstractE2ETest
+import AbstractE2ETestV2
 import graphql.GraphQLError
+import graphql.schema.DataFetchingEnvironment
 import io.mockk.every
 import io.mockk.mockk
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.Meldingssender.sendAktivitetsloggNyAktivitet
-import no.nav.helse.Meldingssender.sendArbeidsforholdløsningOld
-import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
-import no.nav.helse.Meldingssender.sendEgenAnsattløsningOld
-import no.nav.helse.Meldingssender.sendGodkjenningsbehov
-import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
-import no.nav.helse.Meldingssender.sendRisikovurderingløsningOld
-import no.nav.helse.Meldingssender.sendSøknadSendt
-import no.nav.helse.Meldingssender.sendUtbetalingEndret
-import no.nav.helse.Meldingssender.sendVedtaksperiodeNyUtbetaling
-import no.nav.helse.Meldingssender.sendVedtaksperiodeOpprettet
-import no.nav.helse.Meldingssender.sendVergemålløsningOld
-import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsningOld
-import no.nav.helse.MeldingssenderV2
 import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
@@ -28,28 +15,42 @@ import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.januar
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
+import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
+import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
+import no.nav.helse.spesialist.api.graphql.query.PersonQuery
+import no.nav.helse.spesialist.api.notat.NotatDao
+import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
+import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
+import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.spesialist.api.person.PersonApiDao
+import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
+import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
+import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
+import no.nav.helse.spesialist.api.tildeling.TildelingDao
+import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
+import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class TilgangsstyringE2ETest : AbstractE2ETest() {
-    private val meldingssenderV2 = MeldingssenderV2(testRapid)
+internal class TilgangsstyringE2ETest : AbstractE2ETestV2() {
 
     @Test
     fun `Gir 404 når det ikke er noe å vise ennå, selv om saksbehandler har tilgang`() {
         settOppDefaultDataOgTilganger()
 
-        val godkjenningsmeldingId = sendMeldingerOppTilEgenAnsatt()
+        sendMeldingerOppTilEgenAnsatt()
 
         assertKanIkkeHentePerson("Finner ikke data for person med fødselsnummer ")
 
-        sendEgenAnsattløsningOld(godkjenningsmeldingId = godkjenningsmeldingId, erEgenAnsatt = true)
+        håndterEgenansattløsning(erEgenAnsatt = true)
         assertKanIkkeHentePerson("Finner ikke data for person med fødselsnummer ")
 
-        sendFramTilOppgave(godkjenningsmeldingId)
-        assertIngenOppgave()
+        sendFramTilOppgave()
+        assertSaksbehandleroppgaveBleIkkeOpprettet()
 
         saksbehandlertilgangTilSkjermede(harTilgang = true)
         assertKanIkkeHentePerson("Finner ikke data for person med fødselsnummer ")
@@ -59,13 +60,13 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
     fun `Kan hente person om den er klar til visning`() {
         settOppDefaultDataOgTilganger()
 
-        val godkjenningsmeldingId = sendMeldingerOppTilEgenAnsatt()
+        sendMeldingerOppTilEgenAnsatt()
 
         assertKanIkkeHentePerson("Finner ikke data for person med fødselsnummer ")
-        sendEgenAnsattløsningOld(godkjenningsmeldingId = godkjenningsmeldingId, erEgenAnsatt = false)
+        håndterEgenansattløsning(erEgenAnsatt = false)
         assertKanIkkeHentePerson("Finner ikke data for person med fødselsnummer ")
-        sendFramTilOppgave(godkjenningsmeldingId)
-        assertOppgaver(1)
+        sendFramTilOppgave()
+        assertSaksbehandleroppgave(oppgavestatus = AvventerSaksbehandler)
         assertKanHentePerson()
     }
 
@@ -73,17 +74,17 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
     fun `Kan ikke hente person hvis tilgang mangler`() {
         settOppDefaultDataOgTilganger()
 
-        val godkjenningsmeldingId = sendMeldingerOppTilEgenAnsatt()
+        sendMeldingerOppTilEgenAnsatt()
 
         assertKanIkkeHentePerson("Finner ikke data for person med fødselsnummer ")
-        sendEgenAnsattløsningOld(godkjenningsmeldingId = godkjenningsmeldingId, erEgenAnsatt = false)
+        håndterEgenansattløsning(erEgenAnsatt = false)
         assertKanIkkeHentePerson("Finner ikke data for person med fødselsnummer ")
-        sendFramTilOppgave(godkjenningsmeldingId)
-        assertOppgaver(1)
+        sendFramTilOppgave()
+        assertSaksbehandleroppgave(oppgavestatus = AvventerSaksbehandler)
 
         assertKanHentePerson()
 
-        meldingssenderV2.sendEndretSkjermetinfo(FØDSELSNUMMER, true)
+        håndterEndretSkjermetinfo(FØDSELSNUMMER, true)
 
         assertKanIkkeHentePerson("Har ikke tilgang til person med fødselsnummer ")
 
@@ -93,41 +94,36 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
     }
 
     private fun sendMeldingerOppTilEgenAnsatt(): UUID {
-        sendSøknadSendt(AKTØR, FØDSELSNUMMER, ORGNR)
+        håndterSøknad(AKTØR, FØDSELSNUMMER, ORGNR)
         val skjæringstidspunkt = 1.januar
         val fom = 1.januar
         val tom = 31.januar
-        sendVedtaksperiodeOpprettet(
+        håndterVedtaksperiodeOpprettet()
+        håndterVedtaksperiodeNyUtbetaling()
+        håndterUtbetalingEndret()
+        håndterAktivitetsloggNyAktivitet(varselkoder = listOf("RV_IM_1"))
+        val godkjenningsmeldingId = sendGodkjenningsbehov(
             AKTØR,
             FØDSELSNUMMER,
             ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            skjæringstidspunkt = skjæringstidspunkt,
-            fom = fom,
-            tom = tom
+            VEDTAKSPERIODE_ID,
+            UTBETALING_ID,
+            periodeFom = fom,
+            periodeTom = tom,
+            skjæringstidspunkt = skjæringstidspunkt
         )
-        sendVedtaksperiodeNyUtbetaling(VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID, organisasjonsnummer = ORGNR)
-        sendUtbetalingEndret(AKTØR, FØDSELSNUMMER, ORGNR, UTBETALING_ID, "UTBETALING")
-        sendAktivitetsloggNyAktivitet(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, listOf("RV_IM_1"))
-        val godkjenningsmeldingId = sendGodkjenningsbehov(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID, periodeFom = fom, periodeTom = tom, skjæringstidspunkt = skjæringstidspunkt)
-        sendPersoninfoløsningComposite(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
-        sendArbeidsgiverinformasjonløsningOld(
-            hendelseId = godkjenningsmeldingId,
-            organisasjonsnummer = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID
-        )
-        sendArbeidsforholdløsningOld(
-            hendelseId = godkjenningsmeldingId,
-            orgnr = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID
-        )
+        håndterPersoninfoløsning()
+        håndterEnhetløsning()
+        håndterInfotrygdutbetalingerløsning()
+        håndterArbeidsgiverinformasjonløsning()
+        håndterArbeidsforholdløsning()
         return godkjenningsmeldingId
     }
 
-    private fun sendFramTilOppgave(godkjenningsmeldingId: UUID) {
-        sendVergemålløsningOld(godkjenningsmeldingId)
-        sendÅpneGosysOppgaverløsningOld(godkjenningsmeldingId)
-        sendRisikovurderingløsningOld(godkjenningsmeldingId, VEDTAKSPERIODE_ID)
+    private fun sendFramTilOppgave() {
+        håndterVergemålløsning()
+        håndterÅpneOppgaverløsning()
+        håndterRisikovurderingløsning()
     }
 
     private fun fetchPerson() = runBlocking { personQuery.person(FØDSELSNUMMER, null, dataFetchingEnvironment) }
@@ -157,6 +153,24 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
             every { harTilgangTilSkjermedePersoner() } returns harTilgang
         }
     }
+
+    private val dataFetchingEnvironment = mockk<DataFetchingEnvironment>(relaxed = true)
+
+    private val personQuery = PersonQuery(
+        personApiDao = PersonApiDao(dataSource),
+        egenAnsattApiDao = EgenAnsattApiDao(dataSource),
+        tildelingDao = TildelingDao(dataSource),
+        arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource),
+        overstyringApiDao = OverstyringApiDao(dataSource),
+        risikovurderingApiDao = RisikovurderingApiDao(dataSource),
+        varselRepository = ApiVarselRepository(dataSource),
+        oppgaveApiDao = OppgaveApiDao(dataSource),
+        periodehistorikkDao = PeriodehistorikkDao(dataSource),
+        notatDao = NotatDao(dataSource),
+        totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource),
+        snapshotMediator = SnapshotMediator(SnapshotApiDao(dataSource), mockk(relaxed = true)),
+        reservasjonClient = mockk(relaxed = true),
+    )
 
     companion object {
         private fun assertFeilmelding(feilmelding: String, errors: List<GraphQLError>) {
