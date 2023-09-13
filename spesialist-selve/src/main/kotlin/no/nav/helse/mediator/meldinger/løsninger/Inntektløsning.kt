@@ -61,7 +61,7 @@ internal class Inntektløsning(
                         løsning["årMåned"].asYearMonth(),
                         løsning["inntektsliste"].map {
                             Inntekter.Inntekt(
-                                it["beløp"].asInt(),
+                                it["beløp"].asDouble(),
                                 it["orgnummer"].asText(),
                             )
                         }
@@ -75,5 +75,5 @@ internal class Inntektløsning(
 }
 
 data class Inntekter(val årMåned: YearMonth, val inntektsliste: List<Inntekt>) {
-    data class Inntekt(val beløp: Int, val orgnummer: String)
+    data class Inntekt(val beløp: Double, val orgnummer: String)
 }

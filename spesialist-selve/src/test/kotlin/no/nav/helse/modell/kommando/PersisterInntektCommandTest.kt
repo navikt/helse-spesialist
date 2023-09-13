@@ -71,7 +71,7 @@ internal class PersisterInntektCommandTest {
     private fun inntekter() = listOf(
         Inntekter(
             årMåned = YearMonth.parse("2022-11"),
-            inntektsliste = listOf(Inntekter.Inntekt(beløp = 20000, orgnummer = "123456789"))
+            inntektsliste = listOf(Inntekter.Inntekt(beløp = 20000.0, orgnummer = "123456789"))
         )
     )
 }

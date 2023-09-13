@@ -18,7 +18,7 @@ internal class PersisterInntektløsningTest {
                 årMåned = YearMonth.parse("2022-08"),
                 inntektsliste = listOf(
                     Inntekter.Inntekt(
-                        beløp = 20000,
+                        beløp = 20000.0,
                         orgnummer = "123456789"
                     )
                 )
