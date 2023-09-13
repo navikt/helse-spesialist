@@ -16,6 +16,7 @@ import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.januar
 import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver
 import no.nav.helse.modell.overstyring.Subsumsjon
+import no.nav.helse.modell.saksbehandler.handlinger.OverstyringTidslinje
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
@@ -29,7 +30,6 @@ import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.overstyring.Dagtype.Feriedag
 import no.nav.helse.spesialist.api.overstyring.Dagtype.Sykedag
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
-import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
@@ -50,7 +50,15 @@ internal class OverstyringE2ETest : AbstractE2ETestV2() {
     @Test
     fun `saksbehandler overstyrer sykdomstidslinje`() {
         fremTilSaksbehandleroppgave()
-        håndterOverstyrTidslinje(dager = listOf(OverstyringDagDto(20.januar, Feriedag, Sykedag, null, 100)))
+        håndterOverstyrTidslinje(dager = listOf(
+            OverstyringTidslinje.OverstyringDag(
+                20.januar,
+                Feriedag,
+                Sykedag,
+                null,
+                100
+            )
+        ))
         assertOverstyrTidslinje(FØDSELSNUMMER, 1)
 
         assertOppgaver(UTBETALING_ID, "AvventerSaksbehandler", 0)

@@ -35,6 +35,7 @@ import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyringArbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyringInntektOgRefusjon
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyringTidslinje
+import no.nav.helse.modell.saksbehandler.handlinger.OverstyringTidslinje.OverstyringDag
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsettingSykepengegrunnlag
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfeller
@@ -72,7 +73,6 @@ import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.overstyring.Dagtype
-import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
@@ -130,9 +130,9 @@ internal class Hendelsefabrikk(
     internal companion object {
         private val mapper = jacksonObjectMapper()
 
-        fun JsonNode.toOverstyrteDagerDto() =
+        fun JsonNode.toOverstyrteDager() =
             map {
-                OverstyringDagDto(
+                OverstyringDag(
                     dato = it.path("dato").asLocalDate(),
                     type = enumValueOf(it.path("type").asText()),
                     fraType = enumValueOf<Dagtype>(it.path("fraType").asText()),
@@ -425,7 +425,7 @@ internal class Hendelsefabrikk(
         oid: UUID,
         orgnummer: String,
         begrunnelse: String,
-        overstyrteDager: List<OverstyringDagDto>,
+        overstyrteDager: List<OverstyringDag>,
         opprettet: LocalDateTime,
         json: String,
     ) = OverstyringTidslinje(
@@ -449,7 +449,7 @@ internal class Hendelsefabrikk(
             oid = UUID.fromString(jsonNode.path("saksbehandlerOid").asText()),
             orgnummer = jsonNode.path("organisasjonsnummer").asText(),
             begrunnelse = jsonNode.path("begrunnelse").asText(),
-            overstyrteDager = jsonNode.path("dager").toOverstyrteDagerDto(),
+            overstyrteDager = jsonNode.path("dager").toOverstyrteDager(),
             opprettet = LocalDateTime.parse(jsonNode.path("@opprettet").asText()),
             json = json
         )

@@ -3,7 +3,7 @@ package no.nav.helse.modell.kommando
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.modell.overstyring.OverstyringDao
-import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
+import no.nav.helse.modell.saksbehandler.handlinger.OverstyringTidslinje.OverstyringDag
 
 internal class PersisterOverstyringTidslinjeCommand(
     private val oid: UUID,
@@ -11,7 +11,7 @@ internal class PersisterOverstyringTidslinjeCommand(
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
     private val begrunnelse: String,
-    private val overstyrteDager: List<OverstyringDagDto>,
+    private val overstyrteDager: List<OverstyringDag>,
     private val overstyringDao: OverstyringDao,
     private val opprettet: LocalDateTime
 ) : Command {

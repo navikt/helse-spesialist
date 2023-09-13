@@ -11,6 +11,7 @@ import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver
 import no.nav.helse.modell.overstyring.Subsumsjon
+import no.nav.helse.modell.saksbehandler.handlinger.OverstyringTidslinje.OverstyringDag
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
@@ -21,7 +22,6 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandling
 
 internal object TestmeldingsfabrikkV2 {
@@ -666,7 +666,7 @@ internal object TestmeldingsfabrikkV2 {
         aktørId: String,
         fødselsnummer: String,
         organisasjonsnummer: String,
-        dager: List<OverstyringDagDto> = emptyList(),
+        dager: List<OverstyringDag> = emptyList(),
         begrunnelse: String = "begrunnelse",
         saksbehandleroid: UUID = UUID.randomUUID(),
         saksbehandlernavn: String = "saksbehandler",

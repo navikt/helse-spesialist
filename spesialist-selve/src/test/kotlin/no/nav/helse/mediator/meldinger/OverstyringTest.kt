@@ -5,11 +5,11 @@ import io.mockk.verify
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.mediator.Hendelsefabrikk
-import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.mediator.oppgave.OppgaveDao
+import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.overstyring.OverstyringDao
+import no.nav.helse.modell.saksbehandler.handlinger.OverstyringTidslinje.OverstyringDag
 import no.nav.helse.spesialist.api.overstyring.Dagtype
-import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import org.junit.jupiter.api.BeforeEach
@@ -23,7 +23,7 @@ internal class OverstyringTest {
         private const val ORGNUMMER = "987654321"
         private const val BEGRUNNELSE = "Begrunnelse"
         private var OVERSTYRTE_DAGER = listOf(
-            OverstyringDagDto(
+            OverstyringDag(
                 dato = LocalDate.of(2020, 1, 1),
                 type = Dagtype.Sykedag,
                 grad = 100,
@@ -95,7 +95,7 @@ internal class OverstyringTest {
     @Test
     fun `Leser inn overstyring av tidslinje med arbeidsdag`() {
         OVERSTYRTE_DAGER = listOf(
-            OverstyringDagDto(
+            OverstyringDag(
                 dato = LocalDate.of(2020, 1, 1),
                 type = Dagtype.Arbeidsdag,
                 grad = 100,

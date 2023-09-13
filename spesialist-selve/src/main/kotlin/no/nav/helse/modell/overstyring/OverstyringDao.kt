@@ -7,8 +7,8 @@ import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.HelseDao
+import no.nav.helse.modell.saksbehandler.handlinger.OverstyringTidslinje.OverstyringDag
 import no.nav.helse.objectMapper
-import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import org.intellij.lang.annotations.Language
 
@@ -106,13 +106,13 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
         """, mapOf("hendelseId" to hendelseId)
     ).single { row -> row.uuid("ekstern_hendelse_id") })
 
-    fun persisterOverstyringTidslinje(
+    internal fun persisterOverstyringTidslinje(
         hendelseId: UUID,
         eksternHendelseId: UUID,
         fødselsnummer: String,
         organisasjonsnummer: String,
         begrunnelse: String,
-        overstyrteDager: List<OverstyringDagDto>,
+        overstyrteDager: List<OverstyringDag>,
         saksbehandlerRef: UUID,
         tidspunkt: LocalDateTime,
     ) {

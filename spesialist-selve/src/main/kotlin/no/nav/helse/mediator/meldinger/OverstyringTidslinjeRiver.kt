@@ -3,7 +3,7 @@ package no.nav.helse.mediator.meldinger
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.mediator.Hendelsefabrikk.Companion.toOverstyrteDagerDto
+import no.nav.helse.mediator.Hendelsefabrikk.Companion.toOverstyrteDager
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -55,7 +55,7 @@ internal class OverstyringTidslinjeRiver(
             oid = UUID.fromString(packet["saksbehandlerOid"].asText()),
             orgnummer = packet["organisasjonsnummer"].asText(),
             begrunnelse = packet["begrunnelse"].asText(),
-            overstyrteDager = packet["dager"].toOverstyrteDagerDto(),
+            overstyrteDager = packet["dager"].toOverstyrteDager(),
             opprettet = packet["@opprettet"].asLocalDateTime(),
             json = packet.toJson(),
             context = context,
