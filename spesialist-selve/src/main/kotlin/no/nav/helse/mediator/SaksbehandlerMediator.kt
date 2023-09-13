@@ -5,6 +5,7 @@ import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.withMDC
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.abonnement.AbonnementDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
@@ -66,7 +67,7 @@ class SaksbehandlerMediator(
         saksbehandler.register(this)
         saksbehandler.persister(saksbehandlerDao)
         val modellhandling = handling.toModellobjekt()
-        no.nav.helse.rapids_rivers.withMDC(
+        withMDC(
             mapOf(
                 "saksbehandlerOid" to saksbehandler.oid().toString(),
                 "handlingId" to handlingId.toString()
