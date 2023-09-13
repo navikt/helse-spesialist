@@ -2,7 +2,6 @@ import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import graphql.schema.DataFetchingEnvironment
 import io.mockk.every
 import io.mockk.mockk
 import java.time.LocalDate
@@ -26,7 +25,6 @@ import no.nav.helse.Meldingssender.sendVedtaksperiodeNyUtbetaling
 import no.nav.helse.Meldingssender.sendVedtaksperiodeOpprettet
 import no.nav.helse.Meldingssender.sendVergemålløsningOld
 import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsningOld
-import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.TestRapidHelpers.oppgaver
 import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
@@ -64,27 +62,15 @@ import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
-import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
-import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
-import no.nav.helse.spesialist.api.graphql.query.PersonQuery
-import no.nav.helse.spesialist.api.notat.NotatDao
-import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
-import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
-import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
-import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
-import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
-import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spleis.graphql.HentSnapshot
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao as OpptegnelseApiDao
-import no.nav.helse.spesialist.api.tildeling.TildelingDao as TildelingApiDao
 
 internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
@@ -97,26 +83,14 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource)
     private val automatiseringDao = AutomatiseringDao(dataSource)
     private val egenAnsattDao = EgenAnsattDao(dataSource)
-    private val egenAnsattApiDao = EgenAnsattApiDao(dataSource)
-
-    private val apiVarselRepository = ApiVarselRepository(dataSource)
-    private val personApiDao = PersonApiDao(dataSource)
     protected val oppgaveDao = OppgaveDao(dataSource)
-    private val oppgaveApiDao = OppgaveApiDao(dataSource)
-    private val periodehistorikkDao = PeriodehistorikkDao(dataSource)
     protected val personDao = PersonDao(dataSource)
     private val vedtakDao = VedtakDao(dataSource)
-    protected val tildelingApiDao = TildelingApiDao(dataSource)
     private val tildelingDao = TildelingDao(dataSource)
     private val risikovurderingDao = RisikovurderingDao(dataSource)
-    private val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
-    private val overstyringApiDao = OverstyringApiDao(dataSource)
-    private val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
     private val opptegnelseDao = OpptegnelseApiDao(dataSource)
     protected val saksbehandlerDao = SaksbehandlerDao(dataSource)
-    protected val reservasjonDao = ReservasjonDao(dataSource)
-    private val notatDao = NotatDao(dataSource)
-    private val totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource)
+    private val reservasjonDao = ReservasjonDao(dataSource)
     private val totrinnsvurderingDao = TotrinnsvurderingDao(dataSource)
     private val vergemålDao = VergemålDao(dataSource)
     private val overstyringDao = OverstyringDao(dataSource)
@@ -175,25 +149,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     )
 
     internal val saksbehandlerMediator = SaksbehandlerMediator(dataSource, testRapid)
-
-    internal val dataFetchingEnvironment = mockk<DataFetchingEnvironment>(relaxed = true)
-
-
-    internal val personQuery = PersonQuery(
-        personApiDao = personApiDao,
-        egenAnsattApiDao = egenAnsattApiDao,
-        tildelingDao = tildelingApiDao,
-        arbeidsgiverApiDao = arbeidsgiverApiDao,
-        overstyringApiDao = overstyringApiDao,
-        risikovurderingApiDao = risikovurderingApiDao,
-        varselRepository = apiVarselRepository,
-        oppgaveApiDao = oppgaveApiDao,
-        periodehistorikkDao = periodehistorikkDao,
-        notatDao = notatDao,
-        totrinnsvurderingApiDao = totrinnsvurderingApiDao,
-        snapshotMediator = snapshotMediator,
-        reservasjonClient = mockk(relaxed = true),
-    )
 
     @BeforeEach
     internal fun resetTestSetup() {
@@ -302,10 +257,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected fun assertOppgaver(antall: Int) {
         val oppgaver = testRapid.inspektør.oppgaver()
         assertEquals(antall, oppgaver.size)
-    }
-
-    protected fun assertIngenOppgave() {
-        assertEquals(0, testRapid.inspektør.hendelser("oppgave_opprettet").size)
     }
 
     protected fun vedtaksperiode(
