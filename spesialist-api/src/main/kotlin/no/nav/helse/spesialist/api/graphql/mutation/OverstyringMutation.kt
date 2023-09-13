@@ -26,7 +26,7 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
     suspend fun overstyrDager(
         overstyring: TidslinjeOverstyring,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<Boolean> {
+    ): DataFetcherResult<Boolean> = withContext(Dispatchers.IO) {
         val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
         try {
             val handling = OverstyrTidslinjeHandling(
@@ -41,21 +41,27 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
                         fraType = it.fraType,
                         grad = it.grad,
                         fraGrad = it.fraGrad,
-                        subsumsjon = it.subsumsjon?.let { subsumsjon -> SubsumsjonDto(subsumsjon.paragraf, subsumsjon.paragraf, subsumsjon.bokstav) },
+                        subsumsjon = it.subsumsjon?.let { subsumsjon ->
+                            SubsumsjonDto(
+                                subsumsjon.paragraf,
+                                subsumsjon.paragraf,
+                                subsumsjon.bokstav
+                            )
+                        },
                     )
                 })
             withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(handling, saksbehandler) }
         } catch (e: Exception) {
-            return DataFetcherResult.newResult<Boolean>().error(kunneIkkeOverstyreError("dager")).build()
+            return@withContext DataFetcherResult.newResult<Boolean>().error(kunneIkkeOverstyreError("dager")).build()
         }
-        return DataFetcherResult.newResult<Boolean>().data(true).build()
+        DataFetcherResult.newResult<Boolean>().data(true).build()
     }
 
     @Suppress("unused")
     suspend fun overstyrInntektOgRefusjon(
         overstyring: InntektOgRefusjonOverstyring,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<Boolean> {
+    ): DataFetcherResult<Boolean> = withContext(Dispatchers.IO) {
         val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
         try {
             val handling = OverstyrInntektOgRefusjonHandling(
@@ -93,16 +99,17 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
                 })
             withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(handling, saksbehandler) }
         } catch (e: Exception) {
-            return DataFetcherResult.newResult<Boolean>().error(kunneIkkeOverstyreError("inntekt og refusjon")).build()
+            return@withContext DataFetcherResult.newResult<Boolean>()
+                .error(kunneIkkeOverstyreError("inntekt og refusjon")).build()
         }
-        return DataFetcherResult.newResult<Boolean>().data(true).build()
+        DataFetcherResult.newResult<Boolean>().data(true).build()
     }
 
     @Suppress("unused")
     suspend fun overstyrArbeidsforhold(
         overstyring: ArbeidsforholdOverstyringHandling,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<Boolean> {
+    ): DataFetcherResult<Boolean> = withContext(Dispatchers.IO) {
         val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
         try {
             val handling = OverstyrArbeidsforholdHandling(
@@ -119,9 +126,10 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
                 })
             withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(handling, saksbehandler) }
         } catch (e: Exception) {
-            return DataFetcherResult.newResult<Boolean>().error(kunneIkkeOverstyreError("arbeidsforhold")).build()
+            return@withContext DataFetcherResult.newResult<Boolean>().error(kunneIkkeOverstyreError("arbeidsforhold"))
+                .build()
         }
-        return DataFetcherResult.newResult<Boolean>().data(true).build()
+        DataFetcherResult.newResult<Boolean>().data(true).build()
     }
 
     private fun kunneIkkeOverstyreError(overstyring: String): GraphQLError =
