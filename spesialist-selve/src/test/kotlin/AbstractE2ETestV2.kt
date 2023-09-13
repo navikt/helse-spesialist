@@ -104,6 +104,10 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         opprettSaksbehandler()
     }
 
+    // Tanken er at denne ikke skal eksponeres ut av AbstractE2ETest, for å unngå at enkelttester implementer egen kode
+    // som bør være felles
+    protected val __ikke_bruk_denne get() = testRapid
+
     private fun opprettSaksbehandler() {
         sessionOf(dataSource).use {
             @Language("PostgreSQL")
