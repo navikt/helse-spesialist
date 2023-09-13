@@ -445,6 +445,7 @@ enum GraphQLSykdomsdagtype {
     AndreYtelserOpplaringspenger
     AndreYtelserPleiepenger
     AndreYtelserSvangerskapspenger
+    ArbeidIkkeGjenopptattDag
     Arbeidsdag
     Arbeidsgiverdag
     Avslatt
