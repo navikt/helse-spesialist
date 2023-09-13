@@ -197,7 +197,7 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
     private fun godkjennVarsel(
         varselId: UUID,
     ) = asSQL(
-        " UPDATE selve_varsel SET status = :status WHERE unik_id = :varselId ",
+        " UPDATE selve_varsel SET status = :status WHERE unik_id = :varselId and status_endret_ident is not null and status_endret_tidspunkt is not null ",
         mapOf("status" to GODKJENT.name, "varselId" to varselId)
     ).update()
 

@@ -1,0 +1,1 @@
+update selve_varsel set status = 'AKTIV' where id = 6874;
