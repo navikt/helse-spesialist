@@ -29,7 +29,6 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 
-
 internal class TestMediator(
     testRapid: TestRapid,
     snapshotClient: SnapshotClient,
