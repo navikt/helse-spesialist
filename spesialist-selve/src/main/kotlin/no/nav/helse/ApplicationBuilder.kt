@@ -113,6 +113,16 @@ private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 private val personIdRegex = "\\d{11,13}".toRegex()
 
 internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusListener {
+    init {
+        println("file.encoding=" + System.getProperty("file.encoding"))
+        println("java.version=" + System.getProperty("java.version"))
+        println("LANG=" + System.getenv("LANG"))
+        println("LC_ALL=" + System.getenv("LC_ALL"))
+        println("Noen problematiske tegn:")
+        println("ø")
+        println("\u65E5")
+    }
+
     private val dataSourceBuilder = DataSourceBuilder(env)
     private val dataSource = dataSourceBuilder.getDataSource()
 
@@ -239,19 +249,31 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     })
 
     private val stikkprøver = object : Stikkprøver {
-        override fun utsFlereArbeidsgivereFørstegangsbehandling() = plukkTilManuell(env["STIKKPROEVER_UTS_FLERE_AG_FGB_DIVISOR"])
-        override fun utsFlereArbeidsgivereForlengelse() = plukkTilManuell(env["STIKKPROEVER_UTS_FLERE_AG_FORLENGELSE_DIVISOR"])
-        override fun utsEnArbeidsgiverFørstegangsbehandling() = plukkTilManuell(env["STIKKPROEVER_UTS_EN_AG_FGB_DIVISOR"])
+        override fun utsFlereArbeidsgivereFørstegangsbehandling() =
+            plukkTilManuell(env["STIKKPROEVER_UTS_FLERE_AG_FGB_DIVISOR"])
+
+        override fun utsFlereArbeidsgivereForlengelse() =
+            plukkTilManuell(env["STIKKPROEVER_UTS_FLERE_AG_FORLENGELSE_DIVISOR"])
+
+        override fun utsEnArbeidsgiverFørstegangsbehandling() =
+            plukkTilManuell(env["STIKKPROEVER_UTS_EN_AG_FGB_DIVISOR"])
+
         override fun utsEnArbeidsgiverForlengelse() = plukkTilManuell(env["STIKKPROEVER_UTS_EN_AG_FORLENGELSE_DIVISOR"])
-        override fun fullRefusjonFlereArbeidsgivereFørstegangsbehandling() = plukkTilManuell(env["STIKKPROEVER_FULL_REFUSJON_FLERE_AG_FGB_DIVISOR"])
-        override fun fullRefusjonFlereArbeidsgivereForlengelse() = plukkTilManuell(env["STIKKPROEVER_FULL_REFUSJON_FLERE_AG_FORLENGELSE_DIVISOR"])
+        override fun fullRefusjonFlereArbeidsgivereFørstegangsbehandling() =
+            plukkTilManuell(env["STIKKPROEVER_FULL_REFUSJON_FLERE_AG_FGB_DIVISOR"])
+
+        override fun fullRefusjonFlereArbeidsgivereForlengelse() =
+            plukkTilManuell(env["STIKKPROEVER_FULL_REFUSJON_FLERE_AG_FORLENGELSE_DIVISOR"])
+
         override fun fullRefusjonEnArbeidsgiver() = plukkTilManuell(env["STIKKPROEVER_FULL_REFUSJON_EN_AG_DIVISOR"])
     }
 
     private val tilgangsgrupper = Tilgangsgrupper(System.getenv())
 
-    private val saksbehandlereMedTilgangTilStikkprøver: List<String> = requireNotNull(env["SAKSBEHANDLERE_MED_TILGANG_TIL_STIKKPROVER"]).split(',')
-    private val saksbehandlereMedTilgangTilSpesialsaker: List<String> = requireNotNull(env["SAKSBEHANDLERE_MED_TILGANG_TIL_SPESIALSAKER"]).split(',')
+    private val saksbehandlereMedTilgangTilStikkprøver: List<String> =
+        requireNotNull(env["SAKSBEHANDLERE_MED_TILGANG_TIL_STIKKPROVER"]).split(',')
+    private val saksbehandlereMedTilgangTilSpesialsaker: List<String> =
+        requireNotNull(env["SAKSBEHANDLERE_MED_TILGANG_TIL_SPESIALSAKER"]).split(',')
 
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule {
