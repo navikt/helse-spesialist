@@ -61,32 +61,26 @@ data class SubsumsjonEvent(
 )
 
 data class OverstyrtTidslinjeEvent(
+    val id: UUID,
     val fødselsnummer: String,
     val aktørId: String,
     val organisasjonsnummer: String,
     val dager: List<OverstyrtTidslinjeEventDag>,
-    val begrunnelse: String,
-    val saksbehandlerOid: UUID,
-    val saksbehandlerNavn: String,
-    val saksbehandlerIdent: String,
-    val saksbehandlerEpost: String
 ) {
     //TODO: JsonMessage burde ikke være kjent for modell, bør mappes om fra Event til JsonMessage i mediator
     fun somJsonMessage(): JsonMessage {
         return JsonMessage.newMessage(
-            "saksbehandler_overstyrer_tidslinje", mutableMapOf(
+            eventName(), mutableMapOf(
+                "@id" to id,
                 "fødselsnummer" to fødselsnummer,
                 "aktørId" to aktørId,
                 "organisasjonsnummer" to organisasjonsnummer,
                 "dager" to dager,
-                "begrunnelse" to begrunnelse,
-                "saksbehandlerOid" to saksbehandlerOid,
-                "saksbehandlerNavn" to saksbehandlerNavn,
-                "saksbehandlerIdent" to saksbehandlerIdent,
-                "saksbehandlerEpost" to saksbehandlerEpost,
             )
         )
     }
+
+    fun eventName() = "overstyr_tidslinje"
 
     data class OverstyrtTidslinjeEventDag(
         val dato: LocalDate,
@@ -94,7 +88,6 @@ data class OverstyrtTidslinjeEvent(
         val fraType: String,
         val grad: Int?,
         val fraGrad: Int?,
-        val subsumsjon: SubsumsjonEvent?,
     )
 }
 

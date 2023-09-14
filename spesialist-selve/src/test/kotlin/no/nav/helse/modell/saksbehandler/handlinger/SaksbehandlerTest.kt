@@ -23,7 +23,13 @@ internal class SaksbehandlerTest {
 
         val saksbehandler = Saksbehandler("epost@nav.no", UUID.randomUUID(), "navn", "Z999999")
         saksbehandler.register(observer)
-        saksbehandler.håndter(OverstyrtTidslinje("123", "1234", "12345", emptyList(), "begrunnelse"))
+        saksbehandler.håndter(OverstyrtTidslinje(
+            aktørId = "123",
+            fødselsnummer = "1234",
+            organisasjonsnummer = "12345",
+            dager = emptyList(),
+            begrunnelse = "begrunnelse"
+        ))
         assertEquals(true, observert)
     }
 

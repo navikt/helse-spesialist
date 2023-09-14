@@ -7,7 +7,8 @@ import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.HelseDao
-import no.nav.helse.modell.saksbehandler.handlinger.OverstyringTidslinje.OverstyringDag
+import no.nav.helse.db.OverstyrtTidslinjeForDatabase
+import no.nav.helse.modell.saksbehandler.handlinger.OverstyringTidslinje
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import org.intellij.lang.annotations.Language
@@ -112,7 +113,7 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
         fødselsnummer: String,
         organisasjonsnummer: String,
         begrunnelse: String,
-        overstyrteDager: List<OverstyringDag>,
+        overstyrteDager: List<OverstyringTidslinje.OverstyringDag>,
         saksbehandlerRef: UUID,
         tidspunkt: LocalDateTime,
     ) {
@@ -171,6 +172,75 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
                                 "dagtype" to dag.type.toString(),
                                 "grad" to dag.grad,
                                 "fra_dagtype" to dag.fraType.toString(),
+                                "fra_grad" to dag.fraGrad,
+                                "overstyring_tidslinje_ref" to overstyringTidslinjeRef
+                            )
+                        ).asUpdate
+                    )
+                }
+            }
+        }
+    }
+
+
+    internal fun persisterOverstyringTidslinje(
+        overstyrtTidslinje: OverstyrtTidslinjeForDatabase,
+        saksbehandlerOid: UUID
+    ) {
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+            @Language("PostgreSQL")
+            val opprettOverstyringQuery = """
+                INSERT INTO overstyring(hendelse_ref, ekstern_hendelse_id, person_ref, saksbehandler_ref, tidspunkt)
+                SELECT gen_random_uuid(), :ekstern_hendelse_id, p.id, :saksbehandler_ref, :tidspunkt
+                FROM person p
+                WHERE p.fodselsnummer = :fodselsnummer
+            """.trimIndent()
+
+            @Language("PostgreSQL")
+            val opprettOverstyringTidslinjeQuery = """
+                INSERT INTO overstyring_tidslinje(overstyring_ref, arbeidsgiver_ref, begrunnelse)
+                SELECT :overstyring_ref, ag.id, :begrunnelse
+                FROM arbeidsgiver ag
+                WHERE ag.orgnummer = :orgnr
+            """.trimIndent()
+
+            @Language("PostgreSQL")
+            val opprettOverstyringDagQuery = """
+                INSERT INTO overstyring_dag(dato, dagtype, grad, fra_dagtype, fra_grad, overstyring_tidslinje_ref)
+                VALUES (:dato, :dagtype, :grad, :fra_dagtype, :fra_grad, :overstyring_tidslinje_ref)
+            """.trimIndent()
+
+            session.transaction { transactionalSession ->
+                val overstyringRef = transactionalSession.run(
+                    queryOf(
+                        opprettOverstyringQuery,
+                        mapOf(
+                            "ekstern_hendelse_id" to overstyrtTidslinje.id,
+                            "fodselsnummer" to overstyrtTidslinje.fødselsnummer.toLong(),
+                            "saksbehandler_ref" to saksbehandlerOid,
+                            "tidspunkt" to LocalDateTime.now()
+                        )
+                    ).asUpdateAndReturnGeneratedKey
+                )
+                val overstyringTidslinjeRef = transactionalSession.run(
+                    queryOf(
+                        opprettOverstyringTidslinjeQuery,
+                        mapOf(
+                            "overstyring_ref" to overstyringRef,
+                            "orgnr" to overstyrtTidslinje.organisasjonsnummer.toLong(),
+                            "begrunnelse" to overstyrtTidslinje.begrunnelse,
+                        )
+                    ).asUpdateAndReturnGeneratedKey
+                )
+                overstyrtTidslinje.dager.forEach { dag ->
+                    transactionalSession.run(
+                        queryOf(
+                            opprettOverstyringDagQuery,
+                            mapOf(
+                                "dato" to dag.dato,
+                                "dagtype" to dag.type,
+                                "grad" to dag.grad,
+                                "fra_dagtype" to dag.fraType,
                                 "fra_grad" to dag.fraGrad,
                                 "overstyring_tidslinje_ref" to overstyringTidslinjeRef
                             )

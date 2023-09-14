@@ -50,12 +50,8 @@ internal class OverstyringIntegrationTest : AbstractE2ETest() {
         )
         val response = sendOverstyring("/api/overstyr/dager", objectMapper.writeValueAsString(overstyring))
         assertEquals(HttpStatusCode.OK, response.status)
-        assertEquals(1, testRapid.inspektør.hendelser("saksbehandler_overstyrer_tidslinje").size)
-        testRapid.sendTestMessage(
-            testRapid.inspektør.hendelser("saksbehandler_overstyrer_tidslinje").first().toString()
-        )
-        assertEquals("Invalidert", oppgaveStatus())
         assertEquals(1, testRapid.inspektør.hendelser("overstyr_tidslinje").size)
+        assertEquals("Invalidert", oppgaveStatus())
     }
 
     @Test

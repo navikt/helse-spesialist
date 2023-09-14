@@ -2,6 +2,8 @@ package no.nav.helse.mediator
 
 import DatabaseIntegrationTest
 import java.util.UUID
+import kotliquery.queryOf
+import kotliquery.sessionOf
 import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.februar
 import no.nav.helse.januar
@@ -18,6 +20,7 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSyke
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SubsumsjonDto
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -205,6 +208,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
 
     @Test
     fun `håndterer overstyring av tidslinje`() {
+        nyPerson(fødselsnummer = FØDSELSNUMMER, organisasjonsnummer = ORGANISASJONSNUMMER, aktørId = AKTØR_ID)
         val overstyring = OverstyrTidslinjeHandlingFraApi(
             organisasjonsnummer = ORGANISASJONSNUMMER,
             fødselsnummer = FØDSELSNUMMER,
@@ -223,18 +227,14 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
         )
 
         mediator.håndter(overstyring, saksbehandler)
-        val hendelse = testRapid.inspektør.hendelser("saksbehandler_overstyrer_tidslinje").first()
+        val hendelse = testRapid.inspektør.hendelser("overstyr_tidslinje").first()
+        val overstyringId = finnOverstyringId(FØDSELSNUMMER)
 
-        assertNotNull(hendelse["@id"].asText())
+        assertNotNull(overstyringId)
+        assertEquals(overstyringId.toString(), hendelse["@id"].asText())
         assertEquals(FØDSELSNUMMER, hendelse["fødselsnummer"].asText())
         assertEquals(AKTØR_ID, hendelse["aktørId"].asText())
         assertEquals(ORGANISASJONSNUMMER, hendelse["organisasjonsnummer"].asText())
-        assertEquals(SAKSBEHANDLER_OID, hendelse["saksbehandlerOid"].asText().let { UUID.fromString(it) })
-        assertEquals(SAKSBEHANDLER_NAVN, hendelse["saksbehandlerNavn"].asText())
-        assertEquals(SAKSBEHANDLER_IDENT, hendelse["saksbehandlerIdent"].asText())
-        assertEquals(SAKSBEHANDLER_EPOST, hendelse["saksbehandlerEpost"].asText())
-
-        assertEquals("En begrunnelse", hendelse["begrunnelse"].asText())
 
         val overstyrtDag = hendelse["dager"].toList().single()
         assertEquals(10.januar, overstyrtDag["dato"].asLocalDate())
@@ -242,6 +242,15 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
         assertEquals("Arbeidsdag", overstyrtDag["fraType"].asText())
         assertEquals(null, overstyrtDag["grad"]?.textValue())
         assertEquals(100, overstyrtDag["fraGrad"].asInt())
+    }
+
+    private fun finnOverstyringId(fødselsnummer: String): UUID? {
+        @Language("PostgreSQL")
+        val query = " select ekstern_hendelse_id from overstyring where person_ref = (select id from person where fodselsnummer = :fodselsnummer) "
+
+        return sessionOf(dataSource).use {
+            it.run(queryOf(query, mapOf("fodselsnummer" to fødselsnummer.toLong())).map { it.uuid("ekstern_hendelse_id") }.asSingle)
+        }
     }
 
     @Test

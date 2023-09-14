@@ -30,7 +30,7 @@ class Saksbehandler(
     }
 
     internal fun håndter(hendelse: OverstyrtTidslinje) {
-        val event = hendelse.byggEvent(oid, navn, epostadresse, ident)
+        val event = hendelse.byggEvent()
         observers.forEach { it.tidslinjeOverstyrt(event.fødselsnummer, event) }
     }
 

@@ -249,16 +249,17 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
         inntektskilde: Inntektskilde = EN_ARBEIDSGIVER,
         fødselsnummer: String = FNR,
+        aktørId: String = AKTØR,
         organisasjonsnummer: String = ORGNUMMER,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         generasjonId: UUID = UUID.randomUUID(),
         contextId: UUID = UUID.randomUUID(),
         hendelseId: UUID = UUID.randomUUID()
     ) {
-        opprettPerson(fødselsnummer = fødselsnummer)
+        opprettPerson(fødselsnummer = fødselsnummer, aktørId = aktørId)
         opprettArbeidsgiver(organisasjonsnummer = organisasjonsnummer)
         opprettGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
-        opprettVedtaksperiode(periodetype = periodetype, inntektskilde = inntektskilde, vedtaksperiodeId = vedtaksperiodeId)
+        opprettVedtaksperiode(periodetype = periodetype, inntektskilde = inntektskilde, vedtaksperiodeId = vedtaksperiodeId, fødselsnummer = fødselsnummer)
         opprettOppgave(contextId = contextId, vedtaksperiodeId = vedtaksperiodeId, hendelseId = hendelseId)
     }
 
@@ -323,8 +324,11 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         return arbeidsgiverDao.insertArbeidsgiver(organisasjonsnummer, navn, bransjer)!!.also { arbeidsgiverId = it }
     }
 
-    protected fun opprettSnapshot(person: GraphQLPerson = snapshot().data!!.person!!) {
-        snapshotId = snapshotDao.lagre(FNR, person)
+    protected fun opprettSnapshot(
+        person: GraphQLPerson = snapshot().data!!.person!!,
+        fødselsnummer: String = FNR,
+    ) {
+        snapshotId = snapshotDao.lagre(fødselsnummer, person)
     }
 
     protected fun opprettGenerasjon(vedtaksperiodeId: UUID = VEDTAKSPERIODE, generasjonId: UUID = UUID.randomUUID()) {
@@ -354,9 +358,10 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         tom: LocalDate = TOM,
         periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
         inntektskilde: Inntektskilde = EN_ARBEIDSGIVER,
-        forkastet: Boolean = false
+        forkastet: Boolean = false,
+        fødselsnummer: String = FNR,
     ): Long {
-        opprettSnapshot()
+        opprettSnapshot(fødselsnummer = fødselsnummer)
         return vedtakDao.opprett(vedtaksperiodeId, fom, tom, personId, arbeidsgiverId, snapshotId)
             .let { vedtakDao.finnVedtakId(vedtaksperiodeId) }
             ?.also {
