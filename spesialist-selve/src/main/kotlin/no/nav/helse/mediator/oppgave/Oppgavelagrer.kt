@@ -17,7 +17,7 @@ class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
     private lateinit var oppgaveForLagring: OppgaveFraDatabase
     private var totrinnsvurderingForLagring: TotrinnsvurderingFraDatabase? = null
 
-    internal fun lagre(oppgaveMediator: OppgaveMediator, hendelseId: UUID, contextId: UUID) {
+    internal fun lagre(oppgaveMediator: OppgaveMediator, contextId: UUID) {
         val oppgave = oppgaveForLagring
         oppgaveMediator.opprett(
             id = oppgave.id,
@@ -25,7 +25,7 @@ class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
             vedtaksperiodeId = oppgave.vedtaksperiodeId,
             utbetalingId = oppgave.utbetalingId,
             navn = enumValueOf(oppgave.type),
-            hendelseId = hendelseId
+            hendelseId = oppgave.hendelseId
         )
         if (oppgave.tildelt != null) tildelingDao.tildel(oppgave.id, oppgave.tildelt.oid, oppgave.påVent)
         else tildelingDao.avmeld(oppgave.id)

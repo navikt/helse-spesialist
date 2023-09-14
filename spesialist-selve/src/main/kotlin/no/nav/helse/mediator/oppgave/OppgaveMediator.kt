@@ -119,13 +119,12 @@ internal class OppgaveMediator(
     }
 
     fun lagreOgTildelOppgaver(
-        hendelseId: UUID,
         fødselsnummer: String,
         contextId: UUID,
         messageContext: MessageContext,
     ) {
         tildelVedReservasjon(fødselsnummer)
-        lagreOppgaver(hendelseId, contextId, messageContext)
+        lagreOppgaver(contextId, messageContext)
     }
 
     fun avbrytOppgaver(vedtaksperiodeId: UUID) {
@@ -176,14 +175,13 @@ internal class OppgaveMediator(
     }
 
     private fun lagreOppgaver(
-        hendelseId: UUID,
         contextId: UUID,
         messageContext: MessageContext
     ) {
         oppgaveForLagring?.let {
             Oppgavelagrer(tildelingDao).apply {
                 it.accept(this)
-                lagre(this@OppgaveMediator, hendelseId, contextId)
+                lagre(this@OppgaveMediator, contextId)
             }
             logg.info("Oppgave lagret: $it")
             sikkerlogg.info("Oppgave lagret: $it")

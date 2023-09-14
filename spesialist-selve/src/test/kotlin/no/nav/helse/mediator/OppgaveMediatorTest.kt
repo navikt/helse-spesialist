@@ -98,7 +98,7 @@ internal class OppgaveMediatorTest {
         mediator.nyOppgave {
             søknadsoppgave(it)
         }
-        mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
+        mediator.lagreOgTildelOppgaver(TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
         verify(exactly = 1) {
             oppgaveDao.opprettOppgave(
                 0L,
@@ -122,7 +122,7 @@ internal class OppgaveMediatorTest {
         mediator.nyOppgave {
             søknadsoppgave(it)
         }
-        mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
+        mediator.lagreOgTildelOppgaver(TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
         assertFalse(gruppehenterTestoppsett.erKalt)
         verify(exactly = 1) { tildelingDao.tildel(any(), SAKSBEHANDLEROID, any()) }
         assertAntallOpptegnelser(1)
@@ -137,7 +137,7 @@ internal class OppgaveMediatorTest {
         mediator.nyOppgave {
             riskoppgave(it)
         }
-        mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
+        mediator.lagreOgTildelOppgaver(TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
         assertTrue(gruppehenterTestoppsett.erKalt)
         verify(exactly = 0) { tildelingDao.tildel(any(), SAKSBEHANDLEROID, any()) }
         assertAntallOpptegnelser(1)
@@ -152,7 +152,7 @@ internal class OppgaveMediatorTest {
         mediator.nyOppgave {
             stikkprøveoppgave(it)
         }
-        mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
+        mediator.lagreOgTildelOppgaver(TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
         verify(exactly = 0) { tildelingDao.tildel(any(), any(), any()) }
         assertAntallOpptegnelser(1)
     }
@@ -167,7 +167,7 @@ internal class OppgaveMediatorTest {
         mediator.nyOppgave {
             stikkprøveoppgave(it)
         }
-        mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
+        mediator.lagreOgTildelOppgaver(TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
         assertFalse(gruppehenterTestoppsett.erKalt)
         assertAntallOpptegnelser(1)
     }
@@ -184,7 +184,7 @@ internal class OppgaveMediatorTest {
             oppgave = this
         }
         every { oppgaveDao.finn(OPPGAVE_ID) } returns oppgave
-        mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
+        mediator.lagreOgTildelOppgaver(TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
         assertEquals(3, testRapid.inspektør.size)
         assertOppgaveevent(2, "oppgave_oppdatert", Oppgavestatus.Ferdigstilt) {
             assertEquals(OPPGAVE_ID, it.path("oppgaveId").longValue())
@@ -205,7 +205,7 @@ internal class OppgaveMediatorTest {
         mediator.nyOppgave {
             søknadsoppgave(it)
         }
-        mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
+        mediator.lagreOgTildelOppgaver(TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
         verify(exactly = 1) { oppgaveDao.opprettOppgave(any(), COMMAND_CONTEXT_ID, OPPGAVETYPE_SØKNAD, any(), UTBETALING_ID) }
         assertOpptegnelseIkkeOpprettet()
 
@@ -221,12 +221,12 @@ internal class OppgaveMediatorTest {
         mediator.nyOppgave {
             søknadsoppgave(it)
         }
-        mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
+        mediator.lagreOgTildelOppgaver(TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
         assertEquals(1, testRapid.inspektør.size)
         assertAntallOpptegnelser(1)
         testRapid.reset()
         clearMocks(opptegnelseDao)
-        mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
+        mediator.lagreOgTildelOppgaver(TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
         assertEquals(0, testRapid.inspektør.size)
         assertOpptegnelseIkkeOpprettet()
     }

@@ -62,7 +62,7 @@ class OppgavelagrerTest: DatabaseIntegrationTest() {
         val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
         oppgave.accept(oppgavelagrer)
 
-        oppgavelagrer.lagre(oppgaveMediator, HENDELSE_ID, CONTEXT_ID)
+        oppgavelagrer.lagre(oppgaveMediator, CONTEXT_ID)
         verify(exactly = 1) { oppgaveMediator.opprett(OPPGAVE_ID, CONTEXT_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, Oppgavetype.SØKNAD, HENDELSE_ID) }
         verify(exactly = 0) { nyTildelingDao.tildel(any(), any(), any()) }
         verify(exactly = 1) { nyTildelingDao.avmeld(OPPGAVE_ID) }
@@ -86,7 +86,7 @@ class OppgavelagrerTest: DatabaseIntegrationTest() {
         val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
         oppgave.accept(oppgavelagrer)
 
-        oppgavelagrer.lagre(oppgaveMediator, HENDELSE_ID, CONTEXT_ID)
+        oppgavelagrer.lagre(oppgaveMediator, CONTEXT_ID)
         verify(exactly = 1) { oppgaveMediator.opprett(OPPGAVE_ID, CONTEXT_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, Oppgavetype.SØKNAD, HENDELSE_ID) }
         verify(exactly = 0) { nyTildelingDao.tildel(any(), any(), any()) }
         verify(exactly = 0) { oppgaveMediator.lagreTotrinnsvurdering(any()) }
@@ -98,7 +98,7 @@ class OppgavelagrerTest: DatabaseIntegrationTest() {
         val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
         oppgave.accept(oppgavelagrer)
 
-        oppgavelagrer.lagre(oppgaveMediator, HENDELSE_ID, CONTEXT_ID)
+        oppgavelagrer.lagre(oppgaveMediator, CONTEXT_ID)
         verify(exactly = 1) { oppgaveMediator.opprett(OPPGAVE_ID, CONTEXT_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, Oppgavetype.SØKNAD, HENDELSE_ID) }
         verify(exactly = 0) { nyTildelingDao.tildel(any(), any(), any()) }
         verify(exactly = 1) { oppgaveMediator.lagreTotrinnsvurdering(TotrinnsvurderingFraDatabase(VEDTAKSPERIODE_ID, false, SAKSBEHANDLER_OID, BESLUTTER_OID, UTBETALING_ID, TOTRINNSVURDERING_OPPRETTET, TOTRINNSVURDERING_OPPDATERT)) }
@@ -111,7 +111,7 @@ class OppgavelagrerTest: DatabaseIntegrationTest() {
         val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
         oppgave.accept(oppgavelagrer)
 
-        oppgavelagrer.lagre(oppgaveMediator, HENDELSE_ID, CONTEXT_ID)
+        oppgavelagrer.lagre(oppgaveMediator, CONTEXT_ID)
         verify(exactly = 1) { oppgaveMediator.opprett(OPPGAVE_ID, CONTEXT_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, Oppgavetype.SØKNAD, HENDELSE_ID) }
         verify(exactly = 1) { nyTildelingDao.tildel(OPPGAVE_ID, SAKSBEHANDLER_OID, false) }
         verify(exactly = 0) { oppgaveMediator.lagreTotrinnsvurdering(any()) }
@@ -124,7 +124,7 @@ class OppgavelagrerTest: DatabaseIntegrationTest() {
         val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
         oppgave.accept(oppgavelagrer)
 
-        oppgavelagrer.lagre(oppgaveMediator, HENDELSE_ID, CONTEXT_ID)
+        oppgavelagrer.lagre(oppgaveMediator, CONTEXT_ID)
         verify(exactly = 1) { oppgaveMediator.opprett(OPPGAVE_ID, CONTEXT_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, Oppgavetype.SØKNAD, HENDELSE_ID) }
         verify(exactly = 1) { nyTildelingDao.tildel(OPPGAVE_ID, SAKSBEHANDLER_OID, false) }
         verify(exactly = 1) { oppgaveMediator.lagreTotrinnsvurdering(TotrinnsvurderingFraDatabase(VEDTAKSPERIODE_ID, false, SAKSBEHANDLER_OID, BESLUTTER_OID, UTBETALING_ID, TOTRINNSVURDERING_OPPRETTET, TOTRINNSVURDERING_OPPDATERT)) }
@@ -192,7 +192,7 @@ class OppgavelagrerTest: DatabaseIntegrationTest() {
         id = OPPGAVE_ID,
         vedtaksperiodeId = VEDTAKSPERIODE_ID,
         utbetalingId = UTBETALING_ID,
-        hendelseId = UUID.randomUUID(),
+        hendelseId = HENDELSE_ID,
         egenskaper = listOf(OPPGAVETYPE),
         totrinnsvurdering = if (medTotrinnsvurdering) nyTotrinnsvurdering() else null
     )

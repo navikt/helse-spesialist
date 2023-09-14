@@ -693,7 +693,7 @@ internal class HendelseMediator(
                     )
                 } else logg.info("$hendelsenavn er suspendert")
                 behovMediator.håndter(hendelse, context, contextId, messageContext)
-                oppgaveMediator.lagreOgTildelOppgaver(hendelse.id, hendelse.fødselsnummer(), contextId, messageContext)
+                oppgaveMediator.lagreOgTildelOppgaver(hendelse.fødselsnummer(), contextId, messageContext)
             } catch (err: Exception) {
                 logg.warn(
                     "Feil ved kjøring av $hendelsenavn: contextId={}, message={}",
