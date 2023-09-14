@@ -33,12 +33,12 @@ import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.AnnulleringHandling
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandling
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandling
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandling
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.SaksbehandlerHandling
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandling
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.AnnulleringHandlingFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi
 import no.nav.helse.spesialist.api.tell
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.varsel.Varsel
@@ -60,26 +60,26 @@ class SaksbehandlerMediator(
     private val abonnementDao = AbonnementDao(dataSource)
     private val reservasjonDao = ReservasjonDao(dataSource)
 
-    override fun <T: SaksbehandlerHandling> håndter(handling: T, saksbehandlerFraApi: SaksbehandlerFraApi) {
+    override fun <T: HandlingFraApi> håndter(handlingFraApi: T, saksbehandlerFraApi: SaksbehandlerFraApi) {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         val handlingId = UUID.randomUUID()
-        tell(handling)
+        tell(handlingFraApi)
         saksbehandler.register(this)
         saksbehandler.persister(saksbehandlerDao)
-        val modellhandling = handling.toModellobjekt()
+        val modellhandling = handlingFraApi.tilHandling()
         withMDC(
             mapOf(
                 "saksbehandlerOid" to saksbehandler.oid().toString(),
                 "handlingId" to handlingId.toString()
             )
         ) {
-            sikkerlogg.info("Utfører handling ${handling.loggnavn()} på vegne av saksbehandler $saksbehandler")
+            sikkerlogg.info("Utfører handling ${handlingFraApi.loggnavn()} på vegne av saksbehandler $saksbehandler")
             when (modellhandling) {
                 is Overstyring -> håndter(modellhandling, saksbehandler)
                 else -> modellhandling.utførAv(saksbehandler)
             }
         }
-        sikkerlogg.info("Handling ${handling.loggnavn()} utført")
+        sikkerlogg.info("Handling ${handlingFraApi.loggnavn()} utført")
     }
 
     private fun <T: Overstyring> håndter(handling: T, saksbehandler: Saksbehandler) {
@@ -195,17 +195,17 @@ class SaksbehandlerMediator(
 
     private fun SaksbehandlerFraApi.tilSaksbehandler() = Saksbehandler(epost, oid, navn, ident)
 
-    private fun SaksbehandlerHandling.toModellobjekt(): Handling {
+    private fun HandlingFraApi.tilHandling(): Handling {
         return when (this) {
-            is OverstyrArbeidsforholdHandling -> this.toModellobjekt()
-            is OverstyrInntektOgRefusjonHandling -> this.toModellobjekt()
-            is OverstyrTidslinjeHandling -> this.toModellobjekt()
-            is SkjønnsfastsettSykepengegrunnlagHandling -> this.toModellobjekt()
-            is AnnulleringHandling -> this.toModellobjekt()
+            is OverstyrArbeidsforholdHandlingFraApi -> this.tilHandling()
+            is OverstyrInntektOgRefusjonHandlingFraApi -> this.tilHandling()
+            is OverstyrTidslinjeHandlingFraApi -> this.tilHandling()
+            is SkjønnsfastsettSykepengegrunnlagHandlingFraApi -> this.tilHandling()
+            is AnnulleringHandlingFraApi -> this.tilHandling()
         }
     }
 
-    private fun OverstyrArbeidsforholdHandling.toModellobjekt(): OverstyrtArbeidsforhold {
+    private fun OverstyrArbeidsforholdHandlingFraApi.tilHandling(): OverstyrtArbeidsforhold {
         return OverstyrtArbeidsforhold(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
@@ -216,7 +216,7 @@ class SaksbehandlerMediator(
         )
     }
 
-    private fun OverstyrInntektOgRefusjonHandling.toModellobjekt(): OverstyrtInntektOgRefusjon {
+    private fun OverstyrInntektOgRefusjonHandlingFraApi.tilHandling(): OverstyrtInntektOgRefusjon {
         return OverstyrtInntektOgRefusjon(
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
@@ -242,7 +242,7 @@ class SaksbehandlerMediator(
         )
     }
 
-    private fun OverstyrTidslinjeHandling.toModellobjekt(): OverstyrtTidslinje {
+    private fun OverstyrTidslinjeHandlingFraApi.tilHandling(): OverstyrtTidslinje {
         return OverstyrtTidslinje(
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
@@ -266,7 +266,7 @@ class SaksbehandlerMediator(
         )
     }
 
-    private fun SkjønnsfastsettSykepengegrunnlagHandling.toModellobjekt(): SkjønnsfastsattSykepengegrunnlag {
+    private fun SkjønnsfastsettSykepengegrunnlagHandlingFraApi.tilHandling(): SkjønnsfastsattSykepengegrunnlag {
         return SkjønnsfastsattSykepengegrunnlag(
             aktørId,
             fødselsnummer,
@@ -278,9 +278,9 @@ class SaksbehandlerMediator(
                     arbeidsgiverDto.fraÅrlig,
                     arbeidsgiverDto.årsak,
                     type = when (arbeidsgiverDto.type) {
-                        SkjønnsfastsettSykepengegrunnlagHandling.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT -> SkjønnsfastsattSykepengegrunnlag.SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT
-                        SkjønnsfastsettSykepengegrunnlagHandling.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto.RAPPORTERT_ÅRSINNTEKT -> SkjønnsfastsattSykepengegrunnlag.SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.RAPPORTERT_ÅRSINNTEKT
-                        SkjønnsfastsettSykepengegrunnlagHandling.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto.ANNET -> SkjønnsfastsattSykepengegrunnlag.SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.ANNET
+                        SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT -> SkjønnsfastsattSykepengegrunnlag.SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT
+                        SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto.RAPPORTERT_ÅRSINNTEKT -> SkjønnsfastsattSykepengegrunnlag.SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.RAPPORTERT_ÅRSINNTEKT
+                        SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto.ANNET -> SkjønnsfastsattSykepengegrunnlag.SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.ANNET
                     },
                     begrunnelseMal = arbeidsgiverDto.begrunnelseMal,
                     begrunnelseFritekst = arbeidsgiverDto.begrunnelseFritekst,
@@ -294,7 +294,7 @@ class SaksbehandlerMediator(
         )
     }
 
-    private fun AnnulleringHandling.toModellobjekt(): Annullering {
+    private fun AnnulleringHandlingFraApi.tilHandling(): Annullering {
         return Annullering(
             aktørId = this.aktørId,
             fødselsnummer = this.fødselsnummer,

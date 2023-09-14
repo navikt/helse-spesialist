@@ -4,7 +4,7 @@ import AbstractE2ETestV2
 import no.nav.helse.Testdata.ORGNR_GHOST
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandling
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
 import org.junit.jupiter.api.Test
 
 internal class TotrinnsvurderingE2ETest : AbstractE2ETestV2() {
@@ -23,7 +23,7 @@ internal class TotrinnsvurderingE2ETest : AbstractE2ETestV2() {
         fremTilSaksbehandleroppgave(andreArbeidsforhold = listOf(ORGNR_GHOST))
         håndterOverstyrArbeidsforhold(
             overstyrteArbeidsforhold = listOf(
-                OverstyrArbeidsforholdHandling.ArbeidsforholdDto(
+                OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdDto(
                     orgnummer = ORGNR_GHOST,
                     deaktivert = true,
                     begrunnelse = "begrunnelse",

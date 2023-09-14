@@ -9,7 +9,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandling
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -63,7 +63,7 @@ internal class OverstyringArbeidsforholdRiver(
             ident = packet["saksbehandlerIdent"].asText(),
             epost = packet["saksbehandlerEpost"].asText(),
             overstyrteArbeidsforhold = packet["overstyrteArbeidsforhold"].map {
-                OverstyrArbeidsforholdHandling.ArbeidsforholdDto(
+                OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdDto(
                     it["orgnummer"].asText(),
                     it["deaktivert"].asBoolean(),
                     it["begrunnelse"].asText(),

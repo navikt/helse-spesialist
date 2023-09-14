@@ -15,10 +15,10 @@ import no.nav.helse.spesialist.api.graphql.schema.SkjonnsfastsettelseArbeidsgive
 import no.nav.helse.spesialist.api.graphql.schema.SkjonnsfastsettelseArbeidsgiver.SkjonnsfastsettelseType.OMREGNET_ARSINNTEKT
 import no.nav.helse.spesialist.api.graphql.schema.SkjonnsfastsettelseArbeidsgiver.SkjonnsfastsettelseType.RAPPORTERT_ARSINNTEKT
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandling
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandling.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandling.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandling.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto.RAPPORTERT_ÅRSINNTEKT
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto.RAPPORTERT_ÅRSINNTEKT
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SubsumsjonDto
 
 class SkjonnsfastsettelseMutation(private val saksbehandlerhåndterer: Saksbehandlerhåndterer) : Mutation {
@@ -29,12 +29,12 @@ class SkjonnsfastsettelseMutation(private val saksbehandlerhåndterer: Saksbehan
     ): DataFetcherResult<Boolean> = withContext(Dispatchers.IO) {
         val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
         try {
-            val handling = SkjønnsfastsettSykepengegrunnlagHandling(
+            val handling = SkjønnsfastsettSykepengegrunnlagHandlingFraApi(
                 skjonnsfastsettelse.aktorId,
                 skjonnsfastsettelse.fodselsnummer,
                 LocalDate.parse(skjonnsfastsettelse.skjaringstidspunkt),
                 skjonnsfastsettelse.arbeidsgivere.map { arbeidsgiver ->
-                    SkjønnsfastsettSykepengegrunnlagHandling.SkjønnsfastsattArbeidsgiverDto(
+                    SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverDto(
                         arbeidsgiver.organisasjonsnummer,
                         arbeidsgiver.arlig,
                         arbeidsgiver.fraArlig,

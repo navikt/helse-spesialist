@@ -3,18 +3,18 @@ package no.nav.helse.spesialist.api.saksbehandler.handlinger
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import java.time.LocalDate
 
-sealed interface SaksbehandlerHandling {
+sealed interface HandlingFraApi {
     fun loggnavn(): String
 }
 
 @JsonIgnoreProperties
-class OverstyrTidslinjeHandling(
+class OverstyrTidslinjeHandlingFraApi(
     val organisasjonsnummer: String,
     val fødselsnummer: String,
     val aktørId: String,
     val begrunnelse: String,
     val dager: List<OverstyrDagDto>
-): SaksbehandlerHandling {
+): HandlingFraApi {
 
     override fun loggnavn(): String = "overstyr_tidslinje"
 
@@ -29,12 +29,12 @@ class OverstyrTidslinjeHandling(
     )
 }
 
-data class OverstyrInntektOgRefusjonHandling(
+data class OverstyrInntektOgRefusjonHandlingFraApi(
     val aktørId: String,
     val fødselsnummer: String,
     val skjæringstidspunkt: LocalDate,
     val arbeidsgivere: List<OverstyrArbeidsgiverDto>,
-) : SaksbehandlerHandling {
+) : HandlingFraApi {
 
     override fun loggnavn(): String = "overstyr_inntekt_og_refusjon"
 
@@ -58,12 +58,12 @@ data class OverstyrInntektOgRefusjonHandling(
 }
 
 @JsonIgnoreProperties
-data class OverstyrArbeidsforholdHandling(
+data class OverstyrArbeidsforholdHandlingFraApi(
     val fødselsnummer: String,
     val aktørId: String,
     val skjæringstidspunkt: LocalDate,
     val overstyrteArbeidsforhold: List<ArbeidsforholdDto>,
-) : SaksbehandlerHandling {
+) : HandlingFraApi {
 
     override fun loggnavn(): String = "overstyr_arbeidsforhold"
 
@@ -76,12 +76,12 @@ data class OverstyrArbeidsforholdHandling(
     )
 }
 
-data class SkjønnsfastsettSykepengegrunnlagHandling(
+data class SkjønnsfastsettSykepengegrunnlagHandlingFraApi(
     val aktørId: String,
     val fødselsnummer: String,
     val skjæringstidspunkt: LocalDate,
     val arbeidsgivere: List<SkjønnsfastsattArbeidsgiverDto>,
-) : SaksbehandlerHandling {
+) : HandlingFraApi {
 
     override fun loggnavn(): String = "skjønnsfastsett_sykepengegrunnlag"
 
@@ -113,13 +113,13 @@ data class SubsumsjonDto(
 )
 
 @JsonIgnoreProperties
-data class AnnulleringHandling(
+data class AnnulleringHandlingFraApi(
     val aktørId: String,
     val fødselsnummer: String,
     val organisasjonsnummer: String,
     val fagsystemId: String,
     val begrunnelser: List<String> = emptyList(),
     val kommentar: String?
-): SaksbehandlerHandling {
+): HandlingFraApi {
     override fun loggnavn(): String = "annuller_utbetaling"
 }

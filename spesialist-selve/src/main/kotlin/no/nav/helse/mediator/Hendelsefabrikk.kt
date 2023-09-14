@@ -76,7 +76,7 @@ import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandling
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
@@ -513,7 +513,7 @@ internal class Hendelsefabrikk(
         navn: String,
         ident: String,
         epost: String,
-        overstyrteArbeidsforhold: List<OverstyrArbeidsforholdHandling.ArbeidsforholdDto>,
+        overstyrteArbeidsforhold: List<OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdDto>,
         skjæringstidspunkt: LocalDate,
         opprettet: LocalDateTime,
         json: String,
@@ -546,7 +546,7 @@ internal class Hendelsefabrikk(
             ident = jsonNode.path("saksbehandlerIdent").asText(),
             epost = jsonNode.path("saksbehandlerEpost").asText(),
             overstyrteArbeidsforhold = jsonNode.path("overstyrteArbeidsforhold").map {
-                OverstyrArbeidsforholdHandling.ArbeidsforholdDto(
+                OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdDto(
                     it["orgnummer"].asText(),
                     it["deaktivert"].asBoolean(),
                     it["begrunnelse"].asText(),

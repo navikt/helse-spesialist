@@ -1,12 +1,12 @@
 package no.nav.helse.spesialist.api
 
 import io.prometheus.client.Counter
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.AnnulleringHandling
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandling
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandling
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandling
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.SaksbehandlerHandling
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandling
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.AnnulleringHandlingFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi
 
 private val overstyringsteller: Counter = Counter.build("overstyringer", "Teller antall overstyringer")
     .labelNames("opplysningstype", "type")
@@ -21,10 +21,10 @@ internal fun tellOverstyrArbeidsforhold() = overstyringsteller.labels("opplysnin
 internal fun tellOverstyrInntektOgRefusjon() = overstyringsteller.labels("opplysningstype", "inntektogrefusjon").inc()
 internal fun tellSkjønnsfastsettingSykepengegrunnlag() = overstyringsteller.labels("opplysningstype", "skjønnsfastsettingsykepengegrunnlag").inc()
 
-fun tell(handling: SaksbehandlerHandling) = when (handling) {
-    is OverstyrTidslinjeHandling -> tellOverstyrTidslinje()
-    is OverstyrInntektOgRefusjonHandling -> tellOverstyrInntektOgRefusjon()
-    is OverstyrArbeidsforholdHandling -> tellOverstyrArbeidsforhold()
-    is SkjønnsfastsettSykepengegrunnlagHandling -> tellSkjønnsfastsettingSykepengegrunnlag()
-    is AnnulleringHandling -> tellAnnullering()
+fun tell(handling: HandlingFraApi) = when (handling) {
+    is OverstyrTidslinjeHandlingFraApi -> tellOverstyrTidslinje()
+    is OverstyrInntektOgRefusjonHandlingFraApi -> tellOverstyrInntektOgRefusjon()
+    is OverstyrArbeidsforholdHandlingFraApi -> tellOverstyrArbeidsforhold()
+    is SkjønnsfastsettSykepengegrunnlagHandlingFraApi -> tellSkjønnsfastsettingSykepengegrunnlag()
+    is AnnulleringHandlingFraApi -> tellAnnullering()
 }

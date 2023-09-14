@@ -9,13 +9,13 @@ import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.AnnulleringHandling
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandling
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandling
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandling.OverstyrArbeidsgiverDto
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandling
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandling
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandling.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.AnnulleringHandlingFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SubsumsjonDto
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import org.junit.jupiter.api.Assertions
@@ -205,13 +205,13 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
 
     @Test
     fun `håndterer overstyring av tidslinje`() {
-        val overstyring = OverstyrTidslinjeHandling(
+        val overstyring = OverstyrTidslinjeHandlingFraApi(
             organisasjonsnummer = ORGANISASJONSNUMMER,
             fødselsnummer = FØDSELSNUMMER,
             aktørId = AKTØR_ID,
             begrunnelse = "En begrunnelse",
             dager = listOf(
-                OverstyrTidslinjeHandling.OverstyrDagDto(
+                OverstyrTidslinjeHandlingFraApi.OverstyrDagDto(
                     dato = 10.januar,
                     type = "Sykedag",
                     fraType = "Arbeidsdag",
@@ -246,12 +246,12 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
 
     @Test
     fun `håndterer overstyring av arbeidsforhold`() {
-        val overstyring = OverstyrArbeidsforholdHandling(
+        val overstyring = OverstyrArbeidsforholdHandlingFraApi(
             fødselsnummer = FØDSELSNUMMER,
             aktørId = AKTØR_ID,
             skjæringstidspunkt = 1.januar,
             overstyrteArbeidsforhold = listOf(
-                OverstyrArbeidsforholdHandling.ArbeidsforholdDto(
+                OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdDto(
                     orgnummer = ORGANISASJONSNUMMER_GHOST,
                     deaktivert = true,
                     begrunnelse = "en begrunnelse",
@@ -281,7 +281,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
 
     @Test
     fun `håndterer overstyring av inntekt og refusjon`() {
-        val overstyring = OverstyrInntektOgRefusjonHandling(
+        val overstyring = OverstyrInntektOgRefusjonHandlingFraApi(
             fødselsnummer = FØDSELSNUMMER,
             aktørId = AKTØR_ID,
             skjæringstidspunkt = 1.januar,
@@ -365,12 +365,12 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
 
     @Test
     fun `håndterer skjønnsfastsetting av sykepengegrunnlag`() {
-        val skjønnsfastsetting = SkjønnsfastsettSykepengegrunnlagHandling(
+        val skjønnsfastsetting = SkjønnsfastsettSykepengegrunnlagHandlingFraApi(
             fødselsnummer = FØDSELSNUMMER,
             aktørId = AKTØR_ID,
             skjæringstidspunkt = 1.januar,
             arbeidsgivere = listOf(
-                SkjønnsfastsettSykepengegrunnlagHandling.SkjønnsfastsattArbeidsgiverDto(
+                SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverDto(
                     organisasjonsnummer = ORGANISASJONSNUMMER,
                     årlig = 25000.0,
                     fraÅrlig = 25001.0,
@@ -382,7 +382,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
                     begrunnelseKonklusjon = "begrunnelseKonklusjon",
                     initierendeVedtaksperiodeId = PERIODE.id.toString()
                 ),
-                SkjønnsfastsettSykepengegrunnlagHandling.SkjønnsfastsattArbeidsgiverDto(
+                SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverDto(
                     organisasjonsnummer = ORGANISASJONSNUMMER_GHOST,
                     årlig = 21000.0,
                     fraÅrlig = 25001.0,
@@ -451,7 +451,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
     private fun annullering(
         begrunnelser: List<String> = listOf("EN_BEGRUNNELSE"),
         kommentar: String? = "EN_KOMMENTAR",
-    ) = AnnulleringHandling(
+    ) = AnnulleringHandlingFraApi(
         aktørId = AKTØR_ID,
         fødselsnummer = FØDSELSNUMMER,
         organisasjonsnummer = ORGANISASJONSNUMMER,

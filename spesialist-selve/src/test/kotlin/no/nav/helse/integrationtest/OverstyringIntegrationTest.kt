@@ -22,9 +22,9 @@ import no.nav.helse.januar
 import no.nav.helse.mediator.api.AbstractApiTest
 import no.nav.helse.mediator.api.AbstractApiTest.Companion.authentication
 import no.nav.helse.spesialist.api.endepunkter.overstyringApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandling
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandling
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandling.OverstyrDagDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi.OverstyrDagDto
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -39,7 +39,7 @@ internal class OverstyringIntegrationTest : AbstractE2ETest() {
     fun `overstyr tidslinje`() {
         settOppBruker()
         assertOppgaver(1)
-        val overstyring = OverstyrTidslinjeHandling(
+        val overstyring = OverstyrTidslinjeHandlingFraApi(
             organisasjonsnummer = ORGNR,
             fødselsnummer = FØDSELSNUMMER,
             aktørId = AKTØR,
@@ -101,12 +101,12 @@ internal class OverstyringIntegrationTest : AbstractE2ETest() {
     fun `overstyr arbeidsforhold`() {
         settOppBruker(orgnummereMedRelevanteArbeidsforhold = listOf(ORGNR_GHOST))
 
-        val overstyring = OverstyrArbeidsforholdHandling(
+        val overstyring = OverstyrArbeidsforholdHandlingFraApi(
             fødselsnummer = FØDSELSNUMMER,
             aktørId = AKTØR,
             skjæringstidspunkt = 1.januar,
             overstyrteArbeidsforhold = listOf(
-                OverstyrArbeidsforholdHandling.ArbeidsforholdDto(
+                OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdDto(
                     orgnummer = ORGNR_GHOST,
                     deaktivert = true,
                     begrunnelse = "en begrunnelse",

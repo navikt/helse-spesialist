@@ -5,14 +5,14 @@ import java.util.UUID
 import no.nav.helse.spesialist.api.AbstractE2ETest
 import no.nav.helse.spesialist.api.februar
 import no.nav.helse.spesialist.api.januar
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandling
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandling.ArbeidsforholdDto
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandling
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandling.OverstyrArbeidsgiverDto.RefusjonselementDto
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandling
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandling.OverstyrDagDto
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandling
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandling.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverDto.RefusjonselementDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi.OverstyrDagDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SubsumsjonDto
 import org.junit.jupiter.api.Test
 
@@ -20,7 +20,7 @@ internal class OverstyringApiTest: AbstractE2ETest() {
 
     @Test
     fun `overstyr tidslinje`() {
-        val overstyring = OverstyrTidslinjeHandling(
+        val overstyring = OverstyrTidslinjeHandlingFraApi(
             organisasjonsnummer = ORGANISASJONSNUMMER,
             fødselsnummer = FØDSELSNUMMER,
             aktørId = AKTØR_ID,
@@ -37,7 +37,7 @@ internal class OverstyringApiTest: AbstractE2ETest() {
 
     @Test
     fun `overstyr tidslinje til arbeidsdag`() {
-        val overstyring = OverstyrTidslinjeHandling(
+        val overstyring = OverstyrTidslinjeHandlingFraApi(
             organisasjonsnummer = ORGANISASJONSNUMMER,
             fødselsnummer = FØDSELSNUMMER,
             aktørId = AKTØR_ID,
@@ -54,7 +54,7 @@ internal class OverstyringApiTest: AbstractE2ETest() {
 
     @Test
     fun `overstyr tidslinje fra arbeidsdag`() {
-        val overstyring = OverstyrTidslinjeHandling(
+        val overstyring = OverstyrTidslinjeHandlingFraApi(
             organisasjonsnummer = ORGANISASJONSNUMMER,
             fødselsnummer = FØDSELSNUMMER,
             aktørId = AKTØR_ID,
@@ -71,7 +71,7 @@ internal class OverstyringApiTest: AbstractE2ETest() {
 
     @Test
     fun `overstyr arbeidsforhold`() {
-        val overstyring = OverstyrArbeidsforholdHandling(
+        val overstyring = OverstyrArbeidsforholdHandlingFraApi(
             fødselsnummer = FØDSELSNUMMER,
             aktørId = AKTØR_ID,
             skjæringstidspunkt = 1.januar,
@@ -92,12 +92,12 @@ internal class OverstyringApiTest: AbstractE2ETest() {
 
     @Test
     fun `overstyr inntekt og refusjon`() {
-        val overstyring = OverstyrInntektOgRefusjonHandling(
+        val overstyring = OverstyrInntektOgRefusjonHandlingFraApi(
             fødselsnummer = FØDSELSNUMMER,
             aktørId = AKTØR_ID,
             skjæringstidspunkt = 1.januar,
             arbeidsgivere = listOf(
-                OverstyrInntektOgRefusjonHandling.OverstyrArbeidsgiverDto(
+                OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverDto(
                     organisasjonsnummer = ORGANISASJONSNUMMER,
                     månedligInntekt = 25000.0,
                     fraMånedligInntekt = 25001.0,
@@ -123,12 +123,12 @@ internal class OverstyringApiTest: AbstractE2ETest() {
 
     @Test
     fun `skjønnsfastsetting av sykepengegrunnlag`() {
-        val skjonnsfastsetting = SkjønnsfastsettSykepengegrunnlagHandling(
+        val skjonnsfastsetting = SkjønnsfastsettSykepengegrunnlagHandlingFraApi(
             fødselsnummer = FØDSELSNUMMER,
             aktørId = AKTØR_ID,
             skjæringstidspunkt = 1.januar,
             arbeidsgivere = listOf(
-                SkjønnsfastsettSykepengegrunnlagHandling.SkjønnsfastsattArbeidsgiverDto(
+                SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverDto(
                     organisasjonsnummer = ORGANISASJONSNUMMER,
                     årlig = 250000.0,
                     fraÅrlig = 260000.0,

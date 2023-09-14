@@ -14,9 +14,9 @@ import no.nav.helse.spesialist.api.graphql.schema.ArbeidsforholdOverstyringHandl
 import no.nav.helse.spesialist.api.graphql.schema.InntektOgRefusjonOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.TidslinjeOverstyring
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandling
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandling
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandling
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SubsumsjonDto
 
 
@@ -29,13 +29,13 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
     ): DataFetcherResult<Boolean> = withContext(Dispatchers.IO) {
         val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
         try {
-            val handling = OverstyrTidslinjeHandling(
+            val handling = OverstyrTidslinjeHandlingFraApi(
                 organisasjonsnummer = overstyring.organisasjonsnummer,
                 fødselsnummer = overstyring.fodselsnummer,
                 aktørId = overstyring.aktorId,
                 begrunnelse = overstyring.begrunnelse,
                 dager = overstyring.dager.map { it ->
-                    OverstyrTidslinjeHandling.OverstyrDagDto(
+                    OverstyrTidslinjeHandlingFraApi.OverstyrDagDto(
                         dato = LocalDate.parse(it.dato),
                         type = it.type,
                         fraType = it.fraType,
@@ -64,24 +64,24 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
     ): DataFetcherResult<Boolean> = withContext(Dispatchers.IO) {
         val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
         try {
-            val handling = OverstyrInntektOgRefusjonHandling(
+            val handling = OverstyrInntektOgRefusjonHandlingFraApi(
                 overstyring.aktorId,
                 overstyring.fodselsnummer,
                 LocalDate.parse(overstyring.skjaringstidspunkt),
                 overstyring.arbeidsgivere.map { arbeidsgiver ->
-                    OverstyrInntektOgRefusjonHandling.OverstyrArbeidsgiverDto(
+                    OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverDto(
                         organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
                         månedligInntekt = arbeidsgiver.manedligInntekt,
                         fraMånedligInntekt = arbeidsgiver.fraManedligInntekt,
                         refusjonsopplysninger = arbeidsgiver.refusjonsopplysninger?.map {
-                            OverstyrInntektOgRefusjonHandling.OverstyrArbeidsgiverDto.RefusjonselementDto(
+                            OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverDto.RefusjonselementDto(
                                 fom = LocalDate.parse(it.fom),
                                 tom = LocalDate.parse(it.tom),
                                 beløp = it.belop
                             )
                         },
                         fraRefusjonsopplysninger = arbeidsgiver.fraRefusjonsopplysninger?.map {
-                            OverstyrInntektOgRefusjonHandling.OverstyrArbeidsgiverDto.RefusjonselementDto(
+                            OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverDto.RefusjonselementDto(
                                 fom = LocalDate.parse(it.fom),
                                 tom = LocalDate.parse(it.tom),
                                 beløp = it.belop
@@ -112,12 +112,12 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
     ): DataFetcherResult<Boolean> = withContext(Dispatchers.IO) {
         val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
         try {
-            val handling = OverstyrArbeidsforholdHandling(
+            val handling = OverstyrArbeidsforholdHandlingFraApi(
                 overstyring.fodselsnummer,
                 aktørId = overstyring.aktorId,
                 skjæringstidspunkt = LocalDate.parse(overstyring.skjaringstidspunkt),
                 overstyrteArbeidsforhold = overstyring.overstyrteArbeidsforhold.map { arbeidsforhold ->
-                    OverstyrArbeidsforholdHandling.ArbeidsforholdDto(
+                    OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdDto(
                         orgnummer = arbeidsforhold.orgnummer,
                         deaktivert = arbeidsforhold.deaktivert,
                         begrunnelse = arbeidsforhold.begrunnelse,

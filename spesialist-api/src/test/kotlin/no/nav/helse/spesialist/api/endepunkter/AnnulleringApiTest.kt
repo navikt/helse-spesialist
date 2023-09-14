@@ -12,7 +12,7 @@ import io.mockk.slot
 import io.mockk.verify
 import java.util.UUID
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.AnnulleringHandling
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.AnnulleringHandlingFraApi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -31,7 +31,7 @@ internal class AnnulleringApiTest {
 
     @Test
     fun annulleringOk() {
-        val slot = slot<AnnulleringHandling>()
+        val slot = slot<AnnulleringHandlingFraApi>()
         val response = apiTesting.spesialistApi { client ->
             client.post("/api/annullering") {
                 contentType(ContentType.Application.Json)
@@ -57,7 +57,7 @@ internal class AnnulleringApiTest {
 
     @Test
     fun annulleringTommeVerdier() {
-        val slot = slot<AnnulleringHandling>()
+        val slot = slot<AnnulleringHandlingFraApi>()
         val response = apiTesting.spesialistApi { client ->
             client.post("/api/annullering") {
                 contentType(ContentType.Application.Json)

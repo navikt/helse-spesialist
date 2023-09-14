@@ -14,11 +14,11 @@ import no.nav.helse.spesialist.api.endepunkter.ApiTesting
 import no.nav.helse.spesialist.api.endepunkter.overstyringApi
 import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandling
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandling
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandling
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.SaksbehandlerHandling
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandling
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -27,7 +27,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     private val testRapid = TestRapid()
     private val saksbehandlerhåndterer = object : Saksbehandlerhåndterer {
-        override fun <T : SaksbehandlerHandling> håndter(handling: T, saksbehandlerFraApi: SaksbehandlerFraApi) {}
+        override fun <T : HandlingFraApi> håndter(handlingFraApi: T, saksbehandlerFraApi: SaksbehandlerFraApi) {}
         override fun håndter(godkjenning: GodkjenningDto, behandlingId: UUID, saksbehandlerFraApi: SaksbehandlerFraApi) {}
         override fun opprettAbonnement(saksbehandlerFraApi: SaksbehandlerFraApi, personidentifikator: String) {}
         override fun hentAbonnerteOpptegnelser(saksbehandlerFraApi: SaksbehandlerFraApi, sisteSekvensId: Int): List<Opptegnelse> {
@@ -69,16 +69,16 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         testRapid.reset()
     }
 
-    protected fun overstyrTidslinje(payload: OverstyrTidslinjeHandling) =
+    protected fun overstyrTidslinje(payload: OverstyrTidslinjeHandlingFraApi) =
         sendOverstyring("/api/overstyr/dager", saksbehandler, objectMapper.writeValueAsString(payload))
 
-    protected fun overstyrArbeidsforhold(payload: OverstyrArbeidsforholdHandling) =
+    protected fun overstyrArbeidsforhold(payload: OverstyrArbeidsforholdHandlingFraApi) =
         sendOverstyring("/api/overstyr/arbeidsforhold", saksbehandler, objectMapper.writeValueAsString(payload))
 
-    protected fun overstyrInntektOgRefusjon(payload: OverstyrInntektOgRefusjonHandling) =
+    protected fun overstyrInntektOgRefusjon(payload: OverstyrInntektOgRefusjonHandlingFraApi) =
         sendOverstyring("/api/overstyr/inntektogrefusjon", saksbehandler, objectMapper.writeValueAsString(payload))
 
-    protected fun skjønnsfastsettingSykepengegrunnlag(payload: SkjønnsfastsettSykepengegrunnlagHandling) =
+    protected fun skjønnsfastsettingSykepengegrunnlag(payload: SkjønnsfastsettSykepengegrunnlagHandlingFraApi) =
         sendOverstyring(
             "/api/skjonnsfastsett/sykepengegrunnlag",
             saksbehandler,
