@@ -88,27 +88,10 @@ allprojects {
 }
 
 subprojects {
-    tasks {
-        withType<Test> {
-            useJUnitPlatform()
-            testLogging {
-                events("skipped", "failed")
-            }
-        }
+    kotlin {
+        jvmToolchain(17)
     }
-
     tasks {
-        compileKotlin {
-            kotlinOptions.jvmTarget = jvmTargetVersion
-        }
-        compileTestKotlin {
-            kotlinOptions.jvmTarget = jvmTargetVersion
-        }
-
-        withType<Wrapper> {
-            gradleVersion = "8.1"
-        }
-
         withType<Test> {
             useJUnitPlatform()
             testLogging {
@@ -116,18 +99,13 @@ subprojects {
                 showStackTraces = true
                 exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
             }
-
+        }
+        withType<Wrapper>() {
+            gradleVersion = "8.1"
         }
     }
 }
 
-tasks {
-    named<Jar>("jar") { enabled = false }
-}
-
-tasks {
-    named("build") {
-        finalizedBy()
-        project.buildDir.deleteRecursively()
-    }
+tasks.jar {
+    enabled = false
 }
