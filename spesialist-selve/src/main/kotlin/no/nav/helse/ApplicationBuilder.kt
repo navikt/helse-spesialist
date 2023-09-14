@@ -115,6 +115,7 @@ private val personIdRegex = "\\d{11,13}".toRegex()
 internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusListener {
     init {
         println("file.encoding=" + System.getProperty("file.encoding"))
+        println("sun.jnu.encoding=" + System.getProperty("sun.jnu.encoding"))
         println("java.version=" + System.getProperty("java.version"))
         println("LANG=" + System.getenv("LANG"))
         println("LC_ALL=" + System.getenv("LC_ALL"))

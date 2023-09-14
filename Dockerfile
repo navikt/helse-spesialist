@@ -1,5 +1,7 @@
 FROM gcr.io/distroless/java17@sha256:052076466984fd56979c15a9c3b7433262b0ad9aae55bc0c53d1da8ffdd829c3
 
+COPY --from=debian:9.11 /usr/lib/locale /usr/lib/locale
+
 ENV LANG="nb_NO.UTF-8" LC_ALL="nb_NO.UTF-8" TZ="Europe/Oslo" JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF-8"
 
 WORKDIR app
