@@ -387,7 +387,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         hendelseMediator = HendelseMediator(
             dataSource = dataSource,
             rapidsConnection = rapidsConnection,
-            oppgaveMediator = oppgaveMediator,
             godkjenningMediator = godkjenningMediator,
             hendelsefabrikk = hendelsefabrikk
         )

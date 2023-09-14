@@ -143,7 +143,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     internal val hendelseMediator = HendelseMediator(
         dataSource = dataSource,
         rapidsConnection = testRapid,
-        oppgaveMediator = oppgaveMediator,
         godkjenningMediator = godkjenningMediator,
         hendelsefabrikk = hendelsefabrikk
     )

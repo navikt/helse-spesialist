@@ -102,7 +102,6 @@ internal class TestMediator(
         HendelseMediator(
             dataSource = dataSource,
             rapidsConnection = testRapid,
-            oppgaveMediator = oppgaveMediator,
             godkjenningMediator = godkjenningMediator,
             hendelsefabrikk = hendelsefabrikk
         )
