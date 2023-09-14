@@ -1,0 +1,1 @@
+ALTER TABLE overstyring DROP CONSTRAINT overstyring_hendelse_ref_fkey;
