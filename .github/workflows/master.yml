@@ -64,7 +64,6 @@ jobs:
 
     deployProd:
         name: Deploy to prod
-        if: false
         needs: [build, deployDev]
         runs-on: ubuntu-latest
         steps:
