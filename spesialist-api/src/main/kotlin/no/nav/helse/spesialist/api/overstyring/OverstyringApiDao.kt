@@ -67,7 +67,6 @@ class OverstyringApiDao(private val dataSource: DataSource) {
                 INNER JOIN person p ON p.id = o.person_ref
                 INNER JOIN arbeidsgiver a ON a.id = oi.arbeidsgiver_ref
                 INNER JOIN saksbehandler s ON s.oid = o.saksbehandler_ref
-                INNER JOIN hendelse h ON h.id = o.hendelse_ref
             WHERE p.fodselsnummer = ? AND a.orgnummer = ?
         """
             session.run(
@@ -105,7 +104,6 @@ class OverstyringApiDao(private val dataSource: DataSource) {
                 INNER JOIN person p ON p.id = o.person_ref
                 INNER JOIN arbeidsgiver a ON a.id = oi.arbeidsgiver_ref
                 INNER JOIN saksbehandler s ON s.oid = o.saksbehandler_ref
-                INNER JOIN hendelse h ON h.id = o.hendelse_ref
             WHERE p.fodselsnummer = ? AND a.orgnummer = ?
         """
             session.run(
@@ -148,7 +146,6 @@ class OverstyringApiDao(private val dataSource: DataSource) {
                 INNER JOIN begrunnelse b1 ON ss.begrunnelse_fritekst_ref = b1.id 
                 INNER JOIN begrunnelse b2 ON ss.begrunnelse_mal_ref = b2.id 
                 INNER JOIN begrunnelse b3 ON ss.begrunnelse_konklusjon_ref = b3.id 
-                INNER JOIN hendelse h ON h.id = o.hendelse_ref
             WHERE p.fodselsnummer = ? AND a.orgnummer = ?
         """
             session.run(
@@ -188,7 +185,6 @@ class OverstyringApiDao(private val dataSource: DataSource) {
                 INNER JOIN person p ON p.id = o.person_ref
                 INNER JOIN arbeidsgiver a ON a.id = oa.arbeidsgiver_ref
                 INNER JOIN saksbehandler s ON s.oid = o.saksbehandler_ref
-                INNER JOIN hendelse h ON h.id = o.hendelse_ref
             WHERE p.fodselsnummer = ? AND a.orgnummer = ?
         """
         it.run(
