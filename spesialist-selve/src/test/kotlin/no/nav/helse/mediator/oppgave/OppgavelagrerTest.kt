@@ -188,7 +188,7 @@ class OppgavelagrerTest: DatabaseIntegrationTest() {
         verify(exactly = 1) { oppgaveMediator.lagreTotrinnsvurdering(TotrinnsvurderingFraDatabase(VEDTAKSPERIODE_ID, false, SAKSBEHANDLER_OID, BESLUTTER_OID, UTBETALING_ID, TOTRINNSVURDERING_OPPRETTET, TOTRINNSVURDERING_OPPDATERT)) }
     }
 
-    private fun nyOppgave(medTotrinnsvurdering: Boolean = false) = Oppgave.oppgaveMedEgenskaper(
+    private fun nyOppgave(medTotrinnsvurdering: Boolean = false) = Oppgave.nyOppgave(
         id = OPPGAVE_ID,
         vedtaksperiodeId = VEDTAKSPERIODE_ID,
         utbetalingId = UTBETALING_ID,

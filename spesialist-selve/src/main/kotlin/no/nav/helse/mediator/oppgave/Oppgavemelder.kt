@@ -22,20 +22,26 @@ internal class Oppgavemelder(private val hendelseDao: HendelseDao, private val o
         }
     }
 
+    internal fun oppgaveOpprettet(oppgave: Oppgave) {
+        val oppgavemelding = OppgaveForKafkaBygger().bygg(oppgave)
+        val (fnr, melding) = melding("oppgave_opprettet", oppgavemelding)
+        rapidsConnection.publish(fnr, melding.toJson())
+    }
+
     override fun oppgaveEndret(oppgave: Oppgave) {
         val oppgavemelding = OppgaveForKafkaBygger().bygg(oppgave)
-        val (fnr, melding) = melding(oppgavemelding)
+        val (fnr, melding) = melding("oppgave_oppdatert", oppgavemelding)
         rapidsConnection.publish(fnr, melding.toJson())
     }
 
     private fun lagOppgaveOppdatertMelding(oppgaveId: Long): Pair<String, JsonMessage> {
         val oppgavemelding: Oppgavemelding = requireNotNull(oppgaveDao.hentOppgavemelding(oppgaveId))
-        return melding(oppgavemelding)
+        return melding("oppgave_oppdatert", oppgavemelding)
     }
 
-    private fun melding(oppgavemelding: Oppgavemelding): Pair<String, JsonMessage> {
+    private fun melding(eventName: String, oppgavemelding: Oppgavemelding): Pair<String, JsonMessage> {
         val fødselsnummer: String = hendelseDao.finnFødselsnummer(oppgavemelding.hendelseId)
-        return fødselsnummer to JsonMessage.newMessage("oppgave_oppdatert", mutableMapOf(
+        return fødselsnummer to JsonMessage.newMessage(eventName, mutableMapOf(
             "@forårsaket_av" to mapOf("id" to oppgavemelding.hendelseId),
             "hendelseId" to oppgavemelding.hendelseId,
             "oppgaveId" to oppgavemelding.oppgaveId,

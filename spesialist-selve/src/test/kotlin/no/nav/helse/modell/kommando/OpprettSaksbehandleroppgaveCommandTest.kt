@@ -44,6 +44,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
     private val snapshotMediator = mockk<SnapshotMediator>(relaxed = true)
     private val risikovurderingDao = mockk<RisikovurderingDao>(relaxed = true)
     private lateinit var context: CommandContext
+    private lateinit var contextId: UUID
     private lateinit var utbetalingstype: Utbetalingtype
     private val command get() = OpprettSaksbehandleroppgaveCommand(
         fødselsnummer = FNR,
@@ -60,7 +61,8 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
 
     @BeforeEach
     fun setup() {
-        context = CommandContext(UUID.randomUUID())
+        contextId = UUID.randomUUID()
+        context = CommandContext(contextId)
         utbetalingstype = Utbetalingtype.UTBETALING
         clearMocks(oppgaveMediator)
     }
@@ -69,7 +71,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
     fun `oppretter oppgave`() {
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.nyOppgave(capture(slot)) }
+        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
         val oppgave = slot.captured.invoke(1L)
         assertEquals(enOppgave(SØKNAD), oppgave)
     }
@@ -79,7 +81,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         every { automatisering.erStikkprøve(VEDTAKSPERIODE_ID, any()) } returns true
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.nyOppgave(capture(slot)) }
+        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
         assertEquals(enOppgave(STIKKPRØVE), oppgave)
@@ -90,7 +92,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         every { risikovurderingDao.kreverSupersaksbehandler(VEDTAKSPERIODE_ID) } returns true
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.nyOppgave(capture(slot)) }
+        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
         assertEquals(enOppgave(RISK_QA), oppgave)
@@ -101,7 +103,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         utbetalingstype = REVURDERING
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.nyOppgave(capture(slot)) }
+        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
         assertEquals(enOppgave(Oppgavetype.REVURDERING), oppgave)
@@ -112,7 +114,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         every { personDao.findAdressebeskyttelse(FNR) } returns Adressebeskyttelse.Fortrolig
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.nyOppgave(capture(slot)) }
+        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
         assertEquals(enOppgave(FORTROLIG_ADRESSE), oppgave)
@@ -123,7 +125,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         every { snapshotMediator.finnUtbetaling(FNR, UTBETALING_ID) } returns enUtbetaling(personbeløp = 500)
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.nyOppgave(capture(slot)) }
+        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
         assertEquals(enOppgave(UTBETALING_TIL_SYKMELDT), oppgave)
@@ -137,14 +139,14 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         )
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.nyOppgave(capture(slot)) }
+        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
         assertEquals(enOppgave(DELVIS_REFUSJON), oppgave)
     }
 
     private fun enOppgave(vararg oppgavetype: Oppgavetype) =
-        Oppgave.oppgaveMedEgenskaper(1L, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), oppgavetype.toList())
+        Oppgave.nyOppgave(1L, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), oppgavetype.toList())
 
 
     private fun enUtbetaling(personbeløp: Int = 0, arbeidsgiverbeløp: Int = 0): GraphQLUtbetaling =

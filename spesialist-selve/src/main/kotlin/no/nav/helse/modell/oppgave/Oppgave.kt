@@ -6,7 +6,6 @@ import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.Gruppe
 import no.nav.helse.Tilgangskontroll
-import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -220,7 +219,7 @@ class Oppgave private constructor(
     companion object {
         private val logg = LoggerFactory.getLogger(this::class.java)
 
-        fun oppgaveMedEgenskaper(
+        fun nyOppgave(
             id: Long,
             vedtaksperiodeId: UUID,
             utbetalingId: UUID,
@@ -232,34 +231,6 @@ class Oppgave private constructor(
             return Oppgave(id, hovedegenskap, AvventerSaksbehandler, vedtaksperiodeId, utbetalingId, hendelseId, totrinnsvurdering).also {
                 it.egenskaper.addAll(egenskaper)
             }
-        }
-
-        fun lagMelding(
-            oppgaveId: Long,
-            eventName: String,
-            påVent: Boolean? = null,
-            oppgaveDao: OppgaveDao
-        ): Pair<String, JsonMessage> {
-            val hendelseId = oppgaveDao.finnHendelseId(oppgaveId)
-            val oppgave = requireNotNull(oppgaveDao.finn(oppgaveId))
-            val fødselsnummer = oppgaveDao.finnFødselsnummer(oppgaveId)
-            // @TODO bruke ny totrinnsvurderingtabell eller fjerne?
-            val erBeslutterOppgave = false
-            val erReturOppgave = false
-
-            return fødselsnummer to lagMelding(
-                eventName = eventName,
-                hendelseId = hendelseId,
-                oppgaveId = oppgaveId,
-                tilstand = oppgave.tilstand.toString(),
-                type = oppgave.type,
-                fødselsnummer = fødselsnummer,
-                erBeslutterOppgave = erBeslutterOppgave,
-                erReturOppgave = erReturOppgave,
-                ferdigstiltAvIdent = oppgave.ferdigstiltAvIdent,
-                ferdigstiltAvOid = oppgave.ferdigstiltAvOid,
-                påVent = påVent,
-            )
         }
 
         fun lagMelding(

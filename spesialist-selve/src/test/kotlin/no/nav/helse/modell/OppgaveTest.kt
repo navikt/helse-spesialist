@@ -4,7 +4,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.modell.OppgaveInspektør.Companion.inspektør
 import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.modell.oppgave.Oppgave.Companion.oppgaveMedEgenskaper
+import no.nav.helse.modell.oppgave.Oppgave.Companion.nyOppgave
 import no.nav.helse.modell.oppgave.OppgaveObserver
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
@@ -394,11 +394,11 @@ internal class OppgaveTest {
 
     @Test
     fun equals() {
-        val gjenopptattOppgave = oppgaveMedEgenskaper(1L, VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID, UUID.randomUUID(), listOf(OPPGAVETYPE))
-        val oppgave1 = oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), listOf(SØKNAD))
-        val oppgave2 = oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), listOf(SØKNAD))
-        val oppgave3 = oppgaveMedEgenskaper(OPPGAVE_ID, UUID.randomUUID(), UTBETALING_ID, UUID.randomUUID(), listOf(SØKNAD))
-        val oppgave4 = oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), listOf(STIKKPRØVE))
+        val gjenopptattOppgave = nyOppgave(1L, VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID, UUID.randomUUID(), listOf(OPPGAVETYPE))
+        val oppgave1 = nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), listOf(SØKNAD))
+        val oppgave2 = nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), listOf(SØKNAD))
+        val oppgave3 = nyOppgave(OPPGAVE_ID, UUID.randomUUID(), UTBETALING_ID, UUID.randomUUID(), listOf(SØKNAD))
+        val oppgave4 = nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), listOf(STIKKPRØVE))
         assertEquals(oppgave1, oppgave2)
         assertEquals(oppgave1.hashCode(), oppgave2.hashCode())
         assertNotEquals(oppgave1, oppgave3)
@@ -419,7 +419,7 @@ internal class OppgaveTest {
 
     private fun nyOppgave(vararg egenskaper: Oppgavetype, medTotrinnsvurdering: Boolean = false): Oppgave {
         val totrinnsvurdering = if (medTotrinnsvurdering) totrinnsvurdering() else null
-        return oppgaveMedEgenskaper(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), egenskaper.toList(), totrinnsvurdering)
+        return nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), egenskaper.toList(), totrinnsvurdering)
     }
 
     private fun totrinnsvurdering() = Totrinnsvurdering(

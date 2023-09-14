@@ -10,7 +10,6 @@ import no.nav.helse.db.TotrinnsvurderingRepository
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.saksbehandler.Saksbehandler
-import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload.Companion.lagre
@@ -38,17 +37,20 @@ internal class OppgaveMediator(
     private val rapidsConnection: RapidsConnection,
     private val harTilgangTil: Tilgangskontroll = { _, _ -> false }
 ): Oppgavehåndterer, Oppgavefinner {
-    private var oppgaveForLagring: Oppgave? = null
-    private var oppgaveForOppdatering: Oppgave? = null
     private val oppgaverForPublisering = mutableMapOf<Long, String>()
     private val logg = LoggerFactory.getLogger(this::class.java)
-    private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
-    internal fun nyOppgave(opprettOppgaveBlock: (reservertId: Long) -> Oppgave) {
+    internal fun nyOppgave(fødselsnummer: String, contextId: UUID, opprettOppgaveBlock: (reservertId: Long) -> Oppgave) {
         val nesteId = oppgaveDao.reserverNesteId()
         val oppgave = opprettOppgaveBlock(nesteId)
-        oppgave.register(Oppgavemelder(hendelseDao, oppgaveDao, rapidsConnection))
-        leggPåVentForSenereLagring(oppgave)
+        val oppgavemelder = Oppgavemelder(hendelseDao, oppgaveDao, rapidsConnection)
+        oppgavemelder.oppgaveOpprettet(oppgave)
+        oppgave.register(oppgavemelder)
+        tildelVedReservasjon(fødselsnummer, oppgave)
+        Oppgavelagrer(tildelingDao).apply {
+            oppgave.accept(this)
+            this.lagre(this@OppgaveMediator, contextId)
+        }
     }
 
     fun <T> oppgave(id: Long, oppgaveBlock: Oppgave.() -> T): T {
@@ -59,7 +61,6 @@ internal class OppgaveMediator(
             oppgave.accept(this)
             oppdater(this@OppgaveMediator)
         }
-        leggPåVentForSenereOppdatering(oppgave)
         return returverdi
     }
 
@@ -106,29 +107,8 @@ internal class OppgaveMediator(
         }
     }
 
-    /*
-        For nå må oppgaver mellomlagres i denne mediatoren, fordi ved lagring skal det sendes ut meldinger på Kafka,
-        og de skal inneholde standardfeltene for rapids-and-rivers, som i utgangspunktet kun er tilgjengelige via
-        MessageContext, som HendelseMediator har tilgang til.
-    */
-    private fun leggPåVentForSenereLagring(oppgave: Oppgave) {
-        oppgaveForLagring = oppgave
-    }
-    private fun leggPåVentForSenereOppdatering(oppgave: Oppgave) {
-        oppgaveForOppdatering = oppgave
-    }
-
-    fun lagreOgTildelOppgaver(
-        fødselsnummer: String,
-        contextId: UUID,
-        messageContext: MessageContext,
-    ) {
-        tildelVedReservasjon(fødselsnummer)
-        lagreOppgaver(contextId, messageContext)
-    }
-
     fun avbrytOppgaver(vedtaksperiodeId: UUID) {
-        oppgaveDao.finnNyesteOppgaveId(vedtaksperiodeId)?.also { it ->
+        oppgaveDao.finnNyesteOppgaveId(vedtaksperiodeId)?.also {
             oppgave(it) {
                 this.avbryt()
             }
@@ -167,30 +147,11 @@ internal class OppgaveMediator(
         }
     }
 
-    private fun tildelVedReservasjon(fødselsnummer: String) {
+    private fun tildelVedReservasjon(fødselsnummer: String, oppgave: Oppgave) {
         // TODO: skal ikke være SaksbehandlerFraApi, men SaksbehandlerFraDatabase. Må fikses når ReservasjonDao kan flyttes til selve.db
         val (saksbehandlerFraDatabase, settPåVent) = reservasjonDao.hentReservasjonFor(fødselsnummer) ?: return
         val saksbehandler = Saksbehandler(saksbehandlerFraDatabase.epost, saksbehandlerFraDatabase.oid, saksbehandlerFraDatabase.navn, saksbehandlerFraDatabase.ident)
-        oppgaveForLagring?.forsøkTildeling(saksbehandler, settPåVent, harTilgangTil)
-    }
-
-    private fun lagreOppgaver(
-        contextId: UUID,
-        messageContext: MessageContext
-    ) {
-        oppgaveForLagring?.let {
-            Oppgavelagrer(tildelingDao).apply {
-                it.accept(this)
-                lagre(this@OppgaveMediator, contextId)
-            }
-            logg.info("Oppgave lagret: $it")
-            sikkerlogg.info("Oppgave lagret: $it")
-        }
-        oppgaveForLagring = null
-        oppgaveForOppdatering = null
-        oppgaverForPublisering.onEach { (oppgaveId, eventName) ->
-            messageContext.publish(Oppgave.lagMelding(oppgaveId, eventName, oppgaveDao = oppgaveDao).second.toJson())
-        }.clear()
+        oppgave.forsøkTildeling(saksbehandler, settPåVent, harTilgangTil)
     }
 
     fun harFerdigstiltOppgave(vedtaksperiodeId: UUID) = oppgaveDao.harFerdigstiltOppgave(vedtaksperiodeId)

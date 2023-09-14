@@ -57,7 +57,7 @@ class OppgavemelderTest {
         assertEquals(false, melding["erReturOppgave"].asBoolean())
     }
 
-    private fun nyOppgave(medTotrinnsvurdering: Boolean = false) = Oppgave.oppgaveMedEgenskaper(
+    private fun nyOppgave(medTotrinnsvurdering: Boolean = false) = Oppgave.nyOppgave(
         id = OPPGAVE_ID,
         vedtaksperiodeId = VEDTAKSPERIODE_ID,
         utbetalingId = UTBETALING_ID,

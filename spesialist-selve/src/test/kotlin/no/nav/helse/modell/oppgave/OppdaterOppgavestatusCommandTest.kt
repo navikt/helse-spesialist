@@ -23,7 +23,7 @@ internal class OppdaterOppgavestatusCommandTest {
 
     @BeforeEach
     fun beforeEach() {
-        oppgave = Oppgave.oppgaveMedEgenskaper(
+        oppgave = Oppgave.nyOppgave(
             id = 1L,
             vedtaksperiodeId = UUID.randomUUID(),
             utbetalingId = UTBETALING_ID,

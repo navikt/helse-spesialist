@@ -1,10 +1,10 @@
 package no.nav.helse.modell.kommando
 
+import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.meldinger.Hendelse
 import no.nav.helse.modell.CommandContextDao
 import org.slf4j.LoggerFactory
-import java.util.UUID
 
 internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()) {
     private val data = mutableListOf<Any>()
@@ -16,6 +16,8 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
     internal fun behov(behovtype: String, params: Map<String, Any> = emptyMap()) {
         this.behov[behovtype] = params
     }
+
+    internal fun id() = id
 
     internal fun behov() = behov.toMap()
 
