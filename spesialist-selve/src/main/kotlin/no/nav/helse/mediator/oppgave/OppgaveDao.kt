@@ -6,16 +6,11 @@ import no.nav.helse.HelseDao
 import no.nav.helse.db.OppgaveFraDatabase
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommandData
-import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
-import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSystem
-import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.Ferdigstilt
-import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.Invalidert
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 
 interface OppgaveRepository {
@@ -170,66 +165,6 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
             FROM oppgave o WHERE o.utbetaling_id = :utbetaling_id
         """, mapOf("utbetaling_id" to utbetalingId)
         ).single { it.long("oppgaveId") }
-
-    fun finn(oppgaveId: Long) =
-        asSQL(
-            """ 
-            SELECT o.type, o.status, v.vedtaksperiode_id, o.ferdigstilt_av, o.ferdigstilt_av_oid, o.utbetaling_id, s.navn, s.epost, s.ident, s.oid, t.på_vent
-            FROM oppgave o
-            INNER JOIN vedtak v on o.vedtak_ref = v.id
-            LEFT JOIN tildeling t on o.id = t.oppgave_id_ref
-            LEFT JOIN saksbehandler s on s.oid = t.saksbehandler_ref
-            WHERE o.id = :oppgaveId
-        """, mapOf("oppgaveId" to oppgaveId)
-        ).single { row ->
-            Oppgave(
-                id = oppgaveId,
-                type = enumValueOf(row.string("type")),
-                tilstand = tilstand(enumValueOf(row.string("status"))),
-                vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
-                utbetalingId = row.uuid("utbetaling_id"),
-                ferdigstiltAvIdent = row.stringOrNull("ferdigstilt_av"),
-                ferdigstiltAvOid = row.stringOrNull("ferdigstilt_av_oid")?.let(UUID::fromString),
-                tildelt = row.uuidOrNull("oid")?.let {
-                    Saksbehandler(
-                        epostadresse = row.string("epost"),
-                        oid = it,
-                        navn = row.string("navn"),
-                        ident = row.string("ident")
-                    )
-                },
-                påVent = row.boolean("på_vent"),
-                hendelseId = finnHendelseId(oppgaveId)
-            )
-        }
-
-    private fun tilstand(oppgavestatus: Oppgavestatus): Oppgave.Tilstand {
-        return when (oppgavestatus) {
-            AvventerSaksbehandler -> Oppgave.AvventerSaksbehandler
-            AvventerSystem -> Oppgave.AvventerSystem
-            Ferdigstilt -> Oppgave.Ferdigstilt
-            Invalidert -> Oppgave.Invalidert
-        }
-    }
-
-    fun finnAktiv(vedtaksperiodeId: UUID) =
-        asSQL(
-            """ SELECT o.id, o.type, o.status, o.utbetaling_id
-            FROM oppgave o
-            INNER JOIN vedtak v on o.vedtak_ref = v.id
-            WHERE v.vedtaksperiode_id = :vedtaksperiodeId AND o.status IN('AvventerSystem'::oppgavestatus, 'AvventerSaksbehandler'::oppgavestatus)
-        """, mapOf("vedtaksperiodeId" to vedtaksperiodeId)
-        ).single { row ->
-            val id = row.long("id")
-            Oppgave(
-                id = id,
-                type = enumValueOf(row.string("type")),
-                tilstand = tilstand(enumValueOf(row.string("status"))),
-                vedtaksperiodeId = vedtaksperiodeId,
-                utbetalingId = row.uuid("utbetaling_id"),
-                hendelseId = finnHendelseId(id)
-            )
-        }
 
     fun finnVedtaksperiodeId(oppgaveId: Long) = requireNotNull(
         asSQL(

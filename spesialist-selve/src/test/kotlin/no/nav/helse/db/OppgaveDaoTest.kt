@@ -9,7 +9,6 @@ import no.nav.helse.mediator.oppgave.Oppgavemelder
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.TestHendelse
-import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
@@ -19,8 +18,6 @@ import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.BeforeEach
@@ -147,22 +144,6 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `finner oppgave`() {
-        nyPerson()
-        val oppgave = oppgaveDao.finn(oppgaveId) ?: fail { "Fant ikke oppgave" }
-        assertEquals(
-            Oppgave(
-                oppgaveId,
-                OPPGAVETYPE,
-                Oppgave.AvventerSaksbehandler,
-                VEDTAKSPERIODE,
-                utbetalingId = UTBETALING_ID,
-                hendelseId = UUID.randomUUID()
-            ), oppgave
-        )
-    }
-
-    @Test
     fun `finner OppgaveFraDatabase`() {
         val hendelseId = UUID.randomUUID()
         nyPerson(hendelseId = hendelseId)
@@ -242,27 +223,6 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         oppgaveDao.updateOppgave(2L, AvventerSaksbehandler)
 
         assertTrue(oppgaveDao.harFerdigstiltOppgave(VEDTAKSPERIODE))
-    }
-
-
-    @Test
-    fun `finner oppgave knyttet til vedtaksperiodeId`() {
-        nyPerson()
-        assertNotNull(oppgaveDao.finnAktiv(VEDTAKSPERIODE))
-    }
-
-    @Test
-    fun `finner ikke oppgaver for andre vedtaksperiodeider`() {
-        nyPerson()
-        assertNotNull(oppgaveDao.finnAktiv(VEDTAKSPERIODE))
-        oppgaveDao.updateOppgave(oppgaveId, Ferdigstilt)
-        assertNull(oppgaveDao.finnAktiv(VEDTAKSPERIODE))
-
-        val vId2 = UUID.randomUUID()
-        opprettVedtaksperiode(vId2)
-        opprettOppgave(vedtaksperiodeId = vId2)
-        assertNull(oppgaveDao.finnAktiv(VEDTAKSPERIODE))
-        assertNotNull(oppgaveDao.finnAktiv(vId2))
     }
 
     @Test

@@ -92,7 +92,6 @@ internal class OppgaveMediatorTest {
     @Test
     fun `lagrer oppgaver`() {
         every { oppgaveDao.reserverNesteId() } returns 0L
-        every { oppgaveDao.finn(0L) } returns søknadsoppgave(0L)
         every { oppgaveDao.finnHendelseId(any()) } returns HENDELSE_ID
         every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
         mediator.nyOppgave(TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID) {
@@ -116,7 +115,6 @@ internal class OppgaveMediatorTest {
     fun `lagrer oppgave og tildeler til saksbehandler som har reservert personen`() {
         every { oppgaveDao.reserverNesteId() } returns 0L
         every { reservasjonDao.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns Reservasjonsinfo(saksbehandler, false)
-        every { oppgaveDao.finn(0L) } returns søknadsoppgave(0L)
         every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
         mediator.nyOppgave(TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID) {
             søknadsoppgave(it)
@@ -130,7 +128,6 @@ internal class OppgaveMediatorTest {
     fun `tildeler ikke risk-oppgave til saksbehandler som har reservert personen hvis hen ikke har risk-tilgang`() {
         every { oppgaveDao.reserverNesteId() } returns 0L
         every { reservasjonDao.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns Reservasjonsinfo(saksbehandler, false)
-        every { oppgaveDao.finn(0L) } returns riskoppgave(0L)
         every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
         mediator.nyOppgave(TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID) {
             riskoppgave(it)
@@ -144,7 +141,6 @@ internal class OppgaveMediatorTest {
     fun `tildeler ikke reservert personen når oppgave er stikkprøve`() {
         every { oppgaveDao.reserverNesteId() } returns 0L
         every { reservasjonDao.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns Reservasjonsinfo(saksbehandler, false)
-        every { oppgaveDao.finn(0L) } returns stikkprøveoppgave(0L)
         every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
         mediator.nyOppgave(TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID) {
             stikkprøveoppgave(it)
@@ -158,7 +154,6 @@ internal class OppgaveMediatorTest {
         every { reservasjonDao.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns null
         every { oppgaveDao.reserverNesteId() } returns 0L
 
-        every { oppgaveDao.finn(0L) } returns søknadsoppgave(0L)
         every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
         mediator.nyOppgave(TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID) {
             stikkprøveoppgave(it)
@@ -172,13 +167,10 @@ internal class OppgaveMediatorTest {
         every { oppgaveDao.finnOppgave(OPPGAVE_ID) } returns oppgaveFraDatabase()
         every { oppgaveDao.finnHendelseId(any()) } returns HENDELSE_ID
         every { saksbehandlerDao.finnSaksbehandler(any()) } returns saksbehandlerFraDatabase
-        var oppgave: Oppgave? = null
         mediator.oppgave(OPPGAVE_ID) {
             avventerSystem(SAKSBEHANDLERIDENT, SAKSBEHANDLEROID)
             ferdigstill()
-            oppgave = this
         }
-        every { oppgaveDao.finn(OPPGAVE_ID) } returns oppgave
         assertEquals(2, testRapid.inspektør.size)
         assertOppgaveevent(1, "oppgave_oppdatert", Oppgavestatus.Ferdigstilt) {
             assertEquals(OPPGAVE_ID, it.path("oppgaveId").longValue())
@@ -192,7 +184,6 @@ internal class OppgaveMediatorTest {
     fun `oppretter ikke flere oppgaver på samme vedtaksperiodeId`() {
         every { oppgaveDao.harGyldigOppgave(UTBETALING_ID) } returnsMany listOf(false, true)
         every { oppgaveDao.reserverNesteId() } returns 0L
-        every { oppgaveDao.finn(0L) } returns søknadsoppgave(0L)
         mediator.nyOppgave(TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID) {
             søknadsoppgave(it)
         }
@@ -207,7 +198,6 @@ internal class OppgaveMediatorTest {
     @Test
     fun `lagrer ikke dobbelt`() {
         every { oppgaveDao.reserverNesteId() } returns 0L
-        every { oppgaveDao.finn(0L) } returns søknadsoppgave(0L)
         every { oppgaveDao.opprettOppgave(any(), any(), OPPGAVETYPE_SØKNAD, any(), any()) } returns 0L
         every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
 
