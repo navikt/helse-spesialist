@@ -27,7 +27,7 @@ class SkjonnsfastsettelseMutation(private val saksbehandlerhåndterer: Saksbehan
         skjonnsfastsettelse: Skjonnsfastsettelse,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> = withContext(Dispatchers.IO) {
-        val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
+        val saksbehandler: Lazy<SaksbehandlerFraApi> = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
         try {
             val handling = SkjønnsfastsettSykepengegrunnlagHandlingFraApi(
                 skjonnsfastsettelse.aktorId,
@@ -60,7 +60,7 @@ class SkjonnsfastsettelseMutation(private val saksbehandlerhåndterer: Saksbehan
                     )
                 }
             )
-            withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(handling, saksbehandler) }
+            withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(handling, saksbehandler.value) }
         } catch (e: Exception) {
             return@withContext DataFetcherResult.newResult<Boolean>()
                 .error(kunneIkkeSkjønnsfastsetteSykepengegrunnlagError())
