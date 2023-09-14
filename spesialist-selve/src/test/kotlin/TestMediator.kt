@@ -54,6 +54,7 @@ internal class TestMediator(
         hendelseDao,
     )
     private val oppgaveMediator = OppgaveMediator(
+        hendelseDao = hendelseDao,
         oppgaveDao = OppgaveDao(dataSource),
         tildelingDao = tildelingDao,
         reservasjonDao = ReservasjonDao(dataSource),

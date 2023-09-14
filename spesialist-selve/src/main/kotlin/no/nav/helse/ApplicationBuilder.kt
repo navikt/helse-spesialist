@@ -375,6 +375,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     init {
         rapidsConnection.register(this)
         oppgaveMediator = OppgaveMediator(
+            hendelseDao = hendelseDao,
             oppgaveDao = oppgaveDao,
             tildelingDao = tildelingDao,
             reservasjonDao = reservasjonDao,
@@ -391,7 +392,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             hendelsefabrikk = hendelsefabrikk
         )
         saksbehandlerMediator = SaksbehandlerMediator(dataSource, rapidsConnection)
-        oppgavemelder = Oppgavemelder(oppgaveDao, rapidsConnection)
+        oppgavemelder = Oppgavemelder(hendelseDao, oppgaveDao, rapidsConnection)
         tildelingService = TildelingService(
             tildelingApiDao,
             saksbehandlerApiDao,

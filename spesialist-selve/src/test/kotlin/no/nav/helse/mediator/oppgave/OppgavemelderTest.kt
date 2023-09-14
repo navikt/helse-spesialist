@@ -6,6 +6,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.TestRapidHelpers.meldinger
 import no.nav.helse.mediator.asUUID
+import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -24,10 +25,11 @@ class OppgavemelderTest {
         private val HENDELSE_ID = UUID.randomUUID()
     }
 
+    private val hendelseDao = mockk<HendelseDao>(relaxed = true)
     private val dao = mockk<OppgaveDao>(relaxed = true)
     private val testRapid = TestRapid()
     init {
-        every { dao.finnFødselsnummer(any()) } returns FNR
+        every { hendelseDao.finnFødselsnummer(any()) } returns FNR
     }
 
     @BeforeEach
@@ -38,7 +40,7 @@ class OppgavemelderTest {
     @Test
     fun `bygg kafkamelding`() {
         val oppgave = nyOppgave()
-        oppgave.register(Oppgavemelder(dao, testRapid))
+        oppgave.register(Oppgavemelder(hendelseDao, dao, testRapid))
         oppgave.avventerSystem("IDENT", UUID.randomUUID())
         val meldinger = testRapid.inspektør.meldinger()
         assertEquals(1, meldinger.size)

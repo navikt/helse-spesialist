@@ -2,6 +2,7 @@ package no.nav.helse.mediator.oppgave
 
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveObserver
 import no.nav.helse.modell.oppgave.OppgaveVisitor
@@ -13,7 +14,7 @@ import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.tildeling.IOppgavemelder
 import kotlin.properties.Delegates
 
-class Oppgavemelder(private val oppgaveDao: OppgaveDao, private val rapidsConnection: RapidsConnection): OppgaveObserver, IOppgavemelder {
+internal class Oppgavemelder(private val hendelseDao: HendelseDao, private val oppgaveDao: OppgaveDao, private val rapidsConnection: RapidsConnection): OppgaveObserver, IOppgavemelder {
 
     override fun sendOppgaveOppdatertMelding(oppgaveId: Long) {
         lagOppgaveOppdatertMelding(oppgaveId).also { (key, message) ->
@@ -33,7 +34,7 @@ class Oppgavemelder(private val oppgaveDao: OppgaveDao, private val rapidsConnec
     }
 
     private fun melding(oppgavemelding: Oppgavemelding): Pair<String, JsonMessage> {
-        val fødselsnummer: String = oppgaveDao.finnFødselsnummer(oppgavemelding.oppgaveId)
+        val fødselsnummer: String = hendelseDao.finnFødselsnummer(oppgavemelding.hendelseId)
         return fødselsnummer to JsonMessage.newMessage("oppgave_oppdatert", mutableMapOf(
             "@forårsaket_av" to mapOf("id" to oppgavemelding.hendelseId),
             "hendelseId" to oppgavemelding.hendelseId,

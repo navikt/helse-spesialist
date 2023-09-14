@@ -4,8 +4,10 @@ import java.sql.SQLException
 import java.util.UUID
 import no.nav.helse.Tilgangskontroll
 import no.nav.helse.db.SaksbehandlerRepository
+import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingFraDatabase
 import no.nav.helse.db.TotrinnsvurderingRepository
+import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.rapids_rivers.MessageContext
@@ -25,9 +27,10 @@ interface Oppgavefinner {
     fun oppgave(utbetalingId: UUID, oppgaveBlock: Oppgave?.() -> Unit)
 }
 
-class OppgaveMediator(
+internal class OppgaveMediator(
+    private val hendelseDao: HendelseDao,
     private val oppgaveDao: OppgaveDao,
-    private val tildelingDao: no.nav.helse.db.TildelingDao,
+    private val tildelingDao: TildelingDao,
     private val reservasjonDao: ReservasjonDao,
     private val opptegnelseDao: OpptegnelseDao,
     private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
@@ -44,13 +47,13 @@ class OppgaveMediator(
     internal fun nyOppgave(opprettOppgaveBlock: (reservertId: Long) -> Oppgave) {
         val nesteId = oppgaveDao.reserverNesteId()
         val oppgave = opprettOppgaveBlock(nesteId)
-        oppgave.register(Oppgavemelder(oppgaveDao, rapidsConnection))
+        oppgave.register(Oppgavemelder(hendelseDao, oppgaveDao, rapidsConnection))
         leggPåVentForSenereLagring(oppgave)
     }
 
     fun <T> oppgave(id: Long, oppgaveBlock: Oppgave.() -> T): T {
         val oppgave = Oppgavehenter(oppgaveDao, totrinnsvurderingRepository, saksbehandlerRepository).oppgave(id)
-        oppgave.register(Oppgavemelder(oppgaveDao, rapidsConnection))
+        oppgave.register(Oppgavemelder(hendelseDao, oppgaveDao, rapidsConnection))
         val returverdi = oppgaveBlock(oppgave)
         Oppgavelagrer(tildelingDao).apply {
             oppgave.accept(this)
