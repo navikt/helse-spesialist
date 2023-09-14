@@ -37,7 +37,7 @@ internal class PersisterInntektCommand (
         context.behov(
             "InntekterForSykepengegrunnlag",
             mapOf(
-                "beregningStart" to skjæringstidspunkt.minusMonths(3).toYearMonth().toString(),
+                "beregningStart" to skjæringstidspunkt.minusMonths(12).toYearMonth().toString(),
                 "beregningSlutt" to skjæringstidspunkt.minusMonths(1).toYearMonth().toString(),
             )
         )
