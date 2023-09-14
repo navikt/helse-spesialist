@@ -2,6 +2,7 @@
 **
 
 # Except jar files
+!spesialist-selve/build/deps/**
 !spesialist-selve/build/libs/**
 !spesialist-opprydding-dev/build/libs/**
 !spesialist-migrering/build/libs/**

@@ -27,7 +27,7 @@ tasks {
 
         doLast {
             configurations.runtimeClasspath.get().forEach {
-                val file = File("$buildDir/libs/${it.name}")
+                val file = File("$buildDir/deps/${it.name}")
                 if (!file.exists())
                     it.copyTo(file)
             }
