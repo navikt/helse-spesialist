@@ -163,6 +163,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
         asSQL(
             """ SELECT o.id as oppgaveId
             FROM oppgave o WHERE o.utbetaling_id = :utbetaling_id
+            AND o.status NOT IN ('Invalidert'::oppgavestatus, 'Ferdigstilt'::oppgavestatus)
         """, mapOf("utbetaling_id" to utbetalingId)
         ).single { it.long("oppgaveId") }
 
