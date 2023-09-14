@@ -84,7 +84,6 @@ internal class GodkjenningService(
         reserverPerson(reserverPersonOid, fødselsnummer)
         oppgaveMediator.oppgave(godkjenningDTO.oppgavereferanse) {
             avventerSystem(godkjenningDTO.saksbehandlerIdent, oid)
-            rapidsConnection.publish(lagMelding("oppgave_oppdatert", fødselsnummer, hendelseId).toJson())
             overstyringDao.ferdigstillOverstyringerForVedtaksperiode(vedtaksperiodeId)
 
             if (totrinnsvurdering?.erBeslutteroppgave() == true && godkjenningDTO.godkjent) {

@@ -8,7 +8,6 @@ import no.nav.helse.Gruppe
 import no.nav.helse.Tilgangskontroll
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
-import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import org.slf4j.LoggerFactory
@@ -127,10 +126,6 @@ class Oppgave private constructor(
         tilstand.avventerSystem(this, ident, oid)
     }
 
-    fun lagMelding(eventName: String, fødselsnummer: String, hendelseId: UUID): JsonMessage {
-        return lagMelding(fødselsnummer, hendelseId, eventName, this, false).second
-    }
-
     fun avbryt() {
         tilstand.invalider(this)
     }
@@ -231,63 +226,6 @@ class Oppgave private constructor(
             return Oppgave(id, hovedegenskap, AvventerSaksbehandler, vedtaksperiodeId, utbetalingId, hendelseId, totrinnsvurdering).also {
                 it.egenskaper.addAll(egenskaper)
             }
-        }
-
-        fun lagMelding(
-            fødselsnummer: String,
-            hendelseId: UUID,
-            eventName: String,
-            oppgave: Oppgave,
-            påVent: Boolean? = null
-        ): Pair<String, JsonMessage> {
-            // @TODO bruke ny totrinnsvurderingtabell eller fjerne?
-            val erBeslutterOppgave = false
-            val erReturOppgave = false
-
-            return fødselsnummer to lagMelding(
-                eventName = eventName,
-                hendelseId = hendelseId,
-                oppgaveId = oppgave.id,
-                tilstand = oppgave.tilstand.toString(),
-                type = oppgave.type,
-                fødselsnummer = fødselsnummer,
-                erBeslutterOppgave = erBeslutterOppgave,
-                erReturOppgave = erReturOppgave,
-                ferdigstiltAvIdent = oppgave.ferdigstiltAvIdent,
-                ferdigstiltAvOid = oppgave.ferdigstiltAvOid,
-                påVent = påVent,
-            )
-        }
-
-        private fun lagMelding(
-            eventName: String,
-            hendelseId: UUID,
-            oppgaveId: Long,
-            tilstand: String,
-            type: Oppgavetype,
-            fødselsnummer: String,
-            erBeslutterOppgave: Boolean,
-            erReturOppgave: Boolean,
-            ferdigstiltAvIdent: String? = null,
-            ferdigstiltAvOid: UUID? = null,
-            påVent: Boolean? = null,
-        ): JsonMessage {
-            return JsonMessage.newMessage(eventName, mutableMapOf(
-                "@forårsaket_av" to mapOf(
-                    "id" to hendelseId
-                ),
-                "hendelseId" to hendelseId,
-                "oppgaveId" to oppgaveId,
-                "status" to tilstand,
-                "type" to type.name,
-                "fødselsnummer" to fødselsnummer,
-                "erBeslutterOppgave" to erBeslutterOppgave,
-                "erReturOppgave" to erReturOppgave,
-            ).apply {
-                ferdigstiltAvIdent?.also { put("ferdigstiltAvIdent", it) }
-                ferdigstiltAvOid?.also { put("ferdigstiltAvOid", it) }
-                påVent?.also { put("påVent", it) }
-            })
         }
     }
 }
