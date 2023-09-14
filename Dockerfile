@@ -1,7 +1,10 @@
-FROM ghcr.io/navikt/baseimages/temurin:17
+FROM gcr.io/distroless/java17@sha256:052076466984fd56979c15a9c3b7433262b0ad9aae55bc0c53d1da8ffdd829c3
 
-COPY spesialist-selve/build/deps/*.jar ./
-COPY spesialist-selve/build/libs/*.jar ./
+ENV LANG='nb_NO.UTF-8' LANGUAGE='nb_NO:nb' LC_ALL='nb:NO.UTF-8' TZ="Europe/Oslo"
 
-ENV JAVA_OPTS="-XX:MaxRAMPercentage=90"
-RUN echo 'java -XX:MaxRAMPercentage=90 -XX:+PrintFlagsFinal -version | grep -Ei "maxheapsize|maxram"' > /init-scripts/0-dump-memory-config.sh
+WORKDIR app
+
+COPY spesialist-selve/build/deps/*.jar /app/
+COPY spesialist-selve/build/libs/*.jar /app/
+
+CMD ["app.jar"]
