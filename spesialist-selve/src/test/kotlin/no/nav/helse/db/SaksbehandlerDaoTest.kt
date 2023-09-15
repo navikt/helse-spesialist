@@ -15,10 +15,18 @@ internal class SaksbehandlerDaoTest: DatabaseIntegrationTest() {
     @Test
     fun `lagre saksbehandler`() {
         dao.opprettSaksbehandler(SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLEREPOST, SAKSBEHANDLER_IDENT)
-        assertSaksbehandler(SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLEREPOST, SAKSBEHANDLER_IDENT)
+        assertSaksbehandler(1, SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLEREPOST, SAKSBEHANDLER_IDENT)
     }
 
-    private fun assertSaksbehandler(oid: UUID, navn: String, epost: String, ident: String) {
+    @Test
+    fun `oppdater saksbehandler`() {
+        dao.opprettSaksbehandler(SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLEREPOST, SAKSBEHANDLER_IDENT)
+        dao.opprettSaksbehandler(SAKSBEHANDLER_OID, "ANNET_NAVN", "ANNEN_EPOST", "ANNEN_IDENT")
+        assertSaksbehandler(1, SAKSBEHANDLER_OID, "ANNET_NAVN", "ANNEN_EPOST", "ANNEN_IDENT")
+        assertSaksbehandler(0, SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLEREPOST, SAKSBEHANDLER_IDENT)
+    }
+
+    private fun assertSaksbehandler(forventetAntall: Int, oid: UUID, navn: String, epost: String, ident: String) {
         @Language("PostgreSQL")
         val query = """
            SELECT COUNT(1) FROM saksbehandler WHERE oid = ? AND navn = ? AND epost = ? AND ident = ?
@@ -27,6 +35,6 @@ internal class SaksbehandlerDaoTest: DatabaseIntegrationTest() {
         val funnet = sessionOf(dataSource).use {
             it.run(queryOf(query, oid, navn, epost, ident).map { it.int(1) }.asSingle)
         }
-        assertEquals(1, funnet)
+        assertEquals(forventetAntall, funnet)
     }
 }
