@@ -14,8 +14,6 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload.Companion.lagre
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
-import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
-import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.tildeling.Oppgavehåndterer
@@ -120,18 +118,18 @@ internal class OppgaveMediator(
         contextId: UUID,
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
-        navn: Oppgavetype,
+        egenskap: String,
         hendelseId: UUID
     ) {
         if (oppgaveDao.harGyldigOppgave(utbetalingId)) return
-        oppgaveDao.opprettOppgave(id, contextId, navn, vedtaksperiodeId, utbetalingId)
+        oppgaveDao.opprettOppgave(id, contextId, egenskap, vedtaksperiodeId, utbetalingId)
         oppgaverForPublisering[id] = "oppgave_opprettet"
         GodkjenningsbehovPayload(hendelseId).lagre(opptegnelseDao, oppgaveDao.finnFødselsnummer(id))
     }
 
     fun oppdater(
         oppgaveId: Long,
-        status: Oppgavestatus,
+        status: String,
         ferdigstiltAvIdent: String?,
         ferdigstiltAvOid: UUID?
     ) {

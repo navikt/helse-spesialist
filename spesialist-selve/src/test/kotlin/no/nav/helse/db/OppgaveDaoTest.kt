@@ -10,9 +10,6 @@ import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.TestHendelse
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker
-import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
-import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
-import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.Ferdigstilt
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
@@ -43,7 +40,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettArbeidsgiver()
         opprettGenerasjon()
         opprettVedtaksperiode()
-        opprettOppgave(oppgavetype = Oppgavetype.SØKNAD, hendelseId = hendelseId, contextId = contextId)
+        opprettOppgave(oppgavetype = "SØKNAD", hendelseId = hendelseId, contextId = contextId)
         opprettUtbetalingKobling(VEDTAKSPERIODE, UTBETALING_ID)
 
         val oppgaveId = oppgaveDao.finnOppgaveId(UTBETALING_ID)
@@ -51,7 +48,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         val forventetOppgavemleding = Oppgavemelder.Oppgavemelding(
             hendelseId = hendelseId,
             oppgaveId = oppgaveId,
-            status = AvventerSaksbehandler.toString(),
+            status = "AvventerSaksbehandler",
             type = Oppgavetype.SØKNAD.toString(),
             beslutter = null,
             erRetur = false,
@@ -94,11 +91,11 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettPerson(adressebeskyttelse = Adressebeskyttelse.Fortrolig)
         opprettArbeidsgiver()
         opprettVedtaksperiode()
-        opprettOppgave(contextId = CONTEXT_ID, oppgavetype = Oppgavetype.FORTROLIG_ADRESSE)
+        opprettOppgave(contextId = CONTEXT_ID, oppgavetype = "FORTROLIG_ADRESSE")
         assertEquals(1, oppgave().size)
         oppgave().first().assertEquals(
             LocalDate.now(),
-            Oppgavetype.FORTROLIG_ADRESSE,
+            "FORTROLIG_ADRESSE",
             OPPGAVESTATUS,
             null,
             null,
@@ -151,8 +148,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         assertEquals(
             OppgaveFraDatabase(
                 id = oppgaveId,
-                type = OPPGAVETYPE.toString(),
-                status = AvventerSaksbehandler.toString(),
+                type = OPPGAVETYPE,
+                status = "AvventerSaksbehandler",
                 vedtaksperiodeId = VEDTAKSPERIODE,
                 utbetalingId = UTBETALING_ID,
                 hendelseId = hendelseId
@@ -169,7 +166,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `oppdatere oppgave`() {
-        val nyStatus = Ferdigstilt
+        val nyStatus = "Ferdigstilt"
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode()
@@ -190,20 +187,20 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `sjekker om det fins aktiv oppgave`() {
         nyPerson()
-        oppgaveDao.updateOppgave(oppgaveId, AvventerSaksbehandler, null, null)
+        oppgaveDao.updateOppgave(oppgaveId, "AvventerSaksbehandler", null, null)
         assertTrue(oppgaveDao.venterPåSaksbehandler(oppgaveId))
 
-        oppgaveDao.updateOppgave(oppgaveId, Ferdigstilt, null, null)
+        oppgaveDao.updateOppgave(oppgaveId, "Ferdigstilt", null, null)
         assertFalse(oppgaveDao.venterPåSaksbehandler(oppgaveId))
     }
 
     @Test
     fun `sjekker om det fins aktiv oppgave med to oppgaver`() {
         nyPerson()
-        oppgaveDao.updateOppgave(oppgaveId, AvventerSaksbehandler)
+        oppgaveDao.updateOppgave(oppgaveId, "AvventerSaksbehandler")
 
         opprettOppgave(vedtaksperiodeId = VEDTAKSPERIODE)
-        oppgaveDao.updateOppgave(oppgaveId, AvventerSaksbehandler)
+        oppgaveDao.updateOppgave(oppgaveId, "AvventerSaksbehandler")
 
         assertTrue(oppgaveDao.harGyldigOppgave(UTBETALING_ID))
     }
@@ -211,7 +208,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `sjekker at det ikke fins ferdigstilt oppgave`() {
         nyPerson()
-        oppgaveDao.updateOppgave(oppgaveId, AvventerSaksbehandler)
+        oppgaveDao.updateOppgave(oppgaveId, "AvventerSaksbehandler")
 
         assertFalse(oppgaveDao.harFerdigstiltOppgave(VEDTAKSPERIODE))
     }
@@ -219,8 +216,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `sjekker at det fins ferdigstilt oppgave`() {
         nyPerson()
-        oppgaveDao.updateOppgave(oppgaveId, Ferdigstilt)
-        oppgaveDao.updateOppgave(2L, AvventerSaksbehandler)
+        oppgaveDao.updateOppgave(oppgaveId, "Ferdigstilt")
+        oppgaveDao.updateOppgave(2L, "AvventerSaksbehandler")
 
         assertTrue(oppgaveDao.harFerdigstiltOppgave(VEDTAKSPERIODE))
     }
@@ -260,7 +257,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode()
-        opprettOppgave(contextId = CONTEXT_ID, oppgavetype = Oppgavetype.RISK_QA)
+        opprettOppgave(contextId = CONTEXT_ID, oppgavetype = "RISK_QA")
 
         assertTrue(oppgaveDao.erRiskoppgave(oppgaveId))
     }
@@ -300,15 +297,15 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
 
     private fun oppgave() =
         sessionOf(dataSource).use {
-            it.run(queryOf("SELECT * FROM oppgave ORDER BY id DESC").map {
+            it.run(queryOf("SELECT * FROM oppgave ORDER BY id DESC").map { row ->
                 OppgaveAssertions(
-                    oppdatert = it.localDate("oppdatert"),
-                    type = enumValueOf(it.string("type")),
-                    status = enumValueOf(it.string("status")),
-                    ferdigstiltAv = it.stringOrNull("ferdigstilt_av"),
-                    ferdigstiltAvOid = it.stringOrNull("ferdigstilt_av_oid")?.let(UUID::fromString),
-                    vedtakRef = it.longOrNull("vedtak_ref"),
-                    commandContextId = it.stringOrNull("command_context_id")?.let(UUID::fromString)
+                    oppdatert = row.localDate("oppdatert"),
+                    type = row.string("type"),
+                    status = row.string("status"),
+                    ferdigstiltAv = row.stringOrNull("ferdigstilt_av"),
+                    ferdigstiltAvOid = row.stringOrNull("ferdigstilt_av_oid")?.let(UUID::fromString),
+                    vedtakRef = row.longOrNull("vedtak_ref"),
+                    commandContextId = row.stringOrNull("command_context_id")?.let(UUID::fromString)
                 )
             }.asList)
         }
@@ -318,7 +315,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         oppgavetype: Oppgavetype,
         vedtakRef: Long? = null,
         utbetalingId: UUID,
-        status: Oppgavestatus = AvventerSaksbehandler,
+        status: String = "AvventerSaksbehandler",
         mottaker: Mottaker? = null,
     ) = requireNotNull(sessionOf(dataSource, returnGeneratedKey = true).use {
         it.run(
@@ -328,7 +325,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
                 VALUES (now(), CAST(? as oppgavetype), CAST(? as oppgavestatus), ?, ?, ?, ?, ?, CAST(? as mottakertype));
             """,
                 oppgavetype.name,
-                status.name,
+                status,
                 null,
                 null,
                 vedtakRef,
@@ -341,8 +338,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
 
     private class OppgaveAssertions(
         private val oppdatert: LocalDate,
-        private val type: Oppgavetype,
-        private val status: Oppgavestatus,
+        private val type: String,
+        private val status: String,
         private val ferdigstiltAv: String?,
         private val ferdigstiltAvOid: UUID?,
         private val vedtakRef: Long?,
@@ -350,8 +347,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     ) {
         fun assertEquals(
             forventetOppdatert: LocalDate,
-            forventetType: Oppgavetype,
-            forventetStatus: Oppgavestatus,
+            forventetType: String,
+            forventetStatus: String,
             forventetFerdigstilAv: String?,
             forventetFerdigstilAvOid: UUID?,
             forventetVedtakRef: Long?,

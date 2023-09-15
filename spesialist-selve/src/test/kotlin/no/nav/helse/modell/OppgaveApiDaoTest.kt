@@ -15,8 +15,6 @@ import no.nav.helse.spesialist.api.graphql.schema.Mottaker.BEGGE
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker.SYKMELDT
 import no.nav.helse.spesialist.api.graphql.schema.Oppgavetype.RISK_QA
 import no.nav.helse.spesialist.api.graphql.schema.Periodetype.FORSTEGANGSBEHANDLING
-import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
-import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -44,17 +42,17 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
     fun `finner oppgavetype`() {
         nyPerson()
         val type = oppgaveApiDao.finnOppgavetype(VEDTAKSPERIODE)
-        assertEquals(OPPGAVETYPE, type)
+        assertEquals(OPPGAVETYPE, type.toString())
     }
 
     @Test
     fun `finner oppgavetype når det fins flere oppgaver for en vedtaksperiode`() {
         nyPerson()
-        oppgaveDao.updateOppgave(oppgaveId, Oppgavestatus.Invalidert)
+        oppgaveDao.updateOppgave(oppgaveId, "Invalidert")
         opprettOppgave(utbetalingId = UUID.randomUUID())
 
         val type = oppgaveApiDao.finnOppgavetype(VEDTAKSPERIODE)
-        assertEquals(OPPGAVETYPE, type)
+        assertEquals(OPPGAVETYPE, type.toString())
     }
 
     @Test
@@ -132,7 +130,7 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
         opprettArbeidsgiver()
         opprettGenerasjon()
         opprettVedtaksperiode()
-        opprettOppgave(vedtaksperiodeId = VEDTAKSPERIODE, oppgavetype = Oppgavetype.RISK_QA)
+        opprettOppgave(vedtaksperiodeId = VEDTAKSPERIODE, oppgavetype = "RISK_QA")
 
         val oppgaver = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_RISK)
         assertTrue(oppgaver.isNotEmpty())
@@ -170,7 +168,7 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode()
-        opprettOppgave(oppgavetype = Oppgavetype.STIKKPRØVE)
+        opprettOppgave(oppgavetype = "STIKKPRØVE")
 
         val oppgaver = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN)
         assertTrue(oppgaver.isEmpty())
@@ -182,7 +180,7 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
         opprettArbeidsgiver()
         opprettGenerasjon()
         opprettVedtaksperiode()
-        opprettOppgave(oppgavetype = Oppgavetype.STIKKPRØVE)
+        opprettOppgave(oppgavetype = "STIKKPRØVE")
 
         val oppgaver = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_STIKKPRØVE)
         assertTrue(oppgaver.isNotEmpty())

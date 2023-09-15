@@ -24,7 +24,7 @@ class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
             contextId = contextId,
             vedtaksperiodeId = oppgave.vedtaksperiodeId,
             utbetalingId = oppgave.utbetalingId,
-            navn = enumValueOf(oppgave.type),
+            egenskap = oppgave.type,
             hendelseId = oppgave.hendelseId
         )
         if (oppgave.tildelt != null) tildelingDao.tildel(oppgave.id, oppgave.tildelt.oid, oppgave.påVent)
@@ -38,7 +38,7 @@ class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
         val oppgave = oppgaveForLagring
         oppgaveMediator.oppdater(
             oppgaveId = oppgave.id,
-            status = enumValueOf(oppgave.status),
+            status = oppgave.status,
             ferdigstiltAvIdent = oppgave.ferdigstiltAvIdent,
             ferdigstiltAvOid = oppgave.ferdigstiltAvOid
         )

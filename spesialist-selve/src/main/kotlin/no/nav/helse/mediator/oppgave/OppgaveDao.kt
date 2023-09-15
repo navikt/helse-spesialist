@@ -9,9 +9,6 @@ import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommandData
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker
-import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
-import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
-import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 
 interface OppgaveRepository {
     fun finnOppgave(id: Long): OppgaveFraDatabase?
@@ -207,7 +204,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
         }
     }
 
-    fun opprettOppgave(id: Long, commandContextId: UUID, oppgavetype: Oppgavetype, vedtaksperiodeId: UUID, utbetalingId: UUID) =
+    fun opprettOppgave(id: Long, commandContextId: UUID, egenskap: String, vedtaksperiodeId: UUID, utbetalingId: UUID) =
         requireNotNull(run {
             val vedtakRef = vedtakRef(vedtaksperiodeId)
 
@@ -220,8 +217,8 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                     VALUES (:id, now(), CAST(:oppgavetype as oppgavetype), CAST(:oppgavestatus as oppgavestatus), :ferdigstiltAv, :ferdigstiltAvOid, :vedtakRef, :commandContextId, :utbetalingId, CAST(:mottaker as mottakertype));
                 """, mapOf(
                     "id" to id,
-                    "oppgavetype" to oppgavetype.name,
-                    "oppgavestatus" to AvventerSaksbehandler.name,
+                    "oppgavetype" to egenskap,
+                    "oppgavestatus" to "AvventerSaksbehandler",
                     "ferdigstiltAv" to null,
                     "ferdigstiltAvOid" to null,
                     "vedtakRef" to vedtakRef,
@@ -239,7 +236,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
 
     fun updateOppgave(
         oppgaveId: Long,
-        oppgavestatus: Oppgavestatus,
+        oppgavestatus: String,
         ferdigstiltAv: String? = null,
         oid: UUID? = null,
     ) = asSQL(
@@ -250,7 +247,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
         """, mapOf(
             "ferdigstiltAv" to ferdigstiltAv,
             "oid" to oid,
-            "oppgavestatus" to oppgavestatus.name,
+            "oppgavestatus" to oppgavestatus,
             "oppgaveId" to oppgaveId
         )
     ).update()

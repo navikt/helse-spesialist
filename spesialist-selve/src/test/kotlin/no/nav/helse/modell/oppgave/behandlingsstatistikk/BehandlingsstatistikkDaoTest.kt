@@ -6,7 +6,6 @@ import java.time.LocalDateTime
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.vedtaksperiode.Mottakertype
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -79,7 +78,7 @@ internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
     @Test
     fun antallManuelleGodkjenninger() {
         nyPerson()
-        oppgaveDao.updateOppgave(oppgaveId, Oppgavestatus.Ferdigstilt)
+        oppgaveDao.updateOppgave(oppgaveId, "Ferdigstilt")
         assertTrue(behandlingsstatistikkDao.getManueltUtførteOppgaverPerInntektOgPeriodetype(NOW).perMottakertype.isEmpty())
         val dto = behandlingsstatistikkDao.oppgavestatistikk(NOW)
         assertEquals(1, dto.fullførteBehandlinger.totalt)

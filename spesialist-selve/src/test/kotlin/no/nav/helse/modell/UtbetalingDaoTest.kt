@@ -9,7 +9,6 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.ANNULLERT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
@@ -63,7 +62,7 @@ class UtbetalingDaoTest : DatabaseIntegrationTest() {
         val arbeidsgiveroppdragId1 = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
         val personOppdragId1 = lagPersonoppdrag(personFagsystemId)
         val utbetalingId = UUID.randomUUID()
-        val oppgaveId = oppgaveDao.opprettOppgave(nextLong(), UUID.randomUUID(), Oppgavetype.SØKNAD, VEDTAKSPERIODE, utbetalingId)
+        val oppgaveId = oppgaveDao.opprettOppgave(nextLong(), UUID.randomUUID(), "SØKNAD", VEDTAKSPERIODE, utbetalingId)
         utbetalingDao.opprettUtbetalingId(utbetalingId, FNR, ORGNUMMER, Utbetalingtype.UTBETALING, LocalDateTime.now(), arbeidsgiveroppdragId1, personOppdragId1, 2000, 2000)
 
         val utbetaling = utbetalingDao.utbetalingFor(oppgaveId)

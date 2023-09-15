@@ -6,7 +6,6 @@ import no.nav.helse.db.TotrinnsvurderingRepository
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
-import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 
 class Oppgavehenter(
@@ -22,7 +21,7 @@ class Oppgavehenter(
         return Oppgave(
             id = oppgave.id,
             type = enumValueOf<Oppgavetype>(oppgave.type),
-            tilstand = tilstand(enumValueOf<Oppgavestatus>(oppgave.status)),
+            tilstand = tilstand(oppgave.status),
             vedtaksperiodeId = oppgave.vedtaksperiodeId,
             utbetalingId = oppgave.utbetalingId,
             hendelseId = oppgave.hendelseId,
@@ -46,12 +45,13 @@ class Oppgavehenter(
         )
     }
 
-    private fun tilstand(oppgavestatus: Oppgavestatus): Oppgave.Tilstand {
+    private fun tilstand(oppgavestatus: String): Oppgave.Tilstand {
         return when (oppgavestatus) {
-            Oppgavestatus.AvventerSaksbehandler -> Oppgave.AvventerSaksbehandler
-            Oppgavestatus.AvventerSystem -> Oppgave.AvventerSystem
-            Oppgavestatus.Ferdigstilt -> Oppgave.Ferdigstilt
-            Oppgavestatus.Invalidert -> Oppgave.Invalidert
+            "AvventerSaksbehandler" -> Oppgave.AvventerSaksbehandler
+            "AvventerSystem" -> Oppgave.AvventerSystem
+            "Ferdigstilt" -> Oppgave.Ferdigstilt
+            "Invalidert" -> Oppgave.Invalidert
+            else -> throw IllegalStateException("Oppgavestatus $oppgavestatus er ikke en gyldig status")
         }
     }
 

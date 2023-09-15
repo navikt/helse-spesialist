@@ -46,8 +46,6 @@ import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
-import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
-import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
@@ -83,8 +81,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
         internal var OPPGAVE_ID = nextLong()
             private set
-        internal val OPPGAVETYPE = Oppgavetype.SØKNAD
-        internal val OPPGAVESTATUS = Oppgavestatus.AvventerSaksbehandler
+        internal const val OPPGAVETYPE = "SØKNAD"
+        internal const val OPPGAVESTATUS = "AvventerSaksbehandler"
 
         internal const val ORGNUMMER = "123456789"
         internal const val ORGNAVN = "NAVN AS"
@@ -375,7 +373,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected fun opprettOppgave(
         contextId: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
-        oppgavetype: Oppgavetype = OPPGAVETYPE,
+        oppgavetype: String = OPPGAVETYPE,
         utbetalingId: UUID = UTBETALING_ID,
         hendelseId: UUID = UUID.randomUUID()
     ) {
@@ -391,7 +389,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     }
 
     protected fun ferdigstillSistOpprettedeOppgaveOgOpprettNy() {
-        oppgaveDao.updateOppgave(oppgaveId = oppgaveId, oppgavestatus = Oppgavestatus.Ferdigstilt)
+        oppgaveDao.updateOppgave(oppgaveId = oppgaveId, oppgavestatus = "Ferdigstilt")
         opprettOppgave()
     }
 

@@ -5,7 +5,6 @@ import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.db.TildelingDao
-import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
@@ -107,7 +106,7 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
         opprettArbeidsgiver()
         opprettVedtaksperiode()
         opprettOppgave()
-        oppgaveDao.updateOppgave(oppgaveId, Oppgavestatus.Ferdigstilt, SAKSBEHANDLEREPOST, SAKSBEHANDLER_OID)
+        oppgaveDao.updateOppgave(oppgaveId, "Ferdigstilt", SAKSBEHANDLEREPOST, SAKSBEHANDLER_OID)
         tildelTilSaksbehandler()
         val saksbehandlerepost = tildelingDao.tildelingForPerson(FNR)
         assertNull(saksbehandlerepost)

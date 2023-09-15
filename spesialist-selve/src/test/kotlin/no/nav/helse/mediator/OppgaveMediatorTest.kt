@@ -51,7 +51,7 @@ internal class OppgaveMediatorTest {
         private val SAKSBEHANDLEROID = UUID.randomUUID()
         private const val SAKSBEHANDLEREPOST = "saksbehandler@nav.no"
         private const val SAKSBEHANDLERNAVN = "Hen Saksbehandler"
-        private val OPPGAVETYPE_SØKNAD = SØKNAD
+        private const val OPPGAVETYPE_SØKNAD = "SØKNAD"
     }
 
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
