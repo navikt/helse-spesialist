@@ -12,6 +12,7 @@ import no.nav.helse.spesialist.api.modell.OverstyrtTidslinjeEvent
 
 class OverstyrtTidslinje(
     private val id: UUID = UUID.randomUUID(),
+    private val vedtaksperiodeId: UUID,
     private val aktørId: String,
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
@@ -41,7 +42,13 @@ class OverstyrtTidslinje(
     )
 
     internal fun byggSubsumsjoner(oid: UUID): List<Subsumsjon> {
-        return dager.byggSubsumsjoner(fødselsnummer, organisasjonsnummer, begrunnelse, oid)
+        return dager.byggSubsumsjoner(
+            vedtaksperiodeId = vedtaksperiodeId,
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+            begrunnelse = begrunnelse,
+            oid = oid
+        )
     }
 }
 
@@ -56,6 +63,7 @@ class OverstyrtTidslinjedag(
 
     internal companion object {
         internal fun List<OverstyrtTidslinjedag>.byggSubsumsjoner(
+            vedtaksperiodeId: UUID,
             fødselsnummer: String,
             organisasjonsnummer: String,
             begrunnelse: String,
@@ -83,7 +91,7 @@ class OverstyrtTidslinjedag(
                         }
                     ),
                     sporing = Sporing(
-                        vedtaksperioder = emptyList(),
+                        vedtaksperioder = listOf(vedtaksperiodeId),
                         organisasjonsnummer = listOf(organisasjonsnummer),
                         saksbehandler = oid
                     )

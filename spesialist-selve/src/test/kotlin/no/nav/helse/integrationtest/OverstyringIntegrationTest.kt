@@ -40,6 +40,7 @@ internal class OverstyringIntegrationTest : AbstractE2ETest() {
         settOppBruker()
         assertOppgaver(1)
         val overstyring = OverstyrTidslinjeHandlingFraApi(
+            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = ORGNR,
             fødselsnummer = FØDSELSNUMMER,
             aktørId = AKTØR,

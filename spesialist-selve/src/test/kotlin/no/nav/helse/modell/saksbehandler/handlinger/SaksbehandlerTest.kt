@@ -26,11 +26,12 @@ internal class SaksbehandlerTest {
         saksbehandler.register(observer)
         saksbehandler.håndter(
             OverstyrtTidslinje(
+                vedtaksperiodeId = UUID.randomUUID(),
                 aktørId = "123",
                 fødselsnummer = "1234",
                 organisasjonsnummer = "12345",
                 dager = emptyList(),
-                begrunnelse = "begrunnelse"
+                begrunnelse = "begrunnelse",
             )
         )
         assertEquals(true, observert)
@@ -46,14 +47,16 @@ internal class SaksbehandlerTest {
         }
 
         val saksbehandler = Saksbehandler("epost@nav.no", UUID.randomUUID(), "navn", "Z999999")
+        val vedtaksperiodeId = UUID.randomUUID()
         saksbehandler.register(observer)
         saksbehandler.håndter(
             OverstyrtTidslinje(
+                vedtaksperiodeId = vedtaksperiodeId,
                 aktørId = "123",
                 fødselsnummer = "1234",
                 organisasjonsnummer = "12345",
                 dager = overstyrteDager(),
-                begrunnelse = "begrunnelse"
+                begrunnelse = "begrunnelse",
             )
         )
 
@@ -87,7 +90,7 @@ internal class SaksbehandlerTest {
                     )
                 ),
                 input = mapOf("begrunnelseFraSaksbehandler" to "begrunnelse"),
-                sporing = mapOf("organisasjonsnummer" to listOf("12345"), "vedtaksperiode" to emptyList()),
+                sporing = mapOf("organisasjonsnummer" to listOf("12345"), "vedtaksperiode" to listOf(vedtaksperiodeId.toString())),
                 tidsstempel = subsumsjoner[0].tidsstempel,
                 kilde = "spesialist",
             ),
@@ -115,7 +118,7 @@ internal class SaksbehandlerTest {
                     )
                 ),
                 input = mapOf("begrunnelseFraSaksbehandler" to "begrunnelse"),
-                sporing = mapOf("organisasjonsnummer" to listOf("12345"), "vedtaksperiode" to emptyList()),
+                sporing = mapOf("organisasjonsnummer" to listOf("12345"), "vedtaksperiode" to listOf(vedtaksperiodeId.toString())),
                 tidsstempel = subsumsjoner[1].tidsstempel,
                 kilde = "spesialist",
             ),

@@ -6,6 +6,7 @@ import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import java.time.LocalDate
+import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
@@ -30,6 +31,7 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
         val saksbehandler: Lazy<SaksbehandlerFraApi> = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
         try {
             val handling = OverstyrTidslinjeHandlingFraApi(
+                vedtaksperiodeId = UUID.fromString(overstyring.vedtaksperiodeId),
                 organisasjonsnummer = overstyring.organisasjonsnummer,
                 fødselsnummer = overstyring.fodselsnummer,
                 aktørId = overstyring.aktorId,

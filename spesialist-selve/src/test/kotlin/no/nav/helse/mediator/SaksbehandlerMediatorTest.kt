@@ -210,6 +210,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
     fun `håndterer overstyring av tidslinje`() {
         nyPerson(fødselsnummer = FØDSELSNUMMER, organisasjonsnummer = ORGANISASJONSNUMMER, aktørId = AKTØR_ID)
         val overstyring = OverstyrTidslinjeHandlingFraApi(
+            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = ORGANISASJONSNUMMER,
             fødselsnummer = FØDSELSNUMMER,
             aktørId = AKTØR_ID,

@@ -21,6 +21,7 @@ internal class OverstyringApiTest: AbstractE2ETest() {
     @Test
     fun `overstyr tidslinje`() {
         val overstyring = OverstyrTidslinjeHandlingFraApi(
+            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = ORGANISASJONSNUMMER,
             fødselsnummer = FØDSELSNUMMER,
             aktørId = AKTØR_ID,
@@ -38,6 +39,7 @@ internal class OverstyringApiTest: AbstractE2ETest() {
     @Test
     fun `overstyr tidslinje til arbeidsdag`() {
         val overstyring = OverstyrTidslinjeHandlingFraApi(
+            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = ORGANISASJONSNUMMER,
             fødselsnummer = FØDSELSNUMMER,
             aktørId = AKTØR_ID,
@@ -55,6 +57,7 @@ internal class OverstyringApiTest: AbstractE2ETest() {
     @Test
     fun `overstyr tidslinje fra arbeidsdag`() {
         val overstyring = OverstyrTidslinjeHandlingFraApi(
+            vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = ORGANISASJONSNUMMER,
             fødselsnummer = FØDSELSNUMMER,
             aktørId = AKTØR_ID,

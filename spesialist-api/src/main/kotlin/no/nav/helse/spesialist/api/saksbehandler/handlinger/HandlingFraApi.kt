@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.api.saksbehandler.handlinger
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import java.time.LocalDate
+import java.util.UUID
 
 sealed interface HandlingFraApi {
     fun loggnavn(): String
@@ -9,6 +10,7 @@ sealed interface HandlingFraApi {
 
 @JsonIgnoreProperties
 class OverstyrTidslinjeHandlingFraApi(
+    val vedtaksperiodeId: UUID,
     val organisasjonsnummer: String,
     val fødselsnummer: String,
     val aktørId: String,

@@ -266,6 +266,7 @@ class SaksbehandlerMediator(
 
     private fun OverstyrTidslinjeHandlingFraApi.tilHandling(): OverstyrtTidslinje {
         return OverstyrtTidslinje(
+            vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
