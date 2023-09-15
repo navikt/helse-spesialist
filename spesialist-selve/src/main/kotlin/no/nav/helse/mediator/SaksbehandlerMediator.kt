@@ -6,6 +6,7 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.overstyring.Overstyringlagrer
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.saksbehandler.Saksbehandler
+import no.nav.helse.modell.saksbehandler.SaksbehandlerObserver
 import no.nav.helse.modell.saksbehandler.handlinger.Annullering
 import no.nav.helse.modell.saksbehandler.handlinger.Handling
 import no.nav.helse.modell.saksbehandler.handlinger.Lovhjemmel
@@ -29,7 +30,6 @@ import no.nav.helse.spesialist.api.modell.AnnullertUtbetalingEvent
 import no.nav.helse.spesialist.api.modell.OverstyrtArbeidsforholdEvent
 import no.nav.helse.spesialist.api.modell.OverstyrtInntektOgRefusjonEvent
 import no.nav.helse.spesialist.api.modell.OverstyrtTidslinjeEvent
-import no.nav.helse.spesialist.api.modell.SaksbehandlerObserver
 import no.nav.helse.spesialist.api.modell.SkjønnsfastsattSykepengegrunnlagEvent
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao

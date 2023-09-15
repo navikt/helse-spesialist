@@ -4,14 +4,6 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.rapids_rivers.JsonMessage
 
-interface SaksbehandlerObserver {
-    fun tidslinjeOverstyrt(fødselsnummer: String, event: OverstyrtTidslinjeEvent) {}
-    fun inntektOgRefusjonOverstyrt(fødselsnummer: String, event: OverstyrtInntektOgRefusjonEvent) {}
-    fun arbeidsforholdOverstyrt(fødselsnummer: String, event: OverstyrtArbeidsforholdEvent) {}
-    fun sykepengegrunnlagSkjønnsfastsatt(fødselsnummer: String, event: SkjønnsfastsattSykepengegrunnlagEvent) {}
-    fun utbetalingAnnullert(fødselsnummer: String, event: AnnullertUtbetalingEvent) {}
-}
-
 data class OverstyrtInntektOgRefusjonEvent(
     val fødselsnummer: String,
     val aktørId: String,

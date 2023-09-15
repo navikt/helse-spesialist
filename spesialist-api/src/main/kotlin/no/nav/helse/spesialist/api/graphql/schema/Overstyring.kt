@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
 data class TidslinjeOverstyring (
-    val vedtaksperiodeId: String?,
+    val vedtaksperiodeId: String,
     val organisasjonsnummer: String,
     val fodselsnummer: String,
     val aktorId: String,

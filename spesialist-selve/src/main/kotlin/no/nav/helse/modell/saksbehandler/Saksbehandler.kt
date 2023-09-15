@@ -6,7 +6,6 @@ import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtInntektOgRefusjon
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinje
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
-import no.nav.helse.spesialist.api.modell.SaksbehandlerObserver
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 
@@ -31,6 +30,10 @@ class Saksbehandler(
 
     internal fun håndter(hendelse: OverstyrtTidslinje) {
         val event = hendelse.byggEvent()
+        val subsumsjoner = hendelse.byggSubsumsjoner(this.oid).map { it.byggEvent() }
+        subsumsjoner.forEach { subsumsjonEvent ->
+            observers.forEach { it.nySubsumsjon(subsumsjonEvent.fødselsnummer, subsumsjonEvent) }
+        }
         observers.forEach { it.tidslinjeOverstyrt(event.fødselsnummer, event) }
     }
 
