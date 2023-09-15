@@ -8,6 +8,7 @@ import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.handlinger.Annullering
 import no.nav.helse.modell.saksbehandler.handlinger.Handling
+import no.nav.helse.modell.saksbehandler.handlinger.Lovhjemmel
 import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsgiver
@@ -16,7 +17,6 @@ import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinje
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinjedag
 import no.nav.helse.modell.saksbehandler.handlinger.Refusjonselement
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
-import no.nav.helse.modell.saksbehandler.handlinger.Subsumsjon
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.withMDC
@@ -256,8 +256,8 @@ class SaksbehandlerMediator(
                     },
                     begrunnelse = overstyrArbeidsgiver.begrunnelse,
                     forklaring = overstyrArbeidsgiver.forklaring,
-                    subsumsjon = overstyrArbeidsgiver.subsumsjon?.let {
-                        Subsumsjon(it.paragraf, it.ledd, it.bokstav)
+                    lovhjemmel = overstyrArbeidsgiver.subsumsjon?.let {
+                        Lovhjemmel(it.paragraf, it.ledd, it.bokstav)
                     }
                 )
             },
@@ -277,7 +277,7 @@ class SaksbehandlerMediator(
                     it.grad,
                     it.fraGrad,
                     it.subsumsjon?.let { subsumsjon ->
-                        Subsumsjon(
+                        Lovhjemmel(
                             paragraf = subsumsjon.paragraf,
                             ledd = subsumsjon.ledd,
                             bokstav = subsumsjon.bokstav
@@ -307,8 +307,8 @@ class SaksbehandlerMediator(
                     begrunnelseMal = arbeidsgiverDto.begrunnelseMal,
                     begrunnelseFritekst = arbeidsgiverDto.begrunnelseFritekst,
                     begrunnelseKonklusjon = arbeidsgiverDto.begrunnelseKonklusjon,
-                    subsumsjon = arbeidsgiverDto.subsumsjon?.let {
-                        Subsumsjon(it.paragraf, it.ledd, it.bokstav)
+                    lovhjemmel = arbeidsgiverDto.subsumsjon?.let {
+                        Lovhjemmel(it.paragraf, it.ledd, it.bokstav)
                     },
                     initierendeVedtaksperiodeId = arbeidsgiverDto.initierendeVedtaksperiodeId
                 )

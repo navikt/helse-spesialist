@@ -37,7 +37,7 @@ class OverstyrtArbeidsgiver(
     private val fraRefusjonsopplysninger: List<Refusjonselement>?,
     private val begrunnelse: String,
     private val forklaring: String,
-    private val subsumsjon: Subsumsjon?,
+    private val lovhjemmel: Lovhjemmel?,
 ) {
     fun byggEvent() = OverstyrtInntektOgRefusjonEvent.OverstyrtArbeidsgiver(
         organisasjonsnummer,
@@ -47,7 +47,7 @@ class OverstyrtArbeidsgiver(
         fraRefusjonsopplysninger = fraRefusjonsopplysninger?.map(Refusjonselement::byggEvent),
         begrunnelse = begrunnelse,
         forklaring = forklaring,
-        subsumsjon = subsumsjon?.byggEvent()
+        subsumsjon = lovhjemmel?.byggEvent()
     )
 }
 

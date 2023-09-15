@@ -44,7 +44,7 @@ data class OverstyrtInntektOgRefusjonEvent(
         val fraRefusjonsopplysninger: List<OverstyrtRefusjonselement>?,
         val begrunnelse: String,
         val forklaring: String,
-        val subsumsjon: SubsumsjonEvent?,
+        val subsumsjon: LovhjemmelEvent?,
     ) {
         data class OverstyrtRefusjonselement(
             val fom: LocalDate,
@@ -54,7 +54,7 @@ data class OverstyrtInntektOgRefusjonEvent(
     }
 }
 
-data class SubsumsjonEvent(
+data class LovhjemmelEvent(
     val paragraf: String,
     val ledd: String? = null,
     val bokstav: String? = null,
@@ -155,7 +155,7 @@ data class SkjønnsfastsattSykepengegrunnlagEvent(
         val begrunnelseMal: String?,
         val begrunnelseFritekst: String?,
         val begrunnelseKonklusjon: String?,
-        val subsumsjon: SubsumsjonEvent?,
+        val subsumsjon: LovhjemmelEvent?,
         val initierendeVedtaksperiodeId: String?,
     )
 }

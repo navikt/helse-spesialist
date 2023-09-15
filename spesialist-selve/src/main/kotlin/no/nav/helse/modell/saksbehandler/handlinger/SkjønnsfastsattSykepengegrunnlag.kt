@@ -37,7 +37,7 @@ class SkjønnsfastsattSykepengegrunnlag(
         private val begrunnelseMal: String?,
         private val begrunnelseFritekst: String?,
         private val begrunnelseKonklusjon: String?,
-        private val subsumsjon: Subsumsjon?,
+        private val lovhjemmel: Lovhjemmel?,
         private val initierendeVedtaksperiodeId: String?,
     ) {
         fun byggEvent(): SkjønnsfastsattSykepengegrunnlagEvent.SkjønnsfastsattArbeidsgiver {
@@ -54,7 +54,7 @@ class SkjønnsfastsattSykepengegrunnlag(
                 begrunnelseMal = begrunnelseMal,
                 begrunnelseFritekst = begrunnelseFritekst,
                 begrunnelseKonklusjon = begrunnelseKonklusjon,
-                subsumsjon = subsumsjon?.byggEvent(),
+                subsumsjon = lovhjemmel?.byggEvent(),
                 initierendeVedtaksperiodeId = initierendeVedtaksperiodeId
             )
         }

@@ -8,8 +8,8 @@ import no.nav.helse.db.SubsumsjonForDatabase
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinje
+import no.nav.helse.modell.saksbehandler.handlinger.dto.LovhjemmelDto
 import no.nav.helse.modell.saksbehandler.handlinger.dto.OverstyrtTidslinjeDto
-import no.nav.helse.modell.saksbehandler.handlinger.dto.SubsumsjonDto
 
 class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
     internal fun lagre(overstyring: Overstyring, saksbehandlerOid: UUID) {
@@ -41,5 +41,5 @@ class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
         opprettet = LocalDateTime.now(),
     )
 
-    private fun SubsumsjonDto.tilDatabase() = SubsumsjonForDatabase(paragraf = paragraf, ledd = ledd, bokstav = bokstav)
+    private fun LovhjemmelDto.tilDatabase() = SubsumsjonForDatabase(paragraf = paragraf, ledd = ledd, bokstav = bokstav)
 }

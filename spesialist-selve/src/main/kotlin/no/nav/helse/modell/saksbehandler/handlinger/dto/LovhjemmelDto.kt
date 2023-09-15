@@ -1,6 +1,6 @@
 package no.nav.helse.modell.saksbehandler.handlinger.dto
 
-data class SubsumsjonDto(
+data class LovhjemmelDto(
     val paragraf: String,
     val ledd: String?,
     val bokstav: String?,
