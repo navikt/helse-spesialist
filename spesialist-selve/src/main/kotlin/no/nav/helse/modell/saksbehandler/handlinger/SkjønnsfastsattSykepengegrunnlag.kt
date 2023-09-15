@@ -3,7 +3,7 @@ package no.nav.helse.modell.saksbehandler.handlinger
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.modell.saksbehandler.Saksbehandler
-import no.nav.helse.spesialist.api.modell.SkjønnsfastsattSykepengegrunnlagEvent
+import no.nav.helse.modell.saksbehandler.SkjønnsfastsattSykepengegrunnlagEvent
 
 class SkjønnsfastsattSykepengegrunnlag(
     private val aktørId: String,

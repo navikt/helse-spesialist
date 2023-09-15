@@ -1,7 +1,7 @@
 package no.nav.helse.modell.saksbehandler.handlinger
 
+import no.nav.helse.modell.saksbehandler.LovhjemmelEvent
 import no.nav.helse.modell.saksbehandler.handlinger.dto.LovhjemmelDto
-import no.nav.helse.spesialist.api.modell.LovhjemmelEvent
 
 data class Lovhjemmel(
     private val paragraf: String,

@@ -1,8 +1,8 @@
 package no.nav.helse.modell.saksbehandler.handlinger
 
 import java.util.UUID
+import no.nav.helse.modell.saksbehandler.AnnullertUtbetalingEvent
 import no.nav.helse.modell.saksbehandler.Saksbehandler
-import no.nav.helse.spesialist.api.modell.AnnullertUtbetalingEvent
 
 class Annullering(
     private val aktørId: String,

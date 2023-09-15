@@ -2,13 +2,13 @@ package no.nav.helse.modell.saksbehandler.handlinger
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.modell.saksbehandler.OverstyrtTidslinjeEvent
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinjedag.Companion.byggSubsumsjoner
 import no.nav.helse.modell.saksbehandler.handlinger.Subsumsjon.Sporing
 import no.nav.helse.modell.saksbehandler.handlinger.Subsumsjon.Utfall.VILKAR_BEREGNET
 import no.nav.helse.modell.saksbehandler.handlinger.dto.OverstyrtTidslinjeDto
 import no.nav.helse.modell.saksbehandler.handlinger.dto.OverstyrtTidslinjedagDto
-import no.nav.helse.spesialist.api.modell.OverstyrtTidslinjeEvent
 
 class OverstyrtTidslinje(
     private val id: UUID = UUID.randomUUID(),

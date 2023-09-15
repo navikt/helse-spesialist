@@ -2,8 +2,8 @@ package no.nav.helse.modell.saksbehandler.handlinger
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.modell.saksbehandler.OverstyrtArbeidsforholdEvent
 import no.nav.helse.modell.saksbehandler.Saksbehandler
-import no.nav.helse.spesialist.api.modell.OverstyrtArbeidsforholdEvent
 
 class OverstyrtArbeidsforhold(
     private val fødselsnummer: String,

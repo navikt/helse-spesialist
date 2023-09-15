@@ -2,11 +2,11 @@ package no.nav.helse.modell.saksbehandler.handlinger
 
 import java.util.UUID
 import no.nav.helse.januar
+import no.nav.helse.modell.saksbehandler.OverstyrtInntektOgRefusjonEvent
+import no.nav.helse.modell.saksbehandler.OverstyrtTidslinjeEvent
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.SaksbehandlerObserver
 import no.nav.helse.modell.saksbehandler.handlinger.Subsumsjon.Utfall.VILKAR_BEREGNET
-import no.nav.helse.spesialist.api.modell.OverstyrtInntektOgRefusjonEvent
-import no.nav.helse.spesialist.api.modell.OverstyrtTidslinjeEvent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
