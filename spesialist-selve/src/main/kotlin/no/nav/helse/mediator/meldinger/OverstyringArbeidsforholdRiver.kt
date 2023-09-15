@@ -27,10 +27,7 @@ internal class OverstyringArbeidsforholdRiver(
                 it.requireKey("aktørId")
                 it.requireKey("fødselsnummer")
                 it.requireKey("skjæringstidspunkt")
-                it.requireKey("saksbehandlerIdent")
                 it.requireKey("saksbehandlerOid")
-                it.requireKey("saksbehandlerNavn")
-                it.requireKey("saksbehandlerEpost")
                 it.requireKey("@id")
                 it.requireKey("@opprettet")
                 it.requireArray("overstyrteArbeidsforhold") {
@@ -59,9 +56,6 @@ internal class OverstyringArbeidsforholdRiver(
             id = UUID.fromString(packet["@id"].asText()),
             fødselsnummer = packet["fødselsnummer"].asText(),
             oid = UUID.fromString(packet["saksbehandlerOid"].asText()),
-            navn = packet["saksbehandlerNavn"].asText(),
-            ident = packet["saksbehandlerIdent"].asText(),
-            epost = packet["saksbehandlerEpost"].asText(),
             overstyrteArbeidsforhold = packet["overstyrteArbeidsforhold"].map {
                 OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdDto(
                     it["orgnummer"].asText(),

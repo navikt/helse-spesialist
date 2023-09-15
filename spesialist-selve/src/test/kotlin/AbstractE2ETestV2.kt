@@ -22,21 +22,16 @@ import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.ENHET_OSLO
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
-import no.nav.helse.Testdata.SAKSBEHANDLER_EPOST
-import no.nav.helse.Testdata.SAKSBEHANDLER_IDENT
-import no.nav.helse.Testdata.SAKSBEHANDLER_NAVN
-import no.nav.helse.Testdata.SAKSBEHANDLER_OID
 import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.Testdata.snapshot
 import no.nav.helse.januar
+import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Vergemål
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
-import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver
-import no.nav.helse.modell.overstyring.Subsumsjon
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
@@ -57,8 +52,14 @@ import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi.OverstyrDagDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.SubsumsjonDto
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spleis.graphql.HentSnapshot
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
@@ -79,6 +80,17 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
     protected lateinit var sisteGodkjenningsbehovId: UUID
     internal val dataSource = AbstractDatabaseTest.dataSource
     private val testMediator = TestMediator(testRapid, snapshotClient, dataSource)
+    private val saksbehandlerMediator = SaksbehandlerMediator(dataSource, testRapid)
+    protected val SAKSBEHANDLER_OID: UUID = UUID.randomUUID()
+    protected val SAKSBEHANDLER_EPOST = "augunn.saksbehandler@nav.no"
+    protected val SAKSBEHANDLER_IDENT = "S199999"
+    protected val SAKSBEHANDLER_NAVN = "Augunn Saksbehandler"
+    private val saksbehandler = SaksbehandlerFraApi(
+        oid = SAKSBEHANDLER_OID,
+        navn = SAKSBEHANDLER_NAVN,
+        epost = SAKSBEHANDLER_EPOST,
+        ident = SAKSBEHANDLER_IDENT
+    )
 
     @BeforeEach
     internal fun resetTestSetup() {
@@ -1025,11 +1037,14 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
         dager: List<OverstyrDagDto> = listOf(
             OverstyrDagDto(1.januar(1970), Dagtype.Feriedag.toString(), Dagtype.Sykedag.toString(), null, 100, null)
         ),
     ) {
         håndterOverstyring(aktørId, fødselsnummer, organisasjonsnummer, "overstyr_tidslinje") {
+            val handling = OverstyrTidslinjeHandlingFraApi(vedtaksperiodeId, organisasjonsnummer, fødselsnummer, aktørId, "En begrunnelse", dager)
+            saksbehandlerMediator.håndter(handling, saksbehandler)
             // Her må det gjøres kall til api for å sende inn overstyring av tidslinje
         }
     }
@@ -1038,13 +1053,13 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         skjæringstidspunkt: LocalDate = 1.januar(1970),
-        arbeidsgivere: List<OverstyrtArbeidsgiver> = listOf(
-            OverstyrtArbeidsgiver(
+        arbeidsgivere: List<OverstyrArbeidsgiverDto> = listOf(
+            OverstyrArbeidsgiverDto(
                 organisasjonsnummer = ORGNR,
                 månedligInntekt = 25000.0,
                 fraMånedligInntekt = 25001.0,
                 forklaring = "testbortforklaring",
-                subsumsjon = Subsumsjon("8-28", "LEDD_1", "BOKSTAV_A"),
+                subsumsjon = SubsumsjonDto("8-28", "LEDD_1", "BOKSTAV_A"),
                 refusjonsopplysninger = null,
                 fraRefusjonsopplysninger = null,
                 begrunnelse = "en begrunnelse")
@@ -1052,7 +1067,15 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
 
     ) {
         håndterOverstyring(aktørId, fødselsnummer, ORGNR, "overstyr_inntekt_og_refusjon") {
-            sisteMeldingId = meldingssenderV2.sendOverstyrtInntektOgRefusjon(aktørId, fødselsnummer, skjæringstidspunkt, arbeidsgivere)
+            val handling = OverstyrInntektOgRefusjonHandlingFraApi(aktørId, fødselsnummer, skjæringstidspunkt, arbeidsgivere)
+            saksbehandlerMediator.håndter(handling, saksbehandler)
+            sisteMeldingId = meldingssenderV2.sendOverstyrtInntektOgRefusjon(
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                skjæringstidspunkt = skjæringstidspunkt,
+                arbeidsgivere = arbeidsgivere,
+                saksbehandlerOid = SAKSBEHANDLER_OID,
+            )
         }
     }
 
@@ -1060,8 +1083,9 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
-        overstyrteArbeidsforhold: List<OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdDto> = listOf(
-            OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdDto(
+        skjæringstidspunkt: LocalDate = 1.januar,
+        overstyrteArbeidsforhold: List<ArbeidsforholdDto> = listOf(
+            ArbeidsforholdDto(
                 orgnummer = ORGNR,
                 deaktivert = true,
                 begrunnelse = "begrunnelse",
@@ -1070,11 +1094,14 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         )
     ) {
         håndterOverstyring(aktørId, fødselsnummer, organisasjonsnummer, "overstyr_arbeidsforhold") {
+            val handling = OverstyrArbeidsforholdHandlingFraApi(fødselsnummer, aktørId, skjæringstidspunkt, overstyrteArbeidsforhold)
+            saksbehandlerMediator.håndter(handling, saksbehandler)
             sisteMeldingId = meldingssenderV2.sendOverstyrtArbeidsforhold(
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
-                overstyrteArbeidsforhold = overstyrteArbeidsforhold
+                overstyrteArbeidsforhold = overstyrteArbeidsforhold,
+                saksbehandlerOid = SAKSBEHANDLER_OID,
             )
         }
     }

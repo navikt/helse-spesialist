@@ -5,7 +5,6 @@ import no.nav.helse.Testdata.ORGNR_GHOST
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class TotrinnsvurderingE2ETest : AbstractE2ETestV2() {
@@ -37,13 +36,12 @@ internal class TotrinnsvurderingE2ETest : AbstractE2ETestV2() {
         assertTotrinnsvurdering(2.oppgave(VEDTAKSPERIODE_ID))
     }
 
-    @Disabled("Kan enables igjen når vi har funnet ut hvordan vi bør teste hele appen fra ende til ende")
     @Test
     fun `sak blir trukket til totrinnsvurdering ved overstyring av tidslinje`() {
-//        fremTilSaksbehandleroppgave()
-//        håndterOverstyrTidslinje()
-//        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true)
-//        assertOverstyringer(VEDTAKSPERIODE_ID, OverstyringType.Dager)
-//        assertTotrinnsvurdering(2.oppgave(VEDTAKSPERIODE_ID))
+        fremTilSaksbehandleroppgave()
+        håndterOverstyrTidslinje()
+        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true)
+        assertOverstyringer(VEDTAKSPERIODE_ID, OverstyringType.Dager)
+        assertTotrinnsvurdering(2.oppgave(VEDTAKSPERIODE_ID))
     }
 }

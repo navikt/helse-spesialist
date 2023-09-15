@@ -29,10 +29,7 @@ internal class OverstyringInntektOgRefusjonRiver(
                 it.requireKey("fødselsnummer")
                 it.requireKey("arbeidsgivere")
                 it.requireKey("skjæringstidspunkt")
-                it.requireKey("saksbehandlerIdent")
                 it.requireKey("saksbehandlerOid")
-                it.requireKey("saksbehandlerNavn")
-                it.requireKey("saksbehandlerEpost")
                 it.requireKey("@id")
             }
         }.register(this)
@@ -54,9 +51,6 @@ internal class OverstyringInntektOgRefusjonRiver(
             id = UUID.fromString(packet["@id"].asText()),
             fødselsnummer = packet["fødselsnummer"].asText(),
             oid = UUID.fromString(packet["saksbehandlerOid"].asText()),
-            navn = packet["saksbehandlerNavn"].asText(),
-            ident = packet["saksbehandlerIdent"].asText(),
-            epost = packet["saksbehandlerEpost"].asText(),
             arbeidsgivere = packet["arbeidsgivere"].arbeidsgiverelementer(),
             skjæringstidspunkt = packet["skjæringstidspunkt"].asLocalDate(),
             opprettet = packet["@opprettet"].asLocalDateTime(),

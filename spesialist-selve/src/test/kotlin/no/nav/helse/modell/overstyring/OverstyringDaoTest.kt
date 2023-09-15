@@ -349,9 +349,6 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             id = hendelseId,
             fødselsnummer = FØDSELSNUMMER,
             oid = OID,
-            navn = SAKSBEHANDLER_NAVN,
-            epost = SAKSBEHANDLEREPOST,
-            ident = SAKSBEHANDLER_IDENT,
             arbeidsgivere = listOf(
                 OverstyrtArbeidsgiver(
                     organisasjonsnummer = ORGNUMMER,
@@ -367,10 +364,6 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
             opprettet = OPPRETTET,
             json = "{}",
-            reservasjonDao = reservasjonDao,
-            saksbehandlerDao = saksbehandlerDao,
-            oppgaveDao = oppgaveDao,
-            tildelingDao = tildelingDao,
             overstyringDao = overstyringDao,
             overstyringMediator = mockk(),
         )
@@ -408,9 +401,6 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         id = ID,
         fødselsnummer = FØDSELSNUMMER,
         oid = OID,
-        navn = SAKSBEHANDLER_NAVN,
-        epost = SAKSBEHANDLEREPOST,
-        ident = SAKSBEHANDLER_IDENT,
         overstyrteArbeidsforhold = listOf(
             OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdDto(
                 orgnummer = GHOST_ORGNUMMER,
@@ -422,10 +412,6 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
         opprettet = OPPRETTET,
         json = "{}",
-        reservasjonDao = reservasjonDao,
-        saksbehandlerDao = saksbehandlerDao,
-        oppgaveDao = oppgaveDao,
-        tildelingDao = tildelingDao,
         overstyringDao = overstyringDao,
         overstyringMediator = mockk(),
     )

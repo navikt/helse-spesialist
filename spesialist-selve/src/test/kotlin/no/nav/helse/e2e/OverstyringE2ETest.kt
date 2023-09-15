@@ -11,16 +11,14 @@ import kotliquery.sessionOf
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.Testdata.SAKSBEHANDLERTILGANGER_UTEN_TILGANGER
-import no.nav.helse.Testdata.SAKSBEHANDLER_EPOST
 import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.januar
-import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver
-import no.nav.helse.modell.overstyring.Subsumsjon
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.graphql.query.PersonQuery
 import no.nav.helse.spesialist.api.graphql.schema.Arbeidsforholdoverstyring
+import no.nav.helse.spesialist.api.graphql.schema.Dagoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.Inntektoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.Person
 import no.nav.helse.spesialist.api.notat.NotatDao
@@ -30,6 +28,9 @@ import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.SubsumsjonDto
 import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
@@ -39,31 +40,30 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class OverstyringE2ETest : AbstractE2ETestV2() {
 
-    @Disabled("Kan enables igjen når vi har funnet ut hvordan vi bør teste hele appen fra ende til ende")
     @Test
     fun `saksbehandler overstyrer sykdomstidslinje`() {
-//        fremTilSaksbehandleroppgave()
-//        håndterOverstyrTidslinje(dager = listOf(
-//            OverstyringTidslinje.OverstyringDag(
-//                20.januar,
-//                Feriedag,
-//                Sykedag,
-//                null,
-//                100
-//            )
-//        ))
-//        assertOverstyrTidslinje(FØDSELSNUMMER, 1)
-//
-//        assertOppgaver(UTBETALING_ID, "AvventerSaksbehandler", 0)
-//
-//        val nyUtbetalingId = UUID.randomUUID()
-//        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true, utbetalingId = nyUtbetalingId)
-//        assertOppgaver(nyUtbetalingId, "AvventerSaksbehandler", 1)
+        fremTilSaksbehandleroppgave()
+        håndterOverstyrTidslinje(dager = listOf(
+            OverstyrTidslinjeHandlingFraApi.OverstyrDagDto(
+                dato = 20.januar,
+                type = "Feriedag",
+                fraType = "Sykedag",
+                grad = null,
+                fraGrad = 100,
+                subsumsjon = null
+            )
+        ))
+        assertOverstyrTidslinje(FØDSELSNUMMER, 1)
+
+        assertOppgaver(UTBETALING_ID, "AvventerSaksbehandler", 0)
+
+        val nyUtbetalingId = UUID.randomUUID()
+        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true, utbetalingId = nyUtbetalingId)
+        assertOppgaver(nyUtbetalingId, "AvventerSaksbehandler", 1)
     }
 
     @Test
@@ -71,12 +71,12 @@ internal class OverstyringE2ETest : AbstractE2ETestV2() {
         fremTilSaksbehandleroppgave()
         håndterOverstyrInntektOgRefusjon(
             arbeidsgivere = listOf(
-                OverstyrtArbeidsgiver(
+                OverstyrArbeidsgiverDto(
                     organisasjonsnummer = ORGNR,
                     månedligInntekt = 25000.0,
                     fraMånedligInntekt = 25001.0,
                     forklaring = "testbortforklaring",
-                    subsumsjon = Subsumsjon("8-28", "LEDD_1", "BOKSTAV_A"),
+                    subsumsjon = SubsumsjonDto("8-28", "LEDD_1", "BOKSTAV_A"),
                     refusjonsopplysninger = null,
                     fraRefusjonsopplysninger = null,
                     begrunnelse = "begrunnelse")
@@ -120,8 +120,8 @@ internal class OverstyringE2ETest : AbstractE2ETestV2() {
     @Test
     fun `legger ved overstyringer i speil snapshot`() {
         fremTilSaksbehandleroppgave()
-//        håndterOverstyrTidslinje()
-//        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true)
+        håndterOverstyrTidslinje()
+        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true)
         håndterOverstyrInntektOgRefusjon()
         fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true)
         håndterOverstyrArbeidsforhold()
@@ -137,13 +137,13 @@ internal class OverstyringE2ETest : AbstractE2ETestV2() {
 
         assertNotNull(snapshot)
         val overstyringer = snapshot.arbeidsgivere().first().overstyringer()
-        assertEquals(2, overstyringer.size)
-//        assertEquals(1, (overstyringer[0] as Dagoverstyring).dager.size)
-        assertEquals(25000.0, (overstyringer[0] as Inntektoverstyring).inntekt.manedligInntekt)
-        assertEquals(true, (overstyringer[1] as Arbeidsforholdoverstyring).deaktivert)
+        assertEquals(3, overstyringer.size)
+        assertEquals(1, (overstyringer[0] as Dagoverstyring).dager.size)
+        assertEquals(25000.0, (overstyringer[1] as Inntektoverstyring).inntekt.manedligInntekt)
+        assertEquals(true, (overstyringer[2] as Arbeidsforholdoverstyring).deaktivert)
         assertFalse(overstyringer.first().ferdigstilt)
         assertFalse(overstyringer[1].ferdigstilt)
-//        assertFalse(overstyringer.last().ferdigstilt)
+        assertFalse(overstyringer.last().ferdigstilt)
     }
 
     private fun assertOppgaver(utbetalingId: UUID, status: String, forventetAntall: Int) {

@@ -11,8 +11,6 @@ import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.Arbeidsgiverinformasjo
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Vergemål
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
-import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver
-import no.nav.helse.modell.overstyring.Subsumsjon
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
@@ -26,6 +24,8 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.person.Kjønn
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.SubsumsjonDto
 import org.junit.jupiter.api.Assertions.assertEquals
 
 internal class MeldingssenderV2(private val testRapid: TestRapid) {
@@ -702,6 +702,7 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
         fødselsnummer: String,
         organisasjonsnummer: String,
         skjæringstidspunkt: LocalDate = 1.januar(1970),
+        saksbehandlerOid: UUID,
         overstyrteArbeidsforhold: List<ArbeidsforholdDto> = listOf(
             ArbeidsforholdDto(organisasjonsnummer, true, "begrunnelse", "forklaring")
         ),
@@ -713,7 +714,8 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
                 organisasjonsnummer = organisasjonsnummer,
                 skjæringstidspunkt = skjæringstidspunkt,
                 overstyrteArbeidsforhold = overstyrteArbeidsforhold,
-                id = id
+                id = id,
+                saksbehandleroid = saksbehandlerOid
             )
         )
     }
@@ -722,17 +724,19 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
         aktørId: String,
         fødselsnummer: String,
         skjæringstidspunkt: LocalDate = 1.januar(1970),
-        arbeidsgivere: List<OverstyrtArbeidsgiver> = listOf(
-            OverstyrtArbeidsgiver(
+        saksbehandlerOid: UUID,
+        arbeidsgivere: List<OverstyrArbeidsgiverDto> = listOf(
+            OverstyrArbeidsgiverDto(
                 organisasjonsnummer = Testdata.ORGNR,
                 månedligInntekt = 15000.0,
                 fraMånedligInntekt = 25001.0,
                 forklaring = "testbortforklaring",
-                subsumsjon = Subsumsjon("8-28", "LEDD_1", "BOKSTAV_A"),
+                subsumsjon = SubsumsjonDto("8-28", "LEDD_1", "BOKSTAV_A"),
                 refusjonsopplysninger = null,
                 fraRefusjonsopplysninger = null,
-                begrunnelse = "en begrunnelse")
-        )
+                begrunnelse = "en begrunnelse"
+            )
+        ),
     ): UUID =
         newUUID.also { id ->
             testRapid.sendTestMessage(
@@ -742,7 +746,8 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
                     arbeidsgivere = arbeidsgivere,
                     skjæringstidspunkt = skjæringstidspunkt,
                     saksbehandlerepost = Testdata.SAKSBEHANDLER_EPOST,
-                    id = id
+                    id = id,
+                    saksbehandleroid = saksbehandlerOid
                 )
             )
         }
