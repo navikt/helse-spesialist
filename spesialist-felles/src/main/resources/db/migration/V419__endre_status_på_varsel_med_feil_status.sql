@@ -1,0 +1,2 @@
+UPDATE selve_varsel sv SET status = 'AKTIV', status_endret_ident = null, status_endret_tidspunkt = null WHERE id IN (1542244, 1542243, 1542242);
+UPDATE selve_varsel sv SET status = 'AKTIV', status_endret_ident = null, status_endret_tidspunkt = null WHERE id IN (1536526, 1536525, 1536527);
