@@ -3,7 +3,9 @@ package no.nav.helse.mediator
 import java.util.UUID
 import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments.kv
+import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.mediator.overstyring.Overstyringlagrer
+import no.nav.helse.mediator.saksbehandler.SaksbehandlerLagrer
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.saksbehandler.AnnullertUtbetalingEvent
 import no.nav.helse.modell.saksbehandler.OverstyrtArbeidsforholdEvent
@@ -33,7 +35,6 @@ import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
-import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AnnulleringHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
@@ -65,10 +66,10 @@ class SaksbehandlerMediator(
 
     override fun <T : HandlingFraApi> håndter(handlingFraApi: T, saksbehandlerFraApi: SaksbehandlerFraApi) {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
+        SaksbehandlerLagrer(saksbehandlerDao).lagre(saksbehandler)
         val handlingId = UUID.randomUUID()
         tell(handlingFraApi)
         saksbehandler.register(this)
-        saksbehandler.persister(saksbehandlerDao)
         val modellhandling = handlingFraApi.tilHandling()
         withMDC(
             mapOf(
@@ -130,7 +131,7 @@ class SaksbehandlerMediator(
 
     override fun opprettAbonnement(saksbehandlerFraApi: SaksbehandlerFraApi, personidentifikator: String) {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
-        saksbehandler.persister(saksbehandlerDao)
+        SaksbehandlerLagrer(saksbehandlerDao).lagre(saksbehandler)
         abonnementDao.opprettAbonnement(saksbehandler.oid(), personidentifikator.toLong())
     }
 
@@ -139,14 +140,14 @@ class SaksbehandlerMediator(
         sisteSekvensId: Int,
     ): List<Opptegnelse> {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
-        saksbehandler.persister(saksbehandlerDao)
+        SaksbehandlerLagrer(saksbehandlerDao).lagre(saksbehandler)
         abonnementDao.registrerSistekvensnummer(saksbehandler.oid(), sisteSekvensId)
         return opptegnelseDao.finnOpptegnelser(saksbehandler.oid())
     }
 
     override fun hentAbonnerteOpptegnelser(saksbehandlerFraApi: SaksbehandlerFraApi): List<Opptegnelse> {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
-        saksbehandler.persister(saksbehandlerDao)
+        SaksbehandlerLagrer(saksbehandlerDao).lagre(saksbehandler)
         return opptegnelseDao.finnOpptegnelser(saksbehandler.oid())
     }
 
