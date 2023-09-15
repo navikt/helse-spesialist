@@ -39,7 +39,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
         ).single { row ->
             OppgaveFraDatabase(
                 id = id,
-                type = row.string("type"),
+                egenskap = row.string("type"),
                 status = row.string("status"),
                 vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
                 utbetalingId = row.uuid("utbetaling_id"),

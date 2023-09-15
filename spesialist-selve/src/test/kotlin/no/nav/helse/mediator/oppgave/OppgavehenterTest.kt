@@ -7,11 +7,12 @@ import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.TotrinnsvurderingFraDatabase
 import no.nav.helse.db.TotrinnsvurderingRepository
+import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveVisitor
+import no.nav.helse.modell.oppgave.SØKNAD
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
-import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import kotlin.properties.Delegates
@@ -44,7 +45,7 @@ class OppgavehenterTest {
         oppgave.accept(inspektør)
         inspektør.assertOppgave(
             id = OPPGAVE_ID,
-            type = Oppgavetype.SØKNAD,
+            egenskap = SØKNAD,
             tilstand = Oppgave.AvventerSaksbehandler,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID,
@@ -74,7 +75,7 @@ class OppgavehenterTest {
         oppgave.accept(inspektør)
         inspektør.assertOppgave(
             id = OPPGAVE_ID,
-            type = Oppgavetype.SØKNAD,
+            egenskap = SØKNAD,
             tilstand = Oppgave.AvventerSaksbehandler,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID,
@@ -97,33 +98,33 @@ class OppgavehenterTest {
 
     private val inspektør = object : OppgaveVisitor {
         private var id by Delegates.notNull<Long>()
-        private lateinit var type: Oppgavetype
+        private lateinit var egenskap: Egenskap
         private lateinit var tilstand: Oppgave.Tilstand
         private lateinit var vedtaksperiodeId: UUID
         private lateinit var utbetalingId: UUID
         private var ferdigstiltAvOid: UUID? = null
         private var ferdigstiltAvIdent: String? = null
-        private lateinit var egenskaper: List<Oppgavetype>
+        private lateinit var egenskaper: List<Egenskap>
         private var tildelt: Saksbehandler? = null
         private var påVent by Delegates.notNull<Boolean>()
         private var totrinnsvurdering: Totrinnsvurdering? = null
 
         override fun visitOppgave(
             id: Long,
-            type: Oppgavetype,
+            egenskap: Egenskap,
             tilstand: Oppgave.Tilstand,
             vedtaksperiodeId: UUID,
             utbetalingId: UUID,
             hendelseId: UUID,
             ferdigstiltAvOid: UUID?,
             ferdigstiltAvIdent: String?,
-            egenskaper: List<Oppgavetype>,
+            egenskaper: List<Egenskap>,
             tildelt: Saksbehandler?,
             påVent: Boolean,
             totrinnsvurdering: Totrinnsvurdering?
         ) {
             this.id = id
-            this.type = type
+            this.egenskap = egenskap
             this.tilstand = tilstand
             this.vedtaksperiodeId = vedtaksperiodeId
             this.utbetalingId = utbetalingId
@@ -137,19 +138,19 @@ class OppgavehenterTest {
 
         fun assertOppgave(
             id: Long,
-            type: Oppgavetype,
+            egenskap: Egenskap,
             tilstand: Oppgave.Tilstand,
             vedtaksperiodeId: UUID,
             utbetalingId: UUID,
             ferdigstiltAvOid: UUID?,
             ferdigstiltAvIdent: String?,
-            egenskaper: List<Oppgavetype>,
+            egenskaper: List<Egenskap>,
             tildelt: Saksbehandler?,
             påVent: Boolean,
             totrinnsvurdering: Totrinnsvurdering?
         ) {
             assertEquals(id, this.id)
-            assertEquals(type, this.type)
+            assertEquals(egenskap, this.egenskap)
             assertEquals(tilstand, this.tilstand)
             assertEquals(vedtaksperiodeId, this.vedtaksperiodeId)
             assertEquals(utbetalingId, this.utbetalingId)
@@ -166,7 +167,7 @@ class OppgavehenterTest {
         override fun finnOppgave(id: Long): OppgaveFraDatabase {
             return OppgaveFraDatabase(
                 id = OPPGAVE_ID,
-                type = TYPE,
+                egenskap = TYPE,
                 status = STATUS,
                 vedtaksperiodeId = VEDTAKSPERIODE_ID,
                 utbetalingId = UTBETALING_ID,

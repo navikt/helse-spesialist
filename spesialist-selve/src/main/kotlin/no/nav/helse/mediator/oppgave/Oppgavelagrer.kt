@@ -6,12 +6,21 @@ import no.nav.helse.db.OppgaveFraDatabase
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingFraDatabase
+import no.nav.helse.modell.oppgave.DELVIS_REFUSJON
+import no.nav.helse.modell.oppgave.EGEN_ANSATT
+import no.nav.helse.modell.oppgave.Egenskap
+import no.nav.helse.modell.oppgave.FORTROLIG_ADRESSE
+import no.nav.helse.modell.oppgave.INGEN_UTBETALING
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveVisitor
+import no.nav.helse.modell.oppgave.REVURDERING
+import no.nav.helse.modell.oppgave.RISK_QA
+import no.nav.helse.modell.oppgave.STIKKPRØVE
+import no.nav.helse.modell.oppgave.SØKNAD
+import no.nav.helse.modell.oppgave.UTBETALING_TIL_ARBEIDSGIVER
+import no.nav.helse.modell.oppgave.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
-import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
-import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 
 class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
     private lateinit var oppgaveForLagring: OppgaveFraDatabase
@@ -24,7 +33,7 @@ class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
             contextId = contextId,
             vedtaksperiodeId = oppgave.vedtaksperiodeId,
             utbetalingId = oppgave.utbetalingId,
-            egenskap = oppgave.type,
+            egenskap = oppgave.egenskap,
             hendelseId = oppgave.hendelseId
         )
         if (oppgave.tildelt != null) tildelingDao.tildel(oppgave.id, oppgave.tildelt.oid, oppgave.påVent)
@@ -51,30 +60,29 @@ class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
 
     override fun visitOppgave(
         id: Long,
-        type: Oppgavetype,
+        egenskap: Egenskap,
         tilstand: Oppgave.Tilstand,
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
         hendelseId: UUID,
         ferdigstiltAvOid: UUID?,
         ferdigstiltAvIdent: String?,
-        egenskaper: List<Oppgavetype>,
+        egenskaper: List<Egenskap>,
         tildelt: Saksbehandler?,
         påVent: Boolean,
         totrinnsvurdering: Totrinnsvurdering?
     ) {
-        val status = status(tilstand)
         oppgaveForLagring = OppgaveFraDatabase(
             id = id,
-            type = type.toString(),
-            status = status.toString(),
+            egenskap = egenskap(egenskap),
+            status = status(tilstand),
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId,
             hendelseId = hendelseId,
             ferdigstiltAvIdent = ferdigstiltAvIdent,
             ferdigstiltAvOid = ferdigstiltAvOid,
             tildelt = tildelt?.toDto()?.let {
-               SaksbehandlerFraDatabase(it.epost, it.oid, it.navn, it.ident)
+                SaksbehandlerFraDatabase(it.epost, it.oid, it.navn, it.ident)
             },
             påVent = påVent
         )
@@ -100,12 +108,27 @@ class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
         )
     }
 
-    private fun status(tilstand: Oppgave.Tilstand): Oppgavestatus {
+    private fun status(tilstand: Oppgave.Tilstand): String {
         return when (tilstand) {
-            Oppgave.AvventerSaksbehandler -> Oppgavestatus.AvventerSaksbehandler
-            Oppgave.AvventerSystem -> Oppgavestatus.AvventerSystem
-            Oppgave.Ferdigstilt -> Oppgavestatus.Ferdigstilt
-            Oppgave.Invalidert -> Oppgavestatus.Invalidert
+            Oppgave.AvventerSaksbehandler -> "AvventerSaksbehandler"
+            Oppgave.AvventerSystem -> "AvventerSystem"
+            Oppgave.Ferdigstilt -> "Ferdigstilt"
+            Oppgave.Invalidert -> "Invalidert"
+        }
+    }
+
+    private fun egenskap(egenskap: Egenskap): String {
+        return when (egenskap) {
+            DELVIS_REFUSJON -> "DELVIS_REFUSJON"
+            INGEN_UTBETALING -> "INGEN_UTBETALING"
+            REVURDERING -> "REVURDERING"
+            STIKKPRØVE -> "STIKKPRØVE"
+            SØKNAD -> "SØKNAD"
+            EGEN_ANSATT -> "EGEN_ANSATT"
+            FORTROLIG_ADRESSE -> "FORTROLIG_ADRESSE"
+            RISK_QA -> "RISK_QA"
+            UTBETALING_TIL_ARBEIDSGIVER -> "UTBETALING_TIL_ARBEIDSGIVER"
+            UTBETALING_TIL_SYKMELDT -> "UTBETALING_TIL_SYKMELDT"
         }
     }
 }

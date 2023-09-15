@@ -8,18 +8,18 @@ import io.mockk.verify
 import java.util.UUID
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.automatisering.Automatisering
+import no.nav.helse.modell.oppgave.DELVIS_REFUSJON
+import no.nav.helse.modell.oppgave.Egenskap
+import no.nav.helse.modell.oppgave.FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.modell.oppgave.REVURDERING
+import no.nav.helse.modell.oppgave.RISK_QA
+import no.nav.helse.modell.oppgave.STIKKPRØVE
+import no.nav.helse.modell.oppgave.SØKNAD
+import no.nav.helse.modell.oppgave.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.modell.utbetaling.Utbetalingtype.REVURDERING
-import no.nav.helse.spesialist.api.oppgave.Oppgavetype
-import no.nav.helse.spesialist.api.oppgave.Oppgavetype.DELVIS_REFUSJON
-import no.nav.helse.spesialist.api.oppgave.Oppgavetype.FORTROLIG_ADRESSE
-import no.nav.helse.spesialist.api.oppgave.Oppgavetype.RISK_QA
-import no.nav.helse.spesialist.api.oppgave.Oppgavetype.STIKKPRØVE
-import no.nav.helse.spesialist.api.oppgave.Oppgavetype.SØKNAD
-import no.nav.helse.spesialist.api.oppgave.Oppgavetype.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spleis.graphql.enums.GraphQLUtbetalingstatus
@@ -100,13 +100,13 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
 
     @Test
     fun `oppretter revurdering`() {
-        utbetalingstype = REVURDERING
+        utbetalingstype = Utbetalingtype.REVURDERING
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
         verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
-        assertEquals(enOppgave(Oppgavetype.REVURDERING), oppgave)
+        assertEquals(enOppgave(REVURDERING), oppgave)
     }
 
     @Test
@@ -145,8 +145,8 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         assertEquals(enOppgave(DELVIS_REFUSJON), oppgave)
     }
 
-    private fun enOppgave(vararg oppgavetype: Oppgavetype) =
-        Oppgave.nyOppgave(1L, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), oppgavetype.toList())
+    private fun enOppgave(vararg egenskaper: Egenskap) =
+        Oppgave.nyOppgave(1L, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), egenskaper.toList())
 
 
     private fun enUtbetaling(personbeløp: Int = 0, arbeidsgiverbeløp: Int = 0): GraphQLUtbetaling =

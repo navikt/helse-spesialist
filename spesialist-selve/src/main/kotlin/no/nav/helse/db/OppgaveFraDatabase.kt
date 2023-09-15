@@ -4,7 +4,7 @@ import java.util.UUID
 
 data class OppgaveFraDatabase(
     val id: Long,
-    val type: String,
+    val egenskap: String,
     val status: String,
     val vedtaksperiodeId: UUID,
     val utbetalingId: UUID,

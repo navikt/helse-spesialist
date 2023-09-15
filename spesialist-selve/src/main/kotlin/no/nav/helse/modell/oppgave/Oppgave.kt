@@ -9,12 +9,11 @@ import no.nav.helse.Tilgangskontroll
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
-import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import org.slf4j.LoggerFactory
 
 class Oppgave private constructor(
     private val id: Long,
-    private val type: Oppgavetype,
+    private val egenskap: Egenskap,
     private var tilstand: Tilstand,
     private val vedtaksperiodeId: UUID,
     private val utbetalingId: UUID,
@@ -24,7 +23,7 @@ class Oppgave private constructor(
 
     private var ferdigstiltAvIdent: String? = null
     private var ferdigstiltAvOid: UUID? = null
-    private val egenskaper = mutableListOf<Oppgavetype>()
+    private val egenskaper = mutableListOf<Egenskap>()
     private var tildeltTil: Saksbehandler? = null
     private var påVent: Boolean = false
 
@@ -32,7 +31,7 @@ class Oppgave private constructor(
 
     internal constructor(
         id: Long,
-        type: Oppgavetype,
+        egenskap: Egenskap,
         tilstand: Tilstand,
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
@@ -42,7 +41,7 @@ class Oppgave private constructor(
         tildelt: Saksbehandler? = null,
         påVent: Boolean = false,
         totrinnsvurdering: Totrinnsvurdering? = null
-    ) : this(id, type, tilstand, vedtaksperiodeId, utbetalingId, hendelseId, totrinnsvurdering) {
+    ) : this(id, egenskap, tilstand, vedtaksperiodeId, utbetalingId, hendelseId, totrinnsvurdering) {
         this.ferdigstiltAvIdent = ferdigstiltAvIdent
         this.ferdigstiltAvOid = ferdigstiltAvOid
         this.tildeltTil = tildelt
@@ -50,7 +49,7 @@ class Oppgave private constructor(
     }
 
     fun accept(visitor: OppgaveVisitor) {
-        visitor.visitOppgave(id, type, tilstand, vedtaksperiodeId, utbetalingId, hendelseId, ferdigstiltAvOid, ferdigstiltAvIdent, egenskaper, tildeltTil, påVent, totrinnsvurdering)
+        visitor.visitOppgave(id, egenskap, tilstand, vedtaksperiodeId, utbetalingId, hendelseId, ferdigstiltAvOid, ferdigstiltAvIdent, egenskaper, tildeltTil, påVent, totrinnsvurdering)
         totrinnsvurdering?.accept(visitor)
     }
 
@@ -64,11 +63,11 @@ class Oppgave private constructor(
         harTilgangTil: Tilgangskontroll,
     ) {
         check(tilstand is AvventerSaksbehandler) { "Oppgave med id=$id i tilstand=$tilstand kan ikke tildeles" }
-        if (type == Oppgavetype.STIKKPRØVE) {
+        if (egenskap == STIKKPRØVE) {
             logg.info("OppgaveId $id er stikkprøve og tildeles ikke på tross av reservasjon.")
             return
         }
-        if (type == Oppgavetype.RISK_QA) {
+        if (egenskap == RISK_QA) {
             val harTilgangTilRisk = runBlocking { harTilgangTil(saksbehandler.oid(), Gruppe.RISK_QA) }
             if (!harTilgangTilRisk) logg.info("OppgaveId $id er RISK_QA og saksbehandler har ikke tilgang, tildeles ikke på tross av reservasjon.")
             return
@@ -200,15 +199,15 @@ class Oppgave private constructor(
     override fun equals(other: Any?): Boolean {
         if (other !is Oppgave) return false
         if (this.id != other.id) return false
-        return this.type == other.type && this.vedtaksperiodeId == other.vedtaksperiodeId
+        return this.egenskap == other.egenskap && this.vedtaksperiodeId == other.vedtaksperiodeId
     }
 
     override fun hashCode(): Int {
-        return Objects.hash(id, type, vedtaksperiodeId)
+        return Objects.hash(id, egenskap, vedtaksperiodeId)
     }
 
     override fun toString(): String {
-        return "Oppgave(type=$type, tilstand=$tilstand, vedtaksperiodeId=$vedtaksperiodeId, utbetalingId=$utbetalingId, id=$id)"
+        return "Oppgave(type=$egenskap, tilstand=$tilstand, vedtaksperiodeId=$vedtaksperiodeId, utbetalingId=$utbetalingId, id=$id)"
     }
 
     companion object {
@@ -219,10 +218,10 @@ class Oppgave private constructor(
             vedtaksperiodeId: UUID,
             utbetalingId: UUID,
             hendelseId: UUID,
-            egenskaper: List<Oppgavetype>,
+            egenskaper: List<Egenskap>,
             totrinnsvurdering: Totrinnsvurdering? = null
         ): Oppgave {
-            val hovedegenskap = egenskaper.firstOrNull() ?: Oppgavetype.SØKNAD
+            val hovedegenskap = egenskaper.firstOrNull() ?: SØKNAD
             return Oppgave(id, hovedegenskap, AvventerSaksbehandler, vedtaksperiodeId, utbetalingId, hendelseId, totrinnsvurdering).also {
                 it.egenskaper.addAll(egenskaper)
             }

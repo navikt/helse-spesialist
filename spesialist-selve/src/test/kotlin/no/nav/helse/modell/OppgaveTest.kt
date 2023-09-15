@@ -3,24 +3,22 @@ package no.nav.helse.modell
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.modell.OppgaveInspektør.Companion.inspektør
+import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.modell.oppgave.Oppgave.Companion.nyOppgave
 import no.nav.helse.modell.oppgave.OppgaveObserver
+import no.nav.helse.modell.oppgave.RISK_QA
+import no.nav.helse.modell.oppgave.STIKKPRØVE
+import no.nav.helse.modell.oppgave.SØKNAD
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtBeslutter
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtIRetur
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveKreverVurderingAvToSaksbehandlere
-import no.nav.helse.spesialist.api.oppgave.Oppgavetype
-import no.nav.helse.spesialist.api.oppgave.Oppgavetype.STIKKPRØVE
-import no.nav.helse.spesialist.api.oppgave.Oppgavetype.SØKNAD
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.EnumSource
 import kotlin.random.Random.Default.nextLong
 
 internal class OppgaveTest {
@@ -48,13 +46,12 @@ internal class OppgaveTest {
         )
     }
 
-    @ParameterizedTest
-    @EnumSource(value = Oppgavetype::class, names = ["SØKNAD"], mode = EnumSource.Mode.EXCLUDE)
-    fun `Første egenskap anses som oppgavetype`(type: Oppgavetype) {
-        val oppgave = nyOppgave(type, SØKNAD)
+    @Test
+    fun `Første egenskap anses som oppgavetype`() {
+        val oppgave = nyOppgave(RISK_QA, SØKNAD)
 
         inspektør(oppgave) {
-            assertEquals(type, this.type)
+            assertEquals(RISK_QA, this.egenskap)
         }
     }
 
@@ -63,7 +60,7 @@ internal class OppgaveTest {
         val oppgave = nyOppgave()
 
         inspektør(oppgave) {
-            assertEquals(SØKNAD, this.type)
+            assertEquals(SØKNAD, this.egenskap)
         }
     }
 
@@ -394,11 +391,11 @@ internal class OppgaveTest {
 
     @Test
     fun equals() {
-        val gjenopptattOppgave = nyOppgave(1L, VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID, UUID.randomUUID(), listOf(OPPGAVETYPE))
-        val oppgave1 = nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), listOf(SØKNAD))
-        val oppgave2 = nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), listOf(SØKNAD))
-        val oppgave3 = nyOppgave(OPPGAVE_ID, UUID.randomUUID(), UTBETALING_ID, UUID.randomUUID(), listOf(SØKNAD))
-        val oppgave4 = nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), listOf(STIKKPRØVE))
+        val gjenopptattOppgave = Oppgave.nyOppgave(1L, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), listOf(OPPGAVETYPE))
+        val oppgave1 = Oppgave.nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), listOf(SØKNAD))
+        val oppgave2 = Oppgave.nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), listOf(SØKNAD))
+        val oppgave3 = Oppgave.nyOppgave(OPPGAVE_ID, UUID.randomUUID(), UTBETALING_ID, UUID.randomUUID(), listOf(SØKNAD))
+        val oppgave4 = Oppgave.nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), listOf(STIKKPRØVE))
         assertEquals(oppgave1, oppgave2)
         assertEquals(oppgave1.hashCode(), oppgave2.hashCode())
         assertNotEquals(oppgave1, oppgave3)
@@ -417,9 +414,9 @@ internal class OppgaveTest {
         assertEquals(oppgave1.hashCode(), oppgave2.hashCode())
     }
 
-    private fun nyOppgave(vararg egenskaper: Oppgavetype, medTotrinnsvurdering: Boolean = false): Oppgave {
+    private fun nyOppgave(vararg egenskaper: Egenskap, medTotrinnsvurdering: Boolean = false): Oppgave {
         val totrinnsvurdering = if (medTotrinnsvurdering) totrinnsvurdering() else null
-        return nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), egenskaper.toList(), totrinnsvurdering)
+        return Oppgave.nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), egenskaper.toList(), totrinnsvurdering)
     }
 
     private fun totrinnsvurdering() = Totrinnsvurdering(

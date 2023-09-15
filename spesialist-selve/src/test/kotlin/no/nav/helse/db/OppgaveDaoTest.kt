@@ -148,7 +148,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         assertEquals(
             OppgaveFraDatabase(
                 id = oppgaveId,
-                type = OPPGAVETYPE,
+                egenskap = OPPGAVETYPE,
                 status = "AvventerSaksbehandler",
                 vedtaksperiodeId = VEDTAKSPERIODE,
                 utbetalingId = UTBETALING_ID,

@@ -9,16 +9,16 @@ import java.util.UUID
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingFraDatabase
 import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.modell.oppgave.SØKNAD
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
-import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.random.Random
 
 class OppgavelagrerTest: DatabaseIntegrationTest() {
     private companion object {
-        private val OPPGAVETYPE = Oppgavetype.SØKNAD
+        private val OPPGAVETYPE = SØKNAD
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
         private val UTBETALING_ID = UUID.randomUUID()
         private const val SAKSBEHANDLER_IDENT = "Z999999"

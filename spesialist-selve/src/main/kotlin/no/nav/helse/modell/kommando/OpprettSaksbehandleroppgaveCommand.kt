@@ -4,12 +4,18 @@ import java.util.UUID
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.delvisRefusjon
+import no.nav.helse.modell.oppgave.DELVIS_REFUSJON
+import no.nav.helse.modell.oppgave.Egenskap
+import no.nav.helse.modell.oppgave.FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.modell.oppgave.REVURDERING
+import no.nav.helse.modell.oppgave.RISK_QA
+import no.nav.helse.modell.oppgave.STIKKPRØVE
+import no.nav.helse.modell.oppgave.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.utbetalingTilSykmeldt
-import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import org.slf4j.LoggerFactory
@@ -33,18 +39,18 @@ internal class OpprettSaksbehandleroppgaveCommand(
     }
 
     override fun execute(context: CommandContext): Boolean {
-        val egenskaper = mutableListOf<Oppgavetype>()
-        if (harFortroligAdressebeskyttelse) egenskaper.add(Oppgavetype.FORTROLIG_ADRESSE)
-        if (utbetalingtype == Utbetalingtype.REVURDERING) egenskaper.add(Oppgavetype.REVURDERING)
-        if (automatisering.erStikkprøve(vedtaksperiodeId, hendelseId)) egenskaper.add(Oppgavetype.STIKKPRØVE)
-        if (risikovurderingDao.kreverSupersaksbehandler(vedtaksperiodeId)) egenskaper.add(Oppgavetype.RISK_QA)
+        val egenskaper = mutableListOf<Egenskap>()
+        if (harFortroligAdressebeskyttelse) egenskaper.add(FORTROLIG_ADRESSE)
+        if (utbetalingtype == Utbetalingtype.REVURDERING) egenskaper.add(REVURDERING)
+        if (automatisering.erStikkprøve(vedtaksperiodeId, hendelseId)) egenskaper.add(STIKKPRØVE)
+        if (risikovurderingDao.kreverSupersaksbehandler(vedtaksperiodeId)) egenskaper.add(RISK_QA)
 
-        if (vedtaksperiodensUtbetaling.delvisRefusjon()) egenskaper.add(Oppgavetype.DELVIS_REFUSJON)
-        else if (vedtaksperiodensUtbetaling.utbetalingTilSykmeldt()) egenskaper.add(Oppgavetype.UTBETALING_TIL_SYKMELDT)
+        if (vedtaksperiodensUtbetaling.delvisRefusjon()) egenskaper.add(DELVIS_REFUSJON)
+        else if (vedtaksperiodensUtbetaling.utbetalingTilSykmeldt()) egenskaper.add(UTBETALING_TIL_SYKMELDT)
 
         // Kommentert ut fordi disse typene finnes ikke i Speil enda
-//        else if (vedtaksperiodensUtbetaling.utbetalingTilArbeidsgiver()) egenskaper.add(Oppgavetype.UTBETALING_TIL_ARBEIDSGIVER)
-//        else egenskaper.add(Oppgavetype.INGEN_UTBETALING)
+//        else if (vedtaksperiodensUtbetaling.utbetalingTilArbeidsgiver()) egenskaper.add(UTBETALING_TIL_ARBEIDSGIVER)
+//        else egenskaper.add(INGEN_UTBETALING)
 
         oppgaveMediator.nyOppgave(fødselsnummer, context.id()) { reservertId ->
             val oppgave = Oppgave.nyOppgave(reservertId, vedtaksperiodeId, utbetalingId, hendelseId, egenskaper)

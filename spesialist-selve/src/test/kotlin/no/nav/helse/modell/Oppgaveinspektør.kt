@@ -1,28 +1,28 @@
 package no.nav.helse.modell
 
 import java.util.UUID
+import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveVisitor
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
-import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 
 class OppgaveInspektør private constructor(): OppgaveVisitor {
     lateinit var tilstand: Oppgave.Tilstand
-    lateinit var type: Oppgavetype
+    lateinit var egenskap: Egenskap
     var tildelt: Boolean = false
     var påVent: Boolean = false
     var tildeltTil: Saksbehandler? = null
     override fun visitOppgave(
         id: Long,
-        type: Oppgavetype,
+        egenskap: Egenskap,
         tilstand: Oppgave.Tilstand,
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
         hendelseId: UUID,
         ferdigstiltAvOid: UUID?,
         ferdigstiltAvIdent: String?,
-        egenskaper: List<Oppgavetype>,
+        egenskaper: List<Egenskap>,
         tildelt: Saksbehandler?,
         påVent: Boolean,
         totrinnsvurdering: Totrinnsvurdering?
@@ -31,7 +31,7 @@ class OppgaveInspektør private constructor(): OppgaveVisitor {
         this.tildelt = tildelt != null
         this.tildeltTil = tildelt
         this.påVent = påVent
-        this.type = type
+        this.egenskap = egenskap
     }
 
     companion object {

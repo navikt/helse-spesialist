@@ -3,14 +3,24 @@ package no.nav.helse.mediator.oppgave
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.modell.HendelseDao
+import no.nav.helse.modell.oppgave.DELVIS_REFUSJON
+import no.nav.helse.modell.oppgave.EGEN_ANSATT
+import no.nav.helse.modell.oppgave.Egenskap
+import no.nav.helse.modell.oppgave.FORTROLIG_ADRESSE
+import no.nav.helse.modell.oppgave.INGEN_UTBETALING
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveObserver
 import no.nav.helse.modell.oppgave.OppgaveVisitor
+import no.nav.helse.modell.oppgave.REVURDERING
+import no.nav.helse.modell.oppgave.RISK_QA
+import no.nav.helse.modell.oppgave.STIKKPRØVE
+import no.nav.helse.modell.oppgave.SØKNAD
+import no.nav.helse.modell.oppgave.UTBETALING_TIL_ARBEIDSGIVER
+import no.nav.helse.modell.oppgave.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.tildeling.IOppgavemelder
 import kotlin.properties.Delegates
 
@@ -98,14 +108,14 @@ private class OppgaveForKafkaBygger : OppgaveVisitor {
 
     override fun visitOppgave(
         id: Long,
-        type: Oppgavetype,
+        egenskap: Egenskap,
         tilstand: Oppgave.Tilstand,
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
         hendelseId: UUID,
         ferdigstiltAvOid: UUID?,
         ferdigstiltAvIdent: String?,
-        egenskaper: List<Oppgavetype>,
+        egenskaper: List<Egenskap>,
         tildelt: Saksbehandler?,
         påVent: Boolean,
         totrinnsvurdering: Totrinnsvurdering?
@@ -113,7 +123,7 @@ private class OppgaveForKafkaBygger : OppgaveVisitor {
         this.hendelseId = hendelseId
         this.oppgaveId = id
         this.status = mapTilstand(tilstand)
-        this.type = mapType(type)
+        this.type = mapEgenskap(egenskap)
         this.ferdigstiltAvIdent = ferdigstiltAvIdent
         this.ferdigstiltAvOid = ferdigstiltAvOid
         this.påVent = påVent
@@ -141,17 +151,18 @@ private class OppgaveForKafkaBygger : OppgaveVisitor {
         }
     }
 
-    private fun mapType(type: Oppgavetype): String {
-        return when (type) {
-            Oppgavetype.SØKNAD -> "SØKNAD"
-            Oppgavetype.STIKKPRØVE -> "STIKKPRØVE"
-            Oppgavetype.RISK_QA -> "RISK_QA"
-            Oppgavetype.REVURDERING -> "REVURDERING"
-            Oppgavetype.FORTROLIG_ADRESSE -> "FORTROLIG_ADRESSE"
-            Oppgavetype.UTBETALING_TIL_SYKMELDT -> "UTBETALING_TIL_SYKMELDT"
-            Oppgavetype.DELVIS_REFUSJON -> "DELVIS_REFUSJON"
-            Oppgavetype.UTBETALING_TIL_ARBEIDSGIVER -> "UTBETALING_TIL_ARBEIDSGIVER"
-            Oppgavetype.INGEN_UTBETALING -> "INGEN_UTBETALING"
+    private fun mapEgenskap(egenskap: Egenskap): String {
+        return when (egenskap) {
+            SØKNAD -> "SØKNAD"
+            STIKKPRØVE -> "STIKKPRØVE"
+            RISK_QA -> "RISK_QA"
+            REVURDERING -> "REVURDERING"
+            FORTROLIG_ADRESSE -> "FORTROLIG_ADRESSE"
+            UTBETALING_TIL_SYKMELDT -> "UTBETALING_TIL_SYKMELDT"
+            DELVIS_REFUSJON -> "DELVIS_REFUSJON"
+            UTBETALING_TIL_ARBEIDSGIVER -> "UTBETALING_TIL_ARBEIDSGIVER"
+            INGEN_UTBETALING -> "INGEN_UTBETALING"
+            EGEN_ANSATT -> "EGEN_ANSATT"
         }
     }
 }

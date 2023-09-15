@@ -8,9 +8,9 @@ import no.nav.helse.TestRapidHelpers.meldinger
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.modell.oppgave.SØKNAD
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
-import no.nav.helse.spesialist.api.oppgave.Oppgavetype.SØKNAD
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

@@ -9,7 +9,6 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.GODKJENT_UTEN_UTBETALING
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_GODKJENT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
-import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -28,7 +27,7 @@ internal class OppdaterOppgavestatusCommandTest {
             vedtaksperiodeId = UUID.randomUUID(),
             utbetalingId = UTBETALING_ID,
             hendelseId = UUID.randomUUID(),
-            egenskaper = listOf(Oppgavetype.SØKNAD)
+            egenskaper = listOf(SØKNAD)
         )
     }
 
