@@ -63,7 +63,7 @@ class Oppgave private constructor(
         harTilgangTil: Tilgangskontroll,
     ) {
         check(tilstand is AvventerSaksbehandler) { "Oppgave med id=$id i tilstand=$tilstand kan ikke tildeles" }
-        if (egenskap == STIKKPRØVE) {
+        if (egenskap is STIKKPRØVE) {
             logg.info("OppgaveId $id er stikkprøve og tildeles ikke på tross av reservasjon.")
             return
         }

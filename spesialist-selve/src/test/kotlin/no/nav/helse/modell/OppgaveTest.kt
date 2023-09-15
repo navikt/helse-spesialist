@@ -102,7 +102,7 @@ internal class OppgaveTest {
 
     @Test
     fun `Forsøker tildeling ved reservasjon ved manglende tilgang`() {
-        val oppgave = nyOppgave(STIKKPRØVE)
+        val oppgave = nyOppgave(RISK_QA)
         oppgave.forsøkTildeling(saksbehandler, påVent = true, harTilgangTil = { _, _ -> false })
 
         inspektør(oppgave) {
