@@ -15,7 +15,6 @@ import no.nav.helse.modell.HendelseDao.Hendelsetype.GODKJENNING
 import no.nav.helse.modell.HendelseDao.Hendelsetype.GOSYS_OPPGAVE_ENDRET
 import no.nav.helse.modell.HendelseDao.Hendelsetype.NYE_VARSLER
 import no.nav.helse.modell.HendelseDao.Hendelsetype.OPPDATER_PERSONSNAPSHOT
-import no.nav.helse.modell.HendelseDao.Hendelsetype.OVERSTYRING
 import no.nav.helse.modell.HendelseDao.Hendelsetype.OVERSTYRING_ARBEIDSFORHOLD
 import no.nav.helse.modell.HendelseDao.Hendelsetype.OVERSTYRING_IGANGSATT
 import no.nav.helse.modell.HendelseDao.Hendelsetype.OVERSTYRING_INNTEKT_OG_REFUSJON
@@ -41,7 +40,6 @@ import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.person.toFødselsnummer
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyringArbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyringInntektOgRefusjon
-import no.nav.helse.modell.saksbehandler.handlinger.OverstyringTidslinje
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsettingSykepengegrunnlag
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfeller
 import no.nav.helse.modell.utbetaling.UtbetalingAnnullert
@@ -226,7 +224,6 @@ internal class HendelseDao(private val dataSource: DataSource) {
             VEDTAKSPERIODE_FORKASTET -> hendelsefabrikk.vedtaksperiodeForkastet(json)
             GODKJENNING -> hendelsefabrikk.godkjenning(json)
             PÅMINNET_GODKJENNINGSBEHOV -> hendelsefabrikk.påminnetGodkjenningsbehov(json)
-            OVERSTYRING -> hendelsefabrikk.overstyringTidslinje(json)
             OVERSTYRING_INNTEKT_OG_REFUSJON -> hendelsefabrikk.overstyringInntektOgRefusjon(json)
             OVERSTYRING_ARBEIDSFORHOLD -> hendelsefabrikk.overstyringArbeidsforhold(json)
             SKJØNNSFASTSETTING_SYKEPENGEGRUNNLAG -> hendelsefabrikk.skjønnsfastsettingSykepengegrunnlag(json)
@@ -253,7 +250,6 @@ internal class HendelseDao(private val dataSource: DataSource) {
         is VedtaksperiodeForkastet -> VEDTAKSPERIODE_FORKASTET
         is Godkjenningsbehov -> GODKJENNING
         is PåminnetGodkjenningsbehov -> PÅMINNET_GODKJENNINGSBEHOV
-        is OverstyringTidslinje -> OVERSTYRING
         is OverstyringInntektOgRefusjon -> OVERSTYRING_INNTEKT_OG_REFUSJON
         is OverstyringArbeidsforhold -> OVERSTYRING_ARBEIDSFORHOLD
         is SkjønnsfastsettingSykepengegrunnlag -> SKJØNNSFASTSETTING_SYKEPENGEGRUNNLAG
@@ -276,7 +272,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
     }
 
     private enum class Hendelsetype {
-        ADRESSEBESKYTTELSE_ENDRET, VEDTAKSPERIODE_ENDRET, VEDTAKSPERIODE_FORKASTET, GODKJENNING, OVERSTYRING,
+        ADRESSEBESKYTTELSE_ENDRET, VEDTAKSPERIODE_ENDRET, VEDTAKSPERIODE_FORKASTET, GODKJENNING,
         SAKSBEHANDLERLØSNING, UTBETALING_ANNULLERT, OPPDATER_PERSONSNAPSHOT, UTBETALING_ENDRET,
         VEDTAKSPERIODE_REBEREGNET, OVERSTYRING_INNTEKT_OG_REFUSJON, OVERSTYRING_ARBEIDSFORHOLD,
         OVERSTYRING_IGANGSATT, GOSYS_OPPGAVE_ENDRET, ENDRET_SKJERMETINFO, VEDTAK_FATTET,

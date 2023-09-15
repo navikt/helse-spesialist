@@ -1,17 +1,19 @@
 package no.nav.helse.db
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
-class OverstyrtTidslinjeForDatabase(
+data class OverstyrtTidslinjeForDatabase(
     val id: UUID,
     val aktørId: String,
     val fødselsnummer: String,
     val organisasjonsnummer: String,
     val dager: List<OverstyrtTidslinjedagForDatabase>,
-    val begrunnelse: String
+    val begrunnelse: String,
+    val opprettet: LocalDateTime
 )
-class OverstyrtTidslinjedagForDatabase(
+data class OverstyrtTidslinjedagForDatabase(
     val dato: LocalDate,
     val type: String,
     val fraType: String,

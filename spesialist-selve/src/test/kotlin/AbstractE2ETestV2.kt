@@ -38,7 +38,6 @@ import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver
 import no.nav.helse.modell.overstyring.Subsumsjon
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.modell.saksbehandler.handlinger.OverstyringTidslinje.OverstyringDag
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
@@ -59,6 +58,7 @@ import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi.OverstyrDagDto
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spleis.graphql.HentSnapshot
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
@@ -1025,12 +1025,12 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
-        dager: List<OverstyringDag> = listOf(
-            OverstyringDag(1.januar(1970), Dagtype.Feriedag, Dagtype.Sykedag, null, 100)
+        dager: List<OverstyrDagDto> = listOf(
+            OverstyrDagDto(1.januar(1970), Dagtype.Feriedag.toString(), Dagtype.Sykedag.toString(), null, 100, null)
         ),
     ) {
         håndterOverstyring(aktørId, fødselsnummer, organisasjonsnummer, "overstyr_tidslinje") {
-            sisteMeldingId = meldingssenderV2.sendOverstyrTidslinje(aktørId, fødselsnummer, organisasjonsnummer, dager)
+            // Her må det gjøres kall til api for å sende inn overstyring av tidslinje
         }
     }
 

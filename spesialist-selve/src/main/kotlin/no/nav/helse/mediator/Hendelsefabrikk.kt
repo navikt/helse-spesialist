@@ -34,8 +34,6 @@ import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyringArbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyringInntektOgRefusjon
-import no.nav.helse.modell.saksbehandler.handlinger.OverstyringTidslinje
-import no.nav.helse.modell.saksbehandler.handlinger.OverstyringTidslinje.OverstyringDag
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsettingSykepengegrunnlag
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfeller
@@ -72,7 +70,6 @@ import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.notat.NotatMediator
-import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
@@ -129,18 +126,6 @@ internal class Hendelsefabrikk(
 
     internal companion object {
         private val mapper = jacksonObjectMapper()
-
-        fun JsonNode.toOverstyrteDager() =
-            map {
-                OverstyringDag(
-                    dato = it.path("dato").asLocalDate(),
-                    type = enumValueOf(it.path("type").asText()),
-                    fraType = enumValueOf<Dagtype>(it.path("fraType").asText()),
-                    grad = it.path("grad").asInt(),
-                    fraGrad = it.path("fraGrad").asInt()
-                )
-            }
-
     }
 
     internal fun sykefraværstilfelle(fødselsnummer: String, skjæringstidspunkt: LocalDate): Sykefraværstilfelle {
@@ -415,42 +400,6 @@ internal class Hendelsefabrikk(
                 UUID.fromString(it.asText())
             } ?: emptyList(),
             oppgaveId = jsonNode["oppgaveId"].asLong(),
-            json = json
-        )
-    }
-
-    fun overstyringTidslinje(
-        id: UUID,
-        fødselsnummer: String,
-        oid: UUID,
-        orgnummer: String,
-        begrunnelse: String,
-        overstyrteDager: List<OverstyringDag>,
-        opprettet: LocalDateTime,
-        json: String,
-    ) = OverstyringTidslinje(
-        id = id,
-        fødselsnummer = fødselsnummer,
-        oid = oid,
-        orgnummer = orgnummer,
-        begrunnelse = begrunnelse,
-        overstyrteDager = overstyrteDager,
-        opprettet = opprettet,
-        json = json,
-        overstyringDao = overstyringDao,
-        overstyringMediator = overstyringMediator,
-    )
-
-    fun overstyringTidslinje(json: String): OverstyringTidslinje {
-        val jsonNode = mapper.readTree(json)
-        return overstyringTidslinje(
-            id = UUID.fromString(jsonNode.path("@id").asText()),
-            fødselsnummer = jsonNode.path("fødselsnummer").asText(),
-            oid = UUID.fromString(jsonNode.path("saksbehandlerOid").asText()),
-            orgnummer = jsonNode.path("organisasjonsnummer").asText(),
-            begrunnelse = jsonNode.path("begrunnelse").asText(),
-            overstyrteDager = jsonNode.path("dager").toOverstyrteDager(),
-            opprettet = LocalDateTime.parse(jsonNode.path("@opprettet").asText()),
             json = json
         )
     }

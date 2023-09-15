@@ -8,7 +8,6 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.HelseDao
 import no.nav.helse.db.OverstyrtTidslinjeForDatabase
-import no.nav.helse.modell.saksbehandler.handlinger.OverstyringTidslinje
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import org.intellij.lang.annotations.Language
@@ -108,82 +107,6 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
     ).single { row -> row.uuid("ekstern_hendelse_id") })
 
     internal fun persisterOverstyringTidslinje(
-        hendelseId: UUID,
-        eksternHendelseId: UUID,
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-        begrunnelse: String,
-        overstyrteDager: List<OverstyringTidslinje.OverstyringDag>,
-        saksbehandlerRef: UUID,
-        tidspunkt: LocalDateTime,
-    ) {
-        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-            @Language("PostgreSQL")
-            val opprettOverstyringQuery = """
-                INSERT INTO overstyring(hendelse_ref, ekstern_hendelse_id, person_ref, saksbehandler_ref, tidspunkt)
-                SELECT :hendelse_id, :ekstern_hendelse_id, p.id, :saksbehandler_ref, :tidspunkt
-                FROM person p
-                WHERE p.fodselsnummer = :fodselsnummer
-            """.trimIndent()
-
-            @Language("PostgreSQL")
-            val opprettOverstyringTidslinjeQuery = """
-                INSERT INTO overstyring_tidslinje(overstyring_ref, arbeidsgiver_ref, begrunnelse)
-                SELECT :overstyring_ref, ag.id, :begrunnelse
-                FROM arbeidsgiver ag
-                WHERE ag.orgnummer = :orgnr
-            """.trimIndent()
-
-            @Language("PostgreSQL")
-            val opprettOverstyringDagQuery = """
-                INSERT INTO overstyring_dag(dato, dagtype, grad, fra_dagtype, fra_grad, overstyring_tidslinje_ref)
-                VALUES (:dato, :dagtype, :grad, :fra_dagtype, :fra_grad, :overstyring_tidslinje_ref)
-            """.trimIndent()
-
-            session.transaction { transactionalSession ->
-                val overstyringRef = transactionalSession.run(
-                    queryOf(
-                        opprettOverstyringQuery,
-                        mapOf(
-                            "hendelse_id" to hendelseId,
-                            "ekstern_hendelse_id" to eksternHendelseId,
-                            "fodselsnummer" to fødselsnummer.toLong(),
-                            "saksbehandler_ref" to saksbehandlerRef,
-                            "tidspunkt" to tidspunkt
-                        )
-                    ).asUpdateAndReturnGeneratedKey
-                )
-                val overstyringTidslinjeRef = transactionalSession.run(
-                    queryOf(
-                        opprettOverstyringTidslinjeQuery,
-                        mapOf(
-                            "overstyring_ref" to overstyringRef,
-                            "orgnr" to organisasjonsnummer.toLong(),
-                            "begrunnelse" to begrunnelse,
-                        )
-                    ).asUpdateAndReturnGeneratedKey
-                )
-                overstyrteDager.forEach { dag ->
-                    transactionalSession.run(
-                        queryOf(
-                            opprettOverstyringDagQuery,
-                            mapOf(
-                                "dato" to dag.dato,
-                                "dagtype" to dag.type.toString(),
-                                "grad" to dag.grad,
-                                "fra_dagtype" to dag.fraType.toString(),
-                                "fra_grad" to dag.fraGrad,
-                                "overstyring_tidslinje_ref" to overstyringTidslinjeRef
-                            )
-                        ).asUpdate
-                    )
-                }
-            }
-        }
-    }
-
-
-    internal fun persisterOverstyringTidslinje(
         overstyrtTidslinje: OverstyrtTidslinjeForDatabase,
         saksbehandlerOid: UUID
     ) {
@@ -218,7 +141,7 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
                             "ekstern_hendelse_id" to overstyrtTidslinje.id,
                             "fodselsnummer" to overstyrtTidslinje.fødselsnummer.toLong(),
                             "saksbehandler_ref" to saksbehandlerOid,
-                            "tidspunkt" to LocalDateTime.now()
+                            "tidspunkt" to overstyrtTidslinje.opprettet
                         )
                     ).asUpdateAndReturnGeneratedKey
                 )

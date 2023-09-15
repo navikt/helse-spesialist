@@ -2,7 +2,6 @@ package no.nav.helse.mediator
 
 import java.util.UUID
 import javax.sql.DataSource
-import net.logstash.logback.argument.StructuredArguments
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.overstyring.Overstyringlagrer
 import no.nav.helse.modell.overstyring.OverstyringDao
@@ -82,8 +81,8 @@ class SaksbehandlerMediator(
                 is Overstyring -> håndter(modellhandling, saksbehandler)
                 else -> modellhandling.utførAv(saksbehandler)
             }
+            sikkerlogg.info("Handling ${handlingFraApi.loggnavn()} utført")
         }
-        sikkerlogg.info("Handling ${handlingFraApi.loggnavn()} utført")
     }
 
     private fun <T : Overstyring> håndter(handling: T, saksbehandler: Saksbehandler) {

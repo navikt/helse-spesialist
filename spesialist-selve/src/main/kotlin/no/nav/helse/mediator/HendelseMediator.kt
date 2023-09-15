@@ -17,7 +17,6 @@ import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshotRiver
 import no.nav.helse.mediator.meldinger.OverstyringArbeidsforholdRiver
 import no.nav.helse.mediator.meldinger.OverstyringIgangsattRiver
 import no.nav.helse.mediator.meldinger.OverstyringInntektOgRefusjonRiver
-import no.nav.helse.mediator.meldinger.OverstyringTidslinjeRiver
 import no.nav.helse.mediator.meldinger.PåminnetGodkjenningsbehovRiver
 import no.nav.helse.mediator.meldinger.SkjønnsfastsettingSykepengegrunnlagRiver
 import no.nav.helse.mediator.meldinger.SykefraværstilfellerRiver
@@ -57,7 +56,6 @@ import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver
 import no.nav.helse.modell.overstyring.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.person.AdressebeskyttelseEndretRiver
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.modell.saksbehandler.handlinger.OverstyringTidslinje.OverstyringDag
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.Varsel
@@ -111,7 +109,6 @@ internal class HendelseMediator(
             VedtaksperiodeForkastetRiver(it, this)
             VedtaksperiodeEndretRiver(it, this)
             AdressebeskyttelseEndretRiver(it, this)
-            OverstyringTidslinjeRiver(it, this)
             OverstyringInntektOgRefusjonRiver(it, this)
             OverstyringArbeidsforholdRiver(it, this)
             SkjønnsfastsettingSykepengegrunnlagRiver(it, this)
@@ -428,31 +425,6 @@ internal class HendelseMediator(
                 saksbehandleroverstyringer,
                 oppgaveId,
                 message.toJson()
-            ), context
-        )
-    }
-
-    fun overstyringTidslinje(
-        id: UUID,
-        fødselsnummer: String,
-        oid: UUID,
-        orgnummer: String,
-        begrunnelse: String,
-        overstyrteDager: List<OverstyringDag>,
-        opprettet: LocalDateTime,
-        json: String,
-        context: MessageContext,
-    ) {
-        utfør(
-            fødselsnummer, hendelsefabrikk.overstyringTidslinje(
-                id = id,
-                fødselsnummer = fødselsnummer,
-                oid = oid,
-                orgnummer = orgnummer,
-                begrunnelse = begrunnelse,
-                overstyrteDager = overstyrteDager,
-                opprettet = opprettet,
-                json = json
             ), context
         )
     }

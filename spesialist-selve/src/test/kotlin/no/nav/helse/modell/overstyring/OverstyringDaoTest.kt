@@ -4,11 +4,11 @@ import DatabaseIntegrationTest
 import io.mockk.mockk
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.db.OverstyrtTidslinjeForDatabase
+import no.nav.helse.db.OverstyrtTidslinjedagForDatabase
 import no.nav.helse.januar
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyringArbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyringInntektOgRefusjon
-import no.nav.helse.modell.saksbehandler.handlinger.OverstyringTidslinje
-import no.nav.helse.modell.saksbehandler.handlinger.OverstyringTidslinje.OverstyringDag
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsettingSykepengegrunnlag
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
@@ -47,12 +47,13 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         private const val FORKLARING = "Forklaring"
         private const val ÅRSAK = "Årsak"
         private val OVERSTYRTE_DAGER = listOf(
-            OverstyringDag(
+            OverstyrtTidslinjedagForDatabase(
                 dato = LocalDate.of(2020, 1, 1),
-                type = Dagtype.Sykedag,
+                type = Dagtype.Sykedag.toString(),
                 grad = 100,
-                fraType = Dagtype.Feriedag,
-                fraGrad = null
+                fraType = Dagtype.Feriedag.toString(),
+                fraGrad = null,
+                subsumsjon =  null,
             )
         )
         private val OPPRETTET = LocalDate.of(2022, 6, 9).atStartOfDay()
@@ -77,16 +78,17 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `Kan koble overstyringhendelse og vedtaksperiode`() {
         opprettPerson()
-        hendelseDao.opprett(overstyringTidslinje())
         overstyringDao.persisterOverstyringTidslinje(
-            ID,
-            EKSTERN_HENDELSE_ID,
-            FØDSELSNUMMER,
-            ORGNUMMER,
-            BEGRUNNELSE,
-            OVERSTYRTE_DAGER,
+            OverstyrtTidslinjeForDatabase(
+                EKSTERN_HENDELSE_ID,
+                AKTØR_ID,
+                FØDSELSNUMMER,
+                ORGNUMMER,
+                OVERSTYRTE_DAGER,
+                BEGRUNNELSE,
+                OPPRETTET,
+            ),
             OID,
-            OPPRETTET
         )
         overstyringDao.kobleOverstyringOgVedtaksperiode(listOf(VEDTAKSPERIODE), EKSTERN_HENDELSE_ID)
 
@@ -97,16 +99,17 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `Finnes ekstern_hendelse_id i overstyringtabell`() {
         opprettPerson()
-        hendelseDao.opprett(overstyringTidslinje())
         overstyringDao.persisterOverstyringTidslinje(
-            ID,
-            EKSTERN_HENDELSE_ID,
-            FØDSELSNUMMER,
-            ORGNUMMER,
-            BEGRUNNELSE,
-            OVERSTYRTE_DAGER,
+            OverstyrtTidslinjeForDatabase(
+                EKSTERN_HENDELSE_ID,
+                AKTØR_ID,
+                FØDSELSNUMMER,
+                ORGNUMMER,
+                OVERSTYRTE_DAGER,
+                BEGRUNNELSE,
+                OPPRETTET,
+            ),
             OID,
-            OPPRETTET
         )
 
         assertTrue(overstyringDao.finnesEksternHendelseId(EKSTERN_HENDELSE_ID))
@@ -116,16 +119,17 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `Vedtaksperiode har ikke pågående overstyring etter ferdigstilling`() {
         opprettPerson()
-        hendelseDao.opprett(overstyringTidslinje())
         overstyringDao.persisterOverstyringTidslinje(
-            ID,
-            EKSTERN_HENDELSE_ID,
-            FØDSELSNUMMER,
-            ORGNUMMER,
-            BEGRUNNELSE,
-            OVERSTYRTE_DAGER,
+            OverstyrtTidslinjeForDatabase(
+                EKSTERN_HENDELSE_ID,
+                AKTØR_ID,
+                FØDSELSNUMMER,
+                ORGNUMMER,
+                OVERSTYRTE_DAGER,
+                BEGRUNNELSE,
+                OPPRETTET,
+            ),
             OID,
-            OPPRETTET
         )
         overstyringDao.kobleOverstyringOgVedtaksperiode(listOf(VEDTAKSPERIODE), EKSTERN_HENDELSE_ID)
 
@@ -144,24 +148,24 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `Finner opprettede tidslinjeoverstyringer`() {
         opprettPerson()
-        hendelseDao.opprett(overstyringTidslinje())
         overstyringDao.persisterOverstyringTidslinje(
-            ID,
-            EKSTERN_HENDELSE_ID,
-            FØDSELSNUMMER,
-            ORGNUMMER,
-            BEGRUNNELSE,
-            OVERSTYRTE_DAGER,
+            OverstyrtTidslinjeForDatabase(
+                EKSTERN_HENDELSE_ID,
+                AKTØR_ID,
+                FØDSELSNUMMER,
+                ORGNUMMER,
+                OVERSTYRTE_DAGER,
+                BEGRUNNELSE,
+                OPPRETTET,
+            ),
             OID,
-            OPPRETTET
         )
         val hentetOverstyring = overstyringApiDao.finnOverstyringerAvTidslinjer(FØDSELSNUMMER, ORGNUMMER).first()
 
-        assertEquals(ID, hentetOverstyring.hendelseId)
         assertEquals(BEGRUNNELSE, hentetOverstyring.begrunnelse)
         assertEquals(FØDSELSNUMMER, hentetOverstyring.fødselsnummer)
         assertEquals(ORGNUMMER, hentetOverstyring.organisasjonsnummer)
-        assertEquals(OVERSTYRTE_DAGER, hentetOverstyring.overstyrteDager.map { it.dtoToModell() })
+        assertEquals(OVERSTYRTE_DAGER, hentetOverstyring.overstyrteDager.map { it.dtoToDatabase() })
         assertEquals(SAKSBEHANDLER_NAVN, hentetOverstyring.saksbehandlerNavn)
         assertEquals(SAKSBEHANDLER_IDENT, hentetOverstyring.saksbehandlerIdent)
         assertEquals(OPPRETTET, hentetOverstyring.timestamp)
@@ -400,19 +404,6 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         )
     )
 
-    private fun overstyringTidslinje() = OverstyringTidslinje(
-        id = ID,
-        fødselsnummer = FØDSELSNUMMER,
-        oid = OID,
-        orgnummer = ORGNUMMER,
-        begrunnelse = BEGRUNNELSE,
-        overstyrteDager = OVERSTYRTE_DAGER,
-        opprettet = OPPRETTET,
-        json = "{}",
-        overstyringDao = overstyringDao,
-        overstyringMediator = mockk(),
-    )
-
     private fun overstyringArbeidsforhold() = OverstyringArbeidsforhold(
         id = ID,
         fødselsnummer = FØDSELSNUMMER,
@@ -439,12 +430,13 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         overstyringMediator = mockk(),
     )
 
-    private fun OverstyringDagDto.dtoToModell(): OverstyringDag =
-        OverstyringDag(
+    private fun OverstyringDagDto.dtoToDatabase(): OverstyrtTidslinjedagForDatabase =
+        OverstyrtTidslinjedagForDatabase(
             dato = this.dato,
-            type = this.type,
-            fraType = this.fraType,
+            type = this.type.toString(),
+            fraType = this.fraType.toString(),
             grad = this.grad,
             fraGrad = this.fraGrad,
+            subsumsjon = null,
         )
 }

@@ -11,7 +11,6 @@ import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver
 import no.nav.helse.modell.overstyring.Subsumsjon
-import no.nav.helse.modell.saksbehandler.handlinger.OverstyringTidslinje.OverstyringDag
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
@@ -661,31 +660,6 @@ internal object TestmeldingsfabrikkV2 {
                 "@opprettet" to LocalDateTime.now()
             )
         )
-
-    fun lagOverstyringTidslinje(
-        aktørId: String,
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-        dager: List<OverstyringDag> = emptyList(),
-        begrunnelse: String = "begrunnelse",
-        saksbehandleroid: UUID = UUID.randomUUID(),
-        saksbehandlernavn: String = "saksbehandler",
-        saksbehandlerepost: String = "saksbehandler@nav.no",
-        saksbehandlerident: String = "saksbehandlerIdent",
-        id: UUID,
-    ) = nyHendelse(
-        id, "saksbehandler_overstyrer_tidslinje", mapOf(
-            "aktørId" to aktørId,
-            "fødselsnummer" to fødselsnummer,
-            "organisasjonsnummer" to organisasjonsnummer,
-            "dager" to dager,
-            "begrunnelse" to begrunnelse,
-            "saksbehandlerOid" to saksbehandleroid,
-            "saksbehandlerIdent" to saksbehandlerident,
-            "saksbehandlerNavn" to saksbehandlernavn,
-            "saksbehandlerEpost" to saksbehandlerepost
-        )
-    )
 
     fun lagOverstyringInntektOgRefusjon(
         aktørId: String,

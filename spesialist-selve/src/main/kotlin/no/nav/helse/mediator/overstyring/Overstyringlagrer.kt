@@ -1,5 +1,6 @@
 package no.nav.helse.mediator.overstyring
 
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.db.OverstyrtTidslinjeForDatabase
 import no.nav.helse.db.OverstyrtTidslinjedagForDatabase
@@ -37,6 +38,7 @@ class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
             )
         },
         begrunnelse = begrunnelse,
+        opprettet = LocalDateTime.now(),
     )
 
     private fun SubsumsjonDto.tilDatabase() = SubsumsjonForDatabase(paragraf = paragraf, ledd = ledd, bokstav = bokstav)

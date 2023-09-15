@@ -13,7 +13,6 @@ import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Vergemå
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver
 import no.nav.helse.modell.overstyring.Subsumsjon
-import no.nav.helse.modell.saksbehandler.handlinger.OverstyringTidslinje.OverstyringDag
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
@@ -24,8 +23,6 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
-import no.nav.helse.spesialist.api.overstyring.Dagtype.Feriedag
-import no.nav.helse.spesialist.api.overstyring.Dagtype.Sykedag
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.person.Kjønn
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdDto
@@ -699,31 +696,6 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
                 meldingsfabrikk.lagOppdaterPersonsnapshot(aktørId, fødselsnummer, id)
             )
         }
-
-    fun sendOverstyrTidslinje(
-        aktørId: String,
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-        dager: List<OverstyringDag> = listOf(
-            OverstyringDag(1.januar(1970), Feriedag, Sykedag, null, 100)
-        ),
-        saksbehandlerident: String = Testdata.SAKSBEHANDLER_IDENT,
-        saksbehandlerepost: String = Testdata.SAKSBEHANDLER_EPOST,
-        saksbehandleroid: UUID = Testdata.SAKSBEHANDLER_OID,
-    ): UUID = newUUID.also { id ->
-        testRapid.sendTestMessage(
-            meldingsfabrikk.lagOverstyringTidslinje(
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                organisasjonsnummer = organisasjonsnummer,
-                dager = dager,
-                saksbehandleroid = saksbehandleroid,
-                saksbehandlerepost = saksbehandlerepost,
-                saksbehandlerident = saksbehandlerident,
-                id = id,
-            )
-        )
-    }
 
     fun sendOverstyrtArbeidsforhold(
         aktørId: String,
