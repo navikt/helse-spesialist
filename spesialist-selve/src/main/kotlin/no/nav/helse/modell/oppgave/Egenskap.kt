@@ -1,21 +1,20 @@
 package no.nav.helse.modell.oppgave
 
-import java.util.UUID
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 
 sealed interface Egenskap
 
-sealed class TilgangsstyrtEgenskap(private val tilgangsgruppe: UUID): Egenskap {
+sealed interface TilgangsstyrtEgenskap : Egenskap {
     fun kanBehandlesAv(saksbehandler: Saksbehandler): Boolean {
         TODO()
     }
 }
 
-data object RISK_QA: TilgangsstyrtEgenskap(UUID.randomUUID())
+data object RISK_QA: TilgangsstyrtEgenskap
 
-data object FORTROLIG_ADRESSE: TilgangsstyrtEgenskap(UUID.randomUUID())
+data object FORTROLIG_ADRESSE: TilgangsstyrtEgenskap
 
-data object EGEN_ANSATT: TilgangsstyrtEgenskap(UUID.randomUUID())
+data object EGEN_ANSATT: TilgangsstyrtEgenskap
 
 data object REVURDERING: Egenskap
 
