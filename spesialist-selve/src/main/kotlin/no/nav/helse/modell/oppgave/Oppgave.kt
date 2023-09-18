@@ -57,7 +57,7 @@ class Oppgave private constructor(
         observers.add(observer)
     }
 
-    internal fun forsøkTildeling(
+    internal fun forsøkTildelingVedReservasjon(
         saksbehandler: Saksbehandler,
         påVent: Boolean = false,
         harTilgangTil: Tilgangskontroll,

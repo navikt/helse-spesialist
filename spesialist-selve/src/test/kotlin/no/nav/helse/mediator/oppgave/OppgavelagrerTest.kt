@@ -106,7 +106,7 @@ class OppgavelagrerTest: DatabaseIntegrationTest() {
     @Test
     fun `lagre oppgave uten totrinnsvurdering`() {
         val oppgave = nyOppgave(medTotrinnsvurdering = false)
-        oppgave.forsøkTildeling(saksbehandler, harTilgangTil = { _, _ -> true })
+        oppgave.forsøkTildelingVedReservasjon(saksbehandler, harTilgangTil = { _, _ -> true })
         val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
         oppgave.accept(oppgavelagrer)
 
@@ -119,7 +119,7 @@ class OppgavelagrerTest: DatabaseIntegrationTest() {
     @Test
     fun `lagre oppgave`() {
         val oppgave = nyOppgave(medTotrinnsvurdering = true)
-        oppgave.forsøkTildeling(saksbehandler, harTilgangTil = { _, _ -> true })
+        oppgave.forsøkTildelingVedReservasjon(saksbehandler, harTilgangTil = { _, _ -> true })
         val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
         oppgave.accept(oppgavelagrer)
 
@@ -160,7 +160,7 @@ class OppgavelagrerTest: DatabaseIntegrationTest() {
     @Test
     fun `oppdatere oppgave uten totrinnsvurdering`() {
         val oppgave = nyOppgave(medTotrinnsvurdering = false)
-        oppgave.forsøkTildeling(saksbehandler, harTilgangTil = { _, _ -> true })
+        oppgave.forsøkTildelingVedReservasjon(saksbehandler, harTilgangTil = { _, _ -> true })
         oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
         oppgave.ferdigstill()
         val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
@@ -175,7 +175,7 @@ class OppgavelagrerTest: DatabaseIntegrationTest() {
     @Test
     fun `oppdatere oppgave`() {
         val oppgave = nyOppgave(medTotrinnsvurdering = true)
-        oppgave.forsøkTildeling(saksbehandler, harTilgangTil = { _, _ -> true })
+        oppgave.forsøkTildelingVedReservasjon(saksbehandler, harTilgangTil = { _, _ -> true })
         oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
         oppgave.ferdigstill()
         val oppgavelagrer = Oppgavelagrer(nyTildelingDao)

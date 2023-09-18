@@ -146,7 +146,7 @@ internal class OppgaveMediator(
         // TODO: skal ikke være SaksbehandlerFraApi, men SaksbehandlerFraDatabase. Må fikses når ReservasjonDao kan flyttes til selve.db
         val (saksbehandlerFraDatabase, settPåVent) = reservasjonDao.hentReservasjonFor(fødselsnummer) ?: return
         val saksbehandler = Saksbehandler(saksbehandlerFraDatabase.epost, saksbehandlerFraDatabase.oid, saksbehandlerFraDatabase.navn, saksbehandlerFraDatabase.ident)
-        oppgave.forsøkTildeling(saksbehandler, settPåVent, harTilgangTil)
+        oppgave.forsøkTildelingVedReservasjon(saksbehandler, settPåVent, harTilgangTil)
     }
 
     fun harFerdigstiltOppgave(vedtaksperiodeId: UUID) = oppgaveDao.harFerdigstiltOppgave(vedtaksperiodeId)
