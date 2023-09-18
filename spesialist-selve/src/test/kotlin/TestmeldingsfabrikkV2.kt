@@ -700,7 +700,7 @@ internal object TestmeldingsfabrikkV2 {
         fødselsnummer: String,
         organisasjonsnummer: String,
         skjæringstidspunkt: LocalDate,
-        overstyrteArbeidsforhold: List<OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdDto>,
+        overstyrteArbeidsforhold: List<OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdFraApi>,
         saksbehandleroid: UUID = UUID.randomUUID(),
         saksbehandlernavn: String = "saksbehandler",
         saksbehandlerepost: String = "sara.saksbehandler@nav.no",

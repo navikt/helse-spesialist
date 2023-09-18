@@ -23,7 +23,7 @@ internal class TotrinnsvurderingE2ETest : AbstractE2ETestV2() {
         fremTilSaksbehandleroppgave(andreArbeidsforhold = listOf(ORGNR_GHOST))
         håndterOverstyrArbeidsforhold(
             overstyrteArbeidsforhold = listOf(
-                OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdDto(
+                OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdFraApi(
                     orgnummer = ORGNR_GHOST,
                     deaktivert = true,
                     begrunnelse = "begrunnelse",

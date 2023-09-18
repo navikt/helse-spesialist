@@ -103,7 +103,7 @@ internal class OverstyringIntegrationTest : AbstractE2ETest() {
             aktørId = AKTØR,
             skjæringstidspunkt = 1.januar,
             overstyrteArbeidsforhold = listOf(
-                OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdDto(
+                OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdFraApi(
                     orgnummer = ORGNR_GHOST,
                     deaktivert = true,
                     begrunnelse = "en begrunnelse",

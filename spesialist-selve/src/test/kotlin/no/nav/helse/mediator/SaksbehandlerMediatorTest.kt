@@ -261,7 +261,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
             aktørId = AKTØR_ID,
             skjæringstidspunkt = 1.januar,
             overstyrteArbeidsforhold = listOf(
-                OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdDto(
+                OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdFraApi(
                     orgnummer = ORGANISASJONSNUMMER_GHOST,
                     deaktivert = true,
                     begrunnelse = "en begrunnelse",

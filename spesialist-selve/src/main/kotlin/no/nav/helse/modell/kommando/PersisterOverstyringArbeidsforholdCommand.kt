@@ -10,7 +10,7 @@ internal class PersisterOverstyringArbeidsforholdCommand(
     private val oid: UUID,
     private val hendelseId: UUID,
     private val fødselsnummer: String,
-    private val overstyrteArbeidsforhold: List<OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdDto>,
+    private val overstyrteArbeidsforhold: List<OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdFraApi>,
     private val skjæringstidspunkt: LocalDate,
     private val opprettet: LocalDateTime,
     private val overstyringDao: OverstyringDao

@@ -64,13 +64,13 @@ data class OverstyrArbeidsforholdHandlingFraApi(
     val fødselsnummer: String,
     val aktørId: String,
     val skjæringstidspunkt: LocalDate,
-    val overstyrteArbeidsforhold: List<ArbeidsforholdDto>,
+    val overstyrteArbeidsforhold: List<ArbeidsforholdFraApi>,
 ) : HandlingFraApi {
 
     override fun loggnavn(): String = "overstyr_arbeidsforhold"
 
     @JsonIgnoreProperties
-    data class ArbeidsforholdDto(
+    data class ArbeidsforholdFraApi(
         val orgnummer: String,
         val deaktivert: Boolean,
         val begrunnelse: String,

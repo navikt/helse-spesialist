@@ -133,7 +133,7 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
                 aktørId = overstyring.aktorId,
                 skjæringstidspunkt = LocalDate.parse(overstyring.skjaringstidspunkt),
                 overstyrteArbeidsforhold = overstyring.overstyrteArbeidsforhold.map { arbeidsforhold ->
-                    OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdDto(
+                    OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdFraApi(
                         orgnummer = arbeidsforhold.orgnummer,
                         deaktivert = arbeidsforhold.deaktivert,
                         begrunnelse = arbeidsforhold.begrunnelse,

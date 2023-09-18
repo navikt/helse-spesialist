@@ -449,7 +449,7 @@ internal class Hendelsefabrikk(
         id: UUID,
         fødselsnummer: String,
         oid: UUID,
-        overstyrteArbeidsforhold: List<OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdDto>,
+        overstyrteArbeidsforhold: List<OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdFraApi>,
         skjæringstidspunkt: LocalDate,
         opprettet: LocalDateTime,
         json: String,
@@ -472,7 +472,7 @@ internal class Hendelsefabrikk(
             fødselsnummer = jsonNode.path("fødselsnummer").asText(),
             oid = UUID.fromString(jsonNode.path("saksbehandlerOid").asText()),
             overstyrteArbeidsforhold = jsonNode.path("overstyrteArbeidsforhold").map {
-                OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdDto(
+                OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdFraApi(
                     it["orgnummer"].asText(),
                     it["deaktivert"].asBoolean(),
                     it["begrunnelse"].asText(),

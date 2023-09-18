@@ -16,7 +16,7 @@ internal class OverstyringArbeidsforhold(
     override val id: UUID,
     private val fødselsnummer: String,
     oid: UUID,
-    overstyrteArbeidsforhold: List<OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdDto>,
+    overstyrteArbeidsforhold: List<OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdFraApi>,
     skjæringstidspunkt: LocalDate,
     opprettet: LocalDateTime,
     private val json: String,

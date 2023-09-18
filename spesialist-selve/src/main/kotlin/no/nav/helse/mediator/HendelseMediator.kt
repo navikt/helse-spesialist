@@ -479,7 +479,7 @@ internal class HendelseMediator(
         id: UUID,
         fødselsnummer: String,
         oid: UUID,
-        overstyrteArbeidsforhold: List<OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdDto>,
+        overstyrteArbeidsforhold: List<OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdFraApi>,
         skjæringstidspunkt: LocalDate,
         opprettet: LocalDateTime,
         json: String,

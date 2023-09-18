@@ -7,7 +7,7 @@ import no.nav.helse.spesialist.api.februar
 import no.nav.helse.spesialist.api.januar
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.LovhjemmelFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverFraApi.RefusjonselementFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi
@@ -79,7 +79,7 @@ internal class OverstyringApiTest: AbstractE2ETest() {
             aktørId = AKTØR_ID,
             skjæringstidspunkt = 1.januar,
             overstyrteArbeidsforhold = listOf(
-                ArbeidsforholdDto(
+                ArbeidsforholdFraApi(
                     orgnummer = ORGANISASJONSNUMMER_GHOST,
                     deaktivert = true,
                     begrunnelse = "en begrunnelse",

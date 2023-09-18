@@ -99,7 +99,7 @@ internal class OverstyringE2ETest : AbstractE2ETestV2() {
         fremTilSaksbehandleroppgave()
         håndterOverstyrArbeidsforhold(
             overstyrteArbeidsforhold = listOf(
-                OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdDto(
+                OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdFraApi(
                     orgnummer = ORGNR,
                     deaktivert = true,
                     begrunnelse = "begrunnelse",

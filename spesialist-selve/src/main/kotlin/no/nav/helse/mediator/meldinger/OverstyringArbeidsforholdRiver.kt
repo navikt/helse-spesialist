@@ -57,7 +57,7 @@ internal class OverstyringArbeidsforholdRiver(
             fødselsnummer = packet["fødselsnummer"].asText(),
             oid = UUID.fromString(packet["saksbehandlerOid"].asText()),
             overstyrteArbeidsforhold = packet["overstyrteArbeidsforhold"].map {
-                OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdDto(
+                OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdFraApi(
                     it["orgnummer"].asText(),
                     it["deaktivert"].asBoolean(),
                     it["begrunnelse"].asText(),

@@ -25,7 +25,7 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.person.Kjønn
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdFraApi
 import org.junit.jupiter.api.Assertions.assertEquals
 
 internal class MeldingssenderV2(private val testRapid: TestRapid) {
@@ -703,8 +703,8 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
         organisasjonsnummer: String,
         skjæringstidspunkt: LocalDate = 1.januar(1970),
         saksbehandlerOid: UUID,
-        overstyrteArbeidsforhold: List<ArbeidsforholdDto> = listOf(
-            ArbeidsforholdDto(organisasjonsnummer, true, "begrunnelse", "forklaring")
+        overstyrteArbeidsforhold: List<ArbeidsforholdFraApi> = listOf(
+            ArbeidsforholdFraApi(organisasjonsnummer, true, "begrunnelse", "forklaring")
         ),
     ): UUID = newUUID.also { id ->
         testRapid.sendTestMessage(

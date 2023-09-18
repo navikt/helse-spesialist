@@ -402,7 +402,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         fødselsnummer = FØDSELSNUMMER,
         oid = OID,
         overstyrteArbeidsforhold = listOf(
-            OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdDto(
+            OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdFraApi(
                 orgnummer = GHOST_ORGNUMMER,
                 deaktivert = DEAKTIVERT,
                 begrunnelse = BEGRUNNELSE,
