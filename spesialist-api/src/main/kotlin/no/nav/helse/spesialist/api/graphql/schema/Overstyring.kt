@@ -38,7 +38,7 @@ data class OverstyringArbeidsgiver(
     val fraRefusjonsopplysninger: List<OverstyringRefusjonselement>?,
     val begrunnelse: String,
     val forklaring: String,
-    val subsumsjon: Subsumsjon?,
+    val subsumsjon: Lovhjemmel?,
 ) {
 
     data class OverstyringRefusjonselement(
@@ -54,5 +54,6 @@ data class OverstyringDag (
     val fraType: String,
     val grad: Int?,
     val fraGrad: Int?,
-    val subsumsjon: Subsumsjon?
+    val subsumsjon: Lovhjemmel?,
+    val lovhjemmel: Lovhjemmel?
 )

@@ -16,7 +16,7 @@ data class SkjonnsfastsettelseArbeidsgiver(
     val begrunnelseMal: String?,
     val begrunnelseFritekst: String?,
     val begrunnelseKonklusjon: String?,
-    val subsumsjon: Subsumsjon?,
+    val subsumsjon: Lovhjemmel?,
     val initierendeVedtaksperiodeId: String?,
 ) {
 

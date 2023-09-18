@@ -46,7 +46,7 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
                         subsumsjon = it.subsumsjon?.let { subsumsjon ->
                             SubsumsjonDto(
                                 subsumsjon.paragraf,
-                                subsumsjon.paragraf,
+                                subsumsjon.ledd,
                                 subsumsjon.bokstav
                             )
                         },
