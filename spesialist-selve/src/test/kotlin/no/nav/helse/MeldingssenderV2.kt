@@ -731,6 +731,7 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
                 månedligInntekt = 15000.0,
                 fraMånedligInntekt = 25001.0,
                 forklaring = "testbortforklaring",
+                lovhjemmel = null,
                 subsumsjon = LovhjemmelFraApi("8-28", "LEDD_1", "BOKSTAV_A", "folketrygdloven", "1970-01-01"),
                 refusjonsopplysninger = null,
                 fraRefusjonsopplysninger = null,

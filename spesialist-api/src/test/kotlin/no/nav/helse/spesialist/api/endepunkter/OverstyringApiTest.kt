@@ -113,6 +113,7 @@ internal class OverstyringApiTest: AbstractE2ETest() {
                         RefusjonselementDto(1.februar, null, 23000.0),
                     ),
                     subsumsjon = LovhjemmelFraApi("8-28", "3", null, "folketrygdloven", "1970-01-01"),
+                    lovhjemmel = null,
                     begrunnelse = "En begrunnelse",
                     forklaring = "En forklaring"
                 ),

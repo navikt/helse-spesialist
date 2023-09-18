@@ -49,6 +49,7 @@ data class OverstyrInntektOgRefusjonHandlingFraApi(
         val begrunnelse: String,
         val forklaring: String,
         val subsumsjon: LovhjemmelFraApi?,
+        val lovhjemmel: LovhjemmelFraApi?,
     ) {
 
         data class RefusjonselementDto(

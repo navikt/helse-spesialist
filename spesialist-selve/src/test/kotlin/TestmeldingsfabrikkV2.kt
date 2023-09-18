@@ -670,6 +670,7 @@ internal object TestmeldingsfabrikkV2 {
                 månedligInntekt = 25000.0,
                 fraMånedligInntekt = 25001.0,
                 forklaring = "testbortforklaring",
+                lovhjemmel = null,
                 subsumsjon = LovhjemmelFraApi("8-28", "LEDD_1", "BOKSTAV_A", "folketrygdloven", "1970-01-01"),
                 refusjonsopplysninger = null,
                 fraRefusjonsopplysninger = null,

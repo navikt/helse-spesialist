@@ -308,6 +308,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
                         OverstyrArbeidsgiverFraApi.RefusjonselementDto(1.januar, 31.januar, 24000.0),
                         OverstyrArbeidsgiverFraApi.RefusjonselementDto(1.februar, null, 23000.0),
                     ),
+                    lovhjemmel = null,
                     subsumsjon = LovhjemmelFraApi("8-28", "3", null, "folketrygdloven", "1970-01-01"),
                     begrunnelse = "En begrunnelse",
                     forklaring = "En forklaring"
@@ -324,6 +325,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
                         OverstyrArbeidsgiverFraApi.RefusjonselementDto(1.januar, 31.januar, 22000.0),
                         OverstyrArbeidsgiverFraApi.RefusjonselementDto(1.februar, null, 23000.0),
                     ),
+                    lovhjemmel = null,
                     subsumsjon = LovhjemmelFraApi("8-28", "3", null, "folketrygdloven", "1970-01-01"),
                     begrunnelse = "En begrunnelse 2",
                     forklaring = "En forklaring 2"

@@ -101,6 +101,7 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
                         },
                         begrunnelse = arbeidsgiver.begrunnelse,
                         forklaring = arbeidsgiver.forklaring,
+                        lovhjemmel = null,
                         subsumsjon = arbeidsgiver.lovhjemmel?.let { lovhjemmel ->
                             LovhjemmelFraApi(
                                 paragraf = lovhjemmel.paragraf,
