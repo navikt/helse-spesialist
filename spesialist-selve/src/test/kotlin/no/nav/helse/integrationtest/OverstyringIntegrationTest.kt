@@ -24,7 +24,7 @@ import no.nav.helse.mediator.api.AbstractApiTest.Companion.authentication
 import no.nav.helse.spesialist.api.endepunkter.overstyringApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi.OverstyrDagDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi.OverstyrDagFraApi
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -46,7 +46,7 @@ internal class OverstyringIntegrationTest : AbstractE2ETest() {
             aktørId = AKTØR,
             begrunnelse = "en begrunnelse",
             dager = listOf(
-                OverstyrDagDto(dato = 10.januar, type = "Feriedag", fraType = "Sykedag", grad = null, fraGrad = 100, null)
+                OverstyrDagFraApi(dato = 10.januar, type = "Feriedag", fraType = "Sykedag", grad = null, fraGrad = 100, null)
             ),
         )
         val response = sendOverstyring("/api/overstyr/dager", objectMapper.writeValueAsString(overstyring))

@@ -15,10 +15,10 @@ import no.nav.helse.spesialist.api.graphql.schema.ArbeidsforholdOverstyringHandl
 import no.nav.helse.spesialist.api.graphql.schema.InntektOgRefusjonOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.TidslinjeOverstyring
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.LovhjemmelFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.SubsumsjonDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -43,14 +43,14 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
                 aktørId = overstyring.aktorId,
                 begrunnelse = overstyring.begrunnelse,
                 dager = overstyring.dager.map { it ->
-                    OverstyrTidslinjeHandlingFraApi.OverstyrDagDto(
+                    OverstyrTidslinjeHandlingFraApi.OverstyrDagFraApi(
                         dato = LocalDate.parse(it.dato),
                         type = it.type,
                         fraType = it.fraType,
                         grad = it.grad,
                         fraGrad = it.fraGrad,
                         lovhjemmel = it.lovhjemmel?.let { lovhjemmel ->
-                            SubsumsjonDto(
+                            LovhjemmelFraApi(
                                 lovhjemmel.paragraf,
                                 lovhjemmel.ledd,
                                 lovhjemmel.bokstav,
@@ -102,7 +102,7 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
                         begrunnelse = arbeidsgiver.begrunnelse,
                         forklaring = arbeidsgiver.forklaring,
                         subsumsjon = arbeidsgiver.subsumsjon?.let { subsumsjon ->
-                            SubsumsjonDto(
+                            LovhjemmelFraApi(
                                 paragraf = subsumsjon.paragraf,
                                 ledd = subsumsjon.ledd,
                                 bokstav = subsumsjon.bokstav

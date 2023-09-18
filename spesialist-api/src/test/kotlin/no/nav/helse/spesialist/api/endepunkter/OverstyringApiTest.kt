@@ -5,15 +5,15 @@ import java.util.UUID
 import no.nav.helse.spesialist.api.AbstractE2ETest
 import no.nav.helse.spesialist.api.februar
 import no.nav.helse.spesialist.api.januar
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.LovhjemmelFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdDto
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverDto.RefusjonselementDto
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi.OverstyrDagDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi.OverstyrDagFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.SubsumsjonDto
 import org.junit.jupiter.api.Test
 
 internal class OverstyringApiTest: AbstractE2ETest() {
@@ -27,7 +27,7 @@ internal class OverstyringApiTest: AbstractE2ETest() {
             aktørId = AKTØR_ID,
             begrunnelse = "en begrunnelse",
             dager = listOf(
-                OverstyrDagDto(dato = 10.januar, type = "Feriedag", fraType = "Sykedag", grad = null, fraGrad = 100, null)
+                OverstyrDagFraApi(dato = 10.januar, type = "Feriedag", fraType = "Sykedag", grad = null, fraGrad = 100, null)
             )
         )
 
@@ -45,7 +45,7 @@ internal class OverstyringApiTest: AbstractE2ETest() {
             aktørId = AKTØR_ID,
             begrunnelse = "en begrunnelse",
             dager = listOf(
-                OverstyrDagDto(dato = 10.januar, type = "Arbeidsdag", fraType = "Sykedag", grad = null, fraGrad = 100, null)
+                OverstyrDagFraApi(dato = 10.januar, type = "Arbeidsdag", fraType = "Sykedag", grad = null, fraGrad = 100, null)
             )
         )
 
@@ -63,7 +63,7 @@ internal class OverstyringApiTest: AbstractE2ETest() {
             aktørId = AKTØR_ID,
             begrunnelse = "en begrunnelse",
             dager = listOf(
-                OverstyrDagDto(dato = 10.januar, type = "Sykedag", fraType = "Arbeidsdag", grad = null, fraGrad = 100, null)
+                OverstyrDagFraApi(dato = 10.januar, type = "Sykedag", fraType = "Arbeidsdag", grad = null, fraGrad = 100, null)
             )
         )
 
@@ -112,7 +112,7 @@ internal class OverstyringApiTest: AbstractE2ETest() {
                         RefusjonselementDto(1.januar, 31.januar, 24000.0),
                         RefusjonselementDto(1.februar, null, 23000.0),
                     ),
-                    subsumsjon = SubsumsjonDto("8-28", "3", null),
+                    subsumsjon = LovhjemmelFraApi("8-28", "3", null),
                     begrunnelse = "En begrunnelse",
                     forklaring = "En forklaring"
                 ),
@@ -140,7 +140,7 @@ internal class OverstyringApiTest: AbstractE2ETest() {
                     begrunnelseMal = "En begrunnelsemal",
                     begrunnelseFritekst = "begrunnelsefritekst",
                     begrunnelseKonklusjon = "En begrunnelsekonklusjon",
-                    subsumsjon = SubsumsjonDto("8-28", "3", null),
+                    subsumsjon = LovhjemmelFraApi("8-28", "3", null),
                     initierendeVedtaksperiodeId = UUID.randomUUID().toString(),
                 ),
             )

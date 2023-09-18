@@ -15,19 +15,19 @@ class OverstyrTidslinjeHandlingFraApi(
     val fødselsnummer: String,
     val aktørId: String,
     val begrunnelse: String,
-    val dager: List<OverstyrDagDto>
+    val dager: List<OverstyrDagFraApi>
 ): HandlingFraApi {
 
     override fun loggnavn(): String = "overstyr_tidslinje"
 
     @JsonIgnoreProperties
-    class OverstyrDagDto(
+    class OverstyrDagFraApi(
         val dato: LocalDate,
         val type: String,
         val fraType: String,
         val grad: Int?,
         val fraGrad: Int?,
-        val lovhjemmel: SubsumsjonDto?,
+        val lovhjemmel: LovhjemmelFraApi?,
     )
 }
 
@@ -48,7 +48,7 @@ data class OverstyrInntektOgRefusjonHandlingFraApi(
         val fraRefusjonsopplysninger: List<RefusjonselementDto>?,
         val begrunnelse: String,
         val forklaring: String,
-        val subsumsjon: SubsumsjonDto?,
+        val subsumsjon: LovhjemmelFraApi?,
     ) {
 
         data class RefusjonselementDto(
@@ -96,7 +96,7 @@ data class SkjønnsfastsettSykepengegrunnlagHandlingFraApi(
         val begrunnelseMal: String?,
         val begrunnelseFritekst: String?,
         val begrunnelseKonklusjon: String?,
-        val subsumsjon: SubsumsjonDto?,
+        val subsumsjon: LovhjemmelFraApi?,
         val initierendeVedtaksperiodeId: String?,
     ) {
 
@@ -108,7 +108,7 @@ data class SkjønnsfastsettSykepengegrunnlagHandlingFraApi(
     }
 }
 
-data class SubsumsjonDto(
+data class LovhjemmelFraApi(
     val paragraf: String,
     val ledd: String? = null,
     val bokstav: String? = null,

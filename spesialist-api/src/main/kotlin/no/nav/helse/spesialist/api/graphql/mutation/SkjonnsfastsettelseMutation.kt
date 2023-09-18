@@ -15,11 +15,11 @@ import no.nav.helse.spesialist.api.graphql.schema.SkjonnsfastsettelseArbeidsgive
 import no.nav.helse.spesialist.api.graphql.schema.SkjonnsfastsettelseArbeidsgiver.SkjonnsfastsettelseType.OMREGNET_ARSINNTEKT
 import no.nav.helse.spesialist.api.graphql.schema.SkjonnsfastsettelseArbeidsgiver.SkjonnsfastsettelseType.RAPPORTERT_ARSINNTEKT
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.LovhjemmelFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto.RAPPORTERT_ÅRSINNTEKT
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.SubsumsjonDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -57,7 +57,7 @@ class SkjonnsfastsettelseMutation(private val saksbehandlerhåndterer: Saksbehan
                         arbeidsgiver.begrunnelseFritekst,
                         arbeidsgiver.begrunnelseKonklusjon,
                         arbeidsgiver.subsumsjon?.let { subsumsjon ->
-                            SubsumsjonDto(
+                            LovhjemmelFraApi(
                                 subsumsjon.paragraf,
                                 subsumsjon.ledd,
                                 subsumsjon.bokstav

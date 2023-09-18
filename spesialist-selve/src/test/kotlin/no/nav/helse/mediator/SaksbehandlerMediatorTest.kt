@@ -12,13 +12,13 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AnnulleringHandlingFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.LovhjemmelFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverDto
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.SubsumsjonDto
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
@@ -216,7 +216,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
             aktørId = AKTØR_ID,
             begrunnelse = "En begrunnelse",
             dager = listOf(
-                OverstyrTidslinjeHandlingFraApi.OverstyrDagDto(
+                OverstyrTidslinjeHandlingFraApi.OverstyrDagFraApi(
                     dato = 10.januar,
                     type = "Sykedag",
                     fraType = "Arbeidsdag",
@@ -308,7 +308,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
                         OverstyrArbeidsgiverDto.RefusjonselementDto(1.januar, 31.januar, 24000.0),
                         OverstyrArbeidsgiverDto.RefusjonselementDto(1.februar, null, 23000.0),
                     ),
-                    subsumsjon = SubsumsjonDto("8-28", "3", null),
+                    subsumsjon = LovhjemmelFraApi("8-28", "3", null),
                     begrunnelse = "En begrunnelse",
                     forklaring = "En forklaring"
                 ),
@@ -324,7 +324,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
                         OverstyrArbeidsgiverDto.RefusjonselementDto(1.januar, 31.januar, 22000.0),
                         OverstyrArbeidsgiverDto.RefusjonselementDto(1.februar, null, 23000.0),
                     ),
-                    subsumsjon = SubsumsjonDto("8-28", "3", null),
+                    subsumsjon = LovhjemmelFraApi("8-28", "3", null),
                     begrunnelse = "En begrunnelse 2",
                     forklaring = "En forklaring 2"
                 ),
@@ -384,7 +384,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
                     organisasjonsnummer = ORGANISASJONSNUMMER,
                     årlig = 25000.0,
                     fraÅrlig = 25001.0,
-                    subsumsjon = SubsumsjonDto("8-28", "3", null),
+                    subsumsjon = LovhjemmelFraApi("8-28", "3", null),
                     årsak = "En årsak",
                     type = SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT,
                     begrunnelseMal = "En begrunnelsemal",
@@ -396,7 +396,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
                     organisasjonsnummer = ORGANISASJONSNUMMER_GHOST,
                     årlig = 21000.0,
                     fraÅrlig = 25001.0,
-                    subsumsjon = SubsumsjonDto("8-28", "3", null),
+                    subsumsjon = LovhjemmelFraApi("8-28", "3", null),
                     årsak = "En årsak 2",
                     type = SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT,
                     begrunnelseMal = "En begrunnelsemal",

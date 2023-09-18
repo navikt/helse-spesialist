@@ -27,10 +27,10 @@ import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.LovhjemmelFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverDto
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.SubsumsjonDto
 import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
@@ -48,7 +48,7 @@ internal class OverstyringE2ETest : AbstractE2ETestV2() {
     fun `saksbehandler overstyrer sykdomstidslinje`() {
         fremTilSaksbehandleroppgave()
         håndterOverstyrTidslinje(dager = listOf(
-            OverstyrTidslinjeHandlingFraApi.OverstyrDagDto(
+            OverstyrTidslinjeHandlingFraApi.OverstyrDagFraApi(
                 dato = 20.januar,
                 type = "Feriedag",
                 fraType = "Sykedag",
@@ -76,7 +76,7 @@ internal class OverstyringE2ETest : AbstractE2ETestV2() {
                     månedligInntekt = 25000.0,
                     fraMånedligInntekt = 25001.0,
                     forklaring = "testbortforklaring",
-                    subsumsjon = SubsumsjonDto("8-28", "LEDD_1", "BOKSTAV_A"),
+                    subsumsjon = LovhjemmelFraApi("8-28", "LEDD_1", "BOKSTAV_A"),
                     refusjonsopplysninger = null,
                     fraRefusjonsopplysninger = null,
                     begrunnelse = "begrunnelse")
