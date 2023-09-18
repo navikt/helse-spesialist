@@ -25,7 +25,7 @@ import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.person.Kjønn
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.LovhjemmelFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdDto
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverFraApi
 import org.junit.jupiter.api.Assertions.assertEquals
 
 internal class MeldingssenderV2(private val testRapid: TestRapid) {
@@ -725,13 +725,13 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
         fødselsnummer: String,
         skjæringstidspunkt: LocalDate = 1.januar(1970),
         saksbehandlerOid: UUID,
-        arbeidsgivere: List<OverstyrArbeidsgiverDto> = listOf(
-            OverstyrArbeidsgiverDto(
+        arbeidsgivere: List<OverstyrArbeidsgiverFraApi> = listOf(
+            OverstyrArbeidsgiverFraApi(
                 organisasjonsnummer = Testdata.ORGNR,
                 månedligInntekt = 15000.0,
                 fraMånedligInntekt = 25001.0,
                 forklaring = "testbortforklaring",
-                subsumsjon = LovhjemmelFraApi("8-28", "LEDD_1", "BOKSTAV_A"),
+                subsumsjon = LovhjemmelFraApi("8-28", "LEDD_1", "BOKSTAV_A", "folketrygdloven", "1970-01-01"),
                 refusjonsopplysninger = null,
                 fraRefusjonsopplysninger = null,
                 begrunnelse = "en begrunnelse"

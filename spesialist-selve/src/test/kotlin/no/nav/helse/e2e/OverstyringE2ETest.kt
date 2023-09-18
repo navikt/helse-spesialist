@@ -29,7 +29,7 @@ import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.LovhjemmelFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi
 import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
@@ -71,12 +71,12 @@ internal class OverstyringE2ETest : AbstractE2ETestV2() {
         fremTilSaksbehandleroppgave()
         håndterOverstyrInntektOgRefusjon(
             arbeidsgivere = listOf(
-                OverstyrArbeidsgiverDto(
+                OverstyrArbeidsgiverFraApi(
                     organisasjonsnummer = ORGNR,
                     månedligInntekt = 25000.0,
                     fraMånedligInntekt = 25001.0,
                     forklaring = "testbortforklaring",
-                    subsumsjon = LovhjemmelFraApi("8-28", "LEDD_1", "BOKSTAV_A"),
+                    subsumsjon = LovhjemmelFraApi("8-28", "LEDD_1", "BOKSTAV_A", "folketrygdloven", "1970-01-01"),
                     refusjonsopplysninger = null,
                     fraRefusjonsopplysninger = null,
                     begrunnelse = "begrunnelse")

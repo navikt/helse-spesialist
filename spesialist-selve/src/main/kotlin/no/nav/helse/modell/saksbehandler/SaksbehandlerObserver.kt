@@ -18,7 +18,7 @@ data class OverstyrtInntektOgRefusjonEvent(
     val fødselsnummer: String,
     val aktørId: String,
     val skjæringstidspunkt: LocalDate,
-    val arbeidsgivere: List<OverstyrtArbeidsgiver>,
+    val arbeidsgivere: List<OverstyrtArbeidsgiverEvent>,
     val saksbehandlerOid: UUID,
     val saksbehandlerNavn: String,
     val saksbehandlerIdent: String,
@@ -38,17 +38,17 @@ data class OverstyrtInntektOgRefusjonEvent(
         ).toMap()
     )
 
-    data class OverstyrtArbeidsgiver(
+    data class OverstyrtArbeidsgiverEvent(
         val organisasjonsnummer: String,
         val månedligInntekt: Double,
         val fraMånedligInntekt: Double,
-        val refusjonsopplysninger: List<OverstyrtRefusjonselement>?,
-        val fraRefusjonsopplysninger: List<OverstyrtRefusjonselement>?,
+        val refusjonsopplysninger: List<OverstyrtRefusjonselementEvent>?,
+        val fraRefusjonsopplysninger: List<OverstyrtRefusjonselementEvent>?,
         val begrunnelse: String,
         val forklaring: String,
         val subsumsjon: LovhjemmelEvent?,
     ) {
-        data class OverstyrtRefusjonselement(
+        data class OverstyrtRefusjonselementEvent(
             val fom: LocalDate,
             val tom: LocalDate? = null,
             val beløp: Double
@@ -60,8 +60,8 @@ data class LovhjemmelEvent(
     val paragraf: String,
     val ledd: String? = null,
     val bokstav: String? = null,
-    val lovverk: String? = null,
-    val lovverksversjon: String? = null,
+    val lovverk: String,
+    val lovverksversjon: String,
 )
 
 data class OverstyrtTidslinjeEvent(

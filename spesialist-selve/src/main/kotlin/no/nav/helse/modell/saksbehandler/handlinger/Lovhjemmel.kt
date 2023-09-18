@@ -7,8 +7,8 @@ data class Lovhjemmel(
     private val paragraf: String,
     private val ledd: String? = null,
     private val bokstav: String? = null,
-    private val lovverk: String? = null,
-    private val lovverksversjon: String? = null,
+    private val lovverk: String,
+    private val lovverksversjon: String,
 ) {
     fun byggEvent() =
         LovhjemmelEvent(

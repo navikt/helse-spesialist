@@ -35,12 +35,12 @@ data class OverstyrInntektOgRefusjonHandlingFraApi(
     val aktørId: String,
     val fødselsnummer: String,
     val skjæringstidspunkt: LocalDate,
-    val arbeidsgivere: List<OverstyrArbeidsgiverDto>,
+    val arbeidsgivere: List<OverstyrArbeidsgiverFraApi>,
 ) : HandlingFraApi {
 
     override fun loggnavn(): String = "overstyr_inntekt_og_refusjon"
 
-    data class OverstyrArbeidsgiverDto(
+    data class OverstyrArbeidsgiverFraApi(
         val organisasjonsnummer: String,
         val månedligInntekt: Double,
         val fraMånedligInntekt: Double,
@@ -82,12 +82,12 @@ data class SkjønnsfastsettSykepengegrunnlagHandlingFraApi(
     val aktørId: String,
     val fødselsnummer: String,
     val skjæringstidspunkt: LocalDate,
-    val arbeidsgivere: List<SkjønnsfastsattArbeidsgiverDto>,
+    val arbeidsgivere: List<SkjønnsfastsattArbeidsgiverFraApi>,
 ) : HandlingFraApi {
 
     override fun loggnavn(): String = "skjønnsfastsett_sykepengegrunnlag"
 
-    data class SkjønnsfastsattArbeidsgiverDto(
+    data class SkjønnsfastsattArbeidsgiverFraApi(
         val organisasjonsnummer: String,
         val årlig: Double,
         val fraÅrlig: Double,
@@ -96,7 +96,7 @@ data class SkjønnsfastsettSykepengegrunnlagHandlingFraApi(
         val begrunnelseMal: String?,
         val begrunnelseFritekst: String?,
         val begrunnelseKonklusjon: String?,
-        val subsumsjon: LovhjemmelFraApi?,
+        val lovhjemmel: LovhjemmelFraApi?,
         val initierendeVedtaksperiodeId: String?,
     ) {
 
@@ -112,8 +112,8 @@ data class LovhjemmelFraApi(
     val paragraf: String,
     val ledd: String? = null,
     val bokstav: String? = null,
-    val lovverk: String? = null,
-    val lovverksversjon: String? = null,
+    val lovverk: String,
+    val lovverksversjon: String,
 )
 
 @JsonIgnoreProperties

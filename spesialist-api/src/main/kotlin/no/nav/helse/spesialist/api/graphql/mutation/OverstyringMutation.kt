@@ -81,19 +81,19 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
                 fødselsnummer = overstyring.fodselsnummer,
                 skjæringstidspunkt = LocalDate.parse(overstyring.skjaringstidspunkt),
                 arbeidsgivere = overstyring.arbeidsgivere.map { arbeidsgiver ->
-                    OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverDto(
+                    OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverFraApi(
                         organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
                         månedligInntekt = arbeidsgiver.manedligInntekt,
                         fraMånedligInntekt = arbeidsgiver.fraManedligInntekt,
                         refusjonsopplysninger = arbeidsgiver.refusjonsopplysninger?.map { refusjonselement ->
-                            OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverDto.RefusjonselementDto(
+                            OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverFraApi.RefusjonselementDto(
                                 fom = LocalDate.parse(refusjonselement.fom),
                                 tom = refusjonselement.tom?.let { LocalDate.parse(it) },
                                 beløp = refusjonselement.belop
                             )
                         },
                         fraRefusjonsopplysninger = arbeidsgiver.fraRefusjonsopplysninger?.map { refusjonselement ->
-                            OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverDto.RefusjonselementDto(
+                            OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverFraApi.RefusjonselementDto(
                                 fom = LocalDate.parse(refusjonselement.fom),
                                 tom = refusjonselement.tom?.let { LocalDate.parse(it) },
                                 beløp = refusjonselement.belop
@@ -101,11 +101,13 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
                         },
                         begrunnelse = arbeidsgiver.begrunnelse,
                         forklaring = arbeidsgiver.forklaring,
-                        subsumsjon = arbeidsgiver.subsumsjon?.let { subsumsjon ->
+                        subsumsjon = arbeidsgiver.lovhjemmel?.let { lovhjemmel ->
                             LovhjemmelFraApi(
-                                paragraf = subsumsjon.paragraf,
-                                ledd = subsumsjon.ledd,
-                                bokstav = subsumsjon.bokstav
+                                paragraf = lovhjemmel.paragraf,
+                                ledd = lovhjemmel.ledd,
+                                bokstav = lovhjemmel.bokstav,
+                                lovverk = lovhjemmel.lovverk,
+                                lovverksversjon = lovhjemmel.lovverksversjon,
                             )
                         })
                 })

@@ -188,7 +188,9 @@ val overstyrInntektOgRefusjonJson = """
                 "subsumsjon": {
                     "paragraf": "8-28",
                     "ledd": "3",
-                    "bokstav": null
+                    "bokstav": null,
+                    "lovverk": "folketrygdloven",
+                    "lovverksversjon": "1970-01-01"
                 }
             },
             {
@@ -224,7 +226,9 @@ val overstyrInntektOgRefusjonJson = """
                 "subsumsjon": {
                     "paragraf": "8-28",
                     "ledd": "3",
-                    "bokstav": null
+                    "bokstav": null,
+                    "lovverk": "folketrygdloven",
+                    "lovverksversjon": "1970-01-01"
                 }
             }
         ]
@@ -249,7 +253,9 @@ val skjønnsfastsettingJson = """
                 "subsumsjon": {
                     "paragraf": "8-28",
                     "ledd": "3",
-                    "bokstav": null
+                    "bokstav": null,
+                    "lovverk": "folketrygdloven",
+                    "lovverksversjon": "1970-01-01"
                 }
             },
             {
@@ -263,7 +269,9 @@ val skjønnsfastsettingJson = """
                 "subsumsjon": {
                     "paragraf": "8-28",
                     "ledd": "3",
-                    "bokstav": null
+                    "bokstav": null,
+                    "lovverk": "folketrygdloven",
+                    "lovverksversjon": "1970-01-01"
                 },
                 "initierendeVedtaksperiodeId": "${UUID.randomUUID()}"
             }

@@ -38,7 +38,7 @@ data class OverstyringArbeidsgiver(
     val fraRefusjonsopplysninger: List<OverstyringRefusjonselement>?,
     val begrunnelse: String,
     val forklaring: String,
-    val subsumsjon: Lovhjemmel?,
+    val lovhjemmel: Lovhjemmel?,
 ) {
 
     data class OverstyringRefusjonselement(

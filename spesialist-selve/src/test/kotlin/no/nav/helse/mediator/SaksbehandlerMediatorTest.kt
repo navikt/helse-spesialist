@@ -15,10 +15,10 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.AnnulleringHandlingF
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.LovhjemmelFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi.SkjønnsfastsettingstypeDto
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
@@ -296,35 +296,35 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
             aktørId = AKTØR_ID,
             skjæringstidspunkt = 1.januar,
             arbeidsgivere = listOf(
-                OverstyrArbeidsgiverDto(
+                OverstyrArbeidsgiverFraApi(
                     organisasjonsnummer = ORGANISASJONSNUMMER,
                     månedligInntekt = 25000.0,
                     fraMånedligInntekt = 25001.0,
                     refusjonsopplysninger = listOf(
-                        OverstyrArbeidsgiverDto.RefusjonselementDto(1.januar, 31.januar, 25000.0),
-                        OverstyrArbeidsgiverDto.RefusjonselementDto(1.februar, null, 24000.0),
+                        OverstyrArbeidsgiverFraApi.RefusjonselementDto(1.januar, 31.januar, 25000.0),
+                        OverstyrArbeidsgiverFraApi.RefusjonselementDto(1.februar, null, 24000.0),
                     ),
                     fraRefusjonsopplysninger = listOf(
-                        OverstyrArbeidsgiverDto.RefusjonselementDto(1.januar, 31.januar, 24000.0),
-                        OverstyrArbeidsgiverDto.RefusjonselementDto(1.februar, null, 23000.0),
+                        OverstyrArbeidsgiverFraApi.RefusjonselementDto(1.januar, 31.januar, 24000.0),
+                        OverstyrArbeidsgiverFraApi.RefusjonselementDto(1.februar, null, 23000.0),
                     ),
-                    subsumsjon = LovhjemmelFraApi("8-28", "3", null),
+                    subsumsjon = LovhjemmelFraApi("8-28", "3", null, "folketrygdloven", "1970-01-01"),
                     begrunnelse = "En begrunnelse",
                     forklaring = "En forklaring"
                 ),
-                OverstyrArbeidsgiverDto(
+                OverstyrArbeidsgiverFraApi(
                     organisasjonsnummer = ORGANISASJONSNUMMER_GHOST,
                     månedligInntekt = 21000.0,
                     fraMånedligInntekt = 25001.0,
                     refusjonsopplysninger = listOf(
-                        OverstyrArbeidsgiverDto.RefusjonselementDto(1.januar, 31.januar, 21000.0),
-                        OverstyrArbeidsgiverDto.RefusjonselementDto(1.februar, null, 22000.0),
+                        OverstyrArbeidsgiverFraApi.RefusjonselementDto(1.januar, 31.januar, 21000.0),
+                        OverstyrArbeidsgiverFraApi.RefusjonselementDto(1.februar, null, 22000.0),
                     ),
                     fraRefusjonsopplysninger = listOf(
-                        OverstyrArbeidsgiverDto.RefusjonselementDto(1.januar, 31.januar, 22000.0),
-                        OverstyrArbeidsgiverDto.RefusjonselementDto(1.februar, null, 23000.0),
+                        OverstyrArbeidsgiverFraApi.RefusjonselementDto(1.januar, 31.januar, 22000.0),
+                        OverstyrArbeidsgiverFraApi.RefusjonselementDto(1.februar, null, 23000.0),
                     ),
-                    subsumsjon = LovhjemmelFraApi("8-28", "3", null),
+                    subsumsjon = LovhjemmelFraApi("8-28", "3", null, "folketrygdloven", "1970-01-01"),
                     begrunnelse = "En begrunnelse 2",
                     forklaring = "En forklaring 2"
                 ),
@@ -380,11 +380,11 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
             aktørId = AKTØR_ID,
             skjæringstidspunkt = 1.januar,
             arbeidsgivere = listOf(
-                SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverDto(
+                SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi(
                     organisasjonsnummer = ORGANISASJONSNUMMER,
                     årlig = 25000.0,
                     fraÅrlig = 25001.0,
-                    subsumsjon = LovhjemmelFraApi("8-28", "3", null),
+                    lovhjemmel = LovhjemmelFraApi("8-28", "3", null, "folketrygdloven", "1970-01-01"),
                     årsak = "En årsak",
                     type = SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT,
                     begrunnelseMal = "En begrunnelsemal",
@@ -392,11 +392,11 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
                     begrunnelseKonklusjon = "begrunnelseKonklusjon",
                     initierendeVedtaksperiodeId = PERIODE.id.toString()
                 ),
-                SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverDto(
+                SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi(
                     organisasjonsnummer = ORGANISASJONSNUMMER_GHOST,
                     årlig = 21000.0,
                     fraÅrlig = 25001.0,
-                    subsumsjon = LovhjemmelFraApi("8-28", "3", null),
+                    lovhjemmel = LovhjemmelFraApi("8-28", "3", null, "folketrygdloven", "1970-01-01"),
                     årsak = "En årsak 2",
                     type = SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT,
                     begrunnelseMal = "En begrunnelsemal",

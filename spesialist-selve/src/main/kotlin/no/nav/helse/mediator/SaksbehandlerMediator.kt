@@ -258,7 +258,7 @@ class SaksbehandlerMediator(
                     begrunnelse = overstyrArbeidsgiver.begrunnelse,
                     forklaring = overstyrArbeidsgiver.forklaring,
                     lovhjemmel = overstyrArbeidsgiver.subsumsjon?.let {
-                        Lovhjemmel(it.paragraf, it.ledd, it.bokstav)
+                        Lovhjemmel(it.paragraf, it.ledd, it.bokstav, it.lovverk, it.lovverksversjon)
                     }
                 )
             },
@@ -282,7 +282,9 @@ class SaksbehandlerMediator(
                         Lovhjemmel(
                             paragraf = lovhjemmel.paragraf,
                             ledd = lovhjemmel.ledd,
-                            bokstav = lovhjemmel.bokstav
+                            bokstav = lovhjemmel.bokstav,
+                            lovverk = lovhjemmel.lovverk,
+                            lovverksversjon = lovhjemmel.lovverksversjon,
                         )
                     })
             },
@@ -302,15 +304,21 @@ class SaksbehandlerMediator(
                     arbeidsgiverDto.fraÅrlig,
                     arbeidsgiverDto.årsak,
                     type = when (arbeidsgiverDto.type) {
-                        SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT -> SkjønnsfastsattSykepengegrunnlag.SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT
-                        SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto.RAPPORTERT_ÅRSINNTEKT -> SkjønnsfastsattSykepengegrunnlag.SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.RAPPORTERT_ÅRSINNTEKT
-                        SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto.ANNET -> SkjønnsfastsattSykepengegrunnlag.SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.ANNET
+                        SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi.SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT -> SkjønnsfastsattSykepengegrunnlag.SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT
+                        SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi.SkjønnsfastsettingstypeDto.RAPPORTERT_ÅRSINNTEKT -> SkjønnsfastsattSykepengegrunnlag.SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.RAPPORTERT_ÅRSINNTEKT
+                        SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi.SkjønnsfastsettingstypeDto.ANNET -> SkjønnsfastsattSykepengegrunnlag.SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.ANNET
                     },
                     begrunnelseMal = arbeidsgiverDto.begrunnelseMal,
                     begrunnelseFritekst = arbeidsgiverDto.begrunnelseFritekst,
                     begrunnelseKonklusjon = arbeidsgiverDto.begrunnelseKonklusjon,
-                    lovhjemmel = arbeidsgiverDto.subsumsjon?.let {
-                        Lovhjemmel(it.paragraf, it.ledd, it.bokstav)
+                    lovhjemmel = arbeidsgiverDto.lovhjemmel?.let {
+                        Lovhjemmel(
+                            paragraf = it.paragraf,
+                            ledd = it.ledd,
+                            bokstav = it.bokstav,
+                            lovverk = it.lovverk,
+                            lovverksversjon = it.lovverksversjon
+                        )
                     },
                     initierendeVedtaksperiodeId = arbeidsgiverDto.initierendeVedtaksperiodeId
                 )

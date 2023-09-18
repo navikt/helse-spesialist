@@ -17,9 +17,9 @@ import no.nav.helse.spesialist.api.graphql.schema.SkjonnsfastsettelseArbeidsgive
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.LovhjemmelFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto.RAPPORTERT_ÅRSINNTEKT
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi.SkjønnsfastsettingstypeDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi.SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi.SkjønnsfastsettingstypeDto.RAPPORTERT_ÅRSINNTEKT
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -41,7 +41,7 @@ class SkjonnsfastsettelseMutation(private val saksbehandlerhåndterer: Saksbehan
                 skjonnsfastsettelse.fodselsnummer,
                 LocalDate.parse(skjonnsfastsettelse.skjaringstidspunkt),
                 skjonnsfastsettelse.arbeidsgivere.map { arbeidsgiver ->
-                    SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverDto(
+                    SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi(
                         arbeidsgiver.organisasjonsnummer,
                         arbeidsgiver.arlig,
                         arbeidsgiver.fraArlig,
@@ -56,11 +56,13 @@ class SkjonnsfastsettelseMutation(private val saksbehandlerhåndterer: Saksbehan
                         arbeidsgiver.begrunnelseMal,
                         arbeidsgiver.begrunnelseFritekst,
                         arbeidsgiver.begrunnelseKonklusjon,
-                        arbeidsgiver.subsumsjon?.let { subsumsjon ->
+                        arbeidsgiver.lovhjemmel?.let { lovhjemmel ->
                             LovhjemmelFraApi(
-                                subsumsjon.paragraf,
-                                subsumsjon.ledd,
-                                subsumsjon.bokstav
+                                paragraf = lovhjemmel.paragraf,
+                                ledd = lovhjemmel.ledd,
+                                bokstav = lovhjemmel.bokstav,
+                                lovverk = lovhjemmel.lovverk,
+                                lovverksversjon = lovhjemmel.lovverksversjon,
                             )
                         },
                         arbeidsgiver.initierendeVedtaksperiodeId

@@ -21,7 +21,7 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.LovhjemmelFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverFraApi
 
 internal object TestmeldingsfabrikkV2 {
 
@@ -664,13 +664,13 @@ internal object TestmeldingsfabrikkV2 {
     fun lagOverstyringInntektOgRefusjon(
         aktørId: String,
         fødselsnummer: String,
-        arbeidsgivere: List<OverstyrArbeidsgiverDto> = listOf(
-            OverstyrArbeidsgiverDto(
+        arbeidsgivere: List<OverstyrArbeidsgiverFraApi> = listOf(
+            OverstyrArbeidsgiverFraApi(
                 organisasjonsnummer = Testdata.ORGNR,
                 månedligInntekt = 25000.0,
                 fraMånedligInntekt = 25001.0,
                 forklaring = "testbortforklaring",
-                subsumsjon = LovhjemmelFraApi("8-28", "LEDD_1", "BOKSTAV_A"),
+                subsumsjon = LovhjemmelFraApi("8-28", "LEDD_1", "BOKSTAV_A", "folketrygdloven", "1970-01-01"),
                 refusjonsopplysninger = null,
                 fraRefusjonsopplysninger = null,
                 begrunnelse = "en begrunnelse"

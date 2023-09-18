@@ -9,11 +9,11 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.LovhjemmelFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdDto
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverDto.RefusjonselementDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverFraApi.RefusjonselementDto
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi.OverstyrDagFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi.SkjønnsfastsettingstypeDto
 import org.junit.jupiter.api.Test
 
 internal class OverstyringApiTest: AbstractE2ETest() {
@@ -100,7 +100,7 @@ internal class OverstyringApiTest: AbstractE2ETest() {
             aktørId = AKTØR_ID,
             skjæringstidspunkt = 1.januar,
             arbeidsgivere = listOf(
-                OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverDto(
+                OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverFraApi(
                     organisasjonsnummer = ORGANISASJONSNUMMER,
                     månedligInntekt = 25000.0,
                     fraMånedligInntekt = 25001.0,
@@ -112,7 +112,7 @@ internal class OverstyringApiTest: AbstractE2ETest() {
                         RefusjonselementDto(1.januar, 31.januar, 24000.0),
                         RefusjonselementDto(1.februar, null, 23000.0),
                     ),
-                    subsumsjon = LovhjemmelFraApi("8-28", "3", null),
+                    subsumsjon = LovhjemmelFraApi("8-28", "3", null, "folketrygdloven", "1970-01-01"),
                     begrunnelse = "En begrunnelse",
                     forklaring = "En forklaring"
                 ),
@@ -131,7 +131,7 @@ internal class OverstyringApiTest: AbstractE2ETest() {
             aktørId = AKTØR_ID,
             skjæringstidspunkt = 1.januar,
             arbeidsgivere = listOf(
-                SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverDto(
+                SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi(
                     organisasjonsnummer = ORGANISASJONSNUMMER,
                     årlig = 250000.0,
                     fraÅrlig = 260000.0,
@@ -140,7 +140,7 @@ internal class OverstyringApiTest: AbstractE2ETest() {
                     begrunnelseMal = "En begrunnelsemal",
                     begrunnelseFritekst = "begrunnelsefritekst",
                     begrunnelseKonklusjon = "En begrunnelsekonklusjon",
-                    subsumsjon = LovhjemmelFraApi("8-28", "3", null),
+                    lovhjemmel = LovhjemmelFraApi("8-28", "3", null, "folketrygdloven", "1970-01-01"),
                     initierendeVedtaksperiodeId = UUID.randomUUID().toString(),
                 ),
             )

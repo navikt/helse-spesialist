@@ -39,7 +39,7 @@ class OverstyrtArbeidsgiver(
     private val forklaring: String,
     private val lovhjemmel: Lovhjemmel?,
 ) {
-    fun byggEvent() = OverstyrtInntektOgRefusjonEvent.OverstyrtArbeidsgiver(
+    fun byggEvent() = OverstyrtInntektOgRefusjonEvent.OverstyrtArbeidsgiverEvent(
         organisasjonsnummer,
         månedligInntekt,
         fraMånedligInntekt,
@@ -57,6 +57,6 @@ class Refusjonselement(
     private val beløp: Double
 ) {
     fun byggEvent() =
-        OverstyrtInntektOgRefusjonEvent.OverstyrtArbeidsgiver.OverstyrtRefusjonselement(fom, tom, beløp)
+        OverstyrtInntektOgRefusjonEvent.OverstyrtArbeidsgiverEvent.OverstyrtRefusjonselementEvent(fom, tom, beløp)
 }
 
