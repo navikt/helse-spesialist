@@ -35,7 +35,6 @@ internal class OppgaveMediator(
     private val rapidsConnection: RapidsConnection,
     private val harTilgangTil: Tilgangskontroll = { _, _ -> false }
 ): Oppgavehåndterer, Oppgavefinner {
-    private val oppgaverForPublisering = mutableMapOf<Long, String>()
     private val logg = LoggerFactory.getLogger(this::class.java)
 
     internal fun nyOppgave(fødselsnummer: String, contextId: UUID, opprettOppgaveBlock: (reservertId: Long) -> Oppgave) {
@@ -123,7 +122,6 @@ internal class OppgaveMediator(
     ) {
         if (oppgaveDao.harGyldigOppgave(utbetalingId)) return
         oppgaveDao.opprettOppgave(id, contextId, egenskap, vedtaksperiodeId, utbetalingId)
-        oppgaverForPublisering[id] = "oppgave_opprettet"
         GodkjenningsbehovPayload(hendelseId).lagre(opptegnelseDao, oppgaveDao.finnFødselsnummer(id))
     }
 
@@ -134,7 +132,6 @@ internal class OppgaveMediator(
         ferdigstiltAvOid: UUID?
     ) {
         oppgaveDao.updateOppgave(oppgaveId, status, ferdigstiltAvIdent, ferdigstiltAvOid)
-        oppgaverForPublisering[oppgaveId] = "oppgave_oppdatert"
     }
 
     fun reserverOppgave(saksbehandleroid: UUID, fødselsnummer: String) {
