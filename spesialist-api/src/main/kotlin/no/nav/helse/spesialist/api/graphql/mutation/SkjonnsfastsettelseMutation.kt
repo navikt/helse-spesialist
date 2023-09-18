@@ -20,8 +20,15 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSyke
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverDto.SkjønnsfastsettingstypeDto.RAPPORTERT_ÅRSINNTEKT
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SubsumsjonDto
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 class SkjonnsfastsettelseMutation(private val saksbehandlerhåndterer: Saksbehandlerhåndterer) : Mutation {
+
+    private companion object {
+        private val logg: Logger = LoggerFactory.getLogger(SkjonnsfastsettelseMutation::class.java)
+    }
+
     @Suppress("unused")
     suspend fun skjonnsfastsettSykepengegrunnlag(
         skjonnsfastsettelse: Skjonnsfastsettelse,
@@ -62,8 +69,10 @@ class SkjonnsfastsettelseMutation(private val saksbehandlerhåndterer: Saksbehan
             )
             withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(handling, saksbehandler.value) }
         } catch (e: Exception) {
+            val kunneIkkeSkjønnsfastsetteSykepengegrunnlagError = kunneIkkeSkjønnsfastsetteSykepengegrunnlagError()
+            logg.error(kunneIkkeSkjønnsfastsetteSykepengegrunnlagError.message, e)
             return@withContext DataFetcherResult.newResult<Boolean>()
-                .error(kunneIkkeSkjønnsfastsetteSykepengegrunnlagError())
+                .error(kunneIkkeSkjønnsfastsetteSykepengegrunnlagError)
                 .build()
         }
         DataFetcherResult.newResult<Boolean>().data(true).build()

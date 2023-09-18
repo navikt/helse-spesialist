@@ -19,9 +19,15 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforho
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SubsumsjonDto
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 
 class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhåndterer) : Mutation {
+
+    private companion object {
+        private val logg: Logger = LoggerFactory.getLogger(OverstyringMutation::class.java)
+    }
 
     @Suppress("unused")
     suspend fun overstyrDager(
@@ -54,7 +60,9 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
                 })
             withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(handling, saksbehandler.value) }
         } catch (e: Exception) {
-            return@withContext DataFetcherResult.newResult<Boolean>().error(kunneIkkeOverstyreError("dager")).build()
+            val kunneIkkeOverstyreError = kunneIkkeOverstyreError("dager")
+            logg.error(kunneIkkeOverstyreError.message, e)
+            return@withContext DataFetcherResult.newResult<Boolean>().error(kunneIkkeOverstyreError).build()
         }
         DataFetcherResult.newResult<Boolean>().data(true).build()
     }
@@ -67,10 +75,10 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
         val saksbehandler: Lazy<SaksbehandlerFraApi> = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
         try {
             val handling = OverstyrInntektOgRefusjonHandlingFraApi(
-                overstyring.aktorId,
-                overstyring.fodselsnummer,
-                LocalDate.parse(overstyring.skjaringstidspunkt),
-                overstyring.arbeidsgivere.map { arbeidsgiver ->
+                aktørId = overstyring.aktorId,
+                fødselsnummer = overstyring.fodselsnummer,
+                skjæringstidspunkt = LocalDate.parse(overstyring.skjaringstidspunkt),
+                arbeidsgivere = overstyring.arbeidsgivere.map { arbeidsgiver ->
                     OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverDto(
                         organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
                         månedligInntekt = arbeidsgiver.manedligInntekt,
@@ -93,16 +101,18 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
                         forklaring = arbeidsgiver.forklaring,
                         subsumsjon = arbeidsgiver.subsumsjon?.let { subsumsjon ->
                             SubsumsjonDto(
-                                subsumsjon.paragraf,
-                                subsumsjon.ledd,
-                                subsumsjon.bokstav
+                                paragraf = subsumsjon.paragraf,
+                                ledd = subsumsjon.ledd,
+                                bokstav = subsumsjon.bokstav
                             )
                         })
                 })
             withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(handling, saksbehandler.value) }
         } catch (e: Exception) {
+            val kunneIkkeOverstyreError = kunneIkkeOverstyreError("inntekt og refusjon")
+            logg.error(kunneIkkeOverstyreError.message, e)
             return@withContext DataFetcherResult.newResult<Boolean>()
-                .error(kunneIkkeOverstyreError("inntekt og refusjon")).build()
+                .error(kunneIkkeOverstyreError).build()
         }
         DataFetcherResult.newResult<Boolean>().data(true).build()
     }
@@ -128,7 +138,9 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
                 })
             withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(handling, saksbehandler.value) }
         } catch (e: Exception) {
-            return@withContext DataFetcherResult.newResult<Boolean>().error(kunneIkkeOverstyreError("arbeidsforhold"))
+            val kunneIkkeOverstyreError = kunneIkkeOverstyreError("arbeidsforhold")
+            logg.error(kunneIkkeOverstyreError.message, e)
+            return@withContext DataFetcherResult.newResult<Boolean>().error(kunneIkkeOverstyreError)
                 .build()
         }
         DataFetcherResult.newResult<Boolean>().data(true).build()
