@@ -62,19 +62,19 @@ class Oppgave private constructor(
         påVent: Boolean = false,
         harTilgangTil: Tilgangskontroll,
     ) {
-        check(tilstand is AvventerSaksbehandler) { "Oppgave med id=$id i tilstand=$tilstand kan ikke tildeles" }
+        check(tilstand is AvventerSaksbehandler) { "Oppgave med oppgaveId=$id i tilstand=$tilstand kan ikke tildeles" }
         if (egenskap is STIKKPRØVE) {
-            logg.info("OppgaveId $id er stikkprøve og tildeles ikke på tross av reservasjon.")
+            logg.info("Oppgave med {} er stikkprøve og tildeles ikke på tross av reservasjon.", kv("oppgaveId", id))
             return
         }
-        if (egenskap == RISK_QA) {
+        if (egenskap is RISK_QA) {
             val harTilgangTilRisk = runBlocking { harTilgangTil(saksbehandler.oid(), Gruppe.RISK_QA) }
-            if (!harTilgangTilRisk) logg.info("OppgaveId $id er RISK_QA og saksbehandler har ikke tilgang, tildeles ikke på tross av reservasjon.")
+            if (!harTilgangTilRisk) logg.info("Oppgave med {} er RISK_QA og saksbehandler har ikke tilgang, tildeles ikke på tross av reservasjon.", kv("oppgaveId", id))
             return
         }
         tildeltTil = saksbehandler
         this.påVent = påVent
-        logg.info("Oppgave $id tildeles $saksbehandler grunnet reservasjon.")
+        logg.info("Oppgave med {} tildeles $saksbehandler grunnet reservasjon.", kv("oppgaveId", id))
     }
 
     internal fun sendTilBeslutter(behandlendeSaksbehandler: Saksbehandler) {
