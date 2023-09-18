@@ -44,15 +44,14 @@ data class OverstyrInntektOgRefusjonHandlingFraApi(
         val organisasjonsnummer: String,
         val månedligInntekt: Double,
         val fraMånedligInntekt: Double,
-        val refusjonsopplysninger: List<RefusjonselementDto>?,
-        val fraRefusjonsopplysninger: List<RefusjonselementDto>?,
+        val refusjonsopplysninger: List<RefusjonselementFraApi>?,
+        val fraRefusjonsopplysninger: List<RefusjonselementFraApi>?,
         val begrunnelse: String,
         val forklaring: String,
-        val subsumsjon: LovhjemmelFraApi?,
         val lovhjemmel: LovhjemmelFraApi?,
     ) {
 
-        data class RefusjonselementDto(
+        data class RefusjonselementFraApi(
             val fom: LocalDate,
             val tom: LocalDate? = null,
             val beløp: Double,

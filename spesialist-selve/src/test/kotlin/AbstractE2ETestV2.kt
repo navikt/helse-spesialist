@@ -33,6 +33,9 @@ import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Vergemål
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.saksbehandler.LovhjemmelEvent
+import no.nav.helse.modell.saksbehandler.OverstyrtInntektOgRefusjonEvent.OverstyrtArbeidsgiverEvent
+import no.nav.helse.modell.saksbehandler.OverstyrtInntektOgRefusjonEvent.OverstyrtArbeidsgiverEvent.OverstyrtRefusjonselementEvent
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
@@ -58,6 +61,7 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforho
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdDto
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverFraApi.RefusjonselementFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi.OverstyrDagFraApi
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
@@ -1059,8 +1063,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
                 månedligInntekt = 25000.0,
                 fraMånedligInntekt = 25001.0,
                 forklaring = "testbortforklaring",
-                lovhjemmel = null,
-                subsumsjon = LovhjemmelFraApi("8-28", "LEDD_1", "BOKSTAV_A", "folketrygdloven", "1970-01-01"),
+                lovhjemmel = LovhjemmelFraApi("8-28", "LEDD_1", "BOKSTAV_A", "folketrygdloven", "1970-01-01"),
                 refusjonsopplysninger = null,
                 fraRefusjonsopplysninger = null,
                 begrunnelse = "en begrunnelse")
@@ -1074,7 +1077,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
                 skjæringstidspunkt = skjæringstidspunkt,
-                arbeidsgivere = arbeidsgivere,
+                arbeidsgivere = arbeidsgivere.byggOverstyrArbeidsgiverEvent(),
                 saksbehandlerOid = SAKSBEHANDLER_OID,
             )
         }
@@ -1432,6 +1435,29 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
             )
         }
     }
+
+    private fun List<OverstyrArbeidsgiverFraApi>.byggOverstyrArbeidsgiverEvent() = this.map {
+        OverstyrtArbeidsgiverEvent(
+            organisasjonsnummer = it.organisasjonsnummer,
+            månedligInntekt = it.månedligInntekt,
+            fraMånedligInntekt = it.fraMånedligInntekt,
+            refusjonsopplysninger = it.refusjonsopplysninger?.byggRefusjonselementEvent(),
+            fraRefusjonsopplysninger = it.fraRefusjonsopplysninger?.byggRefusjonselementEvent(),
+            begrunnelse = it.begrunnelse,
+            forklaring = it.forklaring,
+            subsumsjon = it.lovhjemmel?.byggLovhjemmelEvent(),
+        )
+    }
+
+    private fun List<RefusjonselementFraApi>.byggRefusjonselementEvent() = this.map {
+        OverstyrtRefusjonselementEvent(
+            fom = it.fom,
+            tom = it.tom,
+            beløp = it.beløp,
+        )
+    }
+
+    private fun LovhjemmelFraApi.byggLovhjemmelEvent() = LovhjemmelEvent(paragraf, ledd, bokstav, lovverk, lovverksversjon)
 
     private fun lagVarseldefinisjoner() {
         Varselkode.entries.forEach { varselkode ->

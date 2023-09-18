@@ -9,7 +9,7 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.LovhjemmelFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdDto
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverFraApi.RefusjonselementDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverFraApi.RefusjonselementFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi.OverstyrDagFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi
@@ -105,15 +105,14 @@ internal class OverstyringApiTest: AbstractE2ETest() {
                     månedligInntekt = 25000.0,
                     fraMånedligInntekt = 25001.0,
                     refusjonsopplysninger = listOf(
-                        RefusjonselementDto(1.januar, 31.januar, 25000.0),
-                        RefusjonselementDto(1.februar, null, 24000.0),
+                        RefusjonselementFraApi(1.januar, 31.januar, 25000.0),
+                        RefusjonselementFraApi(1.februar, null, 24000.0),
                     ),
                     fraRefusjonsopplysninger = listOf(
-                        RefusjonselementDto(1.januar, 31.januar, 24000.0),
-                        RefusjonselementDto(1.februar, null, 23000.0),
+                        RefusjonselementFraApi(1.januar, 31.januar, 24000.0),
+                        RefusjonselementFraApi(1.februar, null, 23000.0),
                     ),
-                    subsumsjon = LovhjemmelFraApi("8-28", "3", null, "folketrygdloven", "1970-01-01"),
-                    lovhjemmel = null,
+                    lovhjemmel = LovhjemmelFraApi("8-28", "3", null, "folketrygdloven", "1970-01-01"),
                     begrunnelse = "En begrunnelse",
                     forklaring = "En forklaring"
                 ),

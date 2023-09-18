@@ -86,14 +86,14 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
                         månedligInntekt = arbeidsgiver.manedligInntekt,
                         fraMånedligInntekt = arbeidsgiver.fraManedligInntekt,
                         refusjonsopplysninger = arbeidsgiver.refusjonsopplysninger?.map { refusjonselement ->
-                            OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverFraApi.RefusjonselementDto(
+                            OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverFraApi.RefusjonselementFraApi(
                                 fom = LocalDate.parse(refusjonselement.fom),
                                 tom = refusjonselement.tom?.let { LocalDate.parse(it) },
                                 beløp = refusjonselement.belop
                             )
                         },
                         fraRefusjonsopplysninger = arbeidsgiver.fraRefusjonsopplysninger?.map { refusjonselement ->
-                            OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverFraApi.RefusjonselementDto(
+                            OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverFraApi.RefusjonselementFraApi(
                                 fom = LocalDate.parse(refusjonselement.fom),
                                 tom = refusjonselement.tom?.let { LocalDate.parse(it) },
                                 beløp = refusjonselement.belop
@@ -101,8 +101,7 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
                         },
                         begrunnelse = arbeidsgiver.begrunnelse,
                         forklaring = arbeidsgiver.forklaring,
-                        lovhjemmel = null,
-                        subsumsjon = arbeidsgiver.lovhjemmel?.let { lovhjemmel ->
+                        lovhjemmel = arbeidsgiver.lovhjemmel?.let { lovhjemmel ->
                             LovhjemmelFraApi(
                                 paragraf = lovhjemmel.paragraf,
                                 ledd = lovhjemmel.ledd,

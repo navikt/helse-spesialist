@@ -257,7 +257,7 @@ class SaksbehandlerMediator(
                     },
                     begrunnelse = overstyrArbeidsgiver.begrunnelse,
                     forklaring = overstyrArbeidsgiver.forklaring,
-                    lovhjemmel = overstyrArbeidsgiver.subsumsjon?.let {
+                    lovhjemmel = overstyrArbeidsgiver.lovhjemmel?.let {
                         Lovhjemmel(it.paragraf, it.ledd, it.bokstav, it.lovverk, it.lovverksversjon)
                     }
                 )
