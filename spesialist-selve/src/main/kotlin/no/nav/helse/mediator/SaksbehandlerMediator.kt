@@ -273,16 +273,16 @@ class SaksbehandlerMediator(
             organisasjonsnummer = organisasjonsnummer,
             dager = dager.map {
                 OverstyrtTidslinjedag(
-                    it.dato,
-                    it.type,
-                    it.fraType,
-                    it.grad,
-                    it.fraGrad,
-                    it.subsumsjon?.let { subsumsjon ->
+                    dato = it.dato,
+                    type = it.type,
+                    fraType = it.fraType,
+                    grad = it.grad,
+                    fraGrad = it.fraGrad,
+                    lovhjemmel = it.lovhjemmel?.let { lovhjemmel ->
                         Lovhjemmel(
-                            paragraf = subsumsjon.paragraf,
-                            ledd = subsumsjon.ledd,
-                            bokstav = subsumsjon.bokstav
+                            paragraf = lovhjemmel.paragraf,
+                            ledd = lovhjemmel.ledd,
+                            bokstav = lovhjemmel.bokstav
                         )
                     })
             },

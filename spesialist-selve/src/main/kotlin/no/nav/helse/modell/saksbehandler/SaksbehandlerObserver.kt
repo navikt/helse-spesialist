@@ -60,6 +60,8 @@ data class LovhjemmelEvent(
     val paragraf: String,
     val ledd: String? = null,
     val bokstav: String? = null,
+    val lovverk: String? = null,
+    val lovverksversjon: String? = null,
 )
 
 data class OverstyrtTidslinjeEvent(

@@ -12,8 +12,6 @@ internal class Subsumsjon(
     private val sporing: Sporing,
 ) {
     private val id = UUID.randomUUID()
-    private val lovverk = "folketrygdloven"
-    private val lovverksversjon = "2019-06-21"
     private val tidsstempel = LocalDateTime.now()
     private val kilde = "spesialist"
 
@@ -25,8 +23,8 @@ internal class Subsumsjon(
             paragraf = lovhjemmelEvent.paragraf,
             ledd = lovhjemmelEvent.ledd,
             bokstav = lovhjemmelEvent.bokstav,
-            lovverk = lovverk,
-            lovverksversjon = lovverksversjon,
+            lovverk = requireNotNull(lovhjemmelEvent.lovverk),
+            lovverksversjon = requireNotNull(lovhjemmelEvent.lovverksversjon),
             utfall = utfall.name,
             input = input,
             output = output,

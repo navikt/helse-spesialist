@@ -54,7 +54,7 @@ internal class OverstyringE2ETest : AbstractE2ETestV2() {
                 fraType = "Sykedag",
                 grad = null,
                 fraGrad = 100,
-                subsumsjon = null
+                lovhjemmel = null
             )
         ))
         assertOverstyrTidslinje(FØDSELSNUMMER, 1)

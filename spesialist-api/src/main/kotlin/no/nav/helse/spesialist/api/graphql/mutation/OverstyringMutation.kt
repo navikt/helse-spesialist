@@ -49,11 +49,13 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
                         fraType = it.fraType,
                         grad = it.grad,
                         fraGrad = it.fraGrad,
-                        subsumsjon = it.subsumsjon?.let { subsumsjon ->
+                        lovhjemmel = it.lovhjemmel?.let { lovhjemmel ->
                             SubsumsjonDto(
-                                subsumsjon.paragraf,
-                                subsumsjon.ledd,
-                                subsumsjon.bokstav
+                                lovhjemmel.paragraf,
+                                lovhjemmel.ledd,
+                                lovhjemmel.bokstav,
+                                lovhjemmel.lovverk,
+                                lovhjemmel.lovverksversjon,
                             )
                         },
                     )

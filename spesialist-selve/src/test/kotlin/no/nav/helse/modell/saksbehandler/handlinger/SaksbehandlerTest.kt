@@ -103,8 +103,8 @@ internal class SaksbehandlerTest {
                 paragraf = "ANNEN PARAGRAF",
                 ledd = "ANNET LEDD",
                 bokstav = "EN BOKSTAV",
-                lovverk = "folketrygdloven",
-                lovverksversjon = "2019-06-21",
+                lovverk = "ANNEN LOV",
+                lovverksversjon = "1970-01-01",
                 utfall = VILKAR_BEREGNET.name,
                 output = mapOf(
                     "dager" to listOf(
@@ -202,6 +202,8 @@ internal class SaksbehandlerTest {
             lovhjemmel = Lovhjemmel(
                 paragraf = "22-13",
                 ledd = "7",
+                lovverk = "folketrygdloven",
+                lovverksversjon = "2019-06-21",
             )
         ),
         OverstyrtTidslinjedag(
@@ -213,6 +215,8 @@ internal class SaksbehandlerTest {
             lovhjemmel = Lovhjemmel(
                 paragraf = "22-13",
                 ledd = "7",
+                lovverk = "folketrygdloven",
+                lovverksversjon = "2019-06-21",
             )
         ),
         OverstyrtTidslinjedag(
@@ -225,6 +229,8 @@ internal class SaksbehandlerTest {
                 paragraf = "ANNEN PARAGRAF",
                 ledd = "ANNET LEDD",
                 bokstav = "EN BOKSTAV",
+                lovverk = "ANNEN LOV",
+                lovverksversjon = "1970-01-01",
             )
         ),
         OverstyrtTidslinjedag(

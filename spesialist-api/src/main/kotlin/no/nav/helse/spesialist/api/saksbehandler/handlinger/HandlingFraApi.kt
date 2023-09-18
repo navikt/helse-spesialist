@@ -27,7 +27,7 @@ class OverstyrTidslinjeHandlingFraApi(
         val fraType: String,
         val grad: Int?,
         val fraGrad: Int?,
-        val subsumsjon: SubsumsjonDto?,
+        val lovhjemmel: SubsumsjonDto?,
     )
 }
 
@@ -112,6 +112,8 @@ data class SubsumsjonDto(
     val paragraf: String,
     val ledd: String? = null,
     val bokstav: String? = null,
+    val lovverk: String? = null,
+    val lovverksversjon: String? = null,
 )
 
 @JsonIgnoreProperties

@@ -54,6 +54,5 @@ data class OverstyringDag (
     val fraType: String,
     val grad: Int?,
     val fraGrad: Int?,
-    val subsumsjon: Lovhjemmel?,
     val lovhjemmel: Lovhjemmel?
 )
