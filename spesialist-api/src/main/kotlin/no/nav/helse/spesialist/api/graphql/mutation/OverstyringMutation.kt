@@ -83,18 +83,18 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
                         organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
                         månedligInntekt = arbeidsgiver.manedligInntekt,
                         fraMånedligInntekt = arbeidsgiver.fraManedligInntekt,
-                        refusjonsopplysninger = arbeidsgiver.refusjonsopplysninger?.map {
+                        refusjonsopplysninger = arbeidsgiver.refusjonsopplysninger?.map { refusjonselement ->
                             OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverDto.RefusjonselementDto(
-                                fom = LocalDate.parse(it.fom),
-                                tom = LocalDate.parse(it.tom),
-                                beløp = it.belop
+                                fom = LocalDate.parse(refusjonselement.fom),
+                                tom = refusjonselement.tom?.let { LocalDate.parse(it) },
+                                beløp = refusjonselement.belop
                             )
                         },
-                        fraRefusjonsopplysninger = arbeidsgiver.fraRefusjonsopplysninger?.map {
+                        fraRefusjonsopplysninger = arbeidsgiver.fraRefusjonsopplysninger?.map { refusjonselement ->
                             OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverDto.RefusjonselementDto(
-                                fom = LocalDate.parse(it.fom),
-                                tom = LocalDate.parse(it.tom),
-                                beløp = it.belop
+                                fom = LocalDate.parse(refusjonselement.fom),
+                                tom = refusjonselement.tom?.let { LocalDate.parse(it) },
+                                beløp = refusjonselement.belop
                             )
                         },
                         begrunnelse = arbeidsgiver.begrunnelse,
