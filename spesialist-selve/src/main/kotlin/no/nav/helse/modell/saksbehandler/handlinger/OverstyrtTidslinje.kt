@@ -24,6 +24,8 @@ class OverstyrtTidslinje(
         saksbehandler.håndter(this)
     }
 
+    override fun loggnavn(): String = "overstyr_tidslinje"
+
     fun byggEvent() = OverstyrtTidslinjeEvent(
         id = id,
         fødselsnummer = fødselsnummer,

@@ -4,9 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import java.time.LocalDate
 import java.util.UUID
 
-sealed interface HandlingFraApi {
-    fun loggnavn(): String
-}
+sealed interface HandlingFraApi
 
 @JsonIgnoreProperties
 class OverstyrTidslinjeHandlingFraApi(
@@ -17,8 +15,6 @@ class OverstyrTidslinjeHandlingFraApi(
     val begrunnelse: String,
     val dager: List<OverstyrDagFraApi>
 ): HandlingFraApi {
-
-    override fun loggnavn(): String = "overstyr_tidslinje"
 
     @JsonIgnoreProperties
     class OverstyrDagFraApi(
@@ -37,8 +33,6 @@ data class OverstyrInntektOgRefusjonHandlingFraApi(
     val skjæringstidspunkt: LocalDate,
     val arbeidsgivere: List<OverstyrArbeidsgiverFraApi>,
 ) : HandlingFraApi {
-
-    override fun loggnavn(): String = "overstyr_inntekt_og_refusjon"
 
     data class OverstyrArbeidsgiverFraApi(
         val organisasjonsnummer: String,
@@ -67,8 +61,6 @@ data class OverstyrArbeidsforholdHandlingFraApi(
     val overstyrteArbeidsforhold: List<ArbeidsforholdFraApi>,
 ) : HandlingFraApi {
 
-    override fun loggnavn(): String = "overstyr_arbeidsforhold"
-
     @JsonIgnoreProperties
     data class ArbeidsforholdFraApi(
         val orgnummer: String,
@@ -84,8 +76,6 @@ data class SkjønnsfastsettSykepengegrunnlagHandlingFraApi(
     val skjæringstidspunkt: LocalDate,
     val arbeidsgivere: List<SkjønnsfastsattArbeidsgiverFraApi>,
 ) : HandlingFraApi {
-
-    override fun loggnavn(): String = "skjønnsfastsett_sykepengegrunnlag"
 
     data class SkjønnsfastsattArbeidsgiverFraApi(
         val organisasjonsnummer: String,
@@ -124,6 +114,4 @@ data class AnnulleringHandlingFraApi(
     val fagsystemId: String,
     val begrunnelser: List<String> = emptyList(),
     val kommentar: String?
-): HandlingFraApi {
-    override fun loggnavn(): String = "annuller_utbetaling"
-}
+): HandlingFraApi

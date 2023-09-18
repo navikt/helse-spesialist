@@ -15,6 +15,8 @@ class SkjønnsfastsattSykepengegrunnlag(
     override fun utførAv(saksbehandler: Saksbehandler) {
         saksbehandler.håndter(this)
     }
+    override fun loggnavn(): String = "skjønnsfastsett_sykepengegrunnlag"
+
     fun byggEvent(oid: UUID, navn: String, epost: String, ident: String): SkjønnsfastsattSykepengegrunnlagEvent {
         return SkjønnsfastsattSykepengegrunnlagEvent(
             fødselsnummer = fødselsnummer,

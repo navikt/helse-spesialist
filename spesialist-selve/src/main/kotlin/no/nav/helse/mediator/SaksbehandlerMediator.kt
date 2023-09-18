@@ -42,7 +42,6 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforho
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi
-import no.nav.helse.spesialist.api.tell
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.varsel.Varsel
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
@@ -66,23 +65,24 @@ class SaksbehandlerMediator(
 
     override fun <T : HandlingFraApi> håndter(handlingFraApi: T, saksbehandlerFraApi: SaksbehandlerFraApi) {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
-        SaksbehandlerLagrer(saksbehandlerDao).lagre(saksbehandler)
-        val handlingId = UUID.randomUUID()
-        tell(handlingFraApi)
-        saksbehandler.register(this)
         val modellhandling = handlingFraApi.tilHandling()
+        SaksbehandlerLagrer(saksbehandlerDao).lagre(saksbehandler)
+        tell(modellhandling)
+        saksbehandler.register(this)
+        val handlingId = UUID.randomUUID()
+
         withMDC(
             mapOf(
                 "saksbehandlerOid" to saksbehandler.oid().toString(),
                 "handlingId" to handlingId.toString()
             )
         ) {
-            sikkerlogg.info("Utfører handling ${handlingFraApi.loggnavn()} på vegne av saksbehandler $saksbehandler")
+            sikkerlogg.info("Utfører handling ${modellhandling.loggnavn()} på vegne av saksbehandler $saksbehandler")
             when (modellhandling) {
                 is Overstyring -> håndter(modellhandling, saksbehandler)
                 else -> modellhandling.utførAv(saksbehandler)
             }
-            sikkerlogg.info("Handling ${handlingFraApi.loggnavn()} utført")
+            sikkerlogg.info("Handling ${modellhandling.loggnavn()} utført")
         }
     }
 

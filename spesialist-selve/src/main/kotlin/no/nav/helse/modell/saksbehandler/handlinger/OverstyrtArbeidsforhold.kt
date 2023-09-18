@@ -16,6 +16,8 @@ class OverstyrtArbeidsforhold(
         saksbehandler.håndter(this)
     }
 
+    override fun loggnavn(): String = "overstyr_arbeidsforhold"
+
     fun byggEvent(oid: UUID, navn: String, epost: String, ident: String): OverstyrtArbeidsforholdEvent {
         return OverstyrtArbeidsforholdEvent(
             fødselsnummer = fødselsnummer,

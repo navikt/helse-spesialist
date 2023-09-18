@@ -16,6 +16,8 @@ class Annullering(
         saksbehandler.håndter(this)
     }
 
+    override fun loggnavn(): String = "annuller_utbetaling"
+
     internal fun byggEvent(oid: UUID, navn: String, epost: String, ident: String): AnnullertUtbetalingEvent {
         return AnnullertUtbetalingEvent(
             fødselsnummer = fødselsnummer,

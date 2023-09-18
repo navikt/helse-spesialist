@@ -16,6 +16,8 @@ class OverstyrtInntektOgRefusjon(
         saksbehandler.håndter(this)
     }
 
+    override fun loggnavn(): String = "overstyr_inntekt_og_refusjon"
+
     fun byggEvent(oid: UUID, navn: String, epost: String, ident: String) =
         OverstyrtInntektOgRefusjonEvent(
             fødselsnummer = fødselsnummer,
