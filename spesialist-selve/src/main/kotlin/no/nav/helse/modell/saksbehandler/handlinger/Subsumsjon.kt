@@ -34,15 +34,28 @@ internal class Subsumsjon(
         )
     }
 
-    internal class Sporing(
+    internal abstract class Sporing(
         private val vedtaksperioder: List<UUID>,
         private val organisasjonsnummer: List<String>,
-        private val saksbehandler: UUID,
+        private val saksbehandler: List<String>,
     ) {
-        internal fun byggEvent() = mapOf(
+        protected abstract fun ekstraSporing(): Map<String, List<String>>
+        internal fun byggEvent(): Map<String, List<String>> = mapOf(
             "vedtaksperiode" to vedtaksperioder.map { it.toString() },
-            "organisasjonsnummer" to organisasjonsnummer
-        )
+            "organisasjonsnummer" to organisasjonsnummer,
+            "saksbehandler" to saksbehandler,
+        ) + ekstraSporing()
+    }
+
+    internal class SporingOverstyrtTidslinje(
+        vedtaksperioder: List<UUID>,
+        organisasjonsnummer: List<String>,
+        saksbehandler: List<String>,
+        private val overstyrtTidslinjeId: UUID
+    ): Sporing(vedtaksperioder, organisasjonsnummer, saksbehandler) {
+        override fun ekstraSporing(): Map<String, List<String>> =
+            mapOf("overstyrtidslinje" to listOf(overstyrtTidslinjeId.toString()))
+
     }
 
     internal enum class Utfall {

@@ -70,6 +70,7 @@ class SaksbehandlerMediator(
         SaksbehandlerLagrer(saksbehandlerDao).lagre(saksbehandler)
         tell(modellhandling)
         saksbehandler.register(this)
+        saksbehandler.register(Subsumsjonsmelder(versjonAvKode, rapidsConnection))
         val handlingId = UUID.randomUUID()
 
         withMDC(

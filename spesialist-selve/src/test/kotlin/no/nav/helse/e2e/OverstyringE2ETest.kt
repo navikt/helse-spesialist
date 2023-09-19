@@ -8,6 +8,7 @@ import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.TestRapidHelpers.siste
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.Testdata.SAKSBEHANDLERTILGANGER_UTEN_TILGANGER
@@ -64,6 +65,25 @@ internal class OverstyringE2ETest : AbstractE2ETestV2() {
         val nyUtbetalingId = UUID.randomUUID()
         fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true, utbetalingId = nyUtbetalingId)
         assertOppgaver(nyUtbetalingId, "AvventerSaksbehandler", 1)
+    }
+
+    @Test
+    fun `saksbehandler overstyrer sykdomstidslinje med referanse til lovhjemmel`() {
+        fremTilSaksbehandleroppgave()
+        håndterOverstyrTidslinje(dager = listOf(
+            OverstyrTidslinjeHandlingFraApi.OverstyrDagFraApi(
+                dato = 20.januar,
+                type = "Feriedag",
+                fraType = "Sykedag",
+                grad = null,
+                fraGrad = 100,
+                lovhjemmel = LovhjemmelFraApi(paragraf = "EN PARAGRAF", ledd = "ET LEDD", bokstav = "EN BOKSTAV", lovverk = "folketrygdloven", lovverksversjon = "1970-01-01")
+            )
+        ))
+        assertOverstyrTidslinje(FØDSELSNUMMER, 1)
+        val subsumsjon = inspektør.siste("subsumsjon")
+
+        assertNotNull(subsumsjon["sporing"]["overstyrtidslinje"])
     }
 
     @Test

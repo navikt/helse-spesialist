@@ -29,7 +29,7 @@ class Saksbehandler(
 
     internal fun håndter(hendelse: OverstyrtTidslinje) {
         val event = hendelse.byggEvent()
-        val subsumsjoner = hendelse.byggSubsumsjoner(this.oid).map { it.byggEvent() }
+        val subsumsjoner = hendelse.byggSubsumsjoner(this.epostadresse).map { it.byggEvent() }
         subsumsjoner.forEach { subsumsjonEvent ->
             observers.forEach { it.nySubsumsjon(subsumsjonEvent.fødselsnummer, subsumsjonEvent) }
         }

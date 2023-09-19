@@ -5,7 +5,7 @@ import java.util.UUID
 import no.nav.helse.modell.saksbehandler.OverstyrtTidslinjeEvent
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinjedag.Companion.byggSubsumsjoner
-import no.nav.helse.modell.saksbehandler.handlinger.Subsumsjon.Sporing
+import no.nav.helse.modell.saksbehandler.handlinger.Subsumsjon.SporingOverstyrtTidslinje
 import no.nav.helse.modell.saksbehandler.handlinger.Subsumsjon.Utfall.VILKAR_BEREGNET
 import no.nav.helse.modell.saksbehandler.handlinger.dto.OverstyrtTidslinjeDto
 import no.nav.helse.modell.saksbehandler.handlinger.dto.OverstyrtTidslinjedagDto
@@ -43,13 +43,14 @@ class OverstyrtTidslinje(
         begrunnelse = begrunnelse
     )
 
-    internal fun byggSubsumsjoner(oid: UUID): List<Subsumsjon> {
+    internal fun byggSubsumsjoner(saksbehandlerEpost: String): List<Subsumsjon> {
         return dager.byggSubsumsjoner(
+            overstyringId = id,
             vedtaksperiodeId = vedtaksperiodeId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             begrunnelse = begrunnelse,
-            oid = oid
+            saksbehandlerEpost = saksbehandlerEpost,
         )
     }
 }
@@ -65,11 +66,12 @@ class OverstyrtTidslinjedag(
 
     internal companion object {
         internal fun List<OverstyrtTidslinjedag>.byggSubsumsjoner(
+            overstyringId: UUID,
             vedtaksperiodeId: UUID,
             fødselsnummer: String,
             organisasjonsnummer: String,
             begrunnelse: String,
-            oid: UUID,
+            saksbehandlerEpost: String,
         ): List<Subsumsjon> = this
             .mapNotNull { if (it.lovhjemmel != null) it.lovhjemmel to it else null }
             .groupBy({ it.first }, { it.second })
@@ -92,10 +94,11 @@ class OverstyrtTidslinjedag(
                             )
                         }
                     ),
-                    sporing = Sporing(
+                    sporing = SporingOverstyrtTidslinje(
                         vedtaksperioder = listOf(vedtaksperiodeId),
                         organisasjonsnummer = listOf(organisasjonsnummer),
-                        saksbehandler = oid
+                        saksbehandler = listOf(saksbehandlerEpost),
+                        overstyrtTidslinjeId = overstyringId,
                     )
                 )
             }

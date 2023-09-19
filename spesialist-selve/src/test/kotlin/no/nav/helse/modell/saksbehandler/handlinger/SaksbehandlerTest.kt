@@ -48,9 +48,11 @@ internal class SaksbehandlerTest {
 
         val saksbehandler = Saksbehandler("epost@nav.no", UUID.randomUUID(), "navn", "Z999999")
         val vedtaksperiodeId = UUID.randomUUID()
+        val overstyringId = UUID.randomUUID()
         saksbehandler.register(observer)
         saksbehandler.håndter(
             OverstyrtTidslinje(
+                id = overstyringId,
                 vedtaksperiodeId = vedtaksperiodeId,
                 aktørId = "123",
                 fødselsnummer = "1234",
@@ -90,7 +92,12 @@ internal class SaksbehandlerTest {
                     )
                 ),
                 input = mapOf("begrunnelseFraSaksbehandler" to "begrunnelse"),
-                sporing = mapOf("organisasjonsnummer" to listOf("12345"), "vedtaksperiode" to listOf(vedtaksperiodeId.toString())),
+                sporing = mapOf(
+                    "organisasjonsnummer" to listOf("12345"),
+                    "vedtaksperiode" to listOf(vedtaksperiodeId.toString()),
+                    "saksbehandler" to listOf("epost@nav.no"),
+                    "overstyrtidslinje" to listOf(overstyringId.toString()),
+                ),
                 tidsstempel = subsumsjoner[0].tidsstempel,
                 kilde = "spesialist",
             ),
@@ -118,7 +125,12 @@ internal class SaksbehandlerTest {
                     )
                 ),
                 input = mapOf("begrunnelseFraSaksbehandler" to "begrunnelse"),
-                sporing = mapOf("organisasjonsnummer" to listOf("12345"), "vedtaksperiode" to listOf(vedtaksperiodeId.toString())),
+                sporing = mapOf(
+                    "organisasjonsnummer" to listOf("12345"),
+                    "vedtaksperiode" to listOf(vedtaksperiodeId.toString()),
+                    "saksbehandler" to listOf("epost@nav.no"),
+                    "overstyrtidslinje" to listOf(overstyringId.toString()),
+                ),
                 tidsstempel = subsumsjoner[1].tidsstempel,
                 kilde = "spesialist",
             ),
