@@ -7,7 +7,8 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 
-internal class Subsumsjonsmelder(private val versjonAvKode: String, private val rapidsConnection: RapidsConnection) : SaksbehandlerObserver {
+internal class Subsumsjonsmelder(private val versjonAvKode: String, private val rapidsConnection: RapidsConnection) :
+    SaksbehandlerObserver {
 
     private val versjon = "1.0.0"
 
@@ -28,23 +29,25 @@ internal class Subsumsjonsmelder(private val versjonAvKode: String, private val 
     }
 
     private fun SubsumsjonEvent.somJsonMessage(): JsonMessage = JsonMessage.newMessage(
-        "subsumsjon", mutableMapOf(
-            "id" to id,
-            "versjon" to versjon,
-            "kilde" to kilde,
-            "versjonAvKode" to versjonAvKode,
-            "fodselsnummer" to fødselsnummer,
-            "sporing" to sporing,
-            "tidsstempel" to tidsstempel,
-            "lovverk" to lovverk,
-            "lovverksversjon" to lovverksversjon,
-            "paragraf" to paragraf,
-            "input" to input,
-            "output" to output,
-            "utfall" to utfall,
-        ).apply {
-            compute("ledd") { _,_ -> ledd }
-            compute("bokstav") { _,_ -> bokstav }
-        }.toMap()
+        "subsumsjon", mapOf(
+            "subsumsjon" to mutableMapOf(
+                "id" to id,
+                "versjon" to versjon,
+                "kilde" to kilde,
+                "versjonAvKode" to versjonAvKode,
+                "fodselsnummer" to fødselsnummer,
+                "sporing" to sporing,
+                "tidsstempel" to tidsstempel,
+                "lovverk" to lovverk,
+                "lovverksversjon" to lovverksversjon,
+                "paragraf" to paragraf,
+                "input" to input,
+                "output" to output,
+                "utfall" to utfall,
+            ).apply {
+                compute("ledd") { _, _ -> ledd }
+                compute("bokstav") { _, _ -> bokstav }
+            }.toMap()
+        )
     )
 }

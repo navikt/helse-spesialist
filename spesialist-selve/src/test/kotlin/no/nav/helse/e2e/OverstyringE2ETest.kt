@@ -81,7 +81,7 @@ internal class OverstyringE2ETest : AbstractE2ETestV2() {
             )
         ))
         assertOverstyrTidslinje(FØDSELSNUMMER, 1)
-        val subsumsjon = inspektør.siste("subsumsjon")
+        val subsumsjon = inspektør.siste("subsumsjon").path("subsumsjon")
 
         assertNotNull(subsumsjon["sporing"]["overstyrtidslinje"])
     }

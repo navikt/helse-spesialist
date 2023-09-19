@@ -9,6 +9,7 @@ import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -53,22 +54,25 @@ class SubsumsjonsmelderTest {
         val meldinger = testRapid.inspektør.meldinger()
         assertEquals(1, meldinger.size)
         val melding = meldinger.single()
+        val subsumsjon = melding.path("subsumsjon")
 
         assertEquals("subsumsjon", melding["@event_name"].asText())
-        assertEquals(id, melding["id"].asUUID())
-        assertEquals(FNR, melding["fodselsnummer"].asText())
-        assertEquals("versjonAvKode", melding["versjonAvKode"].asText())
-        assertEquals("1.0.0", melding["versjon"].asText())
-        assertEquals("EN PARAGRAF", melding["paragraf"].asText())
-        assertEquals("ET LEDD", melding["ledd"].asText())
-        assertEquals("EN BOKSTAV", melding["bokstav"].asText())
-        assertEquals("folketrygdloven", melding["lovverk"].asText())
-        assertEquals("1970-01-01", melding["lovverksversjon"].asText())
-        assertEquals("VILKAR_BEREGNET", melding["utfall"].asText())
-        assertEquals(mapOf("foo" to "bar"), objectMapper.convertValue<Map<String, Any>>(melding["input"]))
-        assertEquals(mapOf("foo" to "bar"), objectMapper.convertValue<Map<String, Any>>(melding["output"]))
-        assertEquals(tidsstempel, melding["tidsstempel"].asLocalDateTime())
-        assertEquals("KILDE", melding["kilde"].asText())
+        assertNotNull(melding["@id"].asUUID())
+        assertNotNull(melding["@opprettet"].asLocalDateTime())
+        assertEquals(id, subsumsjon["id"].asUUID())
+        assertEquals(FNR, subsumsjon["fodselsnummer"].asText())
+        assertEquals("versjonAvKode", subsumsjon["versjonAvKode"].asText())
+        assertEquals("1.0.0", subsumsjon["versjon"].asText())
+        assertEquals("EN PARAGRAF", subsumsjon["paragraf"].asText())
+        assertEquals("ET LEDD", subsumsjon["ledd"].asText())
+        assertEquals("EN BOKSTAV", subsumsjon["bokstav"].asText())
+        assertEquals("folketrygdloven", subsumsjon["lovverk"].asText())
+        assertEquals("1970-01-01", subsumsjon["lovverksversjon"].asText())
+        assertEquals("VILKAR_BEREGNET", subsumsjon["utfall"].asText())
+        assertEquals(mapOf("foo" to "bar"), objectMapper.convertValue<Map<String, Any>>(subsumsjon["input"]))
+        assertEquals(mapOf("foo" to "bar"), objectMapper.convertValue<Map<String, Any>>(subsumsjon["output"]))
+        assertEquals(tidsstempel, subsumsjon["tidsstempel"].asLocalDateTime())
+        assertEquals("KILDE", subsumsjon["kilde"].asText())
     }
 
     @Test
@@ -97,21 +101,24 @@ class SubsumsjonsmelderTest {
         val meldinger = testRapid.inspektør.meldinger()
         assertEquals(1, meldinger.size)
         val melding = meldinger.single()
+        val subsumsjon = melding.path("subsumsjon")
 
         assertEquals("subsumsjon", melding["@event_name"].asText())
-        assertEquals(id, melding["id"].asUUID())
-        assertEquals(FNR, melding["fodselsnummer"].asText())
-        assertEquals("versjonAvKode", melding["versjonAvKode"].asText())
-        assertEquals("1.0.0", melding["versjon"].asText())
-        assertEquals("EN PARAGRAF", melding["paragraf"].asText())
-        assertNull(melding["ledd"])
-        assertNull(melding["bokstav"])
-        assertEquals("folketrygdloven", melding["lovverk"].asText())
-        assertEquals("1970-01-01", melding["lovverksversjon"].asText())
-        assertEquals("VILKAR_BEREGNET", melding["utfall"].asText())
-        assertEquals(mapOf("foo" to "bar"), objectMapper.convertValue<Map<String, Any>>(melding["input"]))
-        assertEquals(mapOf("foo" to "bar"), objectMapper.convertValue<Map<String, Any>>(melding["output"]))
-        assertEquals(tidsstempel, melding["tidsstempel"].asLocalDateTime())
-        assertEquals("KILDE", melding["kilde"].asText())
+        assertNotNull(melding["@id"].asUUID())
+        assertNotNull(melding["@opprettet"].asLocalDateTime())
+        assertEquals(id, subsumsjon["id"].asUUID())
+        assertEquals(FNR, subsumsjon["fodselsnummer"].asText())
+        assertEquals("versjonAvKode", subsumsjon["versjonAvKode"].asText())
+        assertEquals("1.0.0", subsumsjon["versjon"].asText())
+        assertEquals("EN PARAGRAF", subsumsjon["paragraf"].asText())
+        assertNull(subsumsjon["ledd"])
+        assertNull(subsumsjon["bokstav"])
+        assertEquals("folketrygdloven", subsumsjon["lovverk"].asText())
+        assertEquals("1970-01-01", subsumsjon["lovverksversjon"].asText())
+        assertEquals("VILKAR_BEREGNET", subsumsjon["utfall"].asText())
+        assertEquals(mapOf("foo" to "bar"), objectMapper.convertValue<Map<String, Any>>(subsumsjon["input"]))
+        assertEquals(mapOf("foo" to "bar"), objectMapper.convertValue<Map<String, Any>>(subsumsjon["output"]))
+        assertEquals(tidsstempel, subsumsjon["tidsstempel"].asLocalDateTime())
+        assertEquals("KILDE", subsumsjon["kilde"].asText())
     }
 }
