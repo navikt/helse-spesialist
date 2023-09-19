@@ -9,6 +9,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.path
 import java.util.UUID
+import no.nav.helse.mediator.Gruppekontroll
 import no.nav.helse.spesialist.api.client.AccessTokenClient
 import org.slf4j.LoggerFactory
 
@@ -16,8 +17,8 @@ class MsGraphClient(
     private val httpClient: HttpClient,
     private val tokenClient: AccessTokenClient,
     private val graphUrl: String = "https://graph.microsoft.com/v1.0",
-) {
-    suspend fun erIGruppe(oid: UUID, groupId: UUID): Boolean {
+): Gruppekontroll {
+    override suspend fun erIGruppe(oid: UUID, groupId: UUID): Boolean {
         val token = tokenClient.hentAccessToken("https://graph.microsoft.com/.default")
         val response = httpClient.get(graphUrl) {
             url {
@@ -41,7 +42,7 @@ class MsGraphClient(
         }
     }
 
-    companion object {
+    private companion object {
         private val sikkerlogger = LoggerFactory.getLogger("tjenestekall")
     }
 }
