@@ -84,7 +84,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
     protected lateinit var sisteGodkjenningsbehovId: UUID
     internal val dataSource = AbstractDatabaseTest.dataSource
     private val testMediator = TestMediator(testRapid, snapshotClient, dataSource)
-    private val saksbehandlerMediator = SaksbehandlerMediator(dataSource, testRapid)
+    private val saksbehandlerMediator = SaksbehandlerMediator(dataSource, "versjonAvKode", testRapid)
     protected val SAKSBEHANDLER_OID: UUID = UUID.randomUUID()
     protected val SAKSBEHANDLER_EPOST = "augunn.saksbehandler@nav.no"
     protected val SAKSBEHANDLER_IDENT = "S199999"

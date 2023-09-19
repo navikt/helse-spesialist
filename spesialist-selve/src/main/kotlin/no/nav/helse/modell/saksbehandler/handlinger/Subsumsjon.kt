@@ -33,6 +33,7 @@ internal class Subsumsjon(
             kilde = kilde,
         )
     }
+
     internal class Sporing(
         private val vedtaksperioder: List<UUID>,
         private val organisasjonsnummer: List<String>,

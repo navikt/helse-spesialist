@@ -52,6 +52,7 @@ import org.slf4j.LoggerFactory
 
 class SaksbehandlerMediator(
     dataSource: DataSource,
+    private val versjonAvKode: String,
     private val rapidsConnection: RapidsConnection,
 ) : SaksbehandlerObserver, Saksbehandlerhåndterer {
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)

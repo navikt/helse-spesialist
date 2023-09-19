@@ -72,17 +72,15 @@ data class OverstyrtTidslinjeEvent(
     val dager: List<OverstyrtTidslinjeEventDag>,
 ) {
     //TODO: JsonMessage burde ikke være kjent for modell, bør mappes om fra Event til JsonMessage i mediator
-    fun somJsonMessage(): JsonMessage {
-        return JsonMessage.newMessage(
-            eventName(), mutableMapOf(
-                "@id" to id,
-                "fødselsnummer" to fødselsnummer,
-                "aktørId" to aktørId,
-                "organisasjonsnummer" to organisasjonsnummer,
-                "dager" to dager,
-            )
+    fun somJsonMessage(): JsonMessage = JsonMessage.newMessage(
+        eventName(), mutableMapOf(
+            "@id" to id,
+            "fødselsnummer" to fødselsnummer,
+            "aktørId" to aktørId,
+            "organisasjonsnummer" to organisasjonsnummer,
+            "dager" to dager,
         )
-    }
+    )
 
     fun eventName() = "overstyr_tidslinje"
 

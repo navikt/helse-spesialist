@@ -31,7 +31,7 @@ import org.junit.jupiter.api.assertThrows
 
 internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
     private val testRapid = TestRapid()
-    private val mediator = SaksbehandlerMediator(dataSource, testRapid)
+    private val mediator = SaksbehandlerMediator(dataSource, "versjonAvKode", testRapid)
 
     private val AKTØR_ID = "1234567891011"
     private val FØDSELSNUMMER = "12345678910"

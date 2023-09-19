@@ -147,7 +147,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         hendelsefabrikk = hendelsefabrikk
     )
 
-    internal val saksbehandlerMediator = SaksbehandlerMediator(dataSource, testRapid)
+    internal val saksbehandlerMediator = SaksbehandlerMediator(dataSource, "versjonAvKode", testRapid)
 
     @BeforeEach
     internal fun resetTestSetup() {
