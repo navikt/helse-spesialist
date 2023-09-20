@@ -1,5 +1,6 @@
 package no.nav.helse.modell.saksbehandler.handlinger
 
+import TilgangskontrollForTestHarIkkeTilgang
 import java.util.UUID
 import no.nav.helse.januar
 import no.nav.helse.modell.saksbehandler.OverstyrtInntektOgRefusjonEvent
@@ -22,7 +23,7 @@ internal class SaksbehandlerTest {
             }
         }
 
-        val saksbehandler = Saksbehandler("epost@nav.no", UUID.randomUUID(), "navn", "Z999999")
+        val saksbehandler = saksbehandler()
         saksbehandler.register(observer)
         saksbehandler.håndter(
             OverstyrtTidslinje(
@@ -46,7 +47,7 @@ internal class SaksbehandlerTest {
             }
         }
 
-        val saksbehandler = Saksbehandler("epost@nav.no", UUID.randomUUID(), "navn", "Z999999")
+        val saksbehandler = saksbehandler()
         val vedtaksperiodeId = UUID.randomUUID()
         val overstyringId = UUID.randomUUID()
         saksbehandler.register(observer)
@@ -147,7 +148,7 @@ internal class SaksbehandlerTest {
             }
         }
 
-        val saksbehandler = Saksbehandler("epost@nav.no", UUID.randomUUID(), "navn", "Z999999")
+        val saksbehandler = saksbehandler()
         saksbehandler.register(observer)
         saksbehandler.håndter(OverstyrtInntektOgRefusjon("123", "1234", 1.januar, emptyList()))
         assertEquals(true, observert)
@@ -155,7 +156,7 @@ internal class SaksbehandlerTest {
 
     @Test
     fun `referential equals`() {
-        val saksbehandler = Saksbehandler("epost@nav.no", UUID.randomUUID(), "navn", "Z999999")
+        val saksbehandler = saksbehandler()
         assertEquals(saksbehandler, saksbehandler)
         assertEquals(saksbehandler.hashCode(), saksbehandler.hashCode())
     }
@@ -163,8 +164,8 @@ internal class SaksbehandlerTest {
     @Test
     fun `structural equals`() {
         val oid = UUID.randomUUID()
-        val saksbehandler1 = Saksbehandler("epost@nav.no", oid, "navn", "Z999999")
-        val saksbehandler2 = Saksbehandler("epost@nav.no", oid, "navn", "Z999999")
+        val saksbehandler1 = saksbehandler(oid = oid)
+        val saksbehandler2 = saksbehandler(oid = oid)
         assertEquals(saksbehandler1, saksbehandler2)
         assertEquals(saksbehandler1.hashCode(), saksbehandler2.hashCode())
     }
@@ -172,16 +173,16 @@ internal class SaksbehandlerTest {
     @Test
     fun `not equals - epost`() {
         val oid = UUID.randomUUID()
-        val saksbehandler1 = Saksbehandler("epost1@nav.no", oid, "navn", "Z999999")
-        val saksbehandler2 = Saksbehandler("epost2@nav.no", oid, "navn", "Z999999")
+        val saksbehandler1 = saksbehandler(epost = "epost1@nav.no", oid = oid)
+        val saksbehandler2 = saksbehandler(epost = "epost2@nav.no", oid = oid)
         assertNotEquals(saksbehandler1, saksbehandler2)
         assertNotEquals(saksbehandler1.hashCode(), saksbehandler2.hashCode())
     }
 
     @Test
     fun `not equals - oid`() {
-        val saksbehandler1 = Saksbehandler("epost@nav.no", UUID.randomUUID(), "navn", "Z999999")
-        val saksbehandler2 = Saksbehandler("epost@nav.no", UUID.randomUUID(), "navn", "Z999999")
+        val saksbehandler1 = saksbehandler()
+        val saksbehandler2 = saksbehandler()
         assertNotEquals(saksbehandler1, saksbehandler2)
         assertNotEquals(saksbehandler1.hashCode(), saksbehandler2.hashCode())
     }
@@ -189,8 +190,8 @@ internal class SaksbehandlerTest {
     @Test
     fun `not equals - navn`() {
         val oid = UUID.randomUUID()
-        val saksbehandler1 = Saksbehandler("epost@nav.no", oid, "navn 1", "Z999999")
-        val saksbehandler2 = Saksbehandler("epost@nav.no", oid, "navn 2", "Z999999")
+        val saksbehandler1 = saksbehandler(navn = "navn 1", oid = oid)
+        val saksbehandler2 = saksbehandler(navn = "navn 2", oid = oid)
         assertNotEquals(saksbehandler1, saksbehandler2)
         assertNotEquals(saksbehandler1.hashCode(), saksbehandler2.hashCode())
     }
@@ -198,8 +199,8 @@ internal class SaksbehandlerTest {
     @Test
     fun `not equals - ident`() {
         val oid = UUID.randomUUID()
-        val saksbehandler1 = Saksbehandler("epost@nav.no", oid, "navn", "X999999")
-        val saksbehandler2 = Saksbehandler("epost@nav.no", oid, "navn", "Y999999")
+        val saksbehandler1 = saksbehandler(ident = "X999999", oid = oid)
+        val saksbehandler2 = saksbehandler(ident = "Y999999", oid = oid)
         assertNotEquals(saksbehandler1, saksbehandler2)
         assertNotEquals(saksbehandler1.hashCode(), saksbehandler2.hashCode())
     }
@@ -253,5 +254,18 @@ internal class SaksbehandlerTest {
             fraGrad = 100,
             lovhjemmel = null,
         )
+    )
+
+    private fun saksbehandler(
+        epost: String = "epost@nav.no",
+        oid: UUID = UUID.randomUUID(),
+        navn: String = "navn",
+        ident: String = "Z999999",
+    ) = Saksbehandler(
+        epostadresse = epost,
+        oid = oid,
+        navn = navn,
+        ident = ident,
+        tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
     )
 }

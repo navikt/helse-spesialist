@@ -1,15 +1,20 @@
 package no.nav.helse.modell
 
+import TilgangskontrollForTestHarIkkeTilgang
+import TilgangskontrollForTestHarTilgang
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.modell.OppgaveInspektør.Companion.inspektør
+import no.nav.helse.modell.oppgave.EGEN_ANSATT
 import no.nav.helse.modell.oppgave.Egenskap
+import no.nav.helse.modell.oppgave.FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveObserver
 import no.nav.helse.modell.oppgave.RISK_QA
 import no.nav.helse.modell.oppgave.STIKKPRØVE
 import no.nav.helse.modell.oppgave.SØKNAD
 import no.nav.helse.modell.saksbehandler.Saksbehandler
+import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtBeslutter
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtIRetur
@@ -32,19 +37,23 @@ internal class OppgaveTest {
         private val SAKSBEHANDLER_OID = UUID.randomUUID()
         private val BESLUTTER_OID = UUID.randomUUID()
         private val OPPGAVE_ID = nextLong()
-        private val saksbehandler = Saksbehandler(
-            oid = SAKSBEHANDLER_OID,
-            epostadresse = SAKSBEHANDLER_EPOST,
-            navn = SAKSBEHANDLER_NAVN,
-            ident = SAKSBEHANDLER_IDENT
-        )
-        private val beslutter = Saksbehandler(
-            oid = BESLUTTER_OID,
-            epostadresse = SAKSBEHANDLER_EPOST,
-            navn = SAKSBEHANDLER_NAVN,
-            ident = SAKSBEHANDLER_IDENT
+        private val saksbehandler = saksbehandler()
+        private val beslutter = saksbehandler(oid = BESLUTTER_OID)
+        private fun saksbehandler(
+            epost: String = SAKSBEHANDLER_EPOST,
+            oid: UUID = SAKSBEHANDLER_OID,
+            navn: String = SAKSBEHANDLER_NAVN,
+            ident: String = SAKSBEHANDLER_IDENT,
+            tilgangskontroll: Tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
+        ) = Saksbehandler(
+            epostadresse = epost,
+            oid = oid,
+            navn = navn,
+            ident = ident,
+            tilgangskontroll = tilgangskontroll,
         )
     }
+
 
     @Test
     fun `Første egenskap anses som oppgavetype`() {
@@ -67,7 +76,7 @@ internal class OppgaveTest {
     @Test
     fun `Forsøker tildeling ved reservasjon`() {
         val oppgave = nyOppgave(SØKNAD)
-        oppgave.forsøkTildelingVedReservasjon(saksbehandler, false, harTilgangTil = { _, _ -> true })
+        oppgave.forsøkTildelingVedReservasjon(saksbehandler, false)
 
         inspektør(oppgave) {
             assertEquals(true, tildelt)
@@ -79,7 +88,7 @@ internal class OppgaveTest {
     @Test
     fun `Forsøker tildeling ved reservasjon med påVent`() {
         val oppgave = nyOppgave(SØKNAD)
-        oppgave.forsøkTildelingVedReservasjon(saksbehandler, påVent = true, harTilgangTil = { _, _ -> true })
+        oppgave.forsøkTildelingVedReservasjon(saksbehandler, påVent = true)
 
         inspektør(oppgave) {
             assertEquals(true, tildelt)
@@ -91,7 +100,7 @@ internal class OppgaveTest {
     @Test
     fun `Forsøker tildeling ved reservasjon ved stikkprøve`() {
         val oppgave = nyOppgave(STIKKPRØVE)
-        oppgave.forsøkTildelingVedReservasjon(saksbehandler, påVent = true, harTilgangTil = { _, _ -> true })
+        oppgave.forsøkTildelingVedReservasjon(saksbehandler, påVent = true)
 
         inspektør(oppgave) {
             assertEquals(false, tildelt)
@@ -101,9 +110,46 @@ internal class OppgaveTest {
     }
 
     @Test
-    fun `Forsøker tildeling ved reservasjon ved manglende tilgang`() {
+    fun `Forsøker tildeling ved reservasjon med egenskap RISK_QA`() {
         val oppgave = nyOppgave(RISK_QA)
-        oppgave.forsøkTildelingVedReservasjon(saksbehandler, påVent = true, harTilgangTil = { _, _ -> false })
+        val saksbehandler = saksbehandler(tilgangskontroll = TilgangskontrollForTestHarTilgang)
+        oppgave.forsøkTildelingVedReservasjon(saksbehandler, påVent = false)
+
+        inspektør(oppgave) {
+            assertEquals(true, tildelt)
+            assertEquals(false, påVent)
+            assertEquals(saksbehandler, tildeltTil)
+        }
+    }
+
+    @Test
+    fun `Forsøker tildeling ved reservasjon ved manglende tilgang til RISK_QA`() {
+        val oppgave = nyOppgave(RISK_QA)
+        oppgave.forsøkTildelingVedReservasjon(saksbehandler, påVent = true)
+
+        inspektør(oppgave) {
+            assertEquals(false, tildelt)
+            assertEquals(false, påVent)
+            assertEquals(null, tildeltTil)
+        }
+    }
+
+    @Test
+    fun `Forsøker tildeling ved reservasjon ved manglende tilgang til EGEN_ANSATT`() {
+        val oppgave = nyOppgave(EGEN_ANSATT)
+        oppgave.forsøkTildelingVedReservasjon(saksbehandler, påVent = true)
+
+        inspektør(oppgave) {
+            assertEquals(false, tildelt)
+            assertEquals(false, påVent)
+            assertEquals(null, tildeltTil)
+        }
+    }
+
+    @Test
+    fun `Forsøker tildeling ved reservasjon ved manglende tilgang til FORTROIG_ADRESSE`() {
+        val oppgave = nyOppgave(FORTROLIG_ADRESSE)
+        oppgave.forsøkTildelingVedReservasjon(saksbehandler, påVent = true)
 
         inspektør(oppgave) {
             assertEquals(false, tildelt)
@@ -163,7 +209,7 @@ internal class OppgaveTest {
     @Test
     fun `oppgave sendt til beslutter tildeles ingen dersom det ikke finnes noen tidligere beslutter`() {
         val oppgave = nyOppgave(SØKNAD, medTotrinnsvurdering = true)
-        oppgave.forsøkTildelingVedReservasjon(saksbehandler, false) { _, _ -> true }
+        oppgave.forsøkTildelingVedReservasjon(saksbehandler, false)
         oppgave.sendTilBeslutter(saksbehandler)
         inspektør(oppgave) {
             assertEquals(null, tildeltTil)
@@ -312,7 +358,7 @@ internal class OppgaveTest {
     @Test
     fun `legg oppgave på vent`() {
         val oppgave = nyOppgave(SØKNAD)
-        oppgave.forsøkTildelingVedReservasjon(saksbehandler, false) { _, _ -> true }
+        oppgave.forsøkTildelingVedReservasjon(saksbehandler, false)
         oppgave.leggPåVent()
 
         inspektør(oppgave) {
@@ -335,7 +381,7 @@ internal class OppgaveTest {
     @Test
     fun `fjern påVent`() {
         val oppgave = nyOppgave(SØKNAD)
-        oppgave.forsøkTildelingVedReservasjon(saksbehandler, false) { _, _ -> true }
+        oppgave.forsøkTildelingVedReservasjon(saksbehandler, false)
         oppgave.leggPåVent()
         oppgave.fjernPåVent()
 
@@ -361,7 +407,7 @@ internal class OppgaveTest {
     fun `sender ut oppgaveEndret når oppgave sendes legges på vent`() {
         val oppgave = nyOppgave(SØKNAD)
         oppgave.register(observer)
-        oppgave.forsøkTildelingVedReservasjon(saksbehandler, false) { _, _ -> true }
+        oppgave.forsøkTildelingVedReservasjon(saksbehandler, false)
         oppgave.leggPåVent()
 
         assertEquals(1, observer.oppgaverEndret.size)
@@ -376,7 +422,7 @@ internal class OppgaveTest {
     fun `sender ut oppgaveEndret når oppgave ikke er på vent lenger`() {
         val oppgave = nyOppgave(SØKNAD)
         oppgave.register(observer)
-        oppgave.forsøkTildelingVedReservasjon(saksbehandler, false) { _, _ -> true }
+        oppgave.forsøkTildelingVedReservasjon(saksbehandler, false)
         oppgave.leggPåVent()
         oppgave.fjernPåVent()
 

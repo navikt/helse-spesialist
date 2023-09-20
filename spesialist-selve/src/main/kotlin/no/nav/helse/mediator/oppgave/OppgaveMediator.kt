@@ -2,7 +2,6 @@ package no.nav.helse.mediator.oppgave
 
 import java.sql.SQLException
 import java.util.UUID
-import no.nav.helse.Tilgangskontroll
 import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingFraDatabase
@@ -10,6 +9,7 @@ import no.nav.helse.db.TotrinnsvurderingRepository
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.saksbehandler.Saksbehandler
+import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload.Companion.lagre
@@ -33,7 +33,7 @@ internal class OppgaveMediator(
     private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
     private val saksbehandlerRepository: SaksbehandlerRepository,
     private val rapidsConnection: RapidsConnection,
-    private val harTilgangTil: Tilgangskontroll = { _, _ -> false }
+    private val tilgangskontroll: Tilgangskontroll
 ): Oppgavehåndterer, Oppgavefinner {
     private val logg = LoggerFactory.getLogger(this::class.java)
 
@@ -51,7 +51,7 @@ internal class OppgaveMediator(
     }
 
     fun <T> oppgave(id: Long, oppgaveBlock: Oppgave.() -> T): T {
-        val oppgave = Oppgavehenter(oppgaveDao, totrinnsvurderingRepository, saksbehandlerRepository).oppgave(id)
+        val oppgave = Oppgavehenter(oppgaveDao, totrinnsvurderingRepository, saksbehandlerRepository, tilgangskontroll).oppgave(id)
         oppgave.register(Oppgavemelder(hendelseDao, oppgaveDao, rapidsConnection))
         val returverdi = oppgaveBlock(oppgave)
         Oppgavelagrer(tildelingDao).apply {
@@ -145,8 +145,8 @@ internal class OppgaveMediator(
     private fun tildelVedReservasjon(fødselsnummer: String, oppgave: Oppgave) {
         // TODO: skal ikke være SaksbehandlerFraApi, men SaksbehandlerFraDatabase. Må fikses når ReservasjonDao kan flyttes til selve.db
         val (saksbehandlerFraDatabase, settPåVent) = reservasjonDao.hentReservasjonFor(fødselsnummer) ?: return
-        val saksbehandler = Saksbehandler(saksbehandlerFraDatabase.epost, saksbehandlerFraDatabase.oid, saksbehandlerFraDatabase.navn, saksbehandlerFraDatabase.ident)
-        oppgave.forsøkTildelingVedReservasjon(saksbehandler, settPåVent, harTilgangTil)
+        val saksbehandler = Saksbehandler(saksbehandlerFraDatabase.epost, saksbehandlerFraDatabase.oid, saksbehandlerFraDatabase.navn, saksbehandlerFraDatabase.ident, tilgangskontroll)
+        oppgave.forsøkTildelingVedReservasjon(saksbehandler, settPåVent)
     }
 
     fun harFerdigstiltOppgave(vedtaksperiodeId: UUID) = oppgaveDao.harFerdigstiltOppgave(vedtaksperiodeId)
@@ -155,6 +155,7 @@ internal class OppgaveMediator(
         epostadresse = epost,
         oid = oid,
         navn = navn,
-        ident = ident
+        ident = ident,
+        tilgangskontroll = tilgangskontroll,
     )
 }

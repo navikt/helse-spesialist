@@ -1,6 +1,7 @@
 package no.nav.helse.mediator
 
 import DatabaseIntegrationTest
+import TilgangskontrollForTestHarIkkeTilgang
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -31,7 +32,7 @@ import org.junit.jupiter.api.assertThrows
 
 internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
     private val testRapid = TestRapid()
-    private val mediator = SaksbehandlerMediator(dataSource, "versjonAvKode", testRapid)
+    private val mediator = SaksbehandlerMediator(dataSource, "versjonAvKode", testRapid, TilgangskontrollForTestHarIkkeTilgang)
 
     private val AKTØR_ID = "1234567891011"
     private val FØDSELSNUMMER = "12345678910"

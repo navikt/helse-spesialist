@@ -1,6 +1,7 @@
 package no.nav.helse.modell.saksbehandler
 
 import java.util.UUID
+import no.nav.helse.modell.oppgave.TilgangsstyrtEgenskap
 import no.nav.helse.modell.saksbehandler.handlinger.Annullering
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtInntektOgRefusjon
@@ -12,7 +13,8 @@ class Saksbehandler(
     private val epostadresse: String,
     private val oid: UUID,
     private val navn: String,
-    private val ident: String
+    private val ident: String,
+    private val tilgangskontroll: Tilgangskontroll,
 ) {
     private val observers = mutableListOf<SaksbehandlerObserver>()
 
@@ -26,6 +28,9 @@ class Saksbehandler(
     fun accept(visitor: SaksbehandlerVisitor) {
         visitor.visitSaksbehandler(epostadresse, oid, navn, ident)
     }
+
+    internal fun harTilgangTil(egenskap: TilgangsstyrtEgenskap): Boolean =
+        tilgangskontroll.harTilgangTil(oid, egenskap)
 
     internal fun håndter(hendelse: OverstyrtTidslinje) {
         val event = hendelse.byggEvent()

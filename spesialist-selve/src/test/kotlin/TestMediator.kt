@@ -60,7 +60,8 @@ internal class TestMediator(
         opptegnelseDao = opptegnelseDao,
         totrinnsvurderingRepository = totrinnsvurderingDao,
         saksbehandlerRepository = saksbehandlerDao,
-        rapidsConnection = testRapid
+        rapidsConnection = testRapid,
+        TilgangskontrollForTestHarIkkeTilgang,
     )
     private val overstyringMediator = OverstyringMediator(testRapid)
     private val snapshotMediator = SnapshotMediator(SnapshotApiDao(dataSource), snapshotClient)

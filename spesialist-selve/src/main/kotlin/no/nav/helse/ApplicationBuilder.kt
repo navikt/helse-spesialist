@@ -42,6 +42,7 @@ import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.OverstyringMediator
 import no.nav.helse.mediator.SaksbehandlerMediator
+import no.nav.helse.mediator.Tilgangskontrollør
 import no.nav.helse.mediator.api.GodkjenningService
 import no.nav.helse.mediator.api.OppdaterPersonService
 import no.nav.helse.mediator.api.personApi
@@ -259,6 +260,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     }
 
     private val tilgangsgrupper = Tilgangsgrupper(System.getenv())
+    private val tilgangskontrollør = Tilgangskontrollør(msGraphClient, tilgangsgrupper)
 
     private val saksbehandlereMedTilgangTilStikkprøver: List<String> =
         requireNotNull(env["SAKSBEHANDLERE_MED_TILGANG_TIL_STIKKPROVER"]).split(',')
@@ -394,15 +396,16 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             opptegnelseDao = opptegnelseDao,
             totrinnsvurderingRepository = totrinnsvurderingDao,
             saksbehandlerRepository = saksbehandlerDao,
-            rapidsConnection = rapidsConnection
-        ) { oid, gruppe -> msGraphClient.erIGruppe(oid, tilgangsgrupper.gruppeId(gruppe)) }
+            rapidsConnection = rapidsConnection,
+            tilgangskontroll = tilgangskontrollør,
+        )
         hendelseMediator = HendelseMediator(
             dataSource = dataSource,
             rapidsConnection = rapidsConnection,
             godkjenningMediator = godkjenningMediator,
             hendelsefabrikk = hendelsefabrikk
         )
-        saksbehandlerMediator = SaksbehandlerMediator(dataSource, versjonAvKode(env), rapidsConnection)
+        saksbehandlerMediator = SaksbehandlerMediator(dataSource, versjonAvKode(env), rapidsConnection, tilgangskontrollør)
         oppgavemelder = Oppgavemelder(hendelseDao, oppgaveDao, rapidsConnection)
         tildelingService = TildelingService(
             tildelingApiDao,
@@ -457,5 +460,3 @@ fun Application.installErrorHandling() {
         }
     }
 }
-
-typealias Tilgangskontroll = suspend (UUID, Gruppe) -> Boolean

@@ -1,6 +1,7 @@
 package no.nav.helse.mediator.oppgave
 
 import DatabaseIntegrationTest
+import TilgangskontrollForTestHarIkkeTilgang
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
@@ -31,13 +32,15 @@ class OppgavelagrerTest: DatabaseIntegrationTest() {
             oid = SAKSBEHANDLER_OID,
             epostadresse = SAKSBEHANDLER_EPOST,
             navn = SAKSBEHANDLER_NAVN,
-            ident = SAKSBEHANDLER_IDENT
+            ident = SAKSBEHANDLER_IDENT,
+            tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
         )
         private val beslutter = Saksbehandler(
             oid = BESLUTTER_OID,
             epostadresse = SAKSBEHANDLER_EPOST,
             navn = SAKSBEHANDLER_NAVN,
-            ident = SAKSBEHANDLER_IDENT
+            ident = SAKSBEHANDLER_IDENT,
+            tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
         )
 
         private val TOTRINNSVURDERING_OPPRETTET = LocalDateTime.now()
@@ -106,7 +109,7 @@ class OppgavelagrerTest: DatabaseIntegrationTest() {
     @Test
     fun `lagre oppgave uten totrinnsvurdering`() {
         val oppgave = nyOppgave(medTotrinnsvurdering = false)
-        oppgave.forsøkTildelingVedReservasjon(saksbehandler, harTilgangTil = { _, _ -> true })
+        oppgave.forsøkTildelingVedReservasjon(saksbehandler)
         val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
         oppgave.accept(oppgavelagrer)
 
@@ -119,7 +122,7 @@ class OppgavelagrerTest: DatabaseIntegrationTest() {
     @Test
     fun `lagre oppgave`() {
         val oppgave = nyOppgave(medTotrinnsvurdering = true)
-        oppgave.forsøkTildelingVedReservasjon(saksbehandler, harTilgangTil = { _, _ -> true })
+        oppgave.forsøkTildelingVedReservasjon(saksbehandler)
         val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
         oppgave.accept(oppgavelagrer)
 
@@ -160,7 +163,7 @@ class OppgavelagrerTest: DatabaseIntegrationTest() {
     @Test
     fun `oppdatere oppgave uten totrinnsvurdering`() {
         val oppgave = nyOppgave(medTotrinnsvurdering = false)
-        oppgave.forsøkTildelingVedReservasjon(saksbehandler, harTilgangTil = { _, _ -> true })
+        oppgave.forsøkTildelingVedReservasjon(saksbehandler)
         oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
         oppgave.ferdigstill()
         val oppgavelagrer = Oppgavelagrer(nyTildelingDao)
@@ -175,7 +178,7 @@ class OppgavelagrerTest: DatabaseIntegrationTest() {
     @Test
     fun `oppdatere oppgave`() {
         val oppgave = nyOppgave(medTotrinnsvurdering = true)
-        oppgave.forsøkTildelingVedReservasjon(saksbehandler, harTilgangTil = { _, _ -> true })
+        oppgave.forsøkTildelingVedReservasjon(saksbehandler)
         oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
         oppgave.ferdigstill()
         val oppgavelagrer = Oppgavelagrer(nyTildelingDao)

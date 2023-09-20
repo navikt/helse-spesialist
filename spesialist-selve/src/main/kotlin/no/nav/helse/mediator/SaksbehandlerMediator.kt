@@ -14,6 +14,7 @@ import no.nav.helse.modell.saksbehandler.OverstyrtTidslinjeEvent
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.SaksbehandlerObserver
 import no.nav.helse.modell.saksbehandler.SkjønnsfastsattSykepengegrunnlagEvent
+import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.modell.saksbehandler.handlinger.Annullering
 import no.nav.helse.modell.saksbehandler.handlinger.Handling
 import no.nav.helse.modell.saksbehandler.handlinger.Lovhjemmel
@@ -54,6 +55,7 @@ class SaksbehandlerMediator(
     dataSource: DataSource,
     private val versjonAvKode: String,
     private val rapidsConnection: RapidsConnection,
+    private val tilgangskontroll: Tilgangskontroll,
 ) : SaksbehandlerObserver, Saksbehandlerhåndterer {
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
     private val generasjonRepository = ApiGenerasjonRepository(dataSource)
@@ -218,7 +220,7 @@ class SaksbehandlerMediator(
         private val logg = LoggerFactory.getLogger(this::class.java)
     }
 
-    private fun SaksbehandlerFraApi.tilSaksbehandler() = Saksbehandler(epost, oid, navn, ident)
+    private fun SaksbehandlerFraApi.tilSaksbehandler() = Saksbehandler(epost, oid, navn, ident, tilgangskontroll)
 
     private fun HandlingFraApi.tilHandling(): Handling {
         return when (this) {

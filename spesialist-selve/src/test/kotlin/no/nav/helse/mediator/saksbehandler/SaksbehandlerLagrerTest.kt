@@ -1,5 +1,6 @@
 package no.nav.helse.mediator.saksbehandler
 
+import TilgangskontrollForTestHarIkkeTilgang
 import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
@@ -13,7 +14,7 @@ class SaksbehandlerLagrerTest {
     private val NAVN = "Saksbehandler I Nav"
     private val IDENT = "S199999"
     private val dao = mockk<SaksbehandlerDao>(relaxed = true)
-    private val saksbehandler = Saksbehandler(EPOST, OID, NAVN, IDENT)
+    private val saksbehandler = Saksbehandler(EPOST, OID, NAVN, IDENT, TilgangskontrollForTestHarIkkeTilgang)
 
     @Test
     fun `lagre saksbehandler`() {

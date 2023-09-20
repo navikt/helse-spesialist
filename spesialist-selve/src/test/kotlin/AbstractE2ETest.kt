@@ -106,7 +106,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     protected val meldingsfabrikk get() = Testmeldingfabrikk(FØDSELSNUMMER, AKTØR)
 
-    protected val oppgaveMediator = OppgaveMediator(hendelseDao, oppgaveDao, tildelingDao, reservasjonDao, opptegnelseDao, totrinnsvurderingDao, saksbehandlerDao, testRapid)
+    protected val oppgaveMediator = OppgaveMediator(hendelseDao, oppgaveDao, tildelingDao, reservasjonDao, opptegnelseDao, totrinnsvurderingDao, saksbehandlerDao, testRapid, TilgangskontrollForTestHarIkkeTilgang)
     private val godkjenningMediator =
         GodkjenningMediator(vedtakDao, opptegnelseDao, oppgaveDao, utbetalingDao, hendelseDao)
 
@@ -147,7 +147,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         hendelsefabrikk = hendelsefabrikk
     )
 
-    internal val saksbehandlerMediator = SaksbehandlerMediator(dataSource, "versjonAvKode", testRapid)
+    internal val saksbehandlerMediator = SaksbehandlerMediator(dataSource, "versjonAvKode", testRapid, TilgangskontrollForTestHarIkkeTilgang)
 
     @BeforeEach
     internal fun resetTestSetup() {

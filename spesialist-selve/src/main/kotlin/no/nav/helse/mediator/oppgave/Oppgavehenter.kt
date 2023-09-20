@@ -16,12 +16,14 @@ import no.nav.helse.modell.oppgave.SØKNAD
 import no.nav.helse.modell.oppgave.UTBETALING_TIL_ARBEIDSGIVER
 import no.nav.helse.modell.oppgave.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.modell.saksbehandler.Saksbehandler
+import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 
 class Oppgavehenter(
     private val oppgaveRepository: OppgaveRepository,
     private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
-    private val saksbehandlerRepository: SaksbehandlerRepository
+    private val saksbehandlerRepository: SaksbehandlerRepository,
+    private val tilgangskontroll: Tilgangskontroll,
 ) {
     fun oppgave(id: Long): Oppgave {
         val oppgave = oppgaveRepository.finnOppgave(id)
@@ -38,7 +40,7 @@ class Oppgavehenter(
             ferdigstiltAvIdent = oppgave.ferdigstiltAvIdent,
             ferdigstiltAvOid = oppgave.ferdigstiltAvOid,
             tildelt = oppgave.tildelt?.let {
-                Saksbehandler(it.epostadresse, it.oid, it.navn, it.ident)
+                Saksbehandler(it.epostadresse, it.oid, it.navn, it.ident, tilgangskontroll)
             },
             påVent = oppgave.påVent,
             totrinnsvurdering = totrinnsvurdering?.let {
@@ -81,5 +83,5 @@ class Oppgavehenter(
         }
     }
 
-    private fun SaksbehandlerFraDatabase.toSaksbehandler() = Saksbehandler(epostadresse, oid, navn, ident)
+    private fun SaksbehandlerFraDatabase.toSaksbehandler() = Saksbehandler(epostadresse, oid, navn, ident, tilgangskontroll)
 }

@@ -2,10 +2,7 @@ package no.nav.helse.modell.oppgave
 
 import java.util.Objects
 import java.util.UUID
-import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.helse.Gruppe
-import no.nav.helse.Tilgangskontroll
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
@@ -60,16 +57,18 @@ class Oppgave private constructor(
     internal fun forsøkTildelingVedReservasjon(
         saksbehandler: Saksbehandler,
         påVent: Boolean = false,
-        harTilgangTil: Tilgangskontroll,
     ) {
         check(tilstand is AvventerSaksbehandler) { "Oppgave med oppgaveId=$id i tilstand=$tilstand kan ikke tildeles" }
         if (egenskap is STIKKPRØVE) {
             logg.info("Oppgave med {} er stikkprøve og tildeles ikke på tross av reservasjon.", kv("oppgaveId", id))
             return
         }
-        if (egenskap is RISK_QA) {
-            val harTilgangTilRisk = runBlocking { harTilgangTil(saksbehandler.oid(), Gruppe.RISK_QA) }
-            if (!harTilgangTilRisk) logg.info("Oppgave med {} er RISK_QA og saksbehandler har ikke tilgang, tildeles ikke på tross av reservasjon.", kv("oppgaveId", id))
+        if (egenskap is TilgangsstyrtEgenskap && !saksbehandler.harTilgangTil(egenskap)) {
+            logg.info(
+                "Oppgave med {} har egenskaper som saksbehandler med {} ikke har tilgang til å behandle.",
+                kv("oppgaveId", id),
+                kv("oid", saksbehandler.oid())
+            )
             return
         }
         tildeltTil = saksbehandler

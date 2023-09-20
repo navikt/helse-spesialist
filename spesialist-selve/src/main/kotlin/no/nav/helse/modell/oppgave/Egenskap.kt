@@ -1,14 +1,8 @@
 package no.nav.helse.modell.oppgave
 
-import no.nav.helse.modell.saksbehandler.Saksbehandler
-
 sealed interface Egenskap
 
-sealed interface TilgangsstyrtEgenskap : Egenskap {
-    fun kanBehandlesAv(saksbehandler: Saksbehandler): Boolean {
-        TODO()
-    }
-}
+sealed interface TilgangsstyrtEgenskap : Egenskap
 
 data object RISK_QA: TilgangsstyrtEgenskap
 

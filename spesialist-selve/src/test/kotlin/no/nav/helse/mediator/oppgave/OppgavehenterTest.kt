@@ -1,5 +1,6 @@
 package no.nav.helse.mediator.oppgave
 
+import TilgangskontrollForTestHarIkkeTilgang
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.db.OppgaveFraDatabase
@@ -40,7 +41,7 @@ class OppgavehenterTest {
 
     @Test
     fun `konverter fra OppgaveFraDatabase til Oppgave`() {
-        val oppgavehenter = Oppgavehenter(oppgaveRepository, totrinnsvurderingRepository(), saksbehandlerRepository)
+        val oppgavehenter = Oppgavehenter(oppgaveRepository, totrinnsvurderingRepository(), saksbehandlerRepository, TilgangskontrollForTestHarIkkeTilgang)
         val oppgave = oppgavehenter.oppgave(OPPGAVE_ID)
         oppgave.accept(inspektør)
         inspektør.assertOppgave(
@@ -52,7 +53,7 @@ class OppgavehenterTest {
             ferdigstiltAvOid = SAKSBEHANDLER_OID,
             ferdigstiltAvIdent = SAKSBEHANDLER_IDENT,
             egenskaper = emptyList(),
-            tildelt = Saksbehandler(SAKSBEHANDLER_EPOST, SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_IDENT),
+            tildelt = saksbehandler(),
             påVent = PÅ_VENT,
             null
         )
@@ -70,7 +71,7 @@ class OppgavehenterTest {
             oppdatert = LocalDateTime.now()
         )
 
-        val oppgavehenter = Oppgavehenter(oppgaveRepository, totrinnsvurderingRepository(totrinnsvurdering), saksbehandlerRepository)
+        val oppgavehenter = Oppgavehenter(oppgaveRepository, totrinnsvurderingRepository(totrinnsvurdering), saksbehandlerRepository, TilgangskontrollForTestHarIkkeTilgang)
         val oppgave = oppgavehenter.oppgave(OPPGAVE_ID)
         oppgave.accept(inspektør)
         inspektør.assertOppgave(
@@ -82,13 +83,13 @@ class OppgavehenterTest {
             ferdigstiltAvOid = SAKSBEHANDLER_OID,
             ferdigstiltAvIdent = SAKSBEHANDLER_IDENT,
             egenskaper = emptyList(),
-            tildelt = Saksbehandler(SAKSBEHANDLER_EPOST, SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_IDENT),
+            tildelt = saksbehandler(),
             påVent = PÅ_VENT,
             totrinnsvurdering = Totrinnsvurdering(
                 vedtaksperiodeId = VEDTAKSPERIODE_ID,
                 erRetur = ER_RETUR,
-                saksbehandler = Saksbehandler(SAKSBEHANDLER_EPOST, SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_IDENT),
-                beslutter = Saksbehandler(SAKSBEHANDLER_EPOST, BESLUTTER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_IDENT),
+                saksbehandler = saksbehandler(),
+                beslutter = saksbehandler(oid = BESLUTTER_OID),
                 utbetalingId = UTBETALING_ID,
                 opprettet = TOTRINNSVURDERING_OPPRETTET,
                 oppdatert = TOTRINNSVURDERING_OPPDATERT
@@ -198,4 +199,17 @@ class OppgavehenterTest {
             return saksbehandlere[oid]
         }
     }
+
+    private fun saksbehandler(
+        epost: String = SAKSBEHANDLER_EPOST,
+        oid: UUID = SAKSBEHANDLER_OID,
+        navn: String = SAKSBEHANDLER_NAVN,
+        ident: String = SAKSBEHANDLER_IDENT,
+    ) = Saksbehandler(
+        epostadresse = epost,
+        oid = oid,
+        navn = navn,
+        ident = ident,
+        tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
+    )
 }
