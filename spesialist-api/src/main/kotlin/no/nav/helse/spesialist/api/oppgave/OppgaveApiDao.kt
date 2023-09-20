@@ -73,7 +73,7 @@ class OppgaveApiDao(dataSource: DataSource) : HelseDao(dataSource) {
 
     fun finnOppgaver(tilganger: SaksbehandlerTilganger) = asSQL(
         """
-            WITH aktiv_oppgave AS (select o.* from oppgave o where o.status = 'AvventerSaksbehandler'),
+            WITH aktiv_oppgave AS NOT MATERIALIZED (select o.* from oppgave o where o.status = 'AvventerSaksbehandler'),
                  aktiv_tildeling AS (select t.* from tildeling t where t.oppgave_id_ref in (select o.id from aktiv_oppgave o)),
                  har_varsel_om_negativt_belop AS (SELECT sv.vedtaksperiode_id FROM selve_varsel sv
                     INNER JOIN selve_vedtaksperiode_generasjon svg ON sv.generasjon_ref = svg.id
