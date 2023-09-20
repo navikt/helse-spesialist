@@ -8,6 +8,7 @@ import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.vedtaksperiode.vedtak.Faktatype
 import no.nav.helse.modell.vedtaksperiode.vedtak.Sykepengegrunnlagsfakta
+import no.nav.helse.modell.vedtaksperiode.vedtak.Tag
 import no.nav.helse.modell.vedtaksperiode.vedtak.UtkastTilVedtak
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
@@ -31,6 +32,7 @@ internal class UtkastTilVedtakMessage(packet: JsonMessage) {
     private val grunnlagForSykepengegrunnlagPerArbeidsgiver = jacksonObjectMapper().treeToValue<Map<String, Double>>(packet["grunnlagForSykepengegrunnlagPerArbeidsgiver"])
     private val begrensning = packet["begrensning"].asText()
     private val inntekt = packet["inntekt"].asDouble()
+    private val tags = packet["tags"].map { enumValueOf<Tag>(it.asText()) }
     private val sykepengegrunnlagsfakta = packet["sykepengegrunnlagsfakta"].takeUnless { it.isMissingOrNull() }?.let {
         sykepengegrunnlagsfakta(packet, faktatype(packet))
     }
@@ -54,6 +56,7 @@ internal class UtkastTilVedtakMessage(packet: JsonMessage) {
         fom = fom,
         tom = tom,
         vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+        tags = tags
     )
 
     internal fun sendInnTil(sykefraværstilfelle: Sykefraværstilfelle) {

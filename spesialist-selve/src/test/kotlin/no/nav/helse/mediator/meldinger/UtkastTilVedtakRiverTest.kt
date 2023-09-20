@@ -1,11 +1,12 @@
 package no.nav.helse.mediator.meldinger
 
 import io.mockk.mockk
+import io.mockk.verify
 import java.util.UUID
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.meldinger.hendelser.UtkastTilVedtakMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 internal class UtkastTilVedtakRiverTest {
@@ -19,9 +20,13 @@ internal class UtkastTilVedtakRiverTest {
     @Test
     fun `Leser inn utkast_til_vedtak-event`() {
         testRapid.sendTestMessage(utkastTilVedtak("EtterSkjønn"))
+        verify(exactly = 1) { mediator.håndter(any<UtkastTilVedtakMessage>()) }
         testRapid.sendTestMessage(utkastTilVedtak("EtterHovedregel"))
+        verify(exactly = 2) { mediator.håndter(any<UtkastTilVedtakMessage>()) }
         testRapid.sendTestMessage(utkastTilVedtak("IInfotrygd"))
+        verify(exactly = 3) { mediator.håndter(any<UtkastTilVedtakMessage>()) }
         testRapid.sendTestMessage(utkastTilVedtakAuu())
+        verify(exactly = 4) { mediator.håndter(any<UtkastTilVedtakMessage>()) }
     }
 
     @Language("JSON")
@@ -57,7 +62,8 @@ internal class UtkastTilVedtakRiverTest {
           "@id": "${UUID.randomUUID()}",
           "@opprettet": "2018-02-01T00:00:00.000",
           "aktørId": "1234567891011",
-          "fødselsnummer": "12345678910"
+          "fødselsnummer": "12345678910",
+          "tags": ["IngenNyArbeidsgiverperiode"]
         }
     """.trimIndent()
     }
@@ -86,7 +92,8 @@ internal class UtkastTilVedtakRiverTest {
           "@id": "${UUID.randomUUID()}",
           "@opprettet": "2018-02-01T00:00:00.000",
           "aktørId": "1234567891011",
-          "fødselsnummer": "12345678910"
+          "fødselsnummer": "12345678910",
+          "tags": ["IngenNyArbeidsgiverperiode"]
         }
     """.trimIndent()
     }

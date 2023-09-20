@@ -20,7 +20,8 @@ internal class UtkastTilVedtak(
     private val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta?,
     private val fom: LocalDate,
     private val tom: LocalDate,
-    private val vedtakFattetTidspunkt: LocalDateTime
+    private val vedtakFattetTidspunkt: LocalDateTime,
+    private val tags: List<Tag>
 ) {
     fun byggVedtak(vedtakBuilder: SykepengevedtakBuilder) {
         vedtakBuilder.fødselsnummer(fødselsnummer)
@@ -38,6 +39,11 @@ internal class UtkastTilVedtak(
         vedtakBuilder.tom(tom)
         vedtakBuilder.aktørId(aktørId)
         vedtakBuilder.vedtakFattetTidspunkt(vedtakFattetTidspunkt)
+        vedtakBuilder.tags(tags)
         sykepengegrunnlagsfakta?.also { vedtakBuilder.sykepengegrunnlagsfakta(it) }
     }
+}
+
+internal enum class Tag {
+    IngenNyArbeidsgiverperiode
 }

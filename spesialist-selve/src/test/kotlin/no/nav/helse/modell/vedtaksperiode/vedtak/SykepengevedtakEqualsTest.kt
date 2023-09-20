@@ -32,6 +32,7 @@ class SykepengevedtakEqualsTest {
         private const val innrapportertÅrsinntekt = 300000.00
         private const val avviksprosent = 0.0
         private const val seksG2023 = 6 * 118620.0
+        private val tags = listOf("IngenNyArbeidsgiverperiode")
     }
 
     @Test
@@ -50,7 +51,8 @@ class SykepengevedtakEqualsTest {
             grunnlagForSykepengegrunnlagPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver,
             begrensning = begrensning,
             inntekt = inntekt,
-            vedtakFattetTidspunkt = vedtakFattetTidspunkt
+            vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+            tags = tags
         )
 
         assertEquals(vedtak, vedtak)
@@ -78,7 +80,8 @@ class SykepengevedtakEqualsTest {
             utbetalingId = utbetalingId,
             begrunnelseFraMal = "Mal",
             begrunnelseFraFritekst = "Fritekst",
-            begrunnelseFraKonklusjon = "Konklusjon"
+            begrunnelseFraKonklusjon = "Konklusjon",
+            tags = tags
         )
 
         assertEquals(vedtak, vedtak)
@@ -102,6 +105,7 @@ class SykepengevedtakEqualsTest {
             begrensning = begrensning,
             inntekt = inntekt,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+            tags = tags
         )
         val vedtak2 = Sykepengevedtak.AuuVedtak(
             fødselsnummer = fødselsnummer,
@@ -118,6 +122,7 @@ class SykepengevedtakEqualsTest {
             begrensning = begrensning,
             inntekt = inntekt,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+            tags = tags
         )
 
         assertEquals(vedtak1, vedtak2)
@@ -145,7 +150,8 @@ class SykepengevedtakEqualsTest {
             utbetalingId = utbetalingId,
             begrunnelseFraMal = "Mal",
             begrunnelseFraFritekst = "Fritekst",
-            begrunnelseFraKonklusjon = "Konklusjon"
+            begrunnelseFraKonklusjon = "Konklusjon",
+            tags = tags
         )
 
         val vedtak2 = Sykepengevedtak.Vedtak(
@@ -167,7 +173,8 @@ class SykepengevedtakEqualsTest {
             utbetalingId = utbetalingId,
             begrunnelseFraMal = "Mal",
             begrunnelseFraFritekst = "Fritekst",
-            begrunnelseFraKonklusjon = "Konklusjon"
+            begrunnelseFraKonklusjon = "Konklusjon",
+            tags = tags
         )
 
         assertEquals(vedtak1, vedtak2)
@@ -191,6 +198,7 @@ class SykepengevedtakEqualsTest {
             begrensning = begrensning,
             inntekt = inntekt,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+            tags = tags
         )
         val vedtak2 = Sykepengevedtak.AuuVedtak(
             fødselsnummer = "annet fødselsnummer",
@@ -207,6 +215,7 @@ class SykepengevedtakEqualsTest {
             begrensning = begrensning,
             inntekt = inntekt,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+            tags = tags
         )
 
         assertNotEquals(vedtak1, vedtak2)
@@ -230,6 +239,7 @@ class SykepengevedtakEqualsTest {
             begrensning = begrensning,
             inntekt = inntekt,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+            tags = tags
         )
         val vedtak2 = Sykepengevedtak.AuuVedtak(
             fødselsnummer = fødselsnummer,
@@ -246,6 +256,7 @@ class SykepengevedtakEqualsTest {
             begrensning = begrensning,
             inntekt = inntekt,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+            tags = tags
         )
 
         assertNotEquals(vedtak1, vedtak2)
@@ -269,6 +280,7 @@ class SykepengevedtakEqualsTest {
             begrensning = begrensning,
             inntekt = inntekt,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+            tags = tags
         )
         val vedtak2 = Sykepengevedtak.AuuVedtak(
             fødselsnummer = fødselsnummer,
@@ -285,6 +297,7 @@ class SykepengevedtakEqualsTest {
             begrensning = begrensning,
             inntekt = inntekt,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+            tags = tags
         )
 
         assertNotEquals(vedtak1, vedtak2)
@@ -308,6 +321,7 @@ class SykepengevedtakEqualsTest {
             begrensning = begrensning,
             inntekt = inntekt,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+            tags = tags
         )
         val vedtak2 = Sykepengevedtak.AuuVedtak(
             fødselsnummer = fødselsnummer,
@@ -324,6 +338,7 @@ class SykepengevedtakEqualsTest {
             begrensning = begrensning,
             inntekt = inntekt,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+            tags = tags
         )
 
         assertNotEquals(vedtak1, vedtak2)
@@ -347,6 +362,7 @@ class SykepengevedtakEqualsTest {
             begrensning = begrensning,
             inntekt = inntekt,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+            tags = tags
         )
         val vedtak2 = Sykepengevedtak.AuuVedtak(
             fødselsnummer = fødselsnummer,
@@ -363,6 +379,7 @@ class SykepengevedtakEqualsTest {
             begrensning = begrensning,
             inntekt = inntekt,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+            tags = tags
         )
 
         assertNotEquals(vedtak1, vedtak2)
@@ -386,6 +403,7 @@ class SykepengevedtakEqualsTest {
             begrensning = begrensning,
             inntekt = inntekt,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+            tags = tags
         )
         val vedtak2 = Sykepengevedtak.AuuVedtak(
             fødselsnummer = fødselsnummer,
@@ -402,6 +420,7 @@ class SykepengevedtakEqualsTest {
             begrensning = begrensning,
             inntekt = inntekt,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+            tags = tags
         )
 
         assertNotEquals(vedtak1, vedtak2)
@@ -425,6 +444,7 @@ class SykepengevedtakEqualsTest {
             begrensning = begrensning,
             inntekt = inntekt,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+            tags = tags
         )
         val vedtak2 = Sykepengevedtak.AuuVedtak(
             fødselsnummer = fødselsnummer,
@@ -441,6 +461,7 @@ class SykepengevedtakEqualsTest {
             begrensning = begrensning,
             inntekt = inntekt,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+            tags = tags
         )
 
         assertNotEquals(vedtak1, vedtak2)
@@ -464,6 +485,7 @@ class SykepengevedtakEqualsTest {
             begrensning = begrensning,
             inntekt = inntekt,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+            tags = tags
         )
         val vedtak2 = Sykepengevedtak.AuuVedtak(
             fødselsnummer = fødselsnummer,
@@ -480,6 +502,7 @@ class SykepengevedtakEqualsTest {
             begrensning = begrensning,
             inntekt = inntekt,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+            tags = tags
         )
 
         assertNotEquals(vedtak1, vedtak2)
@@ -503,6 +526,7 @@ class SykepengevedtakEqualsTest {
             begrensning = begrensning,
             inntekt = inntekt,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+            tags = tags
         )
         val vedtak2 = Sykepengevedtak.AuuVedtak(
             fødselsnummer = fødselsnummer,
@@ -519,6 +543,7 @@ class SykepengevedtakEqualsTest {
             begrensning = begrensning,
             inntekt = inntekt,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+            tags = tags
         )
 
         assertNotEquals(vedtak1, vedtak2)
@@ -542,6 +567,7 @@ class SykepengevedtakEqualsTest {
             begrensning = begrensning,
             inntekt = inntekt,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+            tags = tags
         )
         val vedtak2 = Sykepengevedtak.AuuVedtak(
             fødselsnummer = fødselsnummer,
@@ -558,6 +584,7 @@ class SykepengevedtakEqualsTest {
             begrensning = begrensning,
             inntekt = inntekt,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+            tags = tags
         )
 
         assertNotEquals(vedtak1, vedtak2)
@@ -581,6 +608,7 @@ class SykepengevedtakEqualsTest {
             begrensning = begrensning,
             inntekt = inntekt,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+            tags = tags
         )
         val vedtak2 = Sykepengevedtak.AuuVedtak(
             fødselsnummer = fødselsnummer,
@@ -597,6 +625,7 @@ class SykepengevedtakEqualsTest {
             begrensning = begrensning,
             inntekt = inntekt,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+            tags = tags
         )
 
         assertNotEquals(vedtak1, vedtak2)
@@ -620,6 +649,7 @@ class SykepengevedtakEqualsTest {
             begrensning = begrensning,
             inntekt = inntekt,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+            tags = tags
         )
         val vedtak2 = Sykepengevedtak.AuuVedtak(
             fødselsnummer = fødselsnummer,
@@ -636,6 +666,7 @@ class SykepengevedtakEqualsTest {
             begrensning = "ANNEN BEGRENSNING",
             inntekt = inntekt,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+            tags = tags
         )
 
         assertNotEquals(vedtak1, vedtak2)
@@ -659,6 +690,7 @@ class SykepengevedtakEqualsTest {
             begrensning = begrensning,
             inntekt = inntekt,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+            tags = tags
         )
         val vedtak2 = Sykepengevedtak.AuuVedtak(
             fødselsnummer = fødselsnummer,
@@ -675,6 +707,7 @@ class SykepengevedtakEqualsTest {
             begrensning = begrensning,
             inntekt = 0.0,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+            tags = tags
         )
 
         assertNotEquals(vedtak1, vedtak2)
@@ -698,6 +731,7 @@ class SykepengevedtakEqualsTest {
             begrensning = begrensning,
             inntekt = inntekt,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+            tags = tags
         )
         val vedtak2 = Sykepengevedtak.AuuVedtak(
             fødselsnummer = fødselsnummer,
@@ -714,6 +748,7 @@ class SykepengevedtakEqualsTest {
             begrensning = begrensning,
             inntekt = inntekt,
             vedtakFattetTidspunkt = LocalDateTime.now().minusDays(1),
+            tags = tags
         )
 
         assertNotEquals(vedtak1, vedtak2)
@@ -741,7 +776,8 @@ class SykepengevedtakEqualsTest {
             utbetalingId = utbetalingId,
             begrunnelseFraMal = "Mal",
             begrunnelseFraFritekst = "Fritekst",
-            begrunnelseFraKonklusjon = "Konklusjon"
+            begrunnelseFraKonklusjon = "Konklusjon",
+            tags = tags
         )
 
         val vedtak2 = Sykepengevedtak.Vedtak(
@@ -763,7 +799,8 @@ class SykepengevedtakEqualsTest {
             utbetalingId = utbetalingId,
             begrunnelseFraMal = "Mal",
             begrunnelseFraFritekst = "Fritekst",
-            begrunnelseFraKonklusjon = "Konklusjon"
+            begrunnelseFraKonklusjon = "Konklusjon",
+            tags = tags
         )
 
         assertNotEquals(vedtak1, vedtak2)
@@ -791,7 +828,8 @@ class SykepengevedtakEqualsTest {
             utbetalingId = utbetalingId,
             begrunnelseFraMal = "Mal",
             begrunnelseFraFritekst = "Fritekst",
-            begrunnelseFraKonklusjon = "Konklusjon"
+            begrunnelseFraKonklusjon = "Konklusjon",
+            tags = tags
         )
 
         val vedtak2 = Sykepengevedtak.Vedtak(
@@ -813,7 +851,8 @@ class SykepengevedtakEqualsTest {
             utbetalingId = UUID.randomUUID(),
             begrunnelseFraMal = "Mal",
             begrunnelseFraFritekst = "Fritekst",
-            begrunnelseFraKonklusjon = "Konklusjon"
+            begrunnelseFraKonklusjon = "Konklusjon",
+            tags = tags
         )
 
         assertNotEquals(vedtak1, vedtak2)

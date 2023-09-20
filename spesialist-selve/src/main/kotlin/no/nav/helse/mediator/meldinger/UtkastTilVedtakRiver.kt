@@ -23,7 +23,7 @@ internal class UtkastTilVedtakRiver(
                 it.requireKey("fom", "tom", "skjæringstidspunkt")
                 it.requireArray("hendelser")
                 it.requireKey("sykepengegrunnlag", "grunnlagForSykepengegrunnlag", "grunnlagForSykepengegrunnlagPerArbeidsgiver")
-                it.requireKey("begrensning", "inntekt", "vedtakFattetTidspunkt")
+                it.requireKey("begrensning", "inntekt", "vedtakFattetTidspunkt", "tags")
 
                 it.interestedIn(
                     "sykepengegrunnlagsfakta",

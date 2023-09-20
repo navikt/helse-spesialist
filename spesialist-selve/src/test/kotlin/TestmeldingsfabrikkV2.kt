@@ -579,7 +579,8 @@ internal object TestmeldingsfabrikkV2 {
             "begrensning" to "VET_IKKE",
             "inntekt" to 600000.0,
             "vedtakFattetTidspunkt" to LocalDateTime.now(),
-            "hendelser" to emptyList<String>()
+            "hendelser" to emptyList<String>(),
+            "tags" to emptyList<String>()
         ).apply {
             compute("utbetalingId") { _, _ -> utbetalingId }
             if (utbetalingId != null) {

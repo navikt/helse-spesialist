@@ -48,7 +48,8 @@ internal class SykefraværstilfelleMediatorTest {
             grunnlagForSykepengegrunnlagPerArbeidsgiver = emptyMap(),
             begrensning = "VET_IKKE",
             inntekt = 0.0,
-            vedtakFattetTidspunkt = vedtakFattetTidspunkt
+            vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+            tags = listOf("IngenNyArbeidsgiverperiode")
         )
         mediator.vedtakFattet(auuVedtak)
         val eventer = testRapid.inspektør.meldinger()
@@ -76,6 +77,8 @@ internal class SykefraværstilfelleMediatorTest {
         assertEquals(0.0, event["inntekt"].asDouble())
         assertEquals(vedtakFattetTidspunkt, event["vedtakFattetTidspunkt"].asLocalDateTime())
         assertEquals(0, event["begrunnelser"].size())
+        assertEquals(1, event["tags"].size())
+        assertEquals("IngenNyArbeidsgiverperiode", event["tags"].first().asText())
     }
 
     @Test
@@ -101,7 +104,9 @@ internal class SykefraværstilfelleMediatorTest {
             ),
             begrunnelseFraMal = null,
             begrunnelseFraFritekst = null,
-            begrunnelseFraKonklusjon = null
+            begrunnelseFraKonklusjon = null,
+            tags = listOf("IngenNyArbeidsgiverperiode")
+
         )
         mediator.vedtakFattet(infotrygd)
         val eventer = testRapid.inspektør.meldinger()
@@ -132,6 +137,8 @@ internal class SykefraværstilfelleMediatorTest {
         assertEquals("IInfotrygd", event["sykepengegrunnlagsfakta"]["fastsatt"].asText())
         assertEquals(10000.0, event["sykepengegrunnlagsfakta"]["omregnetÅrsinntekt"].asDouble())
         assertEquals(0, event["begrunnelser"].size())
+        assertEquals(1, event["tags"].size())
+        assertEquals("IngenNyArbeidsgiverperiode", event["tags"].first().asText())
     }
 
     @Test
@@ -167,7 +174,8 @@ internal class SykefraværstilfelleMediatorTest {
             ),
             begrunnelseFraMal = null,
             begrunnelseFraFritekst = null,
-            begrunnelseFraKonklusjon = null
+            begrunnelseFraKonklusjon = null,
+            tags = listOf("IngenNyArbeidsgiverperiode")
         )
         mediator.vedtakFattet(infotrygd)
         val eventer = testRapid.inspektør.meldinger()
@@ -210,6 +218,8 @@ internal class SykefraværstilfelleMediatorTest {
             ), objectMapper.convertValue(event["sykepengegrunnlagsfakta"]["arbeidsgivere"])
         )
         assertEquals(0, event["begrunnelser"].size())
+        assertEquals(1, event["tags"].size())
+        assertEquals("IngenNyArbeidsgiverperiode", event["tags"].first().asText())
     }
 
     @Test
@@ -247,7 +257,8 @@ internal class SykefraværstilfelleMediatorTest {
             ),
             begrunnelseFraMal = "Mal",
             begrunnelseFraFritekst = "Fritekst",
-            begrunnelseFraKonklusjon = "Konklusjon"
+            begrunnelseFraKonklusjon = "Konklusjon",
+            tags = listOf("IngenNyArbeidsgiverperiode")
         )
         mediator.vedtakFattet(infotrygd)
         val eventer = testRapid.inspektør.meldinger()
@@ -305,5 +316,8 @@ internal class SykefraværstilfelleMediatorTest {
         assertEquals("SkjønnsfastsattSykepengegrunnlagKonklusjon", event["begrunnelser"][2]["type"].asText())
         assertEquals("Konklusjon", event["begrunnelser"][2]["begrunnelse"].asText())
         assertEquals(listOf(mapOf("fom" to fom, "tom" to tom)), objectMapper.convertValue<List<Map<String, LocalDate>>>(event["begrunnelser"][2]["perioder"]))
+
+        assertEquals(1, event["tags"].size())
+        assertEquals("IngenNyArbeidsgiverperiode", event["tags"].first().asText())
     }
 }

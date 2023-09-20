@@ -49,6 +49,7 @@ internal class SykefraværstilfelleMediator(
             "inntekt" to sykepengevedtak.inntekt,
             "vedtakFattetTidspunkt" to "${sykepengevedtak.vedtakFattetTidspunkt}",
             "utbetalingId" to "${sykepengevedtak.utbetalingId}",
+            "tags" to sykepengevedtak.tags,
             "sykepengegrunnlagsfakta" to
                     when (sykepengevedtak.sykepengegrunnlagsfakta) {
                         is Spleis -> {
@@ -145,7 +146,8 @@ internal class SykefraværstilfelleMediator(
                 "begrensning" to sykepengevedtak.begrensning,
                 "inntekt" to sykepengevedtak.inntekt,
                 "vedtakFattetTidspunkt" to "${sykepengevedtak.vedtakFattetTidspunkt}",
-                "begrunnelser" to emptyList<Map<String, Any>>()
+                "begrunnelser" to emptyList<Map<String, Any>>(),
+                "tags" to sykepengevedtak.tags
             )
         )
         return message.toJson()

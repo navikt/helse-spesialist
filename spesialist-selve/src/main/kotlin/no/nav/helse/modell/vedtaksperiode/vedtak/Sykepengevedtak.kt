@@ -19,6 +19,7 @@ internal sealed class Sykepengevedtak(
     val begrensning: String,
     val inntekt: Double,
     val vedtakFattetTidspunkt: LocalDateTime,
+    val tags: List<String>
 ) {
     override fun equals(other: Any?) = this === other || (
             other is Sykepengevedtak
@@ -36,6 +37,7 @@ internal sealed class Sykepengevedtak(
                     && begrensning == other.begrensning
                     && inntekt == other.inntekt
                     && vedtakFattetTidspunkt.withNano(0) == other.vedtakFattetTidspunkt.withNano(0)
+                    && tags == other.tags
             )
 
     override fun hashCode(): Int {
@@ -53,6 +55,7 @@ internal sealed class Sykepengevedtak(
         result = 31 * result + begrensning.hashCode()
         result = 31 * result + inntekt.hashCode()
         result = 31 * result + vedtakFattetTidspunkt.hashCode()
+        result = 31 * result + tags.hashCode()
         return result
     }
 
@@ -72,6 +75,7 @@ internal sealed class Sykepengevedtak(
         begrensning: String,
         inntekt: Double,
         vedtakFattetTidspunkt: LocalDateTime,
+        tags: List<String>
     ) : Sykepengevedtak(
         fødselsnummer,
         aktørId,
@@ -86,7 +90,8 @@ internal sealed class Sykepengevedtak(
         grunnlagForSykepengegrunnlagPerArbeidsgiver,
         begrensning,
         inntekt,
-        vedtakFattetTidspunkt
+        vedtakFattetTidspunkt,
+        tags
     ) {
         override fun equals(other: Any?) = this === other || (super.equals(other) && other is AuuVedtak)
     }
@@ -110,7 +115,8 @@ internal sealed class Sykepengevedtak(
         val begrunnelseFraMal: String?,
         val begrunnelseFraFritekst: String?,
         val begrunnelseFraKonklusjon: String?,
-        vedtakFattetTidspunkt: LocalDateTime
+        vedtakFattetTidspunkt: LocalDateTime,
+        tags: List<String>
     ): Sykepengevedtak(
         fødselsnummer,
         aktørId,
@@ -126,6 +132,7 @@ internal sealed class Sykepengevedtak(
         begrensning,
         inntekt,
         vedtakFattetTidspunkt,
+        tags
     ) {
         override fun equals(other: Any?) = this === other || (
             super.equals(other)
@@ -148,4 +155,3 @@ internal sealed class Sykepengevedtak(
         }
     }
 }
-
