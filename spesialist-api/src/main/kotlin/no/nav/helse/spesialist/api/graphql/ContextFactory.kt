@@ -1,9 +1,9 @@
-@file:Suppress("DEPRECATION")
 
 package no.nav.helse.spesialist.api.graphql
 
-import com.expediagroup.graphql.generator.execution.GraphQLContext
+import com.expediagroup.graphql.generator.extensions.toGraphQLContext
 import com.expediagroup.graphql.server.execution.GraphQLContextFactory
+import graphql.GraphQLContext
 import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.principal
 import io.ktor.server.request.ApplicationRequest
@@ -21,8 +21,6 @@ import org.slf4j.LoggerFactory
 
 private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
-data class AuthorizedContext(val kanSeKode7: Boolean) : GraphQLContext
-
 enum class ContextValues(val key: String) {
     TILGANGER("tilganger"),
     SAKSBEHANDLER_NAVN("saksbehandlerNavn"),
@@ -39,31 +37,24 @@ class ContextFactory(
     private val riskSaksbehandlergruppe: UUID,
     private val saksbehandlereMedTilgangTilStikkprøve: List<String>,
     private val saksbehandlereMedTilgangTilSpesialsaker: List<String>,
-) : GraphQLContextFactory<AuthorizedContext, ApplicationRequest> {
-
-    override suspend fun generateContextMap(request: ApplicationRequest): Map<String, Any> =
-        mapOf(
-            TILGANGER.key to SaksbehandlerTilganger(
-                gruppetilganger = request.getGrupper(),
-                saksbehandlerIdent = request.getSaksbehandlerIdent(),
-                kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
-                riskSaksbehandlergruppe = riskSaksbehandlergruppe,
-                beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe,
-                skjermedePersonerSaksbehandlergruppe = skjermedePersonerSaksbehandlergruppe,
-                saksbehandlereMedTilgangTilStikkprøve = saksbehandlereMedTilgangTilStikkprøve,
-                saksbehandlereMedTilgangTilSpesialsaker = saksbehandlereMedTilgangTilSpesialsaker,
-            ),
-            SAKSBEHANDLER_NAVN.key to request.getSaksbehandlerName(),
-            SAKSBEHANDER_EPOST.key to request.getSaksbehanderEpost(),
-            SAKSBEHANDLER_OID.key to request.getSaksbehandlerOid(),
-            SAKSBEHANDLER_IDENT.key to request.getSaksbehandlerIdent(),
-            SAKSBEHANDLER.key to request.saksbehandler()
-        )
-
-    @Deprecated("The generic context object is deprecated in favor of the context map")
-    override suspend fun generateContext(request: ApplicationRequest): AuthorizedContext {
-        return AuthorizedContext(request.getGrupper().contains(kode7Saksbehandlergruppe))
-    }
+) : GraphQLContextFactory<ApplicationRequest> {
+    override suspend fun generateContext(request: ApplicationRequest): GraphQLContext = mapOf(
+        TILGANGER.key to SaksbehandlerTilganger(
+            gruppetilganger = request.getGrupper(),
+            saksbehandlerIdent = request.getSaksbehandlerIdent(),
+            kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
+            riskSaksbehandlergruppe = riskSaksbehandlergruppe,
+            beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe,
+            skjermedePersonerSaksbehandlergruppe = skjermedePersonerSaksbehandlergruppe,
+            saksbehandlereMedTilgangTilStikkprøve = saksbehandlereMedTilgangTilStikkprøve,
+            saksbehandlereMedTilgangTilSpesialsaker = saksbehandlereMedTilgangTilSpesialsaker,
+        ),
+        SAKSBEHANDLER_NAVN.key to request.getSaksbehandlerName(),
+        SAKSBEHANDER_EPOST.key to request.getSaksbehanderEpost(),
+        SAKSBEHANDLER_OID.key to request.getSaksbehandlerOid(),
+        SAKSBEHANDLER_IDENT.key to request.getSaksbehandlerIdent(),
+        SAKSBEHANDLER.key to request.saksbehandler()
+    ).toGraphQLContext()
 }
 
 private fun ApplicationRequest.getGrupper(): List<UUID> {

@@ -5,6 +5,7 @@ import com.expediagroup.graphql.server.types.GraphQLRequest
 import com.expediagroup.graphql.server.types.GraphQLServerRequest
 import com.expediagroup.graphql.server.types.GraphQLServerResponse
 import graphql.GraphQL
+import graphql.GraphQLContext
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -12,11 +13,9 @@ class LoggingGraphQLRequestHandler(graphQL: GraphQL) : GraphQLRequestHandler(gra
 
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
-    @Suppress("deprecation")
     override suspend fun executeRequest(
         graphQLRequest: GraphQLServerRequest,
-        context: com.expediagroup.graphql.generator.execution.GraphQLContext?,
-        graphQLContext: Map<*, Any>,
+        graphQLContext: GraphQLContext
     ): GraphQLServerResponse {
         if (graphQLRequest is GraphQLRequest) {
             graphQLRequest.operationName.let {
@@ -24,6 +23,6 @@ class LoggingGraphQLRequestHandler(graphQL: GraphQL) : GraphQLRequestHandler(gra
                 else sikkerLogg.warn("GraphQL-kall uten navngitt query, bør fikses i kallende kode. Requesten:\n${graphQLRequest.query}")
             }
         }
-        return super.executeRequest(graphQLRequest, context, graphQLContext)
+        return super.executeRequest(graphQLRequest, graphQLContext)
     }
 }

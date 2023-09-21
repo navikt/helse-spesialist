@@ -88,11 +88,13 @@ class SnapshotClient(
             header("callId", callId)
             contentType(ContentType.Application.Json)
             setBody(
-                GraphQLRequestBody(
-                    query = request.query,
-                    variables = request.variables,
-                    operationName = request.operationName,
-                )
+                request.query?.let {
+                    GraphQLRequestBody(
+                        query = it,
+                        variables = request.variables,
+                        operationName = request.operationName,
+                    )
+                }
             )
         }.body<String>()
 
