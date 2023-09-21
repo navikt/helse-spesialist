@@ -28,7 +28,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
     override fun finnOppgave(id: Long): OppgaveFraDatabase? {
         return asSQL(
             """ 
-            SELECT o.type, o.status, v.vedtaksperiode_id, o.ferdigstilt_av, o.ferdigstilt_av_oid, o.utbetaling_id, s.navn, s.epost, s.ident, s.oid, t.på_vent
+            SELECT o.egenskaper, o.type, o.status, v.vedtaksperiode_id, o.ferdigstilt_av, o.ferdigstilt_av_oid, o.utbetaling_id, s.navn, s.epost, s.ident, s.oid, t.på_vent
             FROM oppgave o
             INNER JOIN vedtak v on o.vedtak_ref = v.id
             LEFT JOIN tildeling t on o.id = t.oppgave_id_ref
@@ -40,7 +40,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
             OppgaveFraDatabase(
                 id = id,
                 egenskap = row.string("type"),
-                egenskaper = emptyList(),
+                egenskaper = row.array<String>("egenskaper").toList(),
                 status = row.string("status"),
                 vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
                 utbetalingId = row.uuid("utbetaling_id"),
@@ -211,12 +211,12 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
 
             val (arbeidsgiverBeløp, personBeløp) = finnArbeidsgiverbeløpOgPersonbeløp(vedtaksperiodeId, utbetalingId)
             val mottaker = finnMottaker(arbeidsgiverBeløp > 0, personBeløp > 0)
-            val egenskaperForDatabase = egenskaper.joinToString { """ '$it' """ }
+            val egenskaperForDatabase = egenskaper.joinToString { """ "$it" """ }
 
             asSQL(
                 """
                     INSERT INTO oppgave(id, oppdatert, type, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, command_context_id, utbetaling_id, mottaker, egenskaper)
-                    VALUES (:id, now(), CAST(:oppgavetype as oppgavetype), CAST(:oppgavestatus as oppgavestatus), :ferdigstiltAv, :ferdigstiltAvOid, :vedtakRef, :commandContextId, :utbetalingId, CAST(:mottaker as mottakertype), ARRAY[:egenskaper]);
+                    VALUES (:id, now(), CAST(:oppgavetype as oppgavetype), CAST(:oppgavestatus as oppgavestatus), :ferdigstiltAv, :ferdigstiltAvOid, :vedtakRef, :commandContextId, :utbetalingId, CAST(:mottaker as mottakertype), '{$egenskaperForDatabase}');
                 """, mapOf(
                     "id" to id,
                     "oppgavetype" to egenskap,
@@ -227,7 +227,6 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                     "commandContextId" to commandContextId,
                     "utbetalingId" to utbetalingId,
                     "mottaker" to mottaker?.name,
-                    "egenskaper" to egenskaperForDatabase,
                 )
             ).updateAndReturnGeneratedKey()
         }) { "Kunne ikke opprette oppgave" }

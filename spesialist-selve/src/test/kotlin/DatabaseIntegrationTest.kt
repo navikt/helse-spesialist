@@ -252,13 +252,14 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         generasjonId: UUID = UUID.randomUUID(),
         contextId: UUID = UUID.randomUUID(),
-        hendelseId: UUID = UUID.randomUUID()
+        hendelseId: UUID = UUID.randomUUID(),
+        oppgaveEgenskaper: List<String> = listOf(OPPGAVETYPE),
     ) {
         opprettPerson(fødselsnummer = fødselsnummer, aktørId = aktørId)
         opprettArbeidsgiver(organisasjonsnummer = organisasjonsnummer)
         opprettGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
         opprettVedtaksperiode(periodetype = periodetype, inntektskilde = inntektskilde, vedtaksperiodeId = vedtaksperiodeId, fødselsnummer = fødselsnummer)
-        opprettOppgave(contextId = contextId, vedtaksperiodeId = vedtaksperiodeId, hendelseId = hendelseId)
+        opprettOppgave(contextId = contextId, vedtaksperiodeId = vedtaksperiodeId, hendelseId = hendelseId, oppgavetype = OPPGAVETYPE, egenskaper = oppgaveEgenskaper)
     }
 
     private fun opprettCommandContext(hendelse: TestHendelse, contextId: UUID) {
@@ -374,6 +375,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         contextId: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         oppgavetype: String = OPPGAVETYPE,
+        egenskaper: List<String> = listOf(OPPGAVETYPE),
         utbetalingId: UUID = UTBETALING_ID,
         hendelseId: UUID = UUID.randomUUID()
     ) {
@@ -383,7 +385,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             nextLong().also { OPPGAVE_ID = it },
             contextId,
             oppgavetype,
-            listOf(oppgavetype),
+            egenskaper,
             vedtaksperiodeId,
             utbetalingId
         )

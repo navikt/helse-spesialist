@@ -78,6 +78,26 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         oppgave().first().assertEquals(
             LocalDate.now(),
             OPPGAVETYPE,
+            listOf(OPPGAVETYPE),
+            OPPGAVESTATUS,
+            null,
+            null,
+            vedtakId,
+            CONTEXT_ID
+        )
+    }
+
+    @Test
+    fun `lagre oppgave med flere egenskaper`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave(contextId = CONTEXT_ID, egenskaper = listOf(OPPGAVETYPE, "RISK_QA"))
+        assertEquals(1, oppgave().size)
+        oppgave().first().assertEquals(
+            LocalDate.now(),
+            OPPGAVETYPE,
+            listOf(OPPGAVETYPE, "RISK_QA"),
             OPPGAVESTATUS,
             null,
             null,
@@ -91,11 +111,12 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettPerson(adressebeskyttelse = Adressebeskyttelse.Fortrolig)
         opprettArbeidsgiver()
         opprettVedtaksperiode()
-        opprettOppgave(contextId = CONTEXT_ID, oppgavetype = "FORTROLIG_ADRESSE")
+        opprettOppgave(contextId = CONTEXT_ID, oppgavetype = "FORTROLIG_ADRESSE", egenskaper = listOf("FORTROLIG_ADRESSE"))
         assertEquals(1, oppgave().size)
         oppgave().first().assertEquals(
             LocalDate.now(),
             "FORTROLIG_ADRESSE",
+            listOf("FORTROLIG_ADRESSE"),
             OPPGAVESTATUS,
             null,
             null,
@@ -149,7 +170,25 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
             OppgaveFraDatabase(
                 id = oppgaveId,
                 egenskap = OPPGAVETYPE,
-                egenskaper = emptyList(),
+                egenskaper = listOf(OPPGAVETYPE),
+                status = "AvventerSaksbehandler",
+                vedtaksperiodeId = VEDTAKSPERIODE,
+                utbetalingId = UTBETALING_ID,
+                hendelseId = hendelseId
+            ), oppgave
+        )
+    }
+
+    @Test
+    fun `finner OppgaveFraDatabase med flere egenskaper`() {
+        val hendelseId = UUID.randomUUID()
+        nyPerson(hendelseId = hendelseId, oppgaveEgenskaper = listOf(OPPGAVETYPE, "RISK_QA"))
+        val oppgave = oppgaveDao.finnOppgave(oppgaveId) ?: fail { "Fant ikke oppgave" }
+        assertEquals(
+            OppgaveFraDatabase(
+                id = oppgaveId,
+                egenskap = OPPGAVETYPE,
+                egenskaper = listOf(OPPGAVETYPE, "RISK_QA"),
                 status = "AvventerSaksbehandler",
                 vedtaksperiodeId = VEDTAKSPERIODE,
                 utbetalingId = UTBETALING_ID,
@@ -177,6 +216,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         oppgave().first().assertEquals(
             LocalDate.now(),
             OPPGAVETYPE,
+            listOf(OPPGAVETYPE),
             nyStatus,
             SAKSBEHANDLEREPOST,
             SAKSBEHANDLER_OID,
@@ -302,6 +342,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
                 OppgaveAssertions(
                     oppdatert = row.localDate("oppdatert"),
                     type = row.string("type"),
+                    egenskaper = row.array<String>("egenskaper").toList(),
                     status = row.string("status"),
                     ferdigstiltAv = row.stringOrNull("ferdigstilt_av"),
                     ferdigstiltAvOid = row.stringOrNull("ferdigstilt_av_oid")?.let(UUID::fromString),
@@ -340,6 +381,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     private class OppgaveAssertions(
         private val oppdatert: LocalDate,
         private val type: String,
+        private val egenskaper: List<String>,
         private val status: String,
         private val ferdigstiltAv: String?,
         private val ferdigstiltAvOid: UUID?,
@@ -349,6 +391,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         fun assertEquals(
             forventetOppdatert: LocalDate,
             forventetType: String,
+            forventetEgenskaper: List<String>,
             forventetStatus: String,
             forventetFerdigstilAv: String?,
             forventetFerdigstilAvOid: UUID?,
@@ -357,6 +400,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         ) {
             assertEquals(forventetOppdatert, oppdatert)
             assertEquals(forventetType, type)
+            assertEquals(forventetEgenskaper, egenskaper)
             assertEquals(forventetStatus, status)
             assertEquals(forventetFerdigstilAv, ferdigstiltAv)
             assertEquals(forventetFerdigstilAvOid, ferdigstiltAvOid)
