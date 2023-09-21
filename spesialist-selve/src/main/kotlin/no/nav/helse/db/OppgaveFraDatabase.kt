@@ -5,6 +5,7 @@ import java.util.UUID
 data class OppgaveFraDatabase(
     val id: Long,
     val egenskap: String,
+    val egenskaper: List<String>,
     val status: String,
     val vedtaksperiodeId: UUID,
     val utbetalingId: UUID,

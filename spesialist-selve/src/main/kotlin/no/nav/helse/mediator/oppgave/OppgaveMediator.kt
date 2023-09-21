@@ -120,13 +120,14 @@ internal class OppgaveMediator(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
         egenskap: String,
+        egenskaper: List<String>,
         hendelseId: UUID
     ) {
         if (oppgaveDao.harGyldigOppgave(utbetalingId)) {
             sikkerlogg.info("Utbetaling med {} har gyldig oppgave.", kv("utbetalingId", utbetalingId))
             return
         }
-        oppgaveDao.opprettOppgave(id, contextId, egenskap, vedtaksperiodeId, utbetalingId)
+        oppgaveDao.opprettOppgave(id, contextId, egenskap, egenskaper, vedtaksperiodeId, utbetalingId)
         GodkjenningsbehovPayload(hendelseId).lagre(opptegnelseDao, oppgaveDao.finnFødselsnummer(id))
     }
 

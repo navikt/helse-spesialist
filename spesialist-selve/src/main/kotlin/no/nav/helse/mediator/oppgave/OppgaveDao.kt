@@ -40,6 +40,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
             OppgaveFraDatabase(
                 id = id,
                 egenskap = row.string("type"),
+                egenskaper = emptyList(),
                 status = row.string("status"),
                 vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
                 utbetalingId = row.uuid("utbetaling_id"),
@@ -204,17 +205,18 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
         }
     }
 
-    fun opprettOppgave(id: Long, commandContextId: UUID, egenskap: String, vedtaksperiodeId: UUID, utbetalingId: UUID) =
+    fun opprettOppgave(id: Long, commandContextId: UUID, egenskap: String, egenskaper: List<String>, vedtaksperiodeId: UUID, utbetalingId: UUID) =
         requireNotNull(run {
             val vedtakRef = vedtakRef(vedtaksperiodeId)
 
             val (arbeidsgiverBeløp, personBeløp) = finnArbeidsgiverbeløpOgPersonbeløp(vedtaksperiodeId, utbetalingId)
             val mottaker = finnMottaker(arbeidsgiverBeløp > 0, personBeløp > 0)
+            val egenskaperForDatabase = egenskaper.joinToString { """ '$it' """ }
 
             asSQL(
                 """
-                    INSERT INTO oppgave(id, oppdatert, type, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, command_context_id, utbetaling_id, mottaker)
-                    VALUES (:id, now(), CAST(:oppgavetype as oppgavetype), CAST(:oppgavestatus as oppgavestatus), :ferdigstiltAv, :ferdigstiltAvOid, :vedtakRef, :commandContextId, :utbetalingId, CAST(:mottaker as mottakertype));
+                    INSERT INTO oppgave(id, oppdatert, type, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, command_context_id, utbetaling_id, mottaker, egenskaper)
+                    VALUES (:id, now(), CAST(:oppgavetype as oppgavetype), CAST(:oppgavestatus as oppgavestatus), :ferdigstiltAv, :ferdigstiltAvOid, :vedtakRef, :commandContextId, :utbetalingId, CAST(:mottaker as mottakertype), ARRAY[:egenskaper]);
                 """, mapOf(
                     "id" to id,
                     "oppgavetype" to egenskap,
@@ -224,7 +226,8 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                     "vedtakRef" to vedtakRef,
                     "commandContextId" to commandContextId,
                     "utbetalingId" to utbetalingId,
-                    "mottaker" to mottaker?.name
+                    "mottaker" to mottaker?.name,
+                    "egenskaper" to egenskaperForDatabase,
                 )
             ).updateAndReturnGeneratedKey()
         }) { "Kunne ikke opprette oppgave" }

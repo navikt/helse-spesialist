@@ -101,6 +101,7 @@ internal class OppgaveMediatorTest {
                 0L,
                 COMMAND_CONTEXT_ID,
                 OPPGAVETYPE_SØKNAD,
+                listOf(OPPGAVETYPE_SØKNAD),
                 VEDTAKSPERIODE_ID,
                 UTBETALING_ID
             )
@@ -200,7 +201,7 @@ internal class OppgaveMediatorTest {
         mediator.nyOppgave(TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID) {
             søknadsoppgave(it)
         }
-        verify(exactly = 1) { oppgaveDao.opprettOppgave(any(), COMMAND_CONTEXT_ID, OPPGAVETYPE_SØKNAD, any(), UTBETALING_ID) }
+        verify(exactly = 1) { oppgaveDao.opprettOppgave(any(), COMMAND_CONTEXT_ID, OPPGAVETYPE_SØKNAD, listOf(OPPGAVETYPE_SØKNAD), any(), UTBETALING_ID) }
         assertOpptegnelseIkkeOpprettet()
 
     }
@@ -208,7 +209,7 @@ internal class OppgaveMediatorTest {
     @Test
     fun `lagrer ikke dobbelt`() {
         every { oppgaveDao.reserverNesteId() } returns 0L
-        every { oppgaveDao.opprettOppgave(any(), any(), OPPGAVETYPE_SØKNAD, any(), any()) } returns 0L
+        every { oppgaveDao.opprettOppgave(any(), any(), OPPGAVETYPE_SØKNAD, listOf(OPPGAVETYPE_SØKNAD), any(), any()) } returns 0L
         every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
 
         mediator.nyOppgave(TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID) {
@@ -228,6 +229,7 @@ internal class OppgaveMediatorTest {
         utbetalingId = UTBETALING_ID,
         hendelseId = HENDELSE_ID,
         egenskap = "SØKNAD",
+        egenskaper = listOf("SØKNAD"),
         status = "AvventerSaksbehandler"
     )
 

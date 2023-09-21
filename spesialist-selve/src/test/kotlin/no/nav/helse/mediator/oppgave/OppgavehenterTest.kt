@@ -169,6 +169,7 @@ class OppgavehenterTest {
             return OppgaveFraDatabase(
                 id = OPPGAVE_ID,
                 egenskap = TYPE,
+                egenskaper = emptyList(),
                 status = STATUS,
                 vedtaksperiodeId = VEDTAKSPERIODE_ID,
                 utbetalingId = UTBETALING_ID,

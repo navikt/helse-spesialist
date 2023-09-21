@@ -34,6 +34,7 @@ class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
             vedtaksperiodeId = oppgave.vedtaksperiodeId,
             utbetalingId = oppgave.utbetalingId,
             egenskap = oppgave.egenskap,
+            egenskaper = oppgave.egenskaper,
             hendelseId = oppgave.hendelseId
         )
         if (oppgave.tildelt != null) tildelingDao.tildel(oppgave.id, oppgave.tildelt.oid, oppgave.påVent)
@@ -75,6 +76,7 @@ class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
         oppgaveForLagring = OppgaveFraDatabase(
             id = id,
             egenskap = egenskap(egenskap),
+            egenskaper = egenskaper.map { egenskap(it) },
             status = status(tilstand),
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId,

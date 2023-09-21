@@ -149,6 +149,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
             OppgaveFraDatabase(
                 id = oppgaveId,
                 egenskap = OPPGAVETYPE,
+                egenskaper = emptyList(),
                 status = "AvventerSaksbehandler",
                 vedtaksperiodeId = VEDTAKSPERIODE,
                 utbetalingId = UTBETALING_ID,

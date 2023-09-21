@@ -383,6 +383,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             nextLong().also { OPPGAVE_ID = it },
             contextId,
             oppgavetype,
+            listOf(oppgavetype),
             vedtaksperiodeId,
             utbetalingId
         )
