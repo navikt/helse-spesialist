@@ -392,7 +392,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     }
 
     protected fun ferdigstillSistOpprettedeOppgaveOgOpprettNy() {
-        oppgaveDao.updateOppgave(oppgaveId = oppgaveId, oppgavestatus = "Ferdigstilt")
+        oppgaveDao.updateOppgave(oppgaveId = oppgaveId, oppgavestatus = "Ferdigstilt", egenskaper = listOf(OPPGAVETYPE))
         opprettOppgave()
     }
 

@@ -241,18 +241,22 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
         oppgavestatus: String,
         ferdigstiltAv: String? = null,
         oid: UUID? = null,
-    ) = asSQL(
-        """
-            UPDATE oppgave
-            SET ferdigstilt_av = :ferdigstiltAv, ferdigstilt_av_oid = :oid, status = :oppgavestatus::oppgavestatus
-            WHERE id=:oppgaveId; 
-        """, mapOf(
-            "ferdigstiltAv" to ferdigstiltAv,
-            "oid" to oid,
-            "oppgavestatus" to oppgavestatus,
-            "oppgaveId" to oppgaveId
-        )
-    ).update()
+        egenskaper: List<String>,
+    ): Int {
+        val egenskaperForDatabase = egenskaper.joinToString { """ "$it" """ }
+        return asSQL(
+            """
+                UPDATE oppgave
+                SET ferdigstilt_av = :ferdigstiltAv, ferdigstilt_av_oid = :oid, status = :oppgavestatus::oppgavestatus, egenskaper = '{$egenskaperForDatabase}'
+                WHERE id=:oppgaveId; 
+            """, mapOf(
+                "ferdigstiltAv" to ferdigstiltAv,
+                "oid" to oid,
+                "oppgavestatus" to oppgavestatus,
+                "oppgaveId" to oppgaveId
+            )
+        ).update()
+    }
 
     override fun finnHendelseId(id: Long) = requireNotNull(
         asSQL(

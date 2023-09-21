@@ -211,12 +211,12 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettArbeidsgiver()
         opprettVedtaksperiode()
         opprettOppgave(contextId = CONTEXT_ID)
-        oppgaveDao.updateOppgave(oppgaveId, nyStatus, SAKSBEHANDLEREPOST, SAKSBEHANDLER_OID)
+        oppgaveDao.updateOppgave(oppgaveId, nyStatus, SAKSBEHANDLEREPOST, SAKSBEHANDLER_OID, listOf(OPPGAVETYPE, "RISK_QA"))
         assertEquals(1, oppgave().size)
         oppgave().first().assertEquals(
             LocalDate.now(),
             OPPGAVETYPE,
-            listOf(OPPGAVETYPE),
+            listOf(OPPGAVETYPE, "RISK_QA"),
             nyStatus,
             SAKSBEHANDLEREPOST,
             SAKSBEHANDLER_OID,
@@ -228,20 +228,20 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `sjekker om det fins aktiv oppgave`() {
         nyPerson()
-        oppgaveDao.updateOppgave(oppgaveId, "AvventerSaksbehandler", null, null)
+        oppgaveDao.updateOppgave(oppgaveId, "AvventerSaksbehandler", null, null, listOf(OPPGAVETYPE))
         assertTrue(oppgaveDao.venterPåSaksbehandler(oppgaveId))
 
-        oppgaveDao.updateOppgave(oppgaveId, "Ferdigstilt", null, null)
+        oppgaveDao.updateOppgave(oppgaveId, "Ferdigstilt", null, null, listOf(OPPGAVETYPE))
         assertFalse(oppgaveDao.venterPåSaksbehandler(oppgaveId))
     }
 
     @Test
     fun `sjekker om det fins aktiv oppgave med to oppgaver`() {
         nyPerson()
-        oppgaveDao.updateOppgave(oppgaveId, "AvventerSaksbehandler")
+        oppgaveDao.updateOppgave(oppgaveId = oppgaveId, oppgavestatus = "AvventerSaksbehandler", egenskaper = listOf(OPPGAVETYPE))
 
         opprettOppgave(vedtaksperiodeId = VEDTAKSPERIODE)
-        oppgaveDao.updateOppgave(oppgaveId, "AvventerSaksbehandler")
+        oppgaveDao.updateOppgave(oppgaveId = oppgaveId, oppgavestatus = "AvventerSaksbehandler", egenskaper = listOf(OPPGAVETYPE))
 
         assertTrue(oppgaveDao.harGyldigOppgave(UTBETALING_ID))
     }
@@ -249,7 +249,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `sjekker at det ikke fins ferdigstilt oppgave`() {
         nyPerson()
-        oppgaveDao.updateOppgave(oppgaveId, "AvventerSaksbehandler")
+        oppgaveDao.updateOppgave(oppgaveId = oppgaveId, oppgavestatus = "AvventerSaksbehandler", egenskaper = listOf(OPPGAVETYPE))
 
         assertFalse(oppgaveDao.harFerdigstiltOppgave(VEDTAKSPERIODE))
     }
@@ -257,8 +257,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `sjekker at det fins ferdigstilt oppgave`() {
         nyPerson()
-        oppgaveDao.updateOppgave(oppgaveId, "Ferdigstilt")
-        oppgaveDao.updateOppgave(2L, "AvventerSaksbehandler")
+        oppgaveDao.updateOppgave(oppgaveId = oppgaveId, oppgavestatus = "Ferdigstilt", egenskaper = listOf(OPPGAVETYPE))
+        oppgaveDao.updateOppgave(oppgaveId = 2L, oppgavestatus = "AvventerSaksbehandler", egenskaper = listOf(OPPGAVETYPE))
 
         assertTrue(oppgaveDao.harFerdigstiltOppgave(VEDTAKSPERIODE))
     }

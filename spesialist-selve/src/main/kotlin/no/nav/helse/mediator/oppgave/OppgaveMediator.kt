@@ -135,9 +135,10 @@ internal class OppgaveMediator(
         oppgaveId: Long,
         status: String,
         ferdigstiltAvIdent: String?,
-        ferdigstiltAvOid: UUID?
+        ferdigstiltAvOid: UUID?,
+        egenskaper: List<String>,
     ) {
-        oppgaveDao.updateOppgave(oppgaveId, status, ferdigstiltAvIdent, ferdigstiltAvOid)
+        oppgaveDao.updateOppgave(oppgaveId, status, ferdigstiltAvIdent, ferdigstiltAvOid, egenskaper)
     }
 
     fun reserverOppgave(saksbehandleroid: UUID, fødselsnummer: String) {

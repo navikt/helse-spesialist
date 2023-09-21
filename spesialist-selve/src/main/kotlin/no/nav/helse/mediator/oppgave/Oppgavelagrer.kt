@@ -50,7 +50,8 @@ class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
             oppgaveId = oppgave.id,
             status = oppgave.status,
             ferdigstiltAvIdent = oppgave.ferdigstiltAvIdent,
-            ferdigstiltAvOid = oppgave.ferdigstiltAvOid
+            ferdigstiltAvOid = oppgave.ferdigstiltAvOid,
+            egenskaper = oppgave.egenskaper,
         )
         if (oppgave.tildelt != null) tildelingDao.tildel(oppgave.id, oppgave.tildelt.oid, oppgave.påVent)
         else tildelingDao.avmeld(oppgave.id)

@@ -106,7 +106,13 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
         opprettArbeidsgiver()
         opprettVedtaksperiode()
         opprettOppgave()
-        oppgaveDao.updateOppgave(oppgaveId, "Ferdigstilt", SAKSBEHANDLEREPOST, SAKSBEHANDLER_OID)
+        oppgaveDao.updateOppgave(
+            oppgaveId = oppgaveId,
+            oppgavestatus = "Ferdigstilt",
+            ferdigstiltAv = SAKSBEHANDLEREPOST,
+            oid = SAKSBEHANDLER_OID,
+            egenskaper = listOf(OPPGAVETYPE)
+        )
         tildelTilSaksbehandler()
         val saksbehandlerepost = tildelingDao.tildelingForPerson(FNR)
         assertNull(saksbehandlerepost)
