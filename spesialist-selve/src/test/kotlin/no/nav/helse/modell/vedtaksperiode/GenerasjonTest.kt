@@ -22,6 +22,7 @@ import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_1
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_2
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_3
+import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjon
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterOppdateringer
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverTotrinnsvurdering
 import no.nav.helse.modell.vedtaksperiode.Periode.Companion.til
@@ -29,6 +30,7 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -511,6 +513,22 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     }
 
     @Test
+    fun `finn generasjon`() {
+        val vedtaksperiodeId1 = UUID.randomUUID()
+        val vedtaksperiodeId2 = UUID.randomUUID()
+        val generasjonV1 = generasjon(vedtaksperiodeId = vedtaksperiodeId1)
+        val generasjonV2 = generasjon(vedtaksperiodeId = vedtaksperiodeId2)
+
+        assertNotNull(listOf(generasjonV1, generasjonV2).finnGenerasjon(vedtaksperiodeId1))
+    }
+
+    @Test
+    fun `finner ikke generasjon`() {
+        val generasjonV1 = generasjon()
+        assertNull(listOf(generasjonV1).finnGenerasjon(UUID.randomUUID()))
+    }
+
+    @Test
     fun `håndterer oppdateringer for kun noen av vedtaksperiodene`() {
         val vedtaksperiodeId2 = UUID.randomUUID()
         val generasjonId1 = UUID.randomUUID()
@@ -578,6 +596,18 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon1 = generasjon(vedtaksperiodeId)
         assertFalse(listOf(generasjon1).kreverTotrinnsvurdering(vedtaksperiodeId))
+    }
+
+    @Test
+    fun `haster å behandle hvis generasjonen har varsel om negativt beløp`() {
+        val generasjon1 = generasjonMedVarsel(varselkode =  "RV_UT_23")
+        assertTrue(generasjon1.hasterÅBehandle())
+    }
+
+    @Test
+    fun `haster ikke å behandle hvis generasjonen ikke har varsel om negativt beløp`() {
+        val generasjon1 = generasjon()
+        assertFalse(generasjon1.hasterÅBehandle())
     }
 
     @Test
@@ -728,7 +758,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         assertEquals(TilstandDto.UtenUtbetalingMåVurderes, Generasjon.UtenUtbetalingMåVurderes.toDto())
     }
 
-    private fun generasjonMedVarsel(fom: LocalDate, tom: LocalDate, vedtaksperiodeId: UUID = UUID.randomUUID(), varselkode: String = "SB_EX_1"): Generasjon {
+    private fun generasjonMedVarsel(fom: LocalDate = 1.januar, tom: LocalDate = 31.januar, vedtaksperiodeId: UUID = UUID.randomUUID(), varselkode: String = "SB_EX_1"): Generasjon {
         return generasjon(vedtaksperiodeId = vedtaksperiodeId, fom = fom, tom = tom).also {
             it.håndterNyttVarsel(Varsel(UUID.randomUUID(), varselkode, LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
             it.registrer(observer)

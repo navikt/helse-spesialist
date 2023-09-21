@@ -1,5 +1,6 @@
 package no.nav.helse.modell.sykefraværstilfelle
 
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.februar
@@ -10,6 +11,7 @@ import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.forhindrerAutomat
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class SykefraværstilfelleTest {
 
@@ -21,6 +23,7 @@ internal class SykefraværstilfelleTest {
         gjeldendeGenerasjon2.håndterTidslinjeendring(1.februar, 28.februar, 1.februar, UUID.randomUUID())
         assertFalse(listOf(gjeldendeGenerasjon1, gjeldendeGenerasjon2).forhindrerAutomatisering(28.februar))
     }
+
     @Test
     fun `har ikke aktive varsler når generasjonene har utbetalingId men ikke fom`() {
         val gjeldendeGenerasjon1 = generasjon(UUID.randomUUID())
@@ -30,6 +33,7 @@ internal class SykefraværstilfelleTest {
         gjeldendeGenerasjon2.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
         assertFalse(listOf(gjeldendeGenerasjon1, gjeldendeGenerasjon2).forhindrerAutomatisering(28.februar))
     }
+
     @Test
     fun `har aktive varsler`() {
         val vedtaksperiodeId2 = UUID.randomUUID()
@@ -44,11 +48,27 @@ internal class SykefraværstilfelleTest {
         assertTrue(listOf(gjeldendeGenerasjon1, gjeldendeGenerasjon2).forhindrerAutomatisering(28.februar))
     }
 
+    @Test
+    fun `thrower hvis generasjon ikke finnes`() {
+        assertThrows<IllegalArgumentException> { sykefraværstilfelle().haster(UUID.randomUUID()) }
+    }
+
     private fun generasjon(vedtaksperiodeId: UUID = UUID.randomUUID()) = Generasjon(
         id = UUID.randomUUID(),
         vedtaksperiodeId = vedtaksperiodeId,
         fom = 1.januar,
         tom = 31.januar,
         skjæringstidspunkt = 1.januar
+    )
+
+    private fun sykefraværstilfelle(
+        fødselsnummer: String = "12345678910",
+        skjæringstidspunkt: LocalDate = 1.januar,
+        gjeldendeGenerasjoner: List<Generasjon> = listOf(generasjon()),
+    ) = Sykefraværstilfelle(
+        fødselsnummer,
+        skjæringstidspunkt,
+        gjeldendeGenerasjoner,
+        emptyList(),
     )
 }

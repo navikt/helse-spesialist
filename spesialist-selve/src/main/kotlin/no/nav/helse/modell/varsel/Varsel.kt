@@ -101,6 +101,10 @@ internal class Varsel(
             return any { it.status == AKTIV && it.varselkode == "RV_MV_1" }
         }
 
+        internal fun List<Varsel>.inneholderVarselOmNegativtBeløp(): Boolean {
+            return any { it.status == AKTIV && it.varselkode == "RV_UT_23" }
+        }
+
         internal fun List<Varsel>.forhindrerAutomatisering() = any { it.status in listOf(VURDERT, AKTIV, AVVIST) }
 
         internal fun JsonNode.varsler(): List<Varsel> {

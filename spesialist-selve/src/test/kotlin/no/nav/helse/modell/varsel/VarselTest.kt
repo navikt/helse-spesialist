@@ -5,6 +5,7 @@ import java.util.UUID
 import no.nav.helse.modell.varsel.Varsel.Companion.finnEksisterendeVarsel
 import no.nav.helse.modell.varsel.Varsel.Companion.forhindrerAutomatisering
 import no.nav.helse.modell.varsel.Varsel.Companion.inneholderMedlemskapsvarsel
+import no.nav.helse.modell.varsel.Varsel.Companion.inneholderVarselOmNegativtBeløp
 import no.nav.helse.modell.varsel.Varsel.Status
 import no.nav.helse.modell.varsel.Varsel.Status.AKTIV
 import no.nav.helse.modell.varsel.Varsel.Status.AVVIST
@@ -127,6 +128,19 @@ internal class VarselTest {
     fun `inneholder medlemskapsvarsel`() {
         val varsel = nyttVarsel(status = AKTIV, kode = "RV_MV_1")
         assertTrue(listOf(varsel).inneholderMedlemskapsvarsel())
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Status::class, names = ["AKTIV"], mode = EnumSource.Mode.EXCLUDE)
+    fun `inneholder ikke varsel om negativt beløp`(status: Status) {
+        val varsel = nyttVarsel(status = status, kode = "RV_UT_23")
+        assertFalse(listOf(varsel).inneholderVarselOmNegativtBeløp())
+    }
+
+    @Test
+    fun `inneholder varsel om negativt beløp`() {
+        val varsel = nyttVarsel(status = AKTIV, kode = "RV_UT_23")
+        assertTrue(listOf(varsel).inneholderVarselOmNegativtBeløp())
     }
 
     @Test

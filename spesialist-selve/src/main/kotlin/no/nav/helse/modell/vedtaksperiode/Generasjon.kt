@@ -9,6 +9,7 @@ import no.nav.helse.modell.varsel.Varsel.Companion.finnEksisterendeVarsel
 import no.nav.helse.modell.varsel.Varsel.Companion.flyttVarslerFor
 import no.nav.helse.modell.varsel.Varsel.Companion.forhindrerAutomatisering
 import no.nav.helse.modell.varsel.Varsel.Companion.inneholderMedlemskapsvarsel
+import no.nav.helse.modell.varsel.Varsel.Companion.inneholderVarselOmNegativtBeløp
 import org.slf4j.LoggerFactory
 
 internal class Generasjon private constructor(
@@ -30,6 +31,8 @@ internal class Generasjon private constructor(
 
     private val varsler: MutableList<Varsel> = varsler.toMutableList()
     private val observers = mutableSetOf<IVedtaksperiodeObserver>()
+
+    internal fun hasterÅBehandle() = varsler.inneholderVarselOmNegativtBeløp()
 
     internal fun registrer(vararg observer: IVedtaksperiodeObserver) {
         observers.addAll(observer)
@@ -365,6 +368,9 @@ internal class Generasjon private constructor(
                 skjæringstidspunkt = skjæringstidspunkt,
             )
         }
+
+        internal fun List<Generasjon>.finnGenerasjon(vedtaksperiodeId: UUID): Generasjon? =
+            this.find { it.vedtaksperiodeId == vedtaksperiodeId }
 
         internal fun fraLagring(
             id: UUID,

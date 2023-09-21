@@ -6,6 +6,7 @@ import no.nav.helse.modell.sykefraværstilfelle.SkjønnsfastattSykepengegrunnlag
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.deaktiver
+import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjon
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.forhindrerAutomatisering
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterGodkjent
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterNyttVarsel
@@ -18,7 +19,7 @@ internal class Sykefraværstilfelle(
     private val fødselsnummer: String,
     private val skjæringstidspunkt: LocalDate,
     private val gjeldendeGenerasjoner: List<Generasjon>,
-    skjønnsfastatteSykepengegrunnlag: List<SkjønnsfastattSykepengegrunnlag>
+    skjønnsfastatteSykepengegrunnlag: List<SkjønnsfastattSykepengegrunnlag>,
 ) {
     private val skjønnsfastatteSykepengegrunnlag = skjønnsfastatteSykepengegrunnlag.sortert()
     private val observers = mutableListOf<SykefraværstilfelleObserver>()
@@ -26,6 +27,12 @@ internal class Sykefraværstilfelle(
     private fun fattVedtak(vedtak: Sykepengevedtak) = observers.forEach { it.vedtakFattet(vedtak) }
 
     private fun deaktiverVarsel(varsel: Varsel) = observers.forEach { it.deaktiverVarsel(varsel) }
+
+    internal fun haster(vedtaksperiodeId: UUID): Boolean {
+        val generasjon = gjeldendeGenerasjoner.finnGenerasjon(vedtaksperiodeId)
+            ?: throw IllegalArgumentException("Finner ikke generasjon med vedtaksperiodeId=$vedtaksperiodeId i sykefraværstilfelle med skjæringstidspunkt=$skjæringstidspunkt")
+        return generasjon.hasterÅBehandle()
+    }
 
     internal fun forhindrerAutomatisering(tilOgMed: LocalDate): Boolean {
         return gjeldendeGenerasjoner.forhindrerAutomatisering(tilOgMed)
