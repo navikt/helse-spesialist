@@ -488,6 +488,15 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
         assertTrue(oppgaveApiDao.finnOppgaver(spesialsaksbehandler).first().spesialsak)
     }
 
+    @Test
+    fun `oppgaver for egne ansatte returneres ikke`() {
+        nyPerson(fødselsnummer = FNR)
+        assertEquals(1, oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN).size)
+
+        markerEgenAnsatt(FNR)
+        assertEquals(0, oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN).size)
+    }
+
     private fun assertOppgaveBehandlingKobling(oppgaveId: Long, forventetBehandlingId: UUID) {
         @Language("PostgreSQL")
         val query =
@@ -522,6 +531,17 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
     private fun markerSpesialsak(vedtaksperiodeId: UUID) {
         @Language("PostgreSQL")
         val query = "insert into spesialsak values ('$vedtaksperiodeId')"
+        sessionOf(dataSource).use { session -> session.run(queryOf(query).asUpdate) }
+    }
+
+    private fun markerEgenAnsatt(fødselsnummer: String) {
+        @Language("PostgreSQL")
+        val query = """
+            insert into egen_ansatt (person_ref, er_egen_ansatt, opprettet)
+            select id, true, now()
+            from person where fodselsnummer = $fødselsnummer
+            on conflict (person_ref) do update set er_egen_ansatt = excluded.er_egen_ansatt
+        """
         sessionOf(dataSource).use { session -> session.run(queryOf(query).asUpdate) }
     }
 }

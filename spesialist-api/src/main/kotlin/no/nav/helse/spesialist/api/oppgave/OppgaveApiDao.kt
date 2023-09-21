@@ -100,6 +100,7 @@ class OppgaveApiDao(dataSource: DataSource) : HelseDao(dataSource) {
                 INNER JOIN person p ON v.person_ref = p.id
                 INNER JOIN person_info pi ON p.info_ref = pi.id
                 INNER JOIN opprinnelig_soknadsdato os ON os.vedtaksperiode_id = v.vedtaksperiode_id
+                INNER JOIN egen_ansatt ea on p.id = ea.person_ref
                 LEFT JOIN utbetaling_id ui ON ui.utbetaling_id = o.utbetaling_id  
                 LEFT JOIN enhet e ON p.enhet_ref = e.id
                 LEFT JOIN saksbehandleroppgavetype sot ON v.id = sot.vedtak_ref
@@ -110,6 +111,7 @@ class OppgaveApiDao(dataSource: DataSource) : HelseDao(dataSource) {
                 LEFT JOIN har_vergemal hv ON hv.person_ref = p.id
                 LEFT JOIN spesialsak sps on sps.vedtaksperiode_id = v.vedtaksperiode_id
             WHERE status = 'AvventerSaksbehandler'::oppgavestatus
+                AND NOT ea.er_egen_ansatt
                 AND CASE WHEN :harTilgangTilRisk 
                     THEN true
                     ELSE o.type != 'RISK_QA' END

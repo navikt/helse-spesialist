@@ -60,6 +60,16 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
     }
 
     @Test
+    fun `ingen får egen ansatt-oppgaver`() {
+        opprettVedtaksperiode(opprettPerson(erEgenAnsatt = true), opprettArbeidsgiver())
+
+        val body = runQuery("""{ alleOppgaver { type } }""")
+        val oppgaver = body["data"]["alleOppgaver"]
+
+        assertEquals(0, oppgaver.size())
+    }
+
+    @Test
     fun `henter behandlede oppgaver`() {
         opprettSaksbehandler()
         val vedtakRef = opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())

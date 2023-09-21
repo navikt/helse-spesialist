@@ -373,6 +373,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         aktørId: String = AKTØRID,
         adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert,
         bostedId: Int = ENHET.id,
+        erEgenAnsatt: Boolean = false,
     ) =
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             val personinfoid = opprettPersoninfo(adressebeskyttelse)
@@ -381,7 +382,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             @Language("PostgreSQL")
             val statement =
                 "INSERT INTO person(fodselsnummer, aktor_id, info_ref, enhet_ref, infotrygdutbetalinger_ref) VALUES(?, ?, ?, ?, ?)"
-            requireNotNull(
+            val personId = requireNotNull(
                 session.run(
                     queryOf(
                         statement,
@@ -393,6 +394,8 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                     ).asUpdateAndReturnGeneratedKey
                 )
             )
+            opprettEgenAnsatt(personId, erEgenAnsatt)
+            personId
         }
 
     private fun opprettPersoninfo(adressebeskyttelse: Adressebeskyttelse) =
@@ -414,6 +417,14 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                     ).asUpdateAndReturnGeneratedKey
                 )
             )
+        }
+
+    private fun opprettEgenAnsatt(personId: Long, erEgenAnsatt: Boolean) =
+        sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val statement =
+                "INSERT INTO egen_ansatt VALUES($personId, $erEgenAnsatt, now())"
+            requireNotNull(session.run(queryOf(statement).asUpdate))
         }
 
     protected fun opprettArbeidsgiver(
