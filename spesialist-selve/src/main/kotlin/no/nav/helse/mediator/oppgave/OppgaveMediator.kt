@@ -2,6 +2,7 @@ package no.nav.helse.mediator.oppgave
 
 import java.sql.SQLException
 import java.util.UUID
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingFraDatabase
@@ -36,6 +37,7 @@ internal class OppgaveMediator(
     private val tilgangskontroll: Tilgangskontroll
 ): Oppgavehåndterer, Oppgavefinner {
     private val logg = LoggerFactory.getLogger(this::class.java)
+    private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
     internal fun nyOppgave(fødselsnummer: String, contextId: UUID, opprettOppgaveBlock: (reservertId: Long) -> Oppgave) {
         val nesteId = oppgaveDao.reserverNesteId()
@@ -120,7 +122,10 @@ internal class OppgaveMediator(
         egenskap: String,
         hendelseId: UUID
     ) {
-        if (oppgaveDao.harGyldigOppgave(utbetalingId)) return
+        if (oppgaveDao.harGyldigOppgave(utbetalingId)) {
+            sikkerlogg.info("Utbetaling med {} har gyldig oppgave.", kv("utbetalingId", utbetalingId))
+            return
+        }
         oppgaveDao.opprettOppgave(id, contextId, egenskap, vedtaksperiodeId, utbetalingId)
         GodkjenningsbehovPayload(hendelseId).lagre(opptegnelseDao, oppgaveDao.finnFødselsnummer(id))
     }
