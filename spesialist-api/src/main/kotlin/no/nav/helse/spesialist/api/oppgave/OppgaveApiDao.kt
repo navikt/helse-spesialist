@@ -74,8 +74,8 @@ class OppgaveApiDao(dataSource: DataSource) : HelseDao(dataSource) {
     fun finnOppgaver(tilganger: SaksbehandlerTilganger) = asSQL(
         """
             WITH aktiv_oppgave AS NOT MATERIALIZED (select o.* from oppgave o where o.status = 'AvventerSaksbehandler'),
-                 aktiv_tildeling AS (select t.* from tildeling t where t.oppgave_id_ref in (select o.id from aktiv_oppgave o)),
-                 har_varsel_om_negativt_belop AS (SELECT sv.vedtaksperiode_id FROM selve_varsel sv
+                 aktiv_tildeling AS NOT MATERIALIZED (select t.* from tildeling t where t.oppgave_id_ref in (select o.id from aktiv_oppgave o)),
+                 har_varsel_om_negativt_belop AS NOT MATERIALIZED (SELECT sv.vedtaksperiode_id FROM selve_varsel sv
                     INNER JOIN selve_vedtaksperiode_generasjon svg ON sv.generasjon_ref = svg.id
                     INNER JOIN vedtak v ON v.vedtaksperiode_id = sv.vedtaksperiode_id
                     INNER JOIN aktiv_oppgave o ON o.vedtak_ref = v.id
@@ -84,7 +84,7 @@ class OppgaveApiDao(dataSource: DataSource) : HelseDao(dataSource) {
                     AND sv.kode = 'RV_UT_23'
                     AND svg.utbetaling_id = o.utbetaling_id
                 ),
-                har_vergemal AS (SELECT har_vergemal, vm.person_ref FROM vergemal vm
+                har_vergemal AS NOT MATERIALIZED (SELECT har_vergemal, vm.person_ref FROM vergemal vm
                     INNER JOIN vedtak v ON v.person_ref = vm.person_ref
                     INNER JOIN aktiv_oppgave o ON o.vedtak_ref = v.id
                 )
