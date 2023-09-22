@@ -7,10 +7,12 @@ import io.mockk.slot
 import io.mockk.verify
 import java.util.UUID
 import no.nav.helse.mediator.oppgave.OppgaveMediator
+import no.nav.helse.modell.OppgaveInspektør.Companion.inspektør
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.oppgave.DELVIS_REFUSJON
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.FORTROLIG_ADRESSE
+import no.nav.helse.modell.oppgave.HASTER
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.REVURDERING
 import no.nav.helse.modell.oppgave.RISK_QA
@@ -19,6 +21,7 @@ import no.nav.helse.modell.oppgave.SØKNAD
 import no.nav.helse.modell.oppgave.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
+import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
@@ -43,6 +46,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
     private val personDao = mockk<PersonDao>(relaxed = true)
     private val snapshotMediator = mockk<SnapshotMediator>(relaxed = true)
     private val risikovurderingDao = mockk<RisikovurderingDao>(relaxed = true)
+    private val sykefraværstilfelle = mockk<Sykefraværstilfelle>(relaxed = true)
     private lateinit var context: CommandContext
     private lateinit var contextId: UUID
     private lateinit var utbetalingstype: Utbetalingtype
@@ -56,6 +60,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         risikovurderingDao = risikovurderingDao,
         utbetalingId = UTBETALING_ID,
         utbetalingtype = utbetalingstype,
+        sykefraværstilfelle = sykefraværstilfelle,
         snapshotMediator = snapshotMediator,
     )
 
@@ -143,6 +148,20 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
 
         val oppgave = slot.captured.invoke(1L)
         assertEquals(enOppgave(DELVIS_REFUSJON), oppgave)
+    }
+
+    @Test
+    fun `oppretter oppgave med egenskap haster`() {
+        every { snapshotMediator.finnUtbetaling(FNR, UTBETALING_ID) } returns enUtbetaling()
+        every { sykefraværstilfelle.haster(VEDTAKSPERIODE_ID) } returns true
+        val slot = slot<((Long) -> Oppgave)>()
+        assertTrue(command.execute(context))
+        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
+
+        val oppgave = slot.captured.invoke(1L)
+        inspektør(oppgave) {
+            assertTrue(egenskaper.contains(HASTER))
+        }
     }
 
     private fun enOppgave(vararg egenskaper: Egenskap) =

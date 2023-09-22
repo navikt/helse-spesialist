@@ -7,6 +7,7 @@ import no.nav.helse.modell.oppgave.DELVIS_REFUSJON
 import no.nav.helse.modell.oppgave.EGEN_ANSATT
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.FORTROLIG_ADRESSE
+import no.nav.helse.modell.oppgave.HASTER
 import no.nav.helse.modell.oppgave.INGEN_UTBETALING
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveObserver
@@ -163,6 +164,7 @@ private class OppgaveForKafkaBygger : OppgaveVisitor {
             UTBETALING_TIL_ARBEIDSGIVER -> "UTBETALING_TIL_ARBEIDSGIVER"
             INGEN_UTBETALING -> "INGEN_UTBETALING"
             EGEN_ANSATT -> "EGEN_ANSATT"
+            HASTER -> "HASTER"
         }
     }
 }

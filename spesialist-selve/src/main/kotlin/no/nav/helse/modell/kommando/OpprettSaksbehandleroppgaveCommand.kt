@@ -7,6 +7,7 @@ import no.nav.helse.modell.delvisRefusjon
 import no.nav.helse.modell.oppgave.DELVIS_REFUSJON
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.FORTROLIG_ADRESSE
+import no.nav.helse.modell.oppgave.HASTER
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.REVURDERING
 import no.nav.helse.modell.oppgave.RISK_QA
@@ -14,6 +15,7 @@ import no.nav.helse.modell.oppgave.STIKKPRØVE
 import no.nav.helse.modell.oppgave.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
+import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.utbetalingTilSykmeldt
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
@@ -30,6 +32,7 @@ internal class OpprettSaksbehandleroppgaveCommand(
     private val risikovurderingDao: RisikovurderingDao,
     private val utbetalingId: UUID,
     private val utbetalingtype: Utbetalingtype,
+    private val sykefraværstilfelle: Sykefraværstilfelle,
     private val snapshotMediator: SnapshotMediator,
 ) : Command {
 
@@ -51,6 +54,7 @@ internal class OpprettSaksbehandleroppgaveCommand(
         // Kommentert ut fordi disse typene finnes ikke i Speil enda
 //        else if (vedtaksperiodensUtbetaling.utbetalingTilArbeidsgiver()) egenskaper.add(UTBETALING_TIL_ARBEIDSGIVER)
 //        else egenskaper.add(INGEN_UTBETALING)
+        if (sykefraværstilfelle.haster(vedtaksperiodeId)) egenskaper.add(HASTER)
 
         oppgaveMediator.nyOppgave(fødselsnummer, context.id()) { reservertId ->
             val oppgave = Oppgave.nyOppgave(reservertId, vedtaksperiodeId, utbetalingId, hendelseId, egenskaper)

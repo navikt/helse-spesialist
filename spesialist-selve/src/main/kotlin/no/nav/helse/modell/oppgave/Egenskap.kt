@@ -48,3 +48,5 @@ data object UTBETALING_TIL_ARBEIDSGIVER: Egenskap {
 data object INGEN_UTBETALING: Egenskap {
     override fun kategori(): Egenskap.Kategori = Mottaker
 }
+
+data object HASTER: Egenskap

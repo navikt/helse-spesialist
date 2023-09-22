@@ -187,6 +187,7 @@ internal class Godkjenningsbehov(
             risikovurderingDao = risikovurderingDao,
             utbetalingId = utbetalingId,
             utbetalingtype = utbetalingtype,
+            sykefraværstilfelle = sykefraværstilfelle,
             snapshotMediator = snapshotMediator,
         ),
         TrengerTotrinnsvurderingCommand(

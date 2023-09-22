@@ -13,6 +13,7 @@ class OppgaveInspektør private constructor(): OppgaveVisitor {
     var tildelt: Boolean = false
     var påVent: Boolean = false
     var tildeltTil: Saksbehandler? = null
+    val egenskaper = mutableListOf<Egenskap>()
     override fun visitOppgave(
         id: Long,
         egenskap: Egenskap,
@@ -32,6 +33,7 @@ class OppgaveInspektør private constructor(): OppgaveVisitor {
         this.tildeltTil = tildelt
         this.påVent = påVent
         this.egenskap = egenskap
+       this.egenskaper.addAll(egenskaper)
     }
 
     companion object {

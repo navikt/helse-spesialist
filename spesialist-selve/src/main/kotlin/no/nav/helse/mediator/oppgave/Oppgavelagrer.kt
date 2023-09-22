@@ -10,6 +10,7 @@ import no.nav.helse.modell.oppgave.DELVIS_REFUSJON
 import no.nav.helse.modell.oppgave.EGEN_ANSATT
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.FORTROLIG_ADRESSE
+import no.nav.helse.modell.oppgave.HASTER
 import no.nav.helse.modell.oppgave.INGEN_UTBETALING
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveVisitor
@@ -132,6 +133,7 @@ class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
             RISK_QA -> "RISK_QA"
             UTBETALING_TIL_ARBEIDSGIVER -> "UTBETALING_TIL_ARBEIDSGIVER"
             UTBETALING_TIL_SYKMELDT -> "UTBETALING_TIL_SYKMELDT"
+            HASTER -> "HASTER"
         }
     }
 }
