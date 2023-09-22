@@ -5,7 +5,7 @@ import no.nav.helse.modell.oppgave.Egenskap.Kategori.Oppgavetype
 import no.nav.helse.modell.oppgave.Egenskap.Kategori.Ukategorisert
 
 sealed interface Egenskap {
-    val kategori: Kategori
+    fun kategori() = Ukategorisert
 
     enum class Kategori {
         Mottaker,
@@ -17,42 +17,34 @@ sealed interface Egenskap {
 
 sealed interface TilgangsstyrtEgenskap : Egenskap
 
-data object RISK_QA: TilgangsstyrtEgenskap {
-    override val kategori: Egenskap.Kategori = Ukategorisert
-}
+data object RISK_QA: TilgangsstyrtEgenskap
 
-data object FORTROLIG_ADRESSE: TilgangsstyrtEgenskap {
-    override val kategori: Egenskap.Kategori = Ukategorisert
-}
+data object FORTROLIG_ADRESSE: TilgangsstyrtEgenskap
 
-data object EGEN_ANSATT: TilgangsstyrtEgenskap {
-    override val kategori: Egenskap.Kategori = Ukategorisert
-}
+data object EGEN_ANSATT: TilgangsstyrtEgenskap
 
 data object REVURDERING: Egenskap {
-    override val kategori: Egenskap.Kategori = Oppgavetype
+    override fun kategori(): Egenskap.Kategori = Oppgavetype
 }
 
 data object SØKNAD: Egenskap {
-    override val kategori: Egenskap.Kategori = Oppgavetype
+    override fun kategori(): Egenskap.Kategori = Oppgavetype
 }
 
-data object STIKKPRØVE: Egenskap {
-    override val kategori: Egenskap.Kategori = Ukategorisert
-}
+data object STIKKPRØVE: Egenskap
 
 data object UTBETALING_TIL_SYKMELDT: Egenskap {
-    override val kategori: Egenskap.Kategori = Mottaker
+    override fun kategori(): Egenskap.Kategori = Mottaker
 }
 
 data object DELVIS_REFUSJON: Egenskap {
-    override val kategori: Egenskap.Kategori = Mottaker
+    override fun kategori(): Egenskap.Kategori = Mottaker
 }
 
 data object UTBETALING_TIL_ARBEIDSGIVER: Egenskap {
-    override val kategori: Egenskap.Kategori = Mottaker
+    override fun kategori(): Egenskap.Kategori = Mottaker
 }
 
 data object INGEN_UTBETALING: Egenskap {
-    override val kategori: Egenskap.Kategori = Mottaker
+    override fun kategori(): Egenskap.Kategori = Mottaker
 }
