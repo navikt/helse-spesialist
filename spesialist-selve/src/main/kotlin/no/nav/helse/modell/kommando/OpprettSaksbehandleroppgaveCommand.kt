@@ -8,15 +8,18 @@ import no.nav.helse.modell.oppgave.DELVIS_REFUSJON
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.HASTER
+import no.nav.helse.modell.oppgave.INGEN_UTBETALING
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.REVURDERING
 import no.nav.helse.modell.oppgave.RISK_QA
 import no.nav.helse.modell.oppgave.STIKKPRØVE
+import no.nav.helse.modell.oppgave.UTBETALING_TIL_ARBEIDSGIVER
 import no.nav.helse.modell.oppgave.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.modell.utbetalingTilArbeidsgiver
 import no.nav.helse.modell.utbetalingTilSykmeldt
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
@@ -48,12 +51,13 @@ internal class OpprettSaksbehandleroppgaveCommand(
         if (automatisering.erStikkprøve(vedtaksperiodeId, hendelseId)) egenskaper.add(STIKKPRØVE)
         if (risikovurderingDao.kreverSupersaksbehandler(vedtaksperiodeId)) egenskaper.add(RISK_QA)
 
-        if (vedtaksperiodensUtbetaling.delvisRefusjon()) egenskaper.add(DELVIS_REFUSJON)
-        else if (vedtaksperiodensUtbetaling.utbetalingTilSykmeldt()) egenskaper.add(UTBETALING_TIL_SYKMELDT)
+        when {
+            vedtaksperiodensUtbetaling.delvisRefusjon() -> egenskaper.add(DELVIS_REFUSJON)
+            vedtaksperiodensUtbetaling.utbetalingTilSykmeldt() -> egenskaper.add(UTBETALING_TIL_SYKMELDT)
+            vedtaksperiodensUtbetaling.utbetalingTilArbeidsgiver() -> egenskaper.add(UTBETALING_TIL_ARBEIDSGIVER)
+            else -> egenskaper.add(INGEN_UTBETALING)
+        }
 
-        // Kommentert ut fordi disse typene finnes ikke i Speil enda
-//        else if (vedtaksperiodensUtbetaling.utbetalingTilArbeidsgiver()) egenskaper.add(UTBETALING_TIL_ARBEIDSGIVER)
-//        else egenskaper.add(INGEN_UTBETALING)
         if (sykefraværstilfelle.haster(vedtaksperiodeId)) egenskaper.add(HASTER)
 
         oppgaveMediator.nyOppgave(fødselsnummer, context.id()) { reservertId ->

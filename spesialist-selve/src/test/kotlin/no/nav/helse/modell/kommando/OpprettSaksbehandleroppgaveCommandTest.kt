@@ -13,11 +13,13 @@ import no.nav.helse.modell.oppgave.DELVIS_REFUSJON
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.HASTER
+import no.nav.helse.modell.oppgave.INGEN_UTBETALING
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.REVURDERING
 import no.nav.helse.modell.oppgave.RISK_QA
 import no.nav.helse.modell.oppgave.STIKKPRØVE
 import no.nav.helse.modell.oppgave.SØKNAD
+import no.nav.helse.modell.oppgave.UTBETALING_TIL_ARBEIDSGIVER
 import no.nav.helse.modell.oppgave.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
@@ -148,6 +150,32 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
 
         val oppgave = slot.captured.invoke(1L)
         assertEquals(enOppgave(DELVIS_REFUSJON), oppgave)
+    }
+
+    @Test
+    fun `oppretter oppgave med egenskap utbetaling til arbeidsgiver`() {
+        every { snapshotMediator.finnUtbetaling(FNR, UTBETALING_ID) } returns enUtbetaling(arbeidsgiverbeløp = 500)
+        val slot = slot<((Long) -> Oppgave)>()
+        assertTrue(command.execute(context))
+        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
+
+        val oppgave = slot.captured.invoke(1L)
+        inspektør(oppgave) {
+            assertTrue(egenskaper.contains(UTBETALING_TIL_ARBEIDSGIVER))
+        }
+    }
+
+    @Test
+    fun `oppretter oppgave med egenskap ingen utbetaling`() {
+        every { snapshotMediator.finnUtbetaling(FNR, UTBETALING_ID) } returns enUtbetaling(personbeløp = 0, arbeidsgiverbeløp = 0)
+        val slot = slot<((Long) -> Oppgave)>()
+        assertTrue(command.execute(context))
+        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
+
+        val oppgave = slot.captured.invoke(1L)
+        inspektør(oppgave) {
+            assertTrue(egenskaper.contains(INGEN_UTBETALING))
+        }
     }
 
     @Test
