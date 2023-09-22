@@ -105,7 +105,8 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     protected val snapshotMediator = SnapshotMediator(snapshotApiDao, snapshotClient)
     protected val notatMediator = mockk<NotatMediator>(relaxed = true)
-    protected val oppgavehåndterer = mockk<Oppgavehåndterer>()
+    protected val oppgavehåndterer = mockk<Oppgavehåndterer>(relaxed = true)
+    protected val totrinnsvurderinghåndterer = mockk<Totrinnsvurderinghåndterer>(relaxed = true)
     protected val tildelingService =
         TildelingService(
             tildelingDao,

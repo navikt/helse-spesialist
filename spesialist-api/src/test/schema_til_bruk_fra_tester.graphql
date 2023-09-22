@@ -287,6 +287,8 @@ type Mutation {
     overstyrArbeidsforhold(overstyring: ArbeidsforholdOverstyringHandlingInput!): Boolean!
     overstyrDager(overstyring: TidslinjeOverstyringInput!): Boolean!
     overstyrInntektOgRefusjon(overstyring: InntektOgRefusjonOverstyringInput!): Boolean!
+    sendIRetur(notatTekst: String!, oppgavereferanse: String!): Boolean!
+    sendTilGodkjenning(oppgavereferanse: String!): Boolean!
     settVarselstatusAktiv(generasjonIdString: String!, ident: String!, varselkode: String!): VarselDTO
     settVarselstatusVurdert(definisjonIdString: String!, generasjonIdString: String!, ident: String!, varselkode: String!): VarselDTO
     skjonnsfastsettSykepengegrunnlag(skjonnsfastsettelse: SkjonnsfastsettelseInput!): Boolean!
@@ -974,6 +976,14 @@ input InntektOgRefusjonOverstyringInput {
     skjaringstidspunkt: String!
 }
 
+input LovhjemmelInput {
+    bokstav: String
+    ledd: String
+    lovverk: String!
+    lovverksversjon: String!
+    paragraf: String!
+}
+
 input OverstyringArbeidsforholdInput {
     begrunnelse: String!
     deaktivert: Boolean!
@@ -986,10 +996,10 @@ input OverstyringArbeidsgiverInput {
     forklaring: String!
     fraManedligInntekt: Float!
     fraRefusjonsopplysninger: [OverstyringRefusjonselementInput!]
+    lovhjemmel: LovhjemmelInput
     manedligInntekt: Float!
     organisasjonsnummer: String!
     refusjonsopplysninger: [OverstyringRefusjonselementInput!]
-    subsumsjon: SubsumsjonInput
 }
 
 input OverstyringDagInput {
@@ -997,7 +1007,7 @@ input OverstyringDagInput {
     fraGrad: Int
     fraType: String!
     grad: Int
-    subsumsjon: SubsumsjonInput
+    lovhjemmel: LovhjemmelInput
     type: String!
 }
 
@@ -1015,8 +1025,8 @@ input SkjonnsfastsettelseArbeidsgiverInput {
     begrunnelseMal: String
     fraArlig: Float!
     initierendeVedtaksperiodeId: String
+    lovhjemmel: LovhjemmelInput
     organisasjonsnummer: String!
-    subsumsjon: SubsumsjonInput
     type: SkjonnsfastsettelseType!
 }
 
@@ -1027,16 +1037,11 @@ input SkjonnsfastsettelseInput {
     skjaringstidspunkt: String!
 }
 
-input SubsumsjonInput {
-    bokstav: String
-    ledd: String
-    paragraf: String!
-}
-
 input TidslinjeOverstyringInput {
     aktorId: String!
     begrunnelse: String!
     dager: [OverstyringDagInput!]!
     fodselsnummer: String!
     organisasjonsnummer: String!
+    vedtaksperiodeId: String!
 }

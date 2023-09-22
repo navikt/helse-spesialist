@@ -19,6 +19,7 @@ import java.time.Duration
 import java.util.UUID
 import no.nav.helse.spesialist.api.GraphQLMetrikker
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
+import no.nav.helse.spesialist.api.Totrinnsvurderinghåndterer
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMediator
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
@@ -33,6 +34,7 @@ import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
+import no.nav.helse.spesialist.api.tildeling.Oppgavehåndterer
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.tildeling.TildelingService
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
@@ -65,7 +67,9 @@ fun Application.graphQLApi(
     behandlingsstatistikkMediator: BehandlingsstatistikkMediator,
     tildelingService: TildelingService,
     notatMediator: NotatMediator,
-    saksbehandlerhåndterer: Saksbehandlerhåndterer
+    saksbehandlerhåndterer: Saksbehandlerhåndterer,
+    oppgavehåndterer: Oppgavehåndterer,
+    totrinnsvurderinghåndterer: Totrinnsvurderinghåndterer
 ) {
     val schema = SchemaBuilder(
         personApiDao = personApiDao,
@@ -85,7 +89,9 @@ fun Application.graphQLApi(
         behandlingsstatistikkMediator = behandlingsstatistikkMediator,
         tildelingService = tildelingService,
         notatMediator = notatMediator,
-        saksbehandlerhåndterer = saksbehandlerhåndterer
+        saksbehandlerhåndterer = saksbehandlerhåndterer,
+        oppgavehåndterer = oppgavehåndterer,
+        totrinnsvurderinghåndterer = totrinnsvurderinghåndterer
     ).build()
 
     val server = GraphQLServer(

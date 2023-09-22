@@ -68,7 +68,9 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
             behandlingsstatistikkMediator = behandlingsstatistikkMediator,
             tildelingService = tildelingService,
             notatMediator = notatMediator,
-            saksbehandlerhåndterer = saksbehandlerhåndterer
+            saksbehandlerhåndterer = saksbehandlerhåndterer,
+            oppgavehåndterer = oppgavehåndterer,
+            totrinnsvurderinghåndterer = totrinnsvurderinghåndterer
         ).build()
 
         graphQLServer = GraphQLServer(

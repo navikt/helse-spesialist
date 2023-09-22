@@ -5,6 +5,7 @@ import com.expediagroup.graphql.generator.TopLevelObject
 import com.expediagroup.graphql.generator.toSchema
 import graphql.schema.GraphQLSchema
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
+import no.nav.helse.spesialist.api.Totrinnsvurderinghåndterer
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMediator
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
@@ -13,6 +14,7 @@ import no.nav.helse.spesialist.api.graphql.mutation.OpptegnelseMutation
 import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutation
 import no.nav.helse.spesialist.api.graphql.mutation.SkjonnsfastsettelseMutation
 import no.nav.helse.spesialist.api.graphql.mutation.TildelingMutation
+import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutation
 import no.nav.helse.spesialist.api.graphql.mutation.VarselMutation
 import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQuery
 import no.nav.helse.spesialist.api.graphql.query.NotatQuery
@@ -29,6 +31,7 @@ import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
+import no.nav.helse.spesialist.api.tildeling.Oppgavehåndterer
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.tildeling.TildelingService
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
@@ -53,7 +56,9 @@ internal class SchemaBuilder(
     private val behandlingsstatistikkMediator: BehandlingsstatistikkMediator,
     private val tildelingService: TildelingService,
     private val notatMediator: NotatMediator,
-    private val saksbehandlerhåndterer: Saksbehandlerhåndterer
+    private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
+    private val oppgavehåndterer: Oppgavehåndterer,
+    private val totrinnsvurderinghåndterer: Totrinnsvurderinghåndterer
 ) {
     fun build(): GraphQLSchema {
         val schemaConfig = SchemaGeneratorConfig(
@@ -126,6 +131,13 @@ internal class SchemaBuilder(
                 ),
                 TopLevelObject(
                     SkjonnsfastsettelseMutation(saksbehandlerhåndterer = saksbehandlerhåndterer)
+                ),
+                TopLevelObject(
+                    TotrinnsvurderingMutation(
+                        saksbehandlerhåndterer = saksbehandlerhåndterer,
+                        oppgavehåndterer = oppgavehåndterer,
+                        totrinnsvurderinghåndterer = totrinnsvurderinghåndterer
+                    )
                 )
             )
         )
