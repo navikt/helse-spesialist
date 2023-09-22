@@ -3,6 +3,7 @@ package no.nav.helse.modell.totrinnsvurdering
 import java.util.UUID
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.oppgave.OppgaveDao
+import no.nav.helse.spesialist.api.Totrinnsvurderinghåndterer
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
@@ -13,7 +14,7 @@ class TotrinnsvurderingMediator(
     private val oppgaveDao: OppgaveDao,
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val notatMediator: NotatMediator,
-) {
+) : Totrinnsvurderinghåndterer {
     fun opprett(vedtaksperiodeId: UUID): TotrinnsvurderingOld = dao.opprett(vedtaksperiodeId)
     fun settBeslutter(vedtaksperiodeId: UUID, saksbehandlerOid: UUID): Unit =
         dao.settBeslutter(vedtaksperiodeId, saksbehandlerOid)
@@ -30,11 +31,11 @@ class TotrinnsvurderingMediator(
         }
     }
 
-    fun lagrePeriodehistorikk(
+    override fun lagrePeriodehistorikk(
         oppgaveId: Long,
         saksbehandleroid: UUID?,
         type: PeriodehistorikkType,
-        notat: Pair<String, NotatType>? = null
+        notat: Pair<String, NotatType>?
     ) {
         var notatId: Int? = null
         if (notat != null && saksbehandleroid != null) {
