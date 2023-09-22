@@ -75,6 +75,9 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
         fødselsnummer: String,
         organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
+        fom: LocalDate,
+        tom: LocalDate,
+        skjæringstidspunkt: LocalDate,
         forårsaketAvId: UUID = UUID.randomUUID(),
     ): UUID = newUUID.also { id ->
         testRapid.sendTestMessage(
@@ -85,6 +88,9 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
                 organisasjonsnummer = organisasjonsnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
                 forårsaketAvId = forårsaketAvId,
+                fom = fom,
+                tom = tom,
+                skjæringstidspunkt = skjæringstidspunkt
             )
         )
     }

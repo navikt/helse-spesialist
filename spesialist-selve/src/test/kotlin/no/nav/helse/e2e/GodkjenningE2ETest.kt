@@ -244,8 +244,8 @@ internal class GodkjenningE2ETest : AbstractE2ETestV2() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = revurdertUtbetaling,
             andreArbeidsforhold = emptyList(),
-            fom = 1.januar,
-            tom = 10.januar,
+            fom = 11.januar,
+            tom = 31.januar,
             kanAvvises = kanAvvises,
             harOppdatertMetainfo = true,
         )

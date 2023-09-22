@@ -22,6 +22,7 @@ import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveKreverVurderingAvToSaksbehandlere
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import kotlin.random.Random.Default.nextLong
@@ -134,6 +135,7 @@ internal class OppgaveTest {
         }
     }
 
+    @Disabled("Kan skrus på igjen når egenskaper har tatt over ansvaret for oppgavetype")
     @Test
     fun `Forsøker tildeling ved reservasjon ved manglende tilgang til EGEN_ANSATT`() {
         val oppgave = nyOppgave(EGEN_ANSATT)

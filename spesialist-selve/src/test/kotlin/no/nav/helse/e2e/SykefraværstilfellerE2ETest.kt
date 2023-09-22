@@ -52,8 +52,8 @@ internal class SykefraværstilfellerE2ETest : AbstractE2ETestV2() {
 
         finnFørsteGenerasjon(vedtaksperiodeId1).also { (skjæringstidspunkt, fom, tom) ->
             assertEquals(1.januar, skjæringstidspunkt)
-            assertEquals(1.januar ,fom)
-            assertEquals(31.januar ,tom)
+            assertEquals(1.januar, fom)
+            assertEquals(5.januar, tom)
         }
         finnSisteGenerasjon(vedtaksperiodeId1).also { (skjæringstidspunkt, fom, tom) ->
             assertEquals(15.januar, skjæringstidspunkt)
@@ -73,7 +73,7 @@ internal class SykefraværstilfellerE2ETest : AbstractE2ETestV2() {
     }
 
     @Test
-    fun `Oppdaterer sykefraværstilfeller for flere tilfeller `() {
+    fun `Oppdaterer sykefraværstilfeller for flere tilfeller`() {
         val vedtaksperiodeId1 = UUID.randomUUID()
         val vedtaksperiodeId2 = UUID.randomUUID()
 
@@ -104,8 +104,8 @@ internal class SykefraværstilfellerE2ETest : AbstractE2ETestV2() {
 
         finnFørsteGenerasjon(vedtaksperiodeId1).also { (skjæringstidspunkt, fom, tom) ->
             assertEquals(1.januar, skjæringstidspunkt)
-            assertEquals(1.januar ,fom)
-            assertEquals(31.januar ,tom)
+            assertEquals(1.januar, fom)
+            assertEquals(5.januar, tom)
         }
         finnSisteGenerasjon(vedtaksperiodeId1).also { (skjæringstidspunkt, fom, tom) ->
             assertEquals(1.januar, skjæringstidspunkt)
@@ -113,9 +113,9 @@ internal class SykefraværstilfellerE2ETest : AbstractE2ETestV2() {
             assertEquals(6.januar, tom)
         }
         finnFørsteGenerasjon(vedtaksperiodeId2).also { (skjæringstidspunkt, fom, tom) ->
-            assertEquals(1.januar, skjæringstidspunkt)
-            assertEquals(1.januar ,fom)
-            assertEquals(31.januar ,tom)
+            assertEquals(10.januar, skjæringstidspunkt)
+            assertEquals(10.januar ,fom)
+            assertEquals(15.januar ,tom)
         }
         finnSisteGenerasjon(vedtaksperiodeId2).also { (skjæringstidspunkt, fom, tom) ->
             assertEquals(11.januar, skjæringstidspunkt)

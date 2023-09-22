@@ -220,10 +220,14 @@ class Oppgave private constructor(
             egenskaper: List<Egenskap>,
             totrinnsvurdering: Totrinnsvurdering? = null
         ): Oppgave {
-            val hovedegenskap = egenskaper.firstOrNull() ?: SØKNAD
+            val hovedegenskap = egenskaper.firstOrNull { it in gyldigeOppgavetyper } ?: SØKNAD
             return Oppgave(id, hovedegenskap, AvventerSaksbehandler, vedtaksperiodeId, utbetalingId, hendelseId, totrinnsvurdering).also {
                 it.egenskaper.addAll(egenskaper)
             }
         }
+
+        // Brukes midlertidig mens vi står i en spagat mellom én oppgavetype og en liste av egenskaper.
+        // Brukes slik at vi kan legge til nye egenskaper i kode som ikke finnes i oppgavetype-enumen i databasen og/eller er håndtert i Speil
+        private val gyldigeOppgavetyper = listOf(FORTROLIG_ADRESSE, REVURDERING, STIKKPRØVE, RISK_QA, DELVIS_REFUSJON, UTBETALING_TIL_SYKMELDT)
     }
 }

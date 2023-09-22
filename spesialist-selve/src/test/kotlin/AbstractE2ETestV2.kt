@@ -134,15 +134,17 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         utbetalingId: UUID = UTBETALING_ID
     ) {
         fremTilÅpneOppgaver(
-            fom,
-            tom,
-            skjæringstidspunkt,
+            fom = fom,
+            tom = tom,
+            skjæringstidspunkt = skjæringstidspunkt,
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId,
         )
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning(vedtaksperiodeId = vedtaksperiodeId)
         håndterUtbetalingUtbetalt()
+        håndterUtkastTilVedtak()
+        håndterVedtakFattet()
     }
 
     protected fun fremTilVergemål(
@@ -218,7 +220,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         personbeløp: Int = 0
     ) {
         håndterSøknad(fødselsnummer = fødselsnummer)
-        håndterVedtaksperiodeOpprettet(vedtaksperiodeId = vedtaksperiodeId)
+        håndterVedtaksperiodeOpprettet(vedtaksperiodeId = vedtaksperiodeId, fom = fom, tom = tom, skjæringstidspunkt = skjæringstidspunkt)
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshot(
             versjon = snapshotversjon,
             fødselsnummer = fødselsnummer,
@@ -410,12 +412,18 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        fom: LocalDate = 1.januar,
+        tom: LocalDate = 31.januar,
+        skjæringstidspunkt: LocalDate = fom,
     ) {
         sisteMeldingId = meldingssenderV2.sendVedtaksperiodeOpprettet(
-            aktørId,
-            fødselsnummer,
-            organisasjonsnummer,
-            vedtaksperiodeId,
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            fom = fom,
+            tom = tom,
+            skjæringstidspunkt = skjæringstidspunkt
         )
         assertIngenEtterspurteBehov()
         assertIngenUtgåendeMeldinger()
