@@ -6,6 +6,7 @@ import no.nav.helse.db.OppgaveFraDatabase
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingFraDatabase
+import no.nav.helse.modell.oppgave.BESLUTTER
 import no.nav.helse.modell.oppgave.DELVIS_REFUSJON
 import no.nav.helse.modell.oppgave.EGEN_ANSATT
 import no.nav.helse.modell.oppgave.Egenskap
@@ -14,6 +15,7 @@ import no.nav.helse.modell.oppgave.HASTER
 import no.nav.helse.modell.oppgave.INGEN_UTBETALING
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveVisitor
+import no.nav.helse.modell.oppgave.RETUR
 import no.nav.helse.modell.oppgave.REVURDERING
 import no.nav.helse.modell.oppgave.RISK_QA
 import no.nav.helse.modell.oppgave.STIKKPRØVE
@@ -134,6 +136,8 @@ class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
             UTBETALING_TIL_ARBEIDSGIVER -> "UTBETALING_TIL_ARBEIDSGIVER"
             UTBETALING_TIL_SYKMELDT -> "UTBETALING_TIL_SYKMELDT"
             HASTER -> "HASTER"
+            BESLUTTER -> "BESLUTTER"
+            RETUR -> "RETUR"
         }
     }
 }

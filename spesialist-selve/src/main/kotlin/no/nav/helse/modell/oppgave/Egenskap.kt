@@ -50,3 +50,7 @@ data object INGEN_UTBETALING: Egenskap {
 }
 
 data object HASTER: Egenskap
+
+data object RETUR: Egenskap
+
+data object BESLUTTER: Egenskap

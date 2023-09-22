@@ -3,6 +3,7 @@ package no.nav.helse.mediator.oppgave
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.modell.HendelseDao
+import no.nav.helse.modell.oppgave.BESLUTTER
 import no.nav.helse.modell.oppgave.DELVIS_REFUSJON
 import no.nav.helse.modell.oppgave.EGEN_ANSATT
 import no.nav.helse.modell.oppgave.Egenskap
@@ -12,6 +13,7 @@ import no.nav.helse.modell.oppgave.INGEN_UTBETALING
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveObserver
 import no.nav.helse.modell.oppgave.OppgaveVisitor
+import no.nav.helse.modell.oppgave.RETUR
 import no.nav.helse.modell.oppgave.REVURDERING
 import no.nav.helse.modell.oppgave.RISK_QA
 import no.nav.helse.modell.oppgave.STIKKPRØVE
@@ -165,6 +167,8 @@ private class OppgaveForKafkaBygger : OppgaveVisitor {
             INGEN_UTBETALING -> "INGEN_UTBETALING"
             EGEN_ANSATT -> "EGEN_ANSATT"
             HASTER -> "HASTER"
+            BESLUTTER -> "BESLUTTER"
+            RETUR -> "RETUR"
         }
     }
 }

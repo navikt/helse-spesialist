@@ -5,11 +5,13 @@ import TilgangskontrollForTestHarTilgang
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.modell.OppgaveInspektør.Companion.inspektør
+import no.nav.helse.modell.oppgave.BESLUTTER
 import no.nav.helse.modell.oppgave.EGEN_ANSATT
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveObserver
+import no.nav.helse.modell.oppgave.RETUR
 import no.nav.helse.modell.oppgave.RISK_QA
 import no.nav.helse.modell.oppgave.STIKKPRØVE
 import no.nav.helse.modell.oppgave.SØKNAD
@@ -21,7 +23,9 @@ import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtIRetur
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveKreverVurderingAvToSaksbehandlere
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -215,6 +219,38 @@ internal class OppgaveTest {
         oppgave.sendTilBeslutter(saksbehandler)
         inspektør(oppgave) {
             assertEquals(null, tildeltTil)
+        }
+    }
+
+    @Test
+    fun `oppgave sendt til beslutter får egenskap BESLUTTER`() {
+        val oppgave = nyOppgave(SØKNAD, medTotrinnsvurdering = true)
+        oppgave.sendTilBeslutter(saksbehandler)
+        inspektør(oppgave) {
+            assertTrue(egenskaper.contains(BESLUTTER))
+        }
+    }
+
+    @Test
+    fun `oppgave sendt i retur får egenskap RETUR`() {
+        val oppgave = nyOppgave(SØKNAD, medTotrinnsvurdering = true)
+        oppgave.sendTilBeslutter(saksbehandler)
+        oppgave.sendIRetur(beslutter)
+        inspektør(oppgave) {
+            assertTrue(egenskaper.contains(RETUR))
+            assertFalse(egenskaper.contains(BESLUTTER))
+        }
+    }
+
+    @Test
+    fun `oppgave sendt til beslutter etter å ha vært sendt i retur har ikke egenskap RETUR`() {
+        val oppgave = nyOppgave(SØKNAD, medTotrinnsvurdering = true)
+        oppgave.sendTilBeslutter(saksbehandler)
+        oppgave.sendIRetur(beslutter)
+        oppgave.sendTilBeslutter(saksbehandler)
+        inspektør(oppgave) {
+            assertFalse(egenskaper.contains(RETUR))
+            assertTrue(egenskaper.contains(BESLUTTER))
         }
     }
 
