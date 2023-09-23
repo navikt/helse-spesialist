@@ -448,8 +448,9 @@ internal class OppgaveTest {
         oppgave.forsøkTildelingVedReservasjon(saksbehandler, false)
         oppgave.leggPåVent()
 
-        assertEquals(1, observer.oppgaverEndret.size)
+        assertEquals(2, observer.oppgaverEndret.size)
         assertEquals(oppgave, observer.oppgaverEndret[0])
+        assertEquals(oppgave, observer.oppgaverEndret[1])
 
         inspektør(oppgave) {
             assertEquals(Oppgave.AvventerSaksbehandler, this.tilstand)
@@ -464,9 +465,10 @@ internal class OppgaveTest {
         oppgave.leggPåVent()
         oppgave.fjernPåVent()
 
-        assertEquals(2, observer.oppgaverEndret.size)
+        assertEquals(3, observer.oppgaverEndret.size)
         assertEquals(oppgave, observer.oppgaverEndret[0])
         assertEquals(oppgave, observer.oppgaverEndret[1])
+        assertEquals(oppgave, observer.oppgaverEndret[2])
 
         inspektør(oppgave) {
             assertEquals(Oppgave.AvventerSaksbehandler, this.tilstand)

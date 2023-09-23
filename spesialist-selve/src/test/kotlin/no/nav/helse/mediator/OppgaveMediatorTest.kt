@@ -93,6 +93,7 @@ internal class OppgaveMediatorTest {
         every { oppgaveDao.reserverNesteId() } returns 0L
         every { oppgaveDao.finnHendelseId(any()) } returns HENDELSE_ID
         every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
+        every { reservasjonDao.hentReservasjonFor(FNR) } returns null
         mediator.nyOppgave(TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID) {
             søknadsoppgave(it)
         }
@@ -211,6 +212,7 @@ internal class OppgaveMediatorTest {
         every { oppgaveDao.reserverNesteId() } returns 0L
         every { oppgaveDao.opprettOppgave(any(), any(), OPPGAVETYPE_SØKNAD, listOf(OPPGAVETYPE_SØKNAD), any(), any()) } returns 0L
         every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
+        every { reservasjonDao.hentReservasjonFor(FNR) } returns null
 
         mediator.nyOppgave(TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID) {
             søknadsoppgave(it)

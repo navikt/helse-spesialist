@@ -58,22 +58,13 @@ class Oppgave private constructor(
         saksbehandler: Saksbehandler,
         påVent: Boolean = false,
     ) {
-        check(tilstand is AvventerSaksbehandler) { "Oppgave med oppgaveId=$id i tilstand=$tilstand kan ikke tildeles" }
+        logg.info("Oppgave med {} forsøkes tildelt grunnet reservasjon.", kv("oppgaveId", id))
+        sikkerlogg.info("Oppgave med {} forsøkes tildelt $saksbehandler grunnet reservasjon.", kv("oppgaveId", id))
         if (egenskap is STIKKPRØVE) {
             logg.info("Oppgave med {} er stikkprøve og tildeles ikke på tross av reservasjon.", kv("oppgaveId", id))
             return
         }
-        if (egenskap is TilgangsstyrtEgenskap && !saksbehandler.harTilgangTil(egenskap)) {
-            logg.info(
-                "Oppgave med {} har egenskaper som saksbehandler med {} ikke har tilgang til å behandle.",
-                kv("oppgaveId", id),
-                kv("oid", saksbehandler.oid())
-            )
-            return
-        }
-        tildeltTil = saksbehandler
-        this.påVent = påVent
-        logg.info("Oppgave med {} tildeles $saksbehandler grunnet reservasjon.", kv("oppgaveId", id))
+        tilstand.tildel(this, saksbehandler, påVent)
     }
 
     internal fun sendTilBeslutter(behandlendeSaksbehandler: Saksbehandler) {
@@ -133,6 +124,14 @@ class Oppgave private constructor(
         tilstand.invalider(this)
     }
 
+    private fun tildel(saksbehandler: Saksbehandler, påVent: Boolean) {
+        this.tildeltTil = saksbehandler
+        this.påVent = påVent
+        logg.info("Oppgave med {} tildeles $saksbehandler", kv("oppgaveId", id))
+        sikkerlogg.info("Oppgave med {} tildeles", kv("oppgaveId", id))
+        oppgaveEndret()
+    }
+
     private fun oppgaveEndret() {
         observers.forEach { it.oppgaveEndret(this) }
     }
@@ -171,6 +170,14 @@ class Oppgave private constructor(
                 kv("oppgaveId", oppgave.id)
             )
         }
+
+        fun tildel(oppgave: Oppgave, saksbehandler: Saksbehandler, påVent: Boolean) {
+            logg.error(
+                "Forventer ikke forsøk på tildeling i {} for oppgave med {} av $saksbehandler",
+                kv("tilstand", this),
+                kv("oppgaveId", oppgave.id)
+            )
+        }
     }
 
     data object AvventerSaksbehandler: Tilstand {
@@ -183,6 +190,18 @@ class Oppgave private constructor(
 
         override fun invalider(oppgave: Oppgave) {
             oppgave.nesteTilstand(Invalidert)
+        }
+
+        override fun tildel(oppgave: Oppgave, saksbehandler: Saksbehandler, påVent: Boolean) {
+            if (oppgave.egenskap is TilgangsstyrtEgenskap && !saksbehandler.harTilgangTil(oppgave.egenskap)) {
+                logg.info(
+                    "Oppgave med {} har egenskaper som saksbehandler med {} ikke har tilgang til å behandle.",
+                    kv("oppgaveId", oppgave.id),
+                    kv("oid", saksbehandler.oid())
+                )
+                return
+            }
+            oppgave.tildel(saksbehandler, påVent)
         }
     }
 
@@ -216,6 +235,7 @@ class Oppgave private constructor(
 
     companion object {
         private val logg = LoggerFactory.getLogger(this::class.java)
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
         fun nyOppgave(
             id: Long,
