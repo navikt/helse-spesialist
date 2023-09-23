@@ -11,6 +11,7 @@ import no.nav.helse.modell.oppgave.DELVIS_REFUSJON
 import no.nav.helse.modell.oppgave.EGEN_ANSATT
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.FORTROLIG_ADRESSE
+import no.nav.helse.modell.oppgave.FULLMAKT
 import no.nav.helse.modell.oppgave.HASTER
 import no.nav.helse.modell.oppgave.INGEN_UTBETALING
 import no.nav.helse.modell.oppgave.Oppgave
@@ -138,6 +139,7 @@ class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
             HASTER -> "HASTER"
             BESLUTTER -> "BESLUTTER"
             RETUR -> "RETUR"
+            FULLMAKT -> "FULLMAKT"
         }
     }
 }
