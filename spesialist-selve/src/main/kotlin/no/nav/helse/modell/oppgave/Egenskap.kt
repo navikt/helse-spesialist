@@ -53,4 +53,4 @@ data object HASTER: Egenskap
 
 data object RETUR: Egenskap
 
-data object BESLUTTER: Egenskap
+data object BESLUTTER: TilgangsstyrtEgenskap

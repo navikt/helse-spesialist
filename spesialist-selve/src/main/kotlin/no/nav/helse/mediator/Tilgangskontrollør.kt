@@ -3,6 +3,7 @@ package no.nav.helse.mediator
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.Tilgangsgrupper
+import no.nav.helse.modell.oppgave.BESLUTTER
 import no.nav.helse.modell.oppgave.EGEN_ANSATT
 import no.nav.helse.modell.oppgave.FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.RISK_QA
@@ -23,6 +24,7 @@ internal class Tilgangskontrollør(
                 EGEN_ANSATT -> gruppekontroll.erIGruppe(oid, tilgangsgrupper.skjermedePersonerGruppeId)
                 FORTROLIG_ADRESSE -> gruppekontroll.erIGruppe(oid, tilgangsgrupper.kode7GruppeId)
                 RISK_QA -> gruppekontroll.erIGruppe(oid, tilgangsgrupper.riskQaGruppeId)
+                BESLUTTER -> gruppekontroll.erIGruppe(oid, tilgangsgrupper.beslutterGruppeId)
             }
         }
     }
