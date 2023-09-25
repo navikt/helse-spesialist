@@ -175,6 +175,29 @@ internal class OppgaveMediatorTest {
     }
 
     @Test
+    fun `Legg oppgave på vent`() {
+        every { totrinnsvurderingDao.hentAktivTotrinnsvurdering(1L) } returns null
+        every { oppgaveDao.finnOppgave(1L) } returns oppgaveFraDatabase(1L, tildelt = true)
+        val tildeling = mediator.leggPåVent(1L)
+        assertEquals(true, tildeling.påVent)
+        assertEquals(SAKSBEHANDLEROID, tildeling.oid)
+        assertEquals(SAKSBEHANDLERNAVN, tildeling.navn)
+        assertEquals(SAKSBEHANDLEREPOST, tildeling.epost)
+    }
+
+    @Test
+    fun `Fjern oppgave fra på vent`() {
+        every { totrinnsvurderingDao.hentAktivTotrinnsvurdering(1L) } returns null
+        every { oppgaveDao.finnOppgave(1L) } returns oppgaveFraDatabase(1L, tildelt = true)
+        mediator.leggPåVent(1L)
+        val tildeling = mediator.fjernPåVent(1L)
+        assertEquals(false, tildeling.påVent)
+        assertEquals(SAKSBEHANDLEROID, tildeling.oid)
+        assertEquals(SAKSBEHANDLERNAVN, tildeling.navn)
+        assertEquals(SAKSBEHANDLEREPOST, tildeling.epost)
+    }
+
+    @Test
     fun `oppdaterer oppgave`() {
         every { oppgaveDao.finnOppgave(OPPGAVE_ID) } returns oppgaveFraDatabase()
         every { oppgaveDao.finnHendelseId(any()) } returns HENDELSE_ID
@@ -204,7 +227,6 @@ internal class OppgaveMediatorTest {
         }
         verify(exactly = 1) { oppgaveDao.opprettOppgave(any(), COMMAND_CONTEXT_ID, OPPGAVETYPE_SØKNAD, listOf(OPPGAVETYPE_SØKNAD), any(), UTBETALING_ID) }
         assertOpptegnelseIkkeOpprettet()
-
     }
 
     @Test
@@ -224,16 +246,6 @@ internal class OppgaveMediatorTest {
         assertEquals(0, testRapid.inspektør.size)
         assertOpptegnelseIkkeOpprettet()
     }
-
-    private fun oppgaveFraDatabase() = OppgaveFraDatabase(
-        id = OPPGAVE_ID,
-        vedtaksperiodeId = VEDTAKSPERIODE_ID,
-        utbetalingId = UTBETALING_ID,
-        hendelseId = HENDELSE_ID,
-        egenskap = "SØKNAD",
-        egenskaper = listOf("SØKNAD"),
-        status = "AvventerSaksbehandler"
-    )
 
     private fun assertAntallOpptegnelser(antallOpptegnelser: Int) = verify(exactly = antallOpptegnelser) {
         opptegnelseDao.opprettOpptegnelse(
@@ -259,4 +271,18 @@ internal class OppgaveMediatorTest {
             assertBlock(it)
         }
     }
+
+    private fun oppgaveFraDatabase(oppgaveId: Long = OPPGAVE_ID, tildelt: Boolean = false) = OppgaveFraDatabase(
+        id = oppgaveId,
+        egenskap = "SØKNAD",
+        egenskaper = listOf("SØKNAD"),
+        status = "AvventerSaksbehandler",
+        vedtaksperiodeId = VEDTAKSPERIODE_ID,
+        utbetalingId = UTBETALING_ID,
+        hendelseId = HENDELSE_ID,
+        ferdigstiltAvIdent = null,
+        ferdigstiltAvOid = null,
+        tildelt = if (tildelt) SaksbehandlerFraDatabase(SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT) else null,
+        påVent = false
+    )
 }

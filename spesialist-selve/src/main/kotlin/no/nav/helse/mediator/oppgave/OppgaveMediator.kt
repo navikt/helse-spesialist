@@ -101,7 +101,7 @@ internal class OppgaveMediator(
         return oppgave(oppgaveId) {
             val tildeltTil = this.fjernPåVent()
             tildeltTil.toDto().let {
-                TildelingApiDto(it.navn, it.epost, it.oid, true)
+                TildelingApiDto(it.navn, it.epost, it.oid, false)
             }
         }
     }
