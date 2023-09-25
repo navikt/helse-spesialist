@@ -5,6 +5,8 @@ import io.ktor.client.request.accept
 import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.path
@@ -46,20 +48,19 @@ class MsGraphClient(
 
     override suspend fun erIGrupper(oid: UUID, gruppeIder: List<UUID>): Boolean {
         val token = tokenClient.hentAccessToken("https://graph.microsoft.com/.default")
-        val response = httpClient.get(graphUrl) {
+        val response = httpClient.post(graphUrl) {
             url {
-                path("users/$oid/transitiveMemberOf/microsoft.graph.group")
-                parameters.append("\$select", "id")
+                path("v1.0/users/$oid/checkMemberGroups")
             }
             bearerAuth(token)
             accept(ContentType.parse("application/json"))
-            header("ConsistencyLevel", "eventual")
+            setBody(mapOf("groupIds" to gruppeIder.map { it.toString() }))
         }
 
-        sikkerlogger.info("ms graph trasitiveMemberOf {}", kv("response", response))
+        sikkerlogger.info("ms graph checkMemberGroups {}", kv("response", response))
 
         val responseNode = objectMapper.readTree(response.bodyAsText())
-        val grupper = responseNode["value"].map { it["id"].asUUID()  }
+        val grupper = responseNode["value"].map { it.asUUID()  }
 
         val harTilgang = grupper.containsAll(gruppeIder)
         if (harTilgang) {
