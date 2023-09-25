@@ -31,21 +31,21 @@ class TilgangskontrollørTest {
     @Test
     fun `Mapper EGEN_ANSATT til gruppeId for egenansatt`() {
         val saksbehandlerOid = UUID.randomUUID()
-        tilgangskontrollør.harTilgangTil(saksbehandlerOid, EGEN_ANSATT)
+        tilgangskontrollør.harTilgangTil(saksbehandlerOid, listOf(EGEN_ANSATT))
         assertEquals(listOf(idForGruppe(SKJERMEDE)), forespørsler[saksbehandlerOid])
     }
 
     @Test
     fun `Mapper RISK_QA til gruppeId for risk QA`() {
         val saksbehandlerOid = UUID.randomUUID()
-        tilgangskontrollør.harTilgangTil(saksbehandlerOid, RISK_QA)
+        tilgangskontrollør.harTilgangTil(saksbehandlerOid, listOf(RISK_QA))
         assertEquals(listOf(idForGruppe(Gruppe.RISK_QA)), forespørsler[saksbehandlerOid])
     }
 
     @Test
     fun `Mapper FORTROLIG_ADRESSE til gruppeId for kode 7`() {
         val saksbehandlerOid = UUID.randomUUID()
-        tilgangskontrollør.harTilgangTil(saksbehandlerOid, FORTROLIG_ADRESSE)
+        tilgangskontrollør.harTilgangTil(saksbehandlerOid, listOf(FORTROLIG_ADRESSE))
         assertEquals(listOf(idForGruppe(KODE7)), forespørsler[saksbehandlerOid])
     }
 }

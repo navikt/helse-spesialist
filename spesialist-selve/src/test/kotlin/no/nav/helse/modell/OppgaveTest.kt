@@ -2,8 +2,12 @@ package no.nav.helse.modell
 
 import TilgangskontrollForTestHarIkkeTilgang
 import TilgangskontrollForTestHarTilgang
+import TilgangskontrollForTestMedKunRiskQA
+import ToggleHelpers.disable
+import ToggleHelpers.enable
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.OppgaveInspektør.Companion.inspektør
 import no.nav.helse.modell.oppgave.BESLUTTER
 import no.nav.helse.modell.oppgave.EGEN_ANSATT
@@ -25,6 +29,7 @@ import no.nav.helse.spesialist.api.feilhåndtering.OppgaveKreverVurderingAvToSak
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -88,6 +93,33 @@ internal class OppgaveTest {
             assertEquals(false, påVent)
             assertEquals(saksbehandler, tildeltTil)
         }
+    }
+
+    @Test
+    fun `Kan tildele ved reservasjon dersom saksbehandler har tilgang til alle tilgangsstyrte egenskaper på oppgaven`() {
+        Toggle.TilgangsstyrteEgenskaper.enable()
+        val oppgave = nyOppgave(SØKNAD, RISK_QA, FORTROLIG_ADRESSE)
+        val saksbehandler = saksbehandler(tilgangskontroll = TilgangskontrollForTestHarTilgang)
+        oppgave.forsøkTildelingVedReservasjon(saksbehandler, false)
+
+        inspektør(oppgave) {
+            assertEquals(true, tildelt)
+            assertEquals(saksbehandler, tildeltTil)
+        }
+        Toggle.TilgangsstyrteEgenskaper.disable()
+    }
+
+    @Test
+    fun `Kan ikke tildele ved reservasjon dersom saksbehandler ikke har tilgang til alle tilgangsstyrte egenskaper på oppgaven`() {
+        Toggle.TilgangsstyrteEgenskaper.enable()
+        val oppgave = nyOppgave(SØKNAD, FORTROLIG_ADRESSE, RISK_QA)
+        oppgave.forsøkTildelingVedReservasjon(saksbehandler(tilgangskontroll = TilgangskontrollForTestMedKunRiskQA), false)
+
+        inspektør(oppgave) {
+            assertEquals(false, tildelt)
+            assertNull(tildeltTil)
+        }
+        Toggle.TilgangsstyrteEgenskaper.disable()
     }
 
     @Test

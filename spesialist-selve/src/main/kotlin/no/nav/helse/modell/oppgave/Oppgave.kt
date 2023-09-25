@@ -3,6 +3,7 @@ package no.nav.helse.modell.oppgave
 import java.util.Objects
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
+import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
@@ -193,15 +194,28 @@ class Oppgave private constructor(
         }
 
         override fun tildel(oppgave: Oppgave, saksbehandler: Saksbehandler, påVent: Boolean) {
-            if (oppgave.egenskap is TilgangsstyrtEgenskap && !saksbehandler.harTilgangTil(oppgave.egenskap)) {
-                logg.info(
-                    "Oppgave med {} har egenskaper som saksbehandler med {} ikke har tilgang til å behandle.",
-                    kv("oppgaveId", oppgave.id),
-                    kv("oid", saksbehandler.oid())
-                )
-                return
+            if (Toggle.TilgangsstyrteEgenskaper.enabled) {
+                val tilgangsstyrteEgenskaper = oppgave.egenskaper.filterIsInstance<TilgangsstyrtEgenskap>()
+                if (tilgangsstyrteEgenskaper.isNotEmpty() && !saksbehandler.harTilgangTil(tilgangsstyrteEgenskaper)) {
+                    logg.info(
+                        "Oppgave med {} har egenskaper som saksbehandler med {} ikke har tilgang til å behandle.",
+                        kv("oppgaveId", oppgave.id),
+                        kv("oid", saksbehandler.oid())
+                    )
+                    return
+                }
+                oppgave.tildel(saksbehandler, påVent)
+            } else {
+                if (oppgave.egenskap is TilgangsstyrtEgenskap && !saksbehandler.harTilgangTil(listOf(oppgave.egenskap))) {
+                    logg.info(
+                        "Oppgave med {} har egenskaper som saksbehandler med {} ikke har tilgang til å behandle.",
+                        kv("oppgaveId", oppgave.id),
+                        kv("oid", saksbehandler.oid())
+                    )
+                    return
+                }
+                oppgave.tildel(saksbehandler, påVent)
             }
-            oppgave.tildel(saksbehandler, påVent)
         }
     }
 

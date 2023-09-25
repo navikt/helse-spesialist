@@ -18,7 +18,7 @@ internal class Tilgangskontrollør(
     private val gruppekontroll: Gruppekontroll,
     private val tilgangsgrupper: Tilgangsgrupper,
 ) : Tilgangskontroll {
-    override fun harTilgangTil(oid: UUID, vararg egenskaper: TilgangsstyrtEgenskap): Boolean {
+    override fun harTilgangTil(oid: UUID, egenskaper: List<TilgangsstyrtEgenskap>): Boolean {
         return runBlocking {
             gruppekontroll.erIGrupper(oid, egenskaper.map { mapTilgangsgruppe(it) })
         }

@@ -6,4 +6,5 @@ abstract class Toggle(private var _enabled: Boolean) {
     internal val enabled get() = _enabled
 
     object Skjonnsfastsetting : Toggle("SKJONNSFASTSETTING", true)
+    object TilgangsstyrteEgenskaper : Toggle("TILGANGSSTYRTEEGENSKAPER", false)
 }
