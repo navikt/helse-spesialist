@@ -20,11 +20,6 @@ class TilgangskontrollørTest {
     private val forespørsler = mutableMapOf<UUID, List<String>>()
 
     private val gruppekontroll = object : Gruppekontroll {
-        override suspend fun erIGruppe(oid: UUID, groupId: UUID): Boolean {
-            forespørsler[oid] = listOf(groupId.toString())
-            return true
-        }
-
         override suspend fun erIGrupper(oid: UUID, gruppeIder: List<UUID>): Boolean {
             forespørsler[oid] = gruppeIder.map { it.toString() }
             return true
