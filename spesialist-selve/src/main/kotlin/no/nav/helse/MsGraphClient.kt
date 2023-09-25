@@ -48,7 +48,7 @@ class MsGraphClient(
         val token = tokenClient.hentAccessToken("https://graph.microsoft.com/.default")
         val response = httpClient.get(graphUrl) {
             url {
-                path("v1.0/users/$oid/memberOf/microsoft.graph.group")
+                path("users/$oid/transitiveMemberOf/microsoft.graph.group")
                 parameters.append("\$select", "id")
             }
             bearerAuth(token)
