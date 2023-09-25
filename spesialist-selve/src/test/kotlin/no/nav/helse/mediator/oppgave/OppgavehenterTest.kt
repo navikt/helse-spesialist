@@ -52,7 +52,7 @@ class OppgavehenterTest {
             utbetalingId = UTBETALING_ID,
             ferdigstiltAvOid = SAKSBEHANDLER_OID,
             ferdigstiltAvIdent = SAKSBEHANDLER_IDENT,
-            egenskaper = emptyList(),
+            egenskaper = listOf(SØKNAD),
             tildelt = saksbehandler(),
             påVent = PÅ_VENT,
             null
@@ -82,7 +82,7 @@ class OppgavehenterTest {
             utbetalingId = UTBETALING_ID,
             ferdigstiltAvOid = SAKSBEHANDLER_OID,
             ferdigstiltAvIdent = SAKSBEHANDLER_IDENT,
-            egenskaper = emptyList(),
+            egenskaper = listOf(SØKNAD),
             tildelt = saksbehandler(),
             påVent = PÅ_VENT,
             totrinnsvurdering = Totrinnsvurdering(
@@ -169,7 +169,7 @@ class OppgavehenterTest {
             return OppgaveFraDatabase(
                 id = OPPGAVE_ID,
                 egenskap = TYPE,
-                egenskaper = emptyList(),
+                egenskaper = listOf(TYPE),
                 status = STATUS,
                 vedtaksperiodeId = VEDTAKSPERIODE_ID,
                 utbetalingId = UTBETALING_ID,

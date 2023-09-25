@@ -38,12 +38,14 @@ class Oppgave private constructor(
         ferdigstiltAvOid: UUID? = null,
         tildelt: Saksbehandler? = null,
         påVent: Boolean = false,
-        totrinnsvurdering: Totrinnsvurdering? = null
+        totrinnsvurdering: Totrinnsvurdering? = null,
+        egenskaper: List<Egenskap>
     ) : this(id, egenskap, tilstand, vedtaksperiodeId, utbetalingId, hendelseId, totrinnsvurdering) {
         this.ferdigstiltAvIdent = ferdigstiltAvIdent
         this.ferdigstiltAvOid = ferdigstiltAvOid
         this.tildeltTil = tildelt
         this.påVent = påVent
+        this.egenskaper.addAll(egenskaper)
     }
 
     fun accept(visitor: OppgaveVisitor) {

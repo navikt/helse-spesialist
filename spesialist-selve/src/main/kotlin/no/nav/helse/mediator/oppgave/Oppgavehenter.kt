@@ -54,6 +54,7 @@ class Oppgavehenter(
                     oppdatert = it.oppdatert
                 )
             },
+            egenskaper = oppgave.egenskaper.map { egenskap(it) }
         )
     }
 
