@@ -59,8 +59,6 @@ class MsGraphClient(
             setBody(mapOf("groupIds" to gruppeIder.map { it.toString() }))
         }
 
-        sikkerlogger.info("ms graph checkMemberGroups {}", kv("response", response))
-
         val responseNode = objectMapper.readTree(response.bodyAsText())
         val grupper = responseNode["value"].map { it.asUUID() }
 
