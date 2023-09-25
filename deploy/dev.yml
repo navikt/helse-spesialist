@@ -102,3 +102,5 @@ spec:
       value: api://dev-gcp.team-rocket.digdir-krr-proxy/.default
     - name: TILGANGSSTYRTEEGENSKAPER
       value: "true"
+    - name: EGENANSATT
+      value: "true"
