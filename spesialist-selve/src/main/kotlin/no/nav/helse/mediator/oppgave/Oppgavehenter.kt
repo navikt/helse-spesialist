@@ -3,12 +3,16 @@ package no.nav.helse.mediator.oppgave
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.TotrinnsvurderingRepository
+import no.nav.helse.modell.oppgave.BESLUTTER
 import no.nav.helse.modell.oppgave.DELVIS_REFUSJON
 import no.nav.helse.modell.oppgave.EGEN_ANSATT
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.FORTROLIG_ADRESSE
+import no.nav.helse.modell.oppgave.FULLMAKT
+import no.nav.helse.modell.oppgave.HASTER
 import no.nav.helse.modell.oppgave.INGEN_UTBETALING
 import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.modell.oppgave.RETUR
 import no.nav.helse.modell.oppgave.REVURDERING
 import no.nav.helse.modell.oppgave.RISK_QA
 import no.nav.helse.modell.oppgave.STIKKPRØVE
@@ -80,6 +84,10 @@ class Oppgavehenter(
             "DELVIS_REFUSJON" -> DELVIS_REFUSJON
             "UTBETALING_TIL_ARBEIDSGIVER" -> UTBETALING_TIL_ARBEIDSGIVER
             "INGEN_UTBETALING" -> INGEN_UTBETALING
+            "HASTER" -> HASTER
+            "RETUR" -> RETUR
+            "BESLUTTER" -> BESLUTTER
+            "FULLMAKT" -> FULLMAKT
             else -> throw IllegalStateException("Egenskap $egenskap er ikke en gyldig egenskap")
         }
     }
