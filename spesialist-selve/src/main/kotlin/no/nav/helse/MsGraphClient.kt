@@ -10,11 +10,9 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.path
 import java.util.UUID
-import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.Gruppekontroll
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.spesialist.api.client.AccessTokenClient
-import org.slf4j.LoggerFactory
 
 class MsGraphClient(
     private val httpClient: HttpClient,
@@ -37,16 +35,6 @@ class MsGraphClient(
         val responseNode = objectMapper.readTree(response.bodyAsText())
         val grupper = responseNode["value"].map { it.asUUID() }
 
-        val harTilgang = grupper.containsAll(gruppeIder)
-        if (harTilgang) {
-            sikkerlogger.info("{} er medlem av $gruppeIder", kv("oid", oid))
-        } else {
-            sikkerlogger.info("{} mangler tilgang til minst en av $gruppeIder", kv("oid", oid))
-        }
-        return harTilgang
-    }
-
-    private companion object {
-        private val sikkerlogger = LoggerFactory.getLogger("tjenestekall")
+        return grupper.containsAll(gruppeIder)
     }
 }
