@@ -18,14 +18,16 @@ internal class Tilgangskontrollør(
     private val gruppekontroll: Gruppekontroll,
     private val tilgangsgrupper: Tilgangsgrupper,
 ) : Tilgangskontroll {
-    override fun harTilgangTil(oid: UUID, egenskap: TilgangsstyrtEgenskap): Boolean {
+    override fun harTilgangTil(oid: UUID, vararg egenskaper: TilgangsstyrtEgenskap): Boolean {
         return runBlocking {
-            when (egenskap) {
-                EGEN_ANSATT -> gruppekontroll.erIGrupper(oid, listOf(tilgangsgrupper.skjermedePersonerGruppeId))
-                FORTROLIG_ADRESSE -> gruppekontroll.erIGrupper(oid, listOf(tilgangsgrupper.kode7GruppeId))
-                RISK_QA -> gruppekontroll.erIGrupper(oid, listOf(tilgangsgrupper.riskQaGruppeId))
-                BESLUTTER -> gruppekontroll.erIGrupper(oid, listOf(tilgangsgrupper.beslutterGruppeId))
-            }
+            gruppekontroll.erIGrupper(oid, egenskaper.map { mapTilgangsgruppe(it) })
         }
+    }
+
+    private fun mapTilgangsgruppe(egenskap: TilgangsstyrtEgenskap) = when (egenskap) {
+        EGEN_ANSATT -> tilgangsgrupper.skjermedePersonerGruppeId
+        FORTROLIG_ADRESSE -> tilgangsgrupper.kode7GruppeId
+        RISK_QA -> tilgangsgrupper.riskQaGruppeId
+        BESLUTTER -> tilgangsgrupper.beslutterGruppeId
     }
 }

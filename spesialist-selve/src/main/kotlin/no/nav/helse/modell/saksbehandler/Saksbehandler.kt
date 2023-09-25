@@ -32,8 +32,8 @@ class Saksbehandler(
 
     internal fun tildeling(påVent: Boolean) = Tildeling(navn = navn, epost = epostadresse, oid = oid, påVent = påVent)
 
-    internal fun harTilgangTil(egenskap: TilgangsstyrtEgenskap): Boolean =
-        tilgangskontroll.harTilgangTil(oid, egenskap)
+    internal fun harTilgangTil(vararg egenskaper: TilgangsstyrtEgenskap): Boolean =
+        tilgangskontroll.harTilgangTil(oid, *egenskaper)
 
     internal fun håndter(hendelse: OverstyrtTidslinje) {
         val event = hendelse.byggEvent()
