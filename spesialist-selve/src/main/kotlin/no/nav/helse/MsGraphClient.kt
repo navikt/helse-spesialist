@@ -9,7 +9,9 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.path
 import java.util.UUID
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.Gruppekontroll
+import no.nav.helse.mediator.asUUID
 import no.nav.helse.spesialist.api.client.AccessTokenClient
 import org.slf4j.LoggerFactory
 
@@ -40,6 +42,30 @@ class MsGraphClient(
                 sikkerlogger.info("$oid er ikke medlem av $groupId")
             }
         }
+    }
+
+    override suspend fun erIGrupper(oid: UUID, gruppeIder: List<UUID>): Boolean {
+        val token = tokenClient.hentAccessToken("https://graph.microsoft.com/.default")
+        val response = httpClient.get(graphUrl) {
+            url {
+                path("v1.0/users/$oid/memberOf/microsoft.graph.group")
+                parameters.append("\$select", "id")
+            }
+            bearerAuth(token)
+            accept(ContentType.parse("application/json"))
+            header("ConsistencyLevel", "eventual")
+        }
+
+        val responseNode = objectMapper.readTree(response.bodyAsText())
+        val grupper = responseNode["value"].map { it["id"].asUUID()  }
+
+        val harTilgang = grupper.containsAll(gruppeIder)
+        if (harTilgang) {
+            sikkerlogger.info("{} er medlem av $gruppeIder", kv("oid", oid))
+        } else {
+            sikkerlogger.info("{} mangler tilgang til minst en av $gruppeIder", kv("oid", oid))
+        }
+        return harTilgang
     }
 
     private companion object {
