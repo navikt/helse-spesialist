@@ -9,6 +9,7 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import io.ktor.http.path
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
@@ -53,14 +54,15 @@ class MsGraphClient(
                 path("v1.0/users/$oid/checkMemberGroups")
             }
             bearerAuth(token)
-            accept(ContentType.parse("application/json"))
+            accept(ContentType.Application.Json)
+            contentType(ContentType.Application.Json)
             setBody(mapOf("groupIds" to gruppeIder.map { it.toString() }))
         }
 
         sikkerlogger.info("ms graph checkMemberGroups {}", kv("response", response))
 
         val responseNode = objectMapper.readTree(response.bodyAsText())
-        val grupper = responseNode["value"].map { it.asUUID()  }
+        val grupper = responseNode["value"].map { it.asUUID() }
 
         val harTilgang = grupper.containsAll(gruppeIder)
         if (harTilgang) {
