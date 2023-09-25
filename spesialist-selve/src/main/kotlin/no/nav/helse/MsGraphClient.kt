@@ -56,6 +56,8 @@ class MsGraphClient(
             header("ConsistencyLevel", "eventual")
         }
 
+        sikkerlogger.info("ms graph trasitiveMemberOf {}", kv("response", response))
+
         val responseNode = objectMapper.readTree(response.bodyAsText())
         val grupper = responseNode["value"].map { it["id"].asUUID()  }
 
