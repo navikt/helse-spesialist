@@ -1,10 +1,13 @@
 package no.nav.helse.modell.kommando
 
 import java.util.UUID
+import no.nav.helse.mediator.Toggle
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.delvisRefusjon
+import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.oppgave.DELVIS_REFUSJON
+import no.nav.helse.modell.oppgave.EGEN_ANSATT
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.HASTER
@@ -33,6 +36,7 @@ internal class OpprettSaksbehandleroppgaveCommand(
     private val hendelseId: UUID,
     private val personDao: PersonDao,
     private val risikovurderingDao: RisikovurderingDao,
+    private val egenAnsattDao: EgenAnsattDao,
     private val utbetalingId: UUID,
     private val utbetalingtype: Utbetalingtype,
     private val sykefraværstilfelle: Sykefraværstilfelle,
@@ -46,6 +50,7 @@ internal class OpprettSaksbehandleroppgaveCommand(
 
     override fun execute(context: CommandContext): Boolean {
         val egenskaper = mutableListOf<Egenskap>()
+        if (Toggle.EgenAnsatt.enabled && egenAnsattDao.erEgenAnsatt(fødselsnummer) == true) egenskaper.add(EGEN_ANSATT)
         if (harFortroligAdressebeskyttelse) egenskaper.add(FORTROLIG_ADRESSE)
         if (utbetalingtype == Utbetalingtype.REVURDERING) egenskaper.add(REVURDERING)
         if (automatisering.erStikkprøve(vedtaksperiodeId, hendelseId)) egenskaper.add(STIKKPRØVE)

@@ -185,6 +185,7 @@ internal class Godkjenningsbehov(
             hendelseId = id,
             personDao = personDao,
             risikovurderingDao = risikovurderingDao,
+            egenAnsattDao = egenAnsattDao,
             utbetalingId = utbetalingId,
             utbetalingtype = utbetalingtype,
             sykefraværstilfelle = sykefraværstilfelle,

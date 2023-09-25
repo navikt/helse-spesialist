@@ -1,15 +1,20 @@
 package no.nav.helse.modell.kommando
 
+import ToggleHelpers.disable
+import ToggleHelpers.enable
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import java.util.UUID
+import no.nav.helse.mediator.Toggle
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.OppgaveInspektør.Companion.inspektør
 import no.nav.helse.modell.automatisering.Automatisering
+import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.oppgave.DELVIS_REFUSJON
+import no.nav.helse.modell.oppgave.EGEN_ANSATT
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.HASTER
@@ -48,6 +53,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
     private val personDao = mockk<PersonDao>(relaxed = true)
     private val snapshotMediator = mockk<SnapshotMediator>(relaxed = true)
     private val risikovurderingDao = mockk<RisikovurderingDao>(relaxed = true)
+    private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
     private val sykefraværstilfelle = mockk<Sykefraværstilfelle>(relaxed = true)
     private lateinit var context: CommandContext
     private lateinit var contextId: UUID
@@ -60,6 +66,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         hendelseId = hendelseId,
         personDao = personDao,
         risikovurderingDao = risikovurderingDao,
+        egenAnsattDao = egenAnsattDao,
         utbetalingId = UTBETALING_ID,
         utbetalingtype = utbetalingstype,
         sykefraværstilfelle = sykefraværstilfelle,
@@ -190,6 +197,22 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         inspektør(oppgave) {
             assertTrue(egenskaper.contains(HASTER))
         }
+    }
+
+    @Test
+    fun `oppretter oppgave med egen ansatt`() {
+        Toggle.EgenAnsatt.enable()
+        every { snapshotMediator.finnUtbetaling(FNR, UTBETALING_ID) } returns enUtbetaling()
+        every { egenAnsattDao.erEgenAnsatt(FNR) } returns true
+        val slot = slot<((Long) -> Oppgave)>()
+        assertTrue(command.execute(context))
+        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
+
+        val oppgave = slot.captured.invoke(1L)
+        inspektør(oppgave) {
+            assertTrue(egenskaper.contains(EGEN_ANSATT))
+        }
+        Toggle.EgenAnsatt.disable()
     }
 
     private fun enOppgave(vararg egenskaper: Egenskap) =
