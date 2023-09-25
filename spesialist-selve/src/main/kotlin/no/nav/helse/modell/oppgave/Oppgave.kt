@@ -98,18 +98,18 @@ class Oppgave private constructor(
         oppgaveEndret()
     }
 
-    internal fun leggPåVent(): Saksbehandler {
+    internal fun leggPåVent(): Tildeling {
         val tildeltTil = this.tildeltTil ?: throw OppgaveIkkeTildelt(id)
         påVent = true
         oppgaveEndret()
-        return tildeltTil
+        return tildeltTil.tildeling(påVent)
     }
 
-    internal fun fjernPåVent(): Saksbehandler {
+    internal fun fjernPåVent(): Tildeling {
         val tildeltTil = this.tildeltTil ?: throw OppgaveIkkeTildelt(id)
         påVent = false
         oppgaveEndret()
-        return tildeltTil
+        return tildeltTil.tildeling(påVent)
     }
 
     fun ferdigstill() {

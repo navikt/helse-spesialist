@@ -90,18 +90,18 @@ internal class OppgaveMediator(
 
     override fun leggPåVent(oppgaveId: Long): TildelingApiDto {
         return oppgave(oppgaveId) {
-            val tildeltTil = this.leggPåVent()
-            tildeltTil.toDto().let {
-                TildelingApiDto(it.navn, it.epost, it.oid, true)
+            val tildeling = this.leggPåVent()
+            tildeling.let {
+                TildelingApiDto(it.navn, it.epost, it.oid, it.påVent)
             }
         }
     }
 
     override fun fjernPåVent(oppgaveId: Long): TildelingApiDto {
         return oppgave(oppgaveId) {
-            val tildeltTil = this.fjernPåVent()
-            tildeltTil.toDto().let {
-                TildelingApiDto(it.navn, it.epost, it.oid, false)
+            val tildeling = this.fjernPåVent()
+            tildeling.let {
+                TildelingApiDto(it.navn, it.epost, it.oid, it.påVent)
             }
         }
     }

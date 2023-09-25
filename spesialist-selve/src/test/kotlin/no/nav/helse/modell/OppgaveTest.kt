@@ -405,6 +405,17 @@ internal class OppgaveTest {
     }
 
     @Test
+    fun `leggPåVent returnerer tildeling`() {
+        val oppgave = nyOppgave(SØKNAD)
+        oppgave.forsøkTildelingVedReservasjon(saksbehandler, false)
+        val tildeling = oppgave.leggPåVent()
+        assertEquals(SAKSBEHANDLER_EPOST,  tildeling.epost)
+        assertEquals(SAKSBEHANDLER_NAVN,  tildeling.navn)
+        assertEquals(SAKSBEHANDLER_OID,  tildeling.oid)
+        assertEquals(true,  tildeling.påVent)
+    }
+
+    @Test
     fun `kan ikke legge oppgave på vent uten at den er tildelt først`() {
         val oppgave = nyOppgave(SØKNAD)
         assertThrows<OppgaveIkkeTildelt> {
@@ -426,6 +437,19 @@ internal class OppgaveTest {
         inspektør(oppgave) {
             assertEquals(false, påVent)
         }
+    }
+
+    @Test
+    fun `fjernPåVent returnerer tildeling`() {
+        val oppgave = nyOppgave(SØKNAD)
+        oppgave.forsøkTildelingVedReservasjon(saksbehandler, false)
+        oppgave.leggPåVent()
+        val tildeling = oppgave.fjernPåVent()
+
+        assertEquals(SAKSBEHANDLER_EPOST,  tildeling.epost)
+        assertEquals(SAKSBEHANDLER_NAVN,  tildeling.navn)
+        assertEquals(SAKSBEHANDLER_OID,  tildeling.oid)
+        assertEquals(false,  tildeling.påVent)
     }
 
     @Test

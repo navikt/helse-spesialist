@@ -1,6 +1,7 @@
 package no.nav.helse.modell.saksbehandler
 
 import java.util.UUID
+import no.nav.helse.modell.oppgave.Tildeling
 import no.nav.helse.modell.oppgave.TilgangsstyrtEgenskap
 import no.nav.helse.modell.saksbehandler.handlinger.Annullering
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsforhold
@@ -28,6 +29,8 @@ class Saksbehandler(
     fun accept(visitor: SaksbehandlerVisitor) {
         visitor.visitSaksbehandler(epostadresse, oid, navn, ident)
     }
+
+    internal fun tildeling(påVent: Boolean) = Tildeling(navn = navn, epost = epostadresse, oid = oid, påVent = påVent)
 
     internal fun harTilgangTil(egenskap: TilgangsstyrtEgenskap): Boolean =
         tilgangskontroll.harTilgangTil(oid, egenskap)

@@ -155,6 +155,34 @@ internal class SaksbehandlerTest {
     }
 
     @Test
+    fun `tildeling med påVent=true`() {
+        val oid = UUID.randomUUID()
+        val epost = "augunn.saksbehandler@nav.no"
+        val navn = "Augunn Saksbehandler"
+        val ident = "S123456"
+        val saksbehandler = saksbehandler(epost, oid, navn, ident)
+        val tildeling = saksbehandler.tildeling(true)
+        assertEquals(oid, tildeling.oid)
+        assertEquals(navn, tildeling.navn)
+        assertEquals(epost, tildeling.epost)
+        assertEquals(true, tildeling.påVent)
+    }
+
+    @Test
+    fun `tildeling med påVent=false`() {
+        val oid = UUID.randomUUID()
+        val epost = "augunn.saksbehandler@nav.no"
+        val navn = "Augunn Saksbehandler"
+        val ident = "S123456"
+        val saksbehandler = saksbehandler(epost, oid, navn, ident)
+        val tildeling = saksbehandler.tildeling(false)
+        assertEquals(oid, tildeling.oid)
+        assertEquals(navn, tildeling.navn)
+        assertEquals(epost, tildeling.epost)
+        assertEquals(false, tildeling.påVent)
+    }
+
+    @Test
     fun `referential equals`() {
         val saksbehandler = saksbehandler()
         assertEquals(saksbehandler, saksbehandler)
