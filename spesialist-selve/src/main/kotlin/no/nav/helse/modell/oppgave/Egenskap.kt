@@ -1,5 +1,6 @@
 package no.nav.helse.modell.oppgave
 
+import java.util.EnumSet
 import no.nav.helse.modell.oppgave.Egenskap.Kategori.Mottaker
 import no.nav.helse.modell.oppgave.Egenskap.Kategori.Oppgavetype
 import no.nav.helse.modell.oppgave.Egenskap.Kategori.Ukategorisert
@@ -31,6 +32,7 @@ enum class Egenskap(
     }
 
     internal companion object {
-        internal fun Collection<Egenskap>.tilgangsstyrteEgenskaper() = filter(Egenskap::tilgangsstyrt)
+        internal val alleTilgangsstyrteEgenskaper = EnumSet.allOf(Egenskap::class.java).filter(Egenskap::tilgangsstyrt)
+        internal fun Collection<Egenskap>.tilgangsstyrteEgenskaper() = filter { it in alleTilgangsstyrteEgenskaper }
     }
 }
