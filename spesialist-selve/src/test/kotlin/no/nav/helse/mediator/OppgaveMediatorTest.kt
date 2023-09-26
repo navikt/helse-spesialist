@@ -18,10 +18,10 @@ import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.OppgaveInspektør.Companion.inspektør
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.kommando.TestHendelse
+import no.nav.helse.modell.oppgave.Egenskap.RISK_QA
+import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
+import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.modell.oppgave.RISK_QA
-import no.nav.helse.modell.oppgave.STIKKPRØVE
-import no.nav.helse.modell.oppgave.SØKNAD
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao

@@ -4,6 +4,16 @@ import java.util.Objects
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.Toggle
+import no.nav.helse.modell.oppgave.Egenskap.BESLUTTER
+import no.nav.helse.modell.oppgave.Egenskap.Companion.tilgangsstyrteEgenskaper
+import no.nav.helse.modell.oppgave.Egenskap.DELVIS_REFUSJON
+import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
+import no.nav.helse.modell.oppgave.Egenskap.RETUR
+import no.nav.helse.modell.oppgave.Egenskap.REVURDERING
+import no.nav.helse.modell.oppgave.Egenskap.RISK_QA
+import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
+import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
+import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
@@ -63,7 +73,7 @@ class Oppgave private constructor(
     ) {
         logg.info("Oppgave med {} forsøkes tildelt grunnet reservasjon.", kv("oppgaveId", id))
         sikkerlogg.info("Oppgave med {} forsøkes tildelt $saksbehandler grunnet reservasjon.", kv("oppgaveId", id))
-        if (egenskap is STIKKPRØVE) {
+        if (egenskap == STIKKPRØVE) {
             logg.info("Oppgave med {} er stikkprøve og tildeles ikke på tross av reservasjon.", kv("oppgaveId", id))
             return
         }
@@ -197,7 +207,7 @@ class Oppgave private constructor(
 
         override fun tildel(oppgave: Oppgave, saksbehandler: Saksbehandler, påVent: Boolean) {
             if (Toggle.TilgangsstyrteEgenskaper.enabled) {
-                val tilgangsstyrteEgenskaper = oppgave.egenskaper.filterIsInstance<TilgangsstyrtEgenskap>()
+                val tilgangsstyrteEgenskaper = oppgave.egenskaper.tilgangsstyrteEgenskaper()
                 if (tilgangsstyrteEgenskaper.isNotEmpty() && !saksbehandler.harTilgangTil(tilgangsstyrteEgenskaper)) {
                     logg.info(
                         "Oppgave med {} har egenskaper som saksbehandler med {} ikke har tilgang til å behandle.",
@@ -208,7 +218,7 @@ class Oppgave private constructor(
                 }
                 oppgave.tildel(saksbehandler, påVent)
             } else {
-                if (oppgave.egenskap is TilgangsstyrtEgenskap && !saksbehandler.harTilgangTil(listOf(oppgave.egenskap))) {
+                if (listOf(oppgave.egenskap).tilgangsstyrteEgenskaper().isNotEmpty() && !saksbehandler.harTilgangTil(listOf(oppgave.egenskap))) {
                     logg.info(
                         "Oppgave med {} har egenskaper som saksbehandler med {} ikke har tilgang til å behandle.",
                         kv("oppgaveId", oppgave.id),

@@ -9,13 +9,16 @@ import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.TotrinnsvurderingFraDatabase
 import no.nav.helse.db.TotrinnsvurderingRepository
 import no.nav.helse.modell.oppgave.Egenskap
+import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveVisitor
-import no.nav.helse.modell.oppgave.SØKNAD
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import kotlin.properties.Delegates
 
 class OppgavehenterTest {
@@ -41,7 +44,7 @@ class OppgavehenterTest {
 
     @Test
     fun `konverter fra OppgaveFraDatabase til Oppgave`() {
-        val oppgavehenter = Oppgavehenter(oppgaveRepository, totrinnsvurderingRepository(), saksbehandlerRepository, TilgangskontrollForTestHarIkkeTilgang)
+        val oppgavehenter = Oppgavehenter(oppgaveRepository(), totrinnsvurderingRepository(), saksbehandlerRepository, TilgangskontrollForTestHarIkkeTilgang)
         val oppgave = oppgavehenter.oppgave(OPPGAVE_ID)
         oppgave.accept(inspektør)
         inspektør.assertOppgave(
@@ -71,7 +74,7 @@ class OppgavehenterTest {
             oppdatert = LocalDateTime.now()
         )
 
-        val oppgavehenter = Oppgavehenter(oppgaveRepository, totrinnsvurderingRepository(totrinnsvurdering), saksbehandlerRepository, TilgangskontrollForTestHarIkkeTilgang)
+        val oppgavehenter = Oppgavehenter(oppgaveRepository(), totrinnsvurderingRepository(totrinnsvurdering), saksbehandlerRepository, TilgangskontrollForTestHarIkkeTilgang)
         val oppgave = oppgavehenter.oppgave(OPPGAVE_ID)
         oppgave.accept(inspektør)
         inspektør.assertOppgave(
@@ -95,6 +98,15 @@ class OppgavehenterTest {
                 oppdatert = TOTRINNSVURDERING_OPPDATERT
             )
         )
+    }
+
+    @ParameterizedTest
+    @EnumSource(Egenskap::class)
+    fun `alle egenskaper må mappes til fra string-verdier`(egenskap: Egenskap) {
+        val oppgavehenter = Oppgavehenter(oppgaveRepository(listOf(egenskap.name)), totrinnsvurderingRepository(), saksbehandlerRepository, TilgangskontrollForTestHarIkkeTilgang)
+        assertDoesNotThrow {
+            oppgavehenter.oppgave(OPPGAVE_ID)
+        }
     }
 
     private val inspektør = object : OppgaveVisitor {
@@ -164,12 +176,12 @@ class OppgavehenterTest {
         }
     }
 
-    private val oppgaveRepository = object : OppgaveRepository {
+    private fun oppgaveRepository(oppgaveegenskaper: List<String> = listOf(TYPE)) = object : OppgaveRepository {
         override fun finnOppgave(id: Long): OppgaveFraDatabase {
             return OppgaveFraDatabase(
                 id = OPPGAVE_ID,
                 egenskap = TYPE,
-                egenskaper = listOf(TYPE),
+                egenskaper = oppgaveegenskaper,
                 status = STATUS,
                 vedtaksperiodeId = VEDTAKSPERIODE_ID,
                 utbetalingId = UTBETALING_ID,

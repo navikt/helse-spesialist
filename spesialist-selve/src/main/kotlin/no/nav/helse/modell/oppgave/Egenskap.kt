@@ -4,8 +4,24 @@ import no.nav.helse.modell.oppgave.Egenskap.Kategori.Mottaker
 import no.nav.helse.modell.oppgave.Egenskap.Kategori.Oppgavetype
 import no.nav.helse.modell.oppgave.Egenskap.Kategori.Ukategorisert
 
-sealed interface Egenskap {
-    fun kategori() = Ukategorisert
+enum class Egenskap(
+    private val kategori: Kategori = Ukategorisert,
+    private val tilgangsstyrt: Boolean = false
+) {
+    RISK_QA(tilgangsstyrt = true),
+    FORTROLIG_ADRESSE(tilgangsstyrt = true),
+    EGEN_ANSATT(tilgangsstyrt = true),
+    BESLUTTER(tilgangsstyrt = true),
+    REVURDERING(kategori = Oppgavetype),
+    SØKNAD(kategori = Oppgavetype),
+    STIKKPRØVE(kategori = Oppgavetype),
+    UTBETALING_TIL_SYKMELDT(kategori = Mottaker),
+    DELVIS_REFUSJON(kategori = Mottaker),
+    UTBETALING_TIL_ARBEIDSGIVER(kategori = Mottaker),
+    INGEN_UTBETALING(kategori = Mottaker),
+    HASTER,
+    RETUR,
+    FULLMAKT;
 
     enum class Kategori {
         Mottaker,
@@ -13,46 +29,8 @@ sealed interface Egenskap {
         Oppgavetype,
         Ukategorisert
     }
+
+    internal companion object {
+        internal fun Collection<Egenskap>.tilgangsstyrteEgenskaper() = filter(Egenskap::tilgangsstyrt)
+    }
 }
-
-sealed interface TilgangsstyrtEgenskap : Egenskap
-
-data object RISK_QA: TilgangsstyrtEgenskap
-
-data object FORTROLIG_ADRESSE: TilgangsstyrtEgenskap
-
-data object EGEN_ANSATT: TilgangsstyrtEgenskap
-
-data object REVURDERING: Egenskap {
-    override fun kategori(): Egenskap.Kategori = Oppgavetype
-}
-
-data object SØKNAD: Egenskap {
-    override fun kategori(): Egenskap.Kategori = Oppgavetype
-}
-
-data object STIKKPRØVE: Egenskap
-
-data object UTBETALING_TIL_SYKMELDT: Egenskap {
-    override fun kategori(): Egenskap.Kategori = Mottaker
-}
-
-data object DELVIS_REFUSJON: Egenskap {
-    override fun kategori(): Egenskap.Kategori = Mottaker
-}
-
-data object UTBETALING_TIL_ARBEIDSGIVER: Egenskap {
-    override fun kategori(): Egenskap.Kategori = Mottaker
-}
-
-data object INGEN_UTBETALING: Egenskap {
-    override fun kategori(): Egenskap.Kategori = Mottaker
-}
-
-data object HASTER: Egenskap
-
-data object RETUR: Egenskap
-
-data object BESLUTTER: TilgangsstyrtEgenskap
-
-data object FULLMAKT: Egenskap
