@@ -136,7 +136,7 @@ class TildelingMutation(
 
     private fun ikkeTildeltError(error: OppgaveIkkeTildelt): GraphQLError {
         return newErrorException()
-            .message("Oppgave allerede tildelt")
+            .message("Oppgave ikke tildelt")
             .extensions(mapOf("code" to error.httpkode))
             .build()
     }
