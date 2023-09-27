@@ -12,6 +12,7 @@ import kotliquery.action.QueryAction
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
+import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.januar
 import no.nav.helse.mediator.FeilendeMeldingerDao
@@ -50,7 +51,6 @@ import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.person.Kjønn
-import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spleis.graphql.HentSnapshot

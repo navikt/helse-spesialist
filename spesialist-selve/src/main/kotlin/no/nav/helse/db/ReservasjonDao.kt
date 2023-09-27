@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api.reservasjon
+package no.nav.helse.db
 
 import java.util.UUID
 import javax.sql.DataSource

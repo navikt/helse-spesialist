@@ -3,6 +3,7 @@ package no.nav.helse.mediator.oppgave
 import java.sql.SQLException
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
+import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingFraDatabase
@@ -15,7 +16,6 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload.Companion.lagre
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
-import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.tildeling.Oppgavehåndterer
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto

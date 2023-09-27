@@ -2,6 +2,7 @@ package no.nav.helse.modell.utbetaling
 
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.mediator.meldinger.Hendelse
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
@@ -14,7 +15,6 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.InvaliderUtbetalingForGenerasjonerCommand
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
-import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 
 internal class UtbetalingEndret(

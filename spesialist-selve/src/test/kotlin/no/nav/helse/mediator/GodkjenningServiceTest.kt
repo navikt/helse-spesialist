@@ -9,6 +9,7 @@ import java.util.UUID
 import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.Testdata
 import no.nav.helse.Testdata.FØDSELSNUMMER
+import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.api.GodkjenningService
 import no.nav.helse.mediator.oppgave.OppgaveDao
@@ -18,7 +19,6 @@ import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
-import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
