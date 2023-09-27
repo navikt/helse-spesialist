@@ -280,6 +280,7 @@ type Mutation {
     feilregistrerNotat(id: Int!): Notat
     fjernPaaVent(oppgaveId: String!): Tildeling
     fjernTildeling(oppgaveId: String!): Boolean!
+    innvilgVedtak(oppgavereferanse: String!): Boolean!
     leggPaaVent(notatTekst: String!, notatType: NotatType!, oppgaveId: String!): Tildeling
     leggTilKommentar(notatId: Int!, saksbehandlerident: String!, tekst: String!): Kommentar
     leggTilNotat(saksbehandlerOid: String!, tekst: String!, type: NotatType!, vedtaksperiodeId: String!): Notat
@@ -289,6 +290,7 @@ type Mutation {
     overstyrInntektOgRefusjon(overstyring: InntektOgRefusjonOverstyringInput!): Boolean!
     sendIRetur(notatTekst: String!, oppgavereferanse: String!): Boolean!
     sendTilGodkjenning(oppgavereferanse: String!): Boolean!
+    sendTilInfotrygd(arsak: String!, begrunnelser: [String!]!, kommentar: String, oppgavereferanse: String!): Boolean!
     settVarselstatusAktiv(generasjonIdString: String!, ident: String!, varselkode: String!): VarselDTO
     settVarselstatusVurdert(definisjonIdString: String!, generasjonIdString: String!, ident: String!, varselkode: String!): VarselDTO
     skjonnsfastsettSykepengegrunnlag(skjonnsfastsettelse: SkjonnsfastsettelseInput!): Boolean!

@@ -19,6 +19,9 @@ class TotrinnsvurderingMediator(
     fun settBeslutter(vedtaksperiodeId: UUID, saksbehandlerOid: UUID): Unit =
         dao.settBeslutter(vedtaksperiodeId, saksbehandlerOid)
 
+    override fun settBeslutter(oppgaveId: Long, saksbehandlerOid: UUID): Unit =
+        dao.settBeslutter(oppgaveId, saksbehandlerOid)
+
     fun settAutomatiskRetur(vedtaksperiodeId: UUID) {
         oppgaveDao.finnNyesteOppgaveId(vedtaksperiodeId)?.let {
             dao.settErRetur(vedtaksperiodeId)
@@ -35,7 +38,7 @@ class TotrinnsvurderingMediator(
         oppgaveId: Long,
         saksbehandleroid: UUID?,
         type: PeriodehistorikkType,
-        notat: Pair<String, NotatType>?
+        notat: Pair<String, NotatType>?,
     ) {
         var notatId: Int? = null
         if (notat != null && saksbehandleroid != null) {
@@ -46,6 +49,10 @@ class TotrinnsvurderingMediator(
             periodehistorikkDao.lagre(type, saksbehandleroid, it, notatId)
         }
     }
+
+    override fun erBeslutterOppgave(oppgaveId: Long): Boolean = hentAktiv(oppgaveId)?.erBeslutteroppgave() ?: false
+    override fun erEgenOppgave(oppgaveId: Long, saksbehandleroid: UUID?): Boolean =
+        hentAktiv(oppgaveId)?.saksbehandler == saksbehandleroid
 
     fun ferdigstill(vedtaksperiodeId: UUID): Unit = dao.ferdigstill(vedtaksperiodeId)
     fun hentAktiv(vedtaksperiodeId: UUID): TotrinnsvurderingOld? = dao.hentAktiv(vedtaksperiodeId)

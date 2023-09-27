@@ -4,6 +4,7 @@ import com.expediagroup.graphql.generator.SchemaGeneratorConfig
 import com.expediagroup.graphql.generator.TopLevelObject
 import com.expediagroup.graphql.generator.toSchema
 import graphql.schema.GraphQLSchema
+import no.nav.helse.spesialist.api.Godkjenninghåndterer
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.Totrinnsvurderinghåndterer
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
@@ -16,6 +17,7 @@ import no.nav.helse.spesialist.api.graphql.mutation.SkjonnsfastsettelseMutation
 import no.nav.helse.spesialist.api.graphql.mutation.TildelingMutation
 import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutation
 import no.nav.helse.spesialist.api.graphql.mutation.VarselMutation
+import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutation
 import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQuery
 import no.nav.helse.spesialist.api.graphql.query.NotatQuery
 import no.nav.helse.spesialist.api.graphql.query.OppdragQuery
@@ -58,7 +60,8 @@ internal class SchemaBuilder(
     private val notatMediator: NotatMediator,
     private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
     private val oppgavehåndterer: Oppgavehåndterer,
-    private val totrinnsvurderinghåndterer: Totrinnsvurderinghåndterer
+    private val totrinnsvurderinghåndterer: Totrinnsvurderinghåndterer,
+    private val godkjenninghåndterer: Godkjenninghåndterer
 ) {
     fun build(): GraphQLSchema {
         val schemaConfig = SchemaGeneratorConfig(
@@ -137,6 +140,14 @@ internal class SchemaBuilder(
                         saksbehandlerhåndterer = saksbehandlerhåndterer,
                         oppgavehåndterer = oppgavehåndterer,
                         totrinnsvurderinghåndterer = totrinnsvurderinghåndterer
+                    )
+                ),
+                TopLevelObject(
+                    VedtakMutation(
+                        oppgavehåndterer = oppgavehåndterer,
+                        totrinnsvurderinghåndterer = totrinnsvurderinghåndterer,
+                        saksbehandlerhåndterer = saksbehandlerhåndterer,
+                        godkjenninghåndterer = godkjenninghåndterer
                     )
                 )
             )

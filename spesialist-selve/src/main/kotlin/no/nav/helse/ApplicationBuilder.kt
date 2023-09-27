@@ -350,7 +350,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 notatMediator = notatMediator,
                 saksbehandlerhåndterer = saksbehandlerMediator,
                 oppgavehåndterer = oppgaveMediator,
-                totrinnsvurderinghåndterer = totrinnsvurderingMediator
+                totrinnsvurderinghåndterer = totrinnsvurderingMediator,
+                godkjenninghåndterer = godkjenningService
             )
 
             routing {

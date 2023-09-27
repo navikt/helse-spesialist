@@ -22,6 +22,7 @@ import java.time.format.DateTimeFormatter
 import java.util.UUID
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import no.nav.helse.spesialist.api.Godkjenninghåndterer
 import no.nav.helse.spesialist.api.JwtStub
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.TestApplication
@@ -113,6 +114,7 @@ fun main() = runBlocking {
         val saksbehandlerhåndterer = mockk<Saksbehandlerhåndterer>(relaxed = true)
         val oppgavehåndterer = mockk<Oppgavehåndterer>(relaxed = true)
         val totrinnsvurderinghåndterer = mockk<Totrinnsvurderinghåndterer>(relaxed = true)
+        val godkjenninghåndterer = mockk<Godkjenninghåndterer>(relaxed = true)
 
         every { snapshotApiDao.utdatert(any()) } returns false
         every { snapshotApiDao.hentSnapshotMedMetadata(any()) } answers withDelay(800) { (enPersoninfo() to enPerson()) }
@@ -195,7 +197,8 @@ fun main() = runBlocking {
             notatMediator = notatMediator,
             saksbehandlerhåndterer = saksbehandlerhåndterer,
             oppgavehåndterer = oppgavehåndterer,
-            totrinnsvurderinghåndterer = totrinnsvurderinghåndterer
+            totrinnsvurderinghåndterer = totrinnsvurderinghåndterer,
+            godkjenninghåndterer = godkjenninghåndterer
         )
     }
 }

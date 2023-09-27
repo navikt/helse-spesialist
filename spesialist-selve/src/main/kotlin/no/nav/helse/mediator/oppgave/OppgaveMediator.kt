@@ -106,6 +106,10 @@ internal class OppgaveMediator(
         }
     }
 
+    override fun venterPåSaksbehandler(oppgaveId: Long): Boolean = oppgaveDao.venterPåSaksbehandler(oppgaveId)
+    override fun erRiskoppgave(oppgaveId: Long): Boolean = oppgaveDao.erRiskoppgave(oppgaveId)
+
+
     fun avbrytOppgaver(vedtaksperiodeId: UUID) {
         oppgaveDao.finnNyesteOppgaveId(vedtaksperiodeId)?.also {
             oppgave(it) {

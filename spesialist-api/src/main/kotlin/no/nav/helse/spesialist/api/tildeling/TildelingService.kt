@@ -16,6 +16,8 @@ interface Oppgavehåndterer {
     fun sendIRetur(oppgaveId: Long, besluttendeSaksbehandler: SaksbehandlerFraApi)
     fun leggPåVent(oppgaveId: Long): TildelingApiDto
     fun fjernPåVent(oppgaveId: Long): TildelingApiDto
+    fun venterPåSaksbehandler(oppgaveId: Long): Boolean
+    fun erRiskoppgave(oppgaveId: Long): Boolean
 }
 
 class TildelingService(
