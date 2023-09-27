@@ -154,9 +154,14 @@ internal class OppgaveMediator(
     }
 
     private fun tildelVedReservasjon(fødselsnummer: String, oppgave: Oppgave) {
-        // TODO: skal ikke være SaksbehandlerFraApi, men SaksbehandlerFraDatabase. Må fikses når ReservasjonDao kan flyttes til selve.db
         val (saksbehandlerFraDatabase, settPåVent) = reservasjonDao.hentReservasjonFor(fødselsnummer) ?: return
-        val saksbehandler = Saksbehandler(saksbehandlerFraDatabase.epost, saksbehandlerFraDatabase.oid, saksbehandlerFraDatabase.navn, saksbehandlerFraDatabase.ident, tilgangskontroll)
+        val saksbehandler = Saksbehandler(
+            epostadresse = saksbehandlerFraDatabase.epostadresse,
+            oid = saksbehandlerFraDatabase.oid,
+            navn = saksbehandlerFraDatabase.navn,
+            ident = saksbehandlerFraDatabase.ident,
+            tilgangskontroll = tilgangskontroll
+        )
         oppgave.forsøkTildelingVedReservasjon(saksbehandler, settPåVent)
     }
 

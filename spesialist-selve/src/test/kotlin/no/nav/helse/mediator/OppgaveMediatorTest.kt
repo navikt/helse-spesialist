@@ -8,8 +8,8 @@ import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
 import no.nav.helse.db.OppgaveFraDatabase
+import no.nav.helse.db.Reservasjon
 import no.nav.helse.db.ReservasjonDao
-import no.nav.helse.db.Reservasjonsinfo
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.TildelingDao
@@ -29,7 +29,6 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
-import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -76,7 +75,6 @@ internal class OppgaveMediatorTest {
         tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
     )
     private val saksbehandlerFraDatabase = SaksbehandlerFraDatabase(SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT)
-    private val saksbehandlerFraApi = SaksbehandlerFraApi(SAKSBEHANDLEROID, SAKSBEHANDLERNAVN, SAKSBEHANDLEREPOST, SAKSBEHANDLERIDENT)
     private val saksbehandler = Saksbehandler(SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT, TilgangskontrollForTestHarIkkeTilgang)
     private fun søknadsoppgave(id: Long): Oppgave = Oppgave.nyOppgave(id, VEDTAKSPERIODE_ID, UTBETALING_ID, HENDELSE_ID, listOf(SØKNAD))
     private fun stikkprøveoppgave(id: Long): Oppgave = Oppgave.nyOppgave(id, VEDTAKSPERIODE_ID_2, UTBETALING_ID_2, UUID.randomUUID(), listOf(STIKKPRØVE))
@@ -115,7 +113,7 @@ internal class OppgaveMediatorTest {
     @Test
     fun `lagrer oppgave og tildeler til saksbehandler som har reservert personen`() {
         every { oppgaveDao.reserverNesteId() } returns 0L
-        every { reservasjonDao.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns Reservasjonsinfo(saksbehandlerFraApi, false)
+        every { reservasjonDao.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns Reservasjon(saksbehandlerFraDatabase, false)
         every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
         lateinit var oppgave: Oppgave
         mediator.nyOppgave(TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID) {
@@ -132,7 +130,7 @@ internal class OppgaveMediatorTest {
     @Test
     fun `tildeler ikke risk-oppgave til saksbehandler som har reservert personen hvis hen ikke har risk-tilgang`() {
         every { oppgaveDao.reserverNesteId() } returns 0L
-        every { reservasjonDao.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns Reservasjonsinfo(saksbehandlerFraApi, false)
+        every { reservasjonDao.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns Reservasjon(saksbehandlerFraDatabase, false)
         every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
         lateinit var oppgave: Oppgave
         mediator.nyOppgave(TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID) {
@@ -149,7 +147,7 @@ internal class OppgaveMediatorTest {
     @Test
     fun `tildeler ikke reservert personen når oppgave er stikkprøve`() {
         every { oppgaveDao.reserverNesteId() } returns 0L
-        every { reservasjonDao.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns Reservasjonsinfo(saksbehandlerFraApi, false)
+        every { reservasjonDao.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns Reservasjon(saksbehandlerFraDatabase, false)
         every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
         mediator.nyOppgave(TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID) {
             stikkprøveoppgave(it)
