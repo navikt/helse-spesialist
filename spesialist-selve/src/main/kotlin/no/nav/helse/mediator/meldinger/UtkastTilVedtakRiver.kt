@@ -1,15 +1,12 @@
 package no.nav.helse.mediator.meldinger
 
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.mediator.api.erDev
-import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.hendelser.UtkastTilVedtakMessage
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
-import no.nav.helse.rapids_rivers.toUUID
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -49,8 +46,6 @@ internal class UtkastTilVedtakRiver(
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        val id = packet["@id"].asUUID()
-        if (erDev() && id == "0cbed01f-be6c-4c2d-a270-eaac93cd57b4".toUUID()) return
         sikkerlogg.info("Mottok melding om utkast_til_vedtak")
         mediator.håndter(UtkastTilVedtakMessage(packet))
     }
