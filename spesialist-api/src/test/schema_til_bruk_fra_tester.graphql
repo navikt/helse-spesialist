@@ -393,7 +393,6 @@ type PeriodeHistorikkElement {
 
 type Periodevilkar {
     alder: Alder!
-    soknadsfrist: Soknadsfrist
     sykepengedager: Sykepengedager!
 }
 
@@ -548,13 +547,6 @@ type SoknadNav implements Hendelse {
     sendtNav: String!
     tom: String!
     type: Hendelsetype!
-}
-
-type Soknadsfrist {
-    oppfylt: Boolean!
-    sendtNav: String!
-    soknadFom: String!
-    soknadTom: String!
 }
 
 type Sykepengedager {

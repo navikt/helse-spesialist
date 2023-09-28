@@ -78,7 +78,6 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSimuleringsperiode
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSimuleringsutbetaling
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUtbetaling
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLVurdering
-import no.nav.helse.spleis.graphql.hentsnapshot.Soknadsfrist
 import no.nav.helse.spleis.graphql.hentsnapshot.Sykepengedager
 
 fun main() = runBlocking {
@@ -281,12 +280,6 @@ private fun enPeriode() = GraphQLBeregnetPeriode(
         Alder(
             alderSisteSykedag = 40,
             oppfylt = true
-        ),
-        soknadsfrist = Soknadsfrist(
-            oppfylt = true,
-            sendtNav = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME),
-            soknadFom = "2020-01-01",
-            soknadTom = "2020-01-31"
         ),
         sykepengedager = Sykepengedager(
             forbrukteSykedager = 10,

@@ -15,7 +15,6 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLGenerasjon
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPeriodevilkar
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUtbetaling
-import no.nav.helse.spleis.graphql.hentsnapshot.Soknadsfrist
 import no.nav.helse.spleis.graphql.hentsnapshot.Sykepengedager
 
 object Testdata {
@@ -109,12 +108,6 @@ object Testdata {
                                             periodevilkar = GraphQLPeriodevilkar(
                                                 alder = Alder(
                                                     alderSisteSykedag = 30,
-                                                    oppfylt = true,
-                                                ),
-                                                soknadsfrist = Soknadsfrist(
-                                                    sendtNav = "2020-01-31",
-                                                    soknadFom = "2020-01-01",
-                                                    soknadTom = "2020-01-31",
                                                     oppfylt = true,
                                                 ),
                                                 sykepengedager = Sykepengedager(

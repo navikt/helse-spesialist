@@ -23,7 +23,6 @@ import no.nav.helse.spleis.graphql.hentsnapshot.Alder
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLBeregnetPeriode
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLOppdrag
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLTidslinjeperiode
-import no.nav.helse.spleis.graphql.hentsnapshot.Soknadsfrist
 import no.nav.helse.spleis.graphql.hentsnapshot.Sykepengedager
 import no.nav.helse.spleis.graphql.enums.Utbetalingtype as GraphQLUtbetalingtype
 
@@ -152,7 +151,6 @@ data class Utbetaling(
 
 data class Periodevilkar(
     val alder: Alder,
-    val soknadsfrist: Soknadsfrist?,
     val sykepengedager: Sykepengedager,
 )
 
@@ -438,7 +436,6 @@ data class BeregnetPeriode(
 
     fun periodevilkar(): Periodevilkar = Periodevilkar(
         alder = periode.periodevilkar.alder,
-        soknadsfrist = periode.periodevilkar.soknadsfrist,
         sykepengedager = periode.periodevilkar.sykepengedager
     )
 

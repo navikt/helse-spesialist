@@ -184,12 +184,6 @@ query HentSnapshot($fnr: String!) {
                                 alderSisteSykedag
                                 oppfylt
                             }
-                            soknadsfrist {
-                                oppfylt
-                                sendtNav
-                                soknadFom
-                                soknadTom
-                            }
                             sykepengedager {
                                 forbrukteSykedager
                                 gjenstaendeSykedager
