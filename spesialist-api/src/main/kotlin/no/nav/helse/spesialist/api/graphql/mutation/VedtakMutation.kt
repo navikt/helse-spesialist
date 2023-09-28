@@ -39,17 +39,17 @@ class VedtakMutation(
         oppgavereferanse: String,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> = withContext(Dispatchers.IO) {
-        val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
+        val saksbehandler: Lazy<SaksbehandlerFraApi> = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
         val tilganger = env.graphQlContext.get<SaksbehandlerTilganger>(ContextValues.TILGANGER.key)
         logg.info("Fatter vedtak for oppgave $oppgavereferanse")
 
-        when (val vedtak = kanFatteVedtak(oppgavereferanse.toLong(), saksbehandler, tilganger)) {
+        when (val vedtak = kanFatteVedtak(oppgavereferanse.toLong(), saksbehandler.value, tilganger)) {
             is VedtakResultat.Success -> {
                 val behandlingId = UUID.randomUUID()
-                val godkjenning = GodkjenningDto(oppgavereferanse.toLong(), true, saksbehandler.ident, null, null, null)
+                val godkjenning = GodkjenningDto(oppgavereferanse.toLong(), true, saksbehandler.value.ident, null, null, null)
 
-                saksbehandlerhåndterer.håndter(godkjenning, behandlingId, saksbehandler)
-                godkjenninghåndterer.håndter(godkjenning, saksbehandler.epost, saksbehandler.oid, behandlingId)
+                saksbehandlerhåndterer.håndter(godkjenning, behandlingId, saksbehandler.value)
+                godkjenninghåndterer.håndter(godkjenning, saksbehandler.value.epost, saksbehandler.value.oid, behandlingId)
 
                 newResult<Boolean>().data(true).build()
             }
@@ -75,24 +75,24 @@ class VedtakMutation(
         kommentar: String?,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> = withContext(Dispatchers.IO) {
-        val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
+        val saksbehandler: Lazy<SaksbehandlerFraApi> = env.graphQlContext.get(ContextValues.SAKSBEHANDLER.key)
         val tilganger = env.graphQlContext.get<SaksbehandlerTilganger>(ContextValues.TILGANGER.key)
         logg.info("Sender oppgave $oppgavereferanse til Infotrygd")
 
-        when (val vedtak = kanFatteVedtak(oppgavereferanse.toLong(), saksbehandler, tilganger)) {
+        when (val vedtak = kanFatteVedtak(oppgavereferanse.toLong(), saksbehandler.value, tilganger)) {
             is VedtakResultat.Success -> {
                 val behandlingId = UUID.randomUUID()
                 val godkjenning = GodkjenningDto(
                     oppgavereferanse.toLong(),
                     false,
-                    saksbehandler.ident,
+                    saksbehandler.value.ident,
                     arsak,
                     begrunnelser,
                     kommentar
                 )
 
-                saksbehandlerhåndterer.håndter(godkjenning, behandlingId, saksbehandler)
-                godkjenninghåndterer.håndter(godkjenning, saksbehandler.epost, saksbehandler.oid, behandlingId)
+                saksbehandlerhåndterer.håndter(godkjenning, behandlingId, saksbehandler.value)
+                godkjenninghåndterer.håndter(godkjenning, saksbehandler.value.epost, saksbehandler.value.oid, behandlingId)
 
                 newResult<Boolean>().data(true).build()
             }
