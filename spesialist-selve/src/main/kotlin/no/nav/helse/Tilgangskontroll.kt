@@ -9,7 +9,8 @@ enum class Gruppe(private val gruppenøkkel: String) {
     KODE7("KODE7_SAKSBEHANDLER_GROUP"),
     BESLUTTER("BESLUTTER_SAKSBEHANDLER_GROUP"),
     SKJERMEDE("SKJERMEDE_PERSONER_GROUP"),
-    STIKKPRØVE("SAKSBEHANDLERE_MED_TILGANG_TIL_STIKKPROVER");
+    STIKKPRØVE("SAKSBEHANDLERE_MED_TILGANG_TIL_STIKKPROVER"),
+    SPESIALSAK("SAKSBEHANDLERE_MED_TILGANG_TIL_SPESIALSAKER");
 
     fun idFra(env: Map<String, String>): UUID = UUID.fromString(env.getValue(gruppenøkkel))
 
@@ -24,6 +25,7 @@ internal class Tilgangsgrupper(private val env: Map<String, String>) {
     val beslutterGruppeId: UUID by lazy { Gruppe.BESLUTTER.idFra(env) }
     val skjermedePersonerGruppeId: UUID by lazy { Gruppe.SKJERMEDE.idFra(env) }
     val stikkprøveGruppeId: UUID by lazy { Gruppe.STIKKPRØVE.idFra(env) }
+    val spesialsakGruppeId: UUID by lazy { Gruppe.SPESIALSAK.idFra(env) }
 
     fun gruppeId(gruppe: Gruppe): UUID = gruppe.idFra(env)
     fun harTilgang(gruppemedlemskap: List<UUID>, gruppe: Gruppe) = gruppemedlemskap.contains(gruppeId(gruppe))

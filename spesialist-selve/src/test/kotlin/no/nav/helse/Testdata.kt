@@ -32,12 +32,12 @@ object Testdata {
     val SAKSBEHANDLERTILGANGER_UTEN_TILGANGER =
         no.nav.helse.spesialist.api.SaksbehandlerTilganger(
             gruppetilganger = emptyList(),
-            saksbehandlerIdent = SAKSBEHANDLER_IDENT,
             kode7Saksbehandlergruppe = UUID.randomUUID(),
             riskSaksbehandlergruppe = UUID.randomUUID(),
             beslutterSaksbehandlergruppe = UUID.randomUUID(),
             skjermedePersonerSaksbehandlergruppe = UUID.randomUUID(),
-            stikkprøveSaksbehandlergruppe = UUID.randomUUID()
+            stikkprøveSaksbehandlergruppe = UUID.randomUUID(),
+            spesialsakSaksbehandlergruppe = UUID.randomUUID()
         )
     internal val UTBETALING_ID = UUID.randomUUID()
 

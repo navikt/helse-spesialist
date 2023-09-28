@@ -115,6 +115,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     private val BESLUTTER_GRUPPE_ID = UUID.randomUUID()
     private val SKJERMEDE_PERSONER_GRUPPE_ID = UUID.randomUUID()
     private val STIKKPRØVE_GRUPPE_ID = UUID.randomUUID()
+    private val SPESIALSAK_GRUPPE_ID = UUID.randomUUID()
 
     protected val SAKSBEHANDLERTILGANGER_MED_INGEN = SaksbehandlerTilganger(
         gruppetilganger = emptyList(),
@@ -122,8 +123,9 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         riskSaksbehandlergruppe = RISK_GRUPPE_ID,
         beslutterSaksbehandlergruppe = BESLUTTER_GRUPPE_ID,
         skjermedePersonerSaksbehandlergruppe = SKJERMEDE_PERSONER_GRUPPE_ID,
-        saksbehandlerIdent = SAKSBEHANDLER_IDENT,
-        stikkprøveSaksbehandlergruppe = STIKKPRØVE_GRUPPE_ID
+        stikkprøveSaksbehandlergruppe = STIKKPRØVE_GRUPPE_ID,
+        spesialsakSaksbehandlergruppe = SPESIALSAK_GRUPPE_ID
+
     )
     protected val SAKSBEHANDLERTILGANGER_MED_KODE7 = SaksbehandlerTilganger(
         gruppetilganger = listOf(KODE7_GRUPPE_ID),
@@ -131,8 +133,9 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         riskSaksbehandlergruppe = RISK_GRUPPE_ID,
         beslutterSaksbehandlergruppe = BESLUTTER_GRUPPE_ID,
         skjermedePersonerSaksbehandlergruppe = SKJERMEDE_PERSONER_GRUPPE_ID,
-        saksbehandlerIdent = SAKSBEHANDLER_IDENT,
-        stikkprøveSaksbehandlergruppe = STIKKPRØVE_GRUPPE_ID
+        stikkprøveSaksbehandlergruppe = STIKKPRØVE_GRUPPE_ID,
+        spesialsakSaksbehandlergruppe = SPESIALSAK_GRUPPE_ID
+
     )
     protected val SAKSBEHANDLERTILGANGER_MED_RISK = SaksbehandlerTilganger(
         gruppetilganger = listOf(RISK_GRUPPE_ID),
@@ -140,8 +143,9 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         riskSaksbehandlergruppe = RISK_GRUPPE_ID,
         beslutterSaksbehandlergruppe = BESLUTTER_GRUPPE_ID,
         skjermedePersonerSaksbehandlergruppe = SKJERMEDE_PERSONER_GRUPPE_ID,
-        saksbehandlerIdent = SAKSBEHANDLER_IDENT,
-        stikkprøveSaksbehandlergruppe = STIKKPRØVE_GRUPPE_ID
+        stikkprøveSaksbehandlergruppe = STIKKPRØVE_GRUPPE_ID,
+        spesialsakSaksbehandlergruppe = SPESIALSAK_GRUPPE_ID
+
     )
     protected val SAKSBEHANDLERTILGANGER_MED_BESLUTTER = SaksbehandlerTilganger(
         gruppetilganger = listOf(BESLUTTER_GRUPPE_ID),
@@ -149,8 +153,9 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         riskSaksbehandlergruppe = RISK_GRUPPE_ID,
         beslutterSaksbehandlergruppe = BESLUTTER_GRUPPE_ID,
         skjermedePersonerSaksbehandlergruppe = SKJERMEDE_PERSONER_GRUPPE_ID,
-        saksbehandlerIdent = SAKSBEHANDLER_IDENT,
-        stikkprøveSaksbehandlergruppe = STIKKPRØVE_GRUPPE_ID
+        stikkprøveSaksbehandlergruppe = STIKKPRØVE_GRUPPE_ID,
+        spesialsakSaksbehandlergruppe = SPESIALSAK_GRUPPE_ID
+
     )
     protected val SAKSBEHANDLERTILGANGER_MED_STIKKPRØVE = SaksbehandlerTilganger(
         gruppetilganger = listOf(STIKKPRØVE_GRUPPE_ID),
@@ -158,8 +163,9 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         riskSaksbehandlergruppe = RISK_GRUPPE_ID,
         beslutterSaksbehandlergruppe = BESLUTTER_GRUPPE_ID,
         skjermedePersonerSaksbehandlergruppe = SKJERMEDE_PERSONER_GRUPPE_ID,
-        saksbehandlerIdent = SAKSBEHANDLER_IDENT,
-        stikkprøveSaksbehandlergruppe = STIKKPRØVE_GRUPPE_ID
+        stikkprøveSaksbehandlergruppe = STIKKPRØVE_GRUPPE_ID,
+        spesialsakSaksbehandlergruppe = SPESIALSAK_GRUPPE_ID
+
     )
 
     internal var personId: Long = -1

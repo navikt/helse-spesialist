@@ -35,7 +35,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     protected val skjermedePersonerGruppeId: UUID = UUID.randomUUID()
     private val beslutterGruppeId: UUID = UUID.randomUUID()
     private val saksbehandlereMedTilgangTilStikkprøver: UUID = UUID.randomUUID()
-    private val saksbehandlereMedTilgangTilSpesialsaker: List<String> = listOf("EN_IDENT")
+    private val saksbehandlereMedTilgangTilSpesialsaker: UUID = UUID.randomUUID()
 
 
     private val reservasjonClient = mockk<ReservasjonClient>(relaxed = true)

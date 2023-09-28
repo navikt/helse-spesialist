@@ -470,15 +470,15 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `støtter spesialsaker`() {
+        val spesialsakSaksbehandlergruppe = UUID.randomUUID()
         val spesialsaksbehandler = SaksbehandlerTilganger(
-            gruppetilganger = emptyList(),
+            gruppetilganger = listOf(spesialsakSaksbehandlergruppe),
             kode7Saksbehandlergruppe = UUID.randomUUID(),
             riskSaksbehandlergruppe = UUID.randomUUID(),
             beslutterSaksbehandlergruppe = UUID.randomUUID(),
             skjermedePersonerSaksbehandlergruppe = UUID.randomUUID(),
-            saksbehandlerIdent = SAKSBEHANDLER_IDENT,
             stikkprøveSaksbehandlergruppe = UUID.randomUUID(),
-            saksbehandlereMedTilgangTilSpesialsaker = listOf(SAKSBEHANDLER_IDENT),
+            spesialsakSaksbehandlergruppe = spesialsakSaksbehandlergruppe,
         )
 
         nyPerson()

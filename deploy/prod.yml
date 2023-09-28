@@ -49,6 +49,7 @@ spec:
           - id: "e750ceb5-b70b-4d94-b4fa-9d22467b786b"
           - id: "59f26eef-0a4f-4038-bf46-3a5b2f252155"
           - id: "e382880a-e12f-4d56-a92e-2283d7da43af"
+          - id: "39c09f12-4a2f-44da-ab6a-ac43d680294c"
   filesFrom:
     - configmap: spesialist-data
       mountPath: /var/run/configmaps
@@ -101,7 +102,7 @@ spec:
     - name: SAKSBEHANDLERE_MED_TILGANG_TIL_STIKKPROVER
       value: e382880a-e12f-4d56-a92e-2283d7da43af
     - name: SAKSBEHANDLERE_MED_TILGANG_TIL_SPESIALSAKER
-      value: "G103083,N115007,C117102"
+      value: 39c09f12-4a2f-44da-ab6a-ac43d680294c
     - name: STIKKPROEVER_UTS_FLERE_AG_FGB_DIVISOR #Kan settes til 1 for å slå av automatisering
       value: "200"
     - name: STIKKPROEVER_UTS_FLERE_AG_FORLENGELSE_DIVISOR

@@ -4,13 +4,12 @@ import java.util.UUID
 
 class SaksbehandlerTilganger(
     private val gruppetilganger: List<UUID>,
-    private val saksbehandlerIdent: String,
     private val kode7Saksbehandlergruppe: UUID,
     private val riskSaksbehandlergruppe: UUID,
     private val beslutterSaksbehandlergruppe: UUID,
     private val skjermedePersonerSaksbehandlergruppe: UUID,
     private val stikkprøveSaksbehandlergruppe: UUID,
-    private val saksbehandlereMedTilgangTilSpesialsaker: List<String> = emptyList(),
+    private val spesialsakSaksbehandlergruppe: UUID,
 ) {
 
     fun harTilgangTilKode7() = kode7Saksbehandlergruppe in gruppetilganger
@@ -21,5 +20,5 @@ class SaksbehandlerTilganger(
 
     fun harTilgangTilSkjermedePersoner() = skjermedePersonerSaksbehandlergruppe in gruppetilganger
     fun hartilgangTilStikkprøve() = stikkprøveSaksbehandlergruppe in gruppetilganger
-    fun hartilgangTilSpesialsaker() = saksbehandlerIdent in saksbehandlereMedTilgangTilSpesialsaker || erDev()
+    fun hartilgangTilSpesialsaker() = spesialsakSaksbehandlergruppe in gruppetilganger
 }

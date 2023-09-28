@@ -279,9 +279,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val tilgangsgrupper = Tilgangsgrupper(System.getenv())
     private val tilgangskontrollør = Tilgangskontrollør(msGraphClient, tilgangsgrupper)
 
-    private val saksbehandlereMedTilgangTilSpesialsaker: List<String> =
-        requireNotNull(env["SAKSBEHANDLERE_MED_TILGANG_TIL_SPESIALSAKER"]).split(',')
-
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule {
             install(CORS) {
@@ -341,7 +338,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 beslutterGruppeId = tilgangsgrupper.beslutterGruppeId,
                 riskGruppeId = tilgangsgrupper.riskQaGruppeId,
                 stikkprøveGruppeId = tilgangsgrupper.stikkprøveGruppeId,
-                saksbehandlereMedTilgangTilSpesialsaker = saksbehandlereMedTilgangTilSpesialsaker,
+                spesialsakGruppeId = tilgangsgrupper.spesialsakGruppeId,
                 snapshotMediator = snapshotMediator,
                 behandlingsstatistikkMediator = behandlingsstatistikkMediator,
                 tildelingService = tildelingService,
