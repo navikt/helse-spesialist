@@ -70,8 +70,8 @@ class OppgavehenterTest {
             saksbehandler = SAKSBEHANDLER_OID,
             beslutter = BESLUTTER_OID,
             utbetalingId = UTBETALING_ID,
-            opprettet = LocalDateTime.now(),
-            oppdatert = LocalDateTime.now()
+            opprettet = TOTRINNSVURDERING_OPPRETTET,
+            oppdatert = TOTRINNSVURDERING_OPPDATERT,
         )
 
         val oppgavehenter = Oppgavehenter(oppgaveRepository(), totrinnsvurderingRepository(totrinnsvurdering), saksbehandlerRepository, TilgangskontrollForTestHarIkkeTilgang)
