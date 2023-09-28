@@ -17,6 +17,7 @@ import no.nav.helse.modell.oppgave.Egenskap.RISK_QA
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_ARBEIDSGIVER
 import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_SYKMELDT
+import no.nav.helse.modell.oppgave.Egenskap.VERGEMÅL
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
@@ -24,6 +25,7 @@ import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.utbetalingTilArbeidsgiver
 import no.nav.helse.modell.utbetalingTilSykmeldt
+import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import org.slf4j.LoggerFactory
@@ -41,6 +43,7 @@ internal class OpprettSaksbehandleroppgaveCommand(
     private val utbetalingtype: Utbetalingtype,
     private val sykefraværstilfelle: Sykefraværstilfelle,
     private val snapshotMediator: SnapshotMediator,
+    private val vergemålDao: VergemålDao,
 ) : Command {
 
     private companion object {
@@ -55,6 +58,7 @@ internal class OpprettSaksbehandleroppgaveCommand(
         if (utbetalingtype == Utbetalingtype.REVURDERING) egenskaper.add(REVURDERING)
         if (automatisering.erStikkprøve(vedtaksperiodeId, hendelseId)) egenskaper.add(STIKKPRØVE)
         if (risikovurderingDao.kreverSupersaksbehandler(vedtaksperiodeId)) egenskaper.add(RISK_QA)
+        if (vergemålDao.harVergemål(fødselsnummer) == true) egenskaper.add(VERGEMÅL)
 
         when {
             vedtaksperiodensUtbetaling.delvisRefusjon() -> egenskaper.add(DELVIS_REFUSJON)

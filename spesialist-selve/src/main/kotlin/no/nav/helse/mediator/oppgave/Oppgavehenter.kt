@@ -14,10 +14,12 @@ import no.nav.helse.modell.oppgave.Egenskap.INGEN_UTBETALING
 import no.nav.helse.modell.oppgave.Egenskap.RETUR
 import no.nav.helse.modell.oppgave.Egenskap.REVURDERING
 import no.nav.helse.modell.oppgave.Egenskap.RISK_QA
+import no.nav.helse.modell.oppgave.Egenskap.SPESIALSAK
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_ARBEIDSGIVER
 import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_SYKMELDT
+import no.nav.helse.modell.oppgave.Egenskap.VERGEMÅL
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
@@ -88,6 +90,8 @@ class Oppgavehenter(
             "RETUR" -> RETUR
             "BESLUTTER" -> BESLUTTER
             "FULLMAKT" -> FULLMAKT
+            "VERGEMÅL" -> VERGEMÅL
+            "SPESIALSAK" -> SPESIALSAK
             else -> throw IllegalStateException("Egenskap $egenskap er ikke en gyldig egenskap")
         }
     }

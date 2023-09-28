@@ -22,7 +22,9 @@ enum class Egenskap(
     INGEN_UTBETALING(kategori = Mottaker),
     HASTER,
     RETUR,
-    FULLMAKT;
+    FULLMAKT,
+    VERGEMÅL,
+    SPESIALSAK;
 
     enum class Kategori {
         Mottaker,

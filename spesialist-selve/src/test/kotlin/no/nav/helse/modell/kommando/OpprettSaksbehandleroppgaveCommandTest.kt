@@ -30,6 +30,7 @@ import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spleis.graphql.enums.GraphQLUtbetalingstatus
@@ -54,6 +55,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
     private val snapshotMediator = mockk<SnapshotMediator>(relaxed = true)
     private val risikovurderingDao = mockk<RisikovurderingDao>(relaxed = true)
     private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
+    private val vergemålDao = mockk<VergemålDao>(relaxed = true)
     private val sykefraværstilfelle = mockk<Sykefraværstilfelle>(relaxed = true)
     private lateinit var context: CommandContext
     private lateinit var contextId: UUID
@@ -71,6 +73,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         utbetalingtype = utbetalingstype,
         sykefraværstilfelle = sykefraværstilfelle,
         snapshotMediator = snapshotMediator,
+        vergemålDao = vergemålDao,
     )
 
     @BeforeEach

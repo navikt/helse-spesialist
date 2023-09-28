@@ -190,6 +190,7 @@ internal class Godkjenningsbehov(
             utbetalingtype = utbetalingtype,
             sykefraværstilfelle = sykefraværstilfelle,
             snapshotMediator = snapshotMediator,
+            vergemålDao = vergemålDao,
         ),
         TrengerTotrinnsvurderingCommand(
             fødselsnummer = fødselsnummer,
