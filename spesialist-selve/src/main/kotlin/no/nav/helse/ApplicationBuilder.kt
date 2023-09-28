@@ -279,8 +279,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val tilgangsgrupper = Tilgangsgrupper(System.getenv())
     private val tilgangskontrollør = Tilgangskontrollør(msGraphClient, tilgangsgrupper)
 
-    private val saksbehandlereMedTilgangTilStikkprøver: List<String> =
-        requireNotNull(env["SAKSBEHANDLERE_MED_TILGANG_TIL_STIKKPROVER"]).split(',')
     private val saksbehandlereMedTilgangTilSpesialsaker: List<String> =
         requireNotNull(env["SAKSBEHANDLERE_MED_TILGANG_TIL_SPESIALSAKER"]).split(',')
 
@@ -342,7 +340,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 kode7Saksbehandlergruppe = tilgangsgrupper.kode7GruppeId,
                 beslutterGruppeId = tilgangsgrupper.beslutterGruppeId,
                 riskGruppeId = tilgangsgrupper.riskQaGruppeId,
-                saksbehandlereMedTilgangTilStikkprøve = saksbehandlereMedTilgangTilStikkprøver,
+                stikkprøveGruppeId = tilgangsgrupper.stikkprøveGruppeId,
                 saksbehandlereMedTilgangTilSpesialsaker = saksbehandlereMedTilgangTilSpesialsaker,
                 snapshotMediator = snapshotMediator,
                 behandlingsstatistikkMediator = behandlingsstatistikkMediator,

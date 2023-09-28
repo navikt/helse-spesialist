@@ -477,7 +477,7 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
             beslutterSaksbehandlergruppe = UUID.randomUUID(),
             skjermedePersonerSaksbehandlergruppe = UUID.randomUUID(),
             saksbehandlerIdent = SAKSBEHANDLER_IDENT,
-            saksbehandlereMedTilgangTilStikkprøve = emptyList(),
+            stikkprøveSaksbehandlergruppe = UUID.randomUUID(),
             saksbehandlereMedTilgangTilSpesialsaker = listOf(SAKSBEHANDLER_IDENT),
         )
 

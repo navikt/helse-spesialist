@@ -89,7 +89,7 @@ spec:
     - name: SKJERMEDE_PERSONER_GROUP
       value: f787f900-6697-440d-a086-d5bb56e26a9c
     - name: SAKSBEHANDLERE_MED_TILGANG_TIL_STIKKPROVER
-      value: "EN_IDENT"
+      value: f787f900-6697-440d-a086-d5bb56e26a9c
     - name: SAKSBEHANDLERE_MED_TILGANG_TIL_SPESIALSAKER
       value: "EN_IDENT"
     - name: SPLEIS_CLIENT_ID

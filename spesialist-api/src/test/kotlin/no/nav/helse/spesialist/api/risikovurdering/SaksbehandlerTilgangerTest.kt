@@ -12,7 +12,7 @@ internal class SaksbehandlerTilgangerTest {
     private val beslutterSaksbehandlergruppe = UUID.randomUUID()
     private val skjermedePersonerSaksbehandlergruppe = UUID.randomUUID()
     private val saksbehandlerIdent = "EN_IDENT"
-    private val saksbehandlereMedTilgangTilStikkprøve = listOf(saksbehandlerIdent)
+    private val saksbehandlereMedTilgangTilStikkprøve = UUID.randomUUID()
 
     @Test
     fun `uten gruppetilhørighet har man ingen tilganger`() {
@@ -23,7 +23,7 @@ internal class SaksbehandlerTilgangerTest {
             riskSaksbehandlergruppe = riskSaksbehandlergruppe,
             beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe,
             skjermedePersonerSaksbehandlergruppe = skjermedePersonerSaksbehandlergruppe,
-            saksbehandlereMedTilgangTilStikkprøve = emptyList(),
+            stikkprøveSaksbehandlergruppe = saksbehandlereMedTilgangTilStikkprøve,
         )
         assertFalse(saksbehandlerTilganger.harTilgangTilKode7())
         assertFalse(saksbehandlerTilganger.harTilgangTilRiskOppgaver())
@@ -40,7 +40,7 @@ internal class SaksbehandlerTilgangerTest {
             riskSaksbehandlergruppe = riskSaksbehandlergruppe,
             beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe,
             skjermedePersonerSaksbehandlergruppe = skjermedePersonerSaksbehandlergruppe,
-            saksbehandlereMedTilgangTilStikkprøve = saksbehandlereMedTilgangTilStikkprøve
+            stikkprøveSaksbehandlergruppe = saksbehandlereMedTilgangTilStikkprøve
         )
         assertTrue(saksbehandlerTilganger.harTilgangTilKode7())
         assertFalse(saksbehandlerTilganger.harTilgangTilRiskOppgaver())
@@ -57,7 +57,7 @@ internal class SaksbehandlerTilgangerTest {
             riskSaksbehandlergruppe = riskSaksbehandlergruppe,
             beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe,
             skjermedePersonerSaksbehandlergruppe = skjermedePersonerSaksbehandlergruppe,
-            saksbehandlereMedTilgangTilStikkprøve = saksbehandlereMedTilgangTilStikkprøve
+            stikkprøveSaksbehandlergruppe = saksbehandlereMedTilgangTilStikkprøve
         )
         assertFalse(saksbehandlerTilganger.harTilgangTilKode7())
         assertFalse(saksbehandlerTilganger.harTilgangTilBeslutterOppgaver())
@@ -74,7 +74,7 @@ internal class SaksbehandlerTilgangerTest {
             riskSaksbehandlergruppe = riskSaksbehandlergruppe,
             beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe,
             skjermedePersonerSaksbehandlergruppe = skjermedePersonerSaksbehandlergruppe,
-            saksbehandlereMedTilgangTilStikkprøve = saksbehandlereMedTilgangTilStikkprøve
+            stikkprøveSaksbehandlergruppe = saksbehandlereMedTilgangTilStikkprøve
         )
         assertFalse(saksbehandlerTilganger.harTilgangTilKode7())
         assertFalse(saksbehandlerTilganger.harTilgangTilRiskOppgaver())
@@ -91,7 +91,7 @@ internal class SaksbehandlerTilgangerTest {
             riskSaksbehandlergruppe = riskSaksbehandlergruppe,
             beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe,
             skjermedePersonerSaksbehandlergruppe = skjermedePersonerSaksbehandlergruppe,
-            saksbehandlereMedTilgangTilStikkprøve = saksbehandlereMedTilgangTilStikkprøve
+            stikkprøveSaksbehandlergruppe = saksbehandlereMedTilgangTilStikkprøve
 
         )
         assertFalse(saksbehandlerTilganger.harTilgangTilKode7())
@@ -114,7 +114,7 @@ internal class SaksbehandlerTilgangerTest {
             beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe,
             skjermedePersonerSaksbehandlergruppe = skjermedePersonerSaksbehandlergruppe,
             saksbehandlerIdent = saksbehandlerIdent,
-            saksbehandlereMedTilgangTilStikkprøve = saksbehandlereMedTilgangTilStikkprøve
+            stikkprøveSaksbehandlergruppe = saksbehandlereMedTilgangTilStikkprøve
 
         )
         assertTrue(saksbehandlerTilganger.harTilgangTilKode7())

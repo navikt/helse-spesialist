@@ -35,7 +35,7 @@ class ContextFactory(
     private val skjermedePersonerSaksbehandlergruppe: UUID,
     private val beslutterSaksbehandlergruppe: UUID,
     private val riskSaksbehandlergruppe: UUID,
-    private val saksbehandlereMedTilgangTilStikkprøve: List<String>,
+    private val stikkprøveSaksbehandlergruppe: UUID,
     private val saksbehandlereMedTilgangTilSpesialsaker: List<String>,
 ) : GraphQLContextFactory<ApplicationRequest> {
     override suspend fun generateContext(request: ApplicationRequest): GraphQLContext = mapOf(
@@ -46,7 +46,7 @@ class ContextFactory(
             riskSaksbehandlergruppe = riskSaksbehandlergruppe,
             beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe,
             skjermedePersonerSaksbehandlergruppe = skjermedePersonerSaksbehandlergruppe,
-            saksbehandlereMedTilgangTilStikkprøve = saksbehandlereMedTilgangTilStikkprøve,
+            stikkprøveSaksbehandlergruppe = stikkprøveSaksbehandlergruppe,
             saksbehandlereMedTilgangTilSpesialsaker = saksbehandlereMedTilgangTilSpesialsaker,
         ),
         SAKSBEHANDLER_NAVN.key to request.getSaksbehandlerName(),

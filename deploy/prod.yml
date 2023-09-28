@@ -48,6 +48,7 @@ spec:
           - id: "c21e58b6-d838-4cb0-919a-398cd40117e3"
           - id: "e750ceb5-b70b-4d94-b4fa-9d22467b786b"
           - id: "59f26eef-0a4f-4038-bf46-3a5b2f252155"
+          - id: "e382880a-e12f-4d56-a92e-2283d7da43af"
   filesFrom:
     - configmap: spesialist-data
       mountPath: /var/run/configmaps
@@ -98,7 +99,7 @@ spec:
     - name: SPLEIS_CLIENT_ID
       value: api://prod-gcp.tbd.spleis-api/.default
     - name: SAKSBEHANDLERE_MED_TILGANG_TIL_STIKKPROVER
-      value: "G103083,N115007,C117102,M136300,S108267,K123956,G157538,B138607,S145454,F140836,O123659,S160466,K104953,J153777,V149621,L105454,K105348"
+      value: e382880a-e12f-4d56-a92e-2283d7da43af
     - name: SAKSBEHANDLERE_MED_TILGANG_TIL_SPESIALSAKER
       value: "G103083,N115007,C117102"
     - name: STIKKPROEVER_UTS_FLERE_AG_FGB_DIVISOR #Kan settes til 1 for å slå av automatisering
