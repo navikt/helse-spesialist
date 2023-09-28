@@ -357,12 +357,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             routing {
                 authenticate("oidc") {
                     personApi(
-                        totrinnsvurderingMediator = totrinnsvurderingMediator,
-                        oppdaterPersonService = oppdaterPersonService,
-                        godkjenningService = godkjenningService,
-                        oppgaveDao = oppgaveDao,
-                        tilgangsgrupper = tilgangsgrupper,
-                        saksbehandlerhåndterer = saksbehandlerMediator
+                        oppdaterPersonService = oppdaterPersonService
                     )
                     overstyringApi(saksbehandlerMediator)
                     annulleringApi(saksbehandlerMediator)
