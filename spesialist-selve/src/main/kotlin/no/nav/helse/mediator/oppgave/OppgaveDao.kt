@@ -4,6 +4,8 @@ import java.util.UUID
 import javax.sql.DataSource
 import no.nav.helse.HelseDao
 import no.nav.helse.db.OppgaveFraDatabase
+import no.nav.helse.db.OppgaveFraDatabaseForVisning
+import no.nav.helse.db.PersonnavnFraDatabase
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommandData
 import no.nav.helse.objectMapper
@@ -56,6 +58,59 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                     )
                 },
                 påVent = row.boolean("på_vent"),
+            )
+        }
+    }
+
+    internal fun finnOppgaverForVisning(): List<OppgaveFraDatabaseForVisning> {
+        return asSQL(
+            """
+                SELECT
+                o.id as oppgave_id, 
+                p.aktor_id,
+                v.vedtaksperiode_id, 
+                pi.fornavn, pi.mellomnavn, pi.etternavn, 
+                o.egenskaper,
+                s.oid, s.ident, s.epost, s.navn,
+                t.på_vent,
+                sot.type as periodetype,
+                o.opprettet,
+                os.soknad_mottatt AS opprinnelig_soknadsdato, 
+                sot.inntektskilde
+            FROM oppgave o
+                INNER JOIN vedtak v ON o.vedtak_ref = v.id
+                INNER JOIN person p ON v.person_ref = p.id
+                INNER JOIN person_info pi ON p.info_ref = pi.id
+                INNER JOIN opprinnelig_soknadsdato os ON os.vedtaksperiode_id = v.vedtaksperiode_id
+                LEFT JOIN saksbehandleroppgavetype sot ON v.id = sot.vedtak_ref
+                LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
+                LEFT JOIN saksbehandler s ON t.saksbehandler_ref = s.oid
+                WHERE o.status = 'AvventerSaksbehandler'
+            """, mapOf()
+        ).list { row ->
+            OppgaveFraDatabaseForVisning(
+                id = row.long("oppgave_id"),
+                aktørId = row.string("aktor_id"),
+                vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
+                navn = PersonnavnFraDatabase(
+                    row.string("fornavn"),
+                    row.stringOrNull("mellomnavn"),
+                    row.string("etternavn"),
+                ),
+                egenskaper = row.array<String>("egenskaper").toList(),
+                tildelt = row.uuidOrNull("oid")?.let {
+                    SaksbehandlerFraDatabase(
+                        epostadresse = row.string("epost"),
+                        it,
+                        row.string("navn"),
+                        row.string("ident")
+                    )
+                },
+                påVent = row.boolean("på_vent"),
+                opprettet = row.localDateTime("opprettet"),
+                opprinneligSøknadsdato = row.localDateTime("opprinnelig_soknadsdato"),
+                inntektskilde = row.string("inntektskilde"),
+                periodetype = row.string("periodetype")
             )
         }
     }

@@ -198,6 +198,61 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `Finn oppgave for visning`() {
+        val fnr = "12345678910"
+        val aktørId = "1234567891011"
+        val arbeidsgiver = "123456789"
+        val vedtaksperiodeId = UUID.randomUUID()
+        val saksbehandlerOid = UUID.randomUUID()
+        nyPerson(fødselsnummer = fnr, aktørId = aktørId, vedtaksperiodeId = vedtaksperiodeId, organisasjonsnummer = arbeidsgiver)
+        tildelOppgave(saksbehandlerOid = saksbehandlerOid)
+        val oppgaver = oppgaveDao.finnOppgaverForVisning()
+        assertEquals(1, oppgaver.size)
+        val førsteOppgave = oppgaver.first()
+        assertEquals(OPPGAVE_ID, førsteOppgave.id)
+        assertEquals(aktørId, førsteOppgave.aktørId)
+        assertEquals(listOf(OPPGAVETYPE), førsteOppgave.egenskaper)
+        assertEquals(FORNAVN, førsteOppgave.navn.fornavn)
+        assertEquals(MELLOMNAVN, førsteOppgave.navn.mellomnavn)
+        assertEquals(ETTERNAVN, førsteOppgave.navn.etternavn)
+        assertEquals("EN_ARBEIDSGIVER", førsteOppgave.inntektskilde)
+        assertEquals("FØRSTEGANGSBEHANDLING", førsteOppgave.periodetype)
+        assertEquals(false, førsteOppgave.påVent)
+        assertEquals(
+            SaksbehandlerFraDatabase(
+                SAKSBEHANDLEREPOST,
+                saksbehandlerOid,
+                SAKSBEHANDLER_NAVN,
+                SAKSBEHANDLER_IDENT
+            ), førsteOppgave.tildelt
+        )
+        assertEquals(vedtaksperiodeId, førsteOppgave.vedtaksperiodeId)
+    }
+
+    @Test
+    fun `Finn oppgaver for visning`() {
+        nyPerson(fødselsnummer = "12345678910", aktørId = "1234567891011", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "123456789")
+        nyPerson(fødselsnummer = "12345678911", aktørId = "1234567891012", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "223456789")
+        nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456789")
+        val oppgaver = oppgaveDao.finnOppgaverForVisning()
+        assertEquals(3, oppgaver.size)
+    }
+
+    @Test
+    fun `Tar kun med oppgaver som avventer saksbehandler`() {
+        nyPerson(fødselsnummer = "12345678910", aktørId = "1234567891011", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "123456789")
+        val oppgaveId1 = OPPGAVE_ID
+        nyPerson(fødselsnummer = "12345678911", aktørId = "1234567891012", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "223456789")
+        val oppgaveId2 = OPPGAVE_ID
+        nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456789")
+        val oppgaveId3 = OPPGAVE_ID
+        avventerSystem(oppgaveId3)
+        val oppgaver = oppgaveDao.finnOppgaverForVisning()
+        assertEquals(2, oppgaver.size)
+        assertEquals(listOf(oppgaveId1, oppgaveId2), oppgaver.map { it.id })
+    }
+
+    @Test
     fun `finner vedtaksperiodeId`() {
         nyPerson()
         val actual = oppgaveDao.finnVedtaksperiodeId(oppgaveId)

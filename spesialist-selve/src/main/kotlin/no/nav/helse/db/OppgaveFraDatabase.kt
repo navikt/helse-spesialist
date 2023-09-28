@@ -1,5 +1,6 @@
 package no.nav.helse.db
 
+import java.time.LocalDateTime
 import java.util.UUID
 
 data class OppgaveFraDatabase(
@@ -14,4 +15,18 @@ data class OppgaveFraDatabase(
     val ferdigstiltAvOid: UUID? = null,
     val tildelt: SaksbehandlerFraDatabase? = null,
     val påVent: Boolean = false
+)
+
+data class OppgaveFraDatabaseForVisning(
+    val id: Long,
+    val aktørId: String,
+    val vedtaksperiodeId: UUID,
+    val navn: PersonnavnFraDatabase,
+    val egenskaper: List<String>,
+    val tildelt: SaksbehandlerFraDatabase? = null,
+    val påVent: Boolean = false,
+    val periodetype: String,
+    val opprettet: LocalDateTime,
+    val opprinneligSøknadsdato: LocalDateTime,
+    val inntektskilde: String
 )

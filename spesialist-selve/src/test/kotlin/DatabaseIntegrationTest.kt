@@ -273,6 +273,15 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         commandContextDao.opprett(hendelse, contextId)
     }
 
+    protected fun tildelOppgave(oppgaveId: Long = OPPGAVE_ID, saksbehandlerOid: UUID, påVent: Boolean = false) {
+        opprettSaksbehandler(saksbehandlerOid, navn = SAKSBEHANDLER_NAVN, epost = SAKSBEHANDLEREPOST, ident = SAKSBEHANDLER_IDENT)
+        @Language("PostgreSQL")
+        val query = "INSERT INTO tildeling(saksbehandler_ref, oppgave_id_ref, på_vent) VALUES (?, ?, ?)"
+        return sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, saksbehandlerOid, oppgaveId, påVent).asExecute)
+        }
+    }
+
     protected fun nyVedtaksperiode(periodetype: Periodetype = FØRSTEGANGSBEHANDLING) {
         val vedtaksperiodeId = UUID.randomUUID()
         opprettVedtaksperiode(vedtaksperiodeId, periodetype = periodetype)
@@ -397,6 +406,11 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             vedtaksperiodeId,
             utbetalingId
         )
+    }
+
+    protected fun avventerSystem(oppgaveId: Long) {
+        oppgaveDao.updateOppgave(oppgaveId = oppgaveId, oppgavestatus = "AvventerSystem", egenskaper = listOf(OPPGAVETYPE))
+
     }
 
     protected fun ferdigstillSistOpprettedeOppgaveOgOpprettNy() {
