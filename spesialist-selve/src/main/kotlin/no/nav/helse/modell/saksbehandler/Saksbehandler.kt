@@ -8,7 +8,6 @@ import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtInntektOgRefusjon
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinje
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
-import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 
 class Saksbehandler(
     private val epostadresse: String,
@@ -63,8 +62,6 @@ class Saksbehandler(
         val event = hendelse.byggEvent(oid, navn, epostadresse, ident)
         observers.forEach { it.utbetalingAnnullert(event.fødselsnummer, event) }
     }
-
-    fun toDto() = SaksbehandlerFraApi(oid = oid, navn = navn, epost = epostadresse, ident = ident)
 
     override fun toString(): String = "epostadresse=$epostadresse, oid=$oid"
 

@@ -4,8 +4,8 @@ import DatabaseIntegrationTest
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import org.intellij.lang.annotations.Language
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -24,6 +24,20 @@ internal class SaksbehandlerDaoTest: DatabaseIntegrationTest() {
         dao.opprettSaksbehandler(SAKSBEHANDLER_OID, "ANNET_NAVN", "ANNEN_EPOST", "ANNEN_IDENT")
         assertSaksbehandler(1, SAKSBEHANDLER_OID, "ANNET_NAVN", "ANNEN_EPOST", "ANNEN_IDENT")
         assertSaksbehandler(0, SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLEREPOST, SAKSBEHANDLER_IDENT)
+    }
+
+    @Test
+    fun `finner saksbehandler vha epost`() {
+        dao.opprettSaksbehandler(SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLEREPOST, SAKSBEHANDLER_IDENT)
+        val saksbehandler = dao.finnOid(SAKSBEHANDLEREPOST)
+        Assertions.assertNotNull(saksbehandler)
+    }
+
+    @Test
+    fun `finner saksbehandler vha epost uavhengig av store bokstaver`() {
+        dao.opprettSaksbehandler(SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLEREPOST.uppercase(), SAKSBEHANDLER_IDENT)
+        val saksbehandler = dao.finnOid(SAKSBEHANDLEREPOST.lowercase())
+        Assertions.assertNotNull(saksbehandler)
     }
 
     private fun assertSaksbehandler(forventetAntall: Int, oid: UUID, navn: String, epost: String, ident: String) {

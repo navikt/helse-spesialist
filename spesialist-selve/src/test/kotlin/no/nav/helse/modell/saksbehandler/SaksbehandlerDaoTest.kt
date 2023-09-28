@@ -2,7 +2,6 @@ package no.nav.helse.modell.saksbehandler
 
 import DatabaseIntegrationTest
 import java.util.UUID
-import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
@@ -47,31 +46,27 @@ internal class SaksbehandlerDaoTest : DatabaseIntegrationTest() {
         assertSaksbehandler(SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLEREPOST, SAKSBEHANDLER_IDENT)
     }
 
-    @Test
-    fun `finner saksbehandler vha epost`() {
-        saksbehandlerDao.opprettSaksbehandler(SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLEREPOST, SAKSBEHANDLER_IDENT)
-        val saksbehandler = saksbehandlerDao.finnSaksbehandler(SAKSBEHANDLEREPOST)
-        assertNotNull(saksbehandler)
-    }
-
-    @Test
-    fun `finner saksbehandler vha epost uavhengig av store bokstaver`() {
-        saksbehandlerDao.opprettSaksbehandler(SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLEREPOST.uppercase(), SAKSBEHANDLER_IDENT)
-        val saksbehandler = saksbehandlerDao.finnSaksbehandler(SAKSBEHANDLEREPOST.lowercase())
-        assertNotNull(saksbehandler)
-    }
-
     private fun saksbehandler(oid: UUID) = query(
         " SELECT * FROM saksbehandler WHERE oid = :oid LIMIT 1; ", "oid" to oid
     ).single { row ->
-        SaksbehandlerFraApi(oid = oid, navn = row.string("navn"), epost = row.string("epost"), ident = row.string("ident"))
+        SaksbehandlerForTestAsserts(navn = row.string("navn"), epost = row.string("epost"), ident = row.string("ident"))
     }
 
     private fun assertSaksbehandler(oid: UUID, navn: String, epost: String, ident: String) {
         val saksbehandler = saksbehandler(oid)
         assertNotNull(saksbehandler)
-        assertEquals(navn, saksbehandler?.navn)
-        assertEquals(epost, saksbehandler?.epost)
-        assertEquals(ident, saksbehandler?.ident)
+        saksbehandler?.assertSaksbehandler(navn, epost, ident)
+    }
+
+    private class SaksbehandlerForTestAsserts(
+        private val navn: String,
+        private val epost: String,
+        private val ident: String
+    ) {
+        fun assertSaksbehandler(navn: String, epost: String, ident: String) {
+            assertEquals(navn, this.navn)
+            assertEquals(epost, this.epost)
+            assertEquals(ident, this.ident)
+        }
     }
 }

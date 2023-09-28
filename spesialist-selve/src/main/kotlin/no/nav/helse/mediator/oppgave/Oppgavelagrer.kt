@@ -26,6 +26,7 @@ import no.nav.helse.modell.oppgave.Egenskap.VERGEMÅL
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveVisitor
 import no.nav.helse.modell.saksbehandler.Saksbehandler
+import no.nav.helse.modell.saksbehandler.SaksbehandlerVisitor
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 
 class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
@@ -90,9 +91,7 @@ class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
             hendelseId = hendelseId,
             ferdigstiltAvIdent = ferdigstiltAvIdent,
             ferdigstiltAvOid = ferdigstiltAvOid,
-            tildelt = tildelt?.toDto()?.let {
-                SaksbehandlerFraDatabase(it.epost, it.oid, it.navn, it.ident)
-            },
+            tildelt = tildelt?.let { Saksbehandlerhenter(it).hent() },
             påVent = påVent
         )
     }
@@ -145,5 +144,18 @@ class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
             VERGEMÅL -> "VERGEMÅL"
             SPESIALSAK -> "SPESIALSAK"
         }
+    }
+
+    private class Saksbehandlerhenter(saksbehandler: Saksbehandler): SaksbehandlerVisitor {
+        private lateinit var saksbehandlerFraDatabase: SaksbehandlerFraDatabase
+        init {
+            saksbehandler.accept(this)
+        }
+
+        override fun visitSaksbehandler(epostadresse: String, oid: UUID, navn: String, ident: String) {
+            saksbehandlerFraDatabase = SaksbehandlerFraDatabase(epostadresse, oid, navn, ident)
+        }
+
+        fun hent() = saksbehandlerFraDatabase
     }
 }

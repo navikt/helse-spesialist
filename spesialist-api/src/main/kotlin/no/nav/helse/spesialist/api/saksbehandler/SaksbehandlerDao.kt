@@ -15,17 +15,4 @@ class SaksbehandlerDao(dataSource: DataSource) : HelseDao(dataSource) {
                     (excluded.navn, excluded.epost, excluded.ident)
             """, mapOf("oid" to oid, "navn" to navn, "epost" to epost, "ident" to ident)
         ).update()
-
-    fun finnSaksbehandler(epost: String) = asSQL(
-        " SELECT * FROM saksbehandler WHERE epost ILIKE :epost LIMIT 1; ",
-        mapOf("epost" to epost)
-    ).single { row ->
-        SaksbehandlerFraApi(
-            oid = row.uuid("oid"),
-            navn = row.string("navn"),
-            epost = row.string("epost"),
-            ident = row.string("ident")
-        )
-    }
-
 }
