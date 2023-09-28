@@ -69,6 +69,7 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.registrerTidsbrukForGodkjenningsbehov
 import no.nav.helse.registrerTidsbrukForHendelse
+import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
 import org.slf4j.LoggerFactory
 
@@ -87,7 +88,7 @@ internal class HendelseMediator(
     private val egenAnsattDao: EgenAnsattDao = EgenAnsattDao(dataSource),
     private val varselRepository: ActualVarselRepository = ActualVarselRepository(dataSource),
     private val metrikkDao: MetrikkDao = MetrikkDao(dataSource),
-) {
+) : Personhåndterer {
     private companion object {
         private val logg = LoggerFactory.getLogger(HendelseMediator::class.java)
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
@@ -694,5 +695,14 @@ internal class HendelseMediator(
             )
             mediator.utfør(hendelse, commandContext, contextId, messageContex)
         }
+    }
+
+    override fun oppdaterSnapshot(fnr: String) {
+        val json = JsonMessage.newMessage(
+            "oppdater_personsnapshot", mapOf(
+                "fødselsnummer" to fnr
+            )
+        )
+        oppdaterPersonsnapshot(json, rapidsConnection)
     }
 }

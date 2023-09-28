@@ -19,6 +19,7 @@ import java.time.Duration
 import java.util.UUID
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
 import no.nav.helse.spesialist.api.GraphQLMetrikker
+import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.Totrinnsvurderinghåndterer
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
@@ -71,7 +72,8 @@ fun Application.graphQLApi(
     saksbehandlerhåndterer: Saksbehandlerhåndterer,
     oppgavehåndterer: Oppgavehåndterer,
     totrinnsvurderinghåndterer: Totrinnsvurderinghåndterer,
-    godkjenninghåndterer: Godkjenninghåndterer
+    godkjenninghåndterer: Godkjenninghåndterer,
+    personhåndterer: Personhåndterer
 ) {
     val schema = SchemaBuilder(
         personApiDao = personApiDao,
@@ -94,7 +96,8 @@ fun Application.graphQLApi(
         saksbehandlerhåndterer = saksbehandlerhåndterer,
         oppgavehåndterer = oppgavehåndterer,
         totrinnsvurderinghåndterer = totrinnsvurderinghåndterer,
-        godkjenninghåndterer = godkjenninghåndterer
+        godkjenninghåndterer = godkjenninghåndterer,
+        personhåndterer = personhåndterer
     ).build()
 
     val server = GraphQLServer(

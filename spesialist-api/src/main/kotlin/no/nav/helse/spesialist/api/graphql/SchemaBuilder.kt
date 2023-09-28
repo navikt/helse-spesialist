@@ -5,6 +5,7 @@ import com.expediagroup.graphql.generator.TopLevelObject
 import com.expediagroup.graphql.generator.toSchema
 import graphql.schema.GraphQLSchema
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
+import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.Totrinnsvurderinghåndterer
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
@@ -13,6 +14,7 @@ import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.graphql.mutation.NotatMutation
 import no.nav.helse.spesialist.api.graphql.mutation.OpptegnelseMutation
 import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutation
+import no.nav.helse.spesialist.api.graphql.mutation.PersonMutation
 import no.nav.helse.spesialist.api.graphql.mutation.SkjonnsfastsettelseMutation
 import no.nav.helse.spesialist.api.graphql.mutation.TildelingMutation
 import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutation
@@ -61,7 +63,8 @@ internal class SchemaBuilder(
     private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
     private val oppgavehåndterer: Oppgavehåndterer,
     private val totrinnsvurderinghåndterer: Totrinnsvurderinghåndterer,
-    private val godkjenninghåndterer: Godkjenninghåndterer
+    private val godkjenninghåndterer: Godkjenninghåndterer,
+    private val personhåndterer: Personhåndterer,
 ) {
     fun build(): GraphQLSchema {
         val schemaConfig = SchemaGeneratorConfig(
@@ -148,6 +151,11 @@ internal class SchemaBuilder(
                         totrinnsvurderinghåndterer = totrinnsvurderinghåndterer,
                         saksbehandlerhåndterer = saksbehandlerhåndterer,
                         godkjenninghåndterer = godkjenninghåndterer
+                    )
+                ),
+                TopLevelObject(
+                    PersonMutation(
+                        personhåndterer = personhåndterer
                     )
                 )
             )

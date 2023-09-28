@@ -24,6 +24,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
 import no.nav.helse.spesialist.api.JwtStub
+import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.TestApplication
 import no.nav.helse.spesialist.api.Totrinnsvurderinghåndterer
@@ -114,6 +115,7 @@ fun main() = runBlocking {
         val oppgavehåndterer = mockk<Oppgavehåndterer>(relaxed = true)
         val totrinnsvurderinghåndterer = mockk<Totrinnsvurderinghåndterer>(relaxed = true)
         val godkjenninghåndterer = mockk<Godkjenninghåndterer>(relaxed = true)
+        val personhåndterer = mockk<Personhåndterer>(relaxed = true)
 
         every { snapshotApiDao.utdatert(any()) } returns false
         every { snapshotApiDao.hentSnapshotMedMetadata(any()) } answers withDelay(800) { (enPersoninfo() to enPerson()) }
@@ -197,7 +199,8 @@ fun main() = runBlocking {
             saksbehandlerhåndterer = saksbehandlerhåndterer,
             oppgavehåndterer = oppgavehåndterer,
             totrinnsvurderinghåndterer = totrinnsvurderinghåndterer,
-            godkjenninghåndterer = godkjenninghåndterer
+            godkjenninghåndterer = godkjenninghåndterer,
+            personhåndterer = personhåndterer
         )
     }
 }

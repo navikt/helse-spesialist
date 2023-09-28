@@ -42,6 +42,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     private val behandlingsstatistikkMediator = mockk<BehandlingsstatistikkMediator>(relaxed = true)
     protected open val saksbehandlerhåndterer = mockk<Saksbehandlerhåndterer>(relaxed = true)
     protected open val godkjenninghåndterer = mockk<Godkjenninghåndterer>(relaxed = true)
+    protected open val personhåndterer = mockk<Personhåndterer>(relaxed = true)
 
     private lateinit var graphQLServer: GraphQLServer<ApplicationRequest>
 
@@ -72,7 +73,8 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
             saksbehandlerhåndterer = saksbehandlerhåndterer,
             oppgavehåndterer = oppgavehåndterer,
             totrinnsvurderinghåndterer = totrinnsvurderinghåndterer,
-            godkjenninghåndterer = godkjenninghåndterer
+            godkjenninghåndterer = godkjenninghåndterer,
+            personhåndterer = personhåndterer
         ).build()
 
         graphQLServer = GraphQLServer(
