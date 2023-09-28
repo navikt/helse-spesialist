@@ -13,9 +13,10 @@ enum class Egenskap(
     FORTROLIG_ADRESSE(tilgangsstyrt = true),
     EGEN_ANSATT(tilgangsstyrt = true),
     BESLUTTER(tilgangsstyrt = true),
+    SPESIALSAK(tilgangsstyrt = true),
     REVURDERING(kategori = Oppgavetype),
     SØKNAD(kategori = Oppgavetype),
-    STIKKPRØVE(kategori = Oppgavetype),
+    STIKKPRØVE(kategori = Oppgavetype, tilgangsstyrt = true),
     UTBETALING_TIL_SYKMELDT(kategori = Mottaker),
     DELVIS_REFUSJON(kategori = Mottaker),
     UTBETALING_TIL_ARBEIDSGIVER(kategori = Mottaker),
@@ -23,8 +24,7 @@ enum class Egenskap(
     HASTER,
     RETUR,
     FULLMAKT,
-    VERGEMÅL,
-    SPESIALSAK;
+    VERGEMÅL;
 
     enum class Kategori {
         Mottaker,

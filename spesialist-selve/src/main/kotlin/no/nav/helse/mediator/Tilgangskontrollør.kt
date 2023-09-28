@@ -8,6 +8,8 @@ import no.nav.helse.modell.oppgave.Egenskap.BESLUTTER
 import no.nav.helse.modell.oppgave.Egenskap.EGEN_ANSATT
 import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.RISK_QA
+import no.nav.helse.modell.oppgave.Egenskap.SPESIALSAK
+import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 
 internal interface Gruppekontroll {
@@ -29,6 +31,8 @@ internal class Tilgangskontrollør(
         FORTROLIG_ADRESSE -> tilgangsgrupper.kode7GruppeId
         RISK_QA -> tilgangsgrupper.riskQaGruppeId
         BESLUTTER -> tilgangsgrupper.beslutterGruppeId
+        STIKKPRØVE -> tilgangsgrupper.stikkprøveGruppeId
+        SPESIALSAK -> tilgangsgrupper.spesialsakGruppeId
         else -> throw IllegalArgumentException("Egenskap $egenskap er ikke støttet som tilgangsstyrt egenskap")
     }
 }
