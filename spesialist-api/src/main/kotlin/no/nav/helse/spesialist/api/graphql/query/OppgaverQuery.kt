@@ -19,6 +19,7 @@ import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.tildeling.Oppgavehåndterer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import kotlin.Int.Companion.MAX_VALUE
 
 class OppgaverQuery(private val oppgaveApiDao: OppgaveApiDao, private val oppgavehåndterer: Oppgavehåndterer) : Query {
 
@@ -55,14 +56,16 @@ class OppgaverQuery(private val oppgaveApiDao: OppgaveApiDao, private val oppgav
         return DataFetcherResult.newResult<List<OppgaveForOversiktsvisning>>().data(oppgaver).build()
     }
 
-    suspend fun oppgaver(env: DataFetchingEnvironment): DataFetcherResult<List<OppgaveTilBehandling>> {
+    suspend fun oppgaver(startIndex: Int? = 0, pageSize: Int? = MAX_VALUE, env: DataFetchingEnvironment): DataFetcherResult<List<OppgaveTilBehandling>> {
+        val start = startIndex ?: 0
+        val offset = pageSize ?: MAX_VALUE
         sikkerLogg.info("Henter OppgaverTilBehandling")
-        val start = startSporing(env)
+        val startTrace = startSporing(env)
         val saksbehandler = env.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(SAKSBEHANDLER.key).value
         val oppgaver = withContext(Dispatchers.IO) {
             oppgavehåndterer.oppgaver(saksbehandler)
-        }
-        avsluttSporing(start)
+        }.subList(start, offset)
+        avsluttSporing(startTrace)
 
         return DataFetcherResult.newResult<List<OppgaveTilBehandling>>().data(oppgaver).build()
     }
