@@ -46,8 +46,6 @@ import no.nav.helse.mediator.OverstyringMediator
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.Tilgangskontrollør
 import no.nav.helse.mediator.api.GodkjenningService
-import no.nav.helse.mediator.api.OppdaterPersonService
-import no.nav.helse.mediator.api.personApi
 import no.nav.helse.mediator.api.totrinnsvurderingApi
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
@@ -352,9 +350,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
 
             routing {
                 authenticate("oidc") {
-                    personApi(
-                        oppdaterPersonService = oppdaterPersonService
-                    )
                     overstyringApi(saksbehandlerMediator)
                     annulleringApi(saksbehandlerMediator)
                     opptegnelseApi(OpptegnelseMediator(opptegnelseApiDao, abonnementDao))
@@ -368,7 +363,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             }
         }.build()
 
-    private val oppdaterPersonService: OppdaterPersonService
     private val godkjenningService: GodkjenningService
 
     private val automatiseringDao = AutomatiseringDao(dataSource)
@@ -425,7 +419,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             totrinnsvurderingApiDao,
             oppgaveMediator
         ) { oppgavemelder }
-        oppdaterPersonService = OppdaterPersonService(rapidsConnection)
         godkjenningService = GodkjenningService(
             dataSource = dataSource,
             rapidsConnection = rapidsConnection,

@@ -4,7 +4,6 @@ import java.io.File
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.mediator.api.erProd
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -20,6 +19,8 @@ internal class GosysOppgaveEndretRiver(
     private val oppgaveDao: OppgaveDao,
     private val personDao: PersonDao
 ) : River.PacketListener {
+
+    private fun erProd() = "prod-gcp" == System.getenv("NAIS_CLUSTER_NAME")
 
     private val ignorerliste: Set<String> by lazy {
         if (erProd()) File("/var/run/configmaps/ignorere-oppgave-endret.csv").readText().split(",").toSet()
