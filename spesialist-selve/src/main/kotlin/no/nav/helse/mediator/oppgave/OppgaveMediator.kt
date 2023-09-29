@@ -126,7 +126,7 @@ internal class OppgaveMediator(
         return oppgaverSaksbehandlerHarTilgangTil.flatMap { it.value }.tilOppgaveTilBehandling()
     }
 
-    fun avbrytOppgaver(vedtaksperiodeId: UUID) {
+    fun avbrytOppgaveFor(vedtaksperiodeId: UUID) {
         oppgaveDao.finnNyesteOppgaveId(vedtaksperiodeId)?.also {
             oppgave(it) {
                 this.avbryt()

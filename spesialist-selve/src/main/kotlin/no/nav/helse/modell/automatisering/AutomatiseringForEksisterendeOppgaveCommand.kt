@@ -35,7 +35,7 @@ internal class AutomatiseringForEksisterendeOppgaveCommand(
             val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson, utbetaling)
             godkjenningMediator.automatiskUtbetaling(context, behov, vedtaksperiodeId, fødselsnummer, hendelseId)
             logg.info("Oppgave avbrytes for vedtaksperiode $vedtaksperiodeId på grunn av automatisering")
-            oppgaveMediator.avbrytOppgaver(vedtaksperiodeId)
+            oppgaveMediator.avbrytOppgaveFor(vedtaksperiodeId)
         }
         return true
     }

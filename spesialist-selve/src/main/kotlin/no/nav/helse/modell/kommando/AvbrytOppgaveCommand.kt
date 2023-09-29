@@ -15,7 +15,7 @@ internal class AvbrytOppgaveCommand(
 
     override fun execute(context: CommandContext): Boolean {
         log.info("invaliderer alle oppgaver relatert til vedtaksperiodeId=$vedtaksperiodeId")
-        oppgaveMediator.avbrytOppgaver(vedtaksperiodeId)
+        oppgaveMediator.avbrytOppgaveFor(vedtaksperiodeId)
         return true
     }
 
