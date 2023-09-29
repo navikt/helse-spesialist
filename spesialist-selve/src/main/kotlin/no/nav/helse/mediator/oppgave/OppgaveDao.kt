@@ -86,7 +86,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                 LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
                 LEFT JOIN saksbehandler s ON t.saksbehandler_ref = s.oid
                 WHERE o.status = 'AvventerSaksbehandler'
-            """, mapOf()
+            """
         ).list { row ->
             OppgaveFraDatabaseForVisning(
                 id = row.long("oppgave_id"),

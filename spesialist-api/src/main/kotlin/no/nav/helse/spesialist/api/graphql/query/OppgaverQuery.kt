@@ -62,7 +62,7 @@ class OppgaverQuery(private val oppgaveApiDao: OppgaveApiDao, private val oppgav
         val oppgaver = withContext(Dispatchers.IO) {
             oppgavehåndterer.oppgaver(saksbehandler)
         }.let {
-            if (startIndex != null && pageSize != null) it.subList(startIndex, startIndex + pageSize)
+            if (startIndex != null && pageSize != null) it.subList(minOf(it.size, startIndex), minOf(it.size, startIndex + pageSize))
             else it
         }
         avsluttSporing(startTrace)
