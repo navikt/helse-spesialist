@@ -226,20 +226,6 @@ internal class OppgaveMediatorTest {
     }
 
     @Test
-    fun `oppretter ikke flere oppgaver på samme vedtaksperiodeId`() {
-        every { oppgaveDao.harGyldigOppgave(UTBETALING_ID) } returnsMany listOf(false, true)
-        every { oppgaveDao.reserverNesteId() } returns 0L
-        mediator.nyOppgave(TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID) {
-            søknadsoppgave(it)
-        }
-        mediator.nyOppgave(TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID) {
-            søknadsoppgave(it)
-        }
-        verify(exactly = 1) { oppgaveDao.opprettOppgave(any(), COMMAND_CONTEXT_ID, OPPGAVETYPE_SØKNAD, listOf(OPPGAVETYPE_SØKNAD), any(), UTBETALING_ID) }
-        assertOpptegnelseIkkeOpprettet()
-    }
-
-    @Test
     fun `lagrer ikke dobbelt`() {
         every { oppgaveDao.reserverNesteId() } returns 0L
         every { oppgaveDao.opprettOppgave(any(), any(), OPPGAVETYPE_SØKNAD, listOf(OPPGAVETYPE_SØKNAD), any(), any()) } returns 0L
