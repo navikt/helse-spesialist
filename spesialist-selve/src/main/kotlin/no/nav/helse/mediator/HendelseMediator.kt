@@ -558,7 +558,7 @@ internal class HendelseMediator(
         utfør(hendelsefabrikk.oppdaterPersonsnapshot(message.toJson()), context)
     }
 
-    fun avbrytSaksbehandling(message: JsonMessage, context: MessageContext) {
+    fun vedtaksperiodeReberegnet(message: JsonMessage, context: MessageContext) {
         utfør(hendelsefabrikk.vedtaksperiodeReberegnet(message.toJson()), context)
     }
 
