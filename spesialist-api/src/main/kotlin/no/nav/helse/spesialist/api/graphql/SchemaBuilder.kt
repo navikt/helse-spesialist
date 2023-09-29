@@ -11,6 +11,7 @@ import no.nav.helse.spesialist.api.Totrinnsvurderinghåndterer
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMediator
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
+import no.nav.helse.spesialist.api.graphql.mutation.AnnulleringMutation
 import no.nav.helse.spesialist.api.graphql.mutation.NotatMutation
 import no.nav.helse.spesialist.api.graphql.mutation.OpptegnelseMutation
 import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutation
@@ -156,6 +157,11 @@ internal class SchemaBuilder(
                 TopLevelObject(
                     PersonMutation(
                         personhåndterer = personhåndterer
+                    )
+                ),
+                TopLevelObject(
+                    AnnulleringMutation(
+                        saksbehandlerhåndterer = saksbehandlerhåndterer
                     )
                 )
             )

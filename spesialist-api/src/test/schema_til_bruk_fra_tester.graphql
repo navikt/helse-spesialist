@@ -275,6 +275,7 @@ type Kommentar {
 
 type Mutation {
     abonner(personidentifikator: String!): Boolean!
+    annuller(annullering: AnnulleringDataInput!): Boolean!
     feilregistrerKommentar(id: Int!): Kommentar
     feilregistrerKommentarV2(id: Int!): Kommentar
     feilregistrerNotat(id: Int!): Notat
@@ -955,6 +956,15 @@ enum Vilkarsgrunnlagtype {
     INFOTRYGD
     SPLEIS
     UKJENT
+}
+
+input AnnulleringDataInput {
+    aktorId: String!
+    begrunnelser: [String!]!
+    fagsystemId: String!
+    fodselsnummer: String!
+    kommentar: String
+    organisasjonsnummer: String!
 }
 
 input ArbeidsforholdOverstyringHandlingInput {
