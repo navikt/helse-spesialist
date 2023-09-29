@@ -7,7 +7,7 @@ import no.nav.helse.modell.oppgave.Egenskap.Kategori.Oppgavetype
 import no.nav.helse.modell.oppgave.Egenskap.Kategori.Ukategorisert
 
 enum class Egenskap(
-    private val kategori: Kategori = Ukategorisert,
+    val kategori: Kategori = Ukategorisert,
     private val tilgangsstyrt: Boolean = false
 ) {
     RISK_QA(tilgangsstyrt = true),
@@ -38,13 +38,7 @@ enum class Egenskap(
         internal val alleTilgangsstyrteEgenskaper = EnumSet.allOf(Egenskap::class.java).filter(Egenskap::tilgangsstyrt)
         internal fun Collection<Egenskap>.tilgangsstyrteEgenskaper() = filter { it in alleTilgangsstyrteEgenskaper }
 
-        internal fun Collection<Egenskap>.toMap(): Map<String, String> {
-            return associate {
-                it.mapToString() to it.kategori.mapToString()
-            }
-        }
-
-        private fun Egenskap.mapToString(): String = when (this) {
+        internal fun Egenskap.mapToString(): String = when (this) {
             RISK_QA -> "RISK_QA"
             FORTROLIG_ADRESSE -> "FORTROLIG_ADRESSE"
             EGEN_ANSATT -> "EGEN_ANSATT"
@@ -63,7 +57,7 @@ enum class Egenskap(
             VERGEMÅL -> "VERGEMÅL"
         }
 
-        private fun Kategori.mapToString(): String {
+        internal fun Kategori.mapToString(): String {
             return when (this) {
                 Mottaker -> "Mottaker"
                 Inntektskilde -> "Inntektskilde"

@@ -13,8 +13,8 @@ import no.nav.helse.db.TotrinnsvurderingRepository
 import no.nav.helse.mediator.TilgangskontrollørForApi
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.oppgave.Egenskap
+import no.nav.helse.modell.oppgave.Egenskap.Companion.mapToString
 import no.nav.helse.modell.oppgave.Egenskap.Companion.tilgangsstyrteEgenskaper
-import no.nav.helse.modell.oppgave.Egenskap.Companion.toMap
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
@@ -23,6 +23,7 @@ import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload.Companion.lagre
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.graphql.schema.OppgaveTilBehandling
+import no.nav.helse.spesialist.api.graphql.schema.Oppgaveegenskap
 import no.nav.helse.spesialist.api.graphql.schema.Periodetype
 import no.nav.helse.spesialist.api.graphql.schema.Personnavn
 import no.nav.helse.spesialist.api.graphql.schema.Tildeling
@@ -216,7 +217,9 @@ internal class OppgaveMediator(
                 )
             },
             periodetype = periodetype(it.periodetype),
-            egenskaper = it.egenskaper.tilEgenskaper().toMap()
+            egenskaper = it.egenskaper.tilEgenskaper().map { egenskap ->
+                Oppgaveegenskap(egenskap.mapToString(), egenskap.kategori.mapToString())
+            }
         )
     }
 

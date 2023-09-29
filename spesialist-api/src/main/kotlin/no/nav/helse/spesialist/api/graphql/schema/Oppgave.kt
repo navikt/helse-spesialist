@@ -54,7 +54,12 @@ data class OppgaveTilBehandling(
     val inntektskilde: String,
     val tildeling: Tildeling?,
     val periodetype: Periodetype,
-    val egenskaper: Map<String, String>
+    val egenskaper: List<Oppgaveegenskap>
+)
+
+data class Oppgaveegenskap(
+    val egenskap: String,
+    val kategori: String
 )
 
 data class OppgaveForPeriodevisning(

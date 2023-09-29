@@ -9,14 +9,18 @@ import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
+import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.schema.FerdigstiltOppgave
 import no.nav.helse.spesialist.api.graphql.schema.OppgaveForOversiktsvisning
+import no.nav.helse.spesialist.api.graphql.schema.OppgaveTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.tilFerdigstilteOppgaver
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
+import no.nav.helse.spesialist.api.tildeling.Oppgavehåndterer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class OppgaverQuery(private val oppgaveApiDao: OppgaveApiDao) : Query {
+class OppgaverQuery(private val oppgaveApiDao: OppgaveApiDao, private val oppgavehåndterer: Oppgavehåndterer) : Query {
 
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
@@ -49,6 +53,18 @@ class OppgaverQuery(private val oppgaveApiDao: OppgaveApiDao) : Query {
         avsluttSporing(start)
 
         return DataFetcherResult.newResult<List<OppgaveForOversiktsvisning>>().data(oppgaver).build()
+    }
+
+    suspend fun oppgaver(env: DataFetchingEnvironment): DataFetcherResult<List<OppgaveTilBehandling>> {
+        sikkerLogg.info("Henter OppgaverTilBehandling")
+        val start = startSporing(env)
+        val saksbehandler = env.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(SAKSBEHANDLER.key).value
+        val oppgaver = withContext(Dispatchers.IO) {
+            oppgavehåndterer.oppgaver(saksbehandler)
+        }
+        avsluttSporing(start)
+
+        return DataFetcherResult.newResult<List<OppgaveTilBehandling>>().data(oppgaver).build()
     }
 
     private fun startSporing(env: DataFetchingEnvironment): Long {

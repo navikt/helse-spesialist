@@ -314,6 +314,7 @@ internal class OppgaveMediatorTest {
         assertEquals(SAKSBEHANDLEROID.toString(), oppgave.tildeling?.oid)
         assertEquals(true, oppgave.tildeling?.paaVent)
         assertEquals("FORSTEGANGSBEHANDLING", oppgave.periodetype.name)
+        assertEquals(EnumSet.allOf(Egenskap::class.java).size, oppgave.egenskaper.size)
     }
 
     private fun assertAntallOpptegnelser(antallOpptegnelser: Int) = verify(exactly = antallOpptegnelser) {
