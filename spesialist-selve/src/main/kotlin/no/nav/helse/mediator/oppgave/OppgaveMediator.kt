@@ -4,6 +4,7 @@ import java.sql.SQLException
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.Tilgangsgrupper
+import no.nav.helse.db.OppgaveFraDatabaseForVisning
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.TildelingDao
@@ -11,6 +12,9 @@ import no.nav.helse.db.TotrinnsvurderingFraDatabase
 import no.nav.helse.db.TotrinnsvurderingRepository
 import no.nav.helse.mediator.TilgangskontrollørForApi
 import no.nav.helse.modell.HendelseDao
+import no.nav.helse.modell.oppgave.Egenskap
+import no.nav.helse.modell.oppgave.Egenskap.Companion.tilgangsstyrteEgenskaper
+import no.nav.helse.modell.oppgave.Egenskap.Companion.toMap
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
@@ -18,6 +22,10 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload.Companion.lagre
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
+import no.nav.helse.spesialist.api.graphql.schema.OppgaveTilBehandling
+import no.nav.helse.spesialist.api.graphql.schema.Periodetype
+import no.nav.helse.spesialist.api.graphql.schema.Personnavn
+import no.nav.helse.spesialist.api.graphql.schema.Tildeling
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.tildeling.Oppgavehåndterer
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
@@ -112,6 +120,12 @@ internal class OppgaveMediator(
     override fun venterPåSaksbehandler(oppgaveId: Long): Boolean = oppgaveDao.venterPåSaksbehandler(oppgaveId)
     override fun erRiskoppgave(oppgaveId: Long): Boolean = oppgaveDao.erRiskoppgave(oppgaveId)
 
+    override fun oppgaver(saksbehandlerFraApi: SaksbehandlerFraApi): List<OppgaveTilBehandling> {
+        val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
+        val oppgaver = oppgaveDao.finnOppgaverForVisning().groupBy { it.egenskaper.tilEgenskaper() }
+        val oppgaverSaksbehandlerHarTilgangTil = oppgaver.filterKeys { saksbehandler.harTilgangTil(it.tilgangsstyrteEgenskaper()) }
+        return oppgaverSaksbehandlerHarTilgangTil.flatMap { it.value }.tilOppgaveTilBehandling()
+    }
 
     fun avbrytOppgaver(vedtaksperiodeId: UUID) {
         oppgaveDao.finnNyesteOppgaveId(vedtaksperiodeId)?.also {
@@ -177,4 +191,50 @@ internal class OppgaveMediator(
         ident = ident,
         tilgangskontroll = TilgangskontrollørForApi(grupper, tilgangsgrupper),
     )
+
+    private fun List<String>.tilEgenskaper(): List<Egenskap> = this.map { enumValueOf<Egenskap>(it) }
+
+    private fun List<OppgaveFraDatabaseForVisning>.tilOppgaveTilBehandling() = map {
+        OppgaveTilBehandling(
+            id = it.id.toString(),
+            opprettet = it.opprettet.toString(),
+            opprinneligSoknadsdato = it.opprinneligSøknadsdato.toString(),
+            vedtaksperiodeId = it.vedtaksperiodeId.toString(),
+            navn = Personnavn(
+                fornavn = it.navn.fornavn,
+                etternavn = it.navn.etternavn,
+                mellomnavn = it.navn.mellomnavn,
+            ),
+            aktorId = it.aktørId,
+            inntektskilde = inntektskilde(it.inntektskilde),
+            tildeling = it.tildelt?.let { tildelt ->
+                Tildeling(
+                    tildelt.navn,
+                    tildelt.epostadresse,
+                    tildelt.oid.toString(),
+                    it.påVent
+                )
+            },
+            periodetype = periodetype(it.periodetype),
+            egenskaper = it.egenskaper.tilEgenskaper().toMap()
+        )
+    }
+
+    private fun periodetype(periodetype: String): Periodetype {
+        return when (periodetype) {
+            "INFOTRYGDFORLENGELSE" -> Periodetype.INFOTRYGDFORLENGELSE
+            "FØRSTEGANGSBEHANDLING" -> Periodetype.FORSTEGANGSBEHANDLING
+            "OVERGANG_FRA_IT" -> Periodetype.OVERGANG_FRA_IT
+            "FORLENGELSE" -> Periodetype.FORLENGELSE
+            else -> throw IllegalArgumentException("$periodetype er ikke en gyldig periodetype")
+        }
+    }
+
+    private fun inntektskilde(inntektskilde: String): String {
+        return when (inntektskilde) {
+            "EN_ARBEIDSGIVER" -> "EN_ARBEIDSGIVER"
+            "FLERE_ARBEIDSGIVERE" -> "FLERE_ARBEIDSGIVERE"
+            else -> throw IllegalArgumentException("$inntektskilde er ikke en gyldig inntektskilde")
+        }
+    }
 }

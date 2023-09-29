@@ -23,6 +23,7 @@ import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtBeslutter
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtIRetur
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
+import no.nav.helse.spesialist.api.graphql.schema.OppgaveTilBehandling
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.notat.NyttNotatDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
@@ -76,6 +77,10 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
         override fun sendIRetur(oppgaveId: Long, besluttendeSaksbehandler: SaksbehandlerFraApi) {
             sendtIRetur = true
             sendIReturBlock()
+        }
+
+        override fun oppgaver(saksbehandlerFraApi: SaksbehandlerFraApi): List<OppgaveTilBehandling> {
+            TODO("Not yet implemented")
         }
 
         override fun leggPåVent(oppgaveId: Long): TildelingApiDto {

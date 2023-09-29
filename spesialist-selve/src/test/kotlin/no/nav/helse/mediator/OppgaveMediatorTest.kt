@@ -6,21 +6,28 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import java.time.LocalDateTime
+import java.util.EnumSet
 import java.util.UUID
+import no.nav.helse.Gruppe
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.db.OppgaveFraDatabase
+import no.nav.helse.db.OppgaveFraDatabaseForVisning
+import no.nav.helse.db.PersonnavnFraDatabase
 import no.nav.helse.db.Reservasjon
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingDao
+import no.nav.helse.idForGruppe
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.OppgaveInspektør.Companion.inspektør
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.kommando.TestHendelse
+import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Egenskap.RISK_QA
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
@@ -30,6 +37,7 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.testEnv
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -78,6 +86,7 @@ internal class OppgaveMediatorTest {
         tilgangsgrupper = Tilgangsgrupper(testEnv)
     )
     private val saksbehandlerFraDatabase = SaksbehandlerFraDatabase(SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT)
+    private fun saksbehandlerFraApi(tilganger: List<UUID> = emptyList()) = SaksbehandlerFraApi(SAKSBEHANDLEROID, SAKSBEHANDLEREPOST, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT, tilganger)
     private val saksbehandler = Saksbehandler(SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT, TilgangskontrollForTestHarIkkeTilgang)
     private fun søknadsoppgave(id: Long): Oppgave = Oppgave.nyOppgave(id, VEDTAKSPERIODE_ID, UTBETALING_ID, HENDELSE_ID, listOf(SØKNAD))
     private fun stikkprøveoppgave(id: Long): Oppgave = Oppgave.nyOppgave(id, VEDTAKSPERIODE_ID_2, UTBETALING_ID_2, UUID.randomUUID(), listOf(STIKKPRØVE))
@@ -248,6 +257,65 @@ internal class OppgaveMediatorTest {
         assertOpptegnelseIkkeOpprettet()
     }
 
+    @Test
+    fun `Hent oppgaver til visning`() {
+        every { oppgaveDao.finnOppgaverForVisning() } returns listOf(
+            oppgaveFraDatabaseForVisning(),
+            oppgaveFraDatabaseForVisning(),
+        )
+        val oppgaver = mediator.oppgaver(saksbehandlerFraApi())
+        assertEquals(2, oppgaver.size)
+    }
+
+    @Test
+    fun `Hent kun oppgaver til visning som saksbehandler har tilgang til`() {
+        every { oppgaveDao.finnOppgaverForVisning() } returns listOf(
+            oppgaveFraDatabaseForVisning(),
+            oppgaveFraDatabaseForVisning(),
+            oppgaveFraDatabaseForVisning(egenskaper = listOf("RISK_QA"),),
+        )
+        val oppgaver = mediator.oppgaver(saksbehandlerFraApi())
+        assertEquals(2, oppgaver.size)
+    }
+
+    @Test
+    fun `Mapper oppgave til visning riktig`() {
+        val opprettet = LocalDateTime.now()
+        val vedtaksperiodeId = UUID.randomUUID()
+        val opprinneligSøknadsdato = LocalDateTime.now()
+        every { oppgaveDao.finnOppgaverForVisning() } returns listOf(
+            oppgaveFraDatabaseForVisning(
+                oppgaveId = 1L,
+                aktørId = "1234567891011",
+                opprettet = opprettet,
+                opprinneligSøknadsdato = opprinneligSøknadsdato,
+                vedtaksperiodeId = vedtaksperiodeId,
+                egenskaper = EnumSet.allOf(Egenskap::class.java).map { it.name },
+                personnavnFraDatabase = PersonnavnFraDatabase("fornavn", "mellomnavn", "etternavn"),
+                tildelt = SaksbehandlerFraDatabase(SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT),
+                påVent = true
+            ),
+        )
+        val saksbehandler = saksbehandlerFraApi(tilganger = EnumSet.allOf(Gruppe::class.java).map { UUID.fromString(idForGruppe(it)) })
+        val oppgaver = mediator.oppgaver(saksbehandler)
+        assertEquals(1, oppgaver.size)
+        val oppgave = oppgaver.single()
+        assertEquals("1", oppgave.id)
+        assertEquals(opprettet.toString(), oppgave.opprettet)
+        assertEquals(opprinneligSøknadsdato.toString(), oppgave.opprinneligSoknadsdato)
+        assertEquals(vedtaksperiodeId.toString(), oppgave.vedtaksperiodeId)
+        assertEquals("fornavn", oppgave.navn.fornavn)
+        assertEquals("mellomnavn", oppgave.navn.mellomnavn)
+        assertEquals("etternavn", oppgave.navn.etternavn)
+        assertEquals("1234567891011", oppgave.aktorId)
+        assertEquals("EN_ARBEIDSGIVER", oppgave.inntektskilde)
+        assertEquals(SAKSBEHANDLERNAVN, oppgave.tildeling?.navn)
+        assertEquals(SAKSBEHANDLEREPOST, oppgave.tildeling?.epost)
+        assertEquals(SAKSBEHANDLEROID.toString(), oppgave.tildeling?.oid)
+        assertEquals(true, oppgave.tildeling?.paaVent)
+        assertEquals("FORSTEGANGSBEHANDLING", oppgave.periodetype.name)
+    }
+
     private fun assertAntallOpptegnelser(antallOpptegnelser: Int) = verify(exactly = antallOpptegnelser) {
         opptegnelseDao.opprettOpptegnelse(
             eq(TESTHENDELSE.fødselsnummer()),
@@ -272,6 +340,31 @@ internal class OppgaveMediatorTest {
             assertBlock(it)
         }
     }
+
+    private fun oppgaveFraDatabaseForVisning(
+        oppgaveId: Long = nextLong(),
+        egenskaper: List<String> = emptyList(),
+        aktørId: String = nextLong(1000000000000, 2000000000000).toString(),
+        opprettet: LocalDateTime = LocalDateTime.now(),
+        opprinneligSøknadsdato: LocalDateTime = LocalDateTime.now(),
+        vedtaksperiodeId: UUID = UUID.randomUUID(),
+        personnavnFraDatabase: PersonnavnFraDatabase = PersonnavnFraDatabase("navn", "mellomnavn", "etternavn"),
+        tildelt: SaksbehandlerFraDatabase? = null,
+        påVent: Boolean = false
+    ) =
+        OppgaveFraDatabaseForVisning(
+            id = oppgaveId,
+            aktørId = aktørId,
+            vedtaksperiodeId = vedtaksperiodeId,
+            navn = personnavnFraDatabase,
+            egenskaper = egenskaper,
+            tildelt = tildelt,
+            påVent = påVent,
+            periodetype = "FØRSTEGANGSBEHANDLING",
+            opprettet = opprettet,
+            opprinneligSøknadsdato = opprinneligSøknadsdato,
+            inntektskilde = "EN_ARBEIDSGIVER"
+        )
 
     private fun oppgaveFraDatabase(oppgaveId: Long = OPPGAVE_ID, tildelt: Boolean = false) = OppgaveFraDatabase(
         id = oppgaveId,

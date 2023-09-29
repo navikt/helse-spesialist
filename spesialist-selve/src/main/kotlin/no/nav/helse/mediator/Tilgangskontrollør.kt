@@ -15,9 +15,9 @@ import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 
 internal abstract class MicrosoftTilgangskontroll(private val tilgangsgrupper: Tilgangsgrupper): Tilgangskontroll {
     final override fun harTilgangTil(oid: UUID, egenskaper: Collection<Egenskap>): Boolean =
-        harTilgangTil(oid, egenskaper.tilTilgangsgrupper())
+        egenskaper.isEmpty() || harTilgangTil(oid, egenskaper.tilTilgangsgrupper())
 
-    abstract fun harTilgangTil(oid: UUID, grupper: List<UUID>): Boolean
+    protected abstract fun harTilgangTil(oid: UUID, grupper: List<UUID>): Boolean
 
     private fun Collection<Egenskap>.tilTilgangsgrupper() = map { egenskap ->
         when (egenskap) {

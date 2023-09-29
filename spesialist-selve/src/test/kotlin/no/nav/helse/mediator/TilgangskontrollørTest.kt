@@ -17,6 +17,7 @@ import no.nav.helse.modell.oppgave.Egenskap.SPESIALSAK
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.testEnv
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 
@@ -34,6 +35,11 @@ class TilgangskontrollørTest {
     }
 
     private val tilgangskontrollørForReservasjon = TilgangskontrollørForReservasjon(gruppekontroll, tilgangsgrupper)
+
+    @Test
+    fun `Har tilgang hvis liste er tom`() {
+        assertTrue(tilgangskontrollørForReservasjon.harTilgangTil(UUID.randomUUID(), emptyList()))
+    }
 
     @Test
     fun `Mapper EGEN_ANSATT til gruppeId for egenansatt`() {

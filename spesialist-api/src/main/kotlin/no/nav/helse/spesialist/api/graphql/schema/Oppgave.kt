@@ -44,6 +44,19 @@ data class OppgaveForOversiktsvisning(
     val spesialsak: Boolean,
 )
 
+data class OppgaveTilBehandling(
+    val id: String,
+    val opprettet: DateTimeString,
+    val opprinneligSoknadsdato: DateTimeString,
+    val vedtaksperiodeId: UUIDString,
+    val navn: Personnavn,
+    val aktorId: String,
+    val inntektskilde: String,
+    val tildeling: Tildeling?,
+    val periodetype: Periodetype,
+    val egenskaper: Map<String, String>
+)
+
 data class OppgaveForPeriodevisning(
     val id: String,
 )

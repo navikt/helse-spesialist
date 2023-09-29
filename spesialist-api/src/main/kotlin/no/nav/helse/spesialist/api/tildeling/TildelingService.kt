@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.api.tildeling
 import java.util.UUID
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeTildelt
+import no.nav.helse.spesialist.api.graphql.schema.OppgaveTilBehandling
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
@@ -18,6 +19,7 @@ interface Oppgavehåndterer {
     fun fjernPåVent(oppgaveId: Long): TildelingApiDto
     fun venterPåSaksbehandler(oppgaveId: Long): Boolean
     fun erRiskoppgave(oppgaveId: Long): Boolean
+    fun oppgaver(saksbehandlerFraApi: SaksbehandlerFraApi): List<OppgaveTilBehandling>
 }
 
 class TildelingService(
