@@ -49,7 +49,8 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
         oid = SAKSBEHANDLER_OID,
         navn = SAKSBEHANDLER_NAVN,
         epost = SAKSBEHANDLER_EPOST,
-        ident = SAKSBEHANDLER_IDENT
+        ident = SAKSBEHANDLER_IDENT,
+        grupper = emptyList()
     )
 
     @BeforeEach
