@@ -3,11 +3,13 @@ package no.nav.helse.mediator.oppgave
 import java.sql.SQLException
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
+import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingFraDatabase
 import no.nav.helse.db.TotrinnsvurderingRepository
+import no.nav.helse.mediator.TilgangskontrollørForApi
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.saksbehandler.Saksbehandler
@@ -34,7 +36,8 @@ internal class OppgaveMediator(
     private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
     private val saksbehandlerRepository: SaksbehandlerRepository,
     private val rapidsConnection: RapidsConnection,
-    private val tilgangskontroll: Tilgangskontroll
+    private val tilgangskontroll: Tilgangskontroll,
+    private val tilgangsgrupper: Tilgangsgrupper
 ): Oppgavehåndterer, Oppgavefinner {
     private val logg = LoggerFactory.getLogger(this::class.java)
     private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
@@ -172,6 +175,6 @@ internal class OppgaveMediator(
         oid = oid,
         navn = navn,
         ident = ident,
-        tilgangskontroll = tilgangskontroll,
+        tilgangskontroll = TilgangskontrollørForApi(grupper, tilgangsgrupper),
     )
 }

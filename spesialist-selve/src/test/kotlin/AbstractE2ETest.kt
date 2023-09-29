@@ -33,6 +33,7 @@ import no.nav.helse.Testdata.SNAPSHOT
 import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.Testdata.snapshot
+import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.TildelingDao
@@ -67,6 +68,7 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spleis.graphql.HentSnapshot
+import no.nav.helse.testEnv
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -106,7 +108,20 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     protected val meldingsfabrikk get() = Testmeldingfabrikk(FØDSELSNUMMER, AKTØR)
 
-    protected val oppgaveMediator = OppgaveMediator(hendelseDao, oppgaveDao, tildelingDao, reservasjonDao, opptegnelseDao, totrinnsvurderingDao, saksbehandlerDao, testRapid, TilgangskontrollForTestHarIkkeTilgang)
+    private val tilgangsgrupper = Tilgangsgrupper(testEnv)
+
+    protected val oppgaveMediator = OppgaveMediator(
+        hendelseDao = hendelseDao,
+        oppgaveDao = oppgaveDao,
+        tildelingDao = tildelingDao,
+        reservasjonDao = reservasjonDao,
+        opptegnelseDao = opptegnelseDao,
+        totrinnsvurderingRepository = totrinnsvurderingDao,
+        saksbehandlerRepository = saksbehandlerDao,
+        rapidsConnection = testRapid,
+        tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
+        tilgangsgrupper = tilgangsgrupper
+    )
     private val godkjenningMediator =
         GodkjenningMediator(vedtakDao, opptegnelseDao, oppgaveDao, utbetalingDao, hendelseDao)
 

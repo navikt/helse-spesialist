@@ -44,7 +44,7 @@ import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.OverstyringMediator
 import no.nav.helse.mediator.SaksbehandlerMediator
-import no.nav.helse.mediator.Tilgangskontrollør
+import no.nav.helse.mediator.TilgangskontrollørForReservasjon
 import no.nav.helse.mediator.api.GodkjenningService
 import no.nav.helse.mediator.api.totrinnsvurderingApi
 import no.nav.helse.mediator.oppgave.OppgaveDao
@@ -275,7 +275,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     }
 
     private val tilgangsgrupper = Tilgangsgrupper(System.getenv())
-    private val tilgangskontrollør = Tilgangskontrollør(msGraphClient, tilgangsgrupper)
+    private val tilgangskontrollørForReservasjon = TilgangskontrollørForReservasjon(msGraphClient, tilgangsgrupper)
 
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule {
@@ -402,7 +402,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             totrinnsvurderingRepository = totrinnsvurderingDao,
             saksbehandlerRepository = saksbehandlerDao,
             rapidsConnection = rapidsConnection,
-            tilgangskontroll = tilgangskontrollør,
+            tilgangskontroll = tilgangskontrollørForReservasjon,
+            tilgangsgrupper = tilgangsgrupper
         )
         hendelseMediator = HendelseMediator(
             dataSource = dataSource,
@@ -411,7 +412,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             hendelsefabrikk = hendelsefabrikk
         )
         saksbehandlerMediator =
-            SaksbehandlerMediator(dataSource, versjonAvKode(env), rapidsConnection, tilgangskontrollør)
+            SaksbehandlerMediator(dataSource, versjonAvKode(env), rapidsConnection, tilgangskontrollørForReservasjon)
         oppgavemelder = Oppgavemelder(hendelseDao, oppgaveDao, rapidsConnection)
         tildelingService = TildelingService(
             tildelingApiDao,

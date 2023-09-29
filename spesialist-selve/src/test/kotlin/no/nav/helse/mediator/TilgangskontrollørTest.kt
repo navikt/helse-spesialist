@@ -1,9 +1,11 @@
 package no.nav.helse.mediator
 
+import java.util.EnumSet
 import java.util.UUID
 import no.nav.helse.Gruppe
 import no.nav.helse.Gruppe.KODE7
 import no.nav.helse.Gruppe.SKJERMEDE
+import no.nav.helse.Gruppekontroll
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.idForGruppe
 import no.nav.helse.modell.oppgave.Egenskap
@@ -31,47 +33,47 @@ class TilgangskontrollørTest {
         }
     }
 
-    private val tilgangskontrollør = Tilgangskontrollør(gruppekontroll, tilgangsgrupper)
+    private val tilgangskontrollørForReservasjon = TilgangskontrollørForReservasjon(gruppekontroll, tilgangsgrupper)
 
     @Test
     fun `Mapper EGEN_ANSATT til gruppeId for egenansatt`() {
         val saksbehandlerOid = UUID.randomUUID()
-        tilgangskontrollør.harTilgangTil(saksbehandlerOid, listOf(EGEN_ANSATT))
+        tilgangskontrollørForReservasjon.harTilgangTil(saksbehandlerOid, listOf(EGEN_ANSATT))
         assertEquals(listOf(idForGruppe(SKJERMEDE)), forespørsler[saksbehandlerOid])
     }
 
     @Test
     fun `Mapper RISK_QA til gruppeId for risk QA`() {
         val saksbehandlerOid = UUID.randomUUID()
-        tilgangskontrollør.harTilgangTil(saksbehandlerOid, listOf(RISK_QA))
+        tilgangskontrollørForReservasjon.harTilgangTil(saksbehandlerOid, listOf(RISK_QA))
         assertEquals(listOf(idForGruppe(Gruppe.RISK_QA)), forespørsler[saksbehandlerOid])
     }
 
     @Test
     fun `Mapper FORTROLIG_ADRESSE til gruppeId for kode 7`() {
         val saksbehandlerOid = UUID.randomUUID()
-        tilgangskontrollør.harTilgangTil(saksbehandlerOid, listOf(FORTROLIG_ADRESSE))
+        tilgangskontrollørForReservasjon.harTilgangTil(saksbehandlerOid, listOf(FORTROLIG_ADRESSE))
         assertEquals(listOf(idForGruppe(KODE7)), forespørsler[saksbehandlerOid])
     }
 
     @Test
     fun `Mapper BESLUTTER til gruppeId for beslutter`() {
         val saksbehandlerOid = UUID.randomUUID()
-        tilgangskontrollør.harTilgangTil(saksbehandlerOid, listOf(BESLUTTER))
+        tilgangskontrollørForReservasjon.harTilgangTil(saksbehandlerOid, listOf(BESLUTTER))
         assertEquals(listOf(idForGruppe(Gruppe.BESLUTTER)), forespørsler[saksbehandlerOid])
     }
 
     @Test
     fun `Mapper STIKKPRØVE til gruppeId for stikkprøve`() {
         val saksbehandlerOid = UUID.randomUUID()
-        tilgangskontrollør.harTilgangTil(saksbehandlerOid, listOf(STIKKPRØVE))
+        tilgangskontrollørForReservasjon.harTilgangTil(saksbehandlerOid, listOf(STIKKPRØVE))
         assertEquals(listOf(idForGruppe(Gruppe.STIKKPRØVE)), forespørsler[saksbehandlerOid])
     }
 
     @Test
     fun `Mapper SPESIALSAK til gruppeId for spesialsak`() {
         val saksbehandlerOid = UUID.randomUUID()
-        tilgangskontrollør.harTilgangTil(saksbehandlerOid, listOf(SPESIALSAK))
+        tilgangskontrollørForReservasjon.harTilgangTil(saksbehandlerOid, listOf(SPESIALSAK))
         assertEquals(listOf(idForGruppe(Gruppe.SPESIALSAK)), forespørsler[saksbehandlerOid])
     }
 
@@ -80,8 +82,24 @@ class TilgangskontrollørTest {
         val saksbehandlerOid = UUID.randomUUID()
         Egenskap.alleTilgangsstyrteEgenskaper.forEach {
             assertDoesNotThrow {
-                tilgangskontrollør.harTilgangTil(saksbehandlerOid, listOf(it))
+                tilgangskontrollørForReservasjon.harTilgangTil(saksbehandlerOid, listOf(it))
             }
         }
+    }
+
+    @Test
+    fun `har tilgang dersom saksbehandler har tilstrekkelige tilganger`() {
+        val saksbehandlergrupper = EnumSet.allOf(Gruppe::class.java).map { UUID.fromString(idForGruppe(it)) }
+        val tilgangskontrollørForApi = TilgangskontrollørForApi(saksbehandlergrupper, tilgangsgrupper)
+        Egenskap.alleTilgangsstyrteEgenskaper.forEach {
+            assertEquals(true, tilgangskontrollørForApi.harTilgangTil(UUID.randomUUID(), listOf(it)))
+        }
+    }
+
+    @Test
+    fun `har ikke tilgang dersom saksbehandler mangler minst én tilgang`() {
+        val saksbehandlergrupper = EnumSet.allOf(Gruppe::class.java).map { UUID.fromString(idForGruppe(it)) }.dropLast(1)
+        val tilgangskontrollørForApi = TilgangskontrollørForApi(saksbehandlergrupper, tilgangsgrupper)
+        assertEquals(false, tilgangskontrollørForApi.harTilgangTil(UUID.randomUUID(), Egenskap.alleTilgangsstyrteEgenskaper))
     }
 }

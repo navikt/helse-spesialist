@@ -7,6 +7,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
+import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.db.OppgaveFraDatabase
 import no.nav.helse.db.Reservasjon
 import no.nav.helse.db.ReservasjonDao
@@ -29,6 +30,7 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
+import no.nav.helse.testEnv
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -73,6 +75,7 @@ internal class OppgaveMediatorTest {
         saksbehandlerRepository = saksbehandlerDao,
         rapidsConnection = testRapid,
         tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
+        tilgangsgrupper = Tilgangsgrupper(testEnv)
     )
     private val saksbehandlerFraDatabase = SaksbehandlerFraDatabase(SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT)
     private val saksbehandler = Saksbehandler(SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT, TilgangskontrollForTestHarIkkeTilgang)

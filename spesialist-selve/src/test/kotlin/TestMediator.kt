@@ -1,5 +1,6 @@
 import java.util.UUID
 import javax.sql.DataSource
+import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.TildelingDao
@@ -28,6 +29,7 @@ import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
+import no.nav.helse.testEnv
 
 internal class TestMediator(
     testRapid: TestRapid,
@@ -52,6 +54,7 @@ internal class TestMediator(
         utbetalingDao,
         hendelseDao,
     )
+    private val tilgangsgrupper = Tilgangsgrupper(testEnv)
     private val oppgaveMediator = OppgaveMediator(
         hendelseDao = hendelseDao,
         oppgaveDao = OppgaveDao(dataSource),
@@ -61,7 +64,8 @@ internal class TestMediator(
         totrinnsvurderingRepository = totrinnsvurderingDao,
         saksbehandlerRepository = saksbehandlerDao,
         rapidsConnection = testRapid,
-        TilgangskontrollForTestHarIkkeTilgang,
+        tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
+        tilgangsgrupper = tilgangsgrupper
     )
     private val overstyringMediator = OverstyringMediator(testRapid)
     private val snapshotMediator = SnapshotMediator(SnapshotApiDao(dataSource), snapshotClient)

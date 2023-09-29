@@ -10,9 +10,12 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.path
 import java.util.UUID
-import no.nav.helse.mediator.Gruppekontroll
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.spesialist.api.client.AccessTokenClient
+
+internal interface Gruppekontroll {
+    suspend fun erIGrupper(oid: UUID, gruppeIder: List<UUID>): Boolean
+}
 
 class MsGraphClient(
     private val httpClient: HttpClient,
