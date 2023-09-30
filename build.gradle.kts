@@ -89,10 +89,6 @@ subprojects {
     kotlin {
         jvmToolchain(17)
     }
-    java {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
     tasks {
         withType<Test> {
             useJUnitPlatform()
@@ -102,7 +98,7 @@ subprojects {
                 exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
             }
         }
-        withType<Wrapper> {
+        withType<Wrapper>() {
             gradleVersion = "8.1"
         }
     }
