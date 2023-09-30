@@ -1,18 +1,16 @@
 val junitJupiterVersion = "5.10.0"
 val ktorVersion = "2.3.4"
 val graphqlKotlinVersion = "7.0.1"
-val jvmTargetVersion = "17"
-val rapidsAndRiversVersion = "2023041310341681374880.67ced5ad4dda"
+val rapidsAndRiversVersion = "2023093008351696055717.ffdec6aede3d"
 val logbackSyslog4jVersion = "1.0.0"
 val hikariCPVersion = "5.0.1"
 val flywayCoreVersion = "9.22.2"
 val kotliqueryVersion = "1.9.0"
-val kotlinTestVersion = "1.6.21"
 val mockkVersion = "1.13.8"
 val postgresqlVersion = "42.6.0"
 
 plugins {
-    kotlin("jvm") version "1.9.0"
+    kotlin("jvm") version "1.9.10"
 }
 
 val githubUser: String by project
