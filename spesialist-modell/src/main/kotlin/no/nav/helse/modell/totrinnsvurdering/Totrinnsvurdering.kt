@@ -18,15 +18,15 @@ class Totrinnsvurdering(
 ) {
     private val erBeslutteroppgave: Boolean get() = !erRetur && saksbehandler != null
 
-    fun accept(totrinnsvurderingVisitor: TotrinnsvurderingVisitor) {
+    internal fun accept(totrinnsvurderingVisitor: TotrinnsvurderingVisitor) {
         totrinnsvurderingVisitor.visitTotrinnsvurdering(vedtaksperiodeId, erRetur, saksbehandler, beslutter, utbetalingId, opprettet, oppdatert)
     }
 
-    fun tidligereBeslutter() = beslutter
+    internal fun tidligereBeslutter() = beslutter
 
-    fun opprinneligSaksbehandler() = saksbehandler
+    internal fun opprinneligSaksbehandler() = saksbehandler
 
-    fun sendTilBeslutter(oppgaveId: Long, behandlendeSaksbehandler: Saksbehandler) {
+    internal fun sendTilBeslutter(oppgaveId: Long, behandlendeSaksbehandler: Saksbehandler) {
         if (erBeslutteroppgave) throw OppgaveAlleredeSendtBeslutter(oppgaveId)
         if (behandlendeSaksbehandler == beslutter) throw OppgaveKreverVurderingAvToSaksbehandlere(oppgaveId)
 
@@ -35,7 +35,7 @@ class Totrinnsvurdering(
         if (erRetur) erRetur = false
     }
 
-    fun sendIRetur(oppgaveId: Long, beslutter: Saksbehandler) {
+    internal fun sendIRetur(oppgaveId: Long, beslutter: Saksbehandler) {
         if (!erBeslutteroppgave) throw OppgaveAlleredeSendtIRetur(oppgaveId)
         if (beslutter == saksbehandler) throw OppgaveKreverVurderingAvToSaksbehandlere(oppgaveId)
 
@@ -44,7 +44,7 @@ class Totrinnsvurdering(
         erRetur = true
     }
 
-    fun ferdigstill(utbetalingId: UUID) {
+    internal fun ferdigstill(utbetalingId: UUID) {
         this.utbetalingId = utbetalingId
     }
 

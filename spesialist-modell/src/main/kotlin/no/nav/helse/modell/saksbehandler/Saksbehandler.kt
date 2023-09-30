@@ -29,10 +29,10 @@ class Saksbehandler(
         visitor.visitSaksbehandler(epostadresse, oid, navn, ident)
     }
 
-    fun tildeling(påVent: Boolean) = Tildeling(navn = navn, epost = epostadresse, oid = oid, påVent = påVent)
-
     fun harTilgangTil(egenskaper: List<Egenskap>): Boolean =
         tilgangskontroll.harTilgangTil(oid, egenskaper)
+
+    internal fun tildeling(påVent: Boolean) = Tildeling(navn = navn, epost = epostadresse, oid = oid, påVent = påVent)
 
     internal fun håndter(hendelse: OverstyrtTidslinje) {
         val event = hendelse.byggEvent()
