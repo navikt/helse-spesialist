@@ -3,7 +3,6 @@ package no.nav.helse.modell.saksbehandler
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.modell.saksbehandler.handlinger.SubsumsjonEvent
-import no.nav.helse.rapids_rivers.JsonMessage
 
 interface SaksbehandlerObserver {
     fun tidslinjeOverstyrt(fødselsnummer: String, event: OverstyrtTidslinjeEvent) {}
@@ -24,19 +23,6 @@ data class OverstyrtInntektOgRefusjonEvent(
     val saksbehandlerIdent: String,
     val saksbehandlerEpost: String
 ) {
-    fun somJsonMessage() = JsonMessage.newMessage(
-        "saksbehandler_overstyrer_inntekt_og_refusjon",
-        listOfNotNull(
-            "aktørId" to aktørId,
-            "fødselsnummer" to fødselsnummer,
-            "skjæringstidspunkt" to skjæringstidspunkt,
-            "arbeidsgivere" to arbeidsgivere,
-            "saksbehandlerOid" to saksbehandlerOid,
-            "saksbehandlerNavn" to saksbehandlerNavn,
-            "saksbehandlerIdent" to saksbehandlerIdent,
-            "saksbehandlerEpost" to saksbehandlerEpost,
-        ).toMap()
-    )
 
     data class OverstyrtArbeidsgiverEvent(
         val organisasjonsnummer: String,
@@ -71,19 +57,6 @@ data class OverstyrtTidslinjeEvent(
     val organisasjonsnummer: String,
     val dager: List<OverstyrtTidslinjeEventDag>,
 ) {
-    //TODO: JsonMessage burde ikke være kjent for modell, bør mappes om fra Event til JsonMessage i mediator
-    fun somJsonMessage(): JsonMessage = JsonMessage.newMessage(
-        eventName(), mutableMapOf(
-            "@id" to id,
-            "fødselsnummer" to fødselsnummer,
-            "aktørId" to aktørId,
-            "organisasjonsnummer" to organisasjonsnummer,
-            "dager" to dager,
-        )
-    )
-
-    fun eventName() = "overstyr_tidslinje"
-
     data class OverstyrtTidslinjeEventDag(
         val dato: LocalDate,
         val type: String,
@@ -103,18 +76,6 @@ data class OverstyrtArbeidsforholdEvent(
     val skjæringstidspunkt: LocalDate,
     val overstyrteArbeidsforhold: List<Arbeidsforhold>,
 ) {
-    fun somJsonMessage() = JsonMessage.newMessage(
-        "saksbehandler_overstyrer_arbeidsforhold", mapOf(
-            "fødselsnummer" to fødselsnummer,
-            "aktørId" to aktørId,
-            "saksbehandlerOid" to saksbehandlerOid,
-            "saksbehandlerNavn" to saksbehandlerNavn,
-            "saksbehandlerIdent" to saksbehandlerIdent,
-            "saksbehandlerEpost" to saksbehandlerEpost,
-            "skjæringstidspunkt" to skjæringstidspunkt,
-            "overstyrteArbeidsforhold" to overstyrteArbeidsforhold,
-        )
-    )
 
     data class Arbeidsforhold(
         val orgnummer: String,
@@ -134,19 +95,6 @@ data class SkjønnsfastsattSykepengegrunnlagEvent(
     val skjæringstidspunkt: LocalDate,
     val arbeidsgivere: List<SkjønnsfastsattArbeidsgiver>
 ) {
-    fun somJsonMessage() = JsonMessage.newMessage(
-        "saksbehandler_skjonnsfastsetter_sykepengegrunnlag",
-        listOfNotNull(
-            "aktørId" to aktørId,
-            "fødselsnummer" to fødselsnummer,
-            "skjæringstidspunkt" to skjæringstidspunkt,
-            "arbeidsgivere" to arbeidsgivere,
-            "saksbehandlerOid" to saksbehandlerOid,
-            "saksbehandlerNavn" to saksbehandlerNavn,
-            "saksbehandlerIdent" to saksbehandlerIdent,
-            "saksbehandlerEpost" to saksbehandlerEpost,
-        ).toMap()
-    )
 
     data class SkjønnsfastsattArbeidsgiver(
         val organisasjonsnummer: String,
@@ -173,24 +121,4 @@ data class AnnullertUtbetalingEvent(
     val fagsystemId: String,
     val begrunnelser: List<String>,
     val kommentar: String?
-) {
-    fun somJsonMessage(): JsonMessage {
-        return JsonMessage.newMessage(
-            "annullering", mutableMapOf(
-                "fødselsnummer" to fødselsnummer,
-                "organisasjonsnummer" to organisasjonsnummer,
-                "aktørId" to aktørId,
-                "saksbehandler" to mapOf(
-                    "epostaddresse" to saksbehandlerEpost,
-                    "oid" to saksbehandlerOid,
-                    "navn" to saksbehandlerNavn,
-                    "ident" to saksbehandlerIdent,
-                ),
-                "fagsystemId" to fagsystemId,
-                "begrunnelser" to begrunnelser,
-            ).apply {
-                compute("kommentar") { _, _ -> kommentar }
-            }
-        )
-    }
-}
+)

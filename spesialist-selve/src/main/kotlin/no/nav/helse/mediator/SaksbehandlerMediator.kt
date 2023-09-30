@@ -6,15 +6,10 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.mediator.overstyring.Overstyringlagrer
+import no.nav.helse.mediator.overstyring.Saksbehandlingsmelder
 import no.nav.helse.mediator.saksbehandler.SaksbehandlerLagrer
 import no.nav.helse.modell.overstyring.OverstyringDao
-import no.nav.helse.modell.saksbehandler.AnnullertUtbetalingEvent
-import no.nav.helse.modell.saksbehandler.OverstyrtArbeidsforholdEvent
-import no.nav.helse.modell.saksbehandler.OverstyrtInntektOgRefusjonEvent
-import no.nav.helse.modell.saksbehandler.OverstyrtTidslinjeEvent
 import no.nav.helse.modell.saksbehandler.Saksbehandler
-import no.nav.helse.modell.saksbehandler.SaksbehandlerObserver
-import no.nav.helse.modell.saksbehandler.SkjønnsfastsattSykepengegrunnlagEvent
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.modell.saksbehandler.handlinger.Annullering
 import no.nav.helse.modell.saksbehandler.handlinger.Handling
@@ -56,7 +51,7 @@ class SaksbehandlerMediator(
     private val versjonAvKode: String,
     private val rapidsConnection: RapidsConnection,
     private val tilgangskontroll: Tilgangskontroll,
-) : SaksbehandlerObserver, Saksbehandlerhåndterer {
+): Saksbehandlerhåndterer {
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
     private val generasjonRepository = ApiGenerasjonRepository(dataSource)
     private val varselRepository = ApiVarselRepository(dataSource)
@@ -71,7 +66,7 @@ class SaksbehandlerMediator(
         val modellhandling = handlingFraApi.tilHandling()
         SaksbehandlerLagrer(saksbehandlerDao).lagre(saksbehandler)
         tell(modellhandling)
-        saksbehandler.register(this)
+        saksbehandler.register(Saksbehandlingsmelder(rapidsConnection))
         saksbehandler.register(Subsumsjonsmelder(versjonAvKode, rapidsConnection))
         val handlingId = UUID.randomUUID()
 
@@ -100,37 +95,6 @@ class SaksbehandlerMediator(
             this.lagre(handling, saksbehandler.oid())
         }
         handling.utførAv(saksbehandler)
-    }
-
-    override fun tidslinjeOverstyrt(fødselsnummer: String, event: OverstyrtTidslinjeEvent) {
-        val json = event.somJsonMessage().toJson()
-        logg.info("Publiserer ${event.eventName()}")
-        sikkerlogg.info(
-            "Publiserer ${event.eventName()} for {}:\n{}",
-            kv("fødselsnummer", fødselsnummer),
-            kv("json", json)
-        )
-        rapidsConnection.publish(fødselsnummer, json)
-    }
-
-    override fun inntektOgRefusjonOverstyrt(fødselsnummer: String, event: OverstyrtInntektOgRefusjonEvent) {
-        val message = event.somJsonMessage()
-        rapidsConnection.publish(fødselsnummer, message.toJson())
-    }
-
-    override fun arbeidsforholdOverstyrt(fødselsnummer: String, event: OverstyrtArbeidsforholdEvent) {
-        val message = event.somJsonMessage()
-        rapidsConnection.publish(fødselsnummer, message.toJson())
-    }
-
-    override fun sykepengegrunnlagSkjønnsfastsatt(fødselsnummer: String, event: SkjønnsfastsattSykepengegrunnlagEvent) {
-        val message = event.somJsonMessage()
-        rapidsConnection.publish(fødselsnummer, message.toJson())
-    }
-
-    override fun utbetalingAnnullert(fødselsnummer: String, event: AnnullertUtbetalingEvent) {
-        val message = event.somJsonMessage()
-        rapidsConnection.publish(fødselsnummer, message.toJson())
     }
 
     override fun opprettAbonnement(saksbehandlerFraApi: SaksbehandlerFraApi, personidentifikator: String) {
@@ -217,7 +181,6 @@ class SaksbehandlerMediator(
 
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-        private val logg = LoggerFactory.getLogger(this::class.java)
     }
 
     private fun SaksbehandlerFraApi.tilSaksbehandler() = Saksbehandler(epost, oid, navn, ident, tilgangskontroll)
