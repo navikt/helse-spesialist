@@ -1,11 +1,11 @@
 package no.nav.helse.mediator
 
 import DatabaseIntegrationTest
-import TilgangskontrollForTestHarIkkeTilgang
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.TestRapidHelpers.hendelser
+import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.rapids_rivers.asLocalDate
@@ -21,6 +21,7 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHan
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi.SkjønnsfastsettingstypeDto
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
+import no.nav.helse.testEnv
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -32,7 +33,7 @@ import org.junit.jupiter.api.assertThrows
 
 internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
     private val testRapid = TestRapid()
-    private val mediator = SaksbehandlerMediator(dataSource, "versjonAvKode", testRapid, TilgangskontrollForTestHarIkkeTilgang)
+    private val mediator = SaksbehandlerMediator(dataSource, "versjonAvKode", testRapid, Tilgangsgrupper(testEnv))
 
     private val AKTØR_ID = "1234567891011"
     private val FØDSELSNUMMER = "12345678910"

@@ -3,6 +3,7 @@ package no.nav.helse.mediator
 import java.util.UUID
 import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments.kv
+import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.mediator.overstyring.Overstyringlagrer
@@ -10,7 +11,6 @@ import no.nav.helse.mediator.overstyring.Saksbehandlingsmelder
 import no.nav.helse.mediator.saksbehandler.SaksbehandlerLagrer
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.saksbehandler.Saksbehandler
-import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.modell.saksbehandler.handlinger.Annullering
 import no.nav.helse.modell.saksbehandler.handlinger.Handling
 import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
@@ -46,11 +46,11 @@ import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode.Companion.vurderVarsler
 import no.nav.helse.spesialist.api.vedtaksperiode.ApiGenerasjonRepository
 import org.slf4j.LoggerFactory
 
-class SaksbehandlerMediator(
+internal class SaksbehandlerMediator(
     dataSource: DataSource,
     private val versjonAvKode: String,
     private val rapidsConnection: RapidsConnection,
-    private val tilgangskontroll: Tilgangskontroll,
+    private val tilgangsgrupper: Tilgangsgrupper,
 ): Saksbehandlerhåndterer {
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
     private val generasjonRepository = ApiGenerasjonRepository(dataSource)
@@ -183,7 +183,8 @@ class SaksbehandlerMediator(
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
 
-    private fun SaksbehandlerFraApi.tilSaksbehandler() = Saksbehandler(epost, oid, navn, ident, tilgangskontroll)
+    private fun SaksbehandlerFraApi.tilSaksbehandler() =
+        Saksbehandler(epost, oid, navn, ident, TilgangskontrollørForApi(this.grupper, tilgangsgrupper))
 
     private fun HandlingFraApi.tilHandling(): Handling {
         return when (this) {

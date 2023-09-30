@@ -1,7 +1,6 @@
 package no.nav.helse.integrationtest
 
 import AbstractIntegrationTest
-import TilgangskontrollForTestHarIkkeTilgang
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -15,6 +14,7 @@ import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.Testdata.ORGNR_GHOST
+import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.januar
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.api.AbstractApiTest
@@ -24,6 +24,7 @@ import no.nav.helse.spesialist.api.endepunkter.overstyringApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi.OverstyrDagFraApi
+import no.nav.helse.testEnv
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -35,7 +36,7 @@ import org.junit.jupiter.api.Test
 internal class OverstyringIntegrationTest : AbstractIntegrationTest() {
 
     protected val saksbehandlerMediator =
-        SaksbehandlerMediator(dataSource, "versjonAvKode", testRapid, TilgangskontrollForTestHarIkkeTilgang)
+        SaksbehandlerMediator(dataSource, "versjonAvKode", testRapid, Tilgangsgrupper(testEnv))
 
     @Test
     fun `overstyr tidslinje`() {

@@ -26,7 +26,6 @@ import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.Testdata.snapshot
 import no.nav.helse.januar
-import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
@@ -84,7 +83,6 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
     protected lateinit var sisteGodkjenningsbehovId: UUID
     internal val dataSource = AbstractDatabaseTest.dataSource
     private val testMediator = TestMediator(testRapid, snapshotClient, dataSource)
-    private val saksbehandlerMediator = SaksbehandlerMediator(dataSource, "versjonAvKode", testRapid, TilgangskontrollForTestHarIkkeTilgang)
     protected val SAKSBEHANDLER_OID: UUID = UUID.randomUUID()
     protected val SAKSBEHANDLER_EPOST = "augunn.saksbehandler@nav.no"
     protected val SAKSBEHANDLER_IDENT = "S199999"
@@ -1061,7 +1059,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
     ) {
         håndterOverstyring(aktørId, fødselsnummer, organisasjonsnummer, "overstyr_tidslinje") {
             val handling = OverstyrTidslinjeHandlingFraApi(vedtaksperiodeId, organisasjonsnummer, fødselsnummer, aktørId, "En begrunnelse", dager)
-            saksbehandlerMediator.håndter(handling, saksbehandler)
+            testMediator.håndter(handling, saksbehandler)
             // Her må det gjøres kall til api for å sende inn overstyring av tidslinje
         }
     }
@@ -1085,7 +1083,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
     ) {
         håndterOverstyring(aktørId, fødselsnummer, ORGNR, "overstyr_inntekt_og_refusjon") {
             val handling = OverstyrInntektOgRefusjonHandlingFraApi(aktørId, fødselsnummer, skjæringstidspunkt, arbeidsgivere)
-            saksbehandlerMediator.håndter(handling, saksbehandler)
+            testMediator.håndter(handling, saksbehandler)
             sisteMeldingId = meldingssenderV2.sendOverstyrtInntektOgRefusjon(
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
@@ -1112,7 +1110,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
     ) {
         håndterOverstyring(aktørId, fødselsnummer, organisasjonsnummer, "overstyr_arbeidsforhold") {
             val handling = OverstyrArbeidsforholdHandlingFraApi(fødselsnummer, aktørId, skjæringstidspunkt, overstyrteArbeidsforhold)
-            saksbehandlerMediator.håndter(handling, saksbehandler)
+            testMediator.håndter(handling, saksbehandler)
             sisteMeldingId = meldingssenderV2.sendOverstyrtArbeidsforhold(
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,

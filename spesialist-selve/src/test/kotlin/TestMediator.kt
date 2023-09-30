@@ -9,6 +9,7 @@ import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.OverstyringMediator
+import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.HendelseDao
@@ -26,6 +27,8 @@ import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
@@ -67,6 +70,7 @@ internal class TestMediator(
         tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
         tilgangsgrupper = tilgangsgrupper
     )
+    private val saksbehandlerMediator = SaksbehandlerMediator(dataSource, "versjonAvKode", testRapid, tilgangsgrupper)
     private val overstyringMediator = OverstyringMediator(testRapid)
     private val snapshotMediator = SnapshotMediator(SnapshotApiDao(dataSource), snapshotClient)
     private val automatisering = Automatisering(
@@ -113,4 +117,8 @@ internal class TestMediator(
 
     internal fun overstyringstyperForVedtaksperiode(vedtaksperiodeId: UUID) =
         overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(vedtaksperiodeId)
+
+    internal fun håndter(handling: HandlingFraApi, saksbehandlerFraApi: SaksbehandlerFraApi) {
+        saksbehandlerMediator.håndter(handling, saksbehandlerFraApi)
+    }
 }
