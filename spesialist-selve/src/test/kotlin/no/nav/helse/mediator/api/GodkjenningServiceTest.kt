@@ -26,14 +26,8 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
     @Test
     fun `håndter godkjenning`() {
         fremTilSaksbehandleroppgave()
-        val oppgavereferanse = sisteOppgaveId()
 
-        godkjenningService.håndter(
-            GodkjenningDto(oppgavereferanse, true, "saksbehandler", null, null, null),
-            "epost@nav.no",
-            UUID.randomUUID(),
-            UUID.randomUUID()
-        )
+        godkjenningService.håndter(godkjenningDto(), "epost@nav.no", UUID.randomUUID(), UUID.randomUUID())
         assertSaksbehandlerløsning(godkjent = true, automatiskBehandlet = false)
     }
 
@@ -45,9 +39,7 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
 
         settTotrinnsvurdering(opprinneligSaksbehandler = opprinneligSaksbehandler, beslutter = beslutterOid)
 
-        godkjenningService.håndter(
-            GodkjenningDto(1L, true, "saksbehandler", null, null, null), "epost@nav.no", beslutterOid, UUID.randomUUID()
-        )
+        godkjenningService.håndter(godkjenningDto(), "epost@nav.no", beslutterOid, UUID.randomUUID())
 
         assertReservertTil(opprinneligSaksbehandler)
     }
@@ -61,12 +53,7 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
         settTotrinnsvurdering(opprinneligSaksbehandler, beslutter)
 
         val enTredjeSaksbehandler = enSaksbehandler()
-        godkjenningService.håndter(
-            GodkjenningDto(1L, true, "saksbehandler", null, null, null),
-            "epost@nav.no",
-            enTredjeSaksbehandler,
-            UUID.randomUUID()
-        )
+        godkjenningService.håndter(godkjenningDto(), "epost@nav.no", enTredjeSaksbehandler, UUID.randomUUID())
 
         assertReservertTil(opprinneligSaksbehandler)
     }
@@ -76,12 +63,7 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
         val opprinneligSaksbehandler = enSaksbehandler()
         fremTilSaksbehandleroppgave()
 
-        godkjenningService.håndter(
-            GodkjenningDto(1L, true, "saksbehandler", null, null, null),
-            "epost@nav.no",
-            opprinneligSaksbehandler,
-            UUID.randomUUID()
-        )
+        godkjenningService.håndter(godkjenningDto(), "epost@nav.no", opprinneligSaksbehandler, UUID.randomUUID())
 
         assertReservertTil(opprinneligSaksbehandler)
     }
@@ -95,9 +77,7 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
 
         settTotrinnsvurdering(opprinneligSaksbehandler, beslutter)
 
-        godkjenningService.håndter(
-            GodkjenningDto(1L, true, "saksbehandler", null, null, null), "epost@nav.no", beslutter, UUID.randomUUID()
-        )
+        godkjenningService.håndter(godkjenningDto(), "epost@nav.no", beslutter, UUID.randomUUID())
 
         val utbetalingId = oppgaveDao.finnUtbetalingId(1L) ?: fail("Fant ikke utbetalingId")
         assertPeriodehistorikk(utbetalingId)
@@ -130,6 +110,9 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
             )
         }
     }
+
+    private fun godkjenningDto(oppgaveId: Long = sisteOppgaveId()) =
+        GodkjenningDto(oppgaveId, true, "saksbehandler", null, null, null)
 
     private fun opprettSaksbehandler(oid: UUID) {
         @Language("PostgreSQL") val query =
