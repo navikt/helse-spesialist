@@ -8,8 +8,8 @@ import no.nav.helse.db.SubsumsjonForDatabase
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinje
-import no.nav.helse.modell.saksbehandler.handlinger.dto.LovhjemmelDto
 import no.nav.helse.modell.saksbehandler.handlinger.dto.OverstyrtTidslinjeDto
+import no.nav.helse.modell.vilkårsprøving.LovhjemmelDto
 
 class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
     internal fun lagre(overstyring: Overstyring, saksbehandlerOid: UUID) {

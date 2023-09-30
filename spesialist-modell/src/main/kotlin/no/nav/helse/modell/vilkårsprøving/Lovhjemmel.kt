@@ -1,7 +1,4 @@
-package no.nav.helse.modell.saksbehandler.handlinger
-
-import no.nav.helse.modell.saksbehandler.LovhjemmelEvent
-import no.nav.helse.modell.saksbehandler.handlinger.dto.LovhjemmelDto
+package no.nav.helse.modell.vilkårsprøving
 
 data class Lovhjemmel(
     private val paragraf: String,
@@ -27,3 +24,19 @@ data class Lovhjemmel(
         lovverksversjon = lovverksversjon
     )
 }
+
+data class LovhjemmelEvent(
+    val paragraf: String,
+    val ledd: String? = null,
+    val bokstav: String? = null,
+    val lovverk: String,
+    val lovverksversjon: String,
+)
+
+data class LovhjemmelDto(
+    val paragraf: String,
+    val ledd: String?,
+    val bokstav: String?,
+    val lovverk: String?,
+    val lovverksversjon: String?,
+)

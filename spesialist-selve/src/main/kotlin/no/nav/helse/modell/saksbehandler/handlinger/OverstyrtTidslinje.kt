@@ -5,10 +5,12 @@ import java.util.UUID
 import no.nav.helse.modell.saksbehandler.OverstyrtTidslinjeEvent
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinjedag.Companion.byggSubsumsjoner
-import no.nav.helse.modell.saksbehandler.handlinger.Subsumsjon.SporingOverstyrtTidslinje
-import no.nav.helse.modell.saksbehandler.handlinger.Subsumsjon.Utfall.VILKAR_BEREGNET
 import no.nav.helse.modell.saksbehandler.handlinger.dto.OverstyrtTidslinjeDto
 import no.nav.helse.modell.saksbehandler.handlinger.dto.OverstyrtTidslinjedagDto
+import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
+import no.nav.helse.modell.vilkårsprøving.Subsumsjon
+import no.nav.helse.modell.vilkårsprøving.Subsumsjon.SporingOverstyrtTidslinje
+import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_BEREGNET
 
 class OverstyrtTidslinje(
     private val id: UUID = UUID.randomUUID(),

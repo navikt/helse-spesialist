@@ -1,9 +1,9 @@
-package no.nav.helse.modell.saksbehandler.handlinger
+package no.nav.helse.modell.vilkårsprøving
 
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class Subsumsjon(
+class Subsumsjon(
     private val lovhjemmel: Lovhjemmel,
     private val fødselsnummer: String,
     private val input: Map<String, Any>,
@@ -15,7 +15,7 @@ internal class Subsumsjon(
     private val tidsstempel = LocalDateTime.now()
     private val kilde = "spesialist"
 
-    internal fun byggEvent(): SubsumsjonEvent {
+    fun byggEvent(): SubsumsjonEvent {
         val lovhjemmelEvent = lovhjemmel.byggEvent()
         return SubsumsjonEvent(
             id = id,
@@ -34,20 +34,20 @@ internal class Subsumsjon(
         )
     }
 
-    internal abstract class Sporing(
+    abstract class Sporing(
         private val vedtaksperioder: List<UUID>,
         private val organisasjonsnummer: List<String>,
         private val saksbehandler: List<String>,
     ) {
         protected abstract fun ekstraSporing(): Map<String, List<String>>
-        internal fun byggEvent(): Map<String, List<String>> = mapOf(
+        fun byggEvent(): Map<String, List<String>> = mapOf(
             "vedtaksperiode" to vedtaksperioder.map { it.toString() },
             "organisasjonsnummer" to organisasjonsnummer,
             "saksbehandler" to saksbehandler,
         ) + ekstraSporing()
     }
 
-    internal class SporingOverstyrtTidslinje(
+    class SporingOverstyrtTidslinje(
         vedtaksperioder: List<UUID>,
         organisasjonsnummer: List<String>,
         saksbehandler: List<String>,
@@ -58,7 +58,7 @@ internal class Subsumsjon(
 
     }
 
-    internal enum class Utfall {
+    enum class Utfall {
         VILKAR_BEREGNET
     }
 }

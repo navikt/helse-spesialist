@@ -2,7 +2,8 @@ package no.nav.helse.modell.saksbehandler
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.modell.saksbehandler.handlinger.SubsumsjonEvent
+import no.nav.helse.modell.vilkårsprøving.LovhjemmelEvent
+import no.nav.helse.modell.vilkårsprøving.SubsumsjonEvent
 
 interface SaksbehandlerObserver {
     fun tidslinjeOverstyrt(fødselsnummer: String, event: OverstyrtTidslinjeEvent) {}
@@ -41,14 +42,6 @@ data class OverstyrtInntektOgRefusjonEvent(
         )
     }
 }
-
-data class LovhjemmelEvent(
-    val paragraf: String,
-    val ledd: String? = null,
-    val bokstav: String? = null,
-    val lovverk: String,
-    val lovverksversjon: String,
-)
 
 data class OverstyrtTidslinjeEvent(
     val id: UUID,

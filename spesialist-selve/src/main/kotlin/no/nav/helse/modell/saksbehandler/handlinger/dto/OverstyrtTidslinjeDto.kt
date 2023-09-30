@@ -2,6 +2,7 @@ package no.nav.helse.modell.saksbehandler.handlinger.dto
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.modell.vilkårsprøving.LovhjemmelDto
 
 data class OverstyrtTidslinjeDto(
     val id: UUID,

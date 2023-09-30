@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.SkjønnsfastsattSykepengegrunnlagEvent
+import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 
 class SkjønnsfastsattSykepengegrunnlag(
     private val aktørId: String,
