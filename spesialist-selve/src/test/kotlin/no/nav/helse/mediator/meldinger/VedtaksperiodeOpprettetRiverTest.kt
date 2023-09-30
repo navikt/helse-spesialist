@@ -14,7 +14,7 @@ internal class VedtaksperiodeOpprettetRiverTest {
 
     private val rapid = TestRapid()
     private val mediator = mockk<HendelseMediator>(relaxed = true)
-    private val meldingsfabrikk = Testmeldingfabrikk("fnr", "aktørid")
+    private val meldingsfabrikk = Testmeldingfabrikk()
 
     init {
         VedtaksperiodeOpprettetRiver(rapid, mediator)

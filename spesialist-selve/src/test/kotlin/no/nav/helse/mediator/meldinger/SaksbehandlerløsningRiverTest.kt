@@ -15,9 +15,9 @@ internal class SaksbehandlerløsningRiverTest {
         private val GODKJENNINGSBEHOV_ID = UUID.randomUUID()
         private val CONTEXT = UUID.randomUUID()
         private const val FNR = "12345678911"
-        private const val AKTØR = "1234567891234"
     }
-    private val testmeldingfabrikk = Testmeldingfabrikk(FNR, AKTØR)
+
+    private val testmeldingfabrikk = Testmeldingfabrikk()
     private val mediator = mockk<HendelseMediator>(relaxed = true)
     private val testRapid = TestRapid().apply {
         SaksbehandlerløsningRiver(this, mediator)
@@ -30,7 +30,14 @@ internal class SaksbehandlerløsningRiverTest {
 
     @Test
     fun `leser saksbehandlerløsning`() {
-        testRapid.sendTestMessage(testmeldingfabrikk.lagSaksbehandlerløsning(id = ID, hendelseId = GODKJENNINGSBEHOV_ID, contextId = CONTEXT))
+        testRapid.sendTestMessage(
+            testmeldingfabrikk.lagSaksbehandlerløsning(
+                FNR,
+                GODKJENNINGSBEHOV_ID,
+                CONTEXT,
+                id = ID
+            )
+        )
         verify(exactly = 1) { mediator.saksbehandlerløsning(
             any(),
             ID,

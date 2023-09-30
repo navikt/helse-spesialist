@@ -9,11 +9,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class UtbetalingAnnullertRiverTest {
-    private companion object {
-        private const val FNR = "12345678911"
-        private const val AKTØR = "1234567891234"
-    }
-    private val testmeldingfabrikk = Testmeldingfabrikk(FNR, AKTØR)
+    private val testmeldingfabrikk = Testmeldingfabrikk()
     private val mediator = mockk<HendelseMediator>(relaxed = true)
     private val testRapid = TestRapid().apply {
         InfotrygdutbetalingerRiver(this, mediator)

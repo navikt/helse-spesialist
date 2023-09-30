@@ -16,16 +16,18 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.rapids_rivers.JsonMessage
 import kotlin.random.Random.Default.nextLong
 
-internal class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørId: String) {
+internal class Testmeldingfabrikk {
     companion object {
         const val OSLO = "0301"
     }
 
     fun lagVedtaksperiodeNyUtbetaling(
+        aktørId: String,
+        fødselsnummer: String,
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
         organisasjonsnummer: String,
-        id: UUID = UUID.randomUUID()
+        id: UUID = UUID.randomUUID(),
     ) = nyHendelse(
         id, "vedtaksperiode_ny_utbetaling", mapOf(
             "vedtaksperiodeId" to "$vedtaksperiodeId",
@@ -52,52 +54,19 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                 "aktiviteter" to varselkoder.map {
                     lagAktivitet(
                         fødselsnummer = fødselsnummer,
-                        varselkode = it,
+                        kode = it,
                         vedtaksperiodeId = vedtaksperiodeId,
-                        organisasjonsnummer = organisasjonsnummer
+                        orgnummer = organisasjonsnummer,
                     )
                 }
             )
         )
     }
 
-    private fun lagAktivitet(
-        id: UUID = UUID.randomUUID(),
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-        vedtaksperiodeId: UUID,
-        varselkode: String,
-    ): Map<String, Any> = mapOf(
-        "id" to id,
-        "melding" to "en melding",
-        "nivå" to "VARSEL",
-        "varselkode" to varselkode,
-        "tidsstempel" to LocalDateTime.now(),
-        "kontekster" to listOf(
-            mapOf(
-                "konteksttype" to "Person",
-                "kontekstmap" to mapOf(
-                    "fødselsnummer" to fødselsnummer,
-                    "aktørId" to "2093088099680"
-                )
-            ),
-            mapOf(
-                "konteksttype" to "Arbeidsgiver",
-                "kontekstmap" to mapOf(
-                    "organisasjonsnummer" to organisasjonsnummer
-                )
-            ),
-            mapOf(
-                "konteksttype" to "Vedtaksperiode",
-                "kontekstmap" to mapOf(
-                    "vedtaksperiodeId" to vedtaksperiodeId
-                )
-            )
-        )
-    )
-
     fun lagAdressebeskyttelseEndret(
-        id: UUID = UUID.randomUUID()
+        aktørId: Any,
+        fødselsnummer: Any,
+        id: UUID = UUID.randomUUID(),
     ) = nyHendelse(
         id, "adressebeskyttelse_endret", mapOf(
             "fødselsnummer" to fødselsnummer,
@@ -177,9 +146,11 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         )
 
     fun lagVedtaksperiodeForkastet(
-        id: UUID = UUID.randomUUID(),
+        aktørId: String,
+        fødselsnummer: String,
         vedtaksperiodeId: UUID = UUID.randomUUID(),
-        organisasjonsnummer: String = "orgnr"
+        organisasjonsnummer: String = "orgnr",
+        id: UUID = UUID.randomUUID(),
     ) =
         nyHendelse(
             id, "vedtaksperiode_forkastet", mapOf(
@@ -191,7 +162,8 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         )
 
     fun lagGodkjenningsbehov(
-        id: UUID = UUID.randomUUID(),
+        aktørId: String,
+        fødselsnummer: String,
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         utbetalingId: UUID = UUID.randomUUID(),
         orgnummer: String = "orgnr",
@@ -201,11 +173,10 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         periodetype: Periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
         førstegangsbehandling: Boolean = true,
         utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING,
-        fødselsnummer: String = this.fødselsnummer,
-        aktørId: String = this.aktørId,
         inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
         orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList(),
         kanAvvises: Boolean = true,
+        id: UUID = UUID.randomUUID(),
     ) =
         nyHendelse(
             id, "behov",
@@ -279,7 +250,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         )
     )
 
-    fun lagHentPersoninfoV2(ident: String, adressebeskyttelse: String = "Ugradert") = mapOf(
+    private fun lagHentPersoninfoV2(ident: String, adressebeskyttelse: String = "Ugradert") = mapOf(
         "ident" to ident,
         "fornavn" to "Kari",
         "mellomnavn" to "",
@@ -289,14 +260,16 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         "adressebeskyttelse" to adressebeskyttelse
     )
 
-    fun lagFullstendigBehov(
-        id: UUID = UUID.randomUUID(),
+    private fun lagFullstendigBehov(
+        aktørId: String,
+        fødselsnummer: String,
         hendelseId: UUID = UUID.randomUUID(),
         contextId: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         organisasjonsnummer: String = "orgnr",
         behov: List<String>,
-        detaljer: Map<String, Any>
+        detaljer: Map<String, Any>,
+        id: UUID = UUID.randomUUID(),
     ) =
         nyHendelse(
             id, "behov", mapOf(
@@ -312,15 +285,18 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         )
 
     fun lagPersoninfoløsningComposite(
-        id: UUID = UUID.randomUUID(),
+        aktørId: String,
+        fødselsnummer: String,
         hendelseId: UUID = UUID.randomUUID(),
         contextId: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         organisasjonsnummer: String = "orgnr",
         enhet: String = "0301",
-        adressebeskyttelse: String = "Ugradert"
+        adressebeskyttelse: String = "Ugradert",
+        id: UUID = UUID.randomUUID(),
     ) = lagFullstendigBehov(
-        id,
+        aktørId,
+        fødselsnummer,
         hendelseId,
         contextId,
         vedtaksperiodeId,
@@ -345,15 +321,18 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                 "HentEnhet" to enhet,
                 "HentPersoninfoV2" to lagHentPersoninfoV2(fødselsnummer, adressebeskyttelse)
             )
-        )
+        ),
+        id
     )
 
     fun lagHentInfotrygdutbetalingerløsning(
-        id: UUID = UUID.randomUUID(),
+        aktørId: String,
+        fødselsnummer: String,
         hendelseId: UUID = UUID.randomUUID(),
         contextId: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
-        organisasjonsnummer: String = "orgnr"
+        organisasjonsnummer: String = "orgnr",
+        id: UUID = UUID.randomUUID(),
     ) =
         nyHendelse(
             id, "behov", mapOf(
@@ -404,10 +383,12 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         )
 
     fun lagHentPersoninfoløsning(
-        id: UUID = UUID.randomUUID(),
+        aktørId: String,
+        fødselsnummer: String,
         hendelseId: UUID = UUID.randomUUID(),
         contextId: UUID = UUID.randomUUID(),
-        adressebeskyttelse: String = "Ugradert"
+        adressebeskyttelse: String = "Ugradert",
+        id: UUID = UUID.randomUUID(),
     ) =
         nyHendelse(
             id, "behov", mapOf(
@@ -431,12 +412,14 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         )
 
     fun lagHentEnhetløsning(
-        id: UUID = UUID.randomUUID(),
+        aktørId: String,
+        fødselsnummer: String,
         hendelseId: UUID = UUID.randomUUID(),
         contextId: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         organisasjonsnummer: String = "orgnr",
-        enhet: String = OSLO
+        enhet: String = OSLO,
+        id: UUID = UUID.randomUUID(),
     ) =
         nyHendelse(
             id, "behov", mapOf(
@@ -455,11 +438,12 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         )
 
     fun lagOverstyringIgangsatt(
-        id: UUID = UUID.randomUUID(),
+        fødselsnummer: String,
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         årsak: String = "KORRIGERT_SØKNAD",
         fom: LocalDate = now(),
-        orgnummer: String = "123456789"
+        orgnummer: String = "123456789",
+        id: UUID = UUID.randomUUID(),
     ) =
         nyHendelse(
             id, "overstyring_igangsatt", mutableMapOf(
@@ -475,7 +459,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         )
 
     fun lagSaksbehandlerløsning(
-        id: UUID = UUID.randomUUID(),
+        fødselsnummer: String,
         hendelseId: UUID = UUID.randomUUID(),
         contextId: UUID = UUID.randomUUID(),
         oppgaveId: Long = nextLong(),
@@ -487,7 +471,8 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         saksbehandleroverstyringer: List<UUID> = emptyList(),
         årsak: String? = null,
         begrunnelser: List<String>? = null,
-        kommentar: String? = null
+        kommentar: String? = null,
+        id: UUID = UUID.randomUUID(),
     ) =
         nyHendelse(
             id, "saksbehandler_løsning", mutableMapOf(
@@ -653,16 +638,18 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
 
 
     fun lagNyeVarsler(
+        fødselsnummer: String,
         id: UUID,
         vedtaksperiodeId: UUID,
         orgnummer: String,
         aktiviteter: List<Map<String, Any>> =
             listOf(
                 lagAktivitet(
+                    fødselsnummer = fødselsnummer,
+                    vedtaksperiodeId = vedtaksperiodeId,
                     orgnummer = orgnummer,
-                    vedtaksperiodeId = vedtaksperiodeId
                 )
-            )
+            ),
 
     ): String {
         return nyHendelse(
@@ -674,7 +661,8 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         )
     }
 
-    fun lagAktivitet(
+    private fun lagAktivitet(
+        fødselsnummer: String,
         id: UUID = UUID.randomUUID(),
         kode: String = "RV_VV",
         vedtaksperiodeId: UUID = UUID.randomUUID(),

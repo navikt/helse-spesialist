@@ -25,7 +25,7 @@ internal class ArbeidsforholdløsningTest {
     private val dao = mockk<ArbeidsforholdDao>(relaxed = true)
     private val mediator = mockk<HendelseMediator>(relaxed = true)
     private val rapid = TestRapid()
-    private val meldingsfabrikk = Testmeldingfabrikk(FØDSELSNUMMER, AKTØRID)
+    private val meldingsfabrikk = Testmeldingfabrikk()
 
     init {
         ArbeidsforholdRiver(rapid, mediator)

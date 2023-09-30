@@ -12,7 +12,7 @@ internal class VedtaksperiodeForkastetRiverTest {
 
     private val rapid = TestRapid()
     private val mediator = mockk<HendelseMediator>(relaxed = true)
-    private val meldingsfabrikk = Testmeldingfabrikk("fnr", "aktørid")
+    private val meldingsfabrikk = Testmeldingfabrikk()
     private val mapper = jacksonObjectMapper()
 
     init {
@@ -21,14 +21,14 @@ internal class VedtaksperiodeForkastetRiverTest {
 
     @Test
     fun `tar imot forkastet-message`() {
-        rapid.sendTestMessage(meldingsfabrikk.lagVedtaksperiodeForkastet())
+        rapid.sendTestMessage(meldingsfabrikk.lagVedtaksperiodeForkastet("aktørId", "fnr"))
         verify { mediator.vedtaksperiodeForkastet(any(), any(), any(), any(), any()) }
     }
 
     @Test
     fun `ignorerer ugyldig message`() {
         rapid.sendTestMessage(
-            meldingsfabrikk.lagVedtaksperiodeForkastet().let { mapper.readTree(it) as ObjectNode }
+            meldingsfabrikk.lagVedtaksperiodeForkastet("aktørId", "fnr").let { mapper.readTree(it) as ObjectNode }
                 .put("vedtaksperiodeId", "dette er ikke en UUID").toString()
         )
         verify(exactly = 0) { mediator.vedtaksperiodeForkastet(any(), any(), any(), any(), any()) }

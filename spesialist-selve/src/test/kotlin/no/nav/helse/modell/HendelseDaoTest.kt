@@ -23,7 +23,7 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
         private val HENDELSE_ID = UUID.randomUUID()
     }
 
-    private val testmeldingfabrikk = Testmeldingfabrikk(FNR, AKTØR)
+    private val testmeldingfabrikk = Testmeldingfabrikk()
     private val graphQLClient = mockk<SnapshotClient>(relaxed = true)
     private lateinit var hendelsefabrikk: Hendelsefabrikk
     private lateinit var vedtaksperiodeForkastet: VedtaksperiodeForkastet
@@ -45,47 +45,37 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
     @BeforeEach
     fun setupEach() {
         vedtaksperiodeForkastet = hendelsefabrikk.vedtaksperiodeForkastet(
-            testmeldingfabrikk.lagVedtaksperiodeForkastet(
-                HENDELSE_ID,
-                VEDTAKSPERIODE
-            )
+            testmeldingfabrikk.lagVedtaksperiodeForkastet(AKTØR, FNR, VEDTAKSPERIODE, id = HENDELSE_ID)
         )
     }
 
     @Test
     fun `finn siste igangsatte overstyring om den er korrigert søknad`() {
         val overstyringIgangsatt = hendelsefabrikk.overstyringIgangsatt(
-            testmeldingfabrikk.lagOverstyringIgangsatt(
-                vedtaksperiodeId = VEDTAKSPERIODE
-            )
+            testmeldingfabrikk.lagOverstyringIgangsatt(FNR, VEDTAKSPERIODE)
         )
         val overstyringIgangsattForAnnenVedtaksperiode = hendelsefabrikk.overstyringIgangsatt(
-            testmeldingfabrikk.lagOverstyringIgangsatt(
-                vedtaksperiodeId = VEDTAKSPERIODE,
-                årsak = "SYKDOMSTIDSLINJE"
-            )
+            testmeldingfabrikk.lagOverstyringIgangsatt(FNR, VEDTAKSPERIODE, "SYKDOMSTIDSLINJE")
         )
         hendelseDao.opprett(overstyringIgangsatt)
         hendelseDao.opprett(overstyringIgangsattForAnnenVedtaksperiode)
         assertNull(hendelseDao.sisteOverstyringIgangsattOmKorrigertSøknad(FNR, VEDTAKSPERIODE))
 
-        hendelseDao.opprett(hendelsefabrikk.overstyringIgangsatt(
-            testmeldingfabrikk.lagOverstyringIgangsatt(
-                vedtaksperiodeId = VEDTAKSPERIODE
+        hendelseDao.opprett(
+            hendelsefabrikk.overstyringIgangsatt(
+                testmeldingfabrikk.lagOverstyringIgangsatt(FNR, VEDTAKSPERIODE)
             )
-        ))
+        )
         assertNotNull(hendelseDao.sisteOverstyringIgangsattOmKorrigertSøknad(FNR, VEDTAKSPERIODE))
     }
 
     @Test
     fun `finn antall korrigerte søknader`() {
         val overstyringIgangsatt = hendelsefabrikk.overstyringIgangsatt(
-            testmeldingfabrikk.lagOverstyringIgangsatt(
-                vedtaksperiodeId = VEDTAKSPERIODE
-            )
+            testmeldingfabrikk.lagOverstyringIgangsatt(FNR, VEDTAKSPERIODE)
         )
         val overstyringIgangsattForAnnenVedtaksperiode = hendelsefabrikk.overstyringIgangsatt(
-            testmeldingfabrikk.lagOverstyringIgangsatt()
+            testmeldingfabrikk.lagOverstyringIgangsatt(FNR)
         )
         hendelseDao.opprett(overstyringIgangsatt)
         hendelseDao.opprett(overstyringIgangsattForAnnenVedtaksperiode)
@@ -97,13 +87,10 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `finn ut om automatisering av korrigert søknad allerede er håndtert`() {
         val overstyringIgangsatt = hendelsefabrikk.overstyringIgangsatt(
-            testmeldingfabrikk.lagOverstyringIgangsatt(
-                id = HENDELSE_ID,
-                vedtaksperiodeId = VEDTAKSPERIODE
-            )
+            testmeldingfabrikk.lagOverstyringIgangsatt(FNR, VEDTAKSPERIODE, id = HENDELSE_ID)
         )
         val overstyringIgangsattForAnnenVedtaksperiode = hendelsefabrikk.overstyringIgangsatt(
-            testmeldingfabrikk.lagOverstyringIgangsatt()
+            testmeldingfabrikk.lagOverstyringIgangsatt(FNR)
         )
         hendelseDao.opprett(overstyringIgangsatt)
         hendelseDao.opprett(overstyringIgangsattForAnnenVedtaksperiode)
@@ -115,7 +102,8 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `lagrer og finner hendelser`() {
         hendelseDao.opprett(vedtaksperiodeForkastet)
-        val actual = hendelseDao.finn(HENDELSE_ID, hendelsefabrikk) ?: fail { "Forventet å finne en hendelse med id $HENDELSE_ID" }
+        val actual = hendelseDao.finn(HENDELSE_ID, hendelsefabrikk)
+            ?: fail { "Forventet å finne en hendelse med id $HENDELSE_ID" }
 
         assertEquals(VEDTAKSPERIODE, finnKobling())
 
@@ -152,8 +140,9 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
 
     private fun finnKobling(hendelseId: UUID = HENDELSE_ID) = sessionOf(dataSource).use { session ->
         session.run(
-            queryOf("SELECT vedtaksperiode_id FROM vedtaksperiode_hendelse WHERE hendelse_ref = ?", hendelseId)
-                .map { UUID.fromString(it.string(1)) }.asSingle
+            queryOf(
+                "SELECT vedtaksperiode_id FROM vedtaksperiode_hendelse WHERE hendelse_ref = ?", hendelseId
+            ).map { UUID.fromString(it.string(1)) }.asSingle
         )
     }
 

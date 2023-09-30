@@ -75,11 +75,12 @@ internal object Meldingssender {
         førstegangsbehandling: Boolean = true,
         inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
         orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList(),
-        utbetalingtype: Utbetalingtype = UTBETALING
+        utbetalingtype: Utbetalingtype = UTBETALING,
     ): UUID = uuid.also { id ->
         testRapid.sendTestMessage(
             meldingsfabrikk.lagGodkjenningsbehov(
-                id = id,
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
                 utbetalingId = utbetalingId,
                 orgnummer = organisasjonsnummer,
@@ -88,11 +89,10 @@ internal object Meldingssender {
                 skjæringstidspunkt = skjæringstidspunkt,
                 periodetype = periodetype,
                 førstegangsbehandling = førstegangsbehandling,
-                fødselsnummer = fødselsnummer,
-                aktørId = aktørId,
+                utbetalingtype = utbetalingtype,
                 inntektskilde = inntektskilde,
                 orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
-                utbetalingtype = utbetalingtype
+                id = id,
             )
         )
     }
@@ -189,7 +189,7 @@ internal object Meldingssender {
                 startdato = LocalDate.now(),
                 sluttdato = null
             )
-        )
+        ),
     ): UUID =
         uuid.also { id ->
             testRapid.sendTestMessage(
@@ -211,7 +211,7 @@ internal object Meldingssender {
         organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
         contextId: UUID = testRapid.inspektør.contextId(),
-        ekstraArbeidsgivere: List<ArbeidsgiverinformasjonJson> = emptyList()
+        ekstraArbeidsgivere: List<ArbeidsgiverinformasjonJson> = emptyList(),
     ): UUID =
         uuid.also { id ->
             val behov = testRapid.inspektør.siste("behov")
@@ -246,25 +246,19 @@ internal object Meldingssender {
         vedtaksperiodeId: UUID,
         contextId: UUID = testRapid.inspektør.contextId(),
         enhet: String = "0301",
-        adressebeskyttelse: String = "Ugradert"
+        adressebeskyttelse: String = "Ugradert",
     ): UUID =
         uuid.also { id ->
             testRapid.sendTestMessage(
                 meldingsfabrikk.lagPersoninfoløsningComposite(
-                    id,
-                    hendelseId,
-                    contextId,
-                    vedtaksperiodeId,
-                    orgnr,
-                    enhet,
-                    adressebeskyttelse
+                    AKTØR, FØDSELSNUMMER, hendelseId, contextId, vedtaksperiodeId, orgnr, enhet, adressebeskyttelse, id,
                 )
             )
         }
 
     fun sendInntektløsningOld(
         godkjenningsmeldingId: UUID,
-        contextId: UUID = testRapid.inspektør.contextId()
+        contextId: UUID = testRapid.inspektør.contextId(),
     ): UUID {
         return uuid.also { id ->
             testRapid.sendTestMessage(
@@ -285,7 +279,7 @@ internal object Meldingssender {
         godkjenningsmeldingId: UUID,
         antall: Int = 0,
         oppslagFeilet: Boolean = false,
-        contextId: UUID = testRapid.inspektør.contextId()
+        contextId: UUID = testRapid.inspektør.contextId(),
     ): UUID {
         return uuid.also { id ->
             testRapid.sendTestMessage(
@@ -307,7 +301,7 @@ internal object Meldingssender {
         vedtaksperiodeId: UUID,
         kanGodkjennesAutomatisk: Boolean = true,
         contextId: UUID = testRapid.inspektør.contextId(),
-        funn: List<Risikofunn> = emptyList()
+        funn: List<Risikofunn> = emptyList(),
     ): UUID {
         return uuid.also { id ->
             testRapid.sendTestMessage(
@@ -329,7 +323,7 @@ internal object Meldingssender {
         godkjenningsmeldingId: UUID,
         erEgenAnsatt: Boolean,
         fødselsnummer: String = FØDSELSNUMMER,
-        contextId: UUID = testRapid.inspektør.contextId()
+        contextId: UUID = testRapid.inspektør.contextId(),
     ): UUID {
         return uuid.also { id ->
             testRapid.sendTestMessage(
@@ -348,7 +342,7 @@ internal object Meldingssender {
     fun sendVergemålløsningOld(
         godkjenningsmeldingId: UUID,
         vergemål: Testmeldingfabrikk.VergemålJson = Testmeldingfabrikk.VergemålJson(),
-        contextId: UUID = testRapid.inspektør.contextId()
+        contextId: UUID = testRapid.inspektør.contextId(),
     ): UUID {
         return uuid.also { id ->
             testRapid.sendTestMessage(
@@ -367,11 +361,17 @@ internal object Meldingssender {
     fun sendVedtaksperiodeNyUtbetaling(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID = UUID.randomUUID(),
-        organisasjonsnummer: String
+        organisasjonsnummer: String,
     ): UUID {
         return uuid.also {
             testRapid.sendTestMessage(
-                meldingsfabrikk.lagVedtaksperiodeNyUtbetaling(vedtaksperiodeId, utbetalingId, organisasjonsnummer)
+                meldingsfabrikk.lagVedtaksperiodeNyUtbetaling(
+                    AKTØR,
+                    FØDSELSNUMMER,
+                    vedtaksperiodeId,
+                    utbetalingId,
+                    organisasjonsnummer
+                )
             )
         }
     }
@@ -396,7 +396,7 @@ internal object Meldingssender {
             )
         }
 
-    private val meldingsfabrikk get() = Testmeldingfabrikk(FØDSELSNUMMER, AKTØR)
+    private val meldingsfabrikk get() = Testmeldingfabrikk()
 
     private val uuid get() = UUID.randomUUID()
 

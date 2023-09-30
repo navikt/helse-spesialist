@@ -14,7 +14,8 @@ class AdressebeskyttelseEndretRiverTest {
         private const val FNR = "12345678911"
         private const val AKTØR = "1234567891234"
     }
-    private val testmeldingfabrikk = Testmeldingfabrikk(FNR, AKTØR)
+
+    private val testmeldingfabrikk = Testmeldingfabrikk()
     private val mediator = mockk<HendelseMediator>(relaxed = true)
     private val testRapid = TestRapid().apply {
         AdressebeskyttelseEndretRiver(this, mediator)
@@ -22,7 +23,7 @@ class AdressebeskyttelseEndretRiverTest {
 
     @Test
     fun `leser adressebeskyttelse endret event`() {
-        testRapid.sendTestMessage(testmeldingfabrikk.lagAdressebeskyttelseEndret(id = HENDELSE_ID))
+        testRapid.sendTestMessage(testmeldingfabrikk.lagAdressebeskyttelseEndret(AKTØR, FNR, HENDELSE_ID))
         verify(exactly = 1) { mediator.adressebeskyttelseEndret(any(), HENDELSE_ID, FNR, any()) }
     }
 }

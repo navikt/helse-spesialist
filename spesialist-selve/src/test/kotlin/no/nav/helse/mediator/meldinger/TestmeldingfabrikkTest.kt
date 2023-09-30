@@ -3,10 +3,10 @@ package no.nav.helse.mediator.meldinger
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import java.util.UUID
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.util.*
 
 internal class TestmeldingfabrikkTest {
     private companion object {
@@ -21,13 +21,13 @@ internal class TestmeldingfabrikkTest {
         private val UTBETALING_ID = UUID.randomUUID()
     }
 
-    private val fabrikk = Testmeldingfabrikk(FNR, AKTØR)
+    private val fabrikk = Testmeldingfabrikk()
 
     @Test
     fun `meldinger inneholder standardfelt`() {
         assertStandardfelt(fabrikk.lagVedtaksperiodeEndret(aktørId = AKTØR, fødselsnummer = FNR))
-        assertStandardfelt(fabrikk.lagVedtaksperiodeForkastet())
-        assertStandardfelt(fabrikk.lagGodkjenningsbehov())
+        assertStandardfelt(fabrikk.lagVedtaksperiodeForkastet(FNR, AKTØR))
+        assertStandardfelt(fabrikk.lagGodkjenningsbehov(AKTØR, FNR))
     }
 
     @Test
@@ -44,7 +44,7 @@ internal class TestmeldingfabrikkTest {
 
     @Test
     fun `vedtaksperiode forkastet`() {
-        val melding = fabrikk.lagVedtaksperiodeForkastet(HENDELSE_ID, VEDTAKSPERIODE_ID, "orgnr")
+        val melding = fabrikk.lagVedtaksperiodeForkastet(AKTØR, FNR, VEDTAKSPERIODE_ID, "orgnr", HENDELSE_ID)
         assertFelt("fødselsnummer", FNR, melding)
         assertFelt("aktørId", AKTØR, melding)
         assertFelt("organisasjonsnummer", "orgnr", melding)
@@ -54,7 +54,7 @@ internal class TestmeldingfabrikkTest {
 
     @Test
     fun godkjenningsbehov() {
-        val melding = fabrikk.lagGodkjenningsbehov(HENDELSE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID,"orgnr")
+        val melding = fabrikk.lagGodkjenningsbehov(AKTØR, FNR, VEDTAKSPERIODE_ID, UTBETALING_ID, id = HENDELSE_ID)
         assertFelt("fødselsnummer", FNR, melding)
         assertFelt("aktørId", AKTØR, melding)
         assertFelt("organisasjonsnummer", "orgnr", melding)
