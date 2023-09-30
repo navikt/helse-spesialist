@@ -1,20 +1,23 @@
 package no.nav.helse.mediator.api
 
-import io.ktor.client.*
+import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
-import io.ktor.client.request.*
-import io.ktor.http.*
+import io.ktor.client.request.HttpRequestBuilder
+import io.ktor.client.request.header
+import io.ktor.http.ContentType
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.auth.authenticate
-import io.ktor.server.cio.*
-import io.ktor.server.engine.*
+import io.ktor.server.cio.CIO
+import io.ktor.server.engine.applicationEngineEnvironment
+import io.ktor.server.engine.connector
+import io.ktor.server.engine.embeddedServer
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.routing
 import java.net.ServerSocket
-import java.util.*
+import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.installErrorHandling
 import no.nav.helse.objectMapper
@@ -47,15 +50,6 @@ abstract class AbstractApiTest {
         private const val epostadresse = "sara.saksbehandler@nav.no"
         internal const val issuer = "https://jwt-provider-domain"
         internal val jwtStub = JwtStub()
-        private val azureConfig = AzureConfig(
-            clientId = clientId,
-            issuer = issuer,
-            jwkProvider = jwtStub.getJwkProviderMock(),
-            tokenEndpoint = "",
-        )
-        internal val azureAdAppConfig = AzureAdAppConfig(
-            azureConfig = azureConfig,
-        )
 
         fun HttpRequestBuilder.authentication(oid: UUID, group: String? = null) {
             header(
@@ -72,7 +66,13 @@ abstract class AbstractApiTest {
             )
         }
 
-        fun HttpRequestBuilder.authentication(oid: UUID, epost: String = epostadresse, navn:String, ident:String, group: String? = null) {
+        fun HttpRequestBuilder.authentication(
+            oid: UUID,
+            epost: String = epostadresse,
+            navn: String,
+            ident: String,
+            group: String? = null,
+        ) {
             header(
                 "Authorization",
                 "Bearer ${
