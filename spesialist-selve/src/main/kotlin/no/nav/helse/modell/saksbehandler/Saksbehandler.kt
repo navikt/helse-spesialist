@@ -31,7 +31,7 @@ class Saksbehandler(
 
     internal fun tildeling(påVent: Boolean) = Tildeling(navn = navn, epost = epostadresse, oid = oid, påVent = påVent)
 
-    internal fun harTilgangTil(egenskaper: List<Egenskap>): Boolean =
+    fun harTilgangTil(egenskaper: List<Egenskap>): Boolean =
         tilgangskontroll.harTilgangTil(oid, egenskaper)
 
     internal fun håndter(hendelse: OverstyrtTidslinje) {
