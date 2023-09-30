@@ -1,4 +1,4 @@
-import no.nav.helse.mediator.Toggle
+import no.nav.helse.modell.Toggle
 
 internal object ToggleHelpers {
 

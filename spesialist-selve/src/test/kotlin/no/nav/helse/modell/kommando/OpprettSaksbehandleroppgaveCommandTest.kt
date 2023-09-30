@@ -8,9 +8,9 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import java.util.UUID
-import no.nav.helse.mediator.Toggle
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.OppgaveInspektør.Companion.inspektør
+import no.nav.helse.modell.Toggle
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.oppgave.Egenskap

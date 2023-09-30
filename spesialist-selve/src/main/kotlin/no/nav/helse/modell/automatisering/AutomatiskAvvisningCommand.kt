@@ -3,7 +3,7 @@ package no.nav.helse.modell.automatisering
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.mediator.Toggle
+import no.nav.helse.modell.Toggle
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext

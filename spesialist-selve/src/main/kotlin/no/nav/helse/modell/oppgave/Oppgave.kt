@@ -3,8 +3,8 @@ package no.nav.helse.modell.oppgave
 import java.util.Objects
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.OppgaveIkkeTildelt
+import no.nav.helse.modell.Toggle
 import no.nav.helse.modell.oppgave.Egenskap.BESLUTTER
 import no.nav.helse.modell.oppgave.Egenskap.Companion.tilgangsstyrteEgenskaper
 import no.nav.helse.modell.oppgave.Egenskap.DELVIS_REFUSJON
@@ -37,7 +37,7 @@ class Oppgave private constructor(
 
     private val observers = mutableListOf<OppgaveObserver>()
 
-    internal constructor(
+    constructor(
         id: Long,
         egenskap: Egenskap,
         tilstand: Tilstand,
@@ -67,7 +67,7 @@ class Oppgave private constructor(
         observers.add(observer)
     }
 
-    internal fun forsøkTildelingVedReservasjon(
+    fun forsøkTildelingVedReservasjon(
         saksbehandler: Saksbehandler,
         påVent: Boolean = false,
     ) {
@@ -80,7 +80,7 @@ class Oppgave private constructor(
         tilstand.tildel(this, saksbehandler, påVent)
     }
 
-    internal fun sendTilBeslutter(behandlendeSaksbehandler: Saksbehandler) {
+    fun sendTilBeslutter(behandlendeSaksbehandler: Saksbehandler) {
         val totrinnsvurdering = requireNotNull(totrinnsvurdering) {
             "Forventer at det eksisterer en aktiv totrinnsvurdering når oppgave sendes til beslutter"
         }
@@ -93,7 +93,7 @@ class Oppgave private constructor(
         oppgaveEndret()
     }
 
-    internal fun sendIRetur(besluttendeSaksbehandler: Saksbehandler) {
+    fun sendIRetur(besluttendeSaksbehandler: Saksbehandler) {
         val totrinnsvurdering = requireNotNull(totrinnsvurdering) {
             "Forventer at det eksisterer en aktiv totrinnsvurdering når oppgave sendes til beslutter"
         }
@@ -111,14 +111,14 @@ class Oppgave private constructor(
         oppgaveEndret()
     }
 
-    internal fun leggPåVent(): Tildeling {
+    fun leggPåVent(): Tildeling {
         val tildeltTil = this.tildeltTil ?: throw OppgaveIkkeTildelt(id)
         påVent = true
         oppgaveEndret()
         return tildeltTil.tildeling(påVent)
     }
 
-    internal fun fjernPåVent(): Tildeling {
+    fun fjernPåVent(): Tildeling {
         val tildeltTil = this.tildeltTil ?: throw OppgaveIkkeTildelt(id)
         påVent = false
         oppgaveEndret()

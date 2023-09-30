@@ -7,7 +7,6 @@ import ToggleHelpers.disable
 import ToggleHelpers.enable
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.OppgaveInspektør.Companion.inspektør
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Egenskap.BESLUTTER

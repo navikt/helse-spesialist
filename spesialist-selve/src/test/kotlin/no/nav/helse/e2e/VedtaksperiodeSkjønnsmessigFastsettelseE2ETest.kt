@@ -4,7 +4,7 @@ import AbstractE2ETestV2
 import ToggleHelpers.disable
 import ToggleHelpers.enable
 import no.nav.helse.Testdata.FØDSELSNUMMER
-import no.nav.helse.mediator.Toggle
+import no.nav.helse.modell.Toggle
 import org.junit.jupiter.api.Test
 
 internal class VedtaksperiodeSkjønnsmessigFastsettelseE2ETest : AbstractE2ETestV2() {

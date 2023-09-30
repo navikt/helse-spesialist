@@ -1,9 +1,9 @@
-package no.nav.helse.mediator
+package no.nav.helse.modell
 
 abstract class Toggle(private var _enabled: Boolean) {
     private constructor(key: String, default: Boolean = false) : this(System.getenv()[key]?.toBoolean() ?: default)
 
-    internal val enabled get() = _enabled
+    val enabled get() = _enabled
 
     object Skjonnsfastsetting : Toggle("SKJONNSFASTSETTING", true)
     object TilgangsstyrteEgenskaper : Toggle("TILGANGSSTYRTEEGENSKAPER", false)
