@@ -22,10 +22,6 @@ import no.nav.helse.modell.oppgave.OppgaveObserver
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
-import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtBeslutter
-import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtIRetur
-import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
-import no.nav.helse.spesialist.api.feilhåndtering.OppgaveKreverVurderingAvToSaksbehandlere
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals

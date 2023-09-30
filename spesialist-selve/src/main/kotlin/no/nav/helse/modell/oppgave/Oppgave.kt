@@ -4,6 +4,7 @@ import java.util.Objects
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.Toggle
+import no.nav.helse.modell.OppgaveIkkeTildelt
 import no.nav.helse.modell.oppgave.Egenskap.BESLUTTER
 import no.nav.helse.modell.oppgave.Egenskap.Companion.tilgangsstyrteEgenskaper
 import no.nav.helse.modell.oppgave.Egenskap.DELVIS_REFUSJON
@@ -16,7 +17,6 @@ import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
-import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import org.slf4j.LoggerFactory
 
 class Oppgave private constructor(

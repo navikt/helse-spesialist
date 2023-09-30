@@ -11,6 +11,11 @@ import no.nav.helse.db.TotrinnsvurderingFraDatabase
 import no.nav.helse.db.TotrinnsvurderingRepository
 import no.nav.helse.mediator.TilgangskontrollørForApi
 import no.nav.helse.modell.HendelseDao
+import no.nav.helse.modell.Modellfeil
+import no.nav.helse.modell.OppgaveAlleredeSendtBeslutter
+import no.nav.helse.modell.OppgaveAlleredeSendtIRetur
+import no.nav.helse.modell.OppgaveKreverVurderingAvToSaksbehandlere
+import no.nav.helse.modell.OppgaveTildeltNoenAndre
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Egenskap.Companion.mapToString
 import no.nav.helse.modell.oppgave.Egenskap.Companion.tilgangsstyrteEgenskaper
@@ -21,6 +26,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload.Companion.lagre
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
+import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.graphql.schema.OppgaveTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.Oppgaveegenskap
 import no.nav.helse.spesialist.api.graphql.schema.Periodetype
@@ -87,20 +93,32 @@ internal class OppgaveMediator(
     override fun sendTilBeslutter(oppgaveId: Long, behandlendeSaksbehandler: SaksbehandlerFraApi) {
         val saksbehandler = behandlendeSaksbehandler.tilSaksbehandler()
         oppgave(oppgaveId) {
-            sendTilBeslutter(saksbehandler)
+            try {
+                sendTilBeslutter(saksbehandler)
+            } catch (e: Modellfeil) {
+                throw e.tilApiFeil()
+            }
         }
     }
 
     override fun sendIRetur(oppgaveId: Long, besluttendeSaksbehandler: SaksbehandlerFraApi) {
         val saksbehandler = besluttendeSaksbehandler.tilSaksbehandler()
         oppgave(oppgaveId) {
-            sendIRetur(saksbehandler)
+            try {
+                sendIRetur(saksbehandler)
+            } catch (e: Modellfeil) {
+                throw e.tilApiFeil()
+            }
         }
     }
 
     override fun leggPåVent(oppgaveId: Long): TildelingApiDto {
         return oppgave(oppgaveId) {
-            val tildeling = this.leggPåVent()
+            val tildeling = try {
+                this.leggPåVent()
+            } catch (e: Modellfeil) {
+                throw e.tilApiFeil()
+            }
             tildeling.let {
                 TildelingApiDto(it.navn, it.epost, it.oid, it.påVent)
             }
@@ -109,7 +127,11 @@ internal class OppgaveMediator(
 
     override fun fjernPåVent(oppgaveId: Long): TildelingApiDto {
         return oppgave(oppgaveId) {
-            val tildeling = this.fjernPåVent()
+            val tildeling = try {
+                this.fjernPåVent()
+            } catch (e: Modellfeil) {
+                throw e.tilApiFeil()
+            }
             tildeling.let {
                 TildelingApiDto(it.navn, it.epost, it.oid, it.påVent)
             }
@@ -232,6 +254,16 @@ internal class OppgaveMediator(
             "EN_ARBEIDSGIVER" -> "EN_ARBEIDSGIVER"
             "FLERE_ARBEIDSGIVERE" -> "FLERE_ARBEIDSGIVERE"
             else -> throw IllegalArgumentException("$inntektskilde er ikke en gyldig inntektskilde")
+        }
+    }
+
+    private fun Modellfeil.tilApiFeil(): no.nav.helse.spesialist.api.feilhåndtering.Modellfeil {
+        return when (this) {
+            is no.nav.helse.modell.OppgaveIkkeTildelt -> OppgaveIkkeTildelt(oppgaveId)
+            is OppgaveTildeltNoenAndre -> TODO()
+            is OppgaveAlleredeSendtBeslutter -> no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtBeslutter(oppgaveId)
+            is OppgaveAlleredeSendtIRetur -> no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtIRetur(oppgaveId)
+            is OppgaveKreverVurderingAvToSaksbehandlere -> no.nav.helse.spesialist.api.feilhåndtering.OppgaveKreverVurderingAvToSaksbehandlere(oppgaveId)
         }
     }
 }
