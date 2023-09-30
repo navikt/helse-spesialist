@@ -34,11 +34,11 @@ enum class Egenskap(
         Ukategorisert
     }
 
-    internal companion object {
-        internal val alleTilgangsstyrteEgenskaper = EnumSet.allOf(Egenskap::class.java).filter(Egenskap::tilgangsstyrt)
-        internal fun Collection<Egenskap>.tilgangsstyrteEgenskaper() = filter { it in alleTilgangsstyrteEgenskaper }
+    companion object {
+        val alleTilgangsstyrteEgenskaper = EnumSet.allOf(Egenskap::class.java).filter(Egenskap::tilgangsstyrt)
+        fun Collection<Egenskap>.tilgangsstyrteEgenskaper() = filter { it in alleTilgangsstyrteEgenskaper }
 
-        internal fun Egenskap.mapToString(): String = when (this) {
+        fun Egenskap.mapToString(): String = when (this) {
             RISK_QA -> "RISK_QA"
             FORTROLIG_ADRESSE -> "FORTROLIG_ADRESSE"
             EGEN_ANSATT -> "EGEN_ANSATT"
@@ -57,7 +57,7 @@ enum class Egenskap(
             VERGEMÅL -> "VERGEMÅL"
         }
 
-        internal fun Kategori.mapToString(): String {
+        fun Kategori.mapToString(): String {
             return when (this) {
                 Mottaker -> "Mottaker"
                 Inntektskilde -> "Inntektskilde"
