@@ -1,4 +1,4 @@
-package no.nav.helse.modell
+package no.nav.helse.modell.oppgave
 
 import TilgangskontrollForTestHarIkkeTilgang
 import TilgangskontrollForTestHarTilgang
@@ -7,8 +7,11 @@ import ToggleHelpers.disable
 import ToggleHelpers.enable
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.modell.OppgaveInspektør.Companion.inspektør
-import no.nav.helse.modell.oppgave.Egenskap
+import no.nav.helse.modell.OppgaveAlleredeSendtBeslutter
+import no.nav.helse.modell.OppgaveAlleredeSendtIRetur
+import no.nav.helse.modell.OppgaveIkkeTildelt
+import no.nav.helse.modell.OppgaveKreverVurderingAvToSaksbehandlere
+import no.nav.helse.modell.Toggle
 import no.nav.helse.modell.oppgave.Egenskap.BESLUTTER
 import no.nav.helse.modell.oppgave.Egenskap.EGEN_ANSATT
 import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
@@ -16,8 +19,7 @@ import no.nav.helse.modell.oppgave.Egenskap.RETUR
 import no.nav.helse.modell.oppgave.Egenskap.RISK_QA
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
-import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.modell.oppgave.OppgaveObserver
+import no.nav.helse.modell.oppgave.OppgaveInspektør.Companion.inspektør
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
@@ -528,7 +530,9 @@ internal class OppgaveTest {
 
     @Test
     fun equals() {
-        val gjenopptattOppgave = Oppgave.nyOppgave(1L, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), listOf(OPPGAVETYPE))
+        val gjenopptattOppgave = Oppgave.nyOppgave(1L, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), listOf(
+            OPPGAVETYPE
+        ))
         val oppgave1 = Oppgave.nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), listOf(SØKNAD))
         val oppgave2 = Oppgave.nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), listOf(SØKNAD))
         val oppgave3 = Oppgave.nyOppgave(OPPGAVE_ID, UUID.randomUUID(), UTBETALING_ID, UUID.randomUUID(), listOf(SØKNAD))

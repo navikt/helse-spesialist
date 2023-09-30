@@ -9,7 +9,6 @@ import io.mockk.slot
 import io.mockk.verify
 import java.util.UUID
 import no.nav.helse.mediator.oppgave.OppgaveMediator
-import no.nav.helse.modell.OppgaveInspektør.Companion.inspektør
 import no.nav.helse.modell.Toggle
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
@@ -26,6 +25,7 @@ import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_ARBEIDSGIVER
 import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.modell.oppgave.OppgaveInspektør.Companion.inspektør
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle

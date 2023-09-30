@@ -1,9 +1,6 @@
-package no.nav.helse.modell
+package no.nav.helse.modell.oppgave
 
 import java.util.UUID
-import no.nav.helse.modell.oppgave.Egenskap
-import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.modell.oppgave.OppgaveVisitor
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 
