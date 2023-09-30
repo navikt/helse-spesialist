@@ -1,17 +1,14 @@
 package no.nav.helse.modell.saksbehandler.handlinger
 
-import TilgangskontrollForTestHarIkkeTilgang
 import java.util.UUID
-import no.nav.helse.januar
 import no.nav.helse.modell.saksbehandler.OverstyrtInntektOgRefusjonEvent
 import no.nav.helse.modell.saksbehandler.OverstyrtTidslinjeEvent
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.SaksbehandlerObserver
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
-import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_BEREGNET
+import no.nav.helse.modell.vilkårsprøving.Subsumsjon
 import no.nav.helse.modell.vilkårsprøving.SubsumsjonEvent
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 internal class SaksbehandlerTest {
@@ -37,7 +34,7 @@ internal class SaksbehandlerTest {
                 begrunnelse = "begrunnelse",
             )
         )
-        assertEquals(true, observert)
+        Assertions.assertEquals(true, observert)
     }
 
     @Test
@@ -65,8 +62,8 @@ internal class SaksbehandlerTest {
             )
         )
 
-        assertEquals(2, subsumsjoner.size)
-        assertEquals(
+        Assertions.assertEquals(2, subsumsjoner.size)
+        Assertions.assertEquals(
             SubsumsjonEvent(
                 id = subsumsjoner[0].id,
                 fødselsnummer = "1234",
@@ -75,7 +72,7 @@ internal class SaksbehandlerTest {
                 bokstav = null,
                 lovverk = "folketrygdloven",
                 lovverksversjon = "2019-06-21",
-                utfall = VILKAR_BEREGNET.name,
+                utfall = Subsumsjon.Utfall.VILKAR_BEREGNET.name,
                 output = mapOf(
                     "dager" to listOf(
                         mapOf(
@@ -106,7 +103,7 @@ internal class SaksbehandlerTest {
             ),
             subsumsjoner[0]
         )
-        assertEquals(
+        Assertions.assertEquals(
             SubsumsjonEvent(
                 id = subsumsjoner[1].id,
                 fødselsnummer = "1234",
@@ -115,7 +112,7 @@ internal class SaksbehandlerTest {
                 bokstav = "EN BOKSTAV",
                 lovverk = "ANNEN LOV",
                 lovverksversjon = "1970-01-01",
-                utfall = VILKAR_BEREGNET.name,
+                utfall = Subsumsjon.Utfall.VILKAR_BEREGNET.name,
                 output = mapOf(
                     "dager" to listOf(
                         mapOf(
@@ -153,7 +150,7 @@ internal class SaksbehandlerTest {
         val saksbehandler = saksbehandler()
         saksbehandler.register(observer)
         saksbehandler.håndter(OverstyrtInntektOgRefusjon("123", "1234", 1.januar, emptyList()))
-        assertEquals(true, observert)
+        Assertions.assertEquals(true, observert)
     }
 
     @Test
@@ -164,10 +161,10 @@ internal class SaksbehandlerTest {
         val ident = "S123456"
         val saksbehandler = saksbehandler(epost, oid, navn, ident)
         val tildeling = saksbehandler.tildeling(true)
-        assertEquals(oid, tildeling.oid)
-        assertEquals(navn, tildeling.navn)
-        assertEquals(epost, tildeling.epost)
-        assertEquals(true, tildeling.påVent)
+        Assertions.assertEquals(oid, tildeling.oid)
+        Assertions.assertEquals(navn, tildeling.navn)
+        Assertions.assertEquals(epost, tildeling.epost)
+        Assertions.assertEquals(true, tildeling.påVent)
     }
 
     @Test
@@ -178,17 +175,17 @@ internal class SaksbehandlerTest {
         val ident = "S123456"
         val saksbehandler = saksbehandler(epost, oid, navn, ident)
         val tildeling = saksbehandler.tildeling(false)
-        assertEquals(oid, tildeling.oid)
-        assertEquals(navn, tildeling.navn)
-        assertEquals(epost, tildeling.epost)
-        assertEquals(false, tildeling.påVent)
+        Assertions.assertEquals(oid, tildeling.oid)
+        Assertions.assertEquals(navn, tildeling.navn)
+        Assertions.assertEquals(epost, tildeling.epost)
+        Assertions.assertEquals(false, tildeling.påVent)
     }
 
     @Test
     fun `referential equals`() {
         val saksbehandler = saksbehandler()
-        assertEquals(saksbehandler, saksbehandler)
-        assertEquals(saksbehandler.hashCode(), saksbehandler.hashCode())
+        Assertions.assertEquals(saksbehandler, saksbehandler)
+        Assertions.assertEquals(saksbehandler.hashCode(), saksbehandler.hashCode())
     }
 
     @Test
@@ -196,8 +193,8 @@ internal class SaksbehandlerTest {
         val oid = UUID.randomUUID()
         val saksbehandler1 = saksbehandler(oid = oid)
         val saksbehandler2 = saksbehandler(oid = oid)
-        assertEquals(saksbehandler1, saksbehandler2)
-        assertEquals(saksbehandler1.hashCode(), saksbehandler2.hashCode())
+        Assertions.assertEquals(saksbehandler1, saksbehandler2)
+        Assertions.assertEquals(saksbehandler1.hashCode(), saksbehandler2.hashCode())
     }
 
     @Test
@@ -205,16 +202,16 @@ internal class SaksbehandlerTest {
         val oid = UUID.randomUUID()
         val saksbehandler1 = saksbehandler(epost = "epost1@nav.no", oid = oid)
         val saksbehandler2 = saksbehandler(epost = "epost2@nav.no", oid = oid)
-        assertNotEquals(saksbehandler1, saksbehandler2)
-        assertNotEquals(saksbehandler1.hashCode(), saksbehandler2.hashCode())
+        Assertions.assertNotEquals(saksbehandler1, saksbehandler2)
+        Assertions.assertNotEquals(saksbehandler1.hashCode(), saksbehandler2.hashCode())
     }
 
     @Test
     fun `not equals - oid`() {
         val saksbehandler1 = saksbehandler()
         val saksbehandler2 = saksbehandler()
-        assertNotEquals(saksbehandler1, saksbehandler2)
-        assertNotEquals(saksbehandler1.hashCode(), saksbehandler2.hashCode())
+        Assertions.assertNotEquals(saksbehandler1, saksbehandler2)
+        Assertions.assertNotEquals(saksbehandler1.hashCode(), saksbehandler2.hashCode())
     }
 
     @Test
@@ -222,8 +219,8 @@ internal class SaksbehandlerTest {
         val oid = UUID.randomUUID()
         val saksbehandler1 = saksbehandler(navn = "navn 1", oid = oid)
         val saksbehandler2 = saksbehandler(navn = "navn 2", oid = oid)
-        assertNotEquals(saksbehandler1, saksbehandler2)
-        assertNotEquals(saksbehandler1.hashCode(), saksbehandler2.hashCode())
+        Assertions.assertNotEquals(saksbehandler1, saksbehandler2)
+        Assertions.assertNotEquals(saksbehandler1.hashCode(), saksbehandler2.hashCode())
     }
 
     @Test
@@ -231,8 +228,8 @@ internal class SaksbehandlerTest {
         val oid = UUID.randomUUID()
         val saksbehandler1 = saksbehandler(ident = "X999999", oid = oid)
         val saksbehandler2 = saksbehandler(ident = "Y999999", oid = oid)
-        assertNotEquals(saksbehandler1, saksbehandler2)
-        assertNotEquals(saksbehandler1.hashCode(), saksbehandler2.hashCode())
+        Assertions.assertNotEquals(saksbehandler1, saksbehandler2)
+        Assertions.assertNotEquals(saksbehandler1.hashCode(), saksbehandler2.hashCode())
     }
 
     private fun overstyrteDager(): List<OverstyrtTidslinjedag> = listOf(

@@ -29,7 +29,7 @@ class Saksbehandler(
         visitor.visitSaksbehandler(epostadresse, oid, navn, ident)
     }
 
-    internal fun tildeling(påVent: Boolean) = Tildeling(navn = navn, epost = epostadresse, oid = oid, påVent = påVent)
+    fun tildeling(påVent: Boolean) = Tildeling(navn = navn, epost = epostadresse, oid = oid, påVent = påVent)
 
     fun harTilgangTil(egenskaper: List<Egenskap>): Boolean =
         tilgangskontroll.harTilgangTil(oid, egenskaper)
