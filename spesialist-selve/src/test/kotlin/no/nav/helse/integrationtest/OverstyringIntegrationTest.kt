@@ -1,6 +1,7 @@
 package no.nav.helse.integrationtest
 
-import AbstractE2ETest
+import AbstractIntegrationTest
+import TilgangskontrollForTestHarIkkeTilgang
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -14,13 +15,11 @@ import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.Testdata.ORGNR_GHOST
-import no.nav.helse.Testdata.SAKSBEHANDLER_EPOST
-import no.nav.helse.Testdata.SAKSBEHANDLER_IDENT
-import no.nav.helse.Testdata.SAKSBEHANDLER_NAVN
-import no.nav.helse.Testdata.SAKSBEHANDLER_OID
 import no.nav.helse.januar
+import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.api.AbstractApiTest
 import no.nav.helse.mediator.api.AbstractApiTest.Companion.authentication
+import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.endepunkter.overstyringApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi
@@ -33,12 +32,14 @@ import org.junit.jupiter.api.Test
 /**
  * Tester samspillet mellom API og selve, altså "integrasjonen" mellom dem 😀
  */
-internal class OverstyringIntegrationTest : AbstractE2ETest() {
+internal class OverstyringIntegrationTest : AbstractIntegrationTest() {
+
+    protected val saksbehandlerMediator =
+        SaksbehandlerMediator(dataSource, "versjonAvKode", testRapid, TilgangskontrollForTestHarIkkeTilgang)
 
     @Test
     fun `overstyr tidslinje`() {
-        settOppBruker()
-        assertOppgaver(1)
+        fremTilSaksbehandleroppgave()
         val overstyring = OverstyrTidslinjeHandlingFraApi(
             vedtaksperiodeId = UUID.randomUUID(),
             organisasjonsnummer = ORGNR,
@@ -46,7 +47,7 @@ internal class OverstyringIntegrationTest : AbstractE2ETest() {
             aktørId = AKTØR,
             begrunnelse = "en begrunnelse",
             dager = listOf(
-                OverstyrDagFraApi(dato = 10.januar, type = "Feriedag", fraType = "Sykedag", grad = null, fraGrad = 100, null)
+                OverstyrDagFraApi(10.januar, type = "Feriedag", fraType = "Sykedag", grad = null, fraGrad = 100, null)
             ),
         )
         val response = sendOverstyring("/api/overstyr/dager", objectMapper.writeValueAsString(overstyring))
@@ -57,7 +58,7 @@ internal class OverstyringIntegrationTest : AbstractE2ETest() {
 
     @Test
     fun `overstyr inntekt med refusjon`() {
-        settOppBruker()
+        fremTilSaksbehandleroppgave()
 
         val response = sendOverstyring("/api/overstyr/inntektogrefusjon", overstyrInntektOgRefusjonJson)
         assertEquals(HttpStatusCode.OK, response.status)
@@ -79,7 +80,7 @@ internal class OverstyringIntegrationTest : AbstractE2ETest() {
 
     @Test
     fun `skjønnsfastsetter sykepengegrunnlag`() {
-        settOppBruker()
+        fremTilSaksbehandleroppgave()
 
         val response = sendOverstyring("/api/skjonnsfastsett/sykepengegrunnlag", skjønnsfastsettingJson)
 
@@ -96,7 +97,7 @@ internal class OverstyringIntegrationTest : AbstractE2ETest() {
 
     @Test
     fun `overstyr arbeidsforhold`() {
-        settOppBruker(orgnummereMedRelevanteArbeidsforhold = listOf(ORGNR_GHOST))
+        fremTilSaksbehandleroppgave(andreArbeidsforhold = listOf(ORGNR_GHOST))
 
         val overstyring = OverstyrArbeidsforholdHandlingFraApi(
             fødselsnummer = FØDSELSNUMMER,
@@ -123,29 +124,25 @@ internal class OverstyringIntegrationTest : AbstractE2ETest() {
     }
 
     private fun sendOverstyring(route: String, data: String) =
-        AbstractApiTest.TestServer { overstyringApi(saksbehandlerMediator) }
-            .withAuthenticatedServer { client ->
-                client.post(route) {
-                    header(HttpHeaders.ContentType, "application/json")
-                    authentication(SAKSBEHANDLER_OID, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_IDENT)
-                    setBody(data)
-                }
+        AbstractApiTest.TestServer { overstyringApi(saksbehandlerMediator) }.withAuthenticatedServer { client ->
+            client.post(route) {
+                header(HttpHeaders.ContentType, "application/json")
+                authentication(SAKSBEHANDLER_OID, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_IDENT)
+                setBody(data)
             }
-
-    private fun overstyringInntektRefusjonsopplysninger(column: String) =
-        sessionOf(dataSource).use { session ->
-            session.run(queryOf("SELECT * FROM overstyring_inntekt").map {
-                it.stringOrNull(column)
-            }.asSingle)
         }
 
-    private fun oppgaveStatus() =
-        sessionOf(dataSource).use { session ->
-            session.run(queryOf("SELECT * FROM oppgave ORDER BY id DESC").map {
-                it.string("status")
-            }.asSingle)
-        }
+    private fun overstyringInntektRefusjonsopplysninger(column: String) = sessionOf(dataSource).use { session ->
+        session.run(queryOf("SELECT * FROM overstyring_inntekt").map {
+            it.stringOrNull(column)
+        }.asSingle)
+    }
 
+    private fun oppgaveStatus() = sessionOf(dataSource).use { session ->
+        session.run(queryOf("SELECT * FROM oppgave ORDER BY id DESC").map {
+            it.string("status")
+        }.asSingle)
+    }
 }
 
 @Language("json")
