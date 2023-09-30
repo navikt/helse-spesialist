@@ -97,7 +97,7 @@ internal class OverstyringIntegrationTest : AbstractIntegrationTest() {
 
     @Test
     fun `overstyr arbeidsforhold`() {
-        fremTilSaksbehandleroppgave(andreArbeidsforhold = listOf(ORGNR_GHOST))
+        fremTilSaksbehandleroppgave(andreArbeidsforhold = listOf(ORGNR_GHOST)) // andreArbeidsforhold er kun for syns skyld, testen er ikke avhengig av at det settes opp i godkjenningsbehovet
 
         val overstyring = OverstyrArbeidsforholdHandlingFraApi(
             fødselsnummer = FØDSELSNUMMER,
@@ -115,10 +115,12 @@ internal class OverstyringIntegrationTest : AbstractIntegrationTest() {
         val response = sendOverstyring("/api/overstyr/arbeidsforhold", objectMapper.writeValueAsString(overstyring))
 
         assertEquals(HttpStatusCode.OK, response.status)
-        assertEquals(1, testRapid.inspektør.hendelser("saksbehandler_overstyrer_arbeidsforhold").size)
-        testRapid.sendTestMessage(
-            testRapid.inspektør.hendelser("saksbehandler_overstyrer_arbeidsforhold").first().toString()
-        )
+        val internMelding = testRapid.inspektør.hendelser("saksbehandler_overstyrer_arbeidsforhold").single().toString()
+        val overstyrtArbeidsforholdNode = objectMapper.readTree(internMelding).path("overstyrteArbeidsforhold")[0]
+        assertEquals(ORGNR_GHOST, overstyrtArbeidsforholdNode.path("orgnummer").asText())
+        assertTrue(overstyrtArbeidsforholdNode.path("deaktivert").asBoolean())
+
+        testRapid.sendTestMessage(internMelding)
         assertEquals("Invalidert", oppgaveStatus())
         assertEquals(1, testRapid.inspektør.hendelser("overstyr_arbeidsforhold").size)
     }
