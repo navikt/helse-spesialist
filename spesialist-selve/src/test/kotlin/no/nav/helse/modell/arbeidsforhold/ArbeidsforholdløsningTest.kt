@@ -25,7 +25,6 @@ internal class ArbeidsforholdløsningTest {
     private val dao = mockk<ArbeidsforholdDao>(relaxed = true)
     private val mediator = mockk<HendelseMediator>(relaxed = true)
     private val rapid = TestRapid()
-    private val meldingsfabrikk = Testmeldingfabrikk()
 
     init {
         ArbeidsforholdRiver(rapid, mediator)
@@ -39,7 +38,7 @@ internal class ArbeidsforholdløsningTest {
     @Test
     fun `mottar arbeidsgiverløsning`() {
         rapid.sendTestMessage(
-            meldingsfabrikk.lagArbeidsforholdløsning(
+            Testmeldingfabrikk.lagArbeidsforholdløsning(
                 aktørId = AKTØRID,
                 fødselsnummer = FØDSELSNUMMER,
                 organisasjonsnummer = ORGNR,
@@ -60,13 +59,14 @@ internal class ArbeidsforholdløsningTest {
     @Test
     fun `mottar tom arbeidsgiverløsning`() {
         rapid.sendTestMessage(
-            meldingsfabrikk.lagArbeidsforholdløsning(
+            Testmeldingfabrikk.lagArbeidsforholdløsning(
                 aktørId = AKTØRID,
                 fødselsnummer = FØDSELSNUMMER,
                 organisasjonsnummer = ORGNR,
                 løsning = listOf(),
                 vedtaksperiodeId = VEDTAKSPERIODE_ID
-            ))
+            )
+        )
 
         verify(exactly = 1) { mediator.løsning(any(), any(), any(), any<Arbeidsforholdløsning>(), any()) }
     }

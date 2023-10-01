@@ -17,7 +17,6 @@ internal class SykefraværstilfellerRiverTest {
 
     private val testRapid = TestRapid()
     private val mediator = mockk<HendelseMediator>(relaxed = true)
-    private val testmeldingfabrikk = Testmeldingfabrikk()
 
     init {
         SykefraværstilfellerRiver(testRapid, mediator)
@@ -46,7 +45,7 @@ internal class SykefraværstilfellerRiverTest {
         )
 
         testRapid.sendTestMessage(
-            testmeldingfabrikk.lagSykefraværstilfeller(
+            Testmeldingfabrikk.lagSykefraværstilfeller(
                 fødselsnummer = FØDSELSNUMMER,
                 aktørId = AKTØR,
                 tilfeller = listOf(

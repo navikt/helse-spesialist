@@ -23,7 +23,6 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
         private val HENDELSE_ID = UUID.randomUUID()
     }
 
-    private val testmeldingfabrikk = Testmeldingfabrikk()
     private val graphQLClient = mockk<SnapshotClient>(relaxed = true)
     private lateinit var hendelsefabrikk: Hendelsefabrikk
     private lateinit var vedtaksperiodeForkastet: VedtaksperiodeForkastet
@@ -45,23 +44,25 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
     @BeforeEach
     fun setupEach() {
         vedtaksperiodeForkastet = hendelsefabrikk.vedtaksperiodeForkastet(
-            testmeldingfabrikk.lagVedtaksperiodeForkastet(AKTØR, FNR, VEDTAKSPERIODE, id = HENDELSE_ID)
+            Testmeldingfabrikk.lagVedtaksperiodeForkastet(AKTØR, FNR, VEDTAKSPERIODE, id = HENDELSE_ID)
         )
     }
 
     @Test
     fun `finn siste igangsatte overstyring om den er korrigert søknad`() {
         val overstyringIgangsatt = hendelsefabrikk.overstyringIgangsatt(
-            testmeldingfabrikk.lagOverstyringIgangsatt(
-                FNR, berørtePerioder = listOf(mapOf(
-                    "vedtaksperiodeId" to "$VEDTAKSPERIODE",
-                    "periodeFom" to "2022-01-01",
-                    "orgnummer" to "orgnr",
-                ))
+            Testmeldingfabrikk.lagOverstyringIgangsatt(
+                FNR, berørtePerioder = listOf(
+                    mapOf(
+                        "vedtaksperiodeId" to "$VEDTAKSPERIODE",
+                        "periodeFom" to "2022-01-01",
+                        "orgnummer" to "orgnr",
+                    )
+                )
             )
         )
         val overstyringIgangsattForAnnenVedtaksperiode = hendelsefabrikk.overstyringIgangsatt(
-            testmeldingfabrikk.lagOverstyringIgangsatt(
+            Testmeldingfabrikk.lagOverstyringIgangsatt(
                 FNR, berørtePerioder = listOf(
                     mapOf(
                         "vedtaksperiodeId" to "$VEDTAKSPERIODE",
@@ -77,7 +78,7 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
 
         hendelseDao.opprett(
             hendelsefabrikk.overstyringIgangsatt(
-                testmeldingfabrikk.lagOverstyringIgangsatt(
+                Testmeldingfabrikk.lagOverstyringIgangsatt(
                     FNR,
                     berørtePerioder = listOf(
                         mapOf(
@@ -95,10 +96,10 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `finn antall korrigerte søknader`() {
         val overstyringIgangsatt = hendelsefabrikk.overstyringIgangsatt(
-            testmeldingfabrikk.lagOverstyringIgangsatt(FNR)
+            Testmeldingfabrikk.lagOverstyringIgangsatt(FNR)
         )
         val overstyringIgangsattForAnnenVedtaksperiode = hendelsefabrikk.overstyringIgangsatt(
-            testmeldingfabrikk.lagOverstyringIgangsatt(FNR)
+            Testmeldingfabrikk.lagOverstyringIgangsatt(FNR)
         )
         hendelseDao.opprett(overstyringIgangsatt)
         hendelseDao.opprett(overstyringIgangsattForAnnenVedtaksperiode)
@@ -110,10 +111,10 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `finn ut om automatisering av korrigert søknad allerede er håndtert`() {
         val overstyringIgangsatt = hendelsefabrikk.overstyringIgangsatt(
-            testmeldingfabrikk.lagOverstyringIgangsatt(FNR, id = HENDELSE_ID)
+            Testmeldingfabrikk.lagOverstyringIgangsatt(FNR, id = HENDELSE_ID)
         )
         val overstyringIgangsattForAnnenVedtaksperiode = hendelsefabrikk.overstyringIgangsatt(
-            testmeldingfabrikk.lagOverstyringIgangsatt(FNR)
+            Testmeldingfabrikk.lagOverstyringIgangsatt(FNR)
         )
         hendelseDao.opprett(overstyringIgangsatt)
         hendelseDao.opprett(overstyringIgangsattForAnnenVedtaksperiode)

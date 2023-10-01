@@ -18,7 +18,6 @@ internal class NyeVarslerRiverTest {
         private const val ORGNR = "123456789"
     }
 
-    private val testmeldingfabrikk = Testmeldingfabrikk()
     private val mediator = mockk<HendelseMediator>(relaxed = true)
     private val testRapid = TestRapid().apply {
         NyeVarslerRiver(this, mediator)
@@ -31,7 +30,7 @@ internal class NyeVarslerRiverTest {
 
     @Test
     fun `leser aktivitetslogg_ny_aktivitet`() {
-        testRapid.sendTestMessage(testmeldingfabrikk.lagNyeVarsler(FNR, HENDELSE, VEDTAKSPERIODE, ORGNR))
+        testRapid.sendTestMessage(Testmeldingfabrikk.lagNyeVarsler(FNR, HENDELSE, VEDTAKSPERIODE, ORGNR))
         verify(exactly = 1) { mediator.nyeVarsler(any(), any(), any(), any(), any()) }
     }
 }

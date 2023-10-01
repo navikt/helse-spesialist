@@ -9,7 +9,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class UtbetalingAnnullertRiverTest {
-    private val testmeldingfabrikk = Testmeldingfabrikk()
     private val mediator = mockk<HendelseMediator>(relaxed = true)
     private val testRapid = TestRapid().apply {
         InfotrygdutbetalingerRiver(this, mediator)
@@ -26,7 +25,7 @@ internal class UtbetalingAnnullertRiverTest {
 
     @Test
     fun `leser selvstendig UtbetalingAnnullert-melding`() {
-        testRapid.sendTestMessage(testmeldingfabrikk.lagUtbetalingAnnullert(arbeidsgiverFagsystemId = "fagsystemId"))
+        testRapid.sendTestMessage(Testmeldingfabrikk.lagUtbetalingAnnullert(arbeidsgiverFagsystemId = "fagsystemId"))
         verify(exactly = 1) { mediator.utbetalingAnnullert(any(), any()) }
     }
 }

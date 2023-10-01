@@ -32,14 +32,15 @@ internal class RisikoCommandTest {
         private const val ORGNUMMER = "123456789"
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
 
-        private val meldingsfabrikk = Testmeldingfabrikk()
-        private fun risikovurderingLøsning(funn: List<Risikofunn>) = objectMapper.readTree(meldingsfabrikk.lagRisikovurderingløsning(
-            aktørId = AKTØR,
-            fødselsnummer = FØDSELSNUMMER,
-            organisasjonsnummer = "815493000",
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            funn = funn,
-        )).path("@løsning").path("Risikovurdering")
+        private fun risikovurderingLøsning(funn: List<Risikofunn>) = objectMapper.readTree(
+            Testmeldingfabrikk.lagRisikovurderingløsning(
+                aktørId = AKTØR,
+                fødselsnummer = FØDSELSNUMMER,
+                organisasjonsnummer = "815493000",
+                vedtaksperiodeId = VEDTAKSPERIODE_ID,
+                funn = funn,
+            )
+        ).path("@løsning").path("Risikovurdering")
     }
 
     private val generasjon = Generasjon(UUID.randomUUID(), VEDTAKSPERIODE_ID, 1.januar, 31.januar, 1.januar)

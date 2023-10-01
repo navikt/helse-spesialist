@@ -21,10 +21,8 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
 import kotlin.random.Random.Default.nextLong
 
-internal class Testmeldingfabrikk {
-    companion object {
-        const val OSLO = "0301"
-    }
+internal object Testmeldingfabrikk {
+    private const val OSLO = "0301"
 
     fun lagVedtaksperiodeNyUtbetaling(
         aktørId: String,

@@ -23,7 +23,7 @@ internal class GodkjenningsbehovRiverTest {
         private val FOM = LocalDate.of(2020, 1, 1)
         private val TOM = LocalDate.of(2020, 1, 31)
     }
-    private val testmeldingfabrikk = Testmeldingfabrikk()
+
     private val mediator = mockk<HendelseMediator>(relaxed = true)
     private val testRapid = TestRapid().apply {
         GodkjenningsbehovRiver(this, mediator)
@@ -37,19 +37,21 @@ internal class GodkjenningsbehovRiverTest {
     @Test
     fun `leser Godkjenningbehov`() {
         val relevanteArbeidsforhold = listOf(ORGNR)
-        testRapid.sendTestMessage(testmeldingfabrikk.lagGodkjenningsbehov(
-            aktørId = AKTØR,
-            fødselsnummer = FNR,
-            vedtaksperiodeId = VEDTAKSPERIODE,
-            utbetalingId = UTBETALING_ID,
-            organisasjonsnummer = ORGNR,
-            periodeFom = FOM,
-            periodeTom = TOM,
-            skjæringstidspunkt = FOM,
-            inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE,
-            orgnummereMedRelevanteArbeidsforhold = relevanteArbeidsforhold,
-            id = HENDELSE,
-        ))
+        testRapid.sendTestMessage(
+            Testmeldingfabrikk.lagGodkjenningsbehov(
+                aktørId = AKTØR,
+                fødselsnummer = FNR,
+                vedtaksperiodeId = VEDTAKSPERIODE,
+                utbetalingId = UTBETALING_ID,
+                organisasjonsnummer = ORGNR,
+                periodeFom = FOM,
+                periodeTom = TOM,
+                skjæringstidspunkt = FOM,
+                inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE,
+                orgnummereMedRelevanteArbeidsforhold = relevanteArbeidsforhold,
+                id = HENDELSE,
+            )
+        )
         verify(exactly = 1) { mediator.godkjenningsbehov(
             any(),
             HENDELSE,

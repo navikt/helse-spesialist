@@ -18,7 +18,6 @@ internal class HentEnhetRiverTest {
         private const val AKTØR = "1234567891234"
     }
 
-    private val testmeldingfabrikk = Testmeldingfabrikk()
     private val mediator = mockk<HendelseMediator>(relaxed = true)
     private val testRapid = TestRapid().apply {
         HentEnhetRiver(this, mediator)
@@ -31,13 +30,13 @@ internal class HentEnhetRiverTest {
 
     @Test
     fun `leser selvstendig HentEnhet-melding`() {
-        testRapid.sendTestMessage(testmeldingfabrikk.lagEnhetløsning(AKTØR, FNR, HENDELSE, CONTEXT))
+        testRapid.sendTestMessage(Testmeldingfabrikk.lagEnhetløsning(AKTØR, FNR, HENDELSE, CONTEXT))
         verify(exactly = 1) { mediator.løsning(HENDELSE, CONTEXT, any(), any<HentEnhetløsning>(), any()) }
     }
 
     @Test
     fun `leser HentEnhet i et behov med flere ting`() {
-        testRapid.sendTestMessage(testmeldingfabrikk.lagPersoninfoløsningComposite(AKTØR, FNR, HENDELSE, CONTEXT))
+        testRapid.sendTestMessage(Testmeldingfabrikk.lagPersoninfoløsningComposite(AKTØR, FNR, HENDELSE, CONTEXT))
         verify(exactly = 1) { mediator.løsning(HENDELSE, CONTEXT, any(), any<HentEnhetløsning>(), any()) }
     }
 }

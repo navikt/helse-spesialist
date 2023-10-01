@@ -27,7 +27,6 @@ internal class VedtaksperiodeForkastetTest {
         private const val FNR = "fnr"
     }
 
-    private val testmeldingfabrikk = Testmeldingfabrikk()
     private val commandContextDao = mockk<CommandContextDao>(relaxed = true)
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
     private val personDao = mockk<PersonDao>(relaxed = true)
@@ -39,7 +38,7 @@ internal class VedtaksperiodeForkastetTest {
         id = HENDELSE,
         vedtaksperiodeId = VEDTAKSPERIODE,
         fødselsnummer = FNR,
-        json = testmeldingfabrikk.lagVedtaksperiodeForkastet("aktørId", FNR, VEDTAKSPERIODE, id = HENDELSE),
+        json = Testmeldingfabrikk.lagVedtaksperiodeForkastet("aktørId", FNR, VEDTAKSPERIODE, id = HENDELSE),
         commandContextDao = commandContextDao,
         oppgaveMediator = oppgaveMediator,
         snapshotClient = graphQLClient,

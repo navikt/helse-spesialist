@@ -21,18 +21,16 @@ internal class TestmeldingfabrikkTest {
         private val UTBETALING_ID = UUID.randomUUID()
     }
 
-    private val fabrikk = Testmeldingfabrikk()
-
     @Test
     fun `meldinger inneholder standardfelt`() {
-        assertStandardfelt(fabrikk.lagVedtaksperiodeEndret(aktørId = AKTØR, fødselsnummer = FNR))
-        assertStandardfelt(fabrikk.lagVedtaksperiodeForkastet(FNR, AKTØR))
-        assertStandardfelt(fabrikk.lagGodkjenningsbehov(AKTØR, FNR))
+        assertStandardfelt(Testmeldingfabrikk.lagVedtaksperiodeEndret(aktørId = AKTØR, fødselsnummer = FNR))
+        assertStandardfelt(Testmeldingfabrikk.lagVedtaksperiodeForkastet(FNR, AKTØR))
+        assertStandardfelt(Testmeldingfabrikk.lagGodkjenningsbehov(AKTØR, FNR))
     }
 
     @Test
     fun `vedtaksperiode endret`() {
-        val melding = fabrikk.lagVedtaksperiodeEndret(HENDELSE_ID, AKTØR, FNR, "orgnr", VEDTAKSPERIODE_ID, "START", "SLUTT")
+        val melding = Testmeldingfabrikk.lagVedtaksperiodeEndret(HENDELSE_ID, AKTØR, FNR, "orgnr", VEDTAKSPERIODE_ID, "START", "SLUTT")
         assertFelt("fødselsnummer", FNR, melding)
         assertFelt("aktørId", AKTØR, melding)
         assertFelt("organisasjonsnummer", "orgnr", melding)
@@ -44,7 +42,7 @@ internal class TestmeldingfabrikkTest {
 
     @Test
     fun `vedtaksperiode forkastet`() {
-        val melding = fabrikk.lagVedtaksperiodeForkastet(AKTØR, FNR, VEDTAKSPERIODE_ID, "orgnr", HENDELSE_ID)
+        val melding = Testmeldingfabrikk.lagVedtaksperiodeForkastet(AKTØR, FNR, VEDTAKSPERIODE_ID, "orgnr", HENDELSE_ID)
         assertFelt("fødselsnummer", FNR, melding)
         assertFelt("aktørId", AKTØR, melding)
         assertFelt("organisasjonsnummer", "orgnr", melding)
@@ -54,7 +52,8 @@ internal class TestmeldingfabrikkTest {
 
     @Test
     fun godkjenningsbehov() {
-        val melding = fabrikk.lagGodkjenningsbehov(AKTØR, FNR, VEDTAKSPERIODE_ID, UTBETALING_ID, id = HENDELSE_ID)
+        val melding =
+            Testmeldingfabrikk.lagGodkjenningsbehov(AKTØR, FNR, VEDTAKSPERIODE_ID, UTBETALING_ID, id = HENDELSE_ID)
         assertFelt("fødselsnummer", FNR, melding)
         assertFelt("aktørId", AKTØR, melding)
         assertFelt("organisasjonsnummer", "orgnr", melding)

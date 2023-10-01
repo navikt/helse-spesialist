@@ -16,7 +16,6 @@ internal class InntektRiverTest {
 
     private val rapid = TestRapid()
     private val mediator = mockk<HendelseMediator>(relaxed = true)
-    private val meldingsfabrikk = Testmeldingfabrikk()
 
     init {
         Inntektløsning.InntektRiver(rapid, mediator)
@@ -30,7 +29,9 @@ internal class InntektRiverTest {
 
     @Test
     fun `leser behov InntekterForSykepengegrunnlag`() {
-        rapid.sendTestMessage(meldingsfabrikk.lagInntektløsning(aktørId = AKTØR, fødselsnummer = FØDSELSNUMMER, ORGNR))
+        rapid.sendTestMessage(
+            Testmeldingfabrikk.lagInntektløsning(aktørId = AKTØR, fødselsnummer = FØDSELSNUMMER, ORGNR)
+        )
         verify(exactly = 1) { mediator.løsning(any(), any(), any(), any(), any()) }
     }
 }

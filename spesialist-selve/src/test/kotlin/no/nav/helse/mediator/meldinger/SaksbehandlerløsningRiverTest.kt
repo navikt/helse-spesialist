@@ -17,7 +17,6 @@ internal class SaksbehandlerløsningRiverTest {
         private const val FNR = "12345678911"
     }
 
-    private val testmeldingfabrikk = Testmeldingfabrikk()
     private val mediator = mockk<HendelseMediator>(relaxed = true)
     private val testRapid = TestRapid().apply {
         SaksbehandlerløsningRiver(this, mediator)
@@ -31,7 +30,7 @@ internal class SaksbehandlerløsningRiverTest {
     @Test
     fun `leser saksbehandlerløsning`() {
         testRapid.sendTestMessage(
-            testmeldingfabrikk.lagSaksbehandlerløsning(
+            Testmeldingfabrikk.lagSaksbehandlerløsning(
                 FNR,
                 GODKJENNINGSBEHOV_ID,
                 CONTEXT,

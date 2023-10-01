@@ -12,7 +12,6 @@ internal class VedtaksperiodeSkjønnsmessigFastsettelseRiverTest {
 
     private val rapid = TestRapid()
     private val mediator = mockk<HendelseMediator>(relaxed = true)
-    private val meldingsfabrikk = Testmeldingfabrikk()
 
     init {
         VedtaksperiodeSkjønnsmessigFastsettelseRiver(rapid, mediator)
@@ -26,7 +25,11 @@ internal class VedtaksperiodeSkjønnsmessigFastsettelseRiverTest {
 
     @Test
     fun `tolker vedtaksperiode_endret for VedtaksperiodeSkjønnsmessigFastsetting`() {
-        rapid.sendTestMessage(meldingsfabrikk.lagVedtaksperiodeEndret(aktørId = "aktørId", fødselsnummer = "fnr", gjeldendeTilstand = "AVVENTER_SKJØNNSMESSIG_FASTSETTELSE"))
+        rapid.sendTestMessage(
+            Testmeldingfabrikk.lagVedtaksperiodeEndret(
+                aktørId = "aktørId", fødselsnummer = "fnr", gjeldendeTilstand = "AVVENTER_SKJØNNSMESSIG_FASTSETTELSE"
+            )
+        )
         verify { mediator.vedtaksperiodeSkjønnsmessigFastsettelse(any(), any(), any(), any(), any(), any(), any()) }
     }
 }

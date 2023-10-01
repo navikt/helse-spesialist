@@ -17,7 +17,6 @@ internal class VedtaksperiodeNyUtbetalingRiverTest {
 
     private val testRapid = TestRapid()
     private val mediator = mockk<HendelseMediator>(relaxed = true)
-    private val testmeldingfabrikk = Testmeldingfabrikk()
 
     init {
         VedtaksperiodeNyUtbetalingRiver(testRapid, mediator)
@@ -32,7 +31,7 @@ internal class VedtaksperiodeNyUtbetalingRiverTest {
     fun `leser inn vedtaksperiode_ny_utbetaling`() {
         val hendelseId = UUID.randomUUID()
         testRapid.sendTestMessage(
-            testmeldingfabrikk.lagVedtaksperiodeNyUtbetaling(
+            Testmeldingfabrikk.lagVedtaksperiodeNyUtbetaling(
                 id = hendelseId,
                 aktørId = AKTØR,
                 fødselsnummer = FØDSELSNUMMER,
