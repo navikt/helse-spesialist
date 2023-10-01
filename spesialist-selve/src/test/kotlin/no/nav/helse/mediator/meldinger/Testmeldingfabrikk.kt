@@ -6,14 +6,19 @@ import java.time.LocalDate.now
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.Testdata
 import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.mediator.meldinger.Risikofunn.Companion.tilJson
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
+import no.nav.helse.modell.saksbehandler.OverstyrtInntektOgRefusjonEvent
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vilkårsprøving.LovhjemmelEvent
 import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
 import kotlin.random.Random.Default.nextLong
 
 internal class Testmeldingfabrikk {
@@ -63,6 +68,24 @@ internal class Testmeldingfabrikk {
         )
     }
 
+    fun lagGosysOppgaveEndret(
+        fødselsnummer: String,
+        id: UUID,
+    ): String =
+        nyHendelse(id, "gosys_oppgave_endret", mapOf("fødselsnummer" to fødselsnummer))
+
+    fun lagEndretSkjermetinfo(
+        fødselsnummer: String,
+        skjermet: Boolean,
+        id: UUID,
+    ): String = nyHendelse(
+        id, "endret_skjermetinfo", mapOf(
+            "fødselsnummer" to fødselsnummer,
+            "skjermet" to skjermet,
+            "@opprettet" to LocalDateTime.now()
+        )
+    )
+
     fun lagAdressebeskyttelseEndret(
         aktørId: Any,
         fødselsnummer: Any,
@@ -75,10 +98,10 @@ internal class Testmeldingfabrikk {
     )
 
     fun lagSøknadSendt(
-        id: UUID = UUID.randomUUID(),
         organisasjonsnummer: String,
         aktørId: String,
         fødselsnummer: String,
+        id: UUID = UUID.randomUUID(),
     ) =
         nyHendelse(
             id, "sendt_søknad_nav", mapOf(
@@ -145,6 +168,49 @@ internal class Testmeldingfabrikk {
             )
         )
 
+    fun lagSaksbehandlerSkjønnsfastsettingSykepengegrunnlag(
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        vedtaksperiodeId: UUID,
+        skjæringstidspunkt: LocalDate = 1.januar,
+        saksbehandlerOid: UUID,
+        saksbehandlerEpost: String,
+        saksbehandlerIdent: String,
+        saksbehandlerNavn: String,
+        id: UUID,
+    ) =
+        nyHendelse(
+            id, "saksbehandler_skjonnsfastsetter_sykepengegrunnlag", mapOf(
+                "vedtaksperiodeId" to "$vedtaksperiodeId",
+                "fødselsnummer" to fødselsnummer,
+                "aktørId" to aktørId,
+                "arbeidsgivere" to listOf(
+                    mapOf(
+                        "organisasjonsnummer" to organisasjonsnummer,
+                        "årlig" to 600000.0,
+                        "fraÅrlig" to 500000.0,
+                        "årsak" to "Skjønnsfastsetting ved mer enn 25% avvik",
+                        "type" to "OMREGNET_ÅRSINNTEKT",
+                        "begrunnelseMal" to "Mal",
+                        "begrunnelseFritekst" to "Fritekst",
+                        "begrunnelseKonklusjon" to "Fritekst",
+                        "subsumsjon" to mapOf(
+                            "paragraf" to "8-30",
+                            "ledd" to "2",
+                            "bokstav" to null,
+                        ),
+                        "initierendeVedtaksperiodeId" to vedtaksperiodeId,
+                    )
+                ),
+                "skjæringstidspunkt" to skjæringstidspunkt,
+                "saksbehandlerIdent" to saksbehandlerIdent,
+                "saksbehandlerOid" to saksbehandlerOid,
+                "saksbehandlerNavn" to saksbehandlerNavn,
+                "saksbehandlerEpost" to saksbehandlerEpost,
+            )
+        )
+
     fun lagVedtaksperiodeForkastet(
         aktørId: String,
         fødselsnummer: String,
@@ -166,7 +232,7 @@ internal class Testmeldingfabrikk {
         fødselsnummer: String,
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         utbetalingId: UUID = UUID.randomUUID(),
-        orgnummer: String = "orgnr",
+        organisasjonsnummer: String = "orgnr",
         periodeFom: LocalDate = now(),
         periodeTom: LocalDate = now(),
         skjæringstidspunkt: LocalDate = now(),
@@ -184,7 +250,7 @@ internal class Testmeldingfabrikk {
                 "@behov" to listOf("Godkjenning"),
                 "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer,
-                "organisasjonsnummer" to orgnummer,
+                "organisasjonsnummer" to organisasjonsnummer,
                 "vedtaksperiodeId" to "$vedtaksperiodeId",
                 "utbetalingId" to "$utbetalingId",
                 "Godkjenning" to mapOf(
@@ -201,8 +267,10 @@ internal class Testmeldingfabrikk {
             )
         )
 
-    private fun arbeidsgiverinformasjon(ekstraArbeidsgivere: List<ArbeidsgiverinformasjonJson>) = (ekstraArbeidsgivere).map(ArbeidsgiverinformasjonJson::toBody)
-    fun lagArbeidsgiverinformasjonløsningOld(
+    private fun arbeidsgiverinformasjon(ekstraArbeidsgivere: List<ArbeidsgiverinformasjonJson>) =
+        ekstraArbeidsgivere.map(ArbeidsgiverinformasjonJson::toBody)
+
+    fun lagArbeidsgiverinformasjonløsning(
         aktørId: String,
         fødselsnummer: String,
         organisasjonsnummer: String,
@@ -223,6 +291,33 @@ internal class Testmeldingfabrikk {
             "orgnummer" to organisasjonsnummer,
             "@løsning" to mapOf(
                 "Arbeidsgiverinformasjon" to arbeidsgiverinformasjon(ekstraArbeidsgivere)
+            )
+        )
+    )
+
+    fun lagArbeidsgiverinformasjonKomposittLøsning(
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        vedtaksperiodeId: UUID,
+        organisasjoner: List<ArbeidsgiverinformasjonJson> = emptyList(),
+        personer: List<Map<String, Any>> = emptyList(),
+        hendelseId: UUID,
+        contextId: UUID,
+        id: UUID,
+    ) = nyHendelse(
+        id, "behov", mapOf(
+            "@final" to true,
+            "@behov" to listOf("Arbeidsgiverinformasjon", "HentPersoninfoV2"),
+            "hendelseId" to "$hendelseId",
+            "contextId" to "$contextId",
+            "vedtaksperiodeId" to "$vedtaksperiodeId",
+            "fødselsnummer" to fødselsnummer,
+            "aktørId" to aktørId,
+            "orgnummer" to organisasjonsnummer,
+            "@løsning" to mapOf(
+                "Arbeidsgiverinformasjon" to organisasjoner.map(ArbeidsgiverinformasjonJson::toBody),
+                "HentPersoninfoV2" to personer
             )
         )
     )
@@ -325,7 +420,7 @@ internal class Testmeldingfabrikk {
         id
     )
 
-    fun lagHentInfotrygdutbetalingerløsning(
+    fun lagInfotrygdutbetalingerløsning(
         aktørId: String,
         fødselsnummer: String,
         hendelseId: UUID = UUID.randomUUID(),
@@ -363,26 +458,39 @@ internal class Testmeldingfabrikk {
             )
         )
 
-    fun lagUtbetalingAnnullertEvent(
-        id: UUID = UUID.randomUUID(),
+    fun lagUtbetalingAnnullert(
         fødselsnummer: String = "123456789",
-        arbeidsgiverFagsystemId: UUID = UUID.randomUUID(),
-        personFagsystemId: UUID? = null,
+        arbeidsgiverFagsystemId: String,
+        personFagsystemId: String? = null,
         utbetalingId: UUID = UUID.randomUUID(),
-        annullertAvSaksbehandler: LocalDate = now(),
-        saksbehandlerEpost: String = "saksbehandler_epost"
+        annullertAvSaksbehandler: LocalDateTime = LocalDateTime.now(),
+        saksbehandlerEpost: String = "saksbehandler_epost",
+        id: UUID = UUID.randomUUID(),
     ) =
         nyHendelse(
             id, "utbetaling_annullert", mapOf(
                 "fødselsnummer" to fødselsnummer,
-                "arbeidsgiverFagsystemId" to arbeidsgiverFagsystemId.toString(),
+                "arbeidsgiverFagsystemId" to arbeidsgiverFagsystemId,
                 "utbetalingId" to utbetalingId.toString(),
                 "tidspunkt" to annullertAvSaksbehandler.toString(),
                 "epost" to saksbehandlerEpost
             ).let { if (personFagsystemId != null) it.plus("personFagsystemId" to personFagsystemId) else it }
         )
 
-    fun lagHentPersoninfoløsning(
+    fun lagSykefraværstilfeller(
+        fødselsnummer: String,
+        aktørId: String,
+        tilfeller: List<Map<String, Any>>,
+        id: UUID = UUID.randomUUID(),
+    ) = nyHendelse(
+        id, "sykefraværstilfeller", mapOf(
+            "fødselsnummer" to fødselsnummer,
+            "aktørId" to aktørId,
+            "tilfeller" to tilfeller,
+        )
+    )
+
+    fun lagPersoninfoløsning(
         aktørId: String,
         fødselsnummer: String,
         hendelseId: UUID = UUID.randomUUID(),
@@ -411,7 +519,7 @@ internal class Testmeldingfabrikk {
             )
         )
 
-    fun lagHentEnhetløsning(
+    fun lagEnhetløsning(
         aktørId: String,
         fødselsnummer: String,
         hendelseId: UUID = UUID.randomUUID(),
@@ -439,24 +547,160 @@ internal class Testmeldingfabrikk {
 
     fun lagOverstyringIgangsatt(
         fødselsnummer: String,
-        vedtaksperiodeId: UUID = UUID.randomUUID(),
+        berørtePerioder: List<Map<String, String>> = listOf(
+            mapOf(
+                "vedtaksperiodeId" to "${UUID.randomUUID()}",
+                "skjæringstidspunkt" to "2022-01-01",
+                "periodeFom" to "2022-01-01",
+                "periodeTom" to "2022-01-31",
+                "orgnummer" to "orgnr",
+                "typeEndring" to "REVURDERING"
+            )
+        ),
         årsak: String = "KORRIGERT_SØKNAD",
         fom: LocalDate = now(),
-        orgnummer: String = "123456789",
+        kilde: UUID = UUID.randomUUID(),
         id: UUID = UUID.randomUUID(),
     ) =
         nyHendelse(
-            id, "overstyring_igangsatt", mutableMapOf(
+            id, "overstyring_igangsatt", mapOf(
                 "fødselsnummer" to fødselsnummer,
-                "årsak" to årsak,
-                "berørtePerioder" to listOf(
-                    mapOf("vedtaksperiodeId" to "${UUID.randomUUID()}", "periodeFom" to "$fom", "orgnummer" to orgnummer),
-                    mapOf("vedtaksperiodeId" to "$vedtaksperiodeId", "periodeFom" to "$fom", "orgnummer" to orgnummer),
-                ),
-                "kilde" to "${UUID.randomUUID()}",
+                "årsak" to årsak, // Denne leses rett fra hendelse-tabellen i HendelseDao, ikke via riveren
+                "berørtePerioder" to berørtePerioder,
+                "kilde" to "$kilde",
                 "periodeForEndringFom" to "$fom",
             )
         )
+
+    fun lagOverstyringInntektOgRefusjon(
+        aktørId: String,
+        fødselsnummer: String,
+        arbeidsgivere: List<OverstyrtInntektOgRefusjonEvent.OverstyrtArbeidsgiverEvent> = listOf(
+            OverstyrtInntektOgRefusjonEvent.OverstyrtArbeidsgiverEvent(
+                organisasjonsnummer = Testdata.ORGNR,
+                månedligInntekt = 25000.0,
+                fraMånedligInntekt = 25001.0,
+                forklaring = "testbortforklaring",
+                subsumsjon = LovhjemmelEvent("8-28", "LEDD_1", "BOKSTAV_A", "folketrygdloven", "1970-01-01"),
+                refusjonsopplysninger = null,
+                fraRefusjonsopplysninger = null,
+                begrunnelse = "en begrunnelse"
+            )
+        ),
+        skjæringstidspunkt: LocalDate,
+        saksbehandleroid: UUID = UUID.randomUUID(),
+        saksbehandlernavn: String = "saksbehandler",
+        saksbehandlerepost: String = "saksbehandler@nav.no",
+        saksbehandlerident: String = "saksbehandlerIdent",
+        id: UUID = UUID.randomUUID(),
+    ) = nyHendelse(
+        id, "saksbehandler_overstyrer_inntekt_og_refusjon", mapOf(
+            "aktørId" to aktørId,
+            "fødselsnummer" to fødselsnummer,
+            "arbeidsgivere" to arbeidsgivere,
+            "saksbehandlerOid" to saksbehandleroid,
+            "saksbehandlerIdent" to saksbehandlerident,
+            "saksbehandlerNavn" to saksbehandlernavn,
+            "saksbehandlerEpost" to saksbehandlerepost,
+            "skjæringstidspunkt" to skjæringstidspunkt,
+        )
+    )
+
+    fun lagOverstyringArbeidsforhold(
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        skjæringstidspunkt: LocalDate,
+        overstyrteArbeidsforhold: List<OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdFraApi>,
+        saksbehandleroid: UUID = UUID.randomUUID(),
+        saksbehandlernavn: String = "saksbehandler",
+        saksbehandlerepost: String = "sara.saksbehandler@nav.no",
+        saksbehandlerident: String = "saksbehandlerIdent",
+        id: UUID,
+    ) = nyHendelse(
+        id, "saksbehandler_overstyrer_arbeidsforhold", mapOf(
+            "aktørId" to aktørId,
+            "fødselsnummer" to fødselsnummer,
+            "organisasjonsnummer" to organisasjonsnummer,
+            "saksbehandlerOid" to saksbehandleroid,
+            "saksbehandlerIdent" to saksbehandlerident,
+            "saksbehandlerNavn" to saksbehandlernavn,
+            "saksbehandlerEpost" to saksbehandlerepost,
+            "skjæringstidspunkt" to skjæringstidspunkt,
+            "overstyrteArbeidsforhold" to overstyrteArbeidsforhold
+        )
+    )
+
+    fun lagUtbetalingEndret(
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        utbetalingId: UUID,
+        type: String = "UTBETALING",
+        forrigeStatus: Utbetalingsstatus = Utbetalingsstatus.NY,
+        gjeldendeStatus: Utbetalingsstatus = Utbetalingsstatus.IKKE_UTBETALT,
+        arbeidsgiverFagsystemId: String = "LWCBIQLHLJISGREBICOHAU",
+        personFagsystemId: String = "ASJKLD90283JKLHAS3JKLF",
+        arbeidsgiverbeløp: Int = 20000,
+        personbeløp: Int = 0,
+        opprettet: LocalDateTime,
+        id: UUID,
+    ) = nyHendelse(
+        id, "utbetaling_endret", mapOf(
+            "utbetalingId" to "$utbetalingId",
+            "aktørId" to aktørId,
+            "fødselsnummer" to fødselsnummer,
+            "organisasjonsnummer" to organisasjonsnummer,
+            "type" to type,
+            "forrigeStatus" to "$forrigeStatus",
+            "gjeldendeStatus" to "$gjeldendeStatus",
+            "@opprettet" to opprettet,
+            "arbeidsgiverOppdrag" to mapOf(
+                "mottaker" to organisasjonsnummer,
+                "fagområde" to "SPREF",
+                "fagsystemId" to arbeidsgiverFagsystemId,
+                "nettoBeløp" to arbeidsgiverbeløp,
+                "linjer" to listOf(
+                    mapOf(
+                        "fom" to "${now()}",
+                        "tom" to "${now()}",
+                        "totalbeløp" to 2000
+                    ),
+                    mapOf(
+                        "fom" to "${now()}",
+                        "tom" to "${now()}",
+                        "totalbeløp" to 2000
+                    )
+                )
+            ),
+            "personOppdrag" to mapOf(
+                "mottaker" to fødselsnummer,
+                "fagområde" to "SP",
+                "fagsystemId" to personFagsystemId,
+                "nettoBeløp" to personbeløp,
+                "linjer" to listOf(
+                    mapOf(
+                        "fom" to "${now()}",
+                        "tom" to "${now()}",
+                        "totalbeløp" to 2000
+                    ),
+                    mapOf(
+                        "fom" to "${now()}",
+                        "tom" to "${now()}",
+                        "totalbeløp" to 2000
+                    )
+                )
+
+            )
+        )
+    )
+
+    fun lagOppdaterPersonsnapshot(aktørId: String, fødselsnummer: String, id: UUID) = nyHendelse(
+        id, "oppdater_personsnapshot", mapOf(
+            "fødselsnummer" to fødselsnummer,
+            "aktørId" to aktørId
+        )
+    )
 
     fun lagSaksbehandlerløsning(
         fødselsnummer: String,
@@ -498,21 +742,19 @@ internal class Testmeldingfabrikk {
         aktørId: String,
         fødselsnummer: String,
         orgnummer: String,
-        vedtaksperiodeId: UUID,
         id: UUID = UUID.randomUUID(),
         hendelseId: UUID = UUID.randomUUID(),
         contextId: UUID = UUID.randomUUID()
     ): String =
         nyHendelse(
             id,
-            "behov", mutableMapOf(
+            "behov", mapOf(
                 "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer,
                 "@final" to true,
                 "@behov" to listOf("InntekterForSykepengegrunnlag"),
                 "contextId" to contextId,
                 "hendelseId" to hendelseId,
-                "vedtaksperiodeId" to vedtaksperiodeId,
                 "orgnummer" to orgnummer,
                 "@løsning" to mapOf(
                     "InntekterForSykepengegrunnlag" to listOf(
@@ -540,7 +782,7 @@ internal class Testmeldingfabrikk {
         contextId: UUID = UUID.randomUUID(),
     ): String = nyHendelse(
         id,
-        "behov", mutableMapOf(
+        "behov", mapOf(
             "aktørId" to aktørId,
             "fødselsnummer" to fødselsnummer,
             "@final" to true,
@@ -562,7 +804,7 @@ internal class Testmeldingfabrikk {
         contextId: UUID = UUID.randomUUID()
     ): String = nyHendelse(
         id,
-        "behov", mutableMapOf(
+        "behov", mapOf(
             "aktørId" to aktørId,
             "fødselsnummer" to fødselsnummer,
             "@final" to true,
@@ -586,7 +828,7 @@ internal class Testmeldingfabrikk {
     ): String =
         nyHendelse(
             id,
-            "behov", mutableMapOf(
+            "behov", mapOf(
                 "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer,
                 "@final" to true,
@@ -605,16 +847,17 @@ internal class Testmeldingfabrikk {
     fun lagRisikovurderingløsning(
         aktørId: String,
         fødselsnummer: String,
+        organisasjonsnummer: String = Testdata.ORGNR,
         vedtaksperiodeId: UUID,
         kanGodkjennesAutomatisk: Boolean = true,
         funn: List<Risikofunn>,
         id: UUID = UUID.randomUUID(),
         hendelseId: UUID = UUID.randomUUID(),
-        contextId: UUID = UUID.randomUUID()
+        contextId: UUID = UUID.randomUUID(),
     ): String =
         nyHendelse(
             id,
-            "behov", mutableMapOf(
+            "behov", mapOf(
                 "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer,
                 "@final" to true,
@@ -623,8 +866,9 @@ internal class Testmeldingfabrikk {
                 "hendelseId" to hendelseId,
                 "Risikovurdering" to mapOf(
                     "vedtaksperiodeId" to vedtaksperiodeId.toString(),
-                    "organisasjonsnummer" to "815493000",
-                    "periodetype" to Periodetype.FORLENGELSE
+                    "organisasjonsnummer" to organisasjonsnummer,
+                    "førstegangsbehandling" to Periodetype.FORLENGELSE,
+                    "kunRefusjon" to true,
                 ),
                 "@løsning" to mapOf(
                     "Risikovurdering" to mapOf(
@@ -695,6 +939,105 @@ internal class Testmeldingfabrikk {
             )
         )
     )
+
+    fun lagVedtakFattet(
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        vedtaksperiodeId: UUID,
+        id: UUID,
+    ): String = nyHendelse(
+        id, "vedtak_fattet", mapOf(
+            "aktørId" to aktørId,
+            "fødselsnummer" to fødselsnummer,
+            "organisasjonsnummer" to organisasjonsnummer,
+            "vedtaksperiodeId" to vedtaksperiodeId
+        )
+    )
+
+    fun lagUtkastTilVedtak(
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        vedtaksperiodeId: UUID,
+        utbetalingId: UUID?,
+        fom: LocalDate,
+        tom: LocalDate, skjæringstidspunkt: LocalDate,
+        fastsattType: String,
+        id: UUID,
+    ): String = nyHendelse(
+        id, "utkast_til_vedtak", mutableMapOf(
+            "aktørId" to aktørId,
+            "fødselsnummer" to fødselsnummer,
+            "organisasjonsnummer" to organisasjonsnummer,
+            "vedtaksperiodeId" to vedtaksperiodeId,
+            "fom" to fom,
+            "tom" to tom,
+            "skjæringstidspunkt" to skjæringstidspunkt,
+            "sykepengegrunnlag" to 600000.0,
+            "grunnlagForSykepengegrunnlag" to 600000.0,
+            "grunnlagForSykepengegrunnlagPerArbeidsgiver" to emptyMap<String, Double>(),
+            "begrensning" to "VET_IKKE",
+            "inntekt" to 600000.0,
+            "vedtakFattetTidspunkt" to LocalDateTime.now(),
+            "hendelser" to emptyList<String>(),
+            "tags" to emptyList<String>()
+        ).apply {
+            compute("utbetalingId") { _, _ -> utbetalingId }
+            if (utbetalingId != null) {
+                val sykepengegrunnlagsfakta = when (fastsattType) {
+                    "EtterSkjønn" -> fastsattEtterSkjønn(organisasjonsnummer)
+                    "EtterHovedregel" -> fastsattEtterHovedregel(organisasjonsnummer)
+                    "IInfotrygd" -> fastsattIInfotrygd()
+                    else -> throw IllegalArgumentException("$fastsattType er ikke en gyldig fastsatt-type")
+                }
+                put("sykepengegrunnlagsfakta", sykepengegrunnlagsfakta)
+            }
+        }
+    )
+
+    private fun fastsattEtterSkjønn(organisasjonsnummer: String): Map<String, Any> {
+        return mapOf(
+            "fastsatt" to "EtterSkjønn",
+            "omregnetÅrsinntekt" to 500000.0,
+            "innrapportertÅrsinntekt" to 600000.0,
+            "skjønnsfastsatt" to 600000.0,
+            "avviksprosent" to 16.67,
+            "6G" to 6 * 118620.0,
+            "tags" to emptyList<String>(),
+            "arbeidsgivere" to listOf(
+                mapOf(
+                    "arbeidsgiver" to organisasjonsnummer,
+                    "omregnetÅrsinntekt" to 500000.00,
+                    "skjønnsfastsatt" to 600000.00
+                )
+            )
+        )
+    }
+
+    private fun fastsattEtterHovedregel(organisasjonsnummer: String): Map<String, Any> {
+        return mapOf(
+            "fastsatt" to "EtterHovedregel",
+            "omregnetÅrsinntekt" to 600000.0,
+            "innrapportertÅrsinntekt" to 600000.0,
+            "avviksprosent" to 0.0,
+            "6G" to 6 * 118620.0,
+            "tags" to emptyList<String>(),
+            "arbeidsgivere" to listOf(
+                mapOf(
+                    "arbeidsgiver" to organisasjonsnummer,
+                    "omregnetÅrsinntekt" to 600000.00,
+                )
+            )
+        )
+    }
+
+    private fun fastsattIInfotrygd(): Map<String, Any> {
+        return mapOf(
+            "fastsatt" to "IInfotrygd",
+            "omregnetÅrsinntekt" to 500000.0,
+        )
+    }
 
     private fun nyHendelse(id: UUID, navn: String, hendelse: Map<String, Any>) =
         JsonMessage.newMessage(nyHendelse(id, navn) + hendelse).toJson()

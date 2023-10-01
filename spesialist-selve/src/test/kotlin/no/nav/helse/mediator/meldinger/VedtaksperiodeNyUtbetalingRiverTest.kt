@@ -1,6 +1,5 @@
 package no.nav.helse.mediator.meldinger
 
-import TestmeldingsfabrikkV2
 import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
@@ -18,7 +17,7 @@ internal class VedtaksperiodeNyUtbetalingRiverTest {
 
     private val testRapid = TestRapid()
     private val mediator = mockk<HendelseMediator>(relaxed = true)
-    private val testmeldingfabrikk = TestmeldingsfabrikkV2
+    private val testmeldingfabrikk = Testmeldingfabrikk()
 
     init {
         VedtaksperiodeNyUtbetalingRiver(testRapid, mediator)

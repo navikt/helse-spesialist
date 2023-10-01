@@ -31,7 +31,7 @@ internal class HentEnhetRiverTest {
 
     @Test
     fun `leser selvstendig HentEnhet-melding`() {
-        testRapid.sendTestMessage(testmeldingfabrikk.lagHentEnhetløsning(AKTØR, FNR, HENDELSE, CONTEXT))
+        testRapid.sendTestMessage(testmeldingfabrikk.lagEnhetløsning(AKTØR, FNR, HENDELSE, CONTEXT))
         verify(exactly = 1) { mediator.løsning(HENDELSE, CONTEXT, any(), any<HentEnhetløsning>(), any()) }
     }
 

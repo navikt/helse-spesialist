@@ -31,7 +31,7 @@ internal class PersoninfoRiverTest {
 
     @Test
     fun `leser selvstendig HentPersoninfo-melding`() {
-        testRapid.sendTestMessage(testmeldingfabrikk.lagHentPersoninfoløsning(AKTØR, FNR, HENDELSE, CONTEXT))
+        testRapid.sendTestMessage(testmeldingfabrikk.lagPersoninfoløsning(AKTØR, FNR, HENDELSE, CONTEXT))
         verify(exactly = 1) { mediator.løsning(HENDELSE, CONTEXT, any(), any<HentPersoninfoløsning>(), any()) }
     }
 

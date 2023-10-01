@@ -37,7 +37,7 @@ internal class ArbeidsgiverinformasjonløsningTest {
     @Test
     fun `mottar arbeidsgiverløsning`() {
         rapid.sendTestMessage(
-            meldingsfabrikk.lagArbeidsgiverinformasjonløsningOld(
+            meldingsfabrikk.lagArbeidsgiverinformasjonløsning(
                 aktørId = AKTØRID,
                 fødselsnummer = FØDSELSNUMMER,
                 organisasjonsnummer = ORGNR,

@@ -26,7 +26,7 @@ internal class UtbetalingAnnullertRiverTest {
 
     @Test
     fun `leser selvstendig UtbetalingAnnullert-melding`() {
-        testRapid.sendTestMessage(testmeldingfabrikk.lagUtbetalingAnnullertEvent())
+        testRapid.sendTestMessage(testmeldingfabrikk.lagUtbetalingAnnullert(arbeidsgiverFagsystemId = "fagsystemId"))
         verify(exactly = 1) { mediator.utbetalingAnnullert(any(), any()) }
     }
 }

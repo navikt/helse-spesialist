@@ -36,8 +36,9 @@ internal class RisikoCommandTest {
         private fun risikovurderingLøsning(funn: List<Risikofunn>) = objectMapper.readTree(meldingsfabrikk.lagRisikovurderingløsning(
             aktørId = AKTØR,
             fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = "815493000",
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            funn = funn
+            funn = funn,
         )).path("@løsning").path("Risikovurdering")
     }
 

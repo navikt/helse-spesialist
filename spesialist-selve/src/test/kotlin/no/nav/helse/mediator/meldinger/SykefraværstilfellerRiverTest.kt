@@ -1,6 +1,5 @@
 package no.nav.helse.mediator.meldinger
 
-import TestmeldingsfabrikkV2
 import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
@@ -18,7 +17,7 @@ internal class SykefraværstilfellerRiverTest {
 
     private val testRapid = TestRapid()
     private val mediator = mockk<HendelseMediator>(relaxed = true)
-    private val testmeldingfabrikk = TestmeldingsfabrikkV2
+    private val testmeldingfabrikk = Testmeldingfabrikk()
 
     init {
         SykefraværstilfellerRiver(testRapid, mediator)
@@ -48,7 +47,6 @@ internal class SykefraværstilfellerRiverTest {
 
         testRapid.sendTestMessage(
             testmeldingfabrikk.lagSykefraværstilfeller(
-                id = hendelseId,
                 fødselsnummer = FØDSELSNUMMER,
                 aktørId = AKTØR,
                 tilfeller = listOf(
@@ -60,7 +58,8 @@ internal class SykefraværstilfellerRiverTest {
                         "dato" to 1.februar,
                         "perioder" to vedtaksperioder2,
                     )
-                )
+                ),
+                id = hendelseId
             )
         )
 

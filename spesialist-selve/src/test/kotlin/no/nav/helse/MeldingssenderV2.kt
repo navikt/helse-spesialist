@@ -1,6 +1,5 @@
 package no.nav.helse
 
-import TestmeldingsfabrikkV2
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -29,7 +28,7 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforho
 import org.junit.jupiter.api.Assertions.assertEquals
 
 internal class MeldingssenderV2(private val testRapid: TestRapid) {
-    private val meldingsfabrikk = TestmeldingsfabrikkV2
+    private val meldingsfabrikk = Testmeldingfabrikk()
     private val newUUID get() = UUID.randomUUID()
 
 
@@ -107,7 +106,6 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
     ): UUID = newUUID.also { id ->
         testRapid.sendTestMessage(
             meldingsfabrikk.lagSaksbehandlerSkjønnsfastsettingSykepengegrunnlag(
-                id = id,
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
@@ -115,7 +113,8 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
                 saksbehandlerOid = saksbehandlerOid,
                 saksbehandlerEpost = saksbehandlerEpost,
                 saksbehandlerIdent = saksbehandlerIdent,
-                saksbehandlerNavn = saksbehandlerNavn
+                saksbehandlerNavn = saksbehandlerNavn,
+                id = id,
             )
         )
     }
@@ -167,10 +166,10 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
         newUUID.also { id ->
             testRapid.sendTestMessage(
                 meldingsfabrikk.lagSykefraværstilfeller(
-                    id,
                     fødselsnummer,
                     aktørId,
                     tilfeller,
+                    id,
                 )
             )
         }
@@ -188,7 +187,7 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
                     fødselsnummer = fødselsnummer,
                     organisasjonsnummer = organisasjonsnummer,
                     vedtaksperiodeId = vedtaksperiodeId,
-                    id = id
+                    id = id,
                 )
             )
         }
@@ -212,7 +211,7 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
             meldingsfabrikk.lagEndretSkjermetinfo(
                 fødselsnummer = fødselsnummer,
                 skjermet = skjermet,
-                id = id
+                id = id,
             )
         )
     }
@@ -241,15 +240,13 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
                 arbeidsgiverbeløp = arbeidsgiverbeløp,
                 personbeløp = personbeløp,
                 opprettet = opprettet,
-                id = id
+                id = id,
             )
         )
     }
 
     fun sendUtbetalingAnnullert(
-        aktørId: String,
         fødselsnummer: String,
-        organisasjonsnummer: String,
         utbetalingId: UUID,
         epost: String,
         arbeidsgiverFagsystemId: String,
@@ -257,14 +254,12 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
     ): UUID = newUUID.also { id ->
         testRapid.sendTestMessage(
             meldingsfabrikk.lagUtbetalingAnnullert(
-                aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
-                organisasjonsnummer = organisasjonsnummer,
-                utbetalingId = utbetalingId,
-                epost = epost,
                 arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
                 personFagsystemId = personFagsystemId,
-                id = id
+                utbetalingId = utbetalingId,
+                saksbehandlerEpost = epost,
+                id = id,
             )
         )
     }
@@ -309,8 +304,6 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
     fun sendPersoninfoløsning(
         aktørId: String,
         fødselsnummer: String,
-        organisasjonsnummer: String,
-        vedtaksperiodeId: UUID,
         adressebeskyttelse: Adressebeskyttelse,
     ): UUID = newUUID.also { id ->
         val behov = testRapid.inspektør.siste("behov")
@@ -322,8 +315,6 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
             meldingsfabrikk.lagPersoninfoløsning(
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
-                organisasjonsnummer = organisasjonsnummer,
-                vedtaksperiodeId = vedtaksperiodeId,
                 id = id,
                 hendelseId = hendelseId,
                 contextId = contextId,
@@ -456,9 +447,9 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
                     vedtaksperiodeId = vedtaksperiodeId,
                     organisasjoner = organisasjoner,
                     personer = personer,
-                    id = id,
                     hendelseId = hendelseId,
-                    contextId = contextId
+                    contextId = contextId,
+                    id = id,
                 )
             )
         }
@@ -557,9 +548,10 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
             meldingsfabrikk.lagInntektløsning(
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
+                orgnummer = Testdata.ORGNR,
                 id = id,
                 hendelseId = hendelseId,
-                contextId = contextId
+                contextId = contextId,
             )
         )
     }
@@ -611,7 +603,7 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
                 funn = funn,
                 id = id,
                 hendelseId = hendelseId,
-                contextId = contextId
+                contextId = contextId,
             )
         )
     }
@@ -651,7 +643,7 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
-                id = id
+                id = id,
             )
         )
     }
@@ -677,8 +669,8 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
                 fom = fom,
                 tom = tom,
                 skjæringstidspunkt = skjæringstidspunkt,
+                fastsattType = fastsattType,
                 id = id,
-                fastsattType = fastsattType
             )
         )
     }
@@ -759,7 +751,6 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
         }
 
     fun sendOverstyringIgangsatt(
-        aktørId: String,
         fødselsnummer: String,
         berørtePerioder: List<Map<String, String>> = listOf(mapOf(
             "vedtaksperiodeId" to "${Testdata.VEDTAKSPERIODE_ID}",
@@ -773,7 +764,6 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
     ): UUID = newUUID.also { id ->
         testRapid.sendTestMessage(
             meldingsfabrikk.lagOverstyringIgangsatt(
-                aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
                 berørtePerioder = berørtePerioder,
                 kilde = kilde,

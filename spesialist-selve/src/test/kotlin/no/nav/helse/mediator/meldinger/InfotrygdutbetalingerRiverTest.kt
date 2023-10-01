@@ -31,7 +31,7 @@ internal class InfotrygdutbetalingerRiverTest {
 
     @Test
     fun `leser selvstendig HentInfotrygdutbetalinger-melding`() {
-        testRapid.sendTestMessage(testmeldingfabrikk.lagHentInfotrygdutbetalingerløsning(AKTØR, FNR, HENDELSE, CONTEXT))
+        testRapid.sendTestMessage(testmeldingfabrikk.lagInfotrygdutbetalingerløsning(AKTØR, FNR, HENDELSE, CONTEXT))
         verify(exactly = 1) { mediator.løsning(HENDELSE, CONTEXT, any(), any<HentPersoninfoløsning>(), any()) }
     }
 

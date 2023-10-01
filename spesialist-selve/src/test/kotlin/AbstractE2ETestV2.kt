@@ -246,7 +246,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
             personbeløp = personbeløp
         )
         if (!harOppdatertMetadata) {
-            håndterPersoninfoløsning(vedtaksperiodeId = vedtaksperiodeId)
+            håndterPersoninfoløsning()
             håndterEnhetløsning(vedtaksperiodeId = vedtaksperiodeId, enhet = enhet)
             håndterInfotrygdutbetalingerløsning(vedtaksperiodeId = vedtaksperiodeId)
             if (andreArbeidsforhold.isNotEmpty()) håndterArbeidsgiverinformasjonløsning(vedtaksperiodeId = vedtaksperiodeId)
@@ -701,9 +701,8 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
     }
 
     protected fun håndterUtbetalingAnnullert(
-        aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
-        organisasjonsnummer: String = ORGNR,
+        saksbehandler_epost: String,
     ) {
         @Suppress("SqlResolve")
         fun fagsystemidFor(utbetalingId: UUID, tilArbeidsgiver: Boolean): String {
@@ -719,11 +718,9 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         }
 
         sisteMeldingId = meldingssenderV2.sendUtbetalingAnnullert(
-            aktørId = aktørId,
             fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
             utbetalingId = utbetalingId,
-            epost = SAKSBEHANDLER_EPOST,
+            epost = saksbehandler_epost,
             arbeidsgiverFagsystemId = fagsystemidFor(utbetalingId, tilArbeidsgiver = true),
             personFagsystemId = fagsystemidFor(utbetalingId, tilArbeidsgiver = false),
         )
@@ -839,22 +836,26 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
     protected fun håndterPersoninfoløsning(
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
-        organisasjonsnummer: String = ORGNR,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
         adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert
     ) {
         assertEtterspurteBehov("HentPersoninfoV2")
-        sisteMeldingId = meldingssenderV2.sendPersoninfoløsning(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId, adressebeskyttelse)
+        sisteMeldingId = meldingssenderV2.sendPersoninfoløsning(
+            aktørId,
+            fødselsnummer,
+            adressebeskyttelse
+        )
     }
 
     protected fun håndterPersoninfoløsningUtenValidering(
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
-        organisasjonsnummer: String = ORGNR,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
         adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert
     ) {
-        sisteMeldingId = meldingssenderV2.sendPersoninfoløsning(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId, adressebeskyttelse)
+        sisteMeldingId = meldingssenderV2.sendPersoninfoløsning(
+            aktørId,
+            fødselsnummer,
+            adressebeskyttelse,
+        )
     }
 
     protected fun håndterEnhetløsning(
@@ -1131,14 +1132,13 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         overstyringBlock()
         val sisteOverstyring = testRapid.inspektør.hendelser(overstyringHendelse).last()
         val hendelseId = UUID.fromString(sisteOverstyring["@id"].asText())
-        håndterOverstyringIgangsatt(aktørId, fødselsnummer, hendelseId)
+        håndterOverstyringIgangsatt(fødselsnummer, hendelseId)
         håndterUtbetalingErstattet(aktørId, fødselsnummer, organisasjonsnummer)
         håndterVedtaksperiodeReberegnet(aktørId, fødselsnummer, organisasjonsnummer)
     }
 
-    private fun håndterOverstyringIgangsatt(aktørId: String, fødselsnummer: String, kildeId: UUID) {
+    private fun håndterOverstyringIgangsatt(fødselsnummer: String, kildeId: UUID) {
         sisteMeldingId = meldingssenderV2.sendOverstyringIgangsatt(
-            aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             berørtePerioder = listOf(
                 mapOf(
@@ -1376,10 +1376,10 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
     }
 
     protected fun assertOverstyringer(vedtaksperiodeId: UUID, vararg forventedeOverstyringstyper: OverstyringType) {
-        val typer = testMediator.overstyringstyperForVedtaksperiode(vedtaksperiodeId)
-        assertEquals(forventedeOverstyringstyper.toSet(), typer.toSet()) {
-            val ikkeEtterspurt = typer.toSet() - forventedeOverstyringstyper.toSet()
-            "Følgende typer finnes ikke: $ikkeEtterspurt\nForventede typer: $forventedeOverstyringstyper\n"
+        val utførteOverstyringstyper = testMediator.overstyringstyperForVedtaksperiode(vedtaksperiodeId)
+        assertEquals(forventedeOverstyringstyper.toSet(), utførteOverstyringstyper.toSet()) {
+            val ikkeEtterspurt = utførteOverstyringstyper.toSet() - forventedeOverstyringstyper.toSet()
+            "Følgende overstyringstyper ble utført i tillegg til de forventede: $ikkeEtterspurt\nForventede typer: ${forventedeOverstyringstyper.joinToString()}\n"
         }
     }
 

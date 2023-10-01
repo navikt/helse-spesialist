@@ -52,10 +52,24 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `finn siste igangsatte overstyring om den er korrigert søknad`() {
         val overstyringIgangsatt = hendelsefabrikk.overstyringIgangsatt(
-            testmeldingfabrikk.lagOverstyringIgangsatt(FNR, VEDTAKSPERIODE)
+            testmeldingfabrikk.lagOverstyringIgangsatt(
+                FNR, berørtePerioder = listOf(mapOf(
+                    "vedtaksperiodeId" to "$VEDTAKSPERIODE",
+                    "periodeFom" to "2022-01-01",
+                    "orgnummer" to "orgnr",
+                ))
+            )
         )
         val overstyringIgangsattForAnnenVedtaksperiode = hendelsefabrikk.overstyringIgangsatt(
-            testmeldingfabrikk.lagOverstyringIgangsatt(FNR, VEDTAKSPERIODE, "SYKDOMSTIDSLINJE")
+            testmeldingfabrikk.lagOverstyringIgangsatt(
+                FNR, berørtePerioder = listOf(
+                    mapOf(
+                        "vedtaksperiodeId" to "$VEDTAKSPERIODE",
+                        "periodeFom" to "2022-01-01",
+                        "orgnummer" to "orgnr",
+                    )
+                ), årsak = "SYKDOMSTIDSLINJE"
+            )
         )
         hendelseDao.opprett(overstyringIgangsatt)
         hendelseDao.opprett(overstyringIgangsattForAnnenVedtaksperiode)
@@ -63,7 +77,16 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
 
         hendelseDao.opprett(
             hendelsefabrikk.overstyringIgangsatt(
-                testmeldingfabrikk.lagOverstyringIgangsatt(FNR, VEDTAKSPERIODE)
+                testmeldingfabrikk.lagOverstyringIgangsatt(
+                    FNR,
+                    berørtePerioder = listOf(
+                        mapOf(
+                            "vedtaksperiodeId" to "$VEDTAKSPERIODE",
+                            "periodeFom" to "2022-01-01",
+                            "orgnummer" to "orgnr",
+                        )
+                    ),
+                )
             )
         )
         assertNotNull(hendelseDao.sisteOverstyringIgangsattOmKorrigertSøknad(FNR, VEDTAKSPERIODE))
@@ -72,7 +95,7 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `finn antall korrigerte søknader`() {
         val overstyringIgangsatt = hendelsefabrikk.overstyringIgangsatt(
-            testmeldingfabrikk.lagOverstyringIgangsatt(FNR, VEDTAKSPERIODE)
+            testmeldingfabrikk.lagOverstyringIgangsatt(FNR)
         )
         val overstyringIgangsattForAnnenVedtaksperiode = hendelsefabrikk.overstyringIgangsatt(
             testmeldingfabrikk.lagOverstyringIgangsatt(FNR)
@@ -87,7 +110,7 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `finn ut om automatisering av korrigert søknad allerede er håndtert`() {
         val overstyringIgangsatt = hendelsefabrikk.overstyringIgangsatt(
-            testmeldingfabrikk.lagOverstyringIgangsatt(FNR, VEDTAKSPERIODE, id = HENDELSE_ID)
+            testmeldingfabrikk.lagOverstyringIgangsatt(FNR, id = HENDELSE_ID)
         )
         val overstyringIgangsattForAnnenVedtaksperiode = hendelsefabrikk.overstyringIgangsatt(
             testmeldingfabrikk.lagOverstyringIgangsatt(FNR)

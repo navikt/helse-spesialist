@@ -6,7 +6,6 @@ import io.mockk.verify
 import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
-import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.meldinger.løsninger.Inntektløsning
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -31,7 +30,7 @@ internal class InntektRiverTest {
 
     @Test
     fun `leser behov InntekterForSykepengegrunnlag`() {
-        rapid.sendTestMessage(meldingsfabrikk.lagInntektløsning(aktørId = AKTØR, fødselsnummer = FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID))
+        rapid.sendTestMessage(meldingsfabrikk.lagInntektløsning(aktørId = AKTØR, fødselsnummer = FØDSELSNUMMER, ORGNR))
         verify(exactly = 1) { mediator.løsning(any(), any(), any(), any(), any()) }
     }
 }

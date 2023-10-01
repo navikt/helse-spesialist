@@ -42,7 +42,7 @@ internal class GodkjenningsbehovRiverTest {
             fødselsnummer = FNR,
             vedtaksperiodeId = VEDTAKSPERIODE,
             utbetalingId = UTBETALING_ID,
-            orgnummer = ORGNR,
+            organisasjonsnummer = ORGNR,
             periodeFom = FOM,
             periodeTom = TOM,
             skjæringstidspunkt = FOM,
