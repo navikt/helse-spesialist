@@ -1,11 +1,11 @@
 package no.nav.helse.e2e
 
-import AbstractE2ETestV2
+import AbstractE2ETest
 import java.util.UUID
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import org.junit.jupiter.api.Test
 
-internal class RevurderingE2ETest : AbstractE2ETestV2() {
+internal class RevurderingE2ETest : AbstractE2ETest() {
 
     @Test
     fun `revurdering ved saksbehandlet oppgave`() {

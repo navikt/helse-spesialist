@@ -1,11 +1,11 @@
 package no.nav.helse.e2e
 
-import AbstractE2ETestV2
+import AbstractE2ETest
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse.Fortrolig
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse.StrengtFortrolig
 import org.junit.jupiter.api.Test
 
-internal class AdressebeskyttelseEndretE2ETest : AbstractE2ETestV2() {
+internal class AdressebeskyttelseEndretE2ETest : AbstractE2ETest() {
     @Test
     fun `oppdaterer adressebeskyttelse på en person vi kjenner til fra før`() {
 

@@ -1,12 +1,12 @@
 package no.nav.helse.e2e
 
-import AbstractE2ETestV2
+import AbstractE2ETest
 import no.nav.helse.TestRapidHelpers.meldinger
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
-internal class FattVedtakE2ETest: AbstractE2ETestV2() {
+internal class FattVedtakE2ETest: AbstractE2ETest() {
 
     @Test
     fun `Fatt vedtak for auu-periode`() {

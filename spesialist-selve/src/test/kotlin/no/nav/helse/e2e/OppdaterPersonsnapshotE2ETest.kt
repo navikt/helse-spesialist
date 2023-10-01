@@ -1,6 +1,6 @@
 package no.nav.helse.e2e
 
-import AbstractE2ETestV2
+import AbstractE2ETest
 import java.time.LocalDate
 import java.util.UUID.randomUUID
 import kotliquery.queryOf
@@ -10,7 +10,7 @@ import no.nav.helse.Testdata.snapshot
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class OppdaterPersonsnapshotE2ETest : AbstractE2ETestV2() {
+internal class OppdaterPersonsnapshotE2ETest : AbstractE2ETest() {
 
     @Test
     fun `Oppdater personsnapshot oppdaterer alle snapshots på personen`() {

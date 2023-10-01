@@ -1,15 +1,15 @@
 package no.nav.helse.e2e
 
-import AbstractE2ETestV2
-import AbstractE2ETestV2.Kommandokjedetilstand.AVBRUTT
-import AbstractE2ETestV2.Kommandokjedetilstand.FERDIG
-import AbstractE2ETestV2.Kommandokjedetilstand.NY
-import AbstractE2ETestV2.Kommandokjedetilstand.SUSPENDERT
+import AbstractE2ETest
+import AbstractE2ETest.Kommandokjedetilstand.AVBRUTT
+import AbstractE2ETest.Kommandokjedetilstand.FERDIG
+import AbstractE2ETest.Kommandokjedetilstand.NY
+import AbstractE2ETest.Kommandokjedetilstand.SUSPENDERT
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 
-internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETestV2() {
+internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
     @Test
     fun `avbryter saksbehandling før oppgave er opprettet til saksbehandling`() {
         håndterSøknad()

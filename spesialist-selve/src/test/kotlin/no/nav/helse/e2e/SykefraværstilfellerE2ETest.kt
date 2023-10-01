@@ -1,6 +1,6 @@
 package no.nav.helse.e2e
 
-import AbstractE2ETestV2
+import AbstractE2ETest
 import java.time.LocalDate
 import java.util.UUID
 import kotliquery.queryOf
@@ -11,7 +11,7 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class SykefraværstilfellerE2ETest : AbstractE2ETestV2() {
+internal class SykefraværstilfellerE2ETest : AbstractE2ETest() {
 
     @Test
     fun `Oppdaterer sykefraværstilfelle`() {

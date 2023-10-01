@@ -1,6 +1,6 @@
 package no.nav.helse.mediator.meldinger
 
-import AbstractE2ETestV2
+import AbstractE2ETest
 import io.mockk.every
 import java.util.UUID
 import kotliquery.queryOf
@@ -10,7 +10,7 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class PåminnetGodkjenningsbehovTest : AbstractE2ETestV2() {
+internal class PåminnetGodkjenningsbehovTest : AbstractE2ETest() {
 
     @Test
     fun `sørger for oppdatert snapshot om det fins oppgave`() {

@@ -1,13 +1,13 @@
 package no.nav.helse.e2e
 
-import AbstractE2ETestV2
+import AbstractE2ETest
 import no.nav.helse.Testdata.ORGNR_GHOST
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
 import org.junit.jupiter.api.Test
 
-internal class TotrinnsvurderingE2ETest : AbstractE2ETestV2() {
+internal class TotrinnsvurderingE2ETest : AbstractE2ETest() {
 
     @Test
     fun `sak blir trukket til totrinnsvurdering ved overstyring av inntekt og refusjon`() {

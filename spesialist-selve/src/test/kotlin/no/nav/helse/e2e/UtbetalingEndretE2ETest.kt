@@ -1,6 +1,6 @@
 package no.nav.helse.e2e
 
-import AbstractE2ETestV2
+import AbstractE2ETest
 import java.util.UUID
 import kotliquery.Row
 import kotliquery.queryOf
@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class UtbetalingEndretE2ETest : AbstractE2ETestV2() {
+internal class UtbetalingEndretE2ETest : AbstractE2ETest() {
 
     @Test
     fun `Lagrer personbeløp og arbeidsgiverbeløp ved innlesing av utbetaling_endret`() {

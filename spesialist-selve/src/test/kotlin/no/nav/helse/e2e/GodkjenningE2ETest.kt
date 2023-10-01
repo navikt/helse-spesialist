@@ -1,10 +1,10 @@
 package no.nav.helse.e2e
 
-import AbstractE2ETestV2
-import AbstractE2ETestV2.Kommandokjedetilstand.AVBRUTT
-import AbstractE2ETestV2.Kommandokjedetilstand.FERDIG
-import AbstractE2ETestV2.Kommandokjedetilstand.NY
-import AbstractE2ETestV2.Kommandokjedetilstand.SUSPENDERT
+import AbstractE2ETest
+import AbstractE2ETest.Kommandokjedetilstand.AVBRUTT
+import AbstractE2ETest.Kommandokjedetilstand.FERDIG
+import AbstractE2ETest.Kommandokjedetilstand.NY
+import AbstractE2ETest.Kommandokjedetilstand.SUSPENDERT
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
@@ -17,7 +17,7 @@ import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class GodkjenningE2ETest : AbstractE2ETestV2() {
+internal class GodkjenningE2ETest : AbstractE2ETest() {
     private companion object {
         private const val ENHET_UTLAND = "0393"
     }

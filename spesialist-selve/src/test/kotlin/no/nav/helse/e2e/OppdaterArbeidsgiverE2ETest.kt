@@ -1,6 +1,6 @@
 package no.nav.helse.e2e
 
-import AbstractE2ETestV2
+import AbstractE2ETest
 import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID.randomUUID
 import kotliquery.queryOf
@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class OppdaterArbeidsgiverE2ETest : AbstractE2ETestV2() {
+internal class OppdaterArbeidsgiverE2ETest : AbstractE2ETest() {
 
     @Test
     fun `Etterspør oppdatert navn selv når svar på behovet er mottatt for et annet orgnr`() {

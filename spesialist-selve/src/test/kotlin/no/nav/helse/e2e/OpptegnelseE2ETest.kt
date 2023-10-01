@@ -1,6 +1,6 @@
 package no.nav.helse.e2e
 
-import AbstractE2ETestV2
+import AbstractE2ETest
 import io.ktor.client.call.body
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
@@ -21,7 +21,7 @@ import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-private class OpptegnelseE2ETest : AbstractE2ETestV2() {
+private class OpptegnelseE2ETest : AbstractE2ETest() {
     private val SAKSBEHANDLER_ID = UUID.randomUUID()
 
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)

@@ -1,6 +1,6 @@
 package no.nav.helse.e2e
 
-import AbstractE2ETestV2
+import AbstractE2ETest
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETestV2() {
+internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
 
     @Test
     fun `Oppretter første generasjon når vedtaksperioden blir opprettet`() {

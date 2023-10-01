@@ -1,6 +1,6 @@
 package no.nav.helse.e2e
 
-import AbstractE2ETestV2
+import AbstractE2ETest
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 
-internal class VedtakFattetE2ETest: AbstractE2ETestV2() {
+internal class VedtakFattetE2ETest: AbstractE2ETest() {
 
     @Test
     fun `vedtak fattet medfører låsing av vedtaksperiode-generasjon`() {

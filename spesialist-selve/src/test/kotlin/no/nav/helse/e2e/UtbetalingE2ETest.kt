@@ -1,6 +1,6 @@
 package no.nav.helse.e2e
 
-import AbstractE2ETestV2
+import AbstractE2ETest
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Testdata.UTBETALING_ID
@@ -12,7 +12,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.OVERFØRT
 import org.junit.jupiter.api.Test
 
-internal class UtbetalingE2ETest : AbstractE2ETestV2() {
+internal class UtbetalingE2ETest : AbstractE2ETest() {
 
     @Test
     fun `utbetaling endret`() {

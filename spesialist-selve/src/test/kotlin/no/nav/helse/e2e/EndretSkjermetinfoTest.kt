@@ -1,11 +1,11 @@
 package no.nav.helse.e2e
 
-import AbstractE2ETestV2
+import AbstractE2ETest
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import org.junit.jupiter.api.Test
 
-internal class EndretSkjermetinfoTest : AbstractE2ETestV2() {
+internal class EndretSkjermetinfoTest : AbstractE2ETest() {
 
     @Test
     fun `Ignorerer hendelsen for ukjente personer`() {

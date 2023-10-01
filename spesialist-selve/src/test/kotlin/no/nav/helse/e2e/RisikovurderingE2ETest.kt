@@ -1,6 +1,6 @@
 package no.nav.helse.e2e
 
-import AbstractE2ETestV2
+import AbstractE2ETest
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-private class RisikovurderingE2ETest : AbstractE2ETestV2() {
+private class RisikovurderingE2ETest : AbstractE2ETest() {
 
     private val funnSomKreverRiskTilgang = listOf(Risikofunn(
         kategori = listOf("8-4"),

@@ -1,9 +1,9 @@
 package no.nav.helse.e2e
 
-import AbstractE2ETestV2
-import AbstractE2ETestV2.Kommandokjedetilstand.AVBRUTT
-import AbstractE2ETestV2.Kommandokjedetilstand.NY
-import AbstractE2ETestV2.Kommandokjedetilstand.SUSPENDERT
+import AbstractE2ETest
+import AbstractE2ETest.Kommandokjedetilstand.AVBRUTT
+import AbstractE2ETest.Kommandokjedetilstand.NY
+import AbstractE2ETest.Kommandokjedetilstand.SUSPENDERT
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -11,7 +11,7 @@ import no.nav.helse.Testdata
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class HendelseE2ETest : AbstractE2ETestV2() {
+internal class HendelseE2ETest : AbstractE2ETest() {
 
     @Test
     fun `ignorerer behov uten tilhørende command`() {

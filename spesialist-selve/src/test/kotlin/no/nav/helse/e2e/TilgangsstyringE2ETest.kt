@@ -1,6 +1,6 @@
 package no.nav.helse.e2e
 
-import AbstractE2ETestV2
+import AbstractE2ETest
 import graphql.GraphQLError
 import graphql.schema.DataFetchingEnvironment
 import io.mockk.every
@@ -36,7 +36,7 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class TilgangsstyringE2ETest : AbstractE2ETestV2() {
+internal class TilgangsstyringE2ETest : AbstractE2ETest() {
 
     @Test
     fun `Gir 404 når det ikke er noe å vise ennå, selv om saksbehandler har tilgang`() {

@@ -27,7 +27,7 @@ import no.nav.helse.spesialist.api.person.Kjønn
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdFraApi
 import org.junit.jupiter.api.Assertions.assertEquals
 
-internal class MeldingssenderV2(private val testRapid: TestRapid) {
+internal class Meldingssender(private val testRapid: TestRapid) {
     private val meldingsfabrikk = Testmeldingfabrikk()
     private val newUUID get() = UUID.randomUUID()
 

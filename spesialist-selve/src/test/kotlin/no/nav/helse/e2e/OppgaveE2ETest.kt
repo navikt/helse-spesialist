@@ -1,13 +1,13 @@
 package no.nav.helse.e2e
 
-import AbstractE2ETestV2
+import AbstractE2ETest
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.Ferdigstilt
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.Invalidert
 import org.junit.jupiter.api.Test
 
-internal class OppgaveE2ETest: AbstractE2ETestV2() {
+internal class OppgaveE2ETest: AbstractE2ETest() {
 
     @Test
     fun `invaliderer oppgave når utbetalingen har blitt forkastet`() {
