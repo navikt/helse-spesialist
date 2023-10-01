@@ -16,7 +16,6 @@ import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.januar
 import no.nav.helse.mediator.FeilendeMeldingerDao
-import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.HendelseDao
@@ -479,30 +478,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             tom = tom,
             totalbeløp = totalbeløp
         )
-    }
-
-    protected fun opprettInntekt(fødselsnummer: String, skjæringstidspunkt: LocalDate, inntekter: List<Inntekter>) {
-        personDao.insertInntekter(fødselsnummer, skjæringstidspunkt, inntekter)
-    }
-
-    protected fun hentUtbetalingMedUtbetalingId(utbetalingIdRef: Long): String? {
-        @Language("PostgreSQL")
-        val statement = "SELECT data FROM utbetaling WHERE utbetaling_id_ref = ? LIMIT 1;"
-        return sessionOf(dataSource).use { session ->
-            session.run(queryOf(statement, utbetalingIdRef).map {
-                it.string("data")
-            }.asSingle)
-        }
-    }
-
-    protected fun hentHendelse(hendelseId: UUID): String? {
-        @Language("PostgreSQL")
-        val statement = "SELECT data FROM hendelse WHERE id = ? LIMIT 1;"
-        return sessionOf(dataSource).use { session ->
-            session.run(queryOf(statement, hendelseId).map {
-                it.string("data")
-            }.asSingle)
-        }
     }
 
     protected fun fagsystemId() = (0..31).map { 'A' + Random().nextInt('Z' - 'A') }.joinToString("")
