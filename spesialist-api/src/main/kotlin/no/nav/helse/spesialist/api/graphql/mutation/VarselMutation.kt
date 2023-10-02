@@ -31,18 +31,15 @@ class VarselMutation(private val varselRepository: ApiVarselRepository) : Mutati
             val erAktiv = varselRepository.erAktiv(varselkode, generasjonId)
                 ?: return@withContext newResult<VarselDTO?>().error(getNotFoundError(varselkode, generasjonId)).build()
 
-
             if (!erAktiv)
                 return@withContext newResult<VarselDTO?>().error(getNotActiveError(varselkode, generasjonId)).build()
 
-            val oppdatertVarsel = varselRepository.settStatusVurdert(
+            varselRepository.settStatusVurdert(
                 generasjonId,
                 UUID.fromString(definisjonIdString),
                 varselkode,
                 ident,
             )
-
-            oppdatertVarsel
                 ?.let { newResult<VarselDTO?>().data(it).build() }
                 ?: newResult<VarselDTO?>().error(getUpdateError(varselkode, generasjonId)).build()
         }
@@ -63,15 +60,55 @@ class VarselMutation(private val varselRepository: ApiVarselRepository) : Mutati
             if (erGodkjent)
                 return@withContext newResult<VarselDTO?>().error(getIsGodkjentError(varselkode, generasjonId)).build()
 
-            val oppdatertVarsel = varselRepository.settStatusAktiv(
+            varselRepository.settStatusAktiv(
                 generasjonId,
                 varselkode,
                 ident,
             )
-
-            oppdatertVarsel
                 ?.let { newResult<VarselDTO?>().data(it).build() }
                 ?: newResult<VarselDTO?>().error(getUpdateError(varselkode, generasjonId)).build()
+        }
+    }
+
+    @Suppress("unused")
+    suspend fun settVarselstatus(
+        generasjonIdString: String,
+        varselkode: String,
+        ident: String,
+        definisjonIdString: String? = null,
+    ): DataFetcherResult<VarselDTO> = withContext(Dispatchers.IO) {
+        val generasjonId = UUID.fromString(generasjonIdString)
+
+        if (definisjonIdString != null) {
+            when (varselRepository.erAktiv(varselkode, generasjonId)) {
+                true -> varselRepository.settStatusVurdert(
+                    generasjonId,
+                    UUID.fromString(definisjonIdString),
+                    varselkode,
+                    ident,
+                )
+                    ?.let { newResult<VarselDTO>().data(it).build() }
+                    ?: newResult<VarselDTO>().error(getUpdateError(varselkode, generasjonId)).build()
+
+                false -> return@withContext newResult<VarselDTO>().error(getNotActiveError(varselkode, generasjonId))
+                    .build()
+
+                null -> return@withContext newResult<VarselDTO>().error(getNotFoundError(varselkode, generasjonId))
+                    .build()
+            }
+        } else {
+            when (varselRepository.erGodkjent(varselkode, generasjonId)) {
+                true -> newResult<VarselDTO>().error(getIsGodkjentError(varselkode, generasjonId)).build()
+                false -> varselRepository.settStatusAktiv(
+                    generasjonId,
+                    varselkode,
+                    ident,
+                )
+                    ?.let { newResult<VarselDTO>().data(it).build() }
+                    ?: newResult<VarselDTO>().error(getUpdateError(varselkode, generasjonId)).build()
+
+                null -> newResult<VarselDTO>().error(getNotFoundError(varselkode, generasjonId)).build()
+            }
         }
     }
 
@@ -85,7 +122,8 @@ class VarselMutation(private val varselRepository: ApiVarselRepository) : Mutati
     }
 
     private fun getNotFoundError(varselkode: String, generasjonId: UUID): GraphQLError {
-        val message = "Kunne ikke oppdatere varsel med varselkode=$varselkode, generasjonId=$generasjonId fordi varselet ikke finnes"
+        val message =
+            "Kunne ikke oppdatere varsel med varselkode=$varselkode, generasjonId=$generasjonId fordi varselet ikke finnes"
         sikkerlogg.error(message)
         return newErrorException()
             .message(message)

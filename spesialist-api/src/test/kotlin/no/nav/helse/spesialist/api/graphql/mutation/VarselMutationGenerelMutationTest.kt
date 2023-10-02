@@ -6,8 +6,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class VarselMutationTest : AbstractGraphQLApiTest() {
-
+internal class VarselMutationGenerelMutationTest : AbstractGraphQLApiTest() {
     @Test
     fun `sett status VURDERT`() {
         val vedtaksperiodeId = UUID.randomUUID()
@@ -22,7 +21,7 @@ internal class VarselMutationTest : AbstractGraphQLApiTest() {
         val body = runQuery(
             """
             mutation SettVarselstatusVurdert {
-                settVarselstatusVurdert(
+                settVarselstatus(
                     generasjonIdString: "$generasjonId", 
                     definisjonIdString: "$definisjonId",
                     varselkode: "EN_KODE", 
@@ -37,7 +36,7 @@ internal class VarselMutationTest : AbstractGraphQLApiTest() {
         """
         )
 
-        assertEquals("VURDERT", body["data"]["settVarselstatusVurdert"]["vurdering"]["status"].asText())
+        assertEquals("VURDERT", body["data"]["settVarselstatus"]["vurdering"]["status"].asText())
     }
 
     @Test
@@ -54,7 +53,7 @@ internal class VarselMutationTest : AbstractGraphQLApiTest() {
         val body = runQuery(
             """
             mutation SettVarselstatusVurdert {
-                settVarselstatusVurdert(
+                settVarselstatus(
                     generasjonIdString: "$generasjonId", 
                     definisjonIdString: "$definisjonId",
                     varselkode: "EN_KODE", 
@@ -86,7 +85,7 @@ internal class VarselMutationTest : AbstractGraphQLApiTest() {
         val body = runQuery(
             """
             mutation SettVarselstatusVurdert {
-                settVarselstatusVurdert(
+                settVarselstatus(
                     generasjonIdString: "$generasjonId",
                     definisjonIdString: "$definisjonId",
                     varselkode: "EN_KODE", 
@@ -116,7 +115,7 @@ internal class VarselMutationTest : AbstractGraphQLApiTest() {
         val body = runQuery(
             """
             mutation SettVarselstatusVurdert {
-                settVarselstatusVurdert(
+                settVarselstatus(
                     generasjonIdString: "$generasjonId",
                     definisjonIdString: "$definisjonId",
                     varselkode: "EN_KODE", 
@@ -148,7 +147,7 @@ internal class VarselMutationTest : AbstractGraphQLApiTest() {
         val body = runQuery(
             """
             mutation SettVarselstatusAktiv {
-                settVarselstatusAktiv(
+                settVarselstatus(
                     generasjonIdString: "$generasjonId", 
                     varselkode: "EN_KODE", 
                     ident: "${SAKSBEHANDLER.oid}" 
@@ -162,7 +161,7 @@ internal class VarselMutationTest : AbstractGraphQLApiTest() {
         """
         )
 
-        assertTrue(body["data"]["settVarselstatusAktiv"]["vurdering"].isNull)
+        assertTrue(body["data"]["settVarselstatus"]["vurdering"].isNull)
     }
 
     @Test
@@ -179,7 +178,7 @@ internal class VarselMutationTest : AbstractGraphQLApiTest() {
         val body = runQuery(
             """
             mutation SettVarselstatusAktiv {
-                settVarselstatusAktiv(
+                settVarselstatus(
                     generasjonIdString: "$generasjonId", 
                     varselkode: "EN_KODE", 
                     ident: "${SAKSBEHANDLER.oid}" 
@@ -209,7 +208,7 @@ internal class VarselMutationTest : AbstractGraphQLApiTest() {
         val body = runQuery(
             """
             mutation SettVarselstatusAktiv {
-                settVarselstatusAktiv(
+                settVarselstatus(
                     generasjonIdString: "$generasjonId", 
                     varselkode: "EN_KODE", 
                     ident: "${SAKSBEHANDLER.oid}" 
@@ -237,7 +236,7 @@ internal class VarselMutationTest : AbstractGraphQLApiTest() {
         val body = runQuery(
             """
             mutation SettVarselstatusAktiv {
-                settVarselstatusAktiv(
+                settVarselstatus(
                     generasjonIdString: "$generasjonId", 
                     varselkode: "EN_KODE", 
                     ident: "${SAKSBEHANDLER.oid}" 
