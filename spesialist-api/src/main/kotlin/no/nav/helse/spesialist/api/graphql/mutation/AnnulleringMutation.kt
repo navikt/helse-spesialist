@@ -24,7 +24,7 @@ class AnnulleringMutation(
         val annulleringHandling = AnnulleringHandlingFraApi(
             aktørId = annullering.aktorId,
             fødselsnummer = annullering.fodselsnummer,
-            organisasjonsnummer = annullering.organisasjonsnummer,
+            organisasjonsnummer = annullering.organisasjonsnummer ?: "",
             fagsystemId = annullering.fagsystemId,
             begrunnelser = annullering.begrunnelser,
             kommentar = annullering.kommentar
