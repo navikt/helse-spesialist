@@ -1,0 +1,2 @@
+update overstyring_dag set dagtype = 'ArbeidIkkeGjenopptattDag' where dagtype = 'FerieUtenSykmeldingDag';
+update overstyring_dag set fra_dagtype = 'ArbeidIkkeGjenopptattDag' where fra_dagtype = 'FerieUtenSykmeldingDag';
