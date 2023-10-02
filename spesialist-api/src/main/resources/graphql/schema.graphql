@@ -5,6 +5,7 @@ schema {
 }
 
 interface GraphQLHendelse {
+    eksternDokumentId: String!
     id: String!
     type: GraphQLHendelsetype!
 }
@@ -41,13 +42,10 @@ type Alder {
 }
 
 type GraphQLArbeidsgiver {
-    generasjon(index: Int!): GraphQLGenerasjon
     generasjoner: [GraphQLGenerasjon!]!
-    generasjonerSlice(first: Int, from: Int): [GraphQLGenerasjon!]!
     ghostPerioder: [GraphQLGhostPeriode!]!
     id: UUID!
     organisasjonsnummer: String!
-    sisteGenerasjon: GraphQLGenerasjon
 }
 
 type GraphQLArbeidsgiverinntekt {
@@ -71,7 +69,6 @@ type GraphQLBeregnetPeriode implements GraphQLTidslinjeperiode {
     gjenstaendeSykedager: Int
     hendelser: [GraphQLHendelse!]!
     id: UUID!
-    inntektsmeldinger: [GraphQLInntektsmelding!]!
     inntektstype: GraphQLInntektstype!
     maksdato: LocalDate!
     opprettet: LocalDateTime!
@@ -79,9 +76,6 @@ type GraphQLBeregnetPeriode implements GraphQLTidslinjeperiode {
     periodetype: GraphQLPeriodetype!
     periodevilkar: GraphQLPeriodevilkar!
     skjaeringstidspunkt: LocalDate!
-    soknaderArbeidsgiver: [GraphQLSoknadArbeidsgiver!]!
-    soknaderNav: [GraphQLSoknadNav!]!
-    sykmeldinger: [GraphQLSykmelding!]!
     tidslinje: [GraphQLDag!]!
     tom: LocalDate!
     utbetaling: GraphQLUtbetaling!
@@ -101,10 +95,7 @@ type GraphQLDag {
 
 type GraphQLGenerasjon {
     id: UUID!
-    periode(index: Int!): GraphQLTidslinjeperiode
     perioder: [GraphQLTidslinjeperiode!]!
-    perioderSlice(first: Int, from: Int): [GraphQLTidslinjeperiode!]!
-    sistePeriode: GraphQLTidslinjeperiode
 }
 
 type GraphQLGhostPeriode {
@@ -135,6 +126,7 @@ type GraphQLInntekterFraAOrdningen {
 
 type GraphQLInntektsmelding implements GraphQLHendelse {
     beregnetInntekt: Float!
+    eksternDokumentId: String!
     id: String!
     mottattDato: LocalDateTime!
     type: GraphQLHendelsetype!
@@ -156,13 +148,11 @@ type GraphQLOppdrag {
 
 type GraphQLPeriodevilkar {
     alder: Alder!
-    soknadsfrist: Soknadsfrist
     sykepengedager: Sykepengedager!
 }
 
 type GraphQLPerson {
     aktorId: String!
-    arbeidsgiver(organisasjonsnummer: String!): GraphQLArbeidsgiver
     arbeidsgivere: [GraphQLArbeidsgiver!]!
     dodsdato: LocalDate
     fodselsnummer: String!
@@ -218,6 +208,7 @@ type GraphQLSimuleringsutbetaling {
 }
 
 type GraphQLSoknadArbeidsgiver implements GraphQLHendelse {
+    eksternDokumentId: String!
     fom: LocalDate!
     id: String!
     rapportertDato: LocalDateTime!
@@ -227,6 +218,7 @@ type GraphQLSoknadArbeidsgiver implements GraphQLHendelse {
 }
 
 type GraphQLSoknadNav implements GraphQLHendelse {
+    eksternDokumentId: String!
     fom: LocalDate!
     id: String!
     rapportertDato: LocalDateTime!
@@ -267,6 +259,7 @@ type GraphQLSykepengegrunnlagsgrense {
 }
 
 type GraphQLSykmelding implements GraphQLHendelse {
+    eksternDokumentId: String!
     fom: LocalDate!
     id: String!
     rapportertDato: LocalDateTime!
@@ -351,13 +344,6 @@ type GraphQLVurdering {
 "Query object"
 type Query {
     person(fnr: String!): GraphQLPerson
-}
-
-type Soknadsfrist {
-    oppfylt: Boolean!
-    sendtNav: LocalDateTime!
-    soknadFom: LocalDate!
-    soknadTom: LocalDate!
 }
 
 type Sykepengedager {
@@ -449,7 +435,6 @@ enum GraphQLSykdomsdagtype {
     Arbeidsdag
     Arbeidsgiverdag
     Avslatt
-    FerieUtenSykmeldingDag
     Feriedag
     ForeldetSykedag
     FriskHelgedag

@@ -120,7 +120,6 @@ private fun GraphQLSykdomsdagtype.tilSykdomsdagtype(): Sykdomsdagtype =
         GraphQLSykdomsdagtype.ARBEIDSDAG -> Sykdomsdagtype.ARBEIDSDAG
         GraphQLSykdomsdagtype.ARBEIDSGIVERDAG -> Sykdomsdagtype.ARBEIDSGIVERDAG
         GraphQLSykdomsdagtype.AVSLATT -> Sykdomsdagtype.AVSLATT
-        GraphQLSykdomsdagtype.FERIEUTENSYKMELDINGDAG -> Sykdomsdagtype.FERIEUTENSYKMELDINGDAG
         GraphQLSykdomsdagtype.ARBEIDIKKEGJENOPPTATTDAG -> Sykdomsdagtype.ARBEIDIKKEGJENOPPTATTDAG
         GraphQLSykdomsdagtype.FERIEDAG -> Sykdomsdagtype.FERIEDAG
         GraphQLSykdomsdagtype.FORELDETSYKEDAG -> Sykdomsdagtype.FORELDET_SYKEDAG

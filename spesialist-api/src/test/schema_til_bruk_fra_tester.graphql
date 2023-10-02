@@ -361,6 +361,24 @@ type OppgaveForPeriodevisning {
     id: String!
 }
 
+type OppgaveTilBehandling {
+    aktorId: String!
+    egenskaper: [Oppgaveegenskap!]!
+    id: String!
+    inntektskilde: String!
+    navn: Personnavn!
+    opprettet: String!
+    opprinneligSoknadsdato: String!
+    periodetype: Periodetype!
+    tildeling: Tildeling
+    vedtaksperiodeId: String!
+}
+
+type Oppgaveegenskap {
+    egenskap: String!
+    kategori: String!
+}
+
 type Opptegnelse {
     aktorId: String!
     payload: String!
@@ -440,6 +458,7 @@ type Query {
     hentOpptegnelser(sekvensId: Int): [Opptegnelse!]!
     notater(forPerioder: [String!]!): [Notater!]!
     oppdrag(fnr: String!): [Oppdrag!]!
+    oppgaver(pageSize: Int, startIndex: Int): [OppgaveTilBehandling!]!
     person(aktorId: String, fnr: String): Person
 }
 
@@ -964,7 +983,7 @@ input AnnulleringDataInput {
     fagsystemId: String!
     fodselsnummer: String!
     kommentar: String
-    organisasjonsnummer: String!
+    organisasjonsnummer: String
 }
 
 input ArbeidsforholdOverstyringHandlingInput {
