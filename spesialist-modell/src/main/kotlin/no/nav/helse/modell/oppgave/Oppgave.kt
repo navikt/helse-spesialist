@@ -1,6 +1,5 @@
 package no.nav.helse.modell.oppgave
 
-import java.util.Objects
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.modell.OppgaveIkkeTildelt
@@ -248,11 +247,17 @@ class Oppgave private constructor(
     override fun equals(other: Any?): Boolean {
         if (other !is Oppgave) return false
         if (this.id != other.id) return false
-        return this.egenskap == other.egenskap && this.vedtaksperiodeId == other.vedtaksperiodeId
+        return this.egenskaper.toSet() == other.egenskaper.toSet() &&
+                this.egenskap == other.egenskap &&
+                this.vedtaksperiodeId == other.vedtaksperiodeId
     }
 
     override fun hashCode(): Int {
-        return Objects.hash(id, egenskap, vedtaksperiodeId)
+        var result = id.hashCode()
+        result = 31 * result + egenskap.hashCode()
+        result = 31 * result + vedtaksperiodeId.hashCode()
+        result = 31 * result + egenskaper.hashCode()
+        return result
     }
 
     override fun toString(): String {

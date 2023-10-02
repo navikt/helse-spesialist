@@ -90,7 +90,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         assertTrue(command.execute(context))
         verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
         val oppgave = slot.captured.invoke(1L)
-        assertEquals(enOppgave(SØKNAD), oppgave)
+        assertEquals(enOppgave(SØKNAD, INGEN_UTBETALING), oppgave)
     }
 
     @Test
@@ -101,7 +101,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
-        assertEquals(enOppgave(STIKKPRØVE), oppgave)
+        assertEquals(enOppgave(SØKNAD, STIKKPRØVE, INGEN_UTBETALING), oppgave)
     }
 
     @Test
@@ -112,7 +112,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
-        assertEquals(enOppgave(RISK_QA), oppgave)
+        assertEquals(enOppgave(SØKNAD, RISK_QA, INGEN_UTBETALING), oppgave)
     }
 
     @Test
@@ -123,7 +123,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
-        assertEquals(enOppgave(REVURDERING), oppgave)
+        assertEquals(enOppgave(REVURDERING, INGEN_UTBETALING), oppgave)
     }
 
     @Test
@@ -134,7 +134,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
-        assertEquals(enOppgave(FORTROLIG_ADRESSE), oppgave)
+        assertEquals(enOppgave(SØKNAD, FORTROLIG_ADRESSE, INGEN_UTBETALING), oppgave)
     }
 
     @Test
@@ -145,7 +145,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
-        assertEquals(enOppgave(UTBETALING_TIL_SYKMELDT), oppgave)
+        assertEquals(enOppgave(SØKNAD, UTBETALING_TIL_SYKMELDT), oppgave)
     }
 
     @Test
@@ -159,7 +159,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
-        assertEquals(enOppgave(DELVIS_REFUSJON), oppgave)
+        assertEquals(enOppgave(SØKNAD, DELVIS_REFUSJON), oppgave)
     }
 
     @Test
@@ -216,6 +216,18 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
             assertTrue(egenskaper.contains(EGEN_ANSATT))
         }
         Toggle.EgenAnsatt.disable()
+    }
+
+    @Test
+    fun `legger ikke til egenskap RISK_QA hvis oppgaven har egenskap REVURDERING`() {
+        every { risikovurderingDao.kreverSupersaksbehandler(VEDTAKSPERIODE_ID) } returns true
+        utbetalingstype = Utbetalingtype.REVURDERING
+        val slot = slot<((Long) -> Oppgave)>()
+        assertTrue(command.execute(context))
+        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
+
+        val oppgave = slot.captured.invoke(1L)
+        assertEquals(enOppgave(REVURDERING, INGEN_UTBETALING), oppgave)
     }
 
     private fun enOppgave(vararg egenskaper: Egenskap) =

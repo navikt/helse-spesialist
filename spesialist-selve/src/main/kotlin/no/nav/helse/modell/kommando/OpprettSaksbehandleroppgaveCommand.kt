@@ -15,6 +15,7 @@ import no.nav.helse.modell.oppgave.Egenskap.INGEN_UTBETALING
 import no.nav.helse.modell.oppgave.Egenskap.REVURDERING
 import no.nav.helse.modell.oppgave.Egenskap.RISK_QA
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
+import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_ARBEIDSGIVER
 import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.modell.oppgave.Egenskap.VERGEMÅL
@@ -55,9 +56,12 @@ internal class OpprettSaksbehandleroppgaveCommand(
         val egenskaper = mutableListOf<Egenskap>()
         if (Toggle.EgenAnsatt.enabled && egenAnsattDao.erEgenAnsatt(fødselsnummer) == true) egenskaper.add(EGEN_ANSATT)
         if (harFortroligAdressebeskyttelse) egenskaper.add(FORTROLIG_ADRESSE)
+
         if (utbetalingtype == Utbetalingtype.REVURDERING) egenskaper.add(REVURDERING)
+        else egenskaper.add(SØKNAD)
+
         if (automatisering.erStikkprøve(vedtaksperiodeId, hendelseId)) egenskaper.add(STIKKPRØVE)
-        if (risikovurderingDao.kreverSupersaksbehandler(vedtaksperiodeId)) egenskaper.add(RISK_QA)
+        if (!egenskaper.contains(REVURDERING) && risikovurderingDao.kreverSupersaksbehandler(vedtaksperiodeId)) egenskaper.add(RISK_QA)
         if (vergemålDao.harVergemål(fødselsnummer) == true) egenskaper.add(VERGEMÅL)
 
         when {
