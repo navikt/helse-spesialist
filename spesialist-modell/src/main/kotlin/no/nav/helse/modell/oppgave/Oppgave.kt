@@ -89,6 +89,7 @@ class Oppgave private constructor(
         egenskaper.remove(RETUR)
         egenskaper.add(BESLUTTER)
         tildeltTil = totrinnsvurdering.tidligereBeslutter()
+        påVent = false
         oppgaveEndret()
     }
 
@@ -107,6 +108,7 @@ class Oppgave private constructor(
         egenskaper.add(RETUR)
 
         tildeltTil = opprinneligSaksbehandler
+        påVent = false
         oppgaveEndret()
     }
 

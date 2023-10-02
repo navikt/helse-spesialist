@@ -261,6 +261,16 @@ internal class OppgaveTest {
     }
 
     @Test
+    fun `oppgave sendt til beslutter ligger ikke lenger på vent`() {
+        val oppgave = nyOppgave(SØKNAD, medTotrinnsvurdering = true)
+        oppgave.forsøkTildelingVedReservasjon(saksbehandler, true)
+        oppgave.sendTilBeslutter(saksbehandler)
+        inspektør(oppgave) {
+            assertFalse(påVent)
+        }
+    }
+
+    @Test
     fun `oppgave sendt i retur får egenskap RETUR`() {
         val oppgave = nyOppgave(SØKNAD, medTotrinnsvurdering = true)
         oppgave.sendTilBeslutter(saksbehandler)
@@ -268,6 +278,18 @@ internal class OppgaveTest {
         inspektør(oppgave) {
             assertTrue(egenskaper.contains(RETUR))
             assertFalse(egenskaper.contains(BESLUTTER))
+        }
+    }
+
+    @Test
+    fun `oppgave sendt i retur ligger ikke lenger på vent`() {
+        val oppgave = nyOppgave(SØKNAD, medTotrinnsvurdering = true)
+        oppgave.forsøkTildelingVedReservasjon(saksbehandler, true)
+        oppgave.sendTilBeslutter(saksbehandler)
+        oppgave.forsøkTildelingVedReservasjon(beslutter, true)
+        oppgave.sendIRetur(beslutter)
+        inspektør(oppgave) {
+            assertFalse(påVent)
         }
     }
 
