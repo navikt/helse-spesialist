@@ -209,7 +209,7 @@ internal class OppgaveMediator(
         tilgangskontroll = TilgangskontrollørForApi(grupper, tilgangsgrupper),
     )
 
-    private fun List<String>.tilEgenskaper(): List<Egenskap> = this.map { enumValueOf<Egenskap>(it) }
+    private fun List<String>.tilEgenskaper(): Set<Egenskap> = this.map { enumValueOf<Egenskap>(it) }.toSet()
 
     private fun List<OppgaveFraDatabaseForVisning>.tilOppgaveTilBehandling() = map {
         OppgaveTilBehandling(
