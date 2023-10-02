@@ -16,6 +16,32 @@ enum class Oppgavetype {
     INGEN_UTBETALING
 }
 
+enum class Egenskap {
+    RISK_QA,
+    FORTROLIG_ADRESSE,
+    EGEN_ANSATT,
+    BESLUTTER,
+    SPESIALSAK,
+    REVURDERING,
+    SOKNAD,
+    STIKKPROVE,
+    UTBETALING_TIL_SYKMELDT,
+    DELVIS_REFUSJON,
+    UTBETALING_TIL_ARBEIDSGIVER,
+    INGEN_UTBETALING,
+    HASTER,
+    RETUR,
+    FULLMAKT,
+    VERGEMAL
+}
+
+enum class Kategori {
+    Mottaker,
+    Inntektskilde,
+    Oppgavetype,
+    Ukategorisert
+}
+
 data class Boenhet(
     val id: String,
     val navn: String,
@@ -58,8 +84,8 @@ data class OppgaveTilBehandling(
 )
 
 data class Oppgaveegenskap(
-    val egenskap: String,
-    val kategori: String
+    val egenskap: Egenskap,
+    val kategori: Kategori,
 )
 
 data class OppgaveForPeriodevisning(

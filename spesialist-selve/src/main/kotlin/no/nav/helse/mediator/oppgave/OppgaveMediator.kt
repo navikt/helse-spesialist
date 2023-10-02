@@ -17,7 +17,6 @@ import no.nav.helse.modell.OppgaveAlleredeSendtIRetur
 import no.nav.helse.modell.OppgaveKreverVurderingAvToSaksbehandlere
 import no.nav.helse.modell.OppgaveTildeltNoenAndre
 import no.nav.helse.modell.oppgave.Egenskap
-import no.nav.helse.modell.oppgave.Egenskap.Companion.mapToString
 import no.nav.helse.modell.oppgave.Egenskap.Companion.tilgangsstyrteEgenskaper
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.saksbehandler.Saksbehandler
@@ -36,6 +35,8 @@ import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.tildeling.Oppgavehåndterer
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import org.slf4j.LoggerFactory
+import no.nav.helse.spesialist.api.graphql.schema.Egenskap as EgenskapForApi
+import no.nav.helse.spesialist.api.graphql.schema.Kategori as KategoriForApi
 
 interface Oppgavefinner {
     fun oppgave(utbetalingId: UUID, oppgaveBlock: Oppgave?.() -> Unit)
@@ -234,7 +235,7 @@ internal class OppgaveMediator(
             },
             periodetype = periodetype(it.periodetype),
             egenskaper = it.egenskaper.tilEgenskaper().map { egenskap ->
-                Oppgaveegenskap(egenskap.mapToString(), egenskap.kategori.mapToString())
+                Oppgaveegenskap(egenskap.mapToApiEgenskap(), egenskap.kategori.mapToApiKategori())
             }
         )
     }
@@ -264,6 +265,34 @@ internal class OppgaveMediator(
             is OppgaveAlleredeSendtBeslutter -> no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtBeslutter(oppgaveId)
             is OppgaveAlleredeSendtIRetur -> no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtIRetur(oppgaveId)
             is OppgaveKreverVurderingAvToSaksbehandlere -> no.nav.helse.spesialist.api.feilhåndtering.OppgaveKreverVurderingAvToSaksbehandlere(oppgaveId)
+        }
+    }
+
+    private fun Egenskap.mapToApiEgenskap(): EgenskapForApi = when (this) {
+        Egenskap.RISK_QA -> EgenskapForApi.RISK_QA
+        Egenskap.FORTROLIG_ADRESSE -> EgenskapForApi.FORTROLIG_ADRESSE
+        Egenskap.EGEN_ANSATT -> EgenskapForApi.EGEN_ANSATT
+        Egenskap.BESLUTTER -> EgenskapForApi.BESLUTTER
+        Egenskap.SPESIALSAK -> EgenskapForApi.SPESIALSAK
+        Egenskap.REVURDERING -> EgenskapForApi.REVURDERING
+        Egenskap.SØKNAD -> EgenskapForApi.SOKNAD
+        Egenskap.STIKKPRØVE -> EgenskapForApi.STIKKPROVE
+        Egenskap.UTBETALING_TIL_SYKMELDT -> EgenskapForApi.UTBETALING_TIL_SYKMELDT
+        Egenskap.DELVIS_REFUSJON -> EgenskapForApi.DELVIS_REFUSJON
+        Egenskap.UTBETALING_TIL_ARBEIDSGIVER -> EgenskapForApi.UTBETALING_TIL_ARBEIDSGIVER
+        Egenskap.INGEN_UTBETALING -> EgenskapForApi.INGEN_UTBETALING
+        Egenskap.HASTER -> EgenskapForApi.HASTER
+        Egenskap.RETUR -> EgenskapForApi.RETUR
+        Egenskap.FULLMAKT -> EgenskapForApi.FULLMAKT
+        Egenskap.VERGEMÅL -> EgenskapForApi.VERGEMAL
+    }
+
+    private fun Egenskap.Kategori.mapToApiKategori(): KategoriForApi {
+        return when (this) {
+            Egenskap.Kategori.Mottaker -> KategoriForApi.Mottaker
+            Egenskap.Kategori.Inntektskilde -> KategoriForApi.Inntektskilde
+            Egenskap.Kategori.Oppgavetype -> KategoriForApi.Oppgavetype
+            Egenskap.Kategori.Ukategorisert -> KategoriForApi.Ukategorisert
         }
     }
 }
