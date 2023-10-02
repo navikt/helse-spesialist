@@ -762,7 +762,6 @@ enum Dagtype {
     Avvistdag
     Dagpengerdag
     Egenmeldingsdag
-    FerieUtenSykmeldingDag
     Feriedag
     Foreldrepengerdag
     Omsorgspengerdag
@@ -920,7 +919,6 @@ enum Sykdomsdagtype {
     ARBEIDSGIVERDAG
     AVSLATT
     FERIEDAG
-    FERIEUTENSYKMELDINGDAG
     FORELDET_SYKEDAG
     FRISK_HELGEDAG
     PERMISJONSDAG

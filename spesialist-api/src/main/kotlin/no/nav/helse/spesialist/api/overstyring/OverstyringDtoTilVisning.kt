@@ -12,7 +12,6 @@ enum class Dagtype {
     Permisjonsdag,
     Arbeidsdag,
     Avvistdag,
-    FerieUtenSykmeldingDag,
     ArbeidIkkeGjenopptattDag,
     Foreldrepengerdag,
     AAPdag,
