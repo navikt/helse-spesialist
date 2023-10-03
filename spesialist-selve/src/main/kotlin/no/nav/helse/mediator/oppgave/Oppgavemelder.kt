@@ -9,10 +9,14 @@ import no.nav.helse.modell.oppgave.Egenskap.DELVIS_REFUSJON
 import no.nav.helse.modell.oppgave.Egenskap.EGEN_ANSATT
 import no.nav.helse.modell.oppgave.Egenskap.EN_ARBEIDSGIVER
 import no.nav.helse.modell.oppgave.Egenskap.FLERE_ARBEIDSGIVERE
+import no.nav.helse.modell.oppgave.Egenskap.FORLENGELSE
+import no.nav.helse.modell.oppgave.Egenskap.FORSTEGANGSBEHANDLING
 import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.FULLMAKT
 import no.nav.helse.modell.oppgave.Egenskap.HASTER
+import no.nav.helse.modell.oppgave.Egenskap.INFOTRYGDFORLENGELSE
 import no.nav.helse.modell.oppgave.Egenskap.INGEN_UTBETALING
+import no.nav.helse.modell.oppgave.Egenskap.OVERGANG_FRA_IT
 import no.nav.helse.modell.oppgave.Egenskap.RETUR
 import no.nav.helse.modell.oppgave.Egenskap.REVURDERING
 import no.nav.helse.modell.oppgave.Egenskap.RISK_QA
@@ -181,6 +185,10 @@ private class OppgaveForKafkaBygger : OppgaveVisitor {
             FULLMAKT -> "FULLMAKT"
             VERGEMÅL -> "VERGEMÅL"
             SPESIALSAK -> "SPESIALSAK"
+            FORLENGELSE -> "FORLENGELSE"
+            FORSTEGANGSBEHANDLING -> "FORSTEGANGSBEHANDLING"
+            INFOTRYGDFORLENGELSE -> "INFOTRYGDFORLENGELSE"
+            OVERGANG_FRA_IT -> "OVERGANG_FRA_IT"
         }
     }
 }

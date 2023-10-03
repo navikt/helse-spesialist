@@ -31,6 +31,10 @@ enum class Egenskap {
     INGEN_UTBETALING,
     EN_ARBEIDSGIVER,
     FLERE_ARBEIDSGIVERE,
+    FORLENGELSE,
+    FORSTEGANGSBEHANDLING,
+    INFOTRYGDFORLENGELSE,
+    OVERGANG_FRA_IT,
     UTLAND,
     HASTER,
     RETUR,
@@ -42,7 +46,8 @@ enum class Kategori {
     Mottaker,
     Inntektskilde,
     Oppgavetype,
-    Ukategorisert
+    Ukategorisert,
+    Periodetype
 }
 
 data class Boenhet(

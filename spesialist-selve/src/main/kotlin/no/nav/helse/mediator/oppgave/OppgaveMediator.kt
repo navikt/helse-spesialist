@@ -279,6 +279,10 @@ internal class OppgaveMediator(
         Egenskap.EN_ARBEIDSGIVER -> EgenskapForApi.EN_ARBEIDSGIVER
         Egenskap.FLERE_ARBEIDSGIVERE -> EgenskapForApi.FLERE_ARBEIDSGIVERE
         Egenskap.UTLAND -> EgenskapForApi.UTLAND
+        Egenskap.FORLENGELSE -> EgenskapForApi.FORLENGELSE
+        Egenskap.FORSTEGANGSBEHANDLING -> EgenskapForApi.FORSTEGANGSBEHANDLING
+        Egenskap.INFOTRYGDFORLENGELSE -> EgenskapForApi.INFOTRYGDFORLENGELSE
+        Egenskap.OVERGANG_FRA_IT -> EgenskapForApi.OVERGANG_FRA_IT
     }
 
     private fun Egenskap.Kategori.mapToApiKategori(): KategoriForApi {
@@ -287,6 +291,7 @@ internal class OppgaveMediator(
             Egenskap.Kategori.Inntektskilde -> KategoriForApi.Inntektskilde
             Egenskap.Kategori.Oppgavetype -> KategoriForApi.Oppgavetype
             Egenskap.Kategori.Ukategorisert -> KategoriForApi.Ukategorisert
+            Egenskap.Kategori.Periodetype -> KategoriForApi.Periodetype
         }
     }
 }

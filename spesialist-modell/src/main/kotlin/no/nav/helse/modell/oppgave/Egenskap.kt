@@ -4,6 +4,7 @@ import java.util.EnumSet
 import no.nav.helse.modell.oppgave.Egenskap.Kategori.Inntektskilde
 import no.nav.helse.modell.oppgave.Egenskap.Kategori.Mottaker
 import no.nav.helse.modell.oppgave.Egenskap.Kategori.Oppgavetype
+import no.nav.helse.modell.oppgave.Egenskap.Kategori.Periodetype
 import no.nav.helse.modell.oppgave.Egenskap.Kategori.Ukategorisert
 
 enum class Egenskap(
@@ -24,6 +25,10 @@ enum class Egenskap(
     INGEN_UTBETALING(kategori = Mottaker),
     EN_ARBEIDSGIVER(kategori = Inntektskilde),
     FLERE_ARBEIDSGIVERE(kategori = Inntektskilde),
+    FORLENGELSE(kategori = Periodetype),
+    FORSTEGANGSBEHANDLING(kategori = Periodetype),
+    INFOTRYGDFORLENGELSE(kategori = Periodetype),
+    OVERGANG_FRA_IT(kategori = Periodetype),
     UTLAND,
     HASTER,
     RETUR,
@@ -34,7 +39,8 @@ enum class Egenskap(
         Mottaker,
         Inntektskilde,
         Oppgavetype,
-        Ukategorisert
+        Ukategorisert,
+        Periodetype
     }
 
     companion object {

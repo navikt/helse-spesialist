@@ -192,6 +192,7 @@ internal class Godkjenningsbehov(
             snapshotMediator = snapshotMediator,
             vergemålDao = vergemålDao,
             inntektskilde = inntektskilde,
+            periodetype = periodetype,
         ),
         TrengerTotrinnsvurderingCommand(
             fødselsnummer = fødselsnummer,

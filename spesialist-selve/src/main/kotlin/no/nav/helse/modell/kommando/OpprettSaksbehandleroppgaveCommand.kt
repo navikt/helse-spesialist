@@ -11,9 +11,13 @@ import no.nav.helse.modell.oppgave.Egenskap.DELVIS_REFUSJON
 import no.nav.helse.modell.oppgave.Egenskap.EGEN_ANSATT
 import no.nav.helse.modell.oppgave.Egenskap.EN_ARBEIDSGIVER
 import no.nav.helse.modell.oppgave.Egenskap.FLERE_ARBEIDSGIVERE
+import no.nav.helse.modell.oppgave.Egenskap.FORLENGELSE
+import no.nav.helse.modell.oppgave.Egenskap.FORSTEGANGSBEHANDLING
 import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.HASTER
+import no.nav.helse.modell.oppgave.Egenskap.INFOTRYGDFORLENGELSE
 import no.nav.helse.modell.oppgave.Egenskap.INGEN_UTBETALING
+import no.nav.helse.modell.oppgave.Egenskap.OVERGANG_FRA_IT
 import no.nav.helse.modell.oppgave.Egenskap.REVURDERING
 import no.nav.helse.modell.oppgave.Egenskap.RISK_QA
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
@@ -31,6 +35,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.utbetalingTilArbeidsgiver
 import no.nav.helse.modell.utbetalingTilSykmeldt
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
+import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
@@ -51,6 +56,7 @@ internal class OpprettSaksbehandleroppgaveCommand(
     private val snapshotMediator: SnapshotMediator,
     private val vergemålDao: VergemålDao,
     private val inntektskilde: Inntektskilde,
+    private val periodetype: Periodetype,
 ) : Command {
 
     private companion object {
@@ -81,6 +87,13 @@ internal class OpprettSaksbehandleroppgaveCommand(
         when (inntektskilde) {
             Inntektskilde.EN_ARBEIDSGIVER -> egenskaper.add(EN_ARBEIDSGIVER)
             Inntektskilde.FLERE_ARBEIDSGIVERE -> egenskaper.add(FLERE_ARBEIDSGIVERE)
+        }
+
+        when (periodetype) {
+            Periodetype.FØRSTEGANGSBEHANDLING -> egenskaper.add(FORSTEGANGSBEHANDLING)
+            Periodetype.FORLENGELSE -> egenskaper.add(FORLENGELSE)
+            Periodetype.INFOTRYGDFORLENGELSE -> egenskaper.add(INFOTRYGDFORLENGELSE)
+            Periodetype.OVERGANG_FRA_IT -> egenskaper.add(OVERGANG_FRA_IT)
         }
 
         if (sykefraværstilfelle.haster(vedtaksperiodeId)) egenskaper.add(HASTER)
