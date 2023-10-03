@@ -16,6 +16,7 @@ import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Egenskap.DELVIS_REFUSJON
 import no.nav.helse.modell.oppgave.Egenskap.EGEN_ANSATT
 import no.nav.helse.modell.oppgave.Egenskap.EN_ARBEIDSGIVER
+import no.nav.helse.modell.oppgave.Egenskap.FLERE_ARBEIDSGIVERE
 import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.HASTER
 import no.nav.helse.modell.oppgave.Egenskap.INGEN_UTBETALING
@@ -63,22 +64,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
     private lateinit var context: CommandContext
     private lateinit var contextId: UUID
     private lateinit var utbetalingstype: Utbetalingtype
-    private val command get() = OpprettSaksbehandleroppgaveCommand(
-        fødselsnummer = FNR,
-        vedtaksperiodeId = VEDTAKSPERIODE_ID,
-        oppgaveMediator = oppgaveMediator,
-        automatisering = automatisering,
-        hendelseId = hendelseId,
-        personDao = personDao,
-        risikovurderingDao = risikovurderingDao,
-        egenAnsattDao = egenAnsattDao,
-        utbetalingId = UTBETALING_ID,
-        utbetalingtype = utbetalingstype,
-        sykefraværstilfelle = sykefraværstilfelle,
-        snapshotMediator = snapshotMediator,
-        vergemålDao = vergemålDao,
-        inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
-    )
+    private val command get() = opprettSaksbehandlerOppgaveCommand()
 
     @BeforeEach
     fun setup() {
@@ -223,7 +209,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
     }
 
     @Test
-    fun `oppretter oppgave med utland`() {
+    fun `oppretter oppgave med egenskap UTLAND`() {
         every { snapshotMediator.finnUtbetaling(FNR, UTBETALING_ID) } returns enUtbetaling()
         every { personDao.finnEnhetId(FNR) } returns "0393"
         val slot = slot<((Long) -> Oppgave)>()
@@ -235,6 +221,20 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
             assertTrue(egenskaper.contains(UTLAND))
         }
     }
+
+    @Test
+    fun `oppretter oppgave med egenskap FLERE_ARBEIDSGIVERE`() {
+        every { snapshotMediator.finnUtbetaling(FNR, UTBETALING_ID) } returns enUtbetaling()
+        val slot = slot<((Long) -> Oppgave)>()
+        assertTrue(opprettSaksbehandlerOppgaveCommand(inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE).execute(context))
+        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
+
+        val oppgave = slot.captured.invoke(1L)
+        inspektør(oppgave) {
+            assertTrue(egenskaper.contains(FLERE_ARBEIDSGIVERE))
+        }
+    }
+
 
     @Test
     fun `legger ikke til egenskap RISK_QA hvis oppgaven har egenskap REVURDERING`() {
@@ -264,5 +264,23 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
             vurdering = null,
             personoppdrag = null,
             arbeidsgiveroppdrag = null,
+        )
+
+    private fun opprettSaksbehandlerOppgaveCommand(inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER) =
+        OpprettSaksbehandleroppgaveCommand(
+            fødselsnummer = FNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            oppgaveMediator = oppgaveMediator,
+            automatisering = automatisering,
+            hendelseId = hendelseId,
+            personDao = personDao,
+            risikovurderingDao = risikovurderingDao,
+            egenAnsattDao = egenAnsattDao,
+            utbetalingId = UTBETALING_ID,
+            utbetalingtype = utbetalingstype,
+            sykefraværstilfelle = sykefraværstilfelle,
+            snapshotMediator = snapshotMediator,
+            vergemålDao = vergemålDao,
+            inntektskilde = inntektskilde,
         )
 }
