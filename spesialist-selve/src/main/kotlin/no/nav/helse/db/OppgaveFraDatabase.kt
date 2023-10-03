@@ -25,7 +25,6 @@ data class OppgaveFraDatabaseForVisning(
     val egenskaper: List<String>,
     val tildelt: SaksbehandlerFraDatabase? = null,
     val påVent: Boolean = false,
-    val periodetype: String,
     val opprettet: LocalDateTime,
     val opprinneligSøknadsdato: LocalDateTime,
 )

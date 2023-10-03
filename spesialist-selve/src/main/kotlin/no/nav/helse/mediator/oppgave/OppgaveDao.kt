@@ -73,7 +73,6 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                 o.egenskaper,
                 s.oid, s.ident, s.epost, s.navn,
                 t.på_vent,
-                sot.type as periodetype,
                 o.opprettet,
                 os.soknad_mottatt AS opprinnelig_soknadsdato
             FROM oppgave o
@@ -81,7 +80,6 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                 INNER JOIN person p ON v.person_ref = p.id
                 INNER JOIN person_info pi ON p.info_ref = pi.id
                 INNER JOIN opprinnelig_soknadsdato os ON os.vedtaksperiode_id = v.vedtaksperiode_id
-                LEFT JOIN saksbehandleroppgavetype sot ON v.id = sot.vedtak_ref
                 LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
                 LEFT JOIN saksbehandler s ON t.saksbehandler_ref = s.oid
                 WHERE o.status = 'AvventerSaksbehandler'
@@ -108,7 +106,6 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                 påVent = row.boolean("på_vent"),
                 opprettet = row.localDateTime("opprettet"),
                 opprinneligSøknadsdato = row.localDateTime("opprinnelig_soknadsdato"),
-                periodetype = row.string("periodetype"),
             )
         }
     }

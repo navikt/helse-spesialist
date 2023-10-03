@@ -28,7 +28,6 @@ import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.graphql.schema.OppgaveTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.Oppgaveegenskap
-import no.nav.helse.spesialist.api.graphql.schema.Periodetype
 import no.nav.helse.spesialist.api.graphql.schema.Personnavn
 import no.nav.helse.spesialist.api.graphql.schema.Tildeling
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
@@ -232,21 +231,10 @@ internal class OppgaveMediator(
                     it.påVent
                 )
             },
-            periodetype = periodetype(it.periodetype),
             egenskaper = it.egenskaper.tilEgenskaper().map { egenskap ->
                 Oppgaveegenskap(egenskap.mapToApiEgenskap(), egenskap.kategori.mapToApiKategori())
             }
         )
-    }
-
-    private fun periodetype(periodetype: String): Periodetype {
-        return when (periodetype) {
-            "INFOTRYGDFORLENGELSE" -> Periodetype.INFOTRYGDFORLENGELSE
-            "FØRSTEGANGSBEHANDLING" -> Periodetype.FORSTEGANGSBEHANDLING
-            "OVERGANG_FRA_IT" -> Periodetype.OVERGANG_FRA_IT
-            "FORLENGELSE" -> Periodetype.FORLENGELSE
-            else -> throw IllegalArgumentException("$periodetype er ikke en gyldig periodetype")
-        }
     }
 
     private fun Modellfeil.tilApiFeil(): no.nav.helse.spesialist.api.feilhåndtering.Modellfeil {

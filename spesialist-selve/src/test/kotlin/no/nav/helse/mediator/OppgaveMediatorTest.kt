@@ -298,7 +298,6 @@ internal class OppgaveMediatorTest {
         assertEquals(SAKSBEHANDLEREPOST, oppgave.tildeling?.epost)
         assertEquals(SAKSBEHANDLEROID.toString(), oppgave.tildeling?.oid)
         assertEquals(true, oppgave.tildeling?.paaVent)
-        assertEquals("FORSTEGANGSBEHANDLING", oppgave.periodetype.name)
         assertEquals(EnumSet.allOf(Egenskap::class.java).size, oppgave.egenskaper.size)
     }
 
@@ -346,7 +345,6 @@ internal class OppgaveMediatorTest {
             egenskaper = egenskaper,
             tildelt = tildelt,
             påVent = påVent,
-            periodetype = "FØRSTEGANGSBEHANDLING",
             opprettet = opprettet,
             opprinneligSøknadsdato = opprinneligSøknadsdato,
         )

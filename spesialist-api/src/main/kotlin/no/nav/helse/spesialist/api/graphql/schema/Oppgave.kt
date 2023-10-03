@@ -86,7 +86,6 @@ data class OppgaveTilBehandling(
     val navn: Personnavn,
     val aktorId: String,
     val tildeling: Tildeling?,
-    val periodetype: Periodetype,
     val egenskaper: List<Oppgaveegenskap>
 )
 

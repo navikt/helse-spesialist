@@ -215,7 +215,6 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         assertEquals(FORNAVN, førsteOppgave.navn.fornavn)
         assertEquals(MELLOMNAVN, førsteOppgave.navn.mellomnavn)
         assertEquals(ETTERNAVN, førsteOppgave.navn.etternavn)
-        assertEquals("FØRSTEGANGSBEHANDLING", førsteOppgave.periodetype)
         assertEquals(false, førsteOppgave.påVent)
         assertEquals(
             SaksbehandlerFraDatabase(
