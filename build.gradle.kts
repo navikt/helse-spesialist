@@ -45,8 +45,7 @@ allprojects {
         implementation("org.flywaydb:flyway-core:$flywayCoreVersion")
         implementation("com.github.seratch:kotliquery:$kotliqueryVersion")
         implementation("io.ktor:ktor-client-cio:$ktorVersion")
-        implementation("io.ktor:ktor-client-apache:$ktorVersion")
-        {
+        implementation("io.ktor:ktor-client-apache:$ktorVersion") {
             exclude(group = "commons-codec")
         }
         implementation("io.ktor:ktor-client-jackson:$ktorVersion") {

@@ -4,7 +4,7 @@ import java.util.UUID
 import no.nav.helse.mediator.oppgave.Oppgavefinner
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
-import no.nav.helse.modell.oppgave.OppgaveInspektør.Companion.oppgaveinspektør
+import no.nav.helse.modell.oppgave.OppgaveInspector.Companion.oppgaveinspektør
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.ANNULLERT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.GODKJENT_UTEN_UTBETALING

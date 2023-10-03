@@ -4,7 +4,7 @@ import java.util.UUID
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 
-internal class OppgaveInspektør private constructor() : OppgaveVisitor {
+internal class OppgaveInspector private constructor() : OppgaveVisitor {
     internal lateinit var tilstand: Oppgave.Tilstand
     internal lateinit var egenskap: Egenskap
     internal var tildelt: Boolean = false
@@ -34,8 +34,8 @@ internal class OppgaveInspektør private constructor() : OppgaveVisitor {
     }
 
     internal companion object {
-        internal fun oppgaveinspektør(oppgave: Oppgave, block: OppgaveInspektør.() -> Unit) {
-            val inspektør = OppgaveInspektør()
+        internal fun oppgaveinspektør(oppgave: Oppgave, block: OppgaveInspector.() -> Unit) {
+            val inspektør = OppgaveInspector()
             oppgave.accept(inspektør)
             block(inspektør)
         }

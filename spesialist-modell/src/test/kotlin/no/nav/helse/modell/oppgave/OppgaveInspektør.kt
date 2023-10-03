@@ -34,7 +34,7 @@ internal class OppgaveInspektør private constructor(): OppgaveVisitor {
     }
 
     internal companion object {
-        fun inspektør(oppgave: Oppgave, block: OppgaveInspektør.() -> Unit) {
+        internal fun inspektør(oppgave: Oppgave, block: OppgaveInspektør.() -> Unit) {
             val inspektør = OppgaveInspektør()
             oppgave.accept(inspektør)
             block(inspektør)
