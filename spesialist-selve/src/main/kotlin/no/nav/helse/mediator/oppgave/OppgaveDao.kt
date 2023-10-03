@@ -62,7 +62,8 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
         }
     }
 
-    internal fun finnOppgaverForVisning(): List<OppgaveFraDatabaseForVisning> {
+    internal fun finnOppgaverForVisning(ekskluderEgenskaper: List<String>): List<OppgaveFraDatabaseForVisning> {
+        val egenskaper = ekskluderEgenskaper.joinToString { """ '$it' """ }
         return asSQL(
             """
                 SELECT
@@ -83,6 +84,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                 LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
                 LEFT JOIN saksbehandler s ON t.saksbehandler_ref = s.oid
                 WHERE o.status = 'AvventerSaksbehandler'
+                AND NOT (egenskaper && ARRAY[$egenskaper]::varchar[]);
             """
         ).list { row ->
             OppgaveFraDatabaseForVisning(

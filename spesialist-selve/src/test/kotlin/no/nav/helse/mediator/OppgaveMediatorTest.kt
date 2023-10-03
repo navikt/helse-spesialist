@@ -245,7 +245,7 @@ internal class OppgaveMediatorTest {
 
     @Test
     fun `Hent oppgaver til visning`() {
-        every { oppgaveDao.finnOppgaverForVisning() } returns listOf(
+        every { oppgaveDao.finnOppgaverForVisning(any()) } returns listOf(
             oppgaveFraDatabaseForVisning(),
             oppgaveFraDatabaseForVisning(),
         )
@@ -255,13 +255,8 @@ internal class OppgaveMediatorTest {
 
     @Test
     fun `Hent kun oppgaver til visning som saksbehandler har tilgang til`() {
-        every { oppgaveDao.finnOppgaverForVisning() } returns listOf(
-            oppgaveFraDatabaseForVisning(),
-            oppgaveFraDatabaseForVisning(),
-            oppgaveFraDatabaseForVisning(egenskaper = listOf("RISK_QA"),),
-        )
-        val oppgaver = mediator.oppgaver(saksbehandlerFraApi())
-        assertEquals(2, oppgaver.size)
+        mediator.oppgaver(saksbehandlerFraApi())
+        verify(exactly = 1) { oppgaveDao.finnOppgaverForVisning(ekskluderEgenskaper = Egenskap.alleTilgangsstyrteEgenskaper.map { it.name }) }
     }
 
     @Test
@@ -269,7 +264,7 @@ internal class OppgaveMediatorTest {
         val opprettet = LocalDateTime.now()
         val vedtaksperiodeId = UUID.randomUUID()
         val opprinneligSøknadsdato = LocalDateTime.now()
-        every { oppgaveDao.finnOppgaverForVisning() } returns listOf(
+        every { oppgaveDao.finnOppgaverForVisning(emptyList()) } returns listOf(
             oppgaveFraDatabaseForVisning(
                 oppgaveId = 1L,
                 aktørId = "1234567891011",

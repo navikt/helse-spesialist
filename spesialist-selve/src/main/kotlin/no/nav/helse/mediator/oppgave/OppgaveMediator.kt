@@ -17,7 +17,6 @@ import no.nav.helse.modell.OppgaveAlleredeSendtIRetur
 import no.nav.helse.modell.OppgaveKreverVurderingAvToSaksbehandlere
 import no.nav.helse.modell.OppgaveTildeltNoenAndre
 import no.nav.helse.modell.oppgave.Egenskap
-import no.nav.helse.modell.oppgave.Egenskap.Companion.tilgangsstyrteEgenskaper
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
@@ -143,9 +142,15 @@ internal class OppgaveMediator(
 
     override fun oppgaver(saksbehandlerFraApi: SaksbehandlerFraApi): List<OppgaveTilBehandling> {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
-        val oppgaver = oppgaveDao.finnOppgaverForVisning().groupBy { it.egenskaper.tilEgenskaper() }
-        val oppgaverSaksbehandlerHarTilgangTil = oppgaver.filterKeys { saksbehandler.harTilgangTil(it.tilgangsstyrteEgenskaper()) }
-        return oppgaverSaksbehandlerHarTilgangTil.flatMap { it.value }.tilOppgaveTilBehandling()
+        val egenskaperSaksbehandlerIkkeHarTilgangTil = Egenskap
+            .alleTilgangsstyrteEgenskaper
+            .filterNot { saksbehandler.harTilgangTil(listOf(it)) }
+            .map(Egenskap::toString)
+
+        val oppgaver = oppgaveDao
+            .finnOppgaverForVisning(ekskluderEgenskaper = egenskaperSaksbehandlerIkkeHarTilgangTil)
+            .groupBy { it.egenskaper.tilEgenskaper() }
+        return oppgaver.flatMap { it.value }.tilOppgaveTilBehandling()
     }
 
     fun avbrytOppgaveFor(vedtaksperiodeId: UUID) {
