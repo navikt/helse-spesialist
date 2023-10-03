@@ -43,6 +43,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import kotlin.Int.Companion.MAX_VALUE
 import kotlin.random.Random.Default.nextLong
 
 internal class OppgaveMediatorTest {
@@ -249,14 +250,14 @@ internal class OppgaveMediatorTest {
             oppgaveFraDatabaseForVisning(),
             oppgaveFraDatabaseForVisning(),
         )
-        val oppgaver = mediator.oppgaver(saksbehandlerFraApi())
+        val oppgaver = mediator.oppgaver(saksbehandlerFraApi(), 0, MAX_VALUE)
         assertEquals(2, oppgaver.size)
     }
 
     @Test
     fun `Hent kun oppgaver til visning som saksbehandler har tilgang til`() {
-        mediator.oppgaver(saksbehandlerFraApi())
-        verify(exactly = 1) { oppgaveDao.finnOppgaverForVisning(ekskluderEgenskaper = Egenskap.alleTilgangsstyrteEgenskaper.map { it.name }, SAKSBEHANDLEROID) }
+        mediator.oppgaver(saksbehandlerFraApi(), 0, MAX_VALUE)
+        verify(exactly = 1) { oppgaveDao.finnOppgaverForVisning(ekskluderEgenskaper = Egenskap.alleTilgangsstyrteEgenskaper.map { it.name }, SAKSBEHANDLEROID, 0, MAX_VALUE) }
     }
 
     @Test
@@ -278,7 +279,7 @@ internal class OppgaveMediatorTest {
             ),
         )
         val saksbehandler = saksbehandlerFraApi(tilganger = EnumSet.allOf(Gruppe::class.java).map { UUID.fromString(idForGruppe(it)) })
-        val oppgaver = mediator.oppgaver(saksbehandler)
+        val oppgaver = mediator.oppgaver(saksbehandler, 0, MAX_VALUE)
         assertEquals(1, oppgaver.size)
         val oppgave = oppgaver.single()
         assertEquals("1", oppgave.id)

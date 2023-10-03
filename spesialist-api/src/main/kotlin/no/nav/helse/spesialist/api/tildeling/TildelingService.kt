@@ -19,7 +19,7 @@ interface Oppgavehåndterer {
     fun fjernPåVent(oppgaveId: Long): TildelingApiDto
     fun venterPåSaksbehandler(oppgaveId: Long): Boolean
     fun erRiskoppgave(oppgaveId: Long): Boolean
-    fun oppgaver(saksbehandlerFraApi: SaksbehandlerFraApi): List<OppgaveTilBehandling>
+    fun oppgaver(saksbehandlerFraApi: SaksbehandlerFraApi, startIndex: Int, pageSize: Int): List<OppgaveTilBehandling>
 }
 
 class TildelingService(

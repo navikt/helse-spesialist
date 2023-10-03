@@ -62,7 +62,12 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
         }
     }
 
-    internal fun finnOppgaverForVisning(ekskluderEgenskaper: List<String>, saksbehandlerOid: UUID): List<OppgaveFraDatabaseForVisning> {
+    internal fun finnOppgaverForVisning(
+        ekskluderEgenskaper: List<String>,
+        saksbehandlerOid: UUID,
+        startIndex: Int = 0,
+        pageSize: Int = Int.MAX_VALUE
+    ): List<OppgaveFraDatabaseForVisning> {
         val egenskaper = ekskluderEgenskaper.joinToString { """ '$it' """ }
         return asSQL(
             """
@@ -87,7 +92,9 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                 WHERE o.status = 'AvventerSaksbehandler'
                 AND NOT (egenskaper && ARRAY[$egenskaper]::varchar[])
                 AND NOT (egenskaper && ARRAY['BESLUTTER']::varchar[] AND ttv.saksbehandler = :oid)
-            """, mapOf("oid" to saksbehandlerOid)
+                OFFSET :start_index
+                LIMIT :page_size
+            """, mapOf("oid" to saksbehandlerOid, "start_index" to startIndex, "page_size" to pageSize)
         ).list { row ->
             OppgaveFraDatabaseForVisning(
                 id = row.long("oppgave_id"),

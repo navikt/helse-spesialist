@@ -79,7 +79,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             sendIReturBlock()
         }
 
-        override fun oppgaver(saksbehandlerFraApi: SaksbehandlerFraApi): List<OppgaveTilBehandling> {
+        override fun oppgaver(saksbehandlerFraApi: SaksbehandlerFraApi, startIndex: Int, pageSize: Int): List<OppgaveTilBehandling> {
             TODO("Not yet implemented")
         }
 

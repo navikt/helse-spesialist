@@ -140,7 +140,7 @@ internal class OppgaveMediator(
     override fun venterPåSaksbehandler(oppgaveId: Long): Boolean = oppgaveDao.venterPåSaksbehandler(oppgaveId)
     override fun erRiskoppgave(oppgaveId: Long): Boolean = oppgaveDao.erRiskoppgave(oppgaveId)
 
-    override fun oppgaver(saksbehandlerFraApi: SaksbehandlerFraApi): List<OppgaveTilBehandling> {
+    override fun oppgaver(saksbehandlerFraApi: SaksbehandlerFraApi, startIndex: Int, pageSize: Int): List<OppgaveTilBehandling> {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         val egenskaperSaksbehandlerIkkeHarTilgangTil = Egenskap
             .alleTilgangsstyrteEgenskaper
@@ -148,7 +148,12 @@ internal class OppgaveMediator(
             .map(Egenskap::toString)
 
         val oppgaver = oppgaveDao
-            .finnOppgaverForVisning(ekskluderEgenskaper = egenskaperSaksbehandlerIkkeHarTilgangTil, saksbehandlerOid = saksbehandler.oid())
+            .finnOppgaverForVisning(
+                ekskluderEgenskaper = egenskaperSaksbehandlerIkkeHarTilgangTil,
+                saksbehandlerOid = saksbehandler.oid(),
+                startIndex = startIndex,
+                pageSize = pageSize
+            )
         return oppgaver.tilOppgaveTilBehandling()
     }
 
