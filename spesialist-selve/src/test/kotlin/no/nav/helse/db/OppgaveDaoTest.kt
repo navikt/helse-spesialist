@@ -240,9 +240,12 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     fun `Finn oppgaver for visning med offset og pagesize`() {
         nyPerson(fødselsnummer = "12345678910", aktørId = "1234567891011", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "123456789")
         nyPerson(fødselsnummer = "12345678911", aktørId = "1234567891012", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "223456789")
+        val oppgaveId2 = OPPGAVE_ID
         nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456789")
+        val oppgaveId3 = OPPGAVE_ID
         val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), 1, 2)
         assertEquals(2, oppgaver.size)
+        assertEquals(listOf(oppgaveId2, oppgaveId3), oppgaver.map { it.id })
     }
 
     @Test
