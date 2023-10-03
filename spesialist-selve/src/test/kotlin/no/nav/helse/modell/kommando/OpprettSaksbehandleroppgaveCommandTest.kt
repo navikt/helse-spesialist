@@ -15,6 +15,7 @@ import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Egenskap.DELVIS_REFUSJON
 import no.nav.helse.modell.oppgave.Egenskap.EGEN_ANSATT
+import no.nav.helse.modell.oppgave.Egenskap.EN_ARBEIDSGIVER
 import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.HASTER
 import no.nav.helse.modell.oppgave.Egenskap.INGEN_UTBETALING
@@ -24,12 +25,14 @@ import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_ARBEIDSGIVER
 import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_SYKMELDT
+import no.nav.helse.modell.oppgave.Egenskap.UTLAND
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveInspektør.Companion.inspektør
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
@@ -74,6 +77,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         sykefraværstilfelle = sykefraværstilfelle,
         snapshotMediator = snapshotMediator,
         vergemålDao = vergemålDao,
+        inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
     )
 
     @BeforeEach
@@ -90,7 +94,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         assertTrue(command.execute(context))
         verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
         val oppgave = slot.captured.invoke(1L)
-        assertEquals(enOppgave(SØKNAD, INGEN_UTBETALING), oppgave)
+        assertEquals(enOppgave(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER), oppgave)
     }
 
     @Test
@@ -101,7 +105,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
-        assertEquals(enOppgave(SØKNAD, STIKKPRØVE, INGEN_UTBETALING), oppgave)
+        assertEquals(enOppgave(SØKNAD, STIKKPRØVE, INGEN_UTBETALING, EN_ARBEIDSGIVER), oppgave)
     }
 
     @Test
@@ -112,7 +116,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
-        assertEquals(enOppgave(SØKNAD, RISK_QA, INGEN_UTBETALING), oppgave)
+        assertEquals(enOppgave(SØKNAD, RISK_QA, INGEN_UTBETALING, EN_ARBEIDSGIVER), oppgave)
     }
 
     @Test
@@ -123,7 +127,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
-        assertEquals(enOppgave(REVURDERING, INGEN_UTBETALING), oppgave)
+        assertEquals(enOppgave(REVURDERING, INGEN_UTBETALING, EN_ARBEIDSGIVER), oppgave)
     }
 
     @Test
@@ -134,7 +138,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
-        assertEquals(enOppgave(SØKNAD, FORTROLIG_ADRESSE, INGEN_UTBETALING), oppgave)
+        assertEquals(enOppgave(SØKNAD, FORTROLIG_ADRESSE, INGEN_UTBETALING, EN_ARBEIDSGIVER), oppgave)
     }
 
     @Test
@@ -145,7 +149,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
-        assertEquals(enOppgave(SØKNAD, UTBETALING_TIL_SYKMELDT), oppgave)
+        assertEquals(enOppgave(SØKNAD, UTBETALING_TIL_SYKMELDT, EN_ARBEIDSGIVER), oppgave)
     }
 
     @Test
@@ -159,7 +163,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
-        assertEquals(enOppgave(SØKNAD, DELVIS_REFUSJON), oppgave)
+        assertEquals(enOppgave(SØKNAD, DELVIS_REFUSJON, EN_ARBEIDSGIVER), oppgave)
     }
 
     @Test
@@ -219,6 +223,20 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
     }
 
     @Test
+    fun `oppretter oppgave med utland`() {
+        every { snapshotMediator.finnUtbetaling(FNR, UTBETALING_ID) } returns enUtbetaling()
+        every { personDao.finnEnhetId(FNR) } returns "0393"
+        val slot = slot<((Long) -> Oppgave)>()
+        assertTrue(command.execute(context))
+        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
+
+        val oppgave = slot.captured.invoke(1L)
+        inspektør(oppgave) {
+            assertTrue(egenskaper.contains(UTLAND))
+        }
+    }
+
+    @Test
     fun `legger ikke til egenskap RISK_QA hvis oppgaven har egenskap REVURDERING`() {
         every { risikovurderingDao.kreverSupersaksbehandler(VEDTAKSPERIODE_ID) } returns true
         utbetalingstype = Utbetalingtype.REVURDERING
@@ -227,7 +245,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
-        assertEquals(enOppgave(REVURDERING, INGEN_UTBETALING), oppgave)
+        assertEquals(enOppgave(REVURDERING, INGEN_UTBETALING, EN_ARBEIDSGIVER), oppgave)
     }
 
     private fun enOppgave(vararg egenskaper: Egenskap) =

@@ -1,6 +1,7 @@
 package no.nav.helse.modell.oppgave
 
 import java.util.EnumSet
+import no.nav.helse.modell.oppgave.Egenskap.Kategori.Inntektskilde
 import no.nav.helse.modell.oppgave.Egenskap.Kategori.Mottaker
 import no.nav.helse.modell.oppgave.Egenskap.Kategori.Oppgavetype
 import no.nav.helse.modell.oppgave.Egenskap.Kategori.Ukategorisert
@@ -21,6 +22,9 @@ enum class Egenskap(
     DELVIS_REFUSJON(kategori = Mottaker),
     UTBETALING_TIL_ARBEIDSGIVER(kategori = Mottaker),
     INGEN_UTBETALING(kategori = Mottaker),
+    EN_ARBEIDSGIVER(kategori = Inntektskilde),
+    FLERE_ARBEIDSGIVERE(kategori = Inntektskilde),
+    UTLAND,
     HASTER,
     RETUR,
     FULLMAKT,

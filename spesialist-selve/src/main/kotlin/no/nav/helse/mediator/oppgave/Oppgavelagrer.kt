@@ -10,6 +10,8 @@ import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Egenskap.BESLUTTER
 import no.nav.helse.modell.oppgave.Egenskap.DELVIS_REFUSJON
 import no.nav.helse.modell.oppgave.Egenskap.EGEN_ANSATT
+import no.nav.helse.modell.oppgave.Egenskap.EN_ARBEIDSGIVER
+import no.nav.helse.modell.oppgave.Egenskap.FLERE_ARBEIDSGIVERE
 import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.FULLMAKT
 import no.nav.helse.modell.oppgave.Egenskap.HASTER
@@ -22,6 +24,7 @@ import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_ARBEIDSGIVER
 import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_SYKMELDT
+import no.nav.helse.modell.oppgave.Egenskap.UTLAND
 import no.nav.helse.modell.oppgave.Egenskap.VERGEMÅL
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveVisitor
@@ -137,6 +140,9 @@ class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
             RISK_QA -> "RISK_QA"
             UTBETALING_TIL_ARBEIDSGIVER -> "UTBETALING_TIL_ARBEIDSGIVER"
             UTBETALING_TIL_SYKMELDT -> "UTBETALING_TIL_SYKMELDT"
+            EN_ARBEIDSGIVER -> "EN_ARBEIDSGIVER"
+            FLERE_ARBEIDSGIVERE -> "FLERE_ARBEIDSGIVERE"
+            UTLAND -> "UTLAND"
             HASTER -> "HASTER"
             BESLUTTER -> "BESLUTTER"
             RETUR -> "RETUR"

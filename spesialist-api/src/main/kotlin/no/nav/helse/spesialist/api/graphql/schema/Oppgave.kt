@@ -29,6 +29,9 @@ enum class Egenskap {
     DELVIS_REFUSJON,
     UTBETALING_TIL_ARBEIDSGIVER,
     INGEN_UTBETALING,
+    EN_ARBEIDSGIVER,
+    FLERE_ARBEIDSGIVERE,
+    UTLAND,
     HASTER,
     RETUR,
     FULLMAKT,
@@ -77,7 +80,6 @@ data class OppgaveTilBehandling(
     val vedtaksperiodeId: UUIDString,
     val navn: Personnavn,
     val aktorId: String,
-    val inntektskilde: String,
     val tildeling: Tildeling?,
     val periodetype: Periodetype,
     val egenskaper: List<Oppgaveegenskap>

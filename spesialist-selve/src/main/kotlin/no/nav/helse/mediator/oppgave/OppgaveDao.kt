@@ -75,8 +75,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                 t.på_vent,
                 sot.type as periodetype,
                 o.opprettet,
-                os.soknad_mottatt AS opprinnelig_soknadsdato, 
-                sot.inntektskilde
+                os.soknad_mottatt AS opprinnelig_soknadsdato
             FROM oppgave o
                 INNER JOIN vedtak v ON o.vedtak_ref = v.id
                 INNER JOIN person p ON v.person_ref = p.id
@@ -109,8 +108,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                 påVent = row.boolean("på_vent"),
                 opprettet = row.localDateTime("opprettet"),
                 opprinneligSøknadsdato = row.localDateTime("opprinnelig_soknadsdato"),
-                inntektskilde = row.string("inntektskilde"),
-                periodetype = row.string("periodetype")
+                periodetype = row.string("periodetype"),
             )
         }
     }

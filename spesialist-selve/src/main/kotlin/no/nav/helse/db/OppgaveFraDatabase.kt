@@ -28,5 +28,4 @@ data class OppgaveFraDatabaseForVisning(
     val periodetype: String,
     val opprettet: LocalDateTime,
     val opprinneligSøknadsdato: LocalDateTime,
-    val inntektskilde: String
 )

@@ -191,6 +191,7 @@ internal class Godkjenningsbehov(
             sykefraværstilfelle = sykefraværstilfelle,
             snapshotMediator = snapshotMediator,
             vergemålDao = vergemålDao,
+            inntektskilde = inntektskilde,
         ),
         TrengerTotrinnsvurderingCommand(
             fødselsnummer = fødselsnummer,

@@ -294,7 +294,6 @@ internal class OppgaveMediatorTest {
         assertEquals("mellomnavn", oppgave.navn.mellomnavn)
         assertEquals("etternavn", oppgave.navn.etternavn)
         assertEquals("1234567891011", oppgave.aktorId)
-        assertEquals("EN_ARBEIDSGIVER", oppgave.inntektskilde)
         assertEquals(SAKSBEHANDLERNAVN, oppgave.tildeling?.navn)
         assertEquals(SAKSBEHANDLEREPOST, oppgave.tildeling?.epost)
         assertEquals(SAKSBEHANDLEROID.toString(), oppgave.tildeling?.oid)
@@ -350,7 +349,6 @@ internal class OppgaveMediatorTest {
             periodetype = "FØRSTEGANGSBEHANDLING",
             opprettet = opprettet,
             opprinneligSøknadsdato = opprinneligSøknadsdato,
-            inntektskilde = "EN_ARBEIDSGIVER"
         )
 
     private fun oppgaveFraDatabase(oppgaveId: Long = OPPGAVE_ID, tildelt: Boolean = false) = OppgaveFraDatabase(

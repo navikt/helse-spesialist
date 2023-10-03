@@ -224,7 +224,6 @@ internal class OppgaveMediator(
                 mellomnavn = it.navn.mellomnavn,
             ),
             aktorId = it.aktørId,
-            inntektskilde = inntektskilde(it.inntektskilde),
             tildeling = it.tildelt?.let { tildelt ->
                 Tildeling(
                     tildelt.navn,
@@ -247,14 +246,6 @@ internal class OppgaveMediator(
             "OVERGANG_FRA_IT" -> Periodetype.OVERGANG_FRA_IT
             "FORLENGELSE" -> Periodetype.FORLENGELSE
             else -> throw IllegalArgumentException("$periodetype er ikke en gyldig periodetype")
-        }
-    }
-
-    private fun inntektskilde(inntektskilde: String): String {
-        return when (inntektskilde) {
-            "EN_ARBEIDSGIVER" -> "EN_ARBEIDSGIVER"
-            "FLERE_ARBEIDSGIVERE" -> "FLERE_ARBEIDSGIVERE"
-            else -> throw IllegalArgumentException("$inntektskilde er ikke en gyldig inntektskilde")
         }
     }
 
@@ -285,6 +276,9 @@ internal class OppgaveMediator(
         Egenskap.RETUR -> EgenskapForApi.RETUR
         Egenskap.FULLMAKT -> EgenskapForApi.FULLMAKT
         Egenskap.VERGEMÅL -> EgenskapForApi.VERGEMAL
+        Egenskap.EN_ARBEIDSGIVER -> EgenskapForApi.EN_ARBEIDSGIVER
+        Egenskap.FLERE_ARBEIDSGIVERE -> EgenskapForApi.FLERE_ARBEIDSGIVERE
+        Egenskap.UTLAND -> EgenskapForApi.UTLAND
     }
 
     private fun Egenskap.Kategori.mapToApiKategori(): KategoriForApi {
