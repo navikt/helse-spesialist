@@ -1,6 +1,6 @@
 import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLGenerateClientTask
 
-val testcontainersVersion = "1.19.0"
+val testcontainersVersion = "1.19.1"
 val graphQLKotlinVersion = "7.0.1"
 val ktorVersion = "2.3.4"
 
