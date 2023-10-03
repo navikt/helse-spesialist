@@ -148,7 +148,7 @@ internal class OppgaveMediator(
             .map(Egenskap::toString)
 
         val oppgaver = oppgaveDao
-            .finnOppgaverForVisning(ekskluderEgenskaper = egenskaperSaksbehandlerIkkeHarTilgangTil)
+            .finnOppgaverForVisning(ekskluderEgenskaper = egenskaperSaksbehandlerIkkeHarTilgangTil, saksbehandlerOid = saksbehandler.oid())
             .groupBy { it.egenskaper.tilEgenskaper() }
         return oppgaver.flatMap { it.value }.tilOppgaveTilBehandling()
     }

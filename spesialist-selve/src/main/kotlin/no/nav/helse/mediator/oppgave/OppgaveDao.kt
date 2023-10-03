@@ -62,7 +62,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
         }
     }
 
-    internal fun finnOppgaverForVisning(ekskluderEgenskaper: List<String>): List<OppgaveFraDatabaseForVisning> {
+    internal fun finnOppgaverForVisning(ekskluderEgenskaper: List<String>, saksbehandlerOid: UUID): List<OppgaveFraDatabaseForVisning> {
         val egenskaper = ekskluderEgenskaper.joinToString { """ '$it' """ }
         return asSQL(
             """
@@ -82,10 +82,12 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                 INNER JOIN person_info pi ON p.info_ref = pi.id
                 INNER JOIN opprinnelig_soknadsdato os ON os.vedtaksperiode_id = v.vedtaksperiode_id
                 LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
+                LEFT JOIN totrinnsvurdering ttv ON (ttv.vedtaksperiode_id = v.vedtaksperiode_id AND ttv.utbetaling_id_ref IS NULL)
                 LEFT JOIN saksbehandler s ON t.saksbehandler_ref = s.oid
                 WHERE o.status = 'AvventerSaksbehandler'
-                AND NOT (egenskaper && ARRAY[$egenskaper]::varchar[]);
-            """
+                AND NOT (egenskaper && ARRAY[$egenskaper]::varchar[])
+                AND NOT (egenskaper && ARRAY['BESLUTTER']::varchar[] AND ttv.saksbehandler = :oid)
+            """, mapOf("oid" to saksbehandlerOid)
         ).list { row ->
             OppgaveFraDatabaseForVisning(
                 id = row.long("oppgave_id"),
