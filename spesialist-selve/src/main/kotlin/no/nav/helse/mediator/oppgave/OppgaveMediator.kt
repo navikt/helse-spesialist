@@ -149,8 +149,7 @@ internal class OppgaveMediator(
 
         val oppgaver = oppgaveDao
             .finnOppgaverForVisning(ekskluderEgenskaper = egenskaperSaksbehandlerIkkeHarTilgangTil, saksbehandlerOid = saksbehandler.oid())
-            .groupBy { it.egenskaper.tilEgenskaper() }
-        return oppgaver.flatMap { it.value }.tilOppgaveTilBehandling()
+        return oppgaver.tilOppgaveTilBehandling()
     }
 
     fun avbrytOppgaveFor(vedtaksperiodeId: UUID) {
