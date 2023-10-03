@@ -1,10 +1,5 @@
 package no.nav.helse.modell.oppgave
 
-import TilgangskontrollForTestHarIkkeTilgang
-import TilgangskontrollForTestHarTilgang
-import TilgangskontrollForTestMedKunRiskQA
-import ToggleHelpers.disable
-import ToggleHelpers.enable
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.modell.OppgaveAlleredeSendtBeslutter
@@ -12,6 +7,8 @@ import no.nav.helse.modell.OppgaveAlleredeSendtIRetur
 import no.nav.helse.modell.OppgaveIkkeTildelt
 import no.nav.helse.modell.OppgaveKreverVurderingAvToSaksbehandlere
 import no.nav.helse.modell.Toggle
+import no.nav.helse.modell.ToggleHelpers.disable
+import no.nav.helse.modell.ToggleHelpers.enable
 import no.nav.helse.modell.oppgave.Egenskap.BESLUTTER
 import no.nav.helse.modell.oppgave.Egenskap.EGEN_ANSATT
 import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
@@ -22,6 +19,9 @@ import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.OppgaveInspektør.Companion.inspektør
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
+import no.nav.helse.modell.saksbehandler.handlinger.TilgangskontrollForTestHarIkkeTilgang
+import no.nav.helse.modell.saksbehandler.handlinger.TilgangskontrollForTestHarTilgang
+import no.nav.helse.modell.saksbehandler.handlinger.TilgangskontrollForTestMedKunRiskQA
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -552,13 +552,19 @@ internal class OppgaveTest {
 
     @Test
     fun equals() {
-        val gjenopptattOppgave = Oppgave.nyOppgave(1L, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), listOf(
-            OPPGAVETYPE
-        ))
-        val oppgave1 = Oppgave.nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), listOf(SØKNAD))
-        val oppgave2 = Oppgave.nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), listOf(SØKNAD))
-        val oppgave3 = Oppgave.nyOppgave(OPPGAVE_ID, UUID.randomUUID(), UTBETALING_ID, UUID.randomUUID(), listOf(SØKNAD))
-        val oppgave4 = Oppgave.nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), listOf(STIKKPRØVE))
+        val gjenopptattOppgave = Oppgave.nyOppgave(
+            1L, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), listOf(
+                OPPGAVETYPE
+            )
+        )
+        val oppgave1 =
+            Oppgave.nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), listOf(SØKNAD))
+        val oppgave2 =
+            Oppgave.nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), listOf(SØKNAD))
+        val oppgave3 =
+            Oppgave.nyOppgave(OPPGAVE_ID, UUID.randomUUID(), UTBETALING_ID, UUID.randomUUID(), listOf(SØKNAD))
+        val oppgave4 =
+            Oppgave.nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), listOf(STIKKPRØVE))
         assertEquals(oppgave1, oppgave2)
         assertEquals(oppgave1.hashCode(), oppgave2.hashCode())
         assertNotEquals(oppgave1, oppgave3)
@@ -579,7 +585,14 @@ internal class OppgaveTest {
 
     private fun nyOppgave(vararg egenskaper: Egenskap, medTotrinnsvurdering: Boolean = false): Oppgave {
         val totrinnsvurdering = if (medTotrinnsvurdering) totrinnsvurdering() else null
-        return Oppgave.nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), egenskaper.toList(), totrinnsvurdering)
+        return Oppgave.nyOppgave(
+            OPPGAVE_ID,
+            VEDTAKSPERIODE_ID,
+            UTBETALING_ID,
+            UUID.randomUUID(),
+            egenskaper.toList(),
+            totrinnsvurdering
+        )
     }
 
     private fun totrinnsvurdering() = Totrinnsvurdering(

@@ -1,6 +1,7 @@
 package no.nav.helse.modell.saksbehandler.handlinger
 
 import java.util.UUID
+import no.nav.helse.modell.januar
 import no.nav.helse.modell.saksbehandler.OverstyrtInntektOgRefusjonEvent
 import no.nav.helse.modell.saksbehandler.OverstyrtTidslinjeEvent
 import no.nav.helse.modell.saksbehandler.Saksbehandler

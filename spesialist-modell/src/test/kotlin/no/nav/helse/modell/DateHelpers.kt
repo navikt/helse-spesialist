@@ -1,4 +1,4 @@
-package no.nav.helse.modell.saksbehandler.handlinger
+package no.nav.helse.modell
 
 import java.time.LocalDate
 

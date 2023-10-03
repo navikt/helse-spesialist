@@ -31,7 +31,7 @@ import no.nav.helse.modell.oppgave.Egenskap.RISK_QA
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.modell.oppgave.OppgaveInspektør.Companion.inspektør
+import no.nav.helse.modell.oppgave.OppgaveInspektør.Companion.oppgaveinspektør
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
@@ -132,7 +132,7 @@ internal class OppgaveMediatorTest {
             søknadsoppgave(it).also { søknadsoppgave -> oppgave = søknadsoppgave }
         }
 
-        inspektør(oppgave) {
+        oppgaveinspektør(oppgave) {
             assertEquals(saksbehandler, tildeltTil)
         }
         verify(exactly = 1) { tildelingDao.tildel(any(), SAKSBEHANDLEROID, any()) }
@@ -149,7 +149,7 @@ internal class OppgaveMediatorTest {
             riskoppgave(it).also { riskoppgave -> oppgave = riskoppgave }
         }
 
-        inspektør(oppgave) {
+        oppgaveinspektør(oppgave) {
             assertEquals(null, tildeltTil)
         }
         verify(exactly = 0) { tildelingDao.tildel(any(), SAKSBEHANDLEROID, any()) }
@@ -178,7 +178,7 @@ internal class OppgaveMediatorTest {
             stikkprøveoppgave(it).also { stikkprøveoppgave -> oppgave = stikkprøveoppgave }
         }
 
-        inspektør(oppgave) {
+        oppgaveinspektør(oppgave) {
             assertEquals(null, tildeltTil)
         }
         assertAntallOpptegnelser(1)

@@ -29,7 +29,7 @@ import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_ARBEIDSGIVER
 import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.modell.oppgave.Egenskap.UTLAND
 import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.modell.oppgave.OppgaveInspektør.Companion.inspektør
+import no.nav.helse.modell.oppgave.OppgaveInspektør.Companion.oppgaveinspektør
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
@@ -166,7 +166,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
-        inspektør(oppgave) {
+        oppgaveinspektør(oppgave) {
             assertTrue(egenskaper.contains(UTBETALING_TIL_ARBEIDSGIVER))
         }
     }
@@ -179,7 +179,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
-        inspektør(oppgave) {
+        oppgaveinspektør(oppgave) {
             assertTrue(egenskaper.contains(INGEN_UTBETALING))
         }
     }
@@ -193,7 +193,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
-        inspektør(oppgave) {
+        oppgaveinspektør(oppgave) {
             assertTrue(egenskaper.contains(HASTER))
         }
     }
@@ -208,7 +208,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
-        inspektør(oppgave) {
+        oppgaveinspektør(oppgave) {
             assertTrue(egenskaper.contains(EGEN_ANSATT))
         }
         Toggle.EgenAnsatt.disable()
@@ -223,7 +223,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
-        inspektør(oppgave) {
+        oppgaveinspektør(oppgave) {
             assertTrue(egenskaper.contains(UTLAND))
         }
     }
@@ -236,7 +236,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
-        inspektør(oppgave) {
+        oppgaveinspektør(oppgave) {
             assertTrue(egenskaper.contains(FLERE_ARBEIDSGIVERE))
         }
     }
@@ -249,7 +249,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
-        inspektør(oppgave) {
+        oppgaveinspektør(oppgave) {
             assertTrue(egenskaper.contains(Egenskap.FORLENGELSE))
         }
     }
@@ -262,7 +262,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
-        inspektør(oppgave) {
+        oppgaveinspektør(oppgave) {
             assertTrue(egenskaper.contains(Egenskap.INFOTRYGDFORLENGELSE))
         }
     }
@@ -275,7 +275,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
 
         val oppgave = slot.captured.invoke(1L)
-        inspektør(oppgave) {
+        oppgaveinspektør(oppgave) {
             assertTrue(egenskaper.contains(Egenskap.OVERGANG_FRA_IT))
         }
     }
