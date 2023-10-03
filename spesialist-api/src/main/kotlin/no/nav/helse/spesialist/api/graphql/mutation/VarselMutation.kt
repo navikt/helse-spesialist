@@ -81,36 +81,34 @@ class VarselMutation(private val varselRepository: ApiVarselRepository) : Mutati
 
         if (definisjonIdString != null) {
             when (varselRepository.erAktiv(varselkode, generasjonId)) {
+                false -> varselError(getNotActiveError(varselkode, generasjonId))
+                null -> varselError(getNotFoundError(varselkode, generasjonId))
                 true -> varselRepository.settStatusVurdert(
-                    generasjonId,
-                    UUID.fromString(definisjonIdString),
-                    varselkode,
-                    ident,
-                )
-                    ?.let { newResult<VarselDTO>().data(it).build() }
-                    ?: newResult<VarselDTO>().error(getUpdateError(varselkode, generasjonId)).build()
-
-                false -> return@withContext newResult<VarselDTO>().error(getNotActiveError(varselkode, generasjonId))
-                    .build()
-
-                null -> return@withContext newResult<VarselDTO>().error(getNotFoundError(varselkode, generasjonId))
-                    .build()
+                    generasjonId = generasjonId,
+                    definisjonId = UUID.fromString(definisjonIdString),
+                    varselkode = varselkode,
+                    ident = ident,
+                ).graphQlResult(varselkode, generasjonId)
             }
         } else {
             when (varselRepository.erGodkjent(varselkode, generasjonId)) {
-                true -> newResult<VarselDTO>().error(getIsGodkjentError(varselkode, generasjonId)).build()
+                true -> varselError(getIsGodkjentError(varselkode, generasjonId))
+                null -> varselError(getNotFoundError(varselkode, generasjonId))
                 false -> varselRepository.settStatusAktiv(
-                    generasjonId,
-                    varselkode,
-                    ident,
-                )
-                    ?.let { newResult<VarselDTO>().data(it).build() }
-                    ?: newResult<VarselDTO>().error(getUpdateError(varselkode, generasjonId)).build()
-
-                null -> newResult<VarselDTO>().error(getNotFoundError(varselkode, generasjonId)).build()
+                    generasjonId = generasjonId,
+                    varselkode = varselkode,
+                    ident = ident,
+                ).graphQlResult(varselkode, generasjonId)
             }
         }
     }
+
+    private fun varselError(error: GraphQLError): DataFetcherResult<VarselDTO> =
+        newResult<VarselDTO>().error(error).build()
+
+    private fun VarselDTO?.graphQlResult(varselkode: String, generasjonId: UUID): DataFetcherResult<VarselDTO> =
+        this?.let { newResult<VarselDTO>().data(it).build() }
+            ?: varselError(getUpdateError(varselkode, generasjonId))
 
     private fun getUpdateError(varselkode: String, generasjonId: UUID): GraphQLError {
         val message = "Kunne ikke oppdatere varsel med varselkode=$varselkode, generasjonId=$generasjonId"
