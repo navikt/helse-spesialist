@@ -40,13 +40,12 @@ import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.GodkjenningMediator
+import no.nav.helse.mediator.GodkjenningService
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.OverstyringMediator
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.TilgangskontrollørForReservasjon
-import no.nav.helse.mediator.api.GodkjenningService
-import no.nav.helse.mediator.api.totrinnsvurderingApi
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.mediator.oppgave.Oppgavemelder
@@ -80,7 +79,6 @@ import no.nav.helse.spesialist.api.behandlingsstatistikk.behandlingsstatistikkAp
 import no.nav.helse.spesialist.api.client.AccessTokenClient
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.endepunkter.annulleringApi
-import no.nav.helse.spesialist.api.endepunkter.overstyringApi
 import no.nav.helse.spesialist.api.feilhåndtering.Modellfeil
 import no.nav.helse.spesialist.api.graphql.graphQLApi
 import no.nav.helse.spesialist.api.notat.NotatDao
@@ -350,15 +348,9 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
 
             routing {
                 authenticate("oidc") {
-                    overstyringApi(saksbehandlerMediator)
                     annulleringApi(saksbehandlerMediator)
                     opptegnelseApi(OpptegnelseMediator(opptegnelseApiDao, abonnementDao))
                     behandlingsstatistikkApi(BehandlingsstatistikkMediator(behandlingsstatistikkDao))
-                    totrinnsvurderingApi(
-                        totrinnsvurderingMediator,
-                        saksbehandlerMediator,
-                        oppgaveMediator
-                    )
                 }
             }
         }.build()

@@ -5,7 +5,7 @@ import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingDao
-import no.nav.helse.mediator.api.GodkjenningService
+import no.nav.helse.mediator.GodkjenningService
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.HendelseDao

@@ -82,6 +82,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         const val AKTØRID = "1017011111111"
         const val ARBEIDSGIVER_NAVN = "EN ARBEIDSGIVER"
         const val ORGANISASJONSNUMMER = "987654321"
+        const val ORGANISASJONSNUMMER_GHOST = "123456789"
     }
 
     protected val apiVarselRepository = ApiVarselRepository(dataSource)

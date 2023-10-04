@@ -1,4 +1,4 @@
-package no.nav.helse.mediator.api
+package no.nav.helse.mediator
 
 import java.sql.SQLException
 import java.time.LocalDateTime
