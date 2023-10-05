@@ -2,8 +2,6 @@ package no.nav.helse.spesialist.api.endepunkter
 
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.request.HttpRequestBuilder
-import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.auth.authenticate
@@ -11,7 +9,6 @@ import io.ktor.server.routing.Route
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.TestApplicationBuilder
 import io.ktor.server.testing.testApplication
-import java.util.UUID
 import no.nav.helse.spesialist.api.AzureAdAppConfig
 import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.JwtStub
@@ -56,12 +53,5 @@ internal class ApiTesting(
             response = block(httpClient())
         }
         return response!!
-    }
-
-    internal fun authentication(oid: UUID, group: String? = null, requestBuilder: HttpRequestBuilder) {
-        requestBuilder.header(
-            "Authorization",
-            "Bearer ${jwtStub.getToken(listOfNotNull(group), oid.toString(), "epostadresse", clientId, issuer)}"
-        )
     }
 }

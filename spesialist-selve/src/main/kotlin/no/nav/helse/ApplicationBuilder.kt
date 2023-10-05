@@ -77,7 +77,6 @@ import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkDa
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMediator
 import no.nav.helse.spesialist.api.client.AccessTokenClient
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
-import no.nav.helse.spesialist.api.endepunkter.annulleringApi
 import no.nav.helse.spesialist.api.feilhåndtering.Modellfeil
 import no.nav.helse.spesialist.api.graphql.graphQLApi
 import no.nav.helse.spesialist.api.notat.NotatDao
@@ -347,7 +346,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
 
             routing {
                 authenticate("oidc") {
-                    annulleringApi(saksbehandlerMediator)
                     opptegnelseApi(OpptegnelseMediator(opptegnelseApiDao, abonnementDao))
                 }
             }
