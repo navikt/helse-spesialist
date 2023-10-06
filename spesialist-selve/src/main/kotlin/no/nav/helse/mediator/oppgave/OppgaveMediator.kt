@@ -25,8 +25,12 @@ import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload.Companion.lagre
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
+import no.nav.helse.spesialist.api.graphql.schema.AntallArbeidsforhold
+import no.nav.helse.spesialist.api.graphql.schema.Mottaker
 import no.nav.helse.spesialist.api.graphql.schema.OppgaveTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.Oppgaveegenskap
+import no.nav.helse.spesialist.api.graphql.schema.Oppgavetype
+import no.nav.helse.spesialist.api.graphql.schema.Periodetype
 import no.nav.helse.spesialist.api.graphql.schema.Personnavn
 import no.nav.helse.spesialist.api.graphql.schema.Tildeling
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
@@ -221,6 +225,7 @@ internal class OppgaveMediator(
     private fun List<String>.tilEgenskaper(): List<Egenskap> = this.map { enumValueOf<Egenskap>(it) }
 
     private fun List<OppgaveFraDatabaseForVisning>.tilOppgaveTilBehandling() = map {
+        val egenskaper = it.egenskaper.tilEgenskaper()
         OppgaveTilBehandling(
             id = it.id.toString(),
             opprettet = it.opprettet.toString(),
@@ -240,9 +245,13 @@ internal class OppgaveMediator(
                     it.påVent
                 )
             },
-            egenskaper = it.egenskaper.tilEgenskaper().map { egenskap ->
+            egenskaper = egenskaper.map { egenskap ->
                 Oppgaveegenskap(egenskap.mapToApiEgenskap(), egenskap.kategori.mapToApiKategori())
-            }
+            },
+            periodetype = egenskaper.periodetype(),
+            oppgavetype = egenskaper.oppgavetype(),
+            mottaker = egenskaper.mottaker(),
+            antallArbeidsforhold = egenskaper.antallArbeidsforhold(),
         )
     }
 
@@ -253,6 +262,47 @@ internal class OppgaveMediator(
             is OppgaveAlleredeSendtBeslutter -> no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtBeslutter(oppgaveId)
             is OppgaveAlleredeSendtIRetur -> no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtIRetur(oppgaveId)
             is OppgaveKreverVurderingAvToSaksbehandlere -> no.nav.helse.spesialist.api.feilhåndtering.OppgaveKreverVurderingAvToSaksbehandlere(oppgaveId)
+        }
+    }
+
+    private fun List<Egenskap>.periodetype(): Periodetype {
+        val egenskap = single { egenskap -> egenskap.kategori ==  Egenskap.Kategori.Periodetype }
+        return when (egenskap) {
+            Egenskap.FORSTEGANGSBEHANDLING -> Periodetype.FORSTEGANGSBEHANDLING
+            Egenskap.FORLENGELSE -> Periodetype.FORLENGELSE
+            Egenskap.INFOTRYGDFORLENGELSE -> Periodetype.INFOTRYGDFORLENGELSE
+            Egenskap.OVERGANG_FRA_IT -> Periodetype.OVERGANG_FRA_IT
+            else -> throw IllegalArgumentException("Kunne ikke mappe egenskap til periodetype")
+        }
+    }
+
+    private fun List<Egenskap>.oppgavetype(): Oppgavetype {
+        val egenskap = single { egenskap -> egenskap.kategori ==  Egenskap.Kategori.Oppgavetype }
+        return when (egenskap) {
+            Egenskap.SØKNAD -> Oppgavetype.SOKNAD
+            Egenskap.REVURDERING -> Oppgavetype.REVURDERING
+            Egenskap.STIKKPRØVE -> Oppgavetype.STIKKPROVE
+            else -> throw IllegalArgumentException("Kunne ikke mappe egenskap til periodetype")
+        }
+    }
+
+    private fun List<Egenskap>.mottaker(): Mottaker {
+        val egenskap = single { egenskap -> egenskap.kategori ==  Egenskap.Kategori.Mottaker }
+        return when (egenskap) {
+            Egenskap.UTBETALING_TIL_SYKMELDT -> Mottaker.SYKMELDT
+            Egenskap.UTBETALING_TIL_ARBEIDSGIVER -> Mottaker.ARBEIDSGIVER
+            Egenskap.DELVIS_REFUSJON -> Mottaker.BEGGE
+            Egenskap.INGEN_UTBETALING -> Mottaker.INGEN
+            else -> throw IllegalArgumentException("Kunne ikke mappe egenskap til periodetype")
+        }
+    }
+
+    private fun List<Egenskap>.antallArbeidsforhold(): AntallArbeidsforhold {
+        val egenskap = single { egenskap -> egenskap.kategori ==  Egenskap.Kategori.Inntektskilde }
+        return when (egenskap) {
+            Egenskap.EN_ARBEIDSGIVER -> AntallArbeidsforhold.ET_ARBEIDSFORHOLD
+            Egenskap.FLERE_ARBEIDSGIVERE -> AntallArbeidsforhold.FLERE_ARBEIDSFORHOLD
+            else -> throw IllegalArgumentException("Kunne ikke mappe egenskap til periodetype")
         }
     }
 
@@ -282,13 +332,11 @@ internal class OppgaveMediator(
         Egenskap.OVERGANG_FRA_IT -> EgenskapForApi.OVERGANG_FRA_IT
     }
 
-    private fun Egenskap.Kategori.mapToApiKategori(): KategoriForApi {
-        return when (this) {
-            Egenskap.Kategori.Mottaker -> KategoriForApi.Mottaker
-            Egenskap.Kategori.Inntektskilde -> KategoriForApi.Inntektskilde
-            Egenskap.Kategori.Oppgavetype -> KategoriForApi.Oppgavetype
-            Egenskap.Kategori.Ukategorisert -> KategoriForApi.Ukategorisert
-            Egenskap.Kategori.Periodetype -> KategoriForApi.Periodetype
-        }
+    private fun Egenskap.Kategori.mapToApiKategori(): KategoriForApi = when (this) {
+        Egenskap.Kategori.Mottaker -> KategoriForApi.Mottaker
+        Egenskap.Kategori.Inntektskilde -> KategoriForApi.Inntektskilde
+        Egenskap.Kategori.Oppgavetype -> KategoriForApi.Oppgavetype
+        Egenskap.Kategori.Ukategorisert -> KategoriForApi.Ukategorisert
+        Egenskap.Kategori.Periodetype -> KategoriForApi.Periodetype
     }
 }

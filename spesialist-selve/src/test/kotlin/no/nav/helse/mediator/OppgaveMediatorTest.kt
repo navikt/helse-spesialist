@@ -27,15 +27,30 @@ import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.kommando.TestHendelse
 import no.nav.helse.modell.oppgave.Egenskap
+import no.nav.helse.modell.oppgave.Egenskap.DELVIS_REFUSJON
+import no.nav.helse.modell.oppgave.Egenskap.EN_ARBEIDSGIVER
+import no.nav.helse.modell.oppgave.Egenskap.FLERE_ARBEIDSGIVERE
+import no.nav.helse.modell.oppgave.Egenskap.FORLENGELSE
+import no.nav.helse.modell.oppgave.Egenskap.FORSTEGANGSBEHANDLING
+import no.nav.helse.modell.oppgave.Egenskap.INFOTRYGDFORLENGELSE
+import no.nav.helse.modell.oppgave.Egenskap.INGEN_UTBETALING
+import no.nav.helse.modell.oppgave.Egenskap.OVERGANG_FRA_IT
+import no.nav.helse.modell.oppgave.Egenskap.REVURDERING
 import no.nav.helse.modell.oppgave.Egenskap.RISK_QA
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
+import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_ARBEIDSGIVER
+import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveInspector.Companion.oppgaveinspektør
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
+import no.nav.helse.spesialist.api.graphql.schema.AntallArbeidsforhold
+import no.nav.helse.spesialist.api.graphql.schema.Mottaker
+import no.nav.helse.spesialist.api.graphql.schema.Oppgavetype
+import no.nav.helse.spesialist.api.graphql.schema.Periodetype
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.testEnv
@@ -43,6 +58,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import kotlin.Int.Companion.MAX_VALUE
 import kotlin.random.Random.Default.nextLong
 
@@ -62,6 +79,7 @@ internal class OppgaveMediatorTest {
         private const val SAKSBEHANDLEREPOST = "saksbehandler@nav.no"
         private const val SAKSBEHANDLERNAVN = "Hen Saksbehandler"
         private const val OPPGAVETYPE_SØKNAD = "SØKNAD"
+        private val EGENSKAPER = listOf(SØKNAD, UTBETALING_TIL_SYKMELDT, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING)
     }
 
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
@@ -272,10 +290,9 @@ internal class OppgaveMediatorTest {
                 opprettet = opprettet,
                 opprinneligSøknadsdato = opprinneligSøknadsdato,
                 vedtaksperiodeId = vedtaksperiodeId,
-                egenskaper = EnumSet.allOf(Egenskap::class.java).map { it.name },
                 personnavnFraDatabase = PersonnavnFraDatabase("fornavn", "mellomnavn", "etternavn"),
                 tildelt = SaksbehandlerFraDatabase(SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT),
-                påVent = true
+                påVent = true,
             ),
         )
         val saksbehandler = saksbehandlerFraApi(tilganger = EnumSet.allOf(Gruppe::class.java).map { UUID.fromString(idForGruppe(it)) })
@@ -294,7 +311,111 @@ internal class OppgaveMediatorTest {
         assertEquals(SAKSBEHANDLEREPOST, oppgave.tildeling?.epost)
         assertEquals(SAKSBEHANDLEROID.toString(), oppgave.tildeling?.oid)
         assertEquals(true, oppgave.tildeling?.paaVent)
-        assertEquals(EnumSet.allOf(Egenskap::class.java).size, oppgave.egenskaper.size)
+        assertEquals(EGENSKAPER.size, oppgave.egenskaper.size)
+    }
+
+    @ParameterizedTest
+    @EnumSource(names = ["REVURDERING", "SØKNAD"], mode = EnumSource.Mode.INCLUDE)
+    fun `Mapper oppgavetypeegenskaper riktig`(egenskap: Egenskap) {
+        val opprettet = LocalDateTime.now()
+        val vedtaksperiodeId = UUID.randomUUID()
+        val opprinneligSøknadsdato = LocalDateTime.now()
+        val egenskaper = listOf(egenskap, UTBETALING_TIL_SYKMELDT, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING)
+        every { oppgaveDao.finnOppgaverForVisning(emptyList(), any()) } returns listOf(
+            oppgaveFraDatabaseForVisning(
+                oppgaveId = 1L,
+                aktørId = "1234567891011",
+                opprettet = opprettet,
+                opprinneligSøknadsdato = opprinneligSøknadsdato,
+                vedtaksperiodeId = vedtaksperiodeId,
+                personnavnFraDatabase = PersonnavnFraDatabase("fornavn", "mellomnavn", "etternavn"),
+                tildelt = SaksbehandlerFraDatabase(SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT),
+                påVent = true,
+                egenskaper = egenskaper.map { it.name },
+            ),
+        )
+        val saksbehandler = saksbehandlerFraApi(tilganger = EnumSet.allOf(Gruppe::class.java).map { UUID.fromString(idForGruppe(it)) })
+        val oppgaver = mediator.oppgaver(saksbehandler, 0, MAX_VALUE)
+        val oppgave = oppgaver.single()
+        assertEquals(egenskap.oppgavetype(), oppgave.oppgavetype)
+    }
+
+    @ParameterizedTest
+    @EnumSource(names = ["FORLENGELSE", "INFOTRYGDFORLENGELSE", "OVERGANG_FRA_IT", "FORSTEGANGSBEHANDLING"], mode = EnumSource.Mode.INCLUDE)
+    fun `Mapper periodetypeegenskaper riktig`(egenskap: Egenskap) {
+        val opprettet = LocalDateTime.now()
+        val vedtaksperiodeId = UUID.randomUUID()
+        val opprinneligSøknadsdato = LocalDateTime.now()
+        val egenskaper = listOf(egenskap, UTBETALING_TIL_SYKMELDT, EN_ARBEIDSGIVER, SØKNAD)
+        every { oppgaveDao.finnOppgaverForVisning(emptyList(), any()) } returns listOf(
+            oppgaveFraDatabaseForVisning(
+                oppgaveId = 1L,
+                aktørId = "1234567891011",
+                opprettet = opprettet,
+                opprinneligSøknadsdato = opprinneligSøknadsdato,
+                vedtaksperiodeId = vedtaksperiodeId,
+                personnavnFraDatabase = PersonnavnFraDatabase("fornavn", "mellomnavn", "etternavn"),
+                tildelt = SaksbehandlerFraDatabase(SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT),
+                påVent = true,
+                egenskaper = egenskaper.map { it.name },
+            ),
+        )
+        val saksbehandler = saksbehandlerFraApi(tilganger = EnumSet.allOf(Gruppe::class.java).map { UUID.fromString(idForGruppe(it)) })
+        val oppgaver = mediator.oppgaver(saksbehandler, 0, MAX_VALUE)
+        val oppgave = oppgaver.single()
+        assertEquals(egenskap.periodetype(), oppgave.periodetype)
+    }
+
+    @ParameterizedTest
+    @EnumSource(names = ["UTBETALING_TIL_SYKMELDT", "DELVIS_REFUSJON", "UTBETALING_TIL_ARBEIDSGIVER", "INGEN_UTBETALING"], mode = EnumSource.Mode.INCLUDE)
+    fun `Mapper mottakeregenskaper riktig`(egenskap: Egenskap) {
+        val opprettet = LocalDateTime.now()
+        val vedtaksperiodeId = UUID.randomUUID()
+        val opprinneligSøknadsdato = LocalDateTime.now()
+        val egenskaper = listOf(egenskap, FORSTEGANGSBEHANDLING, EN_ARBEIDSGIVER, SØKNAD)
+        every { oppgaveDao.finnOppgaverForVisning(emptyList(), any()) } returns listOf(
+            oppgaveFraDatabaseForVisning(
+                oppgaveId = 1L,
+                aktørId = "1234567891011",
+                opprettet = opprettet,
+                opprinneligSøknadsdato = opprinneligSøknadsdato,
+                vedtaksperiodeId = vedtaksperiodeId,
+                personnavnFraDatabase = PersonnavnFraDatabase("fornavn", "mellomnavn", "etternavn"),
+                tildelt = SaksbehandlerFraDatabase(SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT),
+                påVent = true,
+                egenskaper = egenskaper.map { it.name },
+            ),
+        )
+        val saksbehandler = saksbehandlerFraApi(tilganger = EnumSet.allOf(Gruppe::class.java).map { UUID.fromString(idForGruppe(it)) })
+        val oppgaver = mediator.oppgaver(saksbehandler, 0, MAX_VALUE)
+        val oppgave = oppgaver.single()
+        assertEquals(egenskap.mottaker(), oppgave.mottaker)
+    }
+
+    @ParameterizedTest
+    @EnumSource(names = ["EN_ARBEIDSGIVER", "FLERE_ARBEIDSGIVERE"], mode = EnumSource.Mode.INCLUDE)
+    fun `Mapper inntektskildegenskaper riktig`(egenskap: Egenskap) {
+        val opprettet = LocalDateTime.now()
+        val vedtaksperiodeId = UUID.randomUUID()
+        val opprinneligSøknadsdato = LocalDateTime.now()
+        val egenskaper = listOf(egenskap, FORSTEGANGSBEHANDLING, UTBETALING_TIL_SYKMELDT, SØKNAD)
+        every { oppgaveDao.finnOppgaverForVisning(emptyList(), any()) } returns listOf(
+            oppgaveFraDatabaseForVisning(
+                oppgaveId = 1L,
+                aktørId = "1234567891011",
+                opprettet = opprettet,
+                opprinneligSøknadsdato = opprinneligSøknadsdato,
+                vedtaksperiodeId = vedtaksperiodeId,
+                personnavnFraDatabase = PersonnavnFraDatabase("fornavn", "mellomnavn", "etternavn"),
+                tildelt = SaksbehandlerFraDatabase(SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT),
+                påVent = true,
+                egenskaper = egenskaper.map { it.name },
+            ),
+        )
+        val saksbehandler = saksbehandlerFraApi(tilganger = EnumSet.allOf(Gruppe::class.java).map { UUID.fromString(idForGruppe(it)) })
+        val oppgaver = mediator.oppgaver(saksbehandler, 0, MAX_VALUE)
+        val oppgave = oppgaver.single()
+        assertEquals(egenskap.antallArbeidsforhold(), oppgave.antallArbeidsforhold)
     }
 
     private fun assertAntallOpptegnelser(antallOpptegnelser: Int) = verify(exactly = antallOpptegnelser) {
@@ -324,7 +445,7 @@ internal class OppgaveMediatorTest {
 
     private fun oppgaveFraDatabaseForVisning(
         oppgaveId: Long = nextLong(),
-        egenskaper: List<String> = emptyList(),
+        egenskaper: List<String> = EGENSKAPER.map { it.name },
         aktørId: String = nextLong(1000000000000, 2000000000000).toString(),
         opprettet: LocalDateTime = LocalDateTime.now(),
         opprinneligSøknadsdato: LocalDateTime = LocalDateTime.now(),
@@ -358,4 +479,33 @@ internal class OppgaveMediatorTest {
         tildelt = if (tildelt) SaksbehandlerFraDatabase(SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT) else null,
         påVent = false
     )
+
+    private fun Egenskap.periodetype(): Periodetype = when (this) {
+        FORSTEGANGSBEHANDLING -> Periodetype.FORSTEGANGSBEHANDLING
+        FORLENGELSE -> Periodetype.FORLENGELSE
+        INFOTRYGDFORLENGELSE -> Periodetype.INFOTRYGDFORLENGELSE
+        OVERGANG_FRA_IT -> Periodetype.OVERGANG_FRA_IT
+        else -> throw IllegalArgumentException("Kunne ikke mappe egenskap til periodetype")
+    }
+
+    private fun Egenskap.oppgavetype(): Oppgavetype = when (this) {
+        SØKNAD -> Oppgavetype.SOKNAD
+        REVURDERING -> Oppgavetype.REVURDERING
+        STIKKPRØVE -> Oppgavetype.STIKKPROVE
+        else -> throw IllegalArgumentException("Kunne ikke mappe egenskap til periodetype")
+    }
+
+    private fun Egenskap.mottaker(): Mottaker = when (this) {
+        UTBETALING_TIL_SYKMELDT -> Mottaker.SYKMELDT
+        UTBETALING_TIL_ARBEIDSGIVER -> Mottaker.ARBEIDSGIVER
+        DELVIS_REFUSJON -> Mottaker.BEGGE
+        INGEN_UTBETALING -> Mottaker.INGEN
+        else -> throw IllegalArgumentException("Kunne ikke mappe egenskap til periodetype")
+    }
+
+    private fun Egenskap.antallArbeidsforhold(): AntallArbeidsforhold = when (this) {
+        EN_ARBEIDSGIVER -> AntallArbeidsforhold.ET_ARBEIDSFORHOLD
+        FLERE_ARBEIDSGIVERE -> AntallArbeidsforhold.FLERE_ARBEIDSFORHOLD
+        else -> throw IllegalArgumentException("Kunne ikke mappe egenskap til periodetype")
+    }
 }

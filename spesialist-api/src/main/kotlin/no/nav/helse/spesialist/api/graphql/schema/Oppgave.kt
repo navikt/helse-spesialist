@@ -16,6 +16,11 @@ enum class Oppgavetype {
     INGEN_UTBETALING
 }
 
+enum class AntallArbeidsforhold {
+    ET_ARBEIDSFORHOLD,
+    FLERE_ARBEIDSFORHOLD
+}
+
 enum class Egenskap {
     RISK_QA,
     FORTROLIG_ADRESSE,
@@ -86,7 +91,11 @@ data class OppgaveTilBehandling(
     val navn: Personnavn,
     val aktorId: String,
     val tildeling: Tildeling?,
-    val egenskaper: List<Oppgaveegenskap>
+    val egenskaper: List<Oppgaveegenskap>,
+    val periodetype: Periodetype,
+    val oppgavetype: Oppgavetype,
+    val mottaker: Mottaker,
+    val antallArbeidsforhold: AntallArbeidsforhold,
 )
 
 data class Oppgaveegenskap(
@@ -108,7 +117,8 @@ data class Totrinnsvurdering(
 enum class Mottaker {
     SYKMELDT,
     ARBEIDSGIVER,
-    BEGGE
+    BEGGE,
+    INGEN
 }
 
 data class Personnavn(
