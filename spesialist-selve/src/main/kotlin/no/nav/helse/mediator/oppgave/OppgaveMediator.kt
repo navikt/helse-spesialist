@@ -4,8 +4,10 @@ import java.sql.SQLException
 import java.util.UUID
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.db.OppgaveFraDatabaseForVisning
+import no.nav.helse.db.OppgavesorteringForDatabase
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerRepository
+import no.nav.helse.db.SorteringsnøkkelForDatabase
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingFraDatabase
 import no.nav.helse.db.TotrinnsvurderingRepository
@@ -29,9 +31,11 @@ import no.nav.helse.spesialist.api.graphql.schema.AntallArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker
 import no.nav.helse.spesialist.api.graphql.schema.OppgaveTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.Oppgaveegenskap
+import no.nav.helse.spesialist.api.graphql.schema.Oppgavesortering
 import no.nav.helse.spesialist.api.graphql.schema.Oppgavetype
 import no.nav.helse.spesialist.api.graphql.schema.Periodetype
 import no.nav.helse.spesialist.api.graphql.schema.Personnavn
+import no.nav.helse.spesialist.api.graphql.schema.Sorteringsnokkel
 import no.nav.helse.spesialist.api.graphql.schema.Tildeling
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.tildeling.Oppgavehåndterer
@@ -144,7 +148,12 @@ internal class OppgaveMediator(
     override fun venterPåSaksbehandler(oppgaveId: Long): Boolean = oppgaveDao.venterPåSaksbehandler(oppgaveId)
     override fun erRiskoppgave(oppgaveId: Long): Boolean = oppgaveDao.erRiskoppgave(oppgaveId)
 
-    override fun oppgaver(saksbehandlerFraApi: SaksbehandlerFraApi, startIndex: Int, pageSize: Int): List<OppgaveTilBehandling> {
+    override fun oppgaver(
+        saksbehandlerFraApi: SaksbehandlerFraApi,
+        startIndex: Int,
+        pageSize: Int,
+        sortering: List<Oppgavesortering>
+    ): List<OppgaveTilBehandling> {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         val egenskaperSaksbehandlerIkkeHarTilgangTil = Egenskap
             .alleTilgangsstyrteEgenskaper
@@ -156,7 +165,8 @@ internal class OppgaveMediator(
                 ekskluderEgenskaper = egenskaperSaksbehandlerIkkeHarTilgangTil,
                 saksbehandlerOid = saksbehandler.oid(),
                 startIndex = startIndex,
-                pageSize = pageSize
+                pageSize = pageSize,
+                sortering = sortering.tilOppgavesorteringForDatabase()
             )
         return oppgaver.tilOppgaveTilBehandling()
     }
@@ -253,6 +263,14 @@ internal class OppgaveMediator(
             mottaker = egenskaper.mottaker(),
             antallArbeidsforhold = egenskaper.antallArbeidsforhold(),
         )
+    }
+
+    private fun List<Oppgavesortering>.tilOppgavesorteringForDatabase() = map {
+        when (it.nokkel) {
+            Sorteringsnokkel.TILDELT_TIL -> OppgavesorteringForDatabase(SorteringsnøkkelForDatabase.TILDELT_TIL, it.stigende)
+            Sorteringsnokkel.OPPRETTET -> OppgavesorteringForDatabase(SorteringsnøkkelForDatabase.OPPRETTET, it.stigende)
+            Sorteringsnokkel.SOKNAD_MOTTATT -> OppgavesorteringForDatabase(SorteringsnøkkelForDatabase.SØKNAD_MOTTATT, it.stigende)
+        }
     }
 
     private fun Modellfeil.tilApiFeil(): no.nav.helse.spesialist.api.feilhåndtering.Modellfeil {

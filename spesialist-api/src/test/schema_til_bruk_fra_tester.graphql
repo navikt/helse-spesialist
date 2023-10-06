@@ -364,10 +364,12 @@ type OppgaveForPeriodevisning {
 
 type OppgaveTilBehandling {
     aktorId: String!
+    antallArbeidsforhold: AntallArbeidsforhold!
     egenskaper: [Oppgaveegenskap!]!
     id: String!
-    inntektskilde: String!
+    mottaker: Mottaker!
     navn: Personnavn!
+    oppgavetype: Oppgavetype!
     opprettet: String!
     opprinneligSoknadsdato: String!
     periodetype: Periodetype!
@@ -376,8 +378,8 @@ type OppgaveTilBehandling {
 }
 
 type Oppgaveegenskap {
-    egenskap: String!
-    kategori: String!
+    egenskap: Egenskap!
+    kategori: Kategori!
 }
 
 type Opptegnelse {
@@ -459,7 +461,7 @@ type Query {
     hentOpptegnelser(sekvensId: Int): [Opptegnelse!]!
     notater(forPerioder: [String!]!): [Notater!]!
     oppdrag(fnr: String!): [Oppdrag!]!
-    oppgaver(pageSize: Int, startIndex: Int): [OppgaveTilBehandling!]!
+    oppgaver(pageSize: Int, sortering: [OppgavesorteringInput!], startIndex: Int): [OppgaveTilBehandling!]!
     person(aktorId: String, fnr: String): Person
 }
 
@@ -741,6 +743,11 @@ enum Adressebeskyttelse {
     Ukjent
 }
 
+enum AntallArbeidsforhold {
+    ET_ARBEIDSFORHOLD
+    FLERE_ARBEIDSFORHOLD
+}
+
 enum Begrunnelse {
     ANDREYTELSER
     EGENMELDING_UTENFOR_ARBEIDSGIVERPERIODE
@@ -774,6 +781,32 @@ enum Dagtype {
     SykedagNav
 }
 
+enum Egenskap {
+    BESLUTTER
+    DELVIS_REFUSJON
+    EGEN_ANSATT
+    EN_ARBEIDSGIVER
+    FLERE_ARBEIDSGIVERE
+    FORLENGELSE
+    FORSTEGANGSBEHANDLING
+    FORTROLIG_ADRESSE
+    FULLMAKT
+    HASTER
+    INFOTRYGDFORLENGELSE
+    INGEN_UTBETALING
+    OVERGANG_FRA_IT
+    RETUR
+    REVURDERING
+    RISK_QA
+    SOKNAD
+    SPESIALSAK
+    STIKKPROVE
+    UTBETALING_TIL_ARBEIDSGIVER
+    UTBETALING_TIL_SYKMELDT
+    UTLAND
+    VERGEMAL
+}
+
 enum Hendelsetype {
     INNTEKTSMELDING
     NY_SOKNAD
@@ -796,6 +829,14 @@ enum Inntektstype {
     FLEREARBEIDSGIVERE
 }
 
+enum Kategori {
+    Inntektskilde
+    Mottaker
+    Oppgavetype
+    Periodetype
+    Ukategorisert
+}
+
 enum Kildetype {
     INNTEKTSMELDING
     SAKSBEHANDLER
@@ -813,6 +854,7 @@ enum Kjonn {
 enum Mottaker {
     ARBEIDSGIVER
     BEGGE
+    INGEN
     SYKMELDT
 }
 
@@ -905,6 +947,12 @@ enum Skjonnsfastsettingstype {
     ANNET
     OMREGNET_ARSINNTEKT
     RAPPORTERT_ARSINNTEKT
+}
+
+enum Sorteringsnokkel {
+    OPPRETTET
+    SOKNAD_MOTTATT
+    TILDELT_TIL
 }
 
 enum Sykdomsdagtype {
@@ -1005,6 +1053,11 @@ input LovhjemmelInput {
     lovverk: String!
     lovverksversjon: String!
     paragraf: String!
+}
+
+input OppgavesorteringInput {
+    nokkel: Sorteringsnokkel!
+    stigende: Boolean!
 }
 
 input OverstyringArbeidsforholdInput {

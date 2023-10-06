@@ -5,8 +5,10 @@ import javax.sql.DataSource
 import no.nav.helse.HelseDao
 import no.nav.helse.db.OppgaveFraDatabase
 import no.nav.helse.db.OppgaveFraDatabaseForVisning
+import no.nav.helse.db.OppgavesorteringForDatabase
 import no.nav.helse.db.PersonnavnFraDatabase
 import no.nav.helse.db.SaksbehandlerFraDatabase
+import no.nav.helse.db.SorteringsnøkkelForDatabase
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommandData
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.asLocalDate
@@ -66,8 +68,10 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
         ekskluderEgenskaper: List<String>,
         saksbehandlerOid: UUID,
         startIndex: Int = 0,
-        pageSize: Int = Int.MAX_VALUE
+        pageSize: Int = Int.MAX_VALUE,
+        sortering: List<OppgavesorteringForDatabase> = emptyList()
     ): List<OppgaveFraDatabaseForVisning> {
+        val orderBy = if (sortering.isNotEmpty()) sortering.joinToString { it.nøkkelTilKolonne() } else "opprettet DESC"
         val egenskaper = ekskluderEgenskaper.joinToString { """ '$it' """ }
         return asSQL(
             """
@@ -92,6 +96,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                 WHERE o.status = 'AvventerSaksbehandler'
                 AND NOT (egenskaper && ARRAY[$egenskaper]::varchar[])
                 AND NOT (egenskaper && ARRAY['BESLUTTER']::varchar[] AND ttv.saksbehandler = :oid)
+                ORDER BY $orderBy
                 OFFSET :start_index
                 LIMIT :page_size
             """, mapOf("oid" to saksbehandlerOid, "start_index" to startIndex, "page_size" to pageSize)
@@ -120,6 +125,12 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
             )
         }
     }
+
+    private fun OppgavesorteringForDatabase.nøkkelTilKolonne() = when (this.nøkkel) {
+        SorteringsnøkkelForDatabase.TILDELT_TIL -> "navn"
+        SorteringsnøkkelForDatabase.OPPRETTET -> "opprettet"
+        SorteringsnøkkelForDatabase.SØKNAD_MOTTATT -> "opprinnelig_soknadsdato"
+     }+ if (this.stigende) " ASC" else " DESC"
 
     internal fun hentOppgavemelding(oppgaveId: Long): Oppgavemelder.Oppgavemelding? = asSQL(
         """

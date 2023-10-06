@@ -239,13 +239,13 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `Finn oppgaver for visning med offset og pagesize`() {
         nyPerson(fødselsnummer = "12345678910", aktørId = "1234567891011", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "123456789")
+        val oppgaveId1 = OPPGAVE_ID
         nyPerson(fødselsnummer = "12345678911", aktørId = "1234567891012", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "223456789")
         val oppgaveId2 = OPPGAVE_ID
         nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456789")
-        val oppgaveId3 = OPPGAVE_ID
         val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), 1, 2)
         assertEquals(2, oppgaver.size)
-        assertEquals(listOf(oppgaveId2, oppgaveId3), oppgaver.map { it.id })
+        assertEquals(listOf(oppgaveId2, oppgaveId1), oppgaver.map { it.id })
     }
 
     @Test
@@ -259,7 +259,123 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         avventerSystem(oppgaveId3)
         val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID())
         assertEquals(2, oppgaver.size)
-        assertEquals(listOf(oppgaveId1, oppgaveId2), oppgaver.map { it.id })
+        assertEquals(listOf(oppgaveId2, oppgaveId1), oppgaver.map { it.id })
+    }
+
+    @Test
+    fun `Sorterer oppgaver på opprettet stigende`() {
+        nyPerson(fødselsnummer = "12345678910", aktørId = "1234567891011", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "123456789")
+        val oppgaveId1 = OPPGAVE_ID
+        nyPerson(fødselsnummer = "12345678911", aktørId = "1234567891012", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "223456789")
+        val oppgaveId2 = OPPGAVE_ID
+        nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456789")
+        val oppgaveId3 = OPPGAVE_ID
+        val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), sortering = listOf(
+            OppgavesorteringForDatabase(SorteringsnøkkelForDatabase.OPPRETTET, true)
+        ))
+        assertEquals(3, oppgaver.size)
+        assertEquals(listOf(oppgaveId1, oppgaveId2, oppgaveId3), oppgaver.map { it.id })
+    }
+
+    @Test
+    fun `Sorterer oppgaver på opprettet fallende`() {
+        nyPerson(fødselsnummer = "12345678910", aktørId = "1234567891011", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "123456789")
+        val oppgaveId1 = OPPGAVE_ID
+        nyPerson(fødselsnummer = "12345678911", aktørId = "1234567891012", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "223456789")
+        val oppgaveId2 = OPPGAVE_ID
+        nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456789")
+        val oppgaveId3 = OPPGAVE_ID
+        val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), sortering = listOf(
+            OppgavesorteringForDatabase(SorteringsnøkkelForDatabase.OPPRETTET, false)
+        ))
+        assertEquals(3, oppgaver.size)
+        assertEquals(listOf(oppgaveId3, oppgaveId2, oppgaveId1), oppgaver.map { it.id })
+    }
+
+    @Test
+    fun `Sorterer oppgaver på opprinneligSøknadsdato stigende`() {
+        nyPerson(fødselsnummer = "12345678910", aktørId = "1234567891011", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "123456789")
+        val oppgaveId1 = OPPGAVE_ID
+        nyPerson(fødselsnummer = "12345678911", aktørId = "1234567891012", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "223456789")
+        val oppgaveId2 = OPPGAVE_ID
+        nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456789")
+        val oppgaveId3 = OPPGAVE_ID
+        val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), sortering = listOf(
+            OppgavesorteringForDatabase(SorteringsnøkkelForDatabase.SØKNAD_MOTTATT, true)
+        ))
+        assertEquals(3, oppgaver.size)
+        assertEquals(listOf(oppgaveId1, oppgaveId2, oppgaveId3), oppgaver.map { it.id })
+    }
+
+    @Test
+    fun `Sorterer oppgaver på opprinneligSøknadsdato fallende`() {
+        nyPerson(fødselsnummer = "12345678910", aktørId = "1234567891011", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "123456789")
+        val oppgaveId1 = OPPGAVE_ID
+        nyPerson(fødselsnummer = "12345678911", aktørId = "1234567891012", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "223456789")
+        val oppgaveId2 = OPPGAVE_ID
+        nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456789")
+        val oppgaveId3 = OPPGAVE_ID
+        val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), sortering = listOf(
+            OppgavesorteringForDatabase(SorteringsnøkkelForDatabase.SØKNAD_MOTTATT, false)
+        ))
+        assertEquals(3, oppgaver.size)
+        assertEquals(listOf(oppgaveId3, oppgaveId2, oppgaveId1), oppgaver.map { it.id })
+    }
+
+    @Test
+    fun `Sorterer oppgaver på tildeling stigende`() {
+        nyPerson(fødselsnummer = "12345678910", aktørId = "1234567891011", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "123456789")
+        val oppgaveId1 = OPPGAVE_ID
+        tildelOppgave(oppgaveId1, UUID.randomUUID(), "A")
+        nyPerson(fødselsnummer = "12345678911", aktørId = "1234567891012", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "223456789")
+        val oppgaveId2 = OPPGAVE_ID
+        nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456789")
+        val oppgaveId3 = OPPGAVE_ID
+        tildelOppgave(oppgaveId3, UUID.randomUUID(), "B")
+        val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), sortering = listOf(
+            OppgavesorteringForDatabase(SorteringsnøkkelForDatabase.TILDELT_TIL, true)
+        ))
+        assertEquals(3, oppgaver.size)
+        assertEquals(listOf(oppgaveId1, oppgaveId3, oppgaveId2), oppgaver.map { it.id })
+    }
+
+    @Test
+    fun `Sorterer oppgaver på tildeling fallende`() {
+        nyPerson(fødselsnummer = "12345678910", aktørId = "1234567891011", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "123456789")
+        val oppgaveId1 = OPPGAVE_ID
+        tildelOppgave(oppgaveId1, UUID.randomUUID(), "A")
+        nyPerson(fødselsnummer = "12345678911", aktørId = "1234567891012", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "223456789")
+        val oppgaveId2 = OPPGAVE_ID
+        nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456789")
+        val oppgaveId3 = OPPGAVE_ID
+        tildelOppgave(oppgaveId3, UUID.randomUUID(), "B")
+        val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), sortering = listOf(
+            OppgavesorteringForDatabase(SorteringsnøkkelForDatabase.TILDELT_TIL, false)
+        ))
+        assertEquals(3, oppgaver.size)
+        assertEquals(listOf(oppgaveId2, oppgaveId3, oppgaveId1), oppgaver.map { it.id })
+    }
+
+    @Test
+    fun `Sorterer oppgaver på tildeling stigende først, deretter opprettet fallende`() {
+        nyPerson(fødselsnummer = "12345678910", aktørId = "1234567891011", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "123456789")
+        val oppgaveId1 = OPPGAVE_ID
+        tildelOppgave(oppgaveId1, UUID.randomUUID(), "A")
+        nyPerson(fødselsnummer = "12345678911", aktørId = "1234567891012", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "223456789")
+        val oppgaveId2 = OPPGAVE_ID
+        nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456789")
+        val oppgaveId3 = OPPGAVE_ID
+        val saksbehandlerOid2 = UUID.randomUUID()
+        tildelOppgave(oppgaveId3, saksbehandlerOid2, "B")
+        nyPerson(fødselsnummer = "12345678914", aktørId = "1234567891014", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "423456789")
+        val oppgaveId4 = OPPGAVE_ID
+        tildelOppgave(oppgaveId4, saksbehandlerOid2, "B")
+        val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), sortering = listOf(
+            OppgavesorteringForDatabase(SorteringsnøkkelForDatabase.TILDELT_TIL, true),
+            OppgavesorteringForDatabase(SorteringsnøkkelForDatabase.OPPRETTET, false),
+        ))
+        assertEquals(4, oppgaver.size)
+        assertEquals(listOf(oppgaveId1, oppgaveId4, oppgaveId3, oppgaveId2), oppgaver.map { it.id })
     }
 
     @Test
@@ -268,7 +384,10 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         val oppgaveId1 = OPPGAVE_ID
         nyPerson(fødselsnummer = "12345678911", aktørId = "1234567891012", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "223456789", oppgaveEgenskaper = listOf("BESLUTTER"))
         nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456789", oppgaveEgenskaper = listOf("RISK_QA", "FORTROLIG_ADRESSE"))
-        val oppgaver = oppgaveDao.finnOppgaverForVisning(ekskluderEgenskaper = listOf("BESLUTTER", "RISK_QA"), UUID.randomUUID())
+        val oppgaver = oppgaveDao.finnOppgaverForVisning(
+            ekskluderEgenskaper = listOf("BESLUTTER", "RISK_QA"),
+            UUID.randomUUID()
+        )
         assertEquals(1, oppgaver.size)
         assertEquals(listOf(oppgaveId1), oppgaver.map { it.id })
     }
@@ -283,7 +402,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         val oppgaveId3 = OPPGAVE_ID
         val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID())
         assertEquals(3, oppgaver.size)
-        assertEquals(listOf(oppgaveId1, oppgaveId2, oppgaveId3), oppgaver.map { it.id })
+        assertEquals(listOf(oppgaveId3, oppgaveId2, oppgaveId1), oppgaver.map { it.id })
     }
 
     @Test

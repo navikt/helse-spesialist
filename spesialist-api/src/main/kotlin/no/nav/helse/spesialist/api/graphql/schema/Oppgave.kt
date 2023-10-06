@@ -83,6 +83,14 @@ data class OppgaveForOversiktsvisning(
     val spesialsak: Boolean,
 )
 
+data class Oppgavesortering(val nokkel: Sorteringsnokkel, val stigende: Boolean)
+
+enum class Sorteringsnokkel {
+    TILDELT_TIL,
+    OPPRETTET,
+    SOKNAD_MOTTATT
+}
+
 data class OppgaveTilBehandling(
     val id: String,
     val opprettet: DateTimeString,

@@ -28,3 +28,11 @@ data class OppgaveFraDatabaseForVisning(
     val opprettet: LocalDateTime,
     val opprinneligSøknadsdato: LocalDateTime,
 )
+
+data class OppgavesorteringForDatabase(val nøkkel: SorteringsnøkkelForDatabase, val stigende: Boolean)
+
+enum class SorteringsnøkkelForDatabase {
+    TILDELT_TIL,
+    OPPRETTET,
+    SØKNAD_MOTTATT
+}

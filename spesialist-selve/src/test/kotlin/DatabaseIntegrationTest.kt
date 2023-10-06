@@ -272,8 +272,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         commandContextDao.opprett(hendelse, contextId)
     }
 
-    protected fun tildelOppgave(oppgaveId: Long = OPPGAVE_ID, saksbehandlerOid: UUID, påVent: Boolean = false) {
-        opprettSaksbehandler(saksbehandlerOid, navn = SAKSBEHANDLER_NAVN, epost = SAKSBEHANDLEREPOST, ident = SAKSBEHANDLER_IDENT)
+    protected fun tildelOppgave(oppgaveId: Long = OPPGAVE_ID, saksbehandlerOid: UUID, navn: String = SAKSBEHANDLER_NAVN, påVent: Boolean = false) {
+        opprettSaksbehandler(saksbehandlerOid, navn = navn, epost = SAKSBEHANDLEREPOST, ident = SAKSBEHANDLER_IDENT)
         @Language("PostgreSQL")
         val query = "INSERT INTO tildeling(saksbehandler_ref, oppgave_id_ref, på_vent) VALUES (?, ?, ?)"
         return sessionOf(dataSource).use { session ->
