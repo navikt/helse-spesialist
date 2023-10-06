@@ -1,6 +1,8 @@
 package no.nav.helse.spesialist.api.graphql.query
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import graphql.GraphQLException
 import io.mockk.clearMocks
@@ -8,6 +10,7 @@ import io.mockk.every
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
+import no.nav.helse.spesialist.api.graphql.schema.Handling
 import no.nav.helse.spesialist.api.graphql.schema.Periodehandling
 import no.nav.helse.spesialist.api.januar
 import no.nav.helse.spesialist.api.objectMapper
@@ -249,6 +252,26 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         assertTrue(periode["handlinger"].first { it["type"].textValue() == Periodehandling.UTBETALE.name }["tillatt"].booleanValue())
     }
 
+    @Test
+    fun `sjekke at kanAvvises-flagget inkluderes i GraphQL svaret`() {
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver(), kanAvvises = false)
+        val (id, fom, tom) = PERIODE
+        val graphQLperiodeMedOppgave = opprettBeregnetPeriode(fom.toString(), tom.toString(), id)
+        val snapshotGenerasjon = opprettSnapshotGenerasjon(listOf(graphQLperiodeMedOppgave))
+        val arbeidsgiver = opprettSnapshotArbeidsgiver(listOf(snapshotGenerasjon))
+        mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
+
+        val body = runPersonQuery()
+
+        val periode = body["data"]["person"]["arbeidsgivere"].first()["generasjoner"].first()["perioder"].first()
+        val forventedeHandlinger = setOf(
+            Handling(Periodehandling.UTBETALE, true, null),
+            Handling(Periodehandling.AVVISE, false, "Spleis støtter ikke å avvise perioden")
+        )
+        assertFalse(periode["handlinger"].isEmpty)
+        assertEquals(objectMapper.convertValue<Set<ObjectNode>>(forventedeHandlinger), periode["handlinger"].toSet())
+    }
+
     private fun runPersonQuery(group: UUID? = null) = runQuery(
         """{ 
                 person(fnr: "$FØDSELSNUMMER") { 
@@ -266,7 +289,7 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
                                 }
                                 ... on BeregnetPeriode {
                                     vedtaksperiodeId
-                                    handlinger { type, tillatt }
+                                    handlinger { type, tillatt, begrunnelse }
                                     varsler {
                                         generasjonId
                                         kode

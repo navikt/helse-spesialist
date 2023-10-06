@@ -360,6 +360,7 @@ type OppgaveForOversiktsvisning {
 
 type OppgaveForPeriodevisning {
     id: String!
+    kanAvvises: Boolean!
 }
 
 type OppgaveTilBehandling {
@@ -915,6 +916,7 @@ enum Opptegnelsetype {
 }
 
 enum Periodehandling {
+    AVVISE
     UTBETALE
 }
 

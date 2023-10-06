@@ -392,8 +392,9 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         oppgavetype: String = OPPGAVETYPE,
         egenskaper: List<String> = listOf(OPPGAVETYPE),
+        kanAvvises: Boolean = true,
         utbetalingId: UUID = UTBETALING_ID,
-        hendelseId: UUID = UUID.randomUUID()
+        hendelseId: UUID = UUID.randomUUID(),
     ) {
         val hendelse = testhendelse(hendelseId = hendelseId)
         opprettCommandContext(hendelse, contextId)
@@ -403,7 +404,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             oppgavetype,
             egenskaper,
             vedtaksperiodeId,
-            utbetalingId
+            utbetalingId,
+            kanAvvises,
         )
     }
 

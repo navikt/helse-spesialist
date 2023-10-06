@@ -38,6 +38,7 @@ class OppgavehenterTest {
         private val TILDELT_TIL = SaksbehandlerFraDatabase(SAKSBEHANDLER_EPOST, SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_IDENT)
         private const val PÅ_VENT = false
         private const val ER_RETUR = false
+        private const val KAN_AVVISES = true
         private val TOTRINNSVURDERING_OPPRETTET = LocalDateTime.now()
         private val TOTRINNSVURDERING_OPPDATERT = LocalDateTime.now()
     }
@@ -134,6 +135,7 @@ class OppgavehenterTest {
             egenskaper: List<Egenskap>,
             tildelt: Saksbehandler?,
             påVent: Boolean,
+            kanAvvises: Boolean,
             totrinnsvurdering: Totrinnsvurdering?
         ) {
             this.id = id
@@ -189,7 +191,8 @@ class OppgavehenterTest {
                 ferdigstiltAvIdent = SAKSBEHANDLER_IDENT,
                 ferdigstiltAvOid = SAKSBEHANDLER_OID,
                 tildelt = TILDELT_TIL,
-                påVent = PÅ_VENT
+                påVent = PÅ_VENT,
+                kanAvvises = KAN_AVVISES,
             )
         }
 

@@ -292,8 +292,17 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         assertEquals(enOppgave(REVURDERING, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING), oppgave)
     }
 
-    private fun enOppgave(vararg egenskaper: Egenskap) =
-        Oppgave.nyOppgave(1L, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), egenskaper.toList())
+    @Test
+    fun `legger til oppgave med kanAvvises lik false`() {
+        val slot = slot<((Long) -> Oppgave)>()
+        assertTrue(opprettSaksbehandlerOppgaveCommand(kanAvvises = false).execute(context))
+        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
+        val oppgave = slot.captured.invoke(1L)
+        assertEquals(enOppgave(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, kanAvvises = false), oppgave)
+    }
+
+    private fun enOppgave(vararg egenskaper: Egenskap, kanAvvises: Boolean = true) =
+        Oppgave.nyOppgave(1L, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), kanAvvises, egenskaper.toList())
 
 
     private fun enUtbetaling(personbeløp: Int = 0, arbeidsgiverbeløp: Int = 0): GraphQLUtbetaling =
@@ -310,7 +319,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
             arbeidsgiveroppdrag = null,
         )
 
-    private fun opprettSaksbehandlerOppgaveCommand(inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER, periodetype: Periodetype = FØRSTEGANGSBEHANDLING) =
+    private fun opprettSaksbehandlerOppgaveCommand(inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER, periodetype: Periodetype = FØRSTEGANGSBEHANDLING, kanAvvises: Boolean = true) =
         OpprettSaksbehandleroppgaveCommand(
             fødselsnummer = FNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
@@ -327,5 +336,6 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
             vergemålDao = vergemålDao,
             inntektskilde = inntektskilde,
             periodetype = periodetype,
+            kanAvvises = kanAvvises,
         )
 }

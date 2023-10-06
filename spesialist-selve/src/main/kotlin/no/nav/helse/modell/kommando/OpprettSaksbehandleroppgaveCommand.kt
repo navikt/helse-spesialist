@@ -57,6 +57,7 @@ internal class OpprettSaksbehandleroppgaveCommand(
     private val vergemålDao: VergemålDao,
     private val inntektskilde: Inntektskilde,
     private val periodetype: Periodetype,
+    private val kanAvvises: Boolean,
 ) : Command {
 
     private companion object {
@@ -99,7 +100,7 @@ internal class OpprettSaksbehandleroppgaveCommand(
         if (sykefraværstilfelle.haster(vedtaksperiodeId)) egenskaper.add(HASTER)
 
         oppgaveMediator.nyOppgave(fødselsnummer, context.id()) { reservertId ->
-            val oppgave = Oppgave.nyOppgave(reservertId, vedtaksperiodeId, utbetalingId, hendelseId, egenskaper)
+            val oppgave = Oppgave.nyOppgave(reservertId, vedtaksperiodeId, utbetalingId, hendelseId, kanAvvises, egenskaper)
 
             logg.info("Saksbehandleroppgave opprettet, avventer lagring: $oppgave")
             sikkerLogg.info("Saksbehandleroppgave opprettet, avventer lagring: $oppgave")

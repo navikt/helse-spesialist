@@ -18,6 +18,7 @@ interface OppgaveVisitor: TotrinnsvurderingVisitor {
         egenskaper: List<Egenskap>,
         tildelt: Saksbehandler?,
         påVent: Boolean,
+        kanAvvises: Boolean,
         totrinnsvurdering: Totrinnsvurdering?
     ) {}
 }

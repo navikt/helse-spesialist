@@ -56,6 +56,7 @@ class Oppgavehenter(
                 Saksbehandler(it.epostadresse, it.oid, it.navn, it.ident, tilgangskontroll)
             },
             påVent = oppgave.påVent,
+            kanAvvises = oppgave.kanAvvises,
             totrinnsvurdering = totrinnsvurdering?.let {
                 Totrinnsvurdering(
                     vedtaksperiodeId = it.vedtaksperiodeId,

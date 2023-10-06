@@ -370,11 +370,11 @@ data class UberegnetVilkarsprovdPeriode(
 }
 
 enum class Periodehandling {
-    UTBETALE
+    UTBETALE,
+    AVVISE
 }
 
 data class Handling(val type: Periodehandling, val tillatt: Boolean, val begrunnelse: String? = null)
-
 @Suppress("unused")
 data class BeregnetPeriode(
     val id: UUIDString,
@@ -406,9 +406,11 @@ data class BeregnetPeriode(
             listOf(Handling(Periodehandling.UTBETALE, false, "perioden er ikke til godkjenning")
         ) else {
             val oppgavetype = oppgaveApiDao.finnOppgavetype(UUID.fromString(vedtaksperiodeId()))
-            if (oppgavetype == Oppgavetype.RISK_QA && !tilganger.harTilgangTilRiskOppgaver())
+            val handlinger = if (oppgavetype == Oppgavetype.RISK_QA && !tilganger.harTilgangTilRiskOppgaver())
                 listOf(Handling(Periodehandling.UTBETALE, false, "IkkeTilgangTilRisk"))
             else listOf(Handling(Periodehandling.UTBETALE, true))
+            val kanAvvises = oppgave?.kanAvvises ?: false
+            handlinger + Handling(Periodehandling.AVVISE, kanAvvises, "Spleis støtter ikke å avvise perioden")
         }
     }
 
@@ -506,12 +508,14 @@ data class BeregnetPeriode(
     fun oppgavereferanse(): String? =
         oppgaveApiDao.finnOppgaveId(UUID.fromString(vedtaksperiodeId()))?.toString()
 
-    fun oppgave(): OppgaveForPeriodevisning? =
+    val oppgave: OppgaveForPeriodevisning? by lazy {
         oppgaveApiDao.finnPeriodeoppgave(UUID.fromString(vedtaksperiodeId()))?.let { oppgaveForPeriodevisningDto ->
             OppgaveForPeriodevisning(
-                id = oppgaveForPeriodevisningDto.id
+                id = oppgaveForPeriodevisningDto.id,
+                kanAvvises = oppgaveForPeriodevisningDto.kanAvvises
             )
         }
+    }
 
     fun totrinnsvurdering(): Totrinnsvurdering? =
         totrinnsvurderingApiDao.hentAktiv(UUID.fromString(vedtaksperiodeId()))?.let {
@@ -523,6 +527,7 @@ data class BeregnetPeriode(
             )
         }
 }
+
 
 private fun GraphQLOppdrag.tilSimulering(): Simulering =
     Simulering(

@@ -32,7 +32,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
     override fun finnOppgave(id: Long): OppgaveFraDatabase? {
         return asSQL(
             """ 
-            SELECT o.egenskaper, o.type, o.status, v.vedtaksperiode_id, o.ferdigstilt_av, o.ferdigstilt_av_oid, o.utbetaling_id, s.navn, s.epost, s.ident, s.oid, t.på_vent
+            SELECT o.egenskaper, o.type, o.status, v.vedtaksperiode_id, o.ferdigstilt_av, o.ferdigstilt_av_oid, o.utbetaling_id, s.navn, s.epost, s.ident, s.oid, t.på_vent, o.kan_avvises
             FROM oppgave o
             INNER JOIN vedtak v on o.vedtak_ref = v.id
             LEFT JOIN tildeling t on o.id = t.oppgave_id_ref
@@ -60,6 +60,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                     )
                 },
                 påVent = row.boolean("på_vent"),
+                kanAvvises = row.boolean("kan_avvises"),
             )
         }
     }
@@ -84,7 +85,8 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                 s.oid, s.ident, s.epost, s.navn,
                 t.på_vent,
                 o.opprettet,
-                os.soknad_mottatt AS opprinnelig_soknadsdato
+                os.soknad_mottatt AS opprinnelig_soknadsdato,
+                o.kan_avvises
             FROM oppgave o
                 INNER JOIN vedtak v ON o.vedtak_ref = v.id
                 INNER JOIN person p ON v.person_ref = p.id
@@ -277,7 +279,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
         }
     }
 
-    fun opprettOppgave(id: Long, commandContextId: UUID, egenskap: String, egenskaper: List<String>, vedtaksperiodeId: UUID, utbetalingId: UUID) =
+    fun opprettOppgave(id: Long, commandContextId: UUID, egenskap: String, egenskaper: List<String>, vedtaksperiodeId: UUID, utbetalingId: UUID, kanAvvises: Boolean) =
         requireNotNull(run {
             val vedtakRef = vedtakRef(vedtaksperiodeId)
 
@@ -287,8 +289,8 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
 
             asSQL(
                 """
-                    INSERT INTO oppgave(id, oppdatert, type, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, command_context_id, utbetaling_id, mottaker, egenskaper)
-                    VALUES (:id, now(), CAST(:oppgavetype as oppgavetype), CAST(:oppgavestatus as oppgavestatus), :ferdigstiltAv, :ferdigstiltAvOid, :vedtakRef, :commandContextId, :utbetalingId, CAST(:mottaker as mottakertype), '{$egenskaperForDatabase}');
+                    INSERT INTO oppgave(id, oppdatert, type, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, command_context_id, utbetaling_id, mottaker, egenskaper, kan_avvises)
+                    VALUES (:id, now(), CAST(:oppgavetype as oppgavetype), CAST(:oppgavestatus as oppgavestatus), :ferdigstiltAv, :ferdigstiltAvOid, :vedtakRef, :commandContextId, :utbetalingId, CAST(:mottaker as mottakertype), '{$egenskaperForDatabase}', :kanAvvises);
                 """, mapOf(
                     "id" to id,
                     "oppgavetype" to egenskap,
@@ -299,6 +301,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                     "commandContextId" to commandContextId,
                     "utbetalingId" to utbetalingId,
                     "mottaker" to mottaker?.name,
+                    "kanAvvises" to kanAvvises,
                 )
             ).updateAndReturnGeneratedKey()
         }) { "Kunne ikke opprette oppgave" }

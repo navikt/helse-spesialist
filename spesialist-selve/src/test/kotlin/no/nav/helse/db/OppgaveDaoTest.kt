@@ -80,6 +80,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
             OPPGAVETYPE,
             listOf(OPPGAVETYPE),
             OPPGAVESTATUS,
+            true,
             null,
             null,
             vedtakId,
@@ -99,6 +100,27 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
             OPPGAVETYPE,
             listOf(OPPGAVETYPE, "RISK_QA"),
             OPPGAVESTATUS,
+            true,
+            null,
+            null,
+            vedtakId,
+            CONTEXT_ID
+        )
+    }
+
+    @Test
+    fun `lagre oppgave med kanAvvises lik false`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave(contextId = CONTEXT_ID, kanAvvises = false)
+        assertEquals(1, oppgave().size)
+        oppgave().first().assertEquals(
+            LocalDate.now(),
+            OPPGAVETYPE,
+            listOf("SØKNAD"),
+            OPPGAVESTATUS,
+            false,
             null,
             null,
             vedtakId,
@@ -118,6 +140,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
             "FORTROLIG_ADRESSE",
             listOf("FORTROLIG_ADRESSE"),
             OPPGAVESTATUS,
+            true,
             null,
             null,
             vedtakId,
@@ -174,7 +197,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
                 status = "AvventerSaksbehandler",
                 vedtaksperiodeId = VEDTAKSPERIODE,
                 utbetalingId = UTBETALING_ID,
-                hendelseId = hendelseId
+                hendelseId = hendelseId,
+                kanAvvises = true,
             ), oppgave
         )
     }
@@ -192,7 +216,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
                 status = "AvventerSaksbehandler",
                 vedtaksperiodeId = VEDTAKSPERIODE,
                 utbetalingId = UTBETALING_ID,
-                hendelseId = hendelseId
+                hendelseId = hendelseId,
+                kanAvvises = true,
             ), oppgave
         )
     }
@@ -437,6 +462,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
             OPPGAVETYPE,
             listOf(OPPGAVETYPE, "RISK_QA"),
             nyStatus,
+            true,
             SAKSBEHANDLEREPOST,
             SAKSBEHANDLER_OID,
             vedtakId,
@@ -563,6 +589,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
                     type = row.string("type"),
                     egenskaper = row.array<String>("egenskaper").toList(),
                     status = row.string("status"),
+                    kanAvvises = row.boolean("kan_avvises"),
                     ferdigstiltAv = row.stringOrNull("ferdigstilt_av"),
                     ferdigstiltAvOid = row.stringOrNull("ferdigstilt_av_oid")?.let(UUID::fromString),
                     vedtakRef = row.longOrNull("vedtak_ref"),
@@ -582,8 +609,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         it.run(
             queryOf(
                 """
-                INSERT INTO oppgave(oppdatert, type, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, command_context_id, utbetaling_id, mottaker)
-                VALUES (now(), CAST(? as oppgavetype), CAST(? as oppgavestatus), ?, ?, ?, ?, ?, CAST(? as mottakertype));
+                INSERT INTO oppgave(oppdatert, type, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, command_context_id, utbetaling_id, mottaker, kan_avvises)
+                VALUES (now(), CAST(? as oppgavetype), CAST(? as oppgavestatus), ?, ?, ?, ?, ?, CAST(? as mottakertype), ?);
             """,
                 oppgavetype.name,
                 status,
@@ -592,7 +619,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
                 vedtakRef,
                 commandContextId,
                 utbetalingId,
-                mottaker?.name
+                mottaker?.name,
+                true
             ).asUpdateAndReturnGeneratedKey
         )
     }) { "Kunne ikke opprette oppgave" }
@@ -602,6 +630,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         private val type: String,
         private val egenskaper: List<String>,
         private val status: String,
+        private val kanAvvises: Boolean,
         private val ferdigstiltAv: String?,
         private val ferdigstiltAvOid: UUID?,
         private val vedtakRef: Long?,
@@ -612,6 +641,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
             forventetType: String,
             forventetEgenskaper: List<String>,
             forventetStatus: String,
+            forventetKanAvvises: Boolean,
             forventetFerdigstilAv: String?,
             forventetFerdigstilAvOid: UUID?,
             forventetVedtakRef: Long?,
@@ -621,6 +651,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
             assertEquals(forventetType, type)
             assertEquals(forventetEgenskaper, egenskaper)
             assertEquals(forventetStatus, status)
+            assertEquals(forventetKanAvvises, kanAvvises)
             assertEquals(forventetFerdigstilAv, ferdigstiltAv)
             assertEquals(forventetFerdigstilAvOid, ferdigstiltAvOid)
             assertEquals(forventetVedtakRef, vedtakRef)

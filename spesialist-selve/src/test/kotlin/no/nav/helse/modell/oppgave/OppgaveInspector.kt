@@ -23,7 +23,8 @@ internal class OppgaveInspector private constructor() : OppgaveVisitor {
         egenskaper: List<Egenskap>,
         tildelt: Saksbehandler?,
         påVent: Boolean,
-        totrinnsvurdering: Totrinnsvurdering?,
+        kanAvvises: Boolean,
+        totrinnsvurdering: Totrinnsvurdering?
     ) {
         this.tilstand = tilstand
         this.tildelt = tildelt != null

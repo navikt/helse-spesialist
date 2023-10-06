@@ -25,6 +25,7 @@ class Oppgave private constructor(
     private val vedtaksperiodeId: UUID,
     private val utbetalingId: UUID,
     private val hendelseId: UUID,
+    private val kanAvvises: Boolean,
     private val totrinnsvurdering: Totrinnsvurdering?
 ) {
 
@@ -43,13 +44,14 @@ class Oppgave private constructor(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
         hendelseId: UUID,
+        kanAvvises: Boolean,
         ferdigstiltAvIdent: String? = null,
         ferdigstiltAvOid: UUID? = null,
         tildelt: Saksbehandler? = null,
         påVent: Boolean = false,
         totrinnsvurdering: Totrinnsvurdering? = null,
         egenskaper: List<Egenskap>
-    ) : this(id, egenskap, tilstand, vedtaksperiodeId, utbetalingId, hendelseId, totrinnsvurdering) {
+    ) : this(id, egenskap, tilstand, vedtaksperiodeId, utbetalingId, hendelseId, kanAvvises, totrinnsvurdering) {
         this.ferdigstiltAvIdent = ferdigstiltAvIdent
         this.ferdigstiltAvOid = ferdigstiltAvOid
         this.tildeltTil = tildelt
@@ -58,7 +60,7 @@ class Oppgave private constructor(
     }
 
     fun accept(visitor: OppgaveVisitor) {
-        visitor.visitOppgave(id, egenskap, tilstand, vedtaksperiodeId, utbetalingId, hendelseId, ferdigstiltAvOid, ferdigstiltAvIdent, egenskaper, tildeltTil, påVent, totrinnsvurdering)
+        visitor.visitOppgave(id, egenskap, tilstand, vedtaksperiodeId, utbetalingId, hendelseId, ferdigstiltAvOid, ferdigstiltAvIdent, egenskaper, tildeltTil, påVent, kanAvvises, totrinnsvurdering)
         totrinnsvurdering?.accept(visitor)
     }
 
@@ -275,11 +277,12 @@ class Oppgave private constructor(
             vedtaksperiodeId: UUID,
             utbetalingId: UUID,
             hendelseId: UUID,
+            kanAvvises: Boolean,
             egenskaper: List<Egenskap>,
             totrinnsvurdering: Totrinnsvurdering? = null
         ): Oppgave {
             val hovedegenskap = egenskaper.firstOrNull { it in gyldigeOppgavetyper } ?: SØKNAD
-            return Oppgave(id, hovedegenskap, AvventerSaksbehandler, vedtaksperiodeId, utbetalingId, hendelseId, totrinnsvurdering).also {
+            return Oppgave(id, hovedegenskap, AvventerSaksbehandler, vedtaksperiodeId, utbetalingId, hendelseId, kanAvvises, totrinnsvurdering).also {
                 it.egenskaper.addAll(egenskaper)
             }
         }

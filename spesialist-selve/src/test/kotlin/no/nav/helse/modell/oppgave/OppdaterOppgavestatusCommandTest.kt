@@ -28,7 +28,8 @@ internal class OppdaterOppgavestatusCommandTest {
             vedtaksperiodeId = UUID.randomUUID(),
             utbetalingId = UTBETALING_ID,
             hendelseId = UUID.randomUUID(),
-            egenskaper = listOf(SØKNAD)
+            egenskaper = listOf(SØKNAD),
+            kanAvvises = true,
         )
     }
 

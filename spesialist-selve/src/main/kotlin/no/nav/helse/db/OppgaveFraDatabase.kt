@@ -11,10 +11,11 @@ data class OppgaveFraDatabase(
     val vedtaksperiodeId: UUID,
     val utbetalingId: UUID,
     val hendelseId: UUID,
+    val kanAvvises: Boolean,
     val ferdigstiltAvIdent: String? = null,
     val ferdigstiltAvOid: UUID? = null,
     val tildelt: SaksbehandlerFraDatabase? = null,
-    val påVent: Boolean = false
+    val påVent: Boolean = false,
 )
 
 data class OppgaveFraDatabaseForVisning(

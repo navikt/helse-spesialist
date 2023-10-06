@@ -30,6 +30,7 @@ data class OppgaveForOversiktsvisningDto(
 
 data class OppgaveForPeriodevisningDto(
     val id: String,
+    val kanAvvises: Boolean,
 )
 
 enum class Oppgavestatus {

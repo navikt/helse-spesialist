@@ -63,7 +63,8 @@ class OppgavemelderTest {
         utbetalingId = UTBETALING_ID,
         hendelseId = HENDELSE_ID,
         egenskaper = listOf(SØKNAD),
-        totrinnsvurdering = if (medTotrinnsvurdering) totrinnsvurdering() else null
+        totrinnsvurdering = if (medTotrinnsvurdering) totrinnsvurdering() else null,
+        kanAvvises = true,
     )
 
     private fun totrinnsvurdering() = Totrinnsvurdering(

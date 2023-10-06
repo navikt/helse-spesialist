@@ -53,14 +53,14 @@ class OppgaveApiDao(dataSource: DataSource) : HelseDao(dataSource) {
     ).single { it.long("oppgaveId") }
 
     fun finnPeriodeoppgave(vedtaksperiodeId: UUID) = asSQL(
-        """ SELECT o.id
+        """ SELECT o.id, o.kan_avvises
             FROM oppgave o
             INNER JOIN vedtak v ON o.vedtak_ref = v.id
             WHERE v.vedtaksperiode_id = :vedtaksperiodeId 
                 AND status = 'AvventerSaksbehandler'::oppgavestatus 
         """,
         mapOf("vedtaksperiodeId" to vedtaksperiodeId)
-    ).single { OppgaveForPeriodevisningDto(id = it.string("id")) }
+    ).single { OppgaveForPeriodevisningDto(id = it.string("id"), kanAvvises = it.boolean("kan_avvises")) }
 
     fun finnOppgavetype(vedtaksperiodeId: UUID) = asSQL(
         """ SELECT type
@@ -281,7 +281,6 @@ class OppgaveApiDao(dataSource: DataSource) : HelseDao(dataSource) {
             }
         }
     }
-
 }
 
 private data class Inntekter(val årMåned: YearMonth, val inntektsliste: List<Inntekt>) {

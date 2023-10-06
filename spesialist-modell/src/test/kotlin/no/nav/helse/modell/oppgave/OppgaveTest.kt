@@ -553,18 +553,16 @@ internal class OppgaveTest {
     @Test
     fun equals() {
         val gjenopptattOppgave = Oppgave.nyOppgave(
-            1L, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), listOf(
-                OPPGAVETYPE
-            )
+            1L, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), true, listOf(OPPGAVETYPE)
         )
         val oppgave1 =
-            Oppgave.nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), listOf(SØKNAD))
+            Oppgave.nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), true, listOf(SØKNAD))
         val oppgave2 =
-            Oppgave.nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), listOf(SØKNAD))
+            Oppgave.nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), true, listOf(SØKNAD))
         val oppgave3 =
-            Oppgave.nyOppgave(OPPGAVE_ID, UUID.randomUUID(), UTBETALING_ID, UUID.randomUUID(), listOf(SØKNAD))
+            Oppgave.nyOppgave(OPPGAVE_ID, UUID.randomUUID(), UTBETALING_ID, UUID.randomUUID(), true, listOf(SØKNAD))
         val oppgave4 =
-            Oppgave.nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), listOf(STIKKPRØVE))
+            Oppgave.nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), true, listOf(STIKKPRØVE))
         assertEquals(oppgave1, oppgave2)
         assertEquals(oppgave1.hashCode(), oppgave2.hashCode())
         assertNotEquals(oppgave1, oppgave3)
@@ -590,6 +588,7 @@ internal class OppgaveTest {
             VEDTAKSPERIODE_ID,
             UTBETALING_ID,
             UUID.randomUUID(),
+            true,
             egenskaper.toList(),
             totrinnsvurdering
         )

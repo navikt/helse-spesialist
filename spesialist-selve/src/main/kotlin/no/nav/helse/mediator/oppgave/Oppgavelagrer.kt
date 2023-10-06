@@ -49,7 +49,8 @@ class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
             utbetalingId = oppgave.utbetalingId,
             egenskap = oppgave.egenskap,
             egenskaper = oppgave.egenskaper,
-            hendelseId = oppgave.hendelseId
+            hendelseId = oppgave.hendelseId,
+            kanAvvises = oppgave.kanAvvises,
         )
         if (oppgave.tildelt != null) tildelingDao.tildel(oppgave.id, oppgave.tildelt.oid, oppgave.påVent)
         else tildelingDao.avmeld(oppgave.id)
@@ -86,6 +87,7 @@ class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
         egenskaper: List<Egenskap>,
         tildelt: Saksbehandler?,
         påVent: Boolean,
+        kanAvvises: Boolean,
         totrinnsvurdering: Totrinnsvurdering?
     ) {
         oppgaveForLagring = OppgaveFraDatabase(
@@ -99,7 +101,8 @@ class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
             ferdigstiltAvIdent = ferdigstiltAvIdent,
             ferdigstiltAvOid = ferdigstiltAvOid,
             tildelt = tildelt?.let { Saksbehandlerhenter(it).hent() },
-            påVent = påVent
+            påVent = påVent,
+            kanAvvises = kanAvvises,
         )
     }
 

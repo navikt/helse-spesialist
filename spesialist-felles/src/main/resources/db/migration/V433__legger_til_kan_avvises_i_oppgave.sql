@@ -1,0 +1,3 @@
+ALTER TABLE oppgave ADD COLUMN kan_avvises BOOLEAN NOT NULL DEFAULT true;
+
+ALTER TABLE oppgave ALTER COLUMN kan_avvises DROP DEFAULT;

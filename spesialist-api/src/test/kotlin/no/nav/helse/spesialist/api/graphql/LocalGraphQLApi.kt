@@ -102,7 +102,7 @@ fun main() = runBlocking {
         val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
         val overstyringApiDao = OverstyringApiDao(dataSource)
         val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
-        val apiVarselRepository = ApiVarselRepository(dataSource)
+        val apiVarselRepository = mockk<ApiVarselRepository>(relaxed = true)
         val utbetalingApiDao = mockk<UtbetalingApiDao>(relaxed = true)
         val oppgaveApiDao = mockk<OppgaveApiDao>(relaxed = true)
         val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
@@ -297,7 +297,7 @@ private fun enPeriode() = GraphQLBeregnetPeriode(
     ),
     skjaeringstidspunkt = "2020-01-01",
     utbetaling = GraphQLUtbetaling(
-        id = "EN-UTBETALING",
+        id = UUID.randomUUID().toString(),
         arbeidsgiverFagsystemId = "EN-ARBEIDSGIVERFAGSYSTEMID",
         arbeidsgiverNettoBelop = 30000,
         personFagsystemId = "EN-PERSONFAGSYSTEMID",

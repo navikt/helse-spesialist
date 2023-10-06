@@ -186,9 +186,10 @@ internal class OppgaveMediator(
         utbetalingId: UUID,
         egenskap: String,
         egenskaper: List<String>,
-        hendelseId: UUID
+        hendelseId: UUID,
+        kanAvvises: Boolean,
     ) {
-        oppgaveDao.opprettOppgave(id, contextId, egenskap, egenskaper, vedtaksperiodeId, utbetalingId)
+        oppgaveDao.opprettOppgave(id, contextId, egenskap, egenskaper, vedtaksperiodeId, utbetalingId, kanAvvises)
         GodkjenningsbehovPayload(hendelseId).lagre(opptegnelseDao, oppgaveDao.finnFødselsnummer(id))
     }
 

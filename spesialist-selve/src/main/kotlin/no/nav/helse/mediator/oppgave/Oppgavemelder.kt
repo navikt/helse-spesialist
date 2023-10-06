@@ -131,6 +131,7 @@ private class OppgaveForKafkaBygger : OppgaveVisitor {
         egenskaper: List<Egenskap>,
         tildelt: Saksbehandler?,
         påVent: Boolean,
+        kanAvvises: Boolean,
         totrinnsvurdering: Totrinnsvurdering?
     ) {
         this.hendelseId = hendelseId

@@ -124,12 +124,14 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         oppgavetype: Oppgavetype = Oppgavetype.SØKNAD,
         skjæringstidspunkt: LocalDate = periode.fom,
         forkastet: Boolean = false,
+        kanAvvises: Boolean = true,
     ) = opprettVedtak(personId, arbeidsgiverId, periode, skjæringstidspunkt, forkastet).also {
         klargjørVedtak(
             it,
             utbetalingId,
             periode,
-            oppgavetype
+            oppgavetype,
+            kanAvvises = kanAvvises
         )
     }
 
@@ -298,12 +300,13 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         utbetalingId: UUID = UUID.randomUUID(),
         periode: Periode,
         oppgavetype: Oppgavetype,
+        kanAvvises: Boolean = true,
     ) {
         opprettSaksbehandleroppgavetype(Periodetype.FØRSTEGANGSBEHANDLING, Inntektskilde.EN_ARBEIDSGIVER, vedtakId)
         val hendelseId = UUID.randomUUID()
         opprettHendelse(hendelseId)
         opprettAutomatisering(false, vedtaksperiodeId = periode.id, hendelseId = hendelseId)
-        opprettOppgave(Oppgavestatus.AvventerSaksbehandler, oppgavetype, vedtakId, utbetalingId)
+        opprettOppgave(Oppgavestatus.AvventerSaksbehandler, oppgavetype, vedtakId, utbetalingId, kanAvvises = kanAvvises)
     }
 
     private fun opprettSaksbehandleroppgavetype(type: Periodetype, inntektskilde: Inntektskilde, vedtakRef: Long) =
@@ -539,13 +542,14 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         vedtakRef: Long,
         utbetalingId: UUID = UUID.randomUUID(),
         opprettet: LocalDateTime = LocalDateTime.now(),
+        kanAvvises: Boolean = true,
     ): Long {
         val commandContextId = UUID.randomUUID()
         return requireNotNull(
             sessionOf(dataSource, returnGeneratedKey = true).use { session ->
                 @Language("PostgreSQL")
                 val statement =
-                    "INSERT INTO oppgave(utbetaling_id, opprettet, oppdatert, status, vedtak_ref, type, command_context_id) VALUES(?, ?, now(), CAST(? as oppgavestatus), ?, CAST(? as oppgavetype), ?)"
+                    "INSERT INTO oppgave(utbetaling_id, opprettet, oppdatert, status, vedtak_ref, type, command_context_id, kan_avvises) VALUES(?, ?, now(), CAST(? as oppgavestatus), ?, CAST(? as oppgavetype), ?, ?)"
                 session.run(
                     queryOf(
                         statement,
@@ -554,7 +558,8 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                         status.name,
                         vedtakRef,
                         oppgavetype.name,
-                        commandContextId
+                        commandContextId,
+                        kanAvvises,
                     ).asUpdateAndReturnGeneratedKey
                 )
             }).also {
