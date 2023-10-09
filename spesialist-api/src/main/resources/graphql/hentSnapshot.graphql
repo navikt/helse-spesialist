@@ -134,6 +134,7 @@ query HentSnapshot($fnr: String!) {
                             id
                             mottattDato
                             type
+                            eksternDokumentId
                         }
                         ... on GraphQLSoknadArbeidsgiver {
                             __typename
@@ -143,6 +144,7 @@ query HentSnapshot($fnr: String!) {
                             sendtArbeidsgiver
                             tom
                             type
+                            eksternDokumentId
                         }
                         ... on GraphQLSoknadNav {
                             __typename
@@ -152,6 +154,7 @@ query HentSnapshot($fnr: String!) {
                             sendtNav
                             tom
                             type
+                            eksternDokumentId
                         }
                         ... on GraphQLSykmelding {
                             __typename

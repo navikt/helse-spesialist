@@ -23,7 +23,8 @@ data class Inntektsmelding(
     override val id: UUIDString,
     override val type: Hendelsetype,
     val mottattDato: DateTimeString,
-    val beregnetInntekt: Double
+    val beregnetInntekt: Double,
+    val eksternDokumentId: UUIDString?
 ) : Hendelse
 
 data class SoknadArbeidsgiver(
@@ -32,7 +33,8 @@ data class SoknadArbeidsgiver(
     val fom: DateString,
     val tom: DateString,
     val rapportertDato: DateTimeString,
-    val sendtArbeidsgiver: DateTimeString
+    val sendtArbeidsgiver: DateTimeString,
+    val eksternDokumentId: UUIDString?
 ) : Hendelse
 
 data class SoknadNav(
@@ -41,7 +43,8 @@ data class SoknadNav(
     val fom: DateString,
     val tom: DateString,
     val rapportertDato: DateTimeString,
-    val sendtNav: DateTimeString
+    val sendtNav: DateTimeString,
+    val eksternDokumentId: UUIDString?
 ) : Hendelse
 
 data class Sykmelding(
@@ -57,7 +60,8 @@ internal fun GraphQLHendelse.tilHendelse(): Hendelse = when (this) {
         id = id,
         type = Hendelsetype.INNTEKTSMELDING,
         mottattDato = mottattDato,
-        beregnetInntekt = beregnetInntekt
+        beregnetInntekt = beregnetInntekt,
+        eksternDokumentId = eksternDokumentId,
     )
 
     is GraphQLSoknadArbeidsgiver -> SoknadArbeidsgiver(
@@ -66,7 +70,8 @@ internal fun GraphQLHendelse.tilHendelse(): Hendelse = when (this) {
         fom = fom,
         tom = tom,
         rapportertDato = rapportertDato,
-        sendtArbeidsgiver = sendtArbeidsgiver
+        sendtArbeidsgiver = sendtArbeidsgiver,
+        eksternDokumentId = eksternDokumentId,
     )
 
     is GraphQLSoknadNav -> SoknadNav(
@@ -75,7 +80,8 @@ internal fun GraphQLHendelse.tilHendelse(): Hendelse = when (this) {
         fom = fom,
         tom = tom,
         rapportertDato = rapportertDato,
-        sendtNav = sendtNav
+        sendtNav = sendtNav,
+        eksternDokumentId = eksternDokumentId
     )
 
     is GraphQLSykmelding -> Sykmelding(
