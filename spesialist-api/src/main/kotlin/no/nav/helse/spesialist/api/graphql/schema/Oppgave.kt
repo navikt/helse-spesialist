@@ -113,7 +113,6 @@ data class Oppgaveegenskap(
 
 data class OppgaveForPeriodevisning(
     val id: String,
-    val kanAvvises: Boolean,
 )
 
 data class Totrinnsvurdering(

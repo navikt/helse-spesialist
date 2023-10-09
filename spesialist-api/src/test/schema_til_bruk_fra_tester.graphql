@@ -360,7 +360,6 @@ type OppgaveForOversiktsvisning {
 
 type OppgaveForPeriodevisning {
     id: String!
-    kanAvvises: Boolean!
 }
 
 type OppgaveTilBehandling {

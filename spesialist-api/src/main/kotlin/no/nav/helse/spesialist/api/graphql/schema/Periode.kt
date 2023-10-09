@@ -9,6 +9,7 @@ import no.nav.helse.spesialist.api.Toggle
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
+import no.nav.helse.spesialist.api.oppgave.OppgaveForPeriodevisningDto
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
@@ -409,7 +410,7 @@ data class BeregnetPeriode(
             val handlinger = if (oppgavetype == Oppgavetype.RISK_QA && !tilganger.harTilgangTilRiskOppgaver())
                 listOf(Handling(Periodehandling.UTBETALE, false, "IkkeTilgangTilRisk"))
             else listOf(Handling(Periodehandling.UTBETALE, true))
-            val kanAvvises = oppgave?.kanAvvises ?: false
+            val kanAvvises = oppgaveDto?.kanAvvises ?: false
             handlinger + Handling(Periodehandling.AVVISE, kanAvvises, "Spleis støtter ikke å avvise perioden")
         }
     }
@@ -508,14 +509,11 @@ data class BeregnetPeriode(
     fun oppgavereferanse(): String? =
         oppgaveApiDao.finnOppgaveId(UUID.fromString(vedtaksperiodeId()))?.toString()
 
-    val oppgave: OppgaveForPeriodevisning? by lazy {
-        oppgaveApiDao.finnPeriodeoppgave(UUID.fromString(vedtaksperiodeId()))?.let { oppgaveForPeriodevisningDto ->
-            OppgaveForPeriodevisning(
-                id = oppgaveForPeriodevisningDto.id,
-                kanAvvises = oppgaveForPeriodevisningDto.kanAvvises
-            )
-        }
+    private val oppgaveDto: OppgaveForPeriodevisningDto? by lazy {
+        oppgaveApiDao.finnPeriodeoppgave(UUID.fromString(periode.vedtaksperiodeId))
     }
+
+    val oppgave = oppgaveDto?.let { oppgaveDto -> OppgaveForPeriodevisning(id = oppgaveDto.id) }
 
     fun totrinnsvurdering(): Totrinnsvurdering? =
         totrinnsvurderingApiDao.hentAktiv(UUID.fromString(vedtaksperiodeId()))?.let {
