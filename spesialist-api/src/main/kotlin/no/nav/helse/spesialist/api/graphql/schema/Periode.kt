@@ -367,7 +367,10 @@ data class UberegnetVilkarsprovdPeriode(
         varselRepository.finnGodkjenteVarslerForUberegnetPeriode(UUID.fromString(vedtaksperiodeId())).toList()
     fun notater(): List<Notat> = notater(notatDao, vedtaksperiodeId())
 
-    fun vilkarsgrunnlagId(): UUIDString = vilkarsgrunnlagId
+    // Det blir litt for tungvint å håndtere i Speil at vilkarsgrunnlag kan være både null og ikke-null.
+    // Feltet må være nullable i BeregnetPeriode pga. at spleis bruker BeregnetPeriode for annullerte perioder, og de
+    // har vilkarsgrunnlag = null
+    fun vilkarsgrunnlagId(): UUIDString? = vilkarsgrunnlagId
 }
 
 enum class Periodehandling {
