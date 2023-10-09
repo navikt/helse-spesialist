@@ -8,26 +8,6 @@ import no.nav.helse.spesialist.api.vedtaksperiode.EnhetDto
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
 
-// TODO: Ta i bruk denne i DAO
-data class OppgaveForOversiktsvisningDto(
-    val oppgavereferanse: String,
-    val oppgavetype: String,
-    val opprettet: LocalDateTime,
-    val vedtaksperiodeId: UUID,
-    val personinfo: PersoninfoApiDto,
-    val fødselsnummer: String,
-    val aktørId: String,
-    val type: Periodetype?,
-    val inntektskilde: Inntektskilde?,
-    var boenhet: EnhetDto,
-    val tildeling: TildelingApiDto?,
-    val erBeslutterOppgave: Boolean,
-    val erReturOppgave: Boolean,
-    val trengerTotrinnsvurdering: Boolean,
-    val tidligereSaksbehandlerOid: UUID?,
-    val sistSendt: LocalDateTime?
-)
-
 data class OppgaveForPeriodevisningDto(
     val id: String,
     val kanAvvises: Boolean,
