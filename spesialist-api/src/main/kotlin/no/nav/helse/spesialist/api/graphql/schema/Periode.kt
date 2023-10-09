@@ -366,7 +366,7 @@ data class UberegnetVilkarsprovdPeriode(
         varselRepository.finnGodkjenteVarslerForUberegnetPeriode(UUID.fromString(vedtaksperiodeId())).toList()
     fun notater(): List<Notat> = notater(notatDao, vedtaksperiodeId())
 
-    fun vilkarsgrunnlagId(): UUIDString? = vilkarsgrunnlagId
+    fun vilkarsgrunnlagId(): UUIDString = vilkarsgrunnlagId
 }
 
 enum class Periodehandling {
