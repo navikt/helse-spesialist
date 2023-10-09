@@ -46,6 +46,7 @@ import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.OverstyringMediator
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.TilgangskontrollørForReservasjon
+import no.nav.helse.mediator.dokument.DokumentMediator
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.mediator.oppgave.Oppgavemelder
@@ -242,6 +243,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         snapshotClient = snapshotClient,
     )
 
+    private val dokumentMediator: DokumentMediator = DokumentMediator()
+
     private val plukkTilManuell: PlukkTilManuell<String> = ({
         it?.let {
             val divisor = it.toInt()
@@ -341,7 +344,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 oppgavehåndterer = oppgaveMediator,
                 totrinnsvurderinghåndterer = totrinnsvurderingMediator,
                 godkjenninghåndterer = godkjenningService,
-                personhåndterer = hendelseMediator
+                personhåndterer = hendelseMediator,
+                dokumenthåndterer = dokumentMediator,
             )
 
             routing {

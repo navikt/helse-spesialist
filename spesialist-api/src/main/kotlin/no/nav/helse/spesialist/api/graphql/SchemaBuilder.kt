@@ -4,6 +4,7 @@ import com.expediagroup.graphql.generator.SchemaGeneratorConfig
 import com.expediagroup.graphql.generator.TopLevelObject
 import com.expediagroup.graphql.generator.toSchema
 import graphql.schema.GraphQLSchema
+import no.nav.helse.spesialist.api.Dokumenthåndterer
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
 import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
@@ -22,6 +23,7 @@ import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutation
 import no.nav.helse.spesialist.api.graphql.mutation.VarselMutation
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutation
 import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQuery
+import no.nav.helse.spesialist.api.graphql.query.DokumentQuery
 import no.nav.helse.spesialist.api.graphql.query.NotatQuery
 import no.nav.helse.spesialist.api.graphql.query.OppdragQuery
 import no.nav.helse.spesialist.api.graphql.query.OppgaverQuery
@@ -66,6 +68,7 @@ internal class SchemaBuilder(
     private val totrinnsvurderinghåndterer: Totrinnsvurderinghåndterer,
     private val godkjenninghåndterer: Godkjenninghåndterer,
     private val personhåndterer: Personhåndterer,
+    private val dokumenthåndterer: Dokumenthåndterer,
 ) {
     fun build(): GraphQLSchema {
         val schemaConfig = SchemaGeneratorConfig(
@@ -119,7 +122,10 @@ internal class SchemaBuilder(
                     OpptegnelseQuery(
                         saksbehandlerhåndterer = saksbehandlerhåndterer
                     )
-                )
+                ),
+                TopLevelObject(
+                    DokumentQuery(dokumenthåndterer = dokumenthåndterer)
+                ),
             ),
             mutations = listOf(
                 TopLevelObject(

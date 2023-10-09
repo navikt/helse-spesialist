@@ -17,6 +17,7 @@ import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import java.time.Duration
 import java.util.UUID
+import no.nav.helse.spesialist.api.Dokumenthåndterer
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
 import no.nav.helse.spesialist.api.GraphQLMetrikker
 import no.nav.helse.spesialist.api.Personhåndterer
@@ -73,7 +74,8 @@ fun Application.graphQLApi(
     oppgavehåndterer: Oppgavehåndterer,
     totrinnsvurderinghåndterer: Totrinnsvurderinghåndterer,
     godkjenninghåndterer: Godkjenninghåndterer,
-    personhåndterer: Personhåndterer
+    personhåndterer: Personhåndterer,
+    dokumenthåndterer: Dokumenthåndterer,
 ) {
     val schema = SchemaBuilder(
         personApiDao = personApiDao,
@@ -97,7 +99,8 @@ fun Application.graphQLApi(
         oppgavehåndterer = oppgavehåndterer,
         totrinnsvurderinghåndterer = totrinnsvurderinghåndterer,
         godkjenninghåndterer = godkjenninghåndterer,
-        personhåndterer = personhåndterer
+        personhåndterer = personhåndterer,
+        dokumenthåndterer = dokumenthåndterer,
     ).build()
 
     val server = GraphQLServer(

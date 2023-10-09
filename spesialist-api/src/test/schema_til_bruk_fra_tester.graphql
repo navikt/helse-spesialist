@@ -459,6 +459,7 @@ type Query {
     behandledeOppgaver(behandletAvIdent: String, behandletAvOid: String!, fom: String): [FerdigstiltOppgave!]!
     behandlingsstatistikk: Behandlingsstatistikk!
     hentOpptegnelser(sekvensId: Int): [Opptegnelse!]!
+    hentSoknad(dokumentId: String!, fnr: String!): Soknad!
     notater(forPerioder: [String!]!): [Notater!]!
     oppdrag(fnr: String!): [Oppdrag!]!
     oppgaver(pageSize: Int, sortering: [OppgavesorteringInput!], startIndex: Int): [OppgaveTilBehandling!]!
@@ -555,6 +556,11 @@ type SkjonnsfastsattSykepengegrunnlag {
     type: Skjonnsfastsettingstype
 }
 
+type Soknad {
+    sendtNav: String!
+    soknadsperioder: [Soknadsperiode!]!
+}
+
 type SoknadArbeidsgiver implements Hendelse {
     fom: String!
     id: String!
@@ -571,6 +577,14 @@ type SoknadNav implements Hendelse {
     sendtNav: String!
     tom: String!
     type: Hendelsetype!
+}
+
+type Soknadsperiode {
+    avtaltTimer: Int
+    faktiskGrad: Float
+    faktiskTimer: Float
+    sykemeldingsgrad: Float
+    sykemeldingstype: String
 }
 
 type Sykepengedager {
