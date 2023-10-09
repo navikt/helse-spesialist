@@ -413,6 +413,16 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
     """, mapOf("fodselsnummer" to fødselsnummer.toLong())
     ).update()
 
+    fun settKanIkkeAvvises(utbetalingId: UUID) = asSQL(
+        """
+            UPDATE oppgave
+            SET kan_avvises = false
+            WHERE utbetaling_id = :utbetalingId
+            AND status = 'AvventerSaksbehandler'
+            AND kan_avvises = true;
+        """.trimIndent(), mapOf("utbetalingId" to utbetalingId)
+    ).update().let { it > 0 }
+
 
     private fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else this.toString()
 }

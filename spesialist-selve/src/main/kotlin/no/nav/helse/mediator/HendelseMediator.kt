@@ -317,6 +317,13 @@ internal class HendelseMediator(
         context: MessageContext,
     ) {
         if (oppgaveDao.harGyldigOppgave(utbetalingId) || vedtakDao.erAutomatiskGodkjent(utbetalingId)) {
+            //midlertidig kode inntil alle oppgaver er oppdatert med riktig status på flagget
+            if (!kanAvvises) {
+                oppgaveDao.settKanIkkeAvvises(utbetalingId).let { bleOppdatert ->
+                    if (bleOppdatert) sikkerLogg.info("Satte kanAvvises til false for utbetalingId=$utbetalingId, vedtaksperiodeId=$vedtaksperiodeId og hendelsesId=$id")
+                    else sikkerLogg.info("KanAvvises er allerede oppdatert for utbetalingId=$utbetalingId, vedtaksperiodeId=$vedtaksperiodeId og hendelsesId=$id")
+                }
+            }
             sikkerLogg.info("vedtaksperiodeId=$vedtaksperiodeId med utbetalingId=$utbetalingId har gyldig oppgave eller er automatisk godkjent. Ignorerer godkjenningsbehov med id=$id")
             return
         }
