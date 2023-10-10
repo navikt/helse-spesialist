@@ -73,7 +73,7 @@ class Oppgave private constructor(
     ) {
         logg.info("Oppgave med {} forsøkes tildelt grunnet reservasjon.", kv("oppgaveId", id))
         sikkerlogg.info("Oppgave med {} forsøkes tildelt $saksbehandler grunnet reservasjon.", kv("oppgaveId", id))
-        if (egenskap == STIKKPRØVE) {
+        if (egenskaper.contains(STIKKPRØVE)) {
             logg.info("Oppgave med {} er stikkprøve og tildeles ikke på tross av reservasjon.", kv("oppgaveId", id))
             return
         }
