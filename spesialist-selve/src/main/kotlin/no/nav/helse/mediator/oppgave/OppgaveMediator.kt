@@ -300,7 +300,6 @@ internal class OppgaveMediator(
         return when (egenskap) {
             Egenskap.SØKNAD -> Oppgavetype.SOKNAD
             Egenskap.REVURDERING -> Oppgavetype.REVURDERING
-            Egenskap.STIKKPRØVE -> Oppgavetype.STIKKPROVE
             else -> throw IllegalArgumentException("Kunne ikke mappe egenskap til periodetype")
         }
     }
