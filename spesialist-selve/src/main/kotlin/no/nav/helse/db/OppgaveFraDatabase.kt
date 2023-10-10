@@ -6,7 +6,7 @@ import java.util.UUID
 data class OppgaveFraDatabase(
     val id: Long,
     val egenskap: String,
-    val egenskaper: List<String>,
+    val egenskaper: List<EgenskapForDatabase>,
     val status: String,
     val vedtaksperiodeId: UUID,
     val utbetalingId: UUID,
@@ -23,7 +23,7 @@ data class OppgaveFraDatabaseForVisning(
     val aktørId: String,
     val vedtaksperiodeId: UUID,
     val navn: PersonnavnFraDatabase,
-    val egenskaper: List<String>,
+    val egenskaper: List<EgenskapForDatabase>,
     val tildelt: SaksbehandlerFraDatabase? = null,
     val påVent: Boolean = false,
     val opprettet: LocalDateTime,
@@ -36,4 +36,32 @@ enum class SorteringsnøkkelForDatabase {
     TILDELT_TIL,
     OPPRETTET,
     SØKNAD_MOTTATT
+}
+
+
+enum class EgenskapForDatabase {
+    RISK_QA,
+    FORTROLIG_ADRESSE,
+    STRENGT_FORTROLIG_ADRESSE,
+    EGEN_ANSATT,
+    BESLUTTER,
+    SPESIALSAK,
+    REVURDERING,
+    SØKNAD,
+    STIKKPRØVE,
+    UTBETALING_TIL_SYKMELDT,
+    DELVIS_REFUSJON,
+    UTBETALING_TIL_ARBEIDSGIVER,
+    INGEN_UTBETALING,
+    HASTER,
+    RETUR,
+    FULLMAKT,
+    VERGEMÅL,
+    EN_ARBEIDSGIVER,
+    FLERE_ARBEIDSGIVERE,
+    UTLAND,
+    FORLENGELSE,
+    FORSTEGANGSBEHANDLING,
+    INFOTRYGDFORLENGELSE,
+    OVERGANG_FRA_IT
 }

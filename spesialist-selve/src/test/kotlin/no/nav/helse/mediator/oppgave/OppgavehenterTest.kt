@@ -3,6 +3,7 @@ package no.nav.helse.mediator.oppgave
 import TilgangskontrollForTestHarIkkeTilgang
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveFraDatabase
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.SaksbehandlerRepository
@@ -16,16 +17,13 @@ import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.EnumSource
 import kotlin.properties.Delegates
 
 class OppgavehenterTest {
 
     private companion object {
         private const val OPPGAVE_ID = 1L
-        private const val TYPE = "SØKNAD"
+        private val TYPE = EgenskapForDatabase.SØKNAD
         private const val STATUS = "AvventerSaksbehandler"
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
         private val UTBETALING_ID = UUID.randomUUID()
@@ -101,15 +99,6 @@ class OppgavehenterTest {
         )
     }
 
-    @ParameterizedTest
-    @EnumSource(Egenskap::class)
-    fun `alle egenskaper må mappes til fra string-verdier`(egenskap: Egenskap) {
-        val oppgavehenter = Oppgavehenter(oppgaveRepository(listOf(egenskap.name)), totrinnsvurderingRepository(), saksbehandlerRepository, TilgangskontrollForTestHarIkkeTilgang)
-        assertDoesNotThrow {
-            oppgavehenter.oppgave(OPPGAVE_ID)
-        }
-    }
-
     private val inspektør = object : OppgaveVisitor {
         private var id by Delegates.notNull<Long>()
         private lateinit var egenskap: Egenskap
@@ -178,11 +167,11 @@ class OppgavehenterTest {
         }
     }
 
-    private fun oppgaveRepository(oppgaveegenskaper: List<String> = listOf(TYPE)) = object : OppgaveRepository {
+    private fun oppgaveRepository(oppgaveegenskaper: List<EgenskapForDatabase> = listOf(TYPE)) = object : OppgaveRepository {
         override fun finnOppgave(id: Long): OppgaveFraDatabase {
             return OppgaveFraDatabase(
                 id = OPPGAVE_ID,
-                egenskap = TYPE,
+                egenskap = TYPE.name,
                 egenskaper = oppgaveegenskaper,
                 status = STATUS,
                 vedtaksperiodeId = VEDTAKSPERIODE_ID,

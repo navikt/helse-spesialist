@@ -111,7 +111,7 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
             oppgavestatus = "Ferdigstilt",
             ferdigstiltAv = SAKSBEHANDLEREPOST,
             oid = SAKSBEHANDLER_OID,
-            egenskaper = listOf(OPPGAVETYPE)
+            egenskaper = listOf(EGENSKAP)
         )
         tildelTilSaksbehandler()
         val saksbehandlerepost = tildelingDao.tildelingForPerson(FNR)

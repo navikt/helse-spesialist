@@ -2,6 +2,7 @@ package no.nav.helse.mediator.oppgave
 
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveFraDatabase
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.TildelingDao
@@ -93,7 +94,7 @@ class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
     ) {
         oppgaveForLagring = OppgaveFraDatabase(
             id = id,
-            egenskap = egenskap(egenskap),
+            egenskap = egenskap(egenskap).name,
             egenskaper = egenskaper.map { egenskap(it) },
             status = status(tilstand),
             vedtaksperiodeId = vedtaksperiodeId,
@@ -136,32 +137,32 @@ class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
         }
     }
 
-    private fun egenskap(egenskap: Egenskap): String {
+    private fun egenskap(egenskap: Egenskap): EgenskapForDatabase {
         return when (egenskap) {
-            DELVIS_REFUSJON -> "DELVIS_REFUSJON"
-            INGEN_UTBETALING -> "INGEN_UTBETALING"
-            REVURDERING -> "REVURDERING"
-            STIKKPRØVE -> "STIKKPRØVE"
-            SØKNAD -> "SØKNAD"
-            EGEN_ANSATT -> "EGEN_ANSATT"
-            FORTROLIG_ADRESSE -> "FORTROLIG_ADRESSE"
-            STRENGT_FORTROLIG_ADRESSE -> "STRENGT_FORTROLIG_ADRESSE"
-            RISK_QA -> "RISK_QA"
-            UTBETALING_TIL_ARBEIDSGIVER -> "UTBETALING_TIL_ARBEIDSGIVER"
-            UTBETALING_TIL_SYKMELDT -> "UTBETALING_TIL_SYKMELDT"
-            EN_ARBEIDSGIVER -> "EN_ARBEIDSGIVER"
-            FLERE_ARBEIDSGIVERE -> "FLERE_ARBEIDSGIVERE"
-            UTLAND -> "UTLAND"
-            HASTER -> "HASTER"
-            BESLUTTER -> "BESLUTTER"
-            RETUR -> "RETUR"
-            FULLMAKT -> "FULLMAKT"
-            VERGEMÅL -> "VERGEMÅL"
-            SPESIALSAK -> "SPESIALSAK"
-            FORLENGELSE -> "FORLENGELSE"
-            FORSTEGANGSBEHANDLING -> "FORSTEGANGSBEHANDLING"
-            INFOTRYGDFORLENGELSE -> "INFOTRYGDFORLENGELSE"
-            OVERGANG_FRA_IT -> "OVERGANG_FRA_IT"
+            DELVIS_REFUSJON -> EgenskapForDatabase.DELVIS_REFUSJON
+            INGEN_UTBETALING -> EgenskapForDatabase.INGEN_UTBETALING
+            REVURDERING -> EgenskapForDatabase.REVURDERING
+            STIKKPRØVE -> EgenskapForDatabase.STIKKPRØVE
+            SØKNAD -> EgenskapForDatabase.SØKNAD
+            EGEN_ANSATT -> EgenskapForDatabase.EGEN_ANSATT
+            FORTROLIG_ADRESSE -> EgenskapForDatabase.FORTROLIG_ADRESSE
+            STRENGT_FORTROLIG_ADRESSE -> EgenskapForDatabase.STRENGT_FORTROLIG_ADRESSE
+            RISK_QA -> EgenskapForDatabase.RISK_QA
+            UTBETALING_TIL_ARBEIDSGIVER -> EgenskapForDatabase.UTBETALING_TIL_ARBEIDSGIVER
+            UTBETALING_TIL_SYKMELDT -> EgenskapForDatabase.UTBETALING_TIL_SYKMELDT
+            EN_ARBEIDSGIVER -> EgenskapForDatabase.EN_ARBEIDSGIVER
+            FLERE_ARBEIDSGIVERE -> EgenskapForDatabase.FLERE_ARBEIDSGIVERE
+            UTLAND -> EgenskapForDatabase.UTLAND
+            HASTER -> EgenskapForDatabase.HASTER
+            BESLUTTER -> EgenskapForDatabase.BESLUTTER
+            RETUR -> EgenskapForDatabase.RETUR
+            FULLMAKT -> EgenskapForDatabase.FULLMAKT
+            VERGEMÅL -> EgenskapForDatabase.VERGEMÅL
+            SPESIALSAK -> EgenskapForDatabase.SPESIALSAK
+            FORLENGELSE -> EgenskapForDatabase.FORLENGELSE
+            FORSTEGANGSBEHANDLING -> EgenskapForDatabase.FORSTEGANGSBEHANDLING
+            INFOTRYGDFORLENGELSE -> EgenskapForDatabase.INFOTRYGDFORLENGELSE
+            OVERGANG_FRA_IT -> EgenskapForDatabase.OVERGANG_FRA_IT
         }
     }
 

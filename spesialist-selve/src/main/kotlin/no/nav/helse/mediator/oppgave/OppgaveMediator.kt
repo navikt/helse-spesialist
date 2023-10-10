@@ -3,6 +3,7 @@ package no.nav.helse.mediator.oppgave
 import java.sql.SQLException
 import java.util.UUID
 import no.nav.helse.Tilgangsgrupper
+import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveFraDatabaseForVisning
 import no.nav.helse.db.OppgavesorteringForDatabase
 import no.nav.helse.db.ReservasjonDao
@@ -185,7 +186,7 @@ internal class OppgaveMediator(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
         egenskap: String,
-        egenskaper: List<String>,
+        egenskaper: List<EgenskapForDatabase>,
         hendelseId: UUID,
         kanAvvises: Boolean,
     ) {
@@ -198,7 +199,7 @@ internal class OppgaveMediator(
         status: String,
         ferdigstiltAvIdent: String?,
         ferdigstiltAvOid: UUID?,
-        egenskaper: List<String>,
+        egenskaper: List<EgenskapForDatabase>,
     ) {
         oppgaveDao.updateOppgave(oppgaveId, status, ferdigstiltAvIdent, ferdigstiltAvOid, egenskaper)
     }
@@ -233,7 +234,7 @@ internal class OppgaveMediator(
         tilgangskontroll = TilgangskontrollørForApi(grupper, tilgangsgrupper),
     )
 
-    private fun List<String>.tilEgenskaper(): List<Egenskap> = this.map { enumValueOf<Egenskap>(it) }
+    private fun List<EgenskapForDatabase>.tilEgenskaper(): List<Egenskap> = this.map { it.mapTilEgenskap() }
 
     private fun List<OppgaveFraDatabaseForVisning>.tilOppgaveTilBehandling() = map {
         val egenskaper = it.egenskaper.tilEgenskaper()
@@ -349,6 +350,33 @@ internal class OppgaveMediator(
         Egenskap.FORSTEGANGSBEHANDLING -> EgenskapForApi.FORSTEGANGSBEHANDLING
         Egenskap.INFOTRYGDFORLENGELSE -> EgenskapForApi.INFOTRYGDFORLENGELSE
         Egenskap.OVERGANG_FRA_IT -> EgenskapForApi.OVERGANG_FRA_IT
+    }
+
+    private fun EgenskapForDatabase.mapTilEgenskap(): Egenskap = when (this) {
+        EgenskapForDatabase.RISK_QA -> Egenskap.RISK_QA
+        EgenskapForDatabase.FORTROLIG_ADRESSE -> Egenskap.FORTROLIG_ADRESSE
+        EgenskapForDatabase.STRENGT_FORTROLIG_ADRESSE -> Egenskap.STRENGT_FORTROLIG_ADRESSE
+        EgenskapForDatabase.EGEN_ANSATT -> Egenskap.EGEN_ANSATT
+        EgenskapForDatabase.BESLUTTER -> Egenskap.BESLUTTER
+        EgenskapForDatabase.SPESIALSAK -> Egenskap.SPESIALSAK
+        EgenskapForDatabase.REVURDERING -> Egenskap.REVURDERING
+        EgenskapForDatabase.SØKNAD -> Egenskap.SØKNAD
+        EgenskapForDatabase.STIKKPRØVE -> Egenskap.STIKKPRØVE
+        EgenskapForDatabase.UTBETALING_TIL_SYKMELDT -> Egenskap.UTBETALING_TIL_SYKMELDT
+        EgenskapForDatabase.DELVIS_REFUSJON -> Egenskap.DELVIS_REFUSJON
+        EgenskapForDatabase.UTBETALING_TIL_ARBEIDSGIVER -> Egenskap.UTBETALING_TIL_ARBEIDSGIVER
+        EgenskapForDatabase.INGEN_UTBETALING -> Egenskap.INGEN_UTBETALING
+        EgenskapForDatabase.HASTER -> Egenskap.HASTER
+        EgenskapForDatabase.RETUR -> Egenskap.RETUR
+        EgenskapForDatabase.FULLMAKT -> Egenskap.FULLMAKT
+        EgenskapForDatabase.VERGEMÅL -> Egenskap.VERGEMÅL
+        EgenskapForDatabase.EN_ARBEIDSGIVER -> Egenskap.EN_ARBEIDSGIVER
+        EgenskapForDatabase.FLERE_ARBEIDSGIVERE -> Egenskap.FLERE_ARBEIDSGIVERE
+        EgenskapForDatabase.UTLAND -> Egenskap.UTLAND
+        EgenskapForDatabase.FORLENGELSE -> Egenskap.FORLENGELSE
+        EgenskapForDatabase.FORSTEGANGSBEHANDLING -> Egenskap.FORSTEGANGSBEHANDLING
+        EgenskapForDatabase.INFOTRYGDFORLENGELSE -> Egenskap.INFOTRYGDFORLENGELSE
+        EgenskapForDatabase.OVERGANG_FRA_IT -> Egenskap.OVERGANG_FRA_IT
     }
 
     private fun Egenskap.Kategori.mapToApiKategori(): KategoriForApi = when (this) {

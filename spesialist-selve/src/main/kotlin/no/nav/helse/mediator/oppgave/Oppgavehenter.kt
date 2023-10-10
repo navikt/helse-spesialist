@@ -1,5 +1,6 @@
 package no.nav.helse.mediator.oppgave
 
+import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.TotrinnsvurderingRepository
@@ -46,7 +47,7 @@ class Oppgavehenter(
 
         return Oppgave(
             id = oppgave.id,
-            egenskap = egenskap(oppgave.egenskap),
+            egenskap = enumValueOf<EgenskapForDatabase>(oppgave.egenskap).tilEgenskap(),
             tilstand = tilstand(oppgave.status),
             vedtaksperiodeId = oppgave.vedtaksperiodeId,
             utbetalingId = oppgave.utbetalingId,
@@ -69,7 +70,7 @@ class Oppgavehenter(
                     oppdatert = it.oppdatert
                 )
             },
-            egenskaper = oppgave.egenskaper.map { egenskap(it) }
+            egenskaper = oppgave.egenskaper.map { it.tilEgenskap() }
         )
     }
 
@@ -83,33 +84,32 @@ class Oppgavehenter(
         }
     }
 
-    private fun egenskap(egenskap: String): Egenskap {
-        return when (egenskap) {
-            "RISK_QA" -> RISK_QA
-            "FORTROLIG_ADRESSE" -> FORTROLIG_ADRESSE
-            "STRENGT_FORTROLIG_ADRESSE" -> STRENGT_FORTROLIG_ADRESSE
-            "EGEN_ANSATT" -> EGEN_ANSATT
-            "REVURDERING" -> REVURDERING
-            "SØKNAD" -> SØKNAD
-            "STIKKPRØVE" -> STIKKPRØVE
-            "UTBETALING_TIL_SYKMELDT" -> UTBETALING_TIL_SYKMELDT
-            "DELVIS_REFUSJON" -> DELVIS_REFUSJON
-            "UTBETALING_TIL_ARBEIDSGIVER" -> UTBETALING_TIL_ARBEIDSGIVER
-            "INGEN_UTBETALING" -> INGEN_UTBETALING
-            "EN_ARBEIDSGIVER" -> EN_ARBEIDSGIVER
-            "FLERE_ARBEIDSGIVERE" -> FLERE_ARBEIDSGIVERE
-            "FORLENGELSE" -> FORLENGELSE
-            "FORSTEGANGSBEHANDLING" -> FORSTEGANGSBEHANDLING
-            "INFOTRYGDFORLENGELSE" -> INFOTRYGDFORLENGELSE
-            "OVERGANG_FRA_IT" -> OVERGANG_FRA_IT
-            "UTLAND" -> UTLAND
-            "HASTER" -> HASTER
-            "RETUR" -> RETUR
-            "BESLUTTER" -> BESLUTTER
-            "FULLMAKT" -> FULLMAKT
-            "VERGEMÅL" -> VERGEMÅL
-            "SPESIALSAK" -> SPESIALSAK
-            else -> throw IllegalStateException("Egenskap $egenskap er ikke en gyldig egenskap")
+    private fun EgenskapForDatabase.tilEgenskap(): Egenskap {
+        return when (this) {
+            EgenskapForDatabase.RISK_QA -> RISK_QA
+            EgenskapForDatabase.FORTROLIG_ADRESSE -> FORTROLIG_ADRESSE
+            EgenskapForDatabase.STRENGT_FORTROLIG_ADRESSE -> STRENGT_FORTROLIG_ADRESSE
+            EgenskapForDatabase.EGEN_ANSATT -> EGEN_ANSATT
+            EgenskapForDatabase.REVURDERING -> REVURDERING
+            EgenskapForDatabase.SØKNAD -> SØKNAD
+            EgenskapForDatabase.STIKKPRØVE -> STIKKPRØVE
+            EgenskapForDatabase.UTBETALING_TIL_SYKMELDT -> UTBETALING_TIL_SYKMELDT
+            EgenskapForDatabase.DELVIS_REFUSJON -> DELVIS_REFUSJON
+            EgenskapForDatabase.UTBETALING_TIL_ARBEIDSGIVER -> UTBETALING_TIL_ARBEIDSGIVER
+            EgenskapForDatabase.INGEN_UTBETALING -> INGEN_UTBETALING
+            EgenskapForDatabase.EN_ARBEIDSGIVER -> EN_ARBEIDSGIVER
+            EgenskapForDatabase.FLERE_ARBEIDSGIVERE -> FLERE_ARBEIDSGIVERE
+            EgenskapForDatabase.FORLENGELSE -> FORLENGELSE
+            EgenskapForDatabase.FORSTEGANGSBEHANDLING -> FORSTEGANGSBEHANDLING
+            EgenskapForDatabase.INFOTRYGDFORLENGELSE -> INFOTRYGDFORLENGELSE
+            EgenskapForDatabase.OVERGANG_FRA_IT -> OVERGANG_FRA_IT
+            EgenskapForDatabase.UTLAND -> UTLAND
+            EgenskapForDatabase.HASTER -> HASTER
+            EgenskapForDatabase.RETUR -> RETUR
+            EgenskapForDatabase.BESLUTTER -> BESLUTTER
+            EgenskapForDatabase.FULLMAKT -> FULLMAKT
+            EgenskapForDatabase.VERGEMÅL -> VERGEMÅL
+            EgenskapForDatabase.SPESIALSAK -> SPESIALSAK
         }
     }
 

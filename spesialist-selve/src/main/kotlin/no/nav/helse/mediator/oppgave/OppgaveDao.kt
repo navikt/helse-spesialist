@@ -3,6 +3,7 @@ package no.nav.helse.mediator.oppgave
 import java.util.UUID
 import javax.sql.DataSource
 import no.nav.helse.HelseDao
+import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveFraDatabase
 import no.nav.helse.db.OppgaveFraDatabaseForVisning
 import no.nav.helse.db.OppgavesorteringForDatabase
@@ -44,7 +45,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
             OppgaveFraDatabase(
                 id = id,
                 egenskap = row.string("type"),
-                egenskaper = row.array<String>("egenskaper").toList(),
+                egenskaper = row.array<String>("egenskaper").toList().map { enumValueOf(it) },
                 status = row.string("status"),
                 vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
                 utbetalingId = row.uuid("utbetaling_id"),
@@ -115,7 +116,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                     row.stringOrNull("mellomnavn"),
                     row.string("etternavn"),
                 ),
-                egenskaper = row.array<String>("egenskaper").toList(),
+                egenskaper = row.array<String>("egenskaper").toList().map { enumValueOf(it) },
                 tildelt = row.uuidOrNull("oid")?.let {
                     SaksbehandlerFraDatabase(
                         epostadresse = row.string("epost"),
@@ -282,13 +283,13 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
         }
     }
 
-    fun opprettOppgave(id: Long, commandContextId: UUID, egenskap: String, egenskaper: List<String>, vedtaksperiodeId: UUID, utbetalingId: UUID, kanAvvises: Boolean) =
+    fun opprettOppgave(id: Long, commandContextId: UUID, egenskap: String, egenskaper: List<EgenskapForDatabase>, vedtaksperiodeId: UUID, utbetalingId: UUID, kanAvvises: Boolean) =
         requireNotNull(run {
             val vedtakRef = vedtakRef(vedtaksperiodeId)
 
             val (arbeidsgiverBeløp, personBeløp) = finnArbeidsgiverbeløpOgPersonbeløp(vedtaksperiodeId, utbetalingId)
             val mottaker = finnMottaker(arbeidsgiverBeløp > 0, personBeløp > 0)
-            val egenskaperForDatabase = egenskaper.joinToString { """ "$it" """ }
+            val egenskaperForDatabase = egenskaper.joinToString { """ "${it.name}" """ }
 
             asSQL(
                 """
@@ -319,9 +320,9 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
         oppgavestatus: String,
         ferdigstiltAv: String? = null,
         oid: UUID? = null,
-        egenskaper: List<String>,
+        egenskaper: List<EgenskapForDatabase>,
     ): Int {
-        val egenskaperForDatabase = egenskaper.joinToString { """ "$it" """ }
+        val egenskaperForDatabase = egenskaper.joinToString { """ "${it.name}" """ }
         return asSQL(
             """
                 UPDATE oppgave

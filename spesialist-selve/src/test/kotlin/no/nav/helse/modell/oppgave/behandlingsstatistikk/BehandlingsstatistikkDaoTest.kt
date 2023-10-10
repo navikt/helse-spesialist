@@ -78,7 +78,7 @@ internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
     @Test
     fun antallManuelleGodkjenninger() {
         nyPerson()
-        oppgaveDao.updateOppgave(oppgaveId = oppgaveId, oppgavestatus = "Ferdigstilt", egenskaper = listOf(OPPGAVETYPE))
+        oppgaveDao.updateOppgave(oppgaveId = oppgaveId, oppgavestatus = "Ferdigstilt", egenskaper = listOf(EGENSKAP))
         assertTrue(behandlingsstatistikkDao.getManueltUtførteOppgaverPerInntektOgPeriodetype(NOW).perMottakertype.isEmpty())
         val dto = behandlingsstatistikkDao.oppgavestatistikk(NOW)
         assertEquals(1, dto.fullførteBehandlinger.totalt)

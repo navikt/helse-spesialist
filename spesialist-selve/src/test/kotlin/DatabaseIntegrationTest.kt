@@ -12,6 +12,7 @@ import kotliquery.action.QueryAction
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
+import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.januar
@@ -40,7 +41,6 @@ import no.nav.helse.modell.vedtaksperiode.Periode
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.modell.vergemal.VergemålDao
-import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.abonnement.AbonnementDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
@@ -81,6 +81,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         internal var OPPGAVE_ID = nextLong()
             private set
         internal const val OPPGAVETYPE = "SØKNAD"
+        internal val EGENSKAP = EgenskapForDatabase.SØKNAD
         internal const val OPPGAVESTATUS = "AvventerSaksbehandler"
 
         internal const val ORGNUMMER = "123456789"
@@ -108,64 +109,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
         val PERIODE = Periode(UUID.randomUUID(), LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 31))
     }
-
-    private val KODE7_GRUPPE_ID = UUID.randomUUID()
-    private val RISK_GRUPPE_ID = UUID.randomUUID()
-    private val BESLUTTER_GRUPPE_ID = UUID.randomUUID()
-    private val SKJERMEDE_PERSONER_GRUPPE_ID = UUID.randomUUID()
-    private val STIKKPRØVE_GRUPPE_ID = UUID.randomUUID()
-    private val SPESIALSAK_GRUPPE_ID = UUID.randomUUID()
-
-    protected val SAKSBEHANDLERTILGANGER_MED_INGEN = SaksbehandlerTilganger(
-        gruppetilganger = emptyList(),
-        kode7Saksbehandlergruppe = KODE7_GRUPPE_ID,
-        riskSaksbehandlergruppe = RISK_GRUPPE_ID,
-        beslutterSaksbehandlergruppe = BESLUTTER_GRUPPE_ID,
-        skjermedePersonerSaksbehandlergruppe = SKJERMEDE_PERSONER_GRUPPE_ID,
-        stikkprøveSaksbehandlergruppe = STIKKPRØVE_GRUPPE_ID,
-        spesialsakSaksbehandlergruppe = SPESIALSAK_GRUPPE_ID
-
-    )
-    protected val SAKSBEHANDLERTILGANGER_MED_KODE7 = SaksbehandlerTilganger(
-        gruppetilganger = listOf(KODE7_GRUPPE_ID),
-        kode7Saksbehandlergruppe = KODE7_GRUPPE_ID,
-        riskSaksbehandlergruppe = RISK_GRUPPE_ID,
-        beslutterSaksbehandlergruppe = BESLUTTER_GRUPPE_ID,
-        skjermedePersonerSaksbehandlergruppe = SKJERMEDE_PERSONER_GRUPPE_ID,
-        stikkprøveSaksbehandlergruppe = STIKKPRØVE_GRUPPE_ID,
-        spesialsakSaksbehandlergruppe = SPESIALSAK_GRUPPE_ID
-
-    )
-    protected val SAKSBEHANDLERTILGANGER_MED_RISK = SaksbehandlerTilganger(
-        gruppetilganger = listOf(RISK_GRUPPE_ID),
-        kode7Saksbehandlergruppe = KODE7_GRUPPE_ID,
-        riskSaksbehandlergruppe = RISK_GRUPPE_ID,
-        beslutterSaksbehandlergruppe = BESLUTTER_GRUPPE_ID,
-        skjermedePersonerSaksbehandlergruppe = SKJERMEDE_PERSONER_GRUPPE_ID,
-        stikkprøveSaksbehandlergruppe = STIKKPRØVE_GRUPPE_ID,
-        spesialsakSaksbehandlergruppe = SPESIALSAK_GRUPPE_ID
-
-    )
-    protected val SAKSBEHANDLERTILGANGER_MED_BESLUTTER = SaksbehandlerTilganger(
-        gruppetilganger = listOf(BESLUTTER_GRUPPE_ID),
-        kode7Saksbehandlergruppe = KODE7_GRUPPE_ID,
-        riskSaksbehandlergruppe = RISK_GRUPPE_ID,
-        beslutterSaksbehandlergruppe = BESLUTTER_GRUPPE_ID,
-        skjermedePersonerSaksbehandlergruppe = SKJERMEDE_PERSONER_GRUPPE_ID,
-        stikkprøveSaksbehandlergruppe = STIKKPRØVE_GRUPPE_ID,
-        spesialsakSaksbehandlergruppe = SPESIALSAK_GRUPPE_ID
-
-    )
-    protected val SAKSBEHANDLERTILGANGER_MED_STIKKPRØVE = SaksbehandlerTilganger(
-        gruppetilganger = listOf(STIKKPRØVE_GRUPPE_ID),
-        kode7Saksbehandlergruppe = KODE7_GRUPPE_ID,
-        riskSaksbehandlergruppe = RISK_GRUPPE_ID,
-        beslutterSaksbehandlergruppe = BESLUTTER_GRUPPE_ID,
-        skjermedePersonerSaksbehandlergruppe = SKJERMEDE_PERSONER_GRUPPE_ID,
-        stikkprøveSaksbehandlergruppe = STIKKPRØVE_GRUPPE_ID,
-        spesialsakSaksbehandlergruppe = SPESIALSAK_GRUPPE_ID
-
-    )
 
     internal var personId: Long = -1
         private set
@@ -259,7 +202,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         generasjonId: UUID = UUID.randomUUID(),
         contextId: UUID = UUID.randomUUID(),
         hendelseId: UUID = UUID.randomUUID(),
-        oppgaveEgenskaper: List<String> = listOf(OPPGAVETYPE),
+        oppgaveEgenskaper: List<EgenskapForDatabase> = listOf(EGENSKAP),
     ) {
         opprettPerson(fødselsnummer = fødselsnummer, aktørId = aktørId)
         opprettArbeidsgiver(organisasjonsnummer = organisasjonsnummer)
@@ -360,13 +303,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         )
     }
 
-    protected fun utbetalingForSisteGenerasjon(
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE,
-        utbetalingId: UUID
-    ) {
-        generasjonDao.utbetalingFor(generasjonId = generasjonDao.finnSisteGenerasjonFor(vedtaksperiodeId)!!, utbetalingId)
-    }
-
     protected fun opprettVedtaksperiode(
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         fom: LocalDate = FOM,
@@ -391,7 +327,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         contextId: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         oppgavetype: String = OPPGAVETYPE,
-        egenskaper: List<String> = listOf(OPPGAVETYPE),
+        egenskaper: List<EgenskapForDatabase> = listOf(EGENSKAP),
         kanAvvises: Boolean = true,
         utbetalingId: UUID = UTBETALING_ID,
         hendelseId: UUID = UUID.randomUUID(),
@@ -410,13 +346,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     }
 
     protected fun avventerSystem(oppgaveId: Long) {
-        oppgaveDao.updateOppgave(oppgaveId = oppgaveId, oppgavestatus = "AvventerSystem", egenskaper = listOf(OPPGAVETYPE))
+        oppgaveDao.updateOppgave(oppgaveId = oppgaveId, oppgavestatus = "AvventerSystem", egenskaper = listOf(EGENSKAP))
 
-    }
-
-    protected fun ferdigstillSistOpprettedeOppgaveOgOpprettNy() {
-        oppgaveDao.updateOppgave(oppgaveId = oppgaveId, oppgavestatus = "Ferdigstilt", egenskaper = listOf(OPPGAVETYPE))
-        opprettOppgave()
     }
 
     protected fun opprettTotrinnsvurdering(
@@ -534,44 +465,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                 )
             )
         }
-
-    protected fun nyGenerasjon(
-        vedtaksperiodeId: UUID = UUID.randomUUID(),
-        generasjonId: UUID = UUID.randomUUID(),
-        utbetalingId: UUID = UUID.randomUUID(),
-        periode: Periode = PERIODE,
-        tilstandEndretTidspunkt: LocalDateTime? = null,
-        skjæringstidspunkt: LocalDate = periode.fom,
-    ): UUID = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-        @Language("PostgreSQL")
-        val query = """
-            INSERT INTO selve_vedtaksperiode_generasjon(vedtaksperiode_id, unik_id, utbetaling_id, opprettet_av_hendelse, tilstand_endret_tidspunkt, tilstand_endret_av_hendelse, tilstand, fom, tom, skjæringstidspunkt) 
-            VALUES (?, ?, ?, ?, ?, ?, 'Ulåst', ?, ?, ?)
-        """
-        session.run(
-            queryOf(
-                query,
-                vedtaksperiodeId,
-                generasjonId,
-                utbetalingId,
-                UUID.randomUUID(),
-                tilstandEndretTidspunkt,
-                UUID.randomUUID(),
-                periode.fom,
-                periode.tom,
-                skjæringstidspunkt
-            ).asUpdateAndReturnGeneratedKey
-        )
-        return generasjonId
-    }
-
-    protected fun nyttVarsel(
-        id: UUID = UUID.randomUUID(),
-        vedtaksperiodeId: UUID = UUID.randomUUID(),
-        kode: String = "EN_KODE",
-        generasjonId: UUID,
-        definisjonRef: Long? = null,
-    ) = nyttVarsel(id, vedtaksperiodeId, kode, generasjonId, definisjonRef, "AKTIV", null)
 
     protected fun nyttVarsel(
         id: UUID = UUID.randomUUID(),

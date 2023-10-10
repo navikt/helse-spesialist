@@ -93,7 +93,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode()
-        opprettOppgave(contextId = CONTEXT_ID, egenskaper = listOf(OPPGAVETYPE, "RISK_QA"))
+        opprettOppgave(contextId = CONTEXT_ID, egenskaper = listOf(EGENSKAP, EgenskapForDatabase.RISK_QA))
         assertEquals(1, oppgave().size)
         oppgave().first().assertEquals(
             LocalDate.now(),
@@ -133,7 +133,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettPerson(adressebeskyttelse = Adressebeskyttelse.Fortrolig)
         opprettArbeidsgiver()
         opprettVedtaksperiode()
-        opprettOppgave(contextId = CONTEXT_ID, oppgavetype = "FORTROLIG_ADRESSE", egenskaper = listOf("FORTROLIG_ADRESSE"))
+        opprettOppgave(contextId = CONTEXT_ID, oppgavetype = "FORTROLIG_ADRESSE", egenskaper = listOf(EgenskapForDatabase.FORTROLIG_ADRESSE))
         assertEquals(1, oppgave().size)
         oppgave().first().assertEquals(
             LocalDate.now(),
@@ -193,7 +193,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
             OppgaveFraDatabase(
                 id = oppgaveId,
                 egenskap = OPPGAVETYPE,
-                egenskaper = listOf(OPPGAVETYPE),
+                egenskaper = listOf(EGENSKAP),
                 status = "AvventerSaksbehandler",
                 vedtaksperiodeId = VEDTAKSPERIODE,
                 utbetalingId = UTBETALING_ID,
@@ -206,13 +206,13 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `finner OppgaveFraDatabase med flere egenskaper`() {
         val hendelseId = UUID.randomUUID()
-        nyPerson(hendelseId = hendelseId, oppgaveEgenskaper = listOf(OPPGAVETYPE, "RISK_QA"))
+        nyPerson(hendelseId = hendelseId, oppgaveEgenskaper = listOf(EGENSKAP, EgenskapForDatabase.RISK_QA))
         val oppgave = oppgaveDao.finnOppgave(oppgaveId) ?: fail { "Fant ikke oppgave" }
         assertEquals(
             OppgaveFraDatabase(
                 id = oppgaveId,
                 egenskap = OPPGAVETYPE,
-                egenskaper = listOf(OPPGAVETYPE, "RISK_QA"),
+                egenskaper = listOf(EGENSKAP, EgenskapForDatabase.RISK_QA),
                 status = "AvventerSaksbehandler",
                 vedtaksperiodeId = VEDTAKSPERIODE,
                 utbetalingId = UTBETALING_ID,
@@ -236,7 +236,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         val førsteOppgave = oppgaver.first()
         assertEquals(OPPGAVE_ID, førsteOppgave.id)
         assertEquals(aktørId, førsteOppgave.aktørId)
-        assertEquals(listOf(OPPGAVETYPE), førsteOppgave.egenskaper)
+        assertEquals(listOf(EGENSKAP), førsteOppgave.egenskaper)
         assertEquals(FORNAVN, førsteOppgave.navn.fornavn)
         assertEquals(MELLOMNAVN, førsteOppgave.navn.mellomnavn)
         assertEquals(ETTERNAVN, førsteOppgave.navn.etternavn)
@@ -264,9 +264,9 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `Finn oppgaver med bestemte egenskaper`() {
         nyPerson(fødselsnummer = "12345678910", aktørId = "1234567891011", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "123456789")
-        nyPerson(fødselsnummer = "12345678911", aktørId = "1234567891012", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "223456789", oppgaveEgenskaper = listOf("SØKNAD", "RISK_QA", "FORTROLIG_ADRESSE"))
+        nyPerson(fødselsnummer = "12345678911", aktørId = "1234567891012", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "223456789", oppgaveEgenskaper = listOf(EgenskapForDatabase.SØKNAD, EgenskapForDatabase.RISK_QA, EgenskapForDatabase.FORTROLIG_ADRESSE))
         val oppgaveId2 = OPPGAVE_ID
-        nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456789", oppgaveEgenskaper = listOf("RISK_QA", "SØKNAD"))
+        nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456789", oppgaveEgenskaper = listOf(EgenskapForDatabase.RISK_QA, EgenskapForDatabase.SØKNAD))
         val oppgaveId3 = OPPGAVE_ID
         val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), kreverEgenskaper = listOf("RISK_QA", "SØKNAD"))
         assertEquals(2, oppgaver.size)
@@ -276,8 +276,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `Finner ikke oppgaver som ikke har alle de gitte egenskapene`() {
         nyPerson(fødselsnummer = "12345678910", aktørId = "1234567891011", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "123456789")
-        nyPerson(fødselsnummer = "12345678911", aktørId = "1234567891012", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "223456789", oppgaveEgenskaper = listOf("SØKNAD"))
-        nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456789", oppgaveEgenskaper = listOf("RISK_QA"))
+        nyPerson(fødselsnummer = "12345678911", aktørId = "1234567891012", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "223456789", oppgaveEgenskaper = listOf(EgenskapForDatabase.SØKNAD))
+        nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456789", oppgaveEgenskaper = listOf(EgenskapForDatabase.RISK_QA))
         val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), kreverEgenskaper = listOf("RISK_QA", "SØKNAD"))
         assertEquals(0, oppgaver.size)
     }
@@ -428,8 +428,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     fun `Tar kun med oppgaver som saksbehandler har tilgang til`() {
         nyPerson(fødselsnummer = "12345678910", aktørId = "1234567891011", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "123456789")
         val oppgaveId1 = OPPGAVE_ID
-        nyPerson(fødselsnummer = "12345678911", aktørId = "1234567891012", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "223456789", oppgaveEgenskaper = listOf("BESLUTTER"))
-        nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456789", oppgaveEgenskaper = listOf("RISK_QA", "FORTROLIG_ADRESSE"))
+        nyPerson(fødselsnummer = "12345678911", aktørId = "1234567891012", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "223456789", oppgaveEgenskaper = listOf(EgenskapForDatabase.BESLUTTER))
+        nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456789", oppgaveEgenskaper = listOf(EgenskapForDatabase.RISK_QA, EgenskapForDatabase.FORTROLIG_ADRESSE))
         val oppgaver = oppgaveDao.finnOppgaverForVisning(
             ekskluderEgenskaper = listOf("BESLUTTER", "RISK_QA"),
             UUID.randomUUID()
@@ -444,7 +444,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         val oppgaveId1 = OPPGAVE_ID
         nyPerson(fødselsnummer = "12345678911", aktørId = "1234567891012", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "223456789")
         val oppgaveId2 = OPPGAVE_ID
-        nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456789", oppgaveEgenskaper = listOf("RISK_QA", "FORTROLIG_ADRESSE"))
+        nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456789", oppgaveEgenskaper = listOf(EgenskapForDatabase.RISK_QA, EgenskapForDatabase.FORTROLIG_ADRESSE))
         val oppgaveId3 = OPPGAVE_ID
         val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID())
         assertEquals(3, oppgaver.size)
@@ -455,7 +455,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     fun `Saksbehandler får ikke med oppgaver hen har sendt til beslutter selv om hen har beslutter-tilgang`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val saksbehandlerOid = UUID.randomUUID()
-        nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = vedtaksperiodeId, organisasjonsnummer = "323456789", oppgaveEgenskaper = listOf("BESLUTTER"))
+        nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = vedtaksperiodeId, organisasjonsnummer = "323456789", oppgaveEgenskaper = listOf(EgenskapForDatabase.BESLUTTER))
         opprettSaksbehandler(saksbehandlerOid)
         opprettTotrinnsvurdering(vedtaksperiodeId, saksbehandlerOid)
         val oppgaver = oppgaveDao.finnOppgaverForVisning(ekskluderEgenskaper = emptyList(), saksbehandlerOid = saksbehandlerOid)
@@ -466,7 +466,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     fun `Saksbehandler får ikke med oppgaver med egenskap STRENGT_FORTROLIG_ADRESSE`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val saksbehandlerOid = UUID.randomUUID()
-        nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = vedtaksperiodeId, organisasjonsnummer = "323456789", oppgaveEgenskaper = listOf("STRENGT_FORTROLIG_ADRESSE"))
+        nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = vedtaksperiodeId, organisasjonsnummer = "323456789", oppgaveEgenskaper = listOf(EgenskapForDatabase.STRENGT_FORTROLIG_ADRESSE))
         opprettSaksbehandler(saksbehandlerOid)
         opprettTotrinnsvurdering(vedtaksperiodeId, saksbehandlerOid)
         val oppgaver = oppgaveDao.finnOppgaverForVisning(ekskluderEgenskaper = listOf("STRENGT_FORTROLIG_ADRESSE"), saksbehandlerOid = saksbehandlerOid)
@@ -487,7 +487,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettArbeidsgiver()
         opprettVedtaksperiode()
         opprettOppgave(contextId = CONTEXT_ID)
-        oppgaveDao.updateOppgave(oppgaveId, nyStatus, SAKSBEHANDLEREPOST, SAKSBEHANDLER_OID, listOf(OPPGAVETYPE, "RISK_QA"))
+        oppgaveDao.updateOppgave(oppgaveId, nyStatus, SAKSBEHANDLEREPOST, SAKSBEHANDLER_OID, listOf(EGENSKAP, EgenskapForDatabase.RISK_QA))
         assertEquals(1, oppgave().size)
         oppgave().first().assertEquals(
             LocalDate.now(),
@@ -505,20 +505,22 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `sjekker om det fins aktiv oppgave`() {
         nyPerson()
-        oppgaveDao.updateOppgave(oppgaveId, "AvventerSaksbehandler", null, null, listOf(OPPGAVETYPE))
+        oppgaveDao.updateOppgave(oppgaveId, "AvventerSaksbehandler", null, null, listOf(EGENSKAP))
         assertTrue(oppgaveDao.venterPåSaksbehandler(oppgaveId))
 
-        oppgaveDao.updateOppgave(oppgaveId, "Ferdigstilt", null, null, listOf(OPPGAVETYPE))
+        oppgaveDao.updateOppgave(oppgaveId, "Ferdigstilt", null, null, listOf(EGENSKAP))
         assertFalse(oppgaveDao.venterPåSaksbehandler(oppgaveId))
     }
 
     @Test
     fun `sjekker om det fins aktiv oppgave med to oppgaver`() {
         nyPerson()
-        oppgaveDao.updateOppgave(oppgaveId = oppgaveId, oppgavestatus = "AvventerSaksbehandler", egenskaper = listOf(OPPGAVETYPE))
+        oppgaveDao.updateOppgave(oppgaveId = oppgaveId, oppgavestatus = "AvventerSaksbehandler", egenskaper = listOf(
+            EGENSKAP))
 
         opprettOppgave(vedtaksperiodeId = VEDTAKSPERIODE)
-        oppgaveDao.updateOppgave(oppgaveId = oppgaveId, oppgavestatus = "AvventerSaksbehandler", egenskaper = listOf(OPPGAVETYPE))
+        oppgaveDao.updateOppgave(oppgaveId = oppgaveId, oppgavestatus = "AvventerSaksbehandler", egenskaper = listOf(
+            EGENSKAP))
 
         assertTrue(oppgaveDao.harGyldigOppgave(UTBETALING_ID))
     }
@@ -526,7 +528,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `sjekker at det ikke fins ferdigstilt oppgave`() {
         nyPerson()
-        oppgaveDao.updateOppgave(oppgaveId = oppgaveId, oppgavestatus = "AvventerSaksbehandler", egenskaper = listOf(OPPGAVETYPE))
+        oppgaveDao.updateOppgave(oppgaveId = oppgaveId, oppgavestatus = "AvventerSaksbehandler", egenskaper = listOf(
+            EGENSKAP))
 
         assertFalse(oppgaveDao.harFerdigstiltOppgave(VEDTAKSPERIODE))
     }
@@ -534,8 +537,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `sjekker at det fins ferdigstilt oppgave`() {
         nyPerson()
-        oppgaveDao.updateOppgave(oppgaveId = oppgaveId, oppgavestatus = "Ferdigstilt", egenskaper = listOf(OPPGAVETYPE))
-        oppgaveDao.updateOppgave(oppgaveId = 2L, oppgavestatus = "AvventerSaksbehandler", egenskaper = listOf(OPPGAVETYPE))
+        oppgaveDao.updateOppgave(oppgaveId = oppgaveId, oppgavestatus = "Ferdigstilt", egenskaper = listOf(EGENSKAP))
+        oppgaveDao.updateOppgave(oppgaveId = 2L, oppgavestatus = "AvventerSaksbehandler", egenskaper = listOf(EGENSKAP))
 
         assertTrue(oppgaveDao.harFerdigstiltOppgave(VEDTAKSPERIODE))
     }

@@ -37,7 +37,7 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `finner oppgavetype når det fins flere oppgaver for en vedtaksperiode`() {
         nyPerson()
-        oppgaveDao.updateOppgave(oppgaveId = oppgaveId, oppgavestatus = "Invalidert", egenskaper = listOf(OPPGAVETYPE))
+        oppgaveDao.updateOppgave(oppgaveId = oppgaveId, oppgavestatus = "Invalidert", egenskaper = listOf(EGENSKAP))
         opprettOppgave(utbetalingId = UUID.randomUUID())
 
         val type = oppgaveApiDao.finnOppgavetype(VEDTAKSPERIODE)
