@@ -164,11 +164,6 @@ type BeregnetPeriode implements Periode {
     vilkarsgrunnlagId: String
 }
 
-type Boenhet {
-    id: String!
-    navn: String!
-}
-
 type Dag {
     begrunnelser: [Begrunnelse!]
     dato: String!
@@ -255,6 +250,7 @@ type Inntektoverstyring implements Overstyring {
 
 type Inntektsmelding implements Hendelse {
     beregnetInntekt: Float!
+    eksternDokumentId: String
     id: String!
     mottattDato: String!
     type: Hendelsetype!
@@ -335,31 +331,9 @@ type Oppdrag {
     type: String!
 }
 
-type OppgaveForOversiktsvisning {
-    aktorId: String!
-    boenhet: Boenhet
-    flereArbeidsgivere: Boolean!
-    fodselsnummer: String!
-    harVergemal: Boolean
-    haster: Boolean
-    id: String!
-    mottaker: Mottaker
-    navn: Personnavn!
-    opprettet: String!
-    opprinneligSoknadsdato: String!
-    periodetype: Periodetype
-    personinfo: Personinfo!
-    sistSendt: String
-    spesialsak: Boolean!
-    tildeling: Tildeling
-    tilhorerEnhetUtland: Boolean
-    totrinnsvurdering: Totrinnsvurdering
-    type: Oppgavetype!
-    vedtaksperiodeId: String!
-}
-
 type OppgaveForPeriodevisning {
     id: String!
+    kanAvvises: Boolean!
 }
 
 type OppgaveTilBehandling {
@@ -455,7 +429,6 @@ type Personoppdrag implements Spennoppdrag {
 }
 
 type Query {
-    alleOppgaver: [OppgaveForOversiktsvisning!]!
     behandledeOppgaver(behandletAvIdent: String, behandletAvOid: String!, fom: String): [FerdigstiltOppgave!]!
     behandlingsstatistikk: Behandlingsstatistikk!
     hentOpptegnelser(sekvensId: Int): [Opptegnelse!]!
@@ -562,6 +535,7 @@ type Soknad {
 }
 
 type SoknadArbeidsgiver implements Hendelse {
+    eksternDokumentId: String
     fom: String!
     id: String!
     rapportertDato: String!
@@ -571,6 +545,7 @@ type SoknadArbeidsgiver implements Hendelse {
 }
 
 type SoknadNav implements Hendelse {
+    eksternDokumentId: String
     fom: String!
     id: String!
     rapportertDato: String!

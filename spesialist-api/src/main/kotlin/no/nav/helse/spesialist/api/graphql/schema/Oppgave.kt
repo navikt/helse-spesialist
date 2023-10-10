@@ -55,34 +55,6 @@ enum class Kategori {
     Periodetype
 }
 
-data class Boenhet(
-    val id: String,
-    val navn: String,
-)
-
-data class OppgaveForOversiktsvisning(
-    val id: UUIDString,
-    val type: Oppgavetype,
-    val opprettet: DateTimeString,
-    val opprinneligSoknadsdato: DateTimeString,
-    val vedtaksperiodeId: UUIDString,
-    val personinfo: Personinfo,
-    val navn: Personnavn,
-    val aktorId: String,
-    val fodselsnummer: String,
-    val flereArbeidsgivere: Boolean,
-    val boenhet: Boenhet?,
-    val tildeling: Tildeling?,
-    val periodetype: Periodetype?,
-    val sistSendt: DateTimeString?,
-    val totrinnsvurdering: Totrinnsvurdering?,
-    val mottaker: Mottaker?,
-    val haster: Boolean?,
-    val harVergemal: Boolean?,
-    val tilhorerEnhetUtland: Boolean?,
-    val spesialsak: Boolean,
-)
-
 data class Oppgavesortering(val nokkel: Sorteringsnokkel, val stigende: Boolean)
 
 enum class Sorteringsnokkel {
