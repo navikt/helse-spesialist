@@ -157,7 +157,6 @@ internal class Godkjenningsbehov(
         AutomatiskAvvisningCommand(
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
-            egenAnsattDao = egenAnsattDao,
             personDao = personDao,
             vergemålDao = vergemålDao,
             godkjenningMediator = godkjenningMediator,

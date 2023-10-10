@@ -31,13 +31,7 @@ internal class AutomatiskAvvisningCommandTest {
     }
 
     @Test
-    fun `skal avvise ved egen ansatt`() {
-        every { egenAnsattDao.erEgenAnsatt(fødselsnummer) } returns true
-        executeCommand(hentCommand(Utbetalingtype.UTBETALING), "Egen ansatt")
-    }
-
-    @Test
-    fun `skal ikke avvises ved egen ansatt når toggle er på`() {
+    fun `skal ikke avvises ved egen ansatt`() {
         every { egenAnsattDao.erEgenAnsatt(fødselsnummer) } returns true
         executeCommand(hentCommand(Utbetalingtype.UTBETALING), null)
     }
@@ -78,7 +72,6 @@ internal class AutomatiskAvvisningCommandTest {
         AutomatiskAvvisningCommand(
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
-            egenAnsattDao = egenAnsattDao,
             personDao = personDao,
             vergemålDao = vergemålDao,
             godkjenningMediator = godkjenningMediator,

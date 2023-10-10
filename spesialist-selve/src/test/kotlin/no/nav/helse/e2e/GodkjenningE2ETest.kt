@@ -10,6 +10,7 @@ import java.util.UUID
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.januar
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson
+import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.VergemålType.mindreaarig
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.VergemålType.voksen
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSystem
@@ -53,19 +54,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertSaksbehandleroppgave(oppgavestatus = AvventerSystem)
         assertGodkjenningsbehovBesvart(godkjent = false, automatiskBehandlet = false)
         assertVedtaksperiodeAvvist("FØRSTEGANGSBEHANDLING", begrunnelser, kommentar)
-    }
-
-    @Test
-    fun `oppretter ikke oppgave om bruker er egen ansatt`() {
-        fremForbiUtbetalingsfilter()
-        håndterEgenansattløsning(erEgenAnsatt = true)
-        håndterVergemålløsning()
-        håndterÅpneOppgaverløsning()
-        håndterRisikovurderingløsning()
-
-        assertVedtaksperiodeEksisterer(VEDTAKSPERIODE_ID)
-        assertSaksbehandleroppgaveBleIkkeOpprettet()
-        assertGodkjenningsbehovBesvart(false, automatiskBehandlet = true)
     }
 
     @Test
@@ -219,7 +207,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     }
 
     @Test
-    fun `avbryter saksbehandling og avvise godkjenning pga vergemål og egen ansatt`() {
+    fun `avbryter saksbehandling og avvise godkjenning pga vergemål`() {
         fremForbiUtbetalingsfilter()
         håndterEgenansattløsning(erEgenAnsatt = true)
         håndterVergemålløsning(vergemål = listOf(VergemålJson.Vergemål(voksen)))
@@ -229,7 +217,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             sisteGodkjenningsbehovId,
             NY, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, FERDIG
         )
-        assertGodkjenningsbehovBesvart(godkjent = false, automatiskBehandlet = true, "Vergemål", "Egen ansatt")
+        assertGodkjenningsbehovBesvart(godkjent = false, automatiskBehandlet = true, "Vergemål")
 
     }
 
@@ -248,12 +236,10 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             tom = 31.januar,
             kanAvvises = kanAvvises,
             harOppdatertMetainfo = true,
-            // legger til negativt beløp for at den ikke skal automatiseres
-            personbeløp = -100,
         )
 
         håndterEgenansattløsning()
-        håndterVergemålløsning()
+        håndterVergemålløsning(vergemål = listOf(VergemålJson.Vergemål(type = mindreaarig)))
         håndterÅpneOppgaverløsning()
         håndterInntektløsning()
 

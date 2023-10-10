@@ -49,7 +49,6 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
         håndterEgenansattløsning(erEgenAnsatt = true)
         assertKanIkkeHentePerson("Finner ikke data for person med fødselsnummer ")
 
-        sendFramTilOppgave()
         assertSaksbehandleroppgaveBleIkkeOpprettet()
 
         saksbehandlertilgangTilSkjermede(harTilgang = true)
