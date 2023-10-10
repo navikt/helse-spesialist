@@ -13,6 +13,7 @@ import kotlinx.coroutines.withContext
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeTildelt
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
+import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDER_EPOST
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER_IDENT
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER_NAVN
@@ -21,6 +22,7 @@ import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGER
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.graphql.schema.Tildeling
 import no.nav.helse.spesialist.api.notat.NotatMediator
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.tildeling.TildelingService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -106,16 +108,23 @@ class TildelingMutation(
     }
 
     @Suppress("unused")
-    suspend fun fjernPaaVent(oppgaveId: String): DataFetcherResult<Tildeling?> = withContext(Dispatchers.IO) {
-        val tildeling = tildelingService.fjernPåVent(oppgaveId.toLong())
-        newResult<Tildeling?>().data(
-            Tildeling(
-                navn = tildeling.navn,
-                oid = tildeling.oid.toString(),
-                epost = tildeling.epost,
-                paaVent = tildeling.påVent,
-            )
-        ).build()
+    suspend fun fjernPaaVent(oppgaveId: String, env: DataFetchingEnvironment): DataFetcherResult<Tildeling?> {
+        val saksbehandler= env.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(ContextValues.SAKSBEHANDLER.key).value
+        return withContext(Dispatchers.IO) {
+            try {
+                val tildeling = tildelingService.fjernPåVent(oppgaveId.toLong(), saksbehandler)
+                newResult<Tildeling?>().data(
+                    Tildeling(
+                        navn = tildeling.navn,
+                        oid = tildeling.oid.toString(),
+                        epost = tildeling.epost,
+                        paaVent = tildeling.påVent,
+                    )
+                ).build()
+            } catch (e: OppgaveIkkeTildelt) {
+                newResult<Tildeling?>().error(ikkeTildeltError(e)).build()
+            }
+        }
     }
 
     private fun getUpdateError(oppgaveId: String): GraphQLError {

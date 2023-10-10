@@ -17,7 +17,7 @@ interface Oppgavehåndterer {
     fun sendTilBeslutter(oppgaveId: Long, behandlendeSaksbehandler: SaksbehandlerFraApi)
     fun sendIRetur(oppgaveId: Long, besluttendeSaksbehandler: SaksbehandlerFraApi)
     fun leggPåVent(oppgaveId: Long): TildelingApiDto
-    fun fjernPåVent(oppgaveId: Long): TildelingApiDto
+    fun fjernPåVent(oppgaveId: Long)
     fun venterPåSaksbehandler(oppgaveId: Long): Boolean
     fun erRiskoppgave(oppgaveId: Long): Boolean
     fun oppgaver(saksbehandlerFraApi: SaksbehandlerFraApi, startIndex: Int, pageSize: Int, sortering: List<Oppgavesortering>): List<OppgaveTilBehandling>
@@ -52,8 +52,9 @@ class TildelingService(
         return oppgavehåndterer.leggPåVent(oppgaveId)
     }
 
-    internal fun fjernPåVent(oppgaveId: Long): TildelingApiDto {
-        return oppgavehåndterer.fjernPåVent(oppgaveId)
+    internal fun fjernPåVent(oppgaveId: Long, saksbehandler: SaksbehandlerFraApi): TildelingApiDto {
+        oppgavehåndterer.fjernPåVent(oppgaveId)
+        return TildelingApiDto(saksbehandler.navn, saksbehandler.epost, saksbehandler.oid, false)
     }
 
     private fun tildelOppgaveTilEksisterendeSaksbehandler(

@@ -207,18 +207,6 @@ internal class OppgaveMediatorTest {
     }
 
     @Test
-    fun `Fjern oppgave fra på vent`() {
-        every { totrinnsvurderingDao.hentAktivTotrinnsvurdering(1L) } returns null
-        every { oppgaveDao.finnOppgave(1L) } returns oppgaveFraDatabase(1L, tildelt = true)
-        mediator.leggPåVent(1L)
-        val tildeling = mediator.fjernPåVent(1L)
-        assertEquals(false, tildeling.påVent)
-        assertEquals(SAKSBEHANDLEROID, tildeling.oid)
-        assertEquals(SAKSBEHANDLERNAVN, tildeling.navn)
-        assertEquals(SAKSBEHANDLEREPOST, tildeling.epost)
-    }
-
-    @Test
     fun `oppdaterer oppgave`() {
         every { oppgaveDao.finnOppgave(OPPGAVE_ID) } returns oppgaveFraDatabase()
         every { oppgaveDao.finnHendelseId(any()) } returns HENDELSE_ID

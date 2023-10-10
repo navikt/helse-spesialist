@@ -120,11 +120,10 @@ class Oppgave private constructor(
         return tildeltTil.tildeling(påVent)
     }
 
-    fun fjernPåVent(): Tildeling {
-        val tildeltTil = this.tildeltTil ?: throw OppgaveIkkeTildelt(id)
+    fun fjernPåVent() {
+        if (this.tildeltTil == null) throw OppgaveIkkeTildelt(id)
         påVent = false
         oppgaveEndret()
-        return tildeltTil.tildeling(påVent)
     }
 
     fun ferdigstill() {

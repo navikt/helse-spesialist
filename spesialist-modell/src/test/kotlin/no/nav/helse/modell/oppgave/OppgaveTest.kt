@@ -484,19 +484,6 @@ internal class OppgaveTest {
     }
 
     @Test
-    fun `fjernPåVent returnerer tildeling`() {
-        val oppgave = nyOppgave(SØKNAD)
-        oppgave.forsøkTildelingVedReservasjon(saksbehandler, false)
-        oppgave.leggPåVent()
-        val tildeling = oppgave.fjernPåVent()
-
-        assertEquals(SAKSBEHANDLER_EPOST,  tildeling.epost)
-        assertEquals(SAKSBEHANDLER_NAVN,  tildeling.navn)
-        assertEquals(SAKSBEHANDLER_OID,  tildeling.oid)
-        assertEquals(false,  tildeling.påVent)
-    }
-
-    @Test
     fun `kan ikke fjerne oppgave fra på vent uten at den er tildelt først`() {
         val oppgave = nyOppgave(SØKNAD)
 
