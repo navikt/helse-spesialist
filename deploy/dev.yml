@@ -85,7 +85,7 @@ spec:
     - name: KODE7_SAKSBEHANDLER_GROUP
       value: c811e9f4-26a6-43f9-b930-8c83365683a9
     - name: BESLUTTER_SAKSBEHANDLER_GROUP
-      value: 59f26eef-0a4f-4038-bf46-3a5b2f252155
+      value: dd4e2415-b68d-43a4-87b5-fe2ba5f1dc61
     - name: SKJERMEDE_PERSONER_GROUP
       value: f787f900-6697-440d-a086-d5bb56e26a9c
     - name: SAKSBEHANDLERE_MED_TILGANG_TIL_STIKKPROVER
