@@ -81,11 +81,11 @@ spec:
     - name: KAFKA_CONSUMER_GROUP_ID
       value: tbd-spesialist-v1
     - name: RISK_SUPERSAKSBEHANDLER_GROUP
-      value: a7476a04-cec2-44dd-947f-efc745f199a7
+      value: f787f900-6697-440d-a086-d5bb56e26a9c
     - name: KODE7_SAKSBEHANDLER_GROUP
-      value: c811e9f4-26a6-43f9-b930-8c83365683a9
+      value: f787f900-6697-440d-a086-d5bb56e26a9c
     - name: BESLUTTER_SAKSBEHANDLER_GROUP
-      value: 59f26eef-0a4f-4038-bf46-3a5b2f252155
+      value: f787f900-6697-440d-a086-d5bb56e26a9c
     - name: SKJERMEDE_PERSONER_GROUP
       value: f787f900-6697-440d-a086-d5bb56e26a9c
     - name: SAKSBEHANDLERE_MED_TILGANG_TIL_STIKKPROVER
