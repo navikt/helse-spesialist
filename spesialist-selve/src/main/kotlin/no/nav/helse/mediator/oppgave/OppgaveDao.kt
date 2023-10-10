@@ -70,10 +70,12 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
         saksbehandlerOid: UUID,
         startIndex: Int = 0,
         pageSize: Int = Int.MAX_VALUE,
-        sortering: List<OppgavesorteringForDatabase> = emptyList()
+        sortering: List<OppgavesorteringForDatabase> = emptyList(),
+        kreverEgenskaper: List<String> = emptyList()
     ): List<OppgaveFraDatabaseForVisning> {
         val orderBy = if (sortering.isNotEmpty()) sortering.joinToString { it.nøkkelTilKolonne() } else "opprettet DESC"
-        val egenskaper = ekskluderEgenskaper.joinToString { """ '$it' """ }
+        val egenskaperSomSkalEkskluderes = ekskluderEgenskaper.joinToString { """ '$it' """ }
+        val egenskaperSomKreves = kreverEgenskaper.joinToString { """ '$it' """ }
         return asSQL(
             """
                 SELECT
@@ -96,8 +98,9 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                 LEFT JOIN totrinnsvurdering ttv ON (ttv.vedtaksperiode_id = v.vedtaksperiode_id AND ttv.utbetaling_id_ref IS NULL)
                 LEFT JOIN saksbehandler s ON t.saksbehandler_ref = s.oid
                 WHERE o.status = 'AvventerSaksbehandler'
-                AND NOT (egenskaper && ARRAY[$egenskaper]::varchar[])
-                AND NOT (egenskaper && ARRAY['BESLUTTER']::varchar[] AND ttv.saksbehandler = :oid)
+                AND (egenskaper @> ARRAY[$egenskaperSomKreves]::varchar[]) -- egenskaper saksbehandler har filtrert på
+                AND NOT (egenskaper && ARRAY[$egenskaperSomSkalEkskluderes]::varchar[]) -- egenskaper saksbehandler ikke har tilgang til
+                AND NOT (egenskaper && ARRAY['BESLUTTER']::varchar[] AND ttv.saksbehandler = :oid) -- hvis oppgaven er sendt til beslutter og saksbehandler var den som sendte
                 ORDER BY $orderBy
                 OFFSET :start_index
                 LIMIT :page_size

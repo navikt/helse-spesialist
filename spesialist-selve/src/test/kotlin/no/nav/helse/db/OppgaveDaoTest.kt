@@ -262,6 +262,27 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `Finn oppgaver med bestemte egenskaper`() {
+        nyPerson(fødselsnummer = "12345678910", aktørId = "1234567891011", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "123456789")
+        nyPerson(fødselsnummer = "12345678911", aktørId = "1234567891012", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "223456789", oppgaveEgenskaper = listOf("SØKNAD", "RISK_QA", "FORTROLIG_ADRESSE"))
+        val oppgaveId2 = OPPGAVE_ID
+        nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456789", oppgaveEgenskaper = listOf("RISK_QA", "SØKNAD"))
+        val oppgaveId3 = OPPGAVE_ID
+        val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), kreverEgenskaper = listOf("RISK_QA", "SØKNAD"))
+        assertEquals(2, oppgaver.size)
+        assertEquals(listOf(oppgaveId3, oppgaveId2), oppgaver.map { it.id })
+    }
+
+    @Test
+    fun `Finner ikke oppgaver som ikke har alle de gitte egenskapene`() {
+        nyPerson(fødselsnummer = "12345678910", aktørId = "1234567891011", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "123456789")
+        nyPerson(fødselsnummer = "12345678911", aktørId = "1234567891012", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "223456789", oppgaveEgenskaper = listOf("SØKNAD"))
+        nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456789", oppgaveEgenskaper = listOf("RISK_QA"))
+        val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), kreverEgenskaper = listOf("RISK_QA", "SØKNAD"))
+        assertEquals(0, oppgaver.size)
+    }
+
+    @Test
     fun `Finn oppgaver for visning med offset og pagesize`() {
         nyPerson(fødselsnummer = "12345678910", aktørId = "1234567891011", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "123456789")
         val oppgaveId1 = OPPGAVE_ID
