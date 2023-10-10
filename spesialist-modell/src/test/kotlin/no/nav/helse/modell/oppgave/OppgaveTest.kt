@@ -6,9 +6,6 @@ import no.nav.helse.modell.OppgaveAlleredeSendtBeslutter
 import no.nav.helse.modell.OppgaveAlleredeSendtIRetur
 import no.nav.helse.modell.OppgaveIkkeTildelt
 import no.nav.helse.modell.OppgaveKreverVurderingAvToSaksbehandlere
-import no.nav.helse.modell.Toggle
-import no.nav.helse.modell.ToggleHelpers.disable
-import no.nav.helse.modell.ToggleHelpers.enable
 import no.nav.helse.modell.oppgave.Egenskap.BESLUTTER
 import no.nav.helse.modell.oppgave.Egenskap.EGEN_ANSATT
 import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
@@ -94,7 +91,6 @@ internal class OppgaveTest {
 
     @Test
     fun `Kan tildele ved reservasjon dersom saksbehandler har tilgang til alle tilgangsstyrte egenskaper på oppgaven`() {
-        Toggle.TilgangsstyrteEgenskaper.enable()
         val oppgave = nyOppgave(SØKNAD, RISK_QA, FORTROLIG_ADRESSE)
         val saksbehandler = saksbehandler(tilgangskontroll = TilgangskontrollForTestHarTilgang)
         oppgave.forsøkTildelingVedReservasjon(saksbehandler, false)
@@ -103,12 +99,10 @@ internal class OppgaveTest {
             assertEquals(true, tildelt)
             assertEquals(saksbehandler, tildeltTil)
         }
-        Toggle.TilgangsstyrteEgenskaper.disable()
     }
 
     @Test
     fun `Kan ikke tildele ved reservasjon dersom saksbehandler ikke har tilgang til alle tilgangsstyrte egenskaper på oppgaven`() {
-        Toggle.TilgangsstyrteEgenskaper.enable()
         val oppgave = nyOppgave(SØKNAD, FORTROLIG_ADRESSE, RISK_QA)
         oppgave.forsøkTildelingVedReservasjon(saksbehandler(tilgangskontroll = TilgangskontrollForTestMedKunRiskQA), false)
 
@@ -116,7 +110,6 @@ internal class OppgaveTest {
             assertEquals(false, tildelt)
             assertNull(tildeltTil)
         }
-        Toggle.TilgangsstyrteEgenskaper.disable()
     }
 
     @Test

@@ -3,7 +3,6 @@ package no.nav.helse.modell.oppgave
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.modell.OppgaveIkkeTildelt
-import no.nav.helse.modell.Toggle
 import no.nav.helse.modell.oppgave.Egenskap.BESLUTTER
 import no.nav.helse.modell.oppgave.Egenskap.Companion.tilgangsstyrteEgenskaper
 import no.nav.helse.modell.oppgave.Egenskap.DELVIS_REFUSJON
@@ -209,28 +208,16 @@ class Oppgave private constructor(
         }
 
         override fun tildel(oppgave: Oppgave, saksbehandler: Saksbehandler, påVent: Boolean) {
-            if (Toggle.TilgangsstyrteEgenskaper.enabled) {
-                val tilgangsstyrteEgenskaper = oppgave.egenskaper.tilgangsstyrteEgenskaper()
-                if (tilgangsstyrteEgenskaper.isNotEmpty() && !saksbehandler.harTilgangTil(tilgangsstyrteEgenskaper)) {
-                    logg.info(
-                        "Oppgave med {} har egenskaper som saksbehandler med {} ikke har tilgang til å behandle.",
-                        kv("oppgaveId", oppgave.id),
-                        kv("oid", saksbehandler.oid())
-                    )
-                    return
-                }
-                oppgave.tildel(saksbehandler, påVent)
-            } else {
-                if (listOf(oppgave.egenskap).tilgangsstyrteEgenskaper().isNotEmpty() && !saksbehandler.harTilgangTil(listOf(oppgave.egenskap))) {
-                    logg.info(
-                        "Oppgave med {} har egenskaper som saksbehandler med {} ikke har tilgang til å behandle.",
-                        kv("oppgaveId", oppgave.id),
-                        kv("oid", saksbehandler.oid())
-                    )
-                    return
-                }
-                oppgave.tildel(saksbehandler, påVent)
+            val tilgangsstyrteEgenskaper = oppgave.egenskaper.tilgangsstyrteEgenskaper()
+            if (tilgangsstyrteEgenskaper.isNotEmpty() && !saksbehandler.harTilgangTil(tilgangsstyrteEgenskaper)) {
+                logg.info(
+                    "Oppgave med {} har egenskaper som saksbehandler med {} ikke har tilgang til å behandle.",
+                    kv("oppgaveId", oppgave.id),
+                    kv("oid", saksbehandler.oid())
+                )
+                return
             }
+            oppgave.tildel(saksbehandler, påVent)
         }
     }
 
