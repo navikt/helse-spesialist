@@ -2,7 +2,6 @@ package no.nav.helse.modell.kommando
 
 import java.util.UUID
 import no.nav.helse.mediator.oppgave.OppgaveMediator
-import no.nav.helse.modell.Toggle
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.delvisRefusjon
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
@@ -67,7 +66,7 @@ internal class OpprettSaksbehandleroppgaveCommand(
 
     override fun execute(context: CommandContext): Boolean {
         val egenskaper = mutableListOf<Egenskap>()
-        if (Toggle.EgenAnsatt.enabled && egenAnsattDao.erEgenAnsatt(fødselsnummer) == true) egenskaper.add(EGEN_ANSATT)
+        if (egenAnsattDao.erEgenAnsatt(fødselsnummer) == true) egenskaper.add(EGEN_ANSATT)
         if (harFortroligAdressebeskyttelse) egenskaper.add(FORTROLIG_ADRESSE)
 
         if (utbetalingtype == Utbetalingtype.REVURDERING) egenskaper.add(REVURDERING)

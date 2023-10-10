@@ -1,7 +1,5 @@
 package no.nav.helse.modell.kommando
 
-import ToggleHelpers.disable
-import ToggleHelpers.enable
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
@@ -9,7 +7,6 @@ import io.mockk.slot
 import io.mockk.verify
 import java.util.UUID
 import no.nav.helse.mediator.oppgave.OppgaveMediator
-import no.nav.helse.modell.Toggle
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.oppgave.Egenskap
@@ -200,7 +197,6 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
 
     @Test
     fun `oppretter oppgave med egen ansatt`() {
-        Toggle.EgenAnsatt.enable()
         every { snapshotMediator.finnUtbetaling(FNR, UTBETALING_ID) } returns enUtbetaling()
         every { egenAnsattDao.erEgenAnsatt(FNR) } returns true
         val slot = slot<((Long) -> Oppgave)>()
@@ -211,7 +207,6 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         oppgaveinspektør(oppgave) {
             assertTrue(egenskaper.contains(EGEN_ANSATT))
         }
-        Toggle.EgenAnsatt.disable()
     }
 
     @Test

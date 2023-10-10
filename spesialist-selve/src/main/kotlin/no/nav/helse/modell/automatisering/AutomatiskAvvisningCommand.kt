@@ -3,7 +3,6 @@ package no.nav.helse.modell.automatisering
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.modell.Toggle
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
@@ -34,10 +33,10 @@ internal class AutomatiskAvvisningCommand(
         val underVergemål = vergemålDao.harVergemål(fødselsnummer) ?: false
         val avvisGrunnetVergemål = underVergemål && !utbetaling.erRevurdering()
 
-        if ((Toggle.EgenAnsatt.enabled || !erEgenAnsatt) && !avvisGrunnetEnhetUtland && !avvisGrunnetVergemål) return true
+        if (!erEgenAnsatt && !avvisGrunnetEnhetUtland && !avvisGrunnetVergemål) return true
 
         val årsaker = mutableListOf<String>()
-        if (!Toggle.EgenAnsatt.enabled && erEgenAnsatt) årsaker.add("Egen ansatt")
+        if (erEgenAnsatt) årsaker.add("Egen ansatt")
         if (tilhørerEnhetUtland) årsaker.add("Utland")
         if (underVergemål) årsaker.add("Vergemål")
         if (!kanAvvises) {

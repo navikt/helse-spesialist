@@ -100,5 +100,3 @@ spec:
       value: "http://digdir-krr-proxy.team-rocket.svc.cluster.local"
     - name: KONTAKT_OG_RESERVASJONSREGISTERET_SCOPE
       value: api://dev-gcp.team-rocket.digdir-krr-proxy/.default
-    - name: EGENANSATT
-      value: "true"

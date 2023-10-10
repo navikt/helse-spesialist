@@ -1,14 +1,11 @@
 package no.nav.helse.modell.automatisering
 
-import ToggleHelpers.disable
-import ToggleHelpers.enable
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
 import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.modell.Toggle
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.PersonDao
@@ -41,10 +38,8 @@ internal class AutomatiskAvvisningCommandTest {
 
     @Test
     fun `skal ikke avvises ved egen ansatt når toggle er på`() {
-        Toggle.EgenAnsatt.enable()
         every { egenAnsattDao.erEgenAnsatt(fødselsnummer) } returns true
         executeCommand(hentCommand(Utbetalingtype.UTBETALING), null)
-        Toggle.EgenAnsatt.disable()
     }
 
     @Test
