@@ -7,7 +7,6 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.HendelseDao.OverstyringIgangsattKorrigertSøknad
 import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.HentEnhetløsning.Companion.erEnhetUtland
@@ -28,7 +27,6 @@ internal class Automatisering(
     private val risikovurderingDao: RisikovurderingDao,
     private val automatiseringDao: AutomatiseringDao,
     private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
-    private val egenAnsattDao: EgenAnsattDao,
     private val vergemålDao: VergemålDao,
     private val personDao: PersonDao,
     private val vedtakDao: VedtakDao,
@@ -194,7 +192,6 @@ internal class Automatisering(
             risikovurderingDao.hentRisikovurdering(vedtaksperiodeId)
                 ?: validering("Mangler vilkårsvurdering for arbeidsuførhet, aktivitetsplikt eller medvirkning") { false }
         val forhindrerAutomatisering = sykefraværstilfelle.forhindrerAutomatisering(periodeTom)
-        val erEgenAnsatt = egenAnsattDao.erEgenAnsatt(fødselsnummer)
         val harVergemål = vergemålDao.harVergemål(fødselsnummer) ?: false
         val tilhørerUtlandsenhet = erEnhetUtland(personDao.finnEnhetId(fødselsnummer))
         val antallÅpneGosysoppgaver = åpneGosysOppgaverDao.harÅpneOppgaver(fødselsnummer)
@@ -209,7 +206,6 @@ internal class Automatisering(
             validering("Det finnes åpne oppgaver på sykepenger i Gosys") {
                 antallÅpneGosysoppgaver?.let { it == 0 } ?: false
             },
-            validering("Bruker er ansatt i Nav") { erEgenAnsatt == false || erEgenAnsatt == null },
             validering("Bruker er under verge") { !harVergemål },
             validering("Bruker tilhører utlandsenhet") { !tilhørerUtlandsenhet },
             validering("Utbetaling til sykmeldt") { !skalStoppesPgaUTS },

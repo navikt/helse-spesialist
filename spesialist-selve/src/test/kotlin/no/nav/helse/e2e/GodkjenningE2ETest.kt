@@ -248,11 +248,11 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             tom = 31.januar,
             kanAvvises = kanAvvises,
             harOppdatertMetainfo = true,
+            // legger til negativt beløp for at den ikke skal automatiseres
+            personbeløp = -100,
         )
 
-        // egen ansatt er normalt avvisningsgrunn
-        håndterEgenansattløsning(erEgenAnsatt = true)
-
+        håndterEgenansattløsning()
         håndterVergemålløsning()
         håndterÅpneOppgaverløsning()
         håndterInntektløsning()

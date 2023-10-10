@@ -60,7 +60,6 @@ internal class AutomatiseringTest {
             risikovurderingDao = risikovurderingDaoMock,
             automatiseringDao = automatiseringDaoMock,
             åpneGosysOppgaverDao = åpneGosysOppgaverDaoMock,
-            egenAnsattDao = egenAnsattDao,
             vergemålDao = vergemålDaoMock,
             personDao = personDaoMock,
             vedtakDao = vedtakDaoMock,
@@ -166,9 +165,9 @@ internal class AutomatiseringTest {
     }
 
     @Test
-    fun `vedtaksperiode med egen ansatt er ikke automatiserbar`() {
+    fun `vedtaksperiode med egen ansatt skal automatiseres`() {
         every { egenAnsattDao.erEgenAnsatt(any()) } returns true
-        gårTilManuell()
+        gårAutomatisk()
     }
 
     @Test
