@@ -18,7 +18,7 @@ enum class Egenskap(
     SPESIALSAK(tilgangsstyrt = true),
     REVURDERING(kategori = Oppgavetype),
     SØKNAD(kategori = Oppgavetype),
-    STIKKPRØVE(kategori = Oppgavetype, tilgangsstyrt = true),
+    STIKKPRØVE(tilgangsstyrt = true),
     UTBETALING_TIL_SYKMELDT(kategori = Mottaker),
     DELVIS_REFUSJON(kategori = Mottaker),
     UTBETALING_TIL_ARBEIDSGIVER(kategori = Mottaker),

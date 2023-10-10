@@ -296,7 +296,7 @@ internal class OppgaveMediator(
     }
 
     private fun List<Egenskap>.oppgavetype(): Oppgavetype {
-        val egenskap = single { egenskap -> egenskap.kategori ==  Egenskap.Kategori.Oppgavetype }
+        val egenskap = single { egenskap -> egenskap.kategori == Egenskap.Kategori.Oppgavetype }
         return when (egenskap) {
             Egenskap.SØKNAD -> Oppgavetype.SOKNAD
             Egenskap.REVURDERING -> Oppgavetype.REVURDERING
