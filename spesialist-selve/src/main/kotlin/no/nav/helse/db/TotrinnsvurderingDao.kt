@@ -40,10 +40,15 @@ class TotrinnsvurderingDao(private val dataSource: DataSource): Totrinnsvurderin
     override fun oppdater(totrinnsvurderingFraDatabase: TotrinnsvurderingFraDatabase) {
         @Language("PostgreSQL")
         val query = """
-           UPDATE totrinnsvurdering SET saksbehandler = :saksbehandler, beslutter = :beslutter, er_retur = :er_retur,
-           oppdatert = :oppdatert, utbetaling_id_ref = (SELECT id FROM utbetaling_id ui WHERE ui.utbetaling_id = :utbetaling_id)
-           WHERE vedtaksperiode_id = :vedtaksperiode_id AND utbetaling_id_ref IS NULL
-        """
+            UPDATE totrinnsvurdering
+            SET saksbehandler     = :saksbehandler,
+                beslutter         = :beslutter,
+                er_retur          = :er_retur,
+                oppdatert         = :oppdatert,
+                utbetaling_id_ref = (SELECT id FROM utbetaling_id ui WHERE ui.utbetaling_id = :utbetaling_id)
+            WHERE vedtaksperiode_id = :vedtaksperiode_id
+              AND utbetaling_id_ref IS NULL
+        """.trimIndent()
 
         sessionOf(dataSource).use {
             it.run(
@@ -64,13 +69,20 @@ class TotrinnsvurderingDao(private val dataSource: DataSource): Totrinnsvurderin
     override fun hentAktivTotrinnsvurdering(oppgaveId: Long): TotrinnsvurderingFraDatabase? {
         @Language("PostgreSQL")
         val query = """
-           SELECT v.vedtaksperiode_id, er_retur, tv.saksbehandler, tv.beslutter, ui.id as utbetaling_id, tv.opprettet, tv.oppdatert FROM totrinnsvurdering tv
-           INNER JOIN vedtak v on tv.vedtaksperiode_id = v.vedtaksperiode_id
-           INNER JOIN oppgave o on v.id = o.vedtak_ref
-           LEFT JOIN utbetaling_id ui on ui.id = tv.utbetaling_id_ref
-           WHERE o.id = :oppgaveId
-           AND utbetaling_id_ref IS NULL
-        """
+            SELECT v.vedtaksperiode_id,
+                   er_retur,
+                   tv.saksbehandler,
+                   tv.beslutter,
+                   ui.id as utbetaling_id,
+                   tv.opprettet,
+                   tv.oppdatert
+            FROM totrinnsvurdering tv
+                     INNER JOIN vedtak v on tv.vedtaksperiode_id = v.vedtaksperiode_id
+                     INNER JOIN oppgave o on v.id = o.vedtak_ref
+                     LEFT JOIN utbetaling_id ui on ui.id = tv.utbetaling_id_ref
+            WHERE o.id = :oppgaveId
+              AND utbetaling_id_ref IS NULL
+        """.trimIndent()
 
         return sessionOf(dataSource).use {
             it.run(
