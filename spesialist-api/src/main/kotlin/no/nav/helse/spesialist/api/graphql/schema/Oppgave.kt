@@ -24,6 +24,7 @@ enum class AntallArbeidsforhold {
 enum class Egenskap {
     RISK_QA,
     FORTROLIG_ADRESSE,
+    STRENGT_FORTROLIG_ADRESSE,
     EGEN_ANSATT,
     BESLUTTER,
     SPESIALSAK,

@@ -463,6 +463,17 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `Saksbehandler får ikke med oppgaver med egenskap STRENGT_FORTROLIG_ADRESSE`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val saksbehandlerOid = UUID.randomUUID()
+        nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = vedtaksperiodeId, organisasjonsnummer = "323456789", oppgaveEgenskaper = listOf("STRENGT_FORTROLIG_ADRESSE"))
+        opprettSaksbehandler(saksbehandlerOid)
+        opprettTotrinnsvurdering(vedtaksperiodeId, saksbehandlerOid)
+        val oppgaver = oppgaveDao.finnOppgaverForVisning(ekskluderEgenskaper = listOf("STRENGT_FORTROLIG_ADRESSE"), saksbehandlerOid = saksbehandlerOid)
+        assertEquals(0, oppgaver.size)
+    }
+
+    @Test
     fun `finner vedtaksperiodeId`() {
         nyPerson()
         val actual = oppgaveDao.finnVedtaksperiodeId(oppgaveId)

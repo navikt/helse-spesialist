@@ -11,6 +11,7 @@ import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.RISK_QA
 import no.nav.helse.modell.oppgave.Egenskap.SPESIALSAK
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
+import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 
 internal abstract class MicrosoftTilgangskontroll(private val tilgangsgrupper: Tilgangsgrupper): Tilgangskontroll {
@@ -23,6 +24,7 @@ internal abstract class MicrosoftTilgangskontroll(private val tilgangsgrupper: T
         when (egenskap) {
             EGEN_ANSATT -> tilgangsgrupper.skjermedePersonerGruppeId
             FORTROLIG_ADRESSE -> tilgangsgrupper.kode7GruppeId
+            STRENGT_FORTROLIG_ADRESSE -> UUID.randomUUID() // Ingen skal ha tilgang til disse i Speil foreløpig
             RISK_QA -> tilgangsgrupper.riskQaGruppeId
             BESLUTTER -> tilgangsgrupper.beslutterGruppeId
             STIKKPRØVE -> tilgangsgrupper.stikkprøveGruppeId

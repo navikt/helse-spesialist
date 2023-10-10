@@ -289,7 +289,7 @@ internal class OppgaveMediatorTest {
         val opprettet = LocalDateTime.now()
         val vedtaksperiodeId = UUID.randomUUID()
         val opprinneligSøknadsdato = LocalDateTime.now()
-        every { oppgaveDao.finnOppgaverForVisning(emptyList(), any()) } returns listOf(
+        every { oppgaveDao.finnOppgaverForVisning(any(), any()) } returns listOf(
             oppgaveFraDatabaseForVisning(
                 oppgaveId = 1L,
                 aktørId = "1234567891011",
@@ -327,7 +327,7 @@ internal class OppgaveMediatorTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val opprinneligSøknadsdato = LocalDateTime.now()
         val egenskaper = listOf(egenskap, UTBETALING_TIL_SYKMELDT, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING)
-        every { oppgaveDao.finnOppgaverForVisning(emptyList(), any()) } returns listOf(
+        every { oppgaveDao.finnOppgaverForVisning(any(), any()) } returns listOf(
             oppgaveFraDatabaseForVisning(
                 oppgaveId = 1L,
                 aktørId = "1234567891011",
@@ -353,7 +353,7 @@ internal class OppgaveMediatorTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val opprinneligSøknadsdato = LocalDateTime.now()
         val egenskaper = listOf(egenskap, UTBETALING_TIL_SYKMELDT, EN_ARBEIDSGIVER, SØKNAD)
-        every { oppgaveDao.finnOppgaverForVisning(emptyList(), any()) } returns listOf(
+        every { oppgaveDao.finnOppgaverForVisning(any(), any()) } returns listOf(
             oppgaveFraDatabaseForVisning(
                 oppgaveId = 1L,
                 aktørId = "1234567891011",
@@ -379,7 +379,7 @@ internal class OppgaveMediatorTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val opprinneligSøknadsdato = LocalDateTime.now()
         val egenskaper = listOf(egenskap, FORSTEGANGSBEHANDLING, EN_ARBEIDSGIVER, SØKNAD)
-        every { oppgaveDao.finnOppgaverForVisning(emptyList(), any()) } returns listOf(
+        every { oppgaveDao.finnOppgaverForVisning(any(), any()) } returns listOf(
             oppgaveFraDatabaseForVisning(
                 oppgaveId = 1L,
                 aktørId = "1234567891011",
@@ -405,7 +405,7 @@ internal class OppgaveMediatorTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val opprinneligSøknadsdato = LocalDateTime.now()
         val egenskaper = listOf(egenskap, FORSTEGANGSBEHANDLING, UTBETALING_TIL_SYKMELDT, SØKNAD)
-        every { oppgaveDao.finnOppgaverForVisning(emptyList(), any()) } returns listOf(
+        every { oppgaveDao.finnOppgaverForVisning(ekskluderEgenskaper = any(), saksbehandlerOid = any()) } returns listOf(
             oppgaveFraDatabaseForVisning(
                 oppgaveId = 1L,
                 aktørId = "1234567891011",

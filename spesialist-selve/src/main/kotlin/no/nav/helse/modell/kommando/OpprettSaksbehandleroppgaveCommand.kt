@@ -20,6 +20,7 @@ import no.nav.helse.modell.oppgave.Egenskap.OVERGANG_FRA_IT
 import no.nav.helse.modell.oppgave.Egenskap.REVURDERING
 import no.nav.helse.modell.oppgave.Egenskap.RISK_QA
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
+import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_ARBEIDSGIVER
 import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_SYKMELDT
@@ -67,7 +68,14 @@ internal class OpprettSaksbehandleroppgaveCommand(
     override fun execute(context: CommandContext): Boolean {
         val egenskaper = mutableListOf<Egenskap>()
         if (egenAnsattDao.erEgenAnsatt(fødselsnummer) == true) egenskaper.add(EGEN_ANSATT)
-        if (harFortroligAdressebeskyttelse) egenskaper.add(FORTROLIG_ADRESSE)
+
+        val adressebeskyttelse = personDao.findAdressebeskyttelse(fødselsnummer)
+        when (adressebeskyttelse) {
+            Adressebeskyttelse.StrengtFortrolig,
+            Adressebeskyttelse.StrengtFortroligUtland -> egenskaper.add(STRENGT_FORTROLIG_ADRESSE)
+            Adressebeskyttelse.Fortrolig -> egenskaper.add(FORTROLIG_ADRESSE)
+            else -> {}
+        }
 
         if (utbetalingtype == Utbetalingtype.REVURDERING) egenskaper.add(REVURDERING)
         else egenskaper.add(SØKNAD)
@@ -108,10 +116,6 @@ internal class OpprettSaksbehandleroppgaveCommand(
 
         return true
     }
-
-    private val harFortroligAdressebeskyttelse
-        get() =
-            personDao.findAdressebeskyttelse(fødselsnummer) == Adressebeskyttelse.Fortrolig
 
     private val vedtaksperiodensUtbetaling by lazy { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) }
 }

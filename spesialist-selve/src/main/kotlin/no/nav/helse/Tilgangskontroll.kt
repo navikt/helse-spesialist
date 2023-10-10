@@ -28,5 +28,4 @@ internal class Tilgangsgrupper(private val env: Map<String, String>) {
     val spesialsakGruppeId: UUID by lazy { Gruppe.SPESIALSAK.idFra(env) }
 
     fun gruppeId(gruppe: Gruppe): UUID = gruppe.idFra(env)
-    fun harTilgang(gruppemedlemskap: List<UUID>, gruppe: Gruppe) = gruppemedlemskap.contains(gruppeId(gruppe))
 }

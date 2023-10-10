@@ -13,6 +13,7 @@ enum class Egenskap(
 ) {
     RISK_QA(tilgangsstyrt = true),
     FORTROLIG_ADRESSE(tilgangsstyrt = true),
+    STRENGT_FORTROLIG_ADRESSE(tilgangsstyrt = true),
     EGEN_ANSATT(tilgangsstyrt = true),
     BESLUTTER(tilgangsstyrt = true),
     SPESIALSAK(tilgangsstyrt = true),

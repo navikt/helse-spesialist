@@ -15,6 +15,7 @@ import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.RISK_QA
 import no.nav.helse.modell.oppgave.Egenskap.SPESIALSAK
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
+import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.testEnv
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -97,7 +98,9 @@ class TilgangskontrollørTest {
     fun `har tilgang dersom saksbehandler har tilstrekkelige tilganger`() {
         val saksbehandlergrupper = EnumSet.allOf(Gruppe::class.java).map { UUID.fromString(idForGruppe(it)) }
         val tilgangskontrollørForApi = TilgangskontrollørForApi(saksbehandlergrupper, tilgangsgrupper)
-        Egenskap.alleTilgangsstyrteEgenskaper.forEach {
+        Egenskap.alleTilgangsstyrteEgenskaper
+            .filterNot { it == STRENGT_FORTROLIG_ADRESSE } // Ingen har tilgang til disse i Speil foreløpig
+            .forEach {
             assertEquals(true, tilgangskontrollørForApi.harTilgangTil(UUID.randomUUID(), listOf(it)))
         }
     }

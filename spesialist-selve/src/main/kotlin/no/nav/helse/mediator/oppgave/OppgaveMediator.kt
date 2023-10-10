@@ -327,6 +327,7 @@ internal class OppgaveMediator(
     private fun Egenskap.mapToApiEgenskap(): EgenskapForApi = when (this) {
         Egenskap.RISK_QA -> EgenskapForApi.RISK_QA
         Egenskap.FORTROLIG_ADRESSE -> EgenskapForApi.FORTROLIG_ADRESSE
+        Egenskap.STRENGT_FORTROLIG_ADRESSE -> EgenskapForApi.STRENGT_FORTROLIG_ADRESSE
         Egenskap.EGEN_ANSATT -> EgenskapForApi.EGEN_ANSATT
         Egenskap.BESLUTTER -> EgenskapForApi.BESLUTTER
         Egenskap.SPESIALSAK -> EgenskapForApi.SPESIALSAK
