@@ -104,7 +104,7 @@ internal class OpprettSaksbehandleroppgaveCommand(
             Periodetype.OVERGANG_FRA_IT -> egenskaper.add(OVERGANG_FRA_IT)
         }
 
-        if (sykefraværstilfelle.haster(vedtaksperiodeId)) egenskaper.add(HASTER)
+        if (sykefraværstilfelle.haster(vedtaksperiodeId) && (vedtaksperiodensUtbetaling.delvisRefusjon() || vedtaksperiodensUtbetaling.utbetalingTilSykmeldt())) egenskaper.add(HASTER)
 
         oppgaveMediator.nyOppgave(fødselsnummer, context.id()) { reservertId ->
             val oppgave = Oppgave.nyOppgave(reservertId, vedtaksperiodeId, utbetalingId, hendelseId, kanAvvises, egenskaper)

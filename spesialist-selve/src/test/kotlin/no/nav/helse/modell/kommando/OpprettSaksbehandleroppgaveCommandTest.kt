@@ -44,6 +44,7 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spleis.graphql.enums.GraphQLUtbetalingstatus
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUtbetaling
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -205,8 +206,36 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
     }
 
     @Test
-    fun `oppretter oppgave med egenskap haster`() {
-        every { snapshotMediator.finnUtbetaling(FNR, UTBETALING_ID) } returns enUtbetaling()
+    fun `oppretter ikke oppgave med egenskap haster dersom det er utbetaling til arbeidsgiver`() {
+        every { snapshotMediator.finnUtbetaling(FNR, UTBETALING_ID) } returns enUtbetaling(personbeløp = 0, arbeidsgiverbeløp = 500)
+        every { sykefraværstilfelle.haster(VEDTAKSPERIODE_ID) } returns true
+        val slot = slot<((Long) -> Oppgave)>()
+        assertTrue(command.execute(context))
+        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
+
+        val oppgave = slot.captured.invoke(1L)
+        oppgaveinspektør(oppgave) {
+            assertFalse(egenskaper.contains(HASTER))
+        }
+    }
+
+    @Test
+    fun `oppretter oppgave med egenskap haster dersom det er delvis refusjon`() {
+        every { snapshotMediator.finnUtbetaling(FNR, UTBETALING_ID) } returns enUtbetaling(personbeløp = -500, arbeidsgiverbeløp = 500)
+        every { sykefraværstilfelle.haster(VEDTAKSPERIODE_ID) } returns true
+        val slot = slot<((Long) -> Oppgave)>()
+        assertTrue(command.execute(context))
+        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
+
+        val oppgave = slot.captured.invoke(1L)
+        oppgaveinspektør(oppgave) {
+            assertTrue(egenskaper.contains(HASTER))
+        }
+    }
+
+    @Test
+    fun `oppretter oppgave med egenskap haster dersom det er utbetaling til sykmeldte`() {
+        every { snapshotMediator.finnUtbetaling(FNR, UTBETALING_ID) } returns enUtbetaling(personbeløp = -500)
         every { sykefraværstilfelle.haster(VEDTAKSPERIODE_ID) } returns true
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
