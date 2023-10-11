@@ -13,6 +13,7 @@ import kotlinx.coroutines.withContext
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeTildelt
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
+import no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre
 import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDER_EPOST
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER_IDENT
@@ -123,6 +124,8 @@ class TildelingMutation(
                 ).build()
             } catch (e: OppgaveIkkeTildelt) {
                 newResult<Tildeling?>().error(ikkeTildeltError(e)).build()
+            } catch (e: OppgaveTildeltNoenAndre) {
+                newResult<Tildeling?>().error(tildeltNoenAndreError(e)).build()
             }
         }
     }
@@ -139,6 +142,13 @@ class TildelingMutation(
     private fun alleredeTildeltError(error: OppgaveAlleredeTildelt): GraphQLError {
         return newErrorException()
             .message("Oppgave allerede tildelt")
+            .extensions(mapOf("code" to error.httpkode, "tildeling" to error.tildeling))
+            .build()
+    }
+
+    private fun tildeltNoenAndreError(error: OppgaveTildeltNoenAndre): GraphQLError {
+        return newErrorException()
+            .message("Oppgave tildelt noen andre")
             .extensions(mapOf("code" to error.httpkode, "tildeling" to error.tildeling))
             .build()
     }

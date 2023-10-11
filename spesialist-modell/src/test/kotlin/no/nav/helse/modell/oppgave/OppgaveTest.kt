@@ -6,6 +6,7 @@ import no.nav.helse.modell.OppgaveAlleredeSendtBeslutter
 import no.nav.helse.modell.OppgaveAlleredeSendtIRetur
 import no.nav.helse.modell.OppgaveIkkeTildelt
 import no.nav.helse.modell.OppgaveKreverVurderingAvToSaksbehandlere
+import no.nav.helse.modell.OppgaveTildeltNoenAndre
 import no.nav.helse.modell.oppgave.Egenskap.BESLUTTER
 import no.nav.helse.modell.oppgave.Egenskap.EGEN_ANSATT
 import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
@@ -25,7 +26,6 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import kotlin.random.Random.Default.nextLong
@@ -475,7 +475,7 @@ internal class OppgaveTest {
         val oppgave = nyOppgave(SØKNAD)
         oppgave.forsøkTildelingVedReservasjon(saksbehandler, false)
         oppgave.leggPåVent()
-        oppgave.fjernPåVent()
+        oppgave.fjernPåVent(saksbehandler)
 
         inspektør(oppgave) {
             assertEquals(false, påVent)
@@ -487,7 +487,21 @@ internal class OppgaveTest {
         val oppgave = nyOppgave(SØKNAD)
 
         assertThrows<OppgaveIkkeTildelt> {
-            oppgave.fjernPåVent()
+            oppgave.fjernPåVent(saksbehandler)
+        }
+
+        inspektør(oppgave) {
+            assertEquals(false, påVent)
+        }
+    }
+
+    @Test
+    fun `kan ikke fjerne oppgave fra på vent hvis den er tildelt noen andre`() {
+        val oppgave = nyOppgave(SØKNAD)
+        oppgave.forsøkTildelingVedReservasjon(saksbehandler, påVent = false)
+
+        assertThrows<OppgaveTildeltNoenAndre> {
+            oppgave.fjernPåVent(beslutter)
         }
 
         inspektør(oppgave) {
@@ -517,7 +531,7 @@ internal class OppgaveTest {
         oppgave.register(observer)
         oppgave.forsøkTildelingVedReservasjon(saksbehandler, false)
         oppgave.leggPåVent()
-        oppgave.fjernPåVent()
+        oppgave.fjernPåVent(saksbehandler)
 
         assertEquals(3, observer.oppgaverEndret.size)
         assertEquals(oppgave, observer.oppgaverEndret[0])

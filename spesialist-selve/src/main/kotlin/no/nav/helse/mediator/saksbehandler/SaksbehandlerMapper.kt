@@ -1,7 +1,9 @@
 package no.nav.helse.mediator.saksbehandler
 
 import java.util.UUID
+import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.db.SaksbehandlerFraDatabase
+import no.nav.helse.mediator.TilgangskontrollørForApi
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.SaksbehandlerVisitor
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
@@ -20,6 +22,16 @@ internal object SaksbehandlerMapper {
             this.accept(it)
             it.saksbehandlerForDatabase
         }
+    }
+
+    internal fun SaksbehandlerFraApi.tilModellversjon(tilgangsgrupper: Tilgangsgrupper): Saksbehandler {
+        return Saksbehandler(
+            epostadresse = epost,
+            oid = oid,
+            navn = navn,
+            ident = ident,
+            tilgangskontroll = TilgangskontrollørForApi(grupper, tilgangsgrupper)
+        )
     }
 
     private val tilApiMapper get() = object: SaksbehandlerVisitor {

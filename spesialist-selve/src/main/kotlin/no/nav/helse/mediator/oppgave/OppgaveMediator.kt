@@ -14,6 +14,7 @@ import no.nav.helse.db.TotrinnsvurderingRepository
 import no.nav.helse.mediator.TilgangskontrollørForApi
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilOppgaverTilBehandling
 import no.nav.helse.mediator.saksbehandler.SaksbehandlerMapper.tilApiversjon
+import no.nav.helse.mediator.saksbehandler.SaksbehandlerMapper.tilModellversjon
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.Modellfeil
 import no.nav.helse.modell.OppgaveAlleredeSendtBeslutter
@@ -125,10 +126,10 @@ internal class OppgaveMediator(
         }
     }
 
-    override fun fjernPåVent(oppgaveId: Long) {
+    override fun fjernPåVent(oppgaveId: Long, saksbehandler: SaksbehandlerFraApi) {
         oppgave(oppgaveId) {
             try {
-                this.fjernPåVent()
+                this.fjernPåVent(saksbehandler.tilModellversjon(tilgangsgrupper))
             } catch (e: Modellfeil) {
                 throw e.tilApiFeil()
             }

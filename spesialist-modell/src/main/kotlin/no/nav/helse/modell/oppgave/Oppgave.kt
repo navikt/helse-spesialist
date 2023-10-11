@@ -3,6 +3,7 @@ package no.nav.helse.modell.oppgave
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.modell.OppgaveIkkeTildelt
+import no.nav.helse.modell.OppgaveTildeltNoenAndre
 import no.nav.helse.modell.oppgave.Egenskap.BESLUTTER
 import no.nav.helse.modell.oppgave.Egenskap.Companion.tilgangsstyrteEgenskaper
 import no.nav.helse.modell.oppgave.Egenskap.DELVIS_REFUSJON
@@ -120,8 +121,9 @@ class Oppgave private constructor(
         return tildeltTil.tildeling(påVent)
     }
 
-    fun fjernPåVent() {
-        if (this.tildeltTil == null) throw OppgaveIkkeTildelt(id)
+    fun fjernPåVent(saksbehandler: Saksbehandler) {
+        val tildeltTil = this.tildeltTil ?: throw OppgaveIkkeTildelt(id)
+        if (this.tildeltTil != saksbehandler) throw OppgaveTildeltNoenAndre(tildeltTil, this.påVent)
         påVent = false
         oppgaveEndret()
     }
