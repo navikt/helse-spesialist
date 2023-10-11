@@ -161,7 +161,6 @@ internal class OppgaveTest {
         }
     }
 
-    @Disabled("Kan skrus på igjen når egenskaper har tatt over ansvaret for oppgavetype")
     @Test
     fun `Forsøker tildeling ved reservasjon ved manglende tilgang til EGEN_ANSATT`() {
         val oppgave = nyOppgave(EGEN_ANSATT)
