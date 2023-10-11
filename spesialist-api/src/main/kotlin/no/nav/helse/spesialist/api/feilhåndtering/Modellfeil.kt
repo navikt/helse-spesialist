@@ -55,6 +55,24 @@ class OppgaveIkkeTildelt(private val oppgaveId: Long): Modellfeil() {
     }
 }
 
+class OppgaveTildeltNoenAndre(val tildeling: TildelingApiDto): Modellfeil() {
+    override val eksternKontekst: Map<String, Any> = mapOf("tildeling" to tildeling)
+    override val httpkode = HttpStatusCode.Conflict
+    override val feilkode: String = "oppgave_tildelt_noen_andre"
+    override fun logger() {
+        logg.info(
+            "Returnerer {} for {}",
+            keyValue("httpkode", "${httpkode.value}"),
+            keyValue("feilkode", feilkode)
+        )
+        sikkerLogg.info(
+            "Returnerer {} for {}, tildelingsinfo=$eksternKontekst",
+            keyValue("httpkode", "${httpkode.value}"),
+            keyValue("feilkode", feilkode)
+        )
+    }
+}
+
 class ManglerVurderingAvVarsler(private val oppgaveId: Long): Modellfeil() {
     override val eksternKontekst: Map<String, Any> = mapOf("oppgaveId" to oppgaveId.toString())
     override val httpkode = HttpStatusCode.BadRequest
