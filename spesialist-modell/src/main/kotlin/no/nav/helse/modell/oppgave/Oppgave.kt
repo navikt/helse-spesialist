@@ -114,11 +114,11 @@ class Oppgave private constructor(
         oppgaveEndret()
     }
 
-    fun leggPåVent(): Tildeling {
+    fun leggPåVent(saksbehandler: Saksbehandler) {
         val tildeltTil = this.tildeltTil ?: throw OppgaveIkkeTildelt(id)
+        if (this.tildeltTil != saksbehandler) throw OppgaveTildeltNoenAndre(tildeltTil, this.påVent)
         påVent = true
         oppgaveEndret()
-        return tildeltTil.tildeling(påVent)
     }
 
     fun fjernPåVent(saksbehandler: Saksbehandler) {

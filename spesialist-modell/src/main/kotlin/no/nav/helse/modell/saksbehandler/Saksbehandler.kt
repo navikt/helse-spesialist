@@ -2,7 +2,6 @@ package no.nav.helse.modell.saksbehandler
 
 import java.util.UUID
 import no.nav.helse.modell.oppgave.Egenskap
-import no.nav.helse.modell.oppgave.Tildeling
 import no.nav.helse.modell.saksbehandler.handlinger.Annullering
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtInntektOgRefusjon
@@ -31,8 +30,6 @@ class Saksbehandler(
 
     fun harTilgangTil(egenskaper: List<Egenskap>): Boolean =
         tilgangskontroll.harTilgangTil(oid, egenskaper)
-
-    internal fun tildeling(påVent: Boolean) = Tildeling(navn = navn, epost = epostadresse, oid = oid, påVent = påVent)
 
     internal fun håndter(hendelse: OverstyrtTidslinje) {
         val event = hendelse.byggEvent()

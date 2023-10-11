@@ -440,7 +440,7 @@ internal class OppgaveTest {
     fun `legg oppgave på vent`() {
         val oppgave = nyOppgave(SØKNAD)
         oppgave.forsøkTildelingVedReservasjon(saksbehandler, false)
-        oppgave.leggPåVent()
+        oppgave.leggPåVent(saksbehandler)
 
         inspektør(oppgave) {
             assertEquals(true, påVent)
@@ -448,21 +448,10 @@ internal class OppgaveTest {
     }
 
     @Test
-    fun `leggPåVent returnerer tildeling`() {
-        val oppgave = nyOppgave(SØKNAD)
-        oppgave.forsøkTildelingVedReservasjon(saksbehandler, false)
-        val tildeling = oppgave.leggPåVent()
-        assertEquals(SAKSBEHANDLER_EPOST,  tildeling.epost)
-        assertEquals(SAKSBEHANDLER_NAVN,  tildeling.navn)
-        assertEquals(SAKSBEHANDLER_OID,  tildeling.oid)
-        assertEquals(true,  tildeling.påVent)
-    }
-
-    @Test
     fun `kan ikke legge oppgave på vent uten at den er tildelt først`() {
         val oppgave = nyOppgave(SØKNAD)
         assertThrows<OppgaveIkkeTildelt> {
-            oppgave.leggPåVent()
+            oppgave.leggPåVent(saksbehandler)
         }
 
         inspektør(oppgave) {
@@ -474,7 +463,7 @@ internal class OppgaveTest {
     fun `fjern påVent`() {
         val oppgave = nyOppgave(SØKNAD)
         oppgave.forsøkTildelingVedReservasjon(saksbehandler, false)
-        oppgave.leggPåVent()
+        oppgave.leggPåVent(saksbehandler)
         oppgave.fjernPåVent(saksbehandler)
 
         inspektør(oppgave) {
@@ -514,7 +503,7 @@ internal class OppgaveTest {
         val oppgave = nyOppgave(SØKNAD)
         oppgave.register(observer)
         oppgave.forsøkTildelingVedReservasjon(saksbehandler, false)
-        oppgave.leggPåVent()
+        oppgave.leggPåVent(saksbehandler)
 
         assertEquals(2, observer.oppgaverEndret.size)
         assertEquals(oppgave, observer.oppgaverEndret[0])
@@ -530,7 +519,7 @@ internal class OppgaveTest {
         val oppgave = nyOppgave(SØKNAD)
         oppgave.register(observer)
         oppgave.forsøkTildelingVedReservasjon(saksbehandler, false)
-        oppgave.leggPåVent()
+        oppgave.leggPåVent(saksbehandler)
         oppgave.fjernPåVent(saksbehandler)
 
         assertEquals(3, observer.oppgaverEndret.size)

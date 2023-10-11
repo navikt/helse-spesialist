@@ -86,26 +86,30 @@ class TildelingMutation(
         notatTekst: String,
         notatType: NotatType,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<Tildeling?> = withContext(Dispatchers.IO) {
-        val saksbehandlerOid = UUID.fromString(env.graphQlContext.get(SAKSBEHANDLER_OID.key))
+    ): DataFetcherResult<Tildeling?> {
+        val saksbehandler= env.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(ContextValues.SAKSBEHANDLER.key).value
+        return withContext(Dispatchers.IO) {
+            val saksbehandlerOid = UUID.fromString(env.graphQlContext.get(SAKSBEHANDLER_OID.key))
 
-        val tildeling = try {
-            notatMediator.lagreForOppgaveId(oppgaveId.toLong(), notatTekst, saksbehandlerOid, notatType)
-            tildelingService.leggOppgavePåVent(oppgaveId = oppgaveId.toLong())
-        } catch (e: OppgaveIkkeTildelt) {
-            return@withContext newResult<Tildeling?>().error(ikkeTildeltError(e)).build()
-        } catch (e: RuntimeException) {
-            return@withContext newResult<Tildeling?>().error(getUpdateError(oppgaveId)).build()
+            try {
+                notatMediator.lagreForOppgaveId(oppgaveId.toLong(), notatTekst, saksbehandlerOid, notatType)
+                val tildeling = tildelingService.leggOppgavePåVent(oppgaveId = oppgaveId.toLong(), saksbehandler)
+                newResult<Tildeling?>().data(
+                    Tildeling(
+                        navn = tildeling.navn,
+                        oid = tildeling.oid.toString(),
+                        epost = tildeling.epost,
+                        paaVent = tildeling.påVent,
+                    )
+                ).build()
+            } catch (e: OppgaveIkkeTildelt) {
+                newResult<Tildeling?>().error(ikkeTildeltError(e)).build()
+            } catch (e: OppgaveTildeltNoenAndre) {
+                newResult<Tildeling?>().error(tildeltNoenAndreError(e)).build()
+            } catch (e: RuntimeException) {
+                newResult<Tildeling?>().error(getUpdateError(oppgaveId)).build()
+            }
         }
-
-        newResult<Tildeling?>().data(
-            Tildeling(
-                navn = tildeling.navn,
-                oid = tildeling.oid.toString(),
-                epost = tildeling.epost,
-                paaVent = tildeling.påVent,
-            )
-        ).build()
     }
 
     @Suppress("unused")

@@ -113,15 +113,12 @@ internal class OppgaveMediator(
         }
     }
 
-    override fun leggPåVent(oppgaveId: Long): TildelingApiDto {
+    override fun leggPåVent(oppgaveId: Long, saksbehandler: SaksbehandlerFraApi) {
         return oppgave(oppgaveId) {
-            val tildeling = try {
-                this.leggPåVent()
+            try {
+                this.leggPåVent(saksbehandler.tilModellversjon(tilgangsgrupper))
             } catch (e: Modellfeil) {
                 throw e.tilApiFeil()
-            }
-            tildeling.let {
-                TildelingApiDto(it.navn, it.epost, it.oid, it.påVent)
             }
         }
     }

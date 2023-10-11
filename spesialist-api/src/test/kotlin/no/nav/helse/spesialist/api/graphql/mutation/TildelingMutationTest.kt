@@ -1,16 +1,25 @@
 package no.nav.helse.spesialist.api.graphql.mutation
 
+import io.mockk.clearMocks
 import io.mockk.every
 import java.util.UUID
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
+import no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class TildelingMutationTest : AbstractGraphQLApiTest() {
+
+    @BeforeEach
+    fun beforeEach() {
+        clearMocks(oppgavehåndterer)
+    }
+
     @Test
     fun `oppretter tildeling`() {
         opprettSaksbehandler()
@@ -120,8 +129,6 @@ internal class TildelingMutationTest : AbstractGraphQLApiTest() {
         val oppgaveId = finnOppgaveIdFor(PERIODE.id)
         tildelOppgave(oppgaveId, SAKSBEHANDLER.oid)
 
-        every { oppgavehåndterer.leggPåVent(oppgaveId) } returns TildelingApiDto(SAKSBEHANDLER.navn, SAKSBEHANDLER.epost, SAKSBEHANDLER.oid, true)
-
         val body = runQuery(
             """
                 mutation LeggPaaVent {
@@ -145,7 +152,7 @@ internal class TildelingMutationTest : AbstractGraphQLApiTest() {
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
         val oppgaveId = finnOppgaveIdFor(PERIODE.id)
 
-        every { oppgavehåndterer.leggPåVent(oppgaveId) } throws OppgaveIkkeTildelt(oppgaveId)
+        every { oppgavehåndterer.leggPåVent(oppgaveId, any()) } throws OppgaveIkkeTildelt(oppgaveId)
 
         val body = runQuery(
             """
@@ -165,6 +172,31 @@ internal class TildelingMutationTest : AbstractGraphQLApiTest() {
     }
 
     @Test
+    fun `kan ikke legge på vent hvis oppgaven er tildelt noen andre`() {
+        opprettSaksbehandler()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        val oppgaveId = finnOppgaveIdFor(PERIODE.id)
+
+        every { oppgavehåndterer.leggPåVent(oppgaveId, any()) } throws OppgaveTildeltNoenAndre(TildelingApiDto("navn", "epost", UUID.randomUUID(), false))
+
+        val body = runQuery(
+            """
+                mutation LeggPaaVent {
+                    leggPaaVent(
+                        oppgaveId: "$oppgaveId",
+                        notatTekst: "Dett er et notat",
+                        notatType: PaaVent
+                    ) {
+                        navn, oid, epost, reservert, paaVent
+                    }
+                }
+            """
+        )
+
+        assertEquals(409, body["errors"].first()["extensions"]["code"]["value"].asInt())
+    }
+
+    @Test
     fun `fjern på vent`() {
         val oppgaveId = 1L
 
@@ -181,5 +213,51 @@ internal class TildelingMutationTest : AbstractGraphQLApiTest() {
         )
 
         assertFalse(body["data"]["fjernPaaVent"]["paaVent"].booleanValue())
+    }
+
+    @Test
+    fun `kan ikke fjerne oppgave fra på vent hvis den ikke er tildelt`() {
+        opprettSaksbehandler()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        val oppgaveId = finnOppgaveIdFor(PERIODE.id)
+
+        every { oppgavehåndterer.fjernPåVent(oppgaveId, any()) } throws OppgaveIkkeTildelt(oppgaveId)
+
+        val body = runQuery(
+            """
+                mutation FjernPaaVent {
+                    fjernPaaVent(
+                        oppgaveId: "$oppgaveId"
+                    ){
+                        navn, oid, epost, reservert, paaVent
+                    }
+                }
+            """
+        )
+
+        assertEquals(424, body["errors"].first()["extensions"]["code"]["value"].asInt())
+    }
+
+    @Test
+    fun `kan ikke fjerne oppgave fra på vent hvis oppgaven er tildelt noen andre`() {
+        opprettSaksbehandler()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        val oppgaveId = finnOppgaveIdFor(PERIODE.id)
+
+        every { oppgavehåndterer.fjernPåVent(oppgaveId, any()) } throws OppgaveTildeltNoenAndre(TildelingApiDto("navn", "epost", UUID.randomUUID(), false))
+
+        val body = runQuery(
+            """
+                mutation FjernPaaVent {
+                    fjernPaaVent(
+                        oppgaveId: "$oppgaveId"
+                    ){
+                        navn, oid, epost, reservert, paaVent
+                    }
+                }
+            """
+        )
+
+        assertEquals(409, body["errors"].first()["extensions"]["code"]["value"].asInt())
     }
 }

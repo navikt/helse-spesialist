@@ -16,7 +16,7 @@ interface IOppgavemelder {
 interface Oppgavehåndterer {
     fun sendTilBeslutter(oppgaveId: Long, behandlendeSaksbehandler: SaksbehandlerFraApi)
     fun sendIRetur(oppgaveId: Long, besluttendeSaksbehandler: SaksbehandlerFraApi)
-    fun leggPåVent(oppgaveId: Long): TildelingApiDto
+    fun leggPåVent(oppgaveId: Long, saksbehandler: SaksbehandlerFraApi)
     fun fjernPåVent(oppgaveId: Long, saksbehandler: SaksbehandlerFraApi)
     fun venterPåSaksbehandler(oppgaveId: Long): Boolean
     fun erRiskoppgave(oppgaveId: Long): Boolean
@@ -48,8 +48,9 @@ class TildelingService(
         return tildelingDao.slettTildeling(oppgaveId) > 0
     }
 
-    internal fun leggOppgavePåVent(oppgaveId: Long): TildelingApiDto {
-        return oppgavehåndterer.leggPåVent(oppgaveId)
+    internal fun leggOppgavePåVent(oppgaveId: Long, saksbehandler: SaksbehandlerFraApi): TildelingApiDto {
+        oppgavehåndterer.leggPåVent(oppgaveId, saksbehandler)
+        return TildelingApiDto(saksbehandler.navn, saksbehandler.epost, saksbehandler.oid, true)
     }
 
     internal fun fjernPåVent(oppgaveId: Long, saksbehandler: SaksbehandlerFraApi): TildelingApiDto {
