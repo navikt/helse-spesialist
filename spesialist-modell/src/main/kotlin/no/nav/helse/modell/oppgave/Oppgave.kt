@@ -68,6 +68,16 @@ class Oppgave private constructor(
         observers.add(observer)
     }
 
+    fun forsøkTildeling(saksbehandler: Saksbehandler) {
+        logg.info("Oppgave med {} forsøkes tildelt av saksbehandler.", kv("oppgaveId", id))
+        val tildelt = tildeltTil
+        if (tildelt != null && tildelt != saksbehandler) {
+            logg.warn("Oppgave med {} kan ikke tildeles fordi den er tildelt noen andre.", kv("oppgaveId", id))
+            throw OppgaveTildeltNoenAndre(tildelt, this.påVent)
+        }
+        tilstand.tildel(this, saksbehandler, påVent)
+    }
+
     fun forsøkTildelingVedReservasjon(
         saksbehandler: Saksbehandler,
         påVent: Boolean = false,
