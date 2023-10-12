@@ -2,6 +2,7 @@ package no.nav.helse.modell.oppgave
 
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.modell.ManglerTilgang
 import no.nav.helse.modell.OppgaveAlleredeSendtBeslutter
 import no.nav.helse.modell.OppgaveAlleredeSendtIRetur
 import no.nav.helse.modell.OppgaveIkkeTildelt
@@ -43,7 +44,7 @@ internal class OppgaveTest {
         private val BESLUTTER_OID = UUID.randomUUID()
         private val OPPGAVE_ID = nextLong()
         private val saksbehandlerUtenTilgang = saksbehandler()
-        private val beslutter = saksbehandler(oid = BESLUTTER_OID)
+        private val beslutter = saksbehandler(oid = BESLUTTER_OID, tilgangskontroll = TilgangskontrollForTestHarTilgang)
         private fun saksbehandler(
             epost: String = SAKSBEHANDLER_EPOST,
             oid: UUID = SAKSBEHANDLER_OID,
@@ -105,7 +106,9 @@ internal class OppgaveTest {
     @Test
     fun `Kan ikke tildele ved reservasjon dersom saksbehandler ikke har tilgang til alle tilgangsstyrte egenskaper på oppgaven`() {
         val oppgave = nyOppgave(SØKNAD, FORTROLIG_ADRESSE, RISK_QA)
-        oppgave.forsøkTildelingVedReservasjon(saksbehandler(tilgangskontroll = TilgangskontrollForTestMedKunRiskQA), false)
+        assertThrows<ManglerTilgang> {
+            oppgave.forsøkTildelingVedReservasjon(saksbehandler(tilgangskontroll = TilgangskontrollForTestMedKunRiskQA), false)
+        }
 
         inspektør(oppgave) {
             assertEquals(false, tildelt)
@@ -137,24 +140,13 @@ internal class OppgaveTest {
         }
     }
 
-    @Test
-    fun `Forsøker tildeling ved reservasjon med egenskap RISK_QA`() {
-        val oppgave = nyOppgave(RISK_QA)
-        val saksbehandlerMedTilgang = saksbehandler(tilgangskontroll = TilgangskontrollForTestHarTilgang)
-        oppgave.forsøkTildelingVedReservasjon(saksbehandlerMedTilgang, påVent = false)
-
-        inspektør(oppgave) {
-            assertEquals(true, tildelt)
-            assertEquals(false, påVent)
-            assertEquals(saksbehandlerMedTilgang, tildeltTil)
-        }
-    }
-
     @ParameterizedTest
-    @EnumSource(names = ["RISK_QA", "EGEN_ANSATT", "FORTROLIG_ADRESSE", "BESLUTTER", "SPESIALSAK", "STRENGT_FORTROLIG_ADRESSE", "STIKKPRØVE"])
+    @EnumSource(names = ["RISK_QA", "EGEN_ANSATT", "FORTROLIG_ADRESSE", "BESLUTTER", "SPESIALSAK", "STRENGT_FORTROLIG_ADRESSE"])
     fun `Forsøker tildeling ved reservasjon ved manglende tilgang`(egenskap: Egenskap) {
         val oppgave = nyOppgave(egenskap)
-        oppgave.forsøkTildelingVedReservasjon(saksbehandlerUtenTilgang, påVent = true)
+        assertThrows<ManglerTilgang> {
+            oppgave.forsøkTildelingVedReservasjon(saksbehandlerUtenTilgang, påVent = true)
+        }
 
         inspektør(oppgave) {
             assertEquals(false, tildelt)
@@ -167,7 +159,9 @@ internal class OppgaveTest {
     @EnumSource(names = ["RISK_QA", "EGEN_ANSATT", "FORTROLIG_ADRESSE", "BESLUTTER", "SPESIALSAK", "STRENGT_FORTROLIG_ADRESSE", "STIKKPRØVE"])
     fun `Forsøker tildeling ved manglende tilgang`(egenskap: Egenskap) {
         val oppgave = nyOppgave(egenskap)
-        oppgave.forsøkTildeling(saksbehandlerUtenTilgang)
+        assertThrows<ManglerTilgang> {
+            oppgave.forsøkTildeling(saksbehandlerUtenTilgang)
+        }
 
         inspektør(oppgave) {
             assertEquals(false, tildelt)

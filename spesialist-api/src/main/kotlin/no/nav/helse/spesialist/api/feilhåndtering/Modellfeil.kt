@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.api.feilhåndtering
 
 import io.ktor.http.HttpStatusCode
+import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
@@ -98,6 +99,23 @@ class IkkeTilgangTilRiskQa(private val saksbehandlerIdent: String, private val o
         sikkerLogg.info(
             "Saksbehandler {} har ikke tilgang til RISK_QA-saker, {}",
             keyValue("saksbehandlerIdent", saksbehandlerIdent),
+            keyValue("oppgaveId", oppgaveId),
+        )
+    }
+}
+
+class IkkeTilgang(private val oid: UUID, private val oppgaveId: Long): Modellfeil() {
+    override val eksternKontekst: Map<String, Any> = emptyMap()
+    override val httpkode = HttpStatusCode.Forbidden
+    override val feilkode: String = "ikke_tilgang_til_oppgave"
+    override fun logger() {
+        logg.info(
+            "Saksbehandler har ikke tilgang til å behandle oppgaven, {}",
+            keyValue("oppgaveId", oppgaveId),
+        )
+        sikkerLogg.info(
+            "Saksbehandler {} har ikke tilgang til å behandle oppgaven, {}",
+            keyValue("oid", oid),
             keyValue("oppgaveId", oppgaveId),
         )
     }

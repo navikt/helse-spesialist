@@ -16,6 +16,7 @@ import no.nav.helse.mediator.TilgangskontrollørForApi
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilOppgaverTilBehandling
 import no.nav.helse.mediator.saksbehandler.SaksbehandlerMapper.tilModellversjon
 import no.nav.helse.modell.HendelseDao
+import no.nav.helse.modell.ManglerTilgang
 import no.nav.helse.modell.Modellfeil
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
@@ -210,7 +211,9 @@ internal class OppgaveMediator(
             ident = saksbehandlerFraDatabase.ident,
             tilgangskontroll = tilgangskontroll
         )
-        oppgave.forsøkTildelingVedReservasjon(saksbehandler, settPåVent)
+        try {
+            oppgave.forsøkTildelingVedReservasjon(saksbehandler, settPåVent)
+        } catch (_: ManglerTilgang) {}
     }
 
     fun harFerdigstiltOppgave(vedtaksperiodeId: UUID) = oppgaveDao.harFerdigstiltOppgave(vedtaksperiodeId)

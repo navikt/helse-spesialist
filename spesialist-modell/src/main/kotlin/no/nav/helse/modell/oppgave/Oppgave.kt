@@ -2,6 +2,7 @@ package no.nav.helse.modell.oppgave
 
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
+import no.nav.helse.modell.ManglerTilgang
 import no.nav.helse.modell.OppgaveIkkeTildelt
 import no.nav.helse.modell.OppgaveTildeltNoenAndre
 import no.nav.helse.modell.oppgave.Egenskap.BESLUTTER
@@ -226,7 +227,7 @@ class Oppgave private constructor(
                     kv("oppgaveId", oppgave.id),
                     kv("oid", saksbehandler.oid())
                 )
-                return
+                throw ManglerTilgang(saksbehandler.oid(), oppgave.id)
             }
             oppgave.tildel(saksbehandler, påVent)
         }

@@ -11,6 +11,7 @@ import no.nav.helse.mediator.overstyring.Overstyringlagrer
 import no.nav.helse.mediator.overstyring.Saksbehandlingsmelder
 import no.nav.helse.mediator.saksbehandler.SaksbehandlerLagrer
 import no.nav.helse.mediator.saksbehandler.SaksbehandlerMapper.tilApiversjon
+import no.nav.helse.modell.ManglerTilgang
 import no.nav.helse.modell.Modellfeil
 import no.nav.helse.modell.OppgaveAlleredeSendtBeslutter
 import no.nav.helse.modell.OppgaveAlleredeSendtIRetur
@@ -36,6 +37,7 @@ import no.nav.helse.rapids_rivers.withMDC
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.abonnement.AbonnementDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
+import no.nav.helse.spesialist.api.feilhåndtering.IkkeTilgang
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
@@ -212,6 +214,7 @@ internal class SaksbehandlerMediator(
                 is OppgaveAlleredeSendtBeslutter -> no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtBeslutter(oppgaveId)
                 is OppgaveAlleredeSendtIRetur -> no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtIRetur(oppgaveId)
                 is OppgaveKreverVurderingAvToSaksbehandlere -> no.nav.helse.spesialist.api.feilhåndtering.OppgaveKreverVurderingAvToSaksbehandlere(oppgaveId)
+                is ManglerTilgang -> IkkeTilgang(oid, oppgaveId)
             }
         }
     }
