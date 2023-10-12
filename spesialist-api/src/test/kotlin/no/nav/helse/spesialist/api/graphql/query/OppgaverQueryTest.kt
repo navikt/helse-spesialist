@@ -8,6 +8,7 @@ import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import no.nav.helse.spesialist.api.graphql.schema.AntallArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker
 import no.nav.helse.spesialist.api.graphql.schema.OppgaveTilBehandling
+import no.nav.helse.spesialist.api.graphql.schema.Oppgaveegenskaper
 import no.nav.helse.spesialist.api.graphql.schema.Oppgavesortering
 import no.nav.helse.spesialist.api.graphql.schema.Periodetype
 import no.nav.helse.spesialist.api.graphql.schema.Personnavn
@@ -55,6 +56,7 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
         aktorId = "1017011111111",
         tildeling = null,
         egenskaper = emptyList(),
+        oppgaveegenskaper = Oppgaveegenskaper(emptyList()),
         periodetype = Periodetype.FORSTEGANGSBEHANDLING,
         oppgavetype = OppgavetypeForApi.SOKNAD,
         mottaker = Mottaker.SYKMELDT,

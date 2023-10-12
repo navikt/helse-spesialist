@@ -10,6 +10,7 @@ import no.nav.helse.spesialist.api.graphql.schema.Kategori
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker
 import no.nav.helse.spesialist.api.graphql.schema.OppgaveTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.Oppgaveegenskap
+import no.nav.helse.spesialist.api.graphql.schema.Oppgaveegenskaper
 import no.nav.helse.spesialist.api.graphql.schema.Oppgavetype
 import no.nav.helse.spesialist.api.graphql.schema.Periodetype
 import no.nav.helse.spesialist.api.graphql.schema.Personnavn
@@ -17,30 +18,35 @@ import no.nav.helse.spesialist.api.graphql.schema.Tildeling
 import no.nav.helse.spesialist.api.graphql.schema.Egenskap as EgenskapForApi
 
 internal object OppgaveMapper {
-    internal fun List<OppgaveFraDatabaseForVisning>.tilOppgaverTilBehandling() = map {
-        val egenskaper = it.egenskaper.tilModellversjoner()
+    internal fun List<OppgaveFraDatabaseForVisning>.tilOppgaverTilBehandling() = map { oppgave ->
+        val egenskaper = oppgave.egenskaper.tilModellversjoner()
         OppgaveTilBehandling(
-            id = it.id.toString(),
-            opprettet = it.opprettet.toString(),
-            opprinneligSoknadsdato = it.opprinneligSøknadsdato.toString(),
-            vedtaksperiodeId = it.vedtaksperiodeId.toString(),
+            id = oppgave.id.toString(),
+            opprettet = oppgave.opprettet.toString(),
+            opprinneligSoknadsdato = oppgave.opprinneligSøknadsdato.toString(),
+            vedtaksperiodeId = oppgave.vedtaksperiodeId.toString(),
             navn = Personnavn(
-                fornavn = it.navn.fornavn,
-                etternavn = it.navn.etternavn,
-                mellomnavn = it.navn.mellomnavn,
+                fornavn = oppgave.navn.fornavn,
+                etternavn = oppgave.navn.etternavn,
+                mellomnavn = oppgave.navn.mellomnavn,
             ),
-            aktorId = it.aktørId,
-            tildeling = it.tildelt?.let { tildelt ->
+            aktorId = oppgave.aktørId,
+            tildeling = oppgave.tildelt?.let { tildelt ->
                 Tildeling(
                     tildelt.navn,
                     tildelt.epostadresse,
                     tildelt.oid.toString(),
-                    it.påVent
+                    oppgave.påVent
                 )
             },
             egenskaper = egenskaper.map { egenskap ->
                 Oppgaveegenskap(egenskap.tilApiversjon(), egenskap.kategori.tilApiversjon())
             },
+            oppgaveegenskaper = Oppgaveegenskaper(
+                egenskaper = egenskaper.map { egenskap ->
+                    Oppgaveegenskap(egenskap.tilApiversjon(), egenskap.kategori.tilApiversjon())
+                }.sortedBy { it.egenskap }
+            ),
             periodetype = egenskaper.periodetype(),
             oppgavetype = egenskaper.oppgavetype(),
             mottaker = egenskaper.mottaker(),

@@ -69,10 +69,15 @@ data class OppgaveTilBehandling(
     val aktorId: String,
     val tildeling: Tildeling?,
     val egenskaper: List<Oppgaveegenskap>,
+    val oppgaveegenskaper: Oppgaveegenskaper,
     val periodetype: Periodetype,
     val oppgavetype: Oppgavetype,
     val mottaker: Mottaker,
     val antallArbeidsforhold: AntallArbeidsforhold,
+)
+
+data class Oppgaveegenskaper(
+    val egenskaper: List<Oppgaveegenskap>
 )
 
 data class Oppgaveegenskap(
