@@ -37,6 +37,7 @@ import java.net.ProxySelector
 import java.net.URI
 import java.util.UUID
 import no.nav.helse.db.ReservasjonDao
+import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.GodkjenningMediator
@@ -87,7 +88,6 @@ import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
-import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
@@ -196,8 +196,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val vedtakDao = VedtakDao(dataSource)
     private val risikovurderingDao = RisikovurderingDao(dataSource)
     private val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
-    private val saksbehandlerApiDao = SaksbehandlerDao(dataSource)
-    private val saksbehandlerDao = no.nav.helse.db.SaksbehandlerDao(dataSource)
+    private val saksbehandlerDao = SaksbehandlerDao(dataSource)
     private val tildelingApiDao = TildelingApiDao(dataSource)
     private val tildelingDao = TildelingDao(dataSource)
     private val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource)
@@ -401,13 +400,11 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             hendelsefabrikk = hendelsefabrikk
         )
         saksbehandlerMediator = SaksbehandlerMediator(dataSource, versjonAvKode(env), rapidsConnection, oppgaveMediator, tilgangsgrupper)
-        oppgavemelder = Oppgavemelder(hendelseDao, oppgaveDao, rapidsConnection)
+        oppgavemelder = Oppgavemelder(hendelseDao, rapidsConnection)
         tildelingService = TildelingService(
             tildelingApiDao,
-            saksbehandlerApiDao,
-            totrinnsvurderingApiDao,
             oppgaveMediator
-        ) { oppgavemelder }
+        )
         godkjenningService = GodkjenningService(
             dataSource = dataSource,
             rapidsConnection = rapidsConnection,

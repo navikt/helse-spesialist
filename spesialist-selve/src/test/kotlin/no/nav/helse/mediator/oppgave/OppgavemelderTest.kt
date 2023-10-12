@@ -26,7 +26,6 @@ class OppgavemelderTest {
     }
 
     private val hendelseDao = mockk<HendelseDao>(relaxed = true)
-    private val dao = mockk<OppgaveDao>(relaxed = true)
     private val testRapid = TestRapid()
     init {
         every { hendelseDao.finnFødselsnummer(any()) } returns FNR
@@ -40,7 +39,7 @@ class OppgavemelderTest {
     @Test
     fun `bygg kafkamelding`() {
         val oppgave = nyOppgave()
-        oppgave.register(Oppgavemelder(hendelseDao, dao, testRapid))
+        oppgave.register(Oppgavemelder(hendelseDao, testRapid))
         oppgave.avventerSystem("IDENT", UUID.randomUUID())
         val meldinger = testRapid.inspektør.meldinger()
         assertEquals(1, meldinger.size)

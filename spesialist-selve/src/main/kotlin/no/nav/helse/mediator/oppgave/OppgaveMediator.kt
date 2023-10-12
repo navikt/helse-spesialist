@@ -55,7 +55,7 @@ internal class OppgaveMediator(
     internal fun nyOppgave(fødselsnummer: String, contextId: UUID, opprettOppgaveBlock: (reservertId: Long) -> Oppgave) {
         val nesteId = oppgaveDao.reserverNesteId()
         val oppgave = opprettOppgaveBlock(nesteId)
-        val oppgavemelder = Oppgavemelder(hendelseDao, oppgaveDao, rapidsConnection)
+        val oppgavemelder = Oppgavemelder(hendelseDao, rapidsConnection)
         oppgavemelder.oppgaveOpprettet(oppgave)
         oppgave.register(oppgavemelder)
         tildelVedReservasjon(fødselsnummer, oppgave)
@@ -67,7 +67,7 @@ internal class OppgaveMediator(
 
     fun <T> oppgave(id: Long, oppgaveBlock: Oppgave.() -> T): T {
         val oppgave = Oppgavehenter(oppgaveDao, totrinnsvurderingRepository, saksbehandlerRepository, tilgangskontroll).oppgave(id)
-        oppgave.register(Oppgavemelder(hendelseDao, oppgaveDao, rapidsConnection))
+        oppgave.register(Oppgavemelder(hendelseDao, rapidsConnection))
         val returverdi = oppgaveBlock(oppgave)
         Oppgavelagrer(tildelingDao).apply {
             oppgave.accept(this)

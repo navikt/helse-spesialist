@@ -10,26 +10,23 @@ import io.ktor.http.HttpStatusCode
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import no.nav.helse.spesialist.api.SaksbehandlerTilganger
-import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeTildelt
+import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre
 import no.nav.helse.spesialist.api.graphql.ContextValues
-import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDER_EPOST
-import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER_IDENT
-import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER_NAVN
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER_OID
-import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGER
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.graphql.schema.Tildeling
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.tildeling.TildelingService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 class TildelingMutation(
     private val tildelingService: TildelingService,
+    private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
     private val notatMediator: NotatMediator,
 ) : Mutation {
 
@@ -41,37 +38,20 @@ class TildelingMutation(
     suspend fun opprettTildeling(
         oppgaveId: String,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<Tildeling?> = withContext(Dispatchers.IO) {
-        val tilganger = env.graphQlContext.get<SaksbehandlerTilganger>(TILGANGER.key)
-        val saksbehandlerOid = UUID.fromString(env.graphQlContext.get(SAKSBEHANDLER_OID.key))
-        val epostadresse = env.graphQlContext.get<String>(SAKSBEHANDER_EPOST.key)
-        val navn = env.graphQlContext.get<String>(SAKSBEHANDLER_NAVN.key)
-        val ident = env.graphQlContext.get<String>(SAKSBEHANDLER_IDENT.key)
-        val tildeling = try {
-            tildelingService.tildelOppgaveTilSaksbehandler(
-                oppgaveId = oppgaveId.toLong(),
-                saksbehandlerreferanse = saksbehandlerOid,
-                epostadresse = epostadresse,
-                navn = navn,
-                ident = ident,
-                saksbehandlerTilganger = tilganger
-            )
-        } catch (e: OppgaveAlleredeTildelt) {
-            return@withContext newResult<Tildeling?>().error(alleredeTildeltError(e)).build()
-        } catch (e: RuntimeException) {
-            return@withContext newResult<Tildeling?>().error(getUpdateError(oppgaveId)).build()
+    ): DataFetcherResult<Tildeling?> {
+        val saksbehandler= env.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(ContextValues.SAKSBEHANDLER.key).value
+        return withContext(Dispatchers.IO) {
+            try {
+                saksbehandlerhåndterer.håndter(TildelOppgave(oppgaveId.toLong()), saksbehandler)
+                newResult<Tildeling?>().data(
+                    Tildeling(saksbehandler.navn, saksbehandler.epost, saksbehandler.oid.toString(), true)
+                ).build()
+            } catch (e: OppgaveTildeltNoenAndre) {
+                newResult<Tildeling?>().error(alleredeTildeltError(e)).build()
+            } catch (e: RuntimeException) {
+                newResult<Tildeling?>().error(getUpdateError(oppgaveId)).build()
+            }
         }
-
-        sikkerlogg.info("Oppgave $oppgaveId er nå tildelt $saksbehandlerOid.")
-
-        newResult<Tildeling?>().data(
-            Tildeling(
-                navn = tildeling.navn,
-                oid = tildeling.oid.toString(),
-                epost = tildeling.epost,
-                paaVent = tildeling.påVent,
-            )
-        ).build()
     }
 
     @Suppress("unused")
@@ -143,7 +123,7 @@ class TildelingMutation(
             .build()
     }
 
-    private fun alleredeTildeltError(error: OppgaveAlleredeTildelt): GraphQLError {
+    private fun alleredeTildeltError(error: OppgaveTildeltNoenAndre): GraphQLError {
         return newErrorException()
             .message("Oppgave allerede tildelt")
             .extensions(mapOf("code" to error.httpkode, "tildeling" to error.tildeling))

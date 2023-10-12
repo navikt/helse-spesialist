@@ -27,11 +27,9 @@ import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
-import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
-import no.nav.helse.spesialist.api.tildeling.IOppgavemelder
 import no.nav.helse.spesialist.api.tildeling.Oppgavehåndterer
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.tildeling.TildelingService
@@ -111,10 +109,8 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected val tildelingService =
         TildelingService(
             tildelingDao,
-            SaksbehandlerDao(dataSource),
-            totrinnsvurderingApiDao,
             oppgavehåndterer
-        ) { mockk<IOppgavemelder>(relaxed = true) }
+        )
 
     protected fun opprettVedtaksperiode(
         personId: Long,

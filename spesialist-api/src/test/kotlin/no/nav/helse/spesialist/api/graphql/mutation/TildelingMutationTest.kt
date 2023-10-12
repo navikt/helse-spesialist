@@ -2,10 +2,12 @@ package no.nav.helse.spesialist.api.graphql.mutation
 
 import io.mockk.clearMocks
 import io.mockk.every
+import io.mockk.verify
 import java.util.UUID
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -17,14 +19,12 @@ internal class TildelingMutationTest : AbstractGraphQLApiTest() {
 
     @BeforeEach
     fun beforeEach() {
-        clearMocks(oppgavehåndterer)
+        clearMocks(oppgavehåndterer, saksbehandlerhåndterer)
     }
 
     @Test
     fun `oppretter tildeling`() {
-        opprettSaksbehandler()
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
-        val oppgaveId = finnOppgaveIdFor(PERIODE.id)
+        val oppgaveId = 1L
 
         val body = runQuery(
             """
@@ -38,15 +38,16 @@ internal class TildelingMutationTest : AbstractGraphQLApiTest() {
             """
         )
 
+        verify(exactly = 1) { saksbehandlerhåndterer.håndter(TildelOppgave(oppgaveId), any()) }
+
         assertEquals(SAKSBEHANDLER.oid, UUID.fromString(body["data"]["opprettTildeling"]["oid"].asText()))
     }
 
     @Test
     fun `kan ikke tildele allerede tildelt oppgave`() {
-        opprettSaksbehandler()
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
-        val oppgaveId = finnOppgaveIdFor(PERIODE.id)
-        tildelOppgave(oppgaveId, SAKSBEHANDLER.oid)
+        val oppgaveId = 1L
+
+        every { saksbehandlerhåndterer.håndter(any<TildelOppgave>(), any()) } throws OppgaveTildeltNoenAndre(TildelingApiDto("navn", "epost", UUID.randomUUID(), false))
 
         val body = runQuery(
             """

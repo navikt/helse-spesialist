@@ -12,16 +12,9 @@ import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.spesialist.api.tildeling.IOppgavemelder
 import kotlin.properties.Delegates
 
-internal class Oppgavemelder(private val hendelseDao: HendelseDao, private val oppgaveDao: OppgaveDao, private val rapidsConnection: RapidsConnection): OppgaveObserver, IOppgavemelder {
-
-    override fun sendOppgaveOppdatertMelding(oppgaveId: Long) {
-        lagOppgaveOppdatertMelding(oppgaveId).also { (key, message) ->
-            rapidsConnection.publish(key, message.toJson())
-        }
-    }
+internal class Oppgavemelder(private val hendelseDao: HendelseDao, private val rapidsConnection: RapidsConnection): OppgaveObserver {
 
     internal fun oppgaveOpprettet(oppgave: Oppgave) {
         val oppgavemelding = OppgaveForKafkaBygger().bygg(oppgave)
@@ -33,11 +26,6 @@ internal class Oppgavemelder(private val hendelseDao: HendelseDao, private val o
         val oppgavemelding = OppgaveForKafkaBygger().bygg(oppgave)
         val (fnr, melding) = melding("oppgave_oppdatert", oppgavemelding)
         rapidsConnection.publish(fnr, melding.toJson())
-    }
-
-    private fun lagOppgaveOppdatertMelding(oppgaveId: Long): Pair<String, JsonMessage> {
-        val oppgavemelding: Oppgavemelding = requireNotNull(oppgaveDao.hentOppgavemelding(oppgaveId))
-        return melding("oppgave_oppdatert", oppgavemelding)
     }
 
     private fun melding(eventName: String, oppgavemelding: Oppgavemelding): Pair<String, JsonMessage> {
