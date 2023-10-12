@@ -10,6 +10,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import java.util.UUID
 import no.nav.helse.Testdata.AKTØR
+import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.mediator.api.AbstractApiTest
 import no.nav.helse.mediator.api.AbstractApiTest.Companion.authentication
 import no.nav.helse.spesialist.api.abonnement.AbonnementDao
@@ -17,7 +18,6 @@ import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDto
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseMediator
 import no.nav.helse.spesialist.api.abonnement.opptegnelseApi
-import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
