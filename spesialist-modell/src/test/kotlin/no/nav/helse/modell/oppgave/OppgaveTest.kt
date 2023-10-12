@@ -140,6 +140,40 @@ internal class OppgaveTest {
         }
     }
 
+    @Test
+    fun `Forsøk avmelding av oppgave`() {
+        val oppgave = nyOppgave()
+        oppgave.forsøkTildeling(saksbehandlerUtenTilgang)
+        oppgave.forsøkAvmelding(saksbehandlerUtenTilgang)
+
+        inspektør(oppgave) {
+            assertEquals(false, tildelt)
+            assertEquals(false, påVent)
+            assertEquals(null, tildeltTil)
+        }
+    }
+
+    @Test
+    fun `Forsøk avmelding av oppgave når oppgaven er tildelt noen andre`() {
+        val oppgave = nyOppgave()
+        oppgave.forsøkTildeling(saksbehandler(oid = UUID.randomUUID()))
+        oppgave.forsøkAvmelding(saksbehandlerUtenTilgang)
+
+        inspektør(oppgave) {
+            assertEquals(false, tildelt)
+            assertEquals(false, påVent)
+            assertEquals(null, tildeltTil)
+        }
+    }
+
+    @Test
+    fun `Forsøk avmelding av oppgave når oppgaven ikke er tildelt`() {
+        val oppgave = nyOppgave()
+        assertThrows<OppgaveIkkeTildelt> {
+            oppgave.forsøkAvmelding(saksbehandlerUtenTilgang)
+        }
+    }
+
     @ParameterizedTest
     @EnumSource(names = ["RISK_QA", "EGEN_ANSATT", "FORTROLIG_ADRESSE", "BESLUTTER", "SPESIALSAK", "STRENGT_FORTROLIG_ADRESSE"])
     fun `Forsøker tildeling ved reservasjon ved manglende tilgang`(egenskap: Egenskap) {

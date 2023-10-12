@@ -79,6 +79,17 @@ class Oppgave private constructor(
         tilstand.tildel(this, saksbehandler, påVent)
     }
 
+    internal fun forsøkAvmelding(saksbehandler: Saksbehandler) {
+        logg.info("Oppgave med {} forsøkes avmeldt av saksbehandler.", kv("oppgaveId", id))
+        val tildelt = tildeltTil ?: throw OppgaveIkkeTildelt(this.id)
+
+        if (tildelt != saksbehandler) {
+            logg.info("Oppgave med {} er tildelt noen andre, avmeldes", kv("oppgaveId", id))
+            sikkerlogg.info("Oppgave med {} er tildelt $tildelt, avmeldes av $saksbehandler", kv("oppgaveId", id))
+        }
+        tilstand.avmeld(this, saksbehandler)
+    }
+
     fun forsøkTildelingVedReservasjon(
         saksbehandler: Saksbehandler,
         påVent: Boolean = false,
@@ -159,6 +170,14 @@ class Oppgave private constructor(
         oppgaveEndret()
     }
 
+    private fun avmeld(saksbehandler: Saksbehandler) {
+        this.tildeltTil = null
+        this.påVent = false
+        logg.info("Oppgave med {} tildeles saksbehandler med {}", kv("oppgaveId", id), kv("oid", saksbehandler.oid()))
+        sikkerlogg.info("Oppgave med {} tildeles $saksbehandler", kv("oppgaveId", id))
+        oppgaveEndret()
+    }
+
     private fun oppgaveEndret() {
         observers.forEach { it.oppgaveEndret(this) }
     }
@@ -205,6 +224,14 @@ class Oppgave private constructor(
                 kv("oppgaveId", oppgave.id)
             )
         }
+
+        fun avmeld(oppgave: Oppgave, saksbehandler: Saksbehandler) {
+            logg.error(
+                "Forventer ikke forsøk på avmelding i {} for oppgave med {} av $saksbehandler",
+                kv("tilstand", this),
+                kv("oppgaveId", oppgave.id)
+            )
+        }
     }
 
     data object AvventerSaksbehandler: Tilstand {
@@ -230,6 +257,10 @@ class Oppgave private constructor(
                 throw ManglerTilgang(saksbehandler.oid(), oppgave.id)
             }
             oppgave.tildel(saksbehandler, påVent)
+        }
+
+        override fun avmeld(oppgave: Oppgave, saksbehandler: Saksbehandler) {
+            oppgave.avmeld(saksbehandler)
         }
     }
 
