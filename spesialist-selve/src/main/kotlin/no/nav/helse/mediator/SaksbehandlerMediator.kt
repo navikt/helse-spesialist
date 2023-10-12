@@ -44,6 +44,7 @@ import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AnnulleringHandlingFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi
@@ -230,6 +231,7 @@ internal class SaksbehandlerMediator(
             is SkjønnsfastsettSykepengegrunnlagHandlingFraApi -> this.tilModellversjon()
             is AnnulleringHandlingFraApi -> this.tilModellversjon()
             is TildelOppgave -> this.tilModellversjon()
+            is AvmeldOppgave -> this.tilModellversjon()
         }
     }
 
@@ -344,5 +346,9 @@ internal class SaksbehandlerMediator(
 
     private fun TildelOppgave.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.TildelOppgave {
         return no.nav.helse.modell.saksbehandler.handlinger.TildelOppgave(this.oppgaveId)
+    }
+
+    private fun AvmeldOppgave.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.AvmeldOppgave {
+        return no.nav.helse.modell.saksbehandler.handlinger.AvmeldOppgave(this.oppgaveId)
     }
 }

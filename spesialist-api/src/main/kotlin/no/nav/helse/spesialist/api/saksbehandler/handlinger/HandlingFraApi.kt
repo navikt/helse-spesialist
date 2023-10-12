@@ -7,6 +7,7 @@ import java.util.UUID
 sealed interface HandlingFraApi
 
 data class TildelOppgave(val oppgaveId: Long): HandlingFraApi
+data class AvmeldOppgave(val oppgaveId: Long): HandlingFraApi
 
 @JsonIgnoreProperties
 class OverstyrTidslinjeHandlingFraApi(

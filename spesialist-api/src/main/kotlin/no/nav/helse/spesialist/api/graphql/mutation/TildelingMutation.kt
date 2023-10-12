@@ -19,6 +19,7 @@ import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.graphql.schema.Tildeling
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.tildeling.TildelingService
 import org.slf4j.Logger
@@ -35,10 +36,7 @@ class TildelingMutation(
     }
 
     @Suppress("unused")
-    suspend fun opprettTildeling(
-        oppgaveId: String,
-        env: DataFetchingEnvironment,
-    ): DataFetcherResult<Tildeling?> {
+    suspend fun opprettTildeling(oppgaveId: String, env: DataFetchingEnvironment): DataFetcherResult<Tildeling?> {
         val saksbehandler= env.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(ContextValues.SAKSBEHANDLER.key).value
         return withContext(Dispatchers.IO) {
             try {
@@ -55,9 +53,18 @@ class TildelingMutation(
     }
 
     @Suppress("unused")
-    suspend fun fjernTildeling(oppgaveId: String): DataFetcherResult<Boolean> = withContext(Dispatchers.IO) {
-        val result = tildelingService.fjernTildeling(oppgaveId.toLong())
-        newResult<Boolean>().data(result).build()
+    suspend fun fjernTildeling(oppgaveId: String, env: DataFetchingEnvironment): DataFetcherResult<Boolean> {
+        val saksbehandler= env.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(ContextValues.SAKSBEHANDLER.key).value
+        return withContext(Dispatchers.IO) {
+            try {
+                saksbehandlerhåndterer.håndter(AvmeldOppgave(oppgaveId.toLong()), saksbehandler)
+                newResult<Boolean>().data(true).build()
+            } catch (e: OppgaveIkkeTildelt) {
+                newResult<Boolean>().data(false).build()
+            } catch (e: RuntimeException) {
+                newResult<Boolean>().data(false).build()
+            }
+        }
     }
 
     @Suppress("unused")

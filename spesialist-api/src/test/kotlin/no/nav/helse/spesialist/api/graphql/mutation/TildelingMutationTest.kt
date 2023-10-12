@@ -7,6 +7,7 @@ import java.util.UUID
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -86,10 +87,8 @@ internal class TildelingMutationTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `returnerer false hvis oppgaven ikke er tildelt`() {
-        opprettSaksbehandler()
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
-        val oppgaveId = finnOppgaveIdFor(PERIODE.id)
-
+        val oppgaveId = 1L
+        every { saksbehandlerhåndterer.håndter(any<AvmeldOppgave>(), any()) } throws OppgaveIkkeTildelt(oppgaveId)
         val body = runQuery(
             """
                 mutation FjernTildeling {
@@ -105,10 +104,7 @@ internal class TildelingMutationTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `returnerer false hvis oppgaven ikke finnes`() {
-        opprettSaksbehandler()
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
-        val oppgaveId = finnOppgaveIdFor(PERIODE.id)
-        tildelOppgave(oppgaveId, SAKSBEHANDLER.oid)
+        every { saksbehandlerhåndterer.håndter(any<AvmeldOppgave>(), any()) } throws IllegalStateException()
 
         val body = runQuery(
             """

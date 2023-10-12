@@ -14,9 +14,11 @@ import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
+import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AnnulleringHandlingFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.LovhjemmelFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi
@@ -199,6 +201,27 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
         testRapid.reset()
         assertThrows<OppgaveTildeltNoenAndre> {
             mediator.håndter(TildelOppgave(oppgaveId), saksbehandler(UUID.randomUUID()))
+        }
+        assertEquals(0, testRapid.inspektør.hendelser().size)
+    }
+
+    @Test
+    fun `forsøk avmelding av oppgave`() {
+        nyPerson()
+        val oppgaveId = OPPGAVE_ID
+        mediator.håndter(TildelOppgave(oppgaveId), saksbehandler)
+        testRapid.reset()
+        mediator.håndter(AvmeldOppgave(oppgaveId), saksbehandler)
+        val melding = testRapid.inspektør.hendelser().last()
+        assertEquals("oppgave_oppdatert", melding)
+    }
+
+    @Test
+    fun `forsøk avmelding av oppgave når den ikke er tildelt`() {
+        nyPerson()
+        val oppgaveId = OPPGAVE_ID
+        assertThrows<OppgaveIkkeTildelt> {
+            mediator.håndter(AvmeldOppgave(oppgaveId), saksbehandler(UUID.randomUUID()))
         }
         assertEquals(0, testRapid.inspektør.hendelser().size)
     }
