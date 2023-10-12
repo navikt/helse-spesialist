@@ -7,5 +7,5 @@ class LeggOppgavePåVent(oppgaveId: Long): Oppgavehandling(oppgaveId) {
         oppgave.leggPåVent(saksbehandler)
     }
 
-    override fun loggnavn(): String = "avmeld_oppgave"
+    override fun loggnavn(): String = "legg_oppgave_på_vent"
 }
