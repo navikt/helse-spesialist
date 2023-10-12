@@ -19,6 +19,8 @@ import no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AnnulleringHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.FjernOppgaveFraPåVent
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.LeggOppgavePåVent
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.LovhjemmelFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi
@@ -224,6 +226,27 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
             mediator.håndter(AvmeldOppgave(oppgaveId), saksbehandler(UUID.randomUUID()))
         }
         assertEquals(0, testRapid.inspektør.hendelser().size)
+    }
+
+    @Test
+    fun `legg oppgave på vent`() {
+        nyPerson()
+        val oppgaveId = OPPGAVE_ID
+        mediator.håndter(TildelOppgave(oppgaveId), saksbehandler)
+        mediator.håndter(LeggOppgavePåVent(oppgaveId), saksbehandler)
+        val melding = testRapid.inspektør.hendelser("oppgave_oppdatert").last()
+        assertEquals(true, melding["påVent"].asBoolean())
+    }
+
+    @Test
+    fun `fjern oppgave fra på vent`() {
+        nyPerson()
+        val oppgaveId = OPPGAVE_ID
+        mediator.håndter(TildelOppgave(oppgaveId), saksbehandler)
+        mediator.håndter(LeggOppgavePåVent(oppgaveId), saksbehandler)
+        mediator.håndter(FjernOppgaveFraPåVent(oppgaveId), saksbehandler)
+        val melding = testRapid.inspektør.hendelser("oppgave_oppdatert").last()
+        assertEquals(false, melding["påVent"].asBoolean())
     }
 
     @Test
