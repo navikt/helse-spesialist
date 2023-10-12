@@ -20,13 +20,13 @@ import no.nav.helse.spesialist.api.graphql.schema.Tildeling
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.FjernOppgaveFraPåVent
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.LeggOppgavePåVent
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
-import no.nav.helse.spesialist.api.tildeling.TildelingService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 class TildelingMutation(
-    private val tildelingService: TildelingService,
     private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
     private val notatMediator: NotatMediator,
 ) : Mutation {
@@ -80,13 +80,13 @@ class TildelingMutation(
 
             try {
                 notatMediator.lagreForOppgaveId(oppgaveId.toLong(), notatTekst, saksbehandlerOid, notatType)
-                val tildeling = tildelingService.leggOppgavePåVent(oppgaveId = oppgaveId.toLong(), saksbehandler)
+                saksbehandlerhåndterer.håndter(LeggOppgavePåVent(oppgaveId.toLong()), saksbehandler)
                 newResult<Tildeling?>().data(
                     Tildeling(
-                        navn = tildeling.navn,
-                        oid = tildeling.oid.toString(),
-                        epost = tildeling.epost,
-                        paaVent = tildeling.påVent,
+                        navn = saksbehandler.navn,
+                        oid = saksbehandler.oid.toString(),
+                        epost = saksbehandler.epost,
+                        paaVent = true,
                     )
                 ).build()
             } catch (e: OppgaveIkkeTildelt) {
@@ -104,13 +104,13 @@ class TildelingMutation(
         val saksbehandler= env.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(ContextValues.SAKSBEHANDLER.key).value
         return withContext(Dispatchers.IO) {
             try {
-                val tildeling = tildelingService.fjernPåVent(oppgaveId.toLong(), saksbehandler)
+                saksbehandlerhåndterer.håndter(FjernOppgaveFraPåVent(oppgaveId.toLong()), saksbehandler)
                 newResult<Tildeling?>().data(
                     Tildeling(
-                        navn = tildeling.navn,
-                        oid = tildeling.oid.toString(),
-                        epost = tildeling.epost,
-                        paaVent = tildeling.påVent,
+                        navn = saksbehandler.navn,
+                        oid = saksbehandler.oid.toString(),
+                        epost = saksbehandler.epost,
+                        paaVent = false,
                     )
                 ).build()
             } catch (e: OppgaveIkkeTildelt) {

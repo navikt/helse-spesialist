@@ -8,6 +8,8 @@ import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.FjernOppgaveFraPåVent
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.LeggOppgavePåVent
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -121,16 +123,12 @@ internal class TildelingMutationTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `legg på vent`() {
-        opprettSaksbehandler()
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
-        val oppgaveId = finnOppgaveIdFor(PERIODE.id)
-        tildelOppgave(oppgaveId, SAKSBEHANDLER.oid)
 
         val body = runQuery(
             """
                 mutation LeggPaaVent {
                     leggPaaVent(
-                        oppgaveId: "$oppgaveId",
+                        oppgaveId: "1",
                         notatTekst: "Dett er et notat",
                         notatType: PaaVent
                     ) {
@@ -149,7 +147,7 @@ internal class TildelingMutationTest : AbstractGraphQLApiTest() {
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
         val oppgaveId = finnOppgaveIdFor(PERIODE.id)
 
-        every { oppgavehåndterer.leggPåVent(oppgaveId, any()) } throws OppgaveIkkeTildelt(oppgaveId)
+        every { saksbehandlerhåndterer.håndter(any<LeggOppgavePåVent>(), any()) } throws OppgaveIkkeTildelt(oppgaveId)
 
         val body = runQuery(
             """
@@ -170,11 +168,9 @@ internal class TildelingMutationTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `kan ikke legge på vent hvis oppgaven er tildelt noen andre`() {
-        opprettSaksbehandler()
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
-        val oppgaveId = finnOppgaveIdFor(PERIODE.id)
+        val oppgaveId = 1L
 
-        every { oppgavehåndterer.leggPåVent(oppgaveId, any()) } throws OppgaveTildeltNoenAndre(TildelingApiDto("navn", "epost", UUID.randomUUID(), false))
+        every { saksbehandlerhåndterer.håndter(any<LeggOppgavePåVent>(), any()) } throws OppgaveTildeltNoenAndre(TildelingApiDto("navn", "epost", UUID.randomUUID(), false))
 
         val body = runQuery(
             """
@@ -214,11 +210,9 @@ internal class TildelingMutationTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `kan ikke fjerne oppgave fra på vent hvis den ikke er tildelt`() {
-        opprettSaksbehandler()
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
-        val oppgaveId = finnOppgaveIdFor(PERIODE.id)
+        val oppgaveId = 1L
 
-        every { oppgavehåndterer.fjernPåVent(oppgaveId, any()) } throws OppgaveIkkeTildelt(oppgaveId)
+        every { saksbehandlerhåndterer.håndter(any<FjernOppgaveFraPåVent>(), any()) } throws OppgaveIkkeTildelt(oppgaveId)
 
         val body = runQuery(
             """
@@ -237,11 +231,9 @@ internal class TildelingMutationTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `kan ikke fjerne oppgave fra på vent hvis oppgaven er tildelt noen andre`() {
-        opprettSaksbehandler()
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
-        val oppgaveId = finnOppgaveIdFor(PERIODE.id)
+        val oppgaveId = 1L
 
-        every { oppgavehåndterer.fjernPåVent(oppgaveId, any()) } throws OppgaveTildeltNoenAndre(TildelingApiDto("navn", "epost", UUID.randomUUID(), false))
+        every { saksbehandlerhåndterer.håndter(any<FjernOppgaveFraPåVent>(), any()) } throws OppgaveTildeltNoenAndre(TildelingApiDto("navn", "epost", UUID.randomUUID(), false))
 
         val body = runQuery(
             """

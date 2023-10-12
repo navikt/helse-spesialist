@@ -15,7 +15,6 @@ import no.nav.helse.mediator.SaksbehandlerMediator.Companion.tilApiversjon
 import no.nav.helse.mediator.TilgangskontrollørForApi
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilBehandledeOppgaver
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilOppgaverTilBehandling
-import no.nav.helse.mediator.saksbehandler.SaksbehandlerMapper.tilModellversjon
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.ManglerTilgang
 import no.nav.helse.modell.Modellfeil
@@ -32,8 +31,8 @@ import no.nav.helse.spesialist.api.graphql.schema.BehandletOppgave
 import no.nav.helse.spesialist.api.graphql.schema.OppgaveTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.Oppgavesortering
 import no.nav.helse.spesialist.api.graphql.schema.Sorteringsnokkel
+import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
-import no.nav.helse.spesialist.api.tildeling.Oppgavehåndterer
 import org.slf4j.LoggerFactory
 
 interface Oppgavefinner {
@@ -112,26 +111,6 @@ internal class OppgaveMediator(
         oppgave(oppgaveId) {
             try {
                 sendIRetur(saksbehandler)
-            } catch (e: Modellfeil) {
-                throw e.tilApiversjon()
-            }
-        }
-    }
-
-    override fun leggPåVent(oppgaveId: Long, saksbehandler: SaksbehandlerFraApi) {
-        return oppgave(oppgaveId) {
-            try {
-                this.leggPåVent(saksbehandler.tilModellversjon(tilgangsgrupper))
-            } catch (e: Modellfeil) {
-                throw e.tilApiversjon()
-            }
-        }
-    }
-
-    override fun fjernPåVent(oppgaveId: Long, saksbehandler: SaksbehandlerFraApi) {
-        oppgave(oppgaveId) {
-            try {
-                this.fjernPåVent(saksbehandler.tilModellversjon(tilgangsgrupper))
             } catch (e: Modellfeil) {
                 throw e.tilApiversjon()
             }

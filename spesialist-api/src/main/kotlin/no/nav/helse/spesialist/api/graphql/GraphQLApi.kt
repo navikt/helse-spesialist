@@ -31,15 +31,14 @@ import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
+import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
-import no.nav.helse.spesialist.api.tildeling.Oppgavehåndterer
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
-import no.nav.helse.spesialist.api.tildeling.TildelingService
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.utbetaling.UtbetalingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
@@ -68,7 +67,6 @@ fun Application.graphQLApi(
     spesialsakGruppeId: UUID,
     snapshotMediator: SnapshotMediator,
     behandlingsstatistikkMediator: BehandlingsstatistikkMediator,
-    tildelingService: TildelingService,
     notatMediator: NotatMediator,
     saksbehandlerhåndterer: Saksbehandlerhåndterer,
     oppgavehåndterer: Oppgavehåndterer,
@@ -88,12 +86,11 @@ fun Application.graphQLApi(
         utbetalingApiDao = utbetalingApiDao,
         oppgaveApiDao = oppgaveApiDao,
         periodehistorikkDao = periodehistorikkDao,
+        snapshotMediator = snapshotMediator,
         notatDao = notatDao,
         totrinnsvurderingApiDao = totrinnsvurderingApiDao,
         reservasjonClient = reservasjonClient,
-        snapshotMediator = snapshotMediator,
         behandlingsstatistikkMediator = behandlingsstatistikkMediator,
-        tildelingService = tildelingService,
         notatMediator = notatMediator,
         saksbehandlerhåndterer = saksbehandlerhåndterer,
         oppgavehåndterer = oppgavehåndterer,

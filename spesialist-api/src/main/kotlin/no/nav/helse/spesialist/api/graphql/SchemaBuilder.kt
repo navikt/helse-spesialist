@@ -32,15 +32,14 @@ import no.nav.helse.spesialist.api.graphql.query.PersonQuery
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
+import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
-import no.nav.helse.spesialist.api.tildeling.Oppgavehåndterer
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
-import no.nav.helse.spesialist.api.tildeling.TildelingService
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.utbetaling.UtbetalingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
@@ -61,7 +60,6 @@ internal class SchemaBuilder(
     val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
     val reservasjonClient: ReservasjonClient,
     private val behandlingsstatistikkMediator: BehandlingsstatistikkMediator,
-    private val tildelingService: TildelingService,
     private val notatMediator: NotatMediator,
     private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
     private val oppgavehåndterer: Oppgavehåndterer,
@@ -134,7 +132,7 @@ internal class SchemaBuilder(
                     VarselMutation(varselRepository = varselRepository)
                 ),
                 TopLevelObject(
-                    TildelingMutation(tildelingService = tildelingService, saksbehandlerhåndterer = saksbehandlerhåndterer, notatMediator = notatMediator)
+                    TildelingMutation(saksbehandlerhåndterer = saksbehandlerhåndterer, notatMediator = notatMediator)
                 ),
                 TopLevelObject(
                     OpptegnelseMutation(saksbehandlerhåndterer = saksbehandlerhåndterer)

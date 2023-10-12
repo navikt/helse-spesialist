@@ -91,7 +91,6 @@ import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
-import no.nav.helse.spesialist.api.tildeling.TildelingService
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.utbetaling.UtbetalingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
@@ -185,7 +184,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val httpTraceLog = LoggerFactory.getLogger("tjenestekall")
     private lateinit var hendelseMediator: HendelseMediator
     private lateinit var saksbehandlerMediator: SaksbehandlerMediator
-    private lateinit var tildelingService: TildelingService
     private var oppgavemelder: Oppgavemelder
 
     private val personDao = PersonDao(dataSource)
@@ -335,7 +333,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 spesialsakGruppeId = tilgangsgrupper.spesialsakGruppeId,
                 snapshotMediator = snapshotMediator,
                 behandlingsstatistikkMediator = behandlingsstatistikkMediator,
-                tildelingService = tildelingService,
                 notatMediator = notatMediator,
                 saksbehandlerhåndterer = saksbehandlerMediator,
                 oppgavehåndterer = oppgaveMediator,
@@ -401,9 +398,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         )
         saksbehandlerMediator = SaksbehandlerMediator(dataSource, versjonAvKode(env), rapidsConnection, oppgaveMediator, tilgangsgrupper)
         oppgavemelder = Oppgavemelder(hendelseDao, rapidsConnection)
-        tildelingService = TildelingService(
-            oppgaveMediator
-        )
         godkjenningService = GodkjenningService(
             dataSource = dataSource,
             rapidsConnection = rapidsConnection,
