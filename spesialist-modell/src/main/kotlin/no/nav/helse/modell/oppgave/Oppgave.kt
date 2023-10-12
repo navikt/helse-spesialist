@@ -68,7 +68,7 @@ class Oppgave private constructor(
         observers.add(observer)
     }
 
-    fun forsøkTildeling(saksbehandler: Saksbehandler) {
+    internal fun forsøkTildeling(saksbehandler: Saksbehandler) {
         logg.info("Oppgave med {} forsøkes tildelt av saksbehandler.", kv("oppgaveId", id))
         val tildelt = tildeltTil
         if (tildelt != null && tildelt != saksbehandler) {
