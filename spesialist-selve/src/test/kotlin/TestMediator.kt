@@ -69,7 +69,7 @@ internal class TestMediator(
         tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
         tilgangsgrupper = tilgangsgrupper
     )
-    private val saksbehandlerMediator = SaksbehandlerMediator(dataSource, "versjonAvKode", testRapid, tilgangsgrupper)
+    private val saksbehandlerMediator = SaksbehandlerMediator(dataSource, "versjonAvKode", testRapid, oppgaveMediator, tilgangsgrupper)
     private val overstyringMediator = OverstyringMediator(testRapid)
     private val snapshotMediator = SnapshotMediator(SnapshotApiDao(dataSource), snapshotClient)
     private val automatisering = Automatisering(

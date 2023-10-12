@@ -1,16 +1,20 @@
 package no.nav.helse.mediator
 
 import DatabaseIntegrationTest
+import TilgangskontrollForTestHarIkkeTilgang
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.Tilgangsgrupper
+import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.februar
 import no.nav.helse.januar
+import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
+import no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AnnulleringHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.LovhjemmelFraApi
@@ -20,6 +24,7 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRef
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi.SkjønnsfastsettingstypeDto
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import no.nav.helse.testEnv
 import org.intellij.lang.annotations.Language
@@ -31,9 +36,14 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 
+
 internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
+    private val tilgangsgrupper = Tilgangsgrupper(testEnv)
     private val testRapid = TestRapid()
-    private val mediator = SaksbehandlerMediator(dataSource, "versjonAvKode", testRapid, Tilgangsgrupper(testEnv))
+    private val tildelingDbDao = no.nav.helse.db.TildelingDao(dataSource)
+    private val saksbehandlerRepository = SaksbehandlerDao(dataSource)
+    private val oppgaveMediator = OppgaveMediator(hendelseDao, oppgaveDao, tildelingDbDao, reservasjonDao, opptegnelseDao, totrinnsvurderingDao, saksbehandlerRepository, testRapid, TilgangskontrollForTestHarIkkeTilgang, tilgangsgrupper)
+    private val mediator = SaksbehandlerMediator(dataSource, "versjonAvKode", testRapid, oppgaveMediator, tilgangsgrupper)
 
     private val AKTØR_ID = "1234567891011"
     private val FØDSELSNUMMER = "12345678910"
@@ -46,13 +56,15 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
 
     private val SAKSBEHANDLER_EPOST = "epost@nav.no"
 
-    private val saksbehandler = SaksbehandlerFraApi(
-        oid = SAKSBEHANDLER_OID,
-        navn = SAKSBEHANDLER_NAVN,
-        epost = SAKSBEHANDLER_EPOST,
-        ident = SAKSBEHANDLER_IDENT,
-        grupper = emptyList()
-    )
+    private val saksbehandler = saksbehandler()
+
+    private fun saksbehandler(
+        oid: UUID = SAKSBEHANDLER_OID,
+        navn: String = SAKSBEHANDLER_NAVN,
+        epost: String = SAKSBEHANDLER_EPOST,
+        ident: String = SAKSBEHANDLER_IDENT,
+        grupper: List<UUID> = emptyList()
+    ): SaksbehandlerFraApi = SaksbehandlerFraApi(oid, navn, epost, ident, grupper)
 
     @BeforeEach
     internal fun beforeEach() {
@@ -168,7 +180,27 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
         assertEquals("EN_KODE", melding["varselkode"].asText())
         assertEquals("GODKJENT", melding["gjeldende_status"].asText())
         assertEquals("VURDERT", melding["forrige_status"].asText())
+    }
 
+    @Test
+    fun `forsøk tildeling av oppgave`() {
+        nyPerson()
+        val oppgaveId = OPPGAVE_ID
+        mediator.håndter(TildelOppgave(oppgaveId), saksbehandler)
+        val melding = testRapid.inspektør.hendelser().last()
+        assertEquals("oppgave_oppdatert", melding)
+    }
+
+    @Test
+    fun `forsøk tildeling av oppgave når den allerede er tildelt`() {
+        nyPerson()
+        val oppgaveId = OPPGAVE_ID
+        mediator.håndter(TildelOppgave(oppgaveId), saksbehandler)
+        testRapid.reset()
+        assertThrows<OppgaveTildeltNoenAndre> {
+            mediator.håndter(TildelOppgave(oppgaveId), saksbehandler(UUID.randomUUID()))
+        }
+        assertEquals(0, testRapid.inspektør.hendelser().size)
     }
 
     @Test
@@ -246,15 +278,6 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
         assertEquals("Arbeidsdag", overstyrtDag["fraType"].asText())
         assertEquals(null, overstyrtDag["grad"]?.textValue())
         assertEquals(100, overstyrtDag["fraGrad"].asInt())
-    }
-
-    private fun finnOverstyringId(fødselsnummer: String): UUID? {
-        @Language("PostgreSQL")
-        val query = " select ekstern_hendelse_id from overstyring where person_ref = (select id from person where fodselsnummer = :fodselsnummer) "
-
-        return sessionOf(dataSource).use {
-            it.run(queryOf(query, mapOf("fodselsnummer" to fødselsnummer.toLong())).map { it.uuid("ekstern_hendelse_id") }.asSingle)
-        }
     }
 
     @Test
@@ -445,6 +468,15 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
             assertEquals("8-28", it["subsumsjon"]["paragraf"].asText())
             assertEquals("3", it["subsumsjon"]["ledd"].asText())
             Assertions.assertTrue(it["subsumsjon"]["bokstav"].isNull)
+        }
+    }
+
+    private fun finnOverstyringId(fødselsnummer: String): UUID? {
+        @Language("PostgreSQL")
+        val query = " select ekstern_hendelse_id from overstyring where person_ref = (select id from person where fodselsnummer = :fodselsnummer) "
+
+        return sessionOf(dataSource).use {
+            it.run(queryOf(query, mapOf("fodselsnummer" to fødselsnummer.toLong())).map { it.uuid("ekstern_hendelse_id") }.asSingle)
         }
     }
 

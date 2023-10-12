@@ -400,7 +400,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             godkjenningMediator = godkjenningMediator,
             hendelsefabrikk = hendelsefabrikk
         )
-        saksbehandlerMediator = SaksbehandlerMediator(dataSource, versjonAvKode(env), rapidsConnection, tilgangsgrupper)
+        saksbehandlerMediator = SaksbehandlerMediator(dataSource, versjonAvKode(env), rapidsConnection, oppgaveMediator, tilgangsgrupper)
         oppgavemelder = Oppgavemelder(hendelseDao, oppgaveDao, rapidsConnection)
         tildelingService = TildelingService(
             tildelingApiDao,

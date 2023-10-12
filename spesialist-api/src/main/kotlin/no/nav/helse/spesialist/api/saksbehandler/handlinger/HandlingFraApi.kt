@@ -6,6 +6,8 @@ import java.util.UUID
 
 sealed interface HandlingFraApi
 
+class TildelOppgave(val oppgaveId: Long): HandlingFraApi
+
 @JsonIgnoreProperties
 class OverstyrTidslinjeHandlingFraApi(
     val vedtaksperiodeId: UUID,

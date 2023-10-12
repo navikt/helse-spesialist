@@ -11,31 +11,26 @@ import no.nav.helse.db.SorteringsnøkkelForDatabase
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingFraDatabase
 import no.nav.helse.db.TotrinnsvurderingRepository
+import no.nav.helse.mediator.SaksbehandlerMediator.Companion.tilApiversjon
 import no.nav.helse.mediator.TilgangskontrollørForApi
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilOppgaverTilBehandling
-import no.nav.helse.mediator.saksbehandler.SaksbehandlerMapper.tilApiversjon
 import no.nav.helse.mediator.saksbehandler.SaksbehandlerMapper.tilModellversjon
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.Modellfeil
-import no.nav.helse.modell.OppgaveAlleredeSendtBeslutter
-import no.nav.helse.modell.OppgaveAlleredeSendtIRetur
-import no.nav.helse.modell.OppgaveKreverVurderingAvToSaksbehandlere
-import no.nav.helse.modell.OppgaveTildeltNoenAndre
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
+import no.nav.helse.modell.saksbehandler.handlinger.Oppgavehandling
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload.Companion.lagre
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
-import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.graphql.schema.OppgaveTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.Oppgavesortering
 import no.nav.helse.spesialist.api.graphql.schema.Sorteringsnokkel
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.tildeling.Oppgavehåndterer
-import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import org.slf4j.LoggerFactory
 
 interface Oppgavefinner {
@@ -91,13 +86,20 @@ internal class OppgaveMediator(
         totrinnsvurderingRepository.oppdater(totrinnsvurderingFraDatabase)
     }
 
+    internal fun håndter(handling: Oppgavehandling, saksbehandler: Saksbehandler) {
+        oppgave(handling.oppgaveId()) {
+            handling.oppgave(this)
+            handling.utførAv(saksbehandler)
+        }
+    }
+
     override fun sendTilBeslutter(oppgaveId: Long, behandlendeSaksbehandler: SaksbehandlerFraApi) {
         val saksbehandler = behandlendeSaksbehandler.tilSaksbehandler()
         oppgave(oppgaveId) {
             try {
                 sendTilBeslutter(saksbehandler)
             } catch (e: Modellfeil) {
-                throw e.tilApiFeil()
+                throw e.tilApiversjon()
             }
         }
     }
@@ -108,7 +110,7 @@ internal class OppgaveMediator(
             try {
                 sendIRetur(saksbehandler)
             } catch (e: Modellfeil) {
-                throw e.tilApiFeil()
+                throw e.tilApiversjon()
             }
         }
     }
@@ -118,7 +120,7 @@ internal class OppgaveMediator(
             try {
                 this.leggPåVent(saksbehandler.tilModellversjon(tilgangsgrupper))
             } catch (e: Modellfeil) {
-                throw e.tilApiFeil()
+                throw e.tilApiversjon()
             }
         }
     }
@@ -128,7 +130,7 @@ internal class OppgaveMediator(
             try {
                 this.fjernPåVent(saksbehandler.tilModellversjon(tilgangsgrupper))
             } catch (e: Modellfeil) {
-                throw e.tilApiFeil()
+                throw e.tilApiversjon()
             }
         }
     }
@@ -227,19 +229,6 @@ internal class OppgaveMediator(
             Sorteringsnokkel.TILDELT_TIL -> OppgavesorteringForDatabase(SorteringsnøkkelForDatabase.TILDELT_TIL, it.stigende)
             Sorteringsnokkel.OPPRETTET -> OppgavesorteringForDatabase(SorteringsnøkkelForDatabase.OPPRETTET, it.stigende)
             Sorteringsnokkel.SOKNAD_MOTTATT -> OppgavesorteringForDatabase(SorteringsnøkkelForDatabase.SØKNAD_MOTTATT, it.stigende)
-        }
-    }
-
-    private fun Modellfeil.tilApiFeil(): no.nav.helse.spesialist.api.feilhåndtering.Modellfeil {
-        return when (this) {
-            is no.nav.helse.modell.OppgaveIkkeTildelt -> OppgaveIkkeTildelt(oppgaveId)
-            is OppgaveTildeltNoenAndre -> {
-                val (oid, navn, epost) = this.saksbehandler.tilApiversjon()
-                no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre(TildelingApiDto(navn, epost, oid, påVent))
-            }
-            is OppgaveAlleredeSendtBeslutter -> no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtBeslutter(oppgaveId)
-            is OppgaveAlleredeSendtIRetur -> no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtIRetur(oppgaveId)
-            is OppgaveKreverVurderingAvToSaksbehandlere -> no.nav.helse.spesialist.api.feilhåndtering.OppgaveKreverVurderingAvToSaksbehandlere(oppgaveId)
         }
     }
 }

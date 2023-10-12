@@ -6,13 +6,21 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
+import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.mediator.overstyring.Overstyringlagrer
 import no.nav.helse.mediator.overstyring.Saksbehandlingsmelder
 import no.nav.helse.mediator.saksbehandler.SaksbehandlerLagrer
+import no.nav.helse.mediator.saksbehandler.SaksbehandlerMapper.tilApiversjon
+import no.nav.helse.modell.Modellfeil
+import no.nav.helse.modell.OppgaveAlleredeSendtBeslutter
+import no.nav.helse.modell.OppgaveAlleredeSendtIRetur
+import no.nav.helse.modell.OppgaveKreverVurderingAvToSaksbehandlere
+import no.nav.helse.modell.OppgaveTildeltNoenAndre
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.handlinger.Annullering
 import no.nav.helse.modell.saksbehandler.handlinger.Handling
+import no.nav.helse.modell.saksbehandler.handlinger.Oppgavehandling
 import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsgiver
@@ -29,6 +37,7 @@ import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.abonnement.AbonnementDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
+import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
@@ -38,6 +47,8 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforho
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
+import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.varsel.Varsel
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
@@ -50,6 +61,7 @@ internal class SaksbehandlerMediator(
     dataSource: DataSource,
     private val versjonAvKode: String,
     private val rapidsConnection: RapidsConnection,
+    private val oppgaveMediator: OppgaveMediator,
     private val tilgangsgrupper: Tilgangsgrupper,
 ): Saksbehandlerhåndterer {
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
@@ -63,7 +75,7 @@ internal class SaksbehandlerMediator(
 
     override fun <T : HandlingFraApi> håndter(handlingFraApi: T, saksbehandlerFraApi: SaksbehandlerFraApi) {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
-        val modellhandling = handlingFraApi.tilHandling()
+        val modellhandling = handlingFraApi.tilModellversjon()
         SaksbehandlerLagrer(saksbehandlerDao).lagre(saksbehandler)
         tell(modellhandling)
         saksbehandler.register(Saksbehandlingsmelder(rapidsConnection))
@@ -79,13 +91,22 @@ internal class SaksbehandlerMediator(
             sikkerlogg.info("Utfører handling ${modellhandling.loggnavn()} på vegne av saksbehandler $saksbehandler")
             when (modellhandling) {
                 is Overstyring -> håndter(modellhandling, saksbehandler)
+                is Oppgavehandling -> håndter(modellhandling, saksbehandler)
                 else -> modellhandling.utførAv(saksbehandler)
             }
             sikkerlogg.info("Handling ${modellhandling.loggnavn()} utført")
         }
     }
 
-    private fun <T : Overstyring> håndter(handling: T, saksbehandler: Saksbehandler) {
+    private fun håndter(handling: Oppgavehandling, saksbehandler: Saksbehandler) {
+        try {
+            oppgaveMediator.håndter(handling, saksbehandler)
+        } catch (e: Modellfeil) {
+            throw e.tilApiversjon()
+        }
+    }
+
+    private fun håndter(handling: Overstyring, saksbehandler: Saksbehandler) {
         val fødselsnummer = handling.gjelderFødselsnummer()
         val antall = oppgaveApiDao.invaliderOppgaveFor(fødselsnummer)
         sikkerlogg.info("Invaliderer $antall {} for $fødselsnummer", if (antall == 1) "oppgave" else "oppgaver")
@@ -179,24 +200,37 @@ internal class SaksbehandlerMediator(
         rapidsConnection.publish(fødselsnummer, message.toJson())
     }
 
-    private companion object {
+    internal companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
+        internal fun Modellfeil.tilApiversjon(): no.nav.helse.spesialist.api.feilhåndtering.Modellfeil {
+            return when (this) {
+                is no.nav.helse.modell.OppgaveIkkeTildelt -> OppgaveIkkeTildelt(oppgaveId)
+                is OppgaveTildeltNoenAndre -> {
+                    val (oid, navn, epost) = this.saksbehandler.tilApiversjon()
+                    no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre(TildelingApiDto(navn, epost, oid, påVent))
+                }
+                is OppgaveAlleredeSendtBeslutter -> no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtBeslutter(oppgaveId)
+                is OppgaveAlleredeSendtIRetur -> no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtIRetur(oppgaveId)
+                is OppgaveKreverVurderingAvToSaksbehandlere -> no.nav.helse.spesialist.api.feilhåndtering.OppgaveKreverVurderingAvToSaksbehandlere(oppgaveId)
+            }
+        }
     }
 
     private fun SaksbehandlerFraApi.tilSaksbehandler() =
         Saksbehandler(epost, oid, navn, ident, TilgangskontrollørForApi(this.grupper, tilgangsgrupper))
 
-    private fun HandlingFraApi.tilHandling(): Handling {
+    private fun HandlingFraApi.tilModellversjon(): Handling {
         return when (this) {
-            is OverstyrArbeidsforholdHandlingFraApi -> this.tilHandling()
-            is OverstyrInntektOgRefusjonHandlingFraApi -> this.tilHandling()
-            is OverstyrTidslinjeHandlingFraApi -> this.tilHandling()
-            is SkjønnsfastsettSykepengegrunnlagHandlingFraApi -> this.tilHandling()
-            is AnnulleringHandlingFraApi -> this.tilHandling()
+            is OverstyrArbeidsforholdHandlingFraApi -> this.tilModellversjon()
+            is OverstyrInntektOgRefusjonHandlingFraApi -> this.tilModellversjon()
+            is OverstyrTidslinjeHandlingFraApi -> this.tilModellversjon()
+            is SkjønnsfastsettSykepengegrunnlagHandlingFraApi -> this.tilModellversjon()
+            is AnnulleringHandlingFraApi -> this.tilModellversjon()
+            is TildelOppgave -> this.tilModellversjon()
         }
     }
 
-    private fun OverstyrArbeidsforholdHandlingFraApi.tilHandling(): OverstyrtArbeidsforhold {
+    private fun OverstyrArbeidsforholdHandlingFraApi.tilModellversjon(): OverstyrtArbeidsforhold {
         return OverstyrtArbeidsforhold(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
@@ -207,7 +241,7 @@ internal class SaksbehandlerMediator(
         )
     }
 
-    private fun OverstyrInntektOgRefusjonHandlingFraApi.tilHandling(): OverstyrtInntektOgRefusjon {
+    private fun OverstyrInntektOgRefusjonHandlingFraApi.tilModellversjon(): OverstyrtInntektOgRefusjon {
         return OverstyrtInntektOgRefusjon(
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
@@ -233,7 +267,7 @@ internal class SaksbehandlerMediator(
         )
     }
 
-    private fun OverstyrTidslinjeHandlingFraApi.tilHandling(): OverstyrtTidslinje {
+    private fun OverstyrTidslinjeHandlingFraApi.tilModellversjon(): OverstyrtTidslinje {
         return OverstyrtTidslinje(
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktørId,
@@ -260,7 +294,7 @@ internal class SaksbehandlerMediator(
         )
     }
 
-    private fun SkjønnsfastsettSykepengegrunnlagHandlingFraApi.tilHandling(): SkjønnsfastsattSykepengegrunnlag {
+    private fun SkjønnsfastsettSykepengegrunnlagHandlingFraApi.tilModellversjon(): SkjønnsfastsattSykepengegrunnlag {
         return SkjønnsfastsattSykepengegrunnlag(
             aktørId,
             fødselsnummer,
@@ -294,7 +328,7 @@ internal class SaksbehandlerMediator(
         )
     }
 
-    private fun AnnulleringHandlingFraApi.tilHandling(): Annullering {
+    private fun AnnulleringHandlingFraApi.tilModellversjon(): Annullering {
         return Annullering(
             aktørId = this.aktørId,
             fødselsnummer = this.fødselsnummer,
@@ -303,5 +337,9 @@ internal class SaksbehandlerMediator(
             begrunnelser = this.begrunnelser,
             kommentar = this.kommentar
         )
+    }
+
+    private fun TildelOppgave.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.TildelOppgave {
+        return no.nav.helse.modell.saksbehandler.handlinger.TildelOppgave(this.oppgaveId)
     }
 }
