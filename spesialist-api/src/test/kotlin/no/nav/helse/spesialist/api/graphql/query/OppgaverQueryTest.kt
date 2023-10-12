@@ -21,30 +21,6 @@ import no.nav.helse.spesialist.api.graphql.schema.Oppgavetype as OppgavetypeForA
 internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
 
     @Test
-    fun `henter behandlede oppgaver`() {
-        opprettSaksbehandler()
-        val vedtakRef = opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
-        val oppgaveRef = opprettOppgave(vedtakRef = vedtakRef)
-        tildelOppgave(oppgaveRef, SAKSBEHANDLER.oid)
-        ferdigstillOppgave(vedtakRef)
-
-        val body = runQuery(
-            """
-            {
-                behandledeOppgaver(
-                    behandletAvOid: "${SAKSBEHANDLER.oid}", 
-                    fom: "${LocalDateTime.now().minusDays(1)}"
-                ) {
-                    ferdigstiltAv
-                }
-            }
-        """
-        )
-
-        assertEquals("Jan Banan", body["data"]["behandledeOppgaver"].first()["ferdigstiltAv"].asText())
-    }
-
-    @Test
     fun `oppgaver query uten parametere returnerer oppgave`() {
         every { oppgavehåndterer.oppgaver(any(), any(), any(), any()) } returns listOf(oppgaveTilBehandling())
 

@@ -106,7 +106,6 @@ internal class SchemaBuilder(
                 ),
                 TopLevelObject(
                     OppgaverQuery(
-                        oppgaveApiDao = oppgaveApiDao,
                         oppgavehåndterer = oppgavehåndterer
                     )
                 ),

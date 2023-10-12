@@ -1,11 +1,8 @@
 package no.nav.helse.spesialist.api.oppgave
 
-import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
 import no.nav.helse.HelseDao
-import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
-import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
 
 class OppgaveApiDao(dataSource: DataSource) : HelseDao(dataSource) {
 
@@ -52,65 +49,6 @@ class OppgaveApiDao(dataSource: DataSource) : HelseDao(dataSource) {
         """,
         mapOf("vedtaksperiodeId" to vedtaksperiodeId)
     ).single { Oppgavetype.valueOf(it.string("type")) }
-
-    fun hentBehandledeOppgaver(
-        behandletAvOid: UUID,
-        fom: LocalDate?,
-    ): List<FerdigstiltOppgaveDto> {
-        val erFerdigstiltAvSaksbehandler =
-            "((o.status = 'Ferdigstilt' OR o.status = 'AvventerSystem') AND s.oid = :oid)"
-
-        return asSQL(
-            """
-            SELECT o.id                                                     as oppgave_id,
-                   o.type                                                   as oppgavetype,
-                   o.status,
-                   s2.navn                                                  as ferdigstilt_av,
-                   o.oppdatert                                              as ferdigstilt_tidspunkt,
-                   pi.fornavn                                               as soker_fornavn,
-                   pi.mellomnavn                                            as soker_mellomnavn,
-                   pi.etternavn                                             as soker_etternavn,
-                   p.aktor_id                                               as soker_aktor_id,
-                   sot.type                                                 as periodetype,
-                   sot.inntektskilde                                        as inntektstype,
-                   e.navn                                                   as bosted
-            FROM oppgave o
-                     INNER JOIN vedtak v ON o.vedtak_ref = v.id
-                     INNER JOIN person p ON v.person_ref = p.id
-                     INNER JOIN person_info pi ON p.info_ref = pi.id
-                     LEFT JOIN enhet e ON p.enhet_ref = e.id
-                     LEFT JOIN saksbehandleroppgavetype sot ON v.id = sot.vedtak_ref
-                     LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
-                     LEFT JOIN saksbehandler s on t.saksbehandler_ref = s.oid
-                     LEFT JOIN saksbehandler s2 on o.ferdigstilt_av = s2.ident
-                     LEFT JOIN (SELECT DISTINCT ON (vedtaksperiode_id) vedtaksperiode_id, saksbehandler
-                         FROM totrinnsvurdering
-                         WHERE utbetaling_id_ref IS NOT NULL
-                         ORDER BY vedtaksperiode_id, id DESC
-                     ) ttv ON ttv.vedtaksperiode_id = v.vedtaksperiode_id
-            WHERE ($erFerdigstiltAvSaksbehandler OR ttv.saksbehandler = :oid)
-              AND o.oppdatert >= :fom
-            ORDER BY o.oppdatert;
-        """,
-            mapOf("oid" to behandletAvOid, "fom" to (fom ?: LocalDate.now()))
-        ).list {
-            FerdigstiltOppgaveDto(
-                id = it.string("oppgave_id"),
-                type = Oppgavetype.valueOf(it.string("oppgavetype")),
-                ferdigstiltTidspunkt = it.localDateTime("ferdigstilt_tidspunkt"),
-                ferdigstiltAv = it.stringOrNull("ferdigstilt_av"),
-                personinfo = Personnavn(
-                    fornavn = it.string("soker_fornavn"),
-                    mellomnavn = it.stringOrNull("soker_mellomnavn"),
-                    etternavn = it.string("soker_etternavn"),
-                ),
-                aktørId = it.string("soker_aktor_id"),
-                periodetype = Periodetype.valueOf(it.string("periodetype")),
-                inntektskilde = Inntektskilde.valueOf(it.string("inntektstype")),
-                bosted = it.string("bosted"),
-            )
-        }
-    }
 
     fun finnFødselsnummer(oppgaveId: Long) = requireNotNull(asSQL(
         """ SELECT fodselsnummer from person

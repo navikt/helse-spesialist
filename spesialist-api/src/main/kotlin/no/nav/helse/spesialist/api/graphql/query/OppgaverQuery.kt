@@ -4,44 +4,20 @@ import com.expediagroup.graphql.server.operations.Query
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import java.time.Duration
-import java.time.LocalDate
-import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.schema.BehandletOppgave
-import no.nav.helse.spesialist.api.graphql.schema.FerdigstiltOppgave
 import no.nav.helse.spesialist.api.graphql.schema.OppgaveTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.Oppgavesortering
-import no.nav.helse.spesialist.api.graphql.schema.tilFerdigstilteOppgaver
-import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.tildeling.Oppgavehåndterer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class OppgaverQuery(private val oppgaveApiDao: OppgaveApiDao, private val oppgavehåndterer: Oppgavehåndterer) : Query {
+class OppgaverQuery(private val oppgavehåndterer: Oppgavehåndterer) : Query {
 
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
-
-    @Suppress("unused")
-    fun behandledeOppgaver(
-        behandletAvIdent: String? = null,
-        behandletAvOid: String,
-        fom: String?,
-    ): DataFetcherResult<List<FerdigstiltOppgave>> {
-        val fraOgMed = try {
-            LocalDate.parse(fom)
-        } catch (_: Exception) {
-            null
-        }
-
-        val oppgaver =
-            oppgaveApiDao.hentBehandledeOppgaver(UUID.fromString(behandletAvOid), fraOgMed)
-                .tilFerdigstilteOppgaver()
-
-        return DataFetcherResult.newResult<List<FerdigstiltOppgave>>().data(oppgaver).build()
-    }
 
     @Suppress("unused")
     suspend fun behandledeOppgaverIDag(
