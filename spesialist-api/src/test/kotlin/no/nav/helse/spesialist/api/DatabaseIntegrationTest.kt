@@ -108,7 +108,6 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected val totrinnsvurderinghåndterer = mockk<Totrinnsvurderinghåndterer>(relaxed = true)
     protected val tildelingService =
         TildelingService(
-            tildelingDao,
             oppgavehåndterer
         )
 

@@ -17,13 +17,8 @@ interface Oppgavehåndterer {
 }
 
 class TildelingService(
-    private val tildelingDao: TildelingDao,
     private val oppgavehåndterer: Oppgavehåndterer
 ) {
-
-    internal fun fjernTildeling(oppgaveId: Long): Boolean {
-        return tildelingDao.slettTildeling(oppgaveId) > 0
-    }
 
     internal fun leggOppgavePåVent(oppgaveId: Long, saksbehandler: SaksbehandlerFraApi): TildelingApiDto {
         oppgavehåndterer.leggPåVent(oppgaveId, saksbehandler)

@@ -11,14 +11,6 @@ import org.intellij.lang.annotations.Language
 
 class TildelingDao(private val dataSource: DataSource) : HelseDao(dataSource) {
 
-    fun slettTildeling(oppgaveId: Long) = asSQL(
-        """ 
-            DELETE
-            FROM tildeling
-            WHERE oppgave_id_ref = :oppgave_id_ref;
-        """, mapOf("oppgave_id_ref" to oppgaveId)
-    ).update()
-
     fun tildelingForPerson(fødselsnummer: String) = asSQL(
         """ 
             SELECT s.epost, s.oid, s.navn, t.på_vent FROM person
