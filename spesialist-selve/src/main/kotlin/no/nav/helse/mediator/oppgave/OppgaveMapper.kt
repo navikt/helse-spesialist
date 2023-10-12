@@ -1,9 +1,11 @@
 package no.nav.helse.mediator.oppgave
 
+import no.nav.helse.db.BehandletOppgaveFraDatabaseForVisning
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveFraDatabaseForVisning
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.spesialist.api.graphql.schema.AntallArbeidsforhold
+import no.nav.helse.spesialist.api.graphql.schema.BehandletOppgave
 import no.nav.helse.spesialist.api.graphql.schema.Kategori
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker
 import no.nav.helse.spesialist.api.graphql.schema.OppgaveTilBehandling
@@ -45,6 +47,25 @@ internal object OppgaveMapper {
             antallArbeidsforhold = egenskaper.antallArbeidsforhold(),
         )
     }
+
+    internal fun List<BehandletOppgaveFraDatabaseForVisning>.tilBehandledeOppgaver() = map {
+        val egenskaper = it.egenskaper.tilModellversjoner()
+        BehandletOppgave(
+            id = it.id.toString(),
+            aktorId = it.aktørId,
+            oppgavetype = egenskaper.oppgavetype(),
+            periodetype = egenskaper.periodetype(),
+            antallArbeidsforhold = egenskaper.antallArbeidsforhold(),
+            ferdigstiltTidspunkt = it.ferdigstiltTidspunkt.toString(),
+            ferdigstiltAv = it.ferdigstiltAv,
+            personnavn = Personnavn(
+                fornavn = it.navn.fornavn,
+                etternavn = it.navn.etternavn,
+                mellomnavn = it.navn.mellomnavn,
+            ),
+        )
+    }
+
     private fun List<EgenskapForDatabase>.tilModellversjoner(): List<Egenskap> = this.map { it.tilModellversjon() }
 
     private fun List<Egenskap>.periodetype(): Periodetype {

@@ -1,8 +1,10 @@
 package no.nav.helse.mediator.oppgave
 
+import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
 import no.nav.helse.HelseDao
+import no.nav.helse.db.BehandletOppgaveFraDatabaseForVisning
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveFraDatabase
 import no.nav.helse.db.OppgaveFraDatabaseForVisning
@@ -128,6 +130,51 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                 påVent = row.boolean("på_vent"),
                 opprettet = row.localDateTime("opprettet"),
                 opprinneligSøknadsdato = row.localDateTime("opprinnelig_soknadsdato"),
+            )
+        }
+    }
+
+    internal fun finnBehandledeOppgaver(behandletAvOid: UUID): List<BehandletOppgaveFraDatabaseForVisning> {
+        val erFerdigstiltAvSaksbehandler =
+            "((o.status = 'Ferdigstilt' OR o.status = 'AvventerSystem') AND s.oid = :oid)"
+
+        return asSQL(
+            """
+            SELECT 
+                o.id as oppgave_id,
+                p.aktor_id,
+                o.egenskaper,
+                o.oppdatert as ferdigstilt_tidspunkt,
+                s.navn as ferdigstilt_av,
+                pi.fornavn, pi.mellomnavn, pi.etternavn
+            FROM oppgave o
+                INNER JOIN vedtak v ON o.vedtak_ref = v.id
+                INNER JOIN person p ON v.person_ref = p.id
+                INNER JOIN person_info pi ON p.info_ref = pi.id
+                LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
+                LEFT JOIN saksbehandler s ON t.saksbehandler_ref = s.oid
+                LEFT JOIN (SELECT DISTINCT ON (vedtaksperiode_id) vedtaksperiode_id, saksbehandler
+                         FROM totrinnsvurdering
+                         WHERE utbetaling_id_ref IS NOT NULL
+                         ORDER BY vedtaksperiode_id, id DESC
+                     ) ttv ON ttv.vedtaksperiode_id = v.vedtaksperiode_id
+            WHERE ($erFerdigstiltAvSaksbehandler OR ttv.saksbehandler = :oid)
+                AND o.oppdatert >= :fom
+            ORDER BY o.oppdatert;
+        """,
+            mapOf("oid" to behandletAvOid, "fom" to LocalDate.now())
+        ).list { row ->
+            BehandletOppgaveFraDatabaseForVisning(
+                id = row.long("oppgave_id"),
+                aktørId = row.string("aktor_id"),
+                egenskaper = row.array<String>("egenskaper").toList().map { enumValueOf(it) },
+                ferdigstiltTidspunkt = row.localDateTime("ferdigstilt_tidspunkt"),
+                ferdigstiltAv = row.stringOrNull("ferdigstilt_av"),
+                navn = PersonnavnFraDatabase(
+                    row.string("fornavn"),
+                    row.stringOrNull("mellomnavn"),
+                    row.string("etternavn"),
+                ),
             )
         }
     }

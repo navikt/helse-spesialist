@@ -13,6 +13,7 @@ import no.nav.helse.db.TotrinnsvurderingFraDatabase
 import no.nav.helse.db.TotrinnsvurderingRepository
 import no.nav.helse.mediator.SaksbehandlerMediator.Companion.tilApiversjon
 import no.nav.helse.mediator.TilgangskontrollørForApi
+import no.nav.helse.mediator.oppgave.OppgaveMapper.tilBehandledeOppgaver
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilOppgaverTilBehandling
 import no.nav.helse.mediator.saksbehandler.SaksbehandlerMapper.tilModellversjon
 import no.nav.helse.modell.HendelseDao
@@ -27,6 +28,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload.Companion.lagre
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
+import no.nav.helse.spesialist.api.graphql.schema.BehandletOppgave
 import no.nav.helse.spesialist.api.graphql.schema.OppgaveTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.Oppgavesortering
 import no.nav.helse.spesialist.api.graphql.schema.Sorteringsnokkel
@@ -162,6 +164,12 @@ internal class OppgaveMediator(
         return oppgaver.tilOppgaverTilBehandling()
     }
 
+    override fun behandledeOppgaver(saksbehandlerFraApi: SaksbehandlerFraApi): List<BehandletOppgave> {
+        val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
+        val behandledeOppgaver = oppgaveDao.finnBehandledeOppgaver(behandletAvOid = saksbehandler.oid())
+        return behandledeOppgaver.tilBehandledeOppgaver()
+    }
+
     fun avbrytOppgaveFor(vedtaksperiodeId: UUID) {
         oppgaveDao.finnNyesteOppgaveId(vedtaksperiodeId)?.also {
             oppgave(it) {
@@ -225,7 +233,6 @@ internal class OppgaveMediator(
         ident = ident,
         tilgangskontroll = TilgangskontrollørForApi(grupper, tilgangsgrupper),
     )
-
 
     private fun List<Oppgavesortering>.tilOppgavesorteringForDatabase() = map {
         when (it.nokkel) {

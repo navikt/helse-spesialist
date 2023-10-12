@@ -46,7 +46,6 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `oppgaver query uten parametere returnerer oppgave`() {
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
         every { oppgavehåndterer.oppgaver(any(), any(), any(), any()) } returns listOf(oppgaveTilBehandling())
 
         val body = runQuery("""{ oppgaver { id } }""")
@@ -58,7 +57,6 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `oppgaver query med parametere returnerer oppgave`() {
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
         every { oppgavehåndterer.oppgaver(any(), any(), any(), any()) } returns listOf(oppgaveTilBehandling())
 
         val body = runQuery("""{ oppgaver(startIndex: 2, pageSize: 5, sortering: [{nokkel: TILDELT_TIL, stigende: true}]) { id } }""")

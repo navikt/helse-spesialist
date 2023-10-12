@@ -155,7 +155,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         vedtaksperiodeId: UUID? = VEDTAKSPERIODE,
         fødselsnummer: String = FNR,
         type: String = "GODKJENNING",
-        json: String = "{}"
+        json: String = "{}",
     ) = TestHendelse(hendelseId, vedtaksperiodeId, fødselsnummer).also {
         lagreHendelse(it.id, it.fødselsnummer(), type, json)
     }
@@ -163,7 +163,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected fun godkjenningsbehov(
         hendelseId: UUID = HENDELSE_ID,
         fødselsnummer: String = FNR,
-        json: String = "{}"
+        json: String = "{}",
     ) {
         lagreHendelse(hendelseId, fødselsnummer, "GODKJENNING", json)
     }
@@ -172,7 +172,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         hendelseId: UUID,
         fødselsnummer: String = FNR,
         type: String,
-        json: String = "{}"
+        json: String = "{}",
     ) {
         sessionOf(dataSource).use {
             it.run(
@@ -207,15 +207,31 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         opprettPerson(fødselsnummer = fødselsnummer, aktørId = aktørId)
         opprettArbeidsgiver(organisasjonsnummer = organisasjonsnummer)
         opprettGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
-        opprettVedtaksperiode(periodetype = periodetype, inntektskilde = inntektskilde, vedtaksperiodeId = vedtaksperiodeId, fødselsnummer = fødselsnummer)
-        opprettOppgave(contextId = contextId, vedtaksperiodeId = vedtaksperiodeId, hendelseId = hendelseId, oppgavetype = OPPGAVETYPE, egenskaper = oppgaveEgenskaper)
+        opprettVedtaksperiode(
+            periodetype = periodetype,
+            inntektskilde = inntektskilde,
+            vedtaksperiodeId = vedtaksperiodeId,
+            fødselsnummer = fødselsnummer
+        )
+        opprettOppgave(
+            contextId = contextId,
+            vedtaksperiodeId = vedtaksperiodeId,
+            hendelseId = hendelseId,
+            oppgavetype = OPPGAVETYPE,
+            egenskaper = oppgaveEgenskaper
+        )
     }
 
     private fun opprettCommandContext(hendelse: TestHendelse, contextId: UUID) {
         commandContextDao.opprett(hendelse, contextId)
     }
 
-    protected fun tildelOppgave(oppgaveId: Long = OPPGAVE_ID, saksbehandlerOid: UUID, navn: String = SAKSBEHANDLER_NAVN, påVent: Boolean = false) {
+    protected fun tildelOppgave(
+        oppgaveId: Long = OPPGAVE_ID,
+        saksbehandlerOid: UUID,
+        navn: String = SAKSBEHANDLER_NAVN,
+        påVent: Boolean = false,
+    ) {
         opprettSaksbehandler(saksbehandlerOid, navn = navn, epost = SAKSBEHANDLEREPOST, ident = SAKSBEHANDLER_IDENT)
         @Language("PostgreSQL")
         val query = "INSERT INTO tildeling(saksbehandler_ref, oppgave_id_ref, på_vent) VALUES (?, ?, ?)"
@@ -233,7 +249,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     private fun opprettVedtakstype(
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         type: Periodetype = FØRSTEGANGSBEHANDLING,
-        inntektskilde: Inntektskilde = EN_ARBEIDSGIVER
+        inntektskilde: Inntektskilde = EN_ARBEIDSGIVER,
     ) {
         vedtakDao.leggTilVedtaksperiodetype(vedtaksperiodeId, type, inntektskilde)
     }
@@ -241,7 +257,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected fun opprettPerson(
         fødselsnummer: String = FNR,
         aktørId: String = AKTØR,
-        adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert
+        adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert,
     ): Persondata {
         val personinfoId =
             personDao.insertPersoninfo(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, adressebeskyttelse)
@@ -277,7 +293,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected fun opprettArbeidsgiver(
         organisasjonsnummer: String = ORGNUMMER,
         navn: String = ORGNAVN,
-        bransjer: List<String> = BRANSJER
+        bransjer: List<String> = BRANSJER,
     ): Long {
         return arbeidsgiverDao.insertArbeidsgiver(organisasjonsnummer, navn, bransjer)!!.also { arbeidsgiverId = it }
     }
@@ -350,11 +366,21 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     }
 
+    protected fun ferdigstillOppgave(oppgaveId: Long, ferdigstiltAv: String? = null, ferdigstiltAvOid: UUID? = null) {
+        oppgaveDao.updateOppgave(
+            oppgaveId = oppgaveId,
+            oppgavestatus = "Ferdigstilt",
+            ferdigstiltAv = ferdigstiltAv,
+            oid = ferdigstiltAvOid,
+            egenskaper = listOf(EGENSKAP)
+        )
+    }
+
     protected fun opprettTotrinnsvurdering(
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         saksbehandler: UUID? = null,
         erRetur: Boolean = false,
-        ferdigstill: Boolean = false
+        ferdigstill: Boolean = false,
     ) {
         totrinnsvurderingDao.opprett(vedtaksperiodeId)
 
@@ -371,14 +397,14 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     protected fun opprettUtbetalingKobling(
         vedtaksperiodeId: UUID,
-        utbetalingId: UUID
+        utbetalingId: UUID,
     ) {
         utbetalingDao.opprettKobling(vedtaksperiodeId, utbetalingId)
     }
 
     protected fun lagArbeidsgiveroppdrag(
         fagsystemId: String = fagsystemId(),
-        mottaker: String = ORGNUMMER
+        mottaker: String = ORGNUMMER,
     ) =
         utbetalingDao.nyttOppdrag(fagsystemId, mottaker)!!
 

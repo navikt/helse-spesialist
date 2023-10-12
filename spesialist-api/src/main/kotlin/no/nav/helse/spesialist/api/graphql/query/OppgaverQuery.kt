@@ -9,6 +9,7 @@ import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
+import no.nav.helse.spesialist.api.graphql.schema.BehandletOppgave
 import no.nav.helse.spesialist.api.graphql.schema.FerdigstiltOppgave
 import no.nav.helse.spesialist.api.graphql.schema.OppgaveTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.Oppgavesortering
@@ -40,6 +41,18 @@ class OppgaverQuery(private val oppgaveApiDao: OppgaveApiDao, private val oppgav
                 .tilFerdigstilteOppgaver()
 
         return DataFetcherResult.newResult<List<FerdigstiltOppgave>>().data(oppgaver).build()
+    }
+
+    @Suppress("unused")
+    suspend fun behandledeOppgaverIDag(
+        env: DataFetchingEnvironment,
+    ): DataFetcherResult<List<BehandletOppgave>> {
+        val saksbehandler = env.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(SAKSBEHANDLER.key).value
+        val behandledeOppgaver = withContext(Dispatchers.IO) {
+            oppgavehåndterer.behandledeOppgaver(saksbehandler)
+        }
+
+        return DataFetcherResult.newResult<List<BehandletOppgave>>().data(behandledeOppgaver).build()
     }
 
     suspend fun oppgaver(

@@ -30,6 +30,15 @@ data class OppgaveFraDatabaseForVisning(
     val opprinneligSøknadsdato: LocalDateTime,
 )
 
+data class BehandletOppgaveFraDatabaseForVisning(
+    val id: Long,
+    val aktørId: String,
+    val egenskaper: List<EgenskapForDatabase>,
+    val ferdigstiltTidspunkt: LocalDateTime,
+    val ferdigstiltAv: String?,
+    val navn: PersonnavnFraDatabase,
+)
+
 data class OppgavesorteringForDatabase(val nøkkel: SorteringsnøkkelForDatabase, val stigende: Boolean)
 
 enum class SorteringsnøkkelForDatabase {

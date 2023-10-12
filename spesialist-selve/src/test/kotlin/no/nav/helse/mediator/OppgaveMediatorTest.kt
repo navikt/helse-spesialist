@@ -11,6 +11,7 @@ import java.util.EnumSet
 import java.util.UUID
 import no.nav.helse.Gruppe
 import no.nav.helse.Tilgangsgrupper
+import no.nav.helse.db.BehandletOppgaveFraDatabaseForVisning
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveFraDatabase
 import no.nav.helse.db.OppgaveFraDatabaseForVisning
@@ -242,6 +243,16 @@ internal class OppgaveMediatorTest {
     }
 
     @Test
+    fun `Hent behandlede oppgaver til visning`() {
+        every { oppgaveDao.finnBehandledeOppgaver(any()) } returns listOf(
+            behandletOppgaveFraDatabaseForVisning(),
+            behandletOppgaveFraDatabaseForVisning(),
+        )
+        val oppgaver = mediator.behandledeOppgaver(saksbehandlerFraApi())
+        assertEquals(2, oppgaver.size)
+    }
+
+    @Test
     fun `Hent kun oppgaver til visning som saksbehandler har tilgang til`() {
         mediator.oppgaver(saksbehandlerFraApi(), 0, MAX_VALUE, emptyList())
         verify(exactly = 1) { oppgaveDao.finnOppgaverForVisning(
@@ -250,6 +261,34 @@ internal class OppgaveMediatorTest {
             0,
             MAX_VALUE
         ) }
+    }
+
+    @Test
+    fun `Mapper behandlet oppgave til visning riktig`() {
+        val ferdigstiltTidspunkt = LocalDateTime.now()
+        every { oppgaveDao.finnBehandledeOppgaver(any()) } returns listOf(
+            behandletOppgaveFraDatabaseForVisning(
+                oppgaveId = 1L,
+                aktørId = "1234567891011",
+                personnavnFraDatabase = PersonnavnFraDatabase("fornavn", "mellomnavn", "etternavn"),
+                ferdigstiltAv = "Kurt",
+                ferdigstiltTidspunkt = ferdigstiltTidspunkt,
+            ),
+        )
+        val saksbehandler = saksbehandlerFraApi()
+        val oppgaver = mediator.behandledeOppgaver(saksbehandler)
+        assertEquals(1, oppgaver.size)
+        val oppgave = oppgaver.single()
+        assertEquals("1", oppgave.id)
+        assertEquals("1234567891011", oppgave.aktorId)
+        assertEquals("fornavn", oppgave.personnavn.fornavn)
+        assertEquals("mellomnavn", oppgave.personnavn.mellomnavn)
+        assertEquals("etternavn", oppgave.personnavn.etternavn)
+        assertEquals("Kurt", oppgave.ferdigstiltAv)
+        assertEquals(ferdigstiltTidspunkt.toString(), oppgave.ferdigstiltTidspunkt)
+        assertEquals(Oppgavetype.SOKNAD, oppgave.oppgavetype)
+        assertEquals(Periodetype.FORSTEGANGSBEHANDLING, oppgave.periodetype)
+        assertEquals(AntallArbeidsforhold.ET_ARBEIDSFORHOLD, oppgave.antallArbeidsforhold)
     }
 
     @Test
@@ -416,6 +455,22 @@ internal class OppgaveMediatorTest {
             assertBlock(it)
         }
     }
+
+    private fun behandletOppgaveFraDatabaseForVisning(
+        oppgaveId: Long = nextLong(),
+        aktørId: String = nextLong(1000000000000, 2000000000000).toString(),
+        egenskaper: List<EgenskapForDatabase> = EGENSKAPER,
+        ferdigstiltAv: String? = "saksbehandler",
+        personnavnFraDatabase: PersonnavnFraDatabase = PersonnavnFraDatabase("navn", "mellomnavn", "etternavn"),
+        ferdigstiltTidspunkt: LocalDateTime = LocalDateTime.now(),
+    ) = BehandletOppgaveFraDatabaseForVisning(
+        id = oppgaveId,
+        aktørId = aktørId,
+        egenskaper = egenskaper,
+        ferdigstiltAv = ferdigstiltAv,
+        ferdigstiltTidspunkt = ferdigstiltTidspunkt,
+        navn = personnavnFraDatabase
+    )
 
     private fun oppgaveFraDatabaseForVisning(
         oppgaveId: Long = nextLong(),

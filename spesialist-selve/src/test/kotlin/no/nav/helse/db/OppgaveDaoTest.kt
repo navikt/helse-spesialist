@@ -253,6 +253,47 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `Finner behandlet oppgave for visning`() {
+        val fnr = "12345678910"
+        val aktørId = "1234567891011"
+        val arbeidsgiver = "123456789"
+        val saksbehandlerOid = UUID.randomUUID()
+        nyPerson(fødselsnummer = fnr, aktørId = aktørId, organisasjonsnummer = arbeidsgiver)
+        tildelOppgave(saksbehandlerOid = saksbehandlerOid)
+        ferdigstillOppgave(OPPGAVE_ID, ferdigstiltAvOid = saksbehandlerOid, ferdigstiltAv = SAKSBEHANDLER_NAVN)
+
+        val oppgaver = oppgaveDao.finnBehandledeOppgaver(saksbehandlerOid)
+        assertEquals(1, oppgaver.size)
+        val førsteOppgave = oppgaver.first()
+        assertEquals(OPPGAVE_ID, førsteOppgave.id)
+        assertEquals(aktørId, førsteOppgave.aktørId)
+        assertEquals(listOf(EGENSKAP), førsteOppgave.egenskaper)
+        assertEquals(SAKSBEHANDLER_NAVN, førsteOppgave.ferdigstiltAv)
+        assertEquals(FORNAVN, førsteOppgave.navn.fornavn)
+        assertEquals(MELLOMNAVN, førsteOppgave.navn.mellomnavn)
+        assertEquals(ETTERNAVN, førsteOppgave.navn.etternavn)
+    }
+
+    @Test
+    fun `Finn behandlede oppgaver for visning`() {
+        val saksbehandlerOid = UUID.randomUUID()
+        nyPerson(fødselsnummer = "12345678910", aktørId = "1234567891011", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "123456789")
+        tildelOppgave(saksbehandlerOid = saksbehandlerOid)
+        ferdigstillOppgave(OPPGAVE_ID, ferdigstiltAvOid = saksbehandlerOid, ferdigstiltAv = SAKSBEHANDLER_NAVN)
+
+        nyPerson(fødselsnummer = "12345678911", aktørId = "1234567891012", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "223456789")
+        tildelOppgave(saksbehandlerOid = saksbehandlerOid)
+        ferdigstillOppgave(OPPGAVE_ID, ferdigstiltAvOid = saksbehandlerOid, ferdigstiltAv = SAKSBEHANDLER_NAVN)
+
+        nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456789")
+        tildelOppgave(saksbehandlerOid = saksbehandlerOid)
+        avventerSystem(OPPGAVE_ID)
+
+        val oppgaver = oppgaveDao.finnBehandledeOppgaver(saksbehandlerOid)
+        assertEquals(3, oppgaver.size)
+    }
+
+    @Test
     fun `Finn oppgaver for visning`() {
         nyPerson(fødselsnummer = "12345678910", aktørId = "1234567891011", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "123456789")
         nyPerson(fødselsnummer = "12345678911", aktørId = "1234567891012", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "223456789")

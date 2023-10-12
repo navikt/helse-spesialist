@@ -120,6 +120,17 @@ data class FerdigstiltOppgave(
     val ferdigstiltAv: String?,
 )
 
+data class BehandletOppgave(
+    val id: String,
+    val aktorId: String,
+    val oppgavetype: Oppgavetype,
+    val periodetype: Periodetype,
+    val antallArbeidsforhold: AntallArbeidsforhold,
+    val ferdigstiltTidspunkt: DateTimeString,
+    val ferdigstiltAv: String?,
+    val personnavn: Personnavn,
+)
+
 internal fun no.nav.helse.spesialist.api.oppgave.Oppgavetype.tilOppgavetype(): Oppgavetype =
     when (this) {
         no.nav.helse.spesialist.api.oppgave.Oppgavetype.SØKNAD -> Oppgavetype.SOKNAD
