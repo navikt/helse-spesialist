@@ -11,32 +11,6 @@ import org.intellij.lang.annotations.Language
 
 class TildelingDao(private val dataSource: DataSource) : HelseDao(dataSource) {
 
-    fun opprettTildeling(oppgaveId: Long, saksbehandleroid: UUID, påVent: Boolean = false): TildelingApiDto? =
-        sessionOf(dataSource).use { session ->
-            session.transaction { tx ->
-                if (tx.tildelingForOppgave(oppgaveId) != null) null
-                else {
-                    tx.run {
-                        asSQL(
-                            """
-                                WITH inserted AS (
-                                    INSERT INTO tildeling (oppgave_id_ref, saksbehandler_ref, på_vent)
-                                    VALUES (:oppgave_id, :saksbehandler_oid, :paa_vent)
-                                    RETURNING *
-                                )
-                                SELECT s.navn, epost, oid, på_vent FROM inserted i
-                                INNER JOIN saksbehandler s on s.oid = i.saksbehandler_ref
-                            """, mapOf(
-                                "saksbehandler_oid" to saksbehandleroid,
-                                "oppgave_id" to oppgaveId,
-                                "paa_vent" to påVent,
-                            )
-                        ).single(::tildelingDto)
-                    }
-                }
-            }
-        }
-
     fun slettTildeling(oppgaveId: Long) = asSQL(
         """ 
             DELETE

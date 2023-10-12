@@ -3,6 +3,7 @@ package no.nav.helse.modell.oppgave.behandlingsstatistikk
 import DatabaseIntegrationTest
 import java.time.LocalDate
 import java.time.LocalDateTime
+import no.nav.helse.db.TildelingDao
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -15,6 +16,7 @@ import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkTy
 internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
 
     private val NOW = LocalDate.now()
+    private val nyDao = TildelingDao(dataSource)
 
     @Test
     fun `henter automatiserte UTS-saker`() {
@@ -69,7 +71,7 @@ internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
     fun `antall tildelte oppgaver`() {
         nyPerson()
         opprettSaksbehandler()
-        tildelingDao.opprettTildeling(oppgaveId, SAKSBEHANDLER_OID)
+        nyDao.tildel(oppgaveId, SAKSBEHANDLER_OID, false)
         val dto = behandlingsstatistikkDao.oppgavestatistikk(NOW)
         assertEquals(1, dto.tildelteOppgaver.totalt)
         assertEquals(1, dto.tildelteOppgaver.perPeriodetype[BehandlingsstatistikkTypeForApi.FØRSTEGANGSBEHANDLING])
