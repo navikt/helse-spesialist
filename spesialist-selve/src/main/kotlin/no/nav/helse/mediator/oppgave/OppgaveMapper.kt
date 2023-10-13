@@ -114,6 +114,10 @@ internal object OppgaveMapper {
         }
     }
 
+    internal fun List<Oppgaveegenskap>.tilDatabaseversjon(): List<EgenskapForDatabase> {
+        return this.map { it.tilDatabaseversjon() }
+    }
+
     private fun Egenskap.tilApiversjon(): EgenskapForApi = when (this) {
         Egenskap.RISK_QA -> EgenskapForApi.RISK_QA
         Egenskap.FORTROLIG_ADRESSE -> EgenskapForApi.FORTROLIG_ADRESSE
@@ -230,5 +234,32 @@ internal object OppgaveMapper {
             Egenskap.INFOTRYGDFORLENGELSE -> "INFOTRYGDFORLENGELSE"
             Egenskap.OVERGANG_FRA_IT -> "OVERGANG_FRA_IT"
         }
+    }
+
+    private fun Oppgaveegenskap.tilDatabaseversjon() = when (this.egenskap) {
+        no.nav.helse.spesialist.api.graphql.schema.Egenskap.RISK_QA -> EgenskapForDatabase.RISK_QA
+        no.nav.helse.spesialist.api.graphql.schema.Egenskap.FORTROLIG_ADRESSE -> EgenskapForDatabase.FORTROLIG_ADRESSE
+        no.nav.helse.spesialist.api.graphql.schema.Egenskap.STRENGT_FORTROLIG_ADRESSE -> EgenskapForDatabase.STRENGT_FORTROLIG_ADRESSE
+        no.nav.helse.spesialist.api.graphql.schema.Egenskap.EGEN_ANSATT -> EgenskapForDatabase.EGEN_ANSATT
+        no.nav.helse.spesialist.api.graphql.schema.Egenskap.BESLUTTER -> EgenskapForDatabase.BESLUTTER
+        no.nav.helse.spesialist.api.graphql.schema.Egenskap.SPESIALSAK -> EgenskapForDatabase.SPESIALSAK
+        no.nav.helse.spesialist.api.graphql.schema.Egenskap.REVURDERING -> EgenskapForDatabase.REVURDERING
+        no.nav.helse.spesialist.api.graphql.schema.Egenskap.SOKNAD -> EgenskapForDatabase.SØKNAD
+        no.nav.helse.spesialist.api.graphql.schema.Egenskap.STIKKPROVE -> EgenskapForDatabase.STIKKPRØVE
+        no.nav.helse.spesialist.api.graphql.schema.Egenskap.UTBETALING_TIL_SYKMELDT -> EgenskapForDatabase.UTBETALING_TIL_SYKMELDT
+        no.nav.helse.spesialist.api.graphql.schema.Egenskap.DELVIS_REFUSJON -> EgenskapForDatabase.DELVIS_REFUSJON
+        no.nav.helse.spesialist.api.graphql.schema.Egenskap.UTBETALING_TIL_ARBEIDSGIVER -> EgenskapForDatabase.UTBETALING_TIL_ARBEIDSGIVER
+        no.nav.helse.spesialist.api.graphql.schema.Egenskap.INGEN_UTBETALING -> EgenskapForDatabase.INGEN_UTBETALING
+        no.nav.helse.spesialist.api.graphql.schema.Egenskap.EN_ARBEIDSGIVER -> EgenskapForDatabase.HASTER
+        no.nav.helse.spesialist.api.graphql.schema.Egenskap.FLERE_ARBEIDSGIVERE -> EgenskapForDatabase.RETUR
+        no.nav.helse.spesialist.api.graphql.schema.Egenskap.FORLENGELSE -> EgenskapForDatabase.FULLMAKT
+        no.nav.helse.spesialist.api.graphql.schema.Egenskap.FORSTEGANGSBEHANDLING -> EgenskapForDatabase.VERGEMÅL
+        no.nav.helse.spesialist.api.graphql.schema.Egenskap.INFOTRYGDFORLENGELSE -> EgenskapForDatabase.EN_ARBEIDSGIVER
+        no.nav.helse.spesialist.api.graphql.schema.Egenskap.OVERGANG_FRA_IT -> EgenskapForDatabase.FLERE_ARBEIDSGIVERE
+        no.nav.helse.spesialist.api.graphql.schema.Egenskap.UTLAND -> EgenskapForDatabase.UTLAND
+        no.nav.helse.spesialist.api.graphql.schema.Egenskap.HASTER -> EgenskapForDatabase.FORLENGELSE
+        no.nav.helse.spesialist.api.graphql.schema.Egenskap.RETUR -> EgenskapForDatabase.FORSTEGANGSBEHANDLING
+        no.nav.helse.spesialist.api.graphql.schema.Egenskap.FULLMAKT -> EgenskapForDatabase.INFOTRYGDFORLENGELSE
+        no.nav.helse.spesialist.api.graphql.schema.Egenskap.VERGEMAL -> EgenskapForDatabase.OVERGANG_FRA_IT
     }
 }

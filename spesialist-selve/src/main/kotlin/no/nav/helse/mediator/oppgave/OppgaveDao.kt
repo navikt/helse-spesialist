@@ -74,11 +74,11 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
         startIndex: Int = 0,
         pageSize: Int = Int.MAX_VALUE,
         sortering: List<OppgavesorteringForDatabase> = emptyList(),
-        kreverEgenskaper: List<String> = emptyList()
+        kreverEgenskaper: List<EgenskapForDatabase> = emptyList()
     ): List<OppgaveFraDatabaseForVisning> {
         val orderBy = if (sortering.isNotEmpty()) sortering.joinToString { it.nøkkelTilKolonne() } else "opprettet DESC"
         val egenskaperSomSkalEkskluderes = ekskluderEgenskaper.joinToString { """ '$it' """ }
-        val egenskaperSomKreves = kreverEgenskaper.joinToString { """ '$it' """ }
+        val egenskaperSomKreves = kreverEgenskaper.joinToString { """ '${it.name}' """ }
         return asSQL(
             """
                 SELECT
@@ -107,7 +107,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                 ORDER BY $orderBy
                 OFFSET :start_index
                 LIMIT :page_size
-            """, mapOf("oid" to saksbehandlerOid, "start_index" to startIndex, "page_size" to pageSize)
+            """, mapOf("oid" to saksbehandlerOid, "start_index" to startIndex * pageSize, "page_size" to pageSize)
         ).list { row ->
             OppgaveFraDatabaseForVisning(
                 id = row.long("oppgave_id"),

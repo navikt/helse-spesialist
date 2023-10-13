@@ -238,7 +238,7 @@ internal class OppgaveMediatorTest {
             oppgaveFraDatabaseForVisning(),
             oppgaveFraDatabaseForVisning(),
         )
-        val oppgaver = mediator.oppgaver(saksbehandlerFraApi(), 0, MAX_VALUE, emptyList())
+        val oppgaver = mediator.oppgaver(saksbehandlerFraApi(), 0, MAX_VALUE, emptyList(), emptyList())
         assertEquals(2, oppgaver.size)
     }
 
@@ -254,7 +254,7 @@ internal class OppgaveMediatorTest {
 
     @Test
     fun `Hent kun oppgaver til visning som saksbehandler har tilgang til`() {
-        mediator.oppgaver(saksbehandlerFraApi(), 0, MAX_VALUE, emptyList())
+        mediator.oppgaver(saksbehandlerFraApi(), 0, MAX_VALUE, emptyList(), emptyList())
         verify(exactly = 1) { oppgaveDao.finnOppgaverForVisning(
             ekskluderEgenskaper = Egenskap.alleTilgangsstyrteEgenskaper.map { it.name },
             SAKSBEHANDLEROID,
@@ -309,7 +309,7 @@ internal class OppgaveMediatorTest {
             ),
         )
         val saksbehandler = saksbehandlerFraApi(tilganger = EnumSet.allOf(Gruppe::class.java).map { UUID.fromString(idForGruppe(it)) })
-        val oppgaver = mediator.oppgaver(saksbehandler, 0, MAX_VALUE, emptyList())
+        val oppgaver = mediator.oppgaver(saksbehandler, 0, MAX_VALUE, emptyList(), emptyList())
         assertEquals(1, oppgaver.size)
         val oppgave = oppgaver.single()
         assertEquals("1", oppgave.id)
@@ -348,7 +348,7 @@ internal class OppgaveMediatorTest {
             ),
         )
         val saksbehandler = saksbehandlerFraApi(tilganger = EnumSet.allOf(Gruppe::class.java).map { UUID.fromString(idForGruppe(it)) })
-        val oppgaver = mediator.oppgaver(saksbehandler, 0, MAX_VALUE, emptyList())
+        val oppgaver = mediator.oppgaver(saksbehandler, 0, MAX_VALUE, emptyList(), emptyList())
         val oppgave = oppgaver.single()
         assertEquals(egenskap.oppgavetype(), oppgave.oppgavetype)
     }
@@ -374,7 +374,7 @@ internal class OppgaveMediatorTest {
             ),
         )
         val saksbehandler = saksbehandlerFraApi(tilganger = EnumSet.allOf(Gruppe::class.java).map { UUID.fromString(idForGruppe(it)) })
-        val oppgaver = mediator.oppgaver(saksbehandler, 0, MAX_VALUE, emptyList())
+        val oppgaver = mediator.oppgaver(saksbehandler, 0, MAX_VALUE, emptyList(), emptyList())
         val oppgave = oppgaver.single()
         assertEquals(egenskap.periodetype(), oppgave.periodetype)
     }
@@ -400,7 +400,7 @@ internal class OppgaveMediatorTest {
             ),
         )
         val saksbehandler = saksbehandlerFraApi(tilganger = EnumSet.allOf(Gruppe::class.java).map { UUID.fromString(idForGruppe(it)) })
-        val oppgaver = mediator.oppgaver(saksbehandler, 0, MAX_VALUE, emptyList())
+        val oppgaver = mediator.oppgaver(saksbehandler, 0, MAX_VALUE, emptyList(), emptyList())
         val oppgave = oppgaver.single()
         assertEquals(egenskap.mottaker(), oppgave.mottaker)
     }
@@ -426,7 +426,7 @@ internal class OppgaveMediatorTest {
             ),
         )
         val saksbehandler = saksbehandlerFraApi(tilganger = EnumSet.allOf(Gruppe::class.java).map { UUID.fromString(idForGruppe(it)) })
-        val oppgaver = mediator.oppgaver(saksbehandler, 0, MAX_VALUE, emptyList())
+        val oppgaver = mediator.oppgaver(saksbehandler, 0, MAX_VALUE, emptyList(), emptyList())
         val oppgave = oppgaver.single()
         assertEquals(egenskap.antallArbeidsforhold(), oppgave.antallArbeidsforhold)
     }

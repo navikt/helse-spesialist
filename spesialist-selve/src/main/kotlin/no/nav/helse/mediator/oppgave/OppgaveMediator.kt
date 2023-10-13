@@ -14,6 +14,7 @@ import no.nav.helse.db.TotrinnsvurderingRepository
 import no.nav.helse.mediator.SaksbehandlerMediator.Companion.tilApiversjon
 import no.nav.helse.mediator.TilgangskontrollørForApi
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilBehandledeOppgaver
+import no.nav.helse.mediator.oppgave.OppgaveMapper.tilDatabaseversjon
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilOppgaverTilBehandling
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.ManglerTilgang
@@ -29,6 +30,7 @@ import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload.Companion
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.graphql.schema.BehandletOppgave
 import no.nav.helse.spesialist.api.graphql.schema.OppgaveTilBehandling
+import no.nav.helse.spesialist.api.graphql.schema.Oppgaveegenskap
 import no.nav.helse.spesialist.api.graphql.schema.Oppgavesortering
 import no.nav.helse.spesialist.api.graphql.schema.Sorteringsnokkel
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
@@ -124,7 +126,8 @@ internal class OppgaveMediator(
         saksbehandlerFraApi: SaksbehandlerFraApi,
         startIndex: Int,
         pageSize: Int,
-        sortering: List<Oppgavesortering>
+        sortering: List<Oppgavesortering>,
+        egenskaper: List<Oppgaveegenskap>
     ): List<OppgaveTilBehandling> {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         val egenskaperSaksbehandlerIkkeHarTilgangTil = Egenskap
@@ -132,13 +135,16 @@ internal class OppgaveMediator(
             .filterNot { saksbehandler.harTilgangTil(listOf(it)) }
             .map(Egenskap::toString)
 
+        val filtrerteEgenskaper = egenskaper.tilDatabaseversjon()
+
         val oppgaver = oppgaveDao
             .finnOppgaverForVisning(
                 ekskluderEgenskaper = egenskaperSaksbehandlerIkkeHarTilgangTil,
                 saksbehandlerOid = saksbehandler.oid(),
                 startIndex = startIndex,
                 pageSize = pageSize,
-                sortering = sortering.tilOppgavesorteringForDatabase()
+                sortering = sortering.tilOppgavesorteringForDatabase(),
+                kreverEgenskaper = filtrerteEgenskaper
             )
         return oppgaver.tilOppgaverTilBehandling()
     }

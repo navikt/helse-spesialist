@@ -23,23 +23,29 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `oppgaver query uten parametere returnerer oppgave`() {
-        every { oppgavehåndterer.oppgaver(any(), any(), any(), any()) } returns listOf(oppgaveTilBehandling())
+        every { oppgavehåndterer.oppgaver(any(), any(), any(), any(), any()) } returns listOf(oppgaveTilBehandling())
 
         val body = runQuery("""{ oppgaver { id } }""")
         val antallOppgaver = body["data"]["oppgaver"].size()
 
-        verify(exactly = 1) { oppgavehåndterer.oppgaver(any(), 0, Int.MAX_VALUE, any()) }
+        verify(exactly = 1) { oppgavehåndterer.oppgaver(any(), 0, Int.MAX_VALUE, any(), any()) }
         assertEquals(1, antallOppgaver)
     }
 
     @Test
     fun `oppgaver query med parametere returnerer oppgave`() {
-        every { oppgavehåndterer.oppgaver(any(), any(), any(), any()) } returns listOf(oppgaveTilBehandling())
+        every { oppgavehåndterer.oppgaver(any(), any(), any(), any(), any()) } returns listOf(oppgaveTilBehandling())
 
         val body = runQuery("""{ oppgaver(startIndex: 2, pageSize: 5, sortering: [{nokkel: TILDELT_TIL, stigende: true}]) { id } }""")
         val antallOppgaver = body["data"]["oppgaver"].size()
 
-        verify(exactly = 1) { oppgavehåndterer.oppgaver(any(), 2, 5, listOf(Oppgavesortering(Sorteringsnokkel.TILDELT_TIL, true))) }
+        verify(exactly = 1) { oppgavehåndterer.oppgaver(
+            saksbehandlerFraApi = any(),
+            startIndex = 2,
+            pageSize = 5,
+            sortering = listOf(Oppgavesortering(Sorteringsnokkel.TILDELT_TIL, true)),
+            egenskaper = emptyList()
+        ) }
         assertEquals(1, antallOppgaver)
     }
 

@@ -41,7 +41,13 @@ class OppgaverQuery(private val oppgavehåndterer: Oppgavehåndterer) : Query {
         val startTrace = startSporing(env)
         val saksbehandler = env.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(SAKSBEHANDLER.key).value
         val oppgaver = withContext(Dispatchers.IO) {
-            oppgavehåndterer.oppgaver(saksbehandler, startIndex ?: 0, pageSize ?: Int.MAX_VALUE, sortering ?: emptyList())
+            oppgavehåndterer.oppgaver(
+                saksbehandlerFraApi = saksbehandler,
+                startIndex = startIndex ?: 0,
+                pageSize = pageSize ?: Int.MAX_VALUE,
+                sortering = sortering ?: emptyList(),
+                egenskaper = emptyList()
+            )
         }
         avsluttSporing(startTrace)
 
