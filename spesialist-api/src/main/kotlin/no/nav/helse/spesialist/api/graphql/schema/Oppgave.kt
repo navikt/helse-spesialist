@@ -85,6 +85,12 @@ data class Oppgaveegenskap(
     val kategori: Kategori,
 )
 
+enum class Fane {
+    TIL_GODKJENNING,
+    MINE_SAKER,
+    PAA_VENT
+}
+
 data class OppgaveForPeriodevisning(
     val id: String,
 )

@@ -8,6 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.schema.BehandletOppgave
+import no.nav.helse.spesialist.api.graphql.schema.Fane
 import no.nav.helse.spesialist.api.graphql.schema.OppgaveTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.Oppgaveegenskap
 import no.nav.helse.spesialist.api.graphql.schema.Oppgavesortering
@@ -37,6 +38,7 @@ class OppgaverQuery(private val oppgavehåndterer: Oppgavehåndterer) : Query {
         pageSize: Int? = null,
         sortering: List<Oppgavesortering>? = emptyList(),
         filtrerteEgenskaper: List<Oppgaveegenskap>? = emptyList(),
+        fane: Fane? = Fane.TIL_GODKJENNING,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<List<OppgaveTilBehandling>> {
         sikkerLogg.info("Henter OppgaverTilBehandling")
@@ -48,7 +50,8 @@ class OppgaverQuery(private val oppgavehåndterer: Oppgavehåndterer) : Query {
                 startIndex = startIndex ?: 0,
                 pageSize = pageSize ?: Int.MAX_VALUE,
                 sortering = sortering ?: emptyList(),
-                egenskaper = filtrerteEgenskaper ?: emptyList()
+                egenskaper = filtrerteEgenskaper ?: emptyList(),
+                fane = fane ?: Fane.TIL_GODKJENNING
             )
         }
         avsluttSporing(startTrace)

@@ -74,7 +74,9 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
         startIndex: Int = 0,
         pageSize: Int = Int.MAX_VALUE,
         sortering: List<OppgavesorteringForDatabase> = emptyList(),
-        kreverEgenskaper: List<EgenskapForDatabase> = emptyList()
+        kreverEgenskaper: List<EgenskapForDatabase> = emptyList(),
+        egneSakerPåVent: Boolean = false,
+        egneSaker: Boolean = false
     ): List<OppgaveFraDatabaseForVisning> {
         val orderBy = if (sortering.isNotEmpty()) sortering.joinToString { it.nøkkelTilKolonne() } else "opprettet DESC"
         val egenskaperSomSkalEkskluderes = ekskluderEgenskaper.joinToString { """ '$it' """ }
@@ -104,10 +106,22 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                 AND (egenskaper @> ARRAY[$egenskaperSomKreves]::varchar[]) -- egenskaper saksbehandler har filtrert på
                 AND NOT (egenskaper && ARRAY[$egenskaperSomSkalEkskluderes]::varchar[]) -- egenskaper saksbehandler ikke har tilgang til
                 AND NOT (egenskaper && ARRAY['BESLUTTER']::varchar[] AND ttv.saksbehandler = :oid) -- hvis oppgaven er sendt til beslutter og saksbehandler var den som sendte
+                AND 
+                    CASE 
+                        WHEN :egne_saker_pa_vent THEN t.saksbehandler_ref = :oid AND t.på_vent = true
+                        WHEN :egne_saker THEN t.saksbehandler_ref = :oid AND t.på_vent = false
+                        ELSE true
+                    END
                 ORDER BY $orderBy
                 OFFSET :start_index
                 LIMIT :page_size
-            """, mapOf("oid" to saksbehandlerOid, "start_index" to startIndex * pageSize, "page_size" to pageSize)
+            """, mapOf(
+                "oid" to saksbehandlerOid,
+                "start_index" to startIndex * pageSize,
+                "page_size" to pageSize,
+                "egne_saker_pa_vent" to egneSakerPåVent,
+                "egne_saker" to egneSaker
+            )
         ).list { row ->
             OppgaveFraDatabaseForVisning(
                 id = row.long("oppgave_id"),

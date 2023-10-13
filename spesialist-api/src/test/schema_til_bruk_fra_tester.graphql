@@ -438,7 +438,7 @@ type Query {
     hentSoknad(dokumentId: String!, fnr: String!): Soknad!
     notater(forPerioder: [String!]!): [Notater!]!
     oppdrag(fnr: String!): [Oppdrag!]!
-    oppgaver(filtrerteEgenskaper: [OppgaveegenskapInput!], pageSize: Int, sortering: [OppgavesorteringInput!], startIndex: Int): [OppgaveTilBehandling!]!
+    oppgaver(fane: Fane, filtrerteEgenskaper: [OppgaveegenskapInput!], pageSize: Int, sortering: [OppgavesorteringInput!], startIndex: Int): [OppgaveTilBehandling!]!
     person(aktorId: String, fnr: String): Person
 }
 
@@ -798,6 +798,12 @@ enum Egenskap {
     UTBETALING_TIL_SYKMELDT
     UTLAND
     VERGEMAL
+}
+
+enum Fane {
+    MINE_SAKER
+    PAA_VENT
+    TIL_GODKJENNING
 }
 
 enum Hendelsetype {

@@ -39,6 +39,7 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import no.nav.helse.spesialist.api.graphql.schema.AntallArbeidsforhold
+import no.nav.helse.spesialist.api.graphql.schema.Fane.TIL_GODKJENNING
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker
 import no.nav.helse.spesialist.api.graphql.schema.Oppgavetype
 import no.nav.helse.spesialist.api.graphql.schema.Periodetype
@@ -238,7 +239,7 @@ internal class OppgaveMediatorTest {
             oppgaveFraDatabaseForVisning(),
             oppgaveFraDatabaseForVisning(),
         )
-        val oppgaver = mediator.oppgaver(saksbehandlerFraApi(), 0, MAX_VALUE, emptyList(), emptyList())
+        val oppgaver = mediator.oppgaver(saksbehandlerFraApi(), 0, MAX_VALUE, emptyList(), emptyList(), TIL_GODKJENNING)
         assertEquals(2, oppgaver.size)
     }
 
@@ -254,7 +255,7 @@ internal class OppgaveMediatorTest {
 
     @Test
     fun `Hent kun oppgaver til visning som saksbehandler har tilgang til`() {
-        mediator.oppgaver(saksbehandlerFraApi(), 0, MAX_VALUE, emptyList(), emptyList())
+        mediator.oppgaver(saksbehandlerFraApi(), 0, MAX_VALUE, emptyList(), emptyList(), TIL_GODKJENNING)
         verify(exactly = 1) { oppgaveDao.finnOppgaverForVisning(
             ekskluderEgenskaper = Egenskap.alleTilgangsstyrteEgenskaper.map { it.name },
             SAKSBEHANDLEROID,
@@ -309,7 +310,7 @@ internal class OppgaveMediatorTest {
             ),
         )
         val saksbehandler = saksbehandlerFraApi(tilganger = EnumSet.allOf(Gruppe::class.java).map { UUID.fromString(idForGruppe(it)) })
-        val oppgaver = mediator.oppgaver(saksbehandler, 0, MAX_VALUE, emptyList(), emptyList())
+        val oppgaver = mediator.oppgaver(saksbehandler, 0, MAX_VALUE, emptyList(), emptyList(), TIL_GODKJENNING)
         assertEquals(1, oppgaver.size)
         val oppgave = oppgaver.single()
         assertEquals("1", oppgave.id)
@@ -348,7 +349,7 @@ internal class OppgaveMediatorTest {
             ),
         )
         val saksbehandler = saksbehandlerFraApi(tilganger = EnumSet.allOf(Gruppe::class.java).map { UUID.fromString(idForGruppe(it)) })
-        val oppgaver = mediator.oppgaver(saksbehandler, 0, MAX_VALUE, emptyList(), emptyList())
+        val oppgaver = mediator.oppgaver(saksbehandler, 0, MAX_VALUE, emptyList(), emptyList(), TIL_GODKJENNING)
         val oppgave = oppgaver.single()
         assertEquals(egenskap.oppgavetype(), oppgave.oppgavetype)
     }
@@ -374,7 +375,7 @@ internal class OppgaveMediatorTest {
             ),
         )
         val saksbehandler = saksbehandlerFraApi(tilganger = EnumSet.allOf(Gruppe::class.java).map { UUID.fromString(idForGruppe(it)) })
-        val oppgaver = mediator.oppgaver(saksbehandler, 0, MAX_VALUE, emptyList(), emptyList())
+        val oppgaver = mediator.oppgaver(saksbehandler, 0, MAX_VALUE, emptyList(), emptyList(), TIL_GODKJENNING)
         val oppgave = oppgaver.single()
         assertEquals(egenskap.periodetype(), oppgave.periodetype)
     }
@@ -400,7 +401,7 @@ internal class OppgaveMediatorTest {
             ),
         )
         val saksbehandler = saksbehandlerFraApi(tilganger = EnumSet.allOf(Gruppe::class.java).map { UUID.fromString(idForGruppe(it)) })
-        val oppgaver = mediator.oppgaver(saksbehandler, 0, MAX_VALUE, emptyList(), emptyList())
+        val oppgaver = mediator.oppgaver(saksbehandler, 0, MAX_VALUE, emptyList(), emptyList(), TIL_GODKJENNING)
         val oppgave = oppgaver.single()
         assertEquals(egenskap.mottaker(), oppgave.mottaker)
     }
@@ -426,7 +427,7 @@ internal class OppgaveMediatorTest {
             ),
         )
         val saksbehandler = saksbehandlerFraApi(tilganger = EnumSet.allOf(Gruppe::class.java).map { UUID.fromString(idForGruppe(it)) })
-        val oppgaver = mediator.oppgaver(saksbehandler, 0, MAX_VALUE, emptyList(), emptyList())
+        val oppgaver = mediator.oppgaver(saksbehandler, 0, MAX_VALUE, emptyList(), emptyList(), TIL_GODKJENNING)
         val oppgave = oppgaver.single()
         assertEquals(egenskap.antallArbeidsforhold(), oppgave.antallArbeidsforhold)
     }

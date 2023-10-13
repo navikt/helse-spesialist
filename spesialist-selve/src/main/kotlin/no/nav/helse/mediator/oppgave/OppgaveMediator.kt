@@ -29,6 +29,7 @@ import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload.Companion.lagre
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.graphql.schema.BehandletOppgave
+import no.nav.helse.spesialist.api.graphql.schema.Fane
 import no.nav.helse.spesialist.api.graphql.schema.OppgaveTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.Oppgaveegenskap
 import no.nav.helse.spesialist.api.graphql.schema.Oppgavesortering
@@ -127,7 +128,8 @@ internal class OppgaveMediator(
         startIndex: Int,
         pageSize: Int,
         sortering: List<Oppgavesortering>,
-        egenskaper: List<Oppgaveegenskap>
+        egenskaper: List<Oppgaveegenskap>,
+        fane: Fane
     ): List<OppgaveTilBehandling> {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         val egenskaperSaksbehandlerIkkeHarTilgangTil = Egenskap
@@ -144,7 +146,9 @@ internal class OppgaveMediator(
                 startIndex = startIndex,
                 pageSize = pageSize,
                 sortering = sortering.tilOppgavesorteringForDatabase(),
-                kreverEgenskaper = filtrerteEgenskaper
+                kreverEgenskaper = filtrerteEgenskaper,
+                egneSakerPåVent = fane == Fane.PAA_VENT,
+                egneSaker = fane == Fane.MINE_SAKER,
             )
         return oppgaver.tilOppgaverTilBehandling()
     }

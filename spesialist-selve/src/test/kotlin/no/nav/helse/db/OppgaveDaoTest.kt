@@ -503,6 +503,29 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `Tar kun med oppgaver som er tildelt saksbehandler når dette bes om`() {
+        val saksbehandlerOid = UUID.randomUUID()
+        nyPerson(fødselsnummer = "12345678910", aktørId = "1234567891011", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "123456789")
+        val oppgaveId1 = OPPGAVE_ID
+        tildelOppgave(oppgaveId1, saksbehandlerOid = saksbehandlerOid)
+        nyPerson(fødselsnummer = "12345678911", aktørId = "1234567891012", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "223456789")
+        val oppgaveId2 = OPPGAVE_ID
+        tildelOppgave(oppgaveId2, saksbehandlerOid = saksbehandlerOid, påVent = true)
+        nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456789")
+        val oppgaveId3 = OPPGAVE_ID
+
+        val oppgaverSomErTildeltOgIkkePåvent = oppgaveDao.finnOppgaverForVisning(emptyList(), saksbehandlerOid = saksbehandlerOid, egneSaker = true, egneSakerPåVent = false)
+        val oppgaverSomErTildeltOgPåvent = oppgaveDao.finnOppgaverForVisning(emptyList(), saksbehandlerOid = saksbehandlerOid, egneSaker = true, egneSakerPåVent = true)
+        val alleOppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), saksbehandlerOid = saksbehandlerOid, egneSaker = false, egneSakerPåVent = false)
+        assertEquals(1, oppgaverSomErTildeltOgIkkePåvent.size)
+        assertEquals(1, oppgaverSomErTildeltOgPåvent.size)
+        assertEquals(3, alleOppgaver.size)
+        assertEquals(listOf(oppgaveId1), oppgaverSomErTildeltOgIkkePåvent.map { it.id })
+        assertEquals(listOf(oppgaveId2), oppgaverSomErTildeltOgPåvent.map { it.id })
+        assertEquals(setOf(oppgaveId1, oppgaveId2, oppgaveId3), alleOppgaver.map { it.id }.toSet())
+    }
+
+    @Test
     fun `Saksbehandler får ikke med oppgaver hen har sendt til beslutter selv om hen har beslutter-tilgang`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val saksbehandlerOid = UUID.randomUUID()
