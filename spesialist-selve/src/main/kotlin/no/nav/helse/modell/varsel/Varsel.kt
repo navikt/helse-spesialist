@@ -105,6 +105,15 @@ internal class Varsel(
             return any { it.status == AKTIV && it.varselkode == "RV_UT_23" }
         }
 
+        internal fun List<Varsel>.inneholderSvartelistedeVarsler(): Boolean {
+            return any { it.varselkode in svartelistedeVarsler }
+        }
+
+        private val svartelistedeVarsler = listOf(
+            "RV_AY_3", "RV_AY_4", "RV_AY_5", "RV_AY_6", "RV_AY_7", "RV_AY_8", "RV_IT_3", "RV_OS_2", "RV_OS_3",
+            "RV_SI_3", "RV_UT_21", "RV_UT_23", "RV_VV_8", "SB_RV_2"
+        )
+
         internal fun List<Varsel>.forhindrerAutomatisering() = any { it.status in listOf(VURDERT, AKTIV, AVVIST) }
 
         internal fun JsonNode.varsler(): List<Varsel> {

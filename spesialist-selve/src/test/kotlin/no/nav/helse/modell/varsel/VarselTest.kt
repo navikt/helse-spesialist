@@ -5,6 +5,7 @@ import java.util.UUID
 import no.nav.helse.modell.varsel.Varsel.Companion.finnEksisterendeVarsel
 import no.nav.helse.modell.varsel.Varsel.Companion.forhindrerAutomatisering
 import no.nav.helse.modell.varsel.Varsel.Companion.inneholderMedlemskapsvarsel
+import no.nav.helse.modell.varsel.Varsel.Companion.inneholderSvartelistedeVarsler
 import no.nav.helse.modell.varsel.Varsel.Companion.inneholderVarselOmNegativtBeløp
 import no.nav.helse.modell.varsel.Varsel.Status
 import no.nav.helse.modell.varsel.Varsel.Status.AKTIV
@@ -20,6 +21,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import org.junit.jupiter.params.provider.ValueSource
 
 internal class VarselTest {
 
@@ -135,6 +137,20 @@ internal class VarselTest {
     fun `inneholder ikke varsel om negativt beløp`(status: Status) {
         val varsel = nyttVarsel(status = status, kode = "RV_UT_23")
         assertFalse(listOf(varsel).inneholderVarselOmNegativtBeløp())
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["RV_AY_3", "RV_AY_4", "RV_AY_5", "RV_AY_6", "RV_AY_7", "RV_AY_8", "RV_IT_3", "RV_OS_2", "RV_OS_3", "RV_SI_3", "RV_UT_21", "RV_UT_23", "RV_VV_8", "SB_RV_2"])
+    fun `inneholder svartelistet varsel`(varselkode: String) {
+        val varsel = nyttVarsel(status = AKTIV, kode = varselkode)
+        assertTrue(listOf(varsel).inneholderSvartelistedeVarsler())
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Status::class)
+    fun `inneholder svartelistet varsel uavhengig av status`(status: Status) {
+        val varsel = nyttVarsel(status = status, kode = "RV_AY_3")
+        assertTrue(listOf(varsel).inneholderSvartelistedeVarsler())
     }
 
     @Test
