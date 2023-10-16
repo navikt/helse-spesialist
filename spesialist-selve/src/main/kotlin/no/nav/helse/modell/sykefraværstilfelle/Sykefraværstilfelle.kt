@@ -42,6 +42,11 @@ internal class Sykefraværstilfelle(
         gjeldendeGenerasjoner.håndterNyttVarsel(listOf(varsel), hendelseId)
     }
 
+    internal fun spesialsakSomKanAutomatiseres(vedtaksperiodeId: UUID): Boolean {
+        val generasjon = gjeldendeGenerasjoner.finnGenerasjon(vedtaksperiodeId) ?: return false
+        return generasjon.erSpesialsakSomKanAutomatiseres()
+    }
+
     internal fun håndter(utkastTilVedtak: UtkastTilVedtak) {
         val vedtakBuilder = SykepengevedtakBuilder()
         val skjønnsfastsattSykepengegrunnlag = skjønnsfastatteSykepengegrunnlag.lastOrNull()

@@ -23,6 +23,8 @@ internal class Utbetaling(
 
     internal fun harUtbetalingTilSykmeldt() = personbeløp > 0
 
+    internal fun ingenUtbetaling() = refusjonstype() == INGEN_UTBETALING
+
     internal fun erRevurdering() = type == Utbetalingtype.REVURDERING
 
     override fun equals(other: Any?): Boolean = this === other || (

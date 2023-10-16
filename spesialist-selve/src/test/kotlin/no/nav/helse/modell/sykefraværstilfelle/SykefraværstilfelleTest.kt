@@ -35,6 +35,12 @@ internal class SykefraværstilfelleTest {
     }
 
     @Test
+    fun `har ikke spesialsak som kan automatiseres hvis perioden ikke er kjent for sykefraværstilfellet`() {
+        val sykefraværstilfelle = sykefraværstilfelle()
+        assertFalse(sykefraværstilfelle.spesialsakSomKanAutomatiseres(UUID.randomUUID()))
+    }
+
+    @Test
     fun `har aktive varsler`() {
         val vedtaksperiodeId2 = UUID.randomUUID()
         val gjeldendeGenerasjon1 = generasjon(UUID.randomUUID())

@@ -9,6 +9,7 @@ import no.nav.helse.modell.varsel.Varsel.Companion.finnEksisterendeVarsel
 import no.nav.helse.modell.varsel.Varsel.Companion.flyttVarslerFor
 import no.nav.helse.modell.varsel.Varsel.Companion.forhindrerAutomatisering
 import no.nav.helse.modell.varsel.Varsel.Companion.inneholderMedlemskapsvarsel
+import no.nav.helse.modell.varsel.Varsel.Companion.inneholderSvartelistedeVarsler
 import no.nav.helse.modell.varsel.Varsel.Companion.inneholderVarselOmNegativtBeløp
 import org.slf4j.LoggerFactory
 
@@ -26,7 +27,7 @@ internal class Generasjon private constructor(
         vedtaksperiodeId: UUID,
         fom: LocalDate,
         tom: LocalDate,
-        skjæringstidspunkt: LocalDate
+        skjæringstidspunkt: LocalDate,
     ): this(id, vedtaksperiodeId, null, skjæringstidspunkt, Periode(fom, tom), Ulåst, emptySet())
 
     private val varsler: MutableList<Varsel> = varsler.toMutableList()
@@ -57,6 +58,8 @@ internal class Generasjon private constructor(
         if (fom == periode.fom() && tom == periode.tom() && skjæringstidspunkt == this.skjæringstidspunkt) return
         tilstand.tidslinjeendring(this, fom, tom, skjæringstidspunkt, hendelseId)
     }
+
+    internal fun erSpesialsakSomKanAutomatiseres() = !varsler.inneholderSvartelistedeVarsler()
 
     internal fun håndterVedtaksperiodeEndret(
         hendelseId: UUID,
