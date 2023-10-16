@@ -6,6 +6,7 @@ import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.HendelseDao.OverstyringIgangsattKorrigertSøknad
+import no.nav.helse.modell.Toggle
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.overstyring.OverstyringDao
@@ -68,6 +69,13 @@ internal class Automatisering(
                 keyValue("utbetalingId", utbetaling.utbetalingId),
                 problemer
             )
+        }
+
+        if (Toggle.AutomatiserSpesialsak.enabled && erSpesialsakSomKanAutomatiseres(sykefraværstilfelle, utbetaling, vedtaksperiodeId)) {
+            utfallslogger("Automatiserer spesialsak med {} ({})")
+            onAutomatiserbar()
+            automatiseringDao.automatisert(vedtaksperiodeId, hendelseId, utbetaling.utbetalingId)
+            return
         }
 
         if (problemer.isNotEmpty()) {
@@ -224,6 +232,12 @@ internal class Automatisering(
             override fun erAautomatiserbar() = automatiserbar()
             override fun error() = error
         }
+
+    private fun erSpesialsakSomKanAutomatiseres(sykefraværstilfelle: Sykefraværstilfelle, utbetaling: Utbetaling, vedtaksperiodeId: UUID): Boolean {
+        return vedtakDao.erSpesialsak(vedtaksperiodeId) &&
+                sykefraværstilfelle.spesialsakSomKanAutomatiseres(vedtaksperiodeId) &&
+                utbetaling.ingenUtbetaling()
+    }
 
     private class AutomatiserRevurderinger(
         private val utbetaling: Utbetaling,

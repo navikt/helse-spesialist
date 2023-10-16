@@ -1,5 +1,7 @@
 package no.nav.helse.modell.automatisering
 
+import ToggleHelpers.disable
+import ToggleHelpers.enable
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
@@ -9,6 +11,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.januar
 import no.nav.helse.modell.HendelseDao
+import no.nav.helse.modell.Toggle
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
@@ -81,11 +84,11 @@ internal class AutomatiseringTest {
 
     @BeforeEach
     fun setupDefaultTilHappyCase() {
+        every { vedtakDaoMock.erSpesialsak(vedtaksperiodeId) } returns false
         every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(true)
         every { vedtakDaoMock.finnVedtaksperiodetype(vedtaksperiodeId) } returns periodetype
         every { vedtakDaoMock.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.EN_ARBEIDSGIVER
         every { åpneGosysOppgaverDaoMock.harÅpneOppgaver(any()) } returns 0
-        every { egenAnsattDao.erEgenAnsatt(any()) } returns false
         every { overstyringDaoMock.harVedtaksperiodePågåendeOverstyring(any()) } returns false
         every { hendelseDaoMock.sisteOverstyringIgangsattOmKorrigertSøknad(fødselsnummer, vedtaksperiodeId) } returns HendelseDao.OverstyringIgangsattKorrigertSøknad(
             hendelseId = hendelseId.toString(),
@@ -102,6 +105,49 @@ internal class AutomatiseringTest {
         every { generasjonDaoMock.førsteGenerasjonLåstTidspunkt(vedtaksperiodeId) } returns LocalDateTime.now().minusMonths(6).plusDays(1)
         stikkprøveFullRefusjonEnArbeidsgiver = false
         stikkprøveUtsEnArbeidsgiverForlengelse = false
+    }
+
+    @Test
+    fun `går automatisk hvis det er spesialsak og ikke noen svartelistede varsler og ingen utbetaling og toggle er på`() {
+        Toggle.AutomatiserSpesialsak.enable()
+        every { vedtakDaoMock.erSpesialsak(vedtaksperiodeId) } returns true
+        every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(false)
+        every { vedtakDaoMock.finnVedtaksperiodetype(vedtaksperiodeId) } returns periodetype
+        every { vedtakDaoMock.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.EN_ARBEIDSGIVER
+        every { åpneGosysOppgaverDaoMock.harÅpneOppgaver(any()) } returns 1
+        every { vergemålDaoMock.harVergemål(fødselsnummer) } returns true
+        every { vergemålDaoMock.harVergemål(fødselsnummer) } returns true
+        val gjeldendeGenerasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
+        gjeldendeGenerasjon.håndterNyttVarsel(
+            Varsel(UUID.randomUUID(), "RV_IM_1", LocalDateTime.now(), vedtaksperiodeId),
+            hendelseId
+        )
+        support.run {
+            forsøkAutomatisering(generasjoner = listOf(gjeldendeGenerasjon), utbetaling = enUtbetaling(arbeidsgiverbeløp = 0, personbeløp = 0))
+            assertBleAutomatiskGodkjent()
+        }
+        Toggle.AutomatiserSpesialsak.disable()
+    }
+
+    @Test
+    fun `går ikke automatisk hvis det er spesialsak og ikke noen svartelistede varsler og ingen utbetaling og toggle er av`() {
+        Toggle.AutomatiserSpesialsak.disable()
+        every { vedtakDaoMock.erSpesialsak(vedtaksperiodeId) } returns true
+        every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(false)
+        every { vedtakDaoMock.finnVedtaksperiodetype(vedtaksperiodeId) } returns periodetype
+        every { vedtakDaoMock.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.EN_ARBEIDSGIVER
+        every { åpneGosysOppgaverDaoMock.harÅpneOppgaver(any()) } returns 1
+        every { vergemålDaoMock.harVergemål(fødselsnummer) } returns true
+        every { vergemålDaoMock.harVergemål(fødselsnummer) } returns true
+        val gjeldendeGenerasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
+        gjeldendeGenerasjon.håndterNyttVarsel(
+            Varsel(UUID.randomUUID(), "RV_IM_1", LocalDateTime.now(), vedtaksperiodeId),
+            hendelseId
+        )
+        support.run {
+            forsøkAutomatisering(generasjoner = listOf(gjeldendeGenerasjon), utbetaling = enUtbetaling(arbeidsgiverbeløp = 0, personbeløp = 0))
+            assertGikkTilManuell()
+        }
     }
 
     @Test
