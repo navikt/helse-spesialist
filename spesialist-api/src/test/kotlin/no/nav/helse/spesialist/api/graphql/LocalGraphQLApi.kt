@@ -28,6 +28,7 @@ import no.nav.helse.spesialist.api.JwtStub
 import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.TestApplication
+import no.nav.helse.spesialist.api.TestdataGenerator
 import no.nav.helse.spesialist.api.Totrinnsvurderinghåndterer
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMediator
@@ -35,7 +36,12 @@ import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkRe
 import no.nav.helse.spesialist.api.behandlingsstatistikk.Statistikk
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.graphql.schema.Adressebeskyttelse
+import no.nav.helse.spesialist.api.graphql.schema.BehandletOppgave
+import no.nav.helse.spesialist.api.graphql.schema.Fane
 import no.nav.helse.spesialist.api.graphql.schema.Kjonn
+import no.nav.helse.spesialist.api.graphql.schema.Oppgaveegenskap
+import no.nav.helse.spesialist.api.graphql.schema.OppgaverTilBehandling
+import no.nav.helse.spesialist.api.graphql.schema.Oppgavesortering
 import no.nav.helse.spesialist.api.graphql.schema.Personinfo
 import no.nav.helse.spesialist.api.graphql.schema.Reservasjon
 import no.nav.helse.spesialist.api.notat.NotatDao
@@ -48,6 +54,7 @@ import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
@@ -189,13 +196,55 @@ fun main() = runBlocking {
             behandlingsstatistikkMediator = behandlingsstatistikkMediator,
             notatMediator = notatMediator,
             saksbehandlerhåndterer = saksbehandlerhåndterer,
-            oppgavehåndterer = oppgavehåndterer,
+            oppgavehåndterer = SneakyOppgaveHåndterer,
             totrinnsvurderinghåndterer = totrinnsvurderinghåndterer,
             godkjenninghåndterer = godkjenninghåndterer,
             personhåndterer = personhåndterer,
             dokumenthåndterer = dokumenthåndterer,
         )
     }
+}
+
+private object SneakyOppgaveHåndterer : Oppgavehåndterer {
+
+    val mock = mockk<Oppgavehåndterer>(relaxed = true)
+    override fun sendTilBeslutter(oppgaveId: Long, behandlendeSaksbehandler: SaksbehandlerFraApi) {
+        return mock.sendTilBeslutter(oppgaveId, behandlendeSaksbehandler)
+    }
+
+    override fun sendIRetur(oppgaveId: Long, besluttendeSaksbehandler: SaksbehandlerFraApi) {
+        return mock.sendIRetur(oppgaveId, besluttendeSaksbehandler)
+    }
+
+    override fun venterPåSaksbehandler(oppgaveId: Long): Boolean {
+        return mock.venterPåSaksbehandler(oppgaveId)
+    }
+
+    override fun erRiskoppgave(oppgaveId: Long): Boolean {
+        return mock.erRiskoppgave(oppgaveId)
+    }
+
+    override fun oppgaver(
+        saksbehandlerFraApi: SaksbehandlerFraApi,
+        startIndex: Int,
+        pageSize: Int,
+        sortering: List<Oppgavesortering>,
+        egenskaper: List<Oppgaveegenskap>,
+        fane: Fane,
+    ): OppgaverTilBehandling {
+
+        val oppgaver = List(50) { TestdataGenerator.oppgave() }
+            .filter { oppgave -> egenskaper.isEmpty() || oppgave.egenskaper.any { it in egenskaper } }
+        return OppgaverTilBehandling(
+            oppgaver = oppgaver.drop((startIndex - 1) * pageSize).take(pageSize),
+            totaltAntallOppgaver = oppgaver.size
+        )
+    }
+
+    override fun behandledeOppgaver(saksbehandlerFraApi: SaksbehandlerFraApi): List<BehandletOppgave> {
+        return mock.behandledeOppgaver(saksbehandlerFraApi)
+    }
+
 }
 
 private fun DecodedJWT.toJwtPrincipal() =

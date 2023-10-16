@@ -60,6 +60,11 @@ enum class Sorteringsnokkel {
     SOKNAD_MOTTATT
 }
 
+data class OppgaverTilBehandling(
+    val totaltAntallOppgaver: Int,
+    val oppgaver: List<OppgaveTilBehandling>
+)
+
 data class OppgaveTilBehandling(
     val id: String,
     val opprettet: DateTimeString,

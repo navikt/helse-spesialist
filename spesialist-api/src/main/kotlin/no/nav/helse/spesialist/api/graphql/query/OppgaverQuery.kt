@@ -11,6 +11,7 @@ import no.nav.helse.spesialist.api.graphql.schema.BehandletOppgave
 import no.nav.helse.spesialist.api.graphql.schema.Fane
 import no.nav.helse.spesialist.api.graphql.schema.OppgaveTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.Oppgaveegenskap
+import no.nav.helse.spesialist.api.graphql.schema.OppgaverTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.Oppgavesortering
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
@@ -56,7 +57,33 @@ class OppgaverQuery(private val oppgavehåndterer: Oppgavehåndterer) : Query {
         }
         avsluttSporing(startTrace)
 
-        return DataFetcherResult.newResult<List<OppgaveTilBehandling>>().data(oppgaver).build()
+        return DataFetcherResult.newResult<List<OppgaveTilBehandling>>().data(oppgaver.oppgaver).build()
+    }
+
+    suspend fun alleOppgaver(
+        startIndex: Int? = 0,
+        pageSize: Int? = null,
+        sortering: List<Oppgavesortering>? = emptyList(),
+        filtrerteEgenskaper: List<Oppgaveegenskap>? = emptyList(),
+        fane: Fane? = Fane.TIL_GODKJENNING,
+        env: DataFetchingEnvironment,
+    ): DataFetcherResult<OppgaverTilBehandling> {
+        sikkerLogg.info("Henter OppgaverTilBehandling")
+        val startTrace = startSporing(env)
+        val saksbehandler = env.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(SAKSBEHANDLER.key).value
+        val oppgaver = withContext(Dispatchers.IO) {
+            oppgavehåndterer.oppgaver(
+                saksbehandlerFraApi = saksbehandler,
+                startIndex = startIndex ?: 0,
+                pageSize = pageSize ?: Int.MAX_VALUE,
+                sortering = sortering ?: emptyList(),
+                egenskaper = filtrerteEgenskaper ?: emptyList(),
+                fane = fane ?: Fane.TIL_GODKJENNING
+            )
+        }
+        avsluttSporing(startTrace)
+
+        return DataFetcherResult.newResult<OppgaverTilBehandling>().data(oppgaver).build()
     }
 
     private fun startSporing(env: DataFetchingEnvironment): Long {

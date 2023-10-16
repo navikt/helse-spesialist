@@ -12,6 +12,7 @@ import no.nav.helse.spesialist.api.graphql.schema.Kategori
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker
 import no.nav.helse.spesialist.api.graphql.schema.OppgaveTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.Oppgaveegenskap
+import no.nav.helse.spesialist.api.graphql.schema.OppgaverTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.Oppgavesortering
 import no.nav.helse.spesialist.api.graphql.schema.Periodetype
 import no.nav.helse.spesialist.api.graphql.schema.Personnavn
@@ -26,7 +27,7 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `oppgaver query uten parametere returnerer oppgave`() {
-        every { oppgavehåndterer.oppgaver(any(), any(), any(), any(), any(), any()) } returns listOf(oppgaveTilBehandling())
+        every { oppgavehåndterer.oppgaver(any(), any(), any(), any(), any(), any()) } returns OppgaverTilBehandling(oppgaver = listOf(oppgaveTilBehandling()), totaltAntallOppgaver = 1)
 
         val body = runQuery("""{ oppgaver { id } }""")
         val antallOppgaver = body["data"]["oppgaver"].size()
@@ -37,7 +38,7 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `oppgaver query med parametere returnerer oppgave`() {
-        every { oppgavehåndterer.oppgaver(any(), any(), any(), any(), any(), any()) } returns listOf(oppgaveTilBehandling())
+        every { oppgavehåndterer.oppgaver(any(), any(), any(), any(), any(), any()) } returns OppgaverTilBehandling(oppgaver = listOf(oppgaveTilBehandling()), totaltAntallOppgaver = 1)
 
         val body = runQuery("""{ 
             oppgaver(

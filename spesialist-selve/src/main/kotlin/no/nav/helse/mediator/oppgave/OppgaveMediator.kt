@@ -30,8 +30,8 @@ import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload.Companion
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.graphql.schema.BehandletOppgave
 import no.nav.helse.spesialist.api.graphql.schema.Fane
-import no.nav.helse.spesialist.api.graphql.schema.OppgaveTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.Oppgaveegenskap
+import no.nav.helse.spesialist.api.graphql.schema.OppgaverTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.Oppgavesortering
 import no.nav.helse.spesialist.api.graphql.schema.Sorteringsnokkel
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
@@ -130,7 +130,7 @@ internal class OppgaveMediator(
         sortering: List<Oppgavesortering>,
         egenskaper: List<Oppgaveegenskap>,
         fane: Fane
-    ): List<OppgaveTilBehandling> {
+    ): OppgaverTilBehandling {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         val egenskaperSaksbehandlerIkkeHarTilgangTil = Egenskap
             .alleTilgangsstyrteEgenskaper
@@ -150,7 +150,10 @@ internal class OppgaveMediator(
                 egneSakerPåVent = fane == Fane.PAA_VENT,
                 egneSaker = fane == Fane.MINE_SAKER,
             )
-        return oppgaver.tilOppgaverTilBehandling()
+        return OppgaverTilBehandling(
+            oppgaver = oppgaver.tilOppgaverTilBehandling(),
+            totaltAntallOppgaver = 1
+        )
     }
 
     override fun behandledeOppgaver(saksbehandlerFraApi: SaksbehandlerFraApi): List<BehandletOppgave> {
