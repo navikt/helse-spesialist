@@ -10,7 +10,6 @@ import no.nav.helse.spesialist.api.graphql.schema.Kategori
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker
 import no.nav.helse.spesialist.api.graphql.schema.OppgaveTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.Oppgaveegenskap
-import no.nav.helse.spesialist.api.graphql.schema.Oppgaveegenskaper
 import no.nav.helse.spesialist.api.graphql.schema.Oppgavetype
 import no.nav.helse.spesialist.api.graphql.schema.Periodetype
 import no.nav.helse.spesialist.api.graphql.schema.Personnavn
@@ -42,11 +41,6 @@ internal object OppgaveMapper {
             egenskaper = egenskaper.map { egenskap ->
                 Oppgaveegenskap(egenskap.tilApiversjon(), egenskap.kategori.tilApiversjon())
             },
-            oppgaveegenskaper = Oppgaveegenskaper(
-                egenskaper = egenskaper.map { egenskap ->
-                    Oppgaveegenskap(egenskap.tilApiversjon(), egenskap.kategori.tilApiversjon())
-                }.sortedBy { it.egenskap }
-            ),
             periodetype = egenskaper.periodetype(),
             oppgavetype = egenskaper.oppgavetype(),
             mottaker = egenskaper.mottaker(),
