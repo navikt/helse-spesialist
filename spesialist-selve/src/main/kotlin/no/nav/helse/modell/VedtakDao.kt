@@ -1,7 +1,7 @@
 package no.nav.helse.modell
 
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -78,6 +78,12 @@ internal class VedtakDao(private val dataSource: DataSource) {
         @Language("PostgreSQL")
         val statement = "SELECT id FROM vedtak WHERE vedtaksperiode_id = ?"
         session.run(queryOf(statement, vedtaksperiodeId).map { it.long("id") }.asSingle)
+    }
+
+    internal fun erSpesialsak(vedtaksperiodeId: UUID) = sessionOf(dataSource).use {
+        @Language("PostgreSQL")
+        val query = """SELECT true FROM spesialsak WHERE vedtaksperiode_id = :vedtaksperiode_id"""
+        it.run(queryOf(query, mapOf("vedtaksperiode_id" to vedtaksperiodeId)).map { it.boolean(1) }.asSingle) ?: false
     }
 
     internal fun leggTilVedtaksperiodetype(vedtaksperiodeId: UUID, type: Periodetype, inntektskilde: Inntektskilde) =

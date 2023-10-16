@@ -164,6 +164,19 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         assertEquals(ORGNUMMER, vedtakDao.finnOrgnummer(VEDTAKSPERIODE))
     }
 
+    @Test
+    fun spesialsak() {
+        nyPerson()
+        opprettSpesialsak(VEDTAKSPERIODE)
+        assertTrue(vedtakDao.erSpesialsak(VEDTAKSPERIODE))
+    }
+
+    @Test
+    fun `ikke spesialsak`() {
+        nyPerson()
+        assertFalse(vedtakDao.erSpesialsak(VEDTAKSPERIODE))
+    }
+
     private fun assertForkastet(vedtaksperiodeId: UUID, forventetHendelseId: UUID) {
         @Language("PostgreSQL")
         val query = "SELECT forkastet, forkastet_av_hendelse, forkastet_tidspunkt FROM vedtak WHERE vedtaksperiode_id = ?"
@@ -197,6 +210,14 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
                 forkastet = row.boolean("forkastet")
             )
         }.asList)
+    }
+
+    private fun opprettSpesialsak(vedtaksperiodeId: UUID) {
+        @Language("PostgreSQL")
+        val query = """INSERT INTO spesialsak(vedtaksperiode_id) VALUES(?)"""
+        sessionOf(dataSource).use {
+            it.run(queryOf(query, vedtaksperiodeId).asExecute)
+        }
     }
 
     private class Vedtak(
