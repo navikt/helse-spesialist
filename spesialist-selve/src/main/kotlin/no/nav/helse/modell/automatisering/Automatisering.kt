@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.HendelseDao.OverstyringIgangsattKorrigertSøknad
 import no.nav.helse.modell.Toggle
@@ -235,9 +236,21 @@ internal class Automatisering(
         }
 
     private fun erSpesialsakSomKanAutomatiseres(sykefraværstilfelle: Sykefraværstilfelle, utbetaling: Utbetaling, vedtaksperiodeId: UUID): Boolean {
-        return vedtakDao.erSpesialsak(vedtaksperiodeId) &&
-                sykefraværstilfelle.spesialsakSomKanAutomatiseres(vedtaksperiodeId) &&
-                utbetaling.ingenUtbetaling()
+        val erSpesialsak = vedtakDao.erSpesialsak(vedtaksperiodeId)
+        val kanAutomatiseres = sykefraværstilfelle.spesialsakSomKanAutomatiseres(vedtaksperiodeId)
+        val ingenUtbetaling = utbetaling.ingenUtbetaling()
+
+        if (erSpesialsak) {
+            sikkerLogg.info(
+                "vedtaksperiode med {} er spesialsak, {}, {}, {}",
+                kv("vedtaksperiodeId", vedtaksperiodeId),
+                kv("kanAutomatiseres", kanAutomatiseres),
+                kv("ingenUtbetaling", ingenUtbetaling),
+                kv("blirAutomatiskGodkjent", kanAutomatiseres && ingenUtbetaling),
+            )
+        }
+
+        return erSpesialsak && kanAutomatiseres && ingenUtbetaling
     }
 
     private class AutomatiserRevurderinger(
