@@ -160,6 +160,21 @@ internal class VarselTest {
     }
 
     @Test
+    fun `godkjenn spesialsakvarsel`() {
+        val varselId = UUID.randomUUID()
+        val generasjonId = UUID.randomUUID()
+        val vedtaksperiodeId = UUID.randomUUID()
+        val varsel = nyttVarsel(varselId = varselId, vedtaksperiodeId = vedtaksperiodeId, status = AKTIV, kode = "RV_UT_23")
+        varsel.godkjennSpesialsakvarsel(generasjonId)
+        val godkjentVarsel = observer.godkjenteVarsler[varselId]
+        assertEquals(varselId, godkjentVarsel?.varselId)
+        assertEquals(generasjonId, godkjentVarsel?.generasjonId)
+        assertEquals("Automatisk godkjent - spesialsak", godkjentVarsel?.statusEndretAv)
+        assertEquals("RV_UT_23", godkjentVarsel?.varselkode)
+        assertEquals(vedtaksperiodeId, godkjentVarsel?.vedtaksperiodeId)
+    }
+
+    @Test
     fun `varsel toDto`() {
         val varselId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
@@ -200,8 +215,8 @@ internal class VarselTest {
         )
     }
 
-    private fun nyttVarsel(kode: String = "EN_KODE", status: Status = AKTIV): Varsel {
-        return Varsel(UUID.randomUUID(), kode, LocalDateTime.now(), UUID.randomUUID(), status).also {
+    private fun nyttVarsel(varselId: UUID = UUID.randomUUID(), vedtaksperiodeId: UUID = UUID.randomUUID(), kode: String = "EN_KODE", status: Status = AKTIV): Varsel {
+        return Varsel(varselId, kode, LocalDateTime.now(), vedtaksperiodeId, status).also {
             it.registrer(observer)
         }
     }
@@ -211,6 +226,7 @@ internal class VarselTest {
         val opprettedeVarsler = mutableMapOf<UUID, Opprettelse>()
         val reaktiverteVarsler = mutableMapOf<UUID, Reaktivering>()
         val deaktiverteVarsler = mutableMapOf<UUID, Deaktivering>()
+        val godkjenteVarsler = mutableMapOf<UUID, Godkjent>()
 
         private inner class Opprettelse(
             val vedtaksperiodeId: UUID,
@@ -234,6 +250,14 @@ internal class VarselTest {
             val varselkode: String,
         )
 
+        private inner class Godkjent(
+            val vedtaksperiodeId: UUID,
+            val generasjonId: UUID,
+            val varselId: UUID,
+            val varselkode: String,
+            val statusEndretAv: String,
+        )
+
         override fun varselReaktivert(varselId: UUID, varselkode: String, generasjonId: UUID, vedtaksperiodeId: UUID) {
             reaktiverteVarsler[varselId] = Reaktivering(vedtaksperiodeId, generasjonId, varselId, varselkode)
         }
@@ -244,6 +268,16 @@ internal class VarselTest {
 
         override fun varselOpprettet(varselId: UUID, vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, opprettet: LocalDateTime) {
             opprettedeVarsler[varselId] = Opprettelse(vedtaksperiodeId, generasjonId, varselId, varselkode, opprettet)
+        }
+
+        override fun varselGodkjent(
+            varselId: UUID,
+            varselkode: String,
+            generasjonId: UUID,
+            vedtaksperiodeId: UUID,
+            statusEndretAv: String
+        ) {
+            godkjenteVarsler[varselId] = Godkjent(vedtaksperiodeId, generasjonId, varselId, varselkode, statusEndretAv)
         }
 
         fun assertOpprettelse(

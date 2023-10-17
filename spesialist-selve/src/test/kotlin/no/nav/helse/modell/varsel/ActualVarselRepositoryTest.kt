@@ -67,6 +67,14 @@ internal class ActualVarselRepositoryTest : AbstractDatabaseTest() {
     }
 
     @Test
+    fun `varsel godkjent`() {
+        val varselId = UUID.randomUUID()
+        varselRepository.varselOpprettet(varselId, vedtaksperiodeId, generasjonId, "EN_KODE", LocalDateTime.now())
+        varselRepository.varselGodkjent(varselId, "EN_KODE", generasjonId, vedtaksperiodeId, "Spesialsak")
+        assertGodkjent(generasjonId, "EN_KODE")
+    }
+
+    @Test
     fun `varsel har ikke lenger aktiv-status når det er deaktivert`() {
         val varselId = UUID.randomUUID()
         varselRepository.varselOpprettet(varselId, vedtaksperiodeId, generasjonId, "EN_KODE", LocalDateTime.now())
@@ -117,6 +125,21 @@ internal class ActualVarselRepositoryTest : AbstractDatabaseTest() {
             )
         }
         assertEquals("AKTIV", status)
+    }
+
+    private fun assertGodkjent(generasjonId: UUID, varselkode: String) {
+        val status = sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val query = "SELECT status FROM selve_varsel WHERE generasjon_ref = (SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = ? LIMIT 1) AND kode = ?;"
+            session.run(
+                queryOf(
+                    query,
+                    generasjonId,
+                    varselkode
+                ).map { it.string(1) }.asSingle
+            )
+        }
+        assertEquals("GODKJENT", status)
     }
 
     private fun assertInaktiv(generasjonId: UUID, varselkode: String) {

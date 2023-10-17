@@ -5,6 +5,7 @@ import java.util.UUID
 import javax.sql.DataSource
 import no.nav.helse.mediator.builders.GenerasjonBuilder
 import no.nav.helse.modell.varsel.Varsel.Status.AKTIV
+import no.nav.helse.modell.varsel.Varsel.Status.GODKJENT
 import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
 import no.nav.helse.modell.vedtaksperiode.IVedtaksperiodeObserver
 import no.nav.helse.tellInaktivtVarsel
@@ -38,6 +39,11 @@ internal class ActualVarselRepository(dataSource: DataSource): IVedtaksperiodeOb
     override fun varselDeaktivert(varselId: UUID, varselkode: String, generasjonId: UUID, vedtaksperiodeId: UUID) {
         varselDao.oppdaterStatus(vedtaksperiodeId, generasjonId, varselkode, INAKTIV, null, null)
         if (varselkode.matches(varselkodeformat.toRegex())) tellInaktivtVarsel(varselkode)
+    }
+
+    override fun varselGodkjent(varselId: UUID, varselkode: String, generasjonId: UUID, vedtaksperiodeId: UUID, statusEndretAv: String) {
+        val definisjon = definisjonDao.sisteDefinisjonFor(varselkode)
+        varselDao.oppdaterStatus(vedtaksperiodeId, generasjonId, varselkode, status = GODKJENT, ident = statusEndretAv, definisjon.toDto().id)
     }
 
     override fun varselFlyttet(varselId: UUID, gammelGenerasjonId: UUID, nyGenerasjonId: UUID) {

@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.modell.varsel.Varsel.Status.AKTIV
 import no.nav.helse.modell.varsel.Varsel.Status.AVVIST
+import no.nav.helse.modell.varsel.Varsel.Status.GODKJENT
 import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
 import no.nav.helse.modell.varsel.Varsel.Status.VURDERT
 import no.nav.helse.modell.vedtaksperiode.IVedtaksperiodeObserver
@@ -89,6 +90,11 @@ internal class Varsel(
 
     internal fun erRelevantFor(vedtaksperiodeId: UUID): Boolean = this.vedtaksperiodeId == vedtaksperiodeId
 
+    internal fun godkjennSpesialsakvarsel(generasjonId: UUID) {
+        status = GODKJENT
+        observers.forEach { it.varselGodkjent(id, varselkode, generasjonId, vedtaksperiodeId, "Automatisk godkjent - spesialsak") }
+    }
+
     internal companion object {
         internal fun List<Varsel>.flyttVarslerFor(gammelGenerasjonId: UUID, nyGenerasjonId: UUID) {
             forEach { it.oppdaterGenerasjon(gammelGenerasjonId, nyGenerasjonId) }
@@ -106,12 +112,16 @@ internal class Varsel(
         }
 
         internal fun List<Varsel>.inneholderSvartelistedeVarsler(): Boolean {
-            return any { it.varselkode in svartelistedeVarsler }
+            return any { it.varselkode in neiVarsler }
         }
 
-        private val svartelistedeVarsler = listOf(
-            "RV_AY_3", "RV_AY_4", "RV_AY_5", "RV_AY_6", "RV_AY_7", "RV_AY_8", "RV_IT_3", "RV_OS_2", "RV_OS_3",
-            "RV_SI_3", "RV_UT_21", "RV_UT_23", "RV_VV_8", "SB_RV_2"
+        internal fun List<Varsel>.automatiskGodkjennSpesialsakvarsler(generasjonId: UUID) {
+            forEach { it.godkjennSpesialsakvarsel(generasjonId) }
+        }
+
+        private val neiVarsler = listOf(
+            "RV_AY_3", "RV_AY_4", "RV_AY_5", "RV_AY_6", "RV_AY_7", "RV_AY_8", "RV_AY_9", "RV_IT_3", "RV_OS_2", "RV_OS_3",
+            "RV_SI_3", "RV_UT_21", "RV_UT_23", "RV_VV_8", "SB_RV_2", "SB_RV_3", "RV_IV_2"
         )
 
         internal fun List<Varsel>.forhindrerAutomatisering() = any { it.status in listOf(VURDERT, AKTIV, AVVIST) }
