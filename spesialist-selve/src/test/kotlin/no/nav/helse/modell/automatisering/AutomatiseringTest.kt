@@ -116,7 +116,6 @@ internal class AutomatiseringTest {
         every { vedtakDaoMock.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.EN_ARBEIDSGIVER
         every { åpneGosysOppgaverDaoMock.harÅpneOppgaver(any()) } returns 1
         every { vergemålDaoMock.harVergemål(fødselsnummer) } returns true
-        every { vergemålDaoMock.harVergemål(fødselsnummer) } returns true
         val gjeldendeGenerasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
         gjeldendeGenerasjon.håndterNyttVarsel(
             Varsel(UUID.randomUUID(), "RV_IM_1", LocalDateTime.now(), vedtaksperiodeId),
@@ -137,7 +136,6 @@ internal class AutomatiseringTest {
         every { vedtakDaoMock.finnVedtaksperiodetype(vedtaksperiodeId) } returns periodetype
         every { vedtakDaoMock.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.EN_ARBEIDSGIVER
         every { åpneGosysOppgaverDaoMock.harÅpneOppgaver(any()) } returns 1
-        every { vergemålDaoMock.harVergemål(fødselsnummer) } returns true
         every { vergemålDaoMock.harVergemål(fødselsnummer) } returns true
         val gjeldendeGenerasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
         gjeldendeGenerasjon.håndterNyttVarsel(

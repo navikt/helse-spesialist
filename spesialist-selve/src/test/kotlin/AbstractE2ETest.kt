@@ -1279,6 +1279,15 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         assertEquals(forventetAntall, antall)
     }
 
+    protected fun assertGodkjentVarsel(vedtaksperiodeId: UUID, varselkode: String) {
+        val antall = sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val query = "SELECT COUNT(1) FROM selve_varsel WHERE vedtaksperiode_id = ? AND kode = ? AND status = 'GODKJENT'"
+            session.run(queryOf(query, vedtaksperiodeId, varselkode).map { it.int(1) }.asSingle)
+        }
+        assertEquals(1, antall)
+    }
+
     protected fun assertSkjermet(fødselsnummer: String = FØDSELSNUMMER, skjermet: Boolean?) {
         assertEquals(skjermet, EgenAnsattDao(dataSource).erEgenAnsatt(fødselsnummer))
     }

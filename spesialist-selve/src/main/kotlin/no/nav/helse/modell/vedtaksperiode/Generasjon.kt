@@ -5,6 +5,7 @@ import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.modell.varsel.Varsel
+import no.nav.helse.modell.varsel.Varsel.Companion.automatiskGodkjennSpesialsakvarsler
 import no.nav.helse.modell.varsel.Varsel.Companion.finnEksisterendeVarsel
 import no.nav.helse.modell.varsel.Varsel.Companion.flyttVarslerFor
 import no.nav.helse.modell.varsel.Varsel.Companion.forhindrerAutomatisering
@@ -70,6 +71,8 @@ internal class Generasjon private constructor(
     ): Generasjon? {
         return tilstand.vedtaksperiodeEndret(this, id, hendelseId, fom, tom, skjæringstidspunkt)
     }
+
+    internal fun automatiskGodkjennSpesialsakvarsler() = varsler.automatiskGodkjennSpesialsakvarsler(this.id)
 
     internal fun håndterNyUtbetaling(hendelseId: UUID, utbetalingId: UUID) {
         tilstand.nyUtbetaling(this, hendelseId, utbetalingId)

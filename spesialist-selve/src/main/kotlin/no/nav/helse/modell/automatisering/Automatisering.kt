@@ -74,6 +74,7 @@ internal class Automatisering(
         if (Toggle.AutomatiserSpesialsak.enabled && erSpesialsakSomKanAutomatiseres(sykefraværstilfelle, utbetaling, vedtaksperiodeId)) {
             utfallslogger("Automatiserer spesialsak med {} ({})")
             onAutomatiserbar()
+            sykefraværstilfelle.automatiskGodkjennSpesialsakvarsler(vedtaksperiodeId)
             automatiseringDao.automatisert(vedtaksperiodeId, hendelseId, utbetaling.utbetalingId)
             return
         }
