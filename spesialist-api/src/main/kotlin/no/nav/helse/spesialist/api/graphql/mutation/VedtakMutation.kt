@@ -146,7 +146,7 @@ class VedtakMutation(
                     )
                 )
             }
-            if (totrinnsvurderinghåndterer.erEgenOppgave(oppgavereferanse, saksbehandler.oid)) {
+            if (totrinnsvurderinghåndterer.erEgenOppgave(oppgavereferanse, saksbehandler.oid) && !erDev()) {
                 return VedtakResultat.Error(VedtakError.EgenOppgave("Kan ikke beslutte egne oppgaver.", 401))
             }
 
