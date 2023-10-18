@@ -231,29 +231,29 @@ internal object OppgaveMapper {
     }
 
     private fun Oppgaveegenskap.tilDatabaseversjon() = when (this.egenskap) {
-        no.nav.helse.spesialist.api.graphql.schema.Egenskap.RISK_QA -> EgenskapForDatabase.RISK_QA
-        no.nav.helse.spesialist.api.graphql.schema.Egenskap.FORTROLIG_ADRESSE -> EgenskapForDatabase.FORTROLIG_ADRESSE
-        no.nav.helse.spesialist.api.graphql.schema.Egenskap.STRENGT_FORTROLIG_ADRESSE -> EgenskapForDatabase.STRENGT_FORTROLIG_ADRESSE
-        no.nav.helse.spesialist.api.graphql.schema.Egenskap.EGEN_ANSATT -> EgenskapForDatabase.EGEN_ANSATT
-        no.nav.helse.spesialist.api.graphql.schema.Egenskap.BESLUTTER -> EgenskapForDatabase.BESLUTTER
-        no.nav.helse.spesialist.api.graphql.schema.Egenskap.SPESIALSAK -> EgenskapForDatabase.SPESIALSAK
-        no.nav.helse.spesialist.api.graphql.schema.Egenskap.REVURDERING -> EgenskapForDatabase.REVURDERING
-        no.nav.helse.spesialist.api.graphql.schema.Egenskap.SOKNAD -> EgenskapForDatabase.SØKNAD
-        no.nav.helse.spesialist.api.graphql.schema.Egenskap.STIKKPROVE -> EgenskapForDatabase.STIKKPRØVE
-        no.nav.helse.spesialist.api.graphql.schema.Egenskap.UTBETALING_TIL_SYKMELDT -> EgenskapForDatabase.UTBETALING_TIL_SYKMELDT
-        no.nav.helse.spesialist.api.graphql.schema.Egenskap.DELVIS_REFUSJON -> EgenskapForDatabase.DELVIS_REFUSJON
-        no.nav.helse.spesialist.api.graphql.schema.Egenskap.UTBETALING_TIL_ARBEIDSGIVER -> EgenskapForDatabase.UTBETALING_TIL_ARBEIDSGIVER
-        no.nav.helse.spesialist.api.graphql.schema.Egenskap.INGEN_UTBETALING -> EgenskapForDatabase.INGEN_UTBETALING
-        no.nav.helse.spesialist.api.graphql.schema.Egenskap.EN_ARBEIDSGIVER -> EgenskapForDatabase.HASTER
-        no.nav.helse.spesialist.api.graphql.schema.Egenskap.FLERE_ARBEIDSGIVERE -> EgenskapForDatabase.RETUR
-        no.nav.helse.spesialist.api.graphql.schema.Egenskap.FORLENGELSE -> EgenskapForDatabase.FULLMAKT
-        no.nav.helse.spesialist.api.graphql.schema.Egenskap.FORSTEGANGSBEHANDLING -> EgenskapForDatabase.VERGEMÅL
-        no.nav.helse.spesialist.api.graphql.schema.Egenskap.INFOTRYGDFORLENGELSE -> EgenskapForDatabase.EN_ARBEIDSGIVER
-        no.nav.helse.spesialist.api.graphql.schema.Egenskap.OVERGANG_FRA_IT -> EgenskapForDatabase.FLERE_ARBEIDSGIVERE
-        no.nav.helse.spesialist.api.graphql.schema.Egenskap.UTLAND -> EgenskapForDatabase.UTLAND
-        no.nav.helse.spesialist.api.graphql.schema.Egenskap.HASTER -> EgenskapForDatabase.FORLENGELSE
-        no.nav.helse.spesialist.api.graphql.schema.Egenskap.RETUR -> EgenskapForDatabase.FORSTEGANGSBEHANDLING
-        no.nav.helse.spesialist.api.graphql.schema.Egenskap.FULLMAKT -> EgenskapForDatabase.INFOTRYGDFORLENGELSE
-        no.nav.helse.spesialist.api.graphql.schema.Egenskap.VERGEMAL -> EgenskapForDatabase.OVERGANG_FRA_IT
+        EgenskapForApi.RISK_QA -> EgenskapForDatabase.RISK_QA
+        EgenskapForApi.FORTROLIG_ADRESSE -> EgenskapForDatabase.FORTROLIG_ADRESSE
+        EgenskapForApi.STRENGT_FORTROLIG_ADRESSE -> EgenskapForDatabase.STRENGT_FORTROLIG_ADRESSE
+        EgenskapForApi.EGEN_ANSATT -> EgenskapForDatabase.EGEN_ANSATT
+        EgenskapForApi.BESLUTTER -> EgenskapForDatabase.BESLUTTER
+        EgenskapForApi.SPESIALSAK -> EgenskapForDatabase.SPESIALSAK
+        EgenskapForApi.REVURDERING -> EgenskapForDatabase.REVURDERING
+        EgenskapForApi.SOKNAD -> EgenskapForDatabase.SØKNAD
+        EgenskapForApi.STIKKPROVE -> EgenskapForDatabase.STIKKPRØVE
+        EgenskapForApi.UTBETALING_TIL_SYKMELDT -> EgenskapForDatabase.UTBETALING_TIL_SYKMELDT
+        EgenskapForApi.DELVIS_REFUSJON -> EgenskapForDatabase.DELVIS_REFUSJON
+        EgenskapForApi.UTBETALING_TIL_ARBEIDSGIVER -> EgenskapForDatabase.UTBETALING_TIL_ARBEIDSGIVER
+        EgenskapForApi.INGEN_UTBETALING -> EgenskapForDatabase.INGEN_UTBETALING
+        EgenskapForApi.EN_ARBEIDSGIVER -> EgenskapForDatabase.EN_ARBEIDSGIVER
+        EgenskapForApi.FLERE_ARBEIDSGIVERE -> EgenskapForDatabase.FLERE_ARBEIDSGIVERE
+        EgenskapForApi.FORLENGELSE -> EgenskapForDatabase.FORLENGELSE
+        EgenskapForApi.FORSTEGANGSBEHANDLING -> EgenskapForDatabase.FORSTEGANGSBEHANDLING
+        EgenskapForApi.INFOTRYGDFORLENGELSE -> EgenskapForDatabase.INFOTRYGDFORLENGELSE
+        EgenskapForApi.OVERGANG_FRA_IT -> EgenskapForDatabase.OVERGANG_FRA_IT
+        EgenskapForApi.UTLAND -> EgenskapForDatabase.UTLAND
+        EgenskapForApi.HASTER -> EgenskapForDatabase.HASTER
+        EgenskapForApi.RETUR -> EgenskapForDatabase.RETUR
+        EgenskapForApi.FULLMAKT -> EgenskapForDatabase.FULLMAKT
+        EgenskapForApi.VERGEMAL -> EgenskapForDatabase.VERGEMÅL
     }
 }
