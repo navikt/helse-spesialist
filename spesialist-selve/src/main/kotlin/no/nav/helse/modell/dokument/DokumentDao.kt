@@ -3,15 +3,13 @@ package no.nav.helse.modell.dokument
 import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID
 import javax.sql.DataSource
-import kotliquery.queryOf
-import kotliquery.sessionOf
+import no.nav.helse.HelseDao
 import no.nav.helse.objectMapper
-import org.intellij.lang.annotations.Language
 
-class DokumentDao(private val dataSource: DataSource) {
+class DokumentDao(private val dataSource: DataSource) : HelseDao(dataSource) {
     internal fun lagre(fødselsnummer: String, dokumentId: UUID, dokument: JsonNode) {
-        @Language("PostgreSQL")
-        val statement = """
+        asSQL(
+            """
             INSERT INTO dokumenter (dokument_id, person_ref, dokument)
             VALUES (
                 :dokumentId,
@@ -19,40 +17,22 @@ class DokumentDao(private val dataSource: DataSource) {
                 :dokument::json
             )
             ON CONFLICT DO NOTHING
-        """
-        sessionOf(dataSource).use { session ->
-            session.run(
-                queryOf(
-                    statement,
-                    mapOf(
-                        "fodselsnummer" to fødselsnummer.toLong(),
-                        "dokumentId" to dokumentId,
-                        "dokument" to objectMapper.writeValueAsString(dokument)
-                    )
-                ).asExecute
+        """.trimIndent(), mapOf(
+                "fodselsnummer" to fødselsnummer.toLong(),
+                "dokumentId" to dokumentId,
+                "dokument" to objectMapper.writeValueAsString(dokument)
             )
-        }
+        ).update()
     }
 
-    internal fun hent(fødselsnummer: String, dokumentId: UUID): JsonNode? {
-        @Language("PostgreSQL")
-        val query = """
-            SELECT dokument FROM dokumenter WHERE person_ref = (SELECT id FROM person WHERE fodselsnummer=:fodselsnummer) AND dokument_id =:dokumentId
+    internal fun hent(fødselsnummer: String, dokumentId: UUID): JsonNode? = asSQL(
         """
-        return sessionOf(dataSource).use { session ->
-            session.run(
-                queryOf(
-                    query,
-                    mapOf(
-                        "fodselsnummer" to fødselsnummer.toLong(),
-                        "dokumentId" to dokumentId,
-                    )
-                )
-                    .map {
-                        it.stringOrNull("dokument")?.let { dokument -> objectMapper.readTree(dokument) }
-                    }
-                    .asSingle
-            )
-        }
+            SELECT dokument FROM dokumenter WHERE person_ref = (SELECT id FROM person WHERE fodselsnummer=:fodselsnummer) AND dokument_id =:dokumentId
+        """.trimIndent(), mapOf(
+            "fodselsnummer" to fødselsnummer.toLong(),
+            "dokumentId" to dokumentId,
+        )
+    ).single { row ->
+        row.stringOrNull("dokument")?.let { dokument -> objectMapper.readTree(dokument) }
     }
 }
