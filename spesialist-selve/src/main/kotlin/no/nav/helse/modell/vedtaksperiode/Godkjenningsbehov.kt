@@ -193,6 +193,7 @@ internal class Godkjenningsbehov(
             inntektskilde = inntektskilde,
             periodetype = periodetype,
             kanAvvises = kanAvvises,
+            vedtakDao = vedtakDao,
         ),
         TrengerTotrinnsvurderingCommand(
             fødselsnummer = fødselsnummer,

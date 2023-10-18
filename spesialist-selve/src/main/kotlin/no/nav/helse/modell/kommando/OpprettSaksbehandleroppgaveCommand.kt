@@ -2,6 +2,7 @@ package no.nav.helse.modell.kommando
 
 import java.util.UUID
 import no.nav.helse.mediator.oppgave.OppgaveMediator
+import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.delvisRefusjon
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
@@ -19,6 +20,7 @@ import no.nav.helse.modell.oppgave.Egenskap.INGEN_UTBETALING
 import no.nav.helse.modell.oppgave.Egenskap.OVERGANG_FRA_IT
 import no.nav.helse.modell.oppgave.Egenskap.REVURDERING
 import no.nav.helse.modell.oppgave.Egenskap.RISK_QA
+import no.nav.helse.modell.oppgave.Egenskap.SPESIALSAK
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
@@ -58,6 +60,7 @@ internal class OpprettSaksbehandleroppgaveCommand(
     private val inntektskilde: Inntektskilde,
     private val periodetype: Periodetype,
     private val kanAvvises: Boolean,
+    private val vedtakDao: VedtakDao,
 ) : Command {
 
     private companion object {
@@ -102,6 +105,10 @@ internal class OpprettSaksbehandleroppgaveCommand(
             Periodetype.FORLENGELSE -> egenskaper.add(FORLENGELSE)
             Periodetype.INFOTRYGDFORLENGELSE -> egenskaper.add(INFOTRYGDFORLENGELSE)
             Periodetype.OVERGANG_FRA_IT -> egenskaper.add(OVERGANG_FRA_IT)
+        }
+
+        if (vedtakDao.erSpesialsak(vedtaksperiodeId)) {
+            egenskaper.add(SPESIALSAK)
         }
 
         if (sykefraværstilfelle.haster(vedtaksperiodeId) && (vedtaksperiodensUtbetaling.delvisRefusjon() || vedtaksperiodensUtbetaling.utbetalingTilSykmeldt())) egenskaper.add(HASTER)

@@ -7,6 +7,7 @@ import io.mockk.slot
 import io.mockk.verify
 import java.util.UUID
 import no.nav.helse.mediator.oppgave.OppgaveMediator
+import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.oppgave.Egenskap
@@ -20,6 +21,7 @@ import no.nav.helse.modell.oppgave.Egenskap.HASTER
 import no.nav.helse.modell.oppgave.Egenskap.INGEN_UTBETALING
 import no.nav.helse.modell.oppgave.Egenskap.REVURDERING
 import no.nav.helse.modell.oppgave.Egenskap.RISK_QA
+import no.nav.helse.modell.oppgave.Egenskap.SPESIALSAK
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
@@ -66,6 +68,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
     private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
     private val vergemålDao = mockk<VergemålDao>(relaxed = true)
     private val sykefraværstilfelle = mockk<Sykefraværstilfelle>(relaxed = true)
+    private val vedtakDao = mockk<VedtakDao>(relaxed = true)
     private lateinit var context: CommandContext
     private lateinit var contextId: UUID
     private lateinit var utbetalingstype: Utbetalingtype
@@ -262,6 +265,20 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
     }
 
     @Test
+    fun `oppretter oppgave med egenskap spesialsak`() {
+        every { snapshotMediator.finnUtbetaling(FNR, UTBETALING_ID) } returns enUtbetaling()
+        every { vedtakDao.erSpesialsak(VEDTAKSPERIODE_ID) } returns true
+        val slot = slot<((Long) -> Oppgave)>()
+        assertTrue(command.execute(context))
+        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
+
+        val oppgave = slot.captured.invoke(1L)
+        oppgaveinspektør(oppgave) {
+            assertTrue(egenskaper.contains(SPESIALSAK))
+        }
+    }
+
+    @Test
     fun `oppretter oppgave med egenskap UTLAND`() {
         every { snapshotMediator.finnUtbetaling(FNR, UTBETALING_ID) } returns enUtbetaling()
         every { personDao.finnEnhetId(FNR) } returns "0393"
@@ -384,5 +401,6 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
             inntektskilde = inntektskilde,
             periodetype = periodetype,
             kanAvvises = kanAvvises,
+            vedtakDao = vedtakDao,
         )
 }
