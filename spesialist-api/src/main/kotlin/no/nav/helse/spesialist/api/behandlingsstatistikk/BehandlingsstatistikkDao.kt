@@ -15,10 +15,12 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
     fun getAntallTilgjengeligeBeslutteroppgaver() = asSQL(
         """
             SELECT count(1)
-            FROM totrinnsvurdering
-            WHERE utbetaling_id_ref IS NULL
-            AND er_retur = false
-            AND saksbehandler IS NOT NULL
+            FROM totrinnsvurdering t
+            INNER JOIN vedtak v ON v.vedtaksperiode_id = t.vedtaksperiode_id
+            INNER JOIN oppgave o ON v.id = o.vedtak_ref
+            WHERE o.status='AvventerSaksbehandler'::oppgavestatus
+              AND v.forkastet = false 
+              AND o.egenskaper @> ARRAY['BESLUTTER']::VARCHAR[]
         """
     ).single { it.int("count") } ?: 0
 

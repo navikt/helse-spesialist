@@ -3,10 +3,12 @@ package no.nav.helse.modell.oppgave.behandlingsstatistikk
 import DatabaseIntegrationTest
 import java.time.LocalDate
 import java.time.LocalDateTime
+import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.vedtaksperiode.Mottakertype
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -138,9 +140,20 @@ internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
     fun`Får antall tilgjengelige beslutteroppgaver`() {
         nyPerson()
         opprettSaksbehandler()
+        oppgaveDao.updateOppgave(
+            oppgaveId = OPPGAVE_ID,
+            oppgavestatus = Oppgavestatus.AvventerSaksbehandler.toString(),
+            egenskaper = listOf(EGENSKAP, EgenskapForDatabase.BESLUTTER)
+        )
         assertEquals(0, behandlingsstatistikkDao.getAntallTilgjengeligeBeslutteroppgaver())
         opprettTotrinnsvurdering(saksbehandler = SAKSBEHANDLER_OID)
         assertEquals(1, behandlingsstatistikkDao.getAntallTilgjengeligeBeslutteroppgaver())
+        oppgaveDao.updateOppgave(
+            oppgaveId = OPPGAVE_ID,
+            oppgavestatus = Oppgavestatus.Ferdigstilt.toString(),
+            egenskaper = listOf(EGENSKAP, EgenskapForDatabase.BESLUTTER)
+        )
+        assertEquals(0, behandlingsstatistikkDao.getAntallTilgjengeligeBeslutteroppgaver())
     }
 
     @Test
