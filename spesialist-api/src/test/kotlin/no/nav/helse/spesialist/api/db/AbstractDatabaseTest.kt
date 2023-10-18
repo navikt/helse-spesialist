@@ -2,7 +2,7 @@ package no.nav.helse.spesialist.api.db
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import java.util.*
+import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -27,10 +27,7 @@ abstract class AbstractDatabaseTest {
                 username = postgres.username
                 password = postgres.password
                 maximumPoolSize = 5
-                minimumIdle = 1
-                idleTimeout = 500001
-                connectionTimeout = 10000
-                maxLifetime = 600001
+                connectionTimeout = 500
                 initializationFailTimeout = 5000
             })
 

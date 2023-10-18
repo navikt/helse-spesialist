@@ -2,14 +2,14 @@ package no.nav.helse
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import java.util.UUID
+import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import org.flywaydb.core.Flyway
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.BeforeEach
 import org.testcontainers.containers.PostgreSQLContainer
-import java.util.*
-import javax.sql.DataSource
 
 abstract class AbstractDatabaseTest {
 
@@ -27,10 +27,7 @@ abstract class AbstractDatabaseTest {
                 username = postgres.username
                 password = postgres.password
                 maximumPoolSize = 5
-                minimumIdle = 1
-                idleTimeout = 500001
-                connectionTimeout = 10000
-                maxLifetime = 600001
+                connectionTimeout = 500
                 initializationFailTimeout = 5000
             })
 
@@ -54,7 +51,7 @@ abstract class AbstractDatabaseTest {
 }
 
 private fun createTruncateFunction(dataSource: DataSource) {
-    sessionOf(dataSource).use  {
+    sessionOf(dataSource).use {
         @Language("PostgreSQL")
         val query = """
             CREATE OR REPLACE FUNCTION truncate_tables() RETURNS void AS $$
@@ -67,11 +64,10 @@ private fun createTruncateFunction(dataSource: DataSource) {
                 WHERE schemaname='public'
                 AND tablename not in ('enhet', 'flyway_schema_history', 'global_snapshot_versjon');
                 UPDATE global_snapshot_versjon SET versjon = 0 WHERE id = 1;
-
                 EXECUTE truncate_statement;
             END;
             $$ LANGUAGE plpgsql;
-        """
+        """.trimIndent()
         it.run(queryOf(query).asExecute)
     }
 }

@@ -3,13 +3,17 @@ package no.nav.helse.spesialist.api
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import io.ktor.server.application.Application
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
+import io.ktor.server.engine.ApplicationEngine
+import io.ktor.server.engine.ApplicationEngineEnvironmentBuilder
+import io.ktor.server.engine.applicationEngineEnvironment
+import io.ktor.server.engine.connector
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
+import java.net.ServerSocket
+import java.util.UUID
+import javax.sql.DataSource
 import org.flywaydb.core.Flyway
 import org.testcontainers.containers.PostgreSQLContainer
-import java.net.ServerSocket
-import java.util.*
-import javax.sql.DataSource
 
 class TestApplication(private val port: Int = randomPort()) {
 
@@ -38,11 +42,8 @@ class TestApplication(private val port: Int = randomPort()) {
             jdbcUrl = postgres.jdbcUrl
             username = postgres.username
             password = postgres.password
-            maximumPoolSize = 3
-            minimumIdle = 1
-            idleTimeout = 10001
-            connectionTimeout = 1000
-            maxLifetime = 30001
+            maximumPoolSize = 5
+            connectionTimeout = 500
             initializationFailTimeout = 5000
         })
 
