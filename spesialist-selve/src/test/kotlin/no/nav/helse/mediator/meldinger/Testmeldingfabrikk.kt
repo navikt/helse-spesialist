@@ -17,6 +17,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vilkårsprøving.LovhjemmelEvent
+import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
 import kotlin.random.Random.Default.nextLong
@@ -567,6 +568,24 @@ internal object Testmeldingfabrikk {
                 "berørtePerioder" to berørtePerioder,
                 "kilde" to "$kilde",
                 "periodeForEndringFom" to "$fom",
+            )
+        )
+
+    fun lagHentDokumentLøsning(
+        fødselsnummer: String,
+        dokumentId: UUID,
+        id: UUID = UUID.randomUUID(),
+        hendelseId: UUID = UUID.randomUUID(),
+        contextId: UUID = UUID.randomUUID(),
+        dokument: JsonNode = objectMapper.createObjectNode()
+    ) =
+        nyHendelse(
+            id, "hent-dokument", mapOf(
+                "fødselsnummer" to fødselsnummer,
+                "dokumentId" to "$dokumentId",
+                "@løsning" to mapOf("dokument" to dokument),
+                "hendelseId" to "$hendelseId",
+                "contextId" to "$contextId"
             )
         )
 

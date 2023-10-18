@@ -70,6 +70,8 @@ INSERT INTO abonnement_for_opptegnelse(saksbehandler_id, person_id)
 VALUES ('${saksbehandler_oid}', ${sequence_number});
 INSERT INTO saksbehandler_opptegnelse_sekvensnummer (saksbehandler_id, siste_sekvensnummer)
 VALUES ('${saksbehandler_oid}', 1);
+INSERT INTO dokumenter(dokument_id, person_ref, dokument, opprettet)
+VALUES (gen_random_uuid(), ${sequence_number}, '{}'::json, now());
 
 INSERT INTO notat(id, tekst, opprettet, saksbehandler_oid, vedtaksperiode_id, feilregistrert, feilregistrert_tidspunkt)
 VALUES (${sequence_number}, 'TEST_TEXT', now(), '${saksbehandler_oid}', '${vedtaksperiode_id}', false, now());

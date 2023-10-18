@@ -35,6 +35,7 @@ import no.nav.helse.mediator.meldinger.VedtaksperiodeSkjønnsmessigFastsettelseR
 import no.nav.helse.mediator.meldinger.hendelser.UtkastTilVedtakMessage
 import no.nav.helse.mediator.meldinger.løsninger.ArbeidsforholdRiver
 import no.nav.helse.mediator.meldinger.løsninger.ArbeidsgiverRiver
+import no.nav.helse.mediator.meldinger.løsninger.DokumentRiver
 import no.nav.helse.mediator.meldinger.løsninger.EgenAnsattløsning
 import no.nav.helse.mediator.meldinger.løsninger.FlerePersoninfoRiver
 import no.nav.helse.mediator.meldinger.løsninger.HentEnhetRiver
@@ -51,6 +52,7 @@ import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.Toggle
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
+import no.nav.helse.modell.dokument.DokumentDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver
@@ -87,6 +89,7 @@ internal class HendelseMediator(
     private val godkjenningMediator: GodkjenningMediator,
     private val hendelsefabrikk: Hendelsefabrikk,
     private val egenAnsattDao: EgenAnsattDao = EgenAnsattDao(dataSource),
+    private val dokumentDao: DokumentDao = DokumentDao(dataSource),
     private val varselRepository: ActualVarselRepository = ActualVarselRepository(dataSource),
     private val metrikkDao: MetrikkDao = MetrikkDao(dataSource),
 ) : Personhåndterer {
@@ -128,6 +131,7 @@ internal class HendelseMediator(
             VedtaksperiodeSkjønnsmessigFastsettelseRiver(it, this)
             GosysOppgaveEndretRiver(it, this, oppgaveDao, personDao)
             EndretSkjermetinfoRiver(it, personDao, egenAnsattDao, oppgaveDao, godkjenningMediator)
+            DokumentRiver(it, dokumentDao)
             VedtakFattetRiver(it, this)
             NyeVarslerRiver(it, this)
             VarseldefinisjonRiver(it, this)
