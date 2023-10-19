@@ -21,11 +21,11 @@ internal class DokumentRiver(
             .apply {
                 validate {
                     it.demandValue("@event_name", "hent-dokument")
+                    it.demandKey("@løsning.dokument")
                     it.requireKey(
                         "@id",
                         "fødselsnummer",
-                        "dokumentId",
-                        "@løsning.dokument"
+                        "dokumentId"
                     )
                 }
             }.register(this)
