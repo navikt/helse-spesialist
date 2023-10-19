@@ -575,8 +575,6 @@ internal object Testmeldingfabrikk {
         fødselsnummer: String,
         dokumentId: UUID,
         id: UUID = UUID.randomUUID(),
-        hendelseId: UUID = UUID.randomUUID(),
-        contextId: UUID = UUID.randomUUID(),
         dokument: JsonNode = objectMapper.createObjectNode()
     ) =
         nyHendelse(
@@ -584,8 +582,6 @@ internal object Testmeldingfabrikk {
                 "fødselsnummer" to fødselsnummer,
                 "dokumentId" to "$dokumentId",
                 "@løsning" to mapOf("dokument" to dokument),
-                "hendelseId" to "$hendelseId",
-                "contextId" to "$contextId"
             )
         )
 

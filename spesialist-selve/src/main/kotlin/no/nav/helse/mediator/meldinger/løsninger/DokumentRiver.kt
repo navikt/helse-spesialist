@@ -23,8 +23,6 @@ internal class DokumentRiver(
                     it.demandValue("@event_name", "hent-dokument")
                     it.requireKey(
                         "@id",
-                        "contextId",
-                        "hendelseId",
                         "fødselsnummer",
                         "dokumentId",
                         "@løsning.dokument"
