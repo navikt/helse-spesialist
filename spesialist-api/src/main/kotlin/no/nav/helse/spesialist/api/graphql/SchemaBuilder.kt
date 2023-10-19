@@ -121,7 +121,7 @@ internal class SchemaBuilder(
                     )
                 ),
                 TopLevelObject(
-                    DokumentQuery(dokumenthåndterer = dokumenthåndterer)
+                    DokumentQuery(personApiDao = personApiDao, egenAnsattApiDao = egenAnsattApiDao, dokumenthåndterer = dokumenthåndterer)
                 ),
             ),
             mutations = listOf(
