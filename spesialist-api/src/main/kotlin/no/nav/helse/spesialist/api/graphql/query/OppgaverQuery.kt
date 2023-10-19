@@ -9,6 +9,7 @@ import kotlinx.coroutines.withContext
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.schema.BehandletOppgave
 import no.nav.helse.spesialist.api.graphql.schema.Fane
+import no.nav.helse.spesialist.api.graphql.schema.Filtrering
 import no.nav.helse.spesialist.api.graphql.schema.OppgaveTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.Oppgaveegenskap
 import no.nav.helse.spesialist.api.graphql.schema.OppgaverTilBehandling
@@ -51,8 +52,11 @@ class OppgaverQuery(private val oppgavehåndterer: Oppgavehåndterer) : Query {
                 startIndex = startIndex ?: 0,
                 pageSize = pageSize ?: Int.MAX_VALUE,
                 sortering = sortering ?: emptyList(),
-                egenskaper = filtrerteEgenskaper ?: emptyList(),
-                fane = fane ?: Fane.TIL_GODKJENNING
+                filtrering = Filtrering(
+                    egenskaper = filtrerteEgenskaper ?: emptyList(),
+                    egneSakerPåVent = fane == Fane.PAA_VENT,
+                    egneSaker = fane == Fane.MINE_SAKER,
+                ),
             )
         }
         avsluttSporing(startTrace)
@@ -60,12 +64,12 @@ class OppgaverQuery(private val oppgavehåndterer: Oppgavehåndterer) : Query {
         return DataFetcherResult.newResult<List<OppgaveTilBehandling>>().data(oppgaver.oppgaver).build()
     }
 
+    @Suppress("unused")
     suspend fun alleOppgaver(
         startIndex: Int? = 0,
         pageSize: Int? = null,
         sortering: List<Oppgavesortering>? = emptyList(),
-        filtrerteEgenskaper: List<Oppgaveegenskap>? = emptyList(),
-        fane: Fane? = Fane.TIL_GODKJENNING,
+        filtrering: Filtrering,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<OppgaverTilBehandling> {
         sikkerLogg.info("Henter OppgaverTilBehandling")
@@ -77,8 +81,7 @@ class OppgaverQuery(private val oppgavehåndterer: Oppgavehåndterer) : Query {
                 startIndex = startIndex ?: 0,
                 pageSize = pageSize ?: Int.MAX_VALUE,
                 sortering = sortering ?: emptyList(),
-                egenskaper = filtrerteEgenskaper ?: emptyList(),
-                fane = fane ?: Fane.TIL_GODKJENNING
+                filtrering = filtrering,
             )
         }
         avsluttSporing(startTrace)

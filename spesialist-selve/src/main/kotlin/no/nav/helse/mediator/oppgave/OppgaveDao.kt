@@ -76,7 +76,8 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
         sortering: List<OppgavesorteringForDatabase> = emptyList(),
         kreverEgenskaper: List<EgenskapForDatabase> = emptyList(),
         egneSakerPåVent: Boolean = false,
-        egneSaker: Boolean = false
+        egneSaker: Boolean = false,
+        tildelt: Boolean? = null,
     ): List<OppgaveFraDatabaseForVisning> {
         val orderBy = if (sortering.isNotEmpty()) sortering.joinToString { it.nøkkelTilKolonne() } else "opprettet DESC"
         val egenskaperSomSkalEkskluderes = ekskluderEgenskaper.joinToString { """ '$it' """ }
@@ -112,6 +113,12 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                         WHEN :egne_saker THEN t.saksbehandler_ref = :oid AND t.på_vent = false
                         ELSE true
                     END
+                AND
+                    CASE
+                        WHEN :tildelt THEN t.saksbehandler_ref IS NOT NULL
+                        WHEN :tildelt = false THEN t.saksbehandler_ref IS NULL
+                        ELSE true
+                    END
                 ORDER BY $orderBy
                 OFFSET :start_index
                 LIMIT :page_size
@@ -120,7 +127,8 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                 "start_index" to startIndex * pageSize,
                 "page_size" to pageSize,
                 "egne_saker_pa_vent" to egneSakerPåVent,
-                "egne_saker" to egneSaker
+                "egne_saker" to egneSaker,
+                "tildelt" to tildelt,
             )
         ).list { row ->
             OppgaveFraDatabaseForVisning(

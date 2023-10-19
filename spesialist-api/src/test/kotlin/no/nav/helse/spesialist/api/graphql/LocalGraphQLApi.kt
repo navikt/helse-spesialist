@@ -37,9 +37,8 @@ import no.nav.helse.spesialist.api.behandlingsstatistikk.Statistikk
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.graphql.schema.Adressebeskyttelse
 import no.nav.helse.spesialist.api.graphql.schema.BehandletOppgave
-import no.nav.helse.spesialist.api.graphql.schema.Fane
+import no.nav.helse.spesialist.api.graphql.schema.Filtrering
 import no.nav.helse.spesialist.api.graphql.schema.Kjonn
-import no.nav.helse.spesialist.api.graphql.schema.Oppgaveegenskap
 import no.nav.helse.spesialist.api.graphql.schema.OppgaverTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.Oppgavesortering
 import no.nav.helse.spesialist.api.graphql.schema.Personinfo
@@ -112,7 +111,6 @@ fun main() = runBlocking {
         val behandlingsstatistikkMediator = mockk<BehandlingsstatistikkMediator>(relaxed = true)
         val notatMediator = mockk<NotatMediator>(relaxed = true)
         val saksbehandlerhåndterer = mockk<Saksbehandlerhåndterer>(relaxed = true)
-        val oppgavehåndterer = mockk<Oppgavehåndterer>(relaxed = true)
         val totrinnsvurderinghåndterer = mockk<Totrinnsvurderinghåndterer>(relaxed = true)
         val godkjenninghåndterer = mockk<Godkjenninghåndterer>(relaxed = true)
         val personhåndterer = mockk<Personhåndterer>(relaxed = true)
@@ -229,12 +227,11 @@ private object SneakyOppgaveHåndterer : Oppgavehåndterer {
         startIndex: Int,
         pageSize: Int,
         sortering: List<Oppgavesortering>,
-        egenskaper: List<Oppgaveegenskap>,
-        fane: Fane,
+        filtrering: Filtrering,
     ): OppgaverTilBehandling {
 
         val oppgaver = List(50) { TestdataGenerator.oppgave() }
-            .filter { oppgave -> egenskaper.isEmpty() || oppgave.egenskaper.any { it in egenskaper } }
+            .filter { oppgave -> filtrering.egenskaper.isEmpty() || oppgave.egenskaper.any { it in filtrering.egenskaper } }
         return OppgaverTilBehandling(
             oppgaver = oppgaver.drop((startIndex - 1) * pageSize).take(pageSize),
             totaltAntallOppgaver = oppgaver.size

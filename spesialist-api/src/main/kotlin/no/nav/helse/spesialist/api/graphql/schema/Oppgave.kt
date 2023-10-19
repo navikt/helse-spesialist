@@ -52,6 +52,14 @@ enum class Kategori {
     Periodetype
 }
 
+data class Filtrering(
+    val egenskaper: List<Oppgaveegenskap> = emptyList(),
+    val ingenUkategoriserteEgenskaper: Boolean = false,
+    val tildelt: Boolean? = null,
+    val egneSakerPåVent: Boolean = false,
+    val egneSaker: Boolean = false,
+)
+
 data class Oppgavesortering(val nokkel: Sorteringsnokkel, val stigende: Boolean)
 
 enum class Sorteringsnokkel {

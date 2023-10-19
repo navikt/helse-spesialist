@@ -46,6 +46,7 @@ enum class Egenskap(
 
     companion object {
         val alleTilgangsstyrteEgenskaper = EnumSet.allOf(Egenskap::class.java).filter(Egenskap::tilgangsstyrt)
+        val alleUkategoriserteEgenskaper = EnumSet.allOf(Egenskap::class.java).filter { it.kategori == Ukategorisert }
         fun Collection<Egenskap>.tilgangsstyrteEgenskaper() = filter { it in alleTilgangsstyrteEgenskaper }
     }
 }

@@ -29,8 +29,7 @@ import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload.Companion.lagre
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.graphql.schema.BehandletOppgave
-import no.nav.helse.spesialist.api.graphql.schema.Fane
-import no.nav.helse.spesialist.api.graphql.schema.Oppgaveegenskap
+import no.nav.helse.spesialist.api.graphql.schema.Filtrering
 import no.nav.helse.spesialist.api.graphql.schema.OppgaverTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.Oppgavesortering
 import no.nav.helse.spesialist.api.graphql.schema.Sorteringsnokkel
@@ -52,11 +51,15 @@ internal class OppgaveMediator(
     private val saksbehandlerRepository: SaksbehandlerRepository,
     private val rapidsConnection: RapidsConnection,
     private val tilgangskontroll: Tilgangskontroll,
-    private val tilgangsgrupper: Tilgangsgrupper
-): Oppgavehåndterer, Oppgavefinner {
+    private val tilgangsgrupper: Tilgangsgrupper,
+) : Oppgavehåndterer, Oppgavefinner {
     private val logg = LoggerFactory.getLogger(this::class.java)
 
-    internal fun nyOppgave(fødselsnummer: String, contextId: UUID, opprettOppgaveBlock: (reservertId: Long) -> Oppgave) {
+    internal fun nyOppgave(
+        fødselsnummer: String,
+        contextId: UUID,
+        opprettOppgaveBlock: (reservertId: Long) -> Oppgave,
+    ) {
         val nesteId = oppgaveDao.reserverNesteId()
         val oppgave = opprettOppgaveBlock(nesteId)
         val oppgavemelder = Oppgavemelder(hendelseDao, rapidsConnection)
@@ -70,7 +73,12 @@ internal class OppgaveMediator(
     }
 
     fun <T> oppgave(id: Long, oppgaveBlock: Oppgave.() -> T): T {
-        val oppgave = Oppgavehenter(oppgaveDao, totrinnsvurderingRepository, saksbehandlerRepository, tilgangskontroll).oppgave(id)
+        val oppgave = Oppgavehenter(
+            oppgaveDao,
+            totrinnsvurderingRepository,
+            saksbehandlerRepository,
+            tilgangskontroll
+        ).oppgave(id)
         oppgave.register(Oppgavemelder(hendelseDao, rapidsConnection))
         val returverdi = oppgaveBlock(oppgave)
         Oppgavelagrer(tildelingDao).apply {
@@ -128,8 +136,7 @@ internal class OppgaveMediator(
         startIndex: Int,
         pageSize: Int,
         sortering: List<Oppgavesortering>,
-        egenskaper: List<Oppgaveegenskap>,
-        fane: Fane
+        filtrering: Filtrering,
     ): OppgaverTilBehandling {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         val egenskaperSaksbehandlerIkkeHarTilgangTil = Egenskap
@@ -137,18 +144,27 @@ internal class OppgaveMediator(
             .filterNot { saksbehandler.harTilgangTil(listOf(it)) }
             .map(Egenskap::toString)
 
-        val filtrerteEgenskaper = egenskaper.tilDatabaseversjon()
+        val alleUkategoriserteEgenskaper = Egenskap
+            .alleUkategoriserteEgenskaper
+            .map(Egenskap::toString)
+
+        val egenskaperSomSkalEkskluderes =
+            egenskaperSaksbehandlerIkkeHarTilgangTil + if (filtrering.ingenUkategoriserteEgenskaper) alleUkategoriserteEgenskaper else emptyList()
+
+
+        val filtrerteEgenskaper = filtrering.egenskaper.tilDatabaseversjon()
 
         val oppgaver = oppgaveDao
             .finnOppgaverForVisning(
-                ekskluderEgenskaper = egenskaperSaksbehandlerIkkeHarTilgangTil,
+                ekskluderEgenskaper = egenskaperSomSkalEkskluderes,
                 saksbehandlerOid = saksbehandler.oid(),
                 startIndex = startIndex,
                 pageSize = pageSize,
                 sortering = sortering.tilOppgavesorteringForDatabase(),
                 kreverEgenskaper = filtrerteEgenskaper,
-                egneSakerPåVent = fane == Fane.PAA_VENT,
-                egneSaker = fane == Fane.MINE_SAKER,
+                egneSakerPåVent = filtrering.egneSakerPåVent,
+                egneSaker = filtrering.egneSaker,
+                tildelt = filtrering.tildelt,
             )
         return OppgaverTilBehandling(
             oppgaver = oppgaver.tilOppgaverTilBehandling(),
@@ -213,7 +229,8 @@ internal class OppgaveMediator(
         )
         try {
             oppgave.forsøkTildelingVedReservasjon(saksbehandler, settPåVent)
-        } catch (_: ManglerTilgang) {}
+        } catch (_: ManglerTilgang) {
+        }
     }
 
     fun harFerdigstiltOppgave(vedtaksperiodeId: UUID) = oppgaveDao.harFerdigstiltOppgave(vedtaksperiodeId)
@@ -228,9 +245,20 @@ internal class OppgaveMediator(
 
     private fun List<Oppgavesortering>.tilOppgavesorteringForDatabase() = map {
         when (it.nokkel) {
-            Sorteringsnokkel.TILDELT_TIL -> OppgavesorteringForDatabase(SorteringsnøkkelForDatabase.TILDELT_TIL, it.stigende)
-            Sorteringsnokkel.OPPRETTET -> OppgavesorteringForDatabase(SorteringsnøkkelForDatabase.OPPRETTET, it.stigende)
-            Sorteringsnokkel.SOKNAD_MOTTATT -> OppgavesorteringForDatabase(SorteringsnøkkelForDatabase.SØKNAD_MOTTATT, it.stigende)
+            Sorteringsnokkel.TILDELT_TIL -> OppgavesorteringForDatabase(
+                SorteringsnøkkelForDatabase.TILDELT_TIL,
+                it.stigende
+            )
+
+            Sorteringsnokkel.OPPRETTET -> OppgavesorteringForDatabase(
+                SorteringsnøkkelForDatabase.OPPRETTET,
+                it.stigende
+            )
+
+            Sorteringsnokkel.SOKNAD_MOTTATT -> OppgavesorteringForDatabase(
+                SorteringsnøkkelForDatabase.SØKNAD_MOTTATT,
+                it.stigende
+            )
         }
     }
 }

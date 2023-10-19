@@ -7,13 +7,16 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.db.EgenskapForDatabase.BESLUTTER
 import no.nav.helse.db.EgenskapForDatabase.FORTROLIG_ADRESSE
+import no.nav.helse.db.EgenskapForDatabase.HASTER
 import no.nav.helse.db.EgenskapForDatabase.RISK_QA
 import no.nav.helse.db.EgenskapForDatabase.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.db.EgenskapForDatabase.SØKNAD
+import no.nav.helse.db.EgenskapForDatabase.UTLAND
 import no.nav.helse.mediator.oppgave.Oppgavemelder
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.TestHendelse
+import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
@@ -485,6 +488,70 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         )
         assertEquals(1, oppgaver.size)
         assertEquals(listOf(oppgaveId1), oppgaver.map { it.id })
+    }
+
+    @Test
+    fun `Ekskluderer ukategoriserte egenskaper`() {
+        nyPerson(fødselsnummer = "12345678910", aktørId = "1234567891011", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "123456789")
+        val oppgaveId1 = OPPGAVE_ID
+        nyPerson(fødselsnummer = "12345678911", aktørId = "1234567891012", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "223456789", oppgaveEgenskaper = listOf(
+            BESLUTTER
+        ))
+        nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456789", oppgaveEgenskaper = listOf(
+            RISK_QA, FORTROLIG_ADRESSE
+        ))
+        nyPerson(fødselsnummer = "12345678913", aktørId = "1234567891014", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456710", oppgaveEgenskaper = listOf(
+            UTLAND, HASTER
+        ))
+        val oppgaver = oppgaveDao.finnOppgaverForVisning(
+            ekskluderEgenskaper = listOf("BESLUTTER", "RISK_QA") + Egenskap.alleUkategoriserteEgenskaper.map(Egenskap::toString),
+            UUID.randomUUID()
+        )
+        assertEquals(1, oppgaver.size)
+        assertEquals(listOf(oppgaveId1), oppgaver.map { it.id })
+    }
+
+    @Test
+    fun `Får kun oppgaver som er tildelt hvis tildelt er satt til true`() {
+        nyPerson(fødselsnummer = "12345678910", aktørId = "1234567891011", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "123456789")
+        val oppgaveId1 = OPPGAVE_ID
+        tildelOppgave(oppgaveId1, saksbehandlerOid = UUID.randomUUID())
+        nyPerson(fødselsnummer = "12345678911", aktørId = "1234567891012", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "223456789")
+        nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456789")
+
+        val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), tildelt = true)
+        assertEquals(1, oppgaver.size)
+        assertEquals(listOf(oppgaveId1), oppgaver.map { it.id })
+    }
+
+    @Test
+    fun `Får kun oppgaver som ikke er tildelt hvis tildelt er satt til false`() {
+        nyPerson(fødselsnummer = "12345678910", aktørId = "1234567891011", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "123456789")
+        val oppgaveId1 = OPPGAVE_ID
+        tildelOppgave(oppgaveId1, saksbehandlerOid = UUID.randomUUID())
+        nyPerson(fødselsnummer = "12345678911", aktørId = "1234567891012", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "223456789")
+        val oppgaveId2 = OPPGAVE_ID
+        nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456789")
+        val oppgaveId3 = OPPGAVE_ID
+
+        val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), tildelt = false)
+        assertEquals(2, oppgaver.size)
+        assertEquals(listOf(oppgaveId3, oppgaveId2), oppgaver.map { it.id })
+    }
+
+    @Test
+    fun `Får både tildelte og ikke tildelte oppgaver hvis tildelt er satt til null`() {
+        nyPerson(fødselsnummer = "12345678910", aktørId = "1234567891011", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "123456789")
+        val oppgaveId1 = OPPGAVE_ID
+        tildelOppgave(oppgaveId1, saksbehandlerOid = UUID.randomUUID())
+        nyPerson(fødselsnummer = "12345678911", aktørId = "1234567891012", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "223456789")
+        val oppgaveId2 = OPPGAVE_ID
+        nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456789")
+        val oppgaveId3 = OPPGAVE_ID
+
+        val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), tildelt = null)
+        assertEquals(3, oppgaver.size)
+        assertEquals(listOf(oppgaveId3, oppgaveId2, oppgaveId1), oppgaver.map { it.id })
     }
 
     @Test
