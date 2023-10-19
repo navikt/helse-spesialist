@@ -140,7 +140,7 @@ internal class VarselTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = ["RV_AY_3", "RV_AY_4", "RV_AY_5", "RV_AY_6", "RV_AY_7", "RV_AY_8", "RV_IT_3", "RV_OS_2", "RV_OS_3", "RV_SI_3", "RV_UT_21", "RV_UT_23", "RV_VV_8", "SB_RV_2"])
+    @ValueSource(strings = ["RV_IT_3", "RV_OS_2", "RV_OS_3", "RV_SI_3", "RV_UT_21", "RV_UT_23", "RV_VV_8", "SB_RV_2"])
     fun `inneholder svartelistet varsel`(varselkode: String) {
         val varsel = nyttVarsel(status = AKTIV, kode = varselkode)
         assertTrue(listOf(varsel).inneholderSvartelistedeVarsler())
@@ -149,7 +149,7 @@ internal class VarselTest {
     @ParameterizedTest
     @EnumSource(value = Status::class)
     fun `inneholder svartelistet varsel uavhengig av status`(status: Status) {
-        val varsel = nyttVarsel(status = status, kode = "RV_AY_3")
+        val varsel = nyttVarsel(status = status, kode = "RV_IT_3")
         assertTrue(listOf(varsel).inneholderSvartelistedeVarsler())
     }
 

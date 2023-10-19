@@ -113,7 +113,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         håndterVedtaksperiodeOpprettet(vedtaksperiodeId = VEDTAKSPERIODE_ID)
         opprettSpesialsak(vedtaksperiodeId = VEDTAKSPERIODE_ID)
         fremTilSaksbehandleroppgave(
-            regelverksvarsler = listOf("RV_AY_3"),
+            regelverksvarsler = listOf("RV_SI_3"),
             arbeidsgiverbeløp = 0,
             personbeløp = 0
         )
