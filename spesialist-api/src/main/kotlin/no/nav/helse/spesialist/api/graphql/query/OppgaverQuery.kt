@@ -54,7 +54,7 @@ class OppgaverQuery(private val oppgavehåndterer: Oppgavehåndterer) : Query {
                 sortering = sortering ?: emptyList(),
                 filtrering = Filtrering(
                     egenskaper = filtrerteEgenskaper ?: emptyList(),
-                    egneSakerPåVent = fane == Fane.PAA_VENT,
+                    egneSakerPaVent = fane == Fane.PAA_VENT,
                     egneSaker = fane == Fane.MINE_SAKER,
                 ),
             )

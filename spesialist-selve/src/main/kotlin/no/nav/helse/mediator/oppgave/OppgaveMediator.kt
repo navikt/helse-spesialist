@@ -162,7 +162,7 @@ internal class OppgaveMediator(
                 pageSize = pageSize,
                 sortering = sortering.tilOppgavesorteringForDatabase(),
                 kreverEgenskaper = filtrerteEgenskaper,
-                egneSakerPåVent = filtrering.egneSakerPåVent,
+                egneSakerPåVent = filtrering.egneSakerPaVent,
                 egneSaker = filtrering.egneSaker,
                 tildelt = filtrering.tildelt,
             )

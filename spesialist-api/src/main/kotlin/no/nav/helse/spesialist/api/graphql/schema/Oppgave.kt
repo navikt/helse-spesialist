@@ -56,7 +56,7 @@ data class Filtrering(
     val egenskaper: List<Oppgaveegenskap> = emptyList(),
     val ingenUkategoriserteEgenskaper: Boolean = false,
     val tildelt: Boolean? = null,
-    val egneSakerPåVent: Boolean = false,
+    val egneSakerPaVent: Boolean = false,
     val egneSaker: Boolean = false,
 )
 
