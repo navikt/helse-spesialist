@@ -55,8 +55,8 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
 
         verify(exactly = 1) { oppgavehåndterer.oppgaver(
             saksbehandlerFraApi = any(),
-            startIndex = 2,
-            pageSize = 5,
+            offset = 2,
+            limit = 5,
             sortering = listOf(Oppgavesortering(Sorteringsnokkel.TILDELT_TIL, true)),
             filtrering = Filtrering(
                 egenskaper = listOf(Oppgaveegenskap(Egenskap.DELVIS_REFUSJON, Kategori.Mottaker)),

@@ -71,8 +71,8 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
     internal fun finnOppgaverForVisning(
         ekskluderEgenskaper: List<String>,
         saksbehandlerOid: UUID,
-        startIndex: Int = 0,
-        pageSize: Int = Int.MAX_VALUE,
+        offset: Int = 0,
+        limit: Int = Int.MAX_VALUE,
         sortering: List<OppgavesorteringForDatabase> = emptyList(),
         kreverEgenskaper: List<EgenskapForDatabase> = emptyList(),
         egneSakerPåVent: Boolean = false,
@@ -120,12 +120,12 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                         ELSE true
                     END
                 ORDER BY $orderBy
-                OFFSET :start_index
-                LIMIT :page_size
+                OFFSET :offset
+                LIMIT :limit
             """, mapOf(
                 "oid" to saksbehandlerOid,
-                "start_index" to startIndex * pageSize,
-                "page_size" to pageSize,
+                "offset" to offset,
+                "limit" to limit,
                 "egne_saker_pa_vent" to egneSakerPåVent,
                 "egne_saker" to egneSaker,
                 "tildelt" to tildelt,

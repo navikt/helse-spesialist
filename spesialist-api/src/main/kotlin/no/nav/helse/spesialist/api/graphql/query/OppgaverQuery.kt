@@ -49,8 +49,8 @@ class OppgaverQuery(private val oppgavehåndterer: Oppgavehåndterer) : Query {
         val oppgaver = withContext(Dispatchers.IO) {
             oppgavehåndterer.oppgaver(
                 saksbehandlerFraApi = saksbehandler,
-                startIndex = startIndex ?: 0,
-                pageSize = pageSize ?: Int.MAX_VALUE,
+                offset = startIndex ?: 0,
+                limit = pageSize ?: Int.MAX_VALUE,
                 sortering = sortering ?: emptyList(),
                 filtrering = Filtrering(
                     egenskaper = filtrerteEgenskaper ?: emptyList(),
@@ -65,10 +65,10 @@ class OppgaverQuery(private val oppgavehåndterer: Oppgavehåndterer) : Query {
     }
 
     @Suppress("unused")
-    suspend fun alleOppgaver(
-        startIndex: Int? = 0,
-        pageSize: Int? = null,
-        sortering: List<Oppgavesortering>? = emptyList(),
+    suspend fun oppgaveFeed(
+        offset: Int,
+        limit: Int,
+        sortering: List<Oppgavesortering>,
         filtrering: Filtrering,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<OppgaverTilBehandling> {
@@ -78,9 +78,9 @@ class OppgaverQuery(private val oppgavehåndterer: Oppgavehåndterer) : Query {
         val oppgaver = withContext(Dispatchers.IO) {
             oppgavehåndterer.oppgaver(
                 saksbehandlerFraApi = saksbehandler,
-                startIndex = startIndex ?: 0,
-                pageSize = pageSize ?: Int.MAX_VALUE,
-                sortering = sortering ?: emptyList(),
+                offset = offset,
+                limit = limit,
+                sortering = sortering,
                 filtrering = filtrering,
             )
         }

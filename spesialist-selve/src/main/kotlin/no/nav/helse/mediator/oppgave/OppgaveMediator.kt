@@ -133,8 +133,8 @@ internal class OppgaveMediator(
 
     override fun oppgaver(
         saksbehandlerFraApi: SaksbehandlerFraApi,
-        startIndex: Int,
-        pageSize: Int,
+        offset: Int,
+        limit: Int,
         sortering: List<Oppgavesortering>,
         filtrering: Filtrering,
     ): OppgaverTilBehandling {
@@ -158,8 +158,8 @@ internal class OppgaveMediator(
             .finnOppgaverForVisning(
                 ekskluderEgenskaper = egenskaperSomSkalEkskluderes,
                 saksbehandlerOid = saksbehandler.oid(),
-                startIndex = startIndex,
-                pageSize = pageSize,
+                offset = offset,
+                limit = limit,
                 sortering = sortering.tilOppgavesorteringForDatabase(),
                 kreverEgenskaper = filtrerteEgenskaper,
                 egneSakerPåVent = filtrering.egneSakerPaVent,

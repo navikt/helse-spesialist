@@ -336,10 +336,11 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(fødselsnummer = "12345678910", aktørId = "1234567891011", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "123456789")
         val oppgaveId1 = OPPGAVE_ID
         nyPerson(fødselsnummer = "12345678911", aktørId = "1234567891012", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "223456789")
+        val oppgaveId2 = OPPGAVE_ID
         nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456789")
         val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), 1, 2)
-        assertEquals(1, oppgaver.size)
-        assertEquals(listOf(oppgaveId1), oppgaver.map { it.id })
+        assertEquals(2, oppgaver.size)
+        assertEquals(listOf(oppgaveId2, oppgaveId1), oppgaver.map { it.id })
     }
 
     @Test

@@ -206,6 +206,7 @@ fun main() = runBlocking {
 private object SneakyOppgaveHåndterer : Oppgavehåndterer {
 
     val mock = mockk<Oppgavehåndterer>(relaxed = true)
+    val randomOppgaver = List(50) { TestdataGenerator.oppgave() }
     override fun sendTilBeslutter(oppgaveId: Long, behandlendeSaksbehandler: SaksbehandlerFraApi) {
         return mock.sendTilBeslutter(oppgaveId, behandlendeSaksbehandler)
     }
@@ -224,16 +225,14 @@ private object SneakyOppgaveHåndterer : Oppgavehåndterer {
 
     override fun oppgaver(
         saksbehandlerFraApi: SaksbehandlerFraApi,
-        startIndex: Int,
-        pageSize: Int,
+        offset: Int,
+        limit: Int,
         sortering: List<Oppgavesortering>,
         filtrering: Filtrering,
     ): OppgaverTilBehandling {
-
-        val oppgaver = List(50) { TestdataGenerator.oppgave() }
-            .filter { oppgave -> filtrering.egenskaper.isEmpty() || oppgave.egenskaper.any { it in filtrering.egenskaper } }
+        val oppgaver = randomOppgaver.filter { oppgave -> filtrering.egenskaper.isEmpty() || oppgave.egenskaper.any { it in filtrering.egenskaper } }
         return OppgaverTilBehandling(
-            oppgaver = oppgaver.drop((startIndex - 1) * pageSize).take(pageSize),
+            oppgaver = oppgaver.drop(offset).take(limit),
             totaltAntallOppgaver = oppgaver.size
         )
     }
