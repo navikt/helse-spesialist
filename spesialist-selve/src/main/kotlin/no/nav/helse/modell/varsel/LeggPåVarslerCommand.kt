@@ -7,7 +7,6 @@ import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
 import no.nav.helse.modell.person.HentEnhetløsning
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
-import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vergemal.VergemålDao
 import org.slf4j.LoggerFactory
 
@@ -17,7 +16,6 @@ internal class LeggPåVarslerCommand(
     private val personDao: PersonDao,
     private val vergemålDao: VergemålDao,
     private val hendelseId: UUID,
-    private val utbetaling: Utbetaling,
     private val sykefraværstilfelle: Sykefraværstilfelle,
 ) : Command {
 
@@ -25,11 +23,11 @@ internal class LeggPåVarslerCommand(
         val tilhørerEnhetUtland = HentEnhetløsning.erEnhetUtland(personDao.finnEnhetId(fødselsnummer))
         val underVergemål = vergemålDao.harVergemål(fødselsnummer) ?: false
 
-        if (underVergemål && utbetaling.erRevurdering()) {
+        if (underVergemål) {
             logg.info("Håndterer varsel om vergemål på vedtaksperiode $vedtaksperiodeId")
             sykefraværstilfelle.håndter(Varselkode.SB_EX_4.nyttVarsel(vedtaksperiodeId), hendelseId)
         }
-        if (tilhørerEnhetUtland && utbetaling.erRevurdering()) {
+        if (tilhørerEnhetUtland) {
             logg.info("Håndterer varsel om utland på vedtaksperiode $vedtaksperiodeId")
             sykefraværstilfelle.håndter(Varselkode.SB_EX_5.nyttVarsel(vedtaksperiodeId), hendelseId)
         }

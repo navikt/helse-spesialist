@@ -49,6 +49,12 @@ internal class AutomatiskAvvisningCommandTest {
     }
 
     @Test
+    fun `skal ikke avvise ved vergemål dersom kanAvvises er false`() {
+        every { vergemålDao.harVergemål(fødselsnummer) } returns true
+        executeCommand(hentCommand(Utbetalingtype.UTBETALING, false), null)
+    }
+
+    @Test
     fun `skal avvise ved utland dersom utbetaling ikke er revurdering`() {
         every { personDao.finnEnhetId(fødselsnummer) } returns "0393"
         executeCommand(hentCommand(Utbetalingtype.UTBETALING), "Utland")
@@ -68,7 +74,7 @@ internal class AutomatiskAvvisningCommandTest {
             verify (exactly = 0) { godkjenningMediator.automatiskAvvisning(any(), any(), any()) }
     }
 
-    private fun hentCommand(utbetalingstype: Utbetalingtype) =
+    private fun hentCommand(utbetalingstype: Utbetalingtype, kanAvvises: Boolean = true) =
         AutomatiskAvvisningCommand(
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
@@ -77,7 +83,7 @@ internal class AutomatiskAvvisningCommandTest {
             godkjenningMediator = godkjenningMediator,
             hendelseId = hendelseId,
             utbetaling = Utbetaling(utbetalingId, 1000, 1000, utbetalingstype),
-            kanAvvises = true
+            kanAvvises = kanAvvises
         )
 
     private companion object {

@@ -25,31 +25,36 @@ internal class AutomatiskAvvisningCommand(
 
     override fun execute(context: CommandContext): Boolean {
         val tilhørerEnhetUtland = HentEnhetløsning.erEnhetUtland(personDao.finnEnhetId(fødselsnummer))
-        val avvisGrunnetEnhetUtland = tilhørerEnhetUtland && !utbetaling.erRevurdering()
+        val erRevurdering = utbetaling.erRevurdering()
+        val behold = (erRevurdering || !kanAvvises)
+        val avvisGrunnetEnhetUtland = tilhørerEnhetUtland && !behold
         val underVergemål = vergemålDao.harVergemål(fødselsnummer) ?: false
-        val avvisGrunnetVergemål = underVergemål && !utbetaling.erRevurdering()
+        val avvisGrunnetVergemål = underVergemål && !behold
 
-        if (!avvisGrunnetEnhetUtland && !avvisGrunnetVergemål) return true
 
-        val årsaker = mutableListOf<String>()
-        if (tilhørerEnhetUtland) årsaker.add("Utland")
-        if (underVergemål) årsaker.add("Vergemål")
-        if (!kanAvvises) {
-            logg.info(
-                "Ville ha avvist {} pga. $årsaker, men behovet er markert som ikke avvisbar",
-                kv("vedtaksperiodeId", vedtaksperiodeId)
-            )
+        val avvisningsårsaker = mutableListOf<String>()
+        if (tilhørerEnhetUtland) avvisningsårsaker.add("Utland")
+        if (underVergemål) avvisningsårsaker.add("Vergemål")
+        if (!avvisGrunnetEnhetUtland && !avvisGrunnetVergemål) {
+            if (behold) {
+                logg.info(
+                    "Avviser ikke {} som har $avvisningsårsaker, fordi: {}, {}",
+                    kv("vedtaksperiodeId", vedtaksperiodeId),
+                    kv("erRevurdering", erRevurdering),
+                    kv("kanAvvises", kanAvvises)
+                )
+            }
             return true
         }
 
         godkjenningMediator.automatiskAvvisning(
             context::publiser,
             vedtaksperiodeId,
-            årsaker.toList(),
+            avvisningsårsaker.toList(),
             utbetaling,
             hendelseId,
         )
-        logg.info("Automatisk avvisning av vedtaksperiode $vedtaksperiodeId pga:$årsaker")
+        logg.info("Automatisk avvisning av vedtaksperiode $vedtaksperiodeId pga:$avvisningsårsaker")
         return ferdigstill(context)
     }
 

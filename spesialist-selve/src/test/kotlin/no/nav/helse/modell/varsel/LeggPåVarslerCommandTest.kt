@@ -9,8 +9,6 @@ import java.util.UUID
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
-import no.nav.helse.modell.utbetaling.Utbetaling
-import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vergemal.VergemålDao
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -31,45 +29,48 @@ internal class LeggPåVarslerCommandTest {
     }
 
     @Test
-    fun `skal legge på varsel om vergemål dersom utbetaling er revurdering`() {
+    fun `skal legge på varsel om vergemål`() {
         val slot = slot<Varsel>()
         every { vergemålDao.harVergemål(fødselsnummer) } returns true
-        assertTrue(hentCommand(Utbetalingtype.REVURDERING).execute(context))
+        assertTrue(hentCommand().execute(context))
         verify (exactly = 1) { sykefraværstilfelle.håndter(capture(slot), hendelseId) }
         assertEquals("SB_EX_4", slot.captured.toDto().varselkode)
     }
 
     @Test
-    fun `skal ikke legge på varsel for vergemål dersom utbetaling ikke er revurdering`() {
+    fun `skal legge på varsel for vergemål også ved revurdering`() {
+        val slot = slot<Varsel>()
         every { vergemålDao.harVergemål(fødselsnummer) } returns true
-        assertTrue(hentCommand(Utbetalingtype.UTBETALING).execute(context))
-        verify (exactly = 0) { sykefraværstilfelle.håndter(any(), hendelseId) }
+        assertTrue(hentCommand().execute(context))
+        verify (exactly = 1) { sykefraværstilfelle.håndter(capture(slot), hendelseId) }
+        assertEquals("SB_EX_4", slot.captured.toDto().varselkode)
     }
 
     @Test
-    fun `skal legge på varsel om utland dersom utbetaling er revurdering`() {
+    fun `skal legge på varsel om utland`() {
         val slot = slot<Varsel>()
         every { personDao.finnEnhetId(fødselsnummer) } returns "0393"
-        assertTrue(hentCommand(Utbetalingtype.REVURDERING).execute(context))
+        assertTrue(hentCommand().execute(context))
         verify (exactly = 1) { sykefraværstilfelle.håndter(capture(slot), hendelseId) }
         assertEquals("SB_EX_5", slot.captured.toDto().varselkode)
     }
 
     @Test
-    fun `skal ikke legge på varsel for utland dersom utbetaling ikke er revurdering`() {
+    fun `skal legge på varsel for utland også ved revurdering`() {
+        val slot = slot<Varsel>()
         every { personDao.finnEnhetId(fødselsnummer) } returns "0393"
-        assertTrue(hentCommand(Utbetalingtype.UTBETALING).execute(context))
-        verify (exactly = 0) { sykefraværstilfelle.håndter(any(), hendelseId) }
+        assertTrue(hentCommand().execute(context))
+        verify (exactly = 1) { sykefraværstilfelle.håndter(capture(slot), hendelseId) }
+        assertEquals("SB_EX_5", slot.captured.toDto().varselkode)
     }
 
-    private fun hentCommand(utbetalingstype: Utbetalingtype) =
+    private fun hentCommand() =
         LeggPåVarslerCommand(
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             personDao = personDao,
             vergemålDao = vergemålDao,
             hendelseId = hendelseId,
-            utbetaling = Utbetaling(utbetalingId, 1000, 1000, utbetalingstype),
             sykefraværstilfelle = sykefraværstilfelle
         )
 
@@ -77,7 +78,6 @@ internal class LeggPåVarslerCommandTest {
         private const val fødselsnummer = "12345678910"
         private val vedtaksperiodeId = UUID.randomUUID()
         private val hendelseId = UUID.randomUUID()
-        private val utbetalingId = UUID.randomUUID()
     }
 
 }

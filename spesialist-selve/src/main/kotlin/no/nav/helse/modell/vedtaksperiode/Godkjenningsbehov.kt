@@ -220,7 +220,6 @@ internal class Godkjenningsbehov(
             personDao = personDao,
             vergemålDao = vergemålDao,
             hendelseId = id,
-            utbetaling = utbetaling,
             sykefraværstilfelle = sykefraværstilfelle
         )
     )
