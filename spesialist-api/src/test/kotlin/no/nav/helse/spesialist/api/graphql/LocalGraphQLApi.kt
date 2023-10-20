@@ -38,6 +38,7 @@ import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.graphql.schema.Adressebeskyttelse
 import no.nav.helse.spesialist.api.graphql.schema.BehandletOppgave
 import no.nav.helse.spesialist.api.graphql.schema.Filtrering
+import no.nav.helse.spesialist.api.graphql.schema.Kategori
 import no.nav.helse.spesialist.api.graphql.schema.Kjonn
 import no.nav.helse.spesialist.api.graphql.schema.OppgaverTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.Oppgavesortering
@@ -206,7 +207,7 @@ fun main() = runBlocking {
 private object SneakyOppgaveHåndterer : Oppgavehåndterer {
 
     val mock = mockk<Oppgavehåndterer>(relaxed = true)
-    val randomOppgaver = List(50) { TestdataGenerator.oppgave() }
+    val randomOppgaver = List(100) { TestdataGenerator.oppgave() }
     override fun sendTilBeslutter(oppgaveId: Long, behandlendeSaksbehandler: SaksbehandlerFraApi) {
         return mock.sendTilBeslutter(oppgaveId, behandlendeSaksbehandler)
     }
@@ -230,7 +231,10 @@ private object SneakyOppgaveHåndterer : Oppgavehåndterer {
         sortering: List<Oppgavesortering>,
         filtrering: Filtrering,
     ): OppgaverTilBehandling {
-        val oppgaver = randomOppgaver.filter { oppgave -> filtrering.egenskaper.isEmpty() || oppgave.egenskaper.any { it in filtrering.egenskaper } }
+        val oppgaver = randomOppgaver
+            .filter { oppgave -> if (filtrering.ingenUkategoriserteEgenskaper) !oppgave.egenskaper.any { it.kategori == Kategori.Ukategorisert } else true }
+            .filter { oppgave -> filtrering.egenskaper.isEmpty() || oppgave.egenskaper.containsAll(filtrering.egenskaper) }
+            .filter { oppgave -> filtrering.tildelt == null || if (filtrering.tildelt == true) oppgave.tildeling != null else oppgave.tildeling == null }
         return OppgaverTilBehandling(
             oppgaver = oppgaver.drop(offset).take(limit),
             totaltAntallOppgaver = oppgaver.size
