@@ -194,6 +194,11 @@ type Dagoverstyring implements Overstyring {
     timestamp: String!
 }
 
+type DatoPeriode {
+    fom: String!
+    tom: String!
+}
+
 type Enhet {
     id: String!
     navn: String!
@@ -202,6 +207,12 @@ type Enhet {
 type Faresignal {
     beskrivelse: String!
     kategori: [String!]!
+}
+
+type Fravarsperiode {
+    fom: String!
+    fravarstype: Fravarstype!
+    tom: String!
 }
 
 type Generasjon {
@@ -341,7 +352,6 @@ type OppgaveTilBehandling {
     id: String!
     mottaker: Mottaker!
     navn: Personnavn!
-    oppgaveegenskaper: Oppgaveegenskaper!
     oppgavetype: Oppgavetype!
     opprettet: String!
     opprinneligSoknadsdato: String!
@@ -355,8 +365,9 @@ type Oppgaveegenskap {
     kategori: Kategori!
 }
 
-type Oppgaveegenskaper {
-    egenskaper: [Oppgaveegenskap!]!
+type OppgaverTilBehandling {
+    oppgaver: [OppgaveTilBehandling!]!
+    totaltAntallOppgaver: Int!
 }
 
 type Opptegnelse {
@@ -432,6 +443,7 @@ type Personoppdrag implements Spennoppdrag {
 }
 
 type Query {
+    alleOppgaver(filtrering: FiltreringInput!, pageSize: Int, sortering: [OppgavesorteringInput!], startIndex: Int): OppgaverTilBehandling!
     behandledeOppgaverIDag: [BehandletOppgave!]!
     behandlingsstatistikk: Behandlingsstatistikk!
     hentOpptegnelser(sekvensId: Int): [Opptegnelse!]!
@@ -533,6 +545,9 @@ type SkjonnsfastsattSykepengegrunnlag {
 }
 
 type Soknad {
+    arbeidGjenopptatt: String
+    egenmeldingsperioder: [DatoPeriode!]!
+    fravarsperioder: [Fravarsperiode!]!
     sendtNav: String!
     soknadsperioder: [Soknadsperiode!]!
 }
@@ -806,6 +821,14 @@ enum Fane {
     TIL_GODKJENNING
 }
 
+enum Fravarstype {
+    FERIE
+    PERMISJON
+    UTDANNING_DELTID
+    UTDANNING_FULLTID
+    UTLANDSOPPHOLD
+}
+
 enum Hendelsetype {
     INNTEKTSMELDING
     NY_SOKNAD
@@ -1038,6 +1061,14 @@ input ArbeidsforholdOverstyringHandlingInput {
     fodselsnummer: String!
     overstyrteArbeidsforhold: [OverstyringArbeidsforholdInput!]!
     skjaringstidspunkt: String!
+}
+
+input FiltreringInput {
+    egenskaper: [OppgaveegenskapInput!]!
+    egneSaker: Boolean!
+    egneSakerPaVent: Boolean!
+    ingenUkategoriserteEgenskaper: Boolean!
+    tildelt: Boolean
 }
 
 input InntektOgRefusjonOverstyringInput {
