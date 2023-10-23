@@ -40,10 +40,12 @@ import no.nav.helse.spesialist.api.graphql.schema.BehandletOppgave
 import no.nav.helse.spesialist.api.graphql.schema.Filtrering
 import no.nav.helse.spesialist.api.graphql.schema.Kategori
 import no.nav.helse.spesialist.api.graphql.schema.Kjonn
+import no.nav.helse.spesialist.api.graphql.schema.OppgaveTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.OppgaverTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.Oppgavesortering
 import no.nav.helse.spesialist.api.graphql.schema.Personinfo
 import no.nav.helse.spesialist.api.graphql.schema.Reservasjon
+import no.nav.helse.spesialist.api.graphql.schema.Sorteringsnokkel
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.objectMapper
@@ -231,10 +233,7 @@ private object SneakyOppgaveHåndterer : Oppgavehåndterer {
         sortering: List<Oppgavesortering>,
         filtrering: Filtrering,
     ): OppgaverTilBehandling {
-        val oppgaver = randomOppgaver
-            .filter { oppgave -> if (filtrering.ingenUkategoriserteEgenskaper) !oppgave.egenskaper.any { it.kategori == Kategori.Ukategorisert } else true }
-            .filter { oppgave -> filtrering.egenskaper.isEmpty() || oppgave.egenskaper.containsAll(filtrering.egenskaper) }
-            .filter { oppgave -> filtrering.tildelt == null || if (filtrering.tildelt == true) oppgave.tildeling != null else oppgave.tildeling == null }
+        val oppgaver = randomOppgaver.filtered(filtrering).sorted(sortering)
         return OppgaverTilBehandling(
             oppgaver = oppgaver.drop(offset).take(limit),
             totaltAntallOppgaver = oppgaver.size
@@ -246,6 +245,19 @@ private object SneakyOppgaveHåndterer : Oppgavehåndterer {
     }
 
 }
+
+private fun List<OppgaveTilBehandling>.filtered(filtrering: Filtrering): List<OppgaveTilBehandling> = this
+    .filter { oppgave -> if (filtrering.ingenUkategoriserteEgenskaper) !oppgave.egenskaper.any { it.kategori == Kategori.Ukategorisert } else true }
+    .filter { oppgave -> filtrering.egenskaper.isEmpty() || oppgave.egenskaper.containsAll(filtrering.egenskaper) }
+    .filter { oppgave -> filtrering.tildelt == null || if (filtrering.tildelt == true) oppgave.tildeling != null else oppgave.tildeling == null }
+
+private fun List<OppgaveTilBehandling>.sorted(sortering: List<Oppgavesortering>): List<OppgaveTilBehandling> =
+    when (if (sortering.isEmpty()) null else sortering.first().nokkel) {
+        Sorteringsnokkel.TILDELT_TIL -> if (sortering.first().stigende) this.sortedBy { it.tildeling?.navn } else this.sortedByDescending { it.tildeling?.navn }
+        Sorteringsnokkel.OPPRETTET -> if (sortering.first().stigende) this.sortedBy { it.opprettet } else this.sortedByDescending { it.opprettet }
+        Sorteringsnokkel.SOKNAD_MOTTATT -> if (sortering.first().stigende) this.sortedBy { it.opprinneligSoknadsdato } else this.sortedByDescending { it.opprinneligSoknadsdato }
+        null -> this
+    }
 
 private fun DecodedJWT.toJwtPrincipal() =
     JWTPrincipal(JWTParser().parsePayload(payload.decodeBase64String()))
