@@ -194,11 +194,6 @@ type Dagoverstyring implements Overstyring {
     timestamp: String!
 }
 
-type DatoPeriode {
-    fom: String!
-    tom: String!
-}
-
 type Enhet {
     id: String!
     navn: String!
@@ -207,12 +202,6 @@ type Enhet {
 type Faresignal {
     beskrivelse: String!
     kategori: [String!]!
-}
-
-type Fravarsperiode {
-    fom: String!
-    fravarstype: Fravarstype!
-    tom: String!
 }
 
 type Generasjon {
@@ -443,13 +432,13 @@ type Personoppdrag implements Spennoppdrag {
 }
 
 type Query {
-    alleOppgaver(filtrering: FiltreringInput!, pageSize: Int, sortering: [OppgavesorteringInput!], startIndex: Int): OppgaverTilBehandling!
     behandledeOppgaverIDag: [BehandletOppgave!]!
     behandlingsstatistikk: Behandlingsstatistikk!
     hentOpptegnelser(sekvensId: Int): [Opptegnelse!]!
     hentSoknad(dokumentId: String!, fnr: String!): Soknad!
     notater(forPerioder: [String!]!): [Notater!]!
     oppdrag(fnr: String!): [Oppdrag!]!
+    oppgaveFeed(filtrering: FiltreringInput!, limit: Int!, offset: Int!, sortering: [OppgavesorteringInput!]!): OppgaverTilBehandling!
     oppgaver(fane: Fane, filtrerteEgenskaper: [OppgaveegenskapInput!], pageSize: Int, sortering: [OppgavesorteringInput!], startIndex: Int): [OppgaveTilBehandling!]!
     person(aktorId: String, fnr: String): Person
 }
@@ -546,10 +535,7 @@ type SkjonnsfastsattSykepengegrunnlag {
 
 type Soknad {
     arbeidGjenopptatt: String
-    egenmeldingsperioder: [DatoPeriode!]!
-    fravarsperioder: [Fravarsperiode!]!
-    sendtNav: String!
-    soknadsperioder: [Soknadsperiode!]!
+    sykmeldingSkrevet: String
 }
 
 type SoknadArbeidsgiver implements Hendelse {
@@ -570,14 +556,6 @@ type SoknadNav implements Hendelse {
     sendtNav: String!
     tom: String!
     type: Hendelsetype!
-}
-
-type Soknadsperiode {
-    avtaltTimer: Int
-    faktiskGrad: Float
-    faktiskTimer: Float
-    sykemeldingsgrad: Float
-    sykemeldingstype: String
 }
 
 type Sykepengedager {
@@ -819,14 +797,6 @@ enum Fane {
     MINE_SAKER
     PAA_VENT
     TIL_GODKJENNING
-}
-
-enum Fravarstype {
-    FERIE
-    PERMISJON
-    UTDANNING_DELTID
-    UTDANNING_FULLTID
-    UTLANDSOPPHOLD
 }
 
 enum Hendelsetype {

@@ -25,7 +25,7 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
                     dokumentId: ""
                     fnr: "$FØDSELSNUMMER"
                 ) {
-                    sendtNav
+                    sykmeldingSkrevet
                 }
             }
         """
@@ -43,7 +43,7 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
                     dokumentId: "${UUID.randomUUID()}"
                     fnr: "$FØDSELSNUMMER"
                 ) {
-                    sendtNav
+                    sykmeldingSkrevet
                 }
             }
         """
@@ -64,7 +64,7 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
                     dokumentId: "${UUID.randomUUID()}"
                     fnr: "$FØDSELSNUMMER"
                 ) {
-                    sendtNav
+                    sykmeldingSkrevet
                 }
             }
         """
@@ -76,11 +76,11 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
     @Test
     fun `hentSoknad query med riktige tilganger og paramtetre returnerer søknad`() {
         val dokumentId = UUID.randomUUID()
-        val søknadstidspunkt = LocalDateTime.now().toString()
         val arbeidGjenopptatt = LocalDate.now().toString()
+        val sykmeldingSkrevet = LocalDateTime.now().toString()
         opprettSaksbehandler()
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
-        every { dokumenthåndterer.håndter(any(), any(), any()) } returns objectMapper.readTree(søknadJson(søknadstidspunkt, arbeidGjenopptatt))
+        every { dokumenthåndterer.håndter(any(), any(), any()) } returns objectMapper.readTree(søknadJson(arbeidGjenopptatt, sykmeldingSkrevet))
         val dokument = runQuery(
             """
             {
@@ -88,10 +88,7 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
                     dokumentId: "$dokumentId"
                     fnr: "$FØDSELSNUMMER"
                 ) {
-                    sendtNav, arbeidGjenopptatt, egenmeldingsperioder { 
-                        fom,tom
-                    }, fravarsperioder {fom, tom, fravarstype
-                    }
+                    sykmeldingSkrevet, arbeidGjenopptatt
                 }
             }
         """
@@ -103,39 +100,15 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
             dokumentType = DokumentType.SØKNAD.name
         ) }
 
-        assertEquals(4, dokument.size())
-        assertEquals(søknadstidspunkt, dokument["sendtNav"].asText())
+        assertEquals(2, dokument.size())
         assertEquals(arbeidGjenopptatt, dokument["arbeidGjenopptatt"].asText())
-        val egenmeldingsperioderJson = dokument["egenmeldingsperioder"]
-        assertEquals(1, egenmeldingsperioderJson.size())
-        val fravarsperioderJson = dokument["fravarsperioder"]
-        assertEquals(1, fravarsperioderJson.size())
-        val egenmeldingsperiodeJson = dokument["egenmeldingsperioder"].single()
-        assertEquals("2018-01-01", egenmeldingsperiodeJson["fom"].asText())
-        assertEquals("2018-01-31", egenmeldingsperiodeJson["tom"].asText())
-        val fravarsperiodeJson = dokument["fravarsperioder"].single()
-        assertEquals("2018-01-01", fravarsperiodeJson["fom"].asText())
-        assertEquals("2018-01-31", fravarsperiodeJson["tom"].asText())
-        assertEquals("FERIE", fravarsperiodeJson["fravarstype"].asText())
+        assertEquals(sykmeldingSkrevet, dokument["sykmeldingSkrevet"].asText())
     }
 
     @Language("JSON")
-    private fun søknadJson(søknadstidspunkt: String, arbeidGjenopptatt: String) = """{
-  "sendtNav": "$søknadstidspunkt",
+    private fun søknadJson(arbeidGjenopptatt: String, sykmeldingSkrevet: String) = """{
   "arbeidGjenopptatt": "$arbeidGjenopptatt",
-  "egenmeldinger": [
-  {
-  "fom": "2018-01-01",
-  "tom": "2018-01-31"
-  }
-  ],
-  "fravar": [
-    {
-    "fom": "2018-01-01",
-    "tom": "2018-01-31",
-    "type": "FERIE"
-    }
-  ]
+  "sykmeldingSkrevet": "$sykmeldingSkrevet"
 }
 """.trimIndent()
 
