@@ -53,10 +53,11 @@ internal object TestdataGenerator {
         val (oppgavetypeegenskap, oppgavetype) = oppgavetype()
         val (mottakeregenskap, mottaker) = mottaker()
         val (antallArbeidsforholdegenskap, antallArbeidsforhold) = antallArbeidsforhold()
+        val tilfeldigDato = tilfeldigDato()
         return OppgaveTilBehandling(
             id = Random.nextLong().toString(),
-            opprettet = LocalDateTime.now().toString(),
-            opprinneligSoknadsdato = LocalDateTime.now().toString(),
+            opprettet = tilfeldigDato.toString(),
+            opprinneligSoknadsdato = tilfeldigDato.minusDays(listOf(1L,2L,3L,4L,5L,6L,7L,8L,9L).random()).toString(),
             vedtaksperiodeId = UUID.randomUUID().toString(),
             navn = tilfeldigNavn(),
             aktorId = tilfeldigAktørId(),
@@ -115,6 +116,11 @@ internal object TestdataGenerator {
         }
         return Oppgaveegenskap(egenskap, Kategori.Inntektskilde) to antallArbeidsforhold
     }
+
+    private fun tilfeldigDato(): LocalDateTime = LocalDateTime.now()
+        .minusYears(listOf(0L,1L,2L,3L).random())
+        .minusMonths(listOf(1L,2L,3L,4L,5L,6L,7L,8L,9L).random())
+        .minusDays(listOf(1L,2L,3L,4L,5L,6L,7L,8L,9L,10L,11L,15L,20L,22L).random())
 
     private fun tilfeldigNavn(): Personnavn {
         val fornavn = listOf("Skitten", "Kul", "Snill", "Lat", "Perfekt", "Enorm", "Ekkel")
