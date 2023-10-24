@@ -535,6 +535,8 @@ type SkjonnsfastsattSykepengegrunnlag {
 
 type Soknad {
     arbeidGjenopptatt: String
+    egenmeldingsdagerFraSykmelding: [String!]
+    soknadsperioder: [Soknadsperioder!]
     sykmeldingSkrevet: String
 }
 
@@ -556,6 +558,13 @@ type SoknadNav implements Hendelse {
     sendtNav: String!
     tom: String!
     type: Hendelsetype!
+}
+
+type Soknadsperioder {
+    faktiskGrad: Int
+    fom: String!
+    grad: Int!
+    tom: String!
 }
 
 type Sykepengedager {

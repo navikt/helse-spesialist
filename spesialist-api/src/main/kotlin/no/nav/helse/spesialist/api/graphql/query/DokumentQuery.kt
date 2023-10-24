@@ -12,6 +12,7 @@ import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.spesialist.api.Dokumenthåndterer
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.graphql.schema.Soknad
+import no.nav.helse.spesialist.api.graphql.schema.Soknadsperioder
 import no.nav.helse.spesialist.api.person.PersonApiDao
 
 class DokumentQuery(
@@ -50,10 +51,30 @@ class DokumentQuery(
     private fun JsonNode.tilSøknad(): Soknad {
         val arbeidGjenopptatt = this.path("arbeidGjenopptatt").takeUnless { it.isMissingOrNull() }?.asText()
         val sykmeldingSkrevet = this.path("sykmeldingSkrevet").takeUnless { it.isMissingOrNull() }?.asText()
-        return Soknad(arbeidGjenopptatt = arbeidGjenopptatt, sykmeldingSkrevet = sykmeldingSkrevet)
+        val egenmeldingsdagerFraSykmelding =
+            this.path("egenmeldingsdagerFraSykmelding").takeUnless { it.isMissingOrNull() }?.map { it.asText() }
+        val soknadsperioder =
+            this.path("soknadsperioder").takeUnless { it.isMissingOrNull() }?.map { it.tilSøknadsperioder() }
+        return Soknad(
+            arbeidGjenopptatt = arbeidGjenopptatt,
+            sykmeldingSkrevet = sykmeldingSkrevet,
+            egenmeldingsdagerFraSykmelding = egenmeldingsdagerFraSykmelding,
+            soknadsperioder = soknadsperioder
+        )
+    }
+
+    private fun JsonNode.tilSøknadsperioder(): Soknadsperioder {
+        val faktiskGrad = this.path("faktiskGrad").takeUnless { it.isMissingOrNull() }?.asInt()
+        return Soknadsperioder(
+            fom = this.path("fom").asText(),
+            tom = this.path("tom").asText(),
+            grad = this.path("grad").asInt(),
+            faktiskGrad = faktiskGrad
+        )
     }
 
 }
+
 enum class DokumentType {
     SØKNAD, INNTEKTSMELDING
 }

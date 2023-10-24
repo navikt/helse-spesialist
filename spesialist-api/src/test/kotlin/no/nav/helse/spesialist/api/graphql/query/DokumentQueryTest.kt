@@ -9,6 +9,7 @@ import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import no.nav.helse.spesialist.api.objectMapper
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -78,9 +79,16 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
         val dokumentId = UUID.randomUUID()
         val arbeidGjenopptatt = LocalDate.now().toString()
         val sykmeldingSkrevet = LocalDateTime.now().toString()
+
+
         opprettSaksbehandler()
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
-        every { dokumenthåndterer.håndter(any(), any(), any()) } returns objectMapper.readTree(søknadJson(arbeidGjenopptatt, sykmeldingSkrevet))
+        every { dokumenthåndterer.håndter(any(), any(), any()) } returns objectMapper.readTree(
+            søknadJson(
+                arbeidGjenopptatt,
+                sykmeldingSkrevet
+            )
+        )
         val dokument = runQuery(
             """
             {
@@ -88,27 +96,39 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
                     dokumentId: "$dokumentId"
                     fnr: "$FØDSELSNUMMER"
                 ) {
-                    sykmeldingSkrevet, arbeidGjenopptatt
+                    sykmeldingSkrevet, arbeidGjenopptatt, egenmeldingsdagerFraSykmelding, soknadsperioder {
+                    fom, tom, grad, faktiskGrad
+                    }
                 }
             }
         """
         )["data"]["hentSoknad"]
 
-        verify(exactly = 1) { dokumenthåndterer.håndter(
-            fødselsnummer = FØDSELSNUMMER,
-            dokumentId = dokumentId,
-            dokumentType = DokumentType.SØKNAD.name
-        ) }
+        verify(exactly = 1) {
+            dokumenthåndterer.håndter(
+                fødselsnummer = FØDSELSNUMMER,
+                dokumentId = dokumentId,
+                dokumentType = DokumentType.SØKNAD.name
+            )
+        }
 
-        assertEquals(2, dokument.size())
+        assertEquals(4, dokument.size())
         assertEquals(arbeidGjenopptatt, dokument["arbeidGjenopptatt"].asText())
         assertEquals(sykmeldingSkrevet, dokument["sykmeldingSkrevet"].asText())
+        assertEquals("2018-01-01", dokument["egenmeldingsdagerFraSykmelding"].first().asText())
+        val hentetSoknadsperioder = dokument["soknadsperioder"].single()
+        assertEquals("2018-01-01", hentetSoknadsperioder["fom"].asText())
+        assertEquals("2018-01-31", hentetSoknadsperioder["tom"].asText())
+        assertEquals(100, hentetSoknadsperioder["grad"].asInt())
+        assertTrue(hentetSoknadsperioder["faktiskGrad"].isNull)
     }
 
     @Language("JSON")
     private fun søknadJson(arbeidGjenopptatt: String, sykmeldingSkrevet: String) = """{
   "arbeidGjenopptatt": "$arbeidGjenopptatt",
-  "sykmeldingSkrevet": "$sykmeldingSkrevet"
+  "sykmeldingSkrevet": "$sykmeldingSkrevet",
+  "egenmeldingsdagerFraSykmelding": ["2018-01-01"],
+  "soknadsperioder": [{"fom": "2018-01-01", "tom": "2018-01-31", "grad": 100, "faktiskGrad": null}]
 }
 """.trimIndent()
 
