@@ -59,6 +59,7 @@ import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
@@ -222,15 +223,10 @@ fun main() = runBlocking {
 private class SneakySaksbehandlerhåndterer(private val randomOppgaver: MutableList<OppgaveTilBehandling>) : Saksbehandlerhåndterer {
     val mock = mockk<Saksbehandlerhåndterer>(relaxed = true)
     override fun <T : HandlingFraApi> håndter(handlingFraApi: T, saksbehandlerFraApi: SaksbehandlerFraApi) {
-        val oppgaveId = if (handlingFraApi is TildelOppgave) handlingFraApi.oppgaveId else return
-        val oppgave = randomOppgaver.find { it.id.toLong() == oppgaveId } ?: return
-        randomOppgaver.remove(oppgave)
-        randomOppgaver.add(oppgave.copy(tildeling = Tildeling(
-            navn = saksbehandlerFraApi.navn,
-            epost = saksbehandlerFraApi.epost,
-            oid = saksbehandlerFraApi.oid.toString(),
-            paaVent = false,
-        )))
+        when (handlingFraApi) {
+            is TildelOppgave -> tildelOppgave(randomOppgaver, handlingFraApi, saksbehandlerFraApi)
+            is AvmeldOppgave -> avmeldOppgave(randomOppgaver, handlingFraApi)
+        }
     }
 
     override fun håndter(godkjenning: GodkjenningDto, behandlingId: UUID, saksbehandlerFraApi: SaksbehandlerFraApi) {
@@ -295,6 +291,23 @@ private class SneakyOppgaveHåndterer(private val randomOppgaver: List<OppgaveTi
         return mock.behandledeOppgaver(saksbehandlerFraApi)
     }
 
+}
+
+private fun tildelOppgave(randomOppgaver: MutableList<OppgaveTilBehandling>, handlingFraApi: TildelOppgave, saksbehandlerFraApi: SaksbehandlerFraApi) {
+    val oppgave = randomOppgaver.find { it.id.toLong() == handlingFraApi.oppgaveId } ?: return
+    randomOppgaver.remove(oppgave)
+    randomOppgaver.add(oppgave.copy(tildeling = Tildeling(
+        navn = saksbehandlerFraApi.navn,
+        epost = saksbehandlerFraApi.epost,
+        oid = saksbehandlerFraApi.oid.toString(),
+        paaVent = false,
+    )))
+}
+
+private fun avmeldOppgave(randomOppgaver: MutableList<OppgaveTilBehandling>, handlingFraApi: AvmeldOppgave) {
+    val oppgave = randomOppgaver.find { it.id.toLong() == handlingFraApi.oppgaveId } ?: return
+    randomOppgaver.remove(oppgave)
+    randomOppgaver.add(oppgave.copy(tildeling = null))
 }
 
 private fun List<OppgaveTilBehandling>.filtered(
