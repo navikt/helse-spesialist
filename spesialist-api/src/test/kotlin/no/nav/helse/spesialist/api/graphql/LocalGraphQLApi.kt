@@ -43,9 +43,11 @@ import no.nav.helse.spesialist.api.graphql.schema.Kjonn
 import no.nav.helse.spesialist.api.graphql.schema.OppgaveTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.OppgaverTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.Oppgavesortering
+import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
 import no.nav.helse.spesialist.api.graphql.schema.Personinfo
 import no.nav.helse.spesialist.api.graphql.schema.Reservasjon
 import no.nav.helse.spesialist.api.graphql.schema.Sorteringsnokkel
+import no.nav.helse.spesialist.api.graphql.schema.Tildeling
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.objectMapper
@@ -57,12 +59,15 @@ import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.utbetaling.UtbetalingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
+import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import no.nav.helse.spesialist.api.vedtaksperiode.EnhetDto
 import no.nav.helse.spleis.graphql.enums.GraphQLInntektstype
 import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetilstand
@@ -88,18 +93,19 @@ fun main() = runBlocking {
     val jwtStub = JwtStub()
     val clientId = "client_id"
     val issuer = "https://jwt-provider-domain"
-    val epostadresse = "sara.saksbehandler@nav.no"
+    val epostadresse = "dev@nav.no"
     fun getJwt(
         jwtStub: JwtStub,
         epostadresse: String,
         clientId: String,
         issuer: String,
     ) = jwtStub.getToken(
-        emptyList(),
-        UUID.fromString("4577332e-801a-4c13-8a71-39f12b8abfa3").toString(),
-        epostadresse,
-        clientId,
-        issuer
+        groups = emptyList(),
+        oid = UUID.fromString("4577332e-801a-4c13-8a71-39f12b8abfa3").toString(),
+        navn = "Utvikler, Lokal",
+        epostadresse = epostadresse,
+        clientId = clientId,
+        issuer = issuer
     )
 
     TestApplication(4321).start { dataSource ->
@@ -119,7 +125,6 @@ fun main() = runBlocking {
         val reservasjonClient = mockk<ReservasjonClient>(relaxed = true)
         val behandlingsstatistikkMediator = mockk<BehandlingsstatistikkMediator>(relaxed = true)
         val notatMediator = mockk<NotatMediator>(relaxed = true)
-        val saksbehandlerhåndterer = mockk<Saksbehandlerhåndterer>(relaxed = true)
         val totrinnsvurderinghåndterer = mockk<Totrinnsvurderinghåndterer>(relaxed = true)
         val godkjenninghåndterer = mockk<Godkjenninghåndterer>(relaxed = true)
         val personhåndterer = mockk<Personhåndterer>(relaxed = true)
@@ -179,6 +184,8 @@ fun main() = runBlocking {
             }
         }
 
+        val randomOppgaver = MutableList(1000) { TestdataGenerator.oppgave() }
+
         graphQLApi(
             personApiDao = personApiDao,
             egenAnsattApiDao = egenAnsattApiDao,
@@ -202,8 +209,8 @@ fun main() = runBlocking {
             snapshotMediator = SnapshotMediator(snapshotApiDao, mockk(relaxed = true)),
             behandlingsstatistikkMediator = behandlingsstatistikkMediator,
             notatMediator = notatMediator,
-            saksbehandlerhåndterer = saksbehandlerhåndterer,
-            oppgavehåndterer = SneakyOppgaveHåndterer,
+            saksbehandlerhåndterer = SneakySaksbehandlerhåndterer(randomOppgaver),
+            oppgavehåndterer = SneakyOppgaveHåndterer(randomOppgaver),
             totrinnsvurderinghåndterer = totrinnsvurderinghåndterer,
             godkjenninghåndterer = godkjenninghåndterer,
             personhåndterer = personhåndterer,
@@ -212,10 +219,48 @@ fun main() = runBlocking {
     }
 }
 
-private object SneakyOppgaveHåndterer : Oppgavehåndterer {
+private class SneakySaksbehandlerhåndterer(private val randomOppgaver: MutableList<OppgaveTilBehandling>) : Saksbehandlerhåndterer {
+    val mock = mockk<Saksbehandlerhåndterer>(relaxed = true)
+    override fun <T : HandlingFraApi> håndter(handlingFraApi: T, saksbehandlerFraApi: SaksbehandlerFraApi) {
+        val oppgaveId = if (handlingFraApi is TildelOppgave) handlingFraApi.oppgaveId else return
+        val oppgave = randomOppgaver.find { it.id.toLong() == oppgaveId } ?: return
+        randomOppgaver.remove(oppgave)
+        randomOppgaver.add(oppgave.copy(tildeling = Tildeling(
+            navn = saksbehandlerFraApi.navn,
+            epost = saksbehandlerFraApi.epost,
+            oid = saksbehandlerFraApi.oid.toString(),
+            paaVent = false,
+        )))
+    }
+
+    override fun håndter(godkjenning: GodkjenningDto, behandlingId: UUID, saksbehandlerFraApi: SaksbehandlerFraApi) {
+        return mock.håndter(godkjenning, behandlingId, saksbehandlerFraApi)
+    }
+
+    override fun opprettAbonnement(saksbehandlerFraApi: SaksbehandlerFraApi, personidentifikator: String) {
+        return opprettAbonnement(saksbehandlerFraApi, personidentifikator)
+    }
+
+    override fun hentAbonnerteOpptegnelser(
+        saksbehandlerFraApi: SaksbehandlerFraApi,
+        sisteSekvensId: Int,
+    ): List<Opptegnelse> {
+        return mock.hentAbonnerteOpptegnelser(saksbehandlerFraApi, sisteSekvensId)
+    }
+
+    override fun hentAbonnerteOpptegnelser(saksbehandlerFraApi: SaksbehandlerFraApi): List<Opptegnelse> {
+        return mock.hentAbonnerteOpptegnelser(saksbehandlerFraApi)
+    }
+
+    override fun håndterTotrinnsvurdering(oppgavereferanse: Long) {
+        return mock.håndterTotrinnsvurdering(oppgavereferanse)
+    }
+
+}
+
+private class SneakyOppgaveHåndterer(private val randomOppgaver: List<OppgaveTilBehandling>) : Oppgavehåndterer {
 
     val mock = mockk<Oppgavehåndterer>(relaxed = true)
-    val randomOppgaver = List(2000) { TestdataGenerator.oppgave() }
     override fun sendTilBeslutter(oppgaveId: Long, behandlendeSaksbehandler: SaksbehandlerFraApi) {
         return mock.sendTilBeslutter(oppgaveId, behandlendeSaksbehandler)
     }
