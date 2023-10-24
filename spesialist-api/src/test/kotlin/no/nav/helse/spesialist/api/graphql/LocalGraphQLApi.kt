@@ -94,7 +94,13 @@ fun main() = runBlocking {
         epostadresse: String,
         clientId: String,
         issuer: String,
-    ) = jwtStub.getToken(emptyList(), UUID.randomUUID().toString(), epostadresse, clientId, issuer)
+    ) = jwtStub.getToken(
+        emptyList(),
+        UUID.fromString("4577332e-801a-4c13-8a71-39f12b8abfa3").toString(),
+        epostadresse,
+        clientId,
+        issuer
+    )
 
     TestApplication(4321).start { dataSource ->
         val snapshotApiDao = mockk<SnapshotApiDao>(relaxed = true)
@@ -209,7 +215,7 @@ fun main() = runBlocking {
 private object SneakyOppgaveHåndterer : Oppgavehåndterer {
 
     val mock = mockk<Oppgavehåndterer>(relaxed = true)
-    val randomOppgaver = List(100) { TestdataGenerator.oppgave() }
+    val randomOppgaver = List(2000) { TestdataGenerator.oppgave() }
     override fun sendTilBeslutter(oppgaveId: Long, behandlendeSaksbehandler: SaksbehandlerFraApi) {
         return mock.sendTilBeslutter(oppgaveId, behandlendeSaksbehandler)
     }
@@ -233,7 +239,7 @@ private object SneakyOppgaveHåndterer : Oppgavehåndterer {
         sortering: List<Oppgavesortering>,
         filtrering: Filtrering,
     ): OppgaverTilBehandling {
-        val oppgaver = randomOppgaver.filtered(filtrering).sorted(sortering)
+        val oppgaver = randomOppgaver.filtered(filtrering, saksbehandlerFraApi).sorted(sortering)
         return OppgaverTilBehandling(
             oppgaver = oppgaver.drop(offset).take(limit),
             totaltAntallOppgaver = oppgaver.size
@@ -246,10 +252,18 @@ private object SneakyOppgaveHåndterer : Oppgavehåndterer {
 
 }
 
-private fun List<OppgaveTilBehandling>.filtered(filtrering: Filtrering): List<OppgaveTilBehandling> = this
-    .filter { oppgave -> if (filtrering.ingenUkategoriserteEgenskaper) !oppgave.egenskaper.any { it.kategori == Kategori.Ukategorisert } else true }
-    .filter { oppgave -> filtrering.egenskaper.isEmpty() || oppgave.egenskaper.containsAll(filtrering.egenskaper) }
-    .filter { oppgave -> filtrering.tildelt == null || if (filtrering.tildelt == true) oppgave.tildeling != null else oppgave.tildeling == null }
+private fun List<OppgaveTilBehandling>.filtered(
+    filtrering: Filtrering,
+    saksbehandlerFraApi: SaksbehandlerFraApi,
+): List<OppgaveTilBehandling> =
+    this
+        .asSequence()
+        .filter { oppgave -> if (filtrering.egneSaker) oppgave.erTildelt(saksbehandlerFraApi) else true }
+        .filter { oppgave -> if (filtrering.egneSakerPaVent) oppgave.erTildeltOgPåVent(saksbehandlerFraApi) else true }
+        .filter { oppgave -> if (filtrering.ingenUkategoriserteEgenskaper) !oppgave.egenskaper.any { it.kategori == Kategori.Ukategorisert } else true }
+        .filter { oppgave -> filtrering.egenskaper.isEmpty() || oppgave.egenskaper.containsAll(filtrering.egenskaper) }
+        .filter { oppgave -> filtrering.tildelt == null || if (filtrering.tildelt == true) oppgave.tildeling != null else oppgave.tildeling == null }
+        .toList()
 
 private fun List<OppgaveTilBehandling>.sorted(sortering: List<Oppgavesortering>): List<OppgaveTilBehandling> =
     when (if (sortering.isEmpty()) null else sortering.first().nokkel) {
@@ -258,6 +272,12 @@ private fun List<OppgaveTilBehandling>.sorted(sortering: List<Oppgavesortering>)
         Sorteringsnokkel.SOKNAD_MOTTATT -> if (sortering.first().stigende) this.sortedBy { it.opprinneligSoknadsdato } else this.sortedByDescending { it.opprinneligSoknadsdato }
         null -> this
     }
+
+private fun OppgaveTilBehandling.erTildelt(saksbehandlerFraApi: SaksbehandlerFraApi): Boolean =
+    !((this.tildeling == null || this.tildeling?.paaVent == true) || UUID.fromString(this.tildeling?.oid) != saksbehandlerFraApi.oid)
+
+private fun OppgaveTilBehandling.erTildeltOgPåVent(saksbehandlerFraApi: SaksbehandlerFraApi): Boolean =
+    !((this.tildeling == null || this.tildeling?.paaVent == false) || UUID.fromString(this.tildeling?.oid) != saksbehandlerFraApi.oid)
 
 private fun DecodedJWT.toJwtPrincipal() =
     JWTPrincipal(JWTParser().parsePayload(payload.decodeBase64String()))

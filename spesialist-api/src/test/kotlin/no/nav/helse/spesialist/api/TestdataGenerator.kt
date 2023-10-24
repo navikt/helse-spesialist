@@ -16,12 +16,16 @@ import kotlin.random.Random
 
 internal object TestdataGenerator {
 
-    private const val ANDEL_TILDELTE = 0.15
+    private const val ANDEL_TILDELTE = 0.20
     private const val ANDEL_PÅ_VENT = 0.3
 
-    private val saksbehandlere = List(10) {
+    private val saksbehandlere = List(9) {
         tilfeldigSaksbehandler()
-    }
+    } + TestSaksbehandler(
+        oid = UUID.fromString("4577332e-801a-4c13-8a71-39f12b8abfa3"),
+        navn = "Lokal utvikler",
+        epostadresse = "dev@nav.no"
+    )
 
     private val ukategoriserteOppgaveegenskaper get() = mutableListOf<Oppgaveegenskap>().apply {
         if (Random.nextFloat() > 0.9) {
