@@ -522,6 +522,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
 
         val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), tildelt = true)
         assertEquals(1, oppgaver.size)
+        assertEquals(1, oppgaver.first().filtrertAntall)
         assertEquals(listOf(oppgaveId1), oppgaver.map { it.id })
     }
 
@@ -537,6 +538,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
 
         val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), tildelt = false)
         assertEquals(2, oppgaver.size)
+        assertEquals(2, oppgaver.first().filtrertAntall)
         assertEquals(listOf(oppgaveId3, oppgaveId2), oppgaver.map { it.id })
     }
 
@@ -552,6 +554,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
 
         val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), tildelt = null)
         assertEquals(3, oppgaver.size)
+        assertEquals(3, oppgaver.first().filtrertAntall)
         assertEquals(listOf(oppgaveId3, oppgaveId2, oppgaveId1), oppgaver.map { it.id })
     }
 
@@ -567,6 +570,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         val oppgaveId3 = OPPGAVE_ID
         val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID())
         assertEquals(3, oppgaver.size)
+        assertEquals(3, oppgaver.first().filtrertAntall)
         assertEquals(listOf(oppgaveId3, oppgaveId2, oppgaveId1), oppgaver.map { it.id })
     }
 

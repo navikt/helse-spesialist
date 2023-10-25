@@ -94,7 +94,8 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                 t.på_vent,
                 o.opprettet,
                 os.soknad_mottatt AS opprinnelig_soknadsdato,
-                o.kan_avvises
+                o.kan_avvises,
+                count(1) OVER() AS filtered_count
             FROM oppgave o
                 INNER JOIN vedtak v ON o.vedtak_ref = v.id
                 INNER JOIN person p ON v.person_ref = p.id
@@ -152,6 +153,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                 påVent = row.boolean("på_vent"),
                 opprettet = row.localDateTime("opprettet"),
                 opprinneligSøknadsdato = row.localDateTime("opprinnelig_soknadsdato"),
+                filtrertAntall = row.int("filtered_count")
             )
         }
     }

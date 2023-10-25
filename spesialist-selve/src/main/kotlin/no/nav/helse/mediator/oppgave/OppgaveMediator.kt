@@ -168,7 +168,7 @@ internal class OppgaveMediator(
             )
         return OppgaverTilBehandling(
             oppgaver = oppgaver.tilOppgaverTilBehandling(),
-            totaltAntallOppgaver = 1
+            totaltAntallOppgaver = if (oppgaver.isEmpty()) 0 else oppgaver.first().filtrertAntall
         )
     }
 

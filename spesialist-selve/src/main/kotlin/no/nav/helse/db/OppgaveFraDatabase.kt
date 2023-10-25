@@ -28,6 +28,7 @@ data class OppgaveFraDatabaseForVisning(
     val påVent: Boolean = false,
     val opprettet: LocalDateTime,
     val opprinneligSøknadsdato: LocalDateTime,
+    val filtrertAntall: Int,
 )
 
 data class BehandletOppgaveFraDatabaseForVisning(

@@ -236,8 +236,8 @@ internal class OppgaveMediatorTest {
     @Test
     fun `Hent oppgaver til visning`() {
         every { oppgaveDao.finnOppgaverForVisning(any(), any()) } returns listOf(
-            oppgaveFraDatabaseForVisning(),
-            oppgaveFraDatabaseForVisning(),
+            oppgaveFraDatabaseForVisning(filtrertAntall = 2),
+            oppgaveFraDatabaseForVisning(filtrertAntall = 2),
         )
         val oppgaver = mediator.oppgaver(saksbehandlerFraApi(), 0, MAX_VALUE, emptyList(), Filtrering())
         assertEquals(2, oppgaver.oppgaver.size)
@@ -493,7 +493,8 @@ internal class OppgaveMediatorTest {
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         personnavnFraDatabase: PersonnavnFraDatabase = PersonnavnFraDatabase("navn", "mellomnavn", "etternavn"),
         tildelt: SaksbehandlerFraDatabase? = null,
-        påVent: Boolean = false
+        påVent: Boolean = false,
+        filtrertAntall: Int = 1,
     ) =
         OppgaveFraDatabaseForVisning(
             id = oppgaveId,
@@ -505,6 +506,7 @@ internal class OppgaveMediatorTest {
             påVent = påVent,
             opprettet = opprettet,
             opprinneligSøknadsdato = opprinneligSøknadsdato,
+            filtrertAntall = filtrertAntall,
         )
 
     private fun oppgaveFraDatabase(oppgaveId: Long = OPPGAVE_ID, tildelt: Boolean = false) = OppgaveFraDatabase(

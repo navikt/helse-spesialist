@@ -57,7 +57,8 @@ internal class OppgaveMapperTest {
             tildelt = saksbehandler,
             påVent = true,
             opprettet = opprettet,
-            opprinneligSøknadsdato = opprinneligSøknadsdato
+            opprinneligSøknadsdato = opprinneligSøknadsdato,
+            filtrertAntall = 1,
         )
         val oppgaverTilBehandling = listOf(oppgaveFraDatabaseForVisning).tilOppgaverTilBehandling()
         assertEquals(1, oppgaverTilBehandling.size)
@@ -96,7 +97,8 @@ internal class OppgaveMapperTest {
             tildelt = saksbehandler,
             påVent = true,
             opprettet = opprettet,
-            opprinneligSøknadsdato = opprinneligSøknadsdato
+            opprinneligSøknadsdato = opprinneligSøknadsdato,
+            filtrertAntall = 1,
         )
         val oppgaverTilBehandling = listOf(oppgaveFraDatabaseForVisning).tilOppgaverTilBehandling()
         assertEquals(1, oppgaverTilBehandling.size)
@@ -117,7 +119,8 @@ internal class OppgaveMapperTest {
             tildelt = saksbehandler,
             påVent = true,
             opprettet = opprettet,
-            opprinneligSøknadsdato = opprinneligSøknadsdato
+            opprinneligSøknadsdato = opprinneligSøknadsdato,
+            filtrertAntall = 1,
         )
         assertThrows<NoSuchElementException> {
             listOf(oppgaveFraDatabaseForVisning).tilOppgaverTilBehandling()
@@ -141,7 +144,8 @@ internal class OppgaveMapperTest {
             tildelt = saksbehandler,
             påVent = true,
             opprettet = opprettet,
-            opprinneligSøknadsdato = opprinneligSøknadsdato
+            opprinneligSøknadsdato = opprinneligSøknadsdato,
+            filtrertAntall = 1,
         )
         val oppgaverTilBehandling = listOf(oppgaveFraDatabaseForVisning).tilOppgaverTilBehandling()
         assertEquals(1, oppgaverTilBehandling.size)
@@ -168,7 +172,8 @@ internal class OppgaveMapperTest {
             tildelt = saksbehandler,
             påVent = true,
             opprettet = opprettet,
-            opprinneligSøknadsdato = opprinneligSøknadsdato
+            opprinneligSøknadsdato = opprinneligSøknadsdato,
+            filtrertAntall = 1,
         )
         assertThrows<NoSuchElementException> {
             listOf(oppgaveFraDatabaseForVisning).tilOppgaverTilBehandling()
@@ -192,7 +197,8 @@ internal class OppgaveMapperTest {
             tildelt = saksbehandler,
             påVent = true,
             opprettet = opprettet,
-            opprinneligSøknadsdato = opprinneligSøknadsdato
+            opprinneligSøknadsdato = opprinneligSøknadsdato,
+            filtrertAntall = 1,
         )
         val oppgaverTilBehandling = listOf(oppgaveFraDatabaseForVisning).tilOppgaverTilBehandling()
         assertEquals(1, oppgaverTilBehandling.size)
@@ -219,7 +225,8 @@ internal class OppgaveMapperTest {
             tildelt = saksbehandler,
             påVent = true,
             opprettet = opprettet,
-            opprinneligSøknadsdato = opprinneligSøknadsdato
+            opprinneligSøknadsdato = opprinneligSøknadsdato,
+            filtrertAntall = 1,
         )
         assertThrows<NoSuchElementException> {
             listOf(oppgaveFraDatabaseForVisning).tilOppgaverTilBehandling()
