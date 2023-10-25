@@ -537,6 +537,7 @@ type Soknad {
     arbeidGjenopptatt: String
     egenmeldingsdagerFraSykmelding: [String!]
     soknadsperioder: [Soknadsperioder!]
+    sporsmal: [Sporsmal!]
     sykmeldingSkrevet: String
 }
 
@@ -565,6 +566,20 @@ type Soknadsperioder {
     fom: String!
     grad: Int!
     tom: String!
+}
+
+type Sporsmal {
+    kriterieForVisningAvUndersporsmal: Visningskriterium
+    sporsmalstekst: String
+    svar: [Svar!]
+    svartype: Svartype
+    tag: String
+    undersporsmal: [Sporsmal]
+    undertekst: String
+}
+
+type Svar {
+    verdi: String
 }
 
 type Sykepengedager {
@@ -957,6 +972,35 @@ enum Sorteringsnokkel {
     TILDELT_TIL
 }
 
+enum Svartype {
+    BEKREFTELSESPUNKTER
+    BELOP
+    CHECKBOX
+    CHECKBOX_GRUPPE
+    CHECKBOX_PANEL
+    COMBOBOX_MULTI
+    COMBOBOX_SINGLE
+    DATO
+    DATOER
+    FRITEKST
+    IKKE_RELEVANT
+    INFO_BEHANDLINGSDAGER
+    JA_NEI
+    KILOMETER
+    KVITTERING
+    LAND
+    PERIODE
+    PERIODER
+    PROSENT
+    RADIO
+    RADIO_GRUPPE
+    RADIO_GRUPPE_TIMER_PROSENT
+    RADIO_GRUPPE_UKEKALENDER
+    TALL
+    TIMER
+    UKJENT
+}
+
 enum Sykdomsdagtype {
     ANDRE_YTELSER_AAP
     ANDRE_YTELSER_DAGPENGER
@@ -1023,6 +1067,13 @@ enum Varselstatus {
 enum Vilkarsgrunnlagtype {
     INFOTRYGD
     SPLEIS
+    UKJENT
+}
+
+enum Visningskriterium {
+    CHECKED
+    JA
+    NEI
     UKJENT
 }
 
