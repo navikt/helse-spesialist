@@ -21,7 +21,7 @@ data class Sporsmal(
     val undertekst: String? = null,
     val svartype: Svartype? = null,
     val svar: List<Svar>? = null,
-    val undersporsmal: List<Sporsmal?>? = null,
+    val undersporsmal: List<Sporsmal>? = null,
     val kriterieForVisningAvUndersporsmal: Visningskriterium? = null
 )
 

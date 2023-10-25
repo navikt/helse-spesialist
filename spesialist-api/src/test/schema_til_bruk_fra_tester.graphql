@@ -574,7 +574,7 @@ type Sporsmal {
     svar: [Svar!]
     svartype: Svartype
     tag: String
-    undersporsmal: [Sporsmal]
+    undersporsmal: [Sporsmal!]
     undertekst: String
 }
 
