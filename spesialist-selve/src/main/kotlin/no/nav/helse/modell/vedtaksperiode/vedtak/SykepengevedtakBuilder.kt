@@ -54,15 +54,11 @@ internal class SykepengevedtakBuilder {
     internal fun begrunnelseFraMal(begrunnelseFraMal: String) = apply { this.begrunnelseFraMal = begrunnelseFraMal }
     internal fun begrunnelseFraFritekst(begrunnelseFraFritekst: String) = apply { this.begrunnelseFraFritekst = begrunnelseFraFritekst }
     internal fun begrunnelseFraKonklusjon(begrunnelseFraKonklusjon: String) = apply { this.begrunnelseFraKonklusjon = begrunnelseFraKonklusjon }
-    internal fun tags(tags: List<Tag>) = apply { this.tags = tags.map { it.mapToString() } }
+    internal fun tags(tags: List<String>) = apply { this.tags = tags }
 
     internal fun build(): Sykepengevedtak {
         if (utbetalingId != null && sykepengegrunnlagsfakta != null) return buildVedtak()
         return buildAuuVedtak()
-    }
-
-    private fun Tag.mapToString(): String = when (this) {
-        Tag.IngenNyArbeidsgiverperiode -> "IngenNyArbeidsgiverperiode"
     }
 
     private fun buildAuuVedtak(): Sykepengevedtak.AuuVedtak {

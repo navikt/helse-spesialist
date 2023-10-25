@@ -62,7 +62,7 @@ class SykepengevedtakBuilderTest {
             .inntekt(inntekt)
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
             .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_HOVEDREGEL))
-            .tags(listOf(Tag.IngenNyArbeidsgiverperiode))
+            .tags(listOf("IngenNyArbeidsgiverperiode"))
 
         val utkast = builder.build()
         assertTrue(utkast is Sykepengevedtak.Vedtak)
@@ -113,7 +113,7 @@ class SykepengevedtakBuilderTest {
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
             .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_SKJØNN))
             .skjønnsfastsattSykepengegrunnlag(SkjønnsfastattSykepengegrunnlag(skjæringstidspunkt, "Mal", "Fritekst", "Konklusjon", LocalDateTime.now()))
-            .tags(listOf(Tag.IngenNyArbeidsgiverperiode))
+            .tags(listOf("IngenNyArbeidsgiverperiode"))
 
         val utkast = builder.build()
         assertTrue(utkast is Sykepengevedtak.Vedtak)
@@ -163,7 +163,7 @@ class SykepengevedtakBuilderTest {
             .inntekt(inntekt)
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
             .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(I_INFOTRYGD))
-            .tags(listOf(Tag.IngenNyArbeidsgiverperiode))
+            .tags(listOf("IngenNyArbeidsgiverperiode"))
 
         val utkast = builder.build()
         assertTrue(utkast is Sykepengevedtak.Vedtak)
@@ -211,7 +211,7 @@ class SykepengevedtakBuilderTest {
             .begrensning(begrensning)
             .inntekt(inntekt)
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
-            .tags(listOf(Tag.IngenNyArbeidsgiverperiode))
+            .tags(listOf("IngenNyArbeidsgiverperiode"))
 
         val utkast = builder.build()
         assertTrue(utkast is Sykepengevedtak.AuuVedtak)
@@ -254,7 +254,7 @@ class SykepengevedtakBuilderTest {
             .begrensning(begrensning)
             .inntekt(inntekt)
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
-            .tags(listOf(Tag.IngenNyArbeidsgiverperiode))
+            .tags(listOf("IngenNyArbeidsgiverperiode"))
 
         assertTrue(builder.build() is Sykepengevedtak.AuuVedtak)
     }
@@ -278,7 +278,7 @@ class SykepengevedtakBuilderTest {
             .begrensning(begrensning)
             .inntekt(inntekt)
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
-            .tags(listOf(Tag.IngenNyArbeidsgiverperiode))
+            .tags(listOf("IngenNyArbeidsgiverperiode"))
 
         assertTrue(builder.build() is Sykepengevedtak.AuuVedtak)
     }
@@ -302,7 +302,7 @@ class SykepengevedtakBuilderTest {
             .inntekt(inntekt)
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
             .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_HOVEDREGEL))
-            .tags(listOf(Tag.IngenNyArbeidsgiverperiode))
+            .tags(listOf("IngenNyArbeidsgiverperiode"))
 
         assertTrue(builder.build() is Sykepengevedtak.AuuVedtak)
     }
@@ -408,7 +408,7 @@ class SykepengevedtakBuilderTest {
             .begrunnelseFraFritekst("Fritekst")
             .begrunnelseFraMal("Mal")
             .begrunnelseFraKonklusjon("Konklusjon")
-            .tags(listOf(Tag.IngenNyArbeidsgiverperiode))
+            .tags(listOf("IngenNyArbeidsgiverperiode"))
 
         val utkast = builder.build()
         assertTrue(utkast is Sykepengevedtak.Vedtak)
