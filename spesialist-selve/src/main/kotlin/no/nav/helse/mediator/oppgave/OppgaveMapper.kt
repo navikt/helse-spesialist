@@ -108,8 +108,15 @@ internal object OppgaveMapper {
         }
     }
 
-    internal fun List<Oppgaveegenskap>.tilDatabaseversjon(): List<EgenskapForDatabase> {
-        return this.map { it.tilDatabaseversjon() }
+    internal fun List<Oppgaveegenskap>.tilDatabaseversjon(): List<EgenskapForDatabase> =
+        this.map { it.tilDatabaseversjon() }
+
+    internal fun Kategori.tilDatabaseversjon(): Egenskap.Kategori = when (this) {
+        Kategori.Mottaker -> Egenskap.Kategori.Mottaker
+        Kategori.Inntektskilde -> Egenskap.Kategori.Inntektskilde
+        Kategori.Oppgavetype -> Egenskap.Kategori.Oppgavetype
+        Kategori.Ukategorisert -> Egenskap.Kategori.Ukategorisert
+        Kategori.Periodetype -> Egenskap.Kategori.Periodetype
     }
 
     private fun Egenskap.tilApiversjon(): EgenskapForApi = when (this) {

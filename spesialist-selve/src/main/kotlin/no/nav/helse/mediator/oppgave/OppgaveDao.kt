@@ -13,6 +13,7 @@ import no.nav.helse.db.PersonnavnFraDatabase
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.SorteringsnøkkelForDatabase
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommandData
+import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker
@@ -74,14 +75,20 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
         offset: Int = 0,
         limit: Int = Int.MAX_VALUE,
         sortering: List<OppgavesorteringForDatabase> = emptyList(),
-        kreverEgenskaper: List<EgenskapForDatabase> = emptyList(),
         egneSakerPåVent: Boolean = false,
         egneSaker: Boolean = false,
         tildelt: Boolean? = null,
+        grupperteFiltrerteEgenskaper: Map<Egenskap.Kategori, List<EgenskapForDatabase>>? = emptyMap()
     ): List<OppgaveFraDatabaseForVisning> {
         val orderBy = if (sortering.isNotEmpty()) sortering.joinToString { it.nøkkelTilKolonne() } else "opprettet DESC"
         val egenskaperSomSkalEkskluderes = ekskluderEgenskaper.joinToString { """ '$it' """ }
-        val egenskaperSomKreves = kreverEgenskaper.joinToString { """ '${it.name}' """ }
+
+        val ukategoriserteEgenskaper = grupperteFiltrerteEgenskaper?.get(Egenskap.Kategori.Ukategorisert)?.joinToString { """ '${it.name}' """ }
+        val oppgavetypeEgenskaper = grupperteFiltrerteEgenskaper?.get(Egenskap.Kategori.Oppgavetype)?.joinToString { """ '${it.name}' """ }
+        val periodetypeEgenskaper = grupperteFiltrerteEgenskaper?.get(Egenskap.Kategori.Periodetype)?.joinToString { """ '${it.name}' """ }
+        val mottakerEgenskaper = grupperteFiltrerteEgenskaper?.get(Egenskap.Kategori.Mottaker)?.joinToString { """ '${it.name}' """ }
+        val antallArbeidsforholdEgenskaper = grupperteFiltrerteEgenskaper?.get(Egenskap.Kategori.Inntektskilde)?.joinToString { """ '${it.name}' """ }
+
         return asSQL(
             """
                 SELECT
@@ -105,7 +112,11 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                 LEFT JOIN totrinnsvurdering ttv ON (ttv.vedtaksperiode_id = v.vedtaksperiode_id AND ttv.utbetaling_id_ref IS NULL)
                 LEFT JOIN saksbehandler s ON t.saksbehandler_ref = s.oid
                 WHERE o.status = 'AvventerSaksbehandler'
-                AND (egenskaper @> ARRAY[$egenskaperSomKreves]::varchar[]) -- egenskaper saksbehandler har filtrert på
+                AND (:ingen_ukategoriserte_egenskaper OR egenskaper @> ARRAY[$ukategoriserteEgenskaper]::varchar[]) -- egenskaper saksbehandler har filtrert på
+                AND (:ingen_oppgavetype_egenskaper OR egenskaper && ARRAY[$oppgavetypeEgenskaper]::varchar[]) -- egenskaper saksbehandler har filtrert på
+                AND (:ingen_periodetype_egenskaper OR egenskaper && ARRAY[$periodetypeEgenskaper]::varchar[]) -- egenskaper saksbehandler har filtrert på
+                AND (:ingen_mottakertype_egenskaper OR egenskaper && ARRAY[$mottakerEgenskaper]::varchar[]) -- egenskaper saksbehandler har filtrert på
+                AND (:ingen_antallarbeidsforholdtype_egenskaper OR egenskaper && ARRAY[$antallArbeidsforholdEgenskaper]::varchar[]) -- egenskaper saksbehandler har filtrert på
                 AND NOT (egenskaper && ARRAY[$egenskaperSomSkalEkskluderes]::varchar[]) -- egenskaper saksbehandler ikke har tilgang til
                 AND NOT (egenskaper && ARRAY['BESLUTTER']::varchar[] AND ttv.saksbehandler = :oid) -- hvis oppgaven er sendt til beslutter og saksbehandler var den som sendte
                 AND 
@@ -130,6 +141,11 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                 "egne_saker_pa_vent" to egneSakerPåVent,
                 "egne_saker" to egneSaker,
                 "tildelt" to tildelt,
+                "ingen_ukategoriserte_egenskaper" to (ukategoriserteEgenskaper == null),
+                "ingen_oppgavetype_egenskaper" to (oppgavetypeEgenskaper == null),
+                "ingen_periodetype_egenskaper" to (periodetypeEgenskaper == null),
+                "ingen_mottakertype_egenskaper" to (mottakerEgenskaper == null),
+                "ingen_antallarbeidsforholdtype_egenskaper" to (antallArbeidsforholdEgenskaper == null),
             )
         ).list { row ->
             OppgaveFraDatabaseForVisning(

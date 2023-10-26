@@ -151,8 +151,10 @@ internal class OppgaveMediator(
         val egenskaperSomSkalEkskluderes =
             egenskaperSaksbehandlerIkkeHarTilgangTil + if (filtrering.ingenUkategoriserteEgenskaper) alleUkategoriserteEgenskaper else emptyList()
 
-
-        val filtrerteEgenskaper = filtrering.egenskaper.tilDatabaseversjon()
+        val grupperteFiltrerteEgenskaper = filtrering.egenskaper
+            .groupBy { it.kategori }
+            .map { it.key.tilDatabaseversjon() to it.value.tilDatabaseversjon() }
+            .toMap()
 
         val oppgaver = oppgaveDao
             .finnOppgaverForVisning(
@@ -161,10 +163,10 @@ internal class OppgaveMediator(
                 offset = offset,
                 limit = limit,
                 sortering = sortering.tilOppgavesorteringForDatabase(),
-                kreverEgenskaper = filtrerteEgenskaper,
                 egneSakerPåVent = filtrering.egneSakerPaVent,
                 egneSaker = filtrering.egneSaker,
                 tildelt = filtrering.tildelt,
+                grupperteFiltrerteEgenskaper = grupperteFiltrerteEgenskaper,
             )
         return OppgaverTilBehandling(
             oppgaver = oppgaver.tilOppgaverTilBehandling(),

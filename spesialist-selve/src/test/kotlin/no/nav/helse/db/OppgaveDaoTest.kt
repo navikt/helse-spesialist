@@ -6,11 +6,17 @@ import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.db.EgenskapForDatabase.BESLUTTER
+import no.nav.helse.db.EgenskapForDatabase.DELVIS_REFUSJON
+import no.nav.helse.db.EgenskapForDatabase.EN_ARBEIDSGIVER
+import no.nav.helse.db.EgenskapForDatabase.FLERE_ARBEIDSGIVERE
+import no.nav.helse.db.EgenskapForDatabase.FORSTEGANGSBEHANDLING
 import no.nav.helse.db.EgenskapForDatabase.FORTROLIG_ADRESSE
 import no.nav.helse.db.EgenskapForDatabase.HASTER
+import no.nav.helse.db.EgenskapForDatabase.REVURDERING
 import no.nav.helse.db.EgenskapForDatabase.RISK_QA
 import no.nav.helse.db.EgenskapForDatabase.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.db.EgenskapForDatabase.SØKNAD
+import no.nav.helse.db.EgenskapForDatabase.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.db.EgenskapForDatabase.UTLAND
 import no.nav.helse.mediator.oppgave.Oppgavemelder
 import no.nav.helse.modell.CommandContextDao
@@ -317,7 +323,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         val oppgaveId2 = OPPGAVE_ID
         nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456789", oppgaveEgenskaper = listOf(RISK_QA, SØKNAD))
         val oppgaveId3 = OPPGAVE_ID
-        val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), kreverEgenskaper = listOf(RISK_QA, SØKNAD))
+        val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), grupperteFiltrerteEgenskaper = mapOf(Egenskap.Kategori.Ukategorisert to listOf(RISK_QA), Egenskap.Kategori.Oppgavetype to listOf(SØKNAD)))
         assertEquals(2, oppgaver.size)
         assertEquals(listOf(oppgaveId3, oppgaveId2), oppgaver.map { it.id })
     }
@@ -327,7 +333,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(fødselsnummer = "12345678910", aktørId = "1234567891011", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "123456789")
         nyPerson(fødselsnummer = "12345678911", aktørId = "1234567891012", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "223456789", oppgaveEgenskaper = listOf(SØKNAD))
         nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456789", oppgaveEgenskaper = listOf(RISK_QA))
-        val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), kreverEgenskaper = listOf(RISK_QA, SØKNAD))
+        val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), grupperteFiltrerteEgenskaper = mapOf(Egenskap.Kategori.Ukategorisert to listOf(RISK_QA), Egenskap.Kategori.Oppgavetype to listOf(SØKNAD)))
         assertEquals(0, oppgaver.size)
     }
 
@@ -621,6 +627,93 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettTotrinnsvurdering(vedtaksperiodeId, saksbehandlerOid)
         val oppgaver = oppgaveDao.finnOppgaverForVisning(ekskluderEgenskaper = listOf("STRENGT_FORTROLIG_ADRESSE"), saksbehandlerOid = saksbehandlerOid)
         assertEquals(0, oppgaver.size)
+    }
+
+    @Test
+    fun `Oppgaver blir filtrert riktig`() {
+        nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456789", oppgaveEgenskaper = listOf(
+            SØKNAD, HASTER, UTLAND, FORSTEGANGSBEHANDLING, DELVIS_REFUSJON, FLERE_ARBEIDSGIVERE
+        ))
+        val oppgaveId1 = OPPGAVE_ID
+        nyPerson(fødselsnummer = "12345678913", aktørId = "1234567891014", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456790", oppgaveEgenskaper = listOf(
+            REVURDERING, HASTER
+        ))
+        nyPerson(fødselsnummer = "12345678914", aktørId = "1234567891015", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456791", oppgaveEgenskaper = listOf(
+            SØKNAD, UTLAND
+        ))
+        nyPerson(fødselsnummer = "12345678915", aktørId = "1234567891016", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456792", oppgaveEgenskaper = listOf(
+            UTBETALING_TIL_SYKMELDT, EN_ARBEIDSGIVER
+        ))
+        val oppgaveId4 = OPPGAVE_ID
+
+        val oppgaver = oppgaveDao.finnOppgaverForVisning(
+            ekskluderEgenskaper = emptyList(),
+            saksbehandlerOid = UUID.randomUUID(),
+            grupperteFiltrerteEgenskaper = mapOf(Egenskap.Kategori.Oppgavetype to listOf(SØKNAD, REVURDERING))
+        )
+        val oppgaver1 = oppgaveDao.finnOppgaverForVisning(
+            ekskluderEgenskaper = emptyList(),
+            saksbehandlerOid = UUID.randomUUID(),
+            grupperteFiltrerteEgenskaper = mapOf(Egenskap.Kategori.Ukategorisert to listOf(HASTER, UTLAND))
+        )
+        val oppgaver2 = oppgaveDao.finnOppgaverForVisning(
+            ekskluderEgenskaper = emptyList(),
+            saksbehandlerOid = UUID.randomUUID(),
+            grupperteFiltrerteEgenskaper = mapOf(
+                Egenskap.Kategori.Ukategorisert to listOf(HASTER, UTLAND),
+                Egenskap.Kategori.Oppgavetype to listOf(SØKNAD),
+                Egenskap.Kategori.Periodetype to listOf(FORSTEGANGSBEHANDLING),
+                Egenskap.Kategori.Mottaker to listOf(DELVIS_REFUSJON),
+                Egenskap.Kategori.Inntektskilde to listOf(FLERE_ARBEIDSGIVERE),
+            )
+        )
+        val oppgaver3 = oppgaveDao.finnOppgaverForVisning(
+            ekskluderEgenskaper = emptyList(),
+            saksbehandlerOid = UUID.randomUUID(),
+            grupperteFiltrerteEgenskaper = mapOf(
+                Egenskap.Kategori.Mottaker to listOf(UTBETALING_TIL_SYKMELDT),
+                Egenskap.Kategori.Inntektskilde to listOf(EN_ARBEIDSGIVER)
+            )
+        )
+        val oppgaver5 = oppgaveDao.finnOppgaverForVisning(
+            ekskluderEgenskaper = emptyList(),
+            saksbehandlerOid = UUID.randomUUID(),
+            grupperteFiltrerteEgenskaper = emptyMap()
+        )
+
+        assertEquals(3, oppgaver.size)
+        assertEquals(1, oppgaver1.size)
+        assertEquals(oppgaveId1, oppgaver1.first().id)
+        assertEquals(1, oppgaver2.size)
+        assertEquals(oppgaveId1, oppgaver2.first().id)
+        assertEquals(1, oppgaver3.size)
+        assertEquals(oppgaveId4, oppgaver3.first().id)
+        assertEquals(4, oppgaver5.size)
+    }
+
+    @Test
+    fun `Grupperte filtrerte egenskaper fungerer sammen med ekskluderte egenskaper`() {
+        nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456789", oppgaveEgenskaper = listOf(
+            SØKNAD, FORSTEGANGSBEHANDLING, DELVIS_REFUSJON, FLERE_ARBEIDSGIVERE
+        ))
+        val oppgaveId1 = OPPGAVE_ID
+        nyPerson(fødselsnummer = "12345678913", aktørId = "1234567891014", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456790", oppgaveEgenskaper = listOf(
+            SØKNAD, HASTER, UTLAND, FORSTEGANGSBEHANDLING, DELVIS_REFUSJON, FLERE_ARBEIDSGIVERE
+        ))
+
+        val oppgaver = oppgaveDao.finnOppgaverForVisning(
+            ekskluderEgenskaper = Egenskap.alleUkategoriserteEgenskaper.map(Egenskap::toString),
+            saksbehandlerOid = UUID.randomUUID(),
+            grupperteFiltrerteEgenskaper = mapOf(
+                Egenskap.Kategori.Oppgavetype to listOf(SØKNAD),
+                Egenskap.Kategori.Periodetype to listOf(FORSTEGANGSBEHANDLING),
+                Egenskap.Kategori.Mottaker to listOf(DELVIS_REFUSJON),
+                Egenskap.Kategori.Inntektskilde to listOf(FLERE_ARBEIDSGIVERE),
+            )
+        )
+
+        assertEquals(1, oppgaver.size)
+        assertEquals(oppgaveId1, oppgaver.first().id)
     }
 
     @Test
