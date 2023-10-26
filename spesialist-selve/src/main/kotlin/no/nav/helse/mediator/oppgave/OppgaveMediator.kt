@@ -13,6 +13,7 @@ import no.nav.helse.db.TotrinnsvurderingFraDatabase
 import no.nav.helse.db.TotrinnsvurderingRepository
 import no.nav.helse.mediator.SaksbehandlerMediator.Companion.tilApiversjon
 import no.nav.helse.mediator.TilgangskontrollørForApi
+import no.nav.helse.mediator.oppgave.OppgaveMapper.tilApiversjon
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilBehandledeOppgaver
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilDatabaseversjon
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilOppgaverTilBehandling
@@ -28,6 +29,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload.Companion.lagre
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
+import no.nav.helse.spesialist.api.graphql.schema.AntallOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.BehandletOppgave
 import no.nav.helse.spesialist.api.graphql.schema.Filtrering
 import no.nav.helse.spesialist.api.graphql.schema.OppgaverTilBehandling
@@ -172,6 +174,12 @@ internal class OppgaveMediator(
             oppgaver = oppgaver.tilOppgaverTilBehandling(),
             totaltAntallOppgaver = if (oppgaver.isEmpty()) 0 else oppgaver.first().filtrertAntall
         )
+    }
+
+    override fun antallOppgaver(saksbehandlerFraApi: SaksbehandlerFraApi): AntallOppgaver {
+        val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
+        val antallOppgaver = oppgaveDao.finnAntallOppgaver(saksbehandlerOid = saksbehandler.oid())
+        return antallOppgaver.tilApiversjon()
     }
 
     override fun behandledeOppgaver(saksbehandlerFraApi: SaksbehandlerFraApi): List<BehandletOppgave> {

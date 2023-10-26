@@ -849,6 +849,47 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         assertOppgaveStatus(oppgaveId2, "AvventerSaksbehandler")
     }
 
+    @Test
+    fun `Teller mine saker og mine saker på vent riktig`() {
+        val saksbehandlerOid = UUID.randomUUID()
+        opprettSaksbehandler(saksbehandlerOid)
+
+        nyPerson(fødselsnummer = "12345678910", aktørId = "1234567891011", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "123456789")
+        val oppgaveId1 = OPPGAVE_ID
+        tildelOppgave(oppgaveId = oppgaveId1, saksbehandlerOid = saksbehandlerOid)
+
+        nyPerson(fødselsnummer = "12345678911", aktørId = "1234567891012", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "223456789")
+        val oppgaveId2 = OPPGAVE_ID
+        tildelOppgave(oppgaveId = oppgaveId2, saksbehandlerOid = saksbehandlerOid)
+
+        nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456789")
+        val oppgaveId3 = OPPGAVE_ID
+        tildelOppgave(oppgaveId = oppgaveId3, saksbehandlerOid = saksbehandlerOid, påVent = true)
+
+        nyPerson(fødselsnummer = "12345678913", aktørId = "1234567891014", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456790")
+        val oppgaveId4 = OPPGAVE_ID
+        tildelOppgave(oppgaveId = oppgaveId4, saksbehandlerOid = UUID.randomUUID(), påVent = true)
+
+        val antallOppgaver = oppgaveDao.finnAntallOppgaver(saksbehandlerOid)
+
+        assertEquals(2, antallOppgaver.antallMineSaker)
+        assertEquals(1, antallOppgaver.antallMineSakerPåVent)
+    }
+
+    @Test
+    fun `Antall mine saker og mine saker på vent er 0 hvis det ikke finnes tildeling for saksbehandler`() {
+        val saksbehandlerOid = UUID.randomUUID()
+        opprettSaksbehandler(saksbehandlerOid)
+
+        val vedtaksperiodeId1 = UUID.randomUUID()
+        nyPerson(fødselsnummer = "12345678910", aktørId = "1234567891011", vedtaksperiodeId = vedtaksperiodeId1, organisasjonsnummer = "123456789")
+
+        val antallOppgaver = oppgaveDao.finnAntallOppgaver(saksbehandlerOid)
+
+        assertEquals(0, antallOppgaver.antallMineSaker)
+        assertEquals(0, antallOppgaver.antallMineSakerPåVent)
+    }
+
     private fun assertOppgaveStatus(oppgaveId: Long, forventetStatus: String) {
         val status = sessionOf(dataSource).use { session ->
             session.run(

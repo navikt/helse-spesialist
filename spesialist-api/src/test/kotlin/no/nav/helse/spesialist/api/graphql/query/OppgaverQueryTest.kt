@@ -6,6 +6,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import no.nav.helse.spesialist.api.graphql.schema.AntallArbeidsforhold
+import no.nav.helse.spesialist.api.graphql.schema.AntallOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.Egenskap
 import no.nav.helse.spesialist.api.graphql.schema.Filtrering
 import no.nav.helse.spesialist.api.graphql.schema.Kategori
@@ -64,6 +65,27 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
             ),
         ) }
         assertEquals(1, antallOppgaver)
+    }
+
+    @Test
+    fun `antallOppgaver returnerer antall oppgaver`() {
+        every { oppgavehåndterer.antallOppgaver(any()) } returns AntallOppgaver(antallMineSaker = 2, antallMineSakerPaVent = 1)
+
+        val body = runQuery("""{
+            antallOppgaver {
+                antallMineSaker
+                antallMineSakerPaVent
+            }
+        }""")
+
+        val antallMineSaker = body["data"]["antallOppgaver"]["antallMineSaker"].asInt()
+        val antallMineSakerPåVent = body["data"]["antallOppgaver"]["antallMineSakerPaVent"].asInt()
+
+        verify(exactly = 1) { oppgavehåndterer.antallOppgaver(
+            saksbehandlerFraApi = any(),
+        ) }
+        assertEquals(2, antallMineSaker)
+        assertEquals(1, antallMineSakerPåVent)
     }
 
     private fun oppgaveTilBehandling() = OppgaveTilBehandling(

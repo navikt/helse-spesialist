@@ -7,6 +7,7 @@ import java.time.Duration
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
+import no.nav.helse.spesialist.api.graphql.schema.AntallOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.BehandletOppgave
 import no.nav.helse.spesialist.api.graphql.schema.Fane
 import no.nav.helse.spesialist.api.graphql.schema.Filtrering
@@ -87,6 +88,21 @@ class OppgaverQuery(private val oppgavehåndterer: Oppgavehåndterer) : Query {
         avsluttSporing(startTrace)
 
         return DataFetcherResult.newResult<OppgaverTilBehandling>().data(oppgaver).build()
+    }
+
+    @Suppress("unused")
+    suspend fun antallOppgaver(env: DataFetchingEnvironment, ): DataFetcherResult<AntallOppgaver> {
+        sikkerLogg.info("Henter AntallOppgaver")
+        val startTrace = startSporing(env)
+        val saksbehandler = env.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(SAKSBEHANDLER.key).value
+        val antallOppgaver = withContext(Dispatchers.IO) {
+            oppgavehåndterer.antallOppgaver(
+                saksbehandlerFraApi = saksbehandler,
+            )
+        }
+        avsluttSporing(startTrace)
+
+        return DataFetcherResult.newResult<AntallOppgaver>().data(antallOppgaver).build()
     }
 
     private fun startSporing(env: DataFetchingEnvironment): Long {

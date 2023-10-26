@@ -73,6 +73,11 @@ data class OppgaverTilBehandling(
     val oppgaver: List<OppgaveTilBehandling>
 )
 
+data class AntallOppgaver(
+    val antallMineSaker: Int,
+    val antallMineSakerPaVent: Int,
+)
+
 data class OppgaveTilBehandling(
     val id: String,
     val opprettet: DateTimeString,

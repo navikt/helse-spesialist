@@ -11,6 +11,7 @@ import java.util.EnumSet
 import java.util.UUID
 import no.nav.helse.Gruppe
 import no.nav.helse.Tilgangsgrupper
+import no.nav.helse.db.AntallOppgaverFraDatabase
 import no.nav.helse.db.BehandletOppgaveFraDatabaseForVisning
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveFraDatabase
@@ -241,6 +242,14 @@ internal class OppgaveMediatorTest {
         )
         val oppgaver = mediator.oppgaver(saksbehandlerFraApi(), 0, MAX_VALUE, emptyList(), Filtrering())
         assertEquals(2, oppgaver.oppgaver.size)
+    }
+
+    @Test
+    fun `Hent antall mine saker og mine saker på vent til visning`() {
+        every { oppgaveDao.finnAntallOppgaver(any()) } returns AntallOppgaverFraDatabase(antallMineSaker = 2, antallMineSakerPåVent = 1)
+        val antallOppgaver = mediator.antallOppgaver(saksbehandlerFraApi())
+        assertEquals(2, antallOppgaver.antallMineSaker)
+        assertEquals(1, antallOppgaver.antallMineSakerPaVent)
     }
 
     @Test

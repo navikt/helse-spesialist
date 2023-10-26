@@ -21,6 +21,7 @@ interface Periode {
     erForkastet: Boolean!
     fom: String!
     hendelser: [Hendelse!]!
+    id: String!
     inntektstype: Inntektstype!
     opprettet: String!
     periodetilstand: Periodetilstand!
@@ -62,6 +63,11 @@ type Antall {
     automatisk: Int!
     manuelt: Int!
     tilgjengelig: Int!
+}
+
+type AntallOppgaver {
+    antallMineSaker: Int!
+    antallMineSakerPaVent: Int!
 }
 
 type Arbeidsforhold {
@@ -432,6 +438,7 @@ type Personoppdrag implements Spennoppdrag {
 }
 
 type Query {
+    antallOppgaver: AntallOppgaver!
     behandledeOppgaverIDag: [BehandletOppgave!]!
     behandlingsstatistikk: Behandlingsstatistikk!
     hentOpptegnelser(sekvensId: Int): [Opptegnelse!]!

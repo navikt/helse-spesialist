@@ -1,10 +1,12 @@
 package no.nav.helse.mediator.oppgave
 
+import no.nav.helse.db.AntallOppgaverFraDatabase
 import no.nav.helse.db.BehandletOppgaveFraDatabaseForVisning
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveFraDatabaseForVisning
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.spesialist.api.graphql.schema.AntallArbeidsforhold
+import no.nav.helse.spesialist.api.graphql.schema.AntallOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.BehandletOppgave
 import no.nav.helse.spesialist.api.graphql.schema.Kategori
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker
@@ -46,6 +48,10 @@ internal object OppgaveMapper {
             mottaker = egenskaper.mottaker(),
             antallArbeidsforhold = egenskaper.antallArbeidsforhold(),
         )
+    }
+
+    internal fun AntallOppgaverFraDatabase.tilApiversjon(): AntallOppgaver {
+        return AntallOppgaver(antallMineSaker = this.antallMineSaker, antallMineSakerPaVent = this.antallMineSakerPåVent)
     }
 
     internal fun List<BehandletOppgaveFraDatabaseForVisning>.tilBehandledeOppgaver() = map {
