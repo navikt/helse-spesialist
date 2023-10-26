@@ -183,7 +183,8 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                 count(*) FILTER ( WHERE t.på_vent = true ) AS antall_mine_saker_på_vent
             from oppgave o 
                 LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
-            WHERE t.saksbehandler_ref = :oid
+            WHERE o.status = 'AvventerSaksbehandler'
+            AND t.saksbehandler_ref = :oid
         """, mapOf("oid" to saksbehandlerOid)
         ).single { row ->
             AntallOppgaverFraDatabase(
