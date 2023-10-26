@@ -293,7 +293,10 @@ private class SneakyOppgaveHåndterer(private val randomOppgaver: List<OppgaveTi
     }
 
     override fun antallOppgaver(saksbehandlerFraApi: SaksbehandlerFraApi): AntallOppgaver {
-        return mock.antallOppgaver(saksbehandlerFraApi)
+        return AntallOppgaver(
+            antallMineSaker = randomOppgaver.filter { it.erTildelt(saksbehandlerFraApi) }.size,
+            antallMineSakerPaVent = randomOppgaver.filter { it.erTildeltOgPåVent(saksbehandlerFraApi) }.size
+        )
     }
 
     override fun behandledeOppgaver(saksbehandlerFraApi: SaksbehandlerFraApi): List<BehandletOppgave> {
