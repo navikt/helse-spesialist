@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
+import io.ktor.utils.io.core.toByteArray
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
@@ -119,14 +120,15 @@ data class Arbeidsforholdoverstyring(
 ) : Overstyring
 
 data class GhostPeriode(
-    val id: UUIDString,
     val fom: DateString,
     val tom: DateString,
     val skjaeringstidspunkt: DateString,
     val vilkarsgrunnlagId: UUIDString?,
     val deaktivert: Boolean,
     val organisasjonsnummer: String,
-)
+) {
+    val id = UUID.nameUUIDFromBytes(fom.toByteArray() + organisasjonsnummer.toByteArray()).toString()
+}
 
 data class Arbeidsgiver(
     val organisasjonsnummer: String,
@@ -153,15 +155,14 @@ data class Arbeidsgiver(
             perioder = generasjon.perioder.map {
                 when (it) {
                     is GraphQLUberegnetPeriode -> UberegnetPeriode(
-                        id = it.id,
                         varselRepository = varselRepository,
                         periode = it,
                         skalViseAktiveVarsler = index == 0 && perioderSomSkalViseAktiveVarsler.contains(UUID.fromString(it.vedtaksperiodeId)),
                         notatDao = notatDao,
+                        index = index,
                     )
 
                     is GraphQLBeregnetPeriode -> BeregnetPeriode(
-                        id = it.id,
                         orgnummer = organisasjonsnummer,
                         periode = it,
                         risikovurderingApiDao = risikovurderingApiDao,
@@ -172,10 +173,10 @@ data class Arbeidsgiver(
                         totrinnsvurderingApiDao = totrinnsvurderingApiDao,
                         tilganger = tilganger,
                         erSisteGenerasjon = index == 0,
+                        index = index,
                     )
 
                     is GraphQLUberegnetVilkarsprovdPeriode -> UberegnetVilkarsprovdPeriode(
-                        id = it.id,
                         vilkarsgrunnlagId = it.vilkarsgrunnlagId,
                         varselRepository = varselRepository,
                         periode = it,
@@ -183,6 +184,7 @@ data class Arbeidsgiver(
                         // Dette kans fjernes når skjønnsfastsettingperioder også har oppgave.
                         skalViseAktiveVarsler = if (oppgaveId == null) true else index == 0 && perioderSomSkalViseAktiveVarsler.contains(UUID.fromString(it.vedtaksperiodeId)),
                         notatDao = notatDao,
+                        index = index,
                     )
 
                     else -> throw Exception("Ukjent tidslinjeperiode")

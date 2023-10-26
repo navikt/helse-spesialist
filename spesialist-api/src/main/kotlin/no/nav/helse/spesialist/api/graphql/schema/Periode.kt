@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.api.graphql.schema
 import com.expediagroup.graphql.generator.annotations.GraphQLIgnore
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.JsonNode
+import io.ktor.utils.io.core.toByteArray
 import java.util.UUID
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.Toggle
@@ -226,6 +227,7 @@ interface Periode {
     fun erForkastet(): Boolean
     fun fom(): DateString
     fun tom(): DateString
+    fun id(): UUIDString
     fun inntektstype(): Inntektstype
     fun opprettet(): DateTimeString
     fun periodetype(): Periodetype
@@ -319,15 +321,16 @@ interface Periode {
 
 @Suppress("unused")
 data class UberegnetPeriode(
-    val id: UUIDString,
     private val varselRepository: ApiVarselRepository,
     private val periode: GraphQLTidslinjeperiode,
     private val skalViseAktiveVarsler: Boolean,
     private val notatDao: NotatDao,
+    private val index: Int,
 ) : Periode {
     override fun erForkastet(): Boolean = erForkastet(periode)
     override fun fom(): DateString = fom(periode)
     override fun tom(): DateString = tom(periode)
+    override fun id(): String = UUID.nameUUIDFromBytes(vedtaksperiodeId().toByteArray() + index.toByte()).toString()
     override fun inntektstype(): Inntektstype = inntektstype(periode)
     override fun opprettet(): DateTimeString = opprettet(periode)
     override fun periodetype(): Periodetype = periodetype(periode)
@@ -344,16 +347,17 @@ data class UberegnetPeriode(
 
 @Suppress("unused")
 data class UberegnetVilkarsprovdPeriode(
-    val id: UUIDString,
     val vilkarsgrunnlagId: UUIDString,
     private val varselRepository: ApiVarselRepository,
     private val periode: GraphQLTidslinjeperiode,
     private val skalViseAktiveVarsler: Boolean,
     private val notatDao: NotatDao,
+    private val index: Int,
 ) : Periode {
     override fun erForkastet(): Boolean = erForkastet(periode)
     override fun fom(): DateString = fom(periode)
     override fun tom(): DateString = tom(periode)
+    override fun id(): String = UUID.nameUUIDFromBytes(vedtaksperiodeId().toByteArray() + index.toByte()).toString()
     override fun inntektstype(): Inntektstype = inntektstype(periode)
     override fun opprettet(): DateTimeString = opprettet(periode)
     override fun periodetype(): Periodetype = periodetype(periode)
@@ -381,7 +385,6 @@ enum class Periodehandling {
 data class Handling(val type: Periodehandling, val tillatt: Boolean, val begrunnelse: String? = null)
 @Suppress("unused")
 data class BeregnetPeriode(
-    val id: UUIDString,
     private val orgnummer: String,
     private val periode: GraphQLBeregnetPeriode,
     private val risikovurderingApiDao: RisikovurderingApiDao,
@@ -392,11 +395,13 @@ data class BeregnetPeriode(
     private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
     private val tilganger: SaksbehandlerTilganger,
     private val erSisteGenerasjon: Boolean,
+    private val index: Int,
 ) : Periode {
     private val periodetilstand = periodetilstand(periode.periodetilstand, erSisteGenerasjon)
     override fun erForkastet(): Boolean = erForkastet(periode)
     override fun fom(): DateString = fom(periode)
     override fun tom(): DateString = tom(periode)
+    override fun id(): String = UUID.nameUUIDFromBytes(vedtaksperiodeId().toByteArray() + index.toByte()).toString()
     override fun inntektstype(): Inntektstype = inntektstype(periode)
     override fun opprettet(): DateTimeString = opprettet(periode)
     override fun periodetype(): Periodetype = periodetype(periode)
