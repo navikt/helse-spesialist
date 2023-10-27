@@ -173,8 +173,8 @@ class Oppgave private constructor(
     private fun avmeld(saksbehandler: Saksbehandler) {
         this.tildeltTil = null
         this.påVent = false
-        logg.info("Oppgave med {} tildeles saksbehandler med {}", kv("oppgaveId", id), kv("oid", saksbehandler.oid()))
-        sikkerlogg.info("Oppgave med {} tildeles $saksbehandler", kv("oppgaveId", id))
+        logg.info("Oppgave med {} avmeldes saksbehandler med {}", kv("oppgaveId", id), kv("oid", saksbehandler.oid()))
+        sikkerlogg.info("Oppgave med {} avmeldes $saksbehandler", kv("oppgaveId", id))
         oppgaveEndret()
     }
 
