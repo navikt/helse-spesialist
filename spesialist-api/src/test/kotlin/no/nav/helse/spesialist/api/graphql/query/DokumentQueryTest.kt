@@ -180,7 +180,7 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
         }
 
         val spørsmål = dokument["sporsmal"]
-        assertEquals(4, spørsmål.size())
+        assertEquals(5, spørsmål.size())
         assertTrue(spørsmål.none { it["tag"].asText() == "BEKREFT_OPPLYSNINGER" })
         assertTrue(spørsmål.none { it["tag"].asText() == "ANSVARSERKLARING" })
         assertTrue(spørsmål.none { it["tag"].asText() == "VAER_KLAR_OVER_AT" })
@@ -202,6 +202,8 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
         val hvorMangeTimerVanligvis = arbeidUnderveis["undersporsmal"].first { it["tag"].asText() == "JOBBER_DU_NORMAL_ARBEIDSUKE_0" }
         assertEquals("NEI", hvorMangeTimerVanligvis["svar"].first()["verdi"].asText())
         assertEquals(40, hvorMangeTimerVanligvis["undersporsmal"].first()["svar"].first()["verdi"].asInt())
+        val andreInntektskilder = spørsmål.first { it["tag"].asText() == "ANDRE_INNTEKTSKILDER"}
+        assertEquals("NEI", andreInntektskilder["undersporsmal"].first()["undersporsmal"].first()["undersporsmal"].first()["svar"].first()["verdi"].asText())
     }
 
     @Language("JSON")
@@ -971,9 +973,9 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
           ]
         },
         {
-          "id": "fa254129-de59-3735-a7be-cbf11865b80e",
-          "tag": "ANDRE_INNTEKTSKILDER_V2",
-          "sporsmalstekst": "Har du andre inntektskilder enn Pengeløs Sparebank?",
+          "id": "4da1a113-f636-354b-a825-df2de348f621",
+          "tag": "ANDRE_INNTEKTSKILDER",
+          "sporsmalstekst": "Har du andre inntektskilder enn TROMØY BOKOLLEKTIV?",
           "undertekst": null,
           "min": null,
           "max": null,
@@ -981,15 +983,15 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
           "kriterieForVisningAvUndersporsmal": "JA",
           "svar": [
             {
-              "verdi": "NEI"
+              "verdi": "JA"
             }
           ],
           "undersporsmal": [
             {
-              "id": "b9de35ba-d98d-3274-a81d-22de07f12c25",
+              "id": "bc8e81df-754c-38a1-a618-3b006cd3e41e",
               "tag": "HVILKE_ANDRE_INNTEKTSKILDER",
-              "sporsmalstekst": "Velg inntektskildene som passer for deg:",
-              "undertekst": "Finner du ikke noe som passer for deg, svarer du nei på spørsmålet over",
+              "sporsmalstekst": "Hvilke andre inntektskilder har du?",
+              "undertekst": null,
               "min": null,
               "max": null,
               "svartype": "CHECKBOX_GRUPPE",
@@ -997,9 +999,42 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
               "svar": [],
               "undersporsmal": [
                 {
-                  "id": "de2cb7d3-0a64-3ffc-af46-5918b3be6f20",
+                  "id": "b7cb9ec2-8fc2-3cfc-9b85-68b89f187e98",
                   "tag": "INNTEKTSKILDE_ANDRE_ARBEIDSFORHOLD",
-                  "sporsmalstekst": "Ansatt andre steder enn nevnt over",
+                  "sporsmalstekst": "andre arbeidsforhold",
+                  "undertekst": null,
+                  "min": null,
+                  "max": null,
+                  "svartype": "CHECKBOX",
+                  "kriterieForVisningAvUndersporsmal": "CHECKED",
+                  "svar": [
+                    {
+                      "verdi": "CHECKED"
+                    }
+                  ],
+                  "undersporsmal": [
+                    {
+                      "id": "a8036689-091b-3772-94e9-06049cfa3fab",
+                      "tag": "INNTEKTSKILDE_ANDRE_ARBEIDSFORHOLD_ER_DU_SYKMELDT",
+                      "sporsmalstekst": "Er du sykmeldt fra dette?",
+                      "undertekst": null,
+                      "min": null,
+                      "max": null,
+                      "svartype": "JA_NEI",
+                      "kriterieForVisningAvUndersporsmal": null,
+                      "svar": [
+                        {
+                          "verdi": "NEI"
+                        }
+                      ],
+                      "undersporsmal": []
+                    }
+                  ]
+                },
+                {
+                  "id": "5d337b0e-3b7e-30bf-af51-fdc26864863f",
+                  "tag": "INNTEKTSKILDE_SELVSTENDIG",
+                  "sporsmalstekst": "selvstendig næringsdrivende",
                   "undertekst": null,
                   "min": null,
                   "max": null,
@@ -1008,9 +1043,9 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
                   "svar": [],
                   "undersporsmal": [
                     {
-                      "id": "baaa6d37-30e9-3db9-919d-8d2bdaad70b1",
-                      "tag": "INNTEKTSKILDE_ANDRE_ARBEIDSFORHOLD_JOBBET_I_DET_SISTE",
-                      "sporsmalstekst": "Har du jobbet for eller mottatt inntekt fra én eller flere av disse arbeidsgiverne de siste 14 dagene før du ble sykmeldt?",
+                      "id": "d6ce6d10-b597-381e-8c26-eac2d5238dfd",
+                      "tag": "INNTEKTSKILDE_SELVSTENDIG_ER_DU_SYKMELDT",
+                      "sporsmalstekst": "Er du sykmeldt fra dette?",
                       "undertekst": null,
                       "min": null,
                       "max": null,
@@ -1022,9 +1057,9 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
                   ]
                 },
                 {
-                  "id": "8fd8af15-0541-34b9-8d79-3d7a14376493",
-                  "tag": "INNTEKTSKILDE_SELVSTENDIG",
-                  "sporsmalstekst": "Selvstendig næringsdrivende",
+                  "id": "39eb093f-8bb3-3ba9-a997-4fe3f08afff0",
+                  "tag": "INNTEKTSKILDE_SELVSTENDIG_DAGMAMMA",
+                  "sporsmalstekst": "dagmamma",
                   "undertekst": null,
                   "min": null,
                   "max": null,
@@ -1033,133 +1068,73 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
                   "svar": [],
                   "undersporsmal": [
                     {
-                      "id": "75e4c987-700c-371c-a104-5c77161c402d",
-                      "tag": "INNTEKTSKILDE_SELVSTENDIG_N_AR",
-                      "sporsmalstekst": "Har du vært næringsdrivende i mer enn 5 år?",
+                      "id": "90465958-d655-3f50-bf60-b6f64cc6aa58",
+                      "tag": "INNTEKTSKILDE_SELVSTENDIG_DAGMAMMA_ER_DU_SYKMELDT",
+                      "sporsmalstekst": "Er du sykmeldt fra dette?",
                       "undertekst": null,
                       "min": null,
                       "max": null,
                       "svartype": "JA_NEI",
-                      "kriterieForVisningAvUndersporsmal": "JA",
+                      "kriterieForVisningAvUndersporsmal": null,
                       "svar": [],
-                      "undersporsmal": [
-                        {
-                          "id": "d40bcb0a-d7c2-3a3d-a698-7b269283bb00",
-                          "tag": "INNTEKTSKILDE_SELVSTENDIG_VARIG_ENDRING_GRUPPE",
-                          "sporsmalstekst": "Har det vært endring i din arbeidssituasjon eller virksomhet?",
-                          "undertekst": null,
-                          "min": null,
-                          "max": null,
-                          "svartype": "RADIO_GRUPPE",
-                          "kriterieForVisningAvUndersporsmal": null,
-                          "svar": [],
-                          "undersporsmal": [
-                            {
-                              "id": "e36c4471-74fe-3855-a2c8-a1716a3a5c4a",
-                              "tag": "INNTEKTSKILDE_SELVSTENDIG_VARIG_ENDRING_JA",
-                              "sporsmalstekst": "Ja",
-                              "undertekst": null,
-                              "min": null,
-                              "max": null,
-                              "svartype": "RADIO",
-                              "kriterieForVisningAvUndersporsmal": null,
-                              "svar": [],
-                              "undersporsmal": []
-                            },
-                            {
-                              "id": "bb58f043-04bc-31fe-a75d-cc724021ed4c",
-                              "tag": "INNTEKTSKILDE_SELVSTENDIG_VARIG_ENDRING_NEI",
-                              "sporsmalstekst": "Nei",
-                              "undertekst": null,
-                              "min": null,
-                              "max": null,
-                              "svartype": "RADIO",
-                              "kriterieForVisningAvUndersporsmal": null,
-                              "svar": [],
-                              "undersporsmal": []
-                            },
-                            {
-                              "id": "1c7c5659-3faf-3ddf-8f06-1a692edf9e7e",
-                              "tag": "INNTEKTSKILDE_SELVSTENDIG_VARIG_ENDRING_VET_IKKE",
-                              "sporsmalstekst": "Vet ikke",
-                              "undertekst": null,
-                              "min": null,
-                              "max": null,
-                              "svartype": "RADIO",
-                              "kriterieForVisningAvUndersporsmal": null,
-                              "svar": [],
-                              "undersporsmal": []
-                            }
-                          ]
-                        }
-                      ]
+                      "undersporsmal": []
                     }
                   ]
                 },
                 {
-                  "id": "e52dbdeb-adde-3ee7-897d-676a1a4dcbb3",
-                  "tag": "INNTEKTSKILDE_SELVSTENDIG_DAGMAMMA",
-                  "sporsmalstekst": "Dagmamma",
-                  "undertekst": null,
-                  "min": null,
-                  "max": null,
-                  "svartype": "CHECKBOX",
-                  "kriterieForVisningAvUndersporsmal": null,
-                  "svar": [],
-                  "undersporsmal": []
-                },
-                {
-                  "id": "1191a448-ca92-3a3f-9447-8e6de5680b60",
+                  "id": "c4395282-93e5-3b11-ab5a-0a8dd2ba4f48",
                   "tag": "INNTEKTSKILDE_JORDBRUKER",
-                  "sporsmalstekst": "Jordbruk / Fiske / Reindrift",
+                  "sporsmalstekst": "jordbruk / fiske / reindrift",
                   "undertekst": null,
                   "min": null,
                   "max": null,
                   "svartype": "CHECKBOX",
-                  "kriterieForVisningAvUndersporsmal": null,
+                  "kriterieForVisningAvUndersporsmal": "CHECKED",
                   "svar": [],
-                  "undersporsmal": []
+                  "undersporsmal": [
+                    {
+                      "id": "e018a37a-b4c4-3075-b2b5-cbf6f50f5dcf",
+                      "tag": "INNTEKTSKILDE_JORDBRUKER_ER_DU_SYKMELDT",
+                      "sporsmalstekst": "Er du sykmeldt fra dette?",
+                      "undertekst": null,
+                      "min": null,
+                      "max": null,
+                      "svartype": "JA_NEI",
+                      "kriterieForVisningAvUndersporsmal": null,
+                      "svar": [],
+                      "undersporsmal": []
+                    }
+                  ]
                 },
                 {
-                  "id": "f682d284-db14-3abc-b146-94290ae4cee0",
+                  "id": "2fd16d5b-9944-35ca-bbf3-10b987312b96",
                   "tag": "INNTEKTSKILDE_FRILANSER",
-                  "sporsmalstekst": "Frilanser",
+                  "sporsmalstekst": "frilanser",
                   "undertekst": null,
                   "min": null,
                   "max": null,
                   "svartype": "CHECKBOX",
-                  "kriterieForVisningAvUndersporsmal": null,
+                  "kriterieForVisningAvUndersporsmal": "CHECKED",
                   "svar": [],
-                  "undersporsmal": []
+                  "undersporsmal": [
+                    {
+                      "id": "acd37d5f-4526-3add-bfb5-a2c1e7d8fc2a",
+                      "tag": "INNTEKTSKILDE_FRILANSER_ER_DU_SYKMELDT",
+                      "sporsmalstekst": "Er du sykmeldt fra dette?",
+                      "undertekst": null,
+                      "min": null,
+                      "max": null,
+                      "svartype": "JA_NEI",
+                      "kriterieForVisningAvUndersporsmal": null,
+                      "svar": [],
+                      "undersporsmal": []
+                    }
+                  ]
                 },
                 {
-                  "id": "0b6271c3-b2af-30d6-924a-4e6cbeb7d963",
-                  "tag": "INNTEKTSKILDE_OMSORGSLONN",
-                  "sporsmalstekst": "Kommunal omsorgstønad",
-                  "undertekst": null,
-                  "min": null,
-                  "max": null,
-                  "svartype": "CHECKBOX",
-                  "kriterieForVisningAvUndersporsmal": null,
-                  "svar": [],
-                  "undersporsmal": []
-                },
-                {
-                  "id": "d35bbfa3-add7-3561-970e-5afa9dedaa06",
-                  "tag": "INNTEKTSKILDE_FOSTERHJEM",
-                  "sporsmalstekst": "Fosterhjemsgodtgjørelse",
-                  "undertekst": null,
-                  "min": null,
-                  "max": null,
-                  "svartype": "CHECKBOX",
-                  "kriterieForVisningAvUndersporsmal": null,
-                  "svar": [],
-                  "undersporsmal": []
-                },
-                {
-                  "id": "176603d4-b902-36b5-9753-3cdcb09fa0bb",
-                  "tag": "INNTEKTSKILDE_STYREVERV",
-                  "sporsmalstekst": "Styreverv",
+                  "id": "3f3767f9-9edc-338d-8dc6-d5ab4e5cf4c2",
+                  "tag": "INNTEKTSKILDE_ANNET",
+                  "sporsmalstekst": "annet",
                   "undertekst": null,
                   "min": null,
                   "max": null,

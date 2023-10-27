@@ -91,7 +91,7 @@ class DokumentQuery(
             this.path("kriterieForVisningAvUndersporsmal").takeUnless { it.isMissingOrNull() }?.asText()
                 ?.tilVisningskriterium()
         val undersporsmal = this.path("undersporsmal").takeUnless { it.isMissingOrNull() }?.map { it.tilSpørsmål() }
-            ?.filter { it.skalVises() }
+            ?.filter { it.skalVises(rotnivå = false) }
 
         return Sporsmal(
             tag = this.path("tag").takeUnless { it.isMissingOrNull() }?.asText(),
@@ -104,7 +104,7 @@ class DokumentQuery(
         )
     }
 
-    private fun Sporsmal.skalVises(): Boolean {
+    private fun Sporsmal.skalVises(rotnivå: Boolean = true): Boolean {
         val harTagSomSkalVises = when (this.tag) {
             "BEKREFT_OPPLYSNINGER" -> false
             "ANSVARSERKLARING" -> false
@@ -114,11 +114,11 @@ class DokumentQuery(
 
         val harUnderspørsmål = !this.undersporsmal.isNullOrEmpty()
         val førsteSvar = this.svar?.firstOrNull()?.verdi
-        val svartNei = førsteSvar == "NEI"
+        val svartNeiPåRotnivå = førsteSvar == "NEI" && rotnivå
         val kriterieForVisningAvUndersporsmalOppfylt =
             (this.kriterieForVisningAvUndersporsmal == null || this.kriterieForVisningAvUndersporsmal.name == this.svar?.firstOrNull()?.verdi) && harUnderspørsmål
 
-        return harTagSomSkalVises && (kriterieForVisningAvUndersporsmalOppfylt || (førsteSvar != null && !svartNei))
+        return harTagSomSkalVises && (kriterieForVisningAvUndersporsmalOppfylt || (førsteSvar != null && !svartNeiPåRotnivå))
     }
 
     private fun JsonNode.tilSvar(): Svar {
