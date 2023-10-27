@@ -265,6 +265,22 @@ internal class OppgaveTest {
     }
 
     @Test
+    fun `Setter tildeling til null når oppgaven ferdigstilles (da slettes tildelingen)`() {
+        val oppgave = nyOppgave(SØKNAD)
+        oppgave.forsøkTildeling(saksbehandlerUtenTilgang)
+        inspektør(oppgave) {
+            assertEquals(saksbehandlerUtenTilgang, tildeltTil)
+        }
+        oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
+        oppgave.ferdigstill()
+
+        inspektør(oppgave) {
+            assertEquals(Oppgave.Ferdigstilt, tilstand)
+            assertEquals(null, tildeltTil)
+        }
+    }
+
+    @Test
     fun `kaster exception dersom oppgave allerede er sendt til beslutter når man forsøker å sende til beslutter`() {
         val oppgave = nyOppgave(SØKNAD, medTotrinnsvurdering = true)
         oppgave.sendTilBeslutter(saksbehandlerUtenTilgang)

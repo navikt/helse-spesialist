@@ -266,6 +266,7 @@ class Oppgave private constructor(
 
     data object AvventerSystem: Tilstand {
         override fun ferdigstill(oppgave: Oppgave) {
+            oppgave.tildeltTil = null
             oppgave.nesteTilstand(Ferdigstilt)
         }
 
