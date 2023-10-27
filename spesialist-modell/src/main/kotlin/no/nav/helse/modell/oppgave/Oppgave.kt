@@ -243,6 +243,7 @@ class Oppgave private constructor(
         }
 
         override fun invalider(oppgave: Oppgave) {
+            oppgave.tildeltTil = null
             oppgave.nesteTilstand(Invalidert)
         }
 
@@ -266,12 +267,16 @@ class Oppgave private constructor(
 
     data object AvventerSystem: Tilstand {
         override fun ferdigstill(oppgave: Oppgave) {
-            oppgave.tildeltTil = null
-            oppgave.nesteTilstand(Ferdigstilt)
+            nesteTilstand(oppgave, Ferdigstilt)
         }
 
         override fun invalider(oppgave: Oppgave) {
-            oppgave.nesteTilstand(Invalidert)
+            nesteTilstand(oppgave, Invalidert)
+        }
+
+        private fun nesteTilstand(oppgave: Oppgave, tilstand: Tilstand) {
+            oppgave.tildeltTil = null
+            oppgave.nesteTilstand(tilstand)
         }
     }
 

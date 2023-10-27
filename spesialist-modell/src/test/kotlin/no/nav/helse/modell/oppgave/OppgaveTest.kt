@@ -265,7 +265,7 @@ internal class OppgaveTest {
     }
 
     @Test
-    fun `Setter tildeling til null når oppgaven ferdigstilles (da slettes tildelingen)`() {
+    fun `Fjerner tildeling når oppgaven ferdigstilles (da slettes tildelingen)`() {
         val oppgave = nyOppgave(SØKNAD)
         oppgave.forsøkTildeling(saksbehandlerUtenTilgang)
         inspektør(oppgave) {
@@ -276,6 +276,35 @@ internal class OppgaveTest {
 
         inspektør(oppgave) {
             assertEquals(Oppgave.Ferdigstilt, tilstand)
+            assertEquals(null, tildeltTil)
+        }
+    }
+
+    @Test
+    fun `Fjerner tildeling når oppgaven avbrytes i AvventerSaksbehandler (da slettes tildelingen)`() {
+        val oppgave = nyOppgave(SØKNAD)
+        oppgave.forsøkTildeling(saksbehandlerUtenTilgang)
+        inspektør(oppgave) {
+            assertEquals(saksbehandlerUtenTilgang, tildeltTil)
+        }
+        oppgave.avbryt()
+        inspektør(oppgave) {
+            assertEquals(Oppgave.Invalidert, tilstand)
+            assertEquals(null, tildeltTil)
+        }
+    }
+
+    @Test
+    fun `Fjerner tildeling når oppgaven avbrytes i AvventerSystem (da slettes tildelingen)`() {
+        val oppgave = nyOppgave(SØKNAD)
+        oppgave.forsøkTildeling(saksbehandlerUtenTilgang)
+        oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
+        inspektør(oppgave) {
+            assertEquals(saksbehandlerUtenTilgang, tildeltTil)
+        }
+        oppgave.avbryt()
+        inspektør(oppgave) {
+            assertEquals(Oppgave.Invalidert, tilstand)
             assertEquals(null, tildeltTil)
         }
     }
