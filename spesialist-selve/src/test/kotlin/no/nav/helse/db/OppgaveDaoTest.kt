@@ -301,10 +301,35 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
 
         nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456789")
         tildelOppgave(saksbehandlerOid = saksbehandlerOid)
-        avventerSystem(OPPGAVE_ID)
+        avventerSystem(OPPGAVE_ID, ferdigstiltAvOid = saksbehandlerOid, ferdigstiltAv = SAKSBEHANDLER_NAVN)
 
         val oppgaver = oppgaveDao.finnBehandledeOppgaver(saksbehandlerOid)
         assertEquals(3, oppgaver.size)
+    }
+
+    @Test
+    fun `Både saksbehandler som sender til beslutter og saksbehandler som utbetaler ser oppgaven i behandlede oppgaver`() {
+        val saksbehandlerOid = UUID.randomUUID()
+        val beslutterOid = UUID.randomUUID()
+        val annenSaksbehandlerOid = UUID.randomUUID()
+
+        nyPerson(fødselsnummer = FNR, aktørId = AKTØR, vedtaksperiodeId = VEDTAKSPERIODE, organisasjonsnummer = ORGNUMMER)
+        utbetalingsopplegg(1000, 0)
+        opprettSaksbehandler(saksbehandlerOID = saksbehandlerOid)
+        opprettSaksbehandler(beslutterOid, navn = "NAVN TIL BESLUTTER")
+        opprettSaksbehandler(annenSaksbehandlerOid)
+        opprettTotrinnsvurdering(vedtaksperiodeId = VEDTAKSPERIODE, saksbehandler = saksbehandlerOid, ferdigstill = true)
+        ferdigstillOppgave(OPPGAVE_ID, ferdigstiltAvOid = beslutterOid, ferdigstiltAv = "NAVN TIL BESLUTTER")
+
+        val behandletIDagForSaksbehandler = oppgaveDao.finnBehandledeOppgaver(saksbehandlerOid)
+        val behandletIDagForBeslutter = oppgaveDao.finnBehandledeOppgaver(beslutterOid)
+        val behandletIDagForAnnenSaksbehandler = oppgaveDao.finnBehandledeOppgaver(annenSaksbehandlerOid)
+
+        assertEquals(1, behandletIDagForSaksbehandler.size)
+        assertEquals("NAVN TIL BESLUTTER", behandletIDagForSaksbehandler.first().ferdigstiltAv)
+        assertEquals(1, behandletIDagForBeslutter.size)
+        assertEquals("NAVN TIL BESLUTTER", behandletIDagForBeslutter.first().ferdigstiltAv)
+        assertEquals(0, behandletIDagForAnnenSaksbehandler.size)
     }
 
     @Test
@@ -357,7 +382,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         val oppgaveId2 = OPPGAVE_ID
         nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456789")
         val oppgaveId3 = OPPGAVE_ID
-        avventerSystem(oppgaveId3)
+        avventerSystem(oppgaveId3, ferdigstiltAv = "navn", ferdigstiltAvOid = UUID.randomUUID())
         val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID())
         assertEquals(2, oppgaver.size)
         assertEquals(listOf(oppgaveId2, oppgaveId1), oppgaver.map { it.id })

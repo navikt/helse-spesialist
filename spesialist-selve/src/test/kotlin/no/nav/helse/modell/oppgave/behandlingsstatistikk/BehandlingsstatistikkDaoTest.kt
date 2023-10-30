@@ -5,7 +5,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.TildelingDao
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
@@ -190,12 +189,4 @@ internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
     private fun utbetalingTilPerson() = utbetalingsopplegg(beløpTilArbeidsgiver = 0, beløpTilSykmeldt = 4000)
 
     private fun utbetalingTilBegge() = utbetalingsopplegg(beløpTilArbeidsgiver = 2000, beløpTilSykmeldt = 2000)
-
-    private fun utbetalingsopplegg(beløpTilArbeidsgiver: Int, beløpTilSykmeldt: Int) {
-        val arbeidsgiveroppdragId = lagArbeidsgiveroppdrag(fagsystemId())
-        val personOppdragId = lagPersonoppdrag(fagsystemId())
-        val utbetaling_idId = lagUtbetalingId(arbeidsgiveroppdragId, personOppdragId, UTBETALING_ID, arbeidsgiverbeløp = beløpTilArbeidsgiver, personbeløp = beløpTilSykmeldt)
-        utbetalingDao.nyUtbetalingStatus(utbetaling_idId, Utbetalingsstatus.UTBETALT, LocalDateTime.now(), "{}")
-        opprettUtbetalingKobling(VEDTAKSPERIODE, UTBETALING_ID)
-    }
 }

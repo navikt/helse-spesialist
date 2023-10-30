@@ -34,6 +34,7 @@ import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
@@ -363,9 +364,14 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         )
     }
 
-    protected fun avventerSystem(oppgaveId: Long) {
-        oppgaveDao.updateOppgave(oppgaveId = oppgaveId, oppgavestatus = "AvventerSystem", egenskaper = listOf(EGENSKAP))
-
+    protected fun avventerSystem(oppgaveId: Long, ferdigstiltAv: String, ferdigstiltAvOid: UUID) {
+        oppgaveDao.updateOppgave(
+            oppgaveId = oppgaveId,
+            oppgavestatus = "AvventerSystem",
+            ferdigstiltAv = ferdigstiltAv,
+            oid = ferdigstiltAvOid,
+            egenskaper = listOf(EGENSKAP)
+        )
     }
 
     protected fun ferdigstillOppgave(oppgaveId: Long, ferdigstiltAv: String? = null, ferdigstiltAvOid: UUID? = null) {
@@ -402,6 +408,14 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         utbetalingId: UUID,
     ) {
         utbetalingDao.opprettKobling(vedtaksperiodeId, utbetalingId)
+    }
+
+    protected fun utbetalingsopplegg(beløpTilArbeidsgiver: Int, beløpTilSykmeldt: Int) {
+        val arbeidsgiveroppdragId = lagArbeidsgiveroppdrag(fagsystemId())
+        val personOppdragId = lagPersonoppdrag(fagsystemId())
+        val utbetaling_idId = lagUtbetalingId(arbeidsgiveroppdragId, personOppdragId, UTBETALING_ID, arbeidsgiverbeløp = beløpTilArbeidsgiver, personbeløp = beløpTilSykmeldt)
+        utbetalingDao.nyUtbetalingStatus(utbetaling_idId, Utbetalingsstatus.UTBETALT, LocalDateTime.now(), "{}")
+        opprettUtbetalingKobling(VEDTAKSPERIODE, UTBETALING_ID)
     }
 
     protected fun lagArbeidsgiveroppdrag(
