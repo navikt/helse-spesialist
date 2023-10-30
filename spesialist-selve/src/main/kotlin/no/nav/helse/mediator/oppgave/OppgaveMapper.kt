@@ -150,6 +150,7 @@ internal object OppgaveMapper {
         Egenskap.FORSTEGANGSBEHANDLING -> EgenskapForApi.FORSTEGANGSBEHANDLING
         Egenskap.INFOTRYGDFORLENGELSE -> EgenskapForApi.INFOTRYGDFORLENGELSE
         Egenskap.OVERGANG_FRA_IT -> EgenskapForApi.OVERGANG_FRA_IT
+        Egenskap.SKJØNNSFASTSETTELSE -> EgenskapForApi.SKJONNSFASTSETTELSE
     }
 
     private fun Egenskap.Kategori.tilApiversjon(): Kategori = when (this) {
@@ -185,6 +186,7 @@ internal object OppgaveMapper {
         EgenskapForDatabase.FORSTEGANGSBEHANDLING -> Egenskap.FORSTEGANGSBEHANDLING
         EgenskapForDatabase.INFOTRYGDFORLENGELSE -> Egenskap.INFOTRYGDFORLENGELSE
         EgenskapForDatabase.OVERGANG_FRA_IT -> Egenskap.OVERGANG_FRA_IT
+        EgenskapForDatabase.SKJØNNSFASTSETTELSE -> Egenskap.SKJØNNSFASTSETTELSE
     }
 
     internal fun Egenskap.tilDatabaseversjon(): EgenskapForDatabase = when (this) {
@@ -212,6 +214,7 @@ internal object OppgaveMapper {
         Egenskap.FORSTEGANGSBEHANDLING -> EgenskapForDatabase.FORSTEGANGSBEHANDLING
         Egenskap.INFOTRYGDFORLENGELSE -> EgenskapForDatabase.INFOTRYGDFORLENGELSE
         Egenskap.OVERGANG_FRA_IT -> EgenskapForDatabase.OVERGANG_FRA_IT
+        Egenskap.SKJØNNSFASTSETTELSE -> EgenskapForDatabase.SKJØNNSFASTSETTELSE
     }
 
     internal fun Egenskap.tilKafkaversjon(): String {
@@ -240,6 +243,7 @@ internal object OppgaveMapper {
             Egenskap.FORSTEGANGSBEHANDLING -> "FORSTEGANGSBEHANDLING"
             Egenskap.INFOTRYGDFORLENGELSE -> "INFOTRYGDFORLENGELSE"
             Egenskap.OVERGANG_FRA_IT -> "OVERGANG_FRA_IT"
+            Egenskap.SKJØNNSFASTSETTELSE -> "SKJØNNSFASTSETTELSE"
         }
     }
 
@@ -268,5 +272,6 @@ internal object OppgaveMapper {
         EgenskapForApi.RETUR -> EgenskapForDatabase.RETUR
         EgenskapForApi.FULLMAKT -> EgenskapForDatabase.FULLMAKT
         EgenskapForApi.VERGEMAL -> EgenskapForDatabase.VERGEMÅL
+        EgenskapForApi.SKJONNSFASTSETTELSE -> EgenskapForDatabase.SKJØNNSFASTSETTELSE
     }
 }

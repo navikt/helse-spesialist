@@ -11,6 +11,7 @@ import no.nav.helse.modell.varsel.Varsel.Companion.flyttVarslerFor
 import no.nav.helse.modell.varsel.Varsel.Companion.forhindrerAutomatisering
 import no.nav.helse.modell.varsel.Varsel.Companion.inneholderMedlemskapsvarsel
 import no.nav.helse.modell.varsel.Varsel.Companion.inneholderSvartelistedeVarsler
+import no.nav.helse.modell.varsel.Varsel.Companion.inneholderVarselOmAvvik
 import no.nav.helse.modell.varsel.Varsel.Companion.inneholderVarselOmNegativtBeløp
 import org.slf4j.LoggerFactory
 
@@ -164,6 +165,12 @@ internal class Generasjon private constructor(
         val inneholderMedlemskapsvarsel = varsler.inneholderMedlemskapsvarsel()
         logg.info("$this harMedlemskapsvarsel: $inneholderMedlemskapsvarsel")
         return inneholderMedlemskapsvarsel
+    }
+
+    private fun kreverSkjønnsfastsettelse(): Boolean {
+        val inneholderAvviksvarsel = varsler.inneholderVarselOmAvvik()
+        logg.info("$this harAvviksvarsel: $inneholderAvviksvarsel")
+        return inneholderAvviksvarsel
     }
 
     internal sealed interface Tilstand {
@@ -437,6 +444,10 @@ internal class Generasjon private constructor(
 
         internal fun List<Generasjon>.kreverTotrinnsvurdering(vedtaksperiodeId: UUID): Boolean {
             return overlapperMedEllerTidligereEnn(vedtaksperiodeId).any { it.kreverTotrinnsvurdering() }
+        }
+
+        internal fun List<Generasjon>.kreverSkjønnsfastsettelse(vedtaksperiodeId: UUID): Boolean {
+            return overlapperMedEllerTidligereEnn(vedtaksperiodeId).any { it.kreverSkjønnsfastsettelse() }
         }
 
         internal fun List<Generasjon>.deaktiver(varsel: Varsel) {

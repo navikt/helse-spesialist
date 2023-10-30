@@ -111,6 +111,10 @@ internal class Varsel(
             return any { it.status == AKTIV && it.varselkode == "RV_UT_23" }
         }
 
+        internal fun List<Varsel>.inneholderVarselOmAvvik(): Boolean {
+            return any { it.status == AKTIV && it.varselkode == "RV_IV_2" }
+        }
+
         internal fun List<Varsel>.inneholderSvartelistedeVarsler(): Boolean {
             return any { it.varselkode in neiVarsler }
         }

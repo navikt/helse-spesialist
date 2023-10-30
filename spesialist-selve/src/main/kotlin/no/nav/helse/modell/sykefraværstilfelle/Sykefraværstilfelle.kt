@@ -10,6 +10,7 @@ import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjon
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.forhindrerAutomatisering
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterGodkjent
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterNyttVarsel
+import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverSkjønnsfastsettelse
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverTotrinnsvurdering
 import no.nav.helse.modell.vedtaksperiode.vedtak.Sykepengevedtak
 import no.nav.helse.modell.vedtaksperiode.vedtak.SykepengevedtakBuilder
@@ -73,6 +74,10 @@ internal class Sykefraværstilfelle(
 
     internal fun kreverTotrinnsvurdering(vedtaksperiodeId: UUID): Boolean {
         return gjeldendeGenerasjoner.kreverTotrinnsvurdering(vedtaksperiodeId)
+    }
+
+    internal fun kreverSkjønnsfastsettelse(vedtaksperiodeId: UUID): Boolean {
+        return gjeldendeGenerasjoner.kreverSkjønnsfastsettelse(vedtaksperiodeId)
     }
 
     internal fun registrer(observer: SykefraværstilfelleObserver) {

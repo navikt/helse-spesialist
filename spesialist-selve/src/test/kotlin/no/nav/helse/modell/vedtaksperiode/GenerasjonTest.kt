@@ -24,6 +24,7 @@ import no.nav.helse.modell.varsel.Varselkode.SB_EX_2
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_3
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjon
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterOppdateringer
+import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverSkjønnsfastsettelse
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverTotrinnsvurdering
 import no.nav.helse.modell.vedtaksperiode.Periode.Companion.til
 import org.intellij.lang.annotations.Language
@@ -602,6 +603,13 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     fun `haster å behandle hvis generasjonen har varsel om negativt beløp`() {
         val generasjon1 = generasjonMedVarsel(varselkode =  "RV_UT_23")
         assertTrue(generasjon1.hasterÅBehandle())
+    }
+
+    @Test
+    fun `krever skjønnsfastsettelse hvis generasjon har varsel om avvik`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjon1 = listOf(generasjonMedVarsel(vedtaksperiodeId = vedtaksperiodeId, varselkode =  "RV_IV_2"))
+        assertTrue(generasjon1.kreverSkjønnsfastsettelse(vedtaksperiodeId = vedtaksperiodeId))
     }
 
     @Test

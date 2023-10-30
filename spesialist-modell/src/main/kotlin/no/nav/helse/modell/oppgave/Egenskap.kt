@@ -34,6 +34,7 @@ enum class Egenskap(
     HASTER,
     RETUR,
     FULLMAKT,
+    SKJØNNSFASTSETTELSE,
     VERGEMÅL;
 
     enum class Kategori {

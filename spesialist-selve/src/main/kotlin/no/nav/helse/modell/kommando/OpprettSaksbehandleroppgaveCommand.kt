@@ -28,6 +28,7 @@ import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_ARBEIDSGIVER
 import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.modell.oppgave.Egenskap.UTLAND
 import no.nav.helse.modell.oppgave.Egenskap.VERGEMÅL
+import no.nav.helse.modell.oppgave.Egenskap.SKJØNNSFASTSETTELSE
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.person.HentEnhetløsning
 import no.nav.helse.modell.person.PersonDao
@@ -110,6 +111,8 @@ internal class OpprettSaksbehandleroppgaveCommand(
         if (vedtakDao.erSpesialsak(vedtaksperiodeId)) {
             egenskaper.add(SPESIALSAK)
         }
+
+        if (sykefraværstilfelle.kreverSkjønnsfastsettelse(vedtaksperiodeId)) egenskaper.add(SKJØNNSFASTSETTELSE)
 
         if (sykefraværstilfelle.haster(vedtaksperiodeId) && (vedtaksperiodensUtbetaling.delvisRefusjon() || vedtaksperiodensUtbetaling.utbetalingTilSykmeldt())) egenskaper.add(HASTER)
 

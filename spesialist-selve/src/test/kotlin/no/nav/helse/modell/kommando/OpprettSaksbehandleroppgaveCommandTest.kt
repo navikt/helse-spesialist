@@ -21,6 +21,7 @@ import no.nav.helse.modell.oppgave.Egenskap.HASTER
 import no.nav.helse.modell.oppgave.Egenskap.INGEN_UTBETALING
 import no.nav.helse.modell.oppgave.Egenskap.REVURDERING
 import no.nav.helse.modell.oppgave.Egenskap.RISK_QA
+import no.nav.helse.modell.oppgave.Egenskap.SKJØNNSFASTSETTELSE
 import no.nav.helse.modell.oppgave.Egenskap.SPESIALSAK
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
@@ -219,6 +220,20 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         val oppgave = slot.captured.invoke(1L)
         oppgaveinspektør(oppgave) {
             assertFalse(egenskaper.contains(HASTER))
+        }
+    }
+
+    @Test
+    fun `oppretter oppgave med egenskap skjønnsfastsettelse dersom det finnes varsel om avvik`() {
+        every { snapshotMediator.finnUtbetaling(FNR, UTBETALING_ID) } returns enUtbetaling(personbeløp = 0, arbeidsgiverbeløp = 500)
+        every { sykefraværstilfelle.kreverSkjønnsfastsettelse(VEDTAKSPERIODE_ID) } returns true
+        val slot = slot<((Long) -> Oppgave)>()
+        assertTrue(command.execute(context))
+        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
+
+        val oppgave = slot.captured.invoke(1L)
+        oppgaveinspektør(oppgave) {
+            assertTrue(egenskaper.contains(SKJØNNSFASTSETTELSE))
         }
     }
 
