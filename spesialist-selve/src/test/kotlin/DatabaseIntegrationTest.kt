@@ -492,7 +492,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                                             periodetype = GraphQLPeriodetype.FORSTEGANGSBEHANDLING,
                                             tidslinje = emptyList(),
                                             vedtaksperiodeId = UUID.randomUUID().toString(),
-                                            id = UUID.randomUUID().toString(),
                                             periodetilstand = GraphQLPeriodetilstand.VENTERPAANNENPERIODE,
                                             skjaeringstidspunkt = "2020-01-01",
                                             hendelser = emptyList(),

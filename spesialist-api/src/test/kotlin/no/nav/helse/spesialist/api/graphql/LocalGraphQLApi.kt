@@ -393,7 +393,6 @@ private fun enPeriode() = GraphQLBeregnetPeriode(
     periodetype = GraphQLPeriodetype.FORSTEGANGSBEHANDLING,
     tidslinje = emptyList(),
     vedtaksperiodeId = UUID.randomUUID().toString(),
-    id = UUID.randomUUID().toString(),
     beregningId = UUID.randomUUID().toString(),
     forbrukteSykedager = 10,
     gjenstaendeSykedager = 270,

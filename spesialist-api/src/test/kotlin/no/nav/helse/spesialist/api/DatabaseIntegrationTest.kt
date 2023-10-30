@@ -736,7 +736,6 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         skjaeringstidspunkt = LocalDate.now().toString(),
         tidslinje = emptyList(),
         vedtaksperiodeId = vedtaksperiodeId.toString(),
-        id = UUID.randomUUID().toString(),
         beregningId = UUID.randomUUID().toString(),
         forbrukteSykedager = null,
         gjenstaendeSykedager = null,
@@ -777,7 +776,6 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         skjaeringstidspunkt = LocalDate.now().toString(),
         tidslinje = emptyList(),
         vedtaksperiodeId = vedtaksperiodeId.toString(),
-        id = UUID.randomUUID().toString(),
         hendelser = emptyList(),
     )
 

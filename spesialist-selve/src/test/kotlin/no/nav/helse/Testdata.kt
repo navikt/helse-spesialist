@@ -41,9 +41,6 @@ object Testdata {
         )
     internal val UTBETALING_ID = UUID.randomUUID()
 
-    const val VARSEL_KODE_1 = "VARSEL_KODE_1"
-    const val VARSEL_KODE_2 = "VARSEL_KODE_2"
-
     val VEDTAKSPERIODE_ID: UUID = UUID.randomUUID()
     val SNAPSHOT = snapshot(
         aktørId = AKTØR,
@@ -90,7 +87,6 @@ object Testdata {
                                     id = UUID.randomUUID().toString(),
                                     perioder = listOf(
                                         GraphQLBeregnetPeriode(
-                                            id = UUID.randomUUID().toString(),
                                             vedtaksperiodeId = vedtaksperiodeId.toString(),
                                             utbetaling = utbetaling,
                                             erForkastet = false,
