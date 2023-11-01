@@ -9,10 +9,7 @@ import kotlinx.coroutines.withContext
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.schema.AntallOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.BehandletOppgave
-import no.nav.helse.spesialist.api.graphql.schema.Fane
 import no.nav.helse.spesialist.api.graphql.schema.Filtrering
-import no.nav.helse.spesialist.api.graphql.schema.OppgaveTilBehandling
-import no.nav.helse.spesialist.api.graphql.schema.Oppgaveegenskap
 import no.nav.helse.spesialist.api.graphql.schema.OppgaverTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.Oppgavesortering
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
@@ -34,35 +31,6 @@ class OppgaverQuery(private val oppgavehåndterer: Oppgavehåndterer) : Query {
         }
 
         return DataFetcherResult.newResult<List<BehandletOppgave>>().data(behandledeOppgaver).build()
-    }
-
-    suspend fun oppgaver(
-        startIndex: Int? = 0,
-        pageSize: Int? = null,
-        sortering: List<Oppgavesortering>? = emptyList(),
-        filtrerteEgenskaper: List<Oppgaveegenskap>? = emptyList(),
-        fane: Fane? = Fane.TIL_GODKJENNING,
-        env: DataFetchingEnvironment,
-    ): DataFetcherResult<List<OppgaveTilBehandling>> {
-        sikkerLogg.info("Henter OppgaverTilBehandling")
-        val startTrace = startSporing(env)
-        val saksbehandler = env.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(SAKSBEHANDLER.key).value
-        val oppgaver = withContext(Dispatchers.IO) {
-            oppgavehåndterer.oppgaver(
-                saksbehandlerFraApi = saksbehandler,
-                offset = startIndex ?: 0,
-                limit = pageSize ?: Int.MAX_VALUE,
-                sortering = sortering ?: emptyList(),
-                filtrering = Filtrering(
-                    egenskaper = filtrerteEgenskaper ?: emptyList(),
-                    egneSakerPaVent = fane == Fane.PAA_VENT,
-                    egneSaker = fane == Fane.MINE_SAKER,
-                ),
-            )
-        }
-        avsluttSporing(startTrace)
-
-        return DataFetcherResult.newResult<List<OppgaveTilBehandling>>().data(oppgaver.oppgaver).build()
     }
 
     @Suppress("unused")
@@ -91,7 +59,7 @@ class OppgaverQuery(private val oppgavehåndterer: Oppgavehåndterer) : Query {
     }
 
     @Suppress("unused")
-    suspend fun antallOppgaver(env: DataFetchingEnvironment, ): DataFetcherResult<AntallOppgaver> {
+    suspend fun antallOppgaver(env: DataFetchingEnvironment): DataFetcherResult<AntallOppgaver> {
         sikkerLogg.info("Henter AntallOppgaver")
         val startTrace = startSporing(env)
         val saksbehandler = env.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(SAKSBEHANDLER.key).value

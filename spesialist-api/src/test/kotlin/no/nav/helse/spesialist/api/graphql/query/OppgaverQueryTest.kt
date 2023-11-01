@@ -30,10 +30,24 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
     fun `oppgaver query uten parametere returnerer oppgave`() {
         every { oppgavehåndterer.oppgaver(any(), any(), any(), any(), any()) } returns OppgaverTilBehandling(oppgaver = listOf(oppgaveTilBehandling()), totaltAntallOppgaver = 1)
 
-        val body = runQuery("""{ oppgaver { id } }""")
-        val antallOppgaver = body["data"]["oppgaver"].size()
+        val body = runQuery(
+            """{
+                oppgaveFeed(
+                    filtrering: {
+                        egenskaper: []
+                        egneSaker: false
+                        egneSakerPaVent: false
+                        ingenUkategoriserteEgenskaper: false
+                    },
+                    offset: 0,
+                    limit: 14,
+                    sortering: []
+                ) { oppgaver { id } }
+            }"""
+        )
+        val antallOppgaver = body["data"]["oppgaveFeed"].size()
 
-        verify(exactly = 1) { oppgavehåndterer.oppgaver(any(), 0, Int.MAX_VALUE, any(), any()) }
+        verify(exactly = 1) { oppgavehåndterer.oppgaver(any(), 0, 14, any(), any()) }
         assertEquals(1, antallOppgaver)
     }
 
@@ -41,18 +55,22 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
     fun `oppgaver query med parametere returnerer oppgave`() {
         every { oppgavehåndterer.oppgaver(any(), any(), any(), any(), any()) } returns OppgaverTilBehandling(oppgaver = listOf(oppgaveTilBehandling()), totaltAntallOppgaver = 1)
 
-        val body = runQuery("""{ 
-            oppgaver(
-                startIndex: 2, 
-                pageSize: 5, 
-                sortering: [{nokkel: TILDELT_TIL, stigende: true}], 
-                filtrerteEgenskaper: [{egenskap: DELVIS_REFUSJON, kategori: Mottaker}],
-                fane: MINE_SAKER
-            ) { 
-                id 
-            } 
-        }""")
-        val antallOppgaver = body["data"]["oppgaver"].size()
+        val body = runQuery(
+            """{ 
+                oppgaveFeed(
+                    offset: 2, 
+                    limit: 5, 
+                    sortering: [{nokkel: TILDELT_TIL, stigende: true}],
+                     filtrering: {
+                        egenskaper: [{egenskap: DELVIS_REFUSJON, kategori: Mottaker}]
+                        egneSaker: true
+                        egneSakerPaVent: false
+                        ingenUkategoriserteEgenskaper: false
+                    }
+                )  { oppgaver { id } }
+        }"""
+        )
+        val antallOppgaver = body["data"]["oppgaveFeed"].size()
 
         verify(exactly = 1) { oppgavehåndterer.oppgaver(
             saksbehandlerFraApi = any(),
