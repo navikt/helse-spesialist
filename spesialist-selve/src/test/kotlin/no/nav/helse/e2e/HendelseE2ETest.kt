@@ -7,7 +7,6 @@ import AbstractE2ETest.Kommandokjedetilstand.SUSPENDERT
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.Testdata
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -17,13 +16,6 @@ internal class HendelseE2ETest : AbstractE2ETest() {
     fun `ignorerer behov uten tilhørende command`() {
         håndterVedtaksperiodeEndret()
         assertIkkeHendelse(sisteMeldingId)
-    }
-
-    @Test
-    fun `vedtaksperiode forkastet`() {
-        håndterVedtaksperiodeForkastet()
-        assertIkkeHendelse(sisteMeldingId)
-        assertVedtaksperiodeEksistererIkke(Testdata.VEDTAKSPERIODE_ID)
     }
 
     @Test

@@ -18,12 +18,13 @@ internal class VedtaksperiodeForkastet(
     private val vedtaksperiodeId: UUID,
     private val fødselsnummer: String,
     private val json: String,
+    generasjon: Generasjon,
     commandContextDao: CommandContextDao,
     oppgaveMediator: OppgaveMediator,
     snapshotClient: SnapshotClient,
     snapshotDao: SnapshotDao,
     personDao: PersonDao,
-    vedtakDao: VedtakDao
+    vedtakDao: VedtakDao,
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         AvbrytCommand(vedtaksperiodeId, commandContextDao, oppgaveMediator),
@@ -34,7 +35,7 @@ internal class VedtaksperiodeForkastet(
             fødselsnummer = fødselsnummer,
             personDao = personDao,
         ),
-        ForkastVedtaksperiodeCommand(id, vedtaksperiodeId, vedtakDao)
+        ForkastVedtaksperiodeCommand(id, vedtaksperiodeId, generasjon, vedtakDao)
     )
 
     override fun fødselsnummer() = fødselsnummer

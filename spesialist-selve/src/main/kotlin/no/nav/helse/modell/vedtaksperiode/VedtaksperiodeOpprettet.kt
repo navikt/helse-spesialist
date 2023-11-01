@@ -15,7 +15,7 @@ internal class VedtaksperiodeOpprettet(
     override val id: UUID,
     private val fødselsnummer: String,
     organisasjonsnummer: String,
-    vedtaksperiodeId: UUID,
+    private val vedtaksperiodeId: UUID,
     fom: LocalDate,
     tom: LocalDate,
     personDao: PersonDao,
@@ -25,6 +25,7 @@ internal class VedtaksperiodeOpprettet(
     private val json: String,
 ) : Hendelse, MacroCommand() {
 
+    override fun vedtaksperiodeId() = vedtaksperiodeId
     override fun fødselsnummer() = fødselsnummer
     override fun toJson(): String = json
 

@@ -305,6 +305,23 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     }
 
     @Test
+    fun `avviser varsler`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjon = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)
+        generasjon.registrer(generasjonRepository, varselRepository)
+        val varsel1 = Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId)
+        val varsel2 = Varsel(UUID.randomUUID(), "SB_EX_2", LocalDateTime.now(), vedtaksperiodeId)
+        generasjon.håndterNyttVarsel(varsel1, UUID.randomUUID())
+        generasjon.håndterNyttVarsel(varsel2, UUID.randomUUID())
+
+        generasjon.avvisVarsler()
+        assertVarsler(generasjonId, 0, AKTIV, SB_EX_1)
+        assertVarsler(generasjonId, 0, AKTIV, SB_EX_2)
+        assertVarsler(generasjonId, 1, AVVIST, SB_EX_1)
+        assertVarsler(generasjonId, 1, AVVIST, SB_EX_2)
+    }
+
+    @Test
     fun `Lagrer kun én utgave av et aktivt varsel`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)

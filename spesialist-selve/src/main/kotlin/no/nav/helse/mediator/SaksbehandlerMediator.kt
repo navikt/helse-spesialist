@@ -155,15 +155,16 @@ internal class SaksbehandlerMediator(
 
         oppgaveApiDao.lagreBehandlingsreferanse(godkjenning.oppgavereferanse, behandlingId)
 
-        val fødselsnummer = oppgaveApiDao.finnFødselsnummer(godkjenning.oppgavereferanse)
-
-        perioderTilBehandling.vurderVarsler(
-            godkjenning.godkjent,
-            fødselsnummer,
-            behandlingId,
-            saksbehandler.ident(),
-            this::vurderVarsel
-        )
+        if (godkjenning.godkjent) {
+            val fødselsnummer = oppgaveApiDao.finnFødselsnummer(godkjenning.oppgavereferanse)
+            perioderTilBehandling.vurderVarsler(
+                true,
+                fødselsnummer,
+                behandlingId,
+                saksbehandler.ident(),
+                this::vurderVarsel
+            )
+        }
     }
 
     override fun håndterTotrinnsvurdering(oppgavereferanse: Long) {
