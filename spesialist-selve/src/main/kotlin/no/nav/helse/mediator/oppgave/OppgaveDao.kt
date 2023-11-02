@@ -269,12 +269,13 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
         mapOf("oppgaveId" to oppgaveId)
     ).single { it.uuid("utbetaling_id") }
 
-    fun finnNyesteOppgaveId(vedtaksperiodeId: UUID) =
+    fun finnIdForAktivOppgave(vedtaksperiodeId: UUID) =
         asSQL(
             """
             SELECT id FROM oppgave
             WHERE vedtak_ref =
                 (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
+                    AND status not in ('Ferdigstilt'::oppgavestatus, 'Invalidert'::oppgavestatus)
             ORDER BY opprettet DESC
             LIMIT 1
         """, mapOf("vedtaksperiodeId" to vedtaksperiodeId)

@@ -16,14 +16,12 @@ class TotrinnsvurderingMediator(
     private val notatMediator: NotatMediator,
 ) : Totrinnsvurderinghåndterer {
     fun opprett(vedtaksperiodeId: UUID): TotrinnsvurderingOld = dao.opprett(vedtaksperiodeId)
-    fun settBeslutter(vedtaksperiodeId: UUID, saksbehandlerOid: UUID): Unit =
-        dao.settBeslutter(vedtaksperiodeId, saksbehandlerOid)
 
     override fun settBeslutter(oppgaveId: Long, saksbehandlerOid: UUID): Unit =
         dao.settBeslutter(oppgaveId, saksbehandlerOid)
 
     fun settAutomatiskRetur(vedtaksperiodeId: UUID) {
-        oppgaveDao.finnNyesteOppgaveId(vedtaksperiodeId)?.let {
+        oppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId)?.let {
             dao.settErRetur(vedtaksperiodeId)
 
             lagrePeriodehistorikk(

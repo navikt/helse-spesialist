@@ -29,6 +29,7 @@ import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.BeforeEach
@@ -189,13 +190,15 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `finner nyeste oppgaveId uavhengig av status ved hjelp av vedtaksperiodeId`() {
+    fun `finner nyeste oppgaveId for ikke-avsluttede oppgaver ved hjelp av vedtaksperiodeId`() {
         nyPerson()
         opprettOppgave()
-        oppgaveDao.invaliderOppgaveFor(fødselsnummer = FNR)
 
-        val actual = oppgaveDao.finnNyesteOppgaveId(VEDTAKSPERIODE)
+        val actual = oppgaveDao.finnIdForAktivOppgave(VEDTAKSPERIODE)
         assertEquals(OPPGAVE_ID, actual)
+
+        oppgaveDao.invaliderOppgaveFor(fødselsnummer = FNR)
+        assertNull(oppgaveDao.finnIdForAktivOppgave(VEDTAKSPERIODE))
     }
 
     @Test

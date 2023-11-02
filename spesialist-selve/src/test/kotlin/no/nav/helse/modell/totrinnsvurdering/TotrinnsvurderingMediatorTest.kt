@@ -31,14 +31,14 @@ class TotrinnsvurderingMediatorTest {
         val oppgaveId = 42L
         val utbetalingId = UUID.randomUUID()
 
-        every { oppgaveDao.finnNyesteOppgaveId(vedtaksperiodeId) } returns oppgaveId
-        every { oppgaveDao.finnNyesteOppgaveId(any()) } returns oppgaveId
+        every { oppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId) } returns oppgaveId
+        every { oppgaveDao.finnIdForAktivOppgave(any()) } returns oppgaveId
         every { oppgaveDao.finnUtbetalingId(any<Long>()) } returns utbetalingId
 
         totrinnsvurderingMediator.settAutomatiskRetur(vedtaksperiodeId)
 
         verify(exactly = 1) { totrinnsvurderingDao.settErRetur(vedtaksperiodeId) }
-        verify(exactly = 1) { oppgaveDao.finnNyesteOppgaveId(vedtaksperiodeId) }
+        verify(exactly = 1) { oppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId) }
         verify(exactly = 1) {
             periodehistorikkDao.lagre(
                 historikkType = PeriodehistorikkType.TOTRINNSVURDERING_RETUR,

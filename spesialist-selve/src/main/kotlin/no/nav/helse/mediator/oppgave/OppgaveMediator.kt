@@ -189,7 +189,7 @@ internal class OppgaveMediator(
     }
 
     fun avbrytOppgaveFor(vedtaksperiodeId: UUID) {
-        oppgaveDao.finnNyesteOppgaveId(vedtaksperiodeId)?.also {
+        oppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId)?.also {
             oppgave(it) {
                 this.avbryt()
             }
