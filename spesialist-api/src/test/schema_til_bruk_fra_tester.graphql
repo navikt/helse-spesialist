@@ -623,7 +623,6 @@ type Tildeling {
     navn: String!
     oid: String!
     paaVent: Boolean!
-    reservert: Boolean @deprecated(reason: "Skal fjernes til fordel for paaVent")
 }
 
 type Totrinnsvurdering {

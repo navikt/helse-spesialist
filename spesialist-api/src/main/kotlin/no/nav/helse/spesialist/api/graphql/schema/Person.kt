@@ -47,10 +47,7 @@ data class Tildeling(
     val epost: String,
     val oid: UUIDString,
     val paaVent: Boolean,
-) {
-    @Deprecated("Skal fjernes til fordel for paaVent")
-    val reservert: Boolean? = null
-}
+)
 
 data class Person(
     private val snapshot: GraphQLPerson,

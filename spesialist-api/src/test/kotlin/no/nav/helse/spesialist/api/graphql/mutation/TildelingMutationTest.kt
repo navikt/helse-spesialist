@@ -35,7 +35,7 @@ internal class TildelingMutationTest : AbstractGraphQLApiTest() {
                     opprettTildeling(
                         oppgaveId: "$oppgaveId",
                     ) {
-                        navn, oid, epost, reservert, paaVent
+                        navn, oid, epost, paaVent
                     }
                 }
             """
@@ -58,7 +58,7 @@ internal class TildelingMutationTest : AbstractGraphQLApiTest() {
                     opprettTildeling(
                         oppgaveId: "$oppgaveId",
                     ) {
-                        navn, oid, epost, reservert, paaVent
+                        navn, oid, epost, paaVent
                     }
                 }
             """
@@ -132,7 +132,7 @@ internal class TildelingMutationTest : AbstractGraphQLApiTest() {
                         notatTekst: "Dett er et notat",
                         notatType: PaaVent
                     ) {
-                        navn, oid, epost, reservert, paaVent
+                        navn, oid, epost, paaVent
                     }
                 }
             """
@@ -157,7 +157,7 @@ internal class TildelingMutationTest : AbstractGraphQLApiTest() {
                         notatTekst: "Dett er et notat",
                         notatType: PaaVent
                     ) {
-                        navn, oid, epost, reservert, paaVent
+                        navn, oid, epost, paaVent
                     }
                 }
             """
@@ -180,7 +180,7 @@ internal class TildelingMutationTest : AbstractGraphQLApiTest() {
                         notatTekst: "Dett er et notat",
                         notatType: PaaVent
                     ) {
-                        navn, oid, epost, reservert, paaVent
+                        navn, oid, epost, paaVent
                     }
                 }
             """
@@ -198,8 +198,8 @@ internal class TildelingMutationTest : AbstractGraphQLApiTest() {
                 mutation FjernPaaVent {
                     fjernPaaVent(
                         oppgaveId: "$oppgaveId"
-                    ){
-                        navn, oid, epost, reservert, paaVent
+                    ) {
+                        navn, oid, epost, paaVent
                     }
                 }
             """
@@ -219,8 +219,8 @@ internal class TildelingMutationTest : AbstractGraphQLApiTest() {
                 mutation FjernPaaVent {
                     fjernPaaVent(
                         oppgaveId: "$oppgaveId"
-                    ){
-                        navn, oid, epost, reservert, paaVent
+                    ) {
+                        navn, oid, epost, paaVent
                     }
                 }
             """
@@ -240,8 +240,8 @@ internal class TildelingMutationTest : AbstractGraphQLApiTest() {
                 mutation FjernPaaVent {
                     fjernPaaVent(
                         oppgaveId: "$oppgaveId"
-                    ){
-                        navn, oid, epost, reservert, paaVent
+                    ) {
+                        navn, oid, epost, paaVent
                     }
                 }
             """
