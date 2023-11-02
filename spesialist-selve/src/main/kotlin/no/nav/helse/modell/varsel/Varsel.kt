@@ -133,15 +133,12 @@ internal class Varsel(
 
         private val neiVarsler = listOf(
             "RV_IT_3",
-            "RV_OS_2",
-            "RV_OS_3",
+
             "RV_SI_3",
-            "RV_UT_21",
             "RV_UT_23",
             "RV_VV_8",
             "SB_RV_2",
-            "SB_RV_3",
-            "RV_IV_2"
+            "SB_RV_3"
         )
 
         internal fun List<Varsel>.forhindrerAutomatisering() = any { it.status in listOf(VURDERT, AKTIV, AVVIST) }

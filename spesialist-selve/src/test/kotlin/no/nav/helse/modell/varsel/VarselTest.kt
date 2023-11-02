@@ -166,7 +166,7 @@ internal class VarselTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = ["RV_IT_3", "RV_OS_2", "RV_OS_3", "RV_SI_3", "RV_UT_21", "RV_UT_23", "RV_VV_8", "SB_RV_2"])
+    @ValueSource(strings = ["RV_IT_3", "RV_SI_3", "RV_UT_23", "RV_VV_8", "SB_RV_2"])
     fun `inneholder svartelistet varsel`(varselkode: String) {
         val varsel = nyttVarsel(status = AKTIV, kode = varselkode)
         assertTrue(listOf(varsel).inneholderSvartelistedeVarsler())
