@@ -18,26 +18,19 @@ data class GodkjenningsbehovPayload(private val hendelseId: UUID) : OpptegnelseP
     override fun toJson() = """
         { "hendelseId": "$hendelseId" }
     """.trimIndent()
-    companion object {
-        fun GodkjenningsbehovPayload.lagre(opptegnelseDao: OpptegnelseDao, fødselsnummer: String) {
-            opptegnelseDao.opprettOpptegnelse(
-                fødselsnummer = fødselsnummer,
-                payload = this,
-                // Dette er et litt misvisende navn, opprettes både når oppgave opprettes, men også når noe avvises/betales automatisk
-                type = OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE
-            )
-        }
-    }
 }
 
-data class RevurderingAvvistPayload(private val hendelseId: UUID, private val errors: List<String>) :
-    OpptegnelsePayload() {
+enum class AutomatiskBehandlingUtfall {
+    UTBETALT, AVVIST
+}
+
+data class AutomatiskBehandlingPayload(private val hendelseId: UUID, private val utfall: AutomatiskBehandlingUtfall) : OpptegnelsePayload() {
     override fun toJson() = """
-        { "hendelseId": "$hendelseId", "errors": ${errors.map{ "\"$it\""}} }
+        { "hendelseId": "$hendelseId", "utfall": "$utfall" }
     """.trimIndent()
 }
 
-object PersonOppdatertPayload : OpptegnelsePayload() {
+data object PersonOppdatertPayload : OpptegnelsePayload() {
     @Language("json")
     override fun toJson() = """
         { "oppdatert": "${LocalDateTime.now()}" }

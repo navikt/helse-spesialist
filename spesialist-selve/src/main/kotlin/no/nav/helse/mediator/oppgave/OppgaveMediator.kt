@@ -27,8 +27,8 @@ import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.modell.saksbehandler.handlinger.Oppgavehandling
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
-import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload.Companion.lagre
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
+import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import no.nav.helse.spesialist.api.graphql.schema.AntallOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.BehandletOppgave
 import no.nav.helse.spesialist.api.graphql.schema.Filtrering
@@ -207,7 +207,11 @@ internal class OppgaveMediator(
         kanAvvises: Boolean,
     ) {
         oppgaveDao.opprettOppgave(id, contextId, egenskap, egenskaper, vedtaksperiodeId, utbetalingId, kanAvvises)
-        GodkjenningsbehovPayload(hendelseId).lagre(opptegnelseDao, oppgaveDao.finnFødselsnummer(id))
+        opptegnelseDao.opprettOpptegnelse(
+            oppgaveDao.finnFødselsnummer(id),
+            GodkjenningsbehovPayload(hendelseId),
+            OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE
+        )
     }
 
     fun oppdater(

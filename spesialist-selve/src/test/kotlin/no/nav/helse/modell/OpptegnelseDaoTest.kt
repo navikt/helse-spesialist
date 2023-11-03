@@ -4,7 +4,7 @@ import DatabaseIntegrationTest
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.util.UUID
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
-import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload.Companion.lagre
+import no.nav.helse.spesialist.api.abonnement.OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType.UTBETALING_ANNULLERING_OK
 import no.nav.helse.spesialist.api.abonnement.UtbetalingPayload
 import no.nav.helse.spesialist.api.graphql.schema.Opptegnelsetype
@@ -33,7 +33,7 @@ internal class OpptegnelseDaoTest : DatabaseIntegrationTest() {
             UTBETALING_ANNULLERING_OK
         )
 
-        GODKJENNINGSBEHOV_PAYLOAD.lagre(opptegnelseDao, FNR)
+        opptegnelseDao.opprettOpptegnelse(FNR, GODKJENNINGSBEHOV_PAYLOAD, NY_SAKSBEHANDLEROPPGAVE)
 
         val alle = opptegnelseDao.finnOpptegnelser(SAKSBEHANDLER_OID)
         assertEquals(2, alle.size)

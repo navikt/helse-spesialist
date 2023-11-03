@@ -58,13 +58,13 @@ internal class GodkjenningMediatorTest {
     @Test
     fun `automatisk avvisning skal opprette opptegnelse`() {
         mediator.automatiskAvvisning(context::publiser, UUID.randomUUID(), listOf("foo"), utbetaling, UUID.randomUUID())
-        assertOpptegnelseOpprettet()
+        assertFerdigbehandletGodkjenningsbehovOpptegnelseOpprettet()
     }
 
     @Test
     fun `automatisk utbetaling skal opprette opptegnelse`() {
         mediator.automatiskUtbetaling(context, UtbetalingsgodkjenningMessage("{}", utbetaling), UUID.randomUUID(), fnr, UUID.randomUUID())
-        assertOpptegnelseOpprettet()
+        assertFerdigbehandletGodkjenningsbehovOpptegnelseOpprettet()
     }
 
     @Test
@@ -147,7 +147,9 @@ internal class GodkjenningMediatorTest {
         Sykefraværstilfelle(fnr, 1.januar, generasjoner, emptyList())
     )
 
-    private fun assertOpptegnelseOpprettet() = verify(exactly = 1) { opptegnelseDao.opprettOpptegnelse(eq(fnr), any(), eq(OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE)) }
+    private fun assertFerdigbehandletGodkjenningsbehovOpptegnelseOpprettet() = verify(exactly = 1) {
+        opptegnelseDao.opprettOpptegnelse(eq(fnr), any(), eq(OpptegnelseType.FERDIGBEHANDLET_GODKJENNIGSBEHOV))
+    }
 
     private fun assertOpptegnelseIkkeOpprettet() = verify(exactly = 0) { opptegnelseDao.opprettOpptegnelse(eq(fnr), any(), eq(OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE)) }
 
