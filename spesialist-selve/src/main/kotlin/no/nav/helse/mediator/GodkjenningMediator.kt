@@ -93,7 +93,7 @@ internal class GodkjenningMediator(
         opptegnelseDao.opprettOpptegnelse(
             fødselsnummer,
             AutomatiskBehandlingPayload(hendelseId, AutomatiskBehandlingUtfall.UTBETALT),
-            OpptegnelseType.FERDIGBEHANDLET_GODKJENNIGSBEHOV
+            OpptegnelseType.FERDIGBEHANDLET_GODKJENNINGSBEHOV
         )
         automatiseringsteller.inc()
         sikkerLogg.info(
@@ -137,7 +137,7 @@ internal class GodkjenningMediator(
         opptegnelseDao.opprettOpptegnelse(
             fødselsnummer,
             AutomatiskBehandlingPayload(hendelseId, AutomatiskBehandlingUtfall.AVVIST),
-            OpptegnelseType.FERDIGBEHANDLET_GODKJENNIGSBEHOV
+            OpptegnelseType.FERDIGBEHANDLET_GODKJENNINGSBEHOV
         )
 
         begrunnelser.forEach { automatiskAvvistÅrsakerTeller.labels(it).inc() }

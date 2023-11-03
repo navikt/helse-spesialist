@@ -148,7 +148,7 @@ internal class GodkjenningMediatorTest {
     )
 
     private fun assertFerdigbehandletGodkjenningsbehovOpptegnelseOpprettet() = verify(exactly = 1) {
-        opptegnelseDao.opprettOpptegnelse(eq(fnr), any(), eq(OpptegnelseType.FERDIGBEHANDLET_GODKJENNIGSBEHOV))
+        opptegnelseDao.opprettOpptegnelse(eq(fnr), any(), eq(OpptegnelseType.FERDIGBEHANDLET_GODKJENNINGSBEHOV))
     }
 
     private fun assertOpptegnelseIkkeOpprettet() = verify(exactly = 0) { opptegnelseDao.opprettOpptegnelse(eq(fnr), any(), eq(OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE)) }
