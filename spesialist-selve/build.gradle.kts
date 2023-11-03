@@ -3,7 +3,7 @@ val testcontainersVersion = "1.19.1"
 
 plugins {
     kotlin("plugin.serialization") version "1.9.10"
-    id("com.expediagroup.graphql") version "7.0.1"
+    id("com.expediagroup.graphql") version "7.0.2"
 }
 
 dependencies {
