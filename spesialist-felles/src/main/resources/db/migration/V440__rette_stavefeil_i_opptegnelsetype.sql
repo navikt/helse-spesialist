@@ -1,0 +1,3 @@
+update opptegnelse
+set type = 'FERDIGBEHANDLET_GODKJENNINGSBEHOV'
+where type = 'FERDIGBEHANDLET_GODKJENNIGSBEHOV';
