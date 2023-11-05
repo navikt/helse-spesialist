@@ -49,6 +49,8 @@ jobs:
 
   fjern_tag:
     name: Fjern deploy-tag
+    permissions:
+      contents: write
     if: always()
     needs: [ deployDev ]
     runs-on: ubuntu-latest
