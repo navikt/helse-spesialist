@@ -10,6 +10,8 @@ on:
 jobs:
   lag_tag:
     name: Lag en tag
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
