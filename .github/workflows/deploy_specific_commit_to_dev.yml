@@ -23,7 +23,8 @@ jobs:
   build:
     needs: [ lag_branch ]
     permissions:
-      id-token: "write"
+      contents: read
+      id-token: write
     uses: navikt/helse-spesialist/.github/workflows/build-image.yml@master
     secrets: inherit
     with:
