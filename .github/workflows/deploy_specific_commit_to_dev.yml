@@ -8,27 +8,15 @@ on:
         required: true
 
 jobs:
-  lag_branch:
-    name: Lag en (midlertidig) branch
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.inputs.commitHash }}
-      - name: Lag branch for senere workflows
-        run: |
-          git branch denne_skal_deployes_til_dev
-          git push origin denne_skal_deployes_til_dev
 
   build:
-    needs: [ lag_branch ]
     permissions:
       contents: read
       id-token: write
     uses: navikt/helse-spesialist/.github/workflows/build-image.yml@master
     secrets: inherit
     with:
-      ref: denne_skal_deployes_til_dev
+      ref: ${{ github.event.inputs.commitHash }}
 
   deployDev:
     name: deploy to dev
@@ -37,20 +25,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: denne_skal_deployes_til_dev
+          ref: ${{ github.event.inputs.commitHash }}
       - uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: deploy/dev.yml
           IMAGE: ${{ needs.build.outputs.image }}
-
-  fjern_branch:
-    name: Fjern branchen
-    if: always()
-    needs: [ deployDev ]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: |
-          git push origin :denne_skal_deployes_til_dev
