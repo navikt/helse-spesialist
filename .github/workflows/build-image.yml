@@ -45,7 +45,6 @@ jobs:
       - uses: nais/docker-build-push@v0.7.0
         id: docker-build-push
         with:
-          metadata_context: git
           team: tbd
           tag: ${{ inputs.ref }}
           cache_from: type=gha
