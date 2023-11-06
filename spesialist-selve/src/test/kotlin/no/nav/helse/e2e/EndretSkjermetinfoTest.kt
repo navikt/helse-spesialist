@@ -5,7 +5,6 @@ import no.nav.helse.TestRapidHelpers.oppgaveId
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class EndretSkjermetinfoTest : AbstractE2ETest() {
@@ -45,7 +44,6 @@ internal class EndretSkjermetinfoTest : AbstractE2ETest() {
         assertSaksbehandleroppgave(oppgavestatus = Oppgavestatus.AvventerSaksbehandler)
     }
 
-    @Disabled("Dette implementeres i runde to")
     @Test
     fun `Fjerner egenskap egen ansatt hvis personen ikke lenger har status egen ansatt`() {
         fremTilSaksbehandleroppgave()

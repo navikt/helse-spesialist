@@ -775,10 +775,12 @@ internal class Hendelsefabrikk(
     }
 
     fun endretSkjermetinfo(json: String): EndretSkjermetinfo {
+        val erEgenAnsatt = mapper.readTree(json)["skjermet"].asBoolean()
         val jsonNode = mapper.readTree(json)
         return EndretSkjermetinfo(
             id = UUID.fromString(jsonNode["@id"].asText()),
             fødselsnummer = jsonNode["fødselsnummer"].asText(),
+            erEgenAnsatt = erEgenAnsatt,
             json = json,
             oppgaveMediator = oppgaveMediator,
         )

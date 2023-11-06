@@ -142,6 +142,11 @@ class Oppgave private constructor(
         oppgaveEndret()
     }
 
+    fun fjernEgenAnsatt() {
+        egenskaper.remove(EGEN_ANSATT)
+        oppgaveEndret()
+    }
+
     fun leggPåVent(saksbehandler: Saksbehandler) {
         val tildeltTil = this.tildeltTil ?: throw OppgaveIkkeTildelt(id)
         if (this.tildeltTil != saksbehandler) throw OppgaveTildeltNoenAndre(tildeltTil, this.påVent)

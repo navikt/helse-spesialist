@@ -65,10 +65,8 @@ internal class EndretSkjermetinfoRiver(
 
         logger("Mottok hendelse $eventName og oppdaterer database for {}, {}")
         egenAnsattDao.lagre(fødselsnummer, erEgenAnsatt, opprettet)
-        if (erEgenAnsatt) {
-            logger("Behandler melding om at {} har fått status egen ansatt, {}")
-            hendelsemediator.egenAnsattStatusEndret(packet.toJson(), context)
-        }
+        logger("Behandler melding om endret egen ansatt-status for {}, {}")
+        hendelsemediator.egenAnsattStatusEndret(packet.toJson(), context)
     }
 
     private companion object {

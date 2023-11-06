@@ -132,15 +132,21 @@ internal class OppgaveMediator(
         }
     }
 
-    override fun harBlittEgenAnsatt(fødselsnummer: String) {
+    override fun endretEgenAnsattStatus(erEgenAnsatt: Boolean, fødselsnummer: String) {
         val oppgaveId = oppgaveDao.finnOppgaveId(fødselsnummer) ?: run {
             sikkerlogg.info("Ingen aktiv oppgave for {}", kv("fødselsnummer", fødselsnummer))
             return
         }
         oppgave(oppgaveId) {
-            logg.info("Legger til egenskap EGEN_ANSATT på {}", kv("oppgaveId", oppgaveId))
-            sikkerlogg.info("Legger til egenskap EGEN_ANSATT for {}", kv("fødselsnummer", fødselsnummer))
-            leggTilEgenAnsatt()
+            if (erEgenAnsatt) {
+                logg.info("Legger til egenskap EGEN_ANSATT på {}", kv("oppgaveId", oppgaveId))
+                sikkerlogg.info("Legger til egenskap EGEN_ANSATT for {}", kv("fødselsnummer", fødselsnummer))
+                leggTilEgenAnsatt()
+            } else {
+                logg.info("Fjerner egenskap EGEN_ANSATT på {}", kv("oppgaveId", oppgaveId))
+                sikkerlogg.info("Fjerner egenskap EGEN_ANSATT for {}", kv("fødselsnummer", fødselsnummer))
+                fjernEgenAnsatt()
+            }
         }
     }
 
