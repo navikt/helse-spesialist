@@ -57,7 +57,7 @@ internal class VedtaksperiodeSkjønnsmessigFastsettelse(
             fødselsnummer = fødselsnummer,
             personDao = personDao,
         ),
-        ikkesuspenderendeCommand {
+        ikkesuspenderendeCommand("markerPersonSomKlarForVisning") {
             personDao.markerPersonSomKlarForVisning(fødselsnummer)
         }
     )

@@ -30,7 +30,7 @@ internal class OppdaterPersonsnapshot(
             personDao = personDao,
         ),
         OppdaterInfotrygdutbetalingerHardt(fødselsnummer, personDao),
-        ikkesuspenderendeCommand {
+        ikkesuspenderendeCommand("opprettOpptegnelse") {
             opptegnelseDao.opprettOpptegnelse(
                 fødselsnummer,
                 PersonOppdatertPayload,

@@ -14,7 +14,7 @@ internal class EndretSkjermetinfo(
     oppgaveMediator: OppgaveMediator,
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
-        ikkesuspenderendeCommand {
+        ikkesuspenderendeCommand("endretEgenAnsattStatus") {
             oppgaveMediator.harBlittEgenAnsatt(fødselsnummer)
         },
     )

@@ -51,7 +51,7 @@ internal abstract class MacroCommand : Command {
             logg.info("Kommando ${command::class.simpleName} suspenderte, nåværende sti: ${context.sti()}")
             return false
         }
-        logg.info("Kommando ${command::class.simpleName} er ferdig")
+        logg.info("Kommando ${command.name} er ferdig")
         currentIndex += 1
         return true
     }
