@@ -48,10 +48,10 @@ internal fun tellVarsel(varselkode: String) = varselteller.labels("WARN", varsel
 
 internal fun tellInaktivtVarsel(varselkode: String) = inaktiveVarslerteller.labels("WARN", varselkode).inc()
 
-internal fun registrerTidsbrukForHendelse(command: String, tid: Long) = registrerTidsbrukForHendelse.labels(command).observe(tid.toDouble())
+internal fun registrerTidsbrukForHendelse(command: String, tidBruktMs: Int) = registrerTidsbrukForHendelse.labels(command).observe(tidBruktMs.toDouble())
 
-internal fun registrerTidsbrukForGodkjenningsbehov(utfall: GodkjenningsbehovUtfall, tid: Long) =
-    godkjenningsbehovUtfall.labels(utfall.name).observe(tid.toDouble())
+internal fun registrerTidsbrukForGodkjenningsbehov(utfall: GodkjenningsbehovUtfall, tidBruktMs: Int) =
+    godkjenningsbehovUtfall.labels(utfall.name).observe(tidBruktMs.toDouble())
 
 internal class MetrikkRiver(rapidsConnection: RapidsConnection) : River.PacketListener {
     val log: Logger = LoggerFactory.getLogger("MetrikkRiver")

@@ -2,14 +2,18 @@ package no.nav.helse.modell
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import java.util.UUID
+import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.mediator.meldinger.Hendelse
-import no.nav.helse.modell.CommandContextDao.CommandContextTilstand.*
+import no.nav.helse.modell.CommandContextDao.CommandContextTilstand.AVBRUTT
+import no.nav.helse.modell.CommandContextDao.CommandContextTilstand.FEIL
+import no.nav.helse.modell.CommandContextDao.CommandContextTilstand.FERDIG
+import no.nav.helse.modell.CommandContextDao.CommandContextTilstand.NY
+import no.nav.helse.modell.CommandContextDao.CommandContextTilstand.SUSPENDERT
 import no.nav.helse.modell.kommando.CommandContext
 import org.intellij.lang.annotations.Language
-import java.util.*
-import javax.sql.DataSource
 
 internal class CommandContextDao(private val dataSource: DataSource) {
     private companion object {
@@ -83,21 +87,16 @@ internal class CommandContextDao(private val dataSource: DataSource) {
         }
     }
 
-    internal fun contextOpprettetTidspunkt(
+    internal fun tidsbrukForContext(
         contextId: UUID,
     ) = sessionOf(dataSource).use { session ->
-        checkNotNull(
-            session.run(
-                queryOf(
-                    "SELECT min(opprettet) AS context_opprettet FROM command_context WHERE context_id = ?",
-                    contextId,
-                ).map {
-                    it.localDateTime("context_opprettet")
-                }.asSingle
-            )
-        ) {
-            "Det fins ikke noen command_context for contextId $contextId"
-        }
+        @Language("postgresql") val query = """
+            select extract(milliseconds from (max(opprettet) - min(opprettet))) as tid_brukt_ms
+            from command_context
+            where context_id = :contextId
+        """.trimIndent()
+        // Kan bruke !! fordi mappingen thrower hvis spørringen ikke fant noe
+        session.run(queryOf(query, mapOf("contextId" to contextId)).map { it.int("tid_brukt_ms") }.asSingle)!!
     }
 
     fun finnSuspendert(id: UUID) = finnSiste(id)?.takeIf { it.first == SUSPENDERT }?.let { (_, dto) ->

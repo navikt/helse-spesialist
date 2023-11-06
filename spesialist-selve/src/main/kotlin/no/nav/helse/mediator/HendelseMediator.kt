@@ -2,8 +2,6 @@ package no.nav.helse.mediator
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.LocalDateTime.now
-import java.time.temporal.ChronoUnit.MILLIS
 import java.util.UUID
 import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments.keyValue
@@ -653,7 +651,7 @@ internal class HendelseMediator(
             try {
                 logg.info("utfører $hendelsenavn med context_id=$contextId for hendelse_id=${hendelse.id}")
                 if (context.utfør(commandContextDao, hendelse)) {
-                    val kjøretid = MILLIS.between(commandContextDao.contextOpprettetTidspunkt(contextId), now())
+                    val kjøretid = commandContextDao.tidsbrukForContext(contextId)
                     metrikker(hendelsenavn, kjøretid, contextId)
                     logg.info(
                         "Kommando(er) for $hendelsenavn er utført ferdig. Det tok ca {}ms å kjøre hele kommandokjeden",
@@ -676,12 +674,12 @@ internal class HendelseMediator(
         }
     }
 
-    private fun metrikker(hendelsenavn: String, kjøretid: Long, contextId: UUID) {
+    private fun metrikker(hendelsenavn: String, kjøretidMs: Int, contextId: UUID) {
         if (hendelsenavn == Godkjenningsbehov::class.simpleName) {
             val utfall: GodkjenningsbehovUtfall = metrikkDao.finnUtfallForGodkjenningsbehov(contextId)
-            registrerTidsbrukForGodkjenningsbehov(utfall, kjøretid)
+            registrerTidsbrukForGodkjenningsbehov(utfall, kjøretidMs)
         }
-        registrerTidsbrukForHendelse(hendelsenavn, kjøretid)
+        registrerTidsbrukForHendelse(hendelsenavn, kjøretidMs)
     }
 
     private class Løsninger(
