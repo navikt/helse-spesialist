@@ -2,6 +2,7 @@ package no.nav.helse.mediator.oppgave
 
 import java.sql.SQLException
 import java.util.UUID
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgavesorteringForDatabase
@@ -56,6 +57,7 @@ internal class OppgaveMediator(
     private val tilgangsgrupper: Tilgangsgrupper,
 ) : Oppgavehåndterer, Oppgavefinner {
     private val logg = LoggerFactory.getLogger(this::class.java)
+    private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
     internal fun nyOppgave(
         fødselsnummer: String,
@@ -127,6 +129,18 @@ internal class OppgaveMediator(
             } catch (e: Modellfeil) {
                 throw e.tilApiversjon()
             }
+        }
+    }
+
+    override fun harBlittEgenAnsatt(fødselsnummer: String) {
+        val oppgaveId = oppgaveDao.finnOppgaveId(fødselsnummer) ?: run {
+            sikkerlogg.info("Ingen aktiv oppgave for {}", kv("fødselsnummer", fødselsnummer))
+            return
+        }
+        oppgave(oppgaveId) {
+            logg.info("Legger til egenskap EGEN_ANSATT på {}", kv("oppgaveId", oppgaveId))
+            sikkerlogg.info("Legger til egenskap EGEN_ANSATT for {}", kv("fødselsnummer", fødselsnummer))
+            leggTilEgenAnsatt()
         }
     }
 

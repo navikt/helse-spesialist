@@ -780,6 +780,7 @@ internal class Hendelsefabrikk(
             id = UUID.fromString(jsonNode["@id"].asText()),
             fødselsnummer = jsonNode["fødselsnummer"].asText(),
             json = json,
+            oppgaveMediator = oppgaveMediator,
         )
     }
 

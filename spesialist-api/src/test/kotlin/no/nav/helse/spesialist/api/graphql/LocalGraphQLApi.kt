@@ -270,6 +270,8 @@ private class SneakyOppgaveHåndterer(private val randomOppgaver: List<OppgaveTi
         return mock.sendIRetur(oppgaveId, besluttendeSaksbehandler)
     }
 
+    override fun harBlittEgenAnsatt(fødselsnummer: String) {}
+
     override fun venterPåSaksbehandler(oppgaveId: Long): Boolean {
         return mock.venterPåSaksbehandler(oppgaveId)
     }

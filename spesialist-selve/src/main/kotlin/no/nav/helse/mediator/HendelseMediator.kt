@@ -130,7 +130,7 @@ internal class HendelseMediator(
             VedtaksperiodeOpprettetRiver(it, this)
             VedtaksperiodeSkjønnsmessigFastsettelseRiver(it, this)
             GosysOppgaveEndretRiver(it, this, oppgaveDao, personDao)
-            EndretSkjermetinfoRiver(it, personDao, egenAnsattDao, oppgaveDao, godkjenningMediator)
+            EndretSkjermetinfoRiver(it, personDao, egenAnsattDao, oppgaveDao, godkjenningMediator, this)
             DokumentRiver(it, dokumentDao)
             VedtakFattetRiver(it, this)
             NyeVarslerRiver(it, this)
@@ -569,6 +569,10 @@ internal class HendelseMediator(
 
     fun gosysOppgaveEndret(hendelseId: UUID, fødselsnummer: String, aktørId: String, json: String, context: MessageContext) {
         utfør(hendelsefabrikk.gosysOppgaveEndret(hendelseId, fødselsnummer, aktørId, json), context)
+    }
+
+    fun egenAnsattStatusEndret(json: String, context: MessageContext) {
+        utfør(hendelsefabrikk.endretSkjermetinfo(json), context)
     }
 
     fun vedtakFattet(id: UUID, fødselsnummer: String, vedtaksperiodeId: UUID, json: String, context: MessageContext) {

@@ -8,6 +8,7 @@ import no.nav.helse.modell.OppgaveTildeltNoenAndre
 import no.nav.helse.modell.oppgave.Egenskap.BESLUTTER
 import no.nav.helse.modell.oppgave.Egenskap.Companion.tilgangsstyrteEgenskaper
 import no.nav.helse.modell.oppgave.Egenskap.DELVIS_REFUSJON
+import no.nav.helse.modell.oppgave.Egenskap.EGEN_ANSATT
 import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.RETUR
 import no.nav.helse.modell.oppgave.Egenskap.REVURDERING
@@ -133,6 +134,11 @@ class Oppgave private constructor(
 
         tildeltTil = opprinneligSaksbehandler
         påVent = false
+        oppgaveEndret()
+    }
+
+    fun leggTilEgenAnsatt() {
+        egenskaper.add(EGEN_ANSATT)
         oppgaveEndret()
     }
 

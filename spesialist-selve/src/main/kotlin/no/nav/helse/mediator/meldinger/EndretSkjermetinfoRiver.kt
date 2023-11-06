@@ -3,8 +3,9 @@ package no.nav.helse.mediator.meldinger
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.modell.egenansatt.EgenAnsattDao
+import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.oppgave.OppgaveDao
+import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -21,8 +22,8 @@ internal class EndretSkjermetinfoRiver(
     private val egenAnsattDao: EgenAnsattDao,
     val oppgaveDao: OppgaveDao,
     val godkjenningMediator: GodkjenningMediator,
+    val hendelsemediator: HendelseMediator,
 ) : River.PacketListener {
-    private val logg: Logger = LoggerFactory.getLogger(this::class.java)
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
     init {
@@ -64,16 +65,10 @@ internal class EndretSkjermetinfoRiver(
 
         logger("Mottok hendelse $eventName og oppdaterer database for {}, {}")
         egenAnsattDao.lagre(fødselsnummer, erEgenAnsatt, opprettet)
-        if (erEgenAnsatt) avvisOppgave(fødselsnummer, context)
-    }
-
-    private fun avvisOppgave(fødselsnummer: String, context: MessageContext) {
-        val oppgaveId = oppgaveDao.finnOppgaveId(fødselsnummer) ?: return
-
-        logg.info("OppgaveId $oppgaveId avvises fordi vedkommende har blitt egen ansatt")
-        val årsaker = listOf("Egen ansatt")
-        godkjenningMediator.automatiskAvvisning(context::publish, årsaker, oppgaveId)
-        oppgaveDao.invaliderOppgaveFor(fødselsnummer)
+        if (erEgenAnsatt) {
+            logger("Behandler melding om at {} har fått status egen ansatt, {}")
+            hendelsemediator.egenAnsattStatusEndret(packet.toJson(), context)
+        }
     }
 
     private companion object {

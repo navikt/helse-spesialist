@@ -1,8 +1,11 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETest
+import no.nav.helse.TestRapidHelpers.oppgaveId
 import no.nav.helse.Testdata.FØDSELSNUMMER
+import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class EndretSkjermetinfoTest : AbstractE2ETest() {
@@ -31,14 +34,28 @@ internal class EndretSkjermetinfoTest : AbstractE2ETest() {
     }
 
     @Test
-    fun `Avbryter oppgave når person blir egen ansatt`() {
+    fun `Legger til egenskap på oppgave når person får status egen ansatt`() {
         fremTilSaksbehandleroppgave()
-        assertSaksbehandleroppgave(oppgavestatus = Oppgavestatus.AvventerSaksbehandler)
+
+        val oppgaveId = inspektør.oppgaveId().toInt()
+        assertHarIkkeOppgaveegenskap(oppgaveId, Egenskap.EGEN_ANSATT)
 
         håndterEndretSkjermetinfo(skjermet = true)
+        assertHarOppgaveegenskap(oppgaveId, Egenskap.EGEN_ANSATT)
+        assertSaksbehandleroppgave(oppgavestatus = Oppgavestatus.AvventerSaksbehandler)
+    }
 
-        assertSaksbehandleroppgave(oppgavestatus = Oppgavestatus.Invalidert)
-        assertVedtaksperiodeAvvist("FØRSTEGANGSBEHANDLING", listOf("Egen ansatt"))
-        assertUtgåendeMelding("vedtaksperiode_avvist")
+    @Disabled("Dette implementeres i runde to")
+    @Test
+    fun `Fjerner egenskap egen ansatt hvis personen ikke lenger har status egen ansatt`() {
+        fremTilSaksbehandleroppgave()
+        håndterEndretSkjermetinfo(skjermet = true)
+
+        val oppgaveId = inspektør.oppgaveId().toInt()
+        assertHarOppgaveegenskap(oppgaveId, Egenskap.EGEN_ANSATT)
+
+        håndterEndretSkjermetinfo(skjermet = false)
+
+        assertHarIkkeOppgaveegenskap(oppgaveId, Egenskap.EGEN_ANSATT)
     }
 }

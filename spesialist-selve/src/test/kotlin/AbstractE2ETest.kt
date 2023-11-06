@@ -31,6 +31,7 @@ import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Vergemål
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
+import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.saksbehandler.OverstyrtInntektOgRefusjonEvent.OverstyrtArbeidsgiverEvent
 import no.nav.helse.modell.saksbehandler.OverstyrtInntektOgRefusjonEvent.OverstyrtArbeidsgiverEvent.OverstyrtRefusjonselementEvent
@@ -1228,6 +1229,28 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             session.run(queryOf(query, vedtaksperiodeId).map { enumValueOf<Oppgavestatus>(it.string("status")) }.asSingle)
         }
         assertEquals(oppgavestatus, sisteOppgavestatus)
+    }
+
+    protected fun assertHarOppgaveegenskap(oppgaveId: Int, vararg forventedeEgenskaper: Egenskap) {
+        val egenskaper = hentOppgaveegenskaper(oppgaveId)
+        assertTrue(egenskaper.containsAll(forventedeEgenskaper.toList()))
+    }
+
+    protected fun assertHarIkkeOppgaveegenskap(oppgaveId: Int, vararg forventedeEgenskaper: Egenskap) {
+        val egenskaper = hentOppgaveegenskaper(oppgaveId)
+        assertTrue(egenskaper.none { it in forventedeEgenskaper })
+    }
+
+    private fun hentOppgaveegenskaper(oppgaveId: Int): Set<Egenskap> {
+        @Language("PostgreSQL")
+        val query = "select egenskaper from oppgave o where id = :oppgaveId"
+        val egenskaper = requireNotNull(sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, mapOf("oppgaveId" to oppgaveId)).map { row ->
+                row.array<String>("egenskaper").map<String, Egenskap>(::enumValueOf).toSet()
+            }.asSingle)
+        }) { "Forventer å finne en oppgave for id=$oppgaveId" }
+
+        return egenskaper
     }
 
     protected fun assertSaksbehandleroppgaveBleIkkeOpprettet(
