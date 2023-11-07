@@ -14,7 +14,6 @@ interface GraphQLTidslinjeperiode {
     erForkastet: Boolean!
     fom: LocalDate!
     hendelser: [GraphQLHendelse!]!
-    id: UUID!
     inntektstype: GraphQLInntektstype!
     opprettet: LocalDateTime!
     periodetilstand: GraphQLPeriodetilstand!
@@ -68,7 +67,6 @@ type GraphQLBeregnetPeriode implements GraphQLTidslinjeperiode {
     forbrukteSykedager: Int
     gjenstaendeSykedager: Int
     hendelser: [GraphQLHendelse!]!
-    id: UUID!
     inntektstype: GraphQLInntektstype!
     maksdato: LocalDate!
     opprettet: LocalDateTime!
@@ -271,7 +269,6 @@ type GraphQLUberegnetPeriode implements GraphQLTidslinjeperiode {
     erForkastet: Boolean!
     fom: LocalDate!
     hendelser: [GraphQLHendelse!]!
-    id: UUID!
     inntektstype: GraphQLInntektstype!
     opprettet: LocalDateTime!
     periodetilstand: GraphQLPeriodetilstand!
@@ -286,7 +283,6 @@ type GraphQLUberegnetVilkarsprovdPeriode implements GraphQLTidslinjeperiode {
     erForkastet: Boolean!
     fom: LocalDate!
     hendelser: [GraphQLHendelse!]!
-    id: UUID!
     inntektstype: GraphQLInntektstype!
     opprettet: LocalDateTime!
     periodetilstand: GraphQLPeriodetilstand!
@@ -441,6 +437,7 @@ enum GraphQLSykdomsdagtype {
     Permisjonsdag
     SykHelgedag
     Sykedag
+    SykedagNav
     Ubestemtdag
 }
 
