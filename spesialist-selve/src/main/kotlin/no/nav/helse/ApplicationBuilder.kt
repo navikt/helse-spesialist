@@ -50,7 +50,6 @@ import no.nav.helse.mediator.TilgangskontrollørForReservasjon
 import no.nav.helse.mediator.dokument.DokumentMediator
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
-import no.nav.helse.mediator.oppgave.Oppgavemelder
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.automatisering.Automatisering
@@ -185,7 +184,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val httpTraceLog = LoggerFactory.getLogger("tjenestekall")
     private lateinit var hendelseMediator: HendelseMediator
     private lateinit var saksbehandlerMediator: SaksbehandlerMediator
-    private var oppgavemelder: Oppgavemelder
 
     private val personDao = PersonDao(dataSource)
     private val personApiDao = PersonApiDao(dataSource)
@@ -400,7 +398,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         )
         saksbehandlerMediator = SaksbehandlerMediator(dataSource, versjonAvKode(env), rapidsConnection, oppgaveMediator, tilgangsgrupper)
         dokumentMediator = DokumentMediator(dokumentDao, rapidsConnection)
-        oppgavemelder = Oppgavemelder(hendelseDao, rapidsConnection)
         godkjenningService = GodkjenningService(
             dataSource = dataSource,
             rapidsConnection = rapidsConnection,

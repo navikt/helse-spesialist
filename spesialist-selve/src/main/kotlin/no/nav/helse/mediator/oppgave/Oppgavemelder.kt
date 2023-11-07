@@ -14,7 +14,10 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import kotlin.properties.Delegates
 
-internal class Oppgavemelder(private val hendelseDao: HendelseDao, private val rapidsConnection: RapidsConnection): OppgaveObserver {
+internal class Oppgavemelder(
+    private val hendelseDao: HendelseDao,
+    private val rapidsConnection: RapidsConnection,
+) : OppgaveObserver {
 
     internal fun oppgaveOpprettet(oppgave: Oppgave) {
         val oppgavemelding = OppgaveForKafkaBygger().bygg(oppgave)
