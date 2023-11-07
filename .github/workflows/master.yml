@@ -61,6 +61,7 @@ jobs:
                   CLUSTER: dev-gcp
                   RESOURCE: deploy/dev.yml,deploy/dev-db-policy.yml,deploy/hpa.yml
                   IMAGE: ${{ needs.build.outputs.image }}
+                  VARS: nais/dev-hpa.yaml
 
     deployProd:
         name: Deploy to prod
@@ -72,5 +73,6 @@ jobs:
               env:
                   APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
                   CLUSTER: prod-gcp
-                  RESOURCE: deploy/prod.yml,deploy/prod-db-policy.yml
+                  RESOURCE: deploy/prod.yml,deploy/prod-db-policy.yml,deploy/hpa.yml
                   IMAGE: ${{ needs.build.outputs.image }}
+                  VARS: nais/prod-hpa.yaml
