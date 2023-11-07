@@ -23,7 +23,7 @@ internal class DokumentMediatorTest {
         private val TESTHENDELSE = TestHendelse(HENDELSE_ID, VEDTAKSPERIODE_ID, FNR)
         private val DOKUMENTID = UUID.randomUUID()
         private const val DOKUMENTTYPE = "SØKNAD"
-        private val RETRIES = 30
+        private const val RETRIES = 2
     }
 
     private val dokumentDao = mockk<DokumentDao>(relaxed = true)
@@ -32,6 +32,7 @@ internal class DokumentMediatorTest {
     private val mediator = DokumentMediator(
         dokumentDao = dokumentDao,
         rapidsConnection = testRapid,
+        retries = RETRIES,
     )
     @BeforeEach
     fun setup() {

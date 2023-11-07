@@ -15,10 +15,10 @@ import org.slf4j.LoggerFactory
 class DokumentMediator(
     private val dokumentDao: DokumentDao,
     private val rapidsConnection: RapidsConnection,
+    private val retries: Int = 30,
 ) : Dokumenthåndterer {
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-        private val retries = 30
     }
 
     override fun håndter(fødselsnummer: String, dokumentId: UUID, dokumentType: String): JsonNode {
