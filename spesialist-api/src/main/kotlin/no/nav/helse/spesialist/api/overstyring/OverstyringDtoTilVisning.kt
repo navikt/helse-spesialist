@@ -11,7 +11,6 @@ enum class Dagtype {
     Egenmeldingsdag,
     Permisjonsdag,
     Arbeidsdag,
-    Avvistdag,
     ArbeidIkkeGjenopptattDag,
     Foreldrepengerdag,
     AAPdag,
@@ -19,7 +18,11 @@ enum class Dagtype {
     Pleiepengerdag,
     Svangerskapspengerdag,
     Opplaringspengerdag,
-    Dagpengerdag
+    Dagpengerdag,
+
+    // OBS! Spleis støtter ikke å motta disse dagene. De brukes kun (🤞) til historikkvisning, altså hvilken dag det ble overstyrt _fra_.
+    Avvistdag,
+    Helg,
 }
 
 data class OverstyringTidslinjeDto(
@@ -64,6 +67,7 @@ data class OverstyringInntektDto(
         val beløp: Double,
     )
 }
+
 enum class Skjonnsfastsettingstype {
     OMREGNET_ARSINNTEKT,
     RAPPORTERT_ARSINNTEKT,
