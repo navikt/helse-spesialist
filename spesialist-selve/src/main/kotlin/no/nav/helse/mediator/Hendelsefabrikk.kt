@@ -47,8 +47,10 @@ import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.ActualVarselRepository
+import no.nav.helse.modell.varsel.DefinisjonDao
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.Varsel.Companion.varsler
+import no.nav.helse.modell.varsel.Varselmelder
 import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
@@ -119,6 +121,8 @@ internal class Hendelsefabrikk(
     private val overstyringMediator: OverstyringMediator,
     private val snapshotMediator: SnapshotMediator,
     private val versjonAvKode: String?,
+    private val definisjonDao: DefinisjonDao,
+    private val varselmelder: Varselmelder,
 ) {
     private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
     private val sykefraværstilfelleDao = SykefraværstilfelleDao(dataSource)
@@ -662,7 +666,9 @@ internal class Hendelsefabrikk(
             snapshotClient = snapshotClient,
             snapshotDao = snapshotDao,
             personDao = personDao,
-            vedtakDao = vedtakDao
+            vedtakDao = vedtakDao,
+            definisjonDao = definisjonDao,
+            varselmelder = varselmelder,
         )
     }
 

@@ -12,8 +12,10 @@ import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.utbetaling.UtbetalingDao
+import no.nav.helse.modell.varsel.DefinisjonDao
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.modell.varsel.Varselkode
+import no.nav.helse.modell.varsel.Varselmelder
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
@@ -52,6 +54,8 @@ internal class HendelseMediatorTest : AbstractDatabaseTest() {
         overstyringMediator = OverstyringMediator(testRapid),
         snapshotMediator = snapshotMediator,
         versjonAvKode = "versjonAvKode",
+        definisjonDao = DefinisjonDao(dataSource),
+        varselmelder = Varselmelder(testRapid),
     )
 
     private val hendelseMediator = HendelseMediator(
