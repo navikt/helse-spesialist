@@ -22,8 +22,8 @@ class DokumentMediator(
     }
 
     override fun håndter(fødselsnummer: String, dokumentId: UUID, dokumentType: String): JsonNode {
-        return dokumentDao.hent(fødselsnummer, dokumentId).let { søknad ->
-            if (søknad == null) {
+        return dokumentDao.hent(fødselsnummer, dokumentId).let { dokument ->
+            if (dokument == null) {
                 sendHentDokument(fødselsnummer, dokumentId, dokumentType)
 
                 val response = runBlocking {
@@ -33,7 +33,7 @@ class DokumentMediator(
                 return@let response
             }
 
-            return@let søknad
+            return@let dokument
         }
     }
 
@@ -41,12 +41,12 @@ class DokumentMediator(
         if (retries == 0) return objectMapper.createObjectNode()
 
         val response = runBlocking {
-            val søknad = dokumentDao.hent(fødselsnummer, dokumentId)
-            if (søknad == null) {
+            val dokument = dokumentDao.hent(fødselsnummer, dokumentId)
+            if (dokument == null) {
                 delay(100)
                 hentDokument(fødselsnummer, dokumentId, retries - 1)
             } else {
-                return@runBlocking søknad
+                return@runBlocking dokument
             }
         }
         return response
