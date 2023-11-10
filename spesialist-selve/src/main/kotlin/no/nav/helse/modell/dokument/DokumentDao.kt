@@ -10,19 +10,27 @@ class DokumentDao(private val dataSource: DataSource) : HelseDao(dataSource) {
     internal fun lagre(fødselsnummer: String, dokumentId: UUID, dokument: JsonNode) {
         asSQL(
             """
+                SELECT id FROM person WHERE fodselsnummer=:fodselsnummer
+            """.trimIndent(), mapOf(
+                "fodselsnummer" to fødselsnummer.toLong(),
+            )
+        ).single { it.int("id") }?.let { personId ->
+            asSQL(
+                """
             INSERT INTO dokumenter (dokument_id, person_ref, dokument)
             VALUES (
                 :dokumentId,
-                (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer),
+                :personRef,
                 :dokument::json
             )
             ON CONFLICT DO NOTHING
         """.trimIndent(), mapOf(
-                "fodselsnummer" to fødselsnummer.toLong(),
-                "dokumentId" to dokumentId,
-                "dokument" to objectMapper.writeValueAsString(dokument)
-            )
-        ).update()
+                    "dokumentId" to dokumentId,
+                    "personRef" to personId,
+                    "dokument" to objectMapper.writeValueAsString(dokument)
+                )
+            ).update()
+        }
     }
 
     internal fun hent(fødselsnummer: String, dokumentId: UUID): JsonNode? = asSQL(
