@@ -12,7 +12,7 @@ class OpptegnelseMutation(
 ): Mutation {
 
     @Suppress("unused")
-    fun abonner(
+    fun opprettAbonnement(
         personidentifikator: String,
         environment: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> {

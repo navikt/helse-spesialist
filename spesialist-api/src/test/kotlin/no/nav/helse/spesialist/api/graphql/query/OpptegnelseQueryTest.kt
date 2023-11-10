@@ -29,7 +29,7 @@ internal class OpptegnelseQueryTest: AbstractGraphQLApiTest() {
 
         val body = runQuery(
             """query HentOpptegnelser {
-                hentOpptegnelser {
+                opptegnelser {
                     aktorId
                     sekvensnummer
                     type
@@ -37,7 +37,7 @@ internal class OpptegnelseQueryTest: AbstractGraphQLApiTest() {
                 }
             }"""
         )
-        val opptegnelser = jacksonObjectMapper().treeToValue<List<Opptegnelse>>(body["data"]["hentOpptegnelser"])
+        val opptegnelser = jacksonObjectMapper().treeToValue<List<Opptegnelse>>(body["data"]["opptegnelser"])
         assertEquals(3, opptegnelser.size)
         opptegnelser.forEachIndexed { index, opptegnelse ->
             assertEquals(AKTØRID, opptegnelse.aktorId)
@@ -59,7 +59,7 @@ internal class OpptegnelseQueryTest: AbstractGraphQLApiTest() {
         every { saksbehandlerhåndterer.hentAbonnerteOpptegnelser(any(), any()) } returns listOf(Opptegnelse(AKTØRID, 3, typer[2], "{}"))
         val body = runQuery(
             """query HentOpptegnelser {
-                hentOpptegnelser(sekvensId: 2) {
+                opptegnelser(sekvensId: 2) {
                     aktorId
                     sekvensnummer
                     type
@@ -68,7 +68,7 @@ internal class OpptegnelseQueryTest: AbstractGraphQLApiTest() {
             }"""
         )
 
-        val opptegnelser = jacksonObjectMapper().treeToValue<List<Opptegnelse>>(body["data"]["hentOpptegnelser"])
+        val opptegnelser = jacksonObjectMapper().treeToValue<List<Opptegnelse>>(body["data"]["opptegnelser"])
         assertEquals(1, opptegnelser.size)
         val opptegnelse = opptegnelser.single()
         assertEquals(AKTØRID, opptegnelse.aktorId)
@@ -80,7 +80,7 @@ internal class OpptegnelseQueryTest: AbstractGraphQLApiTest() {
     private fun abonner(personId: String) {
         runQuery(
             """mutation Abonner {
-                abonner(personidentifikator: "$personId")
+                opprettAbonnement(personidentifikator: "$personId")
             }"""
         )
     }

@@ -9,9 +9,9 @@ internal class OpptegnelseMutationTest: AbstractGraphQLApiTest() {
     fun `opprett abonnement`() {
         val body = runQuery(
             """mutation Abonner {
-                abonner(personidentifikator: "123")
+                opprettAbonnement(personidentifikator: "123")
             }"""
         )
-        assertEquals(true, body["data"]["abonner"].asBoolean())
+        assertEquals(true, body["data"]["opprettAbonnement"].asBoolean())
     }
 }

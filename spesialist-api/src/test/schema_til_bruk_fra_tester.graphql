@@ -275,7 +275,6 @@ type Kommentar {
 }
 
 type Mutation {
-    abonner(personidentifikator: String!): Boolean!
     annuller(annullering: AnnulleringDataInput!): Boolean!
     feilregistrerKommentar(id: Int!): Kommentar
     feilregistrerKommentarV2(id: Int!): Kommentar
@@ -287,6 +286,7 @@ type Mutation {
     leggTilKommentar(notatId: Int!, saksbehandlerident: String!, tekst: String!): Kommentar
     leggTilNotat(saksbehandlerOid: String!, tekst: String!, type: NotatType!, vedtaksperiodeId: String!): Notat
     oppdaterPerson(fodselsnummer: String!): Boolean!
+    opprettAbonnement(personidentifikator: String!): Boolean!
     opprettTildeling(oppgaveId: String!): Tildeling
     overstyrArbeidsforhold(overstyring: ArbeidsforholdOverstyringHandlingInput!): Boolean!
     overstyrDager(overstyring: TidslinjeOverstyringInput!): Boolean!
@@ -441,11 +441,11 @@ type Query {
     antallOppgaver: AntallOppgaver!
     behandledeOppgaverIDag: [BehandletOppgave!]!
     behandlingsstatistikk: Behandlingsstatistikk!
-    hentOpptegnelser(sekvensId: Int): [Opptegnelse!]!
     hentSoknad(dokumentId: String!, fnr: String!): Soknad!
     notater(forPerioder: [String!]!): [Notater!]!
     oppdrag(fnr: String!): [Oppdrag!]!
     oppgaveFeed(filtrering: FiltreringInput!, limit: Int!, offset: Int!, sortering: [OppgavesorteringInput!]!): OppgaverTilBehandling!
+    opptegnelser(sekvensId: Int): [Opptegnelse!]!
     person(aktorId: String, fnr: String): Person
 }
 
@@ -786,6 +786,7 @@ enum Dagtype {
     Egenmeldingsdag
     Feriedag
     Foreldrepengerdag
+    Helg
     Omsorgspengerdag
     Opplaringspengerdag
     Permisjonsdag
@@ -1018,7 +1019,7 @@ enum Sykdomsdagtype {
     FRISK_HELGEDAG
     PERMISJONSDAG
     SYKEDAG
-    SYKEDAGNAV
+    SYKEDAG_NAV
     SYK_HELGEDAG
     UBESTEMTDAG
 }
