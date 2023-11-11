@@ -22,7 +22,7 @@ spec:
         target:
           type: AverageValue
           averageValue: 200
-  behaviour:
+  behavior:
     scaleDown:
       policies:
         - type: Pods
