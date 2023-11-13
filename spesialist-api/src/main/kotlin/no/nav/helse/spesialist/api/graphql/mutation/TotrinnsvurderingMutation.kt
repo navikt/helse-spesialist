@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.api.graphql.mutation
 
 import com.expediagroup.graphql.server.operations.Mutation
+import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import kotlinx.coroutines.Dispatchers
@@ -8,6 +9,8 @@ import kotlinx.coroutines.withContext
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.Totrinnsvurderinghåndterer
+import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
+import no.nav.helse.spesialist.api.feilhåndtering.Modellfeil
 import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
@@ -34,8 +37,29 @@ class TotrinnsvurderingMutation(
         val behandlendeSaksbehandler: SaksbehandlerFraApi =
             env.graphQlContext.get<Lazy<SaksbehandlerFraApi>?>(ContextValues.SAKSBEHANDLER.key).value
 
-        saksbehandlerhåndterer.håndterTotrinnsvurdering(oppgavereferanse.toLong())
-        oppgavehåndterer.sendTilBeslutter(oppgavereferanse.toLong(), behandlendeSaksbehandler)
+        try {
+            saksbehandlerhåndterer.håndterTotrinnsvurdering(oppgavereferanse.toLong())
+        } catch (error: ManglerVurderingAvVarsler) {
+            return@withContext DataFetcherResult.newResult<Boolean>().error(
+                GraphqlErrorException.newErrorException().message(error.message)
+                    .extensions(mapOf("code" to error.httpkode)).build()
+            ).build()
+        } catch (error: RuntimeException) {
+            return@withContext DataFetcherResult.newResult<Boolean>().error(
+                GraphqlErrorException.newErrorException().message("Kunne ikke håndtere totrinnsvurdering, ukjennt feil")
+                    .extensions(mapOf("code" to 500)).build()
+            ).build()
+        }
+
+        try {
+            oppgavehåndterer.sendTilBeslutter(oppgavereferanse.toLong(), behandlendeSaksbehandler)
+        } catch (modellfeil: Modellfeil) {
+            return@withContext DataFetcherResult.newResult<Boolean>().error(
+                GraphqlErrorException.newErrorException()
+                    .message("Feil ved sending til beslutter: ${modellfeil.message}")
+                    .extensions(mapOf("code" to modellfeil.httpkode)).build()
+            ).build()
+        }
 
         sikkerlogg.info(
             "Oppgave med {} sendes til godkjenning av saksbehandler med {}",
