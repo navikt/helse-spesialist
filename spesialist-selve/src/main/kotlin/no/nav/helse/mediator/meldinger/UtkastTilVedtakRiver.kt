@@ -46,7 +46,7 @@ internal class UtkastTilVedtakRiver(
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        sikkerlogg.info("Mottok melding om utkast_til_vedtak")
+        sikkerlogg.info("Mottok melding om utkast_til_vedtak:\n${packet.toJson()}")
         mediator.håndter(UtkastTilVedtakMessage(packet))
     }
 
