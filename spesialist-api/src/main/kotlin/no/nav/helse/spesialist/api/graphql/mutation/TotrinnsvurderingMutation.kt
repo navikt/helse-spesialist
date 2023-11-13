@@ -43,12 +43,12 @@ class TotrinnsvurderingMutation(
             return@withContext DataFetcherResult.newResult<Boolean>().error(
                 GraphqlErrorException.newErrorException().message(error.message)
                     .extensions(mapOf("code" to error.httpkode)).build()
-            ).build()
+            ).data(false).build()
         } catch (error: RuntimeException) {
             return@withContext DataFetcherResult.newResult<Boolean>().error(
                 GraphqlErrorException.newErrorException().message("Kunne ikke håndtere totrinnsvurdering, ukjennt feil")
                     .extensions(mapOf("code" to 500)).build()
-            ).build()
+            ).data(false).build()
         }
 
         try {
@@ -58,7 +58,7 @@ class TotrinnsvurderingMutation(
                 GraphqlErrorException.newErrorException()
                     .message("Feil ved sending til beslutter: ${modellfeil.message}")
                     .extensions(mapOf("code" to modellfeil.httpkode)).build()
-            ).build()
+            ).data(false).build()
         }
 
         sikkerlogg.info(
