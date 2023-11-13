@@ -42,7 +42,7 @@ internal class ActualVarselRepository(dataSource: DataSource): IVedtaksperiodeOb
         if (varselkode.matches(varselkodeformat.toRegex())) tellInaktivtVarsel(varselkode)
     }
 
-    override fun varselAvvist(varselId: UUID, varselkode: String, generasjonId: UUID, vedtaksperiodeId: UUID, forrigeStatus: Varsel.Status, gjeldendeStatus: Varsel.Status) {
+    override fun varselAvvist(varselId: UUID, varselkode: String, generasjonId: UUID, vedtaksperiodeId: UUID) {
         varselDao.oppdaterStatus(vedtaksperiodeId, generasjonId, varselkode, AVVIST, null, null)
     }
 

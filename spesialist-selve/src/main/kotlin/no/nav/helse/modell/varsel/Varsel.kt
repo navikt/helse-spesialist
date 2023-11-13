@@ -65,11 +65,8 @@ internal class Varsel(
     }
     internal fun avvis(generasjonId: UUID) {
         if (status !in listOf(AKTIV, VURDERT)) return
-        val forrigeStatus = status
         this.status = AVVIST
-        observers.forEach {
-            it.varselAvvist(id, varselkode, generasjonId, vedtaksperiodeId, forrigeStatus, status)
-        }
+        observers.forEach { it.varselAvvist(id, varselkode, generasjonId, vedtaksperiodeId) }
     }
 
     private fun oppdaterGenerasjon(gammelGenerasjonId: UUID, nyGenerasjonId: UUID) {

@@ -11,8 +11,6 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.modell.varsel.DefinisjonDao
-import no.nav.helse.modell.varsel.Varselmelder
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 
 internal class VedtaksperiodeForkastet(
@@ -27,8 +25,6 @@ internal class VedtaksperiodeForkastet(
     snapshotDao: SnapshotDao,
     personDao: PersonDao,
     vedtakDao: VedtakDao,
-    definisjonDao: DefinisjonDao,
-    varselmelder: Varselmelder,
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         AvbrytCommand(vedtaksperiodeId, commandContextDao, oppgaveMediator),
@@ -39,7 +35,7 @@ internal class VedtaksperiodeForkastet(
             fødselsnummer = fødselsnummer,
             personDao = personDao,
         ),
-        ForkastVedtaksperiodeCommand(id, vedtaksperiodeId, fødselsnummer, generasjon, vedtakDao, definisjonDao, varselmelder)
+        ForkastVedtaksperiodeCommand(id, vedtaksperiodeId, generasjon, vedtakDao)
     )
 
     override fun fødselsnummer() = fødselsnummer

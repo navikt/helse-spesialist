@@ -63,8 +63,6 @@ import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.modell.utbetaling.UtbetalingDao
-import no.nav.helse.modell.varsel.DefinisjonDao
-import no.nav.helse.modell.varsel.Varselmelder
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.rapids_rivers.RapidApplication
@@ -375,9 +373,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         automatisering = automatisering,
         overstyringMediator = OverstyringMediator(rapidsConnection),
         snapshotMediator = snapshotMediator,
-        versjonAvKode = versjonAvKode(env),
-        definisjonDao = DefinisjonDao(dataSource),
-        varselmelder = Varselmelder(rapidsConnection),
+        versjonAvKode = versjonAvKode(env)
     )
 
     init {

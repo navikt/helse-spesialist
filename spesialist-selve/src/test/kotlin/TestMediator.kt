@@ -22,8 +22,6 @@ import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
-import no.nav.helse.modell.varsel.DefinisjonDao
-import no.nav.helse.modell.varsel.Varselmelder
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -104,8 +102,6 @@ internal class TestMediator(
         overstyringMediator = overstyringMediator,
         snapshotMediator = snapshotMediator,
         versjonAvKode = "versjonAvKode",
-        definisjonDao = DefinisjonDao(dataSource),
-        varselmelder = Varselmelder(rapidsConnection = testRapid)
     )
 
     init {

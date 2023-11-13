@@ -311,7 +311,7 @@ internal class VarselTest {
             deaktiverteVarsler[varselId] = Deaktivering(vedtaksperiodeId, generasjonId, varselId, varselkode)
         }
 
-        override fun varselAvvist(varselId: UUID, varselkode: String, generasjonId: UUID, vedtaksperiodeId: UUID, forrigeStatus: Status, gjeldendeStatus: Status) {
+        override fun varselAvvist(varselId: UUID, varselkode: String, generasjonId: UUID, vedtaksperiodeId: UUID) {
             avvisteVarsler[varselId] = Avvisning(vedtaksperiodeId, generasjonId, varselId, varselkode)
         }
 

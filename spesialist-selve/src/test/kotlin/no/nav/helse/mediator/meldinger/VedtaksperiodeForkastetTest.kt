@@ -12,8 +12,6 @@ import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.modell.varsel.DefinisjonDao
-import no.nav.helse.modell.varsel.Varselmelder
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
@@ -34,8 +32,6 @@ internal class VedtaksperiodeForkastetTest {
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
     private val personDao = mockk<PersonDao>(relaxed = true)
     private val snapshotDao = mockk<SnapshotDao>(relaxed = true)
-    private val definisjonDao = mockk<DefinisjonDao>(relaxed = true)
-    private val varselmelder = mockk<Varselmelder>(relaxed = true)
     private val graphQLClient = mockk<SnapshotClient>(relaxed = true)
     private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
     private val generasjon = mockk<Generasjon>(relaxed = true)
@@ -52,8 +48,6 @@ internal class VedtaksperiodeForkastetTest {
         snapshotDao = snapshotDao,
         personDao = personDao,
         vedtakDao = vedtakDao,
-        definisjonDao = definisjonDao,
-        varselmelder = varselmelder,
     )
 
     @BeforeEach

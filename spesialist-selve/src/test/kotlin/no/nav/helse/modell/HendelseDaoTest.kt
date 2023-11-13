@@ -38,8 +38,6 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
             overstyringMediator = mockk(),
             snapshotMediator = mockk(relaxed = true),
             versjonAvKode = "versjonAvKode",
-            definisjonDao = mockk(),
-            varselmelder = mockk(),
         )
     }
 
