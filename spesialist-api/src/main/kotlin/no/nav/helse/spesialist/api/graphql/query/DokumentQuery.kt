@@ -11,6 +11,13 @@ import kotlinx.coroutines.withContext
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.spesialist.api.Dokumenthåndterer
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
+import no.nav.helse.spesialist.api.graphql.schema.DokumentInntektsmelding
+import no.nav.helse.spesialist.api.graphql.schema.EndringIRefusjon
+import no.nav.helse.spesialist.api.graphql.schema.GjenopptakelseNaturalytelse
+import no.nav.helse.spesialist.api.graphql.schema.IMPeriode
+import no.nav.helse.spesialist.api.graphql.schema.Naturalytelse
+import no.nav.helse.spesialist.api.graphql.schema.OpphoerAvNaturalytelse
+import no.nav.helse.spesialist.api.graphql.schema.Refusjon
 import no.nav.helse.spesialist.api.graphql.schema.Soknad
 import no.nav.helse.spesialist.api.graphql.schema.Soknadsperioder
 import no.nav.helse.spesialist.api.graphql.schema.Sporsmal
@@ -49,6 +56,31 @@ class DokumentQuery(
         return DataFetcherResult.newResult<Soknad>().data(dokument).build()
     }
 
+    @Suppress("unused")
+    suspend fun hentInntektsmelding(
+        fnr: String,
+        dokumentId: String,
+        env: DataFetchingEnvironment,
+    ): DataFetcherResult<DokumentInntektsmelding> {
+        if (isForbidden(fnr, env)) {
+            return DataFetcherResult.newResult<DokumentInntektsmelding?>().error(getForbiddenError(fnr)).build()
+        }
+
+        if (dokumentId.isEmpty()) {
+            return DataFetcherResult.newResult<DokumentInntektsmelding>().error(getEmptyRequestError()).build()
+        }
+
+        val dokument = withContext(Dispatchers.IO) {
+            dokumenthåndterer.håndter(fnr, UUID.fromString(dokumentId), DokumentType.INNTEKTSMELDING.name)
+        }.let {
+            if (it.size() == 0) return DataFetcherResult.newResult<DokumentInntektsmelding>()
+                .error(getEmptyResultTimeoutError()).build()
+            return@let it.tilInntektsmelding()
+        }
+
+        return DataFetcherResult.newResult<DokumentInntektsmelding>().data(dokument).build()
+    }
+
     private fun getEmptyRequestError(): GraphQLError =
         GraphqlErrorException.newErrorException().message("Requesten mangler dokument-id")
             .extensions(mapOf("code" to 400)).build()
@@ -56,6 +88,88 @@ class DokumentQuery(
     private fun getEmptyResultTimeoutError(): GraphQLError =
         GraphqlErrorException.newErrorException().message("Noe gikk galt, vennligst prøv igjen.")
             .extensions(mapOf("code" to 408)).build()
+
+    private fun JsonNode.tilInntektsmelding(): DokumentInntektsmelding {
+        return DokumentInntektsmelding(
+            begrunnelseForReduksjonEllerIkkeUtbetalt = this.path("begrunnelseForReduksjonEllerIkkeUtbetalt")
+                .takeUnless { it.isMissingOrNull() }?.asText(),
+            bruttoUtbetalt = this.path("bruttoUtbetalt").takeUnless { it.isMissingOrNull() }?.asDouble(),
+            beregnetInntekt = this.path("beregnetInntekt").takeUnless { it.isMissingOrNull() }?.asDouble(),
+            inntektsdato = this.path("inntektsdato").takeUnless { it.isMissingOrNull() }?.asText(),
+            refusjon = this.path("refusjon").takeUnless { it.isMissingOrNull() }?.let { refusjon ->
+                Refusjon(beloepPrMnd = refusjon["beloepPrMnd"].takeUnless { it.isMissingOrNull() }?.asDouble(),
+                    opphoersdato = refusjon["opphoersdato"].takeUnless { it.isMissingOrNull() }?.asText()
+                )
+            },
+            endringIRefusjoner = this.path("endringIRefusjoner").takeUnless { it.isMissingOrNull() }
+                ?.map { endringIRefusjon ->
+                    EndringIRefusjon(endringsdato = endringIRefusjon["endringsdato"].takeUnless { it.isMissingOrNull() }
+                        ?.asText(),
+                        beloep = endringIRefusjon["beloep"].takeUnless { it.isMissingOrNull() }?.asDouble())
+                },
+            opphoerAvNaturalytelser = this.path("opphoerAvNaturalytelser").takeUnless { it.isMissingOrNull() }
+                ?.map { opphørAvNaturalytelse ->
+                    OpphoerAvNaturalytelse(opphørAvNaturalytelse["naturalytelse"].takeUnless { it.isMissingOrNull() }
+                        ?.asText()?.tilNaturalytelse(),
+                        fom = opphørAvNaturalytelse["fom"].takeUnless { it.isMissingOrNull() }?.asText(),
+                        beloepPrMnd = opphørAvNaturalytelse["beloepPrMnd"].takeUnless { it.isMissingOrNull() }
+                            ?.asDouble())
+                },
+            gjenopptakelseNaturalytelser = this.path("gjenopptakelseNaturalytelser").takeUnless { it.isMissingOrNull() }
+                ?.map { gjenopptakelseNaturalytelse ->
+                    GjenopptakelseNaturalytelse(gjenopptakelseNaturalytelse["naturalytelse"].takeUnless { it.isMissingOrNull() }
+                        ?.asText()?.tilNaturalytelse(),
+                        fom = gjenopptakelseNaturalytelse["fom"].takeUnless { it.isMissingOrNull() }?.asText(),
+                        beloepPrMnd = gjenopptakelseNaturalytelse["beloepPrMnd"].takeUnless { it.isMissingOrNull() }
+                            ?.asDouble())
+                },
+            arbeidsgiverperioder = this.path("arbeidsgiverperioder").takeUnless { it.isMissingOrNull() }
+                ?.map { arbeidsgiverperiode ->
+                    IMPeriode(fom = arbeidsgiverperiode["fom"].takeUnless { it.isMissingOrNull() }?.asText(),
+                        tom = arbeidsgiverperiode["tom"].takeUnless { it.isMissingOrNull() }?.asText()
+                    )
+                },
+            ferieperioder = this.path("ferieperioder").takeUnless { it.isMissingOrNull() }?.map { ferieperiode ->
+                IMPeriode(fom = ferieperiode["fom"].takeUnless { it.isMissingOrNull() }?.asText(),
+                    tom = ferieperiode["tom"].takeUnless { it.isMissingOrNull() }?.asText()
+                )
+            },
+            foersteFravaersdag = this.path("foersteFravaersdag").takeUnless { it.isMissingOrNull() }?.asText(),
+            naerRelasjon = this.path("naerRelasjon").takeUnless { it.isMissingOrNull() }?.asBoolean(),
+            innsenderFulltNavn = this.path("innsenderFulltNavn").takeUnless { it.isMissingOrNull() }?.asText(),
+            innsenderTelefon = this.path("innsenderTelefon").takeUnless { it.isMissingOrNull() }?.asText(),
+        )
+    }
+
+    private fun String.tilNaturalytelse(): Naturalytelse {
+        return when (this) {
+            "KOSTDOEGN" -> Naturalytelse.KOSTDOEGN
+            "LOSJI" -> Naturalytelse.LOSJI
+            "ANNET" -> Naturalytelse.ANNET
+            "SKATTEPLIKTIGDELFORSIKRINGER" -> Naturalytelse.SKATTEPLIKTIGDELFORSIKRINGER
+            "BIL" -> Naturalytelse.BIL
+            "KOSTDAGER" -> Naturalytelse.KOSTDAGER
+            "RENTEFORDELLAAN" -> Naturalytelse.RENTEFORDELLAAN
+            "BOLIG" -> Naturalytelse.BOLIG
+            "ELEKTRONISKKOMMUNIKASJON" -> Naturalytelse.ELEKTRONISKKOMMUNIKASJON
+            "AKSJERGRUNNFONDSBEVISTILUNDERKURS" -> Naturalytelse.AKSJERGRUNNFONDSBEVISTILUNDERKURS
+            "OPSJONER" -> Naturalytelse.OPSJONER
+            "KOSTBESPARELSEIHJEMMET" -> Naturalytelse.KOSTBESPARELSEIHJEMMET
+            "FRITRANSPORT" -> Naturalytelse.FRITRANSPORT
+            "BEDRIFTSBARNEHAGEPLASS" -> Naturalytelse.BEDRIFTSBARNEHAGEPLASS
+            "TILSKUDDBARNEHAGEPLASS" -> Naturalytelse.TILSKUDDBARNEHAGEPLASS
+            "BESOEKSREISERHJEMMETANNET" -> Naturalytelse.BESOEKSREISERHJEMMETANNET
+            "INNBETALINGTILUTENLANDSKPENSJONSORDNING" -> Naturalytelse.INNBETALINGTILUTENLANDSKPENSJONSORDNING
+            "YRKEBILTJENESTLIGBEHOVLISTEPRIS" -> Naturalytelse.YRKEBILTJENESTLIGBEHOVLISTEPRIS
+            "YRKEBILTJENESTLIGBEHOVKILOMETER" -> Naturalytelse.YRKEBILTJENESTLIGBEHOVKILOMETER
+            else -> {
+                sikkerLogg.error(
+                    "Inntektsmelding har ny Naturalytelse som må støttes: {}, returnerer UKJENT enn så lenge", this
+                )
+                return Naturalytelse.UKJENT
+            }
+        }
+    }
 
     private fun JsonNode.tilSøknad(): Soknad {
         val arbeidGjenopptatt = this.path("arbeidGjenopptatt").takeUnless { it.isMissingOrNull() }?.asText()
@@ -93,8 +207,7 @@ class DokumentQuery(
         val undersporsmal = this.path("undersporsmal").takeUnless { it.isMissingOrNull() }?.map { it.tilSpørsmål() }
             ?.filter { it.skalVises(rotnivå = false) }
 
-        return Sporsmal(
-            tag = this.path("tag").takeUnless { it.isMissingOrNull() }?.asText(),
+        return Sporsmal(tag = this.path("tag").takeUnless { it.isMissingOrNull() }?.asText(),
             sporsmalstekst = this.path("sporsmalstekst").takeUnless { it.isMissingOrNull() }?.asText(),
             undertekst = this.path("undertekst").takeUnless { it.isMissingOrNull() }?.asText(),
             svartype = this.path("svartype").takeUnless { it.isMissingOrNull() }?.asText()?.tilSvartype(),

@@ -200,6 +200,28 @@ type Dagoverstyring implements Overstyring {
     timestamp: String!
 }
 
+type DokumentInntektsmelding {
+    arbeidsgiverperioder: [IMPeriode!]
+    begrunnelseForReduksjonEllerIkkeUtbetalt: String
+    beregnetInntekt: Float
+    bruttoUtbetalt: Float
+    endringIRefusjoner: [EndringIRefusjon!]
+    ferieperioder: [IMPeriode!]
+    foersteFravaersdag: String
+    gjenopptakelseNaturalytelser: [GjenopptakelseNaturalytelse!]
+    innsenderFulltNavn: String
+    innsenderTelefon: String
+    inntektsdato: String
+    naerRelasjon: Boolean
+    opphoerAvNaturalytelser: [OpphoerAvNaturalytelse!]
+    refusjon: Refusjon
+}
+
+type EndringIRefusjon {
+    beloep: Float
+    endringsdato: String
+}
+
 type Enhet {
     id: String!
     navn: String!
@@ -225,10 +247,21 @@ type GhostPeriode {
     vilkarsgrunnlagId: String
 }
 
+type GjenopptakelseNaturalytelse {
+    beloepPrMnd: Float
+    fom: String
+    naturalytelse: Naturalytelse
+}
+
 type Handling {
     begrunnelse: String
     tillatt: Boolean!
     type: Periodehandling!
+}
+
+type IMPeriode {
+    fom: String
+    tom: String
 }
 
 type Infotrygdutbetaling {
@@ -365,6 +398,12 @@ type OppgaverTilBehandling {
     totaltAntallOppgaver: Int!
 }
 
+type OpphoerAvNaturalytelse {
+    beloepPrMnd: Float
+    fom: String
+    naturalytelse: Naturalytelse
+}
+
 type Opptegnelse {
     aktorId: String!
     payload: String!
@@ -441,12 +480,18 @@ type Query {
     antallOppgaver: AntallOppgaver!
     behandledeOppgaverIDag: [BehandletOppgave!]!
     behandlingsstatistikk: Behandlingsstatistikk!
+    hentInntektsmelding(dokumentId: String!, fnr: String!): DokumentInntektsmelding!
     hentSoknad(dokumentId: String!, fnr: String!): Soknad!
     notater(forPerioder: [String!]!): [Notater!]!
     oppdrag(fnr: String!): [Oppdrag!]!
     oppgaveFeed(filtrering: FiltreringInput!, limit: Int!, offset: Int!, sortering: [OppgavesorteringInput!]!): OppgaverTilBehandling!
     opptegnelser(sekvensId: Int): [Opptegnelse!]!
     person(aktorId: String, fnr: String): Person
+}
+
+type Refusjon {
+    beloepPrMnd: Float
+    opphoersdato: String
 }
 
 type Refusjonselement {
@@ -873,6 +918,29 @@ enum Mottaker {
     BEGGE
     INGEN
     SYKMELDT
+}
+
+enum Naturalytelse {
+    AKSJERGRUNNFONDSBEVISTILUNDERKURS
+    ANNET
+    BEDRIFTSBARNEHAGEPLASS
+    BESOEKSREISERHJEMMETANNET
+    BIL
+    BOLIG
+    ELEKTRONISKKOMMUNIKASJON
+    FRITRANSPORT
+    INNBETALINGTILUTENLANDSKPENSJONSORDNING
+    KOSTBESPARELSEIHJEMMET
+    KOSTDAGER
+    KOSTDOEGN
+    LOSJI
+    OPSJONER
+    RENTEFORDELLAAN
+    SKATTEPLIKTIGDELFORSIKRINGER
+    TILSKUDDBARNEHAGEPLASS
+    UKJENT
+    YRKEBILTJENESTLIGBEHOVKILOMETER
+    YRKEBILTJENESTLIGBEHOVLISTEPRIS
 }
 
 enum NotatType {

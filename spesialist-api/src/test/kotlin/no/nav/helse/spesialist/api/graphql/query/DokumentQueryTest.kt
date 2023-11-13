@@ -206,6 +206,69 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
         assertEquals("NEI", andreInntektskilder["undersporsmal"].first()["undersporsmal"].first()["undersporsmal"].first()["svar"].first()["verdi"].asText())
     }
 
+    @Test
+    fun `hentInntektsmelding query med riktige tilganger og paramtetre returnerer inntektsmelding`() {
+        val dokumentId = UUID.randomUUID()
+
+        opprettSaksbehandler()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        every { dokumenthåndterer.håndter(any(), any(), any()) } returns objectMapper.readTree(
+            inntektsmeldingJson()
+        )
+        val dokument = runQuery(
+            """
+            {
+                hentInntektsmelding(
+                    dokumentId: "$dokumentId"
+                    fnr: "$FØDSELSNUMMER"
+                ) {
+                    begrunnelseForReduksjonEllerIkkeUtbetalt,
+                    bruttoUtbetalt,
+                    beregnetInntekt,
+                    inntektsdato,
+                    refusjon {
+                        beloepPrMnd, opphoersdato
+                    },
+                    endringIRefusjoner { endringsdato, beloep },
+                    opphoerAvNaturalytelser { naturalytelse, fom, beloepPrMnd },
+                    gjenopptakelseNaturalytelser { naturalytelse, fom, beloepPrMnd },
+                    arbeidsgiverperioder { fom, tom },
+                    ferieperioder { fom, tom },
+                    foersteFravaersdag,
+                    naerRelasjon,
+                    innsenderFulltNavn,
+                    innsenderTelefon,
+                }
+            }
+        """
+        )["data"]["hentInntektsmelding"]
+
+        verify(exactly = 1) {
+            dokumenthåndterer.håndter(
+                fødselsnummer = FØDSELSNUMMER,
+                dokumentId = dokumentId,
+                dokumentType = DokumentType.INNTEKTSMELDING.name
+            )
+        }
+
+        assertEquals(14, dokument.size())
+        assertEquals(0.0, dokument["bruttoUtbetalt"].asDouble())
+        assertEquals(35000.0, dokument["beregnetInntekt"].asDouble())
+        assertEquals("2023-08-01", dokument["inntektsdato"].asText())
+        assertEquals(0.0, dokument["refusjon"]["beloepPrMnd"].asDouble())
+        assertTrue(dokument["refusjon"]["opphoersdato"].isNull)
+        assertTrue(dokument["endringIRefusjoner"].isEmpty)
+        assertTrue(dokument["opphoerAvNaturalytelser"].isEmpty)
+        assertTrue(dokument["gjenopptakelseNaturalytelser"].isEmpty)
+        assertEquals("2023-08-01", dokument["arbeidsgiverperioder"].first()["fom"].asText())
+        assertEquals("2023-08-16", dokument["arbeidsgiverperioder"].first()["tom"].asText())
+        assertTrue(dokument["ferieperioder"].isEmpty)
+        assertEquals("2023-08-01", dokument["foersteFravaersdag"].asText())
+        assertTrue(dokument["naerRelasjon"].isNull)
+        assertEquals("MUSKULØS VALS", dokument["innsenderFulltNavn"].asText())
+        assertEquals("12345678", dokument["innsenderTelefon"].asText())
+    }
+
     @Language("JSON")
     private fun søknadJsonMedNeiSvar(arbeidGjenopptatt: String, sykmeldingSkrevet: String) = """{
   "arbeidGjenopptatt": "$arbeidGjenopptatt",
@@ -1179,4 +1242,46 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
 }
 """.trimIndent()
 
+    @Language("JSON")
+    private fun inntektsmeldingJson() = """
+        {
+      "inntektsmeldingId": "bc1f75ef-4d83-40e9-8c45-f3e6ae759ca7",
+      "arbeidstakerFnr": "",
+      "arbeidstakerAktorId": "2989970687986",
+      "virksomhetsnummer": "810007842",
+      "arbeidsgiverFnr": null,
+      "arbeidsgiverAktorId": null,
+      "innsenderFulltNavn": "MUSKULØS VALS",
+      "innsenderTelefon": "12345678",
+      "begrunnelseForReduksjonEllerIkkeUtbetalt": "",
+      "bruttoUtbetalt": null,
+      "arbeidsgivertype": "VIRKSOMHET",
+      "arbeidsforholdId": null,
+      "beregnetInntekt": "35000.00",
+      "inntektsdato": "2023-08-01",
+      "refusjon": {
+        "beloepPrMnd": "0.00",
+        "opphoersdato": null
+      },
+      "endringIRefusjoner": [],
+      "opphoerAvNaturalytelser": [],
+      "gjenopptakelseNaturalytelser": [],
+      "arbeidsgiverperioder": [
+        {
+          "fom": "2023-08-01",
+          "tom": "2023-08-16"
+        }
+      ],
+      "status": "GYLDIG",
+      "arkivreferanse": "im_620105684",
+      "ferieperioder": [],
+      "foersteFravaersdag": "2023-08-01",
+      "mottattDato": "2023-11-10T13:08:17.232151212",
+      "naerRelasjon": null,
+      "avsenderSystem": {
+        "navn": "NAV_NO",
+        "versjon": "1.0"
+      }
+    }
+    """.trimIndent()
 }

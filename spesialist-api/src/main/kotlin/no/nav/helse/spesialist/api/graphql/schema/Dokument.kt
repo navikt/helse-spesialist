@@ -63,3 +63,51 @@ enum class Visningskriterium {
 data class Svar(
     val verdi: String? = null
 )
+
+data class DokumentInntektsmelding(
+    val begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
+    val bruttoUtbetalt: Double?,
+    val beregnetInntekt: Double?,
+    val inntektsdato: DateString?,
+    val refusjon: Refusjon?,
+    val endringIRefusjoner: List<EndringIRefusjon>?,
+    val opphoerAvNaturalytelser: List<OpphoerAvNaturalytelse>?,
+    val gjenopptakelseNaturalytelser: List<GjenopptakelseNaturalytelse>?,
+    val arbeidsgiverperioder: List<IMPeriode>?,
+    val ferieperioder: List<IMPeriode>?,
+    val foersteFravaersdag: DateString?,
+    val naerRelasjon: Boolean?,
+    val innsenderFulltNavn: String?,
+    val innsenderTelefon: String?,
+)
+
+data class Refusjon(
+    val beloepPrMnd: Double?,
+    val opphoersdato: DateString?
+)
+
+data class EndringIRefusjon(
+    val endringsdato: DateString?,
+    val beloep: Double?
+)
+
+data class OpphoerAvNaturalytelse(
+    val naturalytelse: Naturalytelse? = null,
+    val fom: DateString? = null,
+    val beloepPrMnd: Double? = null
+)
+
+enum class Naturalytelse {
+    KOSTDOEGN, LOSJI, ANNET, SKATTEPLIKTIGDELFORSIKRINGER, BIL, KOSTDAGER, RENTEFORDELLAAN, BOLIG, ELEKTRONISKKOMMUNIKASJON, AKSJERGRUNNFONDSBEVISTILUNDERKURS, OPSJONER, KOSTBESPARELSEIHJEMMET, FRITRANSPORT, BEDRIFTSBARNEHAGEPLASS, TILSKUDDBARNEHAGEPLASS, BESOEKSREISERHJEMMETANNET, INNBETALINGTILUTENLANDSKPENSJONSORDNING, YRKEBILTJENESTLIGBEHOVLISTEPRIS, YRKEBILTJENESTLIGBEHOVKILOMETER, UKJENT
+}
+
+data class GjenopptakelseNaturalytelse(
+    val naturalytelse: Naturalytelse? = null,
+    val fom: DateString? = null,
+    val beloepPrMnd: Double? = null
+)
+
+data class IMPeriode(
+    val fom: DateString?,
+    val tom: DateString?
+)
