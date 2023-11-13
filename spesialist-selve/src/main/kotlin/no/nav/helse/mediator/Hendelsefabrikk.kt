@@ -655,7 +655,6 @@ internal class Hendelsefabrikk(
             id = id,
             vedtaksperiodeId = vedtaksperiodeId,
             fødselsnummer = fødselsnummer,
-            generasjon = gjeldendeGenerasjon(vedtaksperiodeId),
             json = json,
             commandContextDao = commandContextDao,
             oppgaveMediator = oppgaveMediator,

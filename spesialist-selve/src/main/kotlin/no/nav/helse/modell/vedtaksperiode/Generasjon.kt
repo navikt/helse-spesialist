@@ -6,7 +6,6 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.Varsel.Companion.automatiskGodkjennSpesialsakvarsler
-import no.nav.helse.modell.varsel.Varsel.Companion.avvisVarsler
 import no.nav.helse.modell.varsel.Varsel.Companion.finnEksisterendeVarsel
 import no.nav.helse.modell.varsel.Varsel.Companion.flyttVarslerFor
 import no.nav.helse.modell.varsel.Varsel.Companion.forhindrerAutomatisering
@@ -83,10 +82,6 @@ internal class Generasjon private constructor(
     internal fun håndterForkastetUtbetaling(utbetalingId: UUID) {
         if (utbetalingId != this.utbetalingId) return
         tilstand.invaliderUtbetaling(this, utbetalingId)
-    }
-
-    internal fun avvisVarsler() {
-        varsler.avvisVarsler(id)
     }
 
     internal fun håndterNyttVarsel(varsel: Varsel, hendelseId: UUID) {

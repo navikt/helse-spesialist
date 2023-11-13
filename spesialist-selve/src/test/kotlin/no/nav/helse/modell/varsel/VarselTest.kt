@@ -2,7 +2,6 @@ package no.nav.helse.modell.varsel
 
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.modell.varsel.Varsel.Companion.avvisVarsler
 import no.nav.helse.modell.varsel.Varsel.Companion.finnEksisterendeVarsel
 import no.nav.helse.modell.varsel.Varsel.Companion.forhindrerAutomatisering
 import no.nav.helse.modell.varsel.Varsel.Companion.inneholderMedlemskapsvarsel
@@ -86,31 +85,6 @@ internal class VarselTest {
         varsel.registrer(observer)
         varsel.deaktiver(generasjonId)
         observer.assertDeaktivering(vedtaksperiodeId, generasjonId, varselId, "EN_KODE")
-    }
-
-    @Test
-    fun `kan avvise varsel`() {
-        val varselId = UUID.randomUUID()
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjonId = UUID.randomUUID()
-        val varsel = nyttVarsel(varselId = varselId, vedtaksperiodeId = vedtaksperiodeId)
-        varsel.avvis(generasjonId)
-        observer.assertAvvisning(vedtaksperiodeId, generasjonId, varselId, "EN_KODE")
-    }
-
-    @Test
-    fun `avviser liste med varsler`() {
-        val varselId1 = UUID.randomUUID()
-        val varselId2 = UUID.randomUUID()
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjonId = UUID.randomUUID()
-        val varsel1 = nyttVarsel(varselId = varselId1, vedtaksperiodeId = vedtaksperiodeId, kode = "EN_KODE")
-        val varsel2 = nyttVarsel(varselId = varselId2, vedtaksperiodeId = vedtaksperiodeId, kode = "EN_ANNEN_KODE")
-
-        listOf(varsel1, varsel2).avvisVarsler(generasjonId)
-
-        observer.assertAvvisning(vedtaksperiodeId, generasjonId, varselId1, "EN_KODE")
-        observer.assertAvvisning(vedtaksperiodeId, generasjonId, varselId2, "EN_ANNEN_KODE")
     }
 
     @ParameterizedTest
@@ -263,7 +237,6 @@ internal class VarselTest {
         val opprettedeVarsler = mutableMapOf<UUID, Opprettelse>()
         val reaktiverteVarsler = mutableMapOf<UUID, Reaktivering>()
         val deaktiverteVarsler = mutableMapOf<UUID, Deaktivering>()
-        val avvisteVarsler = mutableMapOf<UUID, Avvisning>()
         val godkjenteVarsler = mutableMapOf<UUID, Godkjent>()
 
         private inner class Opprettelse(
@@ -288,13 +261,6 @@ internal class VarselTest {
             val varselkode: String,
         )
 
-        private inner class Avvisning(
-            val vedtaksperiodeId: UUID,
-            val generasjonId: UUID,
-            val varselId: UUID,
-            val varselkode: String,
-        )
-
         private inner class Godkjent(
             val vedtaksperiodeId: UUID,
             val generasjonId: UUID,
@@ -309,10 +275,6 @@ internal class VarselTest {
 
         override fun varselDeaktivert(varselId: UUID, varselkode: String, generasjonId: UUID, vedtaksperiodeId: UUID) {
             deaktiverteVarsler[varselId] = Deaktivering(vedtaksperiodeId, generasjonId, varselId, varselkode)
-        }
-
-        override fun varselAvvist(varselId: UUID, varselkode: String, generasjonId: UUID, vedtaksperiodeId: UUID) {
-            avvisteVarsler[varselId] = Avvisning(vedtaksperiodeId, generasjonId, varselId, varselkode)
         }
 
         override fun varselOpprettet(varselId: UUID, vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, opprettet: LocalDateTime) {
@@ -368,19 +330,6 @@ internal class VarselTest {
             assertEquals(forventetGenerasjonId, deaktivering?.generasjonId)
             assertEquals(forventetVarselkode, deaktivering?.varselkode)
             assertEquals(forventetVarselId, deaktivering?.varselId)
-        }
-
-        fun assertAvvisning(
-            forventetVedtaksperiodeId: UUID,
-            forventetGenerasjonId: UUID,
-            forventetVarselId: UUID,
-            forventetVarselkode: String,
-        ) {
-            val avvisning = avvisteVarsler[forventetVarselId]
-            assertEquals(forventetVedtaksperiodeId, avvisning?.vedtaksperiodeId)
-            assertEquals(forventetGenerasjonId, avvisning?.generasjonId)
-            assertEquals(forventetVarselkode, avvisning?.varselkode)
-            assertEquals(forventetVarselId, avvisning?.varselId)
         }
     }
 }

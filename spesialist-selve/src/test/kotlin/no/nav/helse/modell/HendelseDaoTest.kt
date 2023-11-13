@@ -7,7 +7,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
-import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOpprettet
+import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -25,7 +25,7 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
 
     private val graphQLClient = mockk<SnapshotClient>(relaxed = true)
     private lateinit var hendelsefabrikk: Hendelsefabrikk
-    private lateinit var vedtaksperiodeOpprettet: VedtaksperiodeOpprettet
+    private lateinit var vedtaksperiodeForkastet: VedtaksperiodeForkastet
 
     @BeforeAll
     fun setup() {
@@ -43,8 +43,8 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
 
     @BeforeEach
     fun setupEach() {
-        vedtaksperiodeOpprettet = hendelsefabrikk.vedtaksperiodeOpprettet(
-            Testmeldingfabrikk.lagVedtaksperiodeOpprettet(HENDELSE_ID, AKTØR, FNR, ORGNUMMER, VEDTAKSPERIODE)
+        vedtaksperiodeForkastet = hendelsefabrikk.vedtaksperiodeForkastet(
+            Testmeldingfabrikk.lagVedtaksperiodeForkastet(AKTØR, FNR, VEDTAKSPERIODE, id = HENDELSE_ID)
         )
     }
 
@@ -125,7 +125,7 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `lagrer og finner hendelser`() {
-        hendelseDao.opprett(vedtaksperiodeOpprettet)
+        hendelseDao.opprett(vedtaksperiodeForkastet)
         val actual = hendelseDao.finn(HENDELSE_ID, hendelsefabrikk)
             ?: fail { "Forventet å finne en hendelse med id $HENDELSE_ID" }
 
@@ -150,7 +150,7 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
         opprettArbeidsgiver()
         opprettVedtaksperiode()
 
-        hendelseDao.opprett(vedtaksperiodeOpprettet)
+        hendelseDao.opprett(vedtaksperiodeForkastet)
 
         assertEquals(VEDTAKSPERIODE, finnKobling())
     }

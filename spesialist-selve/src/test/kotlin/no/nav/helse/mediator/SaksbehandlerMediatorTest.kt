@@ -115,6 +115,21 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
         assertGodkjenteVarsler(generasjonId, 0)
     }
 
+
+
+    @Test
+    fun `håndter godkjenning når godkjenning er avvist`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjonId = UUID.randomUUID()
+        nyPerson(vedtaksperiodeId = vedtaksperiodeId, generasjonId = generasjonId)
+
+        val definisjonRef = opprettVarseldefinisjon()
+        nyttVarsel(vedtaksperiodeId = vedtaksperiodeId, generasjonId = generasjonId, status = "AKTIV", definisjonRef = definisjonRef)
+        mediator.håndter(godkjenning(oppgaveId, false), UUID.randomUUID(), saksbehandler)
+        assertGodkjenteVarsler(generasjonId, 0)
+        assertAvvisteVarsler(generasjonId, 1)
+    }
+
     @Test
     fun `håndter totrinnsvurdering`() {
         val vedtaksperiodeId = UUID.randomUUID()

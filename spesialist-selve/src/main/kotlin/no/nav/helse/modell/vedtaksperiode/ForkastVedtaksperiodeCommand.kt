@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory
 internal class ForkastVedtaksperiodeCommand(
     private val hendelseId: UUID,
     private val vedtaksperiodeId: UUID,
-    private val generasjon: Generasjon,
     private val vedtakDao: VedtakDao
 ): Command {
     private companion object {
@@ -19,7 +18,6 @@ internal class ForkastVedtaksperiodeCommand(
 
     override fun execute(context: CommandContext): Boolean {
         logg.info("Markerer {} som forkastet", kv("vedtaksperiodeId", vedtaksperiodeId))
-        generasjon.avvisVarsler()
         vedtakDao.markerForkastet(vedtaksperiodeId, hendelseId)
         return true
     }

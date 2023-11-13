@@ -12,7 +12,6 @@ import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -34,29 +33,27 @@ internal class VedtaksperiodeForkastetTest {
     private val snapshotDao = mockk<SnapshotDao>(relaxed = true)
     private val graphQLClient = mockk<SnapshotClient>(relaxed = true)
     private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
-    private val generasjon = mockk<Generasjon>(relaxed = true)
     private val context = CommandContext(CONTEXT)
     private val vedtaksperiodeForkastetMessage = VedtaksperiodeForkastet(
         id = HENDELSE,
         vedtaksperiodeId = VEDTAKSPERIODE,
         fødselsnummer = FNR,
         json = Testmeldingfabrikk.lagVedtaksperiodeForkastet("aktørId", FNR, VEDTAKSPERIODE, id = HENDELSE),
-        generasjon = generasjon,
         commandContextDao = commandContextDao,
         oppgaveMediator = oppgaveMediator,
         snapshotClient = graphQLClient,
         snapshotDao = snapshotDao,
         personDao = personDao,
-        vedtakDao = vedtakDao,
+        vedtakDao = vedtakDao
     )
 
     @BeforeEach
     fun setup() {
-        clearMocks(commandContextDao, vedtakDao, snapshotDao, graphQLClient, generasjon)
+        clearMocks(commandContextDao, vedtakDao, snapshotDao, graphQLClient)
     }
 
     @Test
-    fun `avbryter kommandoer, oppdaterer snapshot, markerer vedtaksperiode som forkastet og avviser varsler`() {
+    fun `avbryter kommandoer, oppdaterer snapshot og markerer vedtaksperiode som forkastet`() {
         every { graphQLClient.hentSnapshot(FNR) } returns SNAPSHOT
         every { snapshotDao.lagre(FNR, SNAPSHOT.data!!.person!!) } returns 1
         every { personDao.findPersonByFødselsnummer(FNR) } returns 1
@@ -64,6 +61,5 @@ internal class VedtaksperiodeForkastetTest {
         verify(exactly = 1) { commandContextDao.avbryt(VEDTAKSPERIODE, CONTEXT) }
         verify(exactly = 1) { snapshotDao.lagre(FNR, SNAPSHOT.data!!.person!!) }
         verify(exactly = 1) { vedtakDao.markerForkastet(VEDTAKSPERIODE, HENDELSE) }
-        verify(exactly = 1) { generasjon.avvisVarsler() }
     }
 }

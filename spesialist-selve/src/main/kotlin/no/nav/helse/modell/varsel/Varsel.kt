@@ -59,14 +59,9 @@ internal class Varsel(
     }
 
     internal fun deaktiver(generasjonId: UUID) {
-        if (status != AKTIV) return
+        if(status != AKTIV) return
         this.status = INAKTIV
         observers.forEach { it.varselDeaktivert(id, varselkode, generasjonId, vedtaksperiodeId) }
-    }
-    internal fun avvis(generasjonId: UUID) {
-        if (status !in listOf(AKTIV, VURDERT)) return
-        this.status = AVVIST
-        observers.forEach { it.varselAvvist(id, varselkode, generasjonId, vedtaksperiodeId) }
     }
 
     private fun oppdaterGenerasjon(gammelGenerasjonId: UUID, nyGenerasjonId: UUID) {
@@ -102,9 +97,6 @@ internal class Varsel(
     }
 
     internal companion object {
-
-        internal fun List<Varsel>.avvisVarsler(generasjonId: UUID) = forEach { it.avvis(generasjonId) }
-
         internal fun List<Varsel>.flyttVarslerFor(gammelGenerasjonId: UUID, nyGenerasjonId: UUID) {
             forEach { it.oppdaterGenerasjon(gammelGenerasjonId, nyGenerasjonId) }
         }
