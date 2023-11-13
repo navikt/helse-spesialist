@@ -201,6 +201,17 @@ internal class VarselTest {
     }
 
     @Test
+    fun `ikke forsøk å godkjenne spesialsakvarsel som allerede er godkjent`() {
+        val varselId = UUID.randomUUID()
+        val generasjonId = UUID.randomUUID()
+        val vedtaksperiodeId = UUID.randomUUID()
+        val varsel = nyttVarsel(varselId = varselId, vedtaksperiodeId = vedtaksperiodeId, status = GODKJENT, kode = "RV_UT_23")
+        varsel.godkjennSpesialsakvarsel(generasjonId)
+        val godkjentVarsel = observer.godkjenteVarsler[varselId]
+        assertEquals(null, godkjentVarsel)
+    }
+
+    @Test
     fun `varsel toDto`() {
         val varselId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()

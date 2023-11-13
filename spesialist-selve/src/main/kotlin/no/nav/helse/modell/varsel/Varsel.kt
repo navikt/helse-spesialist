@@ -99,6 +99,7 @@ internal class Varsel(
     internal fun erRelevantFor(vedtaksperiodeId: UUID): Boolean = this.vedtaksperiodeId == vedtaksperiodeId
 
     internal fun godkjennSpesialsakvarsel(generasjonId: UUID) {
+        if (status == GODKJENT) return
         status = GODKJENT
         observers.forEach { it.varselGodkjent(id, varselkode, generasjonId, vedtaksperiodeId, "Automatisk godkjent - spesialsak") }
     }
