@@ -9,11 +9,12 @@ data class Vedtaksperiode(
     private val fom: LocalDate,
     private val tom: LocalDate,
     private val skjæringstidspunkt: LocalDate,
-    private val varsler: Set<Varsel>
+    private val varsler: Set<Varsel>,
 ) {
     internal fun vedtaksperiodeId() = this.vedtaksperiodeId
 
-    internal fun tidligereEnnOgSammenhengende(other: Vedtaksperiode): Boolean = this.fom <= other.tom && this.skjæringstidspunkt == other.skjæringstidspunkt
+    internal fun tidligereEnnOgSammenhengende(other: Vedtaksperiode): Boolean =
+        this.fom <= other.tom && this.skjæringstidspunkt == other.skjæringstidspunkt
 
     private fun harAktiveVarsler(): Boolean {
         return varsler.any { it.erAktiv() }
@@ -24,17 +25,16 @@ data class Vedtaksperiode(
             return any { it.harAktiveVarsler() }
         }
 
-        fun Set<Vedtaksperiode>.vurderVarsler(
-            godkjent: Boolean,
+        fun Set<Vedtaksperiode>.godkjennVarsler(
             fødselsnummer: String,
             behandlingId: UUID,
             ident: String,
-            godkjenner: (fødselsnummer: String, behandlingId: UUID, vedtaksperiodeId: UUID, varselId: UUID, varselTittel: String, varselkode: String, forrigeStatus: Varsel.Varselstatus, gjeldendeStatus: Varsel.Varselstatus, saksbehandlerIdent: String) -> Unit
+            godkjenner: (fødselsnummer: String, behandlingId: UUID, vedtaksperiodeId: UUID, varselId: UUID, varselTittel: String, varselkode: String, forrigeStatus: Varsel.Varselstatus, gjeldendeStatus: Varsel.Varselstatus, saksbehandlerIdent: String) -> Unit,
         ) {
             forEach { vedtaksperiode ->
                 vedtaksperiode.varsler.forEach {
                     it.vurder(
-                        godkjent = godkjent,
+                        godkjent = true,
                         fødselsnummer = fødselsnummer,
                         behandlingId = behandlingId,
                         vedtaksperiodeId = vedtaksperiode.vedtaksperiodeId,
@@ -42,6 +42,24 @@ data class Vedtaksperiode(
                         vurderer = godkjenner
                     )
                 }
+            }
+        }
+
+        fun Vedtaksperiode.avvisVarsler(
+            fødselsnummer: String,
+            behandlingId: UUID,
+            ident: String,
+            godkjenner: (fødselsnummer: String, behandlingId: UUID, vedtaksperiodeId: UUID, varselId: UUID, varselTittel: String, varselkode: String, forrigeStatus: Varsel.Varselstatus, gjeldendeStatus: Varsel.Varselstatus, saksbehandlerIdent: String) -> Unit,
+        ) {
+            this.varsler.forEach {
+                it.vurder(
+                    godkjent = false,
+                    fødselsnummer = fødselsnummer,
+                    behandlingId = behandlingId,
+                    vedtaksperiodeId = this.vedtaksperiodeId,
+                    ident = ident,
+                    vurderer = godkjenner
+                )
             }
         }
     }

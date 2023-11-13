@@ -187,6 +187,29 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `sender ut varsel_endret ved avvisning av varsler`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjonId = UUID.randomUUID()
+        val varselId = UUID.randomUUID()
+        val behandlingId = UUID.randomUUID()
+        nyPerson(vedtaksperiodeId = vedtaksperiodeId, generasjonId = generasjonId)
+        val definisjonRef = opprettVarseldefinisjon(tittel = "EN_TITTEL")
+        nyttVarsel(id = varselId, vedtaksperiodeId = vedtaksperiodeId, generasjonId = generasjonId, kode = "EN_KODE", status = "AKTIV", definisjonRef = definisjonRef)
+        mediator.håndter(godkjenning(oppgaveId, false), behandlingId, saksbehandler)
+
+        assertEquals(1, testRapid.inspektør.size)
+        val melding = testRapid.inspektør.message(0)
+        assertEquals("varsel_endret", melding["@event_name"].asText())
+        assertEquals(vedtaksperiodeId.toString(), melding["vedtaksperiode_id"].asText())
+        assertEquals(behandlingId.toString(), melding["behandling_id"].asText())
+        assertEquals(varselId.toString(), melding["varsel_id"].asText())
+        assertEquals("EN_TITTEL", melding["varseltittel"].asText())
+        assertEquals("EN_KODE", melding["varselkode"].asText())
+        assertEquals("AVVIST", melding["gjeldende_status"].asText())
+        assertEquals("AKTIV", melding["forrige_status"].asText())
+    }
+
+    @Test
     fun `forsøk tildeling av oppgave`() {
         nyPerson()
         val oppgaveId = OPPGAVE_ID

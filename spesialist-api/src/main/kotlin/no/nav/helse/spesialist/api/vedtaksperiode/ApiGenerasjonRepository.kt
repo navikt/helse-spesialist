@@ -17,6 +17,10 @@ class ApiGenerasjonRepository(dataSource: DataSource) {
         return sammenhengendePerioder + periodeTilGodkjenning
     }
 
+    fun periodeTilGodkjenning(oppgaveId: Long): Vedtaksperiode {
+        return generasjonDao.gjeldendeGenerasjonFor(oppgaveId, varselDao::finnVarslerFor)
+    }
+
     private fun Set<Vedtaksperiode>.tidligereEnnOgSammenhengende(periode: Vedtaksperiode): Set<Vedtaksperiode> {
         return this.filter { other ->
             other.tidligereEnnOgSammenhengende(periode)

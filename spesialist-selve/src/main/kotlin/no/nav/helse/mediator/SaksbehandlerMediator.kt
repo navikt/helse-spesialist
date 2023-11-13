@@ -57,8 +57,9 @@ import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.varsel.Varsel
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
+import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode.Companion.avvisVarsler
+import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode.Companion.godkjennVarsler
 import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode.Companion.harAktiveVarsler
-import no.nav.helse.spesialist.api.vedtak.Vedtaksperiode.Companion.vurderVarsler
 import no.nav.helse.spesialist.api.vedtaksperiode.ApiGenerasjonRepository
 import org.slf4j.LoggerFactory
 
@@ -147,23 +148,19 @@ internal class SaksbehandlerMediator(
 
     override fun håndter(godkjenning: GodkjenningDto, behandlingId: UUID, saksbehandlerFraApi: SaksbehandlerFraApi) {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
-        val perioderTilBehandling = generasjonRepository.perioderTilBehandling(godkjenning.oppgavereferanse)
+        val fødselsnummer = oppgaveApiDao.finnFødselsnummer(godkjenning.oppgavereferanse)
+
         if (godkjenning.godkjent) {
+            val perioderTilBehandling = generasjonRepository.perioderTilBehandling(godkjenning.oppgavereferanse)
             if (perioderTilBehandling.harAktiveVarsler())
                 throw ManglerVurderingAvVarsler(godkjenning.oppgavereferanse)
+            perioderTilBehandling.godkjennVarsler(fødselsnummer, behandlingId, saksbehandler.ident(), this::vurderVarsel)
+        } else {
+            val periodeTilGodkjenning = generasjonRepository.periodeTilGodkjenning(godkjenning.oppgavereferanse)
+            periodeTilGodkjenning.avvisVarsler(fødselsnummer, behandlingId, saksbehandler.ident(), this::vurderVarsel)
         }
 
         oppgaveApiDao.lagreBehandlingsreferanse(godkjenning.oppgavereferanse, behandlingId)
-
-        val fødselsnummer = oppgaveApiDao.finnFødselsnummer(godkjenning.oppgavereferanse)
-
-        perioderTilBehandling.vurderVarsler(
-            godkjenning.godkjent,
-            fødselsnummer,
-            behandlingId,
-            saksbehandler.ident(),
-            this::vurderVarsel
-        )
     }
 
     override fun håndterTotrinnsvurdering(oppgavereferanse: Long) {
