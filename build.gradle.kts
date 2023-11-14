@@ -11,7 +11,7 @@ val mockkVersion = "1.13.8"
 val postgresqlVersion = "42.6.0"
 
 plugins {
-    kotlin("jvm") version "1.9.10"
+    kotlin("jvm") version "1.9.20"
 }
 
 val githubUser: String by project
