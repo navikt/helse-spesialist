@@ -328,8 +328,6 @@ type Mutation {
     sendTilGodkjenning(oppgavereferanse: String!): Boolean!
     sendTilInfotrygd(arsak: String!, begrunnelser: [String!]!, kommentar: String, oppgavereferanse: String!): Boolean!
     settVarselstatus(definisjonIdString: String, generasjonIdString: String!, ident: String!, varselkode: String!): VarselDTO!
-    settVarselstatusAktiv(generasjonIdString: String!, ident: String!, varselkode: String!): VarselDTO
-    settVarselstatusVurdert(definisjonIdString: String!, generasjonIdString: String!, ident: String!, varselkode: String!): VarselDTO
     skjonnsfastsettSykepengegrunnlag(skjonnsfastsettelse: SkjonnsfastsettelseInput!): Boolean!
 }
 

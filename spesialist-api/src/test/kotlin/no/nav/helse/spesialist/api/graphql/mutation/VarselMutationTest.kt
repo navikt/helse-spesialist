@@ -21,8 +21,8 @@ internal class VarselMutationTest : AbstractGraphQLApiTest() {
 
         val body = runQuery(
             """
-            mutation SettVarselstatusVurdert {
-                settVarselstatusVurdert(
+            mutation SettVarselstatus {
+                settVarselstatus(
                     generasjonIdString: "$generasjonId", 
                     definisjonIdString: "$definisjonId",
                     varselkode: "EN_KODE", 
@@ -37,101 +37,7 @@ internal class VarselMutationTest : AbstractGraphQLApiTest() {
         """
         )
 
-        assertEquals("VURDERT", body["data"]["settVarselstatusVurdert"]["vurdering"]["status"].asText())
-    }
-
-    @Test
-    fun `får 409-feil hvis status på varselet er noe annet enn AKTIV`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjonId = UUID.randomUUID()
-        val definisjonId = UUID.randomUUID()
-        opprettSaksbehandler()
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
-        opprettVarseldefinisjon(definisjonId = definisjonId)
-        val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
-        nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, status = "GODKJENT")
-
-        val body = runQuery(
-            """
-            mutation SettVarselstatusVurdert {
-                settVarselstatusVurdert(
-                    generasjonIdString: "$generasjonId", 
-                    definisjonIdString: "$definisjonId",
-                    varselkode: "EN_KODE", 
-                    ident: "${SAKSBEHANDLER.oid}" 
-                ) {
-                    kode
-                    vurdering {
-                        status
-                    }
-                }
-            }
-        """
-        )
-
-        assertEquals(409, body["errors"].first()["extensions"]["code"].asInt())
-    }
-
-    @Test
-    fun `får 500-feil dersom oppdateringen tryner for settVarselstatusVurdert`() {
-        // Vi lar være å opprette definisjon for å fremprovosere at oppdateringen feiler
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjonId = UUID.randomUUID()
-        val definisjonId = UUID.randomUUID()
-        opprettSaksbehandler()
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
-        val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
-        nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef)
-
-        val body = runQuery(
-            """
-            mutation SettVarselstatusVurdert {
-                settVarselstatusVurdert(
-                    generasjonIdString: "$generasjonId",
-                    definisjonIdString: "$definisjonId",
-                    varselkode: "EN_KODE", 
-                    ident: "${SAKSBEHANDLER.oid}" 
-                ) {
-                    kode
-                    vurdering {
-                        status
-                    }
-                }
-            }
-        """
-        )
-
-        assertEquals(500, body["errors"].first()["extensions"]["code"].asInt())
-    }
-
-    @Test
-    fun `får 404-feil dersom varselet ikke finnes for settVarselstatusVurdert`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjonId = UUID.randomUUID()
-        val definisjonId = UUID.randomUUID()
-        opprettSaksbehandler()
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
-        nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
-
-        val body = runQuery(
-            """
-            mutation SettVarselstatusVurdert {
-                settVarselstatusVurdert(
-                    generasjonIdString: "$generasjonId",
-                    definisjonIdString: "$definisjonId",
-                    varselkode: "EN_KODE", 
-                    ident: "${SAKSBEHANDLER.oid}" 
-                ) {
-                    kode
-                    vurdering {
-                        status
-                    }
-                }
-            }
-        """
-        )
-
-        assertEquals(404, body["errors"].first()["extensions"]["code"].asInt())
+        assertEquals("VURDERT", body["data"]["settVarselstatus"]["vurdering"]["status"].asText())
     }
 
     @Test
@@ -147,8 +53,8 @@ internal class VarselMutationTest : AbstractGraphQLApiTest() {
 
         val body = runQuery(
             """
-            mutation SettVarselstatusAktiv {
-                settVarselstatusAktiv(
+            mutation SettVarselstatus {
+                settVarselstatus(
                     generasjonIdString: "$generasjonId", 
                     varselkode: "EN_KODE", 
                     ident: "${SAKSBEHANDLER.oid}" 
@@ -162,11 +68,11 @@ internal class VarselMutationTest : AbstractGraphQLApiTest() {
         """
         )
 
-        assertTrue(body["data"]["settVarselstatusAktiv"]["vurdering"].isNull)
+        assertTrue(body["data"]["settVarselstatus"]["vurdering"].isNull)
     }
 
     @Test
-    fun `får 409-feil hvis status på varselet er noe annet enn GODKJENT for settVarselstatusAktiv`() {
+    fun `får 409-feil hvis status på varselet er noe annet enn AKTIV når man vurderer varsel`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjonId = UUID.randomUUID()
         val definisjonId = UUID.randomUUID()
@@ -178,8 +84,40 @@ internal class VarselMutationTest : AbstractGraphQLApiTest() {
 
         val body = runQuery(
             """
-            mutation SettVarselstatusAktiv {
-                settVarselstatusAktiv(
+            mutation SettVarselstatus {
+                settVarselstatus(
+                    generasjonIdString: "$generasjonId", 
+                    definisjonIdString: "$definisjonId",
+                    varselkode: "EN_KODE", 
+                    ident: "${SAKSBEHANDLER.oid}" 
+                ) {
+                    kode
+                    vurdering {
+                        status
+                    }
+                }
+            }
+        """
+        )
+
+        assertEquals(409, body["errors"].first()["extensions"]["code"].asInt())
+    }
+
+    @Test
+    fun `får 409-feil hvis status på varselet er noe annet enn GODKJENT når gjør varsel aktivt`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjonId = UUID.randomUUID()
+        val definisjonId = UUID.randomUUID()
+        opprettSaksbehandler()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        opprettVarseldefinisjon(definisjonId = definisjonId)
+        val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
+        nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, status = "GODKJENT")
+
+        val body = runQuery(
+            """
+            mutation SettVarselstatus {
+                settVarselstatus(
                     generasjonIdString: "$generasjonId", 
                     varselkode: "EN_KODE", 
                     ident: "${SAKSBEHANDLER.oid}" 
@@ -197,7 +135,7 @@ internal class VarselMutationTest : AbstractGraphQLApiTest() {
     }
 
     @Test
-    fun `får 500-feil dersom oppdateringen tryner for settVarselstatusAktiv`() {
+    fun `får 500-feil dersom oppdateringen tryner for settVarselstatus`() {
         // Vi lar være å opprette definisjon for å fremprovosere at oppdateringen feiler
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjonId = UUID.randomUUID()
@@ -208,8 +146,8 @@ internal class VarselMutationTest : AbstractGraphQLApiTest() {
 
         val body = runQuery(
             """
-            mutation SettVarselstatusAktiv {
-                settVarselstatusAktiv(
+            mutation SettVarselstatus {
+                settVarselstatus(
                     generasjonIdString: "$generasjonId", 
                     varselkode: "EN_KODE", 
                     ident: "${SAKSBEHANDLER.oid}" 
@@ -227,7 +165,7 @@ internal class VarselMutationTest : AbstractGraphQLApiTest() {
     }
 
     @Test
-    fun `får 404-feil hvis varselet ikke finnes for settVarselstatusAktiv`() {
+    fun `får 404-feil hvis varselet ikke finnes for settVarselstatus`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjonId = UUID.randomUUID()
         opprettSaksbehandler()
@@ -236,8 +174,8 @@ internal class VarselMutationTest : AbstractGraphQLApiTest() {
 
         val body = runQuery(
             """
-            mutation SettVarselstatusAktiv {
-                settVarselstatusAktiv(
+            mutation SettVarselstatus {
+                settVarselstatus(
                     generasjonIdString: "$generasjonId", 
                     varselkode: "EN_KODE", 
                     ident: "${SAKSBEHANDLER.oid}" 

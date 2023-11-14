@@ -19,58 +19,6 @@ class VarselMutation(private val varselRepository: ApiVarselRepository) : Mutati
     }
 
     @Suppress("unused")
-    suspend fun settVarselstatusVurdert(
-        generasjonIdString: String,
-        definisjonIdString: String,
-        varselkode: String,
-        ident: String,
-    ): DataFetcherResult<VarselDTO?> {
-        return withContext(Dispatchers.IO) {
-            val generasjonId = UUID.fromString(generasjonIdString)
-
-            val erAktiv = varselRepository.erAktiv(varselkode, generasjonId)
-                ?: return@withContext newResult<VarselDTO?>().error(getNotFoundError(varselkode, generasjonId)).build()
-
-            if (!erAktiv)
-                return@withContext newResult<VarselDTO?>().error(getNotActiveError(varselkode, generasjonId)).build()
-
-            varselRepository.settStatusVurdert(
-                generasjonId,
-                UUID.fromString(definisjonIdString),
-                varselkode,
-                ident,
-            )
-                ?.let { newResult<VarselDTO?>().data(it).build() }
-                ?: newResult<VarselDTO?>().error(getUpdateError(varselkode, generasjonId)).build()
-        }
-    }
-
-    @Suppress("unused")
-    suspend fun settVarselstatusAktiv(
-        generasjonIdString: String,
-        varselkode: String,
-        ident: String,
-    ): DataFetcherResult<VarselDTO?> {
-        return withContext(Dispatchers.IO) {
-            val generasjonId = UUID.fromString(generasjonIdString)
-
-            val erGodkjent = varselRepository.erGodkjent(varselkode, generasjonId)
-                ?: return@withContext newResult<VarselDTO?>().error(getNotFoundError(varselkode, generasjonId)).build()
-
-            if (erGodkjent)
-                return@withContext newResult<VarselDTO?>().error(getIsGodkjentError(varselkode, generasjonId)).build()
-
-            varselRepository.settStatusAktiv(
-                generasjonId,
-                varselkode,
-                ident,
-            )
-                ?.let { newResult<VarselDTO?>().data(it).build() }
-                ?: newResult<VarselDTO?>().error(getUpdateError(varselkode, generasjonId)).build()
-        }
-    }
-
-    @Suppress("unused")
     suspend fun settVarselstatus(
         generasjonIdString: String,
         varselkode: String,
