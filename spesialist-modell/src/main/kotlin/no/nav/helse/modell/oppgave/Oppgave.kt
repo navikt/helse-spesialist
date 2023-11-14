@@ -5,11 +5,13 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.modell.ManglerTilgang
 import no.nav.helse.modell.OppgaveIkkeTildelt
 import no.nav.helse.modell.OppgaveTildeltNoenAndre
+import no.nav.helse.modell.Toggle
 import no.nav.helse.modell.oppgave.Egenskap.BESLUTTER
 import no.nav.helse.modell.oppgave.Egenskap.Companion.tilgangsstyrteEgenskaper
 import no.nav.helse.modell.oppgave.Egenskap.DELVIS_REFUSJON
 import no.nav.helse.modell.oppgave.Egenskap.EGEN_ANSATT
 import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
+import no.nav.helse.modell.oppgave.Egenskap.PÅ_VENT
 import no.nav.helse.modell.oppgave.Egenskap.RETUR
 import no.nav.helse.modell.oppgave.Egenskap.REVURDERING
 import no.nav.helse.modell.oppgave.Egenskap.RISK_QA
@@ -150,6 +152,7 @@ class Oppgave private constructor(
     fun leggPåVent(saksbehandler: Saksbehandler) {
         val tildeltTil = this.tildeltTil ?: throw OppgaveIkkeTildelt(id)
         if (this.tildeltTil != saksbehandler) throw OppgaveTildeltNoenAndre(tildeltTil, this.påVent)
+        if (Toggle.FellesPaVentBenk.enabled) egenskaper.add(PÅ_VENT)
         påVent = true
         oppgaveEndret()
     }
@@ -157,6 +160,7 @@ class Oppgave private constructor(
     fun fjernPåVent(saksbehandler: Saksbehandler) {
         val tildeltTil = this.tildeltTil ?: throw OppgaveIkkeTildelt(id)
         if (this.tildeltTil != saksbehandler) throw OppgaveTildeltNoenAndre(tildeltTil, this.påVent)
+        if (Toggle.FellesPaVentBenk.enabled) egenskaper.remove(PÅ_VENT)
         påVent = false
         oppgaveEndret()
     }
