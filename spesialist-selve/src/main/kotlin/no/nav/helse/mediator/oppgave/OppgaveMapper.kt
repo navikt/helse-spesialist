@@ -151,6 +151,7 @@ internal object OppgaveMapper {
         Egenskap.INFOTRYGDFORLENGELSE -> EgenskapForApi.INFOTRYGDFORLENGELSE
         Egenskap.OVERGANG_FRA_IT -> EgenskapForApi.OVERGANG_FRA_IT
         Egenskap.SKJØNNSFASTSETTELSE -> EgenskapForApi.SKJONNSFASTSETTELSE
+        Egenskap.PÅ_VENT -> EgenskapForApi.PA_VENT
     }
 
     private fun Egenskap.Kategori.tilApiversjon(): Kategori = when (this) {
@@ -187,6 +188,7 @@ internal object OppgaveMapper {
         EgenskapForDatabase.INFOTRYGDFORLENGELSE -> Egenskap.INFOTRYGDFORLENGELSE
         EgenskapForDatabase.OVERGANG_FRA_IT -> Egenskap.OVERGANG_FRA_IT
         EgenskapForDatabase.SKJØNNSFASTSETTELSE -> Egenskap.SKJØNNSFASTSETTELSE
+        EgenskapForDatabase.PÅ_VENT -> Egenskap.PÅ_VENT
     }
 
     internal fun Egenskap.tilDatabaseversjon(): EgenskapForDatabase = when (this) {
@@ -215,6 +217,7 @@ internal object OppgaveMapper {
         Egenskap.INFOTRYGDFORLENGELSE -> EgenskapForDatabase.INFOTRYGDFORLENGELSE
         Egenskap.OVERGANG_FRA_IT -> EgenskapForDatabase.OVERGANG_FRA_IT
         Egenskap.SKJØNNSFASTSETTELSE -> EgenskapForDatabase.SKJØNNSFASTSETTELSE
+        Egenskap.PÅ_VENT -> EgenskapForDatabase.PÅ_VENT
     }
 
     internal fun Egenskap.tilKafkaversjon(): String {
@@ -244,6 +247,7 @@ internal object OppgaveMapper {
             Egenskap.INFOTRYGDFORLENGELSE -> "INFOTRYGDFORLENGELSE"
             Egenskap.OVERGANG_FRA_IT -> "OVERGANG_FRA_IT"
             Egenskap.SKJØNNSFASTSETTELSE -> "SKJØNNSFASTSETTELSE"
+            Egenskap.PÅ_VENT -> "PÅ_VENT"
         }
     }
 
@@ -273,5 +277,6 @@ internal object OppgaveMapper {
         EgenskapForApi.FULLMAKT -> EgenskapForDatabase.FULLMAKT
         EgenskapForApi.VERGEMAL -> EgenskapForDatabase.VERGEMÅL
         EgenskapForApi.SKJONNSFASTSETTELSE -> EgenskapForDatabase.SKJØNNSFASTSETTELSE
+        EgenskapForApi.PA_VENT -> EgenskapForDatabase.PÅ_VENT
     }
 }

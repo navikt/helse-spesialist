@@ -35,6 +35,7 @@ enum class Egenskap(
     RETUR,
     FULLMAKT,
     SKJØNNSFASTSETTELSE,
+    PÅ_VENT,
     VERGEMÅL;
 
     enum class Kategori {

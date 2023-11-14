@@ -42,7 +42,8 @@ enum class Egenskap {
     RETUR,
     FULLMAKT,
     VERGEMAL,
-    SKJONNSFASTSETTELSE
+    SKJONNSFASTSETTELSE,
+    PA_VENT,
 }
 
 enum class Kategori {
