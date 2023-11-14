@@ -222,6 +222,7 @@ class DokumentQuery(
             "BEKREFT_OPPLYSNINGER" -> false
             "ANSVARSERKLARING" -> false
             "VAER_KLAR_OVER_AT" -> false
+            "TIL_SLUTT" -> false
             else -> true
         }
 
