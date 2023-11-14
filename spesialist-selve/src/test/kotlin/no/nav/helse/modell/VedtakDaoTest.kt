@@ -177,6 +177,15 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         assertFalse(vedtakDao.erSpesialsak(VEDTAKSPERIODE))
     }
 
+    @Test
+    fun `sett spesialsak ferdigbehandlet`() {
+        nyPerson()
+        opprettSpesialsak(VEDTAKSPERIODE)
+        assertTrue(vedtakDao.erSpesialsak(VEDTAKSPERIODE))
+        vedtakDao.spesialsakFerdigbehandlet(VEDTAKSPERIODE)
+        assertFalse(vedtakDao.erSpesialsak(VEDTAKSPERIODE))
+    }
+
     private fun assertForkastet(vedtaksperiodeId: UUID, forventetHendelseId: UUID) {
         @Language("PostgreSQL")
         val query = "SELECT forkastet, forkastet_av_hendelse, forkastet_tidspunkt FROM vedtak WHERE vedtaksperiode_id = ?"

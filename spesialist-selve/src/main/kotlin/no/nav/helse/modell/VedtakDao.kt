@@ -82,8 +82,14 @@ internal class VedtakDao(private val dataSource: DataSource) {
 
     internal fun erSpesialsak(vedtaksperiodeId: UUID) = sessionOf(dataSource).use {
         @Language("PostgreSQL")
-        val query = """SELECT true FROM spesialsak WHERE vedtaksperiode_id = :vedtaksperiode_id"""
+        val query = """SELECT true FROM spesialsak WHERE vedtaksperiode_id = :vedtaksperiode_id AND ferdigbehandlet = false"""
         it.run(queryOf(query, mapOf("vedtaksperiode_id" to vedtaksperiodeId)).map { it.boolean(1) }.asSingle) ?: false
+    }
+
+    internal fun spesialsakFerdigbehandlet(vedtaksperiodeId: UUID) = sessionOf(dataSource).use {
+        @Language("PostgreSQL")
+        val query = """UPDATE spesialsak SET ferdigbehandlet = true WHERE vedtaksperiode_id = :vedtaksperiode_id"""
+        it.run(queryOf(query, mapOf("vedtaksperiode_id" to vedtaksperiodeId)).asUpdate)
     }
 
     internal fun leggTilVedtaksperiodetype(vedtaksperiodeId: UUID, type: Periodetype, inntektskilde: Inntektskilde) =

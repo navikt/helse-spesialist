@@ -1,0 +1,1 @@
+ALTER TABLE spesialsak ADD COLUMN ferdigbehandlet boolean DEFAULT false;
