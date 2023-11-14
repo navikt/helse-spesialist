@@ -114,8 +114,7 @@ internal class SaksbehandlerMediator(
 
     private fun håndter(handling: Overstyring, saksbehandler: Saksbehandler) {
         val fødselsnummer = handling.gjelderFødselsnummer()
-        val antall = oppgaveApiDao.invaliderOppgaveFor(fødselsnummer)
-        sikkerlogg.info("Invaliderer $antall {} for $fødselsnummer", if (antall == 1) "oppgave" else "oppgaver")
+        oppgaveMediator.håndter(handling)
         reservasjonDao.reserverPerson(saksbehandler.oid(), fødselsnummer, false)
         sikkerlogg.info("Reserverer person $fødselsnummer til saksbehandler $saksbehandler")
         Overstyringlagrer(overstyringDao).apply {

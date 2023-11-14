@@ -115,7 +115,14 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
         assertGodkjenteVarsler(generasjonId, 0)
     }
 
-
+    @Test
+    fun `invalider eksisterende oppgave ved overstyring`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjonId = UUID.randomUUID()
+        nyPerson(vedtaksperiodeId = vedtaksperiodeId, generasjonId = generasjonId)
+        mediator.håndter(OverstyrTidslinjeHandlingFraApi(VEDTAKSPERIODE, ORGANISASJONSNUMMER, FNR, AKTØR, "", dager = emptyList()), saksbehandler)
+        assertOppgave(OPPGAVE_ID, "Invalidert")
+    }
 
     @Test
     fun `håndter godkjenning når godkjenning er avvist`() {
@@ -547,6 +554,15 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
         return sessionOf(dataSource).use {
             it.run(queryOf(query, mapOf("fodselsnummer" to fødselsnummer.toLong())).map { it.uuid("ekstern_hendelse_id") }.asSingle)
         }
+    }
+
+    private fun assertOppgave(oppgaveId: Long, forventetStatus: String) {
+        @Language("PostgreSQL")
+        val query = "SELECT status FROM oppgave WHERE id = ?"
+        val status = sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, oppgaveId).map { it.string(1) }.asSingle)
+        }
+        assertEquals(forventetStatus, status)
     }
 
     private fun godkjenning(
