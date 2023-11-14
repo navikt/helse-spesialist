@@ -252,7 +252,7 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
         }
 
         assertEquals(14, dokument.size())
-        assertEquals(0.0, dokument["bruttoUtbetalt"].asDouble())
+        assertTrue(dokument["bruttoUtbetalt"].isNull)
         assertEquals(35000.0, dokument["beregnetInntekt"].asDouble())
         assertEquals("2023-08-01", dokument["inntektsdato"].asText())
         assertEquals(0.0, dokument["refusjon"]["beloepPrMnd"].asDouble())
