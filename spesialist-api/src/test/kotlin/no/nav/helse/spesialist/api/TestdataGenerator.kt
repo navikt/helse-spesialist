@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.api
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.spesialist.api.graphql.schema.AntallArbeidsforhold
+import no.nav.helse.spesialist.api.graphql.schema.BehandletOppgave
 import no.nav.helse.spesialist.api.graphql.schema.Egenskap
 import no.nav.helse.spesialist.api.graphql.schema.Kategori
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker
@@ -23,7 +24,7 @@ internal object TestdataGenerator {
         tilfeldigSaksbehandler()
     } + TestSaksbehandler(
         oid = UUID.fromString("4577332e-801a-4c13-8a71-39f12b8abfa3"),
-        navn = "Lokal utvikler",
+        navn = "Utvikler, Lokal",
         epostadresse = "dev@nav.no"
     )
 
@@ -71,6 +72,22 @@ internal object TestdataGenerator {
             oppgavetype = oppgavetype,
             mottaker = mottaker,
             antallArbeidsforhold = antallArbeidsforhold
+        )
+    }
+
+    internal fun behandletOppgave(): BehandletOppgave {
+        val (_, periodetype) = periodetype()
+        val (_, oppgavetype) = oppgavetype()
+        val (_, antallArbeidsforhold) = antallArbeidsforhold()
+        return BehandletOppgave(
+            id = Random.nextLong().toString(),
+            aktorId = tilfeldigAktørId(),
+            oppgavetype = oppgavetype,
+            periodetype = periodetype,
+            antallArbeidsforhold = antallArbeidsforhold,
+            ferdigstiltTidspunkt = LocalDateTime.now().minusMinutes(listOf(5L,10L,15L,20L,40L,60L,7L,8L,9L).random()).minusSeconds(listOf(2L,16L,32L,48L).random()).toString(),
+            ferdigstiltAv = "Utvikler, Lokal",
+            personnavn = tilfeldigNavn(),
         )
     }
 

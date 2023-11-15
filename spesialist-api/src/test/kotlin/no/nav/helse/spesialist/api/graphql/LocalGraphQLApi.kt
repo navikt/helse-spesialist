@@ -38,6 +38,7 @@ import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.graphql.schema.Adressebeskyttelse
 import no.nav.helse.spesialist.api.graphql.schema.AntallOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.BehandledeOppgaver
+import no.nav.helse.spesialist.api.graphql.schema.BehandletOppgave
 import no.nav.helse.spesialist.api.graphql.schema.Filtrering
 import no.nav.helse.spesialist.api.graphql.schema.Kategori
 import no.nav.helse.spesialist.api.graphql.schema.Kjonn
@@ -189,6 +190,7 @@ fun main() = runBlocking {
         }
 
         val randomOppgaver = MutableList(1000) { TestdataGenerator.oppgave() }
+        val randomBehandledeOppgaver = MutableList(32) { TestdataGenerator.behandletOppgave() }
 
         graphQLApi(
             personApiDao = personApiDao,
@@ -214,7 +216,7 @@ fun main() = runBlocking {
             behandlingsstatistikkMediator = behandlingsstatistikkMediator,
             notatMediator = notatMediator,
             saksbehandlerhåndterer = SneakySaksbehandlerhåndterer(randomOppgaver),
-            oppgavehåndterer = SneakyOppgaveHåndterer(randomOppgaver),
+            oppgavehåndterer = SneakyOppgaveHåndterer(randomOppgaver = randomOppgaver, randomBehandledeOppgaver = randomBehandledeOppgaver),
             totrinnsvurderinghåndterer = totrinnsvurderinghåndterer,
             godkjenninghåndterer = godkjenninghåndterer,
             personhåndterer = personhåndterer,
@@ -259,7 +261,10 @@ private class SneakySaksbehandlerhåndterer(private val randomOppgaver: MutableL
 
 }
 
-private class SneakyOppgaveHåndterer(private val randomOppgaver: List<OppgaveTilBehandling>) : Oppgavehåndterer {
+private class SneakyOppgaveHåndterer(
+    private val randomOppgaver: List<OppgaveTilBehandling>,
+    private val randomBehandledeOppgaver: List<BehandletOppgave>,
+) : Oppgavehåndterer {
 
     val mock = mockk<Oppgavehåndterer>(relaxed = true)
     override fun sendTilBeslutter(oppgaveId: Long, behandlendeSaksbehandler: SaksbehandlerFraApi) {
@@ -290,7 +295,7 @@ private class SneakyOppgaveHåndterer(private val randomOppgaver: List<OppgaveTi
         val oppgaver = randomOppgaver.filtered(filtrering, saksbehandlerFraApi).sorted(sortering)
         return OppgaverTilBehandling(
             oppgaver = oppgaver.drop(offset).take(limit),
-            totaltAntallOppgaver = oppgaver.size
+            totaltAntallOppgaver = oppgaver.size,
         )
     }
 
@@ -304,9 +309,12 @@ private class SneakyOppgaveHåndterer(private val randomOppgaver: List<OppgaveTi
     override fun behandledeOppgaver(
         saksbehandlerFraApi: SaksbehandlerFraApi,
         offset: Int,
-        limit: Int
+        limit: Int,
     ): BehandledeOppgaver {
-        return mock.behandledeOppgaver(saksbehandlerFraApi, offset, limit)
+        return BehandledeOppgaver(
+            oppgaver = randomBehandledeOppgaver.drop(offset).take(limit),
+            totaltAntallOppgaver = randomBehandledeOppgaver.size,
+        )
     }
 
 }
