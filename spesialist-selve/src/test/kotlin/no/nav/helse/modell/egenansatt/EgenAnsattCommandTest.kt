@@ -3,13 +3,15 @@ package no.nav.helse.modell.egenansatt
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.mediator.meldinger.løsninger.EgenAnsattløsning
 import no.nav.helse.modell.kommando.CommandContext
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
-import java.util.*
 
 internal class EgenAnsattCommandTest {
     private companion object {
@@ -19,12 +21,10 @@ internal class EgenAnsattCommandTest {
     private val dao = mockk<EgenAnsattDao>(relaxed = true)
 
     private val command = EgenAnsattCommand(dao)
-    private lateinit var context: CommandContext
-
+    private val context: CommandContext = CommandContext(UUID.randomUUID())
 
     @BeforeEach
     fun setup() {
-        context = CommandContext(UUID.randomUUID())
         clearMocks(dao)
     }
 

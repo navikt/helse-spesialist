@@ -13,11 +13,11 @@ internal class EgenAnsattCommand(
         private val logg = LoggerFactory.getLogger(EgenAnsattCommand::class.java)
     }
 
-    override fun execute(context: CommandContext) =  behandle(context)
+    override fun execute(context: CommandContext) = behandle(context)
 
     override fun resume(context: CommandContext) = behandle(context)
 
-    private fun behandle(context: CommandContext) : Boolean {
+    private fun behandle(context: CommandContext): Boolean {
         val løsning = context.get<EgenAnsattløsning>()
         if (løsning == null) {
             logg.info("Trenger informasjon om egen ansatt")
