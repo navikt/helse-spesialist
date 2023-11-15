@@ -1,10 +1,14 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETest
+import java.util.UUID
+import no.nav.helse.TestRapidHelpers.behov
 import no.nav.helse.TestRapidHelpers.oppgaveId
 import no.nav.helse.Testdata.FØDSELSNUMMER
+import no.nav.helse.januar
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class EndretSkjermetinfoTest : AbstractE2ETest() {
@@ -55,5 +59,31 @@ internal class EndretSkjermetinfoTest : AbstractE2ETest() {
         håndterEndretSkjermetinfo(skjermet = false)
 
         assertHarIkkeOppgaveegenskap(oppgaveId, Egenskap.EGEN_ANSATT)
+    }
+
+    @Test
+    fun `Hva skjer i EgenAnsattCommand når vi allerede HAR oppdatert info`() {
+        nyttVedtak(fom = 1.januar, tom = 20.januar)
+
+        håndterEndretSkjermetinfo(skjermet = true)
+
+        resetTestRapid()
+        val vedtaksperiodeId2 = UUID.randomUUID()
+
+        fremForbiUtbetalingsfilter(
+            fom = 21.januar,
+            tom = 30.januar,
+            skjæringstidspunkt = 1.januar,
+            harOppdatertMetadata = true,
+            vedtaksperiodeId = vedtaksperiodeId2,
+            utbetalingId = UUID.randomUUID(),
+        )
+        håndterEgenansattløsning(erEgenAnsatt = true)
+        håndterVergemålløsning()
+        håndterÅpneOppgaverløsning()
+        håndterRisikovurderingløsning(vedtaksperiodeId = vedtaksperiodeId2)
+
+        val behov = inspektør.behov("EgenAnsatt")
+        assertEquals(1, behov.size) // Denne kan vi kanskje prøve å få ned til 0?
     }
 }

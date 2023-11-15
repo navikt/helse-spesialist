@@ -17,6 +17,7 @@
     <logger name="io.netty" level="WARN" />
     <logger name="ktor.application" level="WARN" />
     <logger name="org.testcontainers" level="WARN" />
+    <logger name="tjenestekall" level="debug" />
 
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>

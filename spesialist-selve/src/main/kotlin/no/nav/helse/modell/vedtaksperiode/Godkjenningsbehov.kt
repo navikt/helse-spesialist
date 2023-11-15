@@ -129,6 +129,7 @@ internal class Godkjenningsbehov(
             utbetalingDao = utbetalingDao,
         ),
         EgenAnsattCommand(
+            fødselsnummer = fødselsnummer,
             egenAnsattDao = egenAnsattDao,
         ),
         VergemålCommand(

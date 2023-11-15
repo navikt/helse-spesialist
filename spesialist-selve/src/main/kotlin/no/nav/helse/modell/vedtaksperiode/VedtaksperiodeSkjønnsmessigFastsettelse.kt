@@ -21,7 +21,7 @@ internal class VedtaksperiodeSkjønnsmessigFastsettelse(
     override val id: UUID,
     private val vedtaksperiodeId: UUID,
     private val fødselsnummer: String,
-    private val aktørId: String,
+    aktørId: String,
     private val json: String,
     organisasjonsnummer: String,
     snapshotDao: SnapshotDao,
@@ -48,7 +48,8 @@ internal class VedtaksperiodeSkjønnsmessigFastsettelse(
             førstegangsbehandling = true
         ),
         EgenAnsattCommand(
-            egenAnsattDao = egenAnsattDao
+            fødselsnummer = fødselsnummer,
+            egenAnsattDao = egenAnsattDao,
         ),
         OppdaterSnapshotCommand(
             snapshotClient = snapshotClient,

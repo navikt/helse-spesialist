@@ -20,7 +20,7 @@ internal class EgenAnsattCommandTest {
 
     private val dao = mockk<EgenAnsattDao>(relaxed = true)
 
-    private val command = EgenAnsattCommand(dao)
+    private val command = EgenAnsattCommand(FNR, dao)
     private val context: CommandContext = CommandContext(UUID.randomUUID())
 
     @BeforeEach

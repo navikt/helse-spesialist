@@ -98,10 +98,12 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     @BeforeEach
     internal fun resetTestSetup() {
-        testRapid.reset()
+        resetTestRapid()
         lagVarseldefinisjoner()
         opprettSaksbehandler()
     }
+
+    protected fun resetTestRapid() = testRapid.reset()
 
     // Tanken er at denne ikke skal eksponeres ut av AbstractE2ETest, for å unngå at enkelttester implementer egen kode
     // som bør være felles
