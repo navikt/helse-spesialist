@@ -9,7 +9,6 @@ import kotlinx.coroutines.withContext
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.schema.AntallOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.BehandledeOppgaver
-import no.nav.helse.spesialist.api.graphql.schema.BehandletOppgave
 import no.nav.helse.spesialist.api.graphql.schema.Filtrering
 import no.nav.helse.spesialist.api.graphql.schema.OppgaverTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.Oppgavesortering
@@ -21,22 +20,6 @@ import org.slf4j.LoggerFactory
 class OppgaverQuery(private val oppgavehåndterer: Oppgavehåndterer) : Query {
 
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
-
-    @Suppress("unused")
-    suspend fun behandledeOppgaverIDag(
-        env: DataFetchingEnvironment,
-    ): DataFetcherResult<List<BehandletOppgave>> {
-        val saksbehandler = env.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(SAKSBEHANDLER.key).value
-        val behandledeOppgaver = withContext(Dispatchers.IO) {
-            oppgavehåndterer.behandledeOppgaver(
-                saksbehandlerFraApi = saksbehandler,
-                offset = 0,
-                limit = Int.MAX_VALUE,
-            )
-        }
-
-        return DataFetcherResult.newResult<List<BehandletOppgave>>().data(behandledeOppgaver.oppgaver).build()
-    }
 
     @Suppress("unused")
     suspend fun behandledeOppgaverFeed(

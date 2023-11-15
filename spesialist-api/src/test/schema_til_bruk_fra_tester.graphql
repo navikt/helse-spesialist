@@ -482,7 +482,6 @@ type Personoppdrag implements Spennoppdrag {
 type Query {
     antallOppgaver: AntallOppgaver!
     behandledeOppgaverFeed(limit: Int!, offset: Int!): BehandledeOppgaver!
-    behandledeOppgaverIDag: [BehandletOppgave!]!
     behandlingsstatistikk: Behandlingsstatistikk!
     hentInntektsmelding(dokumentId: String!, fnr: String!): DokumentInntektsmelding!
     hentSoknad(dokumentId: String!, fnr: String!): Soknad!

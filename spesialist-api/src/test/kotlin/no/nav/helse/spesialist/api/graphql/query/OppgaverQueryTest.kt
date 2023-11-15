@@ -88,21 +88,6 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
     }
 
     @Test
-    fun `behandledeOppgaverIDag uten parametere returnerer oppgave`() {
-        every { oppgavehåndterer.behandledeOppgaver(any(), any(), any()) } returns BehandledeOppgaver(oppgaver = listOf(behandletOppgave()), totaltAntallOppgaver = 1)
-
-        val body = runQuery(
-            """{
-                behandledeOppgaverIDag { id }
-            }"""
-        )
-        val antallOppgaver = body["data"]["behandledeOppgaverIDag"].size()
-
-        verify(exactly = 1) { oppgavehåndterer.behandledeOppgaver(any(), 0, Int.MAX_VALUE) }
-        assertEquals(1, antallOppgaver)
-    }
-
-    @Test
     fun `behandledeOppgaverFeed uten parametere returnerer oppgave`() {
         every { oppgavehåndterer.behandledeOppgaver(any(), any(), any()) } returns BehandledeOppgaver(oppgaver = listOf(behandletOppgave()), totaltAntallOppgaver = 1)
 
