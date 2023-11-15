@@ -8,6 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.schema.AntallOppgaver
+import no.nav.helse.spesialist.api.graphql.schema.BehandledeOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.BehandletOppgave
 import no.nav.helse.spesialist.api.graphql.schema.Filtrering
 import no.nav.helse.spesialist.api.graphql.schema.OppgaverTilBehandling
@@ -27,10 +28,32 @@ class OppgaverQuery(private val oppgavehåndterer: Oppgavehåndterer) : Query {
     ): DataFetcherResult<List<BehandletOppgave>> {
         val saksbehandler = env.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(SAKSBEHANDLER.key).value
         val behandledeOppgaver = withContext(Dispatchers.IO) {
-            oppgavehåndterer.behandledeOppgaver(saksbehandler)
+            oppgavehåndterer.behandledeOppgaver(
+                saksbehandlerFraApi = saksbehandler,
+                offset = 0,
+                limit = Int.MAX_VALUE,
+            )
         }
 
-        return DataFetcherResult.newResult<List<BehandletOppgave>>().data(behandledeOppgaver).build()
+        return DataFetcherResult.newResult<List<BehandletOppgave>>().data(behandledeOppgaver.oppgaver).build()
+    }
+
+    @Suppress("unused")
+    suspend fun behandledeOppgaverFeed(
+        offset: Int,
+        limit: Int,
+        env: DataFetchingEnvironment,
+    ): DataFetcherResult<BehandledeOppgaver> {
+        val saksbehandler = env.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(SAKSBEHANDLER.key).value
+        val behandledeOppgaver = withContext(Dispatchers.IO) {
+            oppgavehåndterer.behandledeOppgaver(
+                saksbehandlerFraApi = saksbehandler,
+                offset = offset,
+                limit = limit,
+            )
+        }
+
+        return DataFetcherResult.newResult<BehandledeOppgaver>().data(behandledeOppgaver).build()
     }
 
     @Suppress("unused")

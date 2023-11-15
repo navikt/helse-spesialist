@@ -7,6 +7,8 @@ import java.util.UUID
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import no.nav.helse.spesialist.api.graphql.schema.AntallArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.AntallOppgaver
+import no.nav.helse.spesialist.api.graphql.schema.BehandledeOppgaver
+import no.nav.helse.spesialist.api.graphql.schema.BehandletOppgave
 import no.nav.helse.spesialist.api.graphql.schema.Egenskap
 import no.nav.helse.spesialist.api.graphql.schema.Filtrering
 import no.nav.helse.spesialist.api.graphql.schema.Kategori
@@ -33,15 +35,15 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
         val body = runQuery(
             """{
                 oppgaveFeed(
+                    offset: 0,
+                    limit: 14,
+                    sortering: [],
                     filtrering: {
                         egenskaper: []
                         egneSaker: false
                         egneSakerPaVent: false
                         ingenUkategoriserteEgenskaper: false
-                    },
-                    offset: 0,
-                    limit: 14,
-                    sortering: []
+                    }
                 ) { oppgaver { id } }
             }"""
         )
@@ -58,10 +60,10 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
         val body = runQuery(
             """{ 
                 oppgaveFeed(
-                    offset: 2, 
-                    limit: 5, 
+                    offset: 14, 
+                    limit: 14,
                     sortering: [{nokkel: TILDELT_TIL, stigende: true}],
-                     filtrering: {
+                    filtrering: {
                         egenskaper: [{egenskap: DELVIS_REFUSJON, kategori: Mottaker}]
                         egneSaker: true
                         egneSakerPaVent: false
@@ -74,13 +76,68 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
 
         verify(exactly = 1) { oppgavehåndterer.oppgaver(
             saksbehandlerFraApi = any(),
-            offset = 2,
-            limit = 5,
+            offset = 14,
+            limit = 14,
             sortering = listOf(Oppgavesortering(Sorteringsnokkel.TILDELT_TIL, true)),
             filtrering = Filtrering(
                 egenskaper = listOf(Oppgaveegenskap(Egenskap.DELVIS_REFUSJON, Kategori.Mottaker)),
                 egneSaker = true,
             ),
+        ) }
+        assertEquals(1, antallOppgaver)
+    }
+
+    @Test
+    fun `behandledeOppgaverIDag uten parametere returnerer oppgave`() {
+        every { oppgavehåndterer.behandledeOppgaver(any(), any(), any()) } returns BehandledeOppgaver(oppgaver = listOf(behandletOppgave()), totaltAntallOppgaver = 1)
+
+        val body = runQuery(
+            """{
+                behandledeOppgaverIDag { id }
+            }"""
+        )
+        val antallOppgaver = body["data"]["behandledeOppgaverIDag"].size()
+
+        verify(exactly = 1) { oppgavehåndterer.behandledeOppgaver(any(), 0, Int.MAX_VALUE) }
+        assertEquals(1, antallOppgaver)
+    }
+
+    @Test
+    fun `behandledeOppgaverFeed uten parametere returnerer oppgave`() {
+        every { oppgavehåndterer.behandledeOppgaver(any(), any(), any()) } returns BehandledeOppgaver(oppgaver = listOf(behandletOppgave()), totaltAntallOppgaver = 1)
+
+        val body = runQuery(
+            """{
+                behandledeOppgaverFeed(
+                    offset: 0,
+                    limit: 14,
+                ) { oppgaver { id } }
+            }"""
+        )
+        val antallOppgaver = body["data"]["behandledeOppgaverFeed"].size()
+
+        verify(exactly = 1) { oppgavehåndterer.behandledeOppgaver(any(), 0, 14) }
+        assertEquals(1, antallOppgaver)
+    }
+
+    @Test
+    fun `behandledeOppgaverFeed med parametere returnerer oppgave`() {
+        every { oppgavehåndterer.behandledeOppgaver(any(), any(), any()) } returns BehandledeOppgaver(oppgaver = listOf(behandletOppgave()), totaltAntallOppgaver = 1)
+
+        val body = runQuery(
+            """{ 
+                behandledeOppgaverFeed(
+                    offset: 14, 
+                    limit: 14,
+                )  { oppgaver { id } }
+        }"""
+        )
+        val antallOppgaver = body["data"]["behandledeOppgaverFeed"].size()
+
+        verify(exactly = 1) { oppgavehåndterer.behandledeOppgaver(
+            saksbehandlerFraApi = any(),
+            offset = 14,
+            limit = 14,
         ) }
         assertEquals(1, antallOppgaver)
     }
@@ -123,5 +180,20 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
         oppgavetype = OppgavetypeForApi.SOKNAD,
         mottaker = Mottaker.SYKMELDT,
         antallArbeidsforhold = AntallArbeidsforhold.ET_ARBEIDSFORHOLD
+    )
+
+    private fun behandletOppgave() = BehandletOppgave(
+        id = UUID.randomUUID().toString(),
+        aktorId = "1017011111111",
+        oppgavetype = OppgavetypeForApi.SOKNAD,
+        periodetype = Periodetype.FORSTEGANGSBEHANDLING,
+        antallArbeidsforhold = AntallArbeidsforhold.ET_ARBEIDSFORHOLD,
+        ferdigstiltTidspunkt = LocalDateTime.now().toString(),
+        ferdigstiltAv = "SAKSBEHANDLER",
+        personnavn = Personnavn(
+            fornavn = "Aage",
+            etternavn = "Kurt",
+            mellomnavn = null,
+        ),
     )
 }

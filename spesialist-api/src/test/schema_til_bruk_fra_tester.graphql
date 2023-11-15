@@ -123,6 +123,11 @@ type Arbeidsgiverrefusjon {
     refusjonsopplysninger: [Refusjonselement!]!
 }
 
+type BehandledeOppgaver {
+    oppgaver: [BehandletOppgave!]!
+    totaltAntallOppgaver: Int!
+}
+
 type BehandletOppgave {
     aktorId: String!
     antallArbeidsforhold: AntallArbeidsforhold!
@@ -476,6 +481,7 @@ type Personoppdrag implements Spennoppdrag {
 
 type Query {
     antallOppgaver: AntallOppgaver!
+    behandledeOppgaverFeed(limit: Int!, offset: Int!): BehandledeOppgaver!
     behandledeOppgaverIDag: [BehandletOppgave!]!
     behandlingsstatistikk: Behandlingsstatistikk!
     hentInntektsmelding(dokumentId: String!, fnr: String!): DokumentInntektsmelding!
@@ -853,6 +859,7 @@ enum Egenskap {
     INFOTRYGDFORLENGELSE
     INGEN_UTBETALING
     OVERGANG_FRA_IT
+    PA_VENT
     RETUR
     REVURDERING
     RISK_QA

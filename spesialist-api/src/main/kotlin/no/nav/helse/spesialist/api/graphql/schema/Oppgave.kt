@@ -70,6 +70,11 @@ enum class Sorteringsnokkel {
     SOKNAD_MOTTATT
 }
 
+data class BehandledeOppgaver(
+    val totaltAntallOppgaver: Int,
+    val oppgaver: List<BehandletOppgave>
+)
+
 data class OppgaverTilBehandling(
     val totaltAntallOppgaver: Int,
     val oppgaver: List<OppgaveTilBehandling>
@@ -99,12 +104,6 @@ data class Oppgaveegenskap(
     val egenskap: Egenskap,
     val kategori: Kategori,
 )
-
-enum class Fane {
-    TIL_GODKJENNING,
-    MINE_SAKER,
-    PAA_VENT
-}
 
 data class OppgaveForPeriodevisning(
     val id: String,

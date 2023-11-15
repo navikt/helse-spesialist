@@ -32,7 +32,7 @@ import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import no.nav.helse.spesialist.api.graphql.schema.AntallOppgaver
-import no.nav.helse.spesialist.api.graphql.schema.BehandletOppgave
+import no.nav.helse.spesialist.api.graphql.schema.BehandledeOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.Filtrering
 import no.nav.helse.spesialist.api.graphql.schema.OppgaverTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.Oppgavesortering
@@ -211,10 +211,21 @@ internal class OppgaveMediator(
         return antallOppgaver.tilApiversjon()
     }
 
-    override fun behandledeOppgaver(saksbehandlerFraApi: SaksbehandlerFraApi): List<BehandletOppgave> {
+    override fun behandledeOppgaver(
+        saksbehandlerFraApi: SaksbehandlerFraApi,
+        offset: Int,
+        limit: Int
+    ): BehandledeOppgaver {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
-        val behandledeOppgaver = oppgaveDao.finnBehandledeOppgaver(behandletAvOid = saksbehandler.oid())
-        return behandledeOppgaver.tilBehandledeOppgaver()
+        val behandledeOppgaver = oppgaveDao.finnBehandledeOppgaver(
+            behandletAvOid = saksbehandler.oid(),
+            offset = offset,
+            limit = limit
+        )
+        return BehandledeOppgaver(
+            oppgaver = behandledeOppgaver.tilBehandledeOppgaver(),
+            totaltAntallOppgaver = if (behandledeOppgaver.isEmpty()) 0 else behandledeOppgaver.first().filtrertAntall
+        )
     }
 
     fun avbrytOppgaveFor(vedtaksperiodeId: UUID) {

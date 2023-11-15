@@ -43,6 +43,7 @@ data class BehandletOppgaveFraDatabaseForVisning(
     val ferdigstiltTidspunkt: LocalDateTime,
     val ferdigstiltAv: String?,
     val navn: PersonnavnFraDatabase,
+    val filtrertAntall: Int,
 )
 
 data class OppgavesorteringForDatabase(val nøkkel: SorteringsnøkkelForDatabase, val stigende: Boolean)

@@ -37,7 +37,7 @@ import no.nav.helse.spesialist.api.behandlingsstatistikk.Statistikk
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.graphql.schema.Adressebeskyttelse
 import no.nav.helse.spesialist.api.graphql.schema.AntallOppgaver
-import no.nav.helse.spesialist.api.graphql.schema.BehandletOppgave
+import no.nav.helse.spesialist.api.graphql.schema.BehandledeOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.Filtrering
 import no.nav.helse.spesialist.api.graphql.schema.Kategori
 import no.nav.helse.spesialist.api.graphql.schema.Kjonn
@@ -301,8 +301,12 @@ private class SneakyOppgaveHåndterer(private val randomOppgaver: List<OppgaveTi
         )
     }
 
-    override fun behandledeOppgaver(saksbehandlerFraApi: SaksbehandlerFraApi): List<BehandletOppgave> {
-        return mock.behandledeOppgaver(saksbehandlerFraApi)
+    override fun behandledeOppgaver(
+        saksbehandlerFraApi: SaksbehandlerFraApi,
+        offset: Int,
+        limit: Int
+    ): BehandledeOppgaver {
+        return mock.behandledeOppgaver(saksbehandlerFraApi, offset, limit)
     }
 
 }

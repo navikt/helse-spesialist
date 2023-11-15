@@ -294,6 +294,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `Finn behandlede oppgaver for visning`() {
         val saksbehandlerOid = UUID.randomUUID()
+        val annenSaksbehandlerOid = UUID.randomUUID()
         nyPerson(fødselsnummer = "12345678910", aktørId = "1234567891011", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "123456789")
         tildelOppgave(saksbehandlerOid = saksbehandlerOid)
         ferdigstillOppgave(OPPGAVE_ID, ferdigstiltAvOid = saksbehandlerOid, ferdigstiltAv = SAKSBEHANDLER_NAVN)
@@ -306,8 +307,13 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         tildelOppgave(saksbehandlerOid = saksbehandlerOid)
         avventerSystem(OPPGAVE_ID, ferdigstiltAvOid = saksbehandlerOid, ferdigstiltAv = SAKSBEHANDLER_NAVN)
 
+        nyPerson(fødselsnummer = "12345678913", aktørId = "1234567891014", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "223456790")
+        tildelOppgave(saksbehandlerOid = annenSaksbehandlerOid)
+        ferdigstillOppgave(OPPGAVE_ID, ferdigstiltAvOid = annenSaksbehandlerOid, ferdigstiltAv = "ANNEN_SAKSBEHANDLER")
+
         val oppgaver = oppgaveDao.finnBehandledeOppgaver(saksbehandlerOid)
         assertEquals(3, oppgaver.size)
+        assertEquals(3, oppgaver.first().filtrertAntall)
     }
 
     @Test
@@ -366,7 +372,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `Finn oppgaver for visning med offset og pagesize`() {
+    fun `Finn oppgaver for visning med offset og limit`() {
         nyPerson(fødselsnummer = "12345678910", aktørId = "1234567891011", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "123456789")
         val oppgaveId1 = OPPGAVE_ID
         nyPerson(fødselsnummer = "12345678911", aktørId = "1234567891012", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "223456789")
@@ -375,6 +381,26 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), 1, 2)
         assertEquals(2, oppgaver.size)
         assertEquals(listOf(oppgaveId2, oppgaveId1), oppgaver.map { it.id })
+    }
+
+    @Test
+    fun `Finn behandlede oppgaver med offset og limit`() {
+        val saksbehandlerOid = UUID.randomUUID()
+        nyPerson(fødselsnummer = "12345678910", aktørId = "1234567891011", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "123456789")
+        val oppgaveId1 = OPPGAVE_ID
+        ferdigstillOppgave(oppgaveId1, ferdigstiltAvOid = saksbehandlerOid, ferdigstiltAv = SAKSBEHANDLER_NAVN)
+
+        nyPerson(fødselsnummer = "12345678911", aktørId = "1234567891012", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "223456789")
+        val oppgaveId2 = OPPGAVE_ID
+        ferdigstillOppgave(oppgaveId2, ferdigstiltAvOid = saksbehandlerOid, ferdigstiltAv = SAKSBEHANDLER_NAVN)
+
+        nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456789")
+        val oppgaveId3 = OPPGAVE_ID
+        ferdigstillOppgave(oppgaveId3, ferdigstiltAvOid = saksbehandlerOid, ferdigstiltAv = SAKSBEHANDLER_NAVN)
+
+        val oppgaver = oppgaveDao.finnBehandledeOppgaver(saksbehandlerOid, 1, 2)
+        assertEquals(2, oppgaver.size)
+        assertEquals(listOf(oppgaveId2, oppgaveId3), oppgaver.map { it.id })
     }
 
     @Test

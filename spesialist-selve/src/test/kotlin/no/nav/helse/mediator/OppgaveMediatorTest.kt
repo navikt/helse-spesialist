@@ -255,11 +255,11 @@ internal class OppgaveMediatorTest {
     @Test
     fun `Hent behandlede oppgaver til visning`() {
         every { oppgaveDao.finnBehandledeOppgaver(any()) } returns listOf(
-            behandletOppgaveFraDatabaseForVisning(),
-            behandletOppgaveFraDatabaseForVisning(),
+            behandletOppgaveFraDatabaseForVisning(filtrertAntall = 2),
+            behandletOppgaveFraDatabaseForVisning(filtrertAntall = 2),
         )
-        val oppgaver = mediator.behandledeOppgaver(saksbehandlerFraApi())
-        assertEquals(2, oppgaver.size)
+        val oppgaver = mediator.behandledeOppgaver(saksbehandlerFraApi(), 0, MAX_VALUE)
+        assertEquals(2, oppgaver.oppgaver.size)
     }
 
     @Test
@@ -297,9 +297,9 @@ internal class OppgaveMediatorTest {
             ),
         )
         val saksbehandler = saksbehandlerFraApi()
-        val oppgaver = mediator.behandledeOppgaver(saksbehandler)
-        assertEquals(1, oppgaver.size)
-        val oppgave = oppgaver.single()
+        val oppgaver = mediator.behandledeOppgaver(saksbehandler, 0, MAX_VALUE)
+        assertEquals(1, oppgaver.oppgaver.size)
+        val oppgave = oppgaver.oppgaver.single()
         assertEquals("1", oppgave.id)
         assertEquals("1234567891011", oppgave.aktorId)
         assertEquals("fornavn", oppgave.personnavn.fornavn)
@@ -484,13 +484,15 @@ internal class OppgaveMediatorTest {
         ferdigstiltAv: String? = "saksbehandler",
         personnavnFraDatabase: PersonnavnFraDatabase = PersonnavnFraDatabase("navn", "mellomnavn", "etternavn"),
         ferdigstiltTidspunkt: LocalDateTime = LocalDateTime.now(),
+        filtrertAntall: Int = 1,
     ) = BehandletOppgaveFraDatabaseForVisning(
         id = oppgaveId,
         aktørId = aktørId,
         egenskaper = egenskaper,
         ferdigstiltAv = ferdigstiltAv,
         ferdigstiltTidspunkt = ferdigstiltTidspunkt,
-        navn = personnavnFraDatabase
+        navn = personnavnFraDatabase,
+        filtrertAntall = filtrertAntall,
     )
 
     private fun oppgaveFraDatabaseForVisning(

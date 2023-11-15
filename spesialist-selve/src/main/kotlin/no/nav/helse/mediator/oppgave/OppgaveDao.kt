@@ -31,7 +31,8 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
             """
                SELECT nextval(pg_get_serial_sequence('oppgave', 'id')) as neste_id; 
             """
-        ).single { it.long("neste_id") } ?: throw IllegalStateException("Klarer ikke hente neste id i sekvens fra oppgave-tabellen")
+        ).single { it.long("neste_id") }
+            ?: throw IllegalStateException("Klarer ikke hente neste id i sekvens fra oppgave-tabellen")
     }
 
     override fun finnOppgave(id: Long): OppgaveFraDatabase? {
@@ -79,16 +80,21 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
         egneSakerPåVent: Boolean = false,
         egneSaker: Boolean = false,
         tildelt: Boolean? = null,
-        grupperteFiltrerteEgenskaper: Map<Egenskap.Kategori, List<EgenskapForDatabase>>? = emptyMap()
+        grupperteFiltrerteEgenskaper: Map<Egenskap.Kategori, List<EgenskapForDatabase>>? = emptyMap(),
     ): List<OppgaveFraDatabaseForVisning> {
         val orderBy = if (sortering.isNotEmpty()) sortering.joinToString { it.nøkkelTilKolonne() } else "opprettet DESC"
         val egenskaperSomSkalEkskluderes = ekskluderEgenskaper.joinToString { """ '$it' """ }
 
-        val ukategoriserteEgenskaper = grupperteFiltrerteEgenskaper?.get(Egenskap.Kategori.Ukategorisert)?.joinToString { """ '${it.name}' """ }
-        val oppgavetypeEgenskaper = grupperteFiltrerteEgenskaper?.get(Egenskap.Kategori.Oppgavetype)?.joinToString { """ '${it.name}' """ }
-        val periodetypeEgenskaper = grupperteFiltrerteEgenskaper?.get(Egenskap.Kategori.Periodetype)?.joinToString { """ '${it.name}' """ }
-        val mottakerEgenskaper = grupperteFiltrerteEgenskaper?.get(Egenskap.Kategori.Mottaker)?.joinToString { """ '${it.name}' """ }
-        val antallArbeidsforholdEgenskaper = grupperteFiltrerteEgenskaper?.get(Egenskap.Kategori.Inntektskilde)?.joinToString { """ '${it.name}' """ }
+        val ukategoriserteEgenskaper =
+            grupperteFiltrerteEgenskaper?.get(Egenskap.Kategori.Ukategorisert)?.joinToString { """ '${it.name}' """ }
+        val oppgavetypeEgenskaper =
+            grupperteFiltrerteEgenskaper?.get(Egenskap.Kategori.Oppgavetype)?.joinToString { """ '${it.name}' """ }
+        val periodetypeEgenskaper =
+            grupperteFiltrerteEgenskaper?.get(Egenskap.Kategori.Periodetype)?.joinToString { """ '${it.name}' """ }
+        val mottakerEgenskaper =
+            grupperteFiltrerteEgenskaper?.get(Egenskap.Kategori.Mottaker)?.joinToString { """ '${it.name}' """ }
+        val antallArbeidsforholdEgenskaper =
+            grupperteFiltrerteEgenskaper?.get(Egenskap.Kategori.Inntektskilde)?.joinToString { """ '${it.name}' """ }
 
         return asSQL(
             """
@@ -194,7 +200,11 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
         } ?: AntallOppgaverFraDatabase(antallMineSaker = 0, antallMineSakerPåVent = 0)
     }
 
-    internal fun finnBehandledeOppgaver(behandletAvOid: UUID): List<BehandletOppgaveFraDatabaseForVisning> = asSQL(
+    internal fun finnBehandledeOppgaver(
+        behandletAvOid: UUID,
+        offset: Int = 0,
+        limit: Int = Int.MAX_VALUE,
+    ): List<BehandletOppgaveFraDatabaseForVisning> = asSQL(
         """
         SELECT 
             o.id as oppgave_id,
@@ -202,7 +212,8 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
             o.egenskaper,
             o.oppdatert as ferdigstilt_tidspunkt,
             o.ferdigstilt_av,
-            pi.fornavn, pi.mellomnavn, pi.etternavn
+            pi.fornavn, pi.mellomnavn, pi.etternavn,
+            count(1) OVER() AS filtered_count
         FROM oppgave o
             INNER JOIN vedtak v ON o.vedtak_ref = v.id
             INNER JOIN person p ON v.person_ref = p.id
@@ -214,9 +225,11 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                  ) ttv ON ttv.vedtaksperiode_id = v.vedtaksperiode_id
         WHERE (ttv.saksbehandler = :oid OR (o.ferdigstilt_av_oid = :oid AND (o.status = 'Ferdigstilt' OR o.status = 'AvventerSystem')))
             AND o.oppdatert >= :fom
-        ORDER BY o.oppdatert;
+        ORDER BY o.oppdatert
+        OFFSET :offset
+        LIMIT :limit;
     """,
-        mapOf("oid" to behandletAvOid, "fom" to LocalDate.now())
+        mapOf("oid" to behandletAvOid, "fom" to LocalDate.now(), "offset" to offset, "limit" to limit)
     ).list { row ->
         BehandletOppgaveFraDatabaseForVisning(
             id = row.long("oppgave_id"),
@@ -229,6 +242,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                 row.stringOrNull("mellomnavn"),
                 row.string("etternavn"),
             ),
+            filtrertAntall = row.int("filtered_count"),
         )
     }
 
@@ -236,7 +250,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
         SorteringsnøkkelForDatabase.TILDELT_TIL -> "navn"
         SorteringsnøkkelForDatabase.OPPRETTET -> "opprettet"
         SorteringsnøkkelForDatabase.SØKNAD_MOTTATT -> "opprinnelig_soknadsdato"
-     }+ if (this.stigende) " ASC" else " DESC"
+    } + if (this.stigende) " ASC" else " DESC"
 
     internal fun hentOppgavemelding(oppgaveId: Long): Oppgavemelder.Oppgavemelding? = asSQL(
         """
@@ -384,7 +398,15 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
         }
     }
 
-    fun opprettOppgave(id: Long, commandContextId: UUID, egenskap: String, egenskaper: List<EgenskapForDatabase>, vedtaksperiodeId: UUID, utbetalingId: UUID, kanAvvises: Boolean) =
+    fun opprettOppgave(
+        id: Long,
+        commandContextId: UUID,
+        egenskap: String,
+        egenskaper: List<EgenskapForDatabase>,
+        vedtaksperiodeId: UUID,
+        utbetalingId: UUID,
+        kanAvvises: Boolean,
+    ) =
         requireNotNull(run {
             val vedtakRef = vedtakRef(vedtaksperiodeId)
 

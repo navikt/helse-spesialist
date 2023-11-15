@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.api.oppgave
 
 import no.nav.helse.spesialist.api.graphql.schema.AntallOppgaver
-import no.nav.helse.spesialist.api.graphql.schema.BehandletOppgave
+import no.nav.helse.spesialist.api.graphql.schema.BehandledeOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.Filtrering
 import no.nav.helse.spesialist.api.graphql.schema.OppgaverTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.Oppgavesortering
@@ -15,5 +15,5 @@ interface Oppgavehåndterer {
     fun erRiskoppgave(oppgaveId: Long): Boolean
     fun oppgaver(saksbehandlerFraApi: SaksbehandlerFraApi, offset: Int, limit: Int, sortering: List<Oppgavesortering>, filtrering: Filtrering): OppgaverTilBehandling
     fun antallOppgaver(saksbehandlerFraApi: SaksbehandlerFraApi): AntallOppgaver
-    fun behandledeOppgaver(saksbehandlerFraApi: SaksbehandlerFraApi): List<BehandletOppgave>
+    fun behandledeOppgaver(saksbehandlerFraApi: SaksbehandlerFraApi, offset: Int, limit: Int): BehandledeOppgaver
 }
