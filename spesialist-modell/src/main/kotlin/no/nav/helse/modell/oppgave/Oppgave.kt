@@ -180,6 +180,7 @@ class Oppgave private constructor(
     private fun tildel(saksbehandler: Saksbehandler, påVent: Boolean) {
         this.tildeltTil = saksbehandler
         this.påVent = påVent
+        if (Toggle.FellesPaVentBenk.enabled && påVent) egenskaper.add(PÅ_VENT)
         logg.info("Oppgave med {} tildeles saksbehandler med {}", kv("oppgaveId", id), kv("oid", saksbehandler.oid()))
         sikkerlogg.info("Oppgave med {} tildeles $saksbehandler", kv("oppgaveId", id))
         oppgaveEndret()
