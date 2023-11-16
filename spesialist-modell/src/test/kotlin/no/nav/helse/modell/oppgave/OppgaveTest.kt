@@ -8,8 +8,12 @@ import no.nav.helse.modell.OppgaveAlleredeSendtIRetur
 import no.nav.helse.modell.OppgaveIkkeTildelt
 import no.nav.helse.modell.OppgaveKreverVurderingAvToSaksbehandlere
 import no.nav.helse.modell.OppgaveTildeltNoenAndre
+import no.nav.helse.modell.Toggle
+import no.nav.helse.modell.ToggleHelpers.disable
+import no.nav.helse.modell.ToggleHelpers.enable
 import no.nav.helse.modell.oppgave.Egenskap.BESLUTTER
 import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
+import no.nav.helse.modell.oppgave.Egenskap.PÅ_VENT
 import no.nav.helse.modell.oppgave.Egenskap.RETUR
 import no.nav.helse.modell.oppgave.Egenskap.RISK_QA
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
@@ -118,6 +122,7 @@ internal class OppgaveTest {
 
     @Test
     fun `Forsøker tildeling ved reservasjon med påVent`() {
+        Toggle.FellesPaVentBenk.enable()
         val oppgave = nyOppgave(SØKNAD)
         oppgave.forsøkTildelingVedReservasjon(saksbehandlerUtenTilgang, påVent = true)
 
@@ -125,7 +130,9 @@ internal class OppgaveTest {
             assertEquals(true, tildelt)
             assertEquals(true, påVent)
             assertEquals(saksbehandlerUtenTilgang, tildeltTil)
+            assertTrue(egenskaper.contains(PÅ_VENT))
         }
+        Toggle.FellesPaVentBenk.disable()
     }
 
     @Test
@@ -531,13 +538,16 @@ internal class OppgaveTest {
 
     @Test
     fun `legg oppgave på vent`() {
+        Toggle.FellesPaVentBenk.enable()
         val oppgave = nyOppgave(SØKNAD)
         oppgave.forsøkTildelingVedReservasjon(saksbehandlerUtenTilgang, false)
         oppgave.leggPåVent(saksbehandlerUtenTilgang)
 
         inspektør(oppgave) {
             assertEquals(true, påVent)
+            assertTrue(egenskaper.contains(PÅ_VENT))
         }
+        Toggle.FellesPaVentBenk.disable()
     }
 
     @Test
@@ -554,14 +564,18 @@ internal class OppgaveTest {
 
     @Test
     fun `fjern påVent`() {
+        Toggle.FellesPaVentBenk.enable()
         val oppgave = nyOppgave(SØKNAD)
         oppgave.forsøkTildelingVedReservasjon(saksbehandlerUtenTilgang, false)
         oppgave.leggPåVent(saksbehandlerUtenTilgang)
         oppgave.fjernPåVent(saksbehandlerUtenTilgang)
 
+
         inspektør(oppgave) {
             assertEquals(false, påVent)
+            assertFalse(egenskaper.contains(PÅ_VENT))
         }
+        Toggle.FellesPaVentBenk.disable()
     }
 
     @Test
