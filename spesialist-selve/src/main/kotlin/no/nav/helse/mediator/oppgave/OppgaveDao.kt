@@ -218,12 +218,13 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
             INNER JOIN vedtak v ON o.vedtak_ref = v.id
             INNER JOIN person p ON v.person_ref = p.id
             INNER JOIN person_info pi ON p.info_ref = pi.id
-            LEFT JOIN (SELECT DISTINCT ON (vedtaksperiode_id) vedtaksperiode_id, saksbehandler
+            LEFT JOIN (SELECT DISTINCT ON (vedtaksperiode_id) vedtaksperiode_id, saksbehandler, utbetaling_id
                      FROM totrinnsvurdering
+                     INNER JOIN utbetaling_id ui on ui.id = utbetaling_id_ref
                      WHERE utbetaling_id_ref IS NOT NULL
-                     ORDER BY vedtaksperiode_id, id DESC
-                 ) ttv ON ttv.vedtaksperiode_id = v.vedtaksperiode_id
-        WHERE (ttv.saksbehandler = :oid OR (o.ferdigstilt_av_oid = :oid AND (o.status = 'Ferdigstilt' OR o.status = 'AvventerSystem')))
+                     ORDER BY vedtaksperiode_id, totrinnsvurdering.id DESC
+                 ) ttv ON ttv.vedtaksperiode_id = v.vedtaksperiode_id AND ttv.utbetaling_id = o.utbetaling_id
+        WHERE (ttv.saksbehandler = :oid OR o.ferdigstilt_av_oid = :oid) AND (o.status in ('Ferdigstilt', 'AvventerSystem'))
             AND o.oppdatert >= :fom
         ORDER BY o.oppdatert
         OFFSET :offset
