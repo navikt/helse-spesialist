@@ -22,6 +22,7 @@ internal class PersonRepository(private val dataSource: DataSource) {
                 it.slettOverstyring(personId)
                 it.slettReserverPerson(personId)
                 it.slettOpptegnelse(personId)
+                it.slettPåVent(personId)
                 it.slettPeriodehistorikk(personId)
                 it.slettTotrinnsvurdering(personId)
                 it.slettUtbetaling(personId)
@@ -199,6 +200,12 @@ internal class PersonRepository(private val dataSource: DataSource) {
     private fun TransactionalSession.slettPeriodehistorikk(personRef: Int) {
         @Language("PostgreSQL")
         val query = "DELETE FROM periodehistorikk WHERE utbetaling_id IN (SELECT utbetaling_id FROM utbetaling_id WHERE person_ref = ?)"
+        run(queryOf(query, personRef).asExecute)
+    }
+
+    private fun TransactionalSession.slettPåVent(personRef: Int) {
+        @Language("PostgreSQL")
+        val query = "DELETE FROM pa_vent pv USING vedtak v WHERE pv.vedtaksperiode_id = v.vedtaksperiode_id AND v.person_ref = ?"
         run(queryOf(query, personRef).asExecute)
     }
 
