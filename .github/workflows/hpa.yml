@@ -4,6 +4,7 @@ on:
     push:
         paths:
             - 'deploy/hpa/**'
+            - '.github/workflows/hpa.yml'
         branches:
             - master
 
