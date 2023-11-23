@@ -24,6 +24,7 @@ import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.person.PersonApiDao
+import no.nav.helse.spesialist.api.påvent.PåVentApiDao
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
@@ -167,6 +168,7 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
         periodehistorikkDao = PeriodehistorikkDao(dataSource),
         notatDao = NotatDao(dataSource),
         totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource),
+        påVentApiDao = PåVentApiDao(dataSource),
         snapshotMediator = SnapshotMediator(SnapshotApiDao(dataSource), mockk(relaxed = true)),
         reservasjonClient = mockk(relaxed = true),
     )

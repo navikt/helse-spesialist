@@ -10,6 +10,7 @@ import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.person.PersonApiDao
+import no.nav.helse.spesialist.api.påvent.PåVentApiDao
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
@@ -49,6 +50,12 @@ data class Tildeling(
     val paaVent: Boolean,
 )
 
+data class PaVent(
+    val frist: DateTimeString?,
+    val begrunnelse: String?,
+    val oid: UUIDString
+)
+
 data class Person(
     private val snapshot: GraphQLPerson,
     private val personinfo: Personinfo,
@@ -62,6 +69,7 @@ data class Person(
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val notatDao: NotatDao,
     private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
+    private val påVentApiDao: PåVentApiDao,
     private val tilganger: SaksbehandlerTilganger,
 ) {
     fun versjon(): Int = snapshot.versjon
@@ -101,6 +109,7 @@ data class Person(
             periodehistorikkDao = periodehistorikkDao,
             notatDao = notatDao,
             totrinnsvurderingApiDao = totrinnsvurderingApiDao,
+            påVentApiDao = påVentApiDao,
             tilganger = tilganger,
         )
     }

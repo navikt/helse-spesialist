@@ -27,6 +27,7 @@ import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.person.PersonApiDao
+import no.nav.helse.spesialist.api.påvent.PåVentApiDao
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
@@ -87,6 +88,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
     protected val notatDao = NotatDao(dataSource)
     protected val totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource)
+    protected val påVentApiDao = PåVentApiDao(dataSource)
     protected val personApiDao = PersonApiDao(dataSource)
     protected val tildelingDao = TildelingDao(dataSource)
     protected val overstyringApiDao = OverstyringApiDao(dataSource)
@@ -391,6 +393,27 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             )
             opprettEgenAnsatt(personId, erEgenAnsatt)
             personId
+        }
+
+    protected fun opprettPåVent(
+        vedtaksperiodeId: UUID = UUID.randomUUID(),
+        frist: LocalDate = LocalDate.now().plusDays(21),
+        begrunnelse: String = "En begrunnelse",
+        saksbehandlerOid: UUID = SAKSBEHANDLER.oid,
+    ) =
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+            @Language("PostgreSQL")
+            val statement =
+                "INSERT INTO pa_vent(vedtaksperiode_id, frist, begrunnelse, saksbehandler_ref) VALUES(?, ?, ?, ?)"
+            session.run(
+                queryOf(
+                    statement,
+                    vedtaksperiodeId,
+                    frist,
+                    begrunnelse,
+                    saksbehandlerOid
+                ).asUpdate
+            )
         }
 
     private fun opprettPersoninfo(adressebeskyttelse: Adressebeskyttelse) =

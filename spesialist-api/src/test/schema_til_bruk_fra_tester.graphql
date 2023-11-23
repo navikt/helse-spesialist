@@ -171,6 +171,7 @@ type BeregnetPeriode implements Periode {
     oppgave: OppgaveForPeriodevisning
     oppgavereferanse: String @deprecated(reason: "Oppgavereferanse bør hentes fra periodens oppgave")
     opprettet: String!
+    paVent: PaVent
     periodehistorikk: [PeriodeHistorikkElement!]!
     periodetilstand: Periodetilstand!
     periodetype: Periodetype!
@@ -430,6 +431,12 @@ type OverstyrtInntekt {
     manedligInntekt: Float!
     refusjonsopplysninger: [Refusjonsopplysning!]
     skjaeringstidspunkt: String!
+}
+
+type PaVent {
+    begrunnelse: String
+    frist: String
+    oid: String!
 }
 
 type PeriodeHistorikkElement {

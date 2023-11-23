@@ -19,6 +19,7 @@ import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.person.PersonApiDao
+import no.nav.helse.spesialist.api.påvent.PåVentApiDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
@@ -40,6 +41,7 @@ class PersonQuery(
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val notatDao: NotatDao,
     private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
+    private val påVentApiDao: PåVentApiDao,
     private val snapshotMediator: SnapshotMediator,
     private val reservasjonClient: ReservasjonClient,
 ) : AbstractPersonQuery(personApiDao, egenAnsattApiDao) {
@@ -92,6 +94,7 @@ class PersonQuery(
                 periodehistorikkDao = periodehistorikkDao,
                 notatDao = notatDao,
                 totrinnsvurderingApiDao = totrinnsvurderingApiDao,
+                påVentApiDao = påVentApiDao,
                 tilganger = env.graphQlContext.get("tilganger"),
             )
         }

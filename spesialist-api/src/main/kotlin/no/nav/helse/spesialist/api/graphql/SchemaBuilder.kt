@@ -36,6 +36,7 @@ import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.person.PersonApiDao
+import no.nav.helse.spesialist.api.påvent.PåVentApiDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
@@ -55,6 +56,7 @@ internal class SchemaBuilder(
     val utbetalingApiDao: UtbetalingApiDao,
     val oppgaveApiDao: OppgaveApiDao,
     val periodehistorikkDao: PeriodehistorikkDao,
+    val påVentApiDao: PåVentApiDao,
     val snapshotMediator: SnapshotMediator,
     val notatDao: NotatDao,
     val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
@@ -91,6 +93,7 @@ internal class SchemaBuilder(
                         periodehistorikkDao = periodehistorikkDao,
                         notatDao = notatDao,
                         totrinnsvurderingApiDao = totrinnsvurderingApiDao,
+                        påVentApiDao = påVentApiDao,
                         snapshotMediator = snapshotMediator,
                         reservasjonClient = reservasjonClient,
                     )

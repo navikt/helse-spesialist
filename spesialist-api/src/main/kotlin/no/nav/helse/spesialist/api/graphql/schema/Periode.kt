@@ -14,6 +14,7 @@ import no.nav.helse.spesialist.api.oppgave.OppgaveForPeriodevisningDto
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
+import no.nav.helse.spesialist.api.påvent.PåVentApiDao
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.totrinnsvurdering.TotrinnsvurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
@@ -393,6 +394,7 @@ data class BeregnetPeriode(
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val notatDao: NotatDao,
     private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
+    private val påVentApiDao: PåVentApiDao,
     private val tilganger: SaksbehandlerTilganger,
     private val erSisteGenerasjon: Boolean,
     private val index: Int,
@@ -532,6 +534,14 @@ data class BeregnetPeriode(
                 erBeslutteroppgave = !it.erRetur && it.saksbehandler != null
             )
         }
+
+    fun paVent(): PaVent? = påVentApiDao.hentAktivPåVent(UUID.fromString(vedtaksperiodeId()))?.let {
+        PaVent(
+            frist = it.frist,
+            begrunnelse = it.begrunnelse,
+            oid = it.oid
+        )
+    }
 }
 
 
