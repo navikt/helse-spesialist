@@ -25,8 +25,11 @@ import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
+import no.nav.helse.modell.saksbehandler.handlinger.FjernPåVent
+import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.modell.saksbehandler.handlinger.Oppgavehandling
 import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
+import no.nav.helse.modell.saksbehandler.handlinger.PåVent
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
@@ -115,6 +118,15 @@ internal class OppgaveMediator(
         oppgaveDao.finnOppgaveId(handling.gjelderFødselsnummer())?.let {
             oppgave(it) {
                 this.avbryt()
+            }
+        }
+    }
+
+    internal fun håndter(handling: PåVent) {
+        oppgave(handling.oppgaveId()) {
+            when (handling) {
+                is LeggPåVent -> this.leggPåVent2()
+                is FjernPåVent -> this.fjernPåVent2()
             }
         }
     }

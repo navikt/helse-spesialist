@@ -551,6 +551,20 @@ internal class OppgaveTest {
     }
 
     @Test
+    fun `legg på vent`() {
+        Toggle.FellesPaVentBenk.enable()
+        val oppgave = nyOppgave(SØKNAD)
+        oppgave.forsøkTildelingVedReservasjon(saksbehandlerUtenTilgang, false)
+        oppgave.leggPåVent(saksbehandlerUtenTilgang)
+
+        inspektør(oppgave) {
+            assertEquals(true, påVent)
+            assertTrue(egenskaper.contains(PÅ_VENT))
+        }
+        Toggle.FellesPaVentBenk.disable()
+    }
+
+    @Test
     fun `kan ikke legge oppgave på vent uten at den er tildelt først`() {
         val oppgave = nyOppgave(SØKNAD)
         assertThrows<OppgaveIkkeTildelt> {

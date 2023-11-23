@@ -32,6 +32,7 @@ import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.TestHendelse
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
@@ -152,6 +153,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val generasjonDao = GenerasjonDao(dataSource)
     internal val totrinnsvurderingDao = TotrinnsvurderingDao(dataSource)
     internal val dokumentDao = DokumentDao(dataSource)
+    internal val påVentDao = PåVentDao(dataSource)
 
     internal fun testhendelse(
         hendelseId: UUID = HENDELSE_ID,

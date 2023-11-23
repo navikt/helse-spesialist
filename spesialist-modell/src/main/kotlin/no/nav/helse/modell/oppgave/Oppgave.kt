@@ -165,6 +165,18 @@ class Oppgave private constructor(
         oppgaveEndret()
     }
 
+    fun leggPåVent2() {
+        egenskaper.add(PÅ_VENT)
+        påVent = true
+        oppgaveEndret()
+    }
+
+    fun fjernPåVent2() {
+        egenskaper.remove(PÅ_VENT)
+        påVent = false
+        oppgaveEndret()
+    }
+
     fun ferdigstill() {
         tilstand.ferdigstill(this)
     }

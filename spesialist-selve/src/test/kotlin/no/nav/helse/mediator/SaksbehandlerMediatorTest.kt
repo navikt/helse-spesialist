@@ -2,6 +2,8 @@ package no.nav.helse.mediator
 
 import DatabaseIntegrationTest
 import TilgangskontrollForTestHarIkkeTilgang
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -20,7 +22,9 @@ import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AnnulleringHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.FjernOppgaveFraPåVent
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.FjernPåVent
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.LeggOppgavePåVent
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.LovhjemmelFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi
@@ -275,6 +279,25 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
         mediator.håndter(TildelOppgave(oppgaveId), saksbehandler)
         mediator.håndter(LeggOppgavePåVent(oppgaveId), saksbehandler)
         mediator.håndter(FjernOppgaveFraPåVent(oppgaveId), saksbehandler)
+        val melding = testRapid.inspektør.hendelser("oppgave_oppdatert").last()
+        assertEquals(false, melding["påVent"].asBoolean())
+    }
+
+    @Test
+    fun `legg på vent`() {
+        nyPerson()
+        val oppgaveId = OPPGAVE_ID
+        mediator.håndter(LeggPåVent(oppgaveId, saksbehandler.oid, LocalDate.now().plusDays(21), ""), saksbehandler)
+        val melding = testRapid.inspektør.hendelser("oppgave_oppdatert").last()
+        assertEquals(true, melding["påVent"].asBoolean())
+    }
+
+    @Test
+    fun `fjern på vent`() {
+        nyPerson()
+        val oppgaveId = OPPGAVE_ID
+        mediator.håndter(LeggPåVent(oppgaveId, saksbehandler.oid, LocalDate.now().plusDays(21), ""), saksbehandler)
+        mediator.håndter(FjernPåVent(oppgaveId), saksbehandler)
         val melding = testRapid.inspektør.hendelser("oppgave_oppdatert").last()
         assertEquals(false, melding["påVent"].asBoolean())
     }

@@ -9,6 +9,7 @@ import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.mediator.overstyring.Overstyringlagrer
 import no.nav.helse.mediator.overstyring.Saksbehandlingsmelder
+import no.nav.helse.mediator.påvent.PåVentMediator
 import no.nav.helse.mediator.saksbehandler.SaksbehandlerLagrer
 import no.nav.helse.mediator.saksbehandler.SaksbehandlerMapper.tilApiversjon
 import no.nav.helse.modell.ManglerTilgang
@@ -18,6 +19,7 @@ import no.nav.helse.modell.OppgaveAlleredeSendtIRetur
 import no.nav.helse.modell.OppgaveKreverVurderingAvToSaksbehandlere
 import no.nav.helse.modell.OppgaveTildeltNoenAndre
 import no.nav.helse.modell.overstyring.OverstyringDao
+import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.handlinger.Annullering
 import no.nav.helse.modell.saksbehandler.handlinger.Handling
@@ -28,6 +30,7 @@ import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtInntektOgRefusjon
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinje
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinjedag
+import no.nav.helse.modell.saksbehandler.handlinger.PåVent
 import no.nav.helse.modell.saksbehandler.handlinger.Refusjonselement
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
@@ -46,8 +49,10 @@ import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AnnulleringHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.FjernOppgaveFraPåVent
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.FjernPåVent
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.LeggOppgavePåVent
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi
@@ -69,7 +74,7 @@ internal class SaksbehandlerMediator(
     private val rapidsConnection: RapidsConnection,
     private val oppgaveMediator: OppgaveMediator,
     private val tilgangsgrupper: Tilgangsgrupper,
-): Saksbehandlerhåndterer {
+) : Saksbehandlerhåndterer {
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
     private val generasjonRepository = ApiGenerasjonRepository(dataSource)
     private val varselRepository = ApiVarselRepository(dataSource)
@@ -78,6 +83,7 @@ internal class SaksbehandlerMediator(
     private val abonnementDao = AbonnementDao(dataSource)
     private val reservasjonDao = ReservasjonDao(dataSource)
     private val overstyringDao = OverstyringDao(dataSource)
+    private val påVentDao = PåVentDao(dataSource)
 
     override fun <T : HandlingFraApi> håndter(handlingFraApi: T, saksbehandlerFraApi: SaksbehandlerFraApi) {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
@@ -98,6 +104,7 @@ internal class SaksbehandlerMediator(
             when (modellhandling) {
                 is Overstyring -> håndter(modellhandling, saksbehandler)
                 is Oppgavehandling -> håndter(modellhandling, saksbehandler)
+                is PåVent -> håndter(modellhandling, saksbehandler)
                 else -> modellhandling.utførAv(saksbehandler)
             }
             sikkerlogg.info("Handling ${modellhandling.loggnavn()} utført")
@@ -107,6 +114,21 @@ internal class SaksbehandlerMediator(
     private fun håndter(handling: Oppgavehandling, saksbehandler: Saksbehandler) {
         try {
             oppgaveMediator.håndter(handling, saksbehandler)
+        } catch (e: Modellfeil) {
+            throw e.tilApiversjon()
+        }
+    }
+
+    private fun håndter(handling: PåVent, saksbehandler: Saksbehandler) {
+        try {
+            oppgaveMediator.håndter(handling)
+            PåVentMediator(påVentDao).apply {
+                this.lagre(
+                    påVent = handling,
+                    saksbehandlerOid = saksbehandler.oid()
+                )
+            }
+            handling.utførAv(saksbehandler)
         } catch (e: Modellfeil) {
             throw e.tilApiversjon()
         }
@@ -232,6 +254,8 @@ internal class SaksbehandlerMediator(
             is AvmeldOppgave -> this.tilModellversjon()
             is FjernOppgaveFraPåVent -> this.tilModellversjon()
             is LeggOppgavePåVent -> this.tilModellversjon()
+            is LeggPåVent -> this.tilModellversjon()
+            is FjernPåVent -> this.tilModellversjon()
         }
     }
 
@@ -342,6 +366,14 @@ internal class SaksbehandlerMediator(
             begrunnelser = this.begrunnelser,
             kommentar = this.kommentar
         )
+    }
+
+    private fun LeggPåVent.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent {
+        return no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent(oppgaveId, frist, begrunnelse)
+    }
+
+    private fun FjernPåVent.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.FjernPåVent {
+        return no.nav.helse.modell.saksbehandler.handlinger.FjernPåVent(oppgaveId)
     }
 
     private fun TildelOppgave.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.TildelOppgave {

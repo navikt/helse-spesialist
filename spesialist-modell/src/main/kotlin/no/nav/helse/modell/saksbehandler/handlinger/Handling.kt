@@ -1,5 +1,6 @@
 package no.nav.helse.modell.saksbehandler.handlinger
 
+import java.time.LocalDate
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 
@@ -18,4 +19,10 @@ abstract class Oppgavehandling(private val oppgaveId: Long): Handling {
     fun oppgave(oppgave: Oppgave) {
         this.oppgave = oppgave
     }
+}
+
+interface PåVent: Handling {
+    fun oppgaveId(): Long
+    fun frist(): LocalDate?
+    fun begrunnelse(): String?
 }
