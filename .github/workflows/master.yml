@@ -13,6 +13,7 @@ on:
             - 'deploy/dev-migrering.yml'
             - 'deploy/prod-migrering.yml'
             - '.github/workflows/deploy_specific_commit_to_dev.yml'
+            - 'deploy/hpa/**'
         branches:
             - master
 
@@ -59,9 +60,8 @@ jobs:
               env:
                   APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
                   CLUSTER: dev-gcp
-                  RESOURCE: deploy/dev.yml,deploy/dev-db-policy.yml,deploy/hpa.yml
+                  RESOURCE: deploy/dev.yml,deploy/dev-db-policy.yml
                   IMAGE: ${{ needs.build.outputs.image }}
-                  VARS: deploy/dev-hpa.yml
 
     deployProd:
         name: Deploy to prod
@@ -73,6 +73,5 @@ jobs:
               env:
                   APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
                   CLUSTER: prod-gcp
-                  RESOURCE: deploy/prod.yml,deploy/prod-db-policy.yml,deploy/hpa.yml
+                  RESOURCE: deploy/prod.yml,deploy/prod-db-policy.yml
                   IMAGE: ${{ needs.build.outputs.image }}
-                  VARS: deploy/prod-hpa.yml

@@ -1,0 +1,33 @@
+name: Hovedbygget
+
+on:
+    push:
+        paths:
+            - 'deploy/hpa/**'
+        branches:
+            - master
+
+jobs:
+    deployDev:
+        name: Deploy HPA to dev
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: nais/deploy/actions/deploy@v1
+              env:
+                  APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+                  CLUSTER: dev-gcp
+                  RESOURCE: deploy/hpa.yml
+                  VARS: deploy/dev-hpa.yml
+
+    deployProd:
+        name: Deploy HPA to prod
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: nais/deploy/actions/deploy@v1
+              env:
+                  APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+                  CLUSTER: prod-gcp
+                  RESOURCE: deploy/hpa.yml
+                  VARS: deploy/prod-hpa.yml
