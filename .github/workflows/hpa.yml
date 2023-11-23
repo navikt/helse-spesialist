@@ -17,8 +17,8 @@ jobs:
               env:
                   APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
                   CLUSTER: dev-gcp
-                  RESOURCE: deploy/hpa.yml
-                  VARS: deploy/dev-hpa.yml
+                  RESOURCE: deploy/hpa/hpa.yml
+                  VARS: deploy/hpa/dev-hpa.yml
 
     deployProd:
         name: Deploy HPA to prod
@@ -29,5 +29,5 @@ jobs:
               env:
                   APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
                   CLUSTER: prod-gcp
-                  RESOURCE: deploy/hpa.yml
-                  VARS: deploy/prod-hpa.yml
+                  RESOURCE: deploy/hpa/hpa.yml
+                  VARS: deploy/hpa/prod-hpa.yml
