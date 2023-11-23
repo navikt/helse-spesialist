@@ -120,3 +120,14 @@ data class AnnulleringHandlingFraApi(
     val begrunnelser: List<String> = emptyList(),
     val kommentar: String?
 ): HandlingFraApi
+
+data class LeggPåVent(
+    val oppgaveId: Long,
+    val saksbehandlerOid: UUID,
+    val frist: LocalDate,
+    val begrunnelse: String
+): HandlingFraApi
+
+data class FjernPåVent(
+    val oppgaveId: Long
+): HandlingFraApi

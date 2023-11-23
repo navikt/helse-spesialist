@@ -16,6 +16,7 @@ import no.nav.helse.spesialist.api.graphql.mutation.AnnulleringMutation
 import no.nav.helse.spesialist.api.graphql.mutation.NotatMutation
 import no.nav.helse.spesialist.api.graphql.mutation.OpptegnelseMutation
 import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutation
+import no.nav.helse.spesialist.api.graphql.mutation.PaVentMutation
 import no.nav.helse.spesialist.api.graphql.mutation.PersonMutation
 import no.nav.helse.spesialist.api.graphql.mutation.SkjonnsfastsettelseMutation
 import no.nav.helse.spesialist.api.graphql.mutation.TildelingMutation
@@ -170,7 +171,12 @@ internal class SchemaBuilder(
                     AnnulleringMutation(
                         saksbehandlerhåndterer = saksbehandlerhåndterer
                     )
-                )
+                ),
+                TopLevelObject(
+                    PaVentMutation(
+                        saksbehandlerhåndterer = saksbehandlerhåndterer, notatMediator = notatMediator
+                    )
+                ),
             )
         )
     }
