@@ -3,6 +3,8 @@ kind: HorizontalPodAutoscaler
 metadata:
   name: spesialist
   namespace: tbd
+  labels:
+    team: tbd
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
