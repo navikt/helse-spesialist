@@ -18,6 +18,7 @@ import no.nav.helse.modell.oppgave.Egenskap.HASTER
 import no.nav.helse.modell.oppgave.Egenskap.INFOTRYGDFORLENGELSE
 import no.nav.helse.modell.oppgave.Egenskap.INGEN_UTBETALING
 import no.nav.helse.modell.oppgave.Egenskap.OVERGANG_FRA_IT
+import no.nav.helse.modell.oppgave.Egenskap.PÅ_VENT
 import no.nav.helse.modell.oppgave.Egenskap.REVURDERING
 import no.nav.helse.modell.oppgave.Egenskap.RISK_QA
 import no.nav.helse.modell.oppgave.Egenskap.SPESIALSAK
@@ -32,6 +33,7 @@ import no.nav.helse.modell.oppgave.Egenskap.SKJØNNSFASTSETTELSE
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.person.HentEnhetløsning
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetalingtype
@@ -62,6 +64,7 @@ internal class OpprettSaksbehandleroppgaveCommand(
     private val periodetype: Periodetype,
     private val kanAvvises: Boolean,
     private val vedtakDao: VedtakDao,
+    private val påVentDao: PåVentDao,
 ) : Command {
 
     private companion object {
@@ -110,6 +113,10 @@ internal class OpprettSaksbehandleroppgaveCommand(
 
         if (vedtakDao.erSpesialsak(vedtaksperiodeId)) {
             egenskaper.add(SPESIALSAK)
+        }
+
+        if (påVentDao.erPåVent(vedtaksperiodeId)) {
+            egenskaper.add(PÅ_VENT)
         }
 
         if (sykefraværstilfelle.kreverSkjønnsfastsettelse(vedtaksperiodeId)) egenskaper.add(SKJØNNSFASTSETTELSE)

@@ -33,6 +33,7 @@ import no.nav.helse.modell.person.EndretSkjermetinfo
 import no.nav.helse.modell.person.OppdaterPersonsnapshot
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.SøknadSendt
+import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyringArbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyringInntektOgRefusjon
@@ -102,6 +103,7 @@ internal class Hendelsefabrikk(
     private val notatDao: NotatDao = NotatDao(dataSource),
     private val notatMediator: NotatMediator = NotatMediator(notatDao),
     private val periodehistorikkDao: PeriodehistorikkDao = PeriodehistorikkDao(dataSource),
+    private val påVentDao: PåVentDao = PåVentDao(dataSource),
     private val totrinnsvurderingMediator: TotrinnsvurderingMediator = TotrinnsvurderingMediator(
         totrinnsvurderingDao,
         oppgaveDao,
@@ -224,6 +226,7 @@ internal class Hendelsefabrikk(
             utbetalingDao = utbetalingDao,
             periodehistorikkDao = periodehistorikkDao,
             overstyringDao = overstyringDao,
+            påVentDao = påVentDao,
             totrinnsvurderingMediator = totrinnsvurderingMediator,
             snapshotMediator = snapshotMediator,
         )

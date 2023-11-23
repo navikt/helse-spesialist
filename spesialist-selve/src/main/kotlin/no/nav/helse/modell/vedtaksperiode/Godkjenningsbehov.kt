@@ -31,6 +31,7 @@ import no.nav.helse.modell.kommando.PersisterPeriodehistorikkCommand
 import no.nav.helse.modell.kommando.TrengerTotrinnsvurderingCommand
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.risiko.RisikoCommand
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
@@ -79,6 +80,7 @@ internal class Godkjenningsbehov(
     utbetalingDao: UtbetalingDao,
     periodehistorikkDao: PeriodehistorikkDao,
     overstyringDao: OverstyringDao,
+    påVentDao: PåVentDao,
     totrinnsvurderingMediator: TotrinnsvurderingMediator,
     snapshotMediator: SnapshotMediator,
 ) : Hendelse, MacroCommand() {
@@ -195,6 +197,7 @@ internal class Godkjenningsbehov(
             periodetype = periodetype,
             kanAvvises = kanAvvises,
             vedtakDao = vedtakDao,
+            påVentDao = påVentDao,
         ),
         TrengerTotrinnsvurderingCommand(
             fødselsnummer = fødselsnummer,

@@ -32,6 +32,7 @@ import no.nav.helse.modell.oppgave.Egenskap.UTLAND
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveInspector.Companion.oppgaveinspektør
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetalingtype
@@ -70,6 +71,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
     private val vergemålDao = mockk<VergemålDao>(relaxed = true)
     private val sykefraværstilfelle = mockk<Sykefraværstilfelle>(relaxed = true)
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
+    private val påVentDao = mockk<PåVentDao>(relaxed = true)
     private lateinit var context: CommandContext
     private lateinit var contextId: UUID
     private lateinit var utbetalingstype: Utbetalingtype
@@ -360,6 +362,19 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
     }
 
     @Test
+    fun `oppretter oppgave med egenskap PÅ_VENT`() {
+        every { påVentDao.erPåVent(VEDTAKSPERIODE_ID) } returns true
+        val slot = slot<((Long) -> Oppgave)>()
+        assertTrue(opprettSaksbehandlerOppgaveCommand(periodetype = OVERGANG_FRA_IT).execute(context))
+        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
+
+        val oppgave = slot.captured.invoke(1L)
+        oppgaveinspektør(oppgave) {
+            assertTrue(egenskaper.contains(Egenskap.PÅ_VENT))
+        }
+    }
+
+    @Test
     fun `legger ikke til egenskap RISK_QA hvis oppgaven har egenskap REVURDERING`() {
         every { risikovurderingDao.kreverSupersaksbehandler(VEDTAKSPERIODE_ID) } returns true
         utbetalingstype = Utbetalingtype.REVURDERING
@@ -417,5 +432,6 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
             periodetype = periodetype,
             kanAvvises = kanAvvises,
             vedtakDao = vedtakDao,
+            påVentDao = påVentDao,
         )
 }
