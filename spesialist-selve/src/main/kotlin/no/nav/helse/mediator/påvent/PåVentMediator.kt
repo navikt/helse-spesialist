@@ -19,8 +19,8 @@ class PåVentMediator(
     private fun nyttPåVentInnslag(
         oppgaveId: Long,
         saksbehandlerOid: UUID,
-        frist: LocalDate,
-        begrunnelse: String,
+        frist: LocalDate?,
+        begrunnelse: String?,
     ) {
         dao.lagrePåVent(oppgaveId, saksbehandlerOid, frist, begrunnelse)
     }

@@ -6,7 +6,7 @@ import javax.sql.DataSource
 import no.nav.helse.HelseDao
 
 class PåVentDao(private val dataSource: DataSource) : HelseDao(dataSource) {
-    fun lagrePåVent(oppgaveId: Long, saksbehandlerOid: UUID, frist: LocalDate, begrunnelse: String) =
+    fun lagrePåVent(oppgaveId: Long, saksbehandlerOid: UUID, frist: LocalDate?, begrunnelse: String?) =
         asSQL(
             """
             SELECT v.vedtaksperiode_id

@@ -40,8 +40,8 @@ class PaVentMutation(
         oppgaveId: String,
         notatTekst: String,
         notatType: NotatType,
-        frist: DateString,
-        begrunnelse: String,
+        frist: DateString?,
+        begrunnelse: String?,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<PaVent?> {
         val saksbehandler= env.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(ContextValues.SAKSBEHANDLER.key).value
@@ -50,7 +50,7 @@ class PaVentMutation(
 
             try {
                 notatMediator.lagreForOppgaveId(oppgaveId.toLong(), notatTekst, saksbehandlerOid, notatType)
-                saksbehandlerhåndterer.håndter(LeggPåVent(oppgaveId.toLong(), saksbehandler.oid, LocalDate.parse(frist), begrunnelse), saksbehandler)
+                saksbehandlerhåndterer.håndter(LeggPåVent(oppgaveId.toLong(), saksbehandler.oid, frist?.let { LocalDate.parse(it) }, begrunnelse), saksbehandler)
                 newResult<PaVent?>().data(
                     PaVent(
                         frist = frist,
