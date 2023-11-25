@@ -49,8 +49,12 @@ class PersonQuery(
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
     suspend fun person(fnr: String? = null, aktorId: String? = null, env: DataFetchingEnvironment): DataFetcherResult<Person?> {
-        if (fnr == null && aktorId == null) {
-            return DataFetcherResult.newResult<Person?>().error(getBadRequestError()).build()
+        if (fnr == null) {
+            if (aktorId == null)
+                return DataFetcherResult.newResult<Person?>().error(getBadRequestError("Requesten mangler både fødselsnummer og aktørId")).build()
+            if (aktorId.length != 13) {
+                return DataFetcherResult.newResult<Person?>().error(getBadRequestError("Feil lengde på parameter aktorId: ${aktorId.length}")).build()
+            }
         }
 
         val fødselsnummer =
@@ -64,6 +68,7 @@ class PersonQuery(
                 }
             }
         if (fødselsnummer == null || !personApiDao.spesialistHarPersonKlarForVisningISpeil(fødselsnummer)) {
+            sikkerLogg.info("Svarer not found for parametere fnr=$fnr, aktorId=$aktorId.")
             return DataFetcherResult.newResult<Person?>().error(getNotFoundError(fnr)).build()
         }
 
@@ -127,8 +132,8 @@ class PersonQuery(
         .extensions(mapOf("code" to 501, "field" to "person"))
         .build()
 
-    private fun getBadRequestError(): GraphQLError = GraphqlErrorException.newErrorException()
-        .message("Requesten mangler både fødselsnummer og aktørId")
+    private fun getBadRequestError(melding: String): GraphQLError = GraphqlErrorException.newErrorException()
+        .message(melding)
         .extensions(mapOf("code" to 400))
         .build()
 

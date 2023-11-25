@@ -51,6 +51,15 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
     }
 
     @Test
+    fun `får 400-feil når verdien i aktorId-feltet ikke har riktig lengde`() {
+        val body = runQuery("""{ person(aktorId: "$FØDSELSNUMMER" ) { aktorId } }""")
+
+        val error = body["errors"].first()
+        assertTrue(error["message"].asText().contains("Feil lengde på parameter aktorId"))
+        assertEquals(400, error["extensions"]["code"].asInt())
+    }
+
+    @Test
     fun `får 404-feil når personen man søker etter ikke finnes`() {
         val body = runQuery("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""")
 
