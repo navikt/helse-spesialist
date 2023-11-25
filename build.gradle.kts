@@ -99,7 +99,7 @@ subprojects {
             }
         }
         withType<Wrapper>() {
-            gradleVersion = "8.1"
+            gradleVersion = "8.4"
         }
     }
 }
