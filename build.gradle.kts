@@ -1,4 +1,5 @@
 val junitJupiterVersion = "5.10.1"
+val junitPlatformLauncherVersion = "1.9.2"
 val ktorVersion = "2.3.5"
 val jvmTargetVersion = "17"
 val graphqlKotlinVersion = "7.0.2"
@@ -72,15 +73,12 @@ allprojects {
         implementation("io.ktor:ktor-server-cors:$ktorVersion")
         implementation("io.ktor:ktor-server-call-id:$ktorVersion")
 
-
-        testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
-        testImplementation("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")
+        testRuntimeOnly("org.junit.platform:junit-platform-launcher:$junitPlatformLauncherVersion")
+        testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
         testImplementation("io.ktor:ktor-client-mock-jvm:$ktorVersion")
         testImplementation("io.ktor:ktor-server-test-host:$ktorVersion") {
             exclude(group = "junit")
         }
-        testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
-
         testImplementation("io.mockk:mockk:$mockkVersion")
     }
 }
@@ -90,7 +88,7 @@ subprojects {
         jvmToolchain(17)
     }
     tasks {
-        withType<Test> {
+        named<Test>("test") {
             useJUnitPlatform()
             testLogging {
                 events("skipped", "failed")
@@ -98,7 +96,7 @@ subprojects {
                 exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
             }
         }
-        withType<Wrapper>() {
+        register<Wrapper>("wrapper") {
             gradleVersion = "8.4"
         }
     }

@@ -12,6 +12,7 @@ dependencies {
     implementation(project(":spesialist-felles"))
     implementation(project(":spesialist-api"))
     implementation(project(":spesialist-modell"))
+
     testImplementation("org.testcontainers:postgresql:$testcontainersVersion")
 }
 
@@ -25,13 +26,12 @@ tasks {
                 it.name
             }
         }
-
-        doLast {
-            configurations.runtimeClasspath.get().forEach {
-                val file = File("$buildDir/deps/${it.name}")
-                if (!file.exists())
-                    it.copyTo(file)
-            }
-        }
+    }
+    val copyDeps by registering(Sync::class) {
+        from(configurations.runtimeClasspath)
+        into("build/deps")
+    }
+    named("assemble") {
+        dependsOn(copyDeps)
     }
 }

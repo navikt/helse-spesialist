@@ -1,6 +1,8 @@
 val testcontainersVersion = "1.19.1"
 val cloudSqlVersion = "1.14.1"
 val postgresqlVersion = "42.6.0"
+val junitJupiterVersion = "5.10.1"
+val junitPlatformLauncherVersion = "1.9.2"
 
 val mainClass = "no.nav.helse.opprydding.AppKt"
 
@@ -19,21 +21,22 @@ dependencies {
     }
 }
 
-tasks.named<Jar>("jar") {
-    archiveBaseName.set("app")
+tasks {
+    named<Jar>("jar") {
+        archiveBaseName.set("app")
 
-    manifest {
-        attributes["Main-Class"] = mainClass
-        attributes["Class-Path"] = configurations.runtimeClasspath.get().joinToString(separator = " ") {
-            it.name
+        manifest {
+            attributes["Main-Class"] = mainClass
+            attributes["Class-Path"] = configurations.runtimeClasspath.get().joinToString(separator = " ") {
+                it.name
+            }
         }
     }
-
-    doLast {
-        configurations.runtimeClasspath.get().forEach {
-            val file = File("$buildDir/libs/${it.name}")
-            if (!file.exists())
-                it.copyTo(file)
-        }
+    val copyDeps by registering(Sync::class) {
+        from(configurations.runtimeClasspath)
+        into("build/libs")
+    }
+    named("assemble") {
+        dependsOn(copyDeps)
     }
 }
