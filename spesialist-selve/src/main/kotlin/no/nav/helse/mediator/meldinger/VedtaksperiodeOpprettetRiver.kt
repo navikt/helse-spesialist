@@ -20,7 +20,7 @@ internal class VedtaksperiodeOpprettetRiver(
         River(rapidsConnection).apply {
             validate {
                 it.demandValue("@event_name", "vedtaksperiode_opprettet")
-                it.rejectValue("organisasjonsnummer", "ARBEIDSLEDIG")
+                it.rejectValues("organisasjonsnummer", listOf("ARBEIDSLEDIG", "SELVSTENDIG", "FRILANS"))
                 it.requireKey(
                     "@id", "fødselsnummer", "organisasjonsnummer", "vedtaksperiodeId", "fom", "tom", "skjæringstidspunkt"
                 )
