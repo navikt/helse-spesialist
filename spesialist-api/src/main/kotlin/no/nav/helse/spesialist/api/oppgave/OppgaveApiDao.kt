@@ -42,11 +42,12 @@ class OppgaveApiDao(dataSource: DataSource) : HelseDao(dataSource) {
     ).single { OppgaveForPeriodevisningDto(id = it.string("id"), kanAvvises = it.boolean("kan_avvises")) }
 
     fun finnOppgavetype(vedtaksperiodeId: UUID) = asSQL(
-        """ SELECT type
+        """
+            SELECT type
             FROM oppgave
             WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
-            ORDER BY id LIMIT 1
-        """,
+              AND status = 'AvventerSaksbehandler'
+        """.trimIndent(),
         mapOf("vedtaksperiodeId" to vedtaksperiodeId)
     ).single { Oppgavetype.valueOf(it.string("type")) }
 
