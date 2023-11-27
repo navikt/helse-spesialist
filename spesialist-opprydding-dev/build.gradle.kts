@@ -1,8 +1,6 @@
 val testcontainersVersion = "1.19.1"
 val cloudSqlVersion = "1.14.1"
 val postgresqlVersion = "42.6.0"
-val junitJupiterVersion = "5.10.1"
-val junitPlatformLauncherVersion = "1.9.2"
 
 val mainClass = "no.nav.helse.opprydding.AppKt"
 
@@ -11,7 +9,6 @@ repositories {
 }
 
 dependencies {
-    implementation(kotlin("stdlib"))
     implementation("com.google.cloud.sql:postgres-socket-factory:$cloudSqlVersion")
     implementation("org.postgresql:postgresql:$postgresqlVersion")
 
