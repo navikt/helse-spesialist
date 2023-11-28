@@ -11,7 +11,7 @@ spec:
     kind: Deployment
     name: spesialist
   minReplicas: {{ minReplicas }}
-  maxReplicas: 24
+  maxReplicas: {{ maxReplicas }}
   metrics:
     - type: External
       external:
