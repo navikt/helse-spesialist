@@ -325,6 +325,11 @@ internal class OppgaveMediator(
                 SorteringsnøkkelForDatabase.SØKNAD_MOTTATT,
                 it.stigende
             )
+
+            Sorteringsnokkel.TIDSFRIST -> OppgavesorteringForDatabase(
+                SorteringsnøkkelForDatabase.TIDSFRIST,
+                it.stigende
+            )
         }
     }
 }

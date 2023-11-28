@@ -63,6 +63,7 @@ internal object TestdataGenerator {
             id = Random.nextLong().toString(),
             opprettet = tilfeldigDato.toString(),
             opprinneligSoknadsdato = tilfeldigDato.minusDays(listOf(1L,2L,3L,4L,5L,6L,7L,8L,9L).random()).toString(),
+            tidsfrist = tilfeldigDato.plusDays(listOf(1L,2L,3L,4L,5L,6L,7L,8L,9L).random()).toString(),
             vedtaksperiodeId = UUID.randomUUID().toString(),
             navn = tilfeldigNavn(),
             aktorId = tilfeldigAktørId(),

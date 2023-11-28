@@ -6,6 +6,7 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.EnumSet
 import java.util.UUID
@@ -501,6 +502,7 @@ internal class OppgaveMediatorTest {
         aktørId: String = nextLong(1000000000000, 2000000000000).toString(),
         opprettet: LocalDateTime = LocalDateTime.now(),
         opprinneligSøknadsdato: LocalDateTime = LocalDateTime.now(),
+        tidsfrist: LocalDate = LocalDate.now(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         personnavnFraDatabase: PersonnavnFraDatabase = PersonnavnFraDatabase("navn", "mellomnavn", "etternavn"),
         tildelt: SaksbehandlerFraDatabase? = null,
@@ -517,6 +519,7 @@ internal class OppgaveMediatorTest {
             påVent = påVent,
             opprettet = opprettet,
             opprinneligSøknadsdato = opprinneligSøknadsdato,
+            tidsfrist = tidsfrist,
             filtrertAntall = filtrertAntall,
         )
 

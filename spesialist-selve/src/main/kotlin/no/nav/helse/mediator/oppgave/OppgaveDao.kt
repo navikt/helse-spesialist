@@ -109,6 +109,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                 o.opprettet,
                 os.soknad_mottatt AS opprinnelig_soknadsdato,
                 o.kan_avvises,
+                pv.frist,
                 count(1) OVER() AS filtered_count
             FROM oppgave o
                 INNER JOIN vedtak v ON o.vedtak_ref = v.id
@@ -118,6 +119,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                 LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
                 LEFT JOIN totrinnsvurdering ttv ON (ttv.vedtaksperiode_id = v.vedtaksperiode_id AND ttv.utbetaling_id_ref IS NULL)
                 LEFT JOIN saksbehandler s ON t.saksbehandler_ref = s.oid
+                LEFT JOIN pa_vent pv ON v.vedtaksperiode_id = pv.vedtaksperiode_id
                 WHERE o.status = 'AvventerSaksbehandler'
                 AND (:ingen_ukategoriserte_egenskaper OR egenskaper @> ARRAY[$ukategoriserteEgenskaper]::varchar[]) -- egenskaper saksbehandler har filtrert på
                 AND (:ingen_oppgavetype_egenskaper OR egenskaper && ARRAY[$oppgavetypeEgenskaper]::varchar[]) -- egenskaper saksbehandler har filtrert på
@@ -176,6 +178,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                 påVent = row.boolean("på_vent"),
                 opprettet = row.localDateTime("opprettet"),
                 opprinneligSøknadsdato = row.localDateTime("opprinnelig_soknadsdato"),
+                tidsfrist = row.localDateOrNull("frist"),
                 filtrertAntall = row.int("filtered_count")
             )
         }
@@ -250,6 +253,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
     private fun OppgavesorteringForDatabase.nøkkelTilKolonne() = when (this.nøkkel) {
         SorteringsnøkkelForDatabase.TILDELT_TIL -> "navn"
         SorteringsnøkkelForDatabase.OPPRETTET -> "opprettet"
+        SorteringsnøkkelForDatabase.TIDSFRIST -> "frist"
         SorteringsnøkkelForDatabase.SØKNAD_MOTTATT -> "opprinnelig_soknadsdato"
     } + if (this.stigende) " ASC" else " DESC"
 

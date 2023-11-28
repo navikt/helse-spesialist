@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.api.graphql.query
 
 import io.mockk.every
 import io.mockk.verify
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
@@ -88,6 +89,40 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
     }
 
     @Test
+    fun `oppgaver query sortert på tidsfrist`() {
+        every { oppgavehåndterer.oppgaver(any(), any(), any(), any(), any()) } returns OppgaverTilBehandling(oppgaver = listOf(oppgaveTilBehandling()), totaltAntallOppgaver = 1)
+
+        val body = runQuery(
+            """{ 
+                oppgaveFeed(
+                    offset: 14, 
+                    limit: 14,
+                    sortering: [{nokkel: TIDSFRIST, stigende: true}],
+                    filtrering: {
+                        egenskaper: [{egenskap: DELVIS_REFUSJON, kategori: Mottaker}]
+                        egneSaker: true
+                        egneSakerPaVent: false
+                        ingenUkategoriserteEgenskaper: false
+                    }
+                )  { oppgaver { id } }
+        }"""
+        )
+        val antallOppgaver = body["data"]["oppgaveFeed"].size()
+
+        verify(exactly = 1) { oppgavehåndterer.oppgaver(
+            saksbehandlerFraApi = any(),
+            offset = 14,
+            limit = 14,
+            sortering = listOf(Oppgavesortering(Sorteringsnokkel.TIDSFRIST, true)),
+            filtrering = Filtrering(
+                egenskaper = listOf(Oppgaveegenskap(Egenskap.DELVIS_REFUSJON, Kategori.Mottaker)),
+                egneSaker = true,
+            ),
+        ) }
+        assertEquals(1, antallOppgaver)
+    }
+
+    @Test
     fun `behandledeOppgaverFeed uten parametere returnerer oppgave`() {
         every { oppgavehåndterer.behandledeOppgaver(any(), any(), any()) } returns BehandledeOppgaver(oppgaver = listOf(behandletOppgave()), totaltAntallOppgaver = 1)
 
@@ -152,6 +187,7 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
         id = UUID.randomUUID().toString(),
         opprettet = LocalDateTime.now().toString(),
         opprinneligSoknadsdato = LocalDateTime.now().toString(),
+        tidsfrist = LocalDate.now().toString(),
         vedtaksperiodeId = UUID.randomUUID().toString(),
         navn = Personnavn(
             fornavn = "Aage",

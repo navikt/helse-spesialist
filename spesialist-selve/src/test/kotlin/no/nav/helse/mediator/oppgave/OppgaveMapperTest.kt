@@ -1,5 +1,6 @@
 package no.nav.helse.mediator.oppgave
 
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.db.EgenskapForDatabase
@@ -42,6 +43,7 @@ internal class OppgaveMapperTest {
         private val saksbehandler = SaksbehandlerFraDatabase("epost", UUID.randomUUID(), "navn", "ident")
         private val opprettet = LocalDateTime.now()
         private val opprinneligSøknadsdato = LocalDateTime.now()
+        private val tidsfrist = LocalDate.now()
     }
     private val navn = Triple("fornavn", "mellomnavn", "etternavn")
 
@@ -58,6 +60,7 @@ internal class OppgaveMapperTest {
             påVent = true,
             opprettet = opprettet,
             opprinneligSøknadsdato = opprinneligSøknadsdato,
+            tidsfrist = tidsfrist,
             filtrertAntall = 1,
         )
         val oppgaverTilBehandling = listOf(oppgaveFraDatabaseForVisning).tilOppgaverTilBehandling()
@@ -69,6 +72,7 @@ internal class OppgaveMapperTest {
         assertEquals(Personnavn("fornavn", "etternavn", "mellomnavn"), oppgaveTilBehandling.navn)
         assertEquals(opprettet.toString(), oppgaveTilBehandling.opprettet)
         assertEquals(opprinneligSøknadsdato.toString(), oppgaveTilBehandling.opprinneligSoknadsdato)
+        assertEquals(tidsfrist.toString(), oppgaveTilBehandling.tidsfrist)
         assertEquals(AntallArbeidsforhold.ET_ARBEIDSFORHOLD, oppgaveTilBehandling.antallArbeidsforhold)
         assertEquals(Mottaker.BEGGE, oppgaveTilBehandling.mottaker)
         assertEquals(Oppgavetype.SOKNAD, oppgaveTilBehandling.oppgavetype)
@@ -98,6 +102,7 @@ internal class OppgaveMapperTest {
             påVent = true,
             opprettet = opprettet,
             opprinneligSøknadsdato = opprinneligSøknadsdato,
+            tidsfrist = null,
             filtrertAntall = 1,
         )
         val oppgaverTilBehandling = listOf(oppgaveFraDatabaseForVisning).tilOppgaverTilBehandling()
@@ -120,6 +125,7 @@ internal class OppgaveMapperTest {
             påVent = true,
             opprettet = opprettet,
             opprinneligSøknadsdato = opprinneligSøknadsdato,
+            tidsfrist = null,
             filtrertAntall = 1,
         )
         assertThrows<NoSuchElementException> {
@@ -145,6 +151,7 @@ internal class OppgaveMapperTest {
             påVent = true,
             opprettet = opprettet,
             opprinneligSøknadsdato = opprinneligSøknadsdato,
+            tidsfrist = null,
             filtrertAntall = 1,
         )
         val oppgaverTilBehandling = listOf(oppgaveFraDatabaseForVisning).tilOppgaverTilBehandling()
@@ -173,6 +180,7 @@ internal class OppgaveMapperTest {
             påVent = true,
             opprettet = opprettet,
             opprinneligSøknadsdato = opprinneligSøknadsdato,
+            tidsfrist = null,
             filtrertAntall = 1,
         )
         assertThrows<NoSuchElementException> {
@@ -198,6 +206,7 @@ internal class OppgaveMapperTest {
             påVent = true,
             opprettet = opprettet,
             opprinneligSøknadsdato = opprinneligSøknadsdato,
+            tidsfrist = null,
             filtrertAntall = 1,
         )
         val oppgaverTilBehandling = listOf(oppgaveFraDatabaseForVisning).tilOppgaverTilBehandling()
@@ -226,6 +235,7 @@ internal class OppgaveMapperTest {
             påVent = true,
             opprettet = opprettet,
             opprinneligSøknadsdato = opprinneligSøknadsdato,
+            tidsfrist = null,
             filtrertAntall = 1,
         )
         assertThrows<NoSuchElementException> {

@@ -25,6 +25,7 @@ internal object OppgaveMapper {
             id = oppgave.id.toString(),
             opprettet = oppgave.opprettet.toString(),
             opprinneligSoknadsdato = oppgave.opprinneligSøknadsdato.toString(),
+            tidsfrist = oppgave.tidsfrist.toString(),
             vedtaksperiodeId = oppgave.vedtaksperiodeId.toString(),
             navn = Personnavn(
                 fornavn = oppgave.navn.fornavn,

@@ -379,6 +379,7 @@ private fun List<OppgaveTilBehandling>.sorted(sortering: List<Oppgavesortering>)
         Sorteringsnokkel.TILDELT_TIL -> if (sortering.first().stigende) this.sortedBy { it.tildeling?.navn } else this.sortedByDescending { it.tildeling?.navn }
         Sorteringsnokkel.OPPRETTET -> if (sortering.first().stigende) this.sortedBy { it.opprettet } else this.sortedByDescending { it.opprettet }
         Sorteringsnokkel.SOKNAD_MOTTATT -> if (sortering.first().stigende) this.sortedBy { it.opprinneligSoknadsdato } else this.sortedByDescending { it.opprinneligSoknadsdato }
+        Sorteringsnokkel.TIDSFRIST -> if (sortering.first().stigende) this.sortedBy { it.tidsfrist } else this.sortedByDescending { it.tidsfrist }
         null -> this
     }
 

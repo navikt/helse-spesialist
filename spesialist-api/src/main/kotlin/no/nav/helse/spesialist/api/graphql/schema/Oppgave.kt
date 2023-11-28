@@ -67,7 +67,8 @@ data class Oppgavesortering(val nokkel: Sorteringsnokkel, val stigende: Boolean)
 enum class Sorteringsnokkel {
     TILDELT_TIL,
     OPPRETTET,
-    SOKNAD_MOTTATT
+    SOKNAD_MOTTATT,
+    TIDSFRIST
 }
 
 data class BehandledeOppgaver(
@@ -89,6 +90,7 @@ data class OppgaveTilBehandling(
     val id: String,
     val opprettet: DateTimeString,
     val opprinneligSoknadsdato: DateTimeString,
+    val tidsfrist: DateString?,
     val vedtaksperiodeId: UUIDString,
     val navn: Personnavn,
     val aktorId: String,

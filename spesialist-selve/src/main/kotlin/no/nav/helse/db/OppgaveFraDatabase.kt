@@ -1,5 +1,6 @@
 package no.nav.helse.db
 
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -28,6 +29,7 @@ data class OppgaveFraDatabaseForVisning(
     val påVent: Boolean = false,
     val opprettet: LocalDateTime,
     val opprinneligSøknadsdato: LocalDateTime,
+    val tidsfrist: LocalDate?,
     val filtrertAntall: Int,
 )
 
@@ -51,7 +53,8 @@ data class OppgavesorteringForDatabase(val nøkkel: SorteringsnøkkelForDatabase
 enum class SorteringsnøkkelForDatabase {
     TILDELT_TIL,
     OPPRETTET,
-    SØKNAD_MOTTATT
+    SØKNAD_MOTTATT,
+    TIDSFRIST
 }
 
 

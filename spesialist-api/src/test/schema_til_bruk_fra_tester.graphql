@@ -390,6 +390,7 @@ type OppgaveTilBehandling {
     opprettet: String!
     opprinneligSoknadsdato: String!
     periodetype: Periodetype!
+    tidsfrist: String
     tildeling: Tildeling
     vedtaksperiodeId: String!
 }
@@ -1051,6 +1052,7 @@ enum Skjonnsfastsettingstype {
 enum Sorteringsnokkel {
     OPPRETTET
     SOKNAD_MOTTATT
+    TIDSFRIST
     TILDELT_TIL
 }
 
