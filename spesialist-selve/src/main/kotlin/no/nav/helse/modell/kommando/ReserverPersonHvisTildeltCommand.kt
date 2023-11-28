@@ -21,7 +21,12 @@ internal class ReserverPersonHvisTildeltCommand(
 
     override fun execute(context: CommandContext): Boolean {
         val tildeltSaksbehandler = tildelingDao.tildelingForPerson(fødselsnummer) ?: return true
-        val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(fødselsnummer)
+        val vedtaksperiodeId = try {
+            oppgaveDao.finnVedtaksperiodeId(fødselsnummer)
+        } catch (e: Exception) {
+            sikkerLogg.warn("En feil skjedde, reserverer ikke $fødselsnummer", e)
+            return true
+        }
         val totrinnsvurdering = totrinnsvurderingMediator.hentAktiv(vedtaksperiodeId)
         val saksbehandlerOid: UUID =
             if (totrinnsvurdering?.erBeslutteroppgave() == true)
