@@ -7,19 +7,19 @@ Backend for saksbehandling av sykepengesøknader
 ## Henvendelser
 Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på GitHub.
 
-## Bygging lokalt
-Vi er per nå avhengig av naisdevice for å bygge lokalt, pga graphql schema-endepunktet i filen `spesialist-selve/build.gradle.kts`
+## Oppdatere GraphQL schema mot spleis
+- Kjør tasken `graphqlIntrospectSchema` i spesialist-api, enten i IntelliJ eller fra kommandolinja
+  - Fra kommandolinja: `./gradlew :spesialist-api:graphqlIntrospectSchema`
+- Gjør eventuelt endringer i hva som skal hentes fra spleis i filen `hentSnapshot.graphql`
+- Kjør tasken `graphqlGenerateClient` for å få generert klassene
 
-## Oppdatere GraphQL Schema for tester
+> ℹ️ `graphqlGenerateClient` vil også kjøres som en del av et vanlig bygg, i motsetning til `graphqlIntrospectSchema`.
+
+## Oppdatere GraphQL schema for tester
 Hvis du nylig har gjort endringer i GraphQL-typer, -mutations, -queries eller -subscriptions og ønsker å teste disse endringene, er det lurt å først oppdatere lokalt testskjema, slik at du får syntax highlighting, code completion og et bedre liv. Da gjør du følgende:
 - Kjør opp [LocalGraphQLApi.kt](spesialist-api/src/test/kotlin/no/nav/helse/spesialist/api/graphql/LocalGraphQLApi.kt) sin main-metode, det starter en lokal GraphQL-server.
 - Finn filen [graphql.config.yml](spesialist-api/src/test/graphql.config.yml) og kjør `spesialist-local`, som vil oppdatere [schema_til_bruk_fra_tester.grapqhl](spesialist-api/src/test/schema_til_bruk_fra_tester.graphql). 
 - Commit endringene i `schema_til_bruk_fra_tester.graphql`.
-
-## Oppdatere GraphQL Schema mot spleis
-- Kjør introspection manuelt med IntelliJ fra filen [graphql.config.yml](spesialist-api/src/main/resources/graphql/graphql.config.yml)
-- Gjør eventuelt endringer i hva som skal hentes fra spleis i `hentSnapshot.graphql`
-- Bruk gradle til å få generert klassene
 
 ## Kjøre lokal GraphQL Playground
 - kjør main-funksjonen i LocalGraphQLApi.kt
