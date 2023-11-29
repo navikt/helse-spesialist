@@ -6,6 +6,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
+import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.SykefraværstilfelleDao
@@ -21,6 +22,7 @@ import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
+import no.nav.helse.modell.avviksvurdering.Avviksvurdering
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
@@ -124,6 +126,7 @@ internal class Hendelsefabrikk(
 ) {
     private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
     private val sykefraværstilfelleDao = SykefraværstilfelleDao(dataSource)
+    private val avviksvurderingDao = AvviksvurderingDao(dataSource)
     private val oppgaveMediator: OppgaveMediator by lazy { oppgaveMediator() }
 
     internal companion object {
@@ -171,6 +174,10 @@ internal class Hendelsefabrikk(
             skjæringstidspunkt = skjæringstidspunkt,
             observers = arrayOf(generasjonRepository, varselRepository)
         )
+    }
+
+    internal fun avviksvurdering(avviksvurdering: Avviksvurdering) {
+        avviksvurderingDao.lagre(avviksvurdering.toDto())
     }
 
     fun godkjenning(

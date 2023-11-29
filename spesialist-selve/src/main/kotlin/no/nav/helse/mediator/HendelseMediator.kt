@@ -6,6 +6,7 @@ import java.util.UUID
 import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.MetrikkRiver
+import no.nav.helse.mediator.meldinger.AvviksvurderingRiver
 import no.nav.helse.mediator.meldinger.EndretSkjermetinfoRiver
 import no.nav.helse.mediator.meldinger.GodkjenningsbehovRiver
 import no.nav.helse.mediator.meldinger.GosysOppgaveEndretRiver
@@ -50,6 +51,7 @@ import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.Toggle
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
+import no.nav.helse.modell.avviksvurdering.Avviksvurdering
 import no.nav.helse.modell.dokument.DokumentDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.kommando.CommandContext
@@ -132,6 +134,7 @@ internal class HendelseMediator(
             DokumentRiver(it, dokumentDao)
             VedtakFattetRiver(it, this)
             NyeVarslerRiver(it, this)
+            AvviksvurderingRiver(it, this)
             VarseldefinisjonRiver(it, this)
             VedtaksperiodeNyUtbetalingRiver(it, this)
             SykefraværstilfellerRiver(it, this)
@@ -175,6 +178,10 @@ internal class HendelseMediator(
         val sykefraværstilfelleMediator = SykefraværstilfelleMediator(rapidsConnection)
         sykefraværstilfelle.registrer(sykefraværstilfelleMediator)
         utkastTilVedtakMessage.sendInnTil(sykefraværstilfelle)
+    }
+
+    internal fun håndter(avviksvurdering: Avviksvurdering) {
+        hendelsefabrikk.avviksvurdering(avviksvurdering)
     }
 
     fun adressebeskyttelseEndret(
@@ -501,7 +508,6 @@ internal class HendelseMediator(
             ), context
         )
     }
-
 
     fun utbetalingAnnullert(
         message: JsonMessage,
