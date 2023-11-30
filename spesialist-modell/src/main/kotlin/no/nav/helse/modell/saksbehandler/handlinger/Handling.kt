@@ -24,5 +24,6 @@ abstract class Oppgavehandling(private val oppgaveId: Long): Handling {
 interface PåVent: Handling {
     fun oppgaveId(): Long
     fun frist(): LocalDate?
+    fun skalTildeles(): Boolean?
     fun begrunnelse(): String?
 }

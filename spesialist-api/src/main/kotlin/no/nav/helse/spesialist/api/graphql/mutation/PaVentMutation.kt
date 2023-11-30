@@ -40,17 +40,18 @@ class PaVentMutation(
         oppgaveId: String,
         notatTekst: String,
         notatType: NotatType,
-        frist: DateString?,
+        frist: DateString,
+        tildeling: Boolean,
         begrunnelse: String?,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<PaVent?> {
-        val saksbehandler= env.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(ContextValues.SAKSBEHANDLER.key).value
+        val saksbehandler = env.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(ContextValues.SAKSBEHANDLER.key).value
         return withContext(Dispatchers.IO) {
             val saksbehandlerOid = UUID.fromString(env.graphQlContext.get(SAKSBEHANDLER_OID.key))
 
             try {
                 notatMediator.lagreForOppgaveId(oppgaveId.toLong(), notatTekst, saksbehandlerOid, notatType)
-                saksbehandlerhåndterer.håndter(LeggPåVent(oppgaveId.toLong(), saksbehandler.oid, frist?.let { LocalDate.parse(it) }, begrunnelse), saksbehandler)
+                saksbehandlerhåndterer.håndter(LeggPåVent(oppgaveId.toLong(), saksbehandler.oid, LocalDate.parse(frist), tildeling, begrunnelse), saksbehandler)
                 newResult<PaVent?>().data(
                     PaVent(
                         frist = frist,
@@ -70,7 +71,7 @@ class PaVentMutation(
 
     @Suppress("unused")
     suspend fun fjernPaVent(oppgaveId: String, env: DataFetchingEnvironment): DataFetcherResult<Boolean?> {
-        val saksbehandler= env.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(ContextValues.SAKSBEHANDLER.key).value
+        val saksbehandler = env.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(ContextValues.SAKSBEHANDLER.key).value
         return withContext(Dispatchers.IO) {
             try {
                 saksbehandlerhåndterer.håndter(FjernPåVent(oppgaveId.toLong()), saksbehandler)

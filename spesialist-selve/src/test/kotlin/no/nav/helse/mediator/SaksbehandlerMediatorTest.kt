@@ -3,7 +3,6 @@ package no.nav.helse.mediator
 import DatabaseIntegrationTest
 import TilgangskontrollForTestHarIkkeTilgang
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -287,7 +286,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
     fun `legg på vent`() {
         nyPerson()
         val oppgaveId = OPPGAVE_ID
-        mediator.håndter(LeggPåVent(oppgaveId, saksbehandler.oid, LocalDate.now().plusDays(21), ""), saksbehandler)
+        mediator.håndter(LeggPåVent(oppgaveId, saksbehandler.oid, LocalDate.now().plusDays(21), true, ""), saksbehandler)
         val melding = testRapid.inspektør.hendelser("oppgave_oppdatert").last()
         assertEquals(true, melding["påVent"].asBoolean())
     }
@@ -296,7 +295,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
     fun `fjern på vent`() {
         nyPerson()
         val oppgaveId = OPPGAVE_ID
-        mediator.håndter(LeggPåVent(oppgaveId, saksbehandler.oid, LocalDate.now().plusDays(21), ""), saksbehandler)
+        mediator.håndter(LeggPåVent(oppgaveId, saksbehandler.oid, LocalDate.now().plusDays(21), false,""), saksbehandler)
         mediator.håndter(FjernPåVent(oppgaveId), saksbehandler)
         val melding = testRapid.inspektør.hendelser("oppgave_oppdatert").last()
         assertEquals(false, melding["påVent"].asBoolean())

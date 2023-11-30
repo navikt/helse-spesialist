@@ -121,7 +121,7 @@ internal class SaksbehandlerMediator(
 
     private fun håndter(handling: PåVent, saksbehandler: Saksbehandler) {
         try {
-            oppgaveMediator.håndter(handling)
+            oppgaveMediator.håndter(handling, saksbehandler)
             PåVentMediator(påVentDao).apply {
                 this.lagre(
                     påVent = handling,
@@ -369,7 +369,7 @@ internal class SaksbehandlerMediator(
     }
 
     private fun LeggPåVent.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent {
-        return no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent(oppgaveId, frist, begrunnelse)
+        return no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent(oppgaveId, frist, skalTildeles, begrunnelse)
     }
 
     private fun FjernPåVent.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.FjernPåVent {

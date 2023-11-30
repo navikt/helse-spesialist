@@ -124,7 +124,8 @@ data class AnnulleringHandlingFraApi(
 data class LeggPåVent(
     val oppgaveId: Long,
     val saksbehandlerOid: UUID,
-    val frist: LocalDate?,
+    val frist: LocalDate,
+    val skalTildeles: Boolean,
     val begrunnelse: String?
 ): HandlingFraApi
 

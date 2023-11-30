@@ -165,7 +165,10 @@ class Oppgave private constructor(
         oppgaveEndret()
     }
 
-    fun leggPåVent2() {
+    fun leggPåVent2(skalTildeles: Boolean, saksbehandler: Saksbehandler) {
+        if (this.tildeltTil != saksbehandler && skalTildeles) {
+            this.tildeltTil = saksbehandler
+        }
         egenskaper.add(PÅ_VENT)
         påVent = true
         oppgaveEndret()

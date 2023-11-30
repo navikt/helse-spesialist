@@ -565,6 +565,57 @@ internal class OppgaveTest {
     }
 
     @Test
+    fun `legg på vent og skalTildeles`() {
+        val oppgave = nyOppgave(SØKNAD)
+        oppgave.leggPåVent2(true, saksbehandlerUtenTilgang)
+
+        inspektør(oppgave) {
+            assertEquals(true, påVent)
+            assertTrue(egenskaper.contains(PÅ_VENT))
+            assertEquals(saksbehandlerUtenTilgang, this.tildeltTil)
+        }
+    }
+
+
+    @Test
+    fun `legg på vent og skalTildeles ny saksbehandler`() {
+        val oppgave = nyOppgave(SØKNAD)
+        oppgave.forsøkTildelingVedReservasjon(saksbehandlerUtenTilgang, false)
+        oppgave.leggPåVent2(true, beslutter)
+
+        inspektør(oppgave) {
+            assertEquals(true, påVent)
+            assertTrue(egenskaper.contains(PÅ_VENT))
+            assertEquals(beslutter, this.tildeltTil)
+        }
+    }
+
+    @Test
+    fun `legg på vent og !skalTildeles`() {
+        val oppgave = nyOppgave(SØKNAD)
+        oppgave.leggPåVent2(false, saksbehandlerUtenTilgang)
+
+        inspektør(oppgave) {
+            assertEquals(true, påVent)
+            assertTrue(egenskaper.contains(PÅ_VENT))
+            assertNull(this.tildeltTil)
+        }
+    }
+
+    @Test
+    fun `fjern på vent`() {
+        val oppgave = nyOppgave(SØKNAD)
+        oppgave.leggPåVent2(false, saksbehandlerUtenTilgang)
+        oppgave.fjernPåVent2()
+
+        inspektør(oppgave) {
+            assertEquals(false, påVent)
+            assertTrue(egenskaper.none{ it == PÅ_VENT})
+            assertNull(this.tildeltTil)
+        }
+    }
+
+    @Test
     fun `kan ikke legge oppgave på vent uten at den er tildelt først`() {
         val oppgave = nyOppgave(SØKNAD)
         assertThrows<OppgaveIkkeTildelt> {
