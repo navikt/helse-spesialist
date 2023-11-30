@@ -169,6 +169,9 @@ class Oppgave private constructor(
         if (this.tildeltTil != saksbehandler && skalTildeles) {
             this.tildeltTil = saksbehandler
         }
+        if (this.tildeltTil != null && !skalTildeles) {
+            this.tildeltTil = null
+        }
         egenskaper.add(PÅ_VENT)
         påVent = true
         oppgaveEndret()

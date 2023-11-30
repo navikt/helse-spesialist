@@ -593,6 +593,7 @@ internal class OppgaveTest {
     @Test
     fun `legg på vent og !skalTildeles`() {
         val oppgave = nyOppgave(SØKNAD)
+        oppgave.forsøkTildelingVedReservasjon(saksbehandlerUtenTilgang, false)
         oppgave.leggPåVent2(false, saksbehandlerUtenTilgang)
 
         inspektør(oppgave) {
