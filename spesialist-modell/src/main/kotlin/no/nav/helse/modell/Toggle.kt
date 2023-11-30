@@ -7,5 +7,4 @@ abstract class Toggle(private var _enabled: Boolean) {
 
     object Skjonnsfastsetting : Toggle("SKJONNSFASTSETTING", true)
     object AutomatiserSpesialsak : Toggle("AUTOMATISER_SPESIALSAK", true)
-    object FellesPaVentBenk : Toggle("FELLES_PÅ_VENT_BENK", "dev-gcp" == System.getenv("NAIS_CLUSTER_NAME"))
 }

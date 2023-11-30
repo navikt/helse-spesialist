@@ -5,7 +5,6 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.modell.ManglerTilgang
 import no.nav.helse.modell.OppgaveIkkeTildelt
 import no.nav.helse.modell.OppgaveTildeltNoenAndre
-import no.nav.helse.modell.Toggle
 import no.nav.helse.modell.oppgave.Egenskap.BESLUTTER
 import no.nav.helse.modell.oppgave.Egenskap.Companion.tilgangsstyrteEgenskaper
 import no.nav.helse.modell.oppgave.Egenskap.DELVIS_REFUSJON
@@ -152,7 +151,6 @@ class Oppgave private constructor(
     fun leggPåVent(saksbehandler: Saksbehandler) {
         val tildeltTil = this.tildeltTil ?: throw OppgaveIkkeTildelt(id)
         if (this.tildeltTil != saksbehandler) throw OppgaveTildeltNoenAndre(tildeltTil, this.påVent)
-        if (Toggle.FellesPaVentBenk.enabled) egenskaper.add(PÅ_VENT)
         påVent = true
         oppgaveEndret()
     }
@@ -160,7 +158,6 @@ class Oppgave private constructor(
     fun fjernPåVent(saksbehandler: Saksbehandler) {
         val tildeltTil = this.tildeltTil ?: throw OppgaveIkkeTildelt(id)
         if (this.tildeltTil != saksbehandler) throw OppgaveTildeltNoenAndre(tildeltTil, this.påVent)
-        if (Toggle.FellesPaVentBenk.enabled) egenskaper.remove(PÅ_VENT)
         påVent = false
         oppgaveEndret()
     }
@@ -198,7 +195,6 @@ class Oppgave private constructor(
     private fun tildel(saksbehandler: Saksbehandler, påVent: Boolean) {
         this.tildeltTil = saksbehandler
         this.påVent = påVent
-        if (Toggle.FellesPaVentBenk.enabled && påVent) egenskaper.add(PÅ_VENT)
         logg.info("Oppgave med {} tildeles saksbehandler med {}", kv("oppgaveId", id), kv("oid", saksbehandler.oid()))
         sikkerlogg.info("Oppgave med {} tildeles $saksbehandler", kv("oppgaveId", id))
         oppgaveEndret()
