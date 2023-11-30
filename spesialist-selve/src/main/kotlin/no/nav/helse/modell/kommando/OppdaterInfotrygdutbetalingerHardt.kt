@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory
 internal class OppdaterInfotrygdutbetalingerHardt(
     private val fødselsnummer: String,
     private val personDao: PersonDao,
+    private val førsteKjenteDagFinner: () -> LocalDate,
     private val behov: String = "HentInfotrygdutbetalinger",
 ) : Command {
 
@@ -25,7 +26,7 @@ internal class OppdaterInfotrygdutbetalingerHardt(
         log.info("Etterspør Infotrygdutbetalinger")
         context.behov(
             behov, mapOf(
-                "historikkFom" to LocalDate.now().minusYears(3),
+                "historikkFom" to førsteKjenteDagFinner().minusYears(3),
                 "historikkTom" to LocalDate.now()
             )
         )

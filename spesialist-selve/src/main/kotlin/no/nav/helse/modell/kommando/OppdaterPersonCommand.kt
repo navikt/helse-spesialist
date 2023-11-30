@@ -8,7 +8,8 @@ import org.slf4j.LoggerFactory
 
 internal class OppdaterPersonCommand(
     fødselsnummer: String,
-    personDao: PersonDao
+    førsteKjenteDagFinner: () -> LocalDate,
+    personDao: PersonDao,
 ) : MacroCommand() {
     private companion object {
         private val log = LoggerFactory.getLogger(OppdaterPersonCommand::class.java)
@@ -17,7 +18,7 @@ internal class OppdaterPersonCommand(
     override val commands: List<Command> = listOf(
         OppdaterPersoninfoCommand(fødselsnummer, personDao, force = false),
         OppdaterEnhetCommand(fødselsnummer, personDao),
-        OppdaterInfotrygdutbetalingerCommand(fødselsnummer, personDao)
+        OppdaterInfotrygdutbetalingerCommand(fødselsnummer, personDao, førsteKjenteDagFinner)
     )
 
     private abstract class OppdaterCommand(
@@ -68,13 +69,17 @@ internal class OppdaterPersonCommand(
         }
     }
 
-    private class OppdaterInfotrygdutbetalingerCommand(fødselsnummer: String, personDao: PersonDao) :
+    private class OppdaterInfotrygdutbetalingerCommand(
+        fødselsnummer: String,
+        personDao: PersonDao,
+        førsteKjenteDagFinner: () -> LocalDate,
+    ) :
         OppdaterCommand(
             fødselsnummer = fødselsnummer,
             personDao = personDao,
             behov = "HentInfotrygdutbetalinger",
             parametere = mapOf(
-                "historikkFom" to LocalDate.now().minusYears(3),
+                "historikkFom" to førsteKjenteDagFinner().minusYears(3),
                 "historikkTom" to LocalDate.now()
             )
         ) {

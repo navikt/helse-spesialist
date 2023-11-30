@@ -300,6 +300,24 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         assertNotNull(generasjonDao.førsteGenerasjonLåstTidspunkt(VEDTAKSPERIODE_ID))
     }
 
+    private fun Pair<LocalDate, LocalDate>.tilPeriode() = Periode(first, second)
+    @Test
+    fun `Finner første kjente dato for person`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        val førstePeriode = 1.januar to 5.januar
+        val vedtaksperiodeId1 = UUID.randomUUID()
+        opprettVedtaksperiode(vedtaksperiodeId1, fom = førstePeriode.first, tom = førstePeriode.second)
+        generasjonDao.opprettFor(UUID.randomUUID(), vedtaksperiodeId1, UUID.randomUUID(), førstePeriode.first, førstePeriode.tilPeriode(), Generasjon.Låst)
+
+        val vedtaksperiodeId2 = UUID.randomUUID()
+        val senerePeriode = 10.februar(2022) to 20.februar(2022)
+        opprettVedtaksperiode(vedtaksperiodeId2, fom = senerePeriode.first, tom = senerePeriode.second)
+        generasjonDao.opprettFor(UUID.randomUUID(), vedtaksperiodeId2, UUID.randomUUID(), senerePeriode.first, senerePeriode.tilPeriode(), Generasjon.Låst)
+
+        assertEquals(1.januar, generasjonDao.førsteKjenteDag(FNR))
+    }
+
     private fun assertVarsler(generasjonId: UUID, vararg forventedeVarselkoder: String) {
         @Language("PostgreSQL")
         val query =

@@ -27,6 +27,7 @@ internal class VedtaksperiodeSkjønnsmessigFastsettelse(
     snapshotDao: SnapshotDao,
     snapshotClient: SnapshotClient,
     personDao: PersonDao,
+    generasjonRepository: ActualGenerasjonRepository,
     arbeidsgiverDao: ArbeidsgiverDao,
     arbeidsforholdDao: ArbeidsforholdDao,
     egenAnsattDao: EgenAnsattDao,
@@ -35,7 +36,8 @@ internal class VedtaksperiodeSkjønnsmessigFastsettelse(
         KlargjørPersonCommand(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
-            personDao = personDao,
+            førsteKjenteDagFinner = { generasjonRepository.førsteKjenteDag(fødselsnummer)},
+            personDao = personDao
         ),
         KlargjørArbeidsgiverCommand(
             orgnummere = listOf(organisasjonsnummer),

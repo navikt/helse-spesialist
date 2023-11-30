@@ -24,7 +24,7 @@ internal class OppdaterPersonCommandTest {
 
     private val personDao = mockk<PersonDao>(relaxed = true)
 
-    private val command = OppdaterPersonCommand(FNR, personDao)
+    private val command = OppdaterPersonCommand(FNR, { LocalDate.now() }, personDao)
     private lateinit var context: CommandContext
 
     @BeforeEach

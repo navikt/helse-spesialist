@@ -276,4 +276,21 @@ class GenerasjonDao(private val dataSource: DataSource) {
             )
         }
     }
+
+    internal fun førsteKjenteDag(fødselsnummer: String): LocalDate {
+        @Language("PostgreSQL") val query = """
+            select min(svg.fom) as foersteFom
+            from selve_vedtaksperiode_generasjon svg
+            join vedtak v on svg.vedtaksperiode_id = v.vedtaksperiode_id
+            join person p on p.id = v.person_ref
+            where p.fodselsnummer = :fodselsnummer
+        """.trimIndent()
+        return sessionOf(dataSource).use { session ->
+            session.run(
+                queryOf(
+                    query, mapOf("fodselsnummer" to fødselsnummer.toLong())
+                ).map { it.localDate("foersteFom") }.asSingle
+            ) ?: throw IllegalStateException("Forventet å kunne slå opp første kjente dag")
+        }
+    }
 }

@@ -10,7 +10,8 @@ import org.slf4j.LoggerFactory
 internal class OpprettPersonCommand(
     private val fødselsnummer: String,
     private val aktørId: String,
-    private val personDao: PersonDao
+    private val førsteKjenteDagFinner: () -> LocalDate,
+    private val personDao: PersonDao,
 ) : Command {
 
     private companion object {
@@ -48,7 +49,7 @@ internal class OpprettPersonCommand(
         context.behov("HentPersoninfoV2")
         context.behov("HentEnhet")
         context.behov("HentInfotrygdutbetalinger", mapOf(
-            "historikkFom" to LocalDate.now().minusYears(3),
+            "historikkFom" to førsteKjenteDagFinner().minusYears(3),
             "historikkTom" to LocalDate.now()
         ))
         return false

@@ -210,13 +210,14 @@ internal class Hendelsefabrikk(
             periodetype = periodetype,
             førstegangsbehandling = førstegangsbehandling,
             utbetalingtype = utbetalingtype,
+            kanAvvises = kanAvvises,
             inntektskilde = inntektskilde,
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
-            kanAvvises = kanAvvises,
             skjæringstidspunkt = skjæringstidspunkt,
             sykefraværstilfelle = sykefraværstilfelle(fødselsnummer, skjæringstidspunkt),
             json = json,
             personDao = personDao,
+            generasjonRepository = generasjonRepository,
             arbeidsgiverDao = arbeidsgiverDao,
             vedtakDao = vedtakDao,
             snapshotDao = snapshotDao,
@@ -637,6 +638,7 @@ internal class Hendelsefabrikk(
             snapshotDao = snapshotDao,
             snapshotClient = snapshotClient,
             personDao = personDao,
+            generasjonRepository = generasjonRepository,
             arbeidsgiverDao = arbeidsgiverDao,
             arbeidsforholdDao = arbeidsforholdDao,
             egenAnsattDao = egenAnsattDao,
@@ -772,14 +774,16 @@ internal class Hendelsefabrikk(
 
     fun oppdaterPersonsnapshot(json: String): OppdaterPersonsnapshot {
         val jsonNode = mapper.readTree(json)
+        val fødselsnummer = jsonNode["fødselsnummer"].asText()
         return OppdaterPersonsnapshot(
             id = UUID.fromString(jsonNode["@id"].asText()),
-            fødselsnummer = jsonNode["fødselsnummer"].asText(),
+            fødselsnummer = fødselsnummer,
             json = json,
             snapshotClient = snapshotClient,
             snapshotDao = snapshotDao,
             personDao = personDao,
             opptegnelseDao = opptegnelseDao,
+            førsteKjenteDagFinner = { generasjonRepository.førsteKjenteDag(fødselsnummer) },
         )
     }
 

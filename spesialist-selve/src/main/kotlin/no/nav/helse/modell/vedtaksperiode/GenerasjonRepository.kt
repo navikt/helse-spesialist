@@ -100,6 +100,8 @@ internal class ActualGenerasjonRepository(dataSource: DataSource): IVedtaksperio
             )
     }
 
+    internal fun førsteKjenteDag(fødselsnummer: String) = dao.førsteKjenteDag(fødselsnummer)
+
     private companion object {
         private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
         private fun Generasjon.loggFørsteOpprettet(vedtaksperiodeId: UUID) {

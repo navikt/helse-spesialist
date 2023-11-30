@@ -35,7 +35,7 @@ internal class OpprettPersonCommandTest {
     }
 
     private val personDao = mockk<PersonDao>(relaxed = true)
-    private val command = OpprettPersonCommand(FNR, AKTØR, personDao)
+    private val command = OpprettPersonCommand(FNR, AKTØR, { LocalDate.now() }, personDao)
     private lateinit var context: CommandContext
 
     @BeforeEach

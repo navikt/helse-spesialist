@@ -64,6 +64,7 @@ internal class Godkjenningsbehov(
     sykefraværstilfelle: Sykefraværstilfelle,
     private val json: String,
     personDao: PersonDao,
+    generasjonRepository: ActualGenerasjonRepository,
     arbeidsgiverDao: ArbeidsgiverDao,
     vedtakDao: VedtakDao,
     snapshotDao: SnapshotDao,
@@ -87,6 +88,7 @@ internal class Godkjenningsbehov(
 
     // lambda fordi mange av testene ikke sørger for at utbetalingen fins i databasen før godkjenningsbehovet behandles
     private val utbetalingsfinner = { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) }
+    private val førsteKjenteDagFinner = { generasjonRepository.førsteKjenteDag(fødselsnummer) }
     private val utbetaling = utbetalingDao.hentUtbetaling(utbetalingId)
 
     override val commands: List<Command> = listOf(
@@ -102,7 +104,8 @@ internal class Godkjenningsbehov(
         KlargjørPersonCommand(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
-            personDao = personDao
+            førsteKjenteDagFinner = førsteKjenteDagFinner,
+            personDao = personDao,
         ),
         KlargjørArbeidsgiverCommand(
             orgnummere = orgnummereMedRelevanteArbeidsforhold + organisasjonsnummer,
