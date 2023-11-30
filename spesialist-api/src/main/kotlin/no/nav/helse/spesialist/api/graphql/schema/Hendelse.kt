@@ -3,7 +3,10 @@ package no.nav.helse.spesialist.api.graphql.schema
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLHendelse
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLInntektsmelding
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSoknadArbeidsgiver
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSoknadArbeidsledig
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSoknadFrilans
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSoknadNav
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSoknadSelvstendig
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSykmelding
 
 enum class Hendelsetype {
@@ -11,6 +14,9 @@ enum class Hendelsetype {
     NY_SOKNAD,
     SENDT_SOKNAD_ARBEIDSGIVER,
     SENDT_SOKNAD_NAV,
+    SENDT_SOKNAD_ARBEIDSLEDIG,
+    SENDT_SOKNAD_FRILANS,
+    SENDT_SOKNAD_SELVSTENDIG,
     UKJENT
 }
 
@@ -38,6 +44,36 @@ data class SoknadArbeidsgiver(
 ) : Hendelse
 
 data class SoknadNav(
+    override val id: UUIDString,
+    override val type: Hendelsetype,
+    val fom: DateString,
+    val tom: DateString,
+    val rapportertDato: DateTimeString,
+    val sendtNav: DateTimeString,
+    val eksternDokumentId: UUIDString?
+) : Hendelse
+
+data class SoknadArbeidsledig(
+    override val id: UUIDString,
+    override val type: Hendelsetype,
+    val fom: DateString,
+    val tom: DateString,
+    val rapportertDato: DateTimeString,
+    val sendtNav: DateTimeString,
+    val eksternDokumentId: UUIDString?
+) : Hendelse
+
+data class SoknadFrilans(
+    override val id: UUIDString,
+    override val type: Hendelsetype,
+    val fom: DateString,
+    val tom: DateString,
+    val rapportertDato: DateTimeString,
+    val sendtNav: DateTimeString,
+    val eksternDokumentId: UUIDString?
+) : Hendelse
+
+data class SoknadSelvstendig(
     override val id: UUIDString,
     override val type: Hendelsetype,
     val fom: DateString,
@@ -77,6 +113,36 @@ internal fun GraphQLHendelse.tilHendelse(): Hendelse = when (this) {
     is GraphQLSoknadNav -> SoknadNav(
         id = id,
         type = Hendelsetype.SENDT_SOKNAD_NAV,
+        fom = fom,
+        tom = tom,
+        rapportertDato = rapportertDato,
+        sendtNav = sendtNav,
+        eksternDokumentId = eksternDokumentId
+    )
+
+    is GraphQLSoknadArbeidsledig -> SoknadArbeidsledig(
+        id = id,
+        type = Hendelsetype.SENDT_SOKNAD_ARBEIDSLEDIG,
+        fom = fom,
+        tom = tom,
+        rapportertDato = rapportertDato,
+        sendtNav = sendtNav,
+        eksternDokumentId = eksternDokumentId
+    )
+
+    is GraphQLSoknadFrilans -> SoknadFrilans(
+        id = id,
+        type = Hendelsetype.SENDT_SOKNAD_FRILANS,
+        fom = fom,
+        tom = tom,
+        rapportertDato = rapportertDato,
+        sendtNav = sendtNav,
+        eksternDokumentId = eksternDokumentId
+    )
+
+    is GraphQLSoknadSelvstendig -> SoknadSelvstendig(
+        id = id,
+        type = Hendelsetype.SENDT_SOKNAD_SELVSTENDIG,
         fom = fom,
         tom = tom,
         rapportertDato = rapportertDato,

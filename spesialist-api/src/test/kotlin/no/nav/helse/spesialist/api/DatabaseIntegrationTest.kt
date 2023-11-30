@@ -39,6 +39,7 @@ import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
 import no.nav.helse.spleis.graphql.HentSnapshot
+import no.nav.helse.spleis.graphql.enums.GraphQLHendelsetype
 import no.nav.helse.spleis.graphql.enums.GraphQLInntektstype
 import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetilstand
 import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetype
@@ -50,9 +51,11 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiver
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiverrefusjon
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLBeregnetPeriode
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLGenerasjon
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLHendelse
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPeriodevilkar
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLRefusjonselement
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSoknadArbeidsledig
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSpleisVilkarsgrunnlag
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSykepengegrunnlagsgrense
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLTidslinjeperiode
@@ -739,6 +742,16 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             ghostPerioder = emptyList(),
             generasjoner = generasjoner,
         )
+    protected fun opprettSnapshotHendelse() =
+        GraphQLSoknadArbeidsledig(
+            id = "123",
+            eksternDokumentId = "456",
+            fom = "2022-05-11",
+            tom = "2022-05-30",
+            rapportertDato = "2023-10-10",
+            sendtNav = "2023-10-10",
+            type = GraphQLHendelsetype.SENDTSOKNADARBEIDSLEDIG,
+        )
 
     protected fun opprettSnapshotGenerasjon(perioder: List<GraphQLTidslinjeperiode>, id: UUID = UUID.randomUUID()) =
         GraphQLGenerasjon(id = id.toString(), perioder = perioder)
@@ -748,6 +761,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         tom: String = LocalDate.now().toString(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         utbetalingId: UUID = UUID.randomUUID(),
+        hendelser: List<GraphQLHendelse> = emptyList(),
     ) = GraphQLBeregnetPeriode(
         erForkastet = false,
         fom = fom,
@@ -762,7 +776,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         beregningId = UUID.randomUUID().toString(),
         forbrukteSykedager = null,
         gjenstaendeSykedager = null,
-        hendelser = emptyList(),
+        hendelser = hendelser,
         maksdato = LocalDate.now().toString(),
         vilkarsgrunnlagId = null,
         periodevilkar = GraphQLPeriodevilkar(

@@ -135,6 +135,33 @@ query HentSnapshot($fnr: String!) {
                             type
                             eksternDokumentId
                         }
+                        ... on GraphQLNySoknadFrilans {
+                            __typename
+                            fom
+                            id
+                            rapportertDato
+                            tom
+                            type
+                            eksternDokumentId
+                        }
+                        ... on GraphQLNySoknadSelvstendig {
+                            __typename
+                            fom
+                            id
+                            rapportertDato
+                            tom
+                            type
+                            eksternDokumentId
+                        }
+                        ... on GraphQLNySoknadArbeidsledig {
+                            __typename
+                            fom
+                            id
+                            rapportertDato
+                            tom
+                            type
+                            eksternDokumentId
+                        }
                         ... on GraphQLSoknadArbeidsgiver {
                             __typename
                             fom
@@ -146,6 +173,36 @@ query HentSnapshot($fnr: String!) {
                             eksternDokumentId
                         }
                         ... on GraphQLSoknadNav {
+                            __typename
+                            fom
+                            id
+                            rapportertDato
+                            sendtNav
+                            tom
+                            type
+                            eksternDokumentId
+                        }
+                        ... on GraphQLSoknadArbeidsledig {
+                            __typename
+                            fom
+                            id
+                            rapportertDato
+                            sendtNav
+                            tom
+                            type
+                            eksternDokumentId
+                        }
+                        ... on GraphQLSoknadFrilans {
+                            __typename
+                            fom
+                            id
+                            rapportertDato
+                            sendtNav
+                            tom
+                            type
+                            eksternDokumentId
+                        }
+                        ... on GraphQLSoknadSelvstendig {
                             __typename
                             fom
                             id

@@ -615,7 +615,37 @@ type SoknadArbeidsgiver implements Hendelse {
     type: Hendelsetype!
 }
 
+type SoknadArbeidsledig implements Hendelse {
+    eksternDokumentId: String
+    fom: String!
+    id: String!
+    rapportertDato: String!
+    sendtNav: String!
+    tom: String!
+    type: Hendelsetype!
+}
+
+type SoknadFrilans implements Hendelse {
+    eksternDokumentId: String
+    fom: String!
+    id: String!
+    rapportertDato: String!
+    sendtNav: String!
+    tom: String!
+    type: Hendelsetype!
+}
+
 type SoknadNav implements Hendelse {
+    eksternDokumentId: String
+    fom: String!
+    id: String!
+    rapportertDato: String!
+    sendtNav: String!
+    tom: String!
+    type: Hendelsetype!
+}
+
+type SoknadSelvstendig implements Hendelse {
     eksternDokumentId: String
     fom: String!
     id: String!
@@ -887,7 +917,10 @@ enum Hendelsetype {
     INNTEKTSMELDING
     NY_SOKNAD
     SENDT_SOKNAD_ARBEIDSGIVER
+    SENDT_SOKNAD_ARBEIDSLEDIG
+    SENDT_SOKNAD_FRILANS
     SENDT_SOKNAD_NAV
+    SENDT_SOKNAD_SELVSTENDIG
     UKJENT
 }
 

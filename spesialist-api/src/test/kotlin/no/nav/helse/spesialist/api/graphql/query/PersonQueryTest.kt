@@ -21,6 +21,7 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLBeregnetPeriode
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -242,7 +243,6 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         assertFalse(periode["handlinger"].isEmpty)
         assertFalse(periode["handlinger"].first { it["type"].textValue() == Periodehandling.UTBETALE.name }["tillatt"].booleanValue())
     }
-
     @Test
     fun `utbetaling av risk-oppgave tillatt hvis tilgang til risk`() {
         val personRef = opprettPerson()
@@ -259,6 +259,25 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         val periode = body["data"]["person"]["arbeidsgivere"].first()["generasjoner"].first()["perioder"].first()
         assertFalse(periode["handlinger"].isEmpty)
         assertTrue(periode["handlinger"].first { it["type"].textValue() == Periodehandling.UTBETALE.name }["tillatt"].booleanValue())
+    }
+
+    @Test
+    fun `periode med hendelse`() {
+        val personRef = opprettPerson()
+        val arbeidsgiverRef = opprettArbeidsgiver()
+        opprettVedtaksperiode(personRef, arbeidsgiverRef, oppgavetype = Oppgavetype.RISK_QA)
+        val (id, fom, tom) = PERIODE
+        val graphQLHendelse = opprettSnapshotHendelse()
+        val graphQLperiodeMedOppgave = opprettBeregnetPeriode(fom.toString(), tom.toString(), id, hendelser = listOf(graphQLHendelse))
+        val snapshotGenerasjon = opprettSnapshotGenerasjon(listOf(graphQLperiodeMedOppgave))
+        val arbeidsgiver = opprettSnapshotArbeidsgiver(listOf(snapshotGenerasjon))
+        mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
+
+        val body = runPersonQuery(null)
+
+        val hendelse = body["data"]["person"]["arbeidsgivere"].first()["generasjoner"].first()["perioder"].first()["hendelser"].first()
+        assertNotNull(hendelse)
+        assertEquals("456", hendelse["eksternDokumentId"].textValue())
     }
 
     @Test
@@ -282,7 +301,8 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
     }
 
     private fun runPersonQuery(group: UUID? = null) = runQuery(
-        """{ 
+        """
+            { 
                 person(fnr: "$FØDSELSNUMMER") { 
                     aktorId
                     arbeidsgivere {
@@ -304,11 +324,32 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
                                         kode
                                     }                      
                                 }
-                            }                    
-                        }               
+                                hendelser {
+                                    ... on SoknadArbeidsledig {
+                                        id
+                                        fom
+                                        tom
+                                        eksternDokumentId
+                                        rapportertDato
+                                        sendtNav
+                                        type
+                                    }
+                                    ... on SoknadNav {
+                                        id
+                                        fom
+                                        tom
+                                        eksternDokumentId
+                                        rapportertDato
+                                        sendtNav
+                                        type
+                                    }
+                                }
+                            }               
+                        }    
                     }
                 } 
-            }""",
+            }
+        """,
         group
     )
 

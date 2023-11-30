@@ -130,6 +130,33 @@ type GraphQLInntektsmelding implements GraphQLHendelse {
     type: GraphQLHendelsetype!
 }
 
+type GraphQLNySoknadArbeidsledig implements GraphQLHendelse {
+    eksternDokumentId: String!
+    fom: LocalDate!
+    id: String!
+    rapportertDato: LocalDateTime!
+    tom: LocalDate!
+    type: GraphQLHendelsetype!
+}
+
+type GraphQLNySoknadFrilans implements GraphQLHendelse {
+    eksternDokumentId: String!
+    fom: LocalDate!
+    id: String!
+    rapportertDato: LocalDateTime!
+    tom: LocalDate!
+    type: GraphQLHendelsetype!
+}
+
+type GraphQLNySoknadSelvstendig implements GraphQLHendelse {
+    eksternDokumentId: String!
+    fom: LocalDate!
+    id: String!
+    rapportertDato: LocalDateTime!
+    tom: LocalDate!
+    type: GraphQLHendelsetype!
+}
+
 type GraphQLOmregnetArsinntekt {
     belop: Float!
     inntekterFraAOrdningen: [GraphQLInntekterFraAOrdningen!]
@@ -215,7 +242,37 @@ type GraphQLSoknadArbeidsgiver implements GraphQLHendelse {
     type: GraphQLHendelsetype!
 }
 
+type GraphQLSoknadArbeidsledig implements GraphQLHendelse {
+    eksternDokumentId: String!
+    fom: LocalDate!
+    id: String!
+    rapportertDato: LocalDateTime!
+    sendtNav: LocalDateTime!
+    tom: LocalDate!
+    type: GraphQLHendelsetype!
+}
+
+type GraphQLSoknadFrilans implements GraphQLHendelse {
+    eksternDokumentId: String!
+    fom: LocalDate!
+    id: String!
+    rapportertDato: LocalDateTime!
+    sendtNav: LocalDateTime!
+    tom: LocalDate!
+    type: GraphQLHendelsetype!
+}
+
 type GraphQLSoknadNav implements GraphQLHendelse {
+    eksternDokumentId: String!
+    fom: LocalDate!
+    id: String!
+    rapportertDato: LocalDateTime!
+    sendtNav: LocalDateTime!
+    tom: LocalDate!
+    type: GraphQLHendelsetype!
+}
+
+type GraphQLSoknadSelvstendig implements GraphQLHendelse {
     eksternDokumentId: String!
     fom: LocalDate!
     id: String!
@@ -367,8 +424,14 @@ enum GraphQLBegrunnelse {
 enum GraphQLHendelsetype {
     Inntektsmelding
     NySoknad
+    NySoknadArbeidsledig
+    NySoknadFrilans
+    NySoknadSelvstendig
     SendtSoknadArbeidsgiver
+    SendtSoknadArbeidsledig
+    SendtSoknadFrilans
     SendtSoknadNav
+    SendtSoknadSelvstendig
     Ukjent
 }
 
