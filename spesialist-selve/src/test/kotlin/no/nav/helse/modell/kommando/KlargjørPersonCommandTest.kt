@@ -34,15 +34,14 @@ internal class KlargjørPersonCommandTest {
         private val objectMapper = jacksonObjectMapper()
     }
 
-    private val dao = mockk<PersonDao>(relaxed = true)
-    private val command =
-        KlargjørPersonCommand(FNR, AKTØR, dao)
+    private val personDao = mockk<PersonDao>(relaxed = true)
+    private val command = KlargjørPersonCommand(FNR, AKTØR, personDao)
     private lateinit var context: CommandContext
 
     @BeforeEach
     fun setup() {
         context = CommandContext(UUID.randomUUID())
-        clearMocks(dao)
+        clearMocks(personDao)
     }
 
     @Test
@@ -53,7 +52,7 @@ internal class KlargjørPersonCommandTest {
         context.add(HentInfotrygdutbetalingerløsning(objectMapper.createObjectNode()))
         assertTrue(command.execute(context))
         assertFalse(context.harBehov())
-        verify(exactly = 1) { dao.insertPerson(FNR, AKTØR, any(), any(), any()) }
+        verify(exactly = 1) { personDao.insertPerson(FNR, AKTØR, any(), any(), any()) }
     }
 
     @Test
@@ -91,9 +90,9 @@ internal class KlargjørPersonCommandTest {
         context.add(enhet)
         context.add(utbetalinger)
         assertTrue(command.execute(context))
-        verify(exactly = 1) { personinfo.oppdater(dao, FNR) }
-        verify(exactly = 1) { enhet.oppdater(dao, FNR) }
-        verify(exactly = 1) { utbetalinger.oppdater(dao, FNR) }
+        verify(exactly = 1) { personinfo.oppdater(personDao, FNR) }
+        verify(exactly = 1) { enhet.oppdater(personDao, FNR) }
+        verify(exactly = 1) { utbetalinger.oppdater(personDao, FNR) }
     }
 
     @Test
@@ -126,38 +125,38 @@ internal class KlargjørPersonCommandTest {
     private fun assertHarBehov(forventetBehov: List<String>) {
         assertTrue(context.harBehov())
         assertEquals(forventetBehov, context.behov().keys.toList())
-        verify(exactly = 0) { dao.insertPerson(FNR, any(), any(), any(), any()) }
+        verify(exactly = 0) { personDao.insertPerson(FNR, any(), any(), any(), any()) }
     }
 
     private fun personFinnes() {
-        every { dao.findPersonByFødselsnummer(FNR) } returns 1
+        every { personDao.findPersonByFødselsnummer(FNR) } returns 1
     }
 
     private fun personFinnesIkke() {
-        every { dao.findPersonByFødselsnummer(FNR) } returns null
+        every { personDao.findPersonByFødselsnummer(FNR) } returns null
     }
 
     private fun altOppdatert() {
-        every { dao.findPersoninfoSistOppdatert(FNR) } returns LocalDate.now()
-        every { dao.findEnhetSistOppdatert(FNR) } returns LocalDate.now()
-        every { dao.findITUtbetalingsperioderSistOppdatert(FNR) } returns LocalDate.now()
+        every { personDao.findPersoninfoSistOppdatert(FNR) } returns LocalDate.now()
+        every { personDao.findEnhetSistOppdatert(FNR) } returns LocalDate.now()
+        every { personDao.findITUtbetalingsperioderSistOppdatert(FNR) } returns LocalDate.now()
     }
 
     private fun altUtdatert() {
-        every { dao.findPersoninfoSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
-        every { dao.findEnhetSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
-        every { dao.findITUtbetalingsperioderSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
+        every { personDao.findPersoninfoSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
+        every { personDao.findEnhetSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
+        every { personDao.findITUtbetalingsperioderSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
     }
 
     private fun personinfoOppdatert() {
-        every { dao.findPersoninfoSistOppdatert(FNR) } returns LocalDate.now()
-        every { dao.findEnhetSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
-        every { dao.findITUtbetalingsperioderSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
+        every { personDao.findPersoninfoSistOppdatert(FNR) } returns LocalDate.now()
+        every { personDao.findEnhetSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
+        every { personDao.findITUtbetalingsperioderSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
     }
 
     private fun utdatertUtbetalinger() {
-        every { dao.findPersoninfoSistOppdatert(FNR) } returns LocalDate.now()
-        every { dao.findEnhetSistOppdatert(FNR) } returns LocalDate.now()
-        every { dao.findITUtbetalingsperioderSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
+        every { personDao.findPersoninfoSistOppdatert(FNR) } returns LocalDate.now()
+        every { personDao.findEnhetSistOppdatert(FNR) } returns LocalDate.now()
+        every { personDao.findITUtbetalingsperioderSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
     }
 }

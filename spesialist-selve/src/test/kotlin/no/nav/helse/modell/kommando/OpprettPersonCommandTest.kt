@@ -34,21 +34,21 @@ internal class OpprettPersonCommandTest {
         private val objectMapper = jacksonObjectMapper()
     }
 
-    private val dao = mockk<PersonDao>(relaxed = true)
-    private val command = OpprettPersonCommand(FNR, AKTØR, dao)
+    private val personDao = mockk<PersonDao>(relaxed = true)
+    private val command = OpprettPersonCommand(FNR, AKTØR, personDao)
     private lateinit var context: CommandContext
 
     @BeforeEach
     fun setup() {
         context = CommandContext(UUID.randomUUID())
-        clearMocks(dao)
+        clearMocks(personDao)
     }
 
     @Test
     fun `oppretter ikke person når person finnes fra før`() {
         personFinnes()
         assertTrue(command.execute(context))
-        verify(exactly = 0) { dao.insertPerson(FNR, any(), any(), any(), any()) }
+        verify(exactly = 0) { personDao.insertPerson(FNR, any(), any(), any(), any()) }
     }
 
     @Test
@@ -57,17 +57,17 @@ internal class OpprettPersonCommandTest {
         context.add(HentPersoninfoløsning(FNR, FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE))
         context.add(HentEnhetløsning(ENHET_OSLO))
         assertFalse(command.execute(context))
-        verify(exactly = 0) { dao.insertPerson(FNR, any(), any(), any(), any()) }
+        verify(exactly = 0) { personDao.insertPerson(FNR, any(), any(), any(), any()) }
         personFinnes()
         context.add(HentInfotrygdutbetalingerløsning(objectMapper.createObjectNode()))
         assertTrue(command.resume(context))
-        verify(exactly = 0) { dao.insertPerson(FNR, any(), any(), any(), any()) }
+        verify(exactly = 0) { personDao.insertPerson(FNR, any(), any(), any(), any()) }
     }
 
     @Test
     fun `oppretter person`() {
         val personinfoId = 4691337L
-        every { dao.insertPersoninfo(any(), any(), any(), any(), any(), any()) } returns personinfoId
+        every { personDao.insertPersoninfo(any(), any(), any(), any(), any(), any()) } returns personinfoId
 
         personFinnesIkke()
         context.add(HentPersoninfoløsning(FNR, FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE))
@@ -76,8 +76,8 @@ internal class OpprettPersonCommandTest {
         assertTrue(command.execute(context))
         assertFalse(context.harBehov())
 
-        verify(exactly = 1) { dao.insertPersoninfo(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE) }
-        verify(exactly = 1) { dao.insertPerson(FNR, AKTØR, personinfoId, any(), any()) }
+        verify(exactly = 1) { personDao.insertPersoninfo(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE) }
+        verify(exactly = 1) { personDao.insertPerson(FNR, AKTØR, personinfoId, any(), any()) }
     }
 
     @Test
@@ -114,14 +114,14 @@ internal class OpprettPersonCommandTest {
     private fun assertHarBehov() {
         assertTrue(context.harBehov())
         assertEquals(listOf("HentPersoninfoV2", "HentEnhet", "HentInfotrygdutbetalinger"), context.behov().keys.toList())
-        verify(exactly = 0) { dao.insertPerson(FNR, any(), any(), any(), any()) }
+        verify(exactly = 0) { personDao.insertPerson(FNR, any(), any(), any(), any()) }
     }
 
     private fun personFinnes() {
-        every { dao.findPersonByFødselsnummer(FNR) } returns 1
+        every { personDao.findPersonByFødselsnummer(FNR) } returns 1
     }
     private fun personFinnesIkke() {
-        every { dao.findPersonByFødselsnummer(FNR) } returns null
+        every { personDao.findPersonByFødselsnummer(FNR) } returns null
     }
 
 }

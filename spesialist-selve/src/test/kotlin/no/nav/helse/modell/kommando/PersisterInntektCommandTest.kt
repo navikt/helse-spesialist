@@ -20,19 +20,19 @@ internal class PersisterInntektCommandTest {
         private const val FNR = "12345678910"
     }
 
-    private val dao = mockk<PersonDao>(relaxed = true)
+    private val personDao = mockk<PersonDao>(relaxed = true)
 
     @BeforeEach
     fun setup() {
-        clearMocks(dao)
+        clearMocks(personDao)
     }
 
     @Test
     fun `Sender behov om inntekt ikke er lagret fra før`() {
-        every { dao.findInntekter(any(), any()) } returns null
+        every { personDao.findInntekter(any(), any()) } returns null
 
         val context = CommandContext(UUID.randomUUID())
-        val command = PersisterInntektCommand(FNR, LocalDate.now(), dao)
+        val command = PersisterInntektCommand(FNR, LocalDate.now(), personDao)
 
         assertFalse(command.execute(context))
         assertTrue(context.harBehov())
@@ -40,10 +40,10 @@ internal class PersisterInntektCommandTest {
 
     @Test
     fun `Fullfører dersom inntekt er lagret fra før`() {
-        every { dao.findInntekter(any(), any()) } returns inntekter()
+        every { personDao.findInntekter(any(), any()) } returns inntekter()
 
         val context = CommandContext(UUID.randomUUID())
-        val command = PersisterInntektCommand(FNR, LocalDate.now(), dao)
+        val command = PersisterInntektCommand(FNR, LocalDate.now(), personDao)
 
         assertTrue(command.execute(context))
         assertFalse(context.harBehov())
@@ -53,17 +53,17 @@ internal class PersisterInntektCommandTest {
     fun `Lagrer inntekter dersom det ikke finnes på skjæringstidspunkt for person`() {
         val skjæringtidspunkt = LocalDate.now()
 
-        every { dao.findInntekter(FNR, skjæringtidspunkt) } returns null
+        every { personDao.findInntekter(FNR, skjæringtidspunkt) } returns null
 
         val context = CommandContext(UUID.randomUUID())
-        val command = PersisterInntektCommand(FNR, skjæringtidspunkt, dao)
+        val command = PersisterInntektCommand(FNR, skjæringtidspunkt, personDao)
 
         assertFalse(command.execute(context))
         assertTrue(context.harBehov())
 
         context.add(løsning())
         assertTrue(command.resume(context))
-        verify(exactly = 1) { dao.insertInntekter(FNR, skjæringtidspunkt, inntekter()) }
+        verify(exactly = 1) { personDao.insertInntekter(FNR, skjæringtidspunkt, inntekter()) }
     }
 
     private fun løsning(inntekter: List<Inntekter> = inntekter()) = Inntektløsning(inntekter)

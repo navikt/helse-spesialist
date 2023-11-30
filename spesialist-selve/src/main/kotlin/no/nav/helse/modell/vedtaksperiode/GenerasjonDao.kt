@@ -260,7 +260,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
                 SELECT tilstand_endret_tidspunkt 
                 FROM selve_vedtaksperiode_generasjon 
                 WHERE vedtaksperiode_id = :vedtaksperiodeId AND tilstand = 'Låst'
-                ORDER BY tilstand_endret_tidspunkt ASC 
+                ORDER BY tilstand_endret_tidspunkt
                 LIMIT 1
             """
         return sessionOf(dataSource).use { session ->

@@ -26,13 +26,12 @@ internal class OppdaterPersoninfoCommandTest {
         private val ADRESSEBESKYTTELSE = Adressebeskyttelse.StrengtFortrolig
     }
 
-    private val dao = mockk<PersonDao>(relaxed = true)
-
+    private val personDao = mockk<PersonDao>(relaxed = true)
 
     @Test
     fun `trenger personinfo`() {
         val context = CommandContext(UUID.randomUUID())
-        val command = OppdaterPersoninfoCommand(FNR, dao, force = false)
+        val command = OppdaterPersoninfoCommand(FNR, personDao, force = false)
         utdatertPersoninfo()
         assertFalse(command.execute(context))
         assertTrue(context.harBehov())
@@ -42,41 +41,41 @@ internal class OppdaterPersoninfoCommandTest {
     @Test
     fun `oppdatere personinfo`() {
         val context = CommandContext(UUID.randomUUID())
-        val command = OppdaterPersoninfoCommand(FNR, dao, force = false)
+        val command = OppdaterPersoninfoCommand(FNR, personDao, force = false)
         utdatertPersoninfo()
         val løsning = spyk(HentPersoninfoløsning(FNR, FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE))
         context.add(løsning)
         assertTrue(command.execute(context))
-        verify(exactly = 1) { løsning.oppdater(dao, FNR) }
-        verify(exactly = 1) { dao.upsertPersoninfo(FNR, FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE) }
+        verify(exactly = 1) { løsning.oppdater(personDao, FNR) }
+        verify(exactly = 1) { personDao.upsertPersoninfo(FNR, FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE) }
 
     }
 
     @Test
     fun `oppdaterer ingenting når informasjonen er ny nok`() {
         val context = CommandContext(UUID.randomUUID())
-        val command = OppdaterPersoninfoCommand(FNR, dao, force = false)
-        every { dao.findPersoninfoSistOppdatert(FNR) } returns LocalDate.now()
+        val command = OppdaterPersoninfoCommand(FNR, personDao, force = false)
+        every { personDao.findPersoninfoSistOppdatert(FNR) } returns LocalDate.now()
         assertTrue(command.execute(context))
-        verify(exactly = 0) { dao.upsertPersoninfo(any(), any(), any(), any(), any(), any(), any()) }
+        verify(exactly = 0) { personDao.upsertPersoninfo(any(), any(), any(), any(), any(), any(), any()) }
     }
 
     @Test
     fun `oppdaterer personinfo dersom force er satt til true`() {
         val context = CommandContext(UUID.randomUUID())
-        val command = OppdaterPersoninfoCommand(FNR, dao, force = true)
+        val command = OppdaterPersoninfoCommand(FNR, personDao, force = true)
         val løsning = spyk(HentPersoninfoløsning(FNR, FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE))
         context.add(løsning)
-        every { dao.findPersoninfoSistOppdatert(FNR) } returns LocalDate.now()
+        every { personDao.findPersoninfoSistOppdatert(FNR) } returns LocalDate.now()
         assertTrue(command.execute(context))
-        verify(exactly = 1) { løsning.oppdater(dao, FNR) }
-        verify(exactly = 1) { dao.upsertPersoninfo(any(), any(), any(), any(), any(), any(), any()) }
+        verify(exactly = 1) { løsning.oppdater(personDao, FNR) }
+        verify(exactly = 1) { personDao.upsertPersoninfo(any(), any(), any(), any(), any(), any(), any()) }
     }
 
 
     private fun utdatertPersoninfo() {
-        every { dao.findPersoninfoSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
-        every { dao.findEnhetSistOppdatert(FNR) } returns LocalDate.now()
-        every { dao.findITUtbetalingsperioderSistOppdatert(FNR) } returns LocalDate.now()
+        every { personDao.findPersoninfoSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
+        every { personDao.findEnhetSistOppdatert(FNR) } returns LocalDate.now()
+        every { personDao.findITUtbetalingsperioderSistOppdatert(FNR) } returns LocalDate.now()
     }
 }

@@ -16,19 +16,19 @@ internal class HentEnhetløsningTest {
         private const val INFOTRYGDUTBETALINGER_REF = 2L
     }
 
-    private val dao = mockk<PersonDao>(relaxed = true)
+    private val personDao = mockk<PersonDao>(relaxed = true)
 
     @Test
     fun `lagre person`() {
         val enhet = HentEnhetløsning(ENHET_OSLO)
-        enhet.lagrePerson(dao, FNR, AKTØR, NAVN_REF, INFOTRYGDUTBETALINGER_REF)
-        verify(exactly = 1) { dao.insertPerson(FNR, AKTØR, NAVN_REF, ENHET_OSLO.toInt(), INFOTRYGDUTBETALINGER_REF) }
+        enhet.lagrePerson(personDao, FNR, AKTØR, NAVN_REF, INFOTRYGDUTBETALINGER_REF)
+        verify(exactly = 1) { personDao.insertPerson(FNR, AKTØR, NAVN_REF, ENHET_OSLO.toInt(), INFOTRYGDUTBETALINGER_REF) }
     }
 
     @Test
     fun `oppdatere enhet`() {
         val enhet = HentEnhetløsning(ENHET_SVALBARD)
-        enhet.oppdater(dao, FNR)
-        verify(exactly = 1) { dao.updateEnhet(FNR, ENHET_SVALBARD.toInt()) }
+        enhet.oppdater(personDao, FNR)
+        verify(exactly = 1) { personDao.updateEnhet(FNR, ENHET_SVALBARD.toInt()) }
     }
 }

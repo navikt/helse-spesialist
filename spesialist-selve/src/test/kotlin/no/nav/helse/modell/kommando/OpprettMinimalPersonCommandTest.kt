@@ -17,21 +17,21 @@ internal class OpprettMinimalPersonCommandTest {
         private const val AKTØR = "4321098765432"
     }
 
-    private val dao = mockk<PersonDao>(relaxed = true)
-    private val command = OpprettMinimalPersonCommand(FNR, AKTØR, dao)
+    private val personDao = mockk<PersonDao>(relaxed = true)
+    private val command = OpprettMinimalPersonCommand(FNR, AKTØR, personDao)
     private lateinit var context: CommandContext
 
     @BeforeEach
     fun setup() {
         context = CommandContext(UUID.randomUUID())
-        clearMocks(dao)
+        clearMocks(personDao)
     }
 
     @Test
     fun `oppretter ikke person når person finnes fra før`() {
         personFinnes()
         assertTrue(command.execute(context))
-        verify(exactly = 0) { dao.insertPerson(FNR, AKTØR) }
+        verify(exactly = 0) { personDao.insertPerson(FNR, AKTØR) }
     }
 
 
@@ -41,15 +41,15 @@ internal class OpprettMinimalPersonCommandTest {
         assertTrue(command.execute(context))
         assertFalse(context.harBehov())
 
-        verify(exactly = 1) { dao.insertPerson(FNR, AKTØR) }
+        verify(exactly = 1) { personDao.insertPerson(FNR, AKTØR) }
         personFinnes()
     }
 
     private fun personFinnes() {
-        every { dao.findPersonByFødselsnummer(FNR) } returns 1
+        every { personDao.findPersonByFødselsnummer(FNR) } returns 1
     }
     private fun personFinnesIkke() {
-        every { dao.findPersonByFødselsnummer(FNR) } returns null
+        every { personDao.findPersonByFødselsnummer(FNR) } returns null
     }
 
 }

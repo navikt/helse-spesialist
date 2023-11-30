@@ -27,12 +27,12 @@ internal class PersisterInntektløsningTest {
         )
     }
 
-    private val dao = mockk<PersonDao>(relaxed = true)
+    private val personDao = mockk<PersonDao>(relaxed = true)
 
     @Test
     fun `lagre inntekt`() {
         val inntektløsning = Inntektløsning(INNTEKTER)
-        inntektløsning.lagre(dao, FØDSELSNUMMER, SKJÆRINGSTIDSPUNKT)
-        verify(exactly = 1) { dao.insertInntekter(FØDSELSNUMMER, SKJÆRINGSTIDSPUNKT, INNTEKTER) }
+        inntektløsning.lagre(personDao, FØDSELSNUMMER, SKJÆRINGSTIDSPUNKT)
+        verify(exactly = 1) { personDao.insertInntekter(FØDSELSNUMMER, SKJÆRINGSTIDSPUNKT, INNTEKTER) }
     }
 }

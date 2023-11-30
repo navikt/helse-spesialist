@@ -22,26 +22,26 @@ internal class OppdaterPersonCommandTest {
         private const val FNR = "12345678911"
     }
 
-    private val dao = mockk<PersonDao>(relaxed = true)
+    private val personDao = mockk<PersonDao>(relaxed = true)
 
-    private val command = OppdaterPersonCommand(FNR, dao)
+    private val command = OppdaterPersonCommand(FNR, personDao)
     private lateinit var context: CommandContext
 
     @BeforeEach
     fun setup() {
         context = CommandContext(UUID.randomUUID())
-        clearMocks(dao)
+        clearMocks(personDao)
     }
 
     @Test
     fun `oppdaterer ingenting når informasjonen er ny nok`() {
-        every { dao.findPersoninfoSistOppdatert(FNR) } returns LocalDate.now()
-        every { dao.findEnhetSistOppdatert(FNR) } returns LocalDate.now()
-        every { dao.findITUtbetalingsperioderSistOppdatert(FNR) } returns LocalDate.now()
+        every { personDao.findPersoninfoSistOppdatert(FNR) } returns LocalDate.now()
+        every { personDao.findEnhetSistOppdatert(FNR) } returns LocalDate.now()
+        every { personDao.findITUtbetalingsperioderSistOppdatert(FNR) } returns LocalDate.now()
         assertTrue(command.execute(context))
-        verify(exactly = 0) { dao.updateEnhet(any(), any()) }
-        verify(exactly = 0) { dao.upsertPersoninfo(any(), any(), any(), any(), any(), any(), any()) }
-        verify(exactly = 0) { dao.upsertInfotrygdutbetalinger(any(), any()) }
+        verify(exactly = 0) { personDao.updateEnhet(any(), any()) }
+        verify(exactly = 0) { personDao.upsertPersoninfo(any(), any(), any(), any(), any(), any(), any()) }
+        verify(exactly = 0) { personDao.upsertInfotrygdutbetalinger(any(), any()) }
     }
 
     @Test
@@ -59,7 +59,7 @@ internal class OppdaterPersonCommandTest {
         val løsning = mockk<HentEnhetløsning>(relaxed = true)
         context.add(løsning)
         assertTrue(command.execute(context))
-        verify(exactly = 1) { løsning.oppdater(dao, FNR) }
+        verify(exactly = 1) { løsning.oppdater(personDao, FNR) }
     }
 
     @Test
@@ -77,7 +77,7 @@ internal class OppdaterPersonCommandTest {
         val løsning = mockk<HentInfotrygdutbetalingerløsning>(relaxed = true)
         context.add(løsning)
         assertTrue(command.execute(context))
-        verify(exactly = 1) { løsning.oppdater(dao, FNR) }
+        verify(exactly = 1) { løsning.oppdater(personDao, FNR) }
     }
 
     @Test
@@ -90,26 +90,26 @@ internal class OppdaterPersonCommandTest {
         context.add(enhet)
         context.add(utbetalinger)
         assertTrue(command.execute(context))
-        verify(exactly = 1) { personinfo.oppdater(dao, FNR) }
-        verify(exactly = 1) { enhet.oppdater(dao, FNR) }
-        verify(exactly = 1) { utbetalinger.oppdater(dao, FNR) }
+        verify(exactly = 1) { personinfo.oppdater(personDao, FNR) }
+        verify(exactly = 1) { enhet.oppdater(personDao, FNR) }
+        verify(exactly = 1) { utbetalinger.oppdater(personDao, FNR) }
     }
 
     private fun utdatertEnhet() {
-        every { dao.findPersoninfoSistOppdatert(FNR) } returns LocalDate.now()
-        every { dao.findEnhetSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
-        every { dao.findITUtbetalingsperioderSistOppdatert(FNR) } returns LocalDate.now()
+        every { personDao.findPersoninfoSistOppdatert(FNR) } returns LocalDate.now()
+        every { personDao.findEnhetSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
+        every { personDao.findITUtbetalingsperioderSistOppdatert(FNR) } returns LocalDate.now()
     }
 
     private fun utdatertUtbetalinger() {
-        every { dao.findPersoninfoSistOppdatert(FNR) } returns LocalDate.now()
-        every { dao.findEnhetSistOppdatert(FNR) } returns LocalDate.now()
-        every { dao.findITUtbetalingsperioderSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
+        every { personDao.findPersoninfoSistOppdatert(FNR) } returns LocalDate.now()
+        every { personDao.findEnhetSistOppdatert(FNR) } returns LocalDate.now()
+        every { personDao.findITUtbetalingsperioderSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
     }
 
     private fun altUtdatert() {
-        every { dao.findPersoninfoSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
-        every { dao.findEnhetSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
-        every { dao.findITUtbetalingsperioderSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
+        every { personDao.findPersoninfoSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
+        every { personDao.findEnhetSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
+        every { personDao.findITUtbetalingsperioderSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
     }
 }

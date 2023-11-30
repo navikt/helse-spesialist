@@ -14,30 +14,30 @@ internal class HentInfotrygdutbetalingerløsningTest {
         private val objectMapper = jacksonObjectMapper()
     }
 
-    private val dao = mockk<PersonDao>(relaxed = true)
+    private val personDao = mockk<PersonDao>(relaxed = true)
 
     @Test
     fun `lagre infotrygdutbetalinger`() {
         val json = objectMapper.createObjectNode()
         val utbetalinger = HentInfotrygdutbetalingerløsning(json)
-        utbetalinger.lagre(dao)
-        verify(exactly = 1) { dao.insertInfotrygdutbetalinger(json) }
+        utbetalinger.lagre(personDao)
+        verify(exactly = 1) { personDao.insertInfotrygdutbetalinger(json) }
     }
 
     @Test
     fun `oppdater infotrygdutbetalinger til person`() {
-        every { dao.findInfotrygdutbetalinger(FNR) } returns "{}"
+        every { personDao.findInfotrygdutbetalinger(FNR) } returns "{}"
         val json = objectMapper.createObjectNode()
         val utbetalinger = HentInfotrygdutbetalingerløsning(json)
-        utbetalinger.oppdater(dao, FNR)
-        verify(exactly = 1) { dao.upsertInfotrygdutbetalinger(FNR, json) }
+        utbetalinger.oppdater(personDao, FNR)
+        verify(exactly = 1) { personDao.upsertInfotrygdutbetalinger(FNR, json) }
     }
 
     @Test
     fun `lagre ny infotrygdutbetalinger når person ikke har fra før`() {
         val json = objectMapper.createObjectNode()
         val utbetalinger = HentInfotrygdutbetalingerløsning(json)
-        utbetalinger.oppdater(dao, FNR)
-        verify(exactly = 1) { dao.upsertInfotrygdutbetalinger(FNR, json) }
+        utbetalinger.oppdater(personDao, FNR)
+        verify(exactly = 1) { personDao.upsertInfotrygdutbetalinger(FNR, json) }
     }
 }
