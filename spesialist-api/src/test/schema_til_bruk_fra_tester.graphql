@@ -943,6 +943,7 @@ enum Kategori {
     Mottaker
     Oppgavetype
     Periodetype
+    Status
     Ukategorisert
 }
 

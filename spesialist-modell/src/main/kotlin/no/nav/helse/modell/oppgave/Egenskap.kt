@@ -5,6 +5,7 @@ import no.nav.helse.modell.oppgave.Egenskap.Kategori.Inntektskilde
 import no.nav.helse.modell.oppgave.Egenskap.Kategori.Mottaker
 import no.nav.helse.modell.oppgave.Egenskap.Kategori.Oppgavetype
 import no.nav.helse.modell.oppgave.Egenskap.Kategori.Periodetype
+import no.nav.helse.modell.oppgave.Egenskap.Kategori.Status
 import no.nav.helse.modell.oppgave.Egenskap.Kategori.Ukategorisert
 
 enum class Egenskap(
@@ -35,7 +36,7 @@ enum class Egenskap(
     RETUR,
     FULLMAKT,
     SKJØNNSFASTSETTELSE,
-    PÅ_VENT,
+    PÅ_VENT(kategori = Status),
     VERGEMÅL;
 
     enum class Kategori {
@@ -43,7 +44,8 @@ enum class Egenskap(
         Inntektskilde,
         Oppgavetype,
         Ukategorisert,
-        Periodetype
+        Periodetype,
+        Status
     }
 
     companion object {

@@ -95,6 +95,8 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
             grupperteFiltrerteEgenskaper?.get(Egenskap.Kategori.Mottaker)?.joinToString { """ '${it.name}' """ }
         val antallArbeidsforholdEgenskaper =
             grupperteFiltrerteEgenskaper?.get(Egenskap.Kategori.Inntektskilde)?.joinToString { """ '${it.name}' """ }
+        val statusEgenskaper =
+            grupperteFiltrerteEgenskaper?.get(Egenskap.Kategori.Status)?.joinToString { """ '${it.name}' """ }
 
         return asSQL(
             """
@@ -126,6 +128,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                 AND (:ingen_periodetype_egenskaper OR egenskaper && ARRAY[$periodetypeEgenskaper]::varchar[]) -- egenskaper saksbehandler har filtrert på
                 AND (:ingen_mottakertype_egenskaper OR egenskaper && ARRAY[$mottakerEgenskaper]::varchar[]) -- egenskaper saksbehandler har filtrert på
                 AND (:ingen_antallarbeidsforholdtype_egenskaper OR egenskaper && ARRAY[$antallArbeidsforholdEgenskaper]::varchar[]) -- egenskaper saksbehandler har filtrert på
+                AND (:ingen_statustype_egenskaper OR egenskaper && ARRAY[$statusEgenskaper]::varchar[]) -- egenskaper saksbehandler har filtrert på
                 AND NOT (egenskaper && ARRAY[$egenskaperSomSkalEkskluderes]::varchar[]) -- egenskaper saksbehandler ikke har tilgang til
                 AND NOT (egenskaper && ARRAY['BESLUTTER']::varchar[] AND ttv.saksbehandler = :oid) -- hvis oppgaven er sendt til beslutter og saksbehandler var den som sendte
                 AND 
@@ -155,6 +158,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                 "ingen_periodetype_egenskaper" to (periodetypeEgenskaper == null),
                 "ingen_mottakertype_egenskaper" to (mottakerEgenskaper == null),
                 "ingen_antallarbeidsforholdtype_egenskaper" to (antallArbeidsforholdEgenskaper == null),
+                "ingen_statustype_egenskaper" to (statusEgenskaper == null),
             )
         ).list { row ->
             OppgaveFraDatabaseForVisning(

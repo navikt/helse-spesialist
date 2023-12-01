@@ -9,6 +9,7 @@ import no.nav.helse.db.EgenskapForDatabase.BESLUTTER
 import no.nav.helse.db.EgenskapForDatabase.DELVIS_REFUSJON
 import no.nav.helse.db.EgenskapForDatabase.EN_ARBEIDSGIVER
 import no.nav.helse.db.EgenskapForDatabase.FLERE_ARBEIDSGIVERE
+import no.nav.helse.db.EgenskapForDatabase.PÅ_VENT
 import no.nav.helse.db.EgenskapForDatabase.FORSTEGANGSBEHANDLING
 import no.nav.helse.db.EgenskapForDatabase.FORTROLIG_ADRESSE
 import no.nav.helse.db.EgenskapForDatabase.HASTER
@@ -108,12 +109,12 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode()
-        opprettOppgave(contextId = CONTEXT_ID, egenskaper = listOf(EGENSKAP, RISK_QA))
+        opprettOppgave(contextId = CONTEXT_ID, egenskaper = listOf(EGENSKAP, RISK_QA, PÅ_VENT))
         assertEquals(1, oppgave().size)
         oppgave().first().assertEquals(
             LocalDate.now(),
             OPPGAVETYPE,
-            listOf(OPPGAVETYPE, "RISK_QA"),
+            listOf(OPPGAVETYPE, "RISK_QA", "PÅ_VENT"),
             OPPGAVESTATUS,
             true,
             null,
@@ -748,11 +749,11 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `Grupperte filtrerte egenskaper fungerer sammen med ekskluderte egenskaper`() {
         nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456789", oppgaveEgenskaper = listOf(
-            SØKNAD, FORSTEGANGSBEHANDLING, DELVIS_REFUSJON, FLERE_ARBEIDSGIVERE
+            SØKNAD, FORSTEGANGSBEHANDLING, DELVIS_REFUSJON, FLERE_ARBEIDSGIVERE, PÅ_VENT
         ))
         val oppgaveId1 = OPPGAVE_ID
         nyPerson(fødselsnummer = "12345678913", aktørId = "1234567891014", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456790", oppgaveEgenskaper = listOf(
-            SØKNAD, HASTER, UTLAND, FORSTEGANGSBEHANDLING, DELVIS_REFUSJON, FLERE_ARBEIDSGIVERE
+            SØKNAD, HASTER, UTLAND, FORSTEGANGSBEHANDLING, DELVIS_REFUSJON, FLERE_ARBEIDSGIVERE, PÅ_VENT
         ))
 
         val oppgaver = oppgaveDao.finnOppgaverForVisning(
@@ -763,6 +764,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
                 Egenskap.Kategori.Periodetype to listOf(FORSTEGANGSBEHANDLING),
                 Egenskap.Kategori.Mottaker to listOf(DELVIS_REFUSJON),
                 Egenskap.Kategori.Inntektskilde to listOf(FLERE_ARBEIDSGIVERE),
+                Egenskap.Kategori.Status to listOf(PÅ_VENT),
             )
         )
 

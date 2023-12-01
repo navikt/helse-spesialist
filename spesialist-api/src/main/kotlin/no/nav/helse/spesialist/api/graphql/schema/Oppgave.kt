@@ -51,7 +51,8 @@ enum class Kategori {
     Inntektskilde,
     Oppgavetype,
     Ukategorisert,
-    Periodetype
+    Periodetype,
+    Status
 }
 
 data class Filtrering(

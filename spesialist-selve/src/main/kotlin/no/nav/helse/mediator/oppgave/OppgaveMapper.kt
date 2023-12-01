@@ -124,6 +124,7 @@ internal object OppgaveMapper {
         Kategori.Oppgavetype -> Egenskap.Kategori.Oppgavetype
         Kategori.Ukategorisert -> Egenskap.Kategori.Ukategorisert
         Kategori.Periodetype -> Egenskap.Kategori.Periodetype
+        Kategori.Status -> Egenskap.Kategori.Status
     }
 
     private fun Egenskap.tilApiversjon(): EgenskapForApi = when (this) {
@@ -161,6 +162,7 @@ internal object OppgaveMapper {
         Egenskap.Kategori.Oppgavetype -> Kategori.Oppgavetype
         Egenskap.Kategori.Ukategorisert -> Kategori.Ukategorisert
         Egenskap.Kategori.Periodetype -> Kategori.Periodetype
+        Egenskap.Kategori.Status -> Kategori.Status
     }
 
     internal fun EgenskapForDatabase.tilModellversjon(): Egenskap = when (this) {
