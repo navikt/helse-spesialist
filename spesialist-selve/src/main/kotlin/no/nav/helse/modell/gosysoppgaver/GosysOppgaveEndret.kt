@@ -3,13 +3,13 @@ package no.nav.helse.modell.gosysoppgaver
 import java.util.UUID
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.meldinger.Hendelse
+import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringForEksisterendeOppgaveCommand
 import no.nav.helse.modell.automatisering.SettTidligereAutomatiseringInaktivCommand
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
-import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.oppgave.SjekkAtOppgaveFortsattErÅpenCommand
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.UtbetalingDao
@@ -66,7 +66,6 @@ internal class GosysOppgaveEndret(
             utbetaling = utbetaling,
             periodetype = gosysOppgaveEndretCommandData.periodetype,
             sykefraværstilfelle = sykefraværstilfelle,
-            periodeTom = gosysOppgaveEndretCommandData.periodeTom,
         )
     )
 

@@ -442,6 +442,10 @@ internal class Generasjon private constructor(
             return this.filter { it.tilhører(tilOgMed) }.any { it.forhindrerAutomatisering() }
         }
 
+        internal fun List<Generasjon>.forhindrerAutomatisering(generasjon: Generasjon): Boolean {
+            return this.filter { it.tilhører(generasjon.periode.tom()) }.any { it.forhindrerAutomatisering() }
+        }
+
         internal fun List<Generasjon>.kreverTotrinnsvurdering(vedtaksperiodeId: UUID): Boolean {
             return overlapperMedEllerTidligereEnn(vedtaksperiodeId).any { it.kreverTotrinnsvurdering() }
         }

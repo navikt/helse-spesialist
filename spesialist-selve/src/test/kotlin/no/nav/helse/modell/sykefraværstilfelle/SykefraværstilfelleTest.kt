@@ -16,6 +16,13 @@ import org.junit.jupiter.api.assertThrows
 internal class SykefraværstilfelleTest {
 
     @Test
+    fun `Kan ikke opprette et sykefraværstilfelle uten å ha en generasjon`() {
+        assertThrows<IllegalStateException> {
+            sykefraværstilfelle(gjeldendeGenerasjoner = emptyList())
+        }
+    }
+
+    @Test
     fun `har ikke aktive varsler`() {
         val gjeldendeGenerasjon1 = generasjon(UUID.randomUUID())
         val gjeldendeGenerasjon2 = generasjon(UUID.randomUUID())

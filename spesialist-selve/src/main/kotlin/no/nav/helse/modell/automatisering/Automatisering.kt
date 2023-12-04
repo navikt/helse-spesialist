@@ -1,6 +1,5 @@
 package no.nav.helse.modell.automatisering
 
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
@@ -54,11 +53,10 @@ internal class Automatisering(
         utbetaling: Utbetaling,
         periodetype: Periodetype,
         sykefraværstilfelle: Sykefraværstilfelle,
-        periodeTom: LocalDate,
         onAutomatiserbar: () -> Unit
     ) {
         val problemer =
-            vurder(fødselsnummer, vedtaksperiodeId, utbetaling, periodetype, sykefraværstilfelle, periodeTom)
+            vurder(fødselsnummer, vedtaksperiodeId, utbetaling, periodetype, sykefraværstilfelle)
         val erUTS = utbetaling.harUtbetalingTilSykmeldt()
         val flereArbeidsgivere = vedtakDao.finnInntektskilde(vedtaksperiodeId) == Inntektskilde.FLERE_ARBEIDSGIVERE
         val erFørstegangsbehandling = periodetype == FØRSTEGANGSBEHANDLING
@@ -195,13 +193,12 @@ internal class Automatisering(
         vedtaksperiodeId: UUID,
         utbetaling: Utbetaling,
         periodetype: Periodetype,
-        sykefraværstilfelle: Sykefraværstilfelle,
-        periodeTom: LocalDate
+        sykefraværstilfelle: Sykefraværstilfelle
     ): List<String> {
         val risikovurdering =
             risikovurderingDao.hentRisikovurdering(vedtaksperiodeId)
                 ?: validering("Mangler vilkårsvurdering for arbeidsuførhet, aktivitetsplikt eller medvirkning") { false }
-        val forhindrerAutomatisering = sykefraværstilfelle.forhindrerAutomatisering(periodeTom)
+        val forhindrerAutomatisering = sykefraværstilfelle.forhindrerAutomatisering(vedtaksperiodeId)
         val harVergemål = vergemålDao.harVergemål(fødselsnummer) ?: false
         val tilhørerUtlandsenhet = erEnhetUtland(personDao.finnEnhetId(fødselsnummer))
         val antallÅpneGosysoppgaver = åpneGosysOppgaverDao.harÅpneOppgaver(fødselsnummer)

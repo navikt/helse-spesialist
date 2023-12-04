@@ -601,15 +601,12 @@ internal class HendelseMediator(
 
     private fun løsninger(messageContext: MessageContext, hendelseId: UUID, contextId: UUID): Løsninger? {
         return løsninger ?: run {
-            val hendelse = hendelseDao.finn(hendelseId, hendelsefabrikk)
-            val commandContext = commandContextDao.finnSuspendert(contextId)
-            if (hendelse == null || commandContext == null) {
-                mutableListOf<String>().let {
-                    if (hendelse == null) it += "Finner ikke hendelse med id=$hendelseId"
-                    if (commandContext == null) it += "Command context $contextId er ikke suspendert"
-                    logg.info("Ignorerer melding fordi: " + it.joinToString())
-                }
-
+            val commandContext = commandContextDao.finnSuspendert(contextId) ?: run {
+                logg.info("Ignorerer melding fordi: command context $contextId er ikke suspendert")
+                return null
+            }
+            val hendelse = hendelseDao.finn(hendelseId, hendelsefabrikk) ?: run {
+                logg.info("Ignorerer melding fordi: finner ikke hendelse med id=$hendelseId")
                 return null
             }
             Løsninger(messageContext, hendelse, contextId, commandContext).also { løsninger = it }

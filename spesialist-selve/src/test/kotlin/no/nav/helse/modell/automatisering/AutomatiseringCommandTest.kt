@@ -10,6 +10,7 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.objectMapper
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -28,6 +29,7 @@ internal class AutomatiseringCommandTest {
     }
 
     private val automatisering = mockk<Automatisering>(relaxed = true)
+    private val generasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
     private val command =
         AutomatiseringCommand(
             fødselsnummer,
@@ -44,8 +46,12 @@ internal class AutomatiseringCommandTest {
             ),
             Utbetaling(utbetalingId, 1000, 1000, Utbetalingtype.UTBETALING),
             periodeType,
-            Sykefraværstilfelle(fødselsnummer, 1.januar, emptyList(), emptyList()),
-            1.januar
+            Sykefraværstilfelle(
+                fødselsnummer = fødselsnummer,
+                skjæringstidspunkt = 1.januar,
+                gjeldendeGenerasjoner = listOf(generasjon),
+                skjønnsfastatteSykepengegrunnlag = emptyList()
+            )
         )
 
     private lateinit var context: CommandContext
@@ -59,16 +65,16 @@ internal class AutomatiseringCommandTest {
     fun `kaller automatiser utfør og returnerer true`() {
         assertTrue(command.execute(context))
         verify {
-            automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), any())
+            automatisering.utfør(any(), any(), any(), any(), any(), any(), any())
         }
     }
 
     @Test
     fun `publiserer godkjenningsmelding ved automatisert godkjenning`() {
         every {
-            automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), captureLambda())
+            automatisering.utfør(any(), any(), any(), any(), any(), any(), captureLambda())
         } answers {
-            arg<() -> Unit>(7).invoke()
+            arg<() -> Unit>(6).invoke()
         }
 
         assertTrue(command.execute(context))

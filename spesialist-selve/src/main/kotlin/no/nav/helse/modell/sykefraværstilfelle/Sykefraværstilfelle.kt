@@ -22,6 +22,9 @@ internal class Sykefraværstilfelle(
     private val gjeldendeGenerasjoner: List<Generasjon>,
     skjønnsfastatteSykepengegrunnlag: List<SkjønnsfastattSykepengegrunnlag>,
 ) {
+    init {
+        check(gjeldendeGenerasjoner.isNotEmpty()) { "Kan ikke opprette et sykefraværstilfelle uten generasjoner" }
+    }
     private val skjønnsfastatteSykepengegrunnlag = skjønnsfastatteSykepengegrunnlag.sortert()
     private val observers = mutableListOf<SykefraværstilfelleObserver>()
 
@@ -35,8 +38,10 @@ internal class Sykefraværstilfelle(
         return generasjon.hasterÅBehandle()
     }
 
-    internal fun forhindrerAutomatisering(tilOgMed: LocalDate): Boolean {
-        return gjeldendeGenerasjoner.forhindrerAutomatisering(tilOgMed)
+    internal fun forhindrerAutomatisering(vedtaksperiodeId: UUID): Boolean {
+        val generasjonForPeriode = gjeldendeGenerasjoner.finnGenerasjon(vedtaksperiodeId) ?:
+            throw IllegalStateException("Sykefraværstilfellet må inneholde generasjon for vedtaksperiodeId=$vedtaksperiodeId")
+        return gjeldendeGenerasjoner.forhindrerAutomatisering(generasjonForPeriode)
     }
 
     internal fun håndter(varsel: Varsel, hendelseId: UUID) {

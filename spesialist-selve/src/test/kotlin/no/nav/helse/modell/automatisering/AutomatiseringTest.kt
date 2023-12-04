@@ -314,7 +314,7 @@ internal class AutomatiseringTest {
         val onAutomatiserbar = mockk<() -> Unit>(relaxed = true)
         fun forsøkAutomatisering(
             periodetype: Periodetype = Companion.periodetype,
-            generasjoner: List<Generasjon> = emptyList(),
+            generasjoner: List<Generasjon> = listOf(Generasjon(UUID.randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar)),
             utbetaling: Utbetaling = enUtbetaling(),
         ) = automatisering.utfør(
             fødselsnummer,
@@ -323,7 +323,6 @@ internal class AutomatiseringTest {
             utbetaling,
             periodetype,
             sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1.januar, generasjoner, emptyList()),
-            periodeTom = 31.januar,
             onAutomatiserbar,
         )
 

@@ -179,8 +179,7 @@ internal class Godkjenningsbehov(
             godkjenningMediator = godkjenningMediator,
             utbetaling = utbetaling,
             periodetype = periodetype,
-            sykefraværstilfelle = sykefraværstilfelle,
-            periodeTom = periodeTom
+            sykefraværstilfelle = sykefraværstilfelle
         ),
         OpprettSaksbehandleroppgaveCommand(
             fødselsnummer = fødselsnummer,

@@ -149,7 +149,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning(vedtaksperiodeId = vedtaksperiodeId)
         håndterUtbetalingUtbetalt()
-        håndterUtkastTilVedtak()
+        håndterUtkastTilVedtak(fom = fom, tom = tom, skjæringstidspunkt = skjæringstidspunkt)
         håndterVedtakFattet()
     }
 
@@ -1011,7 +1011,10 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
-        fastsattType: String = "EtterHovedregel"
+        fastsattType: String = "EtterHovedregel",
+        fom: LocalDate = 1.januar,
+        tom: LocalDate = 31.januar,
+        skjæringstidspunkt: LocalDate = fom
     ) {
         val utbetalingId = if (this::utbetalingId.isInitialized) this.utbetalingId else null
         sisteMeldingId = meldingssender.sendUtkastTilVedtak(
@@ -1020,9 +1023,9 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId,
-            fom = 1.januar,
-            tom = 31.januar,
-            skjæringstidspunkt = 1.januar,
+            fom = fom,
+            tom = tom,
+            skjæringstidspunkt = skjæringstidspunkt,
             fastsattType = fastsattType
         )
     }
