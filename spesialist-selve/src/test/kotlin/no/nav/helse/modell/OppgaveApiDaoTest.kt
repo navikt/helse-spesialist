@@ -63,28 +63,10 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `Får feil dersom det finnes flere oppgaver som avventer saksbehandler for en person`() {
-        nyPerson()
-        opprettOppgave()
-        assertThrows<SQLException> {
-            oppgaveApiDao.finnOppgaveId(VEDTAKSPERIODE)
-        }
-    }
-
-    @Test
     fun `Finner oppgave basert på fødselsnummer`() {
         nyPerson()
         val oppgaveId = oppgaveApiDao.finnOppgaveId(FNR)
         assertNotNull(oppgaveId)
-    }
-
-    @Test
-    fun `Feiler på oppslag på oppgave om det fins flere oppgaver for personen`() {
-        nyPerson()
-        opprettOppgave()
-        assertThrows<SQLException> {
-            oppgaveApiDao.finnOppgaveId(FNR)
-        }
     }
 
     @Test

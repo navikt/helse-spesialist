@@ -24,12 +24,14 @@ import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.TestHendelse
 import no.nav.helse.modell.oppgave.Egenskap
+import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
@@ -102,6 +104,61 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
             vedtakId,
             CONTEXT_ID
         )
+    }
+
+    @Test
+    fun `skal ikke lagre ny oppgave dersom det allerede er en eksisterende oppgave på samme person med gitt status`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+
+        opprettVedtaksperiode()
+        opprettOppgave(contextId = CONTEXT_ID)
+        val vedtakIdPåOppgave = vedtakId
+
+        val vedtaksperiodeId = UUID.randomUUID()
+        opprettVedtaksperiode(
+            vedtaksperiodeId = vedtaksperiodeId,
+            fom = TOM.plusDays(1),
+            tom = TOM.plusDays(10),
+            periodetype = Periodetype.FORLENGELSE
+        )
+        assertThrows<IllegalArgumentException> {
+            opprettOppgave(vedtaksperiodeId = vedtaksperiodeId, contextId = CONTEXT_ID)
+        }
+
+        assertEquals(1, oppgave().size)
+        oppgave().first().assertEquals(
+            LocalDate.now(),
+            OPPGAVETYPE,
+            listOf(OPPGAVETYPE),
+            OPPGAVESTATUS,
+            true,
+            null,
+            null,
+            vedtakIdPåOppgave,
+            CONTEXT_ID
+        )
+    }
+
+    @Test
+    fun `skal lagre ny oppgave dersom eksisterende oppgave på samme person ikke avventer saksbehandler`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+
+        opprettVedtaksperiode()
+        opprettOppgave(contextId = CONTEXT_ID)
+        ferdigstillOppgave(oppgaveId = OPPGAVE_ID)
+        assertEquals(1, oppgave().size)
+
+        val vedtaksperiodeId = UUID.randomUUID()
+        opprettVedtaksperiode(
+            vedtaksperiodeId = vedtaksperiodeId,
+            fom = TOM.plusDays(1),
+            tom = TOM.plusDays(10),
+            periodetype = Periodetype.FORLENGELSE
+        )
+        opprettOppgave(vedtaksperiodeId = vedtaksperiodeId, contextId = CONTEXT_ID)
+        assertEquals(2, oppgave().size)
     }
 
     @Test
@@ -188,18 +245,28 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     fun `finner oppgaveId ved hjelp av fødselsnummer`() {
         nyPerson()
         assertEquals(oppgaveId, oppgaveDao.finnOppgaveId(FNR))
+        nyPerson(
+            fødselsnummer = FNR.reversed(),
+            aktørId = AKTØR.reversed(),
+            organisasjonsnummer = ORGNUMMER.reversed(),
+            vedtaksperiodeId = UUID.randomUUID()
+        )
+        assertEquals(oppgaveId, oppgaveDao.finnOppgaveId(FNR.reversed()))
     }
 
     @Test
-    fun `finner nyeste oppgaveId for ikke-avsluttede oppgaver ved hjelp av vedtaksperiodeId`() {
+    fun `finner oppgaveId for ikke-avsluttet oppgave ved hjelp av vedtaksperiodeId`() {
         nyPerson()
+        oppgaveDao.updateOppgave(oppgaveId = OPPGAVE_ID, oppgavestatus = "Ferdigstilt", egenskaper = listOf(EGENSKAP))
         opprettOppgave()
 
-        val actual = oppgaveDao.finnIdForAktivOppgave(VEDTAKSPERIODE)
-        assertEquals(OPPGAVE_ID, actual)
+        assertEquals(OPPGAVE_ID, oppgaveDao.finnIdForAktivOppgave(VEDTAKSPERIODE))
 
         oppgaveDao.invaliderOppgaveFor(fødselsnummer = FNR)
         assertNull(oppgaveDao.finnIdForAktivOppgave(VEDTAKSPERIODE))
+
+        opprettOppgave()
+        assertEquals(OPPGAVE_ID, oppgaveDao.finnIdForAktivOppgave(VEDTAKSPERIODE))
     }
 
     @Test
@@ -814,7 +881,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `sjekker om det fins aktiv oppgave med to oppgaver`() {
         nyPerson()
-        oppgaveDao.updateOppgave(oppgaveId = oppgaveId, oppgavestatus = "AvventerSaksbehandler", egenskaper = listOf(
+        oppgaveDao.updateOppgave(oppgaveId = oppgaveId, oppgavestatus = "Ferdigstilt", egenskaper = listOf(
             EGENSKAP))
 
         opprettOppgave(vedtaksperiodeId = VEDTAKSPERIODE)

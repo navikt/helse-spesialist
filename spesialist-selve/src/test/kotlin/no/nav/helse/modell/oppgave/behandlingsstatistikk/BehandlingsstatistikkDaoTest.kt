@@ -112,16 +112,6 @@ internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `flere periodetyper`() {
-        nyPerson()
-        nyVedtaksperiode(Periodetype.FORLENGELSE)
-        val dto = behandlingsstatistikkDao.oppgavestatistikk(NOW)
-        assertEquals(2, dto.oppgaverTilGodkjenning.totalt)
-        assertEquals(1, dto.oppgaverTilGodkjenning.perPeriodetype[BehandlingsstatistikkTypeForApi.FØRSTEGANGSBEHANDLING])
-        assertEquals(1, dto.oppgaverTilGodkjenning.perPeriodetype[BehandlingsstatistikkTypeForApi.FORLENGELSE])
-    }
-
-    @Test
     fun `tar ikke med innslag som er eldre enn dato som sendes inn for fullførte behandlinger`() {
         nyPersonMedAutomatiskVedtak()
         opprettOppgave(vedtaksperiodeId = VEDTAKSPERIODE)

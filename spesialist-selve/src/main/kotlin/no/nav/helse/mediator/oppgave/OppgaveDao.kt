@@ -418,6 +418,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
     ) =
         requireNotNull(run {
             val vedtakRef = vedtakRef(vedtaksperiodeId)
+            val personRef = personRef(vedtaksperiodeId)
 
             val (arbeidsgiverBeløp, personBeløp) = finnArbeidsgiverbeløpOgPersonbeløp(vedtaksperiodeId, utbetalingId)
             val mottaker = finnMottaker(arbeidsgiverBeløp > 0, personBeløp > 0)
@@ -425,8 +426,16 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
 
             asSQL(
                 """
-                    INSERT INTO oppgave(id, oppdatert, type, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, command_context_id, utbetaling_id, mottaker, egenskaper, kan_avvises)
-                    VALUES (:id, now(), CAST(:oppgavetype as oppgavetype), CAST(:oppgavestatus as oppgavestatus), :ferdigstiltAv, :ferdigstiltAvOid, :vedtakRef, :commandContextId, :utbetalingId, CAST(:mottaker as mottakertype), '{$egenskaperForDatabase}', :kanAvvises);
+                    INSERT INTO oppgave(id, oppdatert, type, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, command_context_id, utbetaling_id, mottaker, egenskaper, kan_avvises)      
+                    SELECT :id, now(), CAST(:oppgavetype as oppgavetype), CAST(:oppgavestatus as oppgavestatus), :ferdigstiltAv, :ferdigstiltAvOid, :vedtakRef, :commandContextId, :utbetalingId, CAST(:mottaker as mottakertype), '{$egenskaperForDatabase}', :kanAvvises
+                    WHERE
+                        NOT EXISTS(
+                            SELECT 1 FROM oppgave o
+                                LEFT JOIN vedtak v on v.id = o.vedtak_ref
+                                WHERE o.status='AvventerSaksbehandler'::oppgavestatus 
+                                    AND v.person_ref=:personRef
+                        )
+                    ;
                 """, mapOf(
                     "id" to id,
                     "oppgavetype" to egenskap,
@@ -438,9 +447,15 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                     "utbetalingId" to utbetalingId,
                     "mottaker" to mottaker?.name,
                     "kanAvvises" to kanAvvises,
+                    "personRef" to personRef,
                 )
             ).updateAndReturnGeneratedKey()
-        }) { "Kunne ikke opprette oppgave" }
+        }) { "Kunne ikke opprette oppgave for vedtak: $vedtaksperiodeId" }
+
+    private fun personRef(vedtaksperiodeId: UUID) = requireNotNull(asSQL(
+        "SELECT person_ref FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId;",
+        mapOf("vedtaksperiodeId" to vedtaksperiodeId)
+    ).single { it.long("person_ref") }) { "Kunne ikke finne person for vedtaksperiodeId $vedtaksperiodeId" }
 
     private fun vedtakRef(vedtaksperiodeId: UUID) = requireNotNull(asSQL(
         "SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId;",
