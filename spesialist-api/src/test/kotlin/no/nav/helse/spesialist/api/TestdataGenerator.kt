@@ -29,11 +29,6 @@ internal object TestdataGenerator {
     )
 
     private val ukategoriserteOppgaveegenskaper get() = mutableListOf<Oppgaveegenskap>().apply {
-        if (Random.nextFloat() > 0.9) {
-            if (Random.nextFloat() > 0.2) add(Oppgaveegenskap(Egenskap.BESLUTTER, Kategori.Ukategorisert))
-            else add(Oppgaveegenskap(Egenskap.RETUR, Kategori.Ukategorisert))
-        }
-
         if (Random.nextFloat() > 0.85) {
             if (Random.nextFloat() > 0.1) add(Oppgaveegenskap(Egenskap.RISK_QA, Kategori.Ukategorisert))
             else add(Oppgaveegenskap(Egenskap.STIKKPROVE, Kategori.Ukategorisert))
@@ -49,6 +44,15 @@ internal object TestdataGenerator {
         if (Random.nextFloat() > 0.8) add(Oppgaveegenskap(Egenskap.HASTER, Kategori.Ukategorisert))
         if (Random.nextFloat() > 0.9) add(Oppgaveegenskap(Egenskap.UTLAND, Kategori.Ukategorisert))
         if (Random.nextFloat() > 0.97) add(Oppgaveegenskap(Egenskap.SPESIALSAK, Kategori.Ukategorisert))
+    }
+
+    private val statusEgenskaper get() = mutableListOf<Oppgaveegenskap>().apply {
+        if (Random.nextFloat() > 0.9) {
+            if (Random.nextFloat() > 0.2) add(Oppgaveegenskap(Egenskap.BESLUTTER, Kategori.Status))
+            else add(Oppgaveegenskap(Egenskap.RETUR, Kategori.Status))
+        }
+
+        if (Random.nextFloat() > 0.8) add(Oppgaveegenskap(Egenskap.PA_VENT, Kategori.Status))
     }
 
     internal fun oppgave(): OppgaveTilBehandling {
@@ -68,7 +72,7 @@ internal object TestdataGenerator {
             navn = tilfeldigNavn(),
             aktorId = tilfeldigAktørId(),
             tildeling = tildeltTil?.let { Tildeling(it.navn, it.epostadresse, it.oid.toString(), Random.nextFloat() <= ANDEL_PÅ_VENT) },
-            egenskaper = listOf(periodetypeegenskap, oppgavetypeegenskap, mottakeregenskap, antallArbeidsforholdegenskap) + tilfeldigeUkategoriserteEgenskaper(),
+            egenskaper = listOf(periodetypeegenskap, oppgavetypeegenskap, mottakeregenskap, antallArbeidsforholdegenskap) + tilfeldigeUkategoriserteEgenskaper() + tilfeldigeStatusEgenskaper(),
             periodetype = periodetype,
             oppgavetype = oppgavetype,
             mottaker = mottaker,
@@ -128,6 +132,7 @@ internal object TestdataGenerator {
     }
 
     private fun tilfeldigeUkategoriserteEgenskaper(): List<Oppgaveegenskap> = ukategoriserteOppgaveegenskaper
+    private fun tilfeldigeStatusEgenskaper(): List<Oppgaveegenskap> = statusEgenskaper
 
     private fun antallArbeidsforhold(): Pair<Oppgaveegenskap, AntallArbeidsforhold> {
         val arbeidsforhold = listOf(AntallArbeidsforhold.ET_ARBEIDSFORHOLD, AntallArbeidsforhold.FLERE_ARBEIDSFORHOLD)
