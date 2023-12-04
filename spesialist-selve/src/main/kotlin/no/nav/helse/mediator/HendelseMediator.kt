@@ -1,5 +1,6 @@
 package no.nav.helse.mediator
 
+import SøknadSendtArbeidsledigRiver
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -104,6 +105,7 @@ internal class HendelseMediator(
         DelegatedRapid(rapidsConnection, ::forbered, ::fortsett, ::errorHandler).also {
             GodkjenningsbehovRiver(it, this)
             SøknadSendtRiver(it, this)
+            SøknadSendtArbeidsledigRiver(it, this)
             PersoninfoRiver(it, this)
             FlerePersoninfoRiver(it, this)
             HentEnhetRiver(it, this)
