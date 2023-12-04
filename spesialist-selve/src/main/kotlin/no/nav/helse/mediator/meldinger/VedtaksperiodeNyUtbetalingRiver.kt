@@ -33,8 +33,6 @@ internal class VedtaksperiodeNyUtbetalingRiver(
         val utbetalingId = UUID.fromString(packet["utbetalingId"].asText())
         val id = UUID.fromString(packet["@id"].asText())
 
-        if (utbetalingId == UUID.fromString("2a7bf322-a1f7-4e72-b55d-fb967715d7b8")) return
-
         sikkerlogg.info(
             "Mottok melding om vedtaksperiode_ny_utbetaling for {}, {}, {} som følge av melding med {}",
             kv("fødselsnummer", fødselsnummer),
