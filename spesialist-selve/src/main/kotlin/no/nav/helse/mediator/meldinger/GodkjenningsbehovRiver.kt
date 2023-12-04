@@ -63,6 +63,8 @@ internal class GodkjenningsbehovRiver(
             StructuredArguments.keyValue("hendelseId", hendelseId),
             StructuredArguments.keyValue("hendelse", packet.toJson()),
         )
+        val utbetalingId = UUID.fromString(packet["utbetalingId"].asText())
+        if (utbetalingId == UUID.fromString("2a7bf322-a1f7-4e72-b55d-fb967715d7b8")) return
         mediator.godkjenningsbehov(
             message = packet,
             id = hendelseId,
@@ -73,7 +75,7 @@ internal class GodkjenningsbehovRiver(
             periodeTom = LocalDate.parse(packet["Godkjenning.periodeTom"].asText()),
             skjæringstidspunkt = LocalDate.parse(packet["Godkjenning.skjæringstidspunkt"].asText()),
             vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText()),
-            utbetalingId = UUID.fromString(packet["utbetalingId"].asText()),
+            utbetalingId = utbetalingId,
             periodetype = Periodetype.valueOf(packet["Godkjenning.periodetype"].asText()),
             førstegangsbehandling = packet["Godkjenning.førstegangsbehandling"].asBoolean(),
             utbetalingtype = Utbetalingtype.valueOf(packet["Godkjenning.utbetalingtype"].asText()),
