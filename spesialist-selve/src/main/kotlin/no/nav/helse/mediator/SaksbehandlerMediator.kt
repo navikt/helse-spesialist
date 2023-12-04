@@ -181,6 +181,7 @@ internal class SaksbehandlerMediator(
             periodeTilGodkjenning.avvisVarsler(fødselsnummer, behandlingId, saksbehandler.ident(), this::vurderVarsel)
         }
 
+        påVentDao.slettPåVent(godkjenning.oppgavereferanse)
         oppgaveApiDao.lagreBehandlingsreferanse(godkjenning.oppgavereferanse, behandlingId)
     }
 

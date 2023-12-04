@@ -37,7 +37,10 @@ import no.nav.helse.testEnv
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -171,6 +174,18 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
         assertDoesNotThrow {
             mediator.håndterTotrinnsvurdering(oppgaveId)
         }
+    }
+
+    @Test
+    fun `håndterer på vent`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjonId = UUID.randomUUID()
+        nyPerson(vedtaksperiodeId = vedtaksperiodeId, generasjonId = generasjonId)
+        påVentDao.lagrePåVent(oppgaveId, saksbehandler.oid, LocalDate.now(), "")
+        assertDoesNotThrow {
+            mediator.håndter(godkjenning(oppgaveId, true), UUID.randomUUID(), saksbehandler)
+        }
+        assertFalse(påVentDao.erPåVent(vedtaksperiodeId))
     }
 
     @Test
