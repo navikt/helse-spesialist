@@ -9,17 +9,16 @@ import no.nav.helse.db.EgenskapForDatabase.BESLUTTER
 import no.nav.helse.db.EgenskapForDatabase.DELVIS_REFUSJON
 import no.nav.helse.db.EgenskapForDatabase.EN_ARBEIDSGIVER
 import no.nav.helse.db.EgenskapForDatabase.FLERE_ARBEIDSGIVERE
-import no.nav.helse.db.EgenskapForDatabase.PÅ_VENT
 import no.nav.helse.db.EgenskapForDatabase.FORSTEGANGSBEHANDLING
 import no.nav.helse.db.EgenskapForDatabase.FORTROLIG_ADRESSE
 import no.nav.helse.db.EgenskapForDatabase.HASTER
+import no.nav.helse.db.EgenskapForDatabase.PÅ_VENT
 import no.nav.helse.db.EgenskapForDatabase.REVURDERING
 import no.nav.helse.db.EgenskapForDatabase.RISK_QA
 import no.nav.helse.db.EgenskapForDatabase.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.db.EgenskapForDatabase.SØKNAD
 import no.nav.helse.db.EgenskapForDatabase.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.db.EgenskapForDatabase.UTLAND
-import no.nav.helse.mediator.oppgave.Oppgavemelder
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.TestHendelse
@@ -31,12 +30,12 @@ import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class OppgaveDaoTest : DatabaseIntegrationTest() {
     private companion object {
@@ -48,34 +47,6 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     fun setupDaoTest() {
         godkjenningsbehov(TESTHENDELSE.id)
         CommandContext(CONTEXT_ID).opprett(CommandContextDao(dataSource), TESTHENDELSE)
-    }
-
-    @Test
-    fun `Henter oppgavemelding`() {
-        val contextId = UUID.randomUUID()
-        val hendelseId = UUID.randomUUID()
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettGenerasjon()
-        opprettVedtaksperiode()
-        opprettOppgave(oppgavetype = "SØKNAD", hendelseId = hendelseId, contextId = contextId)
-        opprettUtbetalingKobling(VEDTAKSPERIODE, UTBETALING_ID)
-
-        val oppgaveId = oppgaveDao.finnOppgaveId(UTBETALING_ID)
-        val oppgavemelding = oppgaveDao.hentOppgavemelding(oppgaveId!!)
-        val forventetOppgavemleding = Oppgavemelder.Oppgavemelding(
-            hendelseId = hendelseId,
-            oppgaveId = oppgaveId,
-            status = "AvventerSaksbehandler",
-            type = Oppgavetype.SØKNAD.toString(),
-            beslutter = null,
-            erRetur = false,
-            ferdigstiltAvIdent = null,
-            ferdigstiltAvOid = null,
-            påVent = false
-        )
-
-        assertEquals(forventetOppgavemleding, oppgavemelding)
     }
 
     @Test

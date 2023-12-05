@@ -31,7 +31,7 @@ internal class Oppgavemelder(
         rapidsConnection.publish(fnr, melding.toJson())
     }
 
-    private fun melding(eventName: String, oppgavemelding: Oppgavemelding): Pair<String, JsonMessage> {
+    private fun melding(eventName: String, oppgavemelding: OppgaveForKafkaBygger.Oppgavemelding): Pair<String, JsonMessage> {
         val fødselsnummer: String = hendelseDao.finnFødselsnummer(oppgavemelding.hendelseId)
         return fødselsnummer to JsonMessage.newMessage(eventName, mutableMapOf(
             "@forårsaket_av" to mapOf("id" to oppgavemelding.hendelseId),
@@ -42,24 +42,13 @@ internal class Oppgavemelder(
             "fødselsnummer" to fødselsnummer,
             "erBeslutterOppgave" to (oppgavemelding.beslutter != null),
             "erReturOppgave" to oppgavemelding.erRetur,
-            "påVent" to oppgavemelding.påVent
+            "påVent" to oppgavemelding.påVent,
+            "egenskaper" to oppgavemelding.egenskaper
         ).apply {
             oppgavemelding.ferdigstiltAvIdent?.also { put("ferdigstiltAvIdent", it) }
             oppgavemelding.ferdigstiltAvOid?.also { put("ferdigstiltAvOid", it) }
         })
     }
-
-    data class Oppgavemelding(
-        val hendelseId: UUID,
-        val oppgaveId: Long,
-        val status: String,
-        val type: String,
-        val beslutter: UUID?,
-        val erRetur: Boolean,
-        val ferdigstiltAvIdent: String? = null,
-        val ferdigstiltAvOid: UUID? = null,
-        val påVent: Boolean,
-    )
 }
 
 private class OppgaveForKafkaBygger : OppgaveVisitor {
@@ -72,10 +61,11 @@ private class OppgaveForKafkaBygger : OppgaveVisitor {
     private var ferdigstiltAvIdent: String? = null
     private var ferdigstiltAvOid: UUID? = null
     private var påVent by Delegates.notNull<Boolean>()
+    private lateinit var egenskaper: List<String>
 
-    fun bygg(oppgave: Oppgave): Oppgavemelder.Oppgavemelding {
+    fun bygg(oppgave: Oppgave): Oppgavemelding {
         oppgave.accept(this)
-        return Oppgavemelder.Oppgavemelding(
+        return Oppgavemelding(
             hendelseId = hendelseId,
             oppgaveId = oppgaveId,
             status = status,
@@ -84,9 +74,23 @@ private class OppgaveForKafkaBygger : OppgaveVisitor {
             erRetur = erRetur,
             ferdigstiltAvIdent = ferdigstiltAvIdent,
             ferdigstiltAvOid = ferdigstiltAvOid,
-            påVent = påVent
+            påVent = påVent,
+            egenskaper = egenskaper
         )
     }
+
+    data class Oppgavemelding(
+        val hendelseId: UUID,
+        val oppgaveId: Long,
+        val status: String,
+        val type: String,
+        val beslutter: UUID?,
+        val erRetur: Boolean,
+        val ferdigstiltAvIdent: String? = null,
+        val ferdigstiltAvOid: UUID? = null,
+        val påVent: Boolean,
+        val egenskaper: List<String>
+    )
 
     override fun visitOppgave(
         id: Long,
@@ -110,6 +114,7 @@ private class OppgaveForKafkaBygger : OppgaveVisitor {
         this.ferdigstiltAvIdent = ferdigstiltAvIdent
         this.ferdigstiltAvOid = ferdigstiltAvOid
         this.påVent = påVent
+        this.egenskaper = egenskaper.map { it.tilKafkaversjon() }
     }
 
     override fun visitTotrinnsvurdering(

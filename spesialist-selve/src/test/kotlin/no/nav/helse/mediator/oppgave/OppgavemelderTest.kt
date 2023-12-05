@@ -54,6 +54,7 @@ class OppgavemelderTest {
         assertEquals(FNR, melding["fødselsnummer"].asText())
         assertEquals(false, melding["erBeslutterOppgave"].asBoolean())
         assertEquals(false, melding["erReturOppgave"].asBoolean())
+        assertEquals(listOf("SØKNAD"), melding["egenskaper"].map { it.asText() })
     }
 
     private fun nyOppgave(medTotrinnsvurdering: Boolean = false) = Oppgave.nyOppgave(
