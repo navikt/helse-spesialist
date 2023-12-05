@@ -11,8 +11,9 @@ data class Soknad(
 data class Soknadsperioder(
     val fom: DateString,
     val tom: DateString,
-    val grad: Int,
+    val grad: Int?,
     val faktiskGrad: Int?,
+    val sykmeldingsgrad: Int?,
 )
 
 data class Sporsmal(

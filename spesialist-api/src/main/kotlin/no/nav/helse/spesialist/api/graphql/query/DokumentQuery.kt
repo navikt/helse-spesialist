@@ -190,12 +190,12 @@ class DokumentQuery(
     }
 
     private fun JsonNode.tilSøknadsperioder(): Soknadsperioder {
-        val faktiskGrad = this.path("faktiskGrad").takeUnless { it.isMissingOrNull() }?.asInt()
         return Soknadsperioder(
             fom = this.path("fom").asText(),
             tom = this.path("tom").asText(),
-            grad = this.path("grad").asInt(),
-            faktiskGrad = faktiskGrad
+            grad = this.path("grad").takeUnless { it.isMissingOrNull() }?.asInt(),
+            sykmeldingsgrad = this.path("sykmeldingsgrad").takeUnless { it.isMissingOrNull() }?.asInt(),
+            faktiskGrad = this.path("faktiskGrad").takeUnless { it.isMissingOrNull() }?.asInt()
         )
     }
 

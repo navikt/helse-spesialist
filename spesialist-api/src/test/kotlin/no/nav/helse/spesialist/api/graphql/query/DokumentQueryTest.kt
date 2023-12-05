@@ -96,7 +96,7 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
                     fnr: "$FØDSELSNUMMER"
                 ) {
                     sykmeldingSkrevet, arbeidGjenopptatt, egenmeldingsdagerFraSykmelding, soknadsperioder {
-                    fom, tom, grad, faktiskGrad
+                    fom, tom, grad, faktiskGrad, sykmeldingsgrad
                     }, sporsmal {
                         tag, sporsmalstekst, undertekst, svartype, svar {verdi}, undersporsmal { 
                             tag, sporsmalstekst, undertekst, svartype, svar {verdi}, undersporsmal { 
@@ -129,6 +129,7 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
         assertEquals("2018-01-01", hentetSoknadsperioder["fom"].asText())
         assertEquals("2018-01-31", hentetSoknadsperioder["tom"].asText())
         assertEquals(100, hentetSoknadsperioder["grad"].asInt())
+        assertEquals(100, hentetSoknadsperioder["sykmeldingsgrad"].asInt())
         assertTrue(hentetSoknadsperioder["faktiskGrad"].isNull)
         val spørsmål = dokument["sporsmal"]
         assertEquals(0, spørsmål.size())
@@ -154,7 +155,7 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
                     fnr: "$FØDSELSNUMMER"
                 ) {
                     sykmeldingSkrevet, arbeidGjenopptatt, egenmeldingsdagerFraSykmelding, soknadsperioder {
-                    fom, tom, grad, faktiskGrad
+                    fom, tom, grad, faktiskGrad, sykmeldingsgrad
                     }, sporsmal {
                         tag, sporsmalstekst, undertekst, svartype, svar {verdi}, undersporsmal { 
                             tag, sporsmalstekst, undertekst, svartype, svar {verdi}, undersporsmal { 
@@ -274,7 +275,7 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
   "arbeidGjenopptatt": "$arbeidGjenopptatt",
   "sykmeldingSkrevet": "$sykmeldingSkrevet",
   "egenmeldingsdagerFraSykmelding": ["2018-01-01"],
-  "soknadsperioder": [{"fom": "2018-01-01", "tom": "2018-01-31", "grad": 100, "faktiskGrad": null}],
+  "soknadsperioder": [{"fom": "2018-01-01", "tom": "2018-01-31", "grad": 100, "faktiskGrad": null, "sykmeldingsgrad": 100}],
   "sporsmal": [
         {
           "id": "e82ceab9-f287-3642-8680-f59cd5c0ed28",
@@ -768,7 +769,7 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
   "arbeidGjenopptatt": "${LocalDate.now()}",
   "sykmeldingSkrevet": "${LocalDateTime.now()}",
   "egenmeldingsdagerFraSykmelding": ["2018-01-01"],
-  "soknadsperioder": [{"fom": "2018-01-01", "tom": "2018-01-31", "grad": 100, "faktiskGrad": null}],
+  "soknadsperioder": [{"fom": "2018-01-01", "tom": "2018-01-31", "grad": 100, "faktiskGrad": null, "sykmeldingsgrad":  100}],
   "sporsmal": [
         {
           "id": "6871a262-214c-322f-b317-0b6feb1fcf06",

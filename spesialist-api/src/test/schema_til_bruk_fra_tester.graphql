@@ -658,7 +658,8 @@ type SoknadSelvstendig implements Hendelse {
 type Soknadsperioder {
     faktiskGrad: Int
     fom: String!
-    grad: Int!
+    grad: Int
+    sykmeldingsgrad: Int
     tom: String!
 }
 
