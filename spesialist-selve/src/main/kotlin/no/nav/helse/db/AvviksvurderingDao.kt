@@ -37,7 +37,7 @@ class AvviksvurderingDao(private val dataSource: DataSource) : HelseDao(dataSour
                             "unik_id" to avviksvurdering.sammenligningsgrunnlag.unikId,
                             "fodselsnummer" to avviksvurdering.fødselsnummer,
                             "skjaeringstidspunkt" to avviksvurdering.skjæringstidspunkt,
-                            "opprettet" to avviksvurdering.oppretttet,
+                            "opprettet" to avviksvurdering.opprettet,
                             "sammenligningsgrunnlag" to objectMapper.writeValueAsString(avviksvurdering.sammenligningsgrunnlag)
                         )
                     ).asUpdateAndReturnGeneratedKey
@@ -49,7 +49,7 @@ class AvviksvurderingDao(private val dataSource: DataSource) : HelseDao(dataSour
                             "unik_id" to avviksvurdering.unikId,
                             "fodselsnummer" to avviksvurdering.fødselsnummer,
                             "skjaeringstidspunkt" to avviksvurdering.skjæringstidspunkt,
-                            "opprettet" to avviksvurdering.oppretttet,
+                            "opprettet" to avviksvurdering.opprettet,
                             "avviksprosent" to avviksvurdering.avviksprosent,
                             "beregningsgrunnlag" to objectMapper.writeValueAsString(avviksvurdering.beregningsgrunnlag),
                             "sammenligningsgrunnlag_ref" to sammenligningsgrunnlagRef

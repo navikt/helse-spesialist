@@ -9,7 +9,7 @@ data class AvviksvurderingDto(
     val unikId: UUID,
     val fødselsnummer: String,
     val skjæringstidspunkt: LocalDate,
-    val oppretttet: LocalDateTime,
+    val opprettet: LocalDateTime,
     val avviksprosent: Double,
     val sammenligningsgrunnlag: SammenligningsgrunnlagDto,
     val beregningsgrunnlag: BeregningsgrunnlagDto,

@@ -13,7 +13,8 @@ import no.nav.helse.modell.avviksvurdering.InnrapportertInntektDto
 import no.nav.helse.modell.avviksvurdering.InntektDto
 import no.nav.helse.modell.avviksvurdering.OmregnetÅrsinntektDto
 import no.nav.helse.modell.avviksvurdering.SammenligningsgrunnlagDto
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 
 internal class AvviksvurderingDaoTest: DatabaseIntegrationTest() {
@@ -31,29 +32,30 @@ internal class AvviksvurderingDaoTest: DatabaseIntegrationTest() {
     fun `finner avviksvurderinge basert på fødselsnummer og skjæringstidspunkt`() {
         val skjæringstidspunkt = 1.januar
         val unikId = UUID.randomUUID()
-        avviksvurderingDao.lagre(avviksvurdering(FNR, skjæringstidspunkt, unikId))
+        val opprettet = LocalDateTime.now()
+        avviksvurderingDao.lagre(avviksvurdering(FNR, skjæringstidspunkt, unikId, opprettet))
 
         val funnetAvviksvurdering = avviksvurderingDao.finnAvviksvurdering(FNR, skjæringstidspunkt)
-        val forventetAvviksvurdering = forventetAvviksvurdering(FNR, skjæringstidspunkt, unikId)
+        val forventetAvviksvurdering = forventetAvviksvurdering(FNR, skjæringstidspunkt, unikId, opprettet)
         assertEquals(forventetAvviksvurdering, funnetAvviksvurdering)
     }
 
-    private fun forventetAvviksvurdering(fødselsnummer: String, skjæringstidspunkt: LocalDate, unikId: UUID): Avviksvurdering {
+    private fun forventetAvviksvurdering(fødselsnummer: String, skjæringstidspunkt: LocalDate, unikId: UUID, opprettet: LocalDateTime): Avviksvurdering {
         return Avviksvurdering(
             unikId = unikId,
             fødselsnummer = fødselsnummer,
             skjæringstidspunkt = skjæringstidspunkt,
-            opprettet = LocalDateTime.now(),
+            opprettet = opprettet,
             avviksprosent = 26.0,
             sammenligningsgrunnlag = sammenligningsgrunnlag(unikId),
             beregningsgrunnlag = beregningsggrunnlag()
         )
     }
 
-    private fun avviksvurdering(fødselsnummer: String = "12345678910", skjæringstidspunkt: LocalDate = 1.januar, unikId: UUID = UUID.randomUUID()): AvviksvurderingDto = AvviksvurderingDto(
+    private fun avviksvurdering(fødselsnummer: String = "12345678910", skjæringstidspunkt: LocalDate = 1.januar, unikId: UUID = UUID.randomUUID(), opprettet: LocalDateTime = LocalDateTime.now()): AvviksvurderingDto = AvviksvurderingDto(
         fødselsnummer = fødselsnummer,
         skjæringstidspunkt = skjæringstidspunkt,
-        oppretttet = LocalDateTime.now(),
+        opprettet = opprettet,
         avviksprosent = 26.0,
         unikId = unikId,
         sammenligningsgrunnlag = sammenligningsgrunnlag(unikId),
