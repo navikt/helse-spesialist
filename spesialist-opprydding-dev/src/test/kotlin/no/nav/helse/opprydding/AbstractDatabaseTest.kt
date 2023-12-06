@@ -120,6 +120,8 @@ internal abstract class AbstractDatabaseTest {
                 "arkiv_tildeling_for_oppgaver_uten_utbetaling_id",
                 "arkiv_oppgave_uten_utbetaling_id",
                 "spesialsak",
+                "avviksvurdering",
+                "sammenligningsgrunnlag",
             )
         )
         tabeller.forEach {

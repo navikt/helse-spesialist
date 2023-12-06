@@ -22,7 +22,7 @@ import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
-import no.nav.helse.modell.avviksvurdering.Avviksvurdering
+import no.nav.helse.modell.avviksvurdering.AvviksvurderingDto
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
@@ -176,8 +176,8 @@ internal class Hendelsefabrikk(
         )
     }
 
-    internal fun avviksvurdering(avviksvurdering: Avviksvurdering) {
-        avviksvurderingDao.lagre(avviksvurdering.toDto())
+    internal fun avviksvurdering(avviksvurdering: AvviksvurderingDto) {
+        avviksvurderingDao.lagre(avviksvurdering)
     }
 
     fun godkjenning(

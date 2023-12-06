@@ -2,39 +2,44 @@ package no.nav.helse.modell.avviksvurdering
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.YearMonth
+import java.util.UUID
 
 internal class Avviksvurdering(
+    private val unikId: UUID,
     private val fødselsnummer: String,
-    private val aktørId: String,
     private val skjæringstidspunkt: LocalDate,
-    private val oppretttet: LocalDateTime,
+    private val opprettet: LocalDateTime,
     private val avviksprosent: Double,
-    private val sammenligningsgrunnlag: Sammenligningsgrunnlag,
-    private val beregningsgrunnlag: Beregningsgrunnlag
+    private val sammenligningsgrunnlag: SammenligningsgrunnlagDto,
+    private val beregningsgrunnlag: BeregningsgrunnlagDto
 
 ) {
-    internal fun toDto() = AvviksvurderingDto(fødselsnummer, aktørId, skjæringstidspunkt, oppretttet, avviksprosent, sammenligningsgrunnlag.toDto(), beregningsgrunnlag.toDto())
-}
 
-internal class Beregningsgrunnlag(private val totalbeløp: Double, private val omregnedeÅrsinntekter: List<OmregnetÅrsinntekt>) {
-    internal fun toDto() = BeregningsgrunnlagDto(totalbeløp = totalbeløp, omregnedeÅrsinntekter = omregnedeÅrsinntekter.map { it.toDto() })
-}
+    internal fun toDto() = AvviksvurderingDto(unikId, fødselsnummer, skjæringstidspunkt, opprettet, avviksprosent, sammenligningsgrunnlag, beregningsgrunnlag)
 
-internal class OmregnetÅrsinntekt(private val arbeidsgiverreferanse: String, private val beløp: Double) {
-    internal fun toDto() = OmregnetÅrsinntektDto(arbeidsgiverreferanse = arbeidsgiverreferanse, beløp = beløp)
-}
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
 
-internal class Sammenligningsgrunnlag(private val totalbeløp: Double, private val innraporterteInntekter: List<InnrapportertInntekt>) {
-    internal fun toDto() = SammenligningsgrunnlagDto(totalbeløp = totalbeløp, innrapprterteInntekter = innraporterteInntekter.map { it.toDto() })
-}
+        other as Avviksvurdering
 
+        if (unikId != other.unikId) return false
+        if (fødselsnummer != other.fødselsnummer) return false
+        if (skjæringstidspunkt != other.skjæringstidspunkt) return false
+        if (avviksprosent != other.avviksprosent) return false
+        if (sammenligningsgrunnlag != other.sammenligningsgrunnlag) return false
+        if (beregningsgrunnlag != other.beregningsgrunnlag) return false
 
-internal class InnrapportertInntekt(private val arbeidsgiverreferanse: String, private val inntekter: List<Inntekt>) {
-    internal fun toDto() = InnrapportertInntektDto(arbeidsgiverreferanse = arbeidsgiverreferanse, inntekter = inntekter.map { it.toDto() })
-}
+        return true
+    }
 
-internal class Inntekt(private val årMåned: YearMonth, private val beløp: Double) {
-    internal fun toDto() = InntektDto(årMåned = årMåned, beløp = beløp)
-
+    override fun hashCode(): Int {
+        var result = unikId.hashCode()
+        result = 31 * result + fødselsnummer.hashCode()
+        result = 31 * result + skjæringstidspunkt.hashCode()
+        result = 31 * result + avviksprosent.hashCode()
+        result = 31 * result + sammenligningsgrunnlag.hashCode()
+        result = 31 * result + beregningsgrunnlag.hashCode()
+        return result
+    }
 }

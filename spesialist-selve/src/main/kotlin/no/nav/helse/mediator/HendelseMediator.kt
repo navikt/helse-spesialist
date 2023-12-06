@@ -52,7 +52,7 @@ import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.Toggle
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
-import no.nav.helse.modell.avviksvurdering.Avviksvurdering
+import no.nav.helse.modell.avviksvurdering.AvviksvurderingDto
 import no.nav.helse.modell.dokument.DokumentDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.kommando.CommandContext
@@ -182,7 +182,7 @@ internal class HendelseMediator(
         utkastTilVedtakMessage.sendInnTil(sykefraværstilfelle)
     }
 
-    internal fun håndter(avviksvurdering: Avviksvurdering) {
+    internal fun håndter(avviksvurdering: AvviksvurderingDto) {
         hendelsefabrikk.avviksvurdering(avviksvurdering)
     }
 

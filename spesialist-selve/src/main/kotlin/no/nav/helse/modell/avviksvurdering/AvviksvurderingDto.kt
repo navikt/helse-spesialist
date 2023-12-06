@@ -3,10 +3,11 @@ package no.nav.helse.modell.avviksvurdering
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
+import java.util.UUID
 
 data class AvviksvurderingDto(
+    val unikId: UUID,
     val fødselsnummer: String,
-    val aktørId: String,
     val skjæringstidspunkt: LocalDate,
     val oppretttet: LocalDateTime,
     val avviksprosent: Double,
@@ -15,8 +16,9 @@ data class AvviksvurderingDto(
 )
 
 data class SammenligningsgrunnlagDto(
+    val unikId: UUID,
     val totalbeløp: Double,
-    val innrapprterteInntekter: List<InnrapportertInntektDto>,
+    val innrapporterteInntekter: List<InnrapportertInntektDto>,
 )
 
 data class InnrapportertInntektDto(

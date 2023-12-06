@@ -24,13 +24,15 @@ internal class AvviksvurderingRiver(
         River(rapidsConnection).apply {
             validate {
                 it.demandValue("@event_name", "avviksvurdering")
-                it.requireKey("@id", "fødselsnummer", "aktørId", "skjæringstidspunkt")
+                it.requireKey("@id", "fødselsnummer", "skjæringstidspunkt")
                 it.requireKey(
+                    "avviksvurdering.id",
                     "avviksvurdering.opprettet",
                     "avviksvurdering.beregningsgrunnlag",
                     "avviksvurdering.beregningsgrunnlag.totalbeløp",
                     "avviksvurdering.sammenligningsgrunnlag",
                     "avviksvurdering.sammenligningsgrunnlag.totalbeløp",
+                    "avviksvurdering.sammenligningsgrunnlag.id",
                     "avviksvurdering.avviksprosent"
                 )
                 it.requireArray("avviksvurdering.beregningsgrunnlag.omregnedeÅrsinntekter") {
@@ -39,7 +41,7 @@ internal class AvviksvurderingRiver(
                         "beløp"
                     )
                 }
-                it.requireArray("avviksvurdering.sammenligningsgrunnlag.innraporterteInntekter") {
+                it.requireArray("avviksvurdering.sammenligningsgrunnlag.innrapporterteInntekter") {
                     requireKey("arbeidsgiverreferanse")
                     requireArray("inntekter") {
                         requireKey(

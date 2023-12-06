@@ -29,6 +29,7 @@ class AvviksvurderingRiverTest {
       "aktørId": "11111100000",
       "skjæringstidspunkt": "2018-01-01",
       "avviksvurdering": {
+        "id": "cc3af2c3-fa9e-4d84-a57e-a7972226cdae",
         "opprettet": "2018-01-01T00:00:00.000",
         "beregningsgrunnlag": {
           "totalbeløp": 550000.0,
@@ -44,8 +45,9 @@ class AvviksvurderingRiverTest {
           ]
         },
         "sammenligningsgrunnlag": {
+          "id": "887b2e4c-5222-45f1-9831-1846a028193b",
           "totalbeløp": 500000.0,
-          "innraporterteInntekter": [
+          "innrapporterteInntekter": [
             {
               "arbeidsgiverreferanse": "000000000",
               "inntekter": [
