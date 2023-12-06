@@ -143,7 +143,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                         WHEN :tildelt = false THEN t.saksbehandler_ref IS NULL
                         ELSE true
                     END
-                ORDER BY $orderBy
+                ORDER BY $orderBy NULLS LAST
                 OFFSET :offset
                 LIMIT :limit
             """, mapOf(

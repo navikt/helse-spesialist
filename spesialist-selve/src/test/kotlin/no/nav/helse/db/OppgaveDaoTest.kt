@@ -547,7 +547,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
             OppgavesorteringForDatabase(SorteringsnøkkelForDatabase.TILDELT_TIL, false)
         ))
         assertEquals(3, oppgaver.size)
-        assertEquals(listOf(oppgaveId2, oppgaveId3, oppgaveId1), oppgaver.map { it.id })
+        assertEquals(listOf(oppgaveId3, oppgaveId1, oppgaveId2), oppgaver.map { it.id })
     }
 
     @Test
