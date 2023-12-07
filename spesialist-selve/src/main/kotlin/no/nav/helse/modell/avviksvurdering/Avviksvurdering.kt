@@ -31,7 +31,7 @@ internal class Avviksvurdering(
         && unikId == other.unikId
         && fødselsnummer == other.fødselsnummer
         && skjæringstidspunkt == other.skjæringstidspunkt
-        && opprettet == other.opprettet
+        && opprettet.withNano(0) == other.opprettet.withNano(0)
         && avviksprosent == other.avviksprosent
         && sammenligningsgrunnlag == other.sammenligningsgrunnlag
         && beregningsgrunnlag == other.beregningsgrunnlag)
