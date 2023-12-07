@@ -57,6 +57,7 @@ enum class Kategori {
 
 data class Filtrering(
     val egenskaper: List<Oppgaveegenskap> = emptyList(),
+    val ekskluderteEgenskaper: List<Oppgaveegenskap>? = emptyList(),
     val ingenUkategoriserteEgenskaper: Boolean = false,
     val tildelt: Boolean? = null,
     val egneSakerPaVent: Boolean = false,

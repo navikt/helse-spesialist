@@ -191,8 +191,10 @@ internal class OppgaveMediator(
             .alleUkategoriserteEgenskaper
             .map(Egenskap::toString)
 
+        val ekskluderteEgenskaper = filtrering.ekskluderteEgenskaper?.tilDatabaseversjon()?.map(EgenskapForDatabase::toString) ?: emptyList()
+
         val egenskaperSomSkalEkskluderes =
-            egenskaperSaksbehandlerIkkeHarTilgangTil + if (filtrering.ingenUkategoriserteEgenskaper) alleUkategoriserteEgenskaper else emptyList()
+            egenskaperSaksbehandlerIkkeHarTilgangTil + ekskluderteEgenskaper + if (filtrering.ingenUkategoriserteEgenskaper) alleUkategoriserteEgenskaper else emptyList()
 
         val grupperteFiltrerteEgenskaper = filtrering.egenskaper
             .groupBy { it.kategori }

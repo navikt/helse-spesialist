@@ -41,8 +41,11 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import no.nav.helse.spesialist.api.graphql.schema.AntallArbeidsforhold
+import no.nav.helse.spesialist.api.graphql.schema.Egenskap.PA_VENT
 import no.nav.helse.spesialist.api.graphql.schema.Filtrering
+import no.nav.helse.spesialist.api.graphql.schema.Kategori
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker
+import no.nav.helse.spesialist.api.graphql.schema.Oppgaveegenskap
 import no.nav.helse.spesialist.api.graphql.schema.Oppgavetype
 import no.nav.helse.spesialist.api.graphql.schema.Periodetype
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
@@ -279,6 +282,20 @@ internal class OppgaveMediatorTest {
         mediator.oppgaver(saksbehandlerFraApi(), 0, MAX_VALUE, emptyList(), Filtrering(ingenUkategoriserteEgenskaper = true))
         verify(exactly = 1) { oppgaveDao.finnOppgaverForVisning(
             ekskluderEgenskaper = Egenskap.alleTilgangsstyrteEgenskaper.map { it.name } + Egenskap.alleUkategoriserteEgenskaper.map { it.name },
+            SAKSBEHANDLEROID,
+            0,
+            MAX_VALUE
+        ) }
+    }
+
+    @Test
+    fun `Ekskluderer alle ekskluderteEgenskaper`() {
+        mediator.oppgaver(saksbehandlerFraApi(), 0, MAX_VALUE, emptyList(), Filtrering(ekskluderteEgenskaper = listOf(Oppgaveegenskap(
+            egenskap = PA_VENT,
+            kategori = Kategori.Status
+        ))))
+        verify(exactly = 1) { oppgaveDao.finnOppgaverForVisning(
+            ekskluderEgenskaper = Egenskap.alleTilgangsstyrteEgenskaper.map { it.name } + Egenskap.PÅ_VENT.name,
             SAKSBEHANDLEROID,
             0,
             MAX_VALUE
