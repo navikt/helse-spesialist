@@ -685,13 +685,13 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456789")
         val oppgaveId3 = OPPGAVE_ID
 
-        val oppgaverSomErTildeltOgIkkePåvent = oppgaveDao.finnOppgaverForVisning(emptyList(), saksbehandlerOid = saksbehandlerOid, egneSaker = true, egneSakerPåVent = false)
+        val oppgaverSomErTildelt = oppgaveDao.finnOppgaverForVisning(emptyList(), saksbehandlerOid = saksbehandlerOid, egneSaker = true, egneSakerPåVent = false)
         val oppgaverSomErTildeltOgPåvent = oppgaveDao.finnOppgaverForVisning(emptyList(), saksbehandlerOid = saksbehandlerOid, egneSaker = true, egneSakerPåVent = true)
         val alleOppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), saksbehandlerOid = saksbehandlerOid, egneSaker = false, egneSakerPåVent = false)
-        assertEquals(1, oppgaverSomErTildeltOgIkkePåvent.size)
+        assertEquals(2, oppgaverSomErTildelt.size)
         assertEquals(1, oppgaverSomErTildeltOgPåvent.size)
         assertEquals(3, alleOppgaver.size)
-        assertEquals(listOf(oppgaveId1), oppgaverSomErTildeltOgIkkePåvent.map { it.id })
+        assertEquals(listOf(oppgaveId2, oppgaveId1), oppgaverSomErTildelt.map { it.id })
         assertEquals(listOf(oppgaveId2), oppgaverSomErTildeltOgPåvent.map { it.id })
         assertEquals(setOf(oppgaveId1, oppgaveId2, oppgaveId3), alleOppgaver.map { it.id }.toSet())
     }
