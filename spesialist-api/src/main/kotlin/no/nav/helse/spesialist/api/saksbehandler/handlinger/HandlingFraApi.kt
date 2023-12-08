@@ -8,8 +8,6 @@ sealed interface HandlingFraApi
 
 data class TildelOppgave(val oppgaveId: Long): HandlingFraApi
 data class AvmeldOppgave(val oppgaveId: Long): HandlingFraApi
-data class LeggOppgavePåVent(val oppgaveId: Long): HandlingFraApi
-data class FjernOppgaveFraPåVent(val oppgaveId: Long): HandlingFraApi
 
 @JsonIgnoreProperties
 class OverstyrTidslinjeHandlingFraApi(

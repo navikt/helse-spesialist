@@ -48,10 +48,8 @@ import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AnnulleringHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.FjernOppgaveFraPåVent
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.FjernPåVent
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.LeggOppgavePåVent
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi
@@ -253,8 +251,6 @@ internal class SaksbehandlerMediator(
             is AnnulleringHandlingFraApi -> this.tilModellversjon()
             is TildelOppgave -> this.tilModellversjon()
             is AvmeldOppgave -> this.tilModellversjon()
-            is FjernOppgaveFraPåVent -> this.tilModellversjon()
-            is LeggOppgavePåVent -> this.tilModellversjon()
             is LeggPåVent -> this.tilModellversjon()
             is FjernPåVent -> this.tilModellversjon()
         }
@@ -383,13 +379,5 @@ internal class SaksbehandlerMediator(
 
     private fun AvmeldOppgave.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.AvmeldOppgave {
         return no.nav.helse.modell.saksbehandler.handlinger.AvmeldOppgave(this.oppgaveId)
-    }
-
-    private fun LeggOppgavePåVent.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.LeggOppgavePåVent {
-        return no.nav.helse.modell.saksbehandler.handlinger.LeggOppgavePåVent(this.oppgaveId)
-    }
-
-    private fun FjernOppgaveFraPåVent.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.FjernOppgaveFraPåVent {
-        return no.nav.helse.modell.saksbehandler.handlinger.FjernOppgaveFraPåVent(this.oppgaveId)
     }
 }

@@ -136,7 +136,7 @@ internal class SchemaBuilder(
                     VarselMutation(varselRepository = varselRepository)
                 ),
                 TopLevelObject(
-                    TildelingMutation(saksbehandlerhåndterer = saksbehandlerhåndterer, notatMediator = notatMediator)
+                    TildelingMutation(saksbehandlerhåndterer = saksbehandlerhåndterer)
                 ),
                 TopLevelObject(
                     OpptegnelseMutation(saksbehandlerhåndterer = saksbehandlerhåndterer)

@@ -125,8 +125,8 @@ internal class OppgaveMediator(
     internal fun håndter(handling: PåVent, saksbehandler: Saksbehandler) {
         oppgave(handling.oppgaveId()) {
             when (handling) {
-                is LeggPåVent -> this.leggPåVent2(handling.skalTildeles(), saksbehandler)
-                is FjernPåVent -> this.fjernPåVent2()
+                is LeggPåVent -> this.leggPåVent(handling.skalTildeles(), saksbehandler)
+                is FjernPåVent -> this.fjernPåVent()
             }
         }
     }

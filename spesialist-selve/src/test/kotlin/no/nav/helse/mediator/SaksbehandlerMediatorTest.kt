@@ -20,9 +20,7 @@ import no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AnnulleringHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.FjernOppgaveFraPåVent
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.FjernPåVent
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.LeggOppgavePåVent
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.LovhjemmelFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
@@ -39,8 +37,6 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -274,27 +270,6 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
             mediator.håndter(AvmeldOppgave(oppgaveId), saksbehandler(UUID.randomUUID()))
         }
         assertEquals(0, testRapid.inspektør.hendelser().size)
-    }
-
-    @Test
-    fun `legg oppgave på vent`() {
-        nyPerson()
-        val oppgaveId = OPPGAVE_ID
-        mediator.håndter(TildelOppgave(oppgaveId), saksbehandler)
-        mediator.håndter(LeggOppgavePåVent(oppgaveId), saksbehandler)
-        val melding = testRapid.inspektør.hendelser("oppgave_oppdatert").last()
-        assertEquals(true, melding["påVent"].asBoolean())
-    }
-
-    @Test
-    fun `fjern oppgave fra på vent`() {
-        nyPerson()
-        val oppgaveId = OPPGAVE_ID
-        mediator.håndter(TildelOppgave(oppgaveId), saksbehandler)
-        mediator.håndter(LeggOppgavePåVent(oppgaveId), saksbehandler)
-        mediator.håndter(FjernOppgaveFraPåVent(oppgaveId), saksbehandler)
-        val melding = testRapid.inspektør.hendelser("oppgave_oppdatert").last()
-        assertEquals(false, melding["påVent"].asBoolean())
     }
 
     @Test
