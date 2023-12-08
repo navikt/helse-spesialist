@@ -133,8 +133,8 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                 AND NOT (egenskaper && ARRAY['BESLUTTER']::varchar[] AND ttv.saksbehandler = :oid) -- hvis oppgaven er sendt til beslutter og saksbehandler var den som sendte
                 AND 
                     CASE 
-                        WHEN :egne_saker_pa_vent THEN t.saksbehandler_ref = :oid AND t.på_vent = true
-                        WHEN :egne_saker THEN t.saksbehandler_ref = :oid AND t.på_vent = false
+                        WHEN :egne_saker_pa_vent THEN t.saksbehandler_ref = :oid AND ('PÅ_VENT' = ANY(o.egenskaper))
+                        WHEN :egne_saker THEN t.saksbehandler_ref = :oid AND NOT ('PÅ_VENT' = ANY(o.egenskaper))
                         ELSE true
                     END
                 AND

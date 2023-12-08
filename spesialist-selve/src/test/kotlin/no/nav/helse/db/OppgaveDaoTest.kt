@@ -679,7 +679,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson(fødselsnummer = "12345678910", aktørId = "1234567891011", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "123456789")
         val oppgaveId1 = OPPGAVE_ID
         tildelOppgave(oppgaveId1, saksbehandlerOid = saksbehandlerOid)
-        nyPerson(fødselsnummer = "12345678911", aktørId = "1234567891012", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "223456789")
+        nyPerson(fødselsnummer = "12345678911", aktørId = "1234567891012", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "223456789", oppgaveEgenskaper = listOf(PÅ_VENT))
         val oppgaveId2 = OPPGAVE_ID
         tildelOppgave(oppgaveId2, saksbehandlerOid = saksbehandlerOid, påVent = true)
         nyPerson(fødselsnummer = "12345678912", aktørId = "1234567891013", vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = "323456789")
