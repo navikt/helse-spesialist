@@ -9,7 +9,7 @@ plugins {
 }
 
 dependencies {
-    api("com.nimbusds:nimbus-jose-jwt:9.37")
+    api("com.nimbusds:nimbus-jose-jwt:9.37.3")
     api("io.ktor:ktor-server-double-receive:$ktorVersion")
     implementation(project(":spesialist-felles"))
     implementation("com.expediagroup:graphql-kotlin-server:$graphQLKotlinVersion")
