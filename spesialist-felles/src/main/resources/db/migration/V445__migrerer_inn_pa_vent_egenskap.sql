@@ -1,4 +1,4 @@
-update pa_vent
+update oppgave
 set egenskaper = array_append(egenskaper, 'PÅ_VENT')
 where id in (select o.id
              from oppgave o
