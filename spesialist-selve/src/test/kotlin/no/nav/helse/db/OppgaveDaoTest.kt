@@ -966,7 +966,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
 
         val antallOppgaver = oppgaveDao.finnAntallOppgaver(saksbehandlerOid)
 
-        assertEquals(2, antallOppgaver.antallMineSaker)
+        assertEquals(3, antallOppgaver.antallMineSaker)
         assertEquals(1, antallOppgaver.antallMineSakerPåVent)
     }
 

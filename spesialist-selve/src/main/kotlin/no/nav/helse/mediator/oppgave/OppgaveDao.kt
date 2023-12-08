@@ -192,7 +192,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
         return asSQL(
             """ 
             SELECT 
-                count(*) FILTER ( WHERE t.på_vent = false ) AS antall_mine_saker,
+                count(*) AS antall_mine_saker,
                 count(*) FILTER ( WHERE t.på_vent = true ) AS antall_mine_saker_på_vent
             from oppgave o 
                 LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
