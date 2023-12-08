@@ -47,7 +47,7 @@ data class Tildeling(
     val navn: String,
     val epost: String,
     val oid: UUIDString,
-    val paaVent: Boolean,
+    val paaVent: Boolean?,
 )
 
 data class PaVent(

@@ -319,11 +319,9 @@ type Mutation {
     feilregistrerKommentarV2(id: Int!): Kommentar
     feilregistrerNotat(id: Int!): Notat
     fjernPaVent(oppgaveId: String!): Boolean
-    fjernPaaVent(oppgaveId: String!): Tildeling
     fjernTildeling(oppgaveId: String!): Boolean!
     innvilgVedtak(oppgavereferanse: String!): Boolean!
     leggPaVent(begrunnelse: String, frist: String!, notatTekst: String!, notatType: NotatType!, oppgaveId: String!, tildeling: Boolean!): PaVent
-    leggPaaVent(notatTekst: String!, notatType: NotatType!, oppgaveId: String!): Tildeling
     leggTilKommentar(notatId: Int!, saksbehandlerident: String!, tekst: String!): Kommentar
     leggTilNotat(saksbehandlerOid: String!, tekst: String!, type: NotatType!, vedtaksperiodeId: String!): Notat
     oppdaterPerson(fodselsnummer: String!): Boolean!
@@ -711,7 +709,7 @@ type Tildeling {
     epost: String!
     navn: String!
     oid: String!
-    paaVent: Boolean!
+    paaVent: Boolean
 }
 
 type Totrinnsvurdering {
