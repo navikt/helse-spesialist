@@ -39,7 +39,8 @@ internal class Sykefraværstilfelle(
     }
 
     internal fun forhindrerAutomatisering(vedtaksperiodeId: UUID): Boolean {
-        val generasjonForPeriode = gjeldendeGenerasjoner.finnGenerasjon(vedtaksperiodeId) // ?: throw IllegalStateException("Sykefraværstilfellet må inneholde generasjon for vedtaksperiodeId=$vedtaksperiodeId")
+        val generasjonForPeriode = gjeldendeGenerasjoner.finnGenerasjon(vedtaksperiodeId) ?:
+            throw IllegalStateException("Sykefraværstilfellet må inneholde generasjon for vedtaksperiodeId=$vedtaksperiodeId")
         return gjeldendeGenerasjoner.forhindrerAutomatisering(generasjonForPeriode)
     }
 
