@@ -22,9 +22,9 @@ internal class Sykefraværstilfelle(
     private val gjeldendeGenerasjoner: List<Generasjon>,
     skjønnsfastatteSykepengegrunnlag: List<SkjønnsfastattSykepengegrunnlag>,
 ) {
-    init {
-        check(gjeldendeGenerasjoner.isNotEmpty()) { "Kan ikke opprette et sykefraværstilfelle uten generasjoner" }
-    }
+//    init {
+//        check(gjeldendeGenerasjoner.isNotEmpty()) { "Kan ikke opprette et sykefraværstilfelle uten generasjoner" }
+//    }
     private val skjønnsfastatteSykepengegrunnlag = skjønnsfastatteSykepengegrunnlag.sortert()
     private val observers = mutableListOf<SykefraværstilfelleObserver>()
 
