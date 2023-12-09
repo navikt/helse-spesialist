@@ -442,7 +442,8 @@ internal class Generasjon private constructor(
             return this.filter { it.tilhører(tilOgMed) }.any { it.forhindrerAutomatisering() }
         }
 
-        internal fun List<Generasjon>.forhindrerAutomatisering(generasjon: Generasjon): Boolean {
+        internal fun List<Generasjon>.forhindrerAutomatisering(generasjon: Generasjon?): Boolean {
+            if (generasjon == null) return false
             return this.filter { it.tilhører(generasjon.periode.tom()) }.any { it.forhindrerAutomatisering() }
         }
 
