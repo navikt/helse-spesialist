@@ -25,6 +25,7 @@ internal class Sykefraværstilfelle(
     init {
         check(gjeldendeGenerasjoner.isNotEmpty()) { "Kan ikke opprette et sykefraværstilfelle uten generasjoner" }
     }
+
     private val skjønnsfastatteSykepengegrunnlag = skjønnsfastatteSykepengegrunnlag.sortert()
     private val observers = mutableListOf<SykefraværstilfelleObserver>()
 
@@ -39,8 +40,8 @@ internal class Sykefraværstilfelle(
     }
 
     internal fun forhindrerAutomatisering(vedtaksperiodeId: UUID): Boolean {
-        val generasjonForPeriode = gjeldendeGenerasjoner.finnGenerasjon(vedtaksperiodeId) ?:
-            throw IllegalStateException("Sykefraværstilfellet må inneholde generasjon for vedtaksperiodeId=$vedtaksperiodeId")
+        val generasjonForPeriode = gjeldendeGenerasjoner.finnGenerasjon(vedtaksperiodeId)
+            ?: throw IllegalStateException("Sykefraværstilfellet må inneholde generasjon for vedtaksperiodeId=$vedtaksperiodeId")
         return gjeldendeGenerasjoner.forhindrerAutomatisering(generasjonForPeriode)
     }
 
@@ -54,7 +55,8 @@ internal class Sykefraværstilfelle(
     }
 
     internal fun automatiskGodkjennSpesialsakvarsler(vedtaksperiodeId: UUID) {
-        val generasjon = gjeldendeGenerasjoner.finnGenerasjon(vedtaksperiodeId) ?: throw IllegalStateException("Forventer å finne generasjon for perioden")
+        val generasjon = gjeldendeGenerasjoner.finnGenerasjon(vedtaksperiodeId)
+            ?: throw IllegalStateException("Forventer å finne generasjon for perioden")
         generasjon.automatiskGodkjennSpesialsakvarsler()
     }
 
