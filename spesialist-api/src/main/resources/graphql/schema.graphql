@@ -130,33 +130,6 @@ type GraphQLInntektsmelding implements GraphQLHendelse {
     type: GraphQLHendelsetype!
 }
 
-type GraphQLNySoknadArbeidsledig implements GraphQLHendelse {
-    eksternDokumentId: String!
-    fom: LocalDate!
-    id: String!
-    rapportertDato: LocalDateTime!
-    tom: LocalDate!
-    type: GraphQLHendelsetype!
-}
-
-type GraphQLNySoknadFrilans implements GraphQLHendelse {
-    eksternDokumentId: String!
-    fom: LocalDate!
-    id: String!
-    rapportertDato: LocalDateTime!
-    tom: LocalDate!
-    type: GraphQLHendelsetype!
-}
-
-type GraphQLNySoknadSelvstendig implements GraphQLHendelse {
-    eksternDokumentId: String!
-    fom: LocalDate!
-    id: String!
-    rapportertDato: LocalDateTime!
-    tom: LocalDate!
-    type: GraphQLHendelsetype!
-}
-
 type GraphQLOmregnetArsinntekt {
     belop: Float!
     inntekterFraAOrdningen: [GraphQLInntekterFraAOrdningen!]
@@ -424,9 +397,6 @@ enum GraphQLBegrunnelse {
 enum GraphQLHendelsetype {
     Inntektsmelding
     NySoknad
-    NySoknadArbeidsledig
-    NySoknadFrilans
-    NySoknadSelvstendig
     SendtSoknadArbeidsgiver
     SendtSoknadArbeidsledig
     SendtSoknadFrilans

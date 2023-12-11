@@ -135,33 +135,6 @@ query HentSnapshot($fnr: String!) {
                             type
                             eksternDokumentId
                         }
-                        ... on GraphQLNySoknadFrilans {
-                            __typename
-                            fom
-                            id
-                            rapportertDato
-                            tom
-                            type
-                            eksternDokumentId
-                        }
-                        ... on GraphQLNySoknadSelvstendig {
-                            __typename
-                            fom
-                            id
-                            rapportertDato
-                            tom
-                            type
-                            eksternDokumentId
-                        }
-                        ... on GraphQLNySoknadArbeidsledig {
-                            __typename
-                            fom
-                            id
-                            rapportertDato
-                            tom
-                            type
-                            eksternDokumentId
-                        }
                         ... on GraphQLSoknadArbeidsgiver {
                             __typename
                             fom
