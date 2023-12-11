@@ -289,6 +289,7 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
             generasjonRef = generasjonRef,
             definisjonRef = definisjonRef
         )
+        val varselEndret = LocalDateTime.now()
         val forventetVarsel = Varsel(
             varselId,
             generasjonId,
@@ -299,9 +300,9 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
             "EN_TITTEL",
             null,
             null,
-            Varselvurdering("EN_IDENT", LocalDateTime.now()),
+            Varselvurdering("EN_IDENT", varselEndret),
         )
-        apiVarselDao.settStatusVurdert(generasjonId, definisjonId, "EN_KODE", "EN_IDENT")
+        apiVarselDao.settStatusVurdert(generasjonId, definisjonId, "EN_KODE", "EN_IDENT", varselEndret)
 
         assertEquals(forventetVarsel, apiVarselDao.finnVarslerSomIkkeErInaktiveFor(vedtaksperiodeId, utbetalingId).single())
     }
@@ -324,7 +325,8 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
             generasjonRef = generasjonRef,
             definisjonRef = definisjonRef
         )
-        val oppdatertVarsel = apiVarselDao.settStatusVurdert(generasjonId, definisjonId, "EN_KODE", "EN_IDENT")
+        val varselEndret = LocalDateTime.now()
+        val oppdatertVarsel = apiVarselDao.settStatusVurdert(generasjonId, definisjonId, "EN_KODE", "EN_IDENT", varselEndret)
         val forsøktOppdatertVarsel = apiVarselDao.settStatusVurdert(generasjonId, definisjonId, "EN_KODE", "EN_IDENT")
 
         assertNotNull(oppdatertVarsel)
@@ -339,7 +341,7 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
                 "EN_TITTEL",
                 null,
                 null,
-                Varselvurdering("EN_IDENT", LocalDateTime.now()),
+                Varselvurdering("EN_IDENT", varselEndret),
             ),
             apiVarselDao.finnVarslerSomIkkeErInaktiveFor(vedtaksperiodeId, utbetalingId).single()
         )
@@ -364,7 +366,8 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
             generasjonRef = generasjonRef,
             definisjonRef = definisjonRef
         )
-        val oppdatertVarsel = apiVarselDao.settStatusVurdert(generasjonId, definisjonId, "EN_KODE", "EN_IDENT")
+        val varselEndret = LocalDateTime.now()
+        val oppdatertVarsel = apiVarselDao.settStatusVurdert(generasjonId, definisjonId, "EN_KODE", "EN_IDENT", varselEndret)
         apiVarselDao.godkjennVarslerFor(listOf(PERIODE.id))
         val forsøktOppdatertVarsel = apiVarselDao.settStatusVurdert(generasjonId, definisjonId, "EN_KODE", "EN_IDENT")
 
@@ -380,7 +383,7 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
                 "EN_TITTEL",
                 null,
                 null,
-                Varselvurdering("EN_IDENT", LocalDateTime.now()),
+                Varselvurdering("EN_IDENT", varselEndret),
             ),
             apiVarselDao.finnVarslerSomIkkeErInaktiveFor(PERIODE.id, utbetalingId).single()
         )
@@ -398,6 +401,7 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
         val varselId = UUID.randomUUID()
         val varselOpprettet = LocalDateTime.now()
+        val varselGodkjent = LocalDateTime.now()
         nyttVarsel(
             id = varselId,
             vedtaksperiodeId = vedtaksperiodeId,
@@ -405,8 +409,9 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
             generasjonRef = generasjonRef,
             definisjonRef = definisjonRef,
             status = "GODKJENT",
+            endretTidspunkt = varselGodkjent,
         )
-        val forsøktOppdatertVarsel = apiVarselDao.settStatusAktiv(generasjonId, "EN_KODE", "EN_IDENT")
+        val forsøktOppdatertVarsel = apiVarselDao.settStatusAktiv(generasjonId, "EN_KODE", "EN_IDENT", LocalDateTime.now())
 
         assertEquals(
             Varsel(
@@ -419,7 +424,7 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
                 "EN_TITTEL",
                 null,
                 null,
-                Varselvurdering("EN_IDENT", LocalDateTime.now()),
+                Varselvurdering("EN_IDENT", varselGodkjent),
             ),
             apiVarselDao.finnVarslerSomIkkeErInaktiveFor(vedtaksperiodeId, utbetalingId).single()
         )

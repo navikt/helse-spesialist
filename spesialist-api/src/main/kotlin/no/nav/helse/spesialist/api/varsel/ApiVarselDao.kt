@@ -86,6 +86,7 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
         definisjonId: UUID,
         varselkode: String,
         ident: String,
+        endretTidspunkt: LocalDateTime? = LocalDateTime.now(),
     ): Varsel? = asSQL(
         """
             WITH updated AS (
@@ -105,7 +106,7 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
         """, mapOf(
             "status_vurdert" to VURDERT.name,
             "status_godkjent" to GODKJENT.name,
-            "endret_tidspunkt" to LocalDateTime.now(),
+            "endret_tidspunkt" to endretTidspunkt,
             "endret_ident" to ident,
             "definisjon_id" to definisjonId,
             "generasjon_id" to generasjonId,
@@ -117,6 +118,7 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
         generasjonId: UUID,
         varselkode: String,
         ident: String,
+        endretTidspunkt: LocalDateTime? = LocalDateTime.now(),
     ): Varsel? = asSQL(
         """
             WITH updated AS (
@@ -136,7 +138,7 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
         """, mapOf(
             "status_aktiv" to AKTIV.name,
             "status_godkjent" to GODKJENT.name,
-            "endret_tidspunkt" to LocalDateTime.now(),
+            "endret_tidspunkt" to endretTidspunkt,
             "endret_ident" to ident,
             "generasjon_id" to generasjonId,
             "kode" to varselkode

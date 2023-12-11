@@ -62,24 +62,11 @@ data class Varsel(
         private val tidsstempel: LocalDateTime,
     ) {
 
-        internal fun toDto(status: Varselstatus): VarselvurderingDTO {
-            return VarselvurderingDTO(
-                ident,
-                tidsstempel.toString(),
-                no.nav.helse.spesialist.api.graphql.schema.Varselstatus.valueOf(status.name)
-            )
-        }
-        override fun equals(other: Any?): Boolean =
-            this === other || (other is Varselvurdering
-                    && javaClass == other.javaClass
-                    && ident == other.ident
-                    && tidsstempel.withNano(0) == other.tidsstempel.withNano(0))
-
-        override fun hashCode(): Int {
-            var result = ident.hashCode()
-            result = 31 * result + tidsstempel.withNano(0).hashCode()
-            return result
-        }
+        internal fun toDto(status: Varselstatus) = VarselvurderingDTO(
+            ident,
+            tidsstempel.toString(),
+            no.nav.helse.spesialist.api.graphql.schema.Varselstatus.valueOf(status.name)
+        )
     }
 
     enum class Varselstatus {
