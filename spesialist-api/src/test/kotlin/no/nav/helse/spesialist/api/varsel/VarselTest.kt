@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.api.varsel
 
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.AVVIST
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.GODKJENT
@@ -89,6 +90,17 @@ internal class VarselTest {
     }
 
     private fun opprettVarsel(status: Varsel.Varselstatus): Varsel {
-        return Varsel(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), "SB_EX_1", status, "EN_TITTEL", null, null, null)
+        return Varsel(
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            LocalDateTime.now(),
+            "SB_EX_1",
+            status,
+            "EN_TITTEL",
+            null,
+            null,
+            null,
+        )
     }
 }

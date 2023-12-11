@@ -211,6 +211,7 @@ data class Risikovurdering(
 data class VarselDTO(
     val generasjonId: UUIDString,
     val definisjonId: UUIDString,
+    val opprettet: DateTimeString,
     val kode: String,
     val tittel: String,
     val forklaring: String?,

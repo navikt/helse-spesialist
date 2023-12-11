@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.api.vedtak
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.spesialist.api.april
 import no.nav.helse.spesialist.api.februar
@@ -91,6 +92,17 @@ internal class VedtaksperiodeTest {
     }
 
     private fun opprettVarsel(status: Varselstatus): Varsel {
-        return Varsel(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), "SB_EX_1", status, "EN_TITTEL", null, null, null)
+        return Varsel(
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            LocalDateTime.now(),
+            "SB_EX_1",
+            status,
+            "EN_TITTEL",
+            null,
+            null,
+            null,
+        )
     }
 }

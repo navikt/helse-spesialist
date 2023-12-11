@@ -255,14 +255,16 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected fun nyttVarsel(
         id: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
+        opprettet: LocalDateTime? = LocalDateTime.now(),
         kode: String = "EN_KODE",
         generasjonRef: Long,
         definisjonRef: Long? = null,
-    ) = nyttVarsel(id, vedtaksperiodeId, kode, generasjonRef, definisjonRef, "AKTIV", null)
+    ) = nyttVarsel(id, vedtaksperiodeId, opprettet, kode, generasjonRef, definisjonRef, "AKTIV", null)
 
     protected fun nyttVarsel(
         id: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
+        opprettet: LocalDateTime? = LocalDateTime.now(),
         kode: String = "EN_KODE",
         generasjonRef: Long,
         definisjonRef: Long? = null,
@@ -282,7 +284,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                 vedtaksperiodeId,
                 generasjonRef,
                 definisjonRef,
-                LocalDateTime.now(),
+                opprettet,
                 status,
                 if (endretTidspunkt != null) "EN_IDENT" else null,
                 endretTidspunkt

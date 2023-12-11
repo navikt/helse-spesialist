@@ -13,6 +13,7 @@ data class Varsel(
     private val varselId: UUID,
     private val generasjonId: UUID,
     private val definisjonId: UUID,
+    private val opprettet: LocalDateTime,
     private val kode: String,
     private var status: Varselstatus,
     private val tittel: String,
@@ -29,11 +30,12 @@ data class Varsel(
     internal fun toDto() = VarselDTO(
         generasjonId.toString(),
         definisjonId.toString(),
+        opprettet.toString(),
         kode,
         tittel,
         forklaring,
         handling,
-        vurdering?.toDto(status)
+        vurdering?.toDto(status),
     )
 
     internal fun erAktiv(): Boolean {
