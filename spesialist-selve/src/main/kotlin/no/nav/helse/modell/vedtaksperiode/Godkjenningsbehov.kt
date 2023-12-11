@@ -169,6 +169,7 @@ internal class Godkjenningsbehov(
             hendelseId = id,
             utbetaling = utbetaling,
             kanAvvises = kanAvvises,
+            sykefraværstilfelle = sykefraværstilfelle,
         ),
         AutomatiseringCommand(
             fødselsnummer = fødselsnummer,

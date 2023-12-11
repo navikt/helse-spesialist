@@ -9,6 +9,7 @@ import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vergemal.VergemålDao
@@ -23,6 +24,7 @@ internal class AutomatiskAvvisningCommandTest {
     private val personDao = mockk<PersonDao>(relaxed = true)
     private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
     private val godkjenningMediator = mockk<GodkjenningMediator>(relaxed = true)
+    private val sykefraværstilfelle = mockk<Sykefraværstilfelle>(relaxed = true)
 
     @BeforeEach
     fun setup() {
@@ -61,6 +63,36 @@ internal class AutomatiskAvvisningCommandTest {
     }
 
     @Test
+    fun `skal avvise skjønnsfastsettelse dersom utbetaling ikke er revurdering og fødselsnummer ikke starter på 31`() {
+        every { sykefraværstilfelle.kreverSkjønnsfastsettelse(vedtaksperiodeId) } returns true
+        executeCommand(
+            hentCommand(Utbetalingtype.UTBETALING, fødselsnummer = "12345678910"),
+            "Skjønnsfastsettelse"
+        )
+    }
+
+    @Test
+    fun `skal ikke avvise uavhengig av skjønnsfastsettelse dersom kanAvvises-flagg er false`() {
+        every { sykefraværstilfelle.kreverSkjønnsfastsettelse(vedtaksperiodeId) } returns true
+        executeCommand(
+            hentCommand(Utbetalingtype.UTBETALING, kanAvvises = false, fødselsnummer = "12345678910"),
+            null
+        )
+    }
+
+    @Test
+    fun `skal ikke avvise skjønnsfastsettelse dersom utbetaling ikke er revurdering og fødselsnummer starter på 31`() {
+        every { sykefraværstilfelle.kreverSkjønnsfastsettelse(vedtaksperiodeId) } returns true
+        executeCommand(hentCommand(Utbetalingtype.UTBETALING, fødselsnummer = "31345678910"), null)
+    }
+
+    @Test
+    fun `skal ikke avvise skjønnsfastsettelse dersom utbetaling er revurdering og fødselsnummer ikke starter på 31`() {
+        every { sykefraværstilfelle.kreverSkjønnsfastsettelse(vedtaksperiodeId) } returns true
+        executeCommand(hentCommand(Utbetalingtype.REVURDERING, fødselsnummer = "12345678910"), null)
+    }
+
+    @Test
     fun `skal ikke avvise ved utland dersom utbetaling er revurdering`() {
         every { personDao.finnEnhetId(fødselsnummer) } returns "0393"
         executeCommand(hentCommand(Utbetalingtype.REVURDERING), null)
@@ -74,7 +106,11 @@ internal class AutomatiskAvvisningCommandTest {
             verify (exactly = 0) { godkjenningMediator.automatiskAvvisning(any(), any(), any()) }
     }
 
-    private fun hentCommand(utbetalingstype: Utbetalingtype, kanAvvises: Boolean = true) =
+    private fun hentCommand(
+        utbetalingstype: Utbetalingtype,
+        kanAvvises: Boolean = true,
+        fødselsnummer: String = "12345678910",
+    ) =
         AutomatiskAvvisningCommand(
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
@@ -83,7 +119,8 @@ internal class AutomatiskAvvisningCommandTest {
             godkjenningMediator = godkjenningMediator,
             hendelseId = hendelseId,
             utbetaling = Utbetaling(utbetalingId, 1000, 1000, utbetalingstype),
-            kanAvvises = kanAvvises
+            kanAvvises = kanAvvises,
+            sykefraværstilfelle = sykefraværstilfelle,
         )
 
     private companion object {
