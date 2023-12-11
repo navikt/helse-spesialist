@@ -6,6 +6,7 @@ import java.util.UUID
 
 internal class Avviksvurdering(
     private val unikId: UUID,
+    private val vilkårsgrunnlagId: UUID,
     private val fødselsnummer: String,
     private val skjæringstidspunkt: LocalDate,
     private val opprettet: LocalDateTime,
@@ -17,6 +18,7 @@ internal class Avviksvurdering(
 
     internal fun toDto() = AvviksvurderingDto(
         unikId = unikId,
+        vilkårsgrunnlagId = vilkårsgrunnlagId,
         fødselsnummer = fødselsnummer,
         skjæringstidspunkt = skjæringstidspunkt,
         opprettet = opprettet,

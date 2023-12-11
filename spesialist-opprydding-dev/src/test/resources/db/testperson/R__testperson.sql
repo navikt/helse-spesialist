@@ -143,4 +143,13 @@ INSERT INTO oppgave_behandling_kobling(oppgave_id, behandling_id)
 VALUES (${sequence_number}, gen_random_uuid());
 
 INSERT INTO stottetabell_for_skjonnsmessig_fastsettelse(fodselsnummer)
-VALUES (${fødselsnummer})
+VALUES (${fødselsnummer});
+
+INSERT INTO sammenligningsgrunnlag(id, unik_id, fødselsnummer, skjæringstidspunkt, opprettet, sammenligningsgrunnlag)
+VALUES (${sequence_number}, gen_random_uuid(), ${fødselsnummer}, '2018-01-01', now(), '{}'::json);
+
+INSERT INTO avviksvurdering(id, unik_id, fødselsnummer, skjæringstidspunkt, opprettet, avviksprosent, beregningsgrunnlag, sammenligningsgrunnlag_ref)
+VALUES (${sequence_number}, '${avviksvurdering_unik_id}', ${fødselsnummer}, '2018-01-01', now(), 25.0, '{}'::json, ${sequence_number});
+
+INSERT INTO vilkarsgrunnlag_per_avviksvurdering(avviksvurdering_ref, vilkårsgrunnlag_id)
+VALUES ('${avviksvurdering_unik_id}', gen_random_uuid());

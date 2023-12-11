@@ -46,6 +46,7 @@ class AvviksvurderingRiverTest {
       "avviksvurdering": {
         "id": "cc3af2c3-fa9e-4d84-a57e-a7972226cdae",
         "opprettet": "2018-01-01T00:00:00.000",
+        "vilkårsgrunnlagId": "bc3af2c3-fa9e-4d84-a57e-a7973336cdaf",
         "beregningsgrunnlag": {
           "totalbeløp": 550000.0,
           "omregnedeÅrsinntekter": [

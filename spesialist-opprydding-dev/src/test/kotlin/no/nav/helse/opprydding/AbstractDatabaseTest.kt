@@ -91,7 +91,8 @@ internal abstract class AbstractDatabaseTest {
                     "command_context_id" to UUID.randomUUID().toString(),
                     "aktør_id" to fødselsnummer.reversed(),
                     "organisasjonsnummer" to Random.nextInt(100000000, 999999999).toString(),
-                    "utbetaling_id" to UUID.randomUUID().toString()
+                    "utbetaling_id" to UUID.randomUUID().toString(),
+                    "avviksvurdering_unik_id" to UUID.randomUUID().toString(),
                 )
             )
             .locations("classpath:db/testperson")
@@ -120,18 +121,16 @@ internal abstract class AbstractDatabaseTest {
                 "arkiv_tildeling_for_oppgaver_uten_utbetaling_id",
                 "arkiv_oppgave_uten_utbetaling_id",
                 "spesialsak",
-                "avviksvurdering",
-                "sammenligningsgrunnlag",
             )
         )
         tabeller.forEach {
-            val tabellCount = finnTabellCount(it)
+            val rowCount = finnRowCount(it)
             if (it in listOf("oppdrag", "utbetalingslinje", "begrunnelse")) {
-                val (expression1, explanation1) = booleanExpressionBlock(tabellCount / 2)
-                assertTrue((expression1)) { "$it has $tabellCount rows, expected it to be $explanation1" }
+                val (expression1, explanation1) = booleanExpressionBlock(rowCount / 2)
+                assertTrue((expression1)) { "$it has $rowCount rows, expected it to be $explanation1" }
             } else {
-                val (expression2, explanation2) = booleanExpressionBlock(tabellCount)
-                assertTrue(expression2) { "$it has $tabellCount rows, expected it to be $explanation2" }
+                val (expression2, explanation2) = booleanExpressionBlock(rowCount)
+                assertTrue(expression2) { "$it has $rowCount rows, expected it to be $explanation2" }
             }
         }
     }
@@ -144,7 +143,7 @@ internal abstract class AbstractDatabaseTest {
         }
     }
 
-    private fun finnTabellCount(tabellnavn: String): Int {
+    private fun finnRowCount(tabellnavn: String): Int {
         return sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val query = "SELECT COUNT(1) FROM $tabellnavn"

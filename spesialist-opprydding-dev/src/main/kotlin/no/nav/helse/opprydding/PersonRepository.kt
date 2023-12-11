@@ -35,6 +35,7 @@ internal class PersonRepository(private val dataSource: DataSource) {
                 it.slettHendelse(fødselsnummer)
                 it.slettInntekt(personId)
                 it.slettDokument(personId)
+                it.slettAvviksvurdering(personId)
                 it.slettPerson(personId)
 
                 sikkerlogg.info("Person med fødselsnummer $fødselsnummer ble slettet")
@@ -62,6 +63,29 @@ internal class PersonRepository(private val dataSource: DataSource) {
 
         slettInfo(personinfoRef)
         slettInfotrygdutbetalinger(infotrygdutbetalingRef)
+    }
+
+    private fun TransactionalSession.slettAvviksvurdering(personRef: Int) {
+        val sammenligningsgrunnlagRefs = finnSammenligningsgrunnlag(personRef)
+
+        @Language("PostgreSQL")
+        val query1 =
+            "DELETE FROM avviksvurdering WHERE fødselsnummer::bigint = (SELECT fodselsnummer FROM person WHERE id = ?)"
+        run(queryOf(query1, personRef).asExecute)
+
+        @Language("PostgreSQL")
+        val query2 =
+            "DELETE FROM sammenligningsgrunnlag WHERE id IN (${sammenligningsgrunnlagRefs.joinToString { "?" }}) "
+        run(queryOf(query2, *sammenligningsgrunnlagRefs.toTypedArray()).asExecute)
+    }
+
+    private fun TransactionalSession.finnSammenligningsgrunnlag(personRef: Int): List<Int> {
+        @Language("PostgreSQL")
+        val query =
+            "SELECT sammenligningsgrunnlag_ref FROM avviksvurdering WHERE fødselsnummer::bigint = (SELECT fodselsnummer FROM person WHERE id = ?)"
+        return run(queryOf(query, personRef).map {
+            it.int("sammenligningsgrunnlag_ref")
+        }.asList)
     }
 
     private fun TransactionalSession.finnPersoninfoRef(personRef: Int): List<Int> {
