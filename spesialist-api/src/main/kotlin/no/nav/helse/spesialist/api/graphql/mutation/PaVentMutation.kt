@@ -20,6 +20,8 @@ import no.nav.helse.spesialist.api.graphql.schema.DateString
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.graphql.schema.PaVent
 import no.nav.helse.spesialist.api.notat.NotatMediator
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.FjernPåVent
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.LeggPåVent
@@ -29,6 +31,7 @@ import org.slf4j.LoggerFactory
 class PaVentMutation(
     private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
     private val notatMediator: NotatMediator,
+    private val periodehistorikkDao: PeriodehistorikkDao
 ) : Mutation {
 
     private companion object {
@@ -74,6 +77,7 @@ class PaVentMutation(
         val saksbehandler = env.graphQlContext.get<Lazy<SaksbehandlerFraApi>>(ContextValues.SAKSBEHANDLER.key).value
         return withContext(Dispatchers.IO) {
             try {
+                periodehistorikkDao.lagre(PeriodehistorikkType.FJERN_FRA_PA_VENT, saksbehandler.oid, oppgaveId.toLong(), null)
                 saksbehandlerhåndterer.håndter(FjernPåVent(oppgaveId.toLong()), saksbehandler)
                 newResult<Boolean?>().data(true).build()
             } catch (e: OppgaveIkkeTildelt) {

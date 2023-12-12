@@ -23,4 +23,21 @@ class PeriodehistorikkDaoTest : DatabaseIntegrationTest() {
         assertEquals(insertCount, result.size)
     }
 
+    @Test
+    fun `lagre periodehistorikk ved hjelp av oppgaveId`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettSaksbehandler()
+        opprettVedtaksperiode()
+        opprettOppgave()
+
+        val insertCount = periodehistorikkDao.lagre(
+            PeriodehistorikkType.TOTRINNSVURDERING_TIL_GODKJENNING,
+            SAKSBEHANDLER_OID,
+            oppgaveId
+        )
+        val result = periodehistorikkDao.finn(UTBETALING_ID)
+
+        assertEquals(insertCount, result.size)
+    }
 }

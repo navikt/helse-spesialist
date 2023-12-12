@@ -44,6 +44,14 @@ class PeriodehistorikkDao(private val dataSource: DataSource) : HelseDao(dataSou
             )
         }
 
+    fun lagre(historikkType: PeriodehistorikkType, saksbehandlerOid: UUID? = null, oppgaveId: Long, notatId: Int? = null) =
+        asSQL(
+            " SELECT utbetaling_id FROM oppgave WHERE id = :oppgaveId; ",
+            mapOf("oppgaveId" to oppgaveId)
+        ).single { it.uuid("utbetaling_id") }?.let {
+            lagre(historikkType, saksbehandlerOid, it, notatId)
+        }
+
     fun migrer(tidligereUtbetalingId: UUID, utbetalingId: UUID) =
         sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")

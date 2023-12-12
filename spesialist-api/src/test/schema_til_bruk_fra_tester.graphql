@@ -788,6 +788,7 @@ type VarselDTO {
     generasjonId: String!
     handling: String
     kode: String!
+    opprettet: String!
     tittel: String!
     vurdering: VarselvurderingDTO
 }
@@ -1038,6 +1039,7 @@ enum Periodehandling {
 }
 
 enum PeriodehistorikkType {
+    FJERN_FRA_PA_VENT
     TOTRINNSVURDERING_ATTESTERT
     TOTRINNSVURDERING_RETUR
     TOTRINNSVURDERING_TIL_GODKJENNING

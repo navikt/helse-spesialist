@@ -174,7 +174,7 @@ internal class SchemaBuilder(
                 ),
                 TopLevelObject(
                     PaVentMutation(
-                        saksbehandlerhåndterer = saksbehandlerhåndterer, notatMediator = notatMediator
+                        saksbehandlerhåndterer = saksbehandlerhåndterer, notatMediator = notatMediator, periodehistorikkDao = periodehistorikkDao
                     )
                 ),
             )
