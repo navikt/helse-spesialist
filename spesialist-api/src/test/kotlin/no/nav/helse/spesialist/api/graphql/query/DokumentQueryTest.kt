@@ -161,7 +161,11 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
                             tag, sporsmalstekst, undertekst, svartype, svar {verdi}, undersporsmal { 
                                 tag, sporsmalstekst, undertekst, svartype, svar {verdi}, undersporsmal {
                                     tag, sporsmalstekst, undertekst, svartype, svar {verdi}, undersporsmal {
-                                        tag, sporsmalstekst, undertekst, svartype, svar {verdi}
+                                        tag, sporsmalstekst, undertekst, svartype, svar {verdi}, undersporsmal {
+                                            tag, sporsmalstekst, undertekst, svartype, svar {verdi}, undersporsmal {
+                                                tag, sporsmalstekst, undertekst, svartype, svar {verdi}
+                                            }
+                                        }
                                     }
                                 }
                             }    
@@ -181,7 +185,7 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
         }
 
         val spørsmål = dokument["sporsmal"]
-        assertEquals(5, spørsmål.size())
+        assertEquals(6, spørsmål.size())
         assertTrue(spørsmål.none { it["tag"].asText() == "BEKREFT_OPPLYSNINGER" })
         assertTrue(spørsmål.none { it["tag"].asText() == "ANSVARSERKLARING" })
         assertTrue(spørsmål.none { it["tag"].asText() == "VAER_KLAR_OVER_AT" })
@@ -205,6 +209,8 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
         assertEquals(40, hvorMangeTimerVanligvis["undersporsmal"].first()["svar"].first()["verdi"].asInt())
         val andreInntektskilder = spørsmål.first { it["tag"].asText() == "ANDRE_INNTEKTSKILDER"}
         assertEquals("NEI", andreInntektskilder["undersporsmal"].first()["undersporsmal"].first()["undersporsmal"].first()["svar"].first()["verdi"].asText())
+        val kjenteInntektskilder = spørsmål.first { it["tag"].asText() == "KJENTE_INNTEKTSKILDER"}
+        assertEquals("Jeg jobber turnus", kjenteInntektskilder["undersporsmal"].first()["undersporsmal"].first()["undersporsmal"].first()["undersporsmal"].first()["undersporsmal"].first()["undersporsmal"].first()["sporsmalstekst"].asText())
     }
 
     @Test
@@ -1031,6 +1037,411 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
                     }
                   ],
                   "undersporsmal": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "9018f180-44a8-3757-8df8-4fa76882f746",
+          "tag": "KJENTE_INNTEKTSKILDER",
+          "sporsmalstekst": "Du er oppført med flere inntektskilder i Arbeidsgiver- og arbeidstakerregisteret. Vi trenger mer informasjon om disse.",
+          "undertekst": null,
+          "min": null,
+          "max": null,
+          "svartype": "GRUPPE_AV_UNDERSPORSMAL",
+          "kriterieForVisningAvUndersporsmal": null,
+          "svar": [],
+          "undersporsmal": [
+            {
+              "id": "c397ce1f-77f3-3576-966c-a5ea2c421c0e",
+              "tag": "KJENTE_INNTEKTSKILDER_GRUPPE_0",
+              "sporsmalstekst": null,
+              "undertekst": null,
+              "min": null,
+              "max": null,
+              "svartype": "GRUPPE_AV_UNDERSPORSMAL",
+              "kriterieForVisningAvUndersporsmal": null,
+              "svar": [],
+              "undersporsmal": [
+                {
+                  "id": "857d8ff6-b4bb-3b0d-8b77-d2b3b42e8cea",
+                  "tag": "KJENTE_INNTEKTSKILDER_GRUPPE_TITTEL_0",
+                  "sporsmalstekst": "Sjokkerende Elektriker",
+                  "undertekst": null,
+                  "min": null,
+                  "max": null,
+                  "svartype": "IKKE_RELEVANT",
+                  "kriterieForVisningAvUndersporsmal": null,
+                  "svar": [],
+                  "undersporsmal": []
+                },
+                {
+                  "id": "5b8da937-4beb-3608-a7f8-9f1371d083f2",
+                  "tag": "KJENTE_INNTEKTSKILDER_SLUTTET_0",
+                  "sporsmalstekst": "Har du sluttet hos Sjokkerende Elektriker før du ble sykmeldt 13. november 2023?",
+                  "undertekst": null,
+                  "min": null,
+                  "max": null,
+                  "svartype": "RADIO_GRUPPE",
+                  "kriterieForVisningAvUndersporsmal": null,
+                  "svar": [],
+                  "undersporsmal": [
+                    {
+                      "id": "486be174-9d07-3404-91e7-8572f1f263a6",
+                      "tag": "KJENTE_INNTEKTSKILDER_SLUTTET_JA_0",
+                      "sporsmalstekst": "Ja",
+                      "undertekst": null,
+                      "min": null,
+                      "max": null,
+                      "svartype": "RADIO",
+                      "kriterieForVisningAvUndersporsmal": "CHECKED",
+                      "svar": [],
+                      "undersporsmal": [
+                        {
+                          "id": "6fe4df44-c000-3cb9-9a50-327a0955d3cf",
+                          "tag": "KJENTE_INNTEKTSKILDER_DATO_SLUTTET_0",
+                          "sporsmalstekst": "Når sluttet du?",
+                          "undertekst": null,
+                          "min": null,
+                          "max": "2023-11-12",
+                          "svartype": "DATO",
+                          "kriterieForVisningAvUndersporsmal": null,
+                          "svar": [],
+                          "undersporsmal": []
+                        }
+                      ]
+                    },
+                    {
+                      "id": "dd1a2c49-8109-3015-b80d-8a9edb89fe30",
+                      "tag": "KJENTE_INNTEKTSKILDER_SLUTTET_NEI_0",
+                      "sporsmalstekst": "Nei",
+                      "undertekst": null,
+                      "min": null,
+                      "max": null,
+                      "svartype": "RADIO",
+                      "kriterieForVisningAvUndersporsmal": "CHECKED",
+                      "svar": [
+                        {
+                          "verdi": "CHECKED"
+                        }
+                      ],
+                      "undersporsmal": [
+                        {
+                          "id": "74d7d49e-1d57-33b5-85e6-6da256e10736",
+                          "tag": "KJENTE_INNTEKTSKILDER_UTFORT_ARBEID_0",
+                          "sporsmalstekst": "Har du utført noe arbeid ved Sjokkerende Elektriker i perioden 29. oktober - 12. november 2023?",
+                          "undertekst": null,
+                          "min": null,
+                          "max": null,
+                          "svartype": "JA_NEI",
+                          "kriterieForVisningAvUndersporsmal": "NEI",
+                          "svar": [
+                            {
+                              "verdi": "NEI"
+                            }
+                          ],
+                          "undersporsmal": [
+                            {
+                              "id": "8e99c11d-21dd-3d27-aa35-a771e147cb85",
+                              "tag": "KJENTE_INNTEKTSKILDER_ARSAK_IKKE_JOBBET_0",
+                              "sporsmalstekst": "Velg en eller flere årsaker til at du ikke har jobbet",
+                              "undertekst": null,
+                              "min": null,
+                              "max": null,
+                              "svartype": "CHECKBOX_GRUPPE",
+                              "kriterieForVisningAvUndersporsmal": null,
+                              "svar": [],
+                              "undersporsmal": [
+                                {
+                                  "id": "3ec5dff7-2c1e-34d8-85a6-6f514a03e6d7",
+                                  "tag": "KJENTE_INNTEKTSKILDER_ARSAK_IKKE_JOBBET_SYKMELDT_0",
+                                  "sporsmalstekst": "Jeg var sykmeldt",
+                                  "undertekst": null,
+                                  "min": null,
+                                  "max": null,
+                                  "svartype": "CHECKBOX",
+                                  "kriterieForVisningAvUndersporsmal": null,
+                                  "svar": [],
+                                  "undersporsmal": []
+                                },
+                                {
+                                  "id": "1a506231-2da3-3b85-84c3-9ed38b7ebb23",
+                                  "tag": "KJENTE_INNTEKTSKILDER_ARSAK_IKKE_JOBBET_TURNUS_0",
+                                  "sporsmalstekst": "Jeg jobber turnus",
+                                  "undertekst": null,
+                                  "min": null,
+                                  "max": null,
+                                  "svartype": "CHECKBOX",
+                                  "kriterieForVisningAvUndersporsmal": null,
+                                  "svar": [
+                                    {
+                                      "verdi": "CHECKED"
+                                    }
+                                  ],
+                                  "undersporsmal": []
+                                },
+                                {
+                                  "id": "6070aadd-47b3-321c-8b58-c9b304428840",
+                                  "tag": "KJENTE_INNTEKTSKILDER_ARSAK_IKKE_JOBBET_FERIE_0",
+                                  "sporsmalstekst": "Jeg hadde lovbestemt ferie",
+                                  "undertekst": null,
+                                  "min": null,
+                                  "max": null,
+                                  "svartype": "CHECKBOX",
+                                  "kriterieForVisningAvUndersporsmal": null,
+                                  "svar": [],
+                                  "undersporsmal": []
+                                },
+                                {
+                                  "id": "b41df6dd-826e-301d-9bb2-792087aa0221",
+                                  "tag": "KJENTE_INNTEKTSKILDER_ARSAK_IKKE_JOBBET_AVSPASERING_0",
+                                  "sporsmalstekst": "Jeg avspaserte",
+                                  "undertekst": null,
+                                  "min": null,
+                                  "max": null,
+                                  "svartype": "CHECKBOX",
+                                  "kriterieForVisningAvUndersporsmal": null,
+                                  "svar": [],
+                                  "undersporsmal": []
+                                },
+                                {
+                                  "id": "1d27b566-27ab-3c66-b18f-5e4446ebbedc",
+                                  "tag": "KJENTE_INNTEKTSKILDER_ARSAK_IKKE_JOBBET_PERMITTERT_0",
+                                  "sporsmalstekst": "Jeg var permittert",
+                                  "undertekst": null,
+                                  "min": null,
+                                  "max": null,
+                                  "svartype": "CHECKBOX",
+                                  "kriterieForVisningAvUndersporsmal": null,
+                                  "svar": [],
+                                  "undersporsmal": []
+                                },
+                                {
+                                  "id": "02f821a2-7a26-3f0b-a5e7-a331b23421b9",
+                                  "tag": "KJENTE_INNTEKTSKILDER_ARSAK_IKKE_JOBBET_PERMISJON_0",
+                                  "sporsmalstekst": "Jeg hadde permisjon",
+                                  "undertekst": null,
+                                  "min": null,
+                                  "max": null,
+                                  "svartype": "CHECKBOX",
+                                  "kriterieForVisningAvUndersporsmal": null,
+                                  "svar": [],
+                                  "undersporsmal": []
+                                },
+                                {
+                                  "id": "a43da7cf-6bd3-3262-a88f-99a7c8a2072b",
+                                  "tag": "KJENTE_INNTEKTSKILDER_ARSAK_IKKE_JOBBET_ANNEN_0",
+                                  "sporsmalstekst": "Annen årsak",
+                                  "undertekst": null,
+                                  "min": null,
+                                  "max": null,
+                                  "svartype": "CHECKBOX",
+                                  "kriterieForVisningAvUndersporsmal": null,
+                                  "svar": [],
+                                  "undersporsmal": []
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "028dab02-e655-3b5d-a7b7-f67968393407",
+              "tag": "KJENTE_INNTEKTSKILDER_GRUPPE_1",
+              "sporsmalstekst": null,
+              "undertekst": null,
+              "min": null,
+              "max": null,
+              "svartype": "GRUPPE_AV_UNDERSPORSMAL",
+              "kriterieForVisningAvUndersporsmal": null,
+              "svar": [],
+              "undersporsmal": [
+                {
+                  "id": "08dcff68-f7e0-328c-81a7-660534321837",
+                  "tag": "KJENTE_INNTEKTSKILDER_GRUPPE_TITTEL_1",
+                  "sporsmalstekst": "Pengeløs Sparebank",
+                  "undertekst": null,
+                  "min": null,
+                  "max": null,
+                  "svartype": "IKKE_RELEVANT",
+                  "kriterieForVisningAvUndersporsmal": null,
+                  "svar": [],
+                  "undersporsmal": []
+                },
+                {
+                  "id": "7ab795e8-55a5-3057-b03b-7c6d27cde342",
+                  "tag": "KJENTE_INNTEKTSKILDER_SLUTTET_1",
+                  "sporsmalstekst": "Har du sluttet hos Pengeløs Sparebank før du ble sykmeldt 13. november 2023?",
+                  "undertekst": null,
+                  "min": null,
+                  "max": null,
+                  "svartype": "RADIO_GRUPPE",
+                  "kriterieForVisningAvUndersporsmal": null,
+                  "svar": [],
+                  "undersporsmal": [
+                    {
+                      "id": "488da78d-2a92-30c9-8d66-2c2149587241",
+                      "tag": "KJENTE_INNTEKTSKILDER_SLUTTET_JA_1",
+                      "sporsmalstekst": "Ja",
+                      "undertekst": null,
+                      "min": null,
+                      "max": null,
+                      "svartype": "RADIO",
+                      "kriterieForVisningAvUndersporsmal": "CHECKED",
+                      "svar": [
+                        {
+                          "verdi": "CHECKED"
+                        }
+                      ],
+                      "undersporsmal": [
+                        {
+                          "id": "0a28d4a3-01b6-3ece-a85e-bcdccfed58cb",
+                          "tag": "KJENTE_INNTEKTSKILDER_DATO_SLUTTET_1",
+                          "sporsmalstekst": "Når sluttet du?",
+                          "undertekst": null,
+                          "min": null,
+                          "max": "2023-11-12",
+                          "svartype": "DATO",
+                          "kriterieForVisningAvUndersporsmal": null,
+                          "svar": [
+                            {
+                              "verdi": "2023-11-01"
+                            }
+                          ],
+                          "undersporsmal": []
+                        }
+                      ]
+                    },
+                    {
+                      "id": "63de7596-e0c7-3a1b-a709-b40217c9553c",
+                      "tag": "KJENTE_INNTEKTSKILDER_SLUTTET_NEI_1",
+                      "sporsmalstekst": "Nei",
+                      "undertekst": null,
+                      "min": null,
+                      "max": null,
+                      "svartype": "RADIO",
+                      "kriterieForVisningAvUndersporsmal": "CHECKED",
+                      "svar": [],
+                      "undersporsmal": [
+                        {
+                          "id": "8e0d6542-8fe5-3d5d-b01d-983c68e07a43",
+                          "tag": "KJENTE_INNTEKTSKILDER_UTFORT_ARBEID_1",
+                          "sporsmalstekst": "Har du utført noe arbeid ved Pengeløs Sparebank i perioden 29. oktober - 12. november 2023?",
+                          "undertekst": null,
+                          "min": null,
+                          "max": null,
+                          "svartype": "JA_NEI",
+                          "kriterieForVisningAvUndersporsmal": "NEI",
+                          "svar": [],
+                          "undersporsmal": [
+                            {
+                              "id": "e2525bce-1843-3440-8ca8-8299291a1367",
+                              "tag": "KJENTE_INNTEKTSKILDER_ARSAK_IKKE_JOBBET_1",
+                              "sporsmalstekst": "Velg en eller flere årsaker til at du ikke har jobbet",
+                              "undertekst": null,
+                              "min": null,
+                              "max": null,
+                              "svartype": "CHECKBOX_GRUPPE",
+                              "kriterieForVisningAvUndersporsmal": null,
+                              "svar": [],
+                              "undersporsmal": [
+                                {
+                                  "id": "3a04d4e5-a107-3a32-a5b4-7da211f01953",
+                                  "tag": "KJENTE_INNTEKTSKILDER_ARSAK_IKKE_JOBBET_SYKMELDT_1",
+                                  "sporsmalstekst": "Jeg var sykmeldt",
+                                  "undertekst": null,
+                                  "min": null,
+                                  "max": null,
+                                  "svartype": "CHECKBOX",
+                                  "kriterieForVisningAvUndersporsmal": null,
+                                  "svar": [],
+                                  "undersporsmal": []
+                                },
+                                {
+                                  "id": "41c9b471-0d06-3211-970a-adbed4b57531",
+                                  "tag": "KJENTE_INNTEKTSKILDER_ARSAK_IKKE_JOBBET_TURNUS_1",
+                                  "sporsmalstekst": "Jeg jobber turnus",
+                                  "undertekst": null,
+                                  "min": null,
+                                  "max": null,
+                                  "svartype": "CHECKBOX",
+                                  "kriterieForVisningAvUndersporsmal": null,
+                                  "svar": [],
+                                  "undersporsmal": []
+                                },
+                                {
+                                  "id": "36cd0e00-0c07-3e87-9231-9fbad5c194ca",
+                                  "tag": "KJENTE_INNTEKTSKILDER_ARSAK_IKKE_JOBBET_FERIE_1",
+                                  "sporsmalstekst": "Jeg hadde lovbestemt ferie",
+                                  "undertekst": null,
+                                  "min": null,
+                                  "max": null,
+                                  "svartype": "CHECKBOX",
+                                  "kriterieForVisningAvUndersporsmal": null,
+                                  "svar": [],
+                                  "undersporsmal": []
+                                },
+                                {
+                                  "id": "5777bf40-62d0-353d-aa29-704df2ccc36e",
+                                  "tag": "KJENTE_INNTEKTSKILDER_ARSAK_IKKE_JOBBET_AVSPASERING_1",
+                                  "sporsmalstekst": "Jeg avspaserte",
+                                  "undertekst": null,
+                                  "min": null,
+                                  "max": null,
+                                  "svartype": "CHECKBOX",
+                                  "kriterieForVisningAvUndersporsmal": null,
+                                  "svar": [],
+                                  "undersporsmal": []
+                                },
+                                {
+                                  "id": "2988b4d6-6471-3a62-9edb-4831026da26b",
+                                  "tag": "KJENTE_INNTEKTSKILDER_ARSAK_IKKE_JOBBET_PERMITTERT_1",
+                                  "sporsmalstekst": "Jeg var permittert",
+                                  "undertekst": null,
+                                  "min": null,
+                                  "max": null,
+                                  "svartype": "CHECKBOX",
+                                  "kriterieForVisningAvUndersporsmal": null,
+                                  "svar": [],
+                                  "undersporsmal": []
+                                },
+                                {
+                                  "id": "561a1ff8-b9fa-3933-a528-4e5305c69d91",
+                                  "tag": "KJENTE_INNTEKTSKILDER_ARSAK_IKKE_JOBBET_PERMISJON_1",
+                                  "sporsmalstekst": "Jeg hadde permisjon",
+                                  "undertekst": null,
+                                  "min": null,
+                                  "max": null,
+                                  "svartype": "CHECKBOX",
+                                  "kriterieForVisningAvUndersporsmal": null,
+                                  "svar": [],
+                                  "undersporsmal": []
+                                },
+                                {
+                                  "id": "a2af9109-b73f-366c-a29a-0ce5301e67e1",
+                                  "tag": "KJENTE_INNTEKTSKILDER_ARSAK_IKKE_JOBBET_ANNEN_1",
+                                  "sporsmalstekst": "Annen årsak",
+                                  "undertekst": null,
+                                  "min": null,
+                                  "max": null,
+                                  "svartype": "CHECKBOX",
+                                  "kriterieForVisningAvUndersporsmal": null,
+                                  "svar": [],
+                                  "undersporsmal": []
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
                 }
               ]
             }
