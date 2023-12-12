@@ -1,5 +1,6 @@
 package no.nav.helse.modell.gosysoppgaver
 
+import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
 import no.nav.helse.modell.kommando.Command
@@ -14,6 +15,7 @@ internal class ÅpneGosysOppgaverCommand(
     private val vedtaksperiodeId: UUID,
     private val sykefraværstilfelle: Sykefraværstilfelle,
     private val harTildeltOppgave: Boolean,
+    private val skjæringstidspunkt: LocalDate,
 ) : Command {
 
     private companion object {
@@ -28,7 +30,10 @@ internal class ÅpneGosysOppgaverCommand(
         val løsning = context.get<ÅpneGosysOppgaverløsning>()
         if (løsning == null) {
             logg.info("Trenger oppgaveinformasjon fra Gosys")
-            context.behov("ÅpneOppgaver", mapOf("aktørId" to aktørId))
+            context.behov(
+                "ÅpneOppgaver",
+                mapOf("aktørId" to aktørId, "ikkeEldreEnn" to skjæringstidspunkt.minusYears(1))
+            )
             return false
         }
 

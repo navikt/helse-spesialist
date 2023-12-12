@@ -3,6 +3,7 @@ package no.nav.helse.modell.gosysoppgaver
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.januar
@@ -58,13 +59,14 @@ internal class ÅpneGosysOppgaverCommandTest {
     }
     private val dao = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
 
-    private fun command(harTildeltOppgave: Boolean = false) = ÅpneGosysOppgaverCommand(
+    private fun command(harTildeltOppgave: Boolean = false, skjæringstidspunkt: LocalDate = LocalDate.now()) = ÅpneGosysOppgaverCommand(
         UUID.randomUUID(),
         AKTØR_ID,
         dao,
         VEDTAKPERIODE_ID,
         sykefraværstilfelle,
         harTildeltOppgave = harTildeltOppgave,
+        skjæringstidspunkt = skjæringstidspunkt,
     )
     private lateinit var context: CommandContext
 
@@ -76,8 +78,10 @@ internal class ÅpneGosysOppgaverCommandTest {
 
     @Test
     fun `Ber om åpne oppgaver i gosys`() {
-        assertFalse(command().execute(context))
+        val skjæringstidspunkt = LocalDate.now().minusDays(17)
+        assertFalse(command(skjæringstidspunkt = skjæringstidspunkt).execute(context))
         assertEquals(listOf("ÅpneOppgaver"), context.behov().keys.toList())
+        assertEquals(skjæringstidspunkt.minusYears(1), context.behov()["ÅpneOppgaver"]!!["ikkeEldreEnn"])
     }
 
     @Test

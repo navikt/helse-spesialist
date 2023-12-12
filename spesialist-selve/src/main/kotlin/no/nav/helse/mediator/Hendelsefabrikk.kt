@@ -884,6 +884,7 @@ internal class Hendelsefabrikk(
             oppgaveDao = oppgaveDao,
             utbetalingDao = utbetalingDao,
             tildelingDao = tildelingDao,
+            generasjonRepository = generasjonRepository,
         )
     }
 
