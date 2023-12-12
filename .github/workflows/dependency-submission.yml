@@ -10,7 +10,7 @@ on:
 jobs:
   dependabot:
     name: Monitor dependencies with Dependabot
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     permissions: # The Dependency Submission API requires write permission
       contents: write
     steps:
@@ -22,4 +22,10 @@ jobs:
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
         with:
           fail-on-error: true
-          gradle-dependency-path: "build.gradle.kts"
+          gradle-build-module: |-
+            :spesialist-api
+            :spesialist-felles
+            :spesialist-migrering
+            :spesialist-modell
+            :spesialist-opprydding-dev
+            :spesialist-selve
