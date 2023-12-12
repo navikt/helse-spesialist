@@ -23,10 +23,12 @@ import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.TestHendelse
 import no.nav.helse.modell.oppgave.Egenskap
+import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.api.graphql.schema.Mottaker
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -939,8 +941,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
 
         oppgaveDao.invaliderOppgaveFor(fødselsnummer = FNR)
 
-        assertOppgaveStatus(oppgaveId1, "Invalidert")
-        assertOppgaveStatus(oppgaveId2, "AvventerSaksbehandler")
+        assertOppgaveStatus(oppgaveId1, Oppgave.Invalidert)
+        assertOppgaveStatus(oppgaveId2, Oppgave.AvventerSaksbehandler)
     }
 
     @Test
@@ -984,14 +986,36 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         assertEquals(0, antallOppgaver.antallMineSakerPåVent)
     }
 
-    private fun assertOppgaveStatus(oppgaveId: Long, forventetStatus: String) {
+    @Test
+    fun `Finner eldste opprettet-dato for en vedtaksperiode`() {
+        val førsteDato = LocalDate.now().minusDays(17)
+        nyPerson()
+        tilbakestillOpprettetDato(OPPGAVE_ID, førsteDato)
+        ferdigstillOppgave(OPPGAVE_ID)
+        assertOppgaveStatus(oppgaveId, Oppgave.Ferdigstilt)
+
+        opprettOppgave()
+        assertOppgaveStatus(oppgaveId, Oppgave.AvventerSaksbehandler)
+
+        assertEquals(førsteDato, oppgaveDao.førsteOppgavedato(VEDTAKSPERIODE))
+    }
+
+    private fun tilbakestillOpprettetDato(oppgaveId: Long, opprettet: LocalDate) {
+        @Language("PostgreSQL")
+        val query = "UPDATE oppgave SET opprettet = :opprettet WHERE id = :oppgaveId"
+        sessionOf(dataSource).use {
+            it.run(queryOf(query, mapOf("oppgaveId" to oppgaveId, "opprettet" to opprettet)).asUpdate)
+        }
+    }
+
+    private fun assertOppgaveStatus(oppgaveId: Long, forventetStatus: Oppgave.Tilstand) {
         val status = sessionOf(dataSource).use { session ->
             session.run(
                 queryOf("SELECT * FROM oppgave where id = :id", mapOf("id" to oppgaveId))
                     .map { it.string("status") }.asSingle
             )
         }
-        assertEquals(forventetStatus, status)
+        assertEquals(forventetStatus.toString(), status)
     }
 
     private fun oppgave() =

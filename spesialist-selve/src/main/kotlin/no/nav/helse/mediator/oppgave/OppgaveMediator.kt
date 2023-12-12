@@ -334,4 +334,6 @@ internal class OppgaveMediator(
             )
         }
     }
+
+    fun førsteOppgavedato(vedtaksperiodeId: UUID) = oppgaveDao.førsteOppgavedato(vedtaksperiodeId)
 }

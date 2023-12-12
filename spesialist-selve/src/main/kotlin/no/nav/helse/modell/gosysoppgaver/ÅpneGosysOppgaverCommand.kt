@@ -1,8 +1,9 @@
 package no.nav.helse.modell.gosysoppgaver
 
-import java.time.LocalDate
+import java.time.LocalDate.now
 import java.util.UUID
 import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
+import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
@@ -12,10 +13,10 @@ internal class ÅpneGosysOppgaverCommand(
     private val hendelseId: UUID,
     private val aktørId: String,
     private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
+    private val oppgaveMediator: OppgaveMediator,
     private val vedtaksperiodeId: UUID,
     private val sykefraværstilfelle: Sykefraværstilfelle,
     private val harTildeltOppgave: Boolean,
-    private val skjæringstidspunkt: LocalDate,
 ) : Command {
 
     private companion object {
@@ -29,10 +30,11 @@ internal class ÅpneGosysOppgaverCommand(
     private fun behandle(context: CommandContext): Boolean {
         val løsning = context.get<ÅpneGosysOppgaverløsning>()
         if (løsning == null) {
+            val ikkeEldreEnn = (oppgaveMediator.førsteOppgavedato(vedtaksperiodeId) ?: now()).minusYears(1)
             logg.info("Trenger oppgaveinformasjon fra Gosys")
             context.behov(
                 "ÅpneOppgaver",
-                mapOf("aktørId" to aktørId, "ikkeEldreEnn" to skjæringstidspunkt.minusYears(1))
+                mapOf("aktørId" to aktørId, "ikkeEldreEnn" to ikkeEldreEnn)
             )
             return false
         }

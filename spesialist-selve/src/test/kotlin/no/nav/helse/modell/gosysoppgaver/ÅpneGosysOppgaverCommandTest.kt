@@ -1,6 +1,7 @@
 package no.nav.helse.modell.gosysoppgaver
 
 import io.mockk.clearMocks
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import java.time.LocalDate
@@ -8,6 +9,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.januar
 import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
+import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.sykefraværstilfelle.SykefraværstilfelleObserver
@@ -63,10 +65,10 @@ internal class ÅpneGosysOppgaverCommandTest {
         UUID.randomUUID(),
         AKTØR_ID,
         dao,
+        mockk<OppgaveMediator> { every { førsteOppgavedato(VEDTAKPERIODE_ID) } returns skjæringstidspunkt},
         VEDTAKPERIODE_ID,
         sykefraværstilfelle,
         harTildeltOppgave = harTildeltOppgave,
-        skjæringstidspunkt = skjæringstidspunkt,
     )
     private lateinit var context: CommandContext
 

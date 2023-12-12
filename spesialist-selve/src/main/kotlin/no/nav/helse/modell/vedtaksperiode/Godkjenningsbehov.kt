@@ -147,10 +147,10 @@ internal class Godkjenningsbehov(
             hendelseId = id,
             aktørId = aktørId,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
+            oppgaveMediator = oppgaveMediator,
             vedtaksperiodeId = vedtaksperiodeId,
             sykefraværstilfelle = sykefraværstilfelle,
             harTildeltOppgave = false,
-            skjæringstidspunkt = skjæringstidspunkt,
         ),
         RisikoCommand(
             hendelseId = id,

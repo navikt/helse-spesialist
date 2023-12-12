@@ -525,6 +525,15 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
             )
         }
 
+    internal fun førsteOppgavedato(vedtaksperiodeId: UUID) = asSQL(
+        """
+            select min(opprettet) as tidligsteOpprettet
+            from oppgave o
+            join vedtak v on o.vedtak_ref = v.id
+            where v.vedtaksperiode_id = :vedtaksperiodeId
+        """.trimIndent(), mapOf("vedtaksperiodeId" to vedtaksperiodeId)
+    ).single { it.localDateOrNull("tidligsteOpprettet") }
+
     fun invaliderOppgaveFor(fødselsnummer: String) = asSQL(
         """
         UPDATE oppgave o
