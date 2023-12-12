@@ -126,6 +126,7 @@ internal class SaksbehandlerMediator(
                     saksbehandlerOid = saksbehandler.oid()
                 )
             }
+            sikkerlogg.info("Utfører handling ${handling.loggnavn()} på vegne av saksbehandler $saksbehandler")
             handling.utførAv(saksbehandler)
         } catch (e: Modellfeil) {
             throw e.tilApiversjon()
