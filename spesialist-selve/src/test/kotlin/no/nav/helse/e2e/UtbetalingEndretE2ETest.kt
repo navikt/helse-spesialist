@@ -8,9 +8,7 @@ import kotliquery.sessionOf
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class UtbetalingEndretE2ETest : AbstractE2ETest() {
@@ -41,34 +39,6 @@ internal class UtbetalingEndretE2ETest : AbstractE2ETest() {
         assertEquals(saksbehandlerOid, finnOidForTildeling(oppgaveId2))
     }
 
-    @Test
-    fun `beholder påVent-flagget ved gjentildeling`() {
-        val saksbehandlerOid = UUID.randomUUID()
-        fremTilSaksbehandleroppgave()
-        opprettSaksbehandler(saksbehandlerOid, "Behandler, Saks", "saks.behandler@nav.no", "Z999999")
-
-        val oppgaveId = oppgaveIdFor(VEDTAKSPERIODE_ID)
-        tildelOppgave(oppgaveId, saksbehandlerOid, påVent = false)
-
-        håndterUtbetalingErstattet(arbeidsgiverbeløp = 20000, personbeløp = 20000)
-        håndterVedtaksperiodeReberegnet()
-        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true)
-
-        val oppgaveId2 = finnNyOppgaveId(forrigeOppgaveId = oppgaveId)
-        val (oid, oppgave2PåVent) = finnOidOgPåVentForTildeling(oppgaveId2)!!
-        assertEquals(saksbehandlerOid, oid)
-        assertFalse(oppgave2PåVent) { "Ny oppgave skal ikke være på vent etter reberegning, siden forrige ikke var det" }
-
-        leggPåVent(oppgaveId2)
-        håndterUtbetalingErstattet(arbeidsgiverbeløp = 20000, personbeløp = 20000)
-        håndterVedtaksperiodeReberegnet()
-        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true)
-
-        val oppgaveId3 = finnNyOppgaveId(forrigeOppgaveId = oppgaveId2)
-        val (_, oppgave3PåVent) = finnOidOgPåVentForTildeling(oppgaveId3)!!
-        assertTrue(oppgave3PåVent) { "Ny oppgave skal være på vent etter reberegning siden forrige var det" }
-    }
-
     private fun finnNyOppgaveId(forrigeOppgaveId: Long) = oppgaveIdFor(VEDTAKSPERIODE_ID).also { nyOppgaveId ->
         assertNotEquals(forrigeOppgaveId, nyOppgaveId) {
             "Det er meningen at det skal ha blitt opprettet en ny oppgave"
@@ -97,25 +67,9 @@ internal class UtbetalingEndretE2ETest : AbstractE2ETest() {
         }
     }
 
-    private fun leggPåVent(oppgaveId: Long) {
-        sessionOf(dataSource).use {
-            it.run(
-                queryOf(
-                    " UPDATE tildeling SET på_vent = true WHERE oppgave_id_ref = :oppgave_id_ref; ",
-                    mapOf("oppgave_id_ref" to oppgaveId)
-                ).asUpdate
-            )
-        }
-    }
-
     private fun finnOidForTildeling(oppgaveId: Long) = hentFraTildeling<UUID?>(oppgaveId) {
         it.uuid("saksbehandler_ref")
     }
-
-    private fun finnOidOgPåVentForTildeling(oppgaveId: Long) =
-        hentFraTildeling<Pair<UUID, Boolean>?>(oppgaveId) {
-            it.uuid("saksbehandler_ref") to it.boolean("på_vent")
-        }
 
     private fun <T> hentFraTildeling(oppgaveId: Long, mapping: (Row) -> T) =
         sessionOf(dataSource).use { session ->

@@ -5,21 +5,19 @@ import javax.sql.DataSource
 import no.nav.helse.HelseDao
 
 class ReservasjonDao(dataSource: DataSource) : HelseDao(dataSource) {
-    fun reserverPerson(saksbehandlerOid: UUID, fødselsnummer: String, påVent: Boolean) {
+    fun reserverPerson(saksbehandlerOid: UUID, fødselsnummer: String) {
         asSQL(
             """
-            INSERT INTO reserver_person(saksbehandler_ref, person_ref, sett_på_vent_flagg)
-            SELECT :saksbehandler_ref, person.id, :sett_paa_vent_flagg
+            INSERT INTO reserver_person(saksbehandler_ref, person_ref)
+            SELECT :saksbehandler_ref, person.id
             FROM person
             WHERE person.fodselsnummer = :fodselsnummer
             ON CONFLICT (person_ref)
                 DO UPDATE SET gyldig_til = current_date + time '23:59:59',
-                              saksbehandler_ref = :saksbehandler_ref,
-                              sett_på_vent_flagg = :sett_paa_vent_flagg;
+                              saksbehandler_ref = :saksbehandler_ref;
             """, mapOf(
                 "saksbehandler_ref" to saksbehandlerOid,
                 "fodselsnummer" to fødselsnummer.toLong(),
-                "sett_paa_vent_flagg" to påVent,
             )
         ).update()
 
@@ -37,12 +35,10 @@ class ReservasjonDao(dataSource: DataSource) : HelseDao(dataSource) {
             navn = it.string("navn"),
             epostadresse = it.string("epost"),
             ident = it.string("ident")
-        ),
-        it.boolean("sett_på_vent_flagg")
+        )
     ) }
 }
 
 data class Reservasjon(
     val reservertTil: SaksbehandlerFraDatabase,
-    val settPåVentFlagg: Boolean,
 )

@@ -27,7 +27,7 @@ internal class ReservasjonDaoTest : DatabaseIntegrationTest() {
     fun `reserverer person`() {
         opprettData()
         val saksbehandler = sessionOf(dataSource).use {
-            reservasjonDao.reserverPerson(SAKSBEHANDLER_OID, FNR, false)
+            reservasjonDao.reserverPerson(SAKSBEHANDLER_OID, FNR)
             reservasjonDao.hentReservasjonFor(FNR)?.reservertTil
                 ?: fail("Forventet at det skulle finnes en reservasjon i basen")
         }
@@ -47,9 +47,9 @@ internal class ReservasjonDaoTest : DatabaseIntegrationTest() {
         )
 
         val saksbehandler = sessionOf(dataSource).use {
-            reservasjonDao.reserverPerson(enAnnenSaksbehandler, FNR, false)
+            reservasjonDao.reserverPerson(enAnnenSaksbehandler, FNR)
             val gyldigTil1 = finnGyldigTil()
-            reservasjonDao.reserverPerson(SAKSBEHANDLER_OID, FNR, false)
+            reservasjonDao.reserverPerson(SAKSBEHANDLER_OID, FNR)
             val gyldigTil2 = finnGyldigTil()
             assertTrue(gyldigTil2.isEqual(gyldigTil1))
             reservasjonDao.hentReservasjonFor(FNR)?.reservertTil

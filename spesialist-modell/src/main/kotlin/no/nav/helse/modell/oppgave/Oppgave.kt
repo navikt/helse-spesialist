@@ -76,9 +76,9 @@ class Oppgave private constructor(
         val tildelt = tildeltTil
         if (tildelt != null && tildelt != saksbehandler) {
             logg.warn("Oppgave med {} kan ikke tildeles fordi den er tildelt noen andre.", kv("oppgaveId", id))
-            throw OppgaveTildeltNoenAndre(tildelt, this.påVent)
+            throw OppgaveTildeltNoenAndre(tildelt, false)
         }
-        tilstand.tildel(this, saksbehandler, påVent)
+        tilstand.tildel(this, saksbehandler)
     }
 
     internal fun forsøkAvmelding(saksbehandler: Saksbehandler) {
@@ -94,7 +94,6 @@ class Oppgave private constructor(
 
     fun forsøkTildelingVedReservasjon(
         saksbehandler: Saksbehandler,
-        påVent: Boolean = false,
     ) {
         logg.info("Oppgave med {} forsøkes tildelt grunnet reservasjon.", kv("oppgaveId", id))
         sikkerlogg.info("Oppgave med {} forsøkes tildelt $saksbehandler grunnet reservasjon.", kv("oppgaveId", id))
@@ -102,7 +101,7 @@ class Oppgave private constructor(
             logg.info("Oppgave med {} er stikkprøve og tildeles ikke på tross av reservasjon.", kv("oppgaveId", id))
             return
         }
-        tilstand.tildel(this, saksbehandler, påVent)
+        tilstand.tildel(this, saksbehandler)
     }
 
     fun sendTilBeslutter(behandlendeSaksbehandler: Saksbehandler) {
@@ -178,9 +177,9 @@ class Oppgave private constructor(
         tilstand.invalider(this)
     }
 
-    private fun tildel(saksbehandler: Saksbehandler, påVent: Boolean) {
+    private fun tildel(saksbehandler: Saksbehandler) {
         this.tildeltTil = saksbehandler
-        this.påVent = påVent
+        this.påVent = egenskaper.contains(PÅ_VENT)
         logg.info("Oppgave med {} tildeles saksbehandler med {}", kv("oppgaveId", id), kv("oid", saksbehandler.oid()))
         sikkerlogg.info("Oppgave med {} tildeles $saksbehandler", kv("oppgaveId", id))
         oppgaveEndret()
@@ -188,7 +187,7 @@ class Oppgave private constructor(
 
     private fun avmeld(saksbehandler: Saksbehandler) {
         this.tildeltTil = null
-        this.påVent = false
+        this.påVent = egenskaper.contains(PÅ_VENT)
         logg.info("Oppgave med {} avmeldes saksbehandler med {}", kv("oppgaveId", id), kv("oid", saksbehandler.oid()))
         sikkerlogg.info("Oppgave med {} avmeldes $saksbehandler", kv("oppgaveId", id))
         oppgaveEndret()
@@ -233,7 +232,7 @@ class Oppgave private constructor(
             )
         }
 
-        fun tildel(oppgave: Oppgave, saksbehandler: Saksbehandler, påVent: Boolean) {
+        fun tildel(oppgave: Oppgave, saksbehandler: Saksbehandler) {
             logg.error(
                 "Forventer ikke forsøk på tildeling i {} for oppgave med {} av $saksbehandler",
                 kv("tilstand", this),
@@ -263,7 +262,7 @@ class Oppgave private constructor(
             oppgave.nesteTilstand(Invalidert)
         }
 
-        override fun tildel(oppgave: Oppgave, saksbehandler: Saksbehandler, påVent: Boolean) {
+        override fun tildel(oppgave: Oppgave, saksbehandler: Saksbehandler) {
             val tilgangsstyrteEgenskaper = oppgave.egenskaper.tilgangsstyrteEgenskaper()
             if (tilgangsstyrteEgenskaper.isNotEmpty() && !saksbehandler.harTilgangTil(tilgangsstyrteEgenskaper)) {
                 logg.info(
@@ -273,7 +272,7 @@ class Oppgave private constructor(
                 )
                 throw ManglerTilgang(saksbehandler.oid(), oppgave.id)
             }
-            oppgave.tildel(saksbehandler, påVent)
+            oppgave.tildel(saksbehandler)
         }
 
         override fun avmeld(oppgave: Oppgave, saksbehandler: Saksbehandler) {

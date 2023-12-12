@@ -280,14 +280,14 @@ internal class OppgaveMediator(
 
     fun reserverOppgave(saksbehandleroid: UUID, fødselsnummer: String) {
         try {
-            reservasjonDao.reserverPerson(saksbehandleroid, fødselsnummer, false)
+            reservasjonDao.reserverPerson(saksbehandleroid, fødselsnummer)
         } catch (e: SQLException) {
             logg.warn("Kunne ikke reservere person")
         }
     }
 
     private fun tildelVedReservasjon(fødselsnummer: String, oppgave: Oppgave) {
-        val (saksbehandlerFraDatabase, settPåVent) = reservasjonDao.hentReservasjonFor(fødselsnummer) ?: return
+        val (saksbehandlerFraDatabase) = reservasjonDao.hentReservasjonFor(fødselsnummer) ?: return
         val saksbehandler = Saksbehandler(
             epostadresse = saksbehandlerFraDatabase.epostadresse,
             oid = saksbehandlerFraDatabase.oid,
@@ -296,7 +296,7 @@ internal class OppgaveMediator(
             tilgangskontroll = tilgangskontroll
         )
         try {
-            oppgave.forsøkTildelingVedReservasjon(saksbehandler, settPåVent)
+            oppgave.forsøkTildelingVedReservasjon(saksbehandler)
         } catch (_: ManglerTilgang) {
         }
     }

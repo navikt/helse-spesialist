@@ -32,10 +32,9 @@ internal class ReserverPersonHvisTildeltCommand(
             if (totrinnsvurdering?.erBeslutteroppgave() == true)
                 totrinnsvurdering.saksbehandler ?: tildeltSaksbehandler.oid
             else tildeltSaksbehandler.oid
-        val påVent = if (totrinnsvurdering?.erBeslutteroppgave() == true) false else tildeltSaksbehandler.påVent
 
         sikkerLogg.info("Oppretter reservasjon for $fødselsnummer til $saksbehandlerOid pga eksisterende tildeling")
-        reservasjonDao.reserverPerson(saksbehandlerOid, fødselsnummer, påVent)
+        reservasjonDao.reserverPerson(saksbehandlerOid, fødselsnummer)
 
         return true
     }

@@ -135,7 +135,7 @@ internal class SaksbehandlerMediator(
     private fun håndter(handling: Overstyring, saksbehandler: Saksbehandler) {
         val fødselsnummer = handling.gjelderFødselsnummer()
         oppgaveMediator.håndter(handling)
-        reservasjonDao.reserverPerson(saksbehandler.oid(), fødselsnummer, false)
+        reservasjonDao.reserverPerson(saksbehandler.oid(), fødselsnummer)
         sikkerlogg.info("Reserverer person $fødselsnummer til saksbehandler $saksbehandler")
         Overstyringlagrer(overstyringDao).apply {
             this.lagre(handling, saksbehandler.oid())
