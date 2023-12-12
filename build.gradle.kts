@@ -97,7 +97,7 @@ subprojects {
             }
         }
         register<Wrapper>("wrapper") {
-            gradleVersion = "8.4"
+            gradleVersion = "8.5"
         }
     }
 }
