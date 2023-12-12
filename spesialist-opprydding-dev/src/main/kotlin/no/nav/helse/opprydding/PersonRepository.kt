@@ -73,6 +73,11 @@ internal class PersonRepository(private val dataSource: DataSource) {
             "DELETE FROM avviksvurdering WHERE fødselsnummer::bigint = (SELECT fodselsnummer FROM person WHERE id = ?)"
         run(queryOf(query1, personRef).asExecute)
 
+        slettSammenligningsgrunnlag(sammenligningsgrunnlagRefs)
+    }
+
+    private fun TransactionalSession.slettSammenligningsgrunnlag(sammenligningsgrunnlagRefs: List<Int>) {
+        if (sammenligningsgrunnlagRefs.isEmpty()) return
         @Language("PostgreSQL")
         val query2 =
             "DELETE FROM sammenligningsgrunnlag WHERE id IN (${sammenligningsgrunnlagRefs.joinToString { "?" }}) "
