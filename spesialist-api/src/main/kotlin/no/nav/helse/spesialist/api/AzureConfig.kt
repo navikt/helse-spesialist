@@ -2,7 +2,7 @@ package no.nav.helse.spesialist.api
 
 import com.auth0.jwk.JwkProvider
 import com.auth0.jwk.JwkProviderBuilder
-import java.net.URL
+import java.net.URI
 
 data class AzureConfig(
     val clientId: String,
@@ -15,6 +15,6 @@ data class AzureConfig(
         issuer: String,
         jwkProviderUri: String,
         tokenEndpoint: String,
-    ) : this(clientId, issuer, JwkProviderBuilder(URL(jwkProviderUri)).build(), tokenEndpoint)
+    ) : this(clientId, issuer, JwkProviderBuilder(URI(jwkProviderUri).toURL()).build(), tokenEndpoint)
 
 }

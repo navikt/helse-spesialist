@@ -1,7 +1,7 @@
 val junitJupiterVersion = "5.10.1"
 val junitPlatformLauncherVersion = "1.9.2"
 val ktorVersion = "2.3.6"
-val jvmTargetVersion = "17"
+val jvmTargetVersion = "21"
 val graphqlKotlinVersion = "7.0.2"
 val rapidsAndRiversVersion = "2023093008351696055717.ffdec6aede3d"
 val logbackSyslog4jVersion = "1.0.0"
@@ -12,7 +12,7 @@ val mockkVersion = "1.13.8"
 val postgresqlVersion = "42.6.0"
 
 plugins {
-    kotlin("jvm") version "1.9.10"
+    kotlin("jvm") version "1.9.21"
 }
 
 val githubUser: String by project
@@ -85,7 +85,7 @@ allprojects {
 
 subprojects {
     kotlin {
-        jvmToolchain(17)
+        jvmToolchain(21)
     }
     tasks {
         named<Test>("test") {
