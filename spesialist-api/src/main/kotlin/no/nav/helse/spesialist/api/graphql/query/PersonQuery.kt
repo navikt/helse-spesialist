@@ -16,6 +16,7 @@ import no.nav.helse.spesialist.api.graphql.schema.Person
 import no.nav.helse.spesialist.api.graphql.schema.Reservasjon
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
+import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.person.PersonApiDao
@@ -44,6 +45,7 @@ class PersonQuery(
     private val påVentApiDao: PåVentApiDao,
     private val snapshotMediator: SnapshotMediator,
     private val reservasjonClient: ReservasjonClient,
+    private val oppgavehåndterer: Oppgavehåndterer,
 ) : AbstractPersonQuery(personApiDao, egenAnsattApiDao) {
 
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
@@ -101,6 +103,7 @@ class PersonQuery(
                 totrinnsvurderingApiDao = totrinnsvurderingApiDao,
                 påVentApiDao = påVentApiDao,
                 tilganger = env.graphQlContext.get("tilganger"),
+                oppgavehåndterer = oppgavehåndterer,
             )
         }
 

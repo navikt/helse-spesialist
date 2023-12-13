@@ -51,6 +51,9 @@ internal object OppgaveMapper {
         )
     }
 
+    internal fun List<EgenskapForDatabase>.tilEgenskaperForVisning() = tilModellversjoner().map { egenskap ->
+        Oppgaveegenskap(egenskap.tilApiversjon(), egenskap.kategori.tilApiversjon()) }
+
     internal fun AntallOppgaverFraDatabase.tilApiversjon(): AntallOppgaver {
         return AntallOppgaver(antallMineSaker = this.antallMineSaker, antallMineSakerPaVent = this.antallMineSakerPåVent)
     }

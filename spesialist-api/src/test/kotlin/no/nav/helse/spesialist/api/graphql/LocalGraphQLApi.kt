@@ -43,6 +43,7 @@ import no.nav.helse.spesialist.api.graphql.schema.Filtrering
 import no.nav.helse.spesialist.api.graphql.schema.Kategori
 import no.nav.helse.spesialist.api.graphql.schema.Kjonn
 import no.nav.helse.spesialist.api.graphql.schema.OppgaveTilBehandling
+import no.nav.helse.spesialist.api.graphql.schema.Oppgaveegenskap
 import no.nav.helse.spesialist.api.graphql.schema.OppgaverTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.Oppgavesortering
 import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
@@ -314,6 +315,10 @@ private class SneakyOppgaveHåndterer(
             oppgaver = randomBehandledeOppgaver.drop(offset).take(limit),
             totaltAntallOppgaver = randomBehandledeOppgaver.size,
         )
+    }
+
+    override fun hentEgenskaper(vedtaksperiodeId: UUID, utbetalingId: UUID): List<Oppgaveegenskap> {
+        return mock.hentEgenskaper(vedtaksperiodeId, utbetalingId)
     }
 
 }

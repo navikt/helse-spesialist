@@ -97,6 +97,7 @@ internal class SchemaBuilder(
                         påVentApiDao = påVentApiDao,
                         snapshotMediator = snapshotMediator,
                         reservasjonClient = reservasjonClient,
+                        oppgavehåndterer = oppgavehåndterer,
                     )
                 ),
                 TopLevelObject(

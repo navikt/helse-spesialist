@@ -11,6 +11,7 @@ import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveForPeriodevisningDto
+import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
@@ -389,6 +390,7 @@ data class Handling(val type: Periodehandling, val tillatt: Boolean, val begrunn
 data class BeregnetPeriode(
     private val orgnummer: String,
     private val periode: GraphQLBeregnetPeriode,
+    private val oppgavehåndterer: Oppgavehåndterer,
     private val risikovurderingApiDao: RisikovurderingApiDao,
     private val varselRepository: ApiVarselRepository,
     private val oppgaveApiDao: OppgaveApiDao,
@@ -412,6 +414,7 @@ data class BeregnetPeriode(
     override fun vedtaksperiodeId(): UUIDString = periode.vedtaksperiodeId
     override fun periodetilstand(): Periodetilstand = periodetilstand
     fun handlinger() = byggHandlinger()
+    fun egenskaper(): List<Oppgaveegenskap> = oppgavehåndterer.hentEgenskaper(UUID.fromString(periode.vedtaksperiodeId), UUID.fromString(periode.utbetaling.id))
 
     private fun byggHandlinger(): List<Handling> {
         return if (periodetilstand != Periodetilstand.TilGodkjenning)

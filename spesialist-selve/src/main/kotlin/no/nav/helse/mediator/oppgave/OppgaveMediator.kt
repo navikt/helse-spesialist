@@ -17,6 +17,7 @@ import no.nav.helse.mediator.TilgangskontrollørForApi
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilApiversjon
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilBehandledeOppgaver
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilDatabaseversjon
+import no.nav.helse.mediator.oppgave.OppgaveMapper.tilEgenskaperForVisning
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilOppgaverTilBehandling
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.ManglerTilgang
@@ -37,6 +38,7 @@ import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import no.nav.helse.spesialist.api.graphql.schema.AntallOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.BehandledeOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.Filtrering
+import no.nav.helse.spesialist.api.graphql.schema.Oppgaveegenskap
 import no.nav.helse.spesialist.api.graphql.schema.OppgaverTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.Oppgavesortering
 import no.nav.helse.spesialist.api.graphql.schema.Sorteringsnokkel
@@ -240,6 +242,15 @@ internal class OppgaveMediator(
             oppgaver = behandledeOppgaver.tilBehandledeOppgaver(),
             totaltAntallOppgaver = if (behandledeOppgaver.isEmpty()) 0 else behandledeOppgaver.first().filtrertAntall
         )
+    }
+
+    override fun hentEgenskaper(vedtaksperiodeId: UUID, utbetalingId: UUID): List<Oppgaveegenskap> {
+        val egenskaper = oppgaveDao.finnEgenskaper(
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = utbetalingId
+        )
+
+        return egenskaper?.tilEgenskaperForVisning() ?: emptyList()
     }
 
     fun avbrytOppgaveFor(vedtaksperiodeId: UUID) {

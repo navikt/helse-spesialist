@@ -188,6 +188,18 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
         }
     }
 
+    internal fun finnEgenskaper(vedtaksperiodeId: UUID, utbetalingId: UUID): List<EgenskapForDatabase>? = asSQL(
+        """
+            SELECT o.egenskaper FROM oppgave o 
+            INNER JOIN vedtak v ON o.vedtak_ref = v.id
+            WHERE v.vedtaksperiode_id = :vedtaksperiodeId
+            AND o.utbetaling_id = :utbetalingId
+        """.trimIndent(), mapOf(
+            "vedtaksperiodeId" to vedtaksperiodeId,
+            "utbetalingId" to utbetalingId
+        )
+    ).single { row -> row.array<String>("egenskaper").toList().map { enumValueOf(it) } }
+
     internal fun finnAntallOppgaver(saksbehandlerOid: UUID): AntallOppgaverFraDatabase {
         return asSQL(
             """ 

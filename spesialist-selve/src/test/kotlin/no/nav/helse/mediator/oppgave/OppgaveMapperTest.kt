@@ -19,6 +19,7 @@ import no.nav.helse.db.EgenskapForDatabase.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.db.OppgaveFraDatabaseForVisning
 import no.nav.helse.db.PersonnavnFraDatabase
 import no.nav.helse.db.SaksbehandlerFraDatabase
+import no.nav.helse.mediator.oppgave.OppgaveMapper.tilEgenskaperForVisning
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilOppgaverTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.AntallArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.Egenskap
@@ -241,5 +242,21 @@ internal class OppgaveMapperTest {
         assertThrows<NoSuchElementException> {
             listOf(oppgaveFraDatabaseForVisning).tilOppgaverTilBehandling()
         }
+    }
+
+    @Test
+    fun `map EgenskapForDatabase til OppgaveEgenskap (api)`() {
+        val egenskaperForDatabase = listOf(SØKNAD, DELVIS_REFUSJON, FORSTEGANGSBEHANDLING, EN_ARBEIDSGIVER)
+        val oppgaveEgenskaper = egenskaperForDatabase.tilEgenskaperForVisning()
+
+        assertEquals(
+            setOf(
+                Oppgaveegenskap(Egenskap.SOKNAD, Kategori.Oppgavetype),
+                Oppgaveegenskap(Egenskap.FORSTEGANGSBEHANDLING, Kategori.Periodetype),
+                Oppgaveegenskap(Egenskap.EN_ARBEIDSGIVER, Kategori.Inntektskilde),
+                Oppgaveegenskap(Egenskap.DELVIS_REFUSJON, Kategori.Mottaker),
+            ),
+            oppgaveEgenskaper.toSet()
+        )
     }
 }

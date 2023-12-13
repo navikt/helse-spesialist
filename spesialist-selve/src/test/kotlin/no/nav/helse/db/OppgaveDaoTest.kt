@@ -946,6 +946,31 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `Finner egenskaper for gitt vedtaksperiode med gitt utbetalingId`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave()
+
+        val fnr2 = "12312312312"
+        val aktørId2 = "43"
+        val vedtaksperiodeId2 = UUID.randomUUID()
+        val utbetalingId2 = UUID.randomUUID()
+        opprettPerson(fødselsnummer = fnr2, aktørId2)
+        opprettArbeidsgiver("999111888", "en annen bedrift")
+        opprettVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId2)
+        opprettOppgave(vedtaksperiodeId = vedtaksperiodeId2, utbetalingId = utbetalingId2, egenskaper = listOf(SØKNAD, PÅ_VENT))
+
+        oppgaveDao.invaliderOppgaveFor(fødselsnummer = FNR)
+
+        val egenskaperOppgaveId1 = oppgaveDao.finnEgenskaper(VEDTAKSPERIODE, UTBETALING_ID)
+        val egenskaperOppgaveId2 = oppgaveDao.finnEgenskaper(vedtaksperiodeId2, utbetalingId2)
+        assertEquals(listOf(SØKNAD), egenskaperOppgaveId1)
+        assertEquals(listOf(SØKNAD, PÅ_VENT), egenskaperOppgaveId2)
+
+    }
+
+    @Test
     fun `Teller mine saker og mine saker på vent riktig`() {
         val saksbehandlerOid = UUID.randomUUID()
         opprettSaksbehandler(saksbehandlerOid)

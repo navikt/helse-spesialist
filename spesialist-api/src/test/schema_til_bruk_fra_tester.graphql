@@ -158,6 +158,7 @@ type Behandlingsstatistikk {
 
 type BeregnetPeriode implements Periode {
     beregningId: String!
+    egenskaper: [Oppgaveegenskap!]!
     erForkastet: Boolean!
     fom: String!
     forbrukteSykedager: Int

@@ -7,6 +7,7 @@ import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
+import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.overstyring.OverstyringArbeidsforholdDto
@@ -138,6 +139,7 @@ data class Arbeidsgiver(
     val ghostPerioder: List<GhostPeriode>,
     private val fødselsnummer: String,
     private val generasjoner: List<GraphQLGenerasjon>,
+    private val oppgavehåndterer: Oppgavehåndterer,
     private val overstyringApiDao: OverstyringApiDao,
     private val arbeidsgiverApiDao: ArbeidsgiverApiDao,
     private val risikovurderingApiDao: RisikovurderingApiDao,
@@ -177,6 +179,7 @@ data class Arbeidsgiver(
                         tilganger = tilganger,
                         erSisteGenerasjon = index == 0,
                         index = index,
+                        oppgavehåndterer = oppgavehåndterer,
                     )
 
                     is GraphQLUberegnetVilkarsprovdPeriode -> UberegnetVilkarsprovdPeriode(
