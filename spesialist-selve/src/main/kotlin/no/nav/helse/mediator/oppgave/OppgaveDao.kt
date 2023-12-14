@@ -194,6 +194,8 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
             INNER JOIN vedtak v ON o.vedtak_ref = v.id
             WHERE v.vedtaksperiode_id = :vedtaksperiodeId
             AND o.utbetaling_id = :utbetalingId
+            ORDER BY o.opprettet DESC
+            LIMIT 1
         """.trimIndent(), mapOf(
             "vedtaksperiodeId" to vedtaksperiodeId,
             "utbetalingId" to utbetalingId
