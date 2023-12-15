@@ -9,6 +9,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.erDev
@@ -46,6 +47,7 @@ class PersonQuery(
     private val snapshotMediator: SnapshotMediator,
     private val reservasjonClient: ReservasjonClient,
     private val oppgavehåndterer: Oppgavehåndterer,
+    private val avviksvurderinghenter: Avviksvurderinghenter,
 ) : AbstractPersonQuery(personApiDao, egenAnsattApiDao) {
 
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
@@ -102,6 +104,7 @@ class PersonQuery(
                 notatDao = notatDao,
                 totrinnsvurderingApiDao = totrinnsvurderingApiDao,
                 påVentApiDao = påVentApiDao,
+                avviksvurderinghenter = avviksvurderinghenter,
                 tilganger = env.graphQlContext.get("tilganger"),
                 oppgavehåndterer = oppgavehåndterer,
             )

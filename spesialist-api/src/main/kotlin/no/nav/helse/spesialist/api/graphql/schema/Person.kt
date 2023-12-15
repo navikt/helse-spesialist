@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.api.graphql.schema
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.notat.NotatDao
@@ -71,6 +72,7 @@ data class Person(
     private val notatDao: NotatDao,
     private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
     private val påVentApiDao: PåVentApiDao,
+    private val avviksvurderinghenter: Avviksvurderinghenter,
     private val tilganger: SaksbehandlerTilganger,
     private val oppgavehåndterer: Oppgavehåndterer,
 ) {
@@ -121,7 +123,8 @@ data class Person(
         personApiDao.finnInfotrygdutbetalinger(snapshot.fodselsnummer)
             ?.let { objectMapper.readValue(it) }
 
-    fun vilkarsgrunnlag(): List<Vilkarsgrunnlag> = snapshot.vilkarsgrunnlag.map { it.tilVilkarsgrunnlag() }
+    fun vilkarsgrunnlag(): List<Vilkarsgrunnlag> =
+        snapshot.vilkarsgrunnlag.map { it.tilVilkarsgrunnlag(avviksvurderinghenter) }
 
     private fun List<GraphQLGhostPeriode>.tilGhostPerioder(organisasjonsnummer: String): List<GhostPeriode> =
         map {

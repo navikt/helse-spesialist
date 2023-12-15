@@ -68,12 +68,14 @@ import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.AzureAdAppConfig
 import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseMediator
 import no.nav.helse.spesialist.api.abonnement.opptegnelseApi
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
+import no.nav.helse.spesialist.api.avviksvurdering.Avviksvurdering
 import no.nav.helse.spesialist.api.azureAdAppAuthentication
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkDao
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMediator
@@ -220,6 +222,11 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val dokumentDao = DokumentDao(dataSource)
     private val generasjonDao = GenerasjonDao(dataSource)
     private val påVentApiDao = PåVentApiDao(dataSource)
+    private val avviksvurderinghenter = object : Avviksvurderinghenter {
+        override fun hentAvviksvurdering(vilkarsgrunnlagId: UUID): Avviksvurdering? {
+            return AvviksvurderingDao(dataSource).finnAvviksvurdering(vilkarsgrunnlagId)
+        }
+    }
     private val avviksvurderingDao = AvviksvurderingDao(dataSource)
 
     private val behandlingsstatistikkMediator = BehandlingsstatistikkMediator(behandlingsstatistikkDao)
@@ -330,6 +337,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 totrinnsvurderingApiDao = totrinnsvurderingApiDao,
                 påVentApiDao = påVentApiDao,
                 reservasjonClient = reservasjonClient,
+                avviksvurderinghenter = avviksvurderinghenter,
                 skjermedePersonerGruppeId = tilgangsgrupper.skjermedePersonerGruppeId,
                 kode7Saksbehandlergruppe = tilgangsgrupper.kode7GruppeId,
                 beslutterGruppeId = tilgangsgrupper.beslutterGruppeId,

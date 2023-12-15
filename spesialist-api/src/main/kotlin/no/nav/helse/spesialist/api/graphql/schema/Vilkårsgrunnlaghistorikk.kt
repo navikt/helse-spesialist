@@ -1,5 +1,7 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
+import java.util.UUID
+import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spleis.graphql.enums.GraphQLVilkarsgrunnlagtype
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLInfotrygdVilkarsgrunnlag
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSpleisVilkarsgrunnlag
@@ -58,27 +60,75 @@ private fun GraphQLVilkarsgrunnlagtype.tilVilkarsgrunnlagtype(): Vilkarsgrunnlag
         else -> throw Exception("Ukjent vilkårsgrunnlagtype ${this.name}")
     }
 
-internal fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(): Vilkarsgrunnlag =
-    when (this) {
-        is GraphQLSpleisVilkarsgrunnlag -> VilkarsgrunnlagSpleis(
-            id = id,
-            vilkarsgrunnlagtype = vilkarsgrunnlagtype.tilVilkarsgrunnlagtype(),
-            inntekter = inntekter.map { it.tilArbeidsgiverinntekt() },
-            arbeidsgiverrefusjoner = arbeidsgiverrefusjoner.map { it.tilArbeidsgiverrefusjon() },
-            omregnetArsinntekt = omregnetArsinntekt,
-            sammenligningsgrunnlag = sammenligningsgrunnlag,
-            skjonnsmessigFastsattAarlig = skjonnsmessigFastsattAarlig,
-            skjaeringstidspunkt = skjaeringstidspunkt,
-            sykepengegrunnlag = sykepengegrunnlag,
-            antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst,
-            grunnbelop = grunnbelop,
-            sykepengegrunnlagsgrense = sykepengegrunnlagsgrense.tilSykepengegrunnlaggrense(),
-            oppfyllerKravOmMedlemskap = oppfyllerKravOmMedlemskap,
-            oppfyllerKravOmMinstelonn = oppfyllerKravOmMinstelonn,
-            oppfyllerKravOmOpptjening = oppfyllerKravOmOpptjening,
-            opptjeningFra = opptjeningFra,
-            avviksprosent = avviksprosent
-        )
+internal fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Avviksvurderinghenter): Vilkarsgrunnlag {
+    return when (this) {
+        is GraphQLSpleisVilkarsgrunnlag -> {
+            if (erProd()) {
+                VilkarsgrunnlagSpleis(
+                    id = id,
+                    vilkarsgrunnlagtype = vilkarsgrunnlagtype.tilVilkarsgrunnlagtype(),
+                    inntekter = inntekter.map { it.tilArbeidsgiverinntekt() },
+                    arbeidsgiverrefusjoner = arbeidsgiverrefusjoner.map { it.tilArbeidsgiverrefusjon() },
+                    omregnetArsinntekt = omregnetArsinntekt,
+                    sammenligningsgrunnlag = sammenligningsgrunnlag,
+                    skjonnsmessigFastsattAarlig = skjonnsmessigFastsattAarlig,
+                    skjaeringstidspunkt = skjaeringstidspunkt,
+                    sykepengegrunnlag = sykepengegrunnlag,
+                    antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst,
+                    grunnbelop = grunnbelop,
+                    sykepengegrunnlagsgrense = sykepengegrunnlagsgrense.tilSykepengegrunnlaggrense(),
+                    oppfyllerKravOmMedlemskap = oppfyllerKravOmMedlemskap,
+                    oppfyllerKravOmMinstelonn = oppfyllerKravOmMinstelonn,
+                    oppfyllerKravOmOpptjening = oppfyllerKravOmOpptjening,
+                    opptjeningFra = opptjeningFra,
+                    avviksprosent = avviksprosent
+                )
+            } else {
+                val avviksvurdering = avviksvurderinghenter.hentAvviksvurdering(UUID.fromString(id))
+                VilkarsgrunnlagSpleis(
+                    id = id,
+                    vilkarsgrunnlagtype = vilkarsgrunnlagtype.tilVilkarsgrunnlagtype(),
+                    inntekter = inntekter.map { it.tilArbeidsgiverinntekt() },
+                    arbeidsgiverrefusjoner = arbeidsgiverrefusjoner.map { it.tilArbeidsgiverrefusjon() },
+                    omregnetArsinntekt = omregnetArsinntekt,
+                    sammenligningsgrunnlag = sammenligningsgrunnlag,
+                    skjonnsmessigFastsattAarlig = skjonnsmessigFastsattAarlig,
+                    skjaeringstidspunkt = skjaeringstidspunkt,
+                    sykepengegrunnlag = sykepengegrunnlag,
+                    antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst,
+                    grunnbelop = grunnbelop,
+                    sykepengegrunnlagsgrense = sykepengegrunnlagsgrense.tilSykepengegrunnlaggrense(),
+                    oppfyllerKravOmMedlemskap = oppfyllerKravOmMedlemskap,
+                    oppfyllerKravOmMinstelonn = oppfyllerKravOmMinstelonn,
+                    oppfyllerKravOmOpptjening = oppfyllerKravOmOpptjening,
+                    opptjeningFra = opptjeningFra,
+                    avviksprosent = avviksprosent
+                ).apply {
+                    if (avviksvurdering != null) {
+                        this.copy(
+                            inntekter = inntekter.map { arbeidsgiverinntekt ->
+                                arbeidsgiverinntekt.copy(
+                                    sammenligningsgrunnlag = arbeidsgiverinntekt.sammenligningsgrunnlag?.copy(
+                                        belop = avviksvurdering.sammenligningsgrunnlag.totalbeløp,
+                                        inntektFraAOrdningen = avviksvurdering.sammenligningsgrunnlag.innrapporterteInntekter.single {
+                                            it.arbeidsgiverreferanse == arbeidsgiverinntekt.arbeidsgiver
+                                        }.inntekter.map { inntekt ->
+                                            InntektFraAOrdningen(
+                                                maned = inntekt.årMåned as YearMonthString,
+                                                sum = inntekt.beløp
+                                            )
+                                        }
+                                    )
+                                )
+                            },
+                            omregnetArsinntekt = avviksvurdering.beregningsgrunnlag.totalbeløp,
+                            sammenligningsgrunnlag = avviksvurdering.sammenligningsgrunnlag.totalbeløp,
+                            avviksprosent = avviksvurdering.avviksprosent
+                        )
+                    }
+                }
+            }
+        }
 
         is GraphQLInfotrygdVilkarsgrunnlag -> VilkarsgrunnlagInfotrygd(
             id = id,
@@ -93,6 +143,7 @@ internal fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(): Vilkarsgrunnlag =
 
         else -> throw Exception("Ukjent vilkårsgrunnlag ${this.javaClass.name}")
     }
+}
 
 internal fun GraphQLSykepengegrunnlagsgrense.tilSykepengegrunnlaggrense() =
     Sykepengegrunnlagsgrense(grunnbelop, grense, virkningstidspunkt)
@@ -102,3 +153,5 @@ data class Sykepengegrunnlagsgrense(
     val grense: Int,
     val virkningstidspunkt: DateString,
 )
+
+private fun erProd() = "prod-gcp" == System.getenv("NAIS_CLUSTER_NAME")

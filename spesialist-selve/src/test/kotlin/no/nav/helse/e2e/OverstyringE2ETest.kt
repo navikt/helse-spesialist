@@ -260,5 +260,6 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         snapshotMediator = SnapshotMediator(SnapshotApiDao(dataSource), mockk(relaxed = true)),
         reservasjonClient = mockk(relaxed = true),
         oppgavehåndterer = mockk(relaxed = true),
+        avviksvurderinghenter = mockk(relaxed = true),
     )
 }

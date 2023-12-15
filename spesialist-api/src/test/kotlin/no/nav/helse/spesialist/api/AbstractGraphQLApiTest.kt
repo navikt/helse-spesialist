@@ -16,6 +16,7 @@ import io.ktor.server.request.ApplicationRequest
 import io.ktor.server.routing.route
 import io.mockk.mockk
 import java.util.UUID
+import no.nav.helse.spesialist.api.avviksvurdering.Avviksvurdering
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMediator
 import no.nav.helse.spesialist.api.endepunkter.ApiTesting
 import no.nav.helse.spesialist.api.graphql.ContextFactory
@@ -44,6 +45,11 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     protected open val godkjenninghåndterer = mockk<Godkjenninghåndterer>(relaxed = true)
     protected open val personhåndterer = mockk<Personhåndterer>(relaxed = true)
     protected open val dokumenthåndterer = mockk<Dokumenthåndterer>(relaxed = true)
+    private val avviksvurderinghenter = object : Avviksvurderinghenter {
+        override fun hentAvviksvurdering(vilkårsgrunnlagId: UUID): Avviksvurdering? {
+            TODO("Not yet implemented")
+        }
+    }
 
     private lateinit var graphQLServer: GraphQLServer<ApplicationRequest>
 
@@ -69,6 +75,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
             totrinnsvurderingApiDao = totrinnsvurderingApiDao,
             påVentApiDao = påVentApiDao,
             reservasjonClient = reservasjonClient,
+            avviksvurderinghenter = avviksvurderinghenter,
             behandlingsstatistikkMediator = behandlingsstatistikkMediator,
             notatMediator = notatMediator,
             saksbehandlerhåndterer = saksbehandlerhåndterer,

@@ -17,6 +17,7 @@ import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import java.time.Duration
 import java.util.UUID
+import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.Dokumenthåndterer
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
 import no.nav.helse.spesialist.api.GraphQLMetrikker
@@ -61,6 +62,7 @@ fun Application.graphQLApi(
     totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
     påVentApiDao: PåVentApiDao,
     reservasjonClient: ReservasjonClient,
+    avviksvurderinghenter: Avviksvurderinghenter,
     skjermedePersonerGruppeId: UUID,
     kode7Saksbehandlergruppe: UUID,
     beslutterGruppeId: UUID,
@@ -93,6 +95,7 @@ fun Application.graphQLApi(
         totrinnsvurderingApiDao = totrinnsvurderingApiDao,
         påVentApiDao = påVentApiDao,
         reservasjonClient = reservasjonClient,
+        avviksvurderinghenter = avviksvurderinghenter,
         behandlingsstatistikkMediator = behandlingsstatistikkMediator,
         notatMediator = notatMediator,
         saksbehandlerhåndterer = saksbehandlerhåndterer,
