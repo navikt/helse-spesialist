@@ -21,7 +21,6 @@ internal class AvviksvurderingTest {
 
         val avviksvurdering = Avviksvurdering(
             unikId = unikId,
-            vilkårsgrunnlagId = vilkårsgrunnlagId,
             fødselsnummer = fødselsnummer,
             skjæringstidspunkt = skjæringstidspunkt,
             opprettet = opprettet,
@@ -34,7 +33,6 @@ internal class AvviksvurderingTest {
         assertEquals(
             avviksvurderingDto(
                 unikId = unikId,
-                vilkårsgrunnlagId = vilkårsgrunnlagId,
                 fødselsnummer = fødselsnummer,
                 skjæringstidspunkt = skjæringstidspunkt,
                 opprettet = opprettet,
@@ -47,7 +45,6 @@ internal class AvviksvurderingTest {
     @Test
     fun equals() {
         val unikId = UUID.randomUUID()
-        val vilkårsgrunnlagId = UUID.randomUUID()
         val fødselsnummer = "12345678910"
         val skjæringstidspunkt = 1.januar
         val opprettet = LocalDateTime.now()
@@ -55,7 +52,6 @@ internal class AvviksvurderingTest {
 
         val avviksvurdering = Avviksvurdering(
             unikId = unikId,
-            vilkårsgrunnlagId =vilkårsgrunnlagId,
             fødselsnummer = fødselsnummer,
             skjæringstidspunkt = skjæringstidspunkt,
             opprettet = opprettet,
@@ -69,7 +65,6 @@ internal class AvviksvurderingTest {
         assertEquals(
             Avviksvurdering(
                 unikId = unikId,
-                vilkårsgrunnlagId = vilkårsgrunnlagId,
                 fødselsnummer = fødselsnummer,
                 skjæringstidspunkt = skjæringstidspunkt,
                 opprettet = opprettet,
@@ -82,7 +77,6 @@ internal class AvviksvurderingTest {
         assertEquals(
             Avviksvurdering(
                 unikId = unikId,
-                vilkårsgrunnlagId = vilkårsgrunnlagId,
                 fødselsnummer = fødselsnummer,
                 skjæringstidspunkt = skjæringstidspunkt,
                 opprettet = opprettet,
@@ -98,12 +92,10 @@ internal class AvviksvurderingTest {
         fødselsnummer: String = "12345678910",
         skjæringstidspunkt: LocalDate = 1.januar,
         unikId: UUID = UUID.randomUUID(),
-        vilkårsgrunnlagId: UUID = UUID.randomUUID(),
         opprettet: LocalDateTime = LocalDateTime.now(),
         avviksprosent: Double = 25.0,
     ): AvviksvurderingDto = AvviksvurderingDto(
         unikId = unikId,
-        vilkårsgrunnlagId = vilkårsgrunnlagId,
         fødselsnummer = fødselsnummer,
         skjæringstidspunkt = skjæringstidspunkt,
         opprettet = opprettet,

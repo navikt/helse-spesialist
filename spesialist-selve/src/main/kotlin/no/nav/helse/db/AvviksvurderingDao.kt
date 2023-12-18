@@ -13,8 +13,8 @@ import no.nav.helse.modell.avviksvurdering.SammenligningsgrunnlagDto
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.avviksvurdering.Beregningsgrunnlag
 import no.nav.helse.spesialist.api.avviksvurdering.Sammenligningsgrunnlag
-import no.nav.helse.spesialist.api.avviksvurdering.Avviksvurdering as ApiAvviksvurdering
 import org.intellij.lang.annotations.Language
+import no.nav.helse.spesialist.api.avviksvurdering.Avviksvurdering as ApiAvviksvurdering
 
 class AvviksvurderingDao(private val dataSource: DataSource) : HelseDao(dataSource) {
 
@@ -31,12 +31,6 @@ class AvviksvurderingDao(private val dataSource: DataSource) : HelseDao(dataSour
             val opprettSammenligningsgrunnlagQuery = """
                 INSERT INTO sammenligningsgrunnlag(unik_id, fødselsnummer, skjæringstidspunkt, opprettet, sammenligningsgrunnlag)
                 VALUES (:unik_id, :fodselsnummer, :skjaeringstidspunkt, :opprettet, CAST(:sammenligningsgrunnlag as json));
-            """.trimIndent()
-
-            @Language("PostgreSQL")
-            val opprettKoblingTilVilkårsgrunnlag = """
-                INSERT INTO vilkarsgrunnlag_per_avviksvurdering(avviksvurdering_ref, vilkårsgrunnlag_id)
-                VALUES (:unik_id, :vilkarsgrunnlag_id) ON CONFLICT DO NOTHING;
             """.trimIndent()
 
             session.transaction { transactionalSession ->
@@ -66,15 +60,6 @@ class AvviksvurderingDao(private val dataSource: DataSource) : HelseDao(dataSour
                         )
                     ).asUpdate
                 )
-                transactionalSession.run(
-                    queryOf(
-                        opprettKoblingTilVilkårsgrunnlag,
-                        mapOf(
-                            "unik_id" to avviksvurdering.unikId,
-                            "vilkarsgrunnlag_id" to avviksvurdering.vilkårsgrunnlagId,
-                        )
-                    ).asUpdate
-                )
             }
         }
     }
@@ -92,7 +77,6 @@ class AvviksvurderingDao(private val dataSource: DataSource) : HelseDao(dataSour
     ).list {
         Avviksvurdering(
             unikId = it.uuid("unik_id"),
-            vilkårsgrunnlagId = it.uuid("vilkårsgrunnlag_id"),
             fødselsnummer = it.string("fødselsnummer"),
             skjæringstidspunkt = it.localDate("skjæringstidspunkt"),
             opprettet = it.localDateTime("opprettet"),
@@ -101,6 +85,7 @@ class AvviksvurderingDao(private val dataSource: DataSource) : HelseDao(dataSour
             beregningsgrunnlag = objectMapper.readValue<BeregningsgrunnlagDto>(it.string("beregningsgrunnlag")),
         )
     }
+
     internal fun finnAvviksvurdering(vilkårsgrunnlagId: UUID): ApiAvviksvurdering? = asSQL(
         """
             SELECT av.unik_id, vpa.vilkårsgrunnlag_id, av.fødselsnummer, av.skjæringstidspunkt, av.opprettet, avviksprosent, beregningsgrunnlag, sg.sammenligningsgrunnlag 
@@ -127,5 +112,16 @@ class AvviksvurderingDao(private val dataSource: DataSource) : HelseDao(dataSour
         )
     }
 
-
+    fun opprettKobling(avviksvurderingId: UUID, vilkårsgrunnlagId: UUID) {
+        asSQL(
+            """
+                INSERT INTO vilkarsgrunnlag_per_avviksvurdering(avviksvurdering_ref, vilkårsgrunnlag_id)
+                VALUES (:unik_id, :vilkarsgrunnlag_id) ON CONFLICT DO NOTHING;
+            """.trimIndent(),
+            mapOf(
+                "unik_id" to avviksvurderingId,
+                "vilkarsgrunnlag_id" to vilkårsgrunnlagId,
+            )
+        ).update()
+    }
 }

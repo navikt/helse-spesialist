@@ -17,7 +17,6 @@ import no.nav.helse.rapids_rivers.asYearMonth
 class AvviksvurderingMessage(packet: JsonMessage) {
 
     private val unikId = packet["avviksvurdering.id"].asUUID()
-    private val vilkårsgrunnlagId = packet["avviksvurdering.vilkårsgrunnlagId"].asUUID()
     private val fødselsnummer = packet["fødselsnummer"].asText()
     private val skjæringstidspunkt = packet["skjæringstidspunkt"].asLocalDate()
     private val opprettet = packet["avviksvurdering.opprettet"].asLocalDateTime()
@@ -29,7 +28,6 @@ class AvviksvurderingMessage(packet: JsonMessage) {
     private val avviksvurdering
         get() = Avviksvurdering(
             unikId = unikId,
-            vilkårsgrunnlagId = vilkårsgrunnlagId,
             fødselsnummer = fødselsnummer,
             skjæringstidspunkt = skjæringstidspunkt,
             opprettet = opprettet,

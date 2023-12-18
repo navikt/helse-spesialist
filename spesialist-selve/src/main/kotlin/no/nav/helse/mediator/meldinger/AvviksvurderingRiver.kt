@@ -27,7 +27,6 @@ internal class AvviksvurderingRiver(
                 it.requireKey("@id", "fødselsnummer", "skjæringstidspunkt")
                 it.requireKey(
                     "avviksvurdering.id",
-                    "avviksvurdering.vilkårsgrunnlagId",
                     "avviksvurdering.opprettet",
                     "avviksvurdering.beregningsgrunnlag",
                     "avviksvurdering.beregningsgrunnlag.totalbeløp",

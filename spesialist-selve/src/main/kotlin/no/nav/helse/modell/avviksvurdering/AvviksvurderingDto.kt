@@ -7,7 +7,6 @@ import java.util.UUID
 
 data class AvviksvurderingDto(
     val unikId: UUID,
-    val vilkårsgrunnlagId: UUID,
     val fødselsnummer: String,
     val skjæringstidspunkt: LocalDate,
     val opprettet: LocalDateTime,
