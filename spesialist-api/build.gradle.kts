@@ -41,8 +41,3 @@ val copySchemaFile by tasks.registering(Copy::class) {
 tasks.graphqlIntrospectSchema {
     finalizedBy(copySchemaFile)
 }
-
-java {
-    setSourceCompatibility(21)
-    setTargetCompatibility(21)
-}
