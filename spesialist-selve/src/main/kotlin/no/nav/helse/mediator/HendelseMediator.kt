@@ -64,6 +64,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.Varseldefinisjon
+import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -92,6 +93,7 @@ internal class HendelseMediator(
     private val egenAnsattDao: EgenAnsattDao = EgenAnsattDao(dataSource),
     private val dokumentDao: DokumentDao = DokumentDao(dataSource),
     private val varselRepository: ActualVarselRepository = ActualVarselRepository(dataSource),
+    private val generasjonRepository: ActualGenerasjonRepository = ActualGenerasjonRepository(dataSource),
     private val metrikkDao: MetrikkDao = MetrikkDao(dataSource),
 ) : Personhåndterer {
     private companion object {
@@ -329,6 +331,13 @@ internal class HendelseMediator(
     ) {
         if (oppgaveDao.harGyldigOppgave(utbetalingId) || vedtakDao.erAutomatiskGodkjent(utbetalingId)) {
             sikkerLogg.info("vedtaksperiodeId=$vedtaksperiodeId med utbetalingId=$utbetalingId har gyldig oppgave eller er automatisk godkjent. Ignorerer godkjenningsbehov med id=$id")
+            return
+        }
+        if (generasjonRepository.finnVedtaksperiodeIderFor(fødselsnummer, skjæringstidspunkt).isEmpty()) {
+            sikkerLogg.error("""
+                vedtaksperiodeId=$vedtaksperiodeId med utbetalingId=$utbetalingId, periodeFom=$periodeFom, periodeTom=$periodeTom 
+                og skjæringstidspunkt=$skjæringstidspunkt kan ikke opprette et sykefraværstilfelle uten generasjoner. 
+                Ignorerer godkjenningsbehov med id=$id""")
             return
         }
         utfør(

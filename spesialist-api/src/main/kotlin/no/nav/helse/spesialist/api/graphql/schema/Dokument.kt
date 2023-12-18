@@ -80,6 +80,7 @@ data class DokumentInntektsmelding(
     val naerRelasjon: Boolean?,
     val innsenderFulltNavn: String?,
     val innsenderTelefon: String?,
+    val inntektEndringAarsak: InntektEndringAarsak? = null,
 )
 
 data class Refusjon(
@@ -111,4 +112,11 @@ data class GjenopptakelseNaturalytelse(
 data class IMPeriode(
     val fom: DateString?,
     val tom: DateString?
+)
+
+data class InntektEndringAarsak(
+    val aarsak: String,
+    val perioder: List<IMPeriode>? = null,
+    val gjelderFra: DateString? = null,
+    val bleKjent: DateString? = null
 )

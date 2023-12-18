@@ -245,6 +245,11 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
                     naerRelasjon,
                     innsenderFulltNavn,
                     innsenderTelefon,
+                    inntektEndringAarsak {
+                        aarsak, perioder { 
+                            fom, tom
+                        }, gjelderFra, bleKjent                    
+                    }
                 }
             }
         """
@@ -258,7 +263,7 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
             )
         }
 
-        assertEquals(14, dokument.size())
+        assertEquals(15, dokument.size())
         assertTrue(dokument["bruttoUtbetalt"].isNull)
         assertEquals(35000.0, dokument["beregnetInntekt"].asDouble())
         assertEquals("2023-08-01", dokument["inntektsdato"].asText())
@@ -274,6 +279,10 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
         assertTrue(dokument["naerRelasjon"].isNull)
         assertEquals("MUSKULØS VALS", dokument["innsenderFulltNavn"].asText())
         assertEquals("12345678", dokument["innsenderTelefon"].asText())
+        assertEquals("Tariffendring", dokument["inntektEndringAarsak"]["aarsak"].asText())
+        assertTrue(dokument["inntektEndringAarsak"]["perioder"].isNull)
+        assertEquals("2023-08-08", dokument["inntektEndringAarsak"]["gjelderFra"].asText())
+        assertEquals("2023-09-12", dokument["inntektEndringAarsak"]["bleKjent"].asText())
     }
 
     @Language("JSON")
@@ -1693,6 +1702,12 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
       "avsenderSystem": {
         "navn": "NAV_NO",
         "versjon": "1.0"
+      },
+      "inntektEndringAarsak": {
+        "aarsak": "Tariffendring",
+        "perioder":null,
+        "gjelderFra":"2023-08-08",
+        "bleKjent":"2023-09-12"
       }
     }
     """.trimIndent()

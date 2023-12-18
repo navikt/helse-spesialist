@@ -15,6 +15,7 @@ import no.nav.helse.spesialist.api.graphql.schema.DokumentInntektsmelding
 import no.nav.helse.spesialist.api.graphql.schema.EndringIRefusjon
 import no.nav.helse.spesialist.api.graphql.schema.GjenopptakelseNaturalytelse
 import no.nav.helse.spesialist.api.graphql.schema.IMPeriode
+import no.nav.helse.spesialist.api.graphql.schema.InntektEndringAarsak
 import no.nav.helse.spesialist.api.graphql.schema.Naturalytelse
 import no.nav.helse.spesialist.api.graphql.schema.OpphoerAvNaturalytelse
 import no.nav.helse.spesialist.api.graphql.schema.Refusjon
@@ -138,6 +139,19 @@ class DokumentQuery(
             naerRelasjon = this.path("naerRelasjon").takeUnless { it.isMissingOrNull() }?.asBoolean(),
             innsenderFulltNavn = this.path("innsenderFulltNavn").takeUnless { it.isMissingOrNull() }?.asText(),
             innsenderTelefon = this.path("innsenderTelefon").takeUnless { it.isMissingOrNull() }?.asText(),
+            inntektEndringAarsak = this.path("inntektEndringAarsak").takeUnless { it.isMissingOrNull() }?.let { endringAarsak ->
+                InntektEndringAarsak(
+                    aarsak = endringAarsak["aarsak"].asText(),
+                    perioder = endringAarsak["perioder"].takeUnless { it.isMissingOrNull() }?.map { periode ->
+                        IMPeriode(
+                            fom = periode["fom"].takeUnless { it.isMissingOrNull() }?.asText(),
+                            tom = periode["tom"].takeUnless { it.isMissingOrNull() }?.asText(),
+                        )
+                    },
+                    gjelderFra = endringAarsak["gjelderFra"].takeUnless { it.isMissingOrNull() }?.asText(),
+                    bleKjent = endringAarsak["bleKjent"].takeUnless { it.isMissingOrNull() }?.asText(),
+                )
+            }
         )
     }
 
