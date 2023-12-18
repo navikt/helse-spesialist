@@ -963,8 +963,7 @@ internal object Testmeldingfabrikk {
         skjæringstidspunkt: LocalDate = 1.januar,
     ): String {
         return nyHendelse(
-            id, "avviksvurdering", mapOf(
-                "@event_name" to "avviksvurdering",
+            id, "avvik_vurdert", mapOf(
                 "fødselsnummer" to fødselsnummer,
                 "aktørId" to aktørId,
                 "skjæringstidspunkt" to skjæringstidspunkt,

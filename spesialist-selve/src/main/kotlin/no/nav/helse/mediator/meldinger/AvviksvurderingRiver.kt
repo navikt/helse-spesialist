@@ -23,7 +23,7 @@ internal class AvviksvurderingRiver(
     init {
         River(rapidsConnection).apply {
             validate {
-                it.demandValue("@event_name", "avviksvurdering")
+                it.demandValue("@event_name", "avvik_vurdert")
                 it.requireKey("@id", "fødselsnummer", "skjæringstidspunkt")
                 it.requireKey(
                     "avviksvurdering.id",

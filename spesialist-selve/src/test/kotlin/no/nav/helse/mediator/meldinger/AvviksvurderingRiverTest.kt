@@ -39,7 +39,7 @@ class AvviksvurderingRiverTest {
     @Language("JSON")
     private fun event() = """
     {
-      "@event_name": "avviksvurdering",
+      "@event_name": "avvik_vurdert",
       "fødselsnummer": "12345678910",
       "aktørId": "11111100000",
       "skjæringstidspunkt": "2018-01-01",
@@ -86,7 +86,7 @@ class AvviksvurderingRiverTest {
     @Language("JSON")
     private fun eventUtenSammenligningsgrunnlag() = """
     {
-      "@event_name": "avviksvurdering",
+      "@event_name": "avvik_vurdert",
       "fødselsnummer": "12345678910",
       "aktørId": "11111100000",
       "skjæringstidspunkt": "2018-01-01",
