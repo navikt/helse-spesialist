@@ -1,5 +1,5 @@
 val graphQLKotlinVersion = "7.0.2"
-val testcontainersVersion = "1.19.1"
+val testcontainersVersion = "1.19.3"
 
 plugins {
     kotlin("plugin.serialization") version "1.9.21"
