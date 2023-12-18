@@ -1,5 +1,5 @@
 val testcontainersVersion = "1.19.3"
-val cloudSqlVersion = "1.14.1"
+val cloudSqlVersion = "1.15.1"
 val postgresqlVersion = "42.7.1"
 
 dependencies {
