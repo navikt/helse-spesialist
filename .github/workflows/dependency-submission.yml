@@ -22,10 +22,3 @@ jobs:
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
         with:
           fail-on-error: true
-          gradle-build-module: |-
-            :spesialist-api
-            :spesialist-felles
-            :spesialist-migrering
-            :spesialist-modell
-            :spesialist-opprydding-dev
-            :spesialist-selve
