@@ -3,6 +3,8 @@ package no.nav.helse
 import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.modell.vedtaksperiode.Inntektskilde
+import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spleis.graphql.HentSnapshot
 import no.nav.helse.spleis.graphql.enums.GraphQLInntektstype
 import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetilstand
@@ -131,6 +133,25 @@ object Testdata {
         }
 
 }
+
+internal data class GodkjenningsbehovTestdata(
+    val aktørId: String = Testdata.AKTØR,
+    val fødselsnummer: String = Testdata.FØDSELSNUMMER,
+    val organisasjonsnummer: String = Testdata.ORGNR,
+    val vedtaksperiodeId: UUID = Testdata.VEDTAKSPERIODE_ID,
+    val utbetalingId: UUID = Testdata.UTBETALING_ID,
+    val periodeFom: LocalDate = 1.januar,
+    val periodeTom: LocalDate = 31.januar,
+    val skjæringstidspunkt: LocalDate = periodeFom,
+    val periodetype: Periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+    val kanAvvises: Boolean = true,
+    val førstegangsbehandling: Boolean = true,
+    val inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
+    val orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList(),
+    val utbetalingtype: no.nav.helse.modell.utbetaling.Utbetalingtype = no.nav.helse.modell.utbetaling.Utbetalingtype.UTBETALING,
+    val avviksvurderingId: UUID = UUID.randomUUID(),
+    val vilkårsgrunnlagId: UUID = UUID.randomUUID(),
+)
 
 internal data class AvviksvurderingTestdata(
     val aktørId: String = Testdata.AKTØR,

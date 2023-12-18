@@ -1,6 +1,7 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETest
+import no.nav.helse.GodkjenningsbehovTestdata
 import no.nav.helse.Testdata.ORGNR_GHOST
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
@@ -20,7 +21,7 @@ internal class TotrinnsvurderingE2ETest : AbstractE2ETest() {
 
     @Test
     fun `sak blir trukket til totrinnsvurdering ved overstyring av arbeidsforhold`() {
-        fremTilSaksbehandleroppgave(andreArbeidsforhold = listOf(ORGNR_GHOST))
+        fremTilSaksbehandleroppgave(godkjenningsbehovTestdata = GodkjenningsbehovTestdata(orgnummereMedRelevanteArbeidsforhold = listOf(ORGNR_GHOST)))
         håndterOverstyrArbeidsforhold(
             overstyrteArbeidsforhold = listOf(
                 OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdFraApi(

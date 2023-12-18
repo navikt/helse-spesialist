@@ -4,9 +4,9 @@ import AbstractE2ETest
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.GodkjenningsbehovTestdata
 import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
-import no.nav.helse.januar
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -51,8 +51,11 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
         håndterSaksbehandlerløsning()
         håndterVedtakFattet()
 
-        val utbetalingId2 = UUID.randomUUID()
-        håndterGodkjenningsbehov(utbetalingId = utbetalingId2, harOppdatertMetainfo = true) //revurdering
+        val revurdertUtbetalingId = UUID.randomUUID()
+        håndterGodkjenningsbehov(
+            harOppdatertMetainfo = true,
+            godkjenningsbehovTestdata = GodkjenningsbehovTestdata(utbetalingId = revurdertUtbetalingId)
+        )
         assertGenerasjoner(VEDTAKSPERIODE_ID, 2)
         assertFerdigBehandledeGenerasjoner(VEDTAKSPERIODE_ID, 1)
     }
@@ -79,7 +82,7 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
 
     @Test
     fun `fjerner knytning til utbetaling når utbetalingen blir forkastet`() {
-        fremTilSaksbehandleroppgave(1.januar, 31.januar, utbetalingId = UTBETALING_ID)
+        fremTilSaksbehandleroppgave(utbetalingId = UTBETALING_ID)
         assertGenerasjonerMedUtbetaling(VEDTAKSPERIODE_ID, UTBETALING_ID, 1)
         håndterUtbetalingForkastet()
         assertGenerasjonerMedUtbetaling(VEDTAKSPERIODE_ID, UTBETALING_ID, 0)

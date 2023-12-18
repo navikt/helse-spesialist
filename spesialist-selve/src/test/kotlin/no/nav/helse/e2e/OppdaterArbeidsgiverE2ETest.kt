@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID.randomUUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.GodkjenningsbehovTestdata
 import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.Testdata.ORGNR_GHOST
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.ArbeidsgiverinformasjonJson
@@ -30,10 +31,12 @@ internal class OppdaterArbeidsgiverE2ETest : AbstractE2ETest() {
         // godkjenningsbehov for forlengelse inneholder et nytt orgnr
         håndterVedtaksperiodeOpprettet(vedtaksperiodeId = vedtaksperiode2Id)
         håndterGodkjenningsbehov(
-            vedtaksperiodeId = vedtaksperiode2Id,
-            andreArbeidsforhold = listOf(ORGNR_GHOST),
             harOppdatertMetainfo = true,
-            utbetalingId = randomUUID()
+            godkjenningsbehovTestdata = GodkjenningsbehovTestdata(
+                vedtaksperiodeId = vedtaksperiode2Id,
+                utbetalingId = randomUUID(),
+                orgnummereMedRelevanteArbeidsforhold = listOf(ORGNR_GHOST),
+            ),
         )
 
         assertInnholdIBehov(behov = "Arbeidsgiverinformasjon") { jsonNode ->

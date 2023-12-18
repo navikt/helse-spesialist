@@ -5,6 +5,7 @@ import io.mockk.every
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.GodkjenningsbehovTestdata
 import no.nav.helse.Testdata
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -41,7 +42,7 @@ internal class PåminnetGodkjenningsbehovTest : AbstractE2ETest() {
         }
     }
 
-    private fun sendPåminnetGodkjenningsbehov(utbetalingId: UUID) = sendGodkjenningsbehov(utbetalingId = utbetalingId)
+    private fun sendPåminnetGodkjenningsbehov(utbetalingId: UUID) = sendGodkjenningsbehov(GodkjenningsbehovTestdata(utbetalingId = utbetalingId))
 
     private fun finnSnapshotVersjon(fnr: String): Int {
         @Language("postgresql")

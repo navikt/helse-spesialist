@@ -20,7 +20,7 @@ internal class OppdaterPersonsnapshotE2ETest : AbstractE2ETest() {
         håndterSaksbehandlerløsning(vedtaksperiodeId = v1)
         håndterVedtakFattet(vedtaksperiodeId = v1)
 
-        fremTilSaksbehandleroppgave(vedtaksperiodeId = v2, snapshotversjon = 1, utbetalingId = randomUUID(), harOppdatertMetadata = true)
+        fremTilSaksbehandleroppgave(vedtaksperiodeId = v2, snapshotversjon = 1, harOppdatertMetadata = true)
         håndterSaksbehandlerløsning(vedtaksperiodeId = v2)
         håndterVedtakFattet(vedtaksperiodeId = v2)
 

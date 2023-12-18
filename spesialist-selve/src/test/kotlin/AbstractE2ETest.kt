@@ -1,3 +1,4 @@
+
 import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -12,6 +13,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.AvviksvurderingTestdata
+import no.nav.helse.GodkjenningsbehovTestdata
 import no.nav.helse.Meldingssender
 import no.nav.helse.TestRapidHelpers.behov
 import no.nav.helse.TestRapidHelpers.hendelser
@@ -46,8 +48,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.vedtaksperiode.Generasjon
-import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
+import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
 import no.nav.helse.modell.vilkårsprøving.LovhjemmelEvent
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.asLocalDateTime
@@ -138,16 +139,15 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         tom: LocalDate = 31.januar,
         skjæringstidspunkt: LocalDate = fom,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
-        utbetalingId: UUID = UTBETALING_ID,
-        avviksvurderingTestdata: AvviksvurderingTestdata = AvviksvurderingTestdata()
+        avviksvurderingTestdata: AvviksvurderingTestdata = AvviksvurderingTestdata(),
     ) {
         fremTilÅpneOppgaver(
-            fom = fom,
-            tom = tom,
-            skjæringstidspunkt = skjæringstidspunkt,
-            vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingId = utbetalingId,
             avviksvurderingTestdata = avviksvurderingTestdata,
+            godkjenningsbehovTestdata = GodkjenningsbehovTestdata(
+                periodeFom = fom,
+                periodeTom = tom,
+                skjæringstidspunkt = skjæringstidspunkt
+            )
         )
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning(vedtaksperiodeId = vedtaksperiodeId)
@@ -157,137 +157,96 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun fremTilVergemål(
-        fom: LocalDate = 1.januar,
-        tom: LocalDate = 31.januar,
-        skjæringstidspunkt: LocalDate = fom,
-        periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
-        fødselsnummer: String = FØDSELSNUMMER,
-        andreArbeidsforhold: List<String> = emptyList(),
         regelverksvarsler: List<String> = emptyList(),
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
-        utbetalingId: UUID = UTBETALING_ID,
         harOppdatertMetadata: Boolean = false,
         snapshotversjon: Int = 1,
         enhet: String = ENHET_OSLO,
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
         avviksvurderingTestdata: AvviksvurderingTestdata = AvviksvurderingTestdata(),
+        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = GodkjenningsbehovTestdata(),
     ) {
         fremForbiUtbetalingsfilter(
-            fom,
-            tom,
-            skjæringstidspunkt,
-            periodetype,
-            fødselsnummer,
-            andreArbeidsforhold,
             regelverksvarsler,
-            vedtaksperiodeId,
-            utbetalingId,
             harOppdatertMetadata = harOppdatertMetadata,
             snapshotversjon = snapshotversjon,
             enhet = enhet,
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp,
             avviksvurderingTestdata = avviksvurderingTestdata,
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata,
         )
         håndterEgenansattløsning()
     }
 
     protected fun fremTilÅpneOppgaver(
-        fom: LocalDate = 1.januar,
-        tom: LocalDate = 31.januar,
-        skjæringstidspunkt: LocalDate = fom,
-        periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
-        fødselsnummer: String = FØDSELSNUMMER,
-        andreArbeidsforhold: List<String> = emptyList(),
         regelverksvarsler: List<String> = emptyList(),
         fullmakter: List<Fullmakt> = emptyList(),
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
-        utbetalingId: UUID = UTBETALING_ID,
         harOppdatertMetadata: Boolean = false,
         snapshotversjon: Int = 1,
         enhet: String = ENHET_OSLO,
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
-        avviksvurderingTestdata: AvviksvurderingTestdata = AvviksvurderingTestdata()
+        avviksvurderingTestdata: AvviksvurderingTestdata = AvviksvurderingTestdata(),
+        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = GodkjenningsbehovTestdata(),
     ) {
         fremTilVergemål(
-            fom,
-            tom,
-            skjæringstidspunkt,
-            periodetype,
-            fødselsnummer,
-            andreArbeidsforhold,
             regelverksvarsler,
-            vedtaksperiodeId,
-            utbetalingId,
             harOppdatertMetadata,
             snapshotversjon,
             enhet,
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp,
             avviksvurderingTestdata = avviksvurderingTestdata,
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata
         )
         håndterVergemålløsning(fullmakter = fullmakter)
     }
 
     protected fun fremForbiUtbetalingsfilter(
-        fom: LocalDate = 1.januar,
-        tom: LocalDate = 31.januar,
-        skjæringstidspunkt: LocalDate = fom,
-        periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
-        fødselsnummer: String = FØDSELSNUMMER,
-        andreArbeidsforhold: List<String> = emptyList(),
         regelverksvarsler: List<String> = emptyList(),
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
-        utbetalingId: UUID = UTBETALING_ID,
         harOppdatertMetadata: Boolean = false,
         snapshotversjon: Int = 1,
         enhet: String = ENHET_OSLO,
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
-        vilkårsgrunnlagId: UUID = UUID.randomUUID(),
         avviksvurderingTestdata: AvviksvurderingTestdata = AvviksvurderingTestdata(),
+        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = GodkjenningsbehovTestdata(
+            avviksvurderingId = avviksvurderingTestdata.avviksvurderingId,
+        ),
     ) {
-        håndterSøknad(fødselsnummer = fødselsnummer)
+        håndterSøknad(fødselsnummer = godkjenningsbehovTestdata.fødselsnummer)
         håndterVedtaksperiodeOpprettet(
-            vedtaksperiodeId = vedtaksperiodeId,
-            fom = fom,
-            tom = tom,
-            skjæringstidspunkt = skjæringstidspunkt
+            vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
+            fom = godkjenningsbehovTestdata.periodeFom,
+            tom = godkjenningsbehovTestdata.periodeTom,
+            skjæringstidspunkt = godkjenningsbehovTestdata.skjæringstidspunkt
         )
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshot(
             versjon = snapshotversjon,
-            fødselsnummer = fødselsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingId = utbetalingId,
+            fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,
+            vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
+            utbetalingId = godkjenningsbehovTestdata.utbetalingId,
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp,
         )
         if (regelverksvarsler.isNotEmpty()) håndterAktivitetsloggNyAktivitet(varselkoder = regelverksvarsler)
         håndterGodkjenningsbehov(
-            vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingId = utbetalingId,
-            fom = fom,
-            tom = tom,
-            skjæringstidspunkt = skjæringstidspunkt,
-            periodetype = periodetype,
             harOppdatertMetainfo = harOppdatertMetadata,
-            andreArbeidsforhold = andreArbeidsforhold,
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp,
             avviksvurderingTestdata = avviksvurderingTestdata,
-            vilkårsgrunnlagId = vilkårsgrunnlagId,
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = godkjenningsbehovTestdata.utbetalingId, vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
         )
         if (!harOppdatertMetadata) {
             håndterPersoninfoløsning()
-            håndterEnhetløsning(vedtaksperiodeId = vedtaksperiodeId, enhet = enhet)
-            håndterInfotrygdutbetalingerløsning(vedtaksperiodeId = vedtaksperiodeId)
-            if (andreArbeidsforhold.isNotEmpty()) håndterArbeidsgiverinformasjonløsning(vedtaksperiodeId = vedtaksperiodeId)
-            håndterArbeidsgiverinformasjonløsning(vedtaksperiodeId = vedtaksperiodeId)
-            håndterArbeidsforholdløsning(vedtaksperiodeId = vedtaksperiodeId)
+            håndterEnhetløsning(vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId, enhet = enhet)
+            håndterInfotrygdutbetalingerløsning(vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
+            if (godkjenningsbehovTestdata.orgnummereMedRelevanteArbeidsforhold.isNotEmpty()) håndterArbeidsgiverinformasjonløsning(vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
+            håndterArbeidsgiverinformasjonløsning(vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
+            håndterArbeidsforholdløsning(vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
         }
-        verify { snapshotClient.hentSnapshot(fødselsnummer) }
+        verify { snapshotClient.hentSnapshot(godkjenningsbehovTestdata.fødselsnummer) }
     }
 
     private fun håndterAvviksvurdering(avviksvurderingTestdata: AvviksvurderingTestdata) {
@@ -317,15 +276,21 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId
         )
+        val avviksvurderingTestdata = AvviksvurderingTestdata()
         håndterGodkjenningsbehov(
-            vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingId = utbetalingId,
-            fom = fom,
-            tom = tom,
-            skjæringstidspunkt = skjæringstidspunkt,
             harOppdatertMetainfo = harOppdatertMetadata,
-            andreArbeidsforhold = andreArbeidsforhold,
-            vilkårsgrunnlagId = vilkårsgrunnlagId,
+            avviksvurderingTestdata = avviksvurderingTestdata,
+            godkjenningsbehovTestdata = GodkjenningsbehovTestdata(
+                periodeFom = fom,
+                periodeTom = tom,
+                skjæringstidspunkt = skjæringstidspunkt,
+                orgnummereMedRelevanteArbeidsforhold = andreArbeidsforhold,
+                vedtaksperiodeId = vedtaksperiodeId,
+                utbetalingId = utbetalingId,
+                vilkårsgrunnlagId = vilkårsgrunnlagId,
+                periodetype = FORLENGELSE,
+                avviksvurderingId = avviksvurderingTestdata.avviksvurderingId,
+            )
         )
         verify { snapshotClient.hentSnapshot(FØDSELSNUMMER) }
 
@@ -334,13 +299,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun fremTilSaksbehandleroppgave(
-        fom: LocalDate = 1.januar,
-        tom: LocalDate = 31.januar,
-        skjæringstidspunkt: LocalDate = fom,
-        fødselsnummer: String = FØDSELSNUMMER,
-        periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
         enhet: String = ENHET_OSLO,
-        andreArbeidsforhold: List<String> = emptyList(),
         regelverksvarsler: List<String> = emptyList(),
         fullmakter: List<Fullmakt> = emptyList(),
         risikofunn: List<Risikofunn> = emptyList(),
@@ -353,30 +312,24 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
         avviksvurderingTestdata: AvviksvurderingTestdata = AvviksvurderingTestdata(),
+        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = GodkjenningsbehovTestdata(utbetalingId = utbetalingId, vedtaksperiodeId = vedtaksperiodeId),
     ) {
         fremTilÅpneOppgaver(
-            fom,
-            tom,
-            skjæringstidspunkt,
-            periodetype,
-            fødselsnummer,
-            andreArbeidsforhold,
             regelverksvarsler,
             fullmakter,
-            vedtaksperiodeId,
-            utbetalingId,
             harOppdatertMetadata = harOppdatertMetadata,
             snapshotversjon = snapshotversjon,
             enhet = enhet,
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp,
             avviksvurderingTestdata = avviksvurderingTestdata,
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata,
         )
         håndterÅpneOppgaverløsning()
         if (!harRisikovurdering) håndterRisikovurderingløsning(
             kanGodkjennesAutomatisk = kanGodkjennesAutomatisk,
             risikofunn = risikofunn,
-            vedtaksperiodeId = vedtaksperiodeId
+            vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId
         )
         if (!erFerdigstilt(sisteGodkjenningsbehovId)) håndterInntektløsning()
     }
@@ -441,28 +394,23 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         fom: LocalDate,
         tom: LocalDate,
         skjæringstidspunkt: LocalDate = fom,
-        andreArbeidsforhold: List<String> = emptyList(),
         regelverksvarsler: List<String> = emptyList(),
         fullmakter: List<Fullmakt> = emptyList(),
         risikofunn: List<Risikofunn> = emptyList(),
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
         utbetalingId: UUID = UTBETALING_ID,
         harOppdatertMetadata: Boolean = false,
+        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = GodkjenningsbehovTestdata(periodeFom = fom, periodeTom = tom, skjæringstidspunkt = skjæringstidspunkt, vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
     ) {
         fremTilSaksbehandleroppgave(
-            fom,
-            tom,
-            skjæringstidspunkt = skjæringstidspunkt,
-            andreArbeidsforhold = andreArbeidsforhold,
             regelverksvarsler = regelverksvarsler,
             fullmakter = fullmakter,
             risikofunn = risikofunn,
-            vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingId = utbetalingId,
-            harOppdatertMetadata = harOppdatertMetadata
+            harOppdatertMetadata = harOppdatertMetadata,
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata,
         )
-        håndterSaksbehandlerløsning(vedtaksperiodeId = vedtaksperiodeId)
-        håndterVedtakFattet(vedtaksperiodeId = vedtaksperiodeId)
+        håndterSaksbehandlerløsning(vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
+        håndterVedtakFattet(vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
     }
 
     protected fun håndterSøknad(
@@ -806,128 +754,56 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun håndterGodkjenningsbehovUtenValidering(
-        aktørId: String = AKTØR,
-        fødselsnummer: String = FØDSELSNUMMER,
-        organisasjonsnummer: String = ORGNR,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
         utbetalingId: UUID = UTBETALING_ID,
-        fom: LocalDate = 1.januar,
-        tom: LocalDate = 31.januar,
-        skjæringstidspunkt: LocalDate = fom,
-        periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
-        kanAvvises: Boolean = true,
-        andreArbeidsforhold: List<String> = emptyList(),
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
         avviksvurderingTestdata: AvviksvurderingTestdata = AvviksvurderingTestdata(),
-        vilkårsgrunnlagId: UUID = UUID.randomUUID(),
+        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = GodkjenningsbehovTestdata(utbetalingId = utbetalingId, avviksvurderingId = avviksvurderingTestdata.avviksvurderingId),
     ) {
-        val erRevurdering = erRevurdering(vedtaksperiodeId)
-        håndterVedtaksperiodeNyUtbetaling(vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
+        val erRevurdering = erRevurdering(godkjenningsbehovTestdata.vedtaksperiodeId)
+        håndterVedtaksperiodeNyUtbetaling(vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId, utbetalingId = godkjenningsbehovTestdata.utbetalingId)
         håndterUtbetalingOpprettet(
             utbetalingtype = if (erRevurdering) "REVURDERING" else "UTBETALING",
-            utbetalingId = utbetalingId,
+            utbetalingId = godkjenningsbehovTestdata.utbetalingId,
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp
         )
-        håndterVedtaksperiodeEndret(vedtaksperiodeId = vedtaksperiodeId)
+        håndterVedtaksperiodeEndret(vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
         håndterAvviksvurdering(avviksvurderingTestdata)
-        sisteMeldingId = sendGodkjenningsbehov(
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingId = utbetalingId,
-            periodeFom = fom,
-            periodeTom = tom,
-            skjæringstidspunkt = skjæringstidspunkt,
-            periodetype = periodetype,
-            kanAvvises = kanAvvises,
-            orgnummereMedRelevanteArbeidsforhold = andreArbeidsforhold,
-            avviksvurderingId = avviksvurderingTestdata.avviksvurderingId,
-            vilkårsgrunnlagId = vilkårsgrunnlagId
-        )
+        sisteMeldingId = sendGodkjenningsbehov(godkjenningsbehovTestdata)
         sisteGodkjenningsbehovId = sisteMeldingId
     }
 
     protected fun håndterGodkjenningsbehov(
-        aktørId: String = AKTØR,
-        fødselsnummer: String = FØDSELSNUMMER,
-        organisasjonsnummer: String = ORGNR,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
-        utbetalingId: UUID = UTBETALING_ID,
-        fom: LocalDate = 1.januar,
-        tom: LocalDate = 31.januar,
-        skjæringstidspunkt: LocalDate = fom,
-        periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
         harOppdatertMetainfo: Boolean = false,
-        andreArbeidsforhold: List<String> = emptyList(),
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
-        kanAvvises: Boolean = true,
         avviksvurderingTestdata: AvviksvurderingTestdata = AvviksvurderingTestdata(),
-        vilkårsgrunnlagId: UUID = UUID.randomUUID(),
+        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = GodkjenningsbehovTestdata(),
     ) {
         val alleArbeidsforhold = sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val query =
                 "SELECT a.orgnummer FROM arbeidsgiver a INNER JOIN vedtak v on a.id = v.arbeidsgiver_ref INNER JOIN person p on p.id = v.person_ref WHERE p.fodselsnummer = ?"
-            session.run(queryOf(query, fødselsnummer.toLong()).map { it.string("orgnummer") }.asList)
+            session.run(queryOf(query, godkjenningsbehovTestdata.fødselsnummer.toLong()).map { it.string("orgnummer") }.asList)
         }
         håndterGodkjenningsbehovUtenValidering(
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingId = utbetalingId,
-            fom = fom,
-            tom = tom,
-            skjæringstidspunkt = skjæringstidspunkt,
-            periodetype = periodetype,
-            kanAvvises = kanAvvises,
-            andreArbeidsforhold = andreArbeidsforhold,
+            utbetalingId = godkjenningsbehovTestdata.utbetalingId,
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp,
             avviksvurderingTestdata = avviksvurderingTestdata,
-            vilkårsgrunnlagId = vilkårsgrunnlagId
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(avviksvurderingId = avviksvurderingTestdata.avviksvurderingId)
         )
 
         when {
             !harOppdatertMetainfo -> assertEtterspurteBehov("HentPersoninfoV2")
-            !andreArbeidsforhold.all { it in alleArbeidsforhold } -> assertEtterspurteBehov("Arbeidsgiverinformasjon")
+            !godkjenningsbehovTestdata.orgnummereMedRelevanteArbeidsforhold.all { it in alleArbeidsforhold } -> assertEtterspurteBehov("Arbeidsgiverinformasjon")
             else -> assertEtterspurteBehov("EgenAnsatt")
         }
     }
 
-    internal fun sendGodkjenningsbehov(
-        aktørId: String = AKTØR,
-        fødselsnummer: String = FØDSELSNUMMER,
-        organisasjonsnummer: String = ORGNR,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
-        utbetalingId: UUID = UTBETALING_ID,
-        periodeFom: LocalDate = 1.januar,
-        periodeTom: LocalDate = 31.januar,
-        skjæringstidspunkt: LocalDate = periodeFom,
-        periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
-        kanAvvises: Boolean = true,
-        orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList(),
-        avviksvurderingId: UUID = UUID.randomUUID(),
-        vilkårsgrunnlagId: UUID = UUID.randomUUID(),
-    ) = meldingssender.sendGodkjenningsbehov(
-        aktørId = aktørId,
-        fødselsnummer = fødselsnummer,
-        organisasjonsnummer = organisasjonsnummer,
-        vedtaksperiodeId = vedtaksperiodeId,
-        utbetalingId = utbetalingId,
-        periodeFom = periodeFom,
-        periodeTom = periodeTom,
-        skjæringstidspunkt = skjæringstidspunkt,
-        periodetype = periodetype,
-        kanAvvises = kanAvvises,
-        orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
-        avviksvurderingId = avviksvurderingId,
-        vilkårsgrunnlagId = vilkårsgrunnlagId
-    ).also { sisteMeldingId = it }
+    internal fun sendGodkjenningsbehov(godkjenningsbehovTestdata: GodkjenningsbehovTestdata) =
+        meldingssender.sendGodkjenningsbehov(godkjenningsbehovTestdata).also { sisteMeldingId = it }
 
     protected fun håndterPersoninfoløsning(
         aktørId: String = AKTØR,

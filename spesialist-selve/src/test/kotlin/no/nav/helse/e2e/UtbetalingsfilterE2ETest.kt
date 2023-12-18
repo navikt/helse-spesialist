@@ -2,6 +2,7 @@ package no.nav.helse.e2e
 
 import AbstractE2ETest
 import java.util.UUID
+import no.nav.helse.GodkjenningsbehovTestdata
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
 import org.junit.jupiter.api.Test
@@ -11,10 +12,12 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETest() {
     @Test
     fun `Går gjennom begge filtreringer`() {
         fremForbiUtbetalingsfilter(
-            periodetype = FORLENGELSE,
-            fødselsnummer = FØDSELSNUMMER,
-            vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingId = utbetalingId,
+            godkjenningsbehovTestdata = GodkjenningsbehovTestdata(
+                periodetype = FORLENGELSE,
+                fødselsnummer = FØDSELSNUMMER,
+                vedtaksperiodeId = vedtaksperiodeId,
+                utbetalingId = utbetalingId,
+            )
         )
         assertVedtaksperiodeEksisterer(vedtaksperiodeId)
         assertGodkjenningsbehovIkkeBesvart()
@@ -24,10 +27,11 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETest() {
     @Test
     fun `går gjennom uten personutbetaling`() {
         fremForbiUtbetalingsfilter(
-            periodetype = FORLENGELSE,
-            fødselsnummer = FØDSELSNUMMER,
-            vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingId = utbetalingId,
+            godkjenningsbehovTestdata = GodkjenningsbehovTestdata(
+                fødselsnummer = FØDSELSNUMMER,
+                vedtaksperiodeId = vedtaksperiodeId,
+                utbetalingId = utbetalingId,
+            )
         )
         assertVedtaksperiodeEksisterer(vedtaksperiodeId)
         assertIkkeAvvistIUtbetalingsfilter()

@@ -2,6 +2,7 @@ package no.nav.helse.e2e
 
 import AbstractE2ETest
 import java.util.UUID
+import no.nav.helse.GodkjenningsbehovTestdata
 import no.nav.helse.TestRapidHelpers.behov
 import no.nav.helse.TestRapidHelpers.oppgaveId
 import no.nav.helse.Testdata.FØDSELSNUMMER
@@ -71,12 +72,14 @@ internal class EndretSkjermetinfoTest : AbstractE2ETest() {
         val vedtaksperiodeId2 = UUID.randomUUID()
 
         fremForbiUtbetalingsfilter(
-            fom = 21.januar,
-            tom = 30.januar,
-            skjæringstidspunkt = 1.januar,
             harOppdatertMetadata = true,
-            vedtaksperiodeId = vedtaksperiodeId2,
-            utbetalingId = UUID.randomUUID(),
+            godkjenningsbehovTestdata = GodkjenningsbehovTestdata(
+                periodeFom = 21.januar,
+                periodeTom = 30.januar,
+                skjæringstidspunkt = 1.januar,
+                vedtaksperiodeId = vedtaksperiodeId2,
+                utbetalingId = UUID.randomUUID(),
+            ),
         )
         håndterEgenansattløsning(erEgenAnsatt = true)
         håndterVergemålløsning()

@@ -7,6 +7,8 @@ import AbstractE2ETest.Kommandokjedetilstand.NY
 import AbstractE2ETest.Kommandokjedetilstand.SUSPENDERT
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.AvviksvurderingTestdata
+import no.nav.helse.GodkjenningsbehovTestdata
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.januar
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson
@@ -90,7 +92,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     @Test
     fun `ignorerer påminnet godkjenningsbehov dersom vedtaket er automatisk godkjent`() {
         val utbetalingId = UUID.randomUUID()
-        fremTilSaksbehandleroppgave(kanGodkjennesAutomatisk = true, utbetalingId = utbetalingId)
+        fremTilSaksbehandleroppgave(utbetalingId = utbetalingId, kanGodkjennesAutomatisk = true)
         håndterGodkjenningsbehovUtenValidering(utbetalingId = utbetalingId)
         assertIngenEtterspurteBehov()
     }
@@ -101,7 +103,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         håndterSøknad()
         håndterVedtaksperiodeOpprettet()
         håndterVedtaksperiodeNyUtbetaling()
-        håndterGodkjenningsbehov(andreArbeidsforhold = andreArbeidsgivere)
+        håndterGodkjenningsbehov(godkjenningsbehovTestdata = GodkjenningsbehovTestdata(orgnummereMedRelevanteArbeidsforhold = andreArbeidsgivere))
         håndterPersoninfoløsning()
         håndterEnhetløsning()
         håndterInfotrygdutbetalingerløsning()
@@ -120,7 +122,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         håndterSøknad()
         håndterVedtaksperiodeOpprettet()
         håndterVedtaksperiodeNyUtbetaling()
-        håndterGodkjenningsbehov(andreArbeidsforhold = andreArbeidsforhold)
+        håndterGodkjenningsbehov(godkjenningsbehovTestdata = GodkjenningsbehovTestdata(orgnummereMedRelevanteArbeidsforhold = andreArbeidsforhold))
         håndterPersoninfoløsning()
         håndterEnhetløsning()
         håndterInfotrygdutbetalingerløsning()
@@ -143,7 +145,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         val andreArbeidsforhold = listOf(arbeidsgiver2, arbeidsgiver3)
         håndterSøknad()
         håndterVedtaksperiodeOpprettet()
-        håndterGodkjenningsbehov(andreArbeidsforhold = andreArbeidsforhold)
+        håndterGodkjenningsbehov(godkjenningsbehovTestdata = GodkjenningsbehovTestdata(orgnummereMedRelevanteArbeidsforhold = andreArbeidsforhold))
         håndterPersoninfoløsning()
         håndterEnhetløsning()
         håndterInfotrygdutbetalingerløsning()
@@ -228,14 +230,18 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         val revurdertUtbetaling = UUID.randomUUID()
         val kanAvvises = false
 
+        val avviksvurderingTestdata = AvviksvurderingTestdata()
         håndterGodkjenningsbehov(
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            utbetalingId = revurdertUtbetaling,
-            andreArbeidsforhold = emptyList(),
-            fom = 11.januar,
-            tom = 31.januar,
-            kanAvvises = kanAvvises,
             harOppdatertMetainfo = true,
+            avviksvurderingTestdata = avviksvurderingTestdata,
+            godkjenningsbehovTestdata = GodkjenningsbehovTestdata(
+                periodeFom = 11.januar,
+                periodeTom = 31.januar,
+                vedtaksperiodeId = VEDTAKSPERIODE_ID,
+                utbetalingId = revurdertUtbetaling,
+                kanAvvises = kanAvvises,
+                avviksvurderingId = avviksvurderingTestdata.avviksvurderingId,
+            )
         )
 
         håndterEgenansattløsning()

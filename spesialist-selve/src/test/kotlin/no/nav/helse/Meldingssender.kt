@@ -14,12 +14,6 @@ import no.nav.helse.modell.saksbehandler.OverstyrtInntektOgRefusjonEvent.Oversty
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
-import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.modell.utbetaling.Utbetalingtype.UTBETALING
-import no.nav.helse.modell.vedtaksperiode.Inntektskilde
-import no.nav.helse.modell.vedtaksperiode.Inntektskilde.EN_ARBEIDSGIVER
-import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.modell.vilkårsprøving.LovhjemmelEvent
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
@@ -264,42 +258,27 @@ internal class Meldingssender(private val testRapid: TestRapid) {
     }
 
     fun sendGodkjenningsbehov(
-        aktørId: String,
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-        vedtaksperiodeId: UUID,
-        utbetalingId: UUID,
-        periodeFom: LocalDate = LocalDate.now(),
-        periodeTom: LocalDate = LocalDate.now(),
-        skjæringstidspunkt: LocalDate = LocalDate.now(),
-        periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
-        kanAvvises: Boolean = true,
-        førstegangsbehandling: Boolean = true,
-        inntektskilde: Inntektskilde = EN_ARBEIDSGIVER,
-        orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList(),
-        utbetalingtype: Utbetalingtype = UTBETALING,
-        avviksvurderingId: UUID,
-        vilkårsgrunnlagId: UUID
+        godkjenningsbehovTestdata: GodkjenningsbehovTestdata,
     ): UUID = newUUID.also { id ->
         testRapid.sendTestMessage(
             Testmeldingfabrikk.lagGodkjenningsbehov(
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                organisasjonsnummer = organisasjonsnummer,
-                vedtaksperiodeId = vedtaksperiodeId,
-                utbetalingId = utbetalingId,
-                periodeFom = periodeFom,
-                periodeTom = periodeTom,
-                periodetype = periodetype,
-                kanAvvises = kanAvvises,
-                skjæringstidspunkt = skjæringstidspunkt,
-                førstegangsbehandling = førstegangsbehandling,
-                utbetalingtype = utbetalingtype,
-                inntektskilde = inntektskilde,
-                orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
+                aktørId = godkjenningsbehovTestdata.aktørId,
+                fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,
+                organisasjonsnummer = godkjenningsbehovTestdata.organisasjonsnummer,
+                vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
+                utbetalingId = godkjenningsbehovTestdata.utbetalingId,
+                periodeFom = godkjenningsbehovTestdata.periodeFom,
+                periodeTom = godkjenningsbehovTestdata.periodeTom,
+                periodetype = godkjenningsbehovTestdata.periodetype,
+                kanAvvises = godkjenningsbehovTestdata.kanAvvises,
+                skjæringstidspunkt = godkjenningsbehovTestdata.skjæringstidspunkt,
+                førstegangsbehandling = godkjenningsbehovTestdata.førstegangsbehandling,
+                utbetalingtype = godkjenningsbehovTestdata.utbetalingtype,
+                inntektskilde = godkjenningsbehovTestdata.inntektskilde,
+                orgnummereMedRelevanteArbeidsforhold = godkjenningsbehovTestdata.orgnummereMedRelevanteArbeidsforhold,
                 id = id,
-                avviksvurderingId = avviksvurderingId,
-                vilkårsgrunnlagId = vilkårsgrunnlagId
+                avviksvurderingId = godkjenningsbehovTestdata.avviksvurderingId,
+                vilkårsgrunnlagId = godkjenningsbehovTestdata.vilkårsgrunnlagId
             )
         )
     }
