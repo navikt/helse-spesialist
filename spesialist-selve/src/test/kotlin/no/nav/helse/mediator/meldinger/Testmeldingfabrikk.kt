@@ -6,6 +6,7 @@ import java.time.LocalDate.now
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.AvviksvurderingTestdata
 import no.nav.helse.Testdata
 import no.nav.helse.februar
 import no.nav.helse.januar
@@ -957,57 +958,6 @@ internal object Testmeldingfabrikk {
         )
     )
 
-    fun lagAvviksvurdering(
-        aktørId: String,
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-        id: UUID = UUID.randomUUID(),
-        avviksprosent: Double = 25.0,
-        sammenligningsgrunnlag: Double = 500000.0,
-        skjæringstidspunkt: LocalDate = 1.januar,
-    ): String {
-        return nyHendelse(
-            id, "avvik_vurdert", mapOf(
-                "fødselsnummer" to fødselsnummer,
-                "aktørId" to aktørId,
-                "skjæringstidspunkt" to skjæringstidspunkt,
-                "avviksvurdering" to mapOf(
-                    "id" to "cc3af2c3-fa9e-4d84-a57e-a7972226cdae",
-                    "opprettet" to "2018-01-01T00:00:00.000",
-                    "vilkårsgrunnlagId" to "bc3af2c3-fa9e-4d84-a57e-a7973336cdaf",
-                    "beregningsgrunnlag" to mapOf(
-                        "totalbeløp" to 550000.0,
-                        "omregnedeÅrsinntekter" to listOf(
-                            mapOf(
-                                "arbeidsgiverreferanse" to organisasjonsnummer,
-                                "beløp" to 250000.0
-                            ),
-                        )
-                    ),
-                    "sammenligningsgrunnlag" to mapOf(
-                        "id" to "887b2e4c-5222-45f1-9831-1846a028193b",
-                        "totalbeløp" to sammenligningsgrunnlag,
-                        "innrapporterteInntekter" to listOf(
-                            mapOf(
-                                "arbeidsgiverreferanse" to organisasjonsnummer,
-                                "inntekter" to listOf(
-                                    mapOf(
-                                        "årMåned" to "2018-01",
-                                        "beløp" to 10000.0
-                                    ), mapOf(
-                                        "årMåned" to "2018-02",
-                                        "beløp" to 10000.0
-                                    )
-                                )
-                            )
-                        )
-                    ),
-                    "avviksprosent" to avviksprosent,
-                )
-            )
-        )
-    }
-
     fun lagVedtakFattet(
         aktørId: String,
         fødselsnummer: String,
@@ -1131,46 +1081,39 @@ internal object Testmeldingfabrikk {
         "@opprettet" to LocalDateTime.now()
     )
 
-    fun lagAvviksvurdering(
-        id: UUID,
-        fødselsnummer: String,
-        skjæringstidspunkt: LocalDate = 1.januar,
-        vilkårsgrunnlagId: UUID,
-        avviksvurderingId: UUID,
-    ): String =
+    fun lagAvviksvurdering(avviksvurderingTestdata: AvviksvurderingTestdata, id: UUID): String =
         nyHendelse(
-            id, "avviksvurdering", mapOf(
-                "fødselsnummer" to fødselsnummer,
-                "skjæringstidspunkt" to skjæringstidspunkt,
+            id, "avvik_vurdert", mapOf(
+                "fødselsnummer" to avviksvurderingTestdata.fødselsnummer,
+                "aktørId" to avviksvurderingTestdata.aktørId,
+                "skjæringstidspunkt" to avviksvurderingTestdata.skjæringstidspunkt,
                 "avviksvurdering" to mapOf(
-                    "id" to avviksvurderingId,
-                    "vilkårsgrunnlagId" to vilkårsgrunnlagId,
+                    "id" to avviksvurderingTestdata.avviksvurderingId,
                     "opprettet" to 1.januar.atStartOfDay(),
                     "beregningsgrunnlag" to mapOf(
-                        "totalbeløp" to 10,
-                        "omregnedeÅrsinntekter" to listOf(
+                        "totalbeløp" to 550000.0, "omregnedeÅrsinntekter" to listOf(
                             mapOf(
-                                "arbeidsgiverreferanse" to "987654321",
-                                "beløp" to 10
-                            )
+                                "arbeidsgiverreferanse" to avviksvurderingTestdata.organisasjonsnummer,
+                                "beløp" to 250000.0
+                            ),
                         )
                     ),
                     "sammenligningsgrunnlag" to mapOf(
-                        "totalbeløp" to 10,
-                        "id" to UUID.randomUUID(),
+                        "id" to "887b2e4c-5222-45f1-9831-1846a028193b",
+                        "totalbeløp" to avviksvurderingTestdata.sammenligningsgrunnlag,
                         "innrapporterteInntekter" to listOf(
                             mapOf(
-                                "arbeidsgiverreferanse" to "987654321",
+                                "arbeidsgiverreferanse" to avviksvurderingTestdata.organisasjonsnummer,
                                 "inntekter" to listOf(
                                     mapOf(
                                         "årMåned" to YearMonth.from(1.januar),
-                                        "beløp" to 10
-                                    )
+                                        "beløp" to 10000.0
+                                    ),
                                 )
                             )
                         )
                     ),
-                    "avviksprosent" to 0,
+                    "avviksprosent" to avviksvurderingTestdata.avviksprosent,
                 )
             )
         )

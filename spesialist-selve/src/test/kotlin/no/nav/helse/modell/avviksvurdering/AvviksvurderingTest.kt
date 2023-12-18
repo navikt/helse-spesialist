@@ -13,7 +13,6 @@ internal class AvviksvurderingTest {
     @Test
     fun `avviksvurdering toDto`() {
         val unikId = UUID.randomUUID()
-        val vilkårsgrunnlagId = UUID.randomUUID()
         val fødselsnummer = "12345678910"
         val skjæringstidspunkt = 1.januar
         val opprettet = LocalDateTime.now()

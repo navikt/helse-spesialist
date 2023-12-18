@@ -1,6 +1,7 @@
 package no.nav.helse
 
 import com.expediagroup.graphql.client.types.GraphQLClientResponse
+import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.spleis.graphql.HentSnapshot
 import no.nav.helse.spleis.graphql.enums.GraphQLInntektstype
@@ -130,3 +131,14 @@ object Testdata {
         }
 
 }
+
+internal data class AvviksvurderingTestdata(
+    val aktørId: String = Testdata.AKTØR,
+    val fødselsnummer: String = Testdata.FØDSELSNUMMER,
+    val organisasjonsnummer: String = Testdata.ORGNR,
+    val avviksprosent: Double = 10.0,
+    val sammenligningsgrunnlag: Double = 650_000.0,
+    val skjæringstidspunkt: LocalDate = 1.januar,
+    val avviksvurderingId: UUID = UUID.randomUUID()
+)
+

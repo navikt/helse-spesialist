@@ -11,6 +11,7 @@ import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
+import no.nav.helse.AvviksvurderingTestdata
 import no.nav.helse.Meldingssender
 import no.nav.helse.TestRapidHelpers.behov
 import no.nav.helse.TestRapidHelpers.hendelser
@@ -138,6 +139,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         skjæringstidspunkt: LocalDate = fom,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
         utbetalingId: UUID = UTBETALING_ID,
+        avviksvurderingTestdata: AvviksvurderingTestdata = AvviksvurderingTestdata()
     ) {
         fremTilÅpneOppgaver(
             fom = fom,
@@ -145,6 +147,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             skjæringstidspunkt = skjæringstidspunkt,
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId,
+            avviksvurderingTestdata = avviksvurderingTestdata,
         )
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning(vedtaksperiodeId = vedtaksperiodeId)
@@ -168,6 +171,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         enhet: String = ENHET_OSLO,
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
+        avviksvurderingTestdata: AvviksvurderingTestdata = AvviksvurderingTestdata(),
     ) {
         fremForbiUtbetalingsfilter(
             fom,
@@ -183,7 +187,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             snapshotversjon = snapshotversjon,
             enhet = enhet,
             arbeidsgiverbeløp = arbeidsgiverbeløp,
-            personbeløp = personbeløp
+            personbeløp = personbeløp,
+            avviksvurderingTestdata = avviksvurderingTestdata,
         )
         håndterEgenansattløsning()
     }
@@ -204,6 +209,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         enhet: String = ENHET_OSLO,
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
+        avviksvurderingTestdata: AvviksvurderingTestdata = AvviksvurderingTestdata()
     ) {
         fremTilVergemål(
             fom,
@@ -219,7 +225,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             snapshotversjon,
             enhet,
             arbeidsgiverbeløp = arbeidsgiverbeløp,
-            personbeløp = personbeløp
+            personbeløp = personbeløp,
+            avviksvurderingTestdata = avviksvurderingTestdata,
         )
         håndterVergemålløsning(fullmakter = fullmakter)
     }
@@ -240,7 +247,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
         vilkårsgrunnlagId: UUID = UUID.randomUUID(),
-        avviksvurderingId: UUID = UUID.randomUUID(),
+        avviksvurderingTestdata: AvviksvurderingTestdata = AvviksvurderingTestdata(),
     ) {
         håndterSøknad(fødselsnummer = fødselsnummer)
         håndterVedtaksperiodeOpprettet(
@@ -269,8 +276,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             andreArbeidsforhold = andreArbeidsforhold,
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp,
-            avviksvurderingId = avviksvurderingId,
-            vilkårsgrunnlagId = vilkårsgrunnlagId
+            avviksvurderingTestdata = avviksvurderingTestdata,
+            vilkårsgrunnlagId = vilkårsgrunnlagId,
         )
         if (!harOppdatertMetadata) {
             håndterPersoninfoløsning()
@@ -283,19 +290,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         verify { snapshotClient.hentSnapshot(fødselsnummer) }
     }
 
-    private fun håndterAvviksvurdering(
-        fødselsnummer: String,
-        skjæringstidspunkt: LocalDate,
-        vilkårsgrunnlagId: UUID,
-        avviksvurderingId: UUID,
-    ) {
-        sisteMeldingId =
-            meldingssender.sendAvviksvurdering(
-                fødselsnummer = fødselsnummer,
-                skjæringstidspunkt = skjæringstidspunkt,
-                vilkårsgrunnlagId = vilkårsgrunnlagId,
-                avviksvurderingId = avviksvurderingId
-            )
+    private fun håndterAvviksvurdering(avviksvurderingTestdata: AvviksvurderingTestdata) {
+        sisteMeldingId = meldingssender.sendAvviksvurdering(avviksvurderingTestdata)
     }
 
     private fun forlengelseFremTilÅpneOppgaver(
@@ -308,7 +304,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         utbetalingId: UUID = UUID.randomUUID(),
         harOppdatertMetadata: Boolean = true,
         vilkårsgrunnlagId: UUID = UUID.randomUUID(),
-        avviksvurderingId: UUID = UUID.randomUUID(),
     ) {
         if (erRevurdering(vedtaksperiodeId)) {
             håndterVedtaksperiodeEndret(vedtaksperiodeId = vedtaksperiodeId)
@@ -331,7 +326,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             harOppdatertMetainfo = harOppdatertMetadata,
             andreArbeidsforhold = andreArbeidsforhold,
             vilkårsgrunnlagId = vilkårsgrunnlagId,
-            avviksvurderingId = avviksvurderingId
         )
         verify { snapshotClient.hentSnapshot(FØDSELSNUMMER) }
 
@@ -358,6 +352,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         snapshotversjon: Int = 1,
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
+        avviksvurderingTestdata: AvviksvurderingTestdata = AvviksvurderingTestdata(),
     ) {
         fremTilÅpneOppgaver(
             fom,
@@ -374,7 +369,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             snapshotversjon = snapshotversjon,
             enhet = enhet,
             arbeidsgiverbeløp = arbeidsgiverbeløp,
-            personbeløp = personbeløp
+            personbeløp = personbeløp,
+            avviksvurderingTestdata = avviksvurderingTestdata,
         )
         håndterÅpneOppgaverløsning()
         if (!harRisikovurdering) håndterRisikovurderingløsning(
@@ -823,7 +819,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         andreArbeidsforhold: List<String> = emptyList(),
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
-        avviksvurderingId: UUID = UUID.randomUUID(),
+        avviksvurderingTestdata: AvviksvurderingTestdata = AvviksvurderingTestdata(),
         vilkårsgrunnlagId: UUID = UUID.randomUUID(),
     ) {
         val erRevurdering = erRevurdering(vedtaksperiodeId)
@@ -835,12 +831,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             personbeløp = personbeløp
         )
         håndterVedtaksperiodeEndret(vedtaksperiodeId = vedtaksperiodeId)
-        håndterAvviksvurdering(
-            fødselsnummer = fødselsnummer,
-            skjæringstidspunkt = skjæringstidspunkt,
-            vilkårsgrunnlagId = vilkårsgrunnlagId,
-            avviksvurderingId = avviksvurderingId
-        )
+        håndterAvviksvurdering(avviksvurderingTestdata)
         sisteMeldingId = sendGodkjenningsbehov(
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
@@ -853,7 +844,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             periodetype = periodetype,
             kanAvvises = kanAvvises,
             orgnummereMedRelevanteArbeidsforhold = andreArbeidsforhold,
-            avviksvurderingId = avviksvurderingId,
+            avviksvurderingId = avviksvurderingTestdata.avviksvurderingId,
             vilkårsgrunnlagId = vilkårsgrunnlagId
         )
         sisteGodkjenningsbehovId = sisteMeldingId
@@ -874,7 +865,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
         kanAvvises: Boolean = true,
-        avviksvurderingId: UUID = UUID.randomUUID(),
+        avviksvurderingTestdata: AvviksvurderingTestdata = AvviksvurderingTestdata(),
         vilkårsgrunnlagId: UUID = UUID.randomUUID(),
     ) {
         val alleArbeidsforhold = sessionOf(dataSource).use { session ->
@@ -893,11 +884,11 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             tom = tom,
             skjæringstidspunkt = skjæringstidspunkt,
             periodetype = periodetype,
+            kanAvvises = kanAvvises,
             andreArbeidsforhold = andreArbeidsforhold,
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp,
-            kanAvvises = kanAvvises,
-            avviksvurderingId = avviksvurderingId,
+            avviksvurderingTestdata = avviksvurderingTestdata,
             vilkårsgrunnlagId = vilkårsgrunnlagId
         )
 
@@ -1155,24 +1146,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             skjæringstidspunkt = skjæringstidspunkt,
             fastsattType = fastsattType,
             inkluderSpleisverdier = inkluderSpleisverdier,
-        )
-    }
-
-    protected fun håndterAvviksvurdering(
-        aktørId: String = AKTØR,
-        fødselsnummer: String = FØDSELSNUMMER,
-        organisasjonsnummer: String = ORGNR,
-        avviksprosent: Double = 25.0,
-        sammenligningsgrunnlag: Double = 500000.0,
-        skjæringstidspunkt: LocalDate = 1.januar,
-    ) {
-        sisteMeldingId = meldingssender.sendAvviksvurdering(
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            avviksprosent = avviksprosent,
-            sammenligningsgrunnlag = sammenligningsgrunnlag,
-            skjæringstidspunkt = skjæringstidspunkt,
         )
     }
 

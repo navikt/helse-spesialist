@@ -684,27 +684,6 @@ internal class Meldingssender(private val testRapid: TestRapid) {
         )
     }
 
-    fun sendAvviksvurdering(
-        aktørId: String,
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-        avviksprosent: Double = 25.0,
-        sammenligningsgrunnlag: Double = 500000.0,
-        skjæringstidspunkt: LocalDate = 1.januar,
-    ): UUID = newUUID.also { id ->
-        testRapid.sendTestMessage(
-            Testmeldingfabrikk.lagAvviksvurdering(
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                organisasjonsnummer = organisasjonsnummer,
-                id = id,
-                avviksprosent = avviksprosent,
-                sammenligningsgrunnlag = sammenligningsgrunnlag,
-                skjæringstidspunkt = skjæringstidspunkt,
-            )
-        )
-    }
-
     fun sendAdressebeskyttelseEndret(
         aktørId: String,
         fødselsnummer: String,
@@ -804,21 +783,11 @@ internal class Meldingssender(private val testRapid: TestRapid) {
         )
     }
 
-    fun sendAvviksvurdering(
-        fødselsnummer: String,
-        skjæringstidspunkt: LocalDate,
-        vilkårsgrunnlagId: UUID,
-        avviksvurderingId: UUID,
-    ): UUID = newUUID.also { id ->
-        testRapid.sendTestMessage(
-            Testmeldingfabrikk.lagAvviksvurdering(
-                id = id,
-                fødselsnummer = fødselsnummer,
-                skjæringstidspunkt = skjæringstidspunkt,
-                vilkårsgrunnlagId = vilkårsgrunnlagId,
-                avviksvurderingId = avviksvurderingId
+    fun sendAvviksvurdering(avviksvurderingTestdata: AvviksvurderingTestdata): UUID =
+        newUUID.also { id ->
+            testRapid.sendTestMessage(
+                Testmeldingfabrikk.lagAvviksvurdering(avviksvurderingTestdata, id)
             )
-        )
-    }
+        }
 
 }
