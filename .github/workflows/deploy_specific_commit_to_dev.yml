@@ -40,7 +40,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: denne_skal_deployes_til_dev
-      - uses: nais/deploy/actions/deploy@v1
+      - uses: nais/deploy/actions/deploy@v2
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
