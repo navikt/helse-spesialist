@@ -110,8 +110,8 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         val generasjonRef = nyGenerasjon(vedtaksperiodeId = PERIODE.id, generasjonId)
         val varselId1 = UUID.randomUUID()
         val varselId2 = UUID.randomUUID()
-        val varsel1Opprettet = LocalDateTime.now()
-        val varsel2Opprettet = LocalDateTime.now()
+        val varsel1Opprettet = LocalDateTime.of(2020, 1, 1, 12, 0,0)
+        val varsel2Opprettet = LocalDateTime.of(2020, 1, 1, 12, 0,0)
         nyttVarsel(
             id = varselId1,
             vedtaksperiodeId = PERIODE.id,
@@ -213,7 +213,7 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         opprettVarseldefinisjon(tittel = "EN_NY_TITTEL", definisjonId = definisjonId)
         val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
         val varselId = UUID.randomUUID()
-        val varselOpprettet = LocalDateTime.now()
+        val varselOpprettet = LocalDateTime.of(2020, 1, 1, 12, 0,0)
         nyttVarsel(
             id = varselId,
             vedtaksperiodeId = vedtaksperiodeId,
@@ -247,7 +247,7 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         opprettVarseldefinisjon("EN_NY_TITTEL")
         val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
         val varselId = UUID.randomUUID()
-        val varselOpprettet = LocalDateTime.now()
+        val varselOpprettet = LocalDateTime.of(2020, 1, 1, 12, 0,0)
         nyttVarsel(
             id = varselId,
             vedtaksperiodeId = vedtaksperiodeId,
@@ -281,7 +281,7 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         val definisjonRef = opprettVarseldefinisjon(definisjonId = definisjonId)
         val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
         val varselId = UUID.randomUUID()
-        val varselOpprettet = LocalDateTime.now()
+        val varselOpprettet = LocalDateTime.of(2020, 1, 1, 12, 0,0)
         nyttVarsel(
             id = varselId,
             vedtaksperiodeId = vedtaksperiodeId,
@@ -289,7 +289,7 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
             generasjonRef = generasjonRef,
             definisjonRef = definisjonRef
         )
-        val varselEndret = LocalDateTime.now()
+        val varselEndret = LocalDateTime.of(2020, 1, 1, 12, 0,0)
         val forventetVarsel = Varsel(
             varselId,
             generasjonId,
@@ -317,7 +317,7 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         val definisjonRef = opprettVarseldefinisjon(definisjonId = definisjonId)
         val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
         val varselId = UUID.randomUUID()
-        val varselOpprettet = LocalDateTime.now()
+        val varselOpprettet = LocalDateTime.of(2020, 1, 1, 12, 0,0)
         nyttVarsel(
             id = varselId,
             vedtaksperiodeId = vedtaksperiodeId,
@@ -325,7 +325,7 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
             generasjonRef = generasjonRef,
             definisjonRef = definisjonRef
         )
-        val varselEndret = LocalDateTime.now()
+        val varselEndret = LocalDateTime.of(2020, 1, 1, 12, 0,0)
         val oppdatertVarsel = apiVarselDao.settStatusVurdert(generasjonId, definisjonId, "EN_KODE", "EN_IDENT", varselEndret)
         val forsøktOppdatertVarsel = apiVarselDao.settStatusVurdert(generasjonId, definisjonId, "EN_KODE", "EN_IDENT")
 
@@ -358,7 +358,7 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         val definisjonRef = opprettVarseldefinisjon(definisjonId = definisjonId)
         val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = PERIODE.id, utbetalingId = utbetalingId)
         val varselId = UUID.randomUUID()
-        val varselOpprettet = LocalDateTime.now()
+        val varselOpprettet = LocalDateTime.of(2020, 1, 1, 12, 0,0)
         nyttVarsel(
             id = varselId,
             vedtaksperiodeId = PERIODE.id,
@@ -366,7 +366,7 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
             generasjonRef = generasjonRef,
             definisjonRef = definisjonRef
         )
-        val varselEndret = LocalDateTime.now()
+        val varselEndret = LocalDateTime.of(2020, 1, 1, 12, 0,0)
         val oppdatertVarsel = apiVarselDao.settStatusVurdert(generasjonId, definisjonId, "EN_KODE", "EN_IDENT", varselEndret)
         apiVarselDao.godkjennVarslerFor(listOf(PERIODE.id))
         val forsøktOppdatertVarsel = apiVarselDao.settStatusVurdert(generasjonId, definisjonId, "EN_KODE", "EN_IDENT")
@@ -400,8 +400,8 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         val definisjonRef = opprettVarseldefinisjon(definisjonId = definisjonId)
         val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
         val varselId = UUID.randomUUID()
-        val varselOpprettet = LocalDateTime.now()
-        val varselGodkjent = LocalDateTime.now()
+        val varselOpprettet = LocalDateTime.of(2020, 1, 1, 12, 0,0)
+        val varselGodkjent = LocalDateTime.of(2020, 1, 1, 12, 0,0)
         nyttVarsel(
             id = varselId,
             vedtaksperiodeId = vedtaksperiodeId,
@@ -411,7 +411,7 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
             status = "GODKJENT",
             endretTidspunkt = varselGodkjent,
         )
-        val forsøktOppdatertVarsel = apiVarselDao.settStatusAktiv(generasjonId, "EN_KODE", "EN_IDENT", LocalDateTime.now())
+        val forsøktOppdatertVarsel = apiVarselDao.settStatusAktiv(generasjonId, "EN_KODE", "EN_IDENT", LocalDateTime.of(2020, 1, 1, 12, 0,0))
 
         assertEquals(
             Varsel(
@@ -441,7 +441,7 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         val definisjonRef = opprettVarseldefinisjon(definisjonId = definisjonId)
         val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
         val varselId = UUID.randomUUID()
-        val varselOpprettet = LocalDateTime.now()
+        val varselOpprettet = LocalDateTime.of(2020, 1, 1, 12, 0,0)
         nyttVarsel(
             id = varselId,
             vedtaksperiodeId = vedtaksperiodeId,
