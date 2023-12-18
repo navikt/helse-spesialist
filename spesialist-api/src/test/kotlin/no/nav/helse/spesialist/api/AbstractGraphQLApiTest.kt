@@ -14,9 +14,16 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.server.request.ApplicationRequest
 import io.ktor.server.routing.route
+import io.mockk.every
 import io.mockk.mockk
+import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.spesialist.api.avviksvurdering.Avviksvurdering
+import no.nav.helse.spesialist.api.avviksvurdering.Beregningsgrunnlag
+import no.nav.helse.spesialist.api.avviksvurdering.InnrapportertInntekt
+import no.nav.helse.spesialist.api.avviksvurdering.Inntekt
+import no.nav.helse.spesialist.api.avviksvurdering.OmregnetÅrsinntekt
+import no.nav.helse.spesialist.api.avviksvurdering.Sammenligningsgrunnlag
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMediator
 import no.nav.helse.spesialist.api.endepunkter.ApiTesting
 import no.nav.helse.spesialist.api.graphql.ContextFactory
@@ -24,6 +31,7 @@ import no.nav.helse.spesialist.api.graphql.RequestParser
 import no.nav.helse.spesialist.api.graphql.SchemaBuilder
 import no.nav.helse.spesialist.api.graphql.queryHandler
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiver
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.TestInstance
@@ -37,6 +45,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     private val beslutterGruppeId: UUID = UUID.randomUUID()
     private val saksbehandlereMedTilgangTilStikkprøver: UUID = UUID.randomUUID()
     private val saksbehandlereMedTilgangTilSpesialsaker: UUID = UUID.randomUUID()
+    private val avviksvurderingId: UUID = UUID.randomUUID()
 
 
     private val reservasjonClient = mockk<ReservasjonClient>(relaxed = true)
@@ -45,11 +54,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     protected open val godkjenninghåndterer = mockk<Godkjenninghåndterer>(relaxed = true)
     protected open val personhåndterer = mockk<Personhåndterer>(relaxed = true)
     protected open val dokumenthåndterer = mockk<Dokumenthåndterer>(relaxed = true)
-    private val avviksvurderinghenter = object : Avviksvurderinghenter {
-        override fun hentAvviksvurdering(vilkårsgrunnlagId: UUID): Avviksvurdering? {
-            TODO("Not yet implemented")
-        }
-    }
+    private val avviksvurderinghenter = mockk<Avviksvurderinghenter>(relaxed = true)
 
     private lateinit var graphQLServer: GraphQLServer<ApplicationRequest>
 
@@ -58,6 +63,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
             queryHandler(graphQLServer)
         }
     }
+
     private fun setupGraphQLServer() {
         val schema = SchemaBuilder(
             personApiDao = personApiDao,
@@ -107,13 +113,52 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
         setupGraphQLServer()
     }
 
+    override fun mockSnapshot(fødselsnummer: String, avviksprosent: Double, arbeidsgivere: List<GraphQLArbeidsgiver>) {
+        super.mockSnapshot(fødselsnummer, avviksprosent, arbeidsgivere)
+        every { avviksvurderinghenter.hentAvviksvurdering(any()) } returns Avviksvurdering(
+            unikId = avviksvurderingId,
+            vilkårsgrunnlagId = UUID.randomUUID(),
+            fødselsnummer = fødselsnummer,
+            skjæringstidspunkt = 1.januar,
+            opprettet = 1.januar.atStartOfDay(),
+            avviksprosent = avviksprosent,
+            sammenligningsgrunnlag = Sammenligningsgrunnlag(
+                unikId = UUID.randomUUID(),
+                totalbeløp = 10000.0,
+                innrapporterteInntekter = listOf(
+                    InnrapportertInntekt(
+                        arbeidsgiverreferanse = ORGANISASJONSNUMMER,
+                        inntekter = listOf(
+                            Inntekt(
+                                årMåned = YearMonth.from(1.januar),
+                                beløp = 10000.0
+                            )
+                        )
+                    )
+                )
+            ),
+            beregningsgrunnlag = Beregningsgrunnlag(
+                totalbeløp = 10000.0,
+                omregnedeÅrsinntekter = listOf(
+                    OmregnetÅrsinntekt(arbeidsgiverreferanse = ORGANISASJONSNUMMER, beløp = 10000.0)
+                )
+            )
+        )
+    }
+
     companion object {
         internal val jwtStub = JwtStub()
         private val requiredGroup: UUID = UUID.randomUUID()
         private const val clientId = "client_id"
         private const val issuer = "https://jwt-provider-domain"
 
-        fun HttpRequestBuilder.authentication(navn: String, epost: String, ident: String, oid: String, group: String? = null) {
+        fun HttpRequestBuilder.authentication(
+            navn: String,
+            epost: String,
+            ident: String,
+            oid: String,
+            group: String? = null,
+        ) {
             header(
                 "Authorization",
                 "Bearer ${

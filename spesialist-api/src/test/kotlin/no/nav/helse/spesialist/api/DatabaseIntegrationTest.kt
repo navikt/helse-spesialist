@@ -676,7 +676,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         )
     }
 
-    protected fun mockSnapshot(
+    open fun mockSnapshot(
         fødselsnummer: String = FØDSELSNUMMER,
         avviksprosent: Double = 0.0,
         arbeidsgivere: List<GraphQLArbeidsgiver> = emptyList(),
