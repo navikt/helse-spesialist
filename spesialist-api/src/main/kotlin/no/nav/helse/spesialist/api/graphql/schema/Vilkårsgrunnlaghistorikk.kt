@@ -84,7 +84,6 @@ internal fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Av
                     avviksprosent = avviksprosent
                 )
             } else {
-                val avviksvurdering = avviksvurderinghenter.hentAvviksvurdering(UUID.fromString(id))
                 VilkarsgrunnlagSpleis(
                     id = id,
                     vilkarsgrunnlagtype = vilkarsgrunnlagtype.tilVilkarsgrunnlagtype(),
@@ -103,10 +102,11 @@ internal fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Av
                     oppfyllerKravOmOpptjening = oppfyllerKravOmOpptjening,
                     opptjeningFra = opptjeningFra,
                     avviksprosent = avviksprosent
-                ).apply {
+                ).let { vilkarsgrunnlagSpleis ->
+                    val avviksvurdering = avviksvurderinghenter.hentAvviksvurdering(UUID.fromString(id))
                     if (avviksvurdering != null) {
-                        this.copy(
-                            inntekter = inntekter.map { arbeidsgiverinntekt ->
+                        vilkarsgrunnlagSpleis.copy(
+                            inntekter = vilkarsgrunnlagSpleis.inntekter.map { arbeidsgiverinntekt ->
                                 arbeidsgiverinntekt.copy(
                                     sammenligningsgrunnlag = arbeidsgiverinntekt.sammenligningsgrunnlag?.copy(
                                         belop = avviksvurdering.sammenligningsgrunnlag.totalbeløp,
@@ -114,7 +114,7 @@ internal fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Av
                                             it.arbeidsgiverreferanse == arbeidsgiverinntekt.arbeidsgiver
                                         }.inntekter.map { inntekt ->
                                             InntektFraAOrdningen(
-                                                maned = inntekt.årMåned as YearMonthString,
+                                                maned = inntekt.årMåned.toString(),
                                                 sum = inntekt.beløp
                                             )
                                         }
@@ -125,6 +125,8 @@ internal fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Av
                             sammenligningsgrunnlag = avviksvurdering.sammenligningsgrunnlag.totalbeløp,
                             avviksprosent = avviksvurdering.avviksprosent
                         )
+                    } else {
+                        vilkarsgrunnlagSpleis
                     }
                 }
             }
