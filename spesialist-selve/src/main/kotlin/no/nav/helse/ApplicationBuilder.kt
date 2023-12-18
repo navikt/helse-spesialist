@@ -36,6 +36,7 @@ import java.lang.management.ManagementFactory
 import java.net.ProxySelector
 import java.net.URI
 import java.util.UUID
+import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.TildelingDao
@@ -219,6 +220,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val dokumentDao = DokumentDao(dataSource)
     private val generasjonDao = GenerasjonDao(dataSource)
     private val påVentApiDao = PåVentApiDao(dataSource)
+    private val avviksvurderingDao = AvviksvurderingDao(dataSource)
 
     private val behandlingsstatistikkMediator = BehandlingsstatistikkMediator(behandlingsstatistikkDao)
 
@@ -397,7 +399,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             dataSource = dataSource,
             rapidsConnection = rapidsConnection,
             godkjenningMediator = godkjenningMediator,
-            hendelsefabrikk = hendelsefabrikk
+            hendelsefabrikk = hendelsefabrikk,
+            avviksvurderingDao = avviksvurderingDao,
         )
         saksbehandlerMediator = SaksbehandlerMediator(dataSource, versjonAvKode(env), rapidsConnection, oppgaveMediator, tilgangsgrupper)
         dokumentMediator = DokumentMediator(dokumentDao, rapidsConnection)

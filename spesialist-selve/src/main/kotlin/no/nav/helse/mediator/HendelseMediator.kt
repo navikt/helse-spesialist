@@ -7,6 +7,7 @@ import java.util.UUID
 import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.MetrikkRiver
+import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.mediator.meldinger.AvviksvurderingRiver
 import no.nav.helse.mediator.meldinger.EndretSkjermetinfoRiver
 import no.nav.helse.mediator.meldinger.GodkjenningsbehovRiver
@@ -91,6 +92,7 @@ internal class HendelseMediator(
     private val hendelsefabrikk: Hendelsefabrikk,
     private val egenAnsattDao: EgenAnsattDao = EgenAnsattDao(dataSource),
     private val dokumentDao: DokumentDao = DokumentDao(dataSource),
+    private val avviksvurderingDao: AvviksvurderingDao,
     private val varselRepository: ActualVarselRepository = ActualVarselRepository(dataSource),
     private val metrikkDao: MetrikkDao = MetrikkDao(dataSource),
 ) : Personhåndterer {
@@ -142,7 +144,7 @@ internal class HendelseMediator(
             SykefraværstilfellerRiver(it, this)
             MetrikkRiver(it)
             PåminnetGodkjenningsbehovRiver(it, this)
-            UtkastTilVedtakRiver(it, this)
+            UtkastTilVedtakRiver(it, this, avviksvurderingDao)
         }
     }
 

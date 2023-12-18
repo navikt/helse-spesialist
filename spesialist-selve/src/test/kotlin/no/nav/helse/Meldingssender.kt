@@ -655,7 +655,8 @@ internal class Meldingssender(private val testRapid: TestRapid) {
         fom: LocalDate,
         tom: LocalDate,
         skjæringstidspunkt: LocalDate,
-        fastsattType: String
+        fastsattType: String,
+        inkluderSpleisverdier: Boolean = true,
     ): UUID = newUUID.also { id ->
         testRapid.sendTestMessage(
             Testmeldingfabrikk.lagUtkastTilVedtak(
@@ -669,6 +670,28 @@ internal class Meldingssender(private val testRapid: TestRapid) {
                 skjæringstidspunkt = skjæringstidspunkt,
                 fastsattType = fastsattType,
                 id = id,
+                inkluderSpleisverdier = inkluderSpleisverdier,
+            )
+        )
+    }
+
+    fun sendAvviksvurdering(
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        avviksprosent: Double = 25.0,
+        sammenligningsgrunnlag: Double = 500000.0,
+        skjæringstidspunkt: LocalDate = 1.januar,
+    ): UUID = newUUID.also { id ->
+        testRapid.sendTestMessage(
+            Testmeldingfabrikk.lagAvviksvurdering(
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                organisasjonsnummer = organisasjonsnummer,
+                id = id,
+                avviksprosent = avviksprosent,
+                sammenligningsgrunnlag = sammenligningsgrunnlag,
+                skjæringstidspunkt = skjæringstidspunkt,
             )
         )
     }

@@ -1,5 +1,6 @@
 package no.nav.helse.mediator.meldinger
 
+import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.meldinger.hendelser.UtkastTilVedtakMessage
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -12,7 +13,8 @@ import org.slf4j.LoggerFactory
 
 internal class UtkastTilVedtakRiver(
     rapidsConnection: RapidsConnection,
-    private val mediator: HendelseMediator
+    private val mediator: HendelseMediator,
+    private val avviksvurderingDao: AvviksvurderingDao,
 ) : River.PacketListener {
 
     init {
@@ -47,7 +49,7 @@ internal class UtkastTilVedtakRiver(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         sikkerlogg.info("Mottok melding om utkast_til_vedtak:\n${packet.toJson()}")
-        mediator.håndter(UtkastTilVedtakMessage(packet))
+        mediator.håndter(UtkastTilVedtakMessage(packet, avviksvurderingDao))
     }
 
     private companion object {

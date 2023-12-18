@@ -953,6 +953,58 @@ internal object Testmeldingfabrikk {
         )
     )
 
+    fun lagAvviksvurdering(
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        id: UUID = UUID.randomUUID(),
+        avviksprosent: Double = 25.0,
+        sammenligningsgrunnlag: Double = 500000.0,
+        skjæringstidspunkt: LocalDate = 1.januar,
+    ): String {
+        return nyHendelse(
+            id, "avviksvurdering", mapOf(
+                "@event_name" to "avviksvurdering",
+                "fødselsnummer" to fødselsnummer,
+                "aktørId" to aktørId,
+                "skjæringstidspunkt" to skjæringstidspunkt,
+                "avviksvurdering" to mapOf(
+                    "id" to "cc3af2c3-fa9e-4d84-a57e-a7972226cdae",
+                    "opprettet" to "2018-01-01T00:00:00.000",
+                    "vilkårsgrunnlagId" to "bc3af2c3-fa9e-4d84-a57e-a7973336cdaf",
+                    "beregningsgrunnlag" to mapOf(
+                        "totalbeløp" to 550000.0,
+                        "omregnedeÅrsinntekter" to listOf(
+                            mapOf(
+                                "arbeidsgiverreferanse" to organisasjonsnummer,
+                                "beløp" to 250000.0
+                            ),
+                        )
+                    ),
+                    "sammenligningsgrunnlag" to mapOf(
+                        "id" to "887b2e4c-5222-45f1-9831-1846a028193b",
+                        "totalbeløp" to sammenligningsgrunnlag,
+                        "innrapporterteInntekter" to listOf(
+                            mapOf(
+                                "arbeidsgiverreferanse" to organisasjonsnummer,
+                                "inntekter" to listOf(
+                                    mapOf(
+                                        "årMåned" to "2018-01",
+                                        "beløp" to 10000.0
+                                    ), mapOf(
+                                        "årMåned" to "2018-02",
+                                        "beløp" to 10000.0
+                                    )
+                                )
+                            )
+                        )
+                    ),
+                    "avviksprosent" to avviksprosent,
+                )
+            )
+        )
+    }
+
     fun lagVedtakFattet(
         aktørId: String,
         fødselsnummer: String,
@@ -975,9 +1027,11 @@ internal object Testmeldingfabrikk {
         vedtaksperiodeId: UUID,
         utbetalingId: UUID?,
         fom: LocalDate,
-        tom: LocalDate, skjæringstidspunkt: LocalDate,
+        tom: LocalDate,
+        skjæringstidspunkt: LocalDate,
         fastsattType: String,
         id: UUID,
+        inkluderSpleisverdier: Boolean = true,
     ): String = nyHendelse(
         id, "utkast_til_vedtak", mutableMapOf(
             "aktørId" to aktørId,
@@ -999,8 +1053,8 @@ internal object Testmeldingfabrikk {
             compute("utbetalingId") { _, _ -> utbetalingId }
             if (utbetalingId != null) {
                 val sykepengegrunnlagsfakta = when (fastsattType) {
-                    "EtterSkjønn" -> fastsattEtterSkjønn(organisasjonsnummer)
-                    "EtterHovedregel" -> fastsattEtterHovedregel(organisasjonsnummer)
+                    "EtterSkjønn" -> fastsattEtterSkjønn(organisasjonsnummer, inkluderSpleisverdier)
+                    "EtterHovedregel" -> fastsattEtterHovedregel(organisasjonsnummer, inkluderSpleisverdier)
                     "IInfotrygd" -> fastsattIInfotrygd()
                     else -> throw IllegalArgumentException("$fastsattType er ikke en gyldig fastsatt-type")
                 }
@@ -1009,13 +1063,14 @@ internal object Testmeldingfabrikk {
         }
     )
 
-    private fun fastsattEtterSkjønn(organisasjonsnummer: String): Map<String, Any> {
-        return mapOf(
+    private fun fastsattEtterSkjønn(
+        organisasjonsnummer: String,
+        inkluderSpleisverdier: Boolean = true,
+    ): Map<String, Any> {
+        return mutableMapOf(
             "fastsatt" to "EtterSkjønn",
             "omregnetÅrsinntekt" to 500000.0,
-            "innrapportertÅrsinntekt" to 600000.0,
             "skjønnsfastsatt" to 600000.0,
-            "avviksprosent" to 16.67,
             "6G" to 6 * 118620.0,
             "tags" to emptyList<String>(),
             "arbeidsgivere" to listOf(
@@ -1025,15 +1080,22 @@ internal object Testmeldingfabrikk {
                     "skjønnsfastsatt" to 600000.00
                 )
             )
-        )
+        ).apply {
+            if (inkluderSpleisverdier) {
+                this["innrapportertÅrsinntekt"] = 600000.0
+                this["avviksprosent"] = 16.67
+            }
+        }
+
     }
 
-    private fun fastsattEtterHovedregel(organisasjonsnummer: String): Map<String, Any> {
-        return mapOf(
+    private fun fastsattEtterHovedregel(
+        organisasjonsnummer: String,
+        inkluderSpleisverdier: Boolean = true,
+    ): Map<String, Any> {
+        return mutableMapOf(
             "fastsatt" to "EtterHovedregel",
             "omregnetÅrsinntekt" to 600000.0,
-            "innrapportertÅrsinntekt" to 600000.0,
-            "avviksprosent" to 0.0,
             "6G" to 6 * 118620.0,
             "tags" to emptyList<String>(),
             "arbeidsgivere" to listOf(
@@ -1042,7 +1104,12 @@ internal object Testmeldingfabrikk {
                     "omregnetÅrsinntekt" to 600000.00,
                 )
             )
-        )
+        ).apply {
+            if (inkluderSpleisverdier) {
+                this["innrapportertÅrsinntekt"] = 600000.0
+                this["avviksprosent"] = 0
+            }
+        }
     }
 
     private fun fastsattIInfotrygd(): Map<String, Any> {

@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import java.util.UUID
+import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.mediator.asUUID
+import no.nav.helse.modell.avviksvurdering.Avviksvurdering.Companion.finnRiktigAvviksvurdering
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.vedtaksperiode.vedtak.Faktatype
 import no.nav.helse.modell.vedtaksperiode.vedtak.Sykepengegrunnlagsfakta
@@ -14,7 +16,11 @@ import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.isMissingOrNull
 
-internal class UtkastTilVedtakMessage(packet: JsonMessage) {
+internal class UtkastTilVedtakMessage(packet: JsonMessage, private val avviksvurderingDao: AvviksvurderingDao) {
+    // Ikke kall denne hvis avviksvurderingen ikke ligger i basen
+    private val avviksvurdering by lazy {
+        avviksvurderingDao.finnAvviksvurderinger(fødselsnummer).finnRiktigAvviksvurdering(skjæringstidspunkt)
+    }
 
     private val fødselsnummer = packet["fødselsnummer"].asText()
     private val aktørId = packet["aktørId"].asText()
@@ -72,11 +78,24 @@ internal class UtkastTilVedtakMessage(packet: JsonMessage) {
     }
 
     private fun sykepengegrunnlagsfakta(packet: JsonMessage, faktatype: Faktatype): Sykepengegrunnlagsfakta {
+        if (faktatype == Faktatype.I_INFOTRYGD) return Sykepengegrunnlagsfakta.Infotrygd(
+            omregnetÅrsinntekt = packet["sykepengegrunnlagsfakta.omregnetÅrsinntekt"].asDouble(),
+        )
+
+        val innrapportertÅrsinntekt = packet["sykepengegrunnlagsfakta.innrapportertÅrsinntekt"].let { spleisverdi ->
+            if (spleisverdi.isMissingOrNull()) avviksvurdering.toDto().sammenligningsgrunnlag.totalbeløp
+            else spleisverdi.asDouble()
+        }
+        val avviksprosent = packet["sykepengegrunnlagsfakta.avviksprosent"].let { spleisverdi ->
+            if (spleisverdi.isMissingOrNull()) avviksvurdering.toDto().avviksprosent
+            else spleisverdi.asDouble()
+        }
+
         return when (faktatype) {
             Faktatype.ETTER_SKJØNN -> Sykepengegrunnlagsfakta.Spleis.EtterSkjønn(
                 omregnetÅrsinntekt = packet["sykepengegrunnlagsfakta.omregnetÅrsinntekt"].asDouble(),
-                innrapportertÅrsinntekt = packet["sykepengegrunnlagsfakta.innrapportertÅrsinntekt"].asDouble(),
-                avviksprosent = packet["sykepengegrunnlagsfakta.avviksprosent"].asDouble(),
+                innrapportertÅrsinntekt = innrapportertÅrsinntekt,
+                avviksprosent = avviksprosent,
                 seksG = packet["sykepengegrunnlagsfakta.6G"].asDouble(),
                 skjønnsfastsatt = packet["sykepengegrunnlagsfakta.skjønnsfastsatt"].asDouble(),
                 tags = packet["sykepengegrunnlagsfakta.tags"].map { it.asText() },
@@ -91,8 +110,8 @@ internal class UtkastTilVedtakMessage(packet: JsonMessage) {
 
             Faktatype.ETTER_HOVEDREGEL -> Sykepengegrunnlagsfakta.Spleis.EtterHovedregel(
                 omregnetÅrsinntekt = packet["sykepengegrunnlagsfakta.omregnetÅrsinntekt"].asDouble(),
-                innrapportertÅrsinntekt = packet["sykepengegrunnlagsfakta.innrapportertÅrsinntekt"].asDouble(),
-                avviksprosent = packet["sykepengegrunnlagsfakta.avviksprosent"].asDouble(),
+                innrapportertÅrsinntekt = innrapportertÅrsinntekt,
+                avviksprosent = avviksprosent,
                 seksG = packet["sykepengegrunnlagsfakta.6G"].asDouble(),
                 tags = packet["sykepengegrunnlagsfakta.tags"].map { it.asText() },
                 arbeidsgivere = packet["sykepengegrunnlagsfakta.arbeidsgivere"].map {
@@ -103,9 +122,7 @@ internal class UtkastTilVedtakMessage(packet: JsonMessage) {
                 },
             )
 
-            Faktatype.I_INFOTRYGD -> Sykepengegrunnlagsfakta.Infotrygd(
-                omregnetÅrsinntekt = packet["sykepengegrunnlagsfakta.omregnetÅrsinntekt"].asDouble(),
-            )
+            else -> error("Her vet vi ikke hva som har skjedd. Feil i kompilatoren?")
         }
     }
 }

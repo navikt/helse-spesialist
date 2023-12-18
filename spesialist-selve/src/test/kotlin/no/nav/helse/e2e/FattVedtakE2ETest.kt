@@ -2,6 +2,7 @@ package no.nav.helse.e2e
 
 import AbstractE2ETest
 import no.nav.helse.TestRapidHelpers.meldinger
+import no.nav.helse.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
@@ -59,5 +60,20 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
         assertEquals("vedtak_fattet", sisteHendelse["@event_name"].asText())
         assertEquals(0, sisteHendelse["begrunnelser"].size())
         assertEquals("IInfotrygd", sisteHendelse["sykepengegrunnlagsfakta"]["fastsatt"].asText())
+    }
+
+    @Test
+    fun `Finn sykepengegrunnlagdata i databasen`() {
+        val sammenligningsgrunnlag = 420_000.0
+        val avviksprosent = 42.0
+        håndterAvviksvurdering(avviksprosent = avviksprosent, sammenligningsgrunnlag = sammenligningsgrunnlag, skjæringstidspunkt = 1.januar)
+        fremTilSaksbehandleroppgave()
+        håndterSaksbehandlerløsning()
+        håndterUtkastTilVedtak(fastsattType = "EtterHovedregel", inkluderSpleisverdier = false)
+        val sisteHendelse = inspektør.meldinger().last()
+        assertEquals("vedtak_fattet", sisteHendelse["@event_name"].asText())
+        assertEquals("EtterHovedregel", sisteHendelse["sykepengegrunnlagsfakta"]["fastsatt"].asText())
+        assertEquals(avviksprosent, sisteHendelse["sykepengegrunnlagsfakta"]["avviksprosent"].asDouble())
+        assertEquals(sammenligningsgrunnlag, sisteHendelse["sykepengegrunnlagsfakta"]["innrapportertÅrsinntekt"].asDouble())
     }
 }

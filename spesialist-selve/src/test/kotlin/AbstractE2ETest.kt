@@ -1014,7 +1014,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         fastsattType: String = "EtterHovedregel",
         fom: LocalDate = 1.januar,
         tom: LocalDate = 31.januar,
-        skjæringstidspunkt: LocalDate = fom
+        skjæringstidspunkt: LocalDate = fom,
+        inkluderSpleisverdier: Boolean = true,
     ) {
         val utbetalingId = if (this::utbetalingId.isInitialized) this.utbetalingId else null
         sisteMeldingId = meldingssender.sendUtkastTilVedtak(
@@ -1026,7 +1027,26 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             fom = fom,
             tom = tom,
             skjæringstidspunkt = skjæringstidspunkt,
-            fastsattType = fastsattType
+            fastsattType = fastsattType,
+            inkluderSpleisverdier = inkluderSpleisverdier,
+        )
+    }
+
+    protected fun håndterAvviksvurdering(
+        aktørId: String = AKTØR,
+        fødselsnummer: String = FØDSELSNUMMER,
+        organisasjonsnummer: String = ORGNR,
+        avviksprosent: Double = 25.0,
+        sammenligningsgrunnlag: Double = 500000.0,
+        skjæringstidspunkt: LocalDate = 1.januar,
+    ) {
+        sisteMeldingId = meldingssender.sendAvviksvurdering(
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+            avviksprosent = avviksprosent,
+            sammenligningsgrunnlag = sammenligningsgrunnlag,
+            skjæringstidspunkt = skjæringstidspunkt,
         )
     }
 

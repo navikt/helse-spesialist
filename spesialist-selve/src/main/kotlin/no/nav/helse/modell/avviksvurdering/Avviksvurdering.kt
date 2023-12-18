@@ -16,6 +16,12 @@ internal class Avviksvurdering(
 
     ) {
 
+    companion object {
+        internal fun List<Avviksvurdering>.finnRiktigAvviksvurdering(skjæringstidspunkt: LocalDate) =
+            filter { it.skjæringstidspunkt == skjæringstidspunkt }.maxByOrNull { it.opprettet }
+                ?: error("Forventet å finne avviksvurdering for $skjæringstidspunkt")
+    }
+
     internal fun toDto() = AvviksvurderingDto(
         unikId = unikId,
         vilkårsgrunnlagId = vilkårsgrunnlagId,

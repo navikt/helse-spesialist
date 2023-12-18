@@ -1,6 +1,7 @@
 import java.util.UUID
 import javax.sql.DataSource
 import no.nav.helse.Tilgangsgrupper
+import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.TildelingDao
@@ -48,6 +49,7 @@ internal class TestMediator(
     private val totrinnsvurderingDao = TotrinnsvurderingDao(dataSource)
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
     private val tildelingDao = TildelingDao(dataSource)
+    private val avviksvurderingDao = AvviksvurderingDao(dataSource)
 
     private val godkjenningMediator = GodkjenningMediator(
         vedtakDao,
@@ -109,7 +111,8 @@ internal class TestMediator(
             dataSource = dataSource,
             rapidsConnection = testRapid,
             godkjenningMediator = godkjenningMediator,
-            hendelsefabrikk = hendelsefabrikk
+            hendelsefabrikk = hendelsefabrikk,
+            avviksvurderingDao = avviksvurderingDao,
         )
     }
 

@@ -14,7 +14,7 @@ internal class UtkastTilVedtakRiverTest {
     private val testRapid = TestRapid()
 
     init {
-        UtkastTilVedtakRiver(testRapid, mediator)
+        UtkastTilVedtakRiver(testRapid, mediator, mockk())
     }
 
     @Test

@@ -6,6 +6,7 @@ import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
+import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.HendelseDao
@@ -39,6 +40,7 @@ internal class HendelseMediatorTest : AbstractDatabaseTest() {
     private val utbetalingDao = UtbetalingDao(dataSource)
     private val snapshotApiDao = SnapshotApiDao(dataSource)
     private val snapshotMediator = SnapshotMediator(snapshotApiDao, snapshotClient)
+    private val avviksvurderingDao = mockk<AvviksvurderingDao>()
 
     private val godkjenningMediator =
         GodkjenningMediator(vedtakDao, opptegnelseDao, oppgaveDao, utbetalingDao, hendelseDao)
@@ -58,7 +60,8 @@ internal class HendelseMediatorTest : AbstractDatabaseTest() {
         dataSource = dataSource,
         rapidsConnection = testRapid,
         godkjenningMediator = godkjenningMediator,
-        hendelsefabrikk = hendelsefabrikk
+        hendelsefabrikk = hendelsefabrikk,
+        avviksvurderingDao = avviksvurderingDao,
     )
 
     @BeforeEach
