@@ -5,14 +5,11 @@ import graphql.GraphQLError
 import graphql.schema.DataFetchingEnvironment
 import io.mockk.every
 import io.mockk.mockk
-import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.Testdata.SNAPSHOT
-import no.nav.helse.Testdata.UTBETALING_ID
-import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.januar
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
@@ -93,7 +90,7 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
         assertKanHentePerson()
     }
 
-    private fun sendMeldingerOppTilEgenAnsatt(): UUID {
+    private fun sendMeldingerOppTilEgenAnsatt() {
         håndterSøknad(AKTØR, FØDSELSNUMMER, ORGNR)
         val skjæringstidspunkt = 1.januar
         val fom = 1.januar
@@ -102,22 +99,12 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
         håndterVedtaksperiodeNyUtbetaling()
         håndterUtbetalingEndret()
         håndterAktivitetsloggNyAktivitet(varselkoder = listOf("RV_IM_1"))
-        val godkjenningsmeldingId = sendGodkjenningsbehov(
-            AKTØR,
-            FØDSELSNUMMER,
-            ORGNR,
-            VEDTAKSPERIODE_ID,
-            UTBETALING_ID,
-            periodeFom = fom,
-            periodeTom = tom,
-            skjæringstidspunkt = skjæringstidspunkt
-        )
+        håndterGodkjenningsbehov()
         håndterPersoninfoløsning()
         håndterEnhetløsning()
         håndterInfotrygdutbetalingerløsning()
         håndterArbeidsgiverinformasjonløsning()
         håndterArbeidsforholdløsning()
-        return godkjenningsmeldingId
     }
 
     private fun sendFramTilOppgave() {

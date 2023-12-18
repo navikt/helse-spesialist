@@ -67,6 +67,7 @@ internal class Meldingssender(private val testRapid: TestRapid) {
             )
         )
     }
+
     fun sendVedtaksperiodeOpprettet(
         aktørId: String,
         fødselsnummer: String,
@@ -100,7 +101,7 @@ internal class Meldingssender(private val testRapid: TestRapid) {
         saksbehandlerOid: UUID,
         saksbehandlerEpost: String,
         saksbehandlerIdent: String,
-        saksbehandlerNavn: String
+        saksbehandlerNavn: String,
     ): UUID = newUUID.also { id ->
         testRapid.sendTestMessage(
             Testmeldingfabrikk.lagSaksbehandlerSkjønnsfastsettingSykepengegrunnlag(
@@ -224,7 +225,7 @@ internal class Meldingssender(private val testRapid: TestRapid) {
         gjeldendeStatus: Utbetalingsstatus = IKKE_UTBETALT,
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
-        opprettet: LocalDateTime
+        opprettet: LocalDateTime,
     ): UUID = newUUID.also { id ->
         testRapid.sendTestMessage(
             Testmeldingfabrikk.lagUtbetalingEndret(
@@ -277,6 +278,8 @@ internal class Meldingssender(private val testRapid: TestRapid) {
         inntektskilde: Inntektskilde = EN_ARBEIDSGIVER,
         orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList(),
         utbetalingtype: Utbetalingtype = UTBETALING,
+        avviksvurderingId: UUID,
+        vilkårsgrunnlagId: UUID
     ): UUID = newUUID.also { id ->
         testRapid.sendTestMessage(
             Testmeldingfabrikk.lagGodkjenningsbehov(
@@ -295,6 +298,8 @@ internal class Meldingssender(private val testRapid: TestRapid) {
                 inntektskilde = inntektskilde,
                 orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
                 id = id,
+                avviksvurderingId = avviksvurderingId,
+                vilkårsgrunnlagId = vilkårsgrunnlagId
             )
         )
     }
@@ -326,7 +331,7 @@ internal class Meldingssender(private val testRapid: TestRapid) {
         fødselsnummer: String,
         organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
-        enhet: String
+        enhet: String,
     ): UUID = newUUID.also { id ->
         val behov = testRapid.inspektør.siste("behov")
         assertEquals("HentEnhet", behov["@behov"].map { it.asText() }.single())
@@ -376,7 +381,7 @@ internal class Meldingssender(private val testRapid: TestRapid) {
         fødselsnummer: String,
         organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
-        arbeidsgiverinformasjonJson: List<ArbeidsgiverinformasjonJson>? = null
+        arbeidsgiverinformasjonJson: List<ArbeidsgiverinformasjonJson>? = null,
     ): UUID =
         newUUID.also { id ->
             val behov = testRapid.inspektør.siste("behov")
@@ -384,13 +389,14 @@ internal class Meldingssender(private val testRapid: TestRapid) {
             val contextId = UUID.fromString(behov["contextId"].asText())
             val hendelseId = UUID.fromString(behov["hendelseId"].asText())
 
-            val arbeidsgivere = arbeidsgiverinformasjonJson ?: behov["Arbeidsgiverinformasjon"]["organisasjonsnummer"].map {
-                ArbeidsgiverinformasjonJson(
-                    it.asText(),
-                    "Navn for ${it.asText()}",
-                    listOf("Bransje for ${it.asText()}")
-                )
-            }
+            val arbeidsgivere =
+                arbeidsgiverinformasjonJson ?: behov["Arbeidsgiverinformasjon"]["organisasjonsnummer"].map {
+                    ArbeidsgiverinformasjonJson(
+                        it.asText(),
+                        "Navn for ${it.asText()}",
+                        listOf("Bransje for ${it.asText()}")
+                    )
+                }
 
             testRapid.sendTestMessage(
                 Testmeldingfabrikk.lagArbeidsgiverinformasjonløsning(
@@ -414,7 +420,10 @@ internal class Meldingssender(private val testRapid: TestRapid) {
     ): UUID =
         newUUID.also { id ->
             val behov = testRapid.inspektør.siste("behov")
-            assertEquals(setOf("Arbeidsgiverinformasjon", "HentPersoninfoV2"), behov["@behov"].map { it.asText() }.toSet())
+            assertEquals(
+                setOf("Arbeidsgiverinformasjon", "HentPersoninfoV2"),
+                behov["@behov"].map { it.asText() }.toSet()
+            )
             val contextId = UUID.fromString(behov["contextId"].asText())
             val hendelseId = UUID.fromString(behov["hendelseId"].asText())
 
@@ -612,7 +621,7 @@ internal class Meldingssender(private val testRapid: TestRapid) {
         godkjenningsbehovId: UUID,
         godkjent: Boolean,
         kommentar: String? = null,
-        begrunnelser: List<String> = emptyList()
+        begrunnelser: List<String> = emptyList(),
     ): UUID {
         return newUUID.also { id ->
             testRapid.sendTestMessage(
@@ -698,7 +707,7 @@ internal class Meldingssender(private val testRapid: TestRapid) {
 
     fun sendAdressebeskyttelseEndret(
         aktørId: String,
-        fødselsnummer: String
+        fødselsnummer: String,
     ): UUID =
         newUUID.also { id ->
             testRapid.sendTestMessage(
@@ -708,7 +717,7 @@ internal class Meldingssender(private val testRapid: TestRapid) {
 
     fun sendOppdaterPersonsnapshot(
         aktørId: String,
-        fødselsnummer: String
+        fødselsnummer: String,
     ): UUID =
         newUUID.also { id ->
             testRapid.sendTestMessage(
@@ -773,14 +782,16 @@ internal class Meldingssender(private val testRapid: TestRapid) {
 
     fun sendOverstyringIgangsatt(
         fødselsnummer: String,
-        berørtePerioder: List<Map<String, String>> = listOf(mapOf(
-            "vedtaksperiodeId" to "${Testdata.VEDTAKSPERIODE_ID}",
-            "skjæringstidspunkt" to "2022-01-01",
-            "periodeFom" to "2022-01-01",
-            "periodeTom" to "2022-01-31",
-            "orgnummer" to Testdata.ORGNR,
-            "typeEndring" to "REVURDERING"
-        )),
+        berørtePerioder: List<Map<String, String>> = listOf(
+            mapOf(
+                "vedtaksperiodeId" to "${Testdata.VEDTAKSPERIODE_ID}",
+                "skjæringstidspunkt" to "2022-01-01",
+                "periodeFom" to "2022-01-01",
+                "periodeTom" to "2022-01-31",
+                "orgnummer" to Testdata.ORGNR,
+                "typeEndring" to "REVURDERING"
+            )
+        ),
         kilde: UUID = UUID.randomUUID(),
     ): UUID = newUUID.also { id ->
         testRapid.sendTestMessage(
@@ -789,6 +800,23 @@ internal class Meldingssender(private val testRapid: TestRapid) {
                 berørtePerioder = berørtePerioder,
                 kilde = kilde,
                 id = id,
+            )
+        )
+    }
+
+    fun sendAvviksvurdering(
+        fødselsnummer: String,
+        skjæringstidspunkt: LocalDate,
+        vilkårsgrunnlagId: UUID,
+        avviksvurderingId: UUID,
+    ): UUID = newUUID.also { id ->
+        testRapid.sendTestMessage(
+            Testmeldingfabrikk.lagAvviksvurdering(
+                id = id,
+                fødselsnummer = fødselsnummer,
+                skjæringstidspunkt = skjæringstidspunkt,
+                vilkårsgrunnlagId = vilkårsgrunnlagId,
+                avviksvurderingId = avviksvurderingId
             )
         )
     }

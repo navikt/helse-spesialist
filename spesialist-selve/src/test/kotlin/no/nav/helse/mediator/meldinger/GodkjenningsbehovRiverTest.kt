@@ -69,7 +69,9 @@ internal class GodkjenningsbehovRiverTest {
             Inntektskilde.FLERE_ARBEIDSGIVERE,
             relevanteArbeidsforhold,
             any(),
-            any()
+            any(),
+            any(),
+            any(),
         ) }
     }
 }

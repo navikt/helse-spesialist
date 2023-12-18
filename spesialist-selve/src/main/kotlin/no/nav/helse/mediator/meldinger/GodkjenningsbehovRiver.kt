@@ -41,7 +41,10 @@ internal class GodkjenningsbehovRiver(
                     "Godkjenning.førstegangsbehandling",
                     "Godkjenning.inntektskilde",
                     "Godkjenning.kanAvvises",
+                    "Godkjenning.vilkårsgrunnlagId",
                 )
+                // TODO: Require denne når ny avviksvurdering er i prod
+                it.interestedIn("avviksvurderingId")
                 it.requireAny("Godkjenning.utbetalingtype", Utbetalingtype.gyldigeTyper.values())
                 it.interestedIn("Godkjenning.orgnummereMedRelevanteArbeidsforhold")
             }
@@ -82,6 +85,8 @@ internal class GodkjenningsbehovRiver(
                 .takeUnless(JsonNode::isMissingOrNull)
                 ?.map { it.asText() } ?: emptyList(),
             kanAvvises = packet["Godkjenning.kanAvvises"].asBoolean(),
+            avviksvurderingId = UUID.fromString(packet["avviksvurderingId"].asText()),
+            vilkårsgrunnlagId = UUID.fromString(packet["Godkjenning.vilkårsgrunnlagId"].asText()),
             context = context
         )
     }

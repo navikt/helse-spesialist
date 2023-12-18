@@ -122,7 +122,7 @@ internal object Testmeldingfabrikk {
         gjeldendeTilstand: String = "GJELDENDE_TILSTAND",
         forårsaketAvId: UUID = UUID.randomUUID(),
         fom: LocalDate = LocalDate.of(2018, 1, 1),
-        tom: LocalDate = LocalDate.of(2018, 1, 31)
+        tom: LocalDate = LocalDate.of(2018, 1, 31),
     ) =
         nyHendelse(
             id, "vedtaksperiode_endret", mapOf(
@@ -149,7 +149,7 @@ internal object Testmeldingfabrikk {
         forårsaketAvId: UUID = UUID.randomUUID(),
         fom: LocalDate = 1.januar,
         tom: LocalDate = 31.januar,
-        skjæringstidspunkt: LocalDate = 1.januar
+        skjæringstidspunkt: LocalDate = 1.januar,
     ) =
         nyHendelse(
             id, "vedtaksperiode_opprettet", mapOf(
@@ -242,6 +242,8 @@ internal object Testmeldingfabrikk {
         orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList(),
         kanAvvises: Boolean = true,
         id: UUID = UUID.randomUUID(),
+        vilkårsgrunnlagId: UUID = UUID.randomUUID(),
+        avviksvurderingId: UUID = UUID.randomUUID(),
     ) =
         nyHendelse(
             id, "behov",
@@ -262,7 +264,9 @@ internal object Testmeldingfabrikk {
                     "inntektskilde" to inntektskilde.name,
                     "orgnummereMedRelevanteArbeidsforhold" to orgnummereMedRelevanteArbeidsforhold,
                     "kanAvvises" to kanAvvises,
-                )
+                    "vilkårsgrunnlagId" to vilkårsgrunnlagId
+                ),
+                "avviksvurderingId" to avviksvurderingId
             )
         )
 
@@ -277,7 +281,7 @@ internal object Testmeldingfabrikk {
         ekstraArbeidsgivere: List<ArbeidsgiverinformasjonJson> = emptyList(),
         id: UUID = UUID.randomUUID(),
         hendelseId: UUID = UUID.randomUUID(),
-        contextId: UUID = UUID.randomUUID()
+        contextId: UUID = UUID.randomUUID(),
     ) = nyHendelse(
         id, "behov", mapOf(
             "@final" to true,
@@ -329,7 +333,7 @@ internal object Testmeldingfabrikk {
         løsning: List<Arbeidsforholdløsning.Løsning>,
         id: UUID = UUID.randomUUID(),
         hendelseId: UUID = UUID.randomUUID(),
-        contextId: UUID = UUID.randomUUID()
+        contextId: UUID = UUID.randomUUID(),
     ) = nyHendelse(
         id, "behov", mapOf(
             "@final" to true,
@@ -575,7 +579,7 @@ internal object Testmeldingfabrikk {
         fødselsnummer: String,
         dokumentId: UUID,
         id: UUID = UUID.randomUUID(),
-        dokument: JsonNode = objectMapper.createObjectNode()
+        dokument: JsonNode = objectMapper.createObjectNode(),
     ) =
         nyHendelse(
             id, "hent-dokument", mapOf(
@@ -757,7 +761,7 @@ internal object Testmeldingfabrikk {
         orgnummer: String,
         id: UUID = UUID.randomUUID(),
         hendelseId: UUID = UUID.randomUUID(),
-        contextId: UUID = UUID.randomUUID()
+        contextId: UUID = UUID.randomUUID(),
     ): String =
         nyHendelse(
             id,
@@ -814,7 +818,7 @@ internal object Testmeldingfabrikk {
         vergemål: VergemålJson,
         id: UUID = UUID.randomUUID(),
         hendelseId: UUID = UUID.randomUUID(),
-        contextId: UUID = UUID.randomUUID()
+        contextId: UUID = UUID.randomUUID(),
     ): String = nyHendelse(
         id,
         "behov", mapOf(
@@ -837,7 +841,7 @@ internal object Testmeldingfabrikk {
         oppslagFeilet: Boolean = false,
         id: UUID = UUID.randomUUID(),
         hendelseId: UUID = UUID.randomUUID(),
-        contextId: UUID = UUID.randomUUID()
+        contextId: UUID = UUID.randomUUID(),
     ): String =
         nyHendelse(
             id,
@@ -908,7 +912,7 @@ internal object Testmeldingfabrikk {
                 )
             ),
 
-    ): String {
+        ): String {
         return nyHendelse(
             id, "aktivitetslogg_ny_aktivitet",
             mapOf(
@@ -1127,10 +1131,54 @@ internal object Testmeldingfabrikk {
         "@opprettet" to LocalDateTime.now()
     )
 
+    fun lagAvviksvurdering(
+        id: UUID,
+        fødselsnummer: String,
+        skjæringstidspunkt: LocalDate = 1.januar,
+        vilkårsgrunnlagId: UUID,
+        avviksvurderingId: UUID,
+    ): String =
+        nyHendelse(
+            id, "avviksvurdering", mapOf(
+                "fødselsnummer" to fødselsnummer,
+                "skjæringstidspunkt" to skjæringstidspunkt,
+                "avviksvurdering" to mapOf(
+                    "id" to avviksvurderingId,
+                    "vilkårsgrunnlagId" to vilkårsgrunnlagId,
+                    "opprettet" to 1.januar.atStartOfDay(),
+                    "beregningsgrunnlag" to mapOf(
+                        "totalbeløp" to 10,
+                        "omregnedeÅrsinntekter" to listOf(
+                            mapOf(
+                                "arbeidsgiverreferanse" to "987654321",
+                                "beløp" to 10
+                            )
+                        )
+                    ),
+                    "sammenligningsgrunnlag" to mapOf(
+                        "totalbeløp" to 10,
+                        "id" to UUID.randomUUID(),
+                        "innrapporterteInntekter" to listOf(
+                            mapOf(
+                                "arbeidsgiverreferanse" to "987654321",
+                                "inntekter" to listOf(
+                                    mapOf(
+                                        "årMåned" to YearMonth.from(1.januar),
+                                        "beløp" to 10
+                                    )
+                                )
+                            )
+                        )
+                    ),
+                    "avviksprosent" to 0,
+                )
+            )
+        )
+
     data class ArbeidsgiverinformasjonJson(
         private val orgnummer: String,
         private val navn: String,
-        private val bransjer: List<String>
+        private val bransjer: List<String>,
     ) {
         fun toBody() = mapOf(
             "orgnummer" to orgnummer,
@@ -1142,7 +1190,7 @@ internal object Testmeldingfabrikk {
     data class VergemålJson(
         val vergemål: List<Vergemål> = emptyList(),
         val fremtidsfullmakter: List<Vergemål> = emptyList(),
-        val fullmakter: List<Fullmakt> = emptyList()
+        val fullmakter: List<Fullmakt> = emptyList(),
     ) {
         fun toBody() = mapOf(
             "vergemål" to vergemål,
@@ -1151,13 +1199,13 @@ internal object Testmeldingfabrikk {
         )
 
         data class Vergemål(
-            val type: VergemålType
+            val type: VergemålType,
         )
 
         data class Fullmakt(
             val områder: List<Område>,
             val gyldigFraOgMed: LocalDate,
-            val gyldigTilOgMed: LocalDate
+            val gyldigTilOgMed: LocalDate,
         )
 
         @Suppress("unused")

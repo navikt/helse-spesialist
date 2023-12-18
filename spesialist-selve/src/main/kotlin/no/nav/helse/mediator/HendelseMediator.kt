@@ -328,6 +328,8 @@ internal class HendelseMediator(
         orgnummereMedRelevanteArbeidsforhold: List<String>,
         kanAvvises: Boolean,
         context: MessageContext,
+        avviksvurderingId: UUID,
+        vilkårsgrunnlagId: UUID,
     ) {
         if (oppgaveDao.harGyldigOppgave(utbetalingId) || vedtakDao.erAutomatiskGodkjent(utbetalingId)) {
             sikkerLogg.info("vedtaksperiodeId=$vedtaksperiodeId med utbetalingId=$utbetalingId har gyldig oppgave eller er automatisk godkjent. Ignorerer godkjenningsbehov med id=$id")
@@ -350,6 +352,8 @@ internal class HendelseMediator(
                 inntektskilde,
                 orgnummereMedRelevanteArbeidsforhold,
                 kanAvvises,
+                avviksvurderingId,
+                vilkårsgrunnlagId,
                 message.toJson(),
             ), context
         )

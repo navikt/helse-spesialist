@@ -196,8 +196,11 @@ internal class Hendelsefabrikk(
         inntektskilde: Inntektskilde,
         orgnummereMedRelevanteArbeidsforhold: List<String>,
         kanAvvises: Boolean,
+        avviksvurderingId: UUID,
+        vilkårsgrunnlagId: UUID,
         json: String,
     ): Godkjenningsbehov {
+        avviksvurderingDao.opprettKobling(avviksvurderingId, vilkårsgrunnlagId)
         return Godkjenningsbehov(
             id = id,
             fødselsnummer = fødselsnummer,
@@ -337,6 +340,8 @@ internal class Hendelsefabrikk(
                 .path("orgnummereMedRelevanteArbeidsforhold")
                 .takeUnless(JsonNode::isMissingOrNull)?.map { it.asText() } ?: emptyList(),
             kanAvvises = jsonNode.path("Godkjenning").path("kanAvvises").asBoolean(),
+            avviksvurderingId = UUID.fromString(jsonNode.path("avviksvurderingId").asText()),
+            vilkårsgrunnlagId = UUID.fromString(jsonNode.path("Godkjenning").path("vilkårsgrunnlagId").asText()),
             json = json,
         )
     }
