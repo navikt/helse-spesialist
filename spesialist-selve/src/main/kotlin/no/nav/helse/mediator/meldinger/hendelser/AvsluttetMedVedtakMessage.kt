@@ -8,9 +8,9 @@ import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.avviksvurdering.Avviksvurdering.Companion.finnRiktigAvviksvurdering
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
+import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetMedVedtak
 import no.nav.helse.modell.vedtaksperiode.vedtak.Faktatype
 import no.nav.helse.modell.vedtaksperiode.vedtak.Sykepengegrunnlagsfakta
-import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetMedVedtak
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime

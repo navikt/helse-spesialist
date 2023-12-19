@@ -1044,6 +1044,30 @@ internal object Testmeldingfabrikk {
         }
     )
 
+    fun lagAvsluttetUtenVedtak(
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        vedtaksperiodeId: UUID,
+        fom: LocalDate,
+        tom: LocalDate,
+        skjæringstidspunkt: LocalDate,
+        id: UUID,
+    ): String = nyHendelse(
+        id, "avsluttet_uten_vedtak", mutableMapOf(
+            "aktørId" to aktørId,
+            "fødselsnummer" to fødselsnummer,
+            "organisasjonsnummer" to organisasjonsnummer,
+            "vedtaksperiodeId" to vedtaksperiodeId,
+            "fom" to fom,
+            "tom" to tom,
+            "skjæringstidspunkt" to skjæringstidspunkt,
+            "hendelser" to emptyList<String>(),
+            "avsluttetTidspunkt" to LocalDateTime.now(),
+            "generasjonId" to UUID.randomUUID(),
+        )
+    )
+
     private fun fastsattEtterSkjønn(
         organisasjonsnummer: String,
         inkluderSpleisverdier: Boolean = true,

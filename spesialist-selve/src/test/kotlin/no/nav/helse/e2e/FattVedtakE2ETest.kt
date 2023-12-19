@@ -1,9 +1,15 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETest
+import com.fasterxml.jackson.module.kotlin.convertValue
+import java.time.LocalDate
 import no.nav.helse.AvviksvurderingTestdata
 import no.nav.helse.TestRapidHelpers.meldinger
+import no.nav.helse.Testdata
 import no.nav.helse.januar
+import no.nav.helse.objectMapper
+import no.nav.helse.rapids_rivers.asLocalDate
+import no.nav.helse.rapids_rivers.asLocalDateTime
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
@@ -11,7 +17,7 @@ import org.junit.jupiter.api.Test
 internal class FattVedtakE2ETest: AbstractE2ETest() {
 
     @Test
-    fun `Fatt vedtak for auu-periode`() {
+    fun `Fatt vedtak for auu-periode, gammelt format`() {
         håndterSøknad()
         håndterVedtaksperiodeOpprettet()
         håndterAvsluttetMedVedtak()
@@ -21,6 +27,32 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
         assertEquals("vedtak_fattet", hendelse["@event_name"].asText())
         assertEquals(0, hendelse["begrunnelser"].size())
         assertNull(hendelse["utbetalingId"])
+    }
+
+    @Test
+    fun `Fatt vedtak for auu-periode`() {
+        håndterSøknad()
+        håndterVedtaksperiodeOpprettet()
+        håndterAvsluttetUtenVedtak()
+        val hendelser = inspektør.meldinger()
+        assertEquals(1, hendelser.size)
+        val hendelse = hendelser.single()
+        assertEquals("vedtak_fattet", hendelse["@event_name"].asText())
+        assertEquals(0, hendelse["begrunnelser"].size())
+        assertNull(hendelse["utbetalingId"])
+        assertNull(hendelse["sykepengegrunnlagsfakta"])
+        assertEquals(0.0, hendelse["grunnlagForSykepengegrunnlag"].asDouble())
+        assertEquals(
+            emptyMap<String, Double>(),
+            objectMapper.convertValue<Map<String, Double>>(hendelse["grunnlagForSykepengegrunnlagPerArbeidsgiver"])
+        )
+        assertEquals("VET_IKKE", hendelse["begrensning"].asText())
+        assertEquals(0.0, hendelse["inntekt"].asDouble())
+        assertEquals(0.0, hendelse["sykepengegrunnlag"].asDouble())
+        assertEquals(1.januar, hendelse["fom"].asLocalDate())
+        assertEquals(11.januar, hendelse["tom"].asLocalDate())
+        assertEquals(Testdata.AKTØR, hendelse["aktørId"].asText())
+        assertEquals(LocalDate.now(), hendelse["vedtakFattetTidspunkt"].asLocalDateTime().toLocalDate())
     }
 
     @Test

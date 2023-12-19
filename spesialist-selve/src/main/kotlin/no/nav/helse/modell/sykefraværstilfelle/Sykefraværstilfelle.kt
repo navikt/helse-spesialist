@@ -12,9 +12,10 @@ import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterGodkjent
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterNyttVarsel
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverSkjønnsfastsettelse
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverTotrinnsvurdering
+import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetMedVedtak
+import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetUtenVedtak
 import no.nav.helse.modell.vedtaksperiode.vedtak.Sykepengevedtak
 import no.nav.helse.modell.vedtaksperiode.vedtak.SykepengevedtakBuilder
-import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetMedVedtak
 
 internal class Sykefraværstilfelle(
     private val fødselsnummer: String,
@@ -67,6 +68,16 @@ internal class Sykefraværstilfelle(
             vedtakBuilder.skjønnsfastsattSykepengegrunnlag(it)
         }
         avsluttetMedVedtak.byggVedtak(vedtakBuilder)
+        fattVedtak(vedtakBuilder.build())
+    }
+
+    internal fun håndter(avsluttetUtenVedtak: AvsluttetUtenVedtak) {
+        val vedtakBuilder = SykepengevedtakBuilder()
+        val skjønnsfastsattSykepengegrunnlag = skjønnsfastatteSykepengegrunnlag.lastOrNull()
+        skjønnsfastsattSykepengegrunnlag?.also {
+            vedtakBuilder.skjønnsfastsattSykepengegrunnlag(it)
+        }
+        avsluttetUtenVedtak.byggMelding(vedtakBuilder)
         fattVedtak(vedtakBuilder.build())
     }
 

@@ -1025,6 +1025,26 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         )
     }
 
+    protected fun håndterAvsluttetUtenVedtak(
+        aktørId: String = AKTØR,
+        fødselsnummer: String = FØDSELSNUMMER,
+        organisasjonsnummer: String = ORGNR,
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        fom: LocalDate = 1.januar,
+        tom: LocalDate = 11.januar,
+        skjæringstidspunkt: LocalDate = fom,
+    ) {
+        sisteMeldingId = meldingssender.sendAvsluttetUtenVedtak(
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            fom = fom,
+            tom = tom,
+            skjæringstidspunkt = skjæringstidspunkt,
+        )
+    }
+
     protected fun håndterVedtakFattet(
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,

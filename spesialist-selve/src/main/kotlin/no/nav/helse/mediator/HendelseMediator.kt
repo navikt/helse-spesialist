@@ -9,6 +9,7 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.MetrikkRiver
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.mediator.meldinger.AvsluttetMedVedtakRiver
+import no.nav.helse.mediator.meldinger.AvsluttetUtenVedtakRiver
 import no.nav.helse.mediator.meldinger.AvvikVurdertRiver
 import no.nav.helse.mediator.meldinger.EndretSkjermetinfoRiver
 import no.nav.helse.mediator.meldinger.GodkjenningsbehovRiver
@@ -34,6 +35,7 @@ import no.nav.helse.mediator.meldinger.VedtaksperiodeOpprettetRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeReberegnetRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeSkjønnsmessigFastsettelseRiver
 import no.nav.helse.mediator.meldinger.hendelser.AvsluttetMedVedtakMessage
+import no.nav.helse.mediator.meldinger.hendelser.AvsluttetUtenVedtakMessage
 import no.nav.helse.mediator.meldinger.løsninger.ArbeidsforholdRiver
 import no.nav.helse.mediator.meldinger.løsninger.ArbeidsgiverRiver
 import no.nav.helse.mediator.meldinger.løsninger.DokumentRiver
@@ -145,6 +147,7 @@ internal class HendelseMediator(
             MetrikkRiver(it)
             PåminnetGodkjenningsbehovRiver(it, this)
             AvsluttetMedVedtakRiver(it, this, avviksvurderingDao)
+            AvsluttetUtenVedtakRiver(it, this)
         }
     }
 
@@ -182,6 +185,15 @@ internal class HendelseMediator(
         val sykefraværstilfelleMediator = SykefraværstilfelleMediator(rapidsConnection)
         sykefraværstilfelle.registrer(sykefraværstilfelleMediator)
         avsluttetMedVedtakMessage.sendInnTil(sykefraværstilfelle)
+    }
+
+    internal fun håndter(avsluttetUtenVedtakMessage: AvsluttetUtenVedtakMessage) {
+        val fødselsnummer = avsluttetUtenVedtakMessage.fødselsnummer()
+        val skjæringstidspunkt = avsluttetUtenVedtakMessage.skjæringstidspunkt()
+        val sykefraværstilfelle = hendelsefabrikk.sykefraværstilfelle(fødselsnummer, skjæringstidspunkt)
+        val sykefraværstilfelleMediator = SykefraværstilfelleMediator(rapidsConnection)
+        sykefraværstilfelle.registrer(sykefraværstilfelleMediator)
+        avsluttetUtenVedtakMessage.sendInnTil(sykefraværstilfelle)
     }
 
     internal fun håndter(avviksvurdering: AvviksvurderingDto) {

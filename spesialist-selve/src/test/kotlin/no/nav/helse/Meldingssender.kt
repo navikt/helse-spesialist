@@ -663,6 +663,29 @@ internal class Meldingssender(private val testRapid: TestRapid) {
         )
     }
 
+    fun sendAvsluttetUtenVedtak(
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        vedtaksperiodeId: UUID,
+        fom: LocalDate,
+        tom: LocalDate,
+        skjæringstidspunkt: LocalDate,
+    ): UUID = newUUID.also { id ->
+        testRapid.sendTestMessage(
+            Testmeldingfabrikk.lagAvsluttetUtenVedtak(
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                organisasjonsnummer = organisasjonsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
+                fom = fom,
+                tom = tom,
+                skjæringstidspunkt = skjæringstidspunkt,
+                id = id,
+            )
+        )
+    }
+
     fun sendAdressebeskyttelseEndret(
         aktørId: String,
         fødselsnummer: String,
