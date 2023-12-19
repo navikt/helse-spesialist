@@ -48,6 +48,7 @@ import no.nav.helse.spleis.graphql.enums.GraphQLVilkarsgrunnlagtype
 import no.nav.helse.spleis.graphql.enums.Utbetalingtype
 import no.nav.helse.spleis.graphql.hentsnapshot.Alder
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiver
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiverinntekt
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiverrefusjon
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLBeregnetPeriode
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLGenerasjon
@@ -695,7 +696,12 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         val vilkårsgrunnlag = GraphQLSpleisVilkarsgrunnlag(
             id = UUID.randomUUID().toString(),
             vilkarsgrunnlagtype = GraphQLVilkarsgrunnlagtype.SPLEIS,
-            inntekter = emptyList(),
+            inntekter = listOf(
+                GraphQLArbeidsgiverinntekt(
+                    arbeidsgiver = ORGANISASJONSNUMMER,
+                    sammenligningsgrunnlag = null
+                )
+            ),
             omregnetArsinntekt = 1_000_000.0,
             sammenligningsgrunnlag = 1_000_000.0,
             skjonnsmessigFastsattAarlig = 0.0,

@@ -1,6 +1,9 @@
 package no.nav.helse.spesialist.api.graphql
 
+import java.time.YearMonth
+import no.nav.helse.rapids_rivers.asYearMonth
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
+import no.nav.helse.spesialist.api.januar
 import no.nav.helse.spesialist.api.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -44,6 +47,51 @@ internal class GraphQLApiTest : AbstractGraphQLApiTest() {
         assertTrue(refusjonsopplysning["tom"].isNull)
         assertEquals(30000.0, refusjonsopplysning["belop"].asDouble())
 
+    }
+    @Test
+    fun `beriker vilkårsgrunnlag med data fra avviksvurdering`() {
+        mockSnapshot(avviksprosent = 26.0)
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+
+        val body = runQuery(
+            """
+            {
+                person(fnr:"$FØDSELSNUMMER") {
+                    vilkarsgrunnlag {
+                        ... on VilkarsgrunnlagSpleis {
+                          inntekter {
+                            arbeidsgiver
+                            sammenligningsgrunnlag {
+                                inntektFraAOrdningen {
+                                    maned
+                                    sum
+                                }
+                                belop
+                            }
+                        }
+                        avviksprosent
+                        sammenligningsgrunnlag
+                        omregnetArsinntekt
+                    }
+                }
+                }
+            }
+        """
+        )
+
+        val vilkårsgrunnlag = body["data"]["person"]["vilkarsgrunnlag"].first()
+        assertEquals(10000.0, vilkårsgrunnlag["omregnetArsinntekt"].asDouble())
+        assertEquals(10000.0, vilkårsgrunnlag["sammenligningsgrunnlag"].asDouble())
+        assertEquals(26.0, vilkårsgrunnlag["avviksprosent"].asDouble())
+        assertEquals(1, vilkårsgrunnlag["inntekter"].size())
+
+        val sammenligningsgrunnlag = vilkårsgrunnlag["inntekter"].first()["sammenligningsgrunnlag"]
+        assertEquals(10000.0, sammenligningsgrunnlag["belop"].asDouble())
+        assertEquals(1, sammenligningsgrunnlag["inntektFraAOrdningen"].size())
+
+        val inntekt = sammenligningsgrunnlag["inntektFraAOrdningen"].first()
+        assertEquals(YearMonth.from(1.januar), inntekt["maned"].asYearMonth())
+        assertEquals(10000.0, inntekt["sum"].asDouble())
     }
     @Test
     fun `henter sykepengegrunnlagsgrense`() {

@@ -108,7 +108,7 @@ internal fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Av
                         vilkarsgrunnlagSpleis.copy(
                             inntekter = vilkarsgrunnlagSpleis.inntekter.map { arbeidsgiverinntekt ->
                                 arbeidsgiverinntekt.copy(
-                                    sammenligningsgrunnlag = arbeidsgiverinntekt.sammenligningsgrunnlag?.copy(
+                                    sammenligningsgrunnlag = Sammenligningsgrunnlag(
                                         belop = avviksvurdering.sammenligningsgrunnlag.totalbeløp,
                                         inntektFraAOrdningen = avviksvurdering.sammenligningsgrunnlag.innrapporterteInntekter.single {
                                             it.arbeidsgiverreferanse == arbeidsgiverinntekt.arbeidsgiver
