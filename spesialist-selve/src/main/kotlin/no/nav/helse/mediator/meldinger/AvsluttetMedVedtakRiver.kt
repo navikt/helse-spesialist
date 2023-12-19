@@ -48,7 +48,7 @@ internal class AvsluttetMedVedtakRiver(
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        sikkerlogg.info("Mottok melding om avsluttet_med_vedtak:\n${packet.toJson()}")
+        sikkerlogg.info("Mottok melding avsluttet_med_vedtak:\n${packet.toJson()}")
         mediator.håndter(AvsluttetMedVedtakMessage(packet, avviksvurderingDao))
     }
 
