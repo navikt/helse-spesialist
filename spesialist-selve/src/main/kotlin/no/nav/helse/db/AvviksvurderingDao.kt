@@ -14,6 +14,7 @@ import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.avviksvurdering.Beregningsgrunnlag
 import no.nav.helse.spesialist.api.avviksvurdering.Sammenligningsgrunnlag
 import org.intellij.lang.annotations.Language
+import org.slf4j.LoggerFactory
 import no.nav.helse.spesialist.api.avviksvurdering.Avviksvurdering as ApiAvviksvurdering
 
 class AvviksvurderingDao(private val dataSource: DataSource) : HelseDao(dataSource) {
@@ -113,15 +114,23 @@ class AvviksvurderingDao(private val dataSource: DataSource) : HelseDao(dataSour
     }
 
     fun opprettKobling(avviksvurderingId: UUID, vilkårsgrunnlagId: UUID) {
-        asSQL(
-            """
-                INSERT INTO vilkarsgrunnlag_per_avviksvurdering(avviksvurdering_ref, vilkårsgrunnlag_id)
-                VALUES (:unik_id, :vilkarsgrunnlag_id) ON CONFLICT DO NOTHING;
-            """.trimIndent(),
-            mapOf(
-                "unik_id" to avviksvurderingId,
-                "vilkarsgrunnlag_id" to vilkårsgrunnlagId,
-            )
-        ).update()
+        try {
+            asSQL(
+                """
+                    INSERT INTO vilkarsgrunnlag_per_avviksvurdering(avviksvurdering_ref, vilkårsgrunnlag_id)
+                    VALUES (:unik_id, :vilkarsgrunnlag_id) ON CONFLICT DO NOTHING;
+                """.trimIndent(),
+                mapOf(
+                    "unik_id" to avviksvurderingId,
+                    "vilkarsgrunnlag_id" to vilkårsgrunnlagId,
+                )
+            ).update()
+        } catch (e: Exception) {
+            logg.info("Lagrer IKKE kobling mellom avviksvurdering og vilkårsgrunnlag. NB! Midlertidig kode!")
+        }
+    }
+
+    companion object {
+        private val logg = LoggerFactory.getLogger(AvviksvurderingDao::class.java)
     }
 }
