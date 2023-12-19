@@ -341,7 +341,9 @@ internal class Hendelsefabrikk(
                 .path("orgnummereMedRelevanteArbeidsforhold")
                 .takeUnless(JsonNode::isMissingOrNull)?.map { it.asText() } ?: emptyList(),
             kanAvvises = jsonNode.path("Godkjenning").path("kanAvvises").asBoolean(),
-            avviksvurderingId = UUID.fromString(jsonNode.path("avviksvurderingId").asText()),
+            avviksvurderingId = jsonNode.path("avviksvurderingId").takeUnless { it.isMissingOrNull() }?.let {
+                UUID.fromString(jsonNode.path("avviksvurderingId").asText())
+            },
             vilkårsgrunnlagId = UUID.fromString(jsonNode.path("Godkjenning").path("vilkårsgrunnlagId").asText()),
             json = json,
         )
