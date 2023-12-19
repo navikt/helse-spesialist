@@ -20,6 +20,7 @@ internal class AvviksvurderingTest {
 
         val avviksvurdering = Avviksvurdering(
             unikId = unikId,
+            vilkårsgrunnlagId = null,
             fødselsnummer = fødselsnummer,
             skjæringstidspunkt = skjæringstidspunkt,
             opprettet = opprettet,
@@ -51,6 +52,7 @@ internal class AvviksvurderingTest {
 
         val avviksvurdering = Avviksvurdering(
             unikId = unikId,
+            vilkårsgrunnlagId = null,
             fødselsnummer = fødselsnummer,
             skjæringstidspunkt = skjæringstidspunkt,
             opprettet = opprettet,
@@ -64,6 +66,7 @@ internal class AvviksvurderingTest {
         assertEquals(
             Avviksvurdering(
                 unikId = unikId,
+                vilkårsgrunnlagId = null,
                 fødselsnummer = fødselsnummer,
                 skjæringstidspunkt = skjæringstidspunkt,
                 opprettet = opprettet,
@@ -76,6 +79,7 @@ internal class AvviksvurderingTest {
         assertEquals(
             Avviksvurdering(
                 unikId = unikId,
+                vilkårsgrunnlagId = null,
                 fødselsnummer = fødselsnummer,
                 skjæringstidspunkt = skjæringstidspunkt,
                 opprettet = opprettet,
@@ -91,10 +95,12 @@ internal class AvviksvurderingTest {
         fødselsnummer: String = "12345678910",
         skjæringstidspunkt: LocalDate = 1.januar,
         unikId: UUID = UUID.randomUUID(),
+        vilkårsgrunnlagId: UUID? = null,
         opprettet: LocalDateTime = LocalDateTime.now(),
         avviksprosent: Double = 25.0,
     ): AvviksvurderingDto = AvviksvurderingDto(
         unikId = unikId,
+        vilkårsgrunnlagId = vilkårsgrunnlagId,
         fødselsnummer = fødselsnummer,
         skjæringstidspunkt = skjæringstidspunkt,
         opprettet = opprettet,

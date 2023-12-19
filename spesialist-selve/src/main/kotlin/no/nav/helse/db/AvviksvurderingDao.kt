@@ -34,6 +34,12 @@ class AvviksvurderingDao(private val dataSource: DataSource) : HelseDao(dataSour
                 VALUES (:fodselsnummer, :skjaeringstidspunkt, :opprettet, CAST(:sammenligningsgrunnlag as json));
             """.trimIndent()
 
+            @Language("PostgreSQL")
+            val opprettKoblingTilVilkårsgrunnlag = """
+                INSERT INTO vilkarsgrunnlag_per_avviksvurdering(avviksvurdering_ref, vilkårsgrunnlag_id)
+                VALUES (:unik_id, :vilkarsgrunnlag_id) ON CONFLICT DO NOTHING;
+            """.trimIndent()
+
             session.transaction { transactionalSession ->
                 val sammenligningsgrunnlagRef = transactionalSession.run(
                     queryOf(
@@ -60,6 +66,17 @@ class AvviksvurderingDao(private val dataSource: DataSource) : HelseDao(dataSour
                         )
                     ).asUpdate
                 )
+                if (avviksvurdering.vilkårsgrunnlagId != null) {
+                    transactionalSession.run(
+                        queryOf(
+                            opprettKoblingTilVilkårsgrunnlag,
+                            mapOf(
+                                "unik_id" to avviksvurdering.unikId,
+                                "vilkarsgrunnlag_id" to avviksvurdering.vilkårsgrunnlagId,
+                            )
+                        ).asUpdate
+                    )
+                }
             }
         }
     }
@@ -77,6 +94,7 @@ class AvviksvurderingDao(private val dataSource: DataSource) : HelseDao(dataSour
     ).list {
         Avviksvurdering(
             unikId = it.uuid("unik_id"),
+            vilkårsgrunnlagId = it.uuid("vilkårsgrunnlag_id"),
             fødselsnummer = it.string("fødselsnummer"),
             skjæringstidspunkt = it.localDate("skjæringstidspunkt"),
             opprettet = it.localDateTime("opprettet"),

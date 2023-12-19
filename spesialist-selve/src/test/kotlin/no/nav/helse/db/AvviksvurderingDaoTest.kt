@@ -58,6 +58,7 @@ internal class AvviksvurderingDaoTest : DatabaseIntegrationTest() {
 
         val avviksvurderinger = avviksvurderingDao.finnAvviksvurderinger(FNR)
         val forventetAvviksvurdering = forventetAvviksvurdering(
+            vilkårsgrunnlagId = vilkårsgrunnlagId,
             fødselsnummer = FNR,
             skjæringstidspunkt = skjæringstidspunkt,
             unikId = unikId,
@@ -172,6 +173,47 @@ internal class AvviksvurderingDaoTest : DatabaseIntegrationTest() {
         assertAntallAvviksvurderinger(unikId2, 1)
     }
 
+    @Test
+    fun `opprettes kobling hvis vilkårsgrunnlagId ikke er null`() {
+        val skjæringstidspunkt = 1.januar
+        val unikId = UUID.randomUUID()
+        val vilkårsgrunnlagId = UUID.randomUUID()
+        val opprettet = LocalDateTime.now()
+        avviksvurderingDao.lagre(
+            avviksvurdering(
+                fødselsnummer = FNR,
+                vilkårsgrunnlagId = vilkårsgrunnlagId,
+                skjæringstidspunkt = skjæringstidspunkt,
+                unikId = unikId,
+                opprettet = opprettet
+            )
+        )
+
+        val avviksvurderinger = avviksvurderingDao.finnAvviksvurderinger(FNR)
+
+        assertEquals(1, avviksvurderinger.size)
+        assertAntallKoblinger(unikId, 1)
+        assertAntallAvviksvurderinger(unikId, 1)
+    }
+
+    @Test
+    fun `opprettes ikke kobling hvis vilkårsgrunnlagId er null`() {
+        val skjæringstidspunkt = 1.januar
+        val unikId = UUID.randomUUID()
+        val opprettet = LocalDateTime.now()
+        avviksvurderingDao.lagre(
+            avviksvurdering(
+                fødselsnummer = FNR,
+                vilkårsgrunnlagId = null,
+                skjæringstidspunkt = skjæringstidspunkt,
+                unikId = unikId,
+                opprettet = opprettet
+            )
+        )
+
+        assertAntallKoblinger(unikId, 0)
+    }
+
 
     private fun assertAntallKoblinger(avviksvurderingUnikId: UUID, forventetAntall: Int) {
         @Language("PostgreSQL")
@@ -197,10 +239,12 @@ internal class AvviksvurderingDaoTest : DatabaseIntegrationTest() {
         fødselsnummer: String,
         skjæringstidspunkt: LocalDate,
         unikId: UUID,
+        vilkårsgrunnlagId: UUID,
         opprettet: LocalDateTime,
     ): Avviksvurdering {
         return Avviksvurdering(
             unikId = unikId,
+            vilkårsgrunnlagId = vilkårsgrunnlagId,
             fødselsnummer = fødselsnummer,
             skjæringstidspunkt = skjæringstidspunkt,
             opprettet = opprettet,
@@ -214,9 +258,11 @@ internal class AvviksvurderingDaoTest : DatabaseIntegrationTest() {
         fødselsnummer: String = "12345678910",
         skjæringstidspunkt: LocalDate = 1.januar,
         unikId: UUID = UUID.randomUUID(),
+        vilkårsgrunnlagId: UUID? = null,
         opprettet: LocalDateTime = LocalDateTime.now(),
     ): AvviksvurderingDto = AvviksvurderingDto(
         unikId = unikId,
+        vilkårsgrunnlagId = vilkårsgrunnlagId,
         fødselsnummer = fødselsnummer,
         skjæringstidspunkt = skjæringstidspunkt,
         opprettet = opprettet,

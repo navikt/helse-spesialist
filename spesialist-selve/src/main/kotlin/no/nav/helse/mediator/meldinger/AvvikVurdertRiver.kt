@@ -25,6 +25,7 @@ internal class AvvikVurdertRiver(
             validate {
                 it.demandValue("@event_name", "avvik_vurdert")
                 it.requireKey("@id", "fødselsnummer", "skjæringstidspunkt")
+                it.interestedIn("avviksvurdering.vilkårsgrunnlagId")
                 it.requireKey(
                     "avviksvurdering.id",
                     "avviksvurdering.opprettet",

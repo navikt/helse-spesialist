@@ -13,10 +13,12 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.asYearMonth
+import no.nav.helse.rapids_rivers.isMissingOrNull
 
 class AvvikVurdertMessage(packet: JsonMessage) {
 
     private val unikId = packet["avviksvurdering.id"].asUUID()
+    private val vilkårsgrunnlagId = packet["avviksvurdering.vilkårsgrunnlagId"].takeUnless { it.isMissingOrNull() }?.asUUID()
     private val fødselsnummer = packet["fødselsnummer"].asText()
     private val skjæringstidspunkt = packet["skjæringstidspunkt"].asLocalDate()
     private val opprettet = packet["avviksvurdering.opprettet"].asLocalDateTime()
@@ -28,6 +30,7 @@ class AvvikVurdertMessage(packet: JsonMessage) {
     private val avviksvurdering
         get() = Avviksvurdering(
             unikId = unikId,
+            vilkårsgrunnlagId = vilkårsgrunnlagId,
             fødselsnummer = fødselsnummer,
             skjæringstidspunkt = skjæringstidspunkt,
             opprettet = opprettet,
