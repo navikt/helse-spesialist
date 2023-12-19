@@ -1012,7 +1012,7 @@ internal object Testmeldingfabrikk {
         skjæringstidspunkt: LocalDate,
         fastsattType: String,
         id: UUID,
-        inkluderSpleisverdier: Boolean = true,
+        settInnAvviksvurderingFraSpleis: Boolean = true,
     ): String = nyHendelse(
         id, "avsluttet_med_vedtak", mutableMapOf(
             "aktørId" to aktørId,
@@ -1034,8 +1034,8 @@ internal object Testmeldingfabrikk {
             compute("utbetalingId") { _, _ -> utbetalingId }
             if (utbetalingId != null) {
                 val sykepengegrunnlagsfakta = when (fastsattType) {
-                    "EtterSkjønn" -> fastsattEtterSkjønn(organisasjonsnummer, inkluderSpleisverdier)
-                    "EtterHovedregel" -> fastsattEtterHovedregel(organisasjonsnummer, inkluderSpleisverdier)
+                    "EtterSkjønn" -> fastsattEtterSkjønn(organisasjonsnummer, settInnAvviksvurderingFraSpleis)
+                    "EtterHovedregel" -> fastsattEtterHovedregel(organisasjonsnummer, settInnAvviksvurderingFraSpleis)
                     "IInfotrygd" -> fastsattIInfotrygd()
                     else -> throw IllegalArgumentException("$fastsattType er ikke en gyldig fastsatt-type")
                 }
@@ -1070,7 +1070,7 @@ internal object Testmeldingfabrikk {
 
     private fun fastsattEtterSkjønn(
         organisasjonsnummer: String,
-        inkluderSpleisverdier: Boolean = true,
+        settInnAvviksvurderingFraSpleis: Boolean = true,
     ): Map<String, Any> {
         return mutableMapOf(
             "fastsatt" to "EtterSkjønn",
@@ -1086,7 +1086,7 @@ internal object Testmeldingfabrikk {
                 )
             )
         ).apply {
-            if (inkluderSpleisverdier) {
+            if (settInnAvviksvurderingFraSpleis) {
                 this["innrapportertÅrsinntekt"] = 600000.0
                 this["avviksprosent"] = 16.67
             }
@@ -1096,7 +1096,7 @@ internal object Testmeldingfabrikk {
 
     private fun fastsattEtterHovedregel(
         organisasjonsnummer: String,
-        inkluderSpleisverdier: Boolean = true,
+        settInnAvviksvurderingFraSpleis: Boolean = true,
     ): Map<String, Any> {
         return mutableMapOf(
             "fastsatt" to "EtterHovedregel",
@@ -1110,7 +1110,7 @@ internal object Testmeldingfabrikk {
                 )
             )
         ).apply {
-            if (inkluderSpleisverdier) {
+            if (settInnAvviksvurderingFraSpleis) {
                 this["innrapportertÅrsinntekt"] = 600000.0
                 this["avviksprosent"] = 0
             }

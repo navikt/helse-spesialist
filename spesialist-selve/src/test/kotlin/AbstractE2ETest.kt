@@ -1008,7 +1008,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         fom: LocalDate = 1.januar,
         tom: LocalDate = 31.januar,
         skjæringstidspunkt: LocalDate = fom,
-        inkluderSpleisverdier: Boolean = true,
+        settInnAvviksvurderingFraSpleis: Boolean = true,
     ) {
         val utbetalingId = if (this::utbetalingId.isInitialized) this.utbetalingId else null
         sisteMeldingId = meldingssender.sendAvsluttetMedVedtak(
@@ -1021,7 +1021,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             tom = tom,
             skjæringstidspunkt = skjæringstidspunkt,
             fastsattType = fastsattType,
-            inkluderSpleisverdier = inkluderSpleisverdier,
+            settInnAvviksvurderingFraSpleis = settInnAvviksvurderingFraSpleis,
         )
     }
 

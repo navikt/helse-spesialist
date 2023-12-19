@@ -94,7 +94,7 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
             )
         )
         håndterSaksbehandlerløsning()
-        håndterAvsluttetMedVedtak(fastsattType = "EtterHovedregel", inkluderSpleisverdier = false)
+        håndterAvsluttetMedVedtak(fastsattType = "EtterHovedregel", settInnAvviksvurderingFraSpleis = false)
 
         val sisteHendelse = inspektør.meldinger().last()
         assertEquals("vedtak_fattet", sisteHendelse["@event_name"].asText())
