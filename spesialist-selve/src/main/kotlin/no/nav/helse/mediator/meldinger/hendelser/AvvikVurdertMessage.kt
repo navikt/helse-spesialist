@@ -14,7 +14,7 @@ import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.asYearMonth
 
-class AvviksvurderingMessage(packet: JsonMessage) {
+class AvvikVurdertMessage(packet: JsonMessage) {
 
     private val unikId = packet["avviksvurdering.id"].asUUID()
     private val fødselsnummer = packet["fødselsnummer"].asText()

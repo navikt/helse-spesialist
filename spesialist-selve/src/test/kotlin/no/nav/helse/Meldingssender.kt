@@ -762,10 +762,10 @@ internal class Meldingssender(private val testRapid: TestRapid) {
         )
     }
 
-    fun sendAvviksvurdering(avviksvurderingTestdata: AvviksvurderingTestdata): UUID =
+    fun sendAvvikVurdert(avviksvurderingTestdata: AvviksvurderingTestdata): UUID =
         newUUID.also { id ->
             testRapid.sendTestMessage(
-                Testmeldingfabrikk.lagAvviksvurdering(avviksvurderingTestdata, id)
+                Testmeldingfabrikk.lagAvvikVurdert(avviksvurderingTestdata, id)
             )
         }
 

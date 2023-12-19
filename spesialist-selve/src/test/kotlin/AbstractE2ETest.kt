@@ -250,7 +250,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     private fun håndterAvviksvurdering(avviksvurderingTestdata: AvviksvurderingTestdata) {
-        sisteMeldingId = meldingssender.sendAvviksvurdering(avviksvurderingTestdata)
+        sisteMeldingId = meldingssender.sendAvvikVurdert(avviksvurderingTestdata)
     }
 
     private fun forlengelseFremTilÅpneOppgaver(

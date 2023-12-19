@@ -8,7 +8,7 @@ import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.MetrikkRiver
 import no.nav.helse.db.AvviksvurderingDao
-import no.nav.helse.mediator.meldinger.AvviksvurderingRiver
+import no.nav.helse.mediator.meldinger.AvvikVurdertRiver
 import no.nav.helse.mediator.meldinger.EndretSkjermetinfoRiver
 import no.nav.helse.mediator.meldinger.GodkjenningsbehovRiver
 import no.nav.helse.mediator.meldinger.GosysOppgaveEndretRiver
@@ -138,7 +138,7 @@ internal class HendelseMediator(
             DokumentRiver(it, dokumentDao)
             VedtakFattetRiver(it, this)
             NyeVarslerRiver(it, this)
-            AvviksvurderingRiver(it, this)
+            AvvikVurdertRiver(it, this)
             VarseldefinisjonRiver(it, this)
             VedtaksperiodeNyUtbetalingRiver(it, this)
             SykefraværstilfellerRiver(it, this)

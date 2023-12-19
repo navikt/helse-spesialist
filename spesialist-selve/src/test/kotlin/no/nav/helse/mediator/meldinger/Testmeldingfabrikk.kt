@@ -1084,7 +1084,7 @@ internal object Testmeldingfabrikk {
         "@opprettet" to LocalDateTime.now()
     )
 
-    fun lagAvviksvurdering(avviksvurderingTestdata: AvviksvurderingTestdata, id: UUID): String =
+    fun lagAvvikVurdert(avviksvurderingTestdata: AvviksvurderingTestdata, id: UUID): String =
         nyHendelse(
             id, "avvik_vurdert", mapOf(
                 "fødselsnummer" to avviksvurderingTestdata.fødselsnummer,

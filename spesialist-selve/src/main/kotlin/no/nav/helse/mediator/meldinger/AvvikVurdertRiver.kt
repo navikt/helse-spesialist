@@ -3,7 +3,7 @@ package no.nav.helse.mediator.meldinger
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.mediator.meldinger.hendelser.AvviksvurderingMessage
+import no.nav.helse.mediator.meldinger.hendelser.AvvikVurdertMessage
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -11,7 +11,7 @@ import no.nav.helse.rapids_rivers.River
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-internal class AvviksvurderingRiver(
+internal class AvvikVurdertRiver(
     rapidsConnection: RapidsConnection,
     private val mediator: HendelseMediator,
 ) : River.PacketListener {
@@ -57,15 +57,15 @@ internal class AvviksvurderingRiver(
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         val hendelseId = UUID.fromString(packet["@id"].asText())
         logg.info(
-            "Mottok avviksvurdering for {}",
+            "Mottok avvik_vurdert for {}",
             kv("hendelseId", hendelseId)
         )
         sikkerlogg.info(
-            "Mottok avviksvurdering med {}, {}",
+            "Mottok avvik_vurdert med {}, {}",
             kv("hendelseId", hendelseId),
             kv("hendelse", packet.toJson())
         )
-        val message = AvviksvurderingMessage(packet)
+        val message = AvvikVurdertMessage(packet)
         message.sendInnTil(mediator)
     }
 }
