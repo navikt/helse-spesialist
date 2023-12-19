@@ -3,6 +3,7 @@ package no.nav.helse.modell.automatisering
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.GodkjenningMediator
+import no.nav.helse.modell.Toggle
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
@@ -34,7 +35,8 @@ internal class AutomatiskAvvisningCommand(
         val avvisGrunnetVergemål = underVergemål && !skalBeholdes
         val erSkjønnsfastsettelse = sykefraværstilfelle.kreverSkjønnsfastsettelse(vedtaksperiodeId)
 
-        val avvisGrunnetSkjønnsfastsettelse = kanAvvises
+        val avvisGrunnetSkjønnsfastsettelse = !Toggle.Avviksvurdering.enabled
+                && kanAvvises
                 && erSkjønnsfastsettelse
                 && !erRevurdering
                 && !fødselsnummer.startsWith("31")
