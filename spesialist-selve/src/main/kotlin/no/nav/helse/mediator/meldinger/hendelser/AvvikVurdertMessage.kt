@@ -53,7 +53,6 @@ class AvvikVurdertMessage(packet: JsonMessage) {
     }
 
     private fun sammenligningsgrunnlag(json: JsonNode): SammenligningsgrunnlagDto = SammenligningsgrunnlagDto(
-        unikId = json["id"].asUUID(),
         totalbeløp = json["totalbeløp"].asDouble(),
         innrapporterteInntekter = innrapporterteInntekter(json["innrapporterteInntekter"])
     )

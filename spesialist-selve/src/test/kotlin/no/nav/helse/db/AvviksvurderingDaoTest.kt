@@ -205,7 +205,7 @@ internal class AvviksvurderingDaoTest : DatabaseIntegrationTest() {
             skjæringstidspunkt = skjæringstidspunkt,
             opprettet = opprettet,
             avviksprosent = 26.0,
-            sammenligningsgrunnlag = sammenligningsgrunnlag(unikId),
+            sammenligningsgrunnlag = sammenligningsgrunnlag(),
             beregningsgrunnlag = beregningsggrunnlag(),
         )
     }
@@ -221,13 +221,12 @@ internal class AvviksvurderingDaoTest : DatabaseIntegrationTest() {
         skjæringstidspunkt = skjæringstidspunkt,
         opprettet = opprettet,
         avviksprosent = 26.0,
-        sammenligningsgrunnlag = sammenligningsgrunnlag(unikId),
+        sammenligningsgrunnlag = sammenligningsgrunnlag(),
         beregningsgrunnlag = beregningsggrunnlag(),
     )
 
-    private fun sammenligningsgrunnlag(unikId: UUID = UUID.randomUUID()): SammenligningsgrunnlagDto =
+    private fun sammenligningsgrunnlag(): SammenligningsgrunnlagDto =
         SammenligningsgrunnlagDto(
-            unikId = unikId,
             totalbeløp = 50000.0,
             innrapporterteInntekter = listOf(innrapportertInntekt())
         )

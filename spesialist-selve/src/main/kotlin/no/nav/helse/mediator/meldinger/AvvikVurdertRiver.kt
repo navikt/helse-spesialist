@@ -32,7 +32,6 @@ internal class AvvikVurdertRiver(
                     "avviksvurdering.beregningsgrunnlag.totalbeløp",
                     "avviksvurdering.sammenligningsgrunnlag",
                     "avviksvurdering.sammenligningsgrunnlag.totalbeløp",
-                    "avviksvurdering.sammenligningsgrunnlag.id",
                     "avviksvurdering.avviksprosent"
                 )
                 it.requireArray("avviksvurdering.beregningsgrunnlag.omregnedeÅrsinntekter") {

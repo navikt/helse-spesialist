@@ -24,7 +24,7 @@ internal class AvviksvurderingTest {
             skjæringstidspunkt = skjæringstidspunkt,
             opprettet = opprettet,
             avviksprosent = avviksprosent,
-            sammenligningsgrunnlag = sammenligningsgrunnlag(unikId = unikId),
+            sammenligningsgrunnlag = sammenligningsgrunnlag(),
             beregningsgrunnlag = beregningsggrunnlag(),
         )
 
@@ -55,7 +55,7 @@ internal class AvviksvurderingTest {
             skjæringstidspunkt = skjæringstidspunkt,
             opprettet = opprettet,
             avviksprosent = avviksprosent,
-            sammenligningsgrunnlag = sammenligningsgrunnlag(unikId = unikId),
+            sammenligningsgrunnlag = sammenligningsgrunnlag(),
             beregningsgrunnlag = beregningsggrunnlag(),
         )
 
@@ -68,7 +68,7 @@ internal class AvviksvurderingTest {
                 skjæringstidspunkt = skjæringstidspunkt,
                 opprettet = opprettet,
                 avviksprosent = avviksprosent,
-                sammenligningsgrunnlag = sammenligningsgrunnlag(unikId = unikId),
+                sammenligningsgrunnlag = sammenligningsgrunnlag(),
                 beregningsgrunnlag = beregningsggrunnlag(),
             ),
             avviksvurdering
@@ -80,7 +80,7 @@ internal class AvviksvurderingTest {
                 skjæringstidspunkt = skjæringstidspunkt,
                 opprettet = opprettet,
                 avviksprosent = avviksprosent,
-                sammenligningsgrunnlag = sammenligningsgrunnlag(unikId = unikId),
+                sammenligningsgrunnlag = sammenligningsgrunnlag(),
                 beregningsgrunnlag = beregningsggrunnlag(),
             ).hashCode(),
             avviksvurdering.hashCode()
@@ -99,13 +99,12 @@ internal class AvviksvurderingTest {
         skjæringstidspunkt = skjæringstidspunkt,
         opprettet = opprettet,
         avviksprosent = avviksprosent,
-        sammenligningsgrunnlag = sammenligningsgrunnlag(unikId),
+        sammenligningsgrunnlag = sammenligningsgrunnlag(),
         beregningsgrunnlag = beregningsggrunnlag(),
     )
 
-    private fun sammenligningsgrunnlag(unikId: UUID = UUID.randomUUID()): SammenligningsgrunnlagDto =
+    private fun sammenligningsgrunnlag(): SammenligningsgrunnlagDto =
         SammenligningsgrunnlagDto(
-            unikId = unikId,
             totalbeløp = 50000.0,
             innrapporterteInntekter = listOf(innrapportertInntekt())
         )

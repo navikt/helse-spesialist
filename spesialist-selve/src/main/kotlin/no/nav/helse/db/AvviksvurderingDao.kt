@@ -30,8 +30,8 @@ class AvviksvurderingDao(private val dataSource: DataSource) : HelseDao(dataSour
 
             @Language("PostgreSQL")
             val opprettSammenligningsgrunnlagQuery = """
-                INSERT INTO sammenligningsgrunnlag(unik_id, fødselsnummer, skjæringstidspunkt, opprettet, sammenligningsgrunnlag)
-                VALUES (:unik_id, :fodselsnummer, :skjaeringstidspunkt, :opprettet, CAST(:sammenligningsgrunnlag as json));
+                INSERT INTO sammenligningsgrunnlag(fødselsnummer, skjæringstidspunkt, opprettet, sammenligningsgrunnlag)
+                VALUES (:fodselsnummer, :skjaeringstidspunkt, :opprettet, CAST(:sammenligningsgrunnlag as json));
             """.trimIndent()
 
             session.transaction { transactionalSession ->
@@ -39,7 +39,6 @@ class AvviksvurderingDao(private val dataSource: DataSource) : HelseDao(dataSour
                     queryOf(
                         opprettSammenligningsgrunnlagQuery,
                         mapOf(
-                            "unik_id" to avviksvurdering.sammenligningsgrunnlag.unikId,
                             "fodselsnummer" to avviksvurdering.fødselsnummer,
                             "skjaeringstidspunkt" to avviksvurdering.skjæringstidspunkt,
                             "opprettet" to avviksvurdering.opprettet,
