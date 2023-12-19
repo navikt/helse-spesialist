@@ -123,7 +123,6 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
             opprettet = 1.januar.atStartOfDay(),
             avviksprosent = avviksprosent,
             sammenligningsgrunnlag = Sammenligningsgrunnlag(
-                unikId = UUID.randomUUID(),
                 totalbeløp = 10000.0,
                 innrapporterteInntekter = listOf(
                     InnrapportertInntekt(

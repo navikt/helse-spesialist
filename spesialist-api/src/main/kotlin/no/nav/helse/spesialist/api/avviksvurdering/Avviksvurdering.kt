@@ -17,7 +17,6 @@ data class Avviksvurdering(
 )
 
 data class Sammenligningsgrunnlag(
-    val unikId: UUID,
     val totalbeløp: Double,
     val innrapporterteInntekter: List<InnrapportertInntekt>,
 )
