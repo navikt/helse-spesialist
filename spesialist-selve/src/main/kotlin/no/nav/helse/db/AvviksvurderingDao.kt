@@ -93,12 +93,12 @@ class AvviksvurderingDao(private val dataSource: DataSource) : HelseDao(dataSour
             FROM avviksvurdering av 
             INNER JOIN sammenligningsgrunnlag sg ON av.sammenligningsgrunnlag_ref = sg.id
             INNER JOIN vilkarsgrunnlag_per_avviksvurdering vpa ON vpa.avviksvurdering_ref = av.unik_id
-            WHERE vpa.vilkårsgrunnlag_id = :vilkårsgrunnlagId
+            WHERE vpa.vilkårsgrunnlag_id = :vilkarsgrunnlagId
             ORDER BY av.opprettet DESC
             LIMIT 1;
         """.trimIndent(),
         mapOf(
-            "vilkårsgrunnlagId" to vilkårsgrunnlagId,
+            "vilkarsgrunnlagId" to vilkårsgrunnlagId,
         )
     ).single {
         ApiAvviksvurdering(
