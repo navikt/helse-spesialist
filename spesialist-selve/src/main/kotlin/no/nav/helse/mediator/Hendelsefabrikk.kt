@@ -196,11 +196,12 @@ internal class Hendelsefabrikk(
         inntektskilde: Inntektskilde,
         orgnummereMedRelevanteArbeidsforhold: List<String>,
         kanAvvises: Boolean,
-        avviksvurderingId: UUID,
+        avviksvurderingId: UUID?,
         vilkårsgrunnlagId: UUID,
         json: String,
     ): Godkjenningsbehov {
-        avviksvurderingDao.opprettKobling(avviksvurderingId, vilkårsgrunnlagId)
+        if (avviksvurderingId != null)
+            avviksvurderingDao.opprettKobling(avviksvurderingId, vilkårsgrunnlagId)
         return Godkjenningsbehov(
             id = id,
             fødselsnummer = fødselsnummer,

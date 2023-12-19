@@ -328,7 +328,7 @@ internal class HendelseMediator(
         orgnummereMedRelevanteArbeidsforhold: List<String>,
         kanAvvises: Boolean,
         context: MessageContext,
-        avviksvurderingId: UUID,
+        avviksvurderingId: UUID?,
         vilkårsgrunnlagId: UUID,
     ) {
         if (oppgaveDao.harGyldigOppgave(utbetalingId) || vedtakDao.erAutomatiskGodkjent(utbetalingId)) {

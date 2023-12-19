@@ -74,4 +74,46 @@ internal class GodkjenningsbehovRiverTest {
             any(),
         ) }
     }
+
+    @Test
+    fun `leser Godkjenningbehov uten avviksvurderingId`() {
+        val relevanteArbeidsforhold = listOf(ORGNR)
+        testRapid.sendTestMessage(
+            Testmeldingfabrikk.lagGodkjenningsbehov(
+                aktørId = AKTØR,
+                fødselsnummer = FNR,
+                vedtaksperiodeId = VEDTAKSPERIODE,
+                utbetalingId = UTBETALING_ID,
+                organisasjonsnummer = ORGNR,
+                periodeFom = FOM,
+                periodeTom = TOM,
+                skjæringstidspunkt = FOM,
+                inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE,
+                orgnummereMedRelevanteArbeidsforhold = relevanteArbeidsforhold,
+                id = HENDELSE,
+                avviksvurderingId = null,
+            )
+        )
+        verify(exactly = 1) { mediator.godkjenningsbehov(
+            message = any(),
+            id = HENDELSE,
+            fødselsnummer = FNR,
+            aktørId = AKTØR,
+            organisasjonsnummer = ORGNR,
+            periodeFom = FOM,
+            periodeTom = TOM,
+            skjæringstidspunkt = FOM,
+            vedtaksperiodeId = VEDTAKSPERIODE,
+            utbetalingId = UTBETALING_ID,
+            periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+            førstegangsbehandling = true,
+            utbetalingtype = Utbetalingtype.UTBETALING,
+            inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE,
+            orgnummereMedRelevanteArbeidsforhold = relevanteArbeidsforhold,
+            kanAvvises = any(),
+            context = any(),
+            avviksvurderingId = null,
+            vilkårsgrunnlagId = any(),
+        ) }
+    }
 }

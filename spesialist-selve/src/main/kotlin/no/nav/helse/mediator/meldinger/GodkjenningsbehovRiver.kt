@@ -85,7 +85,7 @@ internal class GodkjenningsbehovRiver(
                 .takeUnless(JsonNode::isMissingOrNull)
                 ?.map { it.asText() } ?: emptyList(),
             kanAvvises = packet["Godkjenning.kanAvvises"].asBoolean(),
-            avviksvurderingId = UUID.fromString(packet["avviksvurderingId"].asText()),
+            avviksvurderingId = packet["avviksvurderingId"].takeUnless { it.isMissingOrNull() }?.let { UUID.fromString(packet["avviksvurderingId"].asText()) },
             vilkårsgrunnlagId = UUID.fromString(packet["Godkjenning.vilkårsgrunnlagId"].asText()),
             context = context
         )

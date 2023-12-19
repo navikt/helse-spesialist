@@ -244,11 +244,11 @@ internal object Testmeldingfabrikk {
         kanAvvises: Boolean = true,
         id: UUID = UUID.randomUUID(),
         vilkårsgrunnlagId: UUID = UUID.randomUUID(),
-        avviksvurderingId: UUID = UUID.randomUUID(),
+        avviksvurderingId: UUID? = UUID.randomUUID(),
     ) =
         nyHendelse(
             id, "behov",
-            mapOf(
+            mutableMapOf(
                 "@behov" to listOf("Godkjenning"),
                 "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer,
@@ -267,8 +267,11 @@ internal object Testmeldingfabrikk {
                     "kanAvvises" to kanAvvises,
                     "vilkårsgrunnlagId" to vilkårsgrunnlagId
                 ),
-                "avviksvurderingId" to avviksvurderingId
-            )
+            ).apply {
+                if (avviksvurderingId != null) {
+                    put("avviksvurderingId", avviksvurderingId)
+                }
+            }
         )
 
     private fun arbeidsgiverinformasjon(ekstraArbeidsgivere: List<ArbeidsgiverinformasjonJson>) =
