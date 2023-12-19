@@ -1,6 +1,5 @@
 package no.nav.helse.mediator.meldinger.hendelser
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import java.util.UUID
@@ -29,7 +28,7 @@ internal class AvsluttetMedVedtakMessage(packet: JsonMessage, private val avviks
     private val vedtakFattetTidspunkt = packet["vedtakFattetTidspunkt"].asLocalDateTime()
     private val vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
-    private val utbetalingId = packet["utbetalingId"].takeUnless(JsonNode::isMissingOrNull)?.asUUID()
+    private val utbetalingId = packet["utbetalingId"].asUUID()
     private val skjæringstidspunkt = packet["skjæringstidspunkt"].asLocalDate()
     private val hendelser = packet["hendelser"].map { it.asUUID() }
     private val sykepengegrunnlag = packet["sykepengegrunnlag"].asDouble()
@@ -38,9 +37,7 @@ internal class AvsluttetMedVedtakMessage(packet: JsonMessage, private val avviks
     private val begrensning = packet["begrensning"].asText()
     private val inntekt = packet["inntekt"].asDouble()
     private val tags = packet["tags"].map { it.asText() }
-    private val sykepengegrunnlagsfakta = packet["sykepengegrunnlagsfakta"].takeUnless { it.isMissingOrNull() }?.let {
-        sykepengegrunnlagsfakta(packet, faktatype(packet))
-    }
+    private val sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(packet, faktatype(packet))
     internal fun skjæringstidspunkt() = skjæringstidspunkt
     internal fun fødselsnummer() = fødselsnummer
 

@@ -17,19 +17,6 @@ import org.junit.jupiter.api.Test
 internal class FattVedtakE2ETest: AbstractE2ETest() {
 
     @Test
-    fun `Fatt vedtak for auu-periode, gammelt format`() {
-        håndterSøknad()
-        håndterVedtaksperiodeOpprettet()
-        håndterAvsluttetMedVedtak()
-        val hendelser = inspektør.meldinger()
-        assertEquals(1, hendelser.size)
-        val hendelse = hendelser.single()
-        assertEquals("vedtak_fattet", hendelse["@event_name"].asText())
-        assertEquals(0, hendelse["begrunnelser"].size())
-        assertNull(hendelse["utbetalingId"])
-    }
-
-    @Test
     fun `Fatt vedtak for auu-periode`() {
         håndterSøknad()
         håndterVedtaksperiodeOpprettet()

@@ -20,25 +20,40 @@ internal class AvsluttetMedVedtakRiver(
     init {
         River(rapidsConnection).apply {
             validate {
-                it.demandAny("@event_name", listOf("utkast_til_vedtak", "avsluttet_med_vedtak"))
+                it.demandValue("@event_name", "avsluttet_med_vedtak")
                 it.requireKey("@id", "fødselsnummer", "aktørId", "vedtaksperiodeId", "organisasjonsnummer")
                 it.requireKey("fom", "tom", "skjæringstidspunkt")
                 it.requireArray("hendelser")
                 it.requireKey("sykepengegrunnlag", "grunnlagForSykepengegrunnlag", "grunnlagForSykepengegrunnlagPerArbeidsgiver")
                 it.requireKey("begrensning", "inntekt", "vedtakFattetTidspunkt", "tags")
+                it.requireKey("utbetalingId")
 
+                it.requireAny("sykepengegrunnlagsfakta.fastsatt", listOf("EtterHovedregel", "IInfotrygd", "EtterSkjønn"))
+                it.requireKey("sykepengegrunnlagsfakta.omregnetÅrsinntekt")
+                it.require("sykepengegrunnlagsfakta.fastsatt") { fastsattNode ->
+                    when (fastsattNode.asText()) {
+                        "EtterHovedregel" -> {
+                            it.requireKey(
+                                "sykepengegrunnlagsfakta.6G",
+                                "sykepengegrunnlagsfakta.tags",
+                                "sykepengegrunnlagsfakta.arbeidsgivere",
+                            )
+                        }
+                        "EtterSkjønn" -> {
+                            it.requireKey(
+                                "sykepengegrunnlagsfakta.6G",
+                                "sykepengegrunnlagsfakta.tags",
+                                "sykepengegrunnlagsfakta.arbeidsgivere",
+                                "sykepengegrunnlagsfakta.skjønnsfastsatt",
+                            )
+                        }
+                        else -> {}
+                    }
+                }
                 it.interestedIn(
-                    "sykepengegrunnlagsfakta",
-                    "sykepengegrunnlagsfakta.fastsatt",
-                    "sykepengegrunnlagsfakta.omregnetÅrsinntekt",
                     "sykepengegrunnlagsfakta.innrapportertÅrsinntekt",
                     "sykepengegrunnlagsfakta.avviksprosent",
-                    "sykepengegrunnlagsfakta.6G",
-                    "sykepengegrunnlagsfakta.skjønnsfastsatt",
-                    "sykepengegrunnlagsfakta.tags",
-                    "sykepengegrunnlagsfakta.arbeidsgivere",
                 )
-                it.interestedIn("utbetalingId")
             }
         }.register(this)
     }

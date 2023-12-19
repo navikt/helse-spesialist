@@ -1,6 +1,5 @@
 package no.nav.helse.mediator.meldinger
 
-import com.fasterxml.jackson.databind.node.ObjectNode
 import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
@@ -26,17 +25,6 @@ internal class AvsluttetMedVedtakRiverTest {
         verify(exactly = 2) { mediator.håndter(any<AvsluttetMedVedtakMessage>()) }
         testRapid.sendTestMessage(utkastTilVedtak("IInfotrygd"))
         verify(exactly = 3) { mediator.håndter(any<AvsluttetMedVedtakMessage>()) }
-        testRapid.sendTestMessage(utkastTilVedtakAuu())
-        verify(exactly = 4) { mediator.håndter(any<AvsluttetMedVedtakMessage>()) }
-    }
-
-    @Test
-    fun `støtter det nye event-navnet`() {
-        val message = no.nav.helse.objectMapper.readTree(utkastTilVedtak("EtterHovedregel")).let {
-            (it as ObjectNode).put("@event_name", "avsluttet_med_vedtak")
-        }.toString()
-        testRapid.sendTestMessage(message)
-        verify(exactly = 1) { mediator.håndter(any<AvsluttetMedVedtakMessage>()) }
     }
 
     @Language("JSON")
@@ -50,7 +38,7 @@ internal class AvsluttetMedVedtakRiverTest {
 
         return """
         {
-          "@event_name": "utkast_til_vedtak",
+          "@event_name": "avsluttet_med_vedtak",
           "organisasjonsnummer": "987654321",
           "vedtaksperiodeId": "${UUID.randomUUID()}",
           "fom": "2018-01-01",
@@ -69,36 +57,6 @@ internal class AvsluttetMedVedtakRiverTest {
           "inntekt": 60000.0,
           "vedtakFattetTidspunkt": "2018-02-01T00:00:00.000",
           "utbetalingId": "${UUID.randomUUID()}",
-          "@id": "${UUID.randomUUID()}",
-          "@opprettet": "2018-02-01T00:00:00.000",
-          "aktørId": "1234567891011",
-          "fødselsnummer": "12345678910",
-          "tags": ["IngenNyArbeidsgiverperiode"]
-        }
-    """.trimIndent()
-    }
-
-    @Language("JSON")
-    private fun utkastTilVedtakAuu(): String {
-        return """
-        {
-          "@event_name": "utkast_til_vedtak",
-          "organisasjonsnummer": "987654321",
-          "vedtaksperiodeId": "${UUID.randomUUID()}",
-          "fom": "2018-01-01",
-          "tom": "2018-01-31",
-          "hendelser": [
-            "${UUID.randomUUID()}"
-          ],
-          "skjæringstidspunkt": "2018-01-01",
-          "sykepengegrunnlag": 0.0,
-          "grunnlagForSykepengegrunnlag": 0.0,
-          "grunnlagForSykepengegrunnlagPerArbeidsgiver": {
-            "987654321": 0.0
-          },
-          "begrensning": "VET_IKKE",
-          "inntekt": 0.0,
-          "vedtakFattetTidspunkt": "2018-02-01T00:00:00.000",
           "@id": "${UUID.randomUUID()}",
           "@opprettet": "2018-02-01T00:00:00.000",
           "aktørId": "1234567891011",

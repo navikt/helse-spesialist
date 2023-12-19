@@ -9,7 +9,7 @@ internal class AvsluttetMedVedtak(
     private val aktørId: String,
     private val organisasjonsnummer: String,
     private val vedtaksperiodeId: UUID,
-    private val utbetalingId: UUID?,
+    private val utbetalingId: UUID,
     private val skjæringstidspunkt: LocalDate,
     private val hendelser: List<UUID>,
     private val sykepengegrunnlag: Double,
@@ -17,7 +17,7 @@ internal class AvsluttetMedVedtak(
     private val grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Double>,
     private val begrensning: String,
     private val inntekt: Double,
-    private val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta?,
+    private val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta,
     private val fom: LocalDate,
     private val tom: LocalDate,
     private val vedtakFattetTidspunkt: LocalDateTime,
@@ -27,7 +27,7 @@ internal class AvsluttetMedVedtak(
         vedtakBuilder.fødselsnummer(fødselsnummer)
         vedtakBuilder.organisasjonsnummer(organisasjonsnummer)
         vedtakBuilder.vedtaksperiodeId(vedtaksperiodeId)
-        utbetalingId?.also { vedtakBuilder.utbetalingId(it) }
+        vedtakBuilder.utbetalingId(utbetalingId)
         vedtakBuilder.skjæringstidspunkt(skjæringstidspunkt)
         vedtakBuilder.hendelser(hendelser)
         vedtakBuilder.sykepengegrunnlag(sykepengegrunnlag)
@@ -40,6 +40,6 @@ internal class AvsluttetMedVedtak(
         vedtakBuilder.aktørId(aktørId)
         vedtakBuilder.vedtakFattetTidspunkt(vedtakFattetTidspunkt)
         vedtakBuilder.tags(tags)
-        sykepengegrunnlagsfakta?.also { vedtakBuilder.sykepengegrunnlagsfakta(it) }
+        vedtakBuilder.sykepengegrunnlagsfakta(sykepengegrunnlagsfakta)
     }
 }
