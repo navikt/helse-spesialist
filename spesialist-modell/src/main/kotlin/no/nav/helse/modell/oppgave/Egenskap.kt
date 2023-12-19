@@ -37,6 +37,7 @@ enum class Egenskap(
     FULLMAKT,
     SKJØNNSFASTSETTELSE,
     PÅ_VENT(kategori = Status),
+    TILBAKEDATERT,
     VERGEMÅL;
 
     enum class Kategori {

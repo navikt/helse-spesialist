@@ -44,6 +44,7 @@ enum class Egenskap {
     VERGEMAL,
     SKJONNSFASTSETTELSE,
     PA_VENT,
+    TILBAKEDATERT
 }
 
 enum class Kategori {

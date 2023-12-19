@@ -84,5 +84,6 @@ enum class EgenskapForDatabase {
     INFOTRYGDFORLENGELSE,
     OVERGANG_FRA_IT,
     SKJØNNSFASTSETTELSE,
-    PÅ_VENT
+    PÅ_VENT,
+    TILBAKEDATERT
 }

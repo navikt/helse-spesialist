@@ -157,6 +157,7 @@ internal object OppgaveMapper {
         Egenskap.OVERGANG_FRA_IT -> EgenskapForApi.OVERGANG_FRA_IT
         Egenskap.SKJØNNSFASTSETTELSE -> EgenskapForApi.SKJONNSFASTSETTELSE
         Egenskap.PÅ_VENT -> EgenskapForApi.PA_VENT
+        Egenskap.TILBAKEDATERT -> EgenskapForApi.TILBAKEDATERT
     }
 
     private fun Egenskap.Kategori.tilApiversjon(): Kategori = when (this) {
@@ -195,6 +196,7 @@ internal object OppgaveMapper {
         EgenskapForDatabase.OVERGANG_FRA_IT -> Egenskap.OVERGANG_FRA_IT
         EgenskapForDatabase.SKJØNNSFASTSETTELSE -> Egenskap.SKJØNNSFASTSETTELSE
         EgenskapForDatabase.PÅ_VENT -> Egenskap.PÅ_VENT
+        EgenskapForDatabase.TILBAKEDATERT -> Egenskap.TILBAKEDATERT
     }
 
     internal fun Egenskap.tilDatabaseversjon(): EgenskapForDatabase = when (this) {
@@ -224,6 +226,7 @@ internal object OppgaveMapper {
         Egenskap.OVERGANG_FRA_IT -> EgenskapForDatabase.OVERGANG_FRA_IT
         Egenskap.SKJØNNSFASTSETTELSE -> EgenskapForDatabase.SKJØNNSFASTSETTELSE
         Egenskap.PÅ_VENT -> EgenskapForDatabase.PÅ_VENT
+        Egenskap.TILBAKEDATERT -> EgenskapForDatabase.TILBAKEDATERT
     }
 
     internal fun Egenskap.tilKafkaversjon(): String {
@@ -254,6 +257,7 @@ internal object OppgaveMapper {
             Egenskap.OVERGANG_FRA_IT -> "OVERGANG_FRA_IT"
             Egenskap.SKJØNNSFASTSETTELSE -> "SKJØNNSFASTSETTELSE"
             Egenskap.PÅ_VENT -> "PÅ_VENT"
+            Egenskap.TILBAKEDATERT -> "TILBAKEDATERT"
         }
     }
 
@@ -284,5 +288,6 @@ internal object OppgaveMapper {
         EgenskapForApi.VERGEMAL -> EgenskapForDatabase.VERGEMÅL
         EgenskapForApi.SKJONNSFASTSETTELSE -> EgenskapForDatabase.SKJØNNSFASTSETTELSE
         EgenskapForApi.PA_VENT -> EgenskapForDatabase.PÅ_VENT
+        EgenskapForApi.TILBAKEDATERT -> EgenskapForDatabase.TILBAKEDATERT
     }
 }
