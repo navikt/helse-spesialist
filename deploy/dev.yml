@@ -101,3 +101,5 @@ spec:
       value: api://dev-gcp.team-rocket.digdir-krr-proxy/.default
     - name: AUTOMATISER_SPESIALSAK
       value: "true"
+    - name: AVVIKSVURDERING
+      value: "true"

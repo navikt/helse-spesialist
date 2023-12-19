@@ -5,6 +5,7 @@ import java.time.LocalDate
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.modell.Toggle
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.utbetaling.Utbetalingtype.Companion.values
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
@@ -44,7 +45,7 @@ internal class GodkjenningsbehovRiver(
                     "Godkjenning.vilkårsgrunnlagId",
                 )
                 // TODO: Require denne når ny avviksvurdering er i prod
-                it.interestedIn("avviksvurderingId")
+                if (Toggle.Avviksvurdering.enabled) it.requireKey("avviksvurderingId") else it.interestedIn("avviksvurderingId")
                 it.requireAny("Godkjenning.utbetalingtype", Utbetalingtype.gyldigeTyper.values())
                 it.interestedIn("Godkjenning.orgnummereMedRelevanteArbeidsforhold")
             }
