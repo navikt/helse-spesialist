@@ -24,7 +24,7 @@ internal class NyeVarslerRiver(
     init {
         River(rapidsConnection).apply {
             validate {
-                it.demandValue("@event_name", "aktivitetslogg_ny_aktivitet")
+                it.demandAny("@event_name", listOf("aktivitetslogg_ny_aktivitet", "nye_varsler"))
                 it.requireKey("@id", "fødselsnummer")
                 it.require("@opprettet") { message -> message.asLocalDateTime() }
                 it.requireArray("aktiviteter") {

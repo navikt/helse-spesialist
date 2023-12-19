@@ -902,7 +902,7 @@ internal object Testmeldingfabrikk {
         )
 
 
-    fun lagNyeVarsler(
+    fun lagAktivitetsloggNyAktivitet(
         fødselsnummer: String,
         id: UUID,
         vedtaksperiodeId: UUID,
@@ -919,6 +919,31 @@ internal object Testmeldingfabrikk {
         ): String {
         return nyHendelse(
             id, "aktivitetslogg_ny_aktivitet",
+            mapOf(
+                "fødselsnummer" to fødselsnummer,
+                "aktiviteter" to aktiviteter
+            )
+        )
+    }
+
+
+    fun lagNyeVarsler(
+        fødselsnummer: String,
+        id: UUID,
+        vedtaksperiodeId: UUID,
+        orgnummer: String,
+        aktiviteter: List<Map<String, Any>> =
+            listOf(
+                lagAktivitet(
+                    fødselsnummer = fødselsnummer,
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    orgnummer = orgnummer,
+                )
+            ),
+
+        ): String {
+        return nyHendelse(
+            id, "nye_varsler",
             mapOf(
                 "fødselsnummer" to fødselsnummer,
                 "aktiviteter" to aktiviteter
