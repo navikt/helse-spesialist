@@ -20,7 +20,7 @@ internal class UtkastTilVedtakRiver(
     init {
         River(rapidsConnection).apply {
             validate {
-                it.demandValue("@event_name", "utkast_til_vedtak")
+                it.demandAny("@event_name", listOf("utkast_til_vedtak", "avsluttet_med_vedtak"))
                 it.requireKey("@id", "fødselsnummer", "aktørId", "vedtaksperiodeId", "organisasjonsnummer")
                 it.requireKey("fom", "tom", "skjæringstidspunkt")
                 it.requireArray("hendelser")

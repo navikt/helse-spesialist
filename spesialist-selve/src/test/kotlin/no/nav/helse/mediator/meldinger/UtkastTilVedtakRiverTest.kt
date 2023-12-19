@@ -1,5 +1,6 @@
 package no.nav.helse.mediator.meldinger
 
+import com.fasterxml.jackson.databind.node.ObjectNode
 import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
@@ -27,6 +28,15 @@ internal class UtkastTilVedtakRiverTest {
         verify(exactly = 3) { mediator.håndter(any<UtkastTilVedtakMessage>()) }
         testRapid.sendTestMessage(utkastTilVedtakAuu())
         verify(exactly = 4) { mediator.håndter(any<UtkastTilVedtakMessage>()) }
+    }
+
+    @Test
+    fun `støtter det nye event-navnet`() {
+        val message = no.nav.helse.objectMapper.readTree(utkastTilVedtak("EtterHovedregel")).let {
+            (it as ObjectNode).put("@event_name", "avsluttet_med_vedtak")
+        }.toString()
+        testRapid.sendTestMessage(message)
+        verify(exactly = 1) { mediator.håndter(any<UtkastTilVedtakMessage>()) }
     }
 
     @Language("JSON")
