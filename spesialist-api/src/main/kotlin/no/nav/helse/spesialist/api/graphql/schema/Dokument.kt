@@ -81,6 +81,7 @@ data class DokumentInntektsmelding(
     val innsenderFulltNavn: String?,
     val innsenderTelefon: String?,
     val inntektEndringAarsak: InntektEndringAarsak? = null,
+    val avsenderSystem: AvsenderSystem? = null
 )
 
 data class Refusjon(
@@ -119,4 +120,9 @@ data class InntektEndringAarsak(
     val perioder: List<IMPeriode>? = null,
     val gjelderFra: DateString? = null,
     val bleKjent: DateString? = null
+)
+
+data class AvsenderSystem(
+    val navn: String? = null,
+    val versjon: String? = null,
 )

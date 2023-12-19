@@ -11,6 +11,7 @@ import kotlinx.coroutines.withContext
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.spesialist.api.Dokumenthåndterer
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
+import no.nav.helse.spesialist.api.graphql.schema.AvsenderSystem
 import no.nav.helse.spesialist.api.graphql.schema.DokumentInntektsmelding
 import no.nav.helse.spesialist.api.graphql.schema.EndringIRefusjon
 import no.nav.helse.spesialist.api.graphql.schema.GjenopptakelseNaturalytelse
@@ -150,6 +151,12 @@ class DokumentQuery(
                     },
                     gjelderFra = endringAarsak["gjelderFra"].takeUnless { it.isMissingOrNull() }?.asText(),
                     bleKjent = endringAarsak["bleKjent"].takeUnless { it.isMissingOrNull() }?.asText(),
+                )
+            },
+            avsenderSystem = this.path("avsenderSystem").takeUnless { it.isMissingOrNull() }?.let { avsenderSystem ->
+                AvsenderSystem(
+                    navn = avsenderSystem["navn"].takeUnless { it.isMissingOrNull() }?.asText(),
+                    versjon = avsenderSystem["versjon"].takeUnless { it.isMissingOrNull() }?.asText()
                 )
             }
         )

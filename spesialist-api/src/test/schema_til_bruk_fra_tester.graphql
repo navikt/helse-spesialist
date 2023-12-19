@@ -123,6 +123,11 @@ type Arbeidsgiverrefusjon {
     refusjonsopplysninger: [Refusjonselement!]!
 }
 
+type AvsenderSystem {
+    navn: String
+    versjon: String
+}
+
 type BehandledeOppgaver {
     oppgaver: [BehandletOppgave!]!
     totaltAntallOppgaver: Int!
@@ -209,6 +214,7 @@ type Dagoverstyring implements Overstyring {
 
 type DokumentInntektsmelding {
     arbeidsgiverperioder: [IMPeriode!]
+    avsenderSystem: AvsenderSystem
     begrunnelseForReduksjonEllerIkkeUtbetalt: String
     beregnetInntekt: Float
     bruttoUtbetalt: Float

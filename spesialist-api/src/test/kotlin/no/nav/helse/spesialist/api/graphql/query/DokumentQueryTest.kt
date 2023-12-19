@@ -249,6 +249,10 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
                         aarsak, perioder { 
                             fom, tom
                         }, gjelderFra, bleKjent                    
+                    },
+                    avsenderSystem {
+                        navn,
+                        versjon
                     }
                 }
             }
@@ -263,7 +267,7 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
             )
         }
 
-        assertEquals(15, dokument.size())
+        assertEquals(16, dokument.size())
         assertTrue(dokument["bruttoUtbetalt"].isNull)
         assertEquals(35000.0, dokument["beregnetInntekt"].asDouble())
         assertEquals("2023-08-01", dokument["inntektsdato"].asText())
