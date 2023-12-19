@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class UtkastTilVedtak(
+internal class AvsluttetMedVedtak(
     private val fødselsnummer: String,
     private val aktørId: String,
     private val organisasjonsnummer: String,

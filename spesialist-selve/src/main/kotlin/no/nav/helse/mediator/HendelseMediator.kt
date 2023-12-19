@@ -8,6 +8,7 @@ import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.MetrikkRiver
 import no.nav.helse.db.AvviksvurderingDao
+import no.nav.helse.mediator.meldinger.AvsluttetMedVedtakRiver
 import no.nav.helse.mediator.meldinger.AvvikVurdertRiver
 import no.nav.helse.mediator.meldinger.EndretSkjermetinfoRiver
 import no.nav.helse.mediator.meldinger.GodkjenningsbehovRiver
@@ -24,7 +25,6 @@ import no.nav.helse.mediator.meldinger.SykefraværstilfellerRiver
 import no.nav.helse.mediator.meldinger.SøknadSendtRiver
 import no.nav.helse.mediator.meldinger.UtbetalingAnnullertRiver
 import no.nav.helse.mediator.meldinger.UtbetalingEndretRiver
-import no.nav.helse.mediator.meldinger.UtkastTilVedtakRiver
 import no.nav.helse.mediator.meldinger.VarseldefinisjonRiver
 import no.nav.helse.mediator.meldinger.VedtakFattetRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeEndretRiver
@@ -33,7 +33,7 @@ import no.nav.helse.mediator.meldinger.VedtaksperiodeNyUtbetalingRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeOpprettetRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeReberegnetRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeSkjønnsmessigFastsettelseRiver
-import no.nav.helse.mediator.meldinger.hendelser.UtkastTilVedtakMessage
+import no.nav.helse.mediator.meldinger.hendelser.AvsluttetMedVedtakMessage
 import no.nav.helse.mediator.meldinger.løsninger.ArbeidsforholdRiver
 import no.nav.helse.mediator.meldinger.løsninger.ArbeidsgiverRiver
 import no.nav.helse.mediator.meldinger.løsninger.DokumentRiver
@@ -144,7 +144,7 @@ internal class HendelseMediator(
             SykefraværstilfellerRiver(it, this)
             MetrikkRiver(it)
             PåminnetGodkjenningsbehovRiver(it, this)
-            UtkastTilVedtakRiver(it, this, avviksvurderingDao)
+            AvsluttetMedVedtakRiver(it, this, avviksvurderingDao)
         }
     }
 
@@ -175,13 +175,13 @@ internal class HendelseMediator(
         varselRepository.lagreDefinisjon(varseldefinisjon.toDto())
     }
 
-    internal fun håndter(utkastTilVedtakMessage: UtkastTilVedtakMessage) {
-        val fødselsnummer = utkastTilVedtakMessage.fødselsnummer()
-        val skjæringstidspunkt = utkastTilVedtakMessage.skjæringstidspunkt()
+    internal fun håndter(avsluttetMedVedtakMessage: AvsluttetMedVedtakMessage) {
+        val fødselsnummer = avsluttetMedVedtakMessage.fødselsnummer()
+        val skjæringstidspunkt = avsluttetMedVedtakMessage.skjæringstidspunkt()
         val sykefraværstilfelle = hendelsefabrikk.sykefraværstilfelle(fødselsnummer, skjæringstidspunkt)
         val sykefraværstilfelleMediator = SykefraværstilfelleMediator(rapidsConnection)
         sykefraværstilfelle.registrer(sykefraværstilfelleMediator)
-        utkastTilVedtakMessage.sendInnTil(sykefraværstilfelle)
+        avsluttetMedVedtakMessage.sendInnTil(sykefraværstilfelle)
     }
 
     internal fun håndter(avviksvurdering: AvviksvurderingDto) {

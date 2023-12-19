@@ -2,7 +2,7 @@ package no.nav.helse.mediator.meldinger
 
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.mediator.meldinger.hendelser.UtkastTilVedtakMessage
+import no.nav.helse.mediator.meldinger.hendelser.AvsluttetMedVedtakMessage
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -11,7 +11,7 @@ import no.nav.helse.rapids_rivers.River
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-internal class UtkastTilVedtakRiver(
+internal class AvsluttetMedVedtakRiver(
     rapidsConnection: RapidsConnection,
     private val mediator: HendelseMediator,
     private val avviksvurderingDao: AvviksvurderingDao,
@@ -44,12 +44,12 @@ internal class UtkastTilVedtakRiver(
     }
 
     override fun onError(problems: MessageProblems, context: MessageContext) {
-        sikkerlogg.error("Forstod ikke utkast_til_vedtak:\n${problems.toExtendedReport()}")
+        sikkerlogg.error("Forstod ikke avsluttet_med_vedtak:\n${problems.toExtendedReport()}")
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        sikkerlogg.info("Mottok melding om utkast_til_vedtak:\n${packet.toJson()}")
-        mediator.håndter(UtkastTilVedtakMessage(packet, avviksvurderingDao))
+        sikkerlogg.info("Mottok melding om avsluttet_med_vedtak:\n${packet.toJson()}")
+        mediator.håndter(AvsluttetMedVedtakMessage(packet, avviksvurderingDao))
     }
 
     private companion object {

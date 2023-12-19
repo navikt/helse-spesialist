@@ -5,29 +5,29 @@ import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.mediator.meldinger.hendelser.UtkastTilVedtakMessage
+import no.nav.helse.mediator.meldinger.hendelser.AvsluttetMedVedtakMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 
-internal class UtkastTilVedtakRiverTest {
+internal class AvsluttetMedVedtakRiverTest {
     private val mediator = mockk<HendelseMediator>(relaxed = true)
     private val testRapid = TestRapid()
 
     init {
-        UtkastTilVedtakRiver(testRapid, mediator, mockk())
+        AvsluttetMedVedtakRiver(testRapid, mediator, mockk())
     }
 
     @Test
     fun `Leser inn utkast_til_vedtak-event`() {
         testRapid.sendTestMessage(utkastTilVedtak("EtterSkjønn"))
-        verify(exactly = 1) { mediator.håndter(any<UtkastTilVedtakMessage>()) }
+        verify(exactly = 1) { mediator.håndter(any<AvsluttetMedVedtakMessage>()) }
         testRapid.sendTestMessage(utkastTilVedtak("EtterHovedregel"))
-        verify(exactly = 2) { mediator.håndter(any<UtkastTilVedtakMessage>()) }
+        verify(exactly = 2) { mediator.håndter(any<AvsluttetMedVedtakMessage>()) }
         testRapid.sendTestMessage(utkastTilVedtak("IInfotrygd"))
-        verify(exactly = 3) { mediator.håndter(any<UtkastTilVedtakMessage>()) }
+        verify(exactly = 3) { mediator.håndter(any<AvsluttetMedVedtakMessage>()) }
         testRapid.sendTestMessage(utkastTilVedtakAuu())
-        verify(exactly = 4) { mediator.håndter(any<UtkastTilVedtakMessage>()) }
+        verify(exactly = 4) { mediator.håndter(any<AvsluttetMedVedtakMessage>()) }
     }
 
     @Test
@@ -36,7 +36,7 @@ internal class UtkastTilVedtakRiverTest {
             (it as ObjectNode).put("@event_name", "avsluttet_med_vedtak")
         }.toString()
         testRapid.sendTestMessage(message)
-        verify(exactly = 1) { mediator.håndter(any<UtkastTilVedtakMessage>()) }
+        verify(exactly = 1) { mediator.håndter(any<AvsluttetMedVedtakMessage>()) }
     }
 
     @Language("JSON")

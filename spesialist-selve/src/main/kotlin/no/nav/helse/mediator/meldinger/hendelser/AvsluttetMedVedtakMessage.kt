@@ -10,13 +10,13 @@ import no.nav.helse.modell.avviksvurdering.Avviksvurdering.Companion.finnRiktigA
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.vedtaksperiode.vedtak.Faktatype
 import no.nav.helse.modell.vedtaksperiode.vedtak.Sykepengegrunnlagsfakta
-import no.nav.helse.modell.vedtaksperiode.vedtak.UtkastTilVedtak
+import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetMedVedtak
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.isMissingOrNull
 
-internal class UtkastTilVedtakMessage(packet: JsonMessage, private val avviksvurderingDao: AvviksvurderingDao) {
+internal class AvsluttetMedVedtakMessage(packet: JsonMessage, private val avviksvurderingDao: AvviksvurderingDao) {
     // Ikke kall denne hvis avviksvurderingen ikke ligger i basen
     private val avviksvurdering by lazy {
         avviksvurderingDao.finnAvviksvurderinger(fødselsnummer).finnRiktigAvviksvurdering(skjæringstidspunkt)
@@ -44,7 +44,7 @@ internal class UtkastTilVedtakMessage(packet: JsonMessage, private val avviksvur
     internal fun skjæringstidspunkt() = skjæringstidspunkt
     internal fun fødselsnummer() = fødselsnummer
 
-    private val utkastTilVedtak get() = UtkastTilVedtak(
+    private val avsluttetMedVedtak get() = AvsluttetMedVedtak(
         fødselsnummer = fødselsnummer,
         aktørId = aktørId,
         organisasjonsnummer = organisasjonsnummer,
@@ -65,7 +65,7 @@ internal class UtkastTilVedtakMessage(packet: JsonMessage, private val avviksvur
     )
 
     internal fun sendInnTil(sykefraværstilfelle: Sykefraværstilfelle) {
-        sykefraværstilfelle.håndter(utkastTilVedtak)
+        sykefraværstilfelle.håndter(avsluttetMedVedtak)
     }
 
     private fun faktatype(packet: JsonMessage): Faktatype {

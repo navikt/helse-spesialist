@@ -152,7 +152,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning(vedtaksperiodeId = vedtaksperiodeId)
         håndterUtbetalingUtbetalt()
-        håndterUtkastTilVedtak(fom = fom, tom = tom, skjæringstidspunkt = skjæringstidspunkt)
+        håndterAvsluttetMedVedtak(fom = fom, tom = tom, skjæringstidspunkt = skjæringstidspunkt)
         håndterVedtakFattet()
     }
 
@@ -999,7 +999,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         assertUtgåendeBehovløsning("Godkjenning")
     }
 
-    protected fun håndterUtkastTilVedtak(
+    protected fun håndterAvsluttetMedVedtak(
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
@@ -1011,7 +1011,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         inkluderSpleisverdier: Boolean = true,
     ) {
         val utbetalingId = if (this::utbetalingId.isInitialized) this.utbetalingId else null
-        sisteMeldingId = meldingssender.sendUtkastTilVedtak(
+        sisteMeldingId = meldingssender.sendAvsluttetMedVedtak(
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,

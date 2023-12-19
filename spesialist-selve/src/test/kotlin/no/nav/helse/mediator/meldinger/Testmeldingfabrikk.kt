@@ -976,7 +976,7 @@ internal object Testmeldingfabrikk {
         )
     )
 
-    fun lagUtkastTilVedtak(
+    fun lagAvsluttetMedVedtak(
         aktørId: String,
         fødselsnummer: String,
         organisasjonsnummer: String,
@@ -989,7 +989,7 @@ internal object Testmeldingfabrikk {
         id: UUID,
         inkluderSpleisverdier: Boolean = true,
     ): String = nyHendelse(
-        id, "utkast_til_vedtak", mutableMapOf(
+        id, "avsluttet_med_vedtak", mutableMapOf(
             "aktørId" to aktørId,
             "fødselsnummer" to fødselsnummer,
             "organisasjonsnummer" to organisasjonsnummer,

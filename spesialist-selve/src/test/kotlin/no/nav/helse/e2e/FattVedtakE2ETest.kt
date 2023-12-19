@@ -14,7 +14,7 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
     fun `Fatt vedtak for auu-periode`() {
         håndterSøknad()
         håndterVedtaksperiodeOpprettet()
-        håndterUtkastTilVedtak()
+        håndterAvsluttetMedVedtak()
         val hendelser = inspektør.meldinger()
         assertEquals(1, hendelser.size)
         val hendelse = hendelser.single()
@@ -27,7 +27,7 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
     fun `Fatt vedtak for periode der SP er fastsatt etter hovedregel`() {
         fremTilSaksbehandleroppgave()
         håndterSaksbehandlerløsning()
-        håndterUtkastTilVedtak(fastsattType = "EtterHovedregel")
+        håndterAvsluttetMedVedtak(fastsattType = "EtterHovedregel")
         val sisteHendelse = inspektør.meldinger().last()
         assertEquals("vedtak_fattet", sisteHendelse["@event_name"].asText())
         assertEquals(0, sisteHendelse["begrunnelser"].size())
@@ -40,7 +40,7 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
         håndterSkjønnsfastsattSykepengegrunnlag()
         håndterSaksbehandlerløsning()
 
-        håndterUtkastTilVedtak(fastsattType = "EtterSkjønn")
+        håndterAvsluttetMedVedtak(fastsattType = "EtterSkjønn")
         val sisteHendelse = inspektør.meldinger().last()
         assertEquals("vedtak_fattet", sisteHendelse["@event_name"].asText())
         assertEquals(3, sisteHendelse["begrunnelser"].size())
@@ -56,7 +56,7 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
         håndterSkjønnsfastsattSykepengegrunnlag()
         håndterSaksbehandlerløsning()
 
-        håndterUtkastTilVedtak(fastsattType = "IInfotrygd")
+        håndterAvsluttetMedVedtak(fastsattType = "IInfotrygd")
         val sisteHendelse = inspektør.meldinger().last()
         assertEquals("vedtak_fattet", sisteHendelse["@event_name"].asText())
         assertEquals(0, sisteHendelse["begrunnelser"].size())
@@ -75,7 +75,7 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
             )
         )
         håndterSaksbehandlerløsning()
-        håndterUtkastTilVedtak(fastsattType = "EtterHovedregel", inkluderSpleisverdier = false)
+        håndterAvsluttetMedVedtak(fastsattType = "EtterHovedregel", inkluderSpleisverdier = false)
 
         val sisteHendelse = inspektør.meldinger().last()
         assertEquals("vedtak_fattet", sisteHendelse["@event_name"].asText())

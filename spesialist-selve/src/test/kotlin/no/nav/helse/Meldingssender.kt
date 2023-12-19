@@ -634,7 +634,7 @@ internal class Meldingssender(private val testRapid: TestRapid) {
         )
     }
 
-    fun sendUtkastTilVedtak(
+    fun sendAvsluttetMedVedtak(
         aktørId: String,
         fødselsnummer: String,
         organisasjonsnummer: String,
@@ -647,7 +647,7 @@ internal class Meldingssender(private val testRapid: TestRapid) {
         inkluderSpleisverdier: Boolean = true,
     ): UUID = newUUID.also { id ->
         testRapid.sendTestMessage(
-            Testmeldingfabrikk.lagUtkastTilVedtak(
+            Testmeldingfabrikk.lagAvsluttetMedVedtak(
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
