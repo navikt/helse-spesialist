@@ -23,7 +23,7 @@ class DokumentDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 :personRef,
                 :dokument::json
             )
-            ON CONFLICT DO NOTHING
+            ON CONFLICT (dokument_id) DO UPDATE SET dokument = excluded.dokument
         """.trimIndent(), mapOf(
                     "dokumentId" to dokumentId,
                     "personRef" to personId,

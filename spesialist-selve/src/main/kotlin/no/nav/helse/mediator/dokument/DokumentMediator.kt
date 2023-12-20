@@ -23,7 +23,8 @@ class DokumentMediator(
 
     override fun håndter(fødselsnummer: String, dokumentId: UUID, dokumentType: String): JsonNode {
         return dokumentDao.hent(fødselsnummer, dokumentId).let { dokument ->
-            if (dokument == null) {
+            val erTom = dokument?.size() == 0
+            if (dokument == null || erTom) {
                 sendHentDokument(fødselsnummer, dokumentId, dokumentType)
 
                 val response = runBlocking {

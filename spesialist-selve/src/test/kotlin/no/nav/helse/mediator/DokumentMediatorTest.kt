@@ -60,14 +60,24 @@ internal class DokumentMediatorTest {
     }
 
     @Test
-    fun `Sender ikke behov dersom dokumentet finnes i databasen`() {
+    fun `Sender nytt behov dersom dokumentet i databasen er tomt`() {
         every { dokumentDao.hent(any(), any()) } returns objectMapper.createObjectNode()
+        mediator.håndter(TESTHENDELSE.fødselsnummer(), DOKUMENTID, DOKUMENTTYPE)
+        assertEquals(1, testRapid.inspektør.size)
+        assertDokumentevent(0, "hent-dokument", DOKUMENTID)
+    }
+
+    @Test
+    fun `Sender ikke behov dersom dokumentet finnes i databasen`() {
+        every { dokumentDao.hent(any(), any()) } returns objectMapper.readTree("""{"ikkeTom":"harVerdi"}""")
+
         mediator.håndter(TESTHENDELSE.fødselsnummer(), DOKUMENTID, DOKUMENTTYPE)
         verify(exactly = 1) {
             dokumentDao.hent(
                 any(), any()
             )
         }
+
         assertEquals(0, testRapid.inspektør.size)
     }
 
