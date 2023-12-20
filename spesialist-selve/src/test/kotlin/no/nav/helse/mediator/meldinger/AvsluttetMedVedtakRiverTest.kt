@@ -14,7 +14,7 @@ internal class AvsluttetMedVedtakRiverTest {
     private val testRapid = TestRapid()
 
     init {
-        AvsluttetMedVedtakRiver(testRapid, mediator, mockk())
+        AvsluttetMedVedtakRiver(testRapid, mediator, mockk(relaxed = true))
     }
 
     @Test

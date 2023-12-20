@@ -3,8 +3,10 @@ package no.nav.helse.mediator.meldinger.hendelser
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import java.util.UUID
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.mediator.asUUID
+import no.nav.helse.modell.avviksvurdering.Avviksvurdering
 import no.nav.helse.modell.avviksvurdering.Avviksvurdering.Companion.finnRiktigAvviksvurdering
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetMedVedtak
@@ -14,12 +16,9 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.isMissingOrNull
+import org.slf4j.LoggerFactory
 
 internal class AvsluttetMedVedtakMessage(packet: JsonMessage, private val avviksvurderingDao: AvviksvurderingDao) {
-    // Ikke kall denne hvis avviksvurderingen ikke ligger i basen
-    private val avviksvurdering by lazy {
-        avviksvurderingDao.finnAvviksvurderinger(fødselsnummer).finnRiktigAvviksvurdering(skjæringstidspunkt)
-    }
 
     private val fødselsnummer = packet["fødselsnummer"].asText()
     private val aktørId = packet["aktørId"].asText()
@@ -79,14 +78,19 @@ internal class AvsluttetMedVedtakMessage(packet: JsonMessage, private val avviks
             omregnetÅrsinntekt = packet["sykepengegrunnlagsfakta.omregnetÅrsinntekt"].asDouble(),
         )
 
-        val innrapportertÅrsinntekt = packet["sykepengegrunnlagsfakta.innrapportertÅrsinntekt"].let { spleisverdi ->
-            if (spleisverdi.isMissingOrNull()) avviksvurdering.toDto().sammenligningsgrunnlag.totalbeløp
-            else spleisverdi.asDouble()
-        }
-        val avviksprosent = packet["sykepengegrunnlagsfakta.avviksprosent"].let { spleisverdi ->
-            if (spleisverdi.isMissingOrNull()) avviksvurdering.toDto().avviksprosent
-            else spleisverdi.asDouble()
-        }
+        val avviksvurdering: Avviksvurdering? = avviksvurderingDao.finnAvviksvurderinger(fødselsnummer).finnRiktigAvviksvurdering(skjæringstidspunkt)
+
+        logger.info(
+            "Bruker avviksvurdering fra: ${if (avviksvurdering == null) "spleis" else "spinnvill"} for {}",
+            kv("hendelseId", packet["@id"])
+        )
+
+        val innrapportertÅrsinntekt = avviksvurdering?.toDto()?.sammenligningsgrunnlag?.totalbeløp
+            ?: packet["sykepengegrunnlagsfakta.innrapportertÅrsinntekt"].let { if (it.isMissingOrNull()) throw IllegalStateException() else it }
+                .asDouble()
+        val avviksprosent = avviksvurdering?.toDto()?.avviksprosent
+            ?: packet["sykepengegrunnlagsfakta.avviksprosent"].takeIf { it.isNumber }?.doubleValue()
+            ?: error("Her mangler det BÅDE spinnvill avviksvurdering OG informasjon fra spleis 😱")
 
         return when (faktatype) {
             Faktatype.ETTER_SKJØNN -> Sykepengegrunnlagsfakta.Spleis.EtterSkjønn(
@@ -121,5 +125,9 @@ internal class AvsluttetMedVedtakMessage(packet: JsonMessage, private val avviks
 
             else -> error("Her vet vi ikke hva som har skjedd. Feil i kompilatoren?")
         }
+    }
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(AvsluttetMedVedtakMessage::class.java)
     }
 }
