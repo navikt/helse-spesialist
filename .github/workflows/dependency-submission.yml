@@ -16,9 +16,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # ratchet:actions/checkout@v4
       - name: Run snapshot action
-        uses: mikepenz/gradle-dependency-submission@v0.9.1
+        uses: gradle/gradle-build-action@v2
+        with:
+          dependency-graph: generate-and-submit
         env:
           ORG_GRADLE_PROJECT_githubUser: x-access-token
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          fail-on-error: true
