@@ -20,7 +20,7 @@ jobs:
         with:
           dependency-graph: generate-and-submit
       - name: Run the usual CI build (dependency-graph will be generated and submitted post-job)
-        run: ./gradlew build
+        run: ./gradlew :spesialist-selve:build
         env:
           ORG_GRADLE_PROJECT_githubUser: x-access-token
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
