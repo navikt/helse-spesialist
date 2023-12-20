@@ -1,7 +1,9 @@
 package no.nav.helse.mediator.meldinger
 
 import java.util.UUID
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.asUUID
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -33,11 +35,11 @@ internal class VedtakFattetRiver(
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        sikkerlogg.info("Mottok melding om vedtak fattet")
+        val hendelseId = UUID.fromString(packet["@id"].asText())
+        sikkerlogg.info("Mottok melding vedtak_fattet, {}", kv("hendelseId", hendelseId))
 
         val fødselsnummer = packet["fødselsnummer"].asText()
-        val vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
-        val id = UUID.fromString(packet["@id"].asText())
-        mediator.vedtakFattet(id, fødselsnummer, vedtaksperiodeId, packet.toJson(), context)
+        val vedtaksperiodeId = packet["vedtaksperiodeId"].asUUID()
+        mediator.vedtakFattet(hendelseId, fødselsnummer, vedtaksperiodeId, packet.toJson(), context)
     }
 }
