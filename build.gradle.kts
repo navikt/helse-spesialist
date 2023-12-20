@@ -6,7 +6,7 @@ val graphqlKotlinVersion = "7.0.2"
 val rapidsAndRiversVersion = "2023093008351696055717.ffdec6aede3d"
 val logbackSyslog4jVersion = "1.0.0"
 val hikariCPVersion = "5.1.0"
-val flywayCoreVersion = "9.22.3"
+val flywayCoreVersion = "10.3.0"
 val kotliqueryVersion = "1.9.0"
 val mockkVersion = "1.13.8"
 val postgresqlVersion = "42.7.1"
@@ -44,6 +44,7 @@ allprojects {
         }
         implementation("com.zaxxer:HikariCP:$hikariCPVersion")
         implementation("org.flywaydb:flyway-core:$flywayCoreVersion")
+        implementation("org.flywaydb:flyway-database-postgresql:$flywayCoreVersion")
         implementation("com.github.seratch:kotliquery:$kotliqueryVersion")
         implementation("io.ktor:ktor-client-cio:$ktorVersion")
         implementation("io.ktor:ktor-client-apache:$ktorVersion") {
