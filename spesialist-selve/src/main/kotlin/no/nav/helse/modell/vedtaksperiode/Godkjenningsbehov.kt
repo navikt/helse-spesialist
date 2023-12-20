@@ -166,6 +166,7 @@ internal class Godkjenningsbehov(
             vedtaksperiodeId = vedtaksperiodeId,
             personDao = personDao,
             vergemålDao = vergemålDao,
+            vedtakDao = vedtakDao,
             godkjenningMediator = godkjenningMediator,
             hendelseId = id,
             utbetaling = utbetaling,

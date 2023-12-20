@@ -6,12 +6,14 @@ import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
 import no.nav.helse.mediator.GodkjenningMediator
+import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vergemal.VergemålDao
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -22,6 +24,7 @@ internal class AutomatiskAvvisningCommandTest {
 
     private val vergemålDao = mockk<VergemålDao>(relaxed = true)
     private val personDao = mockk<PersonDao>(relaxed = true)
+    private val vedtakDao = mockk<VedtakDao>(relaxed = true)
     private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
     private val godkjenningMediator = mockk<GodkjenningMediator>(relaxed = true)
     private val sykefraværstilfelle = mockk<Sykefraværstilfelle>(relaxed = true)
@@ -93,6 +96,27 @@ internal class AutomatiskAvvisningCommandTest {
     }
 
     @Test
+    fun `skal avvise skjønnsfastsettelse dersom det er flere arbeidsgivere`() {
+        every { sykefraværstilfelle.kreverSkjønnsfastsettelse(vedtaksperiodeId) } returns true
+        every { vedtakDao.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.FLERE_ARBEIDSGIVERE
+        executeCommand(hentCommand(Utbetalingtype.REVURDERING, fødselsnummer = "12345678910"), "Skjønnsfastsettelse")
+    }
+
+    @Test
+    fun `kan ikke avvise skjønnsfastsettelse for flere arbeidsgivere hvis kanAvvises er false`() {
+        every { sykefraværstilfelle.kreverSkjønnsfastsettelse(vedtaksperiodeId) } returns true
+        every { vedtakDao.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.FLERE_ARBEIDSGIVERE
+        executeCommand(hentCommand(Utbetalingtype.REVURDERING, kanAvvises = false, fødselsnummer = "12345678910"), null)
+    }
+
+    @Test
+    fun `skal ikke avvise skjønnsfastsettelse dersom det er en arbeidsgivere`() {
+        every { sykefraværstilfelle.kreverSkjønnsfastsettelse(vedtaksperiodeId) } returns true
+        every { vedtakDao.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.EN_ARBEIDSGIVER
+        executeCommand(hentCommand(Utbetalingtype.REVURDERING, fødselsnummer = "12345678910"), null)
+    }
+
+    @Test
     fun `skal ikke avvise ved utland dersom utbetaling er revurdering`() {
         every { personDao.finnEnhetId(fødselsnummer) } returns "0393"
         executeCommand(hentCommand(Utbetalingtype.REVURDERING), null)
@@ -116,6 +140,7 @@ internal class AutomatiskAvvisningCommandTest {
             vedtaksperiodeId = vedtaksperiodeId,
             personDao = personDao,
             vergemålDao = vergemålDao,
+            vedtakDao = vedtakDao,
             godkjenningMediator = godkjenningMediator,
             hendelseId = hendelseId,
             utbetaling = Utbetaling(utbetalingId, 1000, 1000, utbetalingstype),
