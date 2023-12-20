@@ -3,7 +3,10 @@ package no.nav.helse.spesialist.api.graphql
 import java.time.YearMonth
 import no.nav.helse.rapids_rivers.asYearMonth
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
+import no.nav.helse.spesialist.api.april
+import no.nav.helse.spesialist.api.februar
 import no.nav.helse.spesialist.api.januar
+import no.nav.helse.spesialist.api.mars
 import no.nav.helse.spesialist.api.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -83,15 +86,35 @@ internal class GraphQLApiTest : AbstractGraphQLApiTest() {
         assertEquals(10000.0, vilkårsgrunnlag["omregnetArsinntekt"].asDouble())
         assertEquals(10000.0, vilkårsgrunnlag["sammenligningsgrunnlag"].asDouble())
         assertEquals(26.0, vilkårsgrunnlag["avviksprosent"].asDouble())
-        assertEquals(1, vilkårsgrunnlag["inntekter"].size())
+        assertEquals(2, vilkårsgrunnlag["inntekter"].size())
 
-        val sammenligningsgrunnlag = vilkårsgrunnlag["inntekter"].first()["sammenligningsgrunnlag"]
-        assertEquals(10000.0, sammenligningsgrunnlag["belop"].asDouble())
-        assertEquals(1, sammenligningsgrunnlag["inntektFraAOrdningen"].size())
+        val sammenligningsgrunnlag1 = vilkårsgrunnlag["inntekter"][0]["sammenligningsgrunnlag"]
+        assertEquals(4000.0, sammenligningsgrunnlag1["belop"].asDouble())
+        assertEquals(2, sammenligningsgrunnlag1["inntektFraAOrdningen"].size())
 
-        val inntekt = sammenligningsgrunnlag["inntektFraAOrdningen"].first()
-        assertEquals(YearMonth.from(1.januar), inntekt["maned"].asYearMonth())
-        assertEquals(10000.0, inntekt["sum"].asDouble())
+        val inntekt1_1 = sammenligningsgrunnlag1["inntektFraAOrdningen"][0]
+        assertEquals(YearMonth.from(1.januar), inntekt1_1["maned"].asYearMonth())
+        assertEquals(2000.0, inntekt1_1["sum"].asDouble())
+        val inntekt1_2 = sammenligningsgrunnlag1["inntektFraAOrdningen"][1]
+        assertEquals(YearMonth.from(1.februar), inntekt1_2["maned"].asYearMonth())
+        assertEquals(2000.0, inntekt1_2["sum"].asDouble())
+
+        val sammenligningsgrunnlag2 = vilkårsgrunnlag["inntekter"][1]["sammenligningsgrunnlag"]
+        assertEquals(6000.0, sammenligningsgrunnlag2["belop"].asDouble())
+        assertEquals(4, sammenligningsgrunnlag2["inntektFraAOrdningen"].size())
+
+        val inntekt2_1 = sammenligningsgrunnlag2["inntektFraAOrdningen"][0]
+        assertEquals(YearMonth.from(1.januar), inntekt2_1["maned"].asYearMonth())
+        assertEquals(1500.0, inntekt2_1["sum"].asDouble())
+        val inntekt2_2 = sammenligningsgrunnlag2["inntektFraAOrdningen"][1]
+        assertEquals(YearMonth.from(1.februar), inntekt2_2["maned"].asYearMonth())
+        assertEquals(1500.0, inntekt2_2["sum"].asDouble())
+        val inntekt2_3 = sammenligningsgrunnlag2["inntektFraAOrdningen"][2]
+        assertEquals(YearMonth.from(1.mars), inntekt2_3["maned"].asYearMonth())
+        assertEquals(1500.0, inntekt2_3["sum"].asDouble())
+        val inntekt2_4 = sammenligningsgrunnlag2["inntektFraAOrdningen"][3]
+        assertEquals(YearMonth.from(1.april), inntekt2_4["maned"].asYearMonth())
+        assertEquals(1500.0, inntekt2_4["sum"].asDouble())
     }
     @Test
     fun `henter sykepengegrunnlagsgrense`() {

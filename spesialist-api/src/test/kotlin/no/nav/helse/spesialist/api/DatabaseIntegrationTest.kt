@@ -700,6 +700,10 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                 GraphQLArbeidsgiverinntekt(
                     arbeidsgiver = ORGANISASJONSNUMMER,
                     sammenligningsgrunnlag = null
+                ),
+                GraphQLArbeidsgiverinntekt(
+                    arbeidsgiver = "987656789",
+                    sammenligningsgrunnlag = null
                 )
             ),
             omregnetArsinntekt = 1_000_000.0,

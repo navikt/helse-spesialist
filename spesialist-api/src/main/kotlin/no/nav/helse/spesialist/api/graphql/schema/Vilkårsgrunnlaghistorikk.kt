@@ -107,12 +107,14 @@ internal fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Av
                     if (avviksvurdering != null) {
                         vilkarsgrunnlagSpleis.copy(
                             inntekter = vilkarsgrunnlagSpleis.inntekter.map { arbeidsgiverinntekt ->
+                                val arbeidsgiverinntekter =
+                                    avviksvurdering.sammenligningsgrunnlag.innrapporterteInntekter.single {
+                                        it.arbeidsgiverreferanse == arbeidsgiverinntekt.arbeidsgiver
+                                    }.inntekter
                                 arbeidsgiverinntekt.copy(
                                     sammenligningsgrunnlag = Sammenligningsgrunnlag(
-                                        belop = avviksvurdering.sammenligningsgrunnlag.totalbeløp,
-                                        inntektFraAOrdningen = avviksvurdering.sammenligningsgrunnlag.innrapporterteInntekter.single {
-                                            it.arbeidsgiverreferanse == arbeidsgiverinntekt.arbeidsgiver
-                                        }.inntekter.map { inntekt ->
+                                        belop = arbeidsgiverinntekter.sumOf { it.beløp },
+                                        inntektFraAOrdningen = arbeidsgiverinntekter.map { inntekt ->
                                             InntektFraAOrdningen(
                                                 maned = inntekt.årMåned.toString(),
                                                 sum = inntekt.beløp

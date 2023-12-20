@@ -130,7 +130,32 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                         inntekter = listOf(
                             Inntekt(
                                 årMåned = YearMonth.from(1.januar),
-                                beløp = 10000.0
+                                beløp = 2000.0
+                            ),
+                            Inntekt(
+                                årMåned = YearMonth.from(1.februar),
+                                beløp = 2000.0
+                            )
+                        )
+                    ),
+                    InnrapportertInntekt(
+                        arbeidsgiverreferanse = "987656789",
+                        inntekter = listOf(
+                            Inntekt(
+                                årMåned = YearMonth.from(1.januar),
+                                beløp = 1500.0
+                            ),
+                            Inntekt(
+                                årMåned = YearMonth.from(1.februar),
+                                beløp = 1500.0
+                            ),
+                            Inntekt(
+                                årMåned = YearMonth.from(1.mars),
+                                beløp = 1500.0
+                            ),
+                            Inntekt(
+                                årMåned = YearMonth.from(1.april),
+                                beløp = 1500.0
                             )
                         )
                     )
