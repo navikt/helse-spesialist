@@ -37,12 +37,14 @@ internal class AutomatiskAvvisningCommand(
         val erSkjønnsfastsettelse = sykefraværstilfelle.kreverSkjønnsfastsettelse(vedtaksperiodeId)
         val enArbeidsgiver = vedtakDao.finnInntektskilde(vedtaksperiodeId) == Inntektskilde.EN_ARBEIDSGIVER
 
-        val kandidatForBehandlingAvSkjønnsfastsettelse = Toggle.Avviksvurdering.enabled
-                && fødselsnummer.startsWith("31")
-                && enArbeidsgiver
-        val avvisGrunnetSkjønnsfastsettelse = erSkjønnsfastsettelse
-                && !kandidatForBehandlingAvSkjønnsfastsettelse
-                && kanAvvises
+        val avvisGrunnetSkjønnsfastsettelse =
+            if (!erSkjønnsfastsettelse) false
+            else if (!Toggle.Avviksvurdering.enabled) {
+                kanAvvises
+            } else {
+                val slippesForbi = !erProd() || (fødselsnummer.startsWith("31") && enArbeidsgiver)
+                !slippesForbi && kanAvvises
+            }
 
         if (avvisGrunnetSkjønnsfastsettelse) {
             logg.info("Avviser vedtaksperiode $vedtaksperiodeId grunnet krav om skjønnsfastsetting.")
@@ -76,5 +78,6 @@ internal class AutomatiskAvvisningCommand(
 
     private companion object {
         private val logg = LoggerFactory.getLogger(AutomatiskAvvisningCommand::class.java)
+        private fun erProd() = "prod-gcp" == System.getenv("NAIS_CLUSTER_NAME")
     }
 }
