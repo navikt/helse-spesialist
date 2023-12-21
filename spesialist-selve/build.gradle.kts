@@ -2,7 +2,7 @@ val graphQLKotlinVersion = "7.0.2"
 val testcontainersVersion = "1.19.3"
 
 plugins {
-    kotlin("plugin.serialization") version "1.9.21"
+    kotlin("plugin.serialization") version "1.9.22"
     id("com.expediagroup.graphql") version "7.0.2"
 }
 
