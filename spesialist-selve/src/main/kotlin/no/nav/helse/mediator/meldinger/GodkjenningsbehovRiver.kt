@@ -58,7 +58,6 @@ internal class GodkjenningsbehovRiver(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         val hendelseId = UUID.fromString(packet["@id"].asText())
-        if (hendelseId.toString() == "6a38acda-a214-42e9-bfe6-b26c145ffd34") return
         logg.info(
             "Mottok godkjenningsbehov med {}",
             StructuredArguments.keyValue("hendelseId", hendelseId)
