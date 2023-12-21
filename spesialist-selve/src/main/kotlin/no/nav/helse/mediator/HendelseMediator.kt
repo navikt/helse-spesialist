@@ -343,6 +343,8 @@ internal class HendelseMediator(
         avviksvurderingId: UUID?,
         vilkårsgrunnlagId: UUID,
     ) {
+        if (avviksvurderingId != null)
+            avviksvurderingDao.opprettKobling(avviksvurderingId, vilkårsgrunnlagId)
         if (oppgaveDao.harGyldigOppgave(utbetalingId) || vedtakDao.erAutomatiskGodkjent(utbetalingId)) {
             sikkerLogg.info("vedtaksperiodeId=$vedtaksperiodeId med utbetalingId=$utbetalingId har gyldig oppgave eller er automatisk godkjent. Ignorerer godkjenningsbehov med id=$id")
             return
@@ -364,8 +366,6 @@ internal class HendelseMediator(
                 inntektskilde,
                 orgnummereMedRelevanteArbeidsforhold,
                 kanAvvises,
-                avviksvurderingId,
-                vilkårsgrunnlagId,
                 message.toJson(),
             ), context
         )
