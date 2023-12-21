@@ -46,6 +46,12 @@ internal class AutomatiskAvvisningCommand(
 
         if (avvisGrunnetSkjønnsfastsettelse) {
             logg.info("Avviser vedtaksperiode $vedtaksperiodeId grunnet krav om skjønnsfastsetting.")
+        } else if (erSkjønnsfastsettelse) {
+            logg.info("Avviser ikke vedtaksperiode $vedtaksperiodeId med krav om skjønnsfastsetting: {}, {}, {}, {}",
+                kv("Toggle.Avviksvurdering.enabled", Toggle.Avviksvurdering.enabled),
+                kv("kanAvvises", kanAvvises),
+                kv("fødselsnummer starter med 31", fødselsnummer.startsWith("31")),
+                kv("enArbeidsgiver", enArbeidsgiver))
         }
 
         val avvisningsårsaker = mutableListOf<String>()
