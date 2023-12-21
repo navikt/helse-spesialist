@@ -86,27 +86,39 @@ internal class AutomatiskAvvisningCommandTest {
     @Test
     fun `skal ikke avvise skjønnsfastsettelse dersom utbetaling ikke er revurdering og fødselsnummer starter på 31`() {
         every { sykefraværstilfelle.kreverSkjønnsfastsettelse(vedtaksperiodeId) } returns true
-        executeCommand(hentCommand(Utbetalingtype.UTBETALING, fødselsnummer = "31345678910"), null)
+        executeCommand(
+            hentCommand(Utbetalingtype.UTBETALING, fødselsnummer = "31345678910"),
+            null
+        )
     }
 
     @Test
     fun `skal ikke avvise skjønnsfastsettelse dersom utbetaling er revurdering og fødselsnummer ikke starter på 31`() {
         every { sykefraværstilfelle.kreverSkjønnsfastsettelse(vedtaksperiodeId) } returns true
-        executeCommand(hentCommand(Utbetalingtype.REVURDERING, fødselsnummer = "12345678910"), null)
+        executeCommand(
+            hentCommand(Utbetalingtype.REVURDERING, fødselsnummer = "12345678910"),
+            null
+        )
     }
 
     @Test
     fun `skal avvise skjønnsfastsettelse dersom det er flere arbeidsgivere`() {
         every { sykefraværstilfelle.kreverSkjønnsfastsettelse(vedtaksperiodeId) } returns true
         every { vedtakDao.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.FLERE_ARBEIDSGIVERE
-        executeCommand(hentCommand(Utbetalingtype.REVURDERING, fødselsnummer = "12345678910"), "Skjønnsfastsettelse")
+        executeCommand(
+            hentCommand(Utbetalingtype.REVURDERING, fødselsnummer = "31345678910"),
+            "Skjønnsfastsettelse"
+        )
     }
 
     @Test
     fun `kan ikke avvise skjønnsfastsettelse for flere arbeidsgivere hvis kanAvvises er false`() {
         every { sykefraværstilfelle.kreverSkjønnsfastsettelse(vedtaksperiodeId) } returns true
         every { vedtakDao.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.FLERE_ARBEIDSGIVERE
-        executeCommand(hentCommand(Utbetalingtype.REVURDERING, kanAvvises = false, fødselsnummer = "12345678910"), null)
+        executeCommand(
+            hentCommand(Utbetalingtype.REVURDERING, kanAvvises = false, fødselsnummer = "12345678910"),
+            null
+        )
     }
 
     @Test
@@ -125,7 +137,13 @@ internal class AutomatiskAvvisningCommandTest {
     private fun executeCommand(command: AutomatiskAvvisningCommand, forventetÅrsakTilAvvisning: String?) {
         assertTrue(command.execute(context))
         if (forventetÅrsakTilAvvisning != null)
-            verify (exactly = 1) { godkjenningMediator.automatiskAvvisning(any(), any(), listOf(forventetÅrsakTilAvvisning), any(), any()) }
+            verify (exactly = 1) { godkjenningMediator.automatiskAvvisning(
+                any(),
+                any(),
+                listOf(forventetÅrsakTilAvvisning),
+                any(),
+                any()
+            ) }
         else
             verify (exactly = 0) { godkjenningMediator.automatiskAvvisning(any(), any(), any()) }
     }

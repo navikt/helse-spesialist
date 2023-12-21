@@ -37,21 +37,15 @@ internal class AutomatiskAvvisningCommand(
         val erSkjønnsfastsettelse = sykefraværstilfelle.kreverSkjønnsfastsettelse(vedtaksperiodeId)
         val enArbeidsgiver = vedtakDao.finnInntektskilde(vedtaksperiodeId) == Inntektskilde.EN_ARBEIDSGIVER
 
-
-        val avvisGrunnetSkjønnsfastsettelse = !Toggle.Avviksvurdering.enabled
+        val kandidatForBehandlingAvSkjønnsfastsettelse = Toggle.Avviksvurdering.enabled
+                && fødselsnummer.startsWith("31")
+                && enArbeidsgiver
+        val avvisGrunnetSkjønnsfastsettelse = erSkjønnsfastsettelse
+                && !kandidatForBehandlingAvSkjønnsfastsettelse
                 && kanAvvises
-                && erSkjønnsfastsettelse
-                && !fødselsnummer.startsWith("31")
-                && !enArbeidsgiver
 
         if (avvisGrunnetSkjønnsfastsettelse) {
             logg.info("Avviser vedtaksperiode $vedtaksperiodeId grunnet krav om skjønnsfastsetting.")
-        } else if (erSkjønnsfastsettelse) {
-            logg.info("Avviser ikke vedtaksperiode $vedtaksperiodeId med krav om skjønnsfastsetting: {}, {}, {}, {}",
-                kv("Toggle.Avviksvurdering.enabled", Toggle.Avviksvurdering.enabled),
-                kv("kanAvvises", kanAvvises),
-                kv("fødselsnummer starter med 31", fødselsnummer.startsWith("31")),
-                kv("enArbeidsgiver", enArbeidsgiver))
         }
 
         val avvisningsårsaker = mutableListOf<String>()
