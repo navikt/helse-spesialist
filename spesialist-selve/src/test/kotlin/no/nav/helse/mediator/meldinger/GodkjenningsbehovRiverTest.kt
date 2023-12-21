@@ -76,7 +76,7 @@ internal class GodkjenningsbehovRiverTest {
     }
 
     @Test
-    fun `leser Godkjenningbehov uten avviksvurderingId`() {
+    fun `leser ikke Godkjenningbehov uten avviksvurderingId`() {
         val relevanteArbeidsforhold = listOf(ORGNR)
         testRapid.sendTestMessage(
             Testmeldingfabrikk.lagGodkjenningsbehov(
@@ -94,7 +94,7 @@ internal class GodkjenningsbehovRiverTest {
                 avviksvurderingId = null,
             )
         )
-        verify(exactly = 1) { mediator.godkjenningsbehov(
+        verify(exactly = 0) { mediator.godkjenningsbehov(
             message = any(),
             id = HENDELSE,
             fødselsnummer = FNR,
