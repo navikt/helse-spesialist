@@ -20,9 +20,10 @@ internal class SøknadSendtArbeidsledigRiver(
         River(rapidsConnection).apply {
             validate {
                 it.demandAny("@event_name", listOf("sendt_søknad_arbeidsledig"))
+                it.demandKey("tidligereArbeidsgiverOrgnummer")
                 it.forbid("arbeidsgiver.orgnummer")
                 it.requireKey(
-                    "@id", "fnr", "aktorId", "tidligereArbeidsgiverOrgnummer"
+                    "@id", "fnr", "aktorId"
                 )
             }
         }.register(this)
