@@ -116,6 +116,10 @@ internal class Varsel(
             return any { it.status == AKTIV && it.varselkode == "RV_IV_2" }
         }
 
+        internal fun List<Varsel>.inneholderVarselOmTilbakedatering(): Boolean {
+            return any { it.status == AKTIV && it.varselkode == "RV_SØ_3" }
+        }
+
         internal fun List<Varsel>.inneholderSvartelistedeVarsler(): Boolean {
             return any { it.varselkode in neiVarsler }
         }

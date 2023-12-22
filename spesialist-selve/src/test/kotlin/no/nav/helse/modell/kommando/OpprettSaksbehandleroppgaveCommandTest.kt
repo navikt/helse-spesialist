@@ -26,6 +26,7 @@ import no.nav.helse.modell.oppgave.Egenskap.SPESIALSAK
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
+import no.nav.helse.modell.oppgave.Egenskap.TILBAKEDATERT
 import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_ARBEIDSGIVER
 import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.modell.oppgave.Egenskap.UTLAND
@@ -236,6 +237,19 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         val oppgave = slot.captured.invoke(1L)
         oppgaveinspektør(oppgave) {
             assertTrue(egenskaper.contains(SKJØNNSFASTSETTELSE))
+        }
+    }
+
+    @Test
+    fun `oppretter oppgave med egenskap tilbakedatert dersom det finnes varsel om tilbakedatering`() {
+        every { sykefraværstilfelle.erTilbakedatert(VEDTAKSPERIODE_ID) } returns true
+        val slot = slot<((Long) -> Oppgave)>()
+        assertTrue(command.execute(context))
+        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
+
+        val oppgave = slot.captured.invoke(1L)
+        oppgaveinspektør(oppgave) {
+            assertTrue(egenskaper.contains(TILBAKEDATERT))
         }
     }
 

@@ -6,6 +6,7 @@ import no.nav.helse.modell.sykefraværstilfelle.SkjønnsfastattSykepengegrunnlag
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.deaktiver
+import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.erTilbakedatert
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjon
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.forhindrerAutomatisering
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterGodkjent
@@ -96,6 +97,10 @@ internal class Sykefraværstilfelle(
 
     internal fun kreverSkjønnsfastsettelse(vedtaksperiodeId: UUID): Boolean {
         return gjeldendeGenerasjoner.kreverSkjønnsfastsettelse(vedtaksperiodeId)
+    }
+
+    internal fun erTilbakedatert(vedtaksperiodeId: UUID): Boolean {
+        return gjeldendeGenerasjoner.erTilbakedatert(vedtaksperiodeId)
     }
 
     internal fun registrer(observer: SykefraværstilfelleObserver) {
