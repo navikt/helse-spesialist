@@ -223,8 +223,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val generasjonDao = GenerasjonDao(dataSource)
     private val påVentApiDao = PåVentApiDao(dataSource)
     private val avviksvurderinghenter = object : Avviksvurderinghenter {
-        override fun hentAvviksvurdering(vilkarsgrunnlagId: UUID): Avviksvurdering? {
-            return AvviksvurderingDao(dataSource).finnAvviksvurdering(vilkarsgrunnlagId)
+        override fun hentAvviksvurdering(vilkårsgrunnlagId: UUID): Avviksvurdering? {
+            return AvviksvurderingDao(dataSource).finnAvviksvurdering(vilkårsgrunnlagId)
         }
     }
     private val avviksvurderingDao = AvviksvurderingDao(dataSource)
@@ -385,7 +385,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         godkjenningMediator = godkjenningMediator,
         automatisering = automatisering,
         overstyringMediator = OverstyringMediator(rapidsConnection),
-        snapshotMediator = snapshotMediator,
         versjonAvKode = versjonAvKode(env)
     )
 

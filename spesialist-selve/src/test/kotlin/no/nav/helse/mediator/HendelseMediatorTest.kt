@@ -16,9 +16,7 @@ import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
-import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
-import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -38,8 +36,6 @@ internal class HendelseMediatorTest : AbstractDatabaseTest() {
     private val opptegnelseDao = OpptegnelseApiDao(dataSource)
     private val hendelseDao = HendelseDao(dataSource)
     private val utbetalingDao = UtbetalingDao(dataSource)
-    private val snapshotApiDao = SnapshotApiDao(dataSource)
-    private val snapshotMediator = SnapshotMediator(snapshotApiDao, snapshotClient)
     private val avviksvurderingDao = mockk<AvviksvurderingDao>()
 
     private val godkjenningMediator =
@@ -52,7 +48,6 @@ internal class HendelseMediatorTest : AbstractDatabaseTest() {
         godkjenningMediator = godkjenningMediator,
         automatisering = automatisering,
         overstyringMediator = OverstyringMediator(testRapid),
-        snapshotMediator = snapshotMediator,
         versjonAvKode = "versjonAvKode",
     )
 

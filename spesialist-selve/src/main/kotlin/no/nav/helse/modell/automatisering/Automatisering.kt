@@ -57,7 +57,7 @@ internal class Automatisering(
     ) {
         val problemer =
             vurder(fødselsnummer, vedtaksperiodeId, utbetaling, periodetype, sykefraværstilfelle)
-        val erUTS = utbetaling.harUtbetalingTilSykmeldt()
+        val erUTS = utbetaling.harEndringIUtbetalingTilSykmeldt()
         val flereArbeidsgivere = vedtakDao.finnInntektskilde(vedtaksperiodeId) == Inntektskilde.FLERE_ARBEIDSGIVERE
         val erFørstegangsbehandling = periodetype == FØRSTEGANGSBEHANDLING
 
@@ -203,7 +203,7 @@ internal class Automatisering(
         val tilhørerUtlandsenhet = erEnhetUtland(personDao.finnEnhetId(fødselsnummer))
         val antallÅpneGosysoppgaver = åpneGosysOppgaverDao.harÅpneOppgaver(fødselsnummer)
         val harPågåendeOverstyring = overstyringDao.harVedtaksperiodePågåendeOverstyring(vedtaksperiodeId)
-        val harUtbetalingTilSykmeldt = utbetaling.harUtbetalingTilSykmeldt()
+        val harUtbetalingTilSykmeldt = utbetaling.harEndringIUtbetalingTilSykmeldt()
 
         val skalStoppesPgaUTS = harUtbetalingTilSykmeldt && periodetype !in listOf(FORLENGELSE, FØRSTEGANGSBEHANDLING)
 

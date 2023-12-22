@@ -21,11 +21,17 @@ internal class Utbetaling(
         return NEGATIVT_BELØP
     }
 
-    internal fun harUtbetalingTilSykmeldt() = personbeløp > 0
-
-    internal fun ingenUtbetaling() = refusjonstype() == INGEN_UTBETALING
-
     internal fun erRevurdering() = type == Utbetalingtype.REVURDERING
+
+    internal fun kunUtbetalingTilArbeidsgiver() = arbeidsgiverbeløp != 0 && personbeløp == 0
+
+    internal fun kunUtbetalingTilSykmeldt() = personbeløp != 0 && arbeidsgiverbeløp == 0
+
+    internal fun delvisRefusjon() = personbeløp != 0 && arbeidsgiverbeløp != 0
+
+    internal fun ingenUtbetaling() = arbeidsgiverbeløp == 0 && personbeløp == 0
+
+    internal fun harEndringIUtbetalingTilSykmeldt() = personbeløp != 0
 
     override fun equals(other: Any?): Boolean = this === other || (
         other is Utbetaling &&

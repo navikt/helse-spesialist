@@ -4,7 +4,6 @@ import java.util.UUID
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.automatisering.Automatisering
-import no.nav.helse.modell.delvisRefusjon
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Egenskap.DELVIS_REFUSJON
@@ -21,6 +20,7 @@ import no.nav.helse.modell.oppgave.Egenskap.OVERGANG_FRA_IT
 import no.nav.helse.modell.oppgave.Egenskap.PÅ_VENT
 import no.nav.helse.modell.oppgave.Egenskap.REVURDERING
 import no.nav.helse.modell.oppgave.Egenskap.RISK_QA
+import no.nav.helse.modell.oppgave.Egenskap.SKJØNNSFASTSETTELSE
 import no.nav.helse.modell.oppgave.Egenskap.SPESIALSAK
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
@@ -29,21 +29,18 @@ import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_ARBEIDSGIVER
 import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.modell.oppgave.Egenskap.UTLAND
 import no.nav.helse.modell.oppgave.Egenskap.VERGEMÅL
-import no.nav.helse.modell.oppgave.Egenskap.SKJØNNSFASTSETTELSE
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.person.HentEnhetløsning
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
+import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.modell.utbetalingTilArbeidsgiver
-import no.nav.helse.modell.utbetalingTilSykmeldt
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
-import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import org.slf4j.LoggerFactory
 
 internal class OpprettSaksbehandleroppgaveCommand(
@@ -58,7 +55,7 @@ internal class OpprettSaksbehandleroppgaveCommand(
     private val utbetalingId: UUID,
     private val utbetalingtype: Utbetalingtype,
     private val sykefraværstilfelle: Sykefraværstilfelle,
-    private val snapshotMediator: SnapshotMediator,
+    private val utbetaling: Utbetaling,
     private val vergemålDao: VergemålDao,
     private val inntektskilde: Inntektskilde,
     private val periodetype: Periodetype,
@@ -93,10 +90,10 @@ internal class OpprettSaksbehandleroppgaveCommand(
         if (HentEnhetløsning.erEnhetUtland(personDao.finnEnhetId(fødselsnummer))) egenskaper.add(UTLAND)
 
         when {
-            vedtaksperiodensUtbetaling.delvisRefusjon() -> egenskaper.add(DELVIS_REFUSJON)
-            vedtaksperiodensUtbetaling.utbetalingTilSykmeldt() -> egenskaper.add(UTBETALING_TIL_SYKMELDT)
-            vedtaksperiodensUtbetaling.utbetalingTilArbeidsgiver() -> egenskaper.add(UTBETALING_TIL_ARBEIDSGIVER)
-            else -> egenskaper.add(INGEN_UTBETALING)
+            utbetaling.delvisRefusjon() -> egenskaper.add(DELVIS_REFUSJON)
+            utbetaling.kunUtbetalingTilSykmeldt() -> egenskaper.add(UTBETALING_TIL_SYKMELDT)
+            utbetaling.kunUtbetalingTilArbeidsgiver() -> egenskaper.add(UTBETALING_TIL_ARBEIDSGIVER)
+            utbetaling.ingenUtbetaling() -> egenskaper.add(INGEN_UTBETALING)
         }
 
         when (inntektskilde) {
@@ -121,7 +118,7 @@ internal class OpprettSaksbehandleroppgaveCommand(
 
         if (sykefraværstilfelle.kreverSkjønnsfastsettelse(vedtaksperiodeId)) egenskaper.add(SKJØNNSFASTSETTELSE)
 
-        if (sykefraværstilfelle.haster(vedtaksperiodeId) && (vedtaksperiodensUtbetaling.delvisRefusjon() || vedtaksperiodensUtbetaling.utbetalingTilSykmeldt())) egenskaper.add(HASTER)
+        if (sykefraværstilfelle.haster(vedtaksperiodeId) && utbetaling.harEndringIUtbetalingTilSykmeldt()) egenskaper.add(HASTER)
 
         oppgaveMediator.nyOppgave(fødselsnummer, context.id()) { reservertId ->
             val oppgave = Oppgave.nyOppgave(reservertId, vedtaksperiodeId, utbetalingId, hendelseId, kanAvvises, egenskaper)
@@ -133,6 +130,4 @@ internal class OpprettSaksbehandleroppgaveCommand(
 
         return true
     }
-
-    private val vedtaksperiodensUtbetaling by lazy { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) }
 }

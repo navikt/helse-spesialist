@@ -29,9 +29,7 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
-import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
-import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.testEnv
 
 internal class TestMediator(
@@ -73,7 +71,6 @@ internal class TestMediator(
     )
     private val saksbehandlerMediator = SaksbehandlerMediator(dataSource, "versjonAvKode", testRapid, oppgaveMediator, tilgangsgrupper)
     private val overstyringMediator = OverstyringMediator(testRapid)
-    private val snapshotMediator = SnapshotMediator(SnapshotApiDao(dataSource), snapshotClient)
     private val automatisering = Automatisering(
         risikovurderingDao = RisikovurderingDao(dataSource),
         automatiseringDao = AutomatiseringDao(dataSource),
@@ -102,7 +99,6 @@ internal class TestMediator(
         godkjenningMediator = godkjenningMediator,
         automatisering = automatisering,
         overstyringMediator = overstyringMediator,
-        snapshotMediator = snapshotMediator,
         versjonAvKode = "versjonAvKode",
     )
 

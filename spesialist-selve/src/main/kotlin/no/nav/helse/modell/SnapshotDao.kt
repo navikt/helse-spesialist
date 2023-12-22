@@ -6,7 +6,6 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.objectMapper
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUtbetaling
 import org.intellij.lang.annotations.Language
 
 class SnapshotDao(private val dataSource: DataSource) {
@@ -78,14 +77,4 @@ class SnapshotDao(private val dataSource: DataSource) {
         """
         return run(queryOf(statement, fødselsnummer.toLong()).map { it.int("versjon") }.asSingle)
     }
-
 }
-
-// Disse støtter null fordi (gammelt) oppsett av testdata ikke sørger for at utbetalingen kan hentes opp fra
-// UtbetalingsFilterCommand
-
-internal fun GraphQLUtbetaling?.utbetalingTilSykmeldt() = this != null && personNettoBelop != 0
-
-internal fun GraphQLUtbetaling?.utbetalingTilArbeidsgiver() = this != null && arbeidsgiverNettoBelop != 0
-
-internal fun GraphQLUtbetaling?.delvisRefusjon() = utbetalingTilSykmeldt() && utbetalingTilArbeidsgiver()

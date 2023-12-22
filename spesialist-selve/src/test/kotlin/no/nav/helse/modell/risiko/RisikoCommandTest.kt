@@ -14,9 +14,9 @@ import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.løsninger.Risikovurderingløsning
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
+import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.objectMapper
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUtbetaling
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test
 internal class RisikoCommandTest {
 
     private val risikovurderingDao = mockk<RisikovurderingDao>()
-    private val utbetalingMock = mockk<GraphQLUtbetaling>(relaxed = true)
+    private val utbetalingMock = mockk<Utbetaling>(relaxed = true)
 
     private companion object {
         private const val ORGNUMMER = "123456789"
@@ -68,8 +68,7 @@ internal class RisikoCommandTest {
 
     @Test
     fun `Sender kunRefusjon=true når det ikke skal utbetales noe til den sykmeldte`() {
-        every { utbetalingMock.arbeidsgiverNettoBelop } returns 1
-        every { utbetalingMock.personNettoBelop } returns 0
+        every { utbetalingMock.harEndringIUtbetalingTilSykmeldt() } returns false
 
         risikoCommand().assertFalse()
 
@@ -79,8 +78,7 @@ internal class RisikoCommandTest {
 
     @Test
     fun `Sender kunRefusjon=false når det er utbetaling til den sykmeldte`() {
-        every { utbetalingMock.arbeidsgiverNettoBelop } returns 1
-        every { utbetalingMock.personNettoBelop } returns 1
+        every { utbetalingMock.harEndringIUtbetalingTilSykmeldt() } returns true
 
         risikoCommand().assertFalse()
 
@@ -153,5 +151,6 @@ internal class RisikoCommandTest {
         organisasjonsnummer = organisasjonsnummer,
         førstegangsbehandling = førstegangsbehandling,
         sykefraværstilfelle = sykefraværstilfelle,
-    ) { utbetalingMock }
+        utbetaling = utbetalingMock
+    )
 }

@@ -43,7 +43,6 @@ import no.nav.helse.modell.vergemal.VergemålCommand
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
-import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 
 internal class Godkjenningsbehov(
     override val id: UUID,
@@ -83,11 +82,8 @@ internal class Godkjenningsbehov(
     overstyringDao: OverstyringDao,
     påVentDao: PåVentDao,
     totrinnsvurderingMediator: TotrinnsvurderingMediator,
-    snapshotMediator: SnapshotMediator,
 ) : Hendelse, MacroCommand() {
 
-    // lambda fordi mange av testene ikke sørger for at utbetalingen fins i databasen før godkjenningsbehovet behandles
-    private val utbetalingsfinner = { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) }
     private val førsteKjenteDagFinner = { generasjonRepository.førsteKjenteDag(fødselsnummer) }
     private val utbetaling = utbetalingDao.hentUtbetaling(utbetalingId)
 
@@ -159,7 +155,7 @@ internal class Godkjenningsbehov(
             organisasjonsnummer = organisasjonsnummer,
             førstegangsbehandling = førstegangsbehandling,
             sykefraværstilfelle = sykefraværstilfelle,
-            utbetalingsfinner = utbetalingsfinner,
+            utbetaling = utbetaling,
         ),
         AutomatiskAvvisningCommand(
             fødselsnummer = fødselsnummer,
@@ -196,7 +192,7 @@ internal class Godkjenningsbehov(
             utbetalingId = utbetalingId,
             utbetalingtype = utbetalingtype,
             sykefraværstilfelle = sykefraværstilfelle,
-            snapshotMediator = snapshotMediator,
+            utbetaling = utbetaling,
             vergemålDao = vergemålDao,
             inntektskilde = inntektskilde,
             periodetype = periodetype,

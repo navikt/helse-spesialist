@@ -78,7 +78,6 @@ import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
-import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.slf4j.LoggerFactory
 import no.nav.helse.modell.overstyring.SkjønnsfastsattArbeidsgiver.Companion.arbeidsgiverelementer as skjønnsfastsattArbeidsgiverelementer
@@ -121,7 +120,6 @@ internal class Hendelsefabrikk(
     private val vergemålDao: VergemålDao = VergemålDao(dataSource),
     private val varselRepository: ActualVarselRepository = ActualVarselRepository(dataSource),
     private val overstyringMediator: OverstyringMediator,
-    private val snapshotMediator: SnapshotMediator,
     private val versjonAvKode: String?,
 ) {
     private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
@@ -236,7 +234,6 @@ internal class Hendelsefabrikk(
             overstyringDao = overstyringDao,
             påVentDao = påVentDao,
             totrinnsvurderingMediator = totrinnsvurderingMediator,
-            snapshotMediator = snapshotMediator,
         )
     }
 

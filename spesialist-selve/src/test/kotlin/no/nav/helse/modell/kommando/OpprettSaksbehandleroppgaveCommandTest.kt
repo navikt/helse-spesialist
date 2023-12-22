@@ -35,6 +35,7 @@ import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
+import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -44,15 +45,11 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype.INFOTRYGDFORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.OVERGANG_FRA_IT
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
-import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
-import no.nav.helse.spleis.graphql.enums.GraphQLUtbetalingstatus
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUtbetaling
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import no.nav.helse.spleis.graphql.enums.Utbetalingtype as GraphQLUtbetalingtype
 
 internal class OpprettSaksbehandleroppgaveCommandTest {
     private companion object {
@@ -65,7 +62,6 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
     private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
     private val automatisering = mockk<Automatisering>(relaxed = true)
     private val personDao = mockk<PersonDao>(relaxed = true)
-    private val snapshotMediator = mockk<SnapshotMediator>(relaxed = true)
     private val risikovurderingDao = mockk<RisikovurderingDao>(relaxed = true)
     private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
     private val vergemålDao = mockk<VergemålDao>(relaxed = true)
@@ -76,9 +72,17 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
     private lateinit var contextId: UUID
     private lateinit var utbetalingstype: Utbetalingtype
     private val command get() = opprettSaksbehandlerOppgaveCommand()
+    private val utbetaling = mockk<Utbetaling>(relaxed = true)
 
     @BeforeEach
-    fun setup() {
+    fun beforeEach() {
+        contextId = UUID.randomUUID()
+        context = CommandContext(contextId)
+        utbetalingstype = Utbetalingtype.UTBETALING
+        every { utbetaling.ingenUtbetaling() } returns true
+    }
+    @BeforeEach
+    fun afterEach() {
         contextId = UUID.randomUUID()
         context = CommandContext(contextId)
         utbetalingstype = Utbetalingtype.UTBETALING
@@ -162,7 +166,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
 
     @Test
     fun `oppretter oppgave med egen oppgavetype for utbetaling til sykmeldt`() {
-        every { snapshotMediator.finnUtbetaling(FNR, UTBETALING_ID) } returns enUtbetaling(personbeløp = 500)
+        every { utbetaling.kunUtbetalingTilSykmeldt() } returns true
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
         verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
@@ -173,10 +177,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
 
     @Test
     fun `oppretter oppgave med egen oppgavetype for delvis refusjon`() {
-        every { snapshotMediator.finnUtbetaling(FNR, UTBETALING_ID) } returns enUtbetaling(
-            personbeløp = 500,
-            arbeidsgiverbeløp = 500
-        )
+        every { utbetaling.delvisRefusjon() } returns true
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
         verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
@@ -187,7 +188,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
 
     @Test
     fun `oppretter oppgave med egenskap utbetaling til arbeidsgiver`() {
-        every { snapshotMediator.finnUtbetaling(FNR, UTBETALING_ID) } returns enUtbetaling(arbeidsgiverbeløp = 500)
+        every { utbetaling.kunUtbetalingTilArbeidsgiver() } returns true
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
         verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
@@ -200,7 +201,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
 
     @Test
     fun `oppretter oppgave med egenskap ingen utbetaling`() {
-        every { snapshotMediator.finnUtbetaling(FNR, UTBETALING_ID) } returns enUtbetaling(personbeløp = 0, arbeidsgiverbeløp = 0)
+        every { utbetaling.ingenUtbetaling() } returns true
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
         verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
@@ -213,7 +214,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
 
     @Test
     fun `oppretter ikke oppgave med egenskap haster dersom det er utbetaling til arbeidsgiver`() {
-        every { snapshotMediator.finnUtbetaling(FNR, UTBETALING_ID) } returns enUtbetaling(personbeløp = 0, arbeidsgiverbeløp = 500)
+        every { utbetaling.kunUtbetalingTilArbeidsgiver() } returns true
         every { sykefraværstilfelle.haster(VEDTAKSPERIODE_ID) } returns true
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
@@ -227,7 +228,6 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
 
     @Test
     fun `oppretter oppgave med egenskap skjønnsfastsettelse dersom det finnes varsel om avvik`() {
-        every { snapshotMediator.finnUtbetaling(FNR, UTBETALING_ID) } returns enUtbetaling(personbeløp = 0, arbeidsgiverbeløp = 500)
         every { sykefraværstilfelle.kreverSkjønnsfastsettelse(VEDTAKSPERIODE_ID) } returns true
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
@@ -240,22 +240,8 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
     }
 
     @Test
-    fun `oppretter oppgave med egenskap haster dersom det er delvis refusjon`() {
-        every { snapshotMediator.finnUtbetaling(FNR, UTBETALING_ID) } returns enUtbetaling(personbeløp = -500, arbeidsgiverbeløp = 500)
-        every { sykefraværstilfelle.haster(VEDTAKSPERIODE_ID) } returns true
-        val slot = slot<((Long) -> Oppgave)>()
-        assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
-
-        val oppgave = slot.captured.invoke(1L)
-        oppgaveinspektør(oppgave) {
-            assertTrue(egenskaper.contains(HASTER))
-        }
-    }
-
-    @Test
-    fun `oppretter oppgave med egenskap haster dersom det er utbetaling til sykmeldte`() {
-        every { snapshotMediator.finnUtbetaling(FNR, UTBETALING_ID) } returns enUtbetaling(personbeløp = -500)
+    fun `oppretter oppgave med egenskap haster dersom det er endring i utbetaling til sykmeldte`() {
+        every { utbetaling.harEndringIUtbetalingTilSykmeldt() } returns true
         every { sykefraværstilfelle.haster(VEDTAKSPERIODE_ID) } returns true
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
@@ -269,7 +255,6 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
 
     @Test
     fun `oppretter oppgave med egen ansatt`() {
-        every { snapshotMediator.finnUtbetaling(FNR, UTBETALING_ID) } returns enUtbetaling()
         every { egenAnsattDao.erEgenAnsatt(FNR) } returns true
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
@@ -283,7 +268,6 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
 
     @Test
     fun `oppretter oppgave med egenskap spesialsak`() {
-        every { snapshotMediator.finnUtbetaling(FNR, UTBETALING_ID) } returns enUtbetaling()
         every { vedtakDao.erSpesialsak(VEDTAKSPERIODE_ID) } returns true
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
@@ -297,7 +281,6 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
 
     @Test
     fun `oppretter oppgave med egenskap UTLAND`() {
-        every { snapshotMediator.finnUtbetaling(FNR, UTBETALING_ID) } returns enUtbetaling()
         every { personDao.finnEnhetId(FNR) } returns "0393"
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(command.execute(context))
@@ -311,7 +294,6 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
 
     @Test
     fun `oppretter oppgave med egenskap FLERE_ARBEIDSGIVERE`() {
-        every { snapshotMediator.finnUtbetaling(FNR, UTBETALING_ID) } returns enUtbetaling()
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(opprettSaksbehandlerOppgaveCommand(inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE).execute(context))
         verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
@@ -324,7 +306,6 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
 
     @Test
     fun `oppretter oppgave med egenskap FORLENGELSE`() {
-        every { snapshotMediator.finnUtbetaling(FNR, UTBETALING_ID) } returns enUtbetaling()
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(opprettSaksbehandlerOppgaveCommand(periodetype = FORLENGELSE).execute(context))
         verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
@@ -337,7 +318,6 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
 
     @Test
     fun `oppretter oppgave med egenskap INFOTRYGDFORLENGELSE`() {
-        every { snapshotMediator.finnUtbetaling(FNR, UTBETALING_ID) } returns enUtbetaling()
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(opprettSaksbehandlerOppgaveCommand(periodetype = INFOTRYGDFORLENGELSE).execute(context))
         verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
@@ -350,7 +330,6 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
 
     @Test
     fun `oppretter oppgave med egenskap OVERGANG_FRA_IT`() {
-        every { snapshotMediator.finnUtbetaling(FNR, UTBETALING_ID) } returns enUtbetaling()
         val slot = slot<((Long) -> Oppgave)>()
         assertTrue(opprettSaksbehandlerOppgaveCommand(periodetype = OVERGANG_FRA_IT).execute(context))
         verify(exactly = 1) { oppgaveMediator.nyOppgave(FNR, contextId, capture(slot)) }
@@ -398,21 +377,6 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
     private fun enOppgave(vararg egenskaper: Egenskap, kanAvvises: Boolean = true) =
         Oppgave.nyOppgave(1L, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), kanAvvises, egenskaper.toList())
 
-
-    private fun enUtbetaling(personbeløp: Int = 0, arbeidsgiverbeløp: Int = 0): GraphQLUtbetaling =
-        GraphQLUtbetaling(
-            id = UTBETALING_ID.toString(),
-            arbeidsgiverFagsystemId = "EN_FAGSYSTEMID",
-            arbeidsgiverNettoBelop = arbeidsgiverbeløp,
-            personFagsystemId = "EN_FAGSYSTEMID",
-            personNettoBelop = personbeløp,
-            statusEnum = GraphQLUtbetalingstatus.GODKJENT,
-            typeEnum = GraphQLUtbetalingtype.UTBETALING,
-            vurdering = null,
-            personoppdrag = null,
-            arbeidsgiveroppdrag = null,
-        )
-
     private fun opprettSaksbehandlerOppgaveCommand(inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER, periodetype: Periodetype = FØRSTEGANGSBEHANDLING, kanAvvises: Boolean = true) =
         OpprettSaksbehandleroppgaveCommand(
             fødselsnummer = FNR,
@@ -426,7 +390,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
             utbetalingId = UTBETALING_ID,
             utbetalingtype = utbetalingstype,
             sykefraværstilfelle = sykefraværstilfelle,
-            snapshotMediator = snapshotMediator,
+            utbetaling = utbetaling,
             vergemålDao = vergemålDao,
             inntektskilde = inntektskilde,
             periodetype = periodetype,

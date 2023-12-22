@@ -5,9 +5,8 @@ import no.nav.helse.mediator.meldinger.løsninger.Risikovurderingløsning
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
-import no.nav.helse.modell.utbetalingTilSykmeldt
+import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.varsel.Varselkode.SB_RV_1
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUtbetaling
 import org.slf4j.LoggerFactory
 
 internal class RisikoCommand(
@@ -17,11 +16,8 @@ internal class RisikoCommand(
     private val organisasjonsnummer: String,
     private val førstegangsbehandling: Boolean,
     private val sykefraværstilfelle: Sykefraværstilfelle,
-    private val utbetalingsfinner: () -> GraphQLUtbetaling?,
+    private val utbetaling: Utbetaling,
 ) : Command {
-
-    val utbetaling
-        get() = checkNotNull(utbetalingsfinner()) { "Forventer å kunne finne utbetaling før kjøring av RisikoCommand" }
 
     override fun execute(context: CommandContext) = behandle(context)
 
@@ -33,12 +29,14 @@ internal class RisikoCommand(
         val løsning = context.get<Risikovurderingløsning>()
         if (løsning == null || !løsning.gjelderVedtaksperiode(vedtaksperiodeId)) {
             logg.info("Trenger risikovurdering av vedtaksperiode $vedtaksperiodeId")
-            context.behov("Risikovurdering", mapOf(
-                "vedtaksperiodeId" to vedtaksperiodeId,
-                "organisasjonsnummer" to organisasjonsnummer,
-                "førstegangsbehandling" to førstegangsbehandling,
-                "kunRefusjon" to !utbetaling.utbetalingTilSykmeldt(),
-            ))
+            context.behov(
+                "Risikovurdering", mapOf(
+                    "vedtaksperiodeId" to vedtaksperiodeId,
+                    "organisasjonsnummer" to organisasjonsnummer,
+                    "førstegangsbehandling" to førstegangsbehandling,
+                    "kunRefusjon" to !utbetaling.harEndringIUtbetalingTilSykmeldt(),
+                )
+            )
             return false
         }
 
