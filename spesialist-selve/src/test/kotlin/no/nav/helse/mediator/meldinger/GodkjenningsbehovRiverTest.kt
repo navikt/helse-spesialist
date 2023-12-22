@@ -76,7 +76,7 @@ internal class GodkjenningsbehovRiverTest {
     }
 
     @Test
-    fun `leser ikke Godkjenningbehov uten avviksvurderingId`() {
+    fun `leser ikke Godkjenningbehov uten behandletAvSpinnvill`() {
         val relevanteArbeidsforhold = listOf(ORGNR)
         testRapid.sendTestMessage(
             Testmeldingfabrikk.lagGodkjenningsbehov(

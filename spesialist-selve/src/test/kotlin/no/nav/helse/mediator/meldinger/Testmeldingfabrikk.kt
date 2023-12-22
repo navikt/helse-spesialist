@@ -269,6 +269,7 @@ internal object Testmeldingfabrikk {
                 ),
             ).apply {
                 if (avviksvurderingId != null) {
+                    put("behandletAvSpinnvill", true)
                     put("avviksvurderingId", avviksvurderingId)
                 }
             }

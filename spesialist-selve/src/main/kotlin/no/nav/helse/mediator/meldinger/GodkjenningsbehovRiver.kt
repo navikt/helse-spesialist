@@ -29,6 +29,7 @@ internal class GodkjenningsbehovRiver(
         River(rapidsConnection).apply {
             validate {
                 it.demandAll("@behov", listOf("Godkjenning"))
+                it.demandValue("behandletAvSpinnvill", true)
                 it.rejectKey("@løsning")
                 it.requireKey(
                     "@id", "fødselsnummer", "aktørId", "organisasjonsnummer", "vedtaksperiodeId", "utbetalingId"
@@ -43,7 +44,7 @@ internal class GodkjenningsbehovRiver(
                     "Godkjenning.kanAvvises",
                     "Godkjenning.vilkårsgrunnlagId",
                 )
-                it.demandKey("avviksvurderingId")
+                it.interestedIn("avviksvurderingId")
                 it.requireAny("Godkjenning.utbetalingtype", Utbetalingtype.gyldigeTyper.values())
                 it.interestedIn("Godkjenning.orgnummereMedRelevanteArbeidsforhold")
             }
