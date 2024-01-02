@@ -78,7 +78,6 @@ fragment grunnlag on GraphQLVilkarsgrunnlag {
         }
     }
     omregnetArsinntekt
-    sammenligningsgrunnlag
     skjaeringstidspunkt
     sykepengegrunnlag
 }
@@ -251,7 +250,6 @@ query HentSnapshot($fnr: String!) {
         fodselsnummer
         versjon
         vilkarsgrunnlag {
-            vilkarsgrunnlagtype
             ...grunnlag
             ... on GraphQLInfotrygdVilkarsgrunnlag {
                 __typename

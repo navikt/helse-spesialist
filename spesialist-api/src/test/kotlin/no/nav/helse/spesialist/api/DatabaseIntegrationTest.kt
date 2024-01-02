@@ -695,7 +695,6 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     ): GraphQLPerson {
         val vilkårsgrunnlag = GraphQLSpleisVilkarsgrunnlag(
             id = UUID.randomUUID().toString(),
-            vilkarsgrunnlagtype = GraphQLVilkarsgrunnlagtype.SPLEIS,
             inntekter = listOf(
                 GraphQLArbeidsgiverinntekt(
                     arbeidsgiver = ORGANISASJONSNUMMER,
@@ -707,7 +706,6 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                 )
             ),
             omregnetArsinntekt = 1_000_000.0,
-            sammenligningsgrunnlag = 1_000_000.0,
             skjonnsmessigFastsattAarlig = 0.0,
             skjaeringstidspunkt = "2020-01-01",
             sykepengegrunnlag = 1_000_000.0,
