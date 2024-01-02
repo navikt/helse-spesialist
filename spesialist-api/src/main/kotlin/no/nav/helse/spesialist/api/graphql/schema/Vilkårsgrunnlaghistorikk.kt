@@ -59,9 +59,9 @@ internal fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Av
             VilkarsgrunnlagSpleis(
                 inntekter = inntekter.map { arbeidsgiverinntekt ->
                     val arbeidsgiverinntekter =
-                        avviksvurdering.sammenligningsgrunnlag.innrapporterteInntekter.single {
+                        avviksvurdering.sammenligningsgrunnlag.innrapporterteInntekter.singleOrNull {
                             it.arbeidsgiverreferanse == arbeidsgiverinntekt.arbeidsgiver
-                        }.inntekter
+                        }?.inntekter ?: emptyList()
                     Arbeidsgiverinntekt(
                         arbeidsgiver = arbeidsgiverinntekt.arbeidsgiver,
                         omregnetArsinntekt = arbeidsgiverinntekt.omregnetArsinntekt?.tilOmregnetÅrsinntekt(),
