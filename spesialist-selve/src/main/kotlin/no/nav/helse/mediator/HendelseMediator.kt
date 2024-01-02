@@ -177,7 +177,11 @@ internal class HendelseMediator(
     }
 
     internal fun håndter(varseldefinisjon: Varseldefinisjon) {
-        varselRepository.lagreDefinisjon(varseldefinisjon.toDto())
+        val varseldefinisjonDto = varseldefinisjon.toDto()
+        varselRepository.lagreDefinisjon(varseldefinisjonDto)
+        if (varseldefinisjonDto.avviklet) {
+            varselRepository.avvikleVarsel(varseldefinisjonDto)
+        }
     }
 
     internal fun håndter(avsluttetMedVedtakMessage: AvsluttetMedVedtakMessage) {

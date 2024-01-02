@@ -61,4 +61,8 @@ internal class ActualVarselRepository(dataSource: DataSource): IVedtaksperiodeOb
             opprettet = definisjonDto.opprettet
         )
     }
+
+    internal fun avvikleVarsel(definisjonDto: VarseldefinisjonDto) {
+        varselDao.avvikleVarsel(varselkode = definisjonDto.varselkode, definisjonId = definisjonDto.id)
+    }
 }

@@ -36,4 +36,5 @@ enum class VarselStatusDto {
     GODKJENT,
     VURDERT,
     AVVIST,
+    AVVIKLET,
 }

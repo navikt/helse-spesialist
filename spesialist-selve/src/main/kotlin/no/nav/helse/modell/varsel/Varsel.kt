@@ -24,7 +24,8 @@ internal class Varsel(
         INAKTIV,
         GODKJENT,
         VURDERT,
-        AVVIST;
+        AVVIST,
+        AVVIKLET;
         internal fun toDto(): VarselStatusDto {
             return when (this) {
                 AKTIV -> VarselStatusDto.AKTIV
@@ -32,6 +33,7 @@ internal class Varsel(
                 GODKJENT -> VarselStatusDto.GODKJENT
                 VURDERT -> VarselStatusDto.VURDERT
                 AVVIST -> VarselStatusDto.AVVIST
+                AVVIKLET -> VarselStatusDto.AVVIKLET
             }
         }
     }

@@ -7,6 +7,8 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.januar
 import no.nav.helse.modell.varsel.Varsel.Status.AKTIV
+import no.nav.helse.modell.varsel.Varsel.Status.AVVIKLET
+import no.nav.helse.modell.varsel.Varsel.Status.GODKJENT
 import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
 import no.nav.helse.modell.varsel.Varsel.Status.VURDERT
 import no.nav.helse.modell.vedtaksperiode.Generasjon
@@ -131,6 +133,38 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
         varselDao.oppdaterStatus(v1, generasjonIdv1, "EN_KODE", INAKTIV, "EN_IDENT", definisjonId)
         assertEquals(INAKTIV, varselDao.finnVarselstatus(v1, "EN_KODE"))
         assertEquals(AKTIV, varselDao.finnVarselstatus(v2, "EN_KODE"))
+    }
+
+    @Test
+    fun `avvikling av varsel`() {
+        val definisjonId = UUID.randomUUID()
+        definisjonDao.lagreDefinisjon(definisjonId, "EN_KODE", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now())
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjonId = UUID.randomUUID()
+        generasjonDao.opprettFor(generasjonId, vedtaksperiodeId, UUID.randomUUID(), 1.januar, Periode(1.januar, 31.januar), Generasjon.Ulåst)
+        varselDao.lagreVarsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), vedtaksperiodeId, generasjonId)
+        varselDao.avvikleVarsel("EN_KODE", definisjonId)
+        assertEquals(AVVIKLET, varselDao.finnVarselstatus(vedtaksperiodeId, "EN_KODE"))
+    }
+
+    @Test
+    fun `avvikler ikke varsel hvis varsel ikke har status aktiv`() {
+        val definisjonId = UUID.randomUUID()
+        definisjonDao.lagreDefinisjon(definisjonId, "EN_KODE", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now())
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjonId = UUID.randomUUID()
+        generasjonDao.opprettFor(generasjonId, vedtaksperiodeId, UUID.randomUUID(), 1.januar, Periode(1.januar, 31.januar), Generasjon.Ulåst)
+        varselDao.lagreVarsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), vedtaksperiodeId, generasjonId)
+
+        varselDao.oppdaterStatus(vedtaksperiodeId, generasjonId, "EN_KODE", VURDERT, "EN_IDENT", definisjonId)
+        varselDao.avvikleVarsel("EN_KODE", definisjonId)
+        assertEquals(VURDERT, varselDao.finnVarselstatus(vedtaksperiodeId, "EN_KODE"))
+        varselDao.oppdaterStatus(vedtaksperiodeId, generasjonId, "EN_KODE", GODKJENT, "EN_IDENT", definisjonId)
+        varselDao.avvikleVarsel("EN_KODE", definisjonId)
+        assertEquals(GODKJENT, varselDao.finnVarselstatus(vedtaksperiodeId, "EN_KODE"))
+        varselDao.oppdaterStatus(vedtaksperiodeId, generasjonId, "EN_KODE", INAKTIV, "EN_IDENT", definisjonId)
+        varselDao.avvikleVarsel("EN_KODE", definisjonId)
+        assertEquals(INAKTIV, varselDao.finnVarselstatus(vedtaksperiodeId, "EN_KODE"))
     }
 
     @Test
