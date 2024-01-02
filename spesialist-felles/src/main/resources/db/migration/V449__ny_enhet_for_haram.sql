@@ -1,0 +1,1 @@
+INSERT INTO enhet (id, navn) VALUES (1580, 'NAV Haram') ON CONFLICT DO NOTHING;
