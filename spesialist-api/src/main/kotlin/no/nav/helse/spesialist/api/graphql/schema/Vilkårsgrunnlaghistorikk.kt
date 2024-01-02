@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.api.graphql.schema
 
 import java.util.UUID
 import no.nav.helse.spesialist.api.Avviksvurderinghenter
+import no.nav.helse.spesialist.api.avviksvurdering.Avviksvurdering
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLInfotrygdVilkarsgrunnlag
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSpleisVilkarsgrunnlag
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSykepengegrunnlagsgrense
@@ -52,21 +53,18 @@ data class VilkarsgrunnlagSpleis(
 internal fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Avviksvurderinghenter): Vilkarsgrunnlag {
     return when (this) {
         is GraphQLSpleisVilkarsgrunnlag -> {
-            val avviksvurdering = avviksvurderinghenter.hentAvviksvurdering(UUID.fromString(id))
-            if (avviksvurdering == null) {
-                throw IllegalStateException("Avviksvurdering null for vilkårsgrunnlag $id")
-            }
+            val avviksvurdering: Avviksvurdering? = avviksvurderinghenter.hentAvviksvurdering(UUID.fromString(id))
             VilkarsgrunnlagSpleis(
                 inntekter = inntekter.map { arbeidsgiverinntekt ->
                     val arbeidsgiverinntekter =
-                        avviksvurdering.sammenligningsgrunnlag.innrapporterteInntekter.singleOrNull {
+                        avviksvurdering?.sammenligningsgrunnlag?.innrapporterteInntekter?.singleOrNull {
                             it.arbeidsgiverreferanse == arbeidsgiverinntekt.arbeidsgiver
                         }?.inntekter ?: emptyList()
                     Arbeidsgiverinntekt(
                         arbeidsgiver = arbeidsgiverinntekt.arbeidsgiver,
                         omregnetArsinntekt = arbeidsgiverinntekt.omregnetArsinntekt.tilOmregnetÅrsinntekt(),
                         sammenligningsgrunnlag = Sammenligningsgrunnlag(
-                            belop = arbeidsgiverinntekter.sumOf { it.beløp },
+                            belop = if (avviksvurdering == null) -1.0 else arbeidsgiverinntekter.sumOf { it.beløp },
                             inntektFraAOrdningen = arbeidsgiverinntekter.map { inntekt ->
                                 InntektFraAOrdningen(
                                     maned = inntekt.årMåned.toString(),
@@ -78,9 +76,9 @@ internal fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Av
                         deaktivert = arbeidsgiverinntekt.deaktivert
                     )
                 },
-                omregnetArsinntekt = avviksvurdering.beregningsgrunnlag.totalbeløp,
-                sammenligningsgrunnlag = avviksvurdering.sammenligningsgrunnlag.totalbeløp,
-                avviksprosent = avviksvurdering.avviksprosent,
+                omregnetArsinntekt = avviksvurdering?.beregningsgrunnlag?.totalbeløp ?: -1.0,
+                sammenligningsgrunnlag = avviksvurdering?.sammenligningsgrunnlag?.totalbeløp,
+                avviksprosent = avviksvurdering?.avviksprosent,
                 vilkarsgrunnlagtype = Vilkarsgrunnlagtype.SPLEIS,
                 id = id,
                 arbeidsgiverrefusjoner = arbeidsgiverrefusjoner.map { it.tilArbeidsgiverrefusjon() },
@@ -103,7 +101,7 @@ internal fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Av
             inntekter = inntekter.map {
                 Arbeidsgiverinntekt(
                     arbeidsgiver = it.arbeidsgiver,
-                    omregnetArsinntekt = it.omregnetArsinntekt?.tilOmregnetÅrsinntekt(),
+                    omregnetArsinntekt = it.omregnetArsinntekt.tilOmregnetÅrsinntekt(),
                     sammenligningsgrunnlag = null,
                     skjonnsmessigFastsatt = null,
                     deaktivert = it.deaktivert

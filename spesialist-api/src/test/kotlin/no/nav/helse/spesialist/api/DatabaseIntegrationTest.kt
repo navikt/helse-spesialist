@@ -685,13 +685,12 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     ) {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns object :
             GraphQLClientResponse<HentSnapshot.Result> {
-            override val data = HentSnapshot.Result(snapshot(fødselsnummer, avviksprosent, arbeidsgivere))
+            override val data = HentSnapshot.Result(snapshot(fødselsnummer, arbeidsgivere))
         }
     }
 
     private fun snapshot(
         fødselsnummer: String = FØDSELSNUMMER,
-        avviksprosent: Double = 0.0,
         arbeidsgivere: List<GraphQLArbeidsgiver> = emptyList(),
     ): GraphQLPerson {
         val vilkårsgrunnlag = GraphQLSpleisVilkarsgrunnlag(
