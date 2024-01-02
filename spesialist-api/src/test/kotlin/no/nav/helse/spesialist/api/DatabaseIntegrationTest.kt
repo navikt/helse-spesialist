@@ -44,7 +44,6 @@ import no.nav.helse.spleis.graphql.enums.GraphQLInntektstype
 import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetilstand
 import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetype
 import no.nav.helse.spleis.graphql.enums.GraphQLUtbetalingstatus
-import no.nav.helse.spleis.graphql.enums.GraphQLVilkarsgrunnlagtype
 import no.nav.helse.spleis.graphql.enums.Utbetalingtype
 import no.nav.helse.spleis.graphql.hentsnapshot.Alder
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiver
@@ -697,12 +696,10 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             id = UUID.randomUUID().toString(),
             inntekter = listOf(
                 GraphQLArbeidsgiverinntekt(
-                    arbeidsgiver = ORGANISASJONSNUMMER,
-                    sammenligningsgrunnlag = null
+                    arbeidsgiver = ORGANISASJONSNUMMER
                 ),
                 GraphQLArbeidsgiverinntekt(
-                    arbeidsgiver = "987656789",
-                    sammenligningsgrunnlag = null
+                    arbeidsgiver = "987656789"
                 )
             ),
             omregnetArsinntekt = 1_000_000.0,

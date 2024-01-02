@@ -57,12 +57,14 @@ internal fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Av
                 throw IllegalStateException("Avviksvurdering null for vilkårsgrunnlag $id")
             }
             VilkarsgrunnlagSpleis(
-                inntekter = inntekter.map { it.tilArbeidsgiverinntekt() }.map { arbeidsgiverinntekt ->
+                inntekter = inntekter.map { arbeidsgiverinntekt ->
                     val arbeidsgiverinntekter =
                         avviksvurdering.sammenligningsgrunnlag.innrapporterteInntekter.single {
                             it.arbeidsgiverreferanse == arbeidsgiverinntekt.arbeidsgiver
                         }.inntekter
-                    arbeidsgiverinntekt.copy(
+                    Arbeidsgiverinntekt(
+                        arbeidsgiver = arbeidsgiverinntekt.arbeidsgiver,
+                        omregnetArsinntekt = arbeidsgiverinntekt.omregnetArsinntekt?.tilOmregnetÅrsinntekt(),
                         sammenligningsgrunnlag = Sammenligningsgrunnlag(
                             belop = arbeidsgiverinntekter.sumOf { it.beløp },
                             inntektFraAOrdningen = arbeidsgiverinntekter.map { inntekt ->
@@ -71,7 +73,9 @@ internal fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Av
                                     sum = inntekt.beløp
                                 )
                             }
-                        )
+                        ),
+                        skjonnsmessigFastsatt = arbeidsgiverinntekt.skjonnsmessigFastsatt?.tilOmregnetÅrsinntekt(),
+                        deaktivert = arbeidsgiverinntekt.deaktivert
                     )
                 },
                 omregnetArsinntekt = avviksvurdering.beregningsgrunnlag.totalbeløp,
@@ -96,7 +100,15 @@ internal fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Av
         is GraphQLInfotrygdVilkarsgrunnlag -> VilkarsgrunnlagInfotrygd(
             id = id,
             vilkarsgrunnlagtype = Vilkarsgrunnlagtype.INFOTRYGD,
-            inntekter = inntekter.map { it.tilArbeidsgiverinntekt() },
+            inntekter = inntekter.map {
+                Arbeidsgiverinntekt(
+                    arbeidsgiver = it.arbeidsgiver,
+                    omregnetArsinntekt = it.omregnetArsinntekt?.tilOmregnetÅrsinntekt(),
+                    sammenligningsgrunnlag = null,
+                    skjonnsmessigFastsatt = null,
+                    deaktivert = it.deaktivert
+                )
+            },
             arbeidsgiverrefusjoner = arbeidsgiverrefusjoner.map { it.tilArbeidsgiverrefusjon() },
             omregnetArsinntekt = omregnetArsinntekt,
             skjaeringstidspunkt = skjaeringstidspunkt,

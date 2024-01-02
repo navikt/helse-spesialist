@@ -59,13 +59,6 @@ fragment grunnlag on GraphQLVilkarsgrunnlag {
             kilde
             manedsbelop
         }
-        sammenligningsgrunnlag {
-            belop
-            inntekterFraAOrdningen {
-                maned
-                sum
-            }
-        }
         deaktivert
     }
     arbeidsgiverrefusjoner {

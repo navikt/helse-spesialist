@@ -1,10 +1,8 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
 import no.nav.helse.spleis.graphql.enums.GraphQLInntektskilde
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiverinntekt
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLInntekterFraAOrdningen
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLOmregnetArsinntekt
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSammenligningsgrunnlag
 
 data class Arbeidsgiverinntekt(
     val arbeidsgiver: String,
@@ -40,22 +38,7 @@ enum class Inntektskilde {
     SKJONNSMESSIG_FASTSATT
 }
 
-internal fun GraphQLArbeidsgiverinntekt.tilArbeidsgiverinntekt(): Arbeidsgiverinntekt =
-    Arbeidsgiverinntekt(
-        arbeidsgiver = arbeidsgiver,
-        omregnetArsinntekt = omregnetArsinntekt?.tilOmregnetÅrsinntekt(),
-        sammenligningsgrunnlag = sammenligningsgrunnlag?.tilSammenligningsgrunnlag(),
-        skjonnsmessigFastsatt = skjonnsmessigFastsatt?.tilOmregnetÅrsinntekt(),
-        deaktivert = deaktivert
-    )
-
-private fun GraphQLSammenligningsgrunnlag.tilSammenligningsgrunnlag(): Sammenligningsgrunnlag =
-    Sammenligningsgrunnlag(
-        belop = belop,
-        inntektFraAOrdningen = inntekterFraAOrdningen.map { it.tilInntektFraAOrdningen() }
-    )
-
-private fun GraphQLOmregnetArsinntekt.tilOmregnetÅrsinntekt(): OmregnetArsinntekt =
+internal fun GraphQLOmregnetArsinntekt.tilOmregnetÅrsinntekt(): OmregnetArsinntekt =
     OmregnetArsinntekt(
         belop = belop,
         inntektFraAOrdningen = inntekterFraAOrdningen?.map { it.tilInntektFraAOrdningen() },
