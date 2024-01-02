@@ -64,7 +64,7 @@ internal fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Av
                         }?.inntekter ?: emptyList()
                     Arbeidsgiverinntekt(
                         arbeidsgiver = arbeidsgiverinntekt.arbeidsgiver,
-                        omregnetArsinntekt = arbeidsgiverinntekt.omregnetArsinntekt?.tilOmregnetÅrsinntekt(),
+                        omregnetArsinntekt = arbeidsgiverinntekt.omregnetArsinntekt.tilOmregnetÅrsinntekt(),
                         sammenligningsgrunnlag = Sammenligningsgrunnlag(
                             belop = arbeidsgiverinntekter.sumOf { it.beløp },
                             inntektFraAOrdningen = arbeidsgiverinntekter.map { inntekt ->

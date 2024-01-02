@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.api.graphql.schema
 import no.nav.helse.spleis.graphql.enums.GraphQLInntektskilde
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLInntekterFraAOrdningen
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLOmregnetArsinntekt
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSkjonnsmessigFastsatt
 
 data class Arbeidsgiverinntekt(
     val arbeidsgiver: String,
@@ -43,6 +44,14 @@ internal fun GraphQLOmregnetArsinntekt.tilOmregnetÅrsinntekt(): OmregnetArsinnt
         belop = belop,
         inntektFraAOrdningen = inntekterFraAOrdningen?.map { it.tilInntektFraAOrdningen() },
         kilde = kilde.tilInntektskilde(),
+        manedsbelop = manedsbelop
+    )
+
+internal fun GraphQLSkjonnsmessigFastsatt.tilOmregnetÅrsinntekt(): OmregnetArsinntekt =
+    OmregnetArsinntekt(
+        belop = belop,
+        inntektFraAOrdningen = null,
+        kilde = Inntektskilde.SKJONNSMESSIG_FASTSATT,
         manedsbelop = manedsbelop
     )
 

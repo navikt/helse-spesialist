@@ -51,10 +51,8 @@ interface GraphQLVilkarsgrunnlag {
   id: UUID!
   inntekter: [GraphQLArbeidsgiverinntekt!]!
   omregnetArsinntekt: Float!
-  sammenligningsgrunnlag: Float
   skjaeringstidspunkt: LocalDate!
   sykepengegrunnlag: Float!
-  vilkarsgrunnlagtype: GraphQLVilkarsgrunnlagtype!
 }
 
 type Alder {
@@ -72,9 +70,8 @@ type GraphQLArbeidsgiver {
 type GraphQLArbeidsgiverinntekt {
   arbeidsgiver: String!
   deaktivert: Boolean
-  omregnetArsinntekt: GraphQLOmregnetArsinntekt
-  sammenligningsgrunnlag: GraphQLSammenligningsgrunnlag
-  skjonnsmessigFastsatt: GraphQLOmregnetArsinntekt
+  omregnetArsinntekt: GraphQLOmregnetArsinntekt!
+  skjonnsmessigFastsatt: GraphQLSkjonnsmessigFastsatt
 }
 
 type GraphQLArbeidsgiverrefusjon {
@@ -133,10 +130,8 @@ type GraphQLInfotrygdVilkarsgrunnlag implements GraphQLVilkarsgrunnlag {
   id: UUID!
   inntekter: [GraphQLArbeidsgiverinntekt!]!
   omregnetArsinntekt: Float!
-  sammenligningsgrunnlag: Float
   skjaeringstidspunkt: LocalDate!
   sykepengegrunnlag: Float!
-  vilkarsgrunnlagtype: GraphQLVilkarsgrunnlagtype!
 }
 
 type GraphQLInntekterFraAOrdningen {
@@ -187,11 +182,6 @@ type GraphQLRefusjonselement {
   tom: LocalDate
 }
 
-type GraphQLSammenligningsgrunnlag {
-  belop: Float!
-  inntekterFraAOrdningen: [GraphQLInntekterFraAOrdningen!]!
-}
-
 type GraphQLSimulering {
   perioder: [GraphQLSimuleringsperiode!]!
   totalbelop: Int!
@@ -225,6 +215,13 @@ type GraphQLSimuleringsutbetaling {
   forfall: LocalDate!
   utbetalesTilId: String!
   utbetalesTilNavn: String!
+}
+
+type GraphQLSkjonnsmessigFastsatt {
+  belop: Float!
+  inntekterFraAOrdningen: [GraphQLInntekterFraAOrdningen!]
+  kilde: GraphQLInntektskilde!
+  manedsbelop: Float!
 }
 
 type GraphQLSoknadArbeidsgiver implements GraphQLHendelse {
@@ -280,7 +277,6 @@ type GraphQLSoknadSelvstendig implements GraphQLHendelse {
 type GraphQLSpleisVilkarsgrunnlag implements GraphQLVilkarsgrunnlag {
   antallOpptjeningsdagerErMinst: Int!
   arbeidsgiverrefusjoner: [GraphQLArbeidsgiverrefusjon!]!
-  avviksprosent: Float
   grunnbelop: Int!
   id: UUID!
   inntekter: [GraphQLArbeidsgiverinntekt!]!
@@ -289,12 +285,10 @@ type GraphQLSpleisVilkarsgrunnlag implements GraphQLVilkarsgrunnlag {
   oppfyllerKravOmMinstelonn: Boolean!
   oppfyllerKravOmOpptjening: Boolean!
   opptjeningFra: LocalDate!
-  sammenligningsgrunnlag: Float
   skjaeringstidspunkt: LocalDate!
   skjonnsmessigFastsattAarlig: Float
   sykepengegrunnlag: Float!
   sykepengegrunnlagsgrense: GraphQLSykepengegrunnlagsgrense!
-  vilkarsgrunnlagtype: GraphQLVilkarsgrunnlagtype!
 }
 
 type GraphQLSykdomsdagkilde {
@@ -519,12 +513,6 @@ enum GraphQLUtbetalingstatus {
   Ubetalt
   UtbetalingFeilet
   Utbetalt
-}
-
-enum GraphQLVilkarsgrunnlagtype {
-  Infotrygd
-  Spleis
-  Ukjent
 }
 
 enum Utbetalingtype {

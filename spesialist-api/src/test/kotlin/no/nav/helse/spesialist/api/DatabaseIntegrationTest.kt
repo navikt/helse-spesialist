@@ -40,6 +40,7 @@ import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
 import no.nav.helse.spleis.graphql.HentSnapshot
 import no.nav.helse.spleis.graphql.enums.GraphQLHendelsetype
+import no.nav.helse.spleis.graphql.enums.GraphQLInntektskilde
 import no.nav.helse.spleis.graphql.enums.GraphQLInntektstype
 import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetilstand
 import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetype
@@ -52,6 +53,7 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiverrefusjon
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLBeregnetPeriode
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLGenerasjon
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLHendelse
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLOmregnetArsinntekt
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPeriodevilkar
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLRefusjonselement
@@ -696,10 +698,20 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             id = UUID.randomUUID().toString(),
             inntekter = listOf(
                 GraphQLArbeidsgiverinntekt(
-                    arbeidsgiver = ORGANISASJONSNUMMER
+                    arbeidsgiver = ORGANISASJONSNUMMER,
+                    omregnetArsinntekt = GraphQLOmregnetArsinntekt(
+                        belop = 500_000.0,
+                        manedsbelop = 55_000.0,
+                        kilde = GraphQLInntektskilde.INNTEKTSMELDING
+                    )
                 ),
                 GraphQLArbeidsgiverinntekt(
-                    arbeidsgiver = "987656789"
+                    arbeidsgiver = "987656789",
+                    omregnetArsinntekt = GraphQLOmregnetArsinntekt(
+                        belop = 500_000.0,
+                        manedsbelop = 55_000.0,
+                        kilde = GraphQLInntektskilde.INNTEKTSMELDING
+                    )
                 )
             ),
             omregnetArsinntekt = 1_000_000.0,
@@ -707,7 +719,6 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             skjaeringstidspunkt = "2020-01-01",
             sykepengegrunnlag = 1_000_000.0,
             antallOpptjeningsdagerErMinst = 123,
-            avviksprosent = avviksprosent,
             grunnbelop = 100_000,
             sykepengegrunnlagsgrense = GraphQLSykepengegrunnlagsgrense(
                 grunnbelop = 100_000,

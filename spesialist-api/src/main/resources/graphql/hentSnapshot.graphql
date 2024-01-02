@@ -52,11 +52,6 @@ fragment grunnlag on GraphQLVilkarsgrunnlag {
         }
         skjonnsmessigFastsatt {
             belop
-            inntekterFraAOrdningen {
-                maned
-                sum
-            }
-            kilde
             manedsbelop
         }
         deaktivert
@@ -250,7 +245,6 @@ query HentSnapshot($fnr: String!) {
             ... on GraphQLSpleisVilkarsgrunnlag {
                 __typename
                 antallOpptjeningsdagerErMinst
-                avviksprosent
                 skjonnsmessigFastsattAarlig
                 grunnbelop
                 sykepengegrunnlagsgrense {
