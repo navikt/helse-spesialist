@@ -155,6 +155,36 @@ internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
         assertEquals(1, behandlingsstatistikkDao.getAntallFullførteBeslutteroppgaver(LocalDate.now().minusDays(1)))
     }
 
+    @Test
+    fun`Får antall tilgjengelige egen ansatt-oppgaver`() {
+        nyPerson()
+        opprettSaksbehandler()
+        oppgaveDao.updateOppgave(
+            oppgaveId = OPPGAVE_ID,
+            oppgavestatus = Oppgavestatus.AvventerSaksbehandler.toString(),
+            egenskaper = listOf(EGENSKAP, EgenskapForDatabase.EGEN_ANSATT)
+        )
+        assertEquals(1, behandlingsstatistikkDao.getAntallTilgjengeligeEgenAnsattOppgaver())
+        oppgaveDao.updateOppgave(
+            oppgaveId = OPPGAVE_ID,
+            oppgavestatus = Oppgavestatus.Ferdigstilt.toString(),
+            egenskaper = listOf(EGENSKAP, EgenskapForDatabase.EGEN_ANSATT)
+        )
+        assertEquals(0, behandlingsstatistikkDao.getAntallTilgjengeligeEgenAnsattOppgaver())
+    }
+
+    @Test
+    fun`Får antall fullførte egen ansatt-oppgaver`() {
+        nyPerson()
+        opprettSaksbehandler()
+        oppgaveDao.updateOppgave(
+            oppgaveId = OPPGAVE_ID,
+            oppgavestatus = Oppgavestatus.Ferdigstilt.toString(),
+            egenskaper = listOf(EGENSKAP, EgenskapForDatabase.EGEN_ANSATT)
+        )
+        assertEquals(1, behandlingsstatistikkDao.getAntallManueltFullførteEgenAnsattOppgaver(LocalDate.now().minusDays(1)))
+    }
+
     private operator fun List<Pair<BehandlingsstatistikkTypeForApi, Int>>.get(type: BehandlingsstatistikkTypeForApi) = this.first { it.first == type }.second
 
     private fun nyPersonMedAutomatiskVedtak(

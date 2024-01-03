@@ -169,6 +169,7 @@ fun main() = runBlocking {
             revurdering = Statistikk(0, 105, 204),
             delvisRefusjon = Statistikk(0, 64, 64),
             beslutter = Statistikk(0, 150, 204),
+            egenAnsatt = Statistikk(0, 3, 10),
             antallAnnulleringer = 0,
         )
 

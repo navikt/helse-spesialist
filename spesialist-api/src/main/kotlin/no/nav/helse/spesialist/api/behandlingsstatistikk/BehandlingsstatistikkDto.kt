@@ -42,6 +42,7 @@ data class BehandlingsstatistikkResponse(
     val revurdering: Statistikk,
     val delvisRefusjon: Statistikk,
     val beslutter: Statistikk,
+    val egenAnsatt: Statistikk,
     val antallAnnulleringer: Int,
 )
 

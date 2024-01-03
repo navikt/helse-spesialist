@@ -24,6 +24,27 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
         """
     ).single { it.int("count") } ?: 0
 
+    fun getAntallTilgjengeligeEgenAnsattOppgaver() = asSQL(
+        """
+            SELECT count(1)
+            FROM oppgave o
+            INNER JOIN vedtak v ON o.vedtak_ref = v.id
+            WHERE o.status='AvventerSaksbehandler'::oppgavestatus
+              AND v.forkastet = false 
+              AND o.egenskaper @> ARRAY['EGEN_ANSATT']::VARCHAR[]
+        """
+    ).single { it.int("count") } ?: 0
+
+    fun getAntallManueltFullførteEgenAnsattOppgaver(fom: LocalDate) = asSQL(
+        """
+            SELECT count(1)
+            FROM oppgave
+            WHERE status='Ferdigstilt'::oppgavestatus
+              AND oppdatert >= :fom
+              AND egenskaper @> ARRAY['EGEN_ANSATT']::VARCHAR[]
+        """, mapOf("fom" to fom)
+    ).single { it.int("count") } ?: 0
+
     fun getAntallFullførteBeslutteroppgaver(fom: LocalDate) = asSQL(
         """
             SELECT count(1)

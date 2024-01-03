@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
-import no.nav.helse.spesialist.api.behandlingsstatistikk.Statistikk
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkResponse
+import no.nav.helse.spesialist.api.behandlingsstatistikk.Statistikk
 
 data class Antall(
     val automatisk: Int,
@@ -38,6 +38,8 @@ data class Behandlingsstatistikk(
     fun delvisRefusjon(): Antall = behandlingsstatistikkResponse.delvisRefusjon.tilAntall()
 
     fun beslutter(): Antall = behandlingsstatistikkResponse.beslutter.tilAntall()
+
+    fun egenAnsatt(): Antall = behandlingsstatistikkResponse.egenAnsatt.tilAntall()
 
     fun antallAnnulleringer(): Int = behandlingsstatistikkResponse.antallAnnulleringer
 }
