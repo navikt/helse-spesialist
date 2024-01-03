@@ -14,7 +14,6 @@ import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.Totrinnsvurderinghåndterer
 import no.nav.helse.spesialist.api.erDev
-import no.nav.helse.spesialist.api.feilhåndtering.IkkeTilgangTilRiskQa
 import no.nav.helse.spesialist.api.feilhåndtering.IkkeÅpenOppgave
 import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
@@ -110,7 +109,7 @@ class VedtakMutation(
         }
     }
 
-    private suspend fun kanFatteVedtak(
+    private fun kanFatteVedtak(
         oppgavereferanse: Long,
         saksbehandler: SaksbehandlerFraApi,
         tilganger: SaksbehandlerTilganger,
@@ -122,17 +121,6 @@ class VedtakMutation(
                     "Oppgaven er ikke åpen.",
                     500,
                     IkkeÅpenOppgave("Oppgaven er ikke åpen.", 500)
-                )
-            )
-        }
-
-        val erRiskOppgave = withContext(Dispatchers.IO) { oppgavehåndterer.erRiskoppgave(oppgavereferanse) }
-        if (erRiskOppgave && !tilganger.harTilgangTilRiskOppgaver()) {
-            return VedtakResultat.Error(
-                VedtakError.IkkeTilgangTilRiskQa(
-                    "Saksbehandler har ikke tilgang til risk-qa oppgaver.",
-                    500,
-                    IkkeTilgangTilRiskQa("Saksbehandler har ikke tilgang til risk-qa oppgaver.", 500)
                 )
             )
         }
@@ -163,9 +151,6 @@ class VedtakMutation(
 
     sealed class VedtakError(val melding: String, val code: Int, val exception: Exception?) {
         class IkkeÅpenOppgave(melding: String, code: Int, exception: Exception) :
-            VedtakError(melding, code, exception)
-
-        class IkkeTilgangTilRiskQa(melding: String, code: Int, exception: Exception) :
             VedtakError(melding, code, exception)
 
         class TrengerBeslutterRolle(melding: String, code: Int) :

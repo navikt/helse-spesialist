@@ -292,14 +292,6 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
         """, mapOf("vedtaksperiodeId" to vedtaksperiodeId)
         ).single { it.long("id") }
 
-    fun erRiskoppgave(oppgaveId: Long): Boolean =
-        asSQL(
-            """ SELECT 1 FROM oppgave
-            WHERE id=:oppgaveId
-            AND type = 'RISK_QA'
-        """, mapOf("oppgaveId" to oppgaveId)
-        ).single { true } ?: false
-
     fun finnOppgaveIdUansettStatus(fødselsnummer: String) =
         asSQL(
             """ SELECT o.id as oppgaveId

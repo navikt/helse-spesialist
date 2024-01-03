@@ -227,7 +227,7 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
     }
 
     @Test
-    fun `utbetaling av risk-oppgave ikke tillatt hvis ikke tilgang til risk`() {
+    fun `utbetaling av risk-oppgave tillatt for alle`() {
         val personRef = opprettPerson()
         val arbeidsgiverRef = opprettArbeidsgiver()
         opprettVedtaksperiode(personRef, arbeidsgiverRef, oppgavetype = Oppgavetype.RISK_QA)
@@ -237,24 +237,7 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         val arbeidsgiver = opprettSnapshotArbeidsgiver(listOf(snapshotGenerasjon))
         mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
 
-        val body = runPersonQuery(null)
-
-        val periode = body["data"]["person"]["arbeidsgivere"].first()["generasjoner"].first()["perioder"].first()
-        assertFalse(periode["handlinger"].isEmpty)
-        assertFalse(periode["handlinger"].first { it["type"].textValue() == Periodehandling.UTBETALE.name }["tillatt"].booleanValue())
-    }
-    @Test
-    fun `utbetaling av risk-oppgave tillatt hvis tilgang til risk`() {
-        val personRef = opprettPerson()
-        val arbeidsgiverRef = opprettArbeidsgiver()
-        opprettVedtaksperiode(personRef, arbeidsgiverRef, oppgavetype = Oppgavetype.RISK_QA)
-        val (id, fom, tom) = PERIODE
-        val graphQLperiodeMedOppgave = opprettBeregnetPeriode(fom.toString(), tom.toString(), id)
-        val snapshotGenerasjon = opprettSnapshotGenerasjon(listOf(graphQLperiodeMedOppgave))
-        val arbeidsgiver = opprettSnapshotArbeidsgiver(listOf(snapshotGenerasjon))
-        mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
-
-        val body = runPersonQuery(riskSaksbehandlergruppe)
+        val body = runPersonQuery()
 
         val periode = body["data"]["person"]["arbeidsgivere"].first()["generasjoner"].first()["perioder"].first()
         assertFalse(periode["handlinger"].isEmpty)

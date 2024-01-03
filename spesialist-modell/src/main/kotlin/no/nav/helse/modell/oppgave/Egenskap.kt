@@ -12,7 +12,7 @@ enum class Egenskap(
     val kategori: Kategori = Ukategorisert,
     private val tilgangsstyrt: Boolean = false
 ) {
-    RISK_QA(tilgangsstyrt = true),
+    RISK_QA,
     FORTROLIG_ADRESSE(tilgangsstyrt = true),
     STRENGT_FORTROLIG_ADRESSE(tilgangsstyrt = true),
     EGEN_ANSATT(tilgangsstyrt = true),

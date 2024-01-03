@@ -214,7 +214,6 @@ fun main() = runBlocking {
             skjermedePersonerGruppeId = UUID.randomUUID(),
             kode7Saksbehandlergruppe = UUID.randomUUID(),
             beslutterGruppeId = UUID.randomUUID(),
-            riskGruppeId = UUID.randomUUID(),
             stikkprøveGruppeId = UUID.randomUUID(),
             spesialsakGruppeId = UUID.randomUUID(),
             snapshotMediator = SnapshotMediator(snapshotApiDao, mockk(relaxed = true)),
@@ -282,10 +281,6 @@ private class SneakyOppgaveHåndterer(
 
     override fun venterPåSaksbehandler(oppgaveId: Long): Boolean {
         return mock.venterPåSaksbehandler(oppgaveId)
-    }
-
-    override fun erRiskoppgave(oppgaveId: Long): Boolean {
-        return mock.erRiskoppgave(oppgaveId)
     }
 
     override fun oppgaver(

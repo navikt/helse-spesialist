@@ -12,7 +12,6 @@ import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Egenskap.BESLUTTER
 import no.nav.helse.modell.oppgave.Egenskap.EGEN_ANSATT
 import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
-import no.nav.helse.modell.oppgave.Egenskap.RISK_QA
 import no.nav.helse.modell.oppgave.Egenskap.SPESIALSAK
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
@@ -47,13 +46,6 @@ class TilgangskontrollørTest {
         val saksbehandlerOid = UUID.randomUUID()
         tilgangskontrollørForReservasjon.harTilgangTil(saksbehandlerOid, listOf(EGEN_ANSATT))
         assertEquals(listOf(idForGruppe(SKJERMEDE)), forespørsler[saksbehandlerOid])
-    }
-
-    @Test
-    fun `Mapper RISK_QA til gruppeId for risk QA`() {
-        val saksbehandlerOid = UUID.randomUUID()
-        tilgangskontrollørForReservasjon.harTilgangTil(saksbehandlerOid, listOf(RISK_QA))
-        assertEquals(listOf(idForGruppe(Gruppe.RISK_QA)), forespørsler[saksbehandlerOid])
     }
 
     @Test

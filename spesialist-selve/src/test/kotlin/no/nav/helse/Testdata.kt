@@ -36,7 +36,6 @@ object Testdata {
         no.nav.helse.spesialist.api.SaksbehandlerTilganger(
             gruppetilganger = emptyList(),
             kode7Saksbehandlergruppe = UUID.randomUUID(),
-            riskSaksbehandlergruppe = UUID.randomUUID(),
             beslutterSaksbehandlergruppe = UUID.randomUUID(),
             skjermedePersonerSaksbehandlergruppe = UUID.randomUUID(),
             stikkprøveSaksbehandlergruppe = UUID.randomUUID(),

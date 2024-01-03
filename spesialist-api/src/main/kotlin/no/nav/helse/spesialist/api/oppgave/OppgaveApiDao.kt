@@ -41,16 +41,6 @@ class OppgaveApiDao(dataSource: DataSource) : HelseDao(dataSource) {
         mapOf("vedtaksperiodeId" to vedtaksperiodeId)
     ).single { OppgaveForPeriodevisningDto(id = it.string("id"), kanAvvises = it.boolean("kan_avvises")) }
 
-    fun finnOppgavetype(vedtaksperiodeId: UUID) = asSQL(
-        """
-            SELECT type
-            FROM oppgave
-            WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
-              AND status = 'AvventerSaksbehandler'
-        """.trimIndent(),
-        mapOf("vedtaksperiodeId" to vedtaksperiodeId)
-    ).single { Oppgavetype.valueOf(it.string("type")) }
-
     fun finnFødselsnummer(oppgaveId: Long) = requireNotNull(asSQL(
         """ SELECT fodselsnummer from person
             INNER JOIN vedtak v on person.id = v.person_ref

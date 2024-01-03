@@ -87,23 +87,6 @@ class ManglerVurderingAvVarsler(private val oppgaveId: Long): Modellfeil() {
     }
 }
 
-class IkkeTilgangTilRiskQa(private val saksbehandlerIdent: String, private val oppgaveId: Long): Modellfeil() {
-    override val eksternKontekst: Map<String, Any> = emptyMap()
-    override val httpkode = HttpStatusCode.Forbidden
-    override val feilkode: String = "ikke_tilgang_til_risk_qa"
-    override fun logger() {
-        logg.info(
-            "Saksbehandler har ikke tilgang til RISK_QA-saker, {}",
-            keyValue("oppgaveId", oppgaveId),
-        )
-        sikkerLogg.info(
-            "Saksbehandler {} har ikke tilgang til RISK_QA-saker, {}",
-            keyValue("saksbehandlerIdent", saksbehandlerIdent),
-            keyValue("oppgaveId", oppgaveId),
-        )
-    }
-}
-
 class IkkeTilgang(private val oid: UUID, private val oppgaveId: Long): Modellfeil() {
     override val eksternKontekst: Map<String, Any> = emptyMap()
     override val httpkode = HttpStatusCode.Forbidden

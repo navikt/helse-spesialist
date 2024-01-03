@@ -34,7 +34,6 @@ class ContextFactory(
     private val kode7Saksbehandlergruppe: UUID,
     private val skjermedePersonerSaksbehandlergruppe: UUID,
     private val beslutterSaksbehandlergruppe: UUID,
-    private val riskSaksbehandlergruppe: UUID,
     private val stikkprøveSaksbehandlergruppe: UUID,
     private val spesialsakSaksbehandlergruppe: UUID,
 ) : GraphQLContextFactory<ApplicationRequest> {
@@ -42,7 +41,6 @@ class ContextFactory(
         TILGANGER.key to SaksbehandlerTilganger(
             gruppetilganger = request.getGrupper(),
             kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
-            riskSaksbehandlergruppe = riskSaksbehandlergruppe,
             beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe,
             skjermedePersonerSaksbehandlergruppe = skjermedePersonerSaksbehandlergruppe,
             stikkprøveSaksbehandlergruppe = stikkprøveSaksbehandlergruppe,

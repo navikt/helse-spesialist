@@ -1,20 +1,17 @@
 package no.nav.helse.modell
 
 import DatabaseIntegrationTest
-import java.sql.SQLException
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.TestHendelse
-import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 class OppgaveApiDaoTest : DatabaseIntegrationTest() {
     private companion object {
@@ -26,24 +23,6 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
     fun setupDaoTest() {
         godkjenningsbehov(TESTHENDELSE.id)
         CommandContext(CONTEXT_ID).opprett(CommandContextDao(dataSource), TESTHENDELSE)
-    }
-
-    @Test
-    fun `finner oppgavetype`() {
-        nyPerson()
-        val type = oppgaveApiDao.finnOppgavetype(VEDTAKSPERIODE)
-        assertEquals(OPPGAVETYPE, type.toString())
-    }
-
-    @Test
-    fun `finner oppgavetype når det fins flere oppgaver for en vedtaksperiode`() {
-        val oppgavetype = Oppgavetype.REVURDERING
-        nyPerson()
-        oppgaveDao.updateOppgave(oppgaveId = oppgaveId, oppgavestatus = "Invalidert", egenskaper = listOf(EGENSKAP))
-        opprettOppgave(utbetalingId = UUID.randomUUID(), oppgavetype = oppgavetype.toString())
-
-        val type = oppgaveApiDao.finnOppgavetype(VEDTAKSPERIODE)
-        assertEquals(oppgavetype, type)
     }
 
     @Test

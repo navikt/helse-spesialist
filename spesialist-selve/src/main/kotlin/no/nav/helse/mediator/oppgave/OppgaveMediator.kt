@@ -174,7 +174,6 @@ internal class OppgaveMediator(
     }
 
     override fun venterPåSaksbehandler(oppgaveId: Long): Boolean = oppgaveDao.venterPåSaksbehandler(oppgaveId)
-    override fun erRiskoppgave(oppgaveId: Long): Boolean = oppgaveDao.erRiskoppgave(oppgaveId)
 
     override fun oppgaver(
         saksbehandlerFraApi: SaksbehandlerFraApi,

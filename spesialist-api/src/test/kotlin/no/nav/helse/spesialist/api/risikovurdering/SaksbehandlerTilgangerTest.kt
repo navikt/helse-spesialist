@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test
 
 internal class SaksbehandlerTilgangerTest {
     private val kode7Saksbehandlergruppe = UUID.randomUUID()
-    private val riskSaksbehandlergruppe = UUID.randomUUID()
     private val beslutterSaksbehandlergruppe = UUID.randomUUID()
     private val skjermedePersonerSaksbehandlergruppe = UUID.randomUUID()
     private val saksbehandlereMedTilgangTilStikkprøve = UUID.randomUUID()
@@ -19,14 +18,12 @@ internal class SaksbehandlerTilgangerTest {
         val saksbehandlerTilganger = SaksbehandlerTilganger(
             gruppetilganger = emptyList(),
             kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
-            riskSaksbehandlergruppe = riskSaksbehandlergruppe,
             beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe,
             skjermedePersonerSaksbehandlergruppe = skjermedePersonerSaksbehandlergruppe,
             stikkprøveSaksbehandlergruppe = saksbehandlereMedTilgangTilStikkprøve,
             spesialsakSaksbehandlergruppe = saksbehandlereMedTilgangTilSpesialsaker
         )
         assertFalse(saksbehandlerTilganger.harTilgangTilKode7())
-        assertFalse(saksbehandlerTilganger.harTilgangTilRiskOppgaver())
         assertFalse(saksbehandlerTilganger.harTilgangTilBeslutterOppgaver())
         assertFalse(saksbehandlerTilganger.harTilgangTilSkjermedePersoner())
     }
@@ -36,32 +33,13 @@ internal class SaksbehandlerTilgangerTest {
         val saksbehandlerTilganger = SaksbehandlerTilganger(
             gruppetilganger = listOf(kode7Saksbehandlergruppe),
             kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
-            riskSaksbehandlergruppe = riskSaksbehandlergruppe,
             beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe,
             skjermedePersonerSaksbehandlergruppe = skjermedePersonerSaksbehandlergruppe,
             stikkprøveSaksbehandlergruppe = saksbehandlereMedTilgangTilStikkprøve,
             spesialsakSaksbehandlergruppe = saksbehandlereMedTilgangTilSpesialsaker
         )
         assertTrue(saksbehandlerTilganger.harTilgangTilKode7())
-        assertFalse(saksbehandlerTilganger.harTilgangTilRiskOppgaver())
         assertFalse(saksbehandlerTilganger.harTilgangTilBeslutterOppgaver())
-        assertFalse(saksbehandlerTilganger.harTilgangTilSkjermedePersoner())
-    }
-
-    @Test
-    fun `med risk-gruppetilgang skal man kunne løse risk-oppgaver`() {
-        val saksbehandlerTilganger = SaksbehandlerTilganger(
-            gruppetilganger = listOf(riskSaksbehandlergruppe),
-            kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
-            riskSaksbehandlergruppe = riskSaksbehandlergruppe,
-            beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe,
-            skjermedePersonerSaksbehandlergruppe = skjermedePersonerSaksbehandlergruppe,
-            stikkprøveSaksbehandlergruppe = saksbehandlereMedTilgangTilStikkprøve,
-            spesialsakSaksbehandlergruppe = saksbehandlereMedTilgangTilSpesialsaker
-        )
-        assertFalse(saksbehandlerTilganger.harTilgangTilKode7())
-        assertFalse(saksbehandlerTilganger.harTilgangTilBeslutterOppgaver())
-        assertTrue(saksbehandlerTilganger.harTilgangTilRiskOppgaver())
         assertFalse(saksbehandlerTilganger.harTilgangTilSkjermedePersoner())
     }
 
@@ -70,14 +48,12 @@ internal class SaksbehandlerTilgangerTest {
         val saksbehandlerTilganger = SaksbehandlerTilganger(
             gruppetilganger = listOf(beslutterSaksbehandlergruppe),
             kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
-            riskSaksbehandlergruppe = riskSaksbehandlergruppe,
             beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe,
             skjermedePersonerSaksbehandlergruppe = skjermedePersonerSaksbehandlergruppe,
             stikkprøveSaksbehandlergruppe = saksbehandlereMedTilgangTilStikkprøve,
             spesialsakSaksbehandlergruppe = saksbehandlereMedTilgangTilSpesialsaker
         )
         assertFalse(saksbehandlerTilganger.harTilgangTilKode7())
-        assertFalse(saksbehandlerTilganger.harTilgangTilRiskOppgaver())
         assertTrue(saksbehandlerTilganger.harTilgangTilBeslutterOppgaver())
         assertFalse(saksbehandlerTilganger.harTilgangTilSkjermedePersoner())
     }
@@ -87,14 +63,12 @@ internal class SaksbehandlerTilgangerTest {
         val saksbehandlerTilganger = SaksbehandlerTilganger(
             gruppetilganger = listOf(skjermedePersonerSaksbehandlergruppe),
             kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
-            riskSaksbehandlergruppe = riskSaksbehandlergruppe,
             beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe,
             skjermedePersonerSaksbehandlergruppe = skjermedePersonerSaksbehandlergruppe,
             stikkprøveSaksbehandlergruppe = saksbehandlereMedTilgangTilStikkprøve,
             spesialsakSaksbehandlergruppe = saksbehandlereMedTilgangTilSpesialsaker
         )
         assertFalse(saksbehandlerTilganger.harTilgangTilKode7())
-        assertFalse(saksbehandlerTilganger.harTilgangTilRiskOppgaver())
         assertFalse(saksbehandlerTilganger.harTilgangTilBeslutterOppgaver())
         assertTrue(saksbehandlerTilganger.harTilgangTilSkjermedePersoner())
     }
@@ -103,20 +77,17 @@ internal class SaksbehandlerTilgangerTest {
     fun `med alle gruppetilganger skal man kunne løse alle oppgaver`() {
         val saksbehandlerTilganger = SaksbehandlerTilganger(
             gruppetilganger = listOf(
-                riskSaksbehandlergruppe,
                 kode7Saksbehandlergruppe,
                 beslutterSaksbehandlergruppe,
                 skjermedePersonerSaksbehandlergruppe
             ),
             kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
-            riskSaksbehandlergruppe = riskSaksbehandlergruppe,
             beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe,
             skjermedePersonerSaksbehandlergruppe = skjermedePersonerSaksbehandlergruppe,
             stikkprøveSaksbehandlergruppe = saksbehandlereMedTilgangTilStikkprøve,
             spesialsakSaksbehandlergruppe = saksbehandlereMedTilgangTilSpesialsaker
         )
         assertTrue(saksbehandlerTilganger.harTilgangTilKode7())
-        assertTrue(saksbehandlerTilganger.harTilgangTilRiskOppgaver())
         assertTrue(saksbehandlerTilganger.harTilgangTilBeslutterOppgaver())
         assertTrue(saksbehandlerTilganger.harTilgangTilSkjermedePersoner())
     }

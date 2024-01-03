@@ -39,7 +39,6 @@ import org.junit.jupiter.api.TestInstance
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
 
-    protected val riskSaksbehandlergruppe: UUID = UUID.randomUUID()
     protected val kode7Saksbehandlergruppe: UUID = UUID.randomUUID()
     protected val skjermedePersonerGruppeId: UUID = UUID.randomUUID()
     private val beslutterGruppeId: UUID = UUID.randomUUID()
@@ -98,7 +97,6 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                 kode7Saksbehandlergruppe,
                 skjermedePersonerGruppeId,
                 beslutterGruppeId,
-                riskSaksbehandlergruppe,
                 saksbehandlereMedTilgangTilStikkprøver,
                 saksbehandlereMedTilgangTilSpesialsaker,
             ),

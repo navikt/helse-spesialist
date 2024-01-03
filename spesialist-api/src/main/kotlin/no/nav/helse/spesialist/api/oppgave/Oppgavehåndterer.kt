@@ -14,7 +14,6 @@ interface Oppgavehåndterer {
     fun sendIRetur(oppgaveId: Long, besluttendeSaksbehandler: SaksbehandlerFraApi)
     fun endretEgenAnsattStatus(erEgenAnsatt: Boolean, fødselsnummer: String)
     fun venterPåSaksbehandler(oppgaveId: Long): Boolean
-    fun erRiskoppgave(oppgaveId: Long): Boolean
     fun oppgaver(saksbehandlerFraApi: SaksbehandlerFraApi, offset: Int, limit: Int, sortering: List<Oppgavesortering>, filtrering: Filtrering): OppgaverTilBehandling
     fun antallOppgaver(saksbehandlerFraApi: SaksbehandlerFraApi): AntallOppgaver
     fun behandledeOppgaver(saksbehandlerFraApi: SaksbehandlerFraApi, offset: Int, limit: Int): BehandledeOppgaver

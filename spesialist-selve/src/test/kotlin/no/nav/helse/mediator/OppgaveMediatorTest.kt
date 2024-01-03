@@ -31,7 +31,6 @@ import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.kommando.TestHendelse
 import no.nav.helse.modell.oppgave.Egenskap
-import no.nav.helse.modell.oppgave.Egenskap.RISK_QA
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Oppgave
@@ -107,7 +106,6 @@ internal class OppgaveMediatorTest {
     private val saksbehandler = Saksbehandler(SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT, TilgangskontrollForTestHarIkkeTilgang)
     private fun søknadsoppgave(id: Long): Oppgave = Oppgave.nyOppgave(id, VEDTAKSPERIODE_ID, UTBETALING_ID, HENDELSE_ID, true, listOf(SØKNAD))
     private fun stikkprøveoppgave(id: Long): Oppgave = Oppgave.nyOppgave(id, VEDTAKSPERIODE_ID_2, UTBETALING_ID_2, UUID.randomUUID(), true, listOf(STIKKPRØVE))
-    private fun riskoppgave(id: Long): Oppgave = Oppgave.nyOppgave(id, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), true, listOf(RISK_QA))
 
     @BeforeEach
     fun setup() {
@@ -154,23 +152,6 @@ internal class OppgaveMediatorTest {
             assertEquals(saksbehandler, tildeltTil)
         }
         verify(exactly = 1) { tildelingDao.tildel(any(), SAKSBEHANDLEROID, any()) }
-        assertAntallOpptegnelser(1)
-    }
-
-    @Test
-    fun `tildeler ikke risk-oppgave til saksbehandler som har reservert personen hvis hen ikke har risk-tilgang`() {
-        every { oppgaveDao.reserverNesteId() } returns 0L
-        every { reservasjonDao.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns Reservasjon(saksbehandlerFraDatabase)
-        every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
-        lateinit var oppgave: Oppgave
-        mediator.nyOppgave(TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID) {
-            riskoppgave(it).also { riskoppgave -> oppgave = riskoppgave }
-        }
-
-        oppgaveinspektør(oppgave) {
-            assertEquals(null, tildeltTil)
-        }
-        verify(exactly = 0) { tildelingDao.tildel(any(), SAKSBEHANDLEROID, any()) }
         assertAntallOpptegnelser(1)
     }
 

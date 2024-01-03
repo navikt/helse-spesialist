@@ -913,16 +913,6 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `sjekker risk-oppgaver`() {
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode()
-        opprettOppgave(contextId = CONTEXT_ID, oppgavetype = "RISK_QA")
-
-        assertTrue(oppgaveDao.erRiskoppgave(oppgaveId))
-    }
-
-    @Test
     fun `invaliderer oppgaver`() {
         opprettPerson()
         opprettArbeidsgiver()

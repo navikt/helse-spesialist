@@ -12,7 +12,6 @@ import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveForPeriodevisningDto
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
-import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.påvent.PåVentApiDao
@@ -420,10 +419,7 @@ data class BeregnetPeriode(
         return if (periodetilstand != Periodetilstand.TilGodkjenning)
             listOf(Handling(Periodehandling.UTBETALE, false, "perioden er ikke til godkjenning")
         ) else {
-            val oppgavetype = oppgaveApiDao.finnOppgavetype(UUID.fromString(vedtaksperiodeId()))
-            val handlinger = if (oppgavetype == Oppgavetype.RISK_QA && !tilganger.harTilgangTilRiskOppgaver())
-                listOf(Handling(Periodehandling.UTBETALE, false, "IkkeTilgangTilRisk"))
-            else listOf(Handling(Periodehandling.UTBETALE, true))
+            val handlinger = listOf(Handling(Periodehandling.UTBETALE, true))
             val kanAvvises = oppgaveDto?.kanAvvises ?: false
             handlinger + Handling(Periodehandling.AVVISE, kanAvvises, "Spleis støtter ikke å avvise perioden")
         }
