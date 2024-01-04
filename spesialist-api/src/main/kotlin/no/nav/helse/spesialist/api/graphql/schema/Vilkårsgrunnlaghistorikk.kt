@@ -53,32 +53,39 @@ data class VilkarsgrunnlagSpleis(
 internal fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Avviksvurderinghenter): Vilkarsgrunnlag {
     return when (this) {
         is GraphQLSpleisVilkarsgrunnlag -> {
-            val avviksvurdering: Avviksvurdering? = avviksvurderinghenter.hentAvviksvurdering(UUID.fromString(id))
-            VilkarsgrunnlagSpleis(
-                inntekter = inntekter.map { arbeidsgiverinntekt ->
-                    val arbeidsgiverinntekter =
-                        avviksvurdering?.sammenligningsgrunnlag?.innrapporterteInntekter?.singleOrNull {
-                            it.arbeidsgiverreferanse == arbeidsgiverinntekt.arbeidsgiver
-                        }?.inntekter ?: emptyList()
-                    Arbeidsgiverinntekt(
-                        arbeidsgiver = arbeidsgiverinntekt.arbeidsgiver,
-                        omregnetArsinntekt = arbeidsgiverinntekt.omregnetArsinntekt.tilOmregnetÅrsinntekt(),
-                        sammenligningsgrunnlag = Sammenligningsgrunnlag(
-                            belop = if (avviksvurdering == null) -1.0 else arbeidsgiverinntekter.sumOf { it.beløp },
-                            inntektFraAOrdningen = arbeidsgiverinntekter.map { inntekt ->
+            val avviksvurdering: Avviksvurdering =
+                checkNotNull(avviksvurderinghenter.hentAvviksvurdering(UUID.fromString(id)))
+            val orgnrs =
+                (avviksvurdering.sammenligningsgrunnlag.innrapporterteInntekter.map { it.arbeidsgiverreferanse } + inntekter.map { it.arbeidsgiver }).toSet()
+            val inntekter = orgnrs.map { arbeidsgiverreferanse ->
+                val inntektFraSpleis =
+                    inntekter.singleOrNull { inntektFraSpleis -> inntektFraSpleis.arbeidsgiver == arbeidsgiverreferanse }
+                val sammenligningsgrunnlagInntekt =
+                    avviksvurdering.sammenligningsgrunnlag.innrapporterteInntekter.singleOrNull { it.arbeidsgiverreferanse == arbeidsgiverreferanse }
+                Arbeidsgiverinntekt(
+                    arbeidsgiver = arbeidsgiverreferanse,
+                    omregnetArsinntekt = inntektFraSpleis?.omregnetArsinntekt?.tilOmregnetÅrsinntekt(),
+                    sammenligningsgrunnlag = sammenligningsgrunnlagInntekt?.let {
+                        Sammenligningsgrunnlag(
+                            belop = sammenligningsgrunnlagInntekt.inntekter.sumOf { it.beløp },
+                            inntektFraAOrdningen = sammenligningsgrunnlagInntekt.inntekter.map { inntekt ->
                                 InntektFraAOrdningen(
                                     maned = inntekt.årMåned.toString(),
                                     sum = inntekt.beløp
                                 )
                             }
-                        ),
-                        skjonnsmessigFastsatt = arbeidsgiverinntekt.skjonnsmessigFastsatt?.tilOmregnetÅrsinntekt(),
-                        deaktivert = arbeidsgiverinntekt.deaktivert
-                    )
-                },
-                omregnetArsinntekt = avviksvurdering?.beregningsgrunnlag?.totalbeløp ?: -1.0,
-                sammenligningsgrunnlag = avviksvurdering?.sammenligningsgrunnlag?.totalbeløp,
-                avviksprosent = avviksvurdering?.avviksprosent,
+                        )
+                    },
+                    skjonnsmessigFastsatt = inntektFraSpleis?.skjonnsmessigFastsatt?.tilOmregnetÅrsinntekt(),
+                    deaktivert = inntektFraSpleis?.deaktivert,
+                )
+            }
+
+            VilkarsgrunnlagSpleis(
+                inntekter = inntekter,
+                omregnetArsinntekt = avviksvurdering.beregningsgrunnlag.totalbeløp,
+                sammenligningsgrunnlag = avviksvurdering.sammenligningsgrunnlag.totalbeløp,
+                avviksprosent = avviksvurdering.avviksprosent,
                 vilkarsgrunnlagtype = Vilkarsgrunnlagtype.SPLEIS,
                 id = id,
                 arbeidsgiverrefusjoner = arbeidsgiverrefusjoner.map { it.tilArbeidsgiverrefusjon() },

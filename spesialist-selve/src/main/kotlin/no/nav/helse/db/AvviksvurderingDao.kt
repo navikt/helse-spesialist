@@ -25,7 +25,7 @@ class AvviksvurderingDao(private val dataSource: DataSource) : HelseDao(dataSour
             val opprettAvviksvurderingQuery = """
                 INSERT INTO avviksvurdering(unik_id, fødselsnummer, skjæringstidspunkt, opprettet, avviksprosent, beregningsgrunnlag, sammenligningsgrunnlag_ref)
                 VALUES (:unik_id, :fodselsnummer, :skjaeringstidspunkt, :opprettet, :avviksprosent, CAST(:beregningsgrunnlag as json), :sammenligningsgrunnlag_ref)
-                ON CONFLICT (unik_id) DO NOTHING;
+                ON CONFLICT (unik_id) DO UPDATE SET opprettet = excluded.opprettet, avviksprosent = excluded.avviksprosent, beregningsgrunnlag = CAST(excluded.beregningsgrunnlag as json);
             """.trimIndent()
 
             @Language("PostgreSQL")
