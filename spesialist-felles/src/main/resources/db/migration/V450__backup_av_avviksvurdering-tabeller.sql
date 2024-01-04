@@ -1,0 +1,3 @@
+create table avviksvurdering_spinnvillgate as table avviksvurdering;
+create table vilkarsgrunnlag_per_avviksvurdering_spinnvillgate as table vilkarsgrunnlag_per_avviksvurdering;
+create table sammenligningsgrunnlag_spinnvillgate as table sammenligningsgrunnlag;
