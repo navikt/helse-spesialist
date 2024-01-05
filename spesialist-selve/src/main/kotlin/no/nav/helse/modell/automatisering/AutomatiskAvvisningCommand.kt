@@ -42,7 +42,7 @@ internal class AutomatiskAvvisningCommand(
             else if (!Toggle.Avviksvurdering.enabled) {
                 kanAvvises
             } else {
-                val slippesForbi = !erProd() || enArbeidsgiver
+                val slippesForbi = !erProd() || ((fødselsnummer.length == 11 && (30 .. 31).contains(fødselsnummer.take(2).toInt())) && enArbeidsgiver)
                 !slippesForbi && kanAvvises
             }
 
