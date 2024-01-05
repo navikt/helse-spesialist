@@ -48,8 +48,8 @@ internal class AutomatiskAvvisningCommand(
 
         if (avvisGrunnetSkjønnsfastsettelse) {
             logg.info("Avviser vedtaksperiode $vedtaksperiodeId grunnet krav om skjønnsfastsetting.")
-        } else if (erSkjønnsfastsettelse) {
-            logg.info("Slipper gjennom $vedtaksperiodeId til skjønnsfastsetting.")
+        } else if (erSkjønnsfastsettelse && !utbetaling.erRevurdering()) {
+            logg.info("Slipper gjennom førstegangsbehandling, vedtaksperiodeId $vedtaksperiodeId til skjønnsfastsetting.")
         }
 
         val avvisningsårsaker = mutableListOf<String>()
