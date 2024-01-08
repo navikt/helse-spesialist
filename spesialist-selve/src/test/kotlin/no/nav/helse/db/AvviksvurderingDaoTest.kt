@@ -214,6 +214,25 @@ internal class AvviksvurderingDaoTest : DatabaseIntegrationTest() {
         assertAntallKoblinger(unikId, 0)
     }
 
+    @Test
+    fun `ignorerer slettede avviksvurderinger`() {
+        val unikId = UUID.randomUUID()
+        avviksvurderingDao.lagre(
+            avviksvurdering(
+                fødselsnummer = FNR,
+                vilkårsgrunnlagId = UUID.randomUUID(),
+                skjæringstidspunkt = 1.januar,
+                unikId = unikId,
+                opprettet = LocalDateTime.now()
+            )
+        )
+
+        val antallAvviksvurderinger = avviksvurderingDao.finnAvviksvurderinger(FNR).size
+        assertEquals(1, antallAvviksvurderinger)
+        slettAvviksvurdering(unikId)
+        val antallAvviksvurderingerEtterSletting = avviksvurderingDao.finnAvviksvurderinger(FNR).size
+        assertEquals(0, antallAvviksvurderingerEtterSletting)
+    }
 
     private fun assertAntallKoblinger(avviksvurderingUnikId: UUID, forventetAntall: Int) {
         @Language("PostgreSQL")
@@ -233,6 +252,14 @@ internal class AvviksvurderingDaoTest : DatabaseIntegrationTest() {
             session.run(queryOf(query, mapOf("unik_id" to avviksvurderingUnikId)).map { it.int(1) }.asSingle)
         }
         assertEquals(forventetAntall, antall)
+    }
+
+    private fun slettAvviksvurdering(avviksvurderingUnikId: UUID) {
+        @Language("PostgreSQL")
+        val query = """update avviksvurdering set slettet = now() where unik_id = :unik_id;"""
+        sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, mapOf("unik_id" to avviksvurderingUnikId)).asUpdate)
+        }
     }
 
     private fun forventetAvviksvurdering(
