@@ -86,7 +86,8 @@ class AvviksvurderingDao(private val dataSource: DataSource) : HelseDao(dataSour
             SELECT av.unik_id, vpa.vilkårsgrunnlag_id, av.fødselsnummer, av.skjæringstidspunkt, av.opprettet, avviksprosent, beregningsgrunnlag, sg.sammenligningsgrunnlag FROM avviksvurdering av 
             INNER JOIN sammenligningsgrunnlag sg ON av.sammenligningsgrunnlag_ref = sg.id
             INNER JOIN vilkarsgrunnlag_per_avviksvurdering vpa ON vpa.avviksvurdering_ref = av.unik_id
-            WHERE av.fødselsnummer = :fodselsnummer;
+            WHERE av.fødselsnummer = :fodselsnummer
+            AND av.slettet IS NULL;
         """.trimIndent(),
         mapOf(
             "fodselsnummer" to fødselsnummer,
@@ -110,7 +111,7 @@ class AvviksvurderingDao(private val dataSource: DataSource) : HelseDao(dataSour
             FROM avviksvurdering av 
             INNER JOIN sammenligningsgrunnlag sg ON av.sammenligningsgrunnlag_ref = sg.id
             INNER JOIN vilkarsgrunnlag_per_avviksvurdering vpa ON vpa.avviksvurdering_ref = av.unik_id
-            WHERE vpa.vilkårsgrunnlag_id = :vilkarsgrunnlagId
+            WHERE vpa.vilkårsgrunnlag_id = :vilkarsgrunnlagId AND av.slettet IS NULL
             ORDER BY av.opprettet DESC
             LIMIT 1;
         """.trimIndent(),
