@@ -54,7 +54,7 @@ internal fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Av
     return when (this) {
         is GraphQLSpleisVilkarsgrunnlag -> {
             val avviksvurdering: Avviksvurdering =
-                checkNotNull(avviksvurderinghenter.hentAvviksvurdering(UUID.fromString(id)))
+                checkNotNull(avviksvurderinghenter.hentAvviksvurdering(UUID.fromString(id))) { "Fant ikke avviksvurdering for vilkårsgrunnlagId $id" }
             val orgnrs =
                 (avviksvurdering.sammenligningsgrunnlag.innrapporterteInntekter.map { it.arbeidsgiverreferanse } + inntekter.map { it.arbeidsgiver }).toSet()
             val inntekter = orgnrs.map { arbeidsgiverreferanse ->
