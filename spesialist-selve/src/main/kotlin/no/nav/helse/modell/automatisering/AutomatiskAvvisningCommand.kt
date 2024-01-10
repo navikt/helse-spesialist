@@ -42,7 +42,10 @@ internal class AutomatiskAvvisningCommand(
             else if (!Toggle.Avviksvurdering.enabled) {
                 kanAvvises
             } else {
-                val slippesForbi = !erProd() || ((fødselsnummer.length == 11 && (30 .. 31).contains(fødselsnummer.take(2).toInt())) && enArbeidsgiver)
+                val sluppetForbiTidligere = personDao.findPersonerSomHarPassertFilter()
+                val slippesForbi = !erProd()
+                        || ((fødselsnummer.length == 11 && (30..31).contains(fødselsnummer.take(2).toInt())) && enArbeidsgiver)
+                        || sluppetForbiTidligere.contains(fødselsnummer.toLong())
                 !slippesForbi && kanAvvises
             }
 

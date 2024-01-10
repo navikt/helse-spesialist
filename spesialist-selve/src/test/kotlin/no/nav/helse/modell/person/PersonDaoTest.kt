@@ -10,9 +10,11 @@ import kotliquery.sessionOf
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.person.Kjønn
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class PersonDaoTest : DatabaseIntegrationTest() {
@@ -179,6 +181,29 @@ internal class PersonDaoTest : DatabaseIntegrationTest() {
         assertEquals(YearMonth.parse("2021-01"), personDao.findInntekter(FNR, LocalDate.parse("2020-01-01"))!!.first().årMåned)
     }
 
+    @Test
+    fun `slår opp person som har passert filter`() {
+        val ingenPersoner = personDao.findPersonerSomHarPassertFilter()
+        assertTrue(ingenPersoner.isEmpty())
+        opprettPersonSomHarPassertFilter("12345678910")
+        opprettPersonSomHarPassertFilter("02345678911")
+        val personer = personDao.findPersonerSomHarPassertFilter()
+        assertEquals(2, personer.size)
+        assertTrue(personer.contains(2345678911L))
+    }
+
+    private fun opprettPersonSomHarPassertFilter(fødselsnummer: String) {
+        @Language("PostgreSQL")
+        val query =
+            """
+                INSERT INTO passert_filter_for_skjonnsfastsettelse(fodselsnummer) 
+                VALUES (?)
+            """
+        sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, fødselsnummer.toLong()).asExecute)
+        }
+    }
+
     private fun assertPersoninfo(
         forventetNavn: String,
         forventetMellomnavn: String?,
@@ -295,5 +320,5 @@ internal class PersonDaoTest : DatabaseIntegrationTest() {
             assertEquals(forventetKjønn, kjønn)
             assertEquals(forventetAdressebeskyttelse, adressebeskyttelse)
         }
-    }
+  }
 }

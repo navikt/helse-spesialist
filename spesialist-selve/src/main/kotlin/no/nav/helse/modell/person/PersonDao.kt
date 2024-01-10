@@ -478,6 +478,19 @@ internal class PersonDao(private val dataSource: DataSource) {
         val statement = "INSERT INTO stottetabell_for_skjonnsmessig_fastsettelse(fodselsnummer) VALUES(:fodselsnummer);"
         session.run(queryOf(statement, mapOf("fodselsnummer" to fødselsnummer.toLong())).asUpdate)
     }
+
+    internal fun findPersonerSomHarPassertFilter() =
+        sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val query = """
+                SELECT fodselsnummer FROM passert_filter_for_skjonnsfastsettelse;
+            """
+            session.run(
+                queryOf(
+                    query
+                ).map { row -> row.long("fodselsnummer")}.asList
+            )
+        }
 }
 
 internal fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else this.toString()
