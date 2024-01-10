@@ -74,6 +74,27 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
     }
 
     @Test
+    fun `Får 404 dersom man ikke har fått dokumentet`() {
+        opprettSaksbehandler()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        every { dokumenthåndterer.håndter(any(), any(), any()) } returns objectMapper.createObjectNode().put("error", 404)
+        val dokument = runQuery(
+            """
+            {
+                hentInntektsmelding(
+                    dokumentId: "${UUID.randomUUID()}"
+                    fnr: "$FØDSELSNUMMER"
+                ) {
+                    inntektsdato
+                }
+            }
+        """
+        )["errors"].first()
+
+        assertEquals(404, dokument["extensions"]["code"].asInt())
+    }
+
+    @Test
     fun `hentSoknad query med riktige tilganger og paramtetre returnerer søknad`() {
         val dokumentId = UUID.randomUUID()
         val arbeidGjenopptatt = LocalDate.now().toString()

@@ -68,6 +68,21 @@ internal class DokumentMediatorTest {
     }
 
     @Test
+    fun `Sender nytt behov dersom dokumentet i databasen ikke har 404 error`() {
+        every { dokumentDao.hent(any(), any()) } returns objectMapper.createObjectNode().put("error", 403)
+        mediator.håndter(TESTHENDELSE.fødselsnummer(), DOKUMENTID, DOKUMENTTYPE)
+        assertEquals(1, testRapid.inspektør.size)
+        assertDokumentevent(0, "hent-dokument", DOKUMENTID)
+    }
+
+    @Test
+    fun `Sender ikke nytt behov dersom dokumentet i databasen har 404 error`() {
+        every { dokumentDao.hent(any(), any()) } returns objectMapper.createObjectNode().put("error", 404)
+        mediator.håndter(TESTHENDELSE.fødselsnummer(), DOKUMENTID, DOKUMENTTYPE)
+        assertEquals(0, testRapid.inspektør.size)
+    }
+
+    @Test
     fun `Sender ikke behov dersom dokumentet finnes i databasen`() {
         every { dokumentDao.hent(any(), any()) } returns objectMapper.readTree("""{"ikkeTom":"harVerdi"}""")
 

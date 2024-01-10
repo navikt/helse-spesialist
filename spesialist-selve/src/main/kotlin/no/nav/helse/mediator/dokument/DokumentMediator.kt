@@ -9,6 +9,7 @@ import no.nav.helse.modell.dokument.DokumentDao
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.spesialist.api.Dokumenthåndterer
 import org.slf4j.LoggerFactory
 
@@ -24,7 +25,8 @@ class DokumentMediator(
     override fun håndter(fødselsnummer: String, dokumentId: UUID, dokumentType: String): JsonNode {
         return dokumentDao.hent(fødselsnummer, dokumentId).let { dokument ->
             val erTom = dokument?.size() == 0
-            if (dokument == null || erTom) {
+            val error = dokument?.path("error")?.takeUnless { it.isMissingOrNull() }?.asInt()
+            if (dokument == null || erTom || error != 404) {
                 sendHentDokument(fødselsnummer, dokumentId, dokumentType)
 
                 val response = runBlocking {

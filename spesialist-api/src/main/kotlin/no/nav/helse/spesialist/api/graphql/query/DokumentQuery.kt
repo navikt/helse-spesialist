@@ -75,8 +75,11 @@ class DokumentQuery(
         val dokument = withContext(Dispatchers.IO) {
             dokumenthåndterer.håndter(fnr, UUID.fromString(dokumentId), DokumentType.INNTEKTSMELDING.name)
         }.let {
+            val error = it.path("error")?.takeUnless { error -> error.isMissingOrNull() }?.asInt()
             if (it.size() == 0) return DataFetcherResult.newResult<DokumentInntektsmelding>()
                 .error(getEmptyResultTimeoutError()).build()
+            else if (error == 404) return DataFetcherResult.newResult<DokumentInntektsmelding>()
+                .error(get404Error()).build()
             return@let it.tilInntektsmelding()
         }
 
@@ -84,12 +87,16 @@ class DokumentQuery(
     }
 
     private fun getEmptyRequestError(): GraphQLError =
-        GraphqlErrorException.newErrorException().message("Requesten mangler dokument-id")
+        GraphqlErrorException.newErrorException().message("Requesten mangler dokument-id.")
             .extensions(mapOf("code" to 400)).build()
 
     private fun getEmptyResultTimeoutError(): GraphQLError =
         GraphqlErrorException.newErrorException().message("Noe gikk galt, vennligst prøv igjen.")
             .extensions(mapOf("code" to 408)).build()
+
+    private fun get404Error(): GraphQLError =
+        GraphqlErrorException.newErrorException().message("Speil har ikke tilgang til denne inntektsmeldingen, den må åpnes i Gosys.")
+            .extensions(mapOf("code" to 404)).build()
 
     private fun JsonNode.tilInntektsmelding(): DokumentInntektsmelding {
         return DokumentInntektsmelding(
