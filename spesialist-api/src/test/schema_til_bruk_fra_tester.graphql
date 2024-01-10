@@ -43,7 +43,6 @@ interface Vilkarsgrunnlag {
     id: String!
     inntekter: [Arbeidsgiverinntekt!]!
     omregnetArsinntekt: Float!
-    sammenligningsgrunnlag: Float
     skjaeringstidspunkt: String!
     sykepengegrunnlag: Float!
     vilkarsgrunnlagtype: Vilkarsgrunnlagtype!
@@ -148,6 +147,7 @@ type Behandlingsstatistikk {
     antallAnnulleringer: Int!
     beslutter: Antall!
     delvisRefusjon: Antall!
+    egenAnsatt: Antall!
     enArbeidsgiver: Antall!
     faresignaler: Antall!
     flereArbeidsgivere: Antall!
@@ -506,7 +506,7 @@ type Query {
     antallOppgaver: AntallOppgaver!
     behandledeOppgaverFeed(limit: Int!, offset: Int!): BehandledeOppgaver!
     behandlingsstatistikk: Behandlingsstatistikk!
-    hentInntektsmelding(dokumentId: String!, fnr: String!): DokumentInntektsmelding!
+    hentInntektsmelding(dokumentId: String!, fnr: String!): DokumentInntektsmelding
     hentSoknad(dokumentId: String!, fnr: String!): Soknad!
     notater(forPerioder: [String!]!): [Notater!]!
     oppdrag(fnr: String!): [Oppdrag!]!
@@ -819,7 +819,6 @@ type VilkarsgrunnlagInfotrygd implements Vilkarsgrunnlag {
     id: String!
     inntekter: [Arbeidsgiverinntekt!]!
     omregnetArsinntekt: Float!
-    sammenligningsgrunnlag: Float
     skjaeringstidspunkt: String!
     sykepengegrunnlag: Float!
     vilkarsgrunnlagtype: Vilkarsgrunnlagtype!

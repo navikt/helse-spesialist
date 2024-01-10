@@ -63,7 +63,7 @@ class DokumentQuery(
         fnr: String,
         dokumentId: String,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<DokumentInntektsmelding> {
+    ): DataFetcherResult<DokumentInntektsmelding?> {
         if (isForbidden(fnr, env)) {
             return DataFetcherResult.newResult<DokumentInntektsmelding?>().error(getForbiddenError(fnr)).build()
         }
