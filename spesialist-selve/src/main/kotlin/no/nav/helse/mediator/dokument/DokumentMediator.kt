@@ -26,7 +26,7 @@ class DokumentMediator(
         return dokumentDao.hent(fødselsnummer, dokumentId).let { dokument ->
             val erTom = dokument?.size() == 0
             val error = dokument?.path("error")?.takeUnless { it.isMissingOrNull() }?.asInt()
-            if (dokument == null || erTom || error != 404) {
+            if (dokument == null || erTom || (error != null && error != 404)) {
                 sendHentDokument(fødselsnummer, dokumentId, dokumentType)
 
                 val response = runBlocking {
