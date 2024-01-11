@@ -58,7 +58,6 @@ import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.NyeVarsler
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.modell.vedtaksperiode.PåminnetGodkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeEndret
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
@@ -237,15 +236,6 @@ internal class Hendelsefabrikk(
         )
     }
 
-    fun påminnetGodkjenningsbehov(id: UUID, fødselsnummer: String, json: String) =
-        PåminnetGodkjenningsbehov(
-            id = id,
-            fødselsnummer = fødselsnummer,
-            json = json,
-            snapshotDao = snapshotDao,
-            snapshotClient = snapshotClient,
-        )
-
     fun søknadSendt(
         json: String,
     ): SøknadSendt {
@@ -335,15 +325,6 @@ internal class Hendelsefabrikk(
                 .takeUnless(JsonNode::isMissingOrNull)?.map { it.asText() } ?: emptyList(),
             kanAvvises = jsonNode.path("Godkjenning").path("kanAvvises").asBoolean(),
             json = json,
-        )
-    }
-
-    fun påminnetGodkjenningsbehov(json: String): PåminnetGodkjenningsbehov {
-        val jsonNode = mapper.readTree(json)
-        return påminnetGodkjenningsbehov(
-            id = UUID.fromString(jsonNode.path("@id").asText()),
-            fødselsnummer = jsonNode.path("fødselsnummer").asText(),
-            json = json
         )
     }
 
