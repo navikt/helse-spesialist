@@ -72,6 +72,7 @@ import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOppdatering
+import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -107,8 +108,17 @@ internal class HendelseMediator(
 
     private val behovMediator = BehovMediator()
 
+    private fun skalBehandleMelding(melding: String): Boolean {
+        if (erProd()) return true
+        val jsonNode = objectMapper.readTree(melding)
+        if (jsonNode["@event_name"].asText() in setOf("sendt_søknad_arbeidsgiver", "sendt_søknad_nav")) return true
+        val fødselsnummer = jsonNode["fødselsnummer"]?.asText() ?: return true
+        if (fødselsnummer.toDoubleOrNull() == null) return true
+        return personDao.findPersonByFødselsnummer(fødselsnummer) != null
+    }
+
     init {
-        DelegatedRapid(rapidsConnection, ::forbered, ::fortsett, ::errorHandler).also {
+        DelegatedRapid(rapidsConnection, ::forbered, ::skalBehandleMelding, ::fortsett, ::errorHandler).also {
             GodkjenningsbehovRiver(it, this)
             SøknadSendtRiver(it, this)
             SøknadSendtArbeidsledigRiver(it, this)

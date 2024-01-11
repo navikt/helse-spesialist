@@ -6,6 +6,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 internal class DelegatedRapid(
     private val rapidsConnection: RapidsConnection,
     private val beforeRiverAction: () -> Unit,
+    private val skalBehandleMelding: (String) -> Boolean,
     private val afterRiverAction: (String) -> Unit,
     private val errorAction: (Exception, String) -> Unit
 ) : RapidsConnection(), RapidsConnection.MessageListener {
@@ -21,7 +22,7 @@ internal class DelegatedRapid(
     override fun onMessage(message: String, context: MessageContext) {
         try {
             beforeRiverAction()
-            notifyMessage(message, context)
+            if (skalBehandleMelding(message)) notifyMessage(message, context)
             afterRiverAction(message)
         } catch (err: Exception) {
             errorAction(err, message)

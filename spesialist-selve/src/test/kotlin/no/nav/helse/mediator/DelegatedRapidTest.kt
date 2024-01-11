@@ -14,9 +14,8 @@ import org.junit.jupiter.api.assertThrows
 internal class DelegatedRapidTest : River.PacketListener {
     private val testRapid = TestRapid()
     init {
-        DelegatedRapid(testRapid, ::beforeRiver, ::afterRiver, ::errorHandler).apply {
-            River(this)
-                .register(this@DelegatedRapidTest)
+        DelegatedRapid(testRapid, ::beforeRiver, ::shouldProcess, ::afterRiver, ::errorHandler).apply {
+            River(this).register(this@DelegatedRapidTest)
         }
     }
 
@@ -32,7 +31,7 @@ internal class DelegatedRapidTest : River.PacketListener {
     @Test
     fun `callbacks are called in order`() {
         testRapid.sendTestMessage("{}")
-        assertEquals(listOf("BEFORE", "PACKET", "AFTER"), order)
+        assertEquals(listOf("BEFORE", "SHOULD_PROCESS", "PACKET", "AFTER"), order)
     }
 
     @Test
@@ -41,11 +40,15 @@ internal class DelegatedRapidTest : River.PacketListener {
             testRapid.sendTestMessage("this_is_not_valid_json")
         }
         assertTrue(error)
-        assertEquals(listOf("BEFORE", "ERROR"), order)
+        assertEquals(listOf("BEFORE", "SHOULD_PROCESS", "ERROR"), order)
     }
 
     private fun beforeRiver() {
         order.add("BEFORE")
+    }
+    private fun shouldProcess(message: String): Boolean{
+        order.add("SHOULD_PROCESS")
+        return true
     }
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         order.add("PACKET")
