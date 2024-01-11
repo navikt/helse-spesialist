@@ -111,7 +111,7 @@ internal class HendelseMediator(
     private fun skalBehandleMelding(melding: String): Boolean {
         if (erProd()) return true
         val jsonNode = objectMapper.readTree(melding)
-        if (jsonNode["@event_name"].asText() in setOf("sendt_søknad_arbeidsgiver", "sendt_søknad_nav")) return true
+        if (jsonNode["@event_name"]?.asText() in setOf("sendt_søknad_arbeidsgiver", "sendt_søknad_nav")) return true
         val fødselsnummer = jsonNode["fødselsnummer"]?.asText() ?: return true
         if (fødselsnummer.toDoubleOrNull() == null) return true
         return personDao.findPersonByFødselsnummer(fødselsnummer) != null
