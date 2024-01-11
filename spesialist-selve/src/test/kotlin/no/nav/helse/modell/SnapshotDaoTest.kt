@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test
 
 internal class SnapshotDaoTest : DatabaseIntegrationTest() {
 
-
     @Test
     fun `lagre snapshot`() {
         val snapshot = snapshot().data!!.person!!
