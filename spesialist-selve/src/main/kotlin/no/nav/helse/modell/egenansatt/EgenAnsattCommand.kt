@@ -12,7 +12,6 @@ internal class EgenAnsattCommand(
 
     private companion object {
         private val logg = LoggerFactory.getLogger(EgenAnsattCommand::class.java)
-        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
 
     override fun execute(context: CommandContext) = behandle(context)
@@ -20,6 +19,7 @@ internal class EgenAnsattCommand(
     override fun resume(context: CommandContext) = behandle(context)
 
     private fun behandle(context: CommandContext): Boolean {
+        if (egenAnsattDao.erEgenAnsatt(fødselsnummer) != null) return true
         val løsning = context.get<EgenAnsattløsning>()
         if (løsning == null) {
             logg.info("Trenger informasjon om egen ansatt")
@@ -27,13 +27,7 @@ internal class EgenAnsattCommand(
             return false
         }
 
-        val statusFørUpdate = egenAnsattDao.erEgenAnsatt(fødselsnummer)
         løsning.lagre(egenAnsattDao)
-        if (statusFørUpdate != null) {
-            val statusEtterUpdate = egenAnsattDao.erEgenAnsatt(fødselsnummer)
-            val nødvendigEllerIkke = if (statusFørUpdate == statusEtterUpdate) "unødvendig" else "nødvendig"
-            sikkerlogg.debug("Behov 'EgenAnsatt' var $nødvendigEllerIkke. Før update var status '$statusFørUpdate', etter update er status '$statusEtterUpdate'")
-        }
         return true
     }
 }

@@ -1,6 +1,7 @@
 package no.nav.helse.modell.egenansatt
 
 import io.mockk.clearMocks
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import java.time.LocalDateTime
@@ -30,20 +31,34 @@ internal class EgenAnsattCommandTest {
 
     @Test
     fun `ber om informasjon om egen ansatt`() {
+        every { dao.erEgenAnsatt(any()) } returns null
         assertFalse(command.execute(context))
         assertEquals(listOf("EgenAnsatt"), context.behov().keys.toList())
     }
 
     @Test
     fun `mangler løsning ved resume`() {
+        every { dao.erEgenAnsatt(any()) } returns null
         assertFalse(command.resume(context))
         verify(exactly = 0) { dao.lagre(any(), any(), any()) }
     }
 
     @Test
     fun `lagrer løsning ved resume`() {
+        every { dao.erEgenAnsatt(any()) } returns null
         context.add(EgenAnsattløsning(LocalDateTime.now(), FNR, false))
         assertTrue(command.resume(context))
         verify(exactly = 1) { dao.lagre(FNR, false, any()) }
+    }
+
+    @Test
+    fun `sender ikke behov om informasjonen finnes`() {
+        every { dao.erEgenAnsatt(any()) } returns false
+        assertTrue(command.resume(context))
+        assertEquals(emptyList<String>(), context.behov().keys.toList())
+
+        every { dao.erEgenAnsatt(any()) } returns true
+        assertTrue(command.resume(context))
+        assertEquals(emptyList<String>(), context.behov().keys.toList())
     }
 }

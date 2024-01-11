@@ -244,7 +244,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             )
         )
 
-        håndterEgenansattløsning()
         håndterVergemålløsning(vergemål = listOf(VergemålJson.Vergemål(type = mindreaarig)))
         håndterÅpneOppgaverløsning()
         håndterInntektløsning()

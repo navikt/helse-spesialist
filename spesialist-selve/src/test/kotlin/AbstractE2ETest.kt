@@ -176,7 +176,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             avviksvurderingTestdata = avviksvurderingTestdata,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata,
         )
-        håndterEgenansattløsning()
+        if (!harOppdatertMetadata) håndterEgenansattløsning()
     }
 
     protected fun fremTilÅpneOppgaver(
@@ -294,7 +294,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         )
         verify { snapshotClient.hentSnapshot(FØDSELSNUMMER) }
 
-        håndterEgenansattløsning()
         håndterVergemålløsning(fullmakter = fullmakter)
     }
 
@@ -798,7 +797,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         when {
             !harOppdatertMetainfo -> assertEtterspurteBehov("HentPersoninfoV2")
             !godkjenningsbehovTestdata.orgnummereMedRelevanteArbeidsforhold.all { it in alleArbeidsforhold } -> assertEtterspurteBehov("Arbeidsgiverinformasjon")
-            else -> assertEtterspurteBehov("EgenAnsatt")
+            else -> assertEtterspurteBehov("Vergemål")
         }
     }
 

@@ -49,7 +49,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = false)
         assertKommandokjedetilstander(
             sisteGodkjenningsbehovId,
-            NY, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, FERDIG
+            NY, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, FERDIG
         )
         assertSaksbehandleroppgave(oppgavestatus = Oppgavestatus.AvventerSaksbehandler)
     }
