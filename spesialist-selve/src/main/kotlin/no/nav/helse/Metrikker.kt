@@ -81,7 +81,7 @@ internal class MetrikkRiver(rapidsConnection: RapidsConnection) : River.PacketLi
             ""
         }
 
-        log.info("Registrerer tidsbruk for $behov som $delay ms.$godkjenningslog")
+        log.info("Registrerer svartid for $behov som $delay ms.$godkjenningslog")
         registrerTidsbrukForBehov.labels(behov.first()).observe(delay.toDouble())
     }
 }
