@@ -34,8 +34,6 @@ class ContextFactory(
     private val kode7Saksbehandlergruppe: UUID,
     private val skjermedePersonerSaksbehandlergruppe: UUID,
     private val beslutterSaksbehandlergruppe: UUID,
-    private val stikkprøveSaksbehandlergruppe: UUID,
-    private val spesialsakSaksbehandlergruppe: UUID,
 ) : GraphQLContextFactory<ApplicationRequest> {
     override suspend fun generateContext(request: ApplicationRequest): GraphQLContext = mapOf(
         TILGANGER.key to SaksbehandlerTilganger(
@@ -43,8 +41,6 @@ class ContextFactory(
             kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
             beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe,
             skjermedePersonerSaksbehandlergruppe = skjermedePersonerSaksbehandlergruppe,
-            stikkprøveSaksbehandlergruppe = stikkprøveSaksbehandlergruppe,
-            spesialsakSaksbehandlergruppe = spesialsakSaksbehandlergruppe,
         ),
         SAKSBEHANDLER_NAVN.key to request.getSaksbehandlerName(),
         SAKSBEHANDER_EPOST.key to request.getSaksbehanderEpost(),

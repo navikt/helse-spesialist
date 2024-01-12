@@ -215,8 +215,6 @@ fun main() = runBlocking {
             skjermedePersonerGruppeId = UUID.randomUUID(),
             kode7Saksbehandlergruppe = UUID.randomUUID(),
             beslutterGruppeId = UUID.randomUUID(),
-            stikkprøveGruppeId = UUID.randomUUID(),
-            spesialsakGruppeId = UUID.randomUUID(),
             snapshotMediator = SnapshotMediator(snapshotApiDao, mockk(relaxed = true)),
             behandlingsstatistikkMediator = behandlingsstatistikkMediator,
             notatMediator = notatMediator,

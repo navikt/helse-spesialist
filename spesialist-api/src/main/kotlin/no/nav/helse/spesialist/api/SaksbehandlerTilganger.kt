@@ -7,8 +7,6 @@ class SaksbehandlerTilganger(
     private val kode7Saksbehandlergruppe: UUID,
     private val beslutterSaksbehandlergruppe: UUID,
     private val skjermedePersonerSaksbehandlergruppe: UUID,
-    private val stikkprøveSaksbehandlergruppe: UUID,
-    private val spesialsakSaksbehandlergruppe: UUID,
 ) {
 
     fun harTilgangTilKode7() = kode7Saksbehandlergruppe in gruppetilganger
@@ -16,6 +14,4 @@ class SaksbehandlerTilganger(
     fun harTilgangTilBeslutterOppgaver() = beslutterSaksbehandlergruppe in gruppetilganger
 
     fun harTilgangTilSkjermedePersoner() = skjermedePersonerSaksbehandlergruppe in gruppetilganger
-    fun hartilgangTilStikkprøve() = stikkprøveSaksbehandlergruppe in gruppetilganger
-    fun hartilgangTilSpesialsaker() = spesialsakSaksbehandlergruppe in gruppetilganger
 }

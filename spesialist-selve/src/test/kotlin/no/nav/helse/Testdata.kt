@@ -38,8 +38,6 @@ object Testdata {
             kode7Saksbehandlergruppe = UUID.randomUUID(),
             beslutterSaksbehandlergruppe = UUID.randomUUID(),
             skjermedePersonerSaksbehandlergruppe = UUID.randomUUID(),
-            stikkprøveSaksbehandlergruppe = UUID.randomUUID(),
-            spesialsakSaksbehandlergruppe = UUID.randomUUID()
         )
     internal val UTBETALING_ID = UUID.randomUUID()
 
