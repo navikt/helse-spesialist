@@ -8,8 +8,6 @@ metadata:
 spec:
   image: {{image}}
   port: 8080
-  ingresses:
-    - https://spesialist.intern.nav.no
   liveness:
     path: isalive
     initialDelay: 5
