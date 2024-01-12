@@ -47,8 +47,12 @@ allprojects {
         implementation("org.flywaydb:flyway-database-postgresql:$flywayCoreVersion")
         implementation("com.github.seratch:kotliquery:$kotliqueryVersion")
         implementation("io.ktor:ktor-client-cio:$ktorVersion")
-        implementation("io.ktor:ktor-client-apache:$ktorVersion") {
-            exclude(group = "commons-codec")
+        implementation("io.ktor:ktor-client-apache:$ktorVersion")
+        constraints {
+            implementation("commons-codec:commons-codec") {
+                version { require("1.13") }
+                because("ktor-client-apache v2.3.7 -> httpclient -> commons-codec v1.11 har en sårbarhet")
+            }
         }
         implementation("io.ktor:ktor-client-jackson:$ktorVersion") {
             exclude(group = "com.fasterxml.jackson.core")
