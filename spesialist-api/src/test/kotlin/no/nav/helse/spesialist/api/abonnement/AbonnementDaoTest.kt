@@ -71,6 +71,20 @@ internal class AbonnementDaoTest : DatabaseIntegrationTest() {
         assertEquals(sekvensnummerForPersonen, finnSekvensnummer(saksbehandlerId))
     }
 
+    @Test
+    fun `alle tidligere abonnement slettes når et nytt opprettes`() {
+        val saksbehandlerId = opprettSaksbehandler()
+        val aktørId1 = "42"
+        val aktørId2 = "43"
+        opprettPerson(aktørId = aktørId1)
+        opprettPerson(aktørId = aktørId2, fødselsnummer = "12121299999")
+
+        abonnementDao.opprettAbonnement(saksbehandlerId, aktørId1.toLong())
+        assertEquals(listOf(aktørId1), finnPersonerSaksbehandlerAbonnererPå(saksbehandlerId))
+        abonnementDao.opprettAbonnement(saksbehandlerId, aktørId2.toLong())
+        assertEquals(listOf(aktørId2), finnPersonerSaksbehandlerAbonnererPå(saksbehandlerId))
+    }
+
     private fun settSekvensnummer(saksbehandlerId: UUID, sekvensnummer: Int) = query(
         """
             insert into saksbehandler_opptegnelse_sekvensnummer
@@ -92,4 +106,13 @@ internal class AbonnementDaoTest : DatabaseIntegrationTest() {
             where saksbehandler_id = :saksbehandlerId
         """.trimIndent(), "saksbehandlerId" to saksbehandlerId
     ).single { it.intOrNull("siste_sekvensnummer") }
+
+    private fun finnPersonerSaksbehandlerAbonnererPå(saksbehandlerId: UUID) = query(
+        """
+            select aktor_id
+            from abonnement_for_opptegnelse
+            join person p on abonnement_for_opptegnelse.person_id = p.id
+            where saksbehandler_id = :saksbehandlerId
+        """.trimIndent(), "saksbehandlerId" to saksbehandlerId
+    ).list { it.string("aktor_id") }
 }

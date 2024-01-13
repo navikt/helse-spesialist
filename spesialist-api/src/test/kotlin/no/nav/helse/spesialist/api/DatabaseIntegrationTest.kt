@@ -904,6 +904,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected fun Query.update() = asUpdate.runInSession()
 
     protected fun <T> Query.single(mapper: (Row) -> T?) = map(mapper).asSingle.runInSession()
+    protected fun <T> Query.list(mapper: (Row) -> T?) = map(mapper).asList.runInSession()
 
-    protected fun <T> QueryAction<T>.runInSession() = sessionOf(dataSource).use(::runWithSession)
+    private fun <T> QueryAction<T>.runInSession() = sessionOf(dataSource).use(::runWithSession)
 }

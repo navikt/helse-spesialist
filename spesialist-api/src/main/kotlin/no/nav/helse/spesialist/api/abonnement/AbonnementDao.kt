@@ -10,12 +10,13 @@ class AbonnementDao(private val dataSource: DataSource) : HelseDao(dataSource) {
     fun opprettAbonnement(saksbehandlerId: UUID, aktørId: Long) = sessionOf(dataSource).use { session ->
         session.transaction { transactionalSession ->
             val abonnementQuery = asSQL(
-                """ insert into abonnement_for_opptegnelse
+                """
+                    delete from abonnement_for_opptegnelse where saksbehandler_id = :saksbehandlerId;
+                    insert into abonnement_for_opptegnelse
                     select :saksbehandlerId, p.id
                     from person p
                     where p.aktor_id = :aktorId
-                    on conflict do nothing;
-                """, mapOf("saksbehandlerId" to saksbehandlerId, "aktorId" to aktørId)
+                """.trimIndent(), mapOf("saksbehandlerId" to saksbehandlerId, "aktorId" to aktørId)
             )
             transactionalSession.run(abonnementQuery.asUpdate)
 
