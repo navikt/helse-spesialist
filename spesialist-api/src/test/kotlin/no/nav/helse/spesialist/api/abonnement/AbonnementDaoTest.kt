@@ -1,10 +1,7 @@
 package no.nav.helse.spesialist.api.abonnement
 
 import java.util.UUID
-import kotliquery.queryOf
-import kotliquery.sessionOf
 import no.nav.helse.spesialist.api.DatabaseIntegrationTest
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -74,20 +71,18 @@ internal class AbonnementDaoTest : DatabaseIntegrationTest() {
         assertEquals(sekvensnummerForPersonen, finnSekvensnummer(saksbehandlerId))
     }
 
-    private fun settSekvensnummer(saksbehandlerId: UUID, sekvensnummer: Int) {
-        @Language("postgresql")
-        val query = """
+    private fun settSekvensnummer(saksbehandlerId: UUID, sekvensnummer: Int) = query(
+        """
             insert into saksbehandler_opptegnelse_sekvensnummer
             values ('$saksbehandlerId', $sekvensnummer)
-        """
-        sessionOf(dataSource).use { it.run(queryOf(query).asUpdate) }
-    }
+        """.trimIndent()
+    ).update()
 
     private fun lagOpptegnelse(personRef: Long, eksisterendeSekvensnummer: Int) = query(
         """
             insert into opptegnelse
             values (:person_id, :sekvensnummer, '{"innhold": "noe oppdateringsrelatert"}', 'en eller annen opptegnelsestype')
-        """, "person_id" to personRef, "sekvensnummer" to eksisterendeSekvensnummer
+        """.trimIndent(), "person_id" to personRef, "sekvensnummer" to eksisterendeSekvensnummer
     ).update()
 
     private fun finnSekvensnummer(saksbehandlerId: UUID) = query(
@@ -95,6 +90,6 @@ internal class AbonnementDaoTest : DatabaseIntegrationTest() {
             select siste_sekvensnummer
             from saksbehandler_opptegnelse_sekvensnummer
             where saksbehandler_id = :saksbehandlerId
-        """, "saksbehandlerId" to saksbehandlerId
+        """.trimIndent(), "saksbehandlerId" to saksbehandlerId
     ).single { it.intOrNull("siste_sekvensnummer") }
 }
