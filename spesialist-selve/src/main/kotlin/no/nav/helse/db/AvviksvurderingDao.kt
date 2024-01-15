@@ -144,7 +144,7 @@ class AvviksvurderingDao(private val dataSource: DataSource) : HelseDao(dataSour
                 )
             ).update()
         } catch (e: Exception) {
-            logg.info("Lagrer IKKE kobling mellom avviksvurdering og vilkårsgrunnlag. NB! Midlertidig kode!")
+            logg.error("Lagrer IKKE kobling mellom avviksvurdering ($avviksvurderingId) og vilkårsgrunnlag ($vilkårsgrunnlagId)", e)
         }
     }
 
