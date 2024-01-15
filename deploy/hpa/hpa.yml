@@ -25,8 +25,12 @@ spec:
           type: AverageValue
           averageValue: 200
   behavior:
+    scaleUp:
+      policies:
+        - type: Pods
+          value: 2
     scaleDown:
       policies:
         - type: Pods
-          value: 1
-          periodSeconds: 60
+          value: 3
+          periodSeconds: 30
