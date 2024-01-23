@@ -265,51 +265,6 @@ internal class OppgaveTest {
     }
 
     @Test
-    fun `Fjerner tildeling når oppgaven ferdigstilles (da slettes tildelingen)`() {
-        val oppgave = nyOppgave(SØKNAD)
-        oppgave.forsøkTildeling(saksbehandlerUtenTilgang)
-        inspektør(oppgave) {
-            assertEquals(saksbehandlerUtenTilgang, tildeltTil)
-        }
-        oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
-        oppgave.ferdigstill()
-
-        inspektør(oppgave) {
-            assertEquals(Oppgave.Ferdigstilt, tilstand)
-            assertEquals(null, tildeltTil)
-        }
-    }
-
-    @Test
-    fun `Fjerner tildeling når oppgaven avbrytes i AvventerSaksbehandler (da slettes tildelingen)`() {
-        val oppgave = nyOppgave(SØKNAD)
-        oppgave.forsøkTildeling(saksbehandlerUtenTilgang)
-        inspektør(oppgave) {
-            assertEquals(saksbehandlerUtenTilgang, tildeltTil)
-        }
-        oppgave.avbryt()
-        inspektør(oppgave) {
-            assertEquals(Oppgave.Invalidert, tilstand)
-            assertEquals(null, tildeltTil)
-        }
-    }
-
-    @Test
-    fun `Fjerner tildeling når oppgaven avbrytes i AvventerSystem (da slettes tildelingen)`() {
-        val oppgave = nyOppgave(SØKNAD)
-        oppgave.forsøkTildeling(saksbehandlerUtenTilgang)
-        oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
-        inspektør(oppgave) {
-            assertEquals(saksbehandlerUtenTilgang, tildeltTil)
-        }
-        oppgave.avbryt()
-        inspektør(oppgave) {
-            assertEquals(Oppgave.Invalidert, tilstand)
-            assertEquals(null, tildeltTil)
-        }
-    }
-
-    @Test
     fun `kaster exception dersom oppgave allerede er sendt til beslutter når man forsøker å sende til beslutter`() {
         val oppgave = nyOppgave(SØKNAD, medTotrinnsvurdering = true)
         oppgave.sendTilBeslutter(saksbehandlerUtenTilgang)

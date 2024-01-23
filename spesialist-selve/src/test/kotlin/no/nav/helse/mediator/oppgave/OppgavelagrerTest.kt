@@ -172,7 +172,6 @@ class OppgavelagrerTest: DatabaseIntegrationTest() {
 
         oppgavelagrer.oppdater(oppgaveMediator)
         verify(exactly = 1) { oppgaveMediator.oppdater(OPPGAVE_ID, "Ferdigstilt", SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID, listOf(EgenskapForDatabase.SØKNAD)) }
-        verify(exactly = 1) { nyTildelingDao.avmeld(OPPGAVE_ID) }
         verify(exactly = 0) { oppgaveMediator.lagreTotrinnsvurdering(any()) }
     }
 
@@ -187,7 +186,6 @@ class OppgavelagrerTest: DatabaseIntegrationTest() {
 
         oppgavelagrer.oppdater(oppgaveMediator)
         verify(exactly = 1) { oppgaveMediator.oppdater(OPPGAVE_ID, "Ferdigstilt", SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID, listOf(EgenskapForDatabase.SØKNAD)) }
-        verify(exactly = 1) { nyTildelingDao.avmeld(OPPGAVE_ID) }
         verify(exactly = 1) { oppgaveMediator.lagreTotrinnsvurdering(TotrinnsvurderingFraDatabase(VEDTAKSPERIODE_ID, false, SAKSBEHANDLER_OID, BESLUTTER_OID, UTBETALING_ID, TOTRINNSVURDERING_OPPRETTET, TOTRINNSVURDERING_OPPDATERT)) }
     }
 
