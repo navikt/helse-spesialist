@@ -23,6 +23,7 @@ class Saksbehandler(
 
     fun ident(): String = ident
     fun oid(): UUID = oid
+    fun epostadresse(): String = epostadresse
 
     fun accept(visitor: SaksbehandlerVisitor) {
         visitor.visitSaksbehandler(epostadresse, oid, navn, ident)

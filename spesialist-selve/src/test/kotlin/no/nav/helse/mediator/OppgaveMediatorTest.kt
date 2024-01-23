@@ -195,8 +195,6 @@ internal class OppgaveMediatorTest {
         assertEquals(2, testRapid.inspektør.size)
         assertOppgaveevent(1, "oppgave_oppdatert", Oppgavestatus.Ferdigstilt) {
             assertEquals(OPPGAVE_ID, it.path("oppgaveId").longValue())
-            assertEquals(SAKSBEHANDLERIDENT, it.path("ferdigstiltAvIdent").asText())
-            assertEquals(SAKSBEHANDLEROID, UUID.fromString(it.path("ferdigstiltAvOid").asText()))
         }
         assertOpptegnelseIkkeOpprettet()
     }
@@ -470,7 +468,7 @@ internal class OppgaveMediatorTest {
         testRapid.inspektør.message(indeks).also {
             assertEquals(navn, it.path("@event_name").asText())
             assertEquals(HENDELSE_ID, UUID.fromString(it.path("hendelseId").asText()))
-            assertEquals(status, enumValueOf<Oppgavestatus>(it.path("status").asText()))
+            assertEquals(status, enumValueOf<Oppgavestatus>(it.path("tilstand").asText()))
             assertTrue(it.hasNonNull("oppgaveId"))
             assertBlock(it)
         }

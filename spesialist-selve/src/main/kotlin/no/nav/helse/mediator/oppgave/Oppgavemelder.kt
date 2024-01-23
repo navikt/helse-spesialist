@@ -37,29 +37,25 @@ internal class Oppgavemelder(
             "@forårsaket_av" to mapOf("id" to oppgavemelding.hendelseId),
             "hendelseId" to oppgavemelding.hendelseId,
             "oppgaveId" to oppgavemelding.oppgaveId,
-            "status" to oppgavemelding.status,
+            "tilstand" to oppgavemelding.tilstand,
             "type" to oppgavemelding.type,
             "fødselsnummer" to fødselsnummer,
-            "erBeslutterOppgave" to (oppgavemelding.beslutter != null),
-            "erReturOppgave" to oppgavemelding.erRetur,
             "påVent" to oppgavemelding.påVent,
             "egenskaper" to oppgavemelding.egenskaper
         ).apply {
-            oppgavemelding.ferdigstiltAvIdent?.also { put("ferdigstiltAvIdent", it) }
-            oppgavemelding.ferdigstiltAvOid?.also { put("ferdigstiltAvOid", it) }
+            compute("beslutter") { _, _ -> oppgavemelding.beslutter }
+            compute("saksbehandler") { _, _ -> oppgavemelding.saksbehandler }
         })
     }
 }
 
 private class OppgaveForKafkaBygger : OppgaveVisitor {
-    private var beslutterId: UUID? = null
-    private var erRetur: Boolean = false
+    private var beslutter: Map<String, Any>? = null
+    private var saksbehandler: Map<String, Any>? = null
     private lateinit var hendelseId: UUID
     private var oppgaveId by Delegates.notNull<Long>()
-    private lateinit var status: String
+    private lateinit var tilstand: String
     private lateinit var type: String
-    private var ferdigstiltAvIdent: String? = null
-    private var ferdigstiltAvOid: UUID? = null
     private var påVent by Delegates.notNull<Boolean>()
     private lateinit var egenskaper: List<String>
 
@@ -68,12 +64,10 @@ private class OppgaveForKafkaBygger : OppgaveVisitor {
         return Oppgavemelding(
             hendelseId = hendelseId,
             oppgaveId = oppgaveId,
-            status = status,
+            tilstand = tilstand,
             type = type,
-            beslutter = beslutterId,
-            erRetur = erRetur,
-            ferdigstiltAvIdent = ferdigstiltAvIdent,
-            ferdigstiltAvOid = ferdigstiltAvOid,
+            beslutter = beslutter,
+            saksbehandler = saksbehandler,
             påVent = påVent,
             egenskaper = egenskaper
         )
@@ -82,13 +76,17 @@ private class OppgaveForKafkaBygger : OppgaveVisitor {
     data class Oppgavemelding(
         val hendelseId: UUID,
         val oppgaveId: Long,
-        val status: String,
+        val tilstand: String,
+
+        @Deprecated("Feltet skal fjernes når Risk bruker egenskaper i stedet")
         val type: String,
-        val beslutter: UUID?,
-        val erRetur: Boolean,
-        val ferdigstiltAvIdent: String? = null,
-        val ferdigstiltAvOid: UUID? = null,
+
+        val beslutter: Map<String, Any>?,
+        val saksbehandler: Map<String, Any>?,
+
+        @Deprecated("Feltet skal fjernes når Risk bruker egenskaper i stedet")
         val påVent: Boolean,
+
         val egenskaper: List<String>
     )
 
@@ -109,11 +107,10 @@ private class OppgaveForKafkaBygger : OppgaveVisitor {
     ) {
         this.hendelseId = hendelseId
         this.oppgaveId = id
-        this.status = mapTilstand(tilstand)
+        this.tilstand = mapTilstand(tilstand)
         this.type = egenskap.tilKafkaversjon()
-        this.ferdigstiltAvIdent = ferdigstiltAvIdent
-        this.ferdigstiltAvOid = ferdigstiltAvOid
         this.påVent = påVent
+        this.saksbehandler = tildelt?.toMap()
         this.egenskaper = egenskaper.map { it.tilKafkaversjon() }
     }
 
@@ -126,9 +123,13 @@ private class OppgaveForKafkaBygger : OppgaveVisitor {
         opprettet: LocalDateTime,
         oppdatert: LocalDateTime?
     ) {
-        beslutterId = beslutter?.oid()
-        this.erRetur = erRetur
+        this.beslutter = beslutter?.toMap()
     }
+
+    private fun Saksbehandler.toMap() = mapOf(
+        "epostadresse" to this.epostadresse(),
+        "oid" to this.oid(),
+    )
 
     private fun mapTilstand(tilstand: Oppgave.Tilstand): String {
         return when (tilstand) {
