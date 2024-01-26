@@ -1,5 +1,7 @@
 package no.nav.helse.modell
 
+import java.time.LocalDateTime
+import java.util.UUID
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -22,7 +24,7 @@ class KommandologgTest {
         val innslaget = logg.alleInnslag().single()
         assertEquals("En melding", innslaget.melding)
         assertEquals(1, innslaget.kontekster.size)
-        assertEquals("En kontekst", innslaget.kontekster.single().navn)
+        assertEquals("En kontekst", innslaget.kontekster.single())
     }
 
     @Test
@@ -61,7 +63,7 @@ class KommandologgTest {
         val innslaget = rotlogg.alleInnslag().single()
         assertEquals("En melding", innslaget.melding)
         assertEquals(1, innslaget.kontekster.size)
-        assertEquals("En kontekst", innslaget.kontekster.single().navn)
+        assertEquals("En kontekst", innslaget.kontekster.single())
     }
 
     @Test
@@ -77,7 +79,7 @@ class KommandologgTest {
 
         assertEquals("En melding", barninnslaget.melding)
         assertEquals(1, barninnslaget.kontekster.size)
-        assertEquals("En forelder-kontekst", barninnslaget.kontekster.single().navn)
+        assertEquals("En forelder-kontekst", barninnslaget.kontekster.single())
     }
 
     @Test
@@ -94,11 +96,11 @@ class KommandologgTest {
 
         assertEquals("En melding", forelderinnslaget.melding)
         assertEquals(1, forelderinnslaget.kontekster.size)
-        assertEquals("En barn-kontekst", forelderinnslaget.kontekster.single().navn)
+        assertEquals("En barn-kontekst", forelderinnslaget.kontekster.single())
 
         assertEquals("En melding", barninnslaget.melding)
         assertEquals(1, barninnslaget.kontekster.size)
-        assertEquals("En barn-kontekst", barninnslaget.kontekster.single().navn)
+        assertEquals("En barn-kontekst", barninnslaget.kontekster.single())
     }
 
     @Test
@@ -128,4 +130,24 @@ class KommandologgTest {
         assertEquals(2, barninnslaget.kontekster.size)
         assertEquals(3, barnebarninnslaget.kontekster.size)
     }
+
+    private fun Kommandologg.alleInnslag(): List<TestInnslag> {
+        val visitor = visitor()
+        this.accept(visitor)
+        return visitor.innslag.toList()
+    }
+
+    private fun visitor() = object : KommandologgVisitor {
+        val innslag = mutableListOf<TestInnslag>()
+        override fun visitInnslag(id: UUID, opprettet: LocalDateTime, melding: String, kontekster: List<String>) {
+            innslag.add(TestInnslag(id, opprettet, melding, kontekster))
+        }
+    }
+
+    private data class TestInnslag(
+        val id: UUID,
+        val opprettet: LocalDateTime,
+        val melding: String,
+        val kontekster: List<String>
+    )
 }

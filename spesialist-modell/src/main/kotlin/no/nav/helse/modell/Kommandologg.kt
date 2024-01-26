@@ -7,6 +7,12 @@ class Kommandologg private constructor(private val forelder: Kommandologg? = nul
     private val kontekster = mutableSetOf<KommandologgKontekst>()
     private val logginnslag = mutableListOf<Logginnslag>()
 
+    fun accept(kommandologgVisitor: KommandologgVisitor) {
+        logginnslag.forEach {
+            it.accept(kommandologgVisitor)
+        }
+    }
+
     fun kontekst(kommandonavn: String) {
         kontekster.add(KommandologgKontekst(kommandonavn))
     }
@@ -25,19 +31,21 @@ class Kommandologg private constructor(private val forelder: Kommandologg? = nul
         it.kontekster.addAll(this.kontekster)
     }
 
-    internal fun alleInnslag() = logginnslag.toList()
-
     companion object {
         fun nyLogg() = Kommandologg()
     }
 }
 
-internal data class KommandologgKontekst(internal val navn: String)
+private data class KommandologgKontekst(val navn: String)
 
-internal class Logginnslag(
-    internal val melding: String,
-    internal val kontekster: Set<KommandologgKontekst>
+private class Logginnslag(
+    private val melding: String,
+    private val kontekster: Set<KommandologgKontekst>
 ) {
-    internal val id: UUID = UUID.randomUUID()
-    internal val opprettet: LocalDateTime = LocalDateTime.now()
+    val id: UUID = UUID.randomUUID()
+    val opprettet: LocalDateTime = LocalDateTime.now()
+
+    fun accept(kommandologgVisitor: KommandologgVisitor) {
+        kommandologgVisitor.visitInnslag(id, opprettet, melding, kontekster.map { it.navn })
+    }
 }
