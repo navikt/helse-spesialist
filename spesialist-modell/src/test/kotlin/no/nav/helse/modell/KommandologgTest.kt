@@ -131,6 +131,35 @@ class KommandologgTest {
         assertEquals(3, barnebarninnslaget.kontekster.size)
     }
 
+    @Test
+    fun `Arver ikke kontekster fra søsken`() {
+        val forelder = Kommandologg.nyLogg()
+        forelder.kontekst("En forelder-kontekst")
+
+        val søsken1 = forelder.barn()
+
+        søsken1.kontekst("En søsken1-kontekst")
+        søsken1.nyttInnslag("En melding fra søsken1")
+
+        val søsken2 = forelder.barn()
+
+        søsken2.kontekst("En søsken2-kontekst")
+        søsken2.nyttInnslag("En melding fra søsken2")
+
+        val alleInnslag = forelder.alleInnslag()
+        val søsken1innslaget = alleInnslag[0]
+        val søsken2innslaget = alleInnslag[1]
+        val søsken1kontekster = søsken1innslaget.kontekster
+        val søsken2kontekster = søsken2innslaget.kontekster
+
+        assertEquals(2, alleInnslag.size)
+        assertEquals(2, søsken1kontekster.size)
+        assertEquals(2, søsken2kontekster.size)
+
+        assertEquals(listOf("En forelder-kontekst", "En søsken1-kontekst"), søsken1kontekster)
+        assertEquals(listOf("En forelder-kontekst", "En søsken2-kontekst"), søsken2kontekster)
+    }
+
     private fun Kommandologg.alleInnslag(): List<TestInnslag> {
         val visitor = visitor()
         this.accept(visitor)
