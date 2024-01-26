@@ -3,7 +3,7 @@ package no.nav.helse.modell
 import java.time.LocalDateTime
 import java.util.UUID
 
-class Kommandologg {
+class Kommandologg private constructor(private val forelder: Kommandologg? = null) {
     private val kontekster = mutableSetOf<KommandologgKontekst>()
     private val logginnslag = mutableListOf<Logginnslag>()
 
@@ -12,10 +12,20 @@ class Kommandologg {
     }
 
     fun nyttInnslag(melding: String) {
-        logginnslag.addLast(Logginnslag(melding, kontekster))
+        val innslag = Logginnslag(melding, kontekster)
+        logginnslag.addLast(innslag)
+        forelder?.logginnslag?.addLast(innslag)
+    }
+
+    fun barn() = Kommandologg(forelder = this).also {
+        it.kontekster.addAll(this.kontekster)
     }
 
     internal fun alleInnslag() = logginnslag.toList()
+
+    companion object {
+        fun nyLogg() = Kommandologg()
+    }
 }
 
 internal data class KommandologgKontekst(internal val navn: String)
