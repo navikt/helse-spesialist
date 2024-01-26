@@ -29,7 +29,7 @@ import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.kommando.TestHendelse
+import no.nav.helse.modell.kommando.TestKommandohendelse
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
@@ -68,7 +68,7 @@ internal class OppgaveMediatorTest {
         private val VEDTAKSPERIODE_ID_2 = UUID.randomUUID()
         private val HENDELSE_ID = UUID.randomUUID()
         private val COMMAND_CONTEXT_ID = UUID.randomUUID()
-        private val TESTHENDELSE = TestHendelse(HENDELSE_ID, VEDTAKSPERIODE_ID, FNR)
+        private val TESTHENDELSE = TestKommandohendelse(HENDELSE_ID, VEDTAKSPERIODE_ID, FNR)
         private val OPPGAVE_ID = nextLong()
         private const val SAKSBEHANDLERIDENT = "Z999999"
         private val SAKSBEHANDLEROID = UUID.randomUUID()

@@ -1,7 +1,7 @@
 package no.nav.helse.modell.sykefraværstilfelle
 
 import java.util.UUID
-import no.nav.helse.mediator.meldinger.Hendelse
+import no.nav.helse.mediator.meldinger.Kommandohendelse
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.vedtaksperiode.Generasjon
@@ -15,7 +15,7 @@ internal class Sykefraværstilfeller(
     vedtaksperiodeOppdateringer: List<VedtaksperiodeOppdatering>,
     gjeldendeGenerasjoner: List<Generasjon>,
     private val json: String,
-) : Hendelse, MacroCommand() {
+) : Kommandohendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         OppdaterSykefraværstilfellerCommand(
             fødselsnummer = fødselsnummer,

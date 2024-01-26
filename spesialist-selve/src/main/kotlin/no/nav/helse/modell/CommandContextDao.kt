@@ -6,7 +6,7 @@ import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.mediator.meldinger.Hendelse
+import no.nav.helse.mediator.meldinger.Kommandohendelse
 import no.nav.helse.modell.CommandContextDao.CommandContextTilstand.AVBRUTT
 import no.nav.helse.modell.CommandContextDao.CommandContextTilstand.FEIL
 import no.nav.helse.modell.CommandContextDao.CommandContextTilstand.FERDIG
@@ -20,19 +20,19 @@ internal class CommandContextDao(private val dataSource: DataSource) {
         private val mapper = jacksonObjectMapper()
     }
 
-    internal fun opprett(hendelse: Hendelse, contextId: UUID) {
+    internal fun opprett(hendelse: Kommandohendelse, contextId: UUID) {
         lagre(hendelse, contextId, NY)
     }
 
-    internal fun ferdig(hendelse: Hendelse, contextId: UUID) {
+    internal fun ferdig(hendelse: Kommandohendelse, contextId: UUID) {
         lagre(hendelse, contextId, FERDIG)
     }
 
-    internal fun feil(hendelse: Hendelse, contextId: UUID) {
+    internal fun feil(hendelse: Kommandohendelse, contextId: UUID) {
         lagre(hendelse, contextId, FEIL)
     }
 
-    internal fun suspendert(hendelse: Hendelse, contextId: UUID, sti: List<Int>) {
+    internal fun suspendert(hendelse: Kommandohendelse, contextId: UUID, sti: List<Int>) {
         lagre(hendelse, contextId, SUSPENDERT, sti)
     }
 
@@ -69,7 +69,7 @@ internal class CommandContextDao(private val dataSource: DataSource) {
     }
 
     private fun lagre(
-        hendelse: Hendelse,
+        hendelse: Kommandohendelse,
         contextId: UUID,
         tilstand: CommandContextTilstand,
         sti: List<Int> = emptyList()

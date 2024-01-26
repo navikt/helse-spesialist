@@ -2,14 +2,17 @@ package no.nav.helse.modell.kommando
 
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.mediator.meldinger.Hendelse
+import java.util.UUID
+import no.nav.helse.mediator.meldinger.Kommandohendelse
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.util.*
 
 internal class CommandContextTest {
 
@@ -185,7 +188,7 @@ internal class CommandContextTest {
     private class TestCommand(
         private val executeAction: Command.() -> Boolean = { true },
         private val resumeAction: Command.() -> Boolean = { true }
-    ) : Hendelse {
+    ) : Kommandohendelse {
         var executed = false
         var resumed = false
         var undo = false

@@ -1,7 +1,7 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import java.util.UUID
-import no.nav.helse.mediator.meldinger.Hendelse
+import no.nav.helse.mediator.meldinger.Kommandohendelse
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.kommando.AvbrytCommand
@@ -20,7 +20,7 @@ internal class VedtaksperiodeReberegnet(
     oppgaveMediator: OppgaveMediator,
     periodehistorikkDao: PeriodehistorikkDao,
     utbetalingDao: UtbetalingDao,
-) : Hendelse, MacroCommand() {
+) : Kommandohendelse, MacroCommand() {
 
     override fun fødselsnummer() = fødselsnummer
     override fun toJson(): String = json

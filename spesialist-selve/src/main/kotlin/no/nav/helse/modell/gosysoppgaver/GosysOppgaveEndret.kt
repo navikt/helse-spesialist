@@ -2,7 +2,7 @@ package no.nav.helse.modell.gosysoppgaver
 
 import java.util.UUID
 import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.mediator.meldinger.Hendelse
+import no.nav.helse.mediator.meldinger.Kommandohendelse
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.automatisering.Automatisering
@@ -29,7 +29,7 @@ internal class GosysOppgaveEndret(
     oppgaveDao: OppgaveDao,
     utbetalingDao: UtbetalingDao,
     tildelingDao: TildelingDao,
-) : Hendelse, MacroCommand() {
+) : Kommandohendelse, MacroCommand() {
 
     override fun fødselsnummer() = fødselsnummer
     override fun toJson(): String = json

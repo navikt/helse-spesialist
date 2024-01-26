@@ -1,7 +1,7 @@
 package no.nav.helse.modell.person
 
 import java.util.UUID
-import no.nav.helse.mediator.meldinger.Hendelse
+import no.nav.helse.mediator.meldinger.Kommandohendelse
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
@@ -16,7 +16,7 @@ internal class SøknadSendt(
     private val json: String,
     personDao: PersonDao,
     arbeidsgiverDao: ArbeidsgiverDao,
-) : Hendelse, MacroCommand() {
+) : Kommandohendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         OpprettMinimalPersonCommand(fødselsnummer, aktørId, personDao),
         OpprettMinimalArbeidsgiverCommand(organisasjonsnummer, arbeidsgiverDao),

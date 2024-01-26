@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.mediator.meldinger.Hendelse
+import no.nav.helse.mediator.meldinger.Kommandohendelse
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.intellij.lang.annotations.Language
@@ -24,13 +24,13 @@ internal class BehovMediatorTest {
 
     private val testRapid: TestRapid = TestRapid()
     private val behovMediator: BehovMediator = BehovMediator()
-    private lateinit var testHendelse: TestHendelse
+    private lateinit var testHendelse: TestKommandohendelse
     private lateinit var testContext: CommandContext
 
     @BeforeEach
     fun setupEach() {
         testRapid.reset()
-        testHendelse = TestHendelse(hendelseId)
+        testHendelse = TestKommandohendelse(hendelseId)
         testContext = CommandContext(contextId)
     }
 
@@ -73,7 +73,7 @@ internal class BehovMediatorTest {
         assertDoesNotThrow { LocalDateTime.parse(testRapid.inspektør.field(0, "@opprettet").asText()) }
     }
 
-    inner class TestHendelse(override val id: UUID) : Hendelse {
+    inner class TestKommandohendelse(override val id: UUID) : Kommandohendelse {
         override fun execute(context: CommandContext): Boolean {
             TODO("Not yet implemented")
         }

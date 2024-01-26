@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.mediator.OverstyringMediator
-import no.nav.helse.mediator.meldinger.Hendelse
+import no.nav.helse.mediator.meldinger.Kommandohendelse
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.PersisterOverstyringArbeidsforholdCommand
@@ -22,7 +22,7 @@ internal class OverstyringArbeidsforhold(
     private val json: String,
     overstyringDao: OverstyringDao,
     overstyringMediator: OverstyringMediator,
-) : Hendelse, MacroCommand() {
+) : Kommandohendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         PersisterOverstyringArbeidsforholdCommand(
             oid = oid,

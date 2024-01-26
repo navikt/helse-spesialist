@@ -3,7 +3,7 @@ package no.nav.helse.modell.utbetaling
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.db.ReservasjonDao
-import no.nav.helse.mediator.meldinger.Hendelse
+import no.nav.helse.mediator.meldinger.Kommandohendelse
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.kommando.Command
@@ -38,7 +38,7 @@ internal class UtbetalingEndret(
     oppgaveMediator: OppgaveMediator,
     totrinnsvurderingMediator: TotrinnsvurderingMediator,
     gjeldendeGenerasjoner: List<Generasjon>
-) : Hendelse, MacroCommand() {
+) : Kommandohendelse, MacroCommand() {
 
     override fun fødselsnummer(): String = fødselsnummer
     override fun vedtaksperiodeId(): UUID? = null

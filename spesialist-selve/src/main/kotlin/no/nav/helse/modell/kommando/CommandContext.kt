@@ -2,7 +2,7 @@ package no.nav.helse.modell.kommando
 
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.mediator.meldinger.Hendelse
+import no.nav.helse.mediator.meldinger.Kommandohendelse
 import no.nav.helse.modell.CommandContextDao
 import org.slf4j.LoggerFactory
 
@@ -51,7 +51,7 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
 
     internal fun sti() = sti.toList()
 
-    internal fun opprett(commandContextDao: CommandContextDao, hendelse: Hendelse) {
+    internal fun opprett(commandContextDao: CommandContextDao, hendelse: Kommandohendelse) {
         commandContextDao.opprett(hendelse, id)
     }
 
@@ -65,7 +65,7 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
 
     internal inline fun <reified T> get(): T? = data.filterIsInstance<T>().firstOrNull()
 
-    internal fun utfør(commandContextDao: CommandContextDao, hendelse: Hendelse) = try {
+    internal fun utfør(commandContextDao: CommandContextDao, hendelse: Kommandohendelse) = try {
         utfør(hendelse).also {
             if (ferdigstilt || it) commandContextDao.ferdig(hendelse, id)
             else commandContextDao.suspendert(hendelse, id, sti)

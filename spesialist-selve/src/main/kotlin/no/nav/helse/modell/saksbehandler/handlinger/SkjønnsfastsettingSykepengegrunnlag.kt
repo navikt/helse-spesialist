@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.mediator.OverstyringMediator
-import no.nav.helse.mediator.meldinger.Hendelse
+import no.nav.helse.mediator.meldinger.Kommandohendelse
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.PersisterSkjønnsfastsettingSykepengegrunnlagCommand
@@ -30,7 +30,7 @@ internal class SkjønnsfastsettingSykepengegrunnlag(
     overstyringDao: OverstyringDao,
     overstyringMediator: OverstyringMediator,
     versjonAvKode: String?,
-) : Hendelse, MacroCommand() {
+) : Kommandohendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         PersisterSkjønnsfastsettingSykepengegrunnlagCommand(
             oid = oid,

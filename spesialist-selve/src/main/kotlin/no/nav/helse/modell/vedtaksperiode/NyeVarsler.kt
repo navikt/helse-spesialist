@@ -2,7 +2,7 @@ package no.nav.helse.modell.vedtaksperiode
 
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.mediator.meldinger.Hendelse
+import no.nav.helse.mediator.meldinger.Kommandohendelse
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterNyttVarsel
@@ -15,7 +15,7 @@ internal class NyeVarsler(
     private val varsler: List<Varsel>,
     private val generasjoner: List<Generasjon>,
     private val json: String,
-) : Hendelse {
+) : Kommandohendelse {
 
     private companion object {
         private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")

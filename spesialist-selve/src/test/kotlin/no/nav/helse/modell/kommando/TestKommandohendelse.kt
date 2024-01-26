@@ -1,14 +1,14 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.mediator.meldinger.Hendelse
-import java.util.*
+import java.util.UUID
+import no.nav.helse.mediator.meldinger.Kommandohendelse
 
-internal class TestHendelse(
+internal class TestKommandohendelse(
     override val id: UUID,
     private val vedtaksperiodeId: UUID?,
     private val fnr: String,
     private val json: String = "{}"
-) : Hendelse {
+) : Kommandohendelse {
 
     override fun execute(context: CommandContext): Boolean {
         TODO("Not yet implemented")

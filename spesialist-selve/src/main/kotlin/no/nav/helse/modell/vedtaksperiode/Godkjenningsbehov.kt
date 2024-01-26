@@ -3,7 +3,7 @@ package no.nav.helse.modell.vedtaksperiode
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.mediator.meldinger.Hendelse
+import no.nav.helse.mediator.meldinger.Kommandohendelse
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.SnapshotDao
@@ -82,7 +82,7 @@ internal class Godkjenningsbehov(
     overstyringDao: OverstyringDao,
     påVentDao: PåVentDao,
     totrinnsvurderingMediator: TotrinnsvurderingMediator,
-) : Hendelse, MacroCommand() {
+) : Kommandohendelse, MacroCommand() {
 
     private val førsteKjenteDagFinner = { generasjonRepository.førsteKjenteDag(fødselsnummer) }
     private val utbetaling = utbetalingDao.hentUtbetaling(utbetalingId)

@@ -23,7 +23,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao as OpptegnelseApiDao
 
-internal class HendelseMediatorTest : AbstractDatabaseTest() {
+internal class KommandohendelseMediatorTest : AbstractDatabaseTest() {
 
     private val snapshotClient = mockk<SnapshotClient>(relaxed = true)
     private val oppgaveMediator = mockk<OppgaveMediator>()

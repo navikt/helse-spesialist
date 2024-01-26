@@ -11,7 +11,7 @@ import no.nav.helse.Testdata
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class HendelseE2ETest : AbstractE2ETest() {
+internal class KommandohendelseE2ETest : AbstractE2ETest() {
 
     @Test
     fun `ignorerer behov uten tilhørende command`() {

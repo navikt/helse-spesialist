@@ -1,22 +1,22 @@
 package no.nav.helse.modell.kommando
 
 import DatabaseIntegrationTest
+import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.mediator.meldinger.Hendelse
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import java.util.*
+import no.nav.helse.mediator.meldinger.Kommandohendelse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 internal class CommandContextDaoTest : DatabaseIntegrationTest() {
 
     private companion object {
         private val VEDTAKSPERIODE_ID1 = UUID.randomUUID()
         private val VEDTAKSPERIODE_ID2 = UUID.randomUUID()
-        private lateinit var HENDELSE1: TestHendelse
-        private lateinit var HENDELSE2: TestHendelse
+        private lateinit var HENDELSE1: TestKommandohendelse
+        private lateinit var HENDELSE2: TestKommandohendelse
     }
 
     @Test
@@ -67,19 +67,19 @@ internal class CommandContextDaoTest : DatabaseIntegrationTest() {
         assertContextRad(false, contextId)
     }
 
-    private fun ny(hendelse: Hendelse = HENDELSE1) = UUID.randomUUID().also { uuid ->
+    private fun ny(hendelse: Kommandohendelse = HENDELSE1) = UUID.randomUUID().also { uuid ->
         CommandContext(uuid).opprett(commandContextDao, hendelse)
     }
 
-    private fun ferdig(hendelse: Hendelse = HENDELSE1) = ny(hendelse).also { uuid ->
+    private fun ferdig(hendelse: Kommandohendelse = HENDELSE1) = ny(hendelse).also { uuid ->
         commandContextDao.ferdig(hendelse, uuid)
     }
 
-    private fun suspendert(hendelse: Hendelse = HENDELSE1) = ny(hendelse).also { uuid ->
+    private fun suspendert(hendelse: Kommandohendelse = HENDELSE1) = ny(hendelse).also { uuid ->
         commandContextDao.suspendert(hendelse, uuid, listOf())
     }
 
-    private fun feil(hendelse: Hendelse = HENDELSE1) = ny(hendelse).also { uuid ->
+    private fun feil(hendelse: Kommandohendelse = HENDELSE1) = ny(hendelse).also { uuid ->
         commandContextDao.feil(hendelse, uuid)
     }
 

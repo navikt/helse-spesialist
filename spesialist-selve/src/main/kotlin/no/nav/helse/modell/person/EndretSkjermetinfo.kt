@@ -1,7 +1,7 @@
 package no.nav.helse.modell.person
 
 import java.util.UUID
-import no.nav.helse.mediator.meldinger.Hendelse
+import no.nav.helse.mediator.meldinger.Kommandohendelse
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
@@ -13,7 +13,7 @@ internal class EndretSkjermetinfo(
     erEgenAnsatt: Boolean,
     private val json: String,
     oppgaveMediator: OppgaveMediator,
-) : Hendelse, MacroCommand() {
+) : Kommandohendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         ikkesuspenderendeCommand("endretEgenAnsattStatus") {
             oppgaveMediator.endretEgenAnsattStatus(erEgenAnsatt, fødselsnummer)

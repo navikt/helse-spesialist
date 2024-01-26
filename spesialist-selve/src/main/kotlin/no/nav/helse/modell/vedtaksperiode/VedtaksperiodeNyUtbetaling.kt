@@ -1,7 +1,7 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import java.util.UUID
-import no.nav.helse.mediator.meldinger.Hendelse
+import no.nav.helse.mediator.meldinger.Kommandohendelse
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OpprettKoblingTilUtbetalingCommand
@@ -15,7 +15,7 @@ internal class VedtaksperiodeNyUtbetaling(
     private val json: String,
     utbetalingDao: UtbetalingDao,
     gjeldendeGenerasjon: Generasjon
-) : Hendelse, MacroCommand() {
+) : Kommandohendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         OpprettKoblingTilUtbetalingCommand(
             vedtaksperiodeId = vedtaksperiodeId,

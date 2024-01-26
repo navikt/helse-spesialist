@@ -29,7 +29,7 @@ import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.dokument.DokumentDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
-import no.nav.helse.modell.kommando.TestHendelse
+import no.nav.helse.modell.kommando.TestKommandohendelse
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.påvent.PåVentDao
@@ -161,7 +161,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         fødselsnummer: String = FNR,
         type: String = "GODKJENNING",
         json: String = "{}",
-    ) = TestHendelse(hendelseId, vedtaksperiodeId, fødselsnummer).also {
+    ) = TestKommandohendelse(hendelseId, vedtaksperiodeId, fødselsnummer).also {
         lagreHendelse(it.id, it.fødselsnummer(), type, json)
     }
 
@@ -227,7 +227,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         )
     }
 
-    private fun opprettCommandContext(hendelse: TestHendelse, contextId: UUID) {
+    private fun opprettCommandContext(hendelse: TestKommandohendelse, contextId: UUID) {
         commandContextDao.opprett(hendelse, contextId)
     }
 

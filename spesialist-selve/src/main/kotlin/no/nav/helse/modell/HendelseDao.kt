@@ -8,7 +8,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
-import no.nav.helse.mediator.meldinger.Hendelse
+import no.nav.helse.mediator.meldinger.Kommandohendelse
 import no.nav.helse.modell.HendelseDao.Hendelsetype.ADRESSEBESKYTTELSE_ENDRET
 import no.nav.helse.modell.HendelseDao.Hendelsetype.ENDRET_SKJERMETINFO
 import no.nav.helse.modell.HendelseDao.Hendelsetype.GODKJENNING
@@ -60,7 +60,7 @@ import no.nav.helse.rapids_rivers.asLocalDate
 import org.intellij.lang.annotations.Language
 
 internal class HendelseDao(private val dataSource: DataSource) {
-    internal fun opprett(hendelse: Hendelse) {
+    internal fun opprett(hendelse: Kommandohendelse) {
         sessionOf(dataSource).use { session ->
             session.transaction { transactionalSession ->
                 transactionalSession.run {
@@ -177,7 +177,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
         })
     }
 
-    private fun TransactionalSession.opprettHendelse(hendelse: Hendelse) {
+    private fun TransactionalSession.opprettHendelse(hendelse: Kommandohendelse) {
         @Language("PostgreSQL")
         val hendelseStatement = """
             INSERT INTO hendelse(id, fodselsnummer, data, type)
@@ -217,7 +217,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
         hendelsetype: Hendelsetype,
         json: String,
         hendelsefabrikk: Hendelsefabrikk,
-    ): Hendelse =
+    ): Kommandohendelse =
         when (hendelsetype) {
             ADRESSEBESKYTTELSE_ENDRET -> hendelsefabrikk.adressebeskyttelseEndret(json)
             VEDTAKSPERIODE_ENDRET -> hendelsefabrikk.vedtaksperiodeEndret(json)
@@ -244,7 +244,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
             VEDTAKSPERIODE_SKJØNNSMESSIG_FASTSETTELSE -> hendelsefabrikk.vedtaksperiodeSkjønnsmessigFastsettelse(json)
         }
 
-    private fun tilHendelsetype(hendelse: Hendelse) = when (hendelse) {
+    private fun tilHendelsetype(hendelse: Kommandohendelse) = when (hendelse) {
         is AdressebeskyttelseEndret -> ADRESSEBESKYTTELSE_ENDRET
         is VedtaksperiodeEndret -> VEDTAKSPERIODE_ENDRET
         is VedtaksperiodeForkastet -> VEDTAKSPERIODE_FORKASTET

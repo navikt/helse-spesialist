@@ -18,7 +18,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
 
-internal class HendelseDaoTest : DatabaseIntegrationTest() {
+internal class KommandohendelseDaoTest : DatabaseIntegrationTest() {
     private companion object {
         private val HENDELSE_ID = UUID.randomUUID()
     }

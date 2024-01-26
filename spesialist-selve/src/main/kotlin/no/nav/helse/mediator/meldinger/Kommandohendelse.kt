@@ -3,7 +3,7 @@ package no.nav.helse.mediator.meldinger
 import java.util.UUID
 import no.nav.helse.modell.kommando.Command
 
-internal interface Hendelse : Command {
+internal interface Kommandohendelse : Command {
     val id: UUID
 
     fun fødselsnummer(): String

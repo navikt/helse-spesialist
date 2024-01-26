@@ -14,7 +14,7 @@ import no.nav.helse.mediator.meldinger.AvvikVurdertRiver
 import no.nav.helse.mediator.meldinger.EndretSkjermetinfoRiver
 import no.nav.helse.mediator.meldinger.GodkjenningsbehovRiver
 import no.nav.helse.mediator.meldinger.GosysOppgaveEndretRiver
-import no.nav.helse.mediator.meldinger.Hendelse
+import no.nav.helse.mediator.meldinger.Kommandohendelse
 import no.nav.helse.mediator.meldinger.NyeVarslerRiver
 import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshotRiver
 import no.nav.helse.mediator.meldinger.OverstyringArbeidsforholdRiver
@@ -656,24 +656,24 @@ internal class HendelseMediator(
         sikkerLogg.error("alvorlig feil: ${err.message}\n\t$message", err, err.printStackTrace())
     }
 
-    private fun nyContext(hendelse: Hendelse, contextId: UUID) = CommandContext(contextId).apply {
+    private fun nyContext(hendelse: Kommandohendelse, contextId: UUID) = CommandContext(contextId).apply {
         hendelseDao.opprett(hendelse)
         opprett(commandContextDao, hendelse)
     }
 
-    private fun utfør(fødselsnummer: String, hendelse: Hendelse, messageContext: MessageContext) {
+    private fun utfør(fødselsnummer: String, hendelse: Kommandohendelse, messageContext: MessageContext) {
         if (personDao.findPersonByFødselsnummer(fødselsnummer) == null) return logg.info("ignorerer hendelseId=${hendelse.id} fordi vi ikke kjenner til personen")
         return utfør(hendelse, messageContext)
     }
 
-    private fun utfør(hendelse: Hendelse, messageContext: MessageContext) {
+    private fun utfør(hendelse: Kommandohendelse, messageContext: MessageContext) {
         val contextId = UUID.randomUUID()
         logg.info("oppretter ny kommandokontekst med context_id=$contextId for hendelse_id=${hendelse.id} og type=${hendelse::class.simpleName}")
         utfør(hendelse, nyContext(hendelse, contextId), contextId, messageContext)
     }
 
     private fun utfør(
-        hendelse: Hendelse,
+        hendelse: Kommandohendelse,
         context: CommandContext,
         contextId: UUID,
         messageContext: MessageContext,
@@ -722,7 +722,7 @@ internal class HendelseMediator(
 
     private class Løsninger(
         private val messageContex: MessageContext,
-        private val hendelse: Hendelse,
+        private val hendelse: Kommandohendelse,
         private val contextId: UUID,
         private val commandContext: CommandContext,
     ) {

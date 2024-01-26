@@ -3,7 +3,7 @@ package no.nav.helse.modell.utbetaling
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.db.SaksbehandlerDao
-import no.nav.helse.mediator.meldinger.Hendelse
+import no.nav.helse.mediator.meldinger.Kommandohendelse
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.LagreAnnulleringCommand
@@ -24,7 +24,7 @@ internal class UtbetalingAnnullert(
     snapshotClient: SnapshotClient,
     snapshotDao: SnapshotDao,
     personDao: PersonDao,
-) : Hendelse, MacroCommand() {
+) : Kommandohendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         OppdaterSnapshotCommand(
             snapshotClient = snapshotClient,

@@ -2,7 +2,7 @@ package no.nav.helse.modell.person
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.mediator.meldinger.Hendelse
+import no.nav.helse.mediator.meldinger.Kommandohendelse
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
@@ -23,7 +23,7 @@ internal class OppdaterPersonsnapshot(
     personDao: PersonDao,
     opptegnelseDao: OpptegnelseDao,
     førsteKjenteDagFinner: () -> LocalDate,
-) : Hendelse, MacroCommand() {
+) : Kommandohendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         OppdaterSnapshotCommand(
             snapshotClient = snapshotClient,

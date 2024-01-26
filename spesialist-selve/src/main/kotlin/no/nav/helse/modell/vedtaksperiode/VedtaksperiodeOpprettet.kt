@@ -2,7 +2,7 @@ package no.nav.helse.modell.vedtaksperiode
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.mediator.meldinger.Hendelse
+import no.nav.helse.mediator.meldinger.Kommandohendelse
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.kommando.Command
@@ -23,7 +23,7 @@ internal class VedtaksperiodeOpprettet(
     vedtakDao: VedtakDao,
     generasjon: Generasjon,
     private val json: String,
-) : Hendelse, MacroCommand() {
+) : Kommandohendelse, MacroCommand() {
 
     override fun fødselsnummer() = fødselsnummer
     override fun toJson(): String = json
