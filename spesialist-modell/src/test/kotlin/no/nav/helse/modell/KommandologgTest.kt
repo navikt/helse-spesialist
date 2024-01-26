@@ -90,7 +90,7 @@ class KommandologgTest {
         barn.nyttInnslag("En melding")
 
         val forelderinnslaget = forelder.alleInnslag().single()
-        val barninnslaget = forelder.alleInnslag().single()
+        val barninnslaget = barn.alleInnslag().single()
 
         assertEquals("En melding", forelderinnslaget.melding)
         assertEquals(1, forelderinnslaget.kontekster.size)
@@ -99,5 +99,33 @@ class KommandologgTest {
         assertEquals("En melding", barninnslaget.melding)
         assertEquals(1, barninnslaget.kontekster.size)
         assertEquals("En barn-kontekst", barninnslaget.kontekster.single().navn)
+    }
+
+    @Test
+    fun `Barnebarns innslag propageres opp til rot`() {
+        val forelder = Kommandologg.nyLogg()
+
+        forelder.kontekst("En forelder-kontekst")
+        forelder.nyttInnslag("En melding fra rot")
+
+        val barn = forelder.barn()
+
+        barn.kontekst("En barn-kontekst")
+        barn.nyttInnslag("En melding fra barn")
+
+        val barnebarn = barn.barn()
+
+        barnebarn.kontekst("En barnebarn-kontekst")
+        barnebarn.nyttInnslag("En melding fra barnebarn")
+
+        val alleInnslag = forelder.alleInnslag()
+        val forelderinnslaget = alleInnslag[0]
+        val barninnslaget = alleInnslag[1]
+        val barnebarninnslaget = alleInnslag[2]
+
+        assertEquals(3, alleInnslag.size)
+        assertEquals(1, forelderinnslaget.kontekster.size)
+        assertEquals(2, barninnslaget.kontekster.size)
+        assertEquals(3, barnebarninnslaget.kontekster.size)
     }
 }

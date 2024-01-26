@@ -13,8 +13,12 @@ class Kommandologg private constructor(private val forelder: Kommandologg? = nul
 
     fun nyttInnslag(melding: String) {
         val innslag = Logginnslag(melding, kontekster)
-        logginnslag.addLast(innslag)
-        forelder?.logginnslag?.addLast(innslag)
+        nyttInnslag(innslag)
+    }
+
+    private fun nyttInnslag(innslag: Logginnslag) {
+        this.logginnslag.addLast(innslag)
+        forelder?.nyttInnslag(innslag)
     }
 
     fun barn() = Kommandologg(forelder = this).also {
