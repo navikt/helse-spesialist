@@ -62,6 +62,12 @@ internal class Sykefraværstilfelle(
         generasjon.automatiskGodkjennSpesialsakvarsler()
     }
 
+    internal fun deaktiverVarsel(vedtaksperiodeId: UUID, varselkode: String) {
+        val generasjon = gjeldendeGenerasjoner.finnGenerasjon(vedtaksperiodeId)
+            ?: throw IllegalStateException("Forventer å finne generasjon for perioden")
+        generasjon.deaktiverVarsel(varselkode)
+    }
+
     internal fun håndter(avsluttetMedVedtak: AvsluttetMedVedtak) {
         val vedtakBuilder = SykepengevedtakBuilder()
         val skjønnsfastsattSykepengegrunnlag = skjønnsfastatteSykepengegrunnlag.lastOrNull()

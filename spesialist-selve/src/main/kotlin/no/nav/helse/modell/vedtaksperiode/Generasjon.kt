@@ -97,6 +97,11 @@ internal class Generasjon private constructor(
         funnetVarsel.deaktiver(id)
     }
 
+    internal fun deaktiverVarsel(varselkode: String) {
+        val funnetVarsel = varsler.finnEksisterendeVarsel(varselkode) ?: return
+        funnetVarsel.deaktiver(id)
+    }
+
     internal fun håndterGodkjentAvSaksbehandler(ident: String, hendelseId: UUID) {
         tilstand.håndterGodkjenning(this, ident, hendelseId)
     }
