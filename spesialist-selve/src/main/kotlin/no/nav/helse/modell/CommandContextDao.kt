@@ -6,7 +6,6 @@ import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.mediator.meldinger.Kommandohendelse
 import no.nav.helse.modell.CommandContextDao.CommandContextTilstand.AVBRUTT
 import no.nav.helse.modell.CommandContextDao.CommandContextTilstand.FEIL
 import no.nav.helse.modell.CommandContextDao.CommandContextTilstand.FERDIG
@@ -20,20 +19,20 @@ internal class CommandContextDao(private val dataSource: DataSource) {
         private val mapper = jacksonObjectMapper()
     }
 
-    internal fun opprett(hendelse: Kommandohendelse, contextId: UUID) {
-        lagre(hendelse.id, contextId, NY)
+    internal fun opprett(hendelseId: UUID, contextId: UUID) {
+        lagre(hendelseId, contextId, NY)
     }
 
-    internal fun ferdig(hendelse: Kommandohendelse, contextId: UUID) {
-        lagre(hendelse.id, contextId, FERDIG)
+    internal fun ferdig(hendelseId: UUID, contextId: UUID) {
+        lagre(hendelseId, contextId, FERDIG)
     }
 
-    internal fun feil(hendelse: Kommandohendelse, contextId: UUID) {
-        lagre(hendelse.id, contextId, FEIL)
+    internal fun feil(hendelseId: UUID, contextId: UUID) {
+        lagre(hendelseId, contextId, FEIL)
     }
 
-    internal fun suspendert(hendelse: Kommandohendelse, contextId: UUID, sti: List<Int>) {
-        lagre(hendelse.id, contextId, SUSPENDERT, sti)
+    internal fun suspendert(hendelseId: UUID, contextId: UUID, sti: List<Int>) {
+        lagre(hendelseId, contextId, SUSPENDERT, sti)
     }
 
     fun avbryt(vedtaksperiodeId: UUID, contextId: UUID) {

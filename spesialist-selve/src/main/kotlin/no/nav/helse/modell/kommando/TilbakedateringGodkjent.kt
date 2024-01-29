@@ -2,7 +2,7 @@ package no.nav.helse.modell.kommando
 
 import java.util.UUID
 import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.mediator.meldinger.Hendelse
+import no.nav.helse.mediator.meldinger.Kommandohendelse
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.automatisering.Automatisering
@@ -24,7 +24,7 @@ internal class TilbakedateringGodkjent(
     oppgaveMediator: OppgaveMediator,
     utbetalingDao: UtbetalingDao,
     oppgaveDao: OppgaveDao
-) : Hendelse, MacroCommand() {
+) : Kommandohendelse, MacroCommand() {
 
     override fun fødselsnummer() = fødselsnummer
     override fun toJson(): String = json

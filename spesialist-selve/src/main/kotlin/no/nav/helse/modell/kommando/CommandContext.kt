@@ -52,7 +52,7 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
     internal fun sti() = sti.toList()
 
     internal fun opprett(commandContextDao: CommandContextDao, hendelse: Kommandohendelse) {
-        commandContextDao.opprett(hendelse, id)
+        commandContextDao.opprett(hendelse.id, id)
     }
 
     internal fun avbryt(commandContextDao: CommandContextDao, vedtaksperiodeId: UUID) {
@@ -67,12 +67,12 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
 
     internal fun utfør(commandContextDao: CommandContextDao, hendelse: Kommandohendelse) = try {
         utfør(hendelse).also {
-            if (ferdigstilt || it) commandContextDao.ferdig(hendelse, id)
-            else commandContextDao.suspendert(hendelse, id, sti)
+            if (ferdigstilt || it) commandContextDao.ferdig(hendelse.id, id)
+            else commandContextDao.suspendert(hendelse.id, id, sti)
         }
     } catch (rootErr: Exception) {
         try {
-            commandContextDao.feil(hendelse, id)
+            commandContextDao.feil(hendelse.id, id)
         } catch (nestedErr: Exception) {
             throw RuntimeException("Feil ved lagring av FEIL-tilstand: $nestedErr", rootErr)
         }

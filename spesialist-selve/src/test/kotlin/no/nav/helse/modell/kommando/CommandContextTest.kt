@@ -43,7 +43,7 @@ internal class CommandContextTest {
             assertTrue(context.utfør(commandContextDao, this))
             assertTrue(executed)
             assertFalse(resumed)
-            verify(exactly = 1) { commandContextDao.ferdig(this@apply, CONTEXT) }
+            verify(exactly = 1) { commandContextDao.ferdig(this@apply.id, CONTEXT) }
             verify(exactly = 0) { commandContextDao.suspendert(any(), any(), any()) }
         }
     }
@@ -55,7 +55,7 @@ internal class CommandContextTest {
             assertTrue(context.utfør(commandContextDao, this))
             assertFalse(executed)
             assertTrue(resumed)
-            verify(exactly = 1) { commandContextDao.ferdig(this@apply, CONTEXT) }
+            verify(exactly = 1) { commandContextDao.ferdig(this@apply.id, CONTEXT) }
             verify(exactly = 0) { commandContextDao.suspendert(any(), any(), any()) }
         }
     }
@@ -66,7 +66,7 @@ internal class CommandContextTest {
         TestCommand(executeAction = { false }).apply {
             assertFalse(context.utfør(commandContextDao, this))
             verify(exactly = 0) { commandContextDao.ferdig(any(), any()) }
-            verify(exactly = 1) { commandContextDao.suspendert(this@apply, CONTEXT, any()) }
+            verify(exactly = 1) { commandContextDao.suspendert(this@apply.id, CONTEXT, any()) }
         }
     }
 
@@ -77,7 +77,7 @@ internal class CommandContextTest {
         TestCommand(resumeAction = { false }).apply {
             assertFalse(context.utfør(commandContextDao, this))
             verify(exactly = 0) { commandContextDao.ferdig(any(), any()) }
-            verify(exactly = 1) { commandContextDao.suspendert(this@apply, CONTEXT, sti) }
+            verify(exactly = 1) { commandContextDao.suspendert(this@apply.id, CONTEXT, sti) }
         }
     }
 
@@ -87,7 +87,7 @@ internal class CommandContextTest {
         TestCommand(executeAction = { throw Exception() }).apply {
             assertThrows<Exception> { context.utfør(commandContextDao, this) }
             verify(exactly = 0) { commandContextDao.ferdig(any(), any()) }
-            verify(exactly = 1) { commandContextDao.feil(this@apply, CONTEXT) }
+            verify(exactly = 1) { commandContextDao.feil(this@apply.id, CONTEXT) }
         }
     }
 
@@ -98,7 +98,7 @@ internal class CommandContextTest {
         TestCommand(resumeAction = { throw Exception() }).apply {
             assertThrows<Exception> { context.utfør(commandContextDao, this) }
             verify(exactly = 0) { commandContextDao.ferdig(any(), any()) }
-            verify(exactly = 1) { commandContextDao.feil(this@apply, CONTEXT) }
+            verify(exactly = 1) { commandContextDao.feil(this@apply.id, CONTEXT) }
         }
     }
 
@@ -192,7 +192,7 @@ internal class CommandContextTest {
         var resumed = false
         var undo = false
 
-        override val id = HENDELSE
+        override val id: UUID = HENDELSE
         override fun fødselsnummer() = FNR
         override fun toJson() = SNAPSHOT
 

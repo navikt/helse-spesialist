@@ -228,7 +228,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     }
 
     private fun opprettCommandContext(hendelse: TestHendelse, contextId: UUID) {
-        commandContextDao.opprett(hendelse, contextId)
+        commandContextDao.opprett(hendelse.id, contextId)
     }
 
     protected fun tildelOppgave(

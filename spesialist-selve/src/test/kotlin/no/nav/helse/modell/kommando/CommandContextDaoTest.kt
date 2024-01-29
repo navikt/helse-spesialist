@@ -72,15 +72,15 @@ internal class CommandContextDaoTest : DatabaseIntegrationTest() {
     }
 
     private fun ferdig(hendelse: Kommandohendelse = HENDELSE1) = ny(hendelse).also { uuid ->
-        commandContextDao.ferdig(hendelse, uuid)
+        commandContextDao.ferdig(hendelse.id, uuid)
     }
 
     private fun suspendert(hendelse: Kommandohendelse = HENDELSE1) = ny(hendelse).also { uuid ->
-        commandContextDao.suspendert(hendelse, uuid, listOf())
+        commandContextDao.suspendert(hendelse.id, uuid, listOf())
     }
 
     private fun feil(hendelse: Kommandohendelse = HENDELSE1) = ny(hendelse).also { uuid ->
-        commandContextDao.feil(hendelse, uuid)
+        commandContextDao.feil(hendelse.id, uuid)
     }
 
     private fun avbryt(contextId: UUID, vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID1) {
