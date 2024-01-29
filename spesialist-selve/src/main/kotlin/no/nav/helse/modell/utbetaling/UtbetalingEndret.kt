@@ -41,7 +41,6 @@ internal class UtbetalingEndret(
 ) : Kommandohendelse, MacroCommand() {
 
     override fun fødselsnummer(): String = fødselsnummer
-    override fun vedtaksperiodeId(): UUID? = null
     override fun toJson(): String = json
     override val commands: List<Command> = mutableListOf(
         LagreOppdragCommand(
@@ -71,5 +70,4 @@ internal class UtbetalingEndret(
         if (gjeldendeStatus == FORKASTET)
             add(InvaliderUtbetalingForGenerasjonerCommand(utbetalingId, gjeldendeGenerasjoner))
     }
-
 }

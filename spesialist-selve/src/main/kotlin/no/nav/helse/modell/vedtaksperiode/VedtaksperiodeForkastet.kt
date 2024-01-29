@@ -2,6 +2,7 @@ package no.nav.helse.modell.vedtaksperiode
 
 import java.util.UUID
 import no.nav.helse.mediator.meldinger.Kommandohendelse
+import no.nav.helse.mediator.meldinger.VedtaksperiodeHendelse
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.SnapshotDao
@@ -24,7 +25,7 @@ internal class VedtaksperiodeForkastet(
     snapshotDao: SnapshotDao,
     personDao: PersonDao,
     vedtakDao: VedtakDao
-) : Kommandohendelse, MacroCommand() {
+) : Kommandohendelse, VedtaksperiodeHendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         AvbrytCommand(vedtaksperiodeId, commandContextDao, oppgaveMediator),
         OppdaterSnapshotCommand(

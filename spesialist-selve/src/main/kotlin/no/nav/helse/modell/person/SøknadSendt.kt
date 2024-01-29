@@ -23,7 +23,5 @@ internal class SøknadSendt(
     )
 
     override fun fødselsnummer() = fødselsnummer
-    override fun vedtaksperiodeId(): UUID? = null
     override fun toJson() = json
-
 }

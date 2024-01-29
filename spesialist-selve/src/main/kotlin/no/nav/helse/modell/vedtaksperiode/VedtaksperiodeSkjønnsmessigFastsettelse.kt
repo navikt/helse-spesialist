@@ -2,6 +2,7 @@ package no.nav.helse.modell.vedtaksperiode
 
 import java.util.UUID
 import no.nav.helse.mediator.meldinger.Kommandohendelse
+import no.nav.helse.mediator.meldinger.VedtaksperiodeHendelse
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsforhold.command.KlargjørArbeidsforholdCommand
@@ -31,7 +32,7 @@ internal class VedtaksperiodeSkjønnsmessigFastsettelse(
     arbeidsgiverDao: ArbeidsgiverDao,
     arbeidsforholdDao: ArbeidsforholdDao,
     egenAnsattDao: EgenAnsattDao,
-) : Kommandohendelse, MacroCommand() {
+) : Kommandohendelse, VedtaksperiodeHendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         KlargjørPersonCommand(
             fødselsnummer = fødselsnummer,

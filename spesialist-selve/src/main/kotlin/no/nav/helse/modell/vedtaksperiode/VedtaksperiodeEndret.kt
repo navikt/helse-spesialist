@@ -2,6 +2,7 @@ package no.nav.helse.modell.vedtaksperiode
 
 import java.util.UUID
 import no.nav.helse.mediator.meldinger.Kommandohendelse
+import no.nav.helse.mediator.meldinger.VedtaksperiodeHendelse
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
@@ -22,7 +23,7 @@ internal class VedtaksperiodeEndret(
     snapshotClient: SnapshotClient,
     personDao: PersonDao,
     gjeldendeGenerasjon: Generasjon,
-) : Kommandohendelse, MacroCommand() {
+) : Kommandohendelse, VedtaksperiodeHendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         OppdaterSnapshotCommand(
             snapshotClient = snapshotClient,
@@ -42,5 +43,4 @@ internal class VedtaksperiodeEndret(
     override fun fødselsnummer() = fødselsnummer
     override fun vedtaksperiodeId() = vedtaksperiodeId
     override fun toJson() = json
-
 }

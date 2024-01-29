@@ -15,8 +15,8 @@ internal class CommandContextDaoTest : DatabaseIntegrationTest() {
     private companion object {
         private val VEDTAKSPERIODE_ID1 = UUID.randomUUID()
         private val VEDTAKSPERIODE_ID2 = UUID.randomUUID()
-        private lateinit var HENDELSE1: TestKommandohendelse
-        private lateinit var HENDELSE2: TestKommandohendelse
+        private lateinit var HENDELSE1: TestHendelse
+        private lateinit var HENDELSE2: TestHendelse
     }
 
     @Test
@@ -55,7 +55,7 @@ internal class CommandContextDaoTest : DatabaseIntegrationTest() {
     fun `avbryter bare for riktig vedtaksperiode`() {
         val contextId1 = ny(HENDELSE1)
         val contextId2 = ny(HENDELSE2)
-        avbryt(UUID.randomUUID(), HENDELSE1.vedtaksperiodeId()!!)
+        avbryt(UUID.randomUUID(), HENDELSE1.vedtaksperiodeId())
         assertTilstand(contextId1, "NY", "AVBRUTT")
         assertTilstand(contextId2, "NY")
     }

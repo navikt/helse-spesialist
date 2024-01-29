@@ -29,7 +29,7 @@ import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.dokument.DokumentDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
-import no.nav.helse.modell.kommando.TestKommandohendelse
+import no.nav.helse.modell.kommando.TestHendelse
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.påvent.PåVentDao
@@ -157,11 +157,11 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     internal fun testhendelse(
         hendelseId: UUID = HENDELSE_ID,
-        vedtaksperiodeId: UUID? = VEDTAKSPERIODE,
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         fødselsnummer: String = FNR,
         type: String = "GODKJENNING",
         json: String = "{}",
-    ) = TestKommandohendelse(hendelseId, vedtaksperiodeId, fødselsnummer).also {
+    ) = TestHendelse(hendelseId, vedtaksperiodeId, fødselsnummer).also {
         lagreHendelse(it.id, it.fødselsnummer(), type, json)
     }
 
@@ -227,7 +227,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         )
     }
 
-    private fun opprettCommandContext(hendelse: TestKommandohendelse, contextId: UUID) {
+    private fun opprettCommandContext(hendelse: TestHendelse, contextId: UUID) {
         commandContextDao.opprett(hendelse, contextId)
     }
 
@@ -243,12 +243,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         return sessionOf(dataSource).use { session ->
             session.run(queryOf(query, saksbehandlerOid, oppgaveId, påVent).asExecute)
         }
-    }
-
-    protected fun nyVedtaksperiode(periodetype: Periodetype = FØRSTEGANGSBEHANDLING) {
-        val vedtaksperiodeId = UUID.randomUUID()
-        opprettVedtaksperiode(vedtaksperiodeId, periodetype = periodetype)
-        opprettOppgave(vedtaksperiodeId = vedtaksperiodeId)
     }
 
     private fun opprettVedtakstype(
@@ -592,8 +586,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     protected fun query(@Language("postgresql") query: String, vararg params: Pair<String, Any>) =
         queryOf(query, params.toMap())
-
-    protected fun Query.update() = asUpdate.runInSession()
 
     protected fun <T> Query.single(mapper: (Row) -> T?) = map(mapper).asSingle.runInSession()
 

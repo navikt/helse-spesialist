@@ -9,6 +9,7 @@ import kotliquery.sessionOf
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.Kommandohendelse
+import no.nav.helse.mediator.meldinger.VedtaksperiodeHendelse
 import no.nav.helse.modell.HendelseDao.Hendelsetype.ADRESSEBESKYTTELSE_ENDRET
 import no.nav.helse.modell.HendelseDao.Hendelsetype.ENDRET_SKJERMETINFO
 import no.nav.helse.modell.HendelseDao.Hendelsetype.GODKJENNING
@@ -65,7 +66,8 @@ internal class HendelseDao(private val dataSource: DataSource) {
             session.transaction { transactionalSession ->
                 transactionalSession.run {
                     opprettHendelse(hendelse)
-                    hendelse.vedtaksperiodeId()?.let { opprettKobling(it, hendelse.id) }
+                    if (hendelse is VedtaksperiodeHendelse)
+                        opprettKobling(hendelse.vedtaksperiodeId(), hendelse.id)
                 }
             }
         }

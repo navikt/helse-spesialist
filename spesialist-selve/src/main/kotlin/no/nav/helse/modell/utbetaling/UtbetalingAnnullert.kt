@@ -42,7 +42,5 @@ internal class UtbetalingAnnullert(
     )
 
     override fun fødselsnummer(): String = fødselsnummer
-    override fun vedtaksperiodeId(): UUID? = null
     override fun toJson(): String = json
-
 }

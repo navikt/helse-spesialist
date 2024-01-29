@@ -20,7 +20,6 @@ internal class CommandContextTest {
 
     private companion object {
         private val HENDELSE = UUID.randomUUID()
-        private val VEDTAKSPERIODE = UUID.randomUUID()
         private val CONTEXT = UUID.randomUUID()
         private const val FNR = "fnr"
         private const val SNAPSHOT = "json"
@@ -195,7 +194,6 @@ internal class CommandContextTest {
 
         override val id = HENDELSE
         override fun fødselsnummer() = FNR
-        override fun vedtaksperiodeId() = VEDTAKSPERIODE
         override fun toJson() = SNAPSHOT
 
         override fun execute(context: CommandContext): Boolean {

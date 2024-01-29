@@ -4,6 +4,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.meldinger.Kommandohendelse
+import no.nav.helse.mediator.meldinger.VedtaksperiodeHendelse
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.kommando.MacroCommand
@@ -34,7 +35,7 @@ internal class Saksbehandlerløsning(
     godkjenningMediator: GodkjenningMediator,
     utbetalingDao: UtbetalingDao,
     sykefraværstilfelle: Sykefraværstilfelle,
-) : Kommandohendelse, MacroCommand() {
+) : Kommandohendelse, VedtaksperiodeHendelse, MacroCommand() {
     private val utbetaling = utbetalingDao.utbetalingFor(oppgaveId)
 
     override val commands = listOf(

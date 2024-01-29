@@ -2,6 +2,7 @@ package no.nav.helse.modell.vedtaksperiode.vedtak
 
 import java.util.UUID
 import no.nav.helse.mediator.meldinger.Kommandohendelse
+import no.nav.helse.mediator.meldinger.VedtaksperiodeHendelse
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.vedtaksperiode.Generasjon
@@ -13,7 +14,7 @@ internal class VedtakFattet(
     private val json: String,
     private val gjeldendeGenerasjon: Generasjon,
     private val vedtakDao: VedtakDao
-) : Kommandohendelse {
+) : Kommandohendelse, VedtaksperiodeHendelse {
 
     override fun fødselsnummer(): String = fødselsnummer
     override fun vedtaksperiodeId(): UUID = vedtaksperiodeId

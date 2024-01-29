@@ -23,7 +23,5 @@ internal class OverstyringIgangsatt(
     )
 
     override fun fødselsnummer() = fødselsnummer
-    override fun vedtaksperiodeId(): UUID? = null
     override fun toJson() = json
-
 }

@@ -30,6 +30,7 @@ import no.nav.helse.mediator.meldinger.VarseldefinisjonRiver
 import no.nav.helse.mediator.meldinger.VedtakFattetRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeEndretRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeForkastetRiver
+import no.nav.helse.mediator.meldinger.VedtaksperiodeHendelse
 import no.nav.helse.mediator.meldinger.VedtaksperiodeNyUtbetalingRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeOpprettetRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeReberegnetRiver
@@ -682,7 +683,7 @@ internal class HendelseMediator(
             mapOf(
                 "context_id" to "$contextId",
                 "hendelse_id" to "${hendelse.id}",
-                "vedtaksperiode_id" to "${hendelse.vedtaksperiodeId() ?: "N/A"}"
+                "vedtaksperiode_id" to "${if (hendelse is VedtaksperiodeHendelse) hendelse.vedtaksperiodeId() else "N/A"}"
             )
         ) {
             val hendelsenavn = hendelse::class.simpleName ?: "ukjent hendelse"

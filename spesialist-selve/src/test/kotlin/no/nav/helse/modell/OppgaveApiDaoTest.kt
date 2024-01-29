@@ -5,7 +5,7 @@ import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.kommando.TestKommandohendelse
+import no.nav.helse.modell.kommando.TestHendelse
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test
 class OppgaveApiDaoTest : DatabaseIntegrationTest() {
     private companion object {
         private val CONTEXT_ID = UUID.randomUUID()
-        private val TESTHENDELSE = TestKommandohendelse(HENDELSE_ID, UUID.randomUUID(), FNR)
+        private val TESTHENDELSE = TestHendelse(HENDELSE_ID, UUID.randomUUID(), FNR)
     }
 
     @BeforeEach
