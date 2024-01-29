@@ -21,19 +21,19 @@ internal class CommandContextDao(private val dataSource: DataSource) {
     }
 
     internal fun opprett(hendelse: Kommandohendelse, contextId: UUID) {
-        lagre(hendelse, contextId, NY)
+        lagre(hendelse.id, contextId, NY)
     }
 
     internal fun ferdig(hendelse: Kommandohendelse, contextId: UUID) {
-        lagre(hendelse, contextId, FERDIG)
+        lagre(hendelse.id, contextId, FERDIG)
     }
 
     internal fun feil(hendelse: Kommandohendelse, contextId: UUID) {
-        lagre(hendelse, contextId, FEIL)
+        lagre(hendelse.id, contextId, FEIL)
     }
 
     internal fun suspendert(hendelse: Kommandohendelse, contextId: UUID, sti: List<Int>) {
-        lagre(hendelse, contextId, SUSPENDERT, sti)
+        lagre(hendelse.id, contextId, SUSPENDERT, sti)
     }
 
     fun avbryt(vedtaksperiodeId: UUID, contextId: UUID) {
@@ -69,7 +69,7 @@ internal class CommandContextDao(private val dataSource: DataSource) {
     }
 
     private fun lagre(
-        hendelse: Kommandohendelse,
+        hendelseId: UUID,
         contextId: UUID,
         tilstand: CommandContextTilstand,
         sti: List<Int> = emptyList()
@@ -79,7 +79,7 @@ internal class CommandContextDao(private val dataSource: DataSource) {
                 queryOf(
                     "INSERT INTO command_context(context_id,hendelse_id,tilstand,data) VALUES (?, ?, ?, ?::json)",
                     contextId,
-                    hendelse.id,
+                    hendelseId,
                     tilstand.name,
                     mapper.writeValueAsString(CommandContextDto(sti))
                 ).asExecute
