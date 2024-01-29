@@ -661,7 +661,7 @@ internal class HendelseMediator(
 
     private fun nyContext(hendelse: Kommandohendelse, contextId: UUID) = CommandContext(contextId).apply {
         hendelseDao.opprett(hendelse)
-        opprett(commandContextDao, hendelse)
+        opprett(commandContextDao, hendelse.id)
     }
 
     private fun utfør(fødselsnummer: String, hendelse: Kommandohendelse, messageContext: MessageContext) {

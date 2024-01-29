@@ -48,7 +48,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     @BeforeEach
     fun setupDaoTest() {
         godkjenningsbehov(TESTHENDELSE.id)
-        CommandContext(CONTEXT_ID).opprett(CommandContextDao(dataSource), TESTHENDELSE)
+        CommandContext(CONTEXT_ID).opprett(CommandContextDao(dataSource), TESTHENDELSE.id)
     }
 
     @Test

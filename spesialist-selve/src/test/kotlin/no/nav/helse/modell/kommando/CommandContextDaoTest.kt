@@ -68,7 +68,7 @@ internal class CommandContextDaoTest : DatabaseIntegrationTest() {
     }
 
     private fun ny(hendelse: Kommandohendelse = HENDELSE1) = UUID.randomUUID().also { uuid ->
-        CommandContext(uuid).opprett(commandContextDao, hendelse)
+        CommandContext(uuid).opprett(commandContextDao, hendelse.id)
     }
 
     private fun ferdig(hendelse: Kommandohendelse = HENDELSE1) = ny(hendelse).also { uuid ->

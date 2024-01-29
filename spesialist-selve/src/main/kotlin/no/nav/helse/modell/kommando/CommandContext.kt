@@ -51,8 +51,8 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
 
     internal fun sti() = sti.toList()
 
-    internal fun opprett(commandContextDao: CommandContextDao, hendelse: Kommandohendelse) {
-        commandContextDao.opprett(hendelse.id, id)
+    internal fun opprett(commandContextDao: CommandContextDao, hendelseId: UUID) {
+        commandContextDao.opprett(hendelseId, id)
     }
 
     internal fun avbryt(commandContextDao: CommandContextDao, vedtaksperiodeId: UUID) {
