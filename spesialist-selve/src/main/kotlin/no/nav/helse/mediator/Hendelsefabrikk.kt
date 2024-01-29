@@ -26,6 +26,7 @@ import no.nav.helse.modell.avviksvurdering.AvviksvurderingDto
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
+import no.nav.helse.modell.kommando.TilbakedateringGodkjent
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.overstyring.OverstyringIgangsatt
 import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver
@@ -827,6 +828,41 @@ internal class Hendelsefabrikk(
             tom = LocalDate.parse(jsonNode.path("tom").asText()),
             skjæringstidspunkt = LocalDate.parse(jsonNode.path("skjæringstidspunkt").asText()),
             json = json,
+        )
+    }
+
+    fun godkjentTilbakedatertSykmelding(json: String): TilbakedateringGodkjent {
+        val jsonNode = mapper.readTree(json)
+        return godkjentTilbakedatertSykmelding(
+            id = UUID.fromString(jsonNode.path("@id").asText()),
+            fødselsnummer = jsonNode.path("fødselsnummer").asText(),
+            json = json
+        )
+    }
+
+    fun godkjentTilbakedatertSykmelding(
+        id: UUID,
+        fødselsnummer: String,
+        json: String,
+    ): TilbakedateringGodkjent {
+        val oppgaveDataForAutomatisering = oppgaveDao.finnOppgaveIdUansettStatus(fødselsnummer).let { oppgaveId ->
+            oppgaveDao.gosysOppgaveEndretCommandData(oppgaveId)!!
+        }
+        val sykefraværstilfelle = sykefraværstilfelle(fødselsnummer, oppgaveDataForAutomatisering.skjæringstidspunkt)
+
+        sikkerLog.info("Henter oppgaveDataForAutomatisering ifm. godkjent tilbakedatering for fnr $fødselsnummer og vedtaksperiodeId ${oppgaveDataForAutomatisering.vedtaksperiodeId}")
+
+        return TilbakedateringGodkjent(
+            id = id,
+            fødselsnummer = fødselsnummer,
+            sykefraværstilfelle = sykefraværstilfelle,
+            json = json,
+            oppgaveDataForAutomatisering = oppgaveDataForAutomatisering,
+            automatisering = automatisering,
+            godkjenningMediator = godkjenningMediator,
+            oppgaveMediator = oppgaveMediator,
+            utbetalingDao = utbetalingDao,
+            oppgaveDao = oppgaveDao,
         )
     }
 

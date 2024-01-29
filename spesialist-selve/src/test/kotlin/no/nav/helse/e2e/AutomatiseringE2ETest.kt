@@ -57,6 +57,21 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
     }
 
     @Test
+    fun `fatter automatisk vedtak dersom åpen oppgave får inn godkjent tilbakedatering`() {
+        fremTilÅpneOppgaver(
+            regelverksvarsler = listOf("RV_SØ_3"),
+        )
+        håndterÅpneOppgaverløsning()
+        håndterRisikovurderingløsning()
+
+        assertGodkjenningsbehovIkkeBesvart()
+        assertSaksbehandleroppgave(oppgavestatus = AvventerSaksbehandler)
+
+        håndterTilbakedateringBehandlet(skjæringstidspunkt = 1.januar)
+        assertGodkjenningsbehovBesvart(godkjent = true, automatiskBehandlet = true)
+    }
+
+    @Test
     fun `fatter automatisk vedtak for spesialsaker som ikke har svartelistede varsler og ingen utbetaling`() {
         Toggle.AutomatiserSpesialsak.enable()
         håndterSøknad()

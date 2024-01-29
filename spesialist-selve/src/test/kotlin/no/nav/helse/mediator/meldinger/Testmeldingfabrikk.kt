@@ -74,6 +74,13 @@ internal object Testmeldingfabrikk {
     ): String =
         nyHendelse(id, "gosys_oppgave_endret", mapOf("fødselsnummer" to fødselsnummer))
 
+    fun lagTilbakedateringBehandlet(
+        fødselsnummer: String,
+        id: UUID,
+        skjæringstidspunkt: LocalDate
+    ): String =
+        nyHendelse(id, "tilbakedatering_behandlet", mapOf("fødselsnummer" to fødselsnummer, "sykmeldingId" to "${UUID.randomUUID()}", "syketilfelleStartDato" to skjæringstidspunkt))
+
     fun lagEndretSkjermetinfo(
         fødselsnummer: String,
         skjermet: Boolean,

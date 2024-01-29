@@ -597,6 +597,10 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         assertEtterspurteBehov("ÅpneOppgaver")
     }
 
+    protected fun håndterTilbakedateringBehandlet(fødselsnummer: String = FØDSELSNUMMER, skjæringstidspunkt: LocalDate) {
+        sisteMeldingId = meldingssender.sendTilbakedateringBehandlet(fødselsnummer, skjæringstidspunkt)
+    }
+
     protected fun håndterUtbetalingOpprettet(
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,

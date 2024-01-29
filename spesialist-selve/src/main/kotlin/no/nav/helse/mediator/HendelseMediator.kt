@@ -23,6 +23,7 @@ import no.nav.helse.mediator.meldinger.OverstyringInntektOgRefusjonRiver
 import no.nav.helse.mediator.meldinger.SkjønnsfastsettingSykepengegrunnlagRiver
 import no.nav.helse.mediator.meldinger.SykefraværstilfellerRiver
 import no.nav.helse.mediator.meldinger.SøknadSendtRiver
+import no.nav.helse.mediator.meldinger.TilbakedatertRiver
 import no.nav.helse.mediator.meldinger.UtbetalingAnnullertRiver
 import no.nav.helse.mediator.meldinger.UtbetalingEndretRiver
 import no.nav.helse.mediator.meldinger.VarseldefinisjonRiver
@@ -147,6 +148,7 @@ internal class HendelseMediator(
             VedtaksperiodeOpprettetRiver(it, this)
             VedtaksperiodeSkjønnsmessigFastsettelseRiver(it, this)
             GosysOppgaveEndretRiver(it, this, oppgaveDao, personDao)
+            TilbakedatertRiver(it, this, oppgaveDao)
             EndretSkjermetinfoRiver(it, personDao, egenAnsattDao, oppgaveDao, godkjenningMediator, this)
             DokumentRiver(it, dokumentDao)
             VedtakFattetRiver(it, this)
@@ -608,6 +610,12 @@ internal class HendelseMediator(
 
     fun vedtakFattet(id: UUID, fødselsnummer: String, vedtaksperiodeId: UUID, json: String, context: MessageContext) {
         utfør(hendelsefabrikk.vedtakFattet(id, fødselsnummer, vedtaksperiodeId, json), context)
+    }
+
+    fun godkjentTilbakedatertSykmelding(id: UUID, fødselsnummer: String, vedtaksperiodeId: UUID, skjæringstidspunkt: LocalDate, json: String, context: MessageContext, ) {
+        if (!hendelsefabrikk.sykefraværstilfelle(fødselsnummer, skjæringstidspunkt).erTilbakedatert(vedtaksperiodeId)) return logg.info("ignorerer hendelseId=${id} fordi det ikke er en tilbakedatering")
+
+        utfør(hendelsefabrikk.godkjentTilbakedatertSykmelding(id, fødselsnummer, json,), context)
     }
 
     fun nyeVarsler(

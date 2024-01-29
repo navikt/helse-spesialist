@@ -12,6 +12,7 @@ import no.nav.helse.mediator.meldinger.Hendelse
 import no.nav.helse.modell.HendelseDao.Hendelsetype.ADRESSEBESKYTTELSE_ENDRET
 import no.nav.helse.modell.HendelseDao.Hendelsetype.ENDRET_SKJERMETINFO
 import no.nav.helse.modell.HendelseDao.Hendelsetype.GODKJENNING
+import no.nav.helse.modell.HendelseDao.Hendelsetype.GODKJENT_TILBAKEDATERT_SYKMELDING
 import no.nav.helse.modell.HendelseDao.Hendelsetype.GOSYS_OPPGAVE_ENDRET
 import no.nav.helse.modell.HendelseDao.Hendelsetype.NYE_VARSLER
 import no.nav.helse.modell.HendelseDao.Hendelsetype.OPPDATER_PERSONSNAPSHOT
@@ -32,6 +33,7 @@ import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAKSPERIODE_REBEREGNET
 import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAKSPERIODE_SKJØNNSMESSIG_FASTSETTELSE
 import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAK_FATTET
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
+import no.nav.helse.modell.kommando.TilbakedateringGodkjent
 import no.nav.helse.modell.overstyring.OverstyringIgangsatt
 import no.nav.helse.modell.person.EndretSkjermetinfo
 import no.nav.helse.modell.person.OppdaterPersonsnapshot
@@ -231,6 +233,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
             OPPDATER_PERSONSNAPSHOT -> hendelsefabrikk.oppdaterPersonsnapshot(json)
             VEDTAKSPERIODE_REBEREGNET -> hendelsefabrikk.vedtaksperiodeReberegnet(json)
             GOSYS_OPPGAVE_ENDRET -> hendelsefabrikk.gosysOppgaveEndret(json)
+            GODKJENT_TILBAKEDATERT_SYKMELDING -> hendelsefabrikk.godkjentTilbakedatertSykmelding(json)
             ENDRET_SKJERMETINFO -> hendelsefabrikk.endretSkjermetinfo(json)
             VEDTAK_FATTET -> hendelsefabrikk.vedtakFattet(json)
             NYE_VARSLER -> hendelsefabrikk.nyeVarsler(json)
@@ -264,6 +267,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
         is VedtaksperiodeNyUtbetaling -> VEDTAKSPERIODE_NY_UTBETALING
         is Sykefraværstilfeller -> SYKEFRAVÆRSTILFELLER
         is VedtaksperiodeSkjønnsmessigFastsettelse -> VEDTAKSPERIODE_SKJØNNSMESSIG_FASTSETTELSE
+        is TilbakedateringGodkjent -> GODKJENT_TILBAKEDATERT_SYKMELDING
         else -> throw IllegalArgumentException("ukjent hendelsetype: ${hendelse::class.simpleName}")
     }
 
@@ -273,6 +277,6 @@ internal class HendelseDao(private val dataSource: DataSource) {
         VEDTAKSPERIODE_REBEREGNET, OVERSTYRING_INNTEKT_OG_REFUSJON, OVERSTYRING_ARBEIDSFORHOLD,
         OVERSTYRING_IGANGSATT, GOSYS_OPPGAVE_ENDRET, ENDRET_SKJERMETINFO, VEDTAK_FATTET,
         NYE_VARSLER, VEDTAKSPERIODE_OPPRETTET, SØKNAD_SENDT, VEDTAKSPERIODE_NY_UTBETALING, SYKEFRAVÆRSTILFELLER,
-        SKJØNNSFASTSETTING_SYKEPENGEGRUNNLAG, VEDTAKSPERIODE_SKJØNNSMESSIG_FASTSETTELSE
+        SKJØNNSFASTSETTING_SYKEPENGEGRUNNLAG, VEDTAKSPERIODE_SKJØNNSMESSIG_FASTSETTELSE, GODKJENT_TILBAKEDATERT_SYKMELDING
     }
 }

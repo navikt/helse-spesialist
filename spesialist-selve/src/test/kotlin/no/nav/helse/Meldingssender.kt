@@ -196,6 +196,19 @@ internal class Meldingssender(private val testRapid: TestRapid) {
         )
     }
 
+    fun sendTilbakedateringBehandlet(
+        fødselsnummer: String,
+        skjæringstidspunkt: LocalDate
+    ): UUID = newUUID.also { id ->
+        testRapid.sendTestMessage(
+            Testmeldingfabrikk.lagTilbakedateringBehandlet(
+                fødselsnummer = fødselsnummer,
+                id = id,
+                skjæringstidspunkt = skjæringstidspunkt
+            )
+        )
+    }
+
     fun sendEndretSkjermetinfo(
         fødselsnummer: String,
         skjermet: Boolean,
