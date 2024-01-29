@@ -12,11 +12,19 @@ import no.nav.helse.modell.person.PersonDao
 internal class AdressebeskyttelseEndret(
     override val id: UUID,
     private val fødselsnummer: String,
-    private val json: String,
+    private val json: String
+): Personhendelse {
+    override fun fødselsnummer(): String = fødselsnummer
+
+    override fun toJson(): String = json
+}
+
+internal class AdressebeskyttelseEndretCommand(
+    fødselsnummer: String,
     personDao: PersonDao,
     oppgaveDao: OppgaveDao,
     godkjenningMediator: GodkjenningMediator
-) : Kommandohendelse, MacroCommand() {
+): MacroCommand() {
     override val commands: List<Command> = listOf(
         OppdaterPersoninfoCommand(fødselsnummer, personDao, force = true),
         AvvisVedStrengtFortroligAdressebeskyttelseCommand(
@@ -26,9 +34,4 @@ internal class AdressebeskyttelseEndret(
             godkjenningMediator = godkjenningMediator
         )
     )
-
-    override fun fødselsnummer(): String = fødselsnummer
-
-    override fun toJson(): String = json
-
 }

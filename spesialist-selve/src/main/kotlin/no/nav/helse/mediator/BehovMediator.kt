@@ -18,6 +18,7 @@ internal class BehovMediator {
             sikkerLogg.info("Sender melding i forbindelse med ${hendelse.javaClass.simpleName}\n{}", melding)
             messageContext.publish(hendelse.fødselsnummer(), melding)
         }
+        context.nullstillMeldinger()
     }
 
     private fun publiserBehov(hendelse: Personhendelse, context: CommandContext, contextId: UUID, messageContext: MessageContext) {
@@ -25,6 +26,7 @@ internal class BehovMediator {
         val packet = behovPacket(hendelse, context, contextId)
         sikkerLogg.info("Sender behov for ${context.behov().keys}\n{}", packet)
         messageContext.publish(hendelse.fødselsnummer(), packet)
+        context.nullstillBehov()
     }
 
     private fun behovPacket(hendelse: Personhendelse, context: CommandContext, contextId: UUID) =

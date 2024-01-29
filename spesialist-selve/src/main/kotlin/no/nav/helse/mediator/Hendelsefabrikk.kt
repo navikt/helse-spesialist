@@ -503,23 +503,17 @@ internal class Hendelsefabrikk(
 
     fun adressebeskyttelseEndret(id: UUID, fødselsnummer: String, json: String) =
         AdressebeskyttelseEndret(
-            id,
-            fødselsnummer,
-            json,
-            personDao,
-            oppgaveDao,
-            godkjenningMediator,
+            id = id,
+            fødselsnummer = fødselsnummer,
+            json = json,
         )
 
     fun adressebeskyttelseEndret(json: String): AdressebeskyttelseEndret {
         val jsonNode = mapper.readTree(json)
-        return AdressebeskyttelseEndret(
+        return adressebeskyttelseEndret(
             id = UUID.fromString(jsonNode.path("@id").asText()),
             fødselsnummer = jsonNode.path("fødselsnummer").asText(),
             json = json,
-            personDao = personDao,
-            oppgaveDao = oppgaveDao,
-            godkjenningMediator = godkjenningMediator,
         )
     }
 

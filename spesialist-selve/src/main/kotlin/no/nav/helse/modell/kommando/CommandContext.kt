@@ -25,6 +25,14 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
 
     internal fun meldinger() = meldinger.toList()
 
+    internal fun nullstillMeldinger() {
+        meldinger.clear()
+    }
+
+    internal fun nullstillBehov() {
+        behov.clear()
+    }
+
     /**
      * Publisere svar tilbake på rapid, typisk svar på godkjenningsbehov
      */
@@ -65,14 +73,16 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
 
     internal inline fun <reified T> get(): T? = data.filterIsInstance<T>().firstOrNull()
 
-    internal fun utfør(commandContextDao: CommandContextDao, hendelse: Kommandohendelse) = try {
-        utfør(hendelse).also {
-            if (ferdigstilt || it) commandContextDao.ferdig(hendelse.id, id)
-            else commandContextDao.suspendert(hendelse.id, id, sti)
+    internal fun utfør(commandContextDao: CommandContextDao, hendelse: Kommandohendelse) = utfør(commandContextDao, hendelse.id, hendelse)
+
+    internal fun utfør(commandContextDao: CommandContextDao, hendelseId: UUID, command: Command) = try {
+        utfør(command).also {
+            if (ferdigstilt || it) commandContextDao.ferdig(hendelseId, id)
+            else commandContextDao.suspendert(hendelseId, id, sti)
         }
     } catch (rootErr: Exception) {
         try {
-            commandContextDao.feil(hendelse.id, id)
+            commandContextDao.feil(hendelseId, id)
         } catch (nestedErr: Exception) {
             throw RuntimeException("Feil ved lagring av FEIL-tilstand: $nestedErr", rootErr)
         }

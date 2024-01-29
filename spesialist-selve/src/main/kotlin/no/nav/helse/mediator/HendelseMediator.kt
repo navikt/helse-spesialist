@@ -8,6 +8,8 @@ import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.MetrikkRiver
 import no.nav.helse.db.AvviksvurderingDao
+import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
+import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndretCommand
 import no.nav.helse.mediator.meldinger.AvsluttetMedVedtakRiver
 import no.nav.helse.mediator.meldinger.AvsluttetUtenVedtakRiver
 import no.nav.helse.mediator.meldinger.AvvikVurdertRiver
@@ -20,6 +22,7 @@ import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshotRiver
 import no.nav.helse.mediator.meldinger.OverstyringArbeidsforholdRiver
 import no.nav.helse.mediator.meldinger.OverstyringIgangsattRiver
 import no.nav.helse.mediator.meldinger.OverstyringInntektOgRefusjonRiver
+import no.nav.helse.mediator.meldinger.Personhendelse
 import no.nav.helse.mediator.meldinger.SkjønnsfastsettingSykepengegrunnlagRiver
 import no.nav.helse.mediator.meldinger.SykefraværstilfellerRiver
 import no.nav.helse.mediator.meldinger.SøknadSendtRiver
@@ -59,6 +62,7 @@ import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.avviksvurdering.AvviksvurderingDto
 import no.nav.helse.modell.dokument.DokumentDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
+import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver
 import no.nav.helse.modell.overstyring.SkjønnsfastsattArbeidsgiver
@@ -223,7 +227,7 @@ internal class HendelseMediator(
         fødselsnummer: String,
         context: MessageContext,
     ) {
-        utfør(fødselsnummer, hendelsefabrikk.adressebeskyttelseEndret(id, fødselsnummer, message.toJson()), context)
+        håndter(hendelsefabrikk.adressebeskyttelseEndret(id, fødselsnummer, message.toJson()), context)
     }
 
     fun sykefraværstilfeller(
@@ -643,9 +647,7 @@ internal class HendelseMediator(
                 logg.info("Ignorerer melding fordi: finner ikke hendelse med id=$hendelseId")
                 return null
             }
-            if (hendelse is Kommandohendelse) {
-                Løsninger(messageContext, hendelse, contextId, commandContext).also { løsninger = it }
-            } else null
+            Løsninger(messageContext, hendelse, contextId, commandContext).also { løsninger = it }
         }
     }
 
@@ -659,9 +661,57 @@ internal class HendelseMediator(
         sikkerLogg.error("alvorlig feil: ${err.message}\n\t$message", err, err.printStackTrace())
     }
 
-    private fun nyContext(hendelse: Kommandohendelse, contextId: UUID) = CommandContext(contextId).apply {
+    private fun nyContext(hendelse: Personhendelse, contextId: UUID) = CommandContext(contextId).apply {
         hendelseDao.opprett(hendelse)
         opprett(commandContextDao, hendelse.id)
+    }
+
+    private fun håndter(hendelse: Personhendelse, messageContext: MessageContext) {
+        val contextId = UUID.randomUUID()
+        logg.info("oppretter ny kommandokontekst med context_id=$contextId for hendelse_id=${hendelse.id} og type=${hendelse::class.simpleName}")
+        håndter(hendelse, nyContext(hendelse, contextId), messageContext)
+    }
+
+    private fun håndter(hendelse: Personhendelse, commandContext: CommandContext, messageContext: MessageContext) {
+        val contextId = commandContext.id()
+        val hendelsenavn = hendelse::class.simpleName ?: "ukjent hendelse"
+        try {
+            when (hendelse) {
+                is AdressebeskyttelseEndret -> iverksett(AdressebeskyttelseEndretCommand(hendelse.fødselsnummer(), personDao, oppgaveDao, godkjenningMediator), hendelse.id, commandContext)
+            }
+            behovMediator.håndter(hendelse, commandContext, contextId, messageContext)
+        } catch (e: Exception) {
+            logg.warn(
+                "Feil ved kjøring av $hendelsenavn: contextId={}, message={}",
+                contextId, e.message, e
+            )
+        } finally {
+            logg.info("utført $hendelsenavn med context_id=$contextId for hendelse_id=${hendelse.id}")
+        }
+    }
+
+    private fun iverksett(command: Command, hendelseId: UUID, commandContext: CommandContext) {
+        val contextId = commandContext.id()
+        withMDC(
+            mapOf(
+                "context_id" to "$contextId",
+                "hendelse_id" to "$hendelseId"
+            )
+        ) {
+            try {
+                if (commandContext.utfør(commandContextDao, hendelseId, command)) {
+                    val kjøretid = commandContextDao.tidsbrukForContext(contextId)
+                    metrikker(command.name, kjøretid, contextId)
+                    logg.info(
+                        "Kommando(er) for ${command.name} er utført ferdig. Det tok ca {}ms å kjøre hele kommandokjeden",
+                        kjøretid
+                    )
+                } else logg.info("${command.name} er suspendert")
+            } catch (err: Exception) {
+                command.undo(commandContext)
+                throw err
+            }
+        }
     }
 
     private fun utfør(fødselsnummer: String, hendelse: Kommandohendelse, messageContext: MessageContext) {
@@ -724,8 +774,8 @@ internal class HendelseMediator(
     }
 
     private class Løsninger(
-        private val messageContex: MessageContext,
-        private val hendelse: Kommandohendelse,
+        private val messageContext: MessageContext,
+        private val hendelse: Personhendelse,
         private val contextId: UUID,
         private val commandContext: CommandContext,
     ) {
@@ -741,7 +791,8 @@ internal class HendelseMediator(
                 "fortsetter utførelse av kommandokontekst pga. behov_id=${hendelse.id} med context_id=$contextId for hendelse_id=${hendelse.id}.\n" +
                         "Innkommende melding:\n\t$message"
             )
-            mediator.utfør(hendelse, commandContext, contextId, messageContex)
+            if (hendelse is Kommandohendelse) mediator.utfør(hendelse, commandContext, contextId, messageContext)
+            else mediator.håndter(hendelse, commandContext, messageContext)
         }
     }
 
