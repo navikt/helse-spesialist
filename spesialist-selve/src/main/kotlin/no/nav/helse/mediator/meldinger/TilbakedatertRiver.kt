@@ -73,7 +73,7 @@ internal class TilbakedatertRiver(
                 json = packet.toJson(),
                 context = context
             )
-        } ?: sikkerlogg.info("Ingen åpne oppgaver for {}", fødselsnummer)
+        } ?: sikkerlogg.info("Ingen åpne oppgaver for {} ifm. godkjent tilbakedatering", fødselsnummer)
 
     }
 }
