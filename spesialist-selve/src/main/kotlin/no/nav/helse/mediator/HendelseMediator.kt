@@ -643,7 +643,9 @@ internal class HendelseMediator(
                 logg.info("Ignorerer melding fordi: finner ikke hendelse med id=$hendelseId")
                 return null
             }
-            Løsninger(messageContext, hendelse, contextId, commandContext).also { løsninger = it }
+            if (hendelse is Kommandohendelse) {
+                Løsninger(messageContext, hendelse, contextId, commandContext).also { løsninger = it }
+            } else null
         }
     }
 
