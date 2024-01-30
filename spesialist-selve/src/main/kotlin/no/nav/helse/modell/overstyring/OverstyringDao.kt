@@ -298,11 +298,13 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
                         )
                     ).asUpdateAndReturnGeneratedKey
                 )
+                // Den felles informasjonen ligger på alle arbeidsgiverne. Burde kanskje skilles ut i eget objekt
+                val enArbeidsgiver = arbeidsgivere.first()
                 val begrunnelseFritekstId = requireNotNull(transactionalSession.run(
                     queryOf(
                         opprettBegrunnelseQuery,
                         mapOf(
-                            "tekst" to arbeidsgivere.first().begrunnelseFritekst,
+                            "tekst" to enArbeidsgiver.begrunnelseFritekst,
                             "type" to "SKJØNNSFASTSATT_SYKEPENGEGRUNNLAG_FRITEKST",
                             "saksbehandler_ref" to saksbehandlerRef
                         )
@@ -312,7 +314,7 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
                     queryOf(
                         opprettBegrunnelseQuery,
                         mapOf(
-                            "tekst" to arbeidsgivere.first().begrunnelseMal,
+                            "tekst" to enArbeidsgiver.begrunnelseMal,
                             "type" to "SKJØNNSFASTSATT_SYKEPENGEGRUNNLAG_MAL",
                             "saksbehandler_ref" to saksbehandlerRef
                         )
@@ -322,7 +324,7 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
                     queryOf(
                         opprettBegrunnelseQuery,
                         mapOf(
-                            "tekst" to arbeidsgivere.first().begrunnelseKonklusjon,
+                            "tekst" to enArbeidsgiver.begrunnelseKonklusjon,
                             "type" to "SKJØNNSFASTSATT_SYKEPENGEGRUNNLAG_KONKLUSJON",
                             "saksbehandler_ref" to saksbehandlerRef
                         )
@@ -333,15 +335,15 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
                         opprettSkjønnsfastsettingSykepengegrunnlagQuery,
                         mapOf(
                             "skjaeringstidspunkt" to skjæringstidspunkt,
-                            "arsak" to arbeidsgivere.first().årsak,
-                            "type" to arbeidsgivere.first().type.name,
-                            "subsumsjon" to arbeidsgivere.first().subsumsjon?.let {
+                            "arsak" to enArbeidsgiver.årsak,
+                            "type" to enArbeidsgiver.type.name,
+                            "subsumsjon" to enArbeidsgiver.subsumsjon?.let {
                                 objectMapper.writeValueAsString(
-                                    arbeidsgivere.first().subsumsjon
+                                    enArbeidsgiver.subsumsjon
                                 )
                             },
                             "overstyring_ref" to overstyringRef,
-                            "initierende_vedtaksperiode_id" to arbeidsgivere.first().initierendeVedtaksperiodeId,
+                            "initierende_vedtaksperiode_id" to enArbeidsgiver.initierendeVedtaksperiodeId,
                             "begrunnelse_fritekst_ref" to begrunnelseFritekstId,
                             "begrunnelse_mal_ref" to begrunnelseMalId,
                             "begrunnelse_konklusjon_ref" to begrunnelseKonklusjonId,
