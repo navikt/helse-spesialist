@@ -75,6 +75,7 @@ internal class SykefraværstilfelleMediator(
                                     is Spleis.EtterHovedregel -> put("fastsatt", "EtterHovedregel")
                                     is Spleis.EtterSkjønn -> {
                                         put("fastsatt", "EtterSkjønn")
+                                        put("skjønnsfastsettingtype", checkNotNull(sykepengevedtak.skjønnsfastsettingtype))
                                         put(
                                             "skjønnsfastsatt",
                                             sykepengevedtak.sykepengegrunnlagsfakta.skjønnsfastsatt

@@ -6,6 +6,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.TestRapidHelpers.meldinger
 import no.nav.helse.januar
+import no.nav.helse.modell.overstyring.Skjønnsfastsettingstype
 import no.nav.helse.modell.vedtaksperiode.vedtak.Sykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.vedtak.Sykepengevedtak
 import no.nav.helse.objectMapper
@@ -105,6 +106,7 @@ internal class SykefraværstilfelleMediatorTest {
             begrunnelseFraMal = null,
             begrunnelseFraFritekst = null,
             begrunnelseFraKonklusjon = null,
+            skjønnsfastsettingtype = null,
             tags = listOf("IngenNyArbeidsgiverperiode")
 
         )
@@ -175,6 +177,7 @@ internal class SykefraværstilfelleMediatorTest {
             begrunnelseFraMal = null,
             begrunnelseFraFritekst = null,
             begrunnelseFraKonklusjon = null,
+            skjønnsfastsettingtype = null,
             tags = listOf("IngenNyArbeidsgiverperiode")
         )
         mediator.vedtakFattet(infotrygd)
@@ -258,6 +261,7 @@ internal class SykefraværstilfelleMediatorTest {
             begrunnelseFraMal = "Mal",
             begrunnelseFraFritekst = "Fritekst",
             begrunnelseFraKonklusjon = "Konklusjon",
+            skjønnsfastsettingtype = Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
             tags = listOf("IngenNyArbeidsgiverperiode")
         )
         mediator.vedtakFattet(infotrygd)

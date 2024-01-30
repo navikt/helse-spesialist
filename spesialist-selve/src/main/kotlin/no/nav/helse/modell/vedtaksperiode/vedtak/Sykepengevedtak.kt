@@ -3,6 +3,7 @@ package no.nav.helse.modell.vedtaksperiode.vedtak
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.modell.overstyring.Skjønnsfastsettingstype
 
 internal sealed class Sykepengevedtak(
     val fødselsnummer: String,
@@ -115,6 +116,7 @@ internal sealed class Sykepengevedtak(
         val begrunnelseFraMal: String?,
         val begrunnelseFraFritekst: String?,
         val begrunnelseFraKonklusjon: String?,
+        val skjønnsfastsettingtype: Skjønnsfastsettingstype?,
         vedtakFattetTidspunkt: LocalDateTime,
         tags: List<String>
     ): Sykepengevedtak(
@@ -142,6 +144,7 @@ internal sealed class Sykepengevedtak(
                 && this.begrunnelseFraMal == other.begrunnelseFraMal
                 && this.begrunnelseFraFritekst == other.begrunnelseFraFritekst
                 && this.begrunnelseFraKonklusjon == other.begrunnelseFraKonklusjon
+                && this.skjønnsfastsettingtype == other.skjønnsfastsettingtype
             )
 
         override fun hashCode(): Int {
@@ -151,6 +154,7 @@ internal sealed class Sykepengevedtak(
             result = 31 * result + begrunnelseFraMal.hashCode()
             result = 31 * result + begrunnelseFraFritekst.hashCode()
             result = 31 * result + begrunnelseFraKonklusjon.hashCode()
+            result = 31 * result + skjønnsfastsettingtype.hashCode()
             return result
         }
     }

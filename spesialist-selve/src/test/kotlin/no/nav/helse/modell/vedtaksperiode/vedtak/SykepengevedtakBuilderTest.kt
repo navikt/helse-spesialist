@@ -3,6 +3,7 @@ package no.nav.helse.modell.vedtaksperiode.vedtak
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.januar
+import no.nav.helse.modell.overstyring.Skjønnsfastsettingstype
 import no.nav.helse.modell.sykefraværstilfelle.SkjønnsfastattSykepengegrunnlag
 import no.nav.helse.modell.vedtaksperiode.vedtak.Faktatype.ETTER_HOVEDREGEL
 import no.nav.helse.modell.vedtaksperiode.vedtak.Faktatype.ETTER_SKJØNN
@@ -87,6 +88,7 @@ class SykepengevedtakBuilderTest {
                 begrunnelseFraMal = null,
                 begrunnelseFraFritekst = null,
                 begrunnelseFraKonklusjon = null,
+                skjønnsfastsettingtype = null,
                 tags = listOf("IngenNyArbeidsgiverperiode")
             ), utkast
         )
@@ -112,7 +114,7 @@ class SykepengevedtakBuilderTest {
             .inntekt(inntekt)
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
             .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_SKJØNN))
-            .skjønnsfastsattSykepengegrunnlag(SkjønnsfastattSykepengegrunnlag(skjæringstidspunkt, "Mal", "Fritekst", "Konklusjon", LocalDateTime.now()))
+            .skjønnsfastsattSykepengegrunnlag(SkjønnsfastattSykepengegrunnlag(Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT, skjæringstidspunkt, "Mal", "Fritekst", "Konklusjon", LocalDateTime.now()))
             .tags(listOf("IngenNyArbeidsgiverperiode"))
 
         val utkast = builder.build()
@@ -138,6 +140,7 @@ class SykepengevedtakBuilderTest {
                 begrunnelseFraMal = "Mal",
                 begrunnelseFraFritekst = "Fritekst",
                 begrunnelseFraKonklusjon = "Konklusjon",
+                skjønnsfastsettingtype = Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
                 tags = listOf("IngenNyArbeidsgiverperiode")
             ), utkast
         )
@@ -188,6 +191,7 @@ class SykepengevedtakBuilderTest {
                 begrunnelseFraMal = null,
                 begrunnelseFraFritekst = null,
                 begrunnelseFraKonklusjon = null,
+                skjønnsfastsettingtype = null,
                 tags = listOf("IngenNyArbeidsgiverperiode")
             ), utkast
         )
@@ -433,6 +437,7 @@ class SykepengevedtakBuilderTest {
                 begrunnelseFraMal = null,
                 begrunnelseFraFritekst = null,
                 begrunnelseFraKonklusjon = null,
+                skjønnsfastsettingtype = null,
                 tags = listOf("IngenNyArbeidsgiverperiode")
             ), utkast
         )

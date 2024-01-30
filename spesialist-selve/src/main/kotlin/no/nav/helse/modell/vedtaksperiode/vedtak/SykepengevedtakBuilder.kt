@@ -3,6 +3,7 @@ package no.nav.helse.modell.vedtaksperiode.vedtak
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.modell.overstyring.Skjønnsfastsettingstype
 import no.nav.helse.modell.sykefraværstilfelle.SkjønnsfastattSykepengegrunnlag
 import kotlin.properties.Delegates
 
@@ -27,6 +28,7 @@ internal class SykepengevedtakBuilder {
     private var begrunnelseFraMal: String? = null
     private var begrunnelseFraFritekst: String? = null
     private var begrunnelseFraKonklusjon: String? = null
+    private var skjønnsfastsettingtype: Skjønnsfastsettingstype? = null
     private lateinit var tags: List<String>
 
     internal fun fødselsnummer(fødselsnummer: String) = apply { this.fødselsnummer = fødselsnummer }
@@ -54,6 +56,7 @@ internal class SykepengevedtakBuilder {
     internal fun begrunnelseFraMal(begrunnelseFraMal: String) = apply { this.begrunnelseFraMal = begrunnelseFraMal }
     internal fun begrunnelseFraFritekst(begrunnelseFraFritekst: String) = apply { this.begrunnelseFraFritekst = begrunnelseFraFritekst }
     internal fun begrunnelseFraKonklusjon(begrunnelseFraKonklusjon: String) = apply { this.begrunnelseFraKonklusjon = begrunnelseFraKonklusjon }
+    internal fun type(type: Skjønnsfastsettingstype) = apply { this.skjønnsfastsettingtype = type }
     internal fun tags(tags: List<String>) = apply { this.tags = tags }
 
     internal fun build(): Sykepengevedtak {
@@ -93,6 +96,7 @@ internal class SykepengevedtakBuilder {
         val begrunnelseFraMal = requireNotNull(begrunnelseFraMal) { "Forventer å finne begrunnelse fra mal ved bygging av vedtak når sykepengegrunnlaget er fastsatt etter skjønn" }
         val begrunnelseFraFritekst = requireNotNull(begrunnelseFraFritekst) { "Forventer å finne begrunnelse fra fritekst ved bygging av vedtak når sykepengegrunnlaget er fastsatt etter skjønn" }
         val begrunnelseFraKonklusjon = requireNotNull(begrunnelseFraKonklusjon) { "Forventer å finne begrunnelse fra konklusjon ved bygging av vedtak når sykepengegrunnlaget er fastsatt etter skjønn" }
+        val skjønnsfastsettingtype = requireNotNull(skjønnsfastsettingtype) { "Forventer å finne type ved bygging av vedtak når sykepengegrunnlaget er fastsatt etter skjønn" }
 
         return Sykepengevedtak.Vedtak(
             fødselsnummer = fødselsnummer,
@@ -114,6 +118,7 @@ internal class SykepengevedtakBuilder {
             begrunnelseFraFritekst = begrunnelseFraFritekst,
             begrunnelseFraMal = begrunnelseFraMal,
             begrunnelseFraKonklusjon = begrunnelseFraKonklusjon,
+            skjønnsfastsettingtype = skjønnsfastsettingtype,
             tags = tags
         )
     }
@@ -139,6 +144,7 @@ internal class SykepengevedtakBuilder {
             begrunnelseFraFritekst = null,
             begrunnelseFraMal = null,
             begrunnelseFraKonklusjon = null,
+            skjønnsfastsettingtype = null,
             tags = tags
         )
     }

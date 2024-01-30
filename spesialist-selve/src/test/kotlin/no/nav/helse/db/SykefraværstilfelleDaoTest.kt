@@ -35,7 +35,7 @@ internal class SykefraværstilfelleDaoTest: DatabaseIntegrationTest() {
 
         val funnet = sykefraværstilfelleDao.finnSkjønnsfastsatteSykepengegrunnlag(FNR, 1.januar)
         assertEquals(1, funnet.size)
-        assertEquals(SkjønnsfastattSykepengegrunnlag(1.januar, "En ", "begrunnelse","konklusjon",  tidspunkt), funnet.single())
+        assertEquals(SkjønnsfastattSykepengegrunnlag(Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT, 1.januar, "En ", "begrunnelse","konklusjon",  tidspunkt), funnet.single())
     }
 
     @Test
@@ -75,7 +75,7 @@ internal class SykefraværstilfelleDaoTest: DatabaseIntegrationTest() {
 
         val funnet = sykefraværstilfelleDao.finnSkjønnsfastsatteSykepengegrunnlag(FNR, 1.januar)
         assertEquals(1, funnet.size)
-        assertEquals(SkjønnsfastattSykepengegrunnlag(1.januar, "En ", "begrunnelse", "konklusjon", tidspunkt), funnet.single())
+        assertEquals(SkjønnsfastattSykepengegrunnlag(Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT , 1.januar, "En ", "begrunnelse", "konklusjon", tidspunkt), funnet.single())
     }
 
     @Test
@@ -112,7 +112,7 @@ internal class SykefraværstilfelleDaoTest: DatabaseIntegrationTest() {
 
         val funnet = sykefraværstilfelleDao.finnSkjønnsfastsatteSykepengegrunnlag(FNR, 1.januar)
         assertEquals(1, funnet.size)
-        assertEquals(SkjønnsfastattSykepengegrunnlag(1.januar, "En ", "begrunnelse", "konklusjon", tidspunkt), funnet.single())
+        assertEquals(SkjønnsfastattSykepengegrunnlag(Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT, 1.januar, "En ", "begrunnelse", "konklusjon", tidspunkt), funnet.single())
     }
 
 }
