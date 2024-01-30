@@ -21,7 +21,7 @@ jobs:
           java-version: '21.x'
 
       - name: Set up gradle with generate and submit
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/gradle-build-action@v3
         with:
           dependency-graph: generate-and-submit
       - name: Build gradle (dependency-graph will be generated and submitted post-job)
