@@ -11,7 +11,7 @@ import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.Personhendelse
 import no.nav.helse.mediator.meldinger.VedtaksperiodeHendelse
 import no.nav.helse.modell.HendelseDao.Hendelsetype.ADRESSEBESKYTTELSE_ENDRET
-import no.nav.helse.modell.HendelseDao.Hendelsetype.ENDRET_SKJERMETINFO
+import no.nav.helse.modell.HendelseDao.Hendelsetype.ENDRET_EGEN_ANSATT_STATUS
 import no.nav.helse.modell.HendelseDao.Hendelsetype.GODKJENNING
 import no.nav.helse.modell.HendelseDao.Hendelsetype.GODKJENT_TILBAKEDATERT_SYKMELDING
 import no.nav.helse.modell.HendelseDao.Hendelsetype.GOSYS_OPPGAVE_ENDRET
@@ -36,7 +36,7 @@ import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAK_FATTET
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
 import no.nav.helse.modell.kommando.TilbakedateringGodkjent
 import no.nav.helse.modell.overstyring.OverstyringIgangsatt
-import no.nav.helse.modell.person.EndretSkjermetinfo
+import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import no.nav.helse.modell.person.OppdaterPersonsnapshot
 import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.person.toFødselsnummer
@@ -236,7 +236,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
             VEDTAKSPERIODE_REBEREGNET -> hendelsefabrikk.vedtaksperiodeReberegnet(json)
             GOSYS_OPPGAVE_ENDRET -> hendelsefabrikk.gosysOppgaveEndret(json)
             GODKJENT_TILBAKEDATERT_SYKMELDING -> hendelsefabrikk.godkjentTilbakedatertSykmelding(json)
-            ENDRET_SKJERMETINFO -> hendelsefabrikk.endretSkjermetinfo(json)
+            ENDRET_EGEN_ANSATT_STATUS -> hendelsefabrikk.endretEgenAnsattStatus(json)
             VEDTAK_FATTET -> hendelsefabrikk.vedtakFattet(json)
             NYE_VARSLER -> hendelsefabrikk.nyeVarsler(json)
             VEDTAKSPERIODE_OPPRETTET -> hendelsefabrikk.vedtaksperiodeOpprettet(json)
@@ -261,7 +261,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
         is UtbetalingEndret -> UTBETALING_ENDRET
         is VedtaksperiodeReberegnet -> VEDTAKSPERIODE_REBEREGNET
         is GosysOppgaveEndret -> GOSYS_OPPGAVE_ENDRET
-        is EndretSkjermetinfo -> ENDRET_SKJERMETINFO
+        is EndretEgenAnsattStatus -> ENDRET_EGEN_ANSATT_STATUS
         is VedtakFattet -> VEDTAK_FATTET
         is NyeVarsler -> NYE_VARSLER
         is VedtaksperiodeOpprettet -> VEDTAKSPERIODE_OPPRETTET
@@ -277,7 +277,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
         ADRESSEBESKYTTELSE_ENDRET, VEDTAKSPERIODE_ENDRET, VEDTAKSPERIODE_FORKASTET, GODKJENNING,
         SAKSBEHANDLERLØSNING, UTBETALING_ANNULLERT, OPPDATER_PERSONSNAPSHOT, UTBETALING_ENDRET,
         VEDTAKSPERIODE_REBEREGNET, OVERSTYRING_INNTEKT_OG_REFUSJON, OVERSTYRING_ARBEIDSFORHOLD,
-        OVERSTYRING_IGANGSATT, GOSYS_OPPGAVE_ENDRET, ENDRET_SKJERMETINFO, VEDTAK_FATTET,
+        OVERSTYRING_IGANGSATT, GOSYS_OPPGAVE_ENDRET, ENDRET_EGEN_ANSATT_STATUS, VEDTAK_FATTET,
         NYE_VARSLER, VEDTAKSPERIODE_OPPRETTET, SØKNAD_SENDT, VEDTAKSPERIODE_NY_UTBETALING, SYKEFRAVÆRSTILFELLER,
         SKJØNNSFASTSETTING_SYKEPENGEGRUNNLAG, VEDTAKSPERIODE_SKJØNNSMESSIG_FASTSETTELSE, GODKJENT_TILBAKEDATERT_SYKMELDING
     }

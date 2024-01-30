@@ -67,6 +67,7 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver
 import no.nav.helse.modell.overstyring.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.person.AdressebeskyttelseEndretRiver
+import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.ActualVarselRepository
@@ -610,7 +611,7 @@ internal class HendelseMediator(
     }
 
     fun egenAnsattStatusEndret(json: String, context: MessageContext) {
-        utfør(hendelsefabrikk.endretSkjermetinfo(json), context)
+        håndter(hendelsefabrikk.endretEgenAnsattStatus(json), context)
     }
 
     fun vedtakFattet(id: UUID, fødselsnummer: String, vedtaksperiodeId: UUID, json: String, context: MessageContext) {
@@ -678,6 +679,7 @@ internal class HendelseMediator(
         try {
             when (hendelse) {
                 is AdressebeskyttelseEndret -> iverksett(AdressebeskyttelseEndretCommand(hendelse.fødselsnummer(), personDao, oppgaveDao, godkjenningMediator), hendelse.id, commandContext)
+                is EndretEgenAnsattStatus -> iverksett(hendelsefabrikk.endretEgenAnsattStatus(hendelse.fødselsnummer(), hendelse.erEgenAnsatt), hendelse.id, commandContext)
             }
             behovMediator.håndter(hendelse, commandContext, contextId, messageContext)
         } catch (e: Exception) {

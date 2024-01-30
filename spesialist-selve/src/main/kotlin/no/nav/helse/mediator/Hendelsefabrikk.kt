@@ -32,7 +32,8 @@ import no.nav.helse.modell.overstyring.OverstyringIgangsatt
 import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver
 import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver.Companion.arbeidsgiverelementer
 import no.nav.helse.modell.overstyring.SkjønnsfastsattArbeidsgiver
-import no.nav.helse.modell.person.EndretSkjermetinfo
+import no.nav.helse.modell.person.EndretEgenAnsattStatus
+import no.nav.helse.modell.person.EndretEgenAnsattStatusCommand
 import no.nav.helse.modell.person.OppdaterPersonsnapshot
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.SøknadSendt
@@ -760,15 +761,22 @@ internal class Hendelsefabrikk(
         )
     }
 
-    fun endretSkjermetinfo(json: String): EndretSkjermetinfo {
+    fun endretEgenAnsattStatus(json: String): EndretEgenAnsattStatus {
         val erEgenAnsatt = mapper.readTree(json)["skjermet"].asBoolean()
         val jsonNode = mapper.readTree(json)
-        return EndretSkjermetinfo(
+        return EndretEgenAnsattStatus(
             id = UUID.fromString(jsonNode["@id"].asText()),
             fødselsnummer = jsonNode["fødselsnummer"].asText(),
             erEgenAnsatt = erEgenAnsatt,
             json = json,
-            oppgaveMediator = oppgaveMediator,
+        )
+    }
+
+    fun endretEgenAnsattStatus(fødselsnummer: String, erEgenAnsatt: Boolean): EndretEgenAnsattStatusCommand {
+        return EndretEgenAnsattStatusCommand(
+            fødselsnummer = fødselsnummer,
+            erEgenAnsatt = erEgenAnsatt,
+            oppgaveMediator = oppgaveMediator
         )
     }
 

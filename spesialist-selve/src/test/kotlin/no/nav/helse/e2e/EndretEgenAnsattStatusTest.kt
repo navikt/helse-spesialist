@@ -7,7 +7,7 @@ import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import org.junit.jupiter.api.Test
 
-internal class EndretSkjermetinfoTest : AbstractE2ETest() {
+internal class EndretEgenAnsattStatusTest : AbstractE2ETest() {
 
     @Test
     fun `Ignorerer hendelsen for ukjente personer`() {

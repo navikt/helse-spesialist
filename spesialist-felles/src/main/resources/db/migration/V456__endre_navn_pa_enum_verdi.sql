@@ -1,0 +1,3 @@
+CREATE INDEX ON hendelse(type);
+
+UPDATE hendelse SET type = 'ENDRET_EGEN_ANSATT_STATUS' WHERE type = 'ENDRET_SKJERMETINFO';
