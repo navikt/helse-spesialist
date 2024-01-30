@@ -36,7 +36,7 @@ jobs:
       - name: Gradle build
         uses: gradle/actions/setup-gradle@v3
         with:
-          arguments: :spesialist-selve:build # felles- og api-modulene bygges fordi selve avhenger av dem
+          arguments: :spesialist-selve:build --no-build-cache # felles- og api-modulene bygges fordi selve avhenger av dem
         env:
           ORG_GRADLE_PROJECT_githubUser: x-access-token
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
