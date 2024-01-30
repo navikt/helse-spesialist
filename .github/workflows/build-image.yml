@@ -42,7 +42,7 @@ jobs:
           ORG_GRADLE_PROJECT_githubUser: x-access-token
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: nais/docker-build-push@v0.7.0
+      - uses: nais/docker-build-push@v0
         id: docker-build-push
         with:
           team: tbd
