@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.januar
-import no.nav.helse.modell.overstyring.Skjønnsfastsettingstype
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
@@ -279,10 +278,7 @@ class SykepengevedtakEqualsTest {
         vedtakFattetTidspunkt: LocalDateTime = Companion.vedtakFattetTidspunkt,
         sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta,
         utbetalingId: UUID = Companion.utbetalingId,
-        begrunnelseFraMal: String? = null,
-        begrunnelseFraFritekst: String? = null,
-        begrunnelseFraKonklusjon: String? = null,
-        skjønnsfastsettingstype: Skjønnsfastsettingstype? = null,
+        skjønnsfastsettingopplysninger: SkjønnsfastsettingopplysningerDto? = null,
     ) = Sykepengevedtak.Vedtak(
         fødselsnummer = fødselsnummer,
         aktørId = aktørId,
@@ -299,10 +295,7 @@ class SykepengevedtakEqualsTest {
         inntekt = inntekt,
         sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
         utbetalingId = utbetalingId,
-        begrunnelseFraMal = begrunnelseFraMal,
-        begrunnelseFraFritekst = begrunnelseFraFritekst,
-        begrunnelseFraKonklusjon = begrunnelseFraKonklusjon,
-        skjønnsfastsettingtype = skjønnsfastsettingstype,
+        skjønnsfastsettingopplysninger = skjønnsfastsettingopplysninger,
         vedtakFattetTidspunkt = vedtakFattetTidspunkt,
         tags = tags,
     )

@@ -75,7 +75,7 @@ internal class SykefraværstilfelleMediator(
                                     is Spleis.EtterHovedregel -> put("fastsatt", "EtterHovedregel")
                                     is Spleis.EtterSkjønn -> {
                                         put("fastsatt", "EtterSkjønn")
-                                        put("skjønnsfastsettingtype", checkNotNull(sykepengevedtak.skjønnsfastsettingtype))
+                                        put("skjønnsfastsettingtype", checkNotNull(sykepengevedtak.skjønnsfastsettingopplysninger?.skjønnsfastsettingtype))
                                         put(
                                             "skjønnsfastsatt",
                                             sykepengevedtak.sykepengegrunnlagsfakta.skjønnsfastsatt
@@ -92,38 +92,40 @@ internal class SykefraværstilfelleMediator(
                         }
                     }
         ).apply {
-            if (sykepengevedtak.sykepengegrunnlagsfakta is Spleis.EtterSkjønn) put(
-                "begrunnelser", listOf(
-                    mapOf(
-                        "type" to "SkjønnsfastsattSykepengegrunnlagMal",
-                        "begrunnelse" to sykepengevedtak.begrunnelseFraMal,
-                        "perioder" to listOf(
-                            mapOf(
-                                "fom" to "${sykepengevedtak.fom}", "tom" to "${sykepengevedtak.tom}"
+            if (sykepengevedtak.sykepengegrunnlagsfakta is Spleis.EtterSkjønn) {
+                val skjønnsfastsettingopplysninger = sykepengevedtak.skjønnsfastsettingopplysninger!!
+                put(
+                    "begrunnelser", listOf(
+                        mapOf(
+                            "type" to "SkjønnsfastsattSykepengegrunnlagMal",
+                            "begrunnelse" to skjønnsfastsettingopplysninger.begrunnelseFraMal,
+                            "perioder" to listOf(
+                                mapOf(
+                                    "fom" to "${sykepengevedtak.fom}", "tom" to "${sykepengevedtak.tom}"
+                                )
                             )
-                        )
-                    ),
-                    mapOf(
-                        "type" to "SkjønnsfastsattSykepengegrunnlagFritekst",
-                        "begrunnelse" to sykepengevedtak.begrunnelseFraFritekst,
-                        "perioder" to listOf(
-                            mapOf(
-                                "fom" to "${sykepengevedtak.fom}", "tom" to "${sykepengevedtak.tom}"
+                        ),
+                        mapOf(
+                            "type" to "SkjønnsfastsattSykepengegrunnlagFritekst",
+                            "begrunnelse" to skjønnsfastsettingopplysninger.begrunnelseFraFritekst,
+                            "perioder" to listOf(
+                                mapOf(
+                                    "fom" to "${sykepengevedtak.fom}", "tom" to "${sykepengevedtak.tom}"
+                                )
                             )
-                        )
-                    ),
-                    mapOf(
-                        "type" to "SkjønnsfastsattSykepengegrunnlagKonklusjon",
-                        "begrunnelse" to sykepengevedtak.begrunnelseFraKonklusjon,
-                        "perioder" to listOf(
-                            mapOf(
-                                "fom" to "${sykepengevedtak.fom}", "tom" to "${sykepengevedtak.tom}"
+                        ),
+                        mapOf(
+                            "type" to "SkjønnsfastsattSykepengegrunnlagKonklusjon",
+                            "begrunnelse" to skjønnsfastsettingopplysninger.begrunnelseFraKonklusjon,
+                            "perioder" to listOf(
+                                mapOf(
+                                    "fom" to "${sykepengevedtak.fom}", "tom" to "${sykepengevedtak.tom}"
+                                )
                             )
                         )
                     )
                 )
-            )
-            else put("begrunnelser", emptyList<Map<String, Any>>())
+            } else put("begrunnelser", emptyList<Map<String, Any>>())
         }
         )
 

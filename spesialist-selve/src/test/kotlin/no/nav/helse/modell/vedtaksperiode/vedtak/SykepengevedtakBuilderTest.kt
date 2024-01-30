@@ -85,10 +85,7 @@ class SykepengevedtakBuilderTest {
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(ETTER_HOVEDREGEL),
                 utbetalingId = utbetalingId,
-                begrunnelseFraMal = null,
-                begrunnelseFraFritekst = null,
-                begrunnelseFraKonklusjon = null,
-                skjønnsfastsettingtype = null,
+                skjønnsfastsettingopplysninger = null,
                 tags = listOf("IngenNyArbeidsgiverperiode")
             ), utkast
         )
@@ -137,10 +134,7 @@ class SykepengevedtakBuilderTest {
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(ETTER_SKJØNN),
                 utbetalingId = utbetalingId,
-                begrunnelseFraMal = "Mal",
-                begrunnelseFraFritekst = "Fritekst",
-                begrunnelseFraKonklusjon = "Konklusjon",
-                skjønnsfastsettingtype = Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
+                skjønnsfastsettingopplysninger = SkjønnsfastsettingopplysningerDto("Mal", "Fritekst", "Konklusjon", Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT),
                 tags = listOf("IngenNyArbeidsgiverperiode")
             ), utkast
         )
@@ -188,10 +182,7 @@ class SykepengevedtakBuilderTest {
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(I_INFOTRYGD),
                 utbetalingId = utbetalingId,
-                begrunnelseFraMal = null,
-                begrunnelseFraFritekst = null,
-                begrunnelseFraKonklusjon = null,
-                skjønnsfastsettingtype = null,
+                skjønnsfastsettingopplysninger = null,
                 tags = listOf("IngenNyArbeidsgiverperiode")
             ), utkast
         )
@@ -312,7 +303,7 @@ class SykepengevedtakBuilderTest {
     }
 
     @Test
-    fun`Forventer at begrunnelseFraMal er satt ved bygging av vedtak etter skjønn`() {
+    fun`Forventer at skjønnsfastsettingData er satt ved bygging av vedtak etter skjønn`() {
         val builder = SykepengevedtakBuilder()
         builder
             .fødselsnummer(fødselsnummer)
@@ -331,66 +322,13 @@ class SykepengevedtakBuilderTest {
             .inntekt(inntekt)
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
             .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_SKJØNN))
-            .begrunnelseFraFritekst("Fritekst")
-            .begrunnelseFraKonklusjon("konklusjon")
+            .tags(listOf("IngenNyArbeidsgiverperiode"))
 
-        assertThrows<IllegalArgumentException> { builder.build() }
+        assertThrows<IllegalStateException> { builder.build() }
     }
 
     @Test
-    fun`Forventer at begrunnelseFraFritekst er satt ved bygging av vedtak etter skjønn`() {
-        val builder = SykepengevedtakBuilder()
-        builder
-            .fødselsnummer(fødselsnummer)
-            .aktørId(aktørId)
-            .organisasjonsnummer(organisasjonsnummer)
-            .vedtaksperiodeId(vedtaksperiodeId)
-            .utbetalingId(utbetalingId)
-            .fom(fom)
-            .tom(tom)
-            .skjæringstidspunkt(skjæringstidspunkt)
-            .hendelser(hendelser)
-            .sykepengegrunnlag(sykepengegrunnlag)
-            .grunnlagForSykepengegrunnlag(grunnlagForSykepengegrunnlag)
-            .grunnlagForSykepengegrunnlagPerArbeidsgiver(grunnlagForSykepengegrunnlagPerArbeidsgiver)
-            .begrensning(begrensning)
-            .inntekt(inntekt)
-            .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
-            .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_SKJØNN))
-            .begrunnelseFraMal("Mal")
-            .begrunnelseFraKonklusjon("Konklusjon")
-
-        assertThrows<IllegalArgumentException> { builder.build() }
-    }
-
-    @Test
-    fun`Forventer at begrunnelseFraKonklusjon er satt ved bygging av vedtak etter skjønn`() {
-        val builder = SykepengevedtakBuilder()
-        builder
-            .fødselsnummer(fødselsnummer)
-            .aktørId(aktørId)
-            .organisasjonsnummer(organisasjonsnummer)
-            .vedtaksperiodeId(vedtaksperiodeId)
-            .utbetalingId(utbetalingId)
-            .fom(fom)
-            .tom(tom)
-            .skjæringstidspunkt(skjæringstidspunkt)
-            .hendelser(hendelser)
-            .sykepengegrunnlag(sykepengegrunnlag)
-            .grunnlagForSykepengegrunnlag(grunnlagForSykepengegrunnlag)
-            .grunnlagForSykepengegrunnlagPerArbeidsgiver(grunnlagForSykepengegrunnlagPerArbeidsgiver)
-            .begrensning(begrensning)
-            .inntekt(inntekt)
-            .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
-            .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_SKJØNN))
-            .begrunnelseFraMal("Mal")
-            .begrunnelseFraFritekst("Fritekst")
-
-        assertThrows<IllegalArgumentException> { builder.build() }
-    }
-
-    @Test
-    fun `Benytter ikke begrunnelser selv om det er satt ved bygging etter hovedregel`() {
+    fun `Benytter ikke opplysninger fra skjønnsfastsetting selv om det er satt, ved bygging etter hovedregel`() {
         val builder = SykepengevedtakBuilder()
         builder
             .fødselsnummer(fødselsnummer)
@@ -409,9 +347,7 @@ class SykepengevedtakBuilderTest {
             .inntekt(inntekt)
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
             .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_HOVEDREGEL))
-            .begrunnelseFraFritekst("Fritekst")
-            .begrunnelseFraMal("Mal")
-            .begrunnelseFraKonklusjon("Konklusjon")
+            .skjønnsfastsettingData("Fritekst", "Mal", "Konklusjon", Skjønnsfastsettingstype.RAPPORTERT_ÅRSINNTEKT)
             .tags(listOf("IngenNyArbeidsgiverperiode"))
 
         val utkast = builder.build()
@@ -434,10 +370,7 @@ class SykepengevedtakBuilderTest {
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(ETTER_HOVEDREGEL),
                 utbetalingId = utbetalingId,
-                begrunnelseFraMal = null,
-                begrunnelseFraFritekst = null,
-                begrunnelseFraKonklusjon = null,
-                skjønnsfastsettingtype = null,
+                skjønnsfastsettingopplysninger = null,
                 tags = listOf("IngenNyArbeidsgiverperiode")
             ), utkast
         )

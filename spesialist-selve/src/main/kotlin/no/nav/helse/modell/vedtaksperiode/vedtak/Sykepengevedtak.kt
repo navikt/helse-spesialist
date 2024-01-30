@@ -113,10 +113,7 @@ internal sealed class Sykepengevedtak(
         begrensning: String,
         inntekt: Double,
         val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta,
-        val begrunnelseFraMal: String?,
-        val begrunnelseFraFritekst: String?,
-        val begrunnelseFraKonklusjon: String?,
-        val skjønnsfastsettingtype: Skjønnsfastsettingstype?,
+        val skjønnsfastsettingopplysninger: SkjønnsfastsettingopplysningerDto?,
         vedtakFattetTidspunkt: LocalDateTime,
         tags: List<String>
     ): Sykepengevedtak(
@@ -141,21 +138,22 @@ internal sealed class Sykepengevedtak(
                 && other is Vedtak
                 && this.utbetalingId == other.utbetalingId
                 && this.sykepengegrunnlagsfakta == other.sykepengegrunnlagsfakta
-                && this.begrunnelseFraMal == other.begrunnelseFraMal
-                && this.begrunnelseFraFritekst == other.begrunnelseFraFritekst
-                && this.begrunnelseFraKonklusjon == other.begrunnelseFraKonklusjon
-                && this.skjønnsfastsettingtype == other.skjønnsfastsettingtype
+                && this.skjønnsfastsettingopplysninger == other.skjønnsfastsettingopplysninger
             )
 
         override fun hashCode(): Int {
             var result = super.hashCode()
             result = 31 * result + utbetalingId.hashCode()
             result = 31 * result + sykepengegrunnlagsfakta.hashCode()
-            result = 31 * result + begrunnelseFraMal.hashCode()
-            result = 31 * result + begrunnelseFraFritekst.hashCode()
-            result = 31 * result + begrunnelseFraKonklusjon.hashCode()
-            result = 31 * result + skjønnsfastsettingtype.hashCode()
+            result = 31 * result + skjønnsfastsettingopplysninger.hashCode()
             return result
         }
     }
 }
+
+internal data class SkjønnsfastsettingopplysningerDto(
+    val begrunnelseFraMal: String,
+    val begrunnelseFraFritekst: String,
+    val begrunnelseFraKonklusjon: String,
+    val skjønnsfastsettingtype: Skjønnsfastsettingstype,
+)

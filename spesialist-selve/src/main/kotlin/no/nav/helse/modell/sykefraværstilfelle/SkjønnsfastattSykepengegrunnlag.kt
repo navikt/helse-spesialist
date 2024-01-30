@@ -14,10 +14,7 @@ internal class SkjønnsfastattSykepengegrunnlag(
     private val opprettet: LocalDateTime
 ) {
     internal fun byggVedtak(vedtakBuilder: SykepengevedtakBuilder) {
-        vedtakBuilder.begrunnelseFraMal(begrunnelseFraMal)
-        vedtakBuilder.begrunnelseFraFritekst(begrunnelseFraFritekst)
-        vedtakBuilder.begrunnelseFraKonklusjon(begrunnelseFraKonklusjon)
-        vedtakBuilder.type(type)
+        vedtakBuilder.skjønnsfastsettingData(begrunnelseFraMal, begrunnelseFraFritekst, begrunnelseFraKonklusjon, type)
     }
 
     override fun equals(other: Any?): Boolean {

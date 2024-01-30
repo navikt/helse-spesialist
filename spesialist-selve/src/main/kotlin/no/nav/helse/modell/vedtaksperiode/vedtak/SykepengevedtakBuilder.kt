@@ -25,10 +25,7 @@ internal class SykepengevedtakBuilder {
     private var utbetalingId: UUID? = null
     private var sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta? = null
     private var skjønnsfastsattSykepengegrunnlag: SkjønnsfastattSykepengegrunnlag? = null
-    private var begrunnelseFraMal: String? = null
-    private var begrunnelseFraFritekst: String? = null
-    private var begrunnelseFraKonklusjon: String? = null
-    private var skjønnsfastsettingtype: Skjønnsfastsettingstype? = null
+    private var skjønnsfastsettingopplysninger: SkjønnsfastsettingopplysningerDto? = null
     private lateinit var tags: List<String>
 
     internal fun fødselsnummer(fødselsnummer: String) = apply { this.fødselsnummer = fødselsnummer }
@@ -53,10 +50,14 @@ internal class SykepengevedtakBuilder {
         skjønnsfastsattSykepengegrunnlag.byggVedtak(this)
     }
 
-    internal fun begrunnelseFraMal(begrunnelseFraMal: String) = apply { this.begrunnelseFraMal = begrunnelseFraMal }
-    internal fun begrunnelseFraFritekst(begrunnelseFraFritekst: String) = apply { this.begrunnelseFraFritekst = begrunnelseFraFritekst }
-    internal fun begrunnelseFraKonklusjon(begrunnelseFraKonklusjon: String) = apply { this.begrunnelseFraKonklusjon = begrunnelseFraKonklusjon }
-    internal fun type(type: Skjønnsfastsettingstype) = apply { this.skjønnsfastsettingtype = type }
+    internal fun skjønnsfastsettingData(
+        begrunnelseFraMal: String,
+        begrunnelseFraFritekst: String,
+        begrunnelseFraKonklusjon: String,
+        type: Skjønnsfastsettingstype,
+    ) = apply {
+        this.skjønnsfastsettingopplysninger = SkjønnsfastsettingopplysningerDto(begrunnelseFraMal, begrunnelseFraFritekst, begrunnelseFraKonklusjon, type)
+    }
     internal fun tags(tags: List<String>) = apply { this.tags = tags }
 
     internal fun build(): Sykepengevedtak {
@@ -93,10 +94,7 @@ internal class SykepengevedtakBuilder {
     }
 
     private fun buildVedtakEtterSkjønn(sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta, utbetalingId: UUID): Sykepengevedtak.Vedtak {
-        val begrunnelseFraMal = requireNotNull(begrunnelseFraMal) { "Forventer å finne begrunnelse fra mal ved bygging av vedtak når sykepengegrunnlaget er fastsatt etter skjønn" }
-        val begrunnelseFraFritekst = requireNotNull(begrunnelseFraFritekst) { "Forventer å finne begrunnelse fra fritekst ved bygging av vedtak når sykepengegrunnlaget er fastsatt etter skjønn" }
-        val begrunnelseFraKonklusjon = requireNotNull(begrunnelseFraKonklusjon) { "Forventer å finne begrunnelse fra konklusjon ved bygging av vedtak når sykepengegrunnlaget er fastsatt etter skjønn" }
-        val skjønnsfastsettingtype = requireNotNull(skjønnsfastsettingtype) { "Forventer å finne type ved bygging av vedtak når sykepengegrunnlaget er fastsatt etter skjønn" }
+        checkNotNull(skjønnsfastsettingopplysninger) { "Forventer å finne opplysninger fra saksbehandler ved bygging av vedtak når sykepengegrunnlaget er fastsatt etter skjønn" }
 
         return Sykepengevedtak.Vedtak(
             fødselsnummer = fødselsnummer,
@@ -115,10 +113,7 @@ internal class SykepengevedtakBuilder {
             inntekt = inntekt,
             sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
-            begrunnelseFraFritekst = begrunnelseFraFritekst,
-            begrunnelseFraMal = begrunnelseFraMal,
-            begrunnelseFraKonklusjon = begrunnelseFraKonklusjon,
-            skjønnsfastsettingtype = skjønnsfastsettingtype,
+            skjønnsfastsettingopplysninger = skjønnsfastsettingopplysninger,
             tags = tags
         )
     }
@@ -141,10 +136,7 @@ internal class SykepengevedtakBuilder {
             inntekt = inntekt,
             sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
-            begrunnelseFraFritekst = null,
-            begrunnelseFraMal = null,
-            begrunnelseFraKonklusjon = null,
-            skjønnsfastsettingtype = null,
+            skjønnsfastsettingopplysninger = null,
             tags = tags
         )
     }
