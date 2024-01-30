@@ -17,8 +17,8 @@ on:
 jobs:
   build:
     permissions:
-      contents: "read"
-      id-token: "write"
+      contents: read
+      id-token: write
     name: Build image
     runs-on: ubuntu-latest-16-cores
     outputs:
@@ -31,10 +31,10 @@ jobs:
 
       - uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '21.x'
+          distribution: temurin
+          java-version: 21
 
-      - uses: gradle/gradle-build-action@v2.11.0
+      - uses: gradle/actions/setup-gradle@v3
         name: Gradle build
         with:
           arguments: :spesialist-selve:build # felles- og api-modulene vil bli bygget fordi selve avhenger av dem

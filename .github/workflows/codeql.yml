@@ -30,12 +30,12 @@ jobs:
       - name: Setup Java 
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '21.x'
+          distribution: temurin
+          java-version: 21
           cache: 'gradle'
 
       - name: Gradle build
-        uses: gradle/gradle-build-action@v2.11.0
+        uses: gradle/actions/setup-gradle@v3
         with:
           arguments: :spesialist-selve:build # felles- og api-modulene bygges fordi selve avhenger av dem
         env:
