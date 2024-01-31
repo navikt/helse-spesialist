@@ -1,6 +1,6 @@
 val junitJupiterVersion = "5.10.1"
 val junitPlatformLauncherVersion = "1.10.1"
-val ktorVersion = "2.3.7"
+val ktorVersion = "2.3.8"
 val jvmTargetVersion = "21"
 val graphqlKotlinVersion = "7.0.2"
 val rapidsAndRiversVersion = "2024010209171704183456.6d035b91ffb4"
