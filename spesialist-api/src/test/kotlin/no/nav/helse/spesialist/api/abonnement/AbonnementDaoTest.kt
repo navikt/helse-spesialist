@@ -10,14 +10,17 @@ internal class AbonnementDaoTest : DatabaseIntegrationTest() {
     private val abonnementDao = AbonnementDao(dataSource)
 
     @Test
-    fun `får ikke nytt sekvensnummer hvis det allerede fins et`() {
+    fun `får nytt sekvensnummer selvom det allerede fins et`() {
         val saksbehandlerId = opprettSaksbehandler()
-        val eksisterendeSekvensnummer = 234
-        settSekvensnummer(saksbehandlerId, eksisterendeSekvensnummer)
+        settSekvensnummer(saksbehandlerId, 42)
 
-        abonnementDao.opprettAbonnement(saksbehandlerId, 1L)
+        opprettPerson(aktørId = "91", fødselsnummer = "123")
+        val personId = opprettPerson(aktørId = "97")
+        lagOpptegnelse(personId, 962)
 
-        assertEquals(eksisterendeSekvensnummer, finnSekvensnummer(saksbehandlerId))
+        abonnementDao.opprettAbonnement(saksbehandlerId, 97)
+
+        assertEquals(962, finnSekvensnummer(saksbehandlerId))
     }
 
     @Test

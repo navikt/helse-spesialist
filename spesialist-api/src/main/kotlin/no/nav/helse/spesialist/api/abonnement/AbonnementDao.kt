@@ -20,28 +20,28 @@ class AbonnementDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             )
             transactionalSession.run(abonnementQuery.asUpdate)
 
-            if (saksbehandlerHarSekvensnummer(saksbehandlerId)) return@transaction
-
             val sekvensnummerQuery = asSQL(
                 """
+                    -- hmm, kanskje vi egentlig bare burde sette max(sekvensnummer), ikke joine inn aktuell person?
+                    with aktuelt_sekvensnummer as (
+                        -- Forklaring: høyeste for person, dernest høyeste globalt, dernest 0
+                        select coalesce(max(sekvensnummer), (select max(sekvensnummer) from opptegnelse), 0) sekvensnummeret
+                        from opptegnelse o
+                        join person p on o.person_id = p.id
+                        where aktor_id = :aktorId
+                    )
+                    
                     insert into saksbehandler_opptegnelse_sekvensnummer
-                    select :saksbehandlerId, coalesce(max(o.sekvensnummer), (select max(sekvensnummer) from opptegnelse), 0)
-                    from opptegnelse o
-                             join person p on o.person_id = p.id
+                    select :saksbehandlerId, (select sekvensnummeret from aktuelt_sekvensnummer)
+                    from person p
                     where aktor_id = :aktorId
+                    on conflict (saksbehandler_id) do update
+                        set siste_sekvensnummer = (select sekvensnummeret from aktuelt_sekvensnummer)
                 """.trimIndent(), mapOf("saksbehandlerId" to saksbehandlerId, "aktorId" to aktørId)
             )
             transactionalSession.run(sekvensnummerQuery.asUpdate)
         }
     }
-
-    private fun saksbehandlerHarSekvensnummer(saksbehandlerIdent: UUID) = asSQL(
-        """
-            select siste_sekvensnummer
-            from saksbehandler_opptegnelse_sekvensnummer
-            where saksbehandler_id = :saksbehandlerId;
-        """.trimIndent(), mapOf("saksbehandlerId" to saksbehandlerIdent)
-    ).list { it }.isNotEmpty()
 
     fun registrerSistekvensnummer(saksbehandlerIdent: UUID, sisteSekvensId: Int) = asSQL(
         """
