@@ -470,6 +470,12 @@ internal class Generasjon private constructor(
             return overlapperMedEllerTidligereEnn(vedtaksperiodeId).any { it.erTilbakedatert() }
         }
 
+        internal fun List<Generasjon>.alleTilbakedaterteVedtaksperioder(vedtaksperiodeId: UUID): List<UUID> {
+            return overlapperMedEllerTidligereEnn(vedtaksperiodeId)
+                .filter { it.erTilbakedatert() }
+                .map { it.vedtaksperiodeId }
+        }
+
         internal fun List<Generasjon>.deaktiver(varsel: Varsel) {
             find { varsel.erRelevantFor(it.vedtaksperiodeId) }?.håndterDeaktivertVarsel(varsel)
         }

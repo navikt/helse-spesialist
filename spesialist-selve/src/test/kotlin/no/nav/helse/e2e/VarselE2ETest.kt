@@ -100,6 +100,27 @@ internal class VarselE2ETest : AbstractE2ETest() {
     }
 
     @Test
+    fun `fjern varsel om tilbakedatering på alle overlappende perioder i sykefraværstilfellet for ok-sykmelding`() {
+        fremTilÅpneOppgaver(regelverksvarsler = listOf("RV_SØ_3"),)
+        håndterÅpneOppgaverløsning()
+        håndterRisikovurderingløsning()
+        håndterInntektløsning()
+
+        val vedtaksperiodeId2 = UUID.randomUUID()
+        håndterSøknad()
+        håndterVedtaksperiodeOpprettet(vedtaksperiodeId = vedtaksperiodeId2)
+        håndterAktivitetsloggNyAktivitet(varselkoder = listOf("RV_SØ_3"), vedtaksperiodeId = vedtaksperiodeId2
+        )
+
+        assertVarsel("RV_SØ_3", VEDTAKSPERIODE_ID, AKTIV)
+        assertVarsel("RV_SØ_3", vedtaksperiodeId2, AKTIV)
+
+        håndterTilbakedateringBehandlet(skjæringstidspunkt = 1.januar)
+        assertVarsel("RV_SØ_3", VEDTAKSPERIODE_ID, INAKTIV)
+        assertVarsel("RV_SØ_3", vedtaksperiodeId2, INAKTIV)
+    }
+
+    @Test
     fun `varsel dersom kall til gosys feilet`() {
         fremTilÅpneOppgaver()
         håndterÅpneOppgaverløsning(antall = 0, oppslagFeilet = true)

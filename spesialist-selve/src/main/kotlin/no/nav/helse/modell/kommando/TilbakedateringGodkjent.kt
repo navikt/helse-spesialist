@@ -35,7 +35,7 @@ internal class TilbakedateringGodkjent(
         SjekkAtOppgaveFortsattErÅpenCommand(fødselsnummer = fødselsnummer, oppgaveDao = oppgaveDao),
         DeaktiverVarselCommand(
             sykefraværstilfelle = sykefraværstilfelle,
-            vedtaksperiodeId = oppgaveDataForAutomatisering.vedtaksperiodeId,
+            vedtaksperiodeIder = sykefraværstilfelle.alleTilbakedaterteVedtaksperioder(oppgaveDataForAutomatisering.vedtaksperiodeId),
             varselkode = "RV_SØ_3"
         ),
         SettTidligereAutomatiseringInaktivCommand(

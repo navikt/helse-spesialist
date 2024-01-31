@@ -6,15 +6,17 @@ import org.slf4j.LoggerFactory
 
 internal class DeaktiverVarselCommand(
     private val sykefraværstilfelle: Sykefraværstilfelle,
-    private val vedtaksperiodeId: UUID,
+    private val vedtaksperiodeIder: List<UUID>,
     private val varselkode: String,
 ) : Command {
     companion object {
         private val logg = LoggerFactory.getLogger(DeaktiverVarselCommand::class.java)
     }
     override fun execute(context: CommandContext): Boolean {
-        logg.info("Deaktiverer varsel {} for vedtaksperiodeId {}", varselkode, vedtaksperiodeId)
-        sykefraværstilfelle.deaktiverVarsel(vedtaksperiodeId, varselkode)
+        logg.info("Deaktiverer varlser {} for vedtaksperiodeIder {}", varselkode, vedtaksperiodeIder.toString())
+        vedtaksperiodeIder.map { vedtaksperiodeId ->
+            sykefraværstilfelle.deaktiverVarsel(vedtaksperiodeId, varselkode)
+        }
         return true
     }
 }

@@ -5,6 +5,7 @@ import java.util.UUID
 import no.nav.helse.modell.sykefraværstilfelle.SkjønnsfastattSykepengegrunnlag.Companion.sortert
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.vedtaksperiode.Generasjon
+import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.alleTilbakedaterteVedtaksperioder
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.deaktiver
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.erTilbakedatert
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjon
@@ -107,6 +108,10 @@ internal class Sykefraværstilfelle(
 
     internal fun erTilbakedatert(vedtaksperiodeId: UUID): Boolean {
         return gjeldendeGenerasjoner.erTilbakedatert(vedtaksperiodeId)
+    }
+
+    internal fun alleTilbakedaterteVedtaksperioder(vedtaksperiodeId: UUID): List<UUID> {
+        return gjeldendeGenerasjoner.alleTilbakedaterteVedtaksperioder(vedtaksperiodeId)
     }
 
     internal fun registrer(observer: SykefraværstilfelleObserver) {
