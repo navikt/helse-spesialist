@@ -170,7 +170,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                     row.stringOrNull("mellomnavn"),
                     row.string("etternavn"),
                 ),
-                egenskaper = row.array<String>("egenskaper").toList().map { enumValueOf(it) },
+                egenskaper = row.array<String>("egenskaper").map { enumValueOf<EgenskapForDatabase>(it) }.toSet(),
                 tildelt = row.uuidOrNull("oid")?.let {
                     SaksbehandlerFraDatabase(
                         epostadresse = row.string("epost"),
@@ -188,7 +188,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
         }
     }
 
-    internal fun finnEgenskaper(vedtaksperiodeId: UUID, utbetalingId: UUID): List<EgenskapForDatabase>? = asSQL(
+    internal fun finnEgenskaper(vedtaksperiodeId: UUID, utbetalingId: UUID): Set<EgenskapForDatabase>? = asSQL(
         """
             SELECT o.egenskaper FROM oppgave o 
             INNER JOIN vedtak v ON o.vedtak_ref = v.id
@@ -200,7 +200,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
             "vedtaksperiodeId" to vedtaksperiodeId,
             "utbetalingId" to utbetalingId
         )
-    ).single { row -> row.array<String>("egenskaper").toList().map { enumValueOf(it) } }
+    ).single { row -> row.array<String>("egenskaper").map { enumValueOf<EgenskapForDatabase>(it) }.toSet() }
 
     internal fun finnAntallOppgaver(saksbehandlerOid: UUID): AntallOppgaverFraDatabase {
         return asSQL(
@@ -256,7 +256,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
         BehandletOppgaveFraDatabaseForVisning(
             id = row.long("oppgave_id"),
             aktørId = row.string("aktor_id"),
-            egenskaper = row.array<String>("egenskaper").toList().map { enumValueOf(it) },
+            egenskaper = row.array<String>("egenskaper").map { enumValueOf<EgenskapForDatabase>(it) }.toSet(),
             ferdigstiltTidspunkt = row.localDateTime("ferdigstilt_tidspunkt"),
             ferdigstiltAv = row.stringOrNull("ferdigstilt_av"),
             navn = PersonnavnFraDatabase(

@@ -51,7 +51,7 @@ internal object OppgaveMapper {
         )
     }
 
-    internal fun List<EgenskapForDatabase>.tilEgenskaperForVisning() = tilModellversjoner().map { egenskap ->
+    internal fun Set<EgenskapForDatabase>.tilEgenskaperForVisning() = tilModellversjoner().map { egenskap ->
         Oppgaveegenskap(egenskap.tilApiversjon(), egenskap.kategori.tilApiversjon()) }
 
     internal fun AntallOppgaverFraDatabase.tilApiversjon(): AntallOppgaver {
@@ -76,7 +76,7 @@ internal object OppgaveMapper {
         )
     }
 
-    private fun List<EgenskapForDatabase>.tilModellversjoner(): List<Egenskap> = this.map { it.tilModellversjon() }
+    private fun Set<EgenskapForDatabase>.tilModellversjoner(): List<Egenskap> = this.map { it.tilModellversjon() }
 
     private fun List<Egenskap>.periodetype(): Periodetype {
         val egenskap = single { egenskap -> egenskap.kategori ==  Egenskap.Kategori.Periodetype }

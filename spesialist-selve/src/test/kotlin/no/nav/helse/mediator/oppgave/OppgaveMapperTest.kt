@@ -56,7 +56,7 @@ internal class OppgaveMapperTest {
             aktørId = aktørId,
             vedtaksperiodeId = vedtaksperiodeId,
             navn = PersonnavnFraDatabase(fornavn, mellomnavn, etternavn),
-            egenskaper = listOf(SØKNAD, DELVIS_REFUSJON, FORSTEGANGSBEHANDLING, EN_ARBEIDSGIVER),
+            egenskaper = setOf(SØKNAD, DELVIS_REFUSJON, FORSTEGANGSBEHANDLING, EN_ARBEIDSGIVER),
             tildelt = saksbehandler,
             påVent = true,
             opprettet = opprettet,
@@ -98,7 +98,7 @@ internal class OppgaveMapperTest {
             aktørId = aktørId,
             vedtaksperiodeId = vedtaksperiodeId,
             navn = PersonnavnFraDatabase(fornavn, mellomnavn, etternavn),
-            egenskaper = listOf(egenskapSomMapperTilPeriodetype, DELVIS_REFUSJON, SØKNAD, EN_ARBEIDSGIVER),
+            egenskaper = setOf(egenskapSomMapperTilPeriodetype, DELVIS_REFUSJON, SØKNAD, EN_ARBEIDSGIVER),
             tildelt = saksbehandler,
             påVent = true,
             opprettet = opprettet,
@@ -121,7 +121,7 @@ internal class OppgaveMapperTest {
             aktørId = aktørId,
             vedtaksperiodeId = vedtaksperiodeId,
             navn = PersonnavnFraDatabase(fornavn, mellomnavn, etternavn),
-            egenskaper = listOf(egenskapSomMapperTilPeriodetype, DELVIS_REFUSJON, SØKNAD, EN_ARBEIDSGIVER),
+            egenskaper = setOf(egenskapSomMapperTilPeriodetype, DELVIS_REFUSJON, SØKNAD, EN_ARBEIDSGIVER),
             tildelt = saksbehandler,
             påVent = true,
             opprettet = opprettet,
@@ -147,7 +147,7 @@ internal class OppgaveMapperTest {
             aktørId = aktørId,
             vedtaksperiodeId = vedtaksperiodeId,
             navn = PersonnavnFraDatabase(fornavn, mellomnavn, etternavn),
-            egenskaper = listOf(egenskapSomMapperTilOppgavetype, DELVIS_REFUSJON, FORSTEGANGSBEHANDLING, EN_ARBEIDSGIVER),
+            egenskaper = setOf(egenskapSomMapperTilOppgavetype, DELVIS_REFUSJON, FORSTEGANGSBEHANDLING, EN_ARBEIDSGIVER),
             tildelt = saksbehandler,
             påVent = true,
             opprettet = opprettet,
@@ -165,7 +165,7 @@ internal class OppgaveMapperTest {
     @EnumSource(names = ["SØKNAD", "REVURDERING"], mode = EnumSource.Mode.EXCLUDE)
     fun `map til oppgavetype kaster exception når det mangler en egenskap som er oppgavetype`(egenskapSomIkkeMapperTilOppgavetype: EgenskapForDatabase) {
         // Må gjøres fordi vi skal ha kun én av disse egenskapene pr. kategori.
-        val andreEgenskaper = listOfNotNull(
+        val andreEgenskaper = setOfNotNull(
             if (egenskapSomIkkeMapperTilOppgavetype in listOf(INFOTRYGDFORLENGELSE, FORLENGELSE, FORSTEGANGSBEHANDLING, OVERGANG_FRA_IT)) null else FORSTEGANGSBEHANDLING,
             if (egenskapSomIkkeMapperTilOppgavetype in listOf(DELVIS_REFUSJON, UTBETALING_TIL_SYKMELDT, UTBETALING_TIL_ARBEIDSGIVER, INGEN_UTBETALING)) null else DELVIS_REFUSJON,
             if (egenskapSomIkkeMapperTilOppgavetype in listOf(EN_ARBEIDSGIVER, FLERE_ARBEIDSGIVERE)) null else EN_ARBEIDSGIVER
@@ -202,7 +202,7 @@ internal class OppgaveMapperTest {
             aktørId = aktørId,
             vedtaksperiodeId = vedtaksperiodeId,
             navn = PersonnavnFraDatabase(fornavn, mellomnavn, etternavn),
-            egenskaper = listOf(egenskapSomMapperTilAntallArbeidsforhold, DELVIS_REFUSJON, FORSTEGANGSBEHANDLING, SØKNAD),
+            egenskaper = setOf(egenskapSomMapperTilAntallArbeidsforhold, DELVIS_REFUSJON, FORSTEGANGSBEHANDLING, SØKNAD),
             tildelt = saksbehandler,
             påVent = true,
             opprettet = opprettet,
@@ -220,7 +220,7 @@ internal class OppgaveMapperTest {
     @EnumSource(names = ["EN_ARBEIDSGIVER", "FLERE_ARBEIDSGIVERE"], mode = EnumSource.Mode.EXCLUDE)
     fun `map til antallArbeidsforhold kaster exception når det mangler en egenskap som er antallArbeidsforhold`(egenskapSomIkkeMapperTilAntallArbeidsforhold: EgenskapForDatabase) {
         // Må gjøres fordi vi skal ha kun én av disse egenskapene pr. kategori.
-        val andreEgenskaper = listOfNotNull(
+        val andreEgenskaper = setOfNotNull(
             if (egenskapSomIkkeMapperTilAntallArbeidsforhold in listOf(INFOTRYGDFORLENGELSE, FORLENGELSE, FORSTEGANGSBEHANDLING, OVERGANG_FRA_IT)) null else FORSTEGANGSBEHANDLING,
             if (egenskapSomIkkeMapperTilAntallArbeidsforhold in listOf(DELVIS_REFUSJON, UTBETALING_TIL_SYKMELDT, UTBETALING_TIL_ARBEIDSGIVER, INGEN_UTBETALING)) null else DELVIS_REFUSJON,
             if (egenskapSomIkkeMapperTilAntallArbeidsforhold in listOf(SØKNAD, REVURDERING)) null else SØKNAD
@@ -246,7 +246,7 @@ internal class OppgaveMapperTest {
 
     @Test
     fun `map EgenskapForDatabase til OppgaveEgenskap (api)`() {
-        val egenskaperForDatabase = listOf(SØKNAD, DELVIS_REFUSJON, FORSTEGANGSBEHANDLING, EN_ARBEIDSGIVER)
+        val egenskaperForDatabase = setOf(SØKNAD, DELVIS_REFUSJON, FORSTEGANGSBEHANDLING, EN_ARBEIDSGIVER)
         val oppgaveEgenskaper = egenskaperForDatabase.tilEgenskaperForVisning()
 
         assertEquals(

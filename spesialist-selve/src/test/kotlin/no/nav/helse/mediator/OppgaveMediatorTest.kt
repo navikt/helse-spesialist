@@ -76,7 +76,7 @@ internal class OppgaveMediatorTest {
         private const val SAKSBEHANDLERNAVN = "Hen Saksbehandler"
         private const val OPPGAVETYPE_SØKNAD = "SØKNAD"
         private val EGENSKAP_SØKNAD = EgenskapForDatabase.SØKNAD
-        private val EGENSKAPER = listOf(EgenskapForDatabase.SØKNAD, EgenskapForDatabase.UTBETALING_TIL_SYKMELDT, EgenskapForDatabase.EN_ARBEIDSGIVER, EgenskapForDatabase.FORSTEGANGSBEHANDLING)
+        private val EGENSKAPER = setOf(EgenskapForDatabase.SØKNAD, EgenskapForDatabase.UTBETALING_TIL_SYKMELDT, EgenskapForDatabase.EN_ARBEIDSGIVER, EgenskapForDatabase.FORSTEGANGSBEHANDLING)
     }
 
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
@@ -351,7 +351,7 @@ internal class OppgaveMediatorTest {
         val opprettet = LocalDateTime.now()
         val vedtaksperiodeId = UUID.randomUUID()
         val opprinneligSøknadsdato = LocalDateTime.now()
-        val egenskaper = listOf(egenskap, EgenskapForDatabase.UTBETALING_TIL_SYKMELDT, EgenskapForDatabase.EN_ARBEIDSGIVER, EgenskapForDatabase.FORSTEGANGSBEHANDLING)
+        val egenskaper = setOf(egenskap, EgenskapForDatabase.UTBETALING_TIL_SYKMELDT, EgenskapForDatabase.EN_ARBEIDSGIVER, EgenskapForDatabase.FORSTEGANGSBEHANDLING)
         every { oppgaveDao.finnOppgaverForVisning(any(), any()) } returns listOf(
             oppgaveFraDatabaseForVisning(
                 oppgaveId = 1L,
@@ -377,7 +377,7 @@ internal class OppgaveMediatorTest {
         val opprettet = LocalDateTime.now()
         val vedtaksperiodeId = UUID.randomUUID()
         val opprinneligSøknadsdato = LocalDateTime.now()
-        val egenskaper = listOf(egenskap, EgenskapForDatabase.UTBETALING_TIL_SYKMELDT, EgenskapForDatabase.EN_ARBEIDSGIVER, EgenskapForDatabase.SØKNAD)
+        val egenskaper = setOf(egenskap, EgenskapForDatabase.UTBETALING_TIL_SYKMELDT, EgenskapForDatabase.EN_ARBEIDSGIVER, EgenskapForDatabase.SØKNAD)
         every { oppgaveDao.finnOppgaverForVisning(any(), any()) } returns listOf(
             oppgaveFraDatabaseForVisning(
                 oppgaveId = 1L,
@@ -403,7 +403,7 @@ internal class OppgaveMediatorTest {
         val opprettet = LocalDateTime.now()
         val vedtaksperiodeId = UUID.randomUUID()
         val opprinneligSøknadsdato = LocalDateTime.now()
-        val egenskaper = listOf(egenskap, EgenskapForDatabase.FORSTEGANGSBEHANDLING, EgenskapForDatabase.EN_ARBEIDSGIVER, EgenskapForDatabase.SØKNAD)
+        val egenskaper = setOf(egenskap, EgenskapForDatabase.FORSTEGANGSBEHANDLING, EgenskapForDatabase.EN_ARBEIDSGIVER, EgenskapForDatabase.SØKNAD)
         every { oppgaveDao.finnOppgaverForVisning(any(), any()) } returns listOf(
             oppgaveFraDatabaseForVisning(
                 oppgaveId = 1L,
@@ -429,7 +429,7 @@ internal class OppgaveMediatorTest {
         val opprettet = LocalDateTime.now()
         val vedtaksperiodeId = UUID.randomUUID()
         val opprinneligSøknadsdato = LocalDateTime.now()
-        val egenskaper = listOf(egenskap, EgenskapForDatabase.FORSTEGANGSBEHANDLING, EgenskapForDatabase.UTBETALING_TIL_SYKMELDT, EgenskapForDatabase.SØKNAD)
+        val egenskaper = setOf(egenskap, EgenskapForDatabase.FORSTEGANGSBEHANDLING, EgenskapForDatabase.UTBETALING_TIL_SYKMELDT, EgenskapForDatabase.SØKNAD)
         every { oppgaveDao.finnOppgaverForVisning(ekskluderEgenskaper = any(), saksbehandlerOid = any()) } returns listOf(
             oppgaveFraDatabaseForVisning(
                 oppgaveId = 1L,
@@ -477,7 +477,7 @@ internal class OppgaveMediatorTest {
     private fun behandletOppgaveFraDatabaseForVisning(
         oppgaveId: Long = nextLong(),
         aktørId: String = nextLong(1000000000000, 2000000000000).toString(),
-        egenskaper: List<EgenskapForDatabase> = EGENSKAPER,
+        egenskaper: Set<EgenskapForDatabase> = EGENSKAPER,
         ferdigstiltAv: String? = "saksbehandler",
         personnavnFraDatabase: PersonnavnFraDatabase = PersonnavnFraDatabase("navn", "mellomnavn", "etternavn"),
         ferdigstiltTidspunkt: LocalDateTime = LocalDateTime.now(),
@@ -494,7 +494,7 @@ internal class OppgaveMediatorTest {
 
     private fun oppgaveFraDatabaseForVisning(
         oppgaveId: Long = nextLong(),
-        egenskaper: List<EgenskapForDatabase> = EGENSKAPER,
+        egenskaper: Set<EgenskapForDatabase> = EGENSKAPER,
         aktørId: String = nextLong(1000000000000, 2000000000000).toString(),
         opprettet: LocalDateTime = LocalDateTime.now(),
         opprinneligSøknadsdato: LocalDateTime = LocalDateTime.now(),

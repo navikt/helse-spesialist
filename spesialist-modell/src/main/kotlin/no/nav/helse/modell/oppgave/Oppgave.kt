@@ -34,7 +34,7 @@ class Oppgave private constructor(
 
     private var ferdigstiltAvIdent: String? = null
     private var ferdigstiltAvOid: UUID? = null
-    private val egenskaper = mutableListOf<Egenskap>()
+    private val egenskaper = mutableSetOf<Egenskap>()
     private var tildeltTil: Saksbehandler? = null
     private var påVent: Boolean = false
 
@@ -63,7 +63,7 @@ class Oppgave private constructor(
     }
 
     fun accept(visitor: OppgaveVisitor) {
-        visitor.visitOppgave(id, egenskap, tilstand, vedtaksperiodeId, utbetalingId, hendelseId, ferdigstiltAvOid, ferdigstiltAvIdent, egenskaper, tildeltTil, påVent, kanAvvises, totrinnsvurdering)
+        visitor.visitOppgave(id, egenskap, tilstand, vedtaksperiodeId, utbetalingId, hendelseId, ferdigstiltAvOid, ferdigstiltAvIdent, egenskaper.toList(), tildeltTil, påVent, kanAvvises, totrinnsvurdering)
         totrinnsvurdering?.accept(visitor)
     }
 

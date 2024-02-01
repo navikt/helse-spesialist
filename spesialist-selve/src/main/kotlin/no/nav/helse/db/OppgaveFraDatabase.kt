@@ -24,7 +24,7 @@ data class OppgaveFraDatabaseForVisning(
     val aktørId: String,
     val vedtaksperiodeId: UUID,
     val navn: PersonnavnFraDatabase,
-    val egenskaper: List<EgenskapForDatabase>,
+    val egenskaper: Set<EgenskapForDatabase>,
     val tildelt: SaksbehandlerFraDatabase? = null,
     val påVent: Boolean = false,
     val opprettet: LocalDateTime,
@@ -41,7 +41,7 @@ data class AntallOppgaverFraDatabase(
 data class BehandletOppgaveFraDatabaseForVisning(
     val id: Long,
     val aktørId: String,
-    val egenskaper: List<EgenskapForDatabase>,
+    val egenskaper: Set<EgenskapForDatabase>,
     val ferdigstiltTidspunkt: LocalDateTime,
     val ferdigstiltAv: String?,
     val navn: PersonnavnFraDatabase,

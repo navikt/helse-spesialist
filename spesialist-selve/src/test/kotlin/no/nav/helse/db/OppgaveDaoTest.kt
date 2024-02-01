@@ -294,7 +294,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         val førsteOppgave = oppgaver.first()
         assertEquals(OPPGAVE_ID, førsteOppgave.id)
         assertEquals(aktørId, førsteOppgave.aktørId)
-        assertEquals(listOf(EGENSKAP), førsteOppgave.egenskaper)
+        assertEquals(setOf(EGENSKAP), førsteOppgave.egenskaper)
         assertEquals(FORNAVN, førsteOppgave.navn.fornavn)
         assertEquals(MELLOMNAVN, førsteOppgave.navn.mellomnavn)
         assertEquals(ETTERNAVN, førsteOppgave.navn.etternavn)
@@ -325,7 +325,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         val førsteOppgave = oppgaver.first()
         assertEquals(OPPGAVE_ID, førsteOppgave.id)
         assertEquals(aktørId, førsteOppgave.aktørId)
-        assertEquals(listOf(EGENSKAP), førsteOppgave.egenskaper)
+        assertEquals(setOf(EGENSKAP), førsteOppgave.egenskaper)
         assertEquals(SAKSBEHANDLER_NAVN, førsteOppgave.ferdigstiltAv)
         assertEquals(FORNAVN, førsteOppgave.navn.fornavn)
         assertEquals(MELLOMNAVN, førsteOppgave.navn.mellomnavn)
@@ -955,8 +955,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
 
         val egenskaperOppgaveId1 = oppgaveDao.finnEgenskaper(VEDTAKSPERIODE, UTBETALING_ID)
         val egenskaperOppgaveId2 = oppgaveDao.finnEgenskaper(vedtaksperiodeId2, utbetalingId2)
-        assertEquals(listOf(SØKNAD), egenskaperOppgaveId1)
-        assertEquals(listOf(SØKNAD, PÅ_VENT), egenskaperOppgaveId2)
+        assertEquals(setOf(SØKNAD), egenskaperOppgaveId1)
+        assertEquals(setOf(SØKNAD, PÅ_VENT), egenskaperOppgaveId2)
 
     }
 
