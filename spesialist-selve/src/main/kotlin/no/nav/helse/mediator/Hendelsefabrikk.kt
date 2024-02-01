@@ -848,7 +848,7 @@ internal class Hendelsefabrikk(
         json: String,
     ): TilbakedateringGodkjent {
         val oppgaveDataForAutomatisering = oppgaveDao.finnOppgaveIdUansettStatus(fødselsnummer).let { oppgaveId ->
-            oppgaveDao.gosysOppgaveEndretCommandData(oppgaveId)!!
+            oppgaveDao.oppgaveDataForAutomatisering(oppgaveId)!!
         }
         val sykefraværstilfelle = sykefraværstilfelle(fødselsnummer, oppgaveDataForAutomatisering.skjæringstidspunkt)
 
@@ -882,7 +882,7 @@ internal class Hendelsefabrikk(
     fun gosysOppgaveEndret(hendelseId: UUID, fødselsnummer: String, aktørId: String, json: String): GosysOppgaveEndret {
         // Vi kan ikke sende med oss dataene ned i løypa, så derfor må vi hente det ut på nytt her.
         val commandData = oppgaveDao.finnOppgaveIdUansettStatus(fødselsnummer).let { oppgaveId ->
-            oppgaveDao.gosysOppgaveEndretCommandData(oppgaveId)!!
+            oppgaveDao.oppgaveDataForAutomatisering(oppgaveId)!!
         }
 
         sikkerLog.info("Gjør ny sjekk om det finnes åpne gosysoppgaver for fnr $fødselsnummer og vedtaksperiodeId ${commandData.vedtaksperiodeId}")

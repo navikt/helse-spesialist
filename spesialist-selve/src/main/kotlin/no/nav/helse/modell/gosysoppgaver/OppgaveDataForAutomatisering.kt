@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 
-data class GosysOppgaveEndretCommandData(
+data class OppgaveDataForAutomatisering(
     val vedtaksperiodeId: UUID,
     val periodeFom: LocalDate,
     val periodeTom: LocalDate,

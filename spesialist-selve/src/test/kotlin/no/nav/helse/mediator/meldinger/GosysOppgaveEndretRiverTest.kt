@@ -7,7 +7,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommandData
+import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -57,7 +57,7 @@ internal class GosysOppgaveEndretRiverTest {
 
     private fun mocks(
         oppgaveId: Long? = 1L,
-        commandData: GosysOppgaveEndretCommandData? = GosysOppgaveEndretCommandData(
+        commandData: OppgaveDataForAutomatisering? = OppgaveDataForAutomatisering(
             vedtaksperiodeId = UUID.randomUUID(),
             periodeFom = LocalDate.now(),
             periodeTom = LocalDate.now(),
@@ -69,7 +69,7 @@ internal class GosysOppgaveEndretRiverTest {
         )
     ) {
         every { oppgaveDao.finnOppgaveId(any<String>()) }.returns(oppgaveId)
-        every { oppgaveDao.gosysOppgaveEndretCommandData(any()) }.returns(commandData)
+        every { oppgaveDao.oppgaveDataForAutomatisering(any()) }.returns(commandData)
     }
 
     @Language("JSON")

@@ -53,7 +53,7 @@ internal class TilbakedatertRiver(
         oppgaveDao.finnOppgaveId(fødselsnummer)?.also { oppgaveId ->
             sikkerlogg.info("Fant en oppgave for {}: {}", fødselsnummer, oppgaveId)
 
-            val oppgaveDataForAutomatisering = oppgaveDao.gosysOppgaveEndretCommandData(oppgaveId)
+            val oppgaveDataForAutomatisering = oppgaveDao.oppgaveDataForAutomatisering(oppgaveId)
             if (oppgaveDataForAutomatisering == null) {
                 sikkerlogg.info("Fant ikke commandData for {} og {}", fødselsnummer, oppgaveId)
                 return

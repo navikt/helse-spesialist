@@ -13,7 +13,7 @@ import no.nav.helse.db.OppgavesorteringForDatabase
 import no.nav.helse.db.PersonnavnFraDatabase
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.SorteringsnøkkelForDatabase
-import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommandData
+import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.asLocalDate
@@ -507,7 +507,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
         """, mapOf("oppgaveId" to oppgaveId)
     ).single { it.long("fodselsnummer").toFødselsnummer() })
 
-    fun gosysOppgaveEndretCommandData(oppgaveId: Long): GosysOppgaveEndretCommandData? =
+    fun oppgaveDataForAutomatisering(oppgaveId: Long): OppgaveDataForAutomatisering? =
         asSQL(
             """ SELECT v.vedtaksperiode_id, v.fom, v.tom, o.utbetaling_id, h.id AS hendelseId, h.data AS godkjenningbehovJson, s.type as periodetype
             FROM vedtak v
@@ -519,7 +519,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
         ).single {
             val json = objectMapper.readTree(it.string("godkjenningbehovJson"))
             val skjæringstidspunkt = json.path("Godkjenning").path("skjæringstidspunkt").asLocalDate()
-            GosysOppgaveEndretCommandData(
+            OppgaveDataForAutomatisering(
                 vedtaksperiodeId = it.uuid("vedtaksperiode_id"),
                 periodeFom = it.localDate("fom"),
                 periodeTom = it.localDate("tom"),

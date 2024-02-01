@@ -58,7 +58,7 @@ internal class GosysOppgaveEndretRiver(
 
         oppgaveDao.finnOppgaveId(fødselsnummer)?.also { oppgaveId ->
             sikkerlogg.info("Fant en oppgave for {}: {}", fødselsnummer, oppgaveId)
-            val commandData = oppgaveDao.gosysOppgaveEndretCommandData(oppgaveId)
+            val commandData = oppgaveDao.oppgaveDataForAutomatisering(oppgaveId)
             if (commandData == null) {
                 sikkerlogg.info("Fant ikke commandData for {} og {}", fødselsnummer, oppgaveId)
                 return

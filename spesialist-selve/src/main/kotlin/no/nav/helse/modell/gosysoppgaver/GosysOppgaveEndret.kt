@@ -21,7 +21,7 @@ internal class GosysOppgaveEndret(
     aktørId: String,
     sykefraværstilfelle: Sykefraværstilfelle,
     private val json: String,
-    gosysOppgaveEndretCommandData: GosysOppgaveEndretCommandData,
+    gosysOppgaveEndretCommandData: OppgaveDataForAutomatisering,
     åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     automatisering: Automatisering,
     godkjenningMediator: GodkjenningMediator,
