@@ -66,29 +66,6 @@ abstract class AbstractApiTest {
                 }"
             )
         }
-
-        fun HttpRequestBuilder.authentication(
-            oid: UUID,
-            epost: String = epostadresse,
-            navn: String,
-            ident: String,
-            group: String? = null,
-        ) {
-            header(
-                "Authorization",
-                "Bearer ${
-                    jwtStub.getToken(
-                        groups = listOfNotNull(requiredGroup.toString(), group),
-                        oid = oid.toString(),
-                        epostadresse = epost,
-                        clientId = clientId,
-                        issuer = issuer,
-                        navn = navn,
-                        navIdent = ident
-                    )
-                }"
-            )
-        }
     }
 
     class TestServer(
