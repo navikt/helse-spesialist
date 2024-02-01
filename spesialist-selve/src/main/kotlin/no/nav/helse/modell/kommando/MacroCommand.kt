@@ -38,6 +38,10 @@ internal abstract class MacroCommand : Command {
         context.clear()
     }
 
+    final override fun hash(): String {
+        return name + commands.joinToString { it.hash() }
+    }
+
     private fun run(context: CommandContext, commands: List<Command>): Boolean {
         return CommandContext.run(context, commands) {
             historikk.add(0, it)
