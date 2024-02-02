@@ -38,7 +38,7 @@ internal class SaksbehandlerløsningRiver(
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         val hendelseId = UUID.fromString(packet["hendelseId"].asText())
         val id = UUID.fromString(packet["@id"].asText())
-        if (id == UUID.fromString("d622983f-c054-4f97-97a1-b941d0c8ea23")) return
+        if (id == UUID.fromString("7af5fede-749d-4718-ac91-444996600236")) return
         mediator.saksbehandlerløsning(
             message = packet,
             id = id,
