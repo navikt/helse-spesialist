@@ -3,7 +3,6 @@ package no.nav.helse.modell.automatisering
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.modell.Toggle
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
@@ -39,9 +38,7 @@ internal class AutomatiskAvvisningCommand(
 
         val avvisGrunnetSkjønnsfastsettelse =
             if (!erSkjønnsfastsettelse) false
-            else if (!Toggle.Avviksvurdering.enabled) {
-                kanAvvises
-            } else {
+            else {
                 val sluppetForbiTidligere = personDao.findPersonerSomHarPassertFilter()
                 val slippesForbi = !erProd()
                         || ((fødselsnummer.length == 11 && (30..31).contains(fødselsnummer.take(2).toInt())) && enArbeidsgiver)
