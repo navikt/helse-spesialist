@@ -2,7 +2,6 @@ package no.nav.helse.modell.kommando
 
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.meldinger.Kommandohendelse
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.Toggle
@@ -81,9 +80,7 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
         val newHash = command.hash().convertToUUID()
         if (Toggle.RestartKommandokjede.enabled && hash != null && newHash != hash) {
             logger.info(
-                "Restarter kommandokjede ${command.name} fordi rekkefølgen, antallet kommandoer eller navn på en eller flere kommandoer i kjeden har endret seg.",
-                kv("contextId", id),
-                kv("hendelseId", hendelseId),
+                "Restarter kommandokjede ${command.name} fordi rekkefølgen, antallet kommandoer eller navn på en eller flere kommandoer i kjeden har endret seg."
             )
             sti.clear()
         }
