@@ -98,5 +98,3 @@ spec:
       value: "true"
     - name: AVVIKSVURDERING
       value: "true"
-    - name: RESTART_KOMMANDOKJEDE
-      value: "true"

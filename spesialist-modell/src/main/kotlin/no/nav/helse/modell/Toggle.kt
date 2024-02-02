@@ -8,5 +8,4 @@ abstract class Toggle(private var _enabled: Boolean) {
     object Skjonnsfastsetting : Toggle("SKJONNSFASTSETTING", true)
     object AutomatiserSpesialsak : Toggle("AUTOMATISER_SPESIALSAK", true)
     object Avviksvurdering : Toggle("AVVIKSVURDERING", false)
-    object RestartKommandokjede : Toggle("RESTART_KOMMANDOKJEDE", false)
 }
