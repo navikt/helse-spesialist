@@ -4,7 +4,6 @@ import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.meldinger.Kommandohendelse
 import no.nav.helse.modell.CommandContextDao
-import no.nav.helse.modell.Toggle
 import org.slf4j.LoggerFactory
 
 internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList(), private val hash: UUID? = null) {
@@ -78,7 +77,7 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
 
     internal fun utfør(commandContextDao: CommandContextDao, hendelseId: UUID, command: Command) = try {
         val newHash = command.hash().convertToUUID()
-        if (Toggle.RestartKommandokjede.enabled && hash != null && newHash != hash) {
+        if (hash != null && newHash != hash) {
             logger.info(
                 "Restarter kommandokjede ${command.name} fordi rekkefølgen, antallet kommandoer eller navn på en eller flere kommandoer i kjeden har endret seg."
             )
