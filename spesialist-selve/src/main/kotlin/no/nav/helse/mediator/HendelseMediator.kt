@@ -56,7 +56,6 @@ import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.HendelseDao
-import no.nav.helse.modell.Toggle
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.avviksvurdering.AvviksvurderingDto
@@ -286,9 +285,6 @@ internal class HendelseMediator(
         organisasjonsnummer: String,
         context: MessageContext,
     ) {
-        if (!Toggle.Skjonnsfastsetting.enabled) {
-            return
-        }
         val hendelse = hendelsefabrikk.vedtaksperiodeSkjønnsmessigFastsettelse(
             id = id,
             vedtaksperiodeId = vedtaksperiodeId,
