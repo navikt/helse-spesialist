@@ -1,0 +1,1 @@
+ALTER TABLE command_context ADD COLUMN hash varchar;

@@ -313,6 +313,43 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         avviksvurderingTestdata: AvviksvurderingTestdata = AvviksvurderingTestdata(),
         godkjenningsbehovTestdata: GodkjenningsbehovTestdata = GodkjenningsbehovTestdata(utbetalingId = utbetalingId, vedtaksperiodeId = vedtaksperiodeId),
     ) {
+        fremTilRisikovurdering(
+            enhet = enhet,
+            regelverksvarsler = regelverksvarsler,
+            fullmakter = fullmakter,
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = utbetalingId,
+            harOppdatertMetadata = harOppdatertMetadata,
+            snapshotversjon = snapshotversjon,
+            arbeidsgiverbeløp = arbeidsgiverbeløp,
+            personbeløp = personbeløp,
+            avviksvurderingTestdata = avviksvurderingTestdata,
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata
+        )
+        if (!harRisikovurdering) håndterRisikovurderingløsning(
+            kanGodkjennesAutomatisk = kanGodkjennesAutomatisk,
+            risikofunn = risikofunn,
+            vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId
+        )
+        if (!erFerdigstilt(sisteGodkjenningsbehovId)) håndterInntektløsning()
+    }
+
+    protected fun fremTilRisikovurdering(
+        enhet: String = ENHET_OSLO,
+        regelverksvarsler: List<String> = emptyList(),
+        fullmakter: List<Fullmakt> = emptyList(),
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        utbetalingId: UUID = UUID.randomUUID(),
+        harOppdatertMetadata: Boolean = false,
+        snapshotversjon: Int = 1,
+        arbeidsgiverbeløp: Int = 20000,
+        personbeløp: Int = 0,
+        avviksvurderingTestdata: AvviksvurderingTestdata = AvviksvurderingTestdata(),
+        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = GodkjenningsbehovTestdata(
+            utbetalingId = utbetalingId,
+            vedtaksperiodeId = vedtaksperiodeId
+        ),
+    ) {
         fremTilÅpneOppgaver(
             regelverksvarsler,
             fullmakter,
@@ -325,12 +362,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             godkjenningsbehovTestdata = godkjenningsbehovTestdata,
         )
         håndterÅpneOppgaverløsning()
-        if (!harRisikovurdering) håndterRisikovurderingløsning(
-            kanGodkjennesAutomatisk = kanGodkjennesAutomatisk,
-            risikofunn = risikofunn,
-            vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId
-        )
-        if (!erFerdigstilt(sisteGodkjenningsbehovId)) håndterInntektløsning()
     }
 
     protected fun forlengelseFremTilSaksbehandleroppgave(

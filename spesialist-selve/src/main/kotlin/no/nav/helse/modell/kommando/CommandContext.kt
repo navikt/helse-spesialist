@@ -2,11 +2,13 @@ package no.nav.helse.modell.kommando
 
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.meldinger.Kommandohendelse
 import no.nav.helse.modell.CommandContextDao
+import no.nav.helse.modell.Toggle
 import org.slf4j.LoggerFactory
 
-internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()) {
+internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList(), private val hash: UUID? = null) {
     private val data = mutableListOf<Any>()
     private val behov = mutableMapOf<String, Map<String, Any>>()
     private val sti: MutableList<Int> = sti.toMutableList()
@@ -76,9 +78,18 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
     internal fun utfør(commandContextDao: CommandContextDao, hendelse: Kommandohendelse) = utfør(commandContextDao, hendelse.id, hendelse)
 
     internal fun utfør(commandContextDao: CommandContextDao, hendelseId: UUID, command: Command) = try {
+        val newHash = command.hash().convertToUUID()
+        if (Toggle.RestartKommandokjede.enabled && hash != null && newHash != hash) {
+            logger.info(
+                "Restarter kommandokjede ${command.name} fordi rekkefølgen, antallet kommandoer eller navn på en eller flere kommandoer i kjeden har endret seg.",
+                kv("contextId", id),
+                kv("hendelseId", hendelseId),
+            )
+            sti.clear()
+        }
         utfør(command).also {
             if (ferdigstilt || it) commandContextDao.ferdig(hendelseId, id)
-            else commandContextDao.suspendert(hendelseId, id, sti)
+            else commandContextDao.suspendert(hendelseId, id, newHash, sti)
         }
     } catch (rootErr: Exception) {
         try {
@@ -106,5 +117,7 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
                 if (context.ferdigstilt) true
                 else runner(it)
             }
+
+        internal fun String.convertToUUID() = UUID.nameUUIDFromBytes(this.toByteArray())
     }
 }

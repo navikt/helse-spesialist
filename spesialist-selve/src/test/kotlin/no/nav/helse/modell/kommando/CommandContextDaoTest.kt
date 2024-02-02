@@ -5,6 +5,7 @@ import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.mediator.meldinger.Kommandohendelse
+import no.nav.helse.modell.kommando.CommandContext.Companion.convertToUUID
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
@@ -76,7 +77,7 @@ internal class CommandContextDaoTest : DatabaseIntegrationTest() {
     }
 
     private fun suspendert(hendelse: Kommandohendelse = HENDELSE1) = ny(hendelse).also { uuid ->
-        commandContextDao.suspendert(hendelse.id, uuid, listOf())
+        commandContextDao.suspendert(hendelse.id, uuid, hendelse.hash().convertToUUID(), listOf())
     }
 
     private fun feil(hendelse: Kommandohendelse = HENDELSE1) = ny(hendelse).also { uuid ->

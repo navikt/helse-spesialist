@@ -5,6 +5,7 @@ import io.mockk.verify
 import java.util.UUID
 import no.nav.helse.mediator.meldinger.Kommandohendelse
 import no.nav.helse.modell.CommandContextDao
+import no.nav.helse.modell.kommando.CommandContext.Companion.convertToUUID
 import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -44,7 +45,7 @@ internal class CommandContextTest {
             assertTrue(executed)
             assertFalse(resumed)
             verify(exactly = 1) { commandContextDao.ferdig(this@apply.id, CONTEXT) }
-            verify(exactly = 0) { commandContextDao.suspendert(any(), any(), any()) }
+            verify(exactly = 0) { commandContextDao.suspendert(any(), any(), hash().convertToUUID(), any()) }
         }
     }
 
@@ -56,7 +57,7 @@ internal class CommandContextTest {
             assertFalse(executed)
             assertTrue(resumed)
             verify(exactly = 1) { commandContextDao.ferdig(this@apply.id, CONTEXT) }
-            verify(exactly = 0) { commandContextDao.suspendert(any(), any(), any()) }
+            verify(exactly = 0) { commandContextDao.suspendert(any(), any(), hash().convertToUUID(), any()) }
         }
     }
 
@@ -66,7 +67,7 @@ internal class CommandContextTest {
         TestCommand(executeAction = { false }).apply {
             assertFalse(context.utfør(commandContextDao, this))
             verify(exactly = 0) { commandContextDao.ferdig(any(), any()) }
-            verify(exactly = 1) { commandContextDao.suspendert(this@apply.id, CONTEXT, any()) }
+            verify(exactly = 1) { commandContextDao.suspendert(this@apply.id, CONTEXT, hash().convertToUUID(), any()) }
         }
     }
 
@@ -77,7 +78,7 @@ internal class CommandContextTest {
         TestCommand(resumeAction = { false }).apply {
             assertFalse(context.utfør(commandContextDao, this))
             verify(exactly = 0) { commandContextDao.ferdig(any(), any()) }
-            verify(exactly = 1) { commandContextDao.suspendert(this@apply.id, CONTEXT, sti) }
+            verify(exactly = 1) { commandContextDao.suspendert(this@apply.id, CONTEXT, hash().convertToUUID(), sti) }
         }
     }
 
