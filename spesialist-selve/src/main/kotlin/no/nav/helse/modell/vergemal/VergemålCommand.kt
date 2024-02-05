@@ -5,6 +5,7 @@ import no.nav.helse.mediator.meldinger.løsninger.Vergemålløsning
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
+import no.nav.helse.modell.varsel.Varselkode.SB_EX_4
 import no.nav.helse.modell.varsel.Varselkode.SB_IK_1
 import org.slf4j.LoggerFactory
 
@@ -30,8 +31,8 @@ internal class VergemålCommand(
         løsning.lagre(vergemålDao)
 
         if (løsning.harVergemål()) {
-            // Om personen har vergemål vil vedtaksperioden automatisk avvises
-            // og vi trenger ikke leggge på eventuelle warnings for fullmakt
+            logg.info("Legger til varsel om vergemål på vedtaksperiode $vedtaksperiodeId")
+            sykefraværstilfelle.håndter(SB_EX_4.nyttVarsel(vedtaksperiodeId), hendelseId)
             return true
         }
         if (løsning.harFullmakt()) {

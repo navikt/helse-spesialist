@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-internal class LeggPåVarslerCommandTest {
+internal class VurderEnhetUtlandTest {
     private lateinit var context: CommandContext
 
     private val vergemålDao = mockk<VergemålDao>(relaxed = true)
@@ -26,24 +26,6 @@ internal class LeggPåVarslerCommandTest {
     fun setup() {
         context = CommandContext(UUID.randomUUID())
         clearMocks(vergemålDao, personDao, sykefraværstilfelle)
-    }
-
-    @Test
-    fun `skal legge på varsel om vergemål`() {
-        val slot = slot<Varsel>()
-        every { vergemålDao.harVergemål(fødselsnummer) } returns true
-        assertTrue(hentCommand().execute(context))
-        verify (exactly = 1) { sykefraværstilfelle.håndter(capture(slot), hendelseId) }
-        assertEquals("SB_EX_4", slot.captured.toDto().varselkode)
-    }
-
-    @Test
-    fun `skal legge på varsel for vergemål også ved revurdering`() {
-        val slot = slot<Varsel>()
-        every { vergemålDao.harVergemål(fødselsnummer) } returns true
-        assertTrue(hentCommand().execute(context))
-        verify (exactly = 1) { sykefraværstilfelle.håndter(capture(slot), hendelseId) }
-        assertEquals("SB_EX_4", slot.captured.toDto().varselkode)
     }
 
     @Test
@@ -65,11 +47,10 @@ internal class LeggPåVarslerCommandTest {
     }
 
     private fun hentCommand() =
-        LeggPåVarslerCommand(
+        VurderEnhetUtland(
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             personDao = personDao,
-            vergemålDao = vergemålDao,
             hendelseId = hendelseId,
             sykefraværstilfelle = sykefraværstilfelle
         )

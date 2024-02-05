@@ -60,7 +60,7 @@ class VergemålCommandTest {
     }
 
     @Test
-    fun `Toggle på - ber om informasjon om vergemål`() {
+    fun `Ber om informasjon om vergemål hvis den mangler`() {
         assertFalse(command.execute(context))
         assertEquals(listOf("Vergemål"), context.behov().keys.toList())
     }
@@ -86,7 +86,6 @@ class VergemålCommandTest {
         assertTrue(command.resume(context))
         verify(exactly = 1) { vergemålDao.lagre(FNR, harVergemål) }
         assertEquals(0, context.meldinger().size)
-        assertEquals(0, observer.opprettedeVarsler.size)
     }
 
     @Test
@@ -108,16 +107,16 @@ class VergemålCommandTest {
     }
 
     @Test
-    fun `legger ikke til warning ved vergemål kombinert med fullmakt`() {
+    fun `legger til varsel ved vergemål`() {
         context.add(Vergemålløsning(FNR, harAlt))
         assertTrue(command.resume(context))
         verify(exactly = 1) { vergemålDao.lagre(FNR, harAlt) }
         assertEquals(0, context.meldinger().size)
-        assertEquals(0, observer.opprettedeVarsler.size)
+        assertEquals(1, observer.opprettedeVarsler.size)
     }
 
     @Test
-    fun `legger kun til en warning ved både fullmakt og fremtidsfullmakt`() {
+    fun `legger kun til en varsel ved både fullmakt og fremtidsfullmakt`() {
         context.add(Vergemålløsning(FNR, harBeggeFullmatkstyper))
         assertTrue(command.resume(context))
         verify(exactly = 1) { vergemålDao.lagre(FNR, harBeggeFullmatkstyper) }
