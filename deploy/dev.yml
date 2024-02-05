@@ -42,7 +42,8 @@ spec:
           - "NAVident"
         groups:
           - id: "611669fa-de5c-4dc2-a0e8-6041a019992a"
-          - id: "f787f900-6697-440d-a086-d5bb56e26a9c"
+          - id: "f787f900-6697-440d-a086-d5bb56e26a9c" # gammel hjemmemekka tbd-gruppe
+          - id: "c0227409-2085-4eb2-b487-c4ba270986a3" # nais-tbd
           - id: "c811e9f4-26a6-43f9-b930-8c83365683a9"
           - id: "59f26eef-0a4f-4038-bf46-3a5b2f252155"
           - id: "dd4e2415-b68d-43a4-87b5-fe2ba5f1dc61"
