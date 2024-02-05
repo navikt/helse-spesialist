@@ -19,7 +19,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 
-internal class AutomatiseringCommandTest {
+internal class VurderAutomatiskInnvilgelseTest {
     private companion object {
         private val vedtaksperiodeId = UUID.randomUUID()
         private val utbetalingId = UUID.randomUUID()
@@ -31,7 +31,7 @@ internal class AutomatiseringCommandTest {
     private val automatisering = mockk<Automatisering>(relaxed = true)
     private val generasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
     private val command =
-        AutomatiseringCommand(
+        VurderAutomatiskInnvilgelse(
             fødselsnummer,
             vedtaksperiodeId,
             hendelseId,

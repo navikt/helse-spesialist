@@ -26,7 +26,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 
-internal class ÅpneGosysOppgaverCommandTest {
+internal class VurderÅpenGosysoppgaveTest {
 
     private companion object {
         private const val FNR = "12345678911"
@@ -61,7 +61,7 @@ internal class ÅpneGosysOppgaverCommandTest {
     }
     private val dao = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
 
-    private fun command(harTildeltOppgave: Boolean = false, skjæringstidspunkt: LocalDate = LocalDate.now()) = ÅpneGosysOppgaverCommand(
+    private fun command(harTildeltOppgave: Boolean = false, skjæringstidspunkt: LocalDate = LocalDate.now()) = VurderÅpenGosysoppgave(
         UUID.randomUUID(),
         AKTØR_ID,
         dao,

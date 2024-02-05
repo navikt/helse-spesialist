@@ -8,7 +8,7 @@ import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import org.slf4j.LoggerFactory
 
-internal class TrengerTotrinnsvurderingCommand(
+internal class VurderBehovForTotrinnskontroll(
     private val fødselsnummer: String,
     private val vedtaksperiodeId: UUID,
     private val oppgaveMediator: OppgaveMediator,
@@ -18,7 +18,7 @@ internal class TrengerTotrinnsvurderingCommand(
 ) : Command {
 
     private companion object {
-        private val logg = LoggerFactory.getLogger(TrengerTotrinnsvurderingCommand::class.java)
+        private val logg = LoggerFactory.getLogger(VurderBehovForTotrinnskontroll::class.java)
     }
 
     override fun execute(context: CommandContext): Boolean {

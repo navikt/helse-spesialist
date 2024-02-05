@@ -52,7 +52,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-internal class OpprettSaksbehandleroppgaveCommandTest {
+internal class OpprettSaksbehandleroppgaveTest {
     private companion object {
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
         private val UTBETALING_ID = UUID.randomUUID()
@@ -392,7 +392,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         Oppgave.nyOppgave(1L, VEDTAKSPERIODE_ID, UTBETALING_ID, UUID.randomUUID(), kanAvvises, egenskaper.toList())
 
     private fun opprettSaksbehandlerOppgaveCommand(inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER, periodetype: Periodetype = FØRSTEGANGSBEHANDLING, kanAvvises: Boolean = true) =
-        OpprettSaksbehandleroppgaveCommand(
+        OpprettSaksbehandleroppgave(
             fødselsnummer = FNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             oppgaveMediator = oppgaveMediator,

@@ -42,7 +42,7 @@ internal class GosysOppgaveEndret(
     } ?: false
 
     override val commands: List<Command> = listOf(
-        ÅpneGosysOppgaverCommand(
+        VurderÅpenGosysoppgave(
             hendelseId = id,
             aktørId = aktørId,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,

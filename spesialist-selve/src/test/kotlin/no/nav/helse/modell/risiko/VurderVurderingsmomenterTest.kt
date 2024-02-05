@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-internal class RisikoCommandTest {
+internal class VurderVurderingsmomenterTest {
 
     private val risikovurderingDao = mockk<RisikovurderingDao>()
     private val utbetalingMock = mockk<Utbetaling>(relaxed = true)
@@ -129,12 +129,12 @@ internal class RisikoCommandTest {
         assertEquals(VEDTAKSPERIODE_ID, context.behov().entries.first().value["vedtaksperiodeId"])
     }
 
-    private fun RisikoCommand.assertTrue() {
+    private fun VurderVurderingsmomenter.assertTrue() {
         assertTrue(resume(context))
         assertTrue(execute(context))
     }
 
-    private fun RisikoCommand.assertFalse() {
+    private fun VurderVurderingsmomenter.assertFalse() {
         assertFalse(resume(context))
         assertFalse(execute(context))
     }
@@ -144,7 +144,7 @@ internal class RisikoCommandTest {
         risikovurderingDao: RisikovurderingDao = this.risikovurderingDao,
         organisasjonsnummer: String = ORGNUMMER,
         førstegangsbehandling: Boolean = true
-    ) = RisikoCommand(
+    ) = VurderVurderingsmomenter(
         hendelseId = UUID.randomUUID(),
         vedtaksperiodeId = vedtaksperiodeId,
         risikovurderingDao = risikovurderingDao,

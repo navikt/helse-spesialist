@@ -9,7 +9,7 @@ import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.varsel.Varselkode.SB_RV_1
 import org.slf4j.LoggerFactory
 
-internal class RisikoCommand(
+internal class VurderVurderingsmomenter(
     private val hendelseId: UUID,
     private val vedtaksperiodeId: UUID,
     private val risikovurderingDao: RisikovurderingDao,
@@ -57,6 +57,6 @@ internal class RisikoCommand(
     }
 
     private companion object {
-        private val logg = LoggerFactory.getLogger(RisikoCommand::class.java)
+        private val logg = LoggerFactory.getLogger(VurderVurderingsmomenter::class.java)
     }
 }

@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class VergemålCommandTest {
+class VurderVergemålOgFullmaktTest {
 
     private companion object {
         private const val FNR = "12345678911"
@@ -37,7 +37,7 @@ class VergemålCommandTest {
     private val generasjon = Generasjon(UUID.randomUUID(), VEDTAKSPERIODE_ID, 1.januar, 31.januar, 1.januar).also { it.registrer(observer) }
     private val sykefraværstilfelle = Sykefraværstilfelle(FNR, 1.januar, listOf(generasjon), emptyList())
 
-    private val command = VergemålCommand(
+    private val command = VurderVergemålOgFullmakt(
         hendelseId = UUID.randomUUID(),
         vergemålDao = vergemålDao,
         vedtaksperiodeId = VEDTAKSPERIODE_ID,

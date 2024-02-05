@@ -15,7 +15,7 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vergemal.VergemålDao
 import org.slf4j.LoggerFactory
 
-internal class AutomatiskAvvisningCommand(
+internal class VurderAutomatiskAvvisning(
     private val fødselsnummer: String,
     private val vedtaksperiodeId: UUID,
     private val personDao: PersonDao,
@@ -79,7 +79,7 @@ internal class AutomatiskAvvisningCommand(
     }
 
     private companion object {
-        private val logg = LoggerFactory.getLogger(AutomatiskAvvisningCommand::class.java)
+        private val logg = LoggerFactory.getLogger(VurderAutomatiskAvvisning::class.java)
         private fun erProd() = "prod-gcp" == System.getenv("NAIS_CLUSTER_NAME")
     }
 }

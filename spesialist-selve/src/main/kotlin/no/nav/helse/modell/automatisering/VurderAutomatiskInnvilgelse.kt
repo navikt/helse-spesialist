@@ -11,7 +11,7 @@ import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import org.slf4j.LoggerFactory
 
-internal class AutomatiseringCommand(
+internal class VurderAutomatiskInnvilgelse(
     private val fødselsnummer: String,
     private val vedtaksperiodeId: UUID,
     private val hendelseId: UUID,
@@ -24,7 +24,7 @@ internal class AutomatiseringCommand(
 ) : Command {
 
     private companion object {
-        private val logg = LoggerFactory.getLogger(AutomatiseringCommand::class.java)
+        private val logg = LoggerFactory.getLogger(VurderAutomatiskInnvilgelse::class.java)
     }
 
     override fun execute(context: CommandContext): Boolean {

@@ -22,7 +22,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 
 
-internal class TrengerTotrinnsvurderingCommandTest {
+internal class VurderBehovForTotrinnskontrollTest {
 
     private companion object {
         private val VEDTAKSPERIODE_ID_2 = UUID.randomUUID()
@@ -44,7 +44,7 @@ internal class TrengerTotrinnsvurderingCommandTest {
         ),
         emptyList()
     )
-    private val command = TrengerTotrinnsvurderingCommand(
+    private val command = VurderBehovForTotrinnskontroll(
         fødselsnummer = FØDSELSNUMMER,
         vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
         oppgaveMediator = oppgaveMediator,

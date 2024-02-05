@@ -44,7 +44,7 @@ import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import org.slf4j.LoggerFactory
 
-internal class OpprettSaksbehandleroppgaveCommand(
+internal class OpprettSaksbehandleroppgave(
     private val fødselsnummer: String,
     private val vedtaksperiodeId: UUID,
     private val oppgaveMediator: OppgaveMediator,
@@ -66,7 +66,7 @@ internal class OpprettSaksbehandleroppgaveCommand(
 ) : Command {
 
     private companion object {
-        private val logg = LoggerFactory.getLogger(OpprettSaksbehandleroppgaveCommand::class.java)
+        private val logg = LoggerFactory.getLogger(OpprettSaksbehandleroppgave::class.java)
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     }
 

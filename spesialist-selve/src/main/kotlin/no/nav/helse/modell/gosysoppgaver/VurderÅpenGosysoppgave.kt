@@ -9,7 +9,7 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import org.slf4j.LoggerFactory
 
-internal class ÅpneGosysOppgaverCommand(
+internal class VurderÅpenGosysoppgave(
     private val hendelseId: UUID,
     private val aktørId: String,
     private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
@@ -20,7 +20,7 @@ internal class ÅpneGosysOppgaverCommand(
 ) : Command {
 
     private companion object {
-        private val logg = LoggerFactory.getLogger(ÅpneGosysOppgaverCommand::class.java)
+        private val logg = LoggerFactory.getLogger(VurderÅpenGosysoppgave::class.java)
     }
 
     override fun execute(context: CommandContext) = behandle(context)

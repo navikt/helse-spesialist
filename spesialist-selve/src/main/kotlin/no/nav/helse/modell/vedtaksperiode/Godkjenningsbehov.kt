@@ -13,11 +13,11 @@ import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsforhold.command.KlargjørArbeidsforholdCommand
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
-import no.nav.helse.modell.automatisering.AutomatiseringCommand
-import no.nav.helse.modell.automatisering.AutomatiskAvvisningCommand
+import no.nav.helse.modell.automatisering.VurderAutomatiskAvvisning
+import no.nav.helse.modell.automatisering.VurderAutomatiskInnvilgelse
 import no.nav.helse.modell.egenansatt.EgenAnsattCommand
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
-import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverCommand
+import no.nav.helse.modell.gosysoppgaver.VurderÅpenGosysoppgave
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.AvbrytContextCommand
 import no.nav.helse.modell.kommando.Command
@@ -26,22 +26,22 @@ import no.nav.helse.modell.kommando.KlargjørPersonCommand
 import no.nav.helse.modell.kommando.KlargjørVedtaksperiodeCommand
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OpprettKoblingTilHendelseCommand
-import no.nav.helse.modell.kommando.OpprettSaksbehandleroppgaveCommand
+import no.nav.helse.modell.kommando.OpprettSaksbehandleroppgave
 import no.nav.helse.modell.kommando.PersisterInntektCommand
 import no.nav.helse.modell.kommando.PersisterPeriodehistorikkCommand
-import no.nav.helse.modell.kommando.TrengerTotrinnsvurderingCommand
+import no.nav.helse.modell.kommando.VurderBehovForTotrinnskontroll
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.påvent.PåVentDao
-import no.nav.helse.modell.risiko.RisikoCommand
 import no.nav.helse.modell.risiko.RisikovurderingDao
+import no.nav.helse.modell.risiko.VurderVurderingsmomenter
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.VurderEnhetUtland
-import no.nav.helse.modell.vergemal.VergemålCommand
 import no.nav.helse.modell.vergemal.VergemålDao
+import no.nav.helse.modell.vergemal.VurderVergemålOgFullmakt
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 
@@ -134,7 +134,7 @@ internal class Godkjenningsbehov(
             fødselsnummer = fødselsnummer,
             egenAnsattDao = egenAnsattDao,
         ),
-        VergemålCommand(
+        VurderVergemålOgFullmakt(
             hendelseId = id,
             vergemålDao = vergemålDao,
             vedtaksperiodeId = vedtaksperiodeId,
@@ -147,7 +147,7 @@ internal class Godkjenningsbehov(
             hendelseId = id,
             sykefraværstilfelle = sykefraværstilfelle
         ),
-        ÅpneGosysOppgaverCommand(
+        VurderÅpenGosysoppgave(
             hendelseId = id,
             aktørId = aktørId,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
@@ -156,7 +156,7 @@ internal class Godkjenningsbehov(
             sykefraværstilfelle = sykefraværstilfelle,
             harTildeltOppgave = false,
         ),
-        RisikoCommand(
+        VurderVurderingsmomenter(
             hendelseId = id,
             vedtaksperiodeId = vedtaksperiodeId,
             risikovurderingDao = risikovurderingDao,
@@ -165,7 +165,7 @@ internal class Godkjenningsbehov(
             sykefraværstilfelle = sykefraværstilfelle,
             utbetaling = utbetaling,
         ),
-        AutomatiskAvvisningCommand(
+        VurderAutomatiskAvvisning(
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             personDao = personDao,
@@ -177,7 +177,7 @@ internal class Godkjenningsbehov(
             kanAvvises = kanAvvises,
             sykefraværstilfelle = sykefraværstilfelle,
         ),
-        AutomatiseringCommand(
+        VurderAutomatiskInnvilgelse(
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             hendelseId = id,
@@ -188,7 +188,7 @@ internal class Godkjenningsbehov(
             periodetype = periodetype,
             sykefraværstilfelle = sykefraværstilfelle
         ),
-        OpprettSaksbehandleroppgaveCommand(
+        OpprettSaksbehandleroppgave(
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             oppgaveMediator = oppgaveMediator,
@@ -208,7 +208,7 @@ internal class Godkjenningsbehov(
             vedtakDao = vedtakDao,
             påVentDao = påVentDao,
         ),
-        TrengerTotrinnsvurderingCommand(
+        VurderBehovForTotrinnskontroll(
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             oppgaveMediator = oppgaveMediator,

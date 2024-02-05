@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-internal class AutomatiskAvvisningCommandTest {
+internal class VurderAutomatiskAvvisningTest {
     private lateinit var context: CommandContext
 
     private val vergemålDao = mockk<VergemålDao>(relaxed = true)
@@ -97,7 +97,7 @@ internal class AutomatiskAvvisningCommandTest {
         assertIkkeAvvisning(lagCommand(kanAvvises = false))
     }
 
-    private fun assertAvvisning(command: AutomatiskAvvisningCommand, forventetÅrsak: String) {
+    private fun assertAvvisning(command: VurderAutomatiskAvvisning, forventetÅrsak: String) {
         assertTrue(command.execute(context))
         verify (exactly = 1) { godkjenningMediator.automatiskAvvisning(
             any(),
@@ -108,7 +108,7 @@ internal class AutomatiskAvvisningCommandTest {
         ) }
     }
 
-    private fun assertIkkeAvvisning(command: AutomatiskAvvisningCommand) {
+    private fun assertIkkeAvvisning(command: VurderAutomatiskAvvisning) {
         assertTrue(command.execute(context))
         verify (exactly = 0) { godkjenningMediator.automatiskAvvisning(any(), any(), any()) }
         verify (exactly = 0) { godkjenningMediator.automatiskAvvisning(any(), any(), any(), any(), any()) }
@@ -119,7 +119,7 @@ internal class AutomatiskAvvisningCommandTest {
         kanAvvises: Boolean = true,
         fødselsnummer: String = "12345678910",
     ) =
-        AutomatiskAvvisningCommand(
+        VurderAutomatiskAvvisning(
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             personDao = personDao,
