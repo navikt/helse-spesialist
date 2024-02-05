@@ -59,6 +59,7 @@ import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.NyeVarsler
+import no.nav.helse.modell.vedtaksperiode.OpprettVedtaksperiodeCommand
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeEndret
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
@@ -780,6 +781,21 @@ internal class Hendelsefabrikk(
         )
     }
 
+    fun opprettVedtaksperiode(fødselsnummer: String, hendelse: VedtaksperiodeOpprettet): OpprettVedtaksperiodeCommand {
+        return OpprettVedtaksperiodeCommand(
+            id = hendelse.id,
+            vedtaksperiodeId = hendelse.vedtaksperiodeId(),
+            fødselsnummer = fødselsnummer,
+            generasjon = førsteGenerasjon(hendelse.vedtaksperiodeId(), hendelse.fom, hendelse.tom, hendelse.skjæringstidspunkt),
+            organisasjonsnummer = hendelse.organisasjonsnummer,
+            fom = hendelse.fom,
+            tom = hendelse.tom,
+            personDao = personDao,
+            arbeidsgiverDao = arbeidsgiverDao,
+            vedtakDao = vedtakDao
+        )
+    }
+
     fun vedtaksperiodeReberegnet(json: String): VedtaksperiodeReberegnet {
         val jsonNode = mapper.readTree(json)
         return VedtaksperiodeReberegnet(
@@ -811,10 +827,7 @@ internal class Hendelsefabrikk(
             vedtaksperiodeId = vedtaksperiodeId,
             fom = fom,
             tom = tom,
-            personDao = personDao,
-            arbeidsgiverDao = arbeidsgiverDao,
-            vedtakDao = vedtakDao,
-            generasjon = førsteGenerasjon(vedtaksperiodeId, fom, tom, skjæringstidspunkt),
+            skjæringstidspunkt = skjæringstidspunkt,
             json = json,
         )
     }
