@@ -29,9 +29,15 @@ tasks {
     }
     val copyDeps by registering(Sync::class) {
         from(configurations.runtimeClasspath)
+        exclude("spesialist-*")
         into("build/deps")
     }
+    val copyLibs by registering(Sync::class) {
+        from(configurations.runtimeClasspath)
+        include("spesialist-*")
+        into("build/libs")
+    }
     named("assemble") {
-        dependsOn(copyDeps)
+        dependsOn(copyDeps, copyLibs)
     }
 }
