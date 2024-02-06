@@ -5,13 +5,13 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import org.slf4j.LoggerFactory
 
-internal class EgenAnsattCommand(
+internal class KontrollerEgenAnsattstatus(
     private val fødselsnummer: String,
     private val egenAnsattDao: EgenAnsattDao,
 ) : Command {
 
     private companion object {
-        private val logg = LoggerFactory.getLogger(EgenAnsattCommand::class.java)
+        private val logg = LoggerFactory.getLogger(KontrollerEgenAnsattstatus::class.java)
     }
 
     override fun execute(context: CommandContext) = behandle(context)

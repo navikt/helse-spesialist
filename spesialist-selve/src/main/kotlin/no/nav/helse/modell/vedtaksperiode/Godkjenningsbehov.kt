@@ -15,8 +15,8 @@ import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.VurderAutomatiskAvvisning
 import no.nav.helse.modell.automatisering.VurderAutomatiskInnvilgelse
-import no.nav.helse.modell.egenansatt.EgenAnsattCommand
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
+import no.nav.helse.modell.egenansatt.KontrollerEgenAnsattstatus
 import no.nav.helse.modell.gosysoppgaver.VurderÅpenGosysoppgave
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.AvbrytContextCommand
@@ -130,7 +130,7 @@ internal class Godkjenningsbehov(
             utbetalingId = utbetalingId,
             utbetalingDao = utbetalingDao,
         ),
-        EgenAnsattCommand(
+        KontrollerEgenAnsattstatus(
             fødselsnummer = fødselsnummer,
             egenAnsattDao = egenAnsattDao,
         ),

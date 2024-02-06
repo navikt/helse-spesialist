@@ -14,14 +14,14 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-internal class EgenAnsattCommandTest {
+internal class KontrollerEgenAnsattstatusTest {
     private companion object {
         private const val FNR = "12345678911"
     }
 
     private val dao = mockk<EgenAnsattDao>(relaxed = true)
 
-    private val command = EgenAnsattCommand(FNR, dao)
+    private val command = KontrollerEgenAnsattstatus(FNR, dao)
     private val context: CommandContext = CommandContext(UUID.randomUUID())
 
     @BeforeEach
