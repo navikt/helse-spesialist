@@ -168,7 +168,8 @@ internal class SykefraværstilfelleMediatorTest {
                 arbeidsgivere = listOf(
                     Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
                         organisasjonsnummer = organisasjonsnummer,
-                        omregnetArsinntekt = 10000.0,
+                        omregnetÅrsinntekt = 10000.0,
+                        innrapportertÅrsinntekt = 10000.0,
                     )
                 )
             ),
@@ -212,6 +213,7 @@ internal class SykefraværstilfelleMediatorTest {
                 mapOf(
                     "arbeidsgiver" to organisasjonsnummer,
                     "omregnetÅrsinntekt" to 10000.0,
+                    "innrapportertÅrsinntekt" to 10000.0,
                 )
             ), objectMapper.convertValue(event["sykepengegrunnlagsfakta"]["arbeidsgivere"])
         )
@@ -247,8 +249,9 @@ internal class SykefraværstilfelleMediatorTest {
                 arbeidsgivere = listOf(
                     Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterSkjønn(
                         organisasjonsnummer = organisasjonsnummer,
-                        omregnetArsinntekt = 10000.0,
-                        skjønnsfastsatt = 13000.0
+                        omregnetÅrsinntekt = 10000.0,
+                        skjønnsfastsatt = 13000.0,
+                        innrapportertÅrsinntekt = 13000.0,
                     )
                 ),
                 skjønnsfastsatt = 13000.0
@@ -293,6 +296,7 @@ internal class SykefraværstilfelleMediatorTest {
                 mapOf(
                     "arbeidsgiver" to organisasjonsnummer,
                     "omregnetÅrsinntekt" to 10000.0,
+                    "innrapportertÅrsinntekt" to 13000.0,
                     "skjønnsfastsatt" to 13000.0
                 )
             ), objectMapper.convertValue(event["sykepengegrunnlagsfakta"]["arbeidsgivere"])

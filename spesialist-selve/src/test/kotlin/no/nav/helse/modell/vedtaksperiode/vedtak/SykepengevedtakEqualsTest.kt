@@ -310,8 +310,8 @@ class SykepengevedtakEqualsTest {
                 skjønnsfastsatt = 650000.0,
                 tags = emptyList(),
                 arbeidsgivere = listOf(
-                    Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterSkjønn(organisasjonsnummer, 300000.0, 325000.0),
-                    Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterSkjønn("987654321", 300000.0, 325000.0)
+                    Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterSkjønn(organisasjonsnummer, 300000.0, 300000.0, 325000.0),
+                    Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterSkjønn("987654321", 300000.0, 300000.0, 325000.0)
                 )
             )
 
@@ -322,8 +322,8 @@ class SykepengevedtakEqualsTest {
                 seksG = seksG2023,
                 tags = emptyList(),
                 arbeidsgivere = listOf(
-                    Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(organisasjonsnummer, 300000.0),
-                    Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel("987654321", 300000.0)
+                    Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(organisasjonsnummer, 300000.0, 300000.0),
+                    Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel("987654321", 300000.0, 300000.0)
                 )
             )
 

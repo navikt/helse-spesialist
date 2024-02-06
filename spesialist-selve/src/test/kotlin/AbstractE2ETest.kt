@@ -139,7 +139,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         tom: LocalDate = 31.januar,
         skjæringstidspunkt: LocalDate = fom,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
-        avviksvurderingTestdata: AvviksvurderingTestdata = AvviksvurderingTestdata(),
+        avviksvurderingTestdata: AvviksvurderingTestdata = AvviksvurderingTestdata(skjæringstidspunkt = skjæringstidspunkt, fødselsnummer = FØDSELSNUMMER),
     ) {
         fremTilÅpneOppgaver(
             avviksvurderingTestdata = avviksvurderingTestdata,

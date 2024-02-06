@@ -386,8 +386,8 @@ class SykepengevedtakBuilderTest {
                 skjønnsfastsatt = 650000.0,
                 tags = emptyList(),
                 arbeidsgivere = listOf(
-                    Arbeidsgiver.EtterSkjønn(organisasjonsnummer, 300000.0, 325000.0),
-                    Arbeidsgiver.EtterSkjønn("987654321", 300000.0, 325000.0)
+                    Arbeidsgiver.EtterSkjønn(organisasjonsnummer, 300000.0, 300000.0, 325000.0),
+                    Arbeidsgiver.EtterSkjønn("987654321", 300000.0, 300000.0, 325000.0)
                 )
             )
             ETTER_HOVEDREGEL -> Spleis.EtterHovedregel(
@@ -397,8 +397,8 @@ class SykepengevedtakBuilderTest {
                 seksG = seksG2023,
                 tags = emptyList(),
                 arbeidsgivere = listOf(
-                    Arbeidsgiver.EtterHovedregel(organisasjonsnummer, 300000.0),
-                    Arbeidsgiver.EtterHovedregel("987654321", 300000.0)
+                    Arbeidsgiver.EtterHovedregel(organisasjonsnummer, 300000.0, 300000.0),
+                    Arbeidsgiver.EtterHovedregel("987654321", 300000.0, 300000.0)
                 )
             )
             I_INFOTRYGD -> Infotrygd(

@@ -11,7 +11,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
     @Test
     fun `referential equals - EtterSkjønn`() {
         val sykepengegrunnlagsfakta = Spleis.EtterSkjønn(
-            arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer", 500000.0, 600000.0)),
+            arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer", 500000.0, 500000.0, 600000.0)),
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
@@ -27,7 +27,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
     @Test
     fun `referential equals - EtterHovedregel`() {
         val sykepengegrunnlagsfakta = Spleis.EtterHovedregel(
-            arbeidsgivere = listOf(Arbeidsgiver.EtterHovedregel("organisasjonsnummer", 500000.0)),
+            arbeidsgivere = listOf(Arbeidsgiver.EtterHovedregel("organisasjonsnummer", 500000.0, 500000.0)),
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
@@ -50,7 +50,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
     @Test
     fun `structural equals - EtterSkjønn`() {
         val sykepengegrunnlagsfakta1 = Spleis.EtterSkjønn(
-            arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer", 500000.0, 600000.0)),
+            arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer", 500000.0, 500000.0, 600000.0)),
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
@@ -59,7 +59,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             tags = listOf("TAG")
         )
         val sykepengegrunnlagsfakta2 = Spleis.EtterSkjønn(
-            arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer", 500000.0, 600000.0)),
+            arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer", 500000.0, 500000.0, 600000.0)),
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
@@ -75,7 +75,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
     @Test
     fun `structural equals - EtterHovedregel`() {
         val sykepengegrunnlagsfakta1 = Spleis.EtterHovedregel(
-            arbeidsgivere = listOf(Arbeidsgiver.EtterHovedregel("organisasjonsnummer", 500000.0)),
+            arbeidsgivere = listOf(Arbeidsgiver.EtterHovedregel("organisasjonsnummer", 500000.0, 500000.0)),
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
@@ -83,7 +83,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             tags = listOf("TAG")
         )
         val sykepengegrunnlagsfakta2 = Spleis.EtterHovedregel(
-            arbeidsgivere = listOf(Arbeidsgiver.EtterHovedregel("organisasjonsnummer", 500000.0)),
+            arbeidsgivere = listOf(Arbeidsgiver.EtterHovedregel("organisasjonsnummer", 500000.0, 500000.0)),
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
@@ -107,7 +107,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
     @Test
     fun `not equals - EtterSkjønn - arbeidsgivere`() {
         val sykepengegrunnlagsfakta1 = Spleis.EtterSkjønn(
-            arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer1", 500000.0, 600000.0)),
+            arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer1", 500000.0, 500000.0, 600000.0)),
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
@@ -116,7 +116,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             tags = listOf("TAG")
         )
         val sykepengegrunnlagsfakta2 = Spleis.EtterSkjønn(
-            arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer2", 400000.0, 300000.0)),
+            arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer2", 400000.0, 400000.0, 300000.0)),
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
@@ -132,7 +132,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
     @Test
     fun `not equals - EtterSkjønn - omregnetÅrsinntekt`() {
         val sykepengegrunnlagsfakta1 = Spleis.EtterSkjønn(
-            arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer", 500000.0, 600000.0)),
+            arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer", 500000.0, 500000.0, 600000.0)),
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
@@ -141,7 +141,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             tags = listOf("TAG")
         )
         val sykepengegrunnlagsfakta2 = Spleis.EtterSkjønn(
-            arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer", 500000.0, 600000.0)),
+            arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer", 500000.0, 500000.0, 600000.0)),
             omregnetÅrsinntekt = 400000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
@@ -157,7 +157,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
     @Test
     fun `not equals - EtterSkjønn - innrapporterÅrsinntekt`() {
         val sykepengegrunnlagsfakta1 = Spleis.EtterSkjønn(
-            arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer", 500000.0, 600000.0)),
+            arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer", 500000.0, 500000.0, 600000.0)),
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
@@ -166,7 +166,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             tags = listOf("TAG")
         )
         val sykepengegrunnlagsfakta2 = Spleis.EtterSkjønn(
-            arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer", 500000.0, 600000.0)),
+            arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer", 500000.0, 500000.0, 600000.0)),
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 400000.0,
             avviksprosent = 25.0,
@@ -182,7 +182,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
     @Test
     fun `not equals - EtterSkjønn - avviksprosent`() {
         val sykepengegrunnlagsfakta1 = Spleis.EtterSkjønn(
-            arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer", 500000.0, 600000.0)),
+            arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer", 500000.0, 500000.0, 600000.0)),
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
@@ -191,7 +191,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             tags = listOf("TAG")
         )
         val sykepengegrunnlagsfakta2 = Spleis.EtterSkjønn(
-            arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer", 500000.0, 600000.0)),
+            arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer", 500000.0, 500000.0, 600000.0)),
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 26.0,
@@ -207,7 +207,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
     @Test
     fun `not equals - EtterSkjønn - seksG`() {
         val sykepengegrunnlagsfakta1 = Spleis.EtterSkjønn(
-            arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer", 500000.0, 600000.0)),
+            arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer", 500000.0, 500000.0, 600000.0)),
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
@@ -216,7 +216,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             tags = listOf("TAG")
         )
         val sykepengegrunnlagsfakta2 = Spleis.EtterSkjønn(
-            arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer", 500000.0, 600000.0)),
+            arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer", 500000.0, 500000.0, 600000.0)),
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
@@ -232,7 +232,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
     @Test
     fun `not equals - EtterSkjønn - skjønnsfastsatt`() {
         val sykepengegrunnlagsfakta1 = Spleis.EtterSkjønn(
-            arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer", 500000.0, 600000.0)),
+            arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer", 500000.0, 500000.0, 600000.0)),
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
@@ -241,7 +241,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             tags = listOf("TAG")
         )
         val sykepengegrunnlagsfakta2 = Spleis.EtterSkjønn(
-            arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer", 500000.0, 600000.0)),
+            arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer", 500000.0, 500000.0, 600000.0)),
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
@@ -257,7 +257,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
     @Test
     fun `not equals - EtterSkjønn - tags`() {
         val sykepengegrunnlagsfakta1 = Spleis.EtterSkjønn(
-            arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer", 500000.0, 600000.0)),
+            arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer", 500000.0, 500000.0, 600000.0)),
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
@@ -266,7 +266,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             tags = listOf("TAG1")
         )
         val sykepengegrunnlagsfakta2 = Spleis.EtterSkjønn(
-            arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer", 500000.0, 600000.0)),
+            arbeidsgivere = listOf(Arbeidsgiver.EtterSkjønn("organisasjonsnummer", 500000.0, 500000.0, 600000.0)),
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
@@ -282,7 +282,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
     @Test
     fun `not equals - EtterHovedregel - arbeidsgivere`() {
         val sykepengegrunnlagsfakta1 = Spleis.EtterHovedregel(
-            arbeidsgivere = listOf(Arbeidsgiver.EtterHovedregel("organisasjonsnummer1", 500000.0)),
+            arbeidsgivere = listOf(Arbeidsgiver.EtterHovedregel("organisasjonsnummer1", 500000.0, 500000.0)),
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
@@ -290,7 +290,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             tags = listOf("TAG")
         )
         val sykepengegrunnlagsfakta2 = Spleis.EtterHovedregel(
-            arbeidsgivere = listOf(Arbeidsgiver.EtterHovedregel("organisasjonsnummer2", 400000.0)),
+            arbeidsgivere = listOf(Arbeidsgiver.EtterHovedregel("organisasjonsnummer2", 400000.0, 400000.0)),
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
@@ -305,7 +305,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
     @Test
     fun `not equals - EtterHovedregel - omregnetÅrsinntekt`() {
         val sykepengegrunnlagsfakta1 = Spleis.EtterHovedregel(
-            arbeidsgivere = listOf(Arbeidsgiver.EtterHovedregel("organisasjonsnummer", 500000.0)),
+            arbeidsgivere = listOf(Arbeidsgiver.EtterHovedregel("organisasjonsnummer", 500000.0, 500000.0)),
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
@@ -313,7 +313,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             tags = listOf("TAG")
         )
         val sykepengegrunnlagsfakta2 = Spleis.EtterHovedregel(
-            arbeidsgivere = listOf(Arbeidsgiver.EtterHovedregel("organisasjonsnummer", 500000.0)),
+            arbeidsgivere = listOf(Arbeidsgiver.EtterHovedregel("organisasjonsnummer", 500000.0, 500000.0)),
             omregnetÅrsinntekt = 400000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
@@ -328,7 +328,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
     @Test
     fun `not equals - EtterHovedregel - innrapporterÅrsinntekt`() {
         val sykepengegrunnlagsfakta1 = Spleis.EtterHovedregel(
-            arbeidsgivere = listOf(Arbeidsgiver.EtterHovedregel("organisasjonsnummer", 500000.0)),
+            arbeidsgivere = listOf(Arbeidsgiver.EtterHovedregel("organisasjonsnummer", 500000.0, 500000.0)),
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
@@ -336,7 +336,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             tags = listOf("TAG")
         )
         val sykepengegrunnlagsfakta2 = Spleis.EtterHovedregel(
-            arbeidsgivere = listOf(Arbeidsgiver.EtterHovedregel("organisasjonsnummer", 500000.0)),
+            arbeidsgivere = listOf(Arbeidsgiver.EtterHovedregel("organisasjonsnummer", 500000.0, 500000.0)),
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 400000.0,
             avviksprosent = 25.0,
@@ -351,7 +351,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
     @Test
     fun `not equals - EtterHovedregel - avviksprosent`() {
         val sykepengegrunnlagsfakta1 = Spleis.EtterHovedregel(
-            arbeidsgivere = listOf(Arbeidsgiver.EtterHovedregel("organisasjonsnummer", 500000.0)),
+            arbeidsgivere = listOf(Arbeidsgiver.EtterHovedregel("organisasjonsnummer", 500000.0, 500000.0)),
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
@@ -359,7 +359,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             tags = listOf("TAG")
         )
         val sykepengegrunnlagsfakta2 = Spleis.EtterHovedregel(
-            arbeidsgivere = listOf(Arbeidsgiver.EtterHovedregel("organisasjonsnummer", 500000.0)),
+            arbeidsgivere = listOf(Arbeidsgiver.EtterHovedregel("organisasjonsnummer", 500000.0, 500000.0)),
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 26.0,
@@ -374,7 +374,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
     @Test
     fun `not equals - EtterHovedregel - seksG`() {
         val sykepengegrunnlagsfakta1 = Spleis.EtterHovedregel(
-            arbeidsgivere = listOf(Arbeidsgiver.EtterHovedregel("organisasjonsnummer", 500000.0)),
+            arbeidsgivere = listOf(Arbeidsgiver.EtterHovedregel("organisasjonsnummer", 500000.0, 500000.0)),
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
@@ -382,7 +382,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             tags = listOf("TAG")
         )
         val sykepengegrunnlagsfakta2 = Spleis.EtterHovedregel(
-            arbeidsgivere = listOf(Arbeidsgiver.EtterHovedregel("organisasjonsnummer", 500000.0)),
+            arbeidsgivere = listOf(Arbeidsgiver.EtterHovedregel("organisasjonsnummer", 500000.0, 500000.0)),
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
@@ -397,7 +397,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
     @Test
     fun `not equals - EtterHovedregel - tags`() {
         val sykepengegrunnlagsfakta1 = Spleis.EtterHovedregel(
-            arbeidsgivere = listOf(Arbeidsgiver.EtterHovedregel("organisasjonsnummer", 500000.0)),
+            arbeidsgivere = listOf(Arbeidsgiver.EtterHovedregel("organisasjonsnummer", 500000.0, 500000.0)),
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,
@@ -405,7 +405,7 @@ class SykepengegrunnlagsfaktaEqualsTest {
             tags = listOf("TAG1")
         )
         val sykepengegrunnlagsfakta2 = Spleis.EtterHovedregel(
-            arbeidsgivere = listOf(Arbeidsgiver.EtterHovedregel("organisasjonsnummer", 500000.0)),
+            arbeidsgivere = listOf(Arbeidsgiver.EtterHovedregel("organisasjonsnummer", 500000.0, 500000.0)),
             omregnetÅrsinntekt = 500000.0,
             innrapportertÅrsinntekt = 500000.0,
             avviksprosent = 25.0,

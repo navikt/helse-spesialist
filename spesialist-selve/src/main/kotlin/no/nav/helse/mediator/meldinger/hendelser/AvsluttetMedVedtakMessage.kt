@@ -8,6 +8,7 @@ import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.avviksvurdering.Avviksvurdering
 import no.nav.helse.modell.avviksvurdering.Avviksvurdering.Companion.finnRiktigAvviksvurdering
+import no.nav.helse.modell.avviksvurdering.InnrapportertInntektDto
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetMedVedtak
 import no.nav.helse.modell.vedtaksperiode.vedtak.Faktatype
@@ -85,12 +86,14 @@ internal class AvsluttetMedVedtakMessage(packet: JsonMessage, private val avviks
             kv("hendelseId", packet["@id"])
         )
 
-        val innrapportertÅrsinntekt = avviksvurdering?.toDto()?.sammenligningsgrunnlag?.totalbeløp
+        val avviksvurderingDto = avviksvurdering?.toDto()
+        val innrapportertÅrsinntekt = avviksvurderingDto?.sammenligningsgrunnlag?.totalbeløp
             ?: packet["sykepengegrunnlagsfakta.innrapportertÅrsinntekt"].let { if (it.isMissingOrNull()) throw IllegalStateException() else it }
                 .asDouble()
-        val avviksprosent = avviksvurdering?.toDto()?.avviksprosent
+        val avviksprosent = avviksvurderingDto?.avviksprosent
             ?: packet["sykepengegrunnlagsfakta.avviksprosent"].takeIf { it.isNumber }?.doubleValue()
             ?: error("Her mangler det BÅDE spinnvill avviksvurdering OG informasjon fra spleis 😱")
+        val innrapporterteInntekter = avviksvurderingDto?.sammenligningsgrunnlag?.innrapporterteInntekter ?: error("Avviksvurdering mangler")
 
         return when (faktatype) {
             Faktatype.ETTER_SKJØNN -> Sykepengegrunnlagsfakta.Spleis.EtterSkjønn(
@@ -100,11 +103,13 @@ internal class AvsluttetMedVedtakMessage(packet: JsonMessage, private val avviks
                 seksG = packet["sykepengegrunnlagsfakta.6G"].asDouble(),
                 skjønnsfastsatt = packet["sykepengegrunnlagsfakta.skjønnsfastsatt"].asDouble(),
                 tags = packet["sykepengegrunnlagsfakta.tags"].map { it.asText() },
-                arbeidsgivere = packet["sykepengegrunnlagsfakta.arbeidsgivere"].map {
+                arbeidsgivere = packet["sykepengegrunnlagsfakta.arbeidsgivere"].map { arbeidsgiver ->
+                    val organisasjonsnummer = arbeidsgiver["arbeidsgiver"].asText()
                     Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterSkjønn(
-                        it["arbeidsgiver"].asText(),
-                        it["omregnetÅrsinntekt"].asDouble(),
-                        it["skjønnsfastsatt"].asDouble()
+                        organisasjonsnummer = organisasjonsnummer,
+                        omregnetÅrsinntekt = arbeidsgiver["omregnetÅrsinntekt"].asDouble(),
+                        innrapportertÅrsinntekt = innrapporterteInntekter(organisasjonsnummer, innrapporterteInntekter),
+                        skjønnsfastsatt = arbeidsgiver["skjønnsfastsatt"].asDouble(),
                     )
                 },
             )
@@ -115,10 +120,12 @@ internal class AvsluttetMedVedtakMessage(packet: JsonMessage, private val avviks
                 avviksprosent = avviksprosent,
                 seksG = packet["sykepengegrunnlagsfakta.6G"].asDouble(),
                 tags = packet["sykepengegrunnlagsfakta.tags"].map { it.asText() },
-                arbeidsgivere = packet["sykepengegrunnlagsfakta.arbeidsgivere"].map {
+                arbeidsgivere = packet["sykepengegrunnlagsfakta.arbeidsgivere"].map { arbeidsgiver ->
+                    val organisasjonsnummer = arbeidsgiver["arbeidsgiver"].asText()
                     Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
-                        it["arbeidsgiver"].asText(),
-                        it["omregnetÅrsinntekt"].asDouble(),
+                        organisasjonsnummer = organisasjonsnummer,
+                        omregnetÅrsinntekt = arbeidsgiver["omregnetÅrsinntekt"].asDouble(),
+                        innrapportertÅrsinntekt = innrapporterteInntekter(organisasjonsnummer, innrapporterteInntekter),
                     )
                 },
             )
@@ -126,6 +133,15 @@ internal class AvsluttetMedVedtakMessage(packet: JsonMessage, private val avviks
             else -> error("Her vet vi ikke hva som har skjedd. Feil i kompilatoren?")
         }
     }
+
+    private fun innrapporterteInntekter(
+        arbeidsgiverreferanse: String,
+        innrapportertInntekter: List<InnrapportertInntektDto>,
+    ): Double =
+        innrapportertInntekter
+            .filter { it.arbeidsgiverreferanse == arbeidsgiverreferanse }
+            .flatMap { it.inntekter }
+            .sumOf { it.beløp }
 
     companion object {
         private val logger = LoggerFactory.getLogger(AvsluttetMedVedtakMessage::class.java)

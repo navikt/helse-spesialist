@@ -62,7 +62,8 @@ internal class SykefraværstilfelleMediator(
                                 "arbeidsgivere" to sykepengevedtak.sykepengegrunnlagsfakta.arbeidsgivere.map {
                                     mutableMapOf(
                                         "arbeidsgiver" to it.organisasjonsnummer,
-                                        "omregnetÅrsinntekt" to it.omregnetArsinntekt,
+                                        "omregnetÅrsinntekt" to it.omregnetÅrsinntekt,
+                                        "innrapportertÅrsinntekt" to it.innrapportertÅrsinntekt,
                                     ).apply {
                                         if (it is Spleis.Arbeidsgiver.EtterSkjønn) put(
                                             "skjønnsfastsatt",
