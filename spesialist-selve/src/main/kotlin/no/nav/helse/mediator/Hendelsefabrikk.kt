@@ -67,7 +67,6 @@ import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOppdatering
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOpprettet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnet
-import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeSkjønnsmessigFastsettelse
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.modell.vedtaksperiode.vedtak.VedtakFattet
 import no.nav.helse.modell.vergemal.VergemålDao
@@ -591,43 +590,6 @@ internal class Hendelsefabrikk(
             forårsaketAvId = UUID.fromString(jsonNode.path("@forårsaket_av.id").asText()),
             forrigeTilstand = jsonNode.path("forrigeTilstand").asText(),
             gjeldendeTilstand = jsonNode.path("gjeldendeTilstand").asText(),
-            json = json
-        )
-    }
-
-    fun vedtaksperiodeSkjønnsmessigFastsettelse(
-        id: UUID,
-        vedtaksperiodeId: UUID,
-        fødselsnummer: String,
-        aktørId: String,
-        organisasjonsnummer: String,
-        json: String,
-    ): VedtaksperiodeSkjønnsmessigFastsettelse {
-        return VedtaksperiodeSkjønnsmessigFastsettelse(
-            id = id,
-            vedtaksperiodeId = vedtaksperiodeId,
-            fødselsnummer = fødselsnummer,
-            aktørId = aktørId,
-            json = json,
-            organisasjonsnummer = organisasjonsnummer,
-            snapshotDao = snapshotDao,
-            snapshotClient = snapshotClient,
-            personDao = personDao,
-            generasjonRepository = generasjonRepository,
-            arbeidsgiverDao = arbeidsgiverDao,
-            arbeidsforholdDao = arbeidsforholdDao,
-            egenAnsattDao = egenAnsattDao,
-        )
-    }
-
-    fun vedtaksperiodeSkjønnsmessigFastsettelse(json: String): VedtaksperiodeSkjønnsmessigFastsettelse {
-        val jsonNode = mapper.readTree(json)
-        return vedtaksperiodeSkjønnsmessigFastsettelse(
-            id = UUID.fromString(jsonNode.path("@id").asText()),
-            vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText()),
-            fødselsnummer = jsonNode.path("fødselsnummer").asText(),
-            aktørId = jsonNode.path("aktørId").asText(),
-            organisasjonsnummer = jsonNode.path("organisasjonsnummer").asText(),
             json = json
         )
     }

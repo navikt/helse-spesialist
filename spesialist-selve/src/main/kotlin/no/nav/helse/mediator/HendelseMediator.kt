@@ -37,7 +37,6 @@ import no.nav.helse.mediator.meldinger.VedtaksperiodeHendelse
 import no.nav.helse.mediator.meldinger.VedtaksperiodeNyUtbetalingRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeOpprettetRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeReberegnetRiver
-import no.nav.helse.mediator.meldinger.VedtaksperiodeSkjønnsmessigFastsettelseRiver
 import no.nav.helse.mediator.meldinger.hendelser.AvsluttetMedVedtakMessage
 import no.nav.helse.mediator.meldinger.hendelser.AvsluttetUtenVedtakMessage
 import no.nav.helse.mediator.meldinger.løsninger.ArbeidsforholdRiver
@@ -152,7 +151,6 @@ internal class HendelseMediator(
             UtbetalingEndretRiver(it, this)
             VedtaksperiodeReberegnetRiver(it, this)
             VedtaksperiodeOpprettetRiver(it, this)
-            VedtaksperiodeSkjønnsmessigFastsettelseRiver(it, this)
             GosysOppgaveEndretRiver(it, this, oppgaveDao, personDao)
             TilbakedatertRiver(it, this, oppgaveDao)
             EndretSkjermetinfoRiver(it, personDao, egenAnsattDao, oppgaveDao, godkjenningMediator, this)
@@ -272,26 +270,6 @@ internal class HendelseMediator(
             forårsaketAvId = forårsaketAvId,
             forrigeTilstand = forrigeTilstand,
             gjeldendeTilstand = gjeldendeTilstand,
-            json = message.toJson()
-        )
-        return utfør(hendelse, context)
-    }
-
-    fun vedtaksperiodeSkjønnsmessigFastsettelse(
-        message: JsonMessage,
-        id: UUID,
-        vedtaksperiodeId: UUID,
-        fødselsnummer: String,
-        aktørId: String,
-        organisasjonsnummer: String,
-        context: MessageContext,
-    ) {
-        val hendelse = hendelsefabrikk.vedtaksperiodeSkjønnsmessigFastsettelse(
-            id = id,
-            vedtaksperiodeId = vedtaksperiodeId,
-            fødselsnummer = fødselsnummer,
-            aktørId = aktørId,
-            organisasjonsnummer = organisasjonsnummer,
             json = message.toJson()
         )
         return utfør(hendelse, context)
@@ -615,10 +593,10 @@ internal class HendelseMediator(
         utfør(hendelsefabrikk.vedtakFattet(id, fødselsnummer, vedtaksperiodeId, json), context)
     }
 
-    fun godkjentTilbakedatertSykmelding(id: UUID, fødselsnummer: String, vedtaksperiodeId: UUID, skjæringstidspunkt: LocalDate, json: String, context: MessageContext, ) {
+    fun godkjentTilbakedatertSykmelding(id: UUID, fødselsnummer: String, vedtaksperiodeId: UUID, skjæringstidspunkt: LocalDate, json: String, context: MessageContext) {
         if (!hendelsefabrikk.sykefraværstilfelle(fødselsnummer, skjæringstidspunkt).erTilbakedatert(vedtaksperiodeId)) return logg.info("ignorerer hendelseId=${id} fordi det ikke er en tilbakedatering")
 
-        utfør(hendelsefabrikk.godkjentTilbakedatertSykmelding(id, fødselsnummer, json,), context)
+        utfør(hendelsefabrikk.godkjentTilbakedatertSykmelding(id, fødselsnummer, json), context)
     }
 
     fun nyeVarsler(
