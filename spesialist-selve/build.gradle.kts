@@ -27,6 +27,7 @@ tasks {
             }
         }
     }
+
     val copyDeps by registering(Sync::class) {
         from(configurations.runtimeClasspath)
         exclude("spesialist-*")
