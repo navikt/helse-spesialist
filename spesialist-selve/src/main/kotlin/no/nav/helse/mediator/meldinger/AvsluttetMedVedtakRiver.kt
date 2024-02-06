@@ -50,10 +50,6 @@ internal class AvsluttetMedVedtakRiver(
                         else -> {}
                     }
                 }
-                it.interestedIn(
-                    "sykepengegrunnlagsfakta.innrapportertÅrsinntekt",
-                    "sykepengegrunnlagsfakta.avviksprosent",
-                )
             }
         }.register(this)
     }

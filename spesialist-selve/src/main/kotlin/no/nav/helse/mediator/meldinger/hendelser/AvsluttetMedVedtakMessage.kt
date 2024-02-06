@@ -3,10 +3,8 @@ package no.nav.helse.mediator.meldinger.hendelser
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import java.util.UUID
-import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.mediator.asUUID
-import no.nav.helse.modell.avviksvurdering.Avviksvurdering
 import no.nav.helse.modell.avviksvurdering.Avviksvurdering.Companion.finnRiktigAvviksvurdering
 import no.nav.helse.modell.avviksvurdering.InnrapportertInntektDto
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
@@ -16,8 +14,6 @@ import no.nav.helse.modell.vedtaksperiode.vedtak.Sykepengegrunnlagsfakta
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
-import no.nav.helse.rapids_rivers.isMissingOrNull
-import org.slf4j.LoggerFactory
 
 internal class AvsluttetMedVedtakMessage(packet: JsonMessage, private val avviksvurderingDao: AvviksvurderingDao) {
 
@@ -79,21 +75,10 @@ internal class AvsluttetMedVedtakMessage(packet: JsonMessage, private val avviks
             omregnetÅrsinntekt = packet["sykepengegrunnlagsfakta.omregnetÅrsinntekt"].asDouble(),
         )
 
-        val avviksvurdering: Avviksvurdering? = avviksvurderingDao.finnAvviksvurderinger(fødselsnummer).finnRiktigAvviksvurdering(skjæringstidspunkt)
-
-        logger.info(
-            "Bruker avviksvurdering fra: ${if (avviksvurdering == null) "spleis" else "spinnvill"} for {}",
-            kv("hendelseId", packet["@id"])
-        )
-
-        val avviksvurderingDto = avviksvurdering?.toDto()
-        val innrapportertÅrsinntekt = avviksvurderingDto?.sammenligningsgrunnlag?.totalbeløp
-            ?: packet["sykepengegrunnlagsfakta.innrapportertÅrsinntekt"].let { if (it.isMissingOrNull()) throw IllegalStateException() else it }
-                .asDouble()
-        val avviksprosent = avviksvurderingDto?.avviksprosent
-            ?: packet["sykepengegrunnlagsfakta.avviksprosent"].takeIf { it.isNumber }?.doubleValue()
-            ?: error("Her mangler det BÅDE spinnvill avviksvurdering OG informasjon fra spleis 😱")
-        val innrapporterteInntekter = avviksvurderingDto?.sammenligningsgrunnlag?.innrapporterteInntekter ?: error("Avviksvurdering mangler")
+        val avviksvurderingDto = finnAvviksvurdering().toDto()
+        val innrapportertÅrsinntekt = avviksvurderingDto.sammenligningsgrunnlag.totalbeløp
+        val avviksprosent = avviksvurderingDto.avviksprosent
+        val innrapporterteInntekter = avviksvurderingDto.sammenligningsgrunnlag.innrapporterteInntekter
 
         return when (faktatype) {
             Faktatype.ETTER_SKJØNN -> Sykepengegrunnlagsfakta.Spleis.EtterSkjønn(
@@ -134,6 +119,12 @@ internal class AvsluttetMedVedtakMessage(packet: JsonMessage, private val avviks
         }
     }
 
+    private fun finnAvviksvurdering() = checkNotNull(
+        avviksvurderingDao.finnAvviksvurderinger(fødselsnummer).finnRiktigAvviksvurdering(skjæringstidspunkt)
+    ) {
+        "Forventet å finne avviksvurdering for $aktørId og skjæringstidspunkt $skjæringstidspunkt"
+    }
+
     private fun innrapporterteInntekter(
         arbeidsgiverreferanse: String,
         innrapportertInntekter: List<InnrapportertInntektDto>,
@@ -143,7 +134,4 @@ internal class AvsluttetMedVedtakMessage(packet: JsonMessage, private val avviks
             .flatMap { it.inntekter }
             .sumOf { it.beløp }
 
-    companion object {
-        private val logger = LoggerFactory.getLogger(AvsluttetMedVedtakMessage::class.java)
-    }
 }
