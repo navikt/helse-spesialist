@@ -70,6 +70,7 @@ import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOppdatering
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOpprettet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnet
+import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnetCommand
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.modell.vedtaksperiode.vedtak.VedtakFattet
 import no.nav.helse.modell.vergemal.VergemålDao
@@ -818,6 +819,16 @@ internal class Hendelsefabrikk(
         )
     }
 
+    fun vedtaksperiodeReberegnet(hendelse: VedtaksperiodeReberegnet): VedtaksperiodeReberegnetCommand {
+        return VedtaksperiodeReberegnetCommand(
+            vedtaksperiodeId = hendelse.vedtaksperiodeId(),
+            utbetalingDao = utbetalingDao,
+            periodehistorikkDao = periodehistorikkDao,
+            commandContextDao = commandContextDao,
+            oppgaveMediator = oppgaveMediator
+        )
+    }
+
     fun vedtaksperiodeReberegnet(json: String): VedtaksperiodeReberegnet {
         val jsonNode = mapper.readTree(json)
         return VedtaksperiodeReberegnet(
@@ -825,10 +836,6 @@ internal class Hendelsefabrikk(
             fødselsnummer = jsonNode["fødselsnummer"].asText(),
             vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText()),
             json = json,
-            commandContextDao = commandContextDao,
-            oppgaveMediator = oppgaveMediator,
-            periodehistorikkDao = periodehistorikkDao,
-            utbetalingDao = utbetalingDao,
         )
     }
 

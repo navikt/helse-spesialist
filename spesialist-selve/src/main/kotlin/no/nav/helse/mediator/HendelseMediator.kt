@@ -80,6 +80,7 @@ import no.nav.helse.modell.vedtaksperiode.NyeVarsler
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOppdatering
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOpprettet
+import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnet
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -581,7 +582,7 @@ internal class HendelseMediator(
     }
 
     fun vedtaksperiodeReberegnet(message: JsonMessage, context: MessageContext) {
-        utfør(hendelsefabrikk.vedtaksperiodeReberegnet(message.toJson()), context)
+        håndter(hendelsefabrikk.vedtaksperiodeReberegnet(message.toJson()), context)
     }
 
     fun gosysOppgaveEndret(hendelseId: UUID, fødselsnummer: String, aktørId: String, json: String, context: MessageContext) {
@@ -662,6 +663,7 @@ internal class HendelseMediator(
                 is GosysOppgaveEndret -> iverksett(hendelsefabrikk.gosysOppgaveEndret(hendelse.fødselsnummer(), hendelse), hendelse.id, commandContext)
                 is NyeVarsler -> iverksett(hendelsefabrikk.nyeVarsler(hendelse.fødselsnummer(), hendelse), hendelse.id, commandContext)
                 is TilbakedateringGodkjent -> iverksett(hendelsefabrikk.tilbakedateringGodkjent(hendelse.fødselsnummer()), hendelse.id, commandContext)
+                is VedtaksperiodeReberegnet -> iverksett(hendelsefabrikk.vedtaksperiodeReberegnet(hendelse), hendelse.id, commandContext)
                 else -> throw IllegalArgumentException("Personhendelse må håndteres")
             }
             behovMediator.håndter(hendelse, commandContext, contextId, messageContext)
