@@ -60,6 +60,7 @@ import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.avviksvurdering.AvviksvurderingDto
 import no.nav.helse.modell.dokument.DokumentDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
+import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver
@@ -582,7 +583,7 @@ internal class HendelseMediator(
     }
 
     fun gosysOppgaveEndret(hendelseId: UUID, fødselsnummer: String, aktørId: String, json: String, context: MessageContext) {
-        utfør(hendelsefabrikk.gosysOppgaveEndret(hendelseId, fødselsnummer, aktørId, json), context)
+        håndter(hendelsefabrikk.gosysOppgaveEndret(hendelseId, fødselsnummer, aktørId, json), context)
     }
 
     fun egenAnsattStatusEndret(json: String, context: MessageContext) {
@@ -656,6 +657,7 @@ internal class HendelseMediator(
                 is AdressebeskyttelseEndret -> iverksett(AdressebeskyttelseEndretCommand(hendelse.fødselsnummer(), personDao, oppgaveDao, godkjenningMediator), hendelse.id, commandContext)
                 is EndretEgenAnsattStatus -> iverksett(hendelsefabrikk.endretEgenAnsattStatus(hendelse.fødselsnummer(), hendelse.erEgenAnsatt), hendelse.id, commandContext)
                 is VedtaksperiodeOpprettet -> iverksett(hendelsefabrikk.opprettVedtaksperiode(hendelse.fødselsnummer(), hendelse), hendelse.id, commandContext)
+                is GosysOppgaveEndret -> iverksett(hendelsefabrikk.gosysOppgaveEndret(hendelse.fødselsnummer(), hendelse), hendelse.id, commandContext)
                 else -> throw IllegalArgumentException("Personhendelse må håndteres")
             }
             behovMediator.håndter(hendelse, commandContext, contextId, messageContext)

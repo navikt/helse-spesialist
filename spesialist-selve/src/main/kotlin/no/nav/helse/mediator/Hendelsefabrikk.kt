@@ -25,6 +25,7 @@ import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.avviksvurdering.AvviksvurderingDto
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
+import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommand
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.TilbakedateringGodkjent
 import no.nav.helse.modell.overstyring.OverstyringDao
@@ -758,6 +759,33 @@ internal class Hendelsefabrikk(
         )
     }
 
+    fun gosysOppgaveEndret(fødselsnummer: String, hendelse: GosysOppgaveEndret): GosysOppgaveEndretCommand {
+        val oppgaveDataForAutomatisering = oppgaveDao.finnOppgaveIdUansettStatus(fødselsnummer).let { oppgaveId ->
+            oppgaveDao.oppgaveDataForAutomatisering(oppgaveId)!!
+        }
+
+        val skjæringstidspunkt = gjeldendeGenerasjon(oppgaveDataForAutomatisering.vedtaksperiodeId).skjæringstidspunkt()
+
+        val utbetaling = utbetalingDao.hentUtbetaling(oppgaveDataForAutomatisering.utbetalingId)
+        val oppgaveId by lazy { oppgaveDao.finnOppgaveId(fødselsnummer) }
+        val harTildeltOppgave = oppgaveId?.let { tildelingDao.tildelingForOppgave(it) != null } ?: false
+
+        return GosysOppgaveEndretCommand(
+            id = hendelse.id,
+            fødselsnummer = fødselsnummer,
+            aktørId = hendelse.aktørId,
+            utbetaling = utbetaling,
+            sykefraværstilfelle = sykefraværstilfelle(fødselsnummer, skjæringstidspunkt),
+            harTildeltOppgave = harTildeltOppgave,
+            oppgavedataForAutomatisering = oppgaveDataForAutomatisering,
+            automatisering = automatisering,
+            åpneGosysOppgaverDao = åpneGosysOppgaverDao,
+            oppgaveDao = oppgaveDao,
+            oppgaveMediator = oppgaveMediator,
+            godkjenningMediator = godkjenningMediator
+        )
+    }
+
     fun vedtaksperiodeReberegnet(json: String): VedtaksperiodeReberegnet {
         val jsonNode = mapper.readTree(json)
         return VedtaksperiodeReberegnet(
@@ -860,23 +888,12 @@ internal class Hendelsefabrikk(
             oppgaveDao.oppgaveDataForAutomatisering(oppgaveId)!!
         }
 
-        val skjæringstidspunkt = gjeldendeGenerasjon(commandData.vedtaksperiodeId).skjæringstidspunkt()
-
         sikkerLog.info("Gjør ny sjekk om det finnes åpne gosysoppgaver for fnr $fødselsnummer og vedtaksperiodeId ${commandData.vedtaksperiodeId}")
         return GosysOppgaveEndret(
             id = hendelseId,
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
-            sykefraværstilfelle = sykefraværstilfelle(fødselsnummer, skjæringstidspunkt),
             json = json,
-            gosysOppgaveEndretCommandData = commandData,
-            åpneGosysOppgaverDao = åpneGosysOppgaverDao,
-            automatisering = automatisering,
-            godkjenningMediator = godkjenningMediator,
-            oppgaveMediator = oppgaveMediator,
-            oppgaveDao = oppgaveDao,
-            utbetalingDao = utbetalingDao,
-            tildelingDao = tildelingDao,
         )
     }
 
