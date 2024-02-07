@@ -67,6 +67,7 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeEndret
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
+import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetalingCommand
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOppdatering
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOpprettet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnet
@@ -685,8 +686,6 @@ internal class Hendelsefabrikk(
             vedtaksperiodeId,
             utbetalingId,
             json,
-            utbetalingDao,
-            gjeldendeGenerasjon(vedtaksperiodeId),
         )
     }
 
@@ -826,6 +825,16 @@ internal class Hendelsefabrikk(
             periodehistorikkDao = periodehistorikkDao,
             commandContextDao = commandContextDao,
             oppgaveMediator = oppgaveMediator
+        )
+    }
+
+    fun vedtaksperiodeNyUtbetaling(hendelse: VedtaksperiodeNyUtbetaling): VedtaksperiodeNyUtbetalingCommand {
+        return VedtaksperiodeNyUtbetalingCommand(
+            id = hendelse.id,
+            vedtaksperiodeId = hendelse.vedtaksperiodeId(),
+            utbetalingId = hendelse.utbetalingId,
+            utbetalingDao = utbetalingDao,
+            gjeldendeGenerasjon = gjeldendeGenerasjon(hendelse.vedtaksperiodeId())
         )
     }
 

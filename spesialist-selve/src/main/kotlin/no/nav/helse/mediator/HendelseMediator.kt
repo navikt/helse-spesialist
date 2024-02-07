@@ -78,6 +78,7 @@ import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.NyeVarsler
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOppdatering
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOpprettet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnet
@@ -566,15 +567,7 @@ internal class HendelseMediator(
         json: String,
         context: MessageContext,
     ) {
-        utfør(
-            hendelsefabrikk.vedtaksperiodeNyUtbetaling(
-                hendelseId,
-                fødselsnummer,
-                vedtaksperiodeId,
-                utbetalingId,
-                json
-            ), context
-        )
+        håndter(hendelsefabrikk.vedtaksperiodeNyUtbetaling(hendelseId, fødselsnummer, vedtaksperiodeId, utbetalingId, json), context)
     }
 
     fun oppdaterPersonsnapshot(message: JsonMessage, context: MessageContext) {
@@ -664,6 +657,7 @@ internal class HendelseMediator(
                 is NyeVarsler -> iverksett(hendelsefabrikk.nyeVarsler(hendelse.fødselsnummer(), hendelse), hendelse.id, commandContext)
                 is TilbakedateringGodkjent -> iverksett(hendelsefabrikk.tilbakedateringGodkjent(hendelse.fødselsnummer()), hendelse.id, commandContext)
                 is VedtaksperiodeReberegnet -> iverksett(hendelsefabrikk.vedtaksperiodeReberegnet(hendelse), hendelse.id, commandContext)
+                is VedtaksperiodeNyUtbetaling -> iverksett(hendelsefabrikk.vedtaksperiodeNyUtbetaling(hendelse), hendelse.id, commandContext)
                 else -> throw IllegalArgumentException("Personhendelse må håndteres")
             }
             behovMediator.håndter(hendelse, commandContext, contextId, messageContext)
