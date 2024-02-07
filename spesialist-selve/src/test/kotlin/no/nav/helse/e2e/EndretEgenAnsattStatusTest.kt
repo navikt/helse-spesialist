@@ -2,7 +2,6 @@ package no.nav.helse.e2e
 
 import AbstractE2ETest
 import no.nav.helse.TestRapidHelpers.oppgaveId
-import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import org.junit.jupiter.api.Test

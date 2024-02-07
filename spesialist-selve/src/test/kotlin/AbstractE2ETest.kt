@@ -23,7 +23,6 @@ import no.nav.helse.TestRapidHelpers.siste
 import no.nav.helse.TestRapidHelpers.sisteBehov
 import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.ENHET_OSLO
-import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
@@ -75,8 +74,19 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.fail
+import kotlin.random.Random
+
+class Testdatasett {
+    val fødselsnummer: String = Random.nextLong(from = 100000_00000, until = 699999_99999).toString()
+    val aktørId: String = Random.nextLong(from = 1_000_000_000_000, until = 1_000_099_999_999).toString()
+    val ag1: String = Random.nextLong(from = 10000000000, until = 99999999999).toString()
+}
 
 internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
+    protected val testdata = Testdatasett()
+    val FØDSELSNUMMER = testdata.fødselsnummer
+    private val godkjenningsbehovTestdata = GodkjenningsbehovTestdata(fødselsnummer = FØDSELSNUMMER)
+    private val avviksvurderingTestdata = AvviksvurderingTestdata(fødselsnummer = FØDSELSNUMMER)
     private lateinit var utbetalingId: UUID
     internal val snapshotClient = mockk<SnapshotClient>(relaxed = true)
     private val testRapid = TestRapid()
@@ -142,8 +152,9 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         avviksvurderingTestdata: AvviksvurderingTestdata = AvviksvurderingTestdata(skjæringstidspunkt = skjæringstidspunkt, fødselsnummer = FØDSELSNUMMER),
     ) {
         fremTilÅpneOppgaver(
-            avviksvurderingTestdata = avviksvurderingTestdata,
-            godkjenningsbehovTestdata = GodkjenningsbehovTestdata(
+            avviksvurderingTestdata = avviksvurderingTestdata.copy(fødselsnummer = FØDSELSNUMMER),
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(
+                fødselsnummer = FØDSELSNUMMER,
                 periodeFom = fom,
                 periodeTom = tom,
                 skjæringstidspunkt = skjæringstidspunkt
@@ -163,8 +174,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         enhet: String = ENHET_OSLO,
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
-        avviksvurderingTestdata: AvviksvurderingTestdata = AvviksvurderingTestdata(),
-        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = GodkjenningsbehovTestdata(),
+        avviksvurderingTestdata: AvviksvurderingTestdata = this.avviksvurderingTestdata,
+        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata,
     ) {
         fremForbiUtbetalingsfilter(
             regelverksvarsler,
@@ -173,7 +184,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             enhet = enhet,
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp,
-            avviksvurderingTestdata = avviksvurderingTestdata,
+            avviksvurderingTestdata = avviksvurderingTestdata.copy(fødselsnummer = FØDSELSNUMMER),
             godkjenningsbehovTestdata = godkjenningsbehovTestdata,
         )
         if (!harOppdatertMetadata) håndterEgenansattløsning()
@@ -187,8 +198,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         enhet: String = ENHET_OSLO,
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
-        avviksvurderingTestdata: AvviksvurderingTestdata = AvviksvurderingTestdata(),
-        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = GodkjenningsbehovTestdata(),
+        avviksvurderingTestdata: AvviksvurderingTestdata = this.avviksvurderingTestdata,
+        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata,
     ) {
         fremTilVergemål(
             regelverksvarsler,
@@ -197,7 +208,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             enhet,
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp,
-            avviksvurderingTestdata = avviksvurderingTestdata,
+            avviksvurderingTestdata = avviksvurderingTestdata.copy(fødselsnummer = FØDSELSNUMMER),
             godkjenningsbehovTestdata = godkjenningsbehovTestdata
         )
         håndterVergemålløsning(fullmakter = fullmakter)
@@ -210,9 +221,9 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         enhet: String = ENHET_OSLO,
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
-        avviksvurderingTestdata: AvviksvurderingTestdata = AvviksvurderingTestdata(),
-        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = GodkjenningsbehovTestdata(
-            avviksvurderingId = avviksvurderingTestdata.avviksvurderingId,
+        avviksvurderingTestdata: AvviksvurderingTestdata = this.avviksvurderingTestdata,
+        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata.copy(
+            avviksvurderingId = this.avviksvurderingTestdata.avviksvurderingId,
         ),
     ) {
         håndterSøknad(fødselsnummer = godkjenningsbehovTestdata.fødselsnummer)
@@ -276,11 +287,11 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId
         )
-        val avviksvurderingTestdata = AvviksvurderingTestdata()
         håndterGodkjenningsbehov(
             harOppdatertMetainfo = harOppdatertMetadata,
-            avviksvurderingTestdata = avviksvurderingTestdata,
-            godkjenningsbehovTestdata = GodkjenningsbehovTestdata(
+            avviksvurderingTestdata = this.avviksvurderingTestdata,
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(
+                fødselsnummer = FØDSELSNUMMER,
                 periodeFom = fom,
                 periodeTom = tom,
                 skjæringstidspunkt = skjæringstidspunkt,
@@ -289,7 +300,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 utbetalingId = utbetalingId,
                 vilkårsgrunnlagId = vilkårsgrunnlagId,
                 periodetype = FORLENGELSE,
-                avviksvurderingId = avviksvurderingTestdata.avviksvurderingId,
+                avviksvurderingId = this.avviksvurderingTestdata.avviksvurderingId,
             )
         )
         verify { snapshotClient.hentSnapshot(FØDSELSNUMMER) }
@@ -310,8 +321,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         snapshotversjon: Int = 1,
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
-        avviksvurderingTestdata: AvviksvurderingTestdata = AvviksvurderingTestdata(),
-        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = GodkjenningsbehovTestdata(utbetalingId = utbetalingId, vedtaksperiodeId = vedtaksperiodeId),
+        avviksvurderingTestdata: AvviksvurderingTestdata = this.avviksvurderingTestdata,
+        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata.copy(utbetalingId = utbetalingId, vedtaksperiodeId = vedtaksperiodeId),
     ) {
         fremTilRisikovurdering(
             enhet = enhet,
@@ -323,8 +334,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             snapshotversjon = snapshotversjon,
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp,
-            avviksvurderingTestdata = avviksvurderingTestdata,
-            godkjenningsbehovTestdata = godkjenningsbehovTestdata
+            avviksvurderingTestdata = avviksvurderingTestdata.copy(fødselsnummer = FØDSELSNUMMER),
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(fødselsnummer = FØDSELSNUMMER)
         )
         if (!harRisikovurdering) håndterRisikovurderingløsning(
             kanGodkjennesAutomatisk = kanGodkjennesAutomatisk,
@@ -344,8 +355,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         snapshotversjon: Int = 1,
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
-        avviksvurderingTestdata: AvviksvurderingTestdata = AvviksvurderingTestdata(),
-        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = GodkjenningsbehovTestdata(
+        avviksvurderingTestdata: AvviksvurderingTestdata = this.avviksvurderingTestdata,
+        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata.copy(
             utbetalingId = utbetalingId,
             vedtaksperiodeId = vedtaksperiodeId
         ),
@@ -358,7 +369,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             enhet = enhet,
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp,
-            avviksvurderingTestdata = avviksvurderingTestdata,
+            avviksvurderingTestdata = avviksvurderingTestdata.copy(fødselsnummer = FØDSELSNUMMER),
             godkjenningsbehovTestdata = godkjenningsbehovTestdata,
         )
         håndterÅpneOppgaverløsning()
@@ -430,7 +441,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
         utbetalingId: UUID = UTBETALING_ID,
         harOppdatertMetadata: Boolean = false,
-        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = GodkjenningsbehovTestdata(periodeFom = fom, periodeTom = tom, skjæringstidspunkt = skjæringstidspunkt, vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
+        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata.copy(periodeFom = fom, periodeTom = tom, skjæringstidspunkt = skjæringstidspunkt, vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
     ) {
         fremTilSaksbehandleroppgave(
             regelverksvarsler = regelverksvarsler,
@@ -791,8 +802,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         utbetalingId: UUID = UTBETALING_ID,
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
-        avviksvurderingTestdata: AvviksvurderingTestdata = AvviksvurderingTestdata(),
-        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = GodkjenningsbehovTestdata(utbetalingId = utbetalingId, avviksvurderingId = avviksvurderingTestdata.avviksvurderingId),
+        avviksvurderingTestdata: AvviksvurderingTestdata = this.avviksvurderingTestdata,
+        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata.copy(utbetalingId = utbetalingId, avviksvurderingId = this.avviksvurderingTestdata.avviksvurderingId),
     ) {
         val erRevurdering = erRevurdering(godkjenningsbehovTestdata.vedtaksperiodeId)
         håndterVedtaksperiodeNyUtbetaling(vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId, utbetalingId = godkjenningsbehovTestdata.utbetalingId)
@@ -812,21 +823,21 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         harOppdatertMetainfo: Boolean = false,
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
-        avviksvurderingTestdata: AvviksvurderingTestdata = AvviksvurderingTestdata(),
-        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = GodkjenningsbehovTestdata(),
+        avviksvurderingTestdata: AvviksvurderingTestdata = this.avviksvurderingTestdata,
+        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata,
     ) {
         val alleArbeidsforhold = sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val query =
                 "SELECT a.orgnummer FROM arbeidsgiver a INNER JOIN vedtak v on a.id = v.arbeidsgiver_ref INNER JOIN person p on p.id = v.person_ref WHERE p.fodselsnummer = ?"
-            session.run(queryOf(query, godkjenningsbehovTestdata.fødselsnummer.toLong()).map { it.string("orgnummer") }.asList)
+            session.run(queryOf(query, godkjenningsbehovTestdata.copy(fødselsnummer = FØDSELSNUMMER).fødselsnummer.toLong()).map { it.string("orgnummer") }.asList)
         }
         håndterGodkjenningsbehovUtenValidering(
             utbetalingId = godkjenningsbehovTestdata.utbetalingId,
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp,
-            avviksvurderingTestdata = avviksvurderingTestdata,
-            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(avviksvurderingId = avviksvurderingTestdata.avviksvurderingId)
+            avviksvurderingTestdata = avviksvurderingTestdata.copy(fødselsnummer = FØDSELSNUMMER),
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(fødselsnummer = FØDSELSNUMMER, avviksvurderingId = avviksvurderingTestdata.avviksvurderingId)
         )
 
         when {

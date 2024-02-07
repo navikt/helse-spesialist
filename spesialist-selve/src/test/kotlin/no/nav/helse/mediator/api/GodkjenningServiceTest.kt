@@ -86,7 +86,7 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
     private fun enSaksbehandler(): UUID = UUID.randomUUID().also(::opprettSaksbehandler)
 
     private fun settTotrinnsvurdering(opprinneligSaksbehandler: UUID, beslutter: UUID) {
-        val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(fødselsnummer = Testdata.FØDSELSNUMMER)
+        val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(fødselsnummer = FØDSELSNUMMER)
 
         @Language("postgresql") val sql = """
             insert into totrinnsvurdering (

@@ -5,7 +5,6 @@ import java.time.LocalDate
 import java.util.UUID.randomUUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.snapshot
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

@@ -3,7 +3,6 @@ package no.nav.helse.e2e
 import AbstractE2ETest
 import java.util.UUID
 import no.nav.helse.GodkjenningsbehovTestdata
-import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
 import org.junit.jupiter.api.Test
 
