@@ -75,6 +75,7 @@ import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
+import no.nav.helse.modell.vedtaksperiode.NyeVarsler
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOppdatering
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOpprettet
@@ -607,7 +608,7 @@ internal class HendelseMediator(
         json: String,
         context: MessageContext,
     ) {
-        utfør(hendelsefabrikk.nyeVarsler(id, fødselsnummer, varsler, json), context)
+        håndter(hendelsefabrikk.nyeVarsler(id, fødselsnummer, varsler, json), context)
     }
 
     private fun forbered() {
@@ -658,6 +659,7 @@ internal class HendelseMediator(
                 is EndretEgenAnsattStatus -> iverksett(hendelsefabrikk.endretEgenAnsattStatus(hendelse.fødselsnummer(), hendelse.erEgenAnsatt), hendelse.id, commandContext)
                 is VedtaksperiodeOpprettet -> iverksett(hendelsefabrikk.opprettVedtaksperiode(hendelse.fødselsnummer(), hendelse), hendelse.id, commandContext)
                 is GosysOppgaveEndret -> iverksett(hendelsefabrikk.gosysOppgaveEndret(hendelse.fødselsnummer(), hendelse), hendelse.id, commandContext)
+                is NyeVarsler -> iverksett(hendelsefabrikk.nyeVarsler(hendelse.fødselsnummer(), hendelse), hendelse.id, commandContext)
                 else -> throw IllegalArgumentException("Personhendelse må håndteres")
             }
             behovMediator.håndter(hendelse, commandContext, contextId, messageContext)

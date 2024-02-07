@@ -60,6 +60,7 @@ import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.NyeVarsler
+import no.nav.helse.modell.vedtaksperiode.NyeVarslerCommand
 import no.nav.helse.modell.vedtaksperiode.OpprettVedtaksperiodeCommand
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeEndret
@@ -786,6 +787,15 @@ internal class Hendelsefabrikk(
         )
     }
 
+    fun nyeVarsler(fødselsnummer: String, hendelse: NyeVarsler): NyeVarslerCommand {
+        return NyeVarslerCommand(
+            hendelse.id,
+            fødselsnummer,
+            generasjonerFor(fødselsnummer),
+            hendelse.varsler,
+        )
+    }
+
     fun vedtaksperiodeReberegnet(json: String): VedtaksperiodeReberegnet {
         val jsonNode = mapper.readTree(json)
         return VedtaksperiodeReberegnet(
@@ -912,7 +922,7 @@ internal class Hendelsefabrikk(
     }
 
     fun nyeVarsler(id: UUID, fødselsnummer: String, varsler: List<Varsel>, json: String): NyeVarsler {
-        return NyeVarsler(id, fødselsnummer, varsler, generasjonerFor(fødselsnummer), json)
+        return NyeVarsler(id, fødselsnummer, varsler, json)
     }
 
     fun nyeVarsler(json: String): NyeVarsler {
