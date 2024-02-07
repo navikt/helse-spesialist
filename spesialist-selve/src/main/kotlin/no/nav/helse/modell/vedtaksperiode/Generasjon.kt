@@ -36,6 +36,8 @@ internal class Generasjon private constructor(
     private val varsler: MutableList<Varsel> = varsler.toMutableList()
     private val observers = mutableSetOf<IVedtaksperiodeObserver>()
 
+    internal fun skjæringstidspunkt() = skjæringstidspunkt
+
     internal fun hasterÅBehandle() = varsler.inneholderVarselOmNegativtBeløp()
 
     internal fun registrer(vararg observer: IVedtaksperiodeObserver) {

@@ -860,12 +860,14 @@ internal class Hendelsefabrikk(
             oppgaveDao.oppgaveDataForAutomatisering(oppgaveId)!!
         }
 
+        val skjæringstidspunkt = gjeldendeGenerasjon(commandData.vedtaksperiodeId).skjæringstidspunkt()
+
         sikkerLog.info("Gjør ny sjekk om det finnes åpne gosysoppgaver for fnr $fødselsnummer og vedtaksperiodeId ${commandData.vedtaksperiodeId}")
         return GosysOppgaveEndret(
             id = hendelseId,
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
-            sykefraværstilfelle = sykefraværstilfelle(fødselsnummer, commandData.skjæringstidspunkt),
+            sykefraværstilfelle = sykefraværstilfelle(fødselsnummer, skjæringstidspunkt),
             json = json,
             gosysOppgaveEndretCommandData = commandData,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
