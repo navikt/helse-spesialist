@@ -2,7 +2,7 @@ package no.nav.helse.modell.kommando
 
 import java.util.UUID
 import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.mediator.meldinger.Kommandohendelse
+import no.nav.helse.mediator.meldinger.Personhendelse
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.automatisering.Automatisering
@@ -11,26 +11,27 @@ import no.nav.helse.modell.automatisering.SettTidligereAutomatiseringInaktivComm
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.oppgave.SjekkAtOppgaveFortsattErÅpenCommand
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
-import no.nav.helse.modell.utbetaling.UtbetalingDao
+import no.nav.helse.modell.utbetaling.Utbetaling
 
 internal class TilbakedateringGodkjent(
     override val id: UUID,
     private val fødselsnummer: String,
-    sykefraværstilfelle: Sykefraværstilfelle,
-    private val json: String,
-    oppgaveDataForAutomatisering: OppgaveDataForAutomatisering,
-    automatisering: Automatisering,
-    godkjenningMediator: GodkjenningMediator,
-    oppgaveMediator: OppgaveMediator,
-    utbetalingDao: UtbetalingDao,
-    oppgaveDao: OppgaveDao
-) : Kommandohendelse, MacroCommand() {
-
+    private val json: String
+) : Personhendelse {
     override fun fødselsnummer() = fødselsnummer
     override fun toJson(): String = json
+}
 
-    private val utbetaling = utbetalingDao.hentUtbetaling(oppgaveDataForAutomatisering.utbetalingId)
-
+internal class TilbakedateringGodkjentCommand(
+    fødselsnummer: String,
+    sykefraværstilfelle: Sykefraværstilfelle,
+    utbetaling: Utbetaling,
+    automatisering: Automatisering,
+    oppgaveDataForAutomatisering: OppgaveDataForAutomatisering,
+    oppgaveDao: OppgaveDao,
+    oppgaveMediator: OppgaveMediator,
+    godkjenningMediator: GodkjenningMediator,
+): MacroCommand() {
     override val commands: List<Command> = listOf(
         SjekkAtOppgaveFortsattErÅpenCommand(fødselsnummer = fødselsnummer, oppgaveDao = oppgaveDao),
         DeaktiverVarselCommand(
@@ -56,5 +57,4 @@ internal class TilbakedateringGodkjent(
             sykefraværstilfelle = sykefraværstilfelle,
         )
     )
-
 }

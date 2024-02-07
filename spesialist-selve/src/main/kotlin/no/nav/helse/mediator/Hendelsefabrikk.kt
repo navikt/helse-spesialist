@@ -28,6 +28,7 @@ import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommand
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.TilbakedateringGodkjent
+import no.nav.helse.modell.kommando.TilbakedateringGodkjentCommand
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.overstyring.OverstyringIgangsatt
 import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver
@@ -796,6 +797,27 @@ internal class Hendelsefabrikk(
         )
     }
 
+    fun tilbakedateringGodkjent(fødselsnummer: String): TilbakedateringGodkjentCommand {
+        val oppgaveDataForAutomatisering = oppgaveDao.finnOppgaveIdUansettStatus(fødselsnummer).let { oppgaveId ->
+            oppgaveDao.oppgaveDataForAutomatisering(oppgaveId)!!
+        }
+        val sykefraværstilfelle = sykefraværstilfelle(fødselsnummer, oppgaveDataForAutomatisering.skjæringstidspunkt)
+        val utbetaling = utbetalingDao.hentUtbetaling(oppgaveDataForAutomatisering.utbetalingId)
+
+        sikkerLog.info("Henter oppgaveDataForAutomatisering ifm. godkjent tilbakedatering for fnr $fødselsnummer og vedtaksperiodeId ${oppgaveDataForAutomatisering.vedtaksperiodeId}")
+
+        return TilbakedateringGodkjentCommand(
+            fødselsnummer = fødselsnummer,
+            sykefraværstilfelle = sykefraværstilfelle,
+            utbetaling = utbetaling,
+            automatisering = automatisering,
+            oppgaveDataForAutomatisering = oppgaveDataForAutomatisering,
+            oppgaveDao = oppgaveDao,
+            oppgaveMediator = oppgaveMediator,
+            godkjenningMediator = godkjenningMediator
+        )
+    }
+
     fun vedtaksperiodeReberegnet(json: String): VedtaksperiodeReberegnet {
         val jsonNode = mapper.readTree(json)
         return VedtaksperiodeReberegnet(
@@ -860,24 +882,12 @@ internal class Hendelsefabrikk(
         fødselsnummer: String,
         json: String,
     ): TilbakedateringGodkjent {
-        val oppgaveDataForAutomatisering = oppgaveDao.finnOppgaveIdUansettStatus(fødselsnummer).let { oppgaveId ->
-            oppgaveDao.oppgaveDataForAutomatisering(oppgaveId)!!
-        }
-        val sykefraværstilfelle = sykefraværstilfelle(fødselsnummer, oppgaveDataForAutomatisering.skjæringstidspunkt)
 
-        sikkerLog.info("Henter oppgaveDataForAutomatisering ifm. godkjent tilbakedatering for fnr $fødselsnummer og vedtaksperiodeId ${oppgaveDataForAutomatisering.vedtaksperiodeId}")
 
         return TilbakedateringGodkjent(
             id = id,
             fødselsnummer = fødselsnummer,
-            sykefraværstilfelle = sykefraværstilfelle,
             json = json,
-            oppgaveDataForAutomatisering = oppgaveDataForAutomatisering,
-            automatisering = automatisering,
-            godkjenningMediator = godkjenningMediator,
-            oppgaveMediator = oppgaveMediator,
-            utbetalingDao = utbetalingDao,
-            oppgaveDao = oppgaveDao,
         )
     }
 

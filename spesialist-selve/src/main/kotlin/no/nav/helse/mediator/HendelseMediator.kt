@@ -63,6 +63,7 @@ import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.kommando.TilbakedateringGodkjent
 import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver
 import no.nav.helse.modell.overstyring.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.person.AdressebeskyttelseEndretRiver
@@ -598,7 +599,7 @@ internal class HendelseMediator(
     fun godkjentTilbakedatertSykmelding(id: UUID, fødselsnummer: String, vedtaksperiodeId: UUID, skjæringstidspunkt: LocalDate, json: String, context: MessageContext) {
         if (!hendelsefabrikk.sykefraværstilfelle(fødselsnummer, skjæringstidspunkt).erTilbakedatert(vedtaksperiodeId)) return logg.info("ignorerer hendelseId=${id} fordi det ikke er en tilbakedatering")
 
-        utfør(hendelsefabrikk.godkjentTilbakedatertSykmelding(id, fødselsnummer, json), context)
+        håndter(hendelsefabrikk.godkjentTilbakedatertSykmelding(id, fødselsnummer, json), context)
     }
 
     fun nyeVarsler(
@@ -660,6 +661,7 @@ internal class HendelseMediator(
                 is VedtaksperiodeOpprettet -> iverksett(hendelsefabrikk.opprettVedtaksperiode(hendelse.fødselsnummer(), hendelse), hendelse.id, commandContext)
                 is GosysOppgaveEndret -> iverksett(hendelsefabrikk.gosysOppgaveEndret(hendelse.fødselsnummer(), hendelse), hendelse.id, commandContext)
                 is NyeVarsler -> iverksett(hendelsefabrikk.nyeVarsler(hendelse.fødselsnummer(), hendelse), hendelse.id, commandContext)
+                is TilbakedateringGodkjent -> iverksett(hendelsefabrikk.tilbakedateringGodkjent(hendelse.fødselsnummer()), hendelse.id, commandContext)
                 else -> throw IllegalArgumentException("Personhendelse må håndteres")
             }
             behovMediator.håndter(hendelse, commandContext, contextId, messageContext)
