@@ -86,7 +86,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val testdata = Testdatasett()
     val FØDSELSNUMMER = testdata.fødselsnummer
     private val godkjenningsbehovTestdata = GodkjenningsbehovTestdata(fødselsnummer = FØDSELSNUMMER)
-    private val avviksvurderingTestdata = AvviksvurderingTestdata(fødselsnummer = FØDSELSNUMMER)
+    private val avviksvurderingTestdata = AvviksvurderingTestdata()
     private lateinit var utbetalingId: UUID
     internal val snapshotClient = mockk<SnapshotClient>(relaxed = true)
     private val testRapid = TestRapid()
@@ -149,10 +149,10 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         tom: LocalDate = 31.januar,
         skjæringstidspunkt: LocalDate = fom,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
-        avviksvurderingTestdata: AvviksvurderingTestdata = AvviksvurderingTestdata(skjæringstidspunkt = skjæringstidspunkt, fødselsnummer = FØDSELSNUMMER),
+        avviksvurderingTestdata: AvviksvurderingTestdata = AvviksvurderingTestdata(skjæringstidspunkt = skjæringstidspunkt),
     ) {
         fremTilÅpneOppgaver(
-            avviksvurderingTestdata = avviksvurderingTestdata.copy(fødselsnummer = FØDSELSNUMMER),
+            avviksvurderingTestdata = avviksvurderingTestdata,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(
                 fødselsnummer = FØDSELSNUMMER,
                 periodeFom = fom,
@@ -184,7 +184,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             enhet = enhet,
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp,
-            avviksvurderingTestdata = avviksvurderingTestdata.copy(fødselsnummer = FØDSELSNUMMER),
+            avviksvurderingTestdata = avviksvurderingTestdata,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata,
         )
         if (!harOppdatertMetadata) håndterEgenansattløsning()
@@ -208,7 +208,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             enhet,
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp,
-            avviksvurderingTestdata = avviksvurderingTestdata.copy(fødselsnummer = FØDSELSNUMMER),
+            avviksvurderingTestdata = avviksvurderingTestdata,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata
         )
         håndterVergemålløsning(fullmakter = fullmakter)
@@ -260,8 +260,14 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         verify { snapshotClient.hentSnapshot(godkjenningsbehovTestdata.fødselsnummer) }
     }
 
-    private fun håndterAvviksvurdering(avviksvurderingTestdata: AvviksvurderingTestdata) {
-        sisteMeldingId = meldingssender.sendAvvikVurdert(avviksvurderingTestdata)
+    private fun håndterAvviksvurdering(
+        avviksvurderingTestdata: AvviksvurderingTestdata,
+        fødselsnummer: String,
+        aktørId: String,
+        organisasjonsnummer: String,
+    ) {
+        sisteMeldingId =
+            meldingssender.sendAvvikVurdert(avviksvurderingTestdata, fødselsnummer, aktørId, organisasjonsnummer)
     }
 
     private fun forlengelseFremTilÅpneOppgaver(
@@ -334,7 +340,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             snapshotversjon = snapshotversjon,
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp,
-            avviksvurderingTestdata = avviksvurderingTestdata.copy(fødselsnummer = FØDSELSNUMMER),
+            avviksvurderingTestdata = avviksvurderingTestdata,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(fødselsnummer = FØDSELSNUMMER)
         )
         if (!harRisikovurdering) håndterRisikovurderingløsning(
@@ -369,7 +375,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             enhet = enhet,
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp,
-            avviksvurderingTestdata = avviksvurderingTestdata.copy(fødselsnummer = FØDSELSNUMMER),
+            avviksvurderingTestdata = avviksvurderingTestdata,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata,
         )
         håndterÅpneOppgaverløsning()
@@ -814,7 +820,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             personbeløp = personbeløp
         )
         håndterVedtaksperiodeEndret(vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
-        håndterAvviksvurdering(avviksvurderingTestdata)
+        håndterAvviksvurdering(avviksvurderingTestdata, godkjenningsbehovTestdata.fødselsnummer, godkjenningsbehovTestdata.aktørId, godkjenningsbehovTestdata.organisasjonsnummer)
         sisteMeldingId = sendGodkjenningsbehov(godkjenningsbehovTestdata)
         sisteGodkjenningsbehovId = sisteMeldingId
     }
@@ -836,7 +842,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             utbetalingId = godkjenningsbehovTestdata.utbetalingId,
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp,
-            avviksvurderingTestdata = avviksvurderingTestdata.copy(fødselsnummer = FØDSELSNUMMER),
+            avviksvurderingTestdata = avviksvurderingTestdata,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(fødselsnummer = FØDSELSNUMMER, avviksvurderingId = avviksvurderingTestdata.avviksvurderingId)
         )
 

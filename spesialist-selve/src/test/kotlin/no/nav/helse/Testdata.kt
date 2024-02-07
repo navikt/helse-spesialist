@@ -151,9 +151,6 @@ internal data class GodkjenningsbehovTestdata(
 )
 
 internal data class AvviksvurderingTestdata(
-    val aktørId: String = Testdata.AKTØR,
-    val fødselsnummer: String = Testdata.FØDSELSNUMMER,
-    val organisasjonsnummer: String = Testdata.ORGNR,
     val avviksprosent: Double = 10.0,
     val sammenligningsgrunnlag: Double = 650_000.0,
     val skjæringstidspunkt: LocalDate = 1.januar,

@@ -1141,11 +1141,17 @@ internal object Testmeldingfabrikk {
         "@opprettet" to LocalDateTime.now()
     )
 
-    fun lagAvvikVurdert(avviksvurderingTestdata: AvviksvurderingTestdata, id: UUID): String =
+    fun lagAvvikVurdert(
+        avviksvurderingTestdata: AvviksvurderingTestdata,
+        id: UUID,
+        fødselsnummer: String,
+        aktørId: String,
+        organisasjonsnummer: String
+    ): String =
         nyHendelse(
             id, "avvik_vurdert", mapOf(
-                "fødselsnummer" to avviksvurderingTestdata.fødselsnummer,
-                "aktørId" to avviksvurderingTestdata.aktørId,
+                "fødselsnummer" to fødselsnummer,
+                "aktørId" to aktørId,
                 "skjæringstidspunkt" to avviksvurderingTestdata.skjæringstidspunkt,
                 "avviksvurdering" to mapOf(
                     "id" to avviksvurderingTestdata.avviksvurderingId,
@@ -1153,7 +1159,7 @@ internal object Testmeldingfabrikk {
                     "beregningsgrunnlag" to mapOf(
                         "totalbeløp" to 550000.0, "omregnedeÅrsinntekter" to listOf(
                             mapOf(
-                                "arbeidsgiverreferanse" to avviksvurderingTestdata.organisasjonsnummer,
+                                "arbeidsgiverreferanse" to organisasjonsnummer,
                                 "beløp" to 250000.0
                             ),
                         )
@@ -1163,7 +1169,7 @@ internal object Testmeldingfabrikk {
                         "totalbeløp" to avviksvurderingTestdata.sammenligningsgrunnlag,
                         "innrapporterteInntekter" to listOf(
                             mapOf(
-                                "arbeidsgiverreferanse" to avviksvurderingTestdata.organisasjonsnummer,
+                                "arbeidsgiverreferanse" to organisasjonsnummer,
                                 "inntekter" to listOf(
                                     mapOf(
                                         "årMåned" to YearMonth.from(1.januar),
