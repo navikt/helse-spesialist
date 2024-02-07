@@ -5,8 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID.randomUUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.GodkjenningsbehovTestdata
-import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.Testdata.ORGNR_GHOST
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.ArbeidsgiverinformasjonJson
 import org.intellij.lang.annotations.Language
@@ -32,7 +30,7 @@ internal class OppdaterArbeidsgiverE2ETest : AbstractE2ETest() {
         håndterVedtaksperiodeOpprettet(vedtaksperiodeId = vedtaksperiode2Id)
         håndterGodkjenningsbehov(
             harOppdatertMetainfo = true,
-            godkjenningsbehovTestdata = GodkjenningsbehovTestdata(
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(
                 vedtaksperiodeId = vedtaksperiode2Id,
                 utbetalingId = randomUUID(),
                 orgnummereMedRelevanteArbeidsforhold = listOf(ORGNR_GHOST),

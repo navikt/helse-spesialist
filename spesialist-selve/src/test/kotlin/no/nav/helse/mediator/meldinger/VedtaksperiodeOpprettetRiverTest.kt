@@ -4,8 +4,10 @@ import io.mockk.called
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
+import java.util.UUID
 import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
+import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.intellij.lang.annotations.Language
@@ -30,7 +32,7 @@ internal class VedtaksperiodeOpprettetRiverTest {
     @Test
     fun `behandler vedtaksperiode_opprettet`() {
         rapid.sendTestMessage(
-            Testmeldingfabrikk.lagVedtaksperiodeOpprettet(aktørId = AKTØR, fødselsnummer = FØDSELSNUMMER)
+            Testmeldingfabrikk.lagVedtaksperiodeOpprettet(aktørId = AKTØR, fødselsnummer = FØDSELSNUMMER, organisasjonsnummer = ORGNR, vedtaksperiodeId = UUID.randomUUID())
         )
         verify(exactly = 1) {
             mediator.vedtaksperiodeOpprettet(

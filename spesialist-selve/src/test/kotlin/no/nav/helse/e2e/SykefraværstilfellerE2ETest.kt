@@ -5,7 +5,6 @@ import java.time.LocalDate
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.januar
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -27,11 +26,11 @@ internal class SykefraværstilfellerE2ETest : AbstractE2ETest() {
 
     @Test
     fun `Oppdaterer sykefraværstilfeller - flere perioder i samme tilfelle`() {
-        val vedtaksperiodeId1 = UUID.randomUUID()
-        val vedtaksperiodeId2 = UUID.randomUUID()
-        val revurdertUtbetalingId = UUID.randomUUID()
+        val vedtaksperiodeId1 = testdata.vedtaksperiodeId1
+        val vedtaksperiodeId2 = testdata.vedtaksperiodeId2
+        val revurdertUtbetalingId = testdata.utbetalingId2
 
-        nyttVedtak(vedtaksperiodeId = vedtaksperiodeId1, fom = 1.januar, tom = 5.januar, utbetalingId = UUID.randomUUID())
+        nyttVedtak(godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(periodeFom = 1.januar, periodeTom = 5.januar))
         forlengVedtak(6.januar, 10.januar, skjæringstidspunkt = 1.januar, vedtaksperiodeId = vedtaksperiodeId2)
         håndterVedtaksperiodeEndret(vedtaksperiodeId = vedtaksperiodeId1)
         håndterVedtaksperiodeNyUtbetaling(vedtaksperiodeId = vedtaksperiodeId1, utbetalingId = revurdertUtbetalingId)
@@ -74,11 +73,11 @@ internal class SykefraværstilfellerE2ETest : AbstractE2ETest() {
 
     @Test
     fun `Oppdaterer sykefraværstilfeller for flere tilfeller`() {
-        val vedtaksperiodeId1 = UUID.randomUUID()
-        val vedtaksperiodeId2 = UUID.randomUUID()
+        val vedtaksperiodeId1 = testdata.vedtaksperiodeId1
+        val vedtaksperiodeId2 = testdata.vedtaksperiodeId2
 
-        nyttVedtak(vedtaksperiodeId = vedtaksperiodeId1, fom = 1.januar, tom = 5.januar, utbetalingId = UUID.randomUUID())
-        nyttVedtak(vedtaksperiodeId = vedtaksperiodeId2, fom = 10.januar, tom = 15.januar, utbetalingId = UUID.randomUUID(), harOppdatertMetadata = true)
+        nyttVedtak(godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(periodeFom = 1.januar, periodeTom = 5.januar))
+        nyttVedtak(godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(vedtaksperiodeId = vedtaksperiodeId2, periodeFom = 10.januar, periodeTom = 15.januar, skjæringstidspunkt = 10.januar, utbetalingId = UUID.randomUUID()), harOppdatertMetadata = true)
 
         håndterVedtaksperiodeEndret(vedtaksperiodeId = vedtaksperiodeId1)
         håndterVedtaksperiodeNyUtbetaling(vedtaksperiodeId = vedtaksperiodeId1, utbetalingId = UUID.randomUUID())

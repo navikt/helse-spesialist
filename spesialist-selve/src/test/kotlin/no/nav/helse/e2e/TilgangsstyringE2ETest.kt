@@ -6,10 +6,7 @@ import graphql.schema.DataFetchingEnvironment
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.Testdata.AKTØR
-import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.Testdata.SNAPSHOT
-import no.nav.helse.januar
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
@@ -91,9 +88,6 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
 
     private fun sendMeldingerOppTilEgenAnsatt() {
         håndterSøknad(AKTØR, FØDSELSNUMMER, ORGNR)
-        val skjæringstidspunkt = 1.januar
-        val fom = 1.januar
-        val tom = 31.januar
         håndterVedtaksperiodeOpprettet()
         håndterVedtaksperiodeNyUtbetaling()
         håndterUtbetalingEndret()

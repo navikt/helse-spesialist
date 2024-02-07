@@ -7,9 +7,8 @@ import AbstractE2ETest.Kommandokjedetilstand.NY
 import AbstractE2ETest.Kommandokjedetilstand.SUSPENDERT
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.AvviksvurderingTestdata
+import lagFødselsnummer
 import no.nav.helse.GodkjenningsbehovTestdata
-import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.januar
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.VergemålType.mindreaarig
@@ -83,27 +82,25 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
     @Test
     fun `ignorerer påminnet godkjenningsbehov dersom det eksisterer en aktiv oppgave`() {
-        val utbetalingId = UUID.randomUUID()
-        fremTilSaksbehandleroppgave(utbetalingId = utbetalingId)
-        håndterGodkjenningsbehovUtenValidering(utbetalingId = utbetalingId)
+        fremTilSaksbehandleroppgave()
+        håndterGodkjenningsbehovUtenValidering()
         assertIngenEtterspurteBehov()
     }
 
     @Test
     fun `ignorerer påminnet godkjenningsbehov dersom vedtaket er automatisk godkjent`() {
-        val utbetalingId = UUID.randomUUID()
-        fremTilSaksbehandleroppgave(utbetalingId = utbetalingId, kanGodkjennesAutomatisk = true)
-        håndterGodkjenningsbehovUtenValidering(utbetalingId = utbetalingId)
+        fremTilSaksbehandleroppgave(kanGodkjennesAutomatisk = true)
+        håndterGodkjenningsbehovUtenValidering()
         assertIngenEtterspurteBehov()
     }
 
     @Test
     fun `legger ved ukjente organisasjonsnumre på behov for Arbeidsgiverinformasjon`() {
-        val andreArbeidsgivere = listOf("123456789")
+        val andreArbeidsgivere = listOf(testdata.orgnummer2)
         håndterSøknad()
         håndterVedtaksperiodeOpprettet()
         håndterVedtaksperiodeNyUtbetaling()
-        håndterGodkjenningsbehov(godkjenningsbehovTestdata = GodkjenningsbehovTestdata(orgnummereMedRelevanteArbeidsforhold = andreArbeidsgivere))
+        håndterGodkjenningsbehov(godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(orgnummereMedRelevanteArbeidsforhold = andreArbeidsgivere))
         håndterPersoninfoløsning()
         håndterEnhetløsning()
         håndterInfotrygdutbetalingerløsning()
@@ -116,13 +113,13 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
     @Test
     fun `skiller arbeidsgiverinformasjon- og personinfo-behov etter om det er et orgnr eller ikke`() {
-        val arbeidsgiver2 = "123456789"
-        val arbeidsgiver3 = "12345678911"
+        val arbeidsgiver2 = testdata.orgnummer2
+        val arbeidsgiver3 = lagFødselsnummer()
         val andreArbeidsforhold = listOf(arbeidsgiver2, arbeidsgiver3)
         håndterSøknad()
         håndterVedtaksperiodeOpprettet()
         håndterVedtaksperiodeNyUtbetaling()
-        håndterGodkjenningsbehov(godkjenningsbehovTestdata = GodkjenningsbehovTestdata(orgnummereMedRelevanteArbeidsforhold = andreArbeidsforhold))
+        håndterGodkjenningsbehov(godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(orgnummereMedRelevanteArbeidsforhold = andreArbeidsforhold))
         håndterPersoninfoløsning()
         håndterEnhetløsning()
         håndterInfotrygdutbetalingerløsning()
@@ -140,12 +137,12 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
     @Test
     fun `tar inn arbeidsgiverinformasjon- og personinfo-behov samtidig`() {
-        val arbeidsgiver2 = "123456789"
-        val arbeidsgiver3 = "12345678911"
+        val arbeidsgiver2 = testdata.orgnummer2
+        val arbeidsgiver3 = lagFødselsnummer()
         val andreArbeidsforhold = listOf(arbeidsgiver2, arbeidsgiver3)
         håndterSøknad()
         håndterVedtaksperiodeOpprettet()
-        håndterGodkjenningsbehov(godkjenningsbehovTestdata = GodkjenningsbehovTestdata(orgnummereMedRelevanteArbeidsforhold = andreArbeidsforhold))
+        håndterGodkjenningsbehov(godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(orgnummereMedRelevanteArbeidsforhold = andreArbeidsforhold))
         håndterPersoninfoløsning()
         håndterEnhetløsning()
         håndterInfotrygdutbetalingerløsning()
@@ -230,17 +227,17 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         val revurdertUtbetaling = UUID.randomUUID()
         val kanAvvises = false
 
-        val avviksvurderingTestdata = AvviksvurderingTestdata()
         håndterGodkjenningsbehov(
             harOppdatertMetainfo = true,
-            avviksvurderingTestdata = avviksvurderingTestdata,
             godkjenningsbehovTestdata = GodkjenningsbehovTestdata(
                 periodeFom = 11.januar,
                 periodeTom = 31.januar,
                 vedtaksperiodeId = VEDTAKSPERIODE_ID,
                 utbetalingId = revurdertUtbetaling,
                 kanAvvises = kanAvvises,
-                avviksvurderingId = avviksvurderingTestdata.avviksvurderingId,
+                fødselsnummer = FØDSELSNUMMER,
+                aktørId = AKTØR,
+                organisasjonsnummer = ORGNR,
             )
         )
 

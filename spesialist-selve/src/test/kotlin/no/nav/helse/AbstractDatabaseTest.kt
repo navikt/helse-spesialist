@@ -8,7 +8,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import org.flywaydb.core.Flyway
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.BeforeAll
 import org.testcontainers.containers.PostgreSQLContainer
 
 abstract class AbstractDatabaseTest {
@@ -26,7 +26,7 @@ abstract class AbstractDatabaseTest {
                 jdbcUrl = postgres.jdbcUrl
                 username = postgres.username
                 password = postgres.password
-                maximumPoolSize = 5
+                maximumPoolSize = 50
                 connectionTimeout = 500
                 initializationFailTimeout = 5000
             })
@@ -40,12 +40,13 @@ abstract class AbstractDatabaseTest {
 
             createTruncateFunction(dataSource)
         }
-    }
 
-    @BeforeEach
-    fun resetDatabase() {
-        sessionOf(dataSource).use  {
-            it.run(queryOf("SELECT truncate_tables()").asExecute)
+        @BeforeAll
+        @JvmStatic
+        fun resetDatabase() {
+            sessionOf(dataSource).use  {
+                it.run(queryOf("SELECT truncate_tables()").asExecute)
+            }
         }
     }
 }

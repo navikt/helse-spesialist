@@ -132,11 +132,11 @@ object Testdata {
 }
 
 internal data class GodkjenningsbehovTestdata(
-    val aktørId: String = Testdata.AKTØR,
-    val fødselsnummer: String = Testdata.FØDSELSNUMMER,
-    val organisasjonsnummer: String = Testdata.ORGNR,
-    val vedtaksperiodeId: UUID = Testdata.VEDTAKSPERIODE_ID,
-    val utbetalingId: UUID = Testdata.UTBETALING_ID,
+    val aktørId: String,
+    val fødselsnummer: String,
+    val organisasjonsnummer: String,
+    val vedtaksperiodeId: UUID,
+    val utbetalingId: UUID,
     val periodeFom: LocalDate = 1.januar,
     val periodeTom: LocalDate = 31.januar,
     val skjæringstidspunkt: LocalDate = periodeFom,

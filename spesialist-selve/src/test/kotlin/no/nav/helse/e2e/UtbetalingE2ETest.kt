@@ -2,8 +2,6 @@ package no.nav.helse.e2e
 
 import AbstractE2ETest
 import java.time.LocalDateTime
-import java.util.UUID
-import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.ANNULLERT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.GODKJENT
@@ -61,8 +59,8 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
 
     @Test
     fun `lagrer utbetaling etter utbetaling_endret når utbetalingen har vært til godkjenning og vi kjenner arbeidsgiver`() {
-        val utbetalingId = UUID.randomUUID()
-        fremTilSaksbehandleroppgave(utbetalingId = utbetalingId)
+        val utbetalingId = godkjenningsbehovTestdata.utbetalingId
+        fremTilSaksbehandleroppgave()
         håndterSaksbehandlerløsning()
         håndterUtbetalingEndret(forrigeStatus = IKKE_UTBETALT, gjeldendeStatus = GODKJENT)
         assertUtbetalinger(utbetalingId, 2)

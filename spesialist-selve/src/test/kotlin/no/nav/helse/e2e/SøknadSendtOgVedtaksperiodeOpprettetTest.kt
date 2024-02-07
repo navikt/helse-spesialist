@@ -1,9 +1,6 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETest
-import no.nav.helse.Testdata.AKTØR
-import no.nav.helse.Testdata.ORGNR
-import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import org.junit.jupiter.api.Test
 
 

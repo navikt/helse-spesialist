@@ -537,6 +537,7 @@ internal class Meldingssender(private val testRapid: TestRapid) {
     fun sendInntektløsning(
         aktørId: String,
         fødselsnummer: String,
+        orgnr: String,
     ): UUID = newUUID.also { id ->
         val behov = testRapid.inspektør.siste("behov")
         assertEquals("InntekterForSykepengegrunnlag", behov["@behov"].map { it.asText() }.single())
@@ -547,7 +548,7 @@ internal class Meldingssender(private val testRapid: TestRapid) {
             Testmeldingfabrikk.lagInntektløsning(
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
-                orgnummer = Testdata.ORGNR,
+                orgnummer = orgnr,
                 id = id,
                 hendelseId = hendelseId,
                 contextId = contextId,
@@ -745,11 +746,12 @@ internal class Meldingssender(private val testRapid: TestRapid) {
     fun sendOverstyrtInntektOgRefusjon(
         aktørId: String,
         fødselsnummer: String,
+        orgnummer: String,
         skjæringstidspunkt: LocalDate = 1.januar(1970),
         saksbehandlerOid: UUID,
         arbeidsgivere: List<OverstyrtArbeidsgiverEvent> = listOf(
             OverstyrtArbeidsgiverEvent(
-                organisasjonsnummer = Testdata.ORGNR,
+                organisasjonsnummer = orgnummer,
                 månedligInntekt = 15000.0,
                 fraMånedligInntekt = 25001.0,
                 forklaring = "testbortforklaring",
@@ -776,13 +778,14 @@ internal class Meldingssender(private val testRapid: TestRapid) {
 
     fun sendOverstyringIgangsatt(
         fødselsnummer: String,
+        orgnummer: String,
         berørtePerioder: List<Map<String, String>> = listOf(
             mapOf(
                 "vedtaksperiodeId" to "${Testdata.VEDTAKSPERIODE_ID}",
                 "skjæringstidspunkt" to "2022-01-01",
                 "periodeFom" to "2022-01-01",
                 "periodeTom" to "2022-01-31",
-                "orgnummer" to Testdata.ORGNR,
+                "orgnummer" to orgnummer,
                 "typeEndring" to "REVURDERING"
             )
         ),

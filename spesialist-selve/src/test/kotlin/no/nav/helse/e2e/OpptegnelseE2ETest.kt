@@ -9,7 +9,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import java.util.UUID
-import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.mediator.api.AbstractApiTest
 import no.nav.helse.mediator.api.AbstractApiTest.Companion.authentication

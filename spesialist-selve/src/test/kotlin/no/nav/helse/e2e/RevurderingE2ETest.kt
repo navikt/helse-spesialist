@@ -18,7 +18,7 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
 
         val utbetalingId2 = UUID.randomUUID()
 
-        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, utbetalingId = utbetalingId2, harRisikovurdering = true)
+        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = utbetalingId2), harRisikovurdering = true)
         assertSaksbehandleroppgave(oppgavestatus = Oppgavestatus.AvventerSaksbehandler)
     }
 
@@ -35,7 +35,7 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
             harOppdatertMetadata = true,
             harRisikovurdering = true,
             kanGodkjennesAutomatisk = true,
-            utbetalingId = utbetalingId2,
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = utbetalingId2),
             arbeidsgiverbeløp = -200,
             personbeløp = 0
         )
@@ -54,7 +54,7 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
             harOppdatertMetadata = true,
             harRisikovurdering = true,
             kanGodkjennesAutomatisk = true,
-            utbetalingId = utbetalingId2,
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = utbetalingId2),
             arbeidsgiverbeløp = 200,
             personbeløp = 0
         )

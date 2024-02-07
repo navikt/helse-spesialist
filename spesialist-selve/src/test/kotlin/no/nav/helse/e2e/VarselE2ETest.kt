@@ -5,7 +5,6 @@ import java.time.LocalDate
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.januar
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt

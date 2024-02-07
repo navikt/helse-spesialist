@@ -2,7 +2,7 @@ package no.nav.helse.e2e
 
 import AbstractE2ETest
 import java.time.LocalDate
-import java.util.UUID.randomUUID
+import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.Testdata.snapshot
@@ -13,13 +13,13 @@ internal class OppdaterPersonsnapshotE2ETest : AbstractE2ETest() {
 
     @Test
     fun `Oppdater personsnapshot oppdaterer alle snapshots på personen`() {
-        val v1 = randomUUID()
-        val v2 = randomUUID()
-        fremTilSaksbehandleroppgave(vedtaksperiodeId = v1, snapshotversjon = 1)
+        val v1 = VEDTAKSPERIODE_ID
+        val v2 = VEDTAKSPERIODE_ID_2
+        fremTilSaksbehandleroppgave(godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(vedtaksperiodeId = v1), snapshotversjon = 1)
         håndterSaksbehandlerløsning(vedtaksperiodeId = v1)
         håndterVedtakFattet(vedtaksperiodeId = v1)
 
-        fremTilSaksbehandleroppgave(vedtaksperiodeId = v2, snapshotversjon = 1, harOppdatertMetadata = true)
+        fremTilSaksbehandleroppgave(godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(vedtaksperiodeId = v2, utbetalingId = UUID.randomUUID()), snapshotversjon = 1, harOppdatertMetadata = true)
         håndterSaksbehandlerløsning(vedtaksperiodeId = v2)
         håndterVedtakFattet(vedtaksperiodeId = v2)
 
@@ -34,9 +34,9 @@ internal class OppdaterPersonsnapshotE2ETest : AbstractE2ETest() {
 
     @Test
     fun `Oppdaterer også Infotrygd-utbetalinger`() {
-        val v1 = randomUUID()
-        val snapshot = snapshot(2)
-        fremTilSaksbehandleroppgave(vedtaksperiodeId = v1, snapshotversjon = 1)
+        val v1 = VEDTAKSPERIODE_ID
+        val snapshot = snapshot(2, fødselsnummer = FØDSELSNUMMER, aktørId = AKTØR, organisasjonsnummer = ORGNR, vedtaksperiodeId = VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID)
+        fremTilSaksbehandleroppgave(godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(vedtaksperiodeId = v1), snapshotversjon = 1)
         håndterSaksbehandlerløsning(vedtaksperiodeId = v1)
         håndterVedtakFattet(vedtaksperiodeId = v1)
 

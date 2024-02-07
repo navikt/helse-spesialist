@@ -65,6 +65,7 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUberegnetPeriode
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.fail
 import kotlin.random.Random.Default.nextLong
@@ -91,8 +92,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         internal const val ORGNAVN = "NAVN AS"
         internal val BRANSJER = listOf("EN BRANSJE")
 
-        internal const val FNR = "02345678911"
-        internal const val AKTØR = "4321098765432"
+        internal val FNR = lagFødselsnummer()
+        internal val AKTØR = lagAktørId()
         internal const val FORNAVN = "Kari"
         internal const val MELLOMNAVN = "Mellomnavn"
         internal const val ETTERNAVN = "Nordmann"
@@ -154,6 +155,13 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val totrinnsvurderingDao = TotrinnsvurderingDao(dataSource)
     internal val dokumentDao = DokumentDao(dataSource)
     internal val påVentDao = PåVentDao(dataSource)
+
+    @BeforeEach
+    fun resetDatabase() {
+        sessionOf(dataSource).use  {
+            it.run(queryOf("SELECT truncate_tables()").asExecute)
+        }
+    }
 
     internal fun testhendelse(
         hendelseId: UUID = HENDELSE_ID,

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import java.time.LocalDate
 import no.nav.helse.AvviksvurderingTestdata
 import no.nav.helse.TestRapidHelpers.meldinger
-import no.nav.helse.Testdata
 import no.nav.helse.januar
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.asLocalDate
@@ -38,7 +37,7 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
         assertEquals(0.0, hendelse["sykepengegrunnlag"].asDouble())
         assertEquals(1.januar, hendelse["fom"].asLocalDate())
         assertEquals(11.januar, hendelse["tom"].asLocalDate())
-        assertEquals(Testdata.AKTØR, hendelse["aktørId"].asText())
+        assertEquals(AKTØR, hendelse["aktørId"].asText())
         assertEquals(LocalDate.now(), hendelse["vedtakFattetTidspunkt"].asLocalDateTime().toLocalDate())
     }
 

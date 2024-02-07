@@ -9,9 +9,7 @@ import kotlinx.coroutines.runBlocking
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.TestRapidHelpers.siste
-import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.Testdata.SAKSBEHANDLERTILGANGER_UTEN_TILGANGER
-import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.januar
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
@@ -63,7 +61,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         assertOppgaver(UTBETALING_ID, "AvventerSaksbehandler", 0)
 
         val nyUtbetalingId = UUID.randomUUID()
-        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true, utbetalingId = nyUtbetalingId)
+        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true, godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = nyUtbetalingId))
         assertOppgaver(nyUtbetalingId, "AvventerSaksbehandler", 1)
     }
 
@@ -108,7 +106,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         assertOverstyrInntektOgRefusjon(FØDSELSNUMMER, 1)
 
         val nyUtbetalingId = UUID.randomUUID()
-        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true, utbetalingId = nyUtbetalingId)
+        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true, godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = nyUtbetalingId))
 
         assertOppgaver(nyUtbetalingId, "AvventerSaksbehandler", 1)
         assertTildeling(SAKSBEHANDLER_EPOST, nyUtbetalingId)
@@ -131,7 +129,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         assertOverstyrArbeidsforhold(FØDSELSNUMMER, 1)
 
         val nyUtbetalingId = UUID.randomUUID()
-        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true, utbetalingId = nyUtbetalingId)
+        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true, godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = nyUtbetalingId))
 
         assertOppgaver(nyUtbetalingId, "AvventerSaksbehandler", 1)
         assertTildeling(SAKSBEHANDLER_EPOST, nyUtbetalingId)
@@ -150,7 +148,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         every { dataFetchingEnvironment.graphQlContext.get<SaksbehandlerTilganger>("tilganger") } returns SAKSBEHANDLERTILGANGER_UTEN_TILGANGER
 
         val nyUtbetalingId = UUID.randomUUID()
-        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true, utbetalingId = nyUtbetalingId)
+        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true, godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = nyUtbetalingId))
         assertOppgaver(nyUtbetalingId, "AvventerSaksbehandler", 1)
 
         val snapshot: Person = runBlocking { personQuery.person(FØDSELSNUMMER, null, dataFetchingEnvironment).data!! }

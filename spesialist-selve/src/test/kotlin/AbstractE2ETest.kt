@@ -21,11 +21,7 @@ import no.nav.helse.TestRapidHelpers.løsning
 import no.nav.helse.TestRapidHelpers.løsningOrNull
 import no.nav.helse.TestRapidHelpers.siste
 import no.nav.helse.TestRapidHelpers.sisteBehov
-import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.ENHET_OSLO
-import no.nav.helse.Testdata.ORGNR
-import no.nav.helse.Testdata.UTBETALING_ID
-import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.Testdata.snapshot
 import no.nav.helse.januar
 import no.nav.helse.mediator.meldinger.Risikofunn
@@ -76,16 +72,42 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.fail
 import kotlin.random.Random
 
+fun lagFødselsnummer() = Random.nextLong(from = 100000_00000, until = 699999_99999).toString()
+fun lagAktørId() = Random.nextLong(from = 1_000_000_000_000, until = 1_000_099_999_999).toString()
+
 class Testdatasett {
-    val fødselsnummer: String = Random.nextLong(from = 100000_00000, until = 699999_99999).toString()
-    val aktørId: String = Random.nextLong(from = 1_000_000_000_000, until = 1_000_099_999_999).toString()
-    val ag1: String = Random.nextLong(from = 10000000000, until = 99999999999).toString()
+    private val vedtaksperiodeIds = mutableMapOf<Int, UUID>()
+    private val utbetalingIds = mutableMapOf<Int, UUID>()
+    val fødselsnummer: String = lagFødselsnummer()
+    val aktørId: String = lagAktørId()
+    val orgnummer: String = Random.nextLong(from = 800_000_000, until = 999_999_999).toString()
+    val orgnummer2: String = Random.nextLong(from = 800_000_000, until = 999_999_999).toString()
+    val Int.vedtaksperiodeId: UUID get() = vedtaksperiodeIds.compute(this) { _, _ -> UUID.randomUUID() }!!
+    val Int.utbetalingId: UUID get() = utbetalingIds.compute(this) { _, _ -> UUID.randomUUID() }!!
+    val vedtaksperiodeId1 = 1.vedtaksperiodeId
+    val vedtaksperiodeId2 = 2.vedtaksperiodeId
+    val utbetalingId1 = 1.utbetalingId
+    val utbetalingId2 = 2.utbetalingId
+    override fun toString(): String {
+        return "Testdatasett(fødselsnummer='$fødselsnummer', aktørId='$aktørId', orgnummer='$orgnummer', orgnummer2='$orgnummer2', vedtaksperiodeId1=$vedtaksperiodeId1, vedtaksperiodeId2=$vedtaksperiodeId2, utbetalingId1=$utbetalingId1, utbetalingId2=$utbetalingId2)"
+    }
 }
 
 internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
-    protected val testdata = Testdatasett()
+    protected val testdata = Testdatasett().also { println("Bruker testdata: $it") }
     val FØDSELSNUMMER = testdata.fødselsnummer
-    private val godkjenningsbehovTestdata = GodkjenningsbehovTestdata(fødselsnummer = FØDSELSNUMMER)
+    val ORGNR = testdata.orgnummer
+    val AKTØR = testdata.aktørId
+    val VEDTAKSPERIODE_ID = testdata.vedtaksperiodeId1
+    val VEDTAKSPERIODE_ID_2 = testdata.vedtaksperiodeId2
+    val UTBETALING_ID = testdata.utbetalingId1
+    protected val godkjenningsbehovTestdata = GodkjenningsbehovTestdata(
+        fødselsnummer = FØDSELSNUMMER,
+        aktørId = AKTØR,
+        organisasjonsnummer = ORGNR,
+        vedtaksperiodeId = VEDTAKSPERIODE_ID,
+        utbetalingId = UTBETALING_ID,
+    )
     private val avviksvurderingTestdata = AvviksvurderingTestdata()
     private lateinit var utbetalingId: UUID
     internal val snapshotClient = mockk<SnapshotClient>(relaxed = true)
@@ -148,7 +170,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         fom: LocalDate = 1.januar,
         tom: LocalDate = 31.januar,
         skjæringstidspunkt: LocalDate = fom,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        vedtaksperiodeId: UUID = testdata.vedtaksperiodeId1,
         avviksvurderingTestdata: AvviksvurderingTestdata = AvviksvurderingTestdata(skjæringstidspunkt = skjæringstidspunkt),
     ) {
         fremTilÅpneOppgaver(
@@ -226,7 +248,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             avviksvurderingId = this.avviksvurderingTestdata.avviksvurderingId,
         ),
     ) {
-        håndterSøknad(fødselsnummer = godkjenningsbehovTestdata.fødselsnummer)
+        håndterSøknad(fødselsnummer = godkjenningsbehovTestdata.fødselsnummer, organisasjonsnummer = godkjenningsbehovTestdata.organisasjonsnummer)
         håndterVedtaksperiodeOpprettet(
             vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
             fom = godkjenningsbehovTestdata.periodeFom,
@@ -236,6 +258,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshot(
             versjon = snapshotversjon,
             fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,
+            organisasjonsnummer = godkjenningsbehovTestdata.organisasjonsnummer,
             vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
             utbetalingId = godkjenningsbehovTestdata.utbetalingId,
             arbeidsgiverbeløp = arbeidsgiverbeløp,
@@ -247,7 +270,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp,
             avviksvurderingTestdata = avviksvurderingTestdata,
-            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = godkjenningsbehovTestdata.utbetalingId, vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata
         )
         if (!harOppdatertMetadata) {
             håndterPersoninfoløsning()
@@ -276,8 +299,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         skjæringstidspunkt: LocalDate = fom,
         andreArbeidsforhold: List<String> = emptyList(),
         fullmakter: List<Fullmakt> = emptyList(),
-        vedtaksperiodeId: UUID = UUID.randomUUID(),
-        utbetalingId: UUID = UUID.randomUUID(),
+        vedtaksperiodeId: UUID = testdata.vedtaksperiodeId2,
+        utbetalingId: UUID = testdata.utbetalingId2,
         harOppdatertMetadata: Boolean = true,
         vilkårsgrunnlagId: UUID = UUID.randomUUID(),
     ) {
@@ -319,8 +342,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         regelverksvarsler: List<String> = emptyList(),
         fullmakter: List<Fullmakt> = emptyList(),
         risikofunn: List<Risikofunn> = emptyList(),
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
-        utbetalingId: UUID = UUID.randomUUID(),
         harRisikovurdering: Boolean = false,
         harOppdatertMetadata: Boolean = false,
         kanGodkjennesAutomatisk: Boolean = false,
@@ -328,20 +349,18 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
         avviksvurderingTestdata: AvviksvurderingTestdata = this.avviksvurderingTestdata,
-        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata.copy(utbetalingId = utbetalingId, vedtaksperiodeId = vedtaksperiodeId),
+        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata,
     ) {
         fremTilRisikovurdering(
             enhet = enhet,
             regelverksvarsler = regelverksvarsler,
             fullmakter = fullmakter,
-            vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingId = utbetalingId,
             harOppdatertMetadata = harOppdatertMetadata,
             snapshotversjon = snapshotversjon,
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp,
             avviksvurderingTestdata = avviksvurderingTestdata,
-            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(fødselsnummer = FØDSELSNUMMER)
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata
         )
         if (!harRisikovurdering) håndterRisikovurderingløsning(
             kanGodkjennesAutomatisk = kanGodkjennesAutomatisk,
@@ -355,17 +374,12 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         enhet: String = ENHET_OSLO,
         regelverksvarsler: List<String> = emptyList(),
         fullmakter: List<Fullmakt> = emptyList(),
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
-        utbetalingId: UUID = UUID.randomUUID(),
         harOppdatertMetadata: Boolean = false,
         snapshotversjon: Int = 1,
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
         avviksvurderingTestdata: AvviksvurderingTestdata = this.avviksvurderingTestdata,
-        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata.copy(
-            utbetalingId = utbetalingId,
-            vedtaksperiodeId = vedtaksperiodeId
-        ),
+        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata,
     ) {
         fremTilÅpneOppgaver(
             regelverksvarsler,
@@ -388,8 +402,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         andreArbeidsforhold: List<String> = emptyList(),
         fullmakter: List<Fullmakt> = emptyList(),
         risikofunn: List<Risikofunn> = emptyList(),
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
-        utbetalingId: UUID = UTBETALING_ID,
+        vedtaksperiodeId: UUID = testdata.vedtaksperiodeId1,
+        utbetalingId: UUID = testdata.utbetalingId1,
         harOppdatertMetadata: Boolean = true,
     ) {
         forlengelseFremTilÅpneOppgaver(
@@ -438,16 +452,11 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun nyttVedtak(
-        fom: LocalDate,
-        tom: LocalDate,
-        skjæringstidspunkt: LocalDate = fom,
         regelverksvarsler: List<String> = emptyList(),
         fullmakter: List<Fullmakt> = emptyList(),
         risikofunn: List<Risikofunn> = emptyList(),
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
-        utbetalingId: UUID = UTBETALING_ID,
         harOppdatertMetadata: Boolean = false,
-        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata.copy(periodeFom = fom, periodeTom = tom, skjæringstidspunkt = skjæringstidspunkt, vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
+        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata
     ) {
         fremTilSaksbehandleroppgave(
             regelverksvarsler = regelverksvarsler,
@@ -476,7 +485,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        vedtaksperiodeId: UUID = testdata.vedtaksperiodeId1,
         fom: LocalDate = 1.januar,
         tom: LocalDate = 31.januar,
         skjæringstidspunkt: LocalDate = fom,
@@ -499,7 +508,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        vedtaksperiodeId: UUID = testdata.vedtaksperiodeId1,
         saksbehandlerOid: UUID = SAKSBEHANDLER_OID,
         saksbehandlerEpost: String = SAKSBEHANDLER_EPOST,
         saksbehandlerNavn: String = SAKSBEHANDLER_NAVN,
@@ -521,7 +530,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        vedtaksperiodeId: UUID = testdata.vedtaksperiodeId1,
         forårsaketAvId: UUID = UUID.randomUUID(),
         forrigeTilstand: String? = null,
         gjeldendeTilstand: String? = null,
@@ -544,7 +553,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        vedtaksperiodeId: UUID = testdata.vedtaksperiodeId1,
         forårsaketAvId: UUID = UUID.randomUUID(),
     ) {
         val erRevurdering = erRevurdering(vedtaksperiodeId)
@@ -564,7 +573,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        vedtaksperiodeId: UUID = testdata.vedtaksperiodeId1,
     ) {
         sisteMeldingId = meldingssender.sendVedtaksperiodeForkastet(
             aktørId = aktørId,
@@ -579,8 +588,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
-        utbetalingId: UUID = UTBETALING_ID,
+        vedtaksperiodeId: UUID = testdata.vedtaksperiodeId1,
+        utbetalingId: UUID = testdata.utbetalingId1,
     ) {
         if (!this::utbetalingId.isInitialized || utbetalingId != this.utbetalingId) nyUtbetalingId(utbetalingId)
         sisteMeldingId = meldingssender.sendVedtaksperiodeNyUtbetaling(
@@ -598,7 +607,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        vedtaksperiodeId: UUID = testdata.vedtaksperiodeId1,
         varselkoder: List<String> = emptyList(),
     ) {
         varselkoder.forEach {
@@ -656,7 +665,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         utbetalingtype: String = "UTBETALING",
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
-        utbetalingId: UUID = UTBETALING_ID,
+        utbetalingId: UUID = testdata.utbetalingId1,
     ) {
         nyUtbetalingId(utbetalingId)
         håndterUtbetalingEndret(
@@ -726,7 +735,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         utbetalingtype: String = Utbetalingtype.ANNULLERING.toString(),
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
-        utbetalingId: UUID = UTBETALING_ID,
+        utbetalingId: UUID = testdata.utbetalingId1,
     ) {
         nyUtbetalingId(utbetalingId)
         håndterUtbetalingEndret(
@@ -805,11 +814,10 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun håndterGodkjenningsbehovUtenValidering(
-        utbetalingId: UUID = UTBETALING_ID,
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
         avviksvurderingTestdata: AvviksvurderingTestdata = this.avviksvurderingTestdata,
-        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata.copy(utbetalingId = utbetalingId, avviksvurderingId = this.avviksvurderingTestdata.avviksvurderingId),
+        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata.copy(avviksvurderingId = this.avviksvurderingTestdata.avviksvurderingId),
     ) {
         val erRevurdering = erRevurdering(godkjenningsbehovTestdata.vedtaksperiodeId)
         håndterVedtaksperiodeNyUtbetaling(vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId, utbetalingId = godkjenningsbehovTestdata.utbetalingId)
@@ -836,14 +844,13 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             @Language("PostgreSQL")
             val query =
                 "SELECT a.orgnummer FROM arbeidsgiver a INNER JOIN vedtak v on a.id = v.arbeidsgiver_ref INNER JOIN person p on p.id = v.person_ref WHERE p.fodselsnummer = ?"
-            session.run(queryOf(query, godkjenningsbehovTestdata.copy(fødselsnummer = FØDSELSNUMMER).fødselsnummer.toLong()).map { it.string("orgnummer") }.asList)
+            session.run(queryOf(query, godkjenningsbehovTestdata.fødselsnummer.toLong()).map { it.string("orgnummer") }.asList)
         }
         håndterGodkjenningsbehovUtenValidering(
-            utbetalingId = godkjenningsbehovTestdata.utbetalingId,
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp,
             avviksvurderingTestdata = avviksvurderingTestdata,
-            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(fødselsnummer = FØDSELSNUMMER, avviksvurderingId = avviksvurderingTestdata.avviksvurderingId)
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(avviksvurderingId = avviksvurderingTestdata.avviksvurderingId)
         )
 
         when {
@@ -885,7 +892,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        vedtaksperiodeId: UUID = testdata.vedtaksperiodeId1,
         enhet: String = "0301", // Oslo
     ) {
         assertEtterspurteBehov("HentEnhet")
@@ -897,7 +904,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        vedtaksperiodeId: UUID = testdata.vedtaksperiodeId1,
     ) {
         assertEtterspurteBehov("HentInfotrygdutbetalinger")
         sisteMeldingId = meldingssender.sendInfotrygdutbetalingerløsning(
@@ -912,7 +919,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        vedtaksperiodeId: UUID = testdata.vedtaksperiodeId1,
         arbeidsgiverinformasjonJson: List<Testmeldingfabrikk.ArbeidsgiverinformasjonJson>? = null,
     ) {
         val erKompositt = testRapid.inspektør.sisteBehov("Arbeidsgiverinformasjon", "HentPersoninfoV2") != null
@@ -940,7 +947,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        vedtaksperiodeId: UUID = testdata.vedtaksperiodeId1,
     ) {
         assertEtterspurteBehov("Arbeidsforhold")
         sisteMeldingId =
@@ -973,7 +980,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         fødselsnummer: String = FØDSELSNUMMER,
     ) {
         assertEtterspurteBehov("InntekterForSykepengegrunnlag")
-        sisteMeldingId = meldingssender.sendInntektløsning(aktørId, fødselsnummer)
+        sisteMeldingId = meldingssender.sendInntektløsning(aktørId, fødselsnummer, ORGNR)
     }
 
     protected fun håndterÅpneOppgaverløsning(
@@ -990,7 +997,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        vedtaksperiodeId: UUID = testdata.vedtaksperiodeId1,
         kanGodkjennesAutomatisk: Boolean = true,
         risikofunn: List<Risikofunn> = emptyList(),
     ) {
@@ -1007,7 +1014,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     protected fun håndterSaksbehandlerløsning(
         fødselsnummer: String = FØDSELSNUMMER,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        vedtaksperiodeId: UUID = testdata.vedtaksperiodeId1,
         godkjent: Boolean = true,
         kommentar: String? = null,
         begrunnelser: List<String> = emptyList(),
@@ -1054,7 +1061,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        vedtaksperiodeId: UUID = testdata.vedtaksperiodeId1,
         fastsattType: String = "EtterHovedregel",
         fom: LocalDate = 1.januar,
         tom: LocalDate = 31.januar,
@@ -1080,7 +1087,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        vedtaksperiodeId: UUID = testdata.vedtaksperiodeId1,
         fom: LocalDate = 1.januar,
         tom: LocalDate = 11.januar,
         skjæringstidspunkt: LocalDate = fom,
@@ -1100,7 +1107,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        vedtaksperiodeId: UUID = testdata.vedtaksperiodeId1,
     ) {
         if (this::utbetalingId.isInitialized) håndterUtbetalingUtbetalt(aktørId, fødselsnummer, organisasjonsnummer)
         sisteMeldingId = meldingssender.sendVedtakFattet(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId)
@@ -1129,7 +1136,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        vedtaksperiodeId: UUID = testdata.vedtaksperiodeId1,
         dager: List<OverstyrDagFraApi> = listOf(
             OverstyrDagFraApi(1.januar(1970), Dagtype.Feriedag.toString(), Dagtype.Sykedag.toString(), null, 100, null)
         ),
@@ -1173,9 +1180,10 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             sisteMeldingId = meldingssender.sendOverstyrtInntektOgRefusjon(
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
+                orgnummer = ORGNR,
                 skjæringstidspunkt = skjæringstidspunkt,
-                arbeidsgivere = arbeidsgivere.byggOverstyrArbeidsgiverEvent(),
                 saksbehandlerOid = SAKSBEHANDLER_OID,
+                arbeidsgivere = arbeidsgivere.byggOverstyrArbeidsgiverEvent(),
             )
         }
     }
@@ -1187,7 +1195,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         skjæringstidspunkt: LocalDate = 1.januar,
         overstyrteArbeidsforhold: List<ArbeidsforholdFraApi> = listOf(
             ArbeidsforholdFraApi(
-                orgnummer = ORGNR,
+                orgnummer = organisasjonsnummer,
                 deaktivert = true,
                 begrunnelse = "begrunnelse",
                 forklaring = "forklaring"
@@ -1230,9 +1238,10 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private fun håndterOverstyringIgangsatt(fødselsnummer: String, kildeId: UUID) {
         sisteMeldingId = meldingssender.sendOverstyringIgangsatt(
             fødselsnummer = fødselsnummer,
+            orgnummer = ORGNR,
             berørtePerioder = listOf(
                 mapOf(
-                    "vedtaksperiodeId" to "$VEDTAKSPERIODE_ID"
+                    "vedtaksperiodeId" to "${testdata.vedtaksperiodeId1}"
                 )
             ),
             kilde = kildeId
@@ -1314,7 +1323,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun assertSaksbehandleroppgave(
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        vedtaksperiodeId: UUID = testdata.vedtaksperiodeId1,
         oppgavestatus: Oppgavestatus,
     ) {
         @Language("PostgreSQL")
@@ -1354,7 +1363,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun assertSaksbehandleroppgaveBleIkkeOpprettet(
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        vedtaksperiodeId: UUID = testdata.vedtaksperiodeId1,
     ) {
         @Language("PostgreSQL")
         val query = "SELECT 1 FROM oppgave WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = ?)"
