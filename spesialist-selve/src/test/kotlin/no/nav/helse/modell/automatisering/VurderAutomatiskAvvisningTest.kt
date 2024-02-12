@@ -124,7 +124,6 @@ internal class VurderAutomatiskAvvisningTest {
             vedtaksperiodeId = vedtaksperiodeId,
             personDao = personDao,
             vergemålDao = vergemålDao,
-            vedtakDao = vedtakDao,
             godkjenningMediator = godkjenningMediator,
             hendelseId = hendelseId,
             utbetaling = Utbetaling(utbetalingId, 1000, 1000, utbetalingstype),
