@@ -36,7 +36,10 @@ internal class OppdaterSnapshotCommand(
         return snapshotClient.hentSnapshot(fnr = fødselsnummer).data?.person?.let { person ->
             snapshotDao.lagre(fødselsnummer = fødselsnummer, snapshot = person)
             true
-        } ?: false
+        } ?: run {
+            log.warn("Kunne ikke hente snapshot for vedtaksperiodeId=$vedtaksperiodeId - dette betyr at kommandokjeden stopper opp.")
+            false
+        }
     }
 
     private fun ignorer(): Boolean {
