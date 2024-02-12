@@ -355,7 +355,8 @@ internal class HendelseMediator(
             sikkerLogg.error("""
                 vedtaksperiodeId=$vedtaksperiodeId med utbetalingId=$utbetalingId, periodeFom=$periodeFom, periodeTom=$periodeTom 
                 og skjæringstidspunkt=$skjæringstidspunkt er i et sykefraværstilfelle uten generasjoner lagret. 
-                Ignorerer godkjenningsbehov med id=$id""")
+                Ignorerer godkjenningsbehov med id=$id""".trimIndent()
+            )
             return
         }
         utfør(
