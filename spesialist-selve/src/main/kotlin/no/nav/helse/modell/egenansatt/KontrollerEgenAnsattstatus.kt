@@ -19,7 +19,7 @@ internal class KontrollerEgenAnsattstatus(
     override fun resume(context: CommandContext) = behandle(context)
 
     private fun behandle(context: CommandContext): Boolean {
-        if (egenAnsattDao.erEgenAnsatt(fødselsnummer) != null) return true
+        if (viHarInformasjon()) return true
         val løsning = context.get<EgenAnsattløsning>()
         if (løsning == null) {
             logg.info("Trenger informasjon om egen ansatt")
@@ -30,4 +30,7 @@ internal class KontrollerEgenAnsattstatus(
         løsning.lagre(egenAnsattDao)
         return true
     }
+
+    // Hvis vi har informasjon i databasen er den "garantert" oppdatert, pga. at vi lytter på endringer på topic fra NOM.
+    private fun viHarInformasjon() = egenAnsattDao.erEgenAnsatt(fødselsnummer) != null
 }
