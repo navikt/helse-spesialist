@@ -53,8 +53,9 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
         håndterSøknad()
         håndterVedtaksperiodeOpprettet()
         håndterUtbetalingOpprettet(organisasjonsnummer = ET_ANNET_ORGNR)
+        val utbetalingMeldingId = sisteMeldingId
         assertUtbetalinger(UTBETALING_ID, 0)
-        assertFeilendeMeldinger(1)
+        assertFeilendeMeldinger(1, utbetalingMeldingId)
     }
 
     @Test
@@ -63,8 +64,9 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
         fremTilSaksbehandleroppgave()
         håndterSaksbehandlerløsning()
         håndterUtbetalingEndret(forrigeStatus = IKKE_UTBETALT, gjeldendeStatus = GODKJENT)
+        val utbetalingMeldingId = sisteMeldingId
         assertUtbetalinger(utbetalingId, 2)
-        assertFeilendeMeldinger(0)
+        assertFeilendeMeldinger(0, utbetalingMeldingId)
     }
 
     @Test

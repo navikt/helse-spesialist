@@ -1299,11 +1299,11 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         assertEquals(forventetAntall, antall)
     }
 
-    protected fun assertFeilendeMeldinger(forventetAntall: Int) {
+    protected fun assertFeilendeMeldinger(forventetAntall: Int, hendelseId: UUID) {
         @Language("PostgreSQL")
-        val query = "SELECT COUNT(1) FROM feilende_meldinger"
-        val antall = sessionOf(dataSource).use {
-            it.run(queryOf(query).map { it.int(1) }.asSingle)
+        val query = "SELECT COUNT(1) FROM feilende_meldinger WHERE id = :id"
+        val antall = sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, mapOf("id" to hendelseId)).map { it.int(1) }.asSingle)
         }
         assertEquals(forventetAntall, antall)
     }
