@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID.randomUUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.Testdata.ORGNR_GHOST
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.ArbeidsgiverinformasjonJson
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -33,20 +32,20 @@ internal class OppdaterArbeidsgiverE2ETest : AbstractE2ETest() {
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(
                 vedtaksperiodeId = vedtaksperiode2Id,
                 utbetalingId = randomUUID(),
-                orgnummereMedRelevanteArbeidsforhold = listOf(ORGNR_GHOST),
+                orgnummereMedRelevanteArbeidsforhold = listOf(ORGNR2),
             ),
         )
 
         assertInnholdIBehov(behov = "Arbeidsgiverinformasjon") { jsonNode ->
-            jsonNode.behovInneholderOrganisasjonsnummer(ORGNR_GHOST)
+            jsonNode.behovInneholderOrganisasjonsnummer(ORGNR2)
         }
 
         håndterArbeidsgiverinformasjonløsning(
-            organisasjonsnummer = ORGNR_GHOST,
+            organisasjonsnummer = ORGNR2,
         )
 
         assertEquals("Navn for $ORGNR", arbeidsgivernavn(ORGNR))
-        assertEquals("Navn for $ORGNR_GHOST", arbeidsgivernavn(ORGNR_GHOST))
+        assertEquals("Navn for $ORGNR2", arbeidsgivernavn(ORGNR2))
 
 //        Dette Arbeidsgiverinformasjon-behovet ble tidligere ikke sendt ut fordi løsningen på
 //        Arbeidsgiverinformasjon-behovet som gikk ut ifbm. godkjenningsbehov på vedtaksperiode #2 ble akseptert som gyldig
@@ -85,6 +84,7 @@ internal class OppdaterArbeidsgiverE2ETest : AbstractE2ETest() {
             set navn_oppdatert = 'now'::timestamp - '1 month'::interval
             from arbeidsgiver ag
             where ag.orgnummer = $ORGNR
+            and ag_navn.id = ag.navn_ref
         """.trimIndent()
         sessionOf(dataSource).use { session ->
             session.run(queryOf(query).asExecute)

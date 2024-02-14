@@ -17,7 +17,6 @@ internal class OpprettArbeidsgiverCommand(
     override fun execute(context: CommandContext): Boolean {
         val arbeidsgivereSomIkkeFinnes = arbeidsgivereSomIkkeFinnes()
         if (arbeidsgivereSomIkkeFinnes.isEmpty()) return ignorer()
-        sikkerlogg.info("Arbeidsgiver(e) med orgnr: $arbeidsgivereSomIkkeFinnes finnes ikke fra før")
         return behandle(context)
     }
 
@@ -26,7 +25,7 @@ internal class OpprettArbeidsgiverCommand(
     }
 
     private fun ignorer(): Boolean {
-        logg.info("arbeidsgiver finnes fra før, lager ikke ny")
+        logg.info("arbeidsgiver(e) finnes fra før, ingenting å gjøre")
         return true
     }
 
@@ -51,6 +50,7 @@ internal class OpprettArbeidsgiverCommand(
         orgnummere.filter { arbeidsgiverDao.findArbeidsgiverByOrgnummer(it) == null }
 
     private fun trengerMerInformasjon(context: CommandContext, arbeidsgivereSomIkkeFinnes: List<String>): Boolean {
+        sikkerlogg.info("Ber om info for arbeidsgiver(e) $arbeidsgivereSomIkkeFinnes")
         val (orgnumre, personer) = arbeidsgivereSomIkkeFinnes.partition { it.length == 9 }
         if (orgnumre.isNotEmpty()) context.behov("Arbeidsgiverinformasjon", mapOf("organisasjonsnummer" to orgnumre))
         if (personer.isNotEmpty()) context.behov("HentPersoninfoV2", mapOf("ident" to personer))

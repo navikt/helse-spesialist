@@ -128,6 +128,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val testdata = TestPerson().also { println("Bruker testdata: $it") }
     val FØDSELSNUMMER = testdata.fødselsnummer
     val ORGNR = testdata.orgnummer
+    val ORGNR2 = testdata.orgnummer2
     val AKTØR = testdata.aktørId
     val VEDTAKSPERIODE_ID = testdata.vedtaksperiodeId1
     val VEDTAKSPERIODE_ID_2 = testdata.vedtaksperiodeId2
