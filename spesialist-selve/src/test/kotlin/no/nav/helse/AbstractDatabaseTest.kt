@@ -8,7 +8,6 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import org.flywaydb.core.Flyway
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.BeforeAll
 import org.testcontainers.containers.PostgreSQLContainer
 
 abstract class AbstractDatabaseTest {
@@ -38,12 +37,8 @@ abstract class AbstractDatabaseTest {
                 .load()
                 .migrate()
 
+            // Kan sikkert slå sammen disse to hvis vi ikke lenger trenger å truncate mer enn en gang
             createTruncateFunction(dataSource)
-        }
-
-        @BeforeAll
-        @JvmStatic
-        fun resetDatabase() {
             sessionOf(dataSource).use  {
                 it.run(queryOf("SELECT truncate_tables()").asExecute)
             }
