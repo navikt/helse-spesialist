@@ -74,27 +74,58 @@ import kotlin.random.Random
 
 fun lagFødselsnummer() = Random.nextLong(from = 100000_00000, until = 699999_99999).toString()
 fun lagAktørId() = Random.nextLong(from = 1_000_000_000_000, until = 1_000_099_999_999).toString()
+fun lagOrganisasjonsnummer() = Random.nextLong(from = 800_000_000, until = 999_999_999).toString()
 
-class Testdatasett {
-    private val vedtaksperiodeIds = mutableMapOf<Int, UUID>()
-    private val utbetalingIds = mutableMapOf<Int, UUID>()
+internal class TestPerson {
     val fødselsnummer: String = lagFødselsnummer()
     val aktørId: String = lagAktørId()
-    val orgnummer: String = Random.nextLong(from = 800_000_000, until = 999_999_999).toString()
-    val orgnummer2: String = Random.nextLong(from = 800_000_000, until = 999_999_999).toString()
-    val Int.vedtaksperiodeId: UUID get() = vedtaksperiodeIds.compute(this) { _, _ -> UUID.randomUUID() }!!
-    val Int.utbetalingId: UUID get() = utbetalingIds.compute(this) { _, _ -> UUID.randomUUID() }!!
-    val vedtaksperiodeId1 = 1.vedtaksperiodeId
-    val vedtaksperiodeId2 = 2.vedtaksperiodeId
-    val utbetalingId1 = 1.utbetalingId
-    val utbetalingId2 = 2.utbetalingId
+    private val arbeidsgivere = mutableMapOf<Int, TestArbeidsgiver>()
+    private val arbeidsgiver1 = nyArbeidsgiver()
+    private val arbeidsgiver2 = nyArbeidsgiver()
+    private val vedtaksperiode1 = arbeidsgiver1.nyVedtaksperiode()
+    private val vedtaksperiode2 = arbeidsgiver1.nyVedtaksperiode()
+    val orgnummer: String = arbeidsgiver1.organisasjonsnummer
+    val orgnummer2: String = arbeidsgiver2.organisasjonsnummer
+    val vedtaksperiodeId1 = vedtaksperiode1.vedtaksperiodeId
+    val vedtaksperiodeId2 = vedtaksperiode2.vedtaksperiodeId
+    val utbetalingId1 = vedtaksperiode1.utbetalingId
+    val utbetalingId2 = vedtaksperiode2.utbetalingId
     override fun toString(): String {
         return "Testdatasett(fødselsnummer='$fødselsnummer', aktørId='$aktørId', orgnummer='$orgnummer', orgnummer2='$orgnummer2', vedtaksperiodeId1=$vedtaksperiodeId1, vedtaksperiodeId2=$vedtaksperiodeId2, utbetalingId1=$utbetalingId1, utbetalingId2=$utbetalingId2)"
     }
+
+    val Int.arbeidsgiver get() = arbeidsgivere[this] ?: throw IllegalArgumentException("Arbeidsgiver med index $this finnes ikke")
+
+    internal fun nyArbeidsgiver() = TestArbeidsgiver(fødselsnummer, aktørId).also {
+        arbeidsgivere[arbeidsgivere.size] = it
+    }
+}
+
+internal class TestArbeidsgiver(
+    val fødselsnummer: String,
+    val aktørId: String
+) {
+    private val vedtaksperioder = mutableMapOf<Int, TestVedtaksperiode>()
+    val organisasjonsnummer = lagOrganisasjonsnummer()
+
+    internal fun nyVedtaksperiode() = TestVedtaksperiode(fødselsnummer, aktørId, organisasjonsnummer).also {
+        vedtaksperioder[vedtaksperioder.size] = it
+    }
+
+    val Int.vedtaksperiode get() = vedtaksperioder[this] ?: throw IllegalArgumentException("Vedtaksperiode med index $this for arbeidsgiver $organisasjonsnummer finnes ikke")
+}
+
+internal class TestVedtaksperiode(
+    val fødselsnummer: String,
+    val aktørId: String,
+    val organisasjonsnummer: String,
+) {
+    val vedtaksperiodeId: UUID = UUID.randomUUID()
+    val utbetalingId: UUID = UUID.randomUUID()
 }
 
 internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
-    protected val testdata = Testdatasett().also { println("Bruker testdata: $it") }
+    protected val testdata = TestPerson().also { println("Bruker testdata: $it") }
     val FØDSELSNUMMER = testdata.fødselsnummer
     val ORGNR = testdata.orgnummer
     val AKTØR = testdata.aktørId
