@@ -254,7 +254,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         notatDao = NotatDao(dataSource),
         totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource),
         påVentApiDao = PåVentApiDao(dataSource),
-        snapshotMediator = SnapshotMediator(SnapshotApiDao(dataSource), mockk(relaxed = true)),
+        snapshotMediator = SnapshotMediator(SnapshotApiDao(dataSource), snapshotClient),
         reservasjonClient = mockk(relaxed = true),
         oppgavehåndterer = mockk(relaxed = true),
         avviksvurderinghenter = mockk(relaxed = true),

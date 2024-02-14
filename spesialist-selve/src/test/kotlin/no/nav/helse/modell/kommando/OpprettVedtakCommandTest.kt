@@ -6,7 +6,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.Testdata.SNAPSHOT
+import no.nav.helse.Testdata.snapshot
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
@@ -53,7 +53,7 @@ internal class OpprettVedtakCommandTest {
 
     @Test
     fun `opprette vedtak`() {
-        every { snapshotClient.hentSnapshot(FNR) } returns SNAPSHOT
+        every { snapshotClient.hentSnapshot(FNR) } returns snapshot()
         val (personRef, arbeidsgiverRef, snapshotRef) = personFinnes()
         every { vedtakDao.finnVedtakId(VEDTAKSPERIODE_ID) } returns null
         assertTrue(command.execute(context))
@@ -71,7 +71,7 @@ internal class OpprettVedtakCommandTest {
 
     @Test
     fun `oppdatere vedtak`() {
-        every { snapshotClient.hentSnapshot(FNR) } returns SNAPSHOT
+        every { snapshotClient.hentSnapshot(FNR) } returns snapshot()
         val (_, _, snapshotRef) = personFinnes()
         every { vedtakDao.finnVedtakId(VEDTAKSPERIODE_ID) } returns VEDTAK_REF
         assertTrue(command.execute(context))

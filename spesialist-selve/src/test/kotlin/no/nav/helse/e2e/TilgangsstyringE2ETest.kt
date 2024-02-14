@@ -6,7 +6,7 @@ import graphql.schema.DataFetchingEnvironment
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.Testdata.SNAPSHOT
+import no.nav.helse.Testdata.snapshot
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
@@ -123,7 +123,7 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
     }
 
     private fun settOppDefaultDataOgTilganger() {
-        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshot()
         every { dataFetchingEnvironment.graphQlContext.get<String>("saksbehandlerNavn") } returns "saksbehandler"
         saksbehandlertilgangTilSkjermede(harTilgang = false)
     }
@@ -149,7 +149,7 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
         notatDao = NotatDao(dataSource),
         totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource),
         påVentApiDao = PåVentApiDao(dataSource),
-        snapshotMediator = SnapshotMediator(SnapshotApiDao(dataSource), mockk(relaxed = true)),
+        snapshotMediator = SnapshotMediator(SnapshotApiDao(dataSource), snapshotClient),
         reservasjonClient = mockk(relaxed = true),
         oppgavehåndterer = mockk(relaxed = true),
         avviksvurderinghenter = mockk(relaxed = true),

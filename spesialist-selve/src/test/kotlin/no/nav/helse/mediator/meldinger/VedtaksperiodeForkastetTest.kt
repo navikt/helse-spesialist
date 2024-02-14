@@ -5,7 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
-import no.nav.helse.Testdata.SNAPSHOT
+import no.nav.helse.Testdata.snapshot
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.SnapshotDao
@@ -54,12 +54,13 @@ internal class VedtaksperiodeForkastetTest {
 
     @Test
     fun `avbryter kommandoer, oppdaterer snapshot og markerer vedtaksperiode som forkastet`() {
-        every { graphQLClient.hentSnapshot(FNR) } returns SNAPSHOT
-        every { snapshotDao.lagre(FNR, SNAPSHOT.data!!.person!!) } returns 1
+        val snapshot = snapshot()
+        every { graphQLClient.hentSnapshot(FNR) } returns snapshot
+        every { snapshotDao.lagre(FNR, snapshot.data!!.person!!) } returns 1
         every { personDao.findPersonByFødselsnummer(FNR) } returns 1
         assertTrue(vedtaksperiodeForkastetMessage.execute(context))
         verify(exactly = 1) { commandContextDao.avbryt(VEDTAKSPERIODE, CONTEXT) }
-        verify(exactly = 1) { snapshotDao.lagre(FNR, SNAPSHOT.data!!.person!!) }
+        verify(exactly = 1) { snapshotDao.lagre(FNR, snapshot.data!!.person!!) }
         verify(exactly = 1) { vedtakDao.markerForkastet(VEDTAKSPERIODE, HENDELSE) }
     }
 }

@@ -42,13 +42,6 @@ object Testdata {
     internal val UTBETALING_ID = UUID.randomUUID()
 
     val VEDTAKSPERIODE_ID: UUID = UUID.randomUUID()
-    val SNAPSHOT = snapshot(
-        aktørId = AKTØR,
-        organisasjonsnummer = ORGNR,
-        fødselsnummer = FØDSELSNUMMER,
-        vedtaksperiodeId = VEDTAKSPERIODE_ID,
-        utbetalingId = UTBETALING_ID,
-    )
 
     fun snapshot(
         versjon: Int = 1,
