@@ -72,46 +72,46 @@ import kotlin.random.Random.Default.nextLong
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
+    protected open val HENDELSE_ID: UUID = UUID.randomUUID()
+
+    protected val VEDTAKSPERIODE: UUID = UUID.randomUUID()
+
+    protected open val UTBETALING_ID: UUID = UUID.randomUUID()
+
+    protected open var OPPGAVE_ID = nextLong()
+        protected set
+    private val OPPGAVETYPE = "SØKNAD"
+    protected val EGENSKAP = EgenskapForDatabase.SØKNAD
+    protected val OPPGAVESTATUS = "AvventerSaksbehandler"
+
+    protected val ORGNUMMER = "123456789"
+    protected val ORGNAVN = "NAVN AS"
+    protected val BRANSJER = listOf("EN BRANSJE")
+
+    protected val FNR = lagFødselsnummer()
+    protected val AKTØR = lagAktørId()
+    protected val FORNAVN = "Kari"
+    protected val MELLOMNAVN = "Mellomnavn"
+    protected val ETTERNAVN = "Nordmann"
+    protected val FØDSELSDATO: LocalDate = LocalDate.EPOCH
+    protected val KJØNN = Kjønn.Kvinne
+    protected val ADRESSEBESKYTTELSE = Adressebeskyttelse.Ugradert
+    protected val ENHET = "0301"
+
+    protected val FOM: LocalDate = LocalDate.of(2018, 1, 1)
+
+    protected val TOM: LocalDate = LocalDate.of(2018, 1, 31)
+
+    protected open val SAKSBEHANDLER_OID: UUID = UUID.randomUUID()
+    protected open val SAKSBEHANDLER_EPOST = "sara.saksbehandler@nav.no"
+    protected open val SAKSBEHANDLER_NAVN = "Sara Saksbehandler"
+    protected open val SAKSBEHANDLER_IDENT = "Z999999"
+
+    protected val PERIODE = Periode(UUID.randomUUID(), LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 31))
     protected companion object {
         internal val objectMapper = jacksonObjectMapper()
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             .registerModule(JavaTimeModule())
-        internal val HENDELSE_ID = UUID.randomUUID()
-
-        internal val VEDTAKSPERIODE = UUID.randomUUID()
-
-        internal val UTBETALING_ID = UUID.randomUUID()
-
-        internal var OPPGAVE_ID = nextLong()
-            private set
-        internal const val OPPGAVETYPE = "SØKNAD"
-        internal val EGENSKAP = EgenskapForDatabase.SØKNAD
-        internal const val OPPGAVESTATUS = "AvventerSaksbehandler"
-
-        internal const val ORGNUMMER = "123456789"
-        internal const val ORGNAVN = "NAVN AS"
-        internal val BRANSJER = listOf("EN BRANSJE")
-
-        internal val FNR = lagFødselsnummer()
-        internal val AKTØR = lagAktørId()
-        internal const val FORNAVN = "Kari"
-        internal const val MELLOMNAVN = "Mellomnavn"
-        internal const val ETTERNAVN = "Nordmann"
-        internal val FØDSELSDATO = LocalDate.EPOCH
-        internal val KJØNN = Kjønn.Kvinne
-        internal val ADRESSEBESKYTTELSE = Adressebeskyttelse.Ugradert
-        internal const val ENHET = "0301"
-
-        internal val FOM = LocalDate.of(2018, 1, 1)
-
-        internal val TOM = LocalDate.of(2018, 1, 31)
-        internal val SAKSBEHANDLER_OID = UUID.randomUUID()
-
-        internal const val SAKSBEHANDLEREPOST = "sara.saksbehandler@nav.no"
-        internal const val SAKSBEHANDLER_NAVN = "Sara Saksbehandler"
-        internal const val SAKSBEHANDLER_IDENT = "Z999999"
-
-        val PERIODE = Periode(UUID.randomUUID(), LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 31))
     }
 
     internal var personId: Long = -1
@@ -245,7 +245,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         navn: String = SAKSBEHANDLER_NAVN,
         påVent: Boolean = false,
     ) {
-        opprettSaksbehandler(saksbehandlerOid, navn = navn, epost = SAKSBEHANDLEREPOST, ident = SAKSBEHANDLER_IDENT)
+        opprettSaksbehandler(saksbehandlerOid, navn = navn, epost = SAKSBEHANDLER_EPOST, ident = SAKSBEHANDLER_IDENT)
         @Language("PostgreSQL")
         val query = "INSERT INTO tildeling(saksbehandler_ref, oppgave_id_ref, på_vent) VALUES (?, ?, ?)"
         return sessionOf(dataSource).use { session ->

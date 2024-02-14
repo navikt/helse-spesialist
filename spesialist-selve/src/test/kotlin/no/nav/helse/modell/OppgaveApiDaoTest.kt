@@ -14,10 +14,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class OppgaveApiDaoTest : DatabaseIntegrationTest() {
-    private companion object {
-        private val CONTEXT_ID = UUID.randomUUID()
-        private val TESTHENDELSE = TestHendelse(HENDELSE_ID, UUID.randomUUID(), FNR)
-    }
+    private val CONTEXT_ID = UUID.randomUUID()
+    private val TESTHENDELSE = TestHendelse(HENDELSE_ID, UUID.randomUUID(), FNR)
 
     @BeforeEach
     fun setupDaoTest() {

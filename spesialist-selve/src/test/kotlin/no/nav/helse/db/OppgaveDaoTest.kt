@@ -40,10 +40,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class OppgaveDaoTest : DatabaseIntegrationTest() {
-    private companion object {
-        private val CONTEXT_ID = UUID.randomUUID()
-        private val TESTHENDELSE = TestHendelse(HENDELSE_ID, UUID.randomUUID(), FNR)
-    }
+    private val CONTEXT_ID = UUID.randomUUID()
+    private val TESTHENDELSE = TestHendelse(HENDELSE_ID, UUID.randomUUID(), FNR)
+    private val OPPGAVETYPE = "SØKNAD"
 
     @BeforeEach
     fun setupDaoTest() {
@@ -301,7 +300,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         assertEquals(false, førsteOppgave.påVent)
         assertEquals(
             SaksbehandlerFraDatabase(
-                SAKSBEHANDLEREPOST,
+                SAKSBEHANDLER_EPOST,
                 saksbehandlerOid,
                 SAKSBEHANDLER_NAVN,
                 SAKSBEHANDLER_IDENT
@@ -826,7 +825,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettArbeidsgiver()
         opprettVedtaksperiode()
         opprettOppgave(contextId = CONTEXT_ID)
-        oppgaveDao.updateOppgave(oppgaveId, nyStatus, SAKSBEHANDLEREPOST, SAKSBEHANDLER_OID, listOf(EGENSKAP, RISK_QA))
+        oppgaveDao.updateOppgave(oppgaveId, nyStatus, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_OID, listOf(EGENSKAP, RISK_QA))
         assertEquals(1, oppgave().size)
         oppgave().first().assertEquals(
             LocalDate.now(),
@@ -834,7 +833,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
             listOf(OPPGAVETYPE, "RISK_QA"),
             nyStatus,
             true,
-            SAKSBEHANDLEREPOST,
+            SAKSBEHANDLER_EPOST,
             SAKSBEHANDLER_OID,
             vedtakId,
             CONTEXT_ID

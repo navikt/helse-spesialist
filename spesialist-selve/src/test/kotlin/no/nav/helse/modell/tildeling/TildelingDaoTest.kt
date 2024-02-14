@@ -61,7 +61,7 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
         oppgaveDao.updateOppgave(
             oppgaveId = oppgaveId,
             oppgavestatus = "Ferdigstilt",
-            ferdigstiltAv = SAKSBEHANDLEREPOST,
+            ferdigstiltAv = SAKSBEHANDLER_EPOST,
             oid = SAKSBEHANDLER_OID,
             egenskaper = listOf(EGENSKAP)
         )

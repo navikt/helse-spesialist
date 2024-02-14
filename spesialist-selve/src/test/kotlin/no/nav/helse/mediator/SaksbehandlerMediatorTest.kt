@@ -56,11 +56,10 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
     private val ORGANISASJONSNUMMER = "987654321"
     private val ORGANISASJONSNUMMER_GHOST = "123456789"
 
-    private val SAKSBEHANDLER_OID = UUID.randomUUID()
-    private val SAKSBEHANDLER_NAVN = "ET_NAVN"
-    private val SAKSBEHANDLER_IDENT = "EN_IDENT"
-
-    private val SAKSBEHANDLER_EPOST = "epost@nav.no"
+    override val SAKSBEHANDLER_OID: UUID = UUID.randomUUID()
+    override val SAKSBEHANDLER_NAVN = "ET_NAVN"
+    override val SAKSBEHANDLER_IDENT = "EN_IDENT"
+    override val SAKSBEHANDLER_EPOST = "epost@nav.no"
 
     private val saksbehandler = saksbehandler()
 

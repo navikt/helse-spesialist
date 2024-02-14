@@ -19,37 +19,35 @@ import org.junit.jupiter.api.Test
 import kotlin.random.Random
 
 class OppgavelagrerTest: DatabaseIntegrationTest() {
-    private companion object {
-        private val OPPGAVETYPE = SØKNAD
-        private val VEDTAKSPERIODE_ID = UUID.randomUUID()
-        private val UTBETALING_ID = UUID.randomUUID()
-        private const val SAKSBEHANDLER_IDENT = "Z999999"
-        private const val SAKSBEHANDLER_EPOST = "saksbehandler@nav.no"
-        private const val SAKSBEHANDLER_NAVN = "Hen Saksbehandler"
-        private val SAKSBEHANDLER_OID = UUID.randomUUID()
-        private val BESLUTTER_OID = UUID.randomUUID()
-        private val OPPGAVE_ID = Random.nextLong()
-        private val saksbehandler = Saksbehandler(
-            oid = SAKSBEHANDLER_OID,
-            epostadresse = SAKSBEHANDLER_EPOST,
-            navn = SAKSBEHANDLER_NAVN,
-            ident = SAKSBEHANDLER_IDENT,
-            tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
-        )
-        private val beslutter = Saksbehandler(
-            oid = BESLUTTER_OID,
-            epostadresse = SAKSBEHANDLER_EPOST,
-            navn = SAKSBEHANDLER_NAVN,
-            ident = SAKSBEHANDLER_IDENT,
-            tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
-        )
+    private val OPPGAVETYPE = SØKNAD
+    private val VEDTAKSPERIODE_ID = UUID.randomUUID()
+    override val UTBETALING_ID = UUID.randomUUID()
+    override val SAKSBEHANDLER_IDENT = "Z999999"
+    override val SAKSBEHANDLER_EPOST = "saksbehandler@nav.no"
+    override val SAKSBEHANDLER_NAVN = "Hen Saksbehandler"
+    override val SAKSBEHANDLER_OID = UUID.randomUUID()
+    private val BESLUTTER_OID = UUID.randomUUID()
+    override var OPPGAVE_ID = Random.nextLong()
+    private val saksbehandler = Saksbehandler(
+        oid = SAKSBEHANDLER_OID,
+        epostadresse = SAKSBEHANDLER_EPOST,
+        navn = SAKSBEHANDLER_NAVN,
+        ident = SAKSBEHANDLER_IDENT,
+        tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
+    )
+    private val beslutter = Saksbehandler(
+        oid = BESLUTTER_OID,
+        epostadresse = SAKSBEHANDLER_EPOST,
+        navn = SAKSBEHANDLER_NAVN,
+        ident = SAKSBEHANDLER_IDENT,
+        tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
+    )
 
-        private val TOTRINNSVURDERING_OPPRETTET = LocalDateTime.now()
-        private val TOTRINNSVURDERING_OPPDATERT = LocalDateTime.now()
+    private val TOTRINNSVURDERING_OPPRETTET = LocalDateTime.now()
+    private val TOTRINNSVURDERING_OPPDATERT = LocalDateTime.now()
 
-        private val CONTEXT_ID = UUID.randomUUID()
-        private val HENDELSE_ID = UUID.randomUUID()
-    }
+    private val CONTEXT_ID = UUID.randomUUID()
+    override val HENDELSE_ID = UUID.randomUUID()
 
     private val nyTildelingDao = mockk<TildelingDao>(relaxed = true)
     private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
