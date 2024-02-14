@@ -7,6 +7,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.juli
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -143,7 +144,7 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         val personOppdragId = lagPersonoppdrag(personFagsystemId)
         lagLinje(arbeidsgiverOppdragId, 1.juli(), 10.juli(), 12000)
         lagLinje(personOppdragId, 11.juli(), 31.juli(), 10000)
-        lagUtbetalingId(arbeidsgiverOppdragId, personOppdragId, UTBETALING_ID)
+        val utbetaling_IdId = lagUtbetalingId(arbeidsgiverOppdragId, personOppdragId, UTBETALING_ID)
         opprettUtbetalingKobling(VEDTAKSPERIODE, UTBETALING_ID)
 
         totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
@@ -151,7 +152,7 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
 
         val totrinnsvurdering = totrinnsvurdering()
 
-        assertEquals(1, totrinnsvurdering?.utbetalingIdRef)
+        assertEquals(utbetaling_IdId, totrinnsvurdering?.utbetalingIdRef)
         assertNotNull(totrinnsvurdering?.oppdatert)
     }
 
@@ -196,7 +197,7 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         val personOppdragId = lagPersonoppdrag(personFagsystemId)
         lagLinje(arbeidsgiverOppdragId, 1.juli(), 10.juli(), 12000)
         lagLinje(personOppdragId, 11.juli(), 31.juli(), 10000)
-        lagUtbetalingId(arbeidsgiverOppdragId, personOppdragId, UTBETALING_ID)
+        val utbetaling_IdId = lagUtbetalingId(arbeidsgiverOppdragId, personOppdragId, UTBETALING_ID)
         opprettUtbetalingKobling(VEDTAKSPERIODE, UTBETALING_ID)
 
         totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
@@ -209,7 +210,7 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         assertFalse(totrinnsvurdering.erRetur)
         assertNull(totrinnsvurdering.saksbehandler)
         assertNull(totrinnsvurdering.beslutter)
-        assertEquals(1, totrinnsvurdering.utbetalingIdRef)
+        assertEquals(utbetaling_IdId, totrinnsvurdering.utbetalingIdRef)
 
         totrinnsvurderingDao.settErRetur(VEDTAKSPERIODE)
         totrinnsvurderingDao.settSaksbehandler(VEDTAKSPERIODE, SAKSBEHANDLER_OID)
@@ -221,7 +222,7 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         assertFalse(totrinnsvurderingFerdigstilt.erRetur)
         assertNull(totrinnsvurderingFerdigstilt.saksbehandler)
         assertNull(totrinnsvurderingFerdigstilt.beslutter)
-        assertEquals(1, totrinnsvurdering.utbetalingIdRef)
+        assertEquals(utbetaling_IdId, totrinnsvurderingFerdigstilt.utbetalingIdRef)
     }
 
     @Test
@@ -322,8 +323,10 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         assertNull(totrinnsvurderingDao.hentAktiv(1L))
     }
 
-    private fun totrinnsvurdering() = sessionOf(dataSource).use {
-        it.run(queryOf("SELECT * FROM totrinnsvurdering").map { row ->
+    private fun totrinnsvurdering(vedtaksperiodeId: UUID = VEDTAKSPERIODE) = sessionOf(dataSource, strict = true).use {
+        @Language("postgresql")
+        val query = "SELECT * FROM totrinnsvurdering WHERE vedtaksperiode_id = :vedtaksperiodeId"
+        it.run(queryOf(query, mapOf("vedtaksperiodeId" to vedtaksperiodeId)).map { row ->
             TotrinnsvurderingOld(
                 vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
                 erRetur = row.boolean("er_retur"),

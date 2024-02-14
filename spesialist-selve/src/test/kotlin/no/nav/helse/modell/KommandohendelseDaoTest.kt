@@ -17,13 +17,11 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.fail
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class KommandohendelseDaoTest : DatabaseIntegrationTest() {
-    private companion object {
-        private val HENDELSE_ID = UUID.randomUUID()
-    }
-
     private val graphQLClient = mockk<SnapshotClient>(relaxed = true)
     private lateinit var hendelsefabrikk: Hendelsefabrikk
     private lateinit var vedtaksperiodeForkastet: VedtaksperiodeForkastet

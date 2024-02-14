@@ -66,11 +66,9 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUberegnetPeriode
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.fail
 import kotlin.random.Random.Default.nextLong
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected open val HENDELSE_ID: UUID = UUID.randomUUID()
 
@@ -79,12 +77,11 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected open val UTBETALING_ID: UUID = UUID.randomUUID()
 
     protected open var OPPGAVE_ID = nextLong()
-        protected set
     private val OPPGAVETYPE = "SØKNAD"
     protected val EGENSKAP = EgenskapForDatabase.SØKNAD
     protected val OPPGAVESTATUS = "AvventerSaksbehandler"
 
-    protected val ORGNUMMER = "123456789"
+    protected val ORGNUMMER = lagOrganisasjonsnummer()
     protected val ORGNAVN = "NAVN AS"
     protected val BRANSJER = listOf("EN BRANSJE")
 

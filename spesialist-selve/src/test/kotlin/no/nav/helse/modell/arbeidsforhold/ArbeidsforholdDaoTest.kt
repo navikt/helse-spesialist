@@ -1,13 +1,13 @@
 package no.nav.helse.modell.arbeidsforhold
 
 import DatabaseIntegrationTest
+import java.time.LocalDate
 import no.nav.helse.april
 import no.nav.helse.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 internal class ArbeidsforholdDaoTest : DatabaseIntegrationTest() {
     private companion object {
@@ -19,7 +19,6 @@ internal class ArbeidsforholdDaoTest : DatabaseIntegrationTest() {
 
     @BeforeEach
     fun setup() {
-        resetDatabase()
         opprettPerson()
         opprettArbeidsgiver()
     }
