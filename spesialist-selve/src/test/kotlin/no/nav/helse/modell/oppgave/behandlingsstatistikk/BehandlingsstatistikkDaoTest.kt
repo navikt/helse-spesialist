@@ -3,6 +3,8 @@ package no.nav.helse.modell.oppgave.behandlingsstatistikk
 import DatabaseIntegrationTest
 import java.time.LocalDate
 import java.time.LocalDateTime
+import kotliquery.queryOf
+import kotliquery.sessionOf
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
@@ -11,13 +13,23 @@ import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.vedtaksperiode.Mottakertype
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.parallel.Isolated
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkType as BehandlingsstatistikkTypeForApi
 
+@Isolated
 internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
 
     private val NOW = LocalDate.now()
     private val nyDao = TildelingDao(dataSource)
+
+    @BeforeEach
+    fun tømTabeller() {
+        sessionOf(dataSource).use  {
+            it.run(queryOf("truncate oppgave, automatisering, annullert_av_saksbehandler cascade").asExecute)
+        }
+    }
 
     @Test
     fun `henter automatiserte UTS-saker`() {

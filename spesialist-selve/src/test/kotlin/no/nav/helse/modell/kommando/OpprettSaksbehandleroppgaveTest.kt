@@ -52,7 +52,10 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.parallel.Execution
+import org.junit.jupiter.api.parallel.ExecutionMode
 
+@Execution(ExecutionMode.SAME_THREAD)
 internal class OpprettSaksbehandleroppgaveTest {
     private val VEDTAKSPERIODE_ID = UUID.randomUUID()
     private val UTBETALING_ID = UUID.randomUUID()

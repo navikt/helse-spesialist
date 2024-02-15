@@ -8,11 +8,25 @@ import kotliquery.sessionOf
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.parallel.Execution
+import org.junit.jupiter.api.parallel.ExecutionMode
+import org.junit.jupiter.api.parallel.Isolated
 
+// Test å ta vekk denne når alle tester kjører grønt sammen, for å se om det er den som fikser at denne ikke brekker noen andre, eller om det bare er tilfeldig
+@Isolated
+@Execution(ExecutionMode.SAME_THREAD)
 internal class DefinisjonDaoTest: DatabaseIntegrationTest() {
 
     private val definisjonDao = DefinisjonDao(dataSource)
+
+    @BeforeEach
+    fun tømTabeller() {
+        sessionOf(dataSource).use  {
+            it.run(queryOf("truncate selve_varsel, api_varseldefinisjon").asExecute)
+        }
+    }
 
     @Test
     fun `lagre varseldefinisjon`() {

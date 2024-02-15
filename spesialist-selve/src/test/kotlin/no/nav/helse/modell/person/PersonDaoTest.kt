@@ -15,9 +15,19 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.parallel.Isolated
 
+@Isolated
 internal class PersonDaoTest : DatabaseIntegrationTest() {
+
+    @BeforeEach
+    fun tømTabeller() {
+        sessionOf(dataSource).use  {
+            it.run(queryOf("truncate person_info, inntekt, infotrygdutbetalinger restart identity cascade").asExecute)
+        }
+    }
 
     @Test
     fun `lagre personinfo`() {
