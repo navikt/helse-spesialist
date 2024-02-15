@@ -13,12 +13,10 @@ import org.junit.jupiter.api.Test
 
 internal class CommandContextDaoTest : DatabaseIntegrationTest() {
 
-    private companion object {
-        private val VEDTAKSPERIODE_ID1 = UUID.randomUUID()
-        private val VEDTAKSPERIODE_ID2 = UUID.randomUUID()
-        private lateinit var HENDELSE1: TestHendelse
-        private lateinit var HENDELSE2: TestHendelse
-    }
+    private val VEDTAKSPERIODE_ID1 = UUID.randomUUID()
+    private val VEDTAKSPERIODE_ID2 = UUID.randomUUID()
+    private lateinit var HENDELSE1: TestHendelse
+    private lateinit var HENDELSE2: TestHendelse
 
     @Test
     fun `lagrer context i db`() {

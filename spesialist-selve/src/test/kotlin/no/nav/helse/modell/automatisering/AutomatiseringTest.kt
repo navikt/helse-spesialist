@@ -9,6 +9,8 @@ import io.mockk.verify
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import lagFødselsnummer
+import lagOrganisasjonsnummer
 import no.nav.helse.januar
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.Toggle
@@ -32,6 +34,14 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class AutomatiseringTest {
+
+    private val fødselsnummer = lagFødselsnummer()
+    private val orgnummer = lagOrganisasjonsnummer()
+    private val vedtaksperiodeId = UUID.randomUUID()
+    private val utbetalingId = UUID.randomUUID()
+    private val hendelseId = UUID.randomUUID()
+    private val periodetype = Periodetype.FORLENGELSE
+    private val periodeFom = LocalDate.now()
 
     private val vedtakDaoMock = mockk<VedtakDao>()
     private val risikovurderingDaoMock = mockk<RisikovurderingDao> {
@@ -71,16 +81,6 @@ internal class AutomatiseringTest {
             hendelseDao = hendelseDaoMock,
             generasjonDao = generasjonDaoMock,
         )
-
-    companion object {
-        private const val fødselsnummer = "12345678910"
-        private val vedtaksperiodeId = UUID.randomUUID()
-        private val utbetalingId = UUID.randomUUID()
-        private val hendelseId = UUID.randomUUID()
-        private val periodetype = Periodetype.FORLENGELSE
-        private val orgnummer = "123456789"
-        private val periodeFom = LocalDate.now()
-    }
 
     @BeforeEach
     fun setupDefaultTilHappyCase() {
@@ -146,6 +146,7 @@ internal class AutomatiseringTest {
             forsøkAutomatisering(generasjoner = listOf(gjeldendeGenerasjon), utbetaling = enUtbetaling(arbeidsgiverbeløp = 0, personbeløp = 0))
             assertGikkTilManuell()
         }
+        Toggle.AutomatiserSpesialsak.enable()
     }
 
     @Test
@@ -313,7 +314,7 @@ internal class AutomatiseringTest {
     private val support = object {
         val onAutomatiserbar = mockk<() -> Unit>(relaxed = true)
         fun forsøkAutomatisering(
-            periodetype: Periodetype = Companion.periodetype,
+            periodetype: Periodetype = Periodetype.FORLENGELSE,
             generasjoner: List<Generasjon> = listOf(Generasjon(UUID.randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar)),
             utbetaling: Utbetaling = enUtbetaling(),
         ) = automatisering.utfør(

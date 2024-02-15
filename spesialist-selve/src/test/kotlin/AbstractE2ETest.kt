@@ -317,6 +317,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshot(
             versjon = snapshotversjon,
             fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,
+            aktørId = godkjenningsbehovTestdata.aktørId,
             organisasjonsnummer = godkjenningsbehovTestdata.organisasjonsnummer,
             vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
             utbetalingId = godkjenningsbehovTestdata.utbetalingId,
@@ -372,6 +373,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         håndterVedtaksperiodeNyUtbetaling(vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshot(
             fødselsnummer = FØDSELSNUMMER,
+            aktørId = AKTØR,
+            organisasjonsnummer = ORGNR,
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId
         )

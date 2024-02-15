@@ -79,7 +79,7 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
 
         godkjenningService.håndter(godkjenningDto(), "epost@nav.no", beslutter, UUID.randomUUID())
 
-        val utbetalingId = oppgaveDao.finnUtbetalingId(1L) ?: fail("Fant ikke utbetalingId")
+        val utbetalingId = oppgaveDao.finnUtbetalingId(1.oppgave(VEDTAKSPERIODE_ID)) ?: fail("Fant ikke utbetalingId")
         assertPeriodehistorikk(utbetalingId)
     }
 

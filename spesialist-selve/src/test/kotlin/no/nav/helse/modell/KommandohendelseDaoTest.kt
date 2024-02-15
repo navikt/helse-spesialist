@@ -14,30 +14,24 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.fail
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class KommandohendelseDaoTest : DatabaseIntegrationTest() {
     private val graphQLClient = mockk<SnapshotClient>(relaxed = true)
-    private lateinit var hendelsefabrikk: Hendelsefabrikk
     private lateinit var vedtaksperiodeForkastet: VedtaksperiodeForkastet
 
-    @BeforeAll
-    fun setup() {
-        hendelsefabrikk = Hendelsefabrikk(
-            dataSource = dataSource,
-            snapshotClient = graphQLClient,
-            oppgaveMediator = { mockk() },
-            godkjenningMediator = mockk(relaxed = true),
-            automatisering = mockk(relaxed = true),
-            overstyringMediator = mockk(),
-            versjonAvKode = "versjonAvKode",
-        )
-    }
+    private val hendelsefabrikk: Hendelsefabrikk = Hendelsefabrikk(
+        dataSource = dataSource,
+        snapshotClient = graphQLClient,
+        oppgaveMediator = { mockk() },
+        godkjenningMediator = mockk(relaxed = true),
+        automatisering = mockk(relaxed = true),
+        overstyringMediator = mockk(),
+        versjonAvKode = "versjonAvKode",
+    )
+
 
     @BeforeEach
     fun setupEach() {

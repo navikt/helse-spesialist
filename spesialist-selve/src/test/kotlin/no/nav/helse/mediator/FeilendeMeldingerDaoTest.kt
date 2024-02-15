@@ -25,7 +25,7 @@ internal class FeilendeMeldingerDaoTest: DatabaseIntegrationTest() {
             }
         """
         feilendeMeldingerDao.lagre(id, hendelse, json)
-        feilendeMeldinger().first().also {
+        feilendeMeldinger(id).first().also {
             assertEquals(id, it.id)
             assertEquals(hendelse, it.eventName)
             assertNotNull(it.opprettet)
@@ -48,11 +48,11 @@ internal class FeilendeMeldingerDaoTest: DatabaseIntegrationTest() {
         feilendeMeldingerDao.lagre(id, hendelse, json)
     }
 
-    private fun feilendeMeldinger(): List<FeiletMelding> {
+    private fun feilendeMeldinger(id: UUID): List<FeiletMelding> {
         @Language("PostgreSQL")
-        val statement = "SELECT * FROM feilende_meldinger"
+        val statement = "SELECT * FROM feilende_meldinger WHERE id = :id"
         return sessionOf(dataSource).use { session ->
-            session.run(queryOf(statement).map {
+            session.run(queryOf(statement, mapOf("id" to id)).map {
                 FeiletMelding(
                     id = UUID.fromString(it.string("id")),
                     eventName = it.string("event_name"),
