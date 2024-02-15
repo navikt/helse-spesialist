@@ -4,7 +4,7 @@ import DatabaseIntegrationTest
 import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import org.intellij.lang.annotations.Language
@@ -25,7 +25,7 @@ internal class RisikovurderingDaoTest : DatabaseIntegrationTest() {
             data = data
         )
 
-        risikovurdering().first().assertEquals(
+        risikovurdering(vedtaksperiodeId).first().assertEquals(
             forventetVedtaksperiodeId = vedtaksperiodeId,
             forventetKanGodkjennesAutomatisk = false,
             forventetKreverSupersaksbehandler = false,
@@ -53,7 +53,7 @@ internal class RisikovurderingDaoTest : DatabaseIntegrationTest() {
             data = data
         )
 
-        risikovurdering().also {
+        risikovurdering(vedtaksperiodeId).also {
             assertEquals(2, it.size)
             it.first().assertEquals(
                 forventetVedtaksperiodeId = vedtaksperiodeId,
@@ -72,11 +72,11 @@ internal class RisikovurderingDaoTest : DatabaseIntegrationTest() {
         }
     }
 
-    private fun risikovurdering() =
+    private fun risikovurdering(vedtaksperiodeId: UUID) =
         sessionOf(dataSource).use {
-            @Language("PostgreSQL")
-            val statement = "SELECT * FROM risikovurdering_2021 ORDER BY id DESC"
-            it.run(queryOf(statement).map { row ->
+            @Language("PostgreSQL") val statement =
+                "SELECT * FROM risikovurdering_2021 WHERE vedtaksperiode_id = :vedtaksperiodeId ORDER BY id DESC"
+            it.run(queryOf(statement, mapOf("vedtaksperiodeId" to vedtaksperiodeId)).map { row ->
                 RisikovurderingAssertions(
                     vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
                     kanGodkjennesAutomatisk = row.boolean("kan_godkjennes_automatisk"),

@@ -6,6 +6,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -44,8 +45,10 @@ internal class PåVentDaoTest : DatabaseIntegrationTest() {
         assertTrue(erPåVent)
     }
 
-    private fun påvent() = sessionOf(dataSource).use { session ->
-        session.run(queryOf("SELECT * FROM pa_vent").map { row ->
+    private fun påvent(vedtaksperiodeId: UUID = VEDTAKSPERIODE) = sessionOf(dataSource).use { session ->
+        @Language("PostgreSQL")
+        val statement = "SELECT * FROM pa_vent WHERE vedtaksperiode_id = :vedtaksperiodeId"
+        session.run(queryOf(statement, mapOf("vedtaksperiodeId" to vedtaksperiodeId)).map { row ->
                 PåVent(
                     row.int("id"),
                     row.uuid("vedtaksperiode_id"),

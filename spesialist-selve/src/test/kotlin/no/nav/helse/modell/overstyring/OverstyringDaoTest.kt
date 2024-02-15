@@ -4,6 +4,7 @@ import DatabaseIntegrationTest
 import io.mockk.mockk
 import java.time.LocalDate
 import java.util.UUID
+import lagOrganisasjonsnummer
 import no.nav.helse.db.OverstyrtTidslinjeForDatabase
 import no.nav.helse.db.OverstyrtTidslinjedagForDatabase
 import no.nav.helse.januar
@@ -22,43 +23,35 @@ import org.junit.jupiter.api.Test
 
 internal class OverstyringDaoTest : DatabaseIntegrationTest() {
 
-    companion object {
-        private const val PERSON_FORNAVN = "Per"
-        private const val PERSON_ETTERNAVN = "Son"
-        private val PERSON_FØDSELSDATO = LocalDate.of(1998, 4, 20)
-        private val PERSON_KJØNN = Kjønn.Ukjent
-        private const val ARBEIDSGIVER_NAVN = "Skrue McDuck"
-        private val ID = UUID.randomUUID()
-        private val EKSTERN_HENDELSE_ID = UUID.randomUUID()
-        private const val FØDSELSNUMMER = "12020052345"
-        private const val DEAKTIVERT = true
-        private val SKJÆRINGSTIDSPUNKT = LocalDate.of(2018, 1, 1)
-        private const val AKTØR_ID = "100000234234"
-        private val OID = UUID.randomUUID()
-        private const val SAKSBEHANDLER_NAVN = "Saks Behandler"
-        private const val SAKSBEHANDLER_IDENT = "Z999999"
-        private const val EPOST = "saks.behandler@nav.no"
-        private const val ORGNUMMER = "987654321"
-        private const val GHOST_ORGNUMMER = "123412"
-        private const val BEGRUNNELSE = "BegrunnelseMal\n\nBegrunnelseFritekst"
-        private const val BEGRUNNELSEMAL = "BegrunnelseMal"
-        private const val BEGRUNNELSEFRITEKST = "BegrunnelseFritekst"
-        private const val BEGRUNNELSEKONKLUSJON = "BegrunnelseKonklusjon"
-        private const val FORKLARING = "Forklaring"
-        private const val ÅRSAK = "Årsak"
-        private val OVERSTYRTE_DAGER = listOf(
-            OverstyrtTidslinjedagForDatabase(
-                dato = LocalDate.of(2020, 1, 1),
-                type = Dagtype.Sykedag.toString(),
-                grad = 100,
-                fraType = Dagtype.Feriedag.toString(),
-                fraGrad = null,
-                subsumsjon =  null,
-            )
+    private val PERSON_FORNAVN = "Per"
+    private val PERSON_ETTERNAVN = "Son"
+    private val PERSON_FØDSELSDATO = LocalDate.of(1998, 4, 20)
+    private val PERSON_KJØNN = Kjønn.Ukjent
+    private val ARBEIDSGIVER_NAVN = "Skrue McDuck"
+    private val ID = UUID.randomUUID()
+    private val EKSTERN_HENDELSE_ID = UUID.randomUUID()
+    private val DEAKTIVERT = true
+    private val SKJÆRINGSTIDSPUNKT = LocalDate.of(2018, 1, 1)
+    private val OID = UUID.randomUUID()
+    private val EPOST = "saks.behandler@nav.no"
+    private val BEGRUNNELSE = "BegrunnelseMal\n\nBegrunnelseFritekst"
+    private val BEGRUNNELSEMAL = "BegrunnelseMal"
+    private val BEGRUNNELSEFRITEKST = "BegrunnelseFritekst"
+    private val BEGRUNNELSEKONKLUSJON = "BegrunnelseKonklusjon"
+    private val FORKLARING = "Forklaring"
+    private val ÅRSAK = "Årsak"
+    private val OVERSTYRTE_DAGER = listOf(
+        OverstyrtTidslinjedagForDatabase(
+            dato = LocalDate.of(2020, 1, 1),
+            type = Dagtype.Sykedag.toString(),
+            grad = 100,
+            fraType = Dagtype.Feriedag.toString(),
+            fraGrad = null,
+            subsumsjon =  null,
         )
-        private val OPPRETTET = LocalDate.of(2022, 6, 9).atStartOfDay()
-        private const val INNTEKT = 31000.0
-    }
+    )
+    private val OPPRETTET = LocalDate.of(2022, 6, 9).atStartOfDay()
+    private val INNTEKT = 31000.0
 
     private fun opprettPerson() {
         saksbehandlerDao.opprettSaksbehandler(OID, SAKSBEHANDLER_NAVN, EPOST, SAKSBEHANDLER_IDENT)
@@ -72,7 +65,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             ADRESSEBESKYTTELSE
         )
         val infotrygdutbetaling_ref = personDao.insertInfotrygdutbetalinger(objectMapper.createObjectNode())
-        personDao.insertPerson(FØDSELSNUMMER, AKTØR_ID, navn_ref, 420, infotrygdutbetaling_ref)
+        personDao.insertPerson(FNR, AKTØR, navn_ref, 420, infotrygdutbetaling_ref)
     }
 
     @Test
@@ -81,8 +74,8 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         overstyringDao.persisterOverstyringTidslinje(
             OverstyrtTidslinjeForDatabase(
                 EKSTERN_HENDELSE_ID,
-                AKTØR_ID,
-                FØDSELSNUMMER,
+                AKTØR,
+                FNR,
                 ORGNUMMER,
                 OVERSTYRTE_DAGER,
                 BEGRUNNELSE,
@@ -102,8 +95,8 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         overstyringDao.persisterOverstyringTidslinje(
             OverstyrtTidslinjeForDatabase(
                 EKSTERN_HENDELSE_ID,
-                AKTØR_ID,
-                FØDSELSNUMMER,
+                AKTØR,
+                FNR,
                 ORGNUMMER,
                 OVERSTYRTE_DAGER,
                 BEGRUNNELSE,
@@ -122,8 +115,8 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         overstyringDao.persisterOverstyringTidslinje(
             OverstyrtTidslinjeForDatabase(
                 EKSTERN_HENDELSE_ID,
-                AKTØR_ID,
-                FØDSELSNUMMER,
+                AKTØR,
+                FNR,
                 ORGNUMMER,
                 OVERSTYRTE_DAGER,
                 BEGRUNNELSE,
@@ -133,7 +126,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         )
         overstyringDao.kobleOverstyringOgVedtaksperiode(listOf(VEDTAKSPERIODE), EKSTERN_HENDELSE_ID)
 
-        val hentetOverstyring = overstyringApiDao.finnOverstyringerAvTidslinjer(FØDSELSNUMMER, ORGNUMMER).first()
+        val hentetOverstyring = overstyringApiDao.finnOverstyringerAvTidslinjer(FNR, ORGNUMMER).first()
         assertFalse(hentetOverstyring.ferdigstilt)
 
         assertTrue(overstyringDao.harVedtaksperiodePågåendeOverstyring(VEDTAKSPERIODE))
@@ -141,7 +134,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         assertFalse(overstyringDao.harVedtaksperiodePågåendeOverstyring(VEDTAKSPERIODE))
 
         val hentetOverstyringEtterFerdigstilling =
-            overstyringApiDao.finnOverstyringerAvTidslinjer(FØDSELSNUMMER, ORGNUMMER).first()
+            overstyringApiDao.finnOverstyringerAvTidslinjer(FNR, ORGNUMMER).first()
         assertTrue(hentetOverstyringEtterFerdigstilling.ferdigstilt)
     }
 
@@ -151,8 +144,8 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         overstyringDao.persisterOverstyringTidslinje(
             OverstyrtTidslinjeForDatabase(
                 EKSTERN_HENDELSE_ID,
-                AKTØR_ID,
-                FØDSELSNUMMER,
+                AKTØR,
+                FNR,
                 ORGNUMMER,
                 OVERSTYRTE_DAGER,
                 BEGRUNNELSE,
@@ -160,10 +153,10 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             ),
             OID,
         )
-        val hentetOverstyring = overstyringApiDao.finnOverstyringerAvTidslinjer(FØDSELSNUMMER, ORGNUMMER).first()
+        val hentetOverstyring = overstyringApiDao.finnOverstyringerAvTidslinjer(FNR, ORGNUMMER).first()
 
         assertEquals(BEGRUNNELSE, hentetOverstyring.begrunnelse)
-        assertEquals(FØDSELSNUMMER, hentetOverstyring.fødselsnummer)
+        assertEquals(FNR, hentetOverstyring.fødselsnummer)
         assertEquals(ORGNUMMER, hentetOverstyring.organisasjonsnummer)
         assertEquals(OVERSTYRTE_DAGER, hentetOverstyring.overstyrteDager.map { it.dtoToDatabase() })
         assertEquals(SAKSBEHANDLER_NAVN, hentetOverstyring.saksbehandlerNavn)
@@ -179,7 +172,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         overstyringDao.persisterOverstyringArbeidsforhold(
             ID,
             EKSTERN_HENDELSE_ID,
-            FØDSELSNUMMER,
+            FNR,
             ORGNUMMER,
             BEGRUNNELSE,
             FORKLARING,
@@ -188,14 +181,14 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             OID,
             OPPRETTET
         )
-        val hentetOverstyring = overstyringApiDao.finnOverstyringerAvArbeidsforhold(FØDSELSNUMMER, ORGNUMMER).single()
+        val hentetOverstyring = overstyringApiDao.finnOverstyringerAvArbeidsforhold(FNR, ORGNUMMER).single()
 
         assertEquals(ID, hentetOverstyring.hendelseId)
         assertEquals(BEGRUNNELSE, hentetOverstyring.begrunnelse)
         assertEquals(FORKLARING, hentetOverstyring.forklaring)
         assertEquals(DEAKTIVERT, hentetOverstyring.deaktivert)
         assertEquals(SKJÆRINGSTIDSPUNKT, hentetOverstyring.skjæringstidspunkt)
-        assertEquals(FØDSELSNUMMER, hentetOverstyring.fødselsnummer)
+        assertEquals(FNR, hentetOverstyring.fødselsnummer)
         assertEquals(ORGNUMMER, hentetOverstyring.organisasjonsnummer)
         assertEquals(SAKSBEHANDLER_NAVN, hentetOverstyring.saksbehandlerNavn)
         assertEquals(SAKSBEHANDLER_IDENT, hentetOverstyring.saksbehandlerIdent)
@@ -210,7 +203,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         overstyringDao.persisterOverstyringInntektOgRefusjon(
             ID,
             EKSTERN_HENDELSE_ID,
-            FØDSELSNUMMER,
+            FNR,
             listOf(
                 OverstyrtArbeidsgiver(
                     organisasjonsnummer = ORGNUMMER,
@@ -227,10 +220,10 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             SKJÆRINGSTIDSPUNKT,
             OPPRETTET
         )
-        val hentetOverstyring = overstyringApiDao.finnOverstyringerAvInntektOgRefusjon(FØDSELSNUMMER, ORGNUMMER).first()
+        val hentetOverstyring = overstyringApiDao.finnOverstyringerAvInntektOgRefusjon(FNR, ORGNUMMER).first()
 
         assertEquals(ID, hentetOverstyring.hendelseId)
-        assertEquals(FØDSELSNUMMER, hentetOverstyring.fødselsnummer)
+        assertEquals(FNR, hentetOverstyring.fødselsnummer)
         assertEquals(ORGNUMMER, hentetOverstyring.organisasjonsnummer)
         assertEquals(BEGRUNNELSE, hentetOverstyring.begrunnelse)
         assertEquals(FORKLARING, hentetOverstyring.forklaring)
@@ -254,7 +247,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         overstyringDao.persisterSkjønnsfastsettingSykepengegrunnlag(
             ID,
             EKSTERN_HENDELSE_ID,
-            FØDSELSNUMMER,
+            FNR,
             listOf(
                 SkjønnsfastsattArbeidsgiver(
                     organisasjonsnummer = ORGNUMMER,
@@ -274,10 +267,10 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             OPPRETTET
         )
         val hentetSkjønnsfastsetting =
-            overstyringApiDao.finnSkjønnsfastsettingSykepengegrunnlag(FØDSELSNUMMER, ORGNUMMER).first()
+            overstyringApiDao.finnSkjønnsfastsettingSykepengegrunnlag(FNR, ORGNUMMER).first()
 
         assertEquals(ID, hentetSkjønnsfastsetting.hendelseId)
-        assertEquals(FØDSELSNUMMER, hentetSkjønnsfastsetting.fødselsnummer)
+        assertEquals(FNR, hentetSkjønnsfastsetting.fødselsnummer)
         assertEquals(ORGNUMMER, hentetSkjønnsfastsetting.organisasjonsnummer)
         assertEquals(
             BEGRUNNELSEMAL + "\n\n" + BEGRUNNELSEFRITEKST + "\n\n" + BEGRUNNELSEKONKLUSJON,
@@ -304,7 +297,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         overstyringDao.persisterOverstyringInntektOgRefusjon(
             ID,
             EKSTERN_HENDELSE_ID,
-            FØDSELSNUMMER,
+            FNR,
             listOf(
                 OverstyrtArbeidsgiver(
                     organisasjonsnummer = ORGNUMMER,
@@ -327,7 +320,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         overstyringDao.persisterOverstyringArbeidsforhold(
             ID,
             eksternHendelsesIdArbeidsforhold,
-            FØDSELSNUMMER,
+            FNR,
             ORGNUMMER,
             BEGRUNNELSE,
             FORKLARING,
@@ -347,7 +340,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
     private fun overstyrInntektOgRefusjon(hendelseId: UUID) = hendelseDao.opprett(
         OverstyringInntektOgRefusjon(
             id = hendelseId,
-            fødselsnummer = FØDSELSNUMMER,
+            fødselsnummer = FNR,
             oid = OID,
             arbeidsgivere = listOf(
                 OverstyrtArbeidsgiver(
@@ -372,7 +365,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
     private fun skjønnsfastsettingSykepengegrunnlag(hendelseId: UUID) = hendelseDao.opprett(
         SkjønnsfastsettingSykepengegrunnlag(
             id = hendelseId,
-            fødselsnummer = FØDSELSNUMMER,
+            fødselsnummer = FNR,
             oid = OID,
             arbeidsgivere = listOf(
                 SkjønnsfastsattArbeidsgiver(
@@ -399,11 +392,11 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
 
     private fun overstyringArbeidsforhold() = OverstyringArbeidsforhold(
         id = ID,
-        fødselsnummer = FØDSELSNUMMER,
+        fødselsnummer = FNR,
         oid = OID,
         overstyrteArbeidsforhold = listOf(
             OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdFraApi(
-                orgnummer = GHOST_ORGNUMMER,
+                orgnummer = lagOrganisasjonsnummer(),
                 deaktivert = DEAKTIVERT,
                 begrunnelse = BEGRUNNELSE,
                 forklaring = FORKLARING

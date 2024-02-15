@@ -188,10 +188,15 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
 
     private fun assertForkastet(vedtaksperiodeId: UUID, forventetHendelseId: UUID) {
         @Language("PostgreSQL")
-        val query = "SELECT forkastet, forkastet_av_hendelse, forkastet_tidspunkt FROM vedtak WHERE vedtaksperiode_id = ?"
+        val query =
+            "SELECT forkastet, forkastet_av_hendelse, forkastet_tidspunkt FROM vedtak WHERE vedtaksperiode_id = ?"
         val respons = sessionOf(dataSource).use { session ->
             session.run(queryOf(query, vedtaksperiodeId).map {
-                Triple(it.boolean("forkastet"), it.uuidOrNull("forkastet_av_hendelse"), it.localDateTimeOrNull("forkastet_tidspunkt"))
+                Triple(
+                    it.boolean("forkastet"),
+                    it.uuidOrNull("forkastet_av_hendelse"),
+                    it.localDateTimeOrNull("forkastet_tidspunkt")
+                )
             }.asSingle)
         }
         assertNotNull(respons)
@@ -207,8 +212,14 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         )
     }
 
-    private fun vedtak() = sessionOf(dataSource).use {
-        it.run(queryOf("SELECT vedtaksperiode_id, fom, tom, person_ref, arbeidsgiver_ref, snapshot_ref, forkastet FROM vedtak").map { row ->
+    private fun vedtak(fødselsnummer: String = FNR) = sessionOf(dataSource).use {
+        @Language("PostgreSQL") val query = """
+            SELECT vedtaksperiode_id, fom, tom, person_ref, arbeidsgiver_ref, snapshot_ref, forkastet
+            FROM vedtak
+            JOIN person p on vedtak.person_ref = p.id
+            WHERE fodselsnummer = :foedselsnummer
+        """.trimIndent()
+        it.run(queryOf(query, mapOf("foedselsnummer" to fødselsnummer.toLong())).map { row ->
             Vedtak(
                 vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
                 fom = row.localDate("fom"),
@@ -236,7 +247,7 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         private val personRef: Long,
         private val arbeidsgiverRef: Long,
         val snapshotRef: Int,
-        private val forkastet: Boolean
+        private val forkastet: Boolean,
     ) {
         fun assertEquals(
             forventetVedtaksperiodeId: UUID,
@@ -245,7 +256,7 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
             forventetPersonRef: Long,
             forventetArbeidsgiverRef: Long,
             forventetSnapshotRef: Int,
-            forventetForkastet: Boolean
+            forventetForkastet: Boolean,
         ) {
             assertEquals(forventetVedtaksperiodeId, vedtaksperiodeId)
             assertEquals(forventetFom, fom)
