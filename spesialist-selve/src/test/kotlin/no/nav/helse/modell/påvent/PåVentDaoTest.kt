@@ -21,7 +21,7 @@ internal class PåVentDaoTest : DatabaseIntegrationTest() {
         påVentDao.lagrePåVent(OPPGAVE_ID, SAKSBEHANDLER_OID, frist, "begrunnelse X")
         val påVent = påvent()
         assertEquals(1, påVent.size)
-        påVent.first().assertEquals(1, VEDTAKSPERIODE, SAKSBEHANDLER_OID, frist, "begrunnelse X")
+        påVent.first().assertEquals(VEDTAKSPERIODE, SAKSBEHANDLER_OID, frist, "begrunnelse X")
     }
 
     @Test
@@ -50,7 +50,6 @@ internal class PåVentDaoTest : DatabaseIntegrationTest() {
         val statement = "SELECT * FROM pa_vent WHERE vedtaksperiode_id = :vedtaksperiodeId"
         session.run(queryOf(statement, mapOf("vedtaksperiodeId" to vedtaksperiodeId)).map { row ->
                 PåVent(
-                    row.int("id"),
                     row.uuid("vedtaksperiode_id"),
                     row.uuid("saksbehandler_ref"),
                     row.localDateOrNull("frist"),
@@ -61,7 +60,6 @@ internal class PåVentDaoTest : DatabaseIntegrationTest() {
     }
 
     private class PåVent(
-        private val id: Int,
         private val vedtaksperiodeId: UUID,
         private val saksbehandlerRef: UUID,
         private val frist: LocalDate?,
@@ -69,13 +67,11 @@ internal class PåVentDaoTest : DatabaseIntegrationTest() {
         private val opprettet: LocalDateTime,
     ) {
         fun assertEquals(
-            forventetId: Int,
             forventetVedtaksperiodeId: UUID,
             forventetSaksbehandlerRef: UUID,
             forventetFrist: LocalDate?,
             forventetBegrunnelse: String?,
         ) {
-            assertEquals(forventetId, id)
             assertEquals(forventetVedtaksperiodeId, vedtaksperiodeId)
             assertEquals(forventetSaksbehandlerRef, saksbehandlerRef)
             assertEquals(forventetFrist, frist)
