@@ -6,6 +6,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import java.util.UUID
+import lagFødselsnummer
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.automatisering.Automatisering
@@ -53,12 +54,10 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class OpprettSaksbehandleroppgaveTest {
-    private companion object {
-        private val VEDTAKSPERIODE_ID = UUID.randomUUID()
-        private val UTBETALING_ID = UUID.randomUUID()
-        private const val FNR = "12345678910"
-        private val hendelseId = UUID.randomUUID()
-    }
+    private val VEDTAKSPERIODE_ID = UUID.randomUUID()
+    private val UTBETALING_ID = UUID.randomUUID()
+    private val FNR = lagFødselsnummer()
+    private val hendelseId = UUID.randomUUID()
 
     private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
     private val automatisering = mockk<Automatisering>(relaxed = true)
