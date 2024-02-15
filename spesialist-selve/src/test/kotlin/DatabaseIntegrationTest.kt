@@ -53,7 +53,6 @@ import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
-import no.nav.helse.spesialist.api.person.Kjønn
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spleis.graphql.HentSnapshot
 import no.nav.helse.spleis.graphql.enums.GraphQLInntektstype
@@ -70,28 +69,34 @@ import org.junit.jupiter.api.fail
 import kotlin.random.Random.Default.nextLong
 
 abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
+    private val testperson = TestPerson()
     protected open val HENDELSE_ID: UUID = UUID.randomUUID()
 
-    protected val VEDTAKSPERIODE: UUID = UUID.randomUUID()
+    protected val VEDTAKSPERIODE: UUID = testperson.vedtaksperiodeId1
 
-    protected open val UTBETALING_ID: UUID = UUID.randomUUID()
+    protected open val UTBETALING_ID: UUID = testperson.utbetalingId1
 
     protected open var OPPGAVE_ID = nextLong()
     private val OPPGAVETYPE = "SØKNAD"
     protected val EGENSKAP = EgenskapForDatabase.SØKNAD
     protected val OPPGAVESTATUS = "AvventerSaksbehandler"
 
-    protected val ORGNUMMER = lagOrganisasjonsnummer()
-    protected val ORGNAVN = "NAVN AS"
+    protected val ORGNUMMER = with(testperson) {
+        1.arbeidsgiver.organisasjonsnummer
+    }
+    protected val ORGNAVN = with(testperson) {
+        1.arbeidsgiver.organisasjonsnavn
+    }
+
     protected val BRANSJER = listOf("EN BRANSJE")
 
-    protected val FNR = lagFødselsnummer()
-    protected val AKTØR = lagAktørId()
-    protected val FORNAVN = "Kari"
-    protected val MELLOMNAVN = "Mellomnavn"
-    protected val ETTERNAVN = "Nordmann"
+    protected val FNR = testperson.fødselsnummer
+    protected val AKTØR = testperson.aktørId
+    protected val FORNAVN = testperson.fornavn
+    protected val MELLOMNAVN = testperson.mellomnavn
+    protected val ETTERNAVN = testperson.etternavn
     protected val FØDSELSDATO: LocalDate = LocalDate.EPOCH
-    protected val KJØNN = Kjønn.Kvinne
+    protected val KJØNN = testperson.kjønn
     protected val ADRESSEBESKYTTELSE = Adressebeskyttelse.Ugradert
     protected val ENHET = "0301"
 

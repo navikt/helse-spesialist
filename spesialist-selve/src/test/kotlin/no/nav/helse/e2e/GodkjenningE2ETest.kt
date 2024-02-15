@@ -96,7 +96,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
     @Test
     fun `legger ved ukjente organisasjonsnumre på behov for Arbeidsgiverinformasjon`() {
-        val andreArbeidsgivere = listOf(testdata.orgnummer2)
+        val andreArbeidsgivere = listOf(testperson.orgnummer2)
         håndterSøknad()
         håndterVedtaksperiodeOpprettet()
         håndterVedtaksperiodeNyUtbetaling()
@@ -113,7 +113,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
     @Test
     fun `skiller arbeidsgiverinformasjon- og personinfo-behov etter om det er et orgnr eller ikke`() {
-        val arbeidsgiver2 = testdata.orgnummer2
+        val arbeidsgiver2 = testperson.orgnummer2
         val arbeidsgiver3 = lagFødselsnummer()
         val andreArbeidsforhold = listOf(arbeidsgiver2, arbeidsgiver3)
         håndterSøknad()
@@ -137,7 +137,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
     @Test
     fun `tar inn arbeidsgiverinformasjon- og personinfo-behov samtidig`() {
-        val arbeidsgiver2 = testdata.orgnummer2
+        val arbeidsgiver2 = testperson.orgnummer2
         val arbeidsgiver3 = lagFødselsnummer()
         val andreArbeidsforhold = listOf(arbeidsgiver2, arbeidsgiver3)
         håndterSøknad()

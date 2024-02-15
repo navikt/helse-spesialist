@@ -26,9 +26,9 @@ internal class SykefraværstilfellerE2ETest : AbstractE2ETest() {
 
     @Test
     fun `Oppdaterer sykefraværstilfeller - flere perioder i samme tilfelle`() {
-        val vedtaksperiodeId1 = testdata.vedtaksperiodeId1
-        val vedtaksperiodeId2 = testdata.vedtaksperiodeId2
-        val revurdertUtbetalingId = testdata.utbetalingId2
+        val vedtaksperiodeId1 = testperson.vedtaksperiodeId1
+        val vedtaksperiodeId2 = testperson.vedtaksperiodeId2
+        val revurdertUtbetalingId = testperson.utbetalingId2
 
         nyttVedtak(godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(periodeFom = 1.januar, periodeTom = 5.januar))
         forlengVedtak(6.januar, 10.januar, skjæringstidspunkt = 1.januar, vedtaksperiodeId = vedtaksperiodeId2)
@@ -73,8 +73,8 @@ internal class SykefraværstilfellerE2ETest : AbstractE2ETest() {
 
     @Test
     fun `Oppdaterer sykefraværstilfeller for flere tilfeller`() {
-        val vedtaksperiodeId1 = testdata.vedtaksperiodeId1
-        val vedtaksperiodeId2 = testdata.vedtaksperiodeId2
+        val vedtaksperiodeId1 = testperson.vedtaksperiodeId1
+        val vedtaksperiodeId2 = testperson.vedtaksperiodeId2
 
         nyttVedtak(godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(periodeFom = 1.januar, periodeTom = 5.januar))
         nyttVedtak(godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(vedtaksperiodeId = vedtaksperiodeId2, periodeFom = 10.januar, periodeTom = 15.januar, skjæringstidspunkt = 10.januar, utbetalingId = UUID.randomUUID()), harOppdatertMetadata = true)
