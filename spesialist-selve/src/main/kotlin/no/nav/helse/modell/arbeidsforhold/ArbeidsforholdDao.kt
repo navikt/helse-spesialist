@@ -1,11 +1,11 @@
 package no.nav.helse.modell.arbeidsforhold
 
+import java.time.LocalDate
+import javax.sql.DataSource
 import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import org.intellij.lang.annotations.Language
-import java.time.LocalDate
-import javax.sql.DataSource
 
 class ArbeidsforholdDao(private val dataSource: DataSource) {
     internal fun insertArbeidsforhold(
@@ -118,17 +118,15 @@ class ArbeidsforholdDao(private val dataSource: DataSource) {
             WHERE person_ref = (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer)
               AND arbeidsgiver_ref = (SELECT id FROM arbeidsgiver WHERE orgnummer = :organisasjonsnummer);
         """
-        checkNotNull(
-            session.run(
-                queryOf(
-                    query, mapOf(
-                        "fodselsnummer" to fødselsnummer.toLong(),
-                        "organisasjonsnummer" to organisasjonsnummer.toLong()
-                    )
+        session.run(
+            queryOf(
+                query, mapOf(
+                    "fodselsnummer" to fødselsnummer.toLong(),
+                    "organisasjonsnummer" to organisasjonsnummer.toLong()
                 )
-                    .map { row -> row.sqlDate("oppdatert").toLocalDate() }
-                    .asSingle
             )
-        ) { "Forventer at OpprettArbeidsforholdCommand har lagt inn arbeidsforhold i databasen" }
+                .map { row -> row.sqlDate("oppdatert").toLocalDate() }
+                .asSingle
+        )
     }
 }

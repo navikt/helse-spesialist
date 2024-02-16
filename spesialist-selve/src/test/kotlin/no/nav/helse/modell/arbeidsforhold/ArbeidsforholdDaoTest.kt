@@ -100,7 +100,7 @@ internal class ArbeidsforholdDaoTest : DatabaseIntegrationTest() {
     fun `finner sist oppdatert`() {
         arbeidsforholdDao.insertArbeidsforhold(FNR, ORGNUMMER, STARTDATO, SLUTTDATO, STILLINGSTITTEL, STILLINGSPROSENT)
         arbeidsforholdDao.findArbeidsforholdSistOppdatert(FNR, ORGNUMMER).also {
-            assertTrue(it > LocalDate.now().minusDays(10))
+            assertTrue(it!! > LocalDate.now().minusDays(10))
         }
     }
 

@@ -20,6 +20,10 @@ internal class OppdaterArbeidsforholdCommand(
     override fun execute(context: CommandContext): Boolean {
         val sistOppdatert = arbeidsforholdDao.findArbeidsforholdSistOppdatert(fødselsnummer, organisasjonsnummer)
         return when {
+            sistOppdatert == null -> {
+                logg.warn("Oppdaterer ikke arbeidsforhold som ikke finnes i databasen")
+                true
+            }
             skalOppdateres(sistOppdatert) -> behandle(context)
             else -> {
                 logg.info("Arbeidsforhold er allerede oppdatert")
