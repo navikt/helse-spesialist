@@ -1,4 +1,4 @@
-val junitJupiterVersion = "5.10.1"
+val junitJupiterVersion = "5.10.2"
 val junitPlatformLauncherVersion = "1.10.2"
 val ktorVersion = "2.3.8"
 val jvmTargetVersion = "21"
