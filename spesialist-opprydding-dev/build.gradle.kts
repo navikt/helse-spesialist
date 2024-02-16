@@ -1,4 +1,4 @@
-val testcontainersVersion = "1.19.4"
+val testcontainersVersion = "1.19.5"
 val cloudSqlVersion = "1.15.2"
 val postgresqlVersion = "42.7.1"
 
