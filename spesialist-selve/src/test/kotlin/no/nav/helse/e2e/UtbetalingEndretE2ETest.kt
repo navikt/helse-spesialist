@@ -5,7 +5,6 @@ import java.util.UUID
 import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -31,9 +30,14 @@ internal class UtbetalingEndretE2ETest : AbstractE2ETest() {
         val oppgaveId = oppgaveIdFor(VEDTAKSPERIODE_ID)
         tildelOppgave(oppgaveId, saksbehandlerOid)
 
-        håndterUtbetalingErstattet(arbeidsgiverbeløp = 20000, personbeløp = 20000)
+        val utbetalingId2 = UUID.randomUUID()
+        håndterUtbetalingErstattet(arbeidsgiverbeløp = 20000, personbeløp = 20000, utbetalingId = utbetalingId2)
         håndterVedtaksperiodeReberegnet()
-        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true)
+        fremTilSaksbehandleroppgave(
+            harOppdatertMetadata = true,
+            harRisikovurdering = true,
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = utbetalingId2)
+        )
 
         val oppgaveId2 = finnNyOppgaveId(forrigeOppgaveId = oppgaveId)
         assertEquals(saksbehandlerOid, finnOidForTildeling(oppgaveId2))

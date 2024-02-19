@@ -139,9 +139,17 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
     fun `legger ved overstyringer i speil snapshot`() {
         fremTilSaksbehandleroppgave()
         håndterOverstyrTidslinje()
-        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true)
+        fremTilSaksbehandleroppgave(
+            harOppdatertMetadata = true,
+            harRisikovurdering = true,
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID()),
+        )
         håndterOverstyrInntektOgRefusjon()
-        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true)
+        fremTilSaksbehandleroppgave(
+            harOppdatertMetadata = true,
+            harRisikovurdering = true,
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID()),
+        )
         håndterOverstyrArbeidsforhold()
 
         every { dataFetchingEnvironment.graphQlContext.get<String>("saksbehandlerNavn") } returns "saksbehandler"

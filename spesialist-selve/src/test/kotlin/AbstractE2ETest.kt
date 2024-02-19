@@ -747,6 +747,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         utbetalingtype: String = "UTBETALING",
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
+        utbetalingId: UUID,
     ) {
         håndterUtbetalingForkastet(aktørId, fødselsnummer, organisasjonsnummer)
         håndterUtbetalingEndret(
@@ -756,7 +757,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             utbetalingtype,
             arbeidsgiverbeløp,
             personbeløp,
-            utbetalingId = UUID.randomUUID()
+            utbetalingId = utbetalingId,
         )
         assertIngenEtterspurteBehov()
     }
@@ -1291,7 +1292,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         val sisteOverstyring = testRapid.inspektør.hendelser(overstyringHendelse).last()
         val hendelseId = UUID.fromString(sisteOverstyring["@id"].asText())
         håndterOverstyringIgangsatt(fødselsnummer, hendelseId)
-        håndterUtbetalingErstattet(aktørId, fødselsnummer, organisasjonsnummer)
+        håndterUtbetalingErstattet(aktørId, fødselsnummer, organisasjonsnummer, utbetalingId = UUID.randomUUID())
         håndterVedtaksperiodeReberegnet(aktørId, fødselsnummer, organisasjonsnummer)
     }
 

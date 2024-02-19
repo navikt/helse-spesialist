@@ -1,6 +1,7 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETest
+import java.util.UUID
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.Ferdigstilt
@@ -36,7 +37,11 @@ internal class OppgaveE2ETest: AbstractE2ETest() {
         fremTilSaksbehandleroppgave()
         håndterUtbetalingForkastet()
         assertSaksbehandleroppgave(oppgavestatus = Invalidert)
-        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true)
+        fremTilSaksbehandleroppgave(
+            harOppdatertMetadata = true,
+            harRisikovurdering = true,
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID()),
+        )
         assertSaksbehandleroppgave(oppgavestatus = AvventerSaksbehandler)
     }
 
@@ -54,7 +59,11 @@ internal class OppgaveE2ETest: AbstractE2ETest() {
         håndterSaksbehandlerløsning()
         håndterUtbetalingForkastet()
         assertSaksbehandleroppgave(oppgavestatus = Invalidert)
-        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true)
+        fremTilSaksbehandleroppgave(
+            harOppdatertMetadata = true,
+            harRisikovurdering = true,
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID()),
+        )
         assertSaksbehandleroppgave(oppgavestatus = AvventerSaksbehandler)
     }
 
@@ -63,7 +72,11 @@ internal class OppgaveE2ETest: AbstractE2ETest() {
         fremTilSaksbehandleroppgave()
         håndterUtbetalingForkastet()
         assertSaksbehandleroppgave(oppgavestatus = Invalidert)
-        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true)
+        fremTilSaksbehandleroppgave(
+            harOppdatertMetadata = true,
+            harRisikovurdering = true,
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID()),
+        )
         assertSaksbehandleroppgave(oppgavestatus = AvventerSaksbehandler)
     }
 }

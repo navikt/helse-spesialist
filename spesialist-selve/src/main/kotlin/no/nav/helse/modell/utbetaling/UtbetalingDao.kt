@@ -2,7 +2,7 @@ package no.nav.helse.modell.utbetaling
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -57,6 +57,22 @@ class UtbetalingDao(private val dataSource: DataSource) {
                 ).asExecute
             )
         }
+    }
+
+    internal fun erUtbetalingForkastet(utbetalingId: UUID): Boolean {
+        @Language("PostgreSQL")
+        val query = """
+            SELECT 1
+            FROM utbetaling u
+            JOIN utbetaling_id ui ON u.utbetaling_id_ref = ui.id
+            WHERE ui.utbetaling_id = :utbetaling_id
+            AND status = 'FORKASTET'
+        """.trimIndent()
+        return sessionOf(dataSource).use { session ->
+            session.run(
+                queryOf(query, mapOf("utbetaling_id" to utbetalingId)).map { true }.asSingle
+            )
+        } ?: false
     }
 
     internal fun opprettUtbetalingId(

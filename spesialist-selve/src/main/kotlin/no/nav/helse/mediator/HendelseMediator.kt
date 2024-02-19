@@ -69,6 +69,7 @@ import no.nav.helse.modell.overstyring.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.person.AdressebeskyttelseEndretRiver
 import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import no.nav.helse.modell.person.PersonDao
+ import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.Varsel
@@ -107,6 +108,7 @@ internal class HendelseMediator(
     private val egenAnsattDao: EgenAnsattDao = EgenAnsattDao(dataSource),
     private val dokumentDao: DokumentDao = DokumentDao(dataSource),
     private val avviksvurderingDao: AvviksvurderingDao,
+    private val utbetalingDao: UtbetalingDao = UtbetalingDao(dataSource),
     private val varselRepository: ActualVarselRepository = ActualVarselRepository(dataSource),
     private val generasjonRepository: ActualGenerasjonRepository = ActualGenerasjonRepository(dataSource),
     private val metrikkDao: MetrikkDao = MetrikkDao(dataSource),
@@ -347,6 +349,10 @@ internal class HendelseMediator(
     ) {
         if (avviksvurderingId != null)
             avviksvurderingDao.opprettKobling(avviksvurderingId, vilkårsgrunnlagId)
+        if (utbetalingDao.erUtbetalingForkastet(utbetalingId)) {
+            sikkerLogg.info("Ignorerer godkjenningsbehov med id=$id for utbetalingId=$utbetalingId, da utbetalingen er forkastet")
+            return
+        }
         if (oppgaveDao.harGyldigOppgave(utbetalingId) || vedtakDao.erAutomatiskGodkjent(utbetalingId)) {
             sikkerLogg.info("vedtaksperiodeId=$vedtaksperiodeId med utbetalingId=$utbetalingId har gyldig oppgave eller er automatisk godkjent. Ignorerer godkjenningsbehov med id=$id")
             return

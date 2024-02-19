@@ -80,6 +80,19 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
         assertUtbetalinger(UTBETALING_ID, 3)
     }
 
+    // Når spinnvill utfører avviksvurdering kan spleis rekke å forkaste utbetalingen og sende ut nytt godkjenningsbehov
+    // før spesialist har mottatt det første godkjenningsbehovet
+    @Test
+    fun `ignorerer godkjenningsbehov for forkastet utbetaling`() {
+        håndterSøknad()
+        håndterVedtaksperiodeOpprettet()
+        håndterUtbetalingOpprettet()
+        håndterUtbetalingEndret(gjeldendeStatus = FORKASTET, forrigeStatus = IKKE_GODKJENT)
+
+        håndterGodkjenningsbehovUtenValidering()
+        assertIngenEtterspurteBehov()
+    }
+
     @Test
     fun `feriepengeutbetalinger tas vare på`() {
         håndterSøknad()

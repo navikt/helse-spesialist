@@ -1,6 +1,7 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETest
+import java.util.UUID
 import no.nav.helse.Testdata.ORGNR_GHOST
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
@@ -12,7 +13,11 @@ internal class TotrinnsvurderingE2ETest : AbstractE2ETest() {
     fun `sak blir trukket til totrinnsvurdering ved overstyring av inntekt og refusjon`() {
         fremTilSaksbehandleroppgave()
         håndterOverstyrInntektOgRefusjon()
-        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true)
+        fremTilSaksbehandleroppgave(
+            harOppdatertMetadata = true,
+            harRisikovurdering = true,
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID()),
+        )
         assertOverstyringer(VEDTAKSPERIODE_ID, OverstyringType.Inntekt)
         assertTotrinnsvurdering(2.oppgave(VEDTAKSPERIODE_ID))
     }
@@ -32,7 +37,11 @@ internal class TotrinnsvurderingE2ETest : AbstractE2ETest() {
                 )
             )
         )
-        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true)
+        fremTilSaksbehandleroppgave(
+            harOppdatertMetadata = true,
+            harRisikovurdering = true,
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID()),
+        )
         assertOverstyringer(VEDTAKSPERIODE_ID, OverstyringType.Arbeidsforhold)
         assertTotrinnsvurdering(2.oppgave(VEDTAKSPERIODE_ID))
     }
@@ -41,7 +50,11 @@ internal class TotrinnsvurderingE2ETest : AbstractE2ETest() {
     fun `sak blir trukket til totrinnsvurdering ved overstyring av tidslinje`() {
         fremTilSaksbehandleroppgave()
         håndterOverstyrTidslinje()
-        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true)
+        fremTilSaksbehandleroppgave(
+            harOppdatertMetadata = true,
+            harRisikovurdering = true,
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID()),
+        )
         assertOverstyringer(VEDTAKSPERIODE_ID, OverstyringType.Dager)
         assertTotrinnsvurdering(2.oppgave(VEDTAKSPERIODE_ID))
     }
