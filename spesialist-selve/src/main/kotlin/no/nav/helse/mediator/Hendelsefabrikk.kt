@@ -32,7 +32,6 @@ import no.nav.helse.modell.kommando.TilbakedateringGodkjentCommand
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.overstyring.OverstyringIgangsatt
 import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver
-import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver.Companion.arbeidsgiverelementer
 import no.nav.helse.modell.overstyring.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import no.nav.helse.modell.person.EndretEgenAnsattStatusCommand
@@ -55,7 +54,6 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.Varsel
-import no.nav.helse.modell.varsel.Varsel.Companion.varsler
 import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
@@ -86,7 +84,6 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforho
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.slf4j.LoggerFactory
-import no.nav.helse.modell.overstyring.SkjønnsfastsattArbeidsgiver.Companion.arbeidsgiverelementer as skjønnsfastsattArbeidsgiverelementer
 
 internal class Hendelsefabrikk(
     dataSource: DataSource,
@@ -244,21 +241,6 @@ internal class Hendelsefabrikk(
     }
 
     fun søknadSendt(
-        json: String,
-    ): SøknadSendt {
-        val jsonNode = mapper.readTree(json)
-        return SøknadSendt(
-            id = UUID.fromString(jsonNode.path("@id").asText()),
-            fødselsnummer = jsonNode.path("fødselsnummer").asText(),
-            aktørId = jsonNode.path("aktorId").asText(),
-            organisasjonsnummer = jsonNode.path("organisasjonsnummer").asText(),
-            json = json,
-            personDao = personDao,
-            arbeidsgiverDao = arbeidsgiverDao
-        )
-    }
-
-    fun søknadSendt(
         id: UUID,
         fødselsnummer: String,
         aktørId: String,
@@ -377,29 +359,6 @@ internal class Hendelsefabrikk(
         )
     }
 
-    fun saksbehandlerløsning(json: String): Saksbehandlerløsning {
-        val jsonNode = mapper.readTree(json)
-        return saksbehandlerløsning(
-            id = UUID.fromString(jsonNode["@id"].asText()),
-            behandlingId = UUID.fromString(jsonNode["behandlingId"].asText()),
-            godkjenningsbehovhendelseId = UUID.fromString(jsonNode["hendelseId"].asText()),
-            fødselsnummer = jsonNode["fødselsnummer"].asText(),
-            godkjent = jsonNode["godkjent"].asBoolean(),
-            saksbehandlerident = jsonNode["saksbehandlerident"].asText(),
-            epostadresse = jsonNode["saksbehandlerepost"].asText(),
-            godkjenttidspunkt = jsonNode["godkjenttidspunkt"].asLocalDateTime(),
-            årsak = jsonNode["årsak"].takeUnless(JsonNode::isMissingOrNull)?.asText(),
-            begrunnelser = jsonNode["begrunnelser"].takeUnless(JsonNode::isMissingOrNull)?.map(JsonNode::asText),
-            kommentar = jsonNode["kommentar"].takeUnless(JsonNode::isMissingOrNull)?.asText(),
-            saksbehandleroverstyringer = jsonNode["saksbehandleroverstyringer"].takeUnless(JsonNode::isMissingOrNull)
-            ?.map {
-                UUID.fromString(it.asText())
-            } ?: emptyList(),
-            oppgaveId = jsonNode["oppgaveId"].asLong(),
-            json = json
-        )
-    }
-
     fun overstyringInntektOgRefusjon(
         id: UUID,
         fødselsnummer: String,
@@ -461,52 +420,6 @@ internal class Hendelsefabrikk(
         overstyringMediator = overstyringMediator,
     )
 
-    fun overstyringArbeidsforhold(json: String): OverstyringArbeidsforhold {
-        val jsonNode = mapper.readTree(json)
-        return overstyringArbeidsforhold(
-            id = UUID.fromString(jsonNode.path("@id").asText()),
-            fødselsnummer = jsonNode.path("fødselsnummer").asText(),
-            oid = UUID.fromString(jsonNode.path("saksbehandlerOid").asText()),
-            overstyrteArbeidsforhold = jsonNode.path("overstyrteArbeidsforhold").map {
-                OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdFraApi(
-                    it["orgnummer"].asText(),
-                    it["deaktivert"].asBoolean(),
-                    it["begrunnelse"].asText(),
-                    it["forklaring"].asText()
-                )
-            },
-            skjæringstidspunkt = jsonNode.path("skjæringstidspunkt").asLocalDate(),
-            opprettet = jsonNode.path("@opprettet").asLocalDateTime(),
-            json = json
-        )
-    }
-
-    fun overstyringInntektOgRefusjon(json: String): OverstyringInntektOgRefusjon {
-        val jsonNode = mapper.readTree(json)
-        return overstyringInntektOgRefusjon(
-            id = UUID.fromString(jsonNode.path("@id").asText()),
-            fødselsnummer = jsonNode.path("fødselsnummer").asText(),
-            oid = UUID.fromString(jsonNode.path("saksbehandlerOid").asText()),
-            arbeidsgivere = jsonNode.path("arbeidsgivere").arbeidsgiverelementer(),
-            skjæringstidspunkt = jsonNode.path("skjæringstidspunkt").asLocalDate(),
-            opprettet = jsonNode.path("@opprettet").asLocalDateTime(),
-            json = json
-        )
-    }
-
-    fun skjønnsfastsettingSykepengegrunnlag(json: String): SkjønnsfastsettingSykepengegrunnlag {
-        val jsonNode = mapper.readTree(json)
-        return skjønnsfastsettingSykepengegrunnlag(
-            id = UUID.fromString(jsonNode.path("@id").asText()),
-            fødselsnummer = jsonNode.path("fødselsnummer").asText(),
-            oid = UUID.fromString(jsonNode.path("saksbehandlerOid").asText()),
-            arbeidsgivere = jsonNode.path("arbeidsgivere").skjønnsfastsattArbeidsgiverelementer(),
-            skjæringstidspunkt = jsonNode.path("skjæringstidspunkt").asLocalDate(),
-            opprettet = jsonNode.path("@opprettet").asLocalDateTime(),
-            json = json
-        )
-    }
-
     fun adressebeskyttelseEndret(id: UUID, fødselsnummer: String, json: String) =
         AdressebeskyttelseEndret(
             id = id,
@@ -541,27 +454,6 @@ internal class Hendelsefabrikk(
         )
     }
 
-    fun sykefraværstilfeller(json: String): Sykefraværstilfeller {
-        val jsonNode = mapper.readTree(json)
-        return sykefraværstilfeller(
-            id = UUID.fromString(jsonNode["@id"].asText()),
-            vedtaksperiodeOppdateringer = jsonNode["tilfeller"].flatMap { tilfelleNode ->
-                val skjæringstidspunkt = tilfelleNode["dato"].asLocalDate()
-                tilfelleNode["perioder"].map {
-                    VedtaksperiodeOppdatering(
-                        skjæringstidspunkt = skjæringstidspunkt,
-                        fom = LocalDate.parse(it["fom"].asText()),
-                        tom = LocalDate.parse(it["tom"].asText()),
-                        vedtaksperiodeId = UUID.fromString(it["vedtaksperiodeId"].asText()),
-                    )
-                }
-            },
-            fødselsnummer = jsonNode.path("fødselsnummer").asText(),
-            aktørId = jsonNode.path("aktørId").asText(),
-            json = json
-        )
-    }
-
     fun vedtaksperiodeEndret(
         id: UUID,
         vedtaksperiodeId: UUID,
@@ -583,19 +475,6 @@ internal class Hendelsefabrikk(
             snapshotClient = snapshotClient,
             personDao = personDao,
             gjeldendeGenerasjon = gjeldendeGenerasjon(vedtaksperiodeId)
-        )
-    }
-
-    fun vedtaksperiodeEndret(json: String): VedtaksperiodeEndret {
-        val jsonNode = mapper.readTree(json)
-        return vedtaksperiodeEndret(
-            id = UUID.fromString(jsonNode.path("@id").asText()),
-            vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText()),
-            fødselsnummer = jsonNode.path("fødselsnummer").asText(),
-            forårsaketAvId = UUID.fromString(jsonNode.path("@forårsaket_av.id").asText()),
-            forrigeTilstand = jsonNode.path("forrigeTilstand").asText(),
-            gjeldendeTilstand = jsonNode.path("gjeldendeTilstand").asText(),
-            json = json
         )
     }
 
@@ -686,17 +565,6 @@ internal class Hendelsefabrikk(
             vedtaksperiodeId,
             utbetalingId,
             json,
-        )
-    }
-
-    fun vedtaksperiodeNyUtbetaling(json: String): VedtaksperiodeNyUtbetaling {
-        val jsonNode = mapper.readTree(json)
-        return vedtaksperiodeNyUtbetaling(
-            hendelseId = UUID.fromString(jsonNode.path("@id").asText()),
-            fødselsnummer = jsonNode.path("fødselsnummer").asText(),
-            vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText()),
-            utbetalingId = UUID.fromString(jsonNode.path("utbetalingId").asText()),
-            json = json,
         )
     }
 
@@ -870,29 +738,6 @@ internal class Hendelsefabrikk(
         )
     }
 
-    fun vedtaksperiodeOpprettet(json: String): VedtaksperiodeOpprettet {
-        val jsonNode = mapper.readTree(json)
-        return vedtaksperiodeOpprettet(
-            id = UUID.fromString(jsonNode["@id"].asText()),
-            fødselsnummer = jsonNode["fødselsnummer"].asText(),
-            organisasjonsnummer = jsonNode.path("organisasjonsnummer").asText(),
-            vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText()),
-            fom = LocalDate.parse(jsonNode.path("fom").asText()),
-            tom = LocalDate.parse(jsonNode.path("tom").asText()),
-            skjæringstidspunkt = LocalDate.parse(jsonNode.path("skjæringstidspunkt").asText()),
-            json = json,
-        )
-    }
-
-    fun godkjentTilbakedatertSykmelding(json: String): TilbakedateringGodkjent {
-        val jsonNode = mapper.readTree(json)
-        return godkjentTilbakedatertSykmelding(
-            id = UUID.fromString(jsonNode.path("@id").asText()),
-            fødselsnummer = jsonNode.path("fødselsnummer").asText(),
-            json = json
-        )
-    }
-
     fun godkjentTilbakedatertSykmelding(
         id: UUID,
         fødselsnummer: String,
@@ -937,27 +782,8 @@ internal class Hendelsefabrikk(
         return VedtakFattet(id, fødselsnummer, vedtaksperiodeId, json, gjeldendeGenerasjon(vedtaksperiodeId), vedtakDao)
     }
 
-    fun vedtakFattet(json: String): VedtakFattet {
-        val jsonNode = mapper.readTree(json)
-        return vedtakFattet(
-            id = UUID.fromString(jsonNode.path("@id").asText()),
-            fødselsnummer = jsonNode.path("fødselsnummer").asText(),
-            vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText()),
-            json
-        )
-    }
-
     fun nyeVarsler(id: UUID, fødselsnummer: String, varsler: List<Varsel>, json: String): NyeVarsler {
         return NyeVarsler(id, fødselsnummer, varsler, json)
     }
 
-    fun nyeVarsler(json: String): NyeVarsler {
-        val jsonNode = mapper.readTree(json)
-        return nyeVarsler(
-            id = UUID.fromString(jsonNode.path("@id").asText()),
-            fødselsnummer = jsonNode.path("fødselsnummer").asText(),
-            varsler = jsonNode.path("aktiviteter").varsler(),
-            json,
-        )
-    }
 }

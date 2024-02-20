@@ -213,6 +213,8 @@ internal class HendelseDao(private val dataSource: DataSource) {
         }.asSingle)
     }
 
+    // Denne funksjonen trenger bare å støtte de hendelsetypene som starter en kommandokjede som sender ut behov.
+    // Kommandokjeder som ikke har noen suspenderende subcommands vil aldri kunne komme inn her.
     private fun fraHendelsetype(
         hendelsetype: Hendelsetype,
         json: String,
@@ -220,27 +222,13 @@ internal class HendelseDao(private val dataSource: DataSource) {
     ): Personhendelse =
         when (hendelsetype) {
             ADRESSEBESKYTTELSE_ENDRET -> hendelsefabrikk.adressebeskyttelseEndret(json)
-            VEDTAKSPERIODE_ENDRET -> hendelsefabrikk.vedtaksperiodeEndret(json)
+            // VEDTAKSPERIODE_FORKASTET trengs pt. pga. KommandohendelseDaoTest.`lagrer og finner hendelser`
             VEDTAKSPERIODE_FORKASTET -> hendelsefabrikk.vedtaksperiodeForkastet(json)
             GODKJENNING -> hendelsefabrikk.godkjenning(json)
-            OVERSTYRING_INNTEKT_OG_REFUSJON -> hendelsefabrikk.overstyringInntektOgRefusjon(json)
-            OVERSTYRING_ARBEIDSFORHOLD -> hendelsefabrikk.overstyringArbeidsforhold(json)
-            SKJØNNSFASTSETTING_SYKEPENGEGRUNNLAG -> hendelsefabrikk.skjønnsfastsettingSykepengegrunnlag(json)
-            OVERSTYRING_IGANGSATT -> hendelsefabrikk.overstyringIgangsatt(json)
-            SAKSBEHANDLERLØSNING -> hendelsefabrikk.saksbehandlerløsning(json)
-            UTBETALING_ANNULLERT -> hendelsefabrikk.utbetalingAnnullert(json)
-            UTBETALING_ENDRET -> hendelsefabrikk.utbetalingEndret(json)
             OPPDATER_PERSONSNAPSHOT -> hendelsefabrikk.oppdaterPersonsnapshot(json)
-            VEDTAKSPERIODE_REBEREGNET -> hendelsefabrikk.vedtaksperiodeReberegnet(json)
             GOSYS_OPPGAVE_ENDRET -> hendelsefabrikk.gosysOppgaveEndret(json)
-            GODKJENT_TILBAKEDATERT_SYKMELDING -> hendelsefabrikk.godkjentTilbakedatertSykmelding(json)
-            ENDRET_EGEN_ANSATT_STATUS -> hendelsefabrikk.endretEgenAnsattStatus(json)
-            VEDTAK_FATTET -> hendelsefabrikk.vedtakFattet(json)
-            NYE_VARSLER -> hendelsefabrikk.nyeVarsler(json)
-            VEDTAKSPERIODE_OPPRETTET -> hendelsefabrikk.vedtaksperiodeOpprettet(json)
-            SØKNAD_SENDT -> hendelsefabrikk.søknadSendt(json)
-            VEDTAKSPERIODE_NY_UTBETALING -> hendelsefabrikk.vedtaksperiodeNyUtbetaling(json)
-            SYKEFRAVÆRSTILFELLER -> hendelsefabrikk.sykefraværstilfeller(json)
+            else -> throw IllegalArgumentException("Prøver å gjenoppta en kommando(kjede) etter mottak av hendelsetype " +
+                    "$hendelsetype, men koden som trengs mangler!")
         }
 
     private fun tilHendelsetype(hendelse: Personhendelse) = when (hendelse) {

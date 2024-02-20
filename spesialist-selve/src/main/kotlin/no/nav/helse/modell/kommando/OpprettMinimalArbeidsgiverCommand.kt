@@ -13,22 +13,12 @@ internal class OpprettMinimalArbeidsgiverCommand(
     }
 
     override fun execute(context: CommandContext): Boolean {
-        if (arbeidsgiverFinnes()) return ignorer()
-        return behandle()
-    }
-
-    override fun resume(context: CommandContext): Boolean {
-        return behandle()
-    }
-
-    private fun ignorer(): Boolean {
-        log.info("arbeidsgiver finnes fra før, lager ikke ny")
-        return true
-    }
-
-    private fun behandle(): Boolean {
-        sikkerLog.info("Oppretter minimal arbeidsgiver for organisasjonsnummer: $organisasjonsnummer")
-        arbeidsgiverDao.insertArbeidsgiver(organisasjonsnummer)
+        if (arbeidsgiverFinnes()) {
+            log.info("arbeidsgiver finnes fra før, lager ikke ny")
+        } else {
+            sikkerLog.info("Oppretter minimal arbeidsgiver for organisasjonsnummer: $organisasjonsnummer")
+            arbeidsgiverDao.insertArbeidsgiver(organisasjonsnummer)
+        }
         return true
     }
 
