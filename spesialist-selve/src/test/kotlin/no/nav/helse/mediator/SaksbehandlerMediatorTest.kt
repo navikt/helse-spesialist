@@ -6,6 +6,9 @@ import java.time.LocalDate
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import lagAktørId
+import lagFødselsnummer
+import lagOrganisasjonsnummer
 import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.db.SaksbehandlerDao
@@ -51,10 +54,10 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
     private val oppgaveMediator = OppgaveMediator(hendelseDao, oppgaveDao, tildelingDbDao, reservasjonDao, opptegnelseDao, totrinnsvurderingDao, saksbehandlerRepository, testRapid, TilgangskontrollForTestHarIkkeTilgang, tilgangsgrupper)
     private val mediator = SaksbehandlerMediator(dataSource, "versjonAvKode", testRapid, oppgaveMediator, tilgangsgrupper)
 
-    private val AKTØR_ID = "1234567891011"
-    private val FØDSELSNUMMER = "12345678910"
-    private val ORGANISASJONSNUMMER = "987654321"
-    private val ORGANISASJONSNUMMER_GHOST = "123456789"
+    private val AKTØR_ID = lagAktørId()
+    private val FØDSELSNUMMER = lagFødselsnummer()
+    private val ORGANISASJONSNUMMER = lagOrganisasjonsnummer()
+    private val ORGANISASJONSNUMMER_GHOST = lagOrganisasjonsnummer()
 
     override val SAKSBEHANDLER_OID: UUID = UUID.randomUUID()
     override val SAKSBEHANDLER_NAVN = "ET_NAVN"

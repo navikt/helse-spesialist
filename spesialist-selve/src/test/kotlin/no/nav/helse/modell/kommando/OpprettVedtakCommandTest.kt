@@ -53,7 +53,7 @@ internal class OpprettVedtakCommandTest {
 
     @Test
     fun `opprette vedtak`() {
-        every { snapshotClient.hentSnapshot(FNR) } returns snapshot()
+        every { snapshotClient.hentSnapshot(FNR) } returns snapshot(fødselsnummer = FNR)
         val (personRef, arbeidsgiverRef, snapshotRef) = personFinnes()
         every { vedtakDao.finnVedtakId(VEDTAKSPERIODE_ID) } returns null
         assertTrue(command.execute(context))
@@ -71,7 +71,7 @@ internal class OpprettVedtakCommandTest {
 
     @Test
     fun `oppdatere vedtak`() {
-        every { snapshotClient.hentSnapshot(FNR) } returns snapshot()
+        every { snapshotClient.hentSnapshot(FNR) } returns snapshot(fødselsnummer = FNR)
         val (_, _, snapshotRef) = personFinnes()
         every { vedtakDao.finnVedtakId(VEDTAKSPERIODE_ID) } returns VEDTAK_REF
         assertTrue(command.execute(context))

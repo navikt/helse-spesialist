@@ -54,7 +54,7 @@ internal class VedtaksperiodeForkastetTest {
 
     @Test
     fun `avbryter kommandoer, oppdaterer snapshot og markerer vedtaksperiode som forkastet`() {
-        val snapshot = snapshot()
+        val snapshot = snapshot(fødselsnummer = FNR)
         every { graphQLClient.hentSnapshot(FNR) } returns snapshot
         every { snapshotDao.lagre(FNR, snapshot.data!!.person!!) } returns 1
         every { personDao.findPersonByFødselsnummer(FNR) } returns 1

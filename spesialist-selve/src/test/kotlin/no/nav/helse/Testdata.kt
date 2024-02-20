@@ -47,7 +47,7 @@ object Testdata {
         versjon: Int = 1,
         aktørId: String = AKTØR,
         organisasjonsnummer: String = ORGNR,
-        fødselsnummer: String = FØDSELSNUMMER,
+        fødselsnummer: String,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
         utbetalingId: UUID = UTBETALING_ID,
         arbeidsgiverbeløp: Int = 30000,

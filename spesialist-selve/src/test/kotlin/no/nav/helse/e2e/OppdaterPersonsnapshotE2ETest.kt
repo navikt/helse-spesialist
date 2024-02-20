@@ -23,7 +23,7 @@ internal class OppdaterPersonsnapshotE2ETest : AbstractE2ETest() {
         håndterSaksbehandlerløsning(vedtaksperiodeId = v2)
         håndterVedtakFattet(vedtaksperiodeId = v2)
 
-        val snapshotFinal = snapshot(3)
+        val snapshotFinal = snapshot(3, fødselsnummer = FØDSELSNUMMER)
         håndterOppdaterPersonsnapshot(snapshotSomSkalHentes = snapshotFinal)
 
         assertSnapshot(snapshotFinal, v1)

@@ -1,6 +1,5 @@
 package no.nav.helse.modell.risiko
 
-import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -52,7 +51,6 @@ internal class VurderVurderingsmomenterTest {
     @BeforeEach
     fun setup() {
         context = CommandContext(UUID.randomUUID())
-        clearAllMocks()
         every { risikovurderingDao.hentRisikovurdering(VEDTAKSPERIODE_ID) } returns null
     }
 

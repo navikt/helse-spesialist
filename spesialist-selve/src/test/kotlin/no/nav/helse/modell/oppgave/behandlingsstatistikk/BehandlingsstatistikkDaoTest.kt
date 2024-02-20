@@ -3,8 +3,6 @@ package no.nav.helse.modell.oppgave.behandlingsstatistikk
 import DatabaseIntegrationTest
 import java.time.LocalDate
 import java.time.LocalDateTime
-import kotliquery.queryOf
-import kotliquery.sessionOf
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
@@ -26,9 +24,7 @@ internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
 
     @BeforeEach
     fun tømTabeller() {
-        sessionOf(dataSource).use  {
-            it.run(queryOf("truncate oppgave, automatisering, annullert_av_saksbehandler cascade").asExecute)
-        }
+        query("truncate oppgave, automatisering, annullert_av_saksbehandler, totrinnsvurdering cascade").execute()
     }
 
     @Test

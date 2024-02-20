@@ -7,11 +7,20 @@ import kotliquery.sessionOf
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.parallel.Execution
+import org.junit.jupiter.api.parallel.ExecutionMode
 import org.junit.jupiter.api.parallel.Isolated
 
 @Isolated
+@Execution(ExecutionMode.SAME_THREAD)
 internal class SnapshotDaoTest : DatabaseIntegrationTest() {
+
+    @BeforeEach
+    fun resetGlobalSnapshotVersjon() {
+        query("update global_snapshot_versjon set versjon = 1 where id = 1").update()
+    }
 
     @Test
     fun `lagre snapshot`() {
@@ -50,7 +59,6 @@ internal class SnapshotDaoTest : DatabaseIntegrationTest() {
         )
     }
 
-    private fun globaltVersjonsnummer() = sessionOf(dataSource).use { session ->
-        session.run(queryOf("SELECT versjon FROM global_snapshot_versjon").map { it.int("versjon") }.asSingle)
-    }
+    private fun globaltVersjonsnummer() =
+        query("SELECT versjon FROM global_snapshot_versjon").single { it.int("versjon") }
 }

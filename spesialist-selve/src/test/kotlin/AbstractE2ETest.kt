@@ -169,7 +169,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     )
     private val avviksvurderingTestdata = AvviksvurderingTestdata()
     private lateinit var utbetalingId: UUID
-    internal val snapshotClient = mockk<SnapshotClient>(relaxed = true)
+    internal val snapshotClient = mockk<SnapshotClient>()
     private val testRapid = TestRapid()
     internal val inspektør get() = testRapid.inspektør
     private val meldingssender = Meldingssender(testRapid)
@@ -303,9 +303,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
         avviksvurderingTestdata: AvviksvurderingTestdata = this.avviksvurderingTestdata,
-        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata.copy(
-            avviksvurderingId = this.avviksvurderingTestdata.avviksvurderingId,
-        ),
+        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata,
     ) {
         håndterSøknad(fødselsnummer = godkjenningsbehovTestdata.fødselsnummer, organisasjonsnummer = godkjenningsbehovTestdata.organisasjonsnummer)
         håndterVedtaksperiodeOpprettet(
@@ -879,7 +877,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
         avviksvurderingTestdata: AvviksvurderingTestdata = this.avviksvurderingTestdata,
-        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata.copy(avviksvurderingId = this.avviksvurderingTestdata.avviksvurderingId),
+        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata,
     ) {
         val erRevurdering = erRevurdering(godkjenningsbehovTestdata.vedtaksperiodeId)
         håndterVedtaksperiodeNyUtbetaling(vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId, utbetalingId = godkjenningsbehovTestdata.utbetalingId)

@@ -64,7 +64,6 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUberegnetPeriode
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.fail
 import kotlin.random.Random.Default.nextLong
 
@@ -157,13 +156,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val totrinnsvurderingDao = TotrinnsvurderingDao(dataSource)
     internal val dokumentDao = DokumentDao(dataSource)
     internal val påVentDao = PåVentDao(dataSource)
-
-    @BeforeEach
-    fun resetDatabase() {
-        sessionOf(dataSource).use  {
-            it.run(queryOf("SELECT truncate_tables()").asExecute)
-        }
-    }
 
     internal fun testhendelse(
         hendelseId: UUID = HENDELSE_ID,
@@ -308,7 +300,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     }
 
     protected fun opprettSnapshot(
-        person: GraphQLPerson = snapshot().data!!.person!!,
+        person: GraphQLPerson = snapshot(fødselsnummer = FNR, aktørId = AKTØR).data!!.person!!,
         fødselsnummer: String = FNR,
     ) {
         snapshotId = snapshotDao.lagre(fødselsnummer, person)
@@ -471,8 +463,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     )
 
     protected fun snapshot(
-        fødselsnummer: String = "12345612345",
-        aktørId: String = "123456789101112",
+        fødselsnummer: String = FNR,
+        aktørId: String = AKTØR,
         versjon: Int = 1,
     ): GraphQLClientResponse<HentSnapshot.Result> =
         object : GraphQLClientResponse<HentSnapshot.Result> {
@@ -594,10 +586,13 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         val tom: LocalDate,
     )
 
-    protected fun query(@Language("postgresql") query: String, vararg params: Pair<String, Any>) =
+    protected fun query(@Language("postgresql") query: String, vararg params: Pair<String, Any?>) =
         queryOf(query, params.toMap())
 
     protected fun <T> Query.single(mapper: (Row) -> T?) = map(mapper).asSingle.runInSession()
+    protected fun <T> Query.list(mapper: (Row) -> T?) = map(mapper).asList.runInSession()
+    protected fun Query.update() = asUpdate.runInSession()
+    protected fun Query.execute() = asExecute.runInSession()
 
-    protected fun <T> QueryAction<T>.runInSession() = sessionOf(dataSource).use(::runWithSession)
+    private fun <T> QueryAction<T>.runInSession() = sessionOf(dataSource).use(::runWithSession)
 }

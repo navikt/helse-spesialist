@@ -23,6 +23,7 @@ internal class OpprettVedtakCommand(
 ) : Command {
     private companion object {
         private val log = LoggerFactory.getLogger(OpprettVedtakCommand::class.java)
+        private val sikkerlog = LoggerFactory.getLogger("tjenestekall")
     }
 
     override fun execute(context: CommandContext): Boolean {
@@ -32,6 +33,7 @@ internal class OpprettVedtakCommand(
 
     private fun oppdaterSnapshot(vedtakRef: Long): Boolean {
         log.info("Henter oppdatert graphql-snapshot for vedtaksperiode: $vedtaksperiodeId")
+        sikkerlog.info("Henter oppdatert graphql-snapshot for vedtaksperiode: $vedtaksperiodeId og fnr: $fødselsnummer")
         return snapshotClient.hentSnapshot(fødselsnummer).data?.person?.let {
             val id = snapshotDao.lagre(fødselsnummer, it)
             log.info("Oppdaterer vedtak for vedtaksperiode: $vedtaksperiodeId")

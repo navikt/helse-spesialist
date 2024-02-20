@@ -123,7 +123,7 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
     }
 
     private fun settOppDefaultDataOgTilganger() {
-        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshot()
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshot(fødselsnummer = FØDSELSNUMMER)
         every { dataFetchingEnvironment.graphQlContext.get<String>("saksbehandlerNavn") } returns "saksbehandler"
         saksbehandlertilgangTilSkjermede(harTilgang = false)
     }
