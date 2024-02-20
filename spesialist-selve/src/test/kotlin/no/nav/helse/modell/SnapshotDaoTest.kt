@@ -2,10 +2,7 @@ package no.nav.helse.modell
 
 import DatabaseIntegrationTest
 import com.fasterxml.jackson.module.kotlin.readValue
-import kotliquery.queryOf
-import kotliquery.sessionOf
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -46,18 +43,14 @@ internal class SnapshotDaoTest : DatabaseIntegrationTest() {
         assertEquals(2, globaltVersjonsnummer())
     }
 
-    private fun finnAlleSnapshot(fødselsnummer: String = FNR) = sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL")
-        val query = """
+    private fun finnAlleSnapshot(fødselsnummer: String = FNR) = query(
+        """
             SELECT data, versjon FROM snapshot s
             JOIN person p ON s.person_ref = p.id
-            WHERE p.fodselsnummer = ?
-        """.trimIndent()
-        session.run(queryOf(query, fødselsnummer.toLong())
-            .map { objectMapper.readValue<GraphQLPerson>(it.string("data")) to it.int("versjon") }
-            .asList
-        )
-    }
+            WHERE p.fodselsnummer = :fnr
+        """.trimIndent(), "fnr" to fødselsnummer.toLong()
+    ).list { objectMapper.readValue<GraphQLPerson>(it.string("data")) to it.int("versjon") }
+
 
     private fun globaltVersjonsnummer() =
         query("SELECT versjon FROM global_snapshot_versjon").single { it.int("versjon") }
