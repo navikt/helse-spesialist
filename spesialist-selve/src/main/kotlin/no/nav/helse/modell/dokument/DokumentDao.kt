@@ -47,10 +47,7 @@ class DokumentDao(dataSource: DataSource) : HelseDao(dataSource) {
 
     internal fun slettGamleDokumenter() = asSQL(
         """
-            with slettet as (
-                delete from dokumenter where opprettet < CURRENT_DATE - interval '3 months' returning dokument_id
-            ) 
-            select count(*) as antall_slettet from slettet;
+            delete from dokumenter where opprettet < current_date - interval '3 months';
         """.trimIndent()
-    ).single { row -> row.int("antall_slettet") } ?: 0
+    ).update()
 }

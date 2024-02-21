@@ -1,7 +1,7 @@
 package no.nav.helse.mediator.meldinger
 
 import java.util.UUID
-import net.logstash.logback.argument.StructuredArguments
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -34,7 +34,7 @@ internal class MidnattRiver(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         val hendelseId = UUID.fromString(packet["@id"].asText())
-        logg.info("Mottok melding midnatt , {}", StructuredArguments.kv("hendelseId", hendelseId))
+        logg.info("Mottok melding midnatt , {}", kv("hendelseId", hendelseId))
 
         val antallSlettet = mediator.slettGamleDokumenter()
         logg.info("Slettet $antallSlettet dokumenter")
