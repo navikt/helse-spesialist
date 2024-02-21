@@ -38,6 +38,7 @@ import no.nav.helse.modell.person.EndretEgenAnsattStatusCommand
 import no.nav.helse.modell.person.OppdaterPersonsnapshot
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.SøknadSendt
+import no.nav.helse.modell.person.SøknadSendtCommand
 import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyringArbeidsforhold
@@ -252,9 +253,7 @@ internal class Hendelsefabrikk(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             organisasjonsnummer = organisasjonsnummer,
-            json = json,
-            personDao = personDao,
-            arbeidsgiverDao = arbeidsgiverDao
+            json = json
         )
     }
 
@@ -703,6 +702,16 @@ internal class Hendelsefabrikk(
             utbetalingId = hendelse.utbetalingId,
             utbetalingDao = utbetalingDao,
             gjeldendeGenerasjon = gjeldendeGenerasjon(hendelse.vedtaksperiodeId())
+        )
+    }
+
+    fun søknadSendt(hendelse: SøknadSendt): SøknadSendtCommand {
+        return SøknadSendtCommand(
+            fødselsnummer = hendelse.fødselsnummer(),
+            aktørId = hendelse.aktørId,
+            organisasjonsnummer = hendelse.organisasjonsnummer,
+            personDao = personDao,
+            arbeidsgiverDao = arbeidsgiverDao
         )
     }
 
