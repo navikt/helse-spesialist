@@ -13,6 +13,7 @@ import no.nav.helse.db.SykefraværstilfelleDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.builders.GenerasjonBuilder
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
+import no.nav.helse.mediator.meldinger.Personhendelse
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.CommandContextDao
@@ -36,6 +37,7 @@ import no.nav.helse.modell.overstyring.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import no.nav.helse.modell.person.EndretEgenAnsattStatusCommand
 import no.nav.helse.modell.person.OppdaterPersonsnapshot
+import no.nav.helse.modell.person.OppdaterPersonsnapshotCommand
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.person.SøknadSendtCommand
@@ -586,11 +588,6 @@ internal class Hendelsefabrikk(
             id = UUID.fromString(jsonNode["@id"].asText()),
             fødselsnummer = fødselsnummer,
             json = json,
-            snapshotClient = snapshotClient,
-            snapshotDao = snapshotDao,
-            personDao = personDao,
-            opptegnelseDao = opptegnelseDao,
-            førsteKjenteDagFinner = { generasjonRepository.førsteKjenteDag(fødselsnummer) },
         )
     }
 
@@ -712,6 +709,17 @@ internal class Hendelsefabrikk(
             organisasjonsnummer = hendelse.organisasjonsnummer,
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao
+        )
+    }
+
+    fun oppdaterPersonsnapshotCommand(hendelse: Personhendelse): OppdaterPersonsnapshotCommand {
+        return OppdaterPersonsnapshotCommand(
+            fødselsnummer = hendelse.fødselsnummer(),
+            førsteKjenteDagFinner = { generasjonRepository.førsteKjenteDag(hendelse.fødselsnummer()) },
+            personDao = personDao,
+            snapshotDao = snapshotDao,
+            opptegnelseDao = opptegnelseDao,
+            snapshotClient = snapshotClient
         )
     }
 

@@ -2,7 +2,7 @@ package no.nav.helse.modell.person
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.mediator.meldinger.Kommandohendelse
+import no.nav.helse.mediator.meldinger.Personhendelse
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
@@ -18,12 +18,19 @@ internal class OppdaterPersonsnapshot(
     override val id: UUID,
     private val fødselsnummer: String,
     private val json: String,
-    snapshotClient: SnapshotClient,
-    snapshotDao: SnapshotDao,
-    personDao: PersonDao,
-    opptegnelseDao: OpptegnelseDao,
+) : Personhendelse {
+    override fun fødselsnummer(): String = fødselsnummer
+    override fun toJson(): String = json
+}
+
+internal class OppdaterPersonsnapshotCommand(
+    fødselsnummer: String,
     førsteKjenteDagFinner: () -> LocalDate,
-) : Kommandohendelse, MacroCommand() {
+    personDao: PersonDao,
+    snapshotDao: SnapshotDao,
+    opptegnelseDao: OpptegnelseDao,
+    snapshotClient: SnapshotClient
+): MacroCommand() {
     override val commands: List<Command> = listOf(
         OppdaterSnapshotCommand(
             snapshotClient = snapshotClient,
@@ -40,8 +47,5 @@ internal class OppdaterPersonsnapshot(
             )
         },
     )
-
-    override fun fødselsnummer(): String = fødselsnummer
-    override fun toJson(): String = json
 
 }
