@@ -36,6 +36,7 @@ internal class MidnattRiver(
         val hendelseId = UUID.fromString(packet["@id"].asText())
         logg.info("Mottok melding midnatt , {}", StructuredArguments.kv("hendelseId", hendelseId))
 
-        mediator.slettGamleDokumenter()
+        val antallSlettet = mediator.slettGamleDokumenter()
+        logg.info("Slettet $antallSlettet dokumenter")
     }
 }

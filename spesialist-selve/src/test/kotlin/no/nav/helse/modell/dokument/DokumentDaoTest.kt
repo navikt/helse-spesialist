@@ -56,10 +56,11 @@ internal class DokumentDaoTest : DatabaseIntegrationTest() {
         val dokument2 = objectMapper.readTree("""{"testsøknad":"ny"}""")
         lagreDokumentMedOpprettet(LocalDateTime.now().minusMonths(4), FNR, dokumentId1, dokument1)
         lagreDokumentMedOpprettet(LocalDateTime.now(), FNR, dokumentId2, dokument2)
-        dokumentDao.slettGamleDokumenter()
+        val antallSlettet = dokumentDao.slettGamleDokumenter()
 
         assertNull(dokumentDao.hent(FNR, dokumentId1))
         assertNotNull(dokumentDao.hent(FNR, dokumentId2))
+        assertEquals(1, antallSlettet)
     }
 
     @Test

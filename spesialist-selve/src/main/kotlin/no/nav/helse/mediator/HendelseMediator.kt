@@ -599,8 +599,8 @@ internal class HendelseMediator(
         utfør(hendelsefabrikk.vedtakFattet(id, fødselsnummer, vedtaksperiodeId, json), context)
     }
 
-    fun slettGamleDokumenter() {
-        dokumentDao.slettGamleDokumenter()
+    fun slettGamleDokumenter(): Int {
+        return dokumentDao.slettGamleDokumenter()
     }
 
     fun godkjentTilbakedatertSykmelding(id: UUID, fødselsnummer: String, vedtaksperiodeId: UUID, skjæringstidspunkt: LocalDate, json: String, context: MessageContext) {

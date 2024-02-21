@@ -6,7 +6,8 @@ import javax.sql.DataSource
 import no.nav.helse.HelseDao
 import no.nav.helse.objectMapper
 
-class DokumentDao(private val dataSource: DataSource) : HelseDao(dataSource) {
+class DokumentDao(dataSource: DataSource) : HelseDao(dataSource) {
+
     internal fun lagre(fødselsnummer: String, dokumentId: UUID, dokument: JsonNode) {
         asSQL(
             """
@@ -46,7 +47,10 @@ class DokumentDao(private val dataSource: DataSource) : HelseDao(dataSource) {
 
     internal fun slettGamleDokumenter() = asSQL(
         """
-            DELETE FROM dokumenter where opprettet < CURRENT_DATE - interval '3 months';
+            with slettet as (
+                delete from dokumenter where opprettet < CURRENT_DATE - interval '3 months' returning dokument_id
+            ) 
+            select count(*) as antall_slettet from slettet;
         """.trimIndent()
-    ).update()
+    ).single { row -> row.int("antall_slettet") } ?: 0
 }
