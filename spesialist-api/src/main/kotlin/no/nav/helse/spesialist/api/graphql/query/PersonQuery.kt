@@ -71,7 +71,7 @@ class PersonQuery(
                     return DataFetcherResult.newResult<Person?>().error(getFlereFødselsnumreError(fødselsnumre)).build()
                 }
             }
-        if (fødselsnummer == null || !personApiDao.spesialistHarPersonKlarForVisningISpeil(fødselsnummer)) {
+        if (fødselsnummer == null || (!erDev() && !personApiDao.spesialistHarPersonKlarForVisningISpeil(fødselsnummer))) {
             sikkerLogg.info("Svarer not found for parametere fnr=$fnr, aktorId=$aktorId.")
             return DataFetcherResult.newResult<Person?>().error(getNotFoundError(fnr)).build()
         }
