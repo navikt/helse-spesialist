@@ -1,5 +1,4 @@
 val junitJupiterVersion = "5.10.2"
-val junitPlatformLauncherVersion = "1.10.2"
 val ktorVersion = "2.3.8"
 val jvmTargetVersion = "21"
 val graphqlKotlinVersion = "7.0.2"
@@ -80,7 +79,7 @@ allprojects {
         implementation("io.ktor:ktor-server-cors:$ktorVersion")
         implementation("io.ktor:ktor-server-call-id:$ktorVersion")
 
-        testRuntimeOnly("org.junit.platform:junit-platform-launcher:$junitPlatformLauncherVersion")
+        testRuntimeOnly("org.junit.platform:junit-platform-launcher")
         testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
         testImplementation("io.ktor:ktor-client-mock-jvm:$ktorVersion")
         testImplementation("io.ktor:ktor-server-test-host:$ktorVersion") {
