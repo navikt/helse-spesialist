@@ -599,6 +599,10 @@ internal class HendelseMediator(
         utfør(hendelsefabrikk.vedtakFattet(id, fødselsnummer, vedtaksperiodeId, json), context)
     }
 
+    fun slettGamleDokumenter() {
+        dokumentDao.slettGamleDokumenter()
+    }
+
     fun godkjentTilbakedatertSykmelding(id: UUID, fødselsnummer: String, vedtaksperiodeId: UUID, skjæringstidspunkt: LocalDate, json: String, context: MessageContext) {
         if (!hendelsefabrikk.sykefraværstilfelle(fødselsnummer, skjæringstidspunkt).erTilbakedatert(vedtaksperiodeId)) return logg.info("ignorerer hendelseId=${id} fordi det ikke er en tilbakedatering")
 

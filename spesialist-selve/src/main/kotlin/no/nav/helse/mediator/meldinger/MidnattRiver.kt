@@ -22,7 +22,7 @@ internal class MidnattRiver(
     init {
         River(rapidsConnection).apply {
             validate {
-                it.demandAny("@event_name", listOf("midnatt", "slett_gamle_dokuemnter_spesialist"))
+                it.demandAny("@event_name", listOf("midnatt", "slett_gamle_dokumenter_spesialist"))
                 it.requireKey("@id")
             }
         }.register(this)
@@ -35,5 +35,7 @@ internal class MidnattRiver(
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         val hendelseId = UUID.fromString(packet["@id"].asText())
         logg.info("Mottok melding midnatt , {}", StructuredArguments.kv("hendelseId", hendelseId))
+
+        mediator.slettGamleDokumenter()
     }
 }

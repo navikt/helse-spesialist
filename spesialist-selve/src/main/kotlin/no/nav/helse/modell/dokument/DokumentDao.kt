@@ -43,4 +43,10 @@ class DokumentDao(private val dataSource: DataSource) : HelseDao(dataSource) {
     ).single { row ->
         row.stringOrNull("dokument")?.let { dokument -> objectMapper.readTree(dokument) }
     }
+
+    internal fun slettGamleDokumenter() = asSQL(
+        """
+            DELETE FROM dokumenter where opprettet < CURRENT_DATE - interval '3 months';
+        """.trimIndent()
+    ).update()
 }
