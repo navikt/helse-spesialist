@@ -74,7 +74,6 @@ enum class EgenskapForDatabase {
     INGEN_UTBETALING,
     HASTER,
     RETUR,
-    FULLMAKT,
     VERGEMÅL,
     EN_ARBEIDSGIVER,
     FLERE_ARBEIDSGIVERE,

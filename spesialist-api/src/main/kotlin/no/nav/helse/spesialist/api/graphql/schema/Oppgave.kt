@@ -40,7 +40,6 @@ enum class Egenskap {
     UTLAND,
     HASTER,
     RETUR,
-    FULLMAKT,
     VERGEMAL,
     SKJONNSFASTSETTELSE,
     PA_VENT,

@@ -146,7 +146,6 @@ internal object OppgaveMapper {
         Egenskap.INGEN_UTBETALING -> EgenskapForApi.INGEN_UTBETALING
         Egenskap.HASTER -> EgenskapForApi.HASTER
         Egenskap.RETUR -> EgenskapForApi.RETUR
-        Egenskap.FULLMAKT -> EgenskapForApi.FULLMAKT
         Egenskap.VERGEMÅL -> EgenskapForApi.VERGEMAL
         Egenskap.EN_ARBEIDSGIVER -> EgenskapForApi.EN_ARBEIDSGIVER
         Egenskap.FLERE_ARBEIDSGIVERE -> EgenskapForApi.FLERE_ARBEIDSGIVERE
@@ -185,7 +184,6 @@ internal object OppgaveMapper {
         EgenskapForDatabase.INGEN_UTBETALING -> Egenskap.INGEN_UTBETALING
         EgenskapForDatabase.HASTER -> Egenskap.HASTER
         EgenskapForDatabase.RETUR -> Egenskap.RETUR
-        EgenskapForDatabase.FULLMAKT -> Egenskap.FULLMAKT
         EgenskapForDatabase.VERGEMÅL -> Egenskap.VERGEMÅL
         EgenskapForDatabase.EN_ARBEIDSGIVER -> Egenskap.EN_ARBEIDSGIVER
         EgenskapForDatabase.FLERE_ARBEIDSGIVERE -> Egenskap.FLERE_ARBEIDSGIVERE
@@ -217,7 +215,6 @@ internal object OppgaveMapper {
         Egenskap.HASTER -> EgenskapForDatabase.HASTER
         Egenskap.BESLUTTER -> EgenskapForDatabase.BESLUTTER
         Egenskap.RETUR -> EgenskapForDatabase.RETUR
-        Egenskap.FULLMAKT -> EgenskapForDatabase.FULLMAKT
         Egenskap.VERGEMÅL -> EgenskapForDatabase.VERGEMÅL
         Egenskap.SPESIALSAK -> EgenskapForDatabase.SPESIALSAK
         Egenskap.FORLENGELSE -> EgenskapForDatabase.FORLENGELSE
@@ -248,7 +245,6 @@ internal object OppgaveMapper {
             Egenskap.HASTER -> "HASTER"
             Egenskap.BESLUTTER -> "BESLUTTER"
             Egenskap.RETUR -> "RETUR"
-            Egenskap.FULLMAKT -> "FULLMAKT"
             Egenskap.VERGEMÅL -> "VERGEMÅL"
             Egenskap.SPESIALSAK -> "SPESIALSAK"
             Egenskap.FORLENGELSE -> "FORLENGELSE"
@@ -284,7 +280,6 @@ internal object OppgaveMapper {
         EgenskapForApi.UTLAND -> EgenskapForDatabase.UTLAND
         EgenskapForApi.HASTER -> EgenskapForDatabase.HASTER
         EgenskapForApi.RETUR -> EgenskapForDatabase.RETUR
-        EgenskapForApi.FULLMAKT -> EgenskapForDatabase.FULLMAKT
         EgenskapForApi.VERGEMAL -> EgenskapForDatabase.VERGEMÅL
         EgenskapForApi.SKJONNSFASTSETTELSE -> EgenskapForDatabase.SKJØNNSFASTSETTELSE
         EgenskapForApi.PA_VENT -> EgenskapForDatabase.PÅ_VENT

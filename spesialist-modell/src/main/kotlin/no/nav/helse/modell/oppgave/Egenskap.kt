@@ -34,7 +34,6 @@ enum class Egenskap(
     UTLAND,
     HASTER,
     RETUR(kategori = Status),
-    FULLMAKT,
     SKJØNNSFASTSETTELSE,
     PÅ_VENT(kategori = Status),
     TILBAKEDATERT,

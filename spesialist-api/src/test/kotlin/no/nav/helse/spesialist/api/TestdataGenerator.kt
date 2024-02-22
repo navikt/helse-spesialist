@@ -34,11 +34,7 @@ internal object TestdataGenerator {
             else add(Oppgaveegenskap(Egenskap.STIKKPROVE, Kategori.Ukategorisert))
         }
 
-        if (Random.nextFloat() > 0.95) {
-            if (Random.nextFloat() > 0.5) add(Oppgaveegenskap(Egenskap.VERGEMAL, Kategori.Ukategorisert))
-            else add(Oppgaveegenskap(Egenskap.FULLMAKT, Kategori.Ukategorisert))
-        }
-
+        if (Random.nextFloat() > 0.95) add(Oppgaveegenskap(Egenskap.VERGEMAL, Kategori.Ukategorisert))
         if (Random.nextFloat() > 0.95) add(Oppgaveegenskap(Egenskap.EGEN_ANSATT, Kategori.Ukategorisert))
         if (Random.nextFloat() > 0.95) add(Oppgaveegenskap(Egenskap.FORTROLIG_ADRESSE, Kategori.Ukategorisert))
         if (Random.nextFloat() > 0.8) add(Oppgaveegenskap(Egenskap.HASTER, Kategori.Ukategorisert))
