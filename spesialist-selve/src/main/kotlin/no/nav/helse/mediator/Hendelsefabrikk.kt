@@ -69,6 +69,7 @@ import no.nav.helse.modell.vedtaksperiode.NyeVarslerCommand
 import no.nav.helse.modell.vedtaksperiode.OpprettVedtaksperiodeCommand
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeEndret
+import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeEndretCommand
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetalingCommand
@@ -470,11 +471,7 @@ internal class Hendelsefabrikk(
             json = json,
             forårsaketAvId = forårsaketAvId,
             forrigeTilstand = forrigeTilstand,
-            gjeldendeTilstand = gjeldendeTilstand,
-            snapshotDao = snapshotDao,
-            snapshotClient = snapshotClient,
-            personDao = personDao,
-            gjeldendeGenerasjon = gjeldendeGenerasjon(vedtaksperiodeId)
+            gjeldendeTilstand = gjeldendeTilstand
         )
     }
 
@@ -752,6 +749,20 @@ internal class Hendelsefabrikk(
             oppgaveMediator = oppgaveMediator,
             totrinnsvurderingMediator = totrinnsvurderingMediator,
             json = hendelse.toJson()
+        )
+    }
+
+    fun vedtaksperiodeEndret(hendelse: VedtaksperiodeEndret): VedtaksperiodeEndretCommand {
+        return VedtaksperiodeEndretCommand(
+            fødselsnummer = hendelse.fødselsnummer(),
+            vedtaksperiodeId = hendelse.vedtaksperiodeId(),
+            forårsaketAvId = hendelse.forårsaketAvId,
+            forrigeTilstand = hendelse.forrigeTilstand,
+            gjeldendeTilstand = hendelse.gjeldendeTilstand,
+            gjeldendeGenerasjon = gjeldendeGenerasjon(hendelse.vedtaksperiodeId()),
+            personDao = personDao,
+            snapshotDao = snapshotDao,
+            snapshotClient = snapshotClient
         )
     }
 

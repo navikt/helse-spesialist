@@ -87,6 +87,7 @@ import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.NyeVarsler
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeEndret
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOppdatering
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOpprettet
@@ -304,7 +305,7 @@ internal class HendelseMediator(
             gjeldendeTilstand = gjeldendeTilstand,
             json = message.toJson()
         )
-        return utfør(hendelse, context)
+        return håndter(hendelse, context)
     }
 
     fun vedtaksperiodeOpprettet(
@@ -698,6 +699,7 @@ internal class HendelseMediator(
                 is UtbetalingAnnullert -> iverksett(hendelsefabrikk.utbetalingAnnullert(hendelse), hendelse.id, commandContext)
                 is UtbetalingEndret -> iverksett(hendelsefabrikk.utbetalingEndret(hendelse), hendelse.id, commandContext)
                 is VedtakFattet -> håndter(hendelse)
+                is VedtaksperiodeEndret -> iverksett(hendelsefabrikk.vedtaksperiodeEndret(hendelse), hendelse.id, commandContext)
                 else -> throw IllegalArgumentException("Personhendelse må håndteres")
             }
             behovMediator.håndter(hendelse, commandContext, contextId, messageContext)
