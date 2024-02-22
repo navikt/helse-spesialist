@@ -91,6 +91,7 @@ import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOppdatering
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOpprettet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnet
+import no.nav.helse.modell.vedtaksperiode.vedtak.VedtakFattet
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -238,6 +239,13 @@ internal class HendelseMediator(
             keyValue("fødselsnummer", sykefraværstilfeller.fødselsnummer())
         )
         generasjoner.håndterOppdateringer(sykefraværstilfeller.vedtaksperiodeOppdateringer, sykefraværstilfeller.id)
+    }
+
+    internal fun håndter(vedtakFattet: VedtakFattet) {
+        val vedtaksperiodeId = vedtakFattet.vedtaksperiodeId()
+        val gjeldendeGenerasjon = hendelsefabrikk.gjeldendeGenerasjon(vedtaksperiodeId)
+        gjeldendeGenerasjon.håndterVedtakFattet(vedtakFattet.id)
+        if (vedtakDao.erSpesialsak(vedtaksperiodeId)) vedtakDao.spesialsakFerdigbehandlet(vedtaksperiodeId)
     }
 
     internal fun håndter(avviksvurdering: AvviksvurderingDto) {
@@ -603,7 +611,7 @@ internal class HendelseMediator(
     }
 
     fun vedtakFattet(id: UUID, fødselsnummer: String, vedtaksperiodeId: UUID, json: String, context: MessageContext) {
-        utfør(hendelsefabrikk.vedtakFattet(id, fødselsnummer, vedtaksperiodeId, json), context)
+        håndter(hendelsefabrikk.vedtakFattet(id, fødselsnummer, vedtaksperiodeId, json), context)
     }
 
     fun slettGamleDokumenter(): Int {
@@ -689,6 +697,7 @@ internal class HendelseMediator(
                 is Sykefraværstilfeller -> håndter(hendelse)
                 is UtbetalingAnnullert -> iverksett(hendelsefabrikk.utbetalingAnnullert(hendelse), hendelse.id, commandContext)
                 is UtbetalingEndret -> iverksett(hendelsefabrikk.utbetalingEndret(hendelse), hendelse.id, commandContext)
+                is VedtakFattet -> håndter(hendelse)
                 else -> throw IllegalArgumentException("Personhendelse må håndteres")
             }
             behovMediator.håndter(hendelse, commandContext, contextId, messageContext)

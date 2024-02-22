@@ -828,7 +828,7 @@ internal class Hendelsefabrikk(
     }
 
     fun vedtakFattet(id: UUID, fødselsnummer: String, vedtaksperiodeId: UUID, json: String): VedtakFattet {
-        return VedtakFattet(id, fødselsnummer, vedtaksperiodeId, json, gjeldendeGenerasjon(vedtaksperiodeId), vedtakDao)
+        return VedtakFattet(id, fødselsnummer, vedtaksperiodeId, json)
     }
 
     fun nyeVarsler(id: UUID, fødselsnummer: String, varsler: List<Varsel>, json: String): NyeVarsler {
