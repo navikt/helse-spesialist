@@ -11,6 +11,7 @@ import no.nav.helse.modell.varsel.Varsel.Companion.erVarselOmAvvik
 import no.nav.helse.modell.varsel.Varsel.Companion.finnEksisterendeVarsel
 import no.nav.helse.modell.varsel.Varsel.Companion.flyttVarslerFor
 import no.nav.helse.modell.varsel.Varsel.Companion.forhindrerAutomatisering
+import no.nav.helse.modell.varsel.Varsel.Companion.inneholderAktivtVarselOmAvvik
 import no.nav.helse.modell.varsel.Varsel.Companion.inneholderMedlemskapsvarsel
 import no.nav.helse.modell.varsel.Varsel.Companion.inneholderSvartelistedeVarsler
 import no.nav.helse.modell.varsel.Varsel.Companion.inneholderVarselOmAvvik
@@ -191,7 +192,7 @@ internal class Generasjon private constructor(
     }
 
     private fun kreverSkjønnsfastsettelse(): Boolean {
-        val inneholderAvviksvarsel = varsler.inneholderVarselOmAvvik()
+        val inneholderAvviksvarsel = varsler.inneholderAktivtVarselOmAvvik()
         logg.info("$this harAvviksvarsel: $inneholderAvviksvarsel")
         return inneholderAvviksvarsel
     }
