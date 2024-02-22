@@ -3,7 +3,6 @@ package no.nav.helse.modell.kommando
 import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
-import no.nav.helse.mediator.meldinger.Kommandohendelse
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.kommando.CommandContext.Companion.convertToUUID
 import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
@@ -22,8 +21,6 @@ internal class CommandContextTest {
     private companion object {
         private val HENDELSE = UUID.randomUUID()
         private val CONTEXT = UUID.randomUUID()
-        private const val FNR = "fnr"
-        private const val SNAPSHOT = "json"
     }
 
     private val commandContextDao = mockk<CommandContextDao>(relaxed = true)
@@ -41,7 +38,7 @@ internal class CommandContextTest {
     @Test
     fun `executer kommando uten tilstand`() {
         TestCommand().apply {
-            assertTrue(context.utfør(commandContextDao, this))
+            assertTrue(context.utfør(commandContextDao, this.id, this))
             assertTrue(executed)
             assertFalse(resumed)
             verify(exactly = 1) { commandContextDao.ferdig(this@apply.id, CONTEXT) }
@@ -53,7 +50,7 @@ internal class CommandContextTest {
     fun `resumer kommando med tilstand`() {
         context = CommandContext(CONTEXT, listOf(1))
         TestCommand().apply {
-            assertTrue(context.utfør(commandContextDao, this))
+            assertTrue(context.utfør(commandContextDao, this.id, this))
             assertFalse(executed)
             assertTrue(resumed)
             verify(exactly = 1) { commandContextDao.ferdig(this@apply.id, CONTEXT) }
@@ -65,7 +62,7 @@ internal class CommandContextTest {
     fun `suspenderer ved execute`() {
         context = CommandContext(CONTEXT)
         TestCommand(executeAction = { false }).apply {
-            assertFalse(context.utfør(commandContextDao, this))
+            assertFalse(context.utfør(commandContextDao, this.id, this))
             verify(exactly = 0) { commandContextDao.ferdig(any(), any()) }
             verify(exactly = 1) { commandContextDao.suspendert(this@apply.id, CONTEXT, hash().convertToUUID(), any()) }
         }
@@ -76,7 +73,7 @@ internal class CommandContextTest {
         val sti = listOf(1)
         context = CommandContext(CONTEXT, sti)
         TestCommand(resumeAction = { false }).apply {
-            assertFalse(context.utfør(commandContextDao, this))
+            assertFalse(context.utfør(commandContextDao, this.id, this))
             verify(exactly = 0) { commandContextDao.ferdig(any(), any()) }
             verify(exactly = 1) { commandContextDao.suspendert(this@apply.id, CONTEXT, hash().convertToUUID(), sti) }
         }
@@ -86,7 +83,7 @@ internal class CommandContextTest {
     fun `feil ved execute`() {
         context = CommandContext(CONTEXT)
         TestCommand(executeAction = { throw Exception() }).apply {
-            assertThrows<Exception> { context.utfør(commandContextDao, this) }
+            assertThrows<Exception> { context.utfør(commandContextDao, this.id, this) }
             verify(exactly = 0) { commandContextDao.ferdig(any(), any()) }
             verify(exactly = 1) { commandContextDao.feil(this@apply.id, CONTEXT) }
         }
@@ -97,7 +94,7 @@ internal class CommandContextTest {
         val sti = listOf(1)
         context = CommandContext(CONTEXT, sti)
         TestCommand(resumeAction = { throw Exception() }).apply {
-            assertThrows<Exception> { context.utfør(commandContextDao, this) }
+            assertThrows<Exception> { context.utfør(commandContextDao, this.id, this) }
             verify(exactly = 0) { commandContextDao.ferdig(any(), any()) }
             verify(exactly = 1) { commandContextDao.feil(this@apply.id, CONTEXT) }
         }
@@ -107,7 +104,7 @@ internal class CommandContextTest {
     fun ferdigstiller() {
         context = CommandContext(CONTEXT)
         TestCommand(executeAction = { this.ferdigstill(context)}).apply {
-            context.utfør(commandContextDao, this)
+            context.utfør(commandContextDao, this.id, this)
             verify(exactly = 1) { commandContextDao.ferdig(any(), any())}
         }
     }
@@ -119,7 +116,7 @@ internal class CommandContextTest {
             this.ferdigstill(context)
             false
         }).apply {
-            context.utfør(commandContextDao, this)
+            context.utfør(commandContextDao, this.id, this)
             verify(exactly = 1) { commandContextDao.ferdig(any(), any())}
         }
     }
@@ -188,14 +185,12 @@ internal class CommandContextTest {
     private class TestCommand(
         private val executeAction: Command.() -> Boolean = { true },
         private val resumeAction: Command.() -> Boolean = { true }
-    ) : Kommandohendelse {
+    ) : Command {
         var executed = false
         var resumed = false
         var undo = false
 
-        override val id: UUID = HENDELSE
-        override fun fødselsnummer() = FNR
-        override fun toJson() = SNAPSHOT
+        val id: UUID = HENDELSE
 
         override fun execute(context: CommandContext): Boolean {
             executed = true

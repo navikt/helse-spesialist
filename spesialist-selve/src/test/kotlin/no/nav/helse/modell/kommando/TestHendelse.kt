@@ -1,7 +1,6 @@
 package no.nav.helse.modell.kommando
 
 import java.util.UUID
-import no.nav.helse.mediator.meldinger.Kommandohendelse
 import no.nav.helse.mediator.meldinger.VedtaksperiodeHendelse
 
 internal class TestHendelse(
@@ -9,14 +8,8 @@ internal class TestHendelse(
     private val vedtaksperiodeId: UUID,
     private val fnr: String,
     private val json: String = "{}"
-) : Kommandohendelse, VedtaksperiodeHendelse {
-    override fun execute(context: CommandContext): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    override fun fødselsnummer(): String {
-        return fnr
-    }
+) : VedtaksperiodeHendelse {
+    override fun fødselsnummer(): String = fnr
 
     override fun vedtaksperiodeId(): UUID = vedtaksperiodeId
 

@@ -4,8 +4,7 @@ import DatabaseIntegrationTest
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.mediator.meldinger.Kommandohendelse
-import no.nav.helse.modell.kommando.CommandContext.Companion.convertToUUID
+import no.nav.helse.mediator.meldinger.Hendelse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
@@ -66,19 +65,19 @@ internal class CommandContextDaoTest : DatabaseIntegrationTest() {
         assertContextRad(false, contextId)
     }
 
-    private fun ny(hendelse: Kommandohendelse = HENDELSE1) = UUID.randomUUID().also { uuid ->
+    private fun ny(hendelse: Hendelse = HENDELSE1) = UUID.randomUUID().also { uuid ->
         CommandContext(uuid).opprett(commandContextDao, hendelse.id)
     }
 
-    private fun ferdig(hendelse: Kommandohendelse = HENDELSE1) = ny(hendelse).also { uuid ->
+    private fun ferdig(hendelse: Hendelse = HENDELSE1) = ny(hendelse).also { uuid ->
         commandContextDao.ferdig(hendelse.id, uuid)
     }
 
-    private fun suspendert(hendelse: Kommandohendelse = HENDELSE1) = ny(hendelse).also { uuid ->
-        commandContextDao.suspendert(hendelse.id, uuid, hendelse.hash().convertToUUID(), listOf())
+    private fun suspendert(hendelse: Hendelse = HENDELSE1) = ny(hendelse).also { uuid ->
+        commandContextDao.suspendert(hendelse.id, uuid, UUID.randomUUID(), listOf())
     }
 
-    private fun feil(hendelse: Kommandohendelse = HENDELSE1) = ny(hendelse).also { uuid ->
+    private fun feil(hendelse: Hendelse = HENDELSE1) = ny(hendelse).also { uuid ->
         commandContextDao.feil(hendelse.id, uuid)
     }
 
