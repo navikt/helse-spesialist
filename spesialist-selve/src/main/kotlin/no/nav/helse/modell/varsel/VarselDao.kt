@@ -5,10 +5,11 @@ import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.HelseDao
 import no.nav.helse.modell.varsel.Varsel.Status
 import org.intellij.lang.annotations.Language
 
-internal class VarselDao(private val dataSource: DataSource) {
+internal class VarselDao(private val dataSource: DataSource) : HelseDao(dataSource) {
 
     internal fun lagreVarsel(
         varselId: UUID,
@@ -144,4 +145,16 @@ internal class VarselDao(private val dataSource: DataSource) {
             }.asList)
         }
     }
+
+    internal fun slettFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String) = asSQL(
+        """
+            delete from selve_varsel where vedtaksperiode_id = :vedtaksperiodeId
+                and kode = :varselkode
+                and generasjon_ref = (select id from selve_vedtaksperiode_generasjon where unik_id = :generasjonId) 
+        """.trimIndent(), mapOf(
+            "vedtaksperiodeId" to vedtaksperiodeId,
+            "generasjonId" to generasjonId,
+            "varselkode" to varselkode,
+        )
+    ).update()
 }

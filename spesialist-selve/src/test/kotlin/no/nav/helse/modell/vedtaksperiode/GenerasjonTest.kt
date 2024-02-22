@@ -319,6 +319,17 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     }
 
     @Test
+    fun `sletter varsel om avvik og legger det til på nytt hvis det finnes fra før`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val varselId = UUID.randomUUID()
+        val generasjon = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)
+        generasjon.registrer(generasjonRepository, varselRepository)
+        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "RV_IV_2", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
+        generasjon.håndterNyttVarsel(Varsel(varselId, "RV_IV_2", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
+        assertVarsler(generasjonId, 1, AKTIV, "RV_IV_2", varselId)
+    }
+
+    @Test
     fun `Lagrer kun én utgave av et aktivt varsel`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)
@@ -807,16 +818,33 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         }
     }
 
-    private fun assertVarsler(generasjonId: UUID, forventetAntall: Int, status: Status, varselkode: Varselkode) {
+    private fun assertVarsler(generasjonId: UUID, forventetAntall: Int, status: Status, varselkode: String, varselId: UUID? = null) {
         @Language("PostgreSQL")
         val query =
             """SELECT COUNT(1) FROM selve_varsel sv INNER JOIN selve_vedtaksperiode_generasjon svg ON sv.generasjon_ref = svg.id
-               WHERE svg.unik_id = ? AND sv.status = ? AND sv.kode = ?
+               WHERE svg.unik_id = :generasjonId 
+               AND sv.status = :status 
+               AND sv.kode = :varselkode
+               AND 
+                 CASE 
+                   WHEN :skalSjekkeVarselId = true THEN sv.unik_id = :varselId
+                   ELSE true
+                 END
             """
         val antall = sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, generasjonId, status.name, varselkode.name).map { it.int(1) }.asSingle)
+            session.run(queryOf(query, mapOf(
+                "generasjonId" to generasjonId,
+                "status" to status.name,
+                "varselkode" to varselkode,
+                "skalSjekkeVarselId" to (varselId != null),
+                "varselId" to varselId,
+            )).map { it.int(1) }.asSingle)
         }
         assertEquals(forventetAntall, antall)
+    }
+
+    private fun assertVarsler(generasjonId: UUID, forventetAntall: Int, status: Status, varselkode: Varselkode, varselId: UUID? = null) {
+        assertVarsler(generasjonId, forventetAntall, status, varselkode.name, varselId)
     }
 
     private fun assertUtbetaling(generasjonId: UUID, utbetalingId: UUID) {

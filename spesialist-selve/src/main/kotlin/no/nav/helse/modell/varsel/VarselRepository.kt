@@ -41,6 +41,10 @@ internal class ActualVarselRepository(dataSource: DataSource): IVedtaksperiodeOb
         if (varselkode.matches(varselkodeformat.toRegex())) tellInaktivtVarsel(varselkode)
     }
 
+    override fun varselSlettet(varselId: UUID, varselkode: String, generasjonId: UUID, vedtaksperiodeId: UUID) {
+        varselDao.slettFor(vedtaksperiodeId, generasjonId, varselkode)
+    }
+
     override fun varselGodkjent(varselId: UUID, varselkode: String, generasjonId: UUID, vedtaksperiodeId: UUID, statusEndretAv: String) {
         val definisjon = definisjonDao.sisteDefinisjonFor(varselkode)
         varselDao.oppdaterStatus(vedtaksperiodeId, generasjonId, varselkode, status = GODKJENT, ident = statusEndretAv, definisjon.toDto().id)

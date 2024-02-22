@@ -94,6 +94,17 @@ internal class VarselTest {
         observer.assertDeaktivering(vedtaksperiodeId, generasjonId, varselId, "EN_KODE")
     }
 
+    @Test
+    fun `kan slette varsel`() {
+        val varselId = UUID.randomUUID()
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjonId = UUID.randomUUID()
+        val varsel = Varsel(varselId, "EN_KODE", LocalDateTime.now(), vedtaksperiodeId, AKTIV)
+        varsel.registrer(observer)
+        varsel.slett(generasjonId)
+        observer.assertSletting(vedtaksperiodeId, generasjonId, varselId, "EN_KODE")
+    }
+
     @ParameterizedTest
     @EnumSource(value = Status::class, names = ["INAKTIV"], mode = EnumSource.Mode.EXCLUDE)
     fun `kan ikke reaktivere varsel som ikke er inaktivt`(status: Status) {
@@ -244,6 +255,7 @@ internal class VarselTest {
         val opprettedeVarsler = mutableMapOf<UUID, Opprettelse>()
         val reaktiverteVarsler = mutableMapOf<UUID, Reaktivering>()
         val deaktiverteVarsler = mutableMapOf<UUID, Deaktivering>()
+        val slettedeVarsler = mutableMapOf<UUID, Sletting>()
         val godkjenteVarsler = mutableMapOf<UUID, Godkjent>()
 
         private inner class Opprettelse(
@@ -268,6 +280,13 @@ internal class VarselTest {
             val varselkode: String,
         )
 
+        private inner class Sletting(
+            val vedtaksperiodeId: UUID,
+            val generasjonId: UUID,
+            val varselId: UUID,
+            val varselkode: String,
+        )
+
         private inner class Godkjent(
             val vedtaksperiodeId: UUID,
             val generasjonId: UUID,
@@ -282,6 +301,10 @@ internal class VarselTest {
 
         override fun varselDeaktivert(varselId: UUID, varselkode: String, generasjonId: UUID, vedtaksperiodeId: UUID) {
             deaktiverteVarsler[varselId] = Deaktivering(vedtaksperiodeId, generasjonId, varselId, varselkode)
+        }
+
+        override fun varselSlettet(varselId: UUID, varselkode: String, generasjonId: UUID, vedtaksperiodeId: UUID) {
+            slettedeVarsler[varselId] = Sletting(vedtaksperiodeId, generasjonId, varselId, varselkode)
         }
 
         override fun varselOpprettet(varselId: UUID, vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, opprettet: LocalDateTime) {
@@ -337,6 +360,19 @@ internal class VarselTest {
             assertEquals(forventetGenerasjonId, deaktivering?.generasjonId)
             assertEquals(forventetVarselkode, deaktivering?.varselkode)
             assertEquals(forventetVarselId, deaktivering?.varselId)
+        }
+
+        fun assertSletting(
+            forventetVedtaksperiodeId: UUID,
+            forventetGenerasjonId: UUID,
+            forventetVarselId: UUID,
+            forventetVarselkode: String,
+        ) {
+            val sletting = slettedeVarsler[forventetVarselId]
+            assertEquals(forventetVedtaksperiodeId, sletting?.vedtaksperiodeId)
+            assertEquals(forventetGenerasjonId, sletting?.generasjonId)
+            assertEquals(forventetVarselkode, sletting?.varselkode)
+            assertEquals(forventetVarselId, sletting?.varselId)
         }
     }
 }

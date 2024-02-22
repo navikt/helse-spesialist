@@ -136,6 +136,20 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `sletter varsel`() {
+        val definisjonId = UUID.randomUUID()
+        definisjonDao.lagreDefinisjon(definisjonId, "KODE_EN", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now())
+        definisjonDao.lagreDefinisjon(definisjonId, "KODE_TO", "EN_ANNEN_TITTEL", "EN_ANNEN_FORKLARING", "EN_ANNEN_HANDLING", false, LocalDateTime.now())
+        val v1 = UUID.randomUUID()
+        val generasjonIdv1 = UUID.randomUUID()
+        generasjonDao.opprettFor(generasjonIdv1, v1, UUID.randomUUID(), 1.januar, Periode(1.januar, 31.januar), Generasjon.Ulåst)
+        varselDao.lagreVarsel(UUID.randomUUID(), "KODE_EN", LocalDateTime.now(), v1, generasjonIdv1)
+        varselDao.lagreVarsel(UUID.randomUUID(), "KODE_TO", LocalDateTime.now(), v1, generasjonIdv1)
+        varselDao.slettFor(v1, generasjonIdv1, "KODE_EN")
+        assertEquals(1, varselDao.varslerFor(generasjonIdv1).size)
+    }
+
+    @Test
     fun `avvikling av varsel`() {
         val definisjonId = UUID.randomUUID()
         definisjonDao.lagreDefinisjon(definisjonId, "KODE_99", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now())
