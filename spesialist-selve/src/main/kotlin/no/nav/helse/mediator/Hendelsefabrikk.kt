@@ -44,6 +44,7 @@ import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.person.SøknadSendtCommand
 import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
+import no.nav.helse.modell.saksbehandler.handlinger.OverstyrArbeidsforholdCommand
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyringArbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyringInntektOgRefusjon
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsettingSykepengegrunnlag
@@ -420,8 +421,6 @@ internal class Hendelsefabrikk(
         skjæringstidspunkt = skjæringstidspunkt,
         opprettet = opprettet,
         json = json,
-        overstyringDao = overstyringDao,
-        overstyringMediator = overstyringMediator,
     )
 
     fun adressebeskyttelseEndret(id: UUID, fødselsnummer: String, json: String) =
@@ -772,6 +771,20 @@ internal class Hendelsefabrikk(
             vedtakDao = vedtakDao,
             snapshotClient = snapshotClient,
             oppgaveMediator = oppgaveMediator
+        )
+    }
+
+    fun overstyringArbeidsforhold(hendelse: OverstyringArbeidsforhold): OverstyrArbeidsforholdCommand {
+        return OverstyrArbeidsforholdCommand(
+            id = hendelse.id,
+            fødselsnummer = hendelse.fødselsnummer(),
+            skjæringstidspunkt = hendelse.skjæringstidspunkt,
+            oid = hendelse.oid,
+            overstyrteArbeidsforhold = hendelse.overstyrteArbeidsforhold,
+            opprettet = hendelse.opprettet,
+            overstyringDao = overstyringDao,
+            overstyringMediator = overstyringMediator,
+            json = hendelse.toJson()
         )
     }
 
