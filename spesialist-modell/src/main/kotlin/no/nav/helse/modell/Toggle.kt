@@ -6,5 +6,4 @@ abstract class Toggle(private var _enabled: Boolean) {
     val enabled get() = _enabled
 
     object AutomatiserSpesialsak : Toggle("AUTOMATISER_SPESIALSAK", true)
-    object LeggTilAvviksVarselPåNytt : Toggle("LEGG_TIL_AVVIKSVARSEL_PA_NYTT", false)
 }
