@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import net.logstash.logback.argument.StructuredArguments.kv
+import no.nav.helse.modell.Toggle
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.Varsel.Companion.automatiskGodkjennSpesialsakvarsler
 import no.nav.helse.modell.varsel.Varsel.Companion.erVarselOmAvvik
@@ -99,7 +100,7 @@ internal class Generasjon private constructor(
     internal fun håndterNyttVarsel(varsel: Varsel, hendelseId: UUID) {
         if (!varsel.erRelevantFor(vedtaksperiodeId)) return
         val eksisterendeVarsel = varsler.finnEksisterendeVarsel(varsel) ?: return nyttVarsel(varsel, hendelseId)
-        if (varsel.erVarselOmAvvik() && varsler.inneholderVarselOmAvvik()) {
+        if (Toggle.LeggTilAvviksVarselPåNytt.enabled && varsel.erVarselOmAvvik() && varsler.inneholderVarselOmAvvik()) {
             eksisterendeVarsel.slett(id)
             nyttVarsel(varsel, hendelseId)
         }

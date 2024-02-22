@@ -1,6 +1,8 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import TestPerson
+import ToggleHelpers.disable
+import ToggleHelpers.enable
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -11,6 +13,7 @@ import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.modell.Toggle
 import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.Varsel.Status
@@ -320,6 +323,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
 
     @Test
     fun `sletter varsel om avvik og legger det til på nytt hvis det finnes fra før`() {
+        Toggle.LeggTilAvviksVarselPåNytt.enable()
         val vedtaksperiodeId = UUID.randomUUID()
         val varselId = UUID.randomUUID()
         val generasjon = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)
@@ -327,6 +331,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "RV_IV_2", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
         generasjon.håndterNyttVarsel(Varsel(varselId, "RV_IV_2", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
         assertVarsler(generasjonId, 1, AKTIV, "RV_IV_2", varselId)
+        Toggle.LeggTilAvviksVarselPåNytt.disable()
     }
 
     @Test
