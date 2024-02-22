@@ -2,7 +2,7 @@ package no.nav.helse.mediator.meldinger.hendelser
 
 import java.util.UUID
 import no.nav.helse.mediator.asUUID
-import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
+import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetUtenVedtak
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
@@ -20,6 +20,7 @@ internal class AvsluttetUtenVedtakMessage(packet: JsonMessage) {
 
     internal fun skjæringstidspunkt() = skjæringstidspunkt
     internal fun fødselsnummer() = fødselsnummer
+    internal fun vedtaksperiodeId() = vedtaksperiodeId
 
     private val avsluttetUtenVedtak get() = AvsluttetUtenVedtak(
         fødselsnummer = fødselsnummer,
@@ -32,8 +33,7 @@ internal class AvsluttetUtenVedtakMessage(packet: JsonMessage) {
         tom = tom,
     )
 
-    internal fun sendInnTil(sykefraværstilfelle: Sykefraværstilfelle) {
-        sykefraværstilfelle.håndter(avsluttetUtenVedtak)
+    internal fun sendInnTil(generasjon: Generasjon) {
+        generasjon.håndter(avsluttetUtenVedtak)
     }
-
 }

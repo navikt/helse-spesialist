@@ -220,12 +220,10 @@ internal class HendelseMediator(
     }
 
     internal fun håndter(avsluttetUtenVedtakMessage: AvsluttetUtenVedtakMessage) {
-        val fødselsnummer = avsluttetUtenVedtakMessage.fødselsnummer()
-        val skjæringstidspunkt = avsluttetUtenVedtakMessage.skjæringstidspunkt()
-        val sykefraværstilfelle = hendelsefabrikk.sykefraværstilfelle(fødselsnummer, skjæringstidspunkt)
+        val generasjon = hendelsefabrikk.gjeldendeGenerasjon(avsluttetUtenVedtakMessage.vedtaksperiodeId())
         val sykefraværstilfelleMediator = SykefraværstilfelleMediator(rapidsConnection)
-        sykefraværstilfelle.registrer(sykefraværstilfelleMediator)
-        avsluttetUtenVedtakMessage.sendInnTil(sykefraværstilfelle)
+        generasjon.registrer(sykefraværstilfelleMediator)
+        avsluttetUtenVedtakMessage.sendInnTil(generasjon)
     }
 
     internal fun håndter(avviksvurdering: AvviksvurderingDto) {

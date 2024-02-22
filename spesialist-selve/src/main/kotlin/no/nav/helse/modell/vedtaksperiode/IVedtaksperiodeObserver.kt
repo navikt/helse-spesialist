@@ -3,8 +3,9 @@ package no.nav.helse.modell.vedtaksperiode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.modell.sykefraværstilfelle.SykefraværstilfelleObserver
 
-internal interface IVedtaksperiodeObserver {
+internal interface IVedtaksperiodeObserver: SykefraværstilfelleObserver {
 
     fun tidslinjeOppdatert(generasjonId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate) {}
     fun generasjonOpprettet(

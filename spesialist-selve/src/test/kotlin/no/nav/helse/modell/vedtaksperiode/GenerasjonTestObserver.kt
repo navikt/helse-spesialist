@@ -3,6 +3,7 @@ package no.nav.helse.modell.vedtaksperiode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.modell.vedtaksperiode.vedtak.Sykepengevedtak
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 
@@ -27,6 +28,11 @@ internal class GenerasjonTestObserver: IVedtaksperiodeObserver {
     val opprettedeGenerasjoner = mutableMapOf<UUID, Opprettelse>()
     val oppdaterteGenerasjoner = mutableMapOf<UUID, Tidslinjeendring>()
     val opprettedeVarsler = mutableMapOf<UUID, MutableList<String>>()
+    val vedtakFattet = mutableListOf<Sykepengevedtak>()
+
+    override fun vedtakFattet(sykepengevedtak: Sykepengevedtak) {
+        vedtakFattet.add(sykepengevedtak)
+    }
 
     override fun nyUtbetaling(generasjonId: UUID, utbetalingId: UUID) {
         utbetalingerPåGenerasjoner[generasjonId] = utbetalingId

@@ -14,6 +14,8 @@ import no.nav.helse.modell.varsel.Varsel.Companion.inneholderSvartelistedeVarsle
 import no.nav.helse.modell.varsel.Varsel.Companion.inneholderVarselOmAvvik
 import no.nav.helse.modell.varsel.Varsel.Companion.inneholderVarselOmNegativtBeløp
 import no.nav.helse.modell.varsel.Varsel.Companion.inneholderVarselOmTilbakedatering
+import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetUtenVedtak
+import no.nav.helse.modell.vedtaksperiode.vedtak.SykepengevedtakBuilder
 import org.slf4j.LoggerFactory
 
 internal class Generasjon private constructor(
@@ -50,6 +52,12 @@ internal class Generasjon private constructor(
     }
 
     internal fun tilhører(dato: LocalDate): Boolean = periode.tom() <= dato
+
+    internal fun håndter(avsluttetUtenVedtak: AvsluttetUtenVedtak) {
+        val vedtakBuilder = SykepengevedtakBuilder()
+        avsluttetUtenVedtak.byggMelding(vedtakBuilder)
+        observers.forEach { it.vedtakFattet(vedtakBuilder.build()) }
+    }
 
     internal fun håndterVedtaksperiodeOpprettet(hendelseId: UUID) {
         observers.forEach {

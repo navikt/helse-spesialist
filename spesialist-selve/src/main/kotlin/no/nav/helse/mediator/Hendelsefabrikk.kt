@@ -168,7 +168,7 @@ internal class Hendelsefabrikk(
         }
     }
 
-    private fun gjeldendeGenerasjon(vedtaksperiodeId: UUID): Generasjon {
+    internal fun gjeldendeGenerasjon(vedtaksperiodeId: UUID): Generasjon {
         return GenerasjonBuilder(vedtaksperiodeId = vedtaksperiodeId).build(generasjonRepository, varselRepository)
     }
 
