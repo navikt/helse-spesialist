@@ -73,12 +73,14 @@ import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import no.nav.helse.modell.person.OppdaterPersonsnapshot
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.SøknadSendt
+import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfeller
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
+import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterOppdateringer
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.NyeVarsler
@@ -226,6 +228,16 @@ internal class HendelseMediator(
         avsluttetUtenVedtakMessage.sendInnTil(generasjon)
     }
 
+    internal fun håndter(sykefraværstilfeller: Sykefraværstilfeller) {
+        val generasjoner = hendelsefabrikk.generasjonerFor(sykefraværstilfeller.fødselsnummer())
+        sikkerLogg.info(
+            "oppdaterer sykefraværstilfeller for {}, {}",
+            keyValue("aktørId", sykefraværstilfeller.aktørId),
+            keyValue("fødselsnummer", sykefraværstilfeller.fødselsnummer())
+        )
+        generasjoner.håndterOppdateringer(sykefraværstilfeller.vedtaksperiodeOppdateringer, sykefraværstilfeller.id)
+    }
+
     internal fun håndter(avviksvurdering: AvviksvurderingDto) {
         hendelsefabrikk.avviksvurdering(avviksvurdering)
     }
@@ -255,7 +267,7 @@ internal class HendelseMediator(
             json,
         )
 
-        return utfør(hendelse, context)
+        return håndter(hendelse, context)
     }
 
     fun vedtaksperiodeEndret(
@@ -667,6 +679,7 @@ internal class HendelseMediator(
                 is SøknadSendt -> iverksett(hendelsefabrikk.søknadSendt(hendelse), hendelse.id, commandContext)
                 is OppdaterPersonsnapshot -> iverksett(hendelsefabrikk.oppdaterPersonsnapshot(hendelse), hendelse.id, commandContext)
                 is OverstyringIgangsatt -> iverksett(hendelsefabrikk.kobleVedtaksperiodeTilOverstyring(hendelse), hendelse.id, commandContext)
+                is Sykefraværstilfeller -> håndter(hendelse)
                 else -> throw IllegalArgumentException("Personhendelse må håndteres")
             }
             behovMediator.håndter(hendelse, commandContext, contextId, messageContext)

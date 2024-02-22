@@ -150,7 +150,7 @@ internal class Hendelsefabrikk(
         }
     }
 
-    private fun generasjonerFor(fødselsnummer: String): List<Generasjon> {
+    internal fun generasjonerFor(fødselsnummer: String): List<Generasjon> {
         return gjeldendeGenerasjoner {
             generasjonRepository.finnVedtaksperiodeIderFor(fødselsnummer)
         }
@@ -449,7 +449,6 @@ internal class Hendelsefabrikk(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             vedtaksperiodeOppdateringer = vedtaksperiodeOppdateringer,
-            gjeldendeGenerasjoner = generasjoner,
             json = json,
         )
     }
