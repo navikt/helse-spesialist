@@ -3,7 +3,7 @@ package no.nav.helse.modell.utbetaling
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.db.ReservasjonDao
-import no.nav.helse.mediator.meldinger.Kommandohendelse
+import no.nav.helse.mediator.meldinger.Personhendelse
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.kommando.Command
@@ -20,34 +20,49 @@ import no.nav.helse.spesialist.api.tildeling.TildelingDao
 internal class UtbetalingEndret(
     override val id: UUID,
     private val fødselsnummer: String,
-    orgnummer: String,
-    utbetalingId: UUID,
-    type: String,
-    gjeldendeStatus: Utbetalingsstatus,
-    opprettet: LocalDateTime,
-    arbeidsgiverbeløp: Int,
-    personbeløp: Int,
-    arbeidsgiverOppdrag: LagreOppdragCommand.Oppdrag,
-    personOppdrag: LagreOppdragCommand.Oppdrag,
-    private val json: String,
-    utbetalingDao: UtbetalingDao,
-    opptegnelseDao: OpptegnelseDao,
-    oppgaveDao: OppgaveDao,
-    reservasjonDao: ReservasjonDao,
-    tildelingDao: TildelingDao,
-    oppgaveMediator: OppgaveMediator,
-    totrinnsvurderingMediator: TotrinnsvurderingMediator,
-    gjeldendeGenerasjoner: List<Generasjon>
-) : Kommandohendelse, MacroCommand() {
+    val organisasjonsnummer: String,
+    val utbetalingId: UUID,
+    val type: String,
+    val gjeldendeStatus: Utbetalingsstatus,
+    val opprettet: LocalDateTime,
+    val arbeidsgiverbeløp: Int,
+    val personbeløp: Int,
+    val arbeidsgiverOppdrag: LagreOppdragCommand.Oppdrag,
+    val personOppdrag: LagreOppdragCommand.Oppdrag,
+    private val json: String
+) : Personhendelse {
 
     override fun fødselsnummer(): String = fødselsnummer
     override fun toJson(): String = json
+}
+
+internal class UtbetalingEndretCommand(
+    fødselsnummer: String,
+    organisasjonsnummer: String,
+    utbetalingId: UUID,
+    utbetalingstype: String,
+    gjeldendeStatus: Utbetalingsstatus,
+    opprettet: LocalDateTime,
+    arbeidsgiverOppdrag: LagreOppdragCommand.Oppdrag,
+    personOppdrag: LagreOppdragCommand.Oppdrag,
+    arbeidsgiverbeløp: Int,
+    personbeløp: Int,
+    gjeldendeGenerasjoner: List<Generasjon>,
+    utbetalingDao: UtbetalingDao,
+    opptegnelseDao: OpptegnelseDao,
+    reservasjonDao: ReservasjonDao,
+    oppgaveDao: OppgaveDao,
+    tildelingDao: TildelingDao,
+    oppgaveMediator: OppgaveMediator,
+    totrinnsvurderingMediator: TotrinnsvurderingMediator,
+    json: String
+): MacroCommand() {
     override val commands: List<Command> = mutableListOf(
         LagreOppdragCommand(
             fødselsnummer = fødselsnummer,
-            orgnummer = orgnummer,
+            orgnummer = organisasjonsnummer,
             utbetalingId = utbetalingId,
-            type = Utbetalingtype.valueOf(type),
+            type = Utbetalingtype.valueOf(utbetalingstype),
             status = gjeldendeStatus,
             opprettet = opprettet,
             arbeidsgiverOppdrag = arbeidsgiverOppdrag,
@@ -70,4 +85,5 @@ internal class UtbetalingEndret(
         if (gjeldendeStatus == FORKASTET)
             add(InvaliderUtbetalingForGenerasjonerCommand(utbetalingId, gjeldendeGenerasjoner))
     }
+
 }

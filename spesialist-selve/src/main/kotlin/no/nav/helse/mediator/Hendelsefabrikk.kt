@@ -55,6 +55,7 @@ import no.nav.helse.modell.utbetaling.UtbetalingAnnullert
 import no.nav.helse.modell.utbetaling.UtbetalingAnnullertCommand
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
+import no.nav.helse.modell.utbetaling.UtbetalingEndretCommand
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.ActualVarselRepository
@@ -525,7 +526,7 @@ internal class Hendelsefabrikk(
         return UtbetalingEndret(
             id = UUID.fromString(jsonNode.path("@id").asText()),
             fødselsnummer = jsonNode.path("fødselsnummer").asText(),
-            orgnummer = jsonNode.path("organisasjonsnummer").asText(),
+            organisasjonsnummer = jsonNode.path("organisasjonsnummer").asText(),
             utbetalingId = utbetalingId,
             type = jsonNode.path("type").asText(),
             gjeldendeStatus = Utbetalingsstatus.valueOf(jsonNode.path("gjeldendeStatus").asText()),
@@ -534,15 +535,7 @@ internal class Hendelsefabrikk(
             personbeløp = jsonNode.path("personOppdrag").path("nettoBeløp").asInt(),
             arbeidsgiverOppdrag = tilOppdrag(jsonNode.path("arbeidsgiverOppdrag"), jsonNode.path("organisasjonsnummer").asText()),
             personOppdrag = tilOppdrag(jsonNode.path("personOppdrag"), jsonNode.path("fødselsnummer").asText()),
-            json = json,
-            utbetalingDao = utbetalingDao,
-            opptegnelseDao = opptegnelseDao,
-            oppgaveDao = oppgaveDao,
-            reservasjonDao = reservasjonDao,
-            tildelingDao = tildelingDao,
-            oppgaveMediator = oppgaveMediator,
-            totrinnsvurderingMediator = totrinnsvurderingMediator,
-            gjeldendeGenerasjoner = generasjonerFor(utbetalingId)
+            json = json
         )
     }
 
@@ -735,6 +728,30 @@ internal class Hendelsefabrikk(
             snapshotDao = snapshotDao,
             snapshotClient = snapshotClient,
             saksbehandlerDao = saksbehandlerDao
+        )
+    }
+
+    fun utbetalingEndret(hendelse: UtbetalingEndret): UtbetalingEndretCommand {
+        return UtbetalingEndretCommand(
+            fødselsnummer = hendelse.fødselsnummer(),
+            organisasjonsnummer = hendelse.organisasjonsnummer,
+            utbetalingId = hendelse.utbetalingId,
+            utbetalingstype = hendelse.type,
+            gjeldendeStatus = hendelse.gjeldendeStatus,
+            opprettet = hendelse.opprettet,
+            arbeidsgiverOppdrag = hendelse.arbeidsgiverOppdrag,
+            personOppdrag = hendelse.personOppdrag,
+            arbeidsgiverbeløp = hendelse.arbeidsgiverbeløp,
+            personbeløp = hendelse.personbeløp,
+            gjeldendeGenerasjoner = generasjonerFor(hendelse.utbetalingId),
+            utbetalingDao = utbetalingDao,
+            opptegnelseDao = opptegnelseDao,
+            reservasjonDao = reservasjonDao,
+            oppgaveDao = oppgaveDao,
+            tildelingDao = tildelingDao,
+            oppgaveMediator = oppgaveMediator,
+            totrinnsvurderingMediator = totrinnsvurderingMediator,
+            json = hendelse.toJson()
         )
     }
 

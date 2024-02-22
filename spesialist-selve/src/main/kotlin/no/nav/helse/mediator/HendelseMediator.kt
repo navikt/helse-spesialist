@@ -76,6 +76,7 @@ import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfeller
 import no.nav.helse.modell.utbetaling.UtbetalingAnnullert
 import no.nav.helse.modell.utbetaling.UtbetalingDao
+import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.Varsel
@@ -571,7 +572,7 @@ internal class HendelseMediator(
             )
             return
         }
-        utfør(fødselsnummer, hendelsefabrikk.utbetalingEndret(message.toJson()), context)
+        håndter(fødselsnummer, hendelsefabrikk.utbetalingEndret(message.toJson()), context)
     }
 
     fun vedtaksperiodeNyUtbetaling(
@@ -658,6 +659,11 @@ internal class HendelseMediator(
         opprett(commandContextDao, hendelse.id)
     }
 
+    private fun håndter(fødselsnummer: String, hendelse: Personhendelse, messageContext: MessageContext) {
+        if (personDao.findPersonByFødselsnummer(fødselsnummer) == null) return logg.info("ignorerer hendelseId=${hendelse.id} fordi vi ikke kjenner til personen")
+        håndter(hendelse, messageContext)
+    }
+
     private fun håndter(hendelse: Personhendelse, messageContext: MessageContext) {
         val contextId = UUID.randomUUID()
         logg.info("oppretter ny kommandokontekst med context_id=$contextId for hendelse_id=${hendelse.id} og type=${hendelse::class.simpleName}")
@@ -682,6 +688,7 @@ internal class HendelseMediator(
                 is OverstyringIgangsatt -> iverksett(hendelsefabrikk.kobleVedtaksperiodeTilOverstyring(hendelse), hendelse.id, commandContext)
                 is Sykefraværstilfeller -> håndter(hendelse)
                 is UtbetalingAnnullert -> iverksett(hendelsefabrikk.utbetalingAnnullert(hendelse), hendelse.id, commandContext)
+                is UtbetalingEndret -> iverksett(hendelsefabrikk.utbetalingEndret(hendelse), hendelse.id, commandContext)
                 else -> throw IllegalArgumentException("Personhendelse må håndteres")
             }
             behovMediator.håndter(hendelse, commandContext, contextId, messageContext)
