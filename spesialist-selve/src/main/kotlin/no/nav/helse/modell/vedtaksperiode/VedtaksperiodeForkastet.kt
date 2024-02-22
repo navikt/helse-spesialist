@@ -1,7 +1,6 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import java.util.UUID
-import no.nav.helse.mediator.meldinger.Kommandohendelse
 import no.nav.helse.mediator.meldinger.VedtaksperiodeHendelse
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.CommandContextDao
@@ -18,14 +17,24 @@ internal class VedtaksperiodeForkastet(
     override val id: UUID,
     private val vedtaksperiodeId: UUID,
     private val fødselsnummer: String,
-    private val json: String,
-    commandContextDao: CommandContextDao,
-    oppgaveMediator: OppgaveMediator,
-    snapshotClient: SnapshotClient,
-    snapshotDao: SnapshotDao,
+    private val json: String
+) : VedtaksperiodeHendelse {
+    override fun fødselsnummer() = fødselsnummer
+    override fun vedtaksperiodeId() = vedtaksperiodeId
+    override fun toJson() = json
+}
+
+internal class VedtaksperiodeForkastetCommand(
+    val fødselsnummer: String,
+    val vedtaksperiodeId: UUID,
+    val id: UUID,
     personDao: PersonDao,
-    vedtakDao: VedtakDao
-) : Kommandohendelse, VedtaksperiodeHendelse, MacroCommand() {
+    commandContextDao: CommandContextDao,
+    snapshotDao: SnapshotDao,
+    vedtakDao: VedtakDao,
+    snapshotClient: SnapshotClient,
+    oppgaveMediator: OppgaveMediator
+): MacroCommand() {
     override val commands: List<Command> = listOf(
         AvbrytCommand(vedtaksperiodeId, commandContextDao, oppgaveMediator),
         OppdaterSnapshotCommand(
@@ -37,8 +46,4 @@ internal class VedtaksperiodeForkastet(
         ),
         ForkastVedtaksperiodeCommand(id, vedtaksperiodeId, vedtakDao)
     )
-
-    override fun fødselsnummer() = fødselsnummer
-    override fun vedtaksperiodeId() = vedtaksperiodeId
-    override fun toJson() = json
 }
