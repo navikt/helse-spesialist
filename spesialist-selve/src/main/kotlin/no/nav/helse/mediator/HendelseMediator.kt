@@ -74,6 +74,7 @@ import no.nav.helse.modell.person.OppdaterPersonsnapshot
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfeller
+import no.nav.helse.modell.utbetaling.UtbetalingAnnullert
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.ActualVarselRepository
@@ -542,7 +543,7 @@ internal class HendelseMediator(
         message: JsonMessage,
         context: MessageContext,
     ) {
-        utfør(hendelsefabrikk.utbetalingAnnullert(message.toJson()), context)
+        håndter(hendelsefabrikk.utbetalingAnnullert(message.toJson()), context)
     }
 
     fun utbetalingEndret(
@@ -680,6 +681,7 @@ internal class HendelseMediator(
                 is OppdaterPersonsnapshot -> iverksett(hendelsefabrikk.oppdaterPersonsnapshot(hendelse), hendelse.id, commandContext)
                 is OverstyringIgangsatt -> iverksett(hendelsefabrikk.kobleVedtaksperiodeTilOverstyring(hendelse), hendelse.id, commandContext)
                 is Sykefraværstilfeller -> håndter(hendelse)
+                is UtbetalingAnnullert -> iverksett(hendelsefabrikk.utbetalingAnnullert(hendelse), hendelse.id, commandContext)
                 else -> throw IllegalArgumentException("Personhendelse må håndteres")
             }
             behovMediator.håndter(hendelse, commandContext, contextId, messageContext)

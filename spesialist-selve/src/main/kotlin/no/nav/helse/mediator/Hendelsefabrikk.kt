@@ -52,6 +52,7 @@ import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfeller
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.modell.utbetaling.LagreOppdragCommand
 import no.nav.helse.modell.utbetaling.UtbetalingAnnullert
+import no.nav.helse.modell.utbetaling.UtbetalingAnnullertCommand
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
@@ -443,7 +444,6 @@ internal class Hendelsefabrikk(
         aktørId: String,
         json: String,
     ): Sykefraværstilfeller {
-        val generasjoner = generasjonerFor(fødselsnummer)
         return Sykefraværstilfeller(
             id = id,
             fødselsnummer = fødselsnummer,
@@ -516,11 +516,6 @@ internal class Hendelsefabrikk(
             annullertTidspunkt = LocalDateTime.parse(jsonNode["tidspunkt"].asText()),
             saksbehandlerEpost = jsonNode["epost"].asText(),
             json = json,
-            utbetalingDao = utbetalingDao,
-            saksbehandlerDao = saksbehandlerDao,
-            snapshotClient = snapshotClient,
-            snapshotDao = snapshotDao,
-            personDao = personDao,
         )
     }
 
@@ -726,6 +721,20 @@ internal class Hendelsefabrikk(
             berørteVedtaksperiodeIder = hendelse.berørteVedtaksperiodeIder,
             kilde = hendelse.kilde,
             overstyringDao = overstyringDao,
+        )
+    }
+
+    fun utbetalingAnnullert(hendelse: UtbetalingAnnullert): UtbetalingAnnullertCommand {
+        return UtbetalingAnnullertCommand(
+            fødselsnummer = hendelse.fødselsnummer(),
+            utbetalingId = hendelse.utbetalingId,
+            saksbehandlerEpost = hendelse.saksbehandlerEpost,
+            annullertTidspunkt = hendelse.annullertTidspunkt,
+            utbetalingDao = utbetalingDao,
+            personDao = personDao,
+            snapshotDao = snapshotDao,
+            snapshotClient = snapshotClient,
+            saksbehandlerDao = saksbehandlerDao
         )
     }
 

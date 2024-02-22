@@ -3,7 +3,7 @@ package no.nav.helse.modell.utbetaling
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.db.SaksbehandlerDao
-import no.nav.helse.mediator.meldinger.Kommandohendelse
+import no.nav.helse.mediator.meldinger.Personhendelse
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.LagreAnnulleringCommand
@@ -15,16 +15,26 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 internal class UtbetalingAnnullert(
     override val id: UUID,
     private val fødselsnummer: String,
-    utbetalingId: UUID,
-    annullertTidspunkt: LocalDateTime,
-    saksbehandlerEpost: String,
+    val utbetalingId: UUID,
+    val annullertTidspunkt: LocalDateTime,
+    val saksbehandlerEpost: String,
     private val json: String,
+) : Personhendelse {
+    override fun fødselsnummer(): String = fødselsnummer
+    override fun toJson(): String = json
+}
+
+internal class UtbetalingAnnullertCommand(
+    fødselsnummer: String,
+    utbetalingId: UUID,
+    saksbehandlerEpost: String,
+    annullertTidspunkt: LocalDateTime,
     utbetalingDao: UtbetalingDao,
-    saksbehandlerDao: SaksbehandlerDao,
-    snapshotClient: SnapshotClient,
-    snapshotDao: SnapshotDao,
     personDao: PersonDao,
-) : Kommandohendelse, MacroCommand() {
+    snapshotDao: SnapshotDao,
+    snapshotClient: SnapshotClient,
+    saksbehandlerDao: SaksbehandlerDao
+): MacroCommand() {
     override val commands: List<Command> = listOf(
         OppdaterSnapshotCommand(
             snapshotClient = snapshotClient,
@@ -40,7 +50,4 @@ internal class UtbetalingAnnullert(
             utbetalingId = utbetalingId
         )
     )
-
-    override fun fødselsnummer(): String = fødselsnummer
-    override fun toJson(): String = json
 }
