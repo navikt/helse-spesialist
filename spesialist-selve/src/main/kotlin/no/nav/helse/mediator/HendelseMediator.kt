@@ -65,6 +65,7 @@ import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.TilbakedateringGodkjent
+import no.nav.helse.modell.overstyring.OverstyringIgangsatt
 import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver
 import no.nav.helse.modell.overstyring.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.person.AdressebeskyttelseEndretRiver
@@ -410,7 +411,7 @@ internal class HendelseMediator(
         berørteVedtaksperiodeIder: List<UUID>,
         context: MessageContext,
     ) {
-        utfør(
+        håndter(
             hendelsefabrikk.overstyringIgangsatt(
                 id,
                 fødselsnummer,
@@ -666,7 +667,8 @@ internal class HendelseMediator(
                 is VedtaksperiodeReberegnet -> iverksett(hendelsefabrikk.vedtaksperiodeReberegnet(hendelse), hendelse.id, commandContext)
                 is VedtaksperiodeNyUtbetaling -> iverksett(hendelsefabrikk.vedtaksperiodeNyUtbetaling(hendelse), hendelse.id, commandContext)
                 is SøknadSendt -> iverksett(hendelsefabrikk.søknadSendt(hendelse), hendelse.id, commandContext)
-                is OppdaterPersonsnapshot -> iverksett(hendelsefabrikk.oppdaterPersonsnapshotCommand(hendelse), hendelse.id, commandContext)
+                is OppdaterPersonsnapshot -> iverksett(hendelsefabrikk.oppdaterPersonsnapshot(hendelse), hendelse.id, commandContext)
+                is OverstyringIgangsatt -> iverksett(hendelsefabrikk.kobleVedtaksperiodeTilOverstyring(hendelse), hendelse.id, commandContext)
                 else -> throw IllegalArgumentException("Personhendelse må håndteres")
             }
             behovMediator.håndter(hendelse, commandContext, contextId, messageContext)

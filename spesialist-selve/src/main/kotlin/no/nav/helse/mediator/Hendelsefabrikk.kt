@@ -28,6 +28,7 @@ import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommand
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
+import no.nav.helse.modell.kommando.KobleVedtaksperiodeTilOverstyring
 import no.nav.helse.modell.kommando.TilbakedateringGodkjent
 import no.nav.helse.modell.kommando.TilbakedateringGodkjentCommand
 import no.nav.helse.modell.overstyring.OverstyringDao
@@ -270,7 +271,6 @@ internal class Hendelsefabrikk(
             berørteVedtaksperiodeIder = jsonNode.path("berørtePerioder")
                 .map { UUID.fromString(it["vedtaksperiodeId"].asText()) },
             json = json,
-            overstyringDao = overstyringDao,
         )
     }
 
@@ -286,8 +286,7 @@ internal class Hendelsefabrikk(
             fødselsnummer = fødselsnummer,
             kilde = kilde,
             berørteVedtaksperiodeIder = berørteVedtaksperiodeIder,
-            json = json,
-            overstyringDao = overstyringDao
+            json = json
         )
     }
 
@@ -712,7 +711,7 @@ internal class Hendelsefabrikk(
         )
     }
 
-    fun oppdaterPersonsnapshotCommand(hendelse: Personhendelse): OppdaterPersonsnapshotCommand {
+    fun oppdaterPersonsnapshot(hendelse: Personhendelse): OppdaterPersonsnapshotCommand {
         return OppdaterPersonsnapshotCommand(
             fødselsnummer = hendelse.fødselsnummer(),
             førsteKjenteDagFinner = { generasjonRepository.førsteKjenteDag(hendelse.fødselsnummer()) },
@@ -720,6 +719,14 @@ internal class Hendelsefabrikk(
             snapshotDao = snapshotDao,
             opptegnelseDao = opptegnelseDao,
             snapshotClient = snapshotClient
+        )
+    }
+
+    fun kobleVedtaksperiodeTilOverstyring(hendelse: OverstyringIgangsatt): KobleVedtaksperiodeTilOverstyring {
+        return KobleVedtaksperiodeTilOverstyring(
+            berørteVedtaksperiodeIder = hendelse.berørteVedtaksperiodeIder,
+            kilde = hendelse.kilde,
+            overstyringDao = overstyringDao,
         )
     }
 
