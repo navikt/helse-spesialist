@@ -706,6 +706,7 @@ internal class HendelseMediator(
                 "Feil ved kjøring av $hendelsenavn: contextId={}, message={}",
                 contextId, e.message, e
             )
+            throw e
         } finally {
             logg.info("utført $hendelsenavn med context_id=$contextId for hendelse_id=${hendelse.id}")
         }
