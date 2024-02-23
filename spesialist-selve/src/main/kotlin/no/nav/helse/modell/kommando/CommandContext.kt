@@ -2,7 +2,6 @@ package no.nav.helse.modell.kommando
 
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.mediator.meldinger.Kommandohendelse
 import no.nav.helse.modell.CommandContextDao
 import org.slf4j.LoggerFactory
 
@@ -72,8 +71,6 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
     }
 
     internal inline fun <reified T> get(): T? = data.filterIsInstance<T>().firstOrNull()
-
-    internal fun utfør(commandContextDao: CommandContextDao, hendelse: Kommandohendelse) = utfør(commandContextDao, hendelse.id, hendelse)
 
     internal fun utfør(commandContextDao: CommandContextDao, hendelseId: UUID, command: Command) = try {
         val newHash = command.hash().convertToUUID()

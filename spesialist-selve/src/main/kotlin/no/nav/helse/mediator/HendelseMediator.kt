@@ -16,7 +16,6 @@ import no.nav.helse.mediator.meldinger.AvvikVurdertRiver
 import no.nav.helse.mediator.meldinger.EndretSkjermetinfoRiver
 import no.nav.helse.mediator.meldinger.GodkjenningsbehovRiver
 import no.nav.helse.mediator.meldinger.GosysOppgaveEndretRiver
-import no.nav.helse.mediator.meldinger.Kommandohendelse
 import no.nav.helse.mediator.meldinger.MidnattRiver
 import no.nav.helse.mediator.meldinger.NyeVarslerRiver
 import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshotRiver
@@ -34,7 +33,6 @@ import no.nav.helse.mediator.meldinger.VarseldefinisjonRiver
 import no.nav.helse.mediator.meldinger.VedtakFattetRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeEndretRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeForkastetRiver
-import no.nav.helse.mediator.meldinger.VedtaksperiodeHendelse
 import no.nav.helse.mediator.meldinger.VedtaksperiodeNyUtbetalingRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeOpprettetRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeReberegnetRiver
@@ -749,57 +747,6 @@ internal class HendelseMediator(
         }
     }
 
-    private fun utfør(fødselsnummer: String, hendelse: Kommandohendelse, messageContext: MessageContext) {
-        if (personDao.findPersonByFødselsnummer(fødselsnummer) == null) return logg.info("ignorerer hendelseId=${hendelse.id} fordi vi ikke kjenner til personen")
-        return utfør(hendelse, messageContext)
-    }
-
-    private fun utfør(hendelse: Kommandohendelse, messageContext: MessageContext) {
-        val contextId = UUID.randomUUID()
-        logg.info("oppretter ny kommandokontekst med context_id=$contextId for hendelse_id=${hendelse.id} og type=${hendelse::class.simpleName}")
-        utfør(hendelse, nyContext(hendelse, contextId), contextId, messageContext)
-    }
-
-    private fun utfør(
-        hendelse: Kommandohendelse,
-        context: CommandContext,
-        contextId: UUID,
-        messageContext: MessageContext,
-    ) {
-        withMDC(
-            mapOf(
-                "context_id" to "$contextId",
-                "hendelse_id" to "${hendelse.id}",
-                "vedtaksperiode_id" to "${if (hendelse is VedtaksperiodeHendelse) hendelse.vedtaksperiodeId() else "N/A"}"
-            )
-        ) {
-            val hendelsenavn = hendelse::class.simpleName ?: "ukjent hendelse"
-            try {
-                logg.info("utfører $hendelsenavn med context_id=$contextId for hendelse_id=${hendelse.id}")
-                if (context.utfør(commandContextDao, hendelse)) {
-                    val kjøretid = commandContextDao.tidsbrukForContext(contextId)
-                    metrikker(hendelsenavn, kjøretid, contextId)
-                    logg.info(
-                        "Kommando(er) for $hendelsenavn er utført ferdig. Det tok ca {}ms å kjøre hele kommandokjeden",
-                        kjøretid
-                    )
-                } else logg.info("$hendelsenavn er suspendert")
-                behovMediator.håndter(hendelse, context, contextId, messageContext)
-            } catch (err: Exception) {
-                logg.warn(
-                    "Feil ved kjøring av $hendelsenavn: contextId={}, message={}",
-                    contextId,
-                    err.message,
-                    err
-                )
-                hendelse.undo(context)
-                throw err
-            } finally {
-                logg.info("utført $hendelsenavn med context_id=$contextId for hendelse_id=${hendelse.id}")
-            }
-        }
-    }
-
     private fun metrikker(hendelsenavn: String, kjøretidMs: Int, contextId: UUID) {
         if (hendelsenavn == Godkjenningsbehov::class.simpleName) {
             val utfall: GodkjenningsbehovUtfall = metrikkDao.finnUtfallForGodkjenningsbehov(contextId)
@@ -826,8 +773,7 @@ internal class HendelseMediator(
                 "fortsetter utførelse av kommandokontekst pga. behov_id=${hendelse.id} med context_id=$contextId for hendelse_id=${hendelse.id}.\n" +
                         "Innkommende melding:\n\t$message"
             )
-            if (hendelse is Kommandohendelse) mediator.utfør(hendelse, commandContext, contextId, messageContext)
-            else mediator.håndter(hendelse, commandContext, messageContext)
+            mediator.håndter(hendelse, commandContext, messageContext)
         }
     }
 
