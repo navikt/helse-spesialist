@@ -219,7 +219,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             SKJÆRINGSTIDSPUNKT,
             OPPRETTET
         )
-        val hentetOverstyring = overstyringApiDao.finnOverstyringerAvInntektOgRefusjon(FNR, ORGNUMMER).first()
+        val hentetOverstyring = overstyringApiDao.finnOverstyringerAvInntekt(FNR, ORGNUMMER).first()
 
         assertEquals(EKSTERN_HENDELSE_ID, hentetOverstyring.hendelseId)
         assertEquals(FNR, hentetOverstyring.fødselsnummer)

@@ -73,43 +73,6 @@ class OverstyringApiDao(private val dataSource: DataSource) {
                 queryOf(finnOverstyringQuery, fødselsnummer.toLong(), organisasjonsnummer.toLong())
                     .map { overstyringRow ->
                         OverstyringInntektDto(
-                            hendelseId = overstyringRow.uuid("hendelse_ref"),
-                            fødselsnummer = overstyringRow.long("fodselsnummer").toFødselsnummer(),
-                            organisasjonsnummer = overstyringRow.int("orgnummer").toString(),
-                            begrunnelse = overstyringRow.string("begrunnelse"),
-                            forklaring = overstyringRow.string("forklaring"),
-                            timestamp = overstyringRow.localDateTime("tidspunkt"),
-                            saksbehandlerNavn = overstyringRow.string("navn"),
-                            saksbehandlerIdent = overstyringRow.stringOrNull("ident"),
-                            månedligInntekt = overstyringRow.double("manedlig_inntekt"),
-                            fraMånedligInntekt = overstyringRow.doubleOrNull("fra_manedlig_inntekt"),
-                            skjæringstidspunkt = overstyringRow.localDate("skjaeringstidspunkt"),
-                            refusjonsopplysninger = overstyringRow.stringOrNull("refusjonsopplysninger")
-                                ?.let { objectMapper.readValue<List<OverstyringInntektDto.Refusjonselement>>(it) },
-                            fraRefusjonsopplysninger = overstyringRow.stringOrNull("fra_refusjonsopplysninger")
-                                ?.let { objectMapper.readValue<List<OverstyringInntektDto.Refusjonselement>>(it) },
-                            ferdigstilt = overstyringRow.boolean("ferdigstilt"),
-                        )
-                    }.asList
-            )
-        }
-
-    fun finnOverstyringerAvInntektOgRefusjon(fødselsnummer: String, organisasjonsnummer: String): List<OverstyringInntektDto> =
-        sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val finnOverstyringQuery = """
-            SELECT o.id, o.tidspunkt, o.person_ref, o.hendelse_ref, o.saksbehandler_ref, o.ekstern_hendelse_id, 
-            o.ferdigstilt, oi.*, p.fodselsnummer, a.orgnummer, s.navn, s.ident FROM overstyring o
-                INNER JOIN overstyring_inntekt oi ON o.id = oi.overstyring_ref
-                INNER JOIN person p ON p.id = o.person_ref
-                INNER JOIN arbeidsgiver a ON a.id = oi.arbeidsgiver_ref
-                INNER JOIN saksbehandler s ON s.oid = o.saksbehandler_ref
-            WHERE p.fodselsnummer = ? AND a.orgnummer = ?
-        """
-            session.run(
-                queryOf(finnOverstyringQuery, fødselsnummer.toLong(), organisasjonsnummer.toLong())
-                    .map { overstyringRow ->
-                        OverstyringInntektDto(
                             hendelseId = overstyringRow.uuid("ekstern_hendelse_id"),
                             fødselsnummer = overstyringRow.long("fodselsnummer").toFødselsnummer(),
                             organisasjonsnummer = overstyringRow.int("orgnummer").toString(),
