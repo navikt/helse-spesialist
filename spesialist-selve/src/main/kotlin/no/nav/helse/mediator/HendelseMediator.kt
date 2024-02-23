@@ -75,6 +75,7 @@ import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyringArbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyringInntektOgRefusjon
+import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsettingSykepengegrunnlag
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfeller
 import no.nav.helse.modell.utbetaling.UtbetalingAnnullert
 import no.nav.helse.modell.utbetaling.UtbetalingDao
@@ -517,7 +518,7 @@ internal class HendelseMediator(
         json: String,
         context: MessageContext,
     ) {
-        utfør(
+        håndter(
             fødselsnummer, hendelsefabrikk.skjønnsfastsettingSykepengegrunnlag(
                 id = id,
                 fødselsnummer = fødselsnummer,
@@ -709,6 +710,7 @@ internal class HendelseMediator(
                 is Godkjenningsbehov -> iverksett(hendelsefabrikk.godkjenningsbehov(hendelse), hendelse.id, commandContext)
                 is OverstyringInntektOgRefusjon -> iverksett(hendelsefabrikk.overstyrInntektOgRefusjon(hendelse), hendelse.id, commandContext)
                 is Saksbehandlerløsning -> iverksett(hendelsefabrikk.utbetalingsgodkjenning(hendelse), hendelse.id, commandContext)
+                is SkjønnsfastsettingSykepengegrunnlag -> iverksett(hendelsefabrikk.skjønnsfastsattSykepengegrunnlag(hendelse), hendelse.id, commandContext)
                 else -> throw IllegalArgumentException("Personhendelse må håndteres")
             }
             behovMediator.håndter(hendelse, commandContext, contextId, messageContext)

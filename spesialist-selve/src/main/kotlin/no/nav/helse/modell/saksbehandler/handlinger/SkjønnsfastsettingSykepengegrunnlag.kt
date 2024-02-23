@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.mediator.OverstyringMediator
-import no.nav.helse.mediator.meldinger.Kommandohendelse
+import no.nav.helse.mediator.meldinger.Personhendelse
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.PersisterSkjønnsfastsettingSykepengegrunnlagCommand
@@ -22,15 +22,28 @@ import no.nav.helse.modell.overstyring.SkjønnsfastsattArbeidsgiver
 internal class SkjønnsfastsettingSykepengegrunnlag(
     override val id: UUID,
     private val fødselsnummer: String,
-    oid: UUID,
-    arbeidsgivere: List<SkjønnsfastsattArbeidsgiver>,
-    skjæringstidspunkt: LocalDate,
-    opprettet: LocalDateTime,
+    val oid: UUID,
+    val arbeidsgivere: List<SkjønnsfastsattArbeidsgiver>,
+    val skjæringstidspunkt: LocalDate,
+    val opprettet: LocalDateTime,
     private val json: String,
+) : Personhendelse {
+    override fun fødselsnummer() = fødselsnummer
+    override fun toJson() = json
+}
+
+internal class SkjønnsfastsattSykepengegrunnlagCommand(
+    id: UUID,
+    fødselsnummer: String,
+    skjæringstidspunkt: LocalDate,
+    arbeidsgivere: List<SkjønnsfastsattArbeidsgiver>,
+    oid: UUID,
+    opprettet: LocalDateTime,
+    versjonAvKode: String?,
     overstyringDao: OverstyringDao,
     overstyringMediator: OverstyringMediator,
-    versjonAvKode: String?,
-) : Kommandohendelse, MacroCommand() {
+    json: String
+): MacroCommand() {
     override val commands: List<Command> = listOf(
         PersisterSkjønnsfastsettingSykepengegrunnlagCommand(
             oid = oid,
@@ -55,8 +68,4 @@ internal class SkjønnsfastsettingSykepengegrunnlag(
             versjonAvKode = versjonAvKode
         )
     )
-
-    override fun fødselsnummer() = fødselsnummer
-    override fun toJson() = json
-
 }

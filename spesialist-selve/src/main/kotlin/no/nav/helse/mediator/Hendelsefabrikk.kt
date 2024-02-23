@@ -49,6 +49,7 @@ import no.nav.helse.modell.saksbehandler.handlinger.OverstyrArbeidsforholdComman
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrInntektOgRefusjonCommand
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyringArbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyringInntektOgRefusjon
+import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlagCommand
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsettingSykepengegrunnlag
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfeller
@@ -357,6 +358,21 @@ internal class Hendelsefabrikk(
         json = json,
     )
 
+    fun skjønnsfastsattSykepengegrunnlag(hendelse: SkjønnsfastsettingSykepengegrunnlag): SkjønnsfastsattSykepengegrunnlagCommand {
+        return SkjønnsfastsattSykepengegrunnlagCommand(
+            id = hendelse.id,
+            fødselsnummer = hendelse.fødselsnummer(),
+            skjæringstidspunkt = hendelse.skjæringstidspunkt,
+            arbeidsgivere = hendelse.arbeidsgivere,
+            oid = hendelse.oid,
+            opprettet = hendelse.opprettet,
+            versjonAvKode = versjonAvKode,
+            overstyringDao = overstyringDao,
+            overstyringMediator = overstyringMediator,
+            json = hendelse.toJson()
+        )
+    }
+
     fun skjønnsfastsettingSykepengegrunnlag(
         id: UUID,
         fødselsnummer: String,
@@ -373,9 +389,6 @@ internal class Hendelsefabrikk(
         skjæringstidspunkt = skjæringstidspunkt,
         opprettet = opprettet,
         json = json,
-        overstyringDao = overstyringDao,
-        overstyringMediator = overstyringMediator,
-        versjonAvKode = versjonAvKode,
     )
 
     fun overstyringArbeidsforhold(

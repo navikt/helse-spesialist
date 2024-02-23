@@ -1,7 +1,6 @@
 package no.nav.helse.modell.overstyring
 
 import DatabaseIntegrationTest
-import io.mockk.mockk
 import java.time.LocalDate
 import java.util.UUID
 import lagOrganisasjonsnummer
@@ -382,9 +381,6 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
             opprettet = OPPRETTET,
             json = "{}",
-            overstyringDao = overstyringDao,
-            overstyringMediator = mockk(),
-            versjonAvKode = "versjonAvKode",
         )
     )
 
