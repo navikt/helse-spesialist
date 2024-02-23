@@ -228,7 +228,6 @@ internal class Hendelsefabrikk(
             inntektskilde = inntektskilde,
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
             skjæringstidspunkt = skjæringstidspunkt,
-            sykefraværstilfelle = sykefraværstilfelle(fødselsnummer, skjæringstidspunkt),
             json = json,
         )
     }
@@ -940,5 +939,4 @@ internal class Hendelsefabrikk(
     fun nyeVarsler(id: UUID, fødselsnummer: String, varsler: List<Varsel>, json: String): NyeVarsler {
         return NyeVarsler(id, fødselsnummer, varsler, json)
     }
-
 }

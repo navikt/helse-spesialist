@@ -61,7 +61,6 @@ internal class Godkjenningsbehov(
     val inntektskilde: Inntektskilde,
     val orgnummereMedRelevanteArbeidsforhold: List<String>,
     val skjæringstidspunkt: LocalDate,
-    val sykefraværstilfelle: Sykefraværstilfelle,
     private val json: String,
 ) : VedtaksperiodeHendelse {
 
