@@ -221,7 +221,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         )
         val hentetOverstyring = overstyringApiDao.finnOverstyringerAvInntektOgRefusjon(FNR, ORGNUMMER).first()
 
-        assertEquals(ID, hentetOverstyring.hendelseId)
+        assertEquals(EKSTERN_HENDELSE_ID, hentetOverstyring.hendelseId)
         assertEquals(FNR, hentetOverstyring.fødselsnummer)
         assertEquals(ORGNUMMER, hentetOverstyring.organisasjonsnummer)
         assertEquals(BEGRUNNELSE, hentetOverstyring.begrunnelse)

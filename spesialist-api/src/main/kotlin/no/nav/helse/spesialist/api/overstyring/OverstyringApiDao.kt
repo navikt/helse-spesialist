@@ -110,7 +110,7 @@ class OverstyringApiDao(private val dataSource: DataSource) {
                 queryOf(finnOverstyringQuery, fødselsnummer.toLong(), organisasjonsnummer.toLong())
                     .map { overstyringRow ->
                         OverstyringInntektDto(
-                            hendelseId = overstyringRow.uuid("hendelse_ref"),
+                            hendelseId = overstyringRow.uuid("ekstern_hendelse_id"),
                             fødselsnummer = overstyringRow.long("fodselsnummer").toFødselsnummer(),
                             organisasjonsnummer = overstyringRow.int("orgnummer").toString(),
                             begrunnelse = overstyringRow.string("begrunnelse"),
