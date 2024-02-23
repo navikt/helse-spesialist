@@ -11,6 +11,6 @@ internal interface Personhendelse: Hendelse {
     fun fødselsnummer(): String
 }
 
-internal interface VedtaksperiodeHendelse: Personhendelse {
+internal interface Vedtaksperiodehendelse: Personhendelse {
     fun vedtaksperiodeId(): UUID
 }
