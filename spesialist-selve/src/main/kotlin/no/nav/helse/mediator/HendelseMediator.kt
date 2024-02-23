@@ -393,7 +393,7 @@ internal class HendelseMediator(
             )
             return
         }
-        utfør(
+        håndter(
             hendelsefabrikk.godkjenning(
                 id,
                 fødselsnummer,
@@ -704,6 +704,7 @@ internal class HendelseMediator(
                 is VedtaksperiodeEndret -> iverksett(hendelsefabrikk.vedtaksperiodeEndret(hendelse), hendelse.id, commandContext)
                 is VedtaksperiodeForkastet -> iverksett(hendelsefabrikk.vedtaksperiodeForkastet(hendelse), hendelse.id, commandContext)
                 is OverstyringArbeidsforhold -> iverksett(hendelsefabrikk.overstyringArbeidsforhold(hendelse), hendelse.id, commandContext)
+                is Godkjenningsbehov -> iverksett(hendelsefabrikk.godkjenningsbehov(hendelse), hendelse.id, commandContext)
                 else -> throw IllegalArgumentException("Personhendelse må håndteres")
             }
             behovMediator.håndter(hendelse, commandContext, contextId, messageContext)

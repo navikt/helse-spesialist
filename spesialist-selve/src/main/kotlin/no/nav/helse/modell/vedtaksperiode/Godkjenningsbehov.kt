@@ -3,7 +3,6 @@ package no.nav.helse.modell.vedtaksperiode
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.mediator.meldinger.Kommandohendelse
 import no.nav.helse.mediator.meldinger.VedtaksperiodeHendelse
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.CommandContextDao
@@ -37,6 +36,7 @@ import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.risiko.VurderVurderingsmomenter
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
+import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.VurderEnhetUtland
@@ -48,46 +48,68 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 internal class Godkjenningsbehov(
     override val id: UUID,
     private val fødselsnummer: String,
+    val aktørId: String,
+    val organisasjonsnummer: String,
+    private val vedtaksperiodeId: UUID,
+    val utbetalingId: UUID,
+    val periodeFom: LocalDate,
+    val periodeTom: LocalDate,
+    val periodetype: Periodetype,
+    val førstegangsbehandling: Boolean,
+    val utbetalingtype: Utbetalingtype,
+    val kanAvvises: Boolean,
+    val inntektskilde: Inntektskilde,
+    val orgnummereMedRelevanteArbeidsforhold: List<String>,
+    val skjæringstidspunkt: LocalDate,
+    val sykefraværstilfelle: Sykefraværstilfelle,
+    private val json: String,
+) : VedtaksperiodeHendelse {
+
+    override fun fødselsnummer() = fødselsnummer
+    override fun vedtaksperiodeId() = vedtaksperiodeId
+    override fun toJson() = json
+}
+
+internal class GodkjenningsbehovCommand(
+    id: UUID,
+    fødselsnummer: String,
     aktørId: String,
     organisasjonsnummer: String,
-    private val vedtaksperiodeId: UUID,
-    utbetalingId: UUID,
+    orgnummereMedRelevanteArbeidsforhold: List<String>,
+    vedtaksperiodeId: UUID,
     periodeFom: LocalDate,
     periodeTom: LocalDate,
     periodetype: Periodetype,
-    førstegangsbehandling: Boolean,
-    utbetalingtype: Utbetalingtype,
-    kanAvvises: Boolean,
     inntektskilde: Inntektskilde,
-    orgnummereMedRelevanteArbeidsforhold: List<String>,
-    skjæringstidspunkt: LocalDate,
+    førstegangsbehandling: Boolean,
+    utbetalingId: UUID,
+    utbetaling: Utbetaling,
+    utbetalingtype: Utbetalingtype,
     sykefraværstilfelle: Sykefraværstilfelle,
-    private val json: String,
-    personDao: PersonDao,
-    generasjonRepository: ActualGenerasjonRepository,
-    arbeidsgiverDao: ArbeidsgiverDao,
+    skjæringstidspunkt: LocalDate,
+    kanAvvises: Boolean,
+    førsteKjenteDagFinner: () -> LocalDate,
+    automatisering: Automatisering,
     vedtakDao: VedtakDao,
-    snapshotDao: SnapshotDao,
     commandContextDao: CommandContextDao,
-    risikovurderingDao: RisikovurderingDao,
-    åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
-    egenAnsattDao: EgenAnsattDao,
+    personDao: PersonDao,
+    arbeidsgiverDao: ArbeidsgiverDao,
     arbeidsforholdDao: ArbeidsforholdDao,
+    egenAnsattDao: EgenAnsattDao,
+    utbetalingDao: UtbetalingDao,
     vergemålDao: VergemålDao,
+    åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
+    risikovurderingDao: RisikovurderingDao,
+    påVentDao: PåVentDao,
+    overstyringDao: OverstyringDao,
+    periodehistorikkDao: PeriodehistorikkDao,
+    snapshotDao: SnapshotDao,
     snapshotClient: SnapshotClient,
     oppgaveMediator: OppgaveMediator,
-    automatisering: Automatisering,
     godkjenningMediator: GodkjenningMediator,
-    utbetalingDao: UtbetalingDao,
-    periodehistorikkDao: PeriodehistorikkDao,
-    overstyringDao: OverstyringDao,
-    påVentDao: PåVentDao,
     totrinnsvurderingMediator: TotrinnsvurderingMediator,
-) : Kommandohendelse, VedtaksperiodeHendelse, MacroCommand() {
-
-    private val førsteKjenteDagFinner = { generasjonRepository.førsteKjenteDag(fødselsnummer) }
-    private val utbetaling = utbetalingDao.hentUtbetaling(utbetalingId)
-
+    json: String
+): MacroCommand() {
     override val commands: List<Command> = listOf(
         OpprettKoblingTilHendelseCommand(
             hendelseId = id,
@@ -227,9 +249,4 @@ internal class Godkjenningsbehov(
             personDao = personDao
         )
     )
-
-    override fun fødselsnummer() = fødselsnummer
-    override fun vedtaksperiodeId() = vedtaksperiodeId
-    override fun toJson() = json
-
 }

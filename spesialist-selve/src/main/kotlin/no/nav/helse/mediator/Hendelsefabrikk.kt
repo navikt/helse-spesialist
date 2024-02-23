@@ -64,6 +64,7 @@ import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
+import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovCommand
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.NyeVarsler
 import no.nav.helse.modell.vedtaksperiode.NyeVarslerCommand
@@ -226,26 +227,6 @@ internal class Hendelsefabrikk(
             skjæringstidspunkt = skjæringstidspunkt,
             sykefraværstilfelle = sykefraværstilfelle(fødselsnummer, skjæringstidspunkt),
             json = json,
-            personDao = personDao,
-            generasjonRepository = generasjonRepository,
-            arbeidsgiverDao = arbeidsgiverDao,
-            vedtakDao = vedtakDao,
-            snapshotDao = snapshotDao,
-            commandContextDao = commandContextDao,
-            risikovurderingDao = risikovurderingDao,
-            åpneGosysOppgaverDao = åpneGosysOppgaverDao,
-            egenAnsattDao = egenAnsattDao,
-            arbeidsforholdDao = arbeidsforholdDao,
-            vergemålDao = vergemålDao,
-            snapshotClient = snapshotClient,
-            oppgaveMediator = oppgaveMediator,
-            automatisering = automatisering,
-            godkjenningMediator = godkjenningMediator,
-            utbetalingDao = utbetalingDao,
-            periodehistorikkDao = periodehistorikkDao,
-            overstyringDao = overstyringDao,
-            påVentDao = påVentDao,
-            totrinnsvurderingMediator = totrinnsvurderingMediator,
         )
     }
 
@@ -784,6 +765,51 @@ internal class Hendelsefabrikk(
             opprettet = hendelse.opprettet,
             overstyringDao = overstyringDao,
             overstyringMediator = overstyringMediator,
+            json = hendelse.toJson()
+        )
+    }
+
+    fun godkjenningsbehov(hendelse: Godkjenningsbehov): GodkjenningsbehovCommand {
+        val utbetaling = utbetalingDao.hentUtbetaling(hendelse.utbetalingId)
+        val førsteKjenteDagFinner = { generasjonRepository.førsteKjenteDag(hendelse.fødselsnummer()) }
+        return GodkjenningsbehovCommand(
+            id = hendelse.id,
+            fødselsnummer = hendelse.fødselsnummer(),
+            aktørId = hendelse.aktørId,
+            organisasjonsnummer = hendelse.organisasjonsnummer,
+            orgnummereMedRelevanteArbeidsforhold = hendelse.orgnummereMedRelevanteArbeidsforhold,
+            vedtaksperiodeId = hendelse.vedtaksperiodeId(),
+            periodeFom = hendelse.periodeFom,
+            periodeTom = hendelse.periodeTom,
+            periodetype = hendelse.periodetype,
+            inntektskilde = hendelse.inntektskilde,
+            førstegangsbehandling = hendelse.førstegangsbehandling,
+            utbetalingId = hendelse.utbetalingId,
+            utbetaling = utbetaling,
+            utbetalingtype = hendelse.utbetalingtype,
+            sykefraværstilfelle = sykefraværstilfelle(hendelse.fødselsnummer(), hendelse.skjæringstidspunkt),
+            skjæringstidspunkt = hendelse.skjæringstidspunkt,
+            kanAvvises = hendelse.kanAvvises,
+            førsteKjenteDagFinner = førsteKjenteDagFinner,
+            automatisering = automatisering,
+            vedtakDao = vedtakDao,
+            commandContextDao = commandContextDao,
+            personDao = personDao,
+            arbeidsgiverDao = arbeidsgiverDao,
+            arbeidsforholdDao = arbeidsforholdDao,
+            egenAnsattDao = egenAnsattDao,
+            utbetalingDao = utbetalingDao,
+            vergemålDao = vergemålDao,
+            åpneGosysOppgaverDao = åpneGosysOppgaverDao,
+            risikovurderingDao = risikovurderingDao,
+            påVentDao = påVentDao,
+            overstyringDao = overstyringDao,
+            periodehistorikkDao = periodehistorikkDao,
+            snapshotDao = snapshotDao,
+            snapshotClient = snapshotClient,
+            oppgaveMediator = oppgaveMediator,
+            godkjenningMediator = godkjenningMediator,
+            totrinnsvurderingMediator = totrinnsvurderingMediator,
             json = hendelse.toJson()
         )
     }
