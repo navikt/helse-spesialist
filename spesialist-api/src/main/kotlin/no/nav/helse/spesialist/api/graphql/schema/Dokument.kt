@@ -1,12 +1,25 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
 data class Soknad(
+    val type: Soknadstype?,
     val arbeidGjenopptatt: DateString?,
     val sykmeldingSkrevet: DateTimeString?,
     val egenmeldingsdagerFraSykmelding: List<DateString>?,
     val soknadsperioder: List<Soknadsperioder>?,
     val sporsmal: List<Sporsmal>?
 )
+
+enum class Soknadstype {
+    SELVSTENDIGE_OG_FRILANSERE,
+    OPPHOLD_UTLAND,
+    ARBEIDSTAKERE,
+    ANNET_ARBEIDSFORHOLD,
+    ARBEIDSLEDIG,
+    BEHANDLINGSDAGER,
+    REISETILSKUDD,
+    GRADERT_REISETILSKUDD,
+    UKJENT,
+}
 
 data class Soknadsperioder(
     val fom: DateString,

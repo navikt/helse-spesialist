@@ -616,6 +616,7 @@ type Soknad {
     soknadsperioder: [Soknadsperioder!]
     sporsmal: [Sporsmal!]
     sykmeldingSkrevet: String
+    type: Soknadstype
 }
 
 type SoknadArbeidsgiver implements Hendelse {
@@ -1096,6 +1097,18 @@ enum Skjonnsfastsettingstype {
     ANNET
     OMREGNET_ARSINNTEKT
     RAPPORTERT_ARSINNTEKT
+}
+
+enum Soknadstype {
+    ANNET_ARBEIDSFORHOLD
+    ARBEIDSLEDIG
+    ARBEIDSTAKERE
+    BEHANDLINGSDAGER
+    GRADERT_REISETILSKUDD
+    OPPHOLD_UTLAND
+    REISETILSKUDD
+    SELVSTENDIGE_OG_FRILANSERE
+    UKJENT
 }
 
 enum Sorteringsnokkel {

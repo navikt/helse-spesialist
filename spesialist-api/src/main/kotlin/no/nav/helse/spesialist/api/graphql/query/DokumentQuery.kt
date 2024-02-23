@@ -22,6 +22,7 @@ import no.nav.helse.spesialist.api.graphql.schema.OpphoerAvNaturalytelse
 import no.nav.helse.spesialist.api.graphql.schema.Refusjon
 import no.nav.helse.spesialist.api.graphql.schema.Soknad
 import no.nav.helse.spesialist.api.graphql.schema.Soknadsperioder
+import no.nav.helse.spesialist.api.graphql.schema.Soknadstype
 import no.nav.helse.spesialist.api.graphql.schema.Sporsmal
 import no.nav.helse.spesialist.api.graphql.schema.Svar
 import no.nav.helse.spesialist.api.graphql.schema.Svartype
@@ -200,6 +201,7 @@ class DokumentQuery(
     }
 
     private fun JsonNode.tilSøknad(): Soknad {
+        val type = this.path("type").takeUnless { it.isMissingOrNull() }?.asText()?.tilSoknadstype()
         val arbeidGjenopptatt = this.path("arbeidGjenopptatt").takeUnless { it.isMissingOrNull() }?.asText()
         val sykmeldingSkrevet = this.path("sykmeldingSkrevet").takeUnless { it.isMissingOrNull() }?.asText()
         val egenmeldingsdagerFraSykmelding =
@@ -209,12 +211,32 @@ class DokumentQuery(
         val sporsmal = this.path("sporsmal").takeUnless { it.isMissingOrNull() }?.map { it.tilSpørsmål() }
             ?.filter { it.skalVises() }
         return Soknad(
+            type = type,
             arbeidGjenopptatt = arbeidGjenopptatt,
             sykmeldingSkrevet = sykmeldingSkrevet,
             egenmeldingsdagerFraSykmelding = egenmeldingsdagerFraSykmelding,
             soknadsperioder = soknadsperioder,
             sporsmal = sporsmal
         )
+    }
+
+    private fun String.tilSoknadstype(): Soknadstype {
+        return when (this) {
+            "SELVSTENDIGE_OG_FRILANSERE" -> Soknadstype.SELVSTENDIGE_OG_FRILANSERE
+            "OPPHOLD_UTLAND" -> Soknadstype.OPPHOLD_UTLAND
+            "ARBEIDSTAKERE" -> Soknadstype.ARBEIDSTAKERE
+            "ANNET_ARBEIDSFORHOLD" -> Soknadstype.ANNET_ARBEIDSFORHOLD
+            "ARBEIDSLEDIG" -> Soknadstype.ARBEIDSLEDIG
+            "BEHANDLINGSDAGER" -> Soknadstype.BEHANDLINGSDAGER
+            "REISETILSKUDD" -> Soknadstype.REISETILSKUDD
+            "GRADERT_REISETILSKUDD" -> Soknadstype.GRADERT_REISETILSKUDD
+            else -> {
+                sikkerLogg.error(
+                    "Søknad har ny Soknadstype som må støttes: {}, returnerer UKJENT enn så lenge", this
+                )
+                return Soknadstype.UKJENT
+            }
+        }
     }
 
     private fun JsonNode.tilSøknadsperioder(): Soknadsperioder {

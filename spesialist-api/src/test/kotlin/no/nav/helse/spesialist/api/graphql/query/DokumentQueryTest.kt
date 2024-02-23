@@ -6,6 +6,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
+import no.nav.helse.spesialist.api.graphql.schema.Soknadstype
 import no.nav.helse.spesialist.api.objectMapper
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -116,7 +117,7 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
                     dokumentId: "$dokumentId"
                     fnr: "$FØDSELSNUMMER"
                 ) {
-                    sykmeldingSkrevet, arbeidGjenopptatt, egenmeldingsdagerFraSykmelding, soknadsperioder {
+                    type, sykmeldingSkrevet, arbeidGjenopptatt, egenmeldingsdagerFraSykmelding, soknadsperioder {
                     fom, tom, grad, faktiskGrad, sykmeldingsgrad
                     }, sporsmal {
                         tag, sporsmalstekst, undertekst, svartype, svar {verdi}, undersporsmal { 
@@ -142,7 +143,8 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
             )
         }
 
-        assertEquals(5, dokument.size())
+        assertEquals(6, dokument.size())
+        assertEquals(Soknadstype.ARBEIDSTAKERE.name, dokument["type"]?.asText())
         assertEquals(arbeidGjenopptatt, dokument["arbeidGjenopptatt"].asText())
         assertEquals(sykmeldingSkrevet, dokument["sykmeldingSkrevet"].asText())
         assertEquals("2018-01-01", dokument["egenmeldingsdagerFraSykmelding"].first().asText())
@@ -175,7 +177,7 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
                     dokumentId: "$dokumentId"
                     fnr: "$FØDSELSNUMMER"
                 ) {
-                    sykmeldingSkrevet, arbeidGjenopptatt, egenmeldingsdagerFraSykmelding, soknadsperioder {
+                    type, sykmeldingSkrevet, arbeidGjenopptatt, egenmeldingsdagerFraSykmelding, soknadsperioder {
                     fom, tom, grad, faktiskGrad, sykmeldingsgrad
                     }, sporsmal {
                         tag, sporsmalstekst, undertekst, svartype, svar {verdi}, undersporsmal { 
@@ -312,6 +314,7 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
 
     @Language("JSON")
     private fun søknadJsonMedNeiSvar(arbeidGjenopptatt: String, sykmeldingSkrevet: String) = """{
+  "type": "ARBEIDSTAKERE",
   "arbeidGjenopptatt": "$arbeidGjenopptatt",
   "sykmeldingSkrevet": "$sykmeldingSkrevet",
   "egenmeldingsdagerFraSykmelding": ["2018-01-01"],
@@ -806,6 +809,7 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
 
     @Language("JSON")
     private fun søknadJsonMedJaSvar() = """{
+  "type": "ARBEIDSTAKERE",
   "arbeidGjenopptatt": "${LocalDate.now()}",
   "sykmeldingSkrevet": "${LocalDateTime.now()}",
   "egenmeldingsdagerFraSykmelding": ["2018-01-01"],
