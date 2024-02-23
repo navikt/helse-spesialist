@@ -10,23 +10,23 @@ import no.nav.helse.modell.utbetaling.Utbetaling
 import org.slf4j.LoggerFactory
 
 internal class UtbetalingsgodkjenningCommand(
+    private val id: UUID,
     private val behandlingId: UUID,
-    private val hendelseId: UUID,
+    private val fødselsnummer: String,
+    private val vedtaksperiodeId: UUID,
+    private val utbetaling: Utbetaling?,
+    private val sykefraværstilfelle: Sykefraværstilfelle,
     private val godkjent: Boolean,
-    private val saksbehandlerIdent: String,
-    private val epostadresse: String,
     private val godkjenttidspunkt: LocalDateTime,
+    private val ident: String,
+    private val epostadresse: String,
     private val årsak: String?,
     private val begrunnelser: List<String>?,
     private val kommentar: String?,
     private val saksbehandleroverstyringer: List<UUID>,
     private val godkjenningsbehovhendelseId: UUID,
     private val hendelseDao: HendelseDao,
-    private val godkjenningMediator: GodkjenningMediator,
-    private val vedtaksperiodeId: UUID,
-    private val fødselsnummer: String,
-    private val utbetaling: Utbetaling?,
-    private val sykefraværstilfelle: Sykefraværstilfelle
+    private val godkjenningMediator: GodkjenningMediator
 ) : Command {
 
     private companion object {
@@ -39,12 +39,12 @@ internal class UtbetalingsgodkjenningCommand(
         if (godkjent) {
             godkjenningMediator.saksbehandlerUtbetaling(
                 behandlingId = behandlingId,
-                hendelseId = hendelseId,
+                hendelseId = id,
                 context = context,
                 behov = behov,
                 vedtaksperiodeId = vedtaksperiodeId,
                 fødselsnummer = fødselsnummer,
-                saksbehandlerIdent = saksbehandlerIdent,
+                saksbehandlerIdent = ident,
                 saksbehandlerEpost = epostadresse,
                 godkjenttidspunkt = godkjenttidspunkt,
                 saksbehandleroverstyringer = saksbehandleroverstyringer,
@@ -57,7 +57,7 @@ internal class UtbetalingsgodkjenningCommand(
                 behov = behov,
                 vedtaksperiodeId = vedtaksperiodeId,
                 fødselsnummer = fødselsnummer,
-                saksbehandlerIdent = saksbehandlerIdent,
+                saksbehandlerIdent = ident,
                 saksbehandlerEpost = epostadresse,
                 godkjenttidspunkt = godkjenttidspunkt,
                 årsak = årsak,

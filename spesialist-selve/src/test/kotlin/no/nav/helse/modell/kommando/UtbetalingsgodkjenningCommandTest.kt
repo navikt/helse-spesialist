@@ -40,12 +40,18 @@ internal class UtbetalingsgodkjenningCommandTest {
         clearMocks(hendelseDao)
         commandContext = CommandContext(UUID.randomUUID())
         command = UtbetalingsgodkjenningCommand(
+            id = UUID.randomUUID(),
             behandlingId = UUID.randomUUID(),
-            hendelseId = UUID.randomUUID(),
+            fødselsnummer = fødselsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetaling = utbetaling,
+            sykefraværstilfelle = Sykefraværstilfelle(
+                fødselsnummer, 1.januar, listOf(Generasjon(UUID.randomUUID(), UUID.randomUUID(), 1.januar, 31.januar, 1.januar)), emptyList()
+            ),
             godkjent = GODKJENT,
-            saksbehandlerIdent = IDENT,
-            epostadresse = EPOST,
             godkjenttidspunkt = TIDSPUNKT,
+            ident = IDENT,
+            epostadresse = EPOST,
             årsak = null,
             begrunnelser = null,
             kommentar = null,
@@ -58,12 +64,6 @@ internal class UtbetalingsgodkjenningCommandTest {
                 mockk(relaxed = true),
                 mockk(relaxed = true),
                 mockk(relaxed = true),
-            ),
-            vedtaksperiodeId = vedtaksperiodeId,
-            fødselsnummer = fødselsnummer,
-            utbetaling = utbetaling,
-            sykefraværstilfelle = Sykefraværstilfelle(
-                fødselsnummer, 1.januar, listOf(Generasjon(UUID.randomUUID(), UUID.randomUUID(), 1.januar, 31.januar, 1.januar)), emptyList()
             )
         )
     }

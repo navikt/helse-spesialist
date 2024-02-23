@@ -12,14 +12,13 @@ import no.nav.helse.januar
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.kommando.UtbetalingsgodkjenningCommand
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Refusjonstype
 import no.nav.helse.modell.utbetaling.Refusjonstype.DELVIS_REFUSJON
 import no.nav.helse.modell.utbetaling.Utbetaling
-import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Generasjon
-import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
@@ -30,57 +29,48 @@ internal class SaksbehandlerløsningTest {
     private companion object {
         private val GODKJENNINGSBEHOV_ID = randomUUID()
         private val GODKJENTTIDSPUNKT = LocalDateTime.now()
-        private const val OPPGAVE_ID = 1L
         private const val FNR = "12020052345"
         private const val IDENT = "Z999999"
-        private const val HENDELSE_JSON = """{ "this_key_should_exist": "this_value_should_exist" }"""
         private const val GODKJENNINGSBEHOV_JSON = """{ "@event_name": "behov", "Godkjenning": {} }"""
         private val objectMapper = jacksonObjectMapper()
     }
 
     private val hendelseDao = mockk<HendelseDao>(relaxed = true)
-    private val utbetalingDao = mockk<UtbetalingDao>(relaxed = true)
 
-    private fun saksbehandlerløsning(godkjent: Boolean, saksbehandlerløsning: List<UUID> = emptyList()) = Saksbehandlerløsning(
-        id = randomUUID(),
-        behandlingId = randomUUID(),
-        fødselsnummer = FNR,
-        json = HENDELSE_JSON,
-        godkjent = godkjent,
-        saksbehandlerIdent = IDENT,
-        epostadresse = "saksbehandler@nav.no",
-        godkjenttidspunkt = GODKJENTTIDSPUNKT,
-        årsak = null,
-        begrunnelser = null,
-        kommentar = null,
-        saksbehandleroverstyringer = saksbehandlerløsning,
-        oppgaveId = OPPGAVE_ID,
-        godkjenningsbehovhendelseId = GODKJENNINGSBEHOV_ID,
-        hendelseDao = hendelseDao,
-        oppgaveDao = mockk(relaxed = true),
-        godkjenningMediator = GodkjenningMediator(
-            mockk(relaxed = true),
-            mockk(),
-            mockk(),
-            mockk(),
-            mockk(),
-        ),
-        utbetalingDao = utbetalingDao,
-        sykefraværstilfelle = Sykefraværstilfelle(FNR, 1.januar, listOf(Generasjon(randomUUID(), randomUUID(), 1.januar, 31.januar, 1.januar)), emptyList()),
-    )
+    private fun saksbehandlerløsning(godkjent: Boolean, saksbehandlerløsning: List<UUID> = emptyList(), arbeidsgiverbeløp: Int = 0, personbeløp: Int = 0): UtbetalingsgodkjenningCommand {
+        val vedtaksperiodeId = randomUUID()
+        return UtbetalingsgodkjenningCommand(
+            id = randomUUID(),
+            behandlingId = randomUUID(),
+            fødselsnummer = FNR,
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetaling = Utbetaling(randomUUID(), arbeidsgiverbeløp, personbeløp, Utbetalingtype.UTBETALING),
+            sykefraværstilfelle = Sykefraværstilfelle(
+                fødselsnummer = FNR,
+                skjæringstidspunkt = 1.januar,
+                gjeldendeGenerasjoner = listOf(Generasjon(randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar)),
+                skjønnsfastatteSykepengegrunnlag = emptyList()
+            ),
+            godkjent = godkjent,
+            ident = IDENT,
+            epostadresse = "saksbehandler@nav.no",
+            godkjenttidspunkt = GODKJENTTIDSPUNKT,
+            årsak = null,
+            begrunnelser = null,
+            kommentar = null,
+            saksbehandleroverstyringer = saksbehandlerløsning,
+            godkjenningsbehovhendelseId = GODKJENNINGSBEHOV_ID,
+            hendelseDao = hendelseDao,
+            godkjenningMediator = GodkjenningMediator(mockk(relaxed = true), mockk(), mockk(), mockk(), mockk()),
+        )
+    }
 
     private val context = CommandContext(randomUUID())
 
     @Test
     fun `løser godkjenningsbehov`() {
         every { hendelseDao.finnUtbetalingsgodkjenningbehovJson(GODKJENNINGSBEHOV_ID) } returns GODKJENNINGSBEHOV_JSON
-        every { utbetalingDao.utbetalingFor(OPPGAVE_ID) } returns Utbetaling(
-            randomUUID(),
-            1000,
-            1000,
-            Utbetalingtype.UTBETALING,
-        )
-        val saksbehandlerløsning = saksbehandlerløsning(true)
+        val saksbehandlerløsning = saksbehandlerløsning(true, arbeidsgiverbeløp = 1000, personbeløp = 1000)
         assertTrue(saksbehandlerløsning.execute(context))
         assertLøsning(true, DELVIS_REFUSJON)
     }
@@ -88,12 +78,6 @@ internal class SaksbehandlerløsningTest {
     @Test
     fun `løser godkjenningsbehov med saksbehandleroverstyringer`() {
         every { hendelseDao.finnUtbetalingsgodkjenningbehovJson(GODKJENNINGSBEHOV_ID) } returns GODKJENNINGSBEHOV_JSON
-        every { utbetalingDao.utbetalingFor(OPPGAVE_ID) } returns Utbetaling(
-            randomUUID(),
-            1000,
-            1000,
-            Utbetalingtype.UTBETALING,
-        )
         val  saksbehandleroverstyringer = listOf(randomUUID(), randomUUID())
         val saksbehandlerløsning = saksbehandlerløsning(true, saksbehandleroverstyringer)
         assertTrue(saksbehandlerløsning.execute(context))
@@ -109,13 +93,7 @@ internal class SaksbehandlerløsningTest {
     @Test
     fun `løser godkjenningsbehov ved avvist utbetaling`() {
         every { hendelseDao.finnUtbetalingsgodkjenningbehovJson(GODKJENNINGSBEHOV_ID) } returns GODKJENNINGSBEHOV_JSON
-        every { utbetalingDao.utbetalingFor(OPPGAVE_ID) } returns Utbetaling(
-            randomUUID(),
-            1000,
-            1000,
-            Utbetalingtype.UTBETALING,
-        )
-        val saksbehandlerløsning = saksbehandlerløsning(false)
+        val saksbehandlerløsning = saksbehandlerløsning(false, arbeidsgiverbeløp = 1000, personbeløp = 1000)
         assertTrue(saksbehandlerløsning.execute(context))
         assertLøsning(false, DELVIS_REFUSJON)
     }

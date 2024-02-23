@@ -95,6 +95,7 @@ import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOppdatering
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOpprettet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnet
+import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.modell.vedtaksperiode.vedtak.VedtakFattet
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -463,7 +464,7 @@ internal class HendelseMediator(
         oppgaveId: Long,
         context: MessageContext,
     ) {
-        utfør(
+        håndter(
             fødselsnummer, hendelsefabrikk.saksbehandlerløsning(
                 id,
                 behandlingId,
@@ -707,6 +708,7 @@ internal class HendelseMediator(
                 is OverstyringArbeidsforhold -> iverksett(hendelsefabrikk.overstyringArbeidsforhold(hendelse), hendelse.id, commandContext)
                 is Godkjenningsbehov -> iverksett(hendelsefabrikk.godkjenningsbehov(hendelse), hendelse.id, commandContext)
                 is OverstyringInntektOgRefusjon -> iverksett(hendelsefabrikk.overstyrInntektOgRefusjon(hendelse), hendelse.id, commandContext)
+                is Saksbehandlerløsning -> iverksett(hendelsefabrikk.utbetalingsgodkjenning(hendelse), hendelse.id, commandContext)
                 else -> throw IllegalArgumentException("Personhendelse må håndteres")
             }
             behovMediator.håndter(hendelse, commandContext, contextId, messageContext)

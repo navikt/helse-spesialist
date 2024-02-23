@@ -31,6 +31,7 @@ import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.KobleVedtaksperiodeTilOverstyring
 import no.nav.helse.modell.kommando.TilbakedateringGodkjent
 import no.nav.helse.modell.kommando.TilbakedateringGodkjentCommand
+import no.nav.helse.modell.kommando.UtbetalingsgodkjenningCommand
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.overstyring.OverstyringIgangsatt
 import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver
@@ -320,9 +321,6 @@ internal class Hendelsefabrikk(
         oppgaveId: Long,
         json: String,
     ): Saksbehandlerløsning {
-        val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(oppgaveId)
-        val skjæringstidspunkt = generasjonRepository.skjæringstidspunktFor(vedtaksperiodeId = vedtaksperiodeId)
-        val sykefraværstilfelle = sykefraværstilfelle(fødselsnummer, skjæringstidspunkt)
         return Saksbehandlerløsning(
             id = id,
             behandlingId = behandlingId,
@@ -337,12 +335,7 @@ internal class Hendelsefabrikk(
             kommentar = kommentar,
             saksbehandleroverstyringer = saksbehandleroverstyringer,
             oppgaveId = oppgaveId,
-            godkjenningsbehovhendelseId = godkjenningsbehovhendelseId,
-            hendelseDao = hendelseDao,
-            oppgaveDao = oppgaveDao,
-            godkjenningMediator = godkjenningMediator,
-            utbetalingDao = utbetalingDao,
-            sykefraværstilfelle = sykefraværstilfelle
+            godkjenningsbehovhendelseId = godkjenningsbehovhendelseId
         )
     }
 
@@ -779,6 +772,34 @@ internal class Hendelsefabrikk(
             overstyringDao = overstyringDao,
             overstyringMediator = overstyringMediator,
             json = hendelse.toJson()
+        )
+    }
+
+    fun utbetalingsgodkjenning(hendelse: Saksbehandlerløsning): UtbetalingsgodkjenningCommand {
+        val oppgaveId = hendelse.oppgaveId
+        val fødselsnummer = hendelse.fødselsnummer()
+        val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(oppgaveId)
+        val skjæringstidspunkt = generasjonRepository.skjæringstidspunktFor(vedtaksperiodeId)
+        val sykefraværstilfelle = sykefraværstilfelle(fødselsnummer, skjæringstidspunkt)
+        val utbetaling = utbetalingDao.utbetalingFor(oppgaveId)
+        return UtbetalingsgodkjenningCommand(
+            id = hendelse.id,
+            behandlingId = hendelse.behandlingId,
+            fødselsnummer = fødselsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetaling = utbetaling,
+            sykefraværstilfelle = sykefraværstilfelle,
+            godkjent = hendelse.godkjent,
+            godkjenttidspunkt = hendelse.godkjenttidspunkt,
+            ident = hendelse.saksbehandlerIdent,
+            epostadresse = hendelse.epostadresse,
+            årsak = hendelse.årsak,
+            begrunnelser = hendelse.begrunnelser,
+            kommentar = hendelse.kommentar,
+            saksbehandleroverstyringer = hendelse.saksbehandleroverstyringer,
+            godkjenningsbehovhendelseId = hendelse.godkjenningsbehovhendelseId,
+            hendelseDao = hendelseDao,
+            godkjenningMediator = godkjenningMediator
         )
     }
 
