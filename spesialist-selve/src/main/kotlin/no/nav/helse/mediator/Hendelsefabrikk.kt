@@ -45,6 +45,7 @@ import no.nav.helse.modell.person.SøknadSendtCommand
 import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrArbeidsforholdCommand
+import no.nav.helse.modell.saksbehandler.handlinger.OverstyrInntektOgRefusjonCommand
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyringArbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyringInntektOgRefusjon
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsettingSykepengegrunnlag
@@ -361,8 +362,6 @@ internal class Hendelsefabrikk(
         skjæringstidspunkt = skjæringstidspunkt,
         opprettet = opprettet,
         json = json,
-        overstyringDao = overstyringDao,
-        overstyringMediator = overstyringMediator,
     )
 
     fun skjønnsfastsettingSykepengegrunnlag(
@@ -762,6 +761,20 @@ internal class Hendelsefabrikk(
             skjæringstidspunkt = hendelse.skjæringstidspunkt,
             oid = hendelse.oid,
             overstyrteArbeidsforhold = hendelse.overstyrteArbeidsforhold,
+            opprettet = hendelse.opprettet,
+            overstyringDao = overstyringDao,
+            overstyringMediator = overstyringMediator,
+            json = hendelse.toJson()
+        )
+    }
+
+    fun overstyrInntektOgRefusjon(hendelse: OverstyringInntektOgRefusjon): OverstyrInntektOgRefusjonCommand {
+        return OverstyrInntektOgRefusjonCommand(
+            id = hendelse.id,
+            fødselsnummer = hendelse.fødselsnummer(),
+            oid = hendelse.oid,
+            skjæringstidspunkt = hendelse.skjæringstidspunkt,
+            arbeidsgivere = hendelse.arbeidsgivere,
             opprettet = hendelse.opprettet,
             overstyringDao = overstyringDao,
             overstyringMediator = overstyringMediator,

@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.mediator.OverstyringMediator
-import no.nav.helse.mediator.meldinger.Kommandohendelse
+import no.nav.helse.mediator.meldinger.Personhendelse
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.PersisterOverstyringInntektOgRefusjonCommand
@@ -21,14 +21,27 @@ import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver
 internal class OverstyringInntektOgRefusjon(
     override val id: UUID,
     private val fødselsnummer: String,
-    oid: UUID,
-    arbeidsgivere: List<OverstyrtArbeidsgiver>,
-    skjæringstidspunkt: LocalDate,
-    opprettet: LocalDateTime,
+    val oid: UUID,
+    val arbeidsgivere: List<OverstyrtArbeidsgiver>,
+    val skjæringstidspunkt: LocalDate,
+    val opprettet: LocalDateTime,
     private val json: String,
+) : Personhendelse {
+    override fun fødselsnummer() = fødselsnummer
+    override fun toJson() = json
+}
+
+internal class OverstyrInntektOgRefusjonCommand(
+    id: UUID,
+    fødselsnummer: String,
+    oid: UUID,
+    skjæringstidspunkt: LocalDate,
+    arbeidsgivere: List<OverstyrtArbeidsgiver>,
+    opprettet: LocalDateTime,
     overstyringDao: OverstyringDao,
     overstyringMediator: OverstyringMediator,
-) : Kommandohendelse, MacroCommand() {
+    json: String
+) : MacroCommand() {
     override val commands: List<Command> = listOf(
         PersisterOverstyringInntektOgRefusjonCommand(
             oid = oid,
@@ -47,8 +60,5 @@ internal class OverstyringInntektOgRefusjon(
             overstyringDao = overstyringDao,
         )
     )
-
-    override fun fødselsnummer() = fødselsnummer
-    override fun toJson() = json
 
 }

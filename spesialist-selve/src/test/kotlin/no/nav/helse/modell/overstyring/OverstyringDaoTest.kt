@@ -357,8 +357,6 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
             opprettet = OPPRETTET,
             json = "{}",
-            overstyringDao = overstyringDao,
-            overstyringMediator = mockk(),
         )
     )
 
