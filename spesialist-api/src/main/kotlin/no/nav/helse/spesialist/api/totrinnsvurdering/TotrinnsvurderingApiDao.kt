@@ -15,16 +15,6 @@ class TotrinnsvurderingApiDao(dataSource: DataSource) : HelseDao(dataSource) {
         """, mapOf("vedtaksperiodeId" to vedtaksperiodeId)
     ).single(::tilTotrinnsvurdering)
 
-    fun hentAktiv(oppgaveId: Long): TotrinnsvurderingDto? = asSQL(
-        """
-           SELECT * FROM totrinnsvurdering
-           INNER JOIN vedtak v on totrinnsvurdering.vedtaksperiode_id = v.vedtaksperiode_id
-           INNER JOIN oppgave o on v.id = o.vedtak_ref
-           WHERE o.id = :oppgaveId
-           AND utbetaling_id_ref IS NULL
-        """, mapOf("oppgaveId" to oppgaveId)
-    ).single(::tilTotrinnsvurdering)
-
     private fun tilTotrinnsvurdering(row: Row) =
         TotrinnsvurderingDto(
             vedtaksperiodeId = row.uuid("vedtaksperiode_id"),

@@ -6,7 +6,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.TestRapidHelpers.meldinger
 import no.nav.helse.januar
-import no.nav.helse.modell.overstyring.Skjønnsfastsettingstype
+import no.nav.helse.modell.sykefraværstilfelle.Skjønnsfastsettingstype
 import no.nav.helse.modell.vedtaksperiode.vedtak.SkjønnsfastsettingopplysningerDto
 import no.nav.helse.modell.vedtaksperiode.vedtak.Sykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.vedtak.Sykepengevedtak

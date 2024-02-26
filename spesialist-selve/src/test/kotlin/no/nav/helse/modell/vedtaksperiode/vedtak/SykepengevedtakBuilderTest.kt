@@ -3,8 +3,8 @@ package no.nav.helse.modell.vedtaksperiode.vedtak
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.januar
-import no.nav.helse.modell.overstyring.Skjønnsfastsettingstype
 import no.nav.helse.modell.sykefraværstilfelle.SkjønnsfastattSykepengegrunnlag
+import no.nav.helse.modell.sykefraværstilfelle.Skjønnsfastsettingstype
 import no.nav.helse.modell.vedtaksperiode.vedtak.Faktatype.ETTER_HOVEDREGEL
 import no.nav.helse.modell.vedtaksperiode.vedtak.Faktatype.ETTER_SKJØNN
 import no.nav.helse.modell.vedtaksperiode.vedtak.Faktatype.I_INFOTRYGD

@@ -18,9 +18,7 @@ import org.junit.jupiter.api.Test
 internal class ReservasjonDaoTest : DatabaseIntegrationTest() {
 
     private companion object {
-        private const val FNR = "12345678911"
         private val objectMapper = jacksonObjectMapper()
-        private val SAKSBEHANDLER_OID = UUID.randomUUID()
     }
 
     @Test

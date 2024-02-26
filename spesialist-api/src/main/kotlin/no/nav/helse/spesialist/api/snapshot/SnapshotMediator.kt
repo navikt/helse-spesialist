@@ -1,10 +1,7 @@
 package no.nav.helse.spesialist.api.snapshot
 
-import java.util.UUID
 import no.nav.helse.spesialist.api.graphql.schema.Personinfo
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLBeregnetPeriode
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUtbetaling
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -32,16 +29,4 @@ class SnapshotMediator(private val snapshotDao: SnapshotApiDao, private val snap
         }
         return snapshot
     }
-
-    fun finnUtbetaling(fødselsnummer: String, utbetalingId: UUID): GraphQLUtbetaling? {
-        return hentSnapshot(fødselsnummer)?.second?.let {
-            it.arbeidsgivere.firstNotNullOfOrNull {  arbeidsgiver ->
-                arbeidsgiver.generasjoner.firstOrNull()?.perioder?.filterIsInstance<GraphQLBeregnetPeriode>()
-                    ?.find { periode ->
-                        UUID.fromString(periode.utbetaling.id) == utbetalingId
-                    }?.utbetaling
-            }
-        }
-    }
-
 }

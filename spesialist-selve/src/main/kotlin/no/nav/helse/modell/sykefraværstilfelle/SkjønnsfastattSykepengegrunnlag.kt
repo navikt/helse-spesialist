@@ -2,7 +2,6 @@ package no.nav.helse.modell.sykefraværstilfelle
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import no.nav.helse.modell.overstyring.Skjønnsfastsettingstype
 import no.nav.helse.modell.vedtaksperiode.vedtak.SykepengevedtakBuilder
 
 internal class SkjønnsfastattSykepengegrunnlag(
@@ -46,4 +45,10 @@ internal class SkjønnsfastattSykepengegrunnlag(
     internal companion object {
         internal fun List<SkjønnsfastattSykepengegrunnlag>.sortert() = sortedBy { it.opprettet }
     }
+}
+
+internal enum class Skjønnsfastsettingstype {
+    OMREGNET_ÅRSINNTEKT,
+    RAPPORTERT_ÅRSINNTEKT,
+    ANNET,
 }

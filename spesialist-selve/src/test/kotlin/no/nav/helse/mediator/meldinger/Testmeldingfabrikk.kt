@@ -12,15 +12,12 @@ import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.mediator.meldinger.Risikofunn.Companion.tilJson
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
-import no.nav.helse.modell.saksbehandler.OverstyrtInntektOgRefusjonEvent
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.modell.vilkårsprøving.LovhjemmelEvent
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
 import kotlin.random.Random.Default.nextLong
 
 internal object Testmeldingfabrikk {
@@ -172,49 +169,6 @@ internal object Testmeldingfabrikk {
                 "fom" to fom,
                 "tom" to tom,
                 "skjæringstidspunkt" to skjæringstidspunkt
-            )
-        )
-
-    fun lagSaksbehandlerSkjønnsfastsettingSykepengegrunnlag(
-        aktørId: String,
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-        vedtaksperiodeId: UUID,
-        skjæringstidspunkt: LocalDate = 1.januar,
-        saksbehandlerOid: UUID,
-        saksbehandlerEpost: String,
-        saksbehandlerIdent: String,
-        saksbehandlerNavn: String,
-        id: UUID,
-    ) =
-        nyHendelse(
-            id, "saksbehandler_skjonnsfastsetter_sykepengegrunnlag", mapOf(
-                "vedtaksperiodeId" to "$vedtaksperiodeId",
-                "fødselsnummer" to fødselsnummer,
-                "aktørId" to aktørId,
-                "arbeidsgivere" to listOf(
-                    mapOf(
-                        "organisasjonsnummer" to organisasjonsnummer,
-                        "årlig" to 600000.0,
-                        "fraÅrlig" to 500000.0,
-                        "årsak" to "Skjønnsfastsetting ved mer enn 25% avvik",
-                        "type" to "OMREGNET_ÅRSINNTEKT",
-                        "begrunnelseMal" to "Mal",
-                        "begrunnelseFritekst" to "Fritekst",
-                        "begrunnelseKonklusjon" to "Fritekst",
-                        "subsumsjon" to mapOf(
-                            "paragraf" to "8-30",
-                            "ledd" to "2",
-                            "bokstav" to null,
-                        ),
-                        "initierendeVedtaksperiodeId" to vedtaksperiodeId,
-                    )
-                ),
-                "skjæringstidspunkt" to skjæringstidspunkt,
-                "saksbehandlerIdent" to saksbehandlerIdent,
-                "saksbehandlerOid" to saksbehandlerOid,
-                "saksbehandlerNavn" to saksbehandlerNavn,
-                "saksbehandlerEpost" to saksbehandlerEpost,
             )
         )
 
@@ -600,65 +554,6 @@ internal object Testmeldingfabrikk {
                 "@løsning" to mapOf("dokument" to dokument),
             )
         )
-
-    fun lagOverstyringInntektOgRefusjon(
-        aktørId: String,
-        fødselsnummer: String,
-        arbeidsgivere: List<OverstyrtInntektOgRefusjonEvent.OverstyrtArbeidsgiverEvent> = listOf(
-            OverstyrtInntektOgRefusjonEvent.OverstyrtArbeidsgiverEvent(
-                organisasjonsnummer = Testdata.ORGNR,
-                månedligInntekt = 25000.0,
-                fraMånedligInntekt = 25001.0,
-                forklaring = "testbortforklaring",
-                subsumsjon = LovhjemmelEvent("8-28", "LEDD_1", "BOKSTAV_A", "folketrygdloven", "1970-01-01"),
-                refusjonsopplysninger = null,
-                fraRefusjonsopplysninger = null,
-                begrunnelse = "en begrunnelse"
-            )
-        ),
-        skjæringstidspunkt: LocalDate,
-        saksbehandleroid: UUID = UUID.randomUUID(),
-        saksbehandlernavn: String = "saksbehandler",
-        saksbehandlerepost: String = "saksbehandler@nav.no",
-        saksbehandlerident: String = "saksbehandlerIdent",
-        id: UUID = UUID.randomUUID(),
-    ) = nyHendelse(
-        id, "saksbehandler_overstyrer_inntekt_og_refusjon", mapOf(
-            "aktørId" to aktørId,
-            "fødselsnummer" to fødselsnummer,
-            "arbeidsgivere" to arbeidsgivere,
-            "saksbehandlerOid" to saksbehandleroid,
-            "saksbehandlerIdent" to saksbehandlerident,
-            "saksbehandlerNavn" to saksbehandlernavn,
-            "saksbehandlerEpost" to saksbehandlerepost,
-            "skjæringstidspunkt" to skjæringstidspunkt,
-        )
-    )
-
-    fun lagOverstyringArbeidsforhold(
-        aktørId: String,
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-        skjæringstidspunkt: LocalDate,
-        overstyrteArbeidsforhold: List<OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdFraApi>,
-        saksbehandleroid: UUID = UUID.randomUUID(),
-        saksbehandlernavn: String = "saksbehandler",
-        saksbehandlerepost: String = "sara.saksbehandler@nav.no",
-        saksbehandlerident: String = "saksbehandlerIdent",
-        id: UUID,
-    ) = nyHendelse(
-        id, "saksbehandler_overstyrer_arbeidsforhold", mapOf(
-            "aktørId" to aktørId,
-            "fødselsnummer" to fødselsnummer,
-            "organisasjonsnummer" to organisasjonsnummer,
-            "saksbehandlerOid" to saksbehandleroid,
-            "saksbehandlerIdent" to saksbehandlerident,
-            "saksbehandlerNavn" to saksbehandlernavn,
-            "saksbehandlerEpost" to saksbehandlerepost,
-            "skjæringstidspunkt" to skjæringstidspunkt,
-            "overstyrteArbeidsforhold" to overstyrteArbeidsforhold
-        )
-    )
 
     fun lagUtbetalingEndret(
         aktørId: String,

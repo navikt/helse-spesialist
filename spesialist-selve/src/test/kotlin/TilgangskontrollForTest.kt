@@ -7,8 +7,3 @@ object TilgangskontrollForTestHarIkkeTilgang: Tilgangskontroll {
         return false
     }
 }
-object TilgangskontrollForTestHarTilgang: Tilgangskontroll {
-    override fun harTilgangTil(oid: UUID, egenskaper: Collection<Egenskap>): Boolean {
-        return true
-    }
-}
