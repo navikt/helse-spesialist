@@ -27,8 +27,8 @@ data class SkjønnsfastsattArbeidsgiverForDatabase(
 )
 
 enum class SkjønnsfastsettingstypeForDatabase {
-    OMREGNET_ARSINNTEKT,
-    RAPPORTERT_ARSINNTEKT,
+    OMREGNET_ÅRSINNTEKT,
+    RAPPORTERT_ÅRSINNTEKT,
     ANNET,
 }
 

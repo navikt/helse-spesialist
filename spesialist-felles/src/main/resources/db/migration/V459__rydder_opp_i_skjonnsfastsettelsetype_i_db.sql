@@ -1,0 +1,2 @@
+update skjonnsfastsetting_sykepengegrunnlag set type = 'OMREGNET_ÅRSINNTEKT' where type = 'OMREGNET_ARSINNTEKT';
+update skjonnsfastsetting_sykepengegrunnlag set type = 'RAPPORTERT_ÅRSINNTEKT' where type = 'RAPPORTERT_ARSINNTEKT';

@@ -257,7 +257,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
                         årlig = INNTEKT,
                         fraÅrlig = INNTEKT + 1,
                         årsak = ÅRSAK,
-                        type = SkjønnsfastsettingstypeForDatabase.OMREGNET_ARSINNTEKT,
+                        type = SkjønnsfastsettingstypeForDatabase.OMREGNET_ÅRSINNTEKT,
                         begrunnelseMal = BEGRUNNELSEMAL,
                         begrunnelseKonklusjon = BEGRUNNELSEKONKLUSJON,
                         begrunnelseFritekst = BEGRUNNELSEFRITEKST,
