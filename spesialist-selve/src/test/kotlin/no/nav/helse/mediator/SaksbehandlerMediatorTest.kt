@@ -491,6 +491,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
 
     @Test
     fun `håndterer skjønnsfastsetting av sykepengegrunnlag`() {
+        nyPerson(fødselsnummer = FØDSELSNUMMER, organisasjonsnummer = ORGANISASJONSNUMMER, aktørId = AKTØR_ID)
         val skjønnsfastsetting = SkjønnsfastsettSykepengegrunnlagHandlingFraApi(
             fødselsnummer = FØDSELSNUMMER,
             aktørId = AKTØR_ID,
@@ -525,7 +526,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
 
         mediator.håndter(skjønnsfastsetting, saksbehandler)
 
-        val hendelse = testRapid.inspektør.hendelser("saksbehandler_skjonnsfastsetter_sykepengegrunnlag").first()
+        val hendelse = testRapid.inspektør.hendelser("skjønnsmessig_fastsettelse").first()
 
         assertNotNull(hendelse["@id"].asText())
         assertEquals(FØDSELSNUMMER, hendelse["fødselsnummer"].asText())
@@ -543,9 +544,6 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
             assertEquals("En årsak", it["årsak"].asText())
             assertEquals(25000.0, it["årlig"].asDouble())
             assertEquals(25001.0, it["fraÅrlig"].asDouble())
-            assertEquals("8-28", it["subsumsjon"]["paragraf"].asText())
-            assertEquals("3", it["subsumsjon"]["ledd"].asText())
-            Assertions.assertTrue(it["subsumsjon"]["bokstav"].isNull)
         }
         hendelse["arbeidsgivere"].last().let {
             assertEquals(ORGANISASJONSNUMMER_GHOST, it["organisasjonsnummer"].asText())
@@ -555,9 +553,6 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
             assertEquals("En årsak 2", it["årsak"].asText())
             assertEquals(21000.0, it["årlig"].asDouble())
             assertEquals(25001.0, it["fraÅrlig"].asDouble())
-            assertEquals("8-28", it["subsumsjon"]["paragraf"].asText())
-            assertEquals("3", it["subsumsjon"]["ledd"].asText())
-            Assertions.assertTrue(it["subsumsjon"]["bokstav"].isNull)
         }
     }
 

@@ -58,6 +58,15 @@ class Subsumsjon(
 
     }
 
+    class SporingSkjønnsfastsattSykepengegrunnlag(
+        vedtaksperioder: List<UUID>,
+        organisasjonsnummer: List<String>,
+        saksbehandler: List<String>,
+    ): Sporing(vedtaksperioder, organisasjonsnummer, saksbehandler) {
+        override fun ekstraSporing(): Map<String, List<String>> = emptyMap()
+    }
+
+
     enum class Utfall {
         VILKAR_BEREGNET
     }

@@ -19,5 +19,5 @@ data class OverstyrtTidslinjedagDto(
     val fraType: String,
     val grad: Int?,
     val fraGrad: Int?,
-    val subsumsjon: LovhjemmelDto?
+    val lovhjemmel: LovhjemmelDto?
 )

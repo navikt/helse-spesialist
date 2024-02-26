@@ -4,12 +4,15 @@ import DatabaseIntegrationTest
 import java.time.LocalDate
 import java.util.UUID
 import lagOrganisasjonsnummer
+import no.nav.helse.db.LovhjemmelForDatabase
 import no.nav.helse.db.OverstyrtTidslinjeForDatabase
 import no.nav.helse.db.OverstyrtTidslinjedagForDatabase
+import no.nav.helse.db.SkjønnsfastsattArbeidsgiverForDatabase
+import no.nav.helse.db.SkjønnsfastsattSykepengegrunnlagForDatabase
+import no.nav.helse.db.SkjønnsfastsettingstypeForDatabase
 import no.nav.helse.januar
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyringArbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyringInntektOgRefusjon
-import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsettingSykepengegrunnlag
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.overstyring.Skjonnsfastsettingstype
@@ -46,7 +49,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             grad = 100,
             fraType = Dagtype.Feriedag.toString(),
             fraGrad = null,
-            subsumsjon =  null,
+            lovhjemmel =  null,
         )
     )
     private val OPPRETTET = LocalDate.of(2022, 6, 9).atStartOfDay()
@@ -242,33 +245,35 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `Finner opprettede skjønnsfastsatte sykepengegrunnlag`() {
         opprettPerson()
-        skjønnsfastsettingSykepengegrunnlag(ID)
         overstyringDao.persisterSkjønnsfastsettingSykepengegrunnlag(
-            ID,
-            EKSTERN_HENDELSE_ID,
-            FNR,
-            listOf(
-                SkjønnsfastsattArbeidsgiver(
-                    organisasjonsnummer = ORGNUMMER,
-                    årlig = INNTEKT,
-                    fraÅrlig = INNTEKT + 1,
-                    årsak = ÅRSAK,
-                    type = Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
-                    begrunnelseMal = BEGRUNNELSEMAL,
-                    begrunnelseFritekst = BEGRUNNELSEFRITEKST,
-                    begrunnelseKonklusjon = BEGRUNNELSEKONKLUSJON,
-                    subsumsjon = Subsumsjon(paragraf = "87494"),
-                    initierendeVedtaksperiodeId = VEDTAKSPERIODE
-                )
+            SkjønnsfastsattSykepengegrunnlagForDatabase(
+                id = EKSTERN_HENDELSE_ID,
+                aktørId = AKTØR,
+                fødselsnummer = FNR,
+                skjæringstidspunkt = 1.januar,
+                arbeidsgivere = listOf(
+                    SkjønnsfastsattArbeidsgiverForDatabase(
+                        organisasjonsnummer = ORGNUMMER,
+                        årlig = INNTEKT,
+                        fraÅrlig = INNTEKT + 1,
+                        årsak = ÅRSAK,
+                        type = SkjønnsfastsettingstypeForDatabase.OMREGNET_ARSINNTEKT,
+                        begrunnelseMal = BEGRUNNELSEMAL,
+                        begrunnelseKonklusjon = BEGRUNNELSEKONKLUSJON,
+                        begrunnelseFritekst = BEGRUNNELSEFRITEKST,
+                        initierendeVedtaksperiodeId = VEDTAKSPERIODE.toString(),
+                        lovhjemmel = LovhjemmelForDatabase(
+                            paragraf = "paragraf"
+                        )
+                    )
+                ),
+                OPPRETTET
             ),
             OID,
-            SKJÆRINGSTIDSPUNKT,
-            OPPRETTET
         )
         val hentetSkjønnsfastsetting =
             overstyringApiDao.finnSkjønnsfastsettingSykepengegrunnlag(FNR, ORGNUMMER).first()
 
-        assertEquals(ID, hentetSkjønnsfastsetting.hendelseId)
         assertEquals(FNR, hentetSkjønnsfastsetting.fødselsnummer)
         assertEquals(ORGNUMMER, hentetSkjønnsfastsetting.organisasjonsnummer)
         assertEquals(
@@ -359,31 +364,6 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         )
     )
 
-    private fun skjønnsfastsettingSykepengegrunnlag(hendelseId: UUID) = hendelseDao.opprett(
-        SkjønnsfastsettingSykepengegrunnlag(
-            id = hendelseId,
-            fødselsnummer = FNR,
-            oid = OID,
-            arbeidsgivere = listOf(
-                SkjønnsfastsattArbeidsgiver(
-                    organisasjonsnummer = ORGNUMMER,
-                    årlig = INNTEKT,
-                    fraÅrlig = INNTEKT + 1,
-                    årsak = ÅRSAK,
-                    type = Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
-                    begrunnelseMal = BEGRUNNELSEMAL,
-                    begrunnelseFritekst = BEGRUNNELSEFRITEKST,
-                    begrunnelseKonklusjon = BEGRUNNELSEKONKLUSJON,
-                    subsumsjon = Subsumsjon(paragraf = "87494"),
-                    initierendeVedtaksperiodeId = VEDTAKSPERIODE
-                )
-            ),
-            skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
-            opprettet = OPPRETTET,
-            json = "{}",
-        )
-    )
-
     private fun overstyringArbeidsforhold() = OverstyringArbeidsforhold(
         id = ID,
         fødselsnummer = FNR,
@@ -408,6 +388,6 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             fraType = this.fraType.toString(),
             grad = this.grad,
             fraGrad = this.fraGrad,
-            subsumsjon = null,
+            lovhjemmel = null,
         )
 }

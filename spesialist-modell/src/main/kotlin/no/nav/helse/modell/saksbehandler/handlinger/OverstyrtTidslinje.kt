@@ -120,6 +120,6 @@ class OverstyrtTidslinjedag(
         fraType = fraType,
         grad = grad,
         fraGrad = fraGrad,
-        subsumsjon = lovhjemmel?.toDto()
+        lovhjemmel = lovhjemmel?.toDto()
     )
 }

@@ -57,8 +57,9 @@ internal class Saksbehandlingsmelder(private val rapidsConnection: RapidsConnect
 
     override fun sykepengegrunnlagSkjønnsfastsatt(fødselsnummer: String, event: SkjønnsfastsattSykepengegrunnlagEvent) {
         val jsonMessage = JsonMessage.newMessage(
-            "saksbehandler_skjonnsfastsetter_sykepengegrunnlag",
+            "skjønnsmessig_fastsettelse",
             listOfNotNull(
+                "@id" to event.id,
                 "aktørId" to event.aktørId,
                 "fødselsnummer" to event.fødselsnummer,
                 "skjæringstidspunkt" to event.skjæringstidspunkt,

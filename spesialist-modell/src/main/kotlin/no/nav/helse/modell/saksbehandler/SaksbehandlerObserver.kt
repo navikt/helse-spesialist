@@ -79,6 +79,7 @@ data class OverstyrtArbeidsforholdEvent(
 }
 
 data class SkjønnsfastsattSykepengegrunnlagEvent(
+    val id: UUID,
     val fødselsnummer: String,
     val aktørId: String,
     val saksbehandlerOid: UUID,
@@ -98,7 +99,6 @@ data class SkjønnsfastsattSykepengegrunnlagEvent(
         val begrunnelseMal: String?,
         val begrunnelseFritekst: String?,
         val begrunnelseKonklusjon: String?,
-        val subsumsjon: LovhjemmelEvent?,
         val initierendeVedtaksperiodeId: String?,
     )
 }

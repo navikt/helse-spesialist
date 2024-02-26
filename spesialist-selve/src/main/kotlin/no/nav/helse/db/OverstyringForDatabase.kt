@@ -19,5 +19,5 @@ data class OverstyrtTidslinjedagForDatabase(
     val fraType: String,
     val grad: Int?,
     val fraGrad: Int?,
-    val subsumsjon: SubsumsjonForDatabase?,
+    val lovhjemmel: LovhjemmelForDatabase?,
 )

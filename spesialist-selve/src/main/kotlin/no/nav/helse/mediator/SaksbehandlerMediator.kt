@@ -32,6 +32,7 @@ import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinje
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinjedag
 import no.nav.helse.modell.saksbehandler.handlinger.PåVent
 import no.nav.helse.modell.saksbehandler.handlinger.Refusjonselement
+import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -55,6 +56,7 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforho
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi.SkjønnsfastsettingstypeDto
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
@@ -323,33 +325,33 @@ internal class SaksbehandlerMediator(
 
     private fun SkjønnsfastsettSykepengegrunnlagHandlingFraApi.tilModellversjon(): SkjønnsfastsattSykepengegrunnlag {
         return SkjønnsfastsattSykepengegrunnlag(
-            aktørId,
-            fødselsnummer,
-            skjæringstidspunkt,
-            arbeidsgivere = arbeidsgivere.map { arbeidsgiverDto ->
-                SkjønnsfastsattSykepengegrunnlag.SkjønnsfastsattArbeidsgiver(
-                    arbeidsgiverDto.organisasjonsnummer,
-                    arbeidsgiverDto.årlig,
-                    arbeidsgiverDto.fraÅrlig,
-                    arbeidsgiverDto.årsak,
-                    type = when (arbeidsgiverDto.type) {
-                        SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi.SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT -> SkjønnsfastsattSykepengegrunnlag.SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT
-                        SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi.SkjønnsfastsettingstypeDto.RAPPORTERT_ÅRSINNTEKT -> SkjønnsfastsattSykepengegrunnlag.SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.RAPPORTERT_ÅRSINNTEKT
-                        SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi.SkjønnsfastsettingstypeDto.ANNET -> SkjønnsfastsattSykepengegrunnlag.SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.ANNET
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            skjæringstidspunkt = skjæringstidspunkt,
+            arbeidsgivere = arbeidsgivere.map {
+                SkjønnsfastsattArbeidsgiver(
+                    it.organisasjonsnummer,
+                    it.årlig,
+                    it.fraÅrlig,
+                    it.årsak,
+                    type = when (it.type) {
+                        SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT -> SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT
+                        SkjønnsfastsettingstypeDto.RAPPORTERT_ÅRSINNTEKT -> SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.RAPPORTERT_ÅRSINNTEKT
+                        SkjønnsfastsettingstypeDto.ANNET -> SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.ANNET
                     },
-                    begrunnelseMal = arbeidsgiverDto.begrunnelseMal,
-                    begrunnelseFritekst = arbeidsgiverDto.begrunnelseFritekst,
-                    begrunnelseKonklusjon = arbeidsgiverDto.begrunnelseKonklusjon,
-                    lovhjemmel = arbeidsgiverDto.lovhjemmel?.let {
+                    begrunnelseMal = it.begrunnelseMal,
+                    begrunnelseFritekst = it.begrunnelseFritekst,
+                    begrunnelseKonklusjon = it.begrunnelseKonklusjon,
+                    lovhjemmel = it.lovhjemmel?.let { lovhjemmel ->
                         Lovhjemmel(
-                            paragraf = it.paragraf,
-                            ledd = it.ledd,
-                            bokstav = it.bokstav,
-                            lovverk = it.lovverk,
-                            lovverksversjon = it.lovverksversjon
+                            paragraf = lovhjemmel.paragraf,
+                            ledd = lovhjemmel.ledd,
+                            bokstav = lovhjemmel.bokstav,
+                            lovverk = lovhjemmel.lovverk,
+                            lovverksversjon = lovhjemmel.lovverksversjon
                         )
                     },
-                    initierendeVedtaksperiodeId = arbeidsgiverDto.initierendeVedtaksperiodeId
+                    initierendeVedtaksperiodeId = it.initierendeVedtaksperiodeId
                 )
             }
         )

@@ -53,6 +53,8 @@ class Saksbehandler(
 
     internal fun håndter(hendelse: SkjønnsfastsattSykepengegrunnlag) {
         val event = hendelse.byggEvent(oid, navn, epostadresse, ident)
+        val subsumsjonEvent = hendelse.byggSubsumsjon(this.epostadresse).byggEvent()
+        observers.forEach { it.nySubsumsjon(subsumsjonEvent.fødselsnummer, subsumsjonEvent) }
         observers.forEach { it.sykepengegrunnlagSkjønnsfastsatt(event.fødselsnummer, event) }
     }
 
