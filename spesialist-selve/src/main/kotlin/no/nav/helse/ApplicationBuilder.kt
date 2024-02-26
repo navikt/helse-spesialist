@@ -46,7 +46,6 @@ import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.GodkjenningService
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Hendelsefabrikk
-import no.nav.helse.mediator.OverstyringMediator
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.TilgangskontrollørForReservasjon
 import no.nav.helse.mediator.dokument.DokumentMediator
@@ -382,8 +381,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         snapshotClient = snapshotClient,
         oppgaveMediator = { oppgaveMediator },
         godkjenningMediator = godkjenningMediator,
-        automatisering = automatisering,
-        overstyringMediator = OverstyringMediator(rapidsConnection)
+        automatisering = automatisering
     )
 
     init {

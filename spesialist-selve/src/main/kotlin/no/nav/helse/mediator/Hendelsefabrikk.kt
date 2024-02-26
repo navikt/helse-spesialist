@@ -43,8 +43,6 @@ import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.person.SøknadSendtCommand
 import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
-import no.nav.helse.modell.saksbehandler.handlinger.OverstyrArbeidsforholdCommand
-import no.nav.helse.modell.saksbehandler.handlinger.OverstyringArbeidsforhold
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfeller
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
@@ -87,7 +85,6 @@ import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.slf4j.LoggerFactory
@@ -129,7 +126,6 @@ internal class Hendelsefabrikk(
     private val generasjonRepository: ActualGenerasjonRepository = ActualGenerasjonRepository(dataSource),
     private val vergemålDao: VergemålDao = VergemålDao(dataSource),
     private val varselRepository: ActualVarselRepository = ActualVarselRepository(dataSource),
-    private val overstyringMediator: OverstyringMediator,
 ) {
     private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
     private val sykefraværstilfelleDao = SykefraværstilfelleDao(dataSource)
@@ -331,24 +327,6 @@ internal class Hendelsefabrikk(
             godkjenningsbehovhendelseId = godkjenningsbehovhendelseId
         )
     }
-
-    fun overstyringArbeidsforhold(
-        id: UUID,
-        fødselsnummer: String,
-        oid: UUID,
-        overstyrteArbeidsforhold: List<OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdFraApi>,
-        skjæringstidspunkt: LocalDate,
-        opprettet: LocalDateTime,
-        json: String,
-    ) = OverstyringArbeidsforhold(
-        id = id,
-        fødselsnummer = fødselsnummer,
-        oid = oid,
-        overstyrteArbeidsforhold = overstyrteArbeidsforhold,
-        skjæringstidspunkt = skjæringstidspunkt,
-        opprettet = opprettet,
-        json = json,
-    )
 
     fun adressebeskyttelseEndret(id: UUID, fødselsnummer: String, json: String) =
         AdressebeskyttelseEndret(
@@ -698,20 +676,6 @@ internal class Hendelsefabrikk(
             vedtakDao = vedtakDao,
             snapshotClient = snapshotClient,
             oppgaveMediator = oppgaveMediator
-        )
-    }
-
-    fun overstyringArbeidsforhold(hendelse: OverstyringArbeidsforhold): OverstyrArbeidsforholdCommand {
-        return OverstyrArbeidsforholdCommand(
-            id = hendelse.id,
-            fødselsnummer = hendelse.fødselsnummer(),
-            skjæringstidspunkt = hendelse.skjæringstidspunkt,
-            oid = hendelse.oid,
-            overstyrteArbeidsforhold = hendelse.overstyrteArbeidsforhold,
-            opprettet = hendelse.opprettet,
-            overstyringDao = overstyringDao,
-            overstyringMediator = overstyringMediator,
-            json = hendelse.toJson()
         )
     }
 

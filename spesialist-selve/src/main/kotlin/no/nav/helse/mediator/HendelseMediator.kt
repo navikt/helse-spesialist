@@ -19,7 +19,6 @@ import no.nav.helse.mediator.meldinger.GosysOppgaveEndretRiver
 import no.nav.helse.mediator.meldinger.MidnattRiver
 import no.nav.helse.mediator.meldinger.NyeVarslerRiver
 import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshotRiver
-import no.nav.helse.mediator.meldinger.OverstyringArbeidsforholdRiver
 import no.nav.helse.mediator.meldinger.OverstyringIgangsattRiver
 import no.nav.helse.mediator.meldinger.Personhendelse
 import no.nav.helse.mediator.meldinger.SykefraværstilfellerRiver
@@ -67,7 +66,6 @@ import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import no.nav.helse.modell.person.OppdaterPersonsnapshot
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.SøknadSendt
-import no.nav.helse.modell.saksbehandler.handlinger.OverstyringArbeidsforhold
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfeller
 import no.nav.helse.modell.utbetaling.UtbetalingAnnullert
 import no.nav.helse.modell.utbetaling.UtbetalingDao
@@ -97,7 +95,6 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.registrerTidsbrukForGodkjenningsbehov
 import no.nav.helse.registrerTidsbrukForHendelse
 import no.nav.helse.spesialist.api.Personhåndterer
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
 import org.slf4j.LoggerFactory
 
 internal class HendelseMediator(
@@ -151,7 +148,6 @@ internal class HendelseMediator(
             VedtaksperiodeForkastetRiver(it, this)
             VedtaksperiodeEndretRiver(it, this)
             AdressebeskyttelseEndretRiver(it, this)
-            OverstyringArbeidsforholdRiver(it, this)
             OverstyringIgangsattRiver(it, this)
             EgenAnsattløsning.EgenAnsattRiver(it, this)
             Vergemålløsning.VergemålRiver(it, this)
@@ -475,29 +471,6 @@ internal class HendelseMediator(
         )
     }
 
-    fun overstyringArbeidsforhold(
-        id: UUID,
-        fødselsnummer: String,
-        oid: UUID,
-        overstyrteArbeidsforhold: List<OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdFraApi>,
-        skjæringstidspunkt: LocalDate,
-        opprettet: LocalDateTime,
-        json: String,
-        context: MessageContext,
-    ) {
-        håndter(
-            fødselsnummer, hendelsefabrikk.overstyringArbeidsforhold(
-                id = id,
-                fødselsnummer = fødselsnummer,
-                oid = oid,
-                overstyrteArbeidsforhold = overstyrteArbeidsforhold,
-                skjæringstidspunkt = skjæringstidspunkt,
-                opprettet = opprettet,
-                json = json
-            ), context
-        )
-    }
-
     fun utbetalingAnnullert(
         message: JsonMessage,
         context: MessageContext,
@@ -650,7 +623,6 @@ internal class HendelseMediator(
                 is VedtakFattet -> håndter(hendelse)
                 is VedtaksperiodeEndret -> iverksett(hendelsefabrikk.vedtaksperiodeEndret(hendelse), hendelse.id, commandContext)
                 is VedtaksperiodeForkastet -> iverksett(hendelsefabrikk.vedtaksperiodeForkastet(hendelse), hendelse.id, commandContext)
-                is OverstyringArbeidsforhold -> iverksett(hendelsefabrikk.overstyringArbeidsforhold(hendelse), hendelse.id, commandContext)
                 is Godkjenningsbehov -> iverksett(hendelsefabrikk.godkjenningsbehov(hendelse), hendelse.id, commandContext)
                 is Saksbehandlerløsning -> iverksett(hendelsefabrikk.utbetalingsgodkjenning(hendelse), hendelse.id, commandContext)
                 else -> throw IllegalArgumentException("Personhendelse må håndteres")

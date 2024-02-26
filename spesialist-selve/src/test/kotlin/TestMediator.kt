@@ -9,7 +9,6 @@ import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Hendelsefabrikk
-import no.nav.helse.mediator.OverstyringMediator
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
@@ -70,7 +69,6 @@ internal class TestMediator(
         tilgangsgrupper = tilgangsgrupper
     )
     private val saksbehandlerMediator = SaksbehandlerMediator(dataSource, "versjonAvKode", testRapid, oppgaveMediator, tilgangsgrupper)
-    private val overstyringMediator = OverstyringMediator(testRapid)
     private val automatisering = Automatisering(
         risikovurderingDao = RisikovurderingDao(dataSource),
         automatiseringDao = AutomatiseringDao(dataSource),
@@ -98,7 +96,6 @@ internal class TestMediator(
         oppgaveMediator = { oppgaveMediator },
         godkjenningMediator = godkjenningMediator,
         automatisering = automatisering,
-        overstyringMediator = overstyringMediator,
     )
 
     init {

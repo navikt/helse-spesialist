@@ -16,7 +16,6 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.person.Kjønn
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdFraApi
 import org.junit.jupiter.api.Assertions.assertEquals
 
 internal class Meldingssender(private val testRapid: TestRapid) {
@@ -692,29 +691,6 @@ internal class Meldingssender(private val testRapid: TestRapid) {
                 Testmeldingfabrikk.lagOppdaterPersonsnapshot(aktørId, fødselsnummer, id)
             )
         }
-
-    fun sendOverstyrtArbeidsforhold(
-        aktørId: String,
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-        skjæringstidspunkt: LocalDate = 1.januar(1970),
-        saksbehandlerOid: UUID,
-        overstyrteArbeidsforhold: List<ArbeidsforholdFraApi> = listOf(
-            ArbeidsforholdFraApi(organisasjonsnummer, true, "begrunnelse", "forklaring")
-        ),
-    ): UUID = newUUID.also { id ->
-        testRapid.sendTestMessage(
-            Testmeldingfabrikk.lagOverstyringArbeidsforhold(
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                organisasjonsnummer = organisasjonsnummer,
-                skjæringstidspunkt = skjæringstidspunkt,
-                overstyrteArbeidsforhold = overstyrteArbeidsforhold,
-                id = id,
-                saksbehandleroid = saksbehandlerOid
-            )
-        )
-    }
 
     fun sendOverstyringIgangsatt(
         fødselsnummer: String,

@@ -1,7 +1,5 @@
 package no.nav.helse.modell.overstyring
 
-import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.queryOf
@@ -101,13 +99,6 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
             WHERE ekstern_hendelse_id = :eksternHendelseId
         """, mapOf("eksternHendelseId" to eksternHendelseId)
     ).single { row -> row.boolean(1) } ?: false
-
-    // Skal ikke kunne være null for fremtidige overstyringer. Vær obs hvis den skal brukes på eldre data.
-    fun finnEksternHendelseIdFraHendelseId(hendelseId: UUID) = requireNotNull(asSQL(
-        """ SELECT ekstern_hendelse_id FROM overstyring o
-            WHERE o.hendelse_ref = :hendelseId
-        """, mapOf("hendelseId" to hendelseId)
-    ).single { row -> row.uuid("ekstern_hendelse_id") })
 
     internal fun persisterOverstyringTidslinje(
         overstyrtTidslinje: OverstyrtTidslinjeForDatabase,
@@ -407,64 +398,6 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
                 )
             }
 
-        }
-    }
-
-    fun persisterOverstyringArbeidsforhold(
-        hendelseId: UUID,
-        eksternHendelseId: UUID,
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-        begrunnelse: String,
-        forklaring: String,
-        deaktivert: Boolean,
-        skjæringstidspunkt: LocalDate,
-        saksbehandlerRef: UUID,
-        tidspunkt: LocalDateTime,
-    ) {
-        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-            @Language("PostgreSQL")
-            val opprettOverstyringQuery = """
-                INSERT INTO overstyring(hendelse_ref, ekstern_hendelse_id, person_ref, saksbehandler_ref, tidspunkt)
-                SELECT :hendelse_id, :ekstern_hendelse_id, p.id, :saksbehandler_ref, :tidspunkt
-                FROM person p
-                WHERE p.fodselsnummer = :fodselsnummer
-            """.trimIndent()
-
-            @Language("PostgreSQL")
-            val opprettOverstyringArbeidsforholdQuery = """
-                INSERT INTO overstyring_arbeidsforhold(forklaring, deaktivert, skjaeringstidspunkt, overstyring_ref, begrunnelse, arbeidsgiver_ref)
-                SELECT :forklaring, :deaktivert, :skjaeringstidspunkt, :overstyring_ref, :begrunnelse, ag.id
-                FROM arbeidsgiver ag
-                WHERE ag.orgnummer = :orgnr
-            """.trimIndent()
-
-            val overstyringRef = session.run(
-                queryOf(
-                    opprettOverstyringQuery,
-                    mapOf(
-                        "hendelse_id" to hendelseId,
-                        "ekstern_hendelse_id" to eksternHendelseId,
-                        "saksbehandler_ref" to saksbehandlerRef,
-                        "tidspunkt" to tidspunkt,
-                        "fodselsnummer" to fødselsnummer.toLong()
-                    )
-                ).asUpdateAndReturnGeneratedKey
-            )
-
-            session.run(
-                queryOf(
-                    opprettOverstyringArbeidsforholdQuery,
-                    mapOf(
-                        "forklaring" to forklaring,
-                        "deaktivert" to deaktivert,
-                        "skjaeringstidspunkt" to skjæringstidspunkt,
-                        "overstyring_ref" to overstyringRef,
-                        "begrunnelse" to begrunnelse,
-                        "orgnr" to organisasjonsnummer.toLong()
-                    )
-                ).asUpdate
-            )
         }
     }
 }

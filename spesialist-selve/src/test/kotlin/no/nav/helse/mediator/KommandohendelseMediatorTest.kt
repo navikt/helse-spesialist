@@ -47,7 +47,6 @@ internal class KommandohendelseMediatorTest : AbstractDatabaseTest() {
         oppgaveMediator = { oppgaveMediator },
         godkjenningMediator = godkjenningMediator,
         automatisering = automatisering,
-        overstyringMediator = OverstyringMediator(testRapid),
     )
 
     private val hendelseMediator = HendelseMediator(

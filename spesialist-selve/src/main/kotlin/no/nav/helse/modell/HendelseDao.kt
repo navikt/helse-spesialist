@@ -17,7 +17,6 @@ import no.nav.helse.modell.HendelseDao.Hendelsetype.GODKJENT_TILBAKEDATERT_SYKME
 import no.nav.helse.modell.HendelseDao.Hendelsetype.GOSYS_OPPGAVE_ENDRET
 import no.nav.helse.modell.HendelseDao.Hendelsetype.NYE_VARSLER
 import no.nav.helse.modell.HendelseDao.Hendelsetype.OPPDATER_PERSONSNAPSHOT
-import no.nav.helse.modell.HendelseDao.Hendelsetype.OVERSTYRING_ARBEIDSFORHOLD
 import no.nav.helse.modell.HendelseDao.Hendelsetype.OVERSTYRING_IGANGSATT
 import no.nav.helse.modell.HendelseDao.Hendelsetype.SAKSBEHANDLERLØSNING
 import no.nav.helse.modell.HendelseDao.Hendelsetype.SYKEFRAVÆRSTILFELLER
@@ -37,7 +36,6 @@ import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import no.nav.helse.modell.person.OppdaterPersonsnapshot
 import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.person.toFødselsnummer
-import no.nav.helse.modell.saksbehandler.handlinger.OverstyringArbeidsforhold
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfeller
 import no.nav.helse.modell.utbetaling.UtbetalingAnnullert
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
@@ -232,7 +230,6 @@ internal class HendelseDao(private val dataSource: DataSource) {
         is VedtaksperiodeEndret -> VEDTAKSPERIODE_ENDRET
         is VedtaksperiodeForkastet -> VEDTAKSPERIODE_FORKASTET
         is Godkjenningsbehov -> GODKJENNING
-        is OverstyringArbeidsforhold -> OVERSTYRING_ARBEIDSFORHOLD
         is OverstyringIgangsatt -> OVERSTYRING_IGANGSATT
         is Saksbehandlerløsning -> SAKSBEHANDLERLØSNING
         is UtbetalingAnnullert -> UTBETALING_ANNULLERT
@@ -254,7 +251,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
     private enum class Hendelsetype {
         ADRESSEBESKYTTELSE_ENDRET, VEDTAKSPERIODE_ENDRET, VEDTAKSPERIODE_FORKASTET, GODKJENNING,
         SAKSBEHANDLERLØSNING, UTBETALING_ANNULLERT, OPPDATER_PERSONSNAPSHOT, UTBETALING_ENDRET,
-        VEDTAKSPERIODE_REBEREGNET, OVERSTYRING_ARBEIDSFORHOLD,
+        VEDTAKSPERIODE_REBEREGNET,
         OVERSTYRING_IGANGSATT, GOSYS_OPPGAVE_ENDRET, ENDRET_EGEN_ANSATT_STATUS, VEDTAK_FATTET,
         NYE_VARSLER, VEDTAKSPERIODE_OPPRETTET, SØKNAD_SENDT, VEDTAKSPERIODE_NY_UTBETALING, SYKEFRAVÆRSTILFELLER,
         GODKJENT_TILBAKEDATERT_SYKMELDING
