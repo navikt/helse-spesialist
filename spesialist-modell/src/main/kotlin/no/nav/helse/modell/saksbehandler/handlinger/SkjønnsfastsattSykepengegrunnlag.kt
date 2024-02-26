@@ -80,7 +80,7 @@ class SkjønnsfastsattArbeidsgiver(
             ),
             utfall = VILKAR_BEREGNET,
             sporing = SporingSkjønnsfastsattSykepengegrunnlag(
-                vedtaksperioder = this.mapNotNull { ag -> UUID.fromString(ag.initierendeVedtaksperiodeId) },
+                vedtaksperioder = this.mapNotNull { ag -> ag.initierendeVedtaksperiodeId?.let { UUID.fromString(it) } },
                 organisasjonsnummer = this.map { ag -> ag.organisasjonsnummer },
                 saksbehandler = listOf(saksbehandlerEpost)
             ),
