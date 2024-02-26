@@ -35,7 +35,6 @@ import no.nav.helse.modell.kommando.UtbetalingsgodkjenningCommand
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.overstyring.OverstyringIgangsatt
 import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver
-import no.nav.helse.modell.overstyring.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import no.nav.helse.modell.person.EndretEgenAnsattStatusCommand
 import no.nav.helse.modell.person.OppdaterPersonsnapshot
@@ -49,8 +48,6 @@ import no.nav.helse.modell.saksbehandler.handlinger.OverstyrArbeidsforholdComman
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrInntektOgRefusjonCommand
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyringArbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyringInntektOgRefusjon
-import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlagCommand
-import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsettingSykepengegrunnlag
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfeller
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
@@ -136,7 +133,6 @@ internal class Hendelsefabrikk(
     private val vergemålDao: VergemålDao = VergemålDao(dataSource),
     private val varselRepository: ActualVarselRepository = ActualVarselRepository(dataSource),
     private val overstyringMediator: OverstyringMediator,
-    private val versjonAvKode: String?,
 ) {
     private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
     private val sykefraværstilfelleDao = SykefraværstilfelleDao(dataSource)
@@ -348,39 +344,6 @@ internal class Hendelsefabrikk(
         opprettet: LocalDateTime,
         json: String,
     ) = OverstyringInntektOgRefusjon(
-        id = id,
-        fødselsnummer = fødselsnummer,
-        oid = oid,
-        arbeidsgivere = arbeidsgivere,
-        skjæringstidspunkt = skjæringstidspunkt,
-        opprettet = opprettet,
-        json = json,
-    )
-
-    fun skjønnsfastsattSykepengegrunnlag(hendelse: SkjønnsfastsettingSykepengegrunnlag): SkjønnsfastsattSykepengegrunnlagCommand {
-        return SkjønnsfastsattSykepengegrunnlagCommand(
-            id = hendelse.id,
-            fødselsnummer = hendelse.fødselsnummer(),
-            skjæringstidspunkt = hendelse.skjæringstidspunkt,
-            arbeidsgivere = hendelse.arbeidsgivere,
-            oid = hendelse.oid,
-            opprettet = hendelse.opprettet,
-            versjonAvKode = versjonAvKode,
-            overstyringDao = overstyringDao,
-            overstyringMediator = overstyringMediator,
-            json = hendelse.toJson()
-        )
-    }
-
-    fun skjønnsfastsettingSykepengegrunnlag(
-        id: UUID,
-        fødselsnummer: String,
-        oid: UUID,
-        arbeidsgivere: List<SkjønnsfastsattArbeidsgiver>,
-        skjæringstidspunkt: LocalDate,
-        opprettet: LocalDateTime,
-        json: String,
-    ) = SkjønnsfastsettingSykepengegrunnlag(
         id = id,
         fødselsnummer = fødselsnummer,
         oid = oid,

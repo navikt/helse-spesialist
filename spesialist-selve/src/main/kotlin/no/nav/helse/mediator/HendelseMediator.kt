@@ -23,7 +23,6 @@ import no.nav.helse.mediator.meldinger.OverstyringArbeidsforholdRiver
 import no.nav.helse.mediator.meldinger.OverstyringIgangsattRiver
 import no.nav.helse.mediator.meldinger.OverstyringInntektOgRefusjonRiver
 import no.nav.helse.mediator.meldinger.Personhendelse
-import no.nav.helse.mediator.meldinger.SkjønnsfastsettingSykepengegrunnlagRiver
 import no.nav.helse.mediator.meldinger.SykefraværstilfellerRiver
 import no.nav.helse.mediator.meldinger.SøknadSendtRiver
 import no.nav.helse.mediator.meldinger.TilbakedatertRiver
@@ -65,7 +64,6 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.TilbakedateringGodkjent
 import no.nav.helse.modell.overstyring.OverstyringIgangsatt
 import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver
-import no.nav.helse.modell.overstyring.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.person.AdressebeskyttelseEndretRiver
 import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import no.nav.helse.modell.person.OppdaterPersonsnapshot
@@ -73,7 +71,6 @@ import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyringArbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyringInntektOgRefusjon
-import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsettingSykepengegrunnlag
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfeller
 import no.nav.helse.modell.utbetaling.UtbetalingAnnullert
 import no.nav.helse.modell.utbetaling.UtbetalingDao
@@ -159,7 +156,6 @@ internal class HendelseMediator(
             AdressebeskyttelseEndretRiver(it, this)
             OverstyringInntektOgRefusjonRiver(it, this)
             OverstyringArbeidsforholdRiver(it, this)
-            SkjønnsfastsettingSykepengegrunnlagRiver(it, this)
             OverstyringIgangsattRiver(it, this)
             EgenAnsattløsning.EgenAnsattRiver(it, this)
             Vergemålløsning.VergemålRiver(it, this)
@@ -506,29 +502,6 @@ internal class HendelseMediator(
         )
     }
 
-    fun skjønnsfastsettingSykepengegrunnlag(
-        id: UUID,
-        fødselsnummer: String,
-        oid: UUID,
-        arbeidsgivere: List<SkjønnsfastsattArbeidsgiver>,
-        skjæringstidspunkt: LocalDate,
-        opprettet: LocalDateTime,
-        json: String,
-        context: MessageContext,
-    ) {
-        håndter(
-            fødselsnummer, hendelsefabrikk.skjønnsfastsettingSykepengegrunnlag(
-                id = id,
-                fødselsnummer = fødselsnummer,
-                oid = oid,
-                arbeidsgivere = arbeidsgivere,
-                skjæringstidspunkt = skjæringstidspunkt,
-                opprettet = opprettet,
-                json = json,
-            ), context
-        )
-    }
-
     fun overstyringArbeidsforhold(
         id: UUID,
         fødselsnummer: String,
@@ -708,7 +681,6 @@ internal class HendelseMediator(
                 is Godkjenningsbehov -> iverksett(hendelsefabrikk.godkjenningsbehov(hendelse), hendelse.id, commandContext)
                 is OverstyringInntektOgRefusjon -> iverksett(hendelsefabrikk.overstyrInntektOgRefusjon(hendelse), hendelse.id, commandContext)
                 is Saksbehandlerløsning -> iverksett(hendelsefabrikk.utbetalingsgodkjenning(hendelse), hendelse.id, commandContext)
-                is SkjønnsfastsettingSykepengegrunnlag -> iverksett(hendelsefabrikk.skjønnsfastsattSykepengegrunnlag(hendelse), hendelse.id, commandContext)
                 else -> throw IllegalArgumentException("Personhendelse må håndteres")
             }
             behovMediator.håndter(hendelse, commandContext, contextId, messageContext)

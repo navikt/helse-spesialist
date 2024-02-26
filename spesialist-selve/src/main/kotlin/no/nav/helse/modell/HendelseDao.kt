@@ -21,7 +21,6 @@ import no.nav.helse.modell.HendelseDao.Hendelsetype.OVERSTYRING_ARBEIDSFORHOLD
 import no.nav.helse.modell.HendelseDao.Hendelsetype.OVERSTYRING_IGANGSATT
 import no.nav.helse.modell.HendelseDao.Hendelsetype.OVERSTYRING_INNTEKT_OG_REFUSJON
 import no.nav.helse.modell.HendelseDao.Hendelsetype.SAKSBEHANDLERLØSNING
-import no.nav.helse.modell.HendelseDao.Hendelsetype.SKJØNNSFASTSETTING_SYKEPENGEGRUNNLAG
 import no.nav.helse.modell.HendelseDao.Hendelsetype.SYKEFRAVÆRSTILFELLER
 import no.nav.helse.modell.HendelseDao.Hendelsetype.SØKNAD_SENDT
 import no.nav.helse.modell.HendelseDao.Hendelsetype.UTBETALING_ANNULLERT
@@ -41,7 +40,6 @@ import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.person.toFødselsnummer
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyringArbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyringInntektOgRefusjon
-import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsettingSykepengegrunnlag
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfeller
 import no.nav.helse.modell.utbetaling.UtbetalingAnnullert
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
@@ -238,7 +236,6 @@ internal class HendelseDao(private val dataSource: DataSource) {
         is Godkjenningsbehov -> GODKJENNING
         is OverstyringInntektOgRefusjon -> OVERSTYRING_INNTEKT_OG_REFUSJON
         is OverstyringArbeidsforhold -> OVERSTYRING_ARBEIDSFORHOLD
-        is SkjønnsfastsettingSykepengegrunnlag -> SKJØNNSFASTSETTING_SYKEPENGEGRUNNLAG
         is OverstyringIgangsatt -> OVERSTYRING_IGANGSATT
         is Saksbehandlerløsning -> SAKSBEHANDLERLØSNING
         is UtbetalingAnnullert -> UTBETALING_ANNULLERT
@@ -263,6 +260,6 @@ internal class HendelseDao(private val dataSource: DataSource) {
         VEDTAKSPERIODE_REBEREGNET, OVERSTYRING_INNTEKT_OG_REFUSJON, OVERSTYRING_ARBEIDSFORHOLD,
         OVERSTYRING_IGANGSATT, GOSYS_OPPGAVE_ENDRET, ENDRET_EGEN_ANSATT_STATUS, VEDTAK_FATTET,
         NYE_VARSLER, VEDTAKSPERIODE_OPPRETTET, SØKNAD_SENDT, VEDTAKSPERIODE_NY_UTBETALING, SYKEFRAVÆRSTILFELLER,
-        SKJØNNSFASTSETTING_SYKEPENGEGRUNNLAG, GODKJENT_TILBAKEDATERT_SYKMELDING
+        GODKJENT_TILBAKEDATERT_SYKMELDING
     }
 }

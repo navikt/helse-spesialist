@@ -62,6 +62,7 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRef
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrInntektOgRefusjonHandlingFraApi.OverstyrArbeidsgiverFraApi.RefusjonselementFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrTidslinjeHandlingFraApi.OverstyrDagFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.SkjønnsfastsettSykepengegrunnlagHandlingFraApi
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spleis.graphql.HentSnapshot
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
@@ -562,28 +563,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         assertIngenEtterspurteBehov()
         assertIngenUtgåendeMeldinger()
         assertVedtaksperiodeEksisterer(vedtaksperiodeId)
-    }
-
-    protected fun håndterSkjønnsfastsattSykepengegrunnlag(
-        aktørId: String = AKTØR,
-        fødselsnummer: String = FØDSELSNUMMER,
-        organisasjonsnummer: String = ORGNR,
-        vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
-        saksbehandlerOid: UUID = SAKSBEHANDLER_OID,
-        saksbehandlerEpost: String = SAKSBEHANDLER_EPOST,
-        saksbehandlerNavn: String = SAKSBEHANDLER_NAVN,
-        saksbehandlerIdent: String = SAKSBEHANDLER_IDENT,
-    ) {
-        sisteMeldingId = meldingssender.sendSaksbehandlerSkjønnsfastsettingSykepengegrunnlag(
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            saksbehandlerOid = saksbehandlerOid,
-            saksbehandlerEpost = saksbehandlerEpost,
-            saksbehandlerIdent = saksbehandlerIdent,
-            saksbehandlerNavn = saksbehandlerNavn
-        )
     }
 
     protected fun håndterVedtaksperiodeEndret(
@@ -1191,6 +1170,39 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshotSomSkalHentes
         sisteMeldingId = meldingssender.sendOppdaterPersonsnapshot(aktørId, fødselsnummer)
         assertEtterspurteBehov("HentInfotrygdutbetalinger")
+    }
+
+    protected fun håndterSkjønnsfastsattSykepengegrunnlag(
+        aktørId: String = AKTØR,
+        fødselsnummer: String = FØDSELSNUMMER,
+        organisasjonsnummer: String = ORGNR,
+        vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
+        skjæringstidspunkt: LocalDate = 1.januar,
+        arbeidsgivere: List<SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi> = listOf(
+            SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi(
+                organisasjonsnummer = organisasjonsnummer,
+                årlig = 1.0,
+                fraÅrlig = 1.0,
+                årsak = "årsak",
+                type = SkjønnsfastsettSykepengegrunnlagHandlingFraApi.SkjønnsfastsattArbeidsgiverFraApi.SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT,
+                begrunnelseMal = "begrunnelseMal",
+                begrunnelseKonklusjon = "begrunnelseKonklusjon",
+                begrunnelseFritekst = "begrunnelseFritekst",
+                lovhjemmel = LovhjemmelFraApi(paragraf = "paragraf", ledd = "ledd", bokstav = "bokstav", lovverk = "folketrygdloven", lovverksversjon = ""),
+                initierendeVedtaksperiodeId = vedtaksperiodeId.toString(),
+            )
+        ),
+    ) {
+        håndterOverstyring(aktørId, fødselsnummer, organisasjonsnummer, "skjønnsmessig_fastsettelse") {
+            val handling = SkjønnsfastsettSykepengegrunnlagHandlingFraApi(
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                skjæringstidspunkt = skjæringstidspunkt,
+                arbeidsgivere = arbeidsgivere,
+            )
+            testMediator.håndter(handling, saksbehandler)
+            // Her må det gjøres kall til api for å sende inn overstyring av tidslinje
+        }
     }
 
     protected fun håndterOverstyrTidslinje(

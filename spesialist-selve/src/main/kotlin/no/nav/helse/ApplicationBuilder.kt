@@ -383,8 +383,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         oppgaveMediator = { oppgaveMediator },
         godkjenningMediator = godkjenningMediator,
         automatisering = automatisering,
-        overstyringMediator = OverstyringMediator(rapidsConnection),
-        versjonAvKode = versjonAvKode(env)
+        overstyringMediator = OverstyringMediator(rapidsConnection)
     )
 
     init {

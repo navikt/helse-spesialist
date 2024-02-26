@@ -99,7 +99,6 @@ internal class TestMediator(
         godkjenningMediator = godkjenningMediator,
         automatisering = automatisering,
         overstyringMediator = overstyringMediator,
-        versjonAvKode = "versjonAvKode",
     )
 
     init {

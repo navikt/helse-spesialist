@@ -29,7 +29,6 @@ internal class KommandohendelseDaoTest : DatabaseIntegrationTest() {
         godkjenningMediator = mockk(relaxed = true),
         automatisering = mockk(relaxed = true),
         overstyringMediator = mockk(),
-        versjonAvKode = "versjonAvKode",
     )
 
 
