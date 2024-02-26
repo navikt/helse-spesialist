@@ -40,8 +40,9 @@ internal class Saksbehandlingsmelder(private val rapidsConnection: RapidsConnect
 
     override fun inntektOgRefusjonOverstyrt(fødselsnummer: String, event: OverstyrtInntektOgRefusjonEvent) {
         val jsonMessage = JsonMessage.newMessage(
-            "saksbehandler_overstyrer_inntekt_og_refusjon",
+            "overstyr_inntekt_og_refusjon",
             listOfNotNull(
+                "@id" to event.id,
                 "aktørId" to event.aktørId,
                 "fødselsnummer" to event.fødselsnummer,
                 "skjæringstidspunkt" to event.skjæringstidspunkt,

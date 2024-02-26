@@ -15,6 +15,7 @@ interface SaksbehandlerObserver {
 }
 
 data class OverstyrtInntektOgRefusjonEvent(
+    val id: UUID,
     val fødselsnummer: String,
     val aktørId: String,
     val skjæringstidspunkt: LocalDate,

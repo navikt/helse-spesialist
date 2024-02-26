@@ -5,8 +5,11 @@ import java.time.LocalDate
 import java.util.UUID
 import lagOrganisasjonsnummer
 import no.nav.helse.db.LovhjemmelForDatabase
+import no.nav.helse.db.OverstyrtArbeidsgiverForDatabase
+import no.nav.helse.db.OverstyrtInntektOgRefusjonForDatabase
 import no.nav.helse.db.OverstyrtTidslinjeForDatabase
 import no.nav.helse.db.OverstyrtTidslinjedagForDatabase
+import no.nav.helse.db.RefusjonselementForDatabase
 import no.nav.helse.db.SkjønnsfastsattArbeidsgiverForDatabase
 import no.nav.helse.db.SkjønnsfastsattSykepengegrunnlagForDatabase
 import no.nav.helse.db.SkjønnsfastsettingstypeForDatabase
@@ -201,26 +204,33 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `Finner opprettede inntekt- og refusjonsoverstyringer`() {
         opprettPerson()
-        overstyrInntektOgRefusjon(ID)
         overstyringDao.persisterOverstyringInntektOgRefusjon(
-            ID,
-            EKSTERN_HENDELSE_ID,
-            FNR,
-            listOf(
-                OverstyrtArbeidsgiver(
-                    organisasjonsnummer = ORGNUMMER,
-                    begrunnelse = BEGRUNNELSE,
-                    forklaring = FORKLARING,
-                    månedligInntekt = INNTEKT,
-                    fraMånedligInntekt = INNTEKT + 1,
-                    refusjonsopplysninger = listOf(Refusjonselement(1.januar, 31.januar, 1000.0)),
-                    fraRefusjonsopplysninger = null,
-                    subsumsjon = Subsumsjon(paragraf = "87494")
+            OverstyrtInntektOgRefusjonForDatabase(
+                id = EKSTERN_HENDELSE_ID,
+                aktørId = AKTØR,
+                fødselsnummer = FNR,
+                skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
+                opprettet = OPPRETTET,
+                arbeidsgivere = listOf(
+                    OverstyrtArbeidsgiverForDatabase(
+                        organisasjonsnummer = ORGNUMMER,
+                        månedligInntekt = INNTEKT,
+                        fraMånedligInntekt = INNTEKT + 1,
+                        refusjonsopplysninger = listOf(
+                            RefusjonselementForDatabase(
+                                fom = 1.januar,
+                                tom = 31.januar,
+                                beløp = 1000.0,
+                            )
+                        ),
+                        fraRefusjonsopplysninger = null,
+                        begrunnelse = BEGRUNNELSE,
+                        forklaring = FORKLARING,
+                        lovhjemmel = null,
+                    )
                 )
             ),
             OID,
-            SKJÆRINGSTIDSPUNKT,
-            OPPRETTET
         )
         val hentetOverstyring = overstyringApiDao.finnOverstyringerAvInntekt(FNR, ORGNUMMER).first()
 
@@ -251,6 +261,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
                 aktørId = AKTØR,
                 fødselsnummer = FNR,
                 skjæringstidspunkt = 1.januar,
+                opprettet = OPPRETTET,
                 arbeidsgivere = listOf(
                     SkjønnsfastsattArbeidsgiverForDatabase(
                         organisasjonsnummer = ORGNUMMER,
@@ -262,12 +273,9 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
                         begrunnelseKonklusjon = BEGRUNNELSEKONKLUSJON,
                         begrunnelseFritekst = BEGRUNNELSEFRITEKST,
                         initierendeVedtaksperiodeId = VEDTAKSPERIODE.toString(),
-                        lovhjemmel = LovhjemmelForDatabase(
-                            paragraf = "paragraf"
-                        )
+                        lovhjemmel = LovhjemmelForDatabase(paragraf = "paragraf")
                     )
                 ),
-                OPPRETTET
             ),
             OID,
         )

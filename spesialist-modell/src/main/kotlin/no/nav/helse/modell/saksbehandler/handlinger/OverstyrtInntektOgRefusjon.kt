@@ -4,9 +4,13 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.modell.saksbehandler.OverstyrtInntektOgRefusjonEvent
 import no.nav.helse.modell.saksbehandler.Saksbehandler
+import no.nav.helse.modell.saksbehandler.handlinger.dto.OverstyrtArbeidsgiverDto
+import no.nav.helse.modell.saksbehandler.handlinger.dto.OverstyrtInntektOgRefusjonDto
+import no.nav.helse.modell.saksbehandler.handlinger.dto.RefusjonselementDto
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 
 class OverstyrtInntektOgRefusjon(
+    private val id: UUID = UUID.randomUUID(),
     private val aktørId: String,
     private val fødselsnummer: String,
     private val skjæringstidspunkt: LocalDate,
@@ -21,6 +25,7 @@ class OverstyrtInntektOgRefusjon(
 
     fun byggEvent(oid: UUID, navn: String, epost: String, ident: String) =
         OverstyrtInntektOgRefusjonEvent(
+            id = id,
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             skjæringstidspunkt = skjæringstidspunkt,
@@ -30,6 +35,14 @@ class OverstyrtInntektOgRefusjon(
             saksbehandlerIdent = ident,
             saksbehandlerEpost = epost
         )
+
+    fun toDto() = OverstyrtInntektOgRefusjonDto(
+        id = id,
+        aktørId = aktørId,
+        fødselsnummer = fødselsnummer,
+        skjæringstidspunkt = skjæringstidspunkt,
+        arbeidsgivere = arbeidsgivere.map(OverstyrtArbeidsgiver::toDto)
+    )
 }
 
 class OverstyrtArbeidsgiver(
@@ -52,6 +65,17 @@ class OverstyrtArbeidsgiver(
         forklaring = forklaring,
         subsumsjon = lovhjemmel?.byggEvent()
     )
+
+    fun toDto() = OverstyrtArbeidsgiverDto(
+        organisasjonsnummer = organisasjonsnummer,
+        månedligInntekt = månedligInntekt,
+        fraMånedligInntekt = fraMånedligInntekt,
+        refusjonsopplysninger = refusjonsopplysninger?.map(Refusjonselement::toDto),
+        fraRefusjonsopplysninger = fraRefusjonsopplysninger?.map(Refusjonselement::toDto),
+        begrunnelse = begrunnelse,
+        forklaring = forklaring,
+        lovhjemmel = lovhjemmel?.toDto(),
+    )
 }
 
 class Refusjonselement(
@@ -61,5 +85,7 @@ class Refusjonselement(
 ) {
     fun byggEvent() =
         OverstyrtInntektOgRefusjonEvent.OverstyrtArbeidsgiverEvent.OverstyrtRefusjonselementEvent(fom, tom, beløp)
+
+    fun toDto() = RefusjonselementDto(fom, tom, beløp)
 }
 

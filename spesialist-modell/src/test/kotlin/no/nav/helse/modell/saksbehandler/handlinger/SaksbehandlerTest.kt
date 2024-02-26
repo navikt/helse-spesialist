@@ -150,7 +150,13 @@ internal class SaksbehandlerTest {
 
         val saksbehandler = saksbehandler()
         saksbehandler.register(observer)
-        saksbehandler.håndter(OverstyrtInntektOgRefusjon("123", "1234", 1.januar, emptyList()))
+        saksbehandler.håndter(
+            OverstyrtInntektOgRefusjon(
+            aktørId = "123",
+            fødselsnummer = "1234",
+            skjæringstidspunkt = 1.januar,
+            arbeidsgivere = emptyList()
+        ))
         Assertions.assertEquals(true, observert)
     }
 

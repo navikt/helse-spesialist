@@ -102,8 +102,8 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             skjæringstidspunkt = 1.januar,
         )
 
-        assertOppgaver(UTBETALING_ID, "AvventerSaksbehandler", 0)
         assertOverstyrInntektOgRefusjon(FØDSELSNUMMER, 1)
+        assertOppgaver(UTBETALING_ID, "AvventerSaksbehandler", 0)
 
         val nyUtbetalingId = UUID.randomUUID()
         fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true, godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = nyUtbetalingId))

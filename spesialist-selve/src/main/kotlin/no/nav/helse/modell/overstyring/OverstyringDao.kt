@@ -7,6 +7,7 @@ import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.HelseDao
+import no.nav.helse.db.OverstyrtInntektOgRefusjonForDatabase
 import no.nav.helse.db.OverstyrtTidslinjeForDatabase
 import no.nav.helse.db.SkjønnsfastsattSykepengegrunnlagForDatabase
 import no.nav.helse.objectMapper
@@ -167,6 +168,74 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
                                 "fra_dagtype" to dag.fraType,
                                 "fra_grad" to dag.fraGrad,
                                 "overstyring_tidslinje_ref" to overstyringTidslinjeRef
+                            )
+                        ).asUpdate
+                    )
+                }
+            }
+        }
+    }
+
+    internal fun persisterOverstyringInntektOgRefusjon(
+        overstyrtInntektOgRefusjon: OverstyrtInntektOgRefusjonForDatabase,
+        saksbehandlerOid: UUID,
+    ) {
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+            @Language("PostgreSQL")
+            val opprettOverstyringQuery = """
+                INSERT INTO overstyring(hendelse_ref, ekstern_hendelse_id, person_ref, saksbehandler_ref, tidspunkt)
+                SELECT gen_random_uuid(), :ekstern_hendelse_id, p.id, :saksbehandler_ref, :tidspunkt
+                FROM person p
+                WHERE p.fodselsnummer = :fodselsnummer
+            """.trimIndent()
+
+            @Language("PostgreSQL")
+            val opprettOverstyringInntektOgRefusjonQuery = """
+                INSERT INTO overstyring_inntekt(forklaring, manedlig_inntekt, fra_manedlig_inntekt, skjaeringstidspunkt, overstyring_ref, refusjonsopplysninger, fra_refusjonsopplysninger, begrunnelse, arbeidsgiver_ref, subsumsjon)
+                SELECT :forklaring, :manedlig_inntekt, :fra_manedlig_inntekt, :skjaeringstidspunkt, :overstyring_ref, :refusjonsopplysninger::json, :fra_refusjonsopplysninger::json, :begrunnelse, ag.id, :subsumsjon::json
+                FROM arbeidsgiver ag
+                WHERE ag.orgnummer = :orgnr
+            """.trimIndent()
+
+            session.transaction { transactionalSession ->
+                val overstyringRef = transactionalSession.run(
+                    queryOf(
+                        opprettOverstyringQuery,
+                        mapOf(
+                            "ekstern_hendelse_id" to overstyrtInntektOgRefusjon.id,
+                            "fodselsnummer" to overstyrtInntektOgRefusjon.fødselsnummer.toLong(),
+                            "saksbehandler_ref" to saksbehandlerOid,
+                            "tidspunkt" to overstyrtInntektOgRefusjon.opprettet,
+                        )
+                    ).asUpdateAndReturnGeneratedKey
+                )
+                overstyrtInntektOgRefusjon.arbeidsgivere.forEach { arbeidsgiver ->
+                    transactionalSession.run(
+                        queryOf(
+                            opprettOverstyringInntektOgRefusjonQuery,
+                            mapOf(
+                                "forklaring" to arbeidsgiver.forklaring,
+                                "manedlig_inntekt" to arbeidsgiver.månedligInntekt,
+                                "fra_manedlig_inntekt" to arbeidsgiver.fraMånedligInntekt,
+                                "skjaeringstidspunkt" to overstyrtInntektOgRefusjon.skjæringstidspunkt,
+                                "overstyring_ref" to overstyringRef,
+                                "refusjonsopplysninger" to arbeidsgiver.refusjonsopplysninger?.let {
+                                    objectMapper.writeValueAsString(
+                                        arbeidsgiver.refusjonsopplysninger
+                                    )
+                                },
+                                "fra_refusjonsopplysninger" to arbeidsgiver.fraRefusjonsopplysninger?.let {
+                                    objectMapper.writeValueAsString(
+                                        arbeidsgiver.fraRefusjonsopplysninger
+                                    )
+                                },
+                                "begrunnelse" to arbeidsgiver.begrunnelse,
+                                "orgnr" to arbeidsgiver.organisasjonsnummer.toLong(),
+                                "subsumsjon" to arbeidsgiver.lovhjemmel?.let {
+                                    objectMapper.writeValueAsString(
+                                        arbeidsgiver.lovhjemmel
+                                    )
+                                }
                             )
                         ).asUpdate
                     )

@@ -1201,7 +1201,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 arbeidsgivere = arbeidsgivere,
             )
             testMediator.håndter(handling, saksbehandler)
-            // Her må det gjøres kall til api for å sende inn overstyring av tidslinje
+            // Her må det gjøres kall til api for å sende inn skjønnsfastsettelse
         }
     }
 
@@ -1250,14 +1250,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             val handling =
                 OverstyrInntektOgRefusjonHandlingFraApi(aktørId, fødselsnummer, skjæringstidspunkt, arbeidsgivere)
             testMediator.håndter(handling, saksbehandler)
-            sisteMeldingId = meldingssender.sendOverstyrtInntektOgRefusjon(
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                orgnummer = ORGNR,
-                skjæringstidspunkt = skjæringstidspunkt,
-                saksbehandlerOid = SAKSBEHANDLER_OID,
-                arbeidsgivere = arbeidsgivere.byggOverstyrArbeidsgiverEvent(),
-            )
         }
     }
 

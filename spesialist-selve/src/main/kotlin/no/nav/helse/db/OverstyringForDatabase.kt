@@ -21,3 +21,29 @@ data class OverstyrtTidslinjedagForDatabase(
     val fraGrad: Int?,
     val lovhjemmel: LovhjemmelForDatabase?,
 )
+
+data class OverstyrtInntektOgRefusjonForDatabase(
+    val id: UUID,
+    val aktørId: String,
+    val fødselsnummer: String,
+    val skjæringstidspunkt: LocalDate,
+    val arbeidsgivere: List<OverstyrtArbeidsgiverForDatabase>,
+    val opprettet: LocalDateTime,
+)
+
+data class OverstyrtArbeidsgiverForDatabase(
+    val organisasjonsnummer: String,
+    val månedligInntekt: Double,
+    val fraMånedligInntekt: Double,
+    val refusjonsopplysninger: List<RefusjonselementForDatabase>?,
+    val fraRefusjonsopplysninger: List<RefusjonselementForDatabase>?,
+    val begrunnelse: String,
+    val forklaring: String,
+    val lovhjemmel: LovhjemmelForDatabase?,
+)
+
+data class RefusjonselementForDatabase(
+    val fom: LocalDate,
+    val tom: LocalDate? = null,
+    val beløp: Double
+)
