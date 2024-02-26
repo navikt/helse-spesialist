@@ -17,11 +17,6 @@ dependencies {
 }
 
 tasks {
-    named<Test>("test") {
-        systemProperty("junit.jupiter.execution.parallel.enabled", "true")
-        systemProperty("junit.jupiter.execution.parallel.mode.default", "concurrent")
-        systemProperty("junit.jupiter.execution.parallel.config.strategy", "dynamic")
-    }
 
     named<Jar>("jar") {
         archiveBaseName.set("app")
