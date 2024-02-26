@@ -49,7 +49,6 @@ data class Tildeling(
     val navn: String,
     val epost: String,
     val oid: UUIDString,
-    val paaVent: Boolean?,
 )
 
 data class PaVent(
@@ -93,7 +92,6 @@ data class Person(
             navn = it.navn,
             epost = it.epost,
             oid = it.oid.toString(),
-            paaVent = it.påVent,
         )
     }
 

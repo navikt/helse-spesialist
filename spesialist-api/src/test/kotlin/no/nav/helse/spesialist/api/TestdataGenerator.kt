@@ -18,7 +18,6 @@ import kotlin.random.Random
 internal object TestdataGenerator {
 
     private const val ANDEL_TILDELTE = 0.20
-    private const val ANDEL_PÅ_VENT = 0.3
 
     private val saksbehandlere = List(9) {
         tilfeldigSaksbehandler()
@@ -67,7 +66,7 @@ internal object TestdataGenerator {
             vedtaksperiodeId = UUID.randomUUID().toString(),
             navn = tilfeldigNavn(),
             aktorId = tilfeldigAktørId(),
-            tildeling = tildeltTil?.let { Tildeling(it.navn, it.epostadresse, it.oid.toString(), Random.nextFloat() <= ANDEL_PÅ_VENT) },
+            tildeling = tildeltTil?.let { Tildeling(it.navn, it.epostadresse, it.oid.toString()) },
             egenskaper = listOf(periodetypeegenskap, oppgavetypeegenskap, mottakeregenskap, antallArbeidsforholdegenskap) + tilfeldigeUkategoriserteEgenskaper() + tilfeldigeStatusEgenskaper(),
             periodetype = periodetype,
             oppgavetype = oppgavetype,

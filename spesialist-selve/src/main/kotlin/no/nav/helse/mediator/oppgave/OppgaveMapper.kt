@@ -37,8 +37,7 @@ internal object OppgaveMapper {
                 Tildeling(
                     tildelt.navn,
                     tildelt.epostadresse,
-                    tildelt.oid.toString(),
-                    oppgave.påVent
+                    tildelt.oid.toString()
                 )
             },
             egenskaper = egenskaper.map { egenskap ->

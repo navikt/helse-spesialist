@@ -341,7 +341,6 @@ internal class OppgaveMediatorTest {
         assertEquals(SAKSBEHANDLERNAVN, oppgave.tildeling?.navn)
         assertEquals(SAKSBEHANDLEREPOST, oppgave.tildeling?.epost)
         assertEquals(SAKSBEHANDLEROID.toString(), oppgave.tildeling?.oid)
-        assertEquals(true, oppgave.tildeling?.paaVent)
         assertEquals(EGENSKAPER.size, oppgave.egenskaper.size)
     }
 

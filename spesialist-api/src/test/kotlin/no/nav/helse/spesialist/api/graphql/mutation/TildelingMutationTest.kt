@@ -33,7 +33,7 @@ internal class TildelingMutationTest : AbstractGraphQLApiTest() {
                     opprettTildeling(
                         oppgaveId: "$oppgaveId",
                     ) {
-                        navn, oid, epost, paaVent
+                        navn, oid, epost
                     }
                 }
             """
@@ -56,7 +56,7 @@ internal class TildelingMutationTest : AbstractGraphQLApiTest() {
                     opprettTildeling(
                         oppgaveId: "$oppgaveId",
                     ) {
-                        navn, oid, epost, paaVent
+                        navn, oid, epost
                     }
                 }
             """

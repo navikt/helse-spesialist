@@ -40,6 +40,7 @@ import no.nav.helse.spesialist.api.graphql.schema.Adressebeskyttelse
 import no.nav.helse.spesialist.api.graphql.schema.AntallOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.BehandledeOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.BehandletOppgave
+import no.nav.helse.spesialist.api.graphql.schema.Egenskap
 import no.nav.helse.spesialist.api.graphql.schema.Filtrering
 import no.nav.helse.spesialist.api.graphql.schema.Kategori
 import no.nav.helse.spesialist.api.graphql.schema.Kjonn
@@ -327,7 +328,6 @@ private fun tildelOppgave(randomOppgaver: MutableList<OppgaveTilBehandling>, han
         navn = saksbehandlerFraApi.navn,
         epost = saksbehandlerFraApi.epost,
         oid = saksbehandlerFraApi.oid.toString(),
-        paaVent = false,
     )))
 }
 
@@ -360,10 +360,10 @@ private fun List<OppgaveTilBehandling>.sorted(sortering: List<Oppgavesortering>)
     }
 
 private fun OppgaveTilBehandling.erTildelt(saksbehandlerFraApi: SaksbehandlerFraApi): Boolean =
-    !((this.tildeling == null || this.tildeling?.paaVent == true) || UUID.fromString(this.tildeling?.oid) != saksbehandlerFraApi.oid)
+    !((this.tildeling == null || this.egenskaper.any { it.egenskap == Egenskap.PA_VENT }) || UUID.fromString(this.tildeling?.oid) != saksbehandlerFraApi.oid)
 
 private fun OppgaveTilBehandling.erTildeltOgPåVent(saksbehandlerFraApi: SaksbehandlerFraApi): Boolean =
-    !((this.tildeling == null || this.tildeling?.paaVent == false) || UUID.fromString(this.tildeling?.oid) != saksbehandlerFraApi.oid)
+    !((this.tildeling == null || this.egenskaper.none { it.egenskap == Egenskap.PA_VENT }) || UUID.fromString(this.tildeling?.oid) != saksbehandlerFraApi.oid)
 
 private fun DecodedJWT.toJwtPrincipal() =
     JWTPrincipal(JWTParser().parsePayload(payload.decodeBase64String()))
