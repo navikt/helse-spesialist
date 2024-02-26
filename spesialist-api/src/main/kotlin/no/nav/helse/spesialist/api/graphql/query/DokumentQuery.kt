@@ -222,14 +222,14 @@ class DokumentQuery(
 
     private fun String.tilSoknadstype(): Soknadstype {
         return when (this) {
-            "SELVSTENDIGE_OG_FRILANSERE" -> Soknadstype.SELVSTENDIGE_OG_FRILANSERE
-            "OPPHOLD_UTLAND" -> Soknadstype.OPPHOLD_UTLAND
-            "ARBEIDSTAKERE" -> Soknadstype.ARBEIDSTAKERE
-            "ANNET_ARBEIDSFORHOLD" -> Soknadstype.ANNET_ARBEIDSFORHOLD
-            "ARBEIDSLEDIG" -> Soknadstype.ARBEIDSLEDIG
-            "BEHANDLINGSDAGER" -> Soknadstype.BEHANDLINGSDAGER
-            "REISETILSKUDD" -> Soknadstype.REISETILSKUDD
-            "GRADERT_REISETILSKUDD" -> Soknadstype.GRADERT_REISETILSKUDD
+            "SELVSTENDIGE_OG_FRILANSERE" -> Soknadstype.Selvstendig_og_frilanser
+            "OPPHOLD_UTLAND" -> Soknadstype.Opphold_utland
+            "ARBEIDSTAKERE" -> Soknadstype.Arbeidstaker
+            "ANNET_ARBEIDSFORHOLD" -> Soknadstype.Annet_arbeidsforhold
+            "ARBEIDSLEDIG" -> Soknadstype.Arbeidsledig
+            "BEHANDLINGSDAGER" -> Soknadstype.Behandlingsdager
+            "REISETILSKUDD" -> Soknadstype.Reisetilskudd
+            "GRADERT_REISETILSKUDD" -> Soknadstype.Gradert_reisetilskudd
             else -> {
                 sikkerLogg.error(
                     "Søknad har ny Soknadstype som må støttes: {}, returnerer UKJENT enn så lenge", this

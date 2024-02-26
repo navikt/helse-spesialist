@@ -144,7 +144,7 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
         }
 
         assertEquals(6, dokument.size())
-        assertEquals(Soknadstype.ARBEIDSTAKERE.name, dokument["type"]?.asText())
+        assertEquals(Soknadstype.Arbeidstaker.name, dokument["type"]?.asText())
         assertEquals(arbeidGjenopptatt, dokument["arbeidGjenopptatt"].asText())
         assertEquals(sykmeldingSkrevet, dokument["sykmeldingSkrevet"].asText())
         assertEquals("2018-01-01", dokument["egenmeldingsdagerFraSykmelding"].first().asText())

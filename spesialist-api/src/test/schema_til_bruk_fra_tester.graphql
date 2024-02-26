@@ -1100,14 +1100,14 @@ enum Skjonnsfastsettingstype {
 }
 
 enum Soknadstype {
-    ANNET_ARBEIDSFORHOLD
-    ARBEIDSLEDIG
-    ARBEIDSTAKERE
-    BEHANDLINGSDAGER
-    GRADERT_REISETILSKUDD
-    OPPHOLD_UTLAND
-    REISETILSKUDD
-    SELVSTENDIGE_OG_FRILANSERE
+    Annet_arbeidsforhold
+    Arbeidsledig
+    Arbeidstaker
+    Behandlingsdager
+    Gradert_reisetilskudd
+    Opphold_utland
+    Reisetilskudd
+    Selvstendig_og_frilanser
     UKJENT
 }
 

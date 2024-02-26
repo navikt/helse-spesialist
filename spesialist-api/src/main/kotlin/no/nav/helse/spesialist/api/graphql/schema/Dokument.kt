@@ -6,18 +6,18 @@ data class Soknad(
     val sykmeldingSkrevet: DateTimeString?,
     val egenmeldingsdagerFraSykmelding: List<DateString>?,
     val soknadsperioder: List<Soknadsperioder>?,
-    val sporsmal: List<Sporsmal>?
+    val sporsmal: List<Sporsmal>?,
 )
 
 enum class Soknadstype {
-    SELVSTENDIGE_OG_FRILANSERE,
-    OPPHOLD_UTLAND,
-    ARBEIDSTAKERE,
-    ANNET_ARBEIDSFORHOLD,
-    ARBEIDSLEDIG,
-    BEHANDLINGSDAGER,
-    REISETILSKUDD,
-    GRADERT_REISETILSKUDD,
+    Selvstendig_og_frilanser,
+    Opphold_utland,
+    Arbeidstaker,
+    Annet_arbeidsforhold,
+    Arbeidsledig,
+    Behandlingsdager,
+    Reisetilskudd,
+    Gradert_reisetilskudd,
     UKJENT,
 }
 
@@ -36,7 +36,7 @@ data class Sporsmal(
     val svartype: Svartype? = null,
     val svar: List<Svar>? = null,
     val undersporsmal: List<Sporsmal>? = null,
-    val kriterieForVisningAvUndersporsmal: Visningskriterium? = null
+    val kriterieForVisningAvUndersporsmal: Visningskriterium? = null,
 )
 
 enum class Svartype {
@@ -67,6 +67,7 @@ enum class Svartype {
     KILOMETER,
     UKJENT
 }
+
 enum class Visningskriterium {
     NEI,
     JA,
@@ -75,7 +76,7 @@ enum class Visningskriterium {
 }
 
 data class Svar(
-    val verdi: String? = null
+    val verdi: String? = null,
 )
 
 data class DokumentInntektsmelding(
@@ -94,23 +95,23 @@ data class DokumentInntektsmelding(
     val innsenderFulltNavn: String?,
     val innsenderTelefon: String?,
     val inntektEndringAarsak: InntektEndringAarsak? = null,
-    val avsenderSystem: AvsenderSystem? = null
+    val avsenderSystem: AvsenderSystem? = null,
 )
 
 data class Refusjon(
     val beloepPrMnd: Double?,
-    val opphoersdato: DateString?
+    val opphoersdato: DateString?,
 )
 
 data class EndringIRefusjon(
     val endringsdato: DateString?,
-    val beloep: Double?
+    val beloep: Double?,
 )
 
 data class OpphoerAvNaturalytelse(
     val naturalytelse: Naturalytelse? = null,
     val fom: DateString? = null,
-    val beloepPrMnd: Double? = null
+    val beloepPrMnd: Double? = null,
 )
 
 enum class Naturalytelse {
@@ -120,19 +121,19 @@ enum class Naturalytelse {
 data class GjenopptakelseNaturalytelse(
     val naturalytelse: Naturalytelse? = null,
     val fom: DateString? = null,
-    val beloepPrMnd: Double? = null
+    val beloepPrMnd: Double? = null,
 )
 
 data class IMPeriode(
     val fom: DateString?,
-    val tom: DateString?
+    val tom: DateString?,
 )
 
 data class InntektEndringAarsak(
     val aarsak: String,
     val perioder: List<IMPeriode>? = null,
     val gjelderFra: DateString? = null,
-    val bleKjent: DateString? = null
+    val bleKjent: DateString? = null,
 )
 
 data class AvsenderSystem(
