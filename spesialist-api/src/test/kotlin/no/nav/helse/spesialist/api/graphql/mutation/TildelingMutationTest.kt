@@ -48,7 +48,7 @@ internal class TildelingMutationTest : AbstractGraphQLApiTest() {
     fun `kan ikke tildele allerede tildelt oppgave`() {
         val oppgaveId = 1L
 
-        every { saksbehandlerhåndterer.håndter(any<TildelOppgave>(), any()) } throws OppgaveTildeltNoenAndre(TildelingApiDto("navn", "epost", UUID.randomUUID(), false))
+        every { saksbehandlerhåndterer.håndter(any<TildelOppgave>(), any()) } throws OppgaveTildeltNoenAndre(TildelingApiDto("navn", "epost", UUID.randomUUID()))
 
         val body = runQuery(
             """

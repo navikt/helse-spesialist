@@ -79,7 +79,6 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
         assertEquals(oid, tildeling.oid)
         assertEquals("navn@navnesen.no", tildeling.epost)
         assertEquals("Navn Navnesen", tildeling.navn)
-        assertEquals(false, tildeling.påVent)
     }
 
     private fun nySaksbehandler(oid: UUID = UUID.randomUUID()) {

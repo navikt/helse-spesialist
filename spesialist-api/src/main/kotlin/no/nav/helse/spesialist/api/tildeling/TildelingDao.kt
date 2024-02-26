@@ -13,7 +13,7 @@ class TildelingDao(private val dataSource: DataSource) : HelseDao(dataSource) {
 
     fun tildelingForPerson(fødselsnummer: String) = asSQL(
         """ 
-            SELECT s.epost, s.oid, s.navn, t.på_vent FROM person
+            SELECT s.epost, s.oid, s.navn FROM person
                  RIGHT JOIN vedtak v on person.id = v.person_ref
                  RIGHT JOIN oppgave o on v.id = o.vedtak_ref
                  RIGHT JOIN tildeling t on o.id = t.oppgave_id_ref
@@ -25,7 +25,6 @@ class TildelingDao(private val dataSource: DataSource) : HelseDao(dataSource) {
 
     private fun tildelingDto(it: Row) = TildelingApiDto(
         epost = it.string("epost"),
-        påVent = it.boolean("på_vent"),
         oid = UUID.fromString(it.string("oid")),
         navn = it.string("navn")
     )
@@ -37,7 +36,7 @@ class TildelingDao(private val dataSource: DataSource) : HelseDao(dataSource) {
     private fun Session.tildelingForOppgave(oppgaveId: Long): TildelingApiDto? {
         @Language("PostgreSQL")
         val query = """
-            SELECT s.oid, s.epost, s.navn, t.på_vent FROM tildeling t
+            SELECT s.oid, s.epost, s.navn FROM tildeling t
                 INNER JOIN saksbehandler s on s.oid = t.saksbehandler_ref
             WHERE t.oppgave_id_ref = :oppgaveId
             """

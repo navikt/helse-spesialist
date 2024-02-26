@@ -232,7 +232,7 @@ internal class SaksbehandlerMediator(
                 is no.nav.helse.modell.OppgaveIkkeTildelt -> OppgaveIkkeTildelt(oppgaveId)
                 is OppgaveTildeltNoenAndre -> {
                     val (oid, navn, epost) = this.saksbehandler.tilApiversjon()
-                    no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre(TildelingApiDto(navn, epost, oid, påVent))
+                    no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre(TildelingApiDto(navn, epost, oid))
                 }
                 is OppgaveAlleredeSendtBeslutter -> no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtBeslutter(oppgaveId)
                 is OppgaveAlleredeSendtIRetur -> no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtIRetur(oppgaveId)
