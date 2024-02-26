@@ -2,7 +2,9 @@ package no.nav.helse.mediator.overstyring
 
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.db.ArbeidsforholdForDatabase
 import no.nav.helse.db.LovhjemmelForDatabase
+import no.nav.helse.db.OverstyrtArbeidsforholdForDatabase
 import no.nav.helse.db.OverstyrtArbeidsgiverForDatabase
 import no.nav.helse.db.OverstyrtInntektOgRefusjonForDatabase
 import no.nav.helse.db.OverstyrtTidslinjeForDatabase
@@ -13,10 +15,12 @@ import no.nav.helse.db.SkjønnsfastsattSykepengegrunnlagForDatabase
 import no.nav.helse.db.SkjønnsfastsettingstypeForDatabase
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
+import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtInntektOgRefusjon
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinje
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
+import no.nav.helse.modell.saksbehandler.handlinger.dto.OverstyrtArbeidsforholdDto
 import no.nav.helse.modell.saksbehandler.handlinger.dto.OverstyrtInntektOgRefusjonDto
 import no.nav.helse.modell.saksbehandler.handlinger.dto.OverstyrtTidslinjeDto
 import no.nav.helse.modell.saksbehandler.handlinger.dto.RefusjonselementDto
@@ -28,6 +32,7 @@ class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
         when (overstyring) {
             is OverstyrtTidslinje -> lagreOverstyrTidslinje(overstyring, saksbehandlerOid)
             is OverstyrtInntektOgRefusjon -> lagreOverstyrtInntektOgRefusjon(overstyring, saksbehandlerOid)
+            is OverstyrtArbeidsforhold -> lagreOverstyrtArbeidsforhold(overstyring, saksbehandlerOid)
             is SkjønnsfastsattSykepengegrunnlag -> lagreSkjønnsfastsattSykepengegrunnlag(overstyring, saksbehandlerOid)
         }
     }
@@ -38,6 +43,10 @@ class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
 
     private fun lagreOverstyrtInntektOgRefusjon(overstyring: OverstyrtInntektOgRefusjon, saksbehandlerOid: UUID) {
         overstyringDao.persisterOverstyringInntektOgRefusjon(overstyring.toDto().tilDatabase(), saksbehandlerOid)
+    }
+
+    private fun lagreOverstyrtArbeidsforhold(overstyring: OverstyrtArbeidsforhold, saksbehandlerOid: UUID) {
+        overstyringDao.persisterOverstyringArbeidsforhold(overstyring.toDto().tilDatabase(), saksbehandlerOid)
     }
 
     private fun lagreSkjønnsfastsattSykepengegrunnlag(
@@ -53,6 +62,7 @@ class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
         fødselsnummer = fødselsnummer,
         organisasjonsnummer = organisasjonsnummer,
         begrunnelse = begrunnelse,
+        opprettet = LocalDateTime.now(),
         dager = dager.map {
             OverstyrtTidslinjedagForDatabase(
                 dato = it.dato,
@@ -63,7 +73,6 @@ class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
                 lovhjemmel = it.lovhjemmel?.tilDatabase(),
             )
         },
-        opprettet = LocalDateTime.now(),
     )
 
     private fun OverstyrtInntektOgRefusjonDto.tilDatabase() = OverstyrtInntektOgRefusjonForDatabase(
@@ -71,6 +80,7 @@ class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
         aktørId = aktørId,
         fødselsnummer = fødselsnummer,
         skjæringstidspunkt = skjæringstidspunkt,
+        opprettet = LocalDateTime.now(),
         arbeidsgivere = arbeidsgivere.map {
             OverstyrtArbeidsgiverForDatabase(
                 organisasjonsnummer = it.organisasjonsnummer,
@@ -83,7 +93,22 @@ class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
                 lovhjemmel = it.lovhjemmel?.tilDatabase(),
             )
         },
+    )
+
+    private fun OverstyrtArbeidsforholdDto.tilDatabase() = OverstyrtArbeidsforholdForDatabase(
+        id = id,
+        aktørId = aktørId,
+        fødselsnummer = fødselsnummer,
+        skjæringstidspunkt = skjæringstidspunkt,
         opprettet = LocalDateTime.now(),
+        overstyrteArbeidsforhold = overstyrteArbeidsforhold.map {
+            ArbeidsforholdForDatabase(
+                organisasjonsnummer = it.organisasjonsnummer,
+                deaktivert = it.deaktivert,
+                forklaring = it.forklaring,
+                begrunnelse = it.begrunnelse,
+            )
+        },
     )
 
     private fun SkjønnsfastsattSykepengegrunnlagDto.tilDatabase() = SkjønnsfastsattSykepengegrunnlagForDatabase(
@@ -91,6 +116,7 @@ class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
         aktørId = aktørId,
         fødselsnummer = fødselsnummer,
         skjæringstidspunkt = skjæringstidspunkt,
+        opprettet = LocalDateTime.now(),
         arbeidsgivere = arbeidsgivere.map {
             SkjønnsfastsattArbeidsgiverForDatabase(
                 organisasjonsnummer = it.organisasjonsnummer,
@@ -105,7 +131,6 @@ class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
                 initierendeVedtaksperiodeId = it.initierendeVedtaksperiodeId,
             )
         },
-        opprettet = LocalDateTime.now(),
     )
 
     private fun LovhjemmelDto.tilDatabase() = LovhjemmelForDatabase(paragraf = paragraf, ledd = ledd, bokstav = bokstav)

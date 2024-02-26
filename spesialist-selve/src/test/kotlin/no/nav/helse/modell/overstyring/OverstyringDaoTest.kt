@@ -3,8 +3,9 @@ package no.nav.helse.modell.overstyring
 import DatabaseIntegrationTest
 import java.time.LocalDate
 import java.util.UUID
-import lagOrganisasjonsnummer
+import no.nav.helse.db.ArbeidsforholdForDatabase
 import no.nav.helse.db.LovhjemmelForDatabase
+import no.nav.helse.db.OverstyrtArbeidsforholdForDatabase
 import no.nav.helse.db.OverstyrtArbeidsgiverForDatabase
 import no.nav.helse.db.OverstyrtInntektOgRefusjonForDatabase
 import no.nav.helse.db.OverstyrtTidslinjeForDatabase
@@ -14,12 +15,10 @@ import no.nav.helse.db.SkjønnsfastsattArbeidsgiverForDatabase
 import no.nav.helse.db.SkjønnsfastsattSykepengegrunnlagForDatabase
 import no.nav.helse.db.SkjønnsfastsettingstypeForDatabase
 import no.nav.helse.januar
-import no.nav.helse.modell.saksbehandler.handlinger.OverstyringArbeidsforhold
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.overstyring.Skjonnsfastsettingstype
 import no.nav.helse.spesialist.api.person.Kjønn
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -32,7 +31,6 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
     private val PERSON_FØDSELSDATO = LocalDate.of(1998, 4, 20)
     private val PERSON_KJØNN = Kjønn.Ukjent
     private val ARBEIDSGIVER_NAVN = "Skrue McDuck"
-    private val ID = UUID.randomUUID()
     private val EKSTERN_HENDELSE_ID = UUID.randomUUID()
     private val DEAKTIVERT = true
     private val SKJÆRINGSTIDSPUNKT = LocalDate.of(2018, 1, 1)
@@ -172,22 +170,26 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `Finner opprettede arbeidsforholdoverstyringer`() {
         opprettPerson()
-        hendelseDao.opprett(overstyringArbeidsforhold())
         overstyringDao.persisterOverstyringArbeidsforhold(
-            ID,
-            EKSTERN_HENDELSE_ID,
-            FNR,
-            ORGNUMMER,
-            BEGRUNNELSE,
-            FORKLARING,
-            DEAKTIVERT,
-            SKJÆRINGSTIDSPUNKT,
+            OverstyrtArbeidsforholdForDatabase(
+                id = EKSTERN_HENDELSE_ID,
+                fødselsnummer = FNR,
+                aktørId = AKTØR,
+                skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
+                opprettet = OPPRETTET,
+                overstyrteArbeidsforhold = listOf(
+                    ArbeidsforholdForDatabase(
+                        organisasjonsnummer = ORGNUMMER,
+                        deaktivert = DEAKTIVERT,
+                        begrunnelse = BEGRUNNELSE,
+                        forklaring = FORKLARING,
+                    )
+                )
+            ),
             OID,
-            OPPRETTET
         )
         val hentetOverstyring = overstyringApiDao.finnOverstyringerAvArbeidsforhold(FNR, ORGNUMMER).single()
 
-        assertEquals(ID, hentetOverstyring.hendelseId)
         assertEquals(BEGRUNNELSE, hentetOverstyring.begrunnelse)
         assertEquals(FORKLARING, hentetOverstyring.forklaring)
         assertEquals(DEAKTIVERT, hentetOverstyring.deaktivert)
@@ -233,7 +235,6 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         )
         val hentetOverstyring = overstyringApiDao.finnOverstyringerAvInntekt(FNR, ORGNUMMER).first()
 
-        assertEquals(EKSTERN_HENDELSE_ID, hentetOverstyring.hendelseId)
         assertEquals(FNR, hentetOverstyring.fødselsnummer)
         assertEquals(ORGNUMMER, hentetOverstyring.organisasjonsnummer)
         assertEquals(BEGRUNNELSE, hentetOverstyring.begrunnelse)
@@ -326,20 +327,25 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             ),
             OID,
         )
-        hendelseDao.opprett(overstyringArbeidsforhold())
         overstyringDao.kobleOverstyringOgVedtaksperiode(listOf(VEDTAKSPERIODE), EKSTERN_HENDELSE_ID)
         val eksternHendelsesIdArbeidsforhold = UUID.randomUUID()
         overstyringDao.persisterOverstyringArbeidsforhold(
-            ID,
-            eksternHendelsesIdArbeidsforhold,
-            FNR,
-            ORGNUMMER,
-            BEGRUNNELSE,
-            FORKLARING,
-            DEAKTIVERT,
-            SKJÆRINGSTIDSPUNKT,
+            OverstyrtArbeidsforholdForDatabase(
+                id = eksternHendelsesIdArbeidsforhold,
+                fødselsnummer = FNR,
+                aktørId = AKTØR,
+                skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
+                opprettet = OPPRETTET,
+                overstyrteArbeidsforhold = listOf(
+                    ArbeidsforholdForDatabase(
+                        organisasjonsnummer = ORGNUMMER,
+                        deaktivert = DEAKTIVERT,
+                        begrunnelse = BEGRUNNELSE,
+                        forklaring = FORKLARING,
+                    )
+                )
+            ),
             OID,
-            OPPRETTET
         )
         overstyringDao.kobleOverstyringOgVedtaksperiode(listOf(VEDTAKSPERIODE), eksternHendelsesIdArbeidsforhold)
 
@@ -348,23 +354,6 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         assertEquals(EKSTERN_HENDELSE_ID, aktiveOverstyringer.first())
         assertEquals(eksternHendelsesIdArbeidsforhold, aktiveOverstyringer.last())
     }
-
-    private fun overstyringArbeidsforhold() = OverstyringArbeidsforhold(
-        id = ID,
-        fødselsnummer = FNR,
-        oid = OID,
-        overstyrteArbeidsforhold = listOf(
-            OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdFraApi(
-                orgnummer = lagOrganisasjonsnummer(),
-                deaktivert = DEAKTIVERT,
-                begrunnelse = BEGRUNNELSE,
-                forklaring = FORKLARING
-            )
-        ),
-        skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
-        opprettet = OPPRETTET,
-        json = "{}",
-    )
 
     private fun OverstyringDagDto.dtoToDatabase(): OverstyrtTidslinjedagForDatabase =
         OverstyrtTidslinjedagForDatabase(

@@ -1275,13 +1275,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 overstyrteArbeidsforhold
             )
             testMediator.håndter(handling, saksbehandler)
-            sisteMeldingId = meldingssender.sendOverstyrtArbeidsforhold(
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                organisasjonsnummer = organisasjonsnummer,
-                overstyrteArbeidsforhold = overstyrteArbeidsforhold,
-                saksbehandlerOid = SAKSBEHANDLER_OID,
-            )
         }
     }
 

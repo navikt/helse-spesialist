@@ -45,5 +45,21 @@ data class OverstyrtArbeidsgiverForDatabase(
 data class RefusjonselementForDatabase(
     val fom: LocalDate,
     val tom: LocalDate? = null,
-    val beløp: Double
+    val beløp: Double,
+)
+
+data class OverstyrtArbeidsforholdForDatabase(
+    val id: UUID,
+    val fødselsnummer: String,
+    val aktørId: String,
+    val skjæringstidspunkt: LocalDate,
+    val overstyrteArbeidsforhold: List<ArbeidsforholdForDatabase>,
+    val opprettet: LocalDateTime,
+)
+
+data class ArbeidsforholdForDatabase(
+    val organisasjonsnummer: String,
+    val deaktivert: Boolean,
+    val begrunnelse: String,
+    val forklaring: String,
 )

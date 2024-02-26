@@ -24,7 +24,8 @@ internal class Saksbehandlingsmelder(private val rapidsConnection: RapidsConnect
     }
     override fun arbeidsforholdOverstyrt(fødselsnummer: String, event: OverstyrtArbeidsforholdEvent) {
         val jsonMessage = JsonMessage.newMessage(
-            "saksbehandler_overstyrer_arbeidsforhold", mapOf(
+            "overstyr_arbeidsforhold", mapOf(
+                "@id" to event.id,
                 "fødselsnummer" to event.fødselsnummer,
                 "aktørId" to event.aktørId,
                 "saksbehandlerOid" to event.saksbehandlerOid,

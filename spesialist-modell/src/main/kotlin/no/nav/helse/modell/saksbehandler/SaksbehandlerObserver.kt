@@ -61,6 +61,7 @@ data class OverstyrtTidslinjeEvent(
 }
 
 data class OverstyrtArbeidsforholdEvent(
+    val id: UUID,
     val fødselsnummer: String,
     val aktørId: String,
     val saksbehandlerOid: UUID,

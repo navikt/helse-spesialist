@@ -372,6 +372,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
 
     @Test
     fun `håndterer overstyring av arbeidsforhold`() {
+        nyPerson(fødselsnummer = FØDSELSNUMMER, organisasjonsnummer = ORGANISASJONSNUMMER, aktørId = AKTØR_ID)
         val overstyring = OverstyrArbeidsforholdHandlingFraApi(
             fødselsnummer = FØDSELSNUMMER,
             aktørId = AKTØR_ID,
@@ -387,7 +388,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
         )
 
         mediator.håndter(overstyring, saksbehandler)
-        val hendelse = testRapid.inspektør.hendelser("saksbehandler_overstyrer_arbeidsforhold").first()
+        val hendelse = testRapid.inspektør.hendelser("overstyr_arbeidsforhold").first()
 
         assertNotNull(hendelse["@id"].asText())
         assertEquals(FØDSELSNUMMER, hendelse["fødselsnummer"].asText())

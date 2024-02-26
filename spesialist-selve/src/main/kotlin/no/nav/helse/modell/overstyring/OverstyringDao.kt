@@ -7,6 +7,7 @@ import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.HelseDao
+import no.nav.helse.db.OverstyrtArbeidsforholdForDatabase
 import no.nav.helse.db.OverstyrtInntektOgRefusjonForDatabase
 import no.nav.helse.db.OverstyrtTidslinjeForDatabase
 import no.nav.helse.db.SkjønnsfastsattSykepengegrunnlagForDatabase
@@ -354,6 +355,58 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
                     )
                 }
             }
+        }
+    }
+
+    fun persisterOverstyringArbeidsforhold(
+        overstyrtArbeidsforhold: OverstyrtArbeidsforholdForDatabase,
+        saksbehandlerOid: UUID,
+    ) {
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+            @Language("PostgreSQL")
+            val opprettOverstyringQuery = """
+                INSERT INTO overstyring(hendelse_ref, ekstern_hendelse_id, person_ref, saksbehandler_ref, tidspunkt)
+                SELECT gen_random_uuid(), :ekstern_hendelse_id, p.id, :saksbehandler_ref, :tidspunkt
+                FROM person p
+                WHERE p.fodselsnummer = :fodselsnummer
+            """.trimIndent()
+
+            @Language("PostgreSQL")
+            val opprettOverstyringArbeidsforholdQuery = """
+                INSERT INTO overstyring_arbeidsforhold(forklaring, deaktivert, skjaeringstidspunkt, overstyring_ref, begrunnelse, arbeidsgiver_ref)
+                SELECT :forklaring, :deaktivert, :skjaeringstidspunkt, :overstyring_ref, :begrunnelse, ag.id
+                FROM arbeidsgiver ag
+                WHERE ag.orgnummer = :orgnr
+            """.trimIndent()
+
+            val overstyringRef = session.run(
+                queryOf(
+                    opprettOverstyringQuery,
+                    mapOf(
+                        "ekstern_hendelse_id" to overstyrtArbeidsforhold.id,
+                        "fodselsnummer" to overstyrtArbeidsforhold.fødselsnummer.toLong(),
+                        "saksbehandler_ref" to saksbehandlerOid,
+                        "tidspunkt" to overstyrtArbeidsforhold.opprettet,
+                    )
+                ).asUpdateAndReturnGeneratedKey
+            )
+
+            overstyrtArbeidsforhold.overstyrteArbeidsforhold.forEach { arbeidsforhold ->
+                session.run(
+                    queryOf(
+                        opprettOverstyringArbeidsforholdQuery,
+                        mapOf(
+                            "forklaring" to arbeidsforhold.forklaring,
+                            "deaktivert" to arbeidsforhold.deaktivert,
+                            "skjaeringstidspunkt" to overstyrtArbeidsforhold.skjæringstidspunkt,
+                            "overstyring_ref" to overstyringRef,
+                            "begrunnelse" to arbeidsforhold.begrunnelse,
+                            "orgnr" to arbeidsforhold.organisasjonsnummer.toLong()
+                        )
+                    ).asUpdate
+                )
+            }
+
         }
     }
 

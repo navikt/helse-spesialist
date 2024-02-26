@@ -2,6 +2,7 @@ package no.nav.helse.modell.saksbehandler.handlinger
 
 import java.util.UUID
 import no.nav.helse.modell.januar
+import no.nav.helse.modell.saksbehandler.OverstyrtArbeidsforholdEvent
 import no.nav.helse.modell.saksbehandler.OverstyrtInntektOgRefusjonEvent
 import no.nav.helse.modell.saksbehandler.OverstyrtTidslinjeEvent
 import no.nav.helse.modell.saksbehandler.Saksbehandler
@@ -152,11 +153,34 @@ internal class SaksbehandlerTest {
         saksbehandler.register(observer)
         saksbehandler.håndter(
             OverstyrtInntektOgRefusjon(
-            aktørId = "123",
-            fødselsnummer = "1234",
-            skjæringstidspunkt = 1.januar,
-            arbeidsgivere = emptyList()
-        ))
+                aktørId = "123",
+                fødselsnummer = "1234",
+                skjæringstidspunkt = 1.januar,
+                arbeidsgivere = emptyList()
+            )
+        )
+        Assertions.assertEquals(true, observert)
+    }
+
+    @Test
+    fun `håndtering av OverstyrtArbeidsforhold medfører utgående event`() {
+        var observert = false
+        val observer = object : SaksbehandlerObserver {
+            override fun arbeidsforholdOverstyrt(fødselsnummer: String, event: OverstyrtArbeidsforholdEvent) {
+                observert = true
+            }
+        }
+
+        val saksbehandler = saksbehandler()
+        saksbehandler.register(observer)
+        saksbehandler.håndter(
+            OverstyrtArbeidsforhold(
+                aktørId = "123",
+                fødselsnummer = "1234",
+                skjæringstidspunkt = 1.januar,
+                overstyrteArbeidsforhold = emptyList()
+            )
+        )
         Assertions.assertEquals(true, observert)
     }
 
