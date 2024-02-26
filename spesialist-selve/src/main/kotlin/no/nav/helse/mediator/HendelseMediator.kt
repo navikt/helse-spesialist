@@ -21,7 +21,6 @@ import no.nav.helse.mediator.meldinger.NyeVarslerRiver
 import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshotRiver
 import no.nav.helse.mediator.meldinger.OverstyringArbeidsforholdRiver
 import no.nav.helse.mediator.meldinger.OverstyringIgangsattRiver
-import no.nav.helse.mediator.meldinger.OverstyringInntektOgRefusjonRiver
 import no.nav.helse.mediator.meldinger.Personhendelse
 import no.nav.helse.mediator.meldinger.SykefraværstilfellerRiver
 import no.nav.helse.mediator.meldinger.SøknadSendtRiver
@@ -63,14 +62,12 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.TilbakedateringGodkjent
 import no.nav.helse.modell.overstyring.OverstyringIgangsatt
-import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver
 import no.nav.helse.modell.person.AdressebeskyttelseEndretRiver
 import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import no.nav.helse.modell.person.OppdaterPersonsnapshot
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyringArbeidsforhold
-import no.nav.helse.modell.saksbehandler.handlinger.OverstyringInntektOgRefusjon
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfeller
 import no.nav.helse.modell.utbetaling.UtbetalingAnnullert
 import no.nav.helse.modell.utbetaling.UtbetalingDao
@@ -154,7 +151,6 @@ internal class HendelseMediator(
             VedtaksperiodeForkastetRiver(it, this)
             VedtaksperiodeEndretRiver(it, this)
             AdressebeskyttelseEndretRiver(it, this)
-            OverstyringInntektOgRefusjonRiver(it, this)
             OverstyringArbeidsforholdRiver(it, this)
             OverstyringIgangsattRiver(it, this)
             EgenAnsattløsning.EgenAnsattRiver(it, this)
@@ -479,29 +475,6 @@ internal class HendelseMediator(
         )
     }
 
-    fun overstyringInntektOgRefusjon(
-        id: UUID,
-        fødselsnummer: String,
-        oid: UUID,
-        arbeidsgivere: List<OverstyrtArbeidsgiver>,
-        skjæringstidspunkt: LocalDate,
-        opprettet: LocalDateTime,
-        json: String,
-        context: MessageContext,
-    ) {
-        håndter(
-            fødselsnummer, hendelsefabrikk.overstyringInntektOgRefusjon(
-                id = id,
-                fødselsnummer = fødselsnummer,
-                oid = oid,
-                arbeidsgivere = arbeidsgivere,
-                skjæringstidspunkt = skjæringstidspunkt,
-                opprettet = opprettet,
-                json = json
-            ), context
-        )
-    }
-
     fun overstyringArbeidsforhold(
         id: UUID,
         fødselsnummer: String,
@@ -679,7 +652,6 @@ internal class HendelseMediator(
                 is VedtaksperiodeForkastet -> iverksett(hendelsefabrikk.vedtaksperiodeForkastet(hendelse), hendelse.id, commandContext)
                 is OverstyringArbeidsforhold -> iverksett(hendelsefabrikk.overstyringArbeidsforhold(hendelse), hendelse.id, commandContext)
                 is Godkjenningsbehov -> iverksett(hendelsefabrikk.godkjenningsbehov(hendelse), hendelse.id, commandContext)
-                is OverstyringInntektOgRefusjon -> iverksett(hendelsefabrikk.overstyrInntektOgRefusjon(hendelse), hendelse.id, commandContext)
                 is Saksbehandlerløsning -> iverksett(hendelsefabrikk.utbetalingsgodkjenning(hendelse), hendelse.id, commandContext)
                 else -> throw IllegalArgumentException("Personhendelse må håndteres")
             }

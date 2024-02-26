@@ -34,7 +34,6 @@ import no.nav.helse.modell.kommando.TilbakedateringGodkjentCommand
 import no.nav.helse.modell.kommando.UtbetalingsgodkjenningCommand
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.overstyring.OverstyringIgangsatt
-import no.nav.helse.modell.overstyring.OverstyrtArbeidsgiver
 import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import no.nav.helse.modell.person.EndretEgenAnsattStatusCommand
 import no.nav.helse.modell.person.OppdaterPersonsnapshot
@@ -45,9 +44,7 @@ import no.nav.helse.modell.person.SøknadSendtCommand
 import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrArbeidsforholdCommand
-import no.nav.helse.modell.saksbehandler.handlinger.OverstyrInntektOgRefusjonCommand
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyringArbeidsforhold
-import no.nav.helse.modell.saksbehandler.handlinger.OverstyringInntektOgRefusjon
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfeller
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
@@ -334,24 +331,6 @@ internal class Hendelsefabrikk(
             godkjenningsbehovhendelseId = godkjenningsbehovhendelseId
         )
     }
-
-    fun overstyringInntektOgRefusjon(
-        id: UUID,
-        fødselsnummer: String,
-        oid: UUID,
-        arbeidsgivere: List<OverstyrtArbeidsgiver>,
-        skjæringstidspunkt: LocalDate,
-        opprettet: LocalDateTime,
-        json: String,
-    ) = OverstyringInntektOgRefusjon(
-        id = id,
-        fødselsnummer = fødselsnummer,
-        oid = oid,
-        arbeidsgivere = arbeidsgivere,
-        skjæringstidspunkt = skjæringstidspunkt,
-        opprettet = opprettet,
-        json = json,
-    )
 
     fun overstyringArbeidsforhold(
         id: UUID,
@@ -729,20 +708,6 @@ internal class Hendelsefabrikk(
             skjæringstidspunkt = hendelse.skjæringstidspunkt,
             oid = hendelse.oid,
             overstyrteArbeidsforhold = hendelse.overstyrteArbeidsforhold,
-            opprettet = hendelse.opprettet,
-            overstyringDao = overstyringDao,
-            overstyringMediator = overstyringMediator,
-            json = hendelse.toJson()
-        )
-    }
-
-    fun overstyrInntektOgRefusjon(hendelse: OverstyringInntektOgRefusjon): OverstyrInntektOgRefusjonCommand {
-        return OverstyrInntektOgRefusjonCommand(
-            id = hendelse.id,
-            fødselsnummer = hendelse.fødselsnummer(),
-            oid = hendelse.oid,
-            skjæringstidspunkt = hendelse.skjæringstidspunkt,
-            arbeidsgivere = hendelse.arbeidsgivere,
             opprettet = hendelse.opprettet,
             overstyringDao = overstyringDao,
             overstyringMediator = overstyringMediator,

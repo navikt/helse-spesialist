@@ -15,7 +15,6 @@ import no.nav.helse.db.SkjønnsfastsattSykepengegrunnlagForDatabase
 import no.nav.helse.db.SkjønnsfastsettingstypeForDatabase
 import no.nav.helse.januar
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyringArbeidsforhold
-import no.nav.helse.modell.saksbehandler.handlinger.OverstyringInntektOgRefusjon
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.overstyring.Skjonnsfastsettingstype
@@ -305,26 +304,27 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `Finner hendelsesid'er for ikke ferdigstilte overstyringer for vedtaksperiode`() {
         opprettPerson()
-        overstyrInntektOgRefusjon(ID)
         overstyringDao.persisterOverstyringInntektOgRefusjon(
-            ID,
-            EKSTERN_HENDELSE_ID,
-            FNR,
-            listOf(
-                OverstyrtArbeidsgiver(
-                    organisasjonsnummer = ORGNUMMER,
-                    begrunnelse = BEGRUNNELSE,
-                    forklaring = FORKLARING,
-                    månedligInntekt = INNTEKT,
-                    fraMånedligInntekt = INNTEKT + 1,
-                    refusjonsopplysninger = null,
-                    fraRefusjonsopplysninger = null,
-                    subsumsjon = Subsumsjon(paragraf = "87494")
+            OverstyrtInntektOgRefusjonForDatabase(
+                id = EKSTERN_HENDELSE_ID,
+                aktørId = AKTØR,
+                fødselsnummer = FNR,
+                skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
+                opprettet = OPPRETTET,
+                arbeidsgivere = listOf(
+                    OverstyrtArbeidsgiverForDatabase(
+                        organisasjonsnummer = ORGNUMMER,
+                        månedligInntekt = INNTEKT,
+                        fraMånedligInntekt = INNTEKT + 1,
+                        refusjonsopplysninger = null,
+                        fraRefusjonsopplysninger = null,
+                        begrunnelse = BEGRUNNELSE,
+                        forklaring = FORKLARING,
+                        lovhjemmel = null,
+                    )
                 )
             ),
             OID,
-            SKJÆRINGSTIDSPUNKT,
-            OPPRETTET
         )
         hendelseDao.opprett(overstyringArbeidsforhold())
         overstyringDao.kobleOverstyringOgVedtaksperiode(listOf(VEDTAKSPERIODE), EKSTERN_HENDELSE_ID)
@@ -348,29 +348,6 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         assertEquals(EKSTERN_HENDELSE_ID, aktiveOverstyringer.first())
         assertEquals(eksternHendelsesIdArbeidsforhold, aktiveOverstyringer.last())
     }
-
-    private fun overstyrInntektOgRefusjon(hendelseId: UUID) = hendelseDao.opprett(
-        OverstyringInntektOgRefusjon(
-            id = hendelseId,
-            fødselsnummer = FNR,
-            oid = OID,
-            arbeidsgivere = listOf(
-                OverstyrtArbeidsgiver(
-                    organisasjonsnummer = ORGNUMMER,
-                    begrunnelse = BEGRUNNELSE,
-                    forklaring = FORKLARING,
-                    månedligInntekt = INNTEKT,
-                    fraMånedligInntekt = INNTEKT + 1,
-                    refusjonsopplysninger = null,
-                    fraRefusjonsopplysninger = null,
-                    subsumsjon = Subsumsjon(paragraf = "87494")
-                )
-            ),
-            skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
-            opprettet = OPPRETTET,
-            json = "{}",
-        )
-    )
 
     private fun overstyringArbeidsforhold() = OverstyringArbeidsforhold(
         id = ID,
