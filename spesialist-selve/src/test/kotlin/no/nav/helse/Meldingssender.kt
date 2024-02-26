@@ -10,11 +10,9 @@ import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.Arbeidsgiverinformasjo
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Vergemål
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
-import no.nav.helse.modell.saksbehandler.OverstyrtInntektOgRefusjonEvent.OverstyrtArbeidsgiverEvent
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
-import no.nav.helse.modell.vilkårsprøving.LovhjemmelEvent
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.person.Kjønn
@@ -83,31 +81,6 @@ internal class Meldingssender(private val testRapid: TestRapid) {
                 fom = fom,
                 tom = tom,
                 skjæringstidspunkt = skjæringstidspunkt
-            )
-        )
-    }
-
-    fun sendSaksbehandlerSkjønnsfastsettingSykepengegrunnlag(
-        aktørId: String,
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-        vedtaksperiodeId: UUID,
-        saksbehandlerOid: UUID,
-        saksbehandlerEpost: String,
-        saksbehandlerIdent: String,
-        saksbehandlerNavn: String,
-    ): UUID = newUUID.also { id ->
-        testRapid.sendTestMessage(
-            Testmeldingfabrikk.lagSaksbehandlerSkjønnsfastsettingSykepengegrunnlag(
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                organisasjonsnummer = organisasjonsnummer,
-                vedtaksperiodeId = vedtaksperiodeId,
-                saksbehandlerOid = saksbehandlerOid,
-                saksbehandlerEpost = saksbehandlerEpost,
-                saksbehandlerIdent = saksbehandlerIdent,
-                saksbehandlerNavn = saksbehandlerNavn,
-                id = id,
             )
         )
     }
@@ -742,39 +715,6 @@ internal class Meldingssender(private val testRapid: TestRapid) {
             )
         )
     }
-
-    fun sendOverstyrtInntektOgRefusjon(
-        aktørId: String,
-        fødselsnummer: String,
-        orgnummer: String,
-        skjæringstidspunkt: LocalDate = 1.januar(1970),
-        saksbehandlerOid: UUID,
-        arbeidsgivere: List<OverstyrtArbeidsgiverEvent> = listOf(
-            OverstyrtArbeidsgiverEvent(
-                organisasjonsnummer = orgnummer,
-                månedligInntekt = 15000.0,
-                fraMånedligInntekt = 25001.0,
-                forklaring = "testbortforklaring",
-                subsumsjon = LovhjemmelEvent("8-28", "LEDD_1", "BOKSTAV_A", "folketrygdloven", "1970-01-01"),
-                refusjonsopplysninger = null,
-                fraRefusjonsopplysninger = null,
-                begrunnelse = "en begrunnelse"
-            )
-        ),
-    ): UUID =
-        newUUID.also { id ->
-            testRapid.sendTestMessage(
-                Testmeldingfabrikk.lagOverstyringInntektOgRefusjon(
-                    aktørId = aktørId,
-                    fødselsnummer = fødselsnummer,
-                    arbeidsgivere = arbeidsgivere,
-                    skjæringstidspunkt = skjæringstidspunkt,
-                    saksbehandlerepost = Testdata.SAKSBEHANDLER_EPOST,
-                    id = id,
-                    saksbehandleroid = saksbehandlerOid
-                )
-            )
-        }
 
     fun sendOverstyringIgangsatt(
         fødselsnummer: String,
