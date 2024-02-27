@@ -36,10 +36,10 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import no.nav.helse.testEnv
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -280,7 +280,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
         val oppgaveId = OPPGAVE_ID
         mediator.håndter(LeggPåVent(oppgaveId, saksbehandler.oid, LocalDate.now().plusDays(21), true, ""), saksbehandler)
         val melding = testRapid.inspektør.hendelser("oppgave_oppdatert").last()
-        assertEquals(true, melding["påVent"].asBoolean())
+        assertTrue(melding["egenskaper"].map { it.asText() }.contains("PÅ_VENT"))
     }
 
     @Test
@@ -290,7 +290,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
         mediator.håndter(LeggPåVent(oppgaveId, saksbehandler.oid, LocalDate.now().plusDays(21), false,""), saksbehandler)
         mediator.håndter(FjernPåVent(oppgaveId), saksbehandler)
         val melding = testRapid.inspektør.hendelser("oppgave_oppdatert").last()
-        assertEquals(false, melding["påVent"].asBoolean())
+        assertFalse(melding["egenskaper"].map { it.asText() }.contains("PÅ_VENT"))
     }
 
     @Test
@@ -468,7 +468,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
             assertEquals(25000.0, it["månedligInntekt"].asDouble())
             assertEquals("8-28", it["subsumsjon"]["paragraf"].asText())
             assertEquals("3", it["subsumsjon"]["ledd"].asText())
-            Assertions.assertTrue(it["subsumsjon"]["bokstav"].isNull)
+            assertTrue(it["subsumsjon"]["bokstav"].isNull)
             assertEquals(2, it["refusjonsopplysninger"].size())
             assertEquals("2018-01-01", it["refusjonsopplysninger"].first()["fom"].asText())
             assertEquals("2018-01-31", it["refusjonsopplysninger"].first()["tom"].asText())
@@ -482,7 +482,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
             assertEquals(21000.0, it["månedligInntekt"].asDouble())
             assertEquals("8-28", it["subsumsjon"]["paragraf"].asText())
             assertEquals("3", it["subsumsjon"]["ledd"].asText())
-            Assertions.assertTrue(it["subsumsjon"]["bokstav"].isNull)
+            assertTrue(it["subsumsjon"]["bokstav"].isNull)
             assertEquals(2, it["refusjonsopplysninger"].size())
             assertEquals("2018-01-01", it["refusjonsopplysninger"].first()["fom"].asText())
             assertEquals("2018-01-31", it["refusjonsopplysninger"].first()["tom"].asText())

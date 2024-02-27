@@ -38,9 +38,7 @@ internal class Oppgavemelder(
             "hendelseId" to oppgavemelding.hendelseId,
             "oppgaveId" to oppgavemelding.oppgaveId,
             "tilstand" to oppgavemelding.tilstand,
-            "type" to oppgavemelding.type,
             "fødselsnummer" to fødselsnummer,
-            "påVent" to oppgavemelding.egenskaper.contains("PÅ_VENT"),
             "egenskaper" to oppgavemelding.egenskaper
         ).apply {
             compute("beslutter") { _, _ -> oppgavemelding.beslutter }
@@ -55,7 +53,6 @@ private class OppgaveForKafkaBygger : OppgaveVisitor {
     private lateinit var hendelseId: UUID
     private var oppgaveId by Delegates.notNull<Long>()
     private lateinit var tilstand: String
-    private lateinit var type: String
     private lateinit var egenskaper: List<String>
 
     fun bygg(oppgave: Oppgave): Oppgavemelding {
@@ -64,7 +61,6 @@ private class OppgaveForKafkaBygger : OppgaveVisitor {
             hendelseId = hendelseId,
             oppgaveId = oppgaveId,
             tilstand = tilstand,
-            type = type,
             beslutter = beslutter,
             saksbehandler = saksbehandler,
             egenskaper = egenskaper
@@ -75,13 +71,8 @@ private class OppgaveForKafkaBygger : OppgaveVisitor {
         val hendelseId: UUID,
         val oppgaveId: Long,
         val tilstand: String,
-
-        @Deprecated("Feltet skal fjernes når Risk bruker egenskaper i stedet")
-        val type: String,
-
         val beslutter: Map<String, Any>?,
         val saksbehandler: Map<String, Any>?,
-
         val egenskaper: List<String>
     )
 
@@ -102,7 +93,6 @@ private class OppgaveForKafkaBygger : OppgaveVisitor {
         this.hendelseId = hendelseId
         this.oppgaveId = id
         this.tilstand = mapTilstand(tilstand)
-        this.type = egenskap.tilKafkaversjon()
         this.saksbehandler = tildelt?.toMap()
         this.egenskaper = egenskaper.map { it.tilKafkaversjon() }
     }
