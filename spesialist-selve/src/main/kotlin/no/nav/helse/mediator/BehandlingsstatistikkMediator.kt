@@ -72,49 +72,49 @@ class BehandlingsstatistikkMediator(private val behandlingsstatistikkDao: Behand
             forlengelser = forlengelser(),
             forlengelseIt = forlengelseIt(),
             utbetalingTilArbeidsgiver = Statistikk(
-                automatisertPerInntektPeriodetypeOgMottaker.perMottakertype[Mottakertype.ARBEIDSGIVER] ?: 0,
-                behandlingsstatistikkDao.antallFerdigstilteOppgaverFor(EgenskapForDatabase.SØKNAD, fom),
-                behandlingsstatistikkDao.antallTilgjengeligeOppgaverFor(EgenskapForDatabase.SØKNAD),
+                automatisk = automatisertPerInntektPeriodetypeOgMottaker.perMottakertype[Mottakertype.ARBEIDSGIVER] ?: 0,
+                manuelt = behandlingsstatistikkDao.antallFerdigstilteOppgaverFor(EgenskapForDatabase.UTBETALING_TIL_ARBEIDSGIVER, fom),
+                tilgjengelig = behandlingsstatistikkDao.antallTilgjengeligeOppgaverFor(EgenskapForDatabase.UTBETALING_TIL_ARBEIDSGIVER),
             ),
             utbetalingTilSykmeldt = Statistikk(
-                automatisertPerInntektPeriodetypeOgMottaker.perMottakertype[Mottakertype.SYKMELDT] ?: 0,
-                behandlingsstatistikkDao.antallFerdigstilteOppgaverFor(EgenskapForDatabase.UTBETALING_TIL_SYKMELDT, fom),
-                behandlingsstatistikkDao.antallTilgjengeligeOppgaverFor(EgenskapForDatabase.UTBETALING_TIL_SYKMELDT)
-            ),
-            faresignaler = Statistikk(
-                0,
-                behandlingsstatistikkDao.antallFerdigstilteOppgaverFor(EgenskapForDatabase.RISK_QA, fom),
-                behandlingsstatistikkDao.antallTilgjengeligeOppgaverFor(EgenskapForDatabase.RISK_QA)
-            ),
-            fortroligAdresse = Statistikk(
-                0,
-                behandlingsstatistikkDao.antallFerdigstilteOppgaverFor(EgenskapForDatabase.FORTROLIG_ADRESSE, fom),
-                behandlingsstatistikkDao.antallTilgjengeligeOppgaverFor(EgenskapForDatabase.FORTROLIG_ADRESSE)
-            ),
-            stikkprover = Statistikk(
-                0,
-                behandlingsstatistikkDao.antallFerdigstilteOppgaverFor(EgenskapForDatabase.STIKKPRØVE, fom),
-                behandlingsstatistikkDao.antallTilgjengeligeOppgaverFor(EgenskapForDatabase.STIKKPRØVE)
-            ),
-            revurdering = Statistikk(
-                0,
-                behandlingsstatistikkDao.antallFerdigstilteOppgaverFor(EgenskapForDatabase.REVURDERING, fom),
-                behandlingsstatistikkDao.antallTilgjengeligeOppgaverFor(EgenskapForDatabase.REVURDERING)
+                automatisk = automatisertPerInntektPeriodetypeOgMottaker.perMottakertype[Mottakertype.SYKMELDT] ?: 0,
+                manuelt = behandlingsstatistikkDao.antallFerdigstilteOppgaverFor(EgenskapForDatabase.UTBETALING_TIL_SYKMELDT, fom),
+                tilgjengelig = behandlingsstatistikkDao.antallTilgjengeligeOppgaverFor(EgenskapForDatabase.UTBETALING_TIL_SYKMELDT)
             ),
             delvisRefusjon = Statistikk(
-                automatisertPerInntektPeriodetypeOgMottaker.perMottakertype[Mottakertype.BEGGE] ?: 0,
-                behandlingsstatistikkDao.antallFerdigstilteOppgaverFor(EgenskapForDatabase.DELVIS_REFUSJON, fom),
-                behandlingsstatistikkDao.antallTilgjengeligeOppgaverFor(EgenskapForDatabase.DELVIS_REFUSJON)
+                automatisk = automatisertPerInntektPeriodetypeOgMottaker.perMottakertype[Mottakertype.BEGGE] ?: 0,
+                manuelt = behandlingsstatistikkDao.antallFerdigstilteOppgaverFor(EgenskapForDatabase.DELVIS_REFUSJON, fom),
+                tilgjengelig = behandlingsstatistikkDao.antallTilgjengeligeOppgaverFor(EgenskapForDatabase.DELVIS_REFUSJON)
+            ),
+            faresignaler = Statistikk(
+                automatisk = 0,
+                manuelt = behandlingsstatistikkDao.antallFerdigstilteOppgaverFor(EgenskapForDatabase.RISK_QA, fom),
+                tilgjengelig = behandlingsstatistikkDao.antallTilgjengeligeOppgaverFor(EgenskapForDatabase.RISK_QA)
+            ),
+            fortroligAdresse = Statistikk(
+                automatisk = 0,
+                manuelt = behandlingsstatistikkDao.antallFerdigstilteOppgaverFor(EgenskapForDatabase.FORTROLIG_ADRESSE, fom),
+                tilgjengelig = behandlingsstatistikkDao.antallTilgjengeligeOppgaverFor(EgenskapForDatabase.FORTROLIG_ADRESSE)
+            ),
+            stikkprover = Statistikk(
+                automatisk = 0,
+                manuelt = behandlingsstatistikkDao.antallFerdigstilteOppgaverFor(EgenskapForDatabase.STIKKPRØVE, fom),
+                tilgjengelig = behandlingsstatistikkDao.antallTilgjengeligeOppgaverFor(EgenskapForDatabase.STIKKPRØVE)
+            ),
+            revurdering = Statistikk(
+                automatisk = 0,
+                manuelt = behandlingsstatistikkDao.antallFerdigstilteOppgaverFor(EgenskapForDatabase.REVURDERING, fom),
+                tilgjengelig = behandlingsstatistikkDao.antallTilgjengeligeOppgaverFor(EgenskapForDatabase.REVURDERING)
             ),
             beslutter = Statistikk(
-                0,
-                behandlingsstatistikkDao.getAntallFullførteBeslutteroppgaver(fom),
-                behandlingsstatistikkDao.getAntallTilgjengeligeBeslutteroppgaver()
+                automatisk = 0,
+                manuelt = behandlingsstatistikkDao.getAntallFullførteBeslutteroppgaver(fom),
+                tilgjengelig = behandlingsstatistikkDao.getAntallTilgjengeligeBeslutteroppgaver()
             ),
             egenAnsatt = Statistikk(
-                0,
-                behandlingsstatistikkDao.getAntallManueltFullførteEgenAnsattOppgaver(fom),
-                behandlingsstatistikkDao.getAntallTilgjengeligeEgenAnsattOppgaver()
+                automatisk = 0,
+                manuelt = behandlingsstatistikkDao.getAntallManueltFullførteEgenAnsattOppgaver(fom),
+                tilgjengelig = behandlingsstatistikkDao.getAntallTilgjengeligeEgenAnsattOppgaver()
             ),
             antallAnnulleringer = behandlingsstatistikkDao.getAntallAnnulleringer(fom),
         )
