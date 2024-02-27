@@ -6,6 +6,7 @@ import no.nav.helse.modell.vedtaksperiode.vedtak.SykepengevedtakBuilder
 
 internal class SkjønnsfastattSykepengegrunnlag(
     private val type: Skjønnsfastsettingstype,
+    private val årsak: Skjønnsfastsettingsårsak,
     private val skjæringstidspunkt: LocalDate,
     private val begrunnelseFraMal: String,
     private val begrunnelseFraFritekst: String,
@@ -13,7 +14,7 @@ internal class SkjønnsfastattSykepengegrunnlag(
     private val opprettet: LocalDateTime
 ) {
     internal fun byggVedtak(vedtakBuilder: SykepengevedtakBuilder) {
-        vedtakBuilder.skjønnsfastsettingData(begrunnelseFraMal, begrunnelseFraFritekst, begrunnelseFraKonklusjon, type)
+        vedtakBuilder.skjønnsfastsettingData(begrunnelseFraMal, begrunnelseFraFritekst, begrunnelseFraKonklusjon, type, årsak)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -23,6 +24,7 @@ internal class SkjønnsfastattSykepengegrunnlag(
         other as SkjønnsfastattSykepengegrunnlag
 
         if (type != other.type) return false
+        if (årsak != other.årsak) return false
         if (skjæringstidspunkt != other.skjæringstidspunkt) return false
         if (begrunnelseFraMal != other.begrunnelseFraMal) return false
         if (begrunnelseFraFritekst != other.begrunnelseFraFritekst) return false
@@ -35,6 +37,7 @@ internal class SkjønnsfastattSykepengegrunnlag(
     override fun hashCode(): Int {
         var result = skjæringstidspunkt.hashCode()
         result = 31 * result + type.hashCode()
+        result = 31 * result + årsak.hashCode()
         result = 31 * result + begrunnelseFraMal.hashCode()
         result = 31 * result + begrunnelseFraFritekst.hashCode()
         result = 31 * result + begrunnelseFraKonklusjon.hashCode()
@@ -51,4 +54,9 @@ internal enum class Skjønnsfastsettingstype {
     OMREGNET_ÅRSINNTEKT,
     RAPPORTERT_ÅRSINNTEKT,
     ANNET,
+}
+
+internal enum class Skjønnsfastsettingsårsak {
+    ANDRE_AVSNITT,
+    TREDJE_AVSNITT,
 }

@@ -5,6 +5,7 @@ import java.util.UUID
 import no.nav.helse.januar
 import no.nav.helse.modell.sykefraværstilfelle.SkjønnsfastattSykepengegrunnlag
 import no.nav.helse.modell.sykefraværstilfelle.Skjønnsfastsettingstype
+import no.nav.helse.modell.sykefraværstilfelle.Skjønnsfastsettingsårsak
 import no.nav.helse.modell.vedtaksperiode.vedtak.Faktatype.ETTER_HOVEDREGEL
 import no.nav.helse.modell.vedtaksperiode.vedtak.Faktatype.ETTER_SKJØNN
 import no.nav.helse.modell.vedtaksperiode.vedtak.Faktatype.I_INFOTRYGD
@@ -111,7 +112,7 @@ class SykepengevedtakBuilderTest {
             .inntekt(inntekt)
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
             .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_SKJØNN))
-            .skjønnsfastsattSykepengegrunnlag(SkjønnsfastattSykepengegrunnlag(Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT, skjæringstidspunkt, "Mal", "Fritekst", "Konklusjon", LocalDateTime.now()))
+            .skjønnsfastsattSykepengegrunnlag(SkjønnsfastattSykepengegrunnlag(Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT, Skjønnsfastsettingsårsak.ANDRE_AVSNITT, skjæringstidspunkt, "Mal", "Fritekst", "Konklusjon", LocalDateTime.now()))
             .tags(listOf("IngenNyArbeidsgiverperiode"))
 
         val utkast = builder.build()
@@ -134,7 +135,7 @@ class SykepengevedtakBuilderTest {
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(ETTER_SKJØNN),
                 utbetalingId = utbetalingId,
-                skjønnsfastsettingopplysninger = SkjønnsfastsettingopplysningerDto("Mal", "Fritekst", "Konklusjon", Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT),
+                skjønnsfastsettingopplysninger = SkjønnsfastsettingopplysningerDto("Mal", "Fritekst", "Konklusjon", Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT, Skjønnsfastsettingsårsak.ANDRE_AVSNITT),
                 tags = listOf("IngenNyArbeidsgiverperiode")
             ), utkast
         )
@@ -347,7 +348,7 @@ class SykepengevedtakBuilderTest {
             .inntekt(inntekt)
             .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
             .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta(ETTER_HOVEDREGEL))
-            .skjønnsfastsettingData("Fritekst", "Mal", "Konklusjon", Skjønnsfastsettingstype.RAPPORTERT_ÅRSINNTEKT)
+            .skjønnsfastsettingData("Fritekst", "Mal", "Konklusjon", Skjønnsfastsettingstype.RAPPORTERT_ÅRSINNTEKT, Skjønnsfastsettingsårsak.ANDRE_AVSNITT)
             .tags(listOf("IngenNyArbeidsgiverperiode"))
 
         val utkast = builder.build()

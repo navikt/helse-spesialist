@@ -10,6 +10,7 @@ import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.modell.sykefraværstilfelle.SkjønnsfastattSykepengegrunnlag
 import no.nav.helse.modell.sykefraværstilfelle.Skjønnsfastsettingstype
+import no.nav.helse.modell.sykefraværstilfelle.Skjønnsfastsettingsårsak
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -33,7 +34,7 @@ internal class SykefraværstilfelleDaoTest: DatabaseIntegrationTest() {
 
         val funnet = sykefraværstilfelleDao.finnSkjønnsfastsatteSykepengegrunnlag(FNR, 1.januar)
         assertEquals(1, funnet.size)
-        assertEquals(SkjønnsfastattSykepengegrunnlag(Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT, 1.januar, "mal", "fritekst","konklusjon",  tidspunkt), funnet.single())
+        assertEquals(SkjønnsfastattSykepengegrunnlag(Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT, Skjønnsfastsettingsårsak.ANDRE_AVSNITT, 1.januar, "mal", "fritekst","konklusjon",  tidspunkt), funnet.single())
     }
 
     @Test
@@ -66,7 +67,7 @@ internal class SykefraværstilfelleDaoTest: DatabaseIntegrationTest() {
 
         val funnet = sykefraværstilfelleDao.finnSkjønnsfastsatteSykepengegrunnlag(FNR, 1.januar)
         assertEquals(1, funnet.size)
-        assertEquals(SkjønnsfastattSykepengegrunnlag(Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT , 1.januar, "mal", "fritekst", "konklusjon", tidspunkt), funnet.single())
+        assertEquals(SkjønnsfastattSykepengegrunnlag(Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT, Skjønnsfastsettingsårsak.ANDRE_AVSNITT, 1.januar, "mal", "fritekst", "konklusjon", tidspunkt), funnet.single())
     }
 
     @Test
@@ -89,7 +90,7 @@ internal class SykefraværstilfelleDaoTest: DatabaseIntegrationTest() {
 
         val funnet = sykefraværstilfelleDao.finnSkjønnsfastsatteSykepengegrunnlag(FNR, 1.januar)
         assertEquals(1, funnet.size)
-        assertEquals(SkjønnsfastattSykepengegrunnlag(Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT, 1.januar, "mal", "fritekst", "konklusjon", tidspunkt), funnet.single())
+        assertEquals(SkjønnsfastattSykepengegrunnlag(Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT, Skjønnsfastsettingsårsak.ANDRE_AVSNITT, 1.januar, "mal", "fritekst", "konklusjon", tidspunkt), funnet.single())
     }
 
     private fun skjønnsfastsattSykepengegrunnlag(

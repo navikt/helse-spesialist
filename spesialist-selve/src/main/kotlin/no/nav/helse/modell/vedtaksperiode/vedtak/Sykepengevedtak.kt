@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.modell.sykefraværstilfelle.Skjønnsfastsettingstype
+import no.nav.helse.modell.sykefraværstilfelle.Skjønnsfastsettingsårsak
 
 internal sealed class Sykepengevedtak(
     val fødselsnummer: String,
@@ -156,4 +157,5 @@ internal data class SkjønnsfastsettingopplysningerDto(
     val begrunnelseFraFritekst: String,
     val begrunnelseFraKonklusjon: String,
     val skjønnsfastsettingtype: Skjønnsfastsettingstype,
+    val skjønnsfastsettingsårsak: Skjønnsfastsettingsårsak,
 )

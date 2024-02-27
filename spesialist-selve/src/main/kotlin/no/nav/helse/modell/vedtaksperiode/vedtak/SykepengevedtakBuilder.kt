@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.modell.sykefraværstilfelle.SkjønnsfastattSykepengegrunnlag
 import no.nav.helse.modell.sykefraværstilfelle.Skjønnsfastsettingstype
+import no.nav.helse.modell.sykefraværstilfelle.Skjønnsfastsettingsårsak
 import kotlin.properties.Delegates
 
 internal class SykepengevedtakBuilder {
@@ -55,8 +56,9 @@ internal class SykepengevedtakBuilder {
         begrunnelseFraFritekst: String,
         begrunnelseFraKonklusjon: String,
         type: Skjønnsfastsettingstype,
+        årsak: Skjønnsfastsettingsårsak,
     ) = apply {
-        this.skjønnsfastsettingopplysninger = SkjønnsfastsettingopplysningerDto(begrunnelseFraMal, begrunnelseFraFritekst, begrunnelseFraKonklusjon, type)
+        this.skjønnsfastsettingopplysninger = SkjønnsfastsettingopplysningerDto(begrunnelseFraMal, begrunnelseFraFritekst, begrunnelseFraKonklusjon, type, årsak)
     }
     internal fun tags(tags: List<String>) = apply { this.tags = tags }
 
