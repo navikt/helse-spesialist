@@ -666,18 +666,6 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             )
         }
 
-    protected fun leggPåVent(oppgaveId: Long) = sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL")
-        val statement =
-            "UPDATE tildeling SET på_vent = true WHERE oppgave_id_ref = ?"
-        session.run(
-            queryOf(
-                statement,
-                oppgaveId
-            ).asUpdate
-        )
-    }
-
     open fun mockSnapshot(
         fødselsnummer: String = FØDSELSNUMMER,
         avviksprosent: Double = 0.0,
