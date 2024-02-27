@@ -16,7 +16,6 @@ data class OppgaveFraDatabase(
     val ferdigstiltAvIdent: String? = null,
     val ferdigstiltAvOid: UUID? = null,
     val tildelt: SaksbehandlerFraDatabase? = null,
-    val påVent: Boolean = false,
 )
 
 data class OppgaveFraDatabaseForVisning(

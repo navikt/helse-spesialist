@@ -36,7 +36,6 @@ class Oppgave private constructor(
     private var ferdigstiltAvOid: UUID? = null
     private val egenskaper = mutableSetOf<Egenskap>()
     private var tildeltTil: Saksbehandler? = null
-    private var påVent: Boolean = false
 
     private val observers = mutableListOf<OppgaveObserver>()
 
@@ -51,19 +50,30 @@ class Oppgave private constructor(
         ferdigstiltAvIdent: String? = null,
         ferdigstiltAvOid: UUID? = null,
         tildelt: Saksbehandler? = null,
-        påVent: Boolean = false,
         totrinnsvurdering: Totrinnsvurdering? = null,
         egenskaper: List<Egenskap>
     ) : this(id, egenskap, tilstand, vedtaksperiodeId, utbetalingId, hendelseId, kanAvvises, totrinnsvurdering) {
         this.ferdigstiltAvIdent = ferdigstiltAvIdent
         this.ferdigstiltAvOid = ferdigstiltAvOid
         this.tildeltTil = tildelt
-        this.påVent = påVent
         this.egenskaper.addAll(egenskaper)
     }
 
     fun accept(visitor: OppgaveVisitor) {
-        visitor.visitOppgave(id, egenskap, tilstand, vedtaksperiodeId, utbetalingId, hendelseId, ferdigstiltAvOid, ferdigstiltAvIdent, egenskaper.toList(), tildeltTil, påVent, kanAvvises, totrinnsvurdering)
+        visitor.visitOppgave(
+            id,
+            egenskap,
+            tilstand,
+            vedtaksperiodeId,
+            utbetalingId,
+            hendelseId,
+            ferdigstiltAvOid,
+            ferdigstiltAvIdent,
+            egenskaper.toList(),
+            tildeltTil,
+            kanAvvises,
+            totrinnsvurdering
+        )
         totrinnsvurdering?.accept(visitor)
     }
 
@@ -114,7 +124,6 @@ class Oppgave private constructor(
         egenskaper.remove(RETUR)
         egenskaper.add(BESLUTTER)
         tildeltTil = totrinnsvurdering.tidligereBeslutter()
-        påVent = false
         oppgaveEndret()
     }
 
@@ -133,7 +142,6 @@ class Oppgave private constructor(
         egenskaper.add(RETUR)
 
         tildeltTil = opprinneligSaksbehandler
-        påVent = false
         oppgaveEndret()
     }
 
@@ -155,13 +163,11 @@ class Oppgave private constructor(
             this.tildeltTil = null
         }
         egenskaper.add(PÅ_VENT)
-        påVent = true
         oppgaveEndret()
     }
 
     fun fjernPåVent() {
         egenskaper.remove(PÅ_VENT)
-        påVent = false
         oppgaveEndret()
     }
 
@@ -179,7 +185,6 @@ class Oppgave private constructor(
 
     private fun tildel(saksbehandler: Saksbehandler) {
         this.tildeltTil = saksbehandler
-        this.påVent = egenskaper.contains(PÅ_VENT)
         logg.info("Oppgave med {} tildeles saksbehandler med {}", kv("oppgaveId", id), kv("oid", saksbehandler.oid()))
         sikkerlogg.info("Oppgave med {} tildeles $saksbehandler", kv("oppgaveId", id))
         oppgaveEndret()
@@ -187,7 +192,6 @@ class Oppgave private constructor(
 
     private fun avmeld(saksbehandler: Saksbehandler) {
         this.tildeltTil = null
-        this.påVent = egenskaper.contains(PÅ_VENT)
         logg.info("Oppgave med {} avmeldes saksbehandler med {}", kv("oppgaveId", id), kv("oid", saksbehandler.oid()))
         sikkerlogg.info("Oppgave med {} avmeldes $saksbehandler", kv("oppgaveId", id))
         oppgaveEndret()

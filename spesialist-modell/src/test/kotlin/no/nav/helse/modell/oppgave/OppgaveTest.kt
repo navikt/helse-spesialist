@@ -137,7 +137,6 @@ internal class OppgaveTest {
 
         inspektør(oppgave) {
             assertEquals(false, tildelt)
-            assertEquals(false, påVent)
             assertEquals(null, tildeltTil)
         }
     }

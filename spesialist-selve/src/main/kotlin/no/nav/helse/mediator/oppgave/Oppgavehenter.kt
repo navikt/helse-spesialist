@@ -28,13 +28,12 @@ class Oppgavehenter(
             vedtaksperiodeId = oppgave.vedtaksperiodeId,
             utbetalingId = oppgave.utbetalingId,
             hendelseId = oppgave.hendelseId,
+            kanAvvises = oppgave.kanAvvises,
             ferdigstiltAvIdent = oppgave.ferdigstiltAvIdent,
             ferdigstiltAvOid = oppgave.ferdigstiltAvOid,
             tildelt = oppgave.tildelt?.let {
                 Saksbehandler(it.epostadresse, it.oid, it.navn, it.ident, tilgangskontroll)
             },
-            påVent = oppgave.påVent,
-            kanAvvises = oppgave.kanAvvises,
             totrinnsvurdering = totrinnsvurdering?.let {
                 Totrinnsvurdering(
                     vedtaksperiodeId = it.vedtaksperiodeId,

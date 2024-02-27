@@ -526,11 +526,10 @@ internal class OppgaveMediatorTest {
         vedtaksperiodeId = VEDTAKSPERIODE_ID,
         utbetalingId = UTBETALING_ID,
         hendelseId = HENDELSE_ID,
+        kanAvvises = true,
         ferdigstiltAvIdent = null,
         ferdigstiltAvOid = null,
         tildelt = if (tildelt) SaksbehandlerFraDatabase(SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT) else null,
-        påVent = false,
-        kanAvvises = true,
     )
 
     private fun EgenskapForDatabase.periodetype(): Periodetype = when (this) {

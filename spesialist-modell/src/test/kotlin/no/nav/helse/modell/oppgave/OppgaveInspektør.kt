@@ -22,14 +22,13 @@ internal class OppgaveInspektør private constructor(): OppgaveVisitor {
         ferdigstiltAvIdent: String?,
         egenskaper: List<Egenskap>,
         tildelt: Saksbehandler?,
-        påVent: Boolean,
         kanAvvises: Boolean,
         totrinnsvurdering: Totrinnsvurdering?
     ) {
         this.tilstand = tilstand
         this.tildelt = tildelt != null
         this.tildeltTil = tildelt
-        this.påVent = påVent
+        this.påVent = egenskaper.contains(Egenskap.PÅ_VENT)
         this.egenskap = egenskap
        this.egenskaper.addAll(egenskaper)
     }

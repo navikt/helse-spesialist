@@ -56,6 +56,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                 vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
                 utbetalingId = row.uuid("utbetaling_id"),
                 hendelseId = finnHendelseId(id),
+                kanAvvises = row.boolean("kan_avvises"),
                 ferdigstiltAvIdent = row.stringOrNull("ferdigstilt_av"),
                 ferdigstiltAvOid = row.stringOrNull("ferdigstilt_av_oid")?.let(UUID::fromString),
                 tildelt = row.uuidOrNull("oid")?.let {
@@ -66,8 +67,6 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                         ident = row.string("ident")
                     )
                 },
-                påVent = egenskaper.contains(EgenskapForDatabase.PÅ_VENT),
-                kanAvvises = row.boolean("kan_avvises"),
             )
         }
     }

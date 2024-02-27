@@ -109,7 +109,6 @@ class OppgavehenterTest {
         private var ferdigstiltAvIdent: String? = null
         private lateinit var egenskaper: List<Egenskap>
         private var tildelt: Saksbehandler? = null
-        private var påVent by Delegates.notNull<Boolean>()
         private var totrinnsvurdering: Totrinnsvurdering? = null
 
         override fun visitOppgave(
@@ -123,7 +122,6 @@ class OppgavehenterTest {
             ferdigstiltAvIdent: String?,
             egenskaper: List<Egenskap>,
             tildelt: Saksbehandler?,
-            påVent: Boolean,
             kanAvvises: Boolean,
             totrinnsvurdering: Totrinnsvurdering?
         ) {
@@ -136,7 +134,6 @@ class OppgavehenterTest {
             this.ferdigstiltAvIdent = ferdigstiltAvIdent
             this.egenskaper = egenskaper
             this.tildelt = tildelt
-            this.påVent = påVent
             this.totrinnsvurdering = totrinnsvurdering
         }
 
@@ -162,7 +159,7 @@ class OppgavehenterTest {
             assertEquals(ferdigstiltAvIdent, this.ferdigstiltAvIdent)
             assertEquals(egenskaper, this.egenskaper)
             assertEquals(tildelt, this.tildelt)
-            assertEquals(påVent, this.påVent)
+            assertEquals(påVent, egenskaper.contains(Egenskap.PÅ_VENT))
             assertEquals(totrinnsvurdering, this.totrinnsvurdering)
         }
     }
@@ -177,11 +174,10 @@ class OppgavehenterTest {
                 vedtaksperiodeId = VEDTAKSPERIODE_ID,
                 utbetalingId = UTBETALING_ID,
                 hendelseId = HENDELSE_ID,
+                kanAvvises = KAN_AVVISES,
                 ferdigstiltAvIdent = SAKSBEHANDLER_IDENT,
                 ferdigstiltAvOid = SAKSBEHANDLER_OID,
                 tildelt = TILDELT_TIL,
-                påVent = PÅ_VENT,
-                kanAvvises = KAN_AVVISES,
             )
         }
 

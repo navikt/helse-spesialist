@@ -63,7 +63,6 @@ class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
         ferdigstiltAvIdent: String?,
         egenskaper: List<Egenskap>,
         tildelt: Saksbehandler?,
-        påVent: Boolean,
         kanAvvises: Boolean,
         totrinnsvurdering: Totrinnsvurdering?
     ) {
@@ -75,11 +74,10 @@ class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId,
             hendelseId = hendelseId,
+            kanAvvises = kanAvvises,
             ferdigstiltAvIdent = ferdigstiltAvIdent,
             ferdigstiltAvOid = ferdigstiltAvOid,
             tildelt = tildelt?.tilDatabaseversjon(),
-            påVent = påVent,
-            kanAvvises = kanAvvises,
         )
     }
 

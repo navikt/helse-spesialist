@@ -40,7 +40,7 @@ internal class Oppgavemelder(
             "tilstand" to oppgavemelding.tilstand,
             "type" to oppgavemelding.type,
             "fødselsnummer" to fødselsnummer,
-            "påVent" to oppgavemelding.påVent,
+            "påVent" to oppgavemelding.egenskaper.contains("PÅ_VENT"),
             "egenskaper" to oppgavemelding.egenskaper
         ).apply {
             compute("beslutter") { _, _ -> oppgavemelding.beslutter }
@@ -56,7 +56,6 @@ private class OppgaveForKafkaBygger : OppgaveVisitor {
     private var oppgaveId by Delegates.notNull<Long>()
     private lateinit var tilstand: String
     private lateinit var type: String
-    private var påVent by Delegates.notNull<Boolean>()
     private lateinit var egenskaper: List<String>
 
     fun bygg(oppgave: Oppgave): Oppgavemelding {
@@ -68,7 +67,6 @@ private class OppgaveForKafkaBygger : OppgaveVisitor {
             type = type,
             beslutter = beslutter,
             saksbehandler = saksbehandler,
-            påVent = påVent,
             egenskaper = egenskaper
         )
     }
@@ -84,9 +82,6 @@ private class OppgaveForKafkaBygger : OppgaveVisitor {
         val beslutter: Map<String, Any>?,
         val saksbehandler: Map<String, Any>?,
 
-        @Deprecated("Feltet skal fjernes når Risk bruker egenskaper i stedet")
-        val påVent: Boolean,
-
         val egenskaper: List<String>
     )
 
@@ -101,7 +96,6 @@ private class OppgaveForKafkaBygger : OppgaveVisitor {
         ferdigstiltAvIdent: String?,
         egenskaper: List<Egenskap>,
         tildelt: Saksbehandler?,
-        påVent: Boolean,
         kanAvvises: Boolean,
         totrinnsvurdering: Totrinnsvurdering?
     ) {
@@ -109,7 +103,6 @@ private class OppgaveForKafkaBygger : OppgaveVisitor {
         this.oppgaveId = id
         this.tilstand = mapTilstand(tilstand)
         this.type = egenskap.tilKafkaversjon()
-        this.påVent = påVent
         this.saksbehandler = tildelt?.toMap()
         this.egenskaper = egenskaper.map { it.tilKafkaversjon() }
     }
