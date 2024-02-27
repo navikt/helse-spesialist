@@ -156,6 +156,16 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             connectionRequestTimeout = 40_000
         }
     }
+    private val reservasjonHttpClient = HttpClient(Apache) {
+        install(ContentNegotiation) {
+            register(ContentType.Application.Json, JacksonConverter())
+        }
+        engine {
+            socketTimeout = 1_000
+            connectTimeout = 1_000
+            connectionRequestTimeout = 2_000
+        }
+    }
     private val azureConfig = AzureConfig(
         clientId = env.getValue("AZURE_APP_CLIENT_ID"),
         issuer = env.getValue("AZURE_OPENID_CONFIG_ISSUER"),
@@ -177,7 +187,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         spleisClientId = env.getValue("SPLEIS_CLIENT_ID")
     )
     private val reservasjonClient = ReservasjonClient(
-        httpClient = httpClient,
+        httpClient = reservasjonHttpClient,
         accessTokenClient = accessTokenClient,
         apiUrl = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_API_URL"),
         scope = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_SCOPE"),
