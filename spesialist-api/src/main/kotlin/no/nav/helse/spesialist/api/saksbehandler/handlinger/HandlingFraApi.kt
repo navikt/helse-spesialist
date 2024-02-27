@@ -70,6 +70,7 @@ data class OverstyrArbeidsforholdHandlingFraApi(
         val deaktivert: Boolean,
         val begrunnelse: String,
         val forklaring: String,
+        val lovhjemmel: LovhjemmelFraApi?,
     )
 }
 

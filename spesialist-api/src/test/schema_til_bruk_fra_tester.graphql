@@ -725,7 +725,6 @@ type Tildeling {
     epost: String!
     navn: String!
     oid: String!
-    paaVent: Boolean
 }
 
 type Totrinnsvurdering {
@@ -1278,6 +1277,7 @@ input OverstyringArbeidsforholdInput {
     begrunnelse: String!
     deaktivert: Boolean!
     forklaring: String!
+    lovhjemmel: LovhjemmelInput
     orgnummer: String!
 }
 

@@ -265,8 +265,16 @@ internal class SaksbehandlerMediator(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             skjæringstidspunkt = skjæringstidspunkt,
-            overstyrteArbeidsforhold = overstyrteArbeidsforhold.map {
-                Arbeidsforhold(it.orgnummer, it.deaktivert, it.begrunnelse, it.forklaring)
+            overstyrteArbeidsforhold = overstyrteArbeidsforhold.map { overstyrtArbeidsforhold ->
+                Arbeidsforhold(
+                    organisasjonsnummer = overstyrtArbeidsforhold.orgnummer,
+                    deaktivert = overstyrtArbeidsforhold.deaktivert,
+                    begrunnelse = overstyrtArbeidsforhold.begrunnelse,
+                    forklaring = overstyrtArbeidsforhold.forklaring,
+                    lovhjemmel = overstyrtArbeidsforhold.lovhjemmel?.let {
+                        Lovhjemmel(it.paragraf, it.ledd, it.bokstav, it.lovverk, it.lovverksversjon)
+                    }
+                )
             }
         )
     }

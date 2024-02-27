@@ -137,7 +137,16 @@ class OverstyringMutation(private val saksbehandlerhåndterer: Saksbehandlerhån
                         orgnummer = arbeidsforhold.orgnummer,
                         deaktivert = arbeidsforhold.deaktivert,
                         begrunnelse = arbeidsforhold.begrunnelse,
-                        forklaring = arbeidsforhold.forklaring
+                        forklaring = arbeidsforhold.forklaring,
+                        lovhjemmel = arbeidsforhold.lovhjemmel?.let { lovhjemmel ->
+                            LovhjemmelFraApi(
+                                paragraf = lovhjemmel.paragraf,
+                                ledd = lovhjemmel.ledd,
+                                bokstav = lovhjemmel.bokstav,
+                                lovverk = lovhjemmel.lovverk,
+                                lovverksversjon = lovhjemmel.lovverksversjon,
+                            )
+                        }
                     )
                 })
             withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(handling, saksbehandler.value) }

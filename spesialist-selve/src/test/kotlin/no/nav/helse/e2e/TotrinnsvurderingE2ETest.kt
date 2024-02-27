@@ -4,6 +4,7 @@ import AbstractE2ETest
 import java.util.UUID
 import no.nav.helse.Testdata.ORGNR_GHOST
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.LovhjemmelFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.OverstyrArbeidsforholdHandlingFraApi
 import org.junit.jupiter.api.Test
 
@@ -33,7 +34,8 @@ internal class TotrinnsvurderingE2ETest : AbstractE2ETest() {
                     orgnummer = ORGNR_GHOST,
                     deaktivert = true,
                     begrunnelse = "begrunnelse",
-                    forklaring = "forklaring"
+                    forklaring = "forklaring",
+                    lovhjemmel = LovhjemmelFraApi("8-15", null, null, "folketrygdloven", "1998-12-18"),
                 )
             )
         )

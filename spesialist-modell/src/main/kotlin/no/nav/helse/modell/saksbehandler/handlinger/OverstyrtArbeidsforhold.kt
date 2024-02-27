@@ -6,6 +6,7 @@ import no.nav.helse.modell.saksbehandler.OverstyrtArbeidsforholdEvent
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.handlinger.dto.ArbeidsforholdDto
 import no.nav.helse.modell.saksbehandler.handlinger.dto.OverstyrtArbeidsforholdDto
+import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 
 class OverstyrtArbeidsforhold(
     private val id: UUID = UUID.randomUUID(),
@@ -48,14 +49,15 @@ class Arbeidsforhold(
     private val organisasjonsnummer: String,
     private val deaktivert: Boolean,
     private val begrunnelse: String,
-    private val forklaring: String
+    private val forklaring: String,
+    private val lovhjemmel: Lovhjemmel?,
 ) {
     fun byggEvent(): OverstyrtArbeidsforholdEvent.Arbeidsforhold {
         return OverstyrtArbeidsforholdEvent.Arbeidsforhold(
             orgnummer = organisasjonsnummer,
             deaktivert = deaktivert,
             begrunnelse = begrunnelse,
-            forklaring = forklaring
+            forklaring = forklaring,
         )
     }
 

@@ -121,7 +121,8 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
                     orgnummer = ORGNR,
                     deaktivert = true,
                     begrunnelse = "begrunnelse",
-                    forklaring = "forklaring"
+                    forklaring = "forklaring",
+                    lovhjemmel = LovhjemmelFraApi("8-15", null, null, "folketrygdloven", "1998-12-18"),
                 )
             )
         )

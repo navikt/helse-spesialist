@@ -1263,7 +1263,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 orgnummer = organisasjonsnummer,
                 deaktivert = true,
                 begrunnelse = "begrunnelse",
-                forklaring = "forklaring"
+                forklaring = "forklaring",
+                lovhjemmel = LovhjemmelFraApi("8-15", null, null, "folketrygdloven", "1998-12-18"),
             )
         ),
     ) {

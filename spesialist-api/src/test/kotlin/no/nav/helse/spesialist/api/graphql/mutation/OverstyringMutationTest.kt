@@ -57,7 +57,7 @@ internal class OverstyringMutationTest : AbstractOverstyringApiTest() {
         val body = overstyrArbeidsforhold(
             ArbeidsforholdOverstyringHandling(
                 FØDSELSNUMMER, AKTØRID, 10.januar.toString(), listOf(
-                    OverstyringArbeidsforhold(ORGANISASJONSNUMMER_GHOST, true, "En begrunnelse", "En forklaring")
+                    OverstyringArbeidsforhold(ORGANISASJONSNUMMER_GHOST, true, "En begrunnelse", "En forklaring", null)
                 )
             )
         )

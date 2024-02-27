@@ -27,7 +27,8 @@ data class OverstyringArbeidsforhold(
     val orgnummer: String,
     val deaktivert: Boolean,
     val begrunnelse: String,
-    val forklaring: String
+    val forklaring: String,
+    val lovhjemmel: Lovhjemmel?,
 )
 
 data class OverstyringArbeidsgiver(

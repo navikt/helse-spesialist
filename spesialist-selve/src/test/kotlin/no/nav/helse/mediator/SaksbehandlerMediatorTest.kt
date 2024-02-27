@@ -382,7 +382,8 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
                     orgnummer = ORGANISASJONSNUMMER_GHOST,
                     deaktivert = true,
                     begrunnelse = "en begrunnelse",
-                    forklaring = "en forklaring"
+                    forklaring = "en forklaring",
+                    lovhjemmel = LovhjemmelFraApi("8-15", null, null, "folketrygdloven", "1998-12-18"),
                 )
             ),
         )
