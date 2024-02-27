@@ -2,7 +2,6 @@ package no.nav.helse.modell.saksbehandler
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.modell.vilkårsprøving.LovhjemmelEvent
 import no.nav.helse.modell.vilkårsprøving.SubsumsjonEvent
 
 interface SaksbehandlerObserver {
@@ -34,7 +33,6 @@ data class OverstyrtInntektOgRefusjonEvent(
         val fraRefusjonsopplysninger: List<OverstyrtRefusjonselementEvent>?,
         val begrunnelse: String,
         val forklaring: String,
-        val subsumsjon: LovhjemmelEvent?,
     ) {
         data class OverstyrtRefusjonselementEvent(
             val fom: LocalDate,

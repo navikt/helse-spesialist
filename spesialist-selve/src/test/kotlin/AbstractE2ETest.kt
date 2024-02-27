@@ -44,7 +44,6 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
-import no.nav.helse.modell.vilkårsprøving.LovhjemmelEvent
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -1667,7 +1666,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             fraRefusjonsopplysninger = it.fraRefusjonsopplysninger?.byggRefusjonselementEvent(),
             begrunnelse = it.begrunnelse,
             forklaring = it.forklaring,
-            subsumsjon = it.lovhjemmel?.byggLovhjemmelEvent(),
         )
     }
 
@@ -1678,9 +1676,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             beløp = it.beløp,
         )
     }
-
-    private fun LovhjemmelFraApi.byggLovhjemmelEvent() =
-        LovhjemmelEvent(paragraf, ledd, bokstav, lovverk, lovverksversjon)
 
     private fun lagVarseldefinisjoner() {
         Varselkode.entries.forEach { varselkode ->

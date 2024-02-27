@@ -63,7 +63,6 @@ class OverstyrtArbeidsgiver(
         fraRefusjonsopplysninger = fraRefusjonsopplysninger?.map(Refusjonselement::byggEvent),
         begrunnelse = begrunnelse,
         forklaring = forklaring,
-        subsumsjon = lovhjemmel?.byggEvent()
     )
 
     fun toDto() = OverstyrtArbeidsgiverDto(
