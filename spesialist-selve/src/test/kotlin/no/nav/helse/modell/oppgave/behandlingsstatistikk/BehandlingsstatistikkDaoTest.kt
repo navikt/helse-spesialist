@@ -5,6 +5,7 @@ import java.time.LocalDate
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.spesialist.api.oppgave.Egenskap
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.vedtaksperiode.Mottakertype
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -55,6 +56,21 @@ internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
         assertEquals(0, dto.perInntekttype[no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde.FLERE_ARBEIDSGIVERE])
         assertEquals(1, dto.perPeriodetype[no.nav.helse.spesialist.api.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING])
         assertTrue(dto.perMottakertype.isEmpty())
+    }
+
+    @Test
+    fun `hent antall tilgjengelige oppgaver for gitt egenskap`() {
+        nyPerson()
+        val antall = behandlingsstatistikkDao.antallTilgjengeligeOppgaverFor(Egenskap.SØKNAD)
+        assertEquals(1, antall)
+    }
+
+    @Test
+    fun `hent antall ferdigstilte oppgaver for gitt egenskap`() {
+        nyPerson()
+        oppgaveDao.updateOppgave(OPPGAVE_ID, oppgavestatus = "Ferdigstilt", egenskaper = listOf(EgenskapForDatabase.SØKNAD))
+        val antall = behandlingsstatistikkDao.antallFerdigstilteOppgaverFor(Egenskap.SØKNAD, LocalDate.now())
+        assertEquals(1, antall)
     }
 
     @Test

@@ -4,7 +4,7 @@ import java.time.LocalDate
 import javax.sql.DataSource
 import kotliquery.Query
 import no.nav.helse.HelseDao
-import no.nav.helse.spesialist.api.oppgave.Oppgavetype
+import no.nav.helse.spesialist.api.oppgave.Egenskap
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
 import no.nav.helse.spesialist.api.vedtaksperiode.Mottakertype
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
@@ -100,26 +100,31 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
         return getStatistikkPerInntektOgPeriodetype(query)
     }
 
-    fun getManueltUtførteOppgaverPerOppgavetype(fom: LocalDate) = asSQL(
-        """
-            SELECT o.type, count(distinct o.id)
-            FROM oppgave o
-            WHERE o.status = 'Ferdigstilt'
-              AND o.oppdatert >= :fom
-            GROUP BY o.type;
-        """, mapOf("fom" to fom)
-    ).list { mapOf(Oppgavetype.valueOf(it.string("type")) to it.int("count")) }
-        .fold(emptyMap(), Map<Oppgavetype, Int>::plus)
-
-    fun getTilgjengeligeOppgaverPerOppgavetype() = asSQL(
-        """
-            SELECT o.type, count(distinct o.id)
-            FROM oppgave o
+    fun antallTilgjengeligeOppgaverFor(egenskap: Egenskap): Int {
+        return asSQL("""
+            SELECT count(distinct o.id) FROM oppgave o 
             WHERE o.status = 'AvventerSaksbehandler'
-            GROUP BY o.type;
-        """
-    ).list { mapOf(Oppgavetype.valueOf(it.string("type")) to it.int("count")) }
-        .fold(emptyMap(), Map<Oppgavetype, Int>::plus)
+            AND o.egenskaper @> ARRAY[:egenskap]::varchar[]
+            """.trimIndent(),
+           mapOf(
+               "egenskap" to egenskap.name,
+           )
+        ).single { it.int(1) } ?: 0
+    }
+
+    fun antallFerdigstilteOppgaverFor(egenskap: Egenskap, fom: LocalDate): Int {
+        return asSQL("""
+            SELECT count(distinct o.id) FROM oppgave o 
+            WHERE o.status = 'Ferdigstilt'
+            AND o.oppdatert >= :fom
+            AND o.egenskaper @> ARRAY[:egenskap]::varchar[]
+            """.trimIndent(),
+           mapOf(
+               "egenskap" to egenskap.name,
+               "fom" to fom
+           )
+        ).single { it.int(1) } ?: 0
+    }
 
     private fun getStatistikkPerInntektOgPeriodetype(
         query: Query,
