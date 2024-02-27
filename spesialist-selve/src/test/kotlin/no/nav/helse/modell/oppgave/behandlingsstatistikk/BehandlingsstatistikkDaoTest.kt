@@ -5,7 +5,6 @@ import java.time.LocalDate
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.spesialist.api.oppgave.Egenskap
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.vedtaksperiode.Mottakertype
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -13,7 +12,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.parallel.Isolated
-import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkType as BehandlingsstatistikkTypeForApi
 
 @Isolated
 internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
@@ -61,7 +59,7 @@ internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `hent antall tilgjengelige oppgaver for gitt egenskap`() {
         nyPerson()
-        val antall = behandlingsstatistikkDao.antallTilgjengeligeOppgaverFor(Egenskap.SØKNAD)
+        val antall = behandlingsstatistikkDao.antallTilgjengeligeOppgaverFor(EgenskapForDatabase.SØKNAD)
         assertEquals(1, antall)
     }
 
@@ -69,7 +67,7 @@ internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
     fun `hent antall ferdigstilte oppgaver for gitt egenskap`() {
         nyPerson()
         oppgaveDao.updateOppgave(OPPGAVE_ID, oppgavestatus = "Ferdigstilt", egenskaper = listOf(EgenskapForDatabase.SØKNAD))
-        val antall = behandlingsstatistikkDao.antallFerdigstilteOppgaverFor(Egenskap.SØKNAD, LocalDate.now())
+        val antall = behandlingsstatistikkDao.antallFerdigstilteOppgaverFor(EgenskapForDatabase.SØKNAD, LocalDate.now())
         assertEquals(1, antall)
     }
 
@@ -132,8 +130,6 @@ internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
         )
         assertEquals(1, behandlingsstatistikkDao.getAntallManueltFullførteEgenAnsattOppgaver(LocalDate.now().minusDays(1)))
     }
-
-    private operator fun List<Pair<BehandlingsstatistikkTypeForApi, Int>>.get(type: BehandlingsstatistikkTypeForApi) = this.first { it.first == type }.second
 
     private fun nyPersonMedAutomatiskVedtak(
         periodetype: Periodetype = Periodetype.FØRSTEGANGSBEHANDLING,

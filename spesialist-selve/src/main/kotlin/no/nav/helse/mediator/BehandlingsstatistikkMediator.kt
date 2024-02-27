@@ -1,10 +1,10 @@
 package no.nav.helse.mediator
 
 import java.time.LocalDate
-import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkDao
+import no.nav.helse.db.BehandlingsstatistikkDao
+import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkResponse
 import no.nav.helse.spesialist.api.behandlingsstatistikk.Statistikk
-import no.nav.helse.spesialist.api.oppgave.Egenskap
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
 import no.nav.helse.spesialist.api.vedtaksperiode.Mottakertype
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
@@ -73,38 +73,38 @@ class BehandlingsstatistikkMediator(private val behandlingsstatistikkDao: Behand
             forlengelseIt = forlengelseIt(),
             utbetalingTilArbeidsgiver = Statistikk(
                 automatisertPerInntektPeriodetypeOgMottaker.perMottakertype[Mottakertype.ARBEIDSGIVER] ?: 0,
-                behandlingsstatistikkDao.antallFerdigstilteOppgaverFor(Egenskap.SØKNAD, fom),
-                behandlingsstatistikkDao.antallTilgjengeligeOppgaverFor(Egenskap.SØKNAD),
+                behandlingsstatistikkDao.antallFerdigstilteOppgaverFor(EgenskapForDatabase.SØKNAD, fom),
+                behandlingsstatistikkDao.antallTilgjengeligeOppgaverFor(EgenskapForDatabase.SØKNAD),
             ),
             utbetalingTilSykmeldt = Statistikk(
                 automatisertPerInntektPeriodetypeOgMottaker.perMottakertype[Mottakertype.SYKMELDT] ?: 0,
-                behandlingsstatistikkDao.antallFerdigstilteOppgaverFor(Egenskap.UTBETALING_TIL_SYKMELDT, fom),
-                behandlingsstatistikkDao.antallTilgjengeligeOppgaverFor(Egenskap.UTBETALING_TIL_SYKMELDT)
+                behandlingsstatistikkDao.antallFerdigstilteOppgaverFor(EgenskapForDatabase.UTBETALING_TIL_SYKMELDT, fom),
+                behandlingsstatistikkDao.antallTilgjengeligeOppgaverFor(EgenskapForDatabase.UTBETALING_TIL_SYKMELDT)
             ),
             faresignaler = Statistikk(
                 0,
-                behandlingsstatistikkDao.antallFerdigstilteOppgaverFor(Egenskap.RISK_QA, fom),
-                behandlingsstatistikkDao.antallTilgjengeligeOppgaverFor(Egenskap.RISK_QA)
+                behandlingsstatistikkDao.antallFerdigstilteOppgaverFor(EgenskapForDatabase.RISK_QA, fom),
+                behandlingsstatistikkDao.antallTilgjengeligeOppgaverFor(EgenskapForDatabase.RISK_QA)
             ),
             fortroligAdresse = Statistikk(
                 0,
-                behandlingsstatistikkDao.antallFerdigstilteOppgaverFor(Egenskap.FORTROLIG_ADRESSE, fom),
-                behandlingsstatistikkDao.antallTilgjengeligeOppgaverFor(Egenskap.FORTROLIG_ADRESSE)
+                behandlingsstatistikkDao.antallFerdigstilteOppgaverFor(EgenskapForDatabase.FORTROLIG_ADRESSE, fom),
+                behandlingsstatistikkDao.antallTilgjengeligeOppgaverFor(EgenskapForDatabase.FORTROLIG_ADRESSE)
             ),
             stikkprover = Statistikk(
                 0,
-                behandlingsstatistikkDao.antallFerdigstilteOppgaverFor(Egenskap.STIKKPRØVE, fom),
-                behandlingsstatistikkDao.antallTilgjengeligeOppgaverFor(Egenskap.STIKKPRØVE)
+                behandlingsstatistikkDao.antallFerdigstilteOppgaverFor(EgenskapForDatabase.STIKKPRØVE, fom),
+                behandlingsstatistikkDao.antallTilgjengeligeOppgaverFor(EgenskapForDatabase.STIKKPRØVE)
             ),
             revurdering = Statistikk(
                 0,
-                behandlingsstatistikkDao.antallFerdigstilteOppgaverFor(Egenskap.REVURDERING, fom),
-                behandlingsstatistikkDao.antallTilgjengeligeOppgaverFor(Egenskap.REVURDERING)
+                behandlingsstatistikkDao.antallFerdigstilteOppgaverFor(EgenskapForDatabase.REVURDERING, fom),
+                behandlingsstatistikkDao.antallTilgjengeligeOppgaverFor(EgenskapForDatabase.REVURDERING)
             ),
             delvisRefusjon = Statistikk(
                 automatisertPerInntektPeriodetypeOgMottaker.perMottakertype[Mottakertype.BEGGE] ?: 0,
-                behandlingsstatistikkDao.antallFerdigstilteOppgaverFor(Egenskap.DELVIS_REFUSJON, fom),
-                behandlingsstatistikkDao.antallTilgjengeligeOppgaverFor(Egenskap.DELVIS_REFUSJON)
+                behandlingsstatistikkDao.antallFerdigstilteOppgaverFor(EgenskapForDatabase.DELVIS_REFUSJON, fom),
+                behandlingsstatistikkDao.antallTilgjengeligeOppgaverFor(EgenskapForDatabase.DELVIS_REFUSJON)
             ),
             beslutter = Statistikk(
                 0,

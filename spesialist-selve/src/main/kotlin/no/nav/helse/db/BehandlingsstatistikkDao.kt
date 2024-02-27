@@ -1,10 +1,11 @@
-package no.nav.helse.spesialist.api.behandlingsstatistikk
+package no.nav.helse.db
 
 import java.time.LocalDate
 import javax.sql.DataSource
 import kotliquery.Query
 import no.nav.helse.HelseDao
-import no.nav.helse.spesialist.api.oppgave.Egenskap
+import no.nav.helse.spesialist.api.behandlingsstatistikk.InntektOgPeriodetyperad
+import no.nav.helse.spesialist.api.behandlingsstatistikk.StatistikkPerInntektOgPeriodetype
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
 import no.nav.helse.spesialist.api.vedtaksperiode.Mottakertype
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
@@ -100,7 +101,7 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
         return getStatistikkPerInntektOgPeriodetype(query)
     }
 
-    fun antallTilgjengeligeOppgaverFor(egenskap: Egenskap): Int {
+    fun antallTilgjengeligeOppgaverFor(egenskap: EgenskapForDatabase): Int {
         return asSQL("""
             SELECT count(distinct o.id) FROM oppgave o 
             WHERE o.status = 'AvventerSaksbehandler'
@@ -112,7 +113,7 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
         ).single { it.int(1) } ?: 0
     }
 
-    fun antallFerdigstilteOppgaverFor(egenskap: Egenskap, fom: LocalDate): Int {
+    fun antallFerdigstilteOppgaverFor(egenskap: EgenskapForDatabase, fom: LocalDate): Int {
         return asSQL("""
             SELECT count(distinct o.id) FROM oppgave o 
             WHERE o.status = 'Ferdigstilt'
@@ -170,15 +171,3 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
     ).single { it.int("annulleringer") } ?: 0
 }
 
-enum class BehandlingsstatistikkType {
-    FØRSTEGANGSBEHANDLING,
-    FORLENGELSE,
-    INFOTRYGDFORLENGELSE,
-    OVERGANG_FRA_IT,
-    STIKKPRØVE,
-    RISK_QA,
-    REVURDERING,
-    FORTROLIG_ADRESSE,
-    UTBETALING_TIL_SYKMELDT,
-    DELVIS_REFUSJON
-}

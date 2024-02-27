@@ -38,6 +38,7 @@ import java.net.ProxySelector
 import java.net.URI
 import java.util.UUID
 import no.nav.helse.db.AvviksvurderingDao
+import no.nav.helse.db.BehandlingsstatistikkDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.TildelingDao
@@ -77,7 +78,6 @@ import no.nav.helse.spesialist.api.abonnement.opptegnelseApi
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.avviksvurdering.Avviksvurdering
 import no.nav.helse.spesialist.api.azureAdAppAuthentication
-import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkDao
 import no.nav.helse.spesialist.api.client.AccessTokenClient
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.feilhåndtering.Modellfeil

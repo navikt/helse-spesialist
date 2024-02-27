@@ -48,7 +48,7 @@ import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.spesialist.api.abonnement.AbonnementDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
-import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkDao
+import no.nav.helse.db.BehandlingsstatistikkDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
