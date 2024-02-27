@@ -38,7 +38,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
     override fun finnOppgave(id: Long): OppgaveFraDatabase? {
         return asSQL(
             """ 
-            SELECT o.egenskaper, o.type, o.status, v.vedtaksperiode_id, o.ferdigstilt_av, o.ferdigstilt_av_oid, o.utbetaling_id, s.navn, s.epost, s.ident, s.oid, t.på_vent, o.kan_avvises
+            SELECT o.egenskaper, o.type, o.status, v.vedtaksperiode_id, o.ferdigstilt_av, o.ferdigstilt_av_oid, o.utbetaling_id, s.navn, s.epost, s.ident, s.oid, o.kan_avvises
             FROM oppgave o
             INNER JOIN vedtak v on o.vedtak_ref = v.id
             LEFT JOIN tildeling t on o.id = t.oppgave_id_ref
@@ -47,10 +47,11 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
             ORDER BY o.id DESC LIMIT 1
         """, mapOf("oppgaveId" to id)
         ).single { row ->
+            val egenskaper: List<EgenskapForDatabase> = row.array<String>("egenskaper").toList().map { enumValueOf(it) }
             OppgaveFraDatabase(
                 id = id,
                 egenskap = row.string("type"),
-                egenskaper = row.array<String>("egenskaper").toList().map { enumValueOf(it) },
+                egenskaper = egenskaper,
                 status = row.string("status"),
                 vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
                 utbetalingId = row.uuid("utbetaling_id"),
@@ -65,7 +66,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                         ident = row.string("ident")
                     )
                 },
-                påVent = row.boolean("på_vent"),
+                påVent = egenskaper.contains(EgenskapForDatabase.PÅ_VENT),
                 kanAvvises = row.boolean("kan_avvises"),
             )
         }
@@ -107,7 +108,6 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                 pi.fornavn, pi.mellomnavn, pi.etternavn, 
                 o.egenskaper,
                 s.oid, s.ident, s.epost, s.navn,
-                t.på_vent,
                 o.opprettet,
                 os.soknad_mottatt AS opprinnelig_soknadsdato,
                 o.kan_avvises,
@@ -161,6 +161,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                 "ingen_statustype_egenskaper" to (statusEgenskaper == null),
             )
         ).list { row ->
+            val egenskaper = row.array<String>("egenskaper").map { enumValueOf<EgenskapForDatabase>(it) }.toSet()
             OppgaveFraDatabaseForVisning(
                 id = row.long("oppgave_id"),
                 aktørId = row.string("aktor_id"),
@@ -170,7 +171,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                     row.stringOrNull("mellomnavn"),
                     row.string("etternavn"),
                 ),
-                egenskaper = row.array<String>("egenskaper").map { enumValueOf<EgenskapForDatabase>(it) }.toSet(),
+                egenskaper = egenskaper,
                 tildelt = row.uuidOrNull("oid")?.let {
                     SaksbehandlerFraDatabase(
                         epostadresse = row.string("epost"),
@@ -179,7 +180,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                         row.string("ident")
                     )
                 },
-                påVent = row.boolean("på_vent"),
+                påVent = egenskaper.contains(EgenskapForDatabase.PÅ_VENT),
                 opprettet = row.localDateTime("opprettet"),
                 opprinneligSøknadsdato = row.localDateTime("opprinnelig_soknadsdato"),
                 tidsfrist = row.localDateOrNull("frist"),
@@ -207,7 +208,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
             """ 
             SELECT 
                 count(*) AS antall_mine_saker,
-                count(*) FILTER ( WHERE t.på_vent = true ) AS antall_mine_saker_på_vent
+                count(*) FILTER ( WHERE o.egenskaper @> ARRAY['PÅ_VENT']::varchar[] ) AS antall_mine_saker_på_vent
             from oppgave o 
                 LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
             WHERE o.status = 'AvventerSaksbehandler'

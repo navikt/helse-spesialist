@@ -688,7 +688,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         tildelOppgave(oppgaveId1, saksbehandlerOid = saksbehandlerOid)
         nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer(), oppgaveEgenskaper = listOf(PÅ_VENT))
         val oppgaveId2 = OPPGAVE_ID
-        tildelOppgave(oppgaveId2, saksbehandlerOid = saksbehandlerOid, påVent = true)
+        tildelOppgave(oppgaveId2, saksbehandlerOid = saksbehandlerOid, egenskaper = listOf(SØKNAD, PÅ_VENT))
         nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
         val oppgaveId3 = OPPGAVE_ID
 
@@ -980,11 +980,11 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
 
         nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
         val oppgaveId3 = OPPGAVE_ID
-        tildelOppgave(oppgaveId = oppgaveId3, saksbehandlerOid = saksbehandlerOid, påVent = true)
+        tildelOppgave(oppgaveId = oppgaveId3, saksbehandlerOid = saksbehandlerOid, egenskaper = listOf(SØKNAD, PÅ_VENT))
 
         nyPerson(fødselsnummer = lagFødselsnummer(), aktørId = lagAktørId(), vedtaksperiodeId = UUID.randomUUID(), organisasjonsnummer = lagOrganisasjonsnummer())
         val oppgaveId4 = OPPGAVE_ID
-        tildelOppgave(oppgaveId = oppgaveId4, saksbehandlerOid = UUID.randomUUID(), påVent = true)
+        tildelOppgave(oppgaveId = oppgaveId4, saksbehandlerOid = UUID.randomUUID(), egenskaper = listOf(SØKNAD, PÅ_VENT))
 
         val antallOppgaver = oppgaveDao.finnAntallOppgaver(saksbehandlerOid)
 

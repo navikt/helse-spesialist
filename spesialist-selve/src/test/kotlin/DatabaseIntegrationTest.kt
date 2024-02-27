@@ -237,13 +237,14 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         oppgaveId: Long = OPPGAVE_ID,
         saksbehandlerOid: UUID,
         navn: String = SAKSBEHANDLER_NAVN,
-        påVent: Boolean = false,
+        egenskaper: List<EgenskapForDatabase> = listOf(EgenskapForDatabase.SØKNAD)
     ) {
         opprettSaksbehandler(saksbehandlerOid, navn = navn, epost = SAKSBEHANDLER_EPOST, ident = SAKSBEHANDLER_IDENT)
+        oppgaveDao.updateOppgave(oppgaveId, oppgavestatus = "AvventerSaksbehandler", egenskaper = egenskaper)
         @Language("PostgreSQL")
-        val query = "INSERT INTO tildeling(saksbehandler_ref, oppgave_id_ref, på_vent) VALUES (?, ?, ?)"
+        val query = "INSERT INTO tildeling(saksbehandler_ref, oppgave_id_ref) VALUES (?, ?)"
         return sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, saksbehandlerOid, oppgaveId, påVent).asExecute)
+            session.run(queryOf(query, saksbehandlerOid, oppgaveId).asExecute)
         }
     }
 
