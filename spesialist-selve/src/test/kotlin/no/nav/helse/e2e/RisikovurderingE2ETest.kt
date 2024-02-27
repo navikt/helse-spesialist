@@ -4,9 +4,8 @@ import AbstractE2ETest
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.mediator.meldinger.Risikofunn
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -27,13 +26,13 @@ private class RisikovurderingE2ETest : AbstractE2ETest() {
     @Test
     fun `oppretter oppgave av type RISK_QA`() {
         fremTilSaksbehandleroppgave(risikofunn = funnSomKreverRiskTilgang)
-        assertOppgaveType("RISK_QA", VEDTAKSPERIODE_ID)
+        assertOppgaveHarEgenskap("RISK_QA", VEDTAKSPERIODE_ID)
     }
 
     @Test
     fun `oppretter oppgave av type SØKNAD`() {
         fremTilSaksbehandleroppgave(risikofunn = funnSomAlleKanBehandle)
-        assertOppgaveType("SØKNAD", VEDTAKSPERIODE_ID)
+        assertOppgaveHarEgenskap("SØKNAD", VEDTAKSPERIODE_ID)
     }
 
     @Test
@@ -44,13 +43,19 @@ private class RisikovurderingE2ETest : AbstractE2ETest() {
         }
     }
 
-    private fun assertOppgaveType(forventet: String, vedtaksperiodeId: UUID) =
-        assertEquals(forventet, sessionOf(dataSource).use {
+    private fun assertOppgaveHarEgenskap(forventet: String, vedtaksperiodeId: UUID) {
+        val egenskaper = sessionOf(dataSource).use {
+            @Language("PostgreSQL")
+            val query =
+                "SELECT egenskaper FROM oppgave JOIN vedtak on vedtak.id = vedtak_ref WHERE vedtaksperiode_id = :vedtaksperiodeId"
             it.run(
                 queryOf(
-                    "SELECT type FROM oppgave JOIN vedtak on vedtak.id = vedtak_ref WHERE vedtaksperiode_id = :vedtaksperiodeId",
+                    query,
                     mapOf("vedtaksperiodeId" to vedtaksperiodeId)
-                ).map { row -> row.string("type") }.asSingle
+                ).map { row -> row.array<String>("egenskaper") }.asSingle
             )
-        })
+        }
+        assertTrue(egenskaper?.contains(forventet) ?: false)
+    }
+
 }

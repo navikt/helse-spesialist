@@ -3,7 +3,6 @@ package no.nav.helse.spesialist.api.person
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.spesialist.api.DatabaseIntegrationTest
-import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -55,7 +54,7 @@ internal class PersonApiDaoTest : DatabaseIntegrationTest() {
         val vedtakId = opprettVedtak(personId, opprettArbeidsgiver())
         assertPersonenErIkkeKlar()
 
-        klargjørVedtak(vedtakId = vedtakId, periode = PERIODE, oppgavetype = Oppgavetype.SØKNAD)
+        klargjørVedtak(vedtakId = vedtakId, periode = PERIODE)
         assertPersonenErKlar()
     }
 
@@ -68,11 +67,11 @@ internal class PersonApiDaoTest : DatabaseIntegrationTest() {
         val vedtakId = opprettVedtak(personId, arbeidsgiverId)
         assertPersonenErIkkeKlar()
 
-        klargjørVedtak(vedtakId = vedtakId, periode = PERIODE, oppgavetype = Oppgavetype.SØKNAD)
+        klargjørVedtak(vedtakId = vedtakId, periode = PERIODE)
         assertPersonenErKlar()
         val periode2 = Periode(UUID.randomUUID(), LocalDate.of(2021, 2, 1), LocalDate.of(2021, 2, 12))
         val vedtakId2 = opprettVedtak(personId, arbeidsgiverId, periode2)
-        klargjørVedtak(vedtakId = vedtakId2, periode = periode2, oppgavetype = Oppgavetype.SØKNAD)
+        klargjørVedtak(vedtakId = vedtakId2, periode = periode2)
         assertPersonenErKlar()
     }
 

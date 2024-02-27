@@ -8,7 +8,6 @@ import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingVisitor
 interface OppgaveVisitor: TotrinnsvurderingVisitor {
     fun visitOppgave(
         id: Long,
-        egenskap: Egenskap,
         tilstand: Oppgave.Tilstand,
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,

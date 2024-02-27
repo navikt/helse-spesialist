@@ -78,7 +78,6 @@ private class OppgaveForKafkaBygger : OppgaveVisitor {
 
     override fun visitOppgave(
         id: Long,
-        egenskap: Egenskap,
         tilstand: Oppgave.Tilstand,
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,

@@ -48,7 +48,6 @@ class OppgavehenterTest {
         oppgave.accept(inspektør)
         inspektør.assertOppgave(
             id = OPPGAVE_ID,
-            egenskap = SØKNAD,
             tilstand = Oppgave.AvventerSaksbehandler,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID,
@@ -78,7 +77,6 @@ class OppgavehenterTest {
         oppgave.accept(inspektør)
         inspektør.assertOppgave(
             id = OPPGAVE_ID,
-            egenskap = SØKNAD,
             tilstand = Oppgave.AvventerSaksbehandler,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID,
@@ -101,7 +99,6 @@ class OppgavehenterTest {
 
     private val inspektør = object : OppgaveVisitor {
         private var id by Delegates.notNull<Long>()
-        private lateinit var egenskap: Egenskap
         private lateinit var tilstand: Oppgave.Tilstand
         private lateinit var vedtaksperiodeId: UUID
         private lateinit var utbetalingId: UUID
@@ -113,7 +110,6 @@ class OppgavehenterTest {
 
         override fun visitOppgave(
             id: Long,
-            egenskap: Egenskap,
             tilstand: Oppgave.Tilstand,
             vedtaksperiodeId: UUID,
             utbetalingId: UUID,
@@ -126,7 +122,6 @@ class OppgavehenterTest {
             totrinnsvurdering: Totrinnsvurdering?
         ) {
             this.id = id
-            this.egenskap = egenskap
             this.tilstand = tilstand
             this.vedtaksperiodeId = vedtaksperiodeId
             this.utbetalingId = utbetalingId
@@ -139,7 +134,6 @@ class OppgavehenterTest {
 
         fun assertOppgave(
             id: Long,
-            egenskap: Egenskap,
             tilstand: Oppgave.Tilstand,
             vedtaksperiodeId: UUID,
             utbetalingId: UUID,
@@ -151,7 +145,6 @@ class OppgavehenterTest {
             totrinnsvurdering: Totrinnsvurdering?
         ) {
             assertEquals(id, this.id)
-            assertEquals(egenskap, this.egenskap)
             assertEquals(tilstand, this.tilstand)
             assertEquals(vedtaksperiodeId, this.vedtaksperiodeId)
             assertEquals(utbetalingId, this.utbetalingId)
@@ -168,7 +161,6 @@ class OppgavehenterTest {
         override fun finnOppgave(id: Long): OppgaveFraDatabase {
             return OppgaveFraDatabase(
                 id = OPPGAVE_ID,
-                egenskap = TYPE.name,
                 egenskaper = oppgaveegenskaper,
                 status = STATUS,
                 vedtaksperiodeId = VEDTAKSPERIODE_ID,

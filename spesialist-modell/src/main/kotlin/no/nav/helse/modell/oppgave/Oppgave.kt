@@ -7,23 +7,16 @@ import no.nav.helse.modell.OppgaveIkkeTildelt
 import no.nav.helse.modell.OppgaveTildeltNoenAndre
 import no.nav.helse.modell.oppgave.Egenskap.BESLUTTER
 import no.nav.helse.modell.oppgave.Egenskap.Companion.tilgangsstyrteEgenskaper
-import no.nav.helse.modell.oppgave.Egenskap.DELVIS_REFUSJON
 import no.nav.helse.modell.oppgave.Egenskap.EGEN_ANSATT
-import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.PÅ_VENT
 import no.nav.helse.modell.oppgave.Egenskap.RETUR
-import no.nav.helse.modell.oppgave.Egenskap.REVURDERING
-import no.nav.helse.modell.oppgave.Egenskap.RISK_QA
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
-import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
-import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import org.slf4j.LoggerFactory
 
 class Oppgave private constructor(
     private val id: Long,
-    private val egenskap: Egenskap,
     private var tilstand: Tilstand,
     private val vedtaksperiodeId: UUID,
     private val utbetalingId: UUID,
@@ -41,7 +34,6 @@ class Oppgave private constructor(
 
     constructor(
         id: Long,
-        egenskap: Egenskap,
         tilstand: Tilstand,
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
@@ -52,7 +44,7 @@ class Oppgave private constructor(
         tildelt: Saksbehandler? = null,
         totrinnsvurdering: Totrinnsvurdering? = null,
         egenskaper: List<Egenskap>
-    ) : this(id, egenskap, tilstand, vedtaksperiodeId, utbetalingId, hendelseId, kanAvvises, totrinnsvurdering) {
+    ) : this(id, tilstand, vedtaksperiodeId, utbetalingId, hendelseId, kanAvvises, totrinnsvurdering) {
         this.ferdigstiltAvIdent = ferdigstiltAvIdent
         this.ferdigstiltAvOid = ferdigstiltAvOid
         this.tildeltTil = tildelt
@@ -62,7 +54,6 @@ class Oppgave private constructor(
     fun accept(visitor: OppgaveVisitor) {
         visitor.visitOppgave(
             id,
-            egenskap,
             tilstand,
             vedtaksperiodeId,
             utbetalingId,
@@ -301,20 +292,18 @@ class Oppgave private constructor(
         if (other !is Oppgave) return false
         if (this.id != other.id) return false
         return this.egenskaper.toSet() == other.egenskaper.toSet() &&
-                this.egenskap == other.egenskap &&
                 this.vedtaksperiodeId == other.vedtaksperiodeId
     }
 
     override fun hashCode(): Int {
         var result = id.hashCode()
-        result = 31 * result + egenskap.hashCode()
         result = 31 * result + vedtaksperiodeId.hashCode()
         result = 31 * result + egenskaper.hashCode()
         return result
     }
 
     override fun toString(): String {
-        return "Oppgave(type=$egenskap, tilstand=$tilstand, vedtaksperiodeId=$vedtaksperiodeId, utbetalingId=$utbetalingId, id=$id)"
+        return "Oppgave(tilstand=$tilstand, vedtaksperiodeId=$vedtaksperiodeId, utbetalingId=$utbetalingId, id=$id)"
     }
 
     companion object {
@@ -330,14 +319,9 @@ class Oppgave private constructor(
             egenskaper: List<Egenskap>,
             totrinnsvurdering: Totrinnsvurdering? = null
         ): Oppgave {
-            val hovedegenskap = egenskaper.firstOrNull { it in gyldigeOppgavetyper } ?: SØKNAD
-            return Oppgave(id, hovedegenskap, AvventerSaksbehandler, vedtaksperiodeId, utbetalingId, hendelseId, kanAvvises, totrinnsvurdering).also {
+            return Oppgave(id, AvventerSaksbehandler, vedtaksperiodeId, utbetalingId, hendelseId, kanAvvises, totrinnsvurdering).also {
                 it.egenskaper.addAll(egenskaper)
             }
         }
-
-        // Brukes midlertidig mens vi står i en spagat mellom én oppgavetype og en liste av egenskaper.
-        // Brukes slik at vi kan legge til nye egenskaper i kode som ikke finnes i oppgavetype-enumen i databasen og/eller er håndtert i Speil
-        private val gyldigeOppgavetyper = listOf(FORTROLIG_ADRESSE, REVURDERING, STIKKPRØVE, RISK_QA, DELVIS_REFUSJON, UTBETALING_TIL_SYKMELDT)
     }
 }

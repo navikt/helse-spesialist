@@ -22,7 +22,6 @@ import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
-import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
@@ -118,7 +117,6 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         arbeidsgiverId: Long,
         utbetalingId: UUID = UUID.randomUUID(),
         periode: Periode = PERIODE,
-        oppgavetype: Oppgavetype = Oppgavetype.SØKNAD,
         skjæringstidspunkt: LocalDate = periode.fom,
         forkastet: Boolean = false,
         kanAvvises: Boolean = true,
@@ -127,7 +125,6 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             it,
             utbetalingId,
             periode,
-            oppgavetype,
             kanAvvises = kanAvvises
         )
     }
@@ -298,14 +295,13 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         vedtakId: Long,
         utbetalingId: UUID = UUID.randomUUID(),
         periode: Periode,
-        oppgavetype: Oppgavetype,
         kanAvvises: Boolean = true,
     ) {
         opprettSaksbehandleroppgavetype(Periodetype.FØRSTEGANGSBEHANDLING, Inntektskilde.EN_ARBEIDSGIVER, vedtakId)
         val hendelseId = UUID.randomUUID()
         opprettHendelse(hendelseId)
         opprettAutomatisering(false, vedtaksperiodeId = periode.id, hendelseId = hendelseId)
-        opprettOppgave(Oppgavestatus.AvventerSaksbehandler, oppgavetype, vedtakId, utbetalingId, kanAvvises = kanAvvises)
+        opprettOppgave(Oppgavestatus.AvventerSaksbehandler, vedtakId, utbetalingId, kanAvvises = kanAvvises)
     }
 
     private fun opprettSaksbehandleroppgavetype(type: Periodetype, inntektskilde: Inntektskilde, vedtakRef: Long) =
@@ -556,9 +552,8 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         )
     }
 
-    protected fun opprettOppgave(
+    private fun opprettOppgave(
         status: Oppgavestatus = Oppgavestatus.AvventerSaksbehandler,
-        oppgavetype: Oppgavetype = Oppgavetype.SØKNAD,
         vedtakRef: Long,
         utbetalingId: UUID = UUID.randomUUID(),
         opprettet: LocalDateTime = LocalDateTime.now(),
@@ -569,7 +564,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             sessionOf(dataSource, returnGeneratedKey = true).use { session ->
                 @Language("PostgreSQL")
                 val statement =
-                    "INSERT INTO oppgave(utbetaling_id, opprettet, oppdatert, status, vedtak_ref, type, command_context_id, kan_avvises) VALUES(?, ?, now(), CAST(? as oppgavestatus), ?, CAST(? as oppgavetype), ?, ?)"
+                    "INSERT INTO oppgave(utbetaling_id, opprettet, oppdatert, status, vedtak_ref, command_context_id, kan_avvises) VALUES(?, ?, now(), CAST(? as oppgavestatus), ?, ?, ?)"
                 session.run(
                     queryOf(
                         statement,
@@ -577,7 +572,6 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                         opprettet,
                         status.name,
                         vedtakRef,
-                        oppgavetype.name,
                         commandContextId,
                         kanAvvises,
                     ).asUpdateAndReturnGeneratedKey

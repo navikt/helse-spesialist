@@ -76,7 +76,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected open val UTBETALING_ID: UUID = testperson.utbetalingId1
 
     protected open var OPPGAVE_ID = nextLong()
-    private val OPPGAVETYPE = "SØKNAD"
     protected val EGENSKAP = EgenskapForDatabase.SØKNAD
     protected val OPPGAVESTATUS = "AvventerSaksbehandler"
 
@@ -223,9 +222,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         opprettOppgave(
             contextId = contextId,
             vedtaksperiodeId = vedtaksperiodeId,
-            hendelseId = hendelseId,
-            oppgavetype = OPPGAVETYPE,
-            egenskaper = oppgaveEgenskaper
+            egenskaper = oppgaveEgenskaper,
+            hendelseId = hendelseId
         )
     }
 
@@ -344,7 +342,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected fun opprettOppgave(
         contextId: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
-        oppgavetype: String = OPPGAVETYPE,
         egenskaper: List<EgenskapForDatabase> = listOf(EGENSKAP),
         kanAvvises: Boolean = true,
         utbetalingId: UUID = UTBETALING_ID,
@@ -355,7 +352,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         oppgaveId = oppgaveDao.opprettOppgave(
             nextLong().also { OPPGAVE_ID = it },
             contextId,
-            oppgavetype,
             egenskaper,
             vedtaksperiodeId,
             utbetalingId,

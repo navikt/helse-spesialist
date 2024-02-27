@@ -12,7 +12,6 @@ import no.nav.helse.modell.oppgave.Egenskap.BESLUTTER
 import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.PÅ_VENT
 import no.nav.helse.modell.oppgave.Egenskap.RETUR
-import no.nav.helse.modell.oppgave.Egenskap.RISK_QA
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
@@ -60,25 +59,6 @@ internal class OppgaveTest {
             ident = ident,
             tilgangskontroll = tilgangskontroll,
         )
-    }
-
-
-    @Test
-    fun `Første egenskap anses som oppgavetype`() {
-        val oppgave = nyOppgave(RISK_QA, SØKNAD)
-
-        inspektør(oppgave) {
-            assertEquals(RISK_QA, this.egenskap)
-        }
-    }
-
-    @Test
-    fun `Defaulter til SØKNAD dersom ingen egenskaper er oppgitt`() {
-        val oppgave = nyOppgave()
-
-        inspektør(oppgave) {
-            assertEquals(SØKNAD, this.egenskap)
-        }
     }
 
     @Test

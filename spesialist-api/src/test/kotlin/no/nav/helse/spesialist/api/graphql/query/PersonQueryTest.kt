@@ -14,7 +14,6 @@ import no.nav.helse.spesialist.api.graphql.schema.Handling
 import no.nav.helse.spesialist.api.graphql.schema.Periodehandling
 import no.nav.helse.spesialist.api.januar
 import no.nav.helse.spesialist.api.objectMapper
-import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetilstand
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLBeregnetPeriode
@@ -230,7 +229,7 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
     fun `utbetaling av risk-oppgave tillatt for alle`() {
         val personRef = opprettPerson()
         val arbeidsgiverRef = opprettArbeidsgiver()
-        opprettVedtaksperiode(personRef, arbeidsgiverRef, oppgavetype = Oppgavetype.RISK_QA)
+        opprettVedtaksperiode(personRef, arbeidsgiverRef)
         val (id, fom, tom) = PERIODE
         val graphQLperiodeMedOppgave = opprettBeregnetPeriode(fom.toString(), tom.toString(), id)
         val snapshotGenerasjon = opprettSnapshotGenerasjon(listOf(graphQLperiodeMedOppgave))
@@ -248,7 +247,7 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
     fun `periode med hendelse`() {
         val personRef = opprettPerson()
         val arbeidsgiverRef = opprettArbeidsgiver()
-        opprettVedtaksperiode(personRef, arbeidsgiverRef, oppgavetype = Oppgavetype.RISK_QA)
+        opprettVedtaksperiode(personRef, arbeidsgiverRef)
         val (id, fom, tom) = PERIODE
         val graphQLHendelse = opprettSnapshotHendelse()
         val graphQLperiodeMedOppgave = opprettBeregnetPeriode(fom.toString(), tom.toString(), id, hendelser = listOf(graphQLHendelse))

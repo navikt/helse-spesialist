@@ -265,12 +265,11 @@ internal class OppgaveMediator(
         contextId: UUID,
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
-        egenskap: String,
         egenskaper: List<EgenskapForDatabase>,
         hendelseId: UUID,
         kanAvvises: Boolean,
     ) {
-        oppgaveDao.opprettOppgave(id, contextId, egenskap, egenskaper, vedtaksperiodeId, utbetalingId, kanAvvises)
+        oppgaveDao.opprettOppgave(id, contextId, egenskaper, vedtaksperiodeId, utbetalingId, kanAvvises)
         opptegnelseDao.opprettOpptegnelse(
             oppgaveDao.finnFødselsnummer(id),
             GodkjenningsbehovPayload(hendelseId),

@@ -63,7 +63,14 @@ class UtbetalingDaoTest : DatabaseIntegrationTest() {
         val personOppdragId1 = lagPersonoppdrag(personFagsystemId)
         val utbetalingId = UUID.randomUUID()
         oppgaveDao.updateOppgave(oppgaveId = OPPGAVE_ID, oppgavestatus = "Ferdigstilt", egenskaper = listOf(EGENSKAP))
-        val oppgaveId = oppgaveDao.opprettOppgave(nextLong(), UUID.randomUUID(), "SØKNAD", listOf(EGENSKAP), VEDTAKSPERIODE, utbetalingId, true)
+        val oppgaveId = oppgaveDao.opprettOppgave(
+            nextLong(),
+            UUID.randomUUID(),
+            listOf(EGENSKAP),
+            VEDTAKSPERIODE,
+            utbetalingId,
+            true
+        )
         utbetalingDao.opprettUtbetalingId(utbetalingId, FNR, ORGNUMMER, Utbetalingtype.UTBETALING, LocalDateTime.now(), arbeidsgiveroppdragId1, personOppdragId1, 2000, 2000)
 
         val utbetaling = utbetalingDao.utbetalingFor(oppgaveId)

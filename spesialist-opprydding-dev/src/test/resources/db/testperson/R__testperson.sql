@@ -55,9 +55,8 @@ VALUES (${sequence_number}, '${hendelse_id}', false, false, now(), '${utbetaling
 INSERT INTO automatisering_problem(id, vedtaksperiode_ref, hendelse_ref, problem)
 VALUES (${sequence_number}, ${sequence_number}, '${hendelse_id}', 'PROBLEM');
 INSERT INTO oppgave(id, opprettet, oppdatert, status, vedtak_ref, ferdigstilt_av, ferdigstilt_av_oid,
-                    command_context_id, type, utbetaling_id, kan_avvises)
-VALUES (${sequence_number}, now(), now(), 'AvventerSystem', ${sequence_number}, null, null, '${command_context_id}',
-        'SØKNAD', '${utbetaling_id}', true);
+                    command_context_id, utbetaling_id, kan_avvises)
+VALUES (${sequence_number}, now(), now(), 'AvventerSystem', ${sequence_number}, null, null, '${command_context_id}', '${utbetaling_id}', true);
 
 INSERT INTO tildeling(saksbehandler_ref, oppgave_id_ref)
 VALUES ('${saksbehandler_oid}', ${sequence_number});

@@ -38,7 +38,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
     override fun finnOppgave(id: Long): OppgaveFraDatabase? {
         return asSQL(
             """ 
-            SELECT o.egenskaper, o.type, o.status, v.vedtaksperiode_id, o.ferdigstilt_av, o.ferdigstilt_av_oid, o.utbetaling_id, s.navn, s.epost, s.ident, s.oid, o.kan_avvises
+            SELECT o.egenskaper, o.status, v.vedtaksperiode_id, o.ferdigstilt_av, o.ferdigstilt_av_oid, o.utbetaling_id, s.navn, s.epost, s.ident, s.oid, o.kan_avvises
             FROM oppgave o
             INNER JOIN vedtak v on o.vedtak_ref = v.id
             LEFT JOIN tildeling t on o.id = t.oppgave_id_ref
@@ -50,7 +50,6 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
             val egenskaper: List<EgenskapForDatabase> = row.array<String>("egenskaper").toList().map { enumValueOf(it) }
             OppgaveFraDatabase(
                 id = id,
-                egenskap = row.string("type"),
                 egenskaper = egenskaper,
                 status = row.string("status"),
                 vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
@@ -390,7 +389,6 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
     fun opprettOppgave(
         id: Long,
         commandContextId: UUID,
-        egenskap: String,
         egenskaper: List<EgenskapForDatabase>,
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
@@ -406,8 +404,8 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
 
             asSQL(
                 """
-                    INSERT INTO oppgave(id, oppdatert, type, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, command_context_id, utbetaling_id, mottaker, egenskaper, kan_avvises)      
-                    SELECT :id, now(), CAST(:oppgavetype as oppgavetype), CAST(:oppgavestatus as oppgavestatus), :ferdigstiltAv, :ferdigstiltAvOid, :vedtakRef, :commandContextId, :utbetalingId, CAST(:mottaker as mottakertype), '{$egenskaperForDatabase}', :kanAvvises
+                    INSERT INTO oppgave(id, oppdatert, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, command_context_id, utbetaling_id, mottaker, egenskaper, kan_avvises)      
+                    SELECT :id, now(), CAST(:oppgavestatus as oppgavestatus), :ferdigstiltAv, :ferdigstiltAvOid, :vedtakRef, :commandContextId, :utbetalingId, CAST(:mottaker as mottakertype), '{$egenskaperForDatabase}', :kanAvvises
                     WHERE
                         NOT EXISTS(
                             SELECT 1 FROM oppgave o
@@ -418,7 +416,6 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                     ;
                 """, mapOf(
                     "id" to id,
-                    "oppgavetype" to egenskap,
                     "oppgavestatus" to "AvventerSaksbehandler",
                     "ferdigstiltAv" to null,
                     "ferdigstiltAvOid" to null,

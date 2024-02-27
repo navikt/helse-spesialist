@@ -24,7 +24,6 @@ class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
             contextId = contextId,
             vedtaksperiodeId = oppgave.vedtaksperiodeId,
             utbetalingId = oppgave.utbetalingId,
-            egenskap = oppgave.egenskap,
             egenskaper = oppgave.egenskaper,
             hendelseId = oppgave.hendelseId,
             kanAvvises = oppgave.kanAvvises,
@@ -54,7 +53,6 @@ class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
 
     override fun visitOppgave(
         id: Long,
-        egenskap: Egenskap,
         tilstand: Oppgave.Tilstand,
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
@@ -68,7 +66,6 @@ class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
     ) {
         oppgaveForLagring = OppgaveFraDatabase(
             id = id,
-            egenskap = egenskap.tilDatabaseversjon().name,
             egenskaper = egenskaper.map { it.tilDatabaseversjon() },
             status = status(tilstand),
             vedtaksperiodeId = vedtaksperiodeId,

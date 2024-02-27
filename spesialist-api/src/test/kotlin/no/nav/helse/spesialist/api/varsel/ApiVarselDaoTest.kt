@@ -189,7 +189,11 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         val generasjonId = UUID.randomUUID()
         val utbetalingId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
-        opprettVedtaksperiode(personId = opprettPerson(), arbeidsgiverId = opprettArbeidsgiver(), utbetalingId = utbetalingId)
+        opprettVedtaksperiode(
+            personId = opprettPerson(),
+            arbeidsgiverId = opprettArbeidsgiver(),
+            utbetalingId = utbetalingId
+        )
         opprettVarseldefinisjon(kode = "EN_KODE", definisjonId = definisjonId)
         val generasjonRef1 = nyGenerasjon(vedtaksperiodeId = PERIODE.id, generasjonId = generasjonId, utbetalingId = utbetalingId)
         val generasjonRef2 = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId, utbetalingId = UUID.randomUUID())

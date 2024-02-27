@@ -1,6 +1,5 @@
 package no.nav.helse.mediator.oppgave
 
-import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.TotrinnsvurderingRepository
@@ -23,7 +22,6 @@ class Oppgavehenter(
 
         return Oppgave(
             id = oppgave.id,
-            egenskap = enumValueOf<EgenskapForDatabase>(oppgave.egenskap).tilModellversjon(),
             tilstand = tilstand(oppgave.status),
             vedtaksperiodeId = oppgave.vedtaksperiodeId,
             utbetalingId = oppgave.utbetalingId,

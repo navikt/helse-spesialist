@@ -6,14 +6,12 @@ import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 
 internal class OppgaveInspektør private constructor(): OppgaveVisitor {
     internal lateinit var tilstand: Oppgave.Tilstand
-    internal lateinit var egenskap: Egenskap
     internal var tildelt: Boolean = false
     internal var påVent: Boolean = false
     internal var tildeltTil: Saksbehandler? = null
     internal val egenskaper = mutableListOf<Egenskap>()
     override fun visitOppgave(
         id: Long,
-        egenskap: Egenskap,
         tilstand: Oppgave.Tilstand,
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
@@ -29,8 +27,7 @@ internal class OppgaveInspektør private constructor(): OppgaveVisitor {
         this.tildelt = tildelt != null
         this.tildeltTil = tildelt
         this.påVent = egenskaper.contains(Egenskap.PÅ_VENT)
-        this.egenskap = egenskap
-       this.egenskaper.addAll(egenskaper)
+        this.egenskaper.addAll(egenskaper)
     }
 
     internal companion object {

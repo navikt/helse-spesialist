@@ -74,7 +74,6 @@ internal class OppgaveMediatorTest {
         private val SAKSBEHANDLEROID = UUID.randomUUID()
         private const val SAKSBEHANDLEREPOST = "saksbehandler@nav.no"
         private const val SAKSBEHANDLERNAVN = "Hen Saksbehandler"
-        private const val OPPGAVETYPE_SØKNAD = "SØKNAD"
         private val EGENSKAP_SØKNAD = EgenskapForDatabase.SØKNAD
         private val EGENSKAPER = setOf(EgenskapForDatabase.SØKNAD, EgenskapForDatabase.UTBETALING_TIL_SYKMELDT, EgenskapForDatabase.EN_ARBEIDSGIVER, EgenskapForDatabase.FORSTEGANGSBEHANDLING)
     }
@@ -126,7 +125,6 @@ internal class OppgaveMediatorTest {
             oppgaveDao.opprettOppgave(
                 0L,
                 COMMAND_CONTEXT_ID,
-                OPPGAVETYPE_SØKNAD,
                 listOf(EGENSKAP_SØKNAD),
                 VEDTAKSPERIODE_ID,
                 UTBETALING_ID,
@@ -202,7 +200,7 @@ internal class OppgaveMediatorTest {
     @Test
     fun `lagrer ikke dobbelt`() {
         every { oppgaveDao.reserverNesteId() } returns 0L
-        every { oppgaveDao.opprettOppgave(any(), any(), OPPGAVETYPE_SØKNAD, listOf(EGENSKAP_SØKNAD), any(), any(), any()) } returns 0L
+        every { oppgaveDao.opprettOppgave(any(), any(), listOf(EGENSKAP_SØKNAD), any(), any(), any()) } returns 0L
         every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
         every { reservasjonDao.hentReservasjonFor(FNR) } returns null
 
@@ -520,7 +518,6 @@ internal class OppgaveMediatorTest {
 
     private fun oppgaveFraDatabase(oppgaveId: Long = OPPGAVE_ID, tildelt: Boolean = false) = OppgaveFraDatabase(
         id = oppgaveId,
-        egenskap = "SØKNAD",
         egenskaper = listOf(EgenskapForDatabase.SØKNAD),
         status = "AvventerSaksbehandler",
         vedtaksperiodeId = VEDTAKSPERIODE_ID,
