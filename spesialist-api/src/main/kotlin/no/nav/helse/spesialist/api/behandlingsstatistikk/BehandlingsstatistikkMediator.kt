@@ -113,7 +113,4 @@ class BehandlingsstatistikkMediator(private val behandlingsstatistikkDao: Behand
             antallAnnulleringer = behandlingsstatistikkDao.getAntallAnnulleringer(fom),
         )
     }
-
-    fun hentSaksbehandlingsstatistikk() =
-        behandlingsstatistikkDao.oppgavestatistikk().let(BehandlingstatistikkForSpeilDto::toSpeilMap)
 }
