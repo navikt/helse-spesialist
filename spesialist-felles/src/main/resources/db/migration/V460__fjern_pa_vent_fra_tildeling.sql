@@ -1,0 +1,1 @@
+ALTER TABLE tildeling DROP column på_vent;

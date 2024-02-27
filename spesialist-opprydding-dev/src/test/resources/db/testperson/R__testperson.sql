@@ -59,8 +59,8 @@ INSERT INTO oppgave(id, opprettet, oppdatert, status, vedtak_ref, ferdigstilt_av
 VALUES (${sequence_number}, now(), now(), 'AvventerSystem', ${sequence_number}, null, null, '${command_context_id}',
         'SØKNAD', '${utbetaling_id}', true);
 
-INSERT INTO tildeling(saksbehandler_ref, oppgave_id_ref, på_vent)
-VALUES ('${saksbehandler_oid}', ${sequence_number}, false);
+INSERT INTO tildeling(saksbehandler_ref, oppgave_id_ref)
+VALUES ('${saksbehandler_oid}', ${sequence_number});
 INSERT INTO reserver_person(saksbehandler_ref, person_ref, gyldig_til)
 VALUES ('${saksbehandler_oid}', ${sequence_number}, now());
 

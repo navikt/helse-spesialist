@@ -80,7 +80,7 @@ internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
     fun `antall tildelte oppgaver`() {
         nyPerson()
         opprettSaksbehandler()
-        nyDao.tildel(oppgaveId, SAKSBEHANDLER_OID, false)
+        nyDao.tildel(oppgaveId, SAKSBEHANDLER_OID)
         val dto = behandlingsstatistikkDao.oppgavestatistikk(NOW)
         assertEquals(1, dto.tildelteOppgaver.totalt)
         assertEquals(1, dto.tildelteOppgaver.perPeriodetype[BehandlingsstatistikkTypeForApi.FØRSTEGANGSBEHANDLING])

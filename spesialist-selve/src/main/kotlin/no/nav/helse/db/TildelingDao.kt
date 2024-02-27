@@ -7,11 +7,11 @@ import kotliquery.sessionOf
 import org.intellij.lang.annotations.Language
 
 class TildelingDao(private val dataSource: DataSource) {
-    fun tildel(oppgaveId: Long, saksbehandlerOid: UUID, påVent: Boolean) {
+    fun tildel(oppgaveId: Long, saksbehandlerOid: UUID) {
         @Language("PostgreSQL")
         val query = """
-            INSERT INTO tildeling(saksbehandler_ref, oppgave_id_ref, på_vent) VALUES (:oid, :oppgave_id, :pa_vent)
-            ON CONFLICT (oppgave_id_ref) DO UPDATE SET saksbehandler_ref = :oid, på_vent = :pa_vent
+            INSERT INTO tildeling(saksbehandler_ref, oppgave_id_ref) VALUES (:oid, :oppgave_id)
+            ON CONFLICT (oppgave_id_ref) DO UPDATE SET saksbehandler_ref = :oid
         """
 
         sessionOf(dataSource).use {
@@ -20,7 +20,6 @@ class TildelingDao(private val dataSource: DataSource) {
                     query, mapOf(
                         "oid" to saksbehandlerOid,
                         "oppgave_id" to oppgaveId,
-                        "pa_vent" to påVent
                     )
                 ).asUpdate
             )

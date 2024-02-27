@@ -56,15 +56,14 @@ internal class UtbetalingEndretE2ETest : AbstractE2ETest() {
         requireNotNull(session.run(queryOf(query, vedtaksperiodeId).map { it.long(1) }.asSingle))
     }
 
-    private fun tildelOppgave(oppgaveId: Long, saksbehandlerOid: UUID, påVent: Boolean = false) {
+    private fun tildelOppgave(oppgaveId: Long, saksbehandlerOid: UUID) {
         sessionOf(dataSource).use {
             it.run(
                 queryOf(
-                    "INSERT INTO tildeling(oppgave_id_ref, saksbehandler_ref, på_vent) VALUES(:oppgave_id_ref, :saksbehandler_ref, :paa_vent);",
+                    "INSERT INTO tildeling(oppgave_id_ref, saksbehandler_ref) VALUES(:oppgave_id_ref, :saksbehandler_ref);",
                     mapOf(
                         "oppgave_id_ref" to oppgaveId,
                         "saksbehandler_ref" to saksbehandlerOid,
-                        "paa_vent" to påVent,
                     )
                 ).asUpdate
             )

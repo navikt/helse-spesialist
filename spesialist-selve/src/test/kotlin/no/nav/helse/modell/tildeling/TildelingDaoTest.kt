@@ -18,7 +18,7 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
         val oid = UUID.randomUUID()
         nyPerson()
         nySaksbehandler(oid)
-        nyDao.tildel(OPPGAVE_ID, oid, false)
+        nyDao.tildel(OPPGAVE_ID, oid)
         assertTildeling(OPPGAVE_ID, oid)
     }
 
@@ -29,8 +29,8 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
         nyPerson()
         nySaksbehandler(oid)
         nySaksbehandler(annenOid)
-        nyDao.tildel(OPPGAVE_ID, oid, false)
-        nyDao.tildel(OPPGAVE_ID, annenOid, false)
+        nyDao.tildel(OPPGAVE_ID, oid)
+        nyDao.tildel(OPPGAVE_ID, annenOid)
         assertTildeling(OPPGAVE_ID, annenOid)
     }
 
@@ -39,7 +39,7 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
         val oid = UUID.randomUUID()
         nyPerson()
         nySaksbehandler(oid)
-        nyDao.tildel(OPPGAVE_ID, oid, false)
+        nyDao.tildel(OPPGAVE_ID, oid)
         nyDao.avmeld(OPPGAVE_ID)
         assertTildeling(OPPGAVE_ID, null)
     }
@@ -87,7 +87,7 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
 
     private fun tildelTilSaksbehandler(oppgaveId: Long = this.oppgaveId, oid: UUID = SAKSBEHANDLER_OID) {
         nySaksbehandler(oid)
-        nyDao.tildel(oppgaveId, oid, false)
+        nyDao.tildel(oppgaveId, oid)
     }
 
     private fun assertTildeling(oppgaveId: Long, saksbehandleroid: UUID?) {

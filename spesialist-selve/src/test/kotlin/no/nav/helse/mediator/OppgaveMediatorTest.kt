@@ -151,7 +151,7 @@ internal class OppgaveMediatorTest {
         oppgaveinspektør(oppgave) {
             assertEquals(saksbehandler, tildeltTil)
         }
-        verify(exactly = 1) { tildelingDao.tildel(any(), SAKSBEHANDLEROID, any()) }
+        verify(exactly = 1) { tildelingDao.tildel(any(), SAKSBEHANDLEROID) }
         assertAntallOpptegnelser(1)
     }
 
@@ -163,7 +163,7 @@ internal class OppgaveMediatorTest {
         mediator.nyOppgave(TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID) {
             stikkprøveoppgave(it)
         }
-        verify(exactly = 0) { tildelingDao.tildel(any(), any(), any()) }
+        verify(exactly = 0) { tildelingDao.tildel(any(), any()) }
         assertAntallOpptegnelser(1)
     }
 

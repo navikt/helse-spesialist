@@ -29,7 +29,7 @@ class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
             hendelseId = oppgave.hendelseId,
             kanAvvises = oppgave.kanAvvises,
         )
-        if (oppgave.tildelt != null) tildelingDao.tildel(oppgave.id, oppgave.tildelt.oid, oppgave.påVent)
+        if (oppgave.tildelt != null) tildelingDao.tildel(oppgave.id, oppgave.tildelt.oid)
         else tildelingDao.avmeld(oppgave.id)
 
         val totrinnsvurdering = totrinnsvurderingForLagring
@@ -45,7 +45,7 @@ class Oppgavelagrer(private val tildelingDao: TildelingDao) : OppgaveVisitor {
             ferdigstiltAvOid = oppgave.ferdigstiltAvOid,
             egenskaper = oppgave.egenskaper,
         )
-        if (oppgave.tildelt != null) tildelingDao.tildel(oppgave.id, oppgave.tildelt.oid, oppgave.påVent)
+        if (oppgave.tildelt != null) tildelingDao.tildel(oppgave.id, oppgave.tildelt.oid)
         else tildelingDao.avmeld(oppgave.id)
 
         val totrinnsvurdering = totrinnsvurderingForLagring
