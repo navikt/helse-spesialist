@@ -22,7 +22,7 @@ import java.time.format.DateTimeFormatter
 import java.util.UUID
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.mediator.BehandlingsstatistikkMediator
+import no.nav.helse.mediator.IBehandlingsstatistikkMediator
 import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.Dokumenthåndterer
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
@@ -132,7 +132,7 @@ fun main() = runBlocking {
         val påVentApiDao = mockk<PåVentApiDao>(relaxed = true)
         val reservasjonClient = mockk<ReservasjonClient>(relaxed = true)
         val avviksvurderinghenter = mockk<Avviksvurderinghenter>(relaxed = true)
-        val behandlingsstatistikkMediator = mockk<BehandlingsstatistikkMediator>(relaxed = true)
+        val behandlingsstatistikkMediator = mockk<IBehandlingsstatistikkMediator>(relaxed = true)
         val notatMediator = mockk<NotatMediator>(relaxed = true)
         val totrinnsvurderinghåndterer = mockk<Totrinnsvurderinghåndterer>(relaxed = true)
         val godkjenninghåndterer = mockk<Godkjenninghåndterer>(relaxed = true)

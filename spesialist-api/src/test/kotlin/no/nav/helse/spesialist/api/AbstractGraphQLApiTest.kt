@@ -18,7 +18,7 @@ import io.mockk.every
 import io.mockk.mockk
 import java.time.YearMonth
 import java.util.UUID
-import no.nav.helse.mediator.BehandlingsstatistikkMediator
+import no.nav.helse.mediator.IBehandlingsstatistikkMediator
 import no.nav.helse.spesialist.api.avviksvurdering.Avviksvurdering
 import no.nav.helse.spesialist.api.avviksvurdering.Beregningsgrunnlag
 import no.nav.helse.spesialist.api.avviksvurdering.InnrapportertInntekt
@@ -46,7 +46,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
 
 
     private val reservasjonClient = mockk<ReservasjonClient>(relaxed = true)
-    private val behandlingsstatistikkMediator = mockk<BehandlingsstatistikkMediator>(relaxed = true)
+    private val behandlingsstatistikkMediator = mockk<IBehandlingsstatistikkMediator>(relaxed = true)
     protected open val saksbehandlerhåndterer = mockk<Saksbehandlerhåndterer>(relaxed = true)
     protected open val godkjenninghåndterer = mockk<Godkjenninghåndterer>(relaxed = true)
     protected open val personhåndterer = mockk<Personhåndterer>(relaxed = true)

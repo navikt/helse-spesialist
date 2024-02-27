@@ -17,7 +17,7 @@ import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import java.time.Duration
 import java.util.UUID
-import no.nav.helse.mediator.BehandlingsstatistikkMediator
+import no.nav.helse.mediator.IBehandlingsstatistikkMediator
 import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.Dokumenthåndterer
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
@@ -67,7 +67,7 @@ fun Application.graphQLApi(
     kode7Saksbehandlergruppe: UUID,
     beslutterGruppeId: UUID,
     snapshotMediator: SnapshotMediator,
-    behandlingsstatistikkMediator: BehandlingsstatistikkMediator,
+    behandlingsstatistikkMediator: IBehandlingsstatistikkMediator,
     notatMediator: NotatMediator,
     saksbehandlerhåndterer: Saksbehandlerhåndterer,
     oppgavehåndterer: Oppgavehåndterer,
