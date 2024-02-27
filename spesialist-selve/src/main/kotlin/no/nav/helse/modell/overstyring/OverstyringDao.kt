@@ -22,7 +22,7 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
                     WHEN oa.id IS NOT NULL THEN 'Arbeidsforhold'
                     WHEN ot.id IS NOT NULL THEN 'Dager'
                     WHEN ss.id IS NOT NULL THEN 'Sykepengegrunnlag'
-                END type
+                END as type
             FROM overstyring o
             LEFT JOIN overstyring_arbeidsforhold oa on o.id = oa.overstyring_ref
             LEFT JOIN overstyring_inntekt oi on o.id = oi.overstyring_ref
