@@ -1,8 +1,8 @@
 package no.nav.helse.spesialist.api.graphql.query
 
 import graphql.execution.DataFetcherResult
+import no.nav.helse.mediator.BehandlingsstatistikkMediator
 import no.nav.helse.spesialist.api.graphql.schema.Behandlingsstatistikk
-import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMediator
 
 class BehandlingsstatistikkQuery(private val behandlingsstatistikkMediator: BehandlingsstatistikkMediator) {
 

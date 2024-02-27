@@ -1,6 +1,9 @@
-package no.nav.helse.spesialist.api.behandlingsstatistikk
+package no.nav.helse.mediator
 
 import java.time.LocalDate
+import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkDao
+import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkResponse
+import no.nav.helse.spesialist.api.behandlingsstatistikk.Statistikk
 import no.nav.helse.spesialist.api.oppgave.Egenskap
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
 import no.nav.helse.spesialist.api.vedtaksperiode.Mottakertype
@@ -15,7 +18,8 @@ class BehandlingsstatistikkMediator(private val behandlingsstatistikkDao: Behand
 
         val enArbeidsgiver = {
             Statistikk(
-                automatisk = automatisertPerInntektPeriodetypeOgMottaker.perInntekttype[Inntektskilde.EN_ARBEIDSGIVER] ?: 0,
+                automatisk = automatisertPerInntektPeriodetypeOgMottaker.perInntekttype[Inntektskilde.EN_ARBEIDSGIVER]
+                    ?: 0,
                 manuelt = manueltUtførteOppgaver.perInntekttype[Inntektskilde.EN_ARBEIDSGIVER] ?: 0,
                 tilgjengelig = tilgjengeligeOppgaver.perInntekttype[Inntektskilde.EN_ARBEIDSGIVER] ?: 0
             )
@@ -23,7 +27,8 @@ class BehandlingsstatistikkMediator(private val behandlingsstatistikkDao: Behand
 
         val flereArbeidsgivere = {
             Statistikk(
-                automatisk = automatisertPerInntektPeriodetypeOgMottaker.perInntekttype[Inntektskilde.FLERE_ARBEIDSGIVERE] ?: 0,
+                automatisk = automatisertPerInntektPeriodetypeOgMottaker.perInntekttype[Inntektskilde.FLERE_ARBEIDSGIVERE]
+                    ?: 0,
                 manuelt = manueltUtførteOppgaver.perInntekttype[Inntektskilde.FLERE_ARBEIDSGIVERE] ?: 0,
                 tilgjengelig = tilgjengeligeOppgaver.perInntekttype[Inntektskilde.FLERE_ARBEIDSGIVERE] ?: 0
             )
@@ -31,7 +36,8 @@ class BehandlingsstatistikkMediator(private val behandlingsstatistikkDao: Behand
 
         val forstegangsbehandling = {
             Statistikk(
-                automatisk = automatisertPerInntektPeriodetypeOgMottaker.perPeriodetype[Periodetype.FØRSTEGANGSBEHANDLING] ?: 0,
+                automatisk = automatisertPerInntektPeriodetypeOgMottaker.perPeriodetype[Periodetype.FØRSTEGANGSBEHANDLING]
+                    ?: 0,
                 manuelt = manueltUtførteOppgaver.perPeriodetype[Periodetype.FØRSTEGANGSBEHANDLING] ?: 0,
                 tilgjengelig = tilgjengeligeOppgaver.perPeriodetype[Periodetype.FØRSTEGANGSBEHANDLING] ?: 0
             )
@@ -40,7 +46,8 @@ class BehandlingsstatistikkMediator(private val behandlingsstatistikkDao: Behand
         val forlengelser = {
             Statistikk(
                 automatisk = (automatisertPerInntektPeriodetypeOgMottaker.perPeriodetype[Periodetype.FORLENGELSE] ?: 0)
-                        + (automatisertPerInntektPeriodetypeOgMottaker.perPeriodetype[Periodetype.INFOTRYGDFORLENGELSE] ?: 0),
+                        + (automatisertPerInntektPeriodetypeOgMottaker.perPeriodetype[Periodetype.INFOTRYGDFORLENGELSE]
+                    ?: 0),
                 manuelt = (manueltUtførteOppgaver.perPeriodetype[Periodetype.FORLENGELSE] ?: 0)
                         + (manueltUtførteOppgaver.perPeriodetype[Periodetype.INFOTRYGDFORLENGELSE] ?: 0),
                 tilgjengelig = (tilgjengeligeOppgaver.perPeriodetype[Periodetype.FORLENGELSE] ?: 0)
@@ -50,7 +57,8 @@ class BehandlingsstatistikkMediator(private val behandlingsstatistikkDao: Behand
 
         val forlengelseIt = {
             Statistikk(
-                automatisk = automatisertPerInntektPeriodetypeOgMottaker.perPeriodetype[Periodetype.OVERGANG_FRA_IT] ?: 0,
+                automatisk = automatisertPerInntektPeriodetypeOgMottaker.perPeriodetype[Periodetype.OVERGANG_FRA_IT]
+                    ?: 0,
                 manuelt = manueltUtførteOppgaver.perPeriodetype[Periodetype.OVERGANG_FRA_IT] ?: 0,
                 tilgjengelig = tilgjengeligeOppgaver.perPeriodetype[Periodetype.OVERGANG_FRA_IT] ?: 0,
             )

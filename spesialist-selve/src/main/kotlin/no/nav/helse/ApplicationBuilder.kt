@@ -42,6 +42,7 @@ import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingDao
+import no.nav.helse.mediator.BehandlingsstatistikkMediator
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.GodkjenningService
 import no.nav.helse.mediator.HendelseMediator
@@ -77,7 +78,6 @@ import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.avviksvurdering.Avviksvurdering
 import no.nav.helse.spesialist.api.azureAdAppAuthentication
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkDao
-import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMediator
 import no.nav.helse.spesialist.api.client.AccessTokenClient
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.feilhåndtering.Modellfeil

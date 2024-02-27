@@ -18,13 +18,13 @@ import io.mockk.every
 import io.mockk.mockk
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.mediator.BehandlingsstatistikkMediator
 import no.nav.helse.spesialist.api.avviksvurdering.Avviksvurdering
 import no.nav.helse.spesialist.api.avviksvurdering.Beregningsgrunnlag
 import no.nav.helse.spesialist.api.avviksvurdering.InnrapportertInntekt
 import no.nav.helse.spesialist.api.avviksvurdering.Inntekt
 import no.nav.helse.spesialist.api.avviksvurdering.OmregnetÅrsinntekt
 import no.nav.helse.spesialist.api.avviksvurdering.Sammenligningsgrunnlag
-import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMediator
 import no.nav.helse.spesialist.api.endepunkter.ApiTesting
 import no.nav.helse.spesialist.api.graphql.ContextFactory
 import no.nav.helse.spesialist.api.graphql.RequestParser
