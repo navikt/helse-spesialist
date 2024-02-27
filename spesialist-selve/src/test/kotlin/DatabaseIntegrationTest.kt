@@ -405,10 +405,10 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         utbetalingDao.opprettKobling(vedtaksperiodeId, utbetalingId)
     }
 
-    protected fun utbetalingsopplegg(beløpTilArbeidsgiver: Int, beløpTilSykmeldt: Int) {
+    protected fun utbetalingsopplegg(beløpTilArbeidsgiver: Int, beløpTilSykmeldt: Int, utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING) {
         val arbeidsgiveroppdragId = lagArbeidsgiveroppdrag(fagsystemId())
         val personOppdragId = lagPersonoppdrag(fagsystemId())
-        val utbetaling_idId = lagUtbetalingId(arbeidsgiveroppdragId, personOppdragId, UTBETALING_ID, arbeidsgiverbeløp = beløpTilArbeidsgiver, personbeløp = beløpTilSykmeldt)
+        val utbetaling_idId = lagUtbetalingId(arbeidsgiveroppdragId, personOppdragId, UTBETALING_ID, arbeidsgiverbeløp = beløpTilArbeidsgiver, personbeløp = beløpTilSykmeldt, utbetalingtype = utbetalingtype)
         utbetalingDao.nyUtbetalingStatus(utbetaling_idId, Utbetalingsstatus.UTBETALT, LocalDateTime.now(), "{}")
         opprettUtbetalingKobling(VEDTAKSPERIODE, UTBETALING_ID)
     }
@@ -428,12 +428,13 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         utbetalingId: UUID = UUID.randomUUID(),
         arbeidsgiverbeløp: Int = 2000,
         personbeløp: Int = 2000,
+        utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING
     ): Long =
         utbetalingDao.opprettUtbetalingId(
             utbetalingId = utbetalingId,
             fødselsnummer = FNR,
             orgnummer = ORGNUMMER,
-            type = Utbetalingtype.UTBETALING,
+            type = utbetalingtype,
             opprettet = LocalDateTime.now(),
             arbeidsgiverFagsystemIdRef = arbeidsgiverOppdragId,
             personFagsystemIdRef = personOppdragId,

@@ -5,6 +5,7 @@ import no.nav.helse.db.BehandlingsstatistikkDao
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkResponse
 import no.nav.helse.spesialist.api.behandlingsstatistikk.Statistikk
+import no.nav.helse.spesialist.api.graphql.schema.Utbetalingtype
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
 import no.nav.helse.spesialist.api.vedtaksperiode.Mottakertype
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
@@ -13,13 +14,13 @@ class BehandlingsstatistikkMediator(private val behandlingsstatistikkDao: Behand
     IBehandlingsstatistikkMediator {
 
     override fun getBehandlingsstatistikk(fom: LocalDate): BehandlingsstatistikkResponse {
-        val automatisertPerInntektPeriodetypeOgMottaker = behandlingsstatistikkDao.getAutomatiseringerPerInntektOgPeriodetype(fom)
+        val automatisertPerKombinasjon = behandlingsstatistikkDao.getAutomatiseringPerKombinasjon(fom)
         val manueltUtførteOppgaver = behandlingsstatistikkDao.getManueltUtførteOppgaverPerInntektOgPeriodetype(fom)
         val tilgjengeligeOppgaver = behandlingsstatistikkDao.getTilgjengeligeOppgaverPerInntektOgPeriodetype()
 
         val enArbeidsgiver = {
             Statistikk(
-                automatisk = automatisertPerInntektPeriodetypeOgMottaker.perInntekttype[Inntektskilde.EN_ARBEIDSGIVER]
+                automatisk = automatisertPerKombinasjon.perInntekttype[Inntektskilde.EN_ARBEIDSGIVER]
                     ?: 0,
                 manuelt = manueltUtførteOppgaver.perInntekttype[Inntektskilde.EN_ARBEIDSGIVER] ?: 0,
                 tilgjengelig = tilgjengeligeOppgaver.perInntekttype[Inntektskilde.EN_ARBEIDSGIVER] ?: 0
@@ -28,8 +29,7 @@ class BehandlingsstatistikkMediator(private val behandlingsstatistikkDao: Behand
 
         val flereArbeidsgivere = {
             Statistikk(
-                automatisk = automatisertPerInntektPeriodetypeOgMottaker.perInntekttype[Inntektskilde.FLERE_ARBEIDSGIVERE]
-                    ?: 0,
+                automatisk = automatisertPerKombinasjon.perInntekttype[Inntektskilde.FLERE_ARBEIDSGIVERE] ?: 0,
                 manuelt = manueltUtførteOppgaver.perInntekttype[Inntektskilde.FLERE_ARBEIDSGIVERE] ?: 0,
                 tilgjengelig = tilgjengeligeOppgaver.perInntekttype[Inntektskilde.FLERE_ARBEIDSGIVERE] ?: 0
             )
@@ -37,7 +37,7 @@ class BehandlingsstatistikkMediator(private val behandlingsstatistikkDao: Behand
 
         val forstegangsbehandling = {
             Statistikk(
-                automatisk = automatisertPerInntektPeriodetypeOgMottaker.perPeriodetype[Periodetype.FØRSTEGANGSBEHANDLING]
+                automatisk = automatisertPerKombinasjon.perPeriodetype[Periodetype.FØRSTEGANGSBEHANDLING]
                     ?: 0,
                 manuelt = manueltUtførteOppgaver.perPeriodetype[Periodetype.FØRSTEGANGSBEHANDLING] ?: 0,
                 tilgjengelig = tilgjengeligeOppgaver.perPeriodetype[Periodetype.FØRSTEGANGSBEHANDLING] ?: 0
@@ -46,8 +46,8 @@ class BehandlingsstatistikkMediator(private val behandlingsstatistikkDao: Behand
 
         val forlengelser = {
             Statistikk(
-                automatisk = (automatisertPerInntektPeriodetypeOgMottaker.perPeriodetype[Periodetype.FORLENGELSE] ?: 0)
-                        + (automatisertPerInntektPeriodetypeOgMottaker.perPeriodetype[Periodetype.INFOTRYGDFORLENGELSE]
+                automatisk = (automatisertPerKombinasjon.perPeriodetype[Periodetype.FORLENGELSE] ?: 0)
+                        + (automatisertPerKombinasjon.perPeriodetype[Periodetype.INFOTRYGDFORLENGELSE]
                     ?: 0),
                 manuelt = (manueltUtførteOppgaver.perPeriodetype[Periodetype.FORLENGELSE] ?: 0)
                         + (manueltUtførteOppgaver.perPeriodetype[Periodetype.INFOTRYGDFORLENGELSE] ?: 0),
@@ -58,7 +58,7 @@ class BehandlingsstatistikkMediator(private val behandlingsstatistikkDao: Behand
 
         val forlengelseIt = {
             Statistikk(
-                automatisk = automatisertPerInntektPeriodetypeOgMottaker.perPeriodetype[Periodetype.OVERGANG_FRA_IT]
+                automatisk = automatisertPerKombinasjon.perPeriodetype[Periodetype.OVERGANG_FRA_IT]
                     ?: 0,
                 manuelt = manueltUtførteOppgaver.perPeriodetype[Periodetype.OVERGANG_FRA_IT] ?: 0,
                 tilgjengelig = tilgjengeligeOppgaver.perPeriodetype[Periodetype.OVERGANG_FRA_IT] ?: 0,
@@ -72,17 +72,17 @@ class BehandlingsstatistikkMediator(private val behandlingsstatistikkDao: Behand
             forlengelser = forlengelser(),
             forlengelseIt = forlengelseIt(),
             utbetalingTilArbeidsgiver = Statistikk(
-                automatisk = automatisertPerInntektPeriodetypeOgMottaker.perMottakertype[Mottakertype.ARBEIDSGIVER] ?: 0,
+                automatisk = automatisertPerKombinasjon.perMottakertype[Mottakertype.ARBEIDSGIVER] ?: 0,
                 manuelt = behandlingsstatistikkDao.antallFerdigstilteOppgaverFor(EgenskapForDatabase.UTBETALING_TIL_ARBEIDSGIVER, fom),
                 tilgjengelig = behandlingsstatistikkDao.antallTilgjengeligeOppgaverFor(EgenskapForDatabase.UTBETALING_TIL_ARBEIDSGIVER),
             ),
             utbetalingTilSykmeldt = Statistikk(
-                automatisk = automatisertPerInntektPeriodetypeOgMottaker.perMottakertype[Mottakertype.SYKMELDT] ?: 0,
+                automatisk = automatisertPerKombinasjon.perMottakertype[Mottakertype.SYKMELDT] ?: 0,
                 manuelt = behandlingsstatistikkDao.antallFerdigstilteOppgaverFor(EgenskapForDatabase.UTBETALING_TIL_SYKMELDT, fom),
                 tilgjengelig = behandlingsstatistikkDao.antallTilgjengeligeOppgaverFor(EgenskapForDatabase.UTBETALING_TIL_SYKMELDT)
             ),
             delvisRefusjon = Statistikk(
-                automatisk = automatisertPerInntektPeriodetypeOgMottaker.perMottakertype[Mottakertype.BEGGE] ?: 0,
+                automatisk = automatisertPerKombinasjon.perMottakertype[Mottakertype.BEGGE] ?: 0,
                 manuelt = behandlingsstatistikkDao.antallFerdigstilteOppgaverFor(EgenskapForDatabase.DELVIS_REFUSJON, fom),
                 tilgjengelig = behandlingsstatistikkDao.antallTilgjengeligeOppgaverFor(EgenskapForDatabase.DELVIS_REFUSJON)
             ),
@@ -102,7 +102,7 @@ class BehandlingsstatistikkMediator(private val behandlingsstatistikkDao: Behand
                 tilgjengelig = behandlingsstatistikkDao.antallTilgjengeligeOppgaverFor(EgenskapForDatabase.STIKKPRØVE)
             ),
             revurdering = Statistikk(
-                automatisk = 0,
+                automatisk = automatisertPerKombinasjon.perUtbetalingtype[Utbetalingtype.REVURDERING] ?: 0,
                 manuelt = behandlingsstatistikkDao.antallFerdigstilteOppgaverFor(EgenskapForDatabase.REVURDERING, fom),
                 tilgjengelig = behandlingsstatistikkDao.antallTilgjengeligeOppgaverFor(EgenskapForDatabase.REVURDERING)
             ),

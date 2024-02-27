@@ -3,6 +3,7 @@ package no.nav.helse.modell.oppgave.behandlingsstatistikk
 import DatabaseIntegrationTest
 import java.time.LocalDate
 import no.nav.helse.db.EgenskapForDatabase
+import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
@@ -38,14 +39,6 @@ internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
         automatisertSakForGittMottaker(mottakertype = Mottakertype.BEGGE)
     }
 
-    private fun automatisertSakForGittMottaker(mottakertype: Mottakertype) {
-        nyPersonMedAutomatiskVedtak(mottakertype = mottakertype)
-        val (perInntekttype, perPeriodetype, perMottakertype) =
-            behandlingsstatistikkDao.getAutomatiseringerPerInntektOgPeriodetype(NOW)
-        assertEquals(1, perInntekttype[no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde.EN_ARBEIDSGIVER])
-        assertEquals(1, perPeriodetype[no.nav.helse.spesialist.api.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING])
-        assertEquals(1, perMottakertype[mottakertype])
-    }
     @Test
     fun `henter statikk for tilgjengelige oppgaver`() {
         nyPerson()
@@ -102,6 +95,12 @@ internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun`Får antall automatiserte revurderinger`() {
+        nyPersonMedAutomatiskVedtak(utbetalingtype = Utbetalingtype.REVURDERING)
+        assertEquals(1, behandlingsstatistikkDao.getAutomatiseringPerKombinasjon(LocalDate.now()).perUtbetalingtype[no.nav.helse.spesialist.api.graphql.schema.Utbetalingtype.REVURDERING])
+    }
+
+    @Test
     fun`Får antall tilgjengelige egen ansatt-oppgaver`() {
         nyPerson()
         opprettSaksbehandler()
@@ -131,10 +130,20 @@ internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
         assertEquals(1, behandlingsstatistikkDao.getAntallManueltFullførteEgenAnsattOppgaver(LocalDate.now().minusDays(1)))
     }
 
+    private fun automatisertSakForGittMottaker(mottakertype: Mottakertype) {
+        nyPersonMedAutomatiskVedtak(mottakertype = mottakertype)
+        val (perInntekttype, perPeriodetype, perMottakertype) =
+            behandlingsstatistikkDao.getAutomatiseringPerKombinasjon(NOW)
+        assertEquals(1, perInntekttype[no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde.EN_ARBEIDSGIVER])
+        assertEquals(1, perPeriodetype[no.nav.helse.spesialist.api.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING])
+        assertEquals(1, perMottakertype[mottakertype])
+    }
+
     private fun nyPersonMedAutomatiskVedtak(
         periodetype: Periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
         inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
         mottakertype: Mottakertype = Mottakertype.ARBEIDSGIVER,
+        utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING
     ) {
         godkjenningsbehov()
         opprettPerson()
@@ -142,15 +151,15 @@ internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
         opprettVedtaksperiode(periodetype = periodetype, inntektskilde = inntektskilde)
         nyttAutomatiseringsinnslag(true)
         when (mottakertype) {
-            Mottakertype.ARBEIDSGIVER -> utbetalingTilArbeidsgiver()
-            Mottakertype.SYKMELDT -> utbetalingTilPerson()
-            Mottakertype.BEGGE -> utbetalingTilBegge()
+            Mottakertype.ARBEIDSGIVER -> utbetalingTilArbeidsgiver(utbetalingtype)
+            Mottakertype.SYKMELDT -> utbetalingTilPerson(utbetalingtype)
+            Mottakertype.BEGGE -> utbetalingTilBegge(utbetalingtype)
         }
     }
 
-    private fun utbetalingTilArbeidsgiver() = utbetalingsopplegg(beløpTilArbeidsgiver = 4000, beløpTilSykmeldt = 0)
+    private fun utbetalingTilArbeidsgiver(utbetalingtype: Utbetalingtype) = utbetalingsopplegg(beløpTilArbeidsgiver = 4000, beløpTilSykmeldt = 0, utbetalingtype = utbetalingtype)
 
-    private fun utbetalingTilPerson() = utbetalingsopplegg(beløpTilArbeidsgiver = 0, beløpTilSykmeldt = 4000)
+    private fun utbetalingTilPerson(utbetalingtype: Utbetalingtype) = utbetalingsopplegg(beløpTilArbeidsgiver = 0, beløpTilSykmeldt = 4000, utbetalingtype = utbetalingtype)
 
-    private fun utbetalingTilBegge() = utbetalingsopplegg(beløpTilArbeidsgiver = 2000, beløpTilSykmeldt = 2000)
+    private fun utbetalingTilBegge(utbetalingtype: Utbetalingtype) = utbetalingsopplegg(beløpTilArbeidsgiver = 2000, beløpTilSykmeldt = 2000, utbetalingtype = utbetalingtype)
 }

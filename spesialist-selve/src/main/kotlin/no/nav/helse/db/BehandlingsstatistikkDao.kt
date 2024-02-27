@@ -2,10 +2,10 @@ package no.nav.helse.db
 
 import java.time.LocalDate
 import javax.sql.DataSource
-import kotliquery.Query
 import no.nav.helse.HelseDao
-import no.nav.helse.spesialist.api.behandlingsstatistikk.InntektOgPeriodetyperad
-import no.nav.helse.spesialist.api.behandlingsstatistikk.StatistikkPerInntektOgPeriodetype
+import no.nav.helse.spesialist.api.behandlingsstatistikk.AntallPerKombinasjonRad
+import no.nav.helse.spesialist.api.behandlingsstatistikk.StatistikkPerKombinasjon
+import no.nav.helse.spesialist.api.graphql.schema.Utbetalingtype
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
 import no.nav.helse.spesialist.api.vedtaksperiode.Mottakertype
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
@@ -54,14 +54,15 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
         """, mapOf("fom" to fom)
     ).single { it.int("count") } ?: 0
 
-    fun getAutomatiseringerPerInntektOgPeriodetype(fom: LocalDate): StatistikkPerInntektOgPeriodetype {
-        val query = asSQL("""
+    fun getAutomatiseringPerKombinasjon(fom: LocalDate): StatistikkPerKombinasjon {
+        val rader = asSQL("""
             SELECT s.type,
                 s.inntektskilde,
                 CASE WHEN ui.arbeidsgiverbeløp > 0 AND ui.personbeløp > 0 THEN '${Mottakertype.BEGGE}'
                     WHEN ui.personbeløp > 0 THEN '${Mottakertype.SYKMELDT}'
                     ELSE '${Mottakertype.ARBEIDSGIVER}'
                 END AS mottakertype,
+                ui.type AS utbetaling_type,
                 count(distinct a.id)
             FROM automatisering a
                      INNER JOIN saksbehandleroppgavetype s on s.vedtak_ref = a.vedtaksperiode_ref
@@ -70,35 +71,63 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
                      INNER JOIN utbetaling_id ui on ui.utbetaling_id = vui.utbetaling_id
             WHERE a.opprettet >= :fom
               AND a.automatisert = true
-            GROUP BY s.type, s.inntektskilde, mottakertype;
+            GROUP BY s.type, s.inntektskilde, mottakertype, utbetaling_type;
         """, mapOf("fom" to fom))
+            .list {
+                AntallPerKombinasjonRad(
+                    inntekttype = Inntektskilde.valueOf(it.string("inntektskilde")),
+                    periodetype = Periodetype.valueOf(it.string("type")),
+                    mottakertype = Mottakertype.valueOf(it.string("mottakertype")),
+                    utbetalingtype = Utbetalingtype.valueOf(it.string("utbetaling_type")),
+                    antall = it.int("count")
+                )
+            }
 
-        return getStatistikkPerInntektOgPeriodetype(query, inkluderMottakertype = true)
+        return getStatistikkPerInntektOgPeriodetype(rader)
     }
 
-    fun getTilgjengeligeOppgaverPerInntektOgPeriodetype(): StatistikkPerInntektOgPeriodetype {
-        val query = asSQL("""
+    fun getTilgjengeligeOppgaverPerInntektOgPeriodetype(): StatistikkPerKombinasjon {
+        val rader = asSQL("""
             SELECT s.type, s.inntektskilde, count(distinct o.id)
             FROM oppgave o
                      INNER JOIN saksbehandleroppgavetype s on o.vedtak_ref = s.vedtak_ref
             WHERE o.status = 'AvventerSaksbehandler'
             GROUP BY s.type, s.inntektskilde;
         """)
+            .list {
+                AntallPerKombinasjonRad(
+                    inntekttype = Inntektskilde.valueOf(it.string("inntektskilde")),
+                    periodetype = Periodetype.valueOf(it.string("type")),
+                    mottakertype = null,
+                    utbetalingtype = null,
+                    antall = it.int("count")
+                )
+            }
 
-        return getStatistikkPerInntektOgPeriodetype(query)
+        return getStatistikkPerInntektOgPeriodetype(rader)
     }
 
-    fun getManueltUtførteOppgaverPerInntektOgPeriodetype(fom: LocalDate): StatistikkPerInntektOgPeriodetype {
-        val query = asSQL("""
+    fun getManueltUtførteOppgaverPerInntektOgPeriodetype(fom: LocalDate): StatistikkPerKombinasjon {
+        val rader = asSQL("""
             SELECT s.type, s.inntektskilde, count(distinct o.id)
             FROM oppgave o
                      INNER JOIN saksbehandleroppgavetype s on o.vedtak_ref = s.vedtak_ref
             WHERE o.status = 'Ferdigstilt'
               AND o.oppdatert >= :fom
             GROUP BY s.type, s.inntektskilde;
-        """, mapOf("fom" to fom))
+        """, mapOf("fom" to fom)
+        )
+            .list {
+                AntallPerKombinasjonRad(
+                    inntekttype = Inntektskilde.valueOf(it.string("inntektskilde")),
+                    periodetype = Periodetype.valueOf(it.string("type")),
+                    mottakertype = null,
+                    utbetalingtype = null,
+                    antall = it.int("count")
+                )
+            }
 
-        return getStatistikkPerInntektOgPeriodetype(query)
+        return getStatistikkPerInntektOgPeriodetype(rader)
     }
 
     fun antallTilgjengeligeOppgaverFor(egenskap: EgenskapForDatabase): Int {
@@ -128,36 +157,33 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
     }
 
     private fun getStatistikkPerInntektOgPeriodetype(
-        query: Query,
-        inkluderMottakertype: Boolean = false
-    ): StatistikkPerInntektOgPeriodetype {
-        val rader = query.list {
-            InntektOgPeriodetyperad(
-                inntekttype = Inntektskilde.valueOf(it.string("inntektskilde")),
-                periodetype = Periodetype.valueOf(it.string("type")),
-                mottakertype = if (inkluderMottakertype) Mottakertype.valueOf(it.string("mottakertype")) else null,
-                antall = it.int("count")
-            )
+        rader: List<AntallPerKombinasjonRad>
+    ): StatistikkPerKombinasjon {
+        val perInntekttype = Inntektskilde.entries.associateWith { inntekttype ->
+            rader.filter { it.inntekttype == inntekttype }.sumOf { it.antall }
         }
 
-        val perInntekttype = Inntektskilde.entries.map { inntektskilde ->
-            mapOf(inntektskilde to rader.filter { it.inntekttype == inntektskilde }.sumOf { it.antall })
-        }.fold(emptyMap(), Map<Inntektskilde, Int>::plus)
+        val perPeriodetype = Periodetype.entries.associateWith { periodetype ->
+            rader.filter { it.periodetype == periodetype }.sumOf { it.antall }
+        }
 
-        val perPeriodetype = Periodetype.entries.map { periodetype ->
-            mapOf(periodetype to rader.filter { it.periodetype == periodetype }.sumOf { it.antall })
-        }.fold(emptyMap(), Map<Periodetype, Int>::plus)
-
-        val perMottakertype = if (inkluderMottakertype) {
-            Mottakertype.entries.map { mottakertype ->
-                mapOf(mottakertype to rader.filter { it.mottakertype == mottakertype }.sumOf { it.antall })
-            }.fold(emptyMap(), Map<Mottakertype, Int>::plus)
+        val perMottakertype = if (rader.none { it.mottakertype == null }) {
+            Mottakertype.entries.associateWith { mottakertype ->
+                rader.filter { it.mottakertype == mottakertype }.sumOf { it.antall }
+            }
         } else emptyMap()
 
-        return StatistikkPerInntektOgPeriodetype(
+        val perUtbetalingtype = if (rader.none { it.utbetalingtype == null }) {
+            Utbetalingtype.entries.associateWith { utbetalingtype ->
+                rader.filter { it.utbetalingtype == utbetalingtype }.sumOf { it.antall }
+            }
+        } else emptyMap()
+
+        return StatistikkPerKombinasjon(
             perInntekttype = perInntekttype,
             perPeriodetype = perPeriodetype,
             perMottakertype = perMottakertype,
+            perUtbetalingtype = perUtbetalingtype
         )
     }
 
