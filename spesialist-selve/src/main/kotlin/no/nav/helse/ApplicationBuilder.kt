@@ -72,7 +72,6 @@ import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.AzureAdAppConfig
 import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
-import no.nav.helse.spesialist.api.abonnement.OpptegnelseMediator
 import no.nav.helse.spesialist.api.abonnement.opptegnelseApi
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.avviksvurdering.Avviksvurdering
@@ -103,7 +102,6 @@ import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
 import kotlin.random.Random.Default.nextInt
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationServer
-import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao as OpptegnelseApiDao
 import no.nav.helse.spesialist.api.tildeling.TildelingDao as TildelingApiDao
 
 private val auditLog = LoggerFactory.getLogger("auditLogger")
@@ -217,8 +215,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val egenAnsattApiDao = EgenAnsattApiDao(dataSource)
     private val utbetalingApiDao = UtbetalingApiDao(dataSource)
     private val opptegnelseDao = OpptegnelseDao(dataSource)
-    private val opptegnelseApiDao = OpptegnelseApiDao(dataSource)
-    private val abonnementDao = no.nav.helse.spesialist.api.abonnement.AbonnementDao(dataSource)
     private val behandlingsstatistikkDao = BehandlingsstatistikkDao(dataSource)
     private val notatDao = NotatDao(dataSource)
     private val totrinnsvurderingApiDao = TotrinnsvurderingApiDao(dataSource)
@@ -365,7 +361,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
 
             routing {
                 authenticate("oidc") {
-                    opptegnelseApi(OpptegnelseMediator(opptegnelseApiDao, abonnementDao))
+                    opptegnelseApi()
                 }
             }
         }.build()
