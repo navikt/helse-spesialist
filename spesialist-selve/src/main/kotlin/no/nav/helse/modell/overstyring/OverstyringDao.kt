@@ -325,7 +325,7 @@ class OverstyringDao(private val dataSource: DataSource) : HelseDao(dataSource) 
                                 )
                             },
                             "overstyring_ref" to overstyringRef,
-                            "initierende_vedtaksperiode_id" to UUID.fromString(enArbeidsgiver.initierendeVedtaksperiodeId),
+                            "initierende_vedtaksperiode_id" to enArbeidsgiver.initierendeVedtaksperiodeId?.let { UUID.fromString(it) },
                             "begrunnelse_fritekst_ref" to begrunnelseFritekstId,
                             "begrunnelse_mal_ref" to begrunnelseMalId,
                             "begrunnelse_konklusjon_ref" to begrunnelseKonklusjonId,
