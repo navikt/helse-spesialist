@@ -7,7 +7,6 @@ import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.mediator.Hendelsefabrikk
-import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
@@ -217,7 +216,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
     ): Personmelding {
         val jsonNode = objectMapper.readTree(json)
         return when (hendelsetype) {
-            ADRESSEBESKYTTELSE_ENDRET -> AdressebeskyttelseEndret(jsonNode["@id"].asUUID(), jsonNode["fødselsnummer"].asText(), json)
+            ADRESSEBESKYTTELSE_ENDRET -> AdressebeskyttelseEndret(jsonNode)
             // VEDTAKSPERIODE_FORKASTET trengs pt. pga. KommandohendelseDaoTest.`lagrer og finner hendelser`
             VEDTAKSPERIODE_FORKASTET -> hendelsefabrikk.vedtaksperiodeForkastet(json)
             GODKJENNING -> Godkjenningsbehov(jsonNode)
