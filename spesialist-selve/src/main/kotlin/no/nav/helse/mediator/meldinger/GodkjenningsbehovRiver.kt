@@ -5,8 +5,10 @@ import java.time.LocalDate
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.utbetaling.Utbetalingtype.Companion.values
+import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -67,8 +69,16 @@ internal class GodkjenningsbehovRiver(
             StructuredArguments.keyValue("hendelse", packet.toJson()),
         )
         mediator.godkjenningsbehov(
-            message = packet,
-            id = hendelseId,
+            godkjenning(packet),
+            avviksvurderingId = packet["avviksvurderingId"].takeUnless { it.isMissingOrNull() }?.let { UUID.fromString(it.asText()) },
+            vilkårsgrunnlagId = UUID.fromString(packet["Godkjenning.vilkårsgrunnlagId"].asText()),
+            context = context
+        )
+    }
+
+    private fun godkjenning(packet: JsonMessage): Godkjenningsbehov {
+        return Godkjenningsbehov(
+            id = packet["@id"].asUUID(),
             fødselsnummer = packet["fødselsnummer"].asText(),
             aktørId = packet["aktørId"].asText(),
             organisasjonsnummer = packet["organisasjonsnummer"].asText(),
@@ -85,9 +95,7 @@ internal class GodkjenningsbehovRiver(
                 .takeUnless(JsonNode::isMissingOrNull)
                 ?.map { it.asText() } ?: emptyList(),
             kanAvvises = packet["Godkjenning.kanAvvises"].asBoolean(),
-            avviksvurderingId = packet["avviksvurderingId"].takeUnless { it.isMissingOrNull() }?.let { UUID.fromString(it.asText()) },
-            vilkårsgrunnlagId = UUID.fromString(packet["Godkjenning.vilkårsgrunnlagId"].asText()),
-            context = context
+            json = packet.toJson()
         )
     }
 }

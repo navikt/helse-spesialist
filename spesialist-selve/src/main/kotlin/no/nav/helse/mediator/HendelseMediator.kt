@@ -70,16 +70,13 @@ import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfeller
 import no.nav.helse.modell.utbetaling.UtbetalingAnnullert
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
-import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterOppdateringer
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
-import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.NyeVarsler
-import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeEndret
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
@@ -335,28 +332,17 @@ internal class HendelseMediator(
     }
 
     fun godkjenningsbehov(
-        message: JsonMessage,
-        id: UUID,
-        fødselsnummer: String,
-        aktørId: String,
-        organisasjonsnummer: String,
-        periodeFom: LocalDate,
-        periodeTom: LocalDate,
-        skjæringstidspunkt: LocalDate,
-        vedtaksperiodeId: UUID,
-        utbetalingId: UUID,
-        periodetype: Periodetype,
-        førstegangsbehandling: Boolean,
-        utbetalingtype: Utbetalingtype,
-        inntektskilde: Inntektskilde,
-        orgnummereMedRelevanteArbeidsforhold: List<String>,
-        kanAvvises: Boolean,
+        godkjenningsbehov: Godkjenningsbehov,
         context: MessageContext,
         avviksvurderingId: UUID?,
         vilkårsgrunnlagId: UUID,
     ) {
         if (avviksvurderingId != null)
             avviksvurderingDao.opprettKobling(avviksvurderingId, vilkårsgrunnlagId)
+        val utbetalingId = godkjenningsbehov.utbetalingId
+        val vedtaksperiodeId = godkjenningsbehov.vedtaksperiodeId()
+        val skjæringstidspunkt = godkjenningsbehov.skjæringstidspunkt
+        val id = godkjenningsbehov.id
         if (utbetalingDao.erUtbetalingForkastet(utbetalingId)) {
             sikkerLogg.info("Ignorerer godkjenningsbehov med id=$id for utbetalingId=$utbetalingId, da utbetalingen er forkastet")
             return
@@ -365,34 +351,15 @@ internal class HendelseMediator(
             sikkerLogg.info("vedtaksperiodeId=$vedtaksperiodeId med utbetalingId=$utbetalingId har gyldig oppgave eller er automatisk godkjent. Ignorerer godkjenningsbehov med id=$id")
             return
         }
-        if (generasjonRepository.finnVedtaksperiodeIderFor(fødselsnummer, skjæringstidspunkt).isEmpty()) {
+        if (generasjonRepository.finnVedtaksperiodeIderFor(godkjenningsbehov.fødselsnummer(), skjæringstidspunkt).isEmpty()) {
             sikkerLogg.error("""
-                vedtaksperiodeId=$vedtaksperiodeId med utbetalingId=$utbetalingId, periodeFom=$periodeFom, periodeTom=$periodeTom 
+                vedtaksperiodeId=$vedtaksperiodeId med utbetalingId=$utbetalingId, periodeFom=${godkjenningsbehov.periodeFom}, periodeTom=${godkjenningsbehov.periodeTom} 
                 og skjæringstidspunkt=$skjæringstidspunkt er i et sykefraværstilfelle uten generasjoner lagret. 
                 Ignorerer godkjenningsbehov med id=$id""".trimIndent()
             )
             return
         }
-        håndter(
-            hendelsefabrikk.godkjenning(
-                id,
-                fødselsnummer,
-                aktørId,
-                organisasjonsnummer,
-                periodeFom,
-                periodeTom,
-                vedtaksperiodeId,
-                utbetalingId,
-                skjæringstidspunkt,
-                periodetype,
-                førstegangsbehandling,
-                utbetalingtype,
-                inntektskilde,
-                orgnummereMedRelevanteArbeidsforhold,
-                kanAvvises,
-                message.toJson(),
-            ), context
-        )
+        håndter(godkjenningsbehov, context)
     }
 
     fun søknadSendt(

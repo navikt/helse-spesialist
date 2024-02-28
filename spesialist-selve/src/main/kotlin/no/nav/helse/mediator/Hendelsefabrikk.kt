@@ -52,18 +52,15 @@ import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.utbetaling.UtbetalingEndretCommand
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
-import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovCommand
-import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.NyeVarsler
 import no.nav.helse.modell.vedtaksperiode.NyeVarslerCommand
 import no.nav.helse.modell.vedtaksperiode.OpprettVedtaksperiodeCommand
-import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeEndret
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeEndretCommand
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
@@ -79,7 +76,6 @@ import no.nav.helse.modell.vedtaksperiode.vedtak.VedtakFattet
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
-import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.notat.NotatMediator
@@ -182,44 +178,6 @@ internal class Hendelsefabrikk(
         avviksvurderingDao.lagre(avviksvurdering)
     }
 
-    fun godkjenning(
-        id: UUID,
-        fødselsnummer: String,
-        aktørId: String,
-        organisasjonsnummer: String,
-        periodeFom: LocalDate,
-        periodeTom: LocalDate,
-        vedtaksperiodeId: UUID,
-        utbetalingId: UUID,
-        skjæringstidspunkt: LocalDate,
-        periodetype: Periodetype,
-        førstegangsbehandling: Boolean,
-        utbetalingtype: Utbetalingtype,
-        inntektskilde: Inntektskilde,
-        orgnummereMedRelevanteArbeidsforhold: List<String>,
-        kanAvvises: Boolean,
-        json: String,
-    ): Godkjenningsbehov {
-        return Godkjenningsbehov(
-            id = id,
-            fødselsnummer = fødselsnummer,
-            aktørId = aktørId,
-            organisasjonsnummer = organisasjonsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingId = utbetalingId,
-            periodeFom = periodeFom,
-            periodeTom = periodeTom,
-            periodetype = periodetype,
-            førstegangsbehandling = førstegangsbehandling,
-            utbetalingtype = utbetalingtype,
-            kanAvvises = kanAvvises,
-            inntektskilde = inntektskilde,
-            orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
-            skjæringstidspunkt = skjæringstidspunkt,
-            json = json,
-        )
-    }
-
     fun søknadSendt(
         id: UUID,
         fødselsnummer: String,
@@ -263,33 +221,6 @@ internal class Hendelsefabrikk(
             kilde = kilde,
             berørteVedtaksperiodeIder = berørteVedtaksperiodeIder,
             json = json
-        )
-    }
-
-    fun godkjenning(json: String): Godkjenningsbehov {
-        val jsonNode = mapper.readTree(json)
-        val periodetype = Periodetype.valueOf(jsonNode.path("Godkjenning").path("periodetype").asText())
-        val førstegangsbehandling = jsonNode.path("Godkjenning").path("førstegangsbehandling")
-            .asBoolean(periodetype == Periodetype.FØRSTEGANGSBEHANDLING) // bruker default-value enn så lenge for å kunne parse eldre godkjenningsbehov
-        return godkjenning(
-            id = UUID.fromString(jsonNode.path("@id").asText()),
-            fødselsnummer = jsonNode.path("fødselsnummer").asText(),
-            aktørId = jsonNode.path("aktørId").asText(),
-            organisasjonsnummer = jsonNode.path("organisasjonsnummer").asText(),
-            periodeFom = LocalDate.parse(jsonNode.path("Godkjenning").path("periodeFom").asText()),
-            periodeTom = LocalDate.parse(jsonNode.path("Godkjenning").path("periodeTom").asText()),
-            vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText()),
-            utbetalingId = UUID.fromString(jsonNode.path("utbetalingId").asText()),
-            skjæringstidspunkt = LocalDate.parse(jsonNode.path("Godkjenning").path("skjæringstidspunkt").asText()),
-            periodetype = periodetype,
-            førstegangsbehandling = førstegangsbehandling,
-            utbetalingtype = Utbetalingtype.valueOf(jsonNode.path("Godkjenning").path("utbetalingtype").asText()),
-            inntektskilde = Inntektskilde.valueOf(jsonNode.path("Godkjenning").path("inntektskilde").asText()),
-            orgnummereMedRelevanteArbeidsforhold = jsonNode.path("Godkjenning")
-                .path("orgnummereMedRelevanteArbeidsforhold")
-                .takeUnless(JsonNode::isMissingOrNull)?.map { it.asText() } ?: emptyList(),
-            kanAvvises = jsonNode.path("Godkjenning").path("kanAvvises").asBoolean(),
-            json = json,
         )
     }
 

@@ -9,20 +9,19 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class GodkjenningsbehovRiverTest {
-    private companion object {
-        private val HENDELSE = UUID.randomUUID()
-        private val VEDTAKSPERIODE = UUID.randomUUID()
-        private val UTBETALING_ID = UUID.randomUUID()
-        private const val FNR = "12345678911"
-        private const val AKTØR = "1234567891234"
-        private const val ORGNR = "123456789"
-        private val FOM = LocalDate.of(2020, 1, 1)
-        private val TOM = LocalDate.of(2020, 1, 31)
-    }
+    private val HENDELSE = UUID.randomUUID()
+    private val VEDTAKSPERIODE = UUID.randomUUID()
+    private val UTBETALING_ID = UUID.randomUUID()
+    private val FNR = "12345678911"
+    private val AKTØR = "1234567891234"
+    private val ORGNR = "123456789"
+    private val FOM = LocalDate.of(2020, 1, 1)
+    private val TOM = LocalDate.of(2020, 1, 31)
 
     private val mediator = mockk<HendelseMediator>(relaxed = true)
     private val testRapid = TestRapid().apply {
@@ -37,6 +36,8 @@ internal class GodkjenningsbehovRiverTest {
     @Test
     fun `leser Godkjenningbehov`() {
         val relevanteArbeidsforhold = listOf(ORGNR)
+        val vilkårsgrunnlagId = UUID.randomUUID()
+        val avviksvurderingId = UUID.randomUUID()
         testRapid.sendTestMessage(
             Testmeldingfabrikk.lagGodkjenningsbehov(
                 aktørId = AKTØR,
@@ -50,28 +51,34 @@ internal class GodkjenningsbehovRiverTest {
                 inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE,
                 orgnummereMedRelevanteArbeidsforhold = relevanteArbeidsforhold,
                 id = HENDELSE,
+                kanAvvises = true,
+                førstegangsbehandling = true,
+                vilkårsgrunnlagId = vilkårsgrunnlagId,
+                avviksvurderingId = avviksvurderingId,
+                periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+                utbetalingtype = Utbetalingtype.UTBETALING
             )
         )
         verify(exactly = 1) { mediator.godkjenningsbehov(
-            any(),
-            HENDELSE,
-            FNR,
-            AKTØR,
-            ORGNR,
-            FOM,
-            TOM,
-            FOM,
-            VEDTAKSPERIODE,
-            UTBETALING_ID,
-            Periodetype.FØRSTEGANGSBEHANDLING,
-            true,
-            Utbetalingtype.UTBETALING,
-            Inntektskilde.FLERE_ARBEIDSGIVERE,
-            relevanteArbeidsforhold,
-            any(),
-            any(),
-            any(),
-            any(),
+            godkjenningsbehov = withArg {
+                assertEquals(HENDELSE, it.id)
+                assertEquals(FNR, it.fødselsnummer())
+                assertEquals(AKTØR, it.aktørId)
+                assertEquals(VEDTAKSPERIODE, it.vedtaksperiodeId())
+                assertEquals(ORGNR, it.organisasjonsnummer)
+                assertEquals(FOM, it.periodeFom)
+                assertEquals(TOM, it.periodeTom)
+                assertEquals(FOM, it.skjæringstidspunkt)
+                assertEquals(Inntektskilde.FLERE_ARBEIDSGIVERE, it.inntektskilde)
+                assertEquals(relevanteArbeidsforhold, it.orgnummereMedRelevanteArbeidsforhold)
+                assertEquals(true, it.kanAvvises)
+                assertEquals(true, it.førstegangsbehandling)
+                assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, it.periodetype)
+                assertEquals(Utbetalingtype.UTBETALING, it.utbetalingtype)
+            },
+            context = any(),
+            avviksvurderingId = avviksvurderingId,
+            vilkårsgrunnlagId = vilkårsgrunnlagId
         ) }
     }
 
@@ -94,26 +101,13 @@ internal class GodkjenningsbehovRiverTest {
                 avviksvurderingId = null,
             )
         )
-        verify(exactly = 0) { mediator.godkjenningsbehov(
-            message = any(),
-            id = HENDELSE,
-            fødselsnummer = FNR,
-            aktørId = AKTØR,
-            organisasjonsnummer = ORGNR,
-            periodeFom = FOM,
-            periodeTom = TOM,
-            skjæringstidspunkt = FOM,
-            vedtaksperiodeId = VEDTAKSPERIODE,
-            utbetalingId = UTBETALING_ID,
-            periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
-            førstegangsbehandling = true,
-            utbetalingtype = Utbetalingtype.UTBETALING,
-            inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE,
-            orgnummereMedRelevanteArbeidsforhold = relevanteArbeidsforhold,
-            kanAvvises = any(),
-            context = any(),
-            avviksvurderingId = null,
-            vilkårsgrunnlagId = any(),
-        ) }
+        verify(exactly = 0) {
+            mediator.godkjenningsbehov(
+                godkjenningsbehov = any(),
+                context = any(),
+                avviksvurderingId = null,
+                vilkårsgrunnlagId = any(),
+            )
+        }
     }
 }
