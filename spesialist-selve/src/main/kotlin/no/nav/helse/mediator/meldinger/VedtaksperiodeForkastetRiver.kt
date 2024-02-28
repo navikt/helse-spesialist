@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -39,13 +40,11 @@ internal class VedtaksperiodeForkastetRiver(
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        val vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
-        val id = UUID.fromString(packet["@id"].asText())
         log.info(
             "Mottok vedtaksperiode forkastet {}, {}",
-            StructuredArguments.keyValue("vedtaksperiodeId", vedtaksperiodeId),
-            StructuredArguments.keyValue("eventId", id)
+            StructuredArguments.keyValue("vedtaksperiodeId", UUID.fromString(packet["vedtaksperiodeId"].asText())),
+            StructuredArguments.keyValue("eventId", UUID.fromString(packet["@id"].asText()))
         )
-        mediator.vedtaksperiodeForkastet(packet, id, vedtaksperiodeId, packet["fødselsnummer"].asText(), context)
+        mediator.vedtaksperiodeForkastet(VedtaksperiodeForkastet(packet), context)
     }
 }

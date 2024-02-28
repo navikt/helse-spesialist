@@ -218,7 +218,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
         return when (hendelsetype) {
             ADRESSEBESKYTTELSE_ENDRET -> AdressebeskyttelseEndret(jsonNode)
             // VEDTAKSPERIODE_FORKASTET trengs pt. pga. KommandohendelseDaoTest.`lagrer og finner hendelser`
-            VEDTAKSPERIODE_FORKASTET -> hendelsefabrikk.vedtaksperiodeForkastet(json)
+            VEDTAKSPERIODE_FORKASTET -> VedtaksperiodeForkastet(jsonNode)
             GODKJENNING -> Godkjenningsbehov(jsonNode)
             OPPDATER_PERSONSNAPSHOT -> hendelsefabrikk.oppdaterPersonsnapshot(json)
             GOSYS_OPPGAVE_ENDRET -> hendelsefabrikk.gosysOppgaveEndret(json)

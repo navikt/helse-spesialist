@@ -294,30 +294,6 @@ internal class Hendelsefabrikk(
         )
     }
 
-    fun vedtaksperiodeForkastet(
-        id: UUID,
-        vedtaksperiodeId: UUID,
-        fødselsnummer: String,
-        json: String,
-    ): VedtaksperiodeForkastet {
-        return VedtaksperiodeForkastet(
-            id = id,
-            vedtaksperiodeId = vedtaksperiodeId,
-            fødselsnummer = fødselsnummer,
-            json = json
-        )
-    }
-
-    fun vedtaksperiodeForkastet(json: String): VedtaksperiodeForkastet {
-        val jsonNode = mapper.readTree(json)
-        return vedtaksperiodeForkastet(
-            id = UUID.fromString(jsonNode.path("@id").asText()),
-            vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText()),
-            fødselsnummer = jsonNode.path("fødselsnummer").asText(),
-            json = json
-        )
-    }
-
     fun utbetalingAnnullert(json: String): UtbetalingAnnullert {
         val jsonNode = mapper.readTree(json)
         return UtbetalingAnnullert(

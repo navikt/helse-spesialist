@@ -317,13 +317,10 @@ internal class HendelseMediator(
     }
 
     fun vedtaksperiodeForkastet(
-        message: JsonMessage,
-        id: UUID,
-        vedtaksperiodeId: UUID,
-        fødselsnummer: String,
+        hendelse: VedtaksperiodeForkastet,
         context: MessageContext,
     ) {
-        val hendelse = hendelsefabrikk.vedtaksperiodeForkastet(id, vedtaksperiodeId, fødselsnummer, message.toJson())
+        val vedtaksperiodeId = hendelse.vedtaksperiodeId()
         if (vedtakDao.finnVedtakId(vedtaksperiodeId) == null) {
             logg.info("ignorerer hendelseId=${hendelse.id} fordi vi ikke kjenner til $vedtaksperiodeId")
             return

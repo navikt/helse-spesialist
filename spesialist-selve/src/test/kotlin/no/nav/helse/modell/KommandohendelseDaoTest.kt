@@ -14,13 +14,14 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
 
 internal class KommandohendelseDaoTest : DatabaseIntegrationTest() {
     private val graphQLClient = mockk<SnapshotClient>(relaxed = true)
-    private lateinit var vedtaksperiodeForkastet: VedtaksperiodeForkastet
+    private val vedtaksperiodeForkastet: VedtaksperiodeForkastet = VedtaksperiodeForkastet(
+        objectMapper.readTree(Testmeldingfabrikk.lagVedtaksperiodeForkastet(AKTØR, FNR, VEDTAKSPERIODE, id = HENDELSE_ID))
+    )
 
     private val hendelsefabrikk: Hendelsefabrikk = Hendelsefabrikk(
         dataSource = dataSource,
@@ -29,14 +30,6 @@ internal class KommandohendelseDaoTest : DatabaseIntegrationTest() {
         godkjenningMediator = mockk(relaxed = true),
         automatisering = mockk(relaxed = true),
     )
-
-
-    @BeforeEach
-    fun setupEach() {
-        vedtaksperiodeForkastet = hendelsefabrikk.vedtaksperiodeForkastet(
-            Testmeldingfabrikk.lagVedtaksperiodeForkastet(AKTØR, FNR, VEDTAKSPERIODE, id = HENDELSE_ID)
-        )
-    }
 
     @Test
     fun `finn siste igangsatte overstyring om den er korrigert søknad`() {
