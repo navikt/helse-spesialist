@@ -1,6 +1,5 @@
 package no.nav.helse.modell
 
-import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
@@ -41,11 +40,8 @@ import no.nav.helse.modell.person.toFødselsnummer
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfeller
 import no.nav.helse.modell.utbetaling.UtbetalingAnnullert
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
-import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
-import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.NyeVarsler
-import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeEndret
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
@@ -55,7 +51,6 @@ import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.modell.vedtaksperiode.vedtak.VedtakFattet
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.asLocalDate
-import no.nav.helse.rapids_rivers.isMissingOrNull
 import org.intellij.lang.annotations.Language
 
 internal class HendelseDao(private val dataSource: DataSource) {
@@ -225,40 +220,13 @@ internal class HendelseDao(private val dataSource: DataSource) {
             ADRESSEBESKYTTELSE_ENDRET -> AdressebeskyttelseEndret(jsonNode["@id"].asUUID(), jsonNode["fødselsnummer"].asText(), json)
             // VEDTAKSPERIODE_FORKASTET trengs pt. pga. KommandohendelseDaoTest.`lagrer og finner hendelser`
             VEDTAKSPERIODE_FORKASTET -> hendelsefabrikk.vedtaksperiodeForkastet(json)
-            GODKJENNING -> godkjenning(json)
+            GODKJENNING -> Godkjenningsbehov(jsonNode)
             OPPDATER_PERSONSNAPSHOT -> hendelsefabrikk.oppdaterPersonsnapshot(json)
             GOSYS_OPPGAVE_ENDRET -> hendelsefabrikk.gosysOppgaveEndret(json)
             else -> throw IllegalArgumentException(
                 "Prøver å gjenoppta en kommando(kjede) etter mottak av hendelsetype " +
                         "$hendelsetype, men koden som trengs mangler!")
         }
-    }
-
-    private fun godkjenning(json: String): Godkjenningsbehov {
-        val jsonNode = objectMapper.readTree(json)
-        val periodetype = Periodetype.valueOf(jsonNode.path("Godkjenning").path("periodetype").asText())
-        val førstegangsbehandling = jsonNode.path("Godkjenning").path("førstegangsbehandling")
-            .asBoolean(periodetype == Periodetype.FØRSTEGANGSBEHANDLING) // bruker default-value enn så lenge for å kunne parse eldre godkjenningsbehov
-        return Godkjenningsbehov(
-            id = UUID.fromString(jsonNode.path("@id").asText()),
-            fødselsnummer = jsonNode.path("fødselsnummer").asText(),
-            aktørId = jsonNode.path("aktørId").asText(),
-            organisasjonsnummer = jsonNode.path("organisasjonsnummer").asText(),
-            periodeFom = LocalDate.parse(jsonNode.path("Godkjenning").path("periodeFom").asText()),
-            periodeTom = LocalDate.parse(jsonNode.path("Godkjenning").path("periodeTom").asText()),
-            vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText()),
-            utbetalingId = UUID.fromString(jsonNode.path("utbetalingId").asText()),
-            skjæringstidspunkt = LocalDate.parse(jsonNode.path("Godkjenning").path("skjæringstidspunkt").asText()),
-            periodetype = periodetype,
-            førstegangsbehandling = førstegangsbehandling,
-            utbetalingtype = Utbetalingtype.valueOf(jsonNode.path("Godkjenning").path("utbetalingtype").asText()),
-            inntektskilde = Inntektskilde.valueOf(jsonNode.path("Godkjenning").path("inntektskilde").asText()),
-            orgnummereMedRelevanteArbeidsforhold = jsonNode.path("Godkjenning")
-                .path("orgnummereMedRelevanteArbeidsforhold")
-                .takeUnless(JsonNode::isMissingOrNull)?.map { it.asText() } ?: emptyList(),
-            kanAvvises = jsonNode.path("Godkjenning").path("kanAvvises").asBoolean(),
-            json = json,
-        )
     }
 
     private fun tilHendelsetype(hendelse: Personmelding) = when (hendelse) {

@@ -1,16 +1,11 @@
 package no.nav.helse.mediator.meldinger
 
-import com.fasterxml.jackson.databind.JsonNode
-import java.time.LocalDate
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.utbetaling.Utbetalingtype.Companion.values
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
-import no.nav.helse.modell.vedtaksperiode.Inntektskilde
-import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -69,33 +64,11 @@ internal class GodkjenningsbehovRiver(
             StructuredArguments.keyValue("hendelse", packet.toJson()),
         )
         mediator.godkjenningsbehov(
-            godkjenning(packet),
-            avviksvurderingId = packet["avviksvurderingId"].takeUnless { it.isMissingOrNull() }?.let { UUID.fromString(it.asText()) },
+            Godkjenningsbehov(packet),
+            avviksvurderingId = packet["avviksvurderingId"].takeUnless { it.isMissingOrNull() }
+                ?.let { UUID.fromString(it.asText()) },
             vilkårsgrunnlagId = UUID.fromString(packet["Godkjenning.vilkårsgrunnlagId"].asText()),
             context = context
-        )
-    }
-
-    private fun godkjenning(packet: JsonMessage): Godkjenningsbehov {
-        return Godkjenningsbehov(
-            id = packet["@id"].asUUID(),
-            fødselsnummer = packet["fødselsnummer"].asText(),
-            aktørId = packet["aktørId"].asText(),
-            organisasjonsnummer = packet["organisasjonsnummer"].asText(),
-            periodeFom = LocalDate.parse(packet["Godkjenning.periodeFom"].asText()),
-            periodeTom = LocalDate.parse(packet["Godkjenning.periodeTom"].asText()),
-            skjæringstidspunkt = LocalDate.parse(packet["Godkjenning.skjæringstidspunkt"].asText()),
-            vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText()),
-            utbetalingId = UUID.fromString(packet["utbetalingId"].asText()),
-            periodetype = Periodetype.valueOf(packet["Godkjenning.periodetype"].asText()),
-            førstegangsbehandling = packet["Godkjenning.førstegangsbehandling"].asBoolean(),
-            utbetalingtype = Utbetalingtype.valueOf(packet["Godkjenning.utbetalingtype"].asText()),
-            inntektskilde = Inntektskilde.valueOf(packet["Godkjenning.inntektskilde"].asText()),
-            orgnummereMedRelevanteArbeidsforhold = packet["Godkjenning.orgnummereMedRelevanteArbeidsforhold"]
-                .takeUnless(JsonNode::isMissingOrNull)
-                ?.map { it.asText() } ?: emptyList(),
-            kanAvvises = packet["Godkjenning.kanAvvises"].asBoolean(),
-            json = packet.toJson()
         )
     }
 }

@@ -1,8 +1,10 @@
 package no.nav.helse.modell.vedtaksperiode
 
+import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.mediator.GodkjenningMediator
+import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.CommandContextDao
@@ -42,10 +44,12 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.VurderEnhetUtland
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.modell.vergemal.VurderVergemålOgFullmakt
+import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 
-internal class Godkjenningsbehov(
+internal class Godkjenningsbehov private constructor(
     override val id: UUID,
     private val fødselsnummer: String,
     val aktørId: String,
@@ -67,6 +71,48 @@ internal class Godkjenningsbehov(
     override fun fødselsnummer() = fødselsnummer
     override fun vedtaksperiodeId() = vedtaksperiodeId
     override fun toJson() = json
+
+    internal constructor(packet: JsonMessage): this(
+        id = packet["@id"].asUUID(),
+        fødselsnummer = packet["fødselsnummer"].asText(),
+        aktørId = packet["aktørId"].asText(),
+        organisasjonsnummer = packet["organisasjonsnummer"].asText(),
+        periodeFom = LocalDate.parse(packet["Godkjenning.periodeFom"].asText()),
+        periodeTom = LocalDate.parse(packet["Godkjenning.periodeTom"].asText()),
+        skjæringstidspunkt = LocalDate.parse(packet["Godkjenning.skjæringstidspunkt"].asText()),
+        vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText()),
+        utbetalingId = UUID.fromString(packet["utbetalingId"].asText()),
+        periodetype = Periodetype.valueOf(packet["Godkjenning.periodetype"].asText()),
+        førstegangsbehandling = packet["Godkjenning.førstegangsbehandling"].asBoolean(),
+        utbetalingtype = Utbetalingtype.valueOf(packet["Godkjenning.utbetalingtype"].asText()),
+        inntektskilde = Inntektskilde.valueOf(packet["Godkjenning.inntektskilde"].asText()),
+        orgnummereMedRelevanteArbeidsforhold = packet["Godkjenning.orgnummereMedRelevanteArbeidsforhold"]
+            .takeUnless(JsonNode::isMissingOrNull)
+            ?.map { it.asText() } ?: emptyList(),
+        kanAvvises = packet["Godkjenning.kanAvvises"].asBoolean(),
+        json = packet.toJson()
+    )
+
+    internal constructor(jsonNode: JsonNode): this(
+        id = UUID.fromString(jsonNode.path("@id").asText()),
+        fødselsnummer = jsonNode.path("fødselsnummer").asText(),
+        aktørId = jsonNode.path("aktørId").asText(),
+        organisasjonsnummer = jsonNode.path("organisasjonsnummer").asText(),
+        periodeFom = LocalDate.parse(jsonNode.path("Godkjenning").path("periodeFom").asText()),
+        periodeTom = LocalDate.parse(jsonNode.path("Godkjenning").path("periodeTom").asText()),
+        vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText()),
+        utbetalingId = UUID.fromString(jsonNode.path("utbetalingId").asText()),
+        skjæringstidspunkt = LocalDate.parse(jsonNode.path("Godkjenning").path("skjæringstidspunkt").asText()),
+        periodetype = Periodetype.valueOf(jsonNode.path("Godkjenning").path("periodetype").asText()),
+        førstegangsbehandling = jsonNode.path("Godkjenning").path("førstegangsbehandling").asBoolean(),
+        utbetalingtype = Utbetalingtype.valueOf(jsonNode.path("Godkjenning").path("utbetalingtype").asText()),
+        inntektskilde = Inntektskilde.valueOf(jsonNode.path("Godkjenning").path("inntektskilde").asText()),
+        orgnummereMedRelevanteArbeidsforhold = jsonNode.path("Godkjenning")
+            .path("orgnummereMedRelevanteArbeidsforhold")
+            .takeUnless(JsonNode::isMissingOrNull)?.map { it.asText() } ?: emptyList(),
+        kanAvvises = jsonNode.path("Godkjenning").path("kanAvvises").asBoolean(),
+        json = jsonNode.toString(),
+    )
 }
 
 internal class GodkjenningsbehovCommand(
