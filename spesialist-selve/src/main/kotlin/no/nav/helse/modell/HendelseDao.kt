@@ -8,8 +8,8 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
-import no.nav.helse.mediator.meldinger.Personhendelse
-import no.nav.helse.mediator.meldinger.Vedtaksperiodehendelse
+import no.nav.helse.mediator.meldinger.Personmelding
+import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.HendelseDao.Hendelsetype.ADRESSEBESKYTTELSE_ENDRET
 import no.nav.helse.modell.HendelseDao.Hendelsetype.ENDRET_EGEN_ANSATT_STATUS
 import no.nav.helse.modell.HendelseDao.Hendelsetype.GODKJENNING
@@ -53,12 +53,12 @@ import no.nav.helse.rapids_rivers.asLocalDate
 import org.intellij.lang.annotations.Language
 
 internal class HendelseDao(private val dataSource: DataSource) {
-    internal fun opprett(hendelse: Personhendelse) {
+    internal fun opprett(hendelse: Personmelding) {
         sessionOf(dataSource).use { session ->
             session.transaction { transactionalSession ->
                 transactionalSession.run {
                     opprettHendelse(hendelse)
-                    if (hendelse is Vedtaksperiodehendelse)
+                    if (hendelse is Vedtaksperiodemelding)
                         opprettKobling(hendelse.vedtaksperiodeId(), hendelse.id)
                 }
             }
@@ -171,7 +171,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
         })
     }
 
-    private fun TransactionalSession.opprettHendelse(hendelse: Personhendelse) {
+    private fun TransactionalSession.opprettHendelse(hendelse: Personmelding) {
         @Language("PostgreSQL")
         val hendelseStatement = """
             INSERT INTO hendelse(id, fodselsnummer, data, type)
@@ -213,7 +213,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
         hendelsetype: Hendelsetype,
         json: String,
         hendelsefabrikk: Hendelsefabrikk,
-    ): Personhendelse =
+    ): Personmelding =
         when (hendelsetype) {
             ADRESSEBESKYTTELSE_ENDRET -> hendelsefabrikk.adressebeskyttelseEndret(json)
             // VEDTAKSPERIODE_FORKASTET trengs pt. pga. KommandohendelseDaoTest.`lagrer og finner hendelser`
@@ -225,7 +225,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
                     "$hendelsetype, men koden som trengs mangler!")
         }
 
-    private fun tilHendelsetype(hendelse: Personhendelse) = when (hendelse) {
+    private fun tilHendelsetype(hendelse: Personmelding) = when (hendelse) {
         is AdressebeskyttelseEndret -> ADRESSEBESKYTTELSE_ENDRET
         is VedtaksperiodeEndret -> VEDTAKSPERIODE_ENDRET
         is VedtaksperiodeForkastet -> VEDTAKSPERIODE_FORKASTET

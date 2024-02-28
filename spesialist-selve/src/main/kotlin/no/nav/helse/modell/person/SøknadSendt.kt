@@ -1,7 +1,7 @@
 package no.nav.helse.modell.person
 
 import java.util.UUID
-import no.nav.helse.mediator.meldinger.Personhendelse
+import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
@@ -14,7 +14,7 @@ internal class SøknadSendt(
     val aktørId: String,
     val organisasjonsnummer: String,
     private val json: String,
-) : Personhendelse {
+) : Personmelding {
     override fun fødselsnummer() = fødselsnummer
     override fun toJson() = json
 }

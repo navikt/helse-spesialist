@@ -1,7 +1,7 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import java.util.UUID
-import no.nav.helse.mediator.meldinger.Vedtaksperiodehendelse
+import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.SnapshotDao
@@ -18,7 +18,7 @@ internal class VedtaksperiodeForkastet(
     private val vedtaksperiodeId: UUID,
     private val fødselsnummer: String,
     private val json: String
-) : Vedtaksperiodehendelse {
+) : Vedtaksperiodemelding {
     override fun fødselsnummer() = fødselsnummer
     override fun vedtaksperiodeId() = vedtaksperiodeId
     override fun toJson() = json

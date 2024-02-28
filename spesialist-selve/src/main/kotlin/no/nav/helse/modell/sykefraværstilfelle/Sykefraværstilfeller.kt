@@ -1,7 +1,7 @@
 package no.nav.helse.modell.sykefraværstilfelle
 
 import java.util.UUID
-import no.nav.helse.mediator.meldinger.Personhendelse
+import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOppdatering
 
 internal class Sykefraværstilfeller(
@@ -10,7 +10,7 @@ internal class Sykefraværstilfeller(
     val aktørId: String,
     val vedtaksperiodeOppdateringer: List<VedtaksperiodeOppdatering>,
     private val json: String,
-) : Personhendelse {
+) : Personmelding {
     override fun fødselsnummer() = fødselsnummer
     override fun toJson() = json
 }

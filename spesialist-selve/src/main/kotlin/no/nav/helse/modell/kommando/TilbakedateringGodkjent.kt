@@ -2,7 +2,7 @@ package no.nav.helse.modell.kommando
 
 import java.util.UUID
 import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.mediator.meldinger.Personhendelse
+import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.automatisering.Automatisering
@@ -17,7 +17,7 @@ internal class TilbakedateringGodkjent(
     override val id: UUID,
     private val fødselsnummer: String,
     private val json: String
-) : Personhendelse {
+) : Personmelding {
     override fun fødselsnummer() = fødselsnummer
     override fun toJson(): String = json
 }

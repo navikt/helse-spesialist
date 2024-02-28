@@ -2,15 +2,15 @@ package no.nav.helse.mediator.meldinger
 
 import java.util.UUID
 
-internal interface Hendelse {
+internal interface Melding {
     val id: UUID
     fun toJson(): String
 }
 
-internal interface Personhendelse: Hendelse {
+internal interface Personmelding: Melding {
     fun fødselsnummer(): String
 }
 
-internal interface Vedtaksperiodehendelse: Personhendelse {
+internal interface Vedtaksperiodemelding: Personmelding {
     fun vedtaksperiodeId(): UUID
 }

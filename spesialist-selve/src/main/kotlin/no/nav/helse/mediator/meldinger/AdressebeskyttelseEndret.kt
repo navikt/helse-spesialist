@@ -13,7 +13,7 @@ internal class AdressebeskyttelseEndret(
     override val id: UUID,
     private val fødselsnummer: String,
     private val json: String
-): Personhendelse {
+): Personmelding {
     override fun fødselsnummer(): String = fødselsnummer
 
     override fun toJson(): String = json

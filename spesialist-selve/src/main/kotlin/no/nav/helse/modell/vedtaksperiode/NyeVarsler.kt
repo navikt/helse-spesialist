@@ -2,7 +2,7 @@ package no.nav.helse.modell.vedtaksperiode
 
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.mediator.meldinger.Personhendelse
+import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.varsel.Varsel
@@ -15,7 +15,7 @@ internal class NyeVarsler(
     private val fødselsnummer: String,
     internal val varsler: List<Varsel>,
     private val json: String,
-) : Personhendelse {
+) : Personmelding {
 
     override fun fødselsnummer(): String = fødselsnummer
     override fun toJson(): String = json

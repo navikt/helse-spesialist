@@ -7,7 +7,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
-import no.nav.helse.mediator.meldinger.Vedtaksperiodehendelse
+import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -122,7 +122,7 @@ internal class KommandohendelseDaoTest : DatabaseIntegrationTest() {
         assertEquals(VEDTAKSPERIODE, finnKobling())
 
         assertEquals(FNR, actual.fødselsnummer())
-        check(actual is Vedtaksperiodehendelse)
+        check(actual is Vedtaksperiodemelding)
         assertEquals(VEDTAKSPERIODE, actual.vedtaksperiodeId())
     }
 

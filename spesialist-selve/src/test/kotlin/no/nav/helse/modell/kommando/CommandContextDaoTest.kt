@@ -4,7 +4,7 @@ import DatabaseIntegrationTest
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.mediator.meldinger.Hendelse
+import no.nav.helse.mediator.meldinger.Melding
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
@@ -14,8 +14,8 @@ internal class CommandContextDaoTest : DatabaseIntegrationTest() {
 
     private val VEDTAKSPERIODE_ID1 = UUID.randomUUID()
     private val VEDTAKSPERIODE_ID2 = UUID.randomUUID()
-    private lateinit var HENDELSE1: TestHendelse
-    private lateinit var HENDELSE2: TestHendelse
+    private lateinit var HENDELSE1: TestMelding
+    private lateinit var HENDELSE2: TestMelding
 
     @Test
     fun `lagrer context i db`() {
@@ -65,20 +65,20 @@ internal class CommandContextDaoTest : DatabaseIntegrationTest() {
         assertContextRad(false, contextId)
     }
 
-    private fun ny(hendelse: Hendelse = HENDELSE1) = UUID.randomUUID().also { uuid ->
-        CommandContext(uuid).opprett(commandContextDao, hendelse.id)
+    private fun ny(melding: Melding = HENDELSE1) = UUID.randomUUID().also { uuid ->
+        CommandContext(uuid).opprett(commandContextDao, melding.id)
     }
 
-    private fun ferdig(hendelse: Hendelse = HENDELSE1) = ny(hendelse).also { uuid ->
-        commandContextDao.ferdig(hendelse.id, uuid)
+    private fun ferdig(melding: Melding = HENDELSE1) = ny(melding).also { uuid ->
+        commandContextDao.ferdig(melding.id, uuid)
     }
 
-    private fun suspendert(hendelse: Hendelse = HENDELSE1) = ny(hendelse).also { uuid ->
-        commandContextDao.suspendert(hendelse.id, uuid, UUID.randomUUID(), listOf())
+    private fun suspendert(melding: Melding = HENDELSE1) = ny(melding).also { uuid ->
+        commandContextDao.suspendert(melding.id, uuid, UUID.randomUUID(), listOf())
     }
 
-    private fun feil(hendelse: Hendelse = HENDELSE1) = ny(hendelse).also { uuid ->
-        commandContextDao.feil(hendelse.id, uuid)
+    private fun feil(melding: Melding = HENDELSE1) = ny(melding).also { uuid ->
+        commandContextDao.feil(melding.id, uuid)
     }
 
     private fun avbryt(contextId: UUID, vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID1) {

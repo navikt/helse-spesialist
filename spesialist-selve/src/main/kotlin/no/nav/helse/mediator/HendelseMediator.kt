@@ -20,7 +20,7 @@ import no.nav.helse.mediator.meldinger.MidnattRiver
 import no.nav.helse.mediator.meldinger.NyeVarslerRiver
 import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshotRiver
 import no.nav.helse.mediator.meldinger.OverstyringIgangsattRiver
-import no.nav.helse.mediator.meldinger.Personhendelse
+import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.meldinger.SykefraværstilfellerRiver
 import no.nav.helse.mediator.meldinger.SøknadSendtRiver
 import no.nav.helse.mediator.meldinger.TilbakedatertRiver
@@ -585,23 +585,23 @@ internal class HendelseMediator(
         sikkerLogg.error("alvorlig feil: ${err.message}\n\t$message", err, err.printStackTrace())
     }
 
-    private fun nyContext(hendelse: Personhendelse, contextId: UUID) = CommandContext(contextId).apply {
+    private fun nyContext(hendelse: Personmelding, contextId: UUID) = CommandContext(contextId).apply {
         hendelseDao.opprett(hendelse)
         opprett(commandContextDao, hendelse.id)
     }
 
-    private fun håndter(fødselsnummer: String, hendelse: Personhendelse, messageContext: MessageContext) {
+    private fun håndter(fødselsnummer: String, hendelse: Personmelding, messageContext: MessageContext) {
         if (personDao.findPersonByFødselsnummer(fødselsnummer) == null) return logg.info("ignorerer hendelseId=${hendelse.id} fordi vi ikke kjenner til personen")
         håndter(hendelse, messageContext)
     }
 
-    private fun håndter(hendelse: Personhendelse, messageContext: MessageContext) {
+    private fun håndter(hendelse: Personmelding, messageContext: MessageContext) {
         val contextId = UUID.randomUUID()
         logg.info("oppretter ny kommandokontekst med context_id=$contextId for hendelse_id=${hendelse.id} og type=${hendelse::class.simpleName}")
         håndter(hendelse, nyContext(hendelse, contextId), messageContext)
     }
 
-    private fun håndter(hendelse: Personhendelse, commandContext: CommandContext, messageContext: MessageContext) {
+    private fun håndter(hendelse: Personmelding, commandContext: CommandContext, messageContext: MessageContext) {
         val contextId = commandContext.id()
         val hendelsenavn = hendelse::class.simpleName ?: "ukjent hendelse"
         try {
@@ -673,7 +673,7 @@ internal class HendelseMediator(
 
     private class Løsninger(
         private val messageContext: MessageContext,
-        private val hendelse: Personhendelse,
+        private val hendelse: Personmelding,
         private val contextId: UUID,
         private val commandContext: CommandContext,
     ) {

@@ -22,7 +22,7 @@ import no.nav.helse.db.EgenskapForDatabase.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.db.EgenskapForDatabase.UTLAND
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.kommando.TestHendelse
+import no.nav.helse.modell.kommando.TestMelding
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -43,7 +43,7 @@ import org.junit.jupiter.api.parallel.Isolated
 @Execution(ExecutionMode.SAME_THREAD)
 class OppgaveDaoTest : DatabaseIntegrationTest() {
     private val CONTEXT_ID = UUID.randomUUID()
-    private val TESTHENDELSE = TestHendelse(HENDELSE_ID, UUID.randomUUID(), FNR)
+    private val TESTHENDELSE = TestMelding(HENDELSE_ID, UUID.randomUUID(), FNR)
     private val OPPGAVETYPE = "SØKNAD"
 
     @BeforeEach

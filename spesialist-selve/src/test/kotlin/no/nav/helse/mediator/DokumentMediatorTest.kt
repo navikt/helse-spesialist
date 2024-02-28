@@ -8,7 +8,7 @@ import io.mockk.verify
 import java.util.UUID
 import no.nav.helse.mediator.dokument.DokumentMediator
 import no.nav.helse.modell.dokument.DokumentDao
-import no.nav.helse.modell.kommando.TestHendelse
+import no.nav.helse.modell.kommando.TestMelding
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -20,7 +20,7 @@ internal class DokumentMediatorTest {
         private const val FNR = "12345678911"
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
         private val HENDELSE_ID = UUID.randomUUID()
-        private val TESTHENDELSE = TestHendelse(HENDELSE_ID, VEDTAKSPERIODE_ID, FNR)
+        private val TESTHENDELSE = TestMelding(HENDELSE_ID, VEDTAKSPERIODE_ID, FNR)
         private val DOKUMENTID = UUID.randomUUID()
         private const val DOKUMENTTYPE = "SØKNAD"
         private const val RETRIES = 2

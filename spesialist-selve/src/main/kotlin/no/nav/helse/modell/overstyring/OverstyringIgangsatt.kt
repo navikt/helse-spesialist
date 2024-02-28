@@ -1,7 +1,7 @@
 package no.nav.helse.modell.overstyring
 
 import java.util.UUID
-import no.nav.helse.mediator.meldinger.Personhendelse
+import no.nav.helse.mediator.meldinger.Personmelding
 
 internal class OverstyringIgangsatt(
     override val id: UUID,
@@ -9,7 +9,7 @@ internal class OverstyringIgangsatt(
     val kilde: UUID,
     val berørteVedtaksperiodeIder: List<UUID>,
     private val json: String,
-) : Personhendelse {
+) : Personmelding {
 
     override fun fødselsnummer() = fødselsnummer
     override fun toJson() = json

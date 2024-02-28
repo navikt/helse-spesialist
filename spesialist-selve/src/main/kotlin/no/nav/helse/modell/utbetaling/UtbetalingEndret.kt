@@ -3,7 +3,7 @@ package no.nav.helse.modell.utbetaling
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.db.ReservasjonDao
-import no.nav.helse.mediator.meldinger.Personhendelse
+import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.kommando.Command
@@ -30,7 +30,7 @@ internal class UtbetalingEndret(
     val arbeidsgiverOppdrag: LagreOppdragCommand.Oppdrag,
     val personOppdrag: LagreOppdragCommand.Oppdrag,
     private val json: String
-) : Personhendelse {
+) : Personmelding {
 
     override fun fødselsnummer(): String = fødselsnummer
     override fun toJson(): String = json

@@ -2,7 +2,7 @@ package no.nav.helse.modell.gosysoppgaver
 
 import java.util.UUID
 import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.mediator.meldinger.Personhendelse
+import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.automatisering.Automatisering
@@ -19,7 +19,7 @@ internal class GosysOppgaveEndret(
     private val fødselsnummer: String,
     val aktørId: String,
     private val json: String,
-) : Personhendelse {
+) : Personmelding {
 
     override fun fødselsnummer() = fødselsnummer
     override fun toJson(): String = json

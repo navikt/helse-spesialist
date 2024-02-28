@@ -2,7 +2,7 @@ package no.nav.helse.modell.vedtaksperiode.vedtak
 
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.mediator.meldinger.Personhendelse
+import no.nav.helse.mediator.meldinger.Personmelding
 
 /**
  * Behandler input til godkjenningsbehov fra saksbehandler som har blitt lagt på rapid-en av API-biten av spesialist.
@@ -22,7 +22,7 @@ internal class Saksbehandlerløsning(
     val saksbehandleroverstyringer: List<UUID>,
     val oppgaveId: Long,
     val godkjenningsbehovhendelseId: UUID,
-) : Personhendelse {
+) : Personmelding {
     override fun fødselsnummer() = fødselsnummer
     override fun toJson() = json
 }
