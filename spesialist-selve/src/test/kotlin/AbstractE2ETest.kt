@@ -881,9 +881,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     ) {
         val alleArbeidsforhold = sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
-            val query =
-                "SELECT a.orgnummer FROM arbeidsgiver a INNER JOIN vedtak v on a.id = v.arbeidsgiver_ref INNER JOIN person p on p.id = v.person_ref WHERE p.fodselsnummer = ?"
-            session.run(queryOf(query, godkjenningsbehovTestdata.fødselsnummer.toLong()).map { it.string("orgnummer") }.asList)
+            val query = "SELECT a.orgnummer FROM arbeidsgiver a"
+            session.run(queryOf(query).map { it.string("orgnummer") }.asList)
         }
         håndterGodkjenningsbehovUtenValidering(
             arbeidsgiverbeløp = arbeidsgiverbeløp,
