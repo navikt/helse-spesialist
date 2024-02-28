@@ -23,6 +23,6 @@ class AdressebeskyttelseEndretRiverTest {
     @Test
     fun `leser adressebeskyttelse endret event`() {
         testRapid.sendTestMessage(Testmeldingfabrikk.lagAdressebeskyttelseEndret(AKTØR, FNR, HENDELSE_ID))
-        verify(exactly = 1) { mediator.adressebeskyttelseEndret(any(), HENDELSE_ID, FNR, any()) }
+        verify(exactly = 1) { mediator.håndter(any<AdressebeskyttelseEndret>(), any()) }
     }
 }

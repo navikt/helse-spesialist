@@ -3,6 +3,7 @@ package no.nav.helse.modell.person
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -30,11 +31,9 @@ internal class AdressebeskyttelseEndretRiver(
             "Mottok adressebeskyttelse_endret med {}",
             StructuredArguments.keyValue("hendelseId", hendelseId)
         )
-        mediator.adressebeskyttelseEndret(
-            packet,
-            hendelseId,
-            packet["fødselsnummer"].asText(),
-            context
+        mediator.håndter(
+            hendelse = AdressebeskyttelseEndret(hendelseId, packet["fødselsnummer"].asText(), packet.toJson()),
+            messageContext = context
         )
     }
 }

@@ -7,6 +7,7 @@ import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.mediator.Hendelsefabrikk
+import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
@@ -213,17 +214,20 @@ internal class HendelseDao(private val dataSource: DataSource) {
         hendelsetype: Hendelsetype,
         json: String,
         hendelsefabrikk: Hendelsefabrikk,
-    ): Personmelding =
-        when (hendelsetype) {
-            ADRESSEBESKYTTELSE_ENDRET -> hendelsefabrikk.adressebeskyttelseEndret(json)
+    ): Personmelding {
+        val jsonNode = objectMapper.readTree(json)
+        return when (hendelsetype) {
+            ADRESSEBESKYTTELSE_ENDRET -> AdressebeskyttelseEndret(jsonNode["@id"].asUUID(), jsonNode["fødselsnummer"].asText(), json)
             // VEDTAKSPERIODE_FORKASTET trengs pt. pga. KommandohendelseDaoTest.`lagrer og finner hendelser`
             VEDTAKSPERIODE_FORKASTET -> hendelsefabrikk.vedtaksperiodeForkastet(json)
             GODKJENNING -> hendelsefabrikk.godkjenning(json)
             OPPDATER_PERSONSNAPSHOT -> hendelsefabrikk.oppdaterPersonsnapshot(json)
             GOSYS_OPPGAVE_ENDRET -> hendelsefabrikk.gosysOppgaveEndret(json)
-            else -> throw IllegalArgumentException("Prøver å gjenoppta en kommando(kjede) etter mottak av hendelsetype " +
-                    "$hendelsetype, men koden som trengs mangler!")
+            else -> throw IllegalArgumentException(
+                "Prøver å gjenoppta en kommando(kjede) etter mottak av hendelsetype " +
+                        "$hendelsetype, men koden som trengs mangler!")
         }
+    }
 
     private fun tilHendelsetype(hendelse: Personmelding) = when (hendelse) {
         is AdressebeskyttelseEndret -> ADRESSEBESKYTTELSE_ENDRET

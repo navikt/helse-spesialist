@@ -244,15 +244,6 @@ internal class HendelseMediator(
         hendelsefabrikk.avviksvurdering(avviksvurdering)
     }
 
-    fun adressebeskyttelseEndret(
-        message: JsonMessage,
-        id: UUID,
-        fødselsnummer: String,
-        context: MessageContext,
-    ) {
-        håndter(hendelsefabrikk.adressebeskyttelseEndret(id, fødselsnummer, message.toJson()), context)
-    }
-
     fun sykefraværstilfeller(
         json: String,
         id: UUID,
@@ -595,7 +586,7 @@ internal class HendelseMediator(
         håndter(hendelse, messageContext)
     }
 
-    private fun håndter(hendelse: Personmelding, messageContext: MessageContext) {
+    internal fun håndter(hendelse: Personmelding, messageContext: MessageContext) {
         val contextId = UUID.randomUUID()
         logg.info("oppretter ny kommandokontekst med context_id=$contextId for hendelse_id=${hendelse.id} og type=${hendelse::class.simpleName}")
         håndter(hendelse, nyContext(hendelse, contextId), messageContext)

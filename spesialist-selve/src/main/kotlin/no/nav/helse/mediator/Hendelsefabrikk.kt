@@ -12,7 +12,6 @@ import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.SykefraværstilfelleDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.builders.GenerasjonBuilder
-import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
@@ -325,22 +324,6 @@ internal class Hendelsefabrikk(
             saksbehandleroverstyringer = saksbehandleroverstyringer,
             oppgaveId = oppgaveId,
             godkjenningsbehovhendelseId = godkjenningsbehovhendelseId
-        )
-    }
-
-    fun adressebeskyttelseEndret(id: UUID, fødselsnummer: String, json: String) =
-        AdressebeskyttelseEndret(
-            id = id,
-            fødselsnummer = fødselsnummer,
-            json = json,
-        )
-
-    fun adressebeskyttelseEndret(json: String): AdressebeskyttelseEndret {
-        val jsonNode = mapper.readTree(json)
-        return adressebeskyttelseEndret(
-            id = UUID.fromString(jsonNode.path("@id").asText()),
-            fødselsnummer = jsonNode.path("fødselsnummer").asText(),
-            json = json,
         )
     }
 
