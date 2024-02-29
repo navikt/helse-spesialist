@@ -1,27 +1,17 @@
 package no.nav.helse.mediator.meldinger
 
-import java.util.UUID
-import net.logstash.logback.argument.StructuredArguments
-import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.mediator.oppgave.OppgaveDao
-import no.nav.helse.modell.egenansatt.EgenAnsattDao
-import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
-import no.nav.helse.rapids_rivers.asLocalDateTime
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 internal class EndretSkjermetinfoRiver(
     rapidsConnection: RapidsConnection,
-    private val personDao: PersonDao,
-    private val egenAnsattDao: EgenAnsattDao,
-    val oppgaveDao: OppgaveDao,
-    val godkjenningMediator: GodkjenningMediator,
     val hendelsemediator: HendelseMediator,
 ) : River.PacketListener {
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
@@ -40,7 +30,6 @@ internal class EndretSkjermetinfoRiver(
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        val id = UUID.fromString(packet["@id"].asText())
         val fødselsnummer = packet["fødselsnummer"].asText()
         try {
             fødselsnummer.toLong()
@@ -49,27 +38,10 @@ internal class EndretSkjermetinfoRiver(
             return
         }
 
-        val logger = { msg: String ->
-            sikkerLogg.info(msg,
-                StructuredArguments.kv("fødselsnummer", fødselsnummer),
-                StructuredArguments.kv("eventId", id)
-            )
-        }
-        if (personDao.findPersonByFødselsnummer(fødselsnummer) == null) {
-            logger("Ignorerer $eventName for {} pga: person fins ikke i databasen, {}")
-            return
-        }
-
-        val erEgenAnsatt = packet["skjermet"].asBoolean()
-        val opprettet = packet["@opprettet"]::asLocalDateTime.invoke()
-
-        logger("Mottok hendelse $eventName og oppdaterer database for {}, {}")
-        egenAnsattDao.lagre(fødselsnummer, erEgenAnsatt, opprettet)
-        logger("Behandler melding om endret egen ansatt-status for {}, {}")
-        hendelsemediator.egenAnsattStatusEndret(packet.toJson(), context)
+        hendelsemediator.håndter(fødselsnummer, EndretEgenAnsattStatus(packet), context)
     }
 
     private companion object {
-        const val eventName = "endret_skjermetinfo"
+        private const val eventName = "endret_skjermetinfo"
     }
 }

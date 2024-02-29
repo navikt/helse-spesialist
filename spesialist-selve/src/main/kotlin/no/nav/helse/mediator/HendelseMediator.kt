@@ -55,7 +55,6 @@ import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.avviksvurdering.AvviksvurderingDto
 import no.nav.helse.modell.dokument.DokumentDao
-import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
@@ -106,7 +105,6 @@ internal class HendelseMediator(
     private val feilendeMeldingerDao: FeilendeMeldingerDao = FeilendeMeldingerDao(dataSource),
     private val godkjenningMediator: GodkjenningMediator,
     private val hendelsefabrikk: Hendelsefabrikk,
-    private val egenAnsattDao: EgenAnsattDao = EgenAnsattDao(dataSource),
     private val dokumentDao: DokumentDao = DokumentDao(dataSource),
     private val avviksvurderingDao: AvviksvurderingDao,
     private val utbetalingDao: UtbetalingDao = UtbetalingDao(dataSource),
@@ -158,7 +156,7 @@ internal class HendelseMediator(
             VedtaksperiodeOpprettetRiver(it, this)
             GosysOppgaveEndretRiver(it, this)
             TilbakedatertRiver(it, this, oppgaveDao)
-            EndretSkjermetinfoRiver(it, personDao, egenAnsattDao, oppgaveDao, godkjenningMediator, this)
+            EndretSkjermetinfoRiver(it, this)
             DokumentRiver(it, dokumentDao)
             VedtakFattetRiver(it, this)
             NyeVarslerRiver(it, this)
@@ -493,10 +491,6 @@ internal class HendelseMediator(
         } ?: sikkerlogg.info("Ingen åpne oppgaver i Speil for {}", fødselsnummer)
     }
 
-    fun egenAnsattStatusEndret(json: String, context: MessageContext) {
-        håndter(hendelsefabrikk.endretEgenAnsattStatus(json), context)
-    }
-
     fun vedtakFattet(id: UUID, fødselsnummer: String, vedtaksperiodeId: UUID, json: String, context: MessageContext) {
         håndter(hendelsefabrikk.vedtakFattet(id, fødselsnummer, vedtaksperiodeId, json), context)
     }
@@ -571,7 +565,7 @@ internal class HendelseMediator(
         try {
             when (hendelse) {
                 is AdressebeskyttelseEndret -> iverksett(AdressebeskyttelseEndretCommand(hendelse.fødselsnummer(), personDao, oppgaveDao, godkjenningMediator), hendelse.id, commandContext)
-                is EndretEgenAnsattStatus -> iverksett(hendelsefabrikk.endretEgenAnsattStatus(hendelse.fødselsnummer(), hendelse.erEgenAnsatt), hendelse.id, commandContext)
+                is EndretEgenAnsattStatus -> iverksett(hendelsefabrikk.endretEgenAnsattStatus(hendelse.fødselsnummer(), hendelse), hendelse.id, commandContext)
                 is VedtaksperiodeOpprettet -> iverksett(hendelsefabrikk.opprettVedtaksperiode(hendelse.fødselsnummer(), hendelse), hendelse.id, commandContext)
                 is GosysOppgaveEndret -> iverksett(hendelsefabrikk.gosysOppgaveEndret(hendelse.fødselsnummer(), hendelse), hendelse.id, commandContext)
                 is NyeVarsler -> iverksett(hendelsefabrikk.nyeVarsler(hendelse.fødselsnummer(), hendelse), hendelse.id, commandContext)

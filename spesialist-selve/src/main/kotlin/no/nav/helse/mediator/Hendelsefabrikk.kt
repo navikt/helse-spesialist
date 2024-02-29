@@ -352,21 +352,12 @@ internal class Hendelsefabrikk(
         }
     )
 
-    fun endretEgenAnsattStatus(json: String): EndretEgenAnsattStatus {
-        val erEgenAnsatt = mapper.readTree(json)["skjermet"].asBoolean()
-        val jsonNode = mapper.readTree(json)
-        return EndretEgenAnsattStatus(
-            id = UUID.fromString(jsonNode["@id"].asText()),
-            fødselsnummer = jsonNode["fødselsnummer"].asText(),
-            erEgenAnsatt = erEgenAnsatt,
-            json = json,
-        )
-    }
-
-    fun endretEgenAnsattStatus(fødselsnummer: String, erEgenAnsatt: Boolean): EndretEgenAnsattStatusCommand {
+    fun endretEgenAnsattStatus(fødselsnummer: String, hendelse: EndretEgenAnsattStatus): EndretEgenAnsattStatusCommand {
         return EndretEgenAnsattStatusCommand(
             fødselsnummer = fødselsnummer,
-            erEgenAnsatt = erEgenAnsatt,
+            erEgenAnsatt = hendelse.erEgenAnsatt,
+            opprettet = hendelse.opprettet,
+            egenAnsattDao = egenAnsattDao,
             oppgaveMediator = oppgaveMediator
         )
     }
