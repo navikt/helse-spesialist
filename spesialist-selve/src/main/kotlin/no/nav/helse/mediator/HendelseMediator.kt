@@ -344,13 +344,6 @@ internal class HendelseMediator(
         håndter(hendelsefabrikk.søknadSendt(id, fødselsnummer, aktørId, organisasjonsnummer, message.toJson()), context)
     }
 
-    fun utbetalingAnnullert(
-        message: JsonMessage,
-        context: MessageContext,
-    ) {
-        håndter(hendelsefabrikk.utbetalingAnnullert(message.toJson()), context)
-    }
-
     fun utbetalingEndret(
         fødselsnummer: String,
         organisasjonsnummer: String,

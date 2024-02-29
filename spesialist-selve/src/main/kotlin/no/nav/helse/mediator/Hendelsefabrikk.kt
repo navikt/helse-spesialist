@@ -3,7 +3,6 @@ package no.nav.helse.mediator
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 import no.nav.helse.db.AvviksvurderingDao
@@ -205,18 +204,6 @@ internal class Hendelsefabrikk(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             vedtaksperiodeOppdateringer = vedtaksperiodeOppdateringer,
-            json = json,
-        )
-    }
-
-    fun utbetalingAnnullert(json: String): UtbetalingAnnullert {
-        val jsonNode = mapper.readTree(json)
-        return UtbetalingAnnullert(
-            id = UUID.fromString(jsonNode["@id"].asText()),
-            fødselsnummer = jsonNode["fødselsnummer"].asText(),
-            utbetalingId = UUID.fromString(jsonNode["utbetalingId"].asText()),
-            annullertTidspunkt = LocalDateTime.parse(jsonNode["tidspunkt"].asText()),
-            saksbehandlerEpost = jsonNode["epost"].asText(),
             json = json,
         )
     }

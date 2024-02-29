@@ -3,6 +3,7 @@ package no.nav.helse.mediator.meldinger
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.modell.utbetaling.UtbetalingAnnullert
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -58,6 +59,6 @@ internal class UtbetalingAnnullertRiver(
             "Mottok utbetaling_annullert ${logInfo.joinToString(transform = {"{}"})}",
             *logInfo.toTypedArray()
         )
-        mediator.utbetalingAnnullert(packet, context)
+        mediator.håndter(UtbetalingAnnullert(packet), context)
     }
 }
