@@ -228,7 +228,7 @@ class Oppgave private constructor(
         }
 
         fun tildel(oppgave: Oppgave, saksbehandler: Saksbehandler) {
-            logg.error(
+            logg.warn(
                 "Forventer ikke forsøk på tildeling i {} for oppgave med {} av $saksbehandler",
                 kv("tilstand", this),
                 kv("oppgaveId", oppgave.id)
