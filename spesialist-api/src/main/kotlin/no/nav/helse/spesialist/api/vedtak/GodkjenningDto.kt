@@ -14,11 +14,4 @@ data class GodkjenningDto(
     init {
         if (!godkjent) requireNotNull(årsak)
     }
-
-    fun åpenLoggString() = buildString {
-        append("Godkjenning(")
-        append("oppgavereferanse=$oppgavereferanse,")
-        append("godkjent=$godkjent")
-        append(")")
-    }
 }
