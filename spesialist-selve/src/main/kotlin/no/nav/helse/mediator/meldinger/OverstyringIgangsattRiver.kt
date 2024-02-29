@@ -1,8 +1,9 @@
 package no.nav.helse.mediator.meldinger
 
 import java.util.UUID
-import net.logstash.logback.argument.StructuredArguments
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.modell.overstyring.OverstyringIgangsatt
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -38,33 +39,22 @@ internal class OverstyringIgangsattRiver(
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        val id = UUID.fromString(packet["@id"].asText())
-        val kilde = UUID.fromString(packet["kilde"].asText())
 
-        val berørtePerioderJson = packet["berørtePerioder"]
-        if (berørtePerioderJson.isEmpty) {
+        if (packet["berørtePerioder"].isEmpty) {
             sikkerLogg.info(
                 "Overstyring med {} har ingen berørte perioder.",
-                StructuredArguments.keyValue("kilde", kilde)
+                keyValue("kilde", UUID.fromString(packet["kilde"].asText()))
             )
             return
         }
-        val berørteVedtaksperiodeIder = berørtePerioderJson
-            .map { UUID.fromString(it["vedtaksperiodeId"].asText()) }
 
         log.info(
             "Mottok overstyring igangsatt {}, {}, {}",
-            StructuredArguments.keyValue("berørteVedtaksperiodeIder", berørteVedtaksperiodeIder),
-            StructuredArguments.keyValue("eventId", id),
-            StructuredArguments.keyValue("kilde", kilde),
+            keyValue("berørteVedtaksperiodeIder", packet["berørtePerioder"]
+                .map { UUID.fromString(it["vedtaksperiodeId"].asText()) }),
+            keyValue("eventId", UUID.fromString(packet["@id"].asText())),
+            keyValue("kilde", UUID.fromString(packet["kilde"].asText())),
         )
-        mediator.overstyringIgangsatt(
-            packet,
-            id,
-            packet["fødselsnummer"].asText(),
-            kilde,
-            berørteVedtaksperiodeIder,
-            context
-        )
+        mediator.håndter(OverstyringIgangsatt(packet), context)
     }
 }

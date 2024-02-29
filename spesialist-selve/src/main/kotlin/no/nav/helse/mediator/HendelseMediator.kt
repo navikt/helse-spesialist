@@ -345,25 +345,6 @@ internal class HendelseMediator(
         håndter(hendelsefabrikk.søknadSendt(id, fødselsnummer, aktørId, organisasjonsnummer, message.toJson()), context)
     }
 
-    fun overstyringIgangsatt(
-        message: JsonMessage,
-        id: UUID,
-        fødselsnummer: String,
-        kilde: UUID,
-        berørteVedtaksperiodeIder: List<UUID>,
-        context: MessageContext,
-    ) {
-        håndter(
-            hendelsefabrikk.overstyringIgangsatt(
-                id,
-                fødselsnummer,
-                kilde,
-                berørteVedtaksperiodeIder,
-                message.toJson()
-            ), context
-        )
-    }
-
     fun saksbehandlerløsning(
         message: JsonMessage,
         id: UUID,

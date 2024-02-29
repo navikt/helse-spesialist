@@ -1,15 +1,15 @@
 package no.nav.helse.modell
 
 import DatabaseIntegrationTest
+import io.mockk.every
 import io.mockk.mockk
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
+import no.nav.helse.modell.overstyring.OverstyringIgangsatt
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
-import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -17,75 +17,47 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
 
-internal class KommandohendelseDaoTest : DatabaseIntegrationTest() {
-    private val graphQLClient = mockk<SnapshotClient>(relaxed = true)
+internal class HendelseDaoTest : DatabaseIntegrationTest() {
     private val vedtaksperiodeForkastet: VedtaksperiodeForkastet = VedtaksperiodeForkastet(
         objectMapper.readTree(Testmeldingfabrikk.lagVedtaksperiodeForkastet(AKTØR, FNR, VEDTAKSPERIODE, id = HENDELSE_ID))
     )
 
-    private val hendelsefabrikk: Hendelsefabrikk = Hendelsefabrikk(
-        dataSource = dataSource,
-        snapshotClient = graphQLClient,
-        oppgaveMediator = { mockk() },
-        godkjenningMediator = mockk(relaxed = true),
-        automatisering = mockk(relaxed = true),
-    )
+    private fun mockOverstyringIgangsatt(fødselsnummer: String, berørtePeriodeIder: List<UUID>, årsak: String): OverstyringIgangsatt {
+        return mockk<OverstyringIgangsatt>(relaxed = true) {
+            every { id } returns UUID.randomUUID()
+            every { fødselsnummer() } returns fødselsnummer
+            every { berørteVedtaksperiodeIder } returns berørtePeriodeIder
+            every { toJson() } returns Testmeldingfabrikk.lagOverstyringIgangsatt(
+                fødselsnummer = fødselsnummer,
+                berørtePerioder = berørtePeriodeIder.map {
+                    mapOf(
+                        "vedtaksperiodeId" to "$it",
+                        "periodeFom" to "2022-01-01",
+                        "orgnummer" to "orgnr",
+                    )
+                },
+                årsak = årsak,
+            )
+        }
+    }
 
     @Test
     fun `finn siste igangsatte overstyring om den er korrigert søknad`() {
-        val overstyringIgangsatt = hendelsefabrikk.overstyringIgangsatt(
-            Testmeldingfabrikk.lagOverstyringIgangsatt(
-                FNR, berørtePerioder = listOf(
-                    mapOf(
-                        "vedtaksperiodeId" to "$VEDTAKSPERIODE",
-                        "periodeFom" to "2022-01-01",
-                        "orgnummer" to "orgnr",
-                    )
-                )
-            )
-        )
-        val overstyringIgangsattForAnnenVedtaksperiode = hendelsefabrikk.overstyringIgangsatt(
-            Testmeldingfabrikk.lagOverstyringIgangsatt(
-                FNR, berørtePerioder = listOf(
-                    mapOf(
-                        "vedtaksperiodeId" to "$VEDTAKSPERIODE",
-                        "periodeFom" to "2022-01-01",
-                        "orgnummer" to "orgnr",
-                    )
-                ), årsak = "SYKDOMSTIDSLINJE"
-            )
-        )
+        val fødselsnummer = FNR
+        val overstyringIgangsatt = mockOverstyringIgangsatt(fødselsnummer, listOf(VEDTAKSPERIODE), "KORRIGERT_SØKNAD")
+
+        val overstyringIgangsattForAnnenVedtaksperiode = mockOverstyringIgangsatt(fødselsnummer, listOf(VEDTAKSPERIODE), "SYKDOMSTIDSLINJE")
+
         hendelseDao.opprett(overstyringIgangsatt)
         hendelseDao.opprett(overstyringIgangsattForAnnenVedtaksperiode)
-        assertNull(hendelseDao.sisteOverstyringIgangsattOmKorrigertSøknad(FNR, VEDTAKSPERIODE))
+        assertNull(hendelseDao.sisteOverstyringIgangsattOmKorrigertSøknad(fødselsnummer, VEDTAKSPERIODE))
 
-        hendelseDao.opprett(
-            hendelsefabrikk.overstyringIgangsatt(
-                Testmeldingfabrikk.lagOverstyringIgangsatt(
-                    FNR,
-                    berørtePerioder = listOf(
-                        mapOf(
-                            "vedtaksperiodeId" to "$VEDTAKSPERIODE",
-                            "periodeFom" to "2022-01-01",
-                            "orgnummer" to "orgnr",
-                        )
-                    ),
-                )
-            )
-        )
-        assertNotNull(hendelseDao.sisteOverstyringIgangsattOmKorrigertSøknad(FNR, VEDTAKSPERIODE))
+        hendelseDao.opprett(mockOverstyringIgangsatt(fødselsnummer, listOf(VEDTAKSPERIODE), "KORRIGERT_SØKNAD"))
+        assertNotNull(hendelseDao.sisteOverstyringIgangsattOmKorrigertSøknad(fødselsnummer, VEDTAKSPERIODE))
     }
 
     @Test
     fun `finn antall korrigerte søknader`() {
-        val overstyringIgangsatt = hendelsefabrikk.overstyringIgangsatt(
-            Testmeldingfabrikk.lagOverstyringIgangsatt(FNR)
-        )
-        val overstyringIgangsattForAnnenVedtaksperiode = hendelsefabrikk.overstyringIgangsatt(
-            Testmeldingfabrikk.lagOverstyringIgangsatt(FNR)
-        )
-        hendelseDao.opprett(overstyringIgangsatt)
-        hendelseDao.opprett(overstyringIgangsattForAnnenVedtaksperiode)
         hendelseDao.opprettAutomatiseringKorrigertSøknad(VEDTAKSPERIODE, UUID.randomUUID())
         val actual = hendelseDao.finnAntallAutomatisertKorrigertSøknad(VEDTAKSPERIODE)
         assertEquals(1, actual)
@@ -93,14 +65,6 @@ internal class KommandohendelseDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `finn ut om automatisering av korrigert søknad allerede er håndtert`() {
-        val overstyringIgangsatt = hendelsefabrikk.overstyringIgangsatt(
-            Testmeldingfabrikk.lagOverstyringIgangsatt(FNR, id = HENDELSE_ID)
-        )
-        val overstyringIgangsattForAnnenVedtaksperiode = hendelsefabrikk.overstyringIgangsatt(
-            Testmeldingfabrikk.lagOverstyringIgangsatt(FNR)
-        )
-        hendelseDao.opprett(overstyringIgangsatt)
-        hendelseDao.opprett(overstyringIgangsattForAnnenVedtaksperiode)
         hendelseDao.opprettAutomatiseringKorrigertSøknad(VEDTAKSPERIODE, HENDELSE_ID)
         val håndtert = hendelseDao.erAutomatisertKorrigertSøknadHåndtert(HENDELSE_ID)
         assertTrue(håndtert)

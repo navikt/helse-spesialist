@@ -193,36 +193,6 @@ internal class Hendelsefabrikk(
         )
     }
 
-    fun overstyringIgangsatt(
-        json: String,
-    ): OverstyringIgangsatt {
-        val jsonNode = mapper.readTree(json)
-        return OverstyringIgangsatt(
-            id = UUID.fromString(jsonNode.path("@id").asText()),
-            fødselsnummer = jsonNode.path("fødselsnummer").asText(),
-            kilde = UUID.fromString(jsonNode.path("kilde").asText()),
-            berørteVedtaksperiodeIder = jsonNode.path("berørtePerioder")
-                .map { UUID.fromString(it["vedtaksperiodeId"].asText()) },
-            json = json,
-        )
-    }
-
-    fun overstyringIgangsatt(
-        id: UUID,
-        fødselsnummer: String,
-        kilde: UUID,
-        berørteVedtaksperiodeIder: List<UUID>,
-        json: String,
-    ): OverstyringIgangsatt {
-        return OverstyringIgangsatt(
-            id = id,
-            fødselsnummer = fødselsnummer,
-            kilde = kilde,
-            berørteVedtaksperiodeIder = berørteVedtaksperiodeIder,
-            json = json
-        )
-    }
-
     fun saksbehandlerløsning(
         id: UUID,
         behandlingId: UUID,
