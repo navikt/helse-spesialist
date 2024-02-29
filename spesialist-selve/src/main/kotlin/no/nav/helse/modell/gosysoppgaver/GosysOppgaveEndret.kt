@@ -1,5 +1,6 @@
 package no.nav.helse.modell.gosysoppgaver
 
+import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.meldinger.Personmelding
@@ -13,13 +14,24 @@ import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.oppgave.SjekkAtOppgaveFortsattErÅpenCommand
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
+import no.nav.helse.rapids_rivers.JsonMessage
 
-internal class GosysOppgaveEndret(
+internal class GosysOppgaveEndret private constructor(
     override val id: UUID,
     private val fødselsnummer: String,
-    val aktørId: String,
     private val json: String,
 ) : Personmelding {
+    internal constructor(packet: JsonMessage): this(
+        id = UUID.fromString(packet["@id"].asText()),
+        fødselsnummer = packet["fødselsnummer"].asText(),
+        json = packet.toJson()
+    )
+
+    internal constructor(jsonNode: JsonNode): this(
+        id = UUID.fromString(jsonNode["@id"].asText()),
+        fødselsnummer = jsonNode["fødselsnummer"].asText(),
+        json = jsonNode.toString()
+    )
 
     override fun fødselsnummer() = fødselsnummer
     override fun toJson(): String = json

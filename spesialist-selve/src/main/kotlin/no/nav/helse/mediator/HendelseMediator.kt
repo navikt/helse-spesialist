@@ -116,7 +116,7 @@ internal class HendelseMediator(
 ) : Personhåndterer {
     private companion object {
         private val logg = LoggerFactory.getLogger(HendelseMediator::class.java)
-        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
 
     private val behovMediator = BehovMediator()
@@ -156,7 +156,7 @@ internal class HendelseMediator(
             UtbetalingEndretRiver(it, this)
             VedtaksperiodeReberegnetRiver(it, this)
             VedtaksperiodeOpprettetRiver(it, this)
-            GosysOppgaveEndretRiver(it, this, oppgaveDao, personDao)
+            GosysOppgaveEndretRiver(it, this)
             TilbakedatertRiver(it, this, oppgaveDao)
             EndretSkjermetinfoRiver(it, personDao, egenAnsattDao, oppgaveDao, godkjenningMediator, this)
             DokumentRiver(it, dokumentDao)
@@ -222,7 +222,7 @@ internal class HendelseMediator(
 
     internal fun håndter(sykefraværstilfeller: Sykefraværstilfeller) {
         val generasjoner = hendelsefabrikk.generasjonerFor(sykefraværstilfeller.fødselsnummer())
-        sikkerLogg.info(
+        sikkerlogg.info(
             "oppdaterer sykefraværstilfeller for {}, {}",
             keyValue("aktørId", sykefraværstilfeller.aktørId),
             keyValue("fødselsnummer", sykefraværstilfeller.fødselsnummer())
@@ -272,7 +272,7 @@ internal class HendelseMediator(
     ) {
         if (personDao.findPersonByFødselsnummer(fødselsnummer) == null) {
             logg.info("ignorerer hendelseId=${id} fordi vi kjenner ikke til personen")
-            sikkerLogg.info("ignorerer hendelseId=${id} fordi vi kjenner ikke til personen med fnr=${fødselsnummer}")
+            sikkerlogg.info("ignorerer hendelseId=${id} fordi vi kjenner ikke til personen med fnr=${fødselsnummer}")
             return
         }
         val hendelse = hendelsefabrikk.vedtaksperiodeEndret(
@@ -310,7 +310,7 @@ internal class HendelseMediator(
         )
         if (personDao.findPersonByFødselsnummer(fødselsnummer) == null) {
             logg.error("vedtaksperiodeOpprettet: ignorerer hendelseId=${hendelse.id} fordi vi kjenner ikke til personen")
-            sikkerLogg.error("vedtaksperiodeOpprettet: ignorerer hendelseId=${hendelse.id} fordi vi kjenner ikke til personen med fnr=${fødselsnummer}")
+            sikkerlogg.error("vedtaksperiodeOpprettet: ignorerer hendelseId=${hendelse.id} fordi vi kjenner ikke til personen med fnr=${fødselsnummer}")
             return
         }
         return håndter(hendelse, context)
@@ -341,15 +341,15 @@ internal class HendelseMediator(
         val skjæringstidspunkt = godkjenningsbehov.skjæringstidspunkt
         val id = godkjenningsbehov.id
         if (utbetalingDao.erUtbetalingForkastet(utbetalingId)) {
-            sikkerLogg.info("Ignorerer godkjenningsbehov med id=$id for utbetalingId=$utbetalingId, da utbetalingen er forkastet")
+            sikkerlogg.info("Ignorerer godkjenningsbehov med id=$id for utbetalingId=$utbetalingId, da utbetalingen er forkastet")
             return
         }
         if (oppgaveDao.harGyldigOppgave(utbetalingId) || vedtakDao.erAutomatiskGodkjent(utbetalingId)) {
-            sikkerLogg.info("vedtaksperiodeId=$vedtaksperiodeId med utbetalingId=$utbetalingId har gyldig oppgave eller er automatisk godkjent. Ignorerer godkjenningsbehov med id=$id")
+            sikkerlogg.info("vedtaksperiodeId=$vedtaksperiodeId med utbetalingId=$utbetalingId har gyldig oppgave eller er automatisk godkjent. Ignorerer godkjenningsbehov med id=$id")
             return
         }
         if (generasjonRepository.finnVedtaksperiodeIderFor(godkjenningsbehov.fødselsnummer(), skjæringstidspunkt).isEmpty()) {
-            sikkerLogg.error("""
+            sikkerlogg.error("""
                 vedtaksperiodeId=$vedtaksperiodeId med utbetalingId=$utbetalingId, periodeFom=${godkjenningsbehov.periodeFom}, periodeTom=${godkjenningsbehov.periodeTom} 
                 og skjæringstidspunkt=$skjæringstidspunkt er i et sykefraværstilfelle uten generasjoner lagret. 
                 Ignorerer godkjenningsbehov med id=$id""".trimIndent()
@@ -444,7 +444,7 @@ internal class HendelseMediator(
                 "Fant ikke arbeidsgiver med {}, se sikkerlogg for mer informasjon",
                 keyValue("hendelseId", message["@id"].asText())
             )
-            sikkerLogg.warn(
+            sikkerlogg.warn(
                 "Forstår ikke utbetaling_endret: fant ikke arbeidsgiver med {}, {}, {}, {}. Meldingen er lagret i feilende_meldinger",
                 keyValue("hendelseId", message["@id"].asText()),
                 keyValue("fødselsnummer", fødselsnummer),
@@ -480,8 +480,17 @@ internal class HendelseMediator(
         håndter(hendelsefabrikk.vedtaksperiodeReberegnet(message.toJson()), context)
     }
 
-    fun gosysOppgaveEndret(hendelseId: UUID, fødselsnummer: String, aktørId: String, json: String, context: MessageContext) {
-        håndter(hendelsefabrikk.gosysOppgaveEndret(hendelseId, fødselsnummer, aktørId, json), context)
+    fun gosysOppgaveEndret(fødselsnummer: String, oppgaveEndret: GosysOppgaveEndret, context: MessageContext) {
+        oppgaveDao.finnOppgaveId(fødselsnummer)?.also { oppgaveId ->
+            sikkerlogg.info("Fant en oppgave for {}: {}", fødselsnummer, oppgaveId)
+            val commandData = oppgaveDao.oppgaveDataForAutomatisering(oppgaveId)
+            if (commandData == null) {
+                sikkerlogg.info("Fant ikke commandData for {} og {}", fødselsnummer, oppgaveId)
+                return
+            }
+            sikkerlogg.info("Har oppgave til_godkjenning og commandData for fnr $fødselsnummer og vedtaksperiodeId ${commandData.vedtaksperiodeId}")
+            håndter(oppgaveEndret, context)
+        } ?: sikkerlogg.info("Ingen åpne oppgaver i Speil for {}", fødselsnummer)
     }
 
     fun egenAnsattStatusEndret(json: String, context: MessageContext) {
@@ -537,7 +546,7 @@ internal class HendelseMediator(
 
     private fun errorHandler(err: Exception, message: String) {
         logg.error("alvorlig feil: ${err.message} (se sikkerlogg for melding)", err)
-        sikkerLogg.error("alvorlig feil: ${err.message}\n\t$message", err, err.printStackTrace())
+        sikkerlogg.error("alvorlig feil: ${err.message}\n\t$message", err, err.printStackTrace())
     }
 
     private fun nyContext(hendelse: Personmelding, contextId: UUID) = CommandContext(contextId).apply {
@@ -545,7 +554,7 @@ internal class HendelseMediator(
         opprett(commandContextDao, hendelse.id)
     }
 
-    private fun håndter(fødselsnummer: String, hendelse: Personmelding, messageContext: MessageContext) {
+    internal fun håndter(fødselsnummer: String, hendelse: Personmelding, messageContext: MessageContext) {
         if (personDao.findPersonByFødselsnummer(fødselsnummer) == null) return logg.info("ignorerer hendelseId=${hendelse.id} fordi vi ikke kjenner til personen")
         håndter(hendelse, messageContext)
     }
@@ -640,7 +649,7 @@ internal class HendelseMediator(
 
         fun fortsett(mediator: HendelseMediator, message: String) {
             logg.info("fortsetter utførelse av kommandokontekst pga. behov_id=${hendelse.id} med context_id=$contextId for hendelse_id=${hendelse.id}")
-            sikkerLogg.info(
+            sikkerlogg.info(
                 "fortsetter utførelse av kommandokontekst pga. behov_id=${hendelse.id} med context_id=$contextId for hendelse_id=${hendelse.id}.\n" +
                         "Innkommende melding:\n\t$message"
             )

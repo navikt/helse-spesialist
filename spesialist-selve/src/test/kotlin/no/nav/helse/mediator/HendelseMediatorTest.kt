@@ -1,37 +1,37 @@
 package no.nav.helse.mediator
 
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import java.time.LocalDateTime
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import lagFødselsnummer
 import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.db.AvviksvurderingDao
+import no.nav.helse.mediator.meldinger.GosysOppgaveEndretRiver
 import no.nav.helse.mediator.oppgave.OppgaveDao
-import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.automatisering.Automatisering
+import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
-import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao as OpptegnelseApiDao
 
-internal class KommandohendelseMediatorTest : AbstractDatabaseTest() {
+internal class HendelseMediatorTest : AbstractDatabaseTest() {
 
-    private val snapshotClient = mockk<SnapshotClient>(relaxed = true)
-    private val oppgaveMediator = mockk<OppgaveMediator>()
-    private val automatisering = mockk<Automatisering>()
+    private val fødselsnummer = lagFødselsnummer()
 
     private val testRapid = TestRapid()
 
-    private val oppgaveDao = OppgaveDao(dataSource)
+    private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val vedtakDao = VedtakDao(dataSource)
     private val opptegnelseDao = OpptegnelseApiDao(dataSource)
     private val hendelseDao = HendelseDao(dataSource)
@@ -41,13 +41,7 @@ internal class KommandohendelseMediatorTest : AbstractDatabaseTest() {
     private val godkjenningMediator =
         GodkjenningMediator(vedtakDao, opptegnelseDao, oppgaveDao, utbetalingDao, hendelseDao)
 
-    private val hendelsefabrikk = Hendelsefabrikk(
-        dataSource = dataSource,
-        snapshotClient = snapshotClient,
-        oppgaveMediator = { oppgaveMediator },
-        godkjenningMediator = godkjenningMediator,
-        automatisering = automatisering,
-    )
+    private val hendelsefabrikk = mockk<Hendelsefabrikk>(relaxed = true)
 
     private val hendelseMediator = HendelseMediator(
         dataSource = dataSource,
@@ -55,7 +49,12 @@ internal class KommandohendelseMediatorTest : AbstractDatabaseTest() {
         godkjenningMediator = godkjenningMediator,
         hendelsefabrikk = hendelsefabrikk,
         avviksvurderingDao = avviksvurderingDao,
+        oppgaveDao = oppgaveDao,
     )
+
+    init {
+        GosysOppgaveEndretRiver(testRapid, hendelseMediator)
+    }
 
     @BeforeEach
     internal fun resetTestSetup() {
@@ -69,6 +68,35 @@ internal class KommandohendelseMediatorTest : AbstractDatabaseTest() {
         val varseldefinisjon = Varseldefinisjon(id, "SB_EX_1", "En tittel", null, null, false, LocalDateTime.now())
         hendelseMediator.håndter(varseldefinisjon)
         assertVarseldefinisjon(id)
+    }
+
+    @Test
+    fun `Utfører kommando ved GosysOppgaveEndret`() {
+        val event = mockk<GosysOppgaveEndret>(relaxed = true)
+        every { event.fødselsnummer() } returns fødselsnummer
+        every { event.toJson() } returns "{}"
+        hendelseMediator.gosysOppgaveEndret(fødselsnummer, event, testRapid)
+        verify(exactly = 1) { hendelsefabrikk.gosysOppgaveEndret(fødselsnummer, event) }
+    }
+
+    @Test
+    fun `Returnerer tidlig hvis oppgave ikke er til_godkjenning`() {
+        val event = mockk<GosysOppgaveEndret>(relaxed = true)
+        every { event.fødselsnummer() } returns fødselsnummer
+        every { event.toJson() } returns "{}"
+        every { oppgaveDao.finnOppgaveId(fødselsnummer) } returns null
+        hendelseMediator.gosysOppgaveEndret(fødselsnummer, event, testRapid)
+        verify(exactly = 0) { hendelsefabrikk.gosysOppgaveEndret(any(), any()) }
+    }
+
+    @Test
+    fun `Returnerer tidlig hvis vi ikke har commanddata for oppgave`() {
+        val event = mockk<GosysOppgaveEndret>(relaxed = true)
+        every { event.fødselsnummer() } returns fødselsnummer
+        every { event.toJson() } returns "{}"
+        every { oppgaveDao.oppgaveDataForAutomatisering(any()) } returns null
+        hendelseMediator.gosysOppgaveEndret(fødselsnummer, event, testRapid)
+        verify(exactly = 0) { hendelsefabrikk.gosysOppgaveEndret(any(), any()) }
     }
 
     private fun assertVarseldefinisjon(id: UUID) {
