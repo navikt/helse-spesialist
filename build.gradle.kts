@@ -7,7 +7,7 @@ val logbackSyslog4jVersion = "1.0.0"
 val hikariCPVersion = "5.1.0"
 val flywayCoreVersion = "10.8.1"
 val kotliqueryVersion = "1.9.0"
-val mockkVersion = "1.13.9"
+val mockkVersion = "1.13.10"
 val postgresqlVersion = "42.7.2"
 
 plugins {
