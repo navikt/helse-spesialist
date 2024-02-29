@@ -3,6 +3,7 @@ package no.nav.helse.mediator.meldinger
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeEndret
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -40,24 +41,12 @@ internal class VedtaksperiodeEndretRiver(
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        val vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
-        val id = UUID.fromString(packet["@id"].asText())
-        val forårsaketAvId = UUID.fromString(packet["@forårsaket_av.id"].asText())
         logg.info(
             "Mottok vedtaksperiode endret {}, {}, {}",
-            keyValue("vedtaksperiodeId", vedtaksperiodeId),
-            keyValue("eventId", id),
-            keyValue("forårsaketAvId", forårsaketAvId),
+            keyValue("vedtaksperiodeId", UUID.fromString(packet["vedtaksperiodeId"].asText())),
+            keyValue("eventId", UUID.fromString(packet["@id"].asText())),
+            keyValue("forårsaketAvId", UUID.fromString(packet["@forårsaket_av.id"].asText())),
         )
-        mediator.vedtaksperiodeEndret(
-            message = packet,
-            id = id,
-            vedtaksperiodeId = vedtaksperiodeId,
-            fødselsnummer = packet["fødselsnummer"].asText(),
-            forårsaketAvId = forårsaketAvId,
-            forrigeTilstand = packet["forrigeTilstand"].asText(),
-            gjeldendeTilstand = packet["gjeldendeTilstand"].asText(),
-            context = context
-        )
+        mediator.vedtaksperiodeEndret(melding = VedtaksperiodeEndret(packet), context = context)
     }
 }

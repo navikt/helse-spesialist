@@ -258,31 +258,8 @@ internal class HendelseMediator(
         return håndter(hendelse, context)
     }
 
-    fun vedtaksperiodeEndret(
-        message: JsonMessage,
-        id: UUID,
-        vedtaksperiodeId: UUID,
-        fødselsnummer: String,
-        forårsaketAvId: UUID,
-        forrigeTilstand: String,
-        gjeldendeTilstand: String,
-        context: MessageContext,
-    ) {
-        if (personDao.findPersonByFødselsnummer(fødselsnummer) == null) {
-            logg.info("ignorerer hendelseId=${id} fordi vi kjenner ikke til personen")
-            sikkerlogg.info("ignorerer hendelseId=${id} fordi vi kjenner ikke til personen med fnr=${fødselsnummer}")
-            return
-        }
-        val hendelse = hendelsefabrikk.vedtaksperiodeEndret(
-            id = id,
-            vedtaksperiodeId = vedtaksperiodeId,
-            fødselsnummer = fødselsnummer,
-            forårsaketAvId = forårsaketAvId,
-            forrigeTilstand = forrigeTilstand,
-            gjeldendeTilstand = gjeldendeTilstand,
-            json = message.toJson()
-        )
-        return håndter(hendelse, context)
+    fun vedtaksperiodeEndret(melding: VedtaksperiodeEndret, context: MessageContext) {
+        return håndter(melding.fødselsnummer(), melding, context)
     }
 
     fun vedtaksperiodeOpprettet(

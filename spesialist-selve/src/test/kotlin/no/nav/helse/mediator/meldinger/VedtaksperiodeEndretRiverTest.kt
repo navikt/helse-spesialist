@@ -33,7 +33,7 @@ internal class VedtaksperiodeEndretRiverTest {
                 fødselsnummer = FØDSELSNUMMER
             )
         )
-        verify(exactly = 1) { mediator.vedtaksperiodeEndret(any(), any(), any(), any(), any(), any(), any(), any()) }
+        verify(exactly = 1) { mediator.vedtaksperiodeEndret(any(), any()) }
     }
 
     @Test
@@ -45,6 +45,6 @@ internal class VedtaksperiodeEndretRiverTest {
                 forrigeTilstand = "START"
             )
         )
-        verify(exactly = 0) { mediator.vedtaksperiodeEndret(any(), any(), any(), any(), any(), any(), any(), any()) }
+        verify(exactly = 0) { mediator.vedtaksperiodeEndret(any(), any()) }
     }
 }

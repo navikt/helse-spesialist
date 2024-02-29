@@ -8,6 +8,7 @@ import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
 import no.nav.helse.modell.kommando.VedtaksperiodeGenerasjonCommand
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 
 internal class VedtaksperiodeEndret(
@@ -19,6 +20,15 @@ internal class VedtaksperiodeEndret(
     val forrigeTilstand: String,
     val gjeldendeTilstand: String,
 ) : Vedtaksperiodemelding {
+    internal constructor(packet: JsonMessage): this(
+        id = UUID.fromString(packet["@id"].asText()),
+        vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText()),
+        fødselsnummer = packet["fødselsnummer"].asText(),
+        forårsaketAvId = UUID.fromString(packet["@forårsaket_av.id"].asText()),
+        forrigeTilstand = packet["forrigeTilstand"].asText(),
+        gjeldendeTilstand = packet["gjeldendeTilstand"].asText(),
+        json = packet.toJson()
+    )
 
     override fun fødselsnummer() = fødselsnummer
     override fun vedtaksperiodeId() = vedtaksperiodeId
