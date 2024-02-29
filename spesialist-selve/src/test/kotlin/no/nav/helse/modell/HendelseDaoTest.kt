@@ -7,9 +7,8 @@ import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
-import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.overstyring.OverstyringIgangsatt
-import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
+import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -18,28 +17,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
 
 internal class HendelseDaoTest : DatabaseIntegrationTest() {
-    private val vedtaksperiodeForkastet: VedtaksperiodeForkastet = VedtaksperiodeForkastet(
-        objectMapper.readTree(Testmeldingfabrikk.lagVedtaksperiodeForkastet(AKTØR, FNR, VEDTAKSPERIODE, id = HENDELSE_ID))
-    )
-
-    private fun mockOverstyringIgangsatt(fødselsnummer: String, berørtePeriodeIder: List<UUID>, årsak: String): OverstyringIgangsatt {
-        return mockk<OverstyringIgangsatt>(relaxed = true) {
-            every { id } returns UUID.randomUUID()
-            every { fødselsnummer() } returns fødselsnummer
-            every { berørteVedtaksperiodeIder } returns berørtePeriodeIder
-            every { toJson() } returns Testmeldingfabrikk.lagOverstyringIgangsatt(
-                fødselsnummer = fødselsnummer,
-                berørtePerioder = berørtePeriodeIder.map {
-                    mapOf(
-                        "vedtaksperiodeId" to "$it",
-                        "periodeFom" to "2022-01-01",
-                        "orgnummer" to "orgnr",
-                    )
-                },
-                årsak = årsak,
-            )
-        }
-    }
+    private val godkjenningsbehov: Godkjenningsbehov = mockGodkjenningsbehov()
 
     @Test
     fun `finn siste igangsatte overstyring om den er korrigert søknad`() {
@@ -72,15 +50,10 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `lagrer og finner hendelser`() {
-        hendelseDao.opprett(vedtaksperiodeForkastet)
+        hendelseDao.opprett(godkjenningsbehov)
         val actual = hendelseDao.finn(HENDELSE_ID)
             ?: fail { "Forventet å finne en hendelse med id $HENDELSE_ID" }
-
-        assertEquals(VEDTAKSPERIODE, finnKobling())
-
         assertEquals(FNR, actual.fødselsnummer())
-        check(actual is Vedtaksperiodemelding)
-        assertEquals(VEDTAKSPERIODE, actual.vedtaksperiodeId())
     }
 
     @Test
@@ -98,8 +71,7 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
         opprettArbeidsgiver()
         opprettVedtaksperiode()
 
-        hendelseDao.opprett(vedtaksperiodeForkastet)
-
+        hendelseDao.opprett(godkjenningsbehov)
         assertEquals(VEDTAKSPERIODE, finnKobling())
     }
 
@@ -108,6 +80,34 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
         nyPerson()
         godkjenningsbehov(HENDELSE_ID)
         assertEquals(FNR, hendelseDao.finnFødselsnummer(HENDELSE_ID))
+    }
+
+    private fun mockOverstyringIgangsatt(fødselsnummer: String, berørtePeriodeIder: List<UUID>, årsak: String): OverstyringIgangsatt {
+        return mockk<OverstyringIgangsatt>(relaxed = true) {
+            every { id } returns UUID.randomUUID()
+            every { fødselsnummer() } returns fødselsnummer
+            every { berørteVedtaksperiodeIder } returns berørtePeriodeIder
+            every { toJson() } returns Testmeldingfabrikk.lagOverstyringIgangsatt(
+                fødselsnummer = fødselsnummer,
+                berørtePerioder = berørtePeriodeIder.map {
+                    mapOf(
+                        "vedtaksperiodeId" to "$it",
+                        "periodeFom" to "2022-01-01",
+                        "orgnummer" to "orgnr",
+                    )
+                },
+                årsak = årsak,
+            )
+        }
+    }
+
+    private fun mockGodkjenningsbehov(): Godkjenningsbehov {
+        return mockk<Godkjenningsbehov>(relaxed = true) {
+            every { id } returns HENDELSE_ID
+            every { fødselsnummer() } returns FNR
+            every { vedtaksperiodeId() } returns VEDTAKSPERIODE
+            every { toJson() } returns Testmeldingfabrikk.lagGodkjenningsbehov(AKTØR, FNR, VEDTAKSPERIODE)
+        }
     }
 
     private fun finnKobling(hendelseId: UUID = HENDELSE_ID) = sessionOf(dataSource).use { session ->
