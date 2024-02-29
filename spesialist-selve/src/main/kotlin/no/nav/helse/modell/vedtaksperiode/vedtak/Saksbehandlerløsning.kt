@@ -1,28 +1,50 @@
 package no.nav.helse.modell.vedtaksperiode.vedtak
 
+import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.mediator.meldinger.Personmelding
+import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.asLocalDateTime
+import no.nav.helse.rapids_rivers.isMissingOrNull
 
 /**
  * Behandler input til godkjenningsbehov fra saksbehandler som har blitt lagt på rapid-en av API-biten av spesialist.
  */
-internal class Saksbehandlerløsning(
+internal class Saksbehandlerløsning private constructor(
     override val id: UUID,
     val behandlingId: UUID,
+    val oppgaveId: Long,
+    val godkjenningsbehovhendelseId: UUID,
     private val fødselsnummer: String,
-    private val json: String,
     val godkjent: Boolean,
-    val saksbehandlerIdent: String,
+    val ident: String,
     val epostadresse: String,
     val godkjenttidspunkt: LocalDateTime,
     val årsak: String?,
     val begrunnelser: List<String>?,
     val kommentar: String?,
     val saksbehandleroverstyringer: List<UUID>,
-    val oppgaveId: Long,
-    val godkjenningsbehovhendelseId: UUID,
+    private val json: String,
 ) : Personmelding {
+
+    internal constructor(packet: JsonMessage): this(
+        id = UUID.fromString(packet["@id"].asText()),
+        behandlingId = UUID.fromString(packet["behandlingId"].asText()),
+        oppgaveId = packet["oppgaveId"].asLong(),
+        godkjenningsbehovhendelseId = UUID.fromString(packet["hendelseId"].asText()),
+        fødselsnummer = packet["fødselsnummer"].asText(),
+        godkjent = packet["godkjent"].asBoolean(),
+        ident = packet["saksbehandlerident"].asText(),
+        epostadresse = packet["saksbehandlerepost"].asText(),
+        godkjenttidspunkt = packet["godkjenttidspunkt"].asLocalDateTime(),
+        årsak = packet["årsak"].takeUnless(JsonNode::isMissingOrNull)?.asText(),
+        begrunnelser = packet["begrunnelser"].takeUnless(JsonNode::isMissingOrNull)?.map(JsonNode::asText),
+        kommentar = packet["kommentar"].takeUnless(JsonNode::isMissingOrNull)?.asText(),
+        saksbehandleroverstyringer = packet["saksbehandleroverstyringer"].takeUnless(JsonNode::isMissingOrNull)?.map { UUID.fromString(it.asText()) } ?: emptyList(),
+        json = packet.toJson(),
+    )
+
     override fun fødselsnummer() = fødselsnummer
     override fun toJson() = json
 }

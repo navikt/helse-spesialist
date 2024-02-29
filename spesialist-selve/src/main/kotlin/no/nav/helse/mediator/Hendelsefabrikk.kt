@@ -193,40 +193,6 @@ internal class Hendelsefabrikk(
         )
     }
 
-    fun saksbehandlerløsning(
-        id: UUID,
-        behandlingId: UUID,
-        godkjenningsbehovhendelseId: UUID,
-        fødselsnummer: String,
-        godkjent: Boolean,
-        saksbehandlerident: String,
-        epostadresse: String,
-        godkjenttidspunkt: LocalDateTime,
-        årsak: String?,
-        begrunnelser: List<String>?,
-        kommentar: String?,
-        saksbehandleroverstyringer: List<UUID>,
-        oppgaveId: Long,
-        json: String,
-    ): Saksbehandlerløsning {
-        return Saksbehandlerløsning(
-            id = id,
-            behandlingId = behandlingId,
-            fødselsnummer = fødselsnummer,
-            json = json,
-            godkjent = godkjent,
-            saksbehandlerIdent = saksbehandlerident,
-            epostadresse = epostadresse,
-            godkjenttidspunkt = godkjenttidspunkt,
-            årsak = årsak,
-            begrunnelser = begrunnelser,
-            kommentar = kommentar,
-            saksbehandleroverstyringer = saksbehandleroverstyringer,
-            oppgaveId = oppgaveId,
-            godkjenningsbehovhendelseId = godkjenningsbehovhendelseId
-        )
-    }
-
     fun sykefraværstilfeller(
         id: UUID,
         vedtaksperiodeOppdateringer: List<VedtaksperiodeOppdatering>,
@@ -515,7 +481,7 @@ internal class Hendelsefabrikk(
             sykefraværstilfelle = sykefraværstilfelle,
             godkjent = hendelse.godkjent,
             godkjenttidspunkt = hendelse.godkjenttidspunkt,
-            ident = hendelse.saksbehandlerIdent,
+            ident = hendelse.ident,
             epostadresse = hendelse.epostadresse,
             årsak = hendelse.årsak,
             begrunnelser = hendelse.begrunnelser,

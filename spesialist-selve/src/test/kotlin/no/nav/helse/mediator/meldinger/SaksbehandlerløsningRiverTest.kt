@@ -5,6 +5,7 @@ import io.mockk.verify
 import java.util.UUID
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.meldinger.løsninger.SaksbehandlerløsningRiver
+import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -37,22 +38,6 @@ internal class SaksbehandlerløsningRiverTest {
                 id = ID
             )
         )
-        verify(exactly = 1) { mediator.saksbehandlerløsning(
-            any(),
-            ID,
-            any(),
-            GODKJENNINGSBEHOV_ID,
-            FNR,
-            true,
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any()
-        ) }
+        verify(exactly = 1) { mediator.håndter(FNR, any<Saksbehandlerløsning>(), any()) }
     }
 }

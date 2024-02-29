@@ -32,7 +32,7 @@ internal class AdressebeskyttelseEndretRiver(
             StructuredArguments.keyValue("hendelseId", hendelseId)
         )
         mediator.håndter(
-            hendelse = AdressebeskyttelseEndret(packet),
+            melding = AdressebeskyttelseEndret(packet),
             messageContext = context
         )
     }

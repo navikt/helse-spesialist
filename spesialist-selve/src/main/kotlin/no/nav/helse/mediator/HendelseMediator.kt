@@ -2,7 +2,6 @@ package no.nav.helse.mediator
 
 import SøknadSendtArbeidsledigRiver
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments.keyValue
@@ -345,43 +344,6 @@ internal class HendelseMediator(
         håndter(hendelsefabrikk.søknadSendt(id, fødselsnummer, aktørId, organisasjonsnummer, message.toJson()), context)
     }
 
-    fun saksbehandlerløsning(
-        message: JsonMessage,
-        id: UUID,
-        behandlingId: UUID,
-        godkjenningsbehovhendelseId: UUID,
-        fødselsnummer: String,
-        godkjent: Boolean,
-        saksbehandlerident: String,
-        saksbehandlerepost: String,
-        godkjenttidspunkt: LocalDateTime,
-        årsak: String?,
-        begrunnelser: List<String>?,
-        kommentar: String?,
-        saksbehandleroverstyringer: List<UUID>,
-        oppgaveId: Long,
-        context: MessageContext,
-    ) {
-        håndter(
-            fødselsnummer, hendelsefabrikk.saksbehandlerløsning(
-                id,
-                behandlingId,
-                godkjenningsbehovhendelseId,
-                fødselsnummer,
-                godkjent,
-                saksbehandlerident,
-                saksbehandlerepost,
-                godkjenttidspunkt,
-                årsak,
-                begrunnelser,
-                kommentar,
-                saksbehandleroverstyringer,
-                oppgaveId,
-                message.toJson()
-            ), context
-        )
-    }
-
     fun utbetalingAnnullert(
         message: JsonMessage,
         context: MessageContext,
@@ -506,44 +468,44 @@ internal class HendelseMediator(
         opprett(commandContextDao, hendelse.id)
     }
 
-    internal fun håndter(fødselsnummer: String, hendelse: Personmelding, messageContext: MessageContext) {
-        if (personDao.findPersonByFødselsnummer(fødselsnummer) == null) return logg.info("ignorerer hendelseId=${hendelse.id} fordi vi ikke kjenner til personen")
-        håndter(hendelse, messageContext)
+    internal fun håndter(fødselsnummer: String, melding: Personmelding, messageContext: MessageContext) {
+        if (personDao.findPersonByFødselsnummer(fødselsnummer) == null) return logg.info("ignorerer hendelseId=${melding.id} fordi vi ikke kjenner til personen")
+        håndter(melding, messageContext)
     }
 
-    internal fun håndter(hendelse: Personmelding, messageContext: MessageContext) {
+    internal fun håndter(melding: Personmelding, messageContext: MessageContext) {
         val contextId = UUID.randomUUID()
-        logg.info("oppretter ny kommandokontekst med context_id=$contextId for hendelse_id=${hendelse.id} og type=${hendelse::class.simpleName}")
-        håndter(hendelse, nyContext(hendelse, contextId), messageContext)
+        logg.info("oppretter ny kommandokontekst med context_id=$contextId for hendelse_id=${melding.id} og type=${melding::class.simpleName}")
+        håndter(melding, nyContext(melding, contextId), messageContext)
     }
 
-    private fun håndter(hendelse: Personmelding, commandContext: CommandContext, messageContext: MessageContext) {
+    private fun håndter(melding: Personmelding, commandContext: CommandContext, messageContext: MessageContext) {
         val contextId = commandContext.id()
-        val hendelsenavn = hendelse::class.simpleName ?: "ukjent hendelse"
+        val hendelsenavn = melding::class.simpleName ?: "ukjent hendelse"
         try {
-            when (hendelse) {
-                is AdressebeskyttelseEndret -> iverksett(AdressebeskyttelseEndretCommand(hendelse.fødselsnummer(), personDao, oppgaveDao, godkjenningMediator), hendelse.id, commandContext)
-                is EndretEgenAnsattStatus -> iverksett(hendelsefabrikk.endretEgenAnsattStatus(hendelse.fødselsnummer(), hendelse), hendelse.id, commandContext)
-                is VedtaksperiodeOpprettet -> iverksett(hendelsefabrikk.opprettVedtaksperiode(hendelse.fødselsnummer(), hendelse), hendelse.id, commandContext)
-                is GosysOppgaveEndret -> iverksett(hendelsefabrikk.gosysOppgaveEndret(hendelse.fødselsnummer(), hendelse), hendelse.id, commandContext)
-                is NyeVarsler -> iverksett(hendelsefabrikk.nyeVarsler(hendelse.fødselsnummer(), hendelse), hendelse.id, commandContext)
-                is TilbakedateringGodkjent -> iverksett(hendelsefabrikk.tilbakedateringGodkjent(hendelse.fødselsnummer()), hendelse.id, commandContext)
-                is VedtaksperiodeReberegnet -> iverksett(hendelsefabrikk.vedtaksperiodeReberegnet(hendelse), hendelse.id, commandContext)
-                is VedtaksperiodeNyUtbetaling -> iverksett(hendelsefabrikk.vedtaksperiodeNyUtbetaling(hendelse), hendelse.id, commandContext)
-                is SøknadSendt -> iverksett(hendelsefabrikk.søknadSendt(hendelse), hendelse.id, commandContext)
-                is OppdaterPersonsnapshot -> iverksett(hendelsefabrikk.oppdaterPersonsnapshot(hendelse), hendelse.id, commandContext)
-                is OverstyringIgangsatt -> iverksett(hendelsefabrikk.kobleVedtaksperiodeTilOverstyring(hendelse), hendelse.id, commandContext)
-                is Sykefraværstilfeller -> håndter(hendelse)
-                is UtbetalingAnnullert -> iverksett(hendelsefabrikk.utbetalingAnnullert(hendelse), hendelse.id, commandContext)
-                is UtbetalingEndret -> iverksett(hendelsefabrikk.utbetalingEndret(hendelse), hendelse.id, commandContext)
-                is VedtakFattet -> håndter(hendelse)
-                is VedtaksperiodeEndret -> iverksett(hendelsefabrikk.vedtaksperiodeEndret(hendelse), hendelse.id, commandContext)
-                is VedtaksperiodeForkastet -> iverksett(hendelsefabrikk.vedtaksperiodeForkastet(hendelse), hendelse.id, commandContext)
-                is Godkjenningsbehov -> iverksett(hendelsefabrikk.godkjenningsbehov(hendelse), hendelse.id, commandContext)
-                is Saksbehandlerløsning -> iverksett(hendelsefabrikk.utbetalingsgodkjenning(hendelse), hendelse.id, commandContext)
+            when (melding) {
+                is AdressebeskyttelseEndret -> iverksett(AdressebeskyttelseEndretCommand(melding.fødselsnummer(), personDao, oppgaveDao, godkjenningMediator), melding.id, commandContext)
+                is EndretEgenAnsattStatus -> iverksett(hendelsefabrikk.endretEgenAnsattStatus(melding.fødselsnummer(), melding), melding.id, commandContext)
+                is VedtaksperiodeOpprettet -> iverksett(hendelsefabrikk.opprettVedtaksperiode(melding.fødselsnummer(), melding), melding.id, commandContext)
+                is GosysOppgaveEndret -> iverksett(hendelsefabrikk.gosysOppgaveEndret(melding.fødselsnummer(), melding), melding.id, commandContext)
+                is NyeVarsler -> iverksett(hendelsefabrikk.nyeVarsler(melding.fødselsnummer(), melding), melding.id, commandContext)
+                is TilbakedateringGodkjent -> iverksett(hendelsefabrikk.tilbakedateringGodkjent(melding.fødselsnummer()), melding.id, commandContext)
+                is VedtaksperiodeReberegnet -> iverksett(hendelsefabrikk.vedtaksperiodeReberegnet(melding), melding.id, commandContext)
+                is VedtaksperiodeNyUtbetaling -> iverksett(hendelsefabrikk.vedtaksperiodeNyUtbetaling(melding), melding.id, commandContext)
+                is SøknadSendt -> iverksett(hendelsefabrikk.søknadSendt(melding), melding.id, commandContext)
+                is OppdaterPersonsnapshot -> iverksett(hendelsefabrikk.oppdaterPersonsnapshot(melding), melding.id, commandContext)
+                is OverstyringIgangsatt -> iverksett(hendelsefabrikk.kobleVedtaksperiodeTilOverstyring(melding), melding.id, commandContext)
+                is Sykefraværstilfeller -> håndter(melding)
+                is UtbetalingAnnullert -> iverksett(hendelsefabrikk.utbetalingAnnullert(melding), melding.id, commandContext)
+                is UtbetalingEndret -> iverksett(hendelsefabrikk.utbetalingEndret(melding), melding.id, commandContext)
+                is VedtakFattet -> håndter(melding)
+                is VedtaksperiodeEndret -> iverksett(hendelsefabrikk.vedtaksperiodeEndret(melding), melding.id, commandContext)
+                is VedtaksperiodeForkastet -> iverksett(hendelsefabrikk.vedtaksperiodeForkastet(melding), melding.id, commandContext)
+                is Godkjenningsbehov -> iverksett(hendelsefabrikk.godkjenningsbehov(melding), melding.id, commandContext)
+                is Saksbehandlerløsning -> iverksett(hendelsefabrikk.utbetalingsgodkjenning(melding), melding.id, commandContext)
                 else -> throw IllegalArgumentException("Personhendelse må håndteres")
             }
-            behovMediator.håndter(hendelse, commandContext, contextId, messageContext)
+            behovMediator.håndter(melding, commandContext, contextId, messageContext)
         } catch (e: Exception) {
             logg.warn(
                 "Feil ved kjøring av $hendelsenavn: contextId={}, message={}",
@@ -551,7 +513,7 @@ internal class HendelseMediator(
             )
             throw e
         } finally {
-            logg.info("utført $hendelsenavn med context_id=$contextId for hendelse_id=${hendelse.id}")
+            logg.info("utført $hendelsenavn med context_id=$contextId for hendelse_id=${melding.id}")
         }
     }
 
