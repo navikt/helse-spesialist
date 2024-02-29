@@ -472,8 +472,8 @@ internal class HendelseMediator(
         håndter(hendelsefabrikk.vedtaksperiodeNyUtbetaling(hendelseId, fødselsnummer, vedtaksperiodeId, utbetalingId, json), context)
     }
 
-    fun oppdaterPersonsnapshot(message: JsonMessage, context: MessageContext) {
-        håndter(hendelsefabrikk.oppdaterPersonsnapshot(message.toJson()), context)
+    fun oppdaterPersonsnapshot(hendelse: OppdaterPersonsnapshot, context: MessageContext) {
+        håndter(hendelse, context)
     }
 
     fun vedtaksperiodeReberegnet(message: JsonMessage, context: MessageContext) {
@@ -531,7 +531,7 @@ internal class HendelseMediator(
                 logg.info("Ignorerer melding fordi: command context $contextId er ikke suspendert")
                 return null
             }
-            val hendelse = hendelseDao.finn(hendelseId, hendelsefabrikk) ?: run {
+            val hendelse = hendelseDao.finn(hendelseId) ?: run {
                 logg.info("Ignorerer melding fordi: finner ikke hendelse med id=$hendelseId")
                 return null
             }
@@ -663,6 +663,6 @@ internal class HendelseMediator(
                 "fødselsnummer" to fnr
             )
         )
-        oppdaterPersonsnapshot(json, rapidsConnection)
+        oppdaterPersonsnapshot(OppdaterPersonsnapshot(json), rapidsConnection)
     }
 }

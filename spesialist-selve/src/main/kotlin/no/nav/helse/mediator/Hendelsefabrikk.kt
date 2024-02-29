@@ -35,7 +35,6 @@ import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.overstyring.OverstyringIgangsatt
 import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import no.nav.helse.modell.person.EndretEgenAnsattStatusCommand
-import no.nav.helse.modell.person.OppdaterPersonsnapshot
 import no.nav.helse.modell.person.OppdaterPersonsnapshotCommand
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.SøknadSendt
@@ -352,16 +351,6 @@ internal class Hendelsefabrikk(
             )
         }
     )
-
-    fun oppdaterPersonsnapshot(json: String): OppdaterPersonsnapshot {
-        val jsonNode = mapper.readTree(json)
-        val fødselsnummer = jsonNode["fødselsnummer"].asText()
-        return OppdaterPersonsnapshot(
-            id = UUID.fromString(jsonNode["@id"].asText()),
-            fødselsnummer = fødselsnummer,
-            json = json,
-        )
-    }
 
     fun endretEgenAnsattStatus(json: String): EndretEgenAnsattStatus {
         val erEgenAnsatt = mapper.readTree(json)["skjermet"].asBoolean()

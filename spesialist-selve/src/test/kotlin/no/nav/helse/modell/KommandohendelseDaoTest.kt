@@ -109,7 +109,7 @@ internal class KommandohendelseDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `lagrer og finner hendelser`() {
         hendelseDao.opprett(vedtaksperiodeForkastet)
-        val actual = hendelseDao.finn(HENDELSE_ID, hendelsefabrikk)
+        val actual = hendelseDao.finn(HENDELSE_ID)
             ?: fail { "Forventet å finne en hendelse med id $HENDELSE_ID" }
 
         assertEquals(VEDTAKSPERIODE, finnKobling())

@@ -1,5 +1,6 @@
 package no.nav.helse.modell.person
 
+import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.mediator.meldinger.Personmelding
@@ -9,6 +10,7 @@ import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterInfotrygdutbetalingerHardt
 import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
 import no.nav.helse.modell.kommando.ikkesuspenderendeCommand
+import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import no.nav.helse.spesialist.api.abonnement.PersonOppdatertPayload
@@ -19,6 +21,18 @@ internal class OppdaterPersonsnapshot(
     private val fødselsnummer: String,
     private val json: String,
 ) : Personmelding {
+    internal constructor(packet: JsonMessage): this(
+        id = UUID.fromString(packet["@id"].asText()),
+        fødselsnummer = packet["fødselsnummer"].asText(),
+        json = packet.toJson(),
+    )
+
+    internal constructor(jsonNode: JsonNode): this(
+        id = UUID.fromString(jsonNode["@id"].asText()),
+        fødselsnummer = jsonNode["fødselsnummer"].asText(),
+        json = jsonNode.toString(),
+    )
+
     override fun fødselsnummer(): String = fødselsnummer
     override fun toJson(): String = json
 }
@@ -47,5 +61,4 @@ internal class OppdaterPersonsnapshotCommand(
             )
         },
     )
-
 }

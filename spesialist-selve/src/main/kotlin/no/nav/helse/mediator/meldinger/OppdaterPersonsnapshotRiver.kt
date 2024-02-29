@@ -3,6 +3,7 @@ package no.nav.helse.mediator.meldinger
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.modell.person.OppdaterPersonsnapshot
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -38,6 +39,6 @@ internal class OppdaterPersonsnapshotRiver(
             StructuredArguments.keyValue("fødselsnummer", fødselsnummer),
             StructuredArguments.keyValue("eventId", id)
         )
-        mediator.oppdaterPersonsnapshot(packet, context)
+        mediator.oppdaterPersonsnapshot(OppdaterPersonsnapshot(packet), context)
     }
 }

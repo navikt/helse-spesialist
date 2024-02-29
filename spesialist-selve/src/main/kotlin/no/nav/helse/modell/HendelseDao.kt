@@ -6,7 +6,6 @@ import javax.sql.DataSource
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
@@ -201,9 +200,9 @@ internal class HendelseDao(private val dataSource: DataSource) {
         )
     }
 
-    internal fun finn(id: UUID, hendelsefabrikk: Hendelsefabrikk) = sessionOf(dataSource).use { session ->
+    internal fun finn(id: UUID) = sessionOf(dataSource).use { session ->
         session.run(queryOf("SELECT type,data FROM hendelse WHERE id = ?", id).map { row ->
-            fraHendelsetype(enumValueOf(row.string("type")), row.string("data"), hendelsefabrikk)
+            fraHendelsetype(enumValueOf(row.string("type")), row.string("data"))
         }.asSingle)
     }
 
@@ -212,7 +211,6 @@ internal class HendelseDao(private val dataSource: DataSource) {
     private fun fraHendelsetype(
         hendelsetype: Hendelsetype,
         json: String,
-        hendelsefabrikk: Hendelsefabrikk,
     ): Personmelding {
         val jsonNode = objectMapper.readTree(json)
         return when (hendelsetype) {
@@ -220,7 +218,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
             // VEDTAKSPERIODE_FORKASTET trengs pt. pga. KommandohendelseDaoTest.`lagrer og finner hendelser`
             VEDTAKSPERIODE_FORKASTET -> VedtaksperiodeForkastet(jsonNode)
             GODKJENNING -> Godkjenningsbehov(jsonNode)
-            OPPDATER_PERSONSNAPSHOT -> hendelsefabrikk.oppdaterPersonsnapshot(json)
+            OPPDATER_PERSONSNAPSHOT -> OppdaterPersonsnapshot(jsonNode)
             GOSYS_OPPGAVE_ENDRET -> GosysOppgaveEndret(jsonNode)
             else -> throw IllegalArgumentException(
                 "Prøver å gjenoppta en kommando(kjede) etter mottak av hendelsetype " +
