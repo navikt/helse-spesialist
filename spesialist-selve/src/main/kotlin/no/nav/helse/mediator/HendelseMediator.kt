@@ -69,7 +69,6 @@ import no.nav.helse.modell.utbetaling.UtbetalingAnnullert
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.varsel.ActualVarselRepository
-import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterOppdateringer
@@ -416,16 +415,6 @@ internal class HendelseMediator(
         if (!hendelsefabrikk.sykefraværstilfelle(fødselsnummer, skjæringstidspunkt).erTilbakedatert(vedtaksperiodeId)) return logg.info("ignorerer hendelseId=${id} fordi det ikke er en tilbakedatering")
 
         håndter(hendelsefabrikk.godkjentTilbakedatertSykmelding(id, fødselsnummer, json), context)
-    }
-
-    fun nyeVarsler(
-        id: UUID,
-        fødselsnummer: String,
-        varsler: List<Varsel>,
-        json: String,
-        context: MessageContext,
-    ) {
-        håndter(hendelsefabrikk.nyeVarsler(id, fødselsnummer, varsler, json), context)
     }
 
     private fun forbered() {

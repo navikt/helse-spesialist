@@ -4,6 +4,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.modell.vedtaksperiode.NyeVarsler
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.BeforeEach
 
@@ -31,12 +32,12 @@ internal class NyeVarslerRiverTest {
     @Test
     fun `leser aktivitetslogg_ny_aktivitet`() {
         testRapid.sendTestMessage(Testmeldingfabrikk.lagAktivitetsloggNyAktivitet(FNR, HENDELSE, VEDTAKSPERIODE, ORGNR))
-        verify(exactly = 1) { mediator.nyeVarsler(any(), any(), any(), any(), any()) }
+        verify(exactly = 1) { mediator.håndter(any<NyeVarsler>(), any()) }
     }
 
     @Test
     fun `leser nye_varsler`() {
         testRapid.sendTestMessage(Testmeldingfabrikk.lagNyeVarsler(FNR, HENDELSE, VEDTAKSPERIODE, ORGNR))
-        verify(exactly = 1) { mediator.nyeVarsler(any(), any(), any(), any(), any()) }
+        verify(exactly = 1) { mediator.håndter(any<NyeVarsler>(), any()) }
     }
 }

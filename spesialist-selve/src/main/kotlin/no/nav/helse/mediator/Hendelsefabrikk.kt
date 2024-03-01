@@ -51,7 +51,6 @@ import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.utbetaling.UtbetalingEndretCommand
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.varsel.ActualVarselRepository
-import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
@@ -573,9 +572,5 @@ internal class Hendelsefabrikk(
 
     fun vedtakFattet(id: UUID, fødselsnummer: String, vedtaksperiodeId: UUID, json: String): VedtakFattet {
         return VedtakFattet(id, fødselsnummer, vedtaksperiodeId, json)
-    }
-
-    fun nyeVarsler(id: UUID, fødselsnummer: String, varsler: List<Varsel>, json: String): NyeVarsler {
-        return NyeVarsler(id, fødselsnummer, varsler, json)
     }
 }

@@ -2,9 +2,10 @@ package no.nav.helse.mediator.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID
-import net.logstash.logback.argument.StructuredArguments
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.varsel.Varsel.Companion.varsler
+import no.nav.helse.modell.vedtaksperiode.NyeVarsler
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -48,11 +49,11 @@ internal class NyeVarslerRiver(
 
          sikkerlogg.info(
             "Mottok varsler for {} med {}, {}",
-            StructuredArguments.keyValue("fødselsnummer", fødselsnummer),
-            StructuredArguments.keyValue("hendelseId", hendelseId),
-            StructuredArguments.keyValue("hendelse", packet.toJson())
+            keyValue("fødselsnummer", fødselsnummer),
+            keyValue("hendelseId", hendelseId),
+            keyValue("hendelse", packet.toJson())
         )
 
-        mediator.nyeVarsler(hendelseId, fødselsnummer, varsler, packet.toJson(), context)
+        mediator.håndter(NyeVarsler(packet), context)
     }
 }
