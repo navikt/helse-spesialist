@@ -10,8 +10,10 @@ import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OpprettFørsteVedtaksperiodeGenerasjonCommand
 import no.nav.helse.modell.kommando.OpprettMinimaltVedtakCommand
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.asLocalDate
 
-internal class VedtaksperiodeOpprettet(
+internal class VedtaksperiodeOpprettet internal constructor(
     override val id: UUID,
     private val fødselsnummer: String,
     private val vedtaksperiodeId: UUID,
@@ -21,6 +23,17 @@ internal class VedtaksperiodeOpprettet(
     internal val skjæringstidspunkt: LocalDate,
     private val json: String,
 ) : Vedtaksperiodemelding {
+
+    internal constructor(packet: JsonMessage): this(
+        id = UUID.fromString(packet["@id"].asText()),
+        fødselsnummer = packet["fødselsnummer"].asText(),
+        vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText()),
+        organisasjonsnummer = packet["organisasjonsnummer"].asText(),
+        fom = packet["fom"].asLocalDate(),
+        tom = packet["tom"].asLocalDate(),
+        skjæringstidspunkt = packet["skjæringstidspunkt"].asLocalDate(),
+        json = packet.toJson()
+    )
 
     override fun fødselsnummer() = fødselsnummer
     override fun toJson(): String = json

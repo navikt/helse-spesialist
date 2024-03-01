@@ -1,7 +1,6 @@
 package no.nav.helse.mediator
 
 import SøknadSendtArbeidsledigRiver
-import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments.keyValue
@@ -238,35 +237,6 @@ internal class HendelseMediator(
 
     fun vedtaksperiodeEndret(melding: VedtaksperiodeEndret, context: MessageContext) {
         return håndter(melding.fødselsnummer(), melding, context)
-    }
-
-    fun vedtaksperiodeOpprettet(
-        message: JsonMessage,
-        id: UUID,
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-        vedtaksperiodeId: UUID,
-        fom: LocalDate,
-        tom: LocalDate,
-        skjæringstidspunkt: LocalDate,
-        context: MessageContext,
-    ) {
-        val hendelse = hendelsefabrikk.vedtaksperiodeOpprettet(
-            id,
-            fødselsnummer,
-            organisasjonsnummer,
-            vedtaksperiodeId,
-            fom,
-            tom,
-            skjæringstidspunkt,
-            message.toJson()
-        )
-        if (personDao.findPersonByFødselsnummer(fødselsnummer) == null) {
-            logg.error("vedtaksperiodeOpprettet: ignorerer hendelseId=${hendelse.id} fordi vi kjenner ikke til personen")
-            sikkerlogg.error("vedtaksperiodeOpprettet: ignorerer hendelseId=${hendelse.id} fordi vi kjenner ikke til personen med fnr=${fødselsnummer}")
-            return
-        }
-        return håndter(hendelse, context)
     }
 
     fun vedtaksperiodeForkastet(

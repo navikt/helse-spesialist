@@ -432,28 +432,6 @@ internal class Hendelsefabrikk(
         )
     }
 
-    fun vedtaksperiodeOpprettet(
-        id: UUID,
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-        vedtaksperiodeId: UUID,
-        fom: LocalDate,
-        tom: LocalDate,
-        skjæringstidspunkt: LocalDate,
-        json: String,
-    ): VedtaksperiodeOpprettet {
-        return VedtaksperiodeOpprettet(
-            id = id,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            fom = fom,
-            tom = tom,
-            skjæringstidspunkt = skjæringstidspunkt,
-            json = json,
-        )
-    }
-
     fun vedtakFattet(id: UUID, fødselsnummer: String, vedtaksperiodeId: UUID, json: String): VedtakFattet {
         return VedtakFattet(id, fødselsnummer, vedtaksperiodeId, json)
     }

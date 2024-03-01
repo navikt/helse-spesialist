@@ -9,6 +9,7 @@ import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOpprettet
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.BeforeEach
@@ -35,17 +36,7 @@ internal class VedtaksperiodeOpprettetRiverTest {
             Testmeldingfabrikk.lagVedtaksperiodeOpprettet(aktørId = AKTØR, fødselsnummer = FØDSELSNUMMER, organisasjonsnummer = ORGNR, vedtaksperiodeId = UUID.randomUUID())
         )
         verify(exactly = 1) {
-            mediator.vedtaksperiodeOpprettet(
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any()
-            )
+            mediator.håndter(any(), any<VedtaksperiodeOpprettet>(), any())
         }
     }
 
