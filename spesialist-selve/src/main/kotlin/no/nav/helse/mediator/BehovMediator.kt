@@ -15,7 +15,8 @@ internal class BehovMediator {
 
     private fun publiserMeldinger(hendelse: Personmelding, context: CommandContext, messageContext: MessageContext) {
         context.meldinger().forEach { melding ->
-            sikkerLogg.info("Sender melding i forbindelse med ${hendelse.javaClass.simpleName}\n{}", melding)
+            logg.info("Sender melding i forbindelse med ${hendelse.javaClass.simpleName}")
+            sikkerlogg.info("Sender melding i forbindelse med ${hendelse.javaClass.simpleName}\n{}", melding)
             messageContext.publish(hendelse.fødselsnummer(), melding)
         }
         context.nullstillMeldinger()
@@ -24,7 +25,8 @@ internal class BehovMediator {
     private fun publiserBehov(hendelse: Personmelding, context: CommandContext, contextId: UUID, messageContext: MessageContext) {
         if (!context.harBehov()) return
         val packet = behovPacket(hendelse, context, contextId)
-        sikkerLogg.info("Sender behov for ${context.behov().keys}\n{}", packet)
+        logg.info("Sender behov for ${context.behov().keys}")
+        sikkerlogg.info("Sender behov for ${context.behov().keys}\n{}", packet)
         messageContext.publish(hendelse.fødselsnummer(), packet)
         context.nullstillBehov()
     }
@@ -39,6 +41,7 @@ internal class BehovMediator {
         }).toJson()
 
     private companion object {
-        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
+        private val logg = LoggerFactory.getLogger(this::class.java)
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
 }
