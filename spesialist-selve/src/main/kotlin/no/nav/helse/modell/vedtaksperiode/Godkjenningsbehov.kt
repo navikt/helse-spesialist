@@ -165,37 +165,26 @@ internal class GodkjenningsbehovCommand(
             vedtaksperiodeId = vedtaksperiodeId,
             commandContextDao = commandContextDao
         ),
-        KlargjørPersonCommand(
+        ForberedVisningCommand(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
-            førsteKjenteDagFinner = førsteKjenteDagFinner,
-            personDao = personDao,
-        ),
-        KlargjørArbeidsgiverCommand(
-            orgnummere = orgnummereMedRelevanteArbeidsforhold + organisasjonsnummer,
-            arbeidsgiverDao = arbeidsgiverDao
-        ),
-        KlargjørArbeidsforholdCommand(
-            fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
-            arbeidsforholdDao = arbeidsforholdDao,
-            førstegangsbehandling = førstegangsbehandling
-        ),
-        KlargjørVedtaksperiodeCommand(
-            snapshotClient = snapshotClient,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
+            orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
             vedtaksperiodeId = vedtaksperiodeId,
             periodeFom = periodeFom,
             periodeTom = periodeTom,
-            vedtaksperiodetype = periodetype,
+            periodetype = periodetype,
             inntektskilde = inntektskilde,
-            personDao = personDao,
-            arbeidsgiverDao = arbeidsgiverDao,
-            snapshotDao = snapshotDao,
-            vedtakDao = vedtakDao,
+            førstegangsbehandling = førstegangsbehandling,
             utbetalingId = utbetalingId,
+            førsteKjenteDagFinner = førsteKjenteDagFinner,
+            personDao = personDao,
+            vedtakDao = vedtakDao,
             utbetalingDao = utbetalingDao,
+            arbeidsgiverDao = arbeidsgiverDao,
+            arbeidsforholdDao = arbeidsforholdDao,
+            snapshotDao = snapshotDao,
+            snapshotClient = snapshotClient
         ),
         KontrollerEgenAnsattstatus(
             fødselsnummer = fødselsnummer,
@@ -293,5 +282,62 @@ internal class GodkjenningsbehovCommand(
             skjæringstidspunkt = skjæringstidspunkt,
             personDao = personDao
         )
+    )
+}
+
+private class ForberedVisningCommand(
+    fødselsnummer: String,
+    aktørId: String,
+    organisasjonsnummer: String,
+    orgnummereMedRelevanteArbeidsforhold: List<String>,
+    vedtaksperiodeId: UUID,
+    periodeFom: LocalDate,
+    periodeTom: LocalDate,
+    periodetype: Periodetype,
+    inntektskilde: Inntektskilde,
+    førstegangsbehandling: Boolean,
+    utbetalingId: UUID,
+    førsteKjenteDagFinner: () -> LocalDate,
+    personDao: PersonDao,
+    vedtakDao: VedtakDao,
+    utbetalingDao: UtbetalingDao,
+    arbeidsgiverDao: ArbeidsgiverDao,
+    arbeidsforholdDao: ArbeidsforholdDao,
+    snapshotDao: SnapshotDao,
+    snapshotClient: SnapshotClient
+): MacroCommand() {
+    override val commands: List<Command> = listOf(
+        KlargjørPersonCommand(
+            fødselsnummer = fødselsnummer,
+            aktørId = aktørId,
+            førsteKjenteDagFinner = førsteKjenteDagFinner,
+            personDao = personDao,
+        ),
+        KlargjørArbeidsgiverCommand(
+            orgnummere = orgnummereMedRelevanteArbeidsforhold + organisasjonsnummer,
+            arbeidsgiverDao = arbeidsgiverDao
+        ),
+        KlargjørArbeidsforholdCommand(
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+            arbeidsforholdDao = arbeidsforholdDao,
+            førstegangsbehandling = førstegangsbehandling
+        ),
+        KlargjørVedtaksperiodeCommand(
+            snapshotClient = snapshotClient,
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            periodeFom = periodeFom,
+            periodeTom = periodeTom,
+            vedtaksperiodetype = periodetype,
+            inntektskilde = inntektskilde,
+            personDao = personDao,
+            arbeidsgiverDao = arbeidsgiverDao,
+            snapshotDao = snapshotDao,
+            vedtakDao = vedtakDao,
+            utbetalingId = utbetalingId,
+            utbetalingDao = utbetalingDao,
+        ),
     )
 }
