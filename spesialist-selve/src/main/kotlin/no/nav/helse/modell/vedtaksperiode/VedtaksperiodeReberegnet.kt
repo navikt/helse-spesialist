@@ -9,14 +9,21 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.VedtaksperiodeReberegnetPeriodehistorikk
 import no.nav.helse.modell.utbetaling.UtbetalingDao
+import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 
-internal class VedtaksperiodeReberegnet(
+internal class VedtaksperiodeReberegnet private constructor(
     override val id: UUID,
     private val fødselsnummer: String,
     private val vedtaksperiodeId: UUID,
     private val json: String,
 ) : Vedtaksperiodemelding {
+    internal constructor(packet: JsonMessage): this(
+        id = UUID.fromString(packet["@id"].asText()),
+        fødselsnummer = packet["fødselsnummer"].asText(),
+        vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText()),
+        json = packet.toJson(),
+    )
 
     override fun fødselsnummer() = fødselsnummer
     override fun toJson(): String = json

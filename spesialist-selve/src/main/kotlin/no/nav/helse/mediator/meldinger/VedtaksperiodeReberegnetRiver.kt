@@ -1,6 +1,7 @@
 package no.nav.helse.mediator.meldinger
 
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnet
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -28,6 +29,6 @@ internal class VedtaksperiodeReberegnetRiver(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         log.info("Håndterer reberegning av vedtaksperiode: ${packet["vedtaksperiodeId"].asText()}")
-        mediator.vedtaksperiodeReberegnet(packet, context)
+        mediator.håndter(VedtaksperiodeReberegnet(packet), context)
     }
 }

@@ -344,10 +344,6 @@ internal class HendelseMediator(
         håndter(hendelse, context)
     }
 
-    fun vedtaksperiodeReberegnet(message: JsonMessage, context: MessageContext) {
-        håndter(hendelsefabrikk.vedtaksperiodeReberegnet(message.toJson()), context)
-    }
-
     fun gosysOppgaveEndret(fødselsnummer: String, oppgaveEndret: GosysOppgaveEndret, context: MessageContext) {
         oppgaveDao.finnOppgaveId(fødselsnummer)?.also { oppgaveId ->
             sikkerlogg.info("Fant en oppgave for {}: {}", fødselsnummer, oppgaveId)

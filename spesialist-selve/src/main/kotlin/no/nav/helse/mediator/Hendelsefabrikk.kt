@@ -473,16 +473,6 @@ internal class Hendelsefabrikk(
         )
     }
 
-    fun vedtaksperiodeReberegnet(json: String): VedtaksperiodeReberegnet {
-        val jsonNode = mapper.readTree(json)
-        return VedtaksperiodeReberegnet(
-            id = UUID.fromString(jsonNode["@id"].asText()),
-            fødselsnummer = jsonNode["fødselsnummer"].asText(),
-            vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText()),
-            json = json,
-        )
-    }
-
     fun vedtaksperiodeOpprettet(
         id: UUID,
         fødselsnummer: String,
