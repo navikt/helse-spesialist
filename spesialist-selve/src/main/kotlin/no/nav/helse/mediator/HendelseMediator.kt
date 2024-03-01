@@ -235,10 +235,6 @@ internal class HendelseMediator(
         hendelsefabrikk.avviksvurdering(avviksvurdering)
     }
 
-    fun vedtaksperiodeEndret(melding: VedtaksperiodeEndret, context: MessageContext) {
-        return håndter(melding.fødselsnummer(), melding, context)
-    }
-
     fun vedtaksperiodeForkastet(
         hendelse: VedtaksperiodeForkastet,
         context: MessageContext,
