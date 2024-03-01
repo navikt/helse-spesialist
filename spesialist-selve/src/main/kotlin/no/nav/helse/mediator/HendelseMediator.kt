@@ -22,7 +22,7 @@ import no.nav.helse.mediator.meldinger.OverstyringIgangsattRiver
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.meldinger.SykefraværstilfellerRiver
 import no.nav.helse.mediator.meldinger.SøknadSendtRiver
-import no.nav.helse.mediator.meldinger.TilbakedatertRiver
+import no.nav.helse.mediator.meldinger.TilbakedateringBehandletRiver
 import no.nav.helse.mediator.meldinger.UtbetalingAnnullertRiver
 import no.nav.helse.mediator.meldinger.UtbetalingEndretRiver
 import no.nav.helse.mediator.meldinger.VarseldefinisjonRiver
@@ -57,7 +57,7 @@ import no.nav.helse.modell.dokument.DokumentDao
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.kommando.TilbakedateringGodkjent
+import no.nav.helse.modell.kommando.TilbakedateringBehandlet
 import no.nav.helse.modell.overstyring.OverstyringIgangsatt
 import no.nav.helse.modell.person.AdressebeskyttelseEndretRiver
 import no.nav.helse.modell.person.EndretEgenAnsattStatus
@@ -152,7 +152,7 @@ internal class HendelseMediator(
             VedtaksperiodeReberegnetRiver(it, this)
             VedtaksperiodeOpprettetRiver(it, this)
             GosysOppgaveEndretRiver(it, this)
-            TilbakedatertRiver(it, this, oppgaveDao)
+            TilbakedateringBehandletRiver(it, this)
             EndretSkjermetinfoRiver(it, this)
             DokumentRiver(it, dokumentDao)
             VedtakFattetRiver(it, this)
@@ -383,18 +383,36 @@ internal class HendelseMediator(
         } ?: sikkerlogg.info("Ingen åpne oppgaver i Speil for {}", fødselsnummer)
     }
 
+    fun tilbakedateringBehandlet(fødselsnummer: String, tilbakedateringBehandlet: TilbakedateringBehandlet, context: MessageContext) {
+        val syketilfelleStartDato = tilbakedateringBehandlet.syketilfelleStartdato
+        oppgaveDao.finnOppgaveId(fødselsnummer)?.also { oppgaveId ->
+            sikkerlogg.info("Fant en oppgave for {}: {}", fødselsnummer, oppgaveId)
+
+            val oppgaveDataForAutomatisering = oppgaveDao.oppgaveDataForAutomatisering(oppgaveId)
+                ?: return@also sikkerlogg.info("Fant ikke commandData for {} og {}", fødselsnummer, oppgaveId)
+
+            if (!oppgaveDataForAutomatisering.periodeOverlapperMed(syketilfelleStartDato)) {
+                sikkerlogg.info("SyketilfellestartDato er ikke innenfor periodens fom og tom, for tilbakedateringen {} og {}", fødselsnummer, oppgaveId)
+                return
+            }
+            val skjæringstidspunkt = oppgaveDataForAutomatisering.skjæringstidspunkt
+            val vedtaksperiodeId = oppgaveDataForAutomatisering.vedtaksperiodeId
+            val sykefraværstilfelle = hendelsefabrikk.sykefraværstilfelle(fødselsnummer, skjæringstidspunkt)
+
+            if (!sykefraværstilfelle.erTilbakedatert(vedtaksperiodeId))
+                return logg.info("ignorerer hendelseId=${tilbakedateringBehandlet.id} fordi det ikke er en tilbakedatering")
+
+            sikkerlogg.info("Har oppgave til_godkjenning og commandData for fnr $fødselsnummer og vedtaksperiodeId ${oppgaveDataForAutomatisering.vedtaksperiodeId}")
+            håndter(tilbakedateringBehandlet, context)
+        } ?: sikkerlogg.info("Ingen åpne oppgaver for {} ifm. godkjent tilbakedatering", fødselsnummer)
+    }
+
     fun vedtakFattet(id: UUID, fødselsnummer: String, vedtaksperiodeId: UUID, json: String, context: MessageContext) {
         håndter(hendelsefabrikk.vedtakFattet(id, fødselsnummer, vedtaksperiodeId, json), context)
     }
 
     fun slettGamleDokumenter(): Int {
         return dokumentDao.slettGamleDokumenter()
-    }
-
-    fun godkjentTilbakedatertSykmelding(id: UUID, fødselsnummer: String, vedtaksperiodeId: UUID, skjæringstidspunkt: LocalDate, json: String, context: MessageContext) {
-        if (!hendelsefabrikk.sykefraværstilfelle(fødselsnummer, skjæringstidspunkt).erTilbakedatert(vedtaksperiodeId)) return logg.info("ignorerer hendelseId=${id} fordi det ikke er en tilbakedatering")
-
-        håndter(hendelsefabrikk.godkjentTilbakedatertSykmelding(id, fødselsnummer, json), context)
     }
 
     private fun forbered() {
@@ -451,7 +469,7 @@ internal class HendelseMediator(
                 is VedtaksperiodeOpprettet -> iverksett(hendelsefabrikk.opprettVedtaksperiode(melding.fødselsnummer(), melding), melding.id, commandContext)
                 is GosysOppgaveEndret -> iverksett(hendelsefabrikk.gosysOppgaveEndret(melding.fødselsnummer(), melding), melding.id, commandContext)
                 is NyeVarsler -> iverksett(hendelsefabrikk.nyeVarsler(melding.fødselsnummer(), melding), melding.id, commandContext)
-                is TilbakedateringGodkjent -> iverksett(hendelsefabrikk.tilbakedateringGodkjent(melding.fødselsnummer()), melding.id, commandContext)
+                is TilbakedateringBehandlet -> iverksett(hendelsefabrikk.tilbakedateringGodkjent(melding.fødselsnummer()), melding.id, commandContext)
                 is VedtaksperiodeReberegnet -> iverksett(hendelsefabrikk.vedtaksperiodeReberegnet(melding), melding.id, commandContext)
                 is VedtaksperiodeNyUtbetaling -> iverksett(hendelsefabrikk.vedtaksperiodeNyUtbetaling(melding), melding.id, commandContext)
                 is SøknadSendt -> iverksett(hendelsefabrikk.søknadSendt(melding), melding.id, commandContext)

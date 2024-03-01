@@ -9,40 +9,27 @@ import java.util.UUID
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
+import no.nav.helse.modell.kommando.TilbakedateringBehandlet
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 
-internal class TilbakedatertRiverTest {
+internal class TilbakedateringBehandletRiverTest {
 
     private val mediator = mockk<HendelseMediator>(relaxed = true)
     private val testRapid = TestRapid()
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
 
     init {
-        TilbakedatertRiver(testRapid, mediator, oppgaveDao)
+        TilbakedateringBehandletRiver(testRapid, mediator)
     }
 
     @Test
-    fun `Hvis vi får inn et event for en tilbakedatering_behandlet som har oppgave og som har commanddata, kall mediator`() {
+    fun `Leser tilbakedatering behandlet`() {
         mocks()
         testRapid.sendTestMessage(event())
-        verify(exactly = 1) { mediator.godkjentTilbakedatertSykmelding(any(), any(), any(), any(), any(), any()) }
-    }
-
-    @Test
-    fun `Kaller ikke mediator hvis oppgave ikke er til_godkjenning`() {
-        mocks(oppgaveId = null)
-        testRapid.sendTestMessage(event())
-        verify(exactly = 0) { mediator.godkjentTilbakedatertSykmelding(any(), any(), any(), any(), any(), any()) }
-    }
-
-    @Test
-    fun `Kaller ikke mediator hvis vi ikke har commanddata for oppgave`() {
-        mocks(commandData = null)
-        testRapid.sendTestMessage(event())
-        verify(exactly = 0) { mediator.godkjentTilbakedatertSykmelding(any(), any(), any(), any(), any(), any()) }
+        verify(exactly = 1) { mediator.tilbakedateringBehandlet(any(), any<TilbakedateringBehandlet>(), any()) }
     }
 
     private fun mocks(

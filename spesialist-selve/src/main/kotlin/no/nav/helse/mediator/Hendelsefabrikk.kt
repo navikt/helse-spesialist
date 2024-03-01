@@ -27,7 +27,6 @@ import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommand
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.KobleVedtaksperiodeTilOverstyring
-import no.nav.helse.modell.kommando.TilbakedateringGodkjent
 import no.nav.helse.modell.kommando.TilbakedateringGodkjentCommand
 import no.nav.helse.modell.kommando.UtbetalingsgodkjenningCommand
 import no.nav.helse.modell.overstyring.OverstyringDao
@@ -534,20 +533,6 @@ internal class Hendelsefabrikk(
             fom = fom,
             tom = tom,
             skjæringstidspunkt = skjæringstidspunkt,
-            json = json,
-        )
-    }
-
-    fun godkjentTilbakedatertSykmelding(
-        id: UUID,
-        fødselsnummer: String,
-        json: String,
-    ): TilbakedateringGodkjent {
-
-
-        return TilbakedateringGodkjent(
-            id = id,
-            fødselsnummer = fødselsnummer,
             json = json,
         )
     }

@@ -13,4 +13,6 @@ data class OppgaveDataForAutomatisering(
     val hendelseId: UUID,
     val godkjenningsbehovJson: String,
     val periodetype: Periodetype,
-)
+) {
+    fun periodeOverlapperMed(dato: LocalDate): Boolean = dato in periodeFom..periodeTom
+}

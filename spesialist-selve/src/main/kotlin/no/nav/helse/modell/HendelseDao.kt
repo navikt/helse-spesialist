@@ -29,7 +29,7 @@ import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAKSPERIODE_OPPRETTET
 import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAKSPERIODE_REBEREGNET
 import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAK_FATTET
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
-import no.nav.helse.modell.kommando.TilbakedateringGodkjent
+import no.nav.helse.modell.kommando.TilbakedateringBehandlet
 import no.nav.helse.modell.overstyring.OverstyringIgangsatt
 import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import no.nav.helse.modell.person.OppdaterPersonsnapshot
@@ -243,7 +243,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
         is SøknadSendt -> SØKNAD_SENDT
         is VedtaksperiodeNyUtbetaling -> VEDTAKSPERIODE_NY_UTBETALING
         is Sykefraværstilfeller -> SYKEFRAVÆRSTILFELLER
-        is TilbakedateringGodkjent -> GODKJENT_TILBAKEDATERT_SYKMELDING
+        is TilbakedateringBehandlet -> GODKJENT_TILBAKEDATERT_SYKMELDING
         else -> throw IllegalArgumentException("ukjent hendelsetype: ${hendelse::class.simpleName}")
     }
 
