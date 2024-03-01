@@ -331,14 +331,54 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
         assertEquals(0, melding["begrunnelser"].map { it.asText() }.size)
     }
 
+    // Eksperimentering med DSL for å lage testdata
+    // Slett hvis du oppdager denne koden og den ikke er tatt i bruk andre steder 😂
+    // Plassert her pga. ren og skjær tilfeldighet
+    private data class PERSON(val fødselsnummer: String, val aktørId: String, val arbeidsgiver: List<ARBEIDSGIVER>) {
+        val Int.ag: String
+            get() = arbeidsgiver[this - 1].orgnr
+
+        operator fun <T> invoke(func: PERSON.() -> T) = func()
+    }
+
+    private data class PERSONBUILDER(
+        var fødselsnummer: String,
+        var aktørId: String,
+        var arbeidsgivere: List<ARBEIDSGIVER>,
+    ) {
+        fun build() = PERSON(fødselsnummer, aktørId, arbeidsgivere)
+    }
+
+    private fun person(init: PERSONBUILDER.() -> Unit): PERSON {
+        val builder = PERSONBUILDER(lagFødselsnummer(), lagAktørId(), arbeidsgivere(1))
+        builder.init()
+        return builder.build()
+    }
+
+    private data class ARBEIDSGIVERBUILDER(var orgnrs: List<String>) {
+        fun build() = orgnrs.map(::ARBEIDSGIVER)
+    }
+
+    private data class ARBEIDSGIVER(val orgnr: String)
+
+    private fun arbeidsgivere(antall: Int, init: ARBEIDSGIVERBUILDER.() -> Unit = {}): List<ARBEIDSGIVER> {
+        val builder = ARBEIDSGIVERBUILDER(List(antall) { lagOrganisasjonsnummer() }.toList())
+        builder.init()
+        return builder.build()
+    }
+
     @Test
     fun `håndterer overstyring av tidslinje`() {
-        nyPerson(fødselsnummer = FØDSELSNUMMER, organisasjonsnummer = ORGANISASJONSNUMMER, aktørId = AKTØR_ID)
+        val person = person {
+            arbeidsgivere = arbeidsgivere(2)
+        }
+        nyPerson(fødselsnummer = person.fødselsnummer, aktørId = person.aktørId, organisasjonsnummer = person { 2.ag } )
+
         val overstyring = OverstyrTidslinjeHandlingFraApi(
             vedtaksperiodeId = UUID.randomUUID(),
-            organisasjonsnummer = ORGANISASJONSNUMMER,
-            fødselsnummer = FØDSELSNUMMER,
-            aktørId = AKTØR_ID,
+            organisasjonsnummer = person { 2.ag },
+            fødselsnummer = person.fødselsnummer,
+            aktørId = person.aktørId,
             begrunnelse = "En begrunnelse",
             dager = listOf(
                 OverstyrTidslinjeHandlingFraApi.OverstyrDagFraApi(
@@ -354,13 +394,12 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
 
         mediator.håndter(overstyring, saksbehandler)
         val hendelse = testRapid.inspektør.hendelser("overstyr_tidslinje").first()
-        val overstyringId = finnOverstyringId(FØDSELSNUMMER)
+        val overstyringId = finnOverstyringId(person.fødselsnummer)
 
         assertNotNull(overstyringId)
         assertEquals(overstyringId.toString(), hendelse["@id"].asText())
-        assertEquals(FØDSELSNUMMER, hendelse["fødselsnummer"].asText())
-        assertEquals(AKTØR_ID, hendelse["aktørId"].asText())
-        assertEquals(ORGANISASJONSNUMMER, hendelse["organisasjonsnummer"].asText())
+        assertEquals(person.fødselsnummer, hendelse["fødselsnummer"].asText())
+        assertEquals(person { 2.ag }, hendelse["organisasjonsnummer"].asText())
 
         val overstyrtDag = hendelse["dager"].toList().single()
         assertEquals(10.januar, overstyrtDag["dato"].asLocalDate())
