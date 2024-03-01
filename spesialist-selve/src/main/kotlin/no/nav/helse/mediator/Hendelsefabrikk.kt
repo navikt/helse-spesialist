@@ -62,7 +62,6 @@ import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOpprettet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnetCommand
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
-import no.nav.helse.modell.vedtaksperiode.vedtak.VedtakFattet
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.notat.NotatDao
@@ -430,9 +429,5 @@ internal class Hendelsefabrikk(
             totrinnsvurderingMediator = totrinnsvurderingMediator,
             json = hendelse.toJson()
         )
-    }
-
-    fun vedtakFattet(id: UUID, fødselsnummer: String, vedtaksperiodeId: UUID, json: String): VedtakFattet {
-        return VedtakFattet(id, fødselsnummer, vedtaksperiodeId, json)
     }
 }

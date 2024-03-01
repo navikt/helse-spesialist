@@ -344,10 +344,6 @@ internal class HendelseMediator(
         } ?: sikkerlogg.info("Ingen åpne oppgaver for {} ifm. godkjent tilbakedatering", fødselsnummer)
     }
 
-    fun vedtakFattet(id: UUID, fødselsnummer: String, vedtaksperiodeId: UUID, json: String, context: MessageContext) {
-        håndter(hendelsefabrikk.vedtakFattet(id, fødselsnummer, vedtaksperiodeId, json), context)
-    }
-
     fun slettGamleDokumenter(): Int {
         return dokumentDao.slettGamleDokumenter()
     }

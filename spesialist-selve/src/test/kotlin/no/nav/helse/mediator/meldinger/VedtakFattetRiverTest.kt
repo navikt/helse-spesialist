@@ -5,6 +5,7 @@ import io.mockk.verify
 import java.time.LocalDateTime
 import java.util.*
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.modell.vedtaksperiode.vedtak.VedtakFattet
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
@@ -21,7 +22,7 @@ internal class VedtakFattetRiverTest {
     @Test
     fun `Leser inn vedtak_fattet-event`() {
         testRapid.sendTestMessage(event())
-        verify(exactly = 1) { mediator.vedtakFattet(any(), any(), any(), any(), any()) }
+        verify(exactly = 1) { mediator.håndter(any<VedtakFattet>(), any()) }
     }
 
     @Language("JSON")
