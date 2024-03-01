@@ -6,6 +6,7 @@ import io.mockk.verify
 import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeEndret
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -33,7 +34,7 @@ internal class VedtaksperiodeEndretRiverTest {
                 fødselsnummer = FØDSELSNUMMER
             )
         )
-        verify(exactly = 1) { mediator.vedtaksperiodeEndret(any(), any()) }
+        verify(exactly = 1) { mediator.håndter(any(), any<VedtaksperiodeEndret>(), any()) }
     }
 
     @Test
@@ -45,6 +46,6 @@ internal class VedtaksperiodeEndretRiverTest {
                 forrigeTilstand = "START"
             )
         )
-        verify(exactly = 0) { mediator.vedtaksperiodeEndret(any(), any()) }
+        verify(exactly = 0) { mediator.håndter(any(), any(), any()) }
     }
 }

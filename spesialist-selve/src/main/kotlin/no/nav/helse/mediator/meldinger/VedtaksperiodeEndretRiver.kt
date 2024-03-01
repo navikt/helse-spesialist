@@ -25,7 +25,6 @@ internal class VedtaksperiodeEndretRiver(
             validate {
                 it.demandValue("@event_name", "vedtaksperiode_endret")
                 it.rejectValue("forrigeTilstand", "START")
-                it.rejectValue("gjeldendeTilstand", "AVVENTER_SKJØNNSMESSIG_FASTSETTELSE")
                 it.requireKey("vedtaksperiodeId")
                 it.requireKey("fødselsnummer")
                 it.requireKey("@id")
@@ -47,6 +46,7 @@ internal class VedtaksperiodeEndretRiver(
             keyValue("eventId", UUID.fromString(packet["@id"].asText())),
             keyValue("forårsaketAvId", UUID.fromString(packet["@forårsaket_av.id"].asText())),
         )
-        mediator.vedtaksperiodeEndret(melding = VedtaksperiodeEndret(packet), context = context)
+        val melding = VedtaksperiodeEndret(packet)
+        mediator.håndter(melding.fødselsnummer(), melding, context)
     }
 }
