@@ -41,7 +41,6 @@ import no.nav.helse.modell.person.SøknadSendtCommand
 import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
-import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfeller
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.modell.utbetaling.LagreOppdragCommand
 import no.nav.helse.modell.utbetaling.UtbetalingAnnullert
@@ -64,7 +63,6 @@ import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastetCommand
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetalingCommand
-import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOppdatering
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOpprettet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnetCommand
@@ -188,22 +186,6 @@ internal class Hendelsefabrikk(
             aktørId = aktørId,
             organisasjonsnummer = organisasjonsnummer,
             json = json
-        )
-    }
-
-    fun sykefraværstilfeller(
-        id: UUID,
-        vedtaksperiodeOppdateringer: List<VedtaksperiodeOppdatering>,
-        fødselsnummer: String,
-        aktørId: String,
-        json: String,
-    ): Sykefraværstilfeller {
-        return Sykefraværstilfeller(
-            id = id,
-            fødselsnummer = fødselsnummer,
-            aktørId = aktørId,
-            vedtaksperiodeOppdateringer = vedtaksperiodeOppdateringer,
-            json = json,
         )
     }
 

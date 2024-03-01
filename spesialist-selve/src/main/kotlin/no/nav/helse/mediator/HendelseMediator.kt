@@ -77,7 +77,6 @@ import no.nav.helse.modell.vedtaksperiode.NyeVarsler
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeEndret
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
-import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOppdatering
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOpprettet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnet
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
@@ -235,25 +234,6 @@ internal class HendelseMediator(
 
     internal fun håndter(avviksvurdering: AvviksvurderingDto) {
         hendelsefabrikk.avviksvurdering(avviksvurdering)
-    }
-
-    fun sykefraværstilfeller(
-        json: String,
-        id: UUID,
-        vedtaksperioder: List<VedtaksperiodeOppdatering>,
-        fødselsnummer: String,
-        aktørId: String,
-        context: MessageContext,
-    ) {
-        val hendelse = hendelsefabrikk.sykefraværstilfeller(
-            id,
-            vedtaksperioder,
-            fødselsnummer,
-            aktørId,
-            json,
-        )
-
-        return håndter(hendelse, context)
     }
 
     fun vedtaksperiodeEndret(melding: VedtaksperiodeEndret, context: MessageContext) {

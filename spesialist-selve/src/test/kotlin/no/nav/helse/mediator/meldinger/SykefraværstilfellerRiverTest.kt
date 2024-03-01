@@ -8,8 +8,10 @@ import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfeller
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOppdatering
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -68,6 +70,17 @@ internal class SykefraværstilfellerRiverTest {
             VedtaksperiodeOppdatering(vedtaksperiodeId = vedtaksperiodeId3, skjæringstidspunkt = 1.februar, fom = 1.februar, tom = 5.februar),
             VedtaksperiodeOppdatering(vedtaksperiodeId = vedtaksperiodeId4, skjæringstidspunkt = 1.februar, fom = 6.februar, tom = 10.februar),
         )
-        verify(exactly = 1) { mediator.sykefraværstilfeller(any(), hendelseId, forventetListeVedtaksperioder, FØDSELSNUMMER, AKTØR, any()) }
+
+        verify(exactly = 1) {
+            mediator.håndter(
+                melding = withArg<Sykefraværstilfeller> {
+                    assertEquals(FØDSELSNUMMER, it.fødselsnummer())
+                    assertEquals(AKTØR, it.aktørId)
+                    assertEquals(hendelseId, it.id)
+                    assertEquals(forventetListeVedtaksperioder, it.vedtaksperiodeOppdateringer)
+                },
+                messageContext = any()
+            )
+        }
     }
 }
