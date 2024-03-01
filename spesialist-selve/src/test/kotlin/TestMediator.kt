@@ -8,7 +8,7 @@ import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.mediator.Hendelsefabrikk
+import no.nav.helse.mediator.Kommandofabrikk
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
@@ -90,7 +90,7 @@ internal class TestMediator(
         generasjonDao = generasjonDao,
     )
 
-    private val hendelsefabrikk = Hendelsefabrikk(
+    private val kommandofabrikk = Kommandofabrikk(
         dataSource = dataSource,
         snapshotClient = snapshotClient,
         oppgaveMediator = { oppgaveMediator },
@@ -103,7 +103,7 @@ internal class TestMediator(
             dataSource = dataSource,
             rapidsConnection = testRapid,
             godkjenningMediator = godkjenningMediator,
-            hendelsefabrikk = hendelsefabrikk,
+            kommandofabrikk = kommandofabrikk,
             avviksvurderingDao = avviksvurderingDao,
         )
     }

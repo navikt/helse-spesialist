@@ -100,7 +100,7 @@ internal class HendelseMediator(
     private val hendelseDao: HendelseDao = HendelseDao(dataSource),
     private val feilendeMeldingerDao: FeilendeMeldingerDao = FeilendeMeldingerDao(dataSource),
     private val godkjenningMediator: GodkjenningMediator,
-    private val hendelsefabrikk: Hendelsefabrikk,
+    private val kommandofabrikk: Kommandofabrikk,
     private val dokumentDao: DokumentDao = DokumentDao(dataSource),
     private val avviksvurderingDao: AvviksvurderingDao,
     private val utbetalingDao: UtbetalingDao = UtbetalingDao(dataSource),
@@ -201,21 +201,21 @@ internal class HendelseMediator(
     internal fun håndter(avsluttetMedVedtakMessage: AvsluttetMedVedtakMessage) {
         val fødselsnummer = avsluttetMedVedtakMessage.fødselsnummer()
         val skjæringstidspunkt = avsluttetMedVedtakMessage.skjæringstidspunkt()
-        val sykefraværstilfelle = hendelsefabrikk.sykefraværstilfelle(fødselsnummer, skjæringstidspunkt)
+        val sykefraværstilfelle = kommandofabrikk.sykefraværstilfelle(fødselsnummer, skjæringstidspunkt)
         val sykefraværstilfelleMediator = SykefraværstilfelleMediator(rapidsConnection)
         sykefraværstilfelle.registrer(sykefraværstilfelleMediator)
         avsluttetMedVedtakMessage.sendInnTil(sykefraværstilfelle)
     }
 
     internal fun håndter(avsluttetUtenVedtakMessage: AvsluttetUtenVedtakMessage) {
-        val generasjon = hendelsefabrikk.gjeldendeGenerasjon(avsluttetUtenVedtakMessage.vedtaksperiodeId())
+        val generasjon = kommandofabrikk.gjeldendeGenerasjon(avsluttetUtenVedtakMessage.vedtaksperiodeId())
         val sykefraværstilfelleMediator = SykefraværstilfelleMediator(rapidsConnection)
         generasjon.registrer(sykefraværstilfelleMediator)
         avsluttetUtenVedtakMessage.sendInnTil(generasjon)
     }
 
     internal fun håndter(sykefraværstilfeller: Sykefraværstilfeller) {
-        val generasjoner = hendelsefabrikk.generasjonerFor(sykefraværstilfeller.fødselsnummer())
+        val generasjoner = kommandofabrikk.generasjonerFor(sykefraværstilfeller.fødselsnummer())
         sikkerlogg.info(
             "oppdaterer sykefraværstilfeller for {}, {}",
             keyValue("aktørId", sykefraværstilfeller.aktørId),
@@ -226,13 +226,13 @@ internal class HendelseMediator(
 
     internal fun håndter(vedtakFattet: VedtakFattet) {
         val vedtaksperiodeId = vedtakFattet.vedtaksperiodeId()
-        val gjeldendeGenerasjon = hendelsefabrikk.gjeldendeGenerasjon(vedtaksperiodeId)
+        val gjeldendeGenerasjon = kommandofabrikk.gjeldendeGenerasjon(vedtaksperiodeId)
         gjeldendeGenerasjon.håndterVedtakFattet(vedtakFattet.id)
         if (vedtakDao.erSpesialsak(vedtaksperiodeId)) vedtakDao.spesialsakFerdigbehandlet(vedtaksperiodeId)
     }
 
     internal fun håndter(avviksvurdering: AvviksvurderingDto) {
-        hendelsefabrikk.avviksvurdering(avviksvurdering)
+        kommandofabrikk.avviksvurdering(avviksvurdering)
     }
 
     fun vedtaksperiodeForkastet(
@@ -334,7 +334,7 @@ internal class HendelseMediator(
             }
             val skjæringstidspunkt = oppgaveDataForAutomatisering.skjæringstidspunkt
             val vedtaksperiodeId = oppgaveDataForAutomatisering.vedtaksperiodeId
-            val sykefraværstilfelle = hendelsefabrikk.sykefraværstilfelle(fødselsnummer, skjæringstidspunkt)
+            val sykefraværstilfelle = kommandofabrikk.sykefraværstilfelle(fødselsnummer, skjæringstidspunkt)
 
             if (!sykefraværstilfelle.erTilbakedatert(vedtaksperiodeId))
                 return logg.info("ignorerer hendelseId=${tilbakedateringBehandlet.id} fordi det ikke er en tilbakedatering")
@@ -398,24 +398,24 @@ internal class HendelseMediator(
         try {
             when (melding) {
                 is AdressebeskyttelseEndret -> iverksett(AdressebeskyttelseEndretCommand(melding.fødselsnummer(), personDao, oppgaveDao, godkjenningMediator), melding.id, commandContext)
-                is EndretEgenAnsattStatus -> iverksett(hendelsefabrikk.endretEgenAnsattStatus(melding.fødselsnummer(), melding), melding.id, commandContext)
-                is VedtaksperiodeOpprettet -> iverksett(hendelsefabrikk.opprettVedtaksperiode(melding.fødselsnummer(), melding), melding.id, commandContext)
-                is GosysOppgaveEndret -> iverksett(hendelsefabrikk.gosysOppgaveEndret(melding.fødselsnummer(), melding), melding.id, commandContext)
-                is NyeVarsler -> iverksett(hendelsefabrikk.nyeVarsler(melding.fødselsnummer(), melding), melding.id, commandContext)
-                is TilbakedateringBehandlet -> iverksett(hendelsefabrikk.tilbakedateringGodkjent(melding.fødselsnummer()), melding.id, commandContext)
-                is VedtaksperiodeReberegnet -> iverksett(hendelsefabrikk.vedtaksperiodeReberegnet(melding), melding.id, commandContext)
-                is VedtaksperiodeNyUtbetaling -> iverksett(hendelsefabrikk.vedtaksperiodeNyUtbetaling(melding), melding.id, commandContext)
-                is SøknadSendt -> iverksett(hendelsefabrikk.søknadSendt(melding), melding.id, commandContext)
-                is OppdaterPersonsnapshot -> iverksett(hendelsefabrikk.oppdaterPersonsnapshot(melding), melding.id, commandContext)
-                is OverstyringIgangsatt -> iverksett(hendelsefabrikk.kobleVedtaksperiodeTilOverstyring(melding), melding.id, commandContext)
+                is EndretEgenAnsattStatus -> iverksett(kommandofabrikk.endretEgenAnsattStatus(melding.fødselsnummer(), melding), melding.id, commandContext)
+                is VedtaksperiodeOpprettet -> iverksett(kommandofabrikk.opprettVedtaksperiode(melding.fødselsnummer(), melding), melding.id, commandContext)
+                is GosysOppgaveEndret -> iverksett(kommandofabrikk.gosysOppgaveEndret(melding.fødselsnummer(), melding), melding.id, commandContext)
+                is NyeVarsler -> iverksett(kommandofabrikk.nyeVarsler(melding.fødselsnummer(), melding), melding.id, commandContext)
+                is TilbakedateringBehandlet -> iverksett(kommandofabrikk.tilbakedateringGodkjent(melding.fødselsnummer()), melding.id, commandContext)
+                is VedtaksperiodeReberegnet -> iverksett(kommandofabrikk.vedtaksperiodeReberegnet(melding), melding.id, commandContext)
+                is VedtaksperiodeNyUtbetaling -> iverksett(kommandofabrikk.vedtaksperiodeNyUtbetaling(melding), melding.id, commandContext)
+                is SøknadSendt -> iverksett(kommandofabrikk.søknadSendt(melding), melding.id, commandContext)
+                is OppdaterPersonsnapshot -> iverksett(kommandofabrikk.oppdaterPersonsnapshot(melding), melding.id, commandContext)
+                is OverstyringIgangsatt -> iverksett(kommandofabrikk.kobleVedtaksperiodeTilOverstyring(melding), melding.id, commandContext)
                 is Sykefraværstilfeller -> håndter(melding)
-                is UtbetalingAnnullert -> iverksett(hendelsefabrikk.utbetalingAnnullert(melding), melding.id, commandContext)
-                is UtbetalingEndret -> iverksett(hendelsefabrikk.utbetalingEndret(melding), melding.id, commandContext)
+                is UtbetalingAnnullert -> iverksett(kommandofabrikk.utbetalingAnnullert(melding), melding.id, commandContext)
+                is UtbetalingEndret -> iverksett(kommandofabrikk.utbetalingEndret(melding), melding.id, commandContext)
                 is VedtakFattet -> håndter(melding)
-                is VedtaksperiodeEndret -> iverksett(hendelsefabrikk.vedtaksperiodeEndret(melding), melding.id, commandContext)
-                is VedtaksperiodeForkastet -> iverksett(hendelsefabrikk.vedtaksperiodeForkastet(melding), melding.id, commandContext)
-                is Godkjenningsbehov -> iverksett(hendelsefabrikk.godkjenningsbehov(melding), melding.id, commandContext)
-                is Saksbehandlerløsning -> iverksett(hendelsefabrikk.utbetalingsgodkjenning(melding), melding.id, commandContext)
+                is VedtaksperiodeEndret -> iverksett(kommandofabrikk.vedtaksperiodeEndret(melding), melding.id, commandContext)
+                is VedtaksperiodeForkastet -> iverksett(kommandofabrikk.vedtaksperiodeForkastet(melding), melding.id, commandContext)
+                is Godkjenningsbehov -> iverksett(kommandofabrikk.godkjenningsbehov(melding), melding.id, commandContext)
+                is Saksbehandlerløsning -> iverksett(kommandofabrikk.utbetalingsgodkjenning(melding), melding.id, commandContext)
                 else -> throw IllegalArgumentException("Personhendelse må håndteres")
             }
             behovMediator.håndter(melding, commandContext, contextId, messageContext)

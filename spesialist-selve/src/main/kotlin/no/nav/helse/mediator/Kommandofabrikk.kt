@@ -71,7 +71,7 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.slf4j.LoggerFactory
 
-internal class Hendelsefabrikk(
+internal class Kommandofabrikk(
     dataSource: DataSource,
     private val hendelseDao: HendelseDao = HendelseDao(dataSource),
     private val personDao: PersonDao = PersonDao(dataSource),

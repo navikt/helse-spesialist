@@ -47,7 +47,7 @@ import no.nav.helse.mediator.BehandlingsstatistikkMediator
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.GodkjenningService
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.mediator.Hendelsefabrikk
+import no.nav.helse.mediator.Kommandofabrikk
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.TilgangskontrollørForReservasjon
 import no.nav.helse.mediator.dokument.DokumentMediator
@@ -382,7 +382,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         generasjonDao = generasjonDao,
     )
 
-    private val hendelsefabrikk = Hendelsefabrikk(
+    private val kommandofabrikk = Kommandofabrikk(
         dataSource = dataSource,
         snapshotClient = snapshotClient,
         oppgaveMediator = { oppgaveMediator },
@@ -408,7 +408,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             dataSource = dataSource,
             rapidsConnection = rapidsConnection,
             godkjenningMediator = godkjenningMediator,
-            hendelsefabrikk = hendelsefabrikk,
+            kommandofabrikk = kommandofabrikk,
             avviksvurderingDao = avviksvurderingDao,
         )
         saksbehandlerMediator = SaksbehandlerMediator(dataSource, versjonAvKode(env), rapidsConnection, oppgaveMediator, tilgangsgrupper)
