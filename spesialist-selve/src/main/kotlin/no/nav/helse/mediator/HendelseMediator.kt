@@ -312,17 +312,6 @@ internal class HendelseMediator(
         håndter(godkjenningsbehov, context)
     }
 
-    fun søknadSendt(
-        message: JsonMessage,
-        id: UUID,
-        fødselsnummer: String,
-        aktørId: String,
-        organisasjonsnummer: String,
-        context: MessageContext,
-    ) {
-        håndter(hendelsefabrikk.søknadSendt(id, fødselsnummer, aktørId, organisasjonsnummer, message.toJson()), context)
-    }
-
     fun utbetalingEndret(
         fødselsnummer: String,
         organisasjonsnummer: String,

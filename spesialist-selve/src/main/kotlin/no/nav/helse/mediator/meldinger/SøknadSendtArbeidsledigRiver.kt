@@ -1,6 +1,7 @@
 import java.util.UUID
-import net.logstash.logback.argument.StructuredArguments
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -34,21 +35,15 @@ internal class SøknadSendtArbeidsledigRiver(
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        val hendelseId = UUID.fromString(packet["@id"].asText())
-
-        logg.info("Mottok SøknadSendt med {}", StructuredArguments.keyValue("hendelseId", hendelseId))
+        logg.info(
+            "Mottok SøknadSendt med {}",
+            keyValue("hendelseId", UUID.fromString(packet["@id"].asText()))
+        )
         sikkerLogg.info(
             "Mottok SøknadSendt med {}, {}",
-            StructuredArguments.keyValue("hendelseId", hendelseId),
-            StructuredArguments.keyValue("hendelse", packet.toJson()),
+            keyValue("hendelseId", UUID.fromString(packet["@id"].asText())),
+            keyValue("hendelse", packet.toJson()),
         )
-        mediator.søknadSendt(
-            message = packet,
-            id = hendelseId,
-            fødselsnummer = packet["fnr"].asText(),
-            aktørId = packet["aktorId"].asText(),
-            organisasjonsnummer = packet["tidligereArbeidsgiverOrgnummer"].asText(),
-            context = context
-        )
+        mediator.håndter(SøknadSendt.søknadSendtArbeidsledig(packet), context)
     }
 }

@@ -1,8 +1,9 @@
 package no.nav.helse.mediator.meldinger
 
 import java.util.UUID
-import net.logstash.logback.argument.StructuredArguments
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -34,23 +35,15 @@ internal class SøknadSendtRiver(
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        val hendelseId = UUID.fromString(packet["@id"].asText())
-
-        if (hendelseId == UUID.fromString("67a9d19a-5f60-49f2-97b3-1de316ac6f3f")) return
-
-        logg.info("Mottok SøknadSendt med {}", StructuredArguments.keyValue("hendelseId", hendelseId))
+        logg.info(
+            "Mottok SøknadSendt med {}",
+            keyValue("hendelseId", UUID.fromString(packet["@id"].asText()))
+        )
         sikkerLogg.info(
             "Mottok SøknadSendt med {}, {}",
-            StructuredArguments.keyValue("hendelseId", hendelseId),
-            StructuredArguments.keyValue("hendelse", packet.toJson()),
+            keyValue("hendelseId", UUID.fromString(packet["@id"].asText())),
+            keyValue("hendelse", packet.toJson()),
         )
-        mediator.søknadSendt(
-            message = packet,
-            id = hendelseId,
-            fødselsnummer = packet["fnr"].asText(),
-            aktørId = packet["aktorId"].asText(),
-            organisasjonsnummer = packet["arbeidsgiver.orgnummer"].asText(),
-            context = context
-        )
+        mediator.håndter(SøknadSendt.søknadSendt(packet), context)
     }
 }

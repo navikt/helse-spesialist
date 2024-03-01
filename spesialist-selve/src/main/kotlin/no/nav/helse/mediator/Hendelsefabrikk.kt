@@ -172,22 +172,6 @@ internal class Hendelsefabrikk(
         avviksvurderingDao.lagre(avviksvurdering)
     }
 
-    fun søknadSendt(
-        id: UUID,
-        fødselsnummer: String,
-        aktørId: String,
-        organisasjonsnummer: String,
-        json: String,
-    ): SøknadSendt {
-        return SøknadSendt(
-            id = id,
-            fødselsnummer = fødselsnummer,
-            aktørId = aktørId,
-            organisasjonsnummer = organisasjonsnummer,
-            json = json
-        )
-    }
-
     fun utbetalingEndret(json: String): UtbetalingEndret {
         val jsonNode = mapper.readTree(json)
         val utbetalingId = UUID.fromString(jsonNode.path("utbetalingId").asText())
