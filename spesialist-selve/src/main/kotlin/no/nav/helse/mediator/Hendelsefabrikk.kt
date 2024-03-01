@@ -1,7 +1,5 @@
 package no.nav.helse.mediator
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
@@ -41,13 +39,11 @@ import no.nav.helse.modell.påvent.PåVentDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
-import no.nav.helse.modell.utbetaling.LagreOppdragCommand
 import no.nav.helse.modell.utbetaling.UtbetalingAnnullert
 import no.nav.helse.modell.utbetaling.UtbetalingAnnullertCommand
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.utbetaling.UtbetalingEndretCommand
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Generasjon
@@ -68,8 +64,6 @@ import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnetCommand
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.modell.vedtaksperiode.vedtak.VedtakFattet
 import no.nav.helse.modell.vergemal.VergemålDao
-import no.nav.helse.rapids_rivers.asLocalDate
-import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.notat.NotatMediator
@@ -121,10 +115,6 @@ internal class Hendelsefabrikk(
     private val avviksvurderingDao = AvviksvurderingDao(dataSource)
     private val oppgaveMediator: OppgaveMediator by lazy { oppgaveMediator() }
 
-    internal companion object {
-        private val mapper = jacksonObjectMapper()
-    }
-
     internal fun sykefraværstilfelle(fødselsnummer: String, skjæringstidspunkt: LocalDate): Sykefraværstilfelle {
         val gjeldendeGenerasjoner = generasjonerFor(fødselsnummer, skjæringstidspunkt)
         val skjønnsfastsatteSykepengegrunnlag = sykefraværstilfelleDao.finnSkjønnsfastsatteSykepengegrunnlag(fødselsnummer, skjæringstidspunkt)
@@ -171,37 +161,6 @@ internal class Hendelsefabrikk(
     internal fun avviksvurdering(avviksvurdering: AvviksvurderingDto) {
         avviksvurderingDao.lagre(avviksvurdering)
     }
-
-    fun utbetalingEndret(json: String): UtbetalingEndret {
-        val jsonNode = mapper.readTree(json)
-        val utbetalingId = UUID.fromString(jsonNode.path("utbetalingId").asText())
-        return UtbetalingEndret(
-            id = UUID.fromString(jsonNode.path("@id").asText()),
-            fødselsnummer = jsonNode.path("fødselsnummer").asText(),
-            organisasjonsnummer = jsonNode.path("organisasjonsnummer").asText(),
-            utbetalingId = utbetalingId,
-            type = jsonNode.path("type").asText(),
-            gjeldendeStatus = Utbetalingsstatus.valueOf(jsonNode.path("gjeldendeStatus").asText()),
-            opprettet = jsonNode.path("@opprettet").asLocalDateTime(),
-            arbeidsgiverbeløp = jsonNode.path("arbeidsgiverOppdrag").path("nettoBeløp").asInt(),
-            personbeløp = jsonNode.path("personOppdrag").path("nettoBeløp").asInt(),
-            arbeidsgiverOppdrag = tilOppdrag(jsonNode.path("arbeidsgiverOppdrag"), jsonNode.path("organisasjonsnummer").asText()),
-            personOppdrag = tilOppdrag(jsonNode.path("personOppdrag"), jsonNode.path("fødselsnummer").asText()),
-            json = json
-        )
-    }
-
-    private fun tilOppdrag(jsonNode: JsonNode, mottaker: String) = LagreOppdragCommand.Oppdrag(
-        fagsystemId = jsonNode.path("fagsystemId").asText(),
-        mottaker = jsonNode.path("mottaker").takeIf(JsonNode::isTextual)?.asText() ?: mottaker,
-        linjer = jsonNode.path("linjer").map { linje ->
-            LagreOppdragCommand.Oppdrag.Utbetalingslinje(
-                fom = linje.path("fom").asLocalDate(),
-                tom = linje.path("tom").asLocalDate(),
-                totalbeløp = linje.path("totalbeløp").takeIf(JsonNode::isInt)?.asInt()
-            )
-        }
-    )
 
     fun endretEgenAnsattStatus(fødselsnummer: String, hendelse: EndretEgenAnsattStatus): EndretEgenAnsattStatusCommand {
         return EndretEgenAnsattStatusCommand(

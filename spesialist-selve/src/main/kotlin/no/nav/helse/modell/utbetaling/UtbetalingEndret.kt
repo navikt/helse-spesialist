@@ -1,5 +1,6 @@
 package no.nav.helse.modell.utbetaling
 
+import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.db.ReservasjonDao
@@ -14,10 +15,13 @@ import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.InvaliderUtbetalingForGenerasjonerCommand
+import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.asLocalDate
+import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 
-internal class UtbetalingEndret(
+internal class UtbetalingEndret private constructor(
     override val id: UUID,
     private val fødselsnummer: String,
     val organisasjonsnummer: String,
@@ -31,9 +35,37 @@ internal class UtbetalingEndret(
     val personOppdrag: LagreOppdragCommand.Oppdrag,
     private val json: String
 ) : Personmelding {
+    internal constructor(packet: JsonMessage): this(
+        id = UUID.fromString(packet["@id"].asText()),
+        fødselsnummer = packet["fødselsnummer"].asText(),
+        organisasjonsnummer = packet["organisasjonsnummer"].asText(),
+        utbetalingId = UUID.fromString(packet["utbetalingId"].asText()),
+        type = packet["type"].asText(),
+        gjeldendeStatus = Utbetalingsstatus.valueOf(packet["gjeldendeStatus"].asText()),
+        opprettet = packet["@opprettet"].asLocalDateTime(),
+        arbeidsgiverbeløp = packet["arbeidsgiverOppdrag"]["nettoBeløp"].asInt(),
+        personbeløp = packet["personOppdrag"]["nettoBeløp"].asInt(),
+        arbeidsgiverOppdrag = tilOppdrag(packet["arbeidsgiverOppdrag"], packet["organisasjonsnummer"].asText()),
+        personOppdrag = tilOppdrag(packet["personOppdrag"], packet["fødselsnummer"].asText()),
+        json = packet.toJson()
+    )
 
     override fun fødselsnummer(): String = fødselsnummer
     override fun toJson(): String = json
+
+    private companion object {
+        private fun tilOppdrag(jsonNode: JsonNode, mottaker: String) = LagreOppdragCommand.Oppdrag(
+            fagsystemId = jsonNode.path("fagsystemId").asText(),
+            mottaker = jsonNode.path("mottaker").takeIf(JsonNode::isTextual)?.asText() ?: mottaker,
+            linjer = jsonNode.path("linjer").map { linje ->
+                LagreOppdragCommand.Oppdrag.Utbetalingslinje(
+                    fom = linje.path("fom").asLocalDate(),
+                    tom = linje.path("tom").asLocalDate(),
+                    totalbeløp = linje.path("totalbeløp").takeIf(JsonNode::isInt)?.asInt()
+                )
+            }
+        )
+    }
 }
 
 internal class UtbetalingEndretCommand(

@@ -1,10 +1,10 @@
 package no.nav.helse.mediator.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
-import java.time.LocalDate
 import java.util.UUID
-import net.logstash.logback.argument.StructuredArguments
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.Companion.values
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -27,14 +27,12 @@ internal class UtbetalingEndretRiver(
         River(rapidsConnection).apply {
             validate {
                 it.demandValue("@event_name", "utbetaling_endret")
-                it.requireKey(
-                    "@id", "fødselsnummer", "organisasjonsnummer",
-                    "utbetalingId")
+                it.requireKey("@id", "fødselsnummer", "organisasjonsnummer", "utbetalingId", "type")
                 // disse brukes i Hendelsefabrikk for å lagre oppdrag i db
                 it.requireKey("arbeidsgiverOppdrag.fagsystemId", "personOppdrag.fagsystemId")
                 it.interestedIn("arbeidsgiverOppdrag.mottaker", "personOppdrag.mottaker",
                     "arbeidsgiverOppdrag.nettoBeløp", "personOppdrag.nettoBeløp")
-                /*
+                it.requireKey("arbeidsgiverOppdrag", "personOppdrag")
                 it.requireArray("arbeidsgiverOppdrag.linjer") {
                     require("fom", JsonNode::asLocalDate)
                     require("tom", JsonNode::asLocalDate)
@@ -44,7 +42,7 @@ internal class UtbetalingEndretRiver(
                     require("fom", JsonNode::asLocalDate)
                     require("tom", JsonNode::asLocalDate)
                     interestedIn("totalbeløp")
-                }*/
+                }
                 it.requireAny("forrigeStatus", Utbetalingsstatus.gyldigeStatuser.values())
                 it.requireAny("gjeldendeStatus", Utbetalingsstatus.gyldigeStatuser.values())
                 it.require("@opprettet", JsonNode::asLocalDateTime)
@@ -59,15 +57,14 @@ internal class UtbetalingEndretRiver(
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         val utbetalingId = UUID.fromString(packet["utbetalingId"].asText())
         val fødselsnummer = packet["fødselsnummer"].asText()
-        val orgnummer = packet["organisasjonsnummer"].asText()
         val gjeldendeStatus = packet["gjeldendeStatus"].asText()
 
         sikkerLogg.info(
             "Mottok utbetaling_endret for {}, {} med status {}",
-            StructuredArguments.keyValue("fødselsnummer", fødselsnummer),
-            StructuredArguments.keyValue("utbetalingId", utbetalingId),
-            StructuredArguments.keyValue("gjeldendeStatus", gjeldendeStatus)
+            keyValue("fødselsnummer", fødselsnummer),
+            keyValue("utbetalingId", utbetalingId),
+            keyValue("gjeldendeStatus", gjeldendeStatus)
         )
-        mediator.utbetalingEndret(fødselsnummer, orgnummer, packet, context)
+        mediator.utbetalingEndret(UtbetalingEndret(packet), packet["@event_name"].asText(), context)
     }
 }

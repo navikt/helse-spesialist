@@ -313,31 +313,28 @@ internal class HendelseMediator(
     }
 
     fun utbetalingEndret(
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-        message: JsonMessage,
+        utbetalingEndret: UtbetalingEndret,
+        eventName: String,
         context: MessageContext,
     ) {
+        val organisasjonsnummer = utbetalingEndret.organisasjonsnummer
+        val id = utbetalingEndret.id
         if (arbeidsgiverDao.findArbeidsgiverByOrgnummer(organisasjonsnummer) == null) {
             logg.warn(
                 "Fant ikke arbeidsgiver med {}, se sikkerlogg for mer informasjon",
-                keyValue("hendelseId", message["@id"].asText())
+                keyValue("hendelseId", id)
             )
             sikkerlogg.warn(
                 "Forstår ikke utbetaling_endret: fant ikke arbeidsgiver med {}, {}, {}, {}. Meldingen er lagret i feilende_meldinger",
-                keyValue("hendelseId", message["@id"].asText()),
-                keyValue("fødselsnummer", fødselsnummer),
+                keyValue("hendelseId", id),
+                keyValue("fødselsnummer", utbetalingEndret.fødselsnummer()),
                 keyValue("organisasjonsnummer", organisasjonsnummer),
-                keyValue("utbetalingId", message["utbetalingId"].asText())
+                keyValue("utbetalingId", utbetalingEndret.utbetalingId)
             )
-            feilendeMeldingerDao.lagre(
-                UUID.fromString(message["@id"].asText()),
-                message["@event_name"].asText(),
-                message.toJson()
-            )
+            feilendeMeldingerDao.lagre(id, eventName, utbetalingEndret.toJson())
             return
         }
-        håndter(fødselsnummer, hendelsefabrikk.utbetalingEndret(message.toJson()), context)
+        håndter(utbetalingEndret.fødselsnummer(), utbetalingEndret, context)
     }
 
     fun oppdaterPersonsnapshot(hendelse: OppdaterPersonsnapshot, context: MessageContext) {
