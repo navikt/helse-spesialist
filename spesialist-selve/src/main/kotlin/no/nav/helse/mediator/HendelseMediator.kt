@@ -340,17 +340,6 @@ internal class HendelseMediator(
         håndter(fødselsnummer, hendelsefabrikk.utbetalingEndret(message.toJson()), context)
     }
 
-    fun vedtaksperiodeNyUtbetaling(
-        fødselsnummer: String,
-        hendelseId: UUID,
-        vedtaksperiodeId: UUID,
-        utbetalingId: UUID,
-        json: String,
-        context: MessageContext,
-    ) {
-        håndter(hendelsefabrikk.vedtaksperiodeNyUtbetaling(hendelseId, fødselsnummer, vedtaksperiodeId, utbetalingId, json), context)
-    }
-
     fun oppdaterPersonsnapshot(hendelse: OppdaterPersonsnapshot, context: MessageContext) {
         håndter(hendelse, context)
     }

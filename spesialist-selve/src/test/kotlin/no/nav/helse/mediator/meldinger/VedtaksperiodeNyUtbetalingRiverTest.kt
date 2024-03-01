@@ -9,7 +9,9 @@ import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -40,6 +42,16 @@ internal class VedtaksperiodeNyUtbetalingRiverTest {
                 utbetalingId = UTBETALING_ID,
             )
         )
-        verify(exactly = 1) { mediator.vedtaksperiodeNyUtbetaling(FØDSELSNUMMER, hendelseId, VEDTAKSPERIODE_ID, UTBETALING_ID, any(), any()) }
+        verify(exactly = 1) {
+            mediator.håndter(
+                melding = withArg<VedtaksperiodeNyUtbetaling> {
+                    assertEquals(hendelseId, it.id)
+                    assertEquals(FØDSELSNUMMER, it.fødselsnummer())
+                    assertEquals(VEDTAKSPERIODE_ID, it.vedtaksperiodeId())
+                    assertEquals(UTBETALING_ID, it.utbetalingId)
+                },
+                messageContext = any()
+            )
+        }
     }
 }

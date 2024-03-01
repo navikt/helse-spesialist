@@ -191,22 +191,6 @@ internal class Hendelsefabrikk(
         )
     }
 
-    fun vedtaksperiodeNyUtbetaling(
-        hendelseId: UUID,
-        fødselsnummer: String,
-        vedtaksperiodeId: UUID,
-        utbetalingId: UUID,
-        json: String,
-    ): VedtaksperiodeNyUtbetaling {
-        return VedtaksperiodeNyUtbetaling(
-            hendelseId,
-            fødselsnummer,
-            vedtaksperiodeId,
-            utbetalingId,
-            json,
-        )
-    }
-
     private fun tilOppdrag(jsonNode: JsonNode, mottaker: String) = LagreOppdragCommand.Oppdrag(
         fagsystemId = jsonNode.path("fagsystemId").asText(),
         mottaker = jsonNode.path("mottaker").takeIf(JsonNode::isTextual)?.asText() ?: mottaker,

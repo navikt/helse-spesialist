@@ -6,14 +6,22 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OpprettKoblingTilUtbetalingCommand
 import no.nav.helse.modell.utbetaling.UtbetalingDao
+import no.nav.helse.rapids_rivers.JsonMessage
 
-internal class VedtaksperiodeNyUtbetaling(
+internal class VedtaksperiodeNyUtbetaling private constructor(
     override val id: UUID,
     private val fødselsnummer: String,
     private val vedtaksperiodeId: UUID,
     val utbetalingId: UUID,
     private val json: String
 ) : Vedtaksperiodemelding {
+    internal constructor(packet: JsonMessage): this(
+        id = UUID.fromString(packet["@id"].asText()),
+        fødselsnummer = packet["fødselsnummer"].asText(),
+        vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText()),
+        utbetalingId = UUID.fromString(packet["utbetalingId"].asText()),
+        json = packet.toJson()
+    )
 
     override fun fødselsnummer(): String = fødselsnummer
     override fun vedtaksperiodeId(): UUID = vedtaksperiodeId
