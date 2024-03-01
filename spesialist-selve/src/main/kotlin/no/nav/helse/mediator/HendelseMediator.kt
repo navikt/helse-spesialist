@@ -485,11 +485,12 @@ internal class HendelseMediator(
     }
 
     override fun oppdaterSnapshot(fnr: String) {
-        val json = JsonMessage.newMessage(
+        val json = objectMapper.readTree(JsonMessage.newMessage(
             "oppdater_personsnapshot", mapOf(
                 "fødselsnummer" to fnr
             )
-        )
+        ).toJson())
+
         oppdaterPersonsnapshot(OppdaterPersonsnapshot(json), rapidsConnection)
     }
 }
