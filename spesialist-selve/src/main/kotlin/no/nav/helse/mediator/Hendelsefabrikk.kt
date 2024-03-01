@@ -24,7 +24,7 @@ import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommand
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
-import no.nav.helse.modell.kommando.KobleVedtaksperiodeTilOverstyring
+import no.nav.helse.modell.kommando.KobleVedtaksperiodeTilOverstyringCommand
 import no.nav.helse.modell.kommando.TilbakedateringGodkjentCommand
 import no.nav.helse.modell.kommando.UtbetalingsgodkjenningCommand
 import no.nav.helse.modell.overstyring.OverstyringDao
@@ -284,8 +284,8 @@ internal class Hendelsefabrikk(
         )
     }
 
-    fun kobleVedtaksperiodeTilOverstyring(hendelse: OverstyringIgangsatt): KobleVedtaksperiodeTilOverstyring {
-        return KobleVedtaksperiodeTilOverstyring(
+    fun kobleVedtaksperiodeTilOverstyring(hendelse: OverstyringIgangsatt): KobleVedtaksperiodeTilOverstyringCommand {
+        return KobleVedtaksperiodeTilOverstyringCommand(
             berørteVedtaksperiodeIder = hendelse.berørteVedtaksperiodeIder,
             kilde = hendelse.kilde,
             overstyringDao = overstyringDao,

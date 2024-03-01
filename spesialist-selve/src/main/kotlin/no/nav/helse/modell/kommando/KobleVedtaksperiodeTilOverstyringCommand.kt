@@ -3,7 +3,7 @@ package no.nav.helse.modell.kommando
 import java.util.UUID
 import no.nav.helse.modell.overstyring.OverstyringDao
 
-internal class KobleVedtaksperiodeTilOverstyring(
+internal class KobleVedtaksperiodeTilOverstyringCommand(
     val berørteVedtaksperiodeIder: List<UUID>,
     val kilde: UUID,
     val overstyringDao: OverstyringDao,
