@@ -10,7 +10,6 @@ data class TidslinjeOverstyring (
 )
 
 data class InntektOgRefusjonOverstyring (
-    val vedtaksperiodeId: String?,
     val aktorId: String,
     val fodselsnummer: String,
     val skjaringstidspunkt: DateString,
@@ -18,7 +17,6 @@ data class InntektOgRefusjonOverstyring (
 )
 
 data class ArbeidsforholdOverstyringHandling(
-    val vedtaksperiodeId: String?,
     val fodselsnummer: String,
     val aktorId: String,
     val skjaringstidspunkt: DateString,

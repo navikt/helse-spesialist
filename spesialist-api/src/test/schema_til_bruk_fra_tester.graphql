@@ -1237,7 +1237,6 @@ input ArbeidsforholdOverstyringHandlingInput {
     fodselsnummer: String!
     overstyrteArbeidsforhold: [OverstyringArbeidsforholdInput!]!
     skjaringstidspunkt: String!
-    vedtaksperiodeId: String
 }
 
 input FiltreringInput {
@@ -1254,7 +1253,6 @@ input InntektOgRefusjonOverstyringInput {
     arbeidsgivere: [OverstyringArbeidsgiverInput!]!
     fodselsnummer: String!
     skjaringstidspunkt: String!
-    vedtaksperiodeId: String
 }
 
 input LovhjemmelInput {

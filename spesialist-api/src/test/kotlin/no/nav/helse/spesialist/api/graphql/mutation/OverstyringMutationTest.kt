@@ -56,7 +56,7 @@ internal class OverstyringMutationTest : AbstractOverstyringApiTest() {
     fun `overstyr arbeidsforhold`() {
         val body = overstyrArbeidsforhold(
             ArbeidsforholdOverstyringHandling(
-                UUID.randomUUID().toString(), FØDSELSNUMMER, AKTØRID, 10.januar.toString(), listOf(
+                FØDSELSNUMMER, AKTØRID, 10.januar.toString(), listOf(
                     OverstyringArbeidsforhold(ORGANISASJONSNUMMER_GHOST, true, "En begrunnelse", "En forklaring", null)
                 )
             )
@@ -68,7 +68,7 @@ internal class OverstyringMutationTest : AbstractOverstyringApiTest() {
     fun `overstyr inntekt og refusjon`() {
         val body = overstyrInntektOgRefusjon(
             InntektOgRefusjonOverstyring(
-                UUID.randomUUID().toString(), AKTØRID, FØDSELSNUMMER, 10.januar.toString(), listOf(
+                AKTØRID, FØDSELSNUMMER, 10.januar.toString(), listOf(
                     OverstyringArbeidsgiver(
                         ORGANISASJONSNUMMER_GHOST,
                         24000.0,
