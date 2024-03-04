@@ -6,6 +6,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.mediator.UtgåendeMeldingerObserver
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.arbeidsgiver.Arbeidsgiverinformasjonløsning
 import no.nav.helse.modell.person.HentPersoninfoløsning
@@ -30,9 +31,19 @@ internal class OpprettArbeidsgiverCommandTest {
     private lateinit var context: CommandContext
     private val command = OpprettArbeidsgiverCommand(listOf(ORGNR), dao)
 
+    private val observer = object : UtgåendeMeldingerObserver {
+        val behov = mutableMapOf<String, Map<String, Any>>()
+        override fun behov(behov: String, ekstraKontekst: Map<String, Any>, detaljer: Map<String, Any>) {
+            this.behov[behov] = detaljer
+        }
+
+        override fun hendelse(hendelse: String) {}
+    }
+
     @BeforeEach
     fun setup() {
         context = CommandContext(UUID.randomUUID())
+        context.nyObserver(observer)
         clearMocks(dao)
     }
 
@@ -60,7 +71,7 @@ internal class OpprettArbeidsgiverCommandTest {
         arbeidsgiverFinnesIkke(fnr)
         val command = OpprettArbeidsgiverCommand(listOf(fnr), dao)
         assertFalse(command.execute(context))
-        context.behov().getValue("HentPersoninfoV2").also { behov ->
+        observer.behov.getValue("HentPersoninfoV2").also { behov ->
             assertEquals(listOf(fnr), behov["ident"])
         }
     }

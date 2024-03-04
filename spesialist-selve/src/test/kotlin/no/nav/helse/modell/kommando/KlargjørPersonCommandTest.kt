@@ -7,6 +7,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.mediator.UtgåendeMeldingerObserver
 import no.nav.helse.modell.person.HentEnhetløsning
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerløsning
 import no.nav.helse.modell.person.HentPersoninfoløsning
@@ -38,9 +39,22 @@ internal class KlargjørPersonCommandTest {
     private val command = KlargjørPersonCommand(FNR, AKTØR, { LocalDate.now() }, personDao)
     private lateinit var context: CommandContext
 
+    private val observer = object : UtgåendeMeldingerObserver {
+        val behov = mutableMapOf<String, Map<String, Any>>()
+        val hendelser = mutableListOf<String>()
+        override fun behov(behov: String, ekstraKontekst: Map<String, Any>, detaljer: Map<String, Any>) {
+            this.behov[behov] = detaljer
+        }
+
+        override fun hendelse(hendelse: String) {
+            hendelser.add(hendelse)
+        }
+    }
+
     @BeforeEach
     fun setup() {
         context = CommandContext(UUID.randomUUID())
+        context.nyObserver(observer)
         clearMocks(personDao)
     }
 
@@ -51,7 +65,7 @@ internal class KlargjørPersonCommandTest {
         context.add(HentEnhetløsning(ENHET_OSLO))
         context.add(HentInfotrygdutbetalingerløsning(objectMapper.createObjectNode()))
         assertTrue(command.execute(context))
-        assertFalse(context.harBehov())
+        assertTrue(observer.behov.isEmpty())
         verify(exactly = 1) { personDao.insertPerson(FNR, AKTØR, any(), any(), any()) }
     }
 
@@ -110,7 +124,7 @@ internal class KlargjørPersonCommandTest {
         context.add(mockk<HentPersoninfoløsning>(relaxed = true))
         context.add(mockk<HentInfotrygdutbetalingerløsning>(relaxed = true))
         assertTrue(command.execute(context))
-        assertEquals(0, context.meldinger().size)
+        assertEquals(0, observer.hendelser.size)
     }
 
     @Test
@@ -119,12 +133,12 @@ internal class KlargjørPersonCommandTest {
         context.add(mockk<HentPersoninfoløsning>(relaxed = true))
         context.add(mockk<HentInfotrygdutbetalingerløsning>(relaxed = true))
         assertTrue(command.execute(context))
-        assertEquals(0, context.meldinger().size)
+        assertEquals(0, observer.hendelser.size)
     }
 
     private fun assertHarBehov(forventetBehov: List<String>) {
-        assertTrue(context.harBehov())
-        assertEquals(forventetBehov, context.behov().keys.toList())
+        assertTrue(observer.behov.isNotEmpty())
+        assertEquals(forventetBehov, observer.behov.keys.toList())
         verify(exactly = 0) { personDao.insertPerson(FNR, any(), any(), any(), any()) }
     }
 

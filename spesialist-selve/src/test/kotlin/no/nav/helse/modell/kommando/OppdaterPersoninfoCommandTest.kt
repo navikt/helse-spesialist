@@ -6,6 +6,7 @@ import io.mockk.spyk
 import io.mockk.verify
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.mediator.UtgåendeMeldingerObserver
 import no.nav.helse.modell.person.HentPersoninfoløsning
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
@@ -13,6 +14,7 @@ import no.nav.helse.spesialist.api.person.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class OppdaterPersoninfoCommandTest {
@@ -25,17 +27,32 @@ internal class OppdaterPersoninfoCommandTest {
         private val KJØNN = Kjønn.Ukjent
         private val ADRESSEBESKYTTELSE = Adressebeskyttelse.StrengtFortrolig
     }
+    private lateinit var context: CommandContext
 
     private val personDao = mockk<PersonDao>(relaxed = true)
 
+    private val observer = object : UtgåendeMeldingerObserver {
+        val behov = mutableMapOf<String, Map<String, Any>>()
+        override fun behov(behov: String, ekstraKontekst: Map<String, Any>, detaljer: Map<String, Any>) {
+            this.behov[behov] = detaljer
+        }
+
+        override fun hendelse(hendelse: String) {}
+    }
+
+    @BeforeEach
+    fun beforeEach() {
+        context = CommandContext(UUID.randomUUID())
+        context.nyObserver(observer)
+    }
+
     @Test
     fun `trenger personinfo`() {
-        val context = CommandContext(UUID.randomUUID())
         val command = OppdaterPersoninfoCommand(FNR, personDao, force = false)
         utdatertPersoninfo()
         assertFalse(command.execute(context))
-        assertTrue(context.harBehov())
-        assertEquals(listOf("HentPersoninfoV2"), context.behov().keys.toList())
+        assertTrue(observer.behov.isNotEmpty())
+        assertEquals(listOf("HentPersoninfoV2"), observer.behov.keys.toList())
     }
 
     @Test

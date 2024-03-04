@@ -7,6 +7,7 @@ import io.mockk.verify
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.mediator.UtgåendeMeldingerObserver
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.mediator.meldinger.løsninger.Inntektløsning
 import no.nav.helse.modell.person.PersonDao
@@ -21,9 +22,21 @@ internal class PersisterInntektCommandTest {
     }
 
     private val personDao = mockk<PersonDao>(relaxed = true)
+    private lateinit var context: CommandContext
+
+    private val observer = object : UtgåendeMeldingerObserver {
+        val behov = mutableListOf<String>()
+        override fun behov(behov: String, ekstraKontekst: Map<String, Any>, detaljer: Map<String, Any>) {
+            this.behov.add(behov)
+        }
+
+        override fun hendelse(hendelse: String) {}
+    }
 
     @BeforeEach
     fun setup() {
+        context = CommandContext(UUID.randomUUID())
+        context.nyObserver(observer)
         clearMocks(personDao)
     }
 
@@ -31,22 +44,20 @@ internal class PersisterInntektCommandTest {
     fun `Sender behov om inntekt ikke er lagret fra før`() {
         every { personDao.findInntekter(any(), any()) } returns null
 
-        val context = CommandContext(UUID.randomUUID())
         val command = PersisterInntektCommand(FNR, LocalDate.now(), personDao)
 
         assertFalse(command.execute(context))
-        assertTrue(context.harBehov())
+        assertTrue(observer.behov.isNotEmpty())
     }
 
     @Test
     fun `Fullfører dersom inntekt er lagret fra før`() {
         every { personDao.findInntekter(any(), any()) } returns inntekter()
 
-        val context = CommandContext(UUID.randomUUID())
         val command = PersisterInntektCommand(FNR, LocalDate.now(), personDao)
 
         assertTrue(command.execute(context))
-        assertFalse(context.harBehov())
+        assertTrue(observer.behov.isEmpty())
     }
 
     @Test
@@ -55,11 +66,10 @@ internal class PersisterInntektCommandTest {
 
         every { personDao.findInntekter(FNR, skjæringtidspunkt) } returns null
 
-        val context = CommandContext(UUID.randomUUID())
         val command = PersisterInntektCommand(FNR, skjæringtidspunkt, personDao)
 
         assertFalse(command.execute(context))
-        assertTrue(context.harBehov())
+        assertTrue(observer.behov.isNotEmpty())
 
         context.add(løsning())
         assertTrue(command.resume(context))

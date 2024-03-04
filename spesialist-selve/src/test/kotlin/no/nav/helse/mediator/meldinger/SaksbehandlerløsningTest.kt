@@ -10,6 +10,7 @@ import java.util.UUID
 import java.util.UUID.randomUUID
 import no.nav.helse.januar
 import no.nav.helse.mediator.GodkjenningMediator
+import no.nav.helse.mediator.UtgåendeMeldingerObserver
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.UtbetalingsgodkjenningCommand
@@ -65,7 +66,18 @@ internal class SaksbehandlerløsningTest {
         )
     }
 
-    private val context = CommandContext(randomUUID())
+    private val observer = object : UtgåendeMeldingerObserver {
+        val hendelser = mutableListOf<String>()
+        override fun behov(behov: String, ekstraKontekst: Map<String, Any>, detaljer: Map<String, Any>) {}
+
+        override fun hendelse(hendelse: String) {
+            this.hendelser.add(hendelse)
+        }
+    }
+
+    private val context = CommandContext(randomUUID()).also {
+        it.nyObserver(observer)
+    }
 
     @Test
     fun `løser godkjenningsbehov`() {
@@ -81,7 +93,7 @@ internal class SaksbehandlerløsningTest {
         val  saksbehandleroverstyringer = listOf(randomUUID(), randomUUID())
         val saksbehandlerløsning = saksbehandlerløsning(true, saksbehandleroverstyringer)
         assertTrue(saksbehandlerløsning.execute(context))
-        val løsning = context.meldinger()
+        val løsning = observer.hendelser
             .map(objectMapper::readTree)
             .filter { it["@event_name"].asText() == "behov" }
             .firstOrNull { it["@løsning"].hasNonNull("Godkjenning") } ?: fail("Fant ikke løsning på godkjenningsbehov")
@@ -99,7 +111,7 @@ internal class SaksbehandlerløsningTest {
     }
 
     private fun assertLøsning(godkjent: Boolean, refusjonstype: Refusjonstype) {
-        val løsning = context.meldinger()
+        val løsning = observer.hendelser
             .map(objectMapper::readTree)
             .filter { it["@event_name"].asText() == "behov" }
             .firstOrNull { it["@løsning"].hasNonNull("Godkjenning") } ?: fail("Fant ikke løsning på godkjenningsbehov")

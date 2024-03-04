@@ -5,8 +5,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
+import no.nav.helse.mediator.UtgåendeMeldingerObserver
 import no.nav.helse.modell.person.PersonDao
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -21,9 +21,19 @@ internal class OpprettMinimalPersonCommandTest {
     private val command = OpprettMinimalPersonCommand(FNR, AKTØR, personDao)
     private lateinit var context: CommandContext
 
+    private val observer = object : UtgåendeMeldingerObserver {
+        val behov = mutableListOf<String>()
+        override fun behov(behov: String, ekstraKontekst: Map<String, Any>, detaljer: Map<String, Any>) {
+            this.behov.add(behov)
+        }
+
+        override fun hendelse(hendelse: String) {}
+    }
+
     @BeforeEach
     fun setup() {
         context = CommandContext(UUID.randomUUID())
+        context.nyObserver(observer)
         clearMocks(personDao)
     }
 
@@ -34,12 +44,11 @@ internal class OpprettMinimalPersonCommandTest {
         verify(exactly = 0) { personDao.insertPerson(FNR, AKTØR) }
     }
 
-
     @Test
     fun `oppretter person`() {
         personFinnesIkke()
         assertTrue(command.execute(context))
-        assertFalse(context.harBehov())
+        assertTrue(observer.behov.isEmpty())
 
         verify(exactly = 1) { personDao.insertPerson(FNR, AKTØR) }
         personFinnes()

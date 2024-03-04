@@ -8,6 +8,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.januar
+import no.nav.helse.mediator.UtgåendeMeldingerObserver
 import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.kommando.CommandContext
@@ -72,9 +73,19 @@ internal class VurderÅpenGosysoppgaveTest {
     )
     private lateinit var context: CommandContext
 
+    private val observer = object : UtgåendeMeldingerObserver {
+        val behov = mutableMapOf<String, Map<String, Any>>()
+        override fun behov(behov: String, ekstraKontekst: Map<String, Any>, detaljer: Map<String, Any>) {
+            this.behov[behov] = detaljer
+        }
+
+        override fun hendelse(hendelse: String) {}
+    }
+
     @BeforeEach
     fun setup() {
         context = CommandContext(UUID.randomUUID())
+        context.nyObserver(observer)
         clearMocks(dao)
     }
 
@@ -82,8 +93,8 @@ internal class VurderÅpenGosysoppgaveTest {
     fun `Ber om åpne oppgaver i gosys`() {
         val skjæringstidspunkt = LocalDate.now().minusDays(17)
         assertFalse(command(skjæringstidspunkt = skjæringstidspunkt).execute(context))
-        assertEquals(listOf("ÅpneOppgaver"), context.behov().keys.toList())
-        assertEquals(skjæringstidspunkt.minusYears(1), context.behov()["ÅpneOppgaver"]!!["ikkeEldreEnn"])
+        assertEquals(listOf("ÅpneOppgaver"), observer.behov.keys.toList())
+        assertEquals(skjæringstidspunkt.minusYears(1), observer.behov["ÅpneOppgaver"]!!["ikkeEldreEnn"])
     }
 
     @Test

@@ -8,6 +8,7 @@ import java.util.UUID
 import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.januar
+import no.nav.helse.mediator.UtgåendeMeldingerObserver
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.løsninger.Risikovurderingløsning
@@ -48,9 +49,19 @@ internal class VurderVurderingsmomenterTest {
 
     private lateinit var context: CommandContext
 
+    private val observer = object : UtgåendeMeldingerObserver {
+        val behov = mutableMapOf<String, Map<String, Any>>()
+        override fun behov(behov: String, ekstraKontekst: Map<String, Any>, detaljer: Map<String, Any>) {
+            this.behov[behov] = detaljer
+        }
+
+        override fun hendelse(hendelse: String) {}
+    }
+
     @BeforeEach
     fun setup() {
         context = CommandContext(UUID.randomUUID())
+        context.nyObserver(observer)
         every { risikovurderingDao.hentRisikovurdering(VEDTAKSPERIODE_ID) } returns null
     }
 
@@ -58,10 +69,10 @@ internal class VurderVurderingsmomenterTest {
     fun `Sender behov for risikovurdering`() {
         val risikoCommand = risikoCommand()
         risikoCommand.assertFalse()
-        assertTrue(context.harBehov())
-        assertEquals(1, context.behov().size)
-        assertEquals("Risikovurdering", context.behov().keys.first())
-        assertTrue(context.behov().getValue("Risikovurdering").keys.contains("førstegangsbehandling"))
+        assertTrue(observer.behov.isNotEmpty())
+        assertEquals(1, observer.behov.size)
+        assertEquals("Risikovurdering", observer.behov.keys.first())
+        assertTrue(observer.behov.getValue("Risikovurdering").keys.contains("førstegangsbehandling"))
     }
 
     @Test
@@ -70,7 +81,7 @@ internal class VurderVurderingsmomenterTest {
 
         risikoCommand().assertFalse()
 
-        val risikobehov = context.behov().getValue("Risikovurdering")
+        val risikobehov = observer.behov.getValue("Risikovurdering")
         assertTrue(risikobehov["kunRefusjon"] as Boolean)
     }
 
@@ -80,7 +91,7 @@ internal class VurderVurderingsmomenterTest {
 
         risikoCommand().assertFalse()
 
-        val risikobehov = context.behov().getValue("Risikovurdering")
+        val risikobehov = observer.behov.getValue("Risikovurdering")
         assertFalse(risikobehov["kunRefusjon"] as Boolean)
     }
 
@@ -89,7 +100,7 @@ internal class VurderVurderingsmomenterTest {
         every { risikovurderingDao.hentRisikovurdering(VEDTAKSPERIODE_ID) } returns mockk()
         val risikoCommand = risikoCommand()
         risikoCommand.assertTrue()
-        assertFalse(context.harBehov())
+        assertTrue(observer.behov.isEmpty())
     }
 
     @Test
@@ -97,15 +108,23 @@ internal class VurderVurderingsmomenterTest {
         every { risikovurderingDao.lagre(VEDTAKSPERIODE_ID, any(), any(), any(), any()) } returns
         context.add(
             Risikovurderingløsning(
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            opprettet = LocalDateTime.now(),
-            kanGodkjennesAutomatisk = true,
-            løsning = risikovurderingLøsning(funn = listOf(Risikofunn(kategori = listOf("test"), beskrivelse = "test", kreverSupersaksbehandler = false)))
-        )
+                vedtaksperiodeId = VEDTAKSPERIODE_ID,
+                opprettet = LocalDateTime.now(),
+                kanGodkjennesAutomatisk = true,
+                løsning = risikovurderingLøsning(
+                    funn = listOf(
+                        Risikofunn(
+                            kategori = listOf("test"),
+                            beskrivelse = "test",
+                            kreverSupersaksbehandler = false
+                        )
+                    )
+                )
+            )
         )
         val risikoCommand = risikoCommand()
         assertTrue(risikoCommand.execute(context))
-        assertFalse(context.harBehov())
+        assertTrue(observer.behov.isEmpty())
         verify(exactly = 1) { risikovurderingDao.lagre(VEDTAKSPERIODE_ID, any(), any(), any(), any()) }
     }
 
@@ -122,9 +141,9 @@ internal class VurderVurderingsmomenterTest {
         )
         val risikoCommand = risikoCommand()
         risikoCommand.assertFalse()
-        assertTrue(context.harBehov())
-        assertEquals(setOf("Risikovurdering"), context.behov().keys)
-        assertEquals(VEDTAKSPERIODE_ID, context.behov().entries.first().value["vedtaksperiodeId"])
+        assertTrue(observer.behov.isNotEmpty())
+        assertEquals(setOf("Risikovurdering"), observer.behov.keys)
+        assertEquals(VEDTAKSPERIODE_ID, observer.behov.entries.first().value["vedtaksperiodeId"])
     }
 
     private fun VurderVurderingsmomenter.assertTrue() {

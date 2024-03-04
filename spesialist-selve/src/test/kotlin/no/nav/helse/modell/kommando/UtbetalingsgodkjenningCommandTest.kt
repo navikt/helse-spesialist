@@ -7,6 +7,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.januar
 import no.nav.helse.mediator.GodkjenningMediator
+import no.nav.helse.mediator.UtgåendeMeldingerObserver
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
@@ -35,10 +36,21 @@ internal class UtbetalingsgodkjenningCommandTest {
     private lateinit var commandContext: CommandContext
     private lateinit var command: UtbetalingsgodkjenningCommand
 
+
+    private val observer = object : UtgåendeMeldingerObserver {
+        val hendelser = mutableListOf<String>()
+        override fun behov(behov: String, ekstraKontekst: Map<String, Any>, detaljer: Map<String, Any>) {}
+
+        override fun hendelse(hendelse: String) {
+            this.hendelser.add(hendelse)
+        }
+    }
+
     @BeforeEach
     fun setup() {
         clearMocks(hendelseDao)
         commandContext = CommandContext(UUID.randomUUID())
+        commandContext.nyObserver(observer)
         command = UtbetalingsgodkjenningCommand(
             id = UUID.randomUUID(),
             behandlingId = UUID.randomUUID(),
@@ -72,7 +84,7 @@ internal class UtbetalingsgodkjenningCommandTest {
     fun `løser godkjenningsbehovet`() {
         every { hendelseDao.finnUtbetalingsgodkjenningbehovJson(GODKJENNINGSBEHOV_ID) } returns godkjenningsbehovJson
         assertTrue(command.execute(commandContext))
-        assertNotNull(commandContext.meldinger()
+        assertNotNull(observer.hendelser
             .map(objectMapper::readTree)
             .filter { it["@event_name"].asText() == "behov" }
             .firstOrNull { it["@løsning"].hasNonNull("Godkjenning") })

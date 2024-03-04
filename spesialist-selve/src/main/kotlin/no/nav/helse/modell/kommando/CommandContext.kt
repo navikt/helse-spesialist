@@ -2,41 +2,33 @@ package no.nav.helse.modell.kommando
 
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.mediator.UtgåendeMeldingerObserver
 import no.nav.helse.modell.CommandContextDao
 import org.slf4j.LoggerFactory
 
 internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList(), private val hash: UUID? = null) {
     private val data = mutableListOf<Any>()
-    private val behov = mutableMapOf<String, Map<String, Any>>()
     private val sti: MutableList<Int> = sti.toMutableList()
-    private val meldinger = mutableListOf<String>()
     private var ferdigstilt = false
+    private val observers = mutableSetOf<UtgåendeMeldingerObserver>()
+
+    internal fun nyObserver(observer: UtgåendeMeldingerObserver) {
+        observers.add(observer)
+    }
 
     internal fun behov(behovtype: String, params: Map<String, Any> = emptyMap()) {
-        this.behov[behovtype] = params
+        observers.forEach {
+            it.behov(behovtype, mapOf("contextId" to id), params)
+        }
     }
 
     internal fun id() = id
-
-    internal fun behov() = behov.toMap()
-
-    internal fun harBehov() = behov.isNotEmpty()
-
-    internal fun meldinger() = meldinger.toList()
-
-    internal fun nullstillMeldinger() {
-        meldinger.clear()
-    }
-
-    internal fun nullstillBehov() {
-        behov.clear()
-    }
 
     /**
      * Publisere svar tilbake på rapid, typisk svar på godkjenningsbehov
      */
     internal fun publiser(melding: String) {
-        meldinger.add(melding)
+        observers.forEach { it.hendelse(melding) }
     }
 
     internal fun add(data: Any) {

@@ -6,6 +6,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.mediator.UtgåendeMeldingerObserver
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.arbeidsgiver.Arbeidsgiverinformasjonløsning
 import no.nav.helse.modell.person.HentPersoninfoløsning
@@ -24,9 +25,21 @@ internal class OppdaterArbeidsgiverCommandTest {
 
     private val dao = mockk<ArbeidsgiverDao>(relaxed = true)
 
+    private lateinit var context: CommandContext
+    private val observer = object : UtgåendeMeldingerObserver {
+        val behov = mutableMapOf<String, Map<String, Any>>()
+        override fun behov(behov: String, ekstraKontekst: Map<String, Any>, detaljer: Map<String, Any>) {
+            this.behov[behov] = detaljer
+        }
+
+        override fun hendelse(hendelse: String) {}
+    }
+
     @BeforeEach
     fun setup() {
         clearMocks(dao)
+        context = CommandContext(UUID.randomUUID())
+        context.nyObserver(observer)
     }
 
     @Test
@@ -34,7 +47,6 @@ internal class OppdaterArbeidsgiverCommandTest {
         every { dao.findNavnSistOppdatert(ORGNR) } returns LocalDate.now()
         every { dao.findBransjerSistOppdatert(ORGNR) } returns LocalDate.now()
 
-        val context = CommandContext(UUID.randomUUID())
         løsning(ORGNR).also(context::add)
         val command = OppdaterArbeidsgiverCommand(listOf(ORGNR), dao)
 
@@ -45,7 +57,6 @@ internal class OppdaterArbeidsgiverCommandTest {
     @Test
     fun `sender behov om oppdatering når informasjonen er gammel`() {
         val ghostOrgnr = "orgnr2"
-        val context = CommandContext(UUID.randomUUID())
 
         every { dao.findNavnSistOppdatert(ORGNR) } returns LocalDate.now().minusYears(1)
         every { dao.findBransjerSistOppdatert(ORGNR) } returns LocalDate.now().minusYears(1)
@@ -54,7 +65,7 @@ internal class OppdaterArbeidsgiverCommandTest {
 
         val command = OppdaterArbeidsgiverCommand(listOf(ORGNR, ghostOrgnr), dao)
         assertFalse(command.execute(context))
-        assertTrue(context.harBehov())
+        assertTrue(observer.behov.isNotEmpty())
         verify(exactly = 0) { dao.upsertNavn(any(), any()) }
     }
 
@@ -62,7 +73,6 @@ internal class OppdaterArbeidsgiverCommandTest {
     fun `sender behov om løsning ikke inneholder etterspurt info`() {
         val orgnrMedUtdatertNavn = "111555111"
         val orgnrMedUtdatertBransje = "222777222"
-        val context = CommandContext(UUID.randomUUID())
 
         every { dao.findNavnSistOppdatert(orgnrMedUtdatertNavn) } returns LocalDate.now().minusYears(1)
         every { dao.findBransjerSistOppdatert(orgnrMedUtdatertBransje) } returns LocalDate.now().minusYears(1)
@@ -70,13 +80,13 @@ internal class OppdaterArbeidsgiverCommandTest {
         val command = OppdaterArbeidsgiverCommand(listOf(ORGNR, orgnrMedUtdatertNavn, orgnrMedUtdatertBransje), dao)
 
         assertFalse(command.execute(context))
-        assertTrue(context.harBehov())
+        assertTrue(observer.behov.isNotEmpty())
         assertTrue(
-            context.behov().any {
+            observer.behov.any {
                 it.value.values.any { behovdetalj ->
                     (behovdetalj as List<*>).containsAll(listOf(orgnrMedUtdatertNavn, orgnrMedUtdatertBransje))
                 }
-            }) { "Ønsket orgnr mangler i behovet: ${context.behov()}" }
+            }) { "Ønsket orgnr mangler i behovet: ${observer.behov}" }
 
         verify(exactly = 0) { dao.upsertNavn(any(), any()) }
     }
@@ -85,7 +95,6 @@ internal class OppdaterArbeidsgiverCommandTest {
     fun `etterspør informasjon om løsning bare inneholder svar for et annet orgnr`() {
         val orgnrMedUtdatertNavn = "111555111"
         val orgnrMedOppdaterteData = "222777222"
-        val context = CommandContext(UUID.randomUUID())
 
         every { dao.findNavnSistOppdatert(orgnrMedUtdatertNavn) } returns LocalDate.now().minusYears(1)
 
@@ -94,13 +103,13 @@ internal class OppdaterArbeidsgiverCommandTest {
         val command = OppdaterArbeidsgiverCommand(listOf(ORGNR, orgnrMedUtdatertNavn, orgnrMedOppdaterteData), dao)
 
         assertFalse(command.execute(context))
-        assertTrue(context.harBehov())
+        assertTrue(observer.behov.isNotEmpty())
         assertTrue(
-            context.behov().any {
+            observer.behov.any {
                 it.value.values.any { behovdetalj ->
                     (behovdetalj as List<*>).containsAll(listOf(orgnrMedUtdatertNavn))
                 }
-            }) { "Ønsket orgnr $orgnrMedUtdatertNavn mangler i behovet: ${context.behov()}" }
+            }) { "Ønsket orgnr $orgnrMedUtdatertNavn mangler i behovet: ${observer.behov}" }
 
         verify(exactly = 0) { dao.upsertNavn(any(), any()) }
     }
@@ -108,20 +117,19 @@ internal class OppdaterArbeidsgiverCommandTest {
     @Test
     fun `opprett person-arbeidsgiver dersom den ikke finnes`() {
         val fnr = "12345678911"
-        val context = CommandContext(UUID.randomUUID())
 
         every { dao.findNavnSistOppdatert(fnr) } returns null
 
         val command = OppdaterArbeidsgiverCommand(listOf(fnr), dao)
         assertFalse(command.execute(context))
-        assertTrue(context.harBehov())
+        assertTrue(observer.behov.isNotEmpty())
 
         assertTrue(
-            context.behov().any {
+            observer.behov.any {
                 it.value.values.any { behovdetalj ->
                     (behovdetalj as List<*>).containsAll(listOf(fnr))
                 }
-            }) { "Ønsket orgnr mangler i behovet: ${context.behov()}" }
+            }) { "Ønsket orgnr mangler i behovet: ${observer.behov}" }
 
         løsningPersoninfo(fnr).also(context::add)
         assertFalse(command.execute(context))

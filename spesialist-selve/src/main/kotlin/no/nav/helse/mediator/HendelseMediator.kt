@@ -113,8 +113,6 @@ internal class HendelseMediator(
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
 
-    private val behovMediator = BehovMediator()
-
     private fun skalBehandleMelding(melding: String): Boolean {
         if (erProd()) return true
         val jsonNode = objectMapper.readTree(melding)
@@ -398,13 +396,15 @@ internal class HendelseMediator(
                 "contextId" to contextId.toString()
             )
         ) {
+            logg.info("Behandler melding ${melding::class.simpleName}")
             logg.info("Oppretter ny kommandokontekst som følge av ${melding::class.simpleName}")
             håndter(melding, nyContext(melding, contextId), messageContext)
         }
     }
 
     private fun håndter(melding: Personmelding, commandContext: CommandContext, messageContext: MessageContext) {
-        val contextId = commandContext.id()
+        val behovMediator = BehovMediator()
+        commandContext.nyObserver(behovMediator)
         val hendelsenavn = melding::class.simpleName ?: "ukjent hendelse"
         try {
             when (melding) {
@@ -429,7 +429,7 @@ internal class HendelseMediator(
                 is Saksbehandlerløsning -> iverksett(kommandofabrikk.utbetalingsgodkjenning(melding), melding.id, commandContext)
                 else -> throw IllegalArgumentException("Personhendelse må håndteres")
             }
-            behovMediator.håndter(melding, commandContext, contextId, messageContext)
+            behovMediator.håndter(melding, messageContext)
         } catch (e: Exception) {
             logg.warn("Feil ved behandling av melding $hendelsenavn", e.message, e)
             throw e

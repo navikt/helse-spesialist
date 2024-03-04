@@ -6,6 +6,7 @@ import io.mockk.verify
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.januar
+import no.nav.helse.mediator.UtgåendeMeldingerObserver
 import no.nav.helse.mediator.meldinger.løsninger.Vergemålløsning
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
@@ -24,8 +25,7 @@ class VurderVergemålOgFullmaktTest {
         private val VEDTAKSPERIODE_ID = UUID.fromString("1cd0d9cb-62e8-4f16-b634-f2b9dab550b6")
     }
 
-    private val observer = object : IVedtaksperiodeObserver {
-
+    private val vedtaksperiodeObserver = object : IVedtaksperiodeObserver {
         val opprettedeVarsler = mutableListOf<String>()
 
         override fun varselOpprettet(varselId: UUID, vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, opprettet: LocalDateTime) {
@@ -34,7 +34,7 @@ class VurderVergemålOgFullmaktTest {
     }
 
     private val vergemålDao = mockk<VergemålDao>(relaxed = true)
-    private val generasjon = Generasjon(UUID.randomUUID(), VEDTAKSPERIODE_ID, 1.januar, 31.januar, 1.januar).also { it.registrer(observer) }
+    private val generasjon = Generasjon(UUID.randomUUID(), VEDTAKSPERIODE_ID, 1.januar, 31.januar, 1.januar).also { it.registrer(vedtaksperiodeObserver) }
     private val sykefraværstilfelle = Sykefraværstilfelle(FNR, 1.januar, listOf(generasjon), emptyList())
 
     private val command = VurderVergemålOgFullmakt(
@@ -53,16 +53,29 @@ class VurderVergemålOgFullmaktTest {
     private val harBeggeFullmatkstyper =
         Vergemål(harVergemål = false, harFremtidsfullmakter = true, harFullmakter = true)
 
+    private val observer = object : UtgåendeMeldingerObserver {
+        val behov = mutableListOf<String>()
+        val hendelser = mutableListOf<String>()
+        override fun behov(behov: String, ekstraKontekst: Map<String, Any>, detaljer: Map<String, Any>) {
+            this.behov.add(behov)
+        }
+
+        override fun hendelse(hendelse: String) {
+            hendelser.add(hendelse)
+        }
+    }
+
     @BeforeEach
     fun setup() {
         context = CommandContext(UUID.randomUUID())
+        context.nyObserver(observer)
         clearMocks(vergemålDao)
     }
 
     @Test
     fun `Ber om informasjon om vergemål hvis den mangler`() {
         assertFalse(command.execute(context))
-        assertEquals(listOf("Vergemål"), context.behov().keys.toList())
+        assertEquals(listOf("Vergemål"), observer.behov)
     }
 
     @Test
@@ -76,8 +89,8 @@ class VurderVergemålOgFullmaktTest {
         context.add(Vergemålløsning(FNR, ingenVergemål))
         assertTrue(command.resume(context))
         verify(exactly = 1) { vergemålDao.lagre(FNR, ingenVergemål) }
-        assertEquals(0, context.meldinger().size)
-        assertEquals(0, observer.opprettedeVarsler.size)
+        assertEquals(0, observer.hendelser.size)
+        assertEquals(0, vedtaksperiodeObserver.opprettedeVarsler.size)
     }
 
     @Test
@@ -85,7 +98,7 @@ class VurderVergemålOgFullmaktTest {
         context.add(Vergemålløsning(FNR, harVergemål))
         assertTrue(command.resume(context))
         verify(exactly = 1) { vergemålDao.lagre(FNR, harVergemål) }
-        assertEquals(0, context.meldinger().size)
+        assertEquals(0, observer.hendelser.size)
     }
 
     @Test
@@ -93,8 +106,8 @@ class VurderVergemålOgFullmaktTest {
         context.add(Vergemålløsning(FNR, harFullmakt))
         assertTrue(command.resume(context))
         verify(exactly = 1) { vergemålDao.lagre(FNR, harFullmakt) }
-        assertEquals(0, context.meldinger().size)
-        assertEquals(1, observer.opprettedeVarsler.size)
+        assertEquals(0, observer.hendelser.size)
+        assertEquals(1, vedtaksperiodeObserver.opprettedeVarsler.size)
     }
 
     @Test
@@ -102,8 +115,8 @@ class VurderVergemålOgFullmaktTest {
         context.add(Vergemålløsning(FNR, harFremtidsfullmakt))
         assertTrue(command.resume(context))
         verify(exactly = 1) { vergemålDao.lagre(FNR, harFremtidsfullmakt) }
-        assertEquals(0, context.meldinger().size)
-        assertEquals(1, observer.opprettedeVarsler.size)
+        assertEquals(0, observer.hendelser.size)
+        assertEquals(1, vedtaksperiodeObserver.opprettedeVarsler.size)
     }
 
     @Test
@@ -111,8 +124,8 @@ class VurderVergemålOgFullmaktTest {
         context.add(Vergemålløsning(FNR, harAlt))
         assertTrue(command.resume(context))
         verify(exactly = 1) { vergemålDao.lagre(FNR, harAlt) }
-        assertEquals(0, context.meldinger().size)
-        assertEquals(1, observer.opprettedeVarsler.size)
+        assertEquals(0, observer.hendelser.size)
+        assertEquals(1, vedtaksperiodeObserver.opprettedeVarsler.size)
     }
 
     @Test
@@ -120,7 +133,7 @@ class VurderVergemålOgFullmaktTest {
         context.add(Vergemålløsning(FNR, harBeggeFullmatkstyper))
         assertTrue(command.resume(context))
         verify(exactly = 1) { vergemålDao.lagre(FNR, harBeggeFullmatkstyper) }
-        assertEquals(0, context.meldinger().size)
-        assertEquals(1, observer.opprettedeVarsler.size)
+        assertEquals(0, observer.hendelser.size)
+        assertEquals(1, vedtaksperiodeObserver.opprettedeVarsler.size)
     }
 }

@@ -6,6 +6,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.mediator.UtgåendeMeldingerObserver
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDto
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
@@ -37,9 +38,19 @@ internal class KlargjørArbeidsforholdCommandTest {
         førstegangsbehandling = false
     )
 
+    private val observer = object : UtgåendeMeldingerObserver {
+        val behov = mutableListOf<String>()
+        override fun behov(behov: String, ekstraKontekst: Map<String, Any>, detaljer: Map<String, Any>) {
+            this.behov.add(behov)
+        }
+
+        override fun hendelse(hendelse: String) {}
+    }
+
     @BeforeEach
     fun setup() {
         context = CommandContext(UUID.randomUUID())
+        context.nyObserver(observer)
         clearMocks(arbeidsforholdDao)
     }
 
@@ -47,7 +58,7 @@ internal class KlargjørArbeidsforholdCommandTest {
     fun `oppretter arbeidsforhold`() {
         arbeidsforholdFinnesIkke()
         assertFalse(command.execute(context))
-        assertTrue(context.harBehov())
+        assertTrue(observer.behov.isNotEmpty())
         context.add(
             Arbeidsforholdløsning(
                 listOf(
@@ -77,7 +88,7 @@ internal class KlargjørArbeidsforholdCommandTest {
     fun `oppdaterer arbeidsforhold`() {
         arbeidsforholdErUtdatert()
         assertFalse(command.execute(context))
-        assertTrue(context.harBehov())
+        assertTrue(observer.behov.isNotEmpty())
         context.add(
             Arbeidsforholdløsning(
                 listOf(
@@ -131,7 +142,7 @@ internal class KlargjørArbeidsforholdCommandTest {
         )
         arbeidsforholdFinnes(LocalDate.now().minusDays(1))
         assertFalse(førstegangsCommand.execute(context))
-        assertTrue(context.harBehov())
+        assertTrue(observer.behov.isNotEmpty())
         context.add(
             Arbeidsforholdløsning(
                 listOf(

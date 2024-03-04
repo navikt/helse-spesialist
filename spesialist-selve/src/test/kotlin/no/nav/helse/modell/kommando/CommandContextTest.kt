@@ -3,6 +3,7 @@ package no.nav.helse.modell.kommando
 import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
+import no.nav.helse.mediator.UtgåendeMeldingerObserver
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.kommando.CommandContext.Companion.convertToUUID
 import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
@@ -25,9 +26,22 @@ internal class CommandContextTest {
 
     private val commandContextDao = mockk<CommandContextDao>(relaxed = true)
 
+    private val observer = object : UtgåendeMeldingerObserver {
+        val behov = mutableMapOf<String, Map<String, Any>>()
+        val hendelser = mutableListOf<String>()
+        override fun behov(behov: String, ekstraKontekst: Map<String, Any>, detaljer: Map<String, Any>) {
+            this.behov[behov] = detaljer
+        }
+
+        override fun hendelse(hendelse: String) {
+            this.hendelser.add(hendelse)
+        }
+    }
+
     @BeforeEach
     fun setupEach() {
         context = CommandContext(CONTEXT)
+        context.nyObserver(observer)
     }
 
     @Test
@@ -144,8 +158,8 @@ internal class CommandContextTest {
     fun `samler opp behov`() {
         context.behov("type 1", mapOf("param 1" to 1))
         context.behov("type 2")
-        val result = context.behov()
-        assertTrue(context.harBehov())
+        val result = observer.behov
+        assertTrue(result.isNotEmpty())
         assertTrue(result.containsKey("type 1"))
         assertTrue(result.containsKey("type 2"))
         assertEquals(mapOf("param 1" to 1), result.getValue("type 1") as Map<*, *>)
@@ -153,8 +167,8 @@ internal class CommandContextTest {
 
     @Test
     fun `har ingen behov`() {
-        val result = context.behov()
-        assertFalse(context.harBehov())
+        val result = observer.behov
+        assertTrue(result.isEmpty())
         assertEquals(emptyMap<String, Any>(), result)
     }
 
@@ -162,7 +176,7 @@ internal class CommandContextTest {
     fun `holder på meldinger`() {
         val melding = """{ "a_key": "with_a_value" }"""
         context.publiser(melding)
-        assertEquals(listOf(melding), context.meldinger())
+        assertEquals(listOf(melding), observer.hendelser)
     }
 
     @Test
@@ -172,12 +186,12 @@ internal class CommandContextTest {
         assertEquals(mapOf(
             "type 1" to mapOf("param 1" to 1),
             "type 2" to mapOf("param 2" to 1)
-        ), context.behov())
+        ), observer.behov)
         context.behov("type 1", mapOf("param 1" to 2))
         assertEquals(mapOf(
             "type 1" to mapOf("param 1" to 2),
             "type 2" to mapOf("param 2" to 1)
-        ), context.behov())
+        ), observer.behov)
     }
 
     private class TestObject1
