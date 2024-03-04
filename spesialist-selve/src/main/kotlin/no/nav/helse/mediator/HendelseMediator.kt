@@ -403,8 +403,8 @@ internal class HendelseMediator(
     }
 
     private fun håndter(melding: Personmelding, commandContext: CommandContext, messageContext: MessageContext) {
-        val behovMediator = BehovMediator()
-        commandContext.nyObserver(behovMediator)
+        val utgåendeMeldingerMediator = UtgåendeMeldingerMediator()
+        commandContext.nyObserver(utgåendeMeldingerMediator)
         val hendelsenavn = melding::class.simpleName ?: "ukjent hendelse"
         try {
             when (melding) {
@@ -429,7 +429,7 @@ internal class HendelseMediator(
                 is Saksbehandlerløsning -> iverksett(kommandofabrikk.utbetalingsgodkjenning(melding), melding.id, commandContext)
                 else -> throw IllegalArgumentException("Personhendelse må håndteres")
             }
-            behovMediator.håndter(melding, messageContext)
+            utgåendeMeldingerMediator.håndter(melding, messageContext)
         } catch (e: Exception) {
             logg.warn("Feil ved behandling av melding $hendelsenavn", e.message, e)
             throw e

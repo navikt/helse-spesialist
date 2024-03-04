@@ -13,7 +13,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 
-internal class BehovMediatorTest {
+internal class UtgåendeMeldingerMediatorTest {
     private companion object {
         private const val FNR = "fødselsnummer"
         private val hendelseId = UUID.randomUUID()
@@ -23,7 +23,7 @@ internal class BehovMediatorTest {
     }
 
     private val testRapid: TestRapid = TestRapid()
-    private val behovMediator: BehovMediator = BehovMediator()
+    private val utgåendeMeldingerMediator: UtgåendeMeldingerMediator = UtgåendeMeldingerMediator()
     private lateinit var testmelding: Testmelding
     private lateinit var testContext: CommandContext
 
@@ -32,7 +32,7 @@ internal class BehovMediatorTest {
         testRapid.reset()
         testmelding = Testmelding(hendelseId)
         testContext = CommandContext(contextId)
-        testContext.nyObserver(behovMediator)
+        testContext.nyObserver(utgåendeMeldingerMediator)
     }
 
     @Test
@@ -42,7 +42,7 @@ internal class BehovMediatorTest {
             "param 2" to 2
         )
         testContext.behov("type 1", params)
-        behovMediator.håndter(testmelding, testRapid)
+        utgåendeMeldingerMediator.håndter(testmelding, testRapid)
         assertEquals(listOf("type 1"), testRapid.inspektør.field(0, "@behov").map(JsonNode::asText))
         assertEquals(contextId.toString(), testRapid.inspektør.field(0, "contextId").asText())
         assertEquals(hendelseId.toString(), testRapid.inspektør.field(0, "hendelseId").asText())
@@ -58,7 +58,7 @@ internal class BehovMediatorTest {
         val melding2 = """{ "a_key": "with_a_value" }"""
         testContext.publiser(melding1)
         testContext.publiser(melding2)
-        behovMediator.håndter(testmelding, testRapid)
+        utgåendeMeldingerMediator.håndter(testmelding, testRapid)
         assertEquals(2, testRapid.inspektør.size)
         assertEquals(objectMapper.readTree(melding1), testRapid.inspektør.message(0))
         assertEquals(objectMapper.readTree(melding2), testRapid.inspektør.message(1))
@@ -67,7 +67,7 @@ internal class BehovMediatorTest {
     @Test
     fun standardfelter() {
         testContext.behov("testbehov")
-        behovMediator.håndter(testmelding, testRapid)
+        utgåendeMeldingerMediator.håndter(testmelding, testRapid)
         assertEquals("behov", testRapid.inspektør.field(0, "@event_name").asText())
         assertEquals(FNR, testRapid.inspektør.field(0, "fødselsnummer").asText())
         assertDoesNotThrow { UUID.fromString(testRapid.inspektør.field(0, "@id").asText()) }

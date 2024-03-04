@@ -10,7 +10,7 @@ internal interface UtgåendeMeldingerObserver {
     fun hendelse(hendelse: String)
 }
 
-internal class BehovMediator: UtgåendeMeldingerObserver {
+internal class UtgåendeMeldingerMediator: UtgåendeMeldingerObserver {
     private val utgåendeBehov = mutableMapOf<String, Map<String, Any>>()
     private val utgåendeHendelser = mutableListOf<String>()
     private val ekstraKontekst = mutableMapOf<String, Any>()
