@@ -12,6 +12,7 @@ import kotliquery.sessionOf
 import no.nav.helse.mediator.builders.GenerasjonBuilder
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.VarselDto
+import no.nav.helse.modell.varsel.VarselStatusDto
 import org.intellij.lang.annotations.Language
 
 class GenerasjonDao(private val dataSource: DataSource) {
@@ -106,6 +107,73 @@ class GenerasjonDao(private val dataSource: DataSource) {
 
         this.run(queryOf(query, generasjonId, *varselIder.toTypedArray()).asExecute)
     }
+
+    internal fun finnGjeldendeGenerasjon(vedtaksperiodeId: UUID): GenerasjonDto? {
+        return sessionOf(dataSource).use { session ->
+            session.transaction { tx ->
+                tx.finnGenerasjon(vedtaksperiodeId)
+            }
+        }
+    }
+
+    private fun TransactionalSession.finnGenerasjon(vedtaksperiodeId: UUID): GenerasjonDto? {
+        return run(
+            finnSiste(vedtaksperiodeId).map { row ->
+                val generasjonRef = row.long("id")
+                GenerasjonDto(
+                    row.uuid("unik_id"),
+                    row.uuid("vedtaksperiode_id"),
+                    row.uuidOrNull("utbetaling_id"),
+                    row.localDate("skjæringstidspunkt"),
+                    row.localDate("fom"),
+                    row.localDate("tom"),
+                    when (val tilstand = row.string("tilstand")) {
+                        "Låst" -> TilstandDto.Låst
+                        "Ulåst" -> TilstandDto.Ulåst
+                        "AvsluttetUtenUtbetaling" -> TilstandDto.AvsluttetUtenUtbetaling
+                        "UtenUtbetalingMåVurderes" -> TilstandDto.UtenUtbetalingMåVurderes
+                        else -> throw IllegalArgumentException("$tilstand er ikke en gyldig generasjontilstand")
+                    },
+                    varsler = finnVarsler(generasjonRef)
+                )
+            }.asSingle
+        )
+    }
+
+    private fun TransactionalSession.finnVarsler(generasjonRef: Long): List<VarselDto> {
+        @Language("PostgreSQL")
+        val query = """
+            SELECT 
+            unik_id, 
+            kode, 
+            vedtaksperiode_id, 
+            opprettet, 
+            status 
+            FROM selve_varsel sv WHERE generasjon_ref = :generasjon_ref
+        """.trimIndent()
+        return this.run(
+                queryOf(
+                    query,
+                    mapOf("generasjon_ref" to generasjonRef),
+                ).map { row ->
+                    VarselDto(
+                        row.uuid("unik_id"),
+                        row.string("kode"),
+                        row.localDateTime("opprettet"),
+                        row.uuid("vedtaksperiode_id"),
+                        when (val status = row.string("status")) {
+                            "AKTIV" -> VarselStatusDto.AKTIV
+                            "INAKTIV" -> VarselStatusDto.INAKTIV
+                            "GODKJENT" -> VarselStatusDto.GODKJENT
+                            "VURDERT" -> VarselStatusDto.VURDERT
+                            "AVVIST" -> VarselStatusDto.AVVIST
+                            "AVVIKLET" -> VarselStatusDto.AVVIKLET
+                            else -> throw IllegalArgumentException("$status er ikke en gyldig varselstatus")
+                        }
+                    )
+                }.asList
+            )
+        }
 
     internal fun finnSkjæringstidspunktFor(vedtaksperiodeId: UUID): LocalDate? {
         return sessionOf(dataSource).use { session ->

@@ -79,7 +79,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
             )
         )
         generasjonDao.lagre(generasjonDto)
-        val lagretGenerasjon = finnGenerasjon(id)
+        val lagretGenerasjon = generasjonDao.finnGjeldendeGenerasjon(vedtaksperiodeId)
         assertNotNull(lagretGenerasjon)
         assertEquals(id, lagretGenerasjon?.id)
         assertEquals(vedtaksperiodeId, lagretGenerasjon?.vedtaksperiodeId)
@@ -92,7 +92,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         val varsel = lagretGenerasjon?.varsler?.single()
         assertEquals(varselId, varsel?.id)
         assertEquals("RV_IM_1", varsel?.varselkode)
-        assertEquals(varselOpprettet, varsel?.opprettet)
+        assertEquals(varselOpprettet.withNano(0), varsel?.opprettet?.withNano(0))
         assertEquals(varselstatus, varsel?.status)
         assertEquals(vedtaksperiodeId, varsel?.vedtaksperiodeId)
     }
@@ -114,7 +114,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         )
         generasjonDao.lagre(generasjonDto)
         generasjonDao.lagre(generasjonDto.copy(utbetalingId = nyUtbetalingId, fom = 2.januar, tom = 30.januar, skjæringstidspunkt = 2.januar, tilstand = TilstandDto.Låst))
-        val lagretGenerasjon = finnGenerasjon(id)
+        val lagretGenerasjon = generasjonDao.finnGjeldendeGenerasjon(vedtaksperiodeId)
         assertNotNull(lagretGenerasjon)
         assertEquals(id, lagretGenerasjon?.id)
         assertEquals(vedtaksperiodeId, lagretGenerasjon?.vedtaksperiodeId)
@@ -144,7 +144,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         )
         generasjonDao.lagre(generasjonDto)
         generasjonDao.lagre(generasjonDto.copy(varsler = listOf(VarselDto(varselId, "RV_IM_1", varselOpprettet, vedtaksperiodeId, varselstatus))))
-        val lagretGenerasjon = finnGenerasjon(id)
+        val lagretGenerasjon = generasjonDao.finnGjeldendeGenerasjon(vedtaksperiodeId)
 
         assertNotNull(lagretGenerasjon)
         assertEquals(1, lagretGenerasjon?.varsler?.size)
@@ -168,7 +168,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         )
         generasjonDao.lagre(generasjonDto)
         generasjonDao.lagre(generasjonDto.copy(varsler = listOf(VarselDto(varselId, "RV_IM_1", varselOpprettet, vedtaksperiodeId, VarselStatusDto.VURDERT))))
-        val lagretGenerasjon = finnGenerasjon(id)
+        val lagretGenerasjon = generasjonDao.finnGjeldendeGenerasjon(vedtaksperiodeId)
 
         assertNotNull(lagretGenerasjon)
         assertEquals(1, lagretGenerasjon?.varsler?.size)
@@ -204,7 +204,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
                 )
             )
         )
-        val lagretGenerasjon = finnGenerasjon(id)
+        val lagretGenerasjon = generasjonDao.finnGjeldendeGenerasjon(vedtaksperiodeId)
 
         assertNotNull(lagretGenerasjon)
         assertEquals(1, lagretGenerasjon?.varsler?.size)
@@ -228,7 +228,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         )
         generasjonDao.lagre(generasjonDto)
         generasjonDao.lagre(generasjonDto.copy(varsler = emptyList()))
-        val lagretGenerasjon = finnGenerasjon(id)
+        val lagretGenerasjon = generasjonDao.finnGjeldendeGenerasjon(vedtaksperiodeId)
 
         assertNotNull(lagretGenerasjon)
         assertEquals(0, lagretGenerasjon?.varsler?.size)
@@ -575,74 +575,4 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
                 it.localDateTimeOrNull("opprettet_tidspunkt")
             }.asSingle)
         }
-
-    private fun finnGenerasjon(generasjonId: UUID): GenerasjonDto? {
-        @Language("PostgreSQL")
-        val query = """
-            SELECT unik_id, vedtaksperiode_id, utbetaling_id, fom, tom, skjæringstidspunkt, tilstand FROM selve_vedtaksperiode_generasjon svg WHERE unik_id = :generasjon_id
-        """.trimIndent()
-        return sessionOf(dataSource).use {
-            it.run(
-                queryOf(
-                    query,
-                    mapOf("generasjon_id" to generasjonId),
-                ).map { row ->
-                    GenerasjonDto(
-                        row.uuid("unik_id"),
-                        row.uuid("vedtaksperiode_id"),
-                        row.uuidOrNull("utbetaling_id"),
-                        row.localDate("skjæringstidspunkt"),
-                        row.localDate("fom"),
-                        row.localDate("tom"),
-                        when (val tilstand = row.string("tilstand")) {
-                            "Låst" -> TilstandDto.Låst
-                            "Ulåst" -> TilstandDto.Ulåst
-                            "AvsluttetUtenUtbetaling" -> TilstandDto.AvsluttetUtenUtbetaling
-                            "UtenUtbetalingMåVurderes" -> TilstandDto.UtenUtbetalingMåVurderes
-                            else -> throw IllegalArgumentException("$tilstand er ikke en gyldig generasjontilstand")
-                        },
-                        varsler = finnVarsler(generasjonId)
-                    )
-                }.asSingle
-            )
-        }
-    }
-
-    private fun finnVarsler(generasjonId: UUID): List<VarselDto> {
-        @Language("PostgreSQL")
-        val query = """
-            SELECT 
-            unik_id, 
-            kode, 
-            vedtaksperiode_id, 
-            opprettet, 
-            status 
-            FROM selve_varsel sv WHERE generasjon_ref = (SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = :generasjon_id)
-        """.trimIndent()
-        return sessionOf(dataSource).use {
-            it.run(
-                queryOf(
-                    query,
-                    mapOf("generasjon_id" to generasjonId),
-                ).map { row ->
-                    VarselDto(
-                        row.uuid("unik_id"),
-                        row.string("kode"),
-                        row.localDateTime("opprettet"),
-                        row.uuid("vedtaksperiode_id"),
-                        when (val status = row.string("status")) {
-                            "AKTIV" -> VarselStatusDto.AKTIV
-                            "INAKTIV" -> VarselStatusDto.INAKTIV
-                            "GODKJENT" -> VarselStatusDto.GODKJENT
-                            "VURDERT" -> VarselStatusDto.VURDERT
-                            "AVVIST" -> VarselStatusDto.AVVIST
-                            "AVVIKLET" -> VarselStatusDto.AVVIKLET
-                            else -> throw IllegalArgumentException("$status er ikke en gyldig varselstatus")
-                        }
-                    )
-                }.asList
-            )
-        }
-
-    }
 }
