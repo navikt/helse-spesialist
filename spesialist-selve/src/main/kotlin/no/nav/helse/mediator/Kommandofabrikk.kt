@@ -49,8 +49,6 @@ import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovCommand
-import no.nav.helse.modell.vedtaksperiode.NyeVarsler
-import no.nav.helse.modell.vedtaksperiode.NyeVarslerCommand
 import no.nav.helse.modell.vedtaksperiode.OpprettVedtaksperiodeCommand
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeEndret
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeEndretCommand
@@ -123,12 +121,6 @@ internal class Kommandofabrikk(
     private fun generasjonerFor(fødselsnummer: String, skjæringstidspunkt: LocalDate): List<Generasjon> {
         return gjeldendeGenerasjoner {
             generasjonRepository.finnVedtaksperiodeIderFor(fødselsnummer, skjæringstidspunkt)
-        }
-    }
-
-    internal fun generasjonerFor(fødselsnummer: String): List<Generasjon> {
-        return gjeldendeGenerasjoner {
-            generasjonRepository.finnVedtaksperiodeIderFor(fødselsnummer)
         }
     }
 
@@ -210,15 +202,6 @@ internal class Kommandofabrikk(
             oppgaveDao = oppgaveDao,
             oppgaveMediator = oppgaveMediator,
             godkjenningMediator = godkjenningMediator
-        )
-    }
-
-    fun nyeVarsler(fødselsnummer: String, hendelse: NyeVarsler): NyeVarslerCommand {
-        return NyeVarslerCommand(
-            hendelse.id,
-            fødselsnummer,
-            generasjonerFor(fødselsnummer),
-            hendelse.varsler,
         )
     }
 

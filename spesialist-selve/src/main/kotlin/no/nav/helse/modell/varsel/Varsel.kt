@@ -44,6 +44,8 @@ internal class Varsel(
 
     private val observers = mutableSetOf<IVedtaksperiodeObserver>()
 
+    internal fun vedtaksperiodeId() = vedtaksperiodeId
+
     internal fun accept(visitor: VarselVisitor) {
         visitor.visitVarsel(id, varselkode, opprettet, status)
     }

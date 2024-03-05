@@ -224,6 +224,14 @@ internal class HendelseMediator(
         }
     }
 
+    internal fun håndter(nyeVarsler: NyeVarsler) {
+        nyeVarsler.varsler.forEach { varsel ->
+            generasjonRepository.generasjon(varsel.vedtaksperiodeId()) {
+                it.håndterNyttVarsel(varsel, nyeVarsler.id)
+            }
+        }
+    }
+
     internal fun håndter(vedtakFattet: VedtakFattet) {
         val vedtaksperiodeId = vedtakFattet.vedtaksperiodeId()
         generasjonRepository.generasjon(vedtaksperiodeId) {
@@ -416,7 +424,7 @@ internal class HendelseMediator(
                 is EndretEgenAnsattStatus -> iverksett(kommandofabrikk.endretEgenAnsattStatus(melding.fødselsnummer(), melding), melding.id, commandContext)
                 is VedtaksperiodeOpprettet -> iverksett(kommandofabrikk.opprettVedtaksperiode(melding.fødselsnummer(), melding), melding.id, commandContext)
                 is GosysOppgaveEndret -> iverksett(kommandofabrikk.gosysOppgaveEndret(melding.fødselsnummer(), melding), melding.id, commandContext)
-                is NyeVarsler -> iverksett(kommandofabrikk.nyeVarsler(melding.fødselsnummer(), melding), melding.id, commandContext)
+                is NyeVarsler -> håndter(melding)
                 is TilbakedateringBehandlet -> iverksett(kommandofabrikk.tilbakedateringGodkjent(melding.fødselsnummer()), melding.id, commandContext)
                 is VedtaksperiodeReberegnet -> iverksett(kommandofabrikk.vedtaksperiodeReberegnet(melding), melding.id, commandContext)
                 is VedtaksperiodeNyUtbetaling -> iverksett(kommandofabrikk.vedtaksperiodeNyUtbetaling(melding), melding.id, commandContext)
