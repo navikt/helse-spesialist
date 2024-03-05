@@ -11,6 +11,8 @@ import no.nav.helse.januar
 import no.nav.helse.mediator.builders.GenerasjonBuilder
 import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.VarselDao
+import no.nav.helse.modell.varsel.VarselDto
+import no.nav.helse.modell.varsel.VarselStatusDto
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -54,6 +56,182 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         val forventetGenerasjon = Generasjon(generasjonId2, vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
 
         assertEquals(forventetGenerasjon, generasjon)
+    }
+
+    @Test
+    fun `lagre generasjon`() {
+        val id = UUID.randomUUID()
+        val vedtaksperiodeId = UUID.randomUUID()
+        val utbetalingId = UUID.randomUUID()
+        val varselId = UUID.randomUUID()
+        val varselOpprettet = LocalDateTime.now()
+        val varselstatus = VarselStatusDto.AKTIV
+        val generasjonDto = GenerasjonDto(
+            id = id,
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = utbetalingId,
+            skjæringstidspunkt = 1.januar,
+            fom = 1.januar,
+            tom = 31.januar,
+            tilstand = TilstandDto.Ulåst,
+            varsler = listOf(
+                VarselDto(varselId, "RV_IM_1", varselOpprettet, vedtaksperiodeId, varselstatus)
+            )
+        )
+        generasjonDao.lagre(generasjonDto)
+        val lagretGenerasjon = finnGenerasjon(id)
+        assertNotNull(lagretGenerasjon)
+        assertEquals(id, lagretGenerasjon?.id)
+        assertEquals(vedtaksperiodeId, lagretGenerasjon?.vedtaksperiodeId)
+        assertEquals(1.januar, lagretGenerasjon?.fom)
+        assertEquals(31.januar, lagretGenerasjon?.tom)
+        assertEquals(1.januar, lagretGenerasjon?.skjæringstidspunkt)
+        assertEquals(TilstandDto.Ulåst, lagretGenerasjon?.tilstand)
+        assertEquals(utbetalingId, lagretGenerasjon?.utbetalingId)
+        assertEquals(1, lagretGenerasjon?.varsler?.size)
+        val varsel = lagretGenerasjon?.varsler?.single()
+        assertEquals(varselId, varsel?.id)
+        assertEquals("RV_IM_1", varsel?.varselkode)
+        assertEquals(varselOpprettet, varsel?.opprettet)
+        assertEquals(varselstatus, varsel?.status)
+        assertEquals(vedtaksperiodeId, varsel?.vedtaksperiodeId)
+    }
+
+    @Test
+    fun `oppdatere generasjon`() {
+        val id = UUID.randomUUID()
+        val vedtaksperiodeId = UUID.randomUUID()
+        val nyUtbetalingId = UUID.randomUUID()
+        val generasjonDto = GenerasjonDto(
+            id = id,
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = UUID.randomUUID(),
+            skjæringstidspunkt = 1.januar,
+            fom = 1.januar,
+            tom = 31.januar,
+            tilstand = TilstandDto.Ulåst,
+            varsler = emptyList()
+        )
+        generasjonDao.lagre(generasjonDto)
+        generasjonDao.lagre(generasjonDto.copy(utbetalingId = nyUtbetalingId, fom = 2.januar, tom = 30.januar, skjæringstidspunkt = 2.januar, tilstand = TilstandDto.Låst))
+        val lagretGenerasjon = finnGenerasjon(id)
+        assertNotNull(lagretGenerasjon)
+        assertEquals(id, lagretGenerasjon?.id)
+        assertEquals(vedtaksperiodeId, lagretGenerasjon?.vedtaksperiodeId)
+        assertEquals(2.januar, lagretGenerasjon?.fom)
+        assertEquals(30.januar, lagretGenerasjon?.tom)
+        assertEquals(2.januar, lagretGenerasjon?.skjæringstidspunkt)
+        assertEquals(TilstandDto.Låst, lagretGenerasjon?.tilstand)
+        assertEquals(nyUtbetalingId, lagretGenerasjon?.utbetalingId)
+    }
+
+    @Test
+    fun `legg til varsel`() {
+        val id = UUID.randomUUID()
+        val vedtaksperiodeId = UUID.randomUUID()
+        val varselId = UUID.randomUUID()
+        val varselOpprettet = LocalDateTime.now()
+        val varselstatus = VarselStatusDto.AKTIV
+        val generasjonDto = GenerasjonDto(
+            id = id,
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = UUID.randomUUID(),
+            skjæringstidspunkt = 1.januar,
+            fom = 1.januar,
+            tom = 31.januar,
+            tilstand = TilstandDto.Ulåst,
+            varsler = emptyList()
+        )
+        generasjonDao.lagre(generasjonDto)
+        generasjonDao.lagre(generasjonDto.copy(varsler = listOf(VarselDto(varselId, "RV_IM_1", varselOpprettet, vedtaksperiodeId, varselstatus))))
+        val lagretGenerasjon = finnGenerasjon(id)
+
+        assertNotNull(lagretGenerasjon)
+        assertEquals(1, lagretGenerasjon?.varsler?.size)
+    }
+
+    @Test
+    fun `oppdatere varsel`() {
+        val id = UUID.randomUUID()
+        val vedtaksperiodeId = UUID.randomUUID()
+        val varselId = UUID.randomUUID()
+        val varselOpprettet = LocalDateTime.now()
+        val generasjonDto = GenerasjonDto(
+            id = id,
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = UUID.randomUUID(),
+            skjæringstidspunkt = 1.januar,
+            fom = 1.januar,
+            tom = 31.januar,
+            tilstand = TilstandDto.Ulåst,
+            varsler = listOf(VarselDto(varselId, "RV_IM_1", varselOpprettet, vedtaksperiodeId, VarselStatusDto.AKTIV))
+        )
+        generasjonDao.lagre(generasjonDto)
+        generasjonDao.lagre(generasjonDto.copy(varsler = listOf(VarselDto(varselId, "RV_IM_1", varselOpprettet, vedtaksperiodeId, VarselStatusDto.VURDERT))))
+        val lagretGenerasjon = finnGenerasjon(id)
+
+        assertNotNull(lagretGenerasjon)
+        assertEquals(1, lagretGenerasjon?.varsler?.size)
+        val varsel = lagretGenerasjon?.varsler?.single()
+        assertEquals(VarselStatusDto.VURDERT, varsel?.status)
+    }
+
+    @Test
+    fun `fjerne varsel`() {
+        val id = UUID.randomUUID()
+        val vedtaksperiodeId = UUID.randomUUID()
+        val varselIdSomIkkeBlirSlettet = UUID.randomUUID()
+        val varselOpprettetSomIkkeBlirSlettet = LocalDateTime.now()
+        val generasjonDto = GenerasjonDto(
+            id = id,
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = UUID.randomUUID(),
+            skjæringstidspunkt = 1.januar,
+            fom = 1.januar,
+            tom = 31.januar,
+            tilstand = TilstandDto.Ulåst,
+            varsler = listOf(
+                VarselDto(varselIdSomIkkeBlirSlettet, "RV_IM_1",
+                    varselOpprettetSomIkkeBlirSlettet, vedtaksperiodeId, VarselStatusDto.AKTIV),
+                VarselDto(UUID.randomUUID(), "RV_IM_2", LocalDateTime.now(), vedtaksperiodeId, VarselStatusDto.AKTIV),
+            )
+        )
+        generasjonDao.lagre(generasjonDto)
+        generasjonDao.lagre(
+            generasjonDto.copy(
+                varsler = listOf(
+                    VarselDto(varselIdSomIkkeBlirSlettet, "RV_IM_1", varselOpprettetSomIkkeBlirSlettet, vedtaksperiodeId, VarselStatusDto.AKTIV)
+                )
+            )
+        )
+        val lagretGenerasjon = finnGenerasjon(id)
+
+        assertNotNull(lagretGenerasjon)
+        assertEquals(1, lagretGenerasjon?.varsler?.size)
+    }
+
+    @Test
+    fun `fjerne varsel slik at det ikke er noen varsler igjen på generasjonen`() {
+        val id = UUID.randomUUID()
+        val vedtaksperiodeId = UUID.randomUUID()
+        val varselId = UUID.randomUUID()
+        val varselOpprettet = LocalDateTime.now()
+        val generasjonDto = GenerasjonDto(
+            id = id,
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = UUID.randomUUID(),
+            skjæringstidspunkt = 1.januar,
+            fom = 1.januar,
+            tom = 31.januar,
+            tilstand = TilstandDto.Ulåst,
+            varsler = listOf(VarselDto(varselId, "RV_IM_1", varselOpprettet, vedtaksperiodeId, VarselStatusDto.AKTIV))
+        )
+        generasjonDao.lagre(generasjonDto)
+        generasjonDao.lagre(generasjonDto.copy(varsler = emptyList()))
+        val lagretGenerasjon = finnGenerasjon(id)
+
+        assertNotNull(lagretGenerasjon)
+        assertEquals(0, lagretGenerasjon?.varsler?.size)
     }
 
     @Test
@@ -397,4 +575,74 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
                 it.localDateTimeOrNull("opprettet_tidspunkt")
             }.asSingle)
         }
+
+    private fun finnGenerasjon(generasjonId: UUID): GenerasjonDto? {
+        @Language("PostgreSQL")
+        val query = """
+            SELECT unik_id, vedtaksperiode_id, utbetaling_id, fom, tom, skjæringstidspunkt, tilstand FROM selve_vedtaksperiode_generasjon svg WHERE unik_id = :generasjon_id
+        """.trimIndent()
+        return sessionOf(dataSource).use {
+            it.run(
+                queryOf(
+                    query,
+                    mapOf("generasjon_id" to generasjonId),
+                ).map { row ->
+                    GenerasjonDto(
+                        row.uuid("unik_id"),
+                        row.uuid("vedtaksperiode_id"),
+                        row.uuidOrNull("utbetaling_id"),
+                        row.localDate("skjæringstidspunkt"),
+                        row.localDate("fom"),
+                        row.localDate("tom"),
+                        when (val tilstand = row.string("tilstand")) {
+                            "Låst" -> TilstandDto.Låst
+                            "Ulåst" -> TilstandDto.Ulåst
+                            "AvsluttetUtenUtbetaling" -> TilstandDto.AvsluttetUtenUtbetaling
+                            "UtenUtbetalingMåVurderes" -> TilstandDto.UtenUtbetalingMåVurderes
+                            else -> throw IllegalArgumentException("$tilstand er ikke en gyldig generasjontilstand")
+                        },
+                        varsler = finnVarsler(generasjonId)
+                    )
+                }.asSingle
+            )
+        }
+    }
+
+    private fun finnVarsler(generasjonId: UUID): List<VarselDto> {
+        @Language("PostgreSQL")
+        val query = """
+            SELECT 
+            unik_id, 
+            kode, 
+            vedtaksperiode_id, 
+            opprettet, 
+            status 
+            FROM selve_varsel sv WHERE generasjon_ref = (SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = :generasjon_id)
+        """.trimIndent()
+        return sessionOf(dataSource).use {
+            it.run(
+                queryOf(
+                    query,
+                    mapOf("generasjon_id" to generasjonId),
+                ).map { row ->
+                    VarselDto(
+                        row.uuid("unik_id"),
+                        row.string("kode"),
+                        row.localDateTime("opprettet"),
+                        row.uuid("vedtaksperiode_id"),
+                        when (val status = row.string("status")) {
+                            "AKTIV" -> VarselStatusDto.AKTIV
+                            "INAKTIV" -> VarselStatusDto.INAKTIV
+                            "GODKJENT" -> VarselStatusDto.GODKJENT
+                            "VURDERT" -> VarselStatusDto.VURDERT
+                            "AVVIST" -> VarselStatusDto.AVVIST
+                            "AVVIKLET" -> VarselStatusDto.AVVIKLET
+                            else -> throw IllegalArgumentException("$status er ikke en gyldig varselstatus")
+                        }
+                    )
+                }.asList
+            )
+        }
+
+    }
 }

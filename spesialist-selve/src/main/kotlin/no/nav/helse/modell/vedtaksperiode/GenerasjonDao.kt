@@ -6,10 +6,12 @@ import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.Query
 import kotliquery.Row
+import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.mediator.builders.GenerasjonBuilder
 import no.nav.helse.modell.varsel.Varsel
+import no.nav.helse.modell.varsel.VarselDto
 import org.intellij.lang.annotations.Language
 
 class GenerasjonDao(private val dataSource: DataSource) {
@@ -30,6 +32,79 @@ class GenerasjonDao(private val dataSource: DataSource) {
                 generasjonBuilder.periode(row.localDate("fom"), row.localDate("tom"))
             }.asSingle)
         }
+    }
+
+    internal fun lagre(generasjonDto: GenerasjonDto) {
+        sessionOf(dataSource).use { session ->
+            session.transaction { tx ->
+                tx.lagre(generasjonDto)
+                generasjonDto.varsler.forEach { varselDto ->
+                    tx.lagre(varselDto, generasjonDto.id)
+                }
+                tx.slettVarsler(generasjonDto.id, generasjonDto.varsler.map { it.id })
+            }
+        }
+    }
+
+    private fun TransactionalSession.lagre(generasjonDto: GenerasjonDto) {
+        @Language("PostgreSQL")
+        val query =
+            """
+                INSERT INTO selve_vedtaksperiode_generasjon (unik_id, vedtaksperiode_id, utbetaling_id, opprettet_tidspunkt, opprettet_av_hendelse, tilstand_endret_tidspunkt, tilstand_endret_av_hendelse, fom, tom, skjæringstidspunkt, tilstand) 
+                VALUES (:unik_id, :vedtaksperiode_id, :utbetaling_id, now(), gen_random_uuid(), now(), gen_random_uuid(), :fom, :tom, :skjaeringstidspunkt, :tilstand)
+                ON CONFLICT (unik_id) DO UPDATE SET utbetaling_id = excluded.utbetaling_id, fom = excluded.fom, tom = excluded.tom, skjæringstidspunkt = excluded.skjæringstidspunkt, tilstand = excluded.tilstand
+                """.trimIndent()
+        this.run(
+            queryOf(
+                query,
+                mapOf(
+                    "unik_id" to generasjonDto.id,
+                    "vedtaksperiode_id" to generasjonDto.vedtaksperiodeId,
+                    "utbetaling_id" to generasjonDto.utbetalingId,
+                    "fom" to generasjonDto.fom,
+                    "tom" to generasjonDto.tom,
+                    "skjaeringstidspunkt" to generasjonDto.skjæringstidspunkt,
+                    "tilstand" to generasjonDto.tilstand.name
+                )
+            ).asUpdate
+        )
+    }
+
+    private fun TransactionalSession.lagre(varselDto: VarselDto, generasjonId: UUID) {
+        @Language("PostgreSQL")
+        val query = """
+            INSERT INTO selve_varsel (unik_id, kode, vedtaksperiode_id, generasjon_ref, definisjon_ref, opprettet, status_endret_ident, status_endret_tidspunkt, status) 
+            VALUES (:unik_id, :kode, :vedtaksperiode_id, (SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = :generasjon_id), null, :opprettet, null, null, :status)
+            ON CONFLICT (generasjon_ref, kode) DO UPDATE SET status = excluded.status
+        """.trimIndent()
+
+        this.run(
+            queryOf(
+                query,
+                mapOf(
+                    "unik_id" to varselDto.id,
+                    "kode" to varselDto.varselkode,
+                    "vedtaksperiode_id" to varselDto.vedtaksperiodeId,
+                    "generasjon_id" to generasjonId,
+                    "opprettet" to varselDto.opprettet,
+                    "status" to varselDto.status.name
+                )
+            ).asUpdate
+        )
+    }
+
+    private fun TransactionalSession.slettVarsler(generasjonId: UUID, varselIder: List<UUID>) {
+        @Language("PostgreSQL")
+        val query = if (varselIder.isEmpty()) """
+            DELETE FROM selve_varsel WHERE generasjon_ref = (SELECT id FROM selve_vedtaksperiode_generasjon svg WHERE svg.unik_id = ? LIMIT 1)
+        """.trimIndent()
+        else """
+            DELETE FROM selve_varsel 
+            WHERE generasjon_ref = (SELECT id FROM selve_vedtaksperiode_generasjon svg WHERE svg.unik_id = ? LIMIT 1) 
+            AND selve_varsel.unik_id NOT IN (${varselIder.joinToString { "?" }})
+        """.trimIndent()
+
+        this.run(queryOf(query, generasjonId, *varselIder.toTypedArray()).asExecute)
     }
 
     internal fun finnSkjæringstidspunktFor(vedtaksperiodeId: UUID): LocalDate? {
