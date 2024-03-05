@@ -46,7 +46,7 @@ internal class Generasjon private constructor(
     private val observers = mutableSetOf<IVedtaksperiodeObserver>()
 
     fun accept(visitor: GenerasjonVisitor) {
-        visitor.visitGenerasjon(id, vedtaksperiodeId, utbetalingId, skjæringstidspunkt, periode.fom(), periode.tom(), tilstand)
+        visitor.visitGenerasjon(vedtaksperiodeId, id, utbetalingId, skjæringstidspunkt, periode.fom(), periode.tom(), tilstand)
         varsler.forEach { it.accept(visitor) }
     }
 
