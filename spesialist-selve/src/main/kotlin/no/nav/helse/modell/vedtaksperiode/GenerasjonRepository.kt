@@ -16,6 +16,14 @@ internal class ActualGenerasjonRepository(dataSource: DataSource): IVedtaksperio
 
     private val dao = GenerasjonDao(dataSource)
 
+    internal fun brukGenerasjon(vedtaksperiodeId: UUID, block: (generasjon: Generasjon) -> Unit) {
+        val generasjon = dao.finnGjeldendeGenerasjon(vedtaksperiodeId)?.tilGenerasjon()
+            ?: throw IllegalStateException("Forventer å finne en generasjon for vedtaksperiodeId=$vedtaksperiodeId")
+        block(generasjon)
+        val generasjonForLagring = GenerasjonLagrer(generasjon).generasjonForLagring()
+        dao.lagre(generasjonForLagring)
+    }
+
     internal fun brukGenerasjonHvisFinnes(vedtaksperiodeId: UUID, block: (generasjon: Generasjon) -> Unit) {
         val generasjon = dao.finnGjeldendeGenerasjon(vedtaksperiodeId)?.tilGenerasjon()
             ?: return sikkerlogg.warn("Generasjon for vedtaksperiodeId=$vedtaksperiodeId finnes ikke, returnerer tidlig ved forsøk på å utføre noe i kontekst av generasjon")
@@ -30,10 +38,6 @@ internal class ActualGenerasjonRepository(dataSource: DataSource): IVedtaksperio
 
     internal fun finnVedtaksperiodeIderFor(fødselsnummer: String, skjæringstidspunkt: LocalDate): Set<UUID> {
         return dao.finnVedtaksperiodeIderFor(fødselsnummer, skjæringstidspunkt)
-    }
-
-    internal fun finnVedtaksperiodeIderFor(fødselsnummer: String): Set<UUID> {
-        return dao.finnVedtaksperiodeIderFor(fødselsnummer)
     }
 
     internal fun finnVedtaksperiodeIderFor(utbetalingId: UUID): Set<UUID> {
