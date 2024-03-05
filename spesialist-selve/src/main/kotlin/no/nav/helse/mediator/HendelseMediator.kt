@@ -226,7 +226,7 @@ internal class HendelseMediator(
 
     internal fun håndter(nyeVarsler: NyeVarsler) {
         nyeVarsler.varsler.forEach { varsel ->
-            generasjonRepository.brukGenerasjon(varsel.vedtaksperiodeId()) {
+            generasjonRepository.brukGenerasjonHvisFinnes(varsel.vedtaksperiodeId()) {
                 it.håndterNyttVarsel(varsel, nyeVarsler.id)
             }
         }
