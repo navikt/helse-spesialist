@@ -144,7 +144,7 @@ internal class Kommandofabrikk(
         }
     }
 
-    internal fun gjeldendeGenerasjon(vedtaksperiodeId: UUID): Generasjon {
+    private fun gjeldendeGenerasjon(vedtaksperiodeId: UUID): Generasjon {
         return GenerasjonBuilder(vedtaksperiodeId = vedtaksperiodeId).build(generasjonRepository, varselRepository)
     }
 

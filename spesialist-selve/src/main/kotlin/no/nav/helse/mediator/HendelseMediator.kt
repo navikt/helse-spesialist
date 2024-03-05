@@ -205,10 +205,11 @@ internal class HendelseMediator(
     }
 
     internal fun håndter(avsluttetUtenVedtakMessage: AvsluttetUtenVedtakMessage) {
-        val generasjon = kommandofabrikk.gjeldendeGenerasjon(avsluttetUtenVedtakMessage.vedtaksperiodeId())
-        val sykefraværstilfelleMediator = SykefraværstilfelleMediator(rapidsConnection)
-        generasjon.registrer(sykefraværstilfelleMediator)
-        avsluttetUtenVedtakMessage.sendInnTil(generasjon)
+        generasjonRepository.generasjon(avsluttetUtenVedtakMessage.vedtaksperiodeId()) { generasjon ->
+            val sykefraværstilfelleMediator = SykefraværstilfelleMediator(rapidsConnection)
+            generasjon.registrer(sykefraværstilfelleMediator)
+            avsluttetUtenVedtakMessage.sendInnTil(generasjon)
+        }
     }
 
     internal fun håndter(sykefraværstilfeller: Sykefraværstilfeller) {
@@ -223,8 +224,9 @@ internal class HendelseMediator(
 
     internal fun håndter(vedtakFattet: VedtakFattet) {
         val vedtaksperiodeId = vedtakFattet.vedtaksperiodeId()
-        val gjeldendeGenerasjon = kommandofabrikk.gjeldendeGenerasjon(vedtaksperiodeId)
-        gjeldendeGenerasjon.håndterVedtakFattet(vedtakFattet.id)
+        generasjonRepository.generasjon(vedtaksperiodeId) {
+            it.håndterVedtakFattet(vedtakFattet.id)
+        }
         if (vedtakDao.erSpesialsak(vedtaksperiodeId)) vedtakDao.spesialsakFerdigbehandlet(vedtaksperiodeId)
     }
 
