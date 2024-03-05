@@ -191,7 +191,7 @@ internal class Kommandofabrikk(
             oppgaveDao.oppgaveDataForAutomatisering(oppgaveId)!!
         }
 
-        val skjæringstidspunkt = gjeldendeGenerasjon(oppgaveDataForAutomatisering.vedtaksperiodeId).skjæringstidspunkt()
+        val skjæringstidspunkt = generasjonRepository.skjæringstidspunktFor(oppgaveDataForAutomatisering.vedtaksperiodeId)
 
         val utbetaling = utbetalingDao.hentUtbetaling(oppgaveDataForAutomatisering.utbetalingId)
         val oppgaveId by lazy { oppgaveDao.finnOppgaveId(fødselsnummer) }
