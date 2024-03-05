@@ -4,6 +4,7 @@ import AbstractE2ETest
 import com.fasterxml.jackson.module.kotlin.convertValue
 import java.time.LocalDate
 import no.nav.helse.AvviksvurderingTestdata
+import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.TestRapidHelpers.meldinger
 import no.nav.helse.januar
 import no.nav.helse.objectMapper
@@ -20,7 +21,7 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
         håndterSøknad()
         håndterVedtaksperiodeOpprettet()
         håndterAvsluttetUtenVedtak()
-        val hendelser = inspektør.meldinger()
+        val hendelser = inspektør.hendelser("vedtak_fattet")
         assertEquals(1, hendelser.size)
         val hendelse = hendelser.single()
         assertEquals("vedtak_fattet", hendelse["@event_name"].asText())

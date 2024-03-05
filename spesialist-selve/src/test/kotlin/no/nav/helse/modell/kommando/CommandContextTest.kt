@@ -74,7 +74,6 @@ internal class CommandContextTest {
 
     @Test
     fun `suspenderer ved execute`() {
-        context = CommandContext(CONTEXT)
         TestCommand(executeAction = { false }).apply {
             assertFalse(context.utfør(commandContextDao, this.id, this))
             verify(exactly = 0) { commandContextDao.ferdig(any(), any()) }
@@ -95,7 +94,6 @@ internal class CommandContextTest {
 
     @Test
     fun `feil ved execute`() {
-        context = CommandContext(CONTEXT)
         TestCommand(executeAction = { throw Exception() }).apply {
             assertThrows<Exception> { context.utfør(commandContextDao, this.id, this) }
             verify(exactly = 0) { commandContextDao.ferdig(any(), any()) }
@@ -116,11 +114,32 @@ internal class CommandContextTest {
 
     @Test
     fun ferdigstiller() {
-        context = CommandContext(CONTEXT)
         TestCommand(executeAction = { this.ferdigstill(context)}).apply {
             context.utfør(commandContextDao, this.id, this)
             verify(exactly = 1) { commandContextDao.ferdig(any(), any())}
         }
+    }
+
+    @Test
+    fun `lager kommandokjede_ferdigstilt hendelse når kommandoen ferdigstilles`() {
+        TestCommand(executeAction = { this.ferdigstill(context)}).apply {
+            context.utfør(commandContextDao, this.id, this)
+        }
+        val result = observer.hendelser
+        assertTrue(result.isNotEmpty())
+        assertTrue(result.first().contains("kommandokjede_ferdigstilt"))
+    }
+
+    @Test
+    fun `lager kommandokjede_suspendert hendelse når kommandoen suspenderes`() {
+        TestCommand(executeAction = {
+            false
+        }).apply {
+            context.utfør(commandContextDao, this.id, this)
+        }
+        val result = observer.hendelser
+        assertTrue(result.isNotEmpty())
+        assertTrue(result.first().contains("kommandokjede_suspendert"))
     }
 
     @Test

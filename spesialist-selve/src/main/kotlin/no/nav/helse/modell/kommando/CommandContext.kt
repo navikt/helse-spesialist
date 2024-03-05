@@ -4,6 +4,7 @@ import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.UtgåendeMeldingerObserver
 import no.nav.helse.modell.CommandContextDao
+import no.nav.helse.rapids_rivers.JsonMessage
 import org.slf4j.LoggerFactory
 
 internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList(), private val hash: UUID? = null) {
@@ -73,8 +74,21 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
             sti.clear()
         }
         utfør(command).also {
-            if (ferdigstilt || it) commandContextDao.ferdig(hendelseId, id)
-            else commandContextDao.suspendert(hendelseId, id, newHash, sti)
+            if (ferdigstilt || it) commandContextDao.ferdig(hendelseId, id).also {
+                publiser(JsonMessage.newMessage("kommandokjede_ferdigstilt", mutableMapOf(
+                    "commandContextId" to id,
+                    "meldingId" to hendelseId,
+                    "command" to command.name,
+                )).toJson())
+            }
+            else commandContextDao.suspendert(hendelseId, id, newHash, sti).also {
+                publiser(JsonMessage.newMessage("kommandokjede_suspendert", mutableMapOf(
+                    "commandContextId" to id,
+                    "meldingId" to hendelseId,
+                    "command" to command.name,
+                    "sti" to sti
+                )).toJson())
+            }
         }
     } catch (rootErr: Exception) {
         try {

@@ -536,7 +536,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     ) {
         sisteMeldingId = meldingssender.sendSøknadSendt(aktørId, fødselsnummer, organisasjonsnummer)
         assertIngenEtterspurteBehov()
-        assertIngenUtgåendeMeldinger()
         assertPersonEksisterer(fødselsnummer, aktørId)
         assertArbeidsgiverEksisterer(organisasjonsnummer)
     }
@@ -560,7 +559,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             skjæringstidspunkt = skjæringstidspunkt
         )
         assertIngenEtterspurteBehov()
-        assertIngenUtgåendeMeldinger()
         assertVedtaksperiodeEksisterer(vedtaksperiodeId)
     }
 
@@ -638,7 +636,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             utbetalingId = this.utbetalingId
         )
         assertIngenEtterspurteBehov()
-        assertIngenUtgåendeMeldinger()
     }
 
     protected fun håndterAktivitetsloggNyAktivitet(
@@ -659,7 +656,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             varselkoder = varselkoder
         )
         assertIngenEtterspurteBehov()
-        assertIngenUtgåendeMeldinger()
     }
 
     protected fun håndterSykefraværstilfeller(
@@ -683,7 +679,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         sisteMeldingId = meldingssender.sendEndretSkjermetinfo(fødselsnummer, skjermet)
         if (!skjermet) {
             assertIngenEtterspurteBehov()
-            assertIngenUtgåendeMeldinger()
         }
     }
 
@@ -849,7 +844,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             personFagsystemId = fagsystemidFor(utbetalingId, tilArbeidsgiver = false),
         )
         assertIngenEtterspurteBehov()
-        assertIngenUtgåendeMeldinger()
     }
 
     protected fun håndterGodkjenningsbehovUtenValidering(
