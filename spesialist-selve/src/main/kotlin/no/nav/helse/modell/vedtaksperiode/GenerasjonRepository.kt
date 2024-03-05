@@ -16,9 +16,9 @@ internal class ActualGenerasjonRepository(dataSource: DataSource): IVedtaksperio
 
     private val dao = GenerasjonDao(dataSource)
 
-    internal fun generasjon(vedtaksperiodeId: UUID, block: (generasjon: Generasjon) -> Unit) {
+    internal fun brukGenerasjonHvisFinnes(vedtaksperiodeId: UUID, block: (generasjon: Generasjon) -> Unit) {
         val generasjon = dao.finnGjeldendeGenerasjon(vedtaksperiodeId)?.tilGenerasjon()
-            ?: throw IllegalStateException("Forventer at det finnes en generasjon for vedtaksperiodeId=$vedtaksperiodeId")
+            ?: return sikkerlogg.warn("Generasjon for vedtaksperiodeId=$vedtaksperiodeId finnes ikke, returnerer tidlig ved forsøk på å utføre noe i kontekst av generasjon")
         block(generasjon)
         val generasjonForLagring = GenerasjonLagrer(generasjon).generasjonForLagring()
         dao.lagre(generasjonForLagring)

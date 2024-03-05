@@ -204,7 +204,7 @@ internal class HendelseMediator(
     }
 
     internal fun håndter(avsluttetUtenVedtakMessage: AvsluttetUtenVedtakMessage) {
-        generasjonRepository.generasjon(avsluttetUtenVedtakMessage.vedtaksperiodeId()) { generasjon ->
+        generasjonRepository.brukGenerasjonHvisFinnes(avsluttetUtenVedtakMessage.vedtaksperiodeId()) { generasjon ->
             val sykefraværstilfelleMediator = SykefraværstilfelleMediator(rapidsConnection)
             generasjon.registrer(sykefraværstilfelleMediator)
             avsluttetUtenVedtakMessage.sendInnTil(generasjon)
@@ -218,7 +218,7 @@ internal class HendelseMediator(
             keyValue("fødselsnummer", sykefraværstilfeller.fødselsnummer())
         )
         sykefraværstilfeller.vedtaksperiodeOppdateringer.forEach { oppdatering ->
-            generasjonRepository.generasjon(oppdatering.vedtaksperiodeId) {
+            generasjonRepository.brukGenerasjonHvisFinnes(oppdatering.vedtaksperiodeId) {
                 it.håndterTidslinjeendring(oppdatering.fom, oppdatering.tom, oppdatering.skjæringstidspunkt, sykefraværstilfeller.id)
             }
         }
@@ -226,7 +226,7 @@ internal class HendelseMediator(
 
     internal fun håndter(nyeVarsler: NyeVarsler) {
         nyeVarsler.varsler.forEach { varsel ->
-            generasjonRepository.generasjon(varsel.vedtaksperiodeId()) {
+            generasjonRepository.brukGenerasjonHvisFinnes(varsel.vedtaksperiodeId()) {
                 it.håndterNyttVarsel(varsel, nyeVarsler.id)
             }
         }
@@ -234,7 +234,7 @@ internal class HendelseMediator(
 
     internal fun håndter(vedtakFattet: VedtakFattet) {
         val vedtaksperiodeId = vedtakFattet.vedtaksperiodeId()
-        generasjonRepository.generasjon(vedtaksperiodeId) {
+        generasjonRepository.brukGenerasjonHvisFinnes(vedtaksperiodeId) {
             it.håndterVedtakFattet(vedtakFattet.id)
         }
         if (vedtakDao.erSpesialsak(vedtaksperiodeId)) vedtakDao.spesialsakFerdigbehandlet(vedtaksperiodeId)
