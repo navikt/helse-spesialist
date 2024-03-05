@@ -70,7 +70,6 @@ import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
-import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterOppdateringer
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.NyeVarsler
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeEndret
@@ -213,13 +212,16 @@ internal class HendelseMediator(
     }
 
     internal fun håndter(sykefraværstilfeller: Sykefraværstilfeller) {
-        val generasjoner = kommandofabrikk.generasjonerFor(sykefraværstilfeller.fødselsnummer())
         sikkerlogg.info(
             "oppdaterer sykefraværstilfeller for {}, {}",
             keyValue("aktørId", sykefraværstilfeller.aktørId),
             keyValue("fødselsnummer", sykefraværstilfeller.fødselsnummer())
         )
-        generasjoner.håndterOppdateringer(sykefraværstilfeller.vedtaksperiodeOppdateringer, sykefraværstilfeller.id)
+        sykefraværstilfeller.vedtaksperiodeOppdateringer.forEach { oppdatering ->
+            generasjonRepository.generasjon(oppdatering.vedtaksperiodeId) {
+                it.håndterTidslinjeendring(oppdatering.fom, oppdatering.tom, oppdatering.skjæringstidspunkt, sykefraværstilfeller.id)
+            }
+        }
     }
 
     internal fun håndter(vedtakFattet: VedtakFattet) {

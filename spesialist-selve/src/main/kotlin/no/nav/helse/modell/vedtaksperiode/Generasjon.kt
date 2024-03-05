@@ -470,16 +470,6 @@ internal class Generasjon private constructor(
             return nyGenerasjon
         }
 
-        internal fun List<Generasjon>.håndterOppdateringer(
-            vedtaksperiodeoppdateringer: List<VedtaksperiodeOppdatering>,
-            hendelseId: UUID
-        ) {
-            forEach { generasjon ->
-                val oppdatering = vedtaksperiodeoppdateringer.find { it.vedtaksperiodeId == generasjon.vedtaksperiodeId } ?: return@forEach
-                generasjon.håndterTidslinjeendring(oppdatering.fom, oppdatering.tom, oppdatering.skjæringstidspunkt, hendelseId)
-            }
-        }
-
         internal fun List<Generasjon>.håndterNyttVarsel(varsler: List<Varsel>, hendelseId: UUID) {
             forEach { generasjon ->
                 varsler.forEach { generasjon.håndterNyttVarsel(it, hendelseId) }
