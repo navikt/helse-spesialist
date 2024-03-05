@@ -16,9 +16,14 @@ import no.nav.helse.modell.varsel.Varsel.Companion.inneholderSvartelistedeVarsle
 import no.nav.helse.modell.varsel.Varsel.Companion.inneholderVarselOmAvvik
 import no.nav.helse.modell.varsel.Varsel.Companion.inneholderVarselOmNegativtBeløp
 import no.nav.helse.modell.varsel.Varsel.Companion.inneholderVarselOmTilbakedatering
+import no.nav.helse.modell.varsel.VarselVisitor
 import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetUtenVedtak
 import no.nav.helse.modell.vedtaksperiode.vedtak.SykepengevedtakBuilder
 import org.slf4j.LoggerFactory
+
+internal interface GenerasjonVisitor: VarselVisitor {
+    fun visitGenerasjon(vedtaksperiodeId: UUID, id: UUID, utbetalingId: UUID?, skjæringstidspunkt: LocalDate, fom: LocalDate, tom: LocalDate, tilstand: Generasjon.Tilstand) {}
+}
 
 internal class Generasjon private constructor(
     private val id: UUID,
@@ -40,6 +45,11 @@ internal class Generasjon private constructor(
     private val varsler: MutableList<Varsel> = varsler.toMutableList()
     private val observers = mutableSetOf<IVedtaksperiodeObserver>()
 
+    fun accept(visitor: GenerasjonVisitor) {
+        visitor.visitGenerasjon(id, vedtaksperiodeId, utbetalingId, skjæringstidspunkt, periode.fom(), periode.tom(), tilstand)
+        varsler.forEach { it.accept(visitor) }
+    }
+
     internal fun skjæringstidspunkt() = skjæringstidspunkt
 
     internal fun hasterÅBehandle() = varsler.inneholderVarselOmNegativtBeløp()
@@ -50,7 +60,16 @@ internal class Generasjon private constructor(
     }
 
     internal fun toDto(): GenerasjonDto {
-        return GenerasjonDto(id, vedtaksperiodeId, utbetalingId, skjæringstidspunkt, periode, tilstand.toDto(), varsler.map(Varsel::toDto))
+        return GenerasjonDto(
+            id = id,
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = utbetalingId,
+            skjæringstidspunkt = skjæringstidspunkt,
+            fom = periode.fom(),
+            tom = periode.tom(),
+            tilstand = tilstand.toDto(),
+            varsler = varsler.map(Varsel::toDto)
+        )
     }
 
     internal fun tilhører(dato: LocalDate): Boolean = periode.tom() <= dato

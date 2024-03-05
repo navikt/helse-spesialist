@@ -27,7 +27,6 @@ import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjon
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterOppdateringer
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverSkjønnsfastsettelse
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverTotrinnsvurdering
-import no.nav.helse.modell.vedtaksperiode.Periode.Companion.til
 import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetUtenVedtak
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -800,7 +799,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         generasjon.håndterNyttVarsel(varsel, UUID.randomUUID())
         val dto = generasjon.toDto()
 
-        assertEquals(GenerasjonDto(generasjonId, vedtaksperiodeId, utbetalingId, skjæringstidspunkt, fom til tom, TilstandDto.Ulåst, listOf(varsel.toDto())), dto)
+        assertEquals(GenerasjonDto(generasjonId, vedtaksperiodeId, utbetalingId, skjæringstidspunkt, fom, tom, TilstandDto.Ulåst, listOf(varsel.toDto())), dto)
     }
 
     @Test

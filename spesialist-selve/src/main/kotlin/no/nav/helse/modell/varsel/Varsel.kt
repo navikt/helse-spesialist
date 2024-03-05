@@ -11,6 +11,10 @@ import no.nav.helse.modell.varsel.Varsel.Status.VURDERT
 import no.nav.helse.modell.vedtaksperiode.IVedtaksperiodeObserver
 import no.nav.helse.rapids_rivers.asLocalDateTime
 
+internal interface VarselVisitor {
+    fun visitVarsel(id: UUID, varselkode: String, opprettet: LocalDateTime, status: Varsel.Status) {}
+}
+
 internal class Varsel(
     private val id: UUID,
     private val varselkode: String,
@@ -39,6 +43,10 @@ internal class Varsel(
     }
 
     private val observers = mutableSetOf<IVedtaksperiodeObserver>()
+
+    internal fun accept(visitor: VarselVisitor) {
+        visitor.visitVarsel(id, varselkode, opprettet, status)
+    }
 
     internal fun registrer(vararg observer: IVedtaksperiodeObserver) {
         observers.addAll(observer)
