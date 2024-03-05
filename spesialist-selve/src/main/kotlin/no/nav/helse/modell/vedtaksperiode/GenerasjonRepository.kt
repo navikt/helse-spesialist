@@ -1,16 +1,28 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.builders.GenerasjonBuilder
+import no.nav.helse.modell.varsel.Varsel
+import no.nav.helse.modell.varsel.VarselDto
+import no.nav.helse.modell.varsel.VarselStatusDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 internal class ActualGenerasjonRepository(dataSource: DataSource): IVedtaksperiodeObserver {
 
     private val dao = GenerasjonDao(dataSource)
+
+    internal fun generasjon(vedtaksperiodeId: UUID, block: (generasjon: Generasjon) -> Unit) {
+        val generasjon = dao.finnGjeldendeGenerasjon(vedtaksperiodeId)?.tilGenerasjon()
+            ?: throw IllegalStateException("Forventer at det finnes en generasjon for vedtaksperiodeId=$vedtaksperiodeId")
+        block(generasjon)
+        val generasjonForLagring = GenerasjonLagrer(generasjon).generasjonForLagring()
+        dao.lagre(generasjonForLagring)
+    }
 
     internal fun byggGenerasjon(vedtaksperiodeId: UUID, generasjonBuilder: GenerasjonBuilder) {
         dao.byggSisteFor(vedtaksperiodeId, generasjonBuilder)
@@ -126,5 +138,84 @@ internal class ActualGenerasjonRepository(dataSource: DataSource): IVedtaksperio
                 kv("generasjon", this),
             )
         }
+    }
+
+    private fun GenerasjonDto.tilGenerasjon(): Generasjon {
+        return Generasjon.fraLagring(
+            id = id,
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = utbetalingId,
+            skjæringstidspunkt = skjæringstidspunkt,
+            fom = fom,
+            tom = tom,
+            tilstand = when (tilstand) {
+                TilstandDto.Låst -> Generasjon.Låst
+                TilstandDto.Ulåst -> Generasjon.Ulåst
+                TilstandDto.AvsluttetUtenUtbetaling -> Generasjon.AvsluttetUtenUtbetaling
+                TilstandDto.UtenUtbetalingMåVurderes -> Generasjon.UtenUtbetalingMåVurderes
+            },
+            varsler = varsler.map { varselDto ->
+                Varsel(
+                    id = varselDto.id,
+                    varselkode = varselDto.varselkode,
+                    opprettet = varselDto.opprettet,
+                    vedtaksperiodeId = varselDto.vedtaksperiodeId,
+                    status = when (varselDto.status) {
+                        VarselStatusDto.AKTIV -> Varsel.Status.AKTIV
+                        VarselStatusDto.INAKTIV -> Varsel.Status.INAKTIV
+                        VarselStatusDto.GODKJENT -> Varsel.Status.GODKJENT
+                        VarselStatusDto.VURDERT -> Varsel.Status.VURDERT
+                        VarselStatusDto.AVVIST -> Varsel.Status.AVVIST
+                        VarselStatusDto.AVVIKLET -> Varsel.Status.AVVIKLET
+                    }
+                )
+            }.toSet()
+        )
+    }
+
+    private class GenerasjonLagrer(generasjon: Generasjon): GenerasjonVisitor {
+        private lateinit var vedtaksperiodeId: UUID
+        private lateinit var id: UUID
+        private var utbetalingId: UUID? = null
+        private lateinit var skjæringstidspunkt: LocalDate
+        private lateinit var periode: Periode
+        private lateinit var tilstand: TilstandDto
+        private val varsler = mutableListOf<VarselDto>()
+
+        init {
+            generasjon.accept(this)
+        }
+
+        override fun visitGenerasjon(
+            vedtaksperiodeId: UUID,
+            id: UUID,
+            utbetalingId: UUID?,
+            skjæringstidspunkt: LocalDate,
+            fom: LocalDate,
+            tom: LocalDate,
+            tilstand: Generasjon.Tilstand
+        ) {
+            this.vedtaksperiodeId = vedtaksperiodeId
+            this.id = id
+            this.utbetalingId = utbetalingId
+            this.skjæringstidspunkt = skjæringstidspunkt
+            this.periode = Periode(fom, tom)
+            this.tilstand = tilstand.toDto()
+        }
+
+        override fun visitVarsel(id: UUID, varselkode: String, opprettet: LocalDateTime, status: Varsel.Status) {
+            varsler.add(VarselDto(id, varselkode, opprettet, vedtaksperiodeId, status.toDto()))
+        }
+
+        fun generasjonForLagring() = GenerasjonDto(
+            id = id,
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = utbetalingId,
+            skjæringstidspunkt = skjæringstidspunkt,
+            fom = periode.fom(),
+            tom = periode.tom(),
+            tilstand = tilstand,
+            varsler = varsler
+        )
     }
 }

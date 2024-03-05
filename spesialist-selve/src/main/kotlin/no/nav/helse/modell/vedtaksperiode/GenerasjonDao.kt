@@ -121,13 +121,13 @@ class GenerasjonDao(private val dataSource: DataSource) {
             finnSiste(vedtaksperiodeId).map { row ->
                 val generasjonRef = row.long("id")
                 GenerasjonDto(
-                    row.uuid("unik_id"),
-                    row.uuid("vedtaksperiode_id"),
-                    row.uuidOrNull("utbetaling_id"),
-                    row.localDate("skjæringstidspunkt"),
-                    row.localDate("fom"),
-                    row.localDate("tom"),
-                    when (val tilstand = row.string("tilstand")) {
+                    id = row.uuid("unik_id"),
+                    vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
+                    utbetalingId = row.uuidOrNull("utbetaling_id"),
+                    skjæringstidspunkt = row.localDate("skjæringstidspunkt"),
+                    fom = row.localDate("fom"),
+                    tom = row.localDate("tom"),
+                    tilstand = when (val tilstand = row.string("tilstand")) {
                         "Låst" -> TilstandDto.Låst
                         "Ulåst" -> TilstandDto.Ulåst
                         "AvsluttetUtenUtbetaling" -> TilstandDto.AvsluttetUtenUtbetaling
