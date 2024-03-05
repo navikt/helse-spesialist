@@ -262,6 +262,20 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
 
         assertTilstand(VEDTAKSPERIODE, Generasjon.Låst)
     }
+    @Test
+    fun `oppdaterer generasjon med behandlingsinformasjon`() {
+        val vedtaksperiodeEndretId = UUID.randomUUID()
+        val generasjonId = UUID.randomUUID()
+        generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE, vedtaksperiodeEndretId, 1.januar, Periode(1.januar, 31.januar), Generasjon.Ulåst)
+
+        val spleisBehandlingId = UUID.randomUUID()
+        val tags = listOf("ARBEIDSGIVERUTBETALING", "PERSONUTBETALING")
+
+        generasjonDao.oppdaterMedBehandlingsInformasjon(generasjonId, spleisBehandlingId, tags)
+
+        assertTags(generasjonId, tags)
+        assertSpleisBehandlingId(generasjonId, spleisBehandlingId)
+    }
 
     @Test
     fun `gir false tilbake dersom vi ikke finner noen generasjon`() {
@@ -542,6 +556,34 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         }
 
         assertEquals(forventetTilstand.navn(), tilstand)
+    }
+
+    private fun assertTags(generasjonId: UUID, forventedeTags: List<String>) {
+        val tags = sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val query =
+                "SELECT tags FROM selve_vedtaksperiode_generasjon WHERE unik_id = ?;"
+
+            session.run(queryOf(query, generasjonId).map {
+                it.array<String>("tags").toList()
+            }.asSingle)
+        }
+
+        assertEquals(forventedeTags, tags)
+    }
+
+    private fun assertSpleisBehandlingId(generasjonId: UUID, forventetSpleisBehandlingId: UUID) {
+        val actualSpleisBehandlingId = sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val query =
+                "SELECT spleis_behandling_id FROM selve_vedtaksperiode_generasjon WHERE unik_id = ?;"
+
+            session.run(queryOf(query, generasjonId).map {
+                it.uuidOrNull("spleis_behandling_id")
+            }.asSingle)
+        }
+
+        assertEquals(forventetSpleisBehandlingId, actualSpleisBehandlingId)
     }
 
     private fun assertUtbetaling(generasjonId: UUID, forventetUtbetalingId: UUID?) {
