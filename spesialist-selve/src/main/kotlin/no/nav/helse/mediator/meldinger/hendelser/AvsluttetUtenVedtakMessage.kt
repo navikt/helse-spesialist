@@ -2,12 +2,13 @@ package no.nav.helse.mediator.meldinger.hendelser
 
 import java.util.UUID
 import no.nav.helse.mediator.asUUID
+import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetUtenVedtak
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 
-internal class AvsluttetUtenVedtakMessage(packet: JsonMessage) {
+internal class AvsluttetUtenVedtakMessage(private val packet: JsonMessage): Vedtaksperiodemelding {
 
     private val fødselsnummer = packet["fødselsnummer"].asText()
     private val aktørId = packet["aktørId"].asText()
@@ -19,8 +20,10 @@ internal class AvsluttetUtenVedtakMessage(packet: JsonMessage) {
     private val hendelser = packet["hendelser"].map { it.asUUID() }
 
     internal fun skjæringstidspunkt() = skjæringstidspunkt
-    internal fun fødselsnummer() = fødselsnummer
-    internal fun vedtaksperiodeId() = vedtaksperiodeId
+    override fun fødselsnummer(): String = fødselsnummer
+    override fun vedtaksperiodeId(): UUID = vedtaksperiodeId
+    override val id: UUID = packet["@id"].asUUID()
+    override fun toJson(): String = packet.toJson()
 
     private val avsluttetUtenVedtak get() = AvsluttetUtenVedtak(
         fødselsnummer = fødselsnummer,

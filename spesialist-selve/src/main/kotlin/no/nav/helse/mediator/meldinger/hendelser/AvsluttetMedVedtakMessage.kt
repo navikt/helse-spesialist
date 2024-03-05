@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.kotlin.treeToValue
 import java.util.UUID
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.mediator.asUUID
+import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.avviksvurdering.Avviksvurdering.Companion.finnRiktigAvviksvurdering
 import no.nav.helse.modell.avviksvurdering.InnrapportertInntektDto
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
@@ -15,8 +16,10 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
 
-internal class AvsluttetMedVedtakMessage(packet: JsonMessage, private val avviksvurderingDao: AvviksvurderingDao) {
-
+internal class AvsluttetMedVedtakMessage(
+    private val packet: JsonMessage,
+    private val avviksvurderingDao: AvviksvurderingDao,
+): Vedtaksperiodemelding {
     private val fødselsnummer = packet["fødselsnummer"].asText()
     private val aktørId = packet["aktørId"].asText()
     private val fom = packet["fom"].asLocalDate()
@@ -35,7 +38,10 @@ internal class AvsluttetMedVedtakMessage(packet: JsonMessage, private val avviks
     private val tags = packet["tags"].map { it.asText() }
     private val sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(packet, faktatype(packet))
     internal fun skjæringstidspunkt() = skjæringstidspunkt
-    internal fun fødselsnummer() = fødselsnummer
+    override fun fødselsnummer(): String = fødselsnummer
+    override fun vedtaksperiodeId(): UUID = vedtaksperiodeId
+    override val id: UUID = packet["@id"].asUUID()
+    override fun toJson(): String = packet.toJson()
 
     private val avsluttetMedVedtak get() = AvsluttetMedVedtak(
         fødselsnummer = fødselsnummer,
