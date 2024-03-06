@@ -3,6 +3,7 @@ package no.nav.helse.mediator.meldinger
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.meldinger.hendelser.AvsluttetMedVedtakMessage
+import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -15,6 +16,7 @@ internal class AvsluttetMedVedtakRiver(
     rapidsConnection: RapidsConnection,
     private val mediator: HendelseMediator,
     private val avviksvurderingDao: AvviksvurderingDao,
+    private val generasjonDao: GenerasjonDao
 ) : River.PacketListener {
 
     init {
@@ -60,7 +62,7 @@ internal class AvsluttetMedVedtakRiver(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         sikkerlogg.info("Mottok melding avsluttet_med_vedtak:\n${packet.toJson()}")
-        mediator.håndter(AvsluttetMedVedtakMessage(packet, avviksvurderingDao))
+        mediator.håndter(AvsluttetMedVedtakMessage(packet, avviksvurderingDao, generasjonDao))
     }
 
     private companion object {

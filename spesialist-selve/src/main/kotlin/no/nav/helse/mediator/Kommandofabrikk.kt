@@ -47,6 +47,7 @@ import no.nav.helse.modell.utbetaling.UtbetalingEndretCommand
 import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Generasjon
+import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovCommand
 import no.nav.helse.modell.vedtaksperiode.OpprettVedtaksperiodeCommand
@@ -85,6 +86,7 @@ internal class Kommandofabrikk(
     private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource),
     private val snapshotDao: SnapshotDao = SnapshotDao(dataSource),
     private val egenAnsattDao: EgenAnsattDao = EgenAnsattDao(dataSource),
+    private val generasjonDao: GenerasjonDao = GenerasjonDao(dataSource),
     private val snapshotClient: SnapshotClient,
     oppgaveMediator: () -> OppgaveMediator,
     private val totrinnsvurderingDao: TotrinnsvurderingDao = TotrinnsvurderingDao(dataSource),
@@ -379,6 +381,8 @@ internal class Kommandofabrikk(
             organisasjonsnummer = hendelse.organisasjonsnummer,
             orgnummereMedRelevanteArbeidsforhold = hendelse.orgnummereMedRelevanteArbeidsforhold,
             vedtaksperiodeId = hendelse.vedtaksperiodeId(),
+            spleisBehandlingId = hendelse.spleisBehandlingId,
+            tags = hendelse.tags,
             periodeFom = hendelse.periodeFom,
             periodeTom = hendelse.periodeTom,
             periodetype = hendelse.periodetype,
@@ -398,6 +402,7 @@ internal class Kommandofabrikk(
             arbeidsgiverDao = arbeidsgiverDao,
             arbeidsforholdDao = arbeidsforholdDao,
             egenAnsattDao = egenAnsattDao,
+            generasjonDao = generasjonDao,
             utbetalingDao = utbetalingDao,
             vergemålDao = vergemålDao,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,

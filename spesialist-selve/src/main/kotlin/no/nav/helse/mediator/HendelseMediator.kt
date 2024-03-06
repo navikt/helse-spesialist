@@ -70,6 +70,7 @@ import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
+import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.NyeVarsler
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeEndret
@@ -106,6 +107,7 @@ internal class HendelseMediator(
     private val varselRepository: ActualVarselRepository = ActualVarselRepository(dataSource),
     private val generasjonRepository: ActualGenerasjonRepository = ActualGenerasjonRepository(dataSource),
     private val metrikkDao: MetrikkDao = MetrikkDao(dataSource),
+    private val generasjonDao: GenerasjonDao,
 ) : Personhåndterer {
     private companion object {
         private val logg = LoggerFactory.getLogger(HendelseMediator::class.java)
@@ -158,7 +160,7 @@ internal class HendelseMediator(
             VedtaksperiodeNyUtbetalingRiver(it, this)
             SykefraværstilfellerRiver(it, this)
             MetrikkRiver(it)
-            AvsluttetMedVedtakRiver(it, this, avviksvurderingDao)
+            AvsluttetMedVedtakRiver(it, this, avviksvurderingDao, generasjonDao)
             AvsluttetUtenVedtakRiver(it, this)
             MidnattRiver(it, this)
         }

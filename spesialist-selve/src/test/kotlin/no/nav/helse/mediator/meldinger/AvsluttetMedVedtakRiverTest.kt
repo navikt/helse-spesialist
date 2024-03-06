@@ -16,6 +16,7 @@ import no.nav.helse.modell.avviksvurdering.InnrapportertInntektDto
 import no.nav.helse.modell.avviksvurdering.InntektDto
 import no.nav.helse.modell.avviksvurdering.OmregnetÅrsinntektDto
 import no.nav.helse.modell.avviksvurdering.SammenligningsgrunnlagDto
+import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
@@ -23,10 +24,11 @@ import org.junit.jupiter.api.Test
 internal class AvsluttetMedVedtakRiverTest {
     private val mediator = mockk<HendelseMediator>(relaxed = true)
     private val avviksvurderingDao = mockk<AvviksvurderingDao>(relaxed = true)
+    private val generasjonDao = mockk<GenerasjonDao>(relaxed = true)
     private val testRapid = TestRapid()
 
     init {
-        AvsluttetMedVedtakRiver(testRapid, mediator, avviksvurderingDao)
+        AvsluttetMedVedtakRiver(testRapid, mediator, avviksvurderingDao, generasjonDao)
     }
 
     @Test

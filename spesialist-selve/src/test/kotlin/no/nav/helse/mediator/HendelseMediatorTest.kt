@@ -22,6 +22,7 @@ import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.modell.varsel.Varselkode
+import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -41,6 +42,7 @@ internal class HendelseMediatorTest : AbstractDatabaseTest() {
     private val hendelseDao = HendelseDao(dataSource)
     private val utbetalingDao = UtbetalingDao(dataSource)
     private val avviksvurderingDao = mockk<AvviksvurderingDao>()
+    private val generasjonDao = mockk<GenerasjonDao>()
 
     private val godkjenningMediator =
         GodkjenningMediator(vedtakDao, opptegnelseDao, oppgaveDao, utbetalingDao, hendelseDao)
@@ -50,10 +52,11 @@ internal class HendelseMediatorTest : AbstractDatabaseTest() {
     private val hendelseMediator = HendelseMediator(
         dataSource = dataSource,
         rapidsConnection = testRapid,
+        oppgaveDao = oppgaveDao,
         godkjenningMediator = godkjenningMediator,
         kommandofabrikk = kommandofabrikk,
         avviksvurderingDao = avviksvurderingDao,
-        oppgaveDao = oppgaveDao,
+        generasjonDao = generasjonDao,
     )
 
     init {

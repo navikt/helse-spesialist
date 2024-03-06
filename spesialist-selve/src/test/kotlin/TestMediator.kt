@@ -105,6 +105,7 @@ internal class TestMediator(
             godkjenningMediator = godkjenningMediator,
             kommandofabrikk = kommandofabrikk,
             avviksvurderingDao = avviksvurderingDao,
+            generasjonDao = generasjonDao,
         )
     }
 

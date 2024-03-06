@@ -25,6 +25,7 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.KlargjørArbeidsgiverCommand
 import no.nav.helse.modell.kommando.KlargjørPersonCommand
 import no.nav.helse.modell.kommando.KlargjørVedtaksperiodeCommand
+import no.nav.helse.modell.kommando.LagreBehandlingsInformasjonCommand
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OpprettKoblingTilHendelseCommand
 import no.nav.helse.modell.kommando.OpprettSaksbehandleroppgave
@@ -56,6 +57,8 @@ internal class Godkjenningsbehov private constructor(
     val organisasjonsnummer: String,
     private val vedtaksperiodeId: UUID,
     val utbetalingId: UUID,
+    val spleisBehandlingId: UUID,
+    val tags: List<String>,
     val periodeFom: LocalDate,
     val periodeTom: LocalDate,
     val periodetype: Periodetype,
@@ -81,6 +84,8 @@ internal class Godkjenningsbehov private constructor(
         periodeTom = LocalDate.parse(packet["Godkjenning.periodeTom"].asText()),
         skjæringstidspunkt = LocalDate.parse(packet["Godkjenning.skjæringstidspunkt"].asText()),
         vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText()),
+        spleisBehandlingId = UUID.fromString(packet["Godkjenning.behandlingId"].asText()),
+        tags = packet["Godkjenning.tags"].takeUnless(JsonNode::isMissingOrNull)?.map { it.asText() }?.toList() ?: emptyList<String>(),
         utbetalingId = UUID.fromString(packet["utbetalingId"].asText()),
         periodetype = Periodetype.valueOf(packet["Godkjenning.periodetype"].asText()),
         førstegangsbehandling = packet["Godkjenning.førstegangsbehandling"].asBoolean(),
@@ -101,6 +106,8 @@ internal class Godkjenningsbehov private constructor(
         periodeFom = LocalDate.parse(jsonNode.path("Godkjenning").path("periodeFom").asText()),
         periodeTom = LocalDate.parse(jsonNode.path("Godkjenning").path("periodeTom").asText()),
         vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText()),
+        spleisBehandlingId = UUID.fromString(jsonNode.path("Godkjenning").path("behandlingId").asText()),
+        tags = jsonNode.path("Godkjenning").path("tags").takeUnless(JsonNode::isMissingOrNull)?.map { it.asText() }?.toList() ?: emptyList<String>(),
         utbetalingId = UUID.fromString(jsonNode.path("utbetalingId").asText()),
         skjæringstidspunkt = LocalDate.parse(jsonNode.path("Godkjenning").path("skjæringstidspunkt").asText()),
         periodetype = Periodetype.valueOf(jsonNode.path("Godkjenning").path("periodetype").asText()),
@@ -122,6 +129,8 @@ internal class GodkjenningsbehovCommand(
     organisasjonsnummer: String,
     orgnummereMedRelevanteArbeidsforhold: List<String>,
     vedtaksperiodeId: UUID,
+    spleisBehandlingId: UUID,
+    tags: List<String>,
     periodeFom: LocalDate,
     periodeTom: LocalDate,
     periodetype: Periodetype,
@@ -146,6 +155,7 @@ internal class GodkjenningsbehovCommand(
     åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     risikovurderingDao: RisikovurderingDao,
     påVentDao: PåVentDao,
+    generasjonDao: GenerasjonDao,
     overstyringDao: OverstyringDao,
     periodehistorikkDao: PeriodehistorikkDao,
     snapshotDao: SnapshotDao,
@@ -160,6 +170,12 @@ internal class GodkjenningsbehovCommand(
             hendelseId = id,
             vedtaksperiodeId = vedtaksperiodeId,
             vedtakDao = vedtakDao
+        ),
+        LagreBehandlingsInformasjonCommand(
+          vedtaksperiodeId = vedtaksperiodeId,
+            spleisBehandlingId = spleisBehandlingId,
+            tags = tags,
+            generasjonDao = generasjonDao
         ),
         AvbrytContextCommand(
             vedtaksperiodeId = vedtaksperiodeId,

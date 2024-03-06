@@ -276,6 +276,23 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         assertTags(generasjonId, tags)
         assertSpleisBehandlingId(generasjonId, spleisBehandlingId)
     }
+    @Test
+    fun `ingen tags`() {
+        val vedtaksperiodeEndretId = UUID.randomUUID()
+        val generasjonId = UUID.randomUUID()
+        generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE, vedtaksperiodeEndretId, 1.januar, Periode(1.januar, 31.januar), Generasjon.Ulåst)
+        val spleisBehandlingId = UUID.randomUUID()
+        val tags = emptyList<String>()
+        generasjonDao.oppdaterMedBehandlingsInformasjon(generasjonId, spleisBehandlingId, tags)
+        assertEquals(emptyList<String>(), generasjonDao.finnTagsFor(spleisBehandlingId))
+    }
+
+    @Test
+    fun `mangler tags`() {
+        val tulleId = UUID.randomUUID()
+        val tags = generasjonDao.finnTagsFor(tulleId)
+        assertEquals(null, tags)
+    }
 
     @Test
     fun `gir false tilbake dersom vi ikke finner noen generasjon`() {

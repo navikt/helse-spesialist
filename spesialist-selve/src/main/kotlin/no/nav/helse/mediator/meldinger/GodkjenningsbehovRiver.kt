@@ -40,10 +40,11 @@ internal class GodkjenningsbehovRiver(
                     "Godkjenning.inntektskilde",
                     "Godkjenning.kanAvvises",
                     "Godkjenning.vilkårsgrunnlagId",
+                    "Godkjenning.behandlingId"
                 )
                 it.interestedIn("avviksvurderingId")
                 it.requireAny("Godkjenning.utbetalingtype", Utbetalingtype.gyldigeTyper.values())
-                it.interestedIn("Godkjenning.orgnummereMedRelevanteArbeidsforhold")
+                it.interestedIn("Godkjenning.orgnummereMedRelevanteArbeidsforhold", "Godkjenning.tags")
             }
         }.register(this)
     }

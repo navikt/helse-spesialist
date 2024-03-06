@@ -28,7 +28,7 @@ internal class SykepengevedtakBuilder {
     private var sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta? = null
     private var skjønnsfastsattSykepengegrunnlag: SkjønnsfastattSykepengegrunnlag? = null
     private var skjønnsfastsettingopplysninger: SkjønnsfastsettingopplysningerDto? = null
-    private lateinit var tags: List<String>
+    private val tags: MutableList<String> = mutableListOf()
 
     internal fun fødselsnummer(fødselsnummer: String) = apply { this.fødselsnummer = fødselsnummer }
     internal fun aktørId(aktørId: String) = apply { this.aktørId = aktørId }
@@ -53,6 +53,10 @@ internal class SykepengevedtakBuilder {
         skjønnsfastsattSykepengegrunnlag.byggVedtak(this)
     }
 
+    internal fun tags(tags: List<String>) = apply {
+        this.tags.addAll(tags)
+    }
+
     internal fun skjønnsfastsettingData(
         begrunnelseFraMal: String,
         begrunnelseFraFritekst: String,
@@ -62,7 +66,6 @@ internal class SykepengevedtakBuilder {
     ) = apply {
         this.skjønnsfastsettingopplysninger = SkjønnsfastsettingopplysningerDto(begrunnelseFraMal, begrunnelseFraFritekst, begrunnelseFraKonklusjon, type, årsak)
     }
-    internal fun tags(tags: List<String>) = apply { this.tags = tags }
 
     internal fun build(): Sykepengevedtak {
         if (utbetalingId != null && sykepengegrunnlagsfakta != null) return buildVedtak()

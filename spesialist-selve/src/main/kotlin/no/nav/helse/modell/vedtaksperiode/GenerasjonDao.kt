@@ -56,6 +56,19 @@ class GenerasjonDao(private val dataSource: DataSource) {
         }
     }
 
+    internal fun finnTagsFor(spleisBehandlingId: UUID): List<String>? {
+        val tags = sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val query =
+                "SELECT tags FROM selve_vedtaksperiode_generasjon WHERE spleis_behandling_id = ?;"
+
+            session.run(queryOf(query, spleisBehandlingId).map {
+                it.array<String>("tags").toList()
+            }.asSingle)
+        }
+        return tags
+    }
+
     internal fun lagre(generasjonDto: GenerasjonDto) {
         sessionOf(dataSource).use { session ->
             session.transaction { tx ->

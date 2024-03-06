@@ -410,6 +410,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             godkjenningMediator = godkjenningMediator,
             kommandofabrikk = kommandofabrikk,
             avviksvurderingDao = avviksvurderingDao,
+            generasjonDao = generasjonDao
         )
         saksbehandlerMediator = SaksbehandlerMediator(dataSource, versjonAvKode(env), rapidsConnection, oppgaveMediator, tilgangsgrupper)
         dokumentMediator = DokumentMediator(dokumentDao, rapidsConnection)

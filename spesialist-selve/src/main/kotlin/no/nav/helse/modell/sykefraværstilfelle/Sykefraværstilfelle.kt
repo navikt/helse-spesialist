@@ -68,11 +68,14 @@ internal class Sykefraværstilfelle(
         generasjon.deaktiverVarsel(varselkode)
     }
 
-    internal fun håndter(avsluttetMedVedtak: AvsluttetMedVedtak) {
+    internal fun håndter(avsluttetMedVedtak: AvsluttetMedVedtak, tags: List<String>) {
         val vedtakBuilder = SykepengevedtakBuilder()
         val skjønnsfastsattSykepengegrunnlag = skjønnsfastatteSykepengegrunnlag.lastOrNull()
         skjønnsfastsattSykepengegrunnlag?.also {
             vedtakBuilder.skjønnsfastsattSykepengegrunnlag(it)
+        }
+        if (tags.isNotEmpty()) {
+            vedtakBuilder.tags(tags)
         }
         avsluttetMedVedtak.byggVedtak(vedtakBuilder)
         fattVedtak(vedtakBuilder.build())

@@ -130,6 +130,7 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
         val sisteHendelse = inspektør.meldinger().last()
         assertEquals("vedtak_fattet", sisteHendelse["@event_name"].asText())
         assertEquals(spleisBehandlingId, UUID.fromString(sisteHendelse["behandlingId"].asText()))
+        assertEquals(tagsFraGodkjenningsbehovet + tagsFraAvsluttetMedVedtak, sisteHendelse["tags"].map { it.asText() })
     }
 
 }
