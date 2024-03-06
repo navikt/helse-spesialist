@@ -9,6 +9,7 @@ internal class AvsluttetMedVedtak(
     private val aktørId: String,
     private val organisasjonsnummer: String,
     private val vedtaksperiodeId: UUID,
+    private val spleisBehandlingId: UUID,
     private val utbetalingId: UUID,
     private val skjæringstidspunkt: LocalDate,
     private val hendelser: List<UUID>,
@@ -27,6 +28,7 @@ internal class AvsluttetMedVedtak(
         vedtakBuilder.fødselsnummer(fødselsnummer)
         vedtakBuilder.organisasjonsnummer(organisasjonsnummer)
         vedtakBuilder.vedtaksperiodeId(vedtaksperiodeId)
+        vedtakBuilder.spleisBehandlingId(spleisBehandlingId)
         vedtakBuilder.utbetalingId(utbetalingId)
         vedtakBuilder.skjæringstidspunkt(skjæringstidspunkt)
         vedtakBuilder.hendelser(hendelser)

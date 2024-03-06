@@ -14,6 +14,7 @@ class SykepengevedtakEqualsTest {
         private const val aktørId = "1234567891011"
         private const val organisasjonsnummer = "123456789"
         private val vedtaksperiodeId = UUID.randomUUID()
+        private val spleisBehandlingId = UUID.randomUUID()
         private val utbetalingId = UUID.randomUUID()
         private val fom = 1.januar
         private val tom = 31.januar
@@ -231,6 +232,7 @@ class SykepengevedtakEqualsTest {
         fødselsnummer: String = Companion.fødselsnummer,
         aktørId: String = Companion.aktørId,
         vedtaksperiodeId: UUID = Companion.vedtaksperiodeId,
+        spleisBehandlingId: UUID = Companion.spleisBehandlingId,
         organisasjonsnummer: String = Companion.organisasjonsnummer,
         fom: LocalDate = Companion.fom,
         tom: LocalDate = Companion.tom,
@@ -247,6 +249,7 @@ class SykepengevedtakEqualsTest {
         fødselsnummer = fødselsnummer,
         aktørId = aktørId,
         vedtaksperiodeId = vedtaksperiodeId,
+        spleisBehandlingId = spleisBehandlingId,
         organisasjonsnummer = organisasjonsnummer,
         fom = fom,
         tom = tom,
@@ -265,6 +268,7 @@ class SykepengevedtakEqualsTest {
         fødselsnummer: String = Companion.fødselsnummer,
         aktørId: String = Companion.aktørId,
         vedtaksperiodeId: UUID = Companion.vedtaksperiodeId,
+        spleisBehandlingId: UUID = Companion.spleisBehandlingId,
         organisasjonsnummer: String = Companion.organisasjonsnummer,
         fom: LocalDate = Companion.fom,
         tom: LocalDate = Companion.tom,
@@ -284,6 +288,7 @@ class SykepengevedtakEqualsTest {
         aktørId = aktørId,
         vedtaksperiodeId = vedtaksperiodeId,
         organisasjonsnummer = organisasjonsnummer,
+        spleisBehandlingId = spleisBehandlingId,
         fom = fom,
         tom = tom,
         skjæringstidspunkt = skjæringstidspunkt,

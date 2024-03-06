@@ -26,7 +26,7 @@ internal class AvsluttetMedVedtakRiver(
                 it.requireArray("hendelser")
                 it.requireKey("sykepengegrunnlag", "grunnlagForSykepengegrunnlag", "grunnlagForSykepengegrunnlagPerArbeidsgiver")
                 it.requireKey("begrensning", "inntekt", "vedtakFattetTidspunkt", "tags")
-                it.requireKey("utbetalingId")
+                it.requireKey("utbetalingId", "generasjonId")
 
                 it.requireAny("sykepengegrunnlagsfakta.fastsatt", listOf("EtterHovedregel", "IInfotrygd", "EtterSkjønn"))
                 it.requireKey("sykepengegrunnlagsfakta.omregnetÅrsinntekt")

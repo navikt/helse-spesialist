@@ -9,6 +9,7 @@ internal class AvsluttetUtenVedtak(
     private val aktørId: String,
     private val organisasjonsnummer: String,
     private val vedtaksperiodeId: UUID,
+    private val spleisBehandlingId: UUID,
     private val skjæringstidspunkt: LocalDate,
     private val hendelser: List<UUID>,
     private val fom: LocalDate,
@@ -21,6 +22,7 @@ internal class AvsluttetUtenVedtak(
         vedtakBuilder.fom(fom)
         vedtakBuilder.tom(tom)
         vedtakBuilder.vedtaksperiodeId(vedtaksperiodeId)
+        vedtakBuilder.spleisBehandlingId(spleisBehandlingId)
         vedtakBuilder.skjæringstidspunkt(skjæringstidspunkt)
         vedtakBuilder.hendelser(hendelser)
         vedtakBuilder.vedtakFattetTidspunkt(LocalDateTime.now())

@@ -25,6 +25,7 @@ internal class SykefraværstilfelleMediatorTest {
     private companion object {
         private val fødselsnummer = "12345678910"
         private val vedtaksperiodeId = UUID.randomUUID()
+        private val spleisBehandlingId = UUID.randomUUID()
         private val utbetalingId = UUID.randomUUID()
         private val organisasjonsnummer = "123456789"
         private val aktørId = "1234567891011"
@@ -41,6 +42,7 @@ internal class SykefraværstilfelleMediatorTest {
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             vedtaksperiodeId = vedtaksperiodeId,
+            spleisBehandlingId = spleisBehandlingId,
             organisasjonsnummer = organisasjonsnummer,
             fom = fom,
             tom = tom,
@@ -91,6 +93,7 @@ internal class SykefraværstilfelleMediatorTest {
             aktørId = aktørId,
             vedtaksperiodeId = vedtaksperiodeId,
             organisasjonsnummer = organisasjonsnummer,
+            spleisBehandlingId = spleisBehandlingId,
             fom = fom,
             tom = tom,
             skjæringstidspunkt = skjæringstidspunkt,
@@ -107,7 +110,6 @@ internal class SykefraværstilfelleMediatorTest {
             ),
             skjønnsfastsettingopplysninger = null,
             tags = listOf("IngenNyArbeidsgiverperiode")
-
         )
         mediator.vedtakFattet(infotrygd)
         val eventer = testRapid.inspektør.meldinger()
@@ -149,6 +151,7 @@ internal class SykefraværstilfelleMediatorTest {
             aktørId = aktørId,
             vedtaksperiodeId = vedtaksperiodeId,
             organisasjonsnummer = organisasjonsnummer,
+            spleisBehandlingId = spleisBehandlingId,
             fom = fom,
             tom = tom,
             skjæringstidspunkt = skjæringstidspunkt,
@@ -230,6 +233,7 @@ internal class SykefraværstilfelleMediatorTest {
             aktørId = aktørId,
             vedtaksperiodeId = vedtaksperiodeId,
             organisasjonsnummer = organisasjonsnummer,
+            spleisBehandlingId = spleisBehandlingId,
             fom = fom,
             tom = tom,
             skjæringstidspunkt = skjæringstidspunkt,

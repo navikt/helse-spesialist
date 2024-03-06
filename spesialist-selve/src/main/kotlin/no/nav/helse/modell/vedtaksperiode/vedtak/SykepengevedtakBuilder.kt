@@ -12,6 +12,7 @@ internal class SykepengevedtakBuilder {
     private lateinit var fødselsnummer: String
     private lateinit var aktørId: String
     private lateinit var vedtaksperiodeId: UUID
+    private lateinit var spleisBehandlingId: UUID
     private lateinit var organisasjonsnummer: String
     private lateinit var fom: LocalDate
     private lateinit var tom: LocalDate
@@ -32,6 +33,7 @@ internal class SykepengevedtakBuilder {
     internal fun fødselsnummer(fødselsnummer: String) = apply { this.fødselsnummer = fødselsnummer }
     internal fun aktørId(aktørId: String) = apply { this.aktørId = aktørId }
     internal fun vedtaksperiodeId(vedtaksperiodeId: UUID) = apply { this.vedtaksperiodeId = vedtaksperiodeId }
+    internal fun spleisBehandlingId(spleisBehandlingId: UUID) = apply { this.spleisBehandlingId = spleisBehandlingId }
     internal fun organisasjonsnummer(organisasjonsnummer: String) = apply { this.organisasjonsnummer = organisasjonsnummer }
     internal fun fom(fom: LocalDate) = apply { this.fom = fom }
     internal fun tom(tom: LocalDate) = apply { this.tom = tom }
@@ -72,6 +74,7 @@ internal class SykepengevedtakBuilder {
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             vedtaksperiodeId = vedtaksperiodeId,
+            spleisBehandlingId = spleisBehandlingId,
             organisasjonsnummer = organisasjonsnummer,
             fom = fom,
             tom = tom,
@@ -103,6 +106,7 @@ internal class SykepengevedtakBuilder {
             aktørId = aktørId,
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
+            spleisBehandlingId = spleisBehandlingId,
             utbetalingId = utbetalingId,
             fom = fom,
             tom = tom,
@@ -114,9 +118,9 @@ internal class SykepengevedtakBuilder {
             begrensning = begrensning,
             inntekt = inntekt,
             sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
-            vedtakFattetTidspunkt = vedtakFattetTidspunkt,
             skjønnsfastsettingopplysninger = skjønnsfastsettingopplysninger,
-            tags = tags
+            vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+            tags = tags,
         )
     }
 
@@ -126,6 +130,7 @@ internal class SykepengevedtakBuilder {
             aktørId = aktørId,
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
+            spleisBehandlingId = spleisBehandlingId,
             utbetalingId = utbetalingId,
             fom = fom,
             tom = tom,

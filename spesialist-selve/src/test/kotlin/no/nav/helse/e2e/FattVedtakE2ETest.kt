@@ -3,10 +3,13 @@ package no.nav.helse.e2e
 import AbstractE2ETest
 import com.fasterxml.jackson.module.kotlin.convertValue
 import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.AvviksvurderingTestdata
+import no.nav.helse.GodkjenningsbehovTestdata
 import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.TestRapidHelpers.meldinger
 import no.nav.helse.januar
+import no.nav.helse.mediator.asUUID
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
@@ -18,9 +21,10 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
 
     @Test
     fun `Fatt vedtak for auu-periode`() {
+        val spleisBehandlingId = UUID.randomUUID()
         håndterSøknad()
         håndterVedtaksperiodeOpprettet()
-        håndterAvsluttetUtenVedtak()
+        håndterAvsluttetUtenVedtak(spleisBehandlingId = spleisBehandlingId)
         val hendelser = inspektør.hendelser("vedtak_fattet")
         assertEquals(1, hendelser.size)
         val hendelse = hendelser.single()
@@ -40,6 +44,7 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
         assertEquals(11.januar, hendelse["tom"].asLocalDate())
         assertEquals(AKTØR, hendelse["aktørId"].asText())
         assertEquals(LocalDate.now(), hendelse["vedtakFattetTidspunkt"].asLocalDateTime().toLocalDate())
+        assertEquals(spleisBehandlingId, hendelse["behandlingId"].asUUID())
     }
 
     @Test
@@ -103,4 +108,28 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
         assertEquals(avviksprosent, sykepengegrunnlagsfakta["avviksprosent"].asDouble())
         assertEquals(sammenligningsgrunnlag, sykepengegrunnlagsfakta["innrapportertÅrsinntekt"].asDouble())
     }
+
+    @Test
+    fun `behandlingsinformasjon fra godkjenningsbehovet skal sendes på vedtak_fattet`() {
+        val spleisBehandlingId = UUID.randomUUID()
+        val tagsFraGodkjenningsbehovet = listOf("Arbeidsgiverutbetaling", "Personutbetaling")
+        val tagsFraAvsluttetMedVedtak = listOf("SykepengegrunnlagUnder2G", "IngenNyArbeidsgiverperiode")
+        val godkjenningsbehov = GodkjenningsbehovTestdata(
+            fødselsnummer = FØDSELSNUMMER,
+            aktørId = AKTØR,
+            organisasjonsnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID,
+            spleisBehandlingId = spleisBehandlingId,
+            tags = tagsFraGodkjenningsbehovet
+        )
+        fremTilSaksbehandleroppgave(godkjenningsbehovTestdata = godkjenningsbehov)
+        håndterSaksbehandlerløsning()
+        håndterAvsluttetMedVedtak(tags = tagsFraAvsluttetMedVedtak, spleisBehandlingId = spleisBehandlingId)
+
+        val sisteHendelse = inspektør.meldinger().last()
+        assertEquals("vedtak_fattet", sisteHendelse["@event_name"].asText())
+        assertEquals(spleisBehandlingId, UUID.fromString(sisteHendelse["behandlingId"].asText()))
+    }
+
 }

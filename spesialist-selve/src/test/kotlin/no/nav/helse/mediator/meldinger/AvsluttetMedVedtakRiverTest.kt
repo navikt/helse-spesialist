@@ -80,6 +80,7 @@ internal class AvsluttetMedVedtakRiverTest {
           "@event_name": "avsluttet_med_vedtak",
           "organisasjonsnummer": "987654321",
           "vedtaksperiodeId": "${UUID.randomUUID()}",
+          "generasjonId": "${UUID.randomUUID()}",
           "fom": "2018-01-01",
           "tom": "2018-01-31",
           "hendelser": [

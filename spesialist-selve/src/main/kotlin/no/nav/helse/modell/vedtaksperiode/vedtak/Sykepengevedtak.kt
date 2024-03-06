@@ -10,6 +10,7 @@ internal sealed class Sykepengevedtak(
     val fødselsnummer: String,
     val aktørId: String,
     val vedtaksperiodeId: UUID,
+    val spleisBehandlingId: UUID,
     val organisasjonsnummer: String,
     val fom: LocalDate,
     val tom: LocalDate,
@@ -28,6 +29,7 @@ internal sealed class Sykepengevedtak(
                     && fødselsnummer == other.fødselsnummer
                     && aktørId == other.aktørId
                     && vedtaksperiodeId == other.vedtaksperiodeId
+                    && spleisBehandlingId == other.spleisBehandlingId
                     && organisasjonsnummer == other.organisasjonsnummer
                     && fom == other.fom
                     && tom == other.tom
@@ -46,6 +48,7 @@ internal sealed class Sykepengevedtak(
         var result = fødselsnummer.hashCode()
         result = 31 * result + aktørId.hashCode()
         result = 31 * result + vedtaksperiodeId.hashCode()
+        result = 31 * result + spleisBehandlingId.hashCode()
         result = 31 * result + organisasjonsnummer.hashCode()
         result = 31 * result + fom.hashCode()
         result = 31 * result + tom.hashCode()
@@ -66,6 +69,7 @@ internal sealed class Sykepengevedtak(
         fødselsnummer: String,
         aktørId: String,
         vedtaksperiodeId: UUID,
+        spleisBehandlingId: UUID,
         organisasjonsnummer: String,
         fom: LocalDate,
         tom: LocalDate,
@@ -82,6 +86,7 @@ internal sealed class Sykepengevedtak(
         fødselsnummer,
         aktørId,
         vedtaksperiodeId,
+        spleisBehandlingId,
         organisasjonsnummer,
         fom,
         tom,
@@ -103,6 +108,7 @@ internal sealed class Sykepengevedtak(
         aktørId: String,
         organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
+        spleisBehandlingId: UUID,
         val utbetalingId: UUID,
         fom: LocalDate,
         tom: LocalDate,
@@ -121,6 +127,7 @@ internal sealed class Sykepengevedtak(
         fødselsnummer,
         aktørId,
         vedtaksperiodeId,
+        spleisBehandlingId,
         organisasjonsnummer,
         fom,
         tom,

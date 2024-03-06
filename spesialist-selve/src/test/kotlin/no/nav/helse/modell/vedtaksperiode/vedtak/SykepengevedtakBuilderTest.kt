@@ -24,6 +24,7 @@ class SykepengevedtakBuilderTest {
         private const val aktørId = "1234567891011"
         private const val organisasjonsnummer = "123456789"
         private val vedtaksperiodeId = UUID.randomUUID()
+        private val spleisBehandlingId = UUID.randomUUID()
         private val utbetalingId = UUID.randomUUID()
         private val fom = 1.januar
         private val tom = 31.januar
@@ -52,6 +53,7 @@ class SykepengevedtakBuilderTest {
             .aktørId(aktørId)
             .organisasjonsnummer(organisasjonsnummer)
             .vedtaksperiodeId(vedtaksperiodeId)
+            .spleisBehandlingId(spleisBehandlingId)
             .utbetalingId(utbetalingId)
             .fom(fom)
             .tom(tom)
@@ -74,6 +76,7 @@ class SykepengevedtakBuilderTest {
                 aktørId = aktørId,
                 vedtaksperiodeId = vedtaksperiodeId,
                 organisasjonsnummer = organisasjonsnummer,
+                spleisBehandlingId = spleisBehandlingId,
                 fom = fom,
                 tom = tom,
                 skjæringstidspunkt = skjæringstidspunkt,
@@ -100,6 +103,7 @@ class SykepengevedtakBuilderTest {
             .aktørId(aktørId)
             .organisasjonsnummer(organisasjonsnummer)
             .vedtaksperiodeId(vedtaksperiodeId)
+            .spleisBehandlingId(spleisBehandlingId)
             .utbetalingId(utbetalingId)
             .fom(fom)
             .tom(tom)
@@ -123,6 +127,7 @@ class SykepengevedtakBuilderTest {
                 aktørId = aktørId,
                 vedtaksperiodeId = vedtaksperiodeId,
                 organisasjonsnummer = organisasjonsnummer,
+                spleisBehandlingId = spleisBehandlingId,
                 fom = fom,
                 tom = tom,
                 skjæringstidspunkt = skjæringstidspunkt,
@@ -149,6 +154,7 @@ class SykepengevedtakBuilderTest {
             .aktørId(aktørId)
             .organisasjonsnummer(organisasjonsnummer)
             .vedtaksperiodeId(vedtaksperiodeId)
+            .spleisBehandlingId(spleisBehandlingId)
             .utbetalingId(utbetalingId)
             .fom(fom)
             .tom(tom)
@@ -171,6 +177,7 @@ class SykepengevedtakBuilderTest {
                 aktørId = aktørId,
                 vedtaksperiodeId = vedtaksperiodeId,
                 organisasjonsnummer = organisasjonsnummer,
+                spleisBehandlingId = spleisBehandlingId,
                 fom = fom,
                 tom = tom,
                 skjæringstidspunkt = skjæringstidspunkt,
@@ -197,6 +204,7 @@ class SykepengevedtakBuilderTest {
             .aktørId(aktørId)
             .organisasjonsnummer(organisasjonsnummer)
             .vedtaksperiodeId(vedtaksperiodeId)
+            .spleisBehandlingId(spleisBehandlingId)
             .fom(fom)
             .tom(tom)
             .skjæringstidspunkt(skjæringstidspunkt)
@@ -216,6 +224,7 @@ class SykepengevedtakBuilderTest {
                 fødselsnummer = fødselsnummer,
                 aktørId = aktørId,
                 vedtaksperiodeId = vedtaksperiodeId,
+                spleisBehandlingId = spleisBehandlingId,
                 organisasjonsnummer = organisasjonsnummer,
                 fom = fom,
                 tom = tom,
@@ -240,6 +249,7 @@ class SykepengevedtakBuilderTest {
             .aktørId(aktørId)
             .organisasjonsnummer(organisasjonsnummer)
             .vedtaksperiodeId(vedtaksperiodeId)
+            .spleisBehandlingId(spleisBehandlingId)
             .fom(fom)
             .tom(tom)
             .skjæringstidspunkt(skjæringstidspunkt)
@@ -263,6 +273,7 @@ class SykepengevedtakBuilderTest {
             .aktørId(aktørId)
             .organisasjonsnummer(organisasjonsnummer)
             .vedtaksperiodeId(vedtaksperiodeId)
+            .spleisBehandlingId(spleisBehandlingId)
             .utbetalingId(utbetalingId)
             .fom(fom)
             .tom(tom)
@@ -287,6 +298,7 @@ class SykepengevedtakBuilderTest {
             .aktørId(aktørId)
             .organisasjonsnummer(organisasjonsnummer)
             .vedtaksperiodeId(vedtaksperiodeId)
+            .spleisBehandlingId(spleisBehandlingId)
             .fom(fom)
             .tom(tom)
             .skjæringstidspunkt(skjæringstidspunkt)
@@ -336,6 +348,7 @@ class SykepengevedtakBuilderTest {
             .aktørId(aktørId)
             .organisasjonsnummer(organisasjonsnummer)
             .vedtaksperiodeId(vedtaksperiodeId)
+            .spleisBehandlingId(spleisBehandlingId)
             .utbetalingId(utbetalingId)
             .fom(fom)
             .tom(tom)
@@ -359,6 +372,7 @@ class SykepengevedtakBuilderTest {
                 aktørId = aktørId,
                 vedtaksperiodeId = vedtaksperiodeId,
                 organisasjonsnummer = organisasjonsnummer,
+                spleisBehandlingId = spleisBehandlingId,
                 fom = fom,
                 tom = tom,
                 skjæringstidspunkt = skjæringstidspunkt,
@@ -372,7 +386,7 @@ class SykepengevedtakBuilderTest {
                 sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(ETTER_HOVEDREGEL),
                 utbetalingId = utbetalingId,
                 skjønnsfastsettingopplysninger = null,
-                tags = listOf("IngenNyArbeidsgiverperiode")
+                tags = listOf("IngenNyArbeidsgiverperiode"),
             ), utkast
         )
     }

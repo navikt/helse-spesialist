@@ -206,6 +206,8 @@ internal object Testmeldingfabrikk {
         id: UUID = UUID.randomUUID(),
         vilkårsgrunnlagId: UUID = UUID.randomUUID(),
         avviksvurderingId: UUID? = UUID.randomUUID(),
+        spleisBehandlingId: UUID = UUID.randomUUID(),
+        tags: List<String> = emptyList(),
     ) =
         nyHendelse(
             id, "behov",
@@ -226,7 +228,9 @@ internal object Testmeldingfabrikk {
                     "inntektskilde" to inntektskilde.name,
                     "orgnummereMedRelevanteArbeidsforhold" to orgnummereMedRelevanteArbeidsforhold,
                     "kanAvvises" to kanAvvises,
-                    "vilkårsgrunnlagId" to vilkårsgrunnlagId
+                    "vilkårsgrunnlagId" to vilkårsgrunnlagId,
+                    "behandlingId" to spleisBehandlingId,
+                    "tags" to tags
                 ),
             ).apply {
                 if (avviksvurderingId != null) {
@@ -909,6 +913,7 @@ internal object Testmeldingfabrikk {
         fødselsnummer: String,
         organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
+        spleisBehandlingId: UUID,
         utbetalingId: UUID?,
         fom: LocalDate,
         tom: LocalDate,
@@ -916,12 +921,14 @@ internal object Testmeldingfabrikk {
         fastsattType: String,
         id: UUID,
         settInnAvviksvurderingFraSpleis: Boolean = true,
+        tags: List<String> = emptyList(),
     ): String = nyHendelse(
         id, "avsluttet_med_vedtak", mutableMapOf(
             "aktørId" to aktørId,
             "fødselsnummer" to fødselsnummer,
             "organisasjonsnummer" to organisasjonsnummer,
             "vedtaksperiodeId" to vedtaksperiodeId,
+            "generasjonId" to spleisBehandlingId,
             "fom" to fom,
             "tom" to tom,
             "skjæringstidspunkt" to skjæringstidspunkt,
@@ -932,7 +939,7 @@ internal object Testmeldingfabrikk {
             "inntekt" to 600000.0,
             "vedtakFattetTidspunkt" to LocalDateTime.now(),
             "hendelser" to emptyList<String>(),
-            "tags" to emptyList<String>()
+            "tags" to tags
         ).apply {
             compute("utbetalingId") { _, _ -> utbetalingId }
             if (utbetalingId != null) {
@@ -952,6 +959,7 @@ internal object Testmeldingfabrikk {
         fødselsnummer: String,
         organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
+        spleisBehandlingId: UUID,
         fom: LocalDate,
         tom: LocalDate,
         skjæringstidspunkt: LocalDate,
@@ -967,7 +975,7 @@ internal object Testmeldingfabrikk {
             "skjæringstidspunkt" to skjæringstidspunkt,
             "hendelser" to emptyList<String>(),
             "avsluttetTidspunkt" to LocalDateTime.now(),
-            "generasjonId" to UUID.randomUUID(),
+            "generasjonId" to spleisBehandlingId,
         )
     )
 

@@ -263,7 +263,9 @@ internal class Meldingssender(private val testRapid: TestRapid) {
                 orgnummereMedRelevanteArbeidsforhold = godkjenningsbehovTestdata.orgnummereMedRelevanteArbeidsforhold,
                 id = id,
                 avviksvurderingId = godkjenningsbehovTestdata.avviksvurderingId,
-                vilkårsgrunnlagId = godkjenningsbehovTestdata.vilkårsgrunnlagId
+                vilkårsgrunnlagId = godkjenningsbehovTestdata.vilkårsgrunnlagId,
+                spleisBehandlingId = godkjenningsbehovTestdata.spleisBehandlingId,
+                tags = godkjenningsbehovTestdata.tags
             )
         )
     }
@@ -625,12 +627,14 @@ internal class Meldingssender(private val testRapid: TestRapid) {
         fødselsnummer: String,
         organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
+        spleisBehandlingId: UUID,
         utbetalingId: UUID?,
         fom: LocalDate,
         tom: LocalDate,
         skjæringstidspunkt: LocalDate,
         fastsattType: String,
         settInnAvviksvurderingFraSpleis: Boolean = true,
+        tags: List<String> = emptyList(),
     ): UUID = newUUID.also { id ->
         testRapid.sendTestMessage(
             Testmeldingfabrikk.lagAvsluttetMedVedtak(
@@ -638,6 +642,7 @@ internal class Meldingssender(private val testRapid: TestRapid) {
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
+                spleisBehandlingId = spleisBehandlingId,
                 utbetalingId = utbetalingId,
                 fom = fom,
                 tom = tom,
@@ -645,6 +650,7 @@ internal class Meldingssender(private val testRapid: TestRapid) {
                 fastsattType = fastsattType,
                 id = id,
                 settInnAvviksvurderingFraSpleis = settInnAvviksvurderingFraSpleis,
+                tags = tags
             )
         )
     }
@@ -654,6 +660,7 @@ internal class Meldingssender(private val testRapid: TestRapid) {
         fødselsnummer: String,
         organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
+        spleisBehandlingId: UUID,
         fom: LocalDate,
         tom: LocalDate,
         skjæringstidspunkt: LocalDate,
@@ -664,6 +671,7 @@ internal class Meldingssender(private val testRapid: TestRapid) {
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
+                spleisBehandlingId = spleisBehandlingId,
                 fom = fom,
                 tom = tom,
                 skjæringstidspunkt = skjæringstidspunkt,

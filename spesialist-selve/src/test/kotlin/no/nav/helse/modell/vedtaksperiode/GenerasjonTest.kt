@@ -669,6 +669,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
             testPerson.aktørId,
             with(testPerson) { 1.arbeidsgiver.organisasjonsnummer },
             with(testPerson) { 1.arbeidsgiver.nyVedtaksperiode().vedtaksperiodeId },
+            with(testPerson) { 1.arbeidsgiver.nyVedtaksperiode().spleisBehandlingId },
             1.januar,
             emptyList(),
             1.januar,

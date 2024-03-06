@@ -144,6 +144,7 @@ internal class TestVedtaksperiode(
     val organisasjonsnummer: String,
 ) {
     val vedtaksperiodeId: UUID = UUID.randomUUID()
+    val spleisBehandlingId: UUID = UUID.randomUUID()
     val utbetalingId: UUID = UUID.randomUUID()
 }
 
@@ -1094,11 +1095,13 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
+        spleisBehandlingId: UUID = UUID.randomUUID(),
         fastsattType: String = "EtterHovedregel",
         fom: LocalDate = 1.januar,
         tom: LocalDate = 31.januar,
         skjæringstidspunkt: LocalDate = fom,
         settInnAvviksvurderingFraSpleis: Boolean = true,
+        tags: List<String> = emptyList(),
     ) {
         val utbetalingId = if (this::utbetalingId.isInitialized) this.utbetalingId else null
         sisteMeldingId = meldingssender.sendAvsluttetMedVedtak(
@@ -1106,12 +1109,14 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
+            spleisBehandlingId = spleisBehandlingId,
             utbetalingId = utbetalingId,
             fom = fom,
             tom = tom,
             skjæringstidspunkt = skjæringstidspunkt,
             fastsattType = fastsattType,
             settInnAvviksvurderingFraSpleis = settInnAvviksvurderingFraSpleis,
+            tags = tags
         )
     }
 
@@ -1120,6 +1125,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
+        spleisBehandlingId: UUID = UUID.randomUUID(),
         fom: LocalDate = 1.januar,
         tom: LocalDate = 11.januar,
         skjæringstidspunkt: LocalDate = fom,
@@ -1129,6 +1135,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
+            spleisBehandlingId = spleisBehandlingId,
             fom = fom,
             tom = tom,
             skjæringstidspunkt = skjæringstidspunkt,
