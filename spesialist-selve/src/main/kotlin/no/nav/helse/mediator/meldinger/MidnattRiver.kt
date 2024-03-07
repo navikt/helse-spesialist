@@ -33,8 +33,6 @@ internal class MidnattRiver(
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        // linja under skal fjernes
-        logg.error("Tester speilvendt-alerts-dev")
         val hendelseId = UUID.fromString(packet["@id"].asText())
         logg.info("Mottok melding midnatt , {}", kv("hendelseId", hendelseId))
 
