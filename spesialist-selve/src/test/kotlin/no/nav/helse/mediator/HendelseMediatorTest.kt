@@ -18,7 +18,6 @@ import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
-import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.modell.varsel.Varselkode
@@ -154,7 +153,7 @@ internal class HendelseMediatorTest : AbstractDatabaseTest() {
     }
 
     @Test
-    fun `Returnerer tidlig ved TilbakedateringBehandlet sykmeldingen ikke overlapper med perioden med oppgave`() {
+    fun `Returnerer tidlig ved TilbakedateringBehandlet hvis sykmeldingen ikke overlapper med perioden med oppgave`() {
         val event = mockk<TilbakedateringBehandlet>(relaxed = true) {
             every { fødselsnummer() } returns fødselsnummer
             every { toJson() } returns "{}"
@@ -167,28 +166,6 @@ internal class HendelseMediatorTest : AbstractDatabaseTest() {
         verify(exactly = 1) { oppgaveDao.finnOppgaveId(fødselsnummer) }
         verify(exactly = 1) { oppgaveDao.oppgaveDataForAutomatisering(any()) }
         verify(exactly = 1) { oppgaveDataForAutomatiseringMock.periodeOverlapperMed(any()) }
-        verify(exactly = 0) { kommandofabrikk.tilbakedateringGodkjent(any()) }
-    }
-
-    @Test
-    fun `Returnerer tidlig ved TilbakedateringBehandlet hvis perioden ikke er markert tilbakedatert`() {
-        val event = mockk<TilbakedateringBehandlet>(relaxed = true) {
-            every { fødselsnummer() } returns fødselsnummer
-            every { toJson() } returns "{}"
-        }
-        val oppgaveDataForAutomatiseringMock = mockk<OppgaveDataForAutomatisering>(relaxed = true) {
-            every { periodeOverlapperMed(any()) } returns true
-        }
-        every { oppgaveDao.oppgaveDataForAutomatisering(any()) } returns oppgaveDataForAutomatiseringMock
-        val sykefraværstilfelleMock = mockk<Sykefraværstilfelle>(relaxed = true) {
-            every { erTilbakedatert(any()) } returns false
-        }
-        every { kommandofabrikk.sykefraværstilfelle(any(), any()) } returns sykefraværstilfelleMock
-        hendelseMediator.tilbakedateringBehandlet(fødselsnummer, event, testRapid)
-        verify(exactly = 1) { oppgaveDao.finnOppgaveId(fødselsnummer) }
-        verify(exactly = 1) { oppgaveDao.oppgaveDataForAutomatisering(any()) }
-        verify(exactly = 1) { oppgaveDataForAutomatiseringMock.periodeOverlapperMed(any()) }
-        verify(exactly = 1) { sykefraværstilfelleMock.erTilbakedatert(any()) }
         verify(exactly = 0) { kommandofabrikk.tilbakedateringGodkjent(any()) }
     }
 

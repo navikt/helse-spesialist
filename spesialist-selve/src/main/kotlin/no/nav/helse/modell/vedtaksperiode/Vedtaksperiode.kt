@@ -11,9 +11,20 @@ internal class Vedtaksperiode(
 ) {
     private val generasjoner = generasjoner.toMutableList()
     private val gjeldendeGenerasjon get() = generasjoner.last()
+    private val fom get() = gjeldendeGenerasjon.fom()
+    private val tom get() = gjeldendeGenerasjon.tom()
 
     internal fun toDto(): VedtaksperiodeDto {
         return VedtaksperiodeDto(vedtaksperiodeId, generasjoner.map { it.toDto() })
+    }
+
+    internal fun behandleTilbakedateringGodkjent(perioder: List<Periode>) {
+        if (perioder.none { it.overlapperMed(Periode(fom, tom)) }) return
+        deaktiverVarselMedKode("RV_SØ_3")
+    }
+
+    private fun deaktiverVarselMedKode(varselkode: String) {
+        gjeldendeGenerasjon.deaktiverVarsel(varselkode)
     }
 
     companion object {

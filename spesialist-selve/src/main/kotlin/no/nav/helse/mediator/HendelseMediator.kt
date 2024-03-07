@@ -62,6 +62,7 @@ import no.nav.helse.modell.person.AdressebeskyttelseEndretRiver
 import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import no.nav.helse.modell.person.OppdaterPersonsnapshot
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.person.PersonRepository
 import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfeller
 import no.nav.helse.modell.utbetaling.UtbetalingAnnullert
@@ -113,6 +114,8 @@ internal class HendelseMediator(
         private val logg = LoggerFactory.getLogger(HendelseMediator::class.java)
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
+
+    private val personRepository = PersonRepository(dataSource)
 
     private fun skalBehandleMelding(melding: String): Boolean {
         if (erProd()) return true
@@ -333,6 +336,9 @@ internal class HendelseMediator(
 
     fun tilbakedateringBehandlet(fødselsnummer: String, tilbakedateringBehandlet: TilbakedateringBehandlet, context: MessageContext) {
         val syketilfelleStartDato = tilbakedateringBehandlet.syketilfelleStartdato
+        personRepository.brukPersonHvisFinnes(fødselsnummer) {
+            it.behandleTilbakedateringBehandlet(tilbakedateringBehandlet.perioder)
+        }
         oppgaveDao.finnOppgaveId(fødselsnummer)?.also { oppgaveId ->
             sikkerlogg.info("Fant en oppgave for {}: {}", fødselsnummer, oppgaveId)
 
@@ -343,12 +349,6 @@ internal class HendelseMediator(
                 sikkerlogg.info("SyketilfellestartDato er ikke innenfor periodens fom og tom, for tilbakedateringen {} og {}", fødselsnummer, oppgaveId)
                 return
             }
-            val skjæringstidspunkt = oppgaveDataForAutomatisering.skjæringstidspunkt
-            val vedtaksperiodeId = oppgaveDataForAutomatisering.vedtaksperiodeId
-            val sykefraværstilfelle = kommandofabrikk.sykefraværstilfelle(fødselsnummer, skjæringstidspunkt)
-
-            if (!sykefraværstilfelle.erTilbakedatert(vedtaksperiodeId))
-                return logg.info("ignorerer hendelseId=${tilbakedateringBehandlet.id} fordi det ikke er en tilbakedatering")
 
             sikkerlogg.info("Har oppgave til_godkjenning og commandData for fnr $fødselsnummer og vedtaksperiodeId ${oppgaveDataForAutomatisering.vedtaksperiodeId}")
             håndter(tilbakedateringBehandlet, context)

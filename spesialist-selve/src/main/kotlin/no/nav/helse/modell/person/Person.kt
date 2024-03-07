@@ -1,5 +1,6 @@
 package no.nav.helse.modell.person
 
+import no.nav.helse.modell.vedtaksperiode.Periode
 import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeDto
 
@@ -13,6 +14,10 @@ class Person private constructor(
         fødselsnummer = fødselsnummer,
         vedtaksperioder = vedtaksperioder.map { it.toDto() }
     )
+
+    fun behandleTilbakedateringBehandlet(perioder: List<Periode>) {
+        vedtaksperioder.forEach { it.behandleTilbakedateringGodkjent(perioder) }
+    }
 
     companion object {
         fun gjenopprett(fødselsnummer: String, vedtaksperioder: List<VedtaksperiodeDto>): Person {

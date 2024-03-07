@@ -9,10 +9,12 @@ internal class PersonRepository(private val dataSource: DataSource) {
     private val personDao = PersonDao(dataSource)
     private val generasjonRepository = GenerasjonRepository(dataSource)
     fun brukPersonHvisFinnes(fødselsnummer: String, personScope: (Person) -> Unit) {
-        sessionOf(dataSource).transaction { tx ->
-            val person = tx.finnPerson(fødselsnummer) ?: return
-            personScope(person)
-            tx.lagrePerson(person.toDto())
+        sessionOf(dataSource).use {
+            it.transaction { tx ->
+                val person = tx.finnPerson(fødselsnummer) ?: return
+                personScope(person)
+                tx.lagrePerson(person.toDto())
+            }
         }
     }
 

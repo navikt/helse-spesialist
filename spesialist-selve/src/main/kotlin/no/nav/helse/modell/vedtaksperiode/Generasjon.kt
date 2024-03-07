@@ -44,6 +44,9 @@ internal class Generasjon private constructor(
 
     internal fun hasterÅBehandle() = varsler.inneholderVarselOmNegativtBeløp()
 
+    internal fun fom() = periode.fom()
+    internal fun tom() = periode.tom()
+
     internal fun registrer(vararg observer: IVedtaksperiodeObserver) {
         observers.addAll(observer)
         varsler.forEach { it.registrer(*observer) }

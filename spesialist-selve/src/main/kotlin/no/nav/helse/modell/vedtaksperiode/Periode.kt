@@ -18,6 +18,11 @@ class Periode(
                 && tom == other.tom
                 )
 
+    internal fun overlapperMed(other: Periode) = this.overlapper(other) || other.overlapper(this)
+
+    private fun overlapper(other: Periode) =
+        other.fom in fom .. tom || other.tom in fom .. tom
+
     override fun hashCode(): Int {
         var result = fom.hashCode()
         result = 31 * result + tom.hashCode()

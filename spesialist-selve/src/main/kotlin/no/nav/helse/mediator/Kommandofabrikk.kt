@@ -222,7 +222,6 @@ internal class Kommandofabrikk(
             utbetaling = utbetaling,
             automatisering = automatisering,
             oppgaveDataForAutomatisering = oppgaveDataForAutomatisering,
-            oppgaveDao = oppgaveDao,
             oppgaveMediator = oppgaveMediator,
             godkjenningMediator = godkjenningMediator
         )
