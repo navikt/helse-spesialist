@@ -35,6 +35,39 @@ class GenerasjonDao(private val dataSource: DataSource) {
         }
     }
 
+    internal fun TransactionalSession.finnGenerasjoner(vedtaksperiodeId: UUID): List<GenerasjonDto> {
+        @Language("PostgreSQL")
+        val query = """
+            SELECT id, unik_id, vedtaksperiode_id, utbetaling_id, skjæringstidspunkt, fom, tom, tilstand
+            FROM selve_vedtaksperiode_generasjon 
+            WHERE vedtaksperiode_id = :vedtaksperiode_id ORDER BY id;
+        """
+        return run(
+            queryOf(
+                query,
+                mapOf("vedtaksperiode_id" to vedtaksperiodeId)
+            ).map { row ->
+                val generasjonRef = row.long("id")
+                GenerasjonDto(
+                    id = row.uuid("unik_id"),
+                    vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
+                    utbetalingId = row.uuidOrNull("utbetaling_id"),
+                    skjæringstidspunkt = row.localDate("skjæringstidspunkt"),
+                    fom = row.localDate("fom"),
+                    tom = row.localDate("tom"),
+                    tilstand = when (val tilstand = row.string("tilstand")) {
+                        "Låst" -> TilstandDto.Låst
+                        "Ulåst" -> TilstandDto.Ulåst
+                        "AvsluttetUtenUtbetaling" -> TilstandDto.AvsluttetUtenUtbetaling
+                        "UtenUtbetalingMåVurderes" -> TilstandDto.UtenUtbetalingMåVurderes
+                        else -> throw IllegalArgumentException("$tilstand er ikke en gyldig generasjontilstand")
+                    },
+                    varsler = finnVarsler(generasjonRef)
+                )
+            }.asList
+        )
+    }
+
     internal fun oppdaterMedBehandlingsInformasjon(generasjonId: UUID, spleisBehandlingId: UUID, tags: List<String>) {
         val tagsAsString = tags.joinToString { """ "$it" """ }
         @Language("PostgreSQL")
@@ -79,6 +112,14 @@ class GenerasjonDao(private val dataSource: DataSource) {
                 tx.slettVarsler(generasjonDto.id, generasjonDto.varsler.map { it.id })
             }
         }
+    }
+
+    internal fun TransactionalSession.lagreGenerasjon(generasjonDto: GenerasjonDto) {
+        this.lagre(generasjonDto)
+        generasjonDto.varsler.forEach { varselDto ->
+            this.lagre(varselDto, generasjonDto.id)
+        }
+        this.slettVarsler(generasjonDto.id, generasjonDto.varsler.map { it.id })
     }
 
     private fun TransactionalSession.lagre(generasjonDto: GenerasjonDto) {

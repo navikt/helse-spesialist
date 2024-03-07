@@ -98,6 +98,26 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `finn generasjoner`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjon1 = nyGenerasjonDto(vedtaksperiodeId)
+        val generasjon2 = nyGenerasjonDto(vedtaksperiodeId)
+        generasjonDao.lagre(generasjon1)
+        generasjonDao.lagre(generasjon2)
+        val generasjoner = with(generasjonDao) {
+            sessionOf(dataSource).use { session ->
+                session.transaction { tx ->
+                    tx.finnGenerasjoner(vedtaksperiodeId)
+                }
+            }
+        }
+
+        assertEquals(2, generasjoner.size)
+        assertEquals(generasjon1, generasjoner[0])
+        assertEquals(generasjon2, generasjoner[1])
+    }
+
+    @Test
     fun `oppdatere generasjon`() {
         val id = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
@@ -524,6 +544,28 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         generasjonDao.opprettFor(UUID.randomUUID(), vedtaksperiodeId2, UUID.randomUUID(), senerePeriode.first, senerePeriode.tilPeriode(), Generasjon.Låst)
 
         assertEquals(1.januar, generasjonDao.førsteKjenteDag(FNR))
+    }
+
+    private fun nyGenerasjonDto(
+        vedtaksperiodeId: UUID = UUID.randomUUID(),
+        id: UUID = UUID.randomUUID(),
+        utbetalingId: UUID? = UUID.randomUUID(),
+        fom: LocalDate = 1.januar,
+        tom: LocalDate = 31.januar,
+        skjæringstidspunkt: LocalDate = 1.januar,
+        tilstand: TilstandDto = TilstandDto.Ulåst,
+        varsler: List<VarselDto> = emptyList()
+        ): GenerasjonDto {
+        return GenerasjonDto(
+            id = id,
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = utbetalingId,
+            skjæringstidspunkt = skjæringstidspunkt,
+            fom = fom,
+            tom = tom,
+            tilstand = tilstand,
+            varsler = varsler
+        )
     }
 
     private fun assertVarsler(generasjonId: UUID, vararg forventedeVarselkoder: String) {

@@ -1,5 +1,7 @@
 package no.nav.helse.modell.vedtaksperiode
 
+import java.util.UUID
+
 enum class Periodetype {
     FØRSTEGANGSBEHANDLING,
     FORLENGELSE,
@@ -11,3 +13,8 @@ enum class Inntektskilde {
     EN_ARBEIDSGIVER,
     FLERE_ARBEIDSGIVERE
 }
+
+data class VedtaksperiodeDto(
+    val vedtaksperiodeId: UUID,
+    val generasjoner: List<GenerasjonDto>
+)

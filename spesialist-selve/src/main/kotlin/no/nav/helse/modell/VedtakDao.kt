@@ -3,13 +3,37 @@ package no.nav.helse.modell
 import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
+import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeDto
 import org.intellij.lang.annotations.Language
 
 internal class VedtakDao(private val dataSource: DataSource) {
+    internal fun TransactionalSession.finnVedtaksperiode(vedtaksperiodeId: UUID): VedtaksperiodeDto? {
+        @Language("PostgreSQL")
+        val query = """
+            SELECT 
+            vedtaksperiode_id
+            from vedtak WHERE vedtaksperiode_id = :vedtaksperiode_id AND forkastet = false
+        """.trimIndent()
+
+        return run(
+            queryOf(
+                query,
+                mapOf("vedtaksperiode_id" to vedtaksperiodeId)
+            ).map {
+                VedtaksperiodeDto(
+                    vedtaksperiodeId = it.uuid("vedtaksperiode_id"),
+                    generasjoner = emptyList()
+                )
+            }.asSingle
+        )
+    }
+
+
     internal fun opprett(
         vedtaksperiodeId: UUID,
         fom: LocalDate,

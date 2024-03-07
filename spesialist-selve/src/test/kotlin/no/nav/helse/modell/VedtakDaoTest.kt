@@ -33,6 +33,23 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `finn vedtaksperiode`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettSnapshot()
+        vedtakDao.opprett(VEDTAKSPERIODE, FOM, TOM, personId, arbeidsgiverId, snapshotId)
+        val vedtaksperiode = sessionOf(dataSource).use {
+            it.transaction {
+                with(vedtakDao) {
+                    it.finnVedtaksperiode(VEDTAKSPERIODE)
+                }
+            }
+        }
+        assertNotNull(vedtaksperiode)
+        assertEquals(VEDTAKSPERIODE, vedtaksperiode?.vedtaksperiodeId)
+    }
+
+    @Test
     fun `opprette duplikat vedtak`() {
         opprettPerson()
         opprettArbeidsgiver()
