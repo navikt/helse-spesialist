@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.Varsel
-import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
+import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.IVedtaksperiodeObserver
 
@@ -32,7 +32,7 @@ class GenerasjonBuilder(
     }
 
     internal fun build(
-        generasjonRepository: ActualGenerasjonRepository,
+        generasjonRepository: GenerasjonRepository,
         varselRepository: ActualVarselRepository,
     ): Generasjon {
         generasjonRepository.byggGenerasjon(vedtaksperiodeId, this)

@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test
 internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
     private val varselDao = VarselDao(dataSource)
     private val varselRepository = ActualVarselRepository(dataSource)
-    private val generasjonRepository = ActualGenerasjonRepository(dataSource)
+    private val generasjonRepository = GenerasjonRepository(dataSource)
 
     @Test
     fun `bygg generasjon`() {

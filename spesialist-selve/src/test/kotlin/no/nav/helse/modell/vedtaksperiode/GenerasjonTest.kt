@@ -39,7 +39,7 @@ import org.junit.jupiter.api.Test
 
 internal class GenerasjonTest: AbstractDatabaseTest() {
     private val varselRepository = ActualVarselRepository(dataSource)
-    private val generasjonRepository = ActualGenerasjonRepository(dataSource)
+    private val generasjonRepository = GenerasjonRepository(dataSource)
     private lateinit var generasjonId: UUID
     private lateinit var observer: GenerasjonTestObserver
 

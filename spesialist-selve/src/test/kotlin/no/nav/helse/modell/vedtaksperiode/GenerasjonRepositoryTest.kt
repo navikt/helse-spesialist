@@ -10,10 +10,11 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
 
-    private val repository = ActualGenerasjonRepository(dataSource)
+    private val repository = GenerasjonRepository(dataSource)
 
     @Test
     fun `kan opprette første generasjon`() {
@@ -31,6 +32,13 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         )
         
         assertGenerasjon(vedtaksperiodeId, hendelseId)
+    }
+
+    @Test
+    fun `Exception om vedtaksperioden ikke finnes`() {
+        assertThrows<IllegalStateException> {
+            repository.brukVedtaksperiode(UUID.randomUUID()) {}
+        }
     }
 
     @Test

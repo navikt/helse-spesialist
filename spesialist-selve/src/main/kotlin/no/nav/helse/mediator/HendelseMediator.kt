@@ -69,7 +69,7 @@ import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
-import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
+import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.NyeVarsler
@@ -105,7 +105,7 @@ internal class HendelseMediator(
     private val avviksvurderingDao: AvviksvurderingDao,
     private val utbetalingDao: UtbetalingDao = UtbetalingDao(dataSource),
     private val varselRepository: ActualVarselRepository = ActualVarselRepository(dataSource),
-    private val generasjonRepository: ActualGenerasjonRepository = ActualGenerasjonRepository(dataSource),
+    private val generasjonRepository: GenerasjonRepository = GenerasjonRepository(dataSource),
     private val metrikkDao: MetrikkDao = MetrikkDao(dataSource),
     private val generasjonDao: GenerasjonDao,
 ) : Personhåndterer {

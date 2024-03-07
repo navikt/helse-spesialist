@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class OpprettKoblingTilGenerasjonCommandTest: AbstractDatabaseTest() {
-    private val generasjonRepository = ActualGenerasjonRepository(dataSource)
+    private val generasjonRepository = GenerasjonRepository(dataSource)
     private val generasjonId = UUID.randomUUID()
     private val vedtaksperiodeId = UUID.randomUUID()
     private val utbetalingId = UUID.randomUUID()

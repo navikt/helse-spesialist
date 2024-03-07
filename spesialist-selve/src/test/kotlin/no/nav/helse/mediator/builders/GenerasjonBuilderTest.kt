@@ -10,7 +10,7 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.Varsel
-import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
+import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterNyttVarsel
 import org.intellij.lang.annotations.Language
@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test
 
 class GenerasjonBuilderTest : AbstractDatabaseTest() {
     private val varselRepository = ActualVarselRepository(dataSource)
-    private val generasjonRepository = ActualGenerasjonRepository(dataSource)
+    private val generasjonRepository = GenerasjonRepository(dataSource)
 
     @Test
     fun bygg() {

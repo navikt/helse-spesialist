@@ -13,7 +13,7 @@ import no.nav.helse.modell.varsel.VarselStatusDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-internal class ActualGenerasjonRepository(private val dataSource: DataSource): IVedtaksperiodeObserver {
+internal class GenerasjonRepository(private val dataSource: DataSource): IVedtaksperiodeObserver {
 
     private val dao = GenerasjonDao(dataSource)
     private val vedtakDao = VedtakDao(dataSource)
