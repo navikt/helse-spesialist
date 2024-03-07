@@ -400,7 +400,11 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         opprettGenerasjon(vedtaksperiodeId2, generasjonId2)
         opprettGenerasjon(vedtaksperiodeId2, generasjonId3)
 
-        val vedtaksperiodeIder = generasjonDao.finnVedtaksperiodeIderFor(FNR)
+        val vedtaksperiodeIder = with(generasjonDao) {
+            sessionOf(dataSource).transaction {
+                it.finnVedtaksperiodeIderFor(FNR)
+            }
+        }
         assertEquals(2, vedtaksperiodeIder.size)
         assertTrue(vedtaksperiodeIder.containsAll(setOf(vedtaksperiodeId1, vedtaksperiodeId2)))
     }

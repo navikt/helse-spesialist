@@ -324,8 +324,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
         }
     }
 
-
-    internal fun finnVedtaksperiodeIderFor(fødselsnummer: String): Set<UUID> {
+    internal fun TransactionalSession.finnVedtaksperiodeIderFor(fødselsnummer: String): Set<UUID> {
         @Language("PostgreSQL")
         val query = """
             SELECT svg.vedtaksperiode_id FROM selve_vedtaksperiode_generasjon svg 
@@ -334,9 +333,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
             WHERE fodselsnummer = ? AND forkastet = false
             """
 
-        return sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, fødselsnummer.toLong()).map { it.uuid("vedtaksperiode_id") }.asList).toSet()
-        }
+        return run(queryOf(query, fødselsnummer.toLong()).map { it.uuid("vedtaksperiode_id") }.asList).toSet()
     }
 
     internal fun opprettFor(

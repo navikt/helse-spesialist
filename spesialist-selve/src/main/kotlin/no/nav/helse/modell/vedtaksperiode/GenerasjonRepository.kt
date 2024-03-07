@@ -21,18 +21,29 @@ internal class GenerasjonRepository(private val dataSource: DataSource): IVedtak
     internal fun brukVedtaksperiode(vedtaksperiodeId: UUID, block: (vedtaksperiode: Vedtaksperiode) -> Unit) {
         sessionOf(dataSource).use { session ->
             session.transaction { tx ->
-                val vedtaksperiode = tx.finnVedtaksperiode(vedtaksperiodeId)
+                val vedtaksperiode = tx.finnVedtaksperiode(vedtaksperiodeId).let {
+                    Vedtaksperiode.gjenopprett(it.vedtaksperiodeId, it.generasjoner)
+                }
                 block(vedtaksperiode)
-                tx.lagreVedtaksperiode(vedtaksperiode)
+                tx.lagreVedtaksperiode(vedtaksperiode.toDto())
             }
         }
     }
 
-    private fun TransactionalSession.finnVedtaksperiode(vedtaksperiodeId: UUID): Vedtaksperiode {
+    internal fun TransactionalSession.finnVedtaksperioder(fødselsnummer: String): List<VedtaksperiodeDto> {
+        return with(dao) {
+            finnVedtaksperiodeIderFor(fødselsnummer).map { finnVedtaksperiode(it) }
+        }
+    }
+
+    internal fun TransactionalSession.lagreVedtaksperioder(vedtaksperioder: List<VedtaksperiodeDto>) {
+        vedtaksperioder.forEach { lagreVedtaksperiode(it) }
+    }
+
+    private fun TransactionalSession.finnVedtaksperiode(vedtaksperiodeId: UUID): VedtaksperiodeDto {
         return with(vedtakDao) {
             finnVedtaksperiode(vedtaksperiodeId)
                 ?.copy(generasjoner = finnGenerasjoner(vedtaksperiodeId))
-                ?.let { Vedtaksperiode.gjenopprett(it.vedtaksperiodeId, it.generasjoner) }
                 ?: throw IllegalStateException("Forventer å finne vedtaksperiode for vedtaksperiodeId=$vedtaksperiodeId")
         }
     }
@@ -43,10 +54,9 @@ internal class GenerasjonRepository(private val dataSource: DataSource): IVedtak
         }
     }
 
-    private fun TransactionalSession.lagreVedtaksperiode(vedtaksperiode: Vedtaksperiode) {
-        val dto = vedtaksperiode.toDto()
+    private fun TransactionalSession.lagreVedtaksperiode(vedtaksperiode: VedtaksperiodeDto) {
         with(dao) {
-            dto.generasjoner.forEach { generasjonDto ->
+            vedtaksperiode.generasjoner.forEach { generasjonDto ->
                 lagreGenerasjon(generasjonDto)
             }
         }
