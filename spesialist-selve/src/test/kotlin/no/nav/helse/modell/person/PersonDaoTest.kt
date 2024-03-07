@@ -60,6 +60,18 @@ internal class PersonDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `finn personDto`() {
+        opprettPerson()
+        val personDto = with(personDao) {
+            sessionOf(dataSource).transaction {
+                it.finnPerson(FNR)
+            }
+        }
+        assertNotNull(personDto)
+        assertEquals(FNR, personDto?.fødselsnummer)
+    }
+
+    @Test
     fun `oppretter minimal person`() {
         opprettMinimalPerson()
         assertNotNull(personDao.findPersonByFødselsnummer(FNR))

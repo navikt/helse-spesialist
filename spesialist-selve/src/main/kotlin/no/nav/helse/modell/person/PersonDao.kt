@@ -25,6 +25,21 @@ internal class PersonDao(private val dataSource: DataSource) {
         )
     }
 
+    internal fun TransactionalSession.finnPerson(fødselsnummer: String): PersonDto? {
+        @Language("PostgreSQL")
+        val query = "SELECT fodselsnummer FROM person WHERE fodselsnummer = :fodselsnummer"
+        return run(
+            queryOf(
+                query,
+                mapOf("fodselsnummer" to fødselsnummer.toLong())
+            )
+                .map { row ->
+                    PersonDto(row.long("fodselsnummer").toFødselsnummer(), emptyList())
+                }
+                .asSingle
+        )
+    }
+
     internal fun finnAktørId(fødselsnummer: String): String? = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val query = "SELECT aktor_id FROM person WHERE fodselsnummer = ?"
