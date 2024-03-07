@@ -1,20 +1,56 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
+import kotliquery.TransactionalSession
+import kotliquery.sessionOf
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.builders.GenerasjonBuilder
+import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.varsel.Varsel
-import no.nav.helse.modell.varsel.VarselDto
 import no.nav.helse.modell.varsel.VarselStatusDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-internal class ActualGenerasjonRepository(dataSource: DataSource): IVedtaksperiodeObserver {
+internal class ActualGenerasjonRepository(private val dataSource: DataSource): IVedtaksperiodeObserver {
 
     private val dao = GenerasjonDao(dataSource)
+    private val vedtakDao = VedtakDao(dataSource)
+
+    internal fun brukVedtaksperiode(vedtaksperiodeId: UUID, block: (vedtaksperiode: Vedtaksperiode) -> Unit) {
+        sessionOf(dataSource).use { session ->
+            session.transaction { tx ->
+                val vedtaksperiode = tx.finnVedtaksperiode(vedtaksperiodeId)
+                block(vedtaksperiode)
+                tx.lagreVedtaksperiode(vedtaksperiode)
+            }
+        }
+    }
+
+    private fun TransactionalSession.finnVedtaksperiode(vedtaksperiodeId: UUID): Vedtaksperiode {
+        return with(vedtakDao) {
+            finnVedtaksperiode(vedtaksperiodeId)
+                ?.copy(generasjoner = finnGenerasjoner(vedtaksperiodeId))
+                ?.let { Vedtaksperiode.gjenopprett(it.vedtaksperiodeId, it.generasjoner) }
+                ?: throw IllegalStateException("Forventer å finne vedtaksperiode for vedtaksperiodeId=$vedtaksperiodeId")
+        }
+    }
+
+    private fun TransactionalSession.finnGenerasjoner(vedtaksperiodeId: UUID): List<GenerasjonDto> {
+        return with(dao) {
+            finnGenerasjoner(vedtaksperiodeId)
+        }
+    }
+
+    private fun TransactionalSession.lagreVedtaksperiode(vedtaksperiode: Vedtaksperiode) {
+        val dto = vedtaksperiode.toDto()
+        with(dao) {
+            dto.generasjoner.forEach { generasjonDto ->
+                lagreGenerasjon(generasjonDto)
+            }
+        }
+    }
 
     internal fun brukGenerasjon(vedtaksperiodeId: UUID, block: (generasjon: Generasjon) -> Unit) {
         val generasjon = dao.finnGjeldendeGenerasjon(vedtaksperiodeId)?.tilGenerasjon()
