@@ -76,7 +76,21 @@ internal object Testmeldingfabrikk {
         id: UUID,
         skjæringstidspunkt: LocalDate
     ): String =
-        nyHendelse(id, "tilbakedatering_behandlet", mapOf("fødselsnummer" to fødselsnummer, "sykmeldingId" to "${UUID.randomUUID()}", "syketilfelleStartDato" to skjæringstidspunkt))
+        nyHendelse(
+            id = id,
+            navn = "tilbakedatering_behandlet",
+            hendelse = mapOf(
+                "fødselsnummer" to fødselsnummer,
+                "sykmeldingId" to "${UUID.randomUUID()}",
+                "syketilfelleStartDato" to skjæringstidspunkt,
+                "perioder" to listOf(
+                    mapOf(
+                        "fom" to skjæringstidspunkt,
+                        "tom" to skjæringstidspunkt.plusDays(30)
+                    )
+                )
+            )
+        )
 
     fun lagEndretSkjermetinfo(
         fødselsnummer: String,
