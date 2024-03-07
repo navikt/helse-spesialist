@@ -29,6 +29,9 @@ internal class TilbakedateringBehandletRiver(
                 it.requireKey("fødselsnummer")
                 it.requireKey("sykmeldingId")
                 it.requireKey("syketilfelleStartDato")
+                it.requireArray("perioder") {
+                    requireKey("fom", "tom")
+                }
             }
         }.register(this)
     }

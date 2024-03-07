@@ -57,7 +57,13 @@ internal class TilbakedateringBehandletRiverTest {
       "@opprettet": "${LocalDateTime.now()}",
       "fødselsnummer": "11111100000",
       "sykmeldingId": "${UUID.randomUUID()}",
-      "syketilfelleStartDato": "${LocalDate.now()}"
+      "syketilfelleStartDato": "${LocalDate.now()}",
+      "perioder": [
+          {
+            "fom": "${LocalDate.now()}",
+            "tom": "${LocalDate.now().plusDays(30)}"
+          }
+      ]
     }"""
 
 }

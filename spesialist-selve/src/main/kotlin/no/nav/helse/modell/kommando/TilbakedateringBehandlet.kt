@@ -13,6 +13,7 @@ import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.oppgave.SjekkAtOppgaveFortsattErÅpenCommand
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
+import no.nav.helse.modell.vedtaksperiode.Periode
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 
@@ -20,12 +21,16 @@ internal class TilbakedateringBehandlet private constructor(
     override val id: UUID,
     private val fødselsnummer: String,
     val syketilfelleStartdato: LocalDate,
+    val perioder: List<Periode>,
     private val json: String
 ) : Personmelding {
     internal constructor(packet: JsonMessage): this(
         id = UUID.fromString(packet["@id"].asText()),
         fødselsnummer = packet["fødselsnummer"].asText(),
         syketilfelleStartdato = packet["syketilfelleStartDato"].asLocalDate(),
+        perioder = packet["perioder"].map {
+            Periode(it["fom"].asLocalDate(), it["tom"].asLocalDate())
+        },
         json = packet.toJson()
     )
     override fun fødselsnummer() = fødselsnummer
