@@ -20,7 +20,7 @@ internal class ActualGenerasjonRepository(dataSource: DataSource): IVedtaksperio
         val generasjon = dao.finnGjeldendeGenerasjon(vedtaksperiodeId)?.tilGenerasjon()
             ?: throw IllegalStateException("Forventer å finne en generasjon for vedtaksperiodeId=$vedtaksperiodeId")
         block(generasjon)
-        val generasjonForLagring = GenerasjonLagrer(generasjon).generasjonForLagring()
+        val generasjonForLagring = generasjon.toDto()
         dao.lagre(generasjonForLagring)
     }
 
@@ -28,7 +28,7 @@ internal class ActualGenerasjonRepository(dataSource: DataSource): IVedtaksperio
         val generasjon = dao.finnGjeldendeGenerasjon(vedtaksperiodeId)?.tilGenerasjon()
             ?: return sikkerlogg.warn("Generasjon for vedtaksperiodeId=$vedtaksperiodeId finnes ikke, returnerer tidlig ved forsøk på å utføre noe i kontekst av generasjon")
         block(generasjon)
-        val generasjonForLagring = GenerasjonLagrer(generasjon).generasjonForLagring()
+        val generasjonForLagring = generasjon.toDto()
         dao.lagre(generasjonForLagring)
     }
 
@@ -174,52 +174,6 @@ internal class ActualGenerasjonRepository(dataSource: DataSource): IVedtaksperio
                     }
                 )
             }.toSet()
-        )
-    }
-
-    private class GenerasjonLagrer(generasjon: Generasjon): GenerasjonVisitor {
-        private lateinit var vedtaksperiodeId: UUID
-        private lateinit var id: UUID
-        private var utbetalingId: UUID? = null
-        private lateinit var skjæringstidspunkt: LocalDate
-        private lateinit var periode: Periode
-        private lateinit var tilstand: TilstandDto
-        private val varsler = mutableListOf<VarselDto>()
-
-        init {
-            generasjon.accept(this)
-        }
-
-        override fun visitGenerasjon(
-            vedtaksperiodeId: UUID,
-            id: UUID,
-            utbetalingId: UUID?,
-            skjæringstidspunkt: LocalDate,
-            fom: LocalDate,
-            tom: LocalDate,
-            tilstand: Generasjon.Tilstand
-        ) {
-            this.vedtaksperiodeId = vedtaksperiodeId
-            this.id = id
-            this.utbetalingId = utbetalingId
-            this.skjæringstidspunkt = skjæringstidspunkt
-            this.periode = Periode(fom, tom)
-            this.tilstand = tilstand.toDto()
-        }
-
-        override fun visitVarsel(id: UUID, varselkode: String, opprettet: LocalDateTime, status: Varsel.Status) {
-            varsler.add(VarselDto(id, varselkode, opprettet, vedtaksperiodeId, status.toDto()))
-        }
-
-        fun generasjonForLagring() = GenerasjonDto(
-            id = id,
-            vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingId = utbetalingId,
-            skjæringstidspunkt = skjæringstidspunkt,
-            fom = periode.fom(),
-            tom = periode.tom(),
-            tilstand = tilstand,
-            varsler = varsler
         )
     }
 }
