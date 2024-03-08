@@ -574,9 +574,12 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     fun `structural equals`() {
         val generasjonId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
+        val spleisBehandlingId = UUID.randomUUID()
         val generasjon1 = generasjon(generasjonId, vedtaksperiodeId)
+        generasjon1.oppdaterBehandlingsinformasjon(emptyList(), spleisBehandlingId)
         generasjon1.håndterVedtakFattet(UUID.randomUUID())
         val generasjon2 = generasjon(generasjonId, vedtaksperiodeId)
+        generasjon2.oppdaterBehandlingsinformasjon(emptyList(), spleisBehandlingId)
         generasjon2.håndterVedtakFattet(UUID.randomUUID())
         assertEquals(generasjon1, generasjon2)
         assertEquals(generasjon1.hashCode(), generasjon2.hashCode())
@@ -600,6 +603,20 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         val vedtaksperiodeId2 = UUID.randomUUID()
         val generasjon1 = generasjon(generasjonId, vedtaksperiodeId1)
         val generasjon2 = generasjon(generasjonId, vedtaksperiodeId2)
+        assertNotEquals(generasjon1, generasjon2)
+        assertNotEquals(generasjon1.hashCode(), generasjon2.hashCode())
+    }
+
+    @Test
+    fun `forskjellig spleisBehandlingId og tags`() {
+        val generasjonId = UUID.randomUUID()
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjon1 = generasjon(generasjonId, vedtaksperiodeId)
+        val spleisBehandlingId = UUID.randomUUID()
+        generasjon1.oppdaterBehandlingsinformasjon(listOf("hei"), spleisBehandlingId)
+        val generasjon2 = generasjon(generasjonId, vedtaksperiodeId)
+        val spleisBehandlingId2 = UUID.randomUUID()
+        generasjon2.oppdaterBehandlingsinformasjon(listOf("hallo"), spleisBehandlingId2)
         assertNotEquals(generasjon1, generasjon2)
         assertNotEquals(generasjon1.hashCode(), generasjon2.hashCode())
     }
@@ -712,8 +729,11 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         val tom = 31. januar
         val skjæringstidspunkt = 1.januar
         val utbetalingId = UUID.randomUUID()
+        val spleisBehandlingId = UUID.randomUUID()
         val generasjon = Generasjon(generasjonId, vedtaksperiodeId, fom, tom, skjæringstidspunkt)
         generasjon.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
+        val tags = listOf("tag 1")
+        generasjon.oppdaterBehandlingsinformasjon(tags, spleisBehandlingId)
 
         val varselId = UUID.randomUUID()
         val opprettet = LocalDateTime.now()
@@ -721,7 +741,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         generasjon.håndterNyttVarsel(varsel, UUID.randomUUID())
         val dto = generasjon.toDto()
 
-        assertEquals(GenerasjonDto(generasjonId, vedtaksperiodeId, utbetalingId, skjæringstidspunkt, fom, tom, TilstandDto.Ulåst, listOf(varsel.toDto())), dto)
+        assertEquals(GenerasjonDto(generasjonId, vedtaksperiodeId, utbetalingId, spleisBehandlingId, skjæringstidspunkt, fom, tom, TilstandDto.Ulåst, tags, listOf(varsel.toDto())), dto)
     }
 
     @Test

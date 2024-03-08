@@ -4,8 +4,8 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.Varsel
-import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Generasjon
+import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.IVedtaksperiodeObserver
 
 class GenerasjonBuilder(
@@ -17,6 +17,8 @@ class GenerasjonBuilder(
     private lateinit var skjæringstidspunkt: LocalDate
     private lateinit var tilstand: Generasjon.Tilstand
     private var utbetalingId: UUID? = null
+    private var spleisBehandlingId: UUID? = null
+    private val tags = mutableListOf<String>()
     private val varsler = mutableListOf<Varsel>()
 
     internal fun buildFirst(
@@ -41,10 +43,12 @@ class GenerasjonBuilder(
             id = generasjonId,
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId,
+            spleisBehandlingId = spleisBehandlingId,
             skjæringstidspunkt = skjæringstidspunkt,
             fom = fom,
             tom = tom,
             tilstand = tilstand,
+            tags = tags,
             varsler = varsler.toSet()
         ).also {
             it.registrer(generasjonRepository, varselRepository)
@@ -59,6 +63,10 @@ class GenerasjonBuilder(
         this.utbetalingId = utbetalingId
     }
 
+    internal fun spleisBehandlingId(spleisBehandlingId: UUID) {
+        this.spleisBehandlingId = spleisBehandlingId
+    }
+
     internal fun periode(fom: LocalDate, tom: LocalDate) {
         this.fom = fom
         this.tom = tom
@@ -66,6 +74,10 @@ class GenerasjonBuilder(
 
     internal fun skjæringstidspunkt(skjæringstidspunkt: LocalDate) {
         this.skjæringstidspunkt = skjæringstidspunkt
+    }
+
+    internal fun tags(tags: List<String>) {
+        this.tags.apply { clear(); addAll(tags) }
     }
 
     internal fun tilstand(tilstand: Generasjon.Tilstand) {

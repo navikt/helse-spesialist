@@ -7,6 +7,8 @@ import AbstractE2ETest.Kommandokjedetilstand.NY
 import AbstractE2ETest.Kommandokjedetilstand.SUSPENDERT
 import java.time.LocalDate
 import java.util.UUID
+import kotliquery.queryOf
+import kotliquery.sessionOf
 import lagFødselsnummer
 import no.nav.helse.GodkjenningsbehovTestdata
 import no.nav.helse.januar
@@ -16,6 +18,7 @@ import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Vergemå
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSystem
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -92,6 +95,24 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         fremTilSaksbehandleroppgave(kanGodkjennesAutomatisk = true)
         håndterGodkjenningsbehovUtenValidering()
         assertIngenEtterspurteBehov()
+    }
+
+    @Test
+    fun `oppdaterer behandlingsinformasjon ved påminnet godkjenningsbehov`() {
+        val spleisBehandlingId1 = UUID.randomUUID()
+        val tags1 = listOf("tag 1", "tag 2")
+        fremTilSaksbehandleroppgave(
+            kanGodkjennesAutomatisk = true,
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(tags = tags1, spleisBehandlingId = spleisBehandlingId1)
+        )
+        assertBehandlingsinformasjon(VEDTAKSPERIODE_ID, tags1, spleisBehandlingId1)
+
+        val spleisBehandlingId2 = UUID.randomUUID()
+        val tags2 = listOf("tag 2", "tag 3")
+        håndterGodkjenningsbehovUtenValidering(
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(tags = tags2, spleisBehandlingId = spleisBehandlingId2)
+        )
+        assertBehandlingsinformasjon(VEDTAKSPERIODE_ID, tags2, spleisBehandlingId2)
     }
 
     @Test
@@ -246,5 +267,24 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         håndterInntektløsning()
 
         assertSaksbehandleroppgave(oppgavestatus = AvventerSaksbehandler)
+    }
+
+    private fun assertBehandlingsinformasjon(
+        vedtaksperiodeId: UUID,
+        forventedeTags: List<String>,
+        forventetSpleisBehandlingId: UUID
+    ) {
+        @Language("PostgreSQL")
+        val query =
+            "SELECT tags, spleis_behandling_id FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = :vedtaksperiodeId;"
+
+        val (tags, spleisBehandlingId) = sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, mapOf("vedtaksperiodeId" to vedtaksperiodeId))
+                .map { it.array<String>("tags").toList() to it.uuid("spleis_behandling_id") }.asSingle
+            )
+        }!!
+
+        assertEquals(forventedeTags, tags)
+        assertEquals(forventetSpleisBehandlingId, spleisBehandlingId)
     }
 }

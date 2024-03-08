@@ -24,9 +24,11 @@ internal class Generasjon private constructor(
     private val id: UUID,
     private val vedtaksperiodeId: UUID,
     private var utbetalingId: UUID?,
+    private var spleisBehandlingId: UUID?,
     private var skjæringstidspunkt: LocalDate,
     private var periode: Periode,
     private var tilstand: Tilstand,
+    private var tags: List<String>,
     varsler: Set<Varsel>
 ) {
     internal constructor(
@@ -35,7 +37,7 @@ internal class Generasjon private constructor(
         fom: LocalDate,
         tom: LocalDate,
         skjæringstidspunkt: LocalDate,
-    ): this(id, vedtaksperiodeId, null, skjæringstidspunkt, Periode(fom, tom), Ulåst, emptySet())
+    ): this(id, vedtaksperiodeId, null, null, skjæringstidspunkt, Periode(fom, tom), Ulåst, emptyList(), emptySet())
 
     private val varsler: MutableList<Varsel> = varsler.toMutableList()
     private val observers = mutableSetOf<IVedtaksperiodeObserver>()
@@ -57,10 +59,12 @@ internal class Generasjon private constructor(
             id = id,
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId,
+            spleisBehandlingId = spleisBehandlingId,
             skjæringstidspunkt = skjæringstidspunkt,
             fom = periode.fom(),
             tom = periode.tom(),
             tilstand = tilstand.toDto(),
+            tags = tags,
             varsler = varsler.map(Varsel::toDto)
         )
     }
@@ -129,6 +133,11 @@ internal class Generasjon private constructor(
     internal fun deaktiverVarsel(varselkode: String) {
         val funnetVarsel = varsler.finnEksisterendeVarsel(varselkode) ?: return
         funnetVarsel.deaktiver(id)
+    }
+
+    internal fun oppdaterBehandlingsinformasjon(tags: List<String>, spleisBehandlingId: UUID) {
+        this.tags = tags
+        this.spleisBehandlingId = spleisBehandlingId
     }
 
     internal fun håndterGodkjentAvSaksbehandler(ident: String, hendelseId: UUID) {
@@ -388,6 +397,7 @@ internal class Generasjon private constructor(
                 && id == other.id
                 && vedtaksperiodeId == other.vedtaksperiodeId
                 && utbetalingId == other.utbetalingId
+                && spleisBehandlingId == other.spleisBehandlingId
                 && tilstand == other.tilstand
                 && skjæringstidspunkt == other.skjæringstidspunkt
                 && periode == other.periode)
@@ -396,6 +406,7 @@ internal class Generasjon private constructor(
         var result = id.hashCode()
         result = 31 * result + vedtaksperiodeId.hashCode()
         result = 31 * result + utbetalingId.hashCode()
+        result = 31 * result + spleisBehandlingId.hashCode()
         result = 31 * result + tilstand.hashCode()
         result = 31 * result + skjæringstidspunkt.hashCode()
         result = 31 * result + periode.hashCode()
@@ -430,22 +441,32 @@ internal class Generasjon private constructor(
             id: UUID,
             vedtaksperiodeId: UUID,
             utbetalingId: UUID?,
+            spleisBehandlingId: UUID?,
             skjæringstidspunkt: LocalDate,
             fom: LocalDate,
             tom: LocalDate,
             tilstand: Tilstand,
+            tags: List<String>,
             varsler: Set<Varsel>
         ) = Generasjon(
             id = id,
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId,
+            spleisBehandlingId = spleisBehandlingId,
             skjæringstidspunkt = skjæringstidspunkt,
             periode = Periode(fom, tom),
             tilstand = tilstand,
+            tags = tags,
             varsler = varsler
         )
 
-        private fun opprett(id: UUID, vedtaksperiodeId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate): Generasjon {
+        private fun opprett(
+            id: UUID,
+            vedtaksperiodeId: UUID,
+            fom: LocalDate,
+            tom: LocalDate,
+            skjæringstidspunkt: LocalDate,
+        ): Generasjon {
             return Generasjon(
                 id = id,
                 vedtaksperiodeId = vedtaksperiodeId,

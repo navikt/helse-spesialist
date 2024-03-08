@@ -195,6 +195,7 @@ internal class GenerasjonRepository(private val dataSource: DataSource): IVedtak
             id = id,
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId,
+            spleisBehandlingId = spleisBehandlingId,
             skjæringstidspunkt = skjæringstidspunkt,
             fom = fom,
             tom = tom,
@@ -204,6 +205,7 @@ internal class GenerasjonRepository(private val dataSource: DataSource): IVedtak
                 TilstandDto.AvsluttetUtenUtbetaling -> Generasjon.AvsluttetUtenUtbetaling
                 TilstandDto.UtenUtbetalingMåVurderes -> Generasjon.UtenUtbetalingMåVurderes
             },
+            tags = tags,
             varsler = varsler.map { varselDto ->
                 Varsel(
                     id = varselDto.id,

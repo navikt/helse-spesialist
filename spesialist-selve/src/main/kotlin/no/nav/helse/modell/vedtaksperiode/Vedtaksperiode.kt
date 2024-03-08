@@ -27,6 +27,9 @@ internal class Vedtaksperiode(
         gjeldendeGenerasjon.deaktiverVarsel(varselkode)
     }
 
+    internal fun mottaBehandlingsinformasjon(tags: List<String>, spleisBehandlingId: UUID) =
+        gjeldendeGenerasjon.oppdaterBehandlingsinformasjon(tags, spleisBehandlingId)
+
     companion object {
         fun nyVedtaksperiode(
             vedtaksperiodeId: UUID,
@@ -56,6 +59,7 @@ internal class Vedtaksperiode(
                 id = id,
                 vedtaksperiodeId = vedtaksperiodeId,
                 utbetalingId = utbetalingId,
+                spleisBehandlingId = spleisBehandlingId,
                 skjæringstidspunkt = skjæringstidspunkt,
                 fom = fom,
                 tom = tom,
@@ -65,6 +69,7 @@ internal class Vedtaksperiode(
                     TilstandDto.AvsluttetUtenUtbetaling -> Generasjon.AvsluttetUtenUtbetaling
                     TilstandDto.UtenUtbetalingMåVurderes -> Generasjon.UtenUtbetalingMåVurderes
                 },
+                tags = tags.toList(),
                 varsler = varsler.map { varselDto ->
                     Varsel(
                         id = varselDto.id,

@@ -8,10 +8,12 @@ data class GenerasjonDto(
     val id: UUID,
     val vedtaksperiodeId: UUID,
     val utbetalingId: UUID?,
+    val spleisBehandlingId: UUID?,
     val skjæringstidspunkt: LocalDate,
     val fom: LocalDate,
     val tom: LocalDate,
     val tilstand: TilstandDto,
+    val tags: List<String>,
     val varsler: List<VarselDto>
 )
 

@@ -70,8 +70,8 @@ import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
-import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
+import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.NyeVarsler
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeEndret
@@ -269,6 +269,11 @@ internal class HendelseMediator(
     ) {
         if (avviksvurderingId != null)
             avviksvurderingDao.opprettKobling(avviksvurderingId, vilkårsgrunnlagId)
+
+        generasjonRepository.brukVedtaksperiode(godkjenningsbehov.vedtaksperiodeId()) { vedtaksperiode ->
+            vedtaksperiode.mottaBehandlingsinformasjon(godkjenningsbehov.tags, godkjenningsbehov.spleisBehandlingId)
+        }
+
         val utbetalingId = godkjenningsbehov.utbetalingId
         val vedtaksperiodeId = godkjenningsbehov.vedtaksperiodeId()
         val skjæringstidspunkt = godkjenningsbehov.skjæringstidspunkt

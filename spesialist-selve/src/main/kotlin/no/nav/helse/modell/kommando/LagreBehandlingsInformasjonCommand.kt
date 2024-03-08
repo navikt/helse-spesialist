@@ -3,6 +3,7 @@ package no.nav.helse.modell.kommando
 import java.util.UUID
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 
+// Denne er p.t. overflødig, fordi vi lagrer informasjonen i HendelseMediator.godkjenningsbehov
 internal class LagreBehandlingsInformasjonCommand(
     private val vedtaksperiodeId: UUID,
     private val spleisBehandlingId: UUID,
