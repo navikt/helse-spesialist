@@ -239,8 +239,8 @@ internal class HendelseMediator(
 
     internal fun håndter(vedtakFattet: VedtakFattet) {
         val vedtaksperiodeId = vedtakFattet.vedtaksperiodeId()
-        generasjonRepository.brukGenerasjon(vedtaksperiodeId) {
-            it.håndterVedtakFattet(vedtakFattet.id)
+        generasjonRepository.brukVedtaksperiode(vedtaksperiodeId) {
+            it.vedtakFattet(vedtakFattet.id)
         }
         if (vedtakDao.erSpesialsak(vedtaksperiodeId)) vedtakDao.spesialsakFerdigbehandlet(vedtaksperiodeId)
     }

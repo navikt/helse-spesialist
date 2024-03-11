@@ -32,6 +32,10 @@ internal class Vedtaksperiode(
         gjeldendeGenerasjon.håndter(spleisVedtaksperiode)
     }
 
+    internal fun vedtakFattet(meldingId: UUID) {
+        gjeldendeGenerasjon.håndterVedtakFattet(meldingId)
+    }
+
     internal fun mottaBehandlingsinformasjon(tags: List<String>, spleisBehandlingId: UUID) =
         gjeldendeGenerasjon.oppdaterBehandlingsinformasjon(tags, spleisBehandlingId)
 
