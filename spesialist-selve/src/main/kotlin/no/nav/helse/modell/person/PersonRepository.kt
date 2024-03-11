@@ -8,7 +8,7 @@ import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 internal class PersonRepository(private val dataSource: DataSource) {
     private val personDao = PersonDao(dataSource)
     private val generasjonRepository = GenerasjonRepository(dataSource)
-    fun brukPersonHvisFinnes(fødselsnummer: String, personScope: (Person) -> Unit) {
+    fun brukPersonHvisFinnes(fødselsnummer: String, personScope: Person.() -> Unit) {
         sessionOf(dataSource).use {
             it.transaction { tx ->
                 val person = tx.finnPerson(fødselsnummer) ?: return
@@ -28,7 +28,7 @@ internal class PersonRepository(private val dataSource: DataSource) {
 
     private fun TransactionalSession.lagrePerson(person: PersonDto) {
         with(generasjonRepository) {
-            lagreVedtaksperioder(person.vedtaksperioder)
+            lagreVedtaksperioder(person.fødselsnummer, person.vedtaksperioder)
         }
     }
 }

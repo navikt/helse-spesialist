@@ -10,24 +10,40 @@ class VedtaksperiodeTest {
 
     @Test
     fun `ugyldig tilstand om Spesialist mottar ny behandling når gjeldende generasjon ikke er lukket`() {
-        val vedtaksperiode = nyVedtaksperiode()
+        val vedtaksperiodeId = UUID.randomUUID()
+        val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId)
         assertThrows<IllegalStateException> {
-            vedtaksperiode.nySpleisBehandling(SpleisBehandling(UUID.randomUUID()))
+            vedtaksperiode.nySpleisBehandling(nySpleisBehandling(vedtaksperiodeId))
         }
     }
 
     @Test
-    fun `ny generasjon om Spesialist mottar ny behandling når gjeldende generasjon er lukket`() {
-        val vedtaksperiode = nyVedtaksperiode()
+    fun `ignorerer behandling som ikke er relevant for vedtaksperioden`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val annenVedtaksperiodeId = UUID.randomUUID()
+        val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId)
         vedtaksperiode.vedtakFattet(UUID.randomUUID())
-        vedtaksperiode.nySpleisBehandling(SpleisBehandling(UUID.randomUUID()))
+
+        vedtaksperiode.nySpleisBehandling(nySpleisBehandling(annenVedtaksperiodeId))
+
+        val antallGenerasjoner = vedtaksperiode.toDto().generasjoner.size
+        assertEquals(1, antallGenerasjoner) // Det har ikke blitt opprettet noen ny generasjon for denne vedtaksperioden
+    }
+
+    @Test
+    fun `ny generasjon om Spesialist mottar ny behandling når gjeldende generasjon er lukket`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId)
+        vedtaksperiode.vedtakFattet(UUID.randomUUID())
+        vedtaksperiode.nySpleisBehandling(nySpleisBehandling(vedtaksperiodeId))
         val nyGjeldendeGenerasjon = vedtaksperiode.toDto().generasjoner.last()
         assertEquals(TilstandDto.Ulåst, nyGjeldendeGenerasjon.tilstand)
     }
 
     @Test
     fun `vedtak fattet uten utbetaling medfører at generasjonen lukkes som AUU-generasjon`() {
-        val vedtaksperiode = nyVedtaksperiode()
+        val vedtaksperiodeId = UUID.randomUUID()
+        val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId)
         vedtaksperiode.vedtakFattet(UUID.randomUUID())
         val dto = vedtaksperiode.toDto()
         val generasjon = dto.generasjoner.single()
@@ -37,9 +53,11 @@ class VedtaksperiodeTest {
     @Test
     fun `Kan ikke gjenopprette vedtaksperiode uten generasjoner`() {
         assertThrows<IllegalStateException> {
-            Vedtaksperiode.gjenopprett(UUID.randomUUID(), emptyList())
+            Vedtaksperiode.gjenopprett("987654321", UUID.randomUUID(), emptyList())
         }
     }
 
-    private fun nyVedtaksperiode() = Vedtaksperiode.nyVedtaksperiode(UUID.randomUUID(), 1.januar, 31.januar, 31.januar)
+    private fun nySpleisBehandling(vedtaksperiodeId: UUID) = SpleisBehandling("987654321", vedtaksperiodeId, UUID.randomUUID(), 1.januar, 31.januar)
+
+    private fun nyVedtaksperiode(vedtaksperiodeId: UUID) = Vedtaksperiode.nyVedtaksperiode(nySpleisBehandling(vedtaksperiodeId))
 }

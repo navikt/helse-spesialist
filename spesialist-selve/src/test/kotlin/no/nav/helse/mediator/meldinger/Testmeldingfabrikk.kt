@@ -186,6 +186,28 @@ internal object Testmeldingfabrikk {
             )
         )
 
+    fun lagBehandlingOpprettet(
+        id: UUID = UUID.randomUUID(),
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        vedtaksperiodeId: UUID,
+        spleisBehandlingId: UUID,
+        fom: LocalDate = 1.januar,
+        tom: LocalDate = 31.januar,
+    ) =
+        nyHendelse(
+            id, "behandling_opprettet", mapOf(
+                "vedtaksperiodeId" to "$vedtaksperiodeId",
+                "behandlingId" to "$spleisBehandlingId",
+                "fødselsnummer" to fødselsnummer,
+                "aktørId" to aktørId,
+                "organisasjonsnummer" to organisasjonsnummer,
+                "fom" to fom,
+                "tom" to tom,
+            )
+        )
+
     fun lagVedtaksperiodeForkastet(
         aktørId: String,
         fødselsnummer: String,
