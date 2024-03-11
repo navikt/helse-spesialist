@@ -37,7 +37,7 @@ internal class VurderAutomatiskAvvisning(
             else {
                 val sluppetForbiTidligere = personDao.findPersonerSomHarPassertFilter()
                 val slippesForbi = !erProd()
-                        || ((fødselsnummer.length == 11 && (29..31).contains(fødselsnummer.take(2).toInt())))
+                        || ((fødselsnummer.length == 11 && (24..31).contains(fødselsnummer.take(2).toInt())))
                         || sluppetForbiTidligere.contains(fødselsnummer.toLong())
                 !slippesForbi && kanAvvises
             }
