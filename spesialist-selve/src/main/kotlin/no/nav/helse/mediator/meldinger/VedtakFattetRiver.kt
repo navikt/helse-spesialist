@@ -35,7 +35,7 @@ internal class VedtakFattetRiver(
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        if (packet["@id"].asText() == "d7fd4269-c7a8-4b0a-8bff-6bc94ebaf206") return
+        if (packet["@id"].asText() == "3e454adf-b530-4bd3-8339-4ed3e892cf2c") return
         sikkerlogg.info("Mottok melding vedtak_fattet, {}", kv("hendelseId", UUID.fromString(packet["@id"].asText())))
 
         mediator.håndter(VedtakFattet(packet), context)
