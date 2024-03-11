@@ -14,7 +14,7 @@ internal class SøknadSendtOgVedtaksperiodeOpprettetTest : AbstractE2ETest() {
         assertPersonEksisterer(FØDSELSNUMMER, AKTØR)
         assertArbeidsgiverEksisterer(ORGNR)
         håndterSøknad(AKTØR, FØDSELSNUMMER, ORGNR)
-        spleisOppretterNyBehandling(
+        håndterVedtaksperiodeOpprettet(
             aktørId = AKTØR,
             fødselsnummer = FØDSELSNUMMER,
             organisasjonsnummer = ORGNR,

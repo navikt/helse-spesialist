@@ -10,7 +10,7 @@ internal class AdressebeskyttelseEndretE2ETest : AbstractE2ETest() {
     fun `oppdaterer adressebeskyttelse på en person vi kjenner til fra før`() {
 
         håndterSøknad()
-        spleisOppretterNyBehandling()
+        håndterVedtaksperiodeOpprettet()
         håndterAdressebeskyttelseEndret()
         assertSisteEtterspurteBehov("HentPersoninfoV2")
 
@@ -28,7 +28,7 @@ internal class AdressebeskyttelseEndretE2ETest : AbstractE2ETest() {
     @Test
     fun `Etterspør personinfo uten å sjekke ferskhet når adressebeskyttelse har blitt endret`() {
         håndterSøknad()
-        spleisOppretterNyBehandling()
+        håndterVedtaksperiodeOpprettet()
 
         // Etterspør personinfo selv om det nettopp er gjort
         håndterAdressebeskyttelseEndret()

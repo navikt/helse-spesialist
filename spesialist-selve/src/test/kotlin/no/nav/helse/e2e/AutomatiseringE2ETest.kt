@@ -74,7 +74,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
     fun `fatter automatisk vedtak for spesialsaker som ikke har svartelistede varsler og ingen utbetaling`() {
         Toggle.AutomatiserSpesialsak.enable()
         håndterSøknad()
-        spleisOppretterNyBehandling(vedtaksperiodeId = VEDTAKSPERIODE_ID)
+        håndterVedtaksperiodeOpprettet(vedtaksperiodeId = VEDTAKSPERIODE_ID)
         opprettSpesialsak(vedtaksperiodeId = VEDTAKSPERIODE_ID)
         fremTilÅpneOppgaver(
             fullmakter = listOf(Testmeldingfabrikk.VergemålJson.Fullmakt(listOf(Testmeldingfabrikk.VergemålJson.Område.Syk), 1.januar, 31.januar)),
@@ -103,7 +103,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
     fun `fatter ikke automatisk vedtak for spesialsaker som ikke har svartelistede varsler men har utbetaling`() {
         Toggle.AutomatiserSpesialsak.enable()
         håndterSøknad()
-        spleisOppretterNyBehandling(vedtaksperiodeId = VEDTAKSPERIODE_ID)
+        håndterVedtaksperiodeOpprettet(vedtaksperiodeId = VEDTAKSPERIODE_ID)
         opprettSpesialsak(vedtaksperiodeId = VEDTAKSPERIODE_ID)
         fremTilSaksbehandleroppgave(
             risikofunn = listOf(
@@ -124,7 +124,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
     fun `fatter ikke automatisk vedtak for spesialsaker som har svartelistede varsler men ingen utbetaling`() {
         Toggle.AutomatiserSpesialsak.enable()
         håndterSøknad()
-        spleisOppretterNyBehandling(vedtaksperiodeId = VEDTAKSPERIODE_ID)
+        håndterVedtaksperiodeOpprettet(vedtaksperiodeId = VEDTAKSPERIODE_ID)
         opprettSpesialsak(vedtaksperiodeId = VEDTAKSPERIODE_ID)
         fremTilSaksbehandleroppgave(
             regelverksvarsler = listOf("RV_SI_3"),

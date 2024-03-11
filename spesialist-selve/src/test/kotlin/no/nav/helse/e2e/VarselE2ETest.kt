@@ -107,7 +107,7 @@ internal class VarselE2ETest : AbstractE2ETest() {
 
         val vedtaksperiodeId2 = UUID.randomUUID()
         håndterSøknad()
-        spleisOppretterNyBehandling(vedtaksperiodeId = vedtaksperiodeId2)
+        håndterVedtaksperiodeOpprettet(vedtaksperiodeId = vedtaksperiodeId2)
         håndterAktivitetsloggNyAktivitet(varselkoder = listOf("RV_SØ_3"), vedtaksperiodeId = vedtaksperiodeId2
         )
 

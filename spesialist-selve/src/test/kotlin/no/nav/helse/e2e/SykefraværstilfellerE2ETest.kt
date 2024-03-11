@@ -15,7 +15,7 @@ internal class SykefraværstilfellerE2ETest : AbstractE2ETest() {
     @Test
     fun `Oppdaterer sykefraværstilfelle`() {
         håndterSøknad()
-        spleisOppretterNyBehandling()
+        håndterVedtaksperiodeOpprettet()
         håndterSykefraværstilfeller(tilfeller = listOf(tilfelle()))
 
         val sykefraværstilfelleTriple = finnFørsteGenerasjon(VEDTAKSPERIODE_ID)

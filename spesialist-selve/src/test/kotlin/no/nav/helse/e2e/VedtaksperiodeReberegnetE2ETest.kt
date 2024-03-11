@@ -13,7 +13,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
     @Test
     fun `avbryter saksbehandling før oppgave er opprettet til saksbehandling`() {
         håndterSøknad()
-        spleisOppretterNyBehandling()
+        håndterVedtaksperiodeOpprettet()
         fremTilÅpneOppgaver()
         håndterVedtaksperiodeReberegnet()
         assertKommandokjedetilstander(
@@ -37,7 +37,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
     @Test
     fun `avbryter kommandokjede ved reberegning og oppretter oppgave hos saksbehandler andre runde`() {
         håndterSøknad()
-        spleisOppretterNyBehandling()
+        håndterVedtaksperiodeOpprettet()
         fremTilÅpneOppgaver()
         håndterVedtaksperiodeReberegnet()
         assertKommandokjedetilstander(
@@ -64,7 +64,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
     @Test
     fun `avbryter ikke om forrige tilstand er noe annet enn AVVENTER_GODKJENNING eller AVVENTER_GODKJENNING_REVURDERING`() {
         håndterSøknad()
-        spleisOppretterNyBehandling()
+        håndterVedtaksperiodeOpprettet()
         håndterGodkjenningsbehov()
         håndterVedtaksperiodeEndret(forrigeTilstand = "TIL_UTBETALING", gjeldendeTilstand = "UTBETALING_FEILET")
         assertKommandokjedetilstander(sisteGodkjenningsbehovId, NY, SUSPENDERT)
@@ -73,7 +73,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
     @Test
     fun `avbryter ikke om forrige tilstand er AVVENTER_GODKJENNING_REVURDERING og gjeldende tilstand er TIL_INFOTRYGD`() {
         håndterSøknad()
-        spleisOppretterNyBehandling()
+        håndterVedtaksperiodeOpprettet()
         håndterGodkjenningsbehov()
         håndterVedtaksperiodeEndret(forrigeTilstand = "AVVENTER_GODKJENNING_REVURDERING", gjeldendeTilstand = "TIL_INFOTRYGD")
         assertKommandokjedetilstander(sisteGodkjenningsbehovId, NY, SUSPENDERT)
@@ -82,7 +82,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
     @Test
     fun `avbryter ikke om forrige tilstand er AVVENTER_GODKJENNING_REVURDERING og gjeldende tilstand er AVSLUTTET`() {
         håndterSøknad()
-        spleisOppretterNyBehandling()
+        håndterVedtaksperiodeOpprettet()
         håndterGodkjenningsbehov()
         håndterVedtaksperiodeEndret(forrigeTilstand = "AVVENTER_GODKJENNING_REVURDERING", gjeldendeTilstand = "AVSLUTTET")
         assertKommandokjedetilstander(sisteGodkjenningsbehovId, NY, SUSPENDERT)
@@ -91,7 +91,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
     @Test
     fun `avbryter ikke om forrige tilstand er AVVENTER_GODKJENNING_REVURDERING og gjeldende tilstand er TIL_UTBETALING`() {
         håndterSøknad()
-        spleisOppretterNyBehandling()
+        håndterVedtaksperiodeOpprettet()
         håndterGodkjenningsbehov()
         håndterVedtaksperiodeEndret(forrigeTilstand = "AVVENTER_GODKJENNING_REVURDERING", gjeldendeTilstand = "TIL_UTBETALING")
         assertKommandokjedetilstander(sisteGodkjenningsbehovId, NY, SUSPENDERT)
@@ -100,7 +100,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
     @Test
     fun `avbryter ikke om gjeldende tilstand er TIL_INFOTRYGD`() {
         håndterSøknad()
-        spleisOppretterNyBehandling()
+        håndterVedtaksperiodeOpprettet()
         håndterGodkjenningsbehov()
         håndterVedtaksperiodeEndret(gjeldendeTilstand = "TIL_INFOTRYGD")
         assertKommandokjedetilstander(sisteGodkjenningsbehovId, NY, SUSPENDERT)
@@ -109,7 +109,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
     @Test
     fun `avbryter ikke om gjeldende tilstand er AVSLUTTET`() {
         håndterSøknad()
-        spleisOppretterNyBehandling()
+        håndterVedtaksperiodeOpprettet()
         håndterGodkjenningsbehov()
         håndterVedtaksperiodeEndret(gjeldendeTilstand = "AVSLUTTET")
         assertKommandokjedetilstander(sisteGodkjenningsbehovId, NY, SUSPENDERT)
@@ -118,7 +118,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
     @Test
     fun `avbryter ikke om gjeldende tilstand er TIL_UTBETALING`() {
         håndterSøknad()
-        spleisOppretterNyBehandling()
+        håndterVedtaksperiodeOpprettet()
         håndterGodkjenningsbehov()
         håndterVedtaksperiodeEndret(gjeldendeTilstand = "TIL_UTBETALING")
         assertKommandokjedetilstander(sisteGodkjenningsbehovId, NY, SUSPENDERT)

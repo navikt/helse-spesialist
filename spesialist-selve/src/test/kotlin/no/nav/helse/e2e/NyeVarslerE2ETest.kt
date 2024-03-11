@@ -9,7 +9,7 @@ internal class NyeVarslerE2ETest : AbstractE2ETest() {
     @Test
     fun `lagrer varsler når vi mottar ny aktivitet i aktivitetsloggen`() {
         håndterSøknad()
-        spleisOppretterNyBehandling()
+        håndterVedtaksperiodeOpprettet()
         håndterVedtaksperiodeNyUtbetaling()
         håndterAktivitetsloggNyAktivitet(varselkoder = listOf("EN_KODE"))
 
@@ -19,7 +19,7 @@ internal class NyeVarslerE2ETest : AbstractE2ETest() {
     @Test
     fun `lagrer varsler når vi mottar flere ny aktivitet i aktivitetsloggen`() {
         håndterSøknad()
-        spleisOppretterNyBehandling()
+        håndterVedtaksperiodeOpprettet()
         håndterVedtaksperiodeNyUtbetaling()
         håndterAktivitetsloggNyAktivitet(varselkoder = listOf("EN_KODE"))
         håndterAktivitetsloggNyAktivitet(varselkoder = listOf("EN_ANNEN_KODE"))
@@ -30,7 +30,7 @@ internal class NyeVarslerE2ETest : AbstractE2ETest() {
     @Test
     fun `lagrer flere varsler når vi mottar flere nye aktiviteter i samme aktivitetslogg`() {
         håndterSøknad()
-        spleisOppretterNyBehandling()
+        håndterVedtaksperiodeOpprettet()
         håndterVedtaksperiodeNyUtbetaling()
         håndterAktivitetsloggNyAktivitet(varselkoder = listOf("EN_KODE", "EN_ANNEN_KODE"))
 
@@ -42,10 +42,10 @@ internal class NyeVarslerE2ETest : AbstractE2ETest() {
         val v1 = UUID.randomUUID()
         val v2 = UUID.randomUUID()
         håndterSøknad()
-        spleisOppretterNyBehandling(vedtaksperiodeId = v1)
+        håndterVedtaksperiodeOpprettet(vedtaksperiodeId = v1)
         håndterVedtaksperiodeNyUtbetaling(vedtaksperiodeId = v1)
         håndterSøknad()
-        spleisOppretterNyBehandling(vedtaksperiodeId = v2)
+        håndterVedtaksperiodeOpprettet(vedtaksperiodeId = v2)
         håndterVedtaksperiodeNyUtbetaling(vedtaksperiodeId = v2)
         håndterAktivitetsloggNyAktivitet(vedtaksperiodeId = v1, varselkoder = listOf("EN_KODE"))
         håndterAktivitetsloggNyAktivitet(vedtaksperiodeId = v2, varselkoder = listOf("EN_KODE"))

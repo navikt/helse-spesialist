@@ -30,7 +30,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     @Test
     fun `oppretter vedtak ved godkjenningsbehov`() {
         håndterSøknad()
-        spleisOppretterNyBehandling()
+        håndterVedtaksperiodeOpprettet()
         håndterGodkjenningsbehov()
         håndterPersoninfoløsning()
         håndterEnhetløsning()
@@ -76,7 +76,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     @Test
     fun `avbryter suspendert kommando når godkjenningsbehov kommer inn på nytt`() {
         håndterSøknad()
-        spleisOppretterNyBehandling()
+        håndterVedtaksperiodeOpprettet()
         håndterGodkjenningsbehov()
         val godkjenningsbehovId1 = sisteMeldingId
         håndterGodkjenningsbehov()
@@ -119,7 +119,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     fun `legger ved ukjente organisasjonsnumre på behov for Arbeidsgiverinformasjon`() {
         val andreArbeidsgivere = listOf(testperson.orgnummer2)
         håndterSøknad()
-        spleisOppretterNyBehandling()
+        håndterVedtaksperiodeOpprettet()
         håndterVedtaksperiodeNyUtbetaling()
         håndterGodkjenningsbehov(godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(orgnummereMedRelevanteArbeidsforhold = andreArbeidsgivere))
         håndterPersoninfoløsning()
@@ -138,7 +138,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         val arbeidsgiver3 = lagFødselsnummer()
         val andreArbeidsforhold = listOf(arbeidsgiver2, arbeidsgiver3)
         håndterSøknad()
-        spleisOppretterNyBehandling()
+        håndterVedtaksperiodeOpprettet()
         håndterVedtaksperiodeNyUtbetaling()
         håndterGodkjenningsbehov(godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(orgnummereMedRelevanteArbeidsforhold = andreArbeidsforhold))
         håndterPersoninfoløsning()
@@ -162,7 +162,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         val arbeidsgiver3 = lagFødselsnummer()
         val andreArbeidsforhold = listOf(arbeidsgiver2, arbeidsgiver3)
         håndterSøknad()
-        spleisOppretterNyBehandling()
+        håndterVedtaksperiodeOpprettet()
         håndterGodkjenningsbehov(godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(orgnummereMedRelevanteArbeidsforhold = andreArbeidsforhold))
         håndterPersoninfoløsning()
         håndterEnhetløsning()
@@ -176,7 +176,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     @Test
     fun `legger til riktig felt for adressebeskyttelse i Personinfo`() {
         håndterSøknad()
-        spleisOppretterNyBehandling()
+        håndterVedtaksperiodeOpprettet()
         håndterGodkjenningsbehov()
         håndterPersoninfoløsning(adressebeskyttelse = Adressebeskyttelse.StrengtFortrolig)
         assertAdressebeskyttelse(adressebeskyttelse = Adressebeskyttelse.StrengtFortrolig)
