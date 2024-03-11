@@ -30,6 +30,7 @@ import no.nav.helse.mediator.meldinger.VedtakFattetRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeEndretRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeForkastetRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeNyUtbetalingRiver
+import no.nav.helse.mediator.meldinger.VedtaksperiodeOpprettetRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeReberegnetRiver
 import no.nav.helse.mediator.meldinger.hendelser.AvsluttetMedVedtakMessage
 import no.nav.helse.mediator.meldinger.hendelser.AvsluttetUtenVedtakMessage
@@ -78,6 +79,7 @@ import no.nav.helse.modell.vedtaksperiode.NyeVarsler
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeEndret
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
+import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOpprettet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnet
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.modell.vedtaksperiode.vedtak.VedtakFattet
@@ -151,6 +153,7 @@ internal class HendelseMediator(
             OppdaterPersonsnapshotRiver(it, this)
             UtbetalingEndretRiver(it, this)
             VedtaksperiodeReberegnetRiver(it, this)
+//            VedtaksperiodeOpprettetRiver(it, this)
             GosysOppgaveEndretRiver(it, this)
             TilbakedateringBehandletRiver(it, this)
             EndretSkjermetinfoRiver(it, this)
@@ -439,6 +442,7 @@ internal class HendelseMediator(
             when (melding) {
                 is AdressebeskyttelseEndret -> iverksett(AdressebeskyttelseEndretCommand(melding.fødselsnummer(), personDao, oppgaveDao, godkjenningMediator), melding.id, commandContext)
                 is EndretEgenAnsattStatus -> iverksett(kommandofabrikk.endretEgenAnsattStatus(melding.fødselsnummer(), melding), melding.id, commandContext)
+                is VedtaksperiodeOpprettet -> iverksett(kommandofabrikk.opprettVedtaksperiode(melding.fødselsnummer(), melding), melding.id, commandContext)
                 is GosysOppgaveEndret -> iverksett(kommandofabrikk.gosysOppgaveEndret(melding.fødselsnummer(), melding), melding.id, commandContext)
                 is NyeVarsler -> håndter(melding)
                 is TilbakedateringBehandlet -> iverksett(kommandofabrikk.tilbakedateringGodkjent(melding.fødselsnummer()), melding.id, commandContext)
