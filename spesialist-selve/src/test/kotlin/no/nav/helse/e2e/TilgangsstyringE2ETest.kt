@@ -88,7 +88,7 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
 
     private fun sendMeldingerOppTilEgenAnsatt() {
         håndterSøknad(AKTØR, FØDSELSNUMMER, ORGNR)
-        håndterVedtaksperiodeOpprettet()
+        spleisOppretterNyBehandling()
         håndterVedtaksperiodeNyUtbetaling()
         håndterUtbetalingEndret()
         håndterAktivitetsloggNyAktivitet(varselkoder = listOf("RV_IM_1"))

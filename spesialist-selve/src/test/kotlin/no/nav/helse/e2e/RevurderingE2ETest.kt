@@ -10,7 +10,7 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
     @Test
     fun `revurdering ved saksbehandlet oppgave`() {
         håndterSøknad()
-        håndterVedtaksperiodeOpprettet()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave(regelverksvarsler = listOf("RV_IM_1"))
         håndterSaksbehandlerløsning()
         håndterVedtakFattet()
@@ -25,7 +25,7 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
     @Test
     fun `revurdering av periode med negativt beløp medfører oppgave`() {
         håndterSøknad()
-        håndterVedtaksperiodeOpprettet()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave(kanGodkjennesAutomatisk = true)
         håndterVedtakFattet()
 
@@ -44,7 +44,7 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
     @Test
     fun `revurdering av periode med positivt beløp og ingen varsler medfører ikke oppgave`() {
         håndterSøknad()
-        håndterVedtaksperiodeOpprettet()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave(kanGodkjennesAutomatisk = true)
         håndterVedtakFattet()
 
