@@ -15,7 +15,6 @@ enum class Inntektskilde {
 }
 
 data class VedtaksperiodeDto(
-    val organisasjonsnummer: String,
     val vedtaksperiodeId: UUID,
     val generasjoner: List<GenerasjonDto>
 )

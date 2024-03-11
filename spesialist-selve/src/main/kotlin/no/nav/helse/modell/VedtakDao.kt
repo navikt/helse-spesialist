@@ -16,8 +16,7 @@ internal class VedtakDao(private val dataSource: DataSource) {
         @Language("PostgreSQL")
         val query = """
             SELECT 
-            vedtaksperiode_id,
-            (SELECT orgnummer FROM arbeidsgiver WHERE id = arbeidsgiver_ref)
+            vedtaksperiode_id
             from vedtak WHERE vedtaksperiode_id = :vedtaksperiode_id AND forkastet = false
         """.trimIndent()
 
@@ -27,35 +26,13 @@ internal class VedtakDao(private val dataSource: DataSource) {
                 mapOf("vedtaksperiode_id" to vedtaksperiodeId)
             ).map {
                 VedtaksperiodeDto(
-                    organisasjonsnummer = it.long("orgnummer").toString(),
                     vedtaksperiodeId = it.uuid("vedtaksperiode_id"),
                     generasjoner = emptyList()
                 )
             }.asSingle
         )
     }
-    
-    internal fun TransactionalSession.lagreVedtaksperiode(fødselsnummer: String, vedtaksperiodeDto: VedtaksperiodeDto) {
-        @Language("PostgreSQL")
-        val query = """
-            INSERT INTO vedtak(vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref, snapshot_ref, forkastet)
-            VALUES (:vedtaksperiode_id, :fom, :tom, (SELECT id FROM arbeidsgiver WHERE orgnummer = :organisasjonsnummer), (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer), null, false)
-            ON CONFLICT (vedtaksperiode_id) DO UPDATE SET forkastet = excluded.forkastet
-        """.trimIndent()
 
-        this.run(
-            queryOf(
-                query,
-                mapOf(
-                    "fodselsnummer" to fødselsnummer.toLong(),
-                    "organisasjonsnummer" to vedtaksperiodeDto.organisasjonsnummer.toLong(),
-                    "vedtaksperiode_id" to vedtaksperiodeDto.vedtaksperiodeId,
-                    "fom" to vedtaksperiodeDto.generasjoner.last().fom,
-                    "tom" to vedtaksperiodeDto.generasjoner.last().tom
-                )
-            ).asUpdate
-        )
-    }
 
     internal fun opprett(
         vedtaksperiodeId: UUID,

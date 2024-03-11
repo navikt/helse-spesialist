@@ -7,12 +7,8 @@ import java.time.LocalDate
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.januar
-import no.nav.helse.modell.vedtaksperiode.GenerasjonDto
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.modell.vedtaksperiode.TilstandDto
-import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -37,26 +33,11 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `lagre og finn vedtaksperiode`() {
+    fun `finn vedtaksperiode`() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettSnapshot()
-        sessionOf(dataSource).use {
-            it.transaction {
-                with(vedtakDao) {
-                    it.lagreVedtaksperiode(
-                        fødselsnummer = FNR,
-                        vedtaksperiodeDto = VedtaksperiodeDto(
-                            organisasjonsnummer = ORGNUMMER,
-                            vedtaksperiodeId = VEDTAKSPERIODE,
-                            generasjoner = listOf(
-                                GenerasjonDto(UUID.randomUUID(), VEDTAKSPERIODE, null, UUID.randomUUID(), 1.januar, 1.januar, 31.januar, TilstandDto.Ulåst, emptyList(), emptyList())
-                            )
-                        )
-                    )
-                }
-            }
-        }
+        vedtakDao.opprett(VEDTAKSPERIODE, FOM, TOM, personId, arbeidsgiverId, snapshotId)
         val vedtaksperiode = sessionOf(dataSource).use {
             it.transaction {
                 with(vedtakDao) {
@@ -66,7 +47,6 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         }
         assertNotNull(vedtaksperiode)
         assertEquals(VEDTAKSPERIODE, vedtaksperiode?.vedtaksperiodeId)
-        assertEquals(ORGNUMMER, vedtaksperiode?.organisasjonsnummer)
     }
 
     @Test

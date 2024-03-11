@@ -11,7 +11,6 @@ import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndretCommand
 import no.nav.helse.mediator.meldinger.AvsluttetMedVedtakRiver
 import no.nav.helse.mediator.meldinger.AvsluttetUtenVedtakRiver
 import no.nav.helse.mediator.meldinger.AvvikVurdertRiver
-import no.nav.helse.mediator.meldinger.BehandlingOpprettetRiver
 import no.nav.helse.mediator.meldinger.EndretSkjermetinfoRiver
 import no.nav.helse.mediator.meldinger.GodkjenningsbehovRiver
 import no.nav.helse.mediator.meldinger.GosysOppgaveEndretRiver
@@ -71,7 +70,6 @@ import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
-import no.nav.helse.modell.vedtaksperiode.BehandlingOpprettet
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
@@ -153,7 +151,7 @@ internal class HendelseMediator(
             OppdaterPersonsnapshotRiver(it, this)
             UtbetalingEndretRiver(it, this)
             VedtaksperiodeReberegnetRiver(it, this)
-//            VedtaksperiodeOpprettetRiver(it, this)
+            VedtaksperiodeOpprettetRiver(it, this)
             GosysOppgaveEndretRiver(it, this)
             TilbakedateringBehandletRiver(it, this)
             EndretSkjermetinfoRiver(it, this)
@@ -168,7 +166,6 @@ internal class HendelseMediator(
             AvsluttetMedVedtakRiver(it, this, avviksvurderingDao, generasjonDao)
             AvsluttetUtenVedtakRiver(it, this)
             MidnattRiver(it, this)
-            BehandlingOpprettetRiver(it, this)
         }
     }
 
@@ -242,16 +239,10 @@ internal class HendelseMediator(
 
     internal fun håndter(vedtakFattet: VedtakFattet) {
         val vedtaksperiodeId = vedtakFattet.vedtaksperiodeId()
-        generasjonRepository.brukVedtaksperiode(vedtakFattet.fødselsnummer(), vedtaksperiodeId) {
+        generasjonRepository.brukVedtaksperiode(vedtaksperiodeId) {
             it.vedtakFattet(vedtakFattet.id)
         }
         if (vedtakDao.erSpesialsak(vedtaksperiodeId)) vedtakDao.spesialsakFerdigbehandlet(vedtaksperiodeId)
-    }
-
-    internal fun håndter(melding: BehandlingOpprettet) {
-        personRepository.brukPersonHvisFinnes(melding.fødselsnummer()) {
-            melding.behandleAv(this)
-        }
     }
 
     internal fun håndter(avviksvurdering: AvviksvurderingDto) {
@@ -280,10 +271,10 @@ internal class HendelseMediator(
             avviksvurderingDao.opprettKobling(avviksvurderingId, vilkårsgrunnlagId)
 
         personRepository.brukPersonHvisFinnes(godkjenningsbehov.fødselsnummer()) {
-            mottaSpleisVedtaksperioder(godkjenningsbehov.spleisVedtaksperioder)
+            it.mottaSpleisVedtaksperioder(godkjenningsbehov.spleisVedtaksperioder)
         }
 
-        generasjonRepository.brukVedtaksperiode(godkjenningsbehov.fødselsnummer(), godkjenningsbehov.vedtaksperiodeId()) { vedtaksperiode ->
+        generasjonRepository.brukVedtaksperiode(godkjenningsbehov.vedtaksperiodeId()) { vedtaksperiode ->
             vedtaksperiode.mottaBehandlingsinformasjon(godkjenningsbehov.tags, godkjenningsbehov.spleisBehandlingId)
         }
 
@@ -355,7 +346,7 @@ internal class HendelseMediator(
     fun tilbakedateringBehandlet(fødselsnummer: String, tilbakedateringBehandlet: TilbakedateringBehandlet, context: MessageContext) {
         val syketilfelleStartDato = tilbakedateringBehandlet.syketilfelleStartdato
         personRepository.brukPersonHvisFinnes(fødselsnummer) {
-            behandleTilbakedateringBehandlet(tilbakedateringBehandlet.perioder)
+            it.behandleTilbakedateringBehandlet(tilbakedateringBehandlet.perioder)
         }
         oppgaveDao.finnOppgaveId(fødselsnummer)?.also { oppgaveId ->
             sikkerlogg.info("Fant en oppgave for {}: {}", fødselsnummer, oppgaveId)
