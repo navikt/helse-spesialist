@@ -15,7 +15,7 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
     @Test
     fun `Oppretter første generasjon når vedtaksperioden blir opprettet`() {
         håndterSøknad()
-        håndterVedtaksperiodeOpprettet()
+        spleisOppretterNyBehandling()
         assertGenerasjoner(VEDTAKSPERIODE_ID, 1)
     }
 
@@ -29,7 +29,7 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
     @Test
     fun `Oppretter ikke ny generasjon ved vedtaksperiode_endret dersom det finnes en ubehandlet generasjon fra før av`() {
         håndterSøknad()
-        håndterVedtaksperiodeOpprettet()
+        spleisOppretterNyBehandling()
         håndterVedtaksperiodeEndret()
         assertGenerasjoner(VEDTAKSPERIODE_ID, 1)
     }
@@ -60,7 +60,7 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
     @Test
     fun `Kobler til utbetaling når perioden har fått en ny utbetaling`() {
         håndterSøknad()
-        håndterVedtaksperiodeOpprettet()
+        spleisOppretterNyBehandling()
         håndterVedtaksperiodeNyUtbetaling(utbetalingId = UTBETALING_ID)
         assertGenerasjonerMedUtbetaling(VEDTAKSPERIODE_ID, UTBETALING_ID, 1)
     }
@@ -70,7 +70,7 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
         val gammel = UUID.randomUUID()
         val ny = UUID.randomUUID()
         håndterSøknad()
-        håndterVedtaksperiodeOpprettet()
+        spleisOppretterNyBehandling()
         håndterVedtaksperiodeNyUtbetaling(utbetalingId = gammel)
         håndterVedtaksperiodeNyUtbetaling(utbetalingId = ny)
         assertGenerasjonerMedUtbetaling(VEDTAKSPERIODE_ID, gammel, 0)
@@ -88,7 +88,7 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
     @Test
     fun `Flytter aktive varsler for auu`() {
         håndterSøknad()
-        håndterVedtaksperiodeOpprettet()
+        spleisOppretterNyBehandling()
         håndterVedtakFattet()
         håndterAktivitetsloggNyAktivitet(varselkoder = listOf("RV_IM_1"))
 

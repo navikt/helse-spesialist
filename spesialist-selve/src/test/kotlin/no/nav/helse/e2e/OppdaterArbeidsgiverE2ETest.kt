@@ -26,7 +26,7 @@ internal class OppdaterArbeidsgiverE2ETest : AbstractE2ETest() {
         val vedtaksperiode2Id = randomUUID()
 
         // godkjenningsbehov for forlengelse inneholder et nytt orgnr
-        håndterVedtaksperiodeOpprettet(vedtaksperiodeId = vedtaksperiode2Id)
+        spleisOppretterNyBehandling(vedtaksperiodeId = vedtaksperiode2Id)
         håndterGodkjenningsbehov(
             harOppdatertMetainfo = true,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(

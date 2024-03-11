@@ -29,7 +29,7 @@ internal class KommandohendelseE2ETest : AbstractE2ETest() {
     @Test
     fun `gjør ingen ting om man får tilbake løsning på en avbrutt command context`() {
         håndterSøknad()
-        håndterVedtaksperiodeOpprettet()
+        spleisOppretterNyBehandling()
         håndterGodkjenningsbehov()
         håndterVedtaksperiodeForkastet()
         håndterPersoninfoløsningUtenValidering()

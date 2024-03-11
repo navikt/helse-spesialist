@@ -308,7 +308,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata,
     ) {
         håndterSøknad(fødselsnummer = godkjenningsbehovTestdata.fødselsnummer, organisasjonsnummer = godkjenningsbehovTestdata.organisasjonsnummer)
-        håndterVedtaksperiodeOpprettet(
+        spleisOppretterNyBehandling(
             vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
             fom = godkjenningsbehovTestdata.periodeFom,
             tom = godkjenningsbehovTestdata.periodeTom
@@ -367,7 +367,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             håndterVedtaksperiodeEndret(vedtaksperiodeId = vedtaksperiodeId)
         } else {
             håndterSøknad()
-            håndterVedtaksperiodeOpprettet(vedtaksperiodeId = vedtaksperiodeId)
+            spleisOppretterNyBehandling(vedtaksperiodeId = vedtaksperiodeId)
         }
         håndterVedtaksperiodeNyUtbetaling(vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshot(
@@ -541,7 +541,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         assertArbeidsgiverEksisterer(organisasjonsnummer)
     }
 
-    protected fun håndterVedtaksperiodeOpprettet(
+    protected fun spleisOppretterNyBehandling(
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
@@ -549,6 +549,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         fom: LocalDate = 1.januar,
         tom: LocalDate = 31.januar,
     ) {
+        // TODO: Dette må refaktoreres ytterligere slik at man kan simulere at Spleis sender inn en revurdering
+        // P.t. gjenbrukes behandlingId for en bestemt vedtaksperiode
         if (behandlinger[vedtaksperiodeId] != null) return
         val nySpleisBehandlingId = UUID.randomUUID()
         behandlinger[vedtaksperiodeId] = nySpleisBehandlingId
