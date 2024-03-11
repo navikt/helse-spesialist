@@ -25,7 +25,6 @@ import no.nav.helse.modell.HendelseDao.Hendelsetype.UTBETALING_ENDRET
 import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAKSPERIODE_ENDRET
 import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAKSPERIODE_FORKASTET
 import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAKSPERIODE_NY_UTBETALING
-import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAKSPERIODE_OPPRETTET
 import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAKSPERIODE_REBEREGNET
 import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAK_FATTET
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
@@ -43,7 +42,6 @@ import no.nav.helse.modell.vedtaksperiode.NyeVarsler
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeEndret
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
-import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOpprettet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnet
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.modell.vedtaksperiode.vedtak.VedtakFattet
@@ -239,7 +237,6 @@ internal class HendelseDao(private val dataSource: DataSource) {
         is EndretEgenAnsattStatus -> ENDRET_EGEN_ANSATT_STATUS
         is VedtakFattet -> VEDTAK_FATTET
         is NyeVarsler -> NYE_VARSLER
-        is VedtaksperiodeOpprettet -> VEDTAKSPERIODE_OPPRETTET
         is SøknadSendt -> SØKNAD_SENDT
         is VedtaksperiodeNyUtbetaling -> VEDTAKSPERIODE_NY_UTBETALING
         is Sykefraværstilfeller -> SYKEFRAVÆRSTILFELLER

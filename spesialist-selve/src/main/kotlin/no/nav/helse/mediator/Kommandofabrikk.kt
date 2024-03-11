@@ -50,14 +50,12 @@ import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovCommand
-import no.nav.helse.modell.vedtaksperiode.OpprettVedtaksperiodeCommand
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeEndret
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeEndretCommand
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastetCommand
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetalingCommand
-import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeOpprettet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnetCommand
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
@@ -162,21 +160,6 @@ internal class Kommandofabrikk(
             opprettet = hendelse.opprettet,
             egenAnsattDao = egenAnsattDao,
             oppgaveMediator = oppgaveMediator
-        )
-    }
-
-    fun opprettVedtaksperiode(fødselsnummer: String, hendelse: VedtaksperiodeOpprettet): OpprettVedtaksperiodeCommand {
-        return OpprettVedtaksperiodeCommand(
-            id = hendelse.id,
-            vedtaksperiodeId = hendelse.vedtaksperiodeId(),
-            fødselsnummer = fødselsnummer,
-            generasjon = førsteGenerasjon(hendelse.vedtaksperiodeId(), hendelse.fom, hendelse.tom, hendelse.skjæringstidspunkt),
-            organisasjonsnummer = hendelse.organisasjonsnummer,
-            fom = hendelse.fom,
-            tom = hendelse.tom,
-            personDao = personDao,
-            arbeidsgiverDao = arbeidsgiverDao,
-            vedtakDao = vedtakDao
         )
     }
 
