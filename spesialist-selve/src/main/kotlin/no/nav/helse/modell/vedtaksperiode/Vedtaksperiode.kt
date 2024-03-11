@@ -27,6 +27,11 @@ internal class Vedtaksperiode(
         gjeldendeGenerasjon.deaktiverVarsel(varselkode)
     }
 
+    internal fun håndter(spleisVedtaksperioder: List<SpleisVedtaksperiode>) {
+        val spleisVedtaksperiode = spleisVedtaksperioder.find { it.erRelevant(vedtaksperiodeId) } ?: return
+        gjeldendeGenerasjon.håndter(spleisVedtaksperiode)
+    }
+
     internal fun mottaBehandlingsinformasjon(tags: List<String>, spleisBehandlingId: UUID) =
         gjeldendeGenerasjon.oppdaterBehandlingsinformasjon(tags, spleisBehandlingId)
 

@@ -90,6 +90,12 @@ internal class Generasjon private constructor(
         tilstand.tidslinjeendring(this, fom, tom, skjæringstidspunkt, hendelseId)
     }
 
+    internal fun håndter(spleisVedtaksperiode: SpleisVedtaksperiode) {
+        this.periode = Periode(spleisVedtaksperiode.fom, spleisVedtaksperiode.tom)
+        this.skjæringstidspunkt = spleisVedtaksperiode.skjæringstidspunkt
+        this.spleisBehandlingId = spleisVedtaksperiode.spleisBehandlingId
+    }
+
     internal fun erSpesialsakSomKanAutomatiseres() = !varsler.inneholderSvartelistedeVarsler()
 
     internal fun håndterVedtaksperiodeEndret(
@@ -508,12 +514,6 @@ internal class Generasjon private constructor(
 
         internal fun List<Generasjon>.erTilbakedatert(vedtaksperiodeId: UUID): Boolean {
             return overlapperMedEllerTidligereEnn(vedtaksperiodeId).any { it.erTilbakedatert() }
-        }
-
-        internal fun List<Generasjon>.alleTilbakedaterteVedtaksperioder(vedtaksperiodeId: UUID): List<UUID> {
-            return overlapperMedEllerTidligereEnn(vedtaksperiodeId)
-                .filter { it.erTilbakedatert() }
-                .map { it.vedtaksperiodeId }
         }
 
         internal fun List<Generasjon>.deaktiver(varsel: Varsel) {

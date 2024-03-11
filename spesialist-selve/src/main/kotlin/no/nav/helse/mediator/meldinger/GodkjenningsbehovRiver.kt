@@ -40,8 +40,11 @@ internal class GodkjenningsbehovRiver(
                     "Godkjenning.inntektskilde",
                     "Godkjenning.kanAvvises",
                     "Godkjenning.vilkårsgrunnlagId",
-                    "Godkjenning.behandlingId"
+                    "Godkjenning.behandlingId",
                 )
+                it.requireArray("Godkjenning.perioderMedSammeSkjæringstidspunkt") {
+                    requireKey("vedtaksperiodeId", "behandlingId", "fom", "tom")
+                }
                 it.interestedIn("avviksvurderingId")
                 it.requireAny("Godkjenning.utbetalingtype", Utbetalingtype.gyldigeTyper.values())
                 it.interestedIn("Godkjenning.orgnummereMedRelevanteArbeidsforhold", "Godkjenning.tags")

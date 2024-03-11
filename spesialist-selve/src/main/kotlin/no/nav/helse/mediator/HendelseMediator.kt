@@ -270,6 +270,10 @@ internal class HendelseMediator(
         if (avviksvurderingId != null)
             avviksvurderingDao.opprettKobling(avviksvurderingId, vilkårsgrunnlagId)
 
+        personRepository.brukPersonHvisFinnes(godkjenningsbehov.fødselsnummer()) {
+            it.mottaSpleisVedtaksperioder(godkjenningsbehov.spleisVedtaksperioder)
+        }
+
         generasjonRepository.brukVedtaksperiode(godkjenningsbehov.vedtaksperiodeId()) { vedtaksperiode ->
             vedtaksperiode.mottaBehandlingsinformasjon(godkjenningsbehov.tags, godkjenningsbehov.spleisBehandlingId)
         }

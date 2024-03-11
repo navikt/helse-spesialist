@@ -564,6 +564,19 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     }
 
     @Test
+    fun `oppdaterer fom, tom, skjæringstidspunkt, behandlingId`() {
+        val behandlingId = UUID.randomUUID()
+        val generasjon = generasjon(fom = 1.januar, tom = 31.januar, skjæringstidspunkt = 1.januar)
+        generasjon.håndter(SpleisVedtaksperiode(UUID.randomUUID(), behandlingId, 2.januar, 30.januar, 2.januar))
+        val dto = generasjon.toDto()
+
+        assertEquals(2.januar, dto.fom)
+        assertEquals(30.januar, dto.tom)
+        assertEquals(2.januar, dto.skjæringstidspunkt)
+        assertEquals(behandlingId, dto.spleisBehandlingId)
+    }
+
+    @Test
     fun `referential equals`() {
         val generasjon = generasjon(UUID.randomUUID(), UUID.randomUUID())
         assertEquals(generasjon, generasjon)

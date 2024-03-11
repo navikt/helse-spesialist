@@ -244,7 +244,15 @@ internal object Testmeldingfabrikk {
                     "kanAvvises" to kanAvvises,
                     "vilkårsgrunnlagId" to vilkårsgrunnlagId,
                     "behandlingId" to spleisBehandlingId,
-                    "tags" to tags
+                    "tags" to tags,
+                    "perioderMedSammeSkjæringstidspunkt" to listOf(
+                        mapOf(
+                            "fom" to "$periodeFom",
+                            "tom" to "$periodeTom",
+                            "vedtaksperiodeId" to "$vedtaksperiodeId",
+                            "behandlingId" to "$spleisBehandlingId"
+                        )
+                    )
                 ),
             ).apply {
                 if (avviksvurderingId != null) {

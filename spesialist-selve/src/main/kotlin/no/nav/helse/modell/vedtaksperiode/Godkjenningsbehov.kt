@@ -46,9 +46,20 @@ import no.nav.helse.modell.varsel.VurderEnhetUtland
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.modell.vergemal.VurderVergemålOgFullmakt
 import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
+
+data class SpleisVedtaksperiode(
+    val vedtaksperiodeId: UUID,
+    val spleisBehandlingId: UUID,
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val skjæringstidspunkt: LocalDate
+) {
+    internal fun erRelevant(vedtaksperiodeId: UUID): Boolean = this.vedtaksperiodeId == vedtaksperiodeId
+}
 
 internal class Godkjenningsbehov private constructor(
     override val id: UUID,
@@ -56,6 +67,7 @@ internal class Godkjenningsbehov private constructor(
     val aktørId: String,
     val organisasjonsnummer: String,
     private val vedtaksperiodeId: UUID,
+    val spleisVedtaksperioder: List<SpleisVedtaksperiode>,
     val utbetalingId: UUID,
     val spleisBehandlingId: UUID,
     val tags: List<String>,
@@ -84,6 +96,15 @@ internal class Godkjenningsbehov private constructor(
         periodeTom = LocalDate.parse(packet["Godkjenning.periodeTom"].asText()),
         skjæringstidspunkt = LocalDate.parse(packet["Godkjenning.skjæringstidspunkt"].asText()),
         vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText()),
+        spleisVedtaksperioder = packet["Godkjenning.perioderMedSammeSkjæringstidspunkt"].map { periodeNode ->
+            SpleisVedtaksperiode(
+                vedtaksperiodeId = periodeNode["vedtaksperiodeId"].asUUID(),
+                spleisBehandlingId = periodeNode["behandlingId"].asUUID(),
+                fom = periodeNode["fom"].asLocalDate(),
+                tom = periodeNode["tom"].asLocalDate(),
+                skjæringstidspunkt = packet["Godkjenning.skjæringstidspunkt"].asLocalDate()
+            )
+        },
         spleisBehandlingId = UUID.fromString(packet["Godkjenning.behandlingId"].asText()),
         tags = packet["Godkjenning.tags"].takeUnless(JsonNode::isMissingOrNull)?.map { it.asText() }?.toList() ?: emptyList<String>(),
         utbetalingId = UUID.fromString(packet["utbetalingId"].asText()),
@@ -106,6 +127,15 @@ internal class Godkjenningsbehov private constructor(
         periodeFom = LocalDate.parse(jsonNode.path("Godkjenning").path("periodeFom").asText()),
         periodeTom = LocalDate.parse(jsonNode.path("Godkjenning").path("periodeTom").asText()),
         vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText()),
+        spleisVedtaksperioder = jsonNode.path("Godkjenning").path("perioderMedSammeSkjæringstidspunkt").map { periodeNode ->
+            SpleisVedtaksperiode(
+                vedtaksperiodeId = periodeNode["vedtaksperiodeId"].asUUID(),
+                spleisBehandlingId = periodeNode["behandlingId"].asUUID(),
+                fom = periodeNode["fom"].asLocalDate(),
+                tom = periodeNode["tom"].asLocalDate(),
+                skjæringstidspunkt = jsonNode.path("Godkjenning").path("skjæringstidspunkt").asLocalDate()
+            )
+        },
         spleisBehandlingId = UUID.fromString(jsonNode.path("Godkjenning").path("behandlingId").asText()),
         tags = jsonNode.path("Godkjenning").path("tags").takeUnless(JsonNode::isMissingOrNull)?.map { it.asText() }?.toList() ?: emptyList<String>(),
         utbetalingId = UUID.fromString(jsonNode.path("utbetalingId").asText()),

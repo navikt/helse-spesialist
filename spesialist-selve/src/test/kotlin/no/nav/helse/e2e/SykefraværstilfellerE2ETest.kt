@@ -61,8 +61,8 @@ internal class SykefraværstilfellerE2ETest : AbstractE2ETest() {
         }
         finnFørsteGenerasjon(vedtaksperiodeId2).also { (skjæringstidspunkt, fom, tom) ->
             assertEquals(1.januar, skjæringstidspunkt)
-            assertEquals(1.januar ,fom)
-            assertEquals(31.januar ,tom)
+            assertEquals(6.januar, fom)
+            assertEquals(10.januar, tom)
         }
         finnSisteGenerasjon(vedtaksperiodeId2).also { (skjæringstidspunkt, fom, tom) ->
             assertEquals(15.januar, skjæringstidspunkt)
