@@ -7,6 +7,7 @@ import no.nav.helse.modell.varsel.VarselStatusDto
 internal class Vedtaksperiode private constructor(
     private val vedtaksperiodeId: UUID,
     private val organisasjonsnummer: String,
+    private var forkastet: Boolean,
     generasjoner: List<Generasjon>
 ) {
     private val generasjoner = generasjoner.toMutableList()
@@ -20,6 +21,7 @@ internal class Vedtaksperiode private constructor(
         return VedtaksperiodeDto(
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
+            forkastet = forkastet,
             generasjoner = generasjoner.map { it.toDto() })
     }
 
@@ -47,6 +49,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun vedtakFattet(meldingId: UUID) {
+        if (forkastet) return
         gjeldendeGenerasjon.håndterVedtakFattet(meldingId)
     }
 
@@ -66,19 +69,22 @@ internal class Vedtaksperiode private constructor(
                         tom = spleisBehandling.tom,
                         skjæringstidspunkt = spleisBehandling.fom // Spleis sender oss ikke skjæringstidspunkt på dette tidspunktet
                     )
-                )
+                ),
+                forkastet = false
             )
         }
 
         fun gjenopprett(
             organisasjonsnummer: String,
             vedtaksperiodeId: UUID,
+            forkastet: Boolean,
             generasjoner: List<GenerasjonDto>,
         ): Vedtaksperiode {
             check(generasjoner.isNotEmpty()) { "En vedtaksperiode uten generasjoner skal ikke være mulig" }
             return Vedtaksperiode(
                 organisasjonsnummer = organisasjonsnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
+                forkastet = forkastet,
                 generasjoner = generasjoner.map { it.tilGenerasjon() }
             )
         }

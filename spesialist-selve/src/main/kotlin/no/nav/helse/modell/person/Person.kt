@@ -36,7 +36,7 @@ class Person private constructor(
         fun gjenopprett(fødselsnummer: String, vedtaksperioder: List<VedtaksperiodeDto>): Person {
             return Person(
                 fødselsnummer,
-                vedtaksperioder.map { Vedtaksperiode.gjenopprett(it.organisasjonsnummer, it.vedtaksperiodeId, it.generasjoner) }
+                vedtaksperioder.map { Vedtaksperiode.gjenopprett(it.organisasjonsnummer, it.vedtaksperiodeId, it.forkastet, it.generasjoner) }
             )
         }
     }

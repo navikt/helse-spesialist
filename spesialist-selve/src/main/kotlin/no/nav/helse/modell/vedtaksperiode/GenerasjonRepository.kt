@@ -22,7 +22,7 @@ internal class GenerasjonRepository(private val dataSource: DataSource): IVedtak
         sessionOf(dataSource).use { session ->
             session.transaction { tx ->
                 val vedtaksperiode = tx.finnVedtaksperiode(vedtaksperiodeId).let {
-                    Vedtaksperiode.gjenopprett(it.organisasjonsnummer, it.vedtaksperiodeId, it.generasjoner)
+                    Vedtaksperiode.gjenopprett(it.organisasjonsnummer, it.vedtaksperiodeId, it.forkastet, it.generasjoner)
                 }
                 block(vedtaksperiode)
                 tx.lagreVedtaksperiode(fødselsnummer, vedtaksperiode.toDto())

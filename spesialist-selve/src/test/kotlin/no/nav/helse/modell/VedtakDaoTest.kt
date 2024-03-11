@@ -49,6 +49,7 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
                         vedtaksperiodeDto = VedtaksperiodeDto(
                             organisasjonsnummer = ORGNUMMER,
                             vedtaksperiodeId = VEDTAKSPERIODE,
+                            forkastet = false,
                             generasjoner = listOf(
                                 GenerasjonDto(UUID.randomUUID(), VEDTAKSPERIODE, null, UUID.randomUUID(), 1.januar, 1.januar, 31.januar, TilstandDto.Ulåst, emptyList(), emptyList())
                             )
@@ -67,6 +68,42 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         assertNotNull(vedtaksperiode)
         assertEquals(VEDTAKSPERIODE, vedtaksperiode?.vedtaksperiodeId)
         assertEquals(ORGNUMMER, vedtaksperiode?.organisasjonsnummer)
+        assertEquals(false, vedtaksperiode?.forkastet)
+    }
+
+    @Test
+    fun `finn forkastet vedtaksperiode`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettSnapshot()
+        sessionOf(dataSource).use {
+            it.transaction {
+                with(vedtakDao) {
+                    it.lagreVedtaksperiode(
+                        fødselsnummer = FNR,
+                        vedtaksperiodeDto = VedtaksperiodeDto(
+                            organisasjonsnummer = ORGNUMMER,
+                            vedtaksperiodeId = VEDTAKSPERIODE,
+                            forkastet = true,
+                            generasjoner = listOf(
+                                GenerasjonDto(UUID.randomUUID(), VEDTAKSPERIODE, null, UUID.randomUUID(), 1.januar, 1.januar, 31.januar, TilstandDto.Ulåst, emptyList(), emptyList())
+                            )
+                        )
+                    )
+                }
+            }
+        }
+        val vedtaksperiode = sessionOf(dataSource).use {
+            it.transaction {
+                with(vedtakDao) {
+                    it.finnVedtaksperiode(VEDTAKSPERIODE)
+                }
+            }
+        }
+        assertNotNull(vedtaksperiode)
+        assertEquals(VEDTAKSPERIODE, vedtaksperiode?.vedtaksperiodeId)
+        assertEquals(ORGNUMMER, vedtaksperiode?.organisasjonsnummer)
+        assertEquals(true, vedtaksperiode?.forkastet)
     }
 
     @Test

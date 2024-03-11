@@ -55,7 +55,7 @@ class VedtaksperiodeTest {
     @Test
     fun `Kan ikke gjenopprette vedtaksperiode uten generasjoner`() {
         assertThrows<IllegalStateException> {
-            Vedtaksperiode.gjenopprett("987654321", UUID.randomUUID(), emptyList())
+            Vedtaksperiode.gjenopprett("987654321", UUID.randomUUID(), false, emptyList())
         }
     }
 
