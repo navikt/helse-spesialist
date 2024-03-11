@@ -1,12 +1,12 @@
 package no.nav.helse.modell.vedtaksperiode
 
-import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.VarselStatusDto
 
 internal class Vedtaksperiode private constructor(
     private val vedtaksperiodeId: UUID,
+    private val organisasjonsnummer: String,
     generasjoner: List<Generasjon>
 ) {
     private val generasjoner = generasjoner.toMutableList()
@@ -14,8 +14,13 @@ internal class Vedtaksperiode private constructor(
     private val fom get() = gjeldendeGenerasjon.fom()
     private val tom get() = gjeldendeGenerasjon.tom()
 
+    fun vedtaksperiodeId() = vedtaksperiodeId
+
     internal fun toDto(): VedtaksperiodeDto {
-        return VedtaksperiodeDto(vedtaksperiodeId, generasjoner.map { it.toDto() })
+        return VedtaksperiodeDto(
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            generasjoner = generasjoner.map { it.toDto() })
     }
 
     internal fun behandleTilbakedateringGodkjent(perioder: List<Periode>) {
@@ -33,6 +38,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun nySpleisBehandling(spleisBehandling: SpleisBehandling) {
+        if (!spleisBehandling.erRelevantFor(vedtaksperiodeId)) return
         gjeldendeGenerasjon.nySpleisBehandling(this, spleisBehandling)
     }
 
@@ -48,24 +54,30 @@ internal class Vedtaksperiode private constructor(
         gjeldendeGenerasjon.oppdaterBehandlingsinformasjon(tags, spleisBehandlingId)
 
     companion object {
-        fun nyVedtaksperiode(
-            vedtaksperiodeId: UUID,
-            fom: LocalDate,
-            tom: LocalDate,
-            skjæringstidspunkt: LocalDate,
-        ): Vedtaksperiode {
+        fun nyVedtaksperiode(spleisBehandling: SpleisBehandling): Vedtaksperiode {
             return Vedtaksperiode(
-                vedtaksperiodeId = vedtaksperiodeId,
-                generasjoner = listOf(Generasjon(UUID.randomUUID(), vedtaksperiodeId, fom, tom, skjæringstidspunkt))
+                vedtaksperiodeId = spleisBehandling.vedtaksperiodeId,
+                organisasjonsnummer = spleisBehandling.organisasjonsnummer,
+                generasjoner = listOf(
+                    Generasjon(
+                        id = spleisBehandling.vedtaksperiodeId,
+                        vedtaksperiodeId = spleisBehandling.vedtaksperiodeId,
+                        fom = spleisBehandling.fom,
+                        tom = spleisBehandling.tom,
+                        skjæringstidspunkt = spleisBehandling.fom // Spleis sender oss ikke skjæringstidspunkt på dette tidspunktet
+                    )
+                )
             )
         }
 
         fun gjenopprett(
+            organisasjonsnummer: String,
             vedtaksperiodeId: UUID,
             generasjoner: List<GenerasjonDto>,
         ): Vedtaksperiode {
             check(generasjoner.isNotEmpty()) { "En vedtaksperiode uten generasjoner skal ikke være mulig" }
             return Vedtaksperiode(
+                organisasjonsnummer = organisasjonsnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
                 generasjoner = generasjoner.map { it.tilGenerasjon() }
             )

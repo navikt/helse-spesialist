@@ -170,6 +170,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     )
     private val avviksvurderingTestdata = AvviksvurderingTestdata()
     private lateinit var utbetalingId: UUID
+    private val behandlinger = mutableMapOf<UUID, UUID>()
     internal val snapshotClient = mockk<SnapshotClient>()
     private val testRapid = TestRapid()
     internal val inspektør get() = testRapid.inspektør
@@ -310,8 +311,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         håndterVedtaksperiodeOpprettet(
             vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
             fom = godkjenningsbehovTestdata.periodeFom,
-            tom = godkjenningsbehovTestdata.periodeTom,
-            skjæringstidspunkt = godkjenningsbehovTestdata.skjæringstidspunkt
+            tom = godkjenningsbehovTestdata.periodeTom
         )
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshot(
             versjon = snapshotversjon,
@@ -548,16 +548,18 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
         fom: LocalDate = 1.januar,
         tom: LocalDate = 31.januar,
-        skjæringstidspunkt: LocalDate = fom,
     ) {
-        sisteMeldingId = meldingssender.sendVedtaksperiodeOpprettet(
+        if (behandlinger[vedtaksperiodeId] != null) return
+        val nySpleisBehandlingId = UUID.randomUUID()
+        behandlinger[vedtaksperiodeId] = nySpleisBehandlingId
+        sisteMeldingId = meldingssender.sendBehandlingOpprettet(
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             fom = fom,
             tom = tom,
-            skjæringstidspunkt = skjæringstidspunkt
+            spleisBehandlingId = nySpleisBehandlingId
         )
         assertIngenEtterspurteBehov()
         assertVedtaksperiodeEksisterer(vedtaksperiodeId)

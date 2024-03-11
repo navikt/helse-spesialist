@@ -1,6 +1,7 @@
 package no.nav.helse.modell.person
 
 import no.nav.helse.modell.vedtaksperiode.Periode
+import no.nav.helse.modell.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeDto
@@ -24,11 +25,18 @@ class Person private constructor(
         vedtaksperioder.forEach { it.håndter(perioder) }
     }
 
+    fun nySpleisBehandling(spleisBehandling: SpleisBehandling) {
+        vedtaksperioder
+            .find { spleisBehandling.erRelevantFor(it.vedtaksperiodeId()) }
+            ?.nySpleisBehandling(spleisBehandling)
+            ?: vedtaksperioder.add(Vedtaksperiode.nyVedtaksperiode(spleisBehandling))
+    }
+
     companion object {
         fun gjenopprett(fødselsnummer: String, vedtaksperioder: List<VedtaksperiodeDto>): Person {
             return Person(
                 fødselsnummer,
-                vedtaksperioder.map { Vedtaksperiode.gjenopprett(it.vedtaksperiodeId, it.generasjoner) }
+                vedtaksperioder.map { Vedtaksperiode.gjenopprett(it.organisasjonsnummer, it.vedtaksperiodeId, it.generasjoner) }
             )
         }
     }

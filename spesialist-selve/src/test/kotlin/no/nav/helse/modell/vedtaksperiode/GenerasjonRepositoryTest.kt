@@ -37,7 +37,7 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
     @Test
     fun `Exception om vedtaksperioden ikke finnes`() {
         assertThrows<IllegalStateException> {
-            repository.brukVedtaksperiode(UUID.randomUUID()) {}
+            repository.brukVedtaksperiode("1234567891011", UUID.randomUUID()) {}
         }
     }
 
