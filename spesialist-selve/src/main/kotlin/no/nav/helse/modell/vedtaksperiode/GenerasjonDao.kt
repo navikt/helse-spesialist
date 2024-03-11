@@ -157,7 +157,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
         val query = """
             INSERT INTO selve_varsel (unik_id, kode, vedtaksperiode_id, generasjon_ref, definisjon_ref, opprettet, status_endret_ident, status_endret_tidspunkt, status) 
             VALUES (:unik_id, :kode, :vedtaksperiode_id, (SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = :generasjon_id), null, :opprettet, null, null, :status)
-            ON CONFLICT (generasjon_ref, kode) DO UPDATE SET status = excluded.status
+            ON CONFLICT (generasjon_ref, kode) DO UPDATE SET status = excluded.status, generasjon_ref = excluded.generasjon_ref
         """.trimIndent()
 
         this.run(

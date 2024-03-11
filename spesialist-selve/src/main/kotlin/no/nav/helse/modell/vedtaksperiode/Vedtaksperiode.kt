@@ -5,7 +5,7 @@ import java.util.UUID
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.VarselStatusDto
 
-internal class Vedtaksperiode(
+internal class Vedtaksperiode private constructor(
     private val vedtaksperiodeId: UUID,
     generasjoner: List<Generasjon>
 ) {
@@ -30,6 +30,14 @@ internal class Vedtaksperiode(
     internal fun håndter(spleisVedtaksperioder: List<SpleisVedtaksperiode>) {
         val spleisVedtaksperiode = spleisVedtaksperioder.find { it.erRelevant(vedtaksperiodeId) } ?: return
         gjeldendeGenerasjon.håndter(spleisVedtaksperiode)
+    }
+
+    internal fun nySpleisBehandling(spleisBehandling: SpleisBehandling) {
+        gjeldendeGenerasjon.nySpleisBehandling(this, spleisBehandling)
+    }
+
+    internal fun nyGenerasjon(generasjon: Generasjon) {
+        generasjoner.addLast(generasjon)
     }
 
     internal fun vedtakFattet(meldingId: UUID) {
