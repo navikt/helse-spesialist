@@ -33,5 +33,6 @@ class LoggingGraphQLRequestHandler(graphQL: GraphQL) : GraphQLRequestHandler(gra
     private fun auditLog(graphQLContext: GraphQLContext, operationName: String, personId: String) {
         val saksbehandlerIdent = graphQLContext.get<String>(ContextValues.SAKSBEHANDLER_IDENT.key)
         auditLog.info("end=${System.currentTimeMillis()} suid=$saksbehandlerIdent duid=$personId operation=$operationName")
+        sikkerLogg.debug("audit-logget, operationName: $operationName og ident: $saksbehandlerIdent")
     }
 }
