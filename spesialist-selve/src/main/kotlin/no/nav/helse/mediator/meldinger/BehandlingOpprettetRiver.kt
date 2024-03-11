@@ -16,6 +16,7 @@ internal class BehandlingOpprettetRiver(
         River(rapidsConnection).apply {
             validate {
                 it.demandValue("@event_name", "behandling_opprettet")
+                it.rejectValues("organisasjonsnummer", listOf("ARBEIDSLEDIG", "SELVSTENDIG", "FRILANS"))
                 it.requireKey(
                     "@id",
                     "vedtaksperiodeId",
