@@ -36,8 +36,8 @@ class BehandlingOpprettet private constructor(
         organisasjonsnummer = packet["organisasjonsnummer"].asText(),
         vedtaksperiodeId = packet["vedtaksperiodeId"].asUUID(),
         spleisBehandlingId = packet["behandlingId"].asUUID(),
-        fom = packet["fom"].takeUnless { it.isMissingOrNull() }?.asLocalDate() ?: LocalDate.MIN,
-        tom = packet["tom"].takeUnless { it.isMissingOrNull() }?.asLocalDate() ?: LocalDate.MAX,
+        fom = packet["fom"].takeUnless { it.isMissingOrNull() }?.asLocalDate() ?: LocalDate.EPOCH,
+        tom = packet["tom"].takeUnless { it.isMissingOrNull() }?.asLocalDate() ?: LocalDate.EPOCH,
         json = packet.toJson()
     )
 
