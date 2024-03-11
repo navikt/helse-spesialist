@@ -7,6 +7,7 @@ import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.person.Person
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
+import no.nav.helse.rapids_rivers.isMissingOrNull
 
 data class SpleisBehandling(
     val organisasjonsnummer: String,
@@ -35,8 +36,8 @@ class BehandlingOpprettet private constructor(
         organisasjonsnummer = packet["organisasjonsnummer"].asText(),
         vedtaksperiodeId = packet["vedtaksperiodeId"].asUUID(),
         spleisBehandlingId = packet["behandlingId"].asUUID(),
-        fom = packet["fom"].asLocalDate(),
-        tom = packet["tom"].asLocalDate(),
+        fom = packet["fom"].takeUnless { it.isMissingOrNull() }?.asLocalDate() ?: LocalDate.MIN,
+        tom = packet["tom"].takeUnless { it.isMissingOrNull() }?.asLocalDate() ?: LocalDate.MAX,
         json = packet.toJson()
     )
 

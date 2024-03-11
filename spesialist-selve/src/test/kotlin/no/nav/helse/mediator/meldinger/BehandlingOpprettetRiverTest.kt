@@ -11,7 +11,6 @@ import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.vedtaksperiode.BehandlingOpprettet
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -39,6 +38,22 @@ internal class BehandlingOpprettetRiverTest {
                 organisasjonsnummer = ORGNR,
                 vedtaksperiodeId = UUID.randomUUID(),
                 spleisBehandlingId = UUID.randomUUID()
+            )
+        )
+        verify(exactly = 1) { mediator.håndter(any<BehandlingOpprettet>()) }
+    }
+
+    @Test
+    fun `behandler behandling_opprettet uten fom og tom`() {
+        rapid.sendTestMessage(
+            Testmeldingfabrikk.lagBehandlingOpprettet(
+                aktørId = AKTØR,
+                fødselsnummer = FØDSELSNUMMER,
+                organisasjonsnummer = ORGNR,
+                vedtaksperiodeId = UUID.randomUUID(),
+                spleisBehandlingId = UUID.randomUUID(),
+                fom = null,
+                tom = null
             )
         )
         verify(exactly = 1) { mediator.håndter(any<BehandlingOpprettet>()) }

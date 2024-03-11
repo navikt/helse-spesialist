@@ -23,9 +23,8 @@ internal class BehandlingOpprettetRiver(
                     "behandlingId",
                     "fødselsnummer",
                     "organisasjonsnummer",
-                    "fom",
-                    "tom"
                 )
+                it.interestedIn("fom", "tom")
             }
         }.register(this)
     }
