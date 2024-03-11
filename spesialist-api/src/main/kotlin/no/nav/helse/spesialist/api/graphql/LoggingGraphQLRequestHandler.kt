@@ -21,7 +21,8 @@ class LoggingGraphQLRequestHandler(graphQL: GraphQL) : GraphQLRequestHandler(gra
             graphQLRequest.operationName.also { operationName ->
                 if (operationName != null) {
                     sikkerLogg.trace("GraphQL-kall mottatt, operationName: $operationName")
-                    graphQLRequest.variables?.get("fnr")?.let { auditLog(graphQLContext, operationName, it as String) }
+                    val personId = graphQLRequest.variables?.get("fnr") ?: graphQLRequest.variables?.get("aktorId")
+                    if (personId != null) auditLog(graphQLContext, operationName, personId as String)
                 } else if (!graphQLRequest.query.contains("query IntrospectionQuery"))
                     sikkerLogg.warn("GraphQL-kall uten navngitt query, bør fikses i kallende kode. Requesten:\n${graphQLRequest.query}")
             }
@@ -32,6 +33,5 @@ class LoggingGraphQLRequestHandler(graphQL: GraphQL) : GraphQLRequestHandler(gra
     private fun auditLog(graphQLContext: GraphQLContext, operationName: String, personId: String) {
         val saksbehandlerIdent = graphQLContext.get<String>(ContextValues.SAKSBEHANDLER_IDENT.key)
         auditLog.info("end=${System.currentTimeMillis()} suid=$saksbehandlerIdent duid=$personId operation=$operationName")
-        sikkerLogg.debug("audit-logget noe 👍")
     }
 }
