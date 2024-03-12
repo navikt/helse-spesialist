@@ -1,5 +1,6 @@
 package no.nav.helse.modell.vedtaksperiode
 
+import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.SnapshotDao
@@ -21,6 +22,12 @@ internal class VedtaksperiodeEndret(
         vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText()),
         fødselsnummer = packet["fødselsnummer"].asText(),
         json = packet.toJson()
+    )
+    internal constructor(jsonNode: JsonNode): this(
+        id = UUID.fromString(jsonNode["@id"].asText()),
+        vedtaksperiodeId = UUID.fromString(jsonNode["vedtaksperiodeId"].asText()),
+        fødselsnummer = jsonNode["fødselsnummer"].asText(),
+        json = jsonNode.toString()
     )
 
     override fun fødselsnummer() = fødselsnummer
