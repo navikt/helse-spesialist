@@ -20,7 +20,6 @@ import no.nav.helse.mediator.meldinger.NyeVarslerRiver
 import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshotRiver
 import no.nav.helse.mediator.meldinger.OverstyringIgangsattRiver
 import no.nav.helse.mediator.meldinger.Personmelding
-import no.nav.helse.mediator.meldinger.SykefraværstilfellerRiver
 import no.nav.helse.mediator.meldinger.SøknadSendtRiver
 import no.nav.helse.mediator.meldinger.TilbakedateringBehandletRiver
 import no.nav.helse.mediator.meldinger.UtbetalingAnnullertRiver
@@ -64,7 +63,6 @@ import no.nav.helse.modell.person.OppdaterPersonsnapshot
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.PersonRepository
 import no.nav.helse.modell.person.SøknadSendt
-import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfeller
 import no.nav.helse.modell.utbetaling.UtbetalingAnnullert
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
@@ -160,7 +158,6 @@ internal class HendelseMediator(
             AvvikVurdertRiver(it, this)
             VarseldefinisjonRiver(it, this)
             VedtaksperiodeNyUtbetalingRiver(it, this)
-            SykefraværstilfellerRiver(it, this)
             MetrikkRiver(it)
             AvsluttetMedVedtakRiver(it, this, avviksvurderingDao, generasjonDao)
             AvsluttetUtenVedtakRiver(it, this)
@@ -213,19 +210,6 @@ internal class HendelseMediator(
             val sykefraværstilfelleMediator = SykefraværstilfelleMediator(rapidsConnection)
             generasjon.registrer(sykefraværstilfelleMediator)
             avsluttetUtenVedtakMessage.sendInnTil(generasjon)
-        }
-    }
-
-    internal fun håndter(sykefraværstilfeller: Sykefraværstilfeller) {
-        sikkerlogg.info(
-            "oppdaterer sykefraværstilfeller for {}, {}",
-            keyValue("aktørId", sykefraværstilfeller.aktørId),
-            keyValue("fødselsnummer", sykefraværstilfeller.fødselsnummer())
-        )
-        sykefraværstilfeller.vedtaksperiodeOppdateringer.forEach { oppdatering ->
-            generasjonRepository.brukGenerasjonHvisFinnes(oppdatering.vedtaksperiodeId) {
-                it.håndterTidslinjeendring(oppdatering.fom, oppdatering.tom, oppdatering.skjæringstidspunkt, sykefraværstilfeller.id)
-            }
         }
     }
 
@@ -447,7 +431,6 @@ internal class HendelseMediator(
                 is SøknadSendt -> iverksett(kommandofabrikk.søknadSendt(melding), melding.id, commandContext)
                 is OppdaterPersonsnapshot -> iverksett(kommandofabrikk.oppdaterPersonsnapshot(melding), melding.id, commandContext)
                 is OverstyringIgangsatt -> iverksett(kommandofabrikk.kobleVedtaksperiodeTilOverstyring(melding), melding.id, commandContext)
-                is Sykefraværstilfeller -> håndter(melding)
                 is UtbetalingAnnullert -> iverksett(kommandofabrikk.utbetalingAnnullert(melding), melding.id, commandContext)
                 is UtbetalingEndret -> iverksett(kommandofabrikk.utbetalingEndret(melding), melding.id, commandContext)
                 is VedtakFattet -> håndter(melding)

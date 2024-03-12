@@ -18,7 +18,6 @@ import no.nav.helse.modell.HendelseDao.Hendelsetype.NYE_VARSLER
 import no.nav.helse.modell.HendelseDao.Hendelsetype.OPPDATER_PERSONSNAPSHOT
 import no.nav.helse.modell.HendelseDao.Hendelsetype.OVERSTYRING_IGANGSATT
 import no.nav.helse.modell.HendelseDao.Hendelsetype.SAKSBEHANDLERLØSNING
-import no.nav.helse.modell.HendelseDao.Hendelsetype.SYKEFRAVÆRSTILFELLER
 import no.nav.helse.modell.HendelseDao.Hendelsetype.SØKNAD_SENDT
 import no.nav.helse.modell.HendelseDao.Hendelsetype.UTBETALING_ANNULLERT
 import no.nav.helse.modell.HendelseDao.Hendelsetype.UTBETALING_ENDRET
@@ -34,7 +33,6 @@ import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import no.nav.helse.modell.person.OppdaterPersonsnapshot
 import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.person.toFødselsnummer
-import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfeller
 import no.nav.helse.modell.utbetaling.UtbetalingAnnullert
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
@@ -239,7 +237,6 @@ internal class HendelseDao(private val dataSource: DataSource) {
         is NyeVarsler -> NYE_VARSLER
         is SøknadSendt -> SØKNAD_SENDT
         is VedtaksperiodeNyUtbetaling -> VEDTAKSPERIODE_NY_UTBETALING
-        is Sykefraværstilfeller -> SYKEFRAVÆRSTILFELLER
         is TilbakedateringBehandlet -> GODKJENT_TILBAKEDATERT_SYKMELDING
         else -> throw IllegalArgumentException("ukjent hendelsetype: ${hendelse::class.simpleName}")
     }
@@ -249,7 +246,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
         SAKSBEHANDLERLØSNING, UTBETALING_ANNULLERT, OPPDATER_PERSONSNAPSHOT, UTBETALING_ENDRET,
         VEDTAKSPERIODE_REBEREGNET,
         OVERSTYRING_IGANGSATT, GOSYS_OPPGAVE_ENDRET, ENDRET_EGEN_ANSATT_STATUS, VEDTAK_FATTET,
-        NYE_VARSLER, VEDTAKSPERIODE_OPPRETTET, SØKNAD_SENDT, VEDTAKSPERIODE_NY_UTBETALING, SYKEFRAVÆRSTILFELLER,
+        NYE_VARSLER, SØKNAD_SENDT, VEDTAKSPERIODE_NY_UTBETALING,
         GODKJENT_TILBAKEDATERT_SYKMELDING
     }
 }
