@@ -44,22 +44,6 @@ internal class BehandlingOpprettetRiverTest {
     }
 
     @Test
-    fun `behandler behandling_opprettet uten fom og tom`() {
-        rapid.sendTestMessage(
-            Testmeldingfabrikk.lagBehandlingOpprettet(
-                aktørId = AKTØR,
-                fødselsnummer = FØDSELSNUMMER,
-                organisasjonsnummer = ORGNR,
-                vedtaksperiodeId = UUID.randomUUID(),
-                spleisBehandlingId = UUID.randomUUID(),
-                fom = null,
-                tom = null
-            )
-        )
-        verify(exactly = 1) { mediator.håndter(any<BehandlingOpprettet>()) }
-    }
-
-    @Test
     fun `ignorerer organisasjonsnummer ARBEIDSLEDIG uten å tryne`() {
         rapid.sendTestMessage(
             Testmeldingfabrikk.lagBehandlingOpprettet(

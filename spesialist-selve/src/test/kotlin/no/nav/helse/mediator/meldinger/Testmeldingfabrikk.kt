@@ -193,20 +193,19 @@ internal object Testmeldingfabrikk {
         organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
         spleisBehandlingId: UUID,
-        fom: LocalDate? = 1.januar,
-        tom: LocalDate? = 31.januar,
+        fom: LocalDate = 1.januar,
+        tom: LocalDate = 31.januar,
     ) =
         nyHendelse(
-            id, "behandling_opprettet", mutableMapOf<String, Any>(
+            id, "behandling_opprettet", mapOf(
                 "vedtaksperiodeId" to "$vedtaksperiodeId",
                 "behandlingId" to "$spleisBehandlingId",
                 "fødselsnummer" to fødselsnummer,
                 "aktørId" to aktørId,
                 "organisasjonsnummer" to organisasjonsnummer,
-            ).apply {
-                compute("fom") { _, _ -> fom }
-                compute("tom") { _, _ -> tom }
-            }
+                "fom" to fom,
+                "tom" to tom
+            )
         )
 
     fun lagVedtaksperiodeForkastet(
