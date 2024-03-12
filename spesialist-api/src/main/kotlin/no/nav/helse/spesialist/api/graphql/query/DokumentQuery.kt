@@ -52,7 +52,9 @@ class DokumentQuery(
         val dokument = withContext(Dispatchers.IO) {
             dokumenthåndterer.håndter(fnr, UUID.fromString(dokumentId), DokumentType.SØKNAD.name)
         }.let {
-            if (it.size() == 0) return DataFetcherResult.newResult<Soknad>().error(getEmptyResultTimeoutError()).build()
+            val error = it.path("error")?.takeUnless { error -> error.isMissingOrNull() }?.asInt()
+            if (it.size() == 0) return DataFetcherResult.newResult<Soknad>().error(getExpectationFailedError()).build()
+            else if (error == 408) return DataFetcherResult.newResult<Soknad>().error(getEmptyResultTimeoutError()).build()
             return@let it.tilSøknad()
         }
 
@@ -78,9 +80,10 @@ class DokumentQuery(
         }.let {
             val error = it.path("error")?.takeUnless { error -> error.isMissingOrNull() }?.asInt()
             if (it.size() == 0) return DataFetcherResult.newResult<DokumentInntektsmelding>()
-                .error(getEmptyResultTimeoutError()).build()
+                .error(getExpectationFailedError()).build()
             else if (error == 404) return DataFetcherResult.newResult<DokumentInntektsmelding>()
-                .error(get404Error()).build()
+                .error(getNotFoundErrorEkstern()).build()
+            else if (error == 408) return DataFetcherResult.newResult<DokumentInntektsmelding>().error(getEmptyResultTimeoutError()).build()
             return@let it.tilInntektsmelding()
         }
 
@@ -92,10 +95,14 @@ class DokumentQuery(
             .extensions(mapOf("code" to 400)).build()
 
     private fun getEmptyResultTimeoutError(): GraphQLError =
-        GraphqlErrorException.newErrorException().message("Noe gikk galt, vennligst prøv igjen.")
+        GraphqlErrorException.newErrorException().message("Det tar litt lengre tid enn forventet å hente dokumentet, vennligst prøv igjen.")
             .extensions(mapOf("code" to 408)).build()
 
-    private fun get404Error(): GraphQLError =
+    private fun getExpectationFailedError(): GraphQLError =
+        GraphqlErrorException.newErrorException().message("Noe gikk galt, vennligst prøv igjen.")
+            .extensions(mapOf("code" to 417)).build()
+
+    private fun getNotFoundErrorEkstern(): GraphQLError =
         GraphqlErrorException.newErrorException().message("Speil har ikke tilgang til denne inntektsmeldingen, den må åpnes i Gosys.")
             .extensions(mapOf("code" to 404)).build()
 

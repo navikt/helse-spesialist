@@ -57,7 +57,7 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
     fun `Får 408 dersom man ikke har fått søknaden etter 30 retries`() {
         opprettSaksbehandler()
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
-        every { dokumenthåndterer.håndter(any(), any(), any()) } returns objectMapper.createObjectNode()
+        every { dokumenthåndterer.håndter(any(), any(), any()) } returns objectMapper.createObjectNode().put("error", 408)
         val dokument = runQuery(
             """
             {
@@ -72,6 +72,27 @@ internal class DokumentQueryTest : AbstractGraphQLApiTest() {
         )["errors"].first()
 
         assertEquals(408, dokument["extensions"]["code"].asInt())
+    }
+
+    @Test
+    fun `Får 417 dersom man ikke har dokumentet`() {
+        opprettSaksbehandler()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        every { dokumenthåndterer.håndter(any(), any(), any()) } returns objectMapper.createObjectNode()
+        val dokument = runQuery(
+            """
+            {
+                hentSoknad(
+                    dokumentId: "${UUID.randomUUID()}"
+                    fnr: "$FØDSELSNUMMER"
+                ) {
+                    sykmeldingSkrevet
+                }
+            }
+        """
+        )["errors"].first()
+
+        assertEquals(417, dokument["extensions"]["code"].asInt())
     }
 
     @Test

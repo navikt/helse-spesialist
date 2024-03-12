@@ -41,7 +41,7 @@ class DokumentMediator(
     }
 
     private suspend fun hentDokument(fødselsnummer: String, dokumentId: UUID, retries: Int): JsonNode {
-        if (retries == 0) return objectMapper.createObjectNode()
+        if (retries == 0) return objectMapper.createObjectNode().put("error", 408)
 
         val response = runBlocking {
             val dokument = dokumentDao.hent(fødselsnummer, dokumentId)
