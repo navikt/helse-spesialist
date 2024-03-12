@@ -442,7 +442,7 @@ internal class HendelseMediator(
             }
             utgåendeMeldingerMediator.håndter(melding, messageContext)
         } catch (e: Exception) {
-            logg.warn("Feil ved behandling av melding $hendelsenavn", e.message, e)
+            logg.error("Feil ved behandling av melding $hendelsenavn", e.message, e)
             throw e
         } finally {
             logg.info("Melding $hendelsenavn ferdigbehandlet")
