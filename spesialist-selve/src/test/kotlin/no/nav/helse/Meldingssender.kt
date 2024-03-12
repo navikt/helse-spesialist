@@ -204,6 +204,19 @@ internal class Meldingssender(private val testRapid: TestRapid) {
         )
     }
 
+    fun sendKommandokjedePåminnelse(
+        commandContextId: UUID,
+        meldingId: UUID,
+    ): UUID = newUUID.also { id ->
+        testRapid.sendTestMessage(
+            Testmeldingfabrikk.lagKommandokjedePåminnelse(
+                commandContextId = commandContextId,
+                meldingId = meldingId,
+                id = id
+            )
+        )
+    }
+
     fun sendEndretSkjermetinfo(
         fødselsnummer: String,
         skjermet: Boolean,

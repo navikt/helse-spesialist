@@ -696,6 +696,10 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         sisteMeldingId = meldingssender.sendTilbakedateringBehandlet(fødselsnummer, skjæringstidspunkt)
     }
 
+    protected fun håndterKommandokjedePåminnelse(commandContextId: UUID, meldingId: UUID) {
+        sisteMeldingId = meldingssender.sendKommandokjedePåminnelse(commandContextId, meldingId)
+    }
+
     protected fun håndterUtbetalingOpprettet(
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
@@ -1619,6 +1623,16 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         val query = "SELECT tilstand FROM command_context WHERE hendelse_id = ? ORDER by id DESC LIMIT 1"
         return sessionOf(dataSource).use { session ->
             session.run(queryOf(query, godkjenningsbehovId).map { it.string("tilstand") }.asSingle) == "FERDIG"
+        }
+    }
+
+    internal fun commandContextId(godkjenningsbehovId: UUID): UUID {
+        @Language("PostgreSQL")
+        val query = "SELECT context_id FROM command_context WHERE hendelse_id = ? ORDER by id DESC LIMIT 1"
+        return sessionOf(dataSource).use { session ->
+            requireNotNull(
+                session.run(queryOf(query, godkjenningsbehovId).map { it.uuid("context_id") }.asSingle)
+            )
         }
     }
 

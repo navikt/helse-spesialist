@@ -45,6 +45,7 @@ import no.nav.helse.mediator.meldinger.løsninger.Risikovurderingløsning
 import no.nav.helse.mediator.meldinger.løsninger.SaksbehandlerløsningRiver
 import no.nav.helse.mediator.meldinger.løsninger.Vergemålløsning
 import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
+import no.nav.helse.mediator.meldinger.påminnelser.KommandokjedePåminnelseRiver
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.HendelseDao
@@ -163,6 +164,7 @@ internal class HendelseMediator(
             AvsluttetUtenVedtakRiver(it, this)
             MidnattRiver(it, this)
             BehandlingOpprettetRiver(it, this)
+            KommandokjedePåminnelseRiver(it, this)
         }
     }
 
@@ -185,6 +187,28 @@ internal class HendelseMediator(
         ) {
             løsninger(context, hendelseId, contextId)?.also { it.add(hendelseId, contextId, løsning) }
                 ?: logg.info("mottok løsning som ikke kunne brukes fordi kommandoen ikke lengre er suspendert, eller fordi hendelsen er ukjent")
+        }
+    }
+
+    fun påminnelse(
+        meldingId: UUID,
+        contextId: UUID,
+        hendelseId: UUID,
+        påminnelse: Any,
+        context: MessageContext,
+    ) {
+        withMDC(
+            mapOf(
+                "contextId" to "$contextId",
+                "opprinneligMeldingId" to "$hendelseId",
+                "meldingId" to "$meldingId"
+            )
+        ) {
+            påminnelse(context, hendelseId, contextId)?.also {
+                it.add(hendelseId, contextId, påminnelse)
+                it.fortsett(this)
+            }
+                ?: logg.info("mottok påminnelse som ikke kunne brukes fordi kommandoen ikke lengre er suspendert, eller fordi hendelsen er ukjent")
         }
     }
 
@@ -379,6 +403,20 @@ internal class HendelseMediator(
         }
     }
 
+    private fun påminnelse(messageContext: MessageContext, hendelseId: UUID, contextId: UUID): Påminnelse? {
+        return run {
+            val commandContext = commandContextDao.finnSuspendert(contextId) ?: run {
+                logg.info("Ignorerer melding fordi kommandokonteksten ikke er suspendert")
+                return null
+            }
+            val hendelse = hendelseDao.finn(hendelseId) ?: run {
+                logg.info("Ignorerer melding fordi opprinnelig melding ikke finnes i databasen")
+                return null
+            }
+            Påminnelse(messageContext, hendelse, contextId, commandContext)
+        }
+    }
+
     // fortsetter en command (resume) med oppsamlet løsninger
     private fun fortsett(message: String) {
         løsninger?.fortsett(this, message)
@@ -489,6 +527,24 @@ internal class HendelseMediator(
         fun fortsett(mediator: HendelseMediator, message: String) {
             logg.info("fortsetter utførelse av kommandokontekst som følge av løsninger på behov for ${melding::class.simpleName}")
             sikkerlogg.info("fortsetter utførelse av kommandokontekst som følge av løsninger på behov for ${melding::class.simpleName}\nInnkommende melding:\n\t$message")
+            mediator.håndter(melding, commandContext, messageContext)
+        }
+    }
+
+    private class Påminnelse(
+        private val messageContext: MessageContext,
+        private val melding: Personmelding,
+        private val contextId: UUID,
+        private val commandContext: CommandContext,
+    ) {
+        fun add(hendelseId: UUID, contextId: UUID, påminnelse: Any) {
+            check(hendelseId == melding.id)
+            check(contextId == this.contextId)
+            commandContext.add(påminnelse)
+        }
+
+        fun fortsett(mediator: HendelseMediator) {
+            logg.info("fortsetter utførelse av kommandokontekst som følge av påminnelse")
             mediator.håndter(melding, commandContext, messageContext)
         }
     }

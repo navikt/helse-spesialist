@@ -74,7 +74,7 @@ internal object Testmeldingfabrikk {
     fun lagTilbakedateringBehandlet(
         fødselsnummer: String,
         id: UUID,
-        skjæringstidspunkt: LocalDate
+        skjæringstidspunkt: LocalDate,
     ): String =
         nyHendelse(
             id = id,
@@ -1093,7 +1093,7 @@ internal object Testmeldingfabrikk {
         id: UUID,
         fødselsnummer: String,
         aktørId: String,
-        organisasjonsnummer: String
+        organisasjonsnummer: String,
     ): String =
         nyHendelse(
             id, "avvik_vurdert", mapOf(
@@ -1128,6 +1128,14 @@ internal object Testmeldingfabrikk {
                     ),
                     "avviksprosent" to avviksvurderingTestdata.avviksprosent,
                 )
+            )
+        )
+
+    fun lagKommandokjedePåminnelse(commandContextId: UUID, meldingId: UUID, id: UUID) =
+        nyHendelse(
+            id, "kommandokjede_påminnelse", mapOf(
+                "commandContextId" to commandContextId,
+                "meldingId" to meldingId
             )
         )
 
