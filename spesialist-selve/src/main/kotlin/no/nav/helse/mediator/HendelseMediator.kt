@@ -230,7 +230,10 @@ internal class HendelseMediator(
     }
 
     internal fun håndter(melding: BehandlingOpprettet) {
+        val meldingnavn = BehandlingOpprettet::class.simpleName
+        sikkerlogg.info("Mottatt melding $meldingnavn")
         personRepository.brukPersonHvisFinnes(melding.fødselsnummer()) {
+            sikkerlogg.info("Person finnes, behandler melding $meldingnavn")
             melding.behandleAv(this)
         }
     }
