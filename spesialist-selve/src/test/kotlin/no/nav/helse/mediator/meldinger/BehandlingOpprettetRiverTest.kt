@@ -40,7 +40,7 @@ internal class BehandlingOpprettetRiverTest {
                 spleisBehandlingId = UUID.randomUUID()
             )
         )
-        verify(exactly = 1) { mediator.håndter(any<BehandlingOpprettet>()) }
+        verify(exactly = 1) { mediator.mottaMelding(any<BehandlingOpprettet>()) }
     }
 
     @Test

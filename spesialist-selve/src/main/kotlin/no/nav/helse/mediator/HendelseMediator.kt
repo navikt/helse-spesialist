@@ -69,7 +69,6 @@ import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
-import no.nav.helse.modell.vedtaksperiode.BehandlingOpprettet
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
@@ -242,23 +241,6 @@ internal class HendelseMediator(
             generasjonRepository.brukGenerasjonHvisFinnes(varsel.vedtaksperiodeId()) {
                 it.håndterNyttVarsel(varsel, nyeVarsler.id)
             }
-        }
-    }
-
-    internal fun håndter(vedtakFattet: VedtakFattet) {
-        val vedtaksperiodeId = vedtakFattet.vedtaksperiodeId()
-        generasjonRepository.brukVedtaksperiode(vedtakFattet.fødselsnummer(), vedtaksperiodeId) {
-            it.vedtakFattet(vedtakFattet.id)
-        }
-        if (vedtakDao.erSpesialsak(vedtaksperiodeId)) vedtakDao.spesialsakFerdigbehandlet(vedtaksperiodeId)
-    }
-
-    internal fun håndter(melding: BehandlingOpprettet) {
-        val meldingnavn = BehandlingOpprettet::class.simpleName
-        sikkerlogg.info("Mottatt melding $meldingnavn")
-        personRepository.brukPersonHvisFinnes(melding.fødselsnummer()) {
-            sikkerlogg.info("Person finnes, behandler melding $meldingnavn")
-            melding.behandleAv(this)
         }
     }
 
@@ -491,7 +473,6 @@ internal class HendelseMediator(
                 is OverstyringIgangsatt -> iverksett(kommandofabrikk.kobleVedtaksperiodeTilOverstyring(melding), melding.id, commandContext)
                 is UtbetalingAnnullert -> iverksett(kommandofabrikk.utbetalingAnnullert(melding), melding.id, commandContext)
                 is UtbetalingEndret -> iverksett(kommandofabrikk.utbetalingEndret(melding), melding.id, commandContext)
-                is VedtakFattet -> håndter(melding)
                 is VedtaksperiodeEndret -> iverksett(kommandofabrikk.vedtaksperiodeEndret(melding), melding.id, commandContext)
                 is VedtaksperiodeForkastet -> iverksett(kommandofabrikk.vedtaksperiodeForkastet(melding), melding.id, commandContext)
                 is Godkjenningsbehov -> iverksett(kommandofabrikk.godkjenningsbehov(melding), melding.id, commandContext)

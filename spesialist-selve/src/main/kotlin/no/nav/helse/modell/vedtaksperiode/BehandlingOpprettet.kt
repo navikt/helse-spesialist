@@ -2,6 +2,7 @@ package no.nav.helse.modell.vedtaksperiode
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.mediator.Kommandofabrikk
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.person.Person
@@ -18,7 +19,7 @@ data class SpleisBehandling(
     internal fun erRelevantFor(vedtaksperiodeId: UUID) = this.vedtaksperiodeId == vedtaksperiodeId
 }
 
-class BehandlingOpprettet private constructor(
+internal class BehandlingOpprettet private constructor(
     override val id: UUID,
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
@@ -40,7 +41,7 @@ class BehandlingOpprettet private constructor(
         json = packet.toJson()
     )
 
-    internal fun behandleAv(person: Person) {
+    override fun behandle(person: Person, kommandofabrikk: Kommandofabrikk) {
         person.nySpleisBehandling(SpleisBehandling(organisasjonsnummer, vedtaksperiodeId, spleisBehandlingId, fom, tom))
     }
 
