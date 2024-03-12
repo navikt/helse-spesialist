@@ -22,7 +22,7 @@ internal class VedtakFattetRiverTest {
     @Test
     fun `Leser inn vedtak_fattet-event`() {
         testRapid.sendTestMessage(event())
-        verify(exactly = 1) { mediator.håndter(any<VedtakFattet>(), any()) }
+        verify(exactly = 1) { mediator.mottaMelding(any<VedtakFattet>()) }
     }
 
     @Language("JSON")

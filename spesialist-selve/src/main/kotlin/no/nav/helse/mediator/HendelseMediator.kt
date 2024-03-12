@@ -432,6 +432,23 @@ internal class HendelseMediator(
         opprett(commandContextDao, hendelse.id)
     }
 
+    internal fun mottaMelding(melding: Personmelding) {
+        withMDC(mapOf("meldingId" to melding.id.toString())) {
+            logg.info("Melding ${melding::class.simpleName} mottatt")
+            sikkerlogg.info("Melding ${melding::class.simpleName} mottatt")
+
+            personRepository.brukPersonHvisFinnes(melding.fødselsnummer()) {
+                logg.info("Personen finnes i databasen, behandler melding ${melding::class.simpleName}")
+                sikkerlogg.info("Personen finnes i databasen, behandler melding ${melding::class.simpleName}")
+                melding.behandle(this, kommandofabrikk)
+            }
+            if (melding is VedtakFattet) melding.doFinally(vedtakDao) // Midlertidig frem til spesialsak ikke er en ting lenger
+
+            logg.info("Melding ${melding::class.simpleName} ferdigbehandlet")
+            sikkerlogg.info("Melding ${melding::class.simpleName} ferdigbehandlet")
+        }
+    }
+
     internal fun håndter(fødselsnummer: String, melding: Personmelding, messageContext: MessageContext) {
         withMDC(mapOf("meldingId" to melding.id.toString())) {
             if (personDao.findPersonByFødselsnummer(fødselsnummer) == null) {

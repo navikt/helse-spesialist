@@ -5,6 +5,7 @@ import no.nav.helse.modell.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeDto
+import no.nav.helse.modell.vedtaksperiode.vedtak.VedtakFattet
 
 class Person private constructor(
     private val fødselsnummer: String,
@@ -23,6 +24,12 @@ class Person private constructor(
 
     fun mottaSpleisVedtaksperioder(perioder: List<SpleisVedtaksperiode>) {
         vedtaksperioder.forEach { it.håndter(perioder) }
+    }
+
+    internal fun vedtakFattet(vedtakFattet: VedtakFattet) {
+        vedtaksperioder
+            .find { vedtakFattet.erRelevantFor(it.vedtaksperiodeId()) }
+            ?.vedtakFattet(vedtakFattet.id)
     }
 
     fun nySpleisBehandling(spleisBehandling: SpleisBehandling) {
