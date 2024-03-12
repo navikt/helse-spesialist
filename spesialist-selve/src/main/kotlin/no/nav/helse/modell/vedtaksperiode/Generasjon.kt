@@ -103,16 +103,6 @@ internal class Generasjon private constructor(
 
     internal fun erSpesialsakSomKanAutomatiseres() = !varsler.inneholderSvartelistedeVarsler()
 
-    internal fun håndterVedtaksperiodeEndret(
-        hendelseId: UUID,
-        id: UUID = UUID.randomUUID(),
-        fom: LocalDate = this.periode.fom(),
-        tom: LocalDate = this.periode.tom(),
-        skjæringstidspunkt: LocalDate = this.skjæringstidspunkt
-    ): Generasjon? {
-        return tilstand.vedtaksperiodeEndret(this, id, hendelseId, fom, tom, skjæringstidspunkt)
-    }
-
     internal fun automatiskGodkjennSpesialsakvarsler() = varsler.automatiskGodkjennSpesialsakvarsler(this.id)
 
     internal fun håndterNyUtbetaling(hendelseId: UUID, utbetalingId: UUID) {

@@ -45,9 +45,9 @@ import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.utbetaling.UtbetalingEndretCommand
 import no.nav.helse.modell.varsel.ActualVarselRepository
-import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
+import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovCommand
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeEndret
@@ -138,15 +138,6 @@ internal class Kommandofabrikk(
 
     private fun gjeldendeGenerasjon(vedtaksperiodeId: UUID): Generasjon {
         return GenerasjonBuilder(vedtaksperiodeId = vedtaksperiodeId).build(generasjonRepository, varselRepository)
-    }
-
-    private fun førsteGenerasjon(vedtaksperiodeId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate): Generasjon {
-        return GenerasjonBuilder(vedtaksperiodeId).buildFirst(
-            fom = fom,
-            tom = tom,
-            skjæringstidspunkt = skjæringstidspunkt,
-            observers = arrayOf(generasjonRepository, varselRepository)
-        )
     }
 
     internal fun avviksvurdering(avviksvurdering: AvviksvurderingDto) {
@@ -301,10 +292,6 @@ internal class Kommandofabrikk(
         return VedtaksperiodeEndretCommand(
             fødselsnummer = hendelse.fødselsnummer(),
             vedtaksperiodeId = hendelse.vedtaksperiodeId(),
-            forårsaketAvId = hendelse.forårsaketAvId,
-            forrigeTilstand = hendelse.forrigeTilstand,
-            gjeldendeTilstand = hendelse.gjeldendeTilstand,
-            gjeldendeGenerasjon = gjeldendeGenerasjon(hendelse.vedtaksperiodeId()),
             personDao = personDao,
             snapshotDao = snapshotDao,
             snapshotClient = snapshotClient

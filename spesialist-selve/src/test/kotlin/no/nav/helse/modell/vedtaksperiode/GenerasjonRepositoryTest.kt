@@ -71,39 +71,6 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
     }
 
     @Test
-    fun `kan opprette neste generasjon`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val vedtaksperiodeOpprettet = UUID.randomUUID()
-        val vedtaksperiodeEndret = UUID.randomUUID()
-        val vedtakFattet = UUID.randomUUID()
-        val førsteGenerasjonId = UUID.randomUUID()
-        val andreGenerasjonId = UUID.randomUUID()
-
-        val generasjon = Generasjon(førsteGenerasjonId, vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
-        generasjon.registrer(repository)
-        generasjon.håndterVedtaksperiodeOpprettet(vedtaksperiodeOpprettet)
-        generasjon.håndterVedtakFattet(vedtakFattet)
-        generasjon.håndterVedtaksperiodeEndret(vedtaksperiodeEndret, andreGenerasjonId)
-
-        assertLåstGenerasjon(førsteGenerasjonId, vedtakFattet)
-        assertUbehandletGenerasjon(andreGenerasjonId)
-    }
-
-    @Test
-    fun `kan ikke opprette ny generasjon når tidligere generasjon er ubehandlet`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val vedtaksperiodeOpprettet = UUID.randomUUID()
-        val vedtaksperiodeEndret = UUID.randomUUID()
-        val generasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
-        generasjon.registrer(repository)
-        generasjon.håndterVedtaksperiodeOpprettet(vedtaksperiodeOpprettet)
-        generasjon.håndterVedtaksperiodeEndret(vedtaksperiodeEndret)
-
-        assertGenerasjon(vedtaksperiodeId, vedtaksperiodeOpprettet)
-        assertIngenGenerasjon(vedtaksperiodeId, vedtaksperiodeEndret)
-    }
-
-    @Test
     fun `kan knytte utbetalingId til generasjon`() {
         val generasjonId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
@@ -181,30 +148,6 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
             val query = "SELECT id FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ? AND opprettet_av_hendelse = ?;"
 
             session.run(queryOf(query, vedtaksperiodeId, hendelseId).map {
-                it.long(1)
-            }.asSingle)
-        }
-        assertNotNull(generasjon)
-    }
-
-    private fun assertLåstGenerasjon(generasjonId: UUID, hendelseId: UUID) {
-        val generasjon = sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query = "SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = ? AND tilstand_endret_av_hendelse = ?;"
-
-            session.run(queryOf(query, generasjonId, hendelseId).map {
-                it.long(1)
-            }.asSingle)
-        }
-        assertNotNull(generasjon)
-    }
-
-    private fun assertUbehandletGenerasjon(generasjonId: UUID) {
-        val generasjon = sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query = "SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = ? AND tilstand = '${Generasjon.Ulåst.navn()}';"
-
-            session.run(queryOf(query, generasjonId).map {
                 it.long(1)
             }.asSingle)
         }

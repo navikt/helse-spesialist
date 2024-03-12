@@ -15,14 +15,10 @@ import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.Varsel.Status
 import no.nav.helse.modell.varsel.Varsel.Status.AKTIV
-import no.nav.helse.modell.varsel.Varsel.Status.AVVIST
-import no.nav.helse.modell.varsel.Varsel.Status.GODKJENT
 import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
 import no.nav.helse.modell.varsel.Varsel.Status.VURDERT
 import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_1
-import no.nav.helse.modell.varsel.Varselkode.SB_EX_2
-import no.nav.helse.modell.varsel.Varselkode.SB_EX_3
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjon
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverSkjønnsfastsettelse
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverTotrinnsvurdering
@@ -177,8 +173,6 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     fun `generasjon har aktive varsler`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon = generasjon(vedtaksperiodeId = vedtaksperiodeId)
-        generasjon.registrer(generasjonRepository, varselRepository)
-        generasjon.håndterVedtaksperiodeOpprettet(UUID.randomUUID())
         generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
         assertTrue(generasjon.forhindrerAutomatisering())
     }
@@ -205,91 +199,6 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
             UUID.randomUUID()
         )
         assertTrue(generasjon.forhindrerAutomatisering())
-    }
-
-    @Test
-    fun `opprett neste`() {
-        val nyGenerasjonId = UUID.randomUUID()
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon = Generasjon(UUID.randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
-        val hendelseId = UUID.randomUUID()
-        generasjon.registrer(observer)
-        generasjon.håndterVedtakFattet(UUID.randomUUID())
-        val nyGenerasjon = generasjon.håndterVedtaksperiodeEndret(hendelseId, nyGenerasjonId)
-        assertEquals(1, observer.opprettedeGenerasjoner.size)
-        assertNotEquals(generasjon, nyGenerasjon)
-        observer.assertOpprettelse(nyGenerasjonId, vedtaksperiodeId, hendelseId, 1.januar, 31.januar, 1.januar)
-        assertEquals(
-            Generasjon(nyGenerasjonId, vedtaksperiodeId, 1.januar, 31.januar, 1.januar),
-            nyGenerasjon
-        )
-    }
-
-    @Test
-    fun `ikke opprett neste dersom nåværende er ubehandlet`() {
-        val nyGenerasjonId = UUID.randomUUID()
-        val generasjon = generasjon(UUID.randomUUID(), UUID.randomUUID())
-        generasjon.registrer(observer)
-        val nyGenerasjon = generasjon.håndterVedtaksperiodeEndret(UUID.randomUUID(), nyGenerasjonId)
-        assertEquals(0, observer.opprettedeGenerasjoner.size)
-        assertNull(nyGenerasjon)
-    }
-
-    @Test
-    fun `Kopierer skjæringstidspunkt og periode til neste generasjon`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)
-        generasjon.håndterTidslinjeendring(
-            fom = 1.januar,
-            tom = 5.januar,
-            skjæringstidspunkt = 1.januar,
-            hendelseId = UUID.randomUUID()
-        )
-        generasjon.håndterVedtakFattet(UUID.randomUUID())
-        val nyGenerasjonId = UUID.randomUUID()
-        val nyGenerasjon = generasjon.håndterVedtaksperiodeEndret(UUID.randomUUID(), nyGenerasjonId)
-        val forventetGenerasjon = Generasjon(nyGenerasjonId, vedtaksperiodeId, 1.januar, 5.januar, 1.januar)
-
-        assertEquals(forventetGenerasjon, nyGenerasjon)
-    }
-
-    @Test
-    fun `flytter aktive varsler til neste generasjon når den opprettes`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)
-        generasjon.registrer(generasjonRepository, varselRepository)
-        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
-        generasjon.håndterVedtakFattet(UUID.randomUUID())
-        val nyGenerasjonId = UUID.randomUUID()
-        generasjon.håndterVedtaksperiodeEndret(UUID.randomUUID(), nyGenerasjonId)
-        assertVarsler(generasjonId, 0, AKTIV, SB_EX_1)
-        assertVarsler(nyGenerasjonId, 1, AKTIV, SB_EX_1)
-    }
-
-    @Test
-    fun `flytter ikke varsler som har en annen status enn aktiv`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)
-        generasjon.registrer(generasjonRepository, varselRepository)
-        generasjon.håndterNyttVarsel(
-            Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId, INAKTIV),
-            UUID.randomUUID()
-        )
-        generasjon.håndterNyttVarsel(
-            Varsel(UUID.randomUUID(), "SB_EX_2", LocalDateTime.now(), vedtaksperiodeId, GODKJENT),
-            UUID.randomUUID()
-        )
-        generasjon.håndterNyttVarsel(
-            Varsel(UUID.randomUUID(), "SB_EX_3", LocalDateTime.now(), vedtaksperiodeId, AVVIST),
-            UUID.randomUUID()
-        )
-        generasjon.håndterVedtakFattet(UUID.randomUUID())
-        val nyGenerasjonId = UUID.randomUUID()
-        generasjon.håndterVedtaksperiodeEndret(UUID.randomUUID(), nyGenerasjonId)
-        assertVarsler(nyGenerasjonId, 0, AKTIV, SB_EX_1)
-        assertVarsler(nyGenerasjonId, 0, INAKTIV, SB_EX_1)
-        assertVarsler(nyGenerasjonId, 0, GODKJENT, SB_EX_2)
-        assertVarsler(nyGenerasjonId, 0, AVVIST, SB_EX_3)
     }
 
     @Test

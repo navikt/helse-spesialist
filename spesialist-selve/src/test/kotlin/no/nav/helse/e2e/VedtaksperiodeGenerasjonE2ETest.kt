@@ -8,7 +8,6 @@ import no.nav.helse.modell.vedtaksperiode.Generasjon
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
 
@@ -17,13 +16,6 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
         håndterSøknad()
         spleisOppretterNyBehandling()
         assertGenerasjoner(VEDTAKSPERIODE_ID, 1)
-    }
-
-    @Test
-    fun `Forventer at det eksisterer generasjon for perioden ved vedtaksperiode_endret`() {
-        håndterSøknad()
-        assertThrows<UninitializedPropertyAccessException> { håndterVedtaksperiodeEndret() }
-        assertGenerasjoner(VEDTAKSPERIODE_ID, 0)
     }
 
     @Test
