@@ -1,7 +1,9 @@
 package no.nav.helse.modell.vedtaksperiode
 
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.januar
+import no.nav.helse.modell.varsel.Varsel
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -33,6 +35,24 @@ class VedtaksperiodeTest {
     }
 
     @Test
+    fun `vedtaksperioden mottar nye varsler`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId)
+        vedtaksperiode.nyeVarsler(listOf(nyttVarsel(vedtaksperiodeId)))
+        val gjeldendeGenerasjon = vedtaksperiode.toDto().generasjoner.single()
+        assertEquals(1, gjeldendeGenerasjon.varsler.size)
+    }
+
+    @Test
+    fun `vedtaksperioden ignorerer varsler som ikke er relevante for den`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId)
+        vedtaksperiode.nyeVarsler(listOf(nyttVarsel(UUID.randomUUID())))
+        val gjeldendeGenerasjon = vedtaksperiode.toDto().generasjoner.single()
+        assertEquals(0, gjeldendeGenerasjon.varsler.size)
+    }
+
+    @Test
     fun `ny generasjon om Spesialist mottar ny behandling når gjeldende generasjon er lukket`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId)
@@ -60,6 +80,8 @@ class VedtaksperiodeTest {
     }
 
     private fun nySpleisBehandling(vedtaksperiodeId: UUID) = SpleisBehandling("987654321", vedtaksperiodeId, UUID.randomUUID(), 1.januar, 31.januar)
+
+    private fun nyttVarsel(vedtaksperiodeId: UUID, varselkode: String = "SB_EX_1") = Varsel(UUID.randomUUID(), varselkode, LocalDateTime.now(), vedtaksperiodeId)
 
     private fun nyVedtaksperiode(vedtaksperiodeId: UUID) = Vedtaksperiode.nyVedtaksperiode(nySpleisBehandling(vedtaksperiodeId))
 }

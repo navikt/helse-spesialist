@@ -1,5 +1,6 @@
 package no.nav.helse.modell.person
 
+import no.nav.helse.modell.vedtaksperiode.NyeVarsler
 import no.nav.helse.modell.vedtaksperiode.Periode
 import no.nav.helse.modell.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.vedtaksperiode.SpleisVedtaksperiode
@@ -37,6 +38,10 @@ class Person private constructor(
             .find { spleisBehandling.erRelevantFor(it.vedtaksperiodeId()) }
             ?.nySpleisBehandling(spleisBehandling)
             ?: vedtaksperioder.add(Vedtaksperiode.nyVedtaksperiode(spleisBehandling))
+    }
+
+    internal fun nyeVarsler(nyeVarsler: NyeVarsler) {
+        vedtaksperioder.forEach { it.nyeVarsler(nyeVarsler.varsler) }
     }
 
     companion object {

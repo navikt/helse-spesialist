@@ -72,7 +72,6 @@ import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
-import no.nav.helse.modell.vedtaksperiode.NyeVarsler
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeEndret
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
@@ -233,14 +232,6 @@ internal class HendelseMediator(
             val sykefraværstilfelleMediator = SykefraværstilfelleMediator(rapidsConnection)
             generasjon.registrer(sykefraværstilfelleMediator)
             avsluttetUtenVedtakMessage.sendInnTil(generasjon)
-        }
-    }
-
-    internal fun håndter(nyeVarsler: NyeVarsler) {
-        nyeVarsler.varsler.forEach { varsel ->
-            generasjonRepository.brukGenerasjonHvisFinnes(varsel.vedtaksperiodeId()) {
-                it.håndterNyttVarsel(varsel, nyeVarsler.id)
-            }
         }
     }
 
@@ -422,12 +413,13 @@ internal class HendelseMediator(
             personRepository.brukPersonHvisFinnes(melding.fødselsnummer()) {
                 logg.info("Personen finnes i databasen, behandler melding ${melding::class.simpleName}")
                 sikkerlogg.info("Personen finnes i databasen, behandler melding ${melding::class.simpleName}")
+
                 melding.behandle(this, kommandofabrikk)
             }
             if (melding is VedtakFattet) melding.doFinally(vedtakDao) // Midlertidig frem til spesialsak ikke er en ting lenger
 
-            logg.info("Melding ${melding::class.simpleName} ferdigbehandlet")
-            sikkerlogg.info("Melding ${melding::class.simpleName} ferdigbehandlet")
+            logg.info("Melding ${melding::class.simpleName} lest")
+            sikkerlogg.info("Melding ${melding::class.simpleName} lest")
         }
     }
 
@@ -464,7 +456,6 @@ internal class HendelseMediator(
                 is AdressebeskyttelseEndret -> iverksett(AdressebeskyttelseEndretCommand(melding.fødselsnummer(), personDao, oppgaveDao, godkjenningMediator), melding.id, commandContext)
                 is EndretEgenAnsattStatus -> iverksett(kommandofabrikk.endretEgenAnsattStatus(melding.fødselsnummer(), melding), melding.id, commandContext)
                 is GosysOppgaveEndret -> iverksett(kommandofabrikk.gosysOppgaveEndret(melding.fødselsnummer(), melding), melding.id, commandContext)
-                is NyeVarsler -> håndter(melding)
                 is TilbakedateringBehandlet -> iverksett(kommandofabrikk.tilbakedateringGodkjent(melding.fødselsnummer()), melding.id, commandContext)
                 is VedtaksperiodeReberegnet -> iverksett(kommandofabrikk.vedtaksperiodeReberegnet(melding), melding.id, commandContext)
                 is VedtaksperiodeNyUtbetaling -> iverksett(kommandofabrikk.vedtaksperiodeNyUtbetaling(melding), melding.id, commandContext)

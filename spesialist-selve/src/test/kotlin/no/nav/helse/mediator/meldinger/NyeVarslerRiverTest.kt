@@ -32,12 +32,12 @@ internal class NyeVarslerRiverTest {
     @Test
     fun `leser aktivitetslogg_ny_aktivitet`() {
         testRapid.sendTestMessage(Testmeldingfabrikk.lagAktivitetsloggNyAktivitet(FNR, HENDELSE, VEDTAKSPERIODE, ORGNR))
-        verify(exactly = 1) { mediator.håndter(any<NyeVarsler>(), any()) }
+        verify(exactly = 1) { mediator.mottaMelding(any<NyeVarsler>()) }
     }
 
     @Test
     fun `leser nye_varsler`() {
         testRapid.sendTestMessage(Testmeldingfabrikk.lagNyeVarsler(FNR, HENDELSE, VEDTAKSPERIODE, ORGNR))
-        verify(exactly = 1) { mediator.håndter(any<NyeVarsler>(), any()) }
+        verify(exactly = 1) { mediator.mottaMelding(any<NyeVarsler>()) }
     }
 }

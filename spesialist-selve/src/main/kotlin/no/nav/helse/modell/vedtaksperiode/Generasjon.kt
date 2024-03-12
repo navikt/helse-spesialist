@@ -119,6 +119,7 @@ internal class Generasjon private constructor(
         val eksisterendeVarsel = varsler.finnEksisterendeVarsel(varsel) ?: return nyttVarsel(varsel, hendelseId)
         if (varsel.erVarselOmAvvik() && varsler.inneholderVarselOmAvvik()) {
             eksisterendeVarsel.slett(id)
+            varsler.remove(eksisterendeVarsel)
             logg.info("Slettet eksisterende varsel ({}) for generasjon med id {}", varsel.toString(), id)
             nyttVarsel(varsel, hendelseId)
         }

@@ -53,6 +53,12 @@ internal class Vedtaksperiode private constructor(
         gjeldendeGenerasjon.håndterVedtakFattet(meldingId)
     }
 
+    internal fun nyeVarsler(nyeVarsler: List<Varsel>) {
+        val varsler = nyeVarsler.filter { it.erRelevantFor(vedtaksperiodeId) }
+        if (varsler.isEmpty()) return
+        varsler.forEach { gjeldendeGenerasjon.håndterNyttVarsel(it, UUID.randomUUID()) }
+    }
+
     internal fun mottaBehandlingsinformasjon(tags: List<String>, spleisBehandlingId: UUID) =
         gjeldendeGenerasjon.oppdaterBehandlingsinformasjon(tags, spleisBehandlingId)
 
