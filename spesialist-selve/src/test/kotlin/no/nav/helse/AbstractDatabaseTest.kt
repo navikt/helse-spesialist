@@ -20,7 +20,8 @@ abstract class AbstractDatabaseTest {
             println("Database: jdbc:postgresql://localhost:$firstMappedPort/test startet opp, credentials: test og test")
         }
 
-        val dataSource =
+        @JvmStatic
+        protected val dataSource =
             HikariDataSource(HikariConfig().apply {
                 jdbcUrl = postgres.jdbcUrl
                 username = postgres.username
