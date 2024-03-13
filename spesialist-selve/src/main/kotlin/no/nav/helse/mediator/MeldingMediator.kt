@@ -377,17 +377,16 @@ internal class MeldingMediator(
     }
 
     private fun påminnelse(messageContext: MessageContext, hendelseId: UUID, contextId: UUID): Påminnelse? {
-        return run {
-            val commandContext = commandContextDao.finnSuspendert(contextId) ?: run {
-                logg.info("Ignorerer melding fordi kommandokonteksten ikke er suspendert")
-                return null
-            }
-            val hendelse = hendelseDao.finn(hendelseId) ?: run {
-                logg.info("Ignorerer melding fordi opprinnelig melding ikke finnes i databasen")
-                return null
-            }
-            Påminnelse(messageContext, hendelse, contextId, commandContext)
+        val commandContext = commandContextDao.finnSuspendert(contextId) ?: run {
+            logg.info("Ignorerer melding fordi kommandokonteksten ikke er suspendert")
+            return null
         }
+        val hendelse = hendelseDao.finn(hendelseId) ?: run {
+            logg.info("Ignorerer melding fordi opprinnelig melding ikke finnes i databasen")
+            return null
+        }
+
+        return Påminnelse(messageContext, hendelse, contextId, commandContext)
     }
 
     // fortsetter en command (resume) med oppsamlet løsninger
