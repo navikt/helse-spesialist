@@ -69,7 +69,7 @@ internal class Vedtaksperiode private constructor(
                 organisasjonsnummer = spleisBehandling.organisasjonsnummer,
                 generasjoner = listOf(
                     Generasjon(
-                        id = spleisBehandling.vedtaksperiodeId,
+                        id = UUID.randomUUID(),
                         vedtaksperiodeId = spleisBehandling.vedtaksperiodeId,
                         fom = spleisBehandling.fom,
                         tom = spleisBehandling.tom,
