@@ -2,7 +2,7 @@ package no.nav.helse.mediator.meldinger.løsninger
 
 import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID
-import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.person.HentPersoninfoløsning
 import no.nav.helse.modell.person.HentPersoninfoløsninger
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -16,7 +16,10 @@ import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.person.Kjønn
 import org.slf4j.LoggerFactory
 
-internal class PersoninfoRiver(rapidsConnection: RapidsConnection, private val mediator: HendelseMediator) :
+internal class PersoninfoRiver(
+    rapidsConnection: RapidsConnection,
+    private val mediator: MeldingMediator,
+) :
     River.PacketListener {
     private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
 
@@ -56,7 +59,10 @@ internal class PersoninfoRiver(rapidsConnection: RapidsConnection, private val m
     }
 }
 
-internal class FlerePersoninfoRiver(rapidsConnection: RapidsConnection, private val mediator: HendelseMediator) :
+internal class FlerePersoninfoRiver(
+    rapidsConnection: RapidsConnection,
+    private val mediator: MeldingMediator,
+) :
     River.PacketListener {
     private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
 

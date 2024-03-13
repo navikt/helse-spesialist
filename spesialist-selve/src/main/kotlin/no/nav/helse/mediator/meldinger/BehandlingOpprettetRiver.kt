@@ -1,6 +1,6 @@
 package no.nav.helse.mediator.meldinger
 
-import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.vedtaksperiode.BehandlingOpprettet
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -9,7 +9,7 @@ import no.nav.helse.rapids_rivers.River
 
 internal class BehandlingOpprettetRiver(
     rapidsConnection: RapidsConnection,
-    private val mediator: HendelseMediator,
+    private val mediator: MeldingMediator,
 ): River.PacketListener {
 
     init {

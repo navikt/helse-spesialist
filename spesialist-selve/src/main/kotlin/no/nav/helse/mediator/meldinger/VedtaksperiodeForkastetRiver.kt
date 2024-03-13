@@ -3,7 +3,7 @@ package no.nav.helse.mediator.meldinger
 import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments
-import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory
 
 internal class VedtaksperiodeForkastetRiver(
     rapidsConnection: RapidsConnection,
-    private val mediator: HendelseMediator
+    private val mediator: MeldingMediator
 ) : River.PacketListener {
     private val log = LoggerFactory.getLogger(this::class.java)
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")

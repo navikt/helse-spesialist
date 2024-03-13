@@ -6,7 +6,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
 import lagFødselsnummer
-import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test
 internal class VedtaksperiodeForkastetRiverTest {
 
     private val rapid = TestRapid()
-    private val mediator = mockk<HendelseMediator>(relaxed = true)
+    private val mediator = mockk<MeldingMediator>(relaxed = true)
     private val mapper = jacksonObjectMapper()
 
     init {

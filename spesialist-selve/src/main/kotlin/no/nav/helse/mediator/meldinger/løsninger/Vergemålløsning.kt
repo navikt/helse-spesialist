@@ -1,6 +1,6 @@
 package no.nav.helse.mediator.meldinger.løsninger
 
-import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.vergemal.Vergemål
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.rapids_rivers.*
@@ -17,7 +17,7 @@ internal class Vergemålløsning(
 
     internal class VergemålRiver(
         rapidsConnection: RapidsConnection,
-        private val hendelseMediator: HendelseMediator
+        private val meldingMediator: MeldingMediator
     ) : River.PacketListener {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
@@ -59,7 +59,7 @@ internal class Vergemålløsning(
                 vergemål = vergemål
             )
 
-            hendelseMediator.løsning(
+            meldingMediator.løsning(
                 hendelseId = hendelseId,
                 contextId = contextId,
                 behovId = UUID.fromString(packet["@id"].asText()),

@@ -29,7 +29,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao as OpptegnelseApiDao
 
-internal class HendelseMediatorTest : AbstractDatabaseTest() {
+internal class MeldingMediatorTest : AbstractDatabaseTest() {
 
     private val fødselsnummer = lagFødselsnummer()
 
@@ -48,7 +48,7 @@ internal class HendelseMediatorTest : AbstractDatabaseTest() {
 
     private val kommandofabrikk = mockk<Kommandofabrikk>(relaxed = true)
 
-    private val hendelseMediator = HendelseMediator(
+    private val meldingMediator = MeldingMediator(
         dataSource = dataSource,
         rapidsConnection = testRapid,
         oppgaveDao = oppgaveDao,
@@ -59,8 +59,8 @@ internal class HendelseMediatorTest : AbstractDatabaseTest() {
     )
 
     init {
-        GosysOppgaveEndretRiver(testRapid, hendelseMediator)
-        TilbakedateringBehandletRiver(testRapid, hendelseMediator)
+        GosysOppgaveEndretRiver(testRapid, meldingMediator)
+        TilbakedateringBehandletRiver(testRapid, meldingMediator)
     }
 
     @BeforeEach
@@ -73,7 +73,7 @@ internal class HendelseMediatorTest : AbstractDatabaseTest() {
     fun `lagre varseldefinisjon`() {
         val id = UUID.randomUUID()
         val varseldefinisjon = Varseldefinisjon(id, "SB_EX_1", "En tittel", null, null, false, LocalDateTime.now())
-        hendelseMediator.håndter(varseldefinisjon)
+        meldingMediator.håndter(varseldefinisjon)
         assertVarseldefinisjon(id)
     }
 
@@ -82,7 +82,7 @@ internal class HendelseMediatorTest : AbstractDatabaseTest() {
         val event = mockk<GosysOppgaveEndret>(relaxed = true)
         every { event.fødselsnummer() } returns fødselsnummer
         every { event.toJson() } returns "{}"
-        hendelseMediator.gosysOppgaveEndret(fødselsnummer, event, testRapid)
+        meldingMediator.gosysOppgaveEndret(fødselsnummer, event, testRapid)
         verify(exactly = 1) { kommandofabrikk.gosysOppgaveEndret(fødselsnummer, event) }
     }
 
@@ -92,7 +92,7 @@ internal class HendelseMediatorTest : AbstractDatabaseTest() {
         every { event.fødselsnummer() } returns fødselsnummer
         every { event.toJson() } returns "{}"
         every { oppgaveDao.finnOppgaveId(fødselsnummer) } returns null
-        hendelseMediator.gosysOppgaveEndret(fødselsnummer, event, testRapid)
+        meldingMediator.gosysOppgaveEndret(fødselsnummer, event, testRapid)
         verify(exactly = 0) { kommandofabrikk.gosysOppgaveEndret(any(), any()) }
     }
 
@@ -102,7 +102,7 @@ internal class HendelseMediatorTest : AbstractDatabaseTest() {
         every { event.fødselsnummer() } returns fødselsnummer
         every { event.toJson() } returns "{}"
         every { oppgaveDao.oppgaveDataForAutomatisering(any()) } returns null
-        hendelseMediator.gosysOppgaveEndret(fødselsnummer, event, testRapid)
+        meldingMediator.gosysOppgaveEndret(fødselsnummer, event, testRapid)
         verify(exactly = 0) { kommandofabrikk.gosysOppgaveEndret(any(), any()) }
     }
 
@@ -118,7 +118,7 @@ internal class HendelseMediatorTest : AbstractDatabaseTest() {
         every { kommandofabrikk.sykefraværstilfelle(any(), any()) } returns mockk(relaxed = true) {
             every { erTilbakedatert(any()) } returns true
         }
-        hendelseMediator.tilbakedateringBehandlet(fødselsnummer, event, testRapid)
+        meldingMediator.tilbakedateringBehandlet(fødselsnummer, event, testRapid)
         verify(exactly = 1) { kommandofabrikk.tilbakedateringGodkjent(fødselsnummer) }
     }
 
@@ -132,7 +132,7 @@ internal class HendelseMediatorTest : AbstractDatabaseTest() {
             every { periodeOverlapperMed(any()) } returns true
         }
         every { oppgaveDao.finnOppgaveId(fødselsnummer) } returns null
-        hendelseMediator.tilbakedateringBehandlet(fødselsnummer, event, testRapid)
+        meldingMediator.tilbakedateringBehandlet(fødselsnummer, event, testRapid)
 
         verify(exactly = 1) { oppgaveDao.finnOppgaveId(fødselsnummer) }
         verify(exactly = 0) { kommandofabrikk.tilbakedateringGodkjent(any()) }
@@ -146,7 +146,7 @@ internal class HendelseMediatorTest : AbstractDatabaseTest() {
             every { toJson() } returns "{}"
         }
         every { oppgaveDao.oppgaveDataForAutomatisering(any()) } returns null
-        hendelseMediator.tilbakedateringBehandlet(fødselsnummer, event, testRapid)
+        meldingMediator.tilbakedateringBehandlet(fødselsnummer, event, testRapid)
         verify(exactly = 1) { oppgaveDao.finnOppgaveId(fødselsnummer) }
         verify(exactly = 1) { oppgaveDao.oppgaveDataForAutomatisering(any()) }
         verify(exactly = 0) { kommandofabrikk.tilbakedateringGodkjent(any()) }
@@ -162,7 +162,7 @@ internal class HendelseMediatorTest : AbstractDatabaseTest() {
             every { periodeOverlapperMed(any()) } returns false
         }
         every { oppgaveDao.oppgaveDataForAutomatisering(any()) } returns oppgaveDataForAutomatiseringMock
-        hendelseMediator.tilbakedateringBehandlet(fødselsnummer, event, testRapid)
+        meldingMediator.tilbakedateringBehandlet(fødselsnummer, event, testRapid)
         verify(exactly = 1) { oppgaveDao.finnOppgaveId(fødselsnummer) }
         verify(exactly = 1) { oppgaveDao.oppgaveDataForAutomatisering(any()) }
         verify(exactly = 1) { oppgaveDataForAutomatiseringMock.periodeOverlapperMed(any()) }

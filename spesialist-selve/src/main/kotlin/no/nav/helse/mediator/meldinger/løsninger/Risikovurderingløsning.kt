@@ -3,7 +3,7 @@ package no.nav.helse.mediator.meldinger.løsninger
 import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.varsel.Varselkode.SB_RV_2
@@ -64,7 +64,7 @@ internal class Risikovurderingløsning(
 
     internal class V2River(
         rapidsConnection: RapidsConnection,
-        private val hendelseMediator: HendelseMediator,
+        private val meldingMediator: MeldingMediator,
     ) : River.PacketListener {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
@@ -106,7 +106,7 @@ internal class Risikovurderingløsning(
                 løsning = løsning,
             )
 
-            hendelseMediator.løsning(
+            meldingMediator.løsning(
                 hendelseId = hendelseId,
                 contextId = contextId,
                 behovId = UUID.fromString(packet["@id"].asText()),

@@ -3,7 +3,7 @@ package no.nav.helse.mediator.meldinger
 import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
-import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.vedtaksperiode.NyeVarsler
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.BeforeEach
@@ -19,7 +19,7 @@ internal class NyeVarslerRiverTest {
         private const val ORGNR = "123456789"
     }
 
-    private val mediator = mockk<HendelseMediator>(relaxed = true)
+    private val mediator = mockk<MeldingMediator>(relaxed = true)
     private val testRapid = TestRapid().apply {
         NyeVarslerRiver(this, mediator)
     }

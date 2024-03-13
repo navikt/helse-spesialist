@@ -6,7 +6,7 @@ import io.mockk.verify
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test
 
 internal class TilbakedateringBehandletRiverTest {
 
-    private val mediator = mockk<HendelseMediator>(relaxed = true)
+    private val mediator = mockk<MeldingMediator>(relaxed = true)
     private val testRapid = TestRapid()
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
 

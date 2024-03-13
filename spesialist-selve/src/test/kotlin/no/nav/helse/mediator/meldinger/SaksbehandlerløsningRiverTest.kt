@@ -3,7 +3,7 @@ package no.nav.helse.mediator.meldinger
 import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
-import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.meldinger.løsninger.SaksbehandlerløsningRiver
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -18,7 +18,7 @@ internal class SaksbehandlerløsningRiverTest {
         private const val FNR = "12345678911"
     }
 
-    private val mediator = mockk<HendelseMediator>(relaxed = true)
+    private val mediator = mockk<MeldingMediator>(relaxed = true)
     private val testRapid = TestRapid().apply {
         SaksbehandlerløsningRiver(this, mediator)
     }

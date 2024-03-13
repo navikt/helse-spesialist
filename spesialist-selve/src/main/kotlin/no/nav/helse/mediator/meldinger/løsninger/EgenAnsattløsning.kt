@@ -1,6 +1,6 @@
 package no.nav.helse.mediator.meldinger.løsninger
 
-import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.rapids_rivers.*
 import org.slf4j.LoggerFactory
@@ -18,7 +18,7 @@ internal class EgenAnsattløsning(
 
     internal class EgenAnsattRiver(
         rapidsConnection: RapidsConnection,
-        private val hendelseMediator: HendelseMediator
+        private val mediator: MeldingMediator
     ) : River.PacketListener {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
@@ -53,7 +53,7 @@ internal class EgenAnsattløsning(
                 erEgenAnsatt = erEgenAnsatt
             )
 
-            hendelseMediator.løsning(
+            mediator.løsning(
                 hendelseId = hendelseId,
                 contextId = contextId,
                 behovId = UUID.fromString(packet["@id"].asText()),

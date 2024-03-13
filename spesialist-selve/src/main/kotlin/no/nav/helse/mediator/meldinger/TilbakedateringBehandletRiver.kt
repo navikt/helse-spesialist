@@ -2,7 +2,7 @@ package no.nav.helse.mediator.meldinger
 
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments
-import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory
 // kommer til Spesialist, dvs. sendes på rapiden. Andre meldinger filtreres ut i sparkel-appen
 internal class TilbakedateringBehandletRiver(
     rapidsConnection: RapidsConnection,
-    private val mediator: HendelseMediator,
+    private val mediator: MeldingMediator,
 ) : River.PacketListener {
     private val logg = LoggerFactory.getLogger(this::class.java)
     private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")

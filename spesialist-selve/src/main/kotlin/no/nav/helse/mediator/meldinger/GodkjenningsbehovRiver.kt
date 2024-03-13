@@ -2,7 +2,7 @@ package no.nav.helse.mediator.meldinger
 
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments
-import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.utbetaling.Utbetalingtype.Companion.values
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory
 
 internal class GodkjenningsbehovRiver(
     rapidsConnection: RapidsConnection,
-    private val mediator: HendelseMediator,
+    private val mediator: MeldingMediator,
 ) : River.PacketListener {
     private val logg = LoggerFactory.getLogger(this::class.java)
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")

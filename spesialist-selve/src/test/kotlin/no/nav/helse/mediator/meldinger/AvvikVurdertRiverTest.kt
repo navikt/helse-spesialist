@@ -2,7 +2,7 @@ package no.nav.helse.mediator.meldinger
 
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.avviksvurdering.AvviksvurderingDto
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.intellij.lang.annotations.Language
@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test
 class AvvikVurdertRiverTest {
 
     private val testRapid = TestRapid()
-    private val mediator = mockk<HendelseMediator>(relaxed = true)
+    private val mediator = mockk<MeldingMediator>(relaxed = true)
 
 
     init {

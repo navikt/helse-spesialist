@@ -3,7 +3,7 @@ package no.nav.helse.mediator.meldinger.hendelser
 import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDateTime
@@ -20,7 +20,7 @@ internal class VarseldefinisjonMessage(packet: JsonMessage) {
 
     private val varseldefinisjon get() = Varseldefinisjon(id, varselkode, tittel, forklaring, handling, avviklet, opprettet)
 
-    internal fun sendInnTil(mediator: HendelseMediator) {
+    internal fun sendInnTil(mediator: MeldingMediator) {
         mediator.håndter(varseldefinisjon)
     }
 }

@@ -1,7 +1,7 @@
 package no.nav.helse.mediator.meldinger
 
 import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.meldinger.hendelser.VarseldefinisjonMessage
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory
 
 internal class VarseldefinisjonRiver(
     rapidsConnection: RapidsConnection,
-    private val mediator: HendelseMediator
+    private val mediator: MeldingMediator
 ): River.PacketListener {
 
     private companion object {

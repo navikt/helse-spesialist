@@ -46,7 +46,7 @@ import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.BehandlingsstatistikkMediator
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.GodkjenningService
-import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.Kommandofabrikk
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.TilgangskontrollørForReservasjon
@@ -194,7 +194,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val msGraphClient = MsGraphClient(httpClient = httpClient, tokenClient = accessTokenClient)
 
     private val httpTraceLog = LoggerFactory.getLogger("tjenestekall")
-    private lateinit var hendelseMediator: HendelseMediator
+    private lateinit var meldingMediator: MeldingMediator
     private lateinit var saksbehandlerMediator: SaksbehandlerMediator
 
     private val personDao = PersonDao(dataSource)
@@ -355,7 +355,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 oppgavehåndterer = oppgaveMediator,
                 totrinnsvurderinghåndterer = totrinnsvurderingMediator,
                 godkjenninghåndterer = godkjenningService,
-                personhåndterer = hendelseMediator,
+                personhåndterer = meldingMediator,
                 dokumenthåndterer = dokumentMediator,
             )
 
@@ -404,7 +404,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             tilgangskontroll = tilgangskontrollørForReservasjon,
             tilgangsgrupper = tilgangsgrupper
         )
-        hendelseMediator = HendelseMediator(
+        meldingMediator = MeldingMediator(
             dataSource = dataSource,
             rapidsConnection = rapidsConnection,
             godkjenningMediator = godkjenningMediator,

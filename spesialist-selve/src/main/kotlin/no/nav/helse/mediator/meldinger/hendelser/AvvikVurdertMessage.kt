@@ -1,7 +1,7 @@
 package no.nav.helse.mediator.meldinger.hendelser
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.avviksvurdering.Avviksvurdering
 import no.nav.helse.modell.avviksvurdering.BeregningsgrunnlagDto
@@ -39,7 +39,7 @@ class AvvikVurdertMessage(packet: JsonMessage) {
             beregningsgrunnlag = beregningsgrunnlag
         ).toDto()
 
-    internal fun sendInnTil(mediator: HendelseMediator) {
+    internal fun sendInnTil(mediator: MeldingMediator) {
         mediator.håndter(avviksvurdering)
     }
 

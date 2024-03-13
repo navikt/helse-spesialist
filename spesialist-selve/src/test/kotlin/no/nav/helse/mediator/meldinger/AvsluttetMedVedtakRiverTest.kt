@@ -8,7 +8,7 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.db.AvviksvurderingDao
-import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.meldinger.hendelser.AvsluttetMedVedtakMessage
 import no.nav.helse.modell.avviksvurdering.Avviksvurdering
 import no.nav.helse.modell.avviksvurdering.BeregningsgrunnlagDto
@@ -22,7 +22,7 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 
 internal class AvsluttetMedVedtakRiverTest {
-    private val mediator = mockk<HendelseMediator>(relaxed = true)
+    private val mediator = mockk<MeldingMediator>(relaxed = true)
     private val avviksvurderingDao = mockk<AvviksvurderingDao>(relaxed = true)
     private val generasjonDao = mockk<GenerasjonDao>(relaxed = true)
     private val testRapid = TestRapid()

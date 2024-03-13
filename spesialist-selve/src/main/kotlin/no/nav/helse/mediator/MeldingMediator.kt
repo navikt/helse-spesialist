@@ -87,7 +87,7 @@ import no.nav.helse.registrerTidsbrukForHendelse
 import no.nav.helse.spesialist.api.Personhåndterer
 import org.slf4j.LoggerFactory
 
-internal class HendelseMediator(
+internal class MeldingMediator(
     private val dataSource: DataSource,
     private val rapidsConnection: RapidsConnection,
     private val oppgaveDao: OppgaveDao = OppgaveDao(dataSource),
@@ -108,7 +108,7 @@ internal class HendelseMediator(
     private val generasjonDao: GenerasjonDao,
 ) : Personhåndterer {
     private companion object {
-        private val logg = LoggerFactory.getLogger(HendelseMediator::class.java)
+        private val logg = LoggerFactory.getLogger(MeldingMediator::class.java)
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
 
@@ -524,7 +524,7 @@ internal class HendelseMediator(
             commandContext.add(løsning)
         }
 
-        fun fortsett(mediator: HendelseMediator, message: String) {
+        fun fortsett(mediator: MeldingMediator, message: String) {
             logg.info("fortsetter utførelse av kommandokontekst som følge av løsninger på behov for ${melding::class.simpleName}")
             sikkerlogg.info("fortsetter utførelse av kommandokontekst som følge av løsninger på behov for ${melding::class.simpleName}\nInnkommende melding:\n\t$message")
             mediator.håndter(melding, commandContext, messageContext)
@@ -543,7 +543,7 @@ internal class HendelseMediator(
             commandContext.add(påminnelse)
         }
 
-        fun fortsett(mediator: HendelseMediator) {
+        fun fortsett(mediator: MeldingMediator) {
             logg.info("fortsetter utførelse av kommandokontekst som følge av påminnelse")
             mediator.håndter(melding, commandContext, messageContext)
         }

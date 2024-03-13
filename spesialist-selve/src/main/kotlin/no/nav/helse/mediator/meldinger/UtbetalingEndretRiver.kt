@@ -3,7 +3,7 @@ package no.nav.helse.mediator.meldinger
 import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.Companion.values
@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory
 
 internal class UtbetalingEndretRiver(
     rapidsConnection: RapidsConnection,
-    private val mediator: HendelseMediator
+    private val mediator: MeldingMediator
 ) : River.PacketListener {
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 

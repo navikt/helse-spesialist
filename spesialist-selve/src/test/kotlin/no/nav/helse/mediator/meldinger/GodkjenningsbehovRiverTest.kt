@@ -4,7 +4,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -23,7 +23,7 @@ internal class GodkjenningsbehovRiverTest {
     private val FOM = LocalDate.of(2020, 1, 1)
     private val TOM = LocalDate.of(2020, 1, 31)
 
-    private val mediator = mockk<HendelseMediator>(relaxed = true)
+    private val mediator = mockk<MeldingMediator>(relaxed = true)
     private val testRapid = TestRapid().apply {
         GodkjenningsbehovRiver(this, mediator)
     }

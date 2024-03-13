@@ -1,7 +1,7 @@
 package no.nav.helse.mediator.meldinger
 
 import no.nav.helse.db.AvviksvurderingDao
-import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.meldinger.hendelser.AvsluttetMedVedtakMessage
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory
 
 internal class AvsluttetMedVedtakRiver(
     rapidsConnection: RapidsConnection,
-    private val mediator: HendelseMediator,
+    private val mediator: MeldingMediator,
     private val avviksvurderingDao: AvviksvurderingDao,
     private val generasjonDao: GenerasjonDao
 ) : River.PacketListener {

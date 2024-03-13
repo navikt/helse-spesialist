@@ -2,7 +2,7 @@ package no.nav.helse.mediator.meldinger.løsninger
 
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerløsning
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -11,7 +11,10 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 
-internal class InfotrygdutbetalingerRiver(rapidsConnection: RapidsConnection, private val mediator: HendelseMediator) :
+internal class InfotrygdutbetalingerRiver(
+    rapidsConnection: RapidsConnection,
+    private val mediator: MeldingMediator,
+) :
     River.PacketListener {
     private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     init {

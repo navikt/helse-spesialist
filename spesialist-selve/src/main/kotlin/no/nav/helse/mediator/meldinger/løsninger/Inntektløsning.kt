@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
-import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -21,7 +21,10 @@ internal class Inntektløsning(
     internal fun lagre(personDao: PersonDao, fødselsnummer: String, skjæringstidspunkt: LocalDate): Long? =
         personDao.insertInntekter(fødselsnummer, skjæringstidspunkt, inntekter)
 
-    internal class InntektRiver(rapidsConnection: RapidsConnection, private val mediator: HendelseMediator) :
+    internal class InntektRiver(
+        rapidsConnection: RapidsConnection,
+        private val mediator: MeldingMediator,
+    ) :
         River.PacketListener {
         private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
         private val behov = "InntekterForSykepengegrunnlag"

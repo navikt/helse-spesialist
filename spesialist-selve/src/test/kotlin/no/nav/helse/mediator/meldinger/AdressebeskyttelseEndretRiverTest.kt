@@ -3,7 +3,7 @@ package no.nav.helse.mediator.meldinger
 import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
-import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.person.AdressebeskyttelseEndretRiver
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
@@ -15,7 +15,7 @@ class AdressebeskyttelseEndretRiverTest {
         private const val AKTØR = "1234567891234"
     }
 
-    private val mediator = mockk<HendelseMediator>(relaxed = true)
+    private val mediator = mockk<MeldingMediator>(relaxed = true)
     private val testRapid = TestRapid().apply {
         AdressebeskyttelseEndretRiver(this, mediator)
     }

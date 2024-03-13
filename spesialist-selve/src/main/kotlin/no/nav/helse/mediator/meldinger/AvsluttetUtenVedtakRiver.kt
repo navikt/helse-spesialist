@@ -1,6 +1,6 @@
 package no.nav.helse.mediator.meldinger
 
-import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.meldinger.hendelser.AvsluttetUtenVedtakMessage
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory
 
 internal class AvsluttetUtenVedtakRiver(
     rapidsConnection: RapidsConnection,
-    private val mediator: HendelseMediator,
+    private val mediator: MeldingMediator,
 ) : River.PacketListener {
 
     init {

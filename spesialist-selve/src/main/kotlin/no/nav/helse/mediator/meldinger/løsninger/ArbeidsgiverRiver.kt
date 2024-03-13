@@ -1,7 +1,7 @@
 package no.nav.helse.mediator.meldinger.løsninger
 
 import java.util.UUID
-import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.arbeidsgiver.Arbeidsgiverinformasjonløsning
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory
 
 internal class ArbeidsgiverRiver(
     rapidsConnection: RapidsConnection,
-    private val mediator: HendelseMediator
+    private val mediator: MeldingMediator
 ) : River.PacketListener {
     private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
     private val behov = "Arbeidsgiverinformasjon"

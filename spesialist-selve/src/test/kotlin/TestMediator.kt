@@ -7,7 +7,7 @@ import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.Kommandofabrikk
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.oppgave.OppgaveDao
@@ -99,7 +99,7 @@ internal class TestMediator(
     )
 
     init {
-        HendelseMediator(
+        MeldingMediator(
             dataSource = dataSource,
             rapidsConnection = testRapid,
             godkjenningMediator = godkjenningMediator,

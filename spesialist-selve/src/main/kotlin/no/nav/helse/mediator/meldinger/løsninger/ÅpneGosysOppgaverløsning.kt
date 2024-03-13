@@ -2,7 +2,7 @@ package no.nav.helse.mediator.meldinger.løsninger
 
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDto
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
@@ -75,7 +75,7 @@ internal class ÅpneGosysOppgaverløsning(
 
     internal class ÅpneGosysOppgaverRiver(
         rapidsConnection: RapidsConnection,
-        private val hendelseMediator: HendelseMediator,
+        private val meldingMediator: MeldingMediator,
     ) : River.PacketListener {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
@@ -110,7 +110,7 @@ internal class ÅpneGosysOppgaverløsning(
                 oppslagFeilet = oppslagFeilet
             )
 
-            hendelseMediator.løsning(
+            meldingMediator.løsning(
                 hendelseId = hendelseId,
                 contextId = contextId,
                 behovId = UUID.fromString(packet["@id"].asText()),

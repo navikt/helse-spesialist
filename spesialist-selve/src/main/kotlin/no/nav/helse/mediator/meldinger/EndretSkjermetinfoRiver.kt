@@ -1,6 +1,6 @@
 package no.nav.helse.mediator.meldinger
 
-import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory
 
 internal class EndretSkjermetinfoRiver(
     rapidsConnection: RapidsConnection,
-    val hendelsemediator: HendelseMediator,
+    private val meldingMediator: MeldingMediator,
 ) : River.PacketListener {
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
@@ -38,7 +38,7 @@ internal class EndretSkjermetinfoRiver(
             return
         }
 
-        hendelsemediator.håndter(fødselsnummer, EndretEgenAnsattStatus(packet), context)
+        meldingMediator.håndter(fødselsnummer, EndretEgenAnsattStatus(packet), context)
     }
 
     private companion object {

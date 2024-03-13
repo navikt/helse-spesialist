@@ -2,7 +2,7 @@ package no.nav.helse.mediator.meldinger.påminnelser
 
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments
-import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory
 
 internal class KommandokjedePåminnelseRiver(
     rapidsConnection: RapidsConnection,
-    val hendelsemediator: HendelseMediator,
+    private val mediator: MeldingMediator,
 ) : River.PacketListener {
 
     private companion object {
@@ -44,7 +44,7 @@ internal class KommandokjedePåminnelseRiver(
             meldingId = packet["meldingId"].asUUID()
         )
 
-        hendelsemediator.påminnelse(
+        mediator.påminnelse(
             meldingId,
             kommandokjede.commandContextId,
             kommandokjede.meldingId,

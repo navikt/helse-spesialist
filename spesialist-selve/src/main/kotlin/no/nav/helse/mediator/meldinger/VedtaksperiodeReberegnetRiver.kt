@@ -1,6 +1,6 @@
 package no.nav.helse.mediator.meldinger
 
-import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnet
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory
 
 internal class VedtaksperiodeReberegnetRiver(
     rapidsConnection: RapidsConnection,
-    private val mediator: HendelseMediator
+    private val mediator: MeldingMediator
 ) : River.PacketListener {
     private val log = LoggerFactory.getLogger(this::class.java)
 

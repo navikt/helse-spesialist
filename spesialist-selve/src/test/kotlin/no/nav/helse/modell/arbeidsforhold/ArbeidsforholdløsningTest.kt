@@ -4,7 +4,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import java.time.LocalDate
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
-import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.løsninger.ArbeidsforholdRiver
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -23,7 +23,7 @@ internal class ArbeidsforholdløsningTest {
     }
 
     private val dao = mockk<ArbeidsforholdDao>(relaxed = true)
-    private val mediator = mockk<HendelseMediator>(relaxed = true)
+    private val mediator = mockk<MeldingMediator>(relaxed = true)
     private val rapid = TestRapid()
 
     init {
