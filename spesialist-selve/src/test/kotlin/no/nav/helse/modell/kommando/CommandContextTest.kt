@@ -1,5 +1,6 @@
 package no.nav.helse.modell.kommando
 
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
@@ -121,7 +122,7 @@ internal class CommandContextTest {
     }
 
     @Test
-    fun `lager kommandokjede_ferdigstilt hendelse når kommandoen ferdigstilles`() {
+    fun `lager kommandokjede_ferdigstilt hendelse når kommandokjeden ferdigstilles`() {
         TestCommand(executeAction = { this.ferdigstill(context)}).apply {
             context.utfør(commandContextDao, this.id, this)
         }
@@ -131,7 +132,7 @@ internal class CommandContextTest {
     }
 
     @Test
-    fun `lager kommandokjede_suspendert hendelse når kommandoen suspenderes`() {
+    fun `lager kommandokjede_suspendert hendelse når kommandokjeden suspenderes`() {
         TestCommand(executeAction = {
             false
         }).apply {
@@ -140,6 +141,20 @@ internal class CommandContextTest {
         val result = observer.hendelser
         assertTrue(result.isNotEmpty())
         assertTrue(result.first().contains("kommandokjede_suspendert"))
+    }
+
+    @Test
+    fun `lager kommandokjede_avbrutt hendelse når kommandokjeden avbrytes`() {
+        every { commandContextDao.avbryt(any(), any()) } returns listOf(Pair(context.id(), HENDELSE))
+        TestCommand(executeAction = {
+            false
+        }).apply {
+            context.utfør(commandContextDao, this.id, this)
+        }
+        context.avbryt(commandContextDao, UUID.randomUUID())
+        val result = observer.hendelser
+        assertTrue(result.isNotEmpty())
+        assertTrue(result.last().contains("kommandokjede_avbrutt"))
     }
 
     @Test

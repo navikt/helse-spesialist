@@ -59,6 +59,16 @@ internal class CommandContextDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `returnerer commandContextId og meldingId`() {
+        val contextId1 = ny(HENDELSE1)
+        val contextId2 = ny(HENDELSE2)
+        val avbruttKommandokjede = avbryt(UUID.randomUUID(), HENDELSE1.vedtaksperiodeId())
+        assertEquals(contextId1, avbruttKommandokjede.first().first)
+        assertEquals(HENDELSE1.id, avbruttKommandokjede.first().second)
+        assertTilstand(contextId2, "NY")
+    }
+
+    @Test
     fun `avbryter ikke noe når det ikke finnes eksisterende contexter`() {
         val contextId = UUID.randomUUID()
         commandContextDao.avbryt(UUID.randomUUID(), contextId)
@@ -81,8 +91,8 @@ internal class CommandContextDaoTest : DatabaseIntegrationTest() {
         commandContextDao.feil(melding.id, uuid)
     }
 
-    private fun avbryt(contextId: UUID, vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID1) {
-        commandContextDao.avbryt(vedtaksperiodeId, contextId)
+    private fun avbryt(contextId: UUID, vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID1): List<Pair<UUID, UUID>> {
+        return commandContextDao.avbryt(vedtaksperiodeId, contextId)
     }
 
     private fun assertTilstand(contextId: UUID, vararg expectedTilstand: String) {

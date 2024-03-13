@@ -35,7 +35,7 @@ internal class CommandContextDao(private val dataSource: DataSource) {
         lagre(hendelseId, contextId, SUSPENDERT, hash, sti)
     }
 
-    fun avbryt(vedtaksperiodeId: UUID, contextId: UUID) {
+    fun avbryt(vedtaksperiodeId: UUID, contextId: UUID): List<Pair<UUID, UUID>> {
         sessionOf(dataSource).use  {
             @Language("PostgreSQL")
             val query = """
@@ -50,9 +50,9 @@ internal class CommandContextDao(private val dataSource: DataSource) {
                         AND context_id != :contextId
                         ORDER BY context_id, id DESC
                 ) AS command_contexts
-                WHERE tilstand IN (:ny, :suspendert)
+                WHERE tilstand IN (:ny, :suspendert) RETURNING context_id, hendelse_id
             """
-            it.run(
+            return it.run(
                 queryOf(
                     query,
                     mapOf(
@@ -62,7 +62,7 @@ internal class CommandContextDao(private val dataSource: DataSource) {
                         "ny" to NY.name,
                         "suspendert" to SUSPENDERT.name
                     )
-                ).asUpdate
+                ).map { rad -> rad.uuid("context_id") to rad.uuid("hendelse_id") }.asList
             )
         }
     }
