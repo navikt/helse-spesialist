@@ -32,8 +32,6 @@ internal class Sykefraværstilfelle(
 
     private fun fattVedtak(vedtak: Sykepengevedtak) = observers.forEach { it.vedtakFattet(vedtak) }
 
-    private fun deaktiverVarsel(varsel: Varsel) = observers.forEach { it.deaktiverVarsel(varsel) }
-
     internal fun haster(vedtaksperiodeId: UUID): Boolean {
         val generasjon = gjeldendeGenerasjoner.finnGenerasjon(vedtaksperiodeId)
             ?: throw IllegalArgumentException("Finner ikke generasjon med vedtaksperiodeId=$vedtaksperiodeId i sykefraværstilfelle med skjæringstidspunkt=$skjæringstidspunkt")
@@ -76,7 +74,6 @@ internal class Sykefraværstilfelle(
 
     internal fun deaktiver(varsel: Varsel) {
         gjeldendeGenerasjoner.deaktiver(varsel)
-        deaktiverVarsel(varsel)
     }
 
     internal fun håndterGodkjent(saksbehandlerIdent: String, vedtaksperiodeId: UUID, hendelseId: UUID) {
