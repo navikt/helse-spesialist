@@ -24,14 +24,14 @@ internal class Vergemålløsning(
         init {
             River(rapidsConnection).apply {
                 validate {
-                    it.requireKey("@id")
                     it.demandValue("@event_name", "behov")
                     it.demandValue("@final", true)
                     it.demandAll("@behov", listOf("Vergemål"))
-                    it.require("@opprettet") { message -> message.asLocalDateTime() }
                     it.demandKey("contextId")
                     it.demandKey("hendelseId")
                     it.demandKey("fødselsnummer")
+                    it.requireKey("@id")
+                    it.require("@opprettet") { message -> message.asLocalDateTime() }
                     it.requireKey("@løsning.Vergemål")
                 }
             }.register(this)
