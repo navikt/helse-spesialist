@@ -309,7 +309,7 @@ internal class Generasjon private constructor(
             vedtaksperiode: Vedtaksperiode,
             spleisBehandling: SpleisBehandling
         ) {
-            sikkerlogg.warn("Forventer ikke ny Spleis-behandling, gjeldende generasjon i Spesialist er ikke lukket")
+            throw IllegalStateException("Forventer ikke ny Spleis-behandling, gjeldende generasjon i Spesialist er ikke lukket")
         }
 
         override fun invaliderUtbetaling(generasjon: Generasjon, utbetalingId: UUID) {

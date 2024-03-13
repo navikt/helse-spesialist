@@ -5,13 +5,11 @@ import java.util.UUID
 import no.nav.helse.januar
 import no.nav.helse.modell.varsel.Varsel
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class VedtaksperiodeTest {
 
-    @Disabled
     @Test
     fun `ugyldig tilstand om Spesialist mottar ny behandling når gjeldende generasjon ikke er lukket`() {
         val vedtaksperiodeId = UUID.randomUUID()
