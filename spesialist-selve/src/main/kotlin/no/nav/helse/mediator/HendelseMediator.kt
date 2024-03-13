@@ -406,20 +406,31 @@ internal class HendelseMediator(
     }
 
     internal fun mottaMelding(melding: Personmelding) {
-        withMDC(mapOf("meldingId" to melding.id.toString())) {
-            logg.info("Melding ${melding::class.simpleName} mottatt")
-            sikkerlogg.info("Melding ${melding::class.simpleName} mottatt")
+        val meldingnavn = requireNotNull(melding::class.simpleName)
+        withMDC(
+            mapOf(
+                "meldingId" to melding.id.toString(),
+                "meldingnavn" to meldingnavn
+            )
+        ) {
+            logg.info("Melding $meldingnavn mottatt")
+            sikkerlogg.info("Melding $meldingnavn mottatt")
 
-            personRepository.brukPersonHvisFinnes(melding.fødselsnummer()) {
-                logg.info("Personen finnes i databasen, behandler melding ${melding::class.simpleName}")
-                sikkerlogg.info("Personen finnes i databasen, behandler melding ${melding::class.simpleName}")
+            try {
+                personRepository.brukPersonHvisFinnes(melding.fødselsnummer()) {
+                    logg.info("Personen finnes i databasen, behandler melding $meldingnavn")
+                    sikkerlogg.info("Personen finnes i databasen, behandler melding $meldingnavn")
 
-                melding.behandle(this, kommandofabrikk)
+                    melding.behandle(this, kommandofabrikk)
+                }
+                if (melding is VedtakFattet) melding.doFinally(vedtakDao) // Midlertidig frem til spesialsak ikke er en ting lenger
+            } catch (e: Exception) {
+                logg.error("Feil ved behandling av melding $meldingnavn", e.message, e)
+                throw e
+            } finally {
+                logg.info("Melding $meldingnavn lest")
+                sikkerlogg.info("Melding $meldingnavn lest")
             }
-            if (melding is VedtakFattet) melding.doFinally(vedtakDao) // Midlertidig frem til spesialsak ikke er en ting lenger
-
-            logg.info("Melding ${melding::class.simpleName} lest")
-            sikkerlogg.info("Melding ${melding::class.simpleName} lest")
         }
     }
 
