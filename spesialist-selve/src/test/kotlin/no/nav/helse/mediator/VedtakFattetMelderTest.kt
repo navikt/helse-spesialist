@@ -18,9 +18,9 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class SykefraværstilfelleMediatorTest {
+internal class VedtakFattetMelderTest {
     private val testRapid = TestRapid()
-    private val mediator = SykefraværstilfelleMediator(testRapid)
+    private val mediator = VedtakFattetMelder(testRapid)
 
     private companion object {
         private val fødselsnummer = "12345678910"

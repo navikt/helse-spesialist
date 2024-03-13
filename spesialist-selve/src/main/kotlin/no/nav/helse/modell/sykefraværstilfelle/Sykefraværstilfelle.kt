@@ -2,6 +2,7 @@ package no.nav.helse.modell.sykefraværstilfelle
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.modell.person.PersonObserver
 import no.nav.helse.modell.sykefraværstilfelle.SkjønnsfastattSykepengegrunnlag.Companion.sortert
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.vedtaksperiode.Generasjon
@@ -28,7 +29,7 @@ internal class Sykefraværstilfelle(
     }
 
     private val skjønnsfastatteSykepengegrunnlag = skjønnsfastatteSykepengegrunnlag.sortert()
-    private val observers = mutableListOf<SykefraværstilfelleObserver>()
+    private val observers = mutableListOf<PersonObserver>()
 
     private fun fattVedtak(vedtak: Sykepengevedtak) = observers.forEach { it.vedtakFattet(vedtak) }
 
@@ -92,7 +93,7 @@ internal class Sykefraværstilfelle(
         return gjeldendeGenerasjoner.erTilbakedatert(vedtaksperiodeId)
     }
 
-    internal fun registrer(observer: SykefraværstilfelleObserver) {
+    internal fun registrer(observer: PersonObserver) {
         observers.add(observer)
     }
 }

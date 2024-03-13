@@ -1,7 +1,7 @@
 package no.nav.helse.mediator
 
 import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.helse.modell.sykefraværstilfelle.SykefraværstilfelleObserver
+import no.nav.helse.modell.person.PersonObserver
 import no.nav.helse.modell.vedtaksperiode.IVedtaksperiodeObserver
 import no.nav.helse.modell.vedtaksperiode.vedtak.Sykepengegrunnlagsfakta.Infotrygd
 import no.nav.helse.modell.vedtaksperiode.vedtak.Sykepengegrunnlagsfakta.Spleis
@@ -10,12 +10,12 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 
-internal class SykefraværstilfelleMediator(
+internal class VedtakFattetMelder(
     private val rapidsConnection: RapidsConnection,
-) : SykefraværstilfelleObserver, IVedtaksperiodeObserver {
+) : PersonObserver, IVedtaksperiodeObserver {
     private companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-        private val logg = LoggerFactory.getLogger(SykefraværstilfelleMediator::class.java)
+        private val logg = LoggerFactory.getLogger(VedtakFattetMelder::class.java)
     }
 
     override fun vedtakFattet(sykepengevedtak: Sykepengevedtak) {

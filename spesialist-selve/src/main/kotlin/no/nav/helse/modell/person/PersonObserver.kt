@@ -1,7 +1,7 @@
-package no.nav.helse.modell.sykefraværstilfelle
+package no.nav.helse.modell.person
 
 import no.nav.helse.modell.vedtaksperiode.vedtak.Sykepengevedtak
 
-internal interface SykefraværstilfelleObserver {
+internal interface PersonObserver {
     fun vedtakFattet(sykepengevedtak: Sykepengevedtak) {}
 }

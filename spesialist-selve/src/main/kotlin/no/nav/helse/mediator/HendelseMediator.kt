@@ -222,15 +222,15 @@ internal class HendelseMediator(
         val fødselsnummer = avsluttetMedVedtakMessage.fødselsnummer()
         val skjæringstidspunkt = avsluttetMedVedtakMessage.skjæringstidspunkt()
         val sykefraværstilfelle = kommandofabrikk.sykefraværstilfelle(fødselsnummer, skjæringstidspunkt)
-        val sykefraværstilfelleMediator = SykefraværstilfelleMediator(rapidsConnection)
-        sykefraværstilfelle.registrer(sykefraværstilfelleMediator)
+        val vedtakFattetMelder = VedtakFattetMelder(rapidsConnection)
+        sykefraværstilfelle.registrer(vedtakFattetMelder)
         avsluttetMedVedtakMessage.sendInnTil(sykefraværstilfelle)
     }
 
     internal fun håndter(avsluttetUtenVedtakMessage: AvsluttetUtenVedtakMessage) {
         generasjonRepository.brukGenerasjon(avsluttetUtenVedtakMessage.vedtaksperiodeId()) { generasjon ->
-            val sykefraværstilfelleMediator = SykefraværstilfelleMediator(rapidsConnection)
-            generasjon.registrer(sykefraværstilfelleMediator)
+            val vedtakFattetMelder = VedtakFattetMelder(rapidsConnection)
+            generasjon.registrer(vedtakFattetMelder)
             avsluttetUtenVedtakMessage.sendInnTil(generasjon)
         }
     }
