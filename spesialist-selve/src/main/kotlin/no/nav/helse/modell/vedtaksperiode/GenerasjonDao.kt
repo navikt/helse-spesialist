@@ -120,10 +120,10 @@ class GenerasjonDao(private val dataSource: DataSource) {
 
     internal fun TransactionalSession.lagreGenerasjon(generasjonDto: GenerasjonDto) {
         this.lagre(generasjonDto)
+        this.slettVarsler(generasjonDto.id, generasjonDto.varsler.map { it.id })
         generasjonDto.varsler.forEach { varselDto ->
             this.lagre(varselDto, generasjonDto.id)
         }
-        this.slettVarsler(generasjonDto.id, generasjonDto.varsler.map { it.id })
     }
 
     private fun TransactionalSession.lagre(generasjonDto: GenerasjonDto) {

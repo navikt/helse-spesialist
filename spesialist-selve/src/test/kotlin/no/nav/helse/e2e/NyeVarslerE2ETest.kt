@@ -38,6 +38,17 @@ internal class NyeVarslerE2ETest : AbstractE2ETest() {
     }
 
     @Test
+    fun `gammelt avviksvarsel erstattes av nytt avviksvarsel`() {
+        håndterSøknad()
+        spleisOppretterNyBehandling()
+        håndterVedtaksperiodeNyUtbetaling()
+        håndterAktivitetsloggNyAktivitet(varselkoder = listOf("RV_IV_2"))
+        håndterAktivitetsloggNyAktivitet(varselkoder = listOf("RV_IV_2"))
+
+        assertVarsler(VEDTAKSPERIODE_ID, 1)
+    }
+
+    @Test
     fun `varsler for ulike vedtaksperioder går ikke i beina på hverandre`() {
         val v1 = UUID.randomUUID()
         val v2 = UUID.randomUUID()
