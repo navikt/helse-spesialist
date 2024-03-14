@@ -60,6 +60,19 @@ internal class VedtakDao(private val dataSource: DataSource) {
         )
     }
 
+    internal fun TransactionalSession.lagreOpprinneligSøknadsdato(vedtaksperiodeId: UUID) {
+        @Language("PostgreSQL")
+        val query = """
+            INSERT INTO opprinnelig_soknadsdato 
+            SELECT vedtaksperiode_id, opprettet_tidspunkt
+            FROM selve_vedtaksperiode_generasjon
+            WHERE vedtaksperiode_id = :vedtaksperiode_id
+            ORDER BY opprettet_tidspunkt ASC LIMIT 1
+            ON CONFLICT DO NOTHING;
+            """.trimIndent()
+        run(queryOf(query, mapOf("vedtaksperiode_id" to vedtaksperiodeId)).asUpdate)
+    }
+
     internal fun opprett(
         vedtaksperiodeId: UUID,
         fom: LocalDate,
