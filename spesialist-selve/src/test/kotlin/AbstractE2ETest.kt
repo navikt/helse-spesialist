@@ -71,6 +71,7 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.fail
+import kotlin.random.Random.Default.nextInt
 import kotlin.random.Random.Default.nextLong
 
 fun lagFødselsnummer() = nextLong(from = 100000_00000, until = 699999_99999).toString()
@@ -86,12 +87,17 @@ private val organisasjonsnavnDel2 = listOf("AVDELINGEN", "SENTERET", "FORUM", "K
 
 fun lagOrganisasjonsnavn() = organisasjonsnavnDel1.random() + organisasjonsnavnDel2.random()
 
+fun lagSaksbehandlerident() = ('A'..'Z').random() + "${nextInt(from = 100_000, until = 999_999)}"
+
 fun fødselsdato(): LocalDate {
     val end = LocalDate.now().minusYears(18)
     val start =  end.minusYears(100)
     val randomDayInEpoch = nextLong(start.toEpochDay(), end.toEpochDay())
     return LocalDate.ofEpochDay(randomDayInEpoch)
 }
+
+fun lagFornavn() = fornavnListe.random()
+fun lagEtternavn() = etternavnListe.random()
 
 internal class TestPerson {
     val fødselsnummer: String = lagFødselsnummer()

@@ -19,6 +19,7 @@ import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.testEnv
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 
 // Snakk med Christian før du lager flere subklasser av denne. Det er mulig vi ønsker å lage (eller allerede har laget?)
@@ -30,6 +31,7 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
     private val periodehistorikkDao = PeriodehistorikkDao(dataSource)
     private val totrinnsvurderingDao = TotrinnsvurderingDao(dataSource)
     private val hendelseDao = HendelseDao(dataSource)
+    private val saksbehandlerDao = SaksbehandlerDao(dataSource)
 
     private val oppgaveMediator = OppgaveMediator(
         oppgaveDao = OppgaveDao(dataSource),
@@ -53,6 +55,7 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
         oppgaveMediator = oppgaveMediator,
         reservasjonDao = reservasjonDao,
         periodehistorikkDao = periodehistorikkDao,
+        saksbehandlerRepository = saksbehandlerDao,
         totrinnsvurderingMediator = TotrinnsvurderingMediator(
             totrinnsvurderingDao,
             oppgaveDao,
@@ -66,6 +69,7 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
     protected fun assertSaksbehandlerløsning(
         godkjent: Boolean,
         automatiskBehandlet: Boolean,
+        totrinnsvurdering: Boolean,
         vararg årsakerTilAvvist: String,
     ) {
         val løsning = testRapid.inspektør.siste("saksbehandler_løsning")
@@ -80,10 +84,14 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
         assertNotNull(løsning.path("saksbehandleroid").asText())
         assertNotNull(løsning.path("saksbehandlerepost").asText())
         assertNotNull(løsning.path("godkjenttidspunkt").asLocalDateTime())
+        assertNotNull(løsning.path("saksbehandler"))
         if (årsakerTilAvvist.isNotEmpty()) {
             val begrunnelser = løsning["begrunnelser"].map { it.asText() }
             assertEquals(begrunnelser, begrunnelser.distinct())
             assertEquals(årsakerTilAvvist.toSet(), begrunnelser.toSet())
         }
+
+        if (totrinnsvurdering) assertNotNull(løsning["beslutter"])
+        else assertNull(løsning["beslutter"])
     }
 }

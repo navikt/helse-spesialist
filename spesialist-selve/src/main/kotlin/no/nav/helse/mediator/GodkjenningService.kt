@@ -6,12 +6,14 @@ import java.util.UUID
 import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.db.ReservasjonDao
+import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
@@ -32,6 +34,7 @@ internal class GodkjenningService(
     private val oppgaveMediator: OppgaveMediator,
     private val reservasjonDao: ReservasjonDao = ReservasjonDao(dataSource),
     private val periodehistorikkDao: PeriodehistorikkDao = PeriodehistorikkDao(dataSource),
+    private val saksbehandlerRepository: SaksbehandlerRepository,
     private val totrinnsvurderingMediator: TotrinnsvurderingMediator = TotrinnsvurderingMediator(
         TotrinnsvurderingDao(dataSource), oppgaveDao, periodehistorikkDao,
         NotatMediator(
@@ -52,6 +55,8 @@ internal class GodkjenningService(
         val totrinnsvurdering = totrinnsvurderingMediator.hentAktiv(vedtaksperiodeId)
         val reserverPersonOid: UUID = totrinnsvurdering?.saksbehandler ?: oid
         val saksbehandleroverstyringer = overstyringDao.finnAktiveOverstyringer(vedtaksperiodeId)
+        val saksbehandler = totrinnsvurdering?.saksbehandler() ?: saksbehandlerForJson(oid)
+        val beslutter = totrinnsvurdering?.beslutter()
         val godkjenningMessage = JsonMessage.newMessage("saksbehandler_løsning", mutableMapOf(
             "@forårsaket_av" to mapOf(
                 "event_name" to "behov",
@@ -68,10 +73,12 @@ internal class GodkjenningService(
             "saksbehandlerepost" to epost,
             "godkjenttidspunkt" to LocalDateTime.now(),
             "saksbehandleroverstyringer" to saksbehandleroverstyringer,
+            "saksbehandler" to saksbehandler
         ).apply {
             godkjenningDTO.årsak?.let { put("årsak", it) }
             godkjenningDTO.begrunnelser?.let { put("begrunnelser", it) }
             godkjenningDTO.kommentar?.let { put("kommentar", it) }
+            compute("beslutter") { _, _ -> beslutter }
         }).also {
             sikkerlogg.info("Publiserer saksbehandler-løsning: ${it.toJson()}")
         }
@@ -91,6 +98,24 @@ internal class GodkjenningService(
                 periodehistorikkDao.lagre(TOTRINNSVURDERING_ATTESTERT, oid, utbetalingId, null)
             }
         }
+    }
+
+    private fun TotrinnsvurderingOld.saksbehandler(): Map<String, String> {
+        checkNotNull(saksbehandler) { "Totrinnsvurdering uten saksbehandler gir ikke noen mening ved godkjenning av periode" }
+        return saksbehandlerForJson(saksbehandler)
+    }
+
+    private fun TotrinnsvurderingOld.beslutter(): Map<String, String> {
+        checkNotNull(beslutter) { "Totrinnsvurdering uten beslutter gir ikke noen mening ved godkjenning av periode" }
+        return saksbehandlerForJson(beslutter)
+    }
+
+    private fun saksbehandlerForJson(oid: UUID): Map<String, String> {
+        val saksbehandler = requireNotNull(saksbehandlerRepository.finnSaksbehandler(oid)) { "Finner ikke saksbehandleren i databasen. Det gir ikke noen mening" }
+        return mapOf(
+            "ident" to saksbehandler.ident,
+            "epostadresse" to saksbehandler.epostadresse,
+        )
     }
 
     private fun reserverPerson(oid: UUID, fødselsnummer: String) {

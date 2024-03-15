@@ -4,7 +4,9 @@ import AbstractIntegrationTest
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.Testdata
+import lagEtternavn
+import lagFornavn
+import lagSaksbehandlerident
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import org.intellij.lang.annotations.Language
@@ -25,10 +27,23 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
 
     @Test
     fun `håndter godkjenning`() {
+        val saksbehandler = enSaksbehandler()
         fremTilSaksbehandleroppgave()
 
-        godkjenningService.håndter(godkjenningDto(), "epost@nav.no", UUID.randomUUID(), UUID.randomUUID())
-        assertSaksbehandlerløsning(godkjent = true, automatiskBehandlet = false)
+        godkjenningService.håndter(godkjenningDto(), "epost@nav.no", saksbehandler, UUID.randomUUID())
+        assertSaksbehandlerløsning(godkjent = true, automatiskBehandlet = false, totrinnsvurdering = false)
+    }
+
+    @Test
+    fun `håndter godkjenning med beslutteroppgave`() {
+        val opprinneligSaksbehandler = enSaksbehandler()
+        val beslutter = enSaksbehandler()
+        fremTilSaksbehandleroppgave()
+
+        settTotrinnsvurdering(opprinneligSaksbehandler = opprinneligSaksbehandler, beslutter = beslutter)
+
+        godkjenningService.håndter(godkjenningDto(), "epost@nav.no", beslutter, UUID.randomUUID())
+        assertSaksbehandlerløsning(godkjent = true, automatiskBehandlet = false, totrinnsvurdering = true)
     }
 
     @Test
@@ -118,13 +133,15 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
         @Language("PostgreSQL") val query =
             " insert into saksbehandler(oid, navn, epost, ident) values (:oid, :navn, :e_post, :ident ) "
         return sessionOf(dataSource).use { session ->
+            val fornavn = lagFornavn()
+            val etternavn = lagEtternavn()
             session.run(
                 queryOf(
                     query, mapOf(
                         "oid" to oid,
-                        "navn" to Testdata.SAKSBEHANDLER_NAVN,
-                        "e_post" to Testdata.SAKSBEHANDLER_EPOST,
-                        "ident" to Testdata.SAKSBEHANDLER_IDENT,
+                        "navn" to "$fornavn $etternavn",
+                        "e_post" to "$fornavn.$etternavn@nav.no".lowercase(),
+                        "ident" to lagSaksbehandlerident(),
                     )
                 ).asUpdate
             )
