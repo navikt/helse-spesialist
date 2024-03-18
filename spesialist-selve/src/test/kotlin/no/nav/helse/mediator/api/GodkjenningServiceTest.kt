@@ -98,9 +98,43 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
         assertPeriodehistorikk(utbetalingId)
     }
 
+    @Test
+    fun `Takler at det mangler data på totrinnsvurderingen ved avvisning`() {
+        val opprinneligSaksbehandler = enSaksbehandler()
+
+        fremTilSaksbehandleroppgave()
+        opprettInitiellTotrinnsvurdering()
+        godkjenningService.håndter(godkjenningDtoAvvisning(), "epost@nav.no", opprinneligSaksbehandler, UUID.randomUUID())
+
+        assertSaksbehandlerløsning(godkjent = false, automatiskBehandlet = false, totrinnsvurdering = false)
+    }
+
+    @Test
+    fun `Sender ikke med beslutter ved avvisning`() {
+        val opprinneligSaksbehandler = enSaksbehandler()
+        val beslutter = enSaksbehandler()
+
+        fremTilSaksbehandleroppgave()
+        settTotrinnsvurdering(opprinneligSaksbehandler, beslutter)
+        godkjenningService.håndter(godkjenningDtoAvvisning(), "epost@nav.no", opprinneligSaksbehandler, UUID.randomUUID())
+
+        assertSaksbehandlerløsning(godkjent = false, automatiskBehandlet = false, totrinnsvurdering = false)
+    }
+
     private fun enSaksbehandler(): UUID = UUID.randomUUID().also(::opprettSaksbehandler)
 
-    private fun settTotrinnsvurdering(opprinneligSaksbehandler: UUID, beslutter: UUID) {
+    // Per nå blir det opprettet "en totrinnsvurdering" på et tidspunkt, som så blir updated med uuid-er på et senere
+    // tidspunkt
+    private fun opprettInitiellTotrinnsvurdering() {
+        val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(fødselsnummer = FØDSELSNUMMER)
+
+        @Language("postgresql") val sql = "insert into totrinnsvurdering (vedtaksperiode_id) values (:vedtaksperiodeId)"
+        sessionOf(dataSource).use { session ->
+            session.run(queryOf(sql, mapOf("vedtaksperiodeId" to vedtaksperiodeId)).asUpdate)
+        }
+    }
+
+    private fun settTotrinnsvurdering(opprinneligSaksbehandler: UUID?, beslutter: UUID?) {
         val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(fødselsnummer = FØDSELSNUMMER)
 
         @Language("postgresql") val sql = """
@@ -128,6 +162,9 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
 
     private fun godkjenningDto(oppgaveId: Long = sisteOppgaveId()) =
         GodkjenningDto(oppgaveId, true, "saksbehandler", null, null, null)
+
+    private fun godkjenningDtoAvvisning(oppgaveId: Long = sisteOppgaveId()) =
+        GodkjenningDto(oppgaveId, false, "saksbehandler", "en årsak", null, null)
 
     private fun opprettSaksbehandler(oid: UUID) {
         @Language("PostgreSQL") val query =

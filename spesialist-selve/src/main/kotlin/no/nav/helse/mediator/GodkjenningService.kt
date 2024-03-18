@@ -55,8 +55,8 @@ internal class GodkjenningService(
         val totrinnsvurdering = totrinnsvurderingMediator.hentAktiv(vedtaksperiodeId)
         val reserverPersonOid: UUID = totrinnsvurdering?.saksbehandler ?: oid
         val saksbehandleroverstyringer = overstyringDao.finnAktiveOverstyringer(vedtaksperiodeId)
-        val saksbehandler = totrinnsvurdering?.saksbehandler() ?: saksbehandlerForJson(oid)
-        val beslutter = totrinnsvurdering?.beslutter()
+        val saksbehandler = saksbehandler(godkjenningDTO, totrinnsvurdering, oid)
+        val beslutter = beslutter(godkjenningDTO, totrinnsvurdering)
         val godkjenningMessage = JsonMessage.newMessage("saksbehandler_løsning", mutableMapOf(
             "@forårsaket_av" to mapOf(
                 "event_name" to "behov",
@@ -100,14 +100,31 @@ internal class GodkjenningService(
         }
     }
 
-    private fun TotrinnsvurderingOld.saksbehandler(): Map<String, String> {
-        checkNotNull(saksbehandler) { "Totrinnsvurdering uten saksbehandler gir ikke noen mening ved godkjenning av periode" }
-        return saksbehandlerForJson(saksbehandler)
+    private fun saksbehandler(
+        godkjenningDTO: GodkjenningDto,
+        totrinnsvurdering: TotrinnsvurderingOld?,
+        oid: UUID,
+    ): Map<String, String> = when {
+        !godkjenningDTO.godkjent -> saksbehandlerForJson(oid)
+        totrinnsvurdering == null -> saksbehandlerForJson(oid)
+
+        else -> {
+            checkNotNull(totrinnsvurdering.saksbehandler) { "Totrinnsvurdering uten saksbehandler gir ikke noen mening ved godkjenning av periode" }
+            saksbehandlerForJson(totrinnsvurdering.saksbehandler)
+        }
     }
 
-    private fun TotrinnsvurderingOld.beslutter(): Map<String, String> {
-        checkNotNull(beslutter) { "Totrinnsvurdering uten beslutter gir ikke noen mening ved godkjenning av periode" }
-        return saksbehandlerForJson(beslutter)
+    private fun beslutter(
+        godkjenningDTO: GodkjenningDto,
+        totrinnsvurdering: TotrinnsvurderingOld?,
+    ): Map<String, String>? = when {
+        !godkjenningDTO.godkjent -> null
+        totrinnsvurdering == null -> null
+
+        else -> {
+            checkNotNull(totrinnsvurdering.beslutter) { "Totrinnsvurdering uten beslutter gir ikke noen mening ved godkjenning av periode" }
+            saksbehandlerForJson(totrinnsvurdering.beslutter)
+        }
     }
 
     private fun saksbehandlerForJson(oid: UUID): Map<String, String> {
