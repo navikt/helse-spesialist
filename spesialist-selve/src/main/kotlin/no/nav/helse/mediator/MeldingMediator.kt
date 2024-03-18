@@ -413,7 +413,7 @@ internal class MeldingMediator(
             )
         ) {
             logg.info("Melding $meldingnavn mottatt")
-            sikkerlogg.info("Melding $meldingnavn mottatt")
+            sikkerlogg.info("Melding $meldingnavn mottatt:\n${melding.toJson()}")
 
             try {
                 personRepository.brukPersonHvisFinnes(melding.fødselsnummer()) {
