@@ -23,7 +23,7 @@ spec:
               group: tbd-spesialist-v1
         target:
           type: AverageValue
-          averageValue: 200
+          averageValue: 1000
   behavior:
     scaleUp:
       policies:
