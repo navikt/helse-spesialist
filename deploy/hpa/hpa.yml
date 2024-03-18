@@ -28,9 +28,12 @@ spec:
     scaleUp:
       policies:
         - type: Pods
+          periodSeconds: 15
           value: 2
+      stabilizationWindowSeconds: 10
     scaleDown:
       policies:
         - type: Pods
           value: 3
           periodSeconds: 30
+      stabilizationWindowSeconds: 30
