@@ -16,7 +16,6 @@ spec:
     initialDelay: 5
   resources:
     limits:
-      cpu: 4000m
       memory: 2048Mi
     requests:
       cpu: 100m
