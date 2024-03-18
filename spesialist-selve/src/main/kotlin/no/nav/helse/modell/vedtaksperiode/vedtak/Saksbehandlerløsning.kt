@@ -11,6 +11,8 @@ import no.nav.helse.rapids_rivers.isMissingOrNull
 /**
  * Behandler input til godkjenningsbehov fra saksbehandler som har blitt lagt på rapid-en av API-biten av spesialist.
  */
+
+
 internal class Saksbehandlerløsning private constructor(
     override val id: UUID,
     val behandlingId: UUID,
@@ -25,6 +27,8 @@ internal class Saksbehandlerløsning private constructor(
     val begrunnelser: List<String>?,
     val kommentar: String?,
     val saksbehandleroverstyringer: List<UUID>,
+    val saksbehandler: Saksbehandler,
+    val beslutter: Saksbehandler?,
     private val json: String,
 ) : Personmelding {
 
@@ -41,8 +45,23 @@ internal class Saksbehandlerløsning private constructor(
         årsak = packet["årsak"].takeUnless(JsonNode::isMissingOrNull)?.asText(),
         begrunnelser = packet["begrunnelser"].takeUnless(JsonNode::isMissingOrNull)?.map(JsonNode::asText),
         kommentar = packet["kommentar"].takeUnless(JsonNode::isMissingOrNull)?.asText(),
+        saksbehandler = Saksbehandler(
+            packet["saksbehandler.ident"].asText(),
+            packet["saksbehandler.epostadresse"].asText()
+        ),
+        beslutter = packet["beslutter"].takeUnless(JsonNode::isMissingOrNull)?.let {
+            Saksbehandler(
+                packet["beslutter.ident"].asText(),
+                packet["beslutter.epostadresse"].asText()
+            )
+        },
         saksbehandleroverstyringer = packet["saksbehandleroverstyringer"].takeUnless(JsonNode::isMissingOrNull)?.map { UUID.fromString(it.asText()) } ?: emptyList(),
         json = packet.toJson(),
+    )
+
+    internal data class Saksbehandler(
+        val ident: String,
+        val epostadresse: String
     )
 
     override fun fødselsnummer() = fødselsnummer

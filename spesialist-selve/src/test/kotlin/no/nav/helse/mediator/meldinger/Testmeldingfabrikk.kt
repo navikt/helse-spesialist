@@ -684,6 +684,8 @@ internal object Testmeldingfabrikk {
         saksbehandlerident: String = "Z999999",
         saksbehandlerepost: String = "saksbehandler@nav.no",
         saksbehandlerOID: UUID = UUID.randomUUID(),
+        beslutterident: String? = null,
+        beslutterepost: String? = null,
         saksbehandleroverstyringer: List<UUID> = emptyList(),
         årsak: String? = null,
         begrunnelser: List<String>? = null,
@@ -703,10 +705,23 @@ internal object Testmeldingfabrikk {
                 "saksbehandlerepost" to saksbehandlerepost,
                 "saksbehandleroid" to saksbehandlerOID,
                 "saksbehandleroverstyringer" to saksbehandleroverstyringer,
+                "saksbehandler" to mapOf(
+                    "ident" to saksbehandlerident,
+                    "epostadresse" to saksbehandlerepost,
+                ),
             ).apply {
                 årsak?.also { put("årsak", it) }
                 begrunnelser?.also { put("begrunnelser", it) }
                 kommentar?.also { put("kommentar", it) }
+                beslutterident?.also {
+                    put(
+                        "beslutter",
+                        mapOf(
+                            "ident" to beslutterident,
+                            "epostadresse" to beslutterepost,
+                        )
+                    )
+                }
             }
         )
 

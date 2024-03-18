@@ -21,12 +21,14 @@ internal class SaksbehandlerløsningRiver(
     init {
         River(rapidsConnection)
             .apply {
-                validate {
-                    it.demandValue("@event_name", "saksbehandler_løsning")
-                    it.requireKey("@id", "fødselsnummer", "oppgaveId", "hendelseId", "behandlingId")
-                    it.requireKey("godkjent", "saksbehandlerident", "saksbehandleroid", "saksbehandlerepost")
-                    it.require("godkjenttidspunkt", JsonNode::asLocalDateTime)
-                    it.interestedIn("årsak", "begrunnelser", "kommentar", "saksbehandleroverstyringer")
+                validate { message ->
+                    message.demandValue("@event_name", "saksbehandler_løsning")
+                    message.requireKey("@id", "fødselsnummer", "oppgaveId", "hendelseId", "behandlingId")
+                    message.requireKey("godkjent", "saksbehandlerident", "saksbehandleroid", "saksbehandlerepost")
+                    message.require("godkjenttidspunkt", JsonNode::asLocalDateTime)
+                    message.requireKey("saksbehandler", "saksbehandler.ident", "saksbehandler.epostadresse")
+                    message.interestedIn("beslutter", "beslutter.ident", "beslutter.epostadresse")
+                    message.interestedIn("årsak", "begrunnelser", "kommentar", "saksbehandleroverstyringer")
                 }
             }.register(this)
     }
