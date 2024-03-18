@@ -31,7 +31,6 @@ spec:
     autoInstrumentation:
       enabled: true
       runtime: java
-  webproxy: true
   secureLogs:
     enabled: true
   azure:
