@@ -7,6 +7,7 @@ import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.meldinger.løsninger.SaksbehandlerløsningRiver
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -39,5 +40,33 @@ internal class SaksbehandlerløsningRiverTest {
             )
         )
         verify(exactly = 1) { mediator.håndter(FNR, any<Saksbehandlerløsning>(), any()) }
+    }
+
+    @Test
+    fun `leser saksbehandlerløsning med saksbehandler og beslutter`() {
+        testRapid.sendTestMessage(
+            Testmeldingfabrikk.lagSaksbehandlerløsning(
+                FNR,
+                GODKJENNINGSBEHOV_ID,
+                CONTEXT,
+                id = ID,
+                saksbehandlerepost = "saksbehandler@nav.no",
+                saksbehandlerident = "saksbehandlerident",
+                beslutterepost = "beslutter@nav.no",
+                beslutterident = "beslutterident"
+            )
+        )
+        verify(exactly = 1) {
+            mediator.håndter(
+                FNR,
+                withArg<Saksbehandlerløsning> {
+                    assertEquals("saksbehandler@nav.no", it.saksbehandler.epostadresse)
+                    assertEquals("saksbehandlerident", it.saksbehandler.ident)
+                    assertEquals("beslutter@nav.no", it.beslutter?.epostadresse)
+                    assertEquals("beslutterident", it.beslutter?.ident)
+                },
+                any()
+            )
+        }
     }
 }
