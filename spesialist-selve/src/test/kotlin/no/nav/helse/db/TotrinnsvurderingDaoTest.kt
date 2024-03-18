@@ -36,7 +36,7 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         opprettPerson()
         opprettSaksbehandler()
         totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
-        totrinnsvurderingDao.settSaksbehandler(VEDTAKSPERIODE, SAKSBEHANDLER_OID)
+        settSaksbehandler(VEDTAKSPERIODE, SAKSBEHANDLER_OID)
 
         val totrinnsvurdering = totrinnsvurdering()
 
@@ -49,7 +49,7 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         opprettPerson()
         opprettSaksbehandler()
         totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
-        totrinnsvurderingDao.settBeslutter(VEDTAKSPERIODE, SAKSBEHANDLER_OID)
+        settBeslutter(VEDTAKSPERIODE, SAKSBEHANDLER_OID)
 
         val totrinnsvurdering = totrinnsvurdering()
 
@@ -93,7 +93,7 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         opprettVedtaksperiode()
         opprettOppgave()
         totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
-        totrinnsvurderingDao.settErRetur(OPPGAVE_ID)
+        settErRetur(OPPGAVE_ID)
 
         val totrinnsvurdering = totrinnsvurdering()
 
@@ -107,7 +107,7 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         opprettPerson()
         totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
         totrinnsvurderingDao.settErRetur(VEDTAKSPERIODE)
-        totrinnsvurderingDao.settHåndtertRetur(VEDTAKSPERIODE)
+        settHåndtertRetur(VEDTAKSPERIODE)
 
         val totrinnsvurdering = totrinnsvurdering()
 
@@ -124,7 +124,7 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         opprettOppgave()
         totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
         totrinnsvurderingDao.settErRetur(VEDTAKSPERIODE)
-        totrinnsvurderingDao.settHåndtertRetur(OPPGAVE_ID)
+        settHåndtertRetur(OPPGAVE_ID)
 
         val totrinnsvurdering = totrinnsvurdering()
 
@@ -199,7 +199,7 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         lagLinje(personOppdragId, 11.juli(), 31.juli(), 10000)
         val utbetaling_IdId = lagUtbetalingId(arbeidsgiverOppdragId, personOppdragId, UTBETALING_ID)
         opprettUtbetalingKobling(VEDTAKSPERIODE, UTBETALING_ID)
-
+        opprettOppgave()
         totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
         totrinnsvurderingDao.ferdigstill(VEDTAKSPERIODE)
 
@@ -213,8 +213,8 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         assertEquals(utbetaling_IdId, totrinnsvurdering.utbetalingIdRef)
 
         totrinnsvurderingDao.settErRetur(VEDTAKSPERIODE)
-        totrinnsvurderingDao.settSaksbehandler(VEDTAKSPERIODE, SAKSBEHANDLER_OID)
-        totrinnsvurderingDao.settBeslutter(VEDTAKSPERIODE, SAKSBEHANDLER_OID)
+        settSaksbehandler(VEDTAKSPERIODE, SAKSBEHANDLER_OID)
+        settBeslutter(VEDTAKSPERIODE, SAKSBEHANDLER_OID)
 
         val totrinnsvurderingFerdigstilt = totrinnsvurdering()
 
@@ -306,7 +306,7 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         opprettVedtaksperiode()
         opprettOppgave()
         totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
-        totrinnsvurderingDao.settSaksbehandler(OPPGAVE_ID, SAKSBEHANDLER_OID)
+        settSaksbehandler(OPPGAVE_ID, SAKSBEHANDLER_OID)
 
         assertEquals(SAKSBEHANDLER_OID, totrinnsvurderingDao.hentAktiv(VEDTAKSPERIODE)?.saksbehandler)
     }
@@ -318,7 +318,7 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         opprettArbeidsgiver()
         opprettVedtaksperiode()
         opprettOppgave()
-        totrinnsvurderingDao.settSaksbehandler(1L, SAKSBEHANDLER_OID)
+        settSaksbehandler(1L, SAKSBEHANDLER_OID)
 
         assertNull(totrinnsvurderingDao.hentAktiv(1L))
     }
@@ -338,4 +338,64 @@ internal class TotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
             )
         }.asSingle)
     }
+
+    private fun settSaksbehandler(oppgaveId: Long, saksbehandlerOid: UUID) = query(
+        """
+           UPDATE totrinnsvurdering SET saksbehandler = :saksbehandlerOid, oppdatert = now()
+           WHERE vedtaksperiode_id = (
+               SELECT ttv.vedtaksperiode_id 
+               FROM totrinnsvurdering ttv 
+               INNER JOIN vedtak v on ttv.vedtaksperiode_id = v.vedtaksperiode_id
+               INNER JOIN oppgave o on v.id = o.vedtak_ref
+               WHERE o.id = :oppgaveId
+               LIMIT 1
+           )
+           AND utbetaling_id_ref IS null
+        """.trimIndent(), "oppgaveId" to oppgaveId, "saksbehandlerOid" to saksbehandlerOid
+    ).execute()
+
+    private fun settBeslutter(vedtaksperiodeId: UUID, saksbehandlerOid: UUID) = query(
+        """
+           UPDATE totrinnsvurdering SET beslutter = :saksbehandlerOid, oppdatert = now()
+           WHERE vedtaksperiode_id = :vedtaksperiodeId
+           AND utbetaling_id_ref IS null
+        """.trimIndent(), "vedtaksperiodeId" to vedtaksperiodeId, "saksbehandlerOid" to saksbehandlerOid
+    ).execute()
+
+    private fun settErRetur(oppgaveId: Long) = query(
+        """
+           UPDATE totrinnsvurdering SET er_retur = true, oppdatert = now()
+           WHERE vedtaksperiode_id = (
+               SELECT ttv.vedtaksperiode_id 
+               FROM totrinnsvurdering ttv 
+               INNER JOIN vedtak v on ttv.vedtaksperiode_id = v.vedtaksperiode_id
+               INNER JOIN oppgave o on v.id = o.vedtak_ref
+               WHERE o.id = :oppgaveId
+               LIMIT 1
+           )
+           AND utbetaling_id_ref IS null
+        """.trimIndent(), "oppgaveId" to oppgaveId).execute()
+
+    private fun settHåndtertRetur(vedtaksperiodeId: UUID) = query(
+        """
+           UPDATE totrinnsvurdering SET er_retur = false, oppdatert = now()
+           WHERE vedtaksperiode_id = :vedtaksperiodeId
+           AND utbetaling_id_ref IS null
+        """.trimIndent(), "vedtaksperiodeId" to vedtaksperiodeId
+    ).execute()
+
+
+    private fun settHåndtertRetur(oppgaveId: Long) = query(
+        """
+           UPDATE totrinnsvurdering SET er_retur = false, oppdatert = now()
+           WHERE vedtaksperiode_id = (
+               SELECT ttv.vedtaksperiode_id 
+               FROM totrinnsvurdering ttv 
+               INNER JOIN vedtak v on ttv.vedtaksperiode_id = v.vedtaksperiode_id
+               INNER JOIN oppgave o on v.id = o.vedtak_ref
+               WHERE o.id = :oppgaveId
+               LIMIT 1
+           )
+           AND utbetaling_id_ref IS null
+        """.trimIndent(), "oppgaveId" to oppgaveId).execute()
 }

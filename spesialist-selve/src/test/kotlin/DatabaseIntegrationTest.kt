@@ -388,7 +388,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         totrinnsvurderingDao.opprett(vedtaksperiodeId)
 
         if (saksbehandler != null) {
-            totrinnsvurderingDao.settSaksbehandler(vedtaksperiodeId, saksbehandler)
+            settSaksbehandler(vedtaksperiodeId, saksbehandler)
         }
         if (erRetur) {
             totrinnsvurderingDao.settErRetur(vedtaksperiodeId)
@@ -557,6 +557,14 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             )
         )
     }
+
+    protected fun settSaksbehandler(vedtaksperiodeId: UUID, saksbehandlerOid: UUID) = query(
+        """
+            UPDATE totrinnsvurdering
+            SET saksbehandler = :saksbehandlerOid, oppdatert = now()
+            WHERE vedtaksperiode_id = :vedtaksperiodeId AND utbetaling_id_ref IS null
+        """.trimIndent(), "vedtaksperiodeId" to vedtaksperiodeId, "saksbehandlerOid" to saksbehandlerOid
+    ).execute()
 
     protected fun assertGodkjenteVarsler(generasjonId: UUID, forventetAntall: Int) {
         @Language("PostgreSQL")
