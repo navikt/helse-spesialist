@@ -3,21 +3,28 @@ package no.nav.helse.mediator.meldinger.utgående
 import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.rapids_rivers.JsonMessage
 
-internal class VedtaksperiodeAvvist(
+internal class VedtaksperiodeAvvist private constructor(
     val vedtaksperiodeId: UUID,
     val fødselsnummer: String,
     val periodetype: Periodetype?,
+    val saksbehandler: Saksbehandlerløsning.Saksbehandler,
+    val automatiskBehandlet: Boolean,
     val løsning: JsonNode
 ) {
     internal fun toJson() =
         JsonMessage.newMessage("vedtaksperiode_avvist", mutableMapOf(
             "fødselsnummer" to fødselsnummer,
             "vedtaksperiodeId" to vedtaksperiodeId,
-            "saksbehandlerIdent" to løsning["Godkjenning"]["saksbehandlerIdent"].asText(),
-            "saksbehandlerEpost" to løsning["Godkjenning"]["saksbehandlerEpost"].asText(),
-            "automatiskBehandling" to løsning["Godkjenning"]["automatiskBehandling"].asBoolean(),
+            "saksbehandlerIdent" to saksbehandler.ident,
+            "saksbehandlerEpost" to saksbehandler.epostadresse,
+            "saksbehandler" to mapOf(
+                "ident" to saksbehandler.ident,
+                "epostadresse" to saksbehandler.epostadresse
+            ),
+            "automatiskBehandling" to automatiskBehandlet,
             "årsak" to løsning["Godkjenning"]["årsak"].asText(),
             "begrunnelser" to løsning["Godkjenning"]["begrunnelser"].map(JsonNode::asText),
             "kommentar" to løsning["Godkjenning"]["kommentar"].asText()
@@ -26,4 +33,39 @@ internal class VedtaksperiodeAvvist(
             }
         ).toJson()
 
+    internal companion object {
+        fun manueltAvvist(
+            vedtaksperiodeId: UUID,
+            fødselsnummer: String,
+            periodetype: Periodetype?,
+            saksbehandler: Saksbehandlerløsning.Saksbehandler,
+            løsning: JsonNode,
+        ): VedtaksperiodeAvvist {
+            return VedtaksperiodeAvvist(
+                vedtaksperiodeId = vedtaksperiodeId,
+                fødselsnummer = fødselsnummer,
+                periodetype = periodetype,
+                saksbehandler = saksbehandler,
+                automatiskBehandlet = false,
+                løsning = løsning
+            )
+        }
+
+        fun automatiskAvvist(
+            vedtaksperiodeId: UUID,
+            fødselsnummer: String,
+            periodetype: Periodetype?,
+            saksbehandler: Saksbehandlerløsning.Saksbehandler,
+            løsning: JsonNode
+        ): VedtaksperiodeAvvist {
+            return VedtaksperiodeAvvist(
+                vedtaksperiodeId = vedtaksperiodeId,
+                fødselsnummer = fødselsnummer,
+                periodetype = periodetype,
+                saksbehandler = saksbehandler,
+                automatiskBehandlet = true,
+                løsning =  løsning
+            )
+        }
+    }
 }

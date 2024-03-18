@@ -20,6 +20,7 @@ import no.nav.helse.modell.utbetaling.Refusjonstype.DELVIS_REFUSJON
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Generasjon
+import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
@@ -37,6 +38,16 @@ internal class SaksbehandlerløsningTest {
     }
 
     private val hendelseDao = mockk<HendelseDao>(relaxed = true)
+
+    private val saksbehandler = Saksbehandlerløsning.Saksbehandler(
+        ident = "saksbehandlerident",
+        epostadresse = "saksbehandler@nav.no"
+    )
+
+    private val beslutter = Saksbehandlerløsning.Saksbehandler(
+        ident = "beslutterident",
+        epostadresse = "beslutter@nav.no"
+    )
 
     private fun saksbehandlerløsning(godkjent: Boolean, saksbehandlerløsning: List<UUID> = emptyList(), arbeidsgiverbeløp: Int = 0, personbeløp: Int = 0): UtbetalingsgodkjenningCommand {
         val vedtaksperiodeId = randomUUID()
@@ -63,6 +74,8 @@ internal class SaksbehandlerløsningTest {
             godkjenningsbehovhendelseId = GODKJENNINGSBEHOV_ID,
             hendelseDao = hendelseDao,
             godkjenningMediator = GodkjenningMediator(mockk(relaxed = true), mockk(), mockk(), mockk(), mockk()),
+            saksbehandler = saksbehandler,
+            beslutter = beslutter
         )
     }
 

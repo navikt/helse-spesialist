@@ -330,6 +330,8 @@ internal class Kommandofabrikk(
             godkjenttidspunkt = hendelse.godkjenttidspunkt,
             ident = hendelse.ident,
             epostadresse = hendelse.epostadresse,
+            saksbehandler = hendelse.saksbehandler,
+            beslutter = hendelse.beslutter,
             årsak = hendelse.årsak,
             begrunnelser = hendelse.begrunnelser,
             kommentar = hendelse.kommentar,

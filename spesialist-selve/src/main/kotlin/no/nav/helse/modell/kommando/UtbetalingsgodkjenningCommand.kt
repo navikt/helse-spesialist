@@ -7,6 +7,7 @@ import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
+import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import org.slf4j.LoggerFactory
 
 internal class UtbetalingsgodkjenningCommand(
@@ -25,6 +26,8 @@ internal class UtbetalingsgodkjenningCommand(
     private val kommentar: String?,
     private val saksbehandleroverstyringer: List<UUID>,
     private val godkjenningsbehovhendelseId: UUID,
+    private val saksbehandler: Saksbehandlerløsning.Saksbehandler,
+    private val beslutter: Saksbehandlerløsning.Saksbehandler?,
     private val hendelseDao: HendelseDao,
     private val godkjenningMediator: GodkjenningMediator
 ) : Command {
@@ -46,6 +49,8 @@ internal class UtbetalingsgodkjenningCommand(
                 fødselsnummer = fødselsnummer,
                 saksbehandlerIdent = ident,
                 saksbehandlerEpost = epostadresse,
+                saksbehandler = saksbehandler,
+                beslutter = beslutter,
                 godkjenttidspunkt = godkjenttidspunkt,
                 saksbehandleroverstyringer = saksbehandleroverstyringer,
                 sykefraværstilfelle = sykefraværstilfelle
@@ -59,6 +64,7 @@ internal class UtbetalingsgodkjenningCommand(
                 fødselsnummer = fødselsnummer,
                 saksbehandlerIdent = ident,
                 saksbehandlerEpost = epostadresse,
+                saksbehandler = saksbehandler,
                 godkjenttidspunkt = godkjenttidspunkt,
                 årsak = årsak,
                 begrunnelser = begrunnelser,

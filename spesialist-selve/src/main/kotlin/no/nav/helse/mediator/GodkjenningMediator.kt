@@ -13,6 +13,7 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.UtbetalingDao
+import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.spesialist.api.abonnement.AutomatiskBehandlingPayload
 import no.nav.helse.spesialist.api.abonnement.AutomatiskBehandlingUtfall
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
@@ -35,6 +36,8 @@ internal class GodkjenningMediator(
         fødselsnummer: String,
         saksbehandlerIdent: String,
         saksbehandlerEpost: String,
+        saksbehandler: Saksbehandlerløsning.Saksbehandler,
+        beslutter: Saksbehandlerløsning.Saksbehandler?,
         godkjenttidspunkt: LocalDateTime,
         saksbehandleroverstyringer: List<UUID>,
         sykefraværstilfelle: Sykefraværstilfelle,
@@ -49,7 +52,7 @@ internal class GodkjenningMediator(
         sykefraværstilfelle.håndterGodkjent(saksbehandlerIdent, vedtaksperiodeId, hendelseId)
 
         context.publiser(behov.toJson())
-        context.publiser(behov.lagVedtaksperiodeGodkjent(vedtaksperiodeId, fødselsnummer, vedtakDao).toJson())
+        context.publiser(behov.lagVedtaksperiodeGodkjentManuelt(vedtaksperiodeId, fødselsnummer, saksbehandler, beslutter, vedtakDao).toJson())
     }
 
     internal fun saksbehandlerAvvisning(
@@ -60,6 +63,7 @@ internal class GodkjenningMediator(
         fødselsnummer: String,
         saksbehandlerIdent: String,
         saksbehandlerEpost: String,
+        saksbehandler: Saksbehandlerløsning.Saksbehandler,
         godkjenttidspunkt: LocalDateTime,
         årsak: String?,
         begrunnelser: List<String>?,
@@ -77,7 +81,7 @@ internal class GodkjenningMediator(
             saksbehandleroverstyringer = saksbehandleroverstyringer
         )
         context.publiser(behov.toJson())
-        context.publiser(behov.lagVedtaksperiodeAvvist(vedtaksperiodeId, fødselsnummer, vedtakDao).toJson())
+        context.publiser(behov.lagVedtaksperiodeAvvistManuelt(vedtaksperiodeId, fødselsnummer, saksbehandler, vedtakDao).toJson())
     }
 
     internal fun automatiskUtbetaling(
@@ -89,7 +93,7 @@ internal class GodkjenningMediator(
     ) {
         behov.godkjennAutomatisk()
         context.publiser(behov.toJson())
-        context.publiser(behov.lagVedtaksperiodeGodkjent(vedtaksperiodeId, fødselsnummer, vedtakDao).toJson())
+        context.publiser(behov.lagVedtaksperiodeGodkjentAutomatisk(vedtaksperiodeId, fødselsnummer, vedtakDao).toJson())
         opptegnelseDao.opprettOpptegnelse(
             fødselsnummer,
             AutomatiskBehandlingPayload(hendelseId, AutomatiskBehandlingUtfall.UTBETALT),
@@ -133,7 +137,7 @@ internal class GodkjenningMediator(
     ) {
         behov.avvisAutomatisk(begrunnelser)
         publiserer.publiser(behov.toJson())
-        publiserer.publiser(behov.lagVedtaksperiodeAvvist(vedtaksperiodeId, fødselsnummer, vedtakDao).toJson())
+        publiserer.publiser(behov.lagVedtaksperiodeAvvistAutomatisk(vedtaksperiodeId, fødselsnummer, vedtakDao).toJson())
         opptegnelseDao.opprettOpptegnelse(
             fødselsnummer,
             AutomatiskBehandlingPayload(hendelseId, AutomatiskBehandlingUtfall.AVVIST),
@@ -142,7 +146,7 @@ internal class GodkjenningMediator(
 
         begrunnelser.forEach { automatiskAvvistÅrsakerTeller.labels(it).inc() }
         automatiseringsteller.inc()
-        sikkerLogg.info("Automatisk avvisning av vedtaksperiode $vedtaksperiodeId pga:$begrunnelser", keyValue("fødselsnummer", fødselsnummer))
+        sikkerLogg.info("Automatisk avvisning av vedtaksperiode $vedtaksperiodeId pga: $begrunnelser")
     }
 
     private companion object {

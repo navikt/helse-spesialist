@@ -1,5 +1,6 @@
 package no.nav.helse.mediator
 
+import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
@@ -15,6 +16,8 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.IVedtaksperiodeObserver
+import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
+import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -36,6 +39,17 @@ internal class GodkjenningMediatorTest {
             generasjonerMedGodkjenteVarsler.add(generasjonId)
         }
     }
+    private val hendelserInspektør = object: UtgåendeMeldingerObserver {
+        private val hendelser = mutableListOf<JsonNode>()
+
+        fun hendelser(eventName: String) = hendelser.filter { it["@event_name"]?.asText() == eventName }
+
+        override fun hendelse(hendelse: String) {
+            hendelser.add(objectMapper.readTree(hendelse))
+        }
+
+        override fun behov(behov: String, ekstraKontekst: Map<String, Any>, detaljer: Map<String, Any>) {}
+    }
     private val mediator = GodkjenningMediator(
         vedtakDao = mockk(relaxed = true),
         opptegnelseDao = opptegnelseDao,
@@ -47,11 +61,22 @@ internal class GodkjenningMediatorTest {
         },
     )
 
+    private val saksbehandler = Saksbehandlerløsning.Saksbehandler(
+        ident = "saksbehandlerident",
+        epostadresse = "saksbehandler@nav.no"
+    )
+
+    private val beslutter = Saksbehandlerløsning.Saksbehandler(
+        ident = "beslutterident",
+        epostadresse = "beslutter@nav.no"
+    )
+
     private val utbetaling = Utbetaling(UUID.randomUUID(), 1000, 1000, Utbetalingtype.UTBETALING)
 
     @BeforeEach
     fun setup() {
         context = CommandContext(UUID.randomUUID())
+        context.nyObserver(hendelserInspektør)
         clearMocks(opptegnelseDao)
     }
 
@@ -78,11 +103,122 @@ internal class GodkjenningMediatorTest {
             fødselsnummer = fnr,
             saksbehandlerIdent = "1",
             saksbehandlerEpost = "2@nav.no",
+            saksbehandler = saksbehandler,
+            beslutter = beslutter,
             godkjenttidspunkt = LocalDateTime.now(),
             saksbehandleroverstyringer = emptyList(),
             sykefraværstilfelle = Sykefraværstilfelle(fnr, 1.januar, listOf(generasjon()), emptyList())
         )
         assertOpptegnelseIkkeOpprettet()
+    }
+
+    @Test
+    fun `legg saksbehandler og beslutter på vedtaksperiode_godkjent`() {
+        mediator.saksbehandlerUtbetaling(
+            behandlingId = UUID.randomUUID(),
+            hendelseId = UUID.randomUUID(),
+            context = context,
+            behov = UtbetalingsgodkjenningMessage("{}", utbetaling),
+            vedtaksperiodeId = UUID.randomUUID(),
+            fødselsnummer = fnr,
+            saksbehandlerIdent = "1",
+            saksbehandlerEpost = "2@nav.no",
+            saksbehandler = saksbehandler,
+            beslutter = beslutter,
+            godkjenttidspunkt = LocalDateTime.now(),
+            saksbehandleroverstyringer = emptyList(),
+            sykefraværstilfelle = Sykefraværstilfelle(fnr, 1.januar, listOf(generasjon()), emptyList())
+        )
+        val hendelser = hendelserInspektør.hendelser("vedtaksperiode_godkjent")
+        assertEquals(1, hendelser.size)
+        val vedtaksperiodeGodkjent = hendelser.single()
+        assertEquals(saksbehandler.ident, vedtaksperiodeGodkjent["saksbehandler"]["ident"].asText())
+        assertEquals(saksbehandler.epostadresse, vedtaksperiodeGodkjent["saksbehandler"]["epostadresse"].asText())
+        assertEquals(beslutter.ident, vedtaksperiodeGodkjent["beslutter"]["ident"].asText())
+        assertEquals(beslutter.epostadresse, vedtaksperiodeGodkjent["beslutter"]["epostadresse"].asText())
+        assertEquals(false, vedtaksperiodeGodkjent["automatiskBehandling"].asBoolean())
+    }
+
+    @Test
+    fun `ikke legg beslutter på vedtaksperiode_godkjent dersom den ikke er satt på meldingen inn`() {
+        mediator.saksbehandlerUtbetaling(
+            behandlingId = UUID.randomUUID(),
+            hendelseId = UUID.randomUUID(),
+            context = context,
+            behov = UtbetalingsgodkjenningMessage("{}", utbetaling),
+            vedtaksperiodeId = UUID.randomUUID(),
+            fødselsnummer = fnr,
+            saksbehandlerIdent = "1",
+            saksbehandlerEpost = "2@nav.no",
+            saksbehandler = saksbehandler,
+            beslutter = null,
+            godkjenttidspunkt = LocalDateTime.now(),
+            saksbehandleroverstyringer = emptyList(),
+            sykefraværstilfelle = Sykefraværstilfelle(fnr, 1.januar, listOf(generasjon()), emptyList())
+        )
+        val hendelser = hendelserInspektør.hendelser("vedtaksperiode_godkjent")
+        val vedtaksperiodeGodkjent = hendelser.single()
+        assertEquals(null, vedtaksperiodeGodkjent["beslutter"]?.get("ident")?.asText())
+        assertEquals(null, vedtaksperiodeGodkjent["beslutter"]?.get("epostadresse")?.asText())
+        assertEquals(false, vedtaksperiodeGodkjent["automatiskBehandling"].asBoolean())
+    }
+
+    @Test
+    fun `legg på saksbehandler men ikke beslutter på vedtaksperiode_avvist`() {
+        mediator.saksbehandlerAvvisning(
+            behandlingId = UUID.randomUUID(),
+            context = context,
+            behov = UtbetalingsgodkjenningMessage("{}", utbetaling),
+            vedtaksperiodeId = UUID.randomUUID(),
+            fødselsnummer = fnr,
+            saksbehandlerIdent = "1",
+            saksbehandlerEpost = "2@nav.no",
+            saksbehandler = saksbehandler,
+            godkjenttidspunkt = LocalDateTime.now(),
+            saksbehandleroverstyringer = emptyList(),
+            kommentar = null,
+            årsak = null,
+            begrunnelser = emptyList()
+        )
+        val hendelser = hendelserInspektør.hendelser("vedtaksperiode_avvist")
+        val vedtaksperiodeGodkjent = hendelser.single()
+        assertEquals(saksbehandler.ident, vedtaksperiodeGodkjent["saksbehandler"]["ident"].asText())
+        assertEquals(saksbehandler.epostadresse, vedtaksperiodeGodkjent["saksbehandler"]["epostadresse"].asText())
+        assertEquals(null, vedtaksperiodeGodkjent["beslutter"]?.get("ident")?.asText())
+        assertEquals(null, vedtaksperiodeGodkjent["beslutter"]?.get("epostadresse")?.asText())
+        assertEquals(false, vedtaksperiodeGodkjent["automatiskBehandling"].asBoolean())
+    }
+
+    @Test
+    fun `legg på tbd-saksbehandler på vedtaksperiode_godkjent ved automatisk utbetaling`() {
+        mediator.automatiskUtbetaling(
+            context = context,
+            behov = UtbetalingsgodkjenningMessage("{}", utbetaling),
+            vedtaksperiodeId = UUID.randomUUID(),
+            fødselsnummer = fnr,
+            hendelseId = UUID.randomUUID()
+        )
+        val hendelser = hendelserInspektør.hendelser("vedtaksperiode_godkjent")
+        val vedtaksperiodeGodkjent = hendelser.single()
+        assertEquals("Automatisk behandlet", vedtaksperiodeGodkjent["saksbehandler"]["ident"].asText())
+        assertEquals("tbd@nav.no", vedtaksperiodeGodkjent["saksbehandler"]["epostadresse"].asText())
+        assertEquals(true, vedtaksperiodeGodkjent["automatiskBehandling"].asBoolean())
+    }
+
+    @Test
+    fun `legg på tbd-saksbehandler på vedtaksperiode_avvist ved automatisk avvisning`() {
+        mediator.automatiskAvvisning(
+            publiserer = context::publiser,
+            vedtaksperiodeId = UUID.randomUUID(),
+            hendelseId = UUID.randomUUID(),
+            begrunnelser = emptyList(),
+            utbetaling = utbetaling
+        )
+        val hendelser = hendelserInspektør.hendelser("vedtaksperiode_avvist")
+        val vedtaksperiodeGodkjent = hendelser.single()
+        assertEquals("Automatisk behandlet", vedtaksperiodeGodkjent["saksbehandler"]["ident"].asText())
+        assertEquals("tbd@nav.no", vedtaksperiodeGodkjent["saksbehandler"]["epostadresse"].asText())
+        assertEquals(true, vedtaksperiodeGodkjent["automatiskBehandling"].asBoolean())
     }
 
     @Test
@@ -95,6 +231,7 @@ internal class GodkjenningMediatorTest {
             fnr,
             "1",
             "2@nav.no",
+            saksbehandler,
             LocalDateTime.now(),
             null,
             null,
@@ -142,6 +279,8 @@ internal class GodkjenningMediatorTest {
         fnr,
         "Z000000",
         "saksbehandler@nav.no",
+        saksbehandler,
+        beslutter,
         LocalDateTime.now(),
         emptyList(),
         Sykefraværstilfelle(fnr, 1.januar, generasjoner, emptyList())

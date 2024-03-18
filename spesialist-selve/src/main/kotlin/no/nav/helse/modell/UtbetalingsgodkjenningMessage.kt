@@ -6,6 +6,7 @@ import java.util.UUID
 import no.nav.helse.mediator.meldinger.utgående.VedtaksperiodeAvvist
 import no.nav.helse.mediator.meldinger.utgående.VedtaksperiodeGodkjent
 import no.nav.helse.modell.utbetaling.Utbetaling
+import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -13,6 +14,11 @@ import no.nav.helse.rapids_rivers.MessageProblems
 internal class UtbetalingsgodkjenningMessage(json: String, private val utbetaling: Utbetaling?) {
     private val behov = JsonMessage(json, MessageProblems(json))
     private lateinit var løsning: Map<String, Any>
+
+    private companion object {
+        private const val AUTOMATISK_BEHANDLET_IDENT = "Automatisk behandlet"
+        private const val AUTOMATISK_BEHANDLET_EPOSTADRESSE = "tbd@nav.no"
+    }
 
     internal fun godkjennAutomatisk() {
         løsAutomatisk(true)
@@ -27,8 +33,8 @@ internal class UtbetalingsgodkjenningMessage(json: String, private val utbetalin
             behandlingId = null,
             automatisk = true,
             godkjent = godkjent,
-            saksbehandlerIdent = "Automatisk behandlet",
-            saksbehandlerEpost = "tbd@nav.no",
+            saksbehandlerIdent = AUTOMATISK_BEHANDLET_IDENT,
+            saksbehandlerEpost = AUTOMATISK_BEHANDLET_EPOSTADRESSE,
             godkjenttidspunkt = LocalDateTime.now(),
             årsak = årsak,
             begrunnelser = begrunnelser,
@@ -144,26 +150,61 @@ internal class UtbetalingsgodkjenningMessage(json: String, private val utbetalin
         behov["behandlingId"] = behandlingId ?: UUID.randomUUID()
     }
 
-    internal fun lagVedtaksperiodeGodkjent(
+    internal fun lagVedtaksperiodeGodkjentManuelt(
+        vedtaksperiodeId: UUID,
+        fødselsnummer: String,
+        saksbehandler: Saksbehandlerløsning.Saksbehandler,
+        beslutter: Saksbehandlerløsning.Saksbehandler?,
+        vedtakDao: VedtakDao
+    ) =
+        VedtaksperiodeGodkjent.manueltBehandlet(
+            vedtaksperiodeId = vedtaksperiodeId,
+            fødselsnummer = fødselsnummer,
+            periodetype = vedtakDao.finnVedtaksperiodetype(vedtaksperiodeId),
+            saksbehandler = saksbehandler,
+            beslutter = beslutter
+        )
+
+    internal fun lagVedtaksperiodeGodkjentAutomatisk(
         vedtaksperiodeId: UUID,
         fødselsnummer: String,
         vedtakDao: VedtakDao
     ) =
-        VedtaksperiodeGodkjent(
+        VedtaksperiodeGodkjent.automatiskBehandlet(
             vedtaksperiodeId = vedtaksperiodeId,
             fødselsnummer = fødselsnummer,
             periodetype = vedtakDao.finnVedtaksperiodetype(vedtaksperiodeId),
-            løsning = objectMapper.convertValue(løsning)
+            saksbehandler = Saksbehandlerløsning.Saksbehandler(
+                ident = AUTOMATISK_BEHANDLET_IDENT,
+                epostadresse = AUTOMATISK_BEHANDLET_EPOSTADRESSE
+            )
         )
 
-    internal fun lagVedtaksperiodeAvvist(
+    internal fun lagVedtaksperiodeAvvistManuelt(
         vedtaksperiodeId: UUID,
         fødselsnummer: String,
+        saksbehandler: Saksbehandlerløsning.Saksbehandler,
         vedtakDao: VedtakDao
-    ) = VedtaksperiodeAvvist(
+    ) = VedtaksperiodeAvvist.manueltAvvist(
         vedtaksperiodeId = vedtaksperiodeId,
         fødselsnummer = fødselsnummer,
         periodetype = vedtakDao.finnVedtakId(vedtaksperiodeId)?.let { vedtakDao.finnVedtaksperiodetype(vedtaksperiodeId) },
+        saksbehandler = saksbehandler,
+        løsning = objectMapper.convertValue(løsning)
+    )
+
+    internal fun lagVedtaksperiodeAvvistAutomatisk(
+        vedtaksperiodeId: UUID,
+        fødselsnummer: String,
+        vedtakDao: VedtakDao
+    ) = VedtaksperiodeAvvist.automatiskAvvist(
+        vedtaksperiodeId = vedtaksperiodeId,
+        fødselsnummer = fødselsnummer,
+        periodetype = vedtakDao.finnVedtakId(vedtaksperiodeId)?.let { vedtakDao.finnVedtaksperiodetype(vedtaksperiodeId) },
+        saksbehandler = Saksbehandlerløsning.Saksbehandler(
+            ident = AUTOMATISK_BEHANDLET_IDENT,
+            epostadresse = AUTOMATISK_BEHANDLET_EPOSTADRESSE
+        ),
         løsning = objectMapper.convertValue(løsning)
     )
 

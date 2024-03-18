@@ -13,6 +13,7 @@ import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Generasjon
+import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.objectMapper
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -36,6 +37,16 @@ internal class UtbetalingsgodkjenningCommandTest {
     private lateinit var commandContext: CommandContext
     private lateinit var command: UtbetalingsgodkjenningCommand
 
+
+    private val saksbehandler = Saksbehandlerløsning.Saksbehandler(
+        ident = "saksbehandlerident",
+        epostadresse = "saksbehandler@nav.no"
+    )
+
+    private val beslutter = Saksbehandlerløsning.Saksbehandler(
+        ident = "beslutterident",
+        epostadresse = "beslutter@nav.no"
+    )
 
     private val observer = object : UtgåendeMeldingerObserver {
         val hendelser = mutableListOf<String>()
@@ -70,6 +81,8 @@ internal class UtbetalingsgodkjenningCommandTest {
             saksbehandleroverstyringer = emptyList(),
             godkjenningsbehovhendelseId = GODKJENNINGSBEHOV_ID,
             hendelseDao = hendelseDao,
+            saksbehandler = saksbehandler,
+            beslutter = beslutter,
             godkjenningMediator = GodkjenningMediator(
                 mockk(relaxed = true),
                 mockk(relaxed = true),
