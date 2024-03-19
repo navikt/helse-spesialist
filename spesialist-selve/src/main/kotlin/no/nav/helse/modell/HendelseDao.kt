@@ -215,6 +215,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
             OPPDATER_PERSONSNAPSHOT -> OppdaterPersonsnapshot(jsonNode)
             GOSYS_OPPGAVE_ENDRET -> GosysOppgaveEndret(jsonNode)
             VEDTAKSPERIODE_ENDRET -> VedtaksperiodeEndret(jsonNode)
+            VEDTAKSPERIODE_FORKASTET -> VedtaksperiodeForkastet(jsonNode)
             else -> throw IllegalArgumentException(
                 "Prøver å gjenoppta en kommando(kjede) etter mottak av hendelsetype " +
                         "$hendelsetype, men koden som trengs mangler!")
