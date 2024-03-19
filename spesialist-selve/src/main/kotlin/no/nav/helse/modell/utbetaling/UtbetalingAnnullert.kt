@@ -1,5 +1,6 @@
 package no.nav.helse.modell.utbetaling
 
+import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.db.SaksbehandlerDao
@@ -28,6 +29,14 @@ internal class UtbetalingAnnullert private constructor(
         annullertTidspunkt = LocalDateTime.parse(packet["tidspunkt"].asText()),
         saksbehandlerEpost = packet["epost"].asText(),
         json = packet.toJson()
+    )
+    internal constructor(jsonNode: JsonNode): this(
+        id = UUID.fromString(jsonNode["@id"].asText()),
+        fødselsnummer = jsonNode["fødselsnummer"].asText(),
+        utbetalingId = UUID.fromString(jsonNode["utbetalingId"].asText()),
+        annullertTidspunkt = LocalDateTime.parse(jsonNode["tidspunkt"].asText()),
+        saksbehandlerEpost = jsonNode["epost"].asText(),
+        json = jsonNode.toString()
     )
 
     override fun fødselsnummer(): String = fødselsnummer
