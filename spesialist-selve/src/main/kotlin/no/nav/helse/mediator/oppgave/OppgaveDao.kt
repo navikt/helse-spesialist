@@ -404,8 +404,24 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
 
             asSQL(
                 """
-                    INSERT INTO oppgave(id, oppdatert, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, command_context_id, utbetaling_id, mottaker, egenskaper, kan_avvises)      
-                    SELECT :id, now(), CAST(:oppgavestatus as oppgavestatus), :ferdigstiltAv, :ferdigstiltAvOid, :vedtakRef, :commandContextId, :utbetalingId, CAST(:mottaker as mottakertype), '{$egenskaperForDatabase}', :kanAvvises
+                    INSERT INTO oppgave(id, oppdatert, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, generasjon_ref, command_context_id, utbetaling_id, mottaker, egenskaper, kan_avvises)      
+                    SELECT 
+                        :id, 
+                        now(), 
+                        CAST(:oppgavestatus as oppgavestatus), 
+                        :ferdigstiltAv, 
+                        :ferdigstiltAvOid, 
+                        :vedtakRef,
+                        (
+                            SELECT unik_id FROM selve_vedtaksperiode_generasjon svg WHERE vedtaksperiode_id = (
+                                SELECT vedtaksperiode_id FROM vedtak v WHERE v.id = :vedtakRef
+                            ) ORDER BY id DESC LIMIT 1
+                        ),
+                        :commandContextId, 
+                        :utbetalingId,
+                        CAST(:mottaker as mottakertype), 
+                        '{$egenskaperForDatabase}', 
+                        :kanAvvises
                     WHERE
                         NOT EXISTS(
                             SELECT 1 FROM oppgave o
