@@ -36,7 +36,7 @@ internal class AvsluttetUtenVedtakRiverTest {
             "skjæringstidspunkt": "2018-01-01",
             "hendelser": ["${UUID.randomUUID()}"],
             "vedtaksperiodeId": "${UUID.randomUUID()}",
-            "generasjonId": "${UUID.randomUUID()}",
+            "behandlingId": "${UUID.randomUUID()}",
             "avsluttetTidspunkt": "2018-02-01T00:42:00.000",
             "@id": "${UUID.randomUUID()}",
             "@opprettet": "2018-02-01T00:00:00.000"          

@@ -15,7 +15,7 @@ internal class AvsluttetUtenVedtakMessage(private val packet: JsonMessage): Vedt
     private val fom = packet["fom"].asLocalDate()
     private val tom = packet["tom"].asLocalDate()
     private val vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
-    private val spleisBehandlingId = UUID.fromString(packet["generasjonId"].asText())
+    private val spleisBehandlingId = UUID.fromString(packet["behandlingId"].asText())
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
     private val skjæringstidspunkt = packet["skjæringstidspunkt"].asLocalDate()
     private val hendelser = packet["hendelser"].map { it.asUUID() }

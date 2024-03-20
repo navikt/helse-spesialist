@@ -987,7 +987,7 @@ internal object Testmeldingfabrikk {
             "fødselsnummer" to fødselsnummer,
             "organisasjonsnummer" to organisasjonsnummer,
             "vedtaksperiodeId" to vedtaksperiodeId,
-            "generasjonId" to spleisBehandlingId,
+            "behandlingId" to spleisBehandlingId,
             "fom" to fom,
             "tom" to tom,
             "skjæringstidspunkt" to skjæringstidspunkt,
@@ -1034,7 +1034,7 @@ internal object Testmeldingfabrikk {
             "skjæringstidspunkt" to skjæringstidspunkt,
             "hendelser" to emptyList<String>(),
             "avsluttetTidspunkt" to LocalDateTime.now(),
-            "generasjonId" to spleisBehandlingId,
+            "behandlingId" to spleisBehandlingId,
         )
     )
 

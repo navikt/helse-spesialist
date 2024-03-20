@@ -20,7 +20,7 @@ internal class AvsluttetUtenVedtakRiver(
             validate {
                 it.demandValue("@event_name", "avsluttet_uten_vedtak")
                 it.requireKey("@id", "fødselsnummer", "aktørId", "vedtaksperiodeId", "organisasjonsnummer")
-                it.requireKey("fom", "tom", "skjæringstidspunkt", "generasjonId")
+                it.requireKey("fom", "tom", "skjæringstidspunkt", "behandlingId")
                 it.requireArray("hendelser")
             }
         }.register(this)
