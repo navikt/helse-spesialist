@@ -1,0 +1,1 @@
+CREATE INDEX ON oppgave USING gin(egenskaper);
