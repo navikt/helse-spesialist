@@ -245,7 +245,7 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
                      ORDER BY vedtaksperiode_id, totrinnsvurdering.id DESC
                  ) ttv ON ttv.vedtaksperiode_id = v.vedtaksperiode_id AND ttv.utbetaling_id = o.utbetaling_id
         WHERE (ttv.saksbehandler = :oid OR o.ferdigstilt_av_oid = :oid) AND (o.status in ('Ferdigstilt', 'AvventerSystem'))
-            AND o.oppdatert >= :fom
+            AND o.oppdatert::date = :fom::date
         ORDER BY o.oppdatert
         OFFSET :offset
         LIMIT :limit;
