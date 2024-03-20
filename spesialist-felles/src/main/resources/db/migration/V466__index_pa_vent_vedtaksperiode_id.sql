@@ -1,0 +1,1 @@
+CREATE INDEX ON pa_vent(vedtaksperiode_id);
