@@ -32,6 +32,7 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålDao
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.parallel.ResourceLock
 
 internal class AutomatiseringTest {
 
@@ -108,6 +109,7 @@ internal class AutomatiseringTest {
     }
 
     @Test
+    @ResourceLock("Toggle_AutomatiserSpesialsak")
     fun `går automatisk hvis det er spesialsak og ikke noen svartelistede varsler og ingen utbetaling og toggle er på`() {
         Toggle.AutomatiserSpesialsak.enable()
         every { vedtakDaoMock.erSpesialsak(vedtaksperiodeId) } returns true
@@ -129,6 +131,7 @@ internal class AutomatiseringTest {
     }
 
     @Test
+    @ResourceLock("Toggle_AutomatiserSpesialsak")
     fun `går ikke automatisk hvis det er spesialsak og ikke noen svartelistede varsler og ingen utbetaling og toggle er av`() {
         Toggle.AutomatiserSpesialsak.disable()
         every { vedtakDaoMock.erSpesialsak(vedtaksperiodeId) } returns true
