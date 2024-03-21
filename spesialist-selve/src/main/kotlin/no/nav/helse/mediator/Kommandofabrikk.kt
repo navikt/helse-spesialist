@@ -24,6 +24,8 @@ import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommand
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
+import no.nav.helse.modell.kommando.Command
+import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.KobleVedtaksperiodeTilOverstyringCommand
 import no.nav.helse.modell.kommando.TilbakedateringGodkjentCommand
 import no.nav.helse.modell.kommando.UtbetalingsgodkjenningCommand
@@ -60,6 +62,8 @@ import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnetCommand
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.modell.vergemal.VergemålDao
+import no.nav.helse.registrerTidsbrukForGodkjenningsbehov
+import no.nav.helse.registrerTidsbrukForHendelse
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.notat.NotatMediator
@@ -107,9 +111,14 @@ internal class Kommandofabrikk(
     private val vergemålDao: VergemålDao = VergemålDao(dataSource),
     private val varselRepository: ActualVarselRepository = ActualVarselRepository(dataSource),
 ) {
-    private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
+    private companion object {
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
+        private val logg = LoggerFactory.getLogger(this::class.java)
+
+    }
     private val sykefraværstilfelleDao = SykefraværstilfelleDao(dataSource)
     private val avviksvurderingDao = AvviksvurderingDao(dataSource)
+    private val metrikkDao = MetrikkDao(dataSource)
     private val oppgaveMediator: OppgaveMediator by lazy { oppgaveMediator() }
 
     internal fun sykefraværstilfelle(fødselsnummer: String, skjæringstidspunkt: LocalDate): Sykefraværstilfelle {
@@ -188,7 +197,7 @@ internal class Kommandofabrikk(
         val sykefraværstilfelle = sykefraværstilfelle(fødselsnummer, oppgaveDataForAutomatisering.skjæringstidspunkt)
         val utbetaling = utbetalingDao.hentUtbetaling(oppgaveDataForAutomatisering.utbetalingId)
 
-        sikkerLog.info("Henter oppgaveDataForAutomatisering ifm. godkjent tilbakedatering for fnr $fødselsnummer og vedtaksperiodeId ${oppgaveDataForAutomatisering.vedtaksperiodeId}")
+        sikkerlogg.info("Henter oppgaveDataForAutomatisering ifm. godkjent tilbakedatering for fnr $fødselsnummer og vedtaksperiodeId ${oppgaveDataForAutomatisering.vedtaksperiodeId}")
 
         return TilbakedateringGodkjentCommand(
             fødselsnummer = fødselsnummer,
@@ -388,5 +397,27 @@ internal class Kommandofabrikk(
             totrinnsvurderingMediator = totrinnsvurderingMediator,
             json = hendelse.toJson()
         )
+    }
+
+    private fun iverksett(command: Command, hendelseId: UUID, commandContext: CommandContext) {
+        val contextId = commandContext.id()
+        try {
+            if (commandContext.utfør(commandContextDao, hendelseId, command)) {
+                val kjøretid = commandContextDao.tidsbrukForContext(contextId)
+                metrikker(command.name, kjøretid, contextId)
+                logg.info("Kommando(er) for ${command.name} er utført ferdig. Det tok ca {}ms å kjøre hele kommandokjeden", kjøretid)
+            } else logg.info("${command.name} er suspendert")
+        } catch (err: Exception) {
+            command.undo(commandContext)
+            throw err
+        }
+    }
+
+    private fun metrikker(hendelsenavn: String, kjøretidMs: Int, contextId: UUID) {
+        if (hendelsenavn == Godkjenningsbehov::class.simpleName) {
+            val utfall: GodkjenningsbehovUtfall = metrikkDao.finnUtfallForGodkjenningsbehov(contextId)
+            registrerTidsbrukForGodkjenningsbehov(utfall, kjøretidMs)
+        }
+        registrerTidsbrukForHendelse(hendelsenavn, kjøretidMs)
     }
 }
