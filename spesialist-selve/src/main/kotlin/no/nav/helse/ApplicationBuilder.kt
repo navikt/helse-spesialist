@@ -12,19 +12,14 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationCall
-import io.ktor.server.application.ApplicationCallPipeline
-import io.ktor.server.application.call
 import io.ktor.server.application.install
 import io.ktor.server.auth.authenticate
-import io.ktor.server.auth.jwt.JWTPrincipal
-import io.ktor.server.auth.principal
 import io.ktor.server.plugins.callid.CallId
 import io.ktor.server.plugins.callid.callIdMdc
 import io.ktor.server.plugins.callloging.CallLogging
 import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.plugins.doublereceive.DoubleReceive
 import io.ktor.server.plugins.statuspages.StatusPages
-import io.ktor.server.request.header
 import io.ktor.server.request.httpMethod
 import io.ktor.server.request.path
 import io.ktor.server.request.uri
@@ -46,8 +41,8 @@ import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.BehandlingsstatistikkMediator
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.GodkjenningService
-import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.Kommandofabrikk
+import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.TilgangskontrollørForReservasjon
 import no.nav.helse.mediator.dokument.DokumentMediator
@@ -104,10 +99,8 @@ import kotlin.random.Random.Default.nextInt
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationServer
 import no.nav.helse.spesialist.api.tildeling.TildelingDao as TildelingApiDao
 
-private val auditLog = LoggerFactory.getLogger("auditLogger")
 private val logg = LoggerFactory.getLogger("ApplicationBuilder")
 private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-private val personIdRegex = "\\d{11,13}".toRegex()
 
 internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusListener {
     private val dataSourceBuilder = DataSourceBuilder(env)
@@ -310,22 +303,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 filter { call -> call.request.path().startsWith("/api/") }
             }
             install(DoubleReceive)
-            intercept(ApplicationCallPipeline.Call) {
-                call.principal<JWTPrincipal>()?.let { principal ->
-                    val uri = call.request.uri
-                    val navIdent = principal.payload.getClaim("NAVident").asString()
-                    (personIdRegex.find(uri)?.value ?: call.request.header("fodselsnummer"))?.also { personId ->
-                        auditLog.info(
-                            "end=${System.currentTimeMillis()} suid=$navIdent duid=$personId request=${
-                                uri.substring(
-                                    0,
-                                    uri.length.coerceAtMost(70)
-                                )
-                            }"
-                        )
-                    }
-                }
-            }
             install(ContentNegotiationServer) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
             requestResponseTracing(httpTraceLog)
             azureAdAppAuthentication(azureAdAppConfig)

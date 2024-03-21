@@ -1,5 +1,9 @@
 package no.nav.helse.spesialist.api.graphql.query
 
+import ch.qos.logback.classic.Level
+import ch.qos.logback.classic.Logger
+import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.core.read.ListAppender
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.convertValue
@@ -24,10 +28,10 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.slf4j.LoggerFactory
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class PersonQueryTest : AbstractGraphQLApiTest() {
-
     @AfterEach
     fun clean() {
         clearMocks(snapshotClient, egenAnsattApiDao)
@@ -36,11 +40,13 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
     @Test
     fun `henter person`() {
         mockSnapshot()
+        val logglytter = opprettLogglytter()
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
 
         val body = runQuery("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""")
 
         assertEquals(AKTØRID, body["data"]["person"]["aktorId"].asText())
+        assertEquals(1, logglytter.list.filter { it.message.contains("suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER operation=PersonQuery") && it.level == Level.INFO }.size)
     }
 
     @Test
@@ -61,9 +67,11 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `får 404-feil når personen man søker etter ikke finnes`() {
+        val logglytter = opprettLogglytter()
         val body = runQuery("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""")
 
         assertEquals(404, body["errors"].first()["extensions"]["code"].asInt())
+        assertEquals(1, logglytter.list.filter { it.message.contains("suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER operation=PersonQuery msg=Finner ikke data for person med fødselsnummer $FØDSELSNUMMER") && it.level == Level.WARN }.size)
     }
 
     @Test
@@ -71,11 +79,13 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         val dNummer = "41017012345"
         opprettPerson(fødselsnummer = dNummer, aktørId = AKTØRID)
         opprettVedtaksperiode(opprettPerson(fødselsnummer = FØDSELSNUMMER, aktørId = AKTØRID), opprettArbeidsgiver())
+        val logglytter = opprettLogglytter()
         val body = runQuery("""{ person(aktorId: "$AKTØRID") { fodselsnummer } }""")
 
         val extensions = body["errors"].first()["extensions"]
         assertEquals(500, extensions["code"].asInt())
         assertEquals(setOf(dNummer, FØDSELSNUMMER), extensions["fodselsnumre"].map(JsonNode::asText).toSet())
+        assertEquals(1, logglytter.list.filter { it.message.contains("suid=${SAKSBEHANDLER.ident} duid=$AKTØRID operation=PersonQuery msg=Mer enn ett fødselsnummer for personen") && it.level == Level.WARN }.size)
     }
 
     @Test
@@ -83,18 +93,22 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         mockSnapshot()
         opprettVedtaksperiode(opprettPerson(adressebeskyttelse = Adressebeskyttelse.Fortrolig), opprettArbeidsgiver())
 
+        val logglytter = opprettLogglytter()
         val body = runQuery("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""", kode7Saksbehandlergruppe)
 
         assertEquals(AKTØRID, body["data"]["person"]["aktorId"].asText())
+        assertEquals(1, logglytter.list.filter { it.message.contains("suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER") && it.level == Level.INFO }.size)
     }
 
     @Test
     fun `får 403-feil ved oppslag av kode7-personer uten riktige tilganger`() {
         opprettVedtaksperiode(opprettPerson(adressebeskyttelse = Adressebeskyttelse.Fortrolig), opprettArbeidsgiver())
 
+        val logglytter = opprettLogglytter()
         val body = runQuery("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""")
 
         assertEquals(403, body["errors"].first()["extensions"]["code"].asInt())
+        assertEquals(1, logglytter.list.filter { it.message.contains("suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER operation=PersonQuery flexString1=Deny") && it.level == Level.WARN }.size)
     }
 
     @Test
@@ -103,9 +117,11 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         every { egenAnsattApiDao.erEgenAnsatt(FØDSELSNUMMER) } returns true
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
 
+        val logglytter = opprettLogglytter()
         val body = runQuery("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""", skjermedePersonerGruppeId)
 
         assertEquals(AKTØRID, body["data"]["person"]["aktorId"].asText())
+        assertEquals(1, logglytter.list.filter { it.message.contains("suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER operation=PersonQuery") && it.level == Level.INFO }.size)
     }
 
     @Test
@@ -113,9 +129,11 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         every { egenAnsattApiDao.erEgenAnsatt(FØDSELSNUMMER) } returns true
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
 
+        val logglytter = opprettLogglytter()
         val body = runQuery("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""")
 
         assertEquals(403, body["errors"].first()["extensions"]["code"].asInt())
+        assertEquals(1, logglytter.list.filter { it.message.contains("suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER operation=PersonQuery flexString1=Deny") && it.level == Level.WARN }.size)
     }
 
     @Test
@@ -123,9 +141,11 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } throws GraphQLException("Oops")
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
 
+        val logglytter = opprettLogglytter()
         val body = runQuery("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""")
 
         assertEquals(501, body["errors"].first()["extensions"]["code"].asInt())
+        assertEquals(1, logglytter.list.filter { it.message.contains("suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER operation=PersonQuery msg=Lagret snapshot stemmer ikke overens med forventet format. Dette kommer som regel av at noen har gjort endringer på formatet men glemt å bumpe versjonsnummeret.") && it.level == Level.WARN }.size)
     }
 
     @Test
@@ -372,4 +392,9 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
     )
     private fun Periode.tilBeregnetPeriode(): GraphQLBeregnetPeriode =
         opprettBeregnetPeriode(fom.toString(), tom.toString(), id)
+
+    private fun opprettLogglytter() = ListAppender<ILoggingEvent>().apply {
+        (LoggerFactory.getLogger("auditLogger") as Logger).addAppender(this)
+        start()
+    }
 }

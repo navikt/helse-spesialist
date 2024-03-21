@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.api.graphql.query
 
+import graphql.GraphQLContext
 import graphql.GraphQLError
 import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
@@ -11,8 +12,10 @@ import kotlinx.coroutines.async
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
+import no.nav.helse.spesialist.api.auditLogTeller
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.erDev
+import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.schema.Person
 import no.nav.helse.spesialist.api.graphql.schema.Reservasjon
 import no.nav.helse.spesialist.api.notat.NotatDao
@@ -51,13 +54,20 @@ class PersonQuery(
 ) : AbstractPersonQuery(personApiDao, egenAnsattApiDao) {
 
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
+    private val auditLog = LoggerFactory.getLogger("auditLogger")
 
-    suspend fun person(fnr: String? = null, aktorId: String? = null, env: DataFetchingEnvironment): DataFetcherResult<Person?> {
+    suspend fun person(
+        fnr: String? = null,
+        aktorId: String? = null,
+        env: DataFetchingEnvironment,
+    ): DataFetcherResult<Person?> {
         if (fnr == null) {
             if (aktorId == null)
-                return DataFetcherResult.newResult<Person?>().error(getBadRequestError("Requesten mangler både fødselsnummer og aktørId")).build()
+                return DataFetcherResult.newResult<Person?>()
+                    .error(getBadRequestError("Requesten mangler både fødselsnummer og aktørId")).build()
             if (aktorId.length != 13) {
-                return DataFetcherResult.newResult<Person?>().error(getBadRequestError("Feil lengde på parameter aktorId: ${aktorId.length}")).build()
+                return DataFetcherResult.newResult<Person?>()
+                    .error(getBadRequestError("Feil lengde på parameter aktorId: ${aktorId.length}")).build()
             }
         }
 
@@ -68,17 +78,20 @@ class PersonQuery(
                     personApiDao.finnFødselsnummer(it.toLong())
                 } catch (e: Exception) {
                     val fødselsnumre = personApiDao.finnFødselsnumre(aktorId.toLong()).toSet()
+                    auditLog(env.graphQlContext, aktorId, null, getFlereFødselsnumreError(fødselsnumre).message)
                     return DataFetcherResult.newResult<Person?>().error(getFlereFødselsnumreError(fødselsnumre)).build()
                 }
             }
         if (fødselsnummer == null || (!erDev() && !personApiDao.spesialistHarPersonKlarForVisningISpeil(fødselsnummer))) {
             sikkerLogg.info("Svarer not found for parametere fnr=$fnr, aktorId=$aktorId.")
+            auditLog(env.graphQlContext, fnr ?: aktorId!!, null, getNotFoundError(fnr).message)
             return DataFetcherResult.newResult<Person?>().error(getNotFoundError(fnr)).build()
         }
 
         val reservasjon = finnReservasjonsstatus(fødselsnummer)
 
         if (isForbidden(fødselsnummer, env)) {
+            auditLog(env.graphQlContext, fødselsnummer, false, null)
             return DataFetcherResult.newResult<Person?>().error(getForbiddenError(fødselsnummer)).build()
         }
 
@@ -86,6 +99,7 @@ class PersonQuery(
             snapshotMediator.hentSnapshot(fødselsnummer)
         } catch (e: Exception) {
             sikkerLogg.error("feilet under henting av snapshot for {}", keyValue("fnr", fødselsnummer), e)
+            auditLog(env.graphQlContext, fødselsnummer, null, getSnapshotValidationError().message)
             return DataFetcherResult.newResult<Person?>().error(getSnapshotValidationError()).build()
         }
 
@@ -111,8 +125,10 @@ class PersonQuery(
         }
 
         return if (person == null) {
+            auditLog(env.graphQlContext, fødselsnummer, true, getNotFoundError(fødselsnummer).message)
             DataFetcherResult.newResult<Person?>().error(getNotFoundError(fødselsnummer)).build()
         } else {
+            auditLog(env.graphQlContext, fødselsnummer, true, null)
             DataFetcherResult.newResult<Person?>().data(person).build()
         }
     }
@@ -123,15 +139,16 @@ class PersonQuery(
             reservasjonClient.hentReservasjonsstatus(fødselsnummer)
         }
 
-    private fun getFlereFødselsnumreError(fødselsnumre: Set<String>): GraphQLError = GraphqlErrorException.newErrorException()
-        .message("Mer enn ett fødselsnummer for personen")
-        .extensions(
-            mapOf(
-                "code" to 500,
-                "feilkode" to "HarFlereFodselsnumre",
-                "fodselsnumre" to fødselsnumre,
-            )
-        ).build()
+    private fun getFlereFødselsnumreError(fødselsnumre: Set<String>): GraphQLError =
+        GraphqlErrorException.newErrorException()
+            .message("Mer enn ett fødselsnummer for personen")
+            .extensions(
+                mapOf(
+                    "code" to 500,
+                    "feilkode" to "HarFlereFodselsnumre",
+                    "fodselsnumre" to fødselsnumre,
+                )
+            ).build()
 
     private fun getSnapshotValidationError(): GraphQLError = GraphqlErrorException.newErrorException()
         .message("Lagret snapshot stemmer ikke overens med forventet format. Dette kommer som regel av at noen har gjort endringer på formatet men glemt å bumpe versjonsnummeret.")
@@ -143,4 +160,17 @@ class PersonQuery(
         .extensions(mapOf("code" to 400))
         .build()
 
+    private fun auditLog(graphQLContext: GraphQLContext, personId: String, harTilgang: Boolean?, fantIkkePersonErrorMsg: String?) {
+        val saksbehandlerIdent = graphQLContext.get<String>(ContextValues.SAKSBEHANDLER_IDENT.key)
+        auditLogTeller.inc()
+
+        if (harTilgang == false) {
+            auditLog.warn("end=${System.currentTimeMillis()} suid=$saksbehandlerIdent duid=$personId operation=PersonQuery flexString1=Deny")
+        } else if (fantIkkePersonErrorMsg != null) {
+            auditLog.warn("end=${System.currentTimeMillis()} suid=$saksbehandlerIdent duid=$personId operation=PersonQuery msg=$fantIkkePersonErrorMsg")
+        } else {
+            auditLog.info("end=${System.currentTimeMillis()} suid=$saksbehandlerIdent duid=$personId operation=PersonQuery")
+        }
+        sikkerLogg.debug("audit-logget, operationName: PersonQuery, harTilgang: $harTilgang, fantIkkePersonErrorMsg: $fantIkkePersonErrorMsg")
+    }
 }

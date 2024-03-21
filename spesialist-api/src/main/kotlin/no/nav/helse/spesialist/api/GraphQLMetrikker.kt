@@ -6,6 +6,7 @@ import io.ktor.server.application.createRouteScopedPlugin
 import io.ktor.server.plugins.callloging.processingTimeMillis
 import io.ktor.server.request.httpMethod
 import io.ktor.server.request.receive
+import io.prometheus.client.Counter
 import io.prometheus.client.Summary
 
 val GraphQLMetrikker = createRouteScopedPlugin("GraphQLMetrikker") {
@@ -23,3 +24,6 @@ private val graphQLResponstider =
     Summary.build("graphql_responstider", "Måler responstider for GraphQL-kall")
         .labelNames("operationName")
         .register()
+
+
+internal val auditLogTeller = Counter.build("auditlog_total", "Teller antall auditlogginnslag").register()

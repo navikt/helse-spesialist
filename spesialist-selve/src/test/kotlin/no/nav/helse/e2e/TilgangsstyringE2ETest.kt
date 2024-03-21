@@ -10,6 +10,7 @@ import no.nav.helse.Testdata.snapshot
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
+import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.query.PersonQuery
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
@@ -34,6 +35,7 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
 
     @Test
     fun `Gir 404 når det ikke er noe å vise ennå, selv om saksbehandler har tilgang`() {
+        every { dataFetchingEnvironment.graphQlContext.get<String>(ContextValues.SAKSBEHANDLER_IDENT.key) } returns "A123456"
         settOppDefaultDataOgTilganger()
 
         sendMeldingerOppTilEgenAnsatt()
@@ -51,9 +53,11 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
 
     @Test
     fun `Kan hente person om den er klar til visning`() {
+        every { dataFetchingEnvironment.graphQlContext.get<String>(ContextValues.SAKSBEHANDLER_IDENT.key) } returns "A123456"
         settOppDefaultDataOgTilganger()
 
         sendMeldingerOppTilEgenAnsatt()
+
 
         assertKanIkkeHentePerson("Finner ikke data for person med fødselsnummer ")
         håndterEgenansattløsning(erEgenAnsatt = false)
@@ -65,9 +69,11 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
 
     @Test
     fun `Kan ikke hente person hvis tilgang mangler`() {
+        every { dataFetchingEnvironment.graphQlContext.get<String>(ContextValues.SAKSBEHANDLER_IDENT.key) } returns "A123456"
         settOppDefaultDataOgTilganger()
 
         sendMeldingerOppTilEgenAnsatt()
+
 
         assertKanIkkeHentePerson("Finner ikke data for person med fødselsnummer ")
         håndterEgenansattløsning(erEgenAnsatt = false)
