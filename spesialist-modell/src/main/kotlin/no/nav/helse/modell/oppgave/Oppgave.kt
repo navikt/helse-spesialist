@@ -236,7 +236,7 @@ class Oppgave private constructor(
         }
 
         fun avmeld(oppgave: Oppgave, saksbehandler: Saksbehandler) {
-            logg.error(
+            logg.warn(
                 "Forventer ikke forsøk på avmelding i {} for oppgave med {} av $saksbehandler",
                 kv("tilstand", this),
                 kv("oppgaveId", oppgave.id)
