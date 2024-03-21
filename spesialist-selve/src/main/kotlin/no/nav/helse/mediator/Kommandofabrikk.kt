@@ -120,6 +120,14 @@ internal class Kommandofabrikk(
     private val avviksvurderingDao = AvviksvurderingDao(dataSource)
     private val metrikkDao = MetrikkDao(dataSource)
     private val oppgaveMediator: OppgaveMediator by lazy { oppgaveMediator() }
+    private var commandContext: CommandContext? = null
+
+    internal fun settEksisterendeContext(commandContext: CommandContext) {
+        this.commandContext = commandContext
+    }
+    internal fun nullstilleEksisterendeContext() {
+        this.commandContext = null
+    }
 
     internal fun sykefraværstilfelle(fødselsnummer: String, skjæringstidspunkt: LocalDate): Sykefraværstilfelle {
         val gjeldendeGenerasjoner = generasjonerFor(fødselsnummer, skjæringstidspunkt)
@@ -399,10 +407,15 @@ internal class Kommandofabrikk(
         )
     }
 
-    private fun iverksett(command: Command, hendelseId: UUID, commandContext: CommandContext) {
+    private fun nyContext(meldingId: UUID) = CommandContext(UUID.randomUUID()).apply {
+        opprett(commandContextDao, meldingId)
+    }
+
+    private fun iverksett(command: Command, meldingId: UUID) {
+        val commandContext = this.commandContext ?: nyContext(meldingId)
         val contextId = commandContext.id()
         try {
-            if (commandContext.utfør(commandContextDao, hendelseId, command)) {
+            if (commandContext.utfør(commandContextDao, meldingId, command)) {
                 val kjøretid = commandContextDao.tidsbrukForContext(contextId)
                 metrikker(command.name, kjøretid, contextId)
                 logg.info("Kommando(er) for ${command.name} er utført ferdig. Det tok ca {}ms å kjøre hele kommandokjeden", kjøretid)
