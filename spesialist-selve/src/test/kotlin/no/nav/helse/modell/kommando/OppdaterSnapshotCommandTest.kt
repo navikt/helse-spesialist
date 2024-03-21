@@ -21,7 +21,6 @@ internal class OppdaterSnapshotCommandTest {
         private const val FNR = "fnr"
         private const val AKTØR = "9999999999"
 
-        private val VEDTAKSPERIODE = UUID.randomUUID()
         private val PERSON = GraphQLPerson(
             aktorId = AKTØR,
             arbeidsgivere = emptyList(),
@@ -40,7 +39,6 @@ internal class OppdaterSnapshotCommandTest {
     private val command = OppdaterSnapshotCommand(
         snapshotClient = snapshotClient,
         snapshotDao = snapshotDao,
-        vedtaksperiodeId = VEDTAKSPERIODE,
         fødselsnummer = FNR,
         personDao = personDao,
     )

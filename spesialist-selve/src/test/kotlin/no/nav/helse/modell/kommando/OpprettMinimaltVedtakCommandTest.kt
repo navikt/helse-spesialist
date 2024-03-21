@@ -56,8 +56,7 @@ internal class OpprettMinimaltVedtakCommandTest {
                 fom = FOM,
                 tom = TOM,
                 personRef = personRef,
-                arbeidsgiverRef = arbeidsgiverRef,
-                snapshotRef = null
+                arbeidsgiverRef = arbeidsgiverRef
             )
         }
     }
@@ -67,7 +66,7 @@ internal class OpprettMinimaltVedtakCommandTest {
         every { vedtakDao.finnVedtakId(VEDTAKSPERIODE_ID) } returns 1L
         assertTrue(command.execute(context))
         verify(exactly = 0) {
-            vedtakDao.opprett(any(), any(), any(), any(), any(), any())
+            vedtakDao.opprett(any(), any(), any(), any(), any())
         }
     }
 

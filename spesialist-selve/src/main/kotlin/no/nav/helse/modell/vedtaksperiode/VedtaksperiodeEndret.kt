@@ -37,7 +37,6 @@ internal class VedtaksperiodeEndret(
 
 internal class VedtaksperiodeEndretCommand(
     fødselsnummer: String,
-    vedtaksperiodeId: UUID,
     personDao: PersonDao,
     snapshotDao: SnapshotDao,
     snapshotClient: SnapshotClient
@@ -46,7 +45,6 @@ internal class VedtaksperiodeEndretCommand(
         OppdaterSnapshotCommand(
             snapshotClient = snapshotClient,
             snapshotDao = snapshotDao,
-            vedtaksperiodeId = vedtaksperiodeId,
             fødselsnummer = fødselsnummer,
             personDao = personDao,
         )

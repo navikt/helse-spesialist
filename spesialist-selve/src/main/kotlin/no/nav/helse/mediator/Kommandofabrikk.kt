@@ -308,7 +308,6 @@ internal class Kommandofabrikk(
     fun vedtaksperiodeEndret(hendelse: VedtaksperiodeEndret): VedtaksperiodeEndretCommand {
         return VedtaksperiodeEndretCommand(
             fødselsnummer = hendelse.fødselsnummer(),
-            vedtaksperiodeId = hendelse.vedtaksperiodeId(),
             personDao = personDao,
             snapshotDao = snapshotDao,
             snapshotClient = snapshotClient
@@ -371,8 +370,6 @@ internal class Kommandofabrikk(
             vedtaksperiodeId = hendelse.vedtaksperiodeId(),
             spleisBehandlingId = hendelse.spleisBehandlingId,
             tags = hendelse.tags,
-            periodeFom = hendelse.periodeFom,
-            periodeTom = hendelse.periodeTom,
             periodetype = hendelse.periodetype,
             inntektskilde = hendelse.inntektskilde,
             førstegangsbehandling = hendelse.førstegangsbehandling,
@@ -390,12 +387,12 @@ internal class Kommandofabrikk(
             arbeidsgiverDao = arbeidsgiverDao,
             arbeidsforholdDao = arbeidsforholdDao,
             egenAnsattDao = egenAnsattDao,
-            generasjonDao = generasjonDao,
             utbetalingDao = utbetalingDao,
             vergemålDao = vergemålDao,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
             risikovurderingDao = risikovurderingDao,
             påVentDao = påVentDao,
+            generasjonDao = generasjonDao,
             overstyringDao = overstyringDao,
             periodehistorikkDao = periodehistorikkDao,
             snapshotDao = snapshotDao,

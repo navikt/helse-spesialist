@@ -40,8 +40,8 @@ internal class VedtakDao(private val dataSource: DataSource) {
     internal fun TransactionalSession.lagreVedtaksperiode(fødselsnummer: String, vedtaksperiodeDto: VedtaksperiodeDto) {
         @Language("PostgreSQL")
         val query = """
-            INSERT INTO vedtak(vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref, snapshot_ref, forkastet)
-            VALUES (:vedtaksperiode_id, :fom, :tom, (SELECT id FROM arbeidsgiver WHERE orgnummer = :organisasjonsnummer), (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer), null, :forkastet)
+            INSERT INTO vedtak(vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref, forkastet)
+            VALUES (:vedtaksperiode_id, :fom, :tom, (SELECT id FROM arbeidsgiver WHERE orgnummer = :organisasjonsnummer), (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer), :forkastet)
             ON CONFLICT (vedtaksperiode_id) DO UPDATE SET forkastet = excluded.forkastet
         """.trimIndent()
 
@@ -78,13 +78,12 @@ internal class VedtakDao(private val dataSource: DataSource) {
         fom: LocalDate,
         tom: LocalDate,
         personRef: Long,
-        arbeidsgiverRef: Long,
-        snapshotRef: Int?
+        arbeidsgiverRef: Long
     ) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val query = """
-            INSERT INTO vedtak(vedtaksperiode_id, fom, tom, person_ref, arbeidsgiver_ref, snapshot_ref, forkastet)
-            VALUES (:vedtaksperiode_id, :fom, :tom, :person_ref, :arbeidsgiver_ref, :snapshot_ref, false);
+            INSERT INTO vedtak(vedtaksperiode_id, fom, tom, person_ref, arbeidsgiver_ref, forkastet)
+            VALUES (:vedtaksperiode_id, :fom, :tom, :person_ref, :arbeidsgiver_ref, false);
         """
         session.run(
             queryOf(
@@ -93,32 +92,11 @@ internal class VedtakDao(private val dataSource: DataSource) {
                     "fom" to fom,
                     "tom" to tom,
                     "person_ref" to personRef,
-                    "arbeidsgiver_ref" to arbeidsgiverRef,
-                    "snapshot_ref" to snapshotRef
+                    "arbeidsgiver_ref" to arbeidsgiverRef
                 )
             ).asUpdate
         )
     }
-    
-    internal fun oppdaterSnaphot(vedtakRef: Long, fom: LocalDate, tom: LocalDate, snapshotRef: Int) =
-        sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query = """
-                UPDATE vedtak
-                SET snapshot_ref = :snapshot_ref, fom = :fom, tom = :tom
-                WHERE id = :vedtak_ref
-            """
-            session.run(
-                queryOf(
-                    query, mapOf(
-                        "vedtak_ref" to vedtakRef,
-                        "fom" to fom,
-                        "tom" to tom,
-                        "snapshot_ref" to snapshotRef
-                    )
-                ).asUpdate
-            )
-        }
 
     internal fun opprettKobling(vedtaksperiodeId: UUID, hendelseId: UUID) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")

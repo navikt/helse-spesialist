@@ -179,17 +179,16 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         forkastet: Boolean = false,
     ) =
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-            val snapshotid = opprettSnapshot()
             opprettGenerasjon(periode, skjæringstidspunkt)
             opprettOpprinneligSøknadsdato(periode)
 
             @Language("PostgreSQL")
             val statement =
-                "INSERT INTO vedtak(vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref, snapshot_ref, forkastet) VALUES(?, ?, ?, ?, ?, ?, ?)"
+                "INSERT INTO vedtak(vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref, forkastet) VALUES(?, ?, ?, ?, ?, ?)"
             requireNotNull(
                 session.run(
                     queryOf(
-                        statement, periode.id, periode.fom, periode.tom, arbeidsgiverId, personId, snapshotid, forkastet
+                        statement, periode.id, periode.fom, periode.tom, arbeidsgiverId, personId, forkastet
                     ).asUpdateAndReturnGeneratedKey
                 )
             )

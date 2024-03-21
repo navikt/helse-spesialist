@@ -1,7 +1,6 @@
 package no.nav.helse.modell
 
 import DatabaseIntegrationTest
-import com.fasterxml.jackson.module.kotlin.readValue
 import java.sql.SQLException
 import java.time.LocalDate
 import java.util.UUID
@@ -13,7 +12,6 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.TilstandDto
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeDto
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -31,9 +29,9 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         opprettArbeidsgiver()
         opprettSnapshot()
         opprettSnapshot()
-        vedtakDao.opprett(VEDTAKSPERIODE, FOM, TOM, personId, arbeidsgiverId, snapshotId)
+        vedtakDao.opprett(VEDTAKSPERIODE, FOM, TOM, personId, arbeidsgiverId)
         assertEquals(1, vedtak().size)
-        vedtak().first().assertEquals(VEDTAKSPERIODE, FOM, TOM, personId, arbeidsgiverId, snapshotId, false)
+        vedtak().first().assertEquals(VEDTAKSPERIODE, personId, arbeidsgiverId, false)
     }
 
     @Test
@@ -112,47 +110,18 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         opprettArbeidsgiver()
         opprettSnapshot()
         opprettSnapshot()
-        vedtakDao.opprett(VEDTAKSPERIODE, FOM, TOM, personId, arbeidsgiverId, snapshotId)
+        vedtakDao.opprett(VEDTAKSPERIODE, FOM, TOM, personId, arbeidsgiverId)
         val nyFom = LocalDate.now().minusMonths(1)
         val nyTom = LocalDate.now()
-        val nySnapshotRef = snapshotDao.lagre(FNR, snapshot().data!!.person!!)
         assertThrows<SQLException> {
             vedtakDao.opprett(
                 VEDTAKSPERIODE,
                 nyFom,
                 nyTom,
                 personId,
-                arbeidsgiverId,
-                nySnapshotRef
+                arbeidsgiverId
             )
         }
-    }
-
-    @Test
-    fun `oppdatere vedtak`() {
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettSnapshot()
-        opprettVedtaksperiode()
-        val nyFom = LocalDate.now().minusMonths(1)
-        val nyTom = LocalDate.now()
-        val nySnapshotRef = snapshotDao.lagre(FNR, snapshot().data!!.person!!)
-        vedtakDao.oppdaterSnaphot(
-            vedtakRef = vedtakId,
-            fom = nyFom,
-            tom = nyTom,
-            snapshotRef = nySnapshotRef
-        )
-        assertEquals(1, vedtak().size)
-        vedtak().first().assertEquals(
-            forventetVedtaksperiodeId = VEDTAKSPERIODE,
-            forventetFom = nyFom,
-            forventetTom = nyTom,
-            forventetPersonRef = personId,
-            forventetArbeidsgiverRef = arbeidsgiverId,
-            forventetSnapshotRef = nySnapshotRef,
-            forventetForkastet = false
-        )
     }
 
     @Test
@@ -185,22 +154,6 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         vedtakDao.fjernKobling(VEDTAKSPERIODE, HENDELSE_ID)
 
         assertNull(finnKobling(HENDELSE_ID))
-    }
-
-    @Test
-    fun `insert speil snapshot`() {
-        val nyPerson = snapshot().data!!.person!!
-        val nyVedtaksperiode = UUID.randomUUID()
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode()
-        opprettVedtaksperiode(nyVedtaksperiode)
-        snapshotDao.lagre(FNR, nyPerson)
-        val vedtak = vedtak()
-        assertTrue(
-            vedtak.all { finnSnapshot(it.snapshotRef) == nyPerson },
-            "Alle snapshots på person skal matche den nye jsonen"
-        )
     }
 
     @Test
@@ -288,7 +241,7 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
 
     private fun vedtak(fødselsnummer: String = FNR) = sessionOf(dataSource).use {
         @Language("PostgreSQL") val query = """
-            SELECT vedtaksperiode_id, fom, tom, person_ref, arbeidsgiver_ref, snapshot_ref, forkastet
+            SELECT vedtaksperiode_id, fom, tom, person_ref, arbeidsgiver_ref, forkastet
             FROM vedtak
             JOIN person p on vedtak.person_ref = p.id
             WHERE fodselsnummer = :foedselsnummer
@@ -296,11 +249,8 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         it.run(queryOf(query, mapOf("foedselsnummer" to fødselsnummer.toLong())).map { row ->
             Vedtak(
                 vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
-                fom = row.localDate("fom"),
-                tom = row.localDate("tom"),
                 personRef = row.long("person_ref"),
                 arbeidsgiverRef = row.long("arbeidsgiver_ref"),
-                snapshotRef = row.int("snapshot_ref"),
                 forkastet = row.boolean("forkastet")
             )
         }.asList)
@@ -316,38 +266,20 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
 
     private class Vedtak(
         private val vedtaksperiodeId: UUID,
-        private val fom: LocalDate,
-        private val tom: LocalDate,
         private val personRef: Long,
         private val arbeidsgiverRef: Long,
-        val snapshotRef: Int,
         private val forkastet: Boolean,
     ) {
         fun assertEquals(
             forventetVedtaksperiodeId: UUID,
-            forventetFom: LocalDate,
-            forventetTom: LocalDate,
             forventetPersonRef: Long,
             forventetArbeidsgiverRef: Long,
-            forventetSnapshotRef: Int,
             forventetForkastet: Boolean,
         ) {
             assertEquals(forventetVedtaksperiodeId, vedtaksperiodeId)
-            assertEquals(forventetFom, fom)
-            assertEquals(forventetTom, tom)
             assertEquals(forventetPersonRef, personRef)
             assertEquals(forventetArbeidsgiverRef, arbeidsgiverRef)
-            assertEquals(forventetSnapshotRef, snapshotRef)
             assertEquals(forventetForkastet, forkastet)
         }
-    }
-
-    private fun finnSnapshot(snapshotRef: Int): GraphQLPerson? = sessionOf(dataSource).use { session ->
-        session.run(
-            queryOf(
-                "SELECT data FROM snapshot WHERE id = ?",
-                snapshotRef
-            ).map { objectMapper.readValue<GraphQLPerson>(it.string("data")) }.asSingle
-        )
     }
 }

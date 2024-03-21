@@ -49,8 +49,7 @@ internal class OpprettMinimaltVedtakCommand(
             fom = periodeFom,
             tom = periodeTom,
             personRef = personRef,
-            arbeidsgiverRef = arbeidsgiverRef,
-            snapshotRef = null
+            arbeidsgiverRef = arbeidsgiverRef
         )
 
         return true

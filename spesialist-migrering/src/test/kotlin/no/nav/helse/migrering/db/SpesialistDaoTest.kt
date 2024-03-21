@@ -76,14 +76,13 @@ internal class SpesialistDaoTest : AbstractDatabaseTest() {
         @Language("PostgreSQL")
         val query =
             """
-                INSERT INTO vedtak (vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref, snapshot_ref, forkastet, forkastet_tidspunkt, forkastet_av_hendelse) 
+                INSERT INTO vedtak (vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref, forkastet, forkastet_tidspunkt, forkastet_av_hendelse) 
                 VALUES (
                     ?, 
                     '2018-01-01', 
                     '2018-01-31',
                     (SELECT id FROM arbeidsgiver WHERE orgnummer = ?),
                     (SELECT id FROM person WHERE fodselsnummer = ?),
-                    null,
                     false,
                     null,
                     null

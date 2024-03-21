@@ -55,7 +55,6 @@ internal class VedtaksperiodeForkastetCommand(
         OppdaterSnapshotCommand(
             snapshotClient = snapshotClient,
             snapshotDao = snapshotDao,
-            vedtaksperiodeId = vedtaksperiodeId,
             fødselsnummer = fødselsnummer,
             personDao = personDao,
         ),

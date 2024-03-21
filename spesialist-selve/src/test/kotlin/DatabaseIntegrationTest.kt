@@ -12,6 +12,7 @@ import kotliquery.action.QueryAction
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
+import no.nav.helse.db.BehandlingsstatistikkDao
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
@@ -48,7 +49,6 @@ import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.spesialist.api.abonnement.AbonnementDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
-import no.nav.helse.db.BehandlingsstatistikkDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
@@ -214,10 +214,9 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         opprettArbeidsgiver(organisasjonsnummer = organisasjonsnummer)
         opprettGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
         opprettVedtaksperiode(
-            periodetype = periodetype,
-            inntektskilde = inntektskilde,
             vedtaksperiodeId = vedtaksperiodeId,
-            fødselsnummer = fødselsnummer
+            periodetype = periodetype,
+            inntektskilde = inntektskilde
         )
         opprettOppgave(
             contextId = contextId,
@@ -326,10 +325,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
         inntektskilde: Inntektskilde = EN_ARBEIDSGIVER,
         forkastet: Boolean = false,
-        fødselsnummer: String = FNR,
     ): Long {
-        opprettSnapshot(fødselsnummer = fødselsnummer)
-        return vedtakDao.opprett(vedtaksperiodeId, fom, tom, personId, arbeidsgiverId, snapshotId)
+        return vedtakDao.opprett(vedtaksperiodeId, fom, tom, personId, arbeidsgiverId)
             .let { vedtakDao.finnVedtakId(vedtaksperiodeId) }
             ?.also {
                 vedtakId = it

@@ -28,9 +28,8 @@ UPDATE global_snapshot_versjon
 SET versjon = 1;
 INSERT INTO snapshot(id, data, person_ref, versjon)
 VALUES (${sequence_number}, '{}'::json, ${sequence_number}, 1);
-INSERT INTO vedtak(id, vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref, snapshot_ref, forkastet)
-VALUES (${sequence_number}, '${vedtaksperiode_id}', now(), now(), ${sequence_number}, ${sequence_number},
-        ${sequence_number}, false);
+INSERT INTO vedtak(id, vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref, forkastet)
+VALUES (${sequence_number}, '${vedtaksperiode_id}', now(), now(), ${sequence_number}, ${sequence_number}, false);
 INSERT INTO selve_vedtaksperiode_generasjon(id, unik_id, vedtaksperiode_id, opprettet_av_hendelse, tilstand)
 VALUES (${sequence_number}, '${generasjon_id}', '${vedtaksperiode_id}', '${hendelse_id}', 'Ulåst');
 INSERT INTO opprinnelig_soknadsdato (vedtaksperiode_id, soknad_mottatt)
