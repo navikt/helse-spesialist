@@ -67,6 +67,7 @@ internal class UtbetalingsgodkjenningCommandTest {
             behandlingId = UUID.randomUUID(),
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
+            spleisBehandlingId = null,
             utbetaling = utbetaling,
             sykefraværstilfelle = Sykefraværstilfelle(
                 fødselsnummer, 1.januar, listOf(Generasjon(UUID.randomUUID(), UUID.randomUUID(), 1.januar, 31.januar, 1.januar)), emptyList()
@@ -84,6 +85,7 @@ internal class UtbetalingsgodkjenningCommandTest {
             saksbehandler = saksbehandler,
             beslutter = beslutter,
             godkjenningMediator = GodkjenningMediator(
+                mockk(relaxed = true),
                 mockk(relaxed = true),
                 mockk(relaxed = true),
                 mockk(relaxed = true),

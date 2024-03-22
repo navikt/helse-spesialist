@@ -50,6 +50,7 @@ internal class GosysOppgaveEndretCommand(
     oppgaveDao: OppgaveDao,
     oppgaveMediator: OppgaveMediator,
     godkjenningMediator: GodkjenningMediator,
+    spleisBehandlingId: UUID?,
 ): MacroCommand() {
     override val commands: List<Command> = listOf(
         VurderÅpenGosysoppgave(
@@ -78,6 +79,7 @@ internal class GosysOppgaveEndretCommand(
             utbetaling = utbetaling,
             periodetype = oppgavedataForAutomatisering.periodetype,
             sykefraværstilfelle = sykefraværstilfelle,
+            spleisBehandlingId = spleisBehandlingId
         )
     )
 

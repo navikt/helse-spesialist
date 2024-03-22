@@ -8,6 +8,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 
 internal class VedtaksperiodeAvvist private constructor(
     val vedtaksperiodeId: UUID,
+    val spleisBehandlingId: UUID?,
     val fødselsnummer: String,
     val periodetype: Periodetype?,
     val saksbehandler: Saksbehandlerløsning.Saksbehandler,
@@ -30,12 +31,14 @@ internal class VedtaksperiodeAvvist private constructor(
             "kommentar" to løsning["Godkjenning"]["kommentar"].asText()
             ).apply {
                 compute("periodetype") { _, _ -> periodetype?.name }
+                compute("behandlingId") { _, _ -> spleisBehandlingId }
             }
         ).toJson()
 
     internal companion object {
         fun manueltAvvist(
             vedtaksperiodeId: UUID,
+            spleisBehandlingId: UUID?,
             fødselsnummer: String,
             periodetype: Periodetype?,
             saksbehandler: Saksbehandlerløsning.Saksbehandler,
@@ -43,6 +46,7 @@ internal class VedtaksperiodeAvvist private constructor(
         ): VedtaksperiodeAvvist {
             return VedtaksperiodeAvvist(
                 vedtaksperiodeId = vedtaksperiodeId,
+                spleisBehandlingId = spleisBehandlingId,
                 fødselsnummer = fødselsnummer,
                 periodetype = periodetype,
                 saksbehandler = saksbehandler,
@@ -53,6 +57,7 @@ internal class VedtaksperiodeAvvist private constructor(
 
         fun automatiskAvvist(
             vedtaksperiodeId: UUID,
+            spleisBehandlingId: UUID?,
             fødselsnummer: String,
             periodetype: Periodetype?,
             saksbehandler: Saksbehandlerløsning.Saksbehandler,
@@ -60,6 +65,7 @@ internal class VedtaksperiodeAvvist private constructor(
         ): VedtaksperiodeAvvist {
             return VedtaksperiodeAvvist(
                 vedtaksperiodeId = vedtaksperiodeId,
+                spleisBehandlingId = spleisBehandlingId,
                 fødselsnummer = fødselsnummer,
                 periodetype = periodetype,
                 saksbehandler = saksbehandler,

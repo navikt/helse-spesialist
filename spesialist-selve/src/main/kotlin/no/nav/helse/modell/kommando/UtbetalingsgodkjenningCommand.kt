@@ -15,6 +15,7 @@ internal class UtbetalingsgodkjenningCommand(
     private val behandlingId: UUID,
     private val fødselsnummer: String,
     private val vedtaksperiodeId: UUID,
+    private val spleisBehandlingId: UUID?,
     private val utbetaling: Utbetaling?,
     private val sykefraværstilfelle: Sykefraværstilfelle,
     private val godkjent: Boolean,
@@ -53,7 +54,8 @@ internal class UtbetalingsgodkjenningCommand(
                 beslutter = beslutter,
                 godkjenttidspunkt = godkjenttidspunkt,
                 saksbehandleroverstyringer = saksbehandleroverstyringer,
-                sykefraværstilfelle = sykefraværstilfelle
+                sykefraværstilfelle = sykefraværstilfelle,
+                spleisBehandlingId = spleisBehandlingId
             )
         } else {
             godkjenningMediator.saksbehandlerAvvisning(
@@ -69,7 +71,8 @@ internal class UtbetalingsgodkjenningCommand(
                 årsak = årsak,
                 begrunnelser = begrunnelser,
                 kommentar = kommentar,
-                saksbehandleroverstyringer = saksbehandleroverstyringer
+                saksbehandleroverstyringer = saksbehandleroverstyringer,
+                spleisBehandlingId = spleisBehandlingId
             )
         }
         log.info("sender svar på godkjenningsbehov")

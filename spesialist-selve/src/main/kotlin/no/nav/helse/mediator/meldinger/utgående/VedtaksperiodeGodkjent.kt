@@ -7,6 +7,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 
 internal class VedtaksperiodeGodkjent private constructor(
     private val vedtaksperiodeId: UUID,
+    private val spleisBehandlingId: UUID?,
     private val fødselsnummer: String,
     private val periodetype: Periodetype,
     private val saksbehandler: Saksbehandlerløsning.Saksbehandler,
@@ -33,12 +34,14 @@ internal class VedtaksperiodeGodkjent private constructor(
                         mapOf("ident" to beslutter.ident, "epostadresse" to beslutter.epostadresse)
                     }
                 }
+                compute("behandlingId") { _, _ -> spleisBehandlingId }
             }
         ).toJson()
 
     internal companion object {
         fun manueltBehandlet(
             vedtaksperiodeId: UUID,
+            spleisBehandlingId: UUID?,
             fødselsnummer: String,
             periodetype: Periodetype,
             saksbehandler: Saksbehandlerløsning.Saksbehandler,
@@ -46,6 +49,7 @@ internal class VedtaksperiodeGodkjent private constructor(
         ): VedtaksperiodeGodkjent {
             return VedtaksperiodeGodkjent(
                 vedtaksperiodeId = vedtaksperiodeId,
+                spleisBehandlingId = spleisBehandlingId,
                 fødselsnummer = fødselsnummer,
                 periodetype = periodetype,
                 saksbehandler = saksbehandler,
@@ -56,12 +60,14 @@ internal class VedtaksperiodeGodkjent private constructor(
 
         fun automatiskBehandlet(
             vedtaksperiodeId: UUID,
+            spleisBehandlingId: UUID?,
             fødselsnummer: String,
             periodetype: Periodetype,
             saksbehandler: Saksbehandlerløsning.Saksbehandler
         ): VedtaksperiodeGodkjent {
             return VedtaksperiodeGodkjent(
                 vedtaksperiodeId = vedtaksperiodeId,
+                spleisBehandlingId = spleisBehandlingId,
                 fødselsnummer = fødselsnummer,
                 periodetype = periodetype,
                 saksbehandler = saksbehandler,

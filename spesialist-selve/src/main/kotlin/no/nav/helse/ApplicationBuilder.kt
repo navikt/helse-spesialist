@@ -240,6 +240,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         oppgaveDao,
         UtbetalingDao(dataSource),
         meldingDao,
+        generasjonDao
     )
 
     private val totrinnsvurderingMediator =

@@ -21,7 +21,8 @@ internal class AutomatiseringForEksisterendeOppgaveCommand(
     private val oppgaveMediator: OppgaveMediator,
     private val utbetaling: Utbetaling,
     private val periodetype: Periodetype,
-    private val sykefraværstilfelle: Sykefraværstilfelle
+    private val sykefraværstilfelle: Sykefraværstilfelle,
+    private val spleisBehandlingId: UUID?
 ) : Command {
 
     private companion object {
@@ -31,7 +32,14 @@ internal class AutomatiseringForEksisterendeOppgaveCommand(
     override fun execute(context: CommandContext): Boolean {
         automatisering.utfør(fødselsnummer, vedtaksperiodeId, hendelseId, utbetaling, periodetype, sykefraværstilfelle) {
             val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson, utbetaling)
-            godkjenningMediator.automatiskUtbetaling(context, behov, vedtaksperiodeId, fødselsnummer, hendelseId)
+            godkjenningMediator.automatiskUtbetaling(
+                context = context,
+                behov = behov,
+                vedtaksperiodeId = vedtaksperiodeId,
+                fødselsnummer = fødselsnummer,
+                hendelseId = hendelseId,
+                spleisBehandlingId = spleisBehandlingId
+            )
             logg.info("Oppgave avbrytes for vedtaksperiode $vedtaksperiodeId på grunn av automatisering")
             oppgaveMediator.avbrytOppgaveFor(vedtaksperiodeId)
         }

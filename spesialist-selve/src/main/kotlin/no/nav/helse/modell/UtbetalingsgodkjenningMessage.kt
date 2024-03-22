@@ -152,6 +152,7 @@ internal class UtbetalingsgodkjenningMessage(json: String, private val utbetalin
 
     internal fun lagVedtaksperiodeGodkjentManuelt(
         vedtaksperiodeId: UUID,
+        spleisBehandlingId: UUID?,
         fødselsnummer: String,
         saksbehandler: Saksbehandlerløsning.Saksbehandler,
         beslutter: Saksbehandlerløsning.Saksbehandler?,
@@ -159,6 +160,7 @@ internal class UtbetalingsgodkjenningMessage(json: String, private val utbetalin
     ) =
         VedtaksperiodeGodkjent.manueltBehandlet(
             vedtaksperiodeId = vedtaksperiodeId,
+            spleisBehandlingId = spleisBehandlingId,
             fødselsnummer = fødselsnummer,
             periodetype = vedtakDao.finnVedtaksperiodetype(vedtaksperiodeId),
             saksbehandler = saksbehandler,
@@ -167,11 +169,13 @@ internal class UtbetalingsgodkjenningMessage(json: String, private val utbetalin
 
     internal fun lagVedtaksperiodeGodkjentAutomatisk(
         vedtaksperiodeId: UUID,
+        spleisBehandlingId: UUID?,
         fødselsnummer: String,
         vedtakDao: VedtakDao
     ) =
         VedtaksperiodeGodkjent.automatiskBehandlet(
             vedtaksperiodeId = vedtaksperiodeId,
+            spleisBehandlingId = spleisBehandlingId,
             fødselsnummer = fødselsnummer,
             periodetype = vedtakDao.finnVedtaksperiodetype(vedtaksperiodeId),
             saksbehandler = Saksbehandlerløsning.Saksbehandler(
@@ -182,11 +186,13 @@ internal class UtbetalingsgodkjenningMessage(json: String, private val utbetalin
 
     internal fun lagVedtaksperiodeAvvistManuelt(
         vedtaksperiodeId: UUID,
+        spleisBehandlingId: UUID?,
         fødselsnummer: String,
         saksbehandler: Saksbehandlerløsning.Saksbehandler,
         vedtakDao: VedtakDao
     ) = VedtaksperiodeAvvist.manueltAvvist(
         vedtaksperiodeId = vedtaksperiodeId,
+        spleisBehandlingId = spleisBehandlingId,
         fødselsnummer = fødselsnummer,
         periodetype = vedtakDao.finnVedtakId(vedtaksperiodeId)?.let { vedtakDao.finnVedtaksperiodetype(vedtaksperiodeId) },
         saksbehandler = saksbehandler,
@@ -195,10 +201,12 @@ internal class UtbetalingsgodkjenningMessage(json: String, private val utbetalin
 
     internal fun lagVedtaksperiodeAvvistAutomatisk(
         vedtaksperiodeId: UUID,
+        spleisBehandlingId: UUID?,
         fødselsnummer: String,
         vedtakDao: VedtakDao
     ) = VedtaksperiodeAvvist.automatiskAvvist(
         vedtaksperiodeId = vedtaksperiodeId,
+        spleisBehandlingId = spleisBehandlingId,
         fødselsnummer = fødselsnummer,
         periodetype = vedtakDao.finnVedtakId(vedtaksperiodeId)?.let { vedtakDao.finnVedtaksperiodetype(vedtaksperiodeId) },
         saksbehandler = Saksbehandlerløsning.Saksbehandler(

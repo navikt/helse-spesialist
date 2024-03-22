@@ -54,6 +54,7 @@ internal class TestMediator(
         oppgaveDao,
         utbetalingDao,
         meldingDao,
+        generasjonDao,
     )
     private val tilgangsgrupper = Tilgangsgrupper(testEnv)
     private val oppgaveMediator = OppgaveMediator(

@@ -272,13 +272,14 @@ internal class GodkjenningsbehovCommand(
         VurderAutomatiskAvvisning(
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
+            spleisBehandlingId = spleisBehandlingId,
             personDao = personDao,
             vergemålDao = vergemålDao,
             godkjenningMediator = godkjenningMediator,
             hendelseId = id,
             utbetaling = utbetaling,
             kanAvvises = kanAvvises,
-            sykefraværstilfelle = sykefraværstilfelle,
+            sykefraværstilfelle = sykefraværstilfelle
         ),
         VurderAutomatiskInnvilgelse(
             fødselsnummer = fødselsnummer,
@@ -289,7 +290,8 @@ internal class GodkjenningsbehovCommand(
             godkjenningMediator = godkjenningMediator,
             utbetaling = utbetaling,
             periodetype = periodetype,
-            sykefraværstilfelle = sykefraværstilfelle
+            sykefraværstilfelle = sykefraværstilfelle,
+            spleisBehandlingId = spleisBehandlingId
         ),
         OpprettSaksbehandleroppgave(
             fødselsnummer = fødselsnummer,

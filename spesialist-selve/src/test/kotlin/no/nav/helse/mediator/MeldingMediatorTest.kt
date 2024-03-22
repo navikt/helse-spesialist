@@ -44,7 +44,7 @@ internal class MeldingMediatorTest : AbstractDatabaseTest() {
     private val generasjonDao = mockk<GenerasjonDao>()
 
     private val godkjenningMediator =
-        GodkjenningMediator(vedtakDao, opptegnelseDao, oppgaveDao, utbetalingDao, meldingDao)
+        GodkjenningMediator(vedtakDao, opptegnelseDao, oppgaveDao, utbetalingDao, meldingDao, generasjonDao)
 
     private val kommandofabrikk = mockk<Kommandofabrikk>(relaxed = true)
 

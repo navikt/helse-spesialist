@@ -100,18 +100,19 @@ internal class VurderAutomatiskAvvisningTest {
     private fun assertAvvisning(command: VurderAutomatiskAvvisning, forventetÅrsak: String) {
         assertTrue(command.execute(context))
         verify (exactly = 1) { godkjenningMediator.automatiskAvvisning(
-            any(),
-            any(),
-            listOf(forventetÅrsak),
-            any(),
-            any()
+            publiserer = any(),
+            vedtaksperiodeId = any(),
+            begrunnelser = listOf(forventetÅrsak),
+            utbetaling = any(),
+            hendelseId = any(),
+            spleisBehandlingId = any()
         ) }
     }
 
     private fun assertIkkeAvvisning(command: VurderAutomatiskAvvisning) {
         assertTrue(command.execute(context))
         verify (exactly = 0) { godkjenningMediator.automatiskAvvisning(any(), any(), any()) }
-        verify (exactly = 0) { godkjenningMediator.automatiskAvvisning(any(), any(), any(), any(), any()) }
+        verify (exactly = 0) { godkjenningMediator.automatiskAvvisning(any(), any(), any(), any(), any(), any()) }
     }
 
     private fun lagCommand(
@@ -122,13 +123,14 @@ internal class VurderAutomatiskAvvisningTest {
         VurderAutomatiskAvvisning(
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
+            spleisBehandlingId = null,
             personDao = personDao,
             vergemålDao = vergemålDao,
             godkjenningMediator = godkjenningMediator,
             hendelseId = hendelseId,
             utbetaling = Utbetaling(utbetalingId, 1000, 1000, utbetalingstype),
             kanAvvises = kanAvvises,
-            sykefraværstilfelle = sykefraværstilfelle,
+            sykefraværstilfelle = sykefraværstilfelle
         )
 
     private companion object {

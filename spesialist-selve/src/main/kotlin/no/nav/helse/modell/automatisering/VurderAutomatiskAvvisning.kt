@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory
 internal class VurderAutomatiskAvvisning(
     private val fødselsnummer: String,
     private val vedtaksperiodeId: UUID,
+    private val spleisBehandlingId: UUID?,
     private val personDao: PersonDao,
     private val vergemålDao: VergemålDao,
     private val godkjenningMediator: GodkjenningMediator,
@@ -64,11 +65,12 @@ internal class VurderAutomatiskAvvisning(
         }
 
         godkjenningMediator.automatiskAvvisning(
-            context::publiser,
-            vedtaksperiodeId,
-            avvisningsårsaker.toList(),
-            utbetaling,
-            hendelseId,
+            publiserer = context::publiser,
+            vedtaksperiodeId = vedtaksperiodeId,
+            begrunnelser = avvisningsårsaker.toList(),
+            utbetaling = utbetaling,
+            hendelseId = hendelseId,
+            spleisBehandlingId = spleisBehandlingId
         )
         logg.info("Automatisk avvisning av vedtaksperiode $vedtaksperiodeId pga:$avvisningsårsaker")
         return ferdigstill(context)

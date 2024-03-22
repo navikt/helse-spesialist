@@ -56,6 +56,7 @@ internal class SaksbehandlerløsningTest {
             behandlingId = randomUUID(),
             fødselsnummer = FNR,
             vedtaksperiodeId = vedtaksperiodeId,
+            spleisBehandlingId = null,
             utbetaling = Utbetaling(randomUUID(), arbeidsgiverbeløp, personbeløp, Utbetalingtype.UTBETALING),
             sykefraværstilfelle = Sykefraværstilfelle(
                 fødselsnummer = FNR,
@@ -64,18 +65,18 @@ internal class SaksbehandlerløsningTest {
                 skjønnsfastatteSykepengegrunnlag = emptyList()
             ),
             godkjent = godkjent,
+            godkjenttidspunkt = GODKJENTTIDSPUNKT,
             ident = IDENT,
             epostadresse = "saksbehandler@nav.no",
-            godkjenttidspunkt = GODKJENTTIDSPUNKT,
             årsak = null,
             begrunnelser = null,
             kommentar = null,
             saksbehandleroverstyringer = saksbehandlerløsning,
             godkjenningsbehovhendelseId = GODKJENNINGSBEHOV_ID,
             meldingDao = meldingDao,
-            godkjenningMediator = GodkjenningMediator(mockk(relaxed = true), mockk(), mockk(), mockk(), mockk()),
             saksbehandler = saksbehandler,
-            beslutter = beslutter
+            beslutter = beslutter,
+            godkjenningMediator = GodkjenningMediator(mockk(relaxed = true), mockk(), mockk(), mockk(), mockk(), mockk(relaxed = true))
         )
     }
 

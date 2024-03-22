@@ -181,6 +181,8 @@ internal class Kommandofabrikk(
         val utbetaling = utbetalingDao.hentUtbetaling(oppgaveDataForAutomatisering.utbetalingId)
         val oppgaveId by lazy { oppgaveDao.finnOppgaveId(fødselsnummer) }
         val harTildeltOppgave = oppgaveId?.let { tildelingDao.tildelingForOppgave(it) != null } ?: false
+        val spleisBehandlingId =
+            generasjonDao.finnGjeldendeGenerasjon(oppgaveDataForAutomatisering.vedtaksperiodeId)?.spleisBehandlingId
 
         return GosysOppgaveEndretCommand(
             id = hendelse.id,
@@ -194,7 +196,8 @@ internal class Kommandofabrikk(
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
             oppgaveDao = oppgaveDao,
             oppgaveMediator = oppgaveMediator,
-            godkjenningMediator = godkjenningMediator
+            godkjenningMediator = godkjenningMediator,
+            spleisBehandlingId = spleisBehandlingId
         )
     }
 
@@ -204,6 +207,8 @@ internal class Kommandofabrikk(
         }
         val sykefraværstilfelle = sykefraværstilfelle(fødselsnummer, oppgaveDataForAutomatisering.skjæringstidspunkt)
         val utbetaling = utbetalingDao.hentUtbetaling(oppgaveDataForAutomatisering.utbetalingId)
+        val spleisBehandlingId =
+            generasjonDao.finnGjeldendeGenerasjon(oppgaveDataForAutomatisering.vedtaksperiodeId)?.spleisBehandlingId
 
         sikkerlogg.info("Henter oppgaveDataForAutomatisering ifm. godkjent tilbakedatering for fnr $fødselsnummer og vedtaksperiodeId ${oppgaveDataForAutomatisering.vedtaksperiodeId}")
 
@@ -214,7 +219,8 @@ internal class Kommandofabrikk(
             automatisering = automatisering,
             oppgaveDataForAutomatisering = oppgaveDataForAutomatisering,
             oppgaveMediator = oppgaveMediator,
-            godkjenningMediator = godkjenningMediator
+            godkjenningMediator = godkjenningMediator,
+            spleisBehandlingId = spleisBehandlingId
         )
     }
 
@@ -332,6 +338,7 @@ internal class Kommandofabrikk(
         val oppgaveId = hendelse.oppgaveId
         val fødselsnummer = hendelse.fødselsnummer()
         val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(oppgaveId)
+        val spleisBehandlingId = generasjonDao.finnGjeldendeGenerasjon(vedtaksperiodeId)?.spleisBehandlingId
         val skjæringstidspunkt = generasjonRepository.skjæringstidspunktFor(vedtaksperiodeId)
         val sykefraværstilfelle = sykefraværstilfelle(fødselsnummer, skjæringstidspunkt)
         val utbetaling = utbetalingDao.utbetalingFor(oppgaveId)
@@ -340,19 +347,20 @@ internal class Kommandofabrikk(
             behandlingId = hendelse.behandlingId,
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
+            spleisBehandlingId = spleisBehandlingId,
             utbetaling = utbetaling,
             sykefraværstilfelle = sykefraværstilfelle,
             godkjent = hendelse.godkjent,
             godkjenttidspunkt = hendelse.godkjenttidspunkt,
             ident = hendelse.ident,
             epostadresse = hendelse.epostadresse,
-            saksbehandler = hendelse.saksbehandler,
-            beslutter = hendelse.beslutter,
             årsak = hendelse.årsak,
             begrunnelser = hendelse.begrunnelser,
             kommentar = hendelse.kommentar,
             saksbehandleroverstyringer = hendelse.saksbehandleroverstyringer,
             godkjenningsbehovhendelseId = hendelse.godkjenningsbehovhendelseId,
+            saksbehandler = hendelse.saksbehandler,
+            beslutter = hendelse.beslutter,
             meldingDao = meldingDao,
             godkjenningMediator = godkjenningMediator
         )

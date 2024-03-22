@@ -43,6 +43,7 @@ internal class TilbakedateringGodkjentCommand(
     oppgaveDataForAutomatisering: OppgaveDataForAutomatisering,
     oppgaveMediator: OppgaveMediator,
     godkjenningMediator: GodkjenningMediator,
+    spleisBehandlingId: UUID?,
 ): MacroCommand() {
     override val commands: List<Command> = listOf(
         ikkesuspenderendeCommand("fjernTilbakedatertEgenskap") {
@@ -64,6 +65,7 @@ internal class TilbakedateringGodkjentCommand(
             utbetaling = utbetaling,
             periodetype = oppgaveDataForAutomatisering.periodetype,
             sykefraværstilfelle = sykefraværstilfelle,
+            spleisBehandlingId = spleisBehandlingId
         )
     )
 }

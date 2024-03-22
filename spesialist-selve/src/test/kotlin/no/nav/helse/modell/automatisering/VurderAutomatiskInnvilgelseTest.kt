@@ -35,6 +35,7 @@ internal class VurderAutomatiskInnvilgelseTest {
         VurderAutomatiskInnvilgelse(
             fødselsnummer,
             vedtaksperiodeId,
+            null,
             hendelseId,
             automatisering,
             """{ "@event_name": "behov" }""",
@@ -44,6 +45,7 @@ internal class VurderAutomatiskInnvilgelseTest {
                 oppgaveDao = mockk(relaxed = true),
                 utbetalingDao = mockk(relaxed = true),
                 meldingDao = mockk(relaxed = true),
+                generasjonDao = mockk(relaxed = true),
             ),
             Utbetaling(utbetalingId, 1000, 1000, Utbetalingtype.UTBETALING),
             periodeType,
@@ -52,7 +54,7 @@ internal class VurderAutomatiskInnvilgelseTest {
                 skjæringstidspunkt = 1.januar,
                 gjeldendeGenerasjoner = listOf(generasjon),
                 skjønnsfastatteSykepengegrunnlag = emptyList()
-            )
+            ),
         )
 
     private lateinit var context: CommandContext

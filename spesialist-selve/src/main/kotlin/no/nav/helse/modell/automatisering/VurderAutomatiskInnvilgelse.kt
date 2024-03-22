@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory
 internal class VurderAutomatiskInnvilgelse(
     private val fødselsnummer: String,
     private val vedtaksperiodeId: UUID,
+    private val spleisBehandlingId: UUID?,
     private val hendelseId: UUID,
     private val automatisering: Automatisering,
     private val godkjenningsbehovJson: String,
@@ -30,7 +31,14 @@ internal class VurderAutomatiskInnvilgelse(
     override fun execute(context: CommandContext): Boolean {
         automatisering.utfør(fødselsnummer, vedtaksperiodeId, hendelseId, utbetaling, periodetype, sykefraværstilfelle) {
             val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson, utbetaling)
-            godkjenningMediator.automatiskUtbetaling(context, behov, vedtaksperiodeId, fødselsnummer, hendelseId)
+            godkjenningMediator.automatiskUtbetaling(
+                context = context,
+                behov = behov,
+                vedtaksperiodeId = vedtaksperiodeId,
+                fødselsnummer = fødselsnummer,
+                hendelseId = hendelseId,
+                spleisBehandlingId = spleisBehandlingId
+            )
             logg.info("Automatisk godkjenning for vedtaksperiode $vedtaksperiodeId")
             ferdigstill(context)
         }
