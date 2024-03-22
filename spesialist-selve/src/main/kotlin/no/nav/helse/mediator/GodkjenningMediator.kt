@@ -6,7 +6,7 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.automatiseringsteller
 import no.nav.helse.automatiskAvvistÅrsakerTeller
 import no.nav.helse.mediator.oppgave.OppgaveDao
-import no.nav.helse.modell.HendelseDao
+import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.kommando.CommandContext
@@ -25,7 +25,7 @@ internal class GodkjenningMediator(
     private val opptegnelseDao: OpptegnelseDao,
     val oppgaveDao: OppgaveDao,
     val utbetalingDao: UtbetalingDao,
-    val hendelseDao: HendelseDao,
+    val meldingDao: MeldingDao,
 ) {
     internal fun saksbehandlerUtbetaling(
         behandlingId: UUID,
@@ -121,9 +121,9 @@ internal class GodkjenningMediator(
         utbetaling: Utbetaling,
         hendelseId: UUID,
     ) {
-        val godkjenningsbehovJson = hendelseDao.finnUtbetalingsgodkjenningbehovJson(hendelseId)
+        val godkjenningsbehovJson = meldingDao.finnUtbetalingsgodkjenningbehovJson(hendelseId)
         val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson, utbetaling)
-        val fødselsnummer = hendelseDao.finnFødselsnummer(hendelseId)
+        val fødselsnummer = meldingDao.finnFødselsnummer(hendelseId)
         automatiskAvvisning(publiserer, behov, vedtaksperiodeId, fødselsnummer, begrunnelser, hendelseId)
     }
 

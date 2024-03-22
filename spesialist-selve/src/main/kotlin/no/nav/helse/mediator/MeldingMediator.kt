@@ -48,7 +48,7 @@ import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
 import no.nav.helse.mediator.meldinger.påminnelser.KommandokjedePåminnelseRiver
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.CommandContextDao
-import no.nav.helse.modell.HendelseDao
+import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.avviksvurdering.AvviksvurderingDto
@@ -95,7 +95,7 @@ internal class MeldingMediator(
     private val personDao: PersonDao = PersonDao(dataSource),
     private val commandContextDao: CommandContextDao = CommandContextDao(dataSource),
     private val arbeidsgiverDao: ArbeidsgiverDao = ArbeidsgiverDao(dataSource),
-    private val hendelseDao: HendelseDao = HendelseDao(dataSource),
+    private val meldingDao: MeldingDao = MeldingDao(dataSource),
     private val feilendeMeldingerDao: FeilendeMeldingerDao = FeilendeMeldingerDao(dataSource),
     private val godkjenningMediator: GodkjenningMediator,
     private val kommandofabrikk: Kommandofabrikk,
@@ -362,26 +362,26 @@ internal class MeldingMediator(
         løsninger = null
     }
 
-    private fun løsninger(messageContext: MessageContext, hendelseId: UUID, contextId: UUID): Løsninger? {
+    private fun løsninger(messageContext: MessageContext, meldingId: UUID, contextId: UUID): Løsninger? {
         return løsninger ?: run {
             val commandContext = commandContextDao.finnSuspendert(contextId) ?: run {
                 logg.info("Ignorerer melding fordi kommandokonteksten ikke er suspendert")
                 return null
             }
-            val hendelse = hendelseDao.finn(hendelseId) ?: run {
+            val melding = meldingDao.finn(meldingId) ?: run {
                 logg.info("Ignorerer melding fordi opprinnelig melding ikke finnes i databasen")
                 return null
             }
-            Løsninger(messageContext, hendelse, contextId, commandContext).also { løsninger = it }
+            Løsninger(messageContext, melding, contextId, commandContext).also { løsninger = it }
         }
     }
 
-    private fun påminnelse(messageContext: MessageContext, hendelseId: UUID, contextId: UUID): Påminnelse? {
+    private fun påminnelse(messageContext: MessageContext, meldingId: UUID, contextId: UUID): Påminnelse? {
         val commandContext = commandContextDao.finnSuspendert(contextId) ?: run {
             logg.info("Ignorerer melding fordi kommandokonteksten ikke er suspendert")
             return null
         }
-        val hendelse = hendelseDao.finn(hendelseId) ?: run {
+        val hendelse = meldingDao.finn(meldingId) ?: run {
             logg.info("Ignorerer melding fordi opprinnelig melding ikke finnes i databasen")
             return null
         }
@@ -400,7 +400,7 @@ internal class MeldingMediator(
     }
 
     private fun nyContext(hendelse: Personmelding, contextId: UUID) = CommandContext(contextId).apply {
-        hendelseDao.opprett(hendelse)
+        meldingDao.opprett(hendelse)
         opprett(commandContextDao, hendelse.id)
     }
 

@@ -12,7 +12,7 @@ import java.util.UUID
 import lagFødselsnummer
 import lagOrganisasjonsnummer
 import no.nav.helse.januar
-import no.nav.helse.modell.HendelseDao
+import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.Toggle
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
@@ -54,7 +54,7 @@ internal class AutomatiseringTest {
     private val automatiseringDaoMock = mockk<AutomatiseringDao>(relaxed = true)
     private val vergemålDaoMock = mockk<VergemålDao>(relaxed = true)
     private val overstyringDaoMock = mockk<OverstyringDao>(relaxed = true)
-    private val hendelseDaoMock = mockk<HendelseDao>(relaxed = true)
+    private val meldingDaoMock = mockk<MeldingDao>(relaxed = true)
     private val generasjonDaoMock = mockk<GenerasjonDao>(relaxed = true)
     private var stikkprøveFullRefusjonEnArbeidsgiver = false
     private var stikkprøveUtsEnArbeidsgiverFørstegangsbehandling = false
@@ -79,7 +79,7 @@ internal class AutomatiseringTest {
             vedtakDao = vedtakDaoMock,
             overstyringDao = overstyringDaoMock,
             stikkprøver = stikkprøver,
-            hendelseDao = hendelseDaoMock,
+            meldingDao = meldingDaoMock,
             generasjonDao = generasjonDaoMock,
         )
 
@@ -91,18 +91,18 @@ internal class AutomatiseringTest {
         every { vedtakDaoMock.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.EN_ARBEIDSGIVER
         every { åpneGosysOppgaverDaoMock.harÅpneOppgaver(any()) } returns 0
         every { overstyringDaoMock.harVedtaksperiodePågåendeOverstyring(any()) } returns false
-        every { hendelseDaoMock.sisteOverstyringIgangsattOmKorrigertSøknad(fødselsnummer, vedtaksperiodeId) } returns HendelseDao.OverstyringIgangsattKorrigertSøknad(
-            hendelseId = hendelseId.toString(),
+        every { meldingDaoMock.sisteOverstyringIgangsattOmKorrigertSøknad(fødselsnummer, vedtaksperiodeId) } returns MeldingDao.OverstyringIgangsattKorrigertSøknad(
+            meldingId = hendelseId.toString(),
             periodeForEndringFom = periodeFom,
-            berørtePerioder = listOf(HendelseDao.BerørtPeriode(
+            berørtePerioder = listOf(MeldingDao.BerørtPeriode(
                 vedtaksperiodeId = vedtaksperiodeId,
                 orgnummer = orgnummer,
                 periodeFom = periodeFom
             )
         ))
         every { vedtakDaoMock.finnOrgnummer(vedtaksperiodeId) } returns orgnummer
-        every { hendelseDaoMock.finnAntallAutomatisertKorrigertSøknad(vedtaksperiodeId) } returns 1
-        every { hendelseDaoMock.erAutomatisertKorrigertSøknadHåndtert(hendelseId) } returns false
+        every { meldingDaoMock.finnAntallAutomatisertKorrigertSøknad(vedtaksperiodeId) } returns 1
+        every { meldingDaoMock.erAutomatisertKorrigertSøknadHåndtert(hendelseId) } returns false
         every { generasjonDaoMock.førsteGenerasjonLåstTidspunkt(vedtaksperiodeId) } returns LocalDateTime.now().minusMonths(6).plusDays(1)
         stikkprøveFullRefusjonEnArbeidsgiver = false
         stikkprøveUtsEnArbeidsgiverForlengelse = false
@@ -172,7 +172,7 @@ internal class AutomatiseringTest {
 
     @Test
     fun `vedtaksperiode med 2 tidligere korrigerte søknader er ikke automatiserbar`() {
-        every { hendelseDaoMock.finnAntallAutomatisertKorrigertSøknad(vedtaksperiodeId) } returns 3
+        every { meldingDaoMock.finnAntallAutomatisertKorrigertSøknad(vedtaksperiodeId) } returns 3
         gårTilManuellMedError(problems = listOf("Antall automatisk godkjente korrigerte søknader er større eller lik 2"))
     }
 
@@ -184,7 +184,7 @@ internal class AutomatiseringTest {
 
     @Test
     fun `Automatisering av korrigert søknad er allerede håndtert for tidligere sykefraværstilfelle`() {
-        every { hendelseDaoMock.erAutomatisertKorrigertSøknadHåndtert(hendelseId) } returns true
+        every { meldingDaoMock.erAutomatisertKorrigertSøknadHåndtert(hendelseId) } returns true
         gårAutomatisk()
     }
 

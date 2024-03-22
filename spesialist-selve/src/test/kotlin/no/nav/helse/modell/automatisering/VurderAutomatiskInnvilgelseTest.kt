@@ -43,7 +43,7 @@ internal class VurderAutomatiskInnvilgelseTest {
                 opptegnelseDao = mockk(relaxed = true),
                 oppgaveDao = mockk(relaxed = true),
                 utbetalingDao = mockk(relaxed = true),
-                hendelseDao = mockk(relaxed = true),
+                meldingDao = mockk(relaxed = true),
             ),
             Utbetaling(utbetalingId, 1000, 1000, Utbetalingtype.UTBETALING),
             periodeType,

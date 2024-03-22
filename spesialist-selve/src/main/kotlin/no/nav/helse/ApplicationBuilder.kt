@@ -48,7 +48,7 @@ import no.nav.helse.mediator.TilgangskontrollørForReservasjon
 import no.nav.helse.mediator.dokument.DokumentMediator
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
-import no.nav.helse.modell.HendelseDao
+import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringDao
@@ -217,7 +217,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val notatMediator = NotatMediator(notatDao)
     private val overstyringDao = OverstyringDao(dataSource)
     private val apiVarselRepository = ApiVarselRepository(dataSource)
-    private val hendelseDao = HendelseDao(dataSource)
+    private val meldingDao = MeldingDao(dataSource)
     private val dokumentDao = DokumentDao(dataSource)
     private val generasjonDao = GenerasjonDao(dataSource)
     private val påVentApiDao = PåVentApiDao(dataSource)
@@ -239,7 +239,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         opptegnelseDao,
         oppgaveDao,
         UtbetalingDao(dataSource),
-        hendelseDao,
+        meldingDao,
     )
 
     private val totrinnsvurderingMediator =
@@ -355,7 +355,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         vedtakDao = vedtakDao,
         overstyringDao = overstyringDao,
         stikkprøver = stikkprøver,
-        hendelseDao = hendelseDao,
+        meldingDao = meldingDao,
         generasjonDao = generasjonDao,
     )
 
@@ -370,7 +370,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     init {
         rapidsConnection.register(this)
         oppgaveMediator = OppgaveMediator(
-            hendelseDao = hendelseDao,
+            meldingDao = meldingDao,
             oppgaveDao = oppgaveDao,
             tildelingDao = tildelingDao,
             reservasjonDao = reservasjonDao,

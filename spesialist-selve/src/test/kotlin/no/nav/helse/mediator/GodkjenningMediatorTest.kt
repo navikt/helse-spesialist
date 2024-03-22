@@ -55,7 +55,7 @@ internal class GodkjenningMediatorTest {
         opptegnelseDao = opptegnelseDao,
         oppgaveDao = mockk(relaxed = true),
         utbetalingDao = mockk(relaxed = true),
-        hendelseDao = mockk(relaxed = true) {
+        meldingDao = mockk(relaxed = true) {
             every { finnUtbetalingsgodkjenningbehovJson(any()) } returns "{}"
             every { finnFødselsnummer(any()) } returns fnr
         },

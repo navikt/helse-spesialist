@@ -21,7 +21,7 @@ import no.nav.helse.januar
 import no.nav.helse.mediator.FeilendeMeldingerDao
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.CommandContextDao
-import no.nav.helse.modell.HendelseDao
+import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
@@ -140,7 +140,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val overstyringDao = OverstyringDao(dataSource)
     internal val overstyringApiDao = OverstyringApiDao(dataSource)
     internal val reservasjonDao = ReservasjonDao(dataSource)
-    internal val hendelseDao = HendelseDao(dataSource)
+    internal val meldingDao = MeldingDao(dataSource)
     internal val risikovurderingDao = RisikovurderingDao(dataSource)
     internal val automatiseringDao = AutomatiseringDao(dataSource)
     internal val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource)

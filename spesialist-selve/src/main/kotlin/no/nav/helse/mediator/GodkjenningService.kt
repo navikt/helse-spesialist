@@ -10,7 +10,7 @@ import no.nav.helse.db.SaksbehandlerRepository
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
-import no.nav.helse.modell.HendelseDao
+import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory
 internal class GodkjenningService(
     private val dataSource: DataSource,
     private val oppgaveDao: OppgaveDao = OppgaveDao(dataSource),
-    private val hendelseDao: HendelseDao = HendelseDao(dataSource),
+    private val meldingDao: MeldingDao = MeldingDao(dataSource),
     private val overstyringDao: OverstyringDao = OverstyringDao(dataSource),
     private val rapidsConnection: RapidsConnection,
     private val oppgaveMediator: OppgaveMediator,
@@ -49,7 +49,7 @@ internal class GodkjenningService(
 
     override fun håndter(godkjenningDTO: GodkjenningDto, epost: String, oid: UUID, behandlingId: UUID) {
         val hendelseId = oppgaveDao.finnHendelseId(godkjenningDTO.oppgavereferanse)
-        val fødselsnummer = hendelseDao.finnFødselsnummer(hendelseId)
+        val fødselsnummer = meldingDao.finnFødselsnummer(hendelseId)
         val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(godkjenningDTO.oppgavereferanse)
         val utbetalingId = requireNotNull(oppgaveDao.finnUtbetalingId(godkjenningDTO.oppgavereferanse))
         val totrinnsvurdering = totrinnsvurderingMediator.hentAktiv(vedtaksperiodeId)

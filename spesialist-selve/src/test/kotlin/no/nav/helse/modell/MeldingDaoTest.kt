@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
 
-internal class HendelseDaoTest : DatabaseIntegrationTest() {
+internal class MeldingDaoTest : DatabaseIntegrationTest() {
     private val godkjenningsbehov: Godkjenningsbehov = mockGodkjenningsbehov()
 
     @Test
@@ -26,32 +26,32 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
 
         val overstyringIgangsattForAnnenVedtaksperiode = mockOverstyringIgangsatt(fødselsnummer, listOf(VEDTAKSPERIODE), "SYKDOMSTIDSLINJE")
 
-        hendelseDao.opprett(overstyringIgangsatt)
-        hendelseDao.opprett(overstyringIgangsattForAnnenVedtaksperiode)
-        assertNull(hendelseDao.sisteOverstyringIgangsattOmKorrigertSøknad(fødselsnummer, VEDTAKSPERIODE))
+        meldingDao.opprett(overstyringIgangsatt)
+        meldingDao.opprett(overstyringIgangsattForAnnenVedtaksperiode)
+        assertNull(meldingDao.sisteOverstyringIgangsattOmKorrigertSøknad(fødselsnummer, VEDTAKSPERIODE))
 
-        hendelseDao.opprett(mockOverstyringIgangsatt(fødselsnummer, listOf(VEDTAKSPERIODE), "KORRIGERT_SØKNAD"))
-        assertNotNull(hendelseDao.sisteOverstyringIgangsattOmKorrigertSøknad(fødselsnummer, VEDTAKSPERIODE))
+        meldingDao.opprett(mockOverstyringIgangsatt(fødselsnummer, listOf(VEDTAKSPERIODE), "KORRIGERT_SØKNAD"))
+        assertNotNull(meldingDao.sisteOverstyringIgangsattOmKorrigertSøknad(fødselsnummer, VEDTAKSPERIODE))
     }
 
     @Test
     fun `finn antall korrigerte søknader`() {
-        hendelseDao.opprettAutomatiseringKorrigertSøknad(VEDTAKSPERIODE, UUID.randomUUID())
-        val actual = hendelseDao.finnAntallAutomatisertKorrigertSøknad(VEDTAKSPERIODE)
+        meldingDao.opprettAutomatiseringKorrigertSøknad(VEDTAKSPERIODE, UUID.randomUUID())
+        val actual = meldingDao.finnAntallAutomatisertKorrigertSøknad(VEDTAKSPERIODE)
         assertEquals(1, actual)
     }
 
     @Test
     fun `finn ut om automatisering av korrigert søknad allerede er håndtert`() {
-        hendelseDao.opprettAutomatiseringKorrigertSøknad(VEDTAKSPERIODE, HENDELSE_ID)
-        val håndtert = hendelseDao.erAutomatisertKorrigertSøknadHåndtert(HENDELSE_ID)
+        meldingDao.opprettAutomatiseringKorrigertSøknad(VEDTAKSPERIODE, HENDELSE_ID)
+        val håndtert = meldingDao.erAutomatisertKorrigertSøknadHåndtert(HENDELSE_ID)
         assertTrue(håndtert)
     }
 
     @Test
     fun `lagrer og finner hendelser`() {
-        hendelseDao.opprett(godkjenningsbehov)
-        val actual = hendelseDao.finn(HENDELSE_ID)
+        meldingDao.opprett(godkjenningsbehov)
+        val actual = meldingDao.finn(HENDELSE_ID)
             ?: fail { "Forventet å finne en hendelse med id $HENDELSE_ID" }
         assertEquals(FNR, actual.fødselsnummer())
     }
@@ -60,7 +60,7 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
     fun `finner utbetalingsgodkjenningsbehov`() {
         val json = """{"foo": "bar"}"""
         godkjenningsbehov(HENDELSE_ID, FNR, json)
-        val actual = hendelseDao.finnUtbetalingsgodkjenningbehovJson(HENDELSE_ID)
+        val actual = meldingDao.finnUtbetalingsgodkjenningbehovJson(HENDELSE_ID)
         val expected = objectMapper.readTree(json)
         assertEquals(expected.path("foo"), objectMapper.readTree(actual).path("foo"))
     }
@@ -71,7 +71,7 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
         opprettArbeidsgiver()
         opprettVedtaksperiode()
 
-        hendelseDao.opprett(godkjenningsbehov)
+        meldingDao.opprett(godkjenningsbehov)
         assertEquals(VEDTAKSPERIODE, finnKobling())
     }
 
@@ -79,7 +79,7 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
     fun `finner fødselsnummer ved hjelp av hendelseId`() {
         nyPerson()
         godkjenningsbehov(HENDELSE_ID)
-        assertEquals(FNR, hendelseDao.finnFødselsnummer(HENDELSE_ID))
+        assertEquals(FNR, meldingDao.finnFødselsnummer(HENDELSE_ID))
     }
 
     private fun mockOverstyringIgangsatt(fødselsnummer: String, berørtePeriodeIder: List<UUID>, årsak: String): OverstyringIgangsatt {

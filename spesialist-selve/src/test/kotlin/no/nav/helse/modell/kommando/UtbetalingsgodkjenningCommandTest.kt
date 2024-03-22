@@ -8,7 +8,7 @@ import java.util.UUID
 import no.nav.helse.januar
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.UtgåendeMeldingerObserver
-import no.nav.helse.modell.HendelseDao
+import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
@@ -33,7 +33,7 @@ internal class UtbetalingsgodkjenningCommandTest {
     }
 
     private val godkjenningsbehovJson = """{ "@event_name": "behov" }"""
-    private val hendelseDao = mockk<HendelseDao>()
+    private val meldingDao = mockk<MeldingDao>()
     private lateinit var commandContext: CommandContext
     private lateinit var command: UtbetalingsgodkjenningCommand
 
@@ -59,7 +59,7 @@ internal class UtbetalingsgodkjenningCommandTest {
 
     @BeforeEach
     fun setup() {
-        clearMocks(hendelseDao)
+        clearMocks(meldingDao)
         commandContext = CommandContext(UUID.randomUUID())
         commandContext.nyObserver(observer)
         command = UtbetalingsgodkjenningCommand(
@@ -80,7 +80,7 @@ internal class UtbetalingsgodkjenningCommandTest {
             kommentar = null,
             saksbehandleroverstyringer = emptyList(),
             godkjenningsbehovhendelseId = GODKJENNINGSBEHOV_ID,
-            hendelseDao = hendelseDao,
+            meldingDao = meldingDao,
             saksbehandler = saksbehandler,
             beslutter = beslutter,
             godkjenningMediator = GodkjenningMediator(
@@ -95,7 +95,7 @@ internal class UtbetalingsgodkjenningCommandTest {
 
     @Test
     fun `løser godkjenningsbehovet`() {
-        every { hendelseDao.finnUtbetalingsgodkjenningbehovJson(GODKJENNINGSBEHOV_ID) } returns godkjenningsbehovJson
+        every { meldingDao.finnUtbetalingsgodkjenningbehovJson(GODKJENNINGSBEHOV_ID) } returns godkjenningsbehovJson
         assertTrue(command.execute(commandContext))
         assertNotNull(observer.hendelser
             .map(objectMapper::readTree)

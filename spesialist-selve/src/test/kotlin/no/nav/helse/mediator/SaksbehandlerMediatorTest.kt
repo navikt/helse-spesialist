@@ -51,7 +51,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
     private val testRapid = TestRapid()
     private val tildelingDbDao = no.nav.helse.db.TildelingDao(dataSource)
     private val saksbehandlerRepository = SaksbehandlerDao(dataSource)
-    private val oppgaveMediator = OppgaveMediator(hendelseDao, oppgaveDao, tildelingDbDao, reservasjonDao, opptegnelseDao, totrinnsvurderingDao, saksbehandlerRepository, testRapid, TilgangskontrollForTestHarIkkeTilgang, tilgangsgrupper)
+    private val oppgaveMediator = OppgaveMediator(meldingDao, oppgaveDao, tildelingDbDao, reservasjonDao, opptegnelseDao, totrinnsvurderingDao, saksbehandlerRepository, testRapid, TilgangskontrollForTestHarIkkeTilgang, tilgangsgrupper)
     private val mediator = SaksbehandlerMediator(dataSource, "versjonAvKode", testRapid, oppgaveMediator, tilgangsgrupper)
 
     private val AKTØR_ID = lagAktørId()

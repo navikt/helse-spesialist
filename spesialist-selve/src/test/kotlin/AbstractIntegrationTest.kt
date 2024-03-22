@@ -8,7 +8,7 @@ import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.GodkjenningService
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
-import no.nav.helse.modell.HendelseDao
+import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.rapids_rivers.asLocalDateTime
@@ -30,7 +30,7 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
     private val reservasjonDao = ReservasjonDao(dataSource)
     private val periodehistorikkDao = PeriodehistorikkDao(dataSource)
     private val totrinnsvurderingDao = TotrinnsvurderingDao(dataSource)
-    private val hendelseDao = HendelseDao(dataSource)
+    private val meldingDao = MeldingDao(dataSource)
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
 
     private val oppgaveMediator = OppgaveMediator(
@@ -41,7 +41,7 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
         totrinnsvurderingRepository = totrinnsvurderingDao,
         saksbehandlerRepository = SaksbehandlerDao(dataSource),
         rapidsConnection = testRapid,
-        hendelseDao = hendelseDao,
+        meldingDao = meldingDao,
         tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
         tilgangsgrupper = Tilgangsgrupper(testEnv),
     )
@@ -49,7 +49,7 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
     val godkjenningService = GodkjenningService(
         dataSource = dataSource,
         oppgaveDao = oppgaveDao,
-        hendelseDao = hendelseDao,
+        meldingDao = meldingDao,
         overstyringDao = OverstyringDao(dataSource),
         rapidsConnection = testRapid,
         oppgaveMediator = oppgaveMediator,

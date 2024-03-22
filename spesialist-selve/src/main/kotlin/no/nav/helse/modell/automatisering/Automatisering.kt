@@ -4,8 +4,8 @@ import java.time.LocalDateTime
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.helse.modell.HendelseDao
-import no.nav.helse.modell.HendelseDao.OverstyringIgangsattKorrigertSøknad
+import no.nav.helse.modell.MeldingDao
+import no.nav.helse.modell.MeldingDao.OverstyringIgangsattKorrigertSøknad
 import no.nav.helse.modell.Toggle
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
@@ -33,7 +33,7 @@ internal class Automatisering(
     private val vedtakDao: VedtakDao,
     private val overstyringDao: OverstyringDao,
     private val stikkprøver: Stikkprøver,
-    private val hendelseDao: HendelseDao,
+    private val meldingDao: MeldingDao,
     private val generasjonDao: GenerasjonDao,
 ) {
     private companion object {
@@ -111,15 +111,15 @@ internal class Automatisering(
         fødselsnummer: String,
         vedtaksperiodeId: UUID
     ): OverstyringIgangsattKorrigertSøknad? = generasjonDao.førsteGenerasjonLåstTidspunkt(vedtaksperiodeId)?.let {
-        hendelseDao.sisteOverstyringIgangsattOmKorrigertSøknad(fødselsnummer, vedtaksperiodeId)
+        meldingDao.sisteOverstyringIgangsattOmKorrigertSøknad(fødselsnummer, vedtaksperiodeId)
     }
 
     private fun kanKorrigertSøknadAutomatiseres(
         vedtaksperiodeId: UUID,
         overstyringIgangsattKorrigertSøknad: OverstyringIgangsattKorrigertSøknad
     ): Pair<Boolean, String?> {
-        val hendelseId = UUID.fromString(overstyringIgangsattKorrigertSøknad.hendelseId)
-        if (hendelseDao.erAutomatisertKorrigertSøknadHåndtert(hendelseId)) return Pair(true, null)
+        val hendelseId = UUID.fromString(overstyringIgangsattKorrigertSøknad.meldingId)
+        if (meldingDao.erAutomatisertKorrigertSøknadHåndtert(hendelseId)) return Pair(true, null)
 
         val orgnummer = vedtakDao.finnOrgnummer(vedtaksperiodeId)
         val vedtaksperiodeIdKorrigertSøknad =
@@ -135,8 +135,8 @@ internal class Automatisering(
             val merEnn6MånederSidenVedtakPåFørsteMottattSøknad = generasjonDao.førsteGenerasjonLåstTidspunkt(it)
                 ?.isBefore(LocalDateTime.now().minusMonths(6))
                 ?: true
-            val antallKorrigeringer = hendelseDao.finnAntallAutomatisertKorrigertSøknad(it)
-            hendelseDao.opprettAutomatiseringKorrigertSøknad(it, hendelseId)
+            val antallKorrigeringer = meldingDao.finnAntallAutomatisertKorrigertSøknad(it)
+            meldingDao.opprettAutomatiseringKorrigertSøknad(it, hendelseId)
 
             if (merEnn6MånederSidenVedtakPåFørsteMottattSøknad) return Pair(false, "Mer enn 6 måneder siden vedtak på første mottatt søknad")
             if (antallKorrigeringer >= 2) return Pair(false, "Antall automatisk godkjente korrigerte søknader er større eller lik 2")

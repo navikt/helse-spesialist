@@ -11,7 +11,7 @@ import java.util.UUID.randomUUID
 import no.nav.helse.januar
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.UtgåendeMeldingerObserver
-import no.nav.helse.modell.HendelseDao
+import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.UtbetalingsgodkjenningCommand
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
@@ -37,7 +37,7 @@ internal class SaksbehandlerløsningTest {
         private val objectMapper = jacksonObjectMapper()
     }
 
-    private val hendelseDao = mockk<HendelseDao>(relaxed = true)
+    private val meldingDao = mockk<MeldingDao>(relaxed = true)
 
     private val saksbehandler = Saksbehandlerløsning.Saksbehandler(
         ident = "saksbehandlerident",
@@ -72,7 +72,7 @@ internal class SaksbehandlerløsningTest {
             kommentar = null,
             saksbehandleroverstyringer = saksbehandlerløsning,
             godkjenningsbehovhendelseId = GODKJENNINGSBEHOV_ID,
-            hendelseDao = hendelseDao,
+            meldingDao = meldingDao,
             godkjenningMediator = GodkjenningMediator(mockk(relaxed = true), mockk(), mockk(), mockk(), mockk()),
             saksbehandler = saksbehandler,
             beslutter = beslutter
@@ -94,7 +94,7 @@ internal class SaksbehandlerløsningTest {
 
     @Test
     fun `løser godkjenningsbehov`() {
-        every { hendelseDao.finnUtbetalingsgodkjenningbehovJson(GODKJENNINGSBEHOV_ID) } returns GODKJENNINGSBEHOV_JSON
+        every { meldingDao.finnUtbetalingsgodkjenningbehovJson(GODKJENNINGSBEHOV_ID) } returns GODKJENNINGSBEHOV_JSON
         val saksbehandlerløsning = saksbehandlerløsning(true, arbeidsgiverbeløp = 1000, personbeløp = 1000)
         assertTrue(saksbehandlerløsning.execute(context))
         assertLøsning(true, DELVIS_REFUSJON)
@@ -102,7 +102,7 @@ internal class SaksbehandlerløsningTest {
 
     @Test
     fun `løser godkjenningsbehov med saksbehandleroverstyringer`() {
-        every { hendelseDao.finnUtbetalingsgodkjenningbehovJson(GODKJENNINGSBEHOV_ID) } returns GODKJENNINGSBEHOV_JSON
+        every { meldingDao.finnUtbetalingsgodkjenningbehovJson(GODKJENNINGSBEHOV_ID) } returns GODKJENNINGSBEHOV_JSON
         val  saksbehandleroverstyringer = listOf(randomUUID(), randomUUID())
         val saksbehandlerløsning = saksbehandlerløsning(true, saksbehandleroverstyringer)
         assertTrue(saksbehandlerløsning.execute(context))
@@ -117,7 +117,7 @@ internal class SaksbehandlerløsningTest {
 
     @Test
     fun `løser godkjenningsbehov ved avvist utbetaling`() {
-        every { hendelseDao.finnUtbetalingsgodkjenningbehovJson(GODKJENNINGSBEHOV_ID) } returns GODKJENNINGSBEHOV_JSON
+        every { meldingDao.finnUtbetalingsgodkjenningbehovJson(GODKJENNINGSBEHOV_ID) } returns GODKJENNINGSBEHOV_JSON
         val saksbehandlerløsning = saksbehandlerløsning(false, arbeidsgiverbeløp = 1000, personbeløp = 1000)
         assertTrue(saksbehandlerløsning.execute(context))
         assertLøsning(false, DELVIS_REFUSJON)

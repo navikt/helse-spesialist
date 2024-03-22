@@ -3,7 +3,7 @@ package no.nav.helse.mediator.oppgave
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilKafkaversjon
-import no.nav.helse.modell.HendelseDao
+import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveObserver
@@ -15,7 +15,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import kotlin.properties.Delegates
 
 internal class Oppgavemelder(
-    private val hendelseDao: HendelseDao,
+    private val meldingDao: MeldingDao,
     private val rapidsConnection: RapidsConnection,
 ) : OppgaveObserver {
 
@@ -32,7 +32,7 @@ internal class Oppgavemelder(
     }
 
     private fun melding(eventName: String, oppgavemelding: OppgaveForKafkaBygger.Oppgavemelding): Pair<String, JsonMessage> {
-        val fødselsnummer: String = hendelseDao.finnFødselsnummer(oppgavemelding.hendelseId)
+        val fødselsnummer: String = meldingDao.finnFødselsnummer(oppgavemelding.hendelseId)
         return fødselsnummer to JsonMessage.newMessage(eventName, mutableMapOf(
             "@forårsaket_av" to mapOf("id" to oppgavemelding.hendelseId),
             "hendelseId" to oppgavemelding.hendelseId,

@@ -27,7 +27,7 @@ import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.idForGruppe
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
-import no.nav.helse.modell.HendelseDao
+import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.kommando.TestMelding
 import no.nav.helse.modell.oppgave.Egenskap
@@ -79,7 +79,7 @@ internal class OppgaveMediatorTest {
     }
 
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
-    private val hendelseDao = mockk<HendelseDao>(relaxed = true)
+    private val meldingDao = mockk<MeldingDao>(relaxed = true)
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
     private val tildelingDao = mockk<TildelingDao>(relaxed = true)
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
@@ -89,7 +89,7 @@ internal class OppgaveMediatorTest {
     private val testRapid = TestRapid()
 
     private val mediator = OppgaveMediator(
-        hendelseDao = hendelseDao,
+        meldingDao = meldingDao,
         oppgaveDao = oppgaveDao,
         tildelingDao = tildelingDao,
         reservasjonDao = reservasjonDao,

@@ -9,23 +9,24 @@ import kotliquery.sessionOf
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
-import no.nav.helse.modell.HendelseDao.Hendelsetype.ADRESSEBESKYTTELSE_ENDRET
-import no.nav.helse.modell.HendelseDao.Hendelsetype.ENDRET_EGEN_ANSATT_STATUS
-import no.nav.helse.modell.HendelseDao.Hendelsetype.GODKJENNING
-import no.nav.helse.modell.HendelseDao.Hendelsetype.GODKJENT_TILBAKEDATERT_SYKMELDING
-import no.nav.helse.modell.HendelseDao.Hendelsetype.GOSYS_OPPGAVE_ENDRET
-import no.nav.helse.modell.HendelseDao.Hendelsetype.NYE_VARSLER
-import no.nav.helse.modell.HendelseDao.Hendelsetype.OPPDATER_PERSONSNAPSHOT
-import no.nav.helse.modell.HendelseDao.Hendelsetype.OVERSTYRING_IGANGSATT
-import no.nav.helse.modell.HendelseDao.Hendelsetype.SAKSBEHANDLERLØSNING
-import no.nav.helse.modell.HendelseDao.Hendelsetype.SØKNAD_SENDT
-import no.nav.helse.modell.HendelseDao.Hendelsetype.UTBETALING_ANNULLERT
-import no.nav.helse.modell.HendelseDao.Hendelsetype.UTBETALING_ENDRET
-import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAKSPERIODE_ENDRET
-import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAKSPERIODE_FORKASTET
-import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAKSPERIODE_NY_UTBETALING
-import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAKSPERIODE_REBEREGNET
-import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAK_FATTET
+import no.nav.helse.modell.MeldingDao.Meldingtype.ADRESSEBESKYTTELSE_ENDRET
+import no.nav.helse.modell.MeldingDao.Meldingtype.BEHANDLING_OPPRETTET
+import no.nav.helse.modell.MeldingDao.Meldingtype.ENDRET_EGEN_ANSATT_STATUS
+import no.nav.helse.modell.MeldingDao.Meldingtype.GODKJENNING
+import no.nav.helse.modell.MeldingDao.Meldingtype.GODKJENT_TILBAKEDATERT_SYKMELDING
+import no.nav.helse.modell.MeldingDao.Meldingtype.GOSYS_OPPGAVE_ENDRET
+import no.nav.helse.modell.MeldingDao.Meldingtype.NYE_VARSLER
+import no.nav.helse.modell.MeldingDao.Meldingtype.OPPDATER_PERSONSNAPSHOT
+import no.nav.helse.modell.MeldingDao.Meldingtype.OVERSTYRING_IGANGSATT
+import no.nav.helse.modell.MeldingDao.Meldingtype.SAKSBEHANDLERLØSNING
+import no.nav.helse.modell.MeldingDao.Meldingtype.SØKNAD_SENDT
+import no.nav.helse.modell.MeldingDao.Meldingtype.UTBETALING_ANNULLERT
+import no.nav.helse.modell.MeldingDao.Meldingtype.UTBETALING_ENDRET
+import no.nav.helse.modell.MeldingDao.Meldingtype.VEDTAKSPERIODE_ENDRET
+import no.nav.helse.modell.MeldingDao.Meldingtype.VEDTAKSPERIODE_FORKASTET
+import no.nav.helse.modell.MeldingDao.Meldingtype.VEDTAKSPERIODE_NY_UTBETALING
+import no.nav.helse.modell.MeldingDao.Meldingtype.VEDTAKSPERIODE_REBEREGNET
+import no.nav.helse.modell.MeldingDao.Meldingtype.VEDTAK_FATTET
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
 import no.nav.helse.modell.overstyring.OverstyringIgangsatt
@@ -35,6 +36,7 @@ import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.person.toFødselsnummer
 import no.nav.helse.modell.utbetaling.UtbetalingAnnullert
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
+import no.nav.helse.modell.vedtaksperiode.BehandlingOpprettet
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.NyeVarsler
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeEndret
@@ -47,24 +49,24 @@ import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.asLocalDate
 import org.intellij.lang.annotations.Language
 
-internal class HendelseDao(private val dataSource: DataSource) {
-    internal fun opprett(hendelse: Personmelding) {
+internal class MeldingDao(private val dataSource: DataSource) {
+    internal fun opprett(melding: Personmelding) {
         sessionOf(dataSource).use { session ->
             session.transaction { transactionalSession ->
                 transactionalSession.run {
-                    opprettHendelse(hendelse)
-                    if (hendelse is Vedtaksperiodemelding)
-                        opprettKobling(hendelse.vedtaksperiodeId(), hendelse.id)
+                    opprettMelding(melding)
+                    if (melding is Vedtaksperiodemelding)
+                        opprettKobling(melding.vedtaksperiodeId(), melding.id)
                 }
             }
         }
     }
 
-    internal fun finnFødselsnummer(hendelseId: UUID): String {
+    internal fun finnFødselsnummer(meldingId: UUID): String {
         return sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val statement = """SELECT fodselsnummer FROM hendelse WHERE id = ?"""
-            requireNotNull(session.run(queryOf(statement, hendelseId).map {
+            requireNotNull(session.run(queryOf(statement, meldingId).map {
                 it.long("fodselsnummer").toFødselsnummer()
             }.asSingle))
         }
@@ -84,7 +86,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
         }
     }
 
-    internal fun erAutomatisertKorrigertSøknadHåndtert(hendelseId: UUID): Boolean {
+    internal fun erAutomatisertKorrigertSøknadHåndtert(meldingId: UUID): Boolean {
         return sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val statement = """
@@ -92,20 +94,20 @@ internal class HendelseDao(private val dataSource: DataSource) {
                 FROM automatisering_korrigert_soknad aks
                 WHERE hendelse_ref = :hendelseId
                 """
-            requireNotNull(session.run(queryOf(statement, mapOf("hendelseId" to hendelseId)).map {
+            requireNotNull(session.run(queryOf(statement, mapOf("hendelseId" to meldingId)).map {
                 it.int("antall") > 0
             }.asSingle))
         }
     }
 
-    internal fun opprettAutomatiseringKorrigertSøknad(vedtaksperiodeId: UUID, hendelseId: UUID) {
+    internal fun opprettAutomatiseringKorrigertSøknad(vedtaksperiodeId: UUID, meldingId: UUID) {
         sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val statement = """
                 INSERT INTO automatisering_korrigert_soknad (vedtaksperiode_id, hendelse_ref)
                 VALUES (:vedtaksperiodeId, :hendelseId)
                 """
-            session.run(queryOf(statement, mapOf("vedtaksperiodeId" to vedtaksperiodeId, "hendelseId" to hendelseId)).asExecute)
+            session.run(queryOf(statement, mapOf("vedtaksperiodeId" to vedtaksperiodeId, "hendelseId" to meldingId)).asExecute)
         }
     }
 
@@ -128,7 +130,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
 
                     OverstyringIgangsattKorrigertSøknad(
                         periodeForEndringFom = data["periodeForEndringFom"].asLocalDate(),
-                        hendelseId = data["@id"].asText(),
+                        meldingId = data["@id"].asText(),
                         berørtePerioder = data["berørtePerioder"].map { berørtPeriode ->
                             BerørtPeriode(
                                 vedtaksperiodeId = UUID.fromString(berørtPeriode["vedtaksperiodeId"].asText()),
@@ -144,7 +146,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
 
     internal data class OverstyringIgangsattKorrigertSøknad(
         val periodeForEndringFom: LocalDate,
-        val hendelseId: String,
+        val meldingId: String,
         val berørtePerioder: List<BerørtPeriode>,
     )
 
@@ -154,62 +156,62 @@ internal class HendelseDao(private val dataSource: DataSource) {
         val orgnummer: String,
     )
 
-    internal fun finnUtbetalingsgodkjenningbehovJson(hendelseId: UUID): String {
-        return finnJson(hendelseId, GODKJENNING)
+    internal fun finnUtbetalingsgodkjenningbehovJson(meldingId: UUID): String {
+        return finnJson(meldingId, GODKJENNING)
     }
 
-    private fun finnJson(hendelseId: UUID, hendelsetype: Hendelsetype): String {
+    private fun finnJson(meldingId: UUID, meldingtype: Meldingtype): String {
         return requireNotNull(sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val statement = """SELECT data FROM hendelse WHERE id = ? AND type = ?"""
-            session.run(queryOf(statement, hendelseId, hendelsetype.name).map { it.string("data") }.asSingle)
+            session.run(queryOf(statement, meldingId, meldingtype.name).map { it.string("data") }.asSingle)
         })
     }
 
-    private fun TransactionalSession.opprettHendelse(hendelse: Personmelding) {
+    private fun TransactionalSession.opprettMelding(melding: Personmelding) {
         @Language("PostgreSQL")
-        val hendelseStatement = """
+        val query = """
             INSERT INTO hendelse(id, fodselsnummer, data, type)
                 VALUES(?, ?, CAST(? as json), ?)
             ON CONFLICT DO NOTHING
             """
         run(
             queryOf(
-                hendelseStatement,
-                hendelse.id,
-                hendelse.fødselsnummer().toLong(),
-                hendelse.toJson(),
-                tilHendelsetype(hendelse).name
+                query,
+                melding.id,
+                melding.fødselsnummer().toLong(),
+                melding.toJson(),
+                tilMeldingtype(melding).name
             ).asUpdate
         )
     }
 
-    private fun TransactionalSession.opprettKobling(vedtaksperiodeId: UUID, hendelseId: UUID) {
+    private fun TransactionalSession.opprettKobling(vedtaksperiodeId: UUID, meldingId: UUID) {
         @Language("PostgreSQL")
         val koblingStatement = "INSERT INTO vedtaksperiode_hendelse(vedtaksperiode_id, hendelse_ref) VALUES(?,?)"
         run(
             queryOf(
                 koblingStatement,
                 vedtaksperiodeId,
-                hendelseId
+                meldingId
             ).asUpdate
         )
     }
 
     internal fun finn(id: UUID) = sessionOf(dataSource).use { session ->
         session.run(queryOf("SELECT type,data FROM hendelse WHERE id = ?", id).map { row ->
-            fraHendelsetype(enumValueOf(row.string("type")), row.string("data"))
+            fraMeldingtype(enumValueOf(row.string("type")), row.string("data"))
         }.asSingle)
     }
 
-    // Denne funksjonen trenger bare å støtte de hendelsetypene som starter en kommandokjede som sender ut behov.
+    // Denne funksjonen trenger bare å støtte de meldingtypene som starter en kommandokjede som sender ut behov.
     // Kommandokjeder som ikke har noen suspenderende subcommands vil aldri kunne komme inn her.
-    private fun fraHendelsetype(
-        hendelsetype: Hendelsetype,
+    private fun fraMeldingtype(
+        meldingtype: Meldingtype,
         json: String,
     ): Personmelding {
         val jsonNode = objectMapper.readTree(json)
-        return when (hendelsetype) {
+        return when (meldingtype) {
             ADRESSEBESKYTTELSE_ENDRET -> AdressebeskyttelseEndret(jsonNode)
             GODKJENNING -> Godkjenningsbehov(jsonNode)
             OPPDATER_PERSONSNAPSHOT -> OppdaterPersonsnapshot(jsonNode)
@@ -219,11 +221,11 @@ internal class HendelseDao(private val dataSource: DataSource) {
             UTBETALING_ANNULLERT -> UtbetalingAnnullert(jsonNode)
             else -> throw IllegalArgumentException(
                 "Prøver å gjenoppta en kommando(kjede) etter mottak av hendelsetype " +
-                        "$hendelsetype, men koden som trengs mangler!")
+                        "$meldingtype, men koden som trengs mangler!")
         }
     }
 
-    private fun tilHendelsetype(hendelse: Personmelding) = when (hendelse) {
+    private fun tilMeldingtype(melding: Personmelding) = when (melding) {
         is AdressebeskyttelseEndret -> ADRESSEBESKYTTELSE_ENDRET
         is VedtaksperiodeEndret -> VEDTAKSPERIODE_ENDRET
         is VedtaksperiodeForkastet -> VEDTAKSPERIODE_FORKASTET
@@ -241,13 +243,14 @@ internal class HendelseDao(private val dataSource: DataSource) {
         is SøknadSendt -> SØKNAD_SENDT
         is VedtaksperiodeNyUtbetaling -> VEDTAKSPERIODE_NY_UTBETALING
         is TilbakedateringBehandlet -> GODKJENT_TILBAKEDATERT_SYKMELDING
-        else -> throw IllegalArgumentException("ukjent hendelsetype: ${hendelse::class.simpleName}")
+        is BehandlingOpprettet -> BEHANDLING_OPPRETTET
+        else -> throw IllegalArgumentException("ukjent meldingtype: ${melding::class.simpleName}")
     }
 
-    private enum class Hendelsetype {
+    private enum class Meldingtype {
         ADRESSEBESKYTTELSE_ENDRET, VEDTAKSPERIODE_ENDRET, VEDTAKSPERIODE_FORKASTET, GODKJENNING,
         SAKSBEHANDLERLØSNING, UTBETALING_ANNULLERT, OPPDATER_PERSONSNAPSHOT, UTBETALING_ENDRET,
-        VEDTAKSPERIODE_REBEREGNET,
+        VEDTAKSPERIODE_REBEREGNET, BEHANDLING_OPPRETTET,
         OVERSTYRING_IGANGSATT, GOSYS_OPPGAVE_ENDRET, ENDRET_EGEN_ANSATT_STATUS, VEDTAK_FATTET,
         NYE_VARSLER, SØKNAD_SENDT, VEDTAKSPERIODE_NY_UTBETALING,
         GODKJENT_TILBAKEDATERT_SYKMELDING

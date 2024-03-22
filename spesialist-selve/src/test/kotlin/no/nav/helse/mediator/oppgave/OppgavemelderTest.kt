@@ -7,7 +7,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.TestRapidHelpers.meldinger
 import no.nav.helse.mediator.asUUID
-import no.nav.helse.modell.HendelseDao
+import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.saksbehandler.Saksbehandler
@@ -27,12 +27,12 @@ class OppgavemelderTest {
         private val HENDELSE_ID = UUID.randomUUID()
     }
 
-    private val hendelseDao = mockk<HendelseDao>(relaxed = true)
+    private val meldingDao = mockk<MeldingDao>(relaxed = true)
     private val testRapid = TestRapid()
     private val saksbehandler = saksbehandler("saksbehandler@nav.no")
     private val beslutter = saksbehandler("beslutter@nav.no")
     init {
-        every { hendelseDao.finnFødselsnummer(any()) } returns FNR
+        every { meldingDao.finnFødselsnummer(any()) } returns FNR
     }
 
     @BeforeEach
@@ -43,7 +43,7 @@ class OppgavemelderTest {
     @Test
     fun `bygg kafkamelding`() {
         val oppgave = nyOppgave()
-        oppgave.register(Oppgavemelder(hendelseDao, testRapid))
+        oppgave.register(Oppgavemelder(meldingDao, testRapid))
         oppgave.avventerSystem("IDENT", UUID.randomUUID())
         val meldinger = testRapid.inspektør.meldinger()
         assertEquals(1, meldinger.size)
@@ -64,7 +64,7 @@ class OppgavemelderTest {
     fun `bygg kafkamelding med saksbehandler og beslutter`() {
         val oppgave = nyOppgave(totrinnsvurdering = totrinnsvurdering(beslutter))
         oppgave.forsøkTildelingVedReservasjon(saksbehandler = saksbehandler)
-        oppgave.register(Oppgavemelder(hendelseDao, testRapid))
+        oppgave.register(Oppgavemelder(meldingDao, testRapid))
         oppgave.avventerSystem("IDENT", UUID.randomUUID())
         val meldinger = testRapid.inspektør.meldinger()
         assertEquals(1, meldinger.size)

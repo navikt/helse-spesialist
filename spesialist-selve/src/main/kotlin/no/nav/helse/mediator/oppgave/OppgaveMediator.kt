@@ -19,7 +19,7 @@ import no.nav.helse.mediator.oppgave.OppgaveMapper.tilBehandledeOppgaver
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilDatabaseversjon
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilEgenskaperForVisning
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilOppgaverTilBehandling
-import no.nav.helse.modell.HendelseDao
+import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.ManglerTilgang
 import no.nav.helse.modell.Modellfeil
 import no.nav.helse.modell.oppgave.Egenskap
@@ -51,7 +51,7 @@ interface Oppgavefinner {
 }
 
 internal class OppgaveMediator(
-    private val hendelseDao: HendelseDao,
+    private val meldingDao: MeldingDao,
     private val oppgaveDao: OppgaveDao,
     private val tildelingDao: TildelingDao,
     private val reservasjonDao: ReservasjonDao,
@@ -72,7 +72,7 @@ internal class OppgaveMediator(
     ) {
         val nesteId = oppgaveDao.reserverNesteId()
         val oppgave = opprettOppgaveBlock(nesteId)
-        val oppgavemelder = Oppgavemelder(hendelseDao, rapidsConnection)
+        val oppgavemelder = Oppgavemelder(meldingDao, rapidsConnection)
         oppgavemelder.oppgaveOpprettet(oppgave)
         oppgave.register(oppgavemelder)
         tildelVedReservasjon(fødselsnummer, oppgave)
@@ -89,7 +89,7 @@ internal class OppgaveMediator(
             saksbehandlerRepository,
             tilgangskontroll
         ).oppgave(id)
-        oppgave.register(Oppgavemelder(hendelseDao, rapidsConnection))
+        oppgave.register(Oppgavemelder(meldingDao, rapidsConnection))
         val returverdi = oppgaveBlock(oppgave)
         Oppgavelagrer(tildelingDao).apply {
             oppgave.accept(this)

@@ -12,7 +12,7 @@ import no.nav.helse.mediator.Kommandofabrikk
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
-import no.nav.helse.modell.HendelseDao
+import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringDao
@@ -41,7 +41,7 @@ internal class TestMediator(
     private val oppgaveDao = OppgaveDao(dataSource)
     private val utbetalingDao = UtbetalingDao(dataSource)
     private val overstyringDao = OverstyringDao(dataSource)
-    private val hendelseDao = HendelseDao(dataSource)
+    private val meldingDao = MeldingDao(dataSource)
     private val generasjonDao = GenerasjonDao(dataSource)
     private val totrinnsvurderingDao = TotrinnsvurderingDao(dataSource)
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
@@ -53,11 +53,11 @@ internal class TestMediator(
         opptegnelseDao,
         oppgaveDao,
         utbetalingDao,
-        hendelseDao,
+        meldingDao,
     )
     private val tilgangsgrupper = Tilgangsgrupper(testEnv)
     private val oppgaveMediator = OppgaveMediator(
-        hendelseDao = hendelseDao,
+        meldingDao = meldingDao,
         oppgaveDao = OppgaveDao(dataSource),
         tildelingDao = tildelingDao,
         reservasjonDao = ReservasjonDao(dataSource),
@@ -86,7 +86,7 @@ internal class TestMediator(
             override fun fullRefusjonFlereArbeidsgivereForlengelse() = false
             override fun fullRefusjonEnArbeidsgiver() = false
         },
-        hendelseDao = hendelseDao,
+        meldingDao = meldingDao,
         generasjonDao = generasjonDao,
     )
 

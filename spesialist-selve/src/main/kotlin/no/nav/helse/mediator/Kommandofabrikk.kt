@@ -13,7 +13,7 @@ import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.CommandContextDao
-import no.nav.helse.modell.HendelseDao
+import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
@@ -74,7 +74,7 @@ import org.slf4j.LoggerFactory
 
 internal class Kommandofabrikk(
     dataSource: DataSource,
-    private val hendelseDao: HendelseDao = HendelseDao(dataSource),
+    private val meldingDao: MeldingDao = MeldingDao(dataSource),
     private val personDao: PersonDao = PersonDao(dataSource),
     private val arbeidsgiverDao: ArbeidsgiverDao = ArbeidsgiverDao(dataSource),
     private val vedtakDao: VedtakDao = VedtakDao(dataSource),
@@ -353,7 +353,7 @@ internal class Kommandofabrikk(
             kommentar = hendelse.kommentar,
             saksbehandleroverstyringer = hendelse.saksbehandleroverstyringer,
             godkjenningsbehovhendelseId = hendelse.godkjenningsbehovhendelseId,
-            hendelseDao = hendelseDao,
+            meldingDao = meldingDao,
             godkjenningMediator = godkjenningMediator
         )
     }
