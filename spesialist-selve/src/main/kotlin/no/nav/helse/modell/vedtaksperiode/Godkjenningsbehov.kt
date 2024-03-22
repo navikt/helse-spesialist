@@ -23,9 +23,9 @@ import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.AvbrytContextCommand
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.KlargjørArbeidsgiverCommand
-import no.nav.helse.modell.kommando.KlargjørPersonCommand
 import no.nav.helse.modell.kommando.LagreBehandlingsInformasjonCommand
 import no.nav.helse.modell.kommando.MacroCommand
+import no.nav.helse.modell.kommando.OppdaterPersonCommand
 import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
 import no.nav.helse.modell.kommando.OpprettKoblingTilHendelseCommand
 import no.nav.helse.modell.kommando.OpprettKoblingTilUtbetalingCommand
@@ -224,7 +224,6 @@ internal class GodkjenningsbehovCommand(
         ),
         ForberedVisningCommand(
             fødselsnummer = fødselsnummer,
-            aktørId = aktørId,
             organisasjonsnummer = organisasjonsnummer,
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
             førstegangsbehandling = førstegangsbehandling,
@@ -336,7 +335,6 @@ internal class GodkjenningsbehovCommand(
 
 private class ForberedVisningCommand(
     fødselsnummer: String,
-    aktørId: String,
     organisasjonsnummer: String,
     orgnummereMedRelevanteArbeidsforhold: List<String>,
     førstegangsbehandling: Boolean,
@@ -348,11 +346,10 @@ private class ForberedVisningCommand(
     snapshotClient: SnapshotClient
 ): MacroCommand() {
     override val commands: List<Command> = listOf(
-        KlargjørPersonCommand(
+        OppdaterPersonCommand(
             fødselsnummer = fødselsnummer,
-            aktørId = aktørId,
             førsteKjenteDagFinner = førsteKjenteDagFinner,
-            personDao = personDao,
+            personDao = personDao
         ),
         KlargjørArbeidsgiverCommand(
             orgnummere = orgnummereMedRelevanteArbeidsforhold + organisasjonsnummer,
