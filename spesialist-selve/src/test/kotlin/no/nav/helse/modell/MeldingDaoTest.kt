@@ -26,11 +26,11 @@ internal class MeldingDaoTest : DatabaseIntegrationTest() {
 
         val overstyringIgangsattForAnnenVedtaksperiode = mockOverstyringIgangsatt(fødselsnummer, listOf(VEDTAKSPERIODE), "SYKDOMSTIDSLINJE")
 
-        meldingDao.opprett(overstyringIgangsatt)
-        meldingDao.opprett(overstyringIgangsattForAnnenVedtaksperiode)
+        meldingDao.lagre(overstyringIgangsatt)
+        meldingDao.lagre(overstyringIgangsattForAnnenVedtaksperiode)
         assertNull(meldingDao.sisteOverstyringIgangsattOmKorrigertSøknad(fødselsnummer, VEDTAKSPERIODE))
 
-        meldingDao.opprett(mockOverstyringIgangsatt(fødselsnummer, listOf(VEDTAKSPERIODE), "KORRIGERT_SØKNAD"))
+        meldingDao.lagre(mockOverstyringIgangsatt(fødselsnummer, listOf(VEDTAKSPERIODE), "KORRIGERT_SØKNAD"))
         assertNotNull(meldingDao.sisteOverstyringIgangsattOmKorrigertSøknad(fødselsnummer, VEDTAKSPERIODE))
     }
 
@@ -50,7 +50,7 @@ internal class MeldingDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `lagrer og finner hendelser`() {
-        meldingDao.opprett(godkjenningsbehov)
+        meldingDao.lagre(godkjenningsbehov)
         val actual = meldingDao.finn(HENDELSE_ID)
             ?: fail { "Forventet å finne en hendelse med id $HENDELSE_ID" }
         assertEquals(FNR, actual.fødselsnummer())
@@ -71,7 +71,7 @@ internal class MeldingDaoTest : DatabaseIntegrationTest() {
         opprettArbeidsgiver()
         opprettVedtaksperiode()
 
-        meldingDao.opprett(godkjenningsbehov)
+        meldingDao.lagre(godkjenningsbehov)
         assertEquals(VEDTAKSPERIODE, finnKobling())
     }
 

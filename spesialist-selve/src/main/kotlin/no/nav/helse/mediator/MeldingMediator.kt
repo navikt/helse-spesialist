@@ -400,7 +400,7 @@ internal class MeldingMediator(
     }
 
     private fun nyContext(hendelse: Personmelding, contextId: UUID) = CommandContext(contextId).apply {
-        meldingDao.opprett(hendelse)
+        meldingDao.lagre(hendelse)
         opprett(commandContextDao, hendelse.id)
     }
 
@@ -416,7 +416,7 @@ internal class MeldingMediator(
             sikkerlogg.info("Melding $meldingnavn mottatt:\n${melding.toJson()}")
 
             try {
-                meldingDao.opprett(melding)
+                meldingDao.lagre(melding)
                 personRepository.brukPersonHvisFinnes(melding.fødselsnummer()) {
                     logg.info("Personen finnes i databasen, behandler melding $meldingnavn")
                     sikkerlogg.info("Personen finnes i databasen, behandler melding $meldingnavn")

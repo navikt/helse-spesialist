@@ -50,11 +50,11 @@ import no.nav.helse.rapids_rivers.asLocalDate
 import org.intellij.lang.annotations.Language
 
 internal class MeldingDao(private val dataSource: DataSource) {
-    internal fun opprett(melding: Personmelding) {
+    internal fun lagre(melding: Personmelding) {
         sessionOf(dataSource).use { session ->
             session.transaction { transactionalSession ->
                 transactionalSession.run {
-                    opprettMelding(melding)
+                    lagre(melding)
                     if (melding is Vedtaksperiodemelding)
                         opprettKobling(melding.vedtaksperiodeId(), melding.id)
                 }
@@ -168,7 +168,7 @@ internal class MeldingDao(private val dataSource: DataSource) {
         })
     }
 
-    private fun TransactionalSession.opprettMelding(melding: Personmelding) {
+    private fun TransactionalSession.lagre(melding: Personmelding) {
         @Language("PostgreSQL")
         val query = """
             INSERT INTO hendelse(id, fodselsnummer, data, type)
