@@ -26,8 +26,6 @@ internal class SykefraværstilfelleTest {
     fun `har ikke aktive varsler`() {
         val gjeldendeGenerasjon1 = generasjon(UUID.randomUUID())
         val gjeldendeGenerasjon2 = generasjon(UUID.randomUUID())
-        gjeldendeGenerasjon1.håndterTidslinjeendring(1.januar, 31.januar, 1.januar, UUID.randomUUID())
-        gjeldendeGenerasjon2.håndterTidslinjeendring(1.februar, 28.februar, 1.februar, UUID.randomUUID())
         assertFalse(listOf(gjeldendeGenerasjon1, gjeldendeGenerasjon2).forhindrerAutomatisering(28.februar))
     }
 
@@ -52,8 +50,6 @@ internal class SykefraværstilfelleTest {
         val vedtaksperiodeId2 = UUID.randomUUID()
         val gjeldendeGenerasjon1 = generasjon(UUID.randomUUID())
         val gjeldendeGenerasjon2 = generasjon(vedtaksperiodeId2)
-        gjeldendeGenerasjon1.håndterTidslinjeendring(1.januar, 31.januar, 1.januar, UUID.randomUUID())
-        gjeldendeGenerasjon2.håndterTidslinjeendring(1.februar, 28.februar, 1.februar, UUID.randomUUID())
         gjeldendeGenerasjon2.håndterNyttVarsel(
             Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId2),
             UUID.randomUUID()

@@ -90,11 +90,6 @@ internal class Generasjon private constructor(
 
     internal fun forhindrerAutomatisering(): Boolean = varsler.forhindrerAutomatisering()
 
-    internal fun håndterTidslinjeendring(fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate, hendelseId: UUID) {
-        if (fom == periode.fom() && tom == periode.tom() && skjæringstidspunkt == this.skjæringstidspunkt) return
-        tilstand.tidslinjeendring(this, fom, tom, skjæringstidspunkt, hendelseId)
-    }
-
     internal fun håndter(spleisVedtaksperiode: SpleisVedtaksperiode) {
         this.periode = Periode(spleisVedtaksperiode.fom, spleisVedtaksperiode.tom)
         this.skjæringstidspunkt = spleisVedtaksperiode.skjæringstidspunkt
@@ -165,14 +160,6 @@ internal class Generasjon private constructor(
         val nesteGenerasjon = opprettNeste(id, hendelseId, fom, tom, skjæringstidspunkt)
         flyttAktiveVarsler(nesteGenerasjon)
         return nesteGenerasjon
-    }
-
-    private fun oppdaterTidslinje(fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate) {
-        this.periode = Periode(fom, tom)
-        this.skjæringstidspunkt = skjæringstidspunkt
-        observers.forEach {
-            it.tidslinjeOppdatert(id, fom, tom, skjæringstidspunkt)
-        }
     }
 
     private fun nyUtbetaling(utbetalingId: UUID) {
@@ -256,17 +243,11 @@ internal class Generasjon private constructor(
             }
         }
 
-        fun vedtaksperiodeEndret(generasjon: Generasjon, id: UUID, hendelseId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate): Generasjon? {
-            return null
-        }
-
         fun vedtakFattet(generasjon: Generasjon, hendelseId: UUID) {
             sikkerlogg.info("Forventet ikke vedtak_fattet i {}", kv("tilstand", this::class.simpleName))
         }
 
         fun nySpleisBehandling(generasjon: Generasjon, vedtaksperiode: Vedtaksperiode, spleisBehandling: SpleisBehandling) {}
-
-        fun tidslinjeendring(generasjon: Generasjon, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate, hendelseId: UUID) {}
 
         fun nyUtbetaling(generasjon: Generasjon, hendelseId: UUID, utbetalingId: UUID) {}
 
@@ -291,15 +272,6 @@ internal class Generasjon private constructor(
 
     internal data object Ulåst: Tilstand {
         override fun navn(): String = "Ulåst"
-        override fun tidslinjeendring(
-            generasjon: Generasjon,
-            fom: LocalDate,
-            tom: LocalDate,
-            skjæringstidspunkt: LocalDate,
-            hendelseId: UUID
-        ) {
-            generasjon.oppdaterTidslinje(fom, tom, skjæringstidspunkt)
-        }
         override fun nyUtbetaling(generasjon: Generasjon, hendelseId: UUID, utbetalingId: UUID) {
             generasjon.nyUtbetaling(utbetalingId)
         }
@@ -326,26 +298,6 @@ internal class Generasjon private constructor(
 
     internal data object Låst: Tilstand {
         override fun navn(): String = "Låst"
-        override fun vedtaksperiodeEndret(
-            generasjon: Generasjon,
-            id: UUID,
-            hendelseId: UUID,
-            fom: LocalDate,
-            tom: LocalDate,
-            skjæringstidspunkt: LocalDate
-        ): Generasjon {
-            return generasjon.nyGenerasjon(hendelseId, id, fom, tom, skjæringstidspunkt)
-        }
-
-        override fun tidslinjeendring(
-            generasjon: Generasjon,
-            fom: LocalDate,
-            tom: LocalDate,
-            skjæringstidspunkt: LocalDate,
-            hendelseId: UUID
-        ) {
-            generasjon.nyGenerasjon(hendelseId = hendelseId, fom = fom, tom = tom, skjæringstidspunkt = skjæringstidspunkt)
-        }
 
         override fun nyUtbetaling(generasjon: Generasjon, hendelseId: UUID, utbetalingId: UUID) {
             val nyGenerasjonId = UUID.randomUUID()
@@ -363,26 +315,6 @@ internal class Generasjon private constructor(
 
     internal data object AvsluttetUtenUtbetaling: Tilstand {
         override fun navn(): String = "AvsluttetUtenUtbetaling"
-        override fun vedtaksperiodeEndret(
-            generasjon: Generasjon,
-            id: UUID,
-            hendelseId: UUID,
-            fom: LocalDate,
-            tom: LocalDate,
-            skjæringstidspunkt: LocalDate
-        ): Generasjon {
-            return generasjon.nyGenerasjon(hendelseId, id, fom, tom, skjæringstidspunkt)
-        }
-
-        override fun tidslinjeendring(
-            generasjon: Generasjon,
-            fom: LocalDate,
-            tom: LocalDate,
-            skjæringstidspunkt: LocalDate,
-            hendelseId: UUID
-        ) {
-            generasjon.nyGenerasjon(hendelseId = hendelseId, fom = fom, tom = tom, skjæringstidspunkt = skjæringstidspunkt)
-        }
 
         override fun nyUtbetaling(generasjon: Generasjon, hendelseId: UUID, utbetalingId: UUID) {
             val nyGenerasjonId = UUID.randomUUID()
@@ -404,28 +336,6 @@ internal class Generasjon private constructor(
 
     internal data object UtenUtbetalingMåVurderes: Tilstand {
         override fun navn(): String = "UtenUtbetalingMåVurderes"
-        override fun vedtaksperiodeEndret(
-            generasjon: Generasjon,
-            id: UUID,
-            hendelseId: UUID,
-            fom: LocalDate,
-            tom: LocalDate,
-            skjæringstidspunkt: LocalDate
-        ): Generasjon {
-            generasjon.nyTilstand(this, AvsluttetUtenUtbetaling, hendelseId)
-            return generasjon.nyGenerasjon(hendelseId, id, fom, tom, skjæringstidspunkt)
-        }
-
-        override fun tidslinjeendring(
-            generasjon: Generasjon,
-            fom: LocalDate,
-            tom: LocalDate,
-            skjæringstidspunkt: LocalDate,
-            hendelseId: UUID
-        ) {
-            generasjon.nyTilstand(this, AvsluttetUtenUtbetaling, hendelseId)
-            generasjon.nyGenerasjon(hendelseId = hendelseId, fom = fom, tom = tom, skjæringstidspunkt = skjæringstidspunkt)
-        }
 
         override fun nyUtbetaling(generasjon: Generasjon, hendelseId: UUID, utbetalingId: UUID) {
             val nyGenerasjonId = UUID.randomUUID()

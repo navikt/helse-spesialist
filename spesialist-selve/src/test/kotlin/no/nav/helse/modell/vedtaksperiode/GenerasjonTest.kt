@@ -10,7 +10,6 @@ import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.januar
-import no.nav.helse.mars
 import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.Varsel.Status
@@ -43,121 +42,6 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     internal fun beforeEach() {
         lagVarseldefinisjoner()
         observer = GenerasjonTestObserver()
-    }
-
-    @Test
-    fun `Kan registrere observer`() {
-        val generasjonId = UUID.randomUUID()
-        val generasjon = generasjon(generasjonId, UUID.randomUUID())
-        val observer = object : IVedtaksperiodeObserver {
-            lateinit var generasjonId: UUID
-            lateinit var fom: LocalDate
-            lateinit var tom: LocalDate
-            lateinit var skjæringstidspunkt: LocalDate
-            override fun tidslinjeOppdatert(
-                generasjonId: UUID,
-                fom: LocalDate,
-                tom: LocalDate,
-                skjæringstidspunkt: LocalDate
-            ) {
-                this.generasjonId = generasjonId
-                this.fom = fom
-                this.tom = tom
-                this.skjæringstidspunkt = skjæringstidspunkt
-            }
-        }
-        generasjon.registrer(observer)
-        generasjon.håndterTidslinjeendring(1.mars, 31.mars, 1.mars, UUID.randomUUID())
-        assertEquals(generasjonId, observer.generasjonId)
-        assertEquals(1.mars, observer.fom)
-        assertEquals(31.mars, observer.tom)
-        assertEquals(1.mars, observer.skjæringstidspunkt)
-    }
-
-    @Test
-    fun `Generasjon er ikke å anse som oppdatert dersom fom, tom og skjæringstidspunkt er lik oppdatering`() {
-        val generasjonId = UUID.randomUUID()
-        val generasjon = Generasjon(generasjonId, UUID.randomUUID(), 1.januar, 31.januar, 1.januar)
-        val observer = object : IVedtaksperiodeObserver {
-            var generasjonId: UUID? = null
-            var fom: LocalDate? = null
-            var tom: LocalDate? = null
-            var skjæringstidspunkt: LocalDate? = null
-            override fun tidslinjeOppdatert(
-                generasjonId: UUID,
-                fom: LocalDate,
-                tom: LocalDate,
-                skjæringstidspunkt: LocalDate
-            ) {
-                this.generasjonId = generasjonId
-                this.fom = fom
-                this.tom = tom
-                this.skjæringstidspunkt = skjæringstidspunkt
-            }
-        }
-        generasjon.registrer(observer)
-        generasjon.håndterTidslinjeendring(1.januar, 31.januar, 1.januar, UUID.randomUUID())
-        assertNull(observer.generasjonId)
-        assertNull(observer.fom)
-        assertNull(observer.tom)
-        assertNull(observer.skjæringstidspunkt)
-    }
-
-    @Test
-    fun `Generasjon skal ikke oppdateres dersom den er ferdig behandlet`() {
-        val generasjonId = UUID.randomUUID()
-        val generasjon = generasjon(generasjonId, UUID.randomUUID())
-        generasjon.håndterVedtakFattet(UUID.randomUUID())
-        val observer = object : IVedtaksperiodeObserver {
-            var generasjonId: UUID? = null
-            var fom: LocalDate? = null
-            var tom: LocalDate? = null
-            var skjæringstidspunkt: LocalDate? = null
-            override fun tidslinjeOppdatert(
-                generasjonId: UUID,
-                fom: LocalDate,
-                tom: LocalDate,
-                skjæringstidspunkt: LocalDate
-            ) {
-                this.generasjonId = generasjonId
-                this.fom = fom
-                this.tom = tom
-                this.skjæringstidspunkt = skjæringstidspunkt
-            }
-        }
-        generasjon.registrer(observer)
-        generasjon.håndterTidslinjeendring(1.januar, 31.januar, 1.januar, UUID.randomUUID())
-        assertNull(observer.generasjonId)
-        assertNull(observer.fom)
-        assertNull(observer.tom)
-        assertNull(observer.skjæringstidspunkt)
-    }
-
-    @Test
-    fun `håndterTidslinjeendring setter fom, tom og skjæringstidspunkt på generasjonen`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjonId = UUID.randomUUID()
-        val generasjon = nyGenerasjon(id = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
-        generasjon.håndterTidslinjeendring(1.januar, 31.januar, 1.januar, UUID.randomUUID())
-        assertEquals(
-            Generasjon(generasjonId, vedtaksperiodeId, 1.januar, 31.januar, 1.januar),
-            generasjon
-        )
-    }
-
-    @Test
-    fun `håndterTidslinjeendring setter ikke fom, tom og skjæringstidspunkt på generasjonen hvis den er ferdig behandlet`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjonId = UUID.randomUUID()
-        val generasjon = generasjon(generasjonId, vedtaksperiodeId)
-        generasjon.håndterVedtakFattet(UUID.randomUUID())
-        generasjon.håndterTidslinjeendring(1.februar, 28.februar, 1.februar, UUID.randomUUID())
-        val forventetGenerasjon = Generasjon(generasjonId, vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
-        forventetGenerasjon.håndterVedtakFattet(UUID.randomUUID())
-        assertEquals(
-            forventetGenerasjon,
-            generasjon
-        )
     }
 
     @Test
@@ -361,37 +245,6 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         assertIkkeUtbetaling(generasjonId, nyUtbetalingId)
         assertGenerasjonFor(gammelUtbetalingId, vedtaksperiodeId)
         assertGenerasjonFor(nyUtbetalingId, vedtaksperiodeId)
-    }
-
-    @Test
-    fun `oppdaterer tidslinje på ubehandlet generasjon der fom, tom og eller skjæringstidspunkt er ulike`() {
-        val generasjonId = UUID.randomUUID()
-        val generasjon = nyGenerasjon(generasjonId)
-        generasjon.registrer(observer)
-        generasjon.håndterTidslinjeendring(1.mars, 31.mars, 1.mars, UUID.randomUUID())
-        observer.assertTidslinjeendring(generasjonId, 1.mars, 31.mars, 1.mars)
-    }
-
-    @Test
-    fun `oppdaterer ikke tidslinje på ubehandlet generasjon der fom, tom og eller skjæringstidspunkt er like`() {
-        val generasjonId = UUID.randomUUID()
-        val generasjon = nyGenerasjon(generasjonId)
-        generasjon.registrer(observer)
-        generasjon.håndterTidslinjeendring(1.januar, 31.januar, 1.januar, UUID.randomUUID())
-        assertEquals(0, observer.oppdaterteGenerasjoner.size)
-    }
-
-    @Test
-    fun `oppretter ny generasjon dersom gjeldende generasjon er ferdig behandlet og tidslinje er ulik`() {
-        val generasjonId = UUID.randomUUID()
-        val vedtaksperiodeId = UUID.randomUUID()
-        val hendelseId = UUID.randomUUID()
-        val generasjon = nyGenerasjon(generasjonId, vedtaksperiodeId)
-        generasjon.registrer(observer)
-        generasjon.håndterVedtakFattet(UUID.randomUUID())
-        generasjon.håndterTidslinjeendring(2.januar, 31.januar, 2.januar, hendelseId)
-        assertEquals(1, observer.opprettedeGenerasjoner.size)
-        observer.assertOpprettelse(vedtaksperiodeId, hendelseId, 2.januar, 31.januar, 2.januar)
     }
 
     @Test

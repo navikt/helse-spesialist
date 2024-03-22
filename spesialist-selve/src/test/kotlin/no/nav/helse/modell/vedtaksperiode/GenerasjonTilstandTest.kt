@@ -3,7 +3,6 @@ package no.nav.helse.modell.vedtaksperiode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.modell.varsel.Varsel
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -16,16 +15,6 @@ internal class GenerasjonTilstandTest {
     @BeforeEach
     internal fun beforeEach() {
         observer = GenerasjonTestObserver()
-    }
-
-    @Test
-    fun `Ulåst - håndterTidslinjeendring`() {
-        val generasjonId = UUID.randomUUID()
-        val generasjon = generasjon(generasjonId, UUID.randomUUID())
-        generasjon.registrer(observer)
-
-        generasjon.håndterTidslinjeendring(1.februar, 28.februar, 1.februar, UUID.randomUUID())
-        observer.assertTidslinjeendring(generasjonId, 1.februar, 28.februar, 1.februar)
     }
 
     @Test
@@ -91,25 +80,6 @@ internal class GenerasjonTilstandTest {
     }
 
     @Test
-    fun `Låst - håndterer tidslinjeendring`() {
-        val generasjonId = UUID.randomUUID()
-        val vedtaksperiodeId = UUID.randomUUID()
-        val hendelseId = UUID.randomUUID()
-        val generasjon = generasjon(generasjonId, vedtaksperiodeId)
-        generasjon.registrer(observer)
-
-        val utbetalingId = UUID.randomUUID()
-        generasjon.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
-
-        generasjon.håndterVedtakFattet(UUID.randomUUID())
-        observer.assertTilstandsendring(generasjonId, Generasjon.Ulåst, Generasjon.Låst, 0)
-
-        generasjon.håndterTidslinjeendring(1.februar, 28.februar, 1.februar, hendelseId)
-        assertEquals(1, observer.opprettedeGenerasjoner.size)
-        observer.assertOpprettelse(vedtaksperiodeId, hendelseId, 1.februar, 28.februar, 1.februar)
-    }
-
-    @Test
     fun `Låst - håndterer ny utbetaling`() {
         val generasjonId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
@@ -143,22 +113,6 @@ internal class GenerasjonTilstandTest {
 
         generasjon.håndterForkastetUtbetaling(utbetalingId1)
         observer.assertUtbetaling(generasjonId, utbetalingId1)
-    }
-
-    @Test
-    fun `AUU - håndterer tidslinjeendring`() {
-        val generasjonId = UUID.randomUUID()
-        val hendelseId = UUID.randomUUID()
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon = generasjon(generasjonId, vedtaksperiodeId)
-        generasjon.registrer(observer)
-
-        generasjon.håndterVedtakFattet(UUID.randomUUID())
-        observer.assertTilstandsendring(generasjonId, Generasjon.Ulåst, Generasjon.AvsluttetUtenUtbetaling, 0)
-
-        generasjon.håndterTidslinjeendring(1.februar, 28.februar, 1.februar, hendelseId)
-        assertEquals(1, observer.opprettedeGenerasjoner.size)
-        observer.assertOpprettelse(vedtaksperiodeId, hendelseId, 1.februar, 28.februar, 1.februar)
     }
 
     @Test
@@ -239,26 +193,6 @@ internal class GenerasjonTilstandTest {
         assertEquals(1, observer.opprettedeVarsler.size)
 
         generasjon.håndterGodkjentAvSaksbehandler("123456", UUID.randomUUID())
-        observer.assertTilstandsendring(generasjonId, Generasjon.UtenUtbetalingMåVurderes, Generasjon.AvsluttetUtenUtbetaling, 2)
-    }
-
-    @Test
-    fun `UtenUtbetalingMåVurderes - håndterer tidslinjeendring`() {
-        val generasjonId = UUID.randomUUID()
-        val hendelseId = UUID.randomUUID()
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon = generasjon(generasjonId, vedtaksperiodeId)
-        generasjon.registrer(observer)
-
-        generasjon.håndterVedtakFattet(UUID.randomUUID())
-        observer.assertTilstandsendring(generasjonId, Generasjon.Ulåst, Generasjon.AvsluttetUtenUtbetaling, 0)
-
-        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId), hendelseId)
-        observer.assertTilstandsendring(generasjonId, Generasjon.AvsluttetUtenUtbetaling, Generasjon.UtenUtbetalingMåVurderes, 1)
-
-        generasjon.håndterTidslinjeendring(1.februar, 28.februar, 1.februar, hendelseId)
-        assertEquals(1, observer.opprettedeGenerasjoner.size)
-        observer.assertOpprettelse(vedtaksperiodeId, hendelseId, 1.februar, 28.februar, 1.februar)
         observer.assertTilstandsendring(generasjonId, Generasjon.UtenUtbetalingMåVurderes, Generasjon.AvsluttetUtenUtbetaling, 2)
     }
 
