@@ -1227,7 +1227,7 @@ enum Visningskriterium {
 input AnnulleringDataInput {
     aktorId: String!
     begrunnelser: [String!]!
-    fagsystemId: String!
+    fagsystemId: String
     fodselsnummer: String!
     kommentar: String
     organisasjonsnummer: String

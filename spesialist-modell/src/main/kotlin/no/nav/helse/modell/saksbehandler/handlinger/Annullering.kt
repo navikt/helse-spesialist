@@ -8,7 +8,7 @@ class Annullering(
     private val aktørId: String,
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
-    private val fagsystemId: String,
+    private val fagsystemId: String?,
     private val utbetalingId: String?,
     private val begrunnelser: List<String> = emptyList(),
     private val kommentar: String?

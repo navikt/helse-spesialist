@@ -115,7 +115,7 @@ data class AnnulleringHandlingFraApi(
     val aktørId: String,
     val fødselsnummer: String,
     val organisasjonsnummer: String,
-    val fagsystemId: String,
+    val fagsystemId: String?,
     val utbetalingId: String?,
     val begrunnelser: List<String> = emptyList(),
     val kommentar: String?
