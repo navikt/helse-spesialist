@@ -27,10 +27,6 @@ spec:
     path: /metrics
   kafka:
     pool: nav-prod
-  observability:
-    autoInstrumentation:
-      enabled: true
-      runtime: java
   secureLogs:
     enabled: true
   azure:
