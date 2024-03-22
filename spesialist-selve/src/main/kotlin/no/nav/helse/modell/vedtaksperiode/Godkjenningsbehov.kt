@@ -24,13 +24,15 @@ import no.nav.helse.modell.kommando.AvbrytContextCommand
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.KlargjørArbeidsgiverCommand
 import no.nav.helse.modell.kommando.KlargjørPersonCommand
-import no.nav.helse.modell.kommando.KlargjørVedtaksperiodeCommand
 import no.nav.helse.modell.kommando.LagreBehandlingsInformasjonCommand
 import no.nav.helse.modell.kommando.MacroCommand
+import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
 import no.nav.helse.modell.kommando.OpprettKoblingTilHendelseCommand
+import no.nav.helse.modell.kommando.OpprettKoblingTilUtbetalingCommand
 import no.nav.helse.modell.kommando.OpprettSaksbehandleroppgave
 import no.nav.helse.modell.kommando.PersisterInntektCommand
 import no.nav.helse.modell.kommando.PersisterPeriodehistorikkCommand
+import no.nav.helse.modell.kommando.PersisterVedtaksperiodetypeCommand
 import no.nav.helse.modell.kommando.VurderBehovForTotrinnskontroll
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
@@ -209,20 +211,25 @@ internal class GodkjenningsbehovCommand(
             vedtaksperiodeId = vedtaksperiodeId,
             commandContextDao = commandContextDao
         ),
+        PersisterVedtaksperiodetypeCommand(
+            vedtaksperiodeId = vedtaksperiodeId,
+            vedtaksperiodetype = periodetype,
+            inntektskilde = inntektskilde,
+            vedtakDao = vedtakDao
+        ),
+        OpprettKoblingTilUtbetalingCommand(
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = utbetalingId,
+            utbetalingDao = utbetalingDao
+        ),
         ForberedVisningCommand(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             organisasjonsnummer = organisasjonsnummer,
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
-            vedtaksperiodeId = vedtaksperiodeId,
-            periodetype = periodetype,
-            inntektskilde = inntektskilde,
             førstegangsbehandling = førstegangsbehandling,
-            utbetalingId = utbetalingId,
             førsteKjenteDagFinner = førsteKjenteDagFinner,
             personDao = personDao,
-            vedtakDao = vedtakDao,
-            utbetalingDao = utbetalingDao,
             arbeidsgiverDao = arbeidsgiverDao,
             arbeidsforholdDao = arbeidsforholdDao,
             snapshotDao = snapshotDao,
@@ -332,15 +339,9 @@ private class ForberedVisningCommand(
     aktørId: String,
     organisasjonsnummer: String,
     orgnummereMedRelevanteArbeidsforhold: List<String>,
-    vedtaksperiodeId: UUID,
-    periodetype: Periodetype,
-    inntektskilde: Inntektskilde,
     førstegangsbehandling: Boolean,
-    utbetalingId: UUID,
     førsteKjenteDagFinner: () -> LocalDate,
     personDao: PersonDao,
-    vedtakDao: VedtakDao,
-    utbetalingDao: UtbetalingDao,
     arbeidsgiverDao: ArbeidsgiverDao,
     arbeidsforholdDao: ArbeidsforholdDao,
     snapshotDao: SnapshotDao,
@@ -363,17 +364,11 @@ private class ForberedVisningCommand(
             arbeidsforholdDao = arbeidsforholdDao,
             førstegangsbehandling = førstegangsbehandling
         ),
-        KlargjørVedtaksperiodeCommand(
+        OppdaterSnapshotCommand(
             snapshotClient = snapshotClient,
-            fødselsnummer = fødselsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            vedtaksperiodetype = periodetype,
-            inntektskilde = inntektskilde,
-            personDao = personDao,
             snapshotDao = snapshotDao,
-            vedtakDao = vedtakDao,
-            utbetalingId = utbetalingId,
-            utbetalingDao = utbetalingDao,
+            fødselsnummer = fødselsnummer,
+            personDao = personDao
         ),
     )
 }
