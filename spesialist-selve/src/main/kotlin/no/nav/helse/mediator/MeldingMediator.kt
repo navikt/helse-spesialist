@@ -416,6 +416,7 @@ internal class MeldingMediator(
             sikkerlogg.info("Melding $meldingnavn mottatt:\n${melding.toJson()}")
 
             try {
+                meldingDao.opprett(melding)
                 personRepository.brukPersonHvisFinnes(melding.fødselsnummer()) {
                     logg.info("Personen finnes i databasen, behandler melding $meldingnavn")
                     sikkerlogg.info("Personen finnes i databasen, behandler melding $meldingnavn")
