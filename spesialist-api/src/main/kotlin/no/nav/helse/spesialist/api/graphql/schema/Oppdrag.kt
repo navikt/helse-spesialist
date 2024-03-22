@@ -77,6 +77,8 @@ data class Oppdrag(private val utbetaling: UtbetalingApiDto) {
 
     fun totalbelop() = utbetaling.totalbeløp
 
+    fun utbetalingId(): UUIDString = utbetaling.id.toString()
+
     private fun List<UtbetalingslinjeApiDto>.tilUtbetalingslinjer() =
         map {
             Utbetalingslinje(
