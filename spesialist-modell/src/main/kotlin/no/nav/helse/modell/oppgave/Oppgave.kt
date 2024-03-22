@@ -11,6 +11,7 @@ import no.nav.helse.modell.oppgave.Egenskap.EGEN_ANSATT
 import no.nav.helse.modell.oppgave.Egenskap.PÅ_VENT
 import no.nav.helse.modell.oppgave.Egenskap.RETUR
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
+import no.nav.helse.modell.oppgave.Egenskap.TILBAKEDATERT
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import org.slf4j.LoggerFactory
@@ -143,6 +144,11 @@ class Oppgave private constructor(
 
     fun fjernEgenAnsatt() {
         egenskaper.remove(EGEN_ANSATT)
+        oppgaveEndret()
+    }
+
+    fun fjernTilbakedatert() {
+        egenskaper.remove(TILBAKEDATERT)
         oppgaveEndret()
     }
 

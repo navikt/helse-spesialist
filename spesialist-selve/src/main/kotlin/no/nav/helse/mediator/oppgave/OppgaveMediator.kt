@@ -260,6 +260,15 @@ internal class OppgaveMediator(
         }
     }
 
+    fun fjernTilbakedatert(vedtaksperiodeId: UUID) {
+        oppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId)?.also { oppgaveId ->
+            oppgave(oppgaveId) {
+                logg.info("Fjerner egenskap TILBAKEDATERT på {}", kv("oppgaveId", oppgaveId))
+                fjernTilbakedatert()
+            }
+        }
+    }
+
     internal fun opprett(
         id: Long,
         contextId: UUID,

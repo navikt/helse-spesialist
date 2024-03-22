@@ -45,6 +45,9 @@ internal class TilbakedateringGodkjentCommand(
     godkjenningMediator: GodkjenningMediator,
 ): MacroCommand() {
     override val commands: List<Command> = listOf(
+        ikkesuspenderendeCommand("fjernTilbakedatertEgenskap") {
+            oppgaveMediator.fjernTilbakedatert(oppgaveDataForAutomatisering.vedtaksperiodeId)
+        },
         SettTidligereAutomatiseringInaktivCommand(
             vedtaksperiodeId = oppgaveDataForAutomatisering.vedtaksperiodeId,
             hendelseId = oppgaveDataForAutomatisering.hendelseId,

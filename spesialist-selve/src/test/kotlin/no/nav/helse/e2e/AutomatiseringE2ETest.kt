@@ -6,10 +6,12 @@ import ToggleHelpers.enable
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.TestRapidHelpers.oppgaveId
 import no.nav.helse.januar
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.Toggle
+import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
@@ -64,10 +66,13 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         håndterRisikovurderingløsning()
 
         assertGodkjenningsbehovIkkeBesvart()
+        val oppgaveId = inspektør.oppgaveId().toInt()
         assertSaksbehandleroppgave(oppgavestatus = AvventerSaksbehandler)
+        assertHarOppgaveegenskap(oppgaveId, Egenskap.TILBAKEDATERT)
 
         håndterTilbakedateringBehandlet(skjæringstidspunkt = 1.januar)
         assertGodkjenningsbehovBesvart(godkjent = true, automatiskBehandlet = true)
+        assertHarIkkeOppgaveegenskap(oppgaveId, Egenskap.TILBAKEDATERT)
     }
 
     @Test
