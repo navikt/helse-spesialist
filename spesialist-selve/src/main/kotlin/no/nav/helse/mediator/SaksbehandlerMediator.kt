@@ -372,6 +372,7 @@ internal class SaksbehandlerMediator(
             fødselsnummer = this.fødselsnummer,
             organisasjonsnummer = this.organisasjonsnummer,
             fagsystemId = this.fagsystemId,
+            utbetalingId = this.utbetalingId,
             begrunnelser = this.begrunnelser,
             kommentar = this.kommentar
         )

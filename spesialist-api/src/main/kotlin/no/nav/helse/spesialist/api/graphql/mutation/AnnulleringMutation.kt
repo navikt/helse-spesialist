@@ -26,6 +26,7 @@ class AnnulleringMutation(
             fødselsnummer = annullering.fodselsnummer,
             organisasjonsnummer = annullering.organisasjonsnummer ?: "",
             fagsystemId = annullering.fagsystemId,
+            utbetalingId = annullering.utbetalingId,
             begrunnelser = annullering.begrunnelser,
             kommentar = annullering.kommentar
         )

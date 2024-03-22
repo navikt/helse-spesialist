@@ -1230,6 +1230,7 @@ input AnnulleringDataInput {
     fodselsnummer: String!
     kommentar: String
     organisasjonsnummer: String
+    utbetalingId: String
 }
 
 input ArbeidsforholdOverstyringHandlingInput {

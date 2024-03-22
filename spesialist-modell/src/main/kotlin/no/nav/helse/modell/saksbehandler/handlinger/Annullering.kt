@@ -9,6 +9,7 @@ class Annullering(
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
     private val fagsystemId: String,
+    private val utbetalingId: String?,
     private val begrunnelser: List<String> = emptyList(),
     private val kommentar: String?
 ): Handling {
@@ -28,6 +29,7 @@ class Annullering(
             saksbehandlerIdent = ident,
             saksbehandlerEpost = epost,
             fagsystemId = fagsystemId,
+            utbetalingId = utbetalingId,
             begrunnelser = begrunnelser,
             kommentar = kommentar
         )

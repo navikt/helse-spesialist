@@ -5,6 +5,7 @@ data class AnnulleringData (
     val fodselsnummer: String,
     val organisasjonsnummer: String?,
     val fagsystemId: String,
+    val utbetalingId: String?,
     val begrunnelser: List<String>,
     val kommentar: String?
 )

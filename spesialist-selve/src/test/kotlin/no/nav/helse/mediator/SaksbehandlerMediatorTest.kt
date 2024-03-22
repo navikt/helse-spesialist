@@ -631,6 +631,7 @@ internal class SaksbehandlerMediatorTest: DatabaseIntegrationTest() {
         fødselsnummer = FØDSELSNUMMER,
         organisasjonsnummer = ORGANISASJONSNUMMER,
         fagsystemId = "EN_FAGSYSTEMID",
+        utbetalingId = null,
         begrunnelser = begrunnelser,
         kommentar = kommentar
     )
