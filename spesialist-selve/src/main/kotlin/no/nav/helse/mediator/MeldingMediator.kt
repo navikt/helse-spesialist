@@ -18,7 +18,7 @@ import no.nav.helse.mediator.meldinger.MidnattRiver
 import no.nav.helse.mediator.meldinger.NyeVarslerRiver
 import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshotRiver
 import no.nav.helse.mediator.meldinger.OverstyringIgangsattRiver
-import no.nav.helse.mediator.meldinger.Personmelding
+import no.nav.helse.mediator.meldinger.PersonmeldingOld
 import no.nav.helse.mediator.meldinger.SøknadSendtRiver
 import no.nav.helse.mediator.meldinger.TilbakedateringBehandletRiver
 import no.nav.helse.mediator.meldinger.UtbetalingAnnullertRiver
@@ -361,12 +361,12 @@ internal class MeldingMediator(
         sikkerlogg.error("alvorlig feil: ${err.message}\n\t$message", err, err.printStackTrace())
     }
 
-    private fun nyContext(hendelse: Personmelding, contextId: UUID) = CommandContext(contextId).apply {
+    private fun nyContext(hendelse: PersonmeldingOld, contextId: UUID) = CommandContext(contextId).apply {
         meldingDao.lagre(hendelse)
         opprett(commandContextDao, hendelse.id)
     }
 
-    internal fun mottaMelding(melding: Personmelding, messageContext: MessageContext) {
+    internal fun mottaMelding(melding: PersonmeldingOld, messageContext: MessageContext) {
         val meldingnavn = requireNotNull(melding::class.simpleName)
         withMDC(
             mapOf(
@@ -384,7 +384,7 @@ internal class MeldingMediator(
         }
     }
 
-    private fun gjenopptaMelding(melding: Personmelding, commandContext: CommandContext, messageContext: MessageContext){
+    private fun gjenopptaMelding(melding: PersonmeldingOld, commandContext: CommandContext, messageContext: MessageContext){
         val meldingnavn = requireNotNull(melding::class.simpleName)
         withMDC(
             mapOf(
@@ -403,7 +403,7 @@ internal class MeldingMediator(
         }
     }
 
-    private fun behandleMelding(melding: Personmelding, messageContext: MessageContext){
+    private fun behandleMelding(melding: PersonmeldingOld, messageContext: MessageContext){
         val meldingnavn = requireNotNull(melding::class.simpleName)
         val utgåendeMeldingerMediator = UtgåendeMeldingerMediator()
         val commandContextTilstandMediator = CommandContextTilstandMediator()
@@ -427,7 +427,7 @@ internal class MeldingMediator(
         }
     }
 
-    internal fun håndter(fødselsnummer: String, melding: Personmelding, messageContext: MessageContext) {
+    internal fun håndter(fødselsnummer: String, melding: PersonmeldingOld, messageContext: MessageContext) {
         withMDC(mapOf("meldingId" to melding.id.toString())) {
             if (personDao.findPersonByFødselsnummer(fødselsnummer) == null) {
                 logg.info("Ignorerer melding ${melding::class.simpleName} fordi personen ikke finnes i databasen")
@@ -437,7 +437,7 @@ internal class MeldingMediator(
         }
     }
 
-    internal fun håndter(melding: Personmelding, messageContext: MessageContext) {
+    internal fun håndter(melding: PersonmeldingOld, messageContext: MessageContext) {
         val contextId = UUID.randomUUID()
         withMDC(
             mapOf(
@@ -451,7 +451,7 @@ internal class MeldingMediator(
         }
     }
 
-    private fun håndter(melding: Personmelding, commandContext: CommandContext, messageContext: MessageContext) {
+    private fun håndter(melding: PersonmeldingOld, commandContext: CommandContext, messageContext: MessageContext) {
         val utgåendeMeldingerMediator = UtgåendeMeldingerMediator()
         val commandContextTilstandMediator = CommandContextTilstandMediator()
         commandContext.nyObserver(utgåendeMeldingerMediator)
@@ -510,7 +510,7 @@ internal class MeldingMediator(
 
     private class Løsninger(
         private val messageContext: MessageContext,
-        private val melding: Personmelding,
+        private val melding: PersonmeldingOld,
         private val contextId: UUID,
         private val commandContext: CommandContext,
     ) {
@@ -530,7 +530,7 @@ internal class MeldingMediator(
 
     private class Påminnelse(
         private val messageContext: MessageContext,
-        private val melding: Personmelding,
+        private val melding: PersonmeldingOld,
         private val contextId: UUID,
         private val commandContext: CommandContext,
     ) {

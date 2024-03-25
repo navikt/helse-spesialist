@@ -2,7 +2,7 @@ package no.nav.helse.modell.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID
-import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
+import no.nav.helse.mediator.meldinger.VedtaksperiodemeldingOld
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.SnapshotDao
@@ -20,7 +20,7 @@ internal class VedtaksperiodeForkastet private constructor(
     private val vedtaksperiodeId: UUID,
     private val fødselsnummer: String,
     private val json: String
-) : Vedtaksperiodemelding {
+) : VedtaksperiodemeldingOld {
     internal constructor(packet: JsonMessage): this(
         UUID.fromString(packet["@id"].asText()),
         UUID.fromString(packet["vedtaksperiodeId"].asText()),

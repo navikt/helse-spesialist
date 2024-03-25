@@ -7,8 +7,8 @@ import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
-import no.nav.helse.mediator.meldinger.Personmelding
-import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
+import no.nav.helse.mediator.meldinger.PersonmeldingOld
+import no.nav.helse.mediator.meldinger.VedtaksperiodemeldingOld
 import no.nav.helse.modell.MeldingDao.Meldingtype.ADRESSEBESKYTTELSE_ENDRET
 import no.nav.helse.modell.MeldingDao.Meldingtype.BEHANDLING_OPPRETTET
 import no.nav.helse.modell.MeldingDao.Meldingtype.ENDRET_EGEN_ANSATT_STATUS
@@ -50,12 +50,12 @@ import no.nav.helse.rapids_rivers.asLocalDate
 import org.intellij.lang.annotations.Language
 
 internal class MeldingDao(private val dataSource: DataSource) {
-    internal fun lagre(melding: Personmelding) {
+    internal fun lagre(melding: PersonmeldingOld) {
         sessionOf(dataSource).use { session ->
             session.transaction { transactionalSession ->
                 transactionalSession.run {
                     lagre(melding)
-                    if (melding is Vedtaksperiodemelding)
+                    if (melding is VedtaksperiodemeldingOld)
                         opprettKobling(melding.vedtaksperiodeId(), melding.id)
                 }
             }
@@ -168,7 +168,7 @@ internal class MeldingDao(private val dataSource: DataSource) {
         })
     }
 
-    private fun TransactionalSession.lagre(melding: Personmelding) {
+    private fun TransactionalSession.lagre(melding: PersonmeldingOld) {
         @Language("PostgreSQL")
         val query = """
             INSERT INTO hendelse(id, fodselsnummer, data, type)
@@ -209,7 +209,7 @@ internal class MeldingDao(private val dataSource: DataSource) {
     private fun fraMeldingtype(
         meldingtype: Meldingtype,
         json: String,
-    ): Personmelding {
+    ): PersonmeldingOld {
         val jsonNode = objectMapper.readTree(json)
         return when (meldingtype) {
             ADRESSEBESKYTTELSE_ENDRET -> AdressebeskyttelseEndret(jsonNode)
@@ -225,7 +225,7 @@ internal class MeldingDao(private val dataSource: DataSource) {
         }
     }
 
-    private fun tilMeldingtype(melding: Personmelding) = when (melding) {
+    private fun tilMeldingtype(melding: PersonmeldingOld) = when (melding) {
         is AdressebeskyttelseEndret -> ADRESSEBESKYTTELSE_ENDRET
         is VedtaksperiodeEndret -> VEDTAKSPERIODE_ENDRET
         is VedtaksperiodeForkastet -> VEDTAKSPERIODE_FORKASTET

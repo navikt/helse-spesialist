@@ -3,7 +3,7 @@ package no.nav.helse.modell.kommando
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.mediator.meldinger.Personmelding
+import no.nav.helse.mediator.meldinger.PersonmeldingOld
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringForEksisterendeOppgaveCommand
@@ -21,7 +21,7 @@ internal class TilbakedateringBehandlet private constructor(
     val syketilfelleStartdato: LocalDate,
     val perioder: List<Periode>,
     private val json: String
-) : Personmelding {
+) : PersonmeldingOld {
     internal constructor(packet: JsonMessage): this(
         id = UUID.fromString(packet["@id"].asText()),
         fødselsnummer = packet["fødselsnummer"].asText(),

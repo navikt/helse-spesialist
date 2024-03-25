@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.db.ReservasjonDao
-import no.nav.helse.mediator.meldinger.Personmelding
+import no.nav.helse.mediator.meldinger.PersonmeldingOld
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.kommando.Command
@@ -34,7 +34,7 @@ internal class UtbetalingEndret private constructor(
     val arbeidsgiverOppdrag: LagreOppdragCommand.Oppdrag,
     val personOppdrag: LagreOppdragCommand.Oppdrag,
     private val json: String
-) : Personmelding {
+) : PersonmeldingOld {
     internal constructor(packet: JsonMessage): this(
         id = UUID.fromString(packet["@id"].asText()),
         fødselsnummer = packet["fødselsnummer"].asText(),

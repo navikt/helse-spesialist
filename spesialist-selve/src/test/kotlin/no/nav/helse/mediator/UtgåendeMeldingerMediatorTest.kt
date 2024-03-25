@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
+import no.nav.helse.mediator.meldinger.VedtaksperiodemeldingOld
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.intellij.lang.annotations.Language
@@ -74,7 +74,7 @@ internal class UtgåendeMeldingerMediatorTest {
         assertDoesNotThrow { LocalDateTime.parse(testRapid.inspektør.field(0, "@opprettet").asText()) }
     }
 
-    private inner class Testmelding(override val id: UUID) : Vedtaksperiodemelding {
+    private inner class Testmelding(override val id: UUID) : VedtaksperiodemeldingOld {
 
         override fun fødselsnummer(): String {
             return FNR

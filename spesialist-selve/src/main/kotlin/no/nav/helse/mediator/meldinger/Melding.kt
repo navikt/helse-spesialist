@@ -8,12 +8,12 @@ internal interface Melding {
     val id: UUID
     fun toJson(): String
 }
-
-internal interface Personmelding: Melding {
+@Deprecated("Dette skal erstattes av ny løype for å behandle meldinger")
+internal interface PersonmeldingOld: Melding {
     fun fødselsnummer(): String
     fun behandle(person: Person, kommandofabrikk: Kommandofabrikk) {}
 }
 
-internal interface Vedtaksperiodemelding: Personmelding {
+internal interface VedtaksperiodemeldingOld: PersonmeldingOld {
     fun vedtaksperiodeId(): UUID
 }

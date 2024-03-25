@@ -1,6 +1,6 @@
 package no.nav.helse.mediator
 
-import no.nav.helse.mediator.meldinger.Personmelding
+import no.nav.helse.mediator.meldinger.PersonmeldingOld
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import org.slf4j.LoggerFactory
@@ -24,7 +24,7 @@ internal class UtgåendeMeldingerMediator: CommandContextObserver {
         utgåendeHendelser.add(hendelse)
     }
 
-    internal fun publiserOppsamledeMeldinger(hendelse: Personmelding, messageContext: MessageContext) {
+    internal fun publiserOppsamledeMeldinger(hendelse: PersonmeldingOld, messageContext: MessageContext) {
         publiserHendelser(hendelse, messageContext)
         publiserBehov(hendelse, messageContext)
         utgåendeBehov.clear()
@@ -32,7 +32,7 @@ internal class UtgåendeMeldingerMediator: CommandContextObserver {
         ekstraKontekst.clear()
     }
 
-    private fun publiserHendelser(hendelse: Personmelding, messageContext: MessageContext) {
+    private fun publiserHendelser(hendelse: PersonmeldingOld, messageContext: MessageContext) {
         utgåendeHendelser.forEach { utgåendeHendelse ->
             logg.info("Publiserer hendelse i forbindelse med ${hendelse.javaClass.simpleName}")
             sikkerlogg.info("Publiserer hendelse i forbindelse med ${hendelse.javaClass.simpleName}\n{}", utgåendeHendelse)
@@ -40,7 +40,7 @@ internal class UtgåendeMeldingerMediator: CommandContextObserver {
         }
     }
 
-    private fun publiserBehov(hendelse: Personmelding, messageContext: MessageContext) {
+    private fun publiserBehov(hendelse: PersonmeldingOld, messageContext: MessageContext) {
         if (utgåendeBehov.isEmpty()) return
         val packet = behovPacket(hendelse)
         logg.info("Publiserer behov for ${utgåendeBehov.keys}")
@@ -48,7 +48,7 @@ internal class UtgåendeMeldingerMediator: CommandContextObserver {
         messageContext.publish(hendelse.fødselsnummer(), packet)
     }
 
-    private fun behovPacket(hendelse: Personmelding) =
+    private fun behovPacket(hendelse: PersonmeldingOld) =
         JsonMessage.newNeed(utgåendeBehov.keys.toList(), mutableMapOf<String, Any>(
             "hendelseId" to hendelse.id,
             "fødselsnummer" to hendelse.fødselsnummer()

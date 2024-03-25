@@ -16,7 +16,7 @@ internal class AdressebeskyttelseEndret private constructor(
     override val id: UUID,
     private val fødselsnummer: String,
     private val json: String
-): Personmelding {
+): PersonmeldingOld {
 
     internal constructor(packet: JsonMessage): this(
         id = UUID.fromString(packet["@id"].asText()),

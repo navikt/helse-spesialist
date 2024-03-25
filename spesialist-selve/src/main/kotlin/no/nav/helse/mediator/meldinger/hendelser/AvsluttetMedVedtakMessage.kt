@@ -5,7 +5,7 @@ import com.fasterxml.jackson.module.kotlin.treeToValue
 import java.util.UUID
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.mediator.asUUID
-import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
+import no.nav.helse.mediator.meldinger.VedtaksperiodemeldingOld
 import no.nav.helse.modell.avviksvurdering.Avviksvurdering.Companion.finnRiktigAvviksvurdering
 import no.nav.helse.modell.avviksvurdering.InnrapportertInntektDto
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
@@ -23,7 +23,7 @@ internal class AvsluttetMedVedtakMessage(
     private val packet: JsonMessage,
     private val avviksvurderingDao: AvviksvurderingDao,
     private val generasjonDao: GenerasjonDao,
-): Vedtaksperiodemelding {
+): VedtaksperiodemeldingOld {
     private val fødselsnummer = packet["fødselsnummer"].asText()
     private val aktørId = packet["aktørId"].asText()
     private val fom = packet["fom"].asLocalDate()

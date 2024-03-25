@@ -2,7 +2,7 @@ package no.nav.helse.modell.person
 
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.mediator.meldinger.Personmelding
+import no.nav.helse.mediator.meldinger.PersonmeldingOld
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.kommando.Command
@@ -17,7 +17,7 @@ internal class EndretEgenAnsattStatus private constructor(
     val erEgenAnsatt: Boolean,
     val opprettet: LocalDateTime,
     private val json: String,
-) : Personmelding {
+) : PersonmeldingOld {
 
     internal constructor(packet: JsonMessage): this(
         id = UUID.fromString(packet["@id"].asText()),

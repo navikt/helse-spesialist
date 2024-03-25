@@ -5,7 +5,7 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.asUUID
-import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
+import no.nav.helse.mediator.meldinger.VedtaksperiodemeldingOld
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.SnapshotDao
@@ -83,7 +83,7 @@ internal class Godkjenningsbehov private constructor(
     val orgnummereMedRelevanteArbeidsforhold: List<String>,
     val skjæringstidspunkt: LocalDate,
     private val json: String,
-) : Vedtaksperiodemelding {
+) : VedtaksperiodemeldingOld {
 
     override fun fødselsnummer() = fødselsnummer
     override fun vedtaksperiodeId() = vedtaksperiodeId

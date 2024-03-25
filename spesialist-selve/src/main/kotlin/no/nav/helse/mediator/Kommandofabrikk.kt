@@ -9,7 +9,7 @@ import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.SykefraværstilfelleDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.builders.GenerasjonBuilder
-import no.nav.helse.mediator.meldinger.Personmelding
+import no.nav.helse.mediator.meldinger.PersonmeldingOld
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.CommandContextDao
@@ -263,7 +263,7 @@ internal class Kommandofabrikk(
         )
     }
 
-    fun oppdaterPersonsnapshot(hendelse: Personmelding): OppdaterPersonsnapshotCommand {
+    fun oppdaterPersonsnapshot(hendelse: PersonmeldingOld): OppdaterPersonsnapshotCommand {
         return OppdaterPersonsnapshotCommand(
             fødselsnummer = hendelse.fødselsnummer(),
             førsteKjenteDagFinner = { generasjonRepository.førsteKjenteDag(hendelse.fødselsnummer()) },

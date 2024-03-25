@@ -1,7 +1,7 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import java.util.UUID
-import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
+import no.nav.helse.mediator.meldinger.VedtaksperiodemeldingOld
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.kommando.AvbrytCommand
@@ -17,7 +17,7 @@ internal class VedtaksperiodeReberegnet private constructor(
     private val fødselsnummer: String,
     private val vedtaksperiodeId: UUID,
     private val json: String,
-) : Vedtaksperiodemelding {
+) : VedtaksperiodemeldingOld {
     internal constructor(packet: JsonMessage): this(
         id = UUID.fromString(packet["@id"].asText()),
         fødselsnummer = packet["fødselsnummer"].asText(),

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.db.SaksbehandlerDao
-import no.nav.helse.mediator.meldinger.Personmelding
+import no.nav.helse.mediator.meldinger.PersonmeldingOld
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.LagreAnnulleringCommand
@@ -21,7 +21,7 @@ internal class UtbetalingAnnullert private constructor(
     val annullertTidspunkt: LocalDateTime,
     val saksbehandlerEpost: String,
     private val json: String,
-) : Personmelding {
+) : PersonmeldingOld {
     internal constructor(packet: JsonMessage): this(
         id = UUID.fromString(packet["@id"].asText()),
         fødselsnummer = packet["fødselsnummer"].asText(),

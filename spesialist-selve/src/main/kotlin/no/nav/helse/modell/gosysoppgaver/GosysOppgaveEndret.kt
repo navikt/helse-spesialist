@@ -3,7 +3,7 @@ package no.nav.helse.modell.gosysoppgaver
 import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID
 import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.mediator.meldinger.Personmelding
+import no.nav.helse.mediator.meldinger.PersonmeldingOld
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.automatisering.Automatisering
@@ -20,7 +20,7 @@ internal class GosysOppgaveEndret private constructor(
     override val id: UUID,
     private val fødselsnummer: String,
     private val json: String,
-) : Personmelding {
+) : PersonmeldingOld {
     internal constructor(packet: JsonMessage): this(
         id = UUID.fromString(packet["@id"].asText()),
         fødselsnummer = packet["fødselsnummer"].asText(),

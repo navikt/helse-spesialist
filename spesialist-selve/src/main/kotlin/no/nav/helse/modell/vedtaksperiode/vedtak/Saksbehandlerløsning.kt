@@ -3,7 +3,7 @@ package no.nav.helse.modell.vedtaksperiode.vedtak
 import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.mediator.meldinger.Personmelding
+import no.nav.helse.mediator.meldinger.PersonmeldingOld
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.isMissingOrNull
@@ -30,7 +30,7 @@ internal class Saksbehandlerløsning private constructor(
     val saksbehandler: Saksbehandler,
     val beslutter: Saksbehandler?,
     private val json: String,
-) : Personmelding {
+) : PersonmeldingOld {
 
     internal constructor(packet: JsonMessage): this(
         id = UUID.fromString(packet["@id"].asText()),

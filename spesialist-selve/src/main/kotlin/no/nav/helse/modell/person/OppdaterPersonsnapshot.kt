@@ -3,7 +3,7 @@ package no.nav.helse.modell.person
 import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.mediator.meldinger.Personmelding
+import no.nav.helse.mediator.meldinger.PersonmeldingOld
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
@@ -20,7 +20,7 @@ internal class OppdaterPersonsnapshot(
     override val id: UUID,
     private val fødselsnummer: String,
     private val json: String,
-) : Personmelding {
+) : PersonmeldingOld {
     internal constructor(packet: JsonMessage): this(
         id = UUID.fromString(packet["@id"].asText()),
         fødselsnummer = packet["fødselsnummer"].asText(),
