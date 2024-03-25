@@ -524,8 +524,8 @@ internal class MeldingMediator(
         fun fortsett(mediator: MeldingMediator, message: String) {
             logg.info("fortsetter utførelse av kommandokontekst som følge av løsninger på behov for ${melding::class.simpleName}")
             sikkerlogg.info("fortsetter utførelse av kommandokontekst som følge av løsninger på behov for ${melding::class.simpleName}\nInnkommende melding:\n\t$message")
-            mediator.håndter(melding, commandContext, messageContext)
-            // mediator.gjenopptaMelding(melding, commandContext, messageContext)
+            if (melding is Personmelding) mediator.gjenopptaMelding(melding, commandContext, messageContext)
+            else mediator.håndter(melding, commandContext, messageContext)
         }
     }
 
@@ -543,8 +543,8 @@ internal class MeldingMediator(
 
         fun fortsett(mediator: MeldingMediator) {
             logg.info("fortsetter utførelse av kommandokontekst som følge av påminnelse")
-            mediator.håndter(melding, commandContext, messageContext)
-            // mediator.gjenopptaMelding(melding, commandContext, messageContext)
+            if (melding is Personmelding) mediator.gjenopptaMelding(melding, commandContext, messageContext)
+            else mediator.håndter(melding, commandContext, messageContext)
         }
     }
 
