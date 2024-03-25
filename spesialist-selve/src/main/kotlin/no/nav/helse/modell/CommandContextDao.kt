@@ -107,6 +107,10 @@ internal class CommandContextDao(private val dataSource: DataSource) {
         CommandContext(id, dto.sti, hash?.let { UUID.fromString(it) })
     }
 
+    fun finnSuspendertEllerFeil(id: UUID) = finnSiste(id)?.takeIf { it.first == SUSPENDERT || it.first == FEIL }?.let { (_, dto, hash) ->
+        CommandContext(id, dto.sti, hash?.let { UUID.fromString(it) })
+    }
+
     private fun finnSiste(id: UUID) =
         sessionOf(dataSource).use  { session ->
             @Language("PostgreSQL")

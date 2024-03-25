@@ -328,8 +328,8 @@ internal class MeldingMediator(
     }
 
     private fun påminnelse(messageContext: MessageContext, meldingId: UUID, contextId: UUID): Påminnelse? {
-        val commandContext = commandContextDao.finnSuspendert(contextId) ?: run {
-            logg.info("Ignorerer melding fordi kommandokonteksten ikke er suspendert")
+        val commandContext = commandContextDao.finnSuspendertEllerFeil(contextId) ?: run {
+            logg.info("Ignorerer melding fordi kommandokonteksten ikke er suspendert eller feil")
             return null
         }
         val hendelse = meldingDao.finn(meldingId) ?: run {

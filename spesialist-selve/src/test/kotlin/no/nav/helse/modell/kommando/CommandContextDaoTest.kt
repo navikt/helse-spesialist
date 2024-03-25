@@ -31,6 +31,13 @@ internal class CommandContextDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `finner feil context i db`() {
+        val contextId = feil()
+        assertNotNull(commandContextDao.finnSuspendertEllerFeil(contextId))
+        assertTilstand(contextId, "NY", "FEIL")
+    }
+
+    @Test
     fun `avbryter ikke seg selv`() {
         val contextId = ny()
         avbryt(contextId)
