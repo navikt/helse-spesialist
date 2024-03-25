@@ -6,7 +6,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.mediator.UtgåendeMeldingerObserver
+import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDto
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
@@ -38,7 +38,7 @@ internal class KlargjørArbeidsforholdCommandTest {
         førstegangsbehandling = false
     )
 
-    private val observer = object : UtgåendeMeldingerObserver {
+    private val observer = object : CommandContextObserver {
         val behov = mutableListOf<String>()
         override fun behov(behov: String, ekstraKontekst: Map<String, Any>, detaljer: Map<String, Any>) {
             this.behov.add(behov)

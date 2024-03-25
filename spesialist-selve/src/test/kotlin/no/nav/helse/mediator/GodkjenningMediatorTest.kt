@@ -39,7 +39,7 @@ internal class GodkjenningMediatorTest {
             generasjonerMedGodkjenteVarsler.add(generasjonId)
         }
     }
-    private val hendelserInspektør = object: UtgåendeMeldingerObserver {
+    private val hendelserInspektør = object: CommandContextObserver {
         private val hendelser = mutableListOf<JsonNode>()
 
         fun hendelser(eventName: String) = hendelser.filter { it["@event_name"]?.asText() == eventName }

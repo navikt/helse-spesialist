@@ -6,11 +6,11 @@ import no.nav.helse.rapids_rivers.MessageContext
 import org.slf4j.LoggerFactory
 
 internal interface UtgåendeMeldingerObserver {
-    fun behov(behov: String, ekstraKontekst: Map<String, Any>, detaljer: Map<String, Any>)
-    fun hendelse(hendelse: String)
+    fun behov(behov: String, ekstraKontekst: Map<String, Any>, detaljer: Map<String, Any>) {}
+    fun hendelse(hendelse: String) {}
 }
 
-internal class UtgåendeMeldingerMediator: UtgåendeMeldingerObserver {
+internal class UtgåendeMeldingerMediator: CommandContextObserver {
     private val utgåendeBehov = mutableMapOf<String, Map<String, Any>>()
     private val utgåendeHendelser = mutableListOf<String>()
     private val ekstraKontekst = mutableMapOf<String, Any>()

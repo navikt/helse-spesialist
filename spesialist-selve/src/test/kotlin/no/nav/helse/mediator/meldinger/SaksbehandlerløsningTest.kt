@@ -9,8 +9,8 @@ import java.time.LocalDateTime
 import java.util.UUID
 import java.util.UUID.randomUUID
 import no.nav.helse.januar
+import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.mediator.UtgåendeMeldingerObserver
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.UtbetalingsgodkjenningCommand
@@ -80,7 +80,7 @@ internal class SaksbehandlerløsningTest {
         )
     }
 
-    private val observer = object : UtgåendeMeldingerObserver {
+    private val observer = object : CommandContextObserver {
         val hendelser = mutableListOf<String>()
         override fun behov(behov: String, ekstraKontekst: Map<String, Any>, detaljer: Map<String, Any>) {}
 

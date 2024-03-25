@@ -6,7 +6,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.mediator.UtgåendeMeldingerObserver
+import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.meldinger.løsninger.EgenAnsattløsning
 import no.nav.helse.modell.kommando.CommandContext
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -25,7 +25,7 @@ internal class KontrollerEgenAnsattstatusTest {
     private val command = KontrollerEgenAnsattstatus(FNR, dao)
     private lateinit var context: CommandContext
 
-    private val observer = object : UtgåendeMeldingerObserver {
+    private val observer = object : CommandContextObserver {
         val behov = mutableMapOf<String, Map<String, Any>>()
         override fun behov(behov: String, ekstraKontekst: Map<String, Any>, detaljer: Map<String, Any>) {
             this.behov[behov] = detaljer

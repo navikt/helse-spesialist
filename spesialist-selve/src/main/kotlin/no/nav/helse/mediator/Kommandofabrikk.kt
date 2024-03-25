@@ -121,13 +121,13 @@ internal class Kommandofabrikk(
     private val metrikkDao = MetrikkDao(dataSource)
     private val oppgaveMediator: OppgaveMediator by lazy { oppgaveMediator() }
     private var commandContext: CommandContext? = null
-    private val observers: MutableList<UtgåendeMeldingerObserver> = mutableListOf()
+    private val observers: MutableList<CommandContextObserver> = mutableListOf()
 
-    internal fun nyObserver(observer: UtgåendeMeldingerObserver) {
+    internal fun nyObserver(observer: CommandContextObserver) {
         observers.add(observer)
     }
 
-    internal fun avregistrerObserver(observer: UtgåendeMeldingerObserver) {
+    internal fun avregistrerObserver(observer: CommandContextObserver) {
         observers.remove(observer)
     }
 

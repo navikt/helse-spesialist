@@ -6,7 +6,7 @@ import io.mockk.spyk
 import io.mockk.verify
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.mediator.UtgåendeMeldingerObserver
+import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.modell.person.HentPersoninfoløsning
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
@@ -31,7 +31,7 @@ internal class OppdaterPersoninfoCommandTest {
 
     private val personDao = mockk<PersonDao>(relaxed = true)
 
-    private val observer = object : UtgåendeMeldingerObserver {
+    private val observer = object : CommandContextObserver {
         val behov = mutableMapOf<String, Map<String, Any>>()
         override fun behov(behov: String, ekstraKontekst: Map<String, Any>, detaljer: Map<String, Any>) {
             this.behov[behov] = detaljer

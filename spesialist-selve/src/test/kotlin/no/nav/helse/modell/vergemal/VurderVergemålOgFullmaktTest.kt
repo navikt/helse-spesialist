@@ -6,7 +6,7 @@ import io.mockk.verify
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.januar
-import no.nav.helse.mediator.UtgåendeMeldingerObserver
+import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.meldinger.løsninger.Vergemålløsning
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
@@ -53,7 +53,7 @@ class VurderVergemålOgFullmaktTest {
     private val harBeggeFullmatkstyper =
         Vergemål(harVergemål = false, harFremtidsfullmakter = true, harFullmakter = true)
 
-    private val observer = object : UtgåendeMeldingerObserver {
+    private val observer = object : CommandContextObserver {
         val behov = mutableListOf<String>()
         val hendelser = mutableListOf<String>()
         override fun behov(behov: String, ekstraKontekst: Map<String, Any>, detaljer: Map<String, Any>) {

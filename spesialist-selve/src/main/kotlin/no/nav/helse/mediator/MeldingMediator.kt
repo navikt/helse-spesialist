@@ -450,7 +450,9 @@ internal class MeldingMediator(
 
     private fun håndter(melding: Personmelding, commandContext: CommandContext, messageContext: MessageContext) {
         val utgåendeMeldingerMediator = UtgåendeMeldingerMediator()
+        val commandContextTilstandMediator = CommandContextTilstandMediator()
         commandContext.nyObserver(utgåendeMeldingerMediator)
+        commandContext.nyObserver(commandContextTilstandMediator)
         val hendelsenavn = melding::class.simpleName ?: "ukjent hendelse"
         try {
             when (melding) {
@@ -476,6 +478,7 @@ internal class MeldingMediator(
             logg.error("Feil ved behandling av melding $hendelsenavn", e.message, e)
             throw e
         } finally {
+            commandContextTilstandMediator.håndter(melding, messageContext)
             logg.info("Melding $hendelsenavn ferdigbehandlet")
         }
     }

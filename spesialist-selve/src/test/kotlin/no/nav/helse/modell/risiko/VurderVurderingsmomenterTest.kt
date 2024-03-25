@@ -8,7 +8,7 @@ import java.util.UUID
 import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.januar
-import no.nav.helse.mediator.UtgåendeMeldingerObserver
+import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.løsninger.Risikovurderingløsning
@@ -49,7 +49,7 @@ internal class VurderVurderingsmomenterTest {
 
     private lateinit var context: CommandContext
 
-    private val observer = object : UtgåendeMeldingerObserver {
+    private val observer = object : CommandContextObserver {
         val behov = mutableMapOf<String, Map<String, Any>>()
         override fun behov(behov: String, ekstraKontekst: Map<String, Any>, detaljer: Map<String, Any>) {
             this.behov[behov] = detaljer

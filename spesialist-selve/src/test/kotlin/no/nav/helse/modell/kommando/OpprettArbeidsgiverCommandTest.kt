@@ -6,7 +6,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.mediator.UtgåendeMeldingerObserver
+import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.arbeidsgiver.Arbeidsgiverinformasjonløsning
 import no.nav.helse.modell.person.HentPersoninfoløsning
@@ -31,7 +31,7 @@ internal class OpprettArbeidsgiverCommandTest {
     private lateinit var context: CommandContext
     private val command = OpprettArbeidsgiverCommand(listOf(ORGNR), dao)
 
-    private val observer = object : UtgåendeMeldingerObserver {
+    private val observer = object : CommandContextObserver {
         val behov = mutableMapOf<String, Map<String, Any>>()
         override fun behov(behov: String, ekstraKontekst: Map<String, Any>, detaljer: Map<String, Any>) {
             this.behov[behov] = detaljer

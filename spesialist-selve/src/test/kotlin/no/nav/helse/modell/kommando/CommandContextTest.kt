@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
-import no.nav.helse.mediator.UtgåendeMeldingerObserver
+import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.kommando.CommandContext.Companion.convertToUUID
 import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
@@ -27,15 +27,21 @@ internal class CommandContextTest {
 
     private val commandContextDao = mockk<CommandContextDao>(relaxed = true)
 
-    private val observer = object : UtgåendeMeldingerObserver {
+    private val observer = object : CommandContextObserver {
         val behov = mutableMapOf<String, Map<String, Any>>()
         val hendelser = mutableListOf<String>()
+        val utgåendeTilstandEndringer = mutableListOf<String>()
+
         override fun behov(behov: String, ekstraKontekst: Map<String, Any>, detaljer: Map<String, Any>) {
             this.behov[behov] = detaljer
         }
 
         override fun hendelse(hendelse: String) {
             this.hendelser.add(hendelse)
+        }
+
+        override fun tilstandEndring(hendelse: String) {
+            this.utgåendeTilstandEndringer.add(hendelse)
         }
     }
 
@@ -126,7 +132,7 @@ internal class CommandContextTest {
         TestCommand(executeAction = { this.ferdigstill(context)}).apply {
             context.utfør(commandContextDao, this.id, this)
         }
-        val result = observer.hendelser
+        val result = observer.utgåendeTilstandEndringer
         assertTrue(result.isNotEmpty())
         assertTrue(result.first().contains("kommandokjede_ferdigstilt"))
     }
@@ -138,7 +144,7 @@ internal class CommandContextTest {
         }).apply {
             context.utfør(commandContextDao, this.id, this)
         }
-        val result = observer.hendelser
+        val result = observer.utgåendeTilstandEndringer
         assertTrue(result.isNotEmpty())
         assertTrue(result.first().contains("kommandokjede_suspendert"))
     }
@@ -152,9 +158,20 @@ internal class CommandContextTest {
             context.utfør(commandContextDao, this.id, this)
         }
         context.avbryt(commandContextDao, UUID.randomUUID())
-        val result = observer.hendelser
+        val result = observer.utgåendeTilstandEndringer
         assertTrue(result.isNotEmpty())
         assertTrue(result.last().contains("kommandokjede_avbrutt"))
+    }
+
+    @Test
+    fun `lager kommandokjede_feilet hendelse når kommandokjeden feiler`() {
+        every { commandContextDao.avbryt(any(), any()) } returns listOf(Pair(context.id(), HENDELSE))
+        TestCommand(executeAction = { throw Exception() }).apply {
+            assertThrows<Exception> { context.utfør(commandContextDao, this.id, this) }
+        }
+        val result = observer.utgåendeTilstandEndringer
+        assertTrue(result.isNotEmpty())
+        assertTrue(result.last().contains("kommandokjede_feilet"))
     }
 
     @Test

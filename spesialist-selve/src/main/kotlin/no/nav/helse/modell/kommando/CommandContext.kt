@@ -2,6 +2,7 @@ package no.nav.helse.modell.kommando
 
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.UtgåendeMeldingerObserver
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -11,9 +12,9 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
     private val data = mutableListOf<Any>()
     private val sti: MutableList<Int> = sti.toMutableList()
     private var ferdigstilt = false
-    private val observers = mutableSetOf<UtgåendeMeldingerObserver>()
+    private val observers = mutableSetOf<CommandContextObserver>()
 
-    internal fun nyObserver(observer: UtgåendeMeldingerObserver) {
+    internal fun nyObserver(observer: CommandContextObserver) {
         observers.add(observer)
     }
 
@@ -34,6 +35,10 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
      */
     internal fun publiser(melding: String) {
         observers.forEach { it.hendelse(melding) }
+    }
+
+    private fun publiserTilstandEndring(melding: String) {
+        observers.forEach { it.tilstandEndring(melding) }
     }
 
     internal fun add(data: Any) {
@@ -62,7 +67,7 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
     internal fun avbryt(commandContextDao: CommandContextDao, vedtaksperiodeId: UUID) {
         val avbrutteKommandokjeder = commandContextDao.avbryt(vedtaksperiodeId, id)
         avbrutteKommandokjeder.forEach {
-            publiser(JsonMessage.newMessage("kommandokjede_avbrutt", mutableMapOf(
+            publiserTilstandEndring(JsonMessage.newMessage("kommandokjede_avbrutt", mutableMapOf(
                 "commandContextId" to it.first,
                 "meldingId" to it.second,
             )).toJson())
@@ -85,14 +90,14 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
         }
         utfør(command).also {
             if (ferdigstilt || it) commandContextDao.ferdig(hendelseId, id).also {
-                publiser(JsonMessage.newMessage("kommandokjede_ferdigstilt", mutableMapOf(
+                publiserTilstandEndring(JsonMessage.newMessage("kommandokjede_ferdigstilt", mutableMapOf(
                     "commandContextId" to id,
                     "meldingId" to hendelseId,
                     "command" to command.name,
                 )).toJson())
             }
             else commandContextDao.suspendert(hendelseId, id, newHash, sti).also {
-                publiser(JsonMessage.newMessage("kommandokjede_suspendert", mutableMapOf(
+                publiserTilstandEndring(JsonMessage.newMessage("kommandokjede_suspendert", mutableMapOf(
                     "commandContextId" to id,
                     "meldingId" to hendelseId,
                     "command" to command.name,
@@ -102,7 +107,14 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
         }
     } catch (rootErr: Exception) {
         try {
-            commandContextDao.feil(hendelseId, id)
+            commandContextDao.feil(hendelseId, id).also {
+                publiserTilstandEndring(JsonMessage.newMessage("kommandokjede_feilet", mutableMapOf(
+                    "commandContextId" to id,
+                    "meldingId" to hendelseId,
+                    "command" to command.name,
+                    "sti" to sti
+                )).toJson())
+            }
         } catch (nestedErr: Exception) {
             throw RuntimeException("Feil ved lagring av FEIL-tilstand: $nestedErr", rootErr)
         }

@@ -7,7 +7,7 @@ import io.mockk.verify
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
-import no.nav.helse.mediator.UtgåendeMeldingerObserver
+import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.mediator.meldinger.løsninger.Inntektløsning
 import no.nav.helse.modell.person.PersonDao
@@ -24,7 +24,7 @@ internal class PersisterInntektCommandTest {
     private val personDao = mockk<PersonDao>(relaxed = true)
     private lateinit var context: CommandContext
 
-    private val observer = object : UtgåendeMeldingerObserver {
+    private val observer = object : CommandContextObserver {
         val behov = mutableListOf<String>()
         override fun behov(behov: String, ekstraKontekst: Map<String, Any>, detaljer: Map<String, Any>) {
             this.behov.add(behov)
