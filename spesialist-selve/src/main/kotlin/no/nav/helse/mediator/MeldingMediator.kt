@@ -236,18 +236,6 @@ internal class MeldingMediator(
         kommandofabrikk.avviksvurdering(avviksvurdering)
     }
 
-    fun vedtaksperiodeForkastet(
-        hendelse: VedtaksperiodeForkastet,
-        context: MessageContext,
-    ) {
-        val vedtaksperiodeId = hendelse.vedtaksperiodeId()
-        if (vedtakDao.finnVedtakId(vedtaksperiodeId) == null) {
-            logg.info("ignorerer hendelseId=${hendelse.id} fordi vi ikke kjenner til $vedtaksperiodeId")
-            return
-        }
-        return håndter(hendelse, context)
-    }
-
     fun godkjenningsbehov(
         godkjenningsbehov: Godkjenningsbehov,
         context: MessageContext,
@@ -424,6 +412,7 @@ internal class MeldingMediator(
             throw e
         } finally {
             kommandofabrikk.avregistrerObserver(utgåendeMeldingerMediator)
+            kommandofabrikk.avregistrerObserver(commandContextTilstandMediator)
             commandContextTilstandMediator.publiserTilstandsendringer(melding, messageContext)
         }
     }

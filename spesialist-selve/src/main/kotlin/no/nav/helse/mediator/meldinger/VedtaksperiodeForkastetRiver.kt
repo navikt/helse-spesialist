@@ -45,6 +45,6 @@ internal class VedtaksperiodeForkastetRiver(
             StructuredArguments.keyValue("vedtaksperiodeId", UUID.fromString(packet["vedtaksperiodeId"].asText())),
             StructuredArguments.keyValue("eventId", UUID.fromString(packet["@id"].asText()))
         )
-        mediator.vedtaksperiodeForkastet(VedtaksperiodeForkastet(packet), context)
+        mediator.mottaMelding(VedtaksperiodeForkastet(packet), context)
     }
 }

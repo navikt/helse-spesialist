@@ -35,15 +35,14 @@ internal class VedtaksperiodeForkastetCommandTest {
     private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
     private val context = CommandContext(CONTEXT)
     private val vedtaksperiodeForkastetCommand = VedtaksperiodeForkastetCommand(
-        id = HENDELSE,
-        vedtaksperiodeId = VEDTAKSPERIODE,
         fødselsnummer = FNR,
-        commandContextDao = commandContextDao,
-        oppgaveMediator = oppgaveMediator,
-        snapshotClient = graphQLClient,
-        snapshotDao = snapshotDao,
+        vedtaksperiodeId = VEDTAKSPERIODE,
+        id = HENDELSE,
         personDao = personDao,
-        vedtakDao = vedtakDao
+        commandContextDao = commandContextDao,
+        snapshotDao = snapshotDao,
+        snapshotClient = graphQLClient,
+        oppgaveMediator = oppgaveMediator
     )
 
     @BeforeEach
@@ -60,6 +59,5 @@ internal class VedtaksperiodeForkastetCommandTest {
         assertTrue(vedtaksperiodeForkastetCommand.execute(context))
         verify(exactly = 1) { commandContextDao.avbryt(VEDTAKSPERIODE, CONTEXT) }
         verify(exactly = 1) { snapshotDao.lagre(FNR, snapshot.data!!.person!!) }
-        verify(exactly = 1) { vedtakDao.markerForkastet(VEDTAKSPERIODE, HENDELSE) }
     }
 }

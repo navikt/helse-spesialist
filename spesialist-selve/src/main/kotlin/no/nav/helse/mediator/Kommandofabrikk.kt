@@ -337,7 +337,6 @@ internal class Kommandofabrikk(
             personDao = personDao,
             commandContextDao = commandContextDao,
             snapshotDao = snapshotDao,
-            vedtakDao = vedtakDao,
             snapshotClient = snapshotClient,
             oppgaveMediator = oppgaveMediator
         )
@@ -419,6 +418,10 @@ internal class Kommandofabrikk(
             totrinnsvurderingMediator = totrinnsvurderingMediator,
             json = hendelse.toJson()
         )
+    }
+
+    internal fun iverksettVedtaksperiodeForkastet(melding: VedtaksperiodeForkastet){
+        iverksett(vedtaksperiodeForkastet(melding), melding.id)
     }
 
     private fun nyContext(meldingId: UUID) = CommandContext(UUID.randomUUID()).apply {

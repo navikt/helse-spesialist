@@ -106,7 +106,6 @@ internal class TestPerson {
     val mellomnavn: String? = mellomnavnListe.shuffled().random()
     val etternavn: String = etternavnListe.random()
     val kjønn = Kjønn.entries.toTypedArray().random()
-    val fødselsdato = fødselsdato()
     private val arbeidsgivere = mutableMapOf<Int, TestArbeidsgiver>()
     private val arbeidsgiver1 = nyArbeidsgiver()
     private val arbeidsgiver2 = nyArbeidsgiver()
@@ -1512,6 +1511,9 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected fun assertVedtaksperiodeEksisterer(vedtaksperiodeId: UUID) {
         assertEquals(1, vedtak(vedtaksperiodeId))
     }
+    protected fun assertVedtaksperiodeForkastet(vedtaksperiodeId: UUID) {
+        assertEquals(1, forkastedeVedtak(vedtaksperiodeId))
+    }
 
     protected fun assertVedtaksperiodeEksistererIkke(vedtaksperiodeId: UUID) {
         assertEquals(0, vedtak(vedtaksperiodeId))
@@ -1674,6 +1676,15 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         return sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val query = "SELECT COUNT(*) FROM vedtak WHERE vedtaksperiode_id = ?"
+            requireNotNull(
+                session.run(queryOf(query, vedtaksperiodeId).map { row -> row.int(1) }.asSingle)
+            )
+        }
+    }
+    protected fun forkastedeVedtak(vedtaksperiodeId: UUID): Int {
+        return sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val query = "SELECT COUNT(*) FROM vedtak WHERE vedtaksperiode_id = ? AND forkastet = TRUE"
             requireNotNull(
                 session.run(queryOf(query, vedtaksperiodeId).map { row -> row.int(1) }.asSingle)
             )

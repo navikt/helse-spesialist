@@ -52,6 +52,9 @@ internal class Vedtaksperiode private constructor(
         if (forkastet) return
         gjeldendeGenerasjon.håndterVedtakFattet(meldingId)
     }
+    internal fun vedtaksperiodeForkastet() {
+        forkastet = true
+    }
 
     internal fun nyeVarsler(nyeVarsler: List<Varsel>) {
         val varsler = nyeVarsler.filter { it.erRelevantFor(vedtaksperiodeId) }

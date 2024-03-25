@@ -6,6 +6,7 @@ import no.nav.helse.modell.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeDto
+import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
 import no.nav.helse.modell.vedtaksperiode.vedtak.VedtakFattet
 
 class Person private constructor(
@@ -31,6 +32,11 @@ class Person private constructor(
         vedtaksperioder
             .find { vedtakFattet.erRelevantFor(it.vedtaksperiodeId()) }
             ?.vedtakFattet(vedtakFattet.id)
+    }
+    internal fun vedtaksperiodeForkastet(vedtaksperiodeForkastet: VedtaksperiodeForkastet ) {
+        vedtaksperioder
+            .find { vedtaksperiodeForkastet.erRelevantFor(it.vedtaksperiodeId()) }
+            ?.vedtaksperiodeForkastet()
     }
 
     fun nySpleisBehandling(spleisBehandling: SpleisBehandling) {

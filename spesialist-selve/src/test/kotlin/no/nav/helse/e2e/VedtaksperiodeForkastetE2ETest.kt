@@ -16,4 +16,11 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractE2ETest() {
         håndterVedtaksperiodeForkastet()
         assertSaksbehandleroppgave(oppgavestatus = Ferdigstilt)
     }
+    @Test
+    fun `Markerer perioden som forkastet hvis vi mottar VedtaksperiodeForkastet fra spleis`() {
+        fremTilSaksbehandleroppgave()
+
+        håndterVedtaksperiodeForkastet()
+        assertVedtaksperiodeForkastet(VEDTAKSPERIODE_ID)
+    }
 }
