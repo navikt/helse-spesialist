@@ -10,7 +10,9 @@ import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.håndterNyttVarsel
+import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
+import no.nav.helse.modell.vedtaksperiode.Periode.Companion.til
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -18,6 +20,7 @@ import org.junit.jupiter.api.Test
 class GenerasjonBuilderTest : AbstractDatabaseTest() {
     private val varselRepository = ActualVarselRepository(dataSource)
     private val generasjonRepository = GenerasjonRepository(dataSource)
+    private val generasjonDao = GenerasjonDao(dataSource)
 
     @Test
     fun bygg() {
@@ -25,25 +28,14 @@ class GenerasjonBuilderTest : AbstractDatabaseTest() {
         val vedtaksperiodeId = UUID.randomUUID()
         val varselId = UUID.randomUUID()
         val opprettet = LocalDateTime.now()
-        generasjonRepository.førsteGenerasjonOpprettet(
-            generasjonId,
-            vedtaksperiodeId,
-            UUID.randomUUID(),
-            1.januar,
-            31.januar,
-            1.januar,
-            Generasjon.Ulåst
-        )
+        generasjonDao.opprettFor(generasjonId, vedtaksperiodeId, UUID.randomUUID(), 1.januar, 1.januar til 31.januar, Generasjon.Ulåst)
         varselRepository.varselOpprettet(varselId, vedtaksperiodeId, generasjonId, "SB_EX_1", opprettet)
         val builder = GenerasjonBuilder(vedtaksperiodeId)
         val vedtaksperiode = builder.build(generasjonRepository, varselRepository)
         val forventetVedtaksperiode = Generasjon(generasjonId, vedtaksperiodeId, 1.januar, 31.januar, 1.januar).also {
             it.håndterNyttVarsel(Varsel(varselId, "SB_EX_1", opprettet, vedtaksperiodeId), UUID.randomUUID())
         }
-        assertEquals(
-            forventetVedtaksperiode,
-            vedtaksperiode
-        )
+        assertEquals(forventetVedtaksperiode, vedtaksperiode)
     }
 
     @Test
@@ -61,15 +53,7 @@ class GenerasjonBuilderTest : AbstractDatabaseTest() {
         val generasjonId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
         val varselId = UUID.randomUUID()
-        generasjonRepository.førsteGenerasjonOpprettet(
-            generasjonId,
-            vedtaksperiodeId,
-            UUID.randomUUID(),
-            1.januar,
-            31.januar,
-            1.januar,
-            Generasjon.Ulåst
-        )
+        generasjonDao.opprettFor(generasjonId, vedtaksperiodeId, UUID.randomUUID(), 1.januar, 1.januar til 31.januar, Generasjon.Ulåst)
         val builder = GenerasjonBuilder(vedtaksperiodeId)
         val generasjon = builder.build(generasjonRepository, varselRepository)
         listOf(generasjon).håndterNyttVarsel(

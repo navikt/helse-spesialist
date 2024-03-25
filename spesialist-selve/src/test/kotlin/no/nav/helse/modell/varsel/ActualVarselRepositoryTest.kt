@@ -7,8 +7,10 @@ import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.januar
 import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
-import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Generasjon
+import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
+import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
+import no.nav.helse.modell.vedtaksperiode.Periode
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -20,6 +22,7 @@ internal class ActualVarselRepositoryTest : AbstractDatabaseTest() {
     private val generasjonRepository = GenerasjonRepository(dataSource)
     private val varselRepository = ActualVarselRepository(dataSource)
     private val definisjonDao = DefinisjonDao(dataSource)
+    private val generasjonDao = GenerasjonDao(dataSource)
 
     private lateinit var definisjonId: UUID
     private lateinit var vedtaksperiodeId: UUID
@@ -34,9 +37,8 @@ internal class ActualVarselRepositoryTest : AbstractDatabaseTest() {
         varselRepository.lagreDefinisjon(definisjonDto)
         generasjonId = UUID.randomUUID()
 
-        generasjon = Generasjon(generasjonId, vedtaksperiodeId, 1.januar, 1.januar, 31.januar)
+        generasjon = generasjonDao.opprettFor(generasjonId, vedtaksperiodeId, UUID.randomUUID(), 1.januar, Periode(1.januar, 31.januar), Generasjon.Ulåst)
         generasjon.registrer(generasjonRepository, varselRepository)
-        generasjon.håndterVedtaksperiodeOpprettet(UUID.randomUUID())
     }
 
     @Test

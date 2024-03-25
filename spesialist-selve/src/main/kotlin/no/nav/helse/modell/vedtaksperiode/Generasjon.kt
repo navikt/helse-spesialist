@@ -82,12 +82,6 @@ internal class Generasjon private constructor(
         tilstand.nySpleisBehandling(this, vedtaksperiode, spleisBehandling)
     }
 
-    internal fun håndterVedtaksperiodeOpprettet(hendelseId: UUID) {
-        observers.forEach {
-            it.førsteGenerasjonOpprettet(id, vedtaksperiodeId, hendelseId, periode.fom(), periode.tom(), skjæringstidspunkt, tilstand)
-        }
-    }
-
     internal fun forhindrerAutomatisering(): Boolean = varsler.forhindrerAutomatisering()
 
     internal fun håndter(spleisVedtaksperiode: SpleisVedtaksperiode) {

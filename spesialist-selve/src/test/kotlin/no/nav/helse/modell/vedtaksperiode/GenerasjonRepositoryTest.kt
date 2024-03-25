@@ -5,34 +5,16 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.januar
+import no.nav.helse.modell.vedtaksperiode.Periode.Companion.til
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
 
     private val repository = GenerasjonRepository(dataSource)
-
-    @Test
-    fun `kan opprette første generasjon`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val hendelseId = UUID.randomUUID()
-
-        repository.førsteGenerasjonOpprettet(
-            UUID.randomUUID(),
-            vedtaksperiodeId,
-            hendelseId,
-            1.januar,
-            31.januar,
-            1.januar,
-            Generasjon.Ulåst
-        )
-        
-        assertGenerasjon(vedtaksperiodeId, hendelseId)
-    }
+    private val generasjonDao = GenerasjonDao(dataSource)
 
     @Test
     fun `Exception om vedtaksperioden ikke finnes`() {
@@ -42,43 +24,13 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
     }
 
     @Test
-    fun `kan ikke opprette FØRSTE generasjon når det eksisterer generasjoner fra før av`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val vedtaksperiodeOpprettet1 = UUID.randomUUID()
-        val vedtaksperiodeOpprettet2 = UUID.randomUUID()
-
-        repository.førsteGenerasjonOpprettet(
-            UUID.randomUUID(),
-            vedtaksperiodeId,
-            vedtaksperiodeOpprettet1,
-            1.januar,
-            31.januar,
-            1.januar,
-            Generasjon.Ulåst
-        )
-        repository.førsteGenerasjonOpprettet(
-            UUID.randomUUID(),
-            vedtaksperiodeId,
-            vedtaksperiodeOpprettet2,
-            1.januar,
-            31.januar,
-            1.januar,
-            Generasjon.Ulåst
-        )
-
-        assertGenerasjon(vedtaksperiodeId, vedtaksperiodeOpprettet1)
-        assertIngenGenerasjon(vedtaksperiodeId, vedtaksperiodeOpprettet2)
-    }
-
-    @Test
     fun `kan knytte utbetalingId til generasjon`() {
         val generasjonId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
         val utbetalingId = UUID.randomUUID()
 
-        val generasjon = Generasjon(generasjonId, vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
+        val generasjon = generasjonDao.opprettFor(generasjonId, vedtaksperiodeId, UUID.randomUUID(), 1.januar, 1.januar til 31.januar, Generasjon.Ulåst)
         generasjon.registrer(repository)
-        generasjon.håndterVedtaksperiodeOpprettet(UUID.randomUUID())
         generasjon.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
 
         assertUtbetaling(generasjonId, utbetalingId)
@@ -90,9 +42,8 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         val vedtaksperiodeId = UUID.randomUUID()
         val utbetalingId = UUID.randomUUID()
 
-        val generasjon = Generasjon(generasjonId, vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
+        val generasjon = generasjonDao.opprettFor(generasjonId, vedtaksperiodeId, UUID.randomUUID(), 1.januar, 1.januar til 31.januar, Generasjon.Ulåst)
         generasjon.registrer(repository)
-        generasjon.håndterVedtaksperiodeOpprettet(UUID.randomUUID())
         generasjon.håndterVedtakFattet(UUID.randomUUID())
         generasjon.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
 
@@ -106,9 +57,8 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         val gammel = UUID.randomUUID()
         val ny = UUID.randomUUID()
 
-        val generasjon = Generasjon(generasjonId, vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
+        val generasjon = generasjonDao.opprettFor(generasjonId, vedtaksperiodeId, UUID.randomUUID(), 1.januar, 1.januar til 31.januar, Generasjon.Ulåst)
         generasjon.registrer(repository)
-        generasjon.håndterVedtaksperiodeOpprettet(UUID.randomUUID())
         generasjon.håndterNyUtbetaling(UUID.randomUUID(), gammel)
         generasjon.håndterVedtakFattet(UUID.randomUUID())
         generasjon.håndterNyUtbetaling(UUID.randomUUID(), ny)
@@ -121,10 +71,9 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         val generasjonId = UUID.randomUUID()
         val utbetalingId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
+        val generasjon = generasjonDao.opprettFor(generasjonId, vedtaksperiodeId, UUID.randomUUID(), 1.januar, 1.januar til 31.januar, Generasjon.Ulåst)
 
-        val generasjon = Generasjon(generasjonId, vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
         generasjon.registrer(repository)
-        generasjon.håndterVedtaksperiodeOpprettet(UUID.randomUUID())
         generasjon.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
         assertEquals(1, repository.finnVedtaksperiodeIderFor(utbetalingId).size)
 
@@ -141,30 +90,6 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         tom = 31.januar,
         skjæringstidspunkt = 1.januar
     )
-
-    private fun assertGenerasjon(vedtaksperiodeId: UUID, hendelseId: UUID) {
-        val generasjon = sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query = "SELECT id FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ? AND opprettet_av_hendelse = ?;"
-
-            session.run(queryOf(query, vedtaksperiodeId, hendelseId).map {
-                it.long(1)
-            }.asSingle)
-        }
-        assertNotNull(generasjon)
-    }
-
-    private fun assertIngenGenerasjon(vedtaksperiodeId: UUID, hendelseId: UUID) {
-        val generasjon = sessionOf(dataSource).use {session ->
-            @Language("PostgreSQL")
-            val query = "SELECT id FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ? AND opprettet_av_hendelse = ?;"
-
-            session.run(queryOf(query, vedtaksperiodeId, hendelseId).map {
-                it.long(1)
-            }.asSingle)
-        }
-        assertNull(generasjon)
-    }
 
     private fun assertUtbetaling(generasjonId: UUID, forventetUtbetalingId: UUID?) {
         val utbetalingId = sessionOf(dataSource).use { session ->

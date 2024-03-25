@@ -93,27 +93,6 @@ internal class GenerasjonRepository(private val dataSource: DataSource): IVedtak
             ?: throw IllegalStateException("Forventer å finne skjæringstidspunkt for vedtaksperiodeId=$vedtaksperiodeId")
     }
 
-    override fun førsteGenerasjonOpprettet(
-        generasjonId: UUID,
-        vedtaksperiodeId: UUID,
-        hendelseId: UUID,
-        fom: LocalDate,
-        tom: LocalDate,
-        skjæringstidspunkt: LocalDate,
-        tilstand: Generasjon.Tilstand
-    ) {
-        if (dao.harGenerasjonFor(vedtaksperiodeId)) {
-            return sikkerlogg.info(
-                "Kan ikke opprette første generasjon for {} når det eksisterer generasjoner fra før av",
-                kv("vedtaksperiodeId", vedtaksperiodeId)
-            )
-        }
-        dao.opprettFor(generasjonId, vedtaksperiodeId, hendelseId, skjæringstidspunkt, Periode(fom, tom), tilstand)
-            .also {
-                it.loggFørsteOpprettet(vedtaksperiodeId)
-            }
-    }
-
     override fun generasjonOpprettet(
         generasjonId: UUID,
         vedtaksperiodeId: UUID,
@@ -160,13 +139,6 @@ internal class GenerasjonRepository(private val dataSource: DataSource): IVedtak
 
     private companion object {
         private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
-        private fun Generasjon.loggFørsteOpprettet(vedtaksperiodeId: UUID) {
-            sikkerlogg.info(
-                "Oppretter første generasjon {} for {}",
-                kv("generasjon", this),
-                kv("vedtaksperiodeId", vedtaksperiodeId),
-            )
-        }
 
         private fun Generasjon.loggNesteOpprettet(vedtaksperiodeId: UUID) {
             sikkerlogg.info(

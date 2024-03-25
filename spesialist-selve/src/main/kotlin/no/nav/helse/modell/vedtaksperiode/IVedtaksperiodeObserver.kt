@@ -18,15 +18,6 @@ internal interface IVedtaksperiodeObserver: PersonObserver {
     ) {}
     fun nyUtbetaling(generasjonId: UUID, utbetalingId: UUID) {}
     fun utbetalingForkastet(generasjonId: UUID, utbetalingId: UUID) {}
-    fun førsteGenerasjonOpprettet(
-        generasjonId: UUID,
-        vedtaksperiodeId: UUID,
-        hendelseId: UUID,
-        fom: LocalDate,
-        tom: LocalDate,
-        skjæringstidspunkt: LocalDate,
-        tilstand: Generasjon.Tilstand
-    ) {}
     fun varselOpprettet(varselId: UUID, vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, opprettet: LocalDateTime) {}
     fun varselReaktivert(varselId: UUID, varselkode: String, generasjonId: UUID, vedtaksperiodeId: UUID) {}
     fun varselDeaktivert(varselId: UUID, varselkode: String, generasjonId: UUID, vedtaksperiodeId: UUID) {}

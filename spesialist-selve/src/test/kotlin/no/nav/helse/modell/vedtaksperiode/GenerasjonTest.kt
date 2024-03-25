@@ -21,6 +21,7 @@ import no.nav.helse.modell.varsel.Varselkode.SB_EX_1
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjon
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverSkjønnsfastsettelse
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverTotrinnsvurdering
+import no.nav.helse.modell.vedtaksperiode.Periode.Companion.til
 import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetUtenVedtak
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -35,6 +36,7 @@ import org.junit.jupiter.api.Test
 internal class GenerasjonTest: AbstractDatabaseTest() {
     private val varselRepository = ActualVarselRepository(dataSource)
     private val generasjonRepository = GenerasjonRepository(dataSource)
+    private val generasjonDao = GenerasjonDao(dataSource)
     private lateinit var generasjonId: UUID
     private lateinit var observer: GenerasjonTestObserver
 
@@ -72,8 +74,6 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     fun `generasjon forhindrer automatisering når den har vurdert - ikke godkjente - varsler`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon = generasjon(vedtaksperiodeId = vedtaksperiodeId)
-        generasjon.registrer(generasjonRepository, varselRepository)
-        generasjon.håndterVedtaksperiodeOpprettet(UUID.randomUUID())
         generasjon.håndterNyttVarsel(
             Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId, VURDERT),
             UUID.randomUUID()
@@ -473,9 +473,8 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
 
     private fun nyGenerasjon(id: UUID = UUID.randomUUID(), vedtaksperiodeId: UUID = UUID.randomUUID()): Generasjon {
         generasjonId = id
-        val generasjon = Generasjon(id, vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
+        val generasjon = generasjonDao.opprettFor(generasjonId, vedtaksperiodeId, UUID.randomUUID(), 1.januar, 1.januar til 31.januar, Generasjon.Ulåst)
         generasjon.registrer(generasjonRepository)
-        generasjon.håndterVedtaksperiodeOpprettet(UUID.randomUUID())
         return generasjon
     }
 
