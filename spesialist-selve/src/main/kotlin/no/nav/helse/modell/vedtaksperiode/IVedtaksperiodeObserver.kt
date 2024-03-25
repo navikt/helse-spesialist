@@ -7,7 +7,6 @@ import no.nav.helse.modell.person.PersonObserver
 
 internal interface IVedtaksperiodeObserver: PersonObserver {
 
-    fun tidslinjeOppdatert(generasjonId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate) {}
     fun generasjonOpprettet(
         generasjonId: UUID,
         vedtaksperiodeId: UUID,

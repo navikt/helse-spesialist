@@ -114,10 +114,6 @@ internal class GenerasjonRepository(private val dataSource: DataSource): IVedtak
             }
     }
 
-    override fun tidslinjeOppdatert(generasjonId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate) {
-        dao.oppdaterSykefraværstilfelle(generasjonId, skjæringstidspunkt, Periode(fom, tom))
-    }
-
     override fun generasjonOpprettet(
         generasjonId: UUID,
         vedtaksperiodeId: UUID,

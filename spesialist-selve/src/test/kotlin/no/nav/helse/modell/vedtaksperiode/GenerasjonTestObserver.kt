@@ -5,14 +5,8 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.modell.vedtaksperiode.vedtak.Sykepengevedtak
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
 
 internal class GenerasjonTestObserver: IVedtaksperiodeObserver {
-    internal class Tidslinjeendring(
-        val fom: LocalDate,
-        val tom: LocalDate,
-        val skjæringstidspunkt: LocalDate
-    )
 
     internal class Opprettelse(
         val generasjonId: UUID,
@@ -23,10 +17,9 @@ internal class GenerasjonTestObserver: IVedtaksperiodeObserver {
         val skjæringstidspunkt: LocalDate?
     )
 
-    val tilstandsendringer = mutableMapOf<UUID, MutableList<Pair<Generasjon.Tilstand, Generasjon.Tilstand>>>()
+    private val tilstandsendringer = mutableMapOf<UUID, MutableList<Pair<Generasjon.Tilstand, Generasjon.Tilstand>>>()
     val utbetalingerPåGenerasjoner = mutableMapOf<UUID, UUID?>()
     val opprettedeGenerasjoner = mutableMapOf<UUID, Opprettelse>()
-    val oppdaterteGenerasjoner = mutableMapOf<UUID, Tidslinjeendring>()
     val opprettedeVarsler = mutableMapOf<UUID, MutableList<String>>()
     val vedtakFattet = mutableListOf<Sykepengevedtak>()
 
@@ -53,15 +46,6 @@ internal class GenerasjonTestObserver: IVedtaksperiodeObserver {
     ) {
         opprettedeGenerasjoner[generasjonId] =
             Opprettelse(generasjonId, vedtaksperiodeId, hendelseId, fom, tom, skjæringstidspunkt)
-    }
-
-    override fun tidslinjeOppdatert(
-        generasjonId: UUID,
-        fom: LocalDate,
-        tom: LocalDate,
-        skjæringstidspunkt: LocalDate
-    ) {
-        oppdaterteGenerasjoner[generasjonId] = Tidslinjeendring(fom, tom, skjæringstidspunkt)
     }
 
     override fun tilstandEndret(
@@ -100,54 +84,6 @@ internal class GenerasjonTestObserver: IVedtaksperiodeObserver {
         val (gammel, ny) = tilstandsendringer[generasjonId]!![index]
         assertEquals(forventetGammel, gammel)
         assertEquals(forventetNy, ny)
-    }
-
-    fun assertTidslinjeendring(
-        generasjonId: UUID,
-        forventetFom: LocalDate,
-        forventetTom: LocalDate,
-        forventetSkjæringstidspunkt: LocalDate
-    ) {
-        val tidslinjeendring = oppdaterteGenerasjoner[generasjonId]
-        assertEquals(forventetFom, tidslinjeendring?.fom)
-        assertEquals(forventetTom, tidslinjeendring?.tom)
-        assertEquals(forventetSkjæringstidspunkt, tidslinjeendring?.skjæringstidspunkt)
-    }
-
-    fun assertOpprettelse(
-        forventetGenerasjonId: UUID,
-        forventetVedtaksperiodeId: UUID,
-        forventetHendelseId: UUID,
-        forventetFom: LocalDate,
-        forventetTom: LocalDate,
-        forventetSkjæringstidspunkt: LocalDate
-    ) {
-        val opprettelse = opprettedeGenerasjoner[forventetGenerasjonId]
-        assertNotNull(opprettelse)
-        requireNotNull(opprettelse)
-        assertEquals(forventetGenerasjonId, opprettelse.generasjonId)
-        assertEquals(forventetVedtaksperiodeId, opprettelse.vedtaksperiodeId)
-        assertEquals(forventetHendelseId, opprettelse.hendelseId)
-        assertEquals(forventetFom, opprettelse.fom)
-        assertEquals(forventetTom, opprettelse.tom)
-        assertEquals(forventetSkjæringstidspunkt, opprettelse.skjæringstidspunkt)
-    }
-
-    fun assertOpprettelse(
-        forventetVedtaksperiodeId: UUID,
-        forventetHendelseId: UUID,
-        forventetFom: LocalDate,
-        forventetTom: LocalDate,
-        forventetSkjæringstidspunkt: LocalDate
-    ) {
-        val opprettelser = opprettedeGenerasjoner.values.filter { it.vedtaksperiodeId == forventetVedtaksperiodeId }
-        assertEquals(1, opprettelser.size)
-        val opprettelse = opprettelser[0]
-        assertEquals(forventetVedtaksperiodeId, opprettelse.vedtaksperiodeId)
-        assertEquals(forventetHendelseId, opprettelse.hendelseId)
-        assertEquals(forventetFom, opprettelse.fom)
-        assertEquals(forventetTom, opprettelse.tom)
-        assertEquals(forventetSkjæringstidspunkt, opprettelse.skjæringstidspunkt)
     }
 
     fun assertGjeldendeTilstand(generasjonId: UUID, forventetTilstand: Generasjon.Tilstand) {
