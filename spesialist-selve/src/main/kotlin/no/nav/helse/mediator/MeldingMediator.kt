@@ -3,7 +3,6 @@ package no.nav.helse.mediator
 import SøknadSendtArbeidsledigRiver
 import java.util.UUID
 import javax.sql.DataSource
-import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.MetrikkRiver
 import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
@@ -50,7 +49,6 @@ import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.avviksvurdering.AvviksvurderingDto
 import no.nav.helse.modell.dokument.DokumentDao
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
@@ -94,9 +92,7 @@ internal class MeldingMediator(
     private val vedtakDao: VedtakDao = VedtakDao(dataSource),
     private val personDao: PersonDao = PersonDao(dataSource),
     private val commandContextDao: CommandContextDao = CommandContextDao(dataSource),
-    private val arbeidsgiverDao: ArbeidsgiverDao = ArbeidsgiverDao(dataSource),
     private val meldingDao: MeldingDao = MeldingDao(dataSource),
-    private val feilendeMeldingerDao: FeilendeMeldingerDao = FeilendeMeldingerDao(dataSource),
     private val godkjenningMediator: GodkjenningMediator,
     private val kommandofabrikk: Kommandofabrikk,
     private val dokumentDao: DokumentDao = DokumentDao(dataSource),
@@ -270,7 +266,6 @@ internal class MeldingMediator(
 
         val utbetalingId = godkjenningsbehov.utbetalingId
         val vedtaksperiodeId = godkjenningsbehov.vedtaksperiodeId()
-        val skjæringstidspunkt = godkjenningsbehov.skjæringstidspunkt
         val id = godkjenningsbehov.id
         if (utbetalingDao.erUtbetalingForkastet(utbetalingId)) {
             sikkerlogg.info("Ignorerer godkjenningsbehov med id=$id for utbetalingId=$utbetalingId fordi utbetalingen er forkastet")
@@ -280,40 +275,7 @@ internal class MeldingMediator(
             sikkerlogg.info("vedtaksperiodeId=$vedtaksperiodeId med utbetalingId=$utbetalingId har gyldig oppgave eller er automatisk godkjent. Ignorerer godkjenningsbehov med id=$id")
             return
         }
-        if (generasjonRepository.finnVedtaksperiodeIderFor(godkjenningsbehov.fødselsnummer(), skjæringstidspunkt).isEmpty()) {
-            sikkerlogg.error("""
-                vedtaksperiodeId=$vedtaksperiodeId med utbetalingId=$utbetalingId, periodeFom=${godkjenningsbehov.periodeFom}, periodeTom=${godkjenningsbehov.periodeTom} 
-                og skjæringstidspunkt=$skjæringstidspunkt er i et sykefraværstilfelle uten generasjoner lagret. 
-                Ignorerer godkjenningsbehov med id=$id""".trimIndent()
-            )
-            return
-        }
         håndter(godkjenningsbehov, context)
-    }
-
-    fun utbetalingEndret(
-        utbetalingEndret: UtbetalingEndret,
-        eventName: String,
-        context: MessageContext,
-    ) {
-        val organisasjonsnummer = utbetalingEndret.organisasjonsnummer
-        val id = utbetalingEndret.id
-        if (arbeidsgiverDao.findArbeidsgiverByOrgnummer(organisasjonsnummer) == null) {
-            logg.warn(
-                "Fant ikke arbeidsgiver med {}, se sikkerlogg for mer informasjon",
-                keyValue("hendelseId", id)
-            )
-            sikkerlogg.warn(
-                "Forstår ikke utbetaling_endret: fant ikke arbeidsgiver med {}, {}, {}, {}. Meldingen er lagret i feilende_meldinger",
-                keyValue("hendelseId", id),
-                keyValue("fødselsnummer", utbetalingEndret.fødselsnummer()),
-                keyValue("organisasjonsnummer", organisasjonsnummer),
-                keyValue("utbetalingId", utbetalingEndret.utbetalingId)
-            )
-            feilendeMeldingerDao.lagre(id, eventName, utbetalingEndret.toJson())
-            return
-        }
-        håndter(utbetalingEndret.fødselsnummer(), utbetalingEndret, context)
     }
 
     fun oppdaterPersonsnapshot(hendelse: OppdaterPersonsnapshot, context: MessageContext) {

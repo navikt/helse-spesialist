@@ -22,13 +22,13 @@ internal class UtbetalingEndretRiverTest {
     @Test
     fun `Leser inn utbetaling_endret-event`() {
         testRapid.sendTestMessage(event())
-        verify(exactly = 1) { mediator.utbetalingEndret(any<UtbetalingEndret>(), any(), any()) }
+        verify(exactly = 1) { mediator.håndter(any(), any<UtbetalingEndret>(), any()) }
     }
 
     @Test
     fun `Feiler dersom vi ikke forstår utbetaling-status`() {
         testRapid.sendTestMessage(event("Noe rart med sukker på"))
-        verify(exactly = 0) { mediator.utbetalingEndret(any(), any(), any()) }
+        verify(exactly = 0) { mediator.håndter(any(), any(), any()) }
     }
 
     @Language("JSON")

@@ -47,18 +47,6 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
     }
 
     @Test
-    fun `utbetaling endret uten at vi kjenner arbeidsgiver`() {
-        val ET_ANNET_ORGNR = "2"
-
-        håndterSøknad()
-        spleisOppretterNyBehandling()
-        håndterUtbetalingOpprettet(organisasjonsnummer = ET_ANNET_ORGNR)
-        val utbetalingMeldingId = sisteMeldingId
-        assertUtbetalinger(UTBETALING_ID, 0)
-        assertFeilendeMeldinger(1, utbetalingMeldingId)
-    }
-
-    @Test
     fun `lagrer utbetaling etter utbetaling_endret når utbetalingen har vært til godkjenning og vi kjenner arbeidsgiver`() {
         val utbetalingId = godkjenningsbehovTestdata.utbetalingId
         fremTilSaksbehandleroppgave()

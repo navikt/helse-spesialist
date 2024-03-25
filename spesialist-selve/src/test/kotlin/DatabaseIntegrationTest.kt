@@ -18,7 +18,6 @@ import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.januar
-import no.nav.helse.mediator.FeilendeMeldingerDao
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.MeldingDao
@@ -148,7 +147,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val opptegnelseDao = OpptegnelseDao(dataSource)
     internal val abonnementDao = AbonnementDao(dataSource)
     internal val utbetalingDao = UtbetalingDao(dataSource)
-    internal val feilendeMeldingerDao = FeilendeMeldingerDao(dataSource)
     internal val behandlingsstatistikkDao = BehandlingsstatistikkDao(dataSource)
     internal val vergemålDao = VergemålDao(dataSource)
     internal val generasjonDao = GenerasjonDao(dataSource)

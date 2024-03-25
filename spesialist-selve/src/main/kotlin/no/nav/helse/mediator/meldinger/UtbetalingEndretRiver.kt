@@ -65,6 +65,6 @@ internal class UtbetalingEndretRiver(
             keyValue("utbetalingId", utbetalingId),
             keyValue("gjeldendeStatus", gjeldendeStatus)
         )
-        mediator.utbetalingEndret(UtbetalingEndret(packet), packet["@event_name"].asText(), context)
+        mediator.håndter(fødselsnummer, UtbetalingEndret(packet), context)
     }
 }
