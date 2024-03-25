@@ -38,6 +38,6 @@ internal class VedtakFattetRiver(
         if (packet["@id"].asText() == "4e368bd3-035d-4545-acaf-ce9a8a845b51" || packet["@id"].asText() == "20559222-145d-4516-8f67-433a0dd531a1") return
         sikkerlogg.info("Mottok melding vedtak_fattet, {}", kv("hendelseId", UUID.fromString(packet["@id"].asText())))
 
-        mediator.mottaMelding(VedtakFattet(packet))
+        mediator.mottaMelding(VedtakFattet(packet), context)
     }
 }

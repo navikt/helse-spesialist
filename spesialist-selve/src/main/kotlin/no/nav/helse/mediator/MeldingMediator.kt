@@ -366,7 +366,7 @@ internal class MeldingMediator(
         opprett(commandContextDao, hendelse.id)
     }
 
-    internal fun mottaMelding(melding: Personmelding) {
+    internal fun mottaMelding(melding: Personmelding, messageContext: MessageContext) {
         val meldingnavn = requireNotNull(melding::class.simpleName)
         withMDC(
             mapOf(
@@ -376,8 +376,9 @@ internal class MeldingMediator(
         ) {
             logg.info("Melding $meldingnavn mottatt")
             sikkerlogg.info("Melding $meldingnavn mottatt:\n${melding.toJson()}")
-
+            val utgåendeMeldingerMediator = UtgåendeMeldingerMediator()
             try {
+                kommandofabrikk.nyObserver(utgåendeMeldingerMediator)
                 meldingDao.lagre(melding)
                 personRepository.brukPersonHvisFinnes(melding.fødselsnummer()) {
                     logg.info("Personen finnes i databasen, behandler melding $meldingnavn")
@@ -386,10 +387,12 @@ internal class MeldingMediator(
                     melding.behandle(this, kommandofabrikk)
                 }
                 if (melding is VedtakFattet) melding.doFinally(vedtakDao) // Midlertidig frem til spesialsak ikke er en ting lenger
+                utgåendeMeldingerMediator.publiserOppsamledeMeldinger(melding, messageContext)
             } catch (e: Exception) {
                 logg.error("Feil ved behandling av melding $meldingnavn", e.message, e)
                 throw e
             } finally {
+                kommandofabrikk.avregistrerObserver(utgåendeMeldingerMediator)
                 logg.info("Melding $meldingnavn lest")
                 sikkerlogg.info("Melding $meldingnavn lest")
             }
@@ -443,7 +446,7 @@ internal class MeldingMediator(
                 is Saksbehandlerløsning -> iverksett(kommandofabrikk.utbetalingsgodkjenning(melding), melding.id, commandContext)
                 else -> throw IllegalArgumentException("Personhendelse må håndteres")
             }
-            utgåendeMeldingerMediator.håndter(melding, messageContext)
+            utgåendeMeldingerMediator.publiserOppsamledeMeldinger(melding, messageContext)
         } catch (e: Exception) {
             logg.error("Feil ved behandling av melding $hendelsenavn", e.message, e)
             throw e

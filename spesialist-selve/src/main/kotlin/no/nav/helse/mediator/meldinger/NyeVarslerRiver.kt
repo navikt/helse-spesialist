@@ -54,6 +54,6 @@ internal class NyeVarslerRiver(
             keyValue("hendelse", packet.toJson())
         )
 
-        mediator.mottaMelding(NyeVarsler(packet))
+        mediator.mottaMelding(NyeVarsler(packet), context)
     }
 }

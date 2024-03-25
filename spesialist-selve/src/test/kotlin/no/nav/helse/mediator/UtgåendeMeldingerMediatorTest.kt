@@ -42,7 +42,7 @@ internal class UtgåendeMeldingerMediatorTest {
             "param 2" to 2
         )
         testContext.behov("type 1", params)
-        utgåendeMeldingerMediator.håndter(testmelding, testRapid)
+        utgåendeMeldingerMediator.publiserOppsamledeMeldinger(testmelding, testRapid)
         assertEquals(listOf("type 1"), testRapid.inspektør.field(0, "@behov").map(JsonNode::asText))
         assertEquals(contextId.toString(), testRapid.inspektør.field(0, "contextId").asText())
         assertEquals(hendelseId.toString(), testRapid.inspektør.field(0, "hendelseId").asText())
@@ -58,7 +58,7 @@ internal class UtgåendeMeldingerMediatorTest {
         val melding2 = """{ "a_key": "with_a_value" }"""
         testContext.publiser(melding1)
         testContext.publiser(melding2)
-        utgåendeMeldingerMediator.håndter(testmelding, testRapid)
+        utgåendeMeldingerMediator.publiserOppsamledeMeldinger(testmelding, testRapid)
         assertEquals(2, testRapid.inspektør.size)
         assertEquals(objectMapper.readTree(melding1), testRapid.inspektør.message(0))
         assertEquals(objectMapper.readTree(melding2), testRapid.inspektør.message(1))
@@ -67,7 +67,7 @@ internal class UtgåendeMeldingerMediatorTest {
     @Test
     fun standardfelter() {
         testContext.behov("testbehov")
-        utgåendeMeldingerMediator.håndter(testmelding, testRapid)
+        utgåendeMeldingerMediator.publiserOppsamledeMeldinger(testmelding, testRapid)
         assertEquals("behov", testRapid.inspektør.field(0, "@event_name").asText())
         assertEquals(FNR, testRapid.inspektør.field(0, "fødselsnummer").asText())
         assertDoesNotThrow { UUID.fromString(testRapid.inspektør.field(0, "@id").asText()) }

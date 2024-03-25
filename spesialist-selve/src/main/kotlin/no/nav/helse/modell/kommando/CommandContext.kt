@@ -17,6 +17,10 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
         observers.add(observer)
     }
 
+    internal fun avregistrerObserver(observer: UtgåendeMeldingerObserver) {
+        observers.remove(observer)
+    }
+
     internal fun behov(behovtype: String, params: Map<String, Any> = emptyMap()) {
         observers.forEach {
             it.behov(behovtype, mapOf("contextId" to id), params)

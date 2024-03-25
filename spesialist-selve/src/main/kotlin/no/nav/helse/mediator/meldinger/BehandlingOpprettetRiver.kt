@@ -30,6 +30,6 @@ internal class BehandlingOpprettetRiver(
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        mediator.mottaMelding(BehandlingOpprettet(packet))
+        mediator.mottaMelding(BehandlingOpprettet(packet), context)
     }
 }

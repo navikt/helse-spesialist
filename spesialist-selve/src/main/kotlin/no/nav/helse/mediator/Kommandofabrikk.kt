@@ -121,6 +121,15 @@ internal class Kommandofabrikk(
     private val metrikkDao = MetrikkDao(dataSource)
     private val oppgaveMediator: OppgaveMediator by lazy { oppgaveMediator() }
     private var commandContext: CommandContext? = null
+    private val observers: MutableList<UtgåendeMeldingerObserver> = mutableListOf()
+
+    internal fun nyObserver(observer: UtgåendeMeldingerObserver) {
+        observers.add(observer)
+    }
+
+    internal fun avregistrerObserver(observer: UtgåendeMeldingerObserver) {
+        observers.remove(observer)
+    }
 
     internal fun settEksisterendeContext(commandContext: CommandContext) {
         this.commandContext = commandContext
@@ -418,6 +427,7 @@ internal class Kommandofabrikk(
 
     private fun iverksett(command: Command, meldingId: UUID) {
         val commandContext = this.commandContext ?: nyContext(meldingId)
+        observers.forEach{commandContext.nyObserver(it)}
         val contextId = commandContext.id()
         try {
             if (commandContext.utfør(commandContextDao, meldingId, command)) {
@@ -428,6 +438,8 @@ internal class Kommandofabrikk(
         } catch (err: Exception) {
             command.undo(commandContext)
             throw err
+        } finally {
+            observers.forEach{commandContext.avregistrerObserver(it)}
         }
     }
 

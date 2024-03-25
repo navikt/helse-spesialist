@@ -24,15 +24,15 @@ internal class UtgåendeMeldingerMediator: UtgåendeMeldingerObserver {
         utgåendeHendelser.add(hendelse)
     }
 
-    internal fun håndter(hendelse: Personmelding, messageContext: MessageContext) {
-        publiserMeldinger(hendelse, messageContext)
+    internal fun publiserOppsamledeMeldinger(hendelse: Personmelding, messageContext: MessageContext) {
+        publiserHendelser(hendelse, messageContext)
         publiserBehov(hendelse, messageContext)
         utgåendeBehov.clear()
         utgåendeHendelser.clear()
         ekstraKontekst.clear()
     }
 
-    private fun publiserMeldinger(hendelse: Personmelding, messageContext: MessageContext) {
+    private fun publiserHendelser(hendelse: Personmelding, messageContext: MessageContext) {
         utgåendeHendelser.forEach { utgåendeHendelse ->
             logg.info("Publiserer hendelse i forbindelse med ${hendelse.javaClass.simpleName}")
             sikkerlogg.info("Publiserer hendelse i forbindelse med ${hendelse.javaClass.simpleName}\n{}", utgåendeHendelse)
