@@ -397,28 +397,6 @@ class GenerasjonDao(private val dataSource: DataSource) {
         }
     }
 
-    internal fun oppdaterSykefraværstilfelle(id: UUID, skjæringstidspunkt: LocalDate, periode: Periode) {
-        @Language("PostgreSQL")
-        val query = """
-            UPDATE selve_vedtaksperiode_generasjon 
-            SET skjæringstidspunkt = :skjaeringstidspunkt, fom = :fom, tom = :tom 
-            WHERE unik_id = :unik_id
-            """
-
-        return sessionOf(dataSource).use { session ->
-            session.run(
-                queryOf(
-                    query, mapOf(
-                        "unik_id" to id,
-                        "skjaeringstidspunkt" to skjæringstidspunkt,
-                        "fom" to periode.fom(),
-                        "tom" to periode.tom(),
-                    )
-                ).asUpdate
-            )
-        }
-    }
-
     private fun toGenerasjon(row: Row): Generasjon {
         return Generasjon.fraLagring(
             row.uuid("unik_id"),
