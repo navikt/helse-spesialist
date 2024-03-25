@@ -18,6 +18,7 @@ import no.nav.helse.mediator.meldinger.MidnattRiver
 import no.nav.helse.mediator.meldinger.NyeVarslerRiver
 import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshotRiver
 import no.nav.helse.mediator.meldinger.OverstyringIgangsattRiver
+import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.meldinger.PersonmeldingOld
 import no.nav.helse.mediator.meldinger.SøknadSendtRiver
 import no.nav.helse.mediator.meldinger.TilbakedateringBehandletRiver
@@ -366,7 +367,7 @@ internal class MeldingMediator(
         opprett(commandContextDao, hendelse.id)
     }
 
-    internal fun mottaMelding(melding: PersonmeldingOld, messageContext: MessageContext) {
+    internal fun mottaMelding(melding: Personmelding, messageContext: MessageContext) {
         val meldingnavn = requireNotNull(melding::class.simpleName)
         withMDC(
             mapOf(
@@ -384,7 +385,7 @@ internal class MeldingMediator(
         }
     }
 
-    private fun gjenopptaMelding(melding: PersonmeldingOld, commandContext: CommandContext, messageContext: MessageContext){
+    private fun gjenopptaMelding(melding: Personmelding, commandContext: CommandContext, messageContext: MessageContext){
         val meldingnavn = requireNotNull(melding::class.simpleName)
         withMDC(
             mapOf(
@@ -403,7 +404,7 @@ internal class MeldingMediator(
         }
     }
 
-    private fun behandleMelding(melding: PersonmeldingOld, messageContext: MessageContext){
+    private fun behandleMelding(melding: Personmelding, messageContext: MessageContext){
         val meldingnavn = requireNotNull(melding::class.simpleName)
         val utgåendeMeldingerMediator = UtgåendeMeldingerMediator()
         val commandContextTilstandMediator = CommandContextTilstandMediator()

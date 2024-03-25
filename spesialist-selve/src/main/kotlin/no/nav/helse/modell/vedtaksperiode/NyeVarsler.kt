@@ -2,7 +2,7 @@ package no.nav.helse.modell.vedtaksperiode
 
 import java.util.UUID
 import no.nav.helse.mediator.Kommandofabrikk
-import no.nav.helse.mediator.meldinger.PersonmeldingOld
+import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.Varsel.Companion.varsler
@@ -13,7 +13,7 @@ internal class NyeVarsler private constructor(
     private val fødselsnummer: String,
     internal val varsler: List<Varsel>,
     private val json: String,
-) : PersonmeldingOld {
+) : Personmelding {
     internal constructor(packet: JsonMessage): this(
         id = UUID.fromString(packet["@id"].asText()),
         fødselsnummer = packet["fødselsnummer"].asText(),

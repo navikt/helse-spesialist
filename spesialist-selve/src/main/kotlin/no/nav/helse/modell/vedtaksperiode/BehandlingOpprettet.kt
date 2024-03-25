@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.mediator.Kommandofabrikk
 import no.nav.helse.mediator.asUUID
-import no.nav.helse.mediator.meldinger.VedtaksperiodemeldingOld
+import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.person.Person
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
@@ -28,7 +28,7 @@ internal class BehandlingOpprettet private constructor(
     private val fom: LocalDate,
     private val tom: LocalDate,
     private val json: String
-): VedtaksperiodemeldingOld {
+): Vedtaksperiodemelding {
 
     internal constructor(packet: JsonMessage): this(
         id = packet["@id"].asUUID(),
