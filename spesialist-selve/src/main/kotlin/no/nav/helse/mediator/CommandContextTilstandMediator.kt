@@ -16,7 +16,7 @@ internal class CommandContextTilstandMediator: CommandContextObserver {
         utgåendeTilstandEndringer.add(hendelse)
     }
 
-    internal fun håndter(hendelse: Personmelding, messageContext: MessageContext) {
+    internal fun publiserTilstandsendringer(hendelse: Personmelding, messageContext: MessageContext) {
         publiserTilstandEndringer(hendelse, messageContext)
         utgåendeTilstandEndringer.clear()
     }

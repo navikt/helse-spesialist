@@ -406,8 +406,10 @@ internal class MeldingMediator(
     private fun behandleMelding(melding: Personmelding, messageContext: MessageContext){
         val meldingnavn = requireNotNull(melding::class.simpleName)
         val utgåendeMeldingerMediator = UtgåendeMeldingerMediator()
+        val commandContextTilstandMediator = CommandContextTilstandMediator()
         try {
             kommandofabrikk.nyObserver(utgåendeMeldingerMediator)
+            kommandofabrikk.nyObserver(commandContextTilstandMediator)
             personRepository.brukPersonHvisFinnes(melding.fødselsnummer()) {
                 logg.info("Personen finnes i databasen, behandler melding $meldingnavn")
                 sikkerlogg.info("Personen finnes i databasen, behandler melding $meldingnavn")
@@ -421,6 +423,7 @@ internal class MeldingMediator(
             throw e
         } finally {
             kommandofabrikk.avregistrerObserver(utgåendeMeldingerMediator)
+            commandContextTilstandMediator.publiserTilstandsendringer(melding, messageContext)
         }
     }
 
@@ -478,7 +481,7 @@ internal class MeldingMediator(
             logg.error("Feil ved behandling av melding $hendelsenavn", e.message, e)
             throw e
         } finally {
-            commandContextTilstandMediator.håndter(melding, messageContext)
+            commandContextTilstandMediator.publiserTilstandsendringer(melding, messageContext)
             logg.info("Melding $hendelsenavn ferdigbehandlet")
         }
     }
@@ -521,6 +524,7 @@ internal class MeldingMediator(
             logg.info("fortsetter utførelse av kommandokontekst som følge av løsninger på behov for ${melding::class.simpleName}")
             sikkerlogg.info("fortsetter utførelse av kommandokontekst som følge av løsninger på behov for ${melding::class.simpleName}\nInnkommende melding:\n\t$message")
             mediator.håndter(melding, commandContext, messageContext)
+            mediator.gjenopptaMelding(melding, commandContext, messageContext)
         }
     }
 
@@ -539,6 +543,7 @@ internal class MeldingMediator(
         fun fortsett(mediator: MeldingMediator) {
             logg.info("fortsetter utførelse av kommandokontekst som følge av påminnelse")
             mediator.håndter(melding, commandContext, messageContext)
+            mediator.gjenopptaMelding(melding, commandContext, messageContext)
         }
     }
 
