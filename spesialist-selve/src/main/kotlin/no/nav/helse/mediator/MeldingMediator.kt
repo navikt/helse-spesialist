@@ -376,26 +376,51 @@ internal class MeldingMediator(
         ) {
             logg.info("Melding $meldingnavn mottatt")
             sikkerlogg.info("Melding $meldingnavn mottatt:\n${melding.toJson()}")
-            val utgåendeMeldingerMediator = UtgåendeMeldingerMediator()
-            try {
-                kommandofabrikk.nyObserver(utgåendeMeldingerMediator)
-                meldingDao.lagre(melding)
-                personRepository.brukPersonHvisFinnes(melding.fødselsnummer()) {
-                    logg.info("Personen finnes i databasen, behandler melding $meldingnavn")
-                    sikkerlogg.info("Personen finnes i databasen, behandler melding $meldingnavn")
+            meldingDao.lagre(melding)
+            behandleMelding(melding, messageContext)
 
-                    melding.behandle(this, kommandofabrikk)
-                }
-                if (melding is VedtakFattet) melding.doFinally(vedtakDao) // Midlertidig frem til spesialsak ikke er en ting lenger
-                utgåendeMeldingerMediator.publiserOppsamledeMeldinger(melding, messageContext)
-            } catch (e: Exception) {
-                logg.error("Feil ved behandling av melding $meldingnavn", e.message, e)
-                throw e
-            } finally {
-                kommandofabrikk.avregistrerObserver(utgåendeMeldingerMediator)
-                logg.info("Melding $meldingnavn lest")
-                sikkerlogg.info("Melding $meldingnavn lest")
+            logg.info("Melding $meldingnavn lest")
+            sikkerlogg.info("Melding $meldingnavn lest")
+        }
+    }
+
+    private fun gjenopptaMelding(melding: Personmelding, commandContext: CommandContext, messageContext: MessageContext){
+        val meldingnavn = requireNotNull(melding::class.simpleName)
+        withMDC(
+            mapOf(
+                "meldingId" to melding.id.toString(),
+                "meldingnavn" to meldingnavn
+            )
+        ) {
+            logg.info("Melding $meldingnavn gjenopptatt")
+            sikkerlogg.info("Melding $meldingnavn gjenopptatt:\n${melding.toJson()}")
+            kommandofabrikk.settEksisterendeContext(commandContext)
+            behandleMelding(melding, messageContext)
+            kommandofabrikk.nullstilleEksisterendeContext()
+
+            logg.info("Melding $meldingnavn lest")
+            sikkerlogg.info("Melding $meldingnavn lest")
+        }
+    }
+
+    private fun behandleMelding(melding: Personmelding, messageContext: MessageContext){
+        val meldingnavn = requireNotNull(melding::class.simpleName)
+        val utgåendeMeldingerMediator = UtgåendeMeldingerMediator()
+        try {
+            kommandofabrikk.nyObserver(utgåendeMeldingerMediator)
+            personRepository.brukPersonHvisFinnes(melding.fødselsnummer()) {
+                logg.info("Personen finnes i databasen, behandler melding $meldingnavn")
+                sikkerlogg.info("Personen finnes i databasen, behandler melding $meldingnavn")
+
+                melding.behandle(this, kommandofabrikk)
             }
+            if (melding is VedtakFattet) melding.doFinally(vedtakDao) // Midlertidig frem til spesialsak ikke er en ting lenger
+            utgåendeMeldingerMediator.publiserOppsamledeMeldinger(melding, messageContext)
+        } catch (e: Exception) {
+            logg.error("Feil ved behandling av melding $meldingnavn", e.message, e)
+            throw e
+        } finally {
+            kommandofabrikk.avregistrerObserver(utgåendeMeldingerMediator)
         }
     }
 
