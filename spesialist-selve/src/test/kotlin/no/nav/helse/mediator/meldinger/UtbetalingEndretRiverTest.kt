@@ -3,7 +3,7 @@ package no.nav.helse.mediator.meldinger
 import io.mockk.mockk
 import io.mockk.verify
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -22,13 +22,13 @@ internal class UtbetalingEndretRiverTest {
     @Test
     fun `Leser inn utbetaling_endret-event`() {
         testRapid.sendTestMessage(event())
-        verify(exactly = 1) { mediator.håndter(any(), any<UtbetalingEndret>(), any()) }
+        verify(exactly = 1) { mediator.mottaMelding(any<UtbetalingEndret>(), any()) }
     }
 
     @Test
     fun `Feiler dersom vi ikke forstår utbetaling-status`() {
         testRapid.sendTestMessage(event("Noe rart med sukker på"))
-        verify(exactly = 0) { mediator.håndter(any(), any(), any()) }
+        verify(exactly = 0) { mediator.mottaMelding(any(), any()) }
     }
 
     @Language("JSON")

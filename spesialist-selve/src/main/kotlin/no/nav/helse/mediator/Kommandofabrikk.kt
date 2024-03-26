@@ -150,12 +150,6 @@ internal class Kommandofabrikk(
         }
     }
 
-    private fun generasjonerFor(utbetalingId: UUID): List<Generasjon> {
-        return gjeldendeGenerasjoner {
-            generasjonRepository.finnVedtaksperiodeIderFor(utbetalingId)
-        }
-    }
-
     private fun gjeldendeGenerasjoner(iderGetter: () -> Set<UUID>): List<Generasjon> {
         return iderGetter().map {
             gjeldendeGenerasjon(it)
@@ -296,7 +290,7 @@ internal class Kommandofabrikk(
         )
     }
 
-    fun utbetalingEndret(hendelse: UtbetalingEndret): UtbetalingEndretCommand {
+    private fun utbetalingEndret(hendelse: UtbetalingEndret): UtbetalingEndretCommand {
         return UtbetalingEndretCommand(
             fødselsnummer = hendelse.fødselsnummer(),
             organisasjonsnummer = hendelse.organisasjonsnummer,
@@ -308,7 +302,6 @@ internal class Kommandofabrikk(
             personOppdrag = hendelse.personOppdrag,
             arbeidsgiverbeløp = hendelse.arbeidsgiverbeløp,
             personbeløp = hendelse.personbeløp,
-            gjeldendeGenerasjoner = generasjonerFor(hendelse.utbetalingId),
             utbetalingDao = utbetalingDao,
             opptegnelseDao = opptegnelseDao,
             reservasjonDao = reservasjonDao,
@@ -421,6 +414,10 @@ internal class Kommandofabrikk(
         iverksett(vedtaksperiodeForkastet(melding), melding.id)
     }
 
+    internal fun iverksettUtbetalingEndret(melding: UtbetalingEndret) {
+        iverksett(utbetalingEndret(melding), melding.id)
+    }
+
     private fun nyContext(meldingId: UUID) = CommandContext(UUID.randomUUID()).apply {
         opprett(commandContextDao, meldingId)
     }
@@ -450,4 +447,5 @@ internal class Kommandofabrikk(
         }
         registrerTidsbrukForHendelse(hendelsenavn, kjøretidMs)
     }
+
 }

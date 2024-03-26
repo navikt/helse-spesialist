@@ -1,5 +1,6 @@
 package no.nav.helse.modell.person
 
+import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.vedtaksperiode.NyeVarsler
 import no.nav.helse.modell.vedtaksperiode.Periode
 import no.nav.helse.modell.vedtaksperiode.SpleisBehandling
@@ -48,6 +49,12 @@ class Person private constructor(
 
     internal fun nyeVarsler(nyeVarsler: NyeVarsler) {
         vedtaksperioder.forEach { it.nyeVarsler(nyeVarsler.varsler) }
+    }
+
+    internal fun utbetalingForkastet(utbetalingEndret: UtbetalingEndret) {
+        vedtaksperioder.forEach {
+            it.utbetalingForkastet(utbetalingEndret)
+        }
     }
 
     companion object {

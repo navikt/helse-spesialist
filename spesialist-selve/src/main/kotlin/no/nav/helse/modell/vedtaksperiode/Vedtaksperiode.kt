@@ -1,6 +1,7 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import java.util.UUID
+import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.VarselStatusDto
 
@@ -14,6 +15,7 @@ internal class Vedtaksperiode private constructor(
     private val gjeldendeGenerasjon get() = generasjoner.last()
     private val fom get() = gjeldendeGenerasjon.fom()
     private val tom get() = gjeldendeGenerasjon.tom()
+    private val gjeldendeUtbetalingId get() = gjeldendeGenerasjon.utbetalingId()
 
     fun vedtaksperiodeId() = vedtaksperiodeId
 
@@ -42,6 +44,12 @@ internal class Vedtaksperiode private constructor(
     internal fun nySpleisBehandling(spleisBehandling: SpleisBehandling) {
         if (!spleisBehandling.erRelevantFor(vedtaksperiodeId)) return
         gjeldendeGenerasjon.nySpleisBehandling(this, spleisBehandling)
+    }
+
+    internal fun utbetalingForkastet(utbetalingEndret: UtbetalingEndret){
+        val utbetalingId = gjeldendeUtbetalingId
+        if (utbetalingId == null || !utbetalingEndret.erRelevantFor(utbetalingId)) return
+        gjeldendeGenerasjon.håndterForkastetUtbetaling(utbetalingId)
     }
 
     internal fun nyGenerasjon(generasjon: Generasjon) {

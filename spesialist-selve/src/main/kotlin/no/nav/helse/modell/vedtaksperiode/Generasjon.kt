@@ -45,6 +45,8 @@ internal class Generasjon private constructor(
 
     internal fun skjæringstidspunkt() = skjæringstidspunkt
 
+    internal fun utbetalingId() = utbetalingId
+
     internal fun hasterÅBehandle() = varsler.inneholderVarselOmNegativtBeløp()
 
     internal fun fom() = periode.fom()

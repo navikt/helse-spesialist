@@ -4,17 +4,17 @@ import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.db.ReservasjonDao
-import no.nav.helse.mediator.meldinger.PersonmeldingOld
+import no.nav.helse.mediator.Kommandofabrikk
+import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.ReserverPersonHvisTildeltCommand
 import no.nav.helse.modell.oppgave.OppdaterOppgavestatusCommand
+import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingMediator
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
-import no.nav.helse.modell.vedtaksperiode.Generasjon
-import no.nav.helse.modell.vedtaksperiode.InvaliderUtbetalingForGenerasjonerCommand
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
@@ -34,7 +34,7 @@ internal class UtbetalingEndret private constructor(
     val arbeidsgiverOppdrag: LagreOppdragCommand.Oppdrag,
     val personOppdrag: LagreOppdragCommand.Oppdrag,
     private val json: String
-) : PersonmeldingOld {
+) : Personmelding {
     internal constructor(packet: JsonMessage): this(
         id = UUID.fromString(packet["@id"].asText()),
         fødselsnummer = packet["fødselsnummer"].asText(),
@@ -64,8 +64,14 @@ internal class UtbetalingEndret private constructor(
         json = jsonNode.toString()
     )
 
+    override fun behandle(person: Person, kommandofabrikk: Kommandofabrikk) {
+        if (gjeldendeStatus == FORKASTET) person.utbetalingForkastet(this)
+        kommandofabrikk.iverksettUtbetalingEndret(this)
+    }
+
     override fun fødselsnummer(): String = fødselsnummer
     override fun toJson(): String = json
+    fun erRelevantFor(gjeldendeUtbetalingId: UUID) = utbetalingId == gjeldendeUtbetalingId
 
     private companion object {
         private fun tilOppdrag(jsonNode: JsonNode, mottaker: String) = LagreOppdragCommand.Oppdrag(
@@ -93,7 +99,6 @@ internal class UtbetalingEndretCommand(
     personOppdrag: LagreOppdragCommand.Oppdrag,
     arbeidsgiverbeløp: Int,
     personbeløp: Int,
-    gjeldendeGenerasjoner: List<Generasjon>,
     utbetalingDao: UtbetalingDao,
     opptegnelseDao: OpptegnelseDao,
     reservasjonDao: ReservasjonDao,
@@ -127,9 +132,5 @@ internal class UtbetalingEndretCommand(
             totrinnsvurderingMediator = totrinnsvurderingMediator
         ),
         OppdaterOppgavestatusCommand(utbetalingId, gjeldendeStatus, oppgaveMediator),
-    ).apply {
-        if (gjeldendeStatus == FORKASTET)
-            add(InvaliderUtbetalingForGenerasjonerCommand(utbetalingId, gjeldendeGenerasjoner))
-    }
-
+    )
 }
