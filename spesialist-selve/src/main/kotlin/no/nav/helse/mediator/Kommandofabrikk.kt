@@ -425,6 +425,10 @@ internal class Kommandofabrikk(
         iverksett(overstyringIgangsatt(melding), melding.id)
     }
 
+    internal fun iverksettVedtaksperiodeReberegnet(melding: VedtaksperiodeReberegnet) {
+        iverksett(vedtaksperiodeReberegnet(melding), melding.id)
+    }
+
     private fun nyContext(meldingId: UUID) = CommandContext(UUID.randomUUID()).apply {
         opprett(commandContextDao, meldingId)
     }

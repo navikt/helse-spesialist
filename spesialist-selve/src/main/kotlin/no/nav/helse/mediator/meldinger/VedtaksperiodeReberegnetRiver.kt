@@ -29,6 +29,6 @@ internal class VedtaksperiodeReberegnetRiver(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         log.info("Håndterer reberegning av vedtaksperiode: ${packet["vedtaksperiodeId"].asText()}")
-        mediator.håndter(VedtaksperiodeReberegnet(packet), context)
+        mediator.mottaMelding(VedtaksperiodeReberegnet(packet), context)
     }
 }
