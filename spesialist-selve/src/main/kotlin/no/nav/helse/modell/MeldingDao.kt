@@ -228,9 +228,6 @@ internal class MeldingDao(private val dataSource: DataSource) {
             SØKNAD_SENDT -> SøknadSendt(jsonNode)
             VEDTAKSPERIODE_NY_UTBETALING -> VedtaksperiodeNyUtbetaling(jsonNode)
             BEHANDLING_OPPRETTET -> BehandlingOpprettet(jsonNode)
-            else -> throw IllegalArgumentException(
-                "Prøver å gjenoppta en kommando(kjede) etter mottak av hendelsetype " +
-                        "$meldingtype, men koden som trengs mangler!")
         }
     }
 
