@@ -55,6 +55,6 @@ internal class OverstyringIgangsattRiver(
             keyValue("eventId", UUID.fromString(packet["@id"].asText())),
             keyValue("kilde", UUID.fromString(packet["kilde"].asText())),
         )
-        mediator.håndter(OverstyringIgangsatt(packet), context)
+        mediator.mottaMelding(OverstyringIgangsatt(packet), context)
     }
 }

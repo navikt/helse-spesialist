@@ -27,8 +27,8 @@ import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommand
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.kommando.KobleVedtaksperiodeTilOverstyringCommand
 import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
+import no.nav.helse.modell.kommando.OverstyringIgangsattCommand
 import no.nav.helse.modell.kommando.TilbakedateringGodkjentCommand
 import no.nav.helse.modell.kommando.UtbetalingsgodkjenningCommand
 import no.nav.helse.modell.overstyring.OverstyringDao
@@ -266,10 +266,10 @@ internal class Kommandofabrikk(
         )
     }
 
-    fun kobleVedtaksperiodeTilOverstyring(hendelse: OverstyringIgangsatt): KobleVedtaksperiodeTilOverstyringCommand {
-        return KobleVedtaksperiodeTilOverstyringCommand(
-            berørteVedtaksperiodeIder = hendelse.berørteVedtaksperiodeIder,
-            kilde = hendelse.kilde,
+    fun overstyringIgangsatt(melding: OverstyringIgangsatt): OverstyringIgangsattCommand {
+        return OverstyringIgangsattCommand(
+            berørteVedtaksperiodeIder = melding.berørteVedtaksperiodeIder,
+            kilde = melding.kilde,
             overstyringDao = overstyringDao,
         )
     }
@@ -419,6 +419,10 @@ internal class Kommandofabrikk(
 
     internal fun iverksettVedtaksperiodeNyUtbetaling(melding: VedtaksperiodeNyUtbetaling) {
         iverksett(vedtaksperiodeNyUtbetaling(melding), melding.id)
+    }
+
+    internal fun iverksettOverstyringIgangsatt(melding: OverstyringIgangsatt) {
+        iverksett(overstyringIgangsatt(melding), melding.id)
     }
 
     private fun nyContext(meldingId: UUID) = CommandContext(UUID.randomUUID()).apply {

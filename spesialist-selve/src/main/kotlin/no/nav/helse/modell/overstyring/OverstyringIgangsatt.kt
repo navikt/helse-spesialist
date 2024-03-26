@@ -2,7 +2,9 @@ package no.nav.helse.modell.overstyring
 
 import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID
-import no.nav.helse.mediator.meldinger.PersonmeldingOld
+import no.nav.helse.mediator.Kommandofabrikk
+import no.nav.helse.mediator.meldinger.Personmelding
+import no.nav.helse.modell.person.Person
 import no.nav.helse.rapids_rivers.JsonMessage
 
 internal class OverstyringIgangsatt private constructor(
@@ -11,7 +13,7 @@ internal class OverstyringIgangsatt private constructor(
     val kilde: UUID,
     val berørteVedtaksperiodeIder: List<UUID>,
     private val json: String,
-) : PersonmeldingOld {
+) : Personmelding {
     internal constructor(packet: JsonMessage): this(
         id = UUID.fromString(packet["@id"].asText()),
         fødselsnummer = packet["fødselsnummer"].asText(),
@@ -26,6 +28,10 @@ internal class OverstyringIgangsatt private constructor(
         berørteVedtaksperiodeIder = jsonNode["berørtePerioder"].map { UUID.fromString(it["vedtaksperiodeId"].asText()) },
         json = jsonNode.toString()
     )
+
+    override fun behandle(person: Person, kommandofabrikk: Kommandofabrikk) {
+        kommandofabrikk.iverksettOverstyringIgangsatt(this)
+    }
 
     override fun fødselsnummer() = fødselsnummer
     override fun toJson() = json
