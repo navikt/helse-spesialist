@@ -1,5 +1,6 @@
 package no.nav.helse.modell.overstyring
 
+import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID
 import no.nav.helse.mediator.meldinger.PersonmeldingOld
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -17,6 +18,13 @@ internal class OverstyringIgangsatt private constructor(
         kilde = UUID.fromString(packet["kilde"].asText()),
         berørteVedtaksperiodeIder = packet["berørtePerioder"].map { UUID.fromString(it["vedtaksperiodeId"].asText()) },
         json = packet.toJson()
+    )
+    internal constructor(jsonNode: JsonNode): this(
+        id = UUID.fromString(jsonNode["@id"].asText()),
+        fødselsnummer = jsonNode["fødselsnummer"].asText(),
+        kilde = UUID.fromString(jsonNode["kilde"].asText()),
+        berørteVedtaksperiodeIder = jsonNode["berørtePerioder"].map { UUID.fromString(it["vedtaksperiodeId"].asText()) },
+        json = jsonNode.toString()
     )
 
     override fun fødselsnummer() = fødselsnummer

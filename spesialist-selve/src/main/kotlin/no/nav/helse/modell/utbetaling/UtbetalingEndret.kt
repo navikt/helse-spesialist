@@ -49,6 +49,20 @@ internal class UtbetalingEndret private constructor(
         personOppdrag = tilOppdrag(packet["personOppdrag"], packet["fødselsnummer"].asText()),
         json = packet.toJson()
     )
+    internal constructor(jsonNode: JsonNode): this(
+        id = UUID.fromString(jsonNode["@id"].asText()),
+        fødselsnummer = jsonNode["fødselsnummer"].asText(),
+        organisasjonsnummer = jsonNode["organisasjonsnummer"].asText(),
+        utbetalingId = UUID.fromString(jsonNode["utbetalingId"].asText()),
+        type = jsonNode["type"].asText(),
+        gjeldendeStatus = Utbetalingsstatus.valueOf(jsonNode["gjeldendeStatus"].asText()),
+        opprettet = jsonNode["@opprettet"].asLocalDateTime(),
+        arbeidsgiverbeløp = jsonNode["arbeidsgiverOppdrag"]["nettoBeløp"].asInt(),
+        personbeløp = jsonNode["personOppdrag"]["nettoBeløp"].asInt(),
+        arbeidsgiverOppdrag = tilOppdrag(jsonNode["arbeidsgiverOppdrag"], jsonNode["organisasjonsnummer"].asText()),
+        personOppdrag = tilOppdrag(jsonNode["personOppdrag"], jsonNode["fødselsnummer"].asText()),
+        json = jsonNode.toString()
+    )
 
     override fun fødselsnummer(): String = fødselsnummer
     override fun toJson(): String = json

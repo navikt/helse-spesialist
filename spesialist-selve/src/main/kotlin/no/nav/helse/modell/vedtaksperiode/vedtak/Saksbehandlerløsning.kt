@@ -58,6 +58,32 @@ internal class Saksbehandlerløsning private constructor(
         saksbehandleroverstyringer = packet["saksbehandleroverstyringer"].takeUnless(JsonNode::isMissingOrNull)?.map { UUID.fromString(it.asText()) } ?: emptyList(),
         json = packet.toJson(),
     )
+    internal constructor(jsonNode: JsonNode): this(
+        id = UUID.fromString(jsonNode["@id"].asText()),
+        behandlingId = UUID.fromString(jsonNode["behandlingId"].asText()),
+        oppgaveId = jsonNode["oppgaveId"].asLong(),
+        godkjenningsbehovhendelseId = UUID.fromString(jsonNode["hendelseId"].asText()),
+        fødselsnummer = jsonNode["fødselsnummer"].asText(),
+        godkjent = jsonNode["godkjent"].asBoolean(),
+        ident = jsonNode["saksbehandlerident"].asText(),
+        epostadresse = jsonNode["saksbehandlerepost"].asText(),
+        godkjenttidspunkt = jsonNode["godkjenttidspunkt"].asLocalDateTime(),
+        årsak = jsonNode["årsak"].takeUnless(JsonNode::isMissingOrNull)?.asText(),
+        begrunnelser = jsonNode["begrunnelser"].takeUnless(JsonNode::isMissingOrNull)?.map(JsonNode::asText),
+        kommentar = jsonNode["kommentar"].takeUnless(JsonNode::isMissingOrNull)?.asText(),
+        saksbehandler = Saksbehandler(
+            jsonNode["saksbehandler.ident"].asText(),
+            jsonNode["saksbehandler.epostadresse"].asText()
+        ),
+        beslutter = jsonNode["beslutter"].takeUnless(JsonNode::isMissingOrNull)?.let {
+            Saksbehandler(
+                jsonNode["beslutter.ident"].asText(),
+                jsonNode["beslutter.epostadresse"].asText()
+            )
+        },
+        saksbehandleroverstyringer = jsonNode["saksbehandleroverstyringer"].takeUnless(JsonNode::isMissingOrNull)?.map { UUID.fromString(it.asText()) } ?: emptyList(),
+        json = jsonNode.toString(),
+    )
 
     internal data class Saksbehandler(
         val ident: String,

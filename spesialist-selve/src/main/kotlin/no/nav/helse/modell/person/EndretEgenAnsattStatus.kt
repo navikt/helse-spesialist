@@ -1,5 +1,6 @@
 package no.nav.helse.modell.person
 
+import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.mediator.meldinger.PersonmeldingOld
@@ -25,6 +26,13 @@ internal class EndretEgenAnsattStatus private constructor(
         erEgenAnsatt = packet["skjermet"].asBoolean(),
         opprettet = packet["@opprettet"].asLocalDateTime(),
         json = packet.toJson()
+    )
+    internal constructor(jsonNode: JsonNode): this(
+        id = UUID.fromString(jsonNode["@id"].asText()),
+        fødselsnummer = jsonNode["fødselsnummer"].asText(),
+        erEgenAnsatt = jsonNode["skjermet"].asBoolean(),
+        opprettet = jsonNode["@opprettet"].asLocalDateTime(),
+        json = jsonNode.toString()
     )
 
     override fun fødselsnummer(): String = fødselsnummer

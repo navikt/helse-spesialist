@@ -1,5 +1,6 @@
 package no.nav.helse.modell.vedtaksperiode
 
+import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.mediator.Kommandofabrikk
@@ -39,6 +40,16 @@ internal class BehandlingOpprettet private constructor(
         fom = packet["fom"].asLocalDate(),
         tom = packet["tom"].asLocalDate(),
         json = packet.toJson()
+    )
+    internal constructor(jsonNode: JsonNode): this(
+        id = jsonNode["@id"].asUUID(),
+        fødselsnummer = jsonNode["fødselsnummer"].asText(),
+        organisasjonsnummer = jsonNode["organisasjonsnummer"].asText(),
+        vedtaksperiodeId = jsonNode["vedtaksperiodeId"].asUUID(),
+        spleisBehandlingId = jsonNode["behandlingId"].asUUID(),
+        fom = jsonNode["fom"].asLocalDate(),
+        tom = jsonNode["tom"].asLocalDate(),
+        json = jsonNode.toString()
     )
 
     override fun behandle(person: Person, kommandofabrikk: Kommandofabrikk) {

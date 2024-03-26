@@ -1,5 +1,6 @@
 package no.nav.helse.modell.person
 
+import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID
 import no.nav.helse.mediator.meldinger.PersonmeldingOld
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
@@ -16,6 +17,13 @@ internal class SøknadSendt private constructor(
     val organisasjonsnummer: String,
     private val json: String,
 ) : PersonmeldingOld {
+    internal constructor(jsonNode: JsonNode): this(
+        id = UUID.fromString(jsonNode["@id"].asText()),
+        fødselsnummer = jsonNode["fnr"].asText(),
+        aktørId = jsonNode["aktorId"].asText(),
+        organisasjonsnummer = jsonNode["arbeidsgiver.orgnummer"]?.asText() ?: jsonNode["tidligereArbeidsgiverOrgnummer"].asText(),
+        json = jsonNode.toString(),
+    )
     override fun fødselsnummer() = fødselsnummer
     override fun toJson() = json
 
@@ -28,15 +36,13 @@ internal class SøknadSendt private constructor(
             json = packet.toJson()
         )
 
-        fun søknadSendtArbeidsledig(packet: JsonMessage): SøknadSendt {
-            return SøknadSendt(
-                id = UUID.fromString(packet["@id"].asText()),
-                fødselsnummer = packet["fnr"].asText(),
-                aktørId = packet["aktorId"].asText(),
-                organisasjonsnummer = packet["tidligereArbeidsgiverOrgnummer"].asText(),
-                json = packet.toJson()
-            )
-        }
+        fun søknadSendtArbeidsledig(packet: JsonMessage) = SøknadSendt(
+            id = UUID.fromString(packet["@id"].asText()),
+            fødselsnummer = packet["fnr"].asText(),
+            aktørId = packet["aktorId"].asText(),
+            organisasjonsnummer = packet["tidligereArbeidsgiverOrgnummer"].asText(),
+            json = packet.toJson()
+        )
     }
 }
 

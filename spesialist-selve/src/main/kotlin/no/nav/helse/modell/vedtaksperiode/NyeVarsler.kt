@@ -1,5 +1,6 @@
 package no.nav.helse.modell.vedtaksperiode
 
+import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID
 import no.nav.helse.mediator.Kommandofabrikk
 import no.nav.helse.mediator.meldinger.Personmelding
@@ -19,6 +20,12 @@ internal class NyeVarsler private constructor(
         fødselsnummer = packet["fødselsnummer"].asText(),
         varsler = packet["aktiviteter"].varsler(),
         json = packet.toJson()
+    )
+    internal constructor(jsonNode: JsonNode): this(
+        id = UUID.fromString(jsonNode["@id"].asText()),
+        fødselsnummer = jsonNode["fødselsnummer"].asText(),
+        varsler = jsonNode["aktiviteter"].varsler(),
+        json = jsonNode.toString()
     )
 
     override fun fødselsnummer(): String = fødselsnummer

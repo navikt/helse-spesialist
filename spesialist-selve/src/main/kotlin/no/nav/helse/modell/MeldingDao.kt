@@ -204,8 +204,6 @@ internal class MeldingDao(private val dataSource: DataSource) {
         }.asSingle)
     }
 
-    // Denne funksjonen trenger bare å støtte de meldingtypene som starter en kommandokjede som sender ut behov.
-    // Kommandokjeder som ikke har noen suspenderende subcommands vil aldri kunne komme inn her.
     private fun fraMeldingtype(
         meldingtype: Meldingtype,
         json: String,
@@ -220,6 +218,16 @@ internal class MeldingDao(private val dataSource: DataSource) {
             VEDTAKSPERIODE_FORKASTET -> VedtaksperiodeForkastet(jsonNode)
             UTBETALING_ANNULLERT -> UtbetalingAnnullert(jsonNode)
             GODKJENT_TILBAKEDATERT_SYKMELDING -> TilbakedateringBehandlet(jsonNode)
+            OVERSTYRING_IGANGSATT -> OverstyringIgangsatt(jsonNode)
+            SAKSBEHANDLERLØSNING -> Saksbehandlerløsning(jsonNode)
+            UTBETALING_ENDRET -> UtbetalingEndret(jsonNode)
+            VEDTAKSPERIODE_REBEREGNET -> VedtaksperiodeReberegnet(jsonNode)
+            ENDRET_EGEN_ANSATT_STATUS -> EndretEgenAnsattStatus(jsonNode)
+            VEDTAK_FATTET -> VedtakFattet(jsonNode)
+            NYE_VARSLER -> NyeVarsler(jsonNode)
+            SØKNAD_SENDT -> SøknadSendt(jsonNode)
+            VEDTAKSPERIODE_NY_UTBETALING -> VedtaksperiodeNyUtbetaling(jsonNode)
+            BEHANDLING_OPPRETTET -> BehandlingOpprettet(jsonNode)
             else -> throw IllegalArgumentException(
                 "Prøver å gjenoppta en kommando(kjede) etter mottak av hendelsetype " +
                         "$meldingtype, men koden som trengs mangler!")
