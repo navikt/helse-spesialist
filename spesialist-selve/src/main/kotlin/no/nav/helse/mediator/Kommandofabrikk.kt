@@ -9,6 +9,7 @@ import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.SykefraværstilfelleDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.builders.GenerasjonBuilder
+import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.meldinger.PersonmeldingOld
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
@@ -27,6 +28,7 @@ import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.KobleVedtaksperiodeTilOverstyringCommand
+import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
 import no.nav.helse.modell.kommando.TilbakedateringGodkjentCommand
 import no.nav.helse.modell.kommando.UtbetalingsgodkjenningCommand
 import no.nav.helse.modell.overstyring.OverstyringDao
@@ -52,8 +54,6 @@ import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovCommand
-import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeEndret
-import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeEndretCommand
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastetCommand
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
@@ -320,16 +320,7 @@ internal class Kommandofabrikk(
         )
     }
 
-    fun vedtaksperiodeEndret(hendelse: VedtaksperiodeEndret): VedtaksperiodeEndretCommand {
-        return VedtaksperiodeEndretCommand(
-            fødselsnummer = hendelse.fødselsnummer(),
-            personDao = personDao,
-            snapshotDao = snapshotDao,
-            snapshotClient = snapshotClient
-        )
-    }
-
-    fun vedtaksperiodeForkastet(hendelse: VedtaksperiodeForkastet): VedtaksperiodeForkastetCommand {
+    private fun vedtaksperiodeForkastet(hendelse: VedtaksperiodeForkastet): VedtaksperiodeForkastetCommand {
         return VedtaksperiodeForkastetCommand(
             fødselsnummer = hendelse.fødselsnummer(),
             vedtaksperiodeId = hendelse.vedtaksperiodeId(),
@@ -420,6 +411,12 @@ internal class Kommandofabrikk(
         )
     }
 
+    private fun oppdaterSnapshotCommand(personmelding: Personmelding): OppdaterSnapshotCommand {
+        return OppdaterSnapshotCommand(snapshotClient, snapshotDao, personmelding.fødselsnummer(), personDao)
+    }
+    internal fun iverksettOppdaterSnapshot(melding: Personmelding){
+        iverksett(oppdaterSnapshotCommand(melding), melding.id)
+    }
     internal fun iverksettVedtaksperiodeForkastet(melding: VedtaksperiodeForkastet){
         iverksett(vedtaksperiodeForkastet(melding), melding.id)
     }

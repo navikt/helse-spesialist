@@ -2,21 +2,17 @@ package no.nav.helse.modell.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID
-import no.nav.helse.mediator.meldinger.VedtaksperiodemeldingOld
-import no.nav.helse.modell.SnapshotDao
-import no.nav.helse.modell.kommando.Command
-import no.nav.helse.modell.kommando.MacroCommand
-import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
-import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.mediator.Kommandofabrikk
+import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
+import no.nav.helse.modell.person.Person
 import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 
 internal class VedtaksperiodeEndret(
     override val id: UUID,
     private val vedtaksperiodeId: UUID,
     private val fødselsnummer: String,
     private val json: String,
-) : VedtaksperiodemeldingOld {
+) : Vedtaksperiodemelding {
     internal constructor(packet: JsonMessage): this(
         id = UUID.fromString(packet["@id"].asText()),
         vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText()),
@@ -32,21 +28,9 @@ internal class VedtaksperiodeEndret(
 
     override fun fødselsnummer() = fødselsnummer
     override fun vedtaksperiodeId() = vedtaksperiodeId
-    override fun toJson() = json
-}
+    override fun behandle(person: Person, kommandofabrikk: Kommandofabrikk) {
+        kommandofabrikk.iverksettOppdaterSnapshot(this)
+    }
 
-internal class VedtaksperiodeEndretCommand(
-    fødselsnummer: String,
-    personDao: PersonDao,
-    snapshotDao: SnapshotDao,
-    snapshotClient: SnapshotClient
-) : MacroCommand() {
-    override val commands: List<Command> = listOf(
-        OppdaterSnapshotCommand(
-            snapshotClient = snapshotClient,
-            snapshotDao = snapshotDao,
-            fødselsnummer = fødselsnummer,
-            personDao = personDao,
-        )
-    )
+    override fun toJson() = json
 }

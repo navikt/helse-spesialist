@@ -34,7 +34,7 @@ internal class VedtaksperiodeEndretRiverTest {
                 fødselsnummer = FØDSELSNUMMER
             )
         )
-        verify(exactly = 1) { mediator.håndter(any(), any<VedtaksperiodeEndret>(), any()) }
+        verify(exactly = 1) { mediator.mottaMelding(any<VedtaksperiodeEndret>(), messageContext = any()) }
     }
 
     @Test

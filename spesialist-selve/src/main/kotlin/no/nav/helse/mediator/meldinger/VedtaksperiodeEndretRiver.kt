@@ -46,7 +46,6 @@ internal class VedtaksperiodeEndretRiver(
             keyValue("eventId", UUID.fromString(packet["@id"].asText())),
             keyValue("forårsaketAvId", UUID.fromString(packet["@forårsaket_av.id"].asText())),
         )
-        val melding = VedtaksperiodeEndret(packet)
-        mediator.håndter(melding.fødselsnummer(), melding, context)
+        mediator.mottaMelding(VedtaksperiodeEndret(packet), context)
     }
 }
