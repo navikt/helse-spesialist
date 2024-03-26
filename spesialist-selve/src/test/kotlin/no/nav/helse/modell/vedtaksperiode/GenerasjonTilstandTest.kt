@@ -80,25 +80,6 @@ internal class GenerasjonTilstandTest {
     }
 
     @Test
-    fun `Låst - håndterer ny utbetaling`() {
-        val generasjonId = UUID.randomUUID()
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon = generasjon(generasjonId, vedtaksperiodeId)
-        generasjon.registrer(observer)
-
-        val utbetalingId1 = UUID.randomUUID()
-        generasjon.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId1)
-
-        generasjon.håndterVedtakFattet(UUID.randomUUID())
-        observer.assertTilstandsendring(generasjonId, Generasjon.Ulåst, Generasjon.Låst, 0)
-
-        val utbetalingId2 = UUID.randomUUID()
-        generasjon.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId2)
-        assertEquals(2, observer.utbetalingerPåGenerasjoner.size)
-        assertEquals(1, observer.opprettedeGenerasjoner.size)
-    }
-
-    @Test
     fun `Låst - invalidering av utbetaling`() {
         val generasjonId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
@@ -128,41 +109,6 @@ internal class GenerasjonTilstandTest {
         generasjon.håndterVedtakFattet(UUID.randomUUID())
         observer.assertGjeldendeTilstand(generasjonId, Generasjon.AvsluttetUtenUtbetaling)
     }
-
-    @Test
-    fun `AUU - håndterer ny utbetaling`() {
-        val generasjonId = UUID.randomUUID()
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon = generasjon(generasjonId, vedtaksperiodeId)
-        generasjon.registrer(observer)
-
-        generasjon.håndterVedtakFattet(UUID.randomUUID())
-        observer.assertTilstandsendring(generasjonId, Generasjon.Ulåst, Generasjon.AvsluttetUtenUtbetaling, 0)
-
-        val utbetalingId1 = UUID.randomUUID()
-        generasjon.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId1)
-        assertEquals(1, observer.utbetalingerPåGenerasjoner.size)
-        assertEquals(1, observer.opprettedeGenerasjoner.size)
-    }
-
-    @Test
-    fun `AUU - invaliderer ikke utbetaling`() {
-        val generasjonId = UUID.randomUUID()
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon = generasjon(generasjonId, vedtaksperiodeId)
-        generasjon.registrer(observer)
-
-        generasjon.håndterVedtakFattet(UUID.randomUUID())
-        observer.assertTilstandsendring(generasjonId, Generasjon.Ulåst, Generasjon.AvsluttetUtenUtbetaling, 0)
-
-        val utbetalingId = UUID.randomUUID()
-        generasjon.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
-        assertEquals(1, observer.utbetalingerPåGenerasjoner.size)
-        generasjon.håndterForkastetUtbetaling(utbetalingId)
-        assertEquals(1, observer.utbetalingerPåGenerasjoner.size)
-        observer.assertUtbetaling(generasjonId, null)
-    }
-
     @Test
     fun `AUU - håndterer nytt varsel medfører tilstandsbytte`() {
         val generasjonId = UUID.randomUUID()
@@ -211,50 +157,6 @@ internal class GenerasjonTilstandTest {
 
         generasjon.håndterVedtakFattet(UUID.randomUUID())
         observer.assertGjeldendeTilstand(generasjonId, Generasjon.UtenUtbetalingMåVurderes)
-    }
-
-    @Test
-    fun `UtenUtbetalingMåVurderes - håndterer ny utbetaling`() {
-        val generasjonId = UUID.randomUUID()
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon = generasjon(generasjonId, vedtaksperiodeId)
-        generasjon.registrer(observer)
-
-        generasjon.håndterVedtakFattet(UUID.randomUUID())
-        observer.assertTilstandsendring(generasjonId, Generasjon.Ulåst, Generasjon.AvsluttetUtenUtbetaling, 0)
-
-        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
-        observer.assertTilstandsendring(generasjonId, Generasjon.AvsluttetUtenUtbetaling, Generasjon.UtenUtbetalingMåVurderes, 1)
-
-        val utbetalingId = UUID.randomUUID()
-        generasjon.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
-
-        observer.assertTilstandsendring(generasjonId, Generasjon.UtenUtbetalingMåVurderes, Generasjon.AvsluttetUtenUtbetaling, 2)
-        assertEquals(1, observer.utbetalingerPåGenerasjoner.size)
-        assertEquals(1, observer.opprettedeGenerasjoner.size)
-    }
-
-    @Test
-    fun `UtenUtbetalingMåVurderes - invaliderer ikke utbetaling`() {
-        val generasjonId = UUID.randomUUID()
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon = generasjon(generasjonId, vedtaksperiodeId)
-        generasjon.registrer(observer)
-
-        generasjon.håndterVedtakFattet(UUID.randomUUID())
-        observer.assertTilstandsendring(generasjonId, Generasjon.Ulåst, Generasjon.AvsluttetUtenUtbetaling, 0)
-
-        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
-        observer.assertTilstandsendring(generasjonId, Generasjon.AvsluttetUtenUtbetaling, Generasjon.UtenUtbetalingMåVurderes, 1)
-
-        val utbetalingId = UUID.randomUUID()
-        generasjon.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
-        observer.assertGjeldendeTilstand(generasjonId, Generasjon.AvsluttetUtenUtbetaling)
-        assertEquals(1, observer.utbetalingerPåGenerasjoner.size)
-        generasjon.håndterForkastetUtbetaling(utbetalingId)
-        assertEquals(1, observer.utbetalingerPåGenerasjoner.size)
-        observer.assertUtbetaling(generasjonId, null)
-        observer.assertGjeldendeTilstand(generasjonId, Generasjon.AvsluttetUtenUtbetaling)
     }
 
     private fun generasjon(

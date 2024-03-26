@@ -72,10 +72,6 @@ internal class Varsel(
         observers.forEach { it.varselSlettet(id, varselkode, generasjonId, vedtaksperiodeId) }
     }
 
-    private fun oppdaterGenerasjon(gammelGenerasjonId: UUID, nyGenerasjonId: UUID) {
-        observers.forEach { it.varselFlyttet(this.id, gammelGenerasjonId, nyGenerasjonId) }
-    }
-
     override fun toString(): String {
         return "varselkode=$varselkode, vedtaksperiodeId=$vedtaksperiodeId, status=${status.name}"
     }
@@ -105,10 +101,6 @@ internal class Varsel(
     }
 
     internal companion object {
-        internal fun List<Varsel>.flyttVarslerFor(gammelGenerasjonId: UUID, nyGenerasjonId: UUID) {
-            forEach { it.oppdaterGenerasjon(gammelGenerasjonId, nyGenerasjonId) }
-        }
-
         internal fun List<Varsel>.finnEksisterendeVarsel(varsel: Varsel): Varsel? {
             return find { it.varselkode == varsel.varselkode }
         }

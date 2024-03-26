@@ -232,22 +232,6 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     }
 
     @Test
-    fun `oppretter ny generasjon for vedtaksperiodeId ved ny utbetaling dersom gjeldende generasjon er ferdig behandlet`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)
-        val gammelUtbetalingId = UUID.randomUUID()
-        val nyUtbetalingId = UUID.randomUUID()
-        generasjon.håndterNyUtbetaling(UUID.randomUUID(), gammelUtbetalingId)
-        generasjon.håndterVedtakFattet(UUID.randomUUID())
-        generasjon.håndterNyUtbetaling(UUID.randomUUID(), nyUtbetalingId)
-
-        assertUtbetaling(generasjonId, gammelUtbetalingId)
-        assertIkkeUtbetaling(generasjonId, nyUtbetalingId)
-        assertGenerasjonFor(gammelUtbetalingId, vedtaksperiodeId)
-        assertGenerasjonFor(nyUtbetalingId, vedtaksperiodeId)
-    }
-
-    @Test
     fun `kan fjerne utbetalingId fra ubehandlet generasjon`() {
         val generasjon = nyGenerasjon()
         val utbetalingId = UUID.randomUUID()
@@ -582,17 +566,6 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
             session.run(queryOf(query, generasjonId, utbetalingId).map { it.int(1) }.asSingle)
         }
         assertEquals(0, antall)
-    }
-
-    private fun assertGenerasjonFor(utbetalingId: UUID, vedtaksperiodeId: UUID) {
-        @Language("PostgreSQL")
-        val query =
-            """SELECT COUNT(1) FROM selve_vedtaksperiode_generasjon svg WHERE svg.vedtaksperiode_id = ? AND utbetaling_id = ?
-            """
-        val antall = sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, vedtaksperiodeId, utbetalingId).map { it.int(1) }.asSingle)
-        }
-        assertEquals(1, antall)
     }
 
     private fun assertAntallGenerasjoner(forventetAntall: Int, vedtaksperiodeId: UUID) {

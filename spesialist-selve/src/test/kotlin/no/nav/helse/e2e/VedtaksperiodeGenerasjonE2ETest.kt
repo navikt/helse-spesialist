@@ -40,11 +40,7 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
         håndterSaksbehandlerløsning()
         håndterVedtakFattet()
 
-        val revurdertUtbetalingId = UUID.randomUUID()
-        håndterGodkjenningsbehov(
-            harOppdatertMetainfo = true,
-            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = revurdertUtbetalingId)
-        )
+        spleisOppretterNyBehandling(force = true)
         assertGenerasjoner(VEDTAKSPERIODE_ID, 2)
         assertFerdigBehandledeGenerasjoner(VEDTAKSPERIODE_ID, 1)
     }
@@ -85,7 +81,7 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
         håndterAktivitetsloggNyAktivitet(varselkoder = listOf("RV_IM_1"))
 
         val utbetalingId = UUID.randomUUID()
-        håndterVedtaksperiodeEndret()
+        spleisOppretterNyBehandling(force = true)
         håndterVedtaksperiodeNyUtbetaling(utbetalingId = utbetalingId)
         assertGenerasjoner(VEDTAKSPERIODE_ID, 2)
         assertGenerasjonHarVarsler(VEDTAKSPERIODE_ID, utbetalingId, 1)
@@ -99,7 +95,7 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
         håndterAktivitetsloggNyAktivitet(varselkoder = listOf("RV_IM_1"))
 
         val utbetalingId = UUID.randomUUID()
-        håndterVedtaksperiodeEndret()
+        spleisOppretterNyBehandling(force = true)
         håndterVedtaksperiodeNyUtbetaling(utbetalingId = utbetalingId)
         assertGenerasjoner(VEDTAKSPERIODE_ID, 2)
         assertGenerasjonHarVarsler(VEDTAKSPERIODE_ID, utbetalingId, 1)

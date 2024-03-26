@@ -553,10 +553,11 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
         fom: LocalDate = 1.januar,
         tom: LocalDate = 31.januar,
+        force: Boolean = false
     ) {
         // TODO: Dette må refaktoreres ytterligere slik at man kan simulere at Spleis sender inn en revurdering
         // P.t. gjenbrukes behandlingId for en bestemt vedtaksperiode
-        if (behandlinger[vedtaksperiodeId] != null) return
+        if (!force && behandlinger[vedtaksperiodeId] != null) return
         val nySpleisBehandlingId = UUID.randomUUID()
         behandlinger[vedtaksperiodeId] = nySpleisBehandlingId
         sisteMeldingId = meldingssender.sendBehandlingOpprettet(

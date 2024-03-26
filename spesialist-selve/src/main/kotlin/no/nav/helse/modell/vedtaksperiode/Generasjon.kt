@@ -8,7 +8,6 @@ import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.Varsel.Companion.automatiskGodkjennSpesialsakvarsler
 import no.nav.helse.modell.varsel.Varsel.Companion.erVarselOmAvvik
 import no.nav.helse.modell.varsel.Varsel.Companion.finnEksisterendeVarsel
-import no.nav.helse.modell.varsel.Varsel.Companion.flyttVarslerFor
 import no.nav.helse.modell.varsel.Varsel.Companion.forhindrerAutomatisering
 import no.nav.helse.modell.varsel.Varsel.Companion.inneholderAktivtVarselOmAvvik
 import no.nav.helse.modell.varsel.Varsel.Companion.inneholderMedlemskapsvarsel
@@ -146,27 +145,9 @@ internal class Generasjon private constructor(
         this.tilstand = ny
     }
 
-    private fun nyGenerasjon(
-        hendelseId: UUID,
-        id: UUID = UUID.randomUUID(),
-        fom: LocalDate = this.periode.fom(),
-        tom: LocalDate = this.periode.tom(),
-        skjæringstidspunkt: LocalDate = this.skjæringstidspunkt
-    ): Generasjon {
-        val nesteGenerasjon = opprettNeste(id, hendelseId, fom, tom, skjæringstidspunkt)
-        flyttAktiveVarsler(nesteGenerasjon)
-        return nesteGenerasjon
-    }
-
     private fun nyUtbetaling(utbetalingId: UUID) {
         this.utbetalingId = utbetalingId
         observers.forEach { it.nyUtbetaling(id, utbetalingId) }
-    }
-
-    private fun opprett(hendelseId: UUID) {
-        observers.forEach {
-            it.generasjonOpprettet(id, vedtaksperiodeId, hendelseId, periode.fom(), periode.tom(), skjæringstidspunkt, tilstand)
-        }
     }
 
     private fun nyBehandling(spleisBehandlingId: UUID): Generasjon {
@@ -184,20 +165,6 @@ internal class Generasjon private constructor(
                 "Flytter ${aktiveVarsler.size} varsler fra {} til {}. Gammel generasjon har {}",
                 kv("gammel_generasjon", this.id),
                 kv("ny_generasjon", generasjon.id),
-                kv("utbetalingId", this.utbetalingId),
-            )
-    }
-
-    private fun flyttAktiveVarsler(nyGenerasjon: Generasjon) {
-        val aktiveVarsler = varsler.filter(Varsel::erAktiv)
-        aktiveVarsler.flyttVarslerFor(this.id, nyGenerasjon.id)
-        this.varsler.removeAll(aktiveVarsler)
-        nyGenerasjon.varsler.addAll(aktiveVarsler)
-        if (aktiveVarsler.isNotEmpty())
-            sikkerlogg.info(
-                "Flytter ${aktiveVarsler.size} varsler fra {} til {}. Gammel generasjon har {}",
-                kv("gammel_generasjon", this.id),
-                kv("ny_generasjon", nyGenerasjon.id),
                 kv("utbetalingId", this.utbetalingId),
             )
     }
@@ -245,7 +212,19 @@ internal class Generasjon private constructor(
 
         fun nySpleisBehandling(generasjon: Generasjon, vedtaksperiode: Vedtaksperiode, spleisBehandling: SpleisBehandling) {}
 
-        fun nyUtbetaling(generasjon: Generasjon, hendelseId: UUID, utbetalingId: UUID) {}
+        fun nyUtbetaling(generasjon: Generasjon, hendelseId: UUID, utbetalingId: UUID) {
+            sikkerlogg.error(
+                "Mottatt ny utbetaling med {} for {} i {}",
+                keyValue("utbetalingId", utbetalingId),
+                keyValue("generasjon", generasjon),
+                keyValue("tilstand", this::class.simpleName)
+            )
+            logg.error(
+                "Mottatt ny utbetaling med {} i {}",
+                keyValue("utbetalingId", utbetalingId),
+                keyValue("tilstand", this::class.simpleName)
+            )
+        }
 
         fun invaliderUtbetaling(generasjon: Generasjon, utbetalingId: UUID) {
             logg.error(
@@ -295,11 +274,6 @@ internal class Generasjon private constructor(
     internal data object Låst: Tilstand {
         override fun navn(): String = "Låst"
 
-        override fun nyUtbetaling(generasjon: Generasjon, hendelseId: UUID, utbetalingId: UUID) {
-            val nyGenerasjonId = UUID.randomUUID()
-            generasjon.nyGenerasjon(hendelseId, nyGenerasjonId).nyUtbetaling(utbetalingId)
-        }
-
         override fun nySpleisBehandling(
             generasjon: Generasjon,
             vedtaksperiode: Vedtaksperiode,
@@ -311,11 +285,6 @@ internal class Generasjon private constructor(
 
     internal data object AvsluttetUtenUtbetaling: Tilstand {
         override fun navn(): String = "AvsluttetUtenUtbetaling"
-
-        override fun nyUtbetaling(generasjon: Generasjon, hendelseId: UUID, utbetalingId: UUID) {
-            val nyGenerasjonId = UUID.randomUUID()
-            generasjon.nyGenerasjon(hendelseId, nyGenerasjonId).nyUtbetaling(utbetalingId)
-        }
 
         override fun nySpleisBehandling(
             generasjon: Generasjon,
@@ -332,12 +301,6 @@ internal class Generasjon private constructor(
 
     internal data object UtenUtbetalingMåVurderes: Tilstand {
         override fun navn(): String = "UtenUtbetalingMåVurderes"
-
-        override fun nyUtbetaling(generasjon: Generasjon, hendelseId: UUID, utbetalingId: UUID) {
-            val nyGenerasjonId = UUID.randomUUID()
-            generasjon.nyTilstand(this, AvsluttetUtenUtbetaling, hendelseId)
-            generasjon.nyGenerasjon(hendelseId, nyGenerasjonId).nyUtbetaling(utbetalingId)
-        }
 
         override fun håndterGodkjenning(generasjon: Generasjon, ident: String, hendelseId: UUID) {
             generasjon.nyTilstand(this, AvsluttetUtenUtbetaling, hendelseId)
@@ -437,14 +400,6 @@ internal class Generasjon private constructor(
                 tom = tom,
                 skjæringstidspunkt = skjæringstidspunkt,
             )
-        }
-
-        private fun Generasjon.opprettNeste(generasjonId: UUID, hendelseId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate): Generasjon {
-            val nyGenerasjon = opprett(generasjonId, this.vedtaksperiodeId, fom, tom, skjæringstidspunkt)
-            nyGenerasjon.registrer(*this.observers.toTypedArray())
-            nyGenerasjon.opprett(hendelseId)
-
-            return nyGenerasjon
         }
 
         internal fun List<Generasjon>.håndterNyttVarsel(varsler: List<Varsel>, hendelseId: UUID) {
