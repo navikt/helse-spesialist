@@ -5,13 +5,10 @@ import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.TransactionalSession
 import kotliquery.sessionOf
-import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.builders.GenerasjonBuilder
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.VarselStatusDto
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 internal class GenerasjonRepository(private val dataSource: DataSource): IVedtaksperiodeObserver {
 
@@ -84,36 +81,9 @@ internal class GenerasjonRepository(private val dataSource: DataSource): IVedtak
         return dao.finnVedtaksperiodeIderFor(fødselsnummer, skjæringstidspunkt)
     }
 
-    internal fun finnVedtaksperiodeIderFor(utbetalingId: UUID): Set<UUID> {
-        return dao.finnVedtaksperiodeIderFor(utbetalingId)
-    }
-
     internal fun skjæringstidspunktFor(vedtaksperiodeId: UUID): LocalDate {
         return dao.finnSkjæringstidspunktFor(vedtaksperiodeId)
             ?: throw IllegalStateException("Forventer å finne skjæringstidspunkt for vedtaksperiodeId=$vedtaksperiodeId")
-    }
-
-    override fun generasjonOpprettet(
-        generasjonId: UUID,
-        vedtaksperiodeId: UUID,
-        hendelseId: UUID,
-        fom: LocalDate,
-        tom: LocalDate,
-        skjæringstidspunkt: LocalDate,
-        tilstand: Generasjon.Tilstand
-    ) {
-        dao.opprettFor(generasjonId, vedtaksperiodeId, hendelseId, skjæringstidspunkt, Periode(fom, tom), tilstand)
-            .also {
-                it.loggNesteOpprettet(vedtaksperiodeId)
-            }
-    }
-
-    override fun nyUtbetaling(generasjonId: UUID, utbetalingId: UUID) {
-        dao.utbetalingFor(generasjonId = generasjonId, utbetalingId = utbetalingId)
-    }
-
-    override fun utbetalingForkastet(generasjonId: UUID, utbetalingId: UUID) {
-        fjernUtbetalingFor(generasjonId)
     }
 
     override fun tilstandEndret(
@@ -126,35 +96,7 @@ internal class GenerasjonRepository(private val dataSource: DataSource): IVedtak
         dao.oppdaterTilstandFor(generasjonId, ny, hendelseId)
     }
 
-    private fun fjernUtbetalingFor(generasjonId: UUID) {
-        dao.fjernUtbetalingFor(generasjonId)
-            ?.loggFjernetUtbetaling()
-            ?: sikkerlogg.error(
-                "Finner ikke generasjon med {}. Utbetaling forsøkt fjernet",
-                kv("generasjonId", generasjonId)
-            )
-    }
-
     internal fun førsteKjenteDag(fødselsnummer: String) = dao.førsteKjenteDag(fødselsnummer)
-
-    private companion object {
-        private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
-
-        private fun Generasjon.loggNesteOpprettet(vedtaksperiodeId: UUID) {
-            sikkerlogg.info(
-                "Oppretter neste generasjon {} for {}",
-                kv("generasjon", this),
-                kv("vedtaksperiodeId", vedtaksperiodeId),
-            )
-        }
-
-        private fun Generasjon.loggFjernetUtbetaling() {
-            sikkerlogg.info(
-                "Fjernet knytning for {} til utbetaling",
-                kv("generasjon", this),
-            )
-        }
-    }
 
     private fun GenerasjonDto.tilGenerasjon(): Generasjon {
         return Generasjon.fraLagring(

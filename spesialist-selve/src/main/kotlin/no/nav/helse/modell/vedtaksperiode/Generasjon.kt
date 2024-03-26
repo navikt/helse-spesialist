@@ -6,7 +6,6 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.Varsel.Companion.automatiskGodkjennSpesialsakvarsler
-import no.nav.helse.modell.varsel.Varsel.Companion.erVarselOmAvvik
 import no.nav.helse.modell.varsel.Varsel.Companion.finnEksisterendeVarsel
 import no.nav.helse.modell.varsel.Varsel.Companion.forhindrerAutomatisering
 import no.nav.helse.modell.varsel.Varsel.Companion.inneholderAktivtVarselOmAvvik
@@ -108,7 +107,6 @@ internal class Generasjon private constructor(
         if (!varsel.erRelevantFor(vedtaksperiodeId)) return
         val eksisterendeVarsel = varsler.finnEksisterendeVarsel(varsel) ?: return nyttVarsel(varsel, hendelseId)
         if (varsel.erVarselOmAvvik() && varsler.inneholderVarselOmAvvik()) {
-            eksisterendeVarsel.slett(id)
             varsler.remove(eksisterendeVarsel)
             logg.info("Slettet eksisterende varsel ({}) for generasjon med id {}", varsel.toString(), id)
             nyttVarsel(varsel, hendelseId)
@@ -147,7 +145,6 @@ internal class Generasjon private constructor(
 
     private fun nyUtbetaling(utbetalingId: UUID) {
         this.utbetalingId = utbetalingId
-        observers.forEach { it.nyUtbetaling(id, utbetalingId) }
     }
 
     private fun nyBehandling(spleisBehandlingId: UUID): Generasjon {
@@ -261,7 +258,6 @@ internal class Generasjon private constructor(
 
         override fun invaliderUtbetaling(generasjon: Generasjon, utbetalingId: UUID) {
             generasjon.utbetalingId = null
-            generasjon.observers.forEach { it.utbetalingForkastet(generasjon.id, utbetalingId) }
         }
 
         override fun vedtakFattet(generasjon: Generasjon, hendelseId: UUID) {

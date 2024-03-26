@@ -16,6 +16,7 @@ import no.nav.helse.modell.varsel.Varsel.Status
 import no.nav.helse.modell.varsel.Varsel.Status.AKTIV
 import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
 import no.nav.helse.modell.varsel.Varsel.Status.VURDERT
+import no.nav.helse.modell.varsel.VarselStatusDto
 import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_1
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjon
@@ -113,11 +114,14 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     fun `sletter varsel om avvik og legger det til på nytt hvis det finnes fra før`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val varselId = UUID.randomUUID()
-        val generasjon = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)
-        generasjon.registrer(generasjonRepository, varselRepository)
+        val generasjon = generasjon(vedtaksperiodeId = vedtaksperiodeId)
         generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "RV_IV_2", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
         generasjon.håndterNyttVarsel(Varsel(varselId, "RV_IV_2", LocalDateTime.now(), vedtaksperiodeId), UUID.randomUUID())
-        assertVarsler(generasjonId, 1, AKTIV, "RV_IV_2", varselId)
+        val varsler = generasjon.toDto().varsler
+        assertEquals(1, varsler.size)
+        val varsel = varsler.single()
+        assertEquals(VarselStatusDto.AKTIV, varsel.status)
+        assertEquals("RV_IV_2", varsel.varselkode)
     }
 
     @Test
@@ -180,8 +184,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         generasjon.håndterNyUtbetaling(UUID.randomUUID(), gammelUtbetalingId)
         generasjon.håndterNyUtbetaling(UUID.randomUUID(), nyUtbetalingId)
 
-        assertIkkeUtbetaling(generasjonId, gammelUtbetalingId)
-        assertUtbetaling(generasjonId, nyUtbetalingId)
+        assertEquals(nyUtbetalingId, generasjon.toDto().utbetalingId)
     }
 
     @Test
@@ -218,8 +221,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         generasjon.håndterVedtakFattet(UUID.randomUUID())
         generasjon.håndterNyUtbetaling(UUID.randomUUID(), nyUtbetalingId)
 
-        assertUtbetaling(generasjonId, gammelUtbetalingId)
-        assertIkkeUtbetaling(generasjonId, nyUtbetalingId)
+        assertEquals(gammelUtbetalingId, generasjon.toDto().utbetalingId)
     }
 
     @Test
@@ -236,9 +238,9 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         val generasjon = nyGenerasjon()
         val utbetalingId = UUID.randomUUID()
         generasjon.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
-        assertUtbetaling(generasjonId, utbetalingId)
+        assertEquals(utbetalingId, generasjon.toDto().utbetalingId)
         generasjon.håndterForkastetUtbetaling(utbetalingId)
-        assertIkkeUtbetaling(generasjonId, utbetalingId)
+        assertEquals(null, generasjon.toDto().utbetalingId)
     }
 
     @Test
@@ -247,9 +249,8 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         val utbetalingId = UUID.randomUUID()
         generasjon.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
         generasjon.håndterVedtakFattet(UUID.randomUUID())
-        assertUtbetaling(generasjonId, utbetalingId)
         generasjon.håndterForkastetUtbetaling(utbetalingId)
-        assertUtbetaling(generasjonId, utbetalingId)
+        assertEquals(utbetalingId, generasjon.toDto().utbetalingId)
     }
 
     @Test
@@ -454,31 +455,6 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         assertEquals(1, observer.vedtakFattet.size)
     }
 
-
-    private fun nyGenerasjon(id: UUID = UUID.randomUUID(), vedtaksperiodeId: UUID = UUID.randomUUID()): Generasjon {
-        generasjonId = id
-        val generasjon = generasjonDao.opprettFor(generasjonId, vedtaksperiodeId, UUID.randomUUID(), 1.januar, 1.januar til 31.januar, Generasjon.Ulåst)
-        generasjon.registrer(generasjonRepository)
-        return generasjon
-    }
-
-
-    private fun generasjon(
-        generasjonId: UUID = UUID.randomUUID(),
-        vedtaksperiodeId: UUID = UUID.randomUUID(),
-        fom: LocalDate = 1.januar,
-        tom: LocalDate = 31.januar,
-        skjæringstidspunkt: LocalDate = 1.januar,
-    ) = Generasjon(
-        id = generasjonId,
-        vedtaksperiodeId = vedtaksperiodeId,
-        fom = fom,
-        tom = tom,
-        skjæringstidspunkt = skjæringstidspunkt
-    ).also {
-        it.registrer(observer)
-    }
-
     @Test
     fun `generasjon toDto`() {
         val generasjonId = UUID.randomUUID()
@@ -517,6 +493,30 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         }
     }
 
+    private fun nyGenerasjon(id: UUID = UUID.randomUUID(), vedtaksperiodeId: UUID = UUID.randomUUID()): Generasjon {
+        generasjonId = id
+        val generasjon = generasjonDao.opprettFor(generasjonId, vedtaksperiodeId, UUID.randomUUID(), 1.januar, 1.januar til 31.januar, Generasjon.Ulåst)
+        generasjon.registrer(generasjonRepository)
+        return generasjon
+    }
+
+
+    private fun generasjon(
+        generasjonId: UUID = UUID.randomUUID(),
+        vedtaksperiodeId: UUID = UUID.randomUUID(),
+        fom: LocalDate = 1.januar,
+        tom: LocalDate = 31.januar,
+        skjæringstidspunkt: LocalDate = 1.januar,
+    ) = Generasjon(
+        id = generasjonId,
+        vedtaksperiodeId = vedtaksperiodeId,
+        fom = fom,
+        tom = tom,
+        skjæringstidspunkt = skjæringstidspunkt
+    ).also {
+        it.registrer(observer)
+    }
+
     private fun assertVarsler(generasjonId: UUID, forventetAntall: Int, status: Status, varselkode: String, varselId: UUID? = null) {
         @Language("PostgreSQL")
         val query =
@@ -544,17 +544,6 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
 
     private fun assertVarsler(generasjonId: UUID, forventetAntall: Int, status: Status, varselkode: Varselkode, varselId: UUID? = null) {
         assertVarsler(generasjonId, forventetAntall, status, varselkode.name, varselId)
-    }
-
-    private fun assertUtbetaling(generasjonId: UUID, utbetalingId: UUID) {
-        @Language("PostgreSQL")
-        val query =
-            """SELECT COUNT(1) FROM selve_vedtaksperiode_generasjon svg WHERE svg.unik_id = ? AND utbetaling_id = ?
-            """
-        val antall = sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, generasjonId, utbetalingId).map { it.int(1) }.asSingle)
-        }
-        assertEquals(1, antall)
     }
 
     private fun assertIkkeUtbetaling(generasjonId: UUID, utbetalingId: UUID) {

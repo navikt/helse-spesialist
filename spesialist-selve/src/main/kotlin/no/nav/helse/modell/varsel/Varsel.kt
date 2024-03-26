@@ -52,6 +52,10 @@ internal class Varsel(
 
     internal fun erAktiv(): Boolean = this.status == AKTIV
 
+    internal fun erVarselOmAvvik(): Boolean {
+        return this.varselkode == "RV_IV_2"
+    }
+
     internal fun opprett(generasjonId: UUID) {
         observers.forEach { it.varselOpprettet(id, vedtaksperiodeId, generasjonId, varselkode, opprettet) }
     }
@@ -66,10 +70,6 @@ internal class Varsel(
         if(status != AKTIV) return
         this.status = INAKTIV
         observers.forEach { it.varselDeaktivert(id, varselkode, generasjonId, vedtaksperiodeId) }
-    }
-
-    internal fun slett(generasjonId: UUID) {
-        observers.forEach { it.varselSlettet(id, varselkode, generasjonId, vedtaksperiodeId) }
     }
 
     override fun toString(): String {
@@ -113,10 +113,6 @@ internal class Varsel(
 
         internal fun List<Varsel>.inneholderVarselOmNegativtBeløp(): Boolean {
             return any { it.status == AKTIV && it.varselkode == "RV_UT_23" }
-        }
-
-        internal fun Varsel.erVarselOmAvvik(): Boolean {
-            return this.varselkode == "RV_IV_2"
         }
 
         internal fun List<Varsel>.inneholderAktivtVarselOmAvvik(): Boolean {
