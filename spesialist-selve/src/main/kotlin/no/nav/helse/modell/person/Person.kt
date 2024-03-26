@@ -8,6 +8,7 @@ import no.nav.helse.modell.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
+import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
 import no.nav.helse.modell.vedtaksperiode.vedtak.VedtakFattet
 
 class Person private constructor(
@@ -55,6 +56,12 @@ class Person private constructor(
         vedtaksperioder.forEach {
             it.utbetalingForkastet(utbetalingEndret)
         }
+    }
+
+    internal fun nyUtbetalingForVedtaksperiode(vedtaksperiodeNyUtbetaling: VedtaksperiodeNyUtbetaling) {
+        vedtaksperioder
+            .find { vedtaksperiodeNyUtbetaling.erRelevantFor(it.vedtaksperiodeId()) }
+            ?.nyUtbetaling(vedtaksperiodeNyUtbetaling.id, vedtaksperiodeNyUtbetaling.utbetalingId)
     }
 
     companion object {

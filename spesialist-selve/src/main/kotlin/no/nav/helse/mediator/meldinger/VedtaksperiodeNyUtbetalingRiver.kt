@@ -42,6 +42,6 @@ internal class VedtaksperiodeNyUtbetalingRiver(
             kv("id", id)
         )
 
-        mediator.håndter(VedtaksperiodeNyUtbetaling(packet), context)
+        mediator.mottaMelding(VedtaksperiodeNyUtbetaling(packet), context)
     }
 }

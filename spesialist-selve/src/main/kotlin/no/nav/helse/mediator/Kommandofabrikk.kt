@@ -239,11 +239,9 @@ internal class Kommandofabrikk(
 
     fun vedtaksperiodeNyUtbetaling(hendelse: VedtaksperiodeNyUtbetaling): VedtaksperiodeNyUtbetalingCommand {
         return VedtaksperiodeNyUtbetalingCommand(
-            id = hendelse.id,
             vedtaksperiodeId = hendelse.vedtaksperiodeId(),
             utbetalingId = hendelse.utbetalingId,
-            utbetalingDao = utbetalingDao,
-            gjeldendeGenerasjon = gjeldendeGenerasjon(hendelse.vedtaksperiodeId())
+            utbetalingDao = utbetalingDao
         )
     }
 
@@ -417,6 +415,10 @@ internal class Kommandofabrikk(
     }
     internal fun iverksettUtbetalingAnnulert(melding: UtbetalingAnnullert) {
         iverksett(utbetalingAnnullert(melding), melding.id)
+    }
+
+    internal fun iverksettVedtaksperiodeNyUtbetaling(melding: VedtaksperiodeNyUtbetaling) {
+        iverksett(vedtaksperiodeNyUtbetaling(melding), melding.id)
     }
 
     private fun nyContext(meldingId: UUID) = CommandContext(UUID.randomUUID()).apply {

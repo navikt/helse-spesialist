@@ -2,10 +2,12 @@ package no.nav.helse.modell.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID
-import no.nav.helse.mediator.meldinger.VedtaksperiodemeldingOld
+import no.nav.helse.mediator.Kommandofabrikk
+import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OpprettKoblingTilUtbetalingCommand
+import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.rapids_rivers.JsonMessage
 
@@ -15,7 +17,7 @@ internal class VedtaksperiodeNyUtbetaling private constructor(
     private val vedtaksperiodeId: UUID,
     val utbetalingId: UUID,
     private val json: String
-) : VedtaksperiodemeldingOld {
+) : Vedtaksperiodemelding {
     internal constructor(packet: JsonMessage): this(
         id = UUID.fromString(packet["@id"].asText()),
         fødselsnummer = packet["fødselsnummer"].asText(),
@@ -33,14 +35,19 @@ internal class VedtaksperiodeNyUtbetaling private constructor(
 
     override fun fødselsnummer(): String = fødselsnummer
     override fun vedtaksperiodeId(): UUID = vedtaksperiodeId
+    override fun behandle(person: Person, kommandofabrikk: Kommandofabrikk) {
+        person.nyUtbetalingForVedtaksperiode(this)
+        kommandofabrikk.iverksettVedtaksperiodeNyUtbetaling(this)
+    }
+
+    internal fun erRelevantFor(vedtaksperiodeId: UUID) = this.vedtaksperiodeId == vedtaksperiodeId
+
     override fun toJson(): String = json
 }
 
 internal class VedtaksperiodeNyUtbetalingCommand(
-    id: UUID,
     vedtaksperiodeId: UUID,
     utbetalingId: UUID,
-    gjeldendeGenerasjon: Generasjon,
     utbetalingDao: UtbetalingDao,
 ): MacroCommand() {
     override val commands: List<Command> = listOf(
@@ -49,10 +56,5 @@ internal class VedtaksperiodeNyUtbetalingCommand(
             utbetalingId = utbetalingId,
             utbetalingDao = utbetalingDao,
         ),
-        OpprettKoblingTilGenerasjonCommand(
-            hendelseId = id,
-            utbetalingId = utbetalingId,
-            gjeldendeGenerasjon = gjeldendeGenerasjon
-        )
     )
 }

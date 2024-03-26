@@ -53,13 +53,27 @@ class VedtaksperiodeTest {
     }
 
     @Test
-    fun `ny generasjon om Spesialist mottar ny behandling når gjeldende generasjon er lukket`() {
+    fun `oppretter ny generasjon om spesialist mottar ny behandling når gjeldende generasjon er låst`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId)
+        vedtaksperiode.nyUtbetaling(UUID.randomUUID(), UUID.randomUUID())
+        vedtaksperiode.vedtakFattet(UUID.randomUUID())
+        vedtaksperiode.nySpleisBehandling(nySpleisBehandling(vedtaksperiodeId))
+        val generasjoner = vedtaksperiode.toDto().generasjoner
+        val nyGjeldendeGenerasjon = generasjoner.last()
+        assertEquals(TilstandDto.Ulåst, nyGjeldendeGenerasjon.tilstand)
+        assertEquals(2, generasjoner.size)
+    }
+    @Test
+    fun `oppretter ny generasjon om spesialist mottar ny behandling når gjeldende generasjon er AUU`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId)
         vedtaksperiode.vedtakFattet(UUID.randomUUID())
         vedtaksperiode.nySpleisBehandling(nySpleisBehandling(vedtaksperiodeId))
-        val nyGjeldendeGenerasjon = vedtaksperiode.toDto().generasjoner.last()
+        val generasjoner = vedtaksperiode.toDto().generasjoner
+        val nyGjeldendeGenerasjon = generasjoner.last()
         assertEquals(TilstandDto.Ulåst, nyGjeldendeGenerasjon.tilstand)
+        assertEquals(2, generasjoner.size)
     }
 
     @Test

@@ -43,7 +43,7 @@ internal class VedtaksperiodeNyUtbetalingRiverTest {
             )
         )
         verify(exactly = 1) {
-            mediator.håndter(
+            mediator.mottaMelding(
                 melding = withArg<VedtaksperiodeNyUtbetaling> {
                     assertEquals(hendelseId, it.id)
                     assertEquals(FØDSELSNUMMER, it.fødselsnummer())

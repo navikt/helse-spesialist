@@ -73,6 +73,10 @@ internal class Vedtaksperiode private constructor(
     internal fun mottaBehandlingsinformasjon(tags: List<String>, spleisBehandlingId: UUID) =
         gjeldendeGenerasjon.oppdaterBehandlingsinformasjon(tags, spleisBehandlingId)
 
+    internal fun nyUtbetaling(meldingId: UUID, utbetalingId: UUID) {
+        gjeldendeGenerasjon.håndterNyUtbetaling(meldingId, utbetalingId)
+    }
+
     companion object {
         fun nyVedtaksperiode(spleisBehandling: SpleisBehandling): Vedtaksperiode {
             return Vedtaksperiode(
