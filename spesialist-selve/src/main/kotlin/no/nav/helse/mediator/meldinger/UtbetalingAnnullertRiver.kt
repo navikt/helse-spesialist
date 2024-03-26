@@ -59,6 +59,6 @@ internal class UtbetalingAnnullertRiver(
             "Mottok utbetaling_annullert ${logInfo.joinToString(transform = {"{}"})}",
             *logInfo.toTypedArray()
         )
-        mediator.håndter(UtbetalingAnnullert(packet), context)
+        mediator.mottaMelding(UtbetalingAnnullert(packet), context)
     }
 }

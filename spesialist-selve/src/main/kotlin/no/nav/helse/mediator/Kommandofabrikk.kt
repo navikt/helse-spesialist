@@ -417,6 +417,9 @@ internal class Kommandofabrikk(
     internal fun iverksettUtbetalingEndret(melding: UtbetalingEndret) {
         iverksett(utbetalingEndret(melding), melding.id)
     }
+    internal fun iverksettUtbetalingAnnulert(melding: UtbetalingAnnullert) {
+        iverksett(utbetalingAnnullert(melding), melding.id)
+    }
 
     private fun nyContext(meldingId: UUID) = CommandContext(UUID.randomUUID()).apply {
         opprett(commandContextDao, meldingId)
@@ -447,5 +450,6 @@ internal class Kommandofabrikk(
         }
         registrerTidsbrukForHendelse(hendelsenavn, kjøretidMs)
     }
+
 
 }

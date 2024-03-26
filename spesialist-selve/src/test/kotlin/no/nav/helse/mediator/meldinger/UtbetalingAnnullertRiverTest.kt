@@ -6,7 +6,6 @@ import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.meldinger.løsninger.InfotrygdutbetalingerRiver
 import no.nav.helse.modell.utbetaling.UtbetalingAnnullert
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class UtbetalingAnnullertRiverTest {
@@ -19,14 +18,9 @@ internal class UtbetalingAnnullertRiverTest {
         UtbetalingAnnullertRiver(testRapid, mediator)
     }
 
-    @BeforeEach
-    fun setup() {
-        testRapid.reset()
-    }
-
     @Test
     fun `leser selvstendig UtbetalingAnnullert-melding`() {
         testRapid.sendTestMessage(Testmeldingfabrikk.lagUtbetalingAnnullert(arbeidsgiverFagsystemId = "fagsystemId"))
-        verify(exactly = 1) { mediator.håndter(any<UtbetalingAnnullert>(), any()) }
+        verify(exactly = 1) { mediator.mottaMelding(any<UtbetalingAnnullert>(), any()) }
     }
 }

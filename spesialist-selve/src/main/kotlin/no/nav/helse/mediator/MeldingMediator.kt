@@ -63,7 +63,6 @@ import no.nav.helse.modell.person.OppdaterPersonsnapshot
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.PersonRepository
 import no.nav.helse.modell.person.SøknadSendt
-import no.nav.helse.modell.utbetaling.UtbetalingAnnullert
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
@@ -452,7 +451,6 @@ internal class MeldingMediator(
                 is SøknadSendt -> iverksett(kommandofabrikk.søknadSendt(melding), melding.id, commandContext)
                 is OppdaterPersonsnapshot -> iverksett(kommandofabrikk.oppdaterPersonsnapshot(melding), melding.id, commandContext)
                 is OverstyringIgangsatt -> iverksett(kommandofabrikk.kobleVedtaksperiodeTilOverstyring(melding), melding.id, commandContext)
-                is UtbetalingAnnullert -> iverksett(kommandofabrikk.utbetalingAnnullert(melding), melding.id, commandContext)
                 is Godkjenningsbehov -> iverksett(kommandofabrikk.godkjenningsbehov(melding), melding.id, commandContext)
                 is Saksbehandlerløsning -> iverksett(kommandofabrikk.utbetalingsgodkjenning(melding), melding.id, commandContext)
                 else -> throw IllegalArgumentException("Personhendelse må håndteres")

@@ -4,12 +4,14 @@ import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.db.SaksbehandlerDao
-import no.nav.helse.mediator.meldinger.PersonmeldingOld
+import no.nav.helse.mediator.Kommandofabrikk
+import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.LagreAnnulleringCommand
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
+import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
@@ -21,7 +23,7 @@ internal class UtbetalingAnnullert private constructor(
     val annullertTidspunkt: LocalDateTime,
     val saksbehandlerEpost: String,
     private val json: String,
-) : PersonmeldingOld {
+) : Personmelding {
     internal constructor(packet: JsonMessage): this(
         id = UUID.fromString(packet["@id"].asText()),
         fødselsnummer = packet["fødselsnummer"].asText(),
@@ -38,6 +40,10 @@ internal class UtbetalingAnnullert private constructor(
         saksbehandlerEpost = jsonNode["epost"].asText(),
         json = jsonNode.toString()
     )
+
+    override fun behandle(person: Person, kommandofabrikk: Kommandofabrikk) {
+        kommandofabrikk.iverksettUtbetalingAnnulert(this)
+    }
 
     override fun fødselsnummer(): String = fødselsnummer
     override fun toJson(): String = json
