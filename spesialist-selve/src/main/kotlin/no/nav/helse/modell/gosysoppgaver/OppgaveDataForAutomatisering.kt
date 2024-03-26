@@ -3,6 +3,8 @@ package no.nav.helse.modell.gosysoppgaver
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vedtaksperiode.Periode
+import no.nav.helse.modell.vedtaksperiode.Periode.Companion.til
 
 data class OppgaveDataForAutomatisering(
     val vedtaksperiodeId: UUID,
@@ -14,5 +16,6 @@ data class OppgaveDataForAutomatisering(
     val godkjenningsbehovJson: String,
     val periodetype: Periodetype,
 ) {
-    fun periodeOverlapperMed(dato: LocalDate): Boolean = dato in periodeFom..periodeTom
+    private val periode = periodeFom til periodeTom
+    fun periodeOverlapperMed(perioder: List<Periode>): Boolean = perioder.any{periode.overlapperMed(it)}
 }

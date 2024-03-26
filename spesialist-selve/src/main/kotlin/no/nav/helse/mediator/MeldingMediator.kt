@@ -283,7 +283,6 @@ internal class MeldingMediator(
     }
 
     fun tilbakedateringBehandlet(fødselsnummer: String, tilbakedateringBehandlet: TilbakedateringBehandlet, context: MessageContext) {
-        val syketilfelleStartDato = tilbakedateringBehandlet.syketilfelleStartdato
         personRepository.brukPersonHvisFinnes(fødselsnummer) {
             behandleTilbakedateringBehandlet(tilbakedateringBehandlet.perioder)
         }
@@ -293,8 +292,8 @@ internal class MeldingMediator(
             val oppgaveDataForAutomatisering = oppgaveDao.oppgaveDataForAutomatisering(oppgaveId)
                 ?: return@also sikkerlogg.info("Fant ikke commandData for {} og {}", fødselsnummer, oppgaveId)
 
-            if (!oppgaveDataForAutomatisering.periodeOverlapperMed(syketilfelleStartDato)) {
-                sikkerlogg.info("SyketilfellestartDato er ikke innenfor periodens fom og tom, for tilbakedateringen {} og {}", fødselsnummer, oppgaveId)
+            if (!oppgaveDataForAutomatisering.periodeOverlapperMed(tilbakedateringBehandlet.perioder)) {
+                sikkerlogg.info("Ingen av periodene i sykmeldingen er innenfor vedtaksperiodens fom og tom, for tilbakedateringen {} og {}", fødselsnummer, oppgaveId)
                 return
             }
 
