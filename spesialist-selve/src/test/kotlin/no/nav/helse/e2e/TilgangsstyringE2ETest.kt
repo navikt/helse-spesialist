@@ -93,7 +93,7 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
     }
 
     private fun sendMeldingerOppTilEgenAnsatt() {
-        håndterSøknad(AKTØR, FØDSELSNUMMER, ORGNR)
+        vedtaksløsningenMottarNySøknad(AKTØR, FØDSELSNUMMER, ORGNR)
         spleisOppretterNyBehandling()
         håndterVedtaksperiodeNyUtbetaling()
         håndterUtbetalingEndret()

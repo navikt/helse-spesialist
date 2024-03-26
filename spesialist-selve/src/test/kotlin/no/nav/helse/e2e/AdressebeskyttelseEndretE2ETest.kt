@@ -8,8 +8,7 @@ import org.junit.jupiter.api.Test
 internal class AdressebeskyttelseEndretE2ETest : AbstractE2ETest() {
     @Test
     fun `oppdaterer adressebeskyttelse på en person vi kjenner til fra før`() {
-
-        håndterSøknad()
+        vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         håndterAdressebeskyttelseEndret()
         assertSisteEtterspurteBehov("HentPersoninfoV2")
@@ -27,7 +26,7 @@ internal class AdressebeskyttelseEndretE2ETest : AbstractE2ETest() {
 
     @Test
     fun `Etterspør personinfo uten å sjekke ferskhet når adressebeskyttelse har blitt endret`() {
-        håndterSøknad()
+        vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
 
         // Etterspør personinfo selv om det nettopp er gjort
@@ -37,6 +36,8 @@ internal class AdressebeskyttelseEndretE2ETest : AbstractE2ETest() {
 
     @Test
     fun `Etterspør personinfo men avviser ikke når det ikke er noen åpne oppgaver`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave()
         håndterSaksbehandlerløsning()
         håndterVedtakFattet()
@@ -49,6 +50,8 @@ internal class AdressebeskyttelseEndretE2ETest : AbstractE2ETest() {
 
     @Test
     fun `Behandler ny strengt fortrolig adressebeskyttelse og avviser`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave()
         håndterAdressebeskyttelseEndret()
         assertSisteEtterspurteBehov("HentPersoninfoV2")
@@ -59,6 +62,8 @@ internal class AdressebeskyttelseEndretE2ETest : AbstractE2ETest() {
 
     @Test
     fun `Behandler ny fortrolig adressebeskyttelse og avviser ikke`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave()
         håndterAdressebeskyttelseEndret()
         assertSisteEtterspurteBehov("HentPersoninfoV2")

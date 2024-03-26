@@ -9,6 +9,8 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETest() {
 
     @Test
     fun `Går gjennom begge filtreringer`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremForbiUtbetalingsfilter(
             godkjenningsbehovTestdata = GodkjenningsbehovTestdata(
                 periodetype = FORLENGELSE,
@@ -26,6 +28,8 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETest() {
 
     @Test
     fun `går gjennom uten personutbetaling`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremForbiUtbetalingsfilter(
             godkjenningsbehovTestdata = GodkjenningsbehovTestdata(
                 fødselsnummer = FØDSELSNUMMER,

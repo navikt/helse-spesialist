@@ -167,16 +167,17 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     val VEDTAKSPERIODE_ID = testperson.vedtaksperiodeId1
     val VEDTAKSPERIODE_ID_2 = testperson.vedtaksperiodeId2
     val UTBETALING_ID = testperson.utbetalingId1
-    protected val godkjenningsbehovTestdata = GodkjenningsbehovTestdata(
+    private val behandlinger = mutableMapOf<UUID, MutableList<UUID>>()
+    protected val godkjenningsbehovTestdata get() = GodkjenningsbehovTestdata(
         fødselsnummer = FØDSELSNUMMER,
         aktørId = AKTØR,
         organisasjonsnummer = ORGNR,
         vedtaksperiodeId = VEDTAKSPERIODE_ID,
         utbetalingId = UTBETALING_ID,
+        spleisBehandlingId = behandlinger.getValue(VEDTAKSPERIODE_ID).last()
     )
     private val avviksvurderingTestdata = AvviksvurderingTestdata()
     private lateinit var utbetalingId: UUID
-    private val behandlinger = mutableMapOf<UUID, UUID>()
     internal val snapshotClient = mockk<SnapshotClient>()
     private val testRapid = TestRapid()
     internal val inspektør get() = testRapid.inspektør
@@ -312,12 +313,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         avviksvurderingTestdata: AvviksvurderingTestdata = this.avviksvurderingTestdata,
         godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata,
     ) {
-        håndterSøknad(fødselsnummer = godkjenningsbehovTestdata.fødselsnummer, organisasjonsnummer = godkjenningsbehovTestdata.organisasjonsnummer)
-        spleisOppretterNyBehandling(
-            vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
-            fom = godkjenningsbehovTestdata.periodeFom,
-            tom = godkjenningsbehovTestdata.periodeTom
-        )
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshot(
             versjon = snapshotversjon,
             fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,
@@ -368,13 +363,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         harOppdatertMetadata: Boolean = true,
         vilkårsgrunnlagId: UUID = UUID.randomUUID(),
     ) {
-        if (erRevurdering(vedtaksperiodeId)) {
-            håndterVedtaksperiodeEndret(vedtaksperiodeId = vedtaksperiodeId)
-        } else {
-            håndterSøknad()
-            spleisOppretterNyBehandling(vedtaksperiodeId = vedtaksperiodeId)
-        }
-        håndterVedtaksperiodeNyUtbetaling(vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshot(
             fødselsnummer = FØDSELSNUMMER,
             aktørId = AKTØR,
@@ -436,7 +424,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         if (!erFerdigstilt(sisteGodkjenningsbehovId)) håndterInntektløsning()
     }
 
-    protected fun fremTilRisikovurdering(
+    private fun fremTilRisikovurdering(
         enhet: String = ENHET_OSLO,
         regelverksvarsler: List<String> = emptyList(),
         fullmakter: List<Fullmakt> = emptyList(),
@@ -461,7 +449,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         håndterÅpneOppgaverløsning()
     }
 
-    protected fun forlengelseFremTilSaksbehandleroppgave(
+    private fun forlengelseFremTilSaksbehandleroppgave(
         fom: LocalDate = 1.januar,
         tom: LocalDate = 31.januar,
         skjæringstidspunkt: LocalDate = fom,
@@ -535,7 +523,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         håndterVedtakFattet(vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
     }
 
-    protected fun håndterSøknad(
+    protected fun vedtaksløsningenMottarNySøknad(
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
@@ -553,13 +541,9 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
         fom: LocalDate = 1.januar,
         tom: LocalDate = 31.januar,
-        force: Boolean = false
+        spleisBehandlingId: UUID = UUID.randomUUID()
     ) {
-        // TODO: Dette må refaktoreres ytterligere slik at man kan simulere at Spleis sender inn en revurdering
-        // P.t. gjenbrukes behandlingId for en bestemt vedtaksperiode
-        if (!force && behandlinger[vedtaksperiodeId] != null) return
-        val nySpleisBehandlingId = UUID.randomUUID()
-        behandlinger[vedtaksperiodeId] = nySpleisBehandlingId
+        behandlinger.getOrPut(vedtaksperiodeId) { mutableListOf() }.addLast(spleisBehandlingId)
         sisteMeldingId = meldingssender.sendBehandlingOpprettet(
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
@@ -567,7 +551,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             vedtaksperiodeId = vedtaksperiodeId,
             fom = fom,
             tom = tom,
-            spleisBehandlingId = nySpleisBehandlingId
+            spleisBehandlingId = spleisBehandlingId
         )
         assertIngenEtterspurteBehov()
         assertVedtaksperiodeEksisterer(vedtaksperiodeId)
@@ -907,7 +891,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         }
     }
 
-    internal fun sendGodkjenningsbehov(godkjenningsbehovTestdata: GodkjenningsbehovTestdata) =
+    private fun sendGodkjenningsbehov(godkjenningsbehovTestdata: GodkjenningsbehovTestdata) =
         meldingssender.sendGodkjenningsbehov(godkjenningsbehovTestdata).also { sisteMeldingId = it }
 
     protected fun håndterPersoninfoløsning(

@@ -14,7 +14,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
 
     @Test
     fun `utbetaling endret`() {
-        håndterSøknad()
+        vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         håndterUtbetalingOpprettet(utbetalingtype = "UTBETALING")
         håndterUtbetalingEndret(utbetalingtype = "UTBETALING", gjeldendeStatus = GODKJENT)
@@ -26,7 +26,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
     @Test
     fun `utbetaling endret lagres ikke dobbelt`() {
         val opprettet = LocalDateTime.now()
-        håndterSøknad()
+        vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         håndterUtbetalingOpprettet(utbetalingtype = "UTBETALING")
         håndterUtbetalingEndret(utbetalingtype = "UTBETALING", gjeldendeStatus = GODKJENT, opprettet = opprettet)
@@ -38,7 +38,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
     fun `tillater samme status ved et senere tidspunkt`() {
         val opprettet = LocalDateTime.now()
         val senereTidspunkt = opprettet.plusSeconds(10)
-        håndterSøknad()
+        vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         håndterUtbetalingOpprettet(utbetalingtype = "UTBETALING")
         håndterUtbetalingEndret(utbetalingtype = "UTBETALING", gjeldendeStatus = GODKJENT, opprettet = opprettet)
@@ -48,6 +48,8 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
 
     @Test
     fun `lagrer utbetaling etter utbetaling_endret når utbetalingen har vært til godkjenning og vi kjenner arbeidsgiver`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         val utbetalingId = godkjenningsbehovTestdata.utbetalingId
         fremTilSaksbehandleroppgave()
         håndterSaksbehandlerløsning()
@@ -59,7 +61,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
 
     @Test
     fun `utbetaling forkastet`() {
-        håndterSøknad()
+        vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         håndterUtbetalingOpprettet(utbetalingtype = "UTBETALING")
         håndterUtbetalingEndret(utbetalingtype = "UTBETALING", gjeldendeStatus = FORKASTET, forrigeStatus = IKKE_GODKJENT)
@@ -72,7 +74,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
     // før spesialist har mottatt det første godkjenningsbehovet
     @Test
     fun `ignorerer godkjenningsbehov for forkastet utbetaling`() {
-        håndterSøknad()
+        vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         håndterUtbetalingOpprettet()
         håndterUtbetalingEndret(gjeldendeStatus = FORKASTET, forrigeStatus = IKKE_GODKJENT)
@@ -83,7 +85,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
 
     @Test
     fun `feriepengeutbetalinger tas vare på`() {
-        håndterSøknad()
+        vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         håndterUtbetalingOpprettet(utbetalingtype = "FERIEPENGER")
         håndterUtbetalingEndret(utbetalingtype = "FERIEPENGER")
@@ -92,7 +94,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
 
     @Test
     fun `forstår utbetaling til bruker`() {
-        håndterSøknad()
+        vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         håndterUtbetalingOpprettet(utbetalingtype = "FERIEPENGER")
         håndterUtbetalingEndret(utbetalingtype = "FERIEPENGER", personbeløp = 1000)

@@ -9,7 +9,7 @@ internal class KommandokjedePåminnelseE2ETest : AbstractE2ETest() {
 
     @Test
     fun `påminnelse sender ut nytt behov`() {
-        håndterSøknad()
+        vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         håndterGodkjenningsbehov()
 

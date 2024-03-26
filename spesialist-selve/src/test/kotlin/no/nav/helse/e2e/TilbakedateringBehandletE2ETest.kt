@@ -18,6 +18,8 @@ import org.junit.jupiter.api.Test
 internal class TilbakedateringBehandletE2ETest : AbstractE2ETest() {
     @Test
     fun `fatter automatisk vedtak dersom åpen oppgave får inn godkjent tilbakedatering`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilÅpneOppgaver(
             regelverksvarsler = listOf("RV_SØ_3"),
         )
@@ -36,6 +38,8 @@ internal class TilbakedateringBehandletE2ETest : AbstractE2ETest() {
 
     @Test
     fun `fatter ikke automatisk vedtak dersom ingen av periodene i sykmeldingen er innenfor vedtaksperiodens fom og tom`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilÅpneOppgaver(
             regelverksvarsler = listOf("RV_SØ_3"),
         )
@@ -54,6 +58,8 @@ internal class TilbakedateringBehandletE2ETest : AbstractE2ETest() {
 
     @Test
     fun `fjern varsel om tilbakedatering dersom tilbakedatert sykmelding er godkjent`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilÅpneOppgaver(regelverksvarsler = listOf("RV_SØ_3"),)
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning()
@@ -66,13 +72,15 @@ internal class TilbakedateringBehandletE2ETest : AbstractE2ETest() {
 
     @Test
     fun `fjern varsel om tilbakedatering på alle overlappende perioder i sykefraværstilfellet for ok-sykmelding`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilÅpneOppgaver(regelverksvarsler = listOf("RV_SØ_3"),)
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning()
         håndterInntektløsning()
 
         val vedtaksperiodeId2 = UUID.randomUUID()
-        håndterSøknad()
+        vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling(vedtaksperiodeId = vedtaksperiodeId2)
         håndterAktivitetsloggNyAktivitet(varselkoder = listOf("RV_SØ_3"), vedtaksperiodeId = vedtaksperiodeId2
         )

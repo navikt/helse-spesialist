@@ -7,6 +7,8 @@ internal class AnnulleringE2ETest : AbstractE2ETest() {
 
     @Test
     fun `annullert utbetaling medfører at snapshot blir oppdatert`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave()
         håndterSaksbehandlerløsning()
         håndterVedtakFattet()

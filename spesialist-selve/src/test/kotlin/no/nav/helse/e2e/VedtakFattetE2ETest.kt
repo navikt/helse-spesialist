@@ -4,7 +4,6 @@ import AbstractE2ETest
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -16,6 +15,8 @@ internal class VedtakFattetE2ETest: AbstractE2ETest() {
 
     @Test
     fun `vedtak fattet medfører låsing av vedtaksperiode-generasjon`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave()
         håndterSaksbehandlerløsning()
         assertDoesNotThrow {
@@ -26,6 +27,8 @@ internal class VedtakFattetE2ETest: AbstractE2ETest() {
 
     @Test
     fun `spesialsak er ikke lenger spesialsak når den har vært spesialsak én gang`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave()
         opprettSpesialsak(VEDTAKSPERIODE_ID)
         assertSpesialsak(VEDTAKSPERIODE_ID, true)

@@ -10,10 +10,10 @@ internal class SøknadSendtOgVedtaksperiodeOpprettetTest : AbstractE2ETest() {
     fun `Oppretter minimal person og arbeidsgiver ved mottatt søknad og minimal vedtaksperiode ved vedtaksperiode opprettet`() {
         assertPersonEksistererIkke(FØDSELSNUMMER, AKTØR)
 
-        håndterSøknad(AKTØR, FØDSELSNUMMER, ORGNR)
+        vedtaksløsningenMottarNySøknad(AKTØR, FØDSELSNUMMER, ORGNR)
         assertPersonEksisterer(FØDSELSNUMMER, AKTØR)
         assertArbeidsgiverEksisterer(ORGNR)
-        håndterSøknad(AKTØR, FØDSELSNUMMER, ORGNR)
+        vedtaksløsningenMottarNySøknad(AKTØR, FØDSELSNUMMER, ORGNR)
         spleisOppretterNyBehandling(
             aktørId = AKTØR,
             fødselsnummer = FØDSELSNUMMER,
@@ -22,7 +22,7 @@ internal class SøknadSendtOgVedtaksperiodeOpprettetTest : AbstractE2ETest() {
         )
         assertVedtaksperiodeEksisterer(VEDTAKSPERIODE_ID)
 
-        håndterSøknad(AKTØR, FØDSELSNUMMER, ORGNR)
+        vedtaksløsningenMottarNySøknad(AKTØR, FØDSELSNUMMER, ORGNR)
         assertPersonEksisterer(FØDSELSNUMMER, AKTØR)
         assertArbeidsgiverEksisterer(ORGNR)
     }

@@ -26,6 +26,8 @@ internal class VarselE2ETest : AbstractE2ETest() {
 
     @Test
     fun `ingen varsel`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave()
         assertIngenVarsel(SB_IK_1, VEDTAKSPERIODE_ID)
         assertIngenVarsel(SB_RV_1, VEDTAKSPERIODE_ID)
@@ -36,18 +38,24 @@ internal class VarselE2ETest : AbstractE2ETest() {
 
     @Test
     fun `varsel om vergemål`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave(fullmakter = listOf(Fullmakt(områder = listOf(Syk), LocalDate.MIN, LocalDate.MAX)))
         assertVarsel(SB_IK_1, VEDTAKSPERIODE_ID, AKTIV)
     }
 
     @Test
     fun `varsel om faresignaler ved risikovurdering`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave(risikofunn = listOf(Risikofunn(listOf("EN_KATEGORI"), "EN_BESKRIVELSE", false)))
         assertVarsel(SB_RV_1, VEDTAKSPERIODE_ID, AKTIV)
     }
 
     @Test
     fun `ingen varsler dersom ingen åpne oppgaver eller oppslagsfeil`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilÅpneOppgaver()
         håndterÅpneOppgaverløsning()
         assertIngenVarsel(SB_EX_3, VEDTAKSPERIODE_ID)
@@ -56,6 +64,8 @@ internal class VarselE2ETest : AbstractE2ETest() {
 
     @Test
     fun `lager varsel ved åpne gosys-oppgaver`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilÅpneOppgaver()
         håndterÅpneOppgaverløsning(antall = 1)
         assertVarsel(SB_EX_1, VEDTAKSPERIODE_ID, AKTIV)
@@ -64,6 +74,8 @@ internal class VarselE2ETest : AbstractE2ETest() {
 
     @Test
     fun `lager ikke duplikatvarsel ved åpne gosys-oppgaver`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilÅpneOppgaver()
         håndterÅpneOppgaverløsning(antall = 1)
         håndterRisikovurderingløsning()
@@ -75,6 +87,8 @@ internal class VarselE2ETest : AbstractE2ETest() {
 
     @Test
     fun `fjern varsel om gosys-oppgave dersom det ikke finnes gosys-oppgave lenger`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilÅpneOppgaver()
         håndterÅpneOppgaverløsning(antall = 1)
         håndterRisikovurderingløsning()
@@ -87,6 +101,8 @@ internal class VarselE2ETest : AbstractE2ETest() {
 
     @Test
     fun `varsel dersom kall til gosys feilet`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilÅpneOppgaver()
         håndterÅpneOppgaverløsning(antall = 0, oppslagFeilet = true)
         assertVarsel(SB_EX_3, VEDTAKSPERIODE_ID, AKTIV)
@@ -94,6 +110,8 @@ internal class VarselE2ETest : AbstractE2ETest() {
 
     @Test
     fun `fjern varsel dersom kall til gosys ikke feiler lenger`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilÅpneOppgaver()
         håndterÅpneOppgaverløsning(antall = 0, oppslagFeilet = true)
         håndterRisikovurderingløsning()
@@ -105,6 +123,8 @@ internal class VarselE2ETest : AbstractE2ETest() {
 
     @Test
     fun `legger til varsel om gosys-oppgave når vi får beskjed om at gosys har fått oppgaver`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilÅpneOppgaver()
         håndterÅpneOppgaverløsning(antall = 0)
         håndterRisikovurderingløsning(kanGodkjennesAutomatisk = false)
@@ -117,6 +137,8 @@ internal class VarselE2ETest : AbstractE2ETest() {
 
     @Test
     fun `legger til varsel om manglende gosys-info`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilÅpneOppgaver()
         håndterÅpneOppgaverløsning(oppslagFeilet = true)
         håndterRisikovurderingløsning()
@@ -126,6 +148,8 @@ internal class VarselE2ETest : AbstractE2ETest() {
 
     @Test
     fun `legger til varsel dersom oppslag feiler når vi har fått beskjed om at gosys har endret seg`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilÅpneOppgaver()
         håndterÅpneOppgaverløsning(oppslagFeilet = false)
         håndterRisikovurderingløsning(kanGodkjennesAutomatisk = false)
@@ -138,6 +162,8 @@ internal class VarselE2ETest : AbstractE2ETest() {
 
     @Test
     fun `varsel dersom teknisk feil ved sjekk av 8-4-knappetrykk`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave(
             risikofunn = listOf(
                 Risikofunn(
@@ -152,6 +178,8 @@ internal class VarselE2ETest : AbstractE2ETest() {
 
     @Test
     fun `varsel ved manuell stans av automatisk behandling - 8-4`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave(
             risikofunn = listOf(
                 Risikofunn(listOf("8-4", "EN_ANNEN_KATEGORI"), "EN_BESKRIVELSE", false)

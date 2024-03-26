@@ -17,12 +17,16 @@ import org.junit.jupiter.api.Test
 internal class AutomatiseringE2ETest : AbstractE2ETest() {
     @Test
     fun `fatter automatisk vedtak`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         automatiskGodkjent()
         assertGodkjenningsbehovBesvart(godkjent = true, automatiskBehandlet = true)
     }
 
     @Test
     fun `fatter ikke automatisk vedtak ved warnings`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave(
             regelverksvarsler = listOf("RV_IM_1"),
             kanGodkjennesAutomatisk = true
@@ -34,6 +38,8 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
 
     @Test
     fun `fatter ikke automatisk vedtak ved 8-4 ikke oppfylt`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave(
             risikofunn = listOf(
                 Risikofunn(kategori = listOf("8-4"), beskrivelse = "8-4 ikke ok", kreverSupersaksbehandler = false),
@@ -47,6 +53,8 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
 
     @Test
     fun `fatter ikke automatisk vedtak ved åpne oppgaver i gosys`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilÅpneOppgaver()
         håndterÅpneOppgaverløsning(antall = 1)
         håndterRisikovurderingløsning()
@@ -58,7 +66,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
     @Test
     fun `fatter automatisk vedtak for spesialsaker som ikke har svartelistede varsler og ingen utbetaling`() {
         Toggle.AutomatiserSpesialsak.enable()
-        håndterSøknad()
+        vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling(vedtaksperiodeId = VEDTAKSPERIODE_ID)
         opprettSpesialsak(vedtaksperiodeId = VEDTAKSPERIODE_ID)
         fremTilÅpneOppgaver(
@@ -87,7 +95,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
     @Test
     fun `fatter ikke automatisk vedtak for spesialsaker som ikke har svartelistede varsler men har utbetaling`() {
         Toggle.AutomatiserSpesialsak.enable()
-        håndterSøknad()
+        vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling(vedtaksperiodeId = VEDTAKSPERIODE_ID)
         opprettSpesialsak(vedtaksperiodeId = VEDTAKSPERIODE_ID)
         fremTilSaksbehandleroppgave(
@@ -108,7 +116,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
     @Test
     fun `fatter ikke automatisk vedtak for spesialsaker som har svartelistede varsler men ingen utbetaling`() {
         Toggle.AutomatiserSpesialsak.enable()
-        håndterSøknad()
+        vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling(vedtaksperiodeId = VEDTAKSPERIODE_ID)
         opprettSpesialsak(vedtaksperiodeId = VEDTAKSPERIODE_ID)
         fremTilSaksbehandleroppgave(

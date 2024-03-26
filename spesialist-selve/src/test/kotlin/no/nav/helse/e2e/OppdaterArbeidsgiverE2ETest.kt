@@ -15,6 +15,8 @@ internal class OppdaterArbeidsgiverE2ETest : AbstractE2ETest() {
 
     @Test
     fun `Etterspør oppdatert navn selv når svar på behovet er mottatt for et annet orgnr`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave()
         håndterSaksbehandlerløsning()
         håndterVedtakFattet()

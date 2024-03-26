@@ -16,12 +16,16 @@ internal class EndretEgenAnsattStatusTest : AbstractE2ETest() {
 
     @Test
     fun `Ignorerer hendelsen for fødselsnummer som ikke lar seg caste til long`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         håndterEndretSkjermetinfo("123456789XX", true)
         assertSkjermet(FØDSELSNUMMER, null)
     }
 
     @Test
     fun `Oppdaterer egenansatt-status`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave()
 
         håndterEndretSkjermetinfo(skjermet = false)
@@ -33,6 +37,8 @@ internal class EndretEgenAnsattStatusTest : AbstractE2ETest() {
 
     @Test
     fun `Legger til egenskap på oppgave når person får status egen ansatt`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave()
 
         val oppgaveId = inspektør.oppgaveId().toInt()
@@ -45,6 +51,8 @@ internal class EndretEgenAnsattStatusTest : AbstractE2ETest() {
 
     @Test
     fun `Fjerner egenskap egen ansatt hvis personen ikke lenger har status egen ansatt`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave()
         håndterEndretSkjermetinfo(skjermet = true)
 

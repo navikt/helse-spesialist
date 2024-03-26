@@ -8,7 +8,7 @@ internal class NyeVarslerE2ETest : AbstractE2ETest() {
 
     @Test
     fun `lagrer varsler når vi mottar ny aktivitet i aktivitetsloggen`() {
-        håndterSøknad()
+        vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         håndterVedtaksperiodeNyUtbetaling()
         håndterAktivitetsloggNyAktivitet(varselkoder = listOf("EN_KODE"))
@@ -18,7 +18,7 @@ internal class NyeVarslerE2ETest : AbstractE2ETest() {
 
     @Test
     fun `lagrer varsler når vi mottar flere ny aktivitet i aktivitetsloggen`() {
-        håndterSøknad()
+        vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         håndterVedtaksperiodeNyUtbetaling()
         håndterAktivitetsloggNyAktivitet(varselkoder = listOf("EN_KODE"))
@@ -29,7 +29,7 @@ internal class NyeVarslerE2ETest : AbstractE2ETest() {
 
     @Test
     fun `lagrer flere varsler når vi mottar flere nye aktiviteter i samme aktivitetslogg`() {
-        håndterSøknad()
+        vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         håndterVedtaksperiodeNyUtbetaling()
         håndterAktivitetsloggNyAktivitet(varselkoder = listOf("EN_KODE", "EN_ANNEN_KODE"))
@@ -39,7 +39,7 @@ internal class NyeVarslerE2ETest : AbstractE2ETest() {
 
     @Test
     fun `gammelt avviksvarsel erstattes av nytt avviksvarsel`() {
-        håndterSøknad()
+        vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         håndterVedtaksperiodeNyUtbetaling()
         håndterAktivitetsloggNyAktivitet(varselkoder = listOf("RV_IV_2"))
@@ -52,10 +52,10 @@ internal class NyeVarslerE2ETest : AbstractE2ETest() {
     fun `varsler for ulike vedtaksperioder går ikke i beina på hverandre`() {
         val v1 = UUID.randomUUID()
         val v2 = UUID.randomUUID()
-        håndterSøknad()
+        vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling(vedtaksperiodeId = v1)
         håndterVedtaksperiodeNyUtbetaling(vedtaksperiodeId = v1)
-        håndterSøknad()
+        vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling(vedtaksperiodeId = v2)
         håndterVedtaksperiodeNyUtbetaling(vedtaksperiodeId = v2)
         håndterAktivitetsloggNyAktivitet(vedtaksperiodeId = v1, varselkoder = listOf("EN_KODE"))

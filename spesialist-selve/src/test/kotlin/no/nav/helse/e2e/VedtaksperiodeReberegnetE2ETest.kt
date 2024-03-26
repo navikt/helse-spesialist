@@ -12,7 +12,7 @@ import org.junit.jupiter.api.assertDoesNotThrow
 internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
     @Test
     fun `avbryter saksbehandling før oppgave er opprettet til saksbehandling`() {
-        håndterSøknad()
+        vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         fremTilÅpneOppgaver()
         håndterVedtaksperiodeReberegnet()
@@ -25,6 +25,8 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
 
     @Test
     fun `avbryter saksbehandling etter oppgave er opprettet til saksbehandling`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave()
         håndterVedtaksperiodeReberegnet()
         assertKommandokjedetilstander(
@@ -36,7 +38,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
 
     @Test
     fun `avbryter kommandokjede ved reberegning og oppretter oppgave hos saksbehandler andre runde`() {
-        håndterSøknad()
+        vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         fremTilÅpneOppgaver()
         håndterVedtaksperiodeReberegnet()
@@ -63,7 +65,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
 
     @Test
     fun `avbryter ikke om forrige tilstand er noe annet enn AVVENTER_GODKJENNING eller AVVENTER_GODKJENNING_REVURDERING`() {
-        håndterSøknad()
+        vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         håndterGodkjenningsbehov()
         håndterVedtaksperiodeEndret(forrigeTilstand = "TIL_UTBETALING", gjeldendeTilstand = "UTBETALING_FEILET")
@@ -72,7 +74,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
 
     @Test
     fun `avbryter ikke om forrige tilstand er AVVENTER_GODKJENNING_REVURDERING og gjeldende tilstand er TIL_INFOTRYGD`() {
-        håndterSøknad()
+        vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         håndterGodkjenningsbehov()
         håndterVedtaksperiodeEndret(forrigeTilstand = "AVVENTER_GODKJENNING_REVURDERING", gjeldendeTilstand = "TIL_INFOTRYGD")
@@ -81,7 +83,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
 
     @Test
     fun `avbryter ikke om forrige tilstand er AVVENTER_GODKJENNING_REVURDERING og gjeldende tilstand er AVSLUTTET`() {
-        håndterSøknad()
+        vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         håndterGodkjenningsbehov()
         håndterVedtaksperiodeEndret(forrigeTilstand = "AVVENTER_GODKJENNING_REVURDERING", gjeldendeTilstand = "AVSLUTTET")
@@ -90,7 +92,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
 
     @Test
     fun `avbryter ikke om forrige tilstand er AVVENTER_GODKJENNING_REVURDERING og gjeldende tilstand er TIL_UTBETALING`() {
-        håndterSøknad()
+        vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         håndterGodkjenningsbehov()
         håndterVedtaksperiodeEndret(forrigeTilstand = "AVVENTER_GODKJENNING_REVURDERING", gjeldendeTilstand = "TIL_UTBETALING")
@@ -99,7 +101,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
 
     @Test
     fun `avbryter ikke om gjeldende tilstand er TIL_INFOTRYGD`() {
-        håndterSøknad()
+        vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         håndterGodkjenningsbehov()
         håndterVedtaksperiodeEndret(gjeldendeTilstand = "TIL_INFOTRYGD")
@@ -108,7 +110,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
 
     @Test
     fun `avbryter ikke om gjeldende tilstand er AVSLUTTET`() {
-        håndterSøknad()
+        vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         håndterGodkjenningsbehov()
         håndterVedtaksperiodeEndret(gjeldendeTilstand = "AVSLUTTET")
@@ -117,7 +119,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
 
     @Test
     fun `avbryter ikke om gjeldende tilstand er TIL_UTBETALING`() {
-        håndterSøknad()
+        vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         håndterGodkjenningsbehov()
         håndterVedtaksperiodeEndret(gjeldendeTilstand = "TIL_UTBETALING")

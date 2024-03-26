@@ -22,7 +22,7 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
     @Test
     fun `Fatt vedtak for auu-periode`() {
         val spleisBehandlingId = UUID.randomUUID()
-        håndterSøknad()
+        vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         håndterAvsluttetUtenVedtak(spleisBehandlingId = spleisBehandlingId)
         val hendelser = inspektør.hendelser("vedtak_fattet")
@@ -49,6 +49,8 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
 
     @Test
     fun `Fatt vedtak for periode der SP er fastsatt etter hovedregel`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave()
         håndterSaksbehandlerløsning()
         håndterAvsluttetMedVedtak(fastsattType = "EtterHovedregel")
@@ -60,6 +62,8 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
 
     @Test
     fun `Fatt vedtak for periode der SP er fastsatt etter skjønn`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave()
         håndterSkjønnsfastsattSykepengegrunnlag()
         håndterSaksbehandlerløsning()
@@ -76,6 +80,8 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
 
     @Test
     fun `Fatt vedtak for periode der SP er fastsatt i Infotrygd`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave()
         håndterSkjønnsfastsattSykepengegrunnlag()
         håndterSaksbehandlerløsning()
@@ -91,6 +97,8 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
     fun `Finn sykepengegrunnlagdata i databasen`() {
         val sammenligningsgrunnlag = 420_000.0
         val avviksprosent = 42.0
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave(
             avviksvurderingTestdata = AvviksvurderingTestdata(
                 avviksprosent = avviksprosent,
@@ -123,6 +131,8 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
             spleisBehandlingId = spleisBehandlingId,
             tags = tagsFraGodkjenningsbehovet
         )
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling(spleisBehandlingId = spleisBehandlingId)
         fremTilSaksbehandleroppgave(godkjenningsbehovTestdata = godkjenningsbehov)
         håndterSaksbehandlerløsning()
         håndterAvsluttetMedVedtak(tags = tagsFraAvsluttetMedVedtak, spleisBehandlingId = spleisBehandlingId)

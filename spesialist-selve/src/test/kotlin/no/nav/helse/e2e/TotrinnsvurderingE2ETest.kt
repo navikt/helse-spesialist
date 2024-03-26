@@ -12,6 +12,8 @@ internal class TotrinnsvurderingE2ETest : AbstractE2ETest() {
 
     @Test
     fun `sak blir trukket til totrinnsvurdering ved overstyring av inntekt og refusjon`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave()
         håndterOverstyrInntektOgRefusjon()
         fremTilSaksbehandleroppgave(
@@ -25,6 +27,8 @@ internal class TotrinnsvurderingE2ETest : AbstractE2ETest() {
 
     @Test
     fun `sak blir trukket til totrinnsvurdering ved overstyring av arbeidsforhold`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave(godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(
             orgnummereMedRelevanteArbeidsforhold = listOf(ORGNR_GHOST),
         ))
@@ -50,6 +54,8 @@ internal class TotrinnsvurderingE2ETest : AbstractE2ETest() {
 
     @Test
     fun `sak blir trukket til totrinnsvurdering ved overstyring av tidslinje`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave()
         håndterOverstyrTidslinje()
         fremTilSaksbehandleroppgave(

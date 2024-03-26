@@ -46,6 +46,8 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
 
     @Test
     fun `saksbehandler overstyrer sykdomstidslinje`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave()
         håndterOverstyrTidslinje(dager = listOf(
             OverstyrTidslinjeHandlingFraApi.OverstyrDagFraApi(
@@ -68,6 +70,8 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
 
     @Test
     fun `saksbehandler overstyrer sykdomstidslinje med referanse til lovhjemmel`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave()
         håndterOverstyrTidslinje(dager = listOf(
             OverstyrTidslinjeHandlingFraApi.OverstyrDagFraApi(
@@ -87,6 +91,8 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
 
     @Test
     fun `saksbehandler overstyrer inntekt og refusjon`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave()
         håndterOverstyrInntektOgRefusjon(
             arbeidsgivere = listOf(
@@ -115,6 +121,8 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
 
     @Test
     fun `saksbehandler overstyrer arbeidsforhold`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave()
         håndterOverstyrArbeidsforhold(
             overstyrteArbeidsforhold = listOf(
@@ -139,6 +147,8 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
 
     @Test
     fun `legger ved overstyringer i speil snapshot`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave()
         håndterOverstyrTidslinje()
         fremTilSaksbehandleroppgave(

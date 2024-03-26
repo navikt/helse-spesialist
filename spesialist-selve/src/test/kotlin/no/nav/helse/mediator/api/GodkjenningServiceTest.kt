@@ -19,6 +19,8 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
 
     @Test
     fun `oppgave avventer system når saksbehandlerløsning legges på rapid`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave()
         håndterSaksbehandlerløsning()
         assertGodkjenningsbehovBesvart(godkjent = true, automatiskBehandlet = false)
@@ -28,6 +30,8 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
     @Test
     fun `håndter godkjenning`() {
         val saksbehandler = enSaksbehandler()
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave()
 
         godkjenningService.håndter(godkjenningDto(), "epost@nav.no", saksbehandler, UUID.randomUUID())
@@ -38,6 +42,8 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
     fun `håndter godkjenning med beslutteroppgave`() {
         val opprinneligSaksbehandler = enSaksbehandler()
         val beslutter = enSaksbehandler()
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave()
 
         settTotrinnsvurdering(opprinneligSaksbehandler = opprinneligSaksbehandler, beslutter = beslutter)
@@ -50,6 +56,8 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
     fun `Ved godkjenning av beslutteroppgave reserveres personen til tidligereSaksbehandler`() {
         val opprinneligSaksbehandler = enSaksbehandler()
         val beslutterOid = enSaksbehandler()
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave()
 
         settTotrinnsvurdering(opprinneligSaksbehandler = opprinneligSaksbehandler, beslutter = beslutterOid)
@@ -63,6 +71,8 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
     fun `For beslutteroppgave reserveres personen til opprinnelig saksbehandler, uavhengig av hvem som godkjenner`() {
         val opprinneligSaksbehandler = enSaksbehandler()
         val beslutter = enSaksbehandler()
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave()
 
         settTotrinnsvurdering(opprinneligSaksbehandler, beslutter)
@@ -74,8 +84,10 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
     }
 
     @Test
-    fun `Dersom ikke beslutteroppgave reserveres person til opprinnelig saksbehandler`() {
+    fun `Hvis oppgaven ikke er beslutteroppgave, reserveres person til opprinnelig saksbehandler`() {
         val opprinneligSaksbehandler = enSaksbehandler()
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave()
 
         godkjenningService.håndter(godkjenningDto(), "epost@nav.no", opprinneligSaksbehandler, UUID.randomUUID())
@@ -88,6 +100,8 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
         val opprinneligSaksbehandler = enSaksbehandler()
         val beslutter = enSaksbehandler()
 
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave()
 
         settTotrinnsvurdering(opprinneligSaksbehandler, beslutter)
@@ -102,6 +116,8 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
     fun `Takler at det mangler data på totrinnsvurderingen ved avvisning`() {
         val opprinneligSaksbehandler = enSaksbehandler()
 
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave()
         opprettInitiellTotrinnsvurdering()
         godkjenningService.håndter(godkjenningDtoAvvisning(), "epost@nav.no", opprinneligSaksbehandler, UUID.randomUUID())
@@ -114,6 +130,8 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
         val opprinneligSaksbehandler = enSaksbehandler()
         val beslutter = enSaksbehandler()
 
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave()
         settTotrinnsvurdering(opprinneligSaksbehandler, beslutter)
         godkjenningService.håndter(godkjenningDtoAvvisning(), "epost@nav.no", opprinneligSaksbehandler, UUID.randomUUID())

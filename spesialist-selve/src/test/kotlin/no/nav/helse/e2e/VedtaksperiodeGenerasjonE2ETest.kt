@@ -13,14 +13,14 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
 
     @Test
     fun `Oppretter første generasjon når vedtaksperioden blir opprettet`() {
-        håndterSøknad()
+        vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         assertGenerasjoner(VEDTAKSPERIODE_ID, 1)
     }
 
     @Test
     fun `Oppretter ikke ny generasjon ved vedtaksperiode_endret dersom det finnes en ubehandlet generasjon fra før av`() {
-        håndterSøknad()
+        vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         håndterVedtaksperiodeEndret()
         assertGenerasjoner(VEDTAKSPERIODE_ID, 1)
@@ -28,6 +28,8 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
 
     @Test
     fun `Låser gjeldende generasjon når perioden er godkjent og utbetalt`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave()
         håndterSaksbehandlerløsning()
         håndterVedtakFattet()
@@ -36,18 +38,20 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
 
     @Test
     fun `Oppretter ny generasjon når perioden blir revurdert`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave()
         håndterSaksbehandlerløsning()
         håndterVedtakFattet()
 
-        spleisOppretterNyBehandling(force = true)
+        spleisOppretterNyBehandling()
         assertGenerasjoner(VEDTAKSPERIODE_ID, 2)
         assertFerdigBehandledeGenerasjoner(VEDTAKSPERIODE_ID, 1)
     }
 
     @Test
     fun `Kobler til utbetaling når perioden har fått en ny utbetaling`() {
-        håndterSøknad()
+        vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         håndterVedtaksperiodeNyUtbetaling(utbetalingId = UTBETALING_ID)
         assertGenerasjonerMedUtbetaling(VEDTAKSPERIODE_ID, UTBETALING_ID, 1)
@@ -57,7 +61,7 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
     fun `Gammel utbetaling erstattes av ny utbetaling dersom perioden ikke er ferdig behandlet`() {
         val gammel = UUID.randomUUID()
         val ny = UUID.randomUUID()
-        håndterSøknad()
+        vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         håndterVedtaksperiodeNyUtbetaling(utbetalingId = gammel)
         håndterVedtaksperiodeNyUtbetaling(utbetalingId = ny)
@@ -67,6 +71,8 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
 
     @Test
     fun `fjerner knytning til utbetaling når utbetalingen blir forkastet`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave()
         assertGenerasjonerMedUtbetaling(VEDTAKSPERIODE_ID, UTBETALING_ID, 1)
         håndterUtbetalingForkastet()
@@ -75,13 +81,13 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
 
     @Test
     fun `Flytter aktive varsler for auu`() {
-        håndterSøknad()
+        vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         håndterVedtakFattet()
         håndterAktivitetsloggNyAktivitet(varselkoder = listOf("RV_IM_1"))
 
         val utbetalingId = UUID.randomUUID()
-        spleisOppretterNyBehandling(force = true)
+        spleisOppretterNyBehandling()
         håndterVedtaksperiodeNyUtbetaling(utbetalingId = utbetalingId)
         assertGenerasjoner(VEDTAKSPERIODE_ID, 2)
         assertGenerasjonHarVarsler(VEDTAKSPERIODE_ID, utbetalingId, 1)
@@ -89,13 +95,15 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
 
     @Test
     fun `Flytter aktive varsler for vanlige generasjoner`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
         fremTilSaksbehandleroppgave()
         håndterSaksbehandlerløsning()
         håndterVedtakFattet()
         håndterAktivitetsloggNyAktivitet(varselkoder = listOf("RV_IM_1"))
 
         val utbetalingId = UUID.randomUUID()
-        spleisOppretterNyBehandling(force = true)
+        spleisOppretterNyBehandling()
         håndterVedtaksperiodeNyUtbetaling(utbetalingId = utbetalingId)
         assertGenerasjoner(VEDTAKSPERIODE_ID, 2)
         assertGenerasjonHarVarsler(VEDTAKSPERIODE_ID, utbetalingId, 1)
