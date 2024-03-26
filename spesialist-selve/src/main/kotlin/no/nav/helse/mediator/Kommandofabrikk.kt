@@ -123,12 +123,12 @@ internal class Kommandofabrikk(
     private var commandContext: CommandContext? = null
     private val observers: MutableList<CommandContextObserver> = mutableListOf()
 
-    internal fun nyObserver(observer: CommandContextObserver) {
-        observers.add(observer)
+    internal fun nyObserver(vararg observers: CommandContextObserver) {
+        this.observers.addAll(observers)
     }
 
-    internal fun avregistrerObserver(observer: CommandContextObserver) {
-        observers.remove(observer)
+    internal fun avregistrerObserver(vararg observers: CommandContextObserver) {
+        this.observers.removeAll(observers.toSet())
     }
 
     internal fun settEksisterendeContext(commandContext: CommandContext) {

@@ -397,8 +397,7 @@ internal class MeldingMediator(
         val utgåendeMeldingerMediator = UtgåendeMeldingerMediator()
         val commandContextTilstandMediator = CommandContextTilstandMediator()
         try {
-            kommandofabrikk.nyObserver(utgåendeMeldingerMediator)
-            kommandofabrikk.nyObserver(commandContextTilstandMediator)
+            kommandofabrikk.nyObserver(utgåendeMeldingerMediator, commandContextTilstandMediator)
             personRepository.brukPersonHvisFinnes(melding.fødselsnummer()) {
                 logg.info("Personen finnes i databasen, behandler melding $meldingnavn")
                 sikkerlogg.info("Personen finnes i databasen, behandler melding $meldingnavn")
@@ -411,8 +410,7 @@ internal class MeldingMediator(
             logg.error("Feil ved behandling av melding $meldingnavn", e.message, e)
             throw e
         } finally {
-            kommandofabrikk.avregistrerObserver(utgåendeMeldingerMediator)
-            kommandofabrikk.avregistrerObserver(commandContextTilstandMediator)
+            kommandofabrikk.avregistrerObserver(utgåendeMeldingerMediator, commandContextTilstandMediator)
             commandContextTilstandMediator.publiserTilstandsendringer(melding, messageContext)
         }
     }
