@@ -23,7 +23,6 @@ import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.AvbrytContextCommand
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.KlargjørArbeidsgiverCommand
-import no.nav.helse.modell.kommando.LagreBehandlingsInformasjonCommand
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterPersonCommand
 import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
@@ -162,7 +161,6 @@ internal class GodkjenningsbehovCommand(
     orgnummereMedRelevanteArbeidsforhold: List<String>,
     vedtaksperiodeId: UUID,
     spleisBehandlingId: UUID,
-    tags: List<String>,
     periodetype: Periodetype,
     inntektskilde: Inntektskilde,
     førstegangsbehandling: Boolean,
@@ -185,7 +183,6 @@ internal class GodkjenningsbehovCommand(
     åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     risikovurderingDao: RisikovurderingDao,
     påVentDao: PåVentDao,
-    generasjonDao: GenerasjonDao,
     overstyringDao: OverstyringDao,
     periodehistorikkDao: PeriodehistorikkDao,
     snapshotDao: SnapshotDao,
@@ -200,12 +197,6 @@ internal class GodkjenningsbehovCommand(
             hendelseId = id,
             vedtaksperiodeId = vedtaksperiodeId,
             vedtakDao = vedtakDao
-        ),
-        LagreBehandlingsInformasjonCommand(
-          vedtaksperiodeId = vedtaksperiodeId,
-            spleisBehandlingId = spleisBehandlingId,
-            tags = tags,
-            generasjonDao = generasjonDao
         ),
         AvbrytContextCommand(
             vedtaksperiodeId = vedtaksperiodeId,
