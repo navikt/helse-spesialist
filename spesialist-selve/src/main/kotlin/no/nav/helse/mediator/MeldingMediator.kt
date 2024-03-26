@@ -30,6 +30,7 @@ import no.nav.helse.mediator.meldinger.VedtaksperiodeEndretRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeForkastetRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeNyUtbetalingRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeReberegnetRiver
+import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.mediator.meldinger.hendelser.AvsluttetMedVedtakMessage
 import no.nav.helse.mediator.meldinger.hendelser.AvsluttetUtenVedtakMessage
 import no.nav.helse.mediator.meldinger.løsninger.ArbeidsforholdRiver
@@ -349,10 +350,12 @@ internal class MeldingMediator(
     internal fun mottaMelding(melding: Personmelding, messageContext: MessageContext) {
         val meldingnavn = requireNotNull(melding::class.simpleName)
         withMDC(
-            mapOf(
+            mutableMapOf(
                 "meldingId" to melding.id.toString(),
                 "meldingnavn" to meldingnavn
-            )
+            ).apply {
+                if (melding is Vedtaksperiodemelding) put("vedtaksperiodeId", melding.vedtaksperiodeId().toString())
+            }
         ) {
             logg.info("Melding $meldingnavn mottatt")
             sikkerlogg.info("Melding $meldingnavn mottatt:\n${melding.toJson()}")
