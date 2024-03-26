@@ -134,6 +134,7 @@ internal class Kommandofabrikk(
     internal fun settEksisterendeContext(commandContext: CommandContext) {
         this.commandContext = commandContext
     }
+
     internal fun nullstilleEksisterendeContext() {
         this.commandContext = null
     }
@@ -164,7 +165,7 @@ internal class Kommandofabrikk(
         avviksvurderingDao.lagre(avviksvurdering)
     }
 
-    fun endretEgenAnsattStatus(melding: EndretEgenAnsattStatus): EndretEgenAnsattStatusCommand {
+    private fun endretEgenAnsattStatus(melding: EndretEgenAnsattStatus): EndretEgenAnsattStatusCommand {
         return EndretEgenAnsattStatusCommand(
             fødselsnummer = melding.fødselsnummer(),
             erEgenAnsatt = melding.erEgenAnsatt,
@@ -227,7 +228,7 @@ internal class Kommandofabrikk(
         )
     }
 
-    fun vedtaksperiodeReberegnet(hendelse: VedtaksperiodeReberegnet): VedtaksperiodeReberegnetCommand {
+    private fun vedtaksperiodeReberegnet(hendelse: VedtaksperiodeReberegnet): VedtaksperiodeReberegnetCommand {
         return VedtaksperiodeReberegnetCommand(
             vedtaksperiodeId = hendelse.vedtaksperiodeId(),
             utbetalingDao = utbetalingDao,
@@ -237,7 +238,7 @@ internal class Kommandofabrikk(
         )
     }
 
-    fun vedtaksperiodeNyUtbetaling(hendelse: VedtaksperiodeNyUtbetaling): VedtaksperiodeNyUtbetalingCommand {
+    private fun vedtaksperiodeNyUtbetaling(hendelse: VedtaksperiodeNyUtbetaling): VedtaksperiodeNyUtbetalingCommand {
         return VedtaksperiodeNyUtbetalingCommand(
             vedtaksperiodeId = hendelse.vedtaksperiodeId(),
             utbetalingId = hendelse.utbetalingId,
@@ -266,7 +267,7 @@ internal class Kommandofabrikk(
         )
     }
 
-    fun overstyringIgangsatt(melding: OverstyringIgangsatt): OverstyringIgangsattCommand {
+    private fun overstyringIgangsatt(melding: OverstyringIgangsatt): OverstyringIgangsattCommand {
         return OverstyringIgangsattCommand(
             berørteVedtaksperiodeIder = melding.berørteVedtaksperiodeIder,
             kilde = melding.kilde,
@@ -274,7 +275,7 @@ internal class Kommandofabrikk(
         )
     }
 
-    fun utbetalingAnnullert(hendelse: UtbetalingAnnullert): UtbetalingAnnullertCommand {
+    private fun utbetalingAnnullert(hendelse: UtbetalingAnnullert): UtbetalingAnnullertCommand {
         return UtbetalingAnnullertCommand(
             fødselsnummer = hendelse.fødselsnummer(),
             utbetalingId = hendelse.utbetalingId,
@@ -403,16 +404,19 @@ internal class Kommandofabrikk(
     private fun oppdaterSnapshotCommand(personmelding: Personmelding): OppdaterSnapshotCommand {
         return OppdaterSnapshotCommand(snapshotClient, snapshotDao, personmelding.fødselsnummer(), personDao)
     }
-    internal fun iverksettOppdaterSnapshot(melding: Personmelding){
+
+    internal fun iverksettOppdaterSnapshot(melding: Personmelding) {
         iverksett(oppdaterSnapshotCommand(melding), melding.id)
     }
-    internal fun iverksettVedtaksperiodeForkastet(melding: VedtaksperiodeForkastet){
+
+    internal fun iverksettVedtaksperiodeForkastet(melding: VedtaksperiodeForkastet) {
         iverksett(vedtaksperiodeForkastet(melding), melding.id)
     }
 
     internal fun iverksettUtbetalingEndret(melding: UtbetalingEndret) {
         iverksett(utbetalingEndret(melding), melding.id)
     }
+
     internal fun iverksettUtbetalingAnnulert(melding: UtbetalingAnnullert) {
         iverksett(utbetalingAnnullert(melding), melding.id)
     }
@@ -439,19 +443,23 @@ internal class Kommandofabrikk(
 
     private fun iverksett(command: Command, meldingId: UUID) {
         val commandContext = this.commandContext ?: nyContext(meldingId)
-        observers.forEach{commandContext.nyObserver(it)}
+        observers.forEach { commandContext.nyObserver(it) }
         val contextId = commandContext.id()
-        try {
-            if (commandContext.utfør(commandContextDao, meldingId, command)) {
-                val kjøretid = commandContextDao.tidsbrukForContext(contextId)
-                metrikker(command.name, kjøretid, contextId)
-                logg.info("Kommando(er) for ${command.name} er utført ferdig. Det tok ca {}ms å kjøre hele kommandokjeden", kjøretid)
-            } else logg.info("${command.name} er suspendert")
-        } catch (err: Exception) {
-            command.undo(commandContext)
-            throw err
-        } finally {
-            observers.forEach{commandContext.avregistrerObserver(it)}
+        withMDC(
+            mapOf("contextId" to contextId.toString())
+        ) {
+            try {
+                if (commandContext.utfør(commandContextDao, meldingId, command)) {
+                    val kjøretid = commandContextDao.tidsbrukForContext(contextId)
+                    metrikker(command.name, kjøretid, contextId)
+                    logg.info("Kommando(er) for ${command.name} er utført ferdig. Det tok ca {}ms å kjøre hele kommandokjeden", kjøretid)
+                } else logg.info("${command.name} er suspendert")
+            } catch (err: Exception) {
+                command.undo(commandContext)
+                throw err
+            } finally {
+                observers.forEach { commandContext.avregistrerObserver(it) }
+            }
         }
     }
 
