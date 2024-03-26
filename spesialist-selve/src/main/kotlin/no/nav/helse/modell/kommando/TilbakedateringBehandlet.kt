@@ -1,5 +1,6 @@
 package no.nav.helse.modell.kommando
 
+import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.mediator.GodkjenningMediator
@@ -30,6 +31,15 @@ internal class TilbakedateringBehandlet private constructor(
             Periode(it["fom"].asLocalDate(), it["tom"].asLocalDate())
         },
         json = packet.toJson()
+    )
+    internal constructor(jsonNode: JsonNode): this(
+        id = UUID.fromString(jsonNode["@id"].asText()),
+        fødselsnummer = jsonNode["fødselsnummer"].asText(),
+        syketilfelleStartdato = jsonNode["syketilfelleStartDato"].asLocalDate(),
+        perioder = jsonNode["perioder"].map {
+            Periode(it["fom"].asLocalDate(), it["tom"].asLocalDate())
+        },
+        json = jsonNode.toString()
     )
     override fun fødselsnummer() = fødselsnummer
     override fun toJson(): String = json

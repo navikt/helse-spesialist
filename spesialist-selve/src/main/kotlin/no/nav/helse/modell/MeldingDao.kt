@@ -219,6 +219,7 @@ internal class MeldingDao(private val dataSource: DataSource) {
             VEDTAKSPERIODE_ENDRET -> VedtaksperiodeEndret(jsonNode)
             VEDTAKSPERIODE_FORKASTET -> VedtaksperiodeForkastet(jsonNode)
             UTBETALING_ANNULLERT -> UtbetalingAnnullert(jsonNode)
+            GODKJENT_TILBAKEDATERT_SYKMELDING -> TilbakedateringBehandlet(jsonNode)
             else -> throw IllegalArgumentException(
                 "Prøver å gjenoppta en kommando(kjede) etter mottak av hendelsetype " +
                         "$meldingtype, men koden som trengs mangler!")
