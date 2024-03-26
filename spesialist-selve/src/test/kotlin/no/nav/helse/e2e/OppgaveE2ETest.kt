@@ -14,7 +14,7 @@ internal class OppgaveE2ETest: AbstractE2ETest() {
     fun `invaliderer oppgave når utbetalingen har blitt forkastet`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave()
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterUtbetalingForkastet()
         assertSaksbehandleroppgave(oppgavestatus = Invalidert)
     }
@@ -23,7 +23,7 @@ internal class OppgaveE2ETest: AbstractE2ETest() {
     fun `invaliderer oppgave når utbetaling som har status IKKE_UTBETALT blir forkastet`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave()
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterUtbetalingForkastet(forrigeStatus = IKKE_UTBETALT)
         assertSaksbehandleroppgave(oppgavestatus = Invalidert)
     }
@@ -32,7 +32,7 @@ internal class OppgaveE2ETest: AbstractE2ETest() {
     fun `ferdigstiller oppgaven først når utbetalingen er utbetalt`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave()
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterSaksbehandlerløsning()
         håndterUtbetalingUtbetalt()
         assertSaksbehandleroppgave(oppgavestatus = Ferdigstilt)
@@ -42,10 +42,10 @@ internal class OppgaveE2ETest: AbstractE2ETest() {
     fun `oppretter ny oppgave når det finnes en invalidert oppgave for en vedtaksperiode`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave()
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterUtbetalingForkastet()
         assertSaksbehandleroppgave(oppgavestatus = Invalidert)
-        fremTilSaksbehandleroppgave(
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             harOppdatertMetadata = true,
             harRisikovurdering = true,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID()),
@@ -57,7 +57,7 @@ internal class OppgaveE2ETest: AbstractE2ETest() {
     fun `oppretter ikke ny oppgave når det finnes en aktiv oppgave`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave()
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         assertSaksbehandleroppgave(oppgavestatus = AvventerSaksbehandler)
         håndterGodkjenningsbehovUtenValidering()
         assertSaksbehandleroppgave(oppgavestatus = AvventerSaksbehandler)
@@ -67,11 +67,11 @@ internal class OppgaveE2ETest: AbstractE2ETest() {
     fun `oppretter ny oppgave når saksbehandler har godkjent, men spleis har reberegnet i mellomtiden`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave()
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterSaksbehandlerløsning()
         håndterUtbetalingForkastet()
         assertSaksbehandleroppgave(oppgavestatus = Invalidert)
-        fremTilSaksbehandleroppgave(
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             harOppdatertMetadata = true,
             harRisikovurdering = true,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID()),
@@ -83,10 +83,10 @@ internal class OppgaveE2ETest: AbstractE2ETest() {
     fun `håndterer nytt godkjenningsbehov om vi har automatisk godkjent en periode men spleis har reberegnet i mellomtiden`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave()
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterUtbetalingForkastet()
         assertSaksbehandleroppgave(oppgavestatus = Invalidert)
-        fremTilSaksbehandleroppgave(
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             harOppdatertMetadata = true,
             harRisikovurdering = true,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID()),

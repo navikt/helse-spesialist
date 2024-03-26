@@ -48,7 +48,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
     fun `saksbehandler overstyrer sykdomstidslinje`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave()
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterOverstyrTidslinje(dager = listOf(
             OverstyrTidslinjeHandlingFraApi.OverstyrDagFraApi(
                 dato = 20.januar,
@@ -64,7 +64,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         assertOppgaver(UTBETALING_ID, "AvventerSaksbehandler", 0)
 
         val nyUtbetalingId = UUID.randomUUID()
-        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true, godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = nyUtbetalingId))
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(harOppdatertMetadata = true, harRisikovurdering = true, godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = nyUtbetalingId))
         assertOppgaver(nyUtbetalingId, "AvventerSaksbehandler", 1)
     }
 
@@ -72,7 +72,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
     fun `saksbehandler overstyrer sykdomstidslinje med referanse til lovhjemmel`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave()
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterOverstyrTidslinje(dager = listOf(
             OverstyrTidslinjeHandlingFraApi.OverstyrDagFraApi(
                 dato = 20.januar,
@@ -93,7 +93,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
     fun `saksbehandler overstyrer inntekt og refusjon`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave()
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterOverstyrInntektOgRefusjon(
             arbeidsgivere = listOf(
                 OverstyrArbeidsgiverFraApi(
@@ -113,7 +113,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         assertOppgaver(UTBETALING_ID, "AvventerSaksbehandler", 0)
 
         val nyUtbetalingId = UUID.randomUUID()
-        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true, godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = nyUtbetalingId))
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(harOppdatertMetadata = true, harRisikovurdering = true, godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = nyUtbetalingId))
 
         assertOppgaver(nyUtbetalingId, "AvventerSaksbehandler", 1)
         assertTildeling(SAKSBEHANDLER_EPOST, nyUtbetalingId)
@@ -123,7 +123,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
     fun `saksbehandler overstyrer arbeidsforhold`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave()
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterOverstyrArbeidsforhold(
             overstyrteArbeidsforhold = listOf(
                 OverstyrArbeidsforholdHandlingFraApi.ArbeidsforholdFraApi(
@@ -139,7 +139,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         assertOverstyrArbeidsforhold(FØDSELSNUMMER, 1)
 
         val nyUtbetalingId = UUID.randomUUID()
-        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true, godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = nyUtbetalingId))
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(harOppdatertMetadata = true, harRisikovurdering = true, godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = nyUtbetalingId))
 
         assertOppgaver(nyUtbetalingId, "AvventerSaksbehandler", 1)
         assertTildeling(SAKSBEHANDLER_EPOST, nyUtbetalingId)
@@ -149,15 +149,15 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
     fun `legger ved overstyringer i speil snapshot`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave()
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterOverstyrTidslinje()
-        fremTilSaksbehandleroppgave(
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             harOppdatertMetadata = true,
             harRisikovurdering = true,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID()),
         )
         håndterOverstyrInntektOgRefusjon()
-        fremTilSaksbehandleroppgave(
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             harOppdatertMetadata = true,
             harRisikovurdering = true,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID()),
@@ -169,7 +169,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         every { dataFetchingEnvironment.graphQlContext.get<SaksbehandlerTilganger>("tilganger") } returns SAKSBEHANDLERTILGANGER_UTEN_TILGANGER
 
         val nyUtbetalingId = UUID.randomUUID()
-        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = true, godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = nyUtbetalingId))
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(harOppdatertMetadata = true, harRisikovurdering = true, godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = nyUtbetalingId))
         assertOppgaver(nyUtbetalingId, "AvventerSaksbehandler", 1)
 
         val snapshot: Person = runBlocking { personQuery.person(FØDSELSNUMMER, null, dataFetchingEnvironment).data!! }

@@ -44,7 +44,6 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.Periode
-import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -233,30 +232,48 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         this.utbetalingId = utbetalingId
     }
 
-    protected fun automatiskGodkjent(
+    protected fun spesialistInnvilgerAutomatisk(
         fom: LocalDate = 1.januar,
         tom: LocalDate = 31.januar,
         skjæringstidspunkt: LocalDate = fom,
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
         avviksvurderingTestdata: AvviksvurderingTestdata = AvviksvurderingTestdata(skjæringstidspunkt = skjæringstidspunkt),
     ) {
-        fremTilÅpneOppgaver(
+        spesialistBehandlerGodkjenningsbehovFremTilRisikovurdering(
             avviksvurderingTestdata = avviksvurderingTestdata,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(
-                fødselsnummer = FØDSELSNUMMER,
                 periodeFom = fom,
                 periodeTom = tom,
                 skjæringstidspunkt = skjæringstidspunkt
             )
         )
-        håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning(vedtaksperiodeId = vedtaksperiodeId)
         håndterUtbetalingUtbetalt()
         håndterAvsluttetMedVedtak(fom = fom, tom = tom, skjæringstidspunkt = skjæringstidspunkt)
         håndterVedtakFattet()
     }
 
-    protected fun fremTilVergemål(
+    protected fun spesialistInnvilgerManuelt(
+        regelverksvarsler: List<String> = emptyList(),
+        fullmakter: List<Fullmakt> = emptyList(),
+        risikofunn: List<Risikofunn> = emptyList(),
+        harOppdatertMetadata: Boolean = false,
+        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata
+    ) {
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
+            regelverksvarsler = regelverksvarsler,
+            fullmakter = fullmakter,
+            risikofunn = risikofunn,
+            harOppdatertMetadata = harOppdatertMetadata,
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata,
+        )
+        håndterSaksbehandlerløsning(vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
+        håndterUtbetalingUtbetalt()
+        håndterAvsluttetMedVedtak()
+        håndterVedtakFattet(vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
+    }
+
+    protected fun spesialistBehandlerGodkjenningsbehovFremTilVergemål(
         regelverksvarsler: List<String> = emptyList(),
         harOppdatertMetadata: Boolean = false,
         snapshotversjon: Int = 1,
@@ -266,7 +283,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         avviksvurderingTestdata: AvviksvurderingTestdata = this.avviksvurderingTestdata,
         godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata,
     ) {
-        fremForbiUtbetalingsfilter(
+        spesialistBehandlerGodkjenningsbehovTilOgMedUtbetalingsfilter(
             regelverksvarsler,
             harOppdatertMetadata = harOppdatertMetadata,
             snapshotversjon = snapshotversjon,
@@ -279,7 +296,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         if (!harOppdatertMetadata) håndterEgenansattløsning()
     }
 
-    protected fun fremTilÅpneOppgaver(
+    protected fun spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver(
         regelverksvarsler: List<String> = emptyList(),
         fullmakter: List<Fullmakt> = emptyList(),
         harOppdatertMetadata: Boolean = false,
@@ -290,7 +307,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         avviksvurderingTestdata: AvviksvurderingTestdata = this.avviksvurderingTestdata,
         godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata,
     ) {
-        fremTilVergemål(
+        spesialistBehandlerGodkjenningsbehovFremTilVergemål(
             regelverksvarsler,
             harOppdatertMetadata,
             snapshotversjon,
@@ -303,7 +320,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         håndterVergemålløsning(fullmakter = fullmakter)
     }
 
-    protected fun fremForbiUtbetalingsfilter(
+    protected fun spesialistBehandlerGodkjenningsbehovTilOgMedUtbetalingsfilter(
         regelverksvarsler: List<String> = emptyList(),
         harOppdatertMetadata: Boolean = false,
         snapshotversjon: Int = 1,
@@ -342,7 +359,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         verify { snapshotClient.hentSnapshot(godkjenningsbehovTestdata.fødselsnummer) }
     }
 
-    private fun håndterAvviksvurdering(
+    private fun spinnvillAvviksvurderer(
         avviksvurderingTestdata: AvviksvurderingTestdata,
         fødselsnummer: String,
         aktørId: String,
@@ -352,46 +369,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             meldingssender.sendAvvikVurdert(avviksvurderingTestdata, fødselsnummer, aktørId, organisasjonsnummer)
     }
 
-    private fun forlengelseFremTilÅpneOppgaver(
-        fom: LocalDate = 1.januar,
-        tom: LocalDate = 31.januar,
-        skjæringstidspunkt: LocalDate = fom,
-        andreArbeidsforhold: List<String> = emptyList(),
-        fullmakter: List<Fullmakt> = emptyList(),
-        vedtaksperiodeId: UUID = testperson.vedtaksperiodeId2,
-        utbetalingId: UUID = testperson.utbetalingId2,
-        harOppdatertMetadata: Boolean = true,
-        vilkårsgrunnlagId: UUID = UUID.randomUUID(),
-    ) {
-        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshot(
-            fødselsnummer = FØDSELSNUMMER,
-            aktørId = AKTØR,
-            organisasjonsnummer = ORGNR,
-            vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingId = utbetalingId
-        )
-        håndterGodkjenningsbehov(
-            harOppdatertMetainfo = harOppdatertMetadata,
-            avviksvurderingTestdata = this.avviksvurderingTestdata,
-            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(
-                fødselsnummer = FØDSELSNUMMER,
-                periodeFom = fom,
-                periodeTom = tom,
-                skjæringstidspunkt = skjæringstidspunkt,
-                orgnummereMedRelevanteArbeidsforhold = andreArbeidsforhold,
-                vedtaksperiodeId = vedtaksperiodeId,
-                utbetalingId = utbetalingId,
-                vilkårsgrunnlagId = vilkårsgrunnlagId,
-                periodetype = FORLENGELSE,
-                avviksvurderingId = this.avviksvurderingTestdata.avviksvurderingId,
-            )
-        )
-        verify { snapshotClient.hentSnapshot(FØDSELSNUMMER) }
-
-        håndterVergemålløsning(fullmakter = fullmakter)
-    }
-
-    protected fun fremTilSaksbehandleroppgave(
+    protected fun spesialistBehandlerGodkjenningsbehovFremTilOppgave(
         enhet: String = ENHET_OSLO,
         regelverksvarsler: List<String> = emptyList(),
         fullmakter: List<Fullmakt> = emptyList(),
@@ -405,7 +383,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         avviksvurderingTestdata: AvviksvurderingTestdata = this.avviksvurderingTestdata,
         godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata,
     ) {
-        fremTilRisikovurdering(
+        spesialistBehandlerGodkjenningsbehovFremTilRisikovurdering(
             enhet = enhet,
             regelverksvarsler = regelverksvarsler,
             fullmakter = fullmakter,
@@ -424,7 +402,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         if (!erFerdigstilt(sisteGodkjenningsbehovId)) håndterInntektløsning()
     }
 
-    private fun fremTilRisikovurdering(
+    private fun spesialistBehandlerGodkjenningsbehovFremTilRisikovurdering(
         enhet: String = ENHET_OSLO,
         regelverksvarsler: List<String> = emptyList(),
         fullmakter: List<Fullmakt> = emptyList(),
@@ -435,7 +413,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         avviksvurderingTestdata: AvviksvurderingTestdata = this.avviksvurderingTestdata,
         godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata,
     ) {
-        fremTilÅpneOppgaver(
+        spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver(
             regelverksvarsler,
             fullmakter,
             harOppdatertMetadata = harOppdatertMetadata,
@@ -447,80 +425,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             godkjenningsbehovTestdata = godkjenningsbehovTestdata,
         )
         håndterÅpneOppgaverløsning()
-    }
-
-    private fun forlengelseFremTilSaksbehandleroppgave(
-        fom: LocalDate = 1.januar,
-        tom: LocalDate = 31.januar,
-        skjæringstidspunkt: LocalDate = fom,
-        andreArbeidsforhold: List<String> = emptyList(),
-        fullmakter: List<Fullmakt> = emptyList(),
-        risikofunn: List<Risikofunn> = emptyList(),
-        vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
-        utbetalingId: UUID = testperson.utbetalingId1,
-        harOppdatertMetadata: Boolean = true,
-    ) {
-        forlengelseFremTilÅpneOppgaver(
-            fom,
-            tom,
-            skjæringstidspunkt,
-            andreArbeidsforhold,
-            fullmakter,
-            vedtaksperiodeId,
-            utbetalingId,
-            harOppdatertMetadata
-        )
-        håndterÅpneOppgaverløsning()
-        if (erRevurdering(vedtaksperiodeId)) return
-        håndterRisikovurderingløsning(
-            kanGodkjennesAutomatisk = false,
-            risikofunn = risikofunn,
-            vedtaksperiodeId = vedtaksperiodeId
-        )
-    }
-
-    protected fun forlengVedtak(
-        fom: LocalDate,
-        tom: LocalDate,
-        skjæringstidspunkt: LocalDate = fom,
-        andreArbeidsforhold: List<String> = emptyList(),
-        fullmakter: List<Fullmakt> = emptyList(),
-        risikofunn: List<Risikofunn> = emptyList(),
-        vedtaksperiodeId: UUID = UUID.randomUUID(),
-        utbetalingId: UUID = UUID.randomUUID(),
-        harOppdatertMetadata: Boolean = true,
-    ) {
-        forlengelseFremTilSaksbehandleroppgave(
-            fom,
-            tom,
-            skjæringstidspunkt,
-            andreArbeidsforhold,
-            fullmakter,
-            risikofunn,
-            vedtaksperiodeId,
-            utbetalingId,
-            harOppdatertMetadata
-        )
-        håndterSaksbehandlerløsning(vedtaksperiodeId = vedtaksperiodeId)
-        håndterVedtakFattet(vedtaksperiodeId = vedtaksperiodeId)
-    }
-
-    protected fun nyttVedtak(
-        regelverksvarsler: List<String> = emptyList(),
-        fullmakter: List<Fullmakt> = emptyList(),
-        risikofunn: List<Risikofunn> = emptyList(),
-        harOppdatertMetadata: Boolean = false,
-        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata
-    ) {
-        fremTilSaksbehandleroppgave(
-            regelverksvarsler = regelverksvarsler,
-            fullmakter = fullmakter,
-            risikofunn = risikofunn,
-            harOppdatertMetadata = harOppdatertMetadata,
-            godkjenningsbehovTestdata = godkjenningsbehovTestdata,
-        )
-        håndterSaksbehandlerløsning(vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
-        håndterVedtakFattet(vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
     }
 
     protected fun vedtaksløsningenMottarNySøknad(
@@ -651,20 +555,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             varselkoder = varselkoder
         )
         assertIngenEtterspurteBehov()
-    }
-
-    protected fun håndterSykefraværstilfeller(
-        aktørId: String = AKTØR,
-        fødselsnummer: String = FØDSELSNUMMER,
-        tilfeller: List<Map<String, Any>>,
-    ) {
-        sisteMeldingId = meldingssender.sendSykefraværstilfeller(
-            aktørId,
-            fødselsnummer,
-            tilfeller
-        )
-        assertIngenEtterspurteBehov()
-        assertIngenUtgåendeMeldinger()
     }
 
     protected fun håndterEndretSkjermetinfo(
@@ -860,7 +750,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             personbeløp = personbeløp
         )
         håndterVedtaksperiodeEndret(vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
-        håndterAvviksvurdering(avviksvurderingTestdata, godkjenningsbehovTestdata.fødselsnummer, godkjenningsbehovTestdata.aktørId, godkjenningsbehovTestdata.organisasjonsnummer)
+        spinnvillAvviksvurderer(avviksvurderingTestdata, godkjenningsbehovTestdata.fødselsnummer, godkjenningsbehovTestdata.aktørId, godkjenningsbehovTestdata.organisasjonsnummer)
         sisteMeldingId = sendGodkjenningsbehov(godkjenningsbehovTestdata)
         sisteGodkjenningsbehovId = sisteMeldingId
     }

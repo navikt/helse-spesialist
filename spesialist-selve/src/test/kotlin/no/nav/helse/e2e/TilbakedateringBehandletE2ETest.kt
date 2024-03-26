@@ -20,7 +20,7 @@ internal class TilbakedateringBehandletE2ETest : AbstractE2ETest() {
     fun `fatter automatisk vedtak dersom åpen oppgave får inn godkjent tilbakedatering`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilÅpneOppgaver(
+        spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver(
             regelverksvarsler = listOf("RV_SØ_3"),
         )
         håndterÅpneOppgaverløsning()
@@ -40,7 +40,7 @@ internal class TilbakedateringBehandletE2ETest : AbstractE2ETest() {
     fun `fatter ikke automatisk vedtak dersom ingen av periodene i sykmeldingen er innenfor vedtaksperiodens fom og tom`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilÅpneOppgaver(
+        spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver(
             regelverksvarsler = listOf("RV_SØ_3"),
         )
         håndterÅpneOppgaverløsning()
@@ -60,7 +60,7 @@ internal class TilbakedateringBehandletE2ETest : AbstractE2ETest() {
     fun `fjern varsel om tilbakedatering dersom tilbakedatert sykmelding er godkjent`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilÅpneOppgaver(regelverksvarsler = listOf("RV_SØ_3"),)
+        spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver(regelverksvarsler = listOf("RV_SØ_3"),)
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning()
         håndterInntektløsning()
@@ -74,7 +74,7 @@ internal class TilbakedateringBehandletE2ETest : AbstractE2ETest() {
     fun `fjern varsel om tilbakedatering på alle overlappende perioder i sykefraværstilfellet for ok-sykmelding`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilÅpneOppgaver(regelverksvarsler = listOf("RV_SØ_3"),)
+        spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver(regelverksvarsler = listOf("RV_SØ_3"),)
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning()
         håndterInntektløsning()

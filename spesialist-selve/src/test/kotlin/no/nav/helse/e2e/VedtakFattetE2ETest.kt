@@ -17,7 +17,7 @@ internal class VedtakFattetE2ETest: AbstractE2ETest() {
     fun `vedtak fattet medfører låsing av vedtaksperiode-generasjon`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave()
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterSaksbehandlerløsning()
         assertDoesNotThrow {
             håndterVedtakFattet()
@@ -29,7 +29,7 @@ internal class VedtakFattetE2ETest: AbstractE2ETest() {
     fun `spesialsak er ikke lenger spesialsak når den har vært spesialsak én gang`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave()
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         opprettSpesialsak(VEDTAKSPERIODE_ID)
         assertSpesialsak(VEDTAKSPERIODE_ID, true)
         håndterSaksbehandlerløsning()

@@ -38,7 +38,7 @@ internal class AdressebeskyttelseEndretE2ETest : AbstractE2ETest() {
     fun `Etterspør personinfo men avviser ikke når det ikke er noen åpne oppgaver`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave()
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterSaksbehandlerløsning()
         håndterVedtakFattet()
 
@@ -52,7 +52,7 @@ internal class AdressebeskyttelseEndretE2ETest : AbstractE2ETest() {
     fun `Behandler ny strengt fortrolig adressebeskyttelse og avviser`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave()
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterAdressebeskyttelseEndret()
         assertSisteEtterspurteBehov("HentPersoninfoV2")
 
@@ -64,7 +64,7 @@ internal class AdressebeskyttelseEndretE2ETest : AbstractE2ETest() {
     fun `Behandler ny fortrolig adressebeskyttelse og avviser ikke`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave()
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterAdressebeskyttelseEndret()
         assertSisteEtterspurteBehov("HentPersoninfoV2")
 

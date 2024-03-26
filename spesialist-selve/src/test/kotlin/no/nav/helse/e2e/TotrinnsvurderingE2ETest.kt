@@ -14,9 +14,9 @@ internal class TotrinnsvurderingE2ETest : AbstractE2ETest() {
     fun `sak blir trukket til totrinnsvurdering ved overstyring av inntekt og refusjon`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave()
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterOverstyrInntektOgRefusjon()
-        fremTilSaksbehandleroppgave(
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             harOppdatertMetadata = true,
             harRisikovurdering = true,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID()),
@@ -29,7 +29,7 @@ internal class TotrinnsvurderingE2ETest : AbstractE2ETest() {
     fun `sak blir trukket til totrinnsvurdering ved overstyring av arbeidsforhold`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave(godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(
             orgnummereMedRelevanteArbeidsforhold = listOf(ORGNR_GHOST),
         ))
         håndterOverstyrArbeidsforhold(
@@ -43,7 +43,7 @@ internal class TotrinnsvurderingE2ETest : AbstractE2ETest() {
                 )
             )
         )
-        fremTilSaksbehandleroppgave(
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             harOppdatertMetadata = true,
             harRisikovurdering = true,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID()),
@@ -56,9 +56,9 @@ internal class TotrinnsvurderingE2ETest : AbstractE2ETest() {
     fun `sak blir trukket til totrinnsvurdering ved overstyring av tidslinje`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave()
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterOverstyrTidslinje()
-        fremTilSaksbehandleroppgave(
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             harOppdatertMetadata = true,
             harRisikovurdering = true,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID()),

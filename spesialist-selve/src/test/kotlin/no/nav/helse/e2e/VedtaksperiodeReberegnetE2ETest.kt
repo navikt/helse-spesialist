@@ -14,7 +14,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
     fun `avbryter saksbehandling før oppgave er opprettet til saksbehandling`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilÅpneOppgaver()
+        spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver()
         håndterVedtaksperiodeReberegnet()
         assertKommandokjedetilstander(
             sisteGodkjenningsbehovId,
@@ -27,7 +27,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
     fun `avbryter saksbehandling etter oppgave er opprettet til saksbehandling`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave()
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterVedtaksperiodeReberegnet()
         assertKommandokjedetilstander(
             sisteGodkjenningsbehovId,
@@ -40,7 +40,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
     fun `avbryter kommandokjede ved reberegning og oppretter oppgave hos saksbehandler andre runde`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilÅpneOppgaver()
+        spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver()
         håndterVedtaksperiodeReberegnet()
         assertKommandokjedetilstander(
             sisteGodkjenningsbehovId,
@@ -48,7 +48,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         )
         assertSaksbehandleroppgaveBleIkkeOpprettet()
 
-        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, harRisikovurdering = false)
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(harOppdatertMetadata = true, harRisikovurdering = false)
         assertKommandokjedetilstander(
             sisteGodkjenningsbehovId,
             NY, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, FERDIG

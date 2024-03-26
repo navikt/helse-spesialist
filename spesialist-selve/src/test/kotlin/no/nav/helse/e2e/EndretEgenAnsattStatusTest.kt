@@ -26,7 +26,7 @@ internal class EndretEgenAnsattStatusTest : AbstractE2ETest() {
     fun `Oppdaterer egenansatt-status`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave()
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
 
         håndterEndretSkjermetinfo(skjermet = false)
         assertSkjermet(FØDSELSNUMMER, false)
@@ -39,7 +39,7 @@ internal class EndretEgenAnsattStatusTest : AbstractE2ETest() {
     fun `Legger til egenskap på oppgave når person får status egen ansatt`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave()
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
 
         val oppgaveId = inspektør.oppgaveId().toInt()
         assertHarIkkeOppgaveegenskap(oppgaveId, Egenskap.EGEN_ANSATT)
@@ -53,7 +53,7 @@ internal class EndretEgenAnsattStatusTest : AbstractE2ETest() {
     fun `Fjerner egenskap egen ansatt hvis personen ikke lenger har status egen ansatt`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave()
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterEndretSkjermetinfo(skjermet = true)
 
         val oppgaveId = inspektør.oppgaveId().toInt()

@@ -27,7 +27,7 @@ private class RisikovurderingE2ETest : AbstractE2ETest() {
     fun `oppretter oppgave av type RISK_QA`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave(risikofunn = funnSomKreverRiskTilgang)
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(risikofunn = funnSomKreverRiskTilgang)
         assertOppgaveHarEgenskap("RISK_QA", VEDTAKSPERIODE_ID)
     }
 
@@ -35,7 +35,7 @@ private class RisikovurderingE2ETest : AbstractE2ETest() {
     fun `oppretter oppgave av type SØKNAD`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave(risikofunn = funnSomAlleKanBehandle)
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(risikofunn = funnSomAlleKanBehandle)
         assertOppgaveHarEgenskap("SØKNAD", VEDTAKSPERIODE_ID)
     }
 
@@ -43,7 +43,7 @@ private class RisikovurderingE2ETest : AbstractE2ETest() {
     fun `sender med kunRefusjon`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave()
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         assertInnholdIBehov(behov = "Risikovurdering") { jsonNode ->
             assertTrue(jsonNode["Risikovurdering"]["kunRefusjon"].asBoolean())
         }

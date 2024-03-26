@@ -19,7 +19,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
     fun `fatter automatisk vedtak`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        automatiskGodkjent()
+        spesialistInnvilgerAutomatisk()
         assertGodkjenningsbehovBesvart(godkjent = true, automatiskBehandlet = true)
     }
 
@@ -27,7 +27,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
     fun `fatter ikke automatisk vedtak ved warnings`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave(
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             regelverksvarsler = listOf("RV_IM_1"),
             kanGodkjennesAutomatisk = true
         )
@@ -40,7 +40,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
     fun `fatter ikke automatisk vedtak ved 8-4 ikke oppfylt`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave(
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             risikofunn = listOf(
                 Risikofunn(kategori = listOf("8-4"), beskrivelse = "8-4 ikke ok", kreverSupersaksbehandler = false),
                 Risikofunn(kategori = emptyList(), beskrivelse = "faresignaler ikke ok", kreverSupersaksbehandler = false)
@@ -55,7 +55,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
     fun `fatter ikke automatisk vedtak ved åpne oppgaver i gosys`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilÅpneOppgaver()
+        spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver()
         håndterÅpneOppgaverløsning(antall = 1)
         håndterRisikovurderingløsning()
 
@@ -69,7 +69,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling(vedtaksperiodeId = VEDTAKSPERIODE_ID)
         opprettSpesialsak(vedtaksperiodeId = VEDTAKSPERIODE_ID)
-        fremTilÅpneOppgaver(
+        spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver(
             fullmakter = listOf(Testmeldingfabrikk.VergemålJson.Fullmakt(listOf(Testmeldingfabrikk.VergemålJson.Område.Syk), 1.januar, 31.januar)),
             regelverksvarsler = listOf("RV_IM_1"),
             arbeidsgiverbeløp = 0,
@@ -98,7 +98,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling(vedtaksperiodeId = VEDTAKSPERIODE_ID)
         opprettSpesialsak(vedtaksperiodeId = VEDTAKSPERIODE_ID)
-        fremTilSaksbehandleroppgave(
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             risikofunn = listOf(
                 Risikofunn(kategori = emptyList(), beskrivelse = "faresignaler ikke ok", kreverSupersaksbehandler = false)
             ),
@@ -119,7 +119,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling(vedtaksperiodeId = VEDTAKSPERIODE_ID)
         opprettSpesialsak(vedtaksperiodeId = VEDTAKSPERIODE_ID)
-        fremTilSaksbehandleroppgave(
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             regelverksvarsler = listOf("RV_SI_3"),
             arbeidsgiverbeløp = 0,
             personbeløp = 0

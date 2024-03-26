@@ -13,7 +13,7 @@ internal class MetrikkDaoE2ETest : AbstractE2ETest() {
     fun `identifiserer automatisk godkjenning`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        automatiskGodkjent()
+        spesialistInnvilgerAutomatisk()
 
         val contextId = inspektør.contextId()
         assertEquals(GodkjenningsbehovUtfall.AutomatiskGodkjent, dao.finnUtfallForGodkjenningsbehov(contextId))
@@ -23,7 +23,7 @@ internal class MetrikkDaoE2ETest : AbstractE2ETest() {
     fun `identifiserer automatisk avvisning`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilÅpneOppgaver(fullmakter = listOf())
+        spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver(fullmakter = listOf())
 
         val contextId = inspektør.contextId()
         assertEquals(GodkjenningsbehovUtfall.AutomatiskAvvist, dao.finnUtfallForGodkjenningsbehov(contextId))
@@ -33,7 +33,7 @@ internal class MetrikkDaoE2ETest : AbstractE2ETest() {
     fun `identifiserer manuell oppgave`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilÅpneOppgaver()
+        spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver()
         håndterÅpneOppgaverløsning(antall = 1)
         håndterRisikovurderingløsning()
 

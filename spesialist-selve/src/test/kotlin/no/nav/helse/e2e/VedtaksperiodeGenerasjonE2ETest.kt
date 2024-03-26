@@ -30,7 +30,7 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
     fun `Låser gjeldende generasjon når perioden er godkjent og utbetalt`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave()
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterSaksbehandlerløsning()
         håndterVedtakFattet()
         assertFerdigBehandledeGenerasjoner(VEDTAKSPERIODE_ID, 1)
@@ -40,7 +40,7 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
     fun `Oppretter ny generasjon når perioden blir revurdert`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave()
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterSaksbehandlerløsning()
         håndterVedtakFattet()
 
@@ -73,7 +73,7 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
     fun `fjerner knytning til utbetaling når utbetalingen blir forkastet`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave()
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         assertGenerasjonerMedUtbetaling(VEDTAKSPERIODE_ID, UTBETALING_ID, 1)
         håndterUtbetalingForkastet()
         assertGenerasjonerMedUtbetaling(VEDTAKSPERIODE_ID, UTBETALING_ID, 0)
@@ -97,7 +97,7 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
     fun `Flytter aktive varsler for vanlige generasjoner`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave()
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterSaksbehandlerløsning()
         håndterVedtakFattet()
         håndterAktivitetsloggNyAktivitet(varselkoder = listOf("RV_IM_1"))

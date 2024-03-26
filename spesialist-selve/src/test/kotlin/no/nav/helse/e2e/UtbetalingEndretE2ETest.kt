@@ -26,7 +26,7 @@ internal class UtbetalingEndretE2ETest : AbstractE2ETest() {
         val saksbehandlerOid = UUID.randomUUID()
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave()
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         opprettSaksbehandler(saksbehandlerOid, "Behandler, Saks", "saks.behandler@nav.no", "Z999999")
 
         val oppgaveId = oppgaveIdFor(VEDTAKSPERIODE_ID)
@@ -35,7 +35,7 @@ internal class UtbetalingEndretE2ETest : AbstractE2ETest() {
         val utbetalingId2 = UUID.randomUUID()
         håndterUtbetalingErstattet(arbeidsgiverbeløp = 20000, personbeløp = 20000, utbetalingId = utbetalingId2)
         håndterVedtaksperiodeReberegnet()
-        fremTilSaksbehandleroppgave(
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             harOppdatertMetadata = true,
             harRisikovurdering = true,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = utbetalingId2)

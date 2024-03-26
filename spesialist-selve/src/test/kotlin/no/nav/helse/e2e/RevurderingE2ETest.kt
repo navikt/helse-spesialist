@@ -11,14 +11,14 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
     fun `revurdering ved saksbehandlet oppgave`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave(regelverksvarsler = listOf("RV_IM_1"))
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(regelverksvarsler = listOf("RV_IM_1"))
         håndterSaksbehandlerløsning()
         håndterVedtakFattet()
         assertSaksbehandleroppgave(oppgavestatus = Oppgavestatus.Ferdigstilt)
 
         val utbetalingId2 = UUID.randomUUID()
 
-        fremTilSaksbehandleroppgave(harOppdatertMetadata = true, godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = utbetalingId2), harRisikovurdering = true)
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(harOppdatertMetadata = true, godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = utbetalingId2), harRisikovurdering = true)
         assertSaksbehandleroppgave(oppgavestatus = Oppgavestatus.AvventerSaksbehandler)
     }
 
@@ -26,12 +26,12 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
     fun `revurdering av periode med negativt beløp medfører oppgave`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave(kanGodkjennesAutomatisk = true)
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(kanGodkjennesAutomatisk = true)
         håndterVedtakFattet()
 
         val utbetalingId2 = UUID.randomUUID()
 
-        fremTilSaksbehandleroppgave(
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             harOppdatertMetadata = true,
             harRisikovurdering = true,
             kanGodkjennesAutomatisk = true,
@@ -45,12 +45,12 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
     fun `revurdering av periode med positivt beløp og ingen varsler medfører ikke oppgave`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave(kanGodkjennesAutomatisk = true)
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(kanGodkjennesAutomatisk = true)
         håndterVedtakFattet()
 
         val utbetalingId2 = UUID.randomUUID()
 
-        fremTilSaksbehandleroppgave(
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             harOppdatertMetadata = true,
             harRisikovurdering = true,
             kanGodkjennesAutomatisk = true,

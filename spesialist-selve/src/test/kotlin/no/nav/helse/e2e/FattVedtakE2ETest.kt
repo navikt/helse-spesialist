@@ -51,7 +51,7 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
     fun `Fatt vedtak for periode der SP er fastsatt etter hovedregel`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave()
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterSaksbehandlerløsning()
         håndterAvsluttetMedVedtak(fastsattType = "EtterHovedregel")
         val sisteHendelse = inspektør.meldinger().last()
@@ -64,7 +64,7 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
     fun `Fatt vedtak for periode der SP er fastsatt etter skjønn`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave()
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterSkjønnsfastsattSykepengegrunnlag()
         håndterSaksbehandlerløsning()
 
@@ -82,7 +82,7 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
     fun `Fatt vedtak for periode der SP er fastsatt i Infotrygd`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave()
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterSkjønnsfastsattSykepengegrunnlag()
         håndterSaksbehandlerløsning()
 
@@ -99,7 +99,7 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
         val avviksprosent = 42.0
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave(
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             avviksvurderingTestdata = AvviksvurderingTestdata(
                 avviksprosent = avviksprosent,
                 sammenligningsgrunnlag = sammenligningsgrunnlag,
@@ -133,7 +133,7 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
         )
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling(spleisBehandlingId = spleisBehandlingId)
-        fremTilSaksbehandleroppgave(godkjenningsbehovTestdata = godkjenningsbehov)
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(godkjenningsbehovTestdata = godkjenningsbehov)
         håndterSaksbehandlerløsning()
         håndterAvsluttetMedVedtak(tags = tagsFraAvsluttetMedVedtak, spleisBehandlingId = spleisBehandlingId)
 

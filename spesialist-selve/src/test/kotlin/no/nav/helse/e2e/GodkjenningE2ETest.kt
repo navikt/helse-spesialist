@@ -44,7 +44,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     fun `løser godkjenningsbehov når saksbehandler godkjenner`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave(regelverksvarsler = listOf("Brukeren har flere inntekter de siste tre måneder"))
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(regelverksvarsler = listOf("Brukeren har flere inntekter de siste tre måneder"))
         håndterSaksbehandlerløsning()
 
         assertSaksbehandleroppgave(oppgavestatus = AvventerSystem)
@@ -55,7 +55,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     fun `løser godkjenningsbehov når saksbehandler avslår`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave(regelverksvarsler = listOf("Brukeren har flere inntekter de siste tre måneder"))
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(regelverksvarsler = listOf("Brukeren har flere inntekter de siste tre måneder"))
         val begrunnelser = listOf("Mangler opptjening")
         val kommentar = "Vedkommende mangler opptjening"
         håndterSaksbehandlerløsning(godkjent = false, kommentar = kommentar, begrunnelser = begrunnelser)
@@ -68,7 +68,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     fun `oppretter ikke oppgave om bruker tilhører utlandsenhet`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave(enhet = ENHET_UTLAND)
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(enhet = ENHET_UTLAND)
 
         assertVedtaksperiodeEksisterer(VEDTAKSPERIODE_ID)
         assertSaksbehandleroppgaveBleIkkeOpprettet()
@@ -93,7 +93,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     fun `ignorerer påminnet godkjenningsbehov dersom det eksisterer en aktiv oppgave`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave()
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterGodkjenningsbehovUtenValidering()
         assertIngenEtterspurteBehov()
     }
@@ -102,7 +102,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     fun `ignorerer påminnet godkjenningsbehov dersom vedtaket er automatisk godkjent`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave(kanGodkjennesAutomatisk = true)
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(kanGodkjennesAutomatisk = true)
         håndterGodkjenningsbehovUtenValidering()
         assertIngenEtterspurteBehov()
     }
@@ -113,7 +113,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         val tags1 = listOf("tag 1", "tag 2")
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilSaksbehandleroppgave(
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             kanGodkjennesAutomatisk = true,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(tags = tags1, spleisBehandlingId = spleisBehandlingId1)
         )
@@ -198,7 +198,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     fun `avbryter saksbehandling og avviser godkjenning på person med verge`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilVergemål()
+        spesialistBehandlerGodkjenningsbehovFremTilVergemål()
         håndterVergemålløsning(vergemål = listOf(VergemålJson.Vergemål(voksen)))
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning()
@@ -209,7 +209,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     fun `avbryter ikke saksbehandling for person uten verge`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilVergemål()
+        spesialistBehandlerGodkjenningsbehovFremTilVergemål()
         håndterVergemålløsning()
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning()
@@ -220,7 +220,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     fun `sendes til saksbehandler for godkjenning ved fullmakt`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilVergemål()
+        spesialistBehandlerGodkjenningsbehovFremTilVergemål()
         håndterVergemålløsning(
             fullmakter = listOf(
                 VergemålJson.Fullmakt(
@@ -239,7 +239,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     fun `sendes til saksbehandler for godkjenning ved fremtidsfullmakt`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremTilVergemål()
+        spesialistBehandlerGodkjenningsbehovFremTilVergemål()
         håndterVergemålløsning(fremtidsfullmakter = listOf(VergemålJson.Vergemål(voksen)))
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning()
@@ -250,7 +250,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     fun `avbryter saksbehandling og avvise godkjenning pga vergemål`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        fremForbiUtbetalingsfilter()
+        spesialistBehandlerGodkjenningsbehovTilOgMedUtbetalingsfilter()
         håndterEgenansattløsning(erEgenAnsatt = true)
         håndterVergemålløsning(vergemål = listOf(VergemålJson.Vergemål(voksen)))
         håndterÅpneOppgaverløsning()
@@ -267,7 +267,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     fun `avviser ikke godkjenningsbehov når kanAvvises-flagget er false`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        automatiskGodkjent(11.januar, 31.januar)
+        spesialistInnvilgerAutomatisk(11.januar, 31.januar)
 
         val revurdertUtbetaling = UUID.randomUUID()
         val kanAvvises = false
