@@ -3,7 +3,8 @@ package no.nav.helse.modell.person
 import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.mediator.meldinger.PersonmeldingOld
+import no.nav.helse.mediator.Kommandofabrikk
+import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.kommando.Command
@@ -18,7 +19,7 @@ internal class EndretEgenAnsattStatus private constructor(
     val erEgenAnsatt: Boolean,
     val opprettet: LocalDateTime,
     private val json: String,
-) : PersonmeldingOld {
+) : Personmelding {
 
     internal constructor(packet: JsonMessage): this(
         id = UUID.fromString(packet["@id"].asText()),
@@ -34,6 +35,10 @@ internal class EndretEgenAnsattStatus private constructor(
         opprettet = jsonNode["@opprettet"].asLocalDateTime(),
         json = jsonNode.toString()
     )
+
+    override fun behandle(person: Person, kommandofabrikk: Kommandofabrikk) {
+        kommandofabrikk.iverksettEndretAnsattStatus(this)
+    }
 
     override fun fødselsnummer(): String = fødselsnummer
     override fun toJson(): String = json

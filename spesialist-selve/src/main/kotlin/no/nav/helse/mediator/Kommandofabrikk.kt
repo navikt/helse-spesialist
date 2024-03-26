@@ -164,11 +164,11 @@ internal class Kommandofabrikk(
         avviksvurderingDao.lagre(avviksvurdering)
     }
 
-    fun endretEgenAnsattStatus(fødselsnummer: String, hendelse: EndretEgenAnsattStatus): EndretEgenAnsattStatusCommand {
+    fun endretEgenAnsattStatus(melding: EndretEgenAnsattStatus): EndretEgenAnsattStatusCommand {
         return EndretEgenAnsattStatusCommand(
-            fødselsnummer = fødselsnummer,
-            erEgenAnsatt = hendelse.erEgenAnsatt,
-            opprettet = hendelse.opprettet,
+            fødselsnummer = melding.fødselsnummer(),
+            erEgenAnsatt = melding.erEgenAnsatt,
+            opprettet = melding.opprettet,
             egenAnsattDao = egenAnsattDao,
             oppgaveMediator = oppgaveMediator
         )
@@ -427,6 +427,10 @@ internal class Kommandofabrikk(
 
     internal fun iverksettVedtaksperiodeReberegnet(melding: VedtaksperiodeReberegnet) {
         iverksett(vedtaksperiodeReberegnet(melding), melding.id)
+    }
+
+    internal fun iverksettEndretAnsattStatus(melding: EndretEgenAnsattStatus) {
+        iverksett(endretEgenAnsattStatus(melding), melding.id)
     }
 
     private fun nyContext(meldingId: UUID) = CommandContext(UUID.randomUUID()).apply {

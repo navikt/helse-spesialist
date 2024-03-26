@@ -38,7 +38,7 @@ internal class EndretSkjermetinfoRiver(
             return
         }
 
-        meldingMediator.håndter(fødselsnummer, EndretEgenAnsattStatus(packet), context)
+        meldingMediator.mottaMelding(EndretEgenAnsattStatus(packet), context)
     }
 
     private companion object {

@@ -57,7 +57,6 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
 import no.nav.helse.modell.person.AdressebeskyttelseEndretRiver
-import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import no.nav.helse.modell.person.OppdaterPersonsnapshot
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.PersonRepository
@@ -440,7 +439,6 @@ internal class MeldingMediator(
         try {
             when (melding) {
                 is AdressebeskyttelseEndret -> iverksett(AdressebeskyttelseEndretCommand(melding.fødselsnummer(), personDao, oppgaveDao, godkjenningMediator), melding.id, commandContext)
-                is EndretEgenAnsattStatus -> iverksett(kommandofabrikk.endretEgenAnsattStatus(melding.fødselsnummer(), melding), melding.id, commandContext)
                 is GosysOppgaveEndret -> iverksett(kommandofabrikk.gosysOppgaveEndret(melding.fødselsnummer(), melding), melding.id, commandContext)
                 is TilbakedateringBehandlet -> iverksett(kommandofabrikk.tilbakedateringGodkjent(melding.fødselsnummer()), melding.id, commandContext)
                 is SøknadSendt -> iverksett(kommandofabrikk.søknadSendt(melding), melding.id, commandContext)
