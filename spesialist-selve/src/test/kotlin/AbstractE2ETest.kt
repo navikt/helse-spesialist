@@ -43,6 +43,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.vedtaksperiode.Generasjon
+import no.nav.helse.modell.vedtaksperiode.Periode
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.asLocalDateTime
@@ -696,8 +697,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         assertEtterspurteBehov("ÅpneOppgaver")
     }
 
-    protected fun håndterTilbakedateringBehandlet(fødselsnummer: String = FØDSELSNUMMER, skjæringstidspunkt: LocalDate) {
-        sisteMeldingId = meldingssender.sendTilbakedateringBehandlet(fødselsnummer, skjæringstidspunkt)
+    protected fun håndterTilbakedateringBehandlet(fødselsnummer: String = FØDSELSNUMMER, perioder: List<Periode>) {
+        sisteMeldingId = meldingssender.sendTilbakedateringBehandlet(fødselsnummer, perioder)
     }
 
     protected fun håndterKommandokjedePåminnelse(commandContextId: UUID, meldingId: UUID) {

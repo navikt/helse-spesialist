@@ -5,7 +5,6 @@ import java.time.LocalDate
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.januar
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Område.Syk
@@ -84,39 +83,6 @@ internal class VarselE2ETest : AbstractE2ETest() {
         håndterÅpneOppgaverløsning(antall = 0)
         assertVarsel(SB_EX_1, VEDTAKSPERIODE_ID, INAKTIV)
         assertIngenVarsel(SB_EX_3, VEDTAKSPERIODE_ID)
-    }
-
-    @Test
-    fun `fjern varsel om tilbakedatering dersom tilbakedatert sykmelding er godkjent`() {
-        fremTilÅpneOppgaver(regelverksvarsler = listOf("RV_SØ_3"),)
-        håndterÅpneOppgaverløsning()
-        håndterRisikovurderingløsning()
-        håndterInntektløsning()
-        assertVarsel("RV_SØ_3", VEDTAKSPERIODE_ID, AKTIV)
-
-        håndterTilbakedateringBehandlet(skjæringstidspunkt = 1.januar)
-        assertVarsel("RV_SØ_3", VEDTAKSPERIODE_ID, INAKTIV)
-    }
-
-    @Test
-    fun `fjern varsel om tilbakedatering på alle overlappende perioder i sykefraværstilfellet for ok-sykmelding`() {
-        fremTilÅpneOppgaver(regelverksvarsler = listOf("RV_SØ_3"),)
-        håndterÅpneOppgaverløsning()
-        håndterRisikovurderingløsning()
-        håndterInntektløsning()
-
-        val vedtaksperiodeId2 = UUID.randomUUID()
-        håndterSøknad()
-        spleisOppretterNyBehandling(vedtaksperiodeId = vedtaksperiodeId2)
-        håndterAktivitetsloggNyAktivitet(varselkoder = listOf("RV_SØ_3"), vedtaksperiodeId = vedtaksperiodeId2
-        )
-
-        assertVarsel("RV_SØ_3", VEDTAKSPERIODE_ID, AKTIV)
-        assertVarsel("RV_SØ_3", vedtaksperiodeId2, AKTIV)
-
-        håndterTilbakedateringBehandlet(skjæringstidspunkt = 1.januar)
-        assertVarsel("RV_SØ_3", VEDTAKSPERIODE_ID, INAKTIV)
-        assertVarsel("RV_SØ_3", vedtaksperiodeId2, INAKTIV)
     }
 
     @Test
@@ -204,24 +170,6 @@ internal class VarselE2ETest : AbstractE2ETest() {
                     queryOf(
                         query,
                         varselkode.name,
-                        vedtaksperiodeId,
-                        status.name
-                    ).map { it.int(1) }.asSingle
-                )
-            )
-        }
-        assertEquals(1, antallVarsler)
-    }
-
-    private fun assertVarsel(varselkode: String, vedtaksperiodeId: UUID, status: Varsel.Status) {
-        val antallVarsler = sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query = "SELECT count(*) FROM selve_varsel WHERE kode = ? AND vedtaksperiode_id = ? AND status = ?"
-            requireNotNull(
-                session.run(
-                    queryOf(
-                        query,
-                        varselkode,
                         vedtaksperiodeId,
                         status.name
                     ).map { it.int(1) }.asSingle

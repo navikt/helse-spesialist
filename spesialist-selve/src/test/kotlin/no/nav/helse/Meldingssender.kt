@@ -13,6 +13,7 @@ import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
+import no.nav.helse.modell.vedtaksperiode.Periode
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.person.Kjønn
@@ -193,13 +194,13 @@ internal class Meldingssender(private val testRapid: TestRapid) {
 
     fun sendTilbakedateringBehandlet(
         fødselsnummer: String,
-        skjæringstidspunkt: LocalDate
+        perioder: List<Periode>
     ): UUID = newUUID.also { id ->
         testRapid.sendTestMessage(
             Testmeldingfabrikk.lagTilbakedateringBehandlet(
                 fødselsnummer = fødselsnummer,
                 id = id,
-                skjæringstidspunkt = skjæringstidspunkt
+                perioder = perioder
             )
         )
     }

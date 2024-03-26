@@ -15,6 +15,7 @@ import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
+import no.nav.helse.modell.vedtaksperiode.Periode
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -74,7 +75,7 @@ internal object Testmeldingfabrikk {
     fun lagTilbakedateringBehandlet(
         fødselsnummer: String,
         id: UUID,
-        skjæringstidspunkt: LocalDate,
+        perioder: List<Periode>,
     ): String =
         nyHendelse(
             id = id,
@@ -82,13 +83,10 @@ internal object Testmeldingfabrikk {
             hendelse = mapOf(
                 "fødselsnummer" to fødselsnummer,
                 "sykmeldingId" to "${UUID.randomUUID()}",
-                "syketilfelleStartDato" to skjæringstidspunkt,
-                "perioder" to listOf(
-                    mapOf(
-                        "fom" to skjæringstidspunkt,
-                        "tom" to skjæringstidspunkt.plusDays(30)
-                    )
-                )
+                "perioder" to perioder.map { mapOf(
+                    "fom" to it.fom(),
+                    "tom" to it.tom()
+                )}
             )
         )
 

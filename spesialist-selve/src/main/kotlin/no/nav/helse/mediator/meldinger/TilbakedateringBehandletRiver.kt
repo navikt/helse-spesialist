@@ -28,7 +28,6 @@ internal class TilbakedateringBehandletRiver(
                 it.requireKey("@id")
                 it.requireKey("fødselsnummer")
                 it.requireKey("sykmeldingId")
-                it.requireKey("syketilfelleStartDato")
                 it.requireArray("perioder") {
                     requireKey("fom", "tom")
                 }
