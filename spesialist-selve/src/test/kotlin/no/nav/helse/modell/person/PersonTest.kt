@@ -10,12 +10,13 @@ import org.junit.jupiter.api.Test
 class PersonTest {
 
     private val testperson = TestPerson()
+    private val aktørId = testperson.aktørId
     private val fødselsnummer = testperson.fødselsnummer
     private val arbeidsgiver1 = testperson.nyArbeidsgiver()
 
     @Test
     fun `oppretter ny vedtaksperiode ved ny Spleis-behandling dersom perioden ikke er kjent fra før`() {
-        val person = Person.gjenopprett(fødselsnummer, emptyList())
+        val person = Person.gjenopprett(aktørId, fødselsnummer, emptyList())
         person.nySpleisBehandling(nySpleisBehandling(UUID.randomUUID()))
         val dto = person.toDto()
         assertEquals(1, dto.vedtaksperioder.size)

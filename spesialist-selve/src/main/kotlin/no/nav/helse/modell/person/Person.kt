@@ -12,12 +12,14 @@ import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
 import no.nav.helse.modell.vedtaksperiode.vedtak.VedtakFattet
 
 class Person private constructor(
+    private val aktørId: String,
     private val fødselsnummer: String,
     vedtaksperioder: List<Vedtaksperiode>
 ) {
     private val vedtaksperioder = vedtaksperioder.toMutableList()
 
     fun toDto() = PersonDto(
+        aktørId = aktørId,
         fødselsnummer = fødselsnummer,
         vedtaksperioder = vedtaksperioder.map { it.toDto() }
     )
@@ -65,10 +67,13 @@ class Person private constructor(
     }
 
     companion object {
-        fun gjenopprett(fødselsnummer: String, vedtaksperioder: List<VedtaksperiodeDto>): Person {
+        fun gjenopprett(aktørId: String, fødselsnummer: String, vedtaksperioder: List<VedtaksperiodeDto>): Person {
             return Person(
-                fødselsnummer,
-                vedtaksperioder.map { Vedtaksperiode.gjenopprett(it.organisasjonsnummer, it.vedtaksperiodeId, it.forkastet, it.generasjoner) }
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                vedtaksperioder = vedtaksperioder.map {
+                    Vedtaksperiode.gjenopprett(it.organisasjonsnummer, it.vedtaksperiodeId, it.forkastet, it.generasjoner)
+                }
             )
         }
     }

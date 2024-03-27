@@ -22,7 +22,7 @@ internal class PersonRepository(private val dataSource: DataSource) {
         return with(personDao) {
             finnPerson(fødselsnummer)
                 ?.copy(vedtaksperioder = with(generasjonRepository) { finnVedtaksperioder(fødselsnummer) })
-                ?.let { Person.gjenopprett(it.fødselsnummer, it.vedtaksperioder) }
+                ?.let { Person.gjenopprett(it.aktørId, it.fødselsnummer, it.vedtaksperioder) }
         }
     }
 
