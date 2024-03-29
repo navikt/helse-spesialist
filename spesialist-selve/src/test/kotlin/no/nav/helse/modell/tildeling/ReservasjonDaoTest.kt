@@ -66,7 +66,7 @@ internal class ReservasjonDaoTest : DatabaseIntegrationTest() {
             Kjønn.Kvinne,
             Adressebeskyttelse.Ugradert
         )
-        val utbetalingerRef = personDao.insertInfotrygdutbetalinger(objectMapper.createObjectNode())
+        val utbetalingerRef = personDao.upsertInfotrygdutbetalinger(fødselsnummer, objectMapper.createObjectNode())
         personDao.insertPerson(
             fødselsnummer,
             "4321098765432", personinfoRef, "0301".toInt(), utbetalingerRef

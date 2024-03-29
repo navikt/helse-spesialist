@@ -274,19 +274,6 @@ internal class PersonDao(private val dataSource: DataSource) {
         )
     }
 
-    internal fun findInfotrygdutbetalinger(fødselsnummer: String) = sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL")
-        val query = """
-            SELECT data FROM infotrygdutbetalinger
-            WHERE id=(SELECT infotrygdutbetalinger_ref FROM person WHERE fodselsnummer=?);
-        """
-        session.run(
-            queryOf(query, fødselsnummer.toLong())
-                .map { row -> row.string("data") }
-                .asSingle
-        )
-    }
-
     internal fun findITUtbetalingsperioderSistOppdatert(fødselsnummer: String) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val query = "SELECT infotrygdutbetalinger_oppdatert FROM person WHERE fodselsnummer=?;"
@@ -296,17 +283,6 @@ internal class PersonDao(private val dataSource: DataSource) {
                 .asSingle
         )
     }
-
-    internal fun insertInfotrygdutbetalinger(data: JsonNode) =
-        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-            @Language("PostgreSQL")
-            val query = "INSERT INTO infotrygdutbetalinger(data) VALUES(CAST(? as json));"
-            requireNotNull(
-                session.run(
-                    queryOf(query, objectMapper.writeValueAsString(data)).asUpdateAndReturnGeneratedKey
-                )
-            )
-        }
 
     internal fun findInntekter(fødselsnummer: String, skjæringstidspunkt: LocalDate) =
         sessionOf(dataSource).use { session ->
@@ -400,7 +376,7 @@ internal class PersonDao(private val dataSource: DataSource) {
         run(queryOf(query, fødselsnummer.toLong()).asUpdate)
     }
 
-    private fun TransactionalSession.insertInfotrygdubetalinger(utbetalinger: JsonNode, fødselsnummer: String) {
+    private fun TransactionalSession.insertInfotrygdubetalinger(utbetalinger: JsonNode, fødselsnummer: String): Long {
         @Language("PostgreSQL")
         val query = "INSERT INTO infotrygdutbetalinger (data) VALUES (CAST(? as json))"
 
@@ -413,6 +389,7 @@ internal class PersonDao(private val dataSource: DataSource) {
             )
         )
         updateInfotrygdutbetalingerRef(infotrygdutbetalingerId, fødselsnummer)
+        return infotrygdutbetalingerId
     }
 
     private fun TransactionalSession.updateInfotrygdutbetalingerRef(

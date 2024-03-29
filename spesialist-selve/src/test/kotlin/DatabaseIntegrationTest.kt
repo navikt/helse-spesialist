@@ -258,7 +258,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     ): Persondata {
         val personinfoId =
             personDao.insertPersoninfo(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, adressebeskyttelse)
-        val infotrygdutbetalingerId = personDao.insertInfotrygdutbetalinger(objectMapper.createObjectNode())
+        val infotrygdutbetalingerId = personDao.upsertInfotrygdutbetalinger(fødselsnummer, objectMapper.createObjectNode())
         val enhetId = ENHET.toInt()
         personId = personDao.insertPerson(fødselsnummer, aktørId, personinfoId, enhetId, infotrygdutbetalingerId)
         egenAnsattDao.lagre(fødselsnummer, false, LocalDateTime.now())

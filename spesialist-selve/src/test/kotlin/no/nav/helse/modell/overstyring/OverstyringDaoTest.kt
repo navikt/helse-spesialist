@@ -66,7 +66,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             PERSON_KJØNN,
             ADRESSEBESKYTTELSE
         )
-        val infotrygdutbetaling_ref = personDao.insertInfotrygdutbetalinger(objectMapper.createObjectNode())
+        val infotrygdutbetaling_ref = personDao.upsertInfotrygdutbetalinger(FNR, objectMapper.createObjectNode())
         personDao.insertPerson(FNR, AKTØR, navn_ref, 420, infotrygdutbetaling_ref)
     }
 

@@ -43,7 +43,7 @@ internal class PersonDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `lagre infotrygdutbetalinger`() {
-        personDao.insertInfotrygdutbetalinger(objectMapper.createObjectNode())
+        personDao.upsertInfotrygdutbetalinger(FNR, objectMapper.createObjectNode())
         assertEquals(1, infotrygdUtbetalinger().size)
     }
 
@@ -51,7 +51,7 @@ internal class PersonDaoTest : DatabaseIntegrationTest() {
     fun `oppretter person`() {
         val (_, personinfoId, enhetId, infotrygdutbetalingerId) = opprettPerson()
         assertNotNull(personDao.findPersonByFødselsnummer(FNR))
-        assertNotNull(personDao.findInfotrygdutbetalinger(FNR))
+        assertEquals(1, infotrygdUtbetalinger().size)
         assertEquals(LocalDate.now(), personDao.findEnhetSistOppdatert(FNR))
         assertEquals(LocalDate.now(), personDao.findITUtbetalingsperioderSistOppdatert(FNR))
         assertEquals(LocalDate.now(), personDao.findPersoninfoSistOppdatert(FNR))
