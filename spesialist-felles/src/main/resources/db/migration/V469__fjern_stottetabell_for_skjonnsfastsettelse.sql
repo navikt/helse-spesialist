@@ -1,0 +1,1 @@
+drop table stottetabell_for_skjonnsmessig_fastsettelse;
