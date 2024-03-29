@@ -25,7 +25,7 @@ INSERT INTO arbeidsforhold(id, person_ref, arbeidsgiver_ref, startdato, sluttdat
                            oppdatert)
 VALUES (${sequence_number}, ${sequence_number}, ${sequence_number}, '2018-01-01', '2018-01-31', 'STILLING', 100, now());
 UPDATE global_snapshot_versjon
-SET versjon = 1;
+SET versjon = 1 WHERE versjon <> 1; -- WHERE for å slippe varsel om "update without 'where' updates all rows at once
 INSERT INTO snapshot(id, data, person_ref, versjon)
 VALUES (${sequence_number}, '{}'::json, ${sequence_number}, 1);
 INSERT INTO vedtak(id, vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref, forkastet)
