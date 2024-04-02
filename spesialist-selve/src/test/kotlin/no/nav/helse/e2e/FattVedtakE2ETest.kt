@@ -23,7 +23,7 @@ internal class FattVedtakE2ETest: AbstractE2ETest() {
     fun `Fatt vedtak for auu-periode`() {
         val spleisBehandlingId = UUID.randomUUID()
         vedtaksløsningenMottarNySøknad()
-        spleisOppretterNyBehandling()
+        spleisOppretterNyBehandling(spleisBehandlingId = spleisBehandlingId, fom = 1.januar, tom = 11.januar)
         håndterAvsluttetUtenVedtak(spleisBehandlingId = spleisBehandlingId)
         val hendelser = inspektør.hendelser("vedtak_fattet")
         assertEquals(1, hendelser.size)

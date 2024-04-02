@@ -1,29 +1,14 @@
 package no.nav.helse.modell.vedtaksperiode.vedtak
 
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
 internal class AvsluttetUtenVedtak(
-    private val fødselsnummer: String,
-    private val aktørId: String,
-    private val organisasjonsnummer: String,
     private val vedtaksperiodeId: UUID,
-    private val spleisBehandlingId: UUID,
-    private val skjæringstidspunkt: LocalDate,
     private val hendelser: List<UUID>,
-    private val fom: LocalDate,
-    private val tom: LocalDate,
 ) {
+    fun vedtaksperiodeId() = vedtaksperiodeId
     fun byggMelding(vedtakBuilder: SykepengevedtakBuilder) {
-        vedtakBuilder.fødselsnummer(fødselsnummer)
-        vedtakBuilder.organisasjonsnummer(organisasjonsnummer)
-        vedtakBuilder.aktørId(aktørId)
-        vedtakBuilder.fom(fom)
-        vedtakBuilder.tom(tom)
-        vedtakBuilder.vedtaksperiodeId(vedtaksperiodeId)
-        vedtakBuilder.spleisBehandlingId(spleisBehandlingId)
-        vedtakBuilder.skjæringstidspunkt(skjæringstidspunkt)
         vedtakBuilder.hendelser(hendelser)
         vedtakBuilder.vedtakFattetTidspunkt(LocalDateTime.now())
 

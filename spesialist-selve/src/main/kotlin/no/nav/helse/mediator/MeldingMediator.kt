@@ -32,7 +32,6 @@ import no.nav.helse.mediator.meldinger.VedtaksperiodeNyUtbetalingRiver
 import no.nav.helse.mediator.meldinger.VedtaksperiodeReberegnetRiver
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.mediator.meldinger.hendelser.AvsluttetMedVedtakMessage
-import no.nav.helse.mediator.meldinger.hendelser.AvsluttetUtenVedtakMessage
 import no.nav.helse.mediator.meldinger.løsninger.ArbeidsforholdRiver
 import no.nav.helse.mediator.meldinger.løsninger.ArbeidsgiverRiver
 import no.nav.helse.mediator.meldinger.løsninger.DokumentRiver
@@ -208,23 +207,14 @@ internal class MeldingMediator(
         }
     }
 
-    internal fun håndter(avsluttetMedVedtakMessage: AvsluttetMedVedtakMessage) {
+    internal fun håndter(avsluttetMedVedtakMessage: AvsluttetMedVedtakMessage, messageContext: MessageContext) {
         val fødselsnummer = avsluttetMedVedtakMessage.fødselsnummer()
         val skjæringstidspunkt = avsluttetMedVedtakMessage.skjæringstidspunkt()
         val sykefraværstilfelle = kommandofabrikk.sykefraværstilfelle(fødselsnummer, skjæringstidspunkt)
-        val vedtakFattetMelder = VedtakFattetMelder(rapidsConnection)
+        val vedtakFattetMelder = VedtakFattetMelder(messageContext)
         sykefraværstilfelle.registrer(vedtakFattetMelder)
         avsluttetMedVedtakMessage.sendInnTil(sykefraværstilfelle)
         vedtakFattetMelder.publiserUtgåendeMeldinger()
-    }
-
-    internal fun håndter(avsluttetUtenVedtakMessage: AvsluttetUtenVedtakMessage) {
-        generasjonRepository.brukGenerasjon(avsluttetUtenVedtakMessage.vedtaksperiodeId()) { generasjon ->
-            val vedtakFattetMelder = VedtakFattetMelder(rapidsConnection)
-            generasjon.registrer(vedtakFattetMelder)
-            avsluttetUtenVedtakMessage.sendInnTil(generasjon)
-            vedtakFattetMelder.publiserUtgåendeMeldinger()
-        }
     }
 
     internal fun håndter(avviksvurdering: AvviksvurderingDto) {
@@ -392,15 +382,18 @@ internal class MeldingMediator(
         val meldingnavn = requireNotNull(melding::class.simpleName)
         val utgåendeMeldingerMediator = UtgåendeMeldingerMediator()
         val commandContextTilstandMediator = CommandContextTilstandMediator()
+        val vedtakFattetMelder = VedtakFattetMelder(messageContext)
         try {
             kommandofabrikk.nyObserver(utgåendeMeldingerMediator, commandContextTilstandMediator)
             personRepository.brukPersonHvisFinnes(melding.fødselsnummer()) {
+                this.nyObserver(vedtakFattetMelder)
                 logg.info("Personen finnes i databasen, behandler melding $meldingnavn")
                 sikkerlogg.info("Personen finnes i databasen, behandler melding $meldingnavn")
 
                 melding.behandle(this, kommandofabrikk)
             }
             if (melding is VedtakFattet) melding.doFinally(vedtakDao) // Midlertidig frem til spesialsak ikke er en ting lenger
+            vedtakFattetMelder.publiserUtgåendeMeldinger()
             utgåendeMeldingerMediator.publiserOppsamledeMeldinger(melding, messageContext)
         } catch (e: Exception) {
             logg.error("Feil ved behandling av melding $meldingnavn", e.message, e)

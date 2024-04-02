@@ -1,9 +1,12 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import java.util.UUID
+import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.VarselStatusDto
+import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetUtenVedtak
+import no.nav.helse.modell.vedtaksperiode.vedtak.SykepengevedtakBuilder
 
 internal class Vedtaksperiode private constructor(
     private val vedtaksperiodeId: UUID,
@@ -60,6 +63,18 @@ internal class Vedtaksperiode private constructor(
         if (forkastet) return
         gjeldendeGenerasjon.håndterVedtakFattet(meldingId)
     }
+
+    internal fun avsluttetUtenVedtak(person: Person, avsluttetUtenVedtak: AvsluttetUtenVedtak) {
+        val sykepengevedtakBuilder = SykepengevedtakBuilder()
+        gjeldendeGenerasjon.avsluttetUtenVedtak(sykepengevedtakBuilder)
+        sykepengevedtakBuilder
+            .organisasjonsnummer(organisasjonsnummer)
+            .vedtaksperiodeId(vedtaksperiodeId)
+        avsluttetUtenVedtak
+            .byggMelding(sykepengevedtakBuilder)
+        person.supplerVedtakFattet(sykepengevedtakBuilder)
+    }
+
     internal fun vedtaksperiodeForkastet() {
         forkastet = true
     }
