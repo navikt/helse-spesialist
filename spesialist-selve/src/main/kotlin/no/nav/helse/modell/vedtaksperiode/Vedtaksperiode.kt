@@ -101,6 +101,7 @@ internal class Vedtaksperiode private constructor(
                     Generasjon(
                         id = UUID.randomUUID(),
                         vedtaksperiodeId = spleisBehandling.vedtaksperiodeId,
+                        spleisBehandlingId = spleisBehandling.spleisBehandlingId,
                         fom = spleisBehandling.fom,
                         tom = spleisBehandling.tom,
                         skjæringstidspunkt = spleisBehandling.fom // Spleis sender oss ikke skjæringstidspunkt på dette tidspunktet
