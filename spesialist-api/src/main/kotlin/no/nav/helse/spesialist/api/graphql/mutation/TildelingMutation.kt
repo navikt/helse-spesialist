@@ -35,7 +35,7 @@ class TildelingMutation(
             try {
                 saksbehandlerhåndterer.håndter(TildelOppgave(oppgaveId.toLong()), saksbehandler)
                 newResult<Tildeling?>().data(
-                    Tildeling(saksbehandler.navn, saksbehandler.epost, saksbehandler.oid.toString())
+                    Tildeling(saksbehandler.navn, saksbehandler.epost, saksbehandler.oid)
                 ).build()
             } catch (e: OppgaveTildeltNoenAndre) {
                 newResult<Tildeling?>().error(alleredeTildeltError(e)).build()

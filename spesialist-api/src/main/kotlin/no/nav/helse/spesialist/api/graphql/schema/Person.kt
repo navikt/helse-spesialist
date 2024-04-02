@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.api.graphql.schema
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.module.kotlin.readValue
+import java.util.UUID
 import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
@@ -48,13 +49,13 @@ data class Enhet(
 data class Tildeling(
     val navn: String,
     val epost: String,
-    val oid: UUIDString,
+    val oid: UUID,
 )
 
 data class PaVent(
     val frist: DateTimeString?,
     val begrunnelse: String?,
-    val oid: UUIDString
+    val oid: UUID
 )
 
 data class Person(
@@ -91,7 +92,7 @@ data class Person(
         Tildeling(
             navn = it.navn,
             epost = it.epost,
-            oid = it.oid.toString(),
+            oid = it.oid,
         )
     }
 

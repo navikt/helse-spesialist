@@ -26,7 +26,7 @@ internal object OppgaveMapper {
             opprettet = oppgave.opprettet.toString(),
             opprinneligSoknadsdato = oppgave.opprinneligSøknadsdato.toString(),
             tidsfrist = oppgave.tidsfrist?.toString(),
-            vedtaksperiodeId = oppgave.vedtaksperiodeId.toString(),
+            vedtaksperiodeId = oppgave.vedtaksperiodeId,
             navn = Personnavn(
                 fornavn = oppgave.navn.fornavn,
                 etternavn = oppgave.navn.etternavn,
@@ -37,7 +37,7 @@ internal object OppgaveMapper {
                 Tildeling(
                     tildelt.navn,
                     tildelt.epostadresse,
-                    tildelt.oid.toString()
+                    tildelt.oid
                 )
             },
             egenskaper = egenskaper.map { egenskap ->

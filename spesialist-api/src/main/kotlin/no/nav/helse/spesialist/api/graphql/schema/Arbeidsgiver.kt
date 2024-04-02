@@ -33,7 +33,7 @@ data class Arbeidsforhold(
 )
 
 data class Generasjon(
-    val id: UUIDString,
+    val id: UUID,
     val perioder: List<Periode>,
 )
 
@@ -43,14 +43,14 @@ data class ArbeidsgiverInntekterFraAOrdningen(
 )
 
 interface Overstyring {
-    val hendelseId: UUIDString
+    val hendelseId: UUID
     val timestamp: DateTimeString
     val saksbehandler: Saksbehandler
     val ferdigstilt: Boolean
 }
 
 data class Dagoverstyring(
-    override val hendelseId: UUIDString,
+    override val hendelseId: UUID,
     override val timestamp: DateTimeString,
     override val saksbehandler: Saksbehandler,
     override val ferdigstilt: Boolean,
@@ -67,7 +67,7 @@ data class Dagoverstyring(
 }
 
 data class Inntektoverstyring(
-    override val hendelseId: UUIDString,
+    override val hendelseId: UUID,
     override val timestamp: DateTimeString,
     override val saksbehandler: Saksbehandler,
     override val ferdigstilt: Boolean,
@@ -91,7 +91,7 @@ data class Inntektoverstyring(
 }
 
 data class Sykepengegrunnlagskjonnsfastsetting(
-    override val hendelseId: UUIDString,
+    override val hendelseId: UUID,
     override val timestamp: DateTimeString,
     override val saksbehandler: Saksbehandler,
     override val ferdigstilt: Boolean,
@@ -111,7 +111,7 @@ data class Sykepengegrunnlagskjonnsfastsetting(
 }
 
 data class Arbeidsforholdoverstyring(
-    override val hendelseId: UUIDString,
+    override val hendelseId: UUID,
     override val timestamp: DateTimeString,
     override val saksbehandler: Saksbehandler,
     override val ferdigstilt: Boolean,
@@ -125,7 +125,7 @@ data class GhostPeriode(
     val fom: DateString,
     val tom: DateString,
     val skjaeringstidspunkt: DateString,
-    val vilkarsgrunnlagId: UUIDString?,
+    val vilkarsgrunnlagId: UUID?,
     val deaktivert: Boolean,
     val organisasjonsnummer: String,
 ) {
@@ -161,7 +161,7 @@ data class Arbeidsgiver(
                     is GraphQLUberegnetPeriode -> UberegnetPeriode(
                         varselRepository = varselRepository,
                         periode = it,
-                        skalViseAktiveVarsler = index == 0 && perioderSomSkalViseAktiveVarsler.contains(UUID.fromString(it.vedtaksperiodeId)),
+                        skalViseAktiveVarsler = index == 0 && perioderSomSkalViseAktiveVarsler.contains(it.vedtaksperiodeId),
                         notatDao = notatDao,
                         index = index,
                     )
@@ -188,7 +188,7 @@ data class Arbeidsgiver(
                         periode = it,
                         // Antakelse om at hvis det ikke finnes oppgave er det en periode som skal skjønnsfastsettes. Da vil vi vise varsler.
                         // Dette kans fjernes når skjønnsfastsettingperioder også har oppgave.
-                        skalViseAktiveVarsler = if (oppgaveId == null) true else index == 0 && perioderSomSkalViseAktiveVarsler.contains(UUID.fromString(it.vedtaksperiodeId)),
+                        skalViseAktiveVarsler = if (oppgaveId == null) true else index == 0 && perioderSomSkalViseAktiveVarsler.contains(it.vedtaksperiodeId),
                         notatDao = notatDao,
                         index = index,
                     )
@@ -223,7 +223,7 @@ data class Arbeidsgiver(
 }
 
 private fun OverstyringTidslinjeDto.tilDagoverstyring() = Dagoverstyring(
-    hendelseId = hendelseId.toString(),
+    hendelseId = hendelseId,
     begrunnelse = begrunnelse,
     timestamp = timestamp.format(DateTimeFormatter.ISO_DATE_TIME),
     saksbehandler = Saksbehandler(
@@ -243,7 +243,7 @@ private fun OverstyringTidslinjeDto.tilDagoverstyring() = Dagoverstyring(
 )
 
 private fun OverstyringInntektDto.tilInntektoverstyring() = Inntektoverstyring(
-    hendelseId = hendelseId.toString(),
+    hendelseId = hendelseId,
     timestamp = timestamp.format(DateTimeFormatter.ISO_DATE_TIME),
     saksbehandler = Saksbehandler(
         navn = saksbehandlerNavn,
@@ -274,7 +274,7 @@ private fun OverstyringInntektDto.tilInntektoverstyring() = Inntektoverstyring(
 )
 
 private fun OverstyringArbeidsforholdDto.tilArbeidsforholdoverstyring() = Arbeidsforholdoverstyring(
-    hendelseId = hendelseId.toString(),
+    hendelseId = hendelseId,
     begrunnelse = begrunnelse,
     timestamp = timestamp.format(DateTimeFormatter.ISO_DATE_TIME),
     saksbehandler = Saksbehandler(
@@ -288,7 +288,7 @@ private fun OverstyringArbeidsforholdDto.tilArbeidsforholdoverstyring() = Arbeid
 )
 
 private fun SkjønnsfastsettingSykepengegrunnlagDto.tilSykepengegrunnlagSkjønnsfastsetting() = Sykepengegrunnlagskjonnsfastsetting(
-    hendelseId = hendelseId.toString(),
+    hendelseId = hendelseId,
     timestamp = timestamp.format(DateTimeFormatter.ISO_DATE_TIME),
     saksbehandler = Saksbehandler(
         navn = saksbehandlerNavn,

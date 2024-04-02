@@ -140,7 +140,7 @@ data class Simulering(
 )
 
 data class Utbetaling(
-    val id: UUIDString,
+    val id: UUID,
     val arbeidsgiverFagsystemId: String,
     val arbeidsgiverNettoBelop: Int,
     val personFagsystemId: String,
@@ -166,7 +166,7 @@ data class Kommentar(
 )
 
 data class Notater(
-    val id: UUIDString,
+    val id: UUID,
     val notater: List<Notat>,
 )
 
@@ -174,11 +174,11 @@ data class Notat(
     val id: Int,
     val tekst: String,
     val opprettet: DateTimeString,
-    val saksbehandlerOid: UUIDString,
+    val saksbehandlerOid: UUID,
     val saksbehandlerNavn: String,
     val saksbehandlerEpost: String,
     val saksbehandlerIdent: String,
-    val vedtaksperiodeId: UUIDString,
+    val vedtaksperiodeId: UUID,
     val feilregistrert: Boolean,
     val feilregistrert_tidspunkt: DateTimeString?,
     val type: NotatType,
@@ -209,8 +209,8 @@ data class Risikovurdering(
 )
 
 data class VarselDTO(
-    val generasjonId: UUIDString,
-    val definisjonId: UUIDString,
+    val generasjonId: UUID,
+    val definisjonId: UUID,
     val opprettet: DateTimeString,
     val kode: String,
     val tittel: String,
@@ -229,12 +229,12 @@ interface Periode {
     fun erForkastet(): Boolean
     fun fom(): DateString
     fun tom(): DateString
-    fun id(): UUIDString
+    fun id(): UUID
     fun inntektstype(): Inntektstype
     fun opprettet(): DateTimeString
     fun periodetype(): Periodetype
     fun tidslinje(): List<Dag>
-    fun vedtaksperiodeId(): UUIDString
+    fun vedtaksperiodeId(): UUID
     fun periodetilstand(): Periodetilstand
     fun skjaeringstidspunkt(): DateString
     fun varsler(): List<VarselDTO>
@@ -292,16 +292,16 @@ interface Periode {
     }
 
     @GraphQLIgnore
-    fun notater(notatDao: NotatDao, vedtaksperiodeId: String): List<Notat> = notatDao.finnNotater(UUID.fromString(vedtaksperiodeId)).map {
+    fun notater(notatDao: NotatDao, vedtaksperiodeId: UUID): List<Notat> = notatDao.finnNotater(vedtaksperiodeId).map {
         Notat(
             id = it.id,
             tekst = it.tekst,
             opprettet = it.opprettet.toString(),
-            saksbehandlerOid = it.saksbehandlerOid.toString(),
+            saksbehandlerOid = it.saksbehandlerOid,
             saksbehandlerNavn = it.saksbehandlerNavn,
             saksbehandlerEpost = it.saksbehandlerEpost,
             saksbehandlerIdent = it.saksbehandlerIdent,
-            vedtaksperiodeId = it.vedtaksperiodeId.toString(),
+            vedtaksperiodeId = it.vedtaksperiodeId,
             feilregistrert = it.feilregistrert,
             feilregistrert_tidspunkt = it.feilregistrert_tidspunkt.toString(),
             type = it.type,
@@ -332,24 +332,24 @@ data class UberegnetPeriode(
     override fun erForkastet(): Boolean = erForkastet(periode)
     override fun fom(): DateString = fom(periode)
     override fun tom(): DateString = tom(periode)
-    override fun id(): String = UUID.nameUUIDFromBytes(vedtaksperiodeId().toByteArray() + index.toByte()).toString()
+    override fun id(): UUID = UUID.nameUUIDFromBytes(vedtaksperiodeId().toString().toByteArray() + index.toByte())
     override fun inntektstype(): Inntektstype = inntektstype(periode)
     override fun opprettet(): DateTimeString = opprettet(periode)
     override fun periodetype(): Periodetype = periodetype(periode)
     override fun tidslinje(): List<Dag> = tidslinje(periode)
-    override fun vedtaksperiodeId(): UUIDString = periode.vedtaksperiodeId
+    override fun vedtaksperiodeId(): UUID = periode.vedtaksperiodeId
     override fun periodetilstand(): Periodetilstand = periodetilstand(periode.periodetilstand, true)
     override fun skjaeringstidspunkt(): DateString = periode.skjaeringstidspunkt
     override fun hendelser(): List<Hendelse> = periode.hendelser.map { it.tilHendelse() }
     override fun varsler(): List<VarselDTO> = if (skalViseAktiveVarsler)
-        varselRepository.finnVarslerForUberegnetPeriode(UUID.fromString(vedtaksperiodeId())).toList() else
-        varselRepository.finnGodkjenteVarslerForUberegnetPeriode(UUID.fromString(vedtaksperiodeId())).toList()
+        varselRepository.finnVarslerForUberegnetPeriode(vedtaksperiodeId()).toList() else
+        varselRepository.finnGodkjenteVarslerForUberegnetPeriode(vedtaksperiodeId()).toList()
     fun notater(): List<Notat> = notater(notatDao, vedtaksperiodeId())
 }
 
 @Suppress("unused")
 data class UberegnetVilkarsprovdPeriode(
-    val vilkarsgrunnlagId: UUIDString,
+    val vilkarsgrunnlagId: UUID,
     private val varselRepository: ApiVarselRepository,
     private val periode: GraphQLTidslinjeperiode,
     private val skalViseAktiveVarsler: Boolean,
@@ -359,24 +359,24 @@ data class UberegnetVilkarsprovdPeriode(
     override fun erForkastet(): Boolean = erForkastet(periode)
     override fun fom(): DateString = fom(periode)
     override fun tom(): DateString = tom(periode)
-    override fun id(): String = UUID.nameUUIDFromBytes(vedtaksperiodeId().toByteArray() + index.toByte()).toString()
+    override fun id(): UUID = UUID.nameUUIDFromBytes(vedtaksperiodeId().toString().toByteArray() + index.toByte())
     override fun inntektstype(): Inntektstype = inntektstype(periode)
     override fun opprettet(): DateTimeString = opprettet(periode)
     override fun periodetype(): Periodetype = periodetype(periode)
     override fun tidslinje(): List<Dag> = tidslinje(periode)
-    override fun vedtaksperiodeId(): UUIDString = periode.vedtaksperiodeId
+    override fun vedtaksperiodeId(): UUID = periode.vedtaksperiodeId
     override fun periodetilstand(): Periodetilstand = periodetilstand(periode.periodetilstand, true)
     override fun skjaeringstidspunkt(): DateString = periode.skjaeringstidspunkt
     override fun hendelser(): List<Hendelse> = periode.hendelser.map { it.tilHendelse() }
     override fun varsler(): List<VarselDTO> = if (skalViseAktiveVarsler)
-        varselRepository.finnVarslerForUberegnetPeriode(UUID.fromString(vedtaksperiodeId())).toList() else
-        varselRepository.finnGodkjenteVarslerForUberegnetPeriode(UUID.fromString(vedtaksperiodeId())).toList()
+        varselRepository.finnVarslerForUberegnetPeriode(vedtaksperiodeId()).toList() else
+        varselRepository.finnGodkjenteVarslerForUberegnetPeriode(vedtaksperiodeId()).toList()
     fun notater(): List<Notat> = notater(notatDao, vedtaksperiodeId())
 
     // Det blir litt for tungvint å håndtere i Speil at vilkarsgrunnlag kan være både null og ikke-null.
     // Feltet må være nullable i BeregnetPeriode pga. at spleis bruker BeregnetPeriode for annullerte perioder, og de
     // har vilkarsgrunnlag = null
-    fun vilkarsgrunnlagId(): UUIDString? = vilkarsgrunnlagId
+    fun vilkarsgrunnlagId(): UUID? = vilkarsgrunnlagId
 }
 
 enum class Periodehandling {
@@ -405,15 +405,15 @@ data class BeregnetPeriode(
     override fun erForkastet(): Boolean = erForkastet(periode)
     override fun fom(): DateString = fom(periode)
     override fun tom(): DateString = tom(periode)
-    override fun id(): String = UUID.nameUUIDFromBytes(vedtaksperiodeId().toByteArray() + index.toByte()).toString()
+    override fun id(): UUID = UUID.nameUUIDFromBytes(vedtaksperiodeId().toString().toByteArray() + index.toByte())
     override fun inntektstype(): Inntektstype = inntektstype(periode)
     override fun opprettet(): DateTimeString = opprettet(periode)
     override fun periodetype(): Periodetype = periodetype(periode)
     override fun tidslinje(): List<Dag> = tidslinje(periode)
-    override fun vedtaksperiodeId(): UUIDString = periode.vedtaksperiodeId
+    override fun vedtaksperiodeId(): UUID = periode.vedtaksperiodeId
     override fun periodetilstand(): Periodetilstand = periodetilstand
     fun handlinger() = byggHandlinger()
-    fun egenskaper(): List<Oppgaveegenskap> = oppgavehåndterer.hentEgenskaper(UUID.fromString(periode.vedtaksperiodeId), UUID.fromString(periode.utbetaling.id))
+    fun egenskaper(): List<Oppgaveegenskap> = oppgavehåndterer.hentEgenskaper(periode.vedtaksperiodeId, periode.utbetaling.id)
 
     private fun byggHandlinger(): List<Handling> {
         return if (periodetilstand != Periodetilstand.TilGodkjenning)
@@ -430,7 +430,7 @@ data class BeregnetPeriode(
     fun notater(): List<Notat> = notater(notatDao, vedtaksperiodeId())
 
     fun periodehistorikk(): List<PeriodeHistorikkElement> =
-        periodehistorikkDao.finn(UUID.fromString(utbetaling().id)).map {
+        periodehistorikkDao.finn(utbetaling().id).map {
             PeriodeHistorikkElement(
                 type = it.type,
                 saksbehandler_ident = it.saksbehandler_ident,
@@ -439,7 +439,7 @@ data class BeregnetPeriode(
             )
         }
 
-    fun beregningId(): UUIDString = periode.beregningId
+    fun beregningId(): UUID = periode.beregningId
 
     fun forbrukteSykedager(): Int? = periode.forbrukteSykedager
 
@@ -495,10 +495,10 @@ data class BeregnetPeriode(
         )
     }
 
-    fun vilkarsgrunnlagId(): UUIDString? = periode.vilkarsgrunnlagId
+    fun vilkarsgrunnlagId(): UUID? = periode.vilkarsgrunnlagId
 
     fun risikovurdering(): Risikovurdering? =
-        risikovurderingApiDao.finnRisikovurdering(UUID.fromString(vedtaksperiodeId()))?.let { vurdering ->
+        risikovurderingApiDao.finnRisikovurdering(vedtaksperiodeId())?.let { vurdering ->
             Risikovurdering(
                 funn = vurdering.funn.tilFaresignaler(),
                 kontrollertOk = vurdering.kontrollertOk.tilFaresignaler()
@@ -507,35 +507,35 @@ data class BeregnetPeriode(
 
     override fun varsler(): List<VarselDTO> =
         if (erSisteGenerasjon) varselRepository.finnVarslerSomIkkeErInaktiveForSisteGenerasjon(
-            UUID.fromString(vedtaksperiodeId()),
-            UUID.fromString(periode.utbetaling.id)
+            vedtaksperiodeId(),
+            periode.utbetaling.id
         ).toList()
         else varselRepository.finnVarslerSomIkkeErInaktiveFor(
-            UUID.fromString(vedtaksperiodeId()),
-            UUID.fromString(periode.utbetaling.id)
+            vedtaksperiodeId(),
+            periode.utbetaling.id
         ).toList()
 
     @Deprecated("Oppgavereferanse bør hentes fra periodens oppgave")
     fun oppgavereferanse(): String? =
-        oppgaveApiDao.finnOppgaveId(UUID.fromString(vedtaksperiodeId()))?.toString()
+        oppgaveApiDao.finnOppgaveId(vedtaksperiodeId())?.toString()
 
     private val oppgaveDto: OppgaveForPeriodevisningDto? by lazy {
-        oppgaveApiDao.finnPeriodeoppgave(UUID.fromString(periode.vedtaksperiodeId))
+        oppgaveApiDao.finnPeriodeoppgave(periode.vedtaksperiodeId)
     }
 
     val oppgave = oppgaveDto?.let { oppgaveDto -> OppgaveForPeriodevisning(id = oppgaveDto.id) }
 
     fun totrinnsvurdering(): Totrinnsvurdering? =
-        totrinnsvurderingApiDao.hentAktiv(UUID.fromString(vedtaksperiodeId()))?.let {
+        totrinnsvurderingApiDao.hentAktiv(vedtaksperiodeId())?.let {
             Totrinnsvurdering(
                 erRetur = it.erRetur,
-                saksbehandler = it.saksbehandler?.toString(),
-                beslutter = it.beslutter?.toString(),
+                saksbehandler = it.saksbehandler,
+                beslutter = it.beslutter,
                 erBeslutteroppgave = !it.erRetur && it.saksbehandler != null
             )
         }
 
-    fun paVent(): PaVent? = påVentApiDao.hentAktivPåVent(UUID.fromString(vedtaksperiodeId()))?.let {
+    fun paVent(): PaVent? = påVentApiDao.hentAktivPåVent(vedtaksperiodeId())?.let {
         PaVent(
             frist = it.frist,
             begrunnelse = it.begrunnelse,

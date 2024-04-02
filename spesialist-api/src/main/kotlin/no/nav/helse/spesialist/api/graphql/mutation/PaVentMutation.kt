@@ -59,7 +59,7 @@ class PaVentMutation(
                     PaVent(
                         frist = frist,
                         begrunnelse = begrunnelse,
-                        oid = saksbehandler.oid.toString()
+                        oid = saksbehandler.oid
                     )
                 ).build()
             } catch (e: OppgaveIkkeTildelt) {

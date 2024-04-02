@@ -28,8 +28,8 @@ data class Varsel(
     }
 
     internal fun toDto() = VarselDTO(
-        generasjonId.toString(),
-        definisjonId.toString(),
+        generasjonId,
+        definisjonId,
         opprettet.toString(),
         kode,
         tittel,
