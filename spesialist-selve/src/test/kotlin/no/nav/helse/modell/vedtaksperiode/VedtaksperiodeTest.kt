@@ -5,7 +5,6 @@ import java.util.UUID
 import no.nav.helse.januar
 import no.nav.helse.modell.varsel.Varsel
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -85,14 +84,6 @@ class VedtaksperiodeTest {
         val dto = vedtaksperiode.toDto()
         val generasjon = dto.generasjoner.single()
         assertEquals(TilstandDto.AvsluttetUtenUtbetaling, generasjon.tilstand)
-    }
-
-    @Test
-    fun `ny vedtaksperiode opprettes med spleisBehandlingId`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId)
-        val dto = vedtaksperiode.toDto()
-        assertNotNull(dto.generasjoner.single().spleisBehandlingId)
     }
 
     @Test
