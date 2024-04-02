@@ -55,7 +55,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
                     vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
                     utbetalingId = row.uuidOrNull("utbetaling_id"),
                     spleisBehandlingId = row.uuidOrNull("spleis_behandling_id"),
-                    skjæringstidspunkt = row.localDate("skjæringstidspunkt"),
+                    skjæringstidspunkt = row.localDateOrNull("skjæringstidspunkt") ?: row.localDate("fom"),
                     fom = row.localDate("fom"),
                     tom = row.localDate("tom"),
                     tilstand = when (val tilstand = row.string("tilstand")) {
