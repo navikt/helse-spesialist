@@ -331,14 +331,14 @@ internal class OppgaveMediatorTest {
         assertEquals("1", oppgave.id)
         assertEquals(opprettet.toString(), oppgave.opprettet)
         assertEquals(opprinneligSøknadsdato.toString(), oppgave.opprinneligSoknadsdato)
-        assertEquals(vedtaksperiodeId, oppgave.vedtaksperiodeId)
+        assertEquals(vedtaksperiodeId.toString(), oppgave.vedtaksperiodeId)
         assertEquals("fornavn", oppgave.navn.fornavn)
         assertEquals("mellomnavn", oppgave.navn.mellomnavn)
         assertEquals("etternavn", oppgave.navn.etternavn)
         assertEquals("1234567891011", oppgave.aktorId)
         assertEquals(SAKSBEHANDLERNAVN, oppgave.tildeling?.navn)
         assertEquals(SAKSBEHANDLEREPOST, oppgave.tildeling?.epost)
-        assertEquals(SAKSBEHANDLEROID, oppgave.tildeling?.oid)
+        assertEquals(SAKSBEHANDLEROID.toString(), oppgave.tildeling?.oid)
         assertEquals(EGENSKAPER.size, oppgave.egenskaper.size)
     }
 

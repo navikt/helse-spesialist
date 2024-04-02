@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
-import java.util.UUID
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiverrefusjon
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLRefusjonselement
 
@@ -13,7 +12,7 @@ data class Refusjonselement(
     val fom: DateTimeString,
     val tom: DateTimeString?,
     val belop: Double,
-    val meldingsreferanseId: UUID
+    val meldingsreferanseId: UUIDString
 )
 
 internal fun GraphQLArbeidsgiverrefusjon.tilArbeidsgiverrefusjon(): Arbeidsgiverrefusjon =

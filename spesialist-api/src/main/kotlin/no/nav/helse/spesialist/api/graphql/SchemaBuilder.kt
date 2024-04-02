@@ -78,8 +78,7 @@ internal class SchemaBuilder(
             supportedPackages = listOf(
                 "no.nav.helse.spesialist.api.graphql",
                 "no.nav.helse.spleis.graphql",
-            ),
-            hooks = schemaGeneratorHooks
+            )
         )
         return toSchema(
             config = schemaConfig,
@@ -130,11 +129,7 @@ internal class SchemaBuilder(
                     )
                 ),
                 TopLevelObject(
-                    DokumentQuery(
-                        personApiDao = personApiDao,
-                        egenAnsattApiDao = egenAnsattApiDao,
-                        dokumenthåndterer = dokumenthåndterer
-                    )
+                    DokumentQuery(personApiDao = personApiDao, egenAnsattApiDao = egenAnsattApiDao, dokumenthåndterer = dokumenthåndterer)
                 ),
             ),
             mutations = listOf(
@@ -183,9 +178,7 @@ internal class SchemaBuilder(
                 ),
                 TopLevelObject(
                     PaVentMutation(
-                        saksbehandlerhåndterer = saksbehandlerhåndterer,
-                        notatMediator = notatMediator,
-                        periodehistorikkDao = periodehistorikkDao
+                        saksbehandlerhåndterer = saksbehandlerhåndterer, notatMediator = notatMediator, periodehistorikkDao = periodehistorikkDao
                     )
                 ),
             )

@@ -269,8 +269,7 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         val arbeidsgiverRef = opprettArbeidsgiver()
         opprettVedtaksperiode(personRef, arbeidsgiverRef)
         val (id, fom, tom) = PERIODE
-        val eksternDokumentId = UUID.randomUUID()
-        val graphQLHendelse = opprettSnapshotHendelse(eksternDokumentId)
+        val graphQLHendelse = opprettSnapshotHendelse()
         val graphQLperiodeMedOppgave = opprettBeregnetPeriode(fom.toString(), tom.toString(), id, hendelser = listOf(graphQLHendelse))
         val snapshotGenerasjon = opprettSnapshotGenerasjon(listOf(graphQLperiodeMedOppgave))
         val arbeidsgiver = opprettSnapshotArbeidsgiver(listOf(snapshotGenerasjon))
@@ -280,7 +279,7 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
 
         val hendelse = body["data"]["person"]["arbeidsgivere"].first()["generasjoner"].first()["perioder"].first()["hendelser"].first()
         assertNotNull(hendelse)
-        assertEquals(eksternDokumentId.toString(), hendelse["eksternDokumentId"].textValue())
+        assertEquals("456", hendelse["eksternDokumentId"].textValue())
     }
 
     @Test

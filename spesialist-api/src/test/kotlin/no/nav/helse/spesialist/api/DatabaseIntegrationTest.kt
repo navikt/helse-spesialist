@@ -675,7 +675,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         arbeidsgivere: List<GraphQLArbeidsgiver> = emptyList(),
     ): GraphQLPerson {
         val vilkårsgrunnlag = GraphQLSpleisVilkarsgrunnlag(
-            id = UUID.randomUUID(),
+            id = UUID.randomUUID().toString(),
             inntekter = listOf(
                 GraphQLArbeidsgiverinntekt(
                     arbeidsgiver = ORGANISASJONSNUMMER,
@@ -717,7 +717,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                             fom = "2020-01-01",
                             tom = null,
                             belop = 30000.0,
-                            meldingsreferanseId = UUID.randomUUID()
+                            meldingsreferanseId = UUID.randomUUID().toString()
                         )
                     )
                 )
@@ -740,11 +740,10 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             ghostPerioder = emptyList(),
             generasjoner = generasjoner,
         )
-
-    protected fun opprettSnapshotHendelse(eksternDokumentId: UUID) =
+    protected fun opprettSnapshotHendelse() =
         GraphQLSoknadArbeidsledig(
-            id = UUID.randomUUID().toString(),
-            eksternDokumentId = eksternDokumentId.toString(),
+            id = "123",
+            eksternDokumentId = "456",
             fom = "2022-05-11",
             tom = "2022-05-30",
             rapportertDato = "2023-10-10",
@@ -753,7 +752,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         )
 
     protected fun opprettSnapshotGenerasjon(perioder: List<GraphQLTidslinjeperiode>, id: UUID = UUID.randomUUID()) =
-        GraphQLGenerasjon(id = id, perioder = perioder)
+        GraphQLGenerasjon(id = id.toString(), perioder = perioder)
 
     protected fun opprettBeregnetPeriode(
         fom: String = LocalDate.now().toString(),
@@ -771,8 +770,8 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         periodetilstand = GraphQLPeriodetilstand.TILGODKJENNING,
         skjaeringstidspunkt = LocalDate.now().toString(),
         tidslinje = emptyList(),
-        vedtaksperiodeId = vedtaksperiodeId,
-        beregningId = UUID.randomUUID(),
+        vedtaksperiodeId = vedtaksperiodeId.toString(),
+        beregningId = UUID.randomUUID().toString(),
         forbrukteSykedager = null,
         gjenstaendeSykedager = null,
         hendelser = hendelser,
@@ -787,7 +786,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             )
         ),
         utbetaling = GraphQLUtbetaling(
-            id = utbetalingId,
+            id = utbetalingId.toString(),
             arbeidsgiverFagsystemId = "EN_FAGSYSTEM_ID",
             arbeidsgiverNettoBelop = 1,
             personFagsystemId = "EN_FAGSYSTEM_ID",
@@ -811,7 +810,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         periodetilstand = GraphQLPeriodetilstand.TILGODKJENNING,
         skjaeringstidspunkt = LocalDate.now().toString(),
         tidslinje = emptyList(),
-        vedtaksperiodeId = vedtaksperiodeId,
+        vedtaksperiodeId = vedtaksperiodeId.toString(),
         hendelser = emptyList(),
     )
 

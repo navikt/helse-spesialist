@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
-import java.util.UUID
 import no.nav.helse.spleis.graphql.enums.GraphQLBegrunnelse
 import no.nav.helse.spleis.graphql.enums.GraphQLSykdomsdagkildetype
 import no.nav.helse.spleis.graphql.enums.GraphQLSykdomsdagtype
@@ -67,7 +66,7 @@ enum class Begrunnelse {
 }
 
 data class Kilde(
-    val id: UUID,
+    val id: UUIDString,
     val type: Kildetype
 )
 

@@ -16,6 +16,6 @@ internal class PåVentApiDaoTest : DatabaseIntegrationTest() {
         assertNotNull(påvent)
         assertEquals(LocalDate.now().plusDays(21).toString(), påvent?.frist)
         assertEquals("En begrunnelse", påvent?.begrunnelse)
-        assertEquals(SAKSBEHANDLER.oid, påvent?.oid)
+        assertEquals(SAKSBEHANDLER.oid.toString(), påvent?.oid)
     }
 }

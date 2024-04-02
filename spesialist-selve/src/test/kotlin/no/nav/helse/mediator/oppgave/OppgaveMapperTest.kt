@@ -69,7 +69,7 @@ internal class OppgaveMapperTest {
         val oppgaveTilBehandling = oppgaverTilBehandling.single()
         assertEquals(oppgaveId.toString(), oppgaveTilBehandling.id)
         assertEquals(aktørId, oppgaveTilBehandling.aktorId)
-        assertEquals(vedtaksperiodeId, oppgaveTilBehandling.vedtaksperiodeId)
+        assertEquals(vedtaksperiodeId.toString(), oppgaveTilBehandling.vedtaksperiodeId)
         assertEquals(Personnavn("fornavn", "etternavn", "mellomnavn"), oppgaveTilBehandling.navn)
         assertEquals(opprettet.toString(), oppgaveTilBehandling.opprettet)
         assertEquals(opprinneligSøknadsdato.toString(), oppgaveTilBehandling.opprinneligSoknadsdato)
