@@ -32,7 +32,7 @@ internal class AvsluttetUtenVedtakRiver(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         sikkerlogg.info("Mottok melding avsluttet_uten_vedtak:\n${packet.toJson()}")
-        mediator.håndter(AvsluttetUtenVedtakMessage(packet))
+        mediator.mottaMelding(AvsluttetUtenVedtakMessage(packet), context)
     }
 
     private companion object {

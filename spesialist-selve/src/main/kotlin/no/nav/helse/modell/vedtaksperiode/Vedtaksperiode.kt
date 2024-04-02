@@ -66,6 +66,18 @@ internal class Vedtaksperiode private constructor(
         gjeldendeGenerasjon.håndterVedtakFattet(meldingId)
     }
 
+    internal fun avsluttetUtenVedtak(person: Person, avsluttetUtenVedtak: AvsluttetUtenVedtak) {
+        if (forkastet) return
+        val sykepengevedtakBuilder = SykepengevedtakBuilder()
+        gjeldendeGenerasjon.avsluttetUtenVedtak(avsluttetUtenVedtak, sykepengevedtakBuilder)
+        sykepengevedtakBuilder
+            .organisasjonsnummer(organisasjonsnummer)
+            .vedtaksperiodeId(vedtaksperiodeId)
+        avsluttetUtenVedtak
+            .byggMelding(sykepengevedtakBuilder)
+        person.supplerVedtakFattet(sykepengevedtakBuilder)
+    }
+
     internal fun vedtaksperiodeForkastet() {
         forkastet = true
     }

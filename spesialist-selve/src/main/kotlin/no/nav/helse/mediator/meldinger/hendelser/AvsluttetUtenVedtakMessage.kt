@@ -1,44 +1,52 @@
 package no.nav.helse.mediator.meldinger.hendelser
 
+import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID
+import no.nav.helse.mediator.Kommandofabrikk
 import no.nav.helse.mediator.asUUID
-import no.nav.helse.mediator.meldinger.VedtaksperiodemeldingOld
-import no.nav.helse.modell.vedtaksperiode.Generasjon
+import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
+import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetUtenVedtak
 import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.asLocalDate
 
-internal class AvsluttetUtenVedtakMessage(private val packet: JsonMessage): VedtaksperiodemeldingOld {
+internal class AvsluttetUtenVedtakMessage private constructor(
+    override val id: UUID,
+    private val fødselsnummer: String,
+    private val vedtaksperiodeId: UUID,
+    private val spleisBehandlingId: UUID,
+    private val hendelser: List<UUID>,
+    private val json: String
+): Vedtaksperiodemelding {
 
-    private val fødselsnummer = packet["fødselsnummer"].asText()
-    private val aktørId = packet["aktørId"].asText()
-    private val fom = packet["fom"].asLocalDate()
-    private val tom = packet["tom"].asLocalDate()
-    private val vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
-    private val spleisBehandlingId = UUID.fromString(packet["behandlingId"].asText())
-    private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
-    private val skjæringstidspunkt = packet["skjæringstidspunkt"].asLocalDate()
-    private val hendelser = packet["hendelser"].map { it.asUUID() }
-
-    internal fun skjæringstidspunkt() = skjæringstidspunkt
-    override fun fødselsnummer(): String = fødselsnummer
-    override fun vedtaksperiodeId(): UUID = vedtaksperiodeId
-    override val id: UUID = packet["@id"].asUUID()
-    override fun toJson(): String = packet.toJson()
-
-    private val avsluttetUtenVedtak get() = AvsluttetUtenVedtak(
-        fødselsnummer = fødselsnummer,
-        aktørId = aktørId,
-        organisasjonsnummer = organisasjonsnummer,
-        vedtaksperiodeId = vedtaksperiodeId,
-        spleisBehandlingId = spleisBehandlingId,
-        skjæringstidspunkt = skjæringstidspunkt,
-        hendelser = hendelser,
-        fom = fom,
-        tom = tom,
+    internal constructor(jsonNode: JsonNode): this(
+        id = jsonNode["@id"].asUUID(),
+        fødselsnummer = jsonNode["fødselsnummer"].asText(),
+        vedtaksperiodeId = UUID.fromString(jsonNode["vedtaksperiodeId"].asText()),
+        spleisBehandlingId = UUID.fromString(jsonNode["behandlingId"].asText()),
+        hendelser = jsonNode["hendelser"].map { it.asUUID() },
+        json = jsonNode.toString()
     )
 
-    internal fun sendInnTil(generasjon: Generasjon) {
-        generasjon.håndter(avsluttetUtenVedtak)
+    internal constructor(packet: JsonMessage): this(
+        id = packet["@id"].asUUID(),
+        fødselsnummer = packet["fødselsnummer"].asText(),
+        vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText()),
+        spleisBehandlingId = UUID.fromString(packet["behandlingId"].asText()),
+        hendelser = packet["hendelser"].map { it.asUUID() },
+        json = packet.toJson()
+    )
+
+    private val avsluttetUtenVedtak get() = AvsluttetUtenVedtak(
+        vedtaksperiodeId = vedtaksperiodeId,
+        spleisBehandlingId = spleisBehandlingId,
+        hendelser = hendelser,
+    )
+    override fun fødselsnummer(): String = fødselsnummer
+    override fun vedtaksperiodeId(): UUID = vedtaksperiodeId
+
+    override fun toJson(): String = json
+
+    override fun behandle(person: Person, kommandofabrikk: Kommandofabrikk) {
+        person.avsluttetUtenVedtak(avsluttetUtenVedtak)
     }
 }
