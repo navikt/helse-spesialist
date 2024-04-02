@@ -54,7 +54,7 @@ class NotatQuery(private val notatDao: NotatDao) : Query {
 private fun Map<UUID, List<NotatDto>>.tilNotater(): List<Notater> =
     toList().map { (id, notater) ->
         Notater(
-            id = id.toString(),
+            id = id,
             notater = notater.map(::tilNotat)
         )
     }
@@ -63,11 +63,11 @@ internal fun tilNotat(notat: NotatDto) = Notat(
     id = notat.id,
     tekst = notat.tekst,
     opprettet = notat.opprettet.format(DateTimeFormatter.ISO_DATE_TIME),
-    saksbehandlerOid = notat.saksbehandlerOid.toString(),
+    saksbehandlerOid = notat.saksbehandlerOid,
     saksbehandlerNavn = notat.saksbehandlerNavn,
     saksbehandlerEpost = notat.saksbehandlerEpost,
     saksbehandlerIdent = notat.saksbehandlerIdent,
-    vedtaksperiodeId = notat.vedtaksperiodeId.toString(),
+    vedtaksperiodeId = notat.vedtaksperiodeId,
     feilregistrert = notat.feilregistrert,
     feilregistrert_tidspunkt = notat.feilregistrert_tidspunkt?.format(DateTimeFormatter.ISO_DATE_TIME),
     type = notat.type,

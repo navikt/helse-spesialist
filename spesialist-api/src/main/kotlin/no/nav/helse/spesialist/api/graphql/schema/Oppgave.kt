@@ -1,5 +1,7 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
+import java.util.UUID
+
 enum class Oppgavetype {
     SOKNAD,
     STIKKPROVE,
@@ -93,7 +95,7 @@ data class OppgaveTilBehandling(
     val opprettet: DateTimeString,
     val opprinneligSoknadsdato: DateTimeString,
     val tidsfrist: DateString?,
-    val vedtaksperiodeId: UUIDString,
+    val vedtaksperiodeId: UUID,
     val navn: Personnavn,
     val aktorId: String,
     val tildeling: Tildeling?,
@@ -115,8 +117,8 @@ data class OppgaveForPeriodevisning(
 
 data class Totrinnsvurdering(
     val erRetur: Boolean,
-    val saksbehandler: UUIDString?,
-    val beslutter: UUIDString?,
+    val saksbehandler: UUID?,
+    val beslutter: UUID?,
     val erBeslutteroppgave: Boolean
 )
 

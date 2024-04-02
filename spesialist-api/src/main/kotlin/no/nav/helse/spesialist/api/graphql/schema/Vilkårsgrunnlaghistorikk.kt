@@ -11,7 +11,7 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLVilkarsgrunnlag
 enum class Vilkarsgrunnlagtype { INFOTRYGD, SPLEIS, UKJENT }
 
 interface Vilkarsgrunnlag {
-    val id: UUIDString
+    val id: UUID
     val vilkarsgrunnlagtype: Vilkarsgrunnlagtype
     val inntekter: List<Arbeidsgiverinntekt>
     val arbeidsgiverrefusjoner: List<Arbeidsgiverrefusjon>
@@ -21,7 +21,7 @@ interface Vilkarsgrunnlag {
 }
 
 data class VilkarsgrunnlagInfotrygd(
-    override val id: UUIDString,
+    override val id: UUID,
     override val vilkarsgrunnlagtype: Vilkarsgrunnlagtype,
     override val inntekter: List<Arbeidsgiverinntekt>,
     override val arbeidsgiverrefusjoner: List<Arbeidsgiverrefusjon>,
@@ -31,7 +31,7 @@ data class VilkarsgrunnlagInfotrygd(
 ) : Vilkarsgrunnlag
 
 data class VilkarsgrunnlagSpleis(
-    override val id: UUIDString,
+    override val id: UUID,
     override val vilkarsgrunnlagtype: Vilkarsgrunnlagtype,
     override val inntekter: List<Arbeidsgiverinntekt>,
     override val omregnetArsinntekt: Double,
@@ -54,7 +54,7 @@ internal fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Av
     return when (this) {
         is GraphQLSpleisVilkarsgrunnlag -> {
             val avviksvurdering: Avviksvurdering =
-                checkNotNull(avviksvurderinghenter.hentAvviksvurdering(UUID.fromString(id))) { "Fant ikke avviksvurdering for vilkårsgrunnlagId $id" }
+                checkNotNull(avviksvurderinghenter.hentAvviksvurdering(id)) { "Fant ikke avviksvurdering for vilkårsgrunnlagId $id" }
             val orgnrs =
                 (avviksvurdering.sammenligningsgrunnlag.innrapporterteInntekter.map { it.arbeidsgiverreferanse } + inntekter.map { it.arbeidsgiver }).toSet()
             val inntekter = orgnrs.map { arbeidsgiverreferanse ->

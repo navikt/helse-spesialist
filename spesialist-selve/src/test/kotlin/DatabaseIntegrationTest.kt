@@ -472,7 +472,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                             ghostPerioder = emptyList(),
                             generasjoner = listOf(
                                 GraphQLGenerasjon(
-                                    id = UUID.randomUUID().toString(),
+                                    id = UUID.randomUUID(),
                                     perioder = listOf(
                                         GraphQLUberegnetPeriode(
                                             erForkastet = false,
@@ -482,7 +482,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                                             opprettet = "2020-01-31",
                                             periodetype = GraphQLPeriodetype.FORSTEGANGSBEHANDLING,
                                             tidslinje = emptyList(),
-                                            vedtaksperiodeId = UUID.randomUUID().toString(),
+                                            vedtaksperiodeId = UUID.randomUUID(),
                                             periodetilstand = GraphQLPeriodetilstand.VENTERPAANNENPERIODE,
                                             skjaeringstidspunkt = "2020-01-01",
                                             hendelser = emptyList(),

@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
+import java.util.UUID
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLHendelse
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLInntektsmelding
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSoknadArbeidsgiver
@@ -21,70 +22,70 @@ enum class Hendelsetype {
 }
 
 interface Hendelse {
-    val id: UUIDString
+    val id: UUID
     val type: Hendelsetype
 }
 
 data class Inntektsmelding(
-    override val id: UUIDString,
+    override val id: UUID,
     override val type: Hendelsetype,
     val mottattDato: DateTimeString,
     val beregnetInntekt: Double,
-    val eksternDokumentId: UUIDString?
+    val eksternDokumentId: UUID?
 ) : Hendelse
 
 data class SoknadArbeidsgiver(
-    override val id: UUIDString,
+    override val id: UUID,
     override val type: Hendelsetype,
     val fom: DateString,
     val tom: DateString,
     val rapportertDato: DateTimeString,
     val sendtArbeidsgiver: DateTimeString,
-    val eksternDokumentId: UUIDString?
+    val eksternDokumentId: String?
 ) : Hendelse
 
 data class SoknadNav(
-    override val id: UUIDString,
+    override val id: UUID,
     override val type: Hendelsetype,
     val fom: DateString,
     val tom: DateString,
     val rapportertDato: DateTimeString,
     val sendtNav: DateTimeString,
-    val eksternDokumentId: UUIDString?
+    val eksternDokumentId: UUID?
 ) : Hendelse
 
 data class SoknadArbeidsledig(
-    override val id: UUIDString,
+    override val id: UUID,
     override val type: Hendelsetype,
     val fom: DateString,
     val tom: DateString,
     val rapportertDato: DateTimeString,
     val sendtNav: DateTimeString,
-    val eksternDokumentId: UUIDString?
+    val eksternDokumentId: UUID?
 ) : Hendelse
 
 data class SoknadFrilans(
-    override val id: UUIDString,
+    override val id: UUID,
     override val type: Hendelsetype,
     val fom: DateString,
     val tom: DateString,
     val rapportertDato: DateTimeString,
     val sendtNav: DateTimeString,
-    val eksternDokumentId: UUIDString?
+    val eksternDokumentId: UUID?
 ) : Hendelse
 
 data class SoknadSelvstendig(
-    override val id: UUIDString,
+    override val id: UUID,
     override val type: Hendelsetype,
     val fom: DateString,
     val tom: DateString,
     val rapportertDato: DateTimeString,
     val sendtNav: DateTimeString,
-    val eksternDokumentId: UUIDString?
+    val eksternDokumentId: UUID?
 ) : Hendelse
 
 data class Sykmelding(
-    override val id: UUIDString,
+    override val id: UUID,
     override val type: Hendelsetype,
     val fom: DateString,
     val tom: DateString,
@@ -93,15 +94,15 @@ data class Sykmelding(
 
 internal fun GraphQLHendelse.tilHendelse(): Hendelse = when (this) {
     is GraphQLInntektsmelding -> Inntektsmelding(
-        id = id,
+        id = UUID.fromString(id),
         type = Hendelsetype.INNTEKTSMELDING,
         mottattDato = mottattDato,
         beregnetInntekt = beregnetInntekt,
-        eksternDokumentId = eksternDokumentId,
+        eksternDokumentId = UUID.fromString(eksternDokumentId),
     )
 
     is GraphQLSoknadArbeidsgiver -> SoknadArbeidsgiver(
-        id = id,
+        id = UUID.fromString(id),
         type = Hendelsetype.SENDT_SOKNAD_ARBEIDSGIVER,
         fom = fom,
         tom = tom,
@@ -111,47 +112,47 @@ internal fun GraphQLHendelse.tilHendelse(): Hendelse = when (this) {
     )
 
     is GraphQLSoknadNav -> SoknadNav(
-        id = id,
+        id = UUID.fromString(id),
         type = Hendelsetype.SENDT_SOKNAD_NAV,
         fom = fom,
         tom = tom,
         rapportertDato = rapportertDato,
         sendtNav = sendtNav,
-        eksternDokumentId = eksternDokumentId
+        eksternDokumentId = UUID.fromString(eksternDokumentId)
     )
 
     is GraphQLSoknadArbeidsledig -> SoknadArbeidsledig(
-        id = id,
+        id = UUID.fromString(id),
         type = Hendelsetype.SENDT_SOKNAD_ARBEIDSLEDIG,
         fom = fom,
         tom = tom,
         rapportertDato = rapportertDato,
         sendtNav = sendtNav,
-        eksternDokumentId = eksternDokumentId
+        eksternDokumentId = UUID.fromString(eksternDokumentId)
     )
 
     is GraphQLSoknadFrilans -> SoknadFrilans(
-        id = id,
+        id = UUID.fromString(id),
         type = Hendelsetype.SENDT_SOKNAD_FRILANS,
         fom = fom,
         tom = tom,
         rapportertDato = rapportertDato,
         sendtNav = sendtNav,
-        eksternDokumentId = eksternDokumentId
+        eksternDokumentId = UUID.fromString(eksternDokumentId)
     )
 
     is GraphQLSoknadSelvstendig -> SoknadSelvstendig(
-        id = id,
+        id = UUID.fromString(id),
         type = Hendelsetype.SENDT_SOKNAD_SELVSTENDIG,
         fom = fom,
         tom = tom,
         rapportertDato = rapportertDato,
         sendtNav = sendtNav,
-        eksternDokumentId = eksternDokumentId
+        eksternDokumentId = UUID.fromString(eksternDokumentId)
     )
 
     is GraphQLSykmelding -> Sykmelding(
-        id = id,
+        id = UUID.fromString(id),
         type = Hendelsetype.NY_SOKNAD,
         fom = fom,
         tom = tom,

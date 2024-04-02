@@ -14,8 +14,8 @@ class PåVentApiDao(dataSource: DataSource) : HelseDao(dataSource) {
         )
     ).single {
         PaVent(
-            frist = it.localDateOrNull("frist").toString(),
+            frist = it.localDate("frist").toString(),
             begrunnelse = it.stringOrNull("begrunnelse"),
-            oid = it.uuidOrNull("saksbehandler_ref").toString()
+            oid = it.uuid("saksbehandler_ref")
     ) }
 }

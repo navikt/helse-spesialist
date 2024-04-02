@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
 import java.time.format.DateTimeFormatter
+import java.util.UUID
 import no.nav.helse.spesialist.api.utbetaling.UtbetalingApiDto
 import no.nav.helse.spesialist.api.utbetaling.UtbetalingslinjeApiDto
 import no.nav.helse.spesialist.api.utbetaling.Utbetalingsstatus
@@ -77,7 +78,7 @@ data class Oppdrag(private val utbetaling: UtbetalingApiDto) {
 
     fun totalbelop() = utbetaling.totalbeløp
 
-    fun utbetalingId(): UUIDString = utbetaling.id.toString()
+    fun utbetalingId(): UUID = utbetaling.id
 
     private fun List<UtbetalingslinjeApiDto>.tilUtbetalingslinjer() =
         map {

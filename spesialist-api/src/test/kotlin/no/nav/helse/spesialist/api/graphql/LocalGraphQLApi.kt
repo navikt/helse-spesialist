@@ -327,7 +327,7 @@ private fun tildelOppgave(randomOppgaver: MutableList<OppgaveTilBehandling>, han
     randomOppgaver.add(oppgave.copy(tildeling = Tildeling(
         navn = saksbehandlerFraApi.navn,
         epost = saksbehandlerFraApi.epost,
-        oid = saksbehandlerFraApi.oid.toString(),
+        oid = saksbehandlerFraApi.oid,
     )))
 }
 
@@ -360,10 +360,10 @@ private fun List<OppgaveTilBehandling>.sorted(sortering: List<Oppgavesortering>)
     }
 
 private fun OppgaveTilBehandling.erTildelt(saksbehandlerFraApi: SaksbehandlerFraApi): Boolean =
-    !((this.tildeling == null || this.egenskaper.any { it.egenskap == Egenskap.PA_VENT }) || UUID.fromString(this.tildeling?.oid) != saksbehandlerFraApi.oid)
+    !((this.tildeling == null || this.egenskaper.any { it.egenskap == Egenskap.PA_VENT }) || this.tildeling?.oid != saksbehandlerFraApi.oid)
 
 private fun OppgaveTilBehandling.erTildeltOgPåVent(saksbehandlerFraApi: SaksbehandlerFraApi): Boolean =
-    !((this.tildeling == null || this.egenskaper.none { it.egenskap == Egenskap.PA_VENT }) || UUID.fromString(this.tildeling?.oid) != saksbehandlerFraApi.oid)
+    !((this.tildeling == null || this.egenskaper.none { it.egenskap == Egenskap.PA_VENT }) || this.tildeling?.oid != saksbehandlerFraApi.oid)
 
 private fun DecodedJWT.toJwtPrincipal() =
     JWTPrincipal(JWTParser().parsePayload(payload.decodeBase64String()))
@@ -386,8 +386,8 @@ private fun enPeriode() = GraphQLBeregnetPeriode(
     opprettet = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME),
     periodetype = GraphQLPeriodetype.FORSTEGANGSBEHANDLING,
     tidslinje = emptyList(),
-    vedtaksperiodeId = UUID.randomUUID().toString(),
-    beregningId = UUID.randomUUID().toString(),
+    vedtaksperiodeId = UUID.randomUUID(),
+    beregningId = UUID.randomUUID(),
     forbrukteSykedager = 10,
     gjenstaendeSykedager = 270,
     hendelser = emptyList(),
@@ -407,7 +407,7 @@ private fun enPeriode() = GraphQLBeregnetPeriode(
     ),
     skjaeringstidspunkt = "2020-01-01",
     utbetaling = GraphQLUtbetaling(
-        id = UUID.randomUUID().toString(),
+        id = UUID.randomUUID(),
         arbeidsgiverFagsystemId = "EN-ARBEIDSGIVERFAGSYSTEMID",
         arbeidsgiverNettoBelop = 30000,
         personFagsystemId = "EN-PERSONFAGSYSTEMID",
@@ -471,7 +471,7 @@ private fun enPeriode() = GraphQLBeregnetPeriode(
 )
 
 private fun enGenerasjon() = GraphQLGenerasjon(
-    id = UUID.randomUUID().toString(),
+    id = UUID.randomUUID(),
     perioder = listOf(enPeriode()),
 )
 

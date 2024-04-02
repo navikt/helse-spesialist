@@ -31,7 +31,6 @@ object Testdata {
     const val SAKSBEHANDLER_EPOST = "sara.saksbehandler@nav.no"
     val SAKSBEHANDLER_OID: UUID = UUID.randomUUID()
     const val SAKSBEHANDLER_IDENT = "X999999"
-    const val SAKSBEHANDLER_NAVN = "Sara Saksbehandler"
     val SAKSBEHANDLERTILGANGER_UTEN_TILGANGER =
         no.nav.helse.spesialist.api.SaksbehandlerTilganger(
             gruppetilganger = emptyList(),
@@ -53,7 +52,7 @@ object Testdata {
         arbeidsgiverbeløp: Int = 30000,
         personbeløp: Int = 0,
         utbetaling: GraphQLUtbetaling = GraphQLUtbetaling(
-            id = utbetalingId.toString(),
+            id = utbetalingId,
             arbeidsgiverFagsystemId = "EN_FAGSYSTEMID",
             arbeidsgiverNettoBelop = arbeidsgiverbeløp,
             personFagsystemId = "EN_FAGSYSTEMID",
@@ -77,10 +76,10 @@ object Testdata {
                             ghostPerioder = emptyList(),
                             generasjoner = listOf(
                                 GraphQLGenerasjon(
-                                    id = UUID.randomUUID().toString(),
+                                    id = UUID.randomUUID(),
                                     perioder = listOf(
                                         GraphQLBeregnetPeriode(
-                                            vedtaksperiodeId = vedtaksperiodeId.toString(),
+                                            vedtaksperiodeId = vedtaksperiodeId,
                                             utbetaling = utbetaling,
                                             erForkastet = false,
                                             fom = "2020-01-01",
@@ -89,7 +88,7 @@ object Testdata {
                                             opprettet = "2020-01-31",
                                             periodetype = GraphQLPeriodetype.FORSTEGANGSBEHANDLING,
                                             tidslinje = emptyList(),
-                                            beregningId = UUID.randomUUID().toString(),
+                                            beregningId = UUID.randomUUID(),
                                             forbrukteSykedager = null,
                                             gjenstaendeSykedager = null,
                                             hendelser = emptyList(),

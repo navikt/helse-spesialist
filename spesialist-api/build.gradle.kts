@@ -1,3 +1,4 @@
+import com.expediagroup.graphql.plugin.gradle.config.GraphQLScalar
 import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLIntrospectSchemaTask
 
 val testcontainersVersion = "1.19.6"
@@ -23,6 +24,8 @@ graphql {
     client {
         // hvis endpoint settes her vil spleis introspectes hver gang man bygger
         schemaFile = file("$graphqlDir/schema.graphql")
+        // Ved å sette opp UUID her vil koden som genereres for spleis-typene bruke UUID
+        customScalars = listOf(GraphQLScalar("UUID", "java.util.UUID", "no.nav.helse.spesialist.api.graphql.schema.UUIDScalarConverter"))
         queryFileDirectory = graphqlDir
         packageName = "no.nav.helse.spleis.graphql"
         serializer = com.expediagroup.graphql.plugin.gradle.config.GraphQLSerializer.JACKSON
