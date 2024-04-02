@@ -6,13 +6,13 @@ schema {
 }
 
 interface Hendelse {
-    id: String!
+    id: UUID!
     type: Hendelsetype!
 }
 
 interface Overstyring {
     ferdigstilt: Boolean!
-    hendelseId: String!
+    hendelseId: UUID!
     saksbehandler: Saksbehandler!
     timestamp: String!
 }
@@ -21,7 +21,7 @@ interface Periode {
     erForkastet: Boolean!
     fom: String!
     hendelser: [Hendelse!]!
-    id: String!
+    id: UUID!
     inntektstype: Inntektstype!
     opprettet: String!
     periodetilstand: Periodetilstand!
@@ -30,7 +30,7 @@ interface Periode {
     tidslinje: [Dag!]!
     tom: String!
     varsler: [VarselDTO!]!
-    vedtaksperiodeId: String!
+    vedtaksperiodeId: UUID!
 }
 
 interface Spennoppdrag {
@@ -40,7 +40,7 @@ interface Spennoppdrag {
 
 interface Vilkarsgrunnlag {
     arbeidsgiverrefusjoner: [Arbeidsgiverrefusjon!]!
-    id: String!
+    id: UUID!
     inntekter: [Arbeidsgiverinntekt!]!
     omregnetArsinntekt: Float!
     skjaeringstidspunkt: String!
@@ -81,7 +81,7 @@ type Arbeidsforholdoverstyring implements Overstyring {
     deaktivert: Boolean!
     ferdigstilt: Boolean!
     forklaring: String!
-    hendelseId: String!
+    hendelseId: UUID!
     saksbehandler: Saksbehandler!
     skjaeringstidspunkt: String!
     timestamp: String!
@@ -162,7 +162,7 @@ type Behandlingsstatistikk {
 }
 
 type BeregnetPeriode implements Periode {
-    beregningId: String!
+    beregningId: UUID!
     egenskaper: [Oppgaveegenskap!]!
     erForkastet: Boolean!
     fom: String!
@@ -170,7 +170,7 @@ type BeregnetPeriode implements Periode {
     gjenstaendeSykedager: Int
     handlinger: [Handling!]!
     hendelser: [Hendelse!]!
-    id: String!
+    id: UUID!
     inntektstype: Inntektstype!
     maksdato: String!
     notater: [Notat!]!
@@ -189,8 +189,8 @@ type BeregnetPeriode implements Periode {
     totrinnsvurdering: Totrinnsvurdering
     utbetaling: Utbetaling!
     varsler: [VarselDTO!]!
-    vedtaksperiodeId: String!
-    vilkarsgrunnlagId: String
+    vedtaksperiodeId: UUID!
+    vilkarsgrunnlagId: UUID
 }
 
 type Dag {
@@ -207,7 +207,7 @@ type Dagoverstyring implements Overstyring {
     begrunnelse: String!
     dager: [OverstyrtDag!]!
     ferdigstilt: Boolean!
-    hendelseId: String!
+    hendelseId: UUID!
     saksbehandler: Saksbehandler!
     timestamp: String!
 }
@@ -247,7 +247,7 @@ type Faresignal {
 }
 
 type Generasjon {
-    id: String!
+    id: UUID!
     perioder: [Periode!]!
 }
 
@@ -258,7 +258,7 @@ type GhostPeriode {
     organisasjonsnummer: String!
     skjaeringstidspunkt: String!
     tom: String!
-    vilkarsgrunnlagId: String
+    vilkarsgrunnlagId: UUID
 }
 
 type GjenopptakelseNaturalytelse {
@@ -301,7 +301,7 @@ type InntektFraAOrdningen {
 
 type Inntektoverstyring implements Overstyring {
     ferdigstilt: Boolean!
-    hendelseId: String!
+    hendelseId: UUID!
     inntekt: OverstyrtInntekt!
     saksbehandler: Saksbehandler!
     timestamp: String!
@@ -309,14 +309,14 @@ type Inntektoverstyring implements Overstyring {
 
 type Inntektsmelding implements Hendelse {
     beregnetInntekt: Float!
-    eksternDokumentId: String
-    id: String!
+    eksternDokumentId: UUID
+    id: UUID!
     mottattDato: String!
     type: Hendelsetype!
 }
 
 type Kilde {
-    id: String!
+    id: UUID!
     type: Kildetype!
 }
 
@@ -361,14 +361,14 @@ type Notat {
     saksbehandlerEpost: String!
     saksbehandlerIdent: String!
     saksbehandlerNavn: String!
-    saksbehandlerOid: String!
+    saksbehandlerOid: UUID!
     tekst: String!
     type: NotatType!
-    vedtaksperiodeId: String!
+    vedtaksperiodeId: UUID!
 }
 
 type Notater {
-    id: String!
+    id: UUID!
     notater: [Notat!]!
 }
 
@@ -386,7 +386,7 @@ type Oppdrag {
     status: Oppdragsstatus!
     totalbelop: Int
     type: String!
-    utbetalingId: String!
+    utbetalingId: UUID!
 }
 
 type OppgaveForPeriodevisning {
@@ -406,7 +406,7 @@ type OppgaveTilBehandling {
     periodetype: Periodetype!
     tidsfrist: String
     tildeling: Tildeling
-    vedtaksperiodeId: String!
+    vedtaksperiodeId: UUID!
 }
 
 type Oppgaveegenskap {
@@ -453,7 +453,7 @@ type OverstyrtInntekt {
 type PaVent {
     begrunnelse: String
     frist: String
-    oid: String!
+    oid: UUID!
 }
 
 type PeriodeHistorikkElement {
@@ -524,7 +524,7 @@ type Refusjon {
 type Refusjonselement {
     belop: Float!
     fom: String!
-    meldingsreferanseId: String!
+    meldingsreferanseId: UUID!
     tom: String
 }
 
@@ -621,9 +621,9 @@ type Soknad {
 }
 
 type SoknadArbeidsgiver implements Hendelse {
-    eksternDokumentId: String
+    eksternDokumentId: UUID
     fom: String!
-    id: String!
+    id: UUID!
     rapportertDato: String!
     sendtArbeidsgiver: String!
     tom: String!
@@ -631,9 +631,9 @@ type SoknadArbeidsgiver implements Hendelse {
 }
 
 type SoknadArbeidsledig implements Hendelse {
-    eksternDokumentId: String
+    eksternDokumentId: UUID
     fom: String!
-    id: String!
+    id: UUID!
     rapportertDato: String!
     sendtNav: String!
     tom: String!
@@ -641,9 +641,9 @@ type SoknadArbeidsledig implements Hendelse {
 }
 
 type SoknadFrilans implements Hendelse {
-    eksternDokumentId: String
+    eksternDokumentId: UUID
     fom: String!
-    id: String!
+    id: UUID!
     rapportertDato: String!
     sendtNav: String!
     tom: String!
@@ -651,9 +651,9 @@ type SoknadFrilans implements Hendelse {
 }
 
 type SoknadNav implements Hendelse {
-    eksternDokumentId: String
+    eksternDokumentId: UUID
     fom: String!
-    id: String!
+    id: UUID!
     rapportertDato: String!
     sendtNav: String!
     tom: String!
@@ -661,9 +661,9 @@ type SoknadNav implements Hendelse {
 }
 
 type SoknadSelvstendig implements Hendelse {
-    eksternDokumentId: String
+    eksternDokumentId: UUID
     fom: String!
-    id: String!
+    id: UUID!
     rapportertDato: String!
     sendtNav: String!
     tom: String!
@@ -708,7 +708,7 @@ type Sykepengegrunnlagsgrense {
 
 type Sykepengegrunnlagskjonnsfastsetting implements Overstyring {
     ferdigstilt: Boolean!
-    hendelseId: String!
+    hendelseId: UUID!
     saksbehandler: Saksbehandler!
     skjonnsfastsatt: SkjonnsfastsattSykepengegrunnlag!
     timestamp: String!
@@ -716,7 +716,7 @@ type Sykepengegrunnlagskjonnsfastsetting implements Overstyring {
 
 type Sykmelding implements Hendelse {
     fom: String!
-    id: String!
+    id: UUID!
     rapportertDato: String!
     tom: String!
     type: Hendelsetype!
@@ -725,21 +725,21 @@ type Sykmelding implements Hendelse {
 type Tildeling {
     epost: String!
     navn: String!
-    oid: String!
+    oid: UUID!
 }
 
 type Totrinnsvurdering {
-    beslutter: String
+    beslutter: UUID
     erBeslutteroppgave: Boolean!
     erRetur: Boolean!
-    saksbehandler: String
+    saksbehandler: UUID
 }
 
 type UberegnetPeriode implements Periode {
     erForkastet: Boolean!
     fom: String!
     hendelser: [Hendelse!]!
-    id: String!
+    id: UUID!
     inntektstype: Inntektstype!
     notater: [Notat!]!
     opprettet: String!
@@ -749,14 +749,14 @@ type UberegnetPeriode implements Periode {
     tidslinje: [Dag!]!
     tom: String!
     varsler: [VarselDTO!]!
-    vedtaksperiodeId: String!
+    vedtaksperiodeId: UUID!
 }
 
 type UberegnetVilkarsprovdPeriode implements Periode {
     erForkastet: Boolean!
     fom: String!
     hendelser: [Hendelse!]!
-    id: String!
+    id: UUID!
     inntektstype: Inntektstype!
     notater: [Notat!]!
     opprettet: String!
@@ -766,15 +766,15 @@ type UberegnetVilkarsprovdPeriode implements Periode {
     tidslinje: [Dag!]!
     tom: String!
     varsler: [VarselDTO!]!
-    vedtaksperiodeId: String!
-    vilkarsgrunnlagId: String
+    vedtaksperiodeId: UUID!
+    vilkarsgrunnlagId: UUID
 }
 
 type Utbetaling {
     arbeidsgiverFagsystemId: String!
     arbeidsgiverNettoBelop: Int!
     arbeidsgiversimulering: Simulering
-    id: String!
+    id: UUID!
     personFagsystemId: String!
     personNettoBelop: Int!
     personsimulering: Simulering
@@ -799,9 +799,9 @@ type Utbetalingslinje {
 }
 
 type VarselDTO {
-    definisjonId: String!
+    definisjonId: UUID!
     forklaring: String
-    generasjonId: String!
+    generasjonId: UUID!
     handling: String
     kode: String!
     opprettet: String!
@@ -817,7 +817,7 @@ type VarselvurderingDTO {
 
 type VilkarsgrunnlagInfotrygd implements Vilkarsgrunnlag {
     arbeidsgiverrefusjoner: [Arbeidsgiverrefusjon!]!
-    id: String!
+    id: UUID!
     inntekter: [Arbeidsgiverinntekt!]!
     omregnetArsinntekt: Float!
     skjaeringstidspunkt: String!
@@ -830,7 +830,7 @@ type VilkarsgrunnlagSpleis implements Vilkarsgrunnlag {
     arbeidsgiverrefusjoner: [Arbeidsgiverrefusjon!]!
     avviksprosent: Float
     grunnbelop: Int!
-    id: String!
+    id: UUID!
     inntekter: [Arbeidsgiverinntekt!]!
     omregnetArsinntekt: Float!
     oppfyllerKravOmMedlemskap: Boolean
@@ -1223,6 +1223,9 @@ enum Visningskriterium {
     NEI
     UKJENT
 }
+
+"class java.util.UUID"
+scalar UUID
 
 input AnnulleringDataInput {
     aktorId: String!
