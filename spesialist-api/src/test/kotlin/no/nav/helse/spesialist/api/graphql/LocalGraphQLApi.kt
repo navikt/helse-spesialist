@@ -237,7 +237,10 @@ fun main() = runBlocking {
             behandlingsstatistikkMediator = behandlingsstatistikkMediator,
             notatMediator = notatMediator,
             saksbehandlerhåndterer = SneakySaksbehandlerhåndterer(randomOppgaver),
-            oppgavehåndterer = SneakyOppgaveHåndterer(randomOppgaver = randomOppgaver, randomBehandledeOppgaver = randomBehandledeOppgaver),
+            oppgavehåndterer = SneakyOppgaveHåndterer(
+                randomOppgaver = randomOppgaver,
+                randomBehandledeOppgaver = randomBehandledeOppgaver
+            ),
             totrinnsvurderinghåndterer = totrinnsvurderinghåndterer,
             godkjenninghåndterer = godkjenninghåndterer,
             personhåndterer = personhåndterer,
@@ -246,7 +249,9 @@ fun main() = runBlocking {
     }
 }
 
-private class SneakySaksbehandlerhåndterer(private val randomOppgaver: MutableList<OppgaveTilBehandling>) : Saksbehandlerhåndterer {
+private class SneakySaksbehandlerhåndterer(
+    private val randomOppgaver: MutableList<OppgaveTilBehandling>,
+) : Saksbehandlerhåndterer {
     val mock = mockk<Saksbehandlerhåndterer>(relaxed = true)
     override fun <T : HandlingFraApi> håndter(handlingFraApi: T, saksbehandlerFraApi: SaksbehandlerFraApi) {
         when (handlingFraApi) {
@@ -338,14 +343,22 @@ private class SneakyOppgaveHåndterer(
 
 }
 
-private fun tildelOppgave(randomOppgaver: MutableList<OppgaveTilBehandling>, handlingFraApi: TildelOppgave, saksbehandlerFraApi: SaksbehandlerFraApi) {
+private fun tildelOppgave(
+    randomOppgaver: MutableList<OppgaveTilBehandling>,
+    handlingFraApi: TildelOppgave,
+    saksbehandlerFraApi: SaksbehandlerFraApi,
+) {
     val oppgave = randomOppgaver.find { it.id.toLong() == handlingFraApi.oppgaveId } ?: return
     randomOppgaver.remove(oppgave)
-    randomOppgaver.add(oppgave.copy(tildeling = Tildeling(
-        navn = saksbehandlerFraApi.navn,
-        epost = saksbehandlerFraApi.epost,
-        oid = saksbehandlerFraApi.oid,
-    )))
+    randomOppgaver.add(
+        oppgave.copy(
+            tildeling = Tildeling(
+                navn = saksbehandlerFraApi.navn,
+                epost = saksbehandlerFraApi.epost,
+                oid = saksbehandlerFraApi.oid,
+            )
+        )
+    )
 }
 
 private fun avmeldOppgave(randomOppgaver: MutableList<OppgaveTilBehandling>, handlingFraApi: AvmeldOppgave) {
