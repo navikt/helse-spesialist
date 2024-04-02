@@ -152,6 +152,7 @@ fun main() = runBlocking {
         every { personApiDao.finnEnhet(any()) } returns EnhetDto("1234", "Bømlo")
         every { personApiDao.finnFødselsnummer(isNull(inverse = true)) } returns enPerson().fodselsnummer
         every { personApiDao.spesialistHarPersonKlarForVisningISpeil(any()) } returns true
+        every { personApiDao.finnInfotrygdutbetalinger(any()) } returns "[]"
         coEvery { reservasjonClient.hentReservasjonsstatus(any()) } answers withDelay(800) {
             Reservasjon(kanVarsles = true, reservert = false)
         }
