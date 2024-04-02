@@ -7,8 +7,6 @@ import kotliquery.TransactionalSession
 import kotliquery.sessionOf
 import no.nav.helse.mediator.builders.GenerasjonBuilder
 import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.varsel.Varsel
-import no.nav.helse.modell.varsel.VarselStatusDto
 
 internal class GenerasjonRepository(private val dataSource: DataSource): IVedtaksperiodeObserver {
 
@@ -65,14 +63,6 @@ internal class GenerasjonRepository(private val dataSource: DataSource): IVedtak
         }
     }
 
-    internal fun brukGenerasjon(vedtaksperiodeId: UUID, block: (generasjon: Generasjon) -> Unit) {
-        val generasjon = dao.finnGjeldendeGenerasjon(vedtaksperiodeId)?.tilGenerasjon()
-            ?: throw IllegalStateException("Forventer å finne en generasjon for vedtaksperiodeId=$vedtaksperiodeId")
-        block(generasjon)
-        val generasjonForLagring = generasjon.toDto()
-        dao.lagre(generasjonForLagring)
-    }
-
     internal fun byggGenerasjon(vedtaksperiodeId: UUID, generasjonBuilder: GenerasjonBuilder) {
         dao.byggSisteFor(vedtaksperiodeId, generasjonBuilder)
     }
@@ -98,38 +88,4 @@ internal class GenerasjonRepository(private val dataSource: DataSource): IVedtak
 
     internal fun førsteKjenteDag(fødselsnummer: String) = dao.førsteKjenteDag(fødselsnummer)
 
-    private fun GenerasjonDto.tilGenerasjon(): Generasjon {
-        return Generasjon.fraLagring(
-            id = id,
-            vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingId = utbetalingId,
-            spleisBehandlingId = spleisBehandlingId,
-            skjæringstidspunkt = skjæringstidspunkt,
-            fom = fom,
-            tom = tom,
-            tilstand = when (tilstand) {
-                TilstandDto.Låst -> Generasjon.Låst
-                TilstandDto.Ulåst -> Generasjon.Ulåst
-                TilstandDto.AvsluttetUtenUtbetaling -> Generasjon.AvsluttetUtenUtbetaling
-                TilstandDto.UtenUtbetalingMåVurderes -> Generasjon.UtenUtbetalingMåVurderes
-            },
-            tags = tags,
-            varsler = varsler.map { varselDto ->
-                Varsel(
-                    id = varselDto.id,
-                    varselkode = varselDto.varselkode,
-                    opprettet = varselDto.opprettet,
-                    vedtaksperiodeId = varselDto.vedtaksperiodeId,
-                    status = when (varselDto.status) {
-                        VarselStatusDto.AKTIV -> Varsel.Status.AKTIV
-                        VarselStatusDto.INAKTIV -> Varsel.Status.INAKTIV
-                        VarselStatusDto.GODKJENT -> Varsel.Status.GODKJENT
-                        VarselStatusDto.VURDERT -> Varsel.Status.VURDERT
-                        VarselStatusDto.AVVIST -> Varsel.Status.AVVIST
-                        VarselStatusDto.AVVIKLET -> Varsel.Status.AVVIKLET
-                    }
-                )
-            }.toSet()
-        )
-    }
 }

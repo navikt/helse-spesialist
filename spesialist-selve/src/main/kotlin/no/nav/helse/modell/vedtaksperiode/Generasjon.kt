@@ -368,22 +368,6 @@ internal class Generasjon private constructor(
         private val logg = LoggerFactory.getLogger(Generasjon::class.java)
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
-        internal fun nyVedtaksperiode(
-            generasjonId: UUID = UUID.randomUUID(),
-            vedtaksperiodeId: UUID,
-            fom: LocalDate,
-            tom: LocalDate,
-            skjæringstidspunkt: LocalDate,
-        ): Generasjon {
-            return opprett(
-                id = generasjonId,
-                vedtaksperiodeId = vedtaksperiodeId,
-                fom = fom,
-                tom = tom,
-                skjæringstidspunkt = skjæringstidspunkt,
-            )
-        }
-
         internal fun List<Generasjon>.finnGenerasjon(vedtaksperiodeId: UUID): Generasjon? =
             this.find { it.vedtaksperiodeId == vedtaksperiodeId }
 
@@ -409,22 +393,6 @@ internal class Generasjon private constructor(
             tags = tags,
             varsler = varsler
         )
-
-        private fun opprett(
-            id: UUID,
-            vedtaksperiodeId: UUID,
-            fom: LocalDate,
-            tom: LocalDate,
-            skjæringstidspunkt: LocalDate,
-        ): Generasjon {
-            return Generasjon(
-                id = id,
-                vedtaksperiodeId = vedtaksperiodeId,
-                fom = fom,
-                tom = tom,
-                skjæringstidspunkt = skjæringstidspunkt,
-            )
-        }
 
         internal fun List<Generasjon>.håndterNyttVarsel(varsler: List<Varsel>, hendelseId: UUID) {
             forEach { generasjon ->

@@ -39,16 +39,6 @@ class GenerasjonBuilderTest : AbstractDatabaseTest() {
     }
 
     @Test
-    fun `bygg første generasjon`() {
-        val generasjonId = UUID.randomUUID()
-        val vedtaksperiodeId = UUID.randomUUID()
-        val builder = GenerasjonBuilder(vedtaksperiodeId)
-        val vedtaksperiode = builder.buildFirst(generasjonId, 1.januar, 31.januar, 1.januar, generasjonRepository, varselRepository)
-        val forventetVedtaksperiode = Generasjon(generasjonId, vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
-        assertEquals(forventetVedtaksperiode, vedtaksperiode)
-    }
-
-    @Test
     fun `varselRepository blir registrert som observer`() {
         val generasjonId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
