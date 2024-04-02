@@ -72,13 +72,7 @@ internal class AvsluttetMedVedtakRiver(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         sikkerlogg.info("Mottok melding avsluttet_med_vedtak:\n${packet.toJson()}")
-        if (packet["@id"].asText() in listOf(
-                "7aa38978-beb6-4c92-8c4d-97aef476dc1f",
-                "74e9b587-ba93-44e7-a0b7-24bacc313a94",
-                "21634a26-1500-4bcd-9cb9-02bdc8f38f50",
-                "cfd2fcea-d61c-4a96-a6fa-434112214291",
-            )
-        ) {
+        if (packet["@id"].asText() in listOf("fafefe36-3079-4e88-a17d-b884077df062")) {
             sikkerlogg.info(
                 "Disse må følges opp manuelt, fordi spesialist ikke videresender vedtak_fattet",
                 StructuredArguments.kv("fødselsnummer", packet["fødselsnummer"]),
