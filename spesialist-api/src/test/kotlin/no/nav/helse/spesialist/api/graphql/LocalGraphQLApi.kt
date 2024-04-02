@@ -49,6 +49,7 @@ import no.nav.helse.spesialist.api.graphql.schema.Oppgaveegenskap
 import no.nav.helse.spesialist.api.graphql.schema.OppgaverTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.Oppgavesortering
 import no.nav.helse.spesialist.api.graphql.schema.Opptegnelse
+import no.nav.helse.spesialist.api.graphql.schema.PaVent
 import no.nav.helse.spesialist.api.graphql.schema.Personinfo
 import no.nav.helse.spesialist.api.graphql.schema.Reservasjon
 import no.nav.helse.spesialist.api.graphql.schema.Sorteringsnokkel
@@ -76,6 +77,7 @@ import no.nav.helse.spesialist.api.utbetaling.UtbetalingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import no.nav.helse.spesialist.api.vedtaksperiode.EnhetDto
+import no.nav.helse.spleis.graphql.LocalDate
 import no.nav.helse.spleis.graphql.enums.GraphQLInntektstype
 import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetilstand
 import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetype
@@ -153,6 +155,20 @@ fun main() = runBlocking {
         every { personApiDao.finnFødselsnummer(isNull(inverse = true)) } returns enPerson().fodselsnummer
         every { personApiDao.spesialistHarPersonKlarForVisningISpeil(any()) } returns true
         every { personApiDao.finnInfotrygdutbetalinger(any()) } returns "[]"
+        every { totrinnsvurderingApiDao.hentAktiv(any()) } returns TotrinnsvurderingApiDao.TotrinnsvurderingDto(
+            opprettet = LocalDateTime.now(),
+            oppdatert = LocalDateTime.now(),
+            saksbehandler = UUID.randomUUID(),
+            beslutter = null,
+            erRetur = false,
+            utbetalingIdRef = 42,
+            vedtaksperiodeId = UUID.randomUUID()
+        )
+        every { påVentApiDao.hentAktivPåVent(any()) } returns PaVent(
+            frist = LocalDate(),
+            begrunnelse = null,
+            oid = UUID.randomUUID()
+        )
         coEvery { reservasjonClient.hentReservasjonsstatus(any()) } answers withDelay(800) {
             Reservasjon(kanVarsles = true, reservert = false)
         }
