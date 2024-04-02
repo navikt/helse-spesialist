@@ -338,7 +338,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
             SELECT svg.vedtaksperiode_id FROM selve_vedtaksperiode_generasjon svg 
             INNER JOIN vedtak v on svg.vedtaksperiode_id = v.vedtaksperiode_id
             INNER JOIN person p on p.id = v.person_ref
-            WHERE fodselsnummer = ? AND forkastet = false
+            WHERE fodselsnummer = ?
             """
 
         return run(queryOf(query, fødselsnummer.toLong()).map { it.uuid("vedtaksperiode_id") }.asList).toSet()

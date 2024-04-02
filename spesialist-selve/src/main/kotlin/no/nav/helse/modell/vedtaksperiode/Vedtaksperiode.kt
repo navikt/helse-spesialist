@@ -1,9 +1,12 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import java.util.UUID
+import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.VarselStatusDto
+import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetUtenVedtak
+import no.nav.helse.modell.vedtaksperiode.vedtak.SykepengevedtakBuilder
 
 internal class Vedtaksperiode private constructor(
     private val vedtaksperiodeId: UUID,
@@ -28,7 +31,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun behandleTilbakedateringGodkjent(perioder: List<Periode>) {
-        if (perioder.none { it.overlapperMed(Periode(fom, tom)) }) return
+        if (forkastet || perioder.none { it.overlapperMed(Periode(fom, tom)) }) return
         deaktiverVarselMedKode("RV_SØ_3")
     }
 
@@ -37,16 +40,18 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(spleisVedtaksperioder: List<SpleisVedtaksperiode>) {
+        if (forkastet) return
         val spleisVedtaksperiode = spleisVedtaksperioder.find { it.erRelevant(vedtaksperiodeId) } ?: return
         gjeldendeGenerasjon.håndter(spleisVedtaksperiode)
     }
 
     internal fun nySpleisBehandling(spleisBehandling: SpleisBehandling) {
-        if (!spleisBehandling.erRelevantFor(vedtaksperiodeId)) return
+        if (forkastet || !spleisBehandling.erRelevantFor(vedtaksperiodeId)) return
         gjeldendeGenerasjon.nySpleisBehandling(this, spleisBehandling)
     }
 
-    internal fun utbetalingForkastet(utbetalingEndret: UtbetalingEndret){
+    internal fun utbetalingForkastet(utbetalingEndret: UtbetalingEndret) {
+        if (forkastet) return
         val utbetalingId = gjeldendeUtbetalingId
         if (utbetalingId == null || !utbetalingEndret.erRelevantFor(utbetalingId)) return
         gjeldendeGenerasjon.håndterForkastetUtbetaling(utbetalingId)
@@ -60,20 +65,24 @@ internal class Vedtaksperiode private constructor(
         if (forkastet) return
         gjeldendeGenerasjon.håndterVedtakFattet(meldingId)
     }
+
     internal fun vedtaksperiodeForkastet() {
         forkastet = true
     }
 
     internal fun nyeVarsler(nyeVarsler: List<Varsel>) {
         val varsler = nyeVarsler.filter { it.erRelevantFor(vedtaksperiodeId) }
-        if (varsler.isEmpty()) return
+        if (forkastet || varsler.isEmpty()) return
         varsler.forEach { gjeldendeGenerasjon.håndterNyttVarsel(it, UUID.randomUUID()) }
     }
 
-    internal fun mottaBehandlingsinformasjon(tags: List<String>, spleisBehandlingId: UUID) =
+    internal fun mottaBehandlingsinformasjon(tags: List<String>, spleisBehandlingId: UUID) {
+        if (forkastet) return
         gjeldendeGenerasjon.oppdaterBehandlingsinformasjon(tags, spleisBehandlingId)
+    }
 
     internal fun nyUtbetaling(meldingId: UUID, utbetalingId: UUID) {
+        if (forkastet) return
         gjeldendeGenerasjon.håndterNyUtbetaling(meldingId, utbetalingId)
     }
 
