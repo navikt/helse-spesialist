@@ -215,6 +215,7 @@ internal class MeldingMediator(
         val vedtakFattetMelder = VedtakFattetMelder(rapidsConnection)
         sykefraværstilfelle.registrer(vedtakFattetMelder)
         avsluttetMedVedtakMessage.sendInnTil(sykefraværstilfelle)
+        vedtakFattetMelder.publiserUtgåendeMeldinger()
     }
 
     internal fun håndter(avsluttetUtenVedtakMessage: AvsluttetUtenVedtakMessage) {
@@ -222,6 +223,7 @@ internal class MeldingMediator(
             val vedtakFattetMelder = VedtakFattetMelder(rapidsConnection)
             generasjon.registrer(vedtakFattetMelder)
             avsluttetUtenVedtakMessage.sendInnTil(generasjon)
+            vedtakFattetMelder.publiserUtgåendeMeldinger()
         }
     }
 

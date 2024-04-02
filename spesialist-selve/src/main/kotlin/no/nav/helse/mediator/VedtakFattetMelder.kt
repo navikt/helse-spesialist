@@ -13,12 +13,16 @@ import org.slf4j.LoggerFactory
 internal class VedtakFattetMelder(
     private val rapidsConnection: RapidsConnection,
 ) : PersonObserver, IVedtaksperiodeObserver {
+    private val sykepengevedtak = mutableListOf<Sykepengevedtak>()
     private companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
         private val logg = LoggerFactory.getLogger(VedtakFattetMelder::class.java)
     }
 
-    override fun vedtakFattet(sykepengevedtak: Sykepengevedtak) {
+    internal fun publiserUtgåendeMeldinger() {
+        if (sykepengevedtak.isEmpty()) return
+        check(sykepengevedtak.size == 1) { "Forventer å publisere kun ett vedtak" }
+        val sykepengevedtak = sykepengevedtak.single()
         val json = when (sykepengevedtak) {
             is Sykepengevedtak.AuuVedtak -> auuVedtakJson(sykepengevedtak)
             is Sykepengevedtak.Vedtak -> vedtakJson(sykepengevedtak)
@@ -31,6 +35,10 @@ internal class VedtakFattetMelder(
             kv("vedtaksperiodeId", sykepengevedtak.vedtaksperiodeId)
         )
         rapidsConnection.publish(sykepengevedtak.fødselsnummer, json)
+    }
+
+    override fun vedtakFattet(sykepengevedtak: Sykepengevedtak) {
+        this.sykepengevedtak.add(sykepengevedtak)
     }
 
     private fun vedtakJson(sykepengevedtak: Sykepengevedtak.Vedtak): String {

@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test
 
 internal class VedtakFattetMelderTest {
     private val testRapid = TestRapid()
-    private val mediator = VedtakFattetMelder(testRapid)
+    private val vedtakFattetMelder = VedtakFattetMelder(testRapid)
 
     private companion object {
         private val fødselsnummer = "12345678910"
@@ -56,7 +56,8 @@ internal class VedtakFattetMelderTest {
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
             tags = listOf("IngenNyArbeidsgiverperiode")
         )
-        mediator.vedtakFattet(auuVedtak)
+        vedtakFattetMelder.vedtakFattet(auuVedtak)
+        vedtakFattetMelder.publiserUtgåendeMeldinger()
         val eventer = testRapid.inspektør.meldinger()
 
         assertEquals(1, eventer.size)
@@ -111,7 +112,8 @@ internal class VedtakFattetMelderTest {
             skjønnsfastsettingopplysninger = null,
             tags = listOf("IngenNyArbeidsgiverperiode")
         )
-        mediator.vedtakFattet(infotrygd)
+        vedtakFattetMelder.vedtakFattet(infotrygd)
+        vedtakFattetMelder.publiserUtgåendeMeldinger()
         val eventer = testRapid.inspektør.meldinger()
 
         assertEquals(1, eventer.size)
@@ -180,7 +182,8 @@ internal class VedtakFattetMelderTest {
             skjønnsfastsettingopplysninger = null,
             tags = listOf("IngenNyArbeidsgiverperiode")
         )
-        mediator.vedtakFattet(infotrygd)
+        vedtakFattetMelder.vedtakFattet(infotrygd)
+        vedtakFattetMelder.publiserUtgåendeMeldinger()
         val eventer = testRapid.inspektør.meldinger()
 
         assertEquals(1, eventer.size)
@@ -264,7 +267,8 @@ internal class VedtakFattetMelderTest {
             skjønnsfastsettingopplysninger = SkjønnsfastsettingopplysningerDto("Mal", "Fritekst", "Konklusjon", Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT, Skjønnsfastsettingsårsak.ANDRE_AVSNITT),
             tags = listOf("IngenNyArbeidsgiverperiode")
         )
-        mediator.vedtakFattet(infotrygd)
+        vedtakFattetMelder.vedtakFattet(infotrygd)
+        vedtakFattetMelder.publiserUtgåendeMeldinger()
         val eventer = testRapid.inspektør.meldinger()
 
         assertEquals(1, eventer.size)
