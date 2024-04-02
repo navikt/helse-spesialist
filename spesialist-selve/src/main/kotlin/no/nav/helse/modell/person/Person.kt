@@ -1,6 +1,5 @@
 package no.nav.helse.modell.person
 
-import java.util.UUID
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.vedtaksperiode.NyeVarsler
 import no.nav.helse.modell.vedtaksperiode.Periode
@@ -10,8 +9,6 @@ import no.nav.helse.modell.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
-import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetUtenVedtak
-import no.nav.helse.modell.vedtaksperiode.vedtak.SykepengevedtakBuilder
 import no.nav.helse.modell.vedtaksperiode.vedtak.VedtakFattet
 
 class Person private constructor(
@@ -20,16 +17,6 @@ class Person private constructor(
     vedtaksperioder: List<Vedtaksperiode>
 ) {
     private val vedtaksperioder = vedtaksperioder.toMutableList()
-    private val observers = mutableSetOf<PersonObserver>()
-
-    internal fun nyObserver(observer: PersonObserver) {
-        observers.add(observer)
-    }
-
-    private fun finnVedtaksperiode(vedtaksperiodeId: UUID): Vedtaksperiode {
-        return vedtaksperioder.find { it.vedtaksperiodeId() == vedtaksperiodeId }
-            ?: throw IllegalStateException("Forventer at vedtaksperiode med id=$vedtaksperiodeId finnes")
-    }
 
     fun toDto() = PersonDto(
         aktørId = aktørId,
@@ -46,25 +33,14 @@ class Person private constructor(
     }
 
     internal fun vedtakFattet(vedtakFattet: VedtakFattet) {
-        finnVedtaksperiode(vedtakFattet.vedtaksperiodeId())
-            .vedtakFattet(vedtakFattet.id)
+        vedtaksperioder
+            .find { vedtakFattet.erRelevantFor(it.vedtaksperiodeId()) }
+            ?.vedtakFattet(vedtakFattet.id)
     }
-
-    internal fun avsluttetUtenVedtak(avsluttetUtenVedtak: AvsluttetUtenVedtak) {
-        finnVedtaksperiode(avsluttetUtenVedtak.vedtaksperiodeId())
-            .avsluttetUtenVedtak(this, avsluttetUtenVedtak)
-    }
-
     internal fun vedtaksperiodeForkastet(vedtaksperiodeForkastet: VedtaksperiodeForkastet ) {
-        finnVedtaksperiode(vedtaksperiodeForkastet.vedtaksperiodeId())
-            .vedtaksperiodeForkastet()
-    }
-
-    internal fun supplerVedtakFattet(sykepengevedtakBuilder: SykepengevedtakBuilder) {
-        sykepengevedtakBuilder
-            .aktørId(aktørId)
-            .fødselsnummer(fødselsnummer)
-        observers.forEach { it.vedtakFattet(sykepengevedtakBuilder.build()) }
+        vedtaksperioder
+            .find { vedtaksperiodeForkastet.erRelevantFor(it.vedtaksperiodeId()) }
+            ?.vedtaksperiodeForkastet()
     }
 
     fun nySpleisBehandling(spleisBehandling: SpleisBehandling) {
@@ -85,8 +61,9 @@ class Person private constructor(
     }
 
     internal fun nyUtbetalingForVedtaksperiode(vedtaksperiodeNyUtbetaling: VedtaksperiodeNyUtbetaling) {
-        finnVedtaksperiode(vedtaksperiodeNyUtbetaling.vedtaksperiodeId())
-            .nyUtbetaling(vedtaksperiodeNyUtbetaling.id, vedtaksperiodeNyUtbetaling.utbetalingId)
+        vedtaksperioder
+            .find { vedtaksperiodeNyUtbetaling.erRelevantFor(it.vedtaksperiodeId()) }
+            ?.nyUtbetaling(vedtaksperiodeNyUtbetaling.id, vedtaksperiodeNyUtbetaling.utbetalingId)
     }
 
     companion object {

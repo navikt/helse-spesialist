@@ -7,11 +7,11 @@ import no.nav.helse.modell.vedtaksperiode.vedtak.Sykepengegrunnlagsfakta.Infotry
 import no.nav.helse.modell.vedtaksperiode.vedtak.Sykepengegrunnlagsfakta.Spleis
 import no.nav.helse.modell.vedtaksperiode.vedtak.Sykepengevedtak
 import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageContext
+import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 
 internal class VedtakFattetMelder(
-    private val messageContext: MessageContext,
+    private val rapidsConnection: RapidsConnection,
 ) : PersonObserver, IVedtaksperiodeObserver {
     private val sykepengevedtak = mutableListOf<Sykepengevedtak>()
     private companion object {
@@ -34,8 +34,7 @@ internal class VedtakFattetMelder(
             kv("organisasjonsnummer", sykepengevedtak.organisasjonsnummer),
             kv("vedtaksperiodeId", sykepengevedtak.vedtaksperiodeId)
         )
-        messageContext.publish(sykepengevedtak.fødselsnummer, json)
-        this.sykepengevedtak.clear()
+        rapidsConnection.publish(sykepengevedtak.fødselsnummer, json)
     }
 
     override fun vedtakFattet(sykepengevedtak: Sykepengevedtak) {

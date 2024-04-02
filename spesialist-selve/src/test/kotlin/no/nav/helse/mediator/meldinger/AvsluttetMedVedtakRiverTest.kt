@@ -35,11 +35,11 @@ internal class AvsluttetMedVedtakRiverTest {
     fun `Leser inn utkast_til_vedtak-event`() {
         every { avviksvurderingDao.finnAvviksvurderinger(any()) } returns listOf(avviksvurdering())
         testRapid.sendTestMessage(utkastTilVedtak("EtterSkjønn"))
-        verify(exactly = 1) { mediator.håndter(any<AvsluttetMedVedtakMessage>(), any()) }
+        verify(exactly = 1) { mediator.håndter(any<AvsluttetMedVedtakMessage>()) }
         testRapid.sendTestMessage(utkastTilVedtak("EtterHovedregel"))
-        verify(exactly = 2) { mediator.håndter(any<AvsluttetMedVedtakMessage>(), any()) }
+        verify(exactly = 2) { mediator.håndter(any<AvsluttetMedVedtakMessage>()) }
         testRapid.sendTestMessage(utkastTilVedtak("IInfotrygd"))
-        verify(exactly = 3) { mediator.håndter(any<AvsluttetMedVedtakMessage>(), any()) }
+        verify(exactly = 3) { mediator.håndter(any<AvsluttetMedVedtakMessage>()) }
     }
 
     private fun avviksvurdering(): Avviksvurdering = Avviksvurdering(

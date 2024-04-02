@@ -138,22 +138,9 @@ internal class Generasjon private constructor(
         tilstand.vedtakFattet(this, hendelseId)
     }
 
-    internal fun avsluttetUtenVedtak(sykepengevedtakBuilder: SykepengevedtakBuilder) {
-        tilstand.avsluttetUtenVedtak(this, sykepengevedtakBuilder)
-    }
-
     private fun nyTilstand(gammel: Tilstand, ny: Tilstand, hendelseId: UUID) {
         observers.forEach { it.tilstandEndret(id, vedtaksperiodeId, gammel, ny, hendelseId) }
         this.tilstand = ny
-    }
-
-    private fun supplerAvsluttetUtenVedtak(sykepengevedtakBuilder: SykepengevedtakBuilder) {
-        spleisBehandlingId?.let { sykepengevedtakBuilder.spleisBehandlingId(it) }
-        sykepengevedtakBuilder
-            .tags(tags)
-            .skjæringstidspunkt(skjæringstidspunkt)
-            .fom(fom())
-            .tom(tom())
     }
 
     private fun nyUtbetaling(utbetalingId: UUID) {
@@ -216,10 +203,6 @@ internal class Generasjon private constructor(
             }
         }
 
-        fun avsluttetUtenVedtak(generasjon: Generasjon, sykepengevedtakBuilder: SykepengevedtakBuilder) {
-            throw IllegalStateException("Forventer ikke avsluttet_uten_vedtak i tilstand=${this::class.simpleName}")
-        }
-
         fun vedtakFattet(generasjon: Generasjon, hendelseId: UUID) {
             sikkerlogg.info("Forventet ikke vedtak_fattet i {}", kv("tilstand", this::class.simpleName))
         }
@@ -275,16 +258,6 @@ internal class Generasjon private constructor(
 
         override fun invaliderUtbetaling(generasjon: Generasjon, utbetalingId: UUID) {
             generasjon.utbetalingId = null
-        }
-
-        override fun avsluttetUtenVedtak(generasjon: Generasjon, sykepengevedtakBuilder: SykepengevedtakBuilder) {
-            val nesteTilstand = when {
-                generasjon.varsler.isNotEmpty() -> UtenUtbetalingMåVurderes
-                generasjon.utbetalingId == null -> AvsluttetUtenUtbetaling
-                else -> throw IllegalStateException("Mottatt avsluttet_uten_vedtak på generasjon som har utbetaling. Det gir ingen mening.")
-            }
-            generasjon.nyTilstand(this, nesteTilstand, UUID.randomUUID())
-            generasjon.supplerAvsluttetUtenVedtak(sykepengevedtakBuilder)
         }
 
         override fun vedtakFattet(generasjon: Generasjon, hendelseId: UUID) {

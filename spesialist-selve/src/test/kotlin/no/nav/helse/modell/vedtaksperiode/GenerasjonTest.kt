@@ -1,5 +1,6 @@
 package no.nav.helse.modell.vedtaksperiode
 
+import TestPerson
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -22,6 +23,7 @@ import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.finnGenerasjon
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverSkjønnsfastsettelse
 import no.nav.helse.modell.vedtaksperiode.Generasjon.Companion.kreverTotrinnsvurdering
 import no.nav.helse.modell.vedtaksperiode.Periode.Companion.til
+import no.nav.helse.modell.vedtaksperiode.vedtak.AvsluttetUtenVedtak
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -431,6 +433,26 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         val generasjon2 = generasjon(generasjonId, vedtaksperiodeId, skjæringstidspunkt = 1.januar)
         assertNotEquals(generasjon1, generasjon2)
         assertNotEquals(generasjon1.hashCode(), generasjon2.hashCode())
+    }
+
+    @Test
+    fun `generasjon håndterer avsluttetUtenVedtak`() {
+        val testPerson = TestPerson()
+        val generasjonId = UUID.randomUUID()
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjon1 = generasjon(generasjonId, vedtaksperiodeId, skjæringstidspunkt = 1.januar)
+        generasjon1.håndter(AvsluttetUtenVedtak(
+            testPerson.fødselsnummer,
+            testPerson.aktørId,
+            with(testPerson) { 1.arbeidsgiver.organisasjonsnummer },
+            with(testPerson) { 1.arbeidsgiver.nyVedtaksperiode().vedtaksperiodeId },
+            with(testPerson) { 1.arbeidsgiver.nyVedtaksperiode().spleisBehandlingId },
+            1.januar,
+            emptyList(),
+            1.januar,
+            31.januar
+        ))
+        assertEquals(1, observer.vedtakFattet.size)
     }
 
     @Test

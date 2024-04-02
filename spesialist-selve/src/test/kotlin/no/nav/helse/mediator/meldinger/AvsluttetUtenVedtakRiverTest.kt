@@ -20,7 +20,7 @@ internal class AvsluttetUtenVedtakRiverTest {
     @Test
     fun `Leser inn utkast_til_vedtak-event`() {
         testRapid.sendTestMessage(avsluttetUtenVedtak())
-        verify(exactly = 1) { mediator.mottaMelding(any<AvsluttetUtenVedtakMessage>(), any()) }
+        verify(exactly = 1) { mediator.håndter(any<AvsluttetUtenVedtakMessage>()) }
     }
 
     @Language("JSON")
