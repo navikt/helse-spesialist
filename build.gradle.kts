@@ -12,6 +12,7 @@ val postgresqlVersion = "42.7.2"
 
 plugins {
     kotlin("jvm") version "1.9.22"
+    id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
 }
 
 val githubUser: String by project
@@ -33,13 +34,14 @@ allprojects {
     }
 
     apply(plugin = "org.jetbrains.kotlin.jvm")
+    apply(plugin = "org.jlleitschuh.gradle.ktlint")
 
     dependencies {
         implementation("com.github.navikt:rapids-and-rivers:$rapidsAndRiversVersion")
         implementation("io.ktor:ktor-server-cio:$ktorVersion")
         implementation("io.ktor:ktor-server-websockets:$ktorVersion")
         implementation("org.postgresql:postgresql:$postgresqlVersion")
-        implementation("com.papertrailapp:logback-syslog4j:$logbackSyslog4jVersion") //August, 2014
+        implementation("com.papertrailapp:logback-syslog4j:$logbackSyslog4jVersion") // August, 2014
         {
             exclude(group = "ch.qos.logback")
         }
@@ -87,6 +89,15 @@ allprojects {
         }
         testImplementation("io.mockk:mockk:$mockkVersion")
     }
+
+    ktlint {
+        // Hvis du gjør endringer i disse filterne må du slette alle "build"/"out"-mappene og deretter
+        // kjøre ./gradlew --no-build-cache ktlintCheck minst én gang for at endringene skal ta effekt
+        filter {
+            exclude { it.file.path.contains("generated") }
+            exclude { it.file.path.contains("test") }
+        }
+    }
 }
 
 subprojects {
@@ -108,6 +119,18 @@ subprojects {
     }
 }
 
-tasks.jar {
-    enabled = false
+tasks {
+    register<Copy>("copyPreCommitHook") {
+        description = "Kopierer pre-commit hook fra scripts til .git/hooks"
+        outputs.upToDateWhen { false }
+        from("$rootDir/scripts/pre-commit")
+        into("$rootDir/.git/hooks")
+    }
+
+    jar {
+        enabled = false
+    }
+    build {
+        dependsOn("copyPreCommitHook")
+    }
 }
