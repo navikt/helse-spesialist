@@ -249,10 +249,6 @@ internal class MeldingMediator(
         håndter(godkjenningsbehov, context)
     }
 
-    fun oppdaterPersonsnapshot(hendelse: OppdaterPersonsnapshot, context: MessageContext) {
-        håndter(hendelse, context)
-    }
-
     fun gosysOppgaveEndret(fødselsnummer: String, oppgaveEndret: GosysOppgaveEndret, context: MessageContext) {
         oppgaveDao.finnOppgaveId(fødselsnummer)?.also { oppgaveId ->
             sikkerlogg.info("Fant en oppgave for {}: {}", fødselsnummer, oppgaveId)
@@ -436,7 +432,6 @@ internal class MeldingMediator(
                 is GosysOppgaveEndret -> iverksett(kommandofabrikk.gosysOppgaveEndret(melding.fødselsnummer(), melding), melding.id, commandContext)
                 is TilbakedateringBehandlet -> iverksett(kommandofabrikk.tilbakedateringGodkjent(melding.fødselsnummer()), melding.id, commandContext)
                 is SøknadSendt -> iverksett(kommandofabrikk.søknadSendt(melding), melding.id, commandContext)
-                is OppdaterPersonsnapshot -> iverksett(kommandofabrikk.oppdaterPersonsnapshot(melding), melding.id, commandContext)
                 is Godkjenningsbehov -> iverksett(kommandofabrikk.godkjenningsbehov(melding), melding.id, commandContext)
                 is Saksbehandlerløsning -> iverksett(kommandofabrikk.utbetalingsgodkjenning(melding), melding.id, commandContext)
                 else -> throw IllegalArgumentException("Personhendelse må håndteres")
@@ -519,6 +514,6 @@ internal class MeldingMediator(
             )
         ).toJson())
 
-        oppdaterPersonsnapshot(OppdaterPersonsnapshot(json), rapidsConnection)
+        mottaMelding(OppdaterPersonsnapshot(json), rapidsConnection)
     }
 }

@@ -39,6 +39,6 @@ internal class OppdaterPersonsnapshotRiver(
             StructuredArguments.keyValue("fødselsnummer", fødselsnummer),
             StructuredArguments.keyValue("eventId", id)
         )
-        mediator.oppdaterPersonsnapshot(OppdaterPersonsnapshot(packet), context)
+        mediator.mottaMelding(OppdaterPersonsnapshot(packet), context)
     }
 }

@@ -12,7 +12,6 @@ import no.nav.helse.mediator.builders.GenerasjonBuilder
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndretCommand
 import no.nav.helse.mediator.meldinger.Personmelding
-import no.nav.helse.mediator.meldinger.PersonmeldingOld
 import no.nav.helse.mediator.oppgave.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.CommandContextDao
@@ -37,6 +36,7 @@ import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.overstyring.OverstyringIgangsatt
 import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import no.nav.helse.modell.person.EndretEgenAnsattStatusCommand
+import no.nav.helse.modell.person.OppdaterPersonsnapshot
 import no.nav.helse.modell.person.OppdaterPersonsnapshotCommand
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.SøknadSendt
@@ -262,7 +262,7 @@ internal class Kommandofabrikk(
         return AdressebeskyttelseEndretCommand(melding.fødselsnummer(), personDao, oppgaveDao, godkjenningMediator)
     }
 
-    fun oppdaterPersonsnapshot(hendelse: PersonmeldingOld): OppdaterPersonsnapshotCommand {
+    private fun oppdaterPersonsnapshot(hendelse: Personmelding): OppdaterPersonsnapshotCommand {
         return OppdaterPersonsnapshotCommand(
             fødselsnummer = hendelse.fødselsnummer(),
             førsteKjenteDagFinner = { generasjonRepository.førsteKjenteDag(hendelse.fødselsnummer()) },
@@ -409,6 +409,10 @@ internal class Kommandofabrikk(
 
     private fun oppdaterSnapshotCommand(personmelding: Personmelding): OppdaterSnapshotCommand {
         return OppdaterSnapshotCommand(snapshotClient, snapshotDao, personmelding.fødselsnummer(), personDao)
+    }
+
+    internal fun iverksettOppdaterPersonsnapshot(melding: OppdaterPersonsnapshot) {
+        iverksett(oppdaterPersonsnapshot(melding), melding.id)
     }
 
     internal fun iverksettOppdaterSnapshot(melding: Personmelding) {
