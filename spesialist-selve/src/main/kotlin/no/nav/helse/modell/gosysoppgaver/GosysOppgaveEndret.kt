@@ -14,6 +14,7 @@ import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.oppgave.SjekkAtOppgaveFortsattErÅpenCommand
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
+import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.rapids_rivers.JsonMessage
 
 internal class GosysOppgaveEndret private constructor(
@@ -49,6 +50,7 @@ internal class GosysOppgaveEndretCommand(
     åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     oppgaveDao: OppgaveDao,
     oppgaveMediator: OppgaveMediator,
+    generasjonRepository: GenerasjonRepository,
     godkjenningMediator: GodkjenningMediator,
     spleisBehandlingId: UUID?,
 ): MacroCommand() {
@@ -57,7 +59,7 @@ internal class GosysOppgaveEndretCommand(
             hendelseId = id,
             aktørId = aktørId,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
-            oppgaveMediator = oppgaveMediator,
+            generasjonRepository = generasjonRepository,
             vedtaksperiodeId = oppgavedataForAutomatisering.vedtaksperiodeId,
             sykefraværstilfelle = sykefraværstilfelle,
             harTildeltOppgave = harTildeltOppgave,

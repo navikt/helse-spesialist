@@ -188,6 +188,7 @@ internal class GodkjenningsbehovCommand(
     snapshotDao: SnapshotDao,
     snapshotClient: SnapshotClient,
     oppgaveMediator: OppgaveMediator,
+    generasjonRepository: GenerasjonRepository,
     godkjenningMediator: GodkjenningMediator,
     totrinnsvurderingMediator: TotrinnsvurderingMediator,
     json: String
@@ -246,7 +247,7 @@ internal class GodkjenningsbehovCommand(
             hendelseId = id,
             aktørId = aktørId,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
-            oppgaveMediator = oppgaveMediator,
+            generasjonRepository = generasjonRepository,
             vedtaksperiodeId = vedtaksperiodeId,
             sykefraværstilfelle = sykefraværstilfelle,
             harTildeltOppgave = false,

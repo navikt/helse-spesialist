@@ -202,6 +202,7 @@ internal class Kommandofabrikk(
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
             oppgaveDao = oppgaveDao,
             oppgaveMediator = oppgaveMediator,
+            generasjonRepository = generasjonRepository,
             godkjenningMediator = godkjenningMediator,
             spleisBehandlingId = spleisBehandlingId
         )
@@ -401,6 +402,7 @@ internal class Kommandofabrikk(
             snapshotDao = snapshotDao,
             snapshotClient = snapshotClient,
             oppgaveMediator = oppgaveMediator,
+            generasjonRepository = generasjonRepository,
             godkjenningMediator = godkjenningMediator,
             totrinnsvurderingMediator = totrinnsvurderingMediator,
             json = hendelse.toJson()

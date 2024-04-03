@@ -19,8 +19,8 @@ import no.nav.helse.mediator.oppgave.OppgaveMapper.tilBehandledeOppgaver
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilDatabaseversjon
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilEgenskaperForVisning
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilOppgaverTilBehandling
-import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.ManglerTilgang
+import no.nav.helse.modell.MeldingDao
 import no.nav.helse.modell.Modellfeil
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
@@ -352,6 +352,4 @@ internal class OppgaveMediator(
             )
         }
     }
-
-    fun førsteOppgavedato(vedtaksperiodeId: UUID) = oppgaveDao.førsteOppgavedato(vedtaksperiodeId)
 }

@@ -986,28 +986,6 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         assertEquals(0, antallOppgaver.antallMineSakerPåVent)
     }
 
-    @Test
-    fun `Finner eldste opprettet-dato for en vedtaksperiode`() {
-        val førsteDato = LocalDate.now().minusDays(17)
-        nyPerson()
-        tilbakestillOpprettetDato(OPPGAVE_ID, førsteDato)
-        ferdigstillOppgave(OPPGAVE_ID)
-        assertOppgaveStatus(oppgaveId, Oppgave.Ferdigstilt)
-
-        opprettOppgave()
-        assertOppgaveStatus(oppgaveId, Oppgave.AvventerSaksbehandler)
-
-        assertEquals(førsteDato, oppgaveDao.førsteOppgavedato(VEDTAKSPERIODE))
-    }
-
-    private fun tilbakestillOpprettetDato(oppgaveId: Long, opprettet: LocalDate) {
-        query(
-            "UPDATE oppgave SET opprettet = :opprettet WHERE id = :oppgaveId",
-            "oppgaveId" to oppgaveId,
-            "opprettet" to opprettet
-        ).update()
-    }
-
     private fun assertOppgaveStatus(oppgaveId: Long, forventetStatus: Oppgave.Tilstand) {
         val status = query("SELECT * FROM oppgave where id = :id", "id" to oppgaveId).single { it.string("status") }
         assertEquals(forventetStatus.toString(), status)

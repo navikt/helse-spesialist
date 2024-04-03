@@ -10,7 +10,6 @@ import java.util.UUID
 import no.nav.helse.januar
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
-import no.nav.helse.mediator.oppgave.OppgaveMediator
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.sykefraværstilfelle.Sykefraværstilfelle
 import no.nav.helse.modell.varsel.Varsel
@@ -18,6 +17,7 @@ import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_1
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_3
 import no.nav.helse.modell.vedtaksperiode.Generasjon
+import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.IVedtaksperiodeObserver
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -65,7 +65,7 @@ internal class VurderÅpenGosysoppgaveTest {
         UUID.randomUUID(),
         AKTØR_ID,
         dao,
-        mockk<OppgaveMediator> { every { førsteOppgavedato(VEDTAKPERIODE_ID) } returns skjæringstidspunkt},
+        mockk<GenerasjonRepository> { every { skjæringstidspunktFor(VEDTAKPERIODE_ID) } returns skjæringstidspunkt},
         VEDTAKPERIODE_ID,
         sykefraværstilfelle,
         harTildeltOppgave = harTildeltOppgave,
@@ -94,6 +94,21 @@ internal class VurderÅpenGosysoppgaveTest {
         assertFalse(command(skjæringstidspunkt = skjæringstidspunkt).execute(context))
         assertEquals(listOf("ÅpneOppgaver"), observer.behov.keys.toList())
         assertEquals(skjæringstidspunkt.minusYears(1), observer.behov["ÅpneOppgaver"]!!["ikkeEldreEnn"])
+    }
+
+    @Test
+    fun `Baserer ikkeEldreEnn på dagens dato hvis det ikke fins noen generasjon`() {
+        assertFalse(VurderÅpenGosysoppgave(
+            UUID.randomUUID(),
+            AKTØR_ID,
+            dao,
+            mockk<GenerasjonRepository> { every { skjæringstidspunktFor(VEDTAKPERIODE_ID) } throws IllegalStateException("testfeil")},
+            VEDTAKPERIODE_ID,
+            sykefraværstilfelle,
+            harTildeltOppgave = false,
+        ).execute(context))
+        assertEquals(listOf("ÅpneOppgaver"), observer.behov.keys.toList())
+        assertEquals(LocalDate.now().minusYears(1), observer.behov["ÅpneOppgaver"]!!["ikkeEldreEnn"])
     }
 
     @Test
