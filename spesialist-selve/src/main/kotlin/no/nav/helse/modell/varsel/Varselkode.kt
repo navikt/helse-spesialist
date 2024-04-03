@@ -4,8 +4,8 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 // Alle Varselkoder må følge formatet
-internal const val varselkodeformat = "SB_\\D{2}_\\d{1,3}"
-private val regex = "^$varselkodeformat$".toRegex()
+internal const val VARSELKODEFORMAT = "SB_\\D{2}_\\d{1,3}"
+private val regex = "^$VARSELKODEFORMAT$".toRegex()
 
 // RV = Risikovurdering
 // BO = Beslutteroppgave

@@ -11,8 +11,8 @@ internal class OppdaterPersoninfoCommand(
     private val force: Boolean,
 ) : Command {
     private companion object {
-        private const val behov = "HentPersoninfoV2"
-        private val log = LoggerFactory.getLogger(behov)
+        private const val BEHOV = "HentPersoninfoV2"
+        private val log = LoggerFactory.getLogger(BEHOV)
     }
 
     override fun execute(context: CommandContext): Boolean {
@@ -25,7 +25,7 @@ internal class OppdaterPersoninfoCommand(
     }
 
     private fun ignorer(): Boolean {
-        log.info("har ikke behov for $behov, informasjonen er ny nok")
+        log.info("har ikke behov for $BEHOV, informasjonen er ny nok")
         return true
     }
 
@@ -49,8 +49,8 @@ internal class OppdaterPersoninfoCommand(
     }
 
     private fun trengerMerInformasjon(context: CommandContext): Boolean {
-        log.info("trenger oppdatert $behov")
-        context.behov(behov, emptyMap())
+        log.info("trenger oppdatert $BEHOV")
+        context.behov(BEHOV, emptyMap())
         return false
     }
 }

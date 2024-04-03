@@ -1,7 +1,7 @@
 package no.nav.helse.mediator.builders
 
-import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.Varsel
+import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import java.time.LocalDate
@@ -22,7 +22,7 @@ class GenerasjonBuilder(
 
     internal fun build(
         generasjonRepository: GenerasjonRepository,
-        varselRepository: ActualVarselRepository,
+        varselRepository: VarselRepository,
     ): Generasjon {
         generasjonRepository.byggGenerasjon(vedtaksperiodeId, this)
         varselRepository.byggGenerasjon(generasjonId, this)

@@ -11,7 +11,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
-internal class ActualVarselRepository(dataSource: DataSource) : IVedtaksperiodeObserver {
+internal class VarselRepository(dataSource: DataSource) : IVedtaksperiodeObserver {
     private val varselDao = VarselDao(dataSource)
     private val definisjonDao = DefinisjonDao(dataSource)
 
@@ -30,7 +30,7 @@ internal class ActualVarselRepository(dataSource: DataSource) : IVedtaksperiodeO
         opprettet: LocalDateTime,
     ) {
         varselDao.lagreVarsel(varselId, varselkode, opprettet, vedtaksperiodeId, generasjonId)
-        if (varselkode.matches(varselkodeformat.toRegex())) tellVarsel(varselkode)
+        if (varselkode.matches(VARSELKODEFORMAT.toRegex())) tellVarsel(varselkode)
     }
 
     override fun varselReaktivert(
@@ -40,7 +40,7 @@ internal class ActualVarselRepository(dataSource: DataSource) : IVedtaksperiodeO
         vedtaksperiodeId: UUID,
     ) {
         varselDao.oppdaterStatus(vedtaksperiodeId, generasjonId, varselkode, AKTIV, null, null)
-        if (varselkode.matches(varselkodeformat.toRegex())) tellVarsel(varselkode)
+        if (varselkode.matches(VARSELKODEFORMAT.toRegex())) tellVarsel(varselkode)
     }
 
     override fun varselDeaktivert(
@@ -50,7 +50,7 @@ internal class ActualVarselRepository(dataSource: DataSource) : IVedtaksperiodeO
         vedtaksperiodeId: UUID,
     ) {
         varselDao.oppdaterStatus(vedtaksperiodeId, generasjonId, varselkode, INAKTIV, null, null)
-        if (varselkode.matches(varselkodeformat.toRegex())) tellInaktivtVarsel(varselkode)
+        if (varselkode.matches(VARSELKODEFORMAT.toRegex())) tellInaktivtVarsel(varselkode)
     }
 
     override fun varselGodkjent(

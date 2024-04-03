@@ -47,7 +47,7 @@ import no.nav.helse.modell.utbetaling.UtbetalingAnnullertCommand
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.utbetaling.UtbetalingEndretCommand
-import no.nav.helse.modell.varsel.ActualVarselRepository
+import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
@@ -112,7 +112,7 @@ internal class Kommandofabrikk(
     private val opptegnelseDao: OpptegnelseDao = OpptegnelseDao(dataSource),
     private val generasjonRepository: GenerasjonRepository = GenerasjonRepository(dataSource),
     private val vergemålDao: VergemålDao = VergemålDao(dataSource),
-    private val varselRepository: ActualVarselRepository = ActualVarselRepository(dataSource),
+    private val varselRepository: VarselRepository = VarselRepository(dataSource),
 ) {
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")

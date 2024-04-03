@@ -19,7 +19,7 @@ internal class EndretSkjermetinfoRiver(
     init {
         River(rapidsConnection).apply {
             validate {
-                it.demandValue("@event_name", eventName)
+                it.demandValue("@event_name", EVENT_NAME)
                 it.requireKey("@id", "fødselsnummer", "skjermet", "@opprettet")
             }
         }.register(this)
@@ -29,7 +29,7 @@ internal class EndretSkjermetinfoRiver(
         problems: MessageProblems,
         context: MessageContext,
     ) {
-        sikkerLogg.error("Forstod ikke $eventName:\n${problems.toExtendedReport()}")
+        sikkerLogg.error("Forstod ikke $EVENT_NAME:\n${problems.toExtendedReport()}")
     }
 
     override fun onPacket(
@@ -48,6 +48,6 @@ internal class EndretSkjermetinfoRiver(
     }
 
     private companion object {
-        private const val eventName = "endret_skjermetinfo"
+        private const val EVENT_NAME = "endret_skjermetinfo"
     }
 }

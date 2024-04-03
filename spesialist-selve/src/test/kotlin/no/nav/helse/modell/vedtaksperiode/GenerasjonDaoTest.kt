@@ -1,18 +1,14 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import DatabaseIntegrationTest
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
-import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.mediator.builders.GenerasjonBuilder
-import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.VarselDao
 import no.nav.helse.modell.varsel.VarselDto
+import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.VarselStatusDto
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -20,17 +16,28 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
+import java.util.UUID
 
 internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
     private val varselDao = VarselDao(dataSource)
-    private val varselRepository = ActualVarselRepository(dataSource)
+    private val varselRepository = VarselRepository(dataSource)
     private val generasjonRepository = GenerasjonRepository(dataSource)
 
     @Test
     fun `bygg generasjon`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjonId = UUID.randomUUID()
-        generasjonDao.opprettFor(generasjonId, vedtaksperiodeId, UUID.randomUUID(), 1.januar, Periode(1.januar, 31.januar), Generasjon.Ulåst)
+        generasjonDao.opprettFor(
+            generasjonId,
+            vedtaksperiodeId,
+            UUID.randomUUID(),
+            1.januar,
+            Periode(1.januar, 31.januar),
+            Generasjon.Ulåst,
+        )
         val builder = GenerasjonBuilder(vedtaksperiodeId)
         generasjonDao.byggSisteFor(vedtaksperiodeId, builder)
         builder.varsler(emptyList())
@@ -38,7 +45,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         val forventetGenerasjon = Generasjon(generasjonId, vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
         assertEquals(
             forventetGenerasjon,
-            generasjon
+            generasjon,
         )
     }
 
@@ -47,9 +54,23 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjonId1 = UUID.randomUUID()
         val generasjonId2 = UUID.randomUUID()
-        generasjonDao.opprettFor(generasjonId1, vedtaksperiodeId, UUID.randomUUID(), 1.januar, Periode(1.januar, 31.januar), Generasjon.Ulåst)
+        generasjonDao.opprettFor(
+            generasjonId1,
+            vedtaksperiodeId,
+            UUID.randomUUID(),
+            1.januar,
+            Periode(1.januar, 31.januar),
+            Generasjon.Ulåst,
+        )
         generasjonDao.oppdaterTilstandFor(generasjonId1, Generasjon.Låst, UUID.randomUUID())
-        generasjonDao.opprettFor(generasjonId2, vedtaksperiodeId, UUID.randomUUID(), 1.januar, Periode(1.januar, 31.januar), Generasjon.Ulåst)
+        generasjonDao.opprettFor(
+            generasjonId2,
+            vedtaksperiodeId,
+            UUID.randomUUID(),
+            1.januar,
+            Periode(1.januar, 31.januar),
+            Generasjon.Ulåst,
+        )
         val builder = GenerasjonBuilder(vedtaksperiodeId)
         generasjonDao.byggSisteFor(vedtaksperiodeId, builder)
         builder.varsler(emptyList())
@@ -69,16 +90,18 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         val varselOpprettet = LocalDateTime.now()
         val varselstatus = VarselStatusDto.AKTIV
         val tags = listOf("tag 1", "tag 2")
-        val generasjonDto = nyGenerasjonDto(
-            id = id,
-            vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingId = utbetalingId,
-            spleisBehandlingId = spleisBehandlingId,
-            tags = tags,
-            varsler = listOf(
-                VarselDto(varselId, "RV_IM_1", varselOpprettet, vedtaksperiodeId, varselstatus)
+        val generasjonDto =
+            nyGenerasjonDto(
+                id = id,
+                vedtaksperiodeId = vedtaksperiodeId,
+                utbetalingId = utbetalingId,
+                spleisBehandlingId = spleisBehandlingId,
+                tags = tags,
+                varsler =
+                    listOf(
+                        VarselDto(varselId, "RV_IM_1", varselOpprettet, vedtaksperiodeId, varselstatus),
+                    ),
             )
-        )
         generasjonDao.lagre(generasjonDto)
         val lagretGenerasjon = generasjonDao.finnGjeldendeGenerasjon(vedtaksperiodeId)
         checkNotNull(lagretGenerasjon)
@@ -107,13 +130,14 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         val generasjon2 = nyGenerasjonDto(vedtaksperiodeId)
         generasjonDao.lagre(generasjon1)
         generasjonDao.lagre(generasjon2)
-        val generasjoner = with(generasjonDao) {
-            sessionOf(dataSource).use { session ->
-                session.transaction { tx ->
-                    tx.finnGenerasjoner(vedtaksperiodeId)
+        val generasjoner =
+            with(generasjonDao) {
+                sessionOf(dataSource).use { session ->
+                    session.transaction { tx ->
+                        tx.finnGenerasjoner(vedtaksperiodeId)
+                    }
                 }
             }
-        }
 
         assertEquals(2, generasjoner.size)
         assertEquals(generasjon1, generasjoner[0])
@@ -127,7 +151,15 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         val nyUtbetalingId = UUID.randomUUID()
         val generasjonDto = nyGenerasjonDto(vedtaksperiodeId, id)
         generasjonDao.lagre(generasjonDto)
-        generasjonDao.lagre(generasjonDto.copy(utbetalingId = nyUtbetalingId, fom = 2.januar, tom = 30.januar, skjæringstidspunkt = 2.januar, tilstand = TilstandDto.Låst))
+        generasjonDao.lagre(
+            generasjonDto.copy(
+                utbetalingId = nyUtbetalingId,
+                fom = 2.januar,
+                tom = 30.januar,
+                skjæringstidspunkt = 2.januar,
+                tilstand = TilstandDto.Låst,
+            ),
+        )
         val lagretGenerasjon = generasjonDao.finnGjeldendeGenerasjon(vedtaksperiodeId)
         assertNotNull(lagretGenerasjon)
         assertEquals(id, lagretGenerasjon?.id)
@@ -148,7 +180,9 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         val varselstatus = VarselStatusDto.AKTIV
         val generasjonDto = nyGenerasjonDto(vedtaksperiodeId, id)
         generasjonDao.lagre(generasjonDto)
-        generasjonDao.lagre(generasjonDto.copy(varsler = listOf(VarselDto(varselId, "RV_IM_1", varselOpprettet, vedtaksperiodeId, varselstatus))))
+        generasjonDao.lagre(
+            generasjonDto.copy(varsler = listOf(VarselDto(varselId, "RV_IM_1", varselOpprettet, vedtaksperiodeId, varselstatus))),
+        )
         val lagretGenerasjon = generasjonDao.finnGjeldendeGenerasjon(vedtaksperiodeId)
 
         assertNotNull(lagretGenerasjon)
@@ -160,12 +194,17 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         val vedtaksperiodeId = UUID.randomUUID()
         val varselId = UUID.randomUUID()
         val varselOpprettet = LocalDateTime.now()
-        val generasjonDto = nyGenerasjonDto(
-            vedtaksperiodeId = vedtaksperiodeId,
-            varsler = listOf(VarselDto(varselId, "RV_IM_1", varselOpprettet, vedtaksperiodeId, VarselStatusDto.AKTIV))
-        )
+        val generasjonDto =
+            nyGenerasjonDto(
+                vedtaksperiodeId = vedtaksperiodeId,
+                varsler = listOf(VarselDto(varselId, "RV_IM_1", varselOpprettet, vedtaksperiodeId, VarselStatusDto.AKTIV)),
+            )
         generasjonDao.lagre(generasjonDto)
-        generasjonDao.lagre(generasjonDto.copy(varsler = listOf(VarselDto(varselId, "RV_IM_1", varselOpprettet, vedtaksperiodeId, VarselStatusDto.VURDERT))))
+        generasjonDao.lagre(
+            generasjonDto.copy(
+                varsler = listOf(VarselDto(varselId, "RV_IM_1", varselOpprettet, vedtaksperiodeId, VarselStatusDto.VURDERT)),
+            ),
+        )
         val lagretGenerasjon = generasjonDao.finnGjeldendeGenerasjon(vedtaksperiodeId)
 
         assertNotNull(lagretGenerasjon)
@@ -180,22 +219,36 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         val vedtaksperiodeId = UUID.randomUUID()
         val varselIdSomIkkeBlirSlettet = UUID.randomUUID()
         val varselOpprettetSomIkkeBlirSlettet = LocalDateTime.now()
-        val generasjonDto = nyGenerasjonDto(
-            vedtaksperiodeId = vedtaksperiodeId,
-            id = id,
-            varsler = listOf(
-                VarselDto(varselIdSomIkkeBlirSlettet, "RV_IM_1",
-                    varselOpprettetSomIkkeBlirSlettet, vedtaksperiodeId, VarselStatusDto.AKTIV),
-                VarselDto(UUID.randomUUID(), "RV_IM_2", LocalDateTime.now(), vedtaksperiodeId, VarselStatusDto.AKTIV),
+        val generasjonDto =
+            nyGenerasjonDto(
+                vedtaksperiodeId = vedtaksperiodeId,
+                id = id,
+                varsler =
+                    listOf(
+                        VarselDto(
+                            varselIdSomIkkeBlirSlettet,
+                            "RV_IM_1",
+                            varselOpprettetSomIkkeBlirSlettet,
+                            vedtaksperiodeId,
+                            VarselStatusDto.AKTIV,
+                        ),
+                        VarselDto(UUID.randomUUID(), "RV_IM_2", LocalDateTime.now(), vedtaksperiodeId, VarselStatusDto.AKTIV),
+                    ),
             )
-        )
         generasjonDao.lagre(generasjonDto)
         generasjonDao.lagre(
             generasjonDto.copy(
-                varsler = listOf(
-                    VarselDto(varselIdSomIkkeBlirSlettet, "RV_IM_1", varselOpprettetSomIkkeBlirSlettet, vedtaksperiodeId, VarselStatusDto.AKTIV)
-                )
-            )
+                varsler =
+                    listOf(
+                        VarselDto(
+                            varselIdSomIkkeBlirSlettet,
+                            "RV_IM_1",
+                            varselOpprettetSomIkkeBlirSlettet,
+                            vedtaksperiodeId,
+                            VarselStatusDto.AKTIV,
+                        ),
+                    ),
+            ),
         )
         val lagretGenerasjon = generasjonDao.finnGjeldendeGenerasjon(vedtaksperiodeId)
 
@@ -208,10 +261,11 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         val vedtaksperiodeId = UUID.randomUUID()
         val varselId = UUID.randomUUID()
         val varselOpprettet = LocalDateTime.now()
-        val generasjonDto = nyGenerasjonDto(
-            vedtaksperiodeId = vedtaksperiodeId,
-            varsler = listOf(VarselDto(varselId, "RV_IM_1", varselOpprettet, vedtaksperiodeId, VarselStatusDto.AKTIV))
-        )
+        val generasjonDto =
+            nyGenerasjonDto(
+                vedtaksperiodeId = vedtaksperiodeId,
+                varsler = listOf(VarselDto(varselId, "RV_IM_1", varselOpprettet, vedtaksperiodeId, VarselStatusDto.AKTIV)),
+            )
         generasjonDao.lagre(generasjonDto)
         generasjonDao.lagre(generasjonDto.copy(varsler = emptyList()))
         val lagretGenerasjon = generasjonDao.finnGjeldendeGenerasjon(vedtaksperiodeId)
@@ -223,7 +277,15 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `oppretter generasjon for vedtaksperiode`() {
         val generasjonId = UUID.randomUUID()
-        val generasjon = generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE, UUID.randomUUID(), 1.januar, Periode(1.januar, 31.januar), Generasjon.Ulåst)
+        val generasjon =
+            generasjonDao.opprettFor(
+                generasjonId,
+                VEDTAKSPERIODE,
+                UUID.randomUUID(),
+                1.januar,
+                Periode(1.januar, 31.januar),
+                Generasjon.Ulåst,
+            )
 
         val forventetGenerasjon = Generasjon(generasjonId, VEDTAKSPERIODE, 1.januar, 31.januar, 1.januar)
         assertEquals(forventetGenerasjon, generasjon)
@@ -243,16 +305,31 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
     fun `kan bytte tilstand for generasjon`() {
         val vedtaksperiodeEndretId = UUID.randomUUID()
         val generasjonId = UUID.randomUUID()
-        generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE, vedtaksperiodeEndretId, 1.januar, Periode(1.januar, 31.januar), Generasjon.Ulåst)
+        generasjonDao.opprettFor(
+            generasjonId,
+            VEDTAKSPERIODE,
+            vedtaksperiodeEndretId,
+            1.januar,
+            Periode(1.januar, 31.januar),
+            Generasjon.Ulåst,
+        )
         generasjonDao.oppdaterTilstandFor(generasjonId, Generasjon.Låst, UUID.randomUUID())
 
         assertTilstand(VEDTAKSPERIODE, Generasjon.Låst)
     }
+
     @Test
     fun `oppdaterer generasjon med behandlingsinformasjon`() {
         val vedtaksperiodeEndretId = UUID.randomUUID()
         val generasjonId = UUID.randomUUID()
-        generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE, vedtaksperiodeEndretId, 1.januar, Periode(1.januar, 31.januar), Generasjon.Ulåst)
+        generasjonDao.opprettFor(
+            generasjonId,
+            VEDTAKSPERIODE,
+            vedtaksperiodeEndretId,
+            1.januar,
+            Periode(1.januar, 31.januar),
+            Generasjon.Ulåst,
+        )
 
         val spleisBehandlingId = UUID.randomUUID()
         val tags = listOf("ARBEIDSGIVERUTBETALING", "PERSONUTBETALING")
@@ -262,11 +339,19 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         assertTags(generasjonId, tags)
         assertSpleisBehandlingId(generasjonId, spleisBehandlingId)
     }
+
     @Test
     fun `ingen tags`() {
         val vedtaksperiodeEndretId = UUID.randomUUID()
         val generasjonId = UUID.randomUUID()
-        generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE, vedtaksperiodeEndretId, 1.januar, Periode(1.januar, 31.januar), Generasjon.Ulåst)
+        generasjonDao.opprettFor(
+            generasjonId,
+            VEDTAKSPERIODE,
+            vedtaksperiodeEndretId,
+            1.januar,
+            Periode(1.januar, 31.januar),
+            Generasjon.Ulåst,
+        )
         val spleisBehandlingId = UUID.randomUUID()
         val tags = emptyList<String>()
         generasjonDao.oppdaterMedBehandlingsInformasjon(generasjonId, spleisBehandlingId, tags)
@@ -288,21 +373,42 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `har generasjon`() {
-        generasjonDao.opprettFor(UUID.randomUUID(), VEDTAKSPERIODE, UUID.randomUUID(), 1.januar, Periode(1.januar, 31.januar), Generasjon.Ulåst)
+        generasjonDao.opprettFor(
+            UUID.randomUUID(),
+            VEDTAKSPERIODE,
+            UUID.randomUUID(),
+            1.januar,
+            Periode(1.januar, 31.januar),
+            Generasjon.Ulåst,
+        )
         val funnet = generasjonDao.harGenerasjonFor(VEDTAKSPERIODE)
         assertTrue(funnet)
     }
 
     @Test
     fun `finn skjæringstidspunkt`() {
-        generasjonDao.opprettFor(UUID.randomUUID(), VEDTAKSPERIODE, UUID.randomUUID(), 1.januar, Periode(1.januar, 31.januar), Generasjon.Ulåst)
+        generasjonDao.opprettFor(
+            UUID.randomUUID(),
+            VEDTAKSPERIODE,
+            UUID.randomUUID(),
+            1.januar,
+            Periode(1.januar, 31.januar),
+            Generasjon.Ulåst,
+        )
         val skjæringstidspunkt = generasjonDao.finnSkjæringstidspunktFor(VEDTAKSPERIODE)
         assertEquals(1.januar, skjæringstidspunkt)
     }
 
     @Test
     fun `finn skjæringstidspunkt for siste generasjon`() {
-        generasjonDao.opprettFor(UUID.randomUUID(), VEDTAKSPERIODE, UUID.randomUUID(), 1.januar, Periode(1.januar, 31.januar), Generasjon.Låst)
+        generasjonDao.opprettFor(
+            UUID.randomUUID(),
+            VEDTAKSPERIODE,
+            UUID.randomUUID(),
+            1.januar,
+            Periode(1.januar, 31.januar),
+            Generasjon.Låst,
+        )
         val generasjonId = UUID.randomUUID()
         generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE, UUID.randomUUID(), 2.januar, Periode(1.januar, 31.januar), Generasjon.Ulåst)
 
@@ -320,7 +426,14 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `generasjon hentes opp sammen med varsler`() {
-        generasjonDao.opprettFor(UUID.randomUUID(), VEDTAKSPERIODE, UUID.randomUUID(), 1.januar, Periode(1.januar, 31.januar), Generasjon.Ulåst)
+        generasjonDao.opprettFor(
+            UUID.randomUUID(),
+            VEDTAKSPERIODE,
+            UUID.randomUUID(),
+            1.januar,
+            Periode(1.januar, 31.januar),
+            Generasjon.Ulåst,
+        )
         val varselId = UUID.randomUUID()
         val varselOpprettet = LocalDateTime.now()
         val generasjonId = generasjonIdFor(VEDTAKSPERIODE)
@@ -365,13 +478,14 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         opprettGenerasjon(vedtaksperiodeId2, generasjonId2)
         opprettGenerasjon(vedtaksperiodeId2, generasjonId3)
 
-        val vedtaksperiodeIder = with(generasjonDao) {
-            sessionOf(dataSource).use { session ->
-                session.transaction { tx ->
-                    tx.finnVedtaksperiodeIderFor(FNR)
+        val vedtaksperiodeIder =
+            with(generasjonDao) {
+                sessionOf(dataSource).use { session ->
+                    session.transaction { tx ->
+                        tx.finnVedtaksperiodeIderFor(FNR)
+                    }
                 }
             }
-        }
         assertEquals(2, vedtaksperiodeIder.size)
         assertTrue(vedtaksperiodeIder.containsAll(setOf(vedtaksperiodeId1, vedtaksperiodeId2)))
     }
@@ -400,7 +514,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
             UUID.randomUUID(),
             1.januar,
             Periode(1.januar, 31.januar),
-            Generasjon.Ulåst
+            Generasjon.Ulåst,
         )
         generasjonDao.opprettFor(
             generasjonId2,
@@ -408,7 +522,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
             UUID.randomUUID(),
             1.januar,
             Periode(1.januar, 31.januar),
-            Generasjon.Ulåst
+            Generasjon.Ulåst,
         )
         generasjonDao.utbetalingFor(generasjonId1, utbetalingId)
         generasjonDao.utbetalingFor(generasjonId2, utbetalingId)
@@ -425,7 +539,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
             UUID.randomUUID(),
             1.januar,
             Periode(1.januar, 31.januar),
-            Generasjon.Ulåst
+            Generasjon.Ulåst,
         )
         generasjonDao.utbetalingFor(generasjonId, UTBETALING_ID)
         assertUtbetaling(generasjonId, UTBETALING_ID)
@@ -441,7 +555,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
             UUID.randomUUID(),
             1.januar,
             Periode(1.januar, 31.januar),
-            Generasjon.Ulåst
+            Generasjon.Ulåst,
         )
 
         assertEquals(finnTidligsteGenerasjonOpprettetTidspunkt(VEDTAKSPERIODE), finnSøknadMottatt(VEDTAKSPERIODE))
@@ -455,7 +569,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
             UUID.randomUUID(),
             1.januar,
             Periode(1.januar, 31.januar),
-            Generasjon.Låst
+            Generasjon.Låst,
         )
         val opprinneligSøknadsdato = finnSøknadMottatt(VEDTAKSPERIODE)
         generasjonDao.opprettFor(
@@ -464,7 +578,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
             UUID.randomUUID(),
             1.januar,
             Periode(1.januar, 31.januar),
-            Generasjon.Ulåst
+            Generasjon.Ulåst,
         )
 
         assertEquals(opprinneligSøknadsdato, finnSøknadMottatt(VEDTAKSPERIODE))
@@ -474,13 +588,21 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
     fun `Finner første generasjons låst tidspunkt`() {
         val vedtaksperiodeEndretId = UUID.randomUUID()
         val generasjonId = UUID.randomUUID()
-        generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE, vedtaksperiodeEndretId, 1.januar, Periode(1.januar, 31.januar), Generasjon.Ulåst)
+        generasjonDao.opprettFor(
+            generasjonId,
+            VEDTAKSPERIODE,
+            vedtaksperiodeEndretId,
+            1.januar,
+            Periode(1.januar, 31.januar),
+            Generasjon.Ulåst,
+        )
         generasjonDao.oppdaterTilstandFor(generasjonId, Generasjon.Låst, UUID.randomUUID())
 
         assertNotNull(generasjonDao.førsteGenerasjonLåstTidspunkt(VEDTAKSPERIODE))
     }
 
     private fun Pair<LocalDate, LocalDate>.tilPeriode() = Periode(first, second)
+
     @Test
     fun `Finner første kjente dato for person`() {
         opprettPerson()
@@ -488,12 +610,26 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         val førstePeriode = 1.januar to 5.januar
         val vedtaksperiodeId1 = UUID.randomUUID()
         opprettVedtaksperiode(vedtaksperiodeId1, fom = førstePeriode.first, tom = førstePeriode.second)
-        generasjonDao.opprettFor(UUID.randomUUID(), vedtaksperiodeId1, UUID.randomUUID(), førstePeriode.first, førstePeriode.tilPeriode(), Generasjon.Låst)
+        generasjonDao.opprettFor(
+            UUID.randomUUID(),
+            vedtaksperiodeId1,
+            UUID.randomUUID(),
+            førstePeriode.first,
+            førstePeriode.tilPeriode(),
+            Generasjon.Låst,
+        )
 
         val vedtaksperiodeId2 = UUID.randomUUID()
         val senerePeriode = 10.februar(2022) to 20.februar(2022)
         opprettVedtaksperiode(vedtaksperiodeId2, fom = senerePeriode.first, tom = senerePeriode.second)
-        generasjonDao.opprettFor(UUID.randomUUID(), vedtaksperiodeId2, UUID.randomUUID(), senerePeriode.first, senerePeriode.tilPeriode(), Generasjon.Låst)
+        generasjonDao.opprettFor(
+            UUID.randomUUID(),
+            vedtaksperiodeId2,
+            UUID.randomUUID(),
+            senerePeriode.first,
+            senerePeriode.tilPeriode(),
+            Generasjon.Låst,
+        )
 
         assertEquals(1.januar, generasjonDao.førsteKjenteDag(FNR))
     }
@@ -508,8 +644,8 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         skjæringstidspunkt: LocalDate = 1.januar,
         tilstand: TilstandDto = TilstandDto.Ulåst,
         tags: List<String> = emptyList(),
-        varsler: List<VarselDto> = emptyList()
-        ): GenerasjonDto {
+        varsler: List<VarselDto> = emptyList(),
+    ): GenerasjonDto {
         return GenerasjonDto(
             id = id,
             vedtaksperiodeId = vedtaksperiodeId,
@@ -520,18 +656,22 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
             tom = tom,
             tilstand = tilstand,
             tags = tags,
-            varsler = varsler
+            varsler = varsler,
         )
     }
 
-    private fun assertVarsler(generasjonId: UUID, vararg forventedeVarselkoder: String) {
+    private fun assertVarsler(
+        generasjonId: UUID,
+        vararg forventedeVarselkoder: String,
+    ) {
         @Language("PostgreSQL")
         val query =
             "SELECT kode FROM selve_varsel WHERE generasjon_ref = (SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = ?)"
 
-        val varselkoder = sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, generasjonId).map { it.string("kode") }.asList).toSet()
-        }
+        val varselkoder =
+            sessionOf(dataSource).use { session ->
+                session.run(queryOf(query, generasjonId).map { it.string("kode") }.asList).toSet()
+            }
         assertEquals(forventedeVarselkoder.toSet(), varselkoder)
     }
 
@@ -545,58 +685,82 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         }
     }
 
-    private fun assertTilstand(vedtaksperiodeId: UUID, forventetTilstand: Generasjon.Tilstand) {
-        val tilstand = sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query =
-                "SELECT tilstand FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ?;"
+    private fun assertTilstand(
+        vedtaksperiodeId: UUID,
+        forventetTilstand: Generasjon.Tilstand,
+    ) {
+        val tilstand =
+            sessionOf(dataSource).use { session ->
+                @Language("PostgreSQL")
+                val query =
+                    "SELECT tilstand FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ?;"
 
-            session.run(queryOf(query, vedtaksperiodeId).map {
-                it.string("tilstand")
-            }.asSingle)
-        }
+                session.run(
+                    queryOf(query, vedtaksperiodeId).map {
+                        it.string("tilstand")
+                    }.asSingle,
+                )
+            }
 
         assertEquals(forventetTilstand.navn(), tilstand)
     }
 
-    private fun assertTags(generasjonId: UUID, forventedeTags: List<String>) {
-        val tags = sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query =
-                "SELECT tags FROM selve_vedtaksperiode_generasjon WHERE unik_id = ?;"
+    private fun assertTags(
+        generasjonId: UUID,
+        forventedeTags: List<String>,
+    ) {
+        val tags =
+            sessionOf(dataSource).use { session ->
+                @Language("PostgreSQL")
+                val query =
+                    "SELECT tags FROM selve_vedtaksperiode_generasjon WHERE unik_id = ?;"
 
-            session.run(queryOf(query, generasjonId).map {
-                it.array<String>("tags").toList()
-            }.asSingle)
-        }
+                session.run(
+                    queryOf(query, generasjonId).map {
+                        it.array<String>("tags").toList()
+                    }.asSingle,
+                )
+            }
 
         assertEquals(forventedeTags, tags)
     }
 
-    private fun assertSpleisBehandlingId(generasjonId: UUID, forventetSpleisBehandlingId: UUID) {
-        val actualSpleisBehandlingId = sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query =
-                "SELECT spleis_behandling_id FROM selve_vedtaksperiode_generasjon WHERE unik_id = ?;"
+    private fun assertSpleisBehandlingId(
+        generasjonId: UUID,
+        forventetSpleisBehandlingId: UUID,
+    ) {
+        val actualSpleisBehandlingId =
+            sessionOf(dataSource).use { session ->
+                @Language("PostgreSQL")
+                val query =
+                    "SELECT spleis_behandling_id FROM selve_vedtaksperiode_generasjon WHERE unik_id = ?;"
 
-            session.run(queryOf(query, generasjonId).map {
-                it.uuidOrNull("spleis_behandling_id")
-            }.asSingle)
-        }
+                session.run(
+                    queryOf(query, generasjonId).map {
+                        it.uuidOrNull("spleis_behandling_id")
+                    }.asSingle,
+                )
+            }
 
         assertEquals(forventetSpleisBehandlingId, actualSpleisBehandlingId)
     }
 
-    private fun assertUtbetaling(generasjonId: UUID, forventetUtbetalingId: UUID?) {
-        val utbetalingId = sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query =
-                "SELECT utbetaling_id FROM selve_vedtaksperiode_generasjon WHERE unik_id = ?"
+    private fun assertUtbetaling(
+        generasjonId: UUID,
+        forventetUtbetalingId: UUID?,
+    ) {
+        val utbetalingId =
+            sessionOf(dataSource).use { session ->
+                @Language("PostgreSQL")
+                val query =
+                    "SELECT utbetaling_id FROM selve_vedtaksperiode_generasjon WHERE unik_id = ?"
 
-            session.run(queryOf(query, generasjonId).map {
-                it.uuidOrNull("utbetaling_id")
-            }.asSingle)
-        }
+                session.run(
+                    queryOf(query, generasjonId).map {
+                        it.uuidOrNull("utbetaling_id")
+                    }.asSingle,
+                )
+            }
 
         assertEquals(forventetUtbetalingId, utbetalingId)
     }
@@ -605,17 +769,21 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val query = "SELECT soknad_mottatt FROM opprinnelig_soknadsdato WHERE vedtaksperiode_id = ?"
-            session.run(queryOf(query, vedtaksperiodeId).map {
-                it.localDateTimeOrNull("soknad_mottatt")
-            }.asSingle)
+            session.run(
+                queryOf(query, vedtaksperiodeId).map {
+                    it.localDateTimeOrNull("soknad_mottatt")
+                }.asSingle,
+            )
         }
 
     private fun finnTidligsteGenerasjonOpprettetTidspunkt(vedtaksperiodeId: UUID) =
         sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val query = "SELECT min(opprettet_tidspunkt) as opprettet_tidspunkt FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ? GROUP BY vedtaksperiode_id"
-            session.run(queryOf(query, vedtaksperiodeId).map {
-                it.localDateTimeOrNull("opprettet_tidspunkt")
-            }.asSingle)
+            session.run(
+                queryOf(query, vedtaksperiodeId).map {
+                    it.localDateTimeOrNull("opprettet_tidspunkt")
+                }.asSingle,
+            )
         }
 }

@@ -58,7 +58,7 @@ import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.person.PersonRepository
 import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.utbetaling.UtbetalingDao
-import no.nav.helse.modell.varsel.ActualVarselRepository
+import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
@@ -88,7 +88,7 @@ internal class MeldingMediator(
     private val dokumentDao: DokumentDao = DokumentDao(dataSource),
     private val avviksvurderingDao: AvviksvurderingDao,
     private val utbetalingDao: UtbetalingDao = UtbetalingDao(dataSource),
-    private val varselRepository: ActualVarselRepository = ActualVarselRepository(dataSource),
+    private val varselRepository: VarselRepository = VarselRepository(dataSource),
     private val generasjonRepository: GenerasjonRepository = GenerasjonRepository(dataSource),
     private val metrikkDao: MetrikkDao = MetrikkDao(dataSource),
     private val generasjonDao: GenerasjonDao,
@@ -170,7 +170,9 @@ internal class MeldingMediator(
             ),
         ) {
             løsninger(context, hendelseId, contextId)?.also { it.add(hendelseId, contextId, løsning) }
-                ?: logg.info("mottok løsning som ikke kunne brukes fordi kommandoen ikke lengre er suspendert, eller fordi hendelsen er ukjent")
+                ?: logg.info(
+                    "mottok løsning som ikke kunne brukes fordi kommandoen ikke lengre er suspendert, eller fordi hendelsen er ukjent",
+                )
         }
     }
 
@@ -192,7 +194,9 @@ internal class MeldingMediator(
                 it.add(hendelseId, contextId, påminnelse)
                 it.fortsett(this)
             }
-                ?: logg.info("mottok påminnelse som ikke kunne brukes fordi kommandoen ikke lengre er suspendert, eller fordi hendelsen er ukjent")
+                ?: logg.info(
+                    "mottok påminnelse som ikke kunne brukes fordi kommandoen ikke lengre er suspendert, eller fordi hendelsen er ukjent",
+                )
         }
     }
 
@@ -267,7 +271,9 @@ internal class MeldingMediator(
                 sikkerlogg.info("Fant ikke commandData for {} og {}", fødselsnummer, oppgaveId)
                 return
             }
-            sikkerlogg.info("Har oppgave til_godkjenning og commandData for fnr $fødselsnummer og vedtaksperiodeId ${commandData.vedtaksperiodeId}")
+            sikkerlogg.info(
+                "Har oppgave til_godkjenning og commandData for fnr $fødselsnummer og vedtaksperiodeId ${commandData.vedtaksperiodeId}",
+            )
             håndter(oppgaveEndret, context)
         } ?: sikkerlogg.info("Ingen åpne oppgaver i Speil for {}", fødselsnummer)
     }
@@ -288,11 +294,17 @@ internal class MeldingMediator(
                     ?: return@also sikkerlogg.info("Fant ikke commandData for {} og {}", fødselsnummer, oppgaveId)
 
             if (!oppgaveDataForAutomatisering.periodeOverlapperMed(tilbakedateringBehandlet.perioder)) {
-                sikkerlogg.info("Ingen av periodene i sykmeldingen er innenfor vedtaksperiodens fom og tom, for tilbakedateringen {} og {}", fødselsnummer, oppgaveId)
+                sikkerlogg.info(
+                    "Ingen av periodene i sykmeldingen er innenfor vedtaksperiodens fom og tom, for tilbakedateringen {} og {}",
+                    fødselsnummer,
+                    oppgaveId,
+                )
                 return
             }
 
-            sikkerlogg.info("Har oppgave til_godkjenning og commandData for fnr $fødselsnummer og vedtaksperiodeId ${oppgaveDataForAutomatisering.vedtaksperiodeId}")
+            sikkerlogg.info(
+                "Har oppgave til_godkjenning og commandData for fnr $fødselsnummer og vedtaksperiodeId ${oppgaveDataForAutomatisering.vedtaksperiodeId}",
+            )
             håndter(tilbakedateringBehandlet, context)
         } ?: sikkerlogg.info("Ingen åpne oppgaver for {} ifm. godkjent tilbakedatering", fødselsnummer)
     }

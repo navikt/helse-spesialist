@@ -601,17 +601,18 @@ class OppgaveDao(dataSource: DataSource) : HelseDao(dataSource), OppgaveReposito
             )
         }
 
-    fun invaliderOppgaveFor(fødselsnummer: String) = asSQL(
-        """
-        UPDATE oppgave o
-        SET status = 'Invalidert'
-        FROM oppgave o2
-        JOIN vedtak v on v.id = o2.vedtak_ref
-        JOIN person p on v.person_ref = p.id
-        WHERE p.fodselsnummer = :fodselsnummer
-        and o.id = o2.id
-        AND o.status = 'AvventerSaksbehandler'::oppgavestatus; 
-    """,
+    fun invaliderOppgaveFor(fødselsnummer: String) =
+        asSQL(
+            """
+            UPDATE oppgave o
+            SET status = 'Invalidert'
+            FROM oppgave o2
+            JOIN vedtak v on v.id = o2.vedtak_ref
+            JOIN person p on v.person_ref = p.id
+            WHERE p.fodselsnummer = :fodselsnummer
+            and o.id = o2.id
+            AND o.status = 'AvventerSaksbehandler'::oppgavestatus; 
+        """,
             mapOf("fodselsnummer" to fødselsnummer.toLong()),
         ).update()
 

@@ -121,7 +121,8 @@ internal class Vedtaksperiode private constructor(
                             spleisBehandlingId = spleisBehandling.spleisBehandlingId,
                             fom = spleisBehandling.fom,
                             tom = spleisBehandling.tom,
-                            skjæringstidspunkt = spleisBehandling.fom, // Spleis sender oss ikke skjæringstidspunkt på dette tidspunktet
+                            // Spleis sender oss ikke skjæringstidspunkt på dette tidspunktet
+                            skjæringstidspunkt = spleisBehandling.fom,
                         ),
                     ),
                 forkastet = false,
