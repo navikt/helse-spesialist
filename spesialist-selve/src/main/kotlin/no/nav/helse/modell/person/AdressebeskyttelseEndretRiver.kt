@@ -31,9 +31,6 @@ internal class AdressebeskyttelseEndretRiver(
             "Mottok adressebeskyttelse_endret med {}",
             StructuredArguments.keyValue("hendelseId", hendelseId)
         )
-        mediator.håndter(
-            melding = AdressebeskyttelseEndret(packet),
-            messageContext = context
-        )
+        mediator.mottaMelding(melding = AdressebeskyttelseEndret(packet), messageContext = context)
     }
 }

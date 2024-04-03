@@ -5,8 +5,6 @@ import java.util.UUID
 import javax.sql.DataSource
 import no.nav.helse.MetrikkRiver
 import no.nav.helse.db.AvviksvurderingDao
-import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
-import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndretCommand
 import no.nav.helse.mediator.meldinger.AvsluttetMedVedtakRiver
 import no.nav.helse.mediator.meldinger.AvsluttetUtenVedtakRiver
 import no.nav.helse.mediator.meldinger.AvvikVurdertRiver
@@ -86,7 +84,6 @@ internal class MeldingMediator(
     private val personDao: PersonDao = PersonDao(dataSource),
     private val commandContextDao: CommandContextDao = CommandContextDao(dataSource),
     private val meldingDao: MeldingDao = MeldingDao(dataSource),
-    private val godkjenningMediator: GodkjenningMediator,
     private val kommandofabrikk: Kommandofabrikk,
     private val dokumentDao: DokumentDao = DokumentDao(dataSource),
     private val avviksvurderingDao: AvviksvurderingDao,
@@ -436,7 +433,6 @@ internal class MeldingMediator(
         val hendelsenavn = melding::class.simpleName ?: "ukjent hendelse"
         try {
             when (melding) {
-                is AdressebeskyttelseEndret -> iverksett(AdressebeskyttelseEndretCommand(melding.fødselsnummer(), personDao, oppgaveDao, godkjenningMediator), melding.id, commandContext)
                 is GosysOppgaveEndret -> iverksett(kommandofabrikk.gosysOppgaveEndret(melding.fødselsnummer(), melding), melding.id, commandContext)
                 is TilbakedateringBehandlet -> iverksett(kommandofabrikk.tilbakedateringGodkjent(melding.fødselsnummer()), melding.id, commandContext)
                 is SøknadSendt -> iverksett(kommandofabrikk.søknadSendt(melding), melding.id, commandContext)

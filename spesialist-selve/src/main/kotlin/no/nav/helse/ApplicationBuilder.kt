@@ -385,7 +385,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         meldingMediator = MeldingMediator(
             dataSource = dataSource,
             rapidsConnection = rapidsConnection,
-            godkjenningMediator = godkjenningMediator,
             kommandofabrikk = kommandofabrikk,
             avviksvurderingDao = avviksvurderingDao,
             generasjonDao = generasjonDao

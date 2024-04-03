@@ -9,6 +9,8 @@ import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.SykefraværstilfelleDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.builders.GenerasjonBuilder
+import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
+import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndretCommand
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.meldinger.PersonmeldingOld
 import no.nav.helse.mediator.oppgave.OppgaveDao
@@ -256,6 +258,10 @@ internal class Kommandofabrikk(
         )
     }
 
+    private fun adressebeskyttelseEndret(melding: AdressebeskyttelseEndret): AdressebeskyttelseEndretCommand {
+        return AdressebeskyttelseEndretCommand(melding.fødselsnummer(), personDao, oppgaveDao, godkjenningMediator)
+    }
+
     fun oppdaterPersonsnapshot(hendelse: PersonmeldingOld): OppdaterPersonsnapshotCommand {
         return OppdaterPersonsnapshotCommand(
             fødselsnummer = hendelse.fødselsnummer(),
@@ -435,6 +441,10 @@ internal class Kommandofabrikk(
 
     internal fun iverksettEndretAnsattStatus(melding: EndretEgenAnsattStatus) {
         iverksett(endretEgenAnsattStatus(melding), melding.id)
+    }
+
+    internal fun iverksettAdressebeskyttelseEndret(melding: AdressebeskyttelseEndret) {
+        iverksett(adressebeskyttelseEndret(melding), melding.id)
     }
 
     private fun nyContext(meldingId: UUID) = CommandContext(UUID.randomUUID()).apply {

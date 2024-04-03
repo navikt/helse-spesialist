@@ -13,12 +13,9 @@ import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.mediator.meldinger.GosysOppgaveEndretRiver
 import no.nav.helse.mediator.meldinger.TilbakedateringBehandletRiver
 import no.nav.helse.mediator.oppgave.OppgaveDao
-import no.nav.helse.modell.MeldingDao
-import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
-import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
@@ -27,7 +24,6 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao as OpptegnelseApiDao
 
 internal class MeldingMediatorTest : AbstractDatabaseTest() {
 
@@ -36,15 +32,8 @@ internal class MeldingMediatorTest : AbstractDatabaseTest() {
     private val testRapid = TestRapid()
 
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
-    private val vedtakDao = VedtakDao(dataSource)
-    private val opptegnelseDao = OpptegnelseApiDao(dataSource)
-    private val meldingDao = MeldingDao(dataSource)
-    private val utbetalingDao = UtbetalingDao(dataSource)
     private val avviksvurderingDao = mockk<AvviksvurderingDao>()
     private val generasjonDao = mockk<GenerasjonDao>()
-
-    private val godkjenningMediator =
-        GodkjenningMediator(vedtakDao, opptegnelseDao, oppgaveDao, utbetalingDao, meldingDao, generasjonDao)
 
     private val kommandofabrikk = mockk<Kommandofabrikk>(relaxed = true)
 
@@ -52,7 +41,6 @@ internal class MeldingMediatorTest : AbstractDatabaseTest() {
         dataSource = dataSource,
         rapidsConnection = testRapid,
         oppgaveDao = oppgaveDao,
-        godkjenningMediator = godkjenningMediator,
         kommandofabrikk = kommandofabrikk,
         avviksvurderingDao = avviksvurderingDao,
         generasjonDao = generasjonDao,
