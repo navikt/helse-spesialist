@@ -12,6 +12,7 @@ import no.nav.helse.mediator.meldinger.BehandlingOpprettetRiver
 import no.nav.helse.mediator.meldinger.EndretSkjermetinfoRiver
 import no.nav.helse.mediator.meldinger.GodkjenningsbehovRiver
 import no.nav.helse.mediator.meldinger.GosysOppgaveEndretRiver
+import no.nav.helse.mediator.meldinger.MidlertidigRiver
 import no.nav.helse.mediator.meldinger.MidnattRiver
 import no.nav.helse.mediator.meldinger.NyeVarslerRiver
 import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshotRiver
@@ -147,6 +148,7 @@ internal class MeldingMediator(
             AvsluttetMedVedtakRiver(it, this, avviksvurderingDao, generasjonDao)
             AvsluttetUtenVedtakRiver(it, this)
             MidnattRiver(it, this)
+            MidlertidigRiver(it, dataSource)
             BehandlingOpprettetRiver(it, this)
             KommandokjedePåminnelseRiver(it, this)
         }
